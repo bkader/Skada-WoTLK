@@ -574,7 +574,7 @@ do
         d.id=player.id
         d.label=player.name
         d.class=player.class
-        d.icon=d.class and Skada.classIcon or nil
+        d.icon=d.class and Skada.classIcon or Skada.petIcon
         
         d.value=dps
         d.valuetext=("%02.1f"):format(dps)
@@ -1381,7 +1381,7 @@ do
         d.id=target.id
         d.label=targetname
         d.class=target.class
-        d.icon=d.class and Skada.classIcon or nil
+        d.icon=d.class and Skada.classIcon or Skada.petIcon
 
         d.value=target.amount
         d.valuetext=Skada:FormatValueText(
@@ -1555,7 +1555,7 @@ do
         d.id=player.id
         d.label=player.name
         d.class=player.class
-        d.icon=d.class and Skada.classIcon or nil
+        d.icon=d.class and Skada.classIcon or Skada.petIcon
 
         local total, avoid=0, 0
         for spellname, spell in pairs(player.damagetaken.spells) do

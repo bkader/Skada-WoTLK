@@ -176,7 +176,7 @@ do
         d.id=player.id
         d.label=player.name
         d.class=player.class
-        d.icon=d.class and Skada.classIcon or nil
+        d.icon=d.class and Skada.classIcon or Skada.petIcon
         d.value=uptime
         d.valuetext=("%02.1f%% / %u"):format(uptime/maxtime*100, count)
 
@@ -316,7 +316,7 @@ do
         d.id=player.id
         d.label=player.name
         d.class=player.class
-        d.icon=d.class and Skada.classIcon or nil
+        d.icon=d.class and Skada.classIcon or Skada.petIcon
         d.value=uptime
         d.valuetext=format("%02.1f%% / %u", uptime/maxtime*100, count)
 

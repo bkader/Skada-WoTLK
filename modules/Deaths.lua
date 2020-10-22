@@ -220,7 +220,7 @@ function playermod:Update(win, set)
       d.time=death.time
       d.label=player.name
       d.class=player.class
-      d.icon=d.class and Skada.classIcon or nil
+      d.icon=d.class and Skada.classIcon or Skada.petIcon
 
       d.value=death.time
       d.valuetext=date("%H:%M:%S", death.time)
@@ -247,7 +247,7 @@ function mod:Update(win, set)
       d.id=player.id
       d.label=player.name
       d.class=player.class
-      d.icon=d.class and Skada.classIcon or nil
+      d.icon=d.class and Skada.classIcon or Skada.petIcon
 
       d.value=player.deaths
       d.valuetext=tostring(player.deaths)
@@ -275,7 +275,7 @@ function activitymod:Update(win, set)
     d.id=player.id
     d.label=player.name
     d.class=player.class
-    d.icon=d.class and Skada.classIcon or nil
+    d.icon=d.class and Skada.classIcon or Skada.petIcon
 
     d.value=playertime
     d.valuetext=format("%s (%02.1f%%)", SecondsToTime(playertime), playertime/settime*100)

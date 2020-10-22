@@ -106,7 +106,7 @@ function spellmod:Update(win, set)
       d.id=self.failid.."_"..player.name
       d.label=player.name
       d.class=player.class
-      d.icon=d.class and Skada.classIcon or nil
+      d.icon=d.class and Skada.classIcon or Skada.petIcon
 
       local count=player.fails.events[self.failid].count
       d.value=count
@@ -134,7 +134,7 @@ function mod:Update(win, set)
       d.id=player.id
       d.label=player.name
       d.class=player.class
-      d.icon=d.class and Skada.classIcon or nil
+      d.icon=d.class and Skada.classIcon or Skada.petIcon
 
       d.value=player.fails.count
       d.valuetext=tostring(player.fails.count)
