@@ -93,7 +93,7 @@ function spelltargetsmod:Enter(win, id, label)
   local player=Skada:find_player(win:get_selected_set(), spellsmod.playerid)
   if player then
     self.spellname=label
-    self.title=format(L["%s's ressurect <%s> targets"], player.name, label)
+    self.title=format(L["%s's resurrect <%s> targets"], player.name, label)
   end
 end
 

@@ -22,10 +22,17 @@ local function log_auraapply(set, aura)
   
   elseif aura.auratype=="DEBUFF" then
     if not player.debuffs[aura.spellname] then
-      player.debuffs[aura.spellname]={id=aura.spellid, active=1, refresh=1, uptime=0}
+      player.debuffs[aura.spellname]={id=aura.spellid, active=1, refresh=1, uptime=0, targets={}}
     else
       player.debuffs[aura.spellname].active=player.debuffs[aura.spellname].active+1
       player.debuffs[aura.spellname].refresh=player.debuffs[aura.spellname].refresh+1
+    end
+
+    if set==Skada.current and aura.srcName~= aura.dstName then
+      if not player.debuffs[aura.spellname].targets[aura.dstName] then
+        player.debuffs[aura.spellname].targets[aura.dstName]={id=aura.dstGUID, refresh=0}
+      end
+      player.debuffs[aura.spellname].targets[aura.dstName].refresh=player.debuffs[aura.spellname].targets[aura.dstName].refresh+1
     end
   end
 end
@@ -59,8 +66,11 @@ local function AuraApplied(timestamp, event, srcGUID, srcName, srcFlags, dstGUID
     
     aura.srcGUID=srcGUID
     aura.srcName=srcName
+    aura.dstGUID=dstGUID
+    aura.dstName=dstName
     aura.spellid=spellid
     aura.spellname=spellname
+    aura.spellschool=spellschool
     aura.auratype=auratype
 
     log_auraapply(Skada.current, aura)
@@ -75,8 +85,11 @@ local function AuraRemoved(timestamp, event, srcGUID, srcName, srcFlags, dstGUID
     
     aura.srcGUID=srcGUID
     aura.srcName=srcName
+    aura.dstGUID=dstGUID
+    aura.dstName=dstName
     aura.spellid=spellid
     aura.spellname=spellname
+    aura.spellschool=spellschool
     aura.auratype=auratype
 
     log_auraremove(Skada.current, aura)
@@ -238,6 +251,7 @@ end
 do
   local mod=Skada:NewModule(L["Auras: Debuff uptime"], "AceTimer-3.0")
   local playermod=mod:NewModule(L["Auras spell list"])
+  local targetmod=mod:NewModule(L["Auras target list"])
 
   local function aura_tooltip(win, id, label, tooltip)
     local set=win:get_selected_set()
@@ -264,9 +278,44 @@ do
     tooltip:AddDoubleLine(("%d/%d"):format(uptime, totaltime), ("%02.1f%%)"):format(uptime/totaltime*100), 255,255,255,255,255,255)
   end
 
+  function targetmod:Enter(win, id, label)
+    self.spellname=id
+    local player=Skada:find_player(win:get_selected_set(), playermod.playerid)
+    if player then
+      self.title=format(L["%s's <%s> targets"], player.name, label)
+    end
+  end
+
+  function targetmod:Update(win, set)
+    local player=Skada:find_player(set, playermod.playerid)
+    local max=0
+
+    if player and self.spellname and player.debuffs[self.spellname] then
+      local nr=1
+      local spell=player.debuffs[self.spellname]
+      for targetname, target in pairs(spell.targets) do
+        local d=win.dataset[nr] or {}
+        win.dataset[nr]=d
+
+        d.id=target.id
+        d.label=targetname
+        d.value=target.refresh
+        d.valuetext=format("%s (%02.1f%%)", target.refresh, target.refresh/spell.refresh*100)
+
+        if target.refresh>max then
+          max=target.refresh
+        end
+
+        nr=nr+1
+      end
+    end
+
+    win.metadata.maxvalue=max
+  end
+
   function playermod:Enter(win, id, label)
     self.playerid=id
-    self.title=format(L["%s's Debuff uptime"], label)
+    self.title=format(L["%s's debuff uptime"], label)
   end
 
   function playermod:Update(win, set)
@@ -328,7 +377,8 @@ do
   end
 
   function mod:OnEnable()
-    playermod.metadata={tooltip=aura_tooltip}
+    targetmod.metadata={showspots=true}
+    playermod.metadata={tooltip=aura_tooltip, click1=targetmod}
     mod.metadata={showspots=true, click1=playermod}
 
     Skada:RegisterForCL(AuraApplied, 'SPELL_AURA_APPLIED', {src_is_interesting=true})
@@ -367,5 +417,101 @@ do
       tick_spells(Skada.current)
       tick_spells(Skada.total)
     end
+  end
+end
+
+-- :::::::::::::::::::::::::::::::::::
+-- Sunder counter
+-- :::::::::::::::::::::::::::::::::::
+do
+  local mod=Skada:NewModule(L["Auras: Sunders Counter"])
+  local targetmod=mod:NewModule(L["Auras target list"])
+  local sunder
+
+  function targetmod:Enter(win, id, label)
+    self.playerid=id
+    self.title=format(L["%s's debuff targets"], label)
+  end
+
+  function targetmod:Update(win, set)
+    local player=Skada:find_player(set, self.playerid)
+    local max=0
+    sunder=sunder or select(1, GetSpellInfo(47467))
+
+    if player and player.debuffs[sunder] then
+      local spell=player.debuffs[sunder]
+      local nr=1
+
+      for targetname, target in pairs(spell.targets) do
+        local d=win.dataset[nr] or {}
+        win.dataset[nr]=d
+
+        d.id=target.id
+        d.label=targetname
+        d.value=target.refresh
+        d.valuetext=format("%d (%02.1f%%)", target.refresh, target.refresh/spell.refresh*100)
+
+        if target.refresh>max then
+          max=target.refresh
+        end
+
+        nr=nr+1
+      end
+    end
+
+    win.metadata.maxvalue=max
+  end
+
+  function mod:Update(win, set)
+    local nr, max=1, 0
+    sunder=sunder or select(1, GetSpellInfo(47467))
+
+    local total=0
+    for i, player in ipairs(set.players) do
+      if player.class and player.class=="WARRIOR" then
+        local count=len(player.debuffs)
+        if count>0 then
+          for spellname, spell in pairs(player.debuffs) do
+            if spellname==sunder or spell.id==47467 then
+              total=total+spell.refresh
+
+              local d=win.dataset[nr] or {}
+              win.dataset[nr]=d
+
+
+              d.id=player.id
+              d.label=player.name
+              d.class="WARRIOR"
+              d.icon=Skada.classIcon
+
+              d.value=spell.refresh
+              d.valuetext=format("%d (%02.1f%%)", spell.refresh, spell.refresh/total*100)
+
+              if spell.refresh>max then
+                max=spell.refresh
+              end
+
+              nr=nr+1
+            end
+          end
+        end
+      end
+    end
+    
+    win.metadata.maxvalue=max
+  end
+
+  function mod:OnInitialize()
+    sunder=select(1, GetSpellInfo(47467))
+  end
+
+  function mod:OnEnable()
+    targetmod.metadata={showspots=true}
+    mod.metadata={showspots=true, click1=targetmod}
+    Skada:AddMode(self)
+  end
+
+  function mod:OnDisable()
+    Skada:RemoveMode(self)
   end
 end

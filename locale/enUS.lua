@@ -375,11 +375,15 @@ L["Damage taken per player"] = "Damage taken per player"
 
 L["Auras: Buff uptime"] = true
 L["Auras: Debuff uptime"] = true
+L["Auras: Sunders Counter"] = true
 L["Auras spell list"] = "Auras spell list"
+L["Auras target list"] = "Auras target list"
 L["Buff Uptime"] = true
 L["Debuff Uptime"] = true
 L["%s's buff uptime"] = true
-L["%s's Debuff uptime"] = true
+L["%s's debuff uptime"] = true
+L["%s's debuff targets"] = true
+L["%s's <%s> targets"] = true
 L["Refreshes"] = true
 
 -- ======================= --
@@ -473,7 +477,7 @@ L["%s's CC Taken <%s> sources"] = true
 L["%s's CC Taken <%s> spells"] = true
 
 -- ====================== --
--- ressurect module lines --
+-- resurrect module lines --
 -- ====================== --
 
 L["Resurrects"] = true
@@ -486,7 +490,7 @@ L["received resurrects"] = true
 L["%s's resurrect spells"] = true
 L["%s's resurrect targets"] = true
 L["%s's received resurrects"] = true
-L["%s's ressurect <%s> targets"] = true
+L["%s's resurrect <%s> targets"] = true
 
 -- ====================== --
 -- Avoidance & Mitigation --
