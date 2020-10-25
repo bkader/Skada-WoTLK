@@ -267,11 +267,14 @@ do
     local spell=player.damagedone.spells[label]
     if spell then
       tooltip:AddLine(player.name.." - "..label)
-      if spell.max and spell.min then
+      if spell.min then
         tooltip:AddDoubleLine(L["Minimum hit:"], Skada:FormatNumber(spell.min), 255,255,255,255,255,255)
+      end
+      if spell.max then
         tooltip:AddDoubleLine(L["Maximum hit:"], Skada:FormatNumber(spell.max), 255,255,255,255,255,255)
       end
       tooltip:AddDoubleLine(L["Average hit:"], Skada:FormatNumber(spell.amount/spell.totalhits), 255,255,255,255,255,255)
+      tooltip:AddDoubleLine(L["Total hits:"], tostring(spell.totalhits), 255,255,255,255,255,255)
     end
   end
 
@@ -1006,7 +1009,7 @@ do
 
   function mod:OnEnable()
     spellmod.metadata={columns={Damage=true, Percent=true}}
-    playermod.metadata={showspots=true, tooltip=player_tooltip, click1=spellmod, columns={Damage=true, Percent=true}}
+    playermod.metadata={showspots=true, click1=spellmod, columns={Damage=true, Percent=true}}
     sourcemod.metadata={columns={Damage=true, Percent=true}}
     mod.metadata={showspots=true, click1=playermod, click2=sourcemod, columns={Damage=true, Percent=true}}
 
