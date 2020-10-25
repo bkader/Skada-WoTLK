@@ -97,12 +97,10 @@ local function EventHandler(self, event, ...)
 
     local boss=find_boss_data(Skada.current.mobname)
     if not boss then return end
-    boss.count=boss.count+1
 
     local encounter=find_encounter_data(boss, Skada.current.starttime)
     if not encounter then return end
-
-    local player
+    
 
     for i, player in ipairs(Skada.current.players) do
       if player.id==db.id then
@@ -113,6 +111,10 @@ local function EventHandler(self, event, ...)
             encounter.data[mode]=player[mode:lower()]
           end
         end
+        
+        -- increment boss count and stop
+        boss.count=boss.count+1
+        break
       end
     end
   end
@@ -184,30 +186,31 @@ function mod_comparison:Update(win, set)
 
     for i=1, boss.count do
       local encounter=boss.encounters[i]
+      if encounter then
+        local d=win.dataset[nr] or {}
+        win.dataset[nr]=d
 
-      local d=win.dataset[nr] or {}
-      win.dataset[nr]=d
+        d.id=i
+        d.label=date("%x %X", encounter.starttime)
+        d.value=encounter.data[self.modename]
 
-      d.id=i
-      d.label=date("%x %X", encounter.starttime)
-      d.value=encounter.data[self.modename]
+        if self.modename=="ActiveTime" then
+          d.valuetext=SecondsToTime(d.value)
+        elseif self.modename=="Deaths" or self.modename=="Interrupts" or self.modename=="Fails" then
+          d.valuetext=tostring(d.value)
+        else
+          d.valuetext=Skada:FormatValueText(
+            Skada:FormatNumber(d.value), true,
+            Skada:FormatNumber(d.value/encounter.data.ActiveTime), true
+          )
+        end
 
-      if self.modename=="ActiveTime" then
-        d.valuetext=SecondsToTime(d.value)
-      elseif self.modename=="Deaths" or self.modename=="Interrupts" or self.modename=="Fails" then
-        d.valuetext=tostring(d.value)
-      else
-        d.valuetext=Skada:FormatValueText(
-          Skada:FormatNumber(d.value), true,
-          Skada:FormatNumber(d.value/encounter.data.ActiveTime), true
-        )
+        if i>max then
+          max=i
+        end
+
+        nr=nr+1
       end
-
-      if i>max then
-        max=i
-      end
-
-      nr=nr+1
     end
   end
 
