@@ -580,7 +580,7 @@ do
         d.icon=d.class and Skada.classIcon or Skada.petIcon
         
         d.value=dps
-        d.valuetext=Skada:FormatNumber(dps)
+        d.valuetext=format("%02.1f", dps)
         
         if dps>max then
           max=dps
