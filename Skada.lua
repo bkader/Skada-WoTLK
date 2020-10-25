@@ -1959,16 +1959,13 @@ function Skada:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, eventtype, srcGUID,
       end
       
       -- Schedule an end to this tentative combat situation in 3 seconds.
-      tentativehandle = self:ScheduleTimer(
-                function()
-                  tentative = nil
-                  tentativehandle = nil
-                  self.current = nil
-                  --self:Print("tentative combat start FAILED!")
-                end, Skada.db.profile.tentativetimer or 3)
-      
-                      tentative = (Skada.db.profile.tentativecombatstart and 4) or 0
-      --self:Print("tentative combat start INIT!")
+      tentativehandle = self:ScheduleTimer(function()
+        tentative = nil
+        tentativehandle = nil
+        self.current = nil
+      end, 1)
+
+      tentative = 0
       end
     end
 
