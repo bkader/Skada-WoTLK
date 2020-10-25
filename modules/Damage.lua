@@ -155,12 +155,12 @@ do
     spell.totalhits=spell.totalhits+1
     spell.amount=spell.amount+dmg.amount
 
-    if spell.max==nil or amount>spell.max then
-      spell.max=amount
+    if spell.max==nil or dmg.amount>spell.max then
+      spell.max=dmg.amount
     end
 
-    if (spell.min==nil or amount<spell.min) and not dmg.missed then
-      spell.min=amount
+    if (spell.min==nil or dmg.amount<spell.min) and not dmg.missed then
+      spell.min=dmg.amount
     end
 
     if dmg.critical then
@@ -678,12 +678,12 @@ do
     spell.totalhits=spell.totalhits+1
     spell.amount=spell.amount+dmg.amount
 
-    if spell.max==nil or amount>spell.max then
-      spell.max=amount
+    if spell.max==nil or dmg.amount>spell.max then
+      spell.max=dmg.amount
     end
 
-    if (spell.min==nil or amount<spell.min) and not dmg.missed then
-      spell.min=amount
+    if (spell.min==nil or dmg.amount<spell.min) and not dmg.missed then
+      spell.min=dmg.amount
     end
 
     if dmg.critical then
