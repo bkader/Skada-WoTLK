@@ -28,12 +28,10 @@ local function log_auraapply(set, aura)
       player.debuffs[aura.spellname].refresh=player.debuffs[aura.spellname].refresh+1
     end
 
-    if set==Skada.current and aura.srcName~= aura.dstName then
-      if not player.debuffs[aura.spellname].targets[aura.dstName] then
-        player.debuffs[aura.spellname].targets[aura.dstName]={id=aura.dstGUID, refresh=0}
-      end
-      player.debuffs[aura.spellname].targets[aura.dstName].refresh=player.debuffs[aura.spellname].targets[aura.dstName].refresh+1
+    if not player.debuffs[aura.spellname].targets[aura.dstName] then
+      player.debuffs[aura.spellname].targets[aura.dstName]={id=aura.dstGUID, refresh=0}
     end
+    player.debuffs[aura.spellname].targets[aura.dstName].refresh=player.debuffs[aura.spellname].targets[aura.dstName].refresh+1
   end
 end
 
@@ -300,7 +298,7 @@ do
         d.id=target.id
         d.label=targetname
         d.value=target.refresh
-        d.valuetext=format("%s (%02.1f%%)", target.refresh, target.refresh/spell.refresh*100)
+        d.valuetext=tostring(target.refresh)
 
         if target.refresh>max then
           max=target.refresh
@@ -477,7 +475,6 @@ do
 
               local d=win.dataset[nr] or {}
               win.dataset[nr]=d
-
 
               d.id=player.id
               d.label=player.name
