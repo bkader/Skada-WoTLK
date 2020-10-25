@@ -372,8 +372,8 @@ function mod:ResetClicked(cbk, group, button)
             Skada:Wipe()
             wipe(SkadaImprovementDB)
             SkadaImprovementDB = {}
-            if improvemode.OnEnable then
-              improvemode:OnEnable()
+            if improvemode.OnInitialize then
+              improvemode:OnInitialize()
             end
             collectgarbage("collect")
             for _, win in ipairs(Skada:GetWindows()) do

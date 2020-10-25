@@ -114,6 +114,9 @@ local function EventHandler(self, event, ...)
         
         -- increment boss count and stop
         boss.count=boss.count+1
+        if boss.count~=#boss.encounters then
+          boss.count=#boss.encounters
+        end
         break
       end
     end
@@ -239,10 +242,7 @@ function mod:Update(win, set)
   win.metadata.maxvalue=max
 end
 
-function mod:OnEnable()
-  mod.metadata={click1=mod_modes}
-  mod_modes.metadata={click1=mod_comparison}
-
+function mod:OnInitialize()
   -- make our DB local
   if next(SkadaImprovementDB)==nil then
     SkadaImprovementDB={
@@ -253,6 +253,12 @@ function mod:OnEnable()
     }
   end
   db=SkadaImprovementDB
+end
+
+function mod:OnEnable()
+  mod.metadata={click1=mod_modes}
+  mod_modes.metadata={click1=mod_comparison}
+
 
   Skada:AddMode(self)
 
