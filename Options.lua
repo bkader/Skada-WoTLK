@@ -1,11 +1,15 @@
+local Skada=Skada
+if not Skada then return end
+
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
+
 local media = LibStub("LibSharedMedia-3.0")
 
 Skada.resetoptions = {[1] = L["No"], [2] = L["Yes"], [3] = L["Ask"]}
 
 Skada.windowdefaults = {
   name = "Skada",
-  
+
   barmax=10,
   barspacing=0,
   bartexture="BantoBar",
@@ -55,6 +59,8 @@ Skada.defaults = {
     tooltiprows=3,
     informativetooltips=true,
     onlykeepbosses=false,
+    tentativecombatstart=false,
+    tentativetimer=3,
     hidesolo=false,
     hidepvp=false,
     hidedisables=true,
@@ -378,6 +384,27 @@ Skada.options = {
           get=function() return Skada.db.profile.setstokeep end,
           set=function(self, val) Skada.db.profile.setstokeep = val end,
           order=13,
+        },
+
+        tentativecombatstart = {
+          type="toggle",
+          name=L["Aggressive combat detection"],
+          desc=L["Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons. Meaningless on boss encounters."],
+          order=10,
+          get=function() return Skada.db.profile.tentativecombatstart end,
+          set=function() Skada.db.profile.tentativecombatstart = not Skada.db.profile.tentativecombatstart end,
+        },
+
+        tentativetimer = {
+          type="range",
+          name=L["Tentative Timer"],
+          desc=L["The number of seconds to wait for combat events when engaging combat.\nSkada only creates a new segment if there are enough combat events during a set amount of time.\n\nOnly applies if 'Aggressive combat detection' is turned off."],
+          min=1,
+          max=5,
+          step=1,
+          get=function() return Skada.db.profile.tentativetimer end,
+          set=function(self, val) Skada.db.profile.tentativetimer = val end,
+          order=10.1,
         }
       }
     },
@@ -386,7 +413,7 @@ Skada.options = {
       type = "group",
       name = L["Columns"],
       order=4,
-      args = {},
+      args = {}
     }
   }
 }

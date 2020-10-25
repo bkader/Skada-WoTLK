@@ -407,15 +407,13 @@ function Skada:OnInitialize()
   media:Register("font", "ABF", [[Interface\Addons\Skada\fonts\ABF.ttf]])
   media:Register("font", "Accidental Presidency", [[Interface\Addons\Skada\fonts\Accidental Presidency.ttf]])
   media:Register("font", "Adventure", [[Interface\Addons\Skada\fonts\Adventure.ttf]])
-  media:Register("font", "Diablo", [[Interface\Addons\Skada\fonts\Avqest.ttf]])
-  media:Register("font", "Vera Serif", [[Interface\Addons\Skada\fonts\VeraSe.ttf]])
+  media:Register("font", "Diablo", [[Interface\Addons\Skada\fonts\Diablo.ttf]])
 
   media:Register("statusbar", "Aluminium", [[Interface\Addons\Skada\statusbar\Aluminium]])
   media:Register("statusbar", "Armory", [[Interface\Addons\Skada\statusbar\Armory]])
   media:Register("statusbar", "BantoBar", [[Interface\Addons\Skada\statusbar\BantoBar]])
   media:Register("statusbar", "Details", [[Interface\AddOns\Skada\statusbar\Details]])
-  media:Register("statusbar", "Flat", [[Interface\AddOns\Skada\statusbar\Flat]])
-  media:Register("statusbar", "Glaze2", [[Interface\Addons\Skada\statusbar\Glaze2]])
+  media:Register("statusbar", "Glass", [[Interface\AddOns\Skada\statusbar\Glass]])
   media:Register("statusbar", "Gloss", [[Interface\Addons\Skada\statusbar\Gloss]])
   media:Register("statusbar", "Graphite", [[Interface\Addons\Skada\statusbar\Graphite]])
   media:Register("statusbar", "Grid", [[Interface\Addons\Skada\statusbar\Grid]])
@@ -424,11 +422,11 @@ function Skada:OnInitialize()
   media:Register("statusbar", "Minimalist", [[Interface\Addons\Skada\statusbar\Minimalist]])
   media:Register("statusbar", "Otravi", [[Interface\Addons\Skada\statusbar\Otravi]])
   media:Register("statusbar", "Outline", [[Interface\Addons\Skada\statusbar\Outline]])
-  media:Register("statusbar", "Perl", [[Interface\Addons\Skada\statusbar\Perl]])
   media:Register("statusbar", "Round", [[Interface\Addons\Skada\statusbar\Round]])
   media:Register("statusbar", "Serenity", [[Interface\AddOns\Skada\statusbar\Serenity]])
   media:Register("statusbar", "Smooth", [[Interface\Addons\Skada\statusbar\Smooth]])
-  media:Register("statusbar", "TukTex", [[Interface\Addons\Skada\statusbar\normTex]])
+  media:Register("statusbar", "Smooth v2", [[Interface\Addons\Skada\statusbar\Smoothv2]])
+  media:Register("statusbar", "TukTex", [[Interface\Addons\Skada\statusbar\TukTex]])
   media:Register("statusbar", "WorldState Score", [[Interface\WorldStateFrame\WORLDSTATEFINALSCORE-HIGHLIGHT]])
 
 	-- Some sounds (copied from Omen).
@@ -1963,11 +1961,11 @@ function Skada:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, eventtype, srcGUID,
         tentative = nil
         tentativehandle = nil
         self.current = nil
-      end, 1)
+      end, Skada.db.profile.tentativetimer or 3)
 
-      tentative = 0
-      end
+      tentative = (Skada.db.profile.tentativecombatstart and 4) or 0
     end
+  end
 
 	if self.current and combatlogevents[eventtype] then
 		for i, mod in ipairs(combatlogevents[eventtype]) do
@@ -2241,7 +2239,7 @@ function Skada:FormatNumber(number)
 				return 	("%02.1fK"):format(number / 1000)
 			end
 		else
-			return number
+			return math.floor(number)
 		end
 	end
 end
