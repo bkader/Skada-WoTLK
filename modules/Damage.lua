@@ -255,7 +255,7 @@ do
       tooltip:AddDoubleLine(L["Segment Time"], SecondsToTime(totaltime), 255,255,255,255,255,255)
       tooltip:AddDoubleLine(L["Active Time"], SecondsToTime(activetime), 255,255,255,255,255,255)
       tooltip:AddDoubleLine(L["Damage Done"], Skada:FormatNumber(player.damagedone.amount), 255,255,255,255,255,255)
-      tooltip:AddDoubleLine(Skada:FormatNumber(player.damagedone.amount) .. "/" .. activetime .. ":", ("%02.1f"):format(player.damagedone.amount/math_max(1,activetime)), 255,255,255,255,255,255)
+      tooltip:AddDoubleLine(Skada:FormatNumber(player.damagedone.amount) .. "/" .. activetime .. ":", format("%02.1f", player.damagedone.amount/math_max(1,activetime)), 255,255,255,255,255,255)
 
     end
   end
@@ -549,14 +549,14 @@ do
     if Skada.current then
       local player=Skada:find_player(Skada.current, UnitGUID("player"))
       if player then
-        return ("%02.1f"):format(getDPS(Skada.current, player)).." "..L["DPS"]
+        return format("%02.1f", getDPS(Skada.current, player)).." "..L["DPS"]
       end
     end
   end
 
   local function feed_raid_dps()
     if Skada.current then
-      return ("%02.1f"):format(getRaidDPS(Skada.current)).." "..L["RDPS"]
+      return format("%02.1f", getRaidDPS(Skada.current)).." "..L["RDPS"]
     end
   end
 
@@ -580,7 +580,7 @@ do
         d.icon=d.class and Skada.classIcon or Skada.petIcon
         
         d.value=dps
-        d.valuetext=("%02.1f"):format(dps)
+        d.valuetext=Skada:FormatNumber(dps)
         
         if dps>max then
           max=dps
@@ -632,7 +632,7 @@ do
   end
 
   function mod:AddToTooltip(set, tooltip)
-    GameTooltip:AddDoubleLine(L["DPS"], ("%02.1f"):format(getRaidDPS(set)), 1, 1, 1)
+    GameTooltip:AddDoubleLine(L["DPS"], format("%02.1f", getRaidDPS(set)), 1, 1, 1)
   end
 
   function mod:GetSetSummary(set)
@@ -1455,7 +1455,7 @@ do
           Skada:FormatNumber(player.friendfire.amount), self.metadata.columns.Damage,
           format("%02.1f%%", player.friendfire.amount/set.friendfire*100), self.metadata.columns.Percent
         )
-        d.valuetext=Skada:FormatNumber(player.friendfire.amount)..(" (%02.1f%%)"):format(player.friendfire.amount/set.friendfire*100)
+        d.valuetext=format("%s (%02.1f%%)", Skada:FormatNumber(player.friendfire.amount), player.friendfire.amount/set.friendfire*100)
 
         if player.friendfire.amount>max then
           max=player.friendfire.amount
@@ -1580,7 +1580,7 @@ do
         temp[player.id].avoid=avoid
 
         d.value=avoid/total*100
-        d.valuetext = ("%02.1f%% (%d/%d)"):format(d.value, avoid, total)
+        d.valuetext = format("%02.1f%% (%d/%d)", d.value, avoid, total)
 
         if d.value>max then
           max=d.value
