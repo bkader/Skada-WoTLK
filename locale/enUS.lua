@@ -210,9 +210,10 @@ L["Show tooltips"] = "Show tooltips"
 L["Power gained"] = "Power gained"
 L["Shows tooltips with extra information in some modes."] = "Shows tooltips with extra information in some modes."
 
-L["Average hit:"] = "Average hit:"
-L["Maximum hit:"] = "Maximum hit:"
+L["Total hits:"] = "Total hits:"
 L["Minimum hit:"] = "Minimum hit:"
+L["Maximum hit:"] = "Maximum hit:"
+L["Average hit:"] = "Average hit:"
 L["Absorbs"] = "Absorbs"
 L["'s Absorbs"] = "'s Absorbs"
 
