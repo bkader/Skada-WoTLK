@@ -1,4 +1,4 @@
-local Skada=Skada
+local _, Skada=...
 if not Skada then return end
 
 local LibFail=LibStub("LibFail-1.0", true)
