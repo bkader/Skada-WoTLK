@@ -7,7 +7,6 @@
 	<Script file="modules\Deaths.lua" />
 	<Script file="modules\Dispels.lua" />
 	<Script file="modules\Failbot.lua" />
-	<Script file="modules\FriendlyFire.lua" />
 	<Script file="modules\Interrupts.lua" />
 	<Script file="modules\Power.lua" />
 	<Script file="modules\Resurrects.lua" />
