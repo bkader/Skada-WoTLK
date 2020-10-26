@@ -33,6 +33,7 @@ locale\frFR.lua
 locale\deDE.lua
 
 Skada.lua
+Menus.lua
 Options.lua
 BarDisplay.lua
 

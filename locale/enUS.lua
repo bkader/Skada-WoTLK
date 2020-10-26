@@ -60,6 +60,7 @@ L["Boss fights will be kept with this on, and non-boss fights are discarded."] =
 L["Show raw threat"] = true
 L["Shows raw threat percentage relative to tank instead of modified for range."] = true
 
+L["Hide window"] = "Hide window"
 L["Lock window"] = "Lock window"
 L["Locks the bar window in place."] = "Locks the bar window in place."
 L["Reverse bar growth"] = "Reverse bar growth"
