@@ -70,6 +70,7 @@ Skada.defaults = {
     total = nil,
 
     modules = {},
+    modulesBlocked={},
     columns = {},
     report = {mode = "Damage", set = "current", channel = "Say", chantype = "preset", number = 10},
 
@@ -115,6 +116,16 @@ function Skada:AddColumnOptions(mod)
     Skada.options.args.columns.args[mod:GetName()] = cols
   end
 
+end
+
+function Skada:AddLoadableModuleCheckbox(mod, name, description)
+  local new = {
+    type = "toggle",
+    name = name,
+    desc = description,
+    order = 1,
+  }
+  Skada.options.args.modules.args[mod] = new
 end
 
 local deletewindow = nil
@@ -414,6 +425,33 @@ Skada.options = {
       name = L["Columns"],
       order=4,
       args = {}
+    },
+
+    modules = {
+      type = "group",
+      name = L["Disabled Modules"],
+      order=6,
+      get = function(i) return Skada.db.profile.modulesBlocked[i[#i]] end,
+      set = function(i, value) Skada.db.profile.modulesBlocked[i[#i]] = value; Skada.options.args.modules.args.apply.disabled=false end,
+      args = {
+        desc = {
+          type="description",
+          name=L["Tick the modules you want to disable."],
+          width="full",
+          order=0,
+        },
+        apply = {
+          type="execute",
+          name=APPLY,
+          width="full",
+          func=ReloadUI,
+          confirm = function()
+            return L["This change requires a UI reload. Are you sure?"]
+          end,
+          disabled = true,
+          order=99,
+        },
+      },
     }
   }
 }

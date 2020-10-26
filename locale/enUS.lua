@@ -517,3 +517,9 @@ L["PARRY"] = "Parry"
 L["REFLECT"] = "Reflect"
 L["RESIST"] = "Resist"
 L["'s "] = true
+
+
+L["Disabled Modules"] = true
+L["Tick the modules you want to disable."] = true
+L["This change requires a UI reload. Are you sure?"] = true
+L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = true

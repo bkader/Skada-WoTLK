@@ -706,6 +706,30 @@ function Skada:OnEnable()
   if type(CLASS_ICON_TCOORDS) == "table" then
     Skada.classCoords = CLASS_ICON_TCOORDS
   end
+
+  if self.modulelist then
+    for i = 1, #self.modulelist do
+      self.modulelist[i](self, L)
+    end
+    self.modulelist = nil
+  end
+
+  self:ScheduleTimer("ApplySettings", 2)
+  self:ScheduleTimer("MemoryCheck", 3)
+end
+
+function Skada:MemoryCheck()
+  UpdateAddOnMemoryUsage()
+  local mem = GetAddOnMemoryUsage("Skada")
+  if mem > 30000 then
+    self:Print(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."])
+  end
+end
+
+function Skada:AddLoadableModule(name, description, func)
+  self.modulelist = self.modulelist or {}
+  self.modulelist[#self.modulelist+1] = func
+  self:AddLoadableModuleCheckbox(name, L[name], description and L[description])
 end
 
 local function CheckPet(unit, pet)
