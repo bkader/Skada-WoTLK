@@ -714,7 +714,6 @@ function Skada:OnEnable()
     self.modulelist = nil
   end
 
-  self:ScheduleTimer("ApplySettings", 2)
   self:ScheduleTimer("MemoryCheck", 3)
 end
 
