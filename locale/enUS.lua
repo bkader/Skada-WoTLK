@@ -237,6 +237,10 @@ L["Power"] = true
 L["gained %s"] = true
 L["Power gained: %s"] = true
 L["Power gain spell list"] = "Power gain spell list"
+L["Power gained: Mana"] = true
+L["Power gained: Rage"] = true
+L["Power gained: Energy"] = true
+L["Power gained: Runic Power"] = true
 
 L["Click for"] = "Click for"
 L["Shift-Click for"] = "Shift-Click for"
