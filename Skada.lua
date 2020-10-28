@@ -1235,7 +1235,7 @@ function Skada:StartCombat()
 	self:UpdateDisplay(true)
 
 	-- Schedule timers for updating windows and detecting combat end.
-	update_timer = self:ScheduleRepeatingTimer("UpdateDisplay", 0.5)
+	update_timer = self:ScheduleRepeatingTimer("UpdateDisplay", self.db.profile.updatefrequency or 0.5)
 	tick_timer = self:ScheduleRepeatingTimer("Tick", 1)
 
 	-- Hide in combat option.
@@ -1472,7 +1472,6 @@ function Skada:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, eventtype, srcGUID,
 				if tentative ~= nil then
 					tentative = tentative + 1
 					if tentative == 5 then
-						--self:Print("tentative combat start SUCCESS!")
 						self:CancelTimer(tentativehandle)
 						tentativehandle = nil
 						self:StartCombat()
@@ -1819,10 +1818,14 @@ end
 -- Playerid and playername are exchanged for the pet owner's, and spellname is modified to include pet name.
 function Skada:FixPets(action)
 
+  if not action then return end
+  if not action.playerid and not action.srcGUID then return end
+  if not action.playername and not action.srcName then return end
+
   action.playerid=action.playerid or action.srcGUID
   action.playername=action.playername or action.srcName
 
-	if action and not UnitIsPlayer(action.playername) then
+	if not UnitIsPlayer(action.playername) then
 
 		if not pets[action.playerid] then
 			-- Fix for guardians; requires "playerflags" to be set from CL.

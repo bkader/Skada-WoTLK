@@ -119,6 +119,9 @@ L["Threat: Personal Threat"] = "Threat: Personal Threat"
 L["Data segments to keep"] = "Data segments to keep"
 L["The number of fight segments to keep. Persistent segments are not included in this."] = "The number of fight segments to keep. Persistent segments are not included in this."
 
+L["Update frequency"] = "Update frequency"
+L["How often windows are updated. Shorter for faster updates. Increases CPU usage."] = "How often windows are updated. Shorter for faster updates. Increases CPU usage."
+
 L["Alternate color"] = "Alternate color"
 L["Choose the alternate color of the bars."] = "Choose the alternate color of the bars."
 

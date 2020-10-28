@@ -68,11 +68,12 @@ Skada.defaults = {
     feed = "",
     sets = {},
     total = nil,
+    updatefrequency = 0.5,
 
     modules = {},
-    modulesBlocked={},
     columns = {},
     report = {mode = "Damage", set = "current", channel = "Say", chantype = "preset", number = 10},
+    modulesBlocked={},
 
     windows = {windefaultscopy},
   }
@@ -345,16 +346,6 @@ Skada.options = {
           end,
         },
 
-        numberformat = {
-          type="select",
-          name=L["Number format"],
-          desc=L["Controls the way large numbers are displayed."],
-          values= function() return {[1] = L["Condensed"], [2] = L["Detailed"]} end,
-          get=function() return Skada.db.profile.numberformat end,
-          set=function(self, opt) Skada.db.profile.numberformat = opt end,
-          order=11,
-        },
-
         showranks = {
           type="toggle",
           name=L["Show rank numbers"],
@@ -365,36 +356,6 @@ Skada.options = {
           Skada.db.profile.showranks = not Skada.db.profile.showranks
           Skada:ApplySettings()
           end,
-        },
-
-        datafeed = {
-          type="select",
-          name=L["Data feed"],
-          desc=L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."],
-          values= function()
-          local feeds = {}
-          feeds[""] = L["None"]
-          for name, func in pairs(Skada:GetFeeds()) do feeds[name] = name end
-          return feeds
-          end,
-          get=function() return Skada.db.profile.feed end,
-          set=function(self, feed)
-          Skada.db.profile.feed = feed
-          if feed ~= "" then Skada:SetFeed(Skada:GetFeeds()[feed]) end
-          end,
-          order=12,
-        },
-
-        setstokeep = {
-          type="range",
-          name=L["Data segments to keep"],
-          desc=L["The number of fight segments to keep. Persistent segments are not included in this."],
-          min=0,
-          max=30,
-          step=1,
-          get=function() return Skada.db.profile.setstokeep end,
-          set=function(self, val) Skada.db.profile.setstokeep = val end,
-          order=13,
         },
 
         tentativecombatstart = {
@@ -415,7 +376,60 @@ Skada.options = {
           step=1,
           get=function() return Skada.db.profile.tentativetimer end,
           set=function(self, val) Skada.db.profile.tentativetimer = val end,
-          order=10.1,
+          order=11,
+        },
+
+        numberformat = {
+          type="select",
+          name=L["Number format"],
+          desc=L["Controls the way large numbers are displayed."],
+          values= function() return {[1] = L["Condensed"], [2] = L["Detailed"]} end,
+          get=function() return Skada.db.profile.numberformat end,
+          set=function(self, opt) Skada.db.profile.numberformat = opt end,
+          order=12,
+        },
+
+        datafeed = {
+          type="select",
+          name=L["Data feed"],
+          desc=L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."],
+          values= function()
+          local feeds = {}
+          feeds[""] = L["None"]
+          for name, func in pairs(Skada:GetFeeds()) do feeds[name] = name end
+          return feeds
+          end,
+          get=function() return Skada.db.profile.feed end,
+          set=function(self, feed)
+          Skada.db.profile.feed = feed
+          if feed ~= "" then Skada:SetFeed(Skada:GetFeeds()[feed]) end
+          end,
+          order=13,
+        },
+
+        setstokeep = {
+          type="range",
+          name=L["Data segments to keep"],
+          desc=L["The number of fight segments to keep. Persistent segments are not included in this."],
+          min=0,
+          max=30,
+          step=1,
+          get=function() return Skada.db.profile.setstokeep end,
+          set=function(self, val) Skada.db.profile.setstokeep = val end,
+          order=14,
+        },
+
+        updatefrequency = {
+          type="range",
+          name=L["Update frequency"],
+          desc=L["How often windows are updated. Shorter for faster updates. Increases CPU usage."],
+          min = 0.10,
+          max = 1,
+          step = 0.05,
+          get=function() return Skada.db.profile.updatefrequency end,
+          set=function(self, val) Skada.db.profile.updatefrequency = val end,
+          order=14,
+          width="double",
         }
       }
     },
