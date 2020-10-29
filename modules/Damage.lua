@@ -595,7 +595,7 @@ do
 
     function mod:OnEnable()
       spellmod.metadata={columns={Damage=true, Percent=true}}
-      playermod.metadata={showspots=true, tooltip=player_tooltip, click1=spellmod, columns={Damage=true, Percent=true}}
+      playermod.metadata={tooltip=player_tooltip, click1=spellmod, columns={Damage=true, Percent=true}}
       targetmod.metadata={columns={Damage=true, Percent=true}}
       mod.metadata={showspots=true, click1=playermod, click2=targetmod, columns={Damage=true, DPS=true, Percent=true}}
 
