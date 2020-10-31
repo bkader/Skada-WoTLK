@@ -3,8 +3,8 @@ if not Skada then return end
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 
+local mod = Skada:NewModule(L["Scroll"])
 local bars = Skada:GetModule("BarDisplay")
-local mod = Skada:NewModule("Scroll")
 
 local db
 local defaults = {
