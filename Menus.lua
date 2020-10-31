@@ -100,18 +100,7 @@ function Skada:OpenMenu(window)
             wipe(info)
             info.text = L["Reset"]
             info.func = function()
-                if not StaticPopupDialogs["ResetSkadaDialog"] then
-                    StaticPopupDialogs["ResetSkadaDialog"] = {
-                        text = L["Do you want to reset Skada?"],
-                        button1 = ACCEPT,
-                        button2 = CANCEL,
-                        timeout = 30,
-                        whileDead = 0,
-                        hideOnEscape = 1,
-                        OnAccept = function() Skada:Reset() end,
-                    }
-                end
-                StaticPopup_Show("ResetSkadaDialog")
+              Skada:ShowPopup()
             end
             info.notCheckable = 1
             L_UIDropDownMenu_AddButton(info, level)
@@ -449,7 +438,7 @@ do
             setbox:SetLabel(L["Segment"])
             setbox:SetList({total = L["Total"], current = L["Current"]})
             for i, set in ipairs(Skada.db.profile.sets) do
-                setbox:AddItem(i, (Skada:GetSetLabel(set)))
+                setbox:AddItem(i, set.name)
             end
             setbox:SetCallback("OnValueChanged", function(f, e, value)
                 Skada.db.profile.report.set = value
