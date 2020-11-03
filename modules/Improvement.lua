@@ -1,4 +1,4 @@
-local _, Skada=...
+local Skada=Skada
 if not Skada then return end
 
 local UnitGUID, UnitName, UnitClass=UnitGUID, UnitName, UnitClass
@@ -10,10 +10,9 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
   if Skada.db.profile.modulesBlocked[modname] then return end
 
   local mod=Skada:NewModule(L[modname])
-  local mod_modes=Skada:NewModule(L["Improvement modes"])
-  local mod_comparison=Skada:NewModule(L["Improvement comparison"])
+  local mod_modes=mod:NewModule(L["Improvement modes"])
+  local mod_comparison=mod:NewModule(L["Improvement comparison"])
 
-  SkadaImprovementDB={}
   local db
   local modes={
     "ActiveTime",
@@ -61,7 +60,6 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
     return player.fails.count
   end
 
-
   -- :::::::::::::::::::::::::::::::::::::::::::::::
 
   local function find_boss_data(bossname)
@@ -92,7 +90,7 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
   local function EventHandler(self, event, ...)
     -- sorry but we only record raid bosses
     local inInstance, instanceType=IsInInstance()
-    if not inInstance or instanceType ~= "raid" then return end
+    if not inInstance or instanceType~="raid" then return end
     if not Skada.current or not Skada.current.gotboss then return end
 
     if event=="PLAYER_REGEN_ENABLED" then
@@ -128,7 +126,7 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
   function mod_modes:Enter(win, id, label)
     self.mobid=id
     self.mobname=label
-    self.title=label..L["'s "]..L["Overall data"]
+    self.title=format(L["%s's overall data"], label)
   end
 
   function mod_modes:Update(win, set)
@@ -163,10 +161,6 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
             Skada:FormatNumber(d.value), true,
             Skada:FormatNumber(d.value/active), true
           )
-        end
-
-        if i>max then
-          max=i
         end
 
         nr=nr+1
@@ -250,6 +244,7 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
 
   function mod:OnInitialize()
     -- make our DB local
+    SkadaImprovementDB=SkadaImprovementDB or {}
     if next(SkadaImprovementDB)==nil then
       SkadaImprovementDB={
         id=UnitGUID("player"),
@@ -265,7 +260,6 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
     mod.metadata={click1=mod_modes}
     mod_modes.metadata={click1=mod_comparison}
 
-
     Skada:AddMode(self)
 
     -- register required frame events.
@@ -279,5 +273,43 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
     -- unregister frame events.
     f:UnregisterEvent('PLAYER_REGEN_ENABLED')
     f:SetScript("OnEvent", nil)
+  end
+
+  local function ask_for_reset()
+    StaticPopupDialogs["ResetImprovementDialog"] = {
+      text = L["Do you want to reset your improvement data?"],
+      button1 = ACCEPT,
+      button2 = CANCEL,
+      timeout = 30,
+      whileDead = 0,
+      hideOnEscape = 1,
+      OnAccept = function() mod:Reset() end,
+    }
+    StaticPopup_Show("ResetImprovementDialog")
+  end
+
+  function mod:Reset()
+    Skada:Wipe()
+    SkadaImprovementDB={}
+    self:OnInitialize()
+    collectgarbage("collect")
+    for _, win in ipairs(Skada:GetWindows()) do
+      local mode = win.db.mode
+      if mode == L[modname] or mode == L["Improvement modes"] or mode == L["Improvement comparison"] then
+        win:DisplayMode(mod)
+      end
+    end
+    Skada:UpdateDisplay(true)
+    Skada:Print(L["All data has been reset."])
+  end
+
+  local Default_ShowPopup = Skada.ShowPopup
+  function Skada:ShowPopup(win)
+    if win and win.db.mode == modname then
+      ask_for_reset()
+      return
+    end
+
+    return Default_ShowPopup()
   end
 end)

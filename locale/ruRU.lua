@@ -1,284 +1,556 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "ruRU", false)
-
 if not L then return end
 
-L["%s dies"] = "%s смертей"
-L["%s on %s removed by %s"] = "%s on %s removed by %s"
-L["%s on %s removed by %s's %s"] = "%s on %s removed by %s's %s"
-L["'s "] = " - "
-L["'s Absorbs"] = " - Поглощения"
-L["%s's Damage"] = "%s - Урон"
-L["'s Damage Taken"] = " - Полученный урон"
-L["%s's Death"] = "%s - Смерть"
-L["'s Debuffs"] = " - Отрицательные эффекты"
-L["%s's Fails"] = "%s - Неудачи"
-L["'s Healing"] = " - Исцеление"
-L["A damage meter."] = "Измеритель урона."
-L["Absorb"] = "Поглощение"
-L["Absorb details"] = "Детали поглот."
-L["Absorbed"] = "Поглощено"
-L["Absorbs"] = "Поглощения"
-L["Absorbs and healing"] = "Лечение и Поглощение"
-L["Active Time"] = "Время активности"
-L["Adds a background frame under the bars. The height of the background frame determines how many bars are shown. This will override the max number of bars setting."] = "Добавляет фон за полосами. Высота фона регулируется количеством отображаемых полос. Это аннулирует настройки максимального количества полос."
-L["All data has been reset."] = "Все данные были сброшены."
-L["Alternate color"] = "Альтернативный цвет"
-L["Announce CC breaking to party"] = "Announce CC breaking to party"
-L["Appearance"] = "Внешний вид"
-L["Ask"] = "Уточнить"
-L["Attack"] = "Атака"
-L["Automatically switch to set 'Current' and this mode when entering combat."] = "Автоматически переключаться на 'Текущую' установку и этот режим при входе в бой."
-L["Average hit:"] = "Среднее попадание:"
-L["Background"] = "Фон"
-L["Background color"] = "Цвет фона"
-L["Background texture"] = "Текстура фона"
-L["Bar color"] = "Цвет полос"
-L["Bar display"] = "Отображение полос"
-L["Bar font"] = "Шрифт на полосах"
-L["Bar font size"] = "Размер шрифта на полосах"
-L["Bar height"] = "Высота полос"
-L["Bar orientation"] = "Ориентация полос"
-L["Bar spacing"] = "Промежуток между полосами"
-L["Bar texture"] = "Текстура полос"
-L["Bar width"] = "Длина полос"
-L["Bars"] = "Полосы"
-L["Bars will grow up instead of down."] = "Полосы будут расти вверх, а не вниз."
-L["Block"] = "Блок"
-L["Blocked"] = "Заблокировано"
-L["Border texture"] = "Текстура краёв"
-L["Border thickness"] = "Толщина краёв"
-L["Boss fights will be kept with this on, and non-boss fights are discarded."] = "При включении этой опции бои с боссами будут сохраняться, а бои с не-боссами будут игнорироваться."
-L["CC"] = "СС"
-L["CC Breakers"] = "CC Breakers"
-L["CC breaks"] = "CC breaks"
-L["Change"] = "Изменение"
-L["Channel"] = "Канал"
-L["Choose the alternate color of the bars."] = "Выберите альтернативный цвет полос."
-L["Choose the default color of the bars."] = "Выберите цвет полос по умолчанию."
-L["Choose the system to be used for displaying data in this window."] = "Выберите систему используемую для отображения данных в окне."
-L["Choose the window to be deleted."] = "Выберите окно для удаления."
-L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."] = "Выберите, какие данные выводить в DataBroker. Для этого требуется, модификация которая поддерживает отображение LDB, к примеру Titan Panel."
-L["Class color bars"] = "Полосы по цвету класса"
-L["Class color text"] = "Текст по цвету класса"
-L["Click for"] = "Клик -"
-L["Columns"] = "Колонки"
-L["Combat mode"] = "Режим битвы"
-L["Combined"] = "Совместный"
-L["Condensed"] = "Кратко"
-L["Configure"] = "Конфигурация"
-L["Control-Click for"] = "Control+Клик - "
-L["Controls if data is reset when you enter an instance."] = "Управление сбросом данных при входе в подземелье."
-L["Controls if data is reset when you join a group."] = "Управление сбросом данных при присоединении к группе."
-L["Controls if data is reset when you leave a group."] = "Управление сбросом данных после выхода из группы."
-L["Controls the way large numbers are displayed."] = "Выбор вида отображения цифр."
-L["Create window"] = "Создать окно"
-L["Critical"] = "Крит"
-L["Crushing"] = "Сокр. удар"
-L["Current"] = "Текущий"
-L["DPS"] = "УВС"
-L["Damage"] = "Нанесённый урон"
-L["Damage done"] = "Нанесено урона"
-L["Damage done per player"] = "Нанесено урона каждым играком"
-L["Damage from"] = "Урон от"
-L["Damage on"] = "Урон по"
-L["Spell Details"] = "Детали боевых заклинаний"
-L["Spell List"] = "Список заклинаний"
-L["Damage Taken"] = "Полученный урон"
-L["Damage taken by spell"] = "Урон, полученный от заклинания"
-L["Damage taken per player"] = "Получено урона каждым играком"
-L["Damage: Personal DPS"] = "Урон: собственный УВС"
-L["Damage: Raid DPS"] = "Урон: УВС рейда"
-L["Damaged mobs"] = "Damaged mobs"
-L["Data feed"] = "Подача данных"
-L["Data resets"] = "Сброс данных"
-L["Data segments to keep"] = "Сегменты для хранения"
-L["Death log"] = "Журнал смертей"
-L["Deaths"] = "Смерти"
-L["Deaths:"] = "Смертей:"
-L["Debuff spell list"] = "Список отрицательных эффектов"
-L["Debuff uptimes"] = "Действие дебаффа"
-L["Default"] = "По умолчанию"
-L["Deflect"] = "Отражение"
-L["Delete segment"] = "Удалить сегмент"
-L["Delete window"] = "Удалить окно"
-L["Deletes the chosen window."] = "Удалить все выбранные окна."
-L["Detailed"] = "Детально"
-L["Disable"] = "Отключить"
-L["Disable while hidden"] = "Отключить когда скрыт"
-L["Dispels"] = "Рассеивания"
-L["Dispels:"] = "Рассеивание:"
-L["Display system"] = "Система отображения"
-L["Distance between bars."] = "Расстояние между полосами"
-L["Do not show DPS"] = "Не показывать УВС"
-L["Do not show HPS"] = "Не отображать ИВС"
-L["Do not show TPS"] = "Не показывать TPS (ГУВС)"
-L["Do not warn while tanking"] = "Не извещать при танковании"
-L["Do you want to reset Skada?"] = "Вы действительно хотите сбросить данные?"
-L["Dodge"] = "Уклонение"
-L["Enable"] = "Включить"
-L["Enables the title bar."] = "Включить заглавную полосу."
-L["Enemy damage done"] = "Нанесено урона врагом"
-L["Enemy damage taken"] = "Получено урона врагом"
-L["Enter the name for the new window."] = "Введите имя нового окна."
-L["Enter the name for the window."] = "Введите новое имя для окна."
-L["Evade"] = "Мимо"
-L["Fails"] = "Неудачи"
-L["Fails:"] = "Неудачи:"
-L["Flash screen"] = "Мигание экрана"
-L["General options"] = "Основные настройки"
-L["Glancing"] = "Вскользь"
-L["Guild"] = "Гильдия"
-L["HPS"] = "ИВС"
-L["HPS:"] = "ИВС:"
-L["Healed by"] = "Healed by"
-L["Healed players"] = "Исцелённые игроки"
-L["Healing"] = "Исцеление"
-L["Healing spell details"] = "Детали исцеляющих заклинаний"
-L["Healing spell list"] = "Список исцеляющих заклинаний"
-L["Health"] = "Здоровье"
-L["Hide in PvP"] = "Скрывать в PvP"
-L["Hide in combat"] = "Скрывать в бою"
-L["Hide when solo"] = "Скрывать когда один"
-L["Hides DPS from the Damage mode."] = "Скрыть УВС в режиме урона."
-L["Hides HPS from the Healing modes."] = "Скрыть ИВС (HPS) из режима исцеления."
-L["Hides Skada's window when in Battlegrounds/Arenas."] = "Скрывать окно Skada на аренах/полях сражений."
-L["Hides Skada's window when in combat."] = "Скрывать окно Skada в бою"
-L["Hides Skada's window when not in a party or raid."] = "Скрывать окно Skada, если вы не состоите в группе или рейде."
-L["Hint: Left-Click to toggle Skada window."] = "Подсказка: [Левый клик] открывает/закрывает окно Skada."
-L["Hit"] = "Попадание"
-L["Ignore Main Tanks"] = "Игнорировать танков"
-L["Immune"] = "Невоспр."
-L["Informative tooltips"] = "Информационная подсказка"
-L["Interrupts"] = "Прерывание"
-L["Keep segment"] = "Хранить сегмент"
-L["Last fight"] = "Последняя битва"
-L["Left to right"] = "Слева направо"
-L["Lines"] = "Строки"
-L["List of damaged players"] = "Список игроков, получивших урон"
-L["List of damaging spells"] = "Список наносящих урон заклинаний"
-L["Lock window"] = "Заблокировать окно"
-L["Locks the bar window in place."] = "Зафиксировать окно"
-L["Mana gain spell list"] = "Список способностей получения маны"
-L["Mana gained"] = "Получено маны"
-L["Margin"] = "Граница"
-L["Max bars"] = "Макс полос"
-L["Maximum hit:"] = "Максимальное попадание:"
-L["Minimum hit:"] = "Минимальное попадание:"
-L["Missed"] = "Промах"
-L["Mode"] = "Режим"
-L["Mode switching"] = "Смена режима"
-L["Name of recipient"] = "Имя получателя"
-L["No"] = "Нет"
-L["No mode or segment selected for report."] = "Для отчёта не выбран режим или сегмент."
-L["No mode selected for report."] = "Для отчета не выбран режим."
-L["None"] = "нету"
-L["Number format"] = "Формат чисел"
-L["Officer"] = "Офицер"
-L["Only keep boss fighs"] = "Хранить только бои с боссами"
-L["Options"] = "Опции"
-L["Overheal"] = "Переисцеление"
-L["Overhealing"] = "Избыточное лечение"
-L["Parry"] = "Парир."
-L["Party"] = "Группа"
-L["Percent"] = "Процент"
-L["Play sound"] = "Проиграть звук"
-L["Position of the tooltips."] = "Позиция подсказки"
-L["Profiles"] = "Профили"
-L["RDPS"] = "РУВС"
-L["Raid"] = "Рейд"
-L["Reflect"] = "Отражение"
-L["Rename window"] = "Переименовать окно"
-L["Report"] = "Отчет"
-L["Reset"] = "Сброс"
-L["Reset on entering instance"] = "Сбрасывать при входе в подземелье"
-L["Reset on joining a group"] = "Сбрасывать при присоединении к группе"
-L["Reset on leaving a group"] = "Сбрасывать при покидании группы"
-L["Resist"] = "Сопротивление"
-L["Resisted"] = "Отражено"
-L["Return after combat"] = "Возврат после боя"
-L["Return to the previous set and mode after combat ends."] = "Возврат к предыдущей установке и режиму после окончания боя."
-L["Reverse bar growth"] = "Обратный рост полос"
-L["Right to left"] = "Справа налево"
-L["Right-click to configure"] = "ПКМ для настройки"
-L["Right-click to open menu"] = "ПКМ для меню"
-L["Say"] = "Сказать"
-L["Segment"] = "Сегмент"
-L["Segment Time"] = "Время сегментировано"
-L["Self"] = "Себе"
-L["Send report"] = "Отослать отчёт"
-L["Shake screen"] = "Тряска экрана"
-L["Shift + Left-Click to reset."] = "Shift + ЛКМ для сброса."
-L["Shift-Click for"] = "Shift+Клик -"
-L["Show menu button"] = "Показывать кнопку меню"
-L["Show minimap button"] = "Показывать кнопку на миникарте"
-L["Show rank numbers"] = "Показать номер линии"
-L["Show raw threat"] = "Show raw threat"
-L["Show spark effect"] = "Показать эффект искры"
-L["Show tooltips"] = "Показывать подсказки"
-L["Shows a button for opening the menu in the window title bar."] = "Shows a button for opening the menu in the window title bar."
-L["Shows numbers for relative ranks for modes where it is applicable."] = "Показывает номера линий в режимах, где это применимо."
-L["Shows raw threat percentage relative to tank instead of modified for range."] = "Shows raw threat percentage relative to tank instead of modified for range."
-L["Shows subview summaries in the tooltips."] = "Shows subview summaries in the tooltips."
-L["Shows threat on focus target, or focus target's target, when available."] = "Показывает угрозу цели фокуса, или цели цели фокуса, если доступно."
-L["Shows tooltips with extra information in some modes."] = "В некоторых режимах показывать подсказки с дополнительной информацией."
-L["Skada Menu"] = "Меню Skada"
-L["Skada report on %s for %s, %s to %s:"] = "Отчёт Skada: %s - %s, с %s до %s:"
-L["Skada summary"] = "Skada: Сводка"
-L["Skada will not collect any data when automatically hidden."] = "Skada не будет собирать данные, когда скрыт."
-L["Skada: Fights"] = "Skada: Бои"
-L["Skada: Modes"] = "Skada: Режимы"
-L["Spell details"] = "Детали заклинаний"
-L["Spell list"] = "Список заклинаний"
-L["Start new segment"] = "Начать новый сегмент"
-L["Subview rows"] = "Subview rows"
-L["Switch to mode"] = "Переключить режим"
-L["Switch to segment"] = "Переключиться на сегмент"
-L["TPS"] = "УгВС"
-L["The background color of the title."] = "Цвет фона заголовка"
-L["The color of the background."] = "Цвет фона."
-L["The direction the bars are drawn in."] = "Направление заполнения полос."
-L["The font size of all bars."] = "Размер шрифта для всех полос."
-L["The font used by all bars."] = "Шрифт всех полос."
-L["The height of the bars."] = "Высота полос."
-L["The height of the window. If this is 0 the height is dynamically changed according to how many bars exist."] = "Высота окна. Если значение высоты равно нулю, то она будет изменяться в соответствии с количеством существующих полос."
-L["The margin between the outer edge and the background texture."] = "Разница между наружным краем и текстурой фона."
-L["The maximum number of bars shown."] = "Максимальное количество отображаемых полос."
-L["The number of fight segments to keep. Persistent segments are not included in this."] = "Хранимое число сегментов боёв. Длительные сегменты не входят в это."
-L["The number of rows from each subview to show when using informative tooltips."] = "The number of rows from each subview to show when using informative tooltips."
-L["The sound that will be played when your threat percentage reaches a certain point."] = "Будет воспроизводиться звук, когда процент угрозы достигнет определенной точки."
-L["The texture used as the background of the title."] = "Текстура, используемая для фона заглавия."
-L["The texture used as the background."] = "Текстура фона."
-L["The texture used by all bars."] = "Текстура всех полос."
-L["The texture used for the border of the title."] = "Текстура, используемая для краёв заглавия."
-L["The texture used for the borders."] = "Текстура краёв."
-L["The thickness of the borders."] = "Толщина краёв."
-L["The width of the bars."] = "Длина всех полос."
-L["This will cause the screen to flash as a threat warning."] = "Предупреждение об угрозе будет производиться посредством мигания экрана."
-L["This will cause the screen to shake as a threat warning."] = "Предупреждение об угрозе будет производиться посредством тряски экрана."
-L["This will play a sound as a threat warning."] = "Предупреждение об угрозе будет производиться посредством звукового сигнала."
-L["Threat"] = "Угроза"
-L["Threat sound"] = "Звук угрозы"
-L["Threat threshold"] = "Порог угрозы"
-L["Threat warning"] = "Предупреждение об угрозе"
-L["Threat: Personal Threat"] = "Угроза: своя угроза"
-L["Title bar"] = "Полоса заглавия"
-L["Toggle window"] = "Открыть/закрыть окно"
-L["Toggles showing the minimap button."] = "Отобразить/скрыть кнопку у мини-карты."
-L["Tooltip position"] = "Позиция подсказки"
-L["Tooltips"] = "Подсказки"
-L["Top left"] = "Вверху слева"
-L["Top right"] = "Вверху справа"
-L["Total"] = "Всего"
-L["Total healing"] = "Всего исцеления"
-L["Use focus target"] = "Исп. цель фокуса"
-L["When possible, bar text will be colored according to player class."] = "Когда это возможно, текст полос будет окрашен в соответствии с классом игрока."
-L["When possible, bars will be colored according to player class."] = "Когда это возможно, полосы будут окрашены в соответствии с классом игрока."
-L["When your threat reaches this level, relative to tank, warnings are shown."] = "При достижении угрозы до этого уровня, по сравнению с танком, будут показаны предупреждения."
-L["Whisper"] = "Шепот"
-L["Window height"] = "Высота окна"
-L["Windows"] = "Окна"
-L["Yes"] = "Да"
-L["opens the configuration window"] = "открывает окно конфигурации"
-L["reports the active mode"] = "Сообщить активный режим"
-L["resets all data"] = "сбрасывает все данные"
-L["targets"] = "цели"
+L["A damage meter."]=true
+L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."]=true
+
+L["Skada: Modes"]=true
+L["Skada: Fights"]=true
+
+L["Error: No options selected"]=true
+
+L["Profiles"]=true
+L["Enable"]=true
+L["Disable"]=true
+
+-- common lines
+L["Active Time"]=true
+L["Segment Time"]=true
+L["Click for"]=true
+L["Shift-Click for"]=true
+L["Control-Click for"]=true
+L["Minimum hit:"]=true
+L["Maximum hit:"]=true
+L["Average hit:"]=true
+L["Total hits:"]=true
+L["Percent"]=true
+
+L["General options"]=true
+
+-- windows section:
+L["Window"]=true
+L["Windows"]=true
+
+L["Create window"]=true
+L["Enter the name for the new window."]=true
+
+L["Delete window"]=true
+L["Choose the window to be deleted."]=true
+
+L["Deletes the chosen window."]=true
+
+L["Rename window"]=true
+L["Enter the name for the window."]=true
+L["Lock window"]=true
+L["Locks the bar window in place."]=true
+L["Hide window"]=true
+L["Hides the window."]=true
+L["Display system"]=true
+L["Choose the system to be used for displaying data in this window."]=true
+
+-- bars
+L["Bars"]=true
+L["Bar font"]=true
+L["The font used by all bars."]=true
+L["Bar font size"]=true
+L["The font size of all bars."]=true
+L["Font flags"]=true
+L["Sets the font flags."]=true
+L["None"]=true
+L["Outline"]=true
+L["Thick outline"]=true
+L["Monochrome"]=true
+L["Outlined monochrome"]=true
+L["Bar texture"]=true
+L["The texture used by all bars."]=true
+L["Bar spacing"]=true
+L["Distance between bars."]=true
+L["Bar height"]=true
+L["The height of the bars."]=true
+L["Bar width"]=true
+L["The width of the bars."]=true
+L["Bar orientation"]=true
+L["The direction the bars are drawn in."]=true
+L["Left to right"]=true
+L["Right to left"]=true
+L["Reverse bar growth"]=true
+L["Bars will grow up instead of down."]=true
+L["Bar color"]=true
+L["Choose the default color of the bars."]=true
+L["Background color"]=true
+L["Choose the background color of the bars."]=true
+L["Class color bars"]=true
+L["When possible, bars will be colored according to player class."]=true
+L["Class color text"]=true
+L["When possible, bar text will be colored according to player class."]=true
+L["Class icons"]=true
+L["Use class icons where applicable."]=true
+L["Role icons"]=true
+L["Use role icons where applicable."]=true
+L["Clickthrough"]=true
+L["Disables mouse clicks on bars."]=true
+L["Smooth bars"]=true
+L["Animate bar changes smoothly rather than immediately."]=true
+
+-- title bar
+L["Title bar"]=true
+L["Enables the title bar."]=true
+L["Include set"]=true
+L["Include set name in title bar"]=true
+L["Title height"]=true
+L["The height of the title frame."]=true
+L["Title font size"]=true
+L["The font size of the title bar."]=true
+L["Title color"]=true
+L["The text color of the title."]=true
+L["The texture used as the background of the title."]=true
+L["The background color of the title."]=true
+L["Border texture"]=true
+L["The texture used for the borders."]=true
+L["The texture used for the border of the title."]=true
+L["Border color"]=true
+L["The color used for the border."]=true
+L["Buttons"]=true
+
+-- general window
+L["Background"]=true
+L["Background texture"]=true
+L["The texture used as the background."]=true
+L["Tile"]=true
+L["Tile the background texture."]=true
+L["Tile size"]=true
+L["The size of the texture pattern."]=true
+L["Background color"]=true
+L["The color of the background."]=true
+L["Border"]=true
+L["Border thickness"]=true
+L["The thickness of the borders."]=true
+L["General"]=true
+L["Scale"]=true
+L["Sets the scale of the window."]=true
+L["Strata"]=true
+L["This determines what other frames will be in front of the frame."]=true
+L["Width"]=true
+L["Height"]=true
+
+-- switching
+L["Mode switching"]=true
+L["Combat mode"]=true
+L["Automatically switch to set 'Current' and this mode when entering combat."]=true
+L["Return after combat"]=true
+L["Return to the previous set and mode after combat ends."]=true
+L["Wipe mode"]=true
+L["Automatically switch to set 'Current' and this mode after a wipe."]=true
+L["None"]=true
+
+L["Inline bar display"]=true
+L["Inline display is a horizontal window style."]=true
+L["Fixed bar width"]=true
+L["If checked, bar width is fixed. Otherwise, bar width depends on the text width."]=true
+
+-- data resets
+L["Data resets"]=true
+L["Reset on entering instance"]=true
+L["Controls if data is reset when you enter an instance."]=true
+L["Reset on joining a group"]=true
+L["Controls if data is reset when you join a group."]=true
+L["Reset on leaving a group"]=true
+L["Controls if data is reset when you leave a group."]=true
+L["Ask"]=true
+L["Do you want to reset Skada?"]=true
+L["All data has been reset."]=true
+
+-- general options
+L["Show minimap button"]=true
+L["Toggles showing the minimap button."]=true
+L["Merge pets"]=true
+L["Merges pets with their owners. Changing this only affects new data."]=true
+L["Show totals"]=true
+L["Shows a extra row with a summary in certain modes."]=true
+L["Only keep boss fighs"]=true
+L["Boss fights will be kept with this on, and non-boss fights are discarded."]=true
+L["Hide when solo"]=true
+L["Hides Skada's window when not in a party or raid."]=true
+L["Hide in PvP"]=true
+L["Hides Skada's window when in Battlegrounds/Arenas."]=true
+L["Hide in combat"]=true
+L["Hides Skada's window when in combat."]=true
+L["Disable while hidden"]=true
+L["Skada will not collect any data when automatically hidden."]=true
+L["Sort modes by usage"]=true
+L["The mode list will be sorted to reflect usage instead of alphabetically."]=true
+L["Show rank numbers"]=true
+L["Shows numbers for relative ranks for modes where it is applicable."]=true
+L["Aggressive combat detection"]=true
+L["Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons. Meaningless on boss encounters."]=true
+L["Autostop"]=true
+L["Automatically stops the current segment after half of all raid members have died."]=true
+L["Always show self"]=true
+L["Keeps the player shown last even if there is not enough space."]=true
+L["Number format"]=true
+L["Controls the way large numbers are displayed."]=true
+L["Condensed"]=true
+L["Detailed"]=true
+L["Data feed"]=true
+L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."]=true
+L["Number set duplicates"]=true
+L["Append a count to set names with duplicate mob names."]=true
+L["Set format"]=true
+L["Controls the way set names are displayed."]=true
+L["Data segments to keep"]=true
+L["The number of fight segments to keep. Persistent segments are not included in this."]=true
+L["Update frequency"]=true
+L["How often windows are updated. Shorter for faster updates. Increases CPU usage."]=true
+
+-- columns
+L["Columns"]=true
+
+-- tooltips
+L["Tooltips"]=true
+L["Show tooltips"]=true
+L["Shows tooltips with extra information in some modes."]=true
+L["Informative tooltips"]=true
+L["Shows subview summaries in the tooltips."]=true
+L["Subview rows"]=true
+L["The number of rows from each subview to show when using informative tooltips."]=true
+L["Tooltip position"]=true
+L["Position of the tooltips."]=true
+L["Default"]=true
+L["Top right"]=true
+L["Top left"]=true
+L["Smart"]=true
+
+-- disabled modules
+L["Disabled Modules"]=true
+L["Tick the modules you want to disable."]=true
+L["This change requires a UI reload. Are you sure?"]=true
+L["Adds a set of standard themes to Skada. Custom themes can also be used."]=true
+
+-- themes module
+L["Theme"]=true
+L["Themes"]=true
+L["Apply theme"]=true
+L["Theme applied!"]=true
+L["Name of your new theme."]=true
+L["Save theme"]=true
+L["Delete theme"]=true
+
+-- scroll module
+L["Scroll"]=true
+L["Mouse"]=true
+L["Scrolling speed"]=true
+L["Scroll icon"]=true
+L["Scroll mouse button"]=true
+L["Keybinding"]=true
+L["Key scrolling speed"]=true
+
+-- minimap button
+L["Skada summary"]=true
+L["Hint: Left-Click to toggle Skada window."]=true
+L["Shift+Left-Click to reset."]=true
+L["Right-click to open menu"]=true
+
+-- skada menu
+L["Skada Menu"]=true
+L["Delete segment"]=true
+L["Keep segment"]=true
+L["Toggle window"]=true
+L["Start new segment"]=true
+
+-- window buttons
+L["Configure"]=true
+L["opens the configuration window"]=true
+L["Reset"]=true
+L["resets all data"]=true
+L["Segment"]=true
+L["Mode"]=true
+L["Report"]=true
+
+-- default segments
+L["Total"]=true
+L["Current"]="Current fight"
+
+-- report module and window
+L["Skada: %s for %s:"]=true
+L["Channel"]=true
+L["Self"]=true
+L["Party"]=true
+L["Whisper"]=true
+L["Say"]=true
+L["Whisper Target"]=true
+L["Raid"]=true
+L["Guild"]=true
+L["Officer"]=true
+L["Lines"]=true
+L["There is nothing to report."]=true
+L["No mode or segment selected for report."]=true
+
+-- ================== --
+-- Bar Display Module --
+-- ================== --
+
+L["Bar display"]=true
+L["Bar display is the normal bar window used by most damage meters. It can be extensively styled."]=true
+
+-- ============= --
+-- Threat Module --
+-- ============= --
+L["Threat"]=true
+L["Threat warning"]=true
+L["Do not warn while tanking"]=true
+L["Flash screen"]=true
+L["This will cause the screen to flash as a threat warning."]=true
+L["Shake screen"]=true
+L["This will cause the screen to shake as a threat warning."]=true
+L["Play sound"]=true
+L["This will play a sound as a threat warning."]=true
+L["Threat sound"]=true
+L["The sound that will be played when your threat percentage reaches a certain point."]=true
+L["Threat threshold"]=true
+L["When your threat reaches this level, relative to tank, warnings are shown."]=true
+L["Show raw threat"]=true
+L["Shows raw threat percentage relative to tank instead of modified for range."]=true
+L["Use focus target"]=true
+L["Shows threat on focus target, or focus target's target, when available."]=true
+L["TPS"]=true
+L["Threat: Personal Threat"]=true
+
+-- ======================== --
+-- Absorbs & Healing Module --
+-- ======================== --
+L["Absorbs and healing"]=true
+L["Healing and absorbs spell list"]=true
+L["Healed and absorbed players"]=true
+L["%s's Absorbs and healing"]=true
+L["Healed by %s"]=true
+
+L["Healing"]=true
+L["Healing spell list"]=true
+L["Healed players"]=true
+
+L["%s's healing"]=true
+
+L["HPS"]=true
+
+L["Total healing"]=true
+
+L["Overhealing"]=true
+L["Overheal"]=true
+
+L["Absorbs"]=true
+L["Absorb details"]=true
+L["%s's Absorbs"]=true
+
+L["Critical"]=true
+
+-- ============ --
+-- Auras Module --
+-- ============ --
+
+L["Auras"]=true
+L["Buff and debuff"]=true
+L["Auras: Buff uptime"]=true
+L["Auras: Debuff uptime"]=true
+L["Auras: Sunders Counter"]=true
+L["Auras spell list"]=true
+L["Auras target list"]=true
+L["Buff Uptime"]=true
+L["Debuff Uptime"]=true
+L["%s's buff uptime"]=true
+L["%s's debuff uptime"]=true
+L["%s's debuff targets"]=true
+L["%s's <%s> targets"]=true
+L["Refreshes"]=true
+
+-- ================= --
+-- CC Tracker Module --
+-- ================= --
+
+L["CC Tracker"]=true
+
+-- CC Done:
+L["CC Done"]=true
+L["CC Done spells"]=true
+L["CC Done spell targets"]=true
+L["CC Done targets"]=true
+L["CC Done target spells"]=true
+L["%s's CC Done <%s> targets"]=true
+L["%s's CC Done <%s> spells"]=true
+L["%s's CC Done spells"]=true
+L["%s's CC Done targets"]=true
+
+-- CC Taken
+L["CC Taken"]=true
+L["CC Taken spells"]=true
+L["CC Taken spell sources"]=true
+L["CC Taken sources"]=true
+L["CC Taken source spells"]=true
+L["%s's CC Taken <%s> sources"]=true
+L["%s's CC Taken <%s> spells"]=true
+L["%s's CC Taken spells"]=true
+L["%s's CC Taken sources"]=true
+
+L["CC Breaks"]=true
+L["CC Breakers"]=true
+L["CC Break spells"]=true
+L["CC Break spell targets"]=true
+L["CC Break targets"]=true
+L["CC Break target spells"]=true
+L["%s's CC Break <%s> spells"]=true
+L["%s's CC Break <%s> targets"]=true
+L["%s's CC Break spells"]=true
+L["%s's CC Break targets"]=true
+
+-- options
+L["CC"]=true
+L["Announce CC breaking to party"]=true
+L["Ignore Main Tanks"]=true
+L["%s on %s removed by %s"]= true
+L["%s on %s removed by %s's %s"]= true
+
+
+-- ============= --
+-- Damage Module --
+-- ============= --
+
+-- damage done module
+L["Damage"]=true
+L["Damage spell list"]=true
+L["Damage spell details"]=true
+L["Damage spell targets"]=true
+L["Damage done"]=true
+L["%s's damage"]=true
+
+L["Damage done by spell"]=true
+L["%s's sources"]=true
+
+L["DPS"]=true
+L["Damage: Personal DPS"]=true
+
+L["RDPS"]=true
+L["Damage: Raid DPS"]=true
+
+-- damage taken module
+L["Damage taken"]=true
+L["%s's damage taken"]=true
+L["Damage spell sources"]=true
+L["Damage taken by spell"]=true
+L["%s's targets"]=true
+L["DTPS"]=true
+
+-- enemy damage done module
+L["Enemy damage done"]=true
+L["Damage done per player"]=true
+L["Damage from %s"]=true
+
+-- enemy damage taken module
+L["Enemy damage taken"]=true
+L["Damage taken per player"]=true
+L["Damage on %s"]=true
+L["%s's damage sources"]=true
+
+-- avoidance and mitigation module
+L["Avoidance & Mitigation"]=true
+L["Damage breakdown"]=true
+L["%s's damage breakdown"]=true
+
+-- friendly fire module
+L["Friendly Fire"]=true
+
+L["Glancing"]=true
+L["Crushing"]=true
+
+-- ============= --
+-- Deaths Module --
+-- ============= --
+L["Deaths"]=true
+L["%s's death"]=true
+L["%s's deaths"]=true
+L["Death log"]=true
+L["%s's death log"]=true
+L["Player's deaths"]=true
+L["%s dies"]=true
+L["Spell details"]=true
+L["Spell"]=true
+L["Amount"]=true
+L["Source"]=true
+L["Health"]=true
+L["Change"]=true
+
+-- activity module
+L["Activity"]=true
+L["Activity per target"]=true
+
+-- ==================== --
+-- dispels module lines --
+-- ==================== --
+
+L["Dispels"]=true
+
+L["Dispel spell list"]=true
+L["Dispelled spell list"]=true
+L["Dispelled target list"]=true
+
+L["%s's dispel spells"]=true
+L["%s's dispelled spells"]=true
+L["%s's dispelled targets"]=true
+
+-- ==================== --
+-- failbot module lines --
+-- ==================== --
+
+L["Fails"]=true
+L["%s's fails"]=true
+L["Player's failed events"]=true
+L["Event's failed players"]=true
+
+-- ======================== --
+-- improvement module lines --
+-- ======================== --
+
+L["Improvement"]=true
+L["Improvement modes"]=true
+L["Improvement comparison"]=true
+L["Do you want to reset your improvement data?"]=true
+L["%s's overall data"]=true
+
+-- ======================= --
+-- interrupts module lines --
+-- ======================= --
+
+L["Interrupts"]=true
+L["Interrupt spells"]=true
+L["Interrupted spells"]=true
+L["Interrupted targets"]=true
+
+-- =================== --
+-- Power gained module --
+-- =================== --
+
+L["Power"]=true
+L["Power gained"]=true
+L["%s's gained %s"]=true
+L["Power gained: Mana"]=true
+L["Mana gained spell list"]=true
+L["Power gained: Rage"]=true
+L["Rage gained spell list"]=true
+L["Power gained: Energy"]=true
+L["Energy gained spell list"]=true
+L["Power gained: Runic Power"]=true
+L["Runic Power gained spell list"]=true
+
+-- ====================== --
+-- resurrect module lines --
+-- ====================== --
+
+L["Resurrects"]=true
+L["Resurrect spell list"]=true
+L["Resurrect spell target list"]=true
+L["Resurrect target list"]=true
+L["Resurrect target spell list"]=true
+L["received resurrects"]=true
+
+L["%s's resurrect spells"]=true
+L["%s's resurrect targets"]=true
+L["%s's received resurrects"]=true
+L["%s's resurrect <%s> targets"]=true

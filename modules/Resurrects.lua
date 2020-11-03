@@ -1,4 +1,4 @@
-local _, Skada=...
+local Skada=Skada
 if not Skada then return end
 
 local select, pairs, ipairs=select, pairs, ipairs
@@ -116,7 +116,6 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
           d.value=tonumber(target.count)
           d.valuetext=tostring(target.count)
           d.class=select(2, UnitClass(targetName))
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
           
           if tonumber(target.count) > max then
             max=tonumber(target.count)
@@ -146,7 +145,6 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
         d.value=tonumber(target.count)
         d.valuetext=tostring(target.count)
         d.class=select(2, UnitClass(targetName))
-        d.icon=d.class and Skada.classIcon or Skada.petIcon
         
         if tonumber(target.count) > max then
           max=tonumber(target.count)
@@ -194,12 +192,15 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
       if player.resurrect.count > 0 then
         local d=win.dataset[nr] or {}
         win.dataset[nr]=d
-        d.value=player.resurrect.count
-        d.label=player.name
-        d.valuetext=tostring(player.resurrect.count)
+        
         d.id=player.id
+        d.label=player.name
         d.class=player.class
-        d.icon=d.class and Skada.classIcon or Skada.petIcon
+        d.role=player.role
+        
+        d.value=player.resurrect.count
+        d.valuetext=tostring(player.resurrect.count)
+
         if player.resurrect.count > max then
           max=player.resurrect.count
         end

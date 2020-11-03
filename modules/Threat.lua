@@ -1,4 +1,4 @@
-local _, Skada=...
+local Skada=Skada
 if not Skada then return end
 
 local modname="Threat"
@@ -150,7 +150,6 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
           win.dataset[nr] = d
           d.label = name
           d.class = select(2, UnitClass(name))
-          d.icon = d.class and Skada.classIcon or Skada.petIcon
           d.id = name
           d.threat = threatvalue
           d.isTanking = isTanking
@@ -173,7 +172,6 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
           win.dataset[nr] = d
           d.label = name
           d.class = select(2, UnitClass(name))
-          d.icon = d.class and Skada.classIcon or Skada.petIconplayerIcon
           d.id = name
           d.value = threatpct
           d.isTanking = isTanking

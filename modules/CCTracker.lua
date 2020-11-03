@@ -1,4 +1,4 @@
-local _, Skada=...
+local Skada=Skada
 if not Skada then return end
 
 local CCSpells={
@@ -52,10 +52,10 @@ do
     if Skada.db.profile.modulesBlocked[modname] then return end
     
     local mod=Skada:NewModule(L[modname])
-    local spellsmod=mod:NewModule(L["CC Done Spells"])
-    local spelltargetsmod=mod:NewModule(L["CC Done Spell Targets"])
-    local targetsmod=mod:NewModule(L["CC Done Targets"])
-    local targetspellsmod=mod:NewModule(L["CC Done Target Spells"])
+    local spellsmod=mod:NewModule(L["CC Done spells"])
+    local spelltargetsmod=mod:NewModule(L["CC Done spell targets"])
+    local targetsmod=mod:NewModule(L["CC Done targets"])
+    local targetspellsmod=mod:NewModule(L["CC Done target spells"])
 
     local function log_ccdone(set, data)
       local player=Skada:get_player(set, data.srcGUID, data.srcName)
@@ -115,11 +115,8 @@ do
     end
 
     function spellsmod:Enter(win, id, label)
-      local player=Skada:find_player(win:get_selected_set(), id)
-      if player then
-        self.playerid=id
-        self.title=player.name..L["'s "]..L["CC Done Spells"]
-      end
+      self.playerid=id
+      self.title=format(L["%s's CC Done spells"], label)
     end
 
     function spellsmod:Update(win, set)
@@ -186,10 +183,7 @@ do
 
     function targetsmod:Enter(win, id, label)
       self.playerid=id
-      local player=Skada:find_player(win:get_selected_set(), id)
-      if player then
-        self.title=player.name..L["'s "]..L["CC Done Targets"]
-      end
+      self.title=format(L["%s's CC Done targets"], label)
     end
 
     function targetsmod:Update(win, set)
@@ -265,7 +259,7 @@ do
           d.id=player.id
           d.label=player.name
           d.class=player.class
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
           d.value=player.ccdone.count
           d.valuetext=tostring(player.ccdone.count)
           
@@ -291,7 +285,7 @@ do
       Skada:RegisterForCL(SpellAuraApplied, 'SPELL_AURA_APPLIED', {src_is_interesting=true})
       Skada:RegisterForCL(SpellAuraApplied, 'SPELL_AURA_REFRESH', {src_is_interesting=true})
       
-      Skada:AddMode(self)
+      Skada:AddMode(self, L["CC Tracker"])
     end
 
     function mod:OnDisable()
@@ -332,10 +326,10 @@ do
     if Skada.db.profile.modulesBlocked[modname] then return end
     
     local mod=Skada:NewModule(L[modname])
-    local spellsmod=mod:NewModule(L["CC Taken Spells"])
-    local spellsourcesmod=mod:NewModule(L["CC Taken Spell Sources"])
-    local sourcesmod=mod:NewModule(L["CC Taken Sources"])
-    local sourcespellsmod=mod:NewModule(L["CC Taken Source Spells"])
+    local spellsmod=mod:NewModule(L["CC Taken spells"])
+    local spellsourcesmod=mod:NewModule(L["CC Taken spell sources"])
+    local sourcesmod=mod:NewModule(L["CC Taken sources"])
+    local sourcespellsmod=mod:NewModule(L["CC Taken source spells"])
 
     local function log_cctaken(set, data)
       local player=Skada:get_player(set, data.srcGUID, data.srcName)
@@ -396,10 +390,7 @@ do
 
     function spellsmod:Enter(win, id, label)
       self.playerid=id
-      local player=Skada:find_player(win:get_selected_set(), id)
-      if player then
-        self.title=player.name..L["'s "]..L["CC Taken Spells"]
-      end
+      self.title=format(L["%s's CC Taken spells"], label)
     end
 
     function spellsmod:Update(win, set)
@@ -468,10 +459,7 @@ do
 
     function sourcesmod:Enter(win, id, label)
       self.playerid=id
-      local player=Skada:find_player(win:get_selected_set(), id)
-      if player then
-        self.title=player.name..L["'s "]..L["CC Taken Sources"]
-      end
+      self.title=format(L["%s's CC Taken sources"], label)
     end
 
     function sourcesmod:Update(win, set)
@@ -548,7 +536,7 @@ do
           d.id=player.id
           d.label=player.name
           d.class=player.class
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
           d.value=player.cctaken.count
           d.valuetext=tostring(player.cctaken.count)
 
@@ -574,7 +562,7 @@ do
 
       Skada:RegisterForCL(SpellAuraApplied, 'SPELL_AURA_APPLIED', {dst_is_interesting=true})
       Skada:RegisterForCL(SpellAuraApplied, 'SPELL_AURA_REFRESH', {dst_is_interesting=true})
-      Skada:AddMode(self)
+      Skada:AddMode(self, L["CC Tracker"])
     end
 
     function mod:OnDisable()
@@ -615,10 +603,10 @@ do
     if Skada.db.profile.modulesBlocked[modname] then return end
     
     local mod=Skada:NewModule(L[modname])
-    local spellsmod=mod:NewModule(L["CC Break Spells"])
-    local spelltargetsmod=mod:NewModule(L["CC Break Spell Targets"])
-    local targetsmod=mod:NewModule(L["CC Break Targets"])
-    local targetspellsmod=mod:NewModule(L["CC Break Target Spells"])
+    local spellsmod=mod:NewModule(L["CC Break spells"])
+    local spelltargetsmod=mod:NewModule(L["CC Break spell targets"])
+    local targetsmod=mod:NewModule(L["CC Break targets"])
+    local targetspellsmod=mod:NewModule(L["CC Break target spells"])
 
     local GetNumRaidMembers, GetRaidRosterInfo=GetNumRaidMembers, GetRaidRosterInfo
     local IsInInstance, UnitInRaid=IsInInstance, UnitInRaid
@@ -712,11 +700,8 @@ do
     end
 
     function spellsmod:Enter(win, id, label)
-      local player=Skada:find_player(win:get_selected_set(), id)
-      if player then
-        self.playerid=id
-        self.title=player.name..L["'s "]..L["CC Break Spells"]
-      end
+      self.playerid=id
+      self.title=format(L["%s's CC Break spells"], label)
     end
 
     function spellsmod:Update(win, set)
@@ -783,10 +768,7 @@ do
 
     function targetsmod:Enter(win, id, label)
       self.playerid=id
-      local player=Skada:find_player(win:get_selected_set(), id)
-      if player then
-        self.title=player.name..L["'s "]..L["CC Break Targets"]
-      end
+      self.title=format(L["%s's CC Break targets"], label)
     end
 
     function targetsmod:Update(win, set)
@@ -862,7 +844,7 @@ do
           d.id=player.id
           d.label=player.name
           d.class=player.class
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
           d.value=player.ccbreaks.count
           d.valuetext=tostring(player.ccbreaks.count)
 
@@ -889,7 +871,7 @@ do
       Skada:RegisterForCL(SpellAuraBroken, 'SPELL_AURA_BROKEN', {src_is_interesting = true})
       Skada:RegisterForCL(SpellAuraBroken, 'SPELL_AURA_BROKEN_SPELL', {src_is_interesting = true})
 
-      Skada:AddMode(self)
+      Skada:AddMode(self, L["CC Tracker"])
     end
 
     function mod:OnDisable()

@@ -1,17 +1,7 @@
 <Bindings>
-  <Binding name="SKADA_TOGGLE" description="Toggles visibility of all Skada windows." header="Skada">
-    Skada:ToggleWindow();
-  </Binding>
-  <Binding name="SKADA_RESET" description="Resets all Skada data." header="Skada">
-    Skada:Reset();
-  </Binding>
-  <Binding name="SKADA_NEWSEGMENT" description="Saves current segment and starts a new if in combat." header="Skada">
-    Skada:NewSegment();
-  </Binding>
-  	<Binding name="SKADA_SCROLLUP" description="Scrolls up bars.">
-		Skada:Scroll(true)
-	</Binding>
-	<Binding name="SKADA_SCROLLDOWN" description="Scrolls down bars.">
-		Skada:Scroll(false)
-	</Binding>
+	<Binding name="SKADA_TOGGLE" header="Skada" category="ADDONS">Skada:ToggleWindow()</Binding>
+	<Binding name="SKADA_RESET" category="ADDONS">Skada:ShowPopup()</Binding>
+	<Binding name="SKADA_NEWSEGMENT" category="ADDONS">Skada:NewSegment()</Binding>	
+  	<Binding name="SKADA_SCROLLUP" description="Scrolls up bars.">Skada:Scroll(true)</Binding>
+  	<Binding name="SKADA_SCROLLDOWN" description="Scrolls down bars.">Skada:Scroll(false)</Binding>
 </Bindings>

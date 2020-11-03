@@ -1,4 +1,4 @@
-local _, Skada=...
+local Skada=Skada
 if not Skada then return end
 
 local select, tostring=select, tostring
@@ -49,8 +49,10 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
 
     data.srcGUID=srcGUID
     data.srcName=srcName
+    data.srcFlags=srcFlags
     data.dstGUID=dstGUID
     data.dstName=dstName
+    data.dstFlags=dstFlags
     data.spellid=spellid
     data.spellname=spellname
     data.extraspellid=extraspellid
@@ -180,7 +182,8 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
         d.id=player.id
         d.label=player.name
         d.class=player.class
-        d.icon=d.class and Skada.classIcon or Skada.petIcon
+        d.role=player.role
+
         d.value=player.interrupts.count
         d.valuetext=tostring(player.interrupts.count)
         if player.interrupts.count>max then

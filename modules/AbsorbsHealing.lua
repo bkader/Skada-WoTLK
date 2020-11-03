@@ -1,4 +1,4 @@
-local _, Skada=...
+local Skada=Skada
 if not Skada then return end
 
 local pairs, ipairs=pairs, ipairs
@@ -319,7 +319,7 @@ do
             (" (%02.1f%%)"):format((player.healing+player.absorbTotal)/(set.healing+set.absorbTotal)*100), self.metadata.columns.Percent
             )
           d.class=player.class
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
 
           if((player.healing+player.absorbTotal)>max) then
             max=player.healing+player.absorbTotal
@@ -360,7 +360,7 @@ do
 
     function spellsmod:Enter(win, id, label)
       spellsmod.playerid=id
-      spellsmod.title=label..L["'s Absorbs and healing"]
+      spellsmod.title=format(L["%s's Absorbs and healing"], label)
     end
 
     -- Spell view of a player.
@@ -386,6 +386,7 @@ do
           win.dataset[nr]=d
 
           d.id=spell.id
+          d.spellid=spell.id
           d.label=spell.name
           d.value=spell.healing
           d.valuetext=Skada:FormatValueText(
@@ -407,7 +408,7 @@ do
 
     function healedmod:Enter(win, id, label)
       healedmod.playerid=id
-      healedmod.title=L["Healed by"].." "..label
+      healedmod.title=format(L["Healed by %s"], label)
     end
 
     -- Healed players view of a player.
@@ -440,7 +441,6 @@ do
             d.label=name
             d.value=heal.amount
             d.class=heal.class
-            d.icon=heal.class and Skada.classIcon or Skada.petIcon
             d.valuetext=Skada:FormatValueText(
             Skada:FormatNumber(heal.amount), self.metadata.columns.Healing,
             format("%02.1f%%", heal.amount/(player.healing+player.absorbTotal)*100), self.metadata.columns.Percent
@@ -472,7 +472,7 @@ do
           d.label=player.name
           d.valuetext=Skada:FormatNumber(player.absorbTotal)..(" (%02.1f%%)"):format(player.absorbTotal/set.absorbTotal*100)
           d.class=player.class
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
 
           if player.absorbTotal>max then
             max=player.absorbTotal
@@ -487,7 +487,7 @@ do
 
     function playermod:Enter(win, id, label)
       playermod.playerid=id
-      playermod.title=label..L["'s Absorbs"]
+      playermod.title=format(L["%s's Absorbs"], label)
     end
 
     function playermod:Update(win, set)
@@ -507,7 +507,6 @@ do
           d.label=dstName
           d.valuetext=Skada:FormatNumber(absorbed.amount)..(" (%02.1f%%)"):format(absorbed.amount/player.absorbTotal*100)
           d.class=absorbed.class
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
 
           if absorbed.amount>max then
             max=absorbed.amount
@@ -544,22 +543,13 @@ do
       Skada:RegisterForCL(SpellMissed, 'RANGE_MISSED', {dst_is_interesting_nopets=true})
       Skada:RegisterForCL(SwingMissed, 'SWING_MISSED', {dst_is_interesting_nopets=true})
 
-      Skada:AddMode(self)
-      Skada:AddMode(absorbsmod)
+      Skada:AddMode(self, L["Absorbs and healing"])
+      Skada:AddMode(absorbsmod, L["Absorbs and healing"])
     end
 
     function mod:OnDisable()
       Skada:RemoveMode(self)
       Skada:RemoveMode(absorbsmod)
-    end
-
-    function mod:AddToTooltip(set, tooltip)
-      local endtime=set.endtime
-      if not endtime then
-        endtime=time()
-      end
-      local raidhps=(set.healing+set.absorbTotal)/(endtime - set.starttime + 1)
-      GameTooltip:AddDoubleLine(L["HPS"], ("%02.1f"):format(raidhps), 1,1,1)
     end
 
     function mod:GetSetSummary(set)
@@ -695,7 +685,7 @@ do
           format("%02.1f%%", player.healing/set.healing*100), self.metadata.columns.Percent
           )
           d.class=player.class
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
 
           if player.healing>max then
             max=player.healing
@@ -731,7 +721,7 @@ do
 
     function spellsmod:Enter(win, id, label)
       spellsmod.playerid=id
-      spellsmod.title=label..L["'s Healing"]
+      spellsmod.title=format(L["%s's healing"], label)
     end
 
     -- Spell view of a player.
@@ -750,6 +740,7 @@ do
           win.dataset[nr]=d
 
           d.id=spell.id
+          d.spellid=spell.id
           d.label=spell.name
           d.value=spell.healing
           d.valuetext=Skada:FormatValueText(
@@ -771,7 +762,7 @@ do
 
     function healedmod:Enter(win, id, label)
       healedmod.playerid=id
-      healedmod.title=L["Healed by"].." "..label
+      healedmod.title=format(L["Healed by %s"], label)
     end
 
     -- Healed players view of a player.
@@ -815,7 +806,7 @@ do
       Skada:RegisterForCL(SpellHeal, 'SPELL_HEAL', {src_is_interesting=true})
       Skada:RegisterForCL(SpellHeal, 'SPELL_PERIODIC_HEAL', {src_is_interesting=true})
 
-      Skada:AddMode(self)
+      Skada:AddMode(self, L["Absorbs and healing"])
     end
 
     function mod:OnDisable()
@@ -922,7 +913,7 @@ do
 
     function mod:OnEnable()
       mod.metadata={showspots=true}
-      Skada:AddMode(self)
+      Skada:AddMode(self, L["Absorbs and healing"])
     end
 
     function mod:OnDisable()
@@ -962,7 +953,7 @@ do
             format("%02.1f%%", player.overhealing/set.overhealing*100), self.metadata.columns.Percent
           )
           d.class=player.class
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
 
           if player.overhealing>max then
             max=player.overhealing
@@ -977,7 +968,7 @@ do
     function mod:OnEnable()
       mod.metadata={showspots=true, columns={Overheal=true, Percent=true}}
 
-      Skada:AddMode(self)
+      Skada:AddMode(self, L["Absorbs and healing"])
     end
 
     function mod:OnDisable()

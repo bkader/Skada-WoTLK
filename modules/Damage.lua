@@ -1,4 +1,4 @@
-local _, Skada=...
+local Skada=Skada
 if not Skada then return end
 
 local UnitGUID, UnitClass=UnitGUID, UnitClass
@@ -139,17 +139,17 @@ do
     local dpsmod=Skada:NewModule(L["DPS"])
 
     local spellsmod=Skada:NewModule(L["Damage done by spell"])
-    local spellsourcesmod=spellsmod:NewModule(L["Damage spell targets"])
+    local spellsourcesmod=spellsmod:NewModule(L["Damage spell sources"])
 
     local function log_damage(set, dmg)
-      local player=Skada:find_player(set, dmg.playerid, dmg.playername)
+      local player=Skada:get_player(set, dmg.playerid, dmg.playername)
       if not player then return end
 
       set.damagedone=set.damagedone+dmg.amount
       player.damagedone.amount=player.damagedone.amount+dmg.amount
 
       if not player.damagedone.spells[dmg.spellname] then
-        player.damagedone.spells[dmg.spellname]={id=dmg.spellid, hit=0, totalhits=0, amount=0, critical=0, glancing=0, crushing=0, ABSORB=0, BLOCK=0, DEFLECT=0, DODGE=0, EVADE=0, IMMUNE=0, PARRY=0, REFLECT=0, RESIST=0, MISS=0}
+        player.damagedone.spells[dmg.spellname]={id=dmg.spellid, hit=0, totalhits=0, amount=0, school=dmg.spellschool, critical=0, glancing=0, crushing=0, ABSORB=0, BLOCK=0, DEFLECT=0, DODGE=0, EVADE=0, IMMUNE=0, PARRY=0, REFLECT=0, RESIST=0, MISS=0}
       end
 
       local spell=player.damagedone.spells[dmg.spellname]
@@ -207,8 +207,6 @@ do
       end
     end
 
-    local dmg={}
-
     local function SpellDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
       dmg=_SpellDamage((srcGUID ~= dstGUID), srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
       if dmg then
@@ -255,7 +253,7 @@ do
         tooltip:AddLine(player.name.." - "..L["DPS"])
         tooltip:AddDoubleLine(L["Segment Time"], SecondsToTime(totaltime), 255,255,255,255,255,255)
         tooltip:AddDoubleLine(L["Active Time"], SecondsToTime(activetime), 255,255,255,255,255,255)
-        tooltip:AddDoubleLine(L["Damage Done"], Skada:FormatNumber(player.damagedone.amount), 255,255,255,255,255,255)
+        tooltip:AddDoubleLine(L["Damage done"], Skada:FormatNumber(player.damagedone.amount), 255,255,255,255,255,255)
         tooltip:AddDoubleLine(Skada:FormatNumber(player.damagedone.amount) .. "/" .. activetime .. ":", format("%02.1f", player.damagedone.amount/math_max(1,activetime)), 255,255,255,255,255,255)
 
       end
@@ -283,7 +281,7 @@ do
       local player=Skada:find_player(win:get_selected_set(), id)
       if player then
         self.playerid=id
-        self.title=format(L["%s's Damage"], player.name)
+        self.title=format(L["%s's damage"], player.name)
       end
     end
 
@@ -299,6 +297,7 @@ do
           win.dataset[nr]=d
 
           d.id=spellname
+          d.spellid=spell.id
           d.label=spellname
           d.icon=select(3, GetSpellInfo(spell.id))
 
@@ -322,7 +321,7 @@ do
     function targetmod:Enter(win, id, label)
       local player=Skada:find_player(win:get_selected_set(), id)
       self.playerid=id
-      self.title=format(L["%s's Targets"], player.name)
+      self.title=format(L["%s's targets"], player.name)
     end
 
     function targetmod:Update(win, set)
@@ -370,9 +369,11 @@ do
     end
 
     function spellmod:Enter(win, id, label)
-      local player=Skada:find_player(win:get_selected_set(), playermod.playerid)
       self.spellname=id
-      self.title=player.name..L["'s "]..label
+      local player=Skada:find_player(win:get_selected_set(), playermod.playerid)
+      if player then
+        self.title=player.name.." - "..label
+      end
     end
 
     function spellmod:Update(win, set)
@@ -447,7 +448,7 @@ do
 
     function spellsourcesmod:Enter(win, id, label)
       self.spellname=id
-      self.title=label..L["'s Sources"]
+      self.title=format(L["%s's sources"], label)
     end
 
     function spellsourcesmod:Update(win, set)
@@ -461,7 +462,7 @@ do
           d.id=player.id
           d.label=player.name
           d.class=player.class
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
 
           local amount=player.damagedone.spells[self.spellname].amount
 
@@ -497,6 +498,7 @@ do
         win.dataset[nr]=d
 
         d.id=spellname
+        d.spellid=spell.id
         d.label=spellname
         d.icon=select(3, GetSpellInfo(spell.id))
 
@@ -524,7 +526,7 @@ do
           d.id=player.id
           d.label=player.name
           d.class=player.class
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
 
           local dps=getDPS(set, player)
 
@@ -568,6 +570,8 @@ do
     function dpsmod:Update(win, set)
       local nr, max=1, 0
 
+      local total=getRaidDPS(set)
+
       for i, player in ipairs(set.players) do
         local dps=getDPS(set, player)
 
@@ -578,10 +582,13 @@ do
           d.id=player.id
           d.label=player.name
           d.class=player.class
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
           
           d.value=dps
-          d.valuetext=format("%02.1f", dps)
+          d.valuetext=Skada:FormatValueText(
+            Skada:FormatNumber(dps), self.metadata.columns.DPS,
+            format("%02.1f%%", dps/total*100), self.metadata.columns.Percent
+          )
           
           if dps>max then
             max=dps
@@ -595,33 +602,33 @@ do
 
     function mod:OnEnable()
       spellmod.metadata={columns={Damage=true, Percent=true}}
-      playermod.metadata={tooltip=player_tooltip, click1=spellmod, columns={Damage=true, Percent=true}}
+      playermod.metadata={showspots=true, tooltip=player_tooltip, click1=spellmod, columns={Damage=true, Percent=true}}
       targetmod.metadata={columns={Damage=true, Percent=true}}
       mod.metadata={showspots=true, click1=playermod, click2=targetmod, columns={Damage=true, DPS=true, Percent=true}}
 
-      dpsmod.metadata={showspots=true, tooltip=dps_tooltip, click1=playermod}
+      dpsmod.metadata={showspots=true, tooltip=dps_tooltip, click1=playermod, columns={DPS=true, Percent=true}}
       spellsmod.metadata={showspots=true, ordersort=true, click1=spellsourcesmod}
 
-      Skada:RegisterForCL(SpellDamage, 'DAMAGE_SHIELD', {src_is_interesting=true, dst_is_not_interesting=true})
-      Skada:RegisterForCL(SpellDamage, 'SPELL_DAMAGE', {src_is_interesting=true, dst_is_not_interesting=true})
-      Skada:RegisterForCL(SpellDamage, 'SPELL_PERIODIC_DAMAGE', {src_is_interesting=true, dst_is_not_interesting=true})
-      Skada:RegisterForCL(SpellDamage, 'SPELL_BUILDING_DAMAGE', {src_is_interesting=true, dst_is_not_interesting=true})
-      Skada:RegisterForCL(SpellDamage, 'RANGE_DAMAGE', {src_is_interesting=true, dst_is_not_interesting=true})
+      Skada:RegisterForCL(SpellDamage, 'DAMAGE_SHIELD', {src_is_interesting = true, dst_is_not_interesting = true})
+      Skada:RegisterForCL(SpellDamage, 'SPELL_DAMAGE', {src_is_interesting = true, dst_is_not_interesting = true})
+      Skada:RegisterForCL(SpellDamage, 'SPELL_PERIODIC_DAMAGE', {src_is_interesting = true, dst_is_not_interesting = true})
+      Skada:RegisterForCL(SpellDamage, 'SPELL_BUILDING_DAMAGE', {src_is_interesting = true, dst_is_not_interesting = true})
+      Skada:RegisterForCL(SpellDamage, 'RANGE_DAMAGE', {src_is_interesting = true, dst_is_not_interesting = true})
 
-      Skada:RegisterForCL(SpellMissed, 'SPELL_MISSED', {src_is_interesting=true, dst_is_not_interesting=true})
-      Skada:RegisterForCL(SpellMissed, 'SPELL_PERIODIC_MISSED', {src_is_interesting=true, dst_is_not_interesting=true})
-      Skada:RegisterForCL(SpellMissed, 'RANGE_MISSED', {src_is_interesting=true, dst_is_not_interesting=true})
-      Skada:RegisterForCL(SpellMissed, 'SPELL_BUILDING_MISSED', {src_is_interesting=true, dst_is_not_interesting=true})
+      Skada:RegisterForCL(SwingDamage, 'SWING_DAMAGE', {src_is_interesting = true, dst_is_not_interesting = true})
+      Skada:RegisterForCL(SwingMissed, 'SWING_MISSED', {src_is_interesting = true, dst_is_not_interesting = true})
 
-      Skada:RegisterForCL(SwingDamage, 'SWING_DAMAGE', {src_is_interesting=true, dst_is_not_interesting=true})
-      Skada:RegisterForCL(SwingMissed, 'SWING_MISSED', {src_is_interesting=true, dst_is_not_interesting=true})
+      Skada:RegisterForCL(SpellMissed, 'SPELL_MISSED', {src_is_interesting = true, dst_is_not_interesting = true})
+      Skada:RegisterForCL(SpellMissed, 'SPELL_PERIODIC_MISSED', {src_is_interesting = true, dst_is_not_interesting = true})
+      Skada:RegisterForCL(SpellMissed, 'RANGE_MISSED', {src_is_interesting = true, dst_is_not_interesting = true})
+      Skada:RegisterForCL(SpellMissed, 'SPELL_BUILDING_MISSED', {src_is_interesting = true, dst_is_not_interesting = true})
 
       Skada:AddFeed(L["Damage: Personal DPS"], feed_personal_dps)
       Skada:AddFeed(L["Damage: Raid DPS"], feed_raid_dps)
 
-      Skada:AddMode(self)
-      Skada:AddMode(spellsmod)
-      Skada:AddMode(dpsmod)
+      Skada:AddMode(self, L["Damage done"])
+      Skada:AddMode(spellsmod, L["Damage done"])
+      Skada:AddMode(dpsmod, L["Damage done"])
     end
 
     function mod:OnDisable()
@@ -664,7 +671,7 @@ end
 -- ================== --
 -- Damage Taken Module --
 -- ================== --
-local damagetaken="Damage Taken"
+local damagetaken="Damage taken"
 do
   Skada:AddLoadableModule(damagetaken, nil, function(Skada, L)
     if Skada.db.profile.modulesBlocked[damagetaken] then return end
@@ -685,7 +692,7 @@ do
       player.damagetaken.amount=player.damagetaken.amount+dmg.amount
 
       if not player.damagetaken.spells[dmg.spellname] then
-        player.damagetaken.spells[dmg.spellname]={id=dmg.spellid, hit=0, totalhits=0, amount=0, critical=0, glancing=0, crushing=0, ABSORB=0, BLOCK=0, DEFLECT=0, DODGE=0, EVADE=0, IMMUNE=0, PARRY=0, REFLECT=0, RESIST=0, MISS=0}
+        player.damagetaken.spells[dmg.spellname]={id=dmg.spellid, hit=0, totalhits=0, amount=0, school=dmg.spellschool, critical=0, glancing=0, crushing=0, ABSORB=0, BLOCK=0, DEFLECT=0, DODGE=0, EVADE=0, IMMUNE=0, PARRY=0, REFLECT=0, RESIST=0, MISS=0}
       end
 
       local spell=player.damagetaken.spells[dmg.spellname]
@@ -731,6 +738,7 @@ do
     local function SpellDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
       dmg=_SpellDamage((srcGUID ~= dstGUID), dstGUID, dstName, dstFlags, srcGUID, srcName, srcFlags, ...)
       if dmg then
+        Skada:FixPets(dmg)
         log_damage(Skada.current, dmg)
         log_damage(Skada.total, dmg)
       end
@@ -739,6 +747,7 @@ do
     local function SpellMissed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
       dmg=_SpellMissed((srcGUID ~= dstGUID), dstGUID, dstName, dstFlags, srcGUID, srcName, srcFlags, ...)
       if dmg then
+        Skada:FixPets(dmg)
         log_damage(Skada.current, dmg)
         log_damage(Skada.total, dmg)
       end
@@ -747,6 +756,7 @@ do
     local function SwingDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
       dmg=_SwingDamage((srcGUID ~= dstGUID), dstGUID, dstName, dstFlags, srcGUID, srcName, srcFlags, ...)
       if dmg then
+        Skada:FixPets(dmg)
         log_damage(Skada.current, dmg)
         log_damage(Skada.total, dmg)
       end
@@ -755,6 +765,7 @@ do
     local function SwingMissed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
       dmg=_SwingMissed((srcGUID ~= dstGUID), dstGUID, dstName, dstFlags, srcGUID, srcName, srcFlags, ...)
       if dmg then
+        Skada:FixPets(dmg)
         log_damage(Skada.current, dmg)
         log_damage(Skada.total, dmg)
       end
@@ -762,7 +773,7 @@ do
 
     function playermod:Enter(win, id, label)
       self.playerid=id
-      self.title=format(L["%s's Damage taken"], label)
+      self.title=format(L["%s's damage taken"], label)
     end
 
     function playermod:Update(win, set)
@@ -777,6 +788,7 @@ do
           win.dataset[nr]=d
 
           d.id=spellname
+          d.spellid=spell.id
           d.label=spellname
           d.icon=select(3, GetSpellInfo(spell.id))
 
@@ -800,7 +812,7 @@ do
     function sourcemod:Enter(win, id, label)
       local player=Skada:find_player(win:get_selected_set(), id)
       self.playerid=id
-      self.title=format(L["%s's Damage sources"], player.name)
+      self.title=format(L["%s's damage sources"], player.name)
     end
 
     function sourcemod:Update(win, set)
@@ -848,9 +860,11 @@ do
     end
 
     function spellmod:Enter(win, id, label)
-      local player=Skada:find_player(win:get_selected_set(), playermod.playerid)
       self.spellname=id
-      self.title=player.name..L["'s "]..label
+      local player=Skada:find_player(win:get_selected_set(), playermod.playerid)
+      if player then
+        self.title=player.name.." - "..label
+      end
     end
 
     function spellmod:Update(win, set)
@@ -925,7 +939,7 @@ do
 
     function spelltargetsmod:Enter(win, id, label)
       self.spellname=id
-      self.title=format(L["%s's Targets"], label)
+      self.title=format(L["%s's targets"], label)
     end
 
     function spelltargetsmod:Update(win, set)
@@ -939,7 +953,7 @@ do
           d.id=player.id
           d.label=player.name
           d.class=player.class
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
 
           local amount=player.damagetaken.spells[self.spellname].amount
 
@@ -975,6 +989,7 @@ do
         win.dataset[nr]=d
 
         d.id=spellname
+        d.spellid=spell.id
         d.label=spellname
         d.icon=select(3, GetSpellInfo(spell.id))
 
@@ -1002,7 +1017,7 @@ do
           d.id=player.id
           d.label=player.name
           d.class=player.class
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
 
           d.value=player.damagetaken.amount
           d.valuetext=Skada:FormatValueText(
@@ -1043,8 +1058,8 @@ do
       Skada:RegisterForCL(SwingDamage, 'SWING_DAMAGE', {dst_is_interesting_nopets=true})
       Skada:RegisterForCL(SwingMissed, 'SWING_MISSED', {dst_is_interesting_nopets=true})
 
-      Skada:AddMode(self)
-      Skada:AddMode(spellsmod)
+      Skada:AddMode(self, L["Damage taken"])
+      Skada:AddMode(spellsmod, L["Damage taken"])
     end
 
     function mod:OnDisable()
@@ -1110,7 +1125,7 @@ do
           win.dataset[nr]=d
 
           d.id=event
-          d.label=L[event]
+          d.label=_G[event] or event
           d.value=count/p.total*100
           d.valuetext=format("%d (%02.1f%%)", count, d.value)
 
@@ -1139,7 +1154,7 @@ do
           d.id=player.id
           d.label=player.name
           d.class=player.class
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
 
           local total, avoid=0, 0
           for spellname, spell in pairs(player.damagetaken.spells) do
@@ -1178,7 +1193,7 @@ do
       playermod.metadata={}
       mod.metadata={showspots=true, click1=playermod}
 
-      Skada:AddMode(self)
+      Skada:AddMode(self, L["Damage taken"])
     end
 
     function mod:OnDisable()
@@ -1267,7 +1282,7 @@ do
                   d.id=playername
                   d.label=playername
                   d.class=player.class
-                  d.icon=d.class and Skada.classIcon or Skada.petIcon
+                  d.role=player.role
 
                   d.value=player.done
                   d.valuetext=format("%s (%02.1f%%)", Skada:FormatNumber(player.done), player.done/mob.done*100)
@@ -1323,7 +1338,7 @@ do
         Skada:RegisterForCL(SpellDamageDone, 'RANGE_DAMAGE', {dst_is_interesting_nopets=true, src_is_not_interesting=true})
         Skada:RegisterForCL(SwingDamageDone, 'SWING_DAMAGE', {dst_is_interesting_nopets=true, src_is_not_interesting=true})
 
-        Skada:AddMode(self)
+        Skada:AddMode(self, L["Damage taken"])
       end
 
       function mod:OnDisable()
@@ -1367,8 +1382,6 @@ do
         player.taken=player.taken+dmg.amount
       end
 
-      local dmg={}
-
       local function SpellDamageTaken(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
         if not srcName or not dstName then return end
         srcGUID, srcName=Skada:FixMyPets(srcGUID, srcName)
@@ -1408,7 +1421,7 @@ do
                   d.id=name
                   d.label=name
                   d.class=player.class
-                  d.icon=d.class and Skada.classIcon or Skada.petIcon
+                  d.role=player.role
 
                   d.value=player.taken
                   d.valuetext=format("%s (%02.1f%%)", Skada:FormatNumber(player.taken), player.taken/mob.taken*100)
@@ -1464,7 +1477,7 @@ do
         Skada:RegisterForCL(SpellDamageTaken, 'RANGE_DAMAGE', {src_is_interesting=true, dst_is_not_interesting=true})
         Skada:RegisterForCL(SwingDamageTaken, 'SWING_DAMAGE', {src_is_interesting=true, dst_is_not_interesting=true})
 
-        Skada:AddMode(self)
+        Skada:AddMode(self, L["Damage done"])
       end
 
       function mod:OnDisable()
@@ -1473,10 +1486,6 @@ do
 
       function mod:GetSetSummary(set)
         return Skada:FormatNumber(set.enemies.taken)
-      end
-
-      function mod:GetSetSummary(set)
-        return Skada:FormatNumber(set.enemies.take)
       end
 
       function mod:AddSetAttributes(set)
@@ -1544,7 +1553,7 @@ do
 
     function playermod:Enter(win, id, label)
       self.playerid=id
-      self.title=format(L["%s's Targets"], label)
+      self.title=format(L["%s's targets"], label)
     end
 
     function playermod:Update(win, set)
@@ -1561,7 +1570,6 @@ do
           d.id=target.id
           d.label=targetname
           d.class=target.class
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
 
           d.value=target.amount
           d.valuetext=Skada:FormatValueText(
@@ -1582,7 +1590,7 @@ do
 
     function spellmod:Enter(win, id, label)
       self.playerid=id
-      self.title=format(L["%s's Damage"], label)
+      self.title=format(L["%s's damage"], label)
     end
 
     function spellmod:Update(win, set)
@@ -1626,7 +1634,8 @@ do
           d.id=player.id
           d.label=player.name
           d.class=player.class
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
+
           d.value=player.friendfire.amount
           d.valuetext=Skada:FormatValueText(
             Skada:FormatNumber(player.friendfire.amount), self.metadata.columns.Damage,
@@ -1657,7 +1666,7 @@ do
       
       Skada:RegisterForCL(SwingDamage, 'SWING_DAMAGE', {dst_is_interesting_nopets=true, src_is_interesting_nopets=true})
 
-      Skada:AddMode(self)
+      Skada:AddMode(self, L["Damage done"])
     end
 
     function mod:OnDisable()

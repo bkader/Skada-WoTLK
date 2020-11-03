@@ -1,28 +1,15 @@
 ## Interface: 30300
 ## Title: Skada
 ## Notes: Modular damage meter.
-## Notes-koKR: 데미지 미터 모듈입니다.
-## Notes-zhTW: 模組化的傷害統計。
-## Notes-deDE: Ein Damage-Meter.
-## Notes-frFR: Un damage meter.
-## Notes-zhCN: 伤害统计
-## Author: Zarnivoop
+## Author: Zarnivoop, Kader
 ## Version: r301
 ## SavedVariables: SkadaDB
-## SavedVariablesPerCharacter: SkadaImprovementDB
-## X-Curse-Packaged-Version: r301
-## X-Curse-Project-Name: Skada Damage Meter
-## X-Curse-Project-ID: skada
-## X-Curse-Repository-ID: wow/skada/mainline
-
+## SavedVariablesPerCharacter: SkadaCharDB, SkadaImprovementDB
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, LibWindow-1.1, LibDBIcon-1.0, AceGUI-3.0-SharedMediaWidgets, LibBossIDs-1.0, LibFail-1.0
-
 ## X-License: MIT/X
 ## X-Category: Combat
 
-#@no-lib-strip@
 embeds.xml
-#@end-no-lib-strip@
 
 locale\enUS.lua
 locale\ruRU.lua
@@ -33,8 +20,10 @@ locale\frFR.lua
 locale\deDE.lua
 
 Skada.lua
-Menus.lua
 Options.lua
+Menus.lua
 BarDisplay.lua
+InlineDisplay.lua
+BrokerDisplay.lua
 
 modules.xml

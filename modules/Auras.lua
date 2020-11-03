@@ -1,4 +1,4 @@
-local _, Skada=...
+local Skada=Skada
 if not Skada then return end
 
 local pairs, ipairs=pairs, ipairs
@@ -95,8 +95,10 @@ end
 
 local function len(t)
   local l=0
-  for i, j in pairs(t) do
-    l=l+1
+  if type(t)=="table" then
+    for i, j in pairs(t) do
+      l=l+1
+    end
   end
   return l
 end
@@ -136,8 +138,8 @@ do
       local totaltime=Skada:PlayerActiveTime(set, player)
       local uptime=buff.uptime
       tooltip:AddLine(label)
-      tooltip:AddDoubleLine(L["Active Time"], SecondsToTime(totaltime), 255,255,255,255,255,255)
-      tooltip:AddDoubleLine(L["Buff Uptime"], SecondsToTime(uptime), 255,255,255,255,255,255)
+      tooltip:AddDoubleLine(L["Active Time"], totaltime.."s", 255,255,255,255,255,255)
+      tooltip:AddDoubleLine(L["Buff Uptime"], uptime.."s", 255,255,255,255,255,255)
       tooltip:AddDoubleLine((L["Refreshes"]), buff.refresh, 255,255,255,255,255,255)
       tooltip:AddDoubleLine(("%d/%d"):format(uptime, totaltime), ("%02.1f%%)"):format(uptime/totaltime*100), 255,255,255,255,255,255)
     end
@@ -153,9 +155,8 @@ do
 
       if player then
         local nr=1
-        
         local maxtime=Skada:PlayerActiveTime(set, player)
-        max=maxtime
+        -- max=maxtime
 
         for spellname, spell in pairs(player.buffs) do
           local uptime=spell.uptime
@@ -164,10 +165,15 @@ do
           win.dataset[nr]=d
 
           d.id=spellname
+          d.spellid=spell.id
           d.label=spellname
           d.icon=select(3, GetSpellInfo(spell.id))
           d.value=uptime
-          d.valuetext=("%ds (%02.1f%%)"):format(uptime, uptime/maxtime*100)
+          d.valuetext=format("%02.1f%%", uptime/maxtime*100)
+
+          if uptime>max then
+            max=uptime
+          end
 
           nr=nr + 1
         end
@@ -192,11 +198,14 @@ do
           d.id=player.id
           d.label=player.name
           d.class=player.class
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
           d.value=uptime
-          d.valuetext=("%02.1f%% / %u"):format(uptime/maxtime*100, count)
+          d.valuetext=format("%02.1f%% / %u", uptime/maxtime*100, count)
 
-          max=maxtime
+          if uptime>max then
+            max=uptime
+          end
+
           nr=nr + 1
         end
       end
@@ -205,7 +214,7 @@ do
     end
 
     function mod:OnEnable()
-      playermod.metadata={showspots=true, tooltip=aura_tooltip}
+      playermod.metadata={tooltip=aura_tooltip}
       mod.metadata={click1=playermod}
 
       Skada:RegisterForCL(AuraApplied, 'SPELL_AURA_APPLIED', {src_is_interesting=true})
@@ -213,7 +222,7 @@ do
 
       self:ScheduleRepeatingTimer("Tick", 1)
 
-      Skada:AddMode(self)
+      Skada:AddMode(self, L["Buff and debuff"])
     end
 
     function mod:OnDisable()
@@ -287,8 +296,8 @@ do
       local totaltime=Skada:PlayerActiveTime(set, player)
       local uptime=debuff.uptime
       tooltip:AddLine(label)
-      tooltip:AddDoubleLine(L["Active Time"], SecondsToTime(totaltime), 255,255,255,255,255,255)
-      tooltip:AddDoubleLine(L["Debuff Uptime"], SecondsToTime(uptime), 255,255,255,255,255,255)
+      tooltip:AddDoubleLine(L["Active Time"], totaltime.."s", 255,255,255,255,255,255)
+      tooltip:AddDoubleLine(L["Debuff Uptime"], uptime.."s", 255,255,255,255,255,255)
       tooltip:AddDoubleLine((L["Refreshes"]), debuff.refresh, 255,255,255,255,255,255)
       tooltip:AddDoubleLine(("%d/%d"):format(uptime, totaltime), ("%02.1f%%)"):format(uptime/totaltime*100), 255,255,255,255,255,255)
     end
@@ -350,10 +359,11 @@ do
           win.dataset[nr]=d
 
           d.id=spellname
+          d.spellid=spell.id
           d.label=spellname
           d.icon=select(3, GetSpellInfo(spell.id))
           d.value=uptime
-          d.valuetext=format("%s (%02.1f%%)", SecondsToTime(uptime), uptime/maxtime*100)
+          d.valuetext=format("%02.1f%%", uptime/maxtime*100)
 
           nr=nr + 1
         end
@@ -380,9 +390,13 @@ do
           d.id=player.id
           d.label=player.name
           d.class=player.class
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
           d.value=uptime
           d.valuetext=format("%02.1f%% / %u", uptime/maxtime*100, count)
+
+          if uptime>max then
+            max=uptime
+          end
 
           nr=nr + 1
         end
@@ -401,7 +415,7 @@ do
 
       self:ScheduleRepeatingTimer("Tick", 1)
 
-      Skada:AddMode(self)
+      Skada:AddMode(self, L["Buff and debuff"])
     end
 
     function mod:OnDisable()
@@ -510,7 +524,6 @@ do
                 d.id=player.id
                 d.label=player.name
                 d.class="WARRIOR"
-                d.icon=Skada.classIcon
 
                 d.value=spell.refresh
                 d.valuetext=format("%d (%02.1f%%)", spell.refresh, spell.refresh/total*100)
@@ -536,7 +549,7 @@ do
     function mod:OnEnable()
       targetmod.metadata={showspots=true}
       mod.metadata={showspots=true, click1=targetmod}
-      Skada:AddMode(self)
+      Skada:AddMode(self, L["Buff and debuff"])
     end
 
     function mod:OnDisable()

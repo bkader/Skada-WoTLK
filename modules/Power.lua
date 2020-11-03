@@ -1,4 +1,4 @@
-local _, Skada=...
+local Skada=Skada
 if not Skada then return end
 
 local L=LibStub("AceLocale-3.0"):GetLocale("Skada", false)
@@ -59,10 +59,10 @@ local function log_gain(set, gain)
   -- Add to player total.
   player.power[gain.type].amount=player.power[gain.type].amount+gain.amount
 
-  if not player.power[gain.type].spells[gain.spellname] then
-    player.power[gain.type].spells[gain.spellname]={id=gain.spellid, amount=0}
+  if not player.power[gain.type].spells[gain.spellid] then
+    player.power[gain.type].spells[gain.spellid]=0
   end
-  player.power[gain.type].spells[gain.spellname].amount=player.power[gain.type].spells[gain.spellname].amount+gain.amount
+  player.power[gain.type].spells[gain.spellid]=player.power[gain.type].spells[gain.spellid]+gain.amount
 
   set.power=set.power or {}
   -- Make sure set power type exists.
@@ -82,6 +82,7 @@ local function SpellEnergize(timestamp, eventtype, srcGUID, srcName, srcFlags, d
 
   gain.srcGUID=srcGUID
   gain.srcName=srcName
+  gain.srcFlags=srcFlags
   gain.spellid=spellid
   gain.spellname=spellname
   gain.amount=amount
@@ -102,11 +103,8 @@ local function SpellEnergize(timestamp, eventtype, srcGUID, srcName, srcFlags, d
 end
 
 function _playermod:Enter(win, id, label)
-  local player=Skada:find_player(win:get_selected_set(), id)
-  if player then
-    self.playerid=player.id
-    self.title=label..L["'s "]..format(L["gained %s"], locales[self.power])
-  end
+  self.playerid=id
+  self.title=format(L["%s's gained %s"], label, locales[self.power])
 end
 
 -- Detail view of a player.
@@ -118,25 +116,32 @@ function _playermod:Update(win, set)
   if player and power and player.power[power]then
     local nr=1
 
-    for spellname, spell in pairs(player.power[power].spells) do
+    for spellid, amount in pairs(player.power[power].spells) do
       local d=win.dataset[nr] or {}
       win.dataset[nr]=d
 
-      d.id=spell.id
-      d.label=spellname
-      d.icon=select(3, GetSpellInfo(spell.id))
-      d.value=spell.amount
+      local name, _, icon=GetSpellInfo(spellid)
+
+      d.id=spellid
+      d.spellid=spellid
+      d.label=name
+      d.icon=icon
+
+      d.value=amount
       if power=="mana" then
         d.valuetext=Skada:FormatValueText(
-          Skada:FormatNumber(spell.amount), self.metadata.columns.Power,
-          format("%02.1f%%", spell.amount/player.power[power].amount*100), self.metadata.columns.Percent
+          Skada:FormatNumber(amount), self.metadata.columns.Power,
+          format("%02.1f%%", amount/player.power[power].amount*100), self.metadata.columns.Percent
         )
       else
-        d.valuetext=tostring(spell.amount)
+        d.valuetext=Skada:FormatValueText(
+          amount, self.metadata.columns.Power,
+          format("%02.1f%%", amount/player.power[power].amount*100), self.metadata.columns.Percent
+        )
       end
 
-      if spell.amount>max then
-        max=spell.amount
+      if amount>max then
+        max=amount
       end
 
       nr=nr+1
@@ -176,7 +181,7 @@ do
 
     local manamod=mod:NewModule(L[mana])
     
-    local playermod=manamod:NewModule(L["Power gain spell list"])
+    local playermod=manamod:NewModule(L["Mana gained spell list"])
     playermod.Enter=_playermod.Enter
     playermod.Update=_playermod.Update
 
@@ -195,13 +200,11 @@ do
           d.id=player.id
           d.label=player.name
           d.class=player.class
-          d.icon=player.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
           d.power=power
+
           d.value=amount
-          d.valuetext=Skada:FormatValueText(
-            Skada:FormatNumber(amount), self.metadata.columns.Power,
-            format("%02.1f%%", amount/set.power[power]*100), self.metadata.columns.Percent
-          )
+          d.valuetext=Skada:FormatNumber(amount)
 
           if d.value>max then
             max=d.value
@@ -215,9 +218,9 @@ do
     end
 
     function manamod:OnEnable()
-      playermod.metadata ={showspots=true, columns={Power=true, Percent=true}}
-      manamod.metadata={showspots=true, click1=playermod, columns={Power=true, Percent=true}}
-      Skada:AddMode(self)
+      playermod.metadata ={columns={Power=true, Percent=true}}
+      manamod.metadata={showspots=true, click1=playermod}
+      Skada:AddMode(self, L["Power gained"])
     end
 
     function manamod:OnDisable()
@@ -241,7 +244,7 @@ do
 
     local ragemod=mod:NewModule(L[rage])
     
-    local playermod=ragemod:NewModule(L["Power gain spell list"])
+    local playermod=ragemod:NewModule(L["Rage gained spell list"])
     playermod.Enter=_playermod.Enter
     playermod.Update=_playermod.Update
 
@@ -258,8 +261,9 @@ do
           d.id=player.id
           d.label=player.name
           d.class=player.class
-          d.icon=player.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
           d.power=power
+
           d.value=player.power[power].amount
           d.valuetext=tostring(d.value)
 
@@ -275,9 +279,9 @@ do
     end
 
     function ragemod:OnEnable()
-      playermod.metadata ={showspots=true, columns={Power=true, Percent=true}}
-      ragemod.metadata={showspots=true, click1=playermod, columns={Power=true, Percent=true}}
-      Skada:AddMode(self)
+      playermod.metadata ={columns={Power=true, Percent=true}}
+      ragemod.metadata={showspots=true, click1=playermod}
+      Skada:AddMode(self, L["Power gained"])
     end
 
     function ragemod:OnDisable()
@@ -301,7 +305,7 @@ do
     
     local energymod=mod:NewModule(L[energy])
     
-    local playermod=energymod:NewModule(L["Power gain spell list"])
+    local playermod=energymod:NewModule(L["Energy gained spell list"])
     playermod.Enter=_playermod.Enter
     playermod.Update=_playermod.Update
 
@@ -318,8 +322,9 @@ do
           d.id=player.id
           d.label=player.name
           d.class=player.class
-          d.icon=player.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
           d.power=power
+
           d.value=player.power[power].amount
           d.valuetext=tostring(d.value)
 
@@ -335,9 +340,9 @@ do
     end
 
     function energymod:OnEnable()
-      playermod.metadata ={showspots=true, columns={Power=true, Percent=true}}
-      energymod.metadata={showspots=true, click1=playermod, columns={Power=true, Percent=true}}
-      Skada:AddMode(self)
+      playermod.metadata ={columns={Power=true, Percent=true}}
+      energymod.metadata={showspots=true, click1=playermod}
+      Skada:AddMode(self, L["Power gained"])
     end
 
     function energymod:OnDisable()
@@ -361,7 +366,7 @@ do
     
     local runicmod=mod:NewModule(L[runicpower])
     
-    local playermod=runicmod:NewModule(L["Power gain spell list"])
+    local playermod=runicmod:NewModule(L["Runic Power gained spell list"])
     playermod.Enter=_playermod.Enter
     playermod.Update=_playermod.Update
 
@@ -378,8 +383,9 @@ do
           d.id=player.id
           d.label=player.name
           d.class=player.class
-          d.icon=player.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
           d.power=power
+
           d.value=player.power[power].amount
           d.valuetext=tostring(d.value)
 
@@ -395,9 +401,9 @@ do
     end
 
     function runicmod:OnEnable()
-      playermod.metadata ={showspots=true, columns={Power=true, Percent=true}}
-      runicmod.metadata={showspots=true, click1=playermod, columns={Power=true, Percent=true}}
-      Skada:AddMode(self)
+      playermod.metadata ={columns={Power=true, Percent=true}}
+      runicmod.metadata={showspots=true, click1=playermod}
+      Skada:AddMode(self, L["Power gained"])
     end
 
     function runicmod:OnDisable()

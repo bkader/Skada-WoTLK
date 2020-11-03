@@ -1,4 +1,4 @@
-local _, Skada=...
+local Skada=Skada
 if not Skada then return end
 
 local UnitHealth, UnitHealthMax=UnitHealth, UnitHealthMax
@@ -60,8 +60,10 @@ do
 
       data.srcGUID=srcGUID
       data.srcName=srcName
+      data.srcFlags=srcFlags
       data.dstName=dstName
       data.dstGUID=dstGUID
+      data.dstFlags=dstFlags
       data.spellid=spellid
       data.spellname=spellname
       data.amount=0-amount
@@ -75,8 +77,10 @@ do
 
       data.srcGUID=srcGUID
       data.srcName=srcName
+      data.srcFlags=srcFlags
       data.dstName=dstName
       data.dstGUID=dstGUID
+      data.dstFlags=dstFlags
       data.spellid=6603
       data.spellname=ACTION_SWING
       data.amount=0-amount
@@ -92,8 +96,10 @@ do
 
       data.srcGUID=srcGUID
       data.srcName=srcName
+      data.srcFlags=srcFlags
       data.dstName=dstName
       data.dstGUID=dstGUID
+      data.dstFlags=dstFlags
       data.spellid=spellid
       data.spellname=spellname
       data.amount=amount
@@ -132,7 +138,7 @@ do
 
     function deathlogmod:Enter(win, id, label)
       self.index=id
-      self.title=format(L["%s's Death log"], label)
+      self.title=format(L["%s's death log"], label)
     end
 
     do
@@ -175,6 +181,7 @@ do
               d.time=log.time
               d.label=("%2.2f"):format(diff) .. ": "..log.spellname
               d.icon=select(3, GetSpellInfo(log.spellid))
+              d.spellid=log.spellid
 
               -- used for tooltip
               d.htp=log.htp
@@ -207,14 +214,14 @@ do
 
     function playermod:Enter(win, id, label)
       self.playerid=id
-      self.title=format(L["%s's Deaths"], label)
+      self.title=format(L["%s's deaths"], label)
     end
 
     function playermod:Update(win, set)
       local player=Skada:get_player(set, self.playerid)
       local max=0
 
-      if player then
+      if player and player.deathlog then
         local nr=1
 
         for i, death in ipairs(player.deathlog) do
@@ -225,7 +232,7 @@ do
           d.time=death.time
           d.label=player.name
           d.class=player.class
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
 
           d.value=death.time
           d.valuetext=date("%H:%M:%S", death.time)
@@ -252,7 +259,7 @@ do
           d.id=player.id
           d.label=player.name
           d.class=player.class
-          d.icon=d.class and Skada.classIcon or Skada.petIcon
+          d.role=player.role
 
           d.value=player.deaths
           d.valuetext=tostring(player.deaths)
@@ -364,10 +371,10 @@ do
         d.id=player.id
         d.label=player.name
         d.class=player.class
-        d.icon=d.class and Skada.classIcon or Skada.petIcon
+        d.role=player.role
 
         d.value=playertime
-        d.valuetext=format("%s (%02.1f%%)", SecondsToTime(playertime), playertime/settime*100)
+        d.valuetext=format("%ds (%02.1f%%)", playertime, playertime/settime*100)
 
         nr=nr+1
       end

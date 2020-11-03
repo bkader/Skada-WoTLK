@@ -1,4 +1,4 @@
-local _, Skada=...
+local Skada=Skada
 if not Skada then return end
 
 local LibFail=LibStub("LibFail-1.0", true)
@@ -55,7 +55,7 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
 
   function playermod:Enter(win, id, label)
     self.playerid=id
-    self.title=format(L["%s's Fails"], label)
+    self.title=format(L["%s's fails"], label)
   end
 
   function playermod:Update(win, set)
@@ -75,6 +75,7 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
 
         local spellname, _, spellicon=GetSpellInfo(event.id)
         if spellname then
+          d.spellid=event.id
           d.label=spellname
           d.icon=spellicon
         else
@@ -94,7 +95,7 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
 
   function spellmod:Enter(win, id, label)
     self.failid=id
-    self.title=format(L["%s's Fails"], label)
+    self.title=format(L["%s's fails"], label)
   end
 
   function spellmod:Update(win, set)
@@ -108,7 +109,7 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
         d.id=self.failid.."_"..player.name
         d.label=player.name
         d.class=player.class
-        d.icon=d.class and Skada.classIcon or Skada.petIcon
+        d.role=player.role
 
         local count=player.fails.events[self.failid].count
         d.value=count
@@ -136,7 +137,7 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
         d.id=player.id
         d.label=player.name
         d.class=player.class
-        d.icon=d.class and Skada.classIcon or Skada.petIcon
+        d.role=player.role
 
         d.value=player.fails.count
         d.valuetext=tostring(player.fails.count)
