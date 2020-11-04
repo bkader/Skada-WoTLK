@@ -271,7 +271,8 @@ function lib:NewBarFromPrototype(prototype, name, ...)
   bar = setmetatable(bar, prototype.metatable)
   bar.name = name
   bar:Create(...)
-  bar:SetFont(self.font, self.fontSize, self.fontFlags)
+  bar:SetFont(self.font, self.fontSize, self.fontFlags, self.numfont, self.numfontSize, self.numfontFlags)
+  -- bar:SetFont(self.font, self.fontSize, self.fontFlags)
 
   bars[self][name] = bar
 
@@ -1169,15 +1170,13 @@ function barPrototype:OnSizeChanged()
 end
 
 function barPrototype:SetFont(f1, s1, m1, f2, s2, m2)
-  local t, font, size, flags
+  local label=self.label
+  local font, size, flags=label:GetFont()
+  label:SetFont(f1 or font, s1 or size, m1 or flags)
 
-  t=self.label
-  font, size, flags=t:GetFont()
-  t:SetFont(f1 or font, s1 or size, m1 or flags)
-
-  t = self.timerLabel
-  font, size, flags = t:GetFont()
-  t:SetFont(f2 or font, s2 or size, m2 or flags)
+  local timer = self.timerLabel
+  local numfont, numsize, numflags = timer:GetFont()
+  timer:SetFont(f2 or numfont, s2 or numsize, m2 or numflags)
 end
 
 function barPrototype:SetIconWithCoord(icon, coord)
