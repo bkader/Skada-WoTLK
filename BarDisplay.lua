@@ -377,17 +377,17 @@ do
             bar:SetIconWithCoord("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes", mod.class_icon_tcoords[data.class])
           end
 
+          -- set bar color
+          local color=win.db.barcolor
+
           if data.color then
-            bar:SetColorAt(0, data.color.r, data.color.g, data.color.b, data.color.a or 1)
+            color=data.color
+          elseif data.spellschool and win.db.spellschoolcolors then
+            color=Skada.schoolcolors[data.spellschool] or color
           elseif data.class and win.db.classcolorbars then
-            local color=Skada.classcolors[data.class]
-            if color then
-              bar:SetColorAt(0, color.r, color.g, color.b, color.a or 1)
-            end
-          else
-            local color=win.db.barcolor
-            bar:SetColorAt(0, color.r, color.g, color.b, color.a or 1)
+            color=Skada.classcolors[data.class] or color
           end
+          bar:SetColorAt(0, color.r, color.g, color.b, color.a or 1)
 
           if data.class and win.db.classcolortext then
             local color=Skada.classcolors[data.class]
@@ -730,12 +730,21 @@ function mod:AddDisplayOptions(win, options)
         set=function(i, r,g,b,a) db.barbgcolor={["r"]=r, ["g"]=g, ["b"]=b, ["a"]=a}; Skada:ApplySettings() end,
         order=19,
       },
+            
+      spellschoolcolors = {
+        type="toggle",
+        name=L["Spell school colors"],
+        desc=L["Use spell school colors where applicable."],
+        order=20,
+        get=function() return db.spellschoolcolors end,
+        set=function() db.spellschoolcolors=not db.spellschoolcolors; Skada:ApplySettings() end
+      },
 
       classcolorbars={
         type="toggle",
         name=L["Class color bars"],
         desc=L["When possible, bars will be colored according to player class."],
-        order=20,
+        order=21,
         get=function() return db.classcolorbars end,
         set=function() db.classcolorbars=not db.classcolorbars; Skada:ApplySettings() end,
       },
@@ -744,7 +753,7 @@ function mod:AddDisplayOptions(win, options)
         type="toggle",
         name=L["Class color text"],
         desc=L["When possible, bar text will be colored according to player class."],
-        order=21,
+        order=22,
         get=function() return db.classcolortext end,
         set=function() db.classcolortext=not db.classcolortext; Skada:ApplySettings() end,
       },
@@ -753,7 +762,7 @@ function mod:AddDisplayOptions(win, options)
         type="toggle",
         name=L["Class icons"],
         desc=L["Use class icons where applicable."],
-        order=22,
+        order=23,
         get=function() return db.classicons end,
         set=function() db.classicons=not db.classicons; Skada:ApplySettings() end,
       },
@@ -762,7 +771,7 @@ function mod:AddDisplayOptions(win, options)
         type="toggle",
         name=L["Role icons"],
         desc=L["Use role icons where applicable."],
-        order=23,
+        order=24,
         get=function() return db.roleicons end,
         set=function() db.roleicons=not db.roleicons; Skada:ApplySettings() end,
       },
@@ -771,7 +780,7 @@ function mod:AddDisplayOptions(win, options)
         type="toggle",
         name=L["Clickthrough"],
         desc=L["Disables mouse clicks on bars."],
-        order=24,
+        order=25,
         get=function() return db.clickthrough end,
         set=function() db.clickthrough=not db.clickthrough; Skada:ApplySettings() end
       },
@@ -780,7 +789,7 @@ function mod:AddDisplayOptions(win, options)
         type="toggle",
         name=L["Smooth bars"],
         desc=L["Animate bar changes smoothly rather than immediately."],
-        order=25,
+        order=26,
         get=function() return db.smoothing end,
         set=function() db.smoothing=not db.smoothing; Skada:ApplySettings() end,
       }

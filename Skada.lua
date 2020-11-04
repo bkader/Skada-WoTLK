@@ -32,6 +32,43 @@ local update_timer, tick_timer
 -- classe colors
 Skada.classcolors=CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS
 
+-- spell schools
+do
+  local SPELLSCHOOL_PHYSICAL=1
+  local SPELLSCHOOL_HOLY=2
+  local SPELLSCHOOL_FIRE=4
+  local SPELLSCHOOL_NATURE=8
+  local SPELLSCHOOL_NATUREFIRE=SPELLSCHOOL_FIRE+SPELLSCHOOL_NATURE
+  local SPELLSCHOOL_FROST=16
+  local SPELLSCHOOL_FROSTFIRE=SPELLSCHOOL_FIRE+SPELLSCHOOL_FROST
+  local SPELLSCHOOL_SHADOW=32
+  local SPELLSCHOOL_ARCANE=64
+
+  Skada.schoolcolors={
+    [SPELLSCHOOL_PHYSICAL]={a=1.0,r=1.00,g=1.00,b=0.00}, -- Physical
+    [SPELLSCHOOL_HOLY]={a=1.0,r=1.00,g=0.90,b=0.50}, -- Holy
+    [SPELLSCHOOL_FIRE]={a=1.0,r=1.00,g=0.50,b=0.00}, -- Fire
+    [SPELLSCHOOL_NATURE]={a=1.0,r=0.30,g=1.00,b=0.30}, -- Nature
+    [SPELLSCHOOL_NATUREFIRE]={a=1.0,r=0.30,g=1.00,b=0.30}, -- Naturefire
+    [SPELLSCHOOL_FROST]={a=1.0,r=0.50,g=1.00,b=1.00}, -- Frost
+    [SPELLSCHOOL_FROSTFIRE]={a=1.0,r=0.50,g=1.00,b=1.00}, -- Frostfire
+    [SPELLSCHOOL_SHADOW]={a=1.0,r=0.50,g=0.50,b=1.00}, -- Shadow
+    [SPELLSCHOOL_ARCANE]={a=1.0,r=1.00,g=0.50,b=1.00}, -- Arcane
+  }
+
+  Skada.schoolnames={
+    [SPELLSCHOOL_PHYSICAL]="Physical",
+    [SPELLSCHOOL_HOLY]="Holy",
+    [SPELLSCHOOL_FIRE]="Fire",
+    [SPELLSCHOOL_NATURE]="Nature",
+    [SPELLSCHOOL_NATUREFIRE]="Naturefire",
+    [SPELLSCHOOL_FROST]="Frost",
+    [SPELLSCHOOL_FROSTFIRE]="Frostfire",
+    [SPELLSCHOOL_SHADOW]="Shadow",
+    [SPELLSCHOOL_ARCANE]="Arcane",
+  }
+end
+
 -- list of plyaers and pets
 local players, pets={}, {}
 
@@ -1302,7 +1339,7 @@ function Skada:CheckGroup()
       local unit=format("%s%d", t, i)
       local unitGUID=UnitGUID(unit)
       if unitGUID then
-        players[unitGUID] = true
+        players[unitGUID]=true
         local petGUID=UnitGUID(unit.."pet")
         if petGUID and not pets[petGUID] then
           self:AssignPet(unitGUID, UnitName(unit), petGUID)
@@ -1314,7 +1351,7 @@ function Skada:CheckGroup()
   -- Solo, always check.
   local unitGUID=UnitGUID("player")
   if unitGUID then
-    players[unitGUID] = true
+    players[unitGUID]=true
     local petGUID=UnitGUID("playerpet")
     if petGUID and not pets[petGUID] then
       self:AssignPet(unitGUID, UnitName("player"), petGUID)
@@ -2031,10 +2068,6 @@ function Skada:OnEnable()
   self:RegisterEvent("PLAYER_REGEN_DISABLED")
   self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "CombatLogEvent")
 
-  if type(CUSTOM_CLASS_COLORS)=="table" then
-    Skada.classcolors=CUSTOM_CLASS_COLORS
-  end
-
   if self.modulelist then
     for i=1, #self.modulelist do
       self.modulelist[i](self, L)
@@ -2435,7 +2468,7 @@ do
 
     if eventtype=="SPELL_SUMMON" and (band(srcFlags, RAID_FLAGS)~=0 or band(srcFlags, PET_FLAGS)~=0 or band(srcFlags, SHAM_FLAGS)~=0 or (band(dstFlags, PET_FLAGS)~=0 and pets[dstGUID])) then
       pets[dstGUID]={id=srcGUID, name=srcName}
-      local changed = true -- try to fix the table
+      local changed=true -- try to fix the table
       while changed do
         changed=false
         for pet, owner in pairs(pets) do

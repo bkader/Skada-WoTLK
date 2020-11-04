@@ -19,11 +19,25 @@ L["Segment Time"]=true
 L["Click for"]=true
 L["Shift-Click for"]=true
 L["Control-Click for"]=true
+L["Minimum"]=true
 L["Minimum hit:"]=true
+L["Maximum"]=true
 L["Maximum hit:"]=true
+L["Average"]=true
 L["Average hit:"]=true
 L["Total hits:"]=true
 L["Percent"]=true
+
+-- spell schools
+L["Arcane"]=true
+L["Fire"]=true
+L["Frost"]=true
+L["Frostfire"]=true
+L["Holy"]=true
+L["Nature"]=true
+L["Naturefire"]=true
+L["Physical"]=true
+L["Shadow"]=true
 
 L["General options"]=true
 
@@ -86,6 +100,8 @@ L["Bar color"]=true
 L["Choose the default color of the bars."]=true
 L["Background color"]=true
 L["Choose the background color of the bars."]=true
+L["Spell school colors"]=true
+L["Use spell school colors where applicable."]=true
 L["Class color bars"]=true
 L["When possible, bars will be colored according to player class."]=true
 L["Class color text"]=true
@@ -348,8 +364,6 @@ L["Absorbs"]=true
 L["Absorb details"]=true
 L["%s's Absorbs"]=true
 
-L["Critical"]=true
-
 -- ============ --
 -- Auras Module --
 -- ============ --
@@ -464,6 +478,7 @@ L["%s's damage breakdown"]=true
 -- friendly fire module
 L["Friendly Fire"]=true
 
+L["Critical"]=true
 L["Glancing"]=true
 L["Crushing"]=true
 
