@@ -57,23 +57,9 @@ local UnitIsPlayer, UnitGUID, UnitName=UnitIsPlayer, UnitGUID, UnitName
 -- add missing globals --
 -- =================== --
 
-if not _G.IsInParty then
-  _G.IsInParty=function()
-    return (GetNumPartyMembers()>0)
-  end
-end
-
-if not _G.IsInRaid then
-  _G.IsInRaid=function()
-    return (GetNumRaidMembers()>0)
-  end
-end
-
-if not _G.IsInGroup then
-  _G.IsInGroup=function()
-    return IsInRaid() or IsInParty()
-  end
-end
+local IsInParty=IsInParty or function() return GetNumPartyMembers()>0 end
+local IsInRaid=IsInRaid or function() return GetNumRaidMembers()>0 end
+local IsInGroup=IsInGroup or function() return IsInRaid() or IsInParty() end
 
 -- returns the group type and count
 local function GetGroupTypeAndCount()
