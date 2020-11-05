@@ -26,6 +26,7 @@ L["Maximum hit:"]=true
 L["Average"]=true
 L["Average hit:"]=true
 L["Total hits:"]=true
+L["Count"]=true
 L["Percent"]=true
 
 -- spell schools
@@ -341,18 +342,12 @@ L["Threat: Personal Threat"]=true
 -- ======================== --
 -- Absorbs & Healing Module --
 -- ======================== --
-L["Absorbs and healing"]=true
-L["Healing and absorbs spell list"]=true
-L["Healed and absorbed players"]=true
-L["%s's Absorbs and healing"]=true
-L["Healed by %s"]=true
-
 L["Healing"]=true
+L["Healed player list"]=true
 L["Healing spell list"]=true
-L["Healed players"]=true
-
 L["%s's healing"]=true
-
+L["%s's healing spells"]=true
+L["%s's healed players"]=true
 L["HPS"]=true
 
 L["Total healing"]=true
@@ -361,8 +356,16 @@ L["Overhealing"]=true
 L["Overheal"]=true
 
 L["Absorbs"]=true
-L["Absorb details"]=true
-L["%s's Absorbs"]=true
+L["Absorbed player list"]=true
+L["Absorb spell list"]=true
+L["%s's absorbed players"]=true
+L["%s's absorb spells"]=true
+
+L["Absorbs and healing"]=true
+L["Healing and absorbs spell list"]=true
+L["Healed and absorbed players"]=true
+L["%s's absorb and healing spells"]=true
+L["%s's absorbed and healed players"]=true
 
 -- ============ --
 -- Auras Module --

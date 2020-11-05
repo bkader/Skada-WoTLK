@@ -1,21 +1,20 @@
 local Skada=Skada
 if not Skada then return end
 
-local LibFail=LibStub("LibFail-1.0", true)
-if not LibFail then return end
+Skada:AddLoadableModule("Fails", nil, function(Skada, L)
+  if Skada:IsDisabled("Fails") then return end
 
-local pairs, ipairs, select=pairs, ipairs, select
-local tostring, format=tostring, string.format
-local GetSpellInfo=GetSpellInfo
-local UnitGUID=UnitGUID
-
-local modname="Fails"
-Skada:AddLoadableModule(modname, nil, function(Skada, L)
-  if Skada.db.profile.modulesBlocked[modname] then return end
-
-  local mod=Skada:NewModule(L[modname])
+  local mod=Skada:NewModule(L["Fails"])
   local playermod=mod:NewModule(L["Player's failed events"])
   local spellmod=mod:NewModule(L["Event's failed players"])
+
+  local LibFail=LibStub("LibFail-1.0", true)
+  if not LibFail then return end
+
+  local pairs, ipairs, select=pairs, ipairs, select
+  local tostring, format=tostring, string.format
+  local GetSpellInfo=GetSpellInfo
+  local UnitGUID=UnitGUID
 
   local failevents=LibFail:GetSupportedEvents()
 

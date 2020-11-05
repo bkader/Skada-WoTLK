@@ -2,7 +2,7 @@ local Skada=Skada
 if not Skada then return end
 
 Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custom themes can also be used.", function(Skada, L)
-  if Skada.db.profile.modulesBlocked.Themes then return end
+  if Skada:IsDisabled("Themes") then return end
 
   local themes = {
     {

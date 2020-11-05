@@ -8,13 +8,7 @@ local pairs, ipairs, select=pairs, ipairs, select
 local format=string.format
 local GetSpellInfo=GetSpellInfo
 
-local modname="Power gained"
-local mana="Power gained: Mana"
-local rage="Power gained: Rage"
-local energy="Power gained: Energy"
-local runicpower="Power gained: Runic Power"
-
-local mod=Skada:NewModule(L[modname])
+local mod=Skada:NewModule(L["Power gained"])
 local _playermod={}
 
 local locales={
@@ -89,10 +83,10 @@ local function SpellEnergize(timestamp, eventtype, srcGUID, srcName, srcFlags, d
   gain.type=fix_power_type(tonumber(powertype))
 
   -- no need to record anything if the module is disabled or invalid gain type
-  if (gain.type=="mana" and Skada.db.profile.modulesBlocked[mana]) or
-    (gain.type=="energy" and Skada.db.profile.modulesBlocked[energy]) or
-    (gain.type=="rage" and Skada.db.profile.modulesBlocked[rage]) or
-    (gain.type=="runicpower" and Skada.db.profile.modulesBlocked[runicpower]) or
+  if (gain.type=="mana" and Skada:IsDisabled(mana)) or
+    (gain.type=="energy" and Skada:IsDisabled(energy)) or
+    (gain.type=="rage" and Skada:IsDisabled(rage)) or
+    (gain.type=="runicpower" and Skada:IsDisabled(runicpower)) or
     (not locales[gain.type]) then
       return
   end
@@ -173,245 +167,228 @@ end
 -- ================== --
 -- Power gained: Mana --
 -- ================== --
+Skada:AddLoadableModule("Power gained: Mana", nil, function(Skada, L)
+  if Skada:IsDisabled("Power gained", "Power gained: Mana") then return end
 
-do
-  Skada:AddLoadableModule(mana, nil, function(Skada, L)
-    if Skada.db.profile.modulesBlocked[modname] then return end
-    if Skada.db.profile.modulesBlocked[mana] then return end
+  local manamod=mod:NewModule(L["Power gained: Mana"])
+  
+  local playermod=manamod:NewModule(L["Mana gained spell list"])
+  playermod.Enter=_playermod.Enter
+  playermod.Update=_playermod.Update
 
-    local manamod=mod:NewModule(L[mana])
-    
-    local playermod=manamod:NewModule(L["Mana gained spell list"])
-    playermod.Enter=_playermod.Enter
-    playermod.Update=_playermod.Update
+  function manamod:Update(win, set)
+    local nr, max=1, 0
+    local power="mana"
+    playermod.power=power
 
-    function manamod:Update(win, set)
-      local nr, max=1, 0
-      local power="mana"
-      playermod.power=power
+    for i, player in pairs(set.players) do
+      if player.power and player.power[power] then
+        local d=win.dataset[nr] or {}
+        win.dataset[nr]=d
 
-      for i, player in pairs(set.players) do
-        if player.power and player.power[power] then
-          local d=win.dataset[nr] or {}
-          win.dataset[nr]=d
+        local amount=player.power[power].amount
 
-          local amount=player.power[power].amount
+        d.id=player.id
+        d.label=player.name
+        d.class=player.class
+        d.role=player.role
+        d.power=power
 
-          d.id=player.id
-          d.label=player.name
-          d.class=player.class
-          d.role=player.role
-          d.power=power
+        d.value=amount
+        d.valuetext=Skada:FormatNumber(amount)
 
-          d.value=amount
-          d.valuetext=Skada:FormatNumber(amount)
-
-          if d.value>max then
-            max=d.value
-          end
-
-          nr=nr+1
+        if d.value>max then
+          max=d.value
         end
+
+        nr=nr+1
       end
-
-      win.metadata.maxvalue=max
     end
 
-    function manamod:OnEnable()
-      playermod.metadata ={columns={Power=true, Percent=true}}
-      manamod.metadata={showspots=true, click1=playermod}
-      Skada:AddMode(self, L["Power gained"])
-    end
+    win.metadata.maxvalue=max
+  end
 
-    function manamod:OnDisable()
-      Skada:RemoveMode(self)
-    end
+  function manamod:OnEnable()
+    playermod.metadata ={columns={Power=true, Percent=true}}
+    manamod.metadata={showspots=true, click1=playermod}
+    Skada:AddMode(self, L["Power gained"])
+  end
 
-    function manamod:GetSetSummary(set)
-      return Skada:FormatNumber(set.power and set.power.mana or 0)
-    end
-  end)
-end
+  function manamod:OnDisable()
+    Skada:RemoveMode(self)
+  end
+
+  function manamod:GetSetSummary(set)
+    return Skada:FormatNumber(set.power and set.power.mana or 0)
+  end
+end)
 
 -- ================== --
 -- Power gained: Rage --
 -- ================== --
+Skada:AddLoadableModule("Power gained: Rage", nil, function(Skada, L)
+  if Skada:IsDisabled("Power gained", "Power gained: Rage") then return end
 
-do
-  Skada:AddLoadableModule(rage, nil, function(Skada, L)
-    if Skada.db.profile.modulesBlocked[modname] then return end
-    if Skada.db.profile.modulesBlocked[rage] then return end
+  local ragemod=mod:NewModule(L["Power gained: Rage"])
+  
+  local playermod=ragemod:NewModule(L["Rage gained spell list"])
+  playermod.Enter=_playermod.Enter
+  playermod.Update=_playermod.Update
 
-    local ragemod=mod:NewModule(L[rage])
-    
-    local playermod=ragemod:NewModule(L["Rage gained spell list"])
-    playermod.Enter=_playermod.Enter
-    playermod.Update=_playermod.Update
+  function ragemod:Update(win, set)
+    local nr, max=1, 0
+    local power="rage"
+    playermod.power=power
 
-    function ragemod:Update(win, set)
-      local nr, max=1, 0
-      local power="rage"
-      playermod.power=power
+    for i, player in pairs(set.players) do
+      if player.power and player.power[power] then
+        local d=win.dataset[nr] or {}
+        win.dataset[nr]=d
 
-      for i, player in pairs(set.players) do
-        if player.power and player.power[power] then
-          local d=win.dataset[nr] or {}
-          win.dataset[nr]=d
+        d.id=player.id
+        d.label=player.name
+        d.class=player.class
+        d.role=player.role
+        d.power=power
 
-          d.id=player.id
-          d.label=player.name
-          d.class=player.class
-          d.role=player.role
-          d.power=power
+        d.value=player.power[power].amount
+        d.valuetext=tostring(d.value)
 
-          d.value=player.power[power].amount
-          d.valuetext=tostring(d.value)
-
-          if d.value>max then
-            max=d.value
-          end
-
-          nr=nr+1
+        if d.value>max then
+          max=d.value
         end
+
+        nr=nr+1
       end
-
-      win.metadata.maxvalue=max
     end
 
-    function ragemod:OnEnable()
-      playermod.metadata ={columns={Power=true, Percent=true}}
-      ragemod.metadata={showspots=true, click1=playermod}
-      Skada:AddMode(self, L["Power gained"])
-    end
+    win.metadata.maxvalue=max
+  end
 
-    function ragemod:OnDisable()
-      Skada:RemoveMode(self)
-    end
+  function ragemod:OnEnable()
+    playermod.metadata ={columns={Power=true, Percent=true}}
+    ragemod.metadata={showspots=true, click1=playermod}
+    Skada:AddMode(self, L["Power gained"])
+  end
 
-    function ragemod:GetSetSummary(set)
-      return set.power and set.power.rage or 0
-    end
-  end)
-end
+  function ragemod:OnDisable()
+    Skada:RemoveMode(self)
+  end
 
+  function ragemod:GetSetSummary(set)
+    return set.power and set.power.rage or 0
+  end
+end)
 -- ==================== --
 -- Power gained: Energy --
 -- ==================== --
+Skada:AddLoadableModule("Power gained: Energy", nil, function(Skada, L)
+  if Skada:IsDisabled("Power gained", "Power gained: Energy") then return end
+  
+  local energymod=mod:NewModule(L["Power gained: Energy"])
+  
+  local playermod=energymod:NewModule(L["Energy gained spell list"])
+  playermod.Enter=_playermod.Enter
+  playermod.Update=_playermod.Update
 
-do
-  Skada:AddLoadableModule(energy, nil, function(Skada, L)
-    if Skada.db.profile.modulesBlocked[modname] then return end
-    if Skada.db.profile.modulesBlocked[energy] then return end
-    
-    local energymod=mod:NewModule(L[energy])
-    
-    local playermod=energymod:NewModule(L["Energy gained spell list"])
-    playermod.Enter=_playermod.Enter
-    playermod.Update=_playermod.Update
+  function energymod:Update(win, set)
+    local nr, max=1, 0
+    local power="energy"
+    playermod.power=power
 
-    function energymod:Update(win, set)
-      local nr, max=1, 0
-      local power="energy"
-      playermod.power=power
+    for i, player in pairs(set.players) do
+      if player.power and player.power[power] then
+        local d=win.dataset[nr] or {}
+        win.dataset[nr]=d
 
-      for i, player in pairs(set.players) do
-        if player.power and player.power[power] then
-          local d=win.dataset[nr] or {}
-          win.dataset[nr]=d
+        d.id=player.id
+        d.label=player.name
+        d.class=player.class
+        d.role=player.role
+        d.power=power
 
-          d.id=player.id
-          d.label=player.name
-          d.class=player.class
-          d.role=player.role
-          d.power=power
+        d.value=player.power[power].amount
+        d.valuetext=tostring(d.value)
 
-          d.value=player.power[power].amount
-          d.valuetext=tostring(d.value)
-
-          if d.value>max then
-            max=d.value
-          end
-
-          nr=nr+1
+        if d.value>max then
+          max=d.value
         end
+
+        nr=nr+1
       end
-
-      win.metadata.maxvalue=max
     end
 
-    function energymod:OnEnable()
-      playermod.metadata ={columns={Power=true, Percent=true}}
-      energymod.metadata={showspots=true, click1=playermod}
-      Skada:AddMode(self, L["Power gained"])
-    end
+    win.metadata.maxvalue=max
+  end
 
-    function energymod:OnDisable()
-      Skada:RemoveMode(self)
-    end
+  function energymod:OnEnable()
+    playermod.metadata ={columns={Power=true, Percent=true}}
+    energymod.metadata={showspots=true, click1=playermod}
+    Skada:AddMode(self, L["Power gained"])
+  end
 
-    function energymod:GetSetSummary(set)
-      return set.power and set.power.energy or 0
-    end
-  end)
-end
+  function energymod:OnDisable()
+    Skada:RemoveMode(self)
+  end
+
+  function energymod:GetSetSummary(set)
+    return set.power and set.power.energy or 0
+  end
+end)
 
 -- ========================= --
 -- Power gained: Runic Power --
 -- ========================= --
+Skada:AddLoadableModule("Power gained: Runic Power", nil, function(Skada, L)
+  if Skada:IsDisabled("Power gained", "Power gained: Runic Power") then return end
+  
+  local runicmod=mod:NewModule(L["Power gained: Runic Power"])
+  
+  local playermod=runicmod:NewModule(L["Runic Power gained spell list"])
+  playermod.Enter=_playermod.Enter
+  playermod.Update=_playermod.Update
 
-do
-  Skada:AddLoadableModule(runicpower, nil, function(Skada, L)
-    if Skada.db.profile.modulesBlocked[modname] then return end
-    if Skada.db.profile.modulesBlocked[runicpower] then return end
-    
-    local runicmod=mod:NewModule(L[runicpower])
-    
-    local playermod=runicmod:NewModule(L["Runic Power gained spell list"])
-    playermod.Enter=_playermod.Enter
-    playermod.Update=_playermod.Update
+  function runicmod:Update(win, set)
+    local nr, max=1, 0
+    local power="runicpower"
+    playermod.power=power
 
-    function runicmod:Update(win, set)
-      local nr, max=1, 0
-      local power="runicpower"
-      playermod.power=power
+    for i, player in pairs(set.players) do
+      if player.power and player.power[power] then
+        local d=win.dataset[nr] or {}
+        win.dataset[nr]=d
 
-      for i, player in pairs(set.players) do
-        if player.power and player.power[power] then
-          local d=win.dataset[nr] or {}
-          win.dataset[nr]=d
+        d.id=player.id
+        d.label=player.name
+        d.class=player.class
+        d.role=player.role
+        d.power=power
 
-          d.id=player.id
-          d.label=player.name
-          d.class=player.class
-          d.role=player.role
-          d.power=power
+        d.value=player.power[power].amount
+        d.valuetext=tostring(d.value)
 
-          d.value=player.power[power].amount
-          d.valuetext=tostring(d.value)
-
-          if d.value>max then
-            max=d.value
-          end
-
-          nr=nr+1
+        if d.value>max then
+          max=d.value
         end
+
+        nr=nr+1
       end
-
-      win.metadata.maxvalue=max
     end
 
-    function runicmod:OnEnable()
-      playermod.metadata ={columns={Power=true, Percent=true}}
-      runicmod.metadata={showspots=true, click1=playermod}
-      Skada:AddMode(self, L["Power gained"])
-    end
+    win.metadata.maxvalue=max
+  end
 
-    function runicmod:OnDisable()
-      Skada:RemoveMode(self)
-    end
+  function runicmod:OnEnable()
+    playermod.metadata ={columns={Power=true, Percent=true}}
+    runicmod.metadata={showspots=true, click1=playermod}
+    Skada:AddMode(self, L["Power gained"])
+  end
 
-    function runicmod:GetSetSummary(set)
-      return set.power and set.power.runicpower or 0
-    end
-  end)
-end
+  function runicmod:OnDisable()
+    Skada:RemoveMode(self)
+  end
+
+  function runicmod:GetSetSummary(set)
+    return set.power and set.power.runicpower or 0
+  end
+end)

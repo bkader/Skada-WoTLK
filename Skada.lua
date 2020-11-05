@@ -115,7 +115,8 @@ end
 -- needed locals --
 -- ============= --
 
-local createSet, verify_set, find_mode, sort_modes
+local createSet, verify_set
+local find_mode, sort_modes
 local is_in_pvp, is_solo
 local IsRaidInCombat, IsRaidDead
 local setPlayerActiveTimes
@@ -762,6 +763,16 @@ function Skada:AddLoadableModule(name, description, func)
   self:AddLoadableModuleCheckbox(name, L[name], description and L[description])
 end
 
+function Skada:IsDisabled(...)
+  for i=1, select("#", ...) do
+    local name=select(i, ...)
+    if self.db.profile.modulesBlocked[name]==true then
+      return true
+    end
+  end
+  return false
+end
+
 do
   local numorder=5
 
@@ -963,32 +974,6 @@ function Skada:FixPets(action)
       end
     end
   end
-
-  -- if not UnitIsPlayer(action.playername) then
-
-  --   if not pets[action.playerid] then
-  --     if action.playerflags and band(action.playerflags, COMBATLOG_OBJECT_TYPE_GUARDIAN)~=0 then
-  --       if band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE)~=0 then
-  --         if action.spellname then
-  --           action.spellname=action.playername..": "..action.spellname
-  --         end
-  --         action.playername=UnitName("player")
-  --         action.playerid=UnitGUID("player")
-  --       else
-  --         action.playerid=action.playername
-  --       end
-  --     end
-  --   end
-
-  --   local pet=pets[action.playerid]
-  --   if pet then
-  --     if action.spellname then
-  --       action.spellname=action.playername..": "..action.spellname
-  --     end
-  --     action.playername=pet.name
-  --     action.playerid=pet.id
-  --   end
-  -- end
 end
 
 function Skada:FixMyPets(playerGUID, playerName)
@@ -1059,6 +1044,8 @@ do
   
   function Skada:AddSubviewToTooltip(tooltip, win, mode, id, label)
     wipe(ttwin.dataset)
+
+    if not mode then return end
 
     if mode.Enter then
       mode:Enter(win, id, label)
@@ -1440,6 +1427,21 @@ function Skada:UNIT_PET()
 end
 
 -- ======================================================= --
+
+function Skada:CanReset()
+  local totalplayers=self.total and self.total.players
+  if totalplayers and next(totalplayers) then
+    return true
+  end
+
+  for _,set in ipairs(self.char.sets) do
+    if not set.keep then
+      return true
+    end
+  end
+
+  return false
+end
 
 function Skada:Reset()
   self:Wipe()

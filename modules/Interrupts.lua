@@ -1,18 +1,16 @@
 local Skada=Skada
 if not Skada then return end
+Skada:AddLoadableModule("Interrupts", nil, function(Skada, L)
+  if Skada:IsDisabled("Interrupts") then return end
 
-local select, tostring=select, tostring
-local pairs, ipairs=pairs, ipairs
-local GetSpellInfo=GetSpellInfo
-
-local modname="Interrupts"
-Skada:AddLoadableModule(modname, nil, function(Skada, L)
-  if Skada.db.profile.modulesBlocked[modname] then return end
-
-  local mod=Skada:NewModule(L[modname])
+  local mod=Skada:NewModule(L["Interrupts"])
   local spellsmod=mod:NewModule(L["Interrupted spells"])
   local targetsmod=mod:NewModule(L["Interrupted targets"])
   local playermod=mod:NewModule(L["Interrupt spells"])
+  
+  local select, tostring=select, tostring
+  local pairs, ipairs=pairs, ipairs
+  local GetSpellInfo=GetSpellInfo
 
   local function log_interrupt(set, data)
     local player=Skada:find_player(set, data.playerid, data.playername)

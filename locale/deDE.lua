@@ -319,7 +319,7 @@ L["Threat: Personal Threat"]="Bedrohung: Persönliche Bedrohung"
 L["Absorbs and healing"]="Absorptionen und Heilungen"
 L["Healing and absorbs spell list"]="Heilt und absorbiert die Zauberliste"
 L["Healed and absorbed players"]="Geheilte und absorbierte Spieler"
-L["%s's Absorbs and healing"]="%s absorbiert und heilt"
+L["%s's absorbs and healing"]="%s absorbiert und heilt"
 L["Healed by %s"]="Geheilt von %s"
 
 L["Healing"]="Heilung"
@@ -337,7 +337,7 @@ L["Overheal"]="Überheilung"
 
 L["Absorbs"]="Absorptionen"
 L["Absorb details"]="Details der Schadensabsorption"
-L["%s's Absorbs"]="%s absorbiert"
+L["%s's absorbed players"]="%s absorbiert"
 
 L["Critical"]="Kritischer Treffer"
 

@@ -321,7 +321,7 @@ L["Threat: Personal Threat"]=true
 L["Absorbs and healing"]=true
 L["Healing and absorbs spell list"]=true
 L["Healed and absorbed players"]=true
-L["%s's Absorbs and healing"]=true
+L["%s's absorbs and healing"]=true
 L["Healed by %s"]=true
 
 L["Healing"]=true
@@ -339,7 +339,7 @@ L["Overheal"]=true
 
 L["Absorbs"]=true
 L["Absorb details"]=true
-L["%s's Absorbs"]=true
+L["%s's absorbed players"]=true
 
 L["Critical"]=true
 

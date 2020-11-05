@@ -1,21 +1,20 @@
 local Skada=Skada
 if not Skada then return end
 
-local select, pairs, ipairs=select, pairs, ipairs
-local tostring, tonumber=tostring, tonumber
-local format=string.format
-local GetSpellInfo=GetSpellInfo
-local UnitClass=UnitClass
+Skada:AddLoadableModule("Resurrects", nil, function(Skada, L)
+  if Skada:IsDisabled("Resurrects") then return end
 
-local modname="Resurrects"
-Skada:AddLoadableModule(modname, nil, function(Skada, L)
-  if Skada.db.profile.modulesBlocked[modname] then return end
-
-  local mod=Skada:NewModule(L[modname])
+  local mod=Skada:NewModule(L["Resurrects"])
   local spellsmod=mod:NewModule(L["Resurrect spell list"])
   local spelltargetsmod=mod:NewModule(L["Resurrect spell target list"])
   local targetsmod=mod:NewModule(L["Resurrect target list"])
   local targetspellsmod=mod:NewModule(L["Resurrect target spell list"])
+
+  local select, pairs, ipairs=select, pairs, ipairs
+  local tostring, tonumber=tostring, tonumber
+  local format=string.format
+  local GetSpellInfo=GetSpellInfo
+  local UnitClass=UnitClass
 
   local function log_resurrect(set, data, ts)
     local player=Skada:get_player(set, data.srcGUID, data.srcName)

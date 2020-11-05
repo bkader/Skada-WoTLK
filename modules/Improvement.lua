@@ -1,17 +1,16 @@
 local Skada=Skada
 if not Skada then return end
 
-local UnitGUID, UnitName, UnitClass=UnitGUID, UnitName, UnitClass
-local pairs, ipairs, select, tostring=pairs, ipairs, select, tostring
-local SecondsToTime, date=SecondsToTime, date
+Skada:AddLoadableModule("Improvement", nil, function(Skada, L)
+  if Skada:IsDisabled("Improvement") then return end
 
-local modname="Improvement"
-Skada:AddLoadableModule(modname, nil, function(Skada, L)
-  if Skada.db.profile.modulesBlocked[modname] then return end
-
-  local mod=Skada:NewModule(L[modname])
+  local mod=Skada:NewModule(L["Improvement"])
   local mod_modes=mod:NewModule(L["Improvement modes"])
   local mod_comparison=mod:NewModule(L["Improvement comparison"])
+
+  local UnitGUID, UnitName, UnitClass=UnitGUID, UnitName, UnitClass
+  local pairs, ipairs, select, tostring=pairs, ipairs, select, tostring
+  local SecondsToTime, date=SecondsToTime, date
 
   local db
   local modes={
@@ -37,19 +36,26 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
   end
 
   updaters.Damage=function(set, player)
-    return player.damagedone.amount
+    return player.damagedone and player.damagedone.amount or 0
   end
 
   updaters.DamageTaken=function(set, player)
-    return player.damagetaken.amount
+    return player.damagetaken and player.damagetaken.amount or 0
   end
 
   updaters.Deaths=function(set, player)
-    return player.deaths
+    return player.deaths or 0
   end
 
   updaters.Healing=function(set, player)
-    return (player.healing or 0) + (player.absorbTotal or 0)
+    local total=0
+    if player.healing then
+      total=total+player.healing.amount
+    end
+    if player.absorbs then
+      total=total+player.absorbs.total
+    end
+    return total
   end
 
   updaters.Interrupts=function(set, player)
@@ -57,7 +63,7 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
   end
 
   updaters.Fails=function(set, player)
-    return player.fails.count
+    return player.fails and player.fails.count or 0
   end
 
   -- :::::::::::::::::::::::::::::::::::::::::::::::
@@ -295,7 +301,7 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
     collectgarbage("collect")
     for _, win in ipairs(Skada:GetWindows()) do
       local mode = win.db.mode
-      if mode == L[modname] or mode == L["Improvement modes"] or mode == L["Improvement comparison"] then
+      if mode == L["Improvement"] or mode == L["Improvement modes"] or mode == L["Improvement comparison"] then
         win:DisplayMode(mod)
       end
     end
@@ -305,7 +311,7 @@ Skada:AddLoadableModule(modname, nil, function(Skada, L)
 
   local Default_ShowPopup = Skada.ShowPopup
   function Skada:ShowPopup(win)
-    if win and win.db.mode == modname then
+    if win and win.db.mode == "Improvement" then
       ask_for_reset()
       return
     end

@@ -1,18 +1,17 @@
 local Skada=Skada
 if not Skada then return end
 
-local format, tostring=string.format, tostring
-local pairs, ipairs, select=pairs, ipairs, select
-local GetSpellInfo=GetSpellInfo
+Skada:AddLoadableModule("Dispels", nil, function(Skada, L)
+  if Skada:IsDisabled("Dispels") then return end
 
-local modname="Dispels"
-Skada:AddLoadableModule(modname, nil, function(Skada, L)
-  if Skada.db.profile.modulesBlocked[modname] then return end
-
-  local mod=Skada:NewModule(L[modname])
+  local mod=Skada:NewModule(L["Dispels"])
   local spellsmod=mod:NewModule(L["Dispelled spell list"])
   local targetsmod=mod:NewModule(L["Dispelled target list"])
   local playermod=mod:NewModule(L["Dispel spell list"])
+
+  local format, tostring=string.format, tostring
+  local pairs, ipairs, select=pairs, ipairs, select
+  local GetSpellInfo=GetSpellInfo
 
   local function log_dispels(set, data)
     local player=Skada:get_player(set, data.playerid, data.playername)

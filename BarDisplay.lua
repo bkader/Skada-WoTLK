@@ -83,8 +83,10 @@ function mod:Create(window)
 end
 
 function mod:Destroy(win)
-  win.bargroup:Hide()
-  win.bargroup=nil
+  if win and win.bargroup then
+    win.bargroup:Hide()
+    win.bargroup=nil
+  end
 end
 
 function mod:Wipe(win)
@@ -103,8 +105,10 @@ function mod:Wipe(win)
 end
 
 function mod:Show(win)
-  win.bargroup:Show()
-  win.bargroup:SortBars()
+  if win and win.bargroup then
+    win.bargroup:Show()
+    win.bargroup:SortBars()
+  end
 end
 
 function mod:Hide(win)
@@ -116,7 +120,9 @@ function mod:IsShown(win)
 end
 
 function mod:SetTitle(win, title)
-  win.bargroup.button:SetText(title)
+  if win and win.bargroup then
+    win.bargroup.button:SetText(title)
+  end
 end
 
 function mod:AnchorMoved(cbk, group, x, y)
@@ -278,6 +284,7 @@ do
   end
 
   function mod:Update(win)
+    if not win or not win.bargroup then return end
     win.bargroup.button:SetText(win.metadata.title)
 
     if win.metadata.showspots then
@@ -480,6 +487,8 @@ do
 
   -- Called by Skada windows when window settings have changed.
   function mod:ApplySettings(win)
+    if not win or not win.bargroup then return end
+
     local g=win.bargroup
     g:SetFrameLevel(1)
     

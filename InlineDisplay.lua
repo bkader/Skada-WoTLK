@@ -208,15 +208,19 @@ function mod:Create(window, isnew)
 end
 
 function mod:Destroy(win)
-  win.frame:Hide()
-  win.frame=nil
+  if win and win.frame then
+    win.frame:Hide()
+    win.frame=nil
+  end
 end
 
 function mod:Wipe(win) end
 
 function mod:SetTitle(win, title)
-  win.frame.fstitle:SetText(title)
-  win.frame.barstartx=leftmargin+win.frame.fstitle:GetStringWidth()+20
+  if win and win.frame then
+    win.frame.fstitle:SetText(title)
+    win.frame.barstartx=leftmargin+win.frame.fstitle:GetStringWidth()+20
+  end
 end
 
 function barlibrary:CreateBar(uuid, win)
@@ -322,6 +326,8 @@ end
 
 local wd
 function mod:Update(win)
+  if not win or not win.frame then return end
+
   wd=win.dataset
   for i=#win.dataset, 1, -1 do
     if win.dataset[i].label==nil then
@@ -381,7 +387,9 @@ function mod:Update(win)
 end
 
 function mod:Show(win)
-  win.frame:Show()
+  if win and win.frame then
+    win.frame:Show()
+  end
 end
 
 function mod:Hide(win)
@@ -417,6 +425,8 @@ function mod:GetFontColor(db)
 end
 
 function mod:ApplySettings(win)
+  if not win or not win.frame then return end
+
   local f=win.frame
   local p=win.db
 

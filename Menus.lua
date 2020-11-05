@@ -139,27 +139,29 @@ function Skada:OpenMenu(window)
       if type(L_UIDROPDOWNMENU_MENU_VALUE) == "table" then
         local window=L_UIDROPDOWNMENU_MENU_VALUE
 
-        -- Display list of modes with current ticked; let user switch mode by checking one.
-        wipe(info)
-        info.isTitle=1
-        info.text=L["Mode"]
-        L_UIDropDownMenu_AddButton(info, level)
-
-        for i, module in ipairs(Skada:GetModes()) do
+        -- dsplay modes only if we have modules enabled.
+        local modules=Skada:GetModes()
+        if next(modules)~=nil then
           wipe(info)
-          info.text=module:GetName()
-          info.func=function()
-            window:DisplayMode(module)
+          info.isTitle=1
+          info.text=L["Mode"]
+          L_UIDropDownMenu_AddButton(info, level)
+
+          for i, module in ipairs(modules) do
+            wipe(info)
+            info.text=module:GetName()
+            info.func=function()
+              window:DisplayMode(module)
+            end
+            info.checked=(window.selectedmode == module)
+            L_UIDropDownMenu_AddButton(info, level)
           end
-          info.checked=(window.selectedmode == module)
+
+          wipe(info)
+          info.disabled=1
+          info.notCheckable=1
           L_UIDropDownMenu_AddButton(info, level)
         end
-
-        -- separator
-        wipe(info)
-        info.disabled=1
-        info.notCheckable=1
-        L_UIDropDownMenu_AddButton(info, level)
 
         -- Display list of sets with current ticked; let user switch set by checking one.
         wipe(info)

@@ -1,14 +1,11 @@
 local Skada=Skada
 if not Skada then return end
 
-local modname="Threat"
-Skada:AddLoadableModule(modname, nil, function(Skada, L)
-  if Skada.db.profile.modulesBlocked[modname] then return end
+Skada:AddLoadableModule("Threat", nil, function(Skada, L)
+  if Skada:IsDisabled("Threat") then return end
 
+  local mod = Skada:NewModule(L["Threat"])
   local media = LibStub("LibSharedMedia-3.0")
-
-  -- This mode is a bit special.
-  local mod = Skada:NewModule(L[modname])
 
   local opts = {
     options = {
