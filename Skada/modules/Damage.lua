@@ -111,7 +111,7 @@ local function _SwingMissed(cond, srcGUID, srcName, srcFlags, dstGUID, dstName, 
     dmg.srcGUID=srcGUID
     dmg.srcName=srcName
     dmg.srcFlags=srcFlags
-    
+
     dmg.dstGUID=dstGUID
     dmg.dstName=dstName
     dmg.dstFlags=dstFlags
@@ -134,7 +134,7 @@ end
 local damagedone="Damage"
 Skada:AddLoadableModule(damagedone, nil, function(Skada, L)
   if Skada:IsDisabled(damagedone) then return end
-  
+
   local mod=Skada:NewModule(L[damagedone])
   local playermod=mod:NewModule(L["Damage spell list"])
   local spellmod=mod:NewModule(L["Damage spell details"])
@@ -510,7 +510,7 @@ Skada:AddLoadableModule(damagedone, nil, function(Skada, L)
 
   function spellsmod:Update(win, set)
     local spells={}
-
+    local _
     for i, player in ipairs(set.players) do
       if player.damagedone.amount>0 then
         for spellid, spell in pairs(player.damagedone.spells) do
@@ -612,13 +612,13 @@ Skada:AddLoadableModule(damagedone, nil, function(Skada, L)
         d.label=player.name
         d.class=player.class
         d.role=player.role
-        
+
         d.value=dps
         d.valuetext=Skada:FormatValueText(
           Skada:FormatNumber(dps), self.metadata.columns.DPS,
           format("%02.1f%%", dps/raiddps*100), self.metadata.columns.Percent
         )
-        
+
         if dps>max then
           max=dps
         end
@@ -702,7 +702,7 @@ end)
 local damagetaken="Damage taken"
 Skada:AddLoadableModule(damagetaken, nil, function(Skada, L)
   if Skada:IsDisabled(damagetaken) then return end
-  
+
   local mod=Skada:NewModule(L[damagetaken])
   local playermod=mod:NewModule(L["Damage spell list"])
   local spellmod=mod:NewModule(L["Damage spell details"])
@@ -986,7 +986,7 @@ Skada:AddLoadableModule(damagetaken, nil, function(Skada, L)
 
   function spellsmod:Update(win, set)
     local spells={}
-
+    local _
     for i, player in ipairs(set.players) do
       if player.damagetaken.amount>0 then
         for id, spell in pairs(player.damagetaken.spells) do
@@ -1151,7 +1151,7 @@ end)
 -- ============================= --
 Skada:AddLoadableModule("Avoidance & Mitigation", nil, function(Skada, L)
   if Skada:IsDisabled(damagetaken, "Avoidance & Mitigation") then return end
-  
+
   local mod=Skada:NewModule(L["Avoidance & Mitigation"])
   local playermod=mod:NewModule(L["Damage breakdown"])
 
@@ -1275,7 +1275,7 @@ do
   local function ModUpdate(stat)
     return function(self, win, set)
       local nr, max=1, 0
-      
+
       for mobname, mob in pairs(set.enemies.list) do
         if (mob[stat] or 0)>0 then
           local d=win.dataset[nr] or {}
@@ -1297,7 +1297,7 @@ do
       win.metadata.maxvalue=max
     end
   end
-  
+
   -- ================== --
   -- Enemy damage done --
   -- ================== --
@@ -1312,7 +1312,7 @@ do
     local function log_damage_done(set, dmg)
       if dmg.amount and dmg.amount>0 then
         set.enemies.done=set.enemies.done+dmg.amount
-        
+
         local mob=find_mob(set, dmg.srcName)
         mob.done=mob.done+dmg.amount
 
@@ -1382,7 +1382,7 @@ do
     function mod:OnEnable()
       playermod.metadata={showspots=true}
       mod.metadata={click1=playermod}
-      
+
       Skada:RegisterForCL(SpellDamageDone, 'SPELL_DAMAGE', {dst_is_interesting_nopets=true, src_is_not_interesting=true})
       Skada:RegisterForCL(SpellDamageDone, 'SPELL_PERIODIC_DAMAGE', {dst_is_interesting_nopets=true, src_is_not_interesting=true})
       Skada:RegisterForCL(SpellDamageDone, 'SPELL_BUILDING_DAMAGE', {dst_is_interesting_nopets=true, src_is_not_interesting=true})
@@ -1491,7 +1491,7 @@ do
     function mod:OnEnable()
       playermod.metadata={showspots=true}
       mod.metadata={click1=playermod}
-      
+
       Skada:RegisterForCL(SpellDamageTaken, 'SPELL_DAMAGE', {src_is_interesting=true, dst_is_not_interesting=true})
       Skada:RegisterForCL(SpellDamageTaken, 'SPELL_PERIODIC_DAMAGE', {src_is_interesting=true, dst_is_not_interesting=true})
       Skada:RegisterForCL(SpellDamageTaken, 'SPELL_BUILDING_DAMAGE', {src_is_interesting=true, dst_is_not_interesting=true})
@@ -1577,7 +1577,7 @@ Skada:AddLoadableModule("Friendly Fire", nil, function(Skada, L)
   function playermod:Update(win, set)
     local player=Skada:find_player(set, self.playerid)
     local max=0
-    
+
     if player and player.friendfire.amount>0 then
       local nr=1
 

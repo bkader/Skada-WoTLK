@@ -48,7 +48,6 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
         tilesize = 0
       },
       strata = "LOW",
-      scale = 1,
       hidden = false,
       enabletitle = true,
       titleset = true,
@@ -100,7 +99,6 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
         tilesize = 0
       },
       strata = "LOW",
-      scale = 1,
       hidden = false,
       enabletitle = true,
       titleset = true,
@@ -152,7 +150,6 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
         tilesize = 0
       },
       strata = "LOW",
-      scale = 1,
       hidden = false,
       enabletitle = true,
       titleset = true,
@@ -203,7 +200,6 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
         tilesize = 0
       },
       strata = "LOW",
-      scale = 1,
       hidden = false,
       enabletitle = true,
       titleset = true,

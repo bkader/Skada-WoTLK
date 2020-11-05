@@ -109,13 +109,13 @@ Skada:AddLoadableModule("Resurrects", nil, function(Skada, L)
 
           local d=win.dataset[nr] or {}
           win.dataset[nr]=d
-          
+
           d.id=target.id
           d.label=targetName
           d.value=tonumber(target.count)
           d.valuetext=tostring(target.count)
           d.class=select(2, UnitClass(targetName))
-          
+
           if tonumber(target.count) > max then
             max=tonumber(target.count)
           end
@@ -138,13 +138,13 @@ Skada:AddLoadableModule("Resurrects", nil, function(Skada, L)
       for targetName, target in pairs(player.resurrect.targets) do
         local d=win.dataset[nr] or {}
         win.dataset[nr]=d
-        
+
         d.id=target.id
         d.label=targetName
         d.value=tonumber(target.count)
         d.valuetext=tostring(target.count)
         d.class=select(2, UnitClass(targetName))
-        
+
         if tonumber(target.count) > max then
           max=tonumber(target.count)
         end
@@ -191,12 +191,12 @@ Skada:AddLoadableModule("Resurrects", nil, function(Skada, L)
       if player.resurrect.count > 0 then
         local d=win.dataset[nr] or {}
         win.dataset[nr]=d
-        
+
         d.id=player.id
         d.label=player.name
         d.class=player.class
         d.role=player.role
-        
+
         d.value=player.resurrect.count
         d.valuetext=tostring(player.resurrect.count)
 

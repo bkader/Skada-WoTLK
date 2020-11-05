@@ -193,6 +193,7 @@ do
 
   local function BarClickIgnore(bar)
   local win=bar.win
+  -- FIXME: accessing undefined variable 'button'
   if button=="RightButton" then
     win:RightClick()
   end
@@ -203,7 +204,7 @@ do
     local click1=win.metadata.click1
     local click2=win.metadata.click2
     local click3=win.metadata.click3
-    
+
     if button=="RightButton" and IsShiftKeyDown() then
       Skada:OpenMenu(win)
     elseif win.metadata.click then
@@ -397,10 +398,10 @@ do
           bar:SetColorAt(0, color.r, color.g, color.b, color.a or 1)
 
           if data.class and win.db.classcolortext then
-            local color=Skada.classcolors[data.class]
-            if color then
-              bar.label:SetTextColor(color.r, color.g, color.b, color.a or 1)
-              bar.timerLabel:SetTextColor(color.r, color.g, color.b, color.a or 1)
+            local ccolor=Skada.classcolors[data.class]
+            if ccolor then
+              bar.label:SetTextColor(ccolor.r, ccolor.g, ccolor.b, ccolor.a or 1)
+              bar.timerLabel:SetTextColor(ccolor.r, ccolor.g, ccolor.b, ccolor.a or 1)
             end
           else
             bar.label:SetTextColor(1, 1, 1, 1)
@@ -459,7 +460,7 @@ do
         end
       end
     end
-    
+
     if win.metadata.wipestale then
       local bars=win.bargroup:GetBars()
       for name, bar in pairs(bars) do
@@ -491,7 +492,7 @@ do
 
     local g=win.bargroup
     g:SetFrameLevel(1)
-    
+
     local p=win.db
     g:ReverseGrowth(p.reversegrowth)
     g:SetOrientation(p.barorientation)
@@ -506,11 +507,11 @@ do
       p.barfontpath or LSM:Fetch("font", p.barfont), p.barfontsize, p.barfontflags,
       p.numfontpath or LSM:Fetch("font", p.numfont), p.numfontsize, p.numfontflags
     )
-    
+
     g:SetSpacing(p.barspacing)
     g:UnsetAllColors()
     g:SetColorAt(0,p.barcolor.r,p.barcolor.g,p.barcolor.b, p.barcolor.a)
-    
+
     if p.barslocked then
       g:Lock()
     else
@@ -564,8 +565,8 @@ do
     windowbackdrop.tileSize=0
     g:SetBackdrop(windowbackdrop)
 
-    local color=p.background.color
-    g:SetBackdropColor(color.r, color.g, color.b, color.a or 1)
+    local bgcolor=p.background.color
+    g:SetBackdropColor(bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a or 1)
 
     g:SetEnableMouse(not p.clickthrough)
     g:SetScale(p.scale)
@@ -739,7 +740,7 @@ function mod:AddDisplayOptions(win, options)
         set=function(i, r,g,b,a) db.barbgcolor={["r"]=r, ["g"]=g, ["b"]=b, ["a"]=a}; Skada:ApplySettings() end,
         order=19,
       },
-            
+
       spellschoolcolors = {
         type="toggle",
         name=L["Spell school colors"],
@@ -962,7 +963,7 @@ function mod:AddDisplayOptions(win, options)
         order=20,
         inline=true,
         args={
-          
+
           report={
             type="toggle",
             name=L["Report"],

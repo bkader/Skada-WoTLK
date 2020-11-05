@@ -77,7 +77,7 @@ end
 
 local function BarClick(win, bar, button)
   local id, label= bar.valueid, bar.valuetext
-  
+
   local click1=win.metadata.click1
   local click2=win.metadata.click2
   local click3=win.metadata.click3
@@ -120,7 +120,7 @@ function mod:Create(window, isnew)
   end)
 
   libwindow.RegisterConfig(window.frame, window.db)
-  
+
   if isnew then
     libwindow.SavePosition(window.frame)
   else
@@ -324,11 +324,10 @@ function mod:UpdateBar(bar, bardata, db)
   return bar
 end
 
-local wd
 function mod:Update(win)
   if not win or not win.frame then return end
 
-  wd=win.dataset
+  local wd=win.dataset
   for i=#win.dataset, 1, -1 do
     if win.dataset[i].label==nil then
       table.remove(win.dataset, i)
@@ -360,7 +359,7 @@ function mod:Update(win)
 
   local yoffset=(win.db.height-win.db.barfontsize)/2
   local left=win.frame.barstartx+40
-  
+
   for key, bar in pairs(mybars) do
     bar.bg:SetFrameLevel(9)
     bar.bg:SetHeight(win.db.height)
@@ -488,7 +487,7 @@ end
 
 function mod:AddDisplayOptions(win, options)
     local db=win.db
-    
+
     options.baroptions={
       type="group",
       name="Text",
@@ -580,7 +579,7 @@ function mod:AddDisplayOptions(win, options)
           type="toggle",
           name=L["Clickthrough"],
           desc=L["Disables mouse clicks on bars."],
-          order4,
+          order=4,
           get=function() return db.clickthrough end,
           set=function() db.clickthrough=not db.clickthrough; Skada:ApplySettings() end
         }
@@ -611,6 +610,6 @@ function mod:AddDisplayOptions(win, options)
         }
       }
     }
-        
+
     options.frameoptions=Skada:FrameSettings(db, true)
 end

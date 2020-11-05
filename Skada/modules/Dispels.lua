@@ -16,7 +16,7 @@ Skada:AddLoadableModule("Dispels", nil, function(Skada, L)
   local function log_dispels(set, data)
     local player=Skada:get_player(set, data.playerid, data.playername)
     if not player then return end
-    
+
     player.dispels.count=player.dispels.count+1
 
     if not player.dispels.spells[data.spellname] then
@@ -86,7 +86,7 @@ Skada:AddLoadableModule("Dispels", nil, function(Skada, L)
         if spell.count>max then
           max=spell.count
         end
-        
+
         nr=nr+1
       end
 
@@ -152,7 +152,7 @@ Skada:AddLoadableModule("Dispels", nil, function(Skada, L)
         if spell.count>max then
           max=spell.count
         end
-        
+
         nr=nr+1
       end
     end

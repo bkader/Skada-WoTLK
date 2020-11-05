@@ -8,15 +8,9 @@ local CCSpells={
   [12826]=true, -- Polymorph (rank 4)
   [28272]=true, -- Polymorph (rank 1:pig)
   [28271]=true, -- Polymorph (rank 1:turtle)
-  [9484]=true, -- Shackle Undead (rank 1)
-  [9485]=true, -- Shackle Undead (rank 2)
-  [10955]=true, -- Shackle Undead (rank 3)
   [3355]=true, -- Freezing Trap Effect (rank 1)
   [14308]=true, -- Freezing Trap Effect (rank 2)
   [14309]=true, -- Freezing Trap Effect (rank 3)
-  [2637]=true, -- Hibernate (rank 1)
-  [18657]=true, -- Hibernate (rank 2)
-  [18658]=true, -- Hibernate (rank 3)
   [6770]=true, -- Sap (rank 1)
   [2070]=true, -- Sap (rank 2)
   [11297]=true, -- Sap (rank 3)
@@ -28,7 +22,7 @@ local CCSpells={
   [2637]=true, -- Hibernate (rank 1)
   [18657]=true, -- Hibernate (rank 2)
   [18658]=true, -- Hibernate (rank 3)
-  [20066]=true, -- Repentance 
+  [20066]=true, -- Repentance
   [9484]=true, -- Shackle Undead (rank 1)
   [9485]=true, -- Shackle Undead (rank 2)
   [10955]=true, -- Shackle Undead (rank 3)
@@ -48,7 +42,7 @@ local GetSpellInfo, GetSpellLink=GetSpellInfo, GetSpellLink
 -- ======= --
 Skada:AddLoadableModule("CC Done", nil, function(Skada, L)
   if Skada:IsDisabled("CC Done") then return end
-  
+
   local mod=Skada:NewModule(L["CC Done"])
   local spellsmod=mod:NewModule(L["CC Done spells"])
   local spelltargetsmod=mod:NewModule(L["CC Done spell targets"])
@@ -58,7 +52,7 @@ Skada:AddLoadableModule("CC Done", nil, function(Skada, L)
   local function log_ccdone(set, data)
     local player=Skada:get_player(set, data.srcGUID, data.srcName)
     if not player then return end
-    
+
     player.ccdone.count=player.ccdone.count+1
 
     if not player.ccdone.spells[data.spellname] then
@@ -91,13 +85,13 @@ Skada:AddLoadableModule("CC Done", nil, function(Skada, L)
     if eventtype == "SPELL_AURA_APPLIED" or eventtype == "SPELL_AURA_REFRESH" then
       spellid, spellname, spellschool, auratype=...
     else
-      spellid, spellname, spellschool, extraspellid, extraspellname, extraschool, auratype=...
+      spellid, spellname, spellschool, extraspellid, extraspellname, extraschool, auratype = ...
     end
 
     if CCSpells[spellid] then
       srcGUID,srcName=Skada:FixMyPets(srcGUID, srcName)
       dstGUID,dstName=Skada:FixMyPets(dstGUID, dstName)
-      
+
       data.srcGUID=srcGUID
       data.srcName=srcName
       data.dstGUID=dstGUID
@@ -127,7 +121,7 @@ Skada:AddLoadableModule("CC Done", nil, function(Skada, L)
       for spellname, spell in pairs(player.ccdone.spells) do
         local d=win.dataset[nr] or {}
         win.dataset[nr]=d
-        
+
         d.id=spellname
         d.label=spellname
         d.icon=select(3, GetSpellInfo(spell.id))
@@ -194,12 +188,12 @@ Skada:AddLoadableModule("CC Done", nil, function(Skada, L)
       for targetname, target in pairs(player.ccdone.targets) do
         local d=win.dataset[nr] or {}
         win.dataset[nr]=d
-        
+
         d.id=target.id
         d.label=targetname
         d.value=target.count
         d.valuetext=tostring(target.count)
-        
+
         if target.count>max then
           max=target.count
         end
@@ -260,7 +254,7 @@ Skada:AddLoadableModule("CC Done", nil, function(Skada, L)
         d.role=player.role
         d.value=player.ccdone.count
         d.valuetext=tostring(player.ccdone.count)
-        
+
         if player.ccdone.count>max then
           max=player.ccdone.count
         end
@@ -274,15 +268,15 @@ Skada:AddLoadableModule("CC Done", nil, function(Skada, L)
   function mod:OnEnable()
     spelltargetsmod.metadata={}
     spellsmod.metadata={click1=spelltargetsmod}
-    
+
     targetspellsmod.metadata={}
     targetsmod.metadata={click1=targetspellsmod}
-    
+
     mod.metadata={showspots=true, click1=spellsmod, click2=targetsmod}
 
     Skada:RegisterForCL(SpellAuraApplied, 'SPELL_AURA_APPLIED', {src_is_interesting=true})
     Skada:RegisterForCL(SpellAuraApplied, 'SPELL_AURA_REFRESH', {src_is_interesting=true})
-    
+
     Skada:AddMode(self, L["CC Tracker"])
   end
 
@@ -319,7 +313,7 @@ end)
 -- ======== --
 Skada:AddLoadableModule("CC Taken", nil, function(Skada, L)
   if Skada:IsDisabled("CC Taken") then return end
-  
+
   local mod=Skada:NewModule(L["CC Taken"])
   local spellsmod=mod:NewModule(L["CC Taken spells"])
   local spellsourcesmod=mod:NewModule(L["CC Taken spell sources"])
@@ -329,7 +323,7 @@ Skada:AddLoadableModule("CC Taken", nil, function(Skada, L)
   local function log_cctaken(set, data)
     local player=Skada:get_player(set, data.srcGUID, data.srcName)
     if not player then return end
-    
+
     player.cctaken.count=player.cctaken.count+1
 
     if not player.cctaken.spells[data.spellname] then
@@ -593,7 +587,7 @@ end)
 -- =========== --
 Skada:AddLoadableModule("CC Breakers", nil, function(Skada, L)
   if Skada:IsDisabled("CC Breakers") then return end
-  
+
   local mod=Skada:NewModule(L["CC Breakers"])
   local spellsmod=mod:NewModule(L["CC Break spells"])
   local spelltargetsmod=mod:NewModule(L["CC Break spell targets"])
@@ -602,12 +596,11 @@ Skada:AddLoadableModule("CC Breakers", nil, function(Skada, L)
 
   local GetNumRaidMembers, GetRaidRosterInfo=GetNumRaidMembers, GetRaidRosterInfo
   local IsInInstance, UnitInRaid=IsInInstance, UnitInRaid
-  local SendChatMessage
-  
+
   local function log_ccbreak(set,data)
     local player=Skada:get_player(set, data.srcGUID, data.srcName)
     if not player then return end
-    
+
     player.ccbreaks.count=player.ccbreaks.count+1
 
     if not player.ccbreaks.spells[data.spellname] then
@@ -706,7 +699,7 @@ Skada:AddLoadableModule("CC Breakers", nil, function(Skada, L)
       for spellname, spell in pairs(player.ccbreaks.spells) do
         local d=win.dataset[nr] or {}
         win.dataset[nr]=d
-        
+
         d.id=spellname
         d.label=spellname
         d.icon=select(3, GetSpellInfo(spell.id))
@@ -773,12 +766,12 @@ Skada:AddLoadableModule("CC Breakers", nil, function(Skada, L)
       for targetname, target in pairs(player.ccbreaks.targets) do
         local d=win.dataset[nr] or {}
         win.dataset[nr]=d
-        
+
         d.id=target.id
         d.label=targetname
         d.value=target.count
         d.valuetext=tostring(target.count)
-        
+
         if target.count>max then
           max=target.count
         end

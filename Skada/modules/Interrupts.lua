@@ -7,7 +7,7 @@ Skada:AddLoadableModule("Interrupts", nil, function(Skada, L)
   local spellsmod=mod:NewModule(L["Interrupted spells"])
   local targetsmod=mod:NewModule(L["Interrupted targets"])
   local playermod=mod:NewModule(L["Interrupt spells"])
-  
+
   local select, tostring=select, tostring
   local pairs, ipairs=pairs, ipairs
   local GetSpellInfo=GetSpellInfo
@@ -91,7 +91,7 @@ Skada:AddLoadableModule("Interrupts", nil, function(Skada, L)
         if spell.count>max then
           max=spell.count
         end
-        
+
         nr=nr+1
       end
 
@@ -126,7 +126,7 @@ Skada:AddLoadableModule("Interrupts", nil, function(Skada, L)
         if target.count>max then
           max=target.count
         end
-        
+
         nr=nr+1
       end
     end
@@ -163,7 +163,7 @@ Skada:AddLoadableModule("Interrupts", nil, function(Skada, L)
         if spell.count>max then
           max=spell.count
         end
-        
+
         nr=nr+1
       end
     end

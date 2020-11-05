@@ -1041,7 +1041,7 @@ do
   end
 
   local ttwin=Window:new()
-  
+
   function Skada:AddSubviewToTooltip(tooltip, win, mode, id, label)
     wipe(ttwin.dataset)
 
@@ -1069,7 +1069,7 @@ do
           if data.color then
             color=data.color
           elseif data.class then
-            local color=Skada.classcolors[data.class]
+            color=Skada.classcolors[data.class]
           end
           tooltip:AddDoubleLine(nr..". "..data.label, data.valuetext, color.r, color.g, color.b)
         end
@@ -1132,7 +1132,7 @@ function Skada:ShowTooltip(win, id, label)
       if win.metadata.click3 then
         t:AddLine(L["Control-Click for"].." "..win.metadata.click3:GetName()..".", 0.2, 1, 0.2)
       end
-      
+
       t:Show()
     end
   end
@@ -1350,7 +1350,7 @@ function Skada:ZoneCheck()
   local inInstance, instanceType=IsInInstance()
   local isininstance=inInstance and (instanceType=="party" or instanceType=="raid")
   local isinpvp=is_in_pvp()
-
+-- FIXME: total~=nil -- global total is undef. Maybe 'self.total'?
   if isininstance and wasininstance~=nil and not wasininstance and self.db.profile.reset.instance~=1 and total~=nil then
     if self.db.profile.reset.instance==3 then
       self:ShowPopup()
@@ -1447,7 +1447,7 @@ function Skada:Reset()
   self:Wipe()
   players, pets={}, {}
   self:CheckGroup()
-  
+
   if self.current~=nil then
     wipe(self.current)
     self.current=createSet(L["Current"])
@@ -1476,7 +1476,7 @@ function Skada:Reset()
   dataobj.text="n/&"
   self:UpdateDisplay(true)
   self:Print(L["All data has been reset."])
-  
+
   if not InCombatLockdown() then
     collectgarbage("collect")
   end
@@ -1512,8 +1512,8 @@ function Skada:UpdateDisplay(force)
 
           if self.db.profile.showtotals and win.selectedmode.GetSetSummary then
             local total, existing=0
-            
-            for i, data in ipairs(win.dataset) do
+
+            for _, data in ipairs(win.dataset) do
               if data.id then
                 total=total+data.value
               end
@@ -1539,9 +1539,9 @@ function Skada:UpdateDisplay(force)
       elseif win.selectedset then
         local set=win:get_selected_set()
 
-        for i, mode in ipairs(modes) do
-          local d=win.dataset[i] or {}
-          win.dataset[i]=d
+        for j, mode in ipairs(modes) do
+          local d=win.dataset[j] or {}
+          win.dataset[j]=d
 
           d.id=mode:GetName()
           d.label=mode:GetName()
@@ -1579,7 +1579,7 @@ function Skada:UpdateDisplay(force)
         d.label=L["Current"]
         d.value=1
 
-        for i, set in ipairs(self.char.sets) do
+        for _, set in ipairs(self.char.sets) do
           nr=nr+1
           local d=win.dataset[nr] or {}
           win.dataset[nr]=d
@@ -1645,11 +1645,11 @@ do
     fmt=fmt or Skada.db.profile.setformat
     local namelabel=name
     if fmt<1 or fmt>numsetfmts then fmt=3 end
-    
+
     local timelabel=""
     if starttime and endtime and fmt>1 then
       local duration=SecondsToTime(endtime-starttime, false, false, 2)
-      
+
       Skada.getsetlabel_fs=Skada.getsetlabel_fs or UIParent:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
       Skada.getsetlabel_fs:SetText(duration)
       duration="("..Skada.getsetlabel_fs:GetText()..")"
@@ -1801,7 +1801,7 @@ end
 
 function Skada:ApplyBorder(frame, texture, color, thickness, padtop, padbottom, padleft, padright)
   local borderbackdrop={}
-  
+
   if not frame.borderFrame then
     frame.borderFrame=CreateFrame("Frame", nil, frame)
     frame.borderFrame:SetFrameLevel(0)
@@ -2044,7 +2044,7 @@ function Skada:OnInitialize()
   self.profilesFrame=ACD:AddToBlizOptions("Skada-Profiles", "Profiles", "Skada")
 
   self:RegisterChatCommand("skada", "Command")
-  
+
   self.db.RegisterCallback(self, "OnProfileChanged", "ReloadSettings")
   self.db.RegisterCallback(self, "OnProfileCopied", "ReloadSettings")
   self.db.RegisterCallback(self, "OnProfileReset", "ReloadSettings")
@@ -2102,9 +2102,9 @@ do
   end
 
   function IsRaidDead()
-    local iswipe=true  
+    local iswipe=true
     local t, count=GetGroupTypeAndCount()
-    
+
     if count>0 then
       for i=1, count, 1 do
         if UnitExists(t..i) and not UnitIsDeadOrGhost(t..i) then
@@ -2204,6 +2204,7 @@ do
 
     for i, win in ipairs(windows) do
       win:Wipe()
+      -- FIXME: unused global variable 'change' - maybe it should be 'changed'?
       change=true
 
       if win.db.wipemode~="" and IsRaidDead() then

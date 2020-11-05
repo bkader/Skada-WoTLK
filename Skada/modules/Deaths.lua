@@ -22,13 +22,13 @@ Skada:AddLoadableModule("Deaths", nil, function(Skada, L)
 
   local function log_deathlog(set, data, ts)
     local player = Skada:get_player(set, data.dstGUID, data.dstName)
-    
+
     if player then
       -- et player maxhp if not already set
       if player.maxhp==0 then
         player.maxhp=UnitHealthMax(data.dstName)
       end
-      
+
       -- create a log entry if it doesn't exist.
       if not player.deathlog[1] then
         player.deathlog[1]={time=0, log={}}
@@ -53,7 +53,7 @@ Skada:AddLoadableModule("Deaths", nil, function(Skada, L)
   local data={}
 
   local function SpellDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-    local spellid, spellname, spellschool, amount, overkill, spellschool, resisted, blocked, absorbed, critical, glancing, crushing = ...
+    local spellid, spellname, spellschool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing = ...
     dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName)
 
     data.srcGUID=srcGUID
@@ -82,13 +82,13 @@ Skada:AddLoadableModule("Deaths", nil, function(Skada, L)
     data.spellid=6603
     data.spellname=ACTION_SWING
     data.amount=0-amount
-    
+
     log_deathlog(Skada.current, data, ts)
   end
 
   local function SpellHeal(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
     local spellid, spellname, spellschool, amount, overhealing, absorbed, critical = ...
-    
+
     srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName)
     dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName)
 
@@ -101,7 +101,7 @@ Skada:AddLoadableModule("Deaths", nil, function(Skada, L)
     data.spellid=spellid
     data.spellname=spellname
     data.amount=amount
-    
+
     log_deathlog(Skada.current, data, ts)
   end
 
@@ -351,7 +351,7 @@ end)
 -- =============== --
 Skada:AddLoadableModule("Activity", nil, function(Skada, L)
   if Skada:IsDisabled("Activity") then return end
-  
+
   local mod=Skada:NewModule(L["Activity"])
 
   local function activity_tooltip(win, id, label, tooltip)

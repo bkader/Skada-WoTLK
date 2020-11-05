@@ -18,7 +18,7 @@ local function log_auraapply(set, aura)
       player.buffs[aura.spellname].active=player.buffs[aura.spellname].active+1
       player.buffs[aura.spellname].refresh=player.buffs[aura.spellname].refresh+1
     end
-  
+
   elseif aura.auratype=="DEBUFF" then
     if not player.debuffs[aura.spellname] then
       player.debuffs[aura.spellname]={id=aura.spellid, active=1, refresh=1, uptime=0, targets={}}
@@ -60,7 +60,7 @@ local function AuraApplied(timestamp, event, srcGUID, srcName, srcFlags, dstGUID
   local spellid, spellname, spellschool, auratype=...
   if auratype=="BUFF" or auratype=="DEBUFF" then
     srcGUID, srcName=Skada:FixMyPets(srcGUID, srcName)
-    
+
     aura.srcGUID=srcGUID
     aura.srcName=srcName
     aura.dstGUID=dstGUID
@@ -79,7 +79,7 @@ local function AuraRemoved(timestamp, event, srcGUID, srcName, srcFlags, dstGUID
   local spellid, spellname, spellschool, auratype=...
   if auratype=="BUFF" or auratype=="DEBUFF" then
     srcGUID, srcName=Skada:FixMyPets(srcGUID, srcName)
-    
+
     aura.srcGUID=srcGUID
     aura.srcName=srcName
     aura.dstGUID=dstGUID
@@ -109,7 +109,7 @@ end
 -- :::::::::::::::::::::::::::::::::::
 Skada:AddLoadableModule("Auras: Buff uptime", nil, function(Skada, L)
   if Skada:IsDisabled("Auras: Buff uptime") then return end
-  
+
   local mod=Skada:NewModule(L["Auras: Buff uptime"], "AceTimer-3.0")
   local playermod=mod:NewModule(L["Auras spell list"])
 
@@ -181,7 +181,7 @@ Skada:AddLoadableModule("Auras: Buff uptime", nil, function(Skada, L)
 
     for i, player in ipairs(set.players) do
       local count=len(player.buffs)
-      
+
       if count>0 then
         local maxtime=Skada:PlayerActiveTime(set, player)
         local uptime=player.buff_uptime/count
@@ -339,7 +339,7 @@ Skada:AddLoadableModule("Auras: Debuff uptime", nil, function(Skada, L)
 
     if player then
       local nr=1
-      
+
       local maxtime=Skada:PlayerActiveTime(set, player)
 
       for spellname, spell in pairs(player.debuffs) do
@@ -371,9 +371,9 @@ Skada:AddLoadableModule("Auras: Debuff uptime", nil, function(Skada, L)
 
     for i, player in ipairs(set.players) do
       local maxtime=Skada:PlayerActiveTime(set, player)
-      
+
       local count=len(player.debuffs)
-      
+
       if count>0 then
         local uptime=player.debuff_uptime/count
 
@@ -528,7 +528,7 @@ Skada:AddLoadableModule("Auras: Sunders Counter", nil, function(Skada, L)
         end
       end
     end
-    
+
     win.metadata.maxvalue=max
   end
 

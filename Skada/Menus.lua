@@ -562,7 +562,7 @@ do
       local whisperbox=AceGUI:Create("EditBox")
       whisperbox:SetLabel(L["Whisper Target"])
       whisperbox:SetText(Skada.db.profile.report.target or "")
-      
+
       whisperbox:SetCallback("OnEnterPressed", function(box, event, text)
         if strlenutf8(text) == #text then -- remove spaces which are always non-meaningful and can sometimes cause problems
           local ntext=text:gsub("%s", "")
@@ -618,7 +618,7 @@ do
         Skada:Print("Error: Whisper target not found")
       end
     end)
-    
+
     report:SetFullWidth(true)
     frame:AddChild(report)
   end

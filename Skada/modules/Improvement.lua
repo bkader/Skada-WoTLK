@@ -72,7 +72,7 @@ Skada:AddLoadableModule("Improvement", nil, function(Skada, L)
     db=db or SkadaImprovementDB
     for k, v in pairs(db.bosses) do
       if k==bossname then
-        v.lasttime=currenttime
+        v.lasttime=currenttime -- FIXME accessing undefined variable 'currenttime'
         return v
       end
     end
@@ -106,7 +106,7 @@ Skada:AddLoadableModule("Improvement", nil, function(Skada, L)
 
       local encounter=find_encounter_data(boss, Skada.current.starttime)
       if not encounter then return end
-      
+
 
       for i, player in ipairs(Skada.current.players) do
         if player.id==db.id then
@@ -117,7 +117,7 @@ Skada:AddLoadableModule("Improvement", nil, function(Skada, L)
               encounter.data[mode]=player[mode:lower()]
             end
           end
-          
+
           -- increment boss count and stop
           boss.count=boss.count+1
           if boss.count~=#boss.encounters then
@@ -151,7 +151,7 @@ Skada:AddLoadableModule("Improvement", nil, function(Skada, L)
 
         local value, active=0, 0
 
-        for i, encounter in ipairs(boss.encounters) do
+        for _, encounter in ipairs(boss.encounters) do
           value=value+(encounter.data[mode] or 0)
           active=active+(encounter.data.ActiveTime or 0)
         end
@@ -275,7 +275,7 @@ Skada:AddLoadableModule("Improvement", nil, function(Skada, L)
 
   function mod:OnDisable()
     Skada:RemoveMode(self)
-    
+
     -- unregister frame events.
     f:UnregisterEvent('PLAYER_REGEN_ENABLED')
     f:SetScript("OnEvent", nil)

@@ -21,7 +21,7 @@ Skada:AddLoadableModule("Fails", nil, function(Skada, L)
   local function onFail(event, who, fatal)
     if event and who then
       local unitGUID=UnitGUID(who)
-      
+
       -- add to current set
       if Skada.current then
         local player=Skada:find_player(Skada.current, unitGUID, who)

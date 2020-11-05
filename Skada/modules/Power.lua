@@ -21,7 +21,7 @@ local locales={
 -- returns the proper power type
 local function fix_power_type(t)
   local p
-  
+
   if t==0 then
     p="mana"
   elseif t==1 then
@@ -83,6 +83,7 @@ local function SpellEnergize(timestamp, eventtype, srcGUID, srcName, srcFlags, d
   gain.type=fix_power_type(tonumber(powertype))
 
   -- no need to record anything if the module is disabled or invalid gain type
+  -- FIXME accessing undefined variable 'mana'
   if (gain.type=="mana" and Skada:IsDisabled(mana)) or
     (gain.type=="energy" and Skada:IsDisabled(energy)) or
     (gain.type=="rage" and Skada:IsDisabled(rage)) or
@@ -171,7 +172,7 @@ Skada:AddLoadableModule("Power gained: Mana", nil, function(Skada, L)
   if Skada:IsDisabled("Power gained", "Power gained: Mana") then return end
 
   local manamod=mod:NewModule(L["Power gained: Mana"])
-  
+
   local playermod=manamod:NewModule(L["Mana gained spell list"])
   playermod.Enter=_playermod.Enter
   playermod.Update=_playermod.Update
@@ -230,7 +231,7 @@ Skada:AddLoadableModule("Power gained: Rage", nil, function(Skada, L)
   if Skada:IsDisabled("Power gained", "Power gained: Rage") then return end
 
   local ragemod=mod:NewModule(L["Power gained: Rage"])
-  
+
   local playermod=ragemod:NewModule(L["Rage gained spell list"])
   playermod.Enter=_playermod.Enter
   playermod.Update=_playermod.Update
@@ -284,9 +285,9 @@ end)
 -- ==================== --
 Skada:AddLoadableModule("Power gained: Energy", nil, function(Skada, L)
   if Skada:IsDisabled("Power gained", "Power gained: Energy") then return end
-  
+
   local energymod=mod:NewModule(L["Power gained: Energy"])
-  
+
   local playermod=energymod:NewModule(L["Energy gained spell list"])
   playermod.Enter=_playermod.Enter
   playermod.Update=_playermod.Update
@@ -341,9 +342,9 @@ end)
 -- ========================= --
 Skada:AddLoadableModule("Power gained: Runic Power", nil, function(Skada, L)
   if Skada:IsDisabled("Power gained", "Power gained: Runic Power") then return end
-  
+
   local runicmod=mod:NewModule(L["Power gained: Runic Power"])
-  
+
   local playermod=runicmod:NewModule(L["Runic Power gained spell list"])
   playermod.Enter=_playermod.Enter
   playermod.Update=_playermod.Update

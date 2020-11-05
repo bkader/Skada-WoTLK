@@ -33,7 +33,7 @@ Skada.windowdefaults={
 
   -- buttons
   buttons={menu=true, reset=true, report=true, mode=true, segment=true},
-  
+
   -- title options
   title={
     height=20,
@@ -49,12 +49,12 @@ Skada.windowdefaults={
   },
 
   background={
-    tile=false, 
-    tilesize=0, 
-    color={r=0,g=0,b=0,a=0.4}, 
+    tile=false,
+    tilesize=0,
+    color={r=0,g=0,b=0,a=0.4},
     texture="Solid",
     bordercolor={r=0,g=0,b=0,a=0.5},
-    bordertexture="Blizzard Party", 
+    bordertexture="Blizzard Party",
     borderthickness=1,
     height=200,
   },
@@ -67,14 +67,14 @@ Skada.windowdefaults={
   modeincombat="",
   returnaftercombat=false,
   wipemode="",
-  
+
   hidden=false,
   enabletitle=true,
   titleset=true,
-  
+
   set="current",
   mode=nil,
-  
+
   display="bar",
   snapto=true,
   smoothing=false,
@@ -417,7 +417,7 @@ Skada.options={
           desc=L["Keeps the player shown last even if there is not enough space."],
           order=13,
           get=function() return Skada.db.profile.showself end,
-          set=function() 
+          set=function()
             Skada.db.profile.showself=not Skada.db.profile.showself
             Skada:ApplySettings()
           end
