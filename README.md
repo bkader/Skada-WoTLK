@@ -4,7 +4,7 @@ I am simply a huge fan of **Skada**, I prefer it to other damage meters for seve
 
 ## What's new?
 
-Lots of things were changed, the version for **3.3.3** that you all know is no longer the same. Everything works the same but with much more details and way better performance.
+Lots of things were changed, the version for **3.3.5** that you all know is no longer the same. Everything works the same but with much more details and way better performance.
 
 ## Core Modifications
 
