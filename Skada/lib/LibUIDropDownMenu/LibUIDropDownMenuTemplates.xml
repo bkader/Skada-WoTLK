@@ -8,7 +8,7 @@
 				<Texture name="$parentHighlight" file="Interface\QuestFrame\UI-QuestTitleHighlight" alphaMode="ADD" setAllPoints="true" hidden="true"/>
 			</Layer>
 			<Layer level="ARTWORK">
-				<Texture name="$parentCheck" file="Interface\AddOns\!KTracker\tex_check">
+				<Texture name="$parentCheck" file="Interface\AddOns\Skada\media\textures\icon-check">
 					<Size x="16" y="16"/>
 					<Anchors>
 						<Anchor point="LEFT">
@@ -17,7 +17,7 @@
 					</Anchors>
 					<TexCoords left="0" right="0.5" top="0.5" bottom="1.0"/>
 				</Texture>
-				<Texture name="$parentUnCheck" file="Interface\AddOns\!KTracker\tex_check">
+				<Texture name="$parentUnCheck" file="Interface\AddOns\Skada\media\textures\icon-check">
 					<Size x="16" y="16"/>
 					<Anchors>
 						<Anchor point="LEFT">
@@ -48,7 +48,7 @@
 						<Offset>
 							<AbsDimension x="0" y="0"/>
 						</Offset>
-					</Anchor>                   
+					</Anchor>
 				</Anchors>
 				<Scripts>
 					<OnClick>
@@ -102,7 +102,7 @@
 			</Button>
 		</Frames>
 		<Scripts>
-			<OnLoad>				
+			<OnLoad>
 				self:SetFrameLevel(self:GetParent():GetFrameLevel()+2);
 			</OnLoad>
 			<OnClick>
@@ -154,7 +154,7 @@
 		<HighlightFont style="GameFontHighlightSmallLeft"/>
 		<DisabledFont style="GameFontDisableSmallLeft"/>
 	</Button>
-	
+
 	<Button name="L_UIDropDownListTemplate" hidden="true" frameStrata="DIALOG" enableMouse="true" virtual="true">
 		<Frames>
 			<Frame name="$parentBackdrop" setAllPoints="true">
@@ -230,7 +230,7 @@
 			</OnHide>
 		</Scripts>
 	</Button>
-	
+
 	<Frame name="L_UIDropDownMenuTemplate" virtual="true">
 		<Size>
 			<AbsDimension x="40" y="32"/>
