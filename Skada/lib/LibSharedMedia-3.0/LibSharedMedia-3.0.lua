@@ -1,6 +1,6 @@
-﻿--[[
+--[[
 Name: LibSharedMedia-3.0
-Revision: $Revision: 58 $
+Revision: $Revision: 62 $
 Author: Elkano (elkano@gmx.de)
 Inspired By: SurfaceLib by Haste/Otravi (troeks@gmail.com)
 Website: http://www.wowace.com/projects/libsharedmedia-3-0/
@@ -9,7 +9,7 @@ Dependencies: LibStub, CallbackHandler-1.0
 License: LGPL v2.1
 ]]
 
-local MAJOR, MINOR = "LibSharedMedia-3.0", 90000 + tonumber(("$Revision: 58 $"):match("(%d+)"))
+local MAJOR, MINOR = "LibSharedMedia-3.0", 3030001 -- 3.3.5 / increase manually on changes
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not lib then return end
@@ -20,8 +20,6 @@ local pairs		= _G.pairs
 local type		= _G.type
 
 local band			= _G.bit.band
-
-local table_insert	= _G.table.insert
 local table_sort	= _G.table.sort
 
 local locale = GetLocale()
@@ -59,24 +57,31 @@ lib.MediaType.SOUND			= "sound"				-- sound files
 -- populate lib with default Blizzard data
 -- BACKGROUND
 if not lib.MediaTable.background then lib.MediaTable.background = {} end
-lib.MediaTable.background["Blizzard Dialog Background"]		= [[Interface\DialogFrame\UI-DialogBox-Background]]
-lib.MediaTable.background["Blizzard Low Health"]			= [[Interface\FullScreenTextures\LowHealth]]
-lib.MediaTable.background["Blizzard Out of Control"]		= [[Interface\FullScreenTextures\OutOfControl]]
-lib.MediaTable.background["Blizzard Parchment"]				= [[Interface\AchievementFrame\UI-Achievement-Parchment-Horizontal]]
-lib.MediaTable.background["Blizzard Parchment 2"]			= [[Interface\AchievementFrame\UI-Achievement-Parchment]]
-lib.MediaTable.background["Blizzard Tabard Background"]		= [[Interface\TabardFrame\TabardFrameBackground]]
-lib.MediaTable.background["Blizzard Tooltip"]				= [[Interface\Tooltips\UI-Tooltip-Background]]
-lib.MediaTable.background["Solid"]							= [[Interface\Buttons\WHITE8X8]]
+lib.MediaTable.background["None"]									= [[]]
+lib.MediaTable.background["Blizzard Dialog Background"]				= [[Interface\DialogFrame\UI-DialogBox-Background]]
+lib.MediaTable.background["Blizzard Dialog Background Dark"]		= [[Interface\DialogFrame\UI-DialogBox-Background-Dark]]
+lib.MediaTable.background["Blizzard Dialog Background Gold"]		= [[Interface\DialogFrame\UI-DialogBox-Gold-Background]]
+lib.MediaTable.background["Blizzard Low Health"]					= [[Interface\FullScreenTextures\LowHealth]]
+lib.MediaTable.background["Blizzard Marble"]						= [[Interface\FrameGeneral\UI-Background-Marble]]
+lib.MediaTable.background["Blizzard Out of Control"]				= [[Interface\FullScreenTextures\OutOfControl]]
+lib.MediaTable.background["Blizzard Parchment"]						= [[Interface\AchievementFrame\UI-Achievement-Parchment-Horizontal]]
+lib.MediaTable.background["Blizzard Parchment 2"]					= [[Interface\AchievementFrame\UI-GuildAchievement-Parchment-Horizontal]]
+lib.MediaTable.background["Blizzard Rock"]							= [[Interface\FrameGeneral\UI-Background-Rock]]
+lib.MediaTable.background["Blizzard Tabard Background"]				= [[Interface\TabardFrame\TabardFrameBackground]]
+lib.MediaTable.background["Blizzard Tooltip"]						= [[Interface\Tooltips\UI-Tooltip-Background]]
+lib.MediaTable.background["Solid"]									= [[Interface\Buttons\WHITE8X8]]
+lib.DefaultMedia.background = "None"
 
 -- BORDER
 if not lib.MediaTable.border then lib.MediaTable.border = {} end
-lib.MediaTable.border["None"]								= [[Interface\None]]
+lib.MediaTable.border["None"]								= [[]]
 lib.MediaTable.border["Blizzard Achievement Wood"]			= [[Interface\AchievementFrame\UI-Achievement-WoodBorder]]
 lib.MediaTable.border["Blizzard Chat Bubble"]				= [[Interface\Tooltips\ChatBubble-Backdrop]]
 lib.MediaTable.border["Blizzard Dialog"]					= [[Interface\DialogFrame\UI-DialogBox-Border]]
 lib.MediaTable.border["Blizzard Dialog Gold"]				= [[Interface\DialogFrame\UI-DialogBox-Gold-Border]]
 lib.MediaTable.border["Blizzard Party"]						= [[Interface\CHARACTERFRAME\UI-Party-Border]]
 lib.MediaTable.border["Blizzard Tooltip"]					= [[Interface\Tooltips\UI-Tooltip-Border]]
+lib.DefaultMedia.border = "None"
 
 -- FONT
 if not lib.MediaTable.font then lib.MediaTable.font = {} end
@@ -119,16 +124,16 @@ elseif locale == "ruRU" then
 	SML_MT_font["Nimrod MT"]			= [[Fonts\NIM_____.ttf]]
 	SML_MT_font["Skurri"]				= [[Fonts\SKURRI.TTF]]
 --
-	lib.DefaultMedia.font = "Friz Quadrata TT"
+	lib.DefaultMedia.font = "Arial Narrow"
 --
 else
 	LOCALE_MASK = lib.LOCALE_BIT_western
 	locale_is_western = true
 --
-	SML_MT_font["Arial Narrow"]			= [[Fonts\ARIALN.TTF]]
-	SML_MT_font["Friz Quadrata TT"]		= [[Fonts\FRIZQT__.TTF]]
-	SML_MT_font["Morpheus"]				= [[Fonts\MORPHEUS.TTF]]
-	SML_MT_font["Skurri"]				= [[Fonts\SKURRI.TTF]]
+	SML_MT_font["Arial Narrow"]						= [[Fonts\ARIALN.TTF]]
+	SML_MT_font["Friz Quadrata TT"]					= [[Fonts\FRIZQT__.TTF]]
+	SML_MT_font["Morpheus"]							= [[Fonts\MORPHEUS.TTF]]
+	SML_MT_font["Skurri"]							= [[Fonts\SKURRI.TTF]]
 --
 	lib.DefaultMedia.font = "Friz Quadrata TT"
 --
@@ -137,11 +142,12 @@ end
 -- STATUSBAR
 if not lib.MediaTable.statusbar then lib.MediaTable.statusbar = {} end
 lib.MediaTable.statusbar["Blizzard"]						= [[Interface\TargetingFrame\UI-StatusBar]]
+lib.MediaTable.statusbar["Blizzard Character Skills Bar"]	= [[Interface\PaperDollInfoFrame\UI-Character-Skills-Bar]]
 lib.DefaultMedia.statusbar = "Blizzard"
 
 -- SOUND
 if not lib.MediaTable.sound then lib.MediaTable.sound = {} end
-lib.MediaTable.sound["None"]								= [[Interface\Quiet.mp3]]	-- Relies on the fact that PlaySound[File] doesn't error on non-existing input.
+lib.MediaTable.sound["None"]								= [[Interface\Quiet.ogg]] -- Relies on the fact that PlaySound[File] doesn't error on these values.
 lib.DefaultMedia.sound = "None"
 
 local function rebuildMediaList(mediatype)
@@ -165,12 +171,22 @@ function lib:Register(mediatype, key, data, langmask)
 	if type(key) ~= "string" then
 		error(MAJOR..":Register(mediatype, key, data, langmask) - key must be string, got "..type(key))
 	end
-	if mediatype == lib.MediaType.FONT  and ((langmask and band(langmask, LOCALE_MASK) == 0) or not (langmask or locale_is_western)) then return false end
 	mediatype = mediatype:lower()
+	if mediatype == lib.MediaType.FONT and ((langmask and band(langmask, LOCALE_MASK) == 0) or not (langmask or locale_is_western)) then
+		-- ignore fonts that aren't flagged as supporting local glyphs on non-western clients
+		return false
+	end
+	if mediatype == lib.MediaType.SOUND and type(data) == "string" then
+		local path = data:lower()
+		if not path:find(".ogg", nil, true) and not path:find(".mp3", nil, true) and not path:find(".wav", nil, true) then
+			-- Only wav, ogg and mp3 are valid sounds.
+			return false
+		end
+	end
 	if not mediaTable[mediatype] then mediaTable[mediatype] = {} end
 	local mtable = mediaTable[mediatype]
 	if mtable[key] then return false end
-	
+
 	mtable[key] = data
 	rebuildMediaList(mediatype)
 	self.callbacks:Fire("LibSharedMedia_Registered", mediatype, key)
@@ -181,8 +197,7 @@ function lib:Fetch(mediatype, key, noDefault)
 	local mtt = mediaTable[mediatype]
 	local overridekey = overrideMedia[mediatype]
 	local result = mtt and ((overridekey and mtt[overridekey] or mtt[key]) or (not noDefault and defaultMedia[mediatype] and mtt[defaultMedia[mediatype]])) or nil
-
-	return result
+	return result ~= "" and result or nil
 end
 
 function lib:IsValid(mediatype, key)

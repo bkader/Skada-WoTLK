@@ -1,8 +1,8 @@
 --- **AceLocale-3.0** manages localization in addons, allowing for multiple locale to be registered with fallback to the base locale for untranslated strings.
 -- @class file
 -- @name AceLocale-3.0
--- @release $Id: AceLocale-3.0.lua 895 2009-12-06 16:28:55Z nevcairiel $
-local MAJOR,MINOR = "AceLocale-3.0", 2
+-- @release $Id$
+local MAJOR,MINOR = "AceLocale-3.0-ElvUI", 6
 
 local AceLocale, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 
@@ -10,7 +10,7 @@ if not AceLocale then return end -- no upgrade needed
 
 -- Lua APIs
 local assert, tostring, error = assert, tostring, error
-local setmetatable, rawset, rawget = setmetatable, rawset, rawget
+local getmetatable, setmetatable, rawset, rawget = getmetatable, setmetatable, rawset, rawget
 
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
@@ -56,10 +56,10 @@ local writeproxy = setmetatable({}, {
 	__index = assertfalse
 })
 
--- This metatable proxy is used when registering the default locale. 
+-- This metatable proxy is used when registering the default locale.
 -- It refuses to overwrite existing values
 -- Reason 1: Allows loading locales in any order
--- Reason 2: If 2 modules have the same string, but only the first one to be 
+-- Reason 2: If 2 modules have the same string, but only the first one to be
 --           loaded has a translation for the current locale, the translation
 --           doesn't get overwritten.
 --
@@ -79,7 +79,7 @@ local writedefaultproxy = setmetatable({}, {
 -- @param application Unique name of addon / module
 -- @param locale Name of the locale to register, e.g. "enUS", "deDE", etc.
 -- @param isDefault If this is the default locale being registered (your addon is written in this language, generally enUS)
--- @param silent If true, the locale will not issue warnings for missing keys. Can only be set on the default locale.
+-- @param silent If true, the locale will not issue warnings for missing keys. Must be set on the first locale registered. If set to "raw", nils will be returned for unknown keys (no metatable used).
 -- @usage
 -- -- enUS.lua
 -- local L = LibStub("AceLocale-3.0"):NewLocale("TestLocale", "enUS", true)
@@ -91,31 +91,31 @@ local writedefaultproxy = setmetatable({}, {
 -- L["string1"] = "Zeichenkette1"
 -- @return Locale Table to add localizations to, or nil if the current locale is not required.
 function AceLocale:NewLocale(application, locale, isDefault, silent)
-	
-	if silent and not isDefault then
-		error("Usage: NewLocale(application, locale[, isDefault[, silent]]): 'silent' can only be specified for the default locale", 2)
-	end
-	
-	-- GAME_LOCALE allows translators to test translations of addons without having that wow client installed
-	-- Ammo: I still think this is a bad idea, for instance an addon that checks for some ingame string will fail, just because some other addon
-	-- gives the user the illusion that they can run in a different locale? Ditch this whole thing or allow a setting per 'application'. I'm of the
-	-- opinion to remove this.
-	local gameLocale = GAME_LOCALE or gameLocale
-
-	if locale ~= gameLocale and not isDefault then
-		return -- nop, we don't need these translations
-	end
-	
 	local app = AceLocale.apps[application]
-	
+
+	if silent and app and getmetatable(app) ~= readmetasilent then
+		geterrorhandler()("Usage: NewLocale(application, locale[, isDefault[, silent]]): 'silent' must be specified for the first locale registered")
+	end
+
 	if not app then
-		app = setmetatable({}, silent and readmetasilent or readmeta)
+		if silent=="raw" then
+			app = {}
+		else
+			app = setmetatable({}, silent and readmetasilent or readmeta)
+		end
 		AceLocale.apps[application] = app
 		AceLocale.appnames[app] = application
 	end
 
-	registering = app -- remember globally for writeproxy and writedefaultproxy
-	
+	-- ElvUI block
+	if (not app[locale]) or (app[locale] and type(app[locale]) ~= 'table') then
+		--	app[locale] = setmetatable({}, silent and readmetasilent or readmeta) -- To find missing keys
+		app[locale] = setmetatable({}, readmetasilent)
+	end
+
+	registering = app[locale] -- remember globally for writeproxy and writedefaultproxy
+	-- end block
+
 	if isDefault then
 		return writedefaultproxy
 	end
@@ -128,9 +128,16 @@ end
 -- @param application Unique name of addon / module
 -- @param silent If true, the locale is optional, silently return nil if it's not found (defaults to false, optional)
 -- @return The locale table for the current language.
-function AceLocale:GetLocale(application, silent)
-	if not silent and not AceLocale.apps[application] then
-		error("Usage: GetLocale(application[, silent]): 'application' - No locales registered for '"..tostring(application).."'", 2)
+--- Modified by ElvUI to add `locale` as second arg
+function AceLocale:GetLocale(application, locale, silent)
+	if type(locale) == "boolean" then
+		silent = locale
+		locale = gameLocale
 	end
-	return AceLocale.apps[application]
+
+	if not silent and not AceLocale.apps[application] then
+		error("Usage: GetLocale(application[,locale[, silent]]): 'application' - No locales registered for '"..tostring(application).."'", 2)
+	end
+
+	return AceLocale.apps[application][locale] or AceLocale.apps[application][gameLocale] -- Just in case the table doesn't exist it reverts to default
 end
