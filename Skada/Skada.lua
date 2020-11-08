@@ -847,8 +847,9 @@ end
 -- SETS FUNCTIONS --
 -- =============== --
 
-function createSet(setname)
-    local set = {players = {}, name = setname, starttime = time(), last_action = time(), time = 0}
+function createSet(setname, starttime)
+    starttime = starttime or time()
+    local set = {players = {}, name = setname, starttime = starttime, last_action = starttime, time = 0}
     for _, mode in ipairs(modes) do
         verify_set(mode, set)
     end
@@ -919,7 +920,7 @@ function Skada:DeleteSet(set)
 end
 
 function Skada:GetSetTime(set)
-    return set.time and set.time or (time() - set.starttime)
+    return (set.time and set.time > 0) and set.time or (time() - set.starttime)
 end
 
 -- ================ --
@@ -973,6 +974,8 @@ end
 function Skada:get_player(set, playerid, playername)
     local player = self:find_player(set, playerid)
 
+    local now = time()
+
     if not player then
         if not playername then
             return
@@ -985,7 +988,7 @@ function Skada:get_player(set, playerid, playername)
             class = playerClass,
             role = playerRole or "NONE",
             name = playername,
-            first = time(),
+            first = now,
             time = 0
         }
 
@@ -998,8 +1001,8 @@ function Skada:get_player(set, playerid, playername)
         tinsert(set.players, player)
     end
 
-    player.first = player.first or time()
-    player.last = time()
+    player.first = player.first or now
+    player.last = now
     changed = true
     return player
 end
@@ -1013,10 +1016,7 @@ end
 -- ================== --
 
 function Skada:FixPets(action)
-    if action and (action.playername or action.srcName) then
-        action.playerid = action.playerid or action.srcGUID
-        action.playername = action.playername or action.srcName
-
+    if action and action.playername then
         local pet = pets[action.playerid]
         if pet then
             if self.db.profile.mergepets then
@@ -1030,19 +1030,15 @@ function Skada:FixPets(action)
                 local petMobID = action.playerid:sub(6, 10)
                 action.playerid = pet.id .. petMobID
             end
-        else
-            action.playerflags = action.playerflags or action.srcFlags
-
-            if action.playerflags and band(action.playerflags, COMBATLOG_OBJECT_TYPE_GUARDIAN) ~= 0 then
-                if band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
-                    if action.spellname then
-                        action.spellname = action.playername .. ": " .. action.spellname
-                    end
-                    action.playername = UnitName("player")
-                    action.playerid = UnitGUID("player")
-                else
-                    action.playerid = action.playername
+        elseif action.playerflags and band(action.playerflags, COMBATLOG_OBJECT_TYPE_GUARDIAN) ~= 0 then
+            if band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
+                if action.spellname then
+                    action.spellname = action.playername .. ": " .. action.spellname
                 end
+                action.playername = UnitName("player")
+                action.playerid = UnitGUID("player")
+            else
+                action.playerid = action.playername
             end
         end
     end
@@ -1080,6 +1076,14 @@ function Skada:SetTooltipPosition(tooltip, frame)
     elseif p == "topright" then
         tooltip:SetOwner(frame, "ANCHOR_NONE")
         tooltip:SetPoint("TOPLEFT", frame, "TOPRIGHT")
+    elseif p == "bottomleft" then
+        tooltip:SetOwner(frame, "ANCHOR_NONE")
+        tooltip:SetPoint("BOTTOMRIGHT", frame, "BOTTOMLEFT")
+    elseif p == "bottomright" then
+        tooltip:SetOwner(frame, "ANCHOR_NONE")
+        tooltip:SetPoint("BOTTOMLEFT", frame, "BOTTOMRIGHT")
+    elseif p == "cursor" then
+        tooltip:SetOwner(frame, "ANCHOR_CURSOR")
     elseif p == "smart" and frame then
         if frame:GetLeft() < (GetScreenWidth() / 2) then
             tooltip:SetOwner(frame, "ANCHOR_NONE")
@@ -1142,7 +1146,7 @@ do
 
                     if data.color then
                         color = data.color
-                    elseif data.class then
+                    elseif data.class and Skada.classcolors[data.class] then
                         color = Skada.classcolors[data.class]
                     end
                     tooltip:AddDoubleLine(nr .. ". " .. data.label, data.valuetext, color.r, color.g, color.b)
@@ -2273,9 +2277,11 @@ do
             return
         end
 
+        local now = time()
+
         if not self.db.profile.onlykeepbosses or self.current.gotboss then
-            if self.current.mobname ~= nil and time() - self.current.starttime > 5 then
-                self.current.endtime = self.current.endtime or time()
+            if self.current.mobname ~= nil and now - self.current.starttime > 5 then
+                self.current.endtime = self.current.endtime or now
                 self.current.time = self.current.endtime - self.current.starttime
                 setPlayerActiveTimes(self.current)
                 self.current.stopped = nil
@@ -2358,6 +2364,7 @@ do
         self:CancelTimer(update_timer, true)
         self:CancelTimer(tick_timer, true)
         update_timer, tick_timer = nil, nil
+        self:ScheduleTimer("MemoryCheck", 3)
     end
 
     function Skada:StopSegment()
@@ -2399,12 +2406,14 @@ do
 
         self:Wipe()
 
+        local starttime = time()
+
         if not self.current then
-            self.current = createSet(L["Current"])
+            self.current = createSet(L["Current"], starttime)
         end
 
         if self.total == nil then
-            self.total = createSet(L["Total"])
+            self.total = createSet(L["Total"], starttime)
             self.char.total = self.total
         end
 
@@ -2493,6 +2502,7 @@ do
 
         local src_is_interesting = nil
         local dst_is_interesting = nil
+        local now = time()
 
         if
             not self.current and self.db.profile.tentativecombatstart and srcName and dstName and srcGUID ~= dstGUID and
@@ -2509,10 +2519,10 @@ do
             end
 
             if src_is_interesting or dst_is_interesting then
-                self.current = createSet(L["Current"])
+                self.current = createSet(L["Current"], now)
 
                 if not self.total then
-                    self.total = createSet(L["Total"])
+                    self.total = createSet(L["Total"], now)
                 end
                 tentativehandle =
                     self:ScheduleTimer(

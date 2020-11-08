@@ -28,17 +28,17 @@ Skada:AddLoadableModule(
             player.interrupts.count = player.interrupts.count + 1
 
             -- own spell details
-            if not player.interrupts.spells[data.spellname] then
-                player.interrupts.spells[data.spellname] = {id = data.spellid, count = 0}
+            if not player.interrupts.spells[data.spellid] then
+                player.interrupts.spells[data.spellid] = {school = data.spellschool, count = 0}
             end
-            player.interrupts.spells[data.spellname].count = player.interrupts.spells[data.spellname].count + 1
+            player.interrupts.spells[data.spellid].count = player.interrupts.spells[data.spellid].count + 1
 
             -- extra spell details
-            if not player.interrupts.extraspells[data.extraspellname] then
-                player.interrupts.extraspells[data.extraspellname] = {id = data.extraspellid, count = 0}
+            if not player.interrupts.extraspells[data.extraspellid] then
+                player.interrupts.extraspells[data.extraspellid] = {school = data.extraspellschool, count = 0}
             end
-            player.interrupts.extraspells[data.extraspellname].count =
-                player.interrupts.extraspells[data.extraspellname].count + 1
+            player.interrupts.extraspells[data.extraspellid].count =
+                player.interrupts.extraspells[data.extraspellid].count + 1
 
             -- target details
             if not player.interrupts.targets[data.dstName] then
@@ -55,16 +55,18 @@ Skada:AddLoadableModule(
             -- Interrupts
             local spellid, spellname, spellschool, extraspellid, extraspellname, extraschool = ...
 
-            data.srcGUID = srcGUID
-            data.srcName = srcName
-            data.srcFlags = srcFlags
+            data.playerid = srcGUID
+            data.playername = srcName
+            data.playerflags = srcFlags
             data.dstGUID = dstGUID
             data.dstName = dstName
             data.dstFlags = dstFlags
-            data.spellid = spellid
-            data.spellname = spellname
+            data.spellid = spellid or 6603
+            data.spellname = spellname or MELEE
+            data.spellschool = spellschool or 1
             data.extraspellid = extraspellid
             data.extraspellname = extraspellname
+            data.extraspellschool = extraschool
 
             Skada:FixPets(data)
 
@@ -84,16 +86,25 @@ Skada:AddLoadableModule(
             if player then
                 local nr = 1
 
-                for spellname, spell in pairs(player.interrupts.extraspells) do
+                for spellid, spell in pairs(player.interrupts.extraspells) do
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
-                    d.id = spellname
+                    local spellname, _, spellicon = GetSpellInfo(spellid)
+
+                    d.id = spellid
+                    d.spellid = spellid
                     d.label = spellname
-                    d.icon = select(3, GetSpellInfo(spell.id))
-                    d.spellid = spell.id
+                    d.icon = spellicon
+
                     d.value = spell.count
-                    d.valuetext = tostring(spell.count)
+                    d.valuetext =
+                        Skada:FormatValueText(
+                        spell.count,
+                        mod.metadata.columns.Total,
+                        format("%02.1f%%", 100 * spell.count / math.max(1, set.interrupts)),
+                        mod.metadata.columns.Percent
+                    )
 
                     if spell.count > max then
                         max = spell.count
@@ -124,7 +135,13 @@ Skada:AddLoadableModule(
                     d.id = target.id
                     d.label = targetname
                     d.value = target.count
-                    d.valuetext = tostring(target.count)
+                    d.valuetext =
+                        Skada:FormatValueText(
+                        target.count,
+                        mod.metadata.columns.Total,
+                        format("%02.1f%%", 100 * target.count / math.max(1, set.interrupts)),
+                        mod.metadata.columns.Percent
+                    )
 
                     if target.count > max then
                         max = target.count
@@ -149,16 +166,25 @@ Skada:AddLoadableModule(
             if player then
                 local nr = 1
 
-                for spellname, spell in pairs(player.interrupts.spells) do
+                for spellid, spell in pairs(player.interrupts.spells) do
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
-                    d.id = spellname
+                    local spellname, _, spellicon = GetSpellInfo(spellid)
+
+                    d.id = spellid
+                    d.spellid = spellid
                     d.label = spellname
-                    d.icon = select(3, GetSpellInfo(spell.id))
-                    d.spellid = spell.id
+                    d.icon = spellicon
+
                     d.value = spell.count
-                    d.valuetext = tostring(spell.count)
+                    d.valuetext =
+                        Skada:FormatValueText(
+                        spell.count,
+                        mod.metadata.columns.Total,
+                        format("%02.1f%%", 100 * spell.count / math.max(1, set.interrupts)),
+                        mod.metadata.columns.Percent
+                    )
 
                     if spell.count > max then
                         max = spell.count
@@ -183,7 +209,14 @@ Skada:AddLoadableModule(
                     d.role = player.role
 
                     d.value = player.interrupts.count
-                    d.valuetext = tostring(player.interrupts.count)
+                    d.valuetext =
+                        Skada:FormatValueText(
+                        player.interrupts.count,
+                        self.metadata.columns.Total,
+                        format("%02.1f%%", 100 * player.interrupts.count / math.max(1, set.interrupts)),
+                        self.metadata.columns.Percent
+                    )
+
                     if player.interrupts.count > max then
                         max = player.interrupts.count
                     end
@@ -199,7 +232,13 @@ Skada:AddLoadableModule(
             spellsmod.metadata = {}
             targetsmod.metadata = {}
             playermod.metadata = {}
-            mod.metadata = {showspots = true, click1 = spellsmod, click2 = targetsmod, click3 = playermod}
+            mod.metadata = {
+                showspots = true,
+                click1 = spellsmod,
+                click2 = targetsmod,
+                click3 = playermod,
+                columns = {Total = true, Percent = true}
+            }
 
             Skada:RegisterForCL(SpellInterrupt, "SPELL_INTERRUPT", {src_is_interesting = true})
 
@@ -215,7 +254,13 @@ Skada:AddLoadableModule(
         end
 
         function mod:GetSetSummary(set)
-            return set.interrupts
+            return Skada:FormatValueText(
+                set.interrupts,
+                self.metadata.columns.Total,
+                format("%02.1f%%", 100 * set.interrupts / math.max(1, set.interrupts)),
+                self.metadata.columns.Percent
+            )
+            -- return set.interrupts
         end
 
         -- Called by Skada when a new player is added to a set.

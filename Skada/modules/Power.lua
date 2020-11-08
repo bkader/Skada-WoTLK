@@ -80,9 +80,9 @@ local function SpellEnergize(timestamp, eventtype, srcGUID, srcName, srcFlags, d
     -- Healing
     local spellid, spellname, spellschool, amount, powertype = ...
 
-    gain.srcGUID = srcGUID
-    gain.srcName = srcName
-    gain.srcFlags = srcFlags
+    gain.playerid = srcGUID
+    gain.playername = srcName
+    gain.playerflags = srcFlags
     gain.spellid = spellid
     gain.spellname = spellname
     gain.amount = amount
@@ -102,6 +102,25 @@ local function SpellEnergize(timestamp, eventtype, srcGUID, srcName, srcFlags, d
     Skada:FixPets(gain)
     log_gain(Skada.current, gain)
     log_gain(Skada.total, gain)
+end
+
+local function SpellLeech(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+    local spellid, spellname, spellschool, amount, powertype, extraamount = ...
+    SpellEnergize(
+        timestamp,
+        eventtype,
+        dstGUID,
+        dstName,
+        dstFlags,
+        srcGUID,
+        srcName,
+        srcFlags,
+        spellid,
+        spellname,
+        spellschool,
+        extraamount,
+        powertype
+    )
 end
 
 function _playermod:Enter(win, id, label)
@@ -134,17 +153,17 @@ function _playermod:Update(win, set)
                 d.valuetext =
                     Skada:FormatValueText(
                     Skada:FormatNumber(amount),
-                    self.metadata.columns.Power,
+                    mod.metadata.columns.Power,
                     format("%02.1f%%", amount / player.power[power].amount * 100),
-                    self.metadata.columns.Percent
+                    mod.metadata.columns.Percent
                 )
             else
                 d.valuetext =
                     Skada:FormatValueText(
                     amount,
-                    self.metadata.columns.Power,
+                    mod.metadata.columns.Power,
                     format("%02.1f%%", amount / player.power[power].amount * 100),
-                    self.metadata.columns.Percent
+                    mod.metadata.columns.Percent
                 )
             end
 
@@ -160,8 +179,12 @@ function _playermod:Update(win, set)
 end
 
 function mod:OnEnable()
+    mod.metadata = {columns = {Power = true, Percent = true}}
     Skada:RegisterForCL(SpellEnergize, "SPELL_ENERGIZE", {src_is_interesting = true})
     Skada:RegisterForCL(SpellEnergize, "SPELL_PERIODIC_ENERGIZE", {src_is_interesting = true})
+    Skada:RegisterForCL(SpellEnergize, "SPELL_LEECH", {src_is_interesting = true})
+    Skada:RegisterForCL(SpellEnergize, "SPELL_PERIODIC_LEECH", {dst_is_interesting = true})
+    Skada:AddColumnOptions(self)
 end
 
 -- Called by Skada when a new player is added to a set.
@@ -205,16 +228,20 @@ Skada:AddLoadableModule(
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
-                    local amount = player.power[power].amount
-
                     d.id = player.id
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
                     d.power = power
 
-                    d.value = amount
-                    d.valuetext = Skada:FormatNumber(amount)
+                    d.value = player.power[power].amount
+                    d.valuetext =
+                        Skada:FormatValueText(
+                        Skada:FormatNumber(d.value),
+                        mod.metadata.columns.Power,
+                        format("%02.1f%%", d.value / math.max(1, set.power[power]) * 100),
+                        mod.metadata.columns.Percent
+                    )
 
                     if d.value > max then
                         max = d.value
@@ -228,7 +255,7 @@ Skada:AddLoadableModule(
         end
 
         function manamod:OnEnable()
-            playermod.metadata = {columns = {Power = true, Percent = true}}
+            playermod.metadata = {}
             manamod.metadata = {showspots = true, click1 = playermod}
             Skada:AddMode(self, L["Power gained"])
         end
@@ -277,7 +304,13 @@ Skada:AddLoadableModule(
                     d.power = power
 
                     d.value = player.power[power].amount
-                    d.valuetext = tostring(d.value)
+                    d.valuetext =
+                        Skada:FormatValueText(
+                        d.value,
+                        mod.metadata.columns.Power,
+                        format("%02.1f%%", d.value / math.max(1, set.power[power]) * 100),
+                        mod.metadata.columns.Percent
+                    )
 
                     if d.value > max then
                         max = d.value
@@ -291,7 +324,7 @@ Skada:AddLoadableModule(
         end
 
         function ragemod:OnEnable()
-            playermod.metadata = {columns = {Power = true, Percent = true}}
+            playermod.metadata = {}
             ragemod.metadata = {showspots = true, click1 = playermod}
             Skada:AddMode(self, L["Power gained"])
         end
@@ -339,7 +372,13 @@ Skada:AddLoadableModule(
                     d.power = power
 
                     d.value = player.power[power].amount
-                    d.valuetext = tostring(d.value)
+                    d.valuetext =
+                        Skada:FormatValueText(
+                        d.value,
+                        mod.metadata.columns.Power,
+                        format("%02.1f%%", d.value / math.max(1, set.power[power]) * 100),
+                        mod.metadata.columns.Percent
+                    )
 
                     if d.value > max then
                         max = d.value
@@ -353,7 +392,7 @@ Skada:AddLoadableModule(
         end
 
         function energymod:OnEnable()
-            playermod.metadata = {columns = {Power = true, Percent = true}}
+            playermod.metadata = {}
             energymod.metadata = {showspots = true, click1 = playermod}
             Skada:AddMode(self, L["Power gained"])
         end
@@ -402,7 +441,13 @@ Skada:AddLoadableModule(
                     d.power = power
 
                     d.value = player.power[power].amount
-                    d.valuetext = tostring(d.value)
+                    d.valuetext =
+                        Skada:FormatValueText(
+                        d.value,
+                        mod.metadata.columns.Power,
+                        format("%02.1f%%", d.value / math.max(1, set.power[power]) * 100),
+                        mod.metadata.columns.Percent
+                    )
 
                     if d.value > max then
                         max = d.value
@@ -416,7 +461,7 @@ Skada:AddLoadableModule(
         end
 
         function runicmod:OnEnable()
-            playermod.metadata = {columns = {Power = true, Percent = true}}
+            playermod.metadata = {}
             runicmod.metadata = {showspots = true, click1 = playermod}
             Skada:AddMode(self, L["Power gained"])
         end

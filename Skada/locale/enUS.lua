@@ -253,7 +253,10 @@ L["Position of the tooltips."] = true
 L["Default"] = true
 L["Top right"] = true
 L["Top left"] = true
+L["Bottom right"] = true
+L["Bottom left"] = true
 L["Smart"] = true
+L["Follow Cursor"] = true
 
 -- disabled modules
 L["Disabled Modules"] = true
@@ -385,20 +388,19 @@ L["%s's absorbed and healed players"] = true
 -- Auras Module --
 -- ============ --
 
-L["Auras"] = true
-L["Buff and debuff"] = true
-L["Auras: Buff uptime"] = true
-L["Auras: Debuff uptime"] = true
-L["Auras: Sunders Counter"] = true
-L["Auras spell list"] = true
-L["Auras target list"] = true
-L["Buff Uptime"] = true
-L["Debuff Uptime"] = true
+L["Buffs and Debuffs"] = true
+L["Buffs"] = true
+L["Buff spell list"] = true
 L["%s's buff uptime"] = true
+
+L["Debuffs"] = true
+L["Debuff spell list"] = true
+L["Debuff target list"] = true
 L["%s's debuff uptime"] = true
 L["%s's debuff targets"] = true
 L["%s's <%s> targets"] = true
-L["Refreshes"] = true
+
+L["Sunders Counter"] = true
 
 -- ================= --
 -- CC Tracker Module --

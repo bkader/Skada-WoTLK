@@ -614,9 +614,12 @@ Skada.options = {
                     desc = L["Position of the tooltips."],
                     values = {
                         ["default"] = L["Default"],
+                        ["smart"] = L["Smart"],
                         ["topright"] = L["Top right"],
                         ["topleft"] = L["Top left"],
-                        ["smart"] = L["Smart"]
+                        ["bottomright"] = L["Bottom right"],
+                        ["bottomleft"] = L["Bottom left"],
+                        ["cursor"] = L["Follow Cursor"]
                     },
                     get = function()
                         return Skada.db.profile.tooltippos

@@ -5,6 +5,7 @@ end
 
 local pairs, ipairs = pairs, ipairs
 local select, format = select, string.format
+local math_max = math.max
 local UnitGUID, UnitName, UnitClass = UnitGUID, UnitName, UnitClass
 local GetSpellInfo = GetSpellInfo
 
@@ -27,7 +28,7 @@ Skada:AddLoadableModule(
             end
 
             -- get rid of overhealing
-            local amount = math.max(0, data.amount - data.overhealing)
+            local amount = math_max(0, data.amount - data.overhealing)
 
             -- record the healing
             player.healing.amount = player.healing.amount + amount
@@ -111,7 +112,16 @@ Skada:AddLoadableModule(
 
         local function getHPS(set, player)
             local totaltime = Skada:PlayerActiveTime(set, player)
-            return player.healing.amount / math.max(1, totaltime)
+            return player.healing.amount / math_max(1, totaltime)
+        end
+
+        local function getRaidHPS(set)
+            if set.time > 0 then
+                return set.healing / math_max(1, set.time)
+            else
+                local endtime = set.endtime or time()
+                return set.healing / math_max(1, endtime - set.starttime)
+            end
         end
 
         local function spell_tooltip(win, id, label, tooltip)
@@ -199,9 +209,9 @@ Skada:AddLoadableModule(
                         d.valuetext =
                             Skada:FormatValueText(
                             Skada:FormatNumber(spell.amount),
-                            self.metadata.columns.Healing,
+                            mod.metadata.columns.Healing,
                             format("%02.1f%%", spell.amount / player.healing.amount * 100),
-                            self.metadata.columns.Percent
+                            mod.metadata.columns.Percent
                         )
 
                         if spell.amount > max then
@@ -242,9 +252,9 @@ Skada:AddLoadableModule(
                         d.valuetext =
                             Skada:FormatValueText(
                             Skada:FormatNumber(target.amount),
-                            self.metadata.columns.Healing,
+                            mod.metadata.columns.Healing,
                             format("%02.1f%%", target.amount / player.healing.amount * 100),
-                            self.metadata.columns.Percent
+                            mod.metadata.columns.Percent
                         )
 
                         if target.amount > max then
@@ -295,8 +305,8 @@ Skada:AddLoadableModule(
         end
 
         function mod:OnEnable()
-            spellmod.metadata = {tooltip = spell_tooltip, columns = {Healing = true, Percent = true}}
-            playermod.metadata = {showspots = true, columns = {Healing = true, Percent = true}}
+            spellmod.metadata = {tooltip = spell_tooltip}
+            playermod.metadata = {showspots = true}
             mod.metadata = {
                 showspots = true,
                 click1 = spellmod,
@@ -315,7 +325,14 @@ Skada:AddLoadableModule(
         end
 
         function mod:GetSetSummary(set)
-            return Skada:FormatNumber(set.healing)
+            return Skada:FormatValueText(
+                Skada:FormatNumber(set.healing),
+                self.metadata.columns.Healing,
+                Skada:FormatNumber(getRaidHPS(set)),
+                self.metadata.columns.HPS,
+                format("%02.1f%%", 100 * set.healing / math_max(1, set.healing)),
+                self.metadata.columns.Percent
+            )
         end
 
         function mod:AddPlayerAttributes(player)
@@ -392,7 +409,7 @@ Skada:AddLoadableModule(
         end
 
         function mod:GetSetSummary(set)
-            return Skada:FormatNumber(set.healing + set.overhealing)
+            return Skada:FormatNumber(set.healing) .. "/" .. Skada:FormatNumber(set.overhealing)
         end
     end
 )
@@ -888,7 +905,7 @@ Skada:AddLoadableModule(
                         Skada:FormatValueText(
                         Skada:FormatNumber(player.absorbs.amount),
                         self.metadata.columns.Absorbs,
-                        format("%02.1f%%", player.absorbs.amount / math.max(1, set.absorbs) * 100),
+                        format("%02.1f%%", player.absorbs.amount / math_max(1, set.absorbs) * 100),
                         self.metadata.columns.Percent
                     )
 
@@ -936,7 +953,12 @@ Skada:AddLoadableModule(
         end
 
         function mod:GetSetSummary(set)
-            return Skada:FormatNumber(set.absorbs)
+            return Skada:FormatValueText(
+                Skada:FormatNumber(set.absorbs),
+                self.metadata.columns.Absorbs,
+                format("%02.1f%%", 100 * set.absorbs / math_max(1, set.absorbs)),
+                self.metadata.columns.Percent
+            )
         end
 
         function mod:AddPlayerAttributes(player)
@@ -967,7 +989,16 @@ Skada:AddLoadableModule(
 
         local function getHPS(set, player)
             local totaltime = Skada:PlayerActiveTime(set, player)
-            return (player.healing.amount + player.absorbs.amount) / math.max(1, totaltime)
+            return (player.healing.amount + player.absorbs.amount) / math_max(1, totaltime)
+        end
+
+        local function getRaidHPS(set)
+            if set.time > 0 then
+                return (set.healing + set.absorbs) / math_max(1, set.time)
+            else
+                local endtime = set.endtime or time()
+                return (set.healing + set.absorbs) / math_max(1, endtime - set.starttime)
+            end
         end
 
         local function spell_tooltip(win, id, label, tooltip)
@@ -1068,9 +1099,9 @@ Skada:AddLoadableModule(
                         d.valuetext =
                             Skada:FormatValueText(
                             Skada:FormatNumber(spell.amount),
-                            self.metadata.columns.Healing,
+                            mod.metadata.columns.Healing,
                             format("%02.1f%%", spell.amount / total * 100),
-                            self.metadata.columns.Percent
+                            mod.metadata.columns.Percent
                         )
 
                         if spell.amount > max then
@@ -1124,9 +1155,9 @@ Skada:AddLoadableModule(
                         d.valuetext =
                             Skada:FormatValueText(
                             Skada:FormatNumber(target.amount),
-                            self.metadata.columns.Healing,
+                            mod.metadata.columns.Healing,
                             format("%02.1f%%", target.amount / total * 100),
-                            self.metadata.columns.Percent
+                            mod.metadata.columns.Percent
                         )
 
                         if target.amount > max then
@@ -1179,8 +1210,8 @@ Skada:AddLoadableModule(
         end
 
         function mod:OnEnable()
-            spellmod.metadata = {tooltip = spell_tooltip, columns = {Healing = true, Percent = true}}
-            playermod.metadata = {showspots = true, columns = {Healing = true, Percent = true}}
+            spellmod.metadata = {tooltip = spell_tooltip}
+            playermod.metadata = {showspots = true}
             mod.metadata = {
                 showspots = true,
                 click1 = spellmod,
@@ -1196,7 +1227,15 @@ Skada:AddLoadableModule(
         end
 
         function mod:GetSetSummary(set)
-            return Skada:FormatNumber(set.healing + set.absorbs)
+            local total = set.healing + set.absorbs
+            return Skada:FormatValueText(
+                Skada:FormatNumber(total),
+                mod.metadata.columns.Healing,
+                Skada:FormatNumber(getRaidHPS(set)),
+                mod.metadata.columns.HPS,
+                format("%02.1f%%", 100 * total / math_max(1, total)),
+                mod.metadata.columns.Percent
+            )
         end
     end
 )

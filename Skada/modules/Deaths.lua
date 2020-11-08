@@ -427,7 +427,7 @@ Skada:AddLoadableModule(
                 d.role = player.role
 
                 d.value = playertime
-                d.valuetext = format("%02.1f%%", playertime / settime * 100)
+                d.valuetext = format("%ss (%02.1f%%)", playertime, playertime / settime * 100)
 
                 if playertime > max then
                     max = playertime
@@ -446,6 +446,10 @@ Skada:AddLoadableModule(
 
         function mod:OnDisable()
             Skada:RemoveMode(self)
+        end
+
+        function mod:GetSetSummary(set)
+            return SecondsToTime(Skada:GetSetTime(set))
         end
     end
 )

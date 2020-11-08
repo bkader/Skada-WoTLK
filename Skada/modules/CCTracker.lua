@@ -57,7 +57,7 @@ Skada:AddLoadableModule(
         local targetspellsmod = mod:NewModule(L["CC Done target spells"])
 
         local function log_ccdone(set, data)
-            local player = Skada:get_player(set, data.srcGUID, data.srcName)
+            local player = Skada:get_player(set, data.playerid, data.playername)
             if not player then
                 return
             end
@@ -109,13 +109,14 @@ Skada:AddLoadableModule(
             end
 
             if CCSpells[spellid] then
-                srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName)
-                dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName)
+                data.playerid = srcGUID
+                data.playername = srcName
+                data.playerflags = srcFlags
 
-                data.srcGUID = srcGUID
-                data.srcName = srcName
                 data.dstGUID = dstGUID
                 data.dstName = dstName
+                data.dstFlags = dstFlags
+
                 data.spellid = spellid
                 data.spellname = spellname
                 data.extraspellid = extraspellid
@@ -399,17 +400,20 @@ Skada:AddLoadableModule(
             end
 
             if CCSpells[spellid] then
-                srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName)
-                dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName)
-
                 data.srcGUID = srcGUID
                 data.srcName = srcName
-                data.dstGUID = dstGUID
-                data.dstName = dstName
+                data.srcFlags = srcFlags
+
+                data.playerid = dstGUID
+                data.playername = dstName
+                data.playerflags = dstFlags
+
                 data.spellid = spellid
                 data.spellname = spellname
                 data.extraspellid = extraspellid
                 data.extraspellname = extraspellname
+
+                Skada:FixPets(data)
 
                 log_cctaken(Skada.current, data)
                 log_cctaken(Skada.total, data)
@@ -698,8 +702,12 @@ Skada:AddLoadableModule(
 
             data.srcGUID = srcGUID
             data.srcName = srcName
+            data.srcFlags = srcFlags
+
             data.dstGUID = dstGUID
             data.dstName = dstName
+            data.dstFlags = dstFlags
+
             data.spellid = spellid
             data.spellname = spellname
             data.extraspellid = extraspellid

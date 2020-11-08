@@ -227,6 +227,11 @@ Skada:AddLoadableModule(
         local function SpellDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             dmg = _SpellDamage((srcGUID ~= dstGUID), srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             if dmg then
+                dmg.playerid = dmg.srcGUID
+                dmg.playername = dmg.srcName
+                dmg.playerflags = dmg.srcFlags
+                dmg.srcGUID, dmg.srcName, dmg.srcFlags = nil, nil, nil
+
                 Skada:FixPets(dmg)
                 log_damage(Skada.current, dmg)
                 log_damage(Skada.total, dmg)
@@ -236,6 +241,11 @@ Skada:AddLoadableModule(
         local function SpellMissed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             dmg = _SpellMissed((srcGUID ~= dstGUID), srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             if dmg then
+                dmg.playerid = dmg.srcGUID
+                dmg.playername = dmg.srcName
+                dmg.playerflags = dmg.srcFlags
+                dmg.srcGUID, dmg.srcName, dmg.srcFlags = nil, nil, nil
+
                 Skada:FixPets(dmg)
                 log_damage(Skada.current, dmg)
                 log_damage(Skada.total, dmg)
@@ -245,6 +255,11 @@ Skada:AddLoadableModule(
         local function SwingDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             dmg = _SwingDamage((srcGUID ~= dstGUID), srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             if dmg then
+                dmg.playerid = dmg.srcGUID
+                dmg.playername = dmg.srcName
+                dmg.playerflags = dmg.srcFlags
+                dmg.srcGUID, dmg.srcName, dmg.srcFlags = nil, nil, nil
+
                 Skada:FixPets(dmg)
                 log_damage(Skada.current, dmg)
                 log_damage(Skada.total, dmg)
@@ -254,6 +269,11 @@ Skada:AddLoadableModule(
         local function SwingMissed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             dmg = _SwingMissed((srcGUID ~= dstGUID), srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             if dmg then
+                dmg.playerid = dmg.srcGUID
+                dmg.playername = dmg.srcName
+                dmg.playerflags = dmg.srcFlags
+                dmg.srcGUID, dmg.srcName, dmg.srcFlags = nil, nil, nil
+
                 Skada:FixPets(dmg)
                 log_damage(Skada.current, dmg)
                 log_damage(Skada.total, dmg)
@@ -479,9 +499,9 @@ Skada:AddLoadableModule(
                     d.valuetext =
                         Skada:FormatValueText(
                         Skada:FormatNumber(spell.amount),
-                        self.metadata.columns.Damage,
+                        mod.metadata.columns.Damage,
                         format("%02.1f%%", spell.amount / player.damagedone.amount * 100),
-                        self.metadata.columns.Percent
+                        mod.metadata.columns.Percent
                     )
 
                     if spell.amount > max then
@@ -518,9 +538,9 @@ Skada:AddLoadableModule(
                     d.valuetext =
                         Skada:FormatValueText(
                         Skada:FormatNumber(amount),
-                        self.metadata.columns.Damage,
+                        mod.metadata.columns.Damage,
                         format("%02.1f%%", amount / player.damagedone.amount * 100),
-                        self.metadata.columns.Percent
+                        mod.metadata.columns.Percent
                     )
 
                     if amount > max then
@@ -756,13 +776,9 @@ Skada:AddLoadableModule(
         end
 
         function mod:OnEnable()
-            spellmod.metadata = {tooltip = spellmod_tooltip, columns = {Damage = true, Percent = true}}
-            playermod.metadata = {
-                tooltip = player_tooltip,
-                click1 = spellmod,
-                columns = {Damage = true, Percent = true}
-            }
-            targetmod.metadata = {columns = {Damage = true, Percent = true}}
+            spellmod.metadata = {tooltip = spellmod_tooltip}
+            playermod.metadata = {tooltip = player_tooltip, click1 = spellmod}
+            targetmod.metadata = {}
             mod.metadata = {
                 showspots = true,
                 post_tooltip = damage_tooltip,
@@ -835,7 +851,12 @@ Skada:AddLoadableModule(
         end
 
         function mod:GetSetSummary(set)
-            return Skada:FormatNumber(set.damagedone)
+            return Skada:FormatValueText(
+                Skada:FormatNumber(set.damagedone),
+                self.metadata.columns.Damage,
+                Skada:FormatNumber(getRaidDPS(set)),
+                self.metadata.columns.DPS
+            )
         end
 
         function mod:AddPlayerAttributes(player)
@@ -880,7 +901,7 @@ Skada:AddLoadableModule(
         local spelltargetsmod = spellsmod:NewModule(L["Damage spell targets"])
 
         local function log_damage(set, dmg)
-            local player = Skada:find_player(set, dmg.srcGUID, dmg.srcName)
+            local player = Skada:find_player(set, dmg.playerid, dmg.playername)
             if not player then
                 return
             end
@@ -948,6 +969,11 @@ Skada:AddLoadableModule(
         local function SpellDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             dmg = _SpellDamage((srcGUID ~= dstGUID), dstGUID, dstName, dstFlags, srcGUID, srcName, srcFlags, ...)
             if dmg then
+                dmg.playerid = dmg.srcGUID
+                dmg.playername = dmg.srcName
+                dmg.playerflags = dmg.srcFlags
+                dmg.srcGUID, dmg.srcName, dmg.srcFlags = nil, nil, nil
+
                 log_damage(Skada.current, dmg)
                 log_damage(Skada.total, dmg)
             end
@@ -956,6 +982,11 @@ Skada:AddLoadableModule(
         local function SpellMissed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             dmg = _SpellMissed((srcGUID ~= dstGUID), dstGUID, dstName, dstFlags, srcGUID, srcName, srcFlags, ...)
             if dmg then
+                dmg.playerid = dmg.srcGUID
+                dmg.playername = dmg.srcName
+                dmg.playerflags = dmg.srcFlags
+                dmg.srcGUID, dmg.srcName, dmg.srcFlags = nil, nil, nil
+
                 log_damage(Skada.current, dmg)
                 log_damage(Skada.total, dmg)
             end
@@ -964,6 +995,11 @@ Skada:AddLoadableModule(
         local function SwingDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             dmg = _SwingDamage((srcGUID ~= dstGUID), dstGUID, dstName, dstFlags, srcGUID, srcName, srcFlags, ...)
             if dmg then
+                dmg.playerid = dmg.srcGUID
+                dmg.playername = dmg.srcName
+                dmg.playerflags = dmg.srcFlags
+                dmg.srcGUID, dmg.srcName, dmg.srcFlags = nil, nil, nil
+
                 log_damage(Skada.current, dmg)
                 log_damage(Skada.total, dmg)
             end
@@ -972,8 +1008,30 @@ Skada:AddLoadableModule(
         local function SwingMissed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             dmg = _SwingMissed((srcGUID ~= dstGUID), dstGUID, dstName, dstFlags, srcGUID, srcName, srcFlags, ...)
             if dmg then
+                dmg.playerid = dmg.srcGUID
+                dmg.playername = dmg.srcName
+                dmg.playerflags = dmg.srcFlags
+                dmg.srcGUID, dmg.srcName, dmg.srcFlags = nil, nil, nil
+
                 log_damage(Skada.current, dmg)
                 log_damage(Skada.total, dmg)
+            end
+        end
+
+        local function getDTPS(set, player)
+            local uptime = Skada:PlayerActiveTime(set, player)
+            return player.damagetaken.amount / math_max(1, uptime)
+        end
+
+        local function getRaidDTPS(set)
+            if set.time > 0 then
+                return set.damagetaken / math_max(1, set.time)
+            else
+                local endtime = set.endtime
+                if not endtime then
+                    endtime = time()
+                end
+                return set.damagetaken / math_max(1, endtime - set.starttime)
             end
         end
 
@@ -1006,9 +1064,9 @@ Skada:AddLoadableModule(
                     d.valuetext =
                         Skada:FormatValueText(
                         Skada:FormatNumber(spell.amount),
-                        self.metadata.columns.Damage,
+                        mod.metadata.columns.Damage,
                         format("%02.1f%%", spell.amount / player.damagetaken.amount * 100),
-                        self.metadata.columns.Percent
+                        mod.metadata.columns.Percent
                     )
 
                     if spell.amount > max then
@@ -1045,9 +1103,9 @@ Skada:AddLoadableModule(
                     d.valuetext =
                         Skada:FormatValueText(
                         Skada:FormatNumber(amount),
-                        self.metadata.columns.Damage,
+                        mod.metadata.columns.Damage,
                         format("%02.1f%%", amount / player.damagetaken.amount * 100),
-                        self.metadata.columns.Percent
+                        mod.metadata.columns.Percent
                     )
 
                     if amount > max then
@@ -1207,7 +1265,6 @@ Skada:AddLoadableModule(
                     win.dataset[nr] = d
 
                     local totaltime = Skada:PlayerActiveTime(set, player)
-                    local dtps = player.damagetaken.amount / math.max(1, totaltime)
 
                     d.id = player.id
                     d.label = player.name
@@ -1219,7 +1276,7 @@ Skada:AddLoadableModule(
                         Skada:FormatValueText(
                         Skada:FormatNumber(player.damagetaken.amount),
                         self.metadata.columns.Damage,
-                        Skada:FormatNumber(dtps),
+                        Skada:FormatNumber(getDTPS(set, player)),
                         self.metadata.columns.DTPS,
                         format("%02.1f%%", player.damagetaken.amount / set.damagetaken * 100),
                         self.metadata.columns.Percent
@@ -1284,13 +1341,9 @@ Skada:AddLoadableModule(
         end
 
         function mod:OnEnable()
-            spellmod.metadata = {columns = {Damage = true, Percent = true}}
-            playermod.metadata = {
-                tooltip = spellmod_tooltip,
-                click1 = spellmod,
-                columns = {Damage = true, Percent = true}
-            }
-            sourcemod.metadata = {columns = {Damage = true, Percent = true}}
+            spellmod.metadata = {}
+            playermod.metadata = {tooltip = spellmod_tooltip, click1 = spellmod}
+            sourcemod.metadata = {}
             mod.metadata = {
                 showspots = true,
                 click1 = playermod,
@@ -1325,7 +1378,12 @@ Skada:AddLoadableModule(
         end
 
         function mod:GetSetSummary(set)
-            return Skada:FormatNumber(set.damagetaken)
+            return Skada:FormatValueText(
+                Skada:FormatNumber(set.damagetaken),
+                self.metadata.columns.Damage,
+                Skada:FormatNumber(getRaidDTPS(set)),
+                self.metadata.columns.DTPS
+            )
         end
 
         function mod:AddPlayerAttributes(player)
@@ -1480,7 +1538,7 @@ do
         return mob.players[name]
     end
 
-    local function ModUpdate(stat)
+    local function ModUpdate(stat, mod)
         return function(self, win, set)
             local nr, max = 1, 0
 
@@ -1492,7 +1550,18 @@ do
                     d.id = mobname
                     d.label = mobname
                     d.value = mob[stat]
-                    d.valuetext = Skada:FormatNumber(mob[stat])
+
+                    if mod and mod.metadata.columns then
+                        d.valuetext =
+                            Skada:FormatValueText(
+                            Skada:FormatNumber(mob[stat]),
+                            mod.metadata.columns.Damage,
+                            format("%02.1f%%", 100 * mob[stat] / math.max(1, set.enemies[stat])),
+                            mod.metadata.columns.Percent
+                        )
+                    else
+                        d.valuetext = Skada:FormatNumber(mob[stat])
+                    end
 
                     if mob[stat] > max then
                         max = mob[stat]
@@ -1518,7 +1587,7 @@ do
             end
 
             local mod = Skada:NewModule(L["Enemy damage done"])
-            mod.Update = ModUpdate("done")
+            mod.Update = ModUpdate("done", mod)
 
             local playermod = mod:NewModule(L["Damage done per player"])
 
@@ -1575,10 +1644,11 @@ do
 
                                     d.value = player.done
                                     d.valuetext =
-                                        format(
-                                        "%s (%02.1f%%)",
+                                        Skada:FormatValueText(
                                         Skada:FormatNumber(player.done),
-                                        player.done / mob.done * 100
+                                        mod.metadata.columns.Damage,
+                                        format("%02.1f%%", 100 * player.done / math.max(1, set.enemies.done)),
+                                        mod.metadata.columns.Percent
                                     )
 
                                     if player.done > max then
@@ -1599,7 +1669,7 @@ do
 
             function mod:OnEnable()
                 playermod.metadata = {showspots = true}
-                mod.metadata = {click1 = playermod}
+                mod.metadata = {click1 = playermod, columns = {Damage = true, Percent = true}}
 
                 Skada:RegisterForCL(
                     SpellDamageDone,
@@ -1635,7 +1705,12 @@ do
             end
 
             function mod:GetSetSummary(set)
-                return Skada:FormatNumber(set.enemies.done)
+                return Skada:FormatValueText(
+                    Skada:FormatNumber(set.enemies.done),
+                    self.metadata.columns.Damage,
+                    format("%02.1f%%", 100 * set.enemies.done / math.max(1, set.enemies.done)),
+                    self.metadata.columns.Percent
+                )
             end
 
             function mod:AddSetAttributes(set)
@@ -1658,7 +1733,7 @@ do
             end
 
             local mod = Skada:NewModule(L["Enemy damage taken"])
-            mod.Update = ModUpdate("taken")
+            mod.Update = ModUpdate("taken", mod)
 
             local playermod = mod:NewModule(L["Damage taken per player"])
 
@@ -1715,10 +1790,11 @@ do
 
                                     d.value = player.taken
                                     d.valuetext =
-                                        format(
-                                        "%s (%02.1f%%)",
+                                        Skada:FormatValueText(
                                         Skada:FormatNumber(player.taken),
-                                        player.taken / mob.taken * 100
+                                        mod.metadata.columns.Damage,
+                                        format("%02.1f%%", 100 * player.taken / math.max(1, set.enemies.taken)),
+                                        mod.metadata.columns.Percent
                                     )
 
                                     if player.taken > max then
@@ -1739,7 +1815,7 @@ do
 
             function mod:OnEnable()
                 playermod.metadata = {showspots = true}
-                mod.metadata = {click1 = playermod}
+                mod.metadata = {click1 = playermod, columns = {Damage = true, Percent = true}}
 
                 Skada:RegisterForCL(
                     SpellDamageTaken,
@@ -1775,7 +1851,12 @@ do
             end
 
             function mod:GetSetSummary(set)
-                return Skada:FormatNumber(set.enemies.taken)
+                return Skada:FormatValueText(
+                    Skada:FormatNumber(set.enemies.taken),
+                    self.metadata.columns.Damage,
+                    format("%02.1f%%", 100 * set.enemies.taken / math.max(1, set.enemies.taken)),
+                    self.metadata.columns.Percent
+                )
             end
 
             function mod:AddSetAttributes(set)
@@ -1824,7 +1905,7 @@ Skada:AddLoadableModule(
                 if not player.friendfire.targets[dmg.dstName] then
                     player.friendfire.targets[dmg.dstName] = {
                         id = dmg.dstGUID,
-                        class = select(1, UnitClass(dmg.dstName)),
+                        class = select(2, UnitClass(dmg.dstName)),
                         amount = 0
                     }
                 end
@@ -1835,7 +1916,7 @@ Skada:AddLoadableModule(
         local dmg = {}
 
         local function SpellDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-            dmg = _SpellDamage((srcGUID ~= dstGUID), srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+            dmg = _SpellDamage((dstGUID ~= srcGUID), srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             if dmg then
                 log_damage(Skada.current, dmg)
                 log_damage(Skada.total, dmg)
@@ -1843,7 +1924,7 @@ Skada:AddLoadableModule(
         end
 
         local function SwingDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-            dmg = _SwingMissed((srcGUID ~= dstGUID), srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+            dmg = _SwingMissed((dstGUID ~= srcGUID), srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             if dmg then
                 log_damage(Skada.current, dmg)
                 log_damage(Skada.total, dmg)
@@ -1859,7 +1940,7 @@ Skada:AddLoadableModule(
             local player = Skada:find_player(set, self.playerid)
             local max = 0
 
-            if player and player.friendfire.amount > 0 then
+            if player and player.friendfire.targets then
                 local nr = 1
 
                 for targetname, target in pairs(player.friendfire.targets) do
@@ -1874,9 +1955,9 @@ Skada:AddLoadableModule(
                     d.valuetext =
                         Skada:FormatValueText(
                         Skada:FormatNumber(target.amount),
-                        self.metadata.columns.Damage,
+                        mod.metadata.columns.Damage,
                         format("%02.1f%%", target.amount / set.friendfire * 100),
-                        self.metadata.columns.Percent
+                        mod.metadata.columns.Percent
                     )
 
                     if target.amount > max then
@@ -1916,9 +1997,9 @@ Skada:AddLoadableModule(
                     d.valuetext =
                         Skada:FormatValueText(
                         Skada:FormatNumber(amount),
-                        self.metadata.columns.Damage,
+                        mod.metadata.columns.Damage,
                         format("%02.1f%%", amount / set.friendfire * 100),
-                        self.metadata.columns.Percent
+                        mod.metadata.columns.Percent
                     )
 
                     if amount > max then
@@ -1971,8 +2052,8 @@ Skada:AddLoadableModule(
         end
 
         function mod:OnEnable()
-            spellmod.metadata = {columns = {Damage = true, Percent = true}}
-            playermod.metadata = {columns = {Damage = true, Percent = true}}
+            spellmod.metadata = {}
+            playermod.metadata = {}
             mod.metadata = {
                 showspots = true,
                 click1 = spellmod,
@@ -2024,7 +2105,12 @@ Skada:AddLoadableModule(
         end
 
         function mod:GetSetSummary(set)
-            return Skada:FormatNumber(set.friendfire)
+            return Skada:FormatValueText(
+                Skada:FormatNumber(set.friendfire),
+                self.metadata.columns.Damage,
+                format("%02.1f%%", 100 * set.friendfire / math.max(1, set.friendfire)),
+                self.metadata.columns.Percent
+            )
         end
 
         function mod:SetComplete(set)

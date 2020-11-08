@@ -54,12 +54,16 @@ Skada:AddLoadableModule(
         local data = {}
 
         local function SpellDispel(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+            if eventtype == "SPELL_DISPEL_FAILED" then
+                return
+            end
+
             -- Dispells
             local spellid, spellname, spellschool, extraspellid, extraspellname, extraspellschool, auraType = ...
 
-            data.srcGUID = srcGUID
-            data.srcName = srcName
-            data.srcFlags = srcFlags
+            data.playerid = srcGUID
+            data.playername = srcName
+            data.playerflags = srcFlags
 
             data.dstGUID = dstGUID
             data.dstName = dstName
@@ -69,11 +73,9 @@ Skada:AddLoadableModule(
             data.spellname = spellname
             data.spellschool = spellschool
 
-            data.extraspellid = extraspellid
-            data.extraspellname = extraspellname
-            data.extraspellschool = extraspellschool
-
-            Skada:FixPets(data)
+            data.extraspellid = extraspellid or 6603
+            data.extraspellname = extraspellname or MELEE
+            data.extraspellschool = extraspellschool or 1
 
             log_dispels(Skada.current, data)
             log_dispels(Skada.total, data)
