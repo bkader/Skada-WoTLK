@@ -34,9 +34,6 @@ local changed = true
 -- update & tick timers
 local update_timer, tick_timer
 
--- classe colors
-Skada.classcolors = CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS
-
 -- spell schools
 do
     local SPELLSCHOOL_PHYSICAL = 1
@@ -1013,15 +1010,39 @@ do
     -- this function is called and used only once per player
     function Skada:FixPlayer(player)
         if player.id and player.name then
-            local _, class, _, _, _, name = GetPlayerInfoByGUID(player.id)
-
+            -- fix the name
             if player.id == player.name then
-                if name and class then
+                local name = select(6, GetPlayerInfoByGUID(player.id))
+                if name and name ~= player.name then
                     player.name = name
+                end
+            end
+
+            -- fix the class
+            local class = player.class
+            if not class or class == "UNKNOWN" then
+                class = "UNKNOWN"
+            end
+
+            if class == "UNKNOWN" then
+                class = select(2, UnitClass(player.name))
+
+                -- should we check more?
+                if not class or not self.validclass[class] then
+                    class = select(2, GetPlayerInfoByGUID(player.id))
+                end
+
+                if class and self.validclass[class] then
                     player.class = class
                 end
             end
 
+            -- fix player role
+            if UnitIsPlayer(player.name) and not player.role then
+                player.role = UnitGroupRolesAssigned(player.name) or "NONE"
+            end
+
+            -- fix the spec
             if not player.spec then
                 player.spec = self:GetPlayerSpecID(player.name, class)
             end
@@ -1057,16 +1078,14 @@ function Skada:get_player(set, playerid, playername)
             return
         end
 
-        local playerClass = select(2, UnitClass(playername))
-        local playerRole = UnitGroupRolesAssigned(playername) or nil
         player = {
             id = playerid,
-            class = playerClass,
-            role = playerRole,
             name = playername,
             first = now,
             time = 0
         }
+
+        self:FixPlayer(player)
 
         for _, mode in ipairs(modes) do
             if mode.AddPlayerAttributes ~= nil then
@@ -1195,11 +1214,11 @@ do
     local ttwin = Window:new()
 
     function Skada:AddSubviewToTooltip(tooltip, win, mode, id, label)
-        wipe(ttwin.dataset)
-
         if not mode then
             return
         end
+
+        wipe(ttwin.dataset)
 
         if mode.Enter then
             mode:Enter(win, id, label)
@@ -1225,7 +1244,12 @@ do
                     elseif data.class and Skada.classcolors[data.class] then
                         color = Skada.classcolors[data.class]
                     end
-                    tooltip:AddDoubleLine(nr .. ". " .. data.label, data.valuetext, color.r, color.g, color.b)
+
+                    local title = data.label
+                    if mode.metadata and mode.metadata.showspots then
+                        title = nr .. ". " .. title
+                    end
+                    tooltip:AddDoubleLine(title, data.valuetext, color.r, color.g, color.b)
                 end
             end
 
@@ -2271,6 +2295,40 @@ function Skada:OnInitialize()
     self.db.RegisterCallback(self, "OnProfileCopied", "ReloadSettings")
     self.db.RegisterCallback(self, "OnProfileReset", "ReloadSettings")
     self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes")
+
+    if not self.classcolors then
+        self.classcolors = {
+            ["DEATHKNIGHT"] = {r = 0.77, g = 0.12, b = 0.23},
+            ["DRUID"] = {r = 1, g = 0.49, b = 0.04},
+            ["ENEMY"] = {r = 0.94117, g = 0, 0.0196, b = 1},
+            ["HUNTER"] = {r = 0.67, g = 0.83, b = 0.45},
+            ["MAGE"] = {r = 0.41, g = 0.8, b = 0.94},
+            ["NEUTRAL"] = {r = 1, g = 1, b = 0},
+            ["PALADIN"] = {r = 0.96, g = 0.55, b = 0.73},
+            ["PET"] = {r = 0.3, g = 0.4, b = 0.5},
+            ["PRIEST"] = {r = 1, g = 1, b = 1},
+            ["ROGUE"] = {r = 1, g = 0.96, b = 0.41},
+            ["SHAMAN"] = {r = 0, g = 0.44, b = 0.87},
+            ["UNKNOW"] = {r = 0.2, g = 0.2, b = 0.2},
+            ["WARLOCK"] = {r = 0.58, g = 0.51, b = 0.79},
+            ["WARRIOR"] = {r = 0.78, g = 0.61, b = 0.43}
+        }
+    end
+
+    if not self.validclass then
+        self.validclass = {
+            ["DEATHKNIGHT"] = true,
+            ["DRUID"] = true,
+            ["HUNTER"] = true,
+            ["MAGE"] = true,
+            ["PALADIN"] = true,
+            ["PRIEST"] = true,
+            ["ROGUE"] = true,
+            ["SHAMAN"] = true,
+            ["WARLOCK"] = true,
+            ["WARRIOR"] = true
+        }
+    end
 
     self:ReloadSettings()
     self:ScheduleTimer("ApplySettings", 2)
