@@ -157,7 +157,6 @@ Skada:AddLoadableModule(
         local playermod = mod:NewModule(L["Damage spell list"])
         local targetmod = mod:NewModule(L["Damage target list"])
         local spellmod = mod:NewModule(L["Damage spell details"])
-        local spelltargetsmod = mod:NewModule(L["Damage spell targets"])
 
         local dpsmod = Skada:NewModule(L["DPS"])
 
@@ -218,13 +217,6 @@ Skada:AddLoadableModule(
             end
 
             if set == Skada.current and dmg.dstName and dmg.amount > 0 then
-                spell.targets = spell.targets or {}
-                if not spell.targets[dmg.dstName] then
-                    spell.targets[dmg.dstName] = dmg.amount
-                else
-                    spell.targets[dmg.dstName] = spell.targets[dmg.dstName] + dmg.amount
-                end
-
                 if not player.damagedone.targets[dmg.dstName] then
                     player.damagedone.targets[dmg.dstName] = 0
                 end
@@ -311,16 +303,9 @@ Skada:AddLoadableModule(
             if player then
                 local activetime = Skada:PlayerActiveTime(set, player)
                 local totaltime = Skada:GetSetTime(set)
-                tooltip:AddDoubleLine(
-                    L["Activity"],
-                    ("%02.1f%%"):format(activetime / math.max(1, totaltime) * 100),
-                    255,
-                    255,
-                    255,
-                    255,
-                    255,
-                    255
-                )
+                tooltip:AddDoubleLine(L["Activity"], format("%02.1f%%", 100 * activetime / totaltime), 255, 255, 255)
+                tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 255, 255, 255, 255, 255, 255)
+                tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 255, 255, 255, 255, 255, 255)
             end
         end
 
@@ -655,49 +640,6 @@ Skada:AddLoadableModule(
             win.metadata.maxvalue = max
         end
 
-        function spelltargetsmod:Enter(win, id, label)
-            self.spellid = id
-            local player = Skada:find_player(win:get_selected_set(), playermod.playerid)
-            if player then
-                self.title = format(L["%s's <%s> targets"], player.name, label)
-            else
-                self.title = format(L["%s's targets"], label)
-            end
-        end
-
-        function spelltargetsmod:Update(win, set)
-            local player = Skada:find_player(set, playermod.playerid)
-            local max = 0
-
-            if player and player.damagedone.spells[self.spellid] then
-                local nr = 1
-
-                for targetname, amount in pairs(player.damagedone.spells[self.spellid].targets) do
-                    local d = win.dataset[nr] or {}
-                    win.dataset[nr] = d
-
-                    d.id = targetname
-                    d.label = targetname
-                    d.value = amount
-                    d.valuetext =
-                        Skada:FormatValueText(
-                        Skada:FormatNumber(amount),
-                        mod.metadata.columns.Damage,
-                        format("%02.1f%%", player.damagedone.amount / set.damagedone * 100),
-                        mod.metadata.columns.Percent
-                    )
-
-                    if amount > max then
-                        max = amount
-                    end
-
-                    nr = nr + 1
-                end
-            end
-
-            win.metadata.maxvalue = max
-        end
-
         function spellsmod:Update(win, set)
             local spells, _ = {}
 
@@ -829,7 +771,7 @@ Skada:AddLoadableModule(
 
         function mod:OnEnable()
             spellmod.metadata = {tooltip = spellmod_tooltip}
-            playermod.metadata = {post_tooltip = player_tooltip, click1 = spelltargetsmod, click2 = spellmod}
+            playermod.metadata = {post_tooltip = player_tooltip, click1 = spellmod}
             targetmod.metadata = {}
             mod.metadata = {
                 showspots = true,
