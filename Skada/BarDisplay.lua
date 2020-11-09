@@ -287,7 +287,7 @@ do
     end
 
     function mod:CreateBar(win, name, label, value, maxvalue, icon, o)
-        local bar = win.bargroup:NewCounterBar(name, label, value, maxvalue, icon, o)
+        local bar, isnew = win.bargroup:NewCounterBar(name, label, value, maxvalue, icon, o)
         bar.win = win
         bar:EnableMouseWheel(true)
         bar:SetScript("OnMouseWheel", OnMouseWheel)
@@ -295,7 +295,7 @@ do
         bar.iconFrame:SetScript("OnLeave", nil)
         bar.iconFrame:SetScript("OnMouseDown", nil)
         bar.iconFrame:EnableMouse(false)
-        return bar
+        return bar, isnew
     end
 end
 
