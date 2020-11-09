@@ -52,7 +52,7 @@ local spec_icon_tcoords = {
 }
 
 -- role icons and coordinates
-local role_icon_file, role_icon_tcoords = [["Interface\LFGFrame\UI-LFG-ICON-PORTRAITROLES"]]
+local role_icon_file, role_icon_tcoords = [[Interface\LFGFrame\UI-LFG-ICON-PORTRAITROLES]]
 
 -- classes file and coordinates
 local class_icon_file, class_icon_tcoords = [[Interface\Glues\CharacterCreate\UI-CharacterCreate-Classes]]
