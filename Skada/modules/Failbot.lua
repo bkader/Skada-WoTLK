@@ -121,6 +121,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
 
                     local count = player.fails.spells[self.spellid].count
                     d.value = count
@@ -149,6 +150,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
 
                     d.value = player.fails.count
                     d.valuetext = tostring(player.fails.count)

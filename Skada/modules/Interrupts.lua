@@ -207,6 +207,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
 
                     d.value = player.interrupts.count
                     d.valuetext =

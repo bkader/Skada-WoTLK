@@ -41,7 +41,7 @@ Skada:AddLoadableModule(
             -- record the target
             if not player.healing.targets[data.dstName] then
                 local unitclass = select(2, UnitClass(data.dstName))
-                local unitrole = UnitGroupRolesAssigned(data.dstName) or "NONE"
+                local unitrole = UnitGroupRolesAssigned(data.dstName)
                 player.healing.targets[data.dstName] = {
                     id = data.dstGUID,
                     class = unitclass,
@@ -247,6 +247,7 @@ Skada:AddLoadableModule(
                         d.label = targetname
                         d.class = target.class
                         d.role = target.role
+                        d.spec = target.spec
 
                         d.value = target.amount
                         d.valuetext =
@@ -281,6 +282,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
 
                     d.value = player.healing.amount
                     d.valuetext =
@@ -378,6 +380,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
 
                     d.value = player.healing.amount
                     d.valuetext =
@@ -436,6 +439,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
 
                     d.value = player.healing.overhealing
                     d.valuetext =
@@ -663,7 +667,7 @@ Skada:AddLoadableModule(
             -- record the target
             if not player.absorbs.targets[dstName] then
                 local unitclass = select(2, UnitClass(dstName))
-                local unitrole = UnitGroupRolesAssigned(dstName) or "NONE"
+                local unitrole = UnitGroupRolesAssigned(dstName)
                 player.absorbs.targets[dstName] = {class = unitclass, role = unitrole, amount = 0}
             end
             player.absorbs.targets[dstName].amount = player.absorbs.targets[dstName].amount + amount
@@ -865,6 +869,7 @@ Skada:AddLoadableModule(
                         d.label = targetname
                         d.class = target.class
                         d.role = target.role
+                        d.spec = target.spec
 
                         d.value = target.amount
                         d.valuetext =
@@ -900,6 +905,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
                     d.value = player.absorbs.amount
                     d.valuetext =
                         Skada:FormatValueText(
@@ -1150,6 +1156,7 @@ Skada:AddLoadableModule(
                         d.label = targetname
                         d.class = target.class
                         d.role = target.role
+                        d.spec = target.spec
 
                         d.value = target.amount
                         d.valuetext =
@@ -1186,6 +1193,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
 
                     d.value = healing
                     d.valuetext =

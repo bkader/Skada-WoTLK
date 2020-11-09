@@ -8,6 +8,7 @@ local ICON = LibStub("LibDBIcon-1.0", true)
 local LSM = LibStub("LibSharedMedia-3.0")
 local BOSS = LibStub("LibBossIDs-1.0")
 local AceConfig = LibStub("AceConfig-3.0")
+local LGT = LibStub("LibGroupTalents-1.0")
 
 local dataobj =
     LDB:NewDataObject(
@@ -94,6 +95,7 @@ local GetNumPartyMembers, GetNumRaidMembers = GetNumPartyMembers, GetNumRaidMemb
 local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAffectingCombat, InCombatLockdown
 local UnitClass, UnitGroupRolesAssigned = UnitClass, UnitGroupRolesAssigned
 local UnitGUID, UnitName = UnitGUID, UnitName
+
 -- =================== --
 -- add missing globals --
 -- =================== --
@@ -941,14 +943,82 @@ function Skada:ClearAllIndexes()
     end
 end
 
--- sometimes GUID are shown instead of proper players names
--- this function is called and used only once per player
-function Skada:FixPlayer(player)
-    if player.id and player.name and player.id == player.name then
-        local _, class, _, _, _, name = GetPlayerInfoByGUID(player.id)
-        if name and class then
-            player.name = name
-            player.class = class
+do
+    local specIDs = {
+        ["MAGE"] = {62, 63, 64},
+        ["PRIEST"] = {256, 257, 258},
+        ["ROGUE"] = {259, 260, 261},
+        ["WARLOCK"] = {265, 266, 267},
+        ["WARRIOR"] = {71, 72, 73},
+        ["PALADIN"] = {65, 66, 70},
+        ["DEATHKNIGHT"] = {250, 251, 252},
+        ["DRUID"] = {102, 103, 104, 105},
+        ["HUNTER"] = {253, 254, 255},
+        ["SHAMAN"] = {262, 263, 264}
+    }
+
+    local function GetDruidSubSpec(unit)
+        -- 57881 : Natural Reaction -- used by druid tanks
+        local points = LGT:UnitHasTalent(unit, GetSpellInfo(57881), LGT:GetActiveTalentGroup(unit))
+        if points and points > 0 then
+            return 3 -- druid tank
+        else
+            return 2
+        end
+    end
+
+    function Skada:GetPlayerSpecID(playername, playerclass)
+        local specIdx = 0
+
+        if playername then
+            playerclass = playerclass or select(2, UnitClass(playername))
+            if playerclass and specIDs[playerclass] then
+                local talantGroup = LGT:GetActiveTalentGroup(playername)
+                local maxPoints, index = 0, 0
+
+                for i = 1, MAX_TALENT_TABS do
+                    local name, icon, pointsSpent = LGT:GetTalentTabInfo(playername, i, talantGroup)
+                    if pointsSpent ~= nil then
+                        if maxPoints < pointsSpent then
+                            maxPoints = pointsSpent
+                            if playerclass == "DRUID" and i >= 2 then
+                                if i == 3 then
+                                    index = 4
+                                elseif i == 2 then
+                                    index = GetDruidSubSpec(playername)
+                                end
+                            else
+                                index = i
+                            end
+                        end
+                    end
+                end
+
+                if specIDs[playerclass][index] then
+                    specIdx = specIDs[playerclass][index]
+                end
+            end
+        end
+
+        return specIdx
+    end
+
+    -- sometimes GUID are shown instead of proper players names
+    -- this function is called and used only once per player
+    function Skada:FixPlayer(player)
+        if player.id and player.name then
+            local _, class, _, _, _, name = GetPlayerInfoByGUID(player.id)
+
+            if player.id == player.name then
+                if name and class then
+                    player.name = name
+                    player.class = class
+                end
+            end
+
+            if not player.spec then
+                player.spec = self:GetPlayerSpecID(player.name, class)
+            end
         end
     end
 end
@@ -982,11 +1052,11 @@ function Skada:get_player(set, playerid, playername)
         end
 
         local playerClass = select(2, UnitClass(playername))
-        local playerRole = UnitGroupRolesAssigned(playername)
+        local playerRole = UnitGroupRolesAssigned(playername) or nil
         player = {
             id = playerid,
             class = playerClass,
-            role = playerRole or "NONE",
+            role = playerRole,
             name = playername,
             first = now,
             time = 0
@@ -1563,6 +1633,7 @@ function Skada:Reset()
     collectgarbage("collect")
 
     if not InCombatLockdown() then
+        CombatLogClearEntries()
         collectgarbage("collect")
     end
 end
@@ -2211,6 +2282,7 @@ function Skada:OnEnable()
         self.modulelist = nil
     end
 
+    self:ScheduleRepeatingTimer("ClearCombatLog", self.db.profile.updatefrequency or 0.25)
     self:ScheduleTimer("MemoryCheck", 3)
 end
 
@@ -2663,5 +2735,10 @@ do
                 end
             end
         end
+    end
+
+    -- used to fix broken combat log
+    function Skada:ClearCombatLog()
+        CombatLogClearEntries()
     end
 end

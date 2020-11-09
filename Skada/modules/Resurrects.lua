@@ -139,7 +139,8 @@ Skada:AddLoadableModule(
                     d.id = target.id
                     d.label = targetname
                     d.class = select(2, UnitClass(targetname))
-                    d.role = UnitGroupRolesAssigned(targetname) or "NONE"
+                    d.role = target.role
+                    d.spec = target.spec
 
                     d.value = target.count
                     d.valuetext = tostring(target.count)
@@ -174,7 +175,8 @@ Skada:AddLoadableModule(
                     d.id = target.id
                     d.label = targetname
                     d.class = select(2, UnitClass(targetname))
-                    d.role = UnitGroupRolesAssigned(targetname)
+                    d.role = target.role
+                    d.spec = target.spec
 
                     d.value = target.count
                     d.valuetext = tostring(target.count)
@@ -239,6 +241,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
 
                     d.value = player.resurrect.count
                     d.valuetext = tostring(player.resurrect.count)

@@ -273,6 +273,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
                     d.value = player.ccdone.count
                     d.valuetext = tostring(player.ccdone.count)
 
@@ -569,6 +570,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
                     d.value = player.cctaken.count
                     d.valuetext = tostring(player.cctaken.count)
 
@@ -902,6 +904,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
                     d.value = player.ccbreaks.count
                     d.valuetext = tostring(player.ccbreaks.count)
 

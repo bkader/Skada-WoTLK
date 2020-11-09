@@ -266,6 +266,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
 
                     d.value = death.time
                     d.valuetext = date("%H:%M:%S", death.time)
@@ -293,6 +294,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
 
                     d.value = player.deaths
                     d.valuetext = tostring(player.deaths)
@@ -425,6 +427,7 @@ Skada:AddLoadableModule(
                 d.label = player.name
                 d.class = player.class
                 d.role = player.role
+                d.spec = player.spec
 
                 d.value = playertime
                 d.valuetext = format("%ss (%02.1f%%)", playertime, playertime / settime * 100)

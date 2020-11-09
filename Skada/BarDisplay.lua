@@ -15,6 +15,48 @@ mod.name = L["Bar display"]
 mod.description = L["Bar display is the normal bar window used by most damage meters. It can be extensively styled."]
 Skada:AddDisplaySystem("bar", mod)
 
+-- specs and coordinates
+local spec_icon_file = [[Interface\AddOns\Skada\media\textures\icon-specs]]
+local spec_icon_tcoords = {
+    [250] = {0, 64 / 512, 0, 64 / 512}, --> blood dk
+    [251] = {64 / 512, 128 / 512, 0, 64 / 512}, --> frost dk
+    [252] = {128 / 512, 192 / 512, 0, 64 / 512}, --> unholy dk
+    [102] = {192 / 512, 256 / 512, 0, 64 / 512}, -->  druid balance
+    [103] = {256 / 512, 320 / 512, 0, 64 / 512}, -->  druid feral
+    [104] = {320 / 512, 384 / 512, 0, 64 / 512}, -->  druid guardian
+    [105] = {384 / 512, 448 / 512, 0, 64 / 512}, -->  druid resto
+    [253] = {448 / 512, 512 / 512, 0, 64 / 512}, -->  hunter bm
+    [254] = {0, 64 / 512, 64 / 512, 128 / 512}, --> hunter marks
+    [255] = {64 / 512, 128 / 512, 64 / 512, 128 / 512}, --> hunter survivor
+    [62] = {(128 / 512) + 0.001953125, 192 / 512, 64 / 512, 128 / 512}, --> mage arcane
+    [63] = {192 / 512, 256 / 512, 64 / 512, 128 / 512}, --> mage fire
+    [64] = {256 / 512, 320 / 512, 64 / 512, 128 / 512}, --> mage frost
+    [65] = {0, 64 / 512, 128 / 512, 192 / 512}, --> paladin holy
+    [66] = {64 / 512, 128 / 512, 128 / 512, 192 / 512}, --> paladin protect
+    [70] = {(128 / 512) + 0.001953125, 192 / 512, 128 / 512, 192 / 512}, --> paladin ret
+    [256] = {192 / 512, 256 / 512, 128 / 512, 192 / 512}, --> priest disc
+    [257] = {256 / 512, 320 / 512, 128 / 512, 192 / 512}, --> priest holy
+    [258] = {(320 / 512) + (0.001953125 * 4), 384 / 512, 128 / 512, 192 / 512}, --> priest shadow
+    [259] = {384 / 512, 448 / 512, 128 / 512, 192 / 512}, --> rogue assassination
+    [260] = {448 / 512, 512 / 512, 128 / 512, 192 / 512}, --> rogue combat
+    [261] = {0, 64 / 512, 192 / 512, 256 / 512}, --> rogue sub
+    [262] = {64 / 512, 128 / 512, 192 / 512, 256 / 512}, --> shaman elemental
+    [263] = {128 / 512, 192 / 512, 192 / 512, 256 / 512}, --> shamel enhancement
+    [264] = {192 / 512, 256 / 512, 192 / 512, 256 / 512}, --> shaman resto
+    [265] = {256 / 512, 320 / 512, 192 / 512, 256 / 512}, --> warlock aff
+    [266] = {320 / 512, 384 / 512, 192 / 512, 256 / 512}, --> warlock demo
+    [267] = {384 / 512, 448 / 512, 192 / 512, 256 / 512}, --> warlock destro
+    [71] = {448 / 512, 512 / 512, 192 / 512, 256 / 512}, --> warrior arms
+    [72] = {0, 64 / 512, 256 / 512, 320 / 512}, --> warrior fury
+    [73] = {64 / 512, 128 / 512, 256 / 512, 320 / 512} --> warrior protect
+}
+
+-- role icons and coordinates
+local role_icon_file, role_icon_tcoords = [["Interface\LFGFrame\UI-LFG-ICON-PORTRAITROLES"]]
+
+-- classes file and coordinates
+local class_icon_file, class_icon_tcoords = [[Interface\Glues\CharacterCreate\UI-CharacterCreate-Classes]]
+
 function mod:Create(window)
     -- Re-use bargroup if it exists.
     window.bargroup = mod:GetBarGroup(window.db.name)
@@ -139,17 +181,17 @@ function mod:Create(window)
     -- Restore window position.
     libwindow.RestorePosition(window.bargroup)
 
-    if not mod.class_icon_tcoords then -- amortized class icon coordinate adjustment
-        mod.class_icon_tcoords = {}
+    if not class_icon_tcoords then -- amortized class icon coordinate adjustment
+        class_icon_tcoords = {}
         for class, coords in pairs(CLASS_ICON_TCOORDS) do
             local l, r, t, b = unpack(coords)
             local adj = 0.02
-            mod.class_icon_tcoords[class] = {(l + adj), (r - adj), (t + adj), (b - adj)}
+            class_icon_tcoords[class] = {(l + adj), (r - adj), (t + adj), (b - adj)}
         end
     end
 
-    if not mod.role_icon_tcoords then
-        mod.role_icon_tcoords = {
+    if not role_icon_tcoords then
+        role_icon_tcoords = {
             DAMAGER = {0.3125, 0.63, 0.3125, 0.63},
             HEALER = {0.3125, 0.63, 0.015625, 0.3125},
             TANK = {0, 0.296875, 0.3125, 0.63},
@@ -375,7 +417,11 @@ do
 
         local hasicon = false
         for _, data in ipairs(win.dataset) do
-            if (data.icon and not data.ignore) or (data.class and win.db.classicons) or (data.role and win.db.roleicons) then
+            if
+                (data.icon and not data.ignore) or (data.spec and win.db.specicons) or
+                    (data.class and win.db.classicons) or
+                    (data.role and win.db.roleicons)
+             then
                 hasicon = true
             end
         end
@@ -458,18 +504,15 @@ do
                         bar.missingclass = nil
                     end
 
-                    if data.role and data.role ~= "NONE" and win.db.roleicons then
+                    if data.spec and win.db.specicons and spec_icon_tcoords[data.spec] then
                         bar:ShowIcon()
-                        bar:SetIconWithCoord(
-                            "Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES",
-                            mod.role_icon_tcoords[data.role]
-                        )
-                    elseif data.class and win.db.classicons and mod.class_icon_tcoords[data.class] then
+                        bar:SetIconWithCoord(spec_icon_file, spec_icon_tcoords[data.spec])
+                    elseif data.role and data.role ~= "NONE" and win.db.roleicons then
                         bar:ShowIcon()
-                        bar:SetIconWithCoord(
-                            "Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes",
-                            mod.class_icon_tcoords[data.class]
-                        )
+                        bar:SetIconWithCoord(role_icon_file, role_icon_tcoords[data.role])
+                    elseif data.class and win.db.classicons and class_icon_tcoords[data.class] then
+                        bar:ShowIcon()
+                        bar:SetIconWithCoord(class_icon_file, class_icon_tcoords[data.class])
                     end
 
                     -- set bar color
@@ -976,6 +1019,19 @@ function mod:AddDisplayOptions(win, options)
                 end,
                 set = function()
                     db.roleicons = not db.roleicons
+                    Skada:ApplySettings()
+                end
+            },
+            specicons = {
+                type = "toggle",
+                name = L["Spec icons"],
+                desc = L["Use specialization icons where applicable."],
+                order = 24.1,
+                get = function()
+                    return db.specicons
+                end,
+                set = function()
+                    db.specicons = not db.specicons
                     Skada:ApplySettings()
                 end
             },

@@ -29,6 +29,7 @@ Skada.windowdefaults = {
     classcolortext = false,
     classicons = true,
     roleicons = false,
+    specicons = true,
     showself = true,
     -- buttons
     buttons = {menu = true, reset = true, report = true, mode = true, segment = true},

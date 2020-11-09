@@ -52,12 +52,15 @@ local function log_auraapply(set, aura)
             player.auras[aura.spellid].started = player.auras[aura.spellid].started or now
         end
 
-        local targets = player.auras[aura.spellid].targets
+        if aura.dstName then
+	        local targets = player.auras[aura.spellid].targets or {}
+	        player.auras[aura.spellid].targets=targets
 
-        if not targets[aura.dstName] then
-            targets[aura.dstName] = {id = aura.dstGUID, count = 1}
-        else
-            targets[aura.dstName].count = targets[aura.dstName].count + 1
+	        if not targets[aura.dstName] then
+	            targets[aura.dstName] = {id = aura.dstGUID, count = 1}
+	        else
+	            targets[aura.dstName].count = targets[aura.dstName].count + 1
+	        end
         end
     end
 end
@@ -260,6 +263,7 @@ local function mod_update(auratype, win, set, mod)
             d.label = player.name
             d.class = player.class
             d.role = player.role
+            d.spec = player.spec
 
             d.value = uptime
             d.valuetext = format("%02.1f%% / %u", uptime / maxtime * 100, auracount)
@@ -527,6 +531,7 @@ Skada:AddLoadableModule(
                             d.label = player.name
                             d.class = player.class
                             d.role = player.role
+                            d.spec = player.spec
 
                             d.value = spell.count
                             d.valuetext =

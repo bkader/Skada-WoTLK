@@ -629,6 +629,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
 
                     local amount = player.damagedone.spells[self.spellid].amount
 
@@ -696,6 +697,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
 
                     local dps = getDPS(set, player)
 
@@ -755,6 +757,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
 
                     d.value = dps
                     d.valuetext =
@@ -1200,6 +1203,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
 
                     local amount = player.damagetaken.spells[self.spellid].amount
 
@@ -1270,6 +1274,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
 
                     d.value = player.damagetaken.amount
                     d.valuetext =
@@ -1470,6 +1475,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
 
                     local total, avoid = 0, 0
                     for spellname, spell in pairs(player.damagetaken.spells) do
@@ -1529,11 +1535,22 @@ do
         return set.enemies.list[name]
     end
 
-    local function find_player(mob, name)
+    local function find_player(mob, name, guid, set)
         if not mob.players[name] then
-            local unitCLass = select(2, UnitClass(name))
-            local unitRole = UnitGroupRolesAssigned(name) or "NONE"
-            mob.players[name] = {class = unitCLass, role = unitRole, done = 0, taken = 0}
+            local player = Skada:find_player(set, guid, name)
+            if player then
+                mob.players[name] = {class = player.class, role = player.role, spec = player.spec, done = 0, taken = 0}
+            else
+                local unitClass = select(2, UnitClass(name))
+                local unitRole = UnitGroupRolesAssigned(name)
+                mob.players[name] = {
+                    class = unitClass,
+                    role = unitRole,
+                    spec = Skada:GetPlayerSpecID(name, unitClass),
+                    done = 0,
+                    taken = 0
+                }
+            end
         end
         return mob.players[name]
     end
@@ -1598,7 +1615,7 @@ do
                     local mob = find_mob(set, dmg.srcName)
                     mob.done = mob.done + dmg.amount
 
-                    local player = find_player(mob, dmg.dstName)
+                    local player = find_player(mob, dmg.dstName, dmg.dstGUID, set)
                     player.done = player.done + dmg.amount
                 end
             end
@@ -1641,6 +1658,7 @@ do
                                     d.label = playername
                                     d.class = player.class
                                     d.role = player.role
+                                    d.spec = player.spec
 
                                     d.value = player.done
                                     d.valuetext =
@@ -1744,7 +1762,7 @@ do
                     local mob = find_mob(set, dmg.dstName)
                     mob.taken = mob.taken + dmg.amount
 
-                    local player = find_player(mob, dmg.srcName)
+                    local player = find_player(mob, dmg.srcName, dmg.srcGUID, set)
                     player.taken = player.taken + dmg.amount
                 end
             end
@@ -1787,6 +1805,7 @@ do
                                     d.label = name
                                     d.class = player.class
                                     d.role = player.role
+                                    d.spec = player.spec
 
                                     d.value = player.taken
                                     d.valuetext =
@@ -2024,6 +2043,7 @@ Skada:AddLoadableModule(
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
+                    d.spec = player.spec
 
                     d.value = player.friendfire.amount
                     d.valuetext =
