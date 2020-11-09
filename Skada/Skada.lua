@@ -90,6 +90,7 @@ local wasinparty, wasininstance, wasinpvp = false
 local tsort, tinsert, tremove, tmaxn = table.sort, table.insert, table.remove, table.maxn
 local next, pairs, ipairs, type = next, pairs, ipairs, type
 local tonumber, tostring, format = tonumber, tostring, string.format
+local math_floor, math_max = math.floor, math.max
 local band, time = bit.band, time
 local GetNumPartyMembers, GetNumRaidMembers = GetNumPartyMembers, GetNumRaidMembers
 local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAffectingCombat, InCombatLockdown
@@ -147,7 +148,7 @@ end
 function setPlayerActiveTimes(set)
     for i, player in ipairs(set.players) do
         if player.last then
-            player.time = player.time + (player.last - player.first)
+            player.time = math_max(player.time + (player.last - player.first), 0.1)
         end
     end
 end
@@ -922,7 +923,12 @@ function Skada:DeleteSet(set)
 end
 
 function Skada:GetSetTime(set)
-    return (set.time and set.time > 0) and set.time or (time() - set.starttime)
+    return set.time and set.time or math_max(time() - set.starttime, 0.1)
+end
+
+function Skada:GetFormatedSetTime(set)
+    local settime = self:GetSetTime(set)
+    return self:FormatTime(settime)
 end
 
 -- ================ --
@@ -1770,8 +1776,21 @@ function Skada:FormatNumber(number)
                 return format("%02.1fK", number / 1000)
             end
         else
-            return math.floor(number)
+            return math_floor(number)
         end
+    end
+end
+
+function Skada:FormatTime(sec)
+    if sec then
+        if sec >= 3600 then
+            local h = math_floor(sec / 3600)
+            local m = math_floor(sec / 60 - (h * 60))
+            local s = math.floor(sec - h * 3600 - m * 60)
+            return format("%02.f:%02.f:%02.f", h, m, s)
+        end
+
+        return format("%02.f:%02.f", math_floor(sec / 60), math_floor(sec % 60))
     end
 end
 
@@ -2029,7 +2048,7 @@ function Skada:FrameSettings(db, include_dimensions)
                 desc = L["The size of the texture pattern."],
                 order = 1.3,
                 min = 0,
-                max = math.floor(GetScreenWidth()),
+                max = math_floor(GetScreenWidth()),
                 step = 1.0,
                 get = function()
                     return db.background.tilesize
@@ -2354,7 +2373,7 @@ do
         if not self.db.profile.onlykeepbosses or self.current.gotboss then
             if self.current.mobname ~= nil and now - self.current.starttime > 5 then
                 self.current.endtime = self.current.endtime or now
-                self.current.time = self.current.endtime - self.current.starttime
+                self.current.time = math_max(self.current.endtime - self.current.starttime, 0.1)
                 setPlayerActiveTimes(self.current)
                 self.current.stopped = nil
 
@@ -2367,7 +2386,7 @@ do
                         else
                             local n, c = set.name:match("^(.-)%s*%((%d+)%)$")
                             if n == setname then
-                                max = math.max(max, tonumber(c) or 0)
+                                max = math_max(max, tonumber(c) or 0)
                             end
                         end
                     end
@@ -2443,7 +2462,7 @@ do
         if self.current then
             self.current.stopped = true
             self.current.endtime = time()
-            self.current.time = self.current.endtime - self.current.starttime
+            self.current.time = math_max(self.current.endtime - self.current.starttime, 0.1)
         end
     end
 
