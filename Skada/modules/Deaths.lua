@@ -213,7 +213,7 @@ Skada:AddLoadableModule(
                             d.time = log.time
 
                             -- used for tooltip
-                            d.htp = log.htp
+                            d.hp = log.hp
                             d.amount = log.amount
                             d.source = log.source
                             d.spellname = spellname
@@ -261,18 +261,18 @@ Skada:AddLoadableModule(
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
+                    local dth = death.log[2]
+
                     d.id = i
                     d.time = death.time
-                    d.label = player.name
-                    d.class = player.class
-                    d.role = player.role
-                    d.spec = player.spec
+                    d.label = dth and dth.source or UNKNOW
+                    d.icon = "Interface\\Icons\\Ability_Rogue_FeignDeath"
 
-                    d.value = death.time
-                    d.valuetext = date("%H:%M:%S", death.time)
+                    d.value = dth and dth.time or death.time
+                    d.valuetext = date("%H:%M:%S", d.value)
 
-                    if death.time > max then
-                        max = death.time
+                    if d.value > max then
+                        max = d.value
                     end
 
                     nr = nr + 1
@@ -316,17 +316,17 @@ Skada:AddLoadableModule(
                 tooltip:AddLine(L["Spell details"] .. " - " .. date("%H:%M:%S", entry.time))
                 tooltip:AddDoubleLine(L["Spell"], entry.spellname, 255, 255, 255, 255, 255, 255)
 
-                if entry.amount then
-                    local amount = (entry.amount < 0) and (0 - entry.amount) or entry.amount
-                    tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(amount), 255, 255, 255, 255, 255, 255)
+                if entry.source then
+                    tooltip:AddDoubleLine(L["Source"], entry.source, 255, 255, 255, 255, 255, 255)
                 end
 
                 if entry.hp then
                     tooltip:AddDoubleLine(HEALTH, Skada:FormatNumber(entry.hp), 255, 255, 255, 255, 255, 255)
                 end
 
-                if entry.source then
-                    tooltip:AddDoubleLine(L["Source"], entry.source, 255, 255, 255, 255, 255, 255)
+                if entry.amount then
+                    local amount = (entry.amount < 0) and (0 - entry.amount) or entry.amount
+                    tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(amount), 255, 255, 255, 255, 255, 255)
                 end
             end
         end
@@ -408,8 +408,8 @@ Skada:AddLoadableModule(
                 local settime = Skada:GetSetTime(set)
                 local playertime = Skada:PlayerActiveTime(set, player)
                 tooltip:AddLine(player.name .. ": " .. L["Activity"])
-                tooltip:AddDoubleLine(L["Segment Time"], SecondsToTime(settime), 255, 255, 255)
-                tooltip:AddDoubleLine(L["Active Time"], SecondsToTime(playertime), 255, 255, 255)
+                tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 255, 255, 255)
+                tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(playertime), 255, 255, 255)
                 tooltip:AddDoubleLine(L["Activity"], format("%02.1f%%", playertime / settime * 100), 255, 255, 255)
             end
         end
@@ -430,7 +430,13 @@ Skada:AddLoadableModule(
                 d.spec = player.spec
 
                 d.value = playertime
-                d.valuetext = format("%ss (%02.1f%%)", playertime, playertime / settime * 100)
+                d.valuetext =
+                    Skada:FormatValueText(
+                    Skada:FormatTime(playertime),
+                    self.metadata.columns["Active Time"],
+                    format("%02.1f%%", 100 * playertime / settime),
+                    self.metadata.columns.Percent
+                )
 
                 if playertime > max then
                     max = playertime
@@ -443,7 +449,11 @@ Skada:AddLoadableModule(
         end
 
         function mod:OnEnable()
-            mod.metadata = {showspots = true, tooltip = activity_tooltip}
+            mod.metadata = {
+                showspots = true,
+                tooltip = activity_tooltip,
+                columns = {["Active Time"] = true, Percent = true}
+            }
             Skada:AddMode(self)
         end
 
@@ -452,7 +462,12 @@ Skada:AddLoadableModule(
         end
 
         function mod:GetSetSummary(set)
-            return SecondsToTime(Skada:GetSetTime(set))
+            return Skada:FormatValueText(
+                Skada:GetFormatedSetTime(set),
+                self.metadata.columns["Active Time"],
+                format("%s - %s", date("%H:%M", set.starttime), date("%H:%M", set.endtime)),
+                self.metadata.columns.Percent
+            )
         end
     end
 )
