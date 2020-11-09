@@ -456,6 +456,7 @@ L["%s on %s removed by %s's %s"] = true
 
 -- damage done module
 L["Damage"] = true
+L["Damage target list"] = true
 L["Damage spell list"] = true
 L["Damage spell details"] = true
 L["Damage spell targets"] = true
@@ -474,6 +475,7 @@ L["Damage: Raid DPS"] = true
 -- damage taken module
 L["Damage taken"] = true
 L["%s's damage taken"] = true
+L["Damage source list"] = true
 L["Damage spell sources"] = true
 L["Damage taken by spell"] = true
 L["%s's targets"] = true
