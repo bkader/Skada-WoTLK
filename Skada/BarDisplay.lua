@@ -55,7 +55,7 @@ local spec_icon_tcoords = {
 local role_icon_file, role_icon_tcoords = [[Interface\LFGFrame\UI-LFG-ICON-PORTRAITROLES]]
 
 -- classes file and coordinates
-local class_icon_file, class_icon_tcoords = [[Interface\Glues\CharacterCreate\UI-CharacterCreate-Classes]]
+local class_icon_file, class_icon_tcoords = [[Interface\AddOns\Skada\media\textures\icon-classes]]
 
 function mod:Create(window)
     -- Re-use bargroup if it exists.
@@ -184,10 +184,12 @@ function mod:Create(window)
     if not class_icon_tcoords then -- amortized class icon coordinate adjustment
         class_icon_tcoords = {}
         for class, coords in pairs(CLASS_ICON_TCOORDS) do
-            local l, r, t, b = unpack(coords)
-            local adj = 0.02
-            class_icon_tcoords[class] = {(l + adj), (r - adj), (t + adj), (b - adj)}
+            class_icon_tcoords[class] = coords
         end
+        class_icon_tcoords.ENEMY = {0, 0.25, 0.75, 1}
+        class_icon_tcoords.PET = {0.25, 0.49609375, 0.75, 1}
+        class_icon_tcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
+        class_icon_tcoords.PLAYER = {0.75, 1, 0.75, 1}
     end
 
     if not role_icon_tcoords then
@@ -513,10 +515,13 @@ do
                     elseif data.class and win.db.classicons and class_icon_tcoords[data.class] then
                         bar:ShowIcon()
                         bar:SetIconWithCoord(class_icon_file, class_icon_tcoords[data.class])
+                    elseif not data.ignore and not data.spellid and data.icon then
+                        bar:ShowIcon()
+                        bar:SetIconWithCoord(class_icon_file, class_icon_tcoords["PLAYER"])
                     end
 
                     -- set bar color
-                    local color = win.db.barcolor
+                    local color = win.db.barcolor or Skada.classcolors.NEUTRAL
 
                     if data.color then
                         color = data.color
