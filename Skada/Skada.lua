@@ -812,8 +812,14 @@ function Skada:GetModes()
 end
 
 function Skada:AddLoadableModule(name, description, func)
+    if type(description) == "function" then
+        func = description
+        description = nil
+    end
+
     self.modulelist = self.modulelist or {}
     self.modulelist[#self.modulelist + 1] = func
+
     self:AddLoadableModuleCheckbox(name, L[name], description and L[description])
 end
 
@@ -1018,33 +1024,37 @@ do
                 end
             end
 
-            -- fix the class
-            local class = player.class
-            if not class or class == "UNKNOWN" then
-                class = "UNKNOWN"
-            end
+            -- fix the pet classes
+            if pets[player.id] then
+                -- fix classes for others
+                player.class = "PET"
+                player.owner = self:GetPetOwner(player.id)
+            elseif not player.class then
+                -- it's a real player?
+                if UnitIsPlayer(player.name) then
+                    -- ungrouped player
+                    -- fix the class first
+                    player.class = select(2, UnitClass(player.name))
 
-            if class == "UNKNOWN" then
-                class = select(2, UnitClass(player.name))
+                    -- assign a role if not already assigned
+                    if not player.role then
+                        player.role = UnitGroupRolesAssigned(player.name) or "NONE"
+                    end
 
-                -- should we check more?
-                if not class or not self.validclass[class] then
-                    class = select(2, GetPlayerInfoByGUID(player.id))
+                    -- set the player's spec
+                    if not player.spec then
+                        player.spec = self:GetPlayerSpecID(player.name, player.class)
+                    end
+                elseif player.flag and band(player.flag, 0x00000400) ~= 0 then
+                    -- pets
+                    player.class = "UNGROUPPLAYER"
+                elseif player.flag and band(player.flag, 0x00003000) ~= 0 then
+                    --  last solution
+                    player.class = "PET"
+                    player.owner = self:GetPetOwner(player.id)
+                else
+                    player.class = "UNKNOWN"
                 end
-
-                if class and self.validclass[class] then
-                    player.class = class
-                end
-            end
-
-            -- fix player role
-            if UnitIsPlayer(player.name) and not player.role then
-                player.role = UnitGroupRolesAssigned(player.name) or "NONE"
-            end
-
-            -- fix the spec
-            if not player.spec then
-                player.spec = self:GetPlayerSpecID(player.name, class)
             end
         end
     end
@@ -1068,7 +1078,7 @@ function Skada:find_player(set, playerid)
     end
 end
 
-function Skada:get_player(set, playerid, playername)
+function Skada:get_player(set, playerid, playername, playerflag)
     local player = self:find_player(set, playerid)
 
     local now = time()
@@ -1081,6 +1091,7 @@ function Skada:get_player(set, playerid, playername)
         player = {
             id = playerid,
             name = playername,
+            flag = playerflag,
             first = now,
             time = 0
         }
@@ -1116,19 +1127,18 @@ function Skada:FixPets(action)
         if pet then
             if self.db.profile.mergepets then
                 if action.spellname then
-                    action.spellname = action.playername .. ": " .. action.spellname
+                    action.spellname = action.spellname .. " (" .. action.playername .. ")"
                 end
                 action.playername = pet.name
                 action.playerid = pet.id
             else
-                action.playername = pet.name .. ": " .. action.playername
-                local petMobID = action.playerid:sub(6, 10)
-                action.playerid = pet.id .. petMobID
+                action.playerid = action.playerid
+                action.playername = action.playername .. " (" .. pet.name .. ")"
             end
         elseif action.playerflags and band(action.playerflags, COMBATLOG_OBJECT_TYPE_GUARDIAN) ~= 0 then
             if band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
                 if action.spellname then
-                    action.spellname = action.playername .. ": " .. action.spellname
+                    action.spellname = action.spellname .. " (" .. action.playername .. ")"
                 end
                 action.playername = UnitName("player")
                 action.playerid = UnitGUID("player")
@@ -1450,7 +1460,7 @@ do
 
         local nr = 1
         for _, data in ipairs(report_table.dataset) do
-            if data.id then
+            if data.id and not data.ignore then
                 if report_mode.metadata and report_mode.metadata.showspots then
                     sendchat(format("%2u. %s   %s", nr, data.label, data.valuetext), channel, chantype)
                 else
@@ -1660,7 +1670,7 @@ function Skada:Reset()
     dataobj.text = "n/a"
     self:UpdateDisplay(true)
     self:Print(L["All data has been reset."])
-    collectgarbage("collect")
+    L_CloseDropDownMenus()
 
     if not InCombatLockdown() then
         CombatLogClearEntries()
@@ -2239,6 +2249,7 @@ function Skada:OnInitialize()
     LSM:Register("font", "Accidental Presidency", [[Interface\Addons\Skada\media\fonts\Accidental Presidency.ttf]])
     LSM:Register("font", "Adventure", [[Interface\Addons\Skada\media\fonts\Adventure.ttf]])
     LSM:Register("font", "Diablo", [[Interface\Addons\Skada\media\fonts\Diablo.ttf]])
+    LSM:Register("font", "Forced Square", [[Interface\Addons\Skada\media\fonts\FORCED SQUARE.ttf]])
 
     LSM:Register("statusbar", "Aluminium", [[Interface\Addons\Skada\media\statusbar\Aluminium]])
     LSM:Register("statusbar", "Armory", [[Interface\Addons\Skada\media\statusbar\Armory]])
@@ -2309,7 +2320,7 @@ function Skada:OnInitialize()
             ["PRIEST"] = {r = 1, g = 1, b = 1},
             ["ROGUE"] = {r = 1, g = 0.96, b = 0.41},
             ["SHAMAN"] = {r = 0, g = 0.44, b = 0.87},
-            ["UNKNOW"] = {r = 0.2, g = 0.2, b = 0.2},
+            ["UNKNOWN"] = {r = 0.2, g = 0.2, b = 0.2},
             ["WARLOCK"] = {r = 0.58, g = 0.51, b = 0.79},
             ["WARRIOR"] = {r = 0.78, g = 0.61, b = 0.43}
         }
@@ -2596,13 +2607,23 @@ do
         tick_timer = self:ScheduleRepeatingTimer("Tick", 1)
     end
 
+    local COMBATLOG_OBJECT_TYPE_PET = COMBATLOG_OBJECT_TYPE_PET or 0x00001000
+    local COMBATLOG_OBJECT_TYPE_GUARDIAN = COMBATLOG_OBJECT_TYPE_GUARDIAN or 0x00002000
     local PET_FLAGS = bit.bor(COMBATLOG_OBJECT_TYPE_PET, COMBATLOG_OBJECT_TYPE_GUARDIAN)
+
+    local COMBATLOG_OBJECT_AFFILIATION_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE or 0x00000001
+    local COMBATLOG_OBJECT_AFFILIATION_PARTY = COMBATLOG_OBJECT_AFFILIATION_PARTY or 0x00000002
+    local COMBATLOG_OBJECT_AFFILIATION_RAID = COMBATLOG_OBJECT_AFFILIATION_RAID or 0x00000004
     local RAID_FLAGS =
         bit.bor(
         COMBATLOG_OBJECT_AFFILIATION_MINE,
         COMBATLOG_OBJECT_AFFILIATION_PARTY,
         COMBATLOG_OBJECT_AFFILIATION_RAID
     )
+
+    -- for shaman elemental
+    local COMBATLOG_OBJECT_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
+    local COMBATLOG_OBJECT_CONTROL_NPC = COMBATLOG_OBJECT_CONTROL_NPC or 0x00000200
     local SHAM_FLAGS = bit.bor(COMBATLOG_OBJECT_TYPE_NPC + COMBATLOG_OBJECT_CONTROL_NPC)
 
     -- list of combat events that we don't care about

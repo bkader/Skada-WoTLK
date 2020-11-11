@@ -4,6 +4,7 @@
 <Script file="modules\Damage.lua" />
 <Script file="modules\Threat.lua" />
 <Script file="modules\AbsorbsHealing.lua" />
+<Script file="modules\Activity.lua" />
 <Script file="modules\Deaths.lua" />
 <Script file="modules\Resurrects.lua" />
 <Script file="modules\Auras.lua" />
