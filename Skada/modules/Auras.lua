@@ -509,6 +509,30 @@ Skada:AddLoadableModule(
             return total
         end
 
+        local function increment_sunder(set, playerid, playername, playerflags, spellid, dstName)
+            if not set then
+                return
+            end
+            local player = Skada:get_player(set, playerid, playername, playerflags)
+            if player and player.auras[spellid] then
+                player.auras[spellid].count = (player.auras[spellid].count or 0) + 1
+                player.auras[spellid].started = time()
+
+                if player.auras[spellid].targets[dstName] then
+                    player.auras[spellid].targets[dstName].count =
+                        (player.auras[spellid].targets[dstName].count or 0) + 1
+                end
+            end
+        end
+
+        local function SunderApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+            local spellid, spellname, spellschool, auratype = ...
+            if spellname == sunder then
+                increment_sunder(Skada.current, srcGUID, srcName, srcFlags, spellid, dstName)
+                increment_sunder(Skada.total, srcGUID, srcName, srcFlags, spellid, dstName)
+            end
+        end
+
         function targetmod:Enter(win, id, label)
             self.playername = label
             self.title = _format(L["%s's <%s> targets"], label, sunder)
@@ -597,6 +621,7 @@ Skada:AddLoadableModule(
 
         function mod:OnEnable()
             mod.metadata = {showspots = true, click1 = targetmod}
+            Skada:RegisterForCL(SunderApplied, "SPELL_AURA_APPLIED_DOSE", {src_is_interesting_nopets = true})
             Skada:AddMode(self, L["Buffs and Debuffs"])
         end
 

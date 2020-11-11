@@ -2628,7 +2628,6 @@ do
 
     -- list of combat events that we don't care about
     local ignoredevents = {
-        ["SPELL_AURA_APPLIED_DOSE"] = true,
         ["SPELL_AURA_REMOVED_DOSE"] = true,
         ["SPELL_CAST_START"] = true,
         ["SPELL_CAST_SUCCESS"] = true,
