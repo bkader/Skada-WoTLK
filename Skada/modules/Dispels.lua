@@ -21,7 +21,7 @@ Skada:AddLoadableModule(
         local GetSpellInfo = GetSpellInfo
 
         local function log_dispels(set, data)
-            local player = Skada:get_player(set, data.playerid, data.playername)
+            local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
             if not player then
                 return
             end

@@ -44,7 +44,7 @@ local function log_gain(set, gain)
     end
 
     -- Get the player from set.
-    local player = Skada:get_player(set, gain.playerid, gain.playername)
+    local player = Skada:get_player(set, gain.playerid, gain.playername, gain.playerflags)
     if not player then
         return
     end

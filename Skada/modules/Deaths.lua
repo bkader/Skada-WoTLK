@@ -18,7 +18,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
         local _ipairs, _format, _date = ipairs, string.format, date
 
         local function log_deathlog(set, data, ts)
-            local player = Skada:get_player(set, data.dstGUID, data.dstName)
+            local player = Skada:get_player(set, data.dstGUID, data.dstName, data.dstFlags)
 
             if player then
                 -- et player maxhp if not already set

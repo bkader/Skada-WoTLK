@@ -40,14 +40,13 @@ Skada:AddLoadableModule(
 
             -- record the target
             if not player.healing.targets[data.dstName] then
-                local unitclass = select(2, UnitClass(data.dstName))
-                local unitrole = UnitGroupRolesAssigned(data.dstName)
                 player.healing.targets[data.dstName] = {
                     id = data.dstGUID,
-                    class = unitclass,
-                    role = unitrole,
+                    name = data.dstName,
+                    flag = data.dstFlags,
                     amount = 0
                 }
+                Skada:FixPlayer(player.healing.targets[data.dstName])
             end
             player.healing.targets[data.dstName].amount = player.healing.targets[data.dstName].amount + amount
 
@@ -92,9 +91,11 @@ Skada:AddLoadableModule(
 
             heal.playerid = srcGUID
             heal.playername = srcGUID
+            heal.playerflags = srcFlags
 
             heal.dstGUID = dstGUID
             heal.dstName = dstName
+            heal.dstFlags = dstFlags
 
             heal.spellid = spellid
             heal.spellname = spellname

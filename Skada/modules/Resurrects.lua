@@ -24,7 +24,7 @@ Skada:AddLoadableModule(
         local UnitClass = UnitClass
 
         local function log_resurrect(set, data, ts)
-            local player = Skada:get_player(set, data.srcGUID, data.srcName)
+            local player = Skada:get_player(set, data.srcGUID, data.srcName, data.srcFlags)
             if player then
                 player.resurrect.count = player.resurrect.count + 1
                 set.resurrect = set.resurrect + 1
@@ -69,8 +69,10 @@ Skada:AddLoadableModule(
             spellschool)
             data.srcGUID = srcGUID
             data.srcName = srcName
+            data.srcFlags = srcFlags
             data.dstGUID = dstGUID
             data.dstName = dstName
+            data.dstFlags = dstFlags
             data.spellid = spellid
             data.spellname = spellname
             data.spellschool = spellschool

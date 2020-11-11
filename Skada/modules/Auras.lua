@@ -3,17 +3,58 @@ if not Skada then
     return
 end
 
-local pairs, ipairs = pairs, ipairs
-local format = string.format
-local GetSpellInfo = GetSpellInfo
-local SecondsToTime = SecondsToTime
+--
+-- cache frequently used globals
+--
+local _pairs, _ipairs = pairs, ipairs
+local _format, _select = string.format, select
+local _GetSpellInfo = GetSpellInfo
+local math_min, math_max, math_floor = math.min, math.max, math.floor
 
+--
+-- used to reset timers
+--
+local function setattributes(set)
+    if set then
+        for i, player in _ipairs(set.players) do
+            if player.auras ~= nil then
+                for spellid, spell in _pairs(player.auras) do
+                    if spell.active > 0 then
+                        spell.active = 0
+                        spell.started = nil
+                    end
+                end
+            end
+        end
+    end
+end
+
+--
+-- once the set is complete, we make sure to stop calculating
+--
+local function setcomplete(set)
+    if set then
+        for i, player in _ipairs(set.players) do
+            for spellid, spell in _pairs(player.auras) do
+                if spell.active > 0 and spell.started then
+                    spell.uptime = spell.uptime + math_floor((time() - spell.started) + 0.5)
+                    spell.active = 0
+                    spell.started = nil
+                end
+            end
+        end
+    end
+end
+
+--
+-- common functions to both modules that handle aura apply/remove log
+--
 local function log_auraapply(set, aura)
     if not set then
         return
     end
 
-    local player = Skada:get_player(set, aura.playerid, aura.playername)
+    local player = Skada:get_player(set, aura.playerid, aura.playername, aura.playerflags)
     if not player then
         return
     end
@@ -47,34 +88,34 @@ local function log_auraapply(set, aura)
                 targets = {}
             }
         else
-            player.auras[aura.spellid].count = player.auras[aura.spellid].count + 1
             player.auras[aura.spellid].active = player.auras[aura.spellid].active + 1
             player.auras[aura.spellid].started = player.auras[aura.spellid].started or now
+            player.auras[aura.spellid].count = player.auras[aura.spellid].count + 1
         end
 
         if aura.dstName then
-	        local targets = player.auras[aura.spellid].targets or {}
-	        player.auras[aura.spellid].targets=targets
+            local targets = player.auras[aura.spellid].targets or {}
+            player.auras[aura.spellid].targets = targets
 
-	        if not targets[aura.dstName] then
-	            targets[aura.dstName] = {id = aura.dstGUID, count = 1}
-	        else
-	            targets[aura.dstName].count = targets[aura.dstName].count + 1
-	        end
+            if not targets[aura.dstName] then
+                targets[aura.dstName] = {id = aura.dstGUID, count = 1}
+            else
+                targets[aura.dstName].count = targets[aura.dstName].count + 1
+            end
         end
     end
 end
 
 local function log_auraremove(set, aura)
     if set then
-        local player = Skada:get_player(set, aura.playerid, aura.playername)
+        local player = Skada:get_player(set, aura.playerid, aura.playername, aura.playerflags)
         if player and player.auras and aura.spellid and player.auras[aura.spellid] then
             local a = player.auras[aura.spellid]
             if a.active > 0 then
                 a.active = a.active - 1
 
                 if a.active == 0 and a.started then
-                    a.uptime = a.uptime + math.floor(time() - a.started + 0.5)
+                    a.uptime = a.uptime + math_floor(time() - a.started + 0.5)
                     a.started = nil
                 end
             end
@@ -82,12 +123,14 @@ local function log_auraremove(set, aura)
     end
 end
 
+--
+-- common functions handling SPELL_AURA_APPLIED and SPELL_AURA_REMOVED
+--
+
 local aura = {}
 
 local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
     local spellid, spellname, spellschool, auratype = ...
-
-    -- srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName)
 
     aura.playerid = srcGUID
     aura.playername = srcName
@@ -102,14 +145,13 @@ local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dst
     aura.spellschool = spellschool
     aura.auratype = auratype
 
-    -- Skada:FixPets(aura)
+    Skada:FixPets(aura)
     log_auraapply(Skada.current, aura)
     log_auraapply(Skada.total, aura)
 end
 
 local function AuraRemoved(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
     local spellid, spellname, spellschool, auratype = ...
-    -- srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName)
 
     aura.playerid = srcGUID
     aura.playername = srcName
@@ -124,137 +166,41 @@ local function AuraRemoved(timestamp, eventtype, srcGUID, srcName, srcFlags, dst
     aura.spellschool = spellschool
     aura.auratype = auratype
 
-    -- Skada:FixPets(aura)
+    Skada:FixPets(aura)
     log_auraremove(Skada.current, aura)
     log_auraremove(Skada.total, aura)
 end
 
-local function NullAura(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-	if srcGUID ~= dstGUID then
-	    if eventtype == "SPELL_AURA_APPLIED" then
-	        AuraApplied(timestamp, eventtype, dstGUID, dstName, dstFlags, srcGUID, srcName, srcFlags, ...)
-	    else
-	        AuraRemoved(timestamp, eventtype, dstGUID, dstName, dstFlags, srcGUID, srcName, srcFlags, ...)
-	    end
-	end
-end
+-- ================================================================== --
 
--- account for old total segment
-local clear_set_attributes, complete_set
-do
-    local cleared = false
-    local completed = false
+--
+-- to avoid repeating same functions for both modules, we make
+-- make sure to create generic functions that will handle things
+--
 
-    function clear_set_attributes(set)
-        if set and not cleared then
-            for _, player in ipairs(set.players) do
-                if player.auras ~= nil then
-                    for _, spell in pairs(player.auras) do
-                        if spell.active > 0 then
-                            spell.active = 0
-                            spell.started = 0
-                        end
-                    end
-                end
-            end
+-- main module update function
+local function updatefunc(auratype, win, set)
+    local nr, max = 1, 0
 
-            cleared = true
-        end
-    end
+    for _, player in _ipairs(set.players) do
+        -- we collect number and uptime of auras first
+        local auracount, aurauptime = 0, 0
 
-    function complete_set(set)
-        if not completed then
-            for _, player in ipairs(set.players) do
-                for spellid, spell in pairs(player.auras) do
-                    if spell.active > 0 and spell.started then
-                        spell.uptime = spell.uptime + math.floor((time() - spell.started) + 0.5)
-                        spell.active = 0
-                        spell.started = nil
-                    end
-                end
-            end
-            completed = true
-        end
-    end
-end
-
-local function playermod_update(auratype, win, set, playerid, mod)
-    local nr = 1
-    local max = 0
-    local player = Skada:find_player(set, playerid)
-
-    if player then
-        local maxtime = Skada:PlayerActiveTime(set, player)
-
-        if maxtime and maxtime > 0 then
-            win.metadata.maxvalue = maxtime
-            for spellid, spell in pairs(player.auras) do
-                if spell.auratype == auratype then
-                    local uptime = math.min(maxtime, spell.uptime)
-
-                    -- Account for active auras
-                    if spell.active > 0 and spell.started then
-                        uptime = uptime + math.floor((time() - spell.started) + 0.5)
-                    end
-
-                    local d = win.dataset[nr] or {}
-                    win.dataset[nr] = d
-
-                    local spellname, _, spellicon = GetSpellInfo(spellid)
-
-                    d.id = spellid
-                    d.spellid = spellid
-                    d.label = spellname
-                    d.icon = spellicon
-                    d.spellschool = spell.school
-
-                    d.value = uptime
-
-                    if mod then
-                        d.valuetext =
-                            Skada:FormatValueText(
-                            uptime .. "s",
-                            mod.metadata.columns.Total,
-                            format("%02.1f%%", 100 * uptime / maxtime),
-                            mod.metadata.columns.Percent
-                        )
-                    else
-                        d.valuetext = format("%02.1f%%", 100 * uptime / maxtime)
-                    end
-
-                    nr = nr + 1
-                end
-            end
-        end
-    end
-end
-
-local function mod_update(auratype, win, set, mod)
-    local nr = 1
-    local max = 0
-
-    for i, player in ipairs(set.players) do
-        -- Find number of debuffs.
-        local auracount = 0
-        local aurauptime = 0
-        for spellname, spell in pairs(player.auras) do
+        for spellid, spell in _pairs(player.auras) do
             if spell.auratype == auratype then
                 auracount = auracount + 1
                 aurauptime = aurauptime + spell.uptime
 
-                -- Account for active auras
+                -- still active?
                 if spell.active > 0 and spell.started then
-                    aurauptime = aurauptime + math.floor((time() - spell.started) + 0.5)
+                    aurauptime = aurauptime + math_floor((time() - spell.started) + 0.5)
                 end
             end
         end
 
         if auracount > 0 then
-            -- Calculate player max possible uptime.
             local maxtime = Skada:PlayerActiveTime(set, player)
-
-            -- Now divide by the number of spells to get the average uptime.
-            local uptime = math.min(maxtime, aurauptime / auracount)
+            local uptime = math_min(maxtime, aurauptime / auracount)
 
             local d = win.dataset[nr] or {}
             win.dataset[nr] = d
@@ -266,7 +212,7 @@ local function mod_update(auratype, win, set, mod)
             d.spec = player.spec
 
             d.value = uptime
-            d.valuetext = format("%02.1f%% / %u", uptime / maxtime * 100, auracount)
+            d.valuetext = _format("%02.1f%% / %u", 100 * uptime / maxtime, auracount)
 
             if uptime > max then
                 max = uptime
@@ -279,7 +225,48 @@ local function mod_update(auratype, win, set, mod)
     win.metadata.maxvalue = max
 end
 
-local function spell_tooltip(win, id, label, tooltip, playerid, L)
+-- spells per player list
+local function detailupdatefunc(auratype, win, set, playerid)
+    local player = Skada:find_player(set, playerid)
+    if player then
+        local maxtime = Skada:PlayerActiveTime(set, player)
+        if maxtime and maxtime > 0 then
+            win.metadata.maxvalue = maxtime
+            local nr = 1
+
+            for spellid, spell in _pairs(player.auras) do
+                if spell.auratype == auratype then
+                    local uptime = math_min(maxtime, spell.uptime)
+
+                    if spell.active > 0 and spell.started then
+                        uptime = uptime + math_floor((time() - spell.started) + 0.5)
+                    end
+
+                    local d = win.dataset[nr] or {}
+                    win.dataset[nr] = d
+
+                    local spellname, _, spellicon = _GetSpellInfo(spellid)
+
+                    d.id = spellid
+                    d.spellid = spellid
+                    d.label = spellname
+                    d.icon = spellicon
+                    d.spellschool = spell.school
+
+                    d.value = uptime
+                    d.valuetext = _format("%02.1f%%", 100 * uptime / maxtime)
+
+                    nr = nr + 1
+                end
+            end
+        end
+    end
+
+    -- win.metadata.maxvalue = max
+end
+
+-- used to show tooltip
+local function aura_tooltip(win, id, label, tooltip, playerid, L)
     local set = win:get_selected_set()
     local player = Skada:find_player(set, playerid)
     if player then
@@ -288,6 +275,8 @@ local function spell_tooltip(win, id, label, tooltip, playerid, L)
             local totaltime = Skada:PlayerActiveTime(set, player)
 
             tooltip:AddLine(player.name .. ": " .. label)
+
+            -- add spell school if provided
             if aura.school then
                 local c = Skada.schoolcolors[aura.school]
                 local n = Skada.schoolnames[aura.school]
@@ -296,22 +285,15 @@ local function spell_tooltip(win, id, label, tooltip, playerid, L)
                 end
             end
 
-            tooltip:AddDoubleLine(L["Segment Time"], SecondsToTime(totaltime) .. "s", 255, 255, 255, 255, 255, 255)
-            tooltip:AddDoubleLine(L["Active Time"], SecondsToTime(aura.uptime) .. "s", 255, 255, 255, 255, 255, 255)
-            tooltip:AddDoubleLine((L["Total"]), aura.count, 255, 255, 255, 255, 255, 255)
-            tooltip:AddDoubleLine(
-                ("%d/%d"):format(aura.uptime, totaltime),
-                ("%02.1f%%)"):format(aura.uptime / totaltime * 100),
-                255,
-                255,
-                255,
-                255,
-                255,
-                255
-            )
+            -- add segment and active times
+            tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(totaltime), 255, 255, 255)
+            tooltip:AddDoubleLine(L["Uptime"], Skada:FormatTime(aura.uptime), 255, 255, 255)
+            tooltip:AddDoubleLine(L["Count"], aura.count, 255, 255, 255)
         end
     end
 end
+
+-- ================================================================== --
 
 Skada:AddLoadableModule(
     "Buffs",
@@ -322,28 +304,28 @@ Skada:AddLoadableModule(
         end
 
         local mod = Skada:NewModule(L["Buffs"])
-        local playermod = mod:NewModule(L["Buff spell list"])
+        local spellmod = mod:NewModule(L["Buff spell list"])
 
-        function playermod:Enter(win, id, label)
+        function spellmod:Enter(win, id, label)
             self.playerid = id
-            self.title = format(L["%s's buff uptime"], label)
+            self.title = _format(L["%s's buffs"], label)
         end
 
-        function playermod:Update(win, set)
-            playermod_update("BUFF", win, set, self.playerid, mod)
+        function spellmod:Update(win, set)
+            detailupdatefunc("BUFF", win, set, self.playerid)
         end
 
         function mod:Update(win, set)
-            mod_update("BUFF", win, set, self)
+            updatefunc("BUFF", win, set)
         end
 
-        local function aura_tooltip(win, id, label, tooltip)
-            spell_tooltip(win, id, label, tooltip, playermod.playerid, L)
+        local function buff_tooltip(win, set, label, tooltip)
+            aura_tooltip(win, set, label, tooltip, spellmod.playerid, L)
         end
 
         function mod:OnEnable()
-            playermod.metadata = {tooltip = aura_tooltip}
-            mod.metadata = {click1 = playermod, columns = {Total = true, Percent = true}}
+            spellmod.metadata = {showspots = true, tooltip = buff_tooltip}
+            mod.metadata = {showspots = true, click1 = spellmod}
 
             Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {src_is_interesting = true})
             Skada:RegisterForCL(AuraRemoved, "SPELL_AURA_REMOVED", {src_is_interesting = true})
@@ -356,19 +338,23 @@ Skada:AddLoadableModule(
         end
 
         function mod:AddPlayerAttributes(player)
-            player.auras = player.auras or {}
+            if not player.auras then
+                player.auras = {}
+            end
         end
 
         function mod:AddSetAttributes(set)
-            set.auras = set.auras or {}
-            clear_set_attributes(set)
+            set.auras = {}
+            setattributes(set)
         end
 
         function mod:SetComplete(set)
-            complete_set(set)
+            setcomplete(set)
         end
     end
 )
+
+-- ================================================================== --
 
 Skada:AddLoadableModule(
     "Debuffs",
@@ -379,28 +365,40 @@ Skada:AddLoadableModule(
         end
 
         local mod = Skada:NewModule(L["Debuffs"])
-        local playermod = mod:NewModule(L["Debuff spell list"])
+        local spellmod = mod:NewModule(L["Debuff spell list"])
         local targetmod = mod:NewModule(L["Debuff target list"])
 
-        function targetmod:Enter(win, id, label)
-            self.spellid = id
-            local player = Skada:find_player(win:get_selected_set(), playermod.playerid)
-            if player then
-                self.title = format(L["%s's <%s> targets"], player.name, label)
-            else
-                self.title = format(L["%s's targets"], label)
+        --
+        -- used to record debuffs and rely on AuraApplied and AuraRemoved functions
+        --
+        local function DebuffApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+            if srcName == nil and #srcGUID == 0 and dstName and #dstGUID > 0 then
+                srcGUID = dstGUID
+                srcName = dstName
+                srcFlags = dstFlags
+
+                if eventtype == "SPELL_AURA_APPLIED" then
+                    AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+                else
+                    AuraRemoved(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+                end
             end
         end
 
-        function targetmod:Update(win, set)
-            local player = Skada:find_player(set, playermod.playerid)
-            local max = 0
+        function targetmod:Enter(win, id, label)
+            self.spellid = id
+            self.title = _format(L["%s's <%s> targets"], spellmod.playername, label)
+        end
 
-            if player and self.spellid and player.auras[self.spellid] then
-                local auracount = player.auras[self.spellid].count
+        function targetmod:Update(win, set)
+            local player = Skada:find_player(set, spellmod.playerid)
+            local max = 0
+            if player and player.auras[self.spellid] then
                 local nr = 1
 
-                for targetname, target in pairs(player.auras[self.spellid].targets) do
+                local total = player.auras[self.spellid].count
+
+                for targetname, target in _pairs(player.auras[self.spellid].targets) do
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
@@ -408,13 +406,7 @@ Skada:AddLoadableModule(
                     d.label = targetname
 
                     d.value = target.count
-                    d.valuetext =
-                        Skada:FormatValueText(
-                        target.count,
-                        mod.metadata.columns.Total,
-                        format("%02.1f%%", 100 * target.count / auracount),
-                        mod.metadata.columns.Percent
-                    )
+                    d.valuetext = _format("%u (%02.1f%%)", target.count, 100 * target.count / total)
 
                     if target.count > max then
                         max = target.count
@@ -427,34 +419,35 @@ Skada:AddLoadableModule(
             win.metadata.maxvalue = max
         end
 
-        function playermod:Enter(win, id, label)
+        function spellmod:Enter(win, id, label)
             self.playerid = id
-            self.title = format(L["%s's debuff uptime"], label)
+            self.playername = label
+            self.title = _format(L["%s's debuffs"], label)
         end
 
-        function playermod:Update(win, set)
-            playermod_update("DEBUFF", win, set, self.playerid, mod)
+        function spellmod:Update(win, set)
+            detailupdatefunc("DEBUFF", win, set, self.playerid)
         end
 
         function mod:Update(win, set)
-            mod_update("DEBUFF", win, set, self)
+            updatefunc("DEBUFF", win, set)
         end
 
-        local function aura_tooltip(win, id, label, tooltip)
-            spell_tooltip(win, id, label, tooltip, playermod.playerid, L)
+        local function buff_tooltip(win, set, label, tooltip)
+            aura_tooltip(win, set, label, tooltip, spellmod.playerid, L)
         end
 
         function mod:OnEnable()
-            playermod.metadata = {tooltip = aura_tooltip, click1 = targetmod}
-            mod.metadata = {click1 = playermod, columns = {Total = true, Percent = true}}
+            spellmod.metadata = {tooltip = buff_tooltip, click1 = targetmod}
+            mod.metadata = {showspots = true, click1 = spellmod}
 
             Skada:RegisterForCL(
-                NullAura,
+                DebuffApplied,
                 "SPELL_AURA_APPLIED",
                 {dst_is_interesting_nopets = true, src_is_not_interesting = true}
             )
             Skada:RegisterForCL(
-                NullAura,
+                DebuffApplied,
                 "SPELL_AURA_REMOVED",
                 {dst_is_interesting_nopets = true, src_is_not_interesting = true}
             )
@@ -467,42 +460,45 @@ Skada:AddLoadableModule(
         end
 
         function mod:AddPlayerAttributes(player)
-            player.auras = player.auras or {}
+            if not player.auras then
+                player.auras = {}
+            end
         end
 
         function mod:AddSetAttributes(set)
-            set.auras = set.auras or {}
-            clear_set_attributes(set)
+            set.auras = {}
+            setattributes(set)
         end
 
         function mod:SetComplete(set)
-            complete_set(set)
+            setcomplete(set)
         end
     end
 )
 
+-- ================================================================== --
+
 Skada:AddLoadableModule(
-    "Sunders Counter",
-    nil,
+    "Sunder Counter",
     function(Skada, L)
-        if Skada:IsDisabled("Debuffs", "Sunders Counter") then
+        if Skada:IsDisabled("Debuffs", "Sunder Count") then
             return
         end
 
-        local mod = Skada:NewModule(L["Sunders Counter"])
-        local sunder
+        local mod = Skada:NewModule(L["Sunder Counter"])
+        local targetmod = mod:NewModule(L["Sunder target list"])
+
+        local cached, sunder = {}
 
         local function total_sunders(set)
-            sunder = sunder or select(1, GetSpellInfo(47467))
-
+            sunder = sunder or _select(1, _GetSpellInfo(47467))
             local total = 0
 
             if set then
                 for _, player in ipairs(set.players) do
                     if player.class == "WARRIOR" and player.auras then
-                        for spellid, spell in pairs(player.auras) do
-                            local spellname = select(1, GetSpellInfo(spellid))
-                            if spellname == sunder then
+                        for spellid, spell in _pairs(player.auras) do
+                            if sunder == _select(1, _GetSpellInfo(spellid)) then
                                 total = total + spell.count
                             end
                         end
@@ -513,60 +509,103 @@ Skada:AddLoadableModule(
             return total
         end
 
+        function targetmod:Enter(win, id, label)
+            self.playername = label
+            self.title = _format(L["%s's <%s> targets"], label, sunder)
+        end
+
+        function targetmod:Update(win, set)
+            local max = 0
+
+            if cached.players and self.playername and cached.players[self.playername] then
+                local player = cached.players[self.playername]
+                local nr = 1
+
+                for targetname, count in _pairs(player.targets) do
+                    local d = win.dataset[nr] or {}
+                    win.dataset[nr] = d
+
+                    d.id = targetname
+                    d.label = targetname
+
+                    d.value = count
+                    d.valuetext = _format("%d (%02.1f%%)", count, 100 * count / math_max(1, player.count))
+
+                    if count > max then
+                        max = count
+                    end
+
+                    nr = nr + 1
+                end
+            end
+            win.metadata.maxvalue = max
+        end
+
         function mod:Update(win, set)
-            sunder = sunder or select(1, GetSpellInfo(47467))
+            sunder = sunder or _select(1, _GetSpellInfo(47467))
+            cached = {count = 0, players = {}}
 
-            local nr, max = 1, 0
-            local total = total_sunders(set)
-
-            for _, player in ipairs(set.players) do
+            for _, player in _ipairs(set.players) do
                 if player.class == "WARRIOR" and player.auras then
-                    for spellid, spell in pairs(player.auras) do
-                        local spellname, _, spellicon = GetSpellInfo(spellid)
-                        if spellname == sunder then
-                            local d = win.dataset[nr] or {}
-                            win.dataset[nr] = d
-
-                            d.id = player.id
-                            d.label = player.name
-                            d.class = player.class
-                            d.role = player.role
-                            d.spec = player.spec
-
-                            d.value = spell.count
-                            d.valuetext =
-                                Skada:FormatValueText(
-                                spell.count,
-                                self.metadata.columns.Total,
-                                format("%02.1f%%", 100 * spell.count / math.max(1, total)),
-                                self.metadata.columns.Percent
-                            )
-
-                            if spell.count > max then
-                                max = spell.count
+                    for spellid, spell in _pairs(player.auras) do
+                        if _select(1, _GetSpellInfo(spellid)) == sunder then
+                            cached.count = cached.count + spell.count
+                            cached.players[player.name] = {
+                                id = player.id,
+                                class = player.class,
+                                role = player.role,
+                                spec = player.spec,
+                                count = spell.count,
+                                targets = {}
+                            }
+                            for targetname, target in _pairs(spell.targets) do
+                                cached.players[player.name].targets[targetname] = target.count
                             end
-
-                            nr = nr + 1
                         end
                     end
+                end
+            end
+
+            local max = 0
+
+            if cached.count > 0 then
+                local nr = 1
+
+                for playername, player in _pairs(cached.players) do
+                    local d = win.dataset[nr] or {}
+                    win.dataset[nr] = d
+
+                    d.id = player.id or playername
+                    d.label = playername
+                    d.class = player.class
+                    d.role = player.role
+                    d.spec = player.spec
+
+                    d.value = player.count
+                    d.valuetext = tostring(player.count)
+
+                    if player.count > max then
+                        max = player.count
+                    end
+
+                    nr = nr + 1
                 end
             end
 
             win.metadata.maxvalue = max
         end
 
-        function mod:OnInitialize()
-            sunder = sunder or select(1, GetSpellInfo(47467))
-        end
-
         function mod:OnEnable()
-            sunder = sunder or select(1, GetSpellInfo(47467))
-            mod.metadata = {showspots = true, columns = {Total = true, Percent = true}}
+            mod.metadata = {showspots = true, click1 = targetmod}
             Skada:AddMode(self, L["Buffs and Debuffs"])
         end
 
         function mod:OnDisable()
             Skada:RemoveMode(self)
+        end
+
+        function mod:OnInitialize()
+            sunder = sunder or _select(1, _GetSpellInfo(47467))
         end
 
         function mod:GetSetSummary(set)

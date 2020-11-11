@@ -57,7 +57,7 @@ Skada:AddLoadableModule(
         local targetspellsmod = mod:NewModule(L["CC Done target spells"])
 
         local function log_ccdone(set, data)
-            local player = Skada:get_player(set, data.playerid, data.playername)
+            local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
             if not player then
                 return
             end
@@ -349,7 +349,7 @@ Skada:AddLoadableModule(
         local sourcespellsmod = mod:NewModule(L["CC Taken source spells"])
 
         local function log_cctaken(set, data)
-            local player = Skada:get_player(set, data.srcGUID, data.srcName)
+            local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
             if not player then
                 return
             end
@@ -361,22 +361,22 @@ Skada:AddLoadableModule(
             end
             player.cctaken.spells[data.spellname].count = player.cctaken.spells[data.spellname].count + 1
 
-            if not player.cctaken.spells[data.spellname].sources[data.dstName] then
-                player.cctaken.spells[data.spellname].sources[data.dstName] = {id = data.dstGUID, count = 0}
+            if not player.cctaken.spells[data.spellname].sources[data.srcName] then
+                player.cctaken.spells[data.spellname].sources[data.srcName] = {id = data.srcGUID, count = 0}
             end
-            player.cctaken.spells[data.spellname].sources[data.dstName].count =
-                player.cctaken.spells[data.spellname].sources[data.dstName].count + 1
+            player.cctaken.spells[data.spellname].sources[data.srcName].count =
+                player.cctaken.spells[data.spellname].sources[data.srcName].count + 1
 
-            if not player.cctaken.sources[data.dstName] then
-                player.cctaken.sources[data.dstName] = {id = data.dstGUID, count = 0, spells = {}}
+            if not player.cctaken.sources[data.srcName] then
+                player.cctaken.sources[data.srcName] = {id = data.srcGUID, count = 0, spells = {}}
             end
-            player.cctaken.sources[data.dstName].count = player.cctaken.sources[data.dstName].count + 1
+            player.cctaken.sources[data.srcName].count = player.cctaken.sources[data.srcName].count + 1
 
-            if not player.cctaken.sources[data.dstName].spells[data.spellname] then
-                player.cctaken.sources[data.dstName].spells[data.spellname] = {id = data.spellid, count = 0}
+            if not player.cctaken.sources[data.srcName].spells[data.spellname] then
+                player.cctaken.sources[data.srcName].spells[data.spellname] = {id = data.spellid, count = 0}
             end
-            player.cctaken.sources[data.dstName].spells[data.spellname].count =
-                player.cctaken.sources[data.dstName].spells[data.spellname].count + 1
+            player.cctaken.sources[data.srcName].spells[data.spellname].count =
+                player.cctaken.sources[data.srcName].spells[data.spellname].count + 1
 
             set.cctaken = set.cctaken + 1
         end
