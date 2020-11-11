@@ -187,9 +187,16 @@ function mod:Create(window)
             class_icon_tcoords[class] = coords
         end
         class_icon_tcoords.ENEMY = {0, 0.25, 0.75, 1}
-        class_icon_tcoords.PET = {0.25, 0.49609375, 0.75, 1}
+        class_icon_tcoords.MONSTER = {0, 0.25, 0.75, 1}
+
         class_icon_tcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
+        class_icon_tcoords.UNGROUPPLAYER = {0.5, 0.75, 0.75, 1}
+
+        class_icon_tcoords.PET = {0.25, 0.49609375, 0.75, 1}
         class_icon_tcoords.PLAYER = {0.75, 1, 0.75, 1}
+
+        class_icon_tcoords.Alliance = {0.49609375, 0.7421875, 0.5, 0.75}
+        class_icon_tcoords.Horde = {0.7421875, 0.98828125, 0.5, 0.75}
     end
 
     if not role_icon_tcoords then
@@ -515,9 +522,11 @@ do
                     elseif data.class and win.db.classicons and class_icon_tcoords[data.class] then
                         bar:ShowIcon()
                         bar:SetIconWithCoord(class_icon_file, class_icon_tcoords[data.class])
-                    elseif not data.ignore and not data.spellid and data.icon then
-                        bar:ShowIcon()
-                        bar:SetIconWithCoord(class_icon_file, class_icon_tcoords["PLAYER"])
+                    elseif not data.ignore and not data.spellid then
+                        if data.icon and not bar:IsIconShown() then
+                            bar:ShowIcon()
+                            bar:SetIconWithCoord(class_icon_file, class_icon_tcoords["PLAYER"])
+                        end
                     end
 
                     -- set bar color
