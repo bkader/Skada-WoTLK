@@ -12,6 +12,7 @@ if not L then return end
 -- L["Profiles"] = true
 -- L["Enable"] = true
 -- L["Disable"] = true
+-- L["DISABLED"] = true
 
 -- -- common lines
 -- L["Active Time"] = true
@@ -108,6 +109,8 @@ if not L then return end
 -- L["When possible, bar text will be colored according to player class."] = true
 -- L["Class icons"] = true
 -- L["Use class icons where applicable."] = true
+-- L["Spec icons"] = true
+-- L["Use specialization icons where applicable."] = true
 -- L["Role icons"] = true
 -- L["Use role icons where applicable."] = true
 -- L["Clickthrough"] = true
@@ -386,19 +389,22 @@ if not L then return end
 -- -- Auras Module --
 -- -- ============ --
 
+-- L["Uptime"] = true
+
 -- L["Buffs and Debuffs"] = true
 -- L["Buffs"] = true
 -- L["Buff spell list"] = true
--- L["%s's buff uptime"] = true
+-- L["%s's buffs"] = true
 
 -- L["Debuffs"] = true
 -- L["Debuff spell list"] = true
 -- L["Debuff target list"] = true
--- L["%s's debuff uptime"] = true
+-- L["%s's debuffs"] = true
 -- L["%s's debuff targets"] = true
 -- L["%s's <%s> targets"] = true
 
--- L["Sunders Counter"] = true
+-- L["Sunder Counter"] = true
+-- L["Sunder target list"] = true
 
 -- -- ================= --
 -- -- CC Tracker Module --
@@ -452,11 +458,13 @@ if not L then return end
 
 -- -- damage done module
 -- L["Damage"] = true
+-- L["Damage target list"] = true
 -- L["Damage spell list"] = true
 -- L["Damage spell details"] = true
 -- L["Damage spell targets"] = true
 -- L["Damage done"] = true
 -- L["%s's damage"] = true
+-- L["%s's <%s> damage"] = true
 
 -- L["Damage done by spell"] = true
 -- L["%s's sources"] = true
@@ -469,7 +477,10 @@ if not L then return end
 
 -- -- damage taken module
 -- L["Damage taken"] = true
--- L["%s's damage taken"] = true
+-- L["Damage taken by %s"] = true
+-- L["<%s> damage on %s"] = true
+
+-- L["Damage source list"] = true
 -- L["Damage spell sources"] = true
 -- L["Damage taken by spell"] = true
 -- L["%s's targets"] = true

@@ -14,6 +14,7 @@ L["Error: No options selected"] = true
 L["Profiles"] = true
 L["Enable"] = true
 L["Disable"] = true
+L["DISABLED"] = true
 
 -- common lines
 L["Active Time"] = true
@@ -390,19 +391,22 @@ L["%s's absorbed and healed players"] = true
 -- Auras Module --
 -- ============ --
 
+L["Uptime"] = true
+
 L["Buffs and Debuffs"] = true
 L["Buffs"] = true
 L["Buff spell list"] = true
-L["%s's buff uptime"] = true
+L["%s's buffs"] = true
 
 L["Debuffs"] = true
 L["Debuff spell list"] = true
 L["Debuff target list"] = true
-L["%s's debuff uptime"] = true
+L["%s's debuffs"] = true
 L["%s's debuff targets"] = true
 L["%s's <%s> targets"] = true
 
-L["Sunders Counter"] = true
+L["Sunder Counter"] = true
+L["Sunder target list"] = true
 
 -- ================= --
 -- CC Tracker Module --
@@ -462,6 +466,7 @@ L["Damage spell details"] = true
 L["Damage spell targets"] = true
 L["Damage done"] = true
 L["%s's damage"] = true
+L["%s's <%s> damage"] = true
 
 L["Damage done by spell"] = true
 L["%s's sources"] = true
@@ -474,7 +479,9 @@ L["Damage: Raid DPS"] = true
 
 -- damage taken module
 L["Damage taken"] = true
-L["%s's damage taken"] = true
+L["Damage taken by %s"] = true
+L["<%s> damage on %s"] = true
+
 L["Damage source list"] = true
 L["Damage spell sources"] = true
 L["Damage taken by spell"] = true
