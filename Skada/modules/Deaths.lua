@@ -1,23 +1,7 @@
 local Skada = Skada
-if not Skada then
-    return
-end
+if not Skada then return end
 
-local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
-local UnitDied, UnitIsFeignDeath = UnitDied, UnitIsFeignDeath
-local tinsert, tremove = table.insert, table.remove
-local tsort, tmaxn = table.sort, table.maxn
-local GetSpellInfo = GetSpellInfo
-local SecondsToTime, date = SecondsToTime, date
-local ipairs, format = ipairs, string.format
-
--- ========= --
--- Death Log --
--- ========= --
-Skada:AddLoadableModule(
-    "Deaths",
-    nil,
-    function(Skada, L)
+Skada:AddLoadableModule("Deaths", function(Skada, L)
         if Skada:IsDisabled("Deaths") then
             return
         end
@@ -26,13 +10,20 @@ Skada:AddLoadableModule(
         local playermod = mod:NewModule(L["Player's deaths"])
         local deathlogmod = mod:NewModule(L["Death log"])
 
+        local _UnitHealth, _UnitHealthMax = UnitHealth, UnitHealthMax
+        local _UnitIsFeignDeath = UnitIsFeignDeath
+        local table_insert, table_remove = table.insert, table.remove
+        local table_sort, table_maxn = table.sort, table.maxn
+        local _GetSpellInfo = GetSpellInfo
+        local _ipairs, _format, _date = ipairs, string.format, date
+
         local function log_deathlog(set, data, ts)
             local player = Skada:get_player(set, data.dstGUID, data.dstName)
 
             if player then
                 -- et player maxhp if not already set
                 if player.maxhp == 0 then
-                    player.maxhp = UnitHealthMax(data.dstName)
+                    player.maxhp = _UnitHealthMax(data.dstName)
                 end
 
                 -- create a log entry if it doesn't exist.
@@ -42,7 +33,7 @@ Skada:AddLoadableModule(
 
                 -- record our log
                 local deathlog = player.deathlog[1]
-                tinsert(
+                table_insert(
                     deathlog.log,
                     1,
                     {
@@ -50,13 +41,13 @@ Skada:AddLoadableModule(
                         source = data.srcName,
                         amount = data.amount,
                         time = ts,
-                        hp = UnitHealth(data.dstName)
+                        hp = _UnitHealth(data.dstName)
                     }
                 )
 
                 -- trim things and limit to 15
-                while tmaxn(deathlog.log) > 15 do
-                    tremove(deathlog.log)
+                while table_maxn(deathlog.log) > 15 do
+                    table_remove(deathlog.log)
                 end
             end
         end
@@ -146,7 +137,7 @@ Skada:AddLoadableModule(
         end
 
         local function UnitDied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-            if not UnitIsFeignDeath(dstName) then
+            if not _UnitIsFeignDeath(dstName) then
                 log_death(Skada.current, dstGUID, dstName, ts)
                 log_death(Skada.total, dstGUID, dstName, ts)
             end
@@ -155,7 +146,7 @@ Skada:AddLoadableModule(
         local function log_resurrect(set, playerid, playername)
             local player = Skada:get_player(set, playerid, playername)
             if player then
-                tinsert(player.deathlog, 1, {time = 0, log = {}})
+                table_insert(player.deathlog, 1, {time = 0, log = {}})
             end
         end
 
@@ -165,7 +156,7 @@ Skada:AddLoadableModule(
 
         function deathlogmod:Enter(win, id, label)
             self.index = id
-            self.title = format(L["%s's death log"], label)
+            self.title = _format(L["%s's death log"], label)
         end
 
         do
@@ -189,25 +180,25 @@ Skada:AddLoadableModule(
 
                     pre.id = nr
                     pre.time = deathlog.time
-                    pre.label = date("%H:%M:%S", deathlog.time) .. ": " .. format(L["%s dies"], player.name)
+                    pre.label = _date("%H:%M:%S", deathlog.time) .. ": " .. _format(L["%s dies"], player.name)
                     pre.icon = "Interface\\Icons\\Ability_Rogue_FeignDeath"
                     pre.value = 0
                     pre.valuetext = ""
 
                     nr = nr + 1
 
-                    tsort(deathlog.log, sort_logs)
+                    table_sort(deathlog.log, sort_logs)
 
-                    for i, log in ipairs(deathlog.log) do
+                    for i, log in _ipairs(deathlog.log) do
                         local diff = tonumber(log.time) - tonumber(deathlog.time)
                         if diff > -30 then
                             local d = win.dataset[nr] or {}
                             win.dataset[nr] = d
 
-                            local spellname, _, spellicon = GetSpellInfo(log.spellid)
+                            local spellname, _, spellicon = _GetSpellInfo(log.spellid)
 
                             d.id = nr
-                            d.label = format("%2.2f: %s", diff, spellname)
+                            d.label = _format("%2.2f: %s", diff, spellname)
                             d.icon = spellicon
                             d.spellid = log.spellid
                             d.time = log.time
@@ -226,7 +217,7 @@ Skada:AddLoadableModule(
                                 self.metadata.columns.Change,
                                 Skada:FormatNumber(log.hp or 0),
                                 self.metadata.columns.Health,
-                                format("%02.1f%%", (log.hp or 1) / (player.maxhp or 1) * 100),
+                                _format("%02.1f%%", (log.hp or 1) / (player.maxhp or 1) * 100),
                                 self.metadata.columns.Percent
                             )
 
@@ -247,7 +238,7 @@ Skada:AddLoadableModule(
 
         function playermod:Enter(win, id, label)
             self.playerid = id
-            self.title = format(L["%s's deaths"], label)
+            self.title = _format(L["%s's deaths"], label)
         end
 
         function playermod:Update(win, set)
@@ -257,7 +248,7 @@ Skada:AddLoadableModule(
             if player and player.deathlog then
                 local nr = 1
 
-                for i, death in ipairs(player.deathlog) do
+                for i, death in _ipairs(player.deathlog) do
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
@@ -269,7 +260,7 @@ Skada:AddLoadableModule(
                     d.icon = "Interface\\Icons\\Ability_Rogue_FeignDeath"
 
                     d.value = dth and dth.time or death.time
-                    d.valuetext = date("%H:%M:%S", d.value)
+                    d.valuetext = _date("%H:%M:%S", d.value)
 
                     if d.value > max then
                         max = d.value
@@ -285,7 +276,7 @@ Skada:AddLoadableModule(
         function mod:Update(win, set)
             local nr, max = 1, 0
 
-            for i, player in ipairs(set.players) do
+            for i, player in _ipairs(set.players) do
                 if player.deaths > 0 then
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
@@ -313,7 +304,7 @@ Skada:AddLoadableModule(
         local function entry_tooltip(win, id, label, tooltip)
             local entry = win.dataset[id]
             if entry and entry.spellname then
-                tooltip:AddLine(L["Spell details"] .. " - " .. date("%H:%M:%S", entry.time))
+                tooltip:AddLine(L["Spell details"] .. " - " .. _date("%H:%M:%S", entry.time))
                 tooltip:AddDoubleLine(L["Spell"], entry.spellname, 255, 255, 255, 255, 255, 255)
 
                 if entry.source then
@@ -358,7 +349,7 @@ Skada:AddLoadableModule(
         end
 
         function mod:SetComplete(set)
-            for i, player in ipairs(set.players) do
+            for i, player in _ipairs(set.players) do
                 if player.deaths == 0 then
                     wipe(player.deathlog)
                     player.deathlog = nil
@@ -384,90 +375,6 @@ Skada:AddLoadableModule(
 
         function mod:AddSetAttributes(set)
             set.deaths = set.deaths or 0
-        end
-    end
-)
-
--- =============== --
--- Activity Module --
--- =============== --
-Skada:AddLoadableModule(
-    "Activity",
-    nil,
-    function(Skada, L)
-        if Skada:IsDisabled("Activity") then
-            return
-        end
-
-        local mod = Skada:NewModule(L["Activity"])
-
-        local function activity_tooltip(win, id, label, tooltip)
-            local set = win:get_selected_set()
-            local player = Skada:find_player(set, id, label)
-            if player then
-                local settime = Skada:GetSetTime(set)
-                local playertime = Skada:PlayerActiveTime(set, player)
-                tooltip:AddLine(player.name .. ": " .. L["Activity"])
-                tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 255, 255, 255)
-                tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(playertime), 255, 255, 255)
-                tooltip:AddDoubleLine(L["Activity"], format("%02.1f%%", playertime / settime * 100), 255, 255, 255)
-            end
-        end
-
-        function mod:Update(win, set)
-            local settime = Skada:GetSetTime(set)
-            local nr, max = 1, 0
-            for i, player in ipairs(set.players) do
-                local d = win.dataset[nr] or {}
-                win.dataset[nr] = d
-
-                local playertime = Skada:PlayerActiveTime(set, player)
-
-                d.id = player.id
-                d.label = player.name
-                d.class = player.class
-                d.role = player.role
-                d.spec = player.spec
-
-                d.value = playertime
-                d.valuetext =
-                    Skada:FormatValueText(
-                    Skada:FormatTime(playertime),
-                    self.metadata.columns["Active Time"],
-                    format("%02.1f%%", 100 * playertime / settime),
-                    self.metadata.columns.Percent
-                )
-
-                if playertime > max then
-                    max = playertime
-                end
-
-                nr = nr + 1
-            end
-
-            win.metadata.maxvalue = settime
-        end
-
-        function mod:OnEnable()
-            mod.metadata = {
-                showspots = true,
-                tooltip = activity_tooltip,
-                columns = {["Active Time"] = true, Percent = true}
-            }
-            Skada:AddMode(self)
-        end
-
-        function mod:OnDisable()
-            Skada:RemoveMode(self)
-        end
-
-        function mod:GetSetSummary(set)
-            return Skada:FormatValueText(
-                Skada:GetFormatedSetTime(set),
-                self.metadata.columns["Active Time"],
-                format("%s - %s", date("%H:%M", set.starttime), date("%H:%M", set.endtime)),
-                self.metadata.columns.Percent
-            )
         end
     end
 )
