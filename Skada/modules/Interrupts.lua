@@ -251,17 +251,13 @@ Skada:AddLoadableModule(
         end
 
         function mod:AddToTooltip(set, tooltip)
-            GameTooltip:AddDoubleLine(L["Interrupts"], set.interrupts, 1, 1, 1)
+            if set.interrupts > 0 then
+                tooltip:AddDoubleLine(L["Interrupts"], set.interrupts, 1, 1, 1)
+            end
         end
 
         function mod:GetSetSummary(set)
-            return Skada:FormatValueText(
-                set.interrupts,
-                self.metadata.columns.Total,
-                format("%02.1f%%", 100 * set.interrupts / math.max(1, set.interrupts)),
-                self.metadata.columns.Percent
-            )
-            -- return set.interrupts
+            return set.interrupts
         end
 
         -- Called by Skada when a new player is added to a set.

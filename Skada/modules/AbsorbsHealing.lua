@@ -22,7 +22,7 @@ Skada:AddLoadableModule(
         local spellmod = mod:NewModule(L["Healing spell list"])
 
         local function log_heal(set, data, tick)
-            local player = Skada:get_player(set, data.playerid, data.playername)
+            local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
             if not player then
                 return
             end
@@ -1233,6 +1233,24 @@ Skada:AddLoadableModule(
 
         function mod:OnDisable()
             Skada:RemoveMode(self)
+        end
+
+        function mod:AddToTooltip(set, tooltip)
+            local total = (set.healing or 0) + (set.absorbs or 0)
+            if total > 0 then
+                tooltip:AddDoubleLine(L["Healing"], Skada:FormatNumber(total), 1, 1, 1)
+                tooltip:AddDoubleLine(L["HPS"], Skada:FormatNumber(getRaidHPS(set)), 1, 1, 1)
+            end
+            if set.overhealing and set.overhealing > 0 then
+                local totall = total + set.overhealing
+                tooltip:AddDoubleLine(
+                    L["Overhealing"],
+                    format("%02.1f%%", 100 * set.overhealing / math_max(1, totall)),
+                    1,
+                    1,
+                    1
+                )
+            end
         end
 
         function mod:GetSetSummary(set)

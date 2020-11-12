@@ -633,6 +633,14 @@ Skada:AddLoadableModule(
             sunder = sunder or _select(1, _GetSpellInfo(47467))
         end
 
+        function mod:AddToTooltip(set, tooltip)
+            sunder = sunder or _select(1, _GetSpellInfo(47467))
+            local total = total_sunders(set)
+            if total > 0 then
+                tooltip:AddDoubleLine(sunder, total, 1, 1, 1)
+            end
+        end
+
         function mod:GetSetSummary(set)
             return total_sunders(set)
         end

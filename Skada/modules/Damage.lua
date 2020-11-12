@@ -803,7 +803,8 @@ Skada:AddLoadableModule(
         end
 
         function mod:AddToTooltip(set, tooltip)
-            GameTooltip:AddDoubleLine(L["DPS"], _format("%02.1f", getRaidDPS(set)), 1, 1, 1)
+            tooltip:AddDoubleLine(L["Damage"], Skada:FormatNumber(set.damagedone), 1, 1, 1)
+            tooltip:AddDoubleLine(L["DPS"], Skada:FormatNumber(getRaidDPS(set)), 1, 1, 1)
         end
 
         function mod:GetSetSummary(set)
@@ -1378,6 +1379,11 @@ Skada:AddLoadableModule(
         function mod:OnDisable()
             Skada:RemoveMode(self)
             Skada:RemoveMode(spellsmod)
+        end
+
+        function mod:AddToTooltip(set, tooltip)
+            tooltip:AddDoubleLine(L["Damage taken"], Skada:FormatNumber(set.damagetaken), 1, 1, 1)
+            tooltip:AddDoubleLine(L["DTPS"], Skada:FormatNumber(getRaidDTPS(set)), 1, 1, 1)
         end
 
         function mod:GetSetSummary(set)

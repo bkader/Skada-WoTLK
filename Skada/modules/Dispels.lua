@@ -263,7 +263,9 @@ Skada:AddLoadableModule(
         end
 
         function mod:AddToTooltip(set, tooltip)
-            GameTooltip:AddDoubleLine(L["Dispels"], set.dispels, 1, 1, 1)
+            if set.dispels > 0 then
+                tooltip:AddDoubleLine(L["Dispels"], set.dispels, 1, 1, 1)
+            end
         end
 
         function mod:AddPlayerAttributes(player)

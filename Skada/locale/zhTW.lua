@@ -285,7 +285,7 @@ if not L then return end
 
 -- -- minimap button
 -- L["Skada summary"] = true
--- L["Hint: Left-Click to toggle Skada window."] = true
+-- L["Left-Click to toggle windows."] = true
 -- L["Shift+Left-Click to reset."] = true
 -- L["Right-click to open menu"] = true
 

@@ -35,6 +35,139 @@ local CCSpells = {
     [676] = true -- Disarm
 }
 
+-- extended CC list for only CC Done and CC Taken modules
+local ExtraCCSpells = {
+    -- Death Knight
+    [47476] = true, -- Strangulate
+    [49203] = true, -- Hungering Cold
+    [47481] = true, -- Gnaw
+    [49560] = true, -- Death Grip
+    -- Druid
+    [339] = true, -- Entangling Roots (rank 1)
+    [1062] = true, -- Entangling Roots (rank 2)
+    [5195] = true, -- Entangling Roots (rank 3)
+    [5196] = true, -- Entangling Roots (rank 4)
+    [9852] = true, -- Entangling Roots (rank 5)
+    [9853] = true, -- Entangling Roots (rank 6)
+    [26989] = true, -- Entangling Roots (rank 7)
+    [19975] = true, -- Entangling Roots (Nature's Grasp rank 1)
+    [19974] = true, -- Entangling Roots (Nature's Grasp rank 2)
+    [19973] = true, -- Entangling Roots (Nature's Grasp rank 3)
+    [19972] = true, -- Entangling Roots (Nature's Grasp rank 4)
+    [19971] = true, -- Entangling Roots (Nature's Grasp rank 5)
+    [19970] = true, -- Entangling Roots (Nature's Grasp rank 6)
+    [27010] = true, -- Entangling Roots (Nature's Grasp rank 7)
+    [53313] = true, -- Entangling Roots (Nature's Grasp)
+    [66070] = true, -- Entangling Roots (Force of Nature)
+    [8983] = true, -- Bash
+    [16979] = true, -- Feral Charge - Bear
+    [22570] = true, -- Maim (rank 1)
+    [49802] = true, -- Maim
+    [49803] = true, -- Pounce
+    -- Hunter
+    [19503] = true, -- Scatter Shot
+    [19386] = true, -- Wyvern Sting (rank 1)
+    [24132] = true, -- Wyvern Sting (rank 2)
+    [24133] = true, -- Wyvern Sting (rank 3)
+    [27068] = true, -- Wyvern Sting (rank 4)
+    [49011] = true, -- Wyvern Sting (rank 5)
+    [49012] = true, -- Wyvern Sting
+    [53548] = true, -- Pin (Crab)
+    [4167] = true, -- Web (Spider)
+    [55509] = true, -- Venom Web Spray (Silithid)
+    [24394] = true, -- Intimidation
+    [19577] = true, -- Intimidation (stun)
+    [53568] = true, -- Sonic Blast (Bat)
+    [53543] = true, -- Snatch (Bird of Prey)
+    [50541] = true, -- Clench (Scorpid)
+    [55492] = true, -- Froststorm Breath (Chimaera)
+    [26090] = true, -- Pummel (Gorilla)
+    [53575] = true, -- Tendon Rip (Hyena)
+    [53589] = true, -- Nether Shock (Nether Ray)
+    [53562] = true, -- Ravage (Ravager)
+    [1513] = true, -- Scare Beast
+    [64803] = true, -- Entrapment
+    -- Mage
+    [61305] = true, -- Polymorph Cat
+    [61721] = true, -- Polymorph Rabbit
+    [61780] = true, -- Polymorph Turkey
+    [31661] = true, -- Dragon's Breath
+    [44572] = true, -- Deep Freeze
+    [122] = true, -- Frost Nova
+    [33395] = true, -- Freeze (Frost Water Elemental)
+    [55021] = true, -- Silenced - Improved Counterspell
+    -- Paladin
+    [853] = true, -- Hammer of Justice (rank 1)
+    [5588] = true, -- Hammer of Justice (rank 2)
+    [5589] = true, -- Hammer of Justice (rank 3)
+    [10308] = true, -- Hammer of Justice
+    [10326] = true, -- Turn Evil
+    [2812] = true, -- Holy Wrath (rank 1)
+    [10318] = true, -- Holy Wrath (rank 2)
+    [27319] = true, -- Holy Wrath (rank 3)
+    [48816] = true, -- Holy Wrath (rank 4)
+    [48817] = true, -- Holy Wrath
+    [31935] = true, -- Avengers Shield
+    -- Priest
+    [8122] = true, -- Psychic Scream (rank 1)
+    [8124] = true, -- Psychic Scream (rank 2)
+    [10888] = true, -- Psychic Scream (rank 3)
+    [10890] = true, -- Psychic Scream
+    [605] = true, -- Dominate Mind (Mind Control)
+    [15487] = true, -- Silence
+    [64044] = true, -- Psychic Horror
+    -- Rogue
+    [51724] = true, -- Sap
+    [408] = true, -- Kidney Shot (rank 1)
+    [8643] = true, -- Kidney Shot
+    [2094] = true, -- Blind
+    [1833] = true, -- Cheap Shot
+    [1776] = true, -- Gouge
+    [1330] = true, -- Garrote - Silence
+    -- Shaman
+    [51514] = true, -- Hex
+    [8056] = true, -- Frost Shock (rank 1)
+    [8058] = true, -- Frost Shock (rank 2)
+    [10472] = true, -- Frost Shock (rank 3)
+    [10473] = true, -- Frost Shock (rank 4)
+    [25464] = true, -- Frost Shock (rank 5)
+    [49235] = true, -- Frost Shock (rank 6)
+    [49236] = true, -- Frost Shock
+    [64695] = true, -- Earthgrab (Earthbind Totem with Storm, Earth and Fire talent)
+    [3600] = true, -- Earthbind (Earthbind Totem)
+    [39796] = true, -- Stoneclaw Stun (Stoneclaw Totem)
+    [8034] = true, -- Frostbrand Weapon (rank 1)
+    [8037] = true, -- Frostbrand Weapon (rank 2)
+    [10458] = true, -- Frostbrand Weapon (rank 3)
+    [16352] = true, -- Frostbrand Weapon (rank 4)
+    [16353] = true, -- Frostbrand Weapon (rank 5)
+    [25501] = true, -- Frostbrand Weapon (rank 6)
+    [58797] = true, -- Frostbrand Weapon (rank 7)
+    [58798] = true, -- Frostbrand Weapon (rank 8)
+    [58799] = true, -- Frostbrand Weapon
+    -- Warlock
+    [6215] = true, -- Fear
+    [5484] = true, -- Howl of Terror
+    [30283] = true, -- Shadowfury
+    [22703] = true, -- Infernal Awakening
+    [6789] = true, -- Mortal Coil
+    [47860] = true, -- Death Coil
+    [24259] = true, -- Spell Lock
+    -- Warrior
+    [5246] = true, -- Initmidating Shout
+    [46968] = true, -- Shockwave
+    [6552] = true, -- Pummel
+    [58357] = true, -- Heroic Throw silence
+    [7922] = true, -- Charge
+    [47995] = true, -- Intercept (Stun)--needs review
+    [12323] = true, -- Piercing Howl
+    -- Racials
+    [20549] = true, -- War Stomp
+    [28730] = true, -- Arcane Torrent
+    -- Engineering
+    [67890] = true -- Cobalt Frag Bomb
+}
+
 local pairs, ipairs, select = pairs, ipairs, select
 local tostring, format = tostring, string.format
 local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
@@ -108,7 +241,7 @@ Skada:AddLoadableModule(
                 spellid, spellname, _, extraspellid, extraspellname = ...
             end
 
-            if CCSpells[spellid] then
+            if CCSpells[spellid] or ExtraCCSpells[spellid] then
                 data.playerid = srcGUID
                 data.playername = srcName
                 data.playerflags = srcFlags
@@ -306,6 +439,12 @@ Skada:AddLoadableModule(
             Skada:RemoveMode(self)
         end
 
+        function mod:AddToTooltip(set, tooltip)
+            if set.ccdone > 0 then
+                tooltip:AddDoubleLine(L["CC Done"], set.ccdone, 1, 1, 1)
+            end
+        end
+
         function mod:GetSetSummary(set)
             return set.ccdone
         end
@@ -400,7 +539,7 @@ Skada:AddLoadableModule(
                 spellid, spellname, _, extraspellid, extraspellname = ...
             end
 
-            if CCSpells[spellid] then
+            if CCSpells[spellid] or ExtraCCSpells[spellid] then
                 data.srcGUID = srcGUID
                 data.srcName = srcName
                 data.srcFlags = srcFlags
@@ -601,6 +740,12 @@ Skada:AddLoadableModule(
 
         function mod:OnDisable()
             Skada:RemoveMode(self)
+        end
+
+        function mod:AddToTooltip(set, tooltip)
+            if set.cctaken > 0 then
+                tooltip:AddDoubleLine(L["CC Taken"], set.cctaken, 1, 1, 1)
+            end
         end
 
         function mod:GetSetSummary(set)
@@ -939,7 +1084,9 @@ Skada:AddLoadableModule(
         end
 
         function mod:AddToTooltip(set, tooltip)
-            GameTooltip:AddDoubleLine(L["CC Breaks"], set.ccbreaks, 1, 1, 1)
+            if set.ccbreaks > 0 then
+                tooltip:AddDoubleLine(L["CC Breaks"], set.ccbreaks, 1, 1, 1)
+            end
         end
 
         function mod:GetSetSummary(set)

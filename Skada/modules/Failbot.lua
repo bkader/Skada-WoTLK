@@ -186,7 +186,9 @@ Skada:AddLoadableModule(
         end
 
         function mod:AddToTooltip(set, tooltip)
-            GameTooltip:AddDoubleLine(L["Fails"], set.fails, 1, 1, 1)
+            if set.fails > 0 then
+                tooltip:AddDoubleLine(L["Fails"], set.fails, 1, 1, 1)
+            end
         end
 
         function mod:AddPlayerAttributes(player)

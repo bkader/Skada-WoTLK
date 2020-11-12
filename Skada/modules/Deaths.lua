@@ -1,7 +1,11 @@
 local Skada = Skada
-if not Skada then return end
+if not Skada then
+    return
+end
 
-Skada:AddLoadableModule("Deaths", function(Skada, L)
+Skada:AddLoadableModule(
+    "Deaths",
+    function(Skada, L)
         if Skada:IsDisabled("Deaths") then
             return
         end
@@ -125,8 +129,8 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
             log_deathlog(Skada.current, data, ts)
         end
 
-        local function log_death(set, playerid, playername, ts)
-            local player = Skada:get_player(set, playerid, playername)
+        local function log_death(set, playerid, playername, playerflags, ts)
+            local player = Skada:get_player(set, playerid, playername, playerflags)
             if player then
                 set.deaths = set.deaths + 1
                 player.deaths = player.deaths + 1
@@ -138,20 +142,20 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
         local function UnitDied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             if not _UnitIsFeignDeath(dstName) then
-                log_death(Skada.current, dstGUID, dstName, ts)
-                log_death(Skada.total, dstGUID, dstName, ts)
+                log_death(Skada.current, dstGUID, dstName, dstFlags, ts)
+                log_death(Skada.total, dstGUID, dstName, dstFlags, ts)
             end
         end
 
-        local function log_resurrect(set, playerid, playername)
-            local player = Skada:get_player(set, playerid, playername)
+        local function log_resurrect(set, playerid, playername, playerflags)
+            local player = Skada:get_player(set, playerid, playername, playerflags)
             if player then
                 table_insert(player.deathlog, 1, {time = 0, log = {}})
             end
         end
 
         local function SpellResurrect(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-            log_resurrect(Skada.current, dstGUID, dstName)
+            log_resurrect(Skada.current, dstGUID, dstName, dstFlags)
         end
 
         function deathlogmod:Enter(win, id, label)
@@ -358,7 +362,9 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
         end
 
         function mod:AddToTooltip(set, tooltip)
-            GameTooltip:AddDoubleLine(DEATHS, set.deaths, 1, 1, 1)
+            if set.deaths > 0 then
+                tooltip:AddDoubleLine(DEATHS, set.deaths, 1, 1, 1)
+            end
         end
 
         function mod:GetSetSummary(set)

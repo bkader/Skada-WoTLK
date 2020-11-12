@@ -5,7 +5,6 @@ end
 
 Skada:AddLoadableModule(
     "Resurrects",
-    nil,
     function(Skada, L)
         if Skada:IsDisabled("Resurrects") then
             return
@@ -278,6 +277,12 @@ Skada:AddLoadableModule(
         function mod:OnDisable()
             Skada:RemoveMode(self)
             Skada:DisableModule(self:GetName())
+        end
+
+        function mod:AddToTooltip(set, tooltip)
+            if set.resurrect > 0 then
+                tooltip:AddDoubleLine(L["Resurrects"], set.resurrect, 1, 1, 1)
+            end
         end
 
         function mod:GetSetSummary(set)

@@ -867,8 +867,8 @@ function verify_set(mode, set)
         mode:AddSetAttributes(set)
     end
 
-    for _, player in ipairs(set.players) do
-        if mode.AddPlayerAttributes then
+    if mode.AddPlayerAttributes then
+        for _, player in ipairs(set.players) do
             mode:AddPlayerAttributes(player)
         end
     end
@@ -1914,9 +1914,10 @@ end
 -- ======================================================= --
 
 function dataobj:OnEnter()
-    GameTooltip:SetOwner(self, "ANCHOR_NONE")
-    GameTooltip:SetPoint("TOPLEFT", self, "BOTTOMLEFT")
-    GameTooltip:ClearLines()
+    self.tooltip = self.tooltip or GameTooltip
+    self.tooltip:SetOwner(self, "ANCHOR_NONE")
+    self.tooltip:SetPoint("TOPLEFT", self, "BOTTOMLEFT")
+    self.tooltip:ClearLines()
 
     local set
     if Skada.current then
@@ -1925,28 +1926,32 @@ function dataobj:OnEnter()
         set = Skada.char.sets[1]
     end
     if set then
-        GameTooltip:AddLine(L["Skada summary"], 0, 1, 0)
+        self.tooltip:AddLine(L["Skada summary"], 0, 1, 0)
+        self.tooltip:AddDoubleLine(L["Segment Time"], Skada:GetFormatedSetTime(set), 1, 1, 1)
         for _, mode in ipairs(modes) do
             if mode.AddToTooltip ~= nil then
-                mode:AddToTooltip(set, GameTooltip)
+                mode:AddToTooltip(set, self.tooltip)
             end
         end
+        self.tooltip:AddLine(" ")
+    else
+        self.tooltip:AddLine("Skada", 1, 1, 1)
     end
 
-    GameTooltip:AddLine(L["Hint: Left-Click to toggle Skada window."], 0, 1, 0)
-    GameTooltip:AddLine(L["Shift+Left-Click to reset."], 0, 1, 0)
-    GameTooltip:AddLine(L["Right-click to open menu"], 0, 1, 0)
+    self.tooltip:AddLine(L["Left-Click to toggle windows."])
+    self.tooltip:AddLine(L["Shift+Left-Click to reset."])
+    self.tooltip:AddLine(L["Right-click to open menu"])
 
-    GameTooltip:Show()
+    self.tooltip:Show()
 end
 
 function dataobj:OnLeave()
-    GameTooltip:Hide()
+    self.tooltip:Hide()
 end
 
 function dataobj:OnClick(button)
     if button == "LeftButton" and IsShiftKeyDown() then
-        Skada:Reset()
+        Skada:ShowPopup()
     elseif button == "LeftButton" then
         Skada:ToggleWindow()
     elseif button == "RightButton" then
