@@ -120,6 +120,7 @@ local function GetGroupTypeAndCount()
 
     return t, count
 end
+Skada.GetGroupTypeAndCount = GetGroupTypeAndCount
 
 -- ============= --
 -- needed locals --
