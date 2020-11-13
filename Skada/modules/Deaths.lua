@@ -18,7 +18,7 @@ Skada:AddLoadableModule(
         local _UnitIsFeignDeath = UnitIsFeignDeath
         local table_insert, table_remove = table.insert, table.remove
         local table_sort, table_maxn = table.sort, table.maxn
-        local _GetSpellInfo = GetSpellInfo
+        local _select, _GetSpellInfo = select, GetSpellInfo
         local _ipairs, _format, _date = ipairs, string.format, date
 
         local function log_deathlog(set, data, ts)
@@ -202,7 +202,7 @@ Skada:AddLoadableModule(
                             local spellname, _, spellicon = _GetSpellInfo(log.spellid)
 
                             d.id = nr
-                            d.label = _format("%2.2f: %s", diff, spellname)
+                            d.label = _format("%2.2f: %s", diff or 0, spellname or UNKNOWN)
                             d.icon = spellicon
                             d.spellid = log.spellid
                             d.time = log.time
@@ -256,12 +256,19 @@ Skada:AddLoadableModule(
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
-                    local dth = death.log[2]
-
                     d.id = i
                     d.time = death.time
-                    d.label = dth and dth.source or UNKNOW
                     d.icon = "Interface\\Icons\\Ability_Rogue_FeignDeath"
+
+                    local dth = death.log[1]
+
+                    if dth and dth.spellid then
+                        d.label = _select(1, _GetSpellInfo(dth.spellid))
+                    elseif dth and dth.source then
+                        d.label = dth.source
+                    else
+                        d.label = set.name or UNKNOWN
+                    end
 
                     d.value = dth and dth.time or death.time
                     d.valuetext = _date("%H:%M:%S", d.value)
@@ -355,8 +362,11 @@ Skada:AddLoadableModule(
         function mod:SetComplete(set)
             for i, player in _ipairs(set.players) do
                 if player.deaths == 0 then
-                    wipe(player.deathlog)
                     player.deathlog = nil
+                else
+                    while table_maxn(player.deathlog) > player.deaths do
+                        table_remove(player.deathlog)
+                    end
                 end
             end
         end
