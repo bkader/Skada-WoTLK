@@ -363,7 +363,7 @@ Skada:AddLoadableModule(
             for i, player in _ipairs(set.players) do
                 if player.deaths == 0 then
                     player.deathlog = nil
-                else
+                elseif player.deathlog then
                     while table_maxn(player.deathlog) > player.deaths do
                         table_remove(player.deathlog)
                     end
