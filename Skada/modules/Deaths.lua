@@ -365,7 +365,7 @@ Skada:AddLoadableModule(
                     player.deathlog = nil
                 elseif player.deathlog then
                     while table_maxn(player.deathlog) > player.deaths do
-                        table_remove(player.deathlog)
+                        table_remove(player.deathlog, 1)
                     end
                 end
             end
