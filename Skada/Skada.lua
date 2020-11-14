@@ -2636,7 +2636,6 @@ do
     local ignoredevents = {
         ["SPELL_AURA_REMOVED_DOSE"] = true,
         ["SPELL_CAST_START"] = true,
-        ["SPELL_CAST_SUCCESS"] = true,
         ["SPELL_CAST_FAILED"] = true,
         ["SPELL_DRAIN"] = true,
         ["PARTY_KILL"] = true,
