@@ -113,7 +113,7 @@ Skada:AddLoadableModule(
             local nr, max = 1, 0
 
             for i, player in ipairs(set.players) do
-                if player.fails.count > 0 and player.fails.spells[self.spellid] then
+                if player.fails.count > 0 and self.spellid and player.fails.spells[self.spellid] then
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
