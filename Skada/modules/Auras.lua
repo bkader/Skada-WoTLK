@@ -595,16 +595,28 @@ Skada:AddLoadableModule(
                     for spellid, spell in _pairs(player.auras) do
                         if _select(1, _GetSpellInfo(spellid)) == sunder then
                             cached.count = cached.count + spell.count
-                            cached.players[player.name] = {
-                                id = player.id,
-                                class = player.class,
-                                role = player.role,
-                                spec = player.spec,
-                                count = spell.count,
-                                targets = {}
-                            }
+                            if not cached.players[player.name] then
+                                cached.players[player.name] = {
+                                    id = player.id,
+                                    class = player.class,
+                                    role = player.role,
+                                    spec = player.spec,
+                                    count = spell.count,
+                                    targets = {}
+                                }
+                            else
+                                cached.players[player.name].count = cached.players[player.name].count + spell.count
+                            end
+
+                            cached.players[player.name].targets = cached.players[player.name].targets or {}
+
                             for targetname, target in _pairs(spell.targets) do
-                                cached.players[player.name].targets[targetname] = target.count
+                                if not cached.players[player.name].targets[targetname] then
+                                    cached.players[player.name].targets[targetname] = target.count
+                                else
+                                    cached.players[player.name].targets[targetname] =
+                                        cached.players[player.name].targets[targetname] + target.count
+                                end
                             end
                         end
                     end
