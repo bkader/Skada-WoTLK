@@ -340,9 +340,9 @@ Skada:AddLoadableModule(
                 return
             end
 
-            local spell = player.damagedone.spells[spellmod.spellid]
+            local spell = player.damagedone.spells[spellmod.spellname]
             if spell and label then
-                tooltip:AddLine(player.name .. " - " .. _select(1, _GetSpellInfo(spellmod.spellid)))
+                tooltip:AddLine(player.name .. " - " .. spellmod.spellname)
 
                 if spell.school then
                     local c = Skada.schoolcolors[spell.school]
@@ -419,7 +419,7 @@ Skada:AddLoadableModule(
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
-                    d.id = spell.id
+                    d.id = spellname
                     d.spellid = spell.id
                     d.spellschool = spell.school
                     d.label = spellname
@@ -619,7 +619,7 @@ Skada:AddLoadableModule(
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
-                    d.id = spell.id
+                    d.id = spellname
                     d.spellid = spell.id
                     d.label = spellname
                     d.icon = spell.spellicon
