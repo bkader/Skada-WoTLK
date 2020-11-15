@@ -103,7 +103,7 @@ function Skada:OpenMenu(window)
 
             -- reset
             wipe(info)
-            info.text = L["Reset"]
+            info.text = RESET
             info.func = function()
                 Skada:ShowPopup()
             end

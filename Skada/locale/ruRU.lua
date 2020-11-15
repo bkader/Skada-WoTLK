@@ -167,7 +167,6 @@ if not L then return end
 -- L["Return to the previous set and mode after combat ends."] = true
 -- L["Wipe mode"] = true
 -- L["Automatically switch to set 'Current' and this mode after a wipe."] = true
--- L["None"] = true
 
 -- L["Inline bar display"] = true
 -- L["Inline display is a horizontal window style."] = true
@@ -299,7 +298,6 @@ if not L then return end
 -- -- window buttons
 -- L["Configure"] = true
 -- L["opens the configuration window"] = true
--- L["Reset"] = true
 -- L["Resets all fight data except those marked as kept."] = true
 -- L["Segment"] = true
 -- L["Jump to a specific segment."] = true

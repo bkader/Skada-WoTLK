@@ -13,6 +13,7 @@ L["Error: No options selected"] = true
 
 L["Profiles"] = true
 L["Enable"] = true
+L["ENABLED"] = true
 L["Disable"] = true
 L["DISABLED"] = true
 
@@ -169,7 +170,6 @@ L["Return after combat"] = true
 L["Return to the previous set and mode after combat ends."] = true
 L["Wipe mode"] = true
 L["Automatically switch to set 'Current' and this mode after a wipe."] = true
-L["None"] = true
 
 L["Inline bar display"] = true
 L["Inline display is a horizontal window style."] = true
@@ -301,7 +301,6 @@ L["Start new segment"] = true
 -- window buttons
 L["Configure"] = true
 L["opens the configuration window"] = true
-L["Reset"] = true
 L["Resets all fight data except those marked as kept."] = true
 L["Segment"] = true
 L["Jump to a specific segment."] = true

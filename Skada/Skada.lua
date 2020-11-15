@@ -19,7 +19,7 @@ local dataobj =
 -- Keybindings
 BINDING_HEADER_SKADA = "Skada"
 BINDING_NAME_SKADA_TOGGLE = L["Toggle window"]
-BINDING_NAME_SKADA_RESET = L["Reset"]
+BINDING_NAME_SKADA_RESET = RESET
 BINDING_NAME_SKADA_NEWSEGMENT = L["Start new segment"]
 
 -- available display types

@@ -89,7 +89,7 @@ function mod:Create(window)
         )
 
         window.bargroup:AddButton(
-            L["Reset"],
+            RESET,
             L["Resets all fight data except those marked as kept."],
             "Interface\\Addons\\Skada\\media\\textures\\icon-reset",
             "Interface\\Addons\\Skada\\media\\textures\\icon-reset",
@@ -707,7 +707,7 @@ do
 
         -- Button visibility.
         g:ShowButton(L["Configure"], p.buttons and p.buttons.menu)
-        g:ShowButton(L["Reset"], p.buttons and p.buttons.reset)
+        g:ShowButton(RESET, p.buttons and p.buttons.reset)
         g:ShowButton(L["Segment"], p.buttons and p.buttons.segment)
         g:ShowButton(L["Mode"], p.buttons and p.buttons.mode)
         g:ShowButton(L["Report"], p.buttons and p.buttons.report)
@@ -1311,7 +1311,7 @@ function mod:AddDisplayOptions(win, options)
                     },
                     reset = {
                         type = "toggle",
-                        name = L["Reset"],
+                        name = RESET,
                         order = 4,
                         get = function()
                             return db.buttons.reset
