@@ -1201,8 +1201,6 @@ do
                 action.playername = owner.name
             else
                 action.playername = action.playername .. " (" .. owner.name .. ")"
-                local id = action.playerid:sub(6, 10)
-                action.playerid = owner.id .. id
             end
         end
     end
@@ -1547,7 +1545,7 @@ function Skada:AddFeed(name, func)
     feeds[name] = func
 end
 
-function Skada:RemoveFeed(name, func)
+function Skada:RemoveFeed(name)
     for i, feed in ipairs(feeds) do
         if feed.name == name then
             tremove(feeds, i)
