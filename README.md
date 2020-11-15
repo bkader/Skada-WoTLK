@@ -45,6 +45,5 @@ It is important to know that for most addons to properly function without issues
 
 1. Delete old Skada addon and modules: All folders which the name starts with Skada within the `InterFace\AddOns` folder must be deleted.
 2. Navigate to `WTF\Account` folder, use the search box on top right and search for "Skada". Select all files and delete them.
-3. Download the repository package and extract to `Interface\AddOns`. Please keep everything with the default folder inside the package.
-4. Rename the folder to **Skada**.
-5. Start the game, enable the addon, change the settings the way you want them to be and enjoy!
+3. Download the repository package and extract the `Skada` folder into `Interface\AddOns`.
+4. Start the game, enable the addon, change the settings the way you want them to be and enjoy!
