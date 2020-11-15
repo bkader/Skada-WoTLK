@@ -94,6 +94,16 @@ local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAf
 local UnitClass, UnitGroupRolesAssigned = UnitClass, UnitGroupRolesAssigned
 local UnitGUID, UnitName = UnitGUID, UnitName
 
+local COMBATLOG_OBJECT_TYPE_PET = COMBATLOG_OBJECT_TYPE_PET or 0x00001000
+local COMBATLOG_OBJECT_TYPE_GUARDIAN = COMBATLOG_OBJECT_TYPE_GUARDIAN or 0x00002000
+local PET_FLAGS = bit.bor(COMBATLOG_OBJECT_TYPE_PET, COMBATLOG_OBJECT_TYPE_GUARDIAN)
+
+local COMBATLOG_OBJECT_AFFILIATION_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE or 0x00000001
+local COMBATLOG_OBJECT_AFFILIATION_PARTY = COMBATLOG_OBJECT_AFFILIATION_PARTY or 0x00000002
+local COMBATLOG_OBJECT_AFFILIATION_RAID = COMBATLOG_OBJECT_AFFILIATION_RAID or 0x00000004
+local RAID_FLAGS =
+    bit.bor(COMBATLOG_OBJECT_AFFILIATION_MINE, COMBATLOG_OBJECT_AFFILIATION_PARTY, COMBATLOG_OBJECT_AFFILIATION_RAID)
+
 -- =================== --
 -- add missing globals --
 -- =================== --
@@ -1121,30 +1131,78 @@ end
 -- ================== --
 -- FIX PETS FUNCTIONS --
 -- ================== --
+do
+    -- create our scan tooltip
+    local tooltip = CreateFrame("GameTooltip", "SkadaTooltip", nil, "GameTooltipTemplate")
+    tooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
 
-function Skada:FixPets(action)
-    if action and action.playername then
-        local pet = pets[action.playerid]
-        if pet then
+    local ownerPatterns = {}
+    for i = 1, 44 do
+        local title = _G["UNITNAME_SUMMON_TITLE" .. i]
+        if title and title ~= "%s" and title:find("%s", nil, true) then
+            local pattern = title:gsub("%%s", "(.-)")
+            tinsert(ownerPatterns, pattern)
+        end
+    end
+
+    local function GetPetOwner(guid)
+        tooltip:SetHyperlink("unit:" .. guid)
+        for i = 2, tooltip:NumLines() do
+            local text = _G["SkadaTooltipTextLeft" .. i]:GetText()
+            if text then
+                for _, pattern in next, ownerPatterns do
+                    local owner = text:match(pattern)
+                    if owner then
+                        return owner
+                    end
+                end
+            end
+        end
+    end
+
+    function Skada:FixPets(action)
+        if not action or not action.playername or not action.playerid then
+            return
+        end
+
+        local owner = pets[action.playerid]
+
+        -- we try to associate pets and and guardians with their owner
+        if
+            not owner and action.playerflags and band(action.playerflags, PET_FLAGS) ~= 0 and
+                band(action.playerflags, RAID_FLAGS) ~= 0
+         then
+            if band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
+                owner = {id = UnitGUID("player"), name = UnitName("player")}
+                pets[action.playerid] = owner
+            else
+                local ownerName = GetPetOwner(action.playerid)
+                if ownerName then
+                    local guid = UnitGUID(ownerName)
+                    if players[guid] then
+                        owner = {id = guid, name = ownerName}
+                        pets[action.playerid] = owner
+                    end
+                end
+            end
+
+            if not owner then
+                action.playerid = action.playername
+            end
+        end
+
+        if owner then
             if self.db.profile.mergepets then
                 if action.spellname then
                     action.spellname = action.spellname .. " (" .. action.playername .. ")"
                 end
-                action.playername = pet.name
-                action.playerid = pet.id
+
+                action.playerid = owner.id
+                action.playername = owner.name
             else
-                action.playerid = action.playerid
-                action.playername = action.playername .. " (" .. pet.name .. ")"
-            end
-        elseif action.playerflags and band(action.playerflags, COMBATLOG_OBJECT_TYPE_GUARDIAN) ~= 0 then
-            if band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
-                if action.spellname then
-                    action.spellname = action.spellname .. " (" .. action.playername .. ")"
-                end
-                action.playername = UnitName("player")
-                action.playerid = UnitGUID("player")
-            else
-                action.playerid = action.playername
+                action.playername = action.playername .. " (" .. owner.name .. ")"
+                local id = action.playerid:sub(6, 10)
+                action.playerid = owner.id .. id
             end
         end
     end
@@ -2612,20 +2670,6 @@ do
         update_timer = self:ScheduleRepeatingTimer("UpdateDisplay", self.db.profile.updatefrequency or 0.25)
         tick_timer = self:ScheduleRepeatingTimer("Tick", 1)
     end
-
-    local COMBATLOG_OBJECT_TYPE_PET = COMBATLOG_OBJECT_TYPE_PET or 0x00001000
-    local COMBATLOG_OBJECT_TYPE_GUARDIAN = COMBATLOG_OBJECT_TYPE_GUARDIAN or 0x00002000
-    local PET_FLAGS = bit.bor(COMBATLOG_OBJECT_TYPE_PET, COMBATLOG_OBJECT_TYPE_GUARDIAN)
-
-    local COMBATLOG_OBJECT_AFFILIATION_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE or 0x00000001
-    local COMBATLOG_OBJECT_AFFILIATION_PARTY = COMBATLOG_OBJECT_AFFILIATION_PARTY or 0x00000002
-    local COMBATLOG_OBJECT_AFFILIATION_RAID = COMBATLOG_OBJECT_AFFILIATION_RAID or 0x00000004
-    local RAID_FLAGS =
-        bit.bor(
-        COMBATLOG_OBJECT_AFFILIATION_MINE,
-        COMBATLOG_OBJECT_AFFILIATION_PARTY,
-        COMBATLOG_OBJECT_AFFILIATION_RAID
-    )
 
     -- for shaman elemental
     local COMBATLOG_OBJECT_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
