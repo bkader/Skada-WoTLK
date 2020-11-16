@@ -106,6 +106,7 @@ Skada.defaults = {
         hidepvp = false,
         hidedisables = true,
         hidecombat = false,
+        translit = false,
         mergepets = true,
         feed = "",
         showtotals = false,
@@ -525,6 +526,17 @@ Skada.options = {
                         Skada:ApplySettings()
                     end,
                     width = "double"
+                },
+                translit = {
+                	type = "toggle",
+                	name = L["Translit"],
+                	desc = L["Make those russian letters that no one understand to be presented as western letters."],
+                	order = 18,
+                	get = function() return Skada.db.profile.translit end,
+                	set = function()
+                		Skada.db.profile.translit = not Skada.db.profile.translit
+                		Skada:ApplySettings()
+                	end
                 },
                 setstokeep = {
                     type = "range",

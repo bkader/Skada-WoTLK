@@ -9,6 +9,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 local BOSS = LibStub("LibBossIDs-1.0")
 local AceConfig = LibStub("AceConfig-3.0")
 local LGT = LibStub("LibGroupTalents-1.0")
+local Translit = LibStub("LibTranslit-1.0")
 
 local dataobj =
     LDB:NewDataObject(
@@ -1035,6 +1036,11 @@ do
                 end
             end
 
+            -- use LibTranslit to convert cyrillic letters into western letters.
+            if self.db.profile.translit and Translit then
+                player.name = Translit:Transliterate(player.name, "!")
+            end
+
             -- fix the pet classes
             if pets[player.id] then
                 -- fix classes for others
@@ -1206,13 +1212,13 @@ do
     end
 end
 
-function Skada:FixMyPets(playerGUID, playerName)
-    local pet = pets[playerGUID]
-    if pet then
-        return pet.id, pet.name
+function Skada:FixMyPets(playerid, playername)
+    local owner = pets[playerid]
+    if owner then
+        return owner.id, owner.name
     end
 
-    return playerGUID, playerName
+    return playerid, playername
 end
 
 function Skada:PetDebug()
