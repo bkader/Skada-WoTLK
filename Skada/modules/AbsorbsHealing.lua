@@ -496,7 +496,6 @@ Skada:AddLoadableModule(
             [48707] = 5,
             [51052] = 10,
             [51271] = 20,
-            [77535] = 10,
             [62606] = 10,
             [11426] = 60,
             [13031] = 60,
@@ -578,7 +577,7 @@ Skada:AddLoadableModule(
             [7239] = 120,
             [7242] = 120,
             [7245] = 120,
-            [6052] = 120,
+            [7254] = 120,
             [53915] = 120,
             [53914] = 120,
             [53913] = 120,
@@ -604,6 +603,7 @@ Skada:AddLoadableModule(
             [31002] = 300,
             [30999] = 300,
             [30994] = 300,
+            [31000] = 300,
             [23506] = 20,
             [12561] = 60,
             [31771] = 20,
@@ -633,7 +633,9 @@ Skada:AddLoadableModule(
             [65858] = 15,
             [67260] = 15,
             [67259] = 15,
-            [67261] = 15
+            [67261] = 15,
+            [65686] = 86400,
+            [65684] = 86400
         }
 
         local mage_fire_ward = {
@@ -741,91 +743,98 @@ Skada:AddLoadableModule(
         -- the time it was applied, but function depending on the damage received
         --
         local function sort_shields(a, b)
-            local spellA = a.spellid
-            local spellB = b.spellid
+            local a_spell = a and a.spellid or 100000
+            local b_spell = b and b.spellid or 100000
 
             -- puts oldest absorb first if there is two with the same id.
-            if spellA == spellB then
+            if a_spell == b_spell then
                 return a.timestamp < b.timestamp
             end
 
             -- twin val'kyr light essence
-            if spellA == 65686 then
+            if a_spell == 65686 then
                 return true
             end
-            if spellB == 65686 then
+            if b_spell == 65686 then
                 return false
             end
 
             -- twin val'kyr dark essence
-            if spellA == 65684 then
+            if a_spell == 65684 then
                 return true
             end
-            if spellB == 65684 then
+            if b_spell == 65684 then
                 return false
             end
 
             --frost ward
-            if mage_frost_ward[spellA] then
+            if mage_frost_ward[a_spell] then
                 return true
             end
-            if mage_frost_ward[spellB] then
+            if mage_frost_ward[b_spell] then
                 return false
             end
 
             -- fire ward
-            if mage_fire_ward[spellA] then
+            if mage_fire_ward[a_spell] then
                 return true
             end
-            if mage_fire_ward[spellB] then
+            if mage_fire_ward[b_spell] then
                 return false
             end
 
             --shadow ward
-            if warlock_shadow_ward[spellA] then
+            if warlock_shadow_ward[a_spell] then
                 return true
             end
-            if warlock_shadow_ward[spellB] then
+            if warlock_shadow_ward[b_spell] then
                 return false
             end
 
             -- Sacred Shield
-            if spellA == 58597 then
+            if a_spell == 58597 then
                 return true
             end
-            if spellB == 58597 then
+            if b_spell == 58597 then
                 return false
             end
 
             -- Fell blossom
-            if spellA == 28527 then
+            if a_spell == 28527 then
                 return true
             end
-            if spellB == 28527 then
+            if b_spell == 28527 then
                 return false
             end
 
             -- Divine Aegis
-            if spellA == 47753 then
+            if a_spell == 47753 then
                 return true
             end
-            if spellB == 47753 then
+            if b_spell == 47753 then
                 return false
             end
 
             -- Ice Barrier
-            if mage_ice_barrier[spellA] then
+            if mage_ice_barrier[a_spell] then
                 return true
             end
-            if mage_ice_barrier[spellB] then
+            if mage_ice_barrier[b_spell] then
                 return false
             end
 
             -- Warlock Sacrifice
-            if warlock_sacrifice[spellA] then
+            if warlock_sacrifice[a_spell] then
                 return true
             end
-            if warlock_sacrifice[spellB] then
+            if warlock_sacrifice[b_spell] then
+                return false
+            end
+
+            if absorbspells[a_spell] then
+                return true
+            end
+            if absorbspells[b_spell] then
                 return false
             end
 
@@ -856,7 +865,7 @@ Skada:AddLoadableModule(
                 shields[dstName] = shields[dstName] or {}
 
                 local absorb = {}
-                absorb.timestamp = timestamp or _GetTime()
+                absorb.timestamp = timestamp
                 absorb.srcGUID = srcGUID
                 absorb.srcName = srcName
                 absorb.srcFlags = srcFlags
@@ -878,9 +887,37 @@ Skada:AddLoadableModule(
                             function()
                                 remove_shield(dstName, dstGUID, spellid)
                             end,
-                            4
+                            0.1
                         )
                     end
+                end
+            end
+        end
+
+        local function AuraRefresh(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+            local spellid, spellname, spellschool, auratype, amount = ...
+            if absorbspells[spellid] then
+                shields[dstName] = shields[dstName] or {}
+
+                local found = false
+                for _, absorb in _ipairs(shields[dstName]) do
+                    if absorb.spellid == spellid and absorb.srcGUID == srcGUID then
+                        absorb.timestamp = timestamp
+                        found = true
+                        break
+                    end
+                end
+
+                if not found then
+                    local absorb = {}
+                    absorb.timestamp = timestamp
+                    absorb.srcGUID = srcGUID
+                    absorb.srcName = srcName
+                    absorb.srcFlags = srcFlags
+                    absorb.spellid = spellid
+
+                    table_insert(shields[dstName], absorb)
+                    table_sort(shields[dstName], sort_shields)
                 end
             end
         end
@@ -1150,15 +1187,30 @@ Skada:AddLoadableModule(
         do
             local function check_for_shields(unit)
                 if unit then
+                    local found = false
                     local dstGUID, dstName = _UnitGUID(unit), _UnitName(unit)
+                    shields[dstName] = shields[dstName] or {}
                     -- loop through our shields and see if player were pre-shielded
                     for i = 0, 31 do
-                        local _, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitAura(unit, i, nil, "BUFF")
+                        local spellname, _, _, _, _, duration, expires, unitCaster, _, _, spellid =
+                            UnitAura(unit, i, nil, "BUFF")
 
                         -- if we find any, we make sure to send it to AuraApplied to do the rest
                         if spellid and absorbspells[spellid] and unitCaster then
+                            found = true -- flag so we can order shields later
+
                             local srcGUID, srcName = _UnitGUID(unitCaster), _UnitName(unitCaster)
-                            AuraApplied(nil, nil, srcGUID, srcName, _, dstGUID, dstName, nil, spellid)
+
+                            local absorb = {}
+                            absorb.timestamp = expires - (duration or absorbspells[spellid])
+                            absorb.srcGUID = srcGUID
+                            absorb.srcName = srcName
+                            absorb.spellid = spellid
+                            table_insert(shields[dstName], absorb)
+                        end
+
+                        if found then
+                            table_sort(shields[dstName], sort_shields)
                         end
                     end
                 end
@@ -1193,9 +1245,9 @@ Skada:AddLoadableModule(
 
             hooksecurefunc(Skada, "StartCombat", mod.StartCombat)
 
-            Skada:RegisterForCL(AuraApplied, "SPELL_AURA_REFRESH", {src_is_interesting_nopets = true})
             Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {src_is_interesting_nopets = true})
             Skada:RegisterForCL(AuraRemoved, "SPELL_AURA_REMOVED", {src_is_interesting_nopets = true})
+            Skada:RegisterForCL(AuraRefresh, "SPELL_AURA_REFRESH", {src_is_interesting_nopets = true})
             Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {dst_is_interesting_nopets = true})
             Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {dst_is_interesting_nopets = true})
             Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {dst_is_interesting_nopets = true})
