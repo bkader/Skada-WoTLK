@@ -1861,7 +1861,9 @@ end
 function Skada:FormatNumber(number)
     if number then
         if self.db.profile.numberformat == 1 then
-            if number > 1000000 then
+            if number > 1000000000 then
+                return format("%02.3fB", number / 1000000000)
+            elseif number > 1000000 then
                 return format("%02.2fM", number / 1000000)
             else
                 return format("%02.1fK", number / 1000)
@@ -1877,7 +1879,7 @@ function Skada:FormatTime(sec)
         if sec >= 3600 then
             local h = math_floor(sec / 3600)
             local m = math_floor(sec / 60 - (h * 60))
-            local s = math.floor(sec - h * 3600 - m * 60)
+            local s = math_floor(sec - h * 3600 - m * 60)
             return format("%02.f:%02.f:%02.f", h, m, s)
         end
 
