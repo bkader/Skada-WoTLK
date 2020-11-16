@@ -880,7 +880,7 @@ function verify_set(mode, set)
 
     if mode.AddPlayerAttributes then
         for _, player in ipairs(set.players) do
-            mode:AddPlayerAttributes(player)
+            mode:AddPlayerAttributes(player, set)
         end
     end
 end
@@ -1111,7 +1111,7 @@ function Skada:get_player(set, playerid, playername, playerflag)
 
         for _, mode in ipairs(modes) do
             if mode.AddPlayerAttributes ~= nil then
-                mode:AddPlayerAttributes(player)
+                mode:AddPlayerAttributes(player, set)
             end
         end
 
