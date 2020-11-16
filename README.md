@@ -1,6 +1,6 @@
 # Skada Revisited
 
-I am simply a huge fan of **Skada**, I prefer it to other damage meters for several reasons. No need to judge me, it's after all a perfonal preference.
+I am simply a huge fan of **Skada**, I prefer it to other damage meters for several reasons. No need to judge me, it's after all a personal preference.
 
 ## What's new?
 
