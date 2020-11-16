@@ -20,6 +20,7 @@ Skada:AddLoadableModule(
         local table_sort, table_maxn = table.sort, table.maxn
         local _select, _GetSpellInfo = select, GetSpellInfo
         local _ipairs, _format, _date = ipairs, string.format, date
+        local math_abs, math_max = math.abs, math.max
 
         local function log_deathlog(set, data, ts)
             local player = Skada:get_player(set, data.dstGUID, data.dstName, data.dstFlags)
@@ -27,7 +28,7 @@ Skada:AddLoadableModule(
             if player then
                 -- et player maxhp if not already set
                 if player.maxhp == 0 then
-                    player.maxhp = _UnitHealthMax(data.dstName)
+                    player.maxhp = math_max(_UnitHealthMax(player.name) or 0, player.maxhp or 0)
                 end
 
                 -- create a log entry if it doesn't exist.
@@ -214,7 +215,7 @@ Skada:AddLoadableModule(
                             d.spellname = spellname
 
                             d.value = log.hp or 0
-                            local change = (log.amount > 0 and "+" or "-") .. Skada:FormatNumber(math.abs(log.amount))
+                            local change = (log.amount > 0 and "+" or "-") .. Skada:FormatNumber(math_abs(log.amount))
                             d.valuetext =
                                 Skada:FormatValueText(
                                 change,
@@ -264,6 +265,8 @@ Skada:AddLoadableModule(
 
                     if dth and dth.spellid then
                         d.label = _select(1, _GetSpellInfo(dth.spellid))
+                        d.icon = _select(3, _GetSpellInfo(dth.spellid))
+                        d.spellid = dth.spellid
                     elseif dth and dth.source then
                         d.label = dth.source
                     else
@@ -381,10 +384,10 @@ Skada:AddLoadableModule(
             return set.deaths
         end
 
-        function mod:AddPlayerAttributes(player)
+        function mod:AddPlayerAttributes(player, set)
             if not player.deaths then
                 player.deaths = 0
-                player.maxhp = 0
+                player.maxhp = math_max(_UnitHealthMax(player.name) or 0, player.maxhp or 0)
                 player.deathlog = {}
             end
         end
