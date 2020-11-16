@@ -95,7 +95,7 @@ Skada.defaults = {
         setformat = 3,
         setnumber = true,
         showranks = true,
-        setstokeep = 10,
+        setstokeep = 15,
         tooltips = true,
         tooltippos = "smart",
         tooltiprows = 3,
@@ -532,7 +532,7 @@ Skada.options = {
                     desc = L["The number of fight segments to keep. Persistent segments are not included in this."],
                     order = 98,
                     min = 0,
-                    max = 30,
+                    max = 99,
                     step = 1,
                     get = function()
                         return Skada.db.profile.setstokeep
