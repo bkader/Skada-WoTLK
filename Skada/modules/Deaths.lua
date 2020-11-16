@@ -72,14 +72,15 @@ Skada:AddLoadableModule(
                 critical,
                 glancing,
                 crushing = ...
-            dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName)
+
+            local dstGUID_modified, dstName_modified = Skada:FixMyPets(dstGUID, dstName)
 
             data.srcGUID = srcGUID
             data.srcName = srcName
             data.srcFlags = srcFlags
 
-            data.dstName = dstName
-            data.dstGUID = dstGUID
+            data.dstGUID = dstGUID_modified or dstGUID
+            data.dstName = dstName_modified or dstName
             data.dstFlags = dstFlags
 
             data.spellid = spellid
@@ -92,14 +93,15 @@ Skada:AddLoadableModule(
 
         local function SwingDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             local amount, overkill, spellschool, resisted, blocked, absorbed, critical, glancing, crushing = ...
-            dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName)
+
+            local dstGUID_modified, dstName_modified = Skada:FixMyPets(dstGUID, dstName)
 
             data.srcGUID = srcGUID
             data.srcName = srcName
             data.srcFlags = srcFlags
 
-            data.dstName = dstName
-            data.dstGUID = dstGUID
+            data.dstGUID = dstGUID_modified or dstGUID
+            data.dstName = dstName_modified or dstName
             data.dstFlags = dstFlags
 
             data.spellid = 6603
@@ -112,15 +114,15 @@ Skada:AddLoadableModule(
         local function SpellHeal(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             local spellid, spellname, spellschool, amount, overhealing, absorbed, critical = ...
 
-            srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName)
-            dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName)
+            local srcGUID_modified, srcName_modified = Skada:FixMyPets(srcGUID, srcName)
+            local dstGUID_modified, dstName_modified = Skada:FixMyPets(dstGUID, dstName)
 
-            data.srcGUID = srcGUID
-            data.srcName = srcName
+            data.srcGUID = dstGUID_modified or srcGUID
+            data.srcName = dstName_modified or srcName
             data.srcFlags = srcFlags
 
-            data.dstName = dstName
-            data.dstGUID = dstGUID
+            data.dstGUID = dstGUID_modified or dstGUID
+            data.dstName = dstName_modified or dstName
             data.dstFlags = dstFlags
 
             data.spellid = spellid

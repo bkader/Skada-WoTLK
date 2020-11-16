@@ -845,10 +845,11 @@ Skada:AddLoadableModule(
 
             local petid = srcGUID
             local petname = srcName
-            srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName)
 
-            data.srcGUID = srcGUID
-            data.srcName = srcName
+            local srcGUID_modified, srcName_modified = Skada:FixMyPets(srcGUID, srcName)
+
+            data.srcGUID = srcGUID_modified or srcGUID
+            data.srcName = srcName_modified or srcName
             data.srcFlags = srcFlags
 
             data.dstGUID = dstGUID
@@ -864,6 +865,7 @@ Skada:AddLoadableModule(
             log_ccbreak(Skada.total, data)
 
             -- Optional announce
+            srcName = srcName_modified or srcName
             local inInstance, instanceType = IsInInstance()
             if
                 Skada.db.profile.modules.ccannounce and GetNumRaidMembers() > 0 and UnitInRaid(srcName) and
