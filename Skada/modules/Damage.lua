@@ -830,14 +830,28 @@ Skada:AddLoadableModule(
         -- used to record damage on useful targets
         --
         function mod:OnInitialize()
+            --
+            -- we make sure to add our missing entries to LibBabble-Boss
+            --
+            LBB["Cult Adherent"] = L["Cult Adherent"]
+            LBB["Cult Fanatic"] = L["Cult Fanatic"]
+            LBB["Deformed Fanatic"] = L["Deformed Fanatic"]
+            LBB["Empowered Adherent"] = L["Empowered Adherent"]
+            LBB["Gas Cloud"] = L["Gas Cloud"]
+            LBB["Reanimated Adherent"] = L["Reanimated Adherent"]
+            LBB["Reanimated Fanatic"] = L["Reanimated Fanatic"]
+            LBB["Volatile Ooze"] = L["Volatile Ooze"]
+            LBB["Wicked Spirit"] = "Wicked Spirit"
+            LBB["Darnavan"] = L["Darnavan"]
+            LBB["Living Inferno"] = L["Living Inferno"]
+
             if not groupName then
                 groupName = {
                     [LBB["The Lich King"]] = L["Useful targets"],
                     [LBB["Professor Putricide"]] = L["Oozes"],
                     [LBB["Blood Prince Council"]] = L["Princes overkilling"],
                     [LBB["Lady Deathwhisper"]] = L["Adds"],
-                    [LBB["Halion"]] = L["Halion and Inferno"],
-                    ["Valkyrs"] = L["Valkyrs overkilling"]
+                    [LBB["Halion"]] = L["Halion and Inferno"]
                 }
             end
 

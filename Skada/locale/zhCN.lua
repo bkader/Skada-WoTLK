@@ -518,6 +518,18 @@ if not L then return end
 -- L["Halion and Inferno"] = true
 -- L["Valkyrs overkilling"] = true
 
+-- -- missing bosses entries
+-- L["Cult Adherent"] = true
+-- L["Cult Fanatic"] = true
+-- L["Darnavan"] = true
+-- L["Deformed Fanatic"] = true
+-- L["Empowered Adherent"] = true
+-- L["Gas Cloud"] = true
+-- L["Living Inferno"] = true
+-- L["Reanimated Adherent"] = true
+-- L["Reanimated Fanatic"] = true
+-- L["Volatile Ooze"] = true
+
 -- -- ============= --
 -- -- Deaths Module --
 -- -- ============= --
