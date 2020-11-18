@@ -32,6 +32,49 @@ Skada:AddLoadableModule(
         local spellsmod = Skada:NewModule(L["Damage done by spell"])
         local spellsourcesmod = spellsmod:NewModule(L["Damage spell sources"])
 
+        local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
+
+        --
+        -- hold the name of targets used to record useful damage
+        --
+        local groupName, validTarget
+
+        --
+        -- the instance difficulty is only called once to reduce
+        -- useless multiple calls that return the same thing
+        -- This value is set to nil on SetComplete
+        --
+        local instanceDiff
+
+        local function get_raid_diff()
+            if not instanceDiff then
+                local _, instanceType, difficulty, _, _, dynamicDiff, isDynamic = GetInstanceInfo()
+                if instanceType == "raid" and isDynamic then
+                    if difficulty == 1 or difficulty == 3 then -- 10man raid
+                        instanceDiff = (dynamicDiff == 0) and "10n" or ((dynamicDiff == 1) and "10h" or "unknown")
+                    elseif difficulty == 2 or difficulty == 4 then -- 25main raid
+                        instanceDiff = (dynamicDiff == 0) and "25n" or ((dynamicDiff == 1) and "25h" or "unknown")
+                    end
+                else
+                    local insDiss = GetInstanceDifficulty()
+                    if insDiss == 1 then
+                        instanceDiff = "10n"
+                    elseif insDiss == 2 then
+                        instanceDiff = "25n"
+                    elseif insDiss == 3 then
+                        instanceDiff = "10h"
+                    elseif insDiss == 4 then
+                        instanceDiff = "25h"
+                    end
+                end
+            end
+
+            return instanceDiff
+        end
+
+        local valkyrsTable
+        local valkyr10hp, valkyr25hp = 1900000, 2992000
+
         local function log_damage(set, dmg)
             local player = Skada:get_player(set, dmg.playerid, dmg.playername, dmg.playerflags)
             if not player then
@@ -94,6 +137,57 @@ Skada:AddLoadableModule(
                     player.damagedone.targets[dmg.dstName] = 0
                 end
                 player.damagedone.targets[dmg.dstName] = player.damagedone.targets[dmg.dstName] + dmg.amount
+
+                -- add useful damage.
+                if validTarget[dmg.dstName] then
+                    local altname = groupName[validTarget[dmg.dstName]]
+
+                    -- same name, ignore to not have double damage.
+                    if altname == dmg.dstName then
+                        return
+                    end
+
+                    if not player.damagedone.targets[altname] then
+                        player.damagedone.targets[altname] = 0
+                    end
+
+                    -- useful damage on Val'kyrs
+                    if dmg.dstName == LBB["Val'kyr Shadowguard"] then
+                        local diff = get_raid_diff()
+
+                        -- useful damage accounts only on heroic mode.
+                        if diff == "10h" or diff == "25h" then
+                            -- we make sure to always have a table.
+                            valkyrsTable = valkyrsTable or {}
+
+                            -- valkyr's max health depending on the difficulty
+                            local maxhp = diff == "10h" and valkyr10hp or valkyr25hp
+
+                            -- we make sure to add our valkyr to the table
+                            if not valkyrsTable[dmg.dstGUID] then
+                                valkyrsTable[dmg.dstGUID] = maxhp - dmg.amount
+                            else
+                                --
+                                -- here, the valkyr was already recorded, it reached half its health
+                                -- but the player still dpsing it. This counts as useless damage.
+                                --
+                                if valkyrsTable[dmg.dstGUID] < maxhp / 2 then
+                                    player.damagedone.targets[L["Valkyrs overkilling"]] =
+                                        (player.damagedone.targets[L["Valkyrs overkilling"]] or 0) + dmg.amount
+                                    return
+                                end
+
+                                -- deducte the damage
+                                valkyrsTable[dmg.dstGUID] = valkyrsTable[dmg.dstGUID] - dmg.amount
+                            end
+                        end
+                    end
+
+                    -- if we are on BPC, we attempt to catch overkilling
+                    local amount =
+                        (validTarget[dmg.dstName] == LBB["Blood Prince Council"]) and dmg.overkill or dmg.amount
+                    player.damagedone.targets[altname] = (player.damagedone.targets[altname] or 0) + amount
+                end
             end
         end
 
@@ -731,6 +825,51 @@ Skada:AddLoadableModule(
             win.metadata.maxvalue = max
         end
 
+        --
+        -- we make sure to fill our groupName and validTarget tables
+        -- used to record damage on useful targets
+        --
+        function mod:OnInitialize()
+            if not groupName then
+                groupName = {
+                    [LBB["The Lich King"]] = L["Useful targets"],
+                    [LBB["Professor Putricide"]] = L["Oozes"],
+                    [LBB["Blood Prince Council"]] = L["Princes overkilling"],
+                    [LBB["Lady Deathwhisper"]] = L["Adds"],
+                    [LBB["Halion"]] = L["Halion and Inferno"],
+                    ["Valkyrs"] = L["Valkyrs overkilling"]
+                }
+            end
+
+            if not validTarget then
+                validTarget = {
+                    -- The Lich King fight
+                    [LBB["Raging Spirit"]] = LBB["The Lich King"],
+                    [LBB["Ice Sphere"]] = LBB["The Lich King"],
+                    [LBB["Val'kyr Shadowguard"]] = LBB["The Lich King"],
+                    [LBB["Wicked Spirit"]] = LBB["The Lich King"],
+                    -- Professor Putricide
+                    [LBB["Gas Cloud"]] = LBB["Professor Putricide"],
+                    [LBB["Volatile Ooze"]] = LBB["Professor Putricide"],
+                    -- Blood Prince Council
+                    [LBB["Prince Valanar"]] = LBB["Blood Prince Council"],
+                    [LBB["Prince Taldaram"]] = LBB["Blood Prince Council"],
+                    [LBB["Prince Keleseth"]] = LBB["Blood Prince Council"],
+                    -- Lady Deathwhisper
+                    [LBB["Cult Adherent"]] = LBB["Lady Deathwhisper"],
+                    [LBB["Empowered Adherent"]] = LBB["Lady Deathwhisper"],
+                    [LBB["Reanimated Adherent"]] = LBB["Lady Deathwhisper"],
+                    [LBB["Cult Fanatic"]] = LBB["Lady Deathwhisper"],
+                    [LBB["Deformed Fanatic"]] = LBB["Lady Deathwhisper"],
+                    [LBB["Reanimated Fanatic"]] = LBB["Lady Deathwhisper"],
+                    [LBB["Darnavan"]] = LBB["Lady Deathwhisper"],
+                    -- Halion
+                    [LBB["Halion"]] = LBB["Halion"],
+                    [LBB["Living Inferno"]] = LBB["Halion"]
+                }
+            end
+        end
+
         function mod:OnEnable()
             spellmod.metadata = {tooltip = spellmod_tooltip}
             playermod.metadata = {post_tooltip = player_tooltip, click1 = spellmod}
@@ -824,6 +963,7 @@ Skada:AddLoadableModule(
 
         function mod:AddSetAttributes(set)
             set.damagedone = set.damagedone or 0
+            instanceDiff, valkyrsTable = nil, nil
         end
 
         function mod:SetComplete(set)
@@ -833,6 +973,7 @@ Skada:AddLoadableModule(
                     player.damagedone.targets = nil
                 end
             end
+            instanceDiff, valkyrsTable = nil, nil
         end
     end
 )

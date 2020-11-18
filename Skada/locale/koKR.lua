@@ -11,6 +11,7 @@ if not L then return end
 
 -- L["Profiles"] = true
 -- L["Enable"] = true
+-- L["ENABLED"] = true
 -- L["Disable"] = true
 -- L["DISABLED"] = true
 
@@ -195,6 +196,8 @@ if not L then return end
 -- -- general options
 -- L["Show minimap button"] = true
 -- L["Toggles showing the minimap button."] = true
+-- L["Translit"] = true
+-- L["Make those russian letters that no one understand to be presented as western letters."] = true
 -- L["Merge pets"] = true
 -- L["Merges pets with their owners. Changing this only affects new data."] = true
 -- L["Show totals"] = true
@@ -506,6 +509,14 @@ if not L then return end
 -- L["Critical"] = true
 -- L["Glancing"] = true
 -- L["Crushing"] = true
+
+-- useful damage targets
+-- L["Useful targets"] = true
+-- L["Oozes"] = true
+-- L["Princes overkilling"] = true
+-- L["Adds"] = true
+-- L["Halion and Inferno"] = true
+-- L["Valkyrs overkilling"] = true
 
 -- -- ============= --
 -- -- Deaths Module --

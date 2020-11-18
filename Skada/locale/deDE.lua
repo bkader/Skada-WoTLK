@@ -210,6 +210,8 @@ L["All data has been reset."] = "Alle Daten wurden zurückgesetzt."
 -- general options
 L["Show minimap button"] = "Minikartenbutton zeigen"
 L["Toggles showing the minimap button."] = "Zeigt oder versteckt den Minikartenbutton"
+-- L["Translit"] = true
+-- L["Make those russian letters that no one understand to be presented as western letters."] = true
 L["Merge pets"] = "Begleiter zusammenfügen"
 L["Merges pets with their owners. Changing this only affects new data."] =
     "Fügt Begleiter mit ihren Besitzern zusammen. Eine Änderung wirkt sich hier nur auf neue Daten aus."
@@ -544,6 +546,14 @@ L["Friendly Fire"] = "Friendly Fire"
 L["Critical"] = "Kritischer Treffer"
 L["Glancing"] = "Gestreift"
 L["Crushing"] = "Schmetternd"
+
+-- useful damage targets
+-- L["Useful targets"] = true
+-- L["Oozes"] = true
+-- L["Princes overkilling"] = true
+-- L["Adds"] = true
+-- L["Halion and Inferno"] = true
+-- L["Valkyrs overkilling"] = true
 
 -- ============= --
 -- Deaths Module --

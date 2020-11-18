@@ -512,6 +512,14 @@ L["Critical"] = true
 L["Glancing"] = true
 L["Crushing"] = true
 
+-- useful damage targets
+L["Useful targets"] = true
+L["Oozes"] = true
+L["Princes overkilling"] = true
+L["Adds"] = true
+L["Halion and Inferno"] = true
+L["Valkyrs overkilling"] = true
+
 -- ============= --
 -- Deaths Module --
 -- ============= --
