@@ -894,7 +894,6 @@ Skada:AddLoadableModule(
                         C_Timer.After(
                             0.1,
                             function()
-                                print(spellid, "shield removed")
                                 remove_shield(dstName, dstGUID, spellid)
                             end
                         )
