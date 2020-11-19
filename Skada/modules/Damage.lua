@@ -56,14 +56,14 @@ Skada:AddLoadableModule(
                         instanceDiff = (dynamicDiff == 0) and "25n" or ((dynamicDiff == 1) and "25h" or "unknown")
                     end
                 else
-                    local insDiss = GetInstanceDifficulty()
-                    if insDiss == 1 then
+                    local insDiff = GetInstanceDifficulty()
+                    if insDiff == 1 then
                         instanceDiff = "10n"
-                    elseif insDiss == 2 then
+                    elseif insDiff == 2 then
                         instanceDiff = "25n"
-                    elseif insDiss == 3 then
+                    elseif insDiff == 3 then
                         instanceDiff = "10h"
-                    elseif insDiss == 4 then
+                    elseif insDiff == 4 then
                         instanceDiff = "25h"
                     end
                 end
