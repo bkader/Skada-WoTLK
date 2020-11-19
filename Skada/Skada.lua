@@ -1,4 +1,4 @@
-local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0")
+local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceConsole-3.0", "AceEvent-3.0")
 _G.Skada = Skada
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
@@ -94,6 +94,7 @@ local GetNumPartyMembers, GetNumRaidMembers = GetNumPartyMembers, GetNumRaidMemb
 local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAffectingCombat, InCombatLockdown
 local UnitClass, UnitGroupRolesAssigned = UnitClass, UnitGroupRolesAssigned
 local UnitGUID, UnitName = UnitGUID, UnitName
+local CombatLogClearEntries = CombatLogClearEntries
 
 local COMBATLOG_OBJECT_TYPE_PET = COMBATLOG_OBJECT_TYPE_PET or 0x00001000
 local COMBATLOG_OBJECT_TYPE_GUARDIAN = COMBATLOG_OBJECT_TYPE_GUARDIAN or 0x00002000
@@ -132,6 +133,104 @@ local function GetGroupTypeAndCount()
     return t, count
 end
 Skada.GetGroupTypeAndCount = GetGroupTypeAndCount
+
+-- C_Timer instead of AceTimer
+-- shamelessly copied from Details.
+if not C_Timer or C_Timer._version ~= 3 then
+    local setmetatable = setmetatable
+
+    C_Timer = C_Timer or {}
+    C_Timer._version = 3
+
+    local TickerPrototype = {}
+    local TickerMetatable = {
+        __index = TickerPrototype,
+        __metatable = true
+    }
+
+    local waitTable = {}
+    local waitFrame = TimerFrame or CreateFrame("Frame", "TimerFrame", UIParent)
+    waitFrame:SetScript(
+        "OnUpdate",
+        function(self, elapsed)
+            local total = #waitTable
+
+            for i = 1, total do
+                local ticker = waitTable[i]
+
+                if ticker then
+                    if ticker._cancelled then
+                        tremove(waitTable, i)
+                    elseif ticker._delay > elapsed then
+                        ticker._delay = ticker._delay - elapsed
+                        i = i + 1
+                    else
+                        ticker._callback(ticker)
+
+                        if ticker._remainingIterations == -1 then
+                            ticker._delay = ticker._duration
+                            i = i + 1
+                        elseif ticker._remainingIterations > 1 then
+                            ticker._remainingIterations = ticker._remainingIterations - 1
+                            ticker._delay = ticker._duration
+                            i = i + 1
+                        elseif ticker._remainingIterations == 1 then
+                            tremove(waitTable, i)
+                            total = total - 1
+                        end
+                    end
+                end
+            end
+
+            if #waitTable == 0 then
+                self:Hide()
+            end
+        end
+    )
+
+    local function AddDelayedCall(ticker, oldTicker)
+        if oldTicker and type(oldTicker) == "table" then
+            ticker = oldTicker
+        end
+
+        tinsert(waitTable, ticker)
+        waitFrame:Show()
+    end
+    _G.AddDelayedCall = _G.AddDelayedCall or AddDelayedCall
+
+    local function CreateTicker(duration, callback, iterations)
+        local ticker = setmetatable({}, TickerMetatable)
+        ticker._remainingIterations = iterations or -1
+        ticker._duration = duration
+        ticker._delay = duration
+        ticker._callback = callback
+
+        AddDelayedCall(ticker)
+        return ticker
+    end
+
+    function C_Timer.After(duration, callback)
+        AddDelayedCall(
+            {
+                _remainingIterations = 1,
+                _delay = duration,
+                _callback = callback
+            }
+        )
+    end
+
+    function C_Timer.NewTimer(duration, callback)
+        return CreateTicker(duration, callback, 1)
+    end
+
+    function C_Timer.NewTicker(duration, callback, iterations)
+        return CreateTicker(duration, callback, iterations)
+    end
+
+    function TickerPrototype:Cancel()
+        self._cancelled = true
+    end
+end
 
 -- ============= --
 -- needed locals --
@@ -2411,7 +2510,12 @@ function Skada:OnInitialize()
     end
 
     self:ReloadSettings()
-    self:ScheduleTimer("ApplySettings", 2)
+    C_Timer.After(
+        2,
+        function()
+            self:ApplySettings()
+        end
+    )
 end
 
 function Skada:MemoryCheck()
@@ -2439,8 +2543,14 @@ function Skada:OnEnable()
         self.modulelist = nil
     end
 
-    self:ScheduleRepeatingTimer("ClearCombatLog", self.db.profile.updatefrequency or 0.25)
-    self:ScheduleTimer("MemoryCheck", 3)
+    -- used to fix broken combat log
+    C_Timer.NewTicker(self.db.profile.updatefrequency or 0.25, CombatLogClearEntries)
+    C_Timer.After(
+        3,
+        function()
+            self:MemoryCheck()
+        end
+    )
 end
 
 -- ======================================================= --
@@ -2480,12 +2590,6 @@ do
         end
 
         return iswipe
-    end
-
-    function Skada:Tick()
-        if not disabled and self.current and not InCombatLockdown() and not IsRaidInCombat() then
-            self:EndSegment()
-        end
     end
 
     function Skada:PLAYER_REGEN_DISABLED()
@@ -2590,10 +2694,19 @@ do
         end
 
         self:UpdateDisplay(true)
-        self:CancelTimer(update_timer, true)
-        self:CancelTimer(tick_timer, true)
+        if update_timer and not update_timer._cancelled then
+            update_timer:Cancel()
+        end
+        if tick_timer and not tick_timer._cancelled then
+            tick_timer:Cancel()
+        end
         update_timer, tick_timer = nil, nil
-        self:ScheduleTimer("MemoryCheck", 3)
+        C_Timer.After(
+            3,
+            function()
+                self:MemoryCheck()
+            end
+        )
     end
 
     function Skada:StopSegment()
@@ -2619,13 +2732,19 @@ do
     local tentative, tentativehandle
     local deathcounter, startingmembers = 0, 0
 
+    local function combat_tick()
+        if not disabled and Skada.current and not InCombatLockdown() and not IsRaidInCombat() then
+            Skada:EndSegment()
+        end
+    end
+
     function Skada:StartCombat()
         deathcounter = 0
         local _, members = GetGroupTypeAndCount()
         startingmembers = members
 
-        if tentativehandle ~= nil then
-            self:CancelTimer(tentativehandle)
+        if tentativehandle and not tentativehandle._cancelled then
+            tentativehandle:Cancel()
             tentativehandle = nil
         end
 
@@ -2672,8 +2791,14 @@ do
 
         self:UpdateDisplay(true)
 
-        update_timer = self:ScheduleRepeatingTimer("UpdateDisplay", self.db.profile.updatefrequency or 0.25)
-        tick_timer = self:ScheduleRepeatingTimer("Tick", 1)
+        update_timer =
+            C_Timer.NewTicker(
+            self.db.profile.updatefrequency or 0.25,
+            function()
+                self:UpdateDisplay()
+            end
+        )
+        tick_timer = C_Timer.NewTicker(1, combat_tick)
     end
 
     -- for shaman elemental
@@ -2748,13 +2873,13 @@ do
                     self.total = createSet(L["Total"], now)
                 end
                 tentativehandle =
-                    self:ScheduleTimer(
+                    C_Timer.After(
+                    1,
                     function()
                         tentative = nil
                         tentativehandle = nil
                         self.current = nil
-                    end,
-                    1
+                    end
                 )
                 tentative = 0
             end
@@ -2848,7 +2973,7 @@ do
                     if tentative ~= nil then
                         tentative = tentative + 1
                         if tentative == 5 then
-                            self:CancelTimer(tentativehandle)
+                            tentativehandle:Cancel()
                             tentativehandle = nil
                             self:StartCombat()
                         end
@@ -2895,10 +3020,5 @@ do
                 end
             end
         end
-    end
-
-    -- used to fix broken combat log
-    function Skada:ClearCombatLog()
-        CombatLogClearEntries()
     end
 end

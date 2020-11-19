@@ -488,7 +488,7 @@ Skada:AddLoadableModule(
             return
         end
 
-        local mod = Skada:NewModule(L["Absorbs"], "AceTimer-3.0")
+        local mod = Skada:NewModule(L["Absorbs"])
         local spellmod = mod:NewModule(L["Absorb spell list"])
         local playermod = mod:NewModule(L["Absorbed player list"])
 
@@ -598,7 +598,6 @@ Skada:AddLoadableModule(
             [25747] = 15,
             [25746] = 15,
             [23991] = 15,
-            [31000] = 300,
             [30997] = 300,
             [31002] = 300,
             [30999] = 300,
@@ -892,11 +891,12 @@ Skada:AddLoadableModule(
 
                 for _, absorb in _ipairs(shields[dstName]) do
                     if absorb.srcGUID == srcGUID and absorb.spellid == spellid then
-                        mod:ScheduleTimer(
+                        C_Timer.After(
+                            0.1,
                             function()
+                                print(spellid, "shield removed")
                                 remove_shield(dstName, dstGUID, spellid)
-                            end,
-                            0.1
+                            end
                         )
                     end
                 end
