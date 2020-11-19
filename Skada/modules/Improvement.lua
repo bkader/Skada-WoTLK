@@ -17,7 +17,7 @@ Skada:AddLoadableModule(
 
         local UnitGUID, UnitName, UnitClass = UnitGUID, UnitName, UnitClass
         local pairs, ipairs, select, tostring = pairs, ipairs, select, tostring
-        local SecondsToTime, date = SecondsToTime, date
+        local date = date
 
         local db
         local modes = {
@@ -105,7 +105,7 @@ Skada:AddLoadableModule(
             if not inInstance or instanceType ~= "raid" then
                 return
             end
-            if not Skada.current or not Skada.current.gotboss then
+            if not Skada.current or not Skada.current.gotboss or not Skada.current.success then
                 return
             end
 
@@ -171,17 +171,15 @@ Skada:AddLoadableModule(
                     d.value = value
 
                     if mode == "ActiveTime" then
-                        d.valuetext = SecondsToTime(d.value)
+                        d.valuetext = Skada:FormatTime(d.value)
                     elseif mode == "Deaths" or mode == "Interrupts" or mode == "Fails" then
                         d.valuetext = tostring(d.value)
                     else
-                        d.valuetext =
-                            Skada:FormatValueText(
-                            Skada:FormatNumber(d.value),
-                            true,
-                            Skada:FormatNumber(d.value / active),
-                            true
-                        )
+                        d.valuetext = Skada:FormatNumber(d.value)
+                    end
+
+                    if i > max then
+                        max = i
                     end
 
                     nr = nr + 1
@@ -215,7 +213,7 @@ Skada:AddLoadableModule(
                         local value = encounter.data[self.modename]
                         d.value = value or 0
                         if self.modename == "ActiveTime" then
-                            d.valuetext = SecondsToTime(d.value)
+                            d.valuetext = Skada:FormatTime(d.value)
                         elseif self.modename == "Deaths" or self.modename == "Interrupts" or self.modename == "Fails" then
                             d.valuetext = tostring(d.value)
                         else
@@ -228,8 +226,8 @@ Skada:AddLoadableModule(
                             )
                         end
 
-                        if i > max then
-                            max = i
+                        if d.value > max then
+                            max = d.value
                         end
 
                         nr = nr + 1
@@ -285,8 +283,9 @@ Skada:AddLoadableModule(
         end
 
         function mod:OnEnable()
-            mod.metadata = {click1 = mod_modes}
+            mod_comparison.metadata = {ordersort = true}
             mod_modes.metadata = {click1 = mod_comparison}
+            mod.metadata = {click1 = mod_modes}
 
             Skada:AddMode(self)
 
