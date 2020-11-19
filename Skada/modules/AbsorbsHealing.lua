@@ -623,7 +623,7 @@ Skada:AddLoadableModule(
             [28810] = 30,
             [54808] = 12,
             [55019] = 12,
-            [64411] = 15,
+            -- [64411] = 15,
             [64413] = 8,
             [40322] = 30,
             [65874] = 15,
@@ -743,103 +743,112 @@ Skada:AddLoadableModule(
         -- the time it was applied, but function depending on the damage received
         --
         local function sort_shields(a, b)
-            local a_spell = a and a.spellid or 100000
-            local b_spell = b and b.spellid or 100000
+            if not a or a.spellid == nil then
+                return false
+            elseif not b or b.spellid then
+                return true
+            end
 
             -- puts oldest absorb first if there is two with the same id.
-            if a_spell == b_spell then
-                return a.timestamp < b.timestamp
+            if a.spellid == b.spellid then
+                if not a.timestamp then
+                    return false
+                elseif not b.timestamp then
+                    return true
+                else
+                    return (a.timestamp < b.timestamp)
+                end
             end
 
             -- twin val'kyr light essence
-            if a_spell == 65686 then
+            if a.spellid == 65686 then
                 return true
             end
-            if b_spell == 65686 then
+            if b.spellid == 65686 then
                 return false
             end
 
             -- twin val'kyr dark essence
-            if a_spell == 65684 then
+            if a.spellid == 65684 then
                 return true
             end
-            if b_spell == 65684 then
+            if b.spellid == 65684 then
                 return false
             end
 
             --frost ward
-            if mage_frost_ward[a_spell] then
+            if mage_frost_ward[a.spellid] then
                 return true
             end
-            if mage_frost_ward[b_spell] then
+            if mage_frost_ward[b.spellid] then
                 return false
             end
 
             -- fire ward
-            if mage_fire_ward[a_spell] then
+            if mage_fire_ward[a.spellid] then
                 return true
             end
-            if mage_fire_ward[b_spell] then
+            if mage_fire_ward[b.spellid] then
                 return false
             end
 
             --shadow ward
-            if warlock_shadow_ward[a_spell] then
+            if warlock_shadow_ward[a.spellid] then
                 return true
             end
-            if warlock_shadow_ward[b_spell] then
+            if warlock_shadow_ward[b.spellid] then
                 return false
             end
 
             -- Sacred Shield
-            if a_spell == 58597 then
+            if a.spellid == 58597 then
                 return true
             end
-            if b_spell == 58597 then
+            if b.spellid == 58597 then
                 return false
             end
 
             -- Fell blossom
-            if a_spell == 28527 then
+            if a.spellid == 28527 then
                 return true
             end
-            if b_spell == 28527 then
+            if b.spellid == 28527 then
                 return false
             end
 
             -- Divine Aegis
-            if a_spell == 47753 then
+            if a.spellid == 47753 then
                 return true
             end
-            if b_spell == 47753 then
+            if b.spellid == 47753 then
                 return false
             end
 
             -- Ice Barrier
-            if mage_ice_barrier[a_spell] then
+            if mage_ice_barrier[a.spellid] then
                 return true
             end
-            if mage_ice_barrier[b_spell] then
+            if mage_ice_barrier[b.spellid] then
                 return false
             end
 
             -- Warlock Sacrifice
-            if warlock_sacrifice[a_spell] then
+            if warlock_sacrifice[a.spellid] then
                 return true
             end
-            if warlock_sacrifice[b_spell] then
+            if warlock_sacrifice[b.spellid] then
                 return false
             end
 
-            if absorbspells[a_spell] then
+            if absorbspells[a.spellid] then
                 return true
             end
-            if absorbspells[b_spell] then
+            if absorbspells[b.spellid] then
                 return false
             end
 
             -- sort oldest buffs to the top
-            return a.timestamp < b.timestamp
+            return (a.timestamp < b.timestamp)
         end
 
         local function remove_shield(dstName, srcGUID, spellid)
