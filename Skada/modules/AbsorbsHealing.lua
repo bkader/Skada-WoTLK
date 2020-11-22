@@ -744,7 +744,7 @@ Skada:AddLoadableModule(
         local function sort_shields(a, b)
             if not a or a.spellid == nil then
                 return false
-            elseif not b or b.spellid then
+            elseif not b or b.spellid == nil then
                 return true
             end
 
