@@ -5,7 +5,6 @@ end
 
 Skada:AddLoadableModule(
     "Fails",
-    nil,
     function(Skada, L)
         if Skada:IsDisabled("Fails") then
             return
@@ -20,10 +19,10 @@ Skada:AddLoadableModule(
             return
         end
 
-        local pairs, ipairs, select = pairs, ipairs, select
-        local tostring, format = tostring, string.format
-        local GetSpellInfo = GetSpellInfo
-        local UnitGUID = UnitGUID
+        local _pairs, _ipairs = pairs, ipairs
+        local _tostring, _format = tostring, string.format
+        local _GetSpellInfo = GetSpellInfo
+        local _UnitGUID = UnitGUID
 
         local failevents = LibFail:GetSupportedEvents()
 
@@ -35,7 +34,7 @@ Skada:AddLoadableModule(
                     return
                 end
 
-                local unitGUID = UnitGUID(who)
+                local unitGUID = _UnitGUID(who)
 
                 -- add to current set
                 if Skada.current then
@@ -67,53 +66,16 @@ Skada:AddLoadableModule(
             end
         end
 
-        function playermod:Enter(win, id, label)
-            self.playerid = id
-            self.title = format(L["%s's fails"], label)
-        end
-
-        function playermod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid)
-            local max = 0
-
-            if player and player.fails.spells then
-                local nr = 1
-
-                for spellid, count in pairs(player.fails.spells) do
-                    local spellname, _, spellicon = GetSpellInfo(spellid)
-
-                    local d = win.dataset[nr] or {}
-                    win.dataset[nr] = d
-
-                    d.id = spellid
-                    d.spellid = spellid
-                    d.label = spellname
-                    d.icon = spellicon
-
-                    d.value = count
-                    d.valuetext = tostring(count)
-
-                    if count > max then
-                        max = count
-                    end
-
-                    nr = nr + 1
-                end
-            end
-
-            win.metadata.maxvalue = max
-        end
-
         function spellmod:Enter(win, id, label)
             self.spellid = id
-            self.title = format(L["%s's fails"], label)
+            self.title = _format(L["%s's fails"], label)
         end
 
         function spellmod:Update(win, set)
             local nr, max = 1, 0
 
-            for i, player in ipairs(set.players) do
-                if player.fails.count > 0 and self.spellid and player.fails.spells[self.spellid] then
+            for _, player in _ipairs(set.players) do
+                if player.fails.spells and player.fails.spells[self.spellid] then
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
@@ -123,12 +85,11 @@ Skada:AddLoadableModule(
                     d.role = player.role
                     d.spec = player.spec
 
-                    local count = player.fails.spells[self.spellid].count
-                    d.value = count
-                    d.valuetext = tostring(count)
+                    d.value = player.fails.spells[self.spellid]
+                    d.valuetext = _tostring(d.value)
 
-                    if count > max then
-                        max = count
+                    if d.value > max then
+                        max = d.value
                     end
 
                     nr = nr + 1
@@ -138,10 +99,48 @@ Skada:AddLoadableModule(
             win.metadata.maxvalue = max
         end
 
+        function playermod:Enter(win, id, label)
+            self.playerid = id
+            self.title = _format(L["%s's fails"], label)
+        end
+
+        function playermod:Update(win, set)
+            local player = Skada:find_player(set, self.playerid)
+            local max = 0
+
+            if player and player.fails.spells then
+                local nr = 1
+
+                for spellid, count in _pairs(player.fails.spells) do
+                    local spellname, _, spellicon = _GetSpellInfo(spellid)
+                    if spellname then
+                        local d = win.dataset[nr] or {}
+                        win.dataset[nr] = d
+
+                        d.id = spellid
+                        d.spellid = spellid
+                        d.label = spellname
+                        d.icon = spellicon
+
+                        d.value = count
+                        d.valuetext = _tostring(count)
+
+                        if count > max then
+                            max = count
+                        end
+
+                        nr = nr + 1
+                    end
+                end
+            end
+
+            win.metadata.maxvalue = max
+        end
+
         function mod:Update(win, set)
             local nr, max = 1, 0
 
-            for i, player in ipairs(set.players) do
+            for i, player in _ipairs(set.players) do
                 if player.fails.count > 0 then
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
@@ -153,10 +152,10 @@ Skada:AddLoadableModule(
                     d.spec = player.spec
 
                     d.value = player.fails.count
-                    d.valuetext = tostring(player.fails.count)
+                    d.valuetext = _tostring(player.fails.count)
 
-                    if player.fails.count > max then
-                        max = player.fails.count
+                    if d.value > max then
+                        max = d.value
                     end
 
                     nr = nr + 1
@@ -167,12 +166,13 @@ Skada:AddLoadableModule(
         end
 
         function mod:OnEnable()
-            for _, event in ipairs(failevents) do
+            for _, event in _ipairs(failevents) do
                 LibFail:RegisterCallback(event, onFail)
             end
 
-            playermod.metadata = {showspots = true, click1 = spellmod}
-            mod.metadata = {showspots = true, ordersort = true, click1 = playermod}
+            spellmod.metadata = {}
+            playermod.metadata = {click1 = spellmod}
+            mod.metadata = {click1 = playermod}
 
             Skada:AddMode(self)
         end
@@ -202,7 +202,7 @@ Skada:AddLoadableModule(
         end
 
         function mod:SetComplete(set)
-            for i, player in ipairs(set.players) do
+            for i, player in _ipairs(set.players) do
                 if player.fails == 0 then
                     player.fails.spells = nil
                 end
