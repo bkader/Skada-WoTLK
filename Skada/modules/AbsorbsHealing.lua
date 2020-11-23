@@ -1203,7 +1203,7 @@ Skada:AddLoadableModule(
                         local spellname, _, _, _, _, duration, expires, unitCaster, _, _, spellid =
                             UnitAura(unit, i, nil, "BUFF")
 
-                        -- if we find any, we make sure to send it to AuraApplied to do the rest
+                        -- if we find any, we make sure to record the data to minimize the loss
                         if spellid and absorbspells[spellid] and unitCaster then
                             found = true -- flag so we can order shields later
 
