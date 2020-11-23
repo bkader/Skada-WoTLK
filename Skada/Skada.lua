@@ -11,6 +11,9 @@ local AceConfig = LibStub("AceConfig-3.0")
 local LGT = LibStub("LibGroupTalents-1.0")
 local Translit = LibStub("LibTranslit-1.0")
 
+local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
+local bossNames
+
 local dataobj =
     LDB:NewDataObject(
     "Skada",
@@ -1127,12 +1130,12 @@ do
     -- this function is called and used only once per player
     function Skada:FixPlayer(player)
         if player.id and player.name then
+            -- collect some info from the player's guid
+            local _, class, _, _, _, name = GetPlayerInfoByGUID(player.id)
+
             -- fix the name
-            if player.id == player.name then
-                local name = select(6, GetPlayerInfoByGUID(player.id))
-                if name and name ~= player.name then
-                    player.name = name
-                end
+            if player.id == player.name and name and name ~= player.name then
+                player.name = name
             end
 
             -- use LibTranslit to convert cyrillic letters into western letters.
@@ -1146,21 +1149,13 @@ do
                 player.class = "PET"
                 player.owner = self:GetPetOwner(player.id)
             elseif not player.class then
-                -- it's a real player?
-                if UnitIsPlayer(player.name) then
-                    -- ungrouped player
+                -- class already received from GetPlayerInfoByGUID?
+                if class then
+                    -- it's a real player?
+                    player.class = class
+                elseif UnitIsPlayer(player.name) then
                     -- fix the class first
                     player.class = select(2, UnitClass(player.name))
-
-                    -- assign a role if not already assigned
-                    if not player.role then
-                        player.role = UnitGroupRolesAssigned(player.name) or "NONE"
-                    end
-
-                    -- set the player's spec
-                    if not player.spec then
-                        player.spec = self:GetPlayerSpecID(player.name, player.class)
-                    end
                 elseif player.flag and band(player.flag, 0x00000400) ~= 0 then
                     -- pets
                     player.class = "UNGROUPPLAYER"
@@ -1170,6 +1165,13 @@ do
                     player.owner = self:GetPetOwner(player.id)
                 else
                     player.class = "UNKNOWN"
+                end
+
+                -- if the player has been assigned a valid class,
+                -- we make sure to assign his/her role and spec
+                if player.class and self.validclass[player.class] then
+                    player.role = player.role or UnitGroupRolesAssigned(player.name) or "NONE"
+                    player.spec = player.spec or self:GetPlayerSpecID(player.name, player.class)
                 end
             end
         end
@@ -2423,6 +2425,7 @@ function Skada:OnInitialize()
     LSM:Register("statusbar", "Armory", [[Interface\Addons\Skada\media\statusbar\Armory]])
     LSM:Register("statusbar", "BantoBar", [[Interface\Addons\Skada\media\statusbar\BantoBar]])
     LSM:Register("statusbar", "Details", [[Interface\AddOns\Skada\media\statusbar\Details]])
+    LSM:Register("statusbar", "Flat", [[Interface\Addons\Skada\media\statusbar\Flat]])
     LSM:Register("statusbar", "Glass", [[Interface\AddOns\Skada\media\statusbar\Glass]])
     LSM:Register("statusbar", "Gloss", [[Interface\Addons\Skada\media\statusbar\Gloss]])
     LSM:Register("statusbar", "Graphite", [[Interface\Addons\Skada\media\statusbar\Graphite]])
@@ -2434,8 +2437,8 @@ function Skada:OnInitialize()
     LSM:Register("statusbar", "Outline", [[Interface\Addons\Skada\media\statusbar\Outline]])
     LSM:Register("statusbar", "Round", [[Interface\Addons\Skada\media\statusbar\Round]])
     LSM:Register("statusbar", "Serenity", [[Interface\AddOns\Skada\media\statusbar\Serenity]])
-    LSM:Register("statusbar", "Smooth", [[Interface\Addons\Skada\media\statusbar\Smooth]])
     LSM:Register("statusbar", "Smooth v2", [[Interface\Addons\Skada\media\statusbar\Smoothv2]])
+    LSM:Register("statusbar", "Smooth", [[Interface\Addons\Skada\media\statusbar\Smooth]])
     LSM:Register("statusbar", "TukTex", [[Interface\Addons\Skada\media\statusbar\TukTex]])
     LSM:Register("statusbar", "WorldState Score", [[Interface\WorldStateFrame\WORLDSTATEFINALSCORE-HIGHLIGHT]])
 
@@ -2506,6 +2509,65 @@ function Skada:OnInitialize()
             ["SHAMAN"] = true,
             ["WARLOCK"] = true,
             ["WARRIOR"] = true
+        }
+    end
+
+    -- add Gunship adds
+    -- horde
+    BOSS.BossIDs[36960] = true -- Kor'kron Sergeant, Gunship add
+    BOSS.BossIDs[37029] = true -- Kor'kron Reaver, Gunship add
+    BOSS.BossIDs[36968] = true -- Kor'kron Axethrower, Gunship add
+    BOSS.BossIDs[36982] = true -- Kor'kron Rocketeer, Gunship add
+    BOSS.BossIDs[37117] = true -- Kor'kron Battle-Mage, Gunship add
+    -- alliance
+    BOSS.BossIDs[36961] = true -- Skybreaker Sergeant, Gunship add
+    BOSS.BossIDs[36950] = true -- Skybreaker Marine, Gunship add
+    BOSS.BossIDs[36969] = true -- Skybreaker Rifleman, Gunship add
+    BOSS.BossIDs[36978] = true -- Skybreaker Mortar Soldier, Gunship add
+    BOSS.BossIDs[37116] = true -- Skybreaker Sorcerer, Gunship add
+
+    LBB["Kor'kron Sergeant"] = L["Kor'kron Sergeant"]
+    LBB["Kor'kron Reaver"] = L["Kor'kron Reaver"]
+    LBB["Kor'kron Axethrower"] = L["Kor'kron Axethrower"]
+    LBB["Kor'kron Rocketeer"] = L["Kor'kron Rocketeer"]
+    LBB["Kor'kron Battle-Mage"] = L["Kor'kron Battle-Mage"]
+    LBB["Skybreaker Sergeant"] = L["Skybreaker Sergeant"]
+    LBB["Skybreaker Marine"] = L["Skybreaker Marine"]
+    LBB["Skybreaker Rifleman"] = L["Skybreaker Rifleman"]
+    LBB["Skybreaker Mortar Soldier"] = L["Skybreaker Mortar Soldier"]
+    LBB["Skybreaker Sorcerer"] = L["Skybreaker Sorcerer"]
+
+    -- we add some adds to LibBabble-Boss so we can fix the
+    -- set name later to use the "real" boss name instead
+    LBB["Dream Cloud"] = L["Dream Cloud"]
+    LBB["Risen Archmage"] = L["Risen Archmage"]
+    LBB["Blazing Skeleton"] = L["Blazing Skeleton"]
+    LBB["Blistering Zombie"] = L["Blistering Zombie"]
+    LBB["Gluttonous Abomination"] = L["Gluttonous Abomination"]
+
+    if not bossNames then
+        bossNames = {
+            -- Icecrown Gunship Battle
+            [LBB["Kor'kron Sergeant"]] = LBB["Icecrown Gunship Battle"],
+            [LBB["Kor'kron Reaver"]] = LBB["Icecrown Gunship Battle"],
+            [LBB["Kor'kron Axethrower"]] = LBB["Icecrown Gunship Battle"],
+            [LBB["Kor'kron Rocketeer"]] = LBB["Icecrown Gunship Battle"],
+            [LBB["Kor'kron Battle-Mage"]] = LBB["Icecrown Gunship Battle"],
+            [LBB["Skybreaker Sergeant"]] = LBB["Icecrown Gunship Battle"],
+            [LBB["Skybreaker Marine"]] = LBB["Icecrown Gunship Battle"],
+            [LBB["Skybreaker Rifleman"]] = LBB["Icecrown Gunship Battle"],
+            [LBB["Skybreaker Mortar Soldier"]] = LBB["Icecrown Gunship Battle"],
+            [LBB["Skybreaker Sorcerer"]] = LBB["Icecrown Gunship Battle"],
+            -- Blood Prince Council
+            [LBB["Prince Valanar"]] = LBB["Blood Prince Council"],
+            [LBB["Prince Taldaram"]] = LBB["Blood Prince Council"],
+            [LBB["Prince Keleseth"]] = LBB["Blood Prince Council"],
+            -- Valithria Dreamwalker
+            [LBB["Dream Cloud"]] = LBB["Valithria Dreamwalker"],
+            [LBB["Risen Archmage"]] = LBB["Valithria Dreamwalker"],
+            [LBB["Blazing Skeleton"]] = LBB["Valithria Dreamwalker"],
+            [LBB["Blistering Zombie"]] = LBB["Valithria Dreamwalker"],
+            [LBB["Gluttonous Abomination"]] = LBB["Valithria Dreamwalker"]
         }
     end
 
@@ -2618,6 +2680,11 @@ do
                 self.current.time = math_max(self.current.endtime - self.current.starttime, 0.1)
                 setPlayerActiveTimes(self.current)
                 self.current.stopped = nil
+
+                -- try to fix Gunship and Valithria set names.
+                if bossNames[self.current.mobname] then
+                    self.current.mobname = bossNames[self.current.mobname]
+                end
 
                 local setname = self.current.mobname
                 if self.db.profile.setnumber then

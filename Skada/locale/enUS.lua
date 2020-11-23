@@ -469,6 +469,8 @@ L["Damage done"] = true
 L["%s's damage"] = true
 L["%s's <%s> damage"] = true
 
+L["Useful damage"] = true
+
 L["Damage done by spell"] = true
 L["%s's sources"] = true
 
@@ -493,6 +495,7 @@ L["DTPS"] = true
 L["Enemy damage done"] = true
 L["Damage done per player"] = true
 L["Damage from %s"] = true
+L["%s's damage on %s"] = true
 
 -- enemy damage taken module
 L["Enemy damage taken"] = true
@@ -531,6 +534,22 @@ L["Living Inferno"] = true
 L["Reanimated Adherent"] = true
 L["Reanimated Fanatic"] = true
 L["Volatile Ooze"] = true
+
+L["Kor'kron Sergeant"] = true
+L["Kor'kron Reaver"] = true
+L["Kor'kron Axethrower"] = true
+L["Kor'kron Rocketeer"] = true
+L["Kor'kron Battle-Mage"] = true
+L["Skybreaker Sergeant"] = true
+L["Skybreaker Marine"] = true
+L["Skybreaker Rifleman"] = true
+L["Skybreaker Mortar Soldier"] = true
+L["Skybreaker Sorcerer"] = true
+L["Dream Cloud"] = true
+L["Risen Archmage"] = true
+L["Blazing Skeleton"] = true
+L["Blistering Zombie"] = true
+L["Gluttonous Abomination"] = true
 
 -- ============= --
 -- Deaths Module --

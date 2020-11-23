@@ -132,6 +132,13 @@ Skada:AddLoadableModule(
                 end
             end
 
+            -- add the damage overkill
+            if dmg.overkill and dmg.overkill > 0 then
+                spell.overkill = (spell.overkill or 0) + dmg.overkill
+                player.overkill = (player.overkill or 0) + dmg.overkill
+                set.overkill = (set.overkill or 0) + dmg.overkill
+            end
+
             if set == Skada.current and dmg.dstName and dmg.amount > 0 then
                 player.damagedone.targets[dmg.dstName] = (player.damagedone.targets[dmg.dstName] or 0) + dmg.amount
 
@@ -753,7 +760,7 @@ Skada:AddLoadableModule(
                         Skada:FormatValueText(
                         Skada:FormatNumber(player.damagedone.amount),
                         self.metadata.columns.Damage,
-                        _format("%02.1f", dps),
+                        Skada:FormatNumber(dps),
                         self.metadata.columns.DPS,
                         _format("%02.1f%%", player.damagedone.amount / set.damagedone * 100),
                         self.metadata.columns.Percent
@@ -964,12 +971,13 @@ Skada:AddLoadableModule(
 
         function mod:AddPlayerAttributes(player)
             if not player.damagedone then
-                player.damagedone = {amount = 0, spells = {}, targets = {}}
+                player.damagedone = {amount = 0, overkil = 0, spells = {}, targets = {}}
             end
         end
 
         function mod:AddSetAttributes(set)
             set.damagedone = set.damagedone or 0
+            set.overkill = set.overkill or 0
             instanceDiff, valkyrsTable = nil, nil
         end
 
@@ -981,6 +989,85 @@ Skada:AddLoadableModule(
                 end
             end
             instanceDiff, valkyrsTable = nil, nil
+        end
+    end
+)
+
+-- ================== --
+-- Useful Damage Module --
+-- ================== --
+--
+-- this module uses the data from Damage module and
+-- show the "effective" damage and dps by substructing
+-- the overkill from the amount of damage done.
+--
+
+Skada:AddLoadableModule(
+    "Useful damage",
+    function(Skada, L)
+        if Skada:IsDisabled("Damage", "Useful damage") then
+            return
+        end
+
+        local mod = Skada:NewModule(L["Useful damage"])
+
+        local function getDPS(set, player)
+            local uptime = Skada:PlayerActiveTime(set, player)
+            local amount = player.damagedone.amount - (player.overkill or 0)
+            return amount / math_max(1, uptime)
+        end
+
+        function mod:Update(win, set)
+            local max = 0
+
+            if set and set.damagedone > 0 then
+                local total = set.damagedone - (set.overkill or 0)
+                local nr = 1
+
+                for _, player in _ipairs(set.players) do
+                    if player.damagedone.amount > 0 then
+                        local d = win.dataset[nr] or {}
+                        win.dataset[nr] = d
+
+                        d.id = player.id
+                        d.label = player.name
+                        d.class = player.class
+                        d.role = player.role
+                        d.spec = player.spec
+
+                        local amount = player.damagedone.amount - (player.overkill or 0)
+                        local dps = getDPS(set, player)
+
+                        d.value = amount
+                        d.valuetext =
+                            Skada:FormatValueText(
+                            Skada:FormatNumber(amount),
+                            self.metadata.columns.Damage,
+                            Skada:FormatNumber(dps),
+                            self.metadata.columns.DPS,
+                            _format("%02.1f%%", 100 * amount / math_max(1, total)),
+                            self.metadata.columns.Percent
+                        )
+
+                        if amount > max then
+                            max = amount
+                        end
+
+                        nr = nr + 1
+                    end
+                end
+            end
+
+            win.metadata.maxvalue = max
+        end
+
+        function mod:OnEnable()
+            mod.metadata = {showspots = true, columns = {Damage = true, DPS = true, Percent = true}}
+            Skada:AddMode(self, L["Damage"])
+        end
+
+        function mod:OnDisable()
+            Skada:RemoveMode(self)
         end
     end
 )
@@ -1717,7 +1804,7 @@ Skada:AddLoadableModule(
 
         local _ipairs, _pairs, _format = ipairs, pairs, string.format
 
-        local _cached = {}
+        local cached = {}
 
         function playermod:Enter(win, id, label)
             self.mobname = label
@@ -1727,11 +1814,11 @@ Skada:AddLoadableModule(
         function playermod:Update(win, set)
             local max = 0
 
-            if self.mobname and _cached.list[self.mobname] then
-                local total = _cached.list[self.mobname].amount
+            if self.mobname and cached.list[self.mobname] then
+                local total = cached.list[self.mobname].amount
                 local nr = 1
 
-                for playername, player in _pairs(_cached.list[self.mobname].players) do
+                for playername, player in _pairs(cached.list[self.mobname].players) do
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
@@ -1763,19 +1850,19 @@ Skada:AddLoadableModule(
 
         function mod:Update(win, set)
             if set.damagedone > 0 then
-                _cached.amount = set.damagedone
-                _cached.list = {}
+                cached.amount = set.damagedone
+                cached.list = {}
 
                 for _, player in _ipairs(set.players) do
                     if player.damagedone.amount > 0 then
                         for targetname, amount in _pairs(player.damagedone.targets) do
                             -- add damage amount to target, but before, we create it if it doesn't exist
-                            _cached.list[targetname] = _cached.list[targetname] or {amount = 0, players = {}}
-                            _cached.list[targetname].amount = _cached.list[targetname].amount + amount
+                            cached.list[targetname] = cached.list[targetname] or {amount = 0, players = {}}
+                            cached.list[targetname].amount = cached.list[targetname].amount + amount
 
                             -- add the player to the list and add his/her damage
-                            if not _cached.list[targetname].players[player.name] then
-                                _cached.list[targetname].players[player.name] = {
+                            if not cached.list[targetname].players[player.name] then
+                                cached.list[targetname].players[player.name] = {
                                     id = player.id,
                                     class = player.class,
                                     role = player.role,
@@ -1783,8 +1870,8 @@ Skada:AddLoadableModule(
                                     amount = 0
                                 }
                             end
-                            _cached.list[targetname].players[player.name].amount =
-                                _cached.list[targetname].players[player.name].amount + amount
+                            cached.list[targetname].players[player.name].amount =
+                                cached.list[targetname].players[player.name].amount + amount
                         end
                     end
                 end
@@ -1792,10 +1879,10 @@ Skada:AddLoadableModule(
 
             local max = 0
 
-            if _cached.list then
+            if cached.list then
                 local nr = 1
 
-                for targetname, target in _pairs(_cached.list) do
+                for targetname, target in _pairs(cached.list) do
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
@@ -1806,7 +1893,7 @@ Skada:AddLoadableModule(
                         Skada:FormatValueText(
                         Skada:FormatNumber(target.amount),
                         mod.metadata.columns.Damage,
-                        _format("%02.1f%%", 100 * target.amount / _cached.amount),
+                        _format("%02.1f%%", 100 * target.amount / cached.amount),
                         mod.metadata.columns.Percent
                     )
 
@@ -1833,7 +1920,7 @@ Skada:AddLoadableModule(
         end
 
         function mod:AddSetAttributes(set)
-            _cached = {}
+            cached = {}
         end
     end
 )
@@ -2150,7 +2237,7 @@ Skada:AddLoadableModule(
         end
 
         function mod:AddSetAttributes(set)
-            _cached = {}
+            cached = {}
         end
     end
 )

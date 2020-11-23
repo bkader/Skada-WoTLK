@@ -504,6 +504,8 @@ L["Damage done"] = "Schaden verursacht"
 L["%s's damage"] = "%s : Schaden"
 L["%s's <%s> damage"] = "%s <%s> Schaden"
 
+-- L["Useful damage"] = true
+
 L["Damage done by spell"] = "Durch Zauber verursachter Schaden"
 L["%s's sources"] = "%s Quellen"
 
@@ -566,6 +568,22 @@ L["Crushing"] = "Schmetternd"
 -- L["Reanimated Adherent"] = true
 -- L["Reanimated Fanatic"] = true
 -- L["Volatile Ooze"] = true
+
+-- L["Kor'kron Sergeant"] = true
+-- L["Kor'kron Reaver"] = true
+-- L["Kor'kron Axethrower"] = true
+-- L["Kor'kron Rocketeer"] = true
+-- L["Kor'kron Battle-Mage"] = true
+-- L["Skybreaker Sergeant"] = true
+-- L["Skybreaker Marine"] = true
+-- L["Skybreaker Rifleman"] = true
+-- L["Skybreaker Mortar Soldier"] = true
+-- L["Skybreaker Sorcerer"] = true
+-- L["Dream Cloud"] = true
+-- L["Risen Archmage"] = true
+-- L["Blazing Skeleton"] = true
+-- L["Blistering Zombie"] = true
+-- L["Gluttonous Abomination"] = true
 
 -- ============= --
 -- Deaths Module --
