@@ -750,9 +750,9 @@ Skada:AddLoadableModule(
 
             -- puts oldest absorb first if there is two with the same id.
             if a.spellid == b.spellid then
-                if not a.timestamp then
+                if a.timestamp == nil then
                     return false
-                elseif not b.timestamp then
+                elseif b.timestamp == nil then
                     return true
                 else
                     return (a.timestamp < b.timestamp)
@@ -847,6 +847,12 @@ Skada:AddLoadableModule(
             end
 
             -- sort oldest buffs to the top
+            if a.timestamp == nil then
+                return false
+            end
+            if b.timestamp == nil then
+                return true
+            end
             return (a.timestamp < b.timestamp)
         end
 
