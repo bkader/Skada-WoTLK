@@ -570,12 +570,10 @@ L["Crushing"] = "Schmetternd"
 -- L["Volatile Ooze"] = true
 
 -- L["Kor'kron Sergeant"] = true
--- L["Kor'kron Reaver"] = true
 -- L["Kor'kron Axethrower"] = true
 -- L["Kor'kron Rocketeer"] = true
 -- L["Kor'kron Battle-Mage"] = true
 -- L["Skybreaker Sergeant"] = true
--- L["Skybreaker Marine"] = true
 -- L["Skybreaker Rifleman"] = true
 -- L["Skybreaker Mortar Soldier"] = true
 -- L["Skybreaker Sorcerer"] = true
