@@ -363,7 +363,7 @@ Skada:AddLoadableModule(
                 )
                 tooltip:AddDoubleLine(
                     Skada:FormatNumber(player.damagedone.amount) .. "/" .. activetime .. ":",
-                    _format("%02.1f", player.damagedone.amount / math_max(1, activetime)),
+                    Skada:FormatNumber(player.damagedone.amount / math_max(1, activetime)),
                     255,
                     255,
                     255,
@@ -781,14 +781,14 @@ Skada:AddLoadableModule(
             if Skada.current then
                 local player = Skada:find_player(Skada.current, _UnitGUID("player"))
                 if player then
-                    return _format("%02.1f", getDPS(Skada.current, player)) .. " " .. L["DPS"]
+                    return Skada:FormatNumber(getDPS(Skada.current, player)) .. " " .. L["DPS"]
                 end
             end
         end
 
         local function feed_raid_dps()
             if Skada.current then
-                return _format("%02.1f", getRaidDPS(Skada.current)) .. " " .. L["RDPS"]
+                return Skada:FormatNumber(getRaidDPS(Skada.current)) .. " " .. L["RDPS"]
             end
         end
 
