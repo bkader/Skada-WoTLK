@@ -1131,7 +1131,10 @@ do
     function Skada:FixPlayer(player)
         if player.id and player.name then
             -- collect some info from the player's guid
-            local _, class, _, _, _, name = GetPlayerInfoByGUID(player.id)
+            local name, class, _
+            if player.id then
+                _, class, _, _, _, name = GetPlayerInfoByGUID(player.id)
+            end
 
             -- fix the name
             if player.id == player.name and name and name ~= player.name then
@@ -2515,24 +2518,23 @@ function Skada:OnInitialize()
     -- add Gunship adds
     -- horde
     BOSS.BossIDs[36960] = true -- Kor'kron Sergeant, Gunship add
-    BOSS.BossIDs[37029] = true -- Kor'kron Reaver, Gunship add
     BOSS.BossIDs[36968] = true -- Kor'kron Axethrower, Gunship add
     BOSS.BossIDs[36982] = true -- Kor'kron Rocketeer, Gunship add
     BOSS.BossIDs[37117] = true -- Kor'kron Battle-Mage, Gunship add
+    BOSS.BossIDs[37215] = true -- Orgrim's Hammer
+
     -- alliance
     BOSS.BossIDs[36961] = true -- Skybreaker Sergeant, Gunship add
-    BOSS.BossIDs[36950] = true -- Skybreaker Marine, Gunship add
     BOSS.BossIDs[36969] = true -- Skybreaker Rifleman, Gunship add
     BOSS.BossIDs[36978] = true -- Skybreaker Mortar Soldier, Gunship add
     BOSS.BossIDs[37116] = true -- Skybreaker Sorcerer, Gunship add
+    BOSS.BossIDs[37540] = true -- The Skybreaker
 
     LBB["Kor'kron Sergeant"] = L["Kor'kron Sergeant"]
-    LBB["Kor'kron Reaver"] = L["Kor'kron Reaver"]
     LBB["Kor'kron Axethrower"] = L["Kor'kron Axethrower"]
     LBB["Kor'kron Rocketeer"] = L["Kor'kron Rocketeer"]
     LBB["Kor'kron Battle-Mage"] = L["Kor'kron Battle-Mage"]
     LBB["Skybreaker Sergeant"] = L["Skybreaker Sergeant"]
-    LBB["Skybreaker Marine"] = L["Skybreaker Marine"]
     LBB["Skybreaker Rifleman"] = L["Skybreaker Rifleman"]
     LBB["Skybreaker Mortar Soldier"] = L["Skybreaker Mortar Soldier"]
     LBB["Skybreaker Sorcerer"] = L["Skybreaker Sorcerer"]
@@ -2549,12 +2551,10 @@ function Skada:OnInitialize()
         bossNames = {
             -- Icecrown Gunship Battle
             [LBB["Kor'kron Sergeant"]] = LBB["Icecrown Gunship Battle"],
-            [LBB["Kor'kron Reaver"]] = LBB["Icecrown Gunship Battle"],
             [LBB["Kor'kron Axethrower"]] = LBB["Icecrown Gunship Battle"],
             [LBB["Kor'kron Rocketeer"]] = LBB["Icecrown Gunship Battle"],
             [LBB["Kor'kron Battle-Mage"]] = LBB["Icecrown Gunship Battle"],
             [LBB["Skybreaker Sergeant"]] = LBB["Icecrown Gunship Battle"],
-            [LBB["Skybreaker Marine"]] = LBB["Icecrown Gunship Battle"],
             [LBB["Skybreaker Rifleman"]] = LBB["Icecrown Gunship Battle"],
             [LBB["Skybreaker Mortar Soldier"]] = LBB["Icecrown Gunship Battle"],
             [LBB["Skybreaker Sorcerer"]] = LBB["Icecrown Gunship Battle"],
