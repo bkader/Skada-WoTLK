@@ -61,6 +61,7 @@ local ExtraCCSpells = {
     [66070] = true, -- Entangling Roots (Force of Nature)
     [8983] = true, -- Bash
     [16979] = true, -- Feral Charge - Bear
+    [45334] = true, -- Feral Charge Effect
     [22570] = true, -- Maim (rank 1)
     [49802] = true, -- Maim
     [49803] = true, -- Pounce
@@ -162,8 +163,10 @@ local ExtraCCSpells = {
     [47995] = true, -- Intercept (Stun)--needs review
     [12323] = true, -- Piercing Howl
     -- Racials
-    [20549] = true, -- War Stomp
-    [28730] = true, -- Arcane Torrent
+    [20549] = true, -- War Stomp (Tauren)
+    [28730] = true, -- Arcane Torrent (Bloodelf)
+    [47779] = true, -- Arcane Torrent (Bloodelf)
+    [50613] = true, -- Arcane Torrent (Bloodelf)
     -- Engineering
     [67890] = true -- Cobalt Frag Bomb
 }
