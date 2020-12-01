@@ -21,10 +21,10 @@ local dataobj =
 )
 
 -- Keybindings
-BINDING_HEADER_SKADA = "Skada"
-BINDING_NAME_SKADA_TOGGLE = L["Toggle window"]
-BINDING_NAME_SKADA_RESET = RESET
-BINDING_NAME_SKADA_NEWSEGMENT = L["Start new segment"]
+_G.BINDING_HEADER_SKADA = "Skada"
+_G.BINDING_NAME_SKADA_TOGGLE = L["Toggle window"]
+_G.BINDING_NAME_SKADA_RESET = RESET
+_G.BINDING_NAME_SKADA_NEWSEGMENT = L["Start new segment"]
 
 -- available display types
 Skada.displays = {}
@@ -1132,7 +1132,12 @@ do
         if player.id and player.name then
             -- collect some info from the player's guid
             local name, class, _
-            if player.id then
+
+            -- the only way to fix this error is to literally
+            -- ignore it if we don't have a valid GUID.
+            if player.id and #player.id ~= 18 then
+                return player
+            elseif player.id then
                 _, class, _, _, _, name = GetPlayerInfoByGUID(player.id)
             end
 
@@ -1181,7 +1186,7 @@ do
     end
 end
 
-function Skada:find_player(set, playerid)
+function Skada:find_player(set, playerid, playername)
     if set and playerid then
         set._playeridx = set._playeridx or {}
         local player = set._playeridx[playerid]
@@ -1190,7 +1195,7 @@ function Skada:find_player(set, playerid)
         end
 
         for _, p in ipairs(set.players) do
-            if p.id == playerid then
+            if p.id == playerid or p.name == playername then
                 Skada:FixPlayer(p)
                 set._playeridx[playerid] = p
                 return p
