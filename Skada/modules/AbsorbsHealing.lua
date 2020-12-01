@@ -3,7 +3,7 @@ if not Skada then
     return
 end
 
-local _time, _GetTime = time, GetTime
+local _time, _GetTime, _band = time, GetTime, bit.band
 local _pairs, _ipairs = pairs, ipairs
 local _select, _format = select, string.format
 local math_max = math.max
@@ -598,11 +598,11 @@ Skada:AddLoadableModule(
             [25747] = 15,
             [25746] = 15,
             [23991] = 15,
+            [31000] = 300,
             [30997] = 300,
             [31002] = 300,
             [30999] = 300,
             [30994] = 300,
-            [31000] = 300,
             [23506] = 20,
             [12561] = 60,
             [31771] = 20,
@@ -622,7 +622,6 @@ Skada:AddLoadableModule(
             [28810] = 30,
             [54808] = 12,
             [55019] = 12,
-            -- [64411] = 15,
             [64413] = 8,
             [40322] = 30,
             [65874] = 15,
@@ -742,117 +741,95 @@ Skada:AddLoadableModule(
         -- the time it was applied, but function depending on the damage received
         --
         local function sort_shields(a, b)
-            if not a or a.spellid == nil then
-                return false
-            elseif not b or b.spellid == nil then
-                return true
-            end
+            local a_spell = a.spellid
+            local b_spell = b.spellid
 
             -- puts oldest absorb first if there is two with the same id.
-            if a.spellid == b.spellid then
-                if a.timestamp == nil then
-                    return false
-                elseif b.timestamp == nil then
-                    return true
-                else
-                    return (a.timestamp < b.timestamp)
-                end
+            if a_spell == b_spell then
+                return (a.timestamp < b.timestamp)
             end
 
             -- twin val'kyr light essence
-            if a.spellid == 65686 then
+            if a_spell == 65686 then
                 return true
             end
-            if b.spellid == 65686 then
+            if b_spell == 65686 then
                 return false
             end
 
             -- twin val'kyr dark essence
-            if a.spellid == 65684 then
+            if a_spell == 65684 then
                 return true
             end
-            if b.spellid == 65684 then
+            if b_spell == 65684 then
                 return false
             end
 
             --frost ward
-            if mage_frost_ward[a.spellid] then
+            if mage_frost_ward[a_spell] then
                 return true
             end
-            if mage_frost_ward[b.spellid] then
+            if mage_frost_ward[b_spell] then
                 return false
             end
 
             -- fire ward
-            if mage_fire_ward[a.spellid] then
+            if mage_fire_ward[a_spell] then
                 return true
             end
-            if mage_fire_ward[b.spellid] then
+            if mage_fire_ward[b_spell] then
                 return false
             end
 
             --shadow ward
-            if warlock_shadow_ward[a.spellid] then
+            if warlock_shadow_ward[a_spell] then
                 return true
             end
-            if warlock_shadow_ward[b.spellid] then
+            if warlock_shadow_ward[b_spell] then
                 return false
             end
 
             -- Sacred Shield
-            if a.spellid == 58597 then
+            if a_spell == 58597 then
                 return true
             end
-            if b.spellid == 58597 then
+            if b_spell == 58597 then
                 return false
             end
 
             -- Fell blossom
-            if a.spellid == 28527 then
+            if a_spell == 28527 then
                 return true
             end
-            if b.spellid == 28527 then
+            if b_spell == 28527 then
                 return false
             end
 
             -- Divine Aegis
-            if a.spellid == 47753 then
+            if a_spell == 47753 then
                 return true
             end
-            if b.spellid == 47753 then
+            if b_spell == 47753 then
                 return false
             end
 
             -- Ice Barrier
-            if mage_ice_barrier[a.spellid] then
+            if mage_ice_barrier[a_spell] then
                 return true
             end
-            if mage_ice_barrier[b.spellid] then
+            if mage_ice_barrier[b_spell] then
                 return false
             end
 
             -- Warlock Sacrifice
-            if warlock_sacrifice[a.spellid] then
+            if warlock_sacrifice[a_spell] then
                 return true
             end
-            if warlock_sacrifice[b.spellid] then
-                return false
-            end
-
-            if absorbspells[a.spellid] then
-                return true
-            end
-            if absorbspells[b.spellid] then
+            if warlock_sacrifice[b_spell] then
                 return false
             end
 
             -- sort oldest buffs to the top
-            if a.timestamp == nil then
-                return false
-            end
-            if b.timestamp == nil then
-                return true
-            end
             return (a.timestamp < b.timestamp)
         end
 
@@ -915,7 +892,7 @@ Skada:AddLoadableModule(
 
                 local found = false
                 for _, absorb in _ipairs(shields[dstName]) do
-                    if absorb.spellid == spellid and absorb.srcGUID == srcGUID then
+                    if absorb.srcGUID == srcGUID and absorb.spellid == spellid then
                         absorb.timestamp = timestamp
                         found = true
                         break
@@ -944,35 +921,36 @@ Skada:AddLoadableModule(
                 -- twin val'kyr light essence and we took fire damage
                 if absorb.spellid == 65686 then
                     --twin val'kyr dark essence and we took shadow damage
-                    if bit.band(spellschool, 0x4) == spellschool then
+                    if _band(spellschool, 0x4) == spellschool then
                         return
                     end
                 elseif absorb.spellid == 65684 then
                     -- check if its a frost ward
-                    if bit.band(spellschool, 0x20) == spellschool then
+                    if _band(spellschool, 0x20) == spellschool then
                         return
                     end
                 elseif mage_frost_ward[absorb.spellid] then
                     -- check if its a fire ward
                     -- only pick if its frost damage
-                    if bit.band(spellschool, 0x10) == spellschool then
+                    if _band(spellschool, 0x10) == spellschool then
                         found = absorb
                         break
                     end
                 elseif mage_fire_ward[absorb.spellid] then
                     -- check if its a shadow ward
                     -- only pick if its fire damage
-                    if bit.band(spellschool, 0x4) == spellschool then
+                    if _band(spellschool, 0x4) == spellschool then
                         found = absorb
                         break
                     end
                 elseif warlock_shadow_ward[absorb.spellid] then
                     -- only pick if its shadow damage
-                    if bit.band(spellschool, 0x20) == spellschool then
+                    if _band(spellschool, 0x20) == spellschool then
                         found = absorb
                         break
                     end
                 else
+                    -- since no ward was found, we choose the old absorb
                     found = absorb
                     break
                 end
