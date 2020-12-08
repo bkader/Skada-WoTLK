@@ -3,8 +3,8 @@ if not Skada then
     return
 end
 
-local _time = time
-local _pairs, _ipairs, _next = pairs, ipairs, next
+local _time, _GetTime, _band = time, GetTime, bit.band
+local _pairs, _ipairs = pairs, ipairs
 local _select, _format = select, string.format
 local math_max = math.max
 local _UnitGUID, _UnitName, _UnitClass = UnitGUID, UnitName, UnitClass
@@ -622,7 +622,7 @@ Skada:AddLoadableModule(
             [28810] = 30,
             [54808] = 12,
             [55019] = 12,
-            [64411] = 15,
+            -- [64411] = 15,
             [64413] = 8,
             [40322] = 30,
             [65874] = 15,
@@ -689,8 +689,18 @@ Skada:AddLoadableModule(
             [47986] = 30 -- rank 9
         }
 
-        local function log_absorb(set, playername, dstGUID, dstName, dstFlags, spellid, spellschool, amount)
-            local player = Skada:get_player(set, _UnitGUID(playername), playername)
+        local function log_absorb(
+            set,
+            playerid,
+            playername,
+            playerflags,
+            dstGUID,
+            dstName,
+            dstFlags,
+            spellid,
+            spellschool,
+            amount)
+            local player = Skada:get_player(set, playerid, playername, playerflags)
             if not player then
                 return
             end
@@ -701,7 +711,7 @@ Skada:AddLoadableModule(
 
             -- record the target
             if not player.absorbs.targets[dstName] then
-                local p = Skada:find_player(set, dstGUID, dstName, dstFlags)
+                local p = Skada:find_player(set, dstGUID, dstName, dstGUID)
                 if p then
                     player.absorbs.targets[dstName] = {
                         id = p.id,
@@ -736,14 +746,136 @@ Skada:AddLoadableModule(
         end
 
         local shields = {}
-        local damage = {}
+
+        --
+        -- just like details, we make sure to order shields by priority, and that's not
+        -- the time it was applied, but function depending on the damage received
+        --
+        local function sort_shields(a, b)
+            local a_spell = a.spellid
+            local b_spell = b.spellid
+
+            -- puts oldest absorb first if there is two with the same id.
+            if a_spell == b_spell then
+                return (a.timestamp < b.timestamp)
+            end
+
+            -- twin val'kyr light essence
+            if a_spell == 65686 then
+                return true
+            end
+            if b_spell == 65686 then
+                return false
+            end
+
+            -- twin val'kyr dark essence
+            if a_spell == 65684 then
+                return true
+            end
+            if b_spell == 65684 then
+                return false
+            end
+
+            --frost ward
+            if mage_frost_ward[a_spell] then
+                return true
+            end
+            if mage_frost_ward[b_spell] then
+                return false
+            end
+
+            -- fire ward
+            if mage_fire_ward[a_spell] then
+                return true
+            end
+            if mage_fire_ward[b_spell] then
+                return false
+            end
+
+            --shadow ward
+            if warlock_shadow_ward[a_spell] then
+                return true
+            end
+            if warlock_shadow_ward[b_spell] then
+                return false
+            end
+
+            -- Sacred Shield
+            if a_spell == 58597 then
+                return true
+            end
+            if b_spell == 58597 then
+                return false
+            end
+
+            -- Fell blossom
+            if a_spell == 28527 then
+                return true
+            end
+            if b_spell == 28527 then
+                return false
+            end
+
+            -- Divine Aegis
+            if a_spell == 47753 then
+                return true
+            end
+            if b_spell == 47753 then
+                return false
+            end
+
+            -- Ice Barrier
+            if mage_ice_barrier[a_spell] then
+                return true
+            end
+            if mage_ice_barrier[b_spell] then
+                return false
+            end
+
+            -- Warlock Sacrifice
+            if warlock_sacrifice[a_spell] then
+                return true
+            end
+            if warlock_sacrifice[b_spell] then
+                return false
+            end
+
+            -- sort oldest buffs to the top
+            return (a.timestamp < b.timestamp)
+        end
+
+        local function remove_shield(dstName, srcGUID, spellid)
+            shields[dstName] = shields[dstName] or {}
+            local index
+
+            for i, absorb in _ipairs(shields[dstName]) do
+                if absorb.srcGUID == srcGUID and absorb.spellid == spellid then
+                    index = i
+                    break
+                end
+            end
+
+            if index then
+                table_remove(shields[dstName], index)
+                table_sort(shields[dstName], sort_shields)
+            end
+        end
 
         local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-            local spellid, spellname, spellschool, auratype = ...
+            local spellid, spellname, spellschool, auratype, amount = ...
             if absorbspells[spellid] then
                 shields[dstName] = shields[dstName] or {}
-                shields[dstName][spellid] = shields[dstName][spellid] or {}
-                shields[dstName][spellid][srcName] = true
+
+                local absorb = {}
+                absorb.timestamp = timestamp
+                absorb.srcGUID = srcGUID
+                absorb.srcName = srcName
+                absorb.srcFlags = srcFlags
+                absorb.spellid = spellid
+                absorb.spellschool = spellschool
+
+                table_insert(shields[dstName], absorb)
+                table_sort(shields[dstName], sort_shields)
             end
         end
 
@@ -751,44 +883,117 @@ Skada:AddLoadableModule(
             local spellid, spellname, spellschool, auratype = ...
             if absorbspells[spellid] then
                 shields[dstName] = shields[dstName] or {}
-                if shields[dstName] and shields[dstName][spellid] and shields[dstName][spellid][srcName] then
-                    C_Timer.After(
-                        0.1,
-                        function()
-                            if damage[dstName] > 0 then
-                                log_absorb(
-                                    Skada.current,
-                                    srcName,
-                                    dstGUID,
-                                    dstName,
-                                    dstFlags,
-                                    spellid,
-                                    spellschool,
-                                    damage[dstName]
-                                )
-                                log_absorb(
-                                    Skada.total,
-                                    srcName,
-                                    dstGUID,
-                                    dstName,
-                                    dstFlags,
-                                    spellid,
-                                    spellschool,
-                                    damage[dstName]
-                                )
 
-                                -- reset the damage to start over
-                                damage[dstName] = 0
+                for _, absorb in _ipairs(shields[dstName]) do
+                    if absorb.srcGUID == srcGUID and absorb.spellid == spellid and absorb.spellschool == spellschool then
+                        C_Timer.After(
+                            0.1,
+                            function()
+                                remove_shield(dstName, dstGUID, spellid)
                             end
-
-                            -- remove the shield
-                            shields[dstName][spellid][srcName] = nil
-                            if _next(shields[dstName][spellid]) == nil then
-                                shields[dstName][spellid] = nil
-                            end
-                        end
-                    )
+                        )
+                    end
                 end
+            end
+        end
+
+        local function AuraRefresh(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+            local spellid, spellname, spellschool, auratype, amount = ...
+            if absorbspells[spellid] then
+                shields[dstName] = shields[dstName] or {}
+
+                local found = false
+                for _, absorb in _ipairs(shields[dstName]) do
+                    if absorb.srcGUID == srcGUID and absorb.spellid == spellid and absorb.spellschool == spellschool then
+                        absorb.timestamp = timestamp
+                        found = true
+                        break
+                    end
+                end
+
+                if not found then
+                    local absorb = {}
+                    absorb.timestamp = timestamp
+                    absorb.srcGUID = srcGUID
+                    absorb.srcName = srcName
+                    absorb.srcFlags = srcFlags
+                    absorb.spellid = spellid
+                    absorb.spellschool = spellschool
+
+                    table_insert(shields[dstName], absorb)
+                    table_sort(shields[dstName], sort_shields)
+                end
+            end
+        end
+
+        local function process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool)
+            shields[dstName] = shields[dstName] or {}
+            local found
+
+            for _, absorb in _ipairs(shields[dstName]) do
+                -- twin val'kyr light essence and we took fire damage
+                if absorb.spellid == 65686 then
+                    --twin val'kyr dark essence and we took shadow damage
+                    if _band(spellschool, 0x4) == spellschool then
+                        return
+                    end
+                elseif absorb.spellid == 65684 then
+                    -- check if its a frost ward
+                    if _band(spellschool, 0x20) == spellschool then
+                        return
+                    end
+                elseif mage_frost_ward[absorb.spellid] then
+                    -- check if its a fire ward
+                    -- only pick if its frost damage
+                    if _band(spellschool, 0x10) == spellschool then
+                        found = absorb
+                        break
+                    end
+                elseif mage_fire_ward[absorb.spellid] then
+                    -- check if its a shadow ward
+                    -- only pick if its fire damage
+                    if _band(spellschool, 0x4) == spellschool then
+                        found = absorb
+                        break
+                    end
+                elseif warlock_shadow_ward[absorb.spellid] then
+                    -- only pick if its shadow damage
+                    if _band(spellschool, 0x20) == spellschool then
+                        found = absorb
+                        break
+                    end
+                else
+                    -- since no ward was found, we choose the old absorb
+                    found = absorb
+                    break
+                end
+            end
+
+            if found then
+                log_absorb(
+                    Skada.current,
+                    found.srcGUID,
+                    found.srcName,
+                    found.srcFlags,
+                    dstGUID,
+                    dstName,
+                    dstFlags,
+                    found.spellid,
+                    found.spellschool,
+                    absorbed
+                )
+                log_absorb(
+                    Skada.total,
+                    found.srcGUID,
+                    found.srcName,
+                    found.srcFlags,
+                    dstGUID,
+                    dstName,
+                    dstFlags,
+                    found.spellid,
+                    found.spellschool,
+                    absorbed
+                )
             end
         end
 
@@ -805,22 +1010,22 @@ Skada:AddLoadableModule(
                 critical,
                 glancing,
                 crushing = ...
-            if absorbed and absorbed > 0 and dstName and srcName and shields[dstName] then
-                damage[dstName] = (damage[dstName] or 0) + absorbed
+            if absorbed and absorbed > 0 and dstName and srcName then
+                process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool)
             end
         end
 
         local function SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             local spellid, spellname, spellschool, misstype, absorbed = ...
             if misstype == "ABSORB" and absorbed > 0 and dstName and srcName then
-                damage[dstName] = (damage[dstName] or 0) + absorbed
+                process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool)
             end
         end
 
         local function SwingDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             local amount, overkill, spellschool, resisted, blocked, absorbed, critical, glancing, crushing = ...
-            if absorbed and absorbed > 0 and dstName and srcName and shields[dstName] then
-                damage[dstName] = (damage[dstName] or 0) + absorbed
+            if absorbed and absorbed > 0 and dstName and srcName then
+                process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, 1)
             end
         end
 
@@ -847,6 +1052,13 @@ Skada:AddLoadableModule(
                 local spell = player.absorbs.spells[id]
                 if spell then
                     tooltip:AddLine(player.name .. " - " .. label)
+                    if spell.school then
+                        local c = Skada.schoolcolors[spell.school]
+                        local n = Skada.schoolnames[spell.school]
+                        if c and n then
+                            tooltip:AddLine(L[n], c.r, c.g, c.b)
+                        end
+                    end
                     if spell.min and spell.max then
                         tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.min), 255, 255, 255, 255, 255, 255)
                         tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.max), 255, 255, 255, 255, 255, 255)
@@ -887,6 +1099,7 @@ Skada:AddLoadableModule(
                         d.spellid = spellid
                         d.label = spellname
                         d.icon = spellicon
+                        d.spellschool = spell.school
 
                         d.value = spell.amount
                         d.valuetext =
@@ -999,9 +1212,20 @@ Skada:AddLoadableModule(
 
                         -- if we find any, we make sure to record the data to minimize the loss
                         if spellid and absorbspells[spellid] and unitCaster then
-                            shields[dstName] = shields[dstName] or {}
-                            shields[dstName][spellid] = shields[dstName][spellid] or {}
-                            shields[dstName][spellid][_UnitName(unitCaster)] = true
+                            found = true -- flag so we can order shields later
+
+                            local srcGUID, srcName = _UnitGUID(unitCaster), _UnitName(unitCaster)
+
+                            local absorb = {}
+                            absorb.timestamp = expires - (duration or absorbspells[spellid])
+                            absorb.srcGUID = srcGUID
+                            absorb.srcName = srcName
+                            absorb.spellid = spellid
+                            table_insert(shields[dstName], absorb)
+                        end
+
+                        if found then
+                            table_sort(shields[dstName], sort_shields)
                         end
                     end
                 end
@@ -1011,16 +1235,15 @@ Skada:AddLoadableModule(
                 -- we always clear our shields table at the start of the combat
                 shields = {}
 
-                local _pref, _min, _max = "raid", 1, GetNumRaidMembers()
-                if _max == 0 then
-                    _pref, _min, _max = "party", 0, GetNumPartyMembers()
-                end
-
-                for i = _min, _max do
-                    local unit = (i == 0) and "player" or _pref .. tostring(i)
-                    if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
-                        check_for_shields(unit)
+                local t, count = Skada:GetGroupTypeAndCount()
+                if count > 0 then
+                    for i = 1, count do
+                        if UnitExists(t .. i) and not UnitIsDeadOrGhost(t .. i) then
+                            check_for_shields(t .. i)
+                        end
                     end
+                elseif not UnitIsDeadOrGhost(t) then
+                    check_for_shields(t)
                 end
             end
         end
@@ -1039,6 +1262,7 @@ Skada:AddLoadableModule(
 
             Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {src_is_interesting_nopets = true})
             Skada:RegisterForCL(AuraRemoved, "SPELL_AURA_REMOVED", {src_is_interesting_nopets = true})
+            Skada:RegisterForCL(AuraRefresh, "SPELL_AURA_REFRESH", {src_is_interesting_nopets = true})
             Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {dst_is_interesting_nopets = true})
             Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {dst_is_interesting_nopets = true})
             Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {dst_is_interesting_nopets = true})
