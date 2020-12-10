@@ -765,9 +765,9 @@ Skada:AddLoadableModule(
         local function process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool)
             shields[dstName] = shields[dstName] or {}
 
-            local found_src, found_shield_id
+            local found_sources, found_src, found_shield_id
 
-            for shield_id, spells in pairs(shields[dstName]) do
+            for shield_id, sources in pairs(shields[dstName]) do
                 -- twin val'kyr light essence and we took fire damage?
                 if shield_id == 65686 then
                     if _band(spellschool, 0x4) == spellschool then
@@ -782,23 +782,26 @@ Skada:AddLoadableModule(
                 elseif mage_frost_ward[shield_id] then
                     if _band(spellschool, 0x10) == spellschool then
                         found_shield_id = shield_id
+                        found_sources = sources
                         break
                     end
 				-- Fire Ward and we took fire damage?
                 elseif mage_fire_ward[shield_id] then
                     if _band(spellschool, 0x4) == spellschool then
                         found_shield_id = shield_id
+                        found_sources = sources
                         break
                     end
 				-- Shadow Ward and we took shadow damage?
                 elseif warlock_shadow_ward[shield_id] then
                     if _band(spellschool, 0x20) == spellschool then
                         found_shield_id = shield_id
+                        found_sources = sources
                         break
                     end
                 else
                     local mintime
-                    for shield_src, ts in pairs(spells) do
+                    for shield_src, ts in pairs(sources) do
                         local starttime = ts - timestamp
                         if starttime > 0 and (mintime == nil or starttime < mintime) then
                             found_src = shield_src
@@ -810,16 +813,16 @@ Skada:AddLoadableModule(
             end
 
             -- we didn't found any source byt we have a shield?
-            if not found_src and found_shield_id and shields[dstName][found_shield_id] then
-                local mintime
-                for shield_src, ts in pairs(shields[dstName][found_shield_id]) do
-                    local starttime = ts - timestamp
-                    if starttime > 0 and (mintime == nil or starttime < mintime) then
-                        found_src = shield_src
-                        mintime = starttime
-                    end
-                end
-            end
+            if not found_src and found_sources then
+				local mintime
+				for shield_src, ts in pairs(found_sources) do
+					local starttime = ts - timestamp
+					if starttime > 0 and (mintime == nil or starttime < mintime) then
+						found_src = shield_src
+						mintime = starttime
+					end
+				end
+			end
 
             if found_src and found_shield_id then
                 log_absorb(Skada.current, found_src, dstGUID, dstName, dstFlags, found_shield_id, absorbed)
@@ -840,21 +843,21 @@ Skada:AddLoadableModule(
                 critical,
                 glancing,
                 crushing = ...
-            if absorbed and absorbed > 0 and dstName and srcName then
+            if absorbed and absorbed > 0 and dstName and shields[dstName] and srcName then
                 process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool)
             end
         end
 
         local function SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             local spellid, spellname, spellschool, misstype, absorbed = ...
-            if misstype == "ABSORB" and absorbed > 0 and dstName and srcName then
+            if misstype == "ABSORB" and absorbed > 0 and dstName and shields[dstName] and srcName then
                 process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool)
             end
         end
 
         local function SwingDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             local amount, overkill, spellschool, resisted, blocked, absorbed, critical, glancing, crushing = ...
-            if absorbed and absorbed > 0 and dstName and srcName then
+            if absorbed and absorbed > 0 and dstName and shields[dstName] and srcName then
                 process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool)
             end
         end
