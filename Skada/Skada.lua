@@ -1514,6 +1514,8 @@ function Skada:Command(param)
         self:ToggleWindow()
     elseif param == "config" then
         self:OpenOptions()
+	elseif param == "clear" or param == "clean" then
+		self:CleanGarbage(true)
     elseif param:sub(1, 6) == "report" then
         param = param:sub(7)
 
@@ -1540,6 +1542,7 @@ function Skada:Command(param)
         self:Print(format("%-20s", "/skada toggle"))
         self:Print(format("%-20s", "/skada newsegment"))
         self:Print(format("%-20s", "/skada config"))
+        self:Print(format("%-20s", "/skada clear"))
     end
 end
 
@@ -1843,8 +1846,7 @@ function Skada:Reset()
     L_CloseDropDownMenus()
 
     if not InCombatLockdown() then
-        CombatLogClearEntries()
-        collectgarbage("collect")
+		self:CleanGarbage(true)
     end
 end
 
@@ -2577,12 +2579,7 @@ function Skada:OnInitialize()
     end
 
     self:ReloadSettings()
-    C_Timer.After(
-        2,
-        function()
-            self:ApplySettings()
-        end
-    )
+    C_Timer.After(2, function() self:ApplySettings() end)
 end
 
 function Skada:MemoryCheck()
@@ -2593,6 +2590,13 @@ function Skada:MemoryCheck()
             L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."]
         )
     end
+end
+
+function Skada:CleanGarbage(clean)
+	CombatLogClearEntries()
+	if clean and not InCombatLockdown() then
+		collectgarbage("collect")
+	end
 end
 
 function Skada:OnEnable()
@@ -2611,13 +2615,8 @@ function Skada:OnEnable()
     end
 
     -- used to fix broken combat log
-    C_Timer.NewTicker(self.db.profile.updatefrequency or 0.25, CombatLogClearEntries)
-    C_Timer.After(
-        3,
-        function()
-            self:MemoryCheck()
-        end
-    )
+    C_Timer.NewTicker(2, self.CleanGarbage)
+    C_Timer.After(3, self.MemoryCheck)
 end
 
 -- ======================================================= --
@@ -2773,12 +2772,7 @@ do
             tick_timer:Cancel()
         end
         update_timer, tick_timer = nil, nil
-        C_Timer.After(
-            3,
-            function()
-                self:MemoryCheck()
-            end
-        )
+        C_Timer.After(3, self.MemoryCheck)
     end
 
     function Skada:StopSegment()
