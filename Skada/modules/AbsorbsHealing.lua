@@ -757,7 +757,7 @@ Skada:AddLoadableModule(
             if absorbspells[spellid] then
                 shields[dstName] = shields[dstName] or {}
                 if shields[dstName] and shields[dstName][spellid] and shields[dstName][spellid][srcName] then
-                    shields[dstName][spellid][dstName] = timestamp + 0.1
+                    shields[dstName][spellid][srcName] = timestamp + 0.1
                 end
             end
         end
