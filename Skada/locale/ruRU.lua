@@ -18,17 +18,17 @@ L["DISABLED"] = "ВЫКЛЮЧЕН"
 -- common lines
 L["Active Time"] = "Время активности"
 L["Segment Time"] = "Время сегмента"
-L["Click for"] = "Клик -"
-L["Shift-Click for"] = "Shift+Клик -"
-L["Control-Click for"] = "Control+Клик - "
-L["Minimum"] = "Минимальный"
+L["Click for"] = "Click -"
+L["Shift-Click for"] = "Shift-Click -"
+L["Control-Click for"] = "Control-Click - "
+L["Minimum"] = "Минимум"
 L["Minimum hit:"] = "Минимальное попадание:"
-L["Maximum"] = "Максимальный"
+L["Maximum"] = "Максимум"
 L["Maximum hit:"] = "Максимальное попадание:"
 L["Average"] = "В среднем"
 L["Average hit:"] = "Среднее попадание:"
-L["Total hits:"] = "Всего попадание:"
-L["Count"] = "Считать"
+L["Total hits:"] = "Всего попаданий:"
+L["Count"] = "Количество"
 L["Percent"] = "Процент"
 
 -- spell schools
@@ -412,7 +412,7 @@ L["%s's <%s> targets"] = "%s <%s> цели"
 -- CC Tracker Module --
 -- ================= --
 
-L["CC Tracker"] = "Контроли"
+L["CC Tracker"] = "Отслеживание Контроля"
 
 -- CC Done:
 -- L["CC Done"] = true
@@ -448,7 +448,7 @@ L["CC Breakers"] = "Прерыватели контроля"
 -- L["%s's CC Break targets"] = true
 
 -- options
-L["CC"] = "Контроли"
+L["CC"] = "Контроль"
 L["Announce CC breaking to party"] = true
 L["Ignore Main Tanks"] = true
 L["%s on %s removed by %s"] = true
@@ -482,28 +482,28 @@ L["Damage: Raid DPS"] = "Урон: УВС рейда"
 -- damage taken module
 L["Damage taken"] = "Полученный урон"
 L["Damage taken by %s"] = "%s - Полученный урон"
-L["<%s> damage on %s"] = "Урон %s на %s"
+L["<%s> damage on %s"] = "Урон %s по %s"
 
-L["Damage source list"] = "Сточников повреждений"
+L["Damage source list"] = "Список источников повреждений"
 L["Damage spell sources"] = "Источники заклинаний"
 L["Damage taken by spell"] = "Урон, полученный от заклинания"
 L["%s's targets"] = "%s - цели"
 L["DTPS"] = "ПУВС"
 
 -- enemy damage done module
-L["Enemy damage done"] = "Нанесено урона врагом"
-L["Damage done per player"] = "Нанесено урона каждым игроком"
+L["Enemy damage done"] = "Урон, нанесенный противником"
+L["Damage done per player"] = "Получено урона игроками"
 L["Damage from %s"] = "Урон от %s"
-L["%s's damage on %s"] = "Урон %s на %s"
+L["%s's damage on %s"] = "Урон %s по %s"
 
 -- enemy damage taken module
 L["Enemy damage taken"] = "Получено урона врагом"
-L["Damage taken per player"] = "Получено урона каждым игроком"
+L["Damage taken per player"] = "Получено урона от игроков"
 L["Damage on %s"] = "Урон по %s"
-L["%s's damage sources"] = "%s - Сточников повреждений"
+L["%s's damage sources"] = "%s - Источники повреждений"
 
 -- avoidance and mitigation module
-L["Avoidance & Mitigation"] = "Избежание и смягчение"
+L["Avoidance & Mitigation"] = "Избегание и уменьшение урона"
 L["Damage breakdown"] = "Детали повреждений"
 L["%s's damage breakdown"] = "%s - Детали повреждений"
 
@@ -552,14 +552,14 @@ L["Crushing"] = "Сокр. удар"
 -- Deaths Module --
 -- ============= --
 L["Deaths"] = "Смерти"
-L["%s's death"] = "%s - Смерти"
+L["%s's death"] = "%s - Смерть"
 L["%s's deaths"] = "%s - Смерти"
 L["Death log"] = "Журнал смертей"
-L["%s's death log"] = "%s - Журнал смертей"
+L["%s's death log"] = "%s - Журнал смерти"
 L["Player's deaths"] = "Смерть игрока"
 L["%s dies"] = "%s умирает"
-L["Spell details"] = "Детали заклинаний"
-L["Spell"] = "Орфографии"
+L["Spell details"] = "Детали заклинания"
+L["Spell"] = "Заклинание"
 L["Amount"] = "Количество"
 L["Source"] = "Источник"
 L["Health"] = "Здоровье"
@@ -575,13 +575,13 @@ L["Activity per target"] = "Активность на цель"
 
 L["Dispels"] = "Рассеивания"
 
-L["Dispel spell list"] = "Рассеивание заклинаний"
-L["Dispelled spell list"] = "Рассеянные заклинания"
-L["Dispelled target list"] = "Рассеянные цели"
+L["Dispel spell list"] = "Список заклинаний рассеивания"
+L["Dispelled spell list"] = "Список рассеянных заклинаний"
+L["Dispelled target list"] = "Список целей рассеивания"
 
-L["%s's dispel spells"] = "%s - Рассеивание заклинаний"
+L["%s's dispel spells"] = "%s - Заклинания рассеивания"
 L["%s's dispelled spells"] = "%s - Рассеянные заклинания"
-L["%s's dispelled targets"] = "%s - Рассеянные цели"
+L["%s's dispelled targets"] = "%s - Цели рассеивания"
 
 -- ==================== --
 -- failbot module lines --
@@ -607,12 +607,12 @@ L["Event's failed players"] = "Неудачи игроки события"
 -- ======================= --
 
 L["Interrupts"] = "Прерывания"
-L["Interrupt spells"] = "Прерывание заклинаний"
+L["Interrupt spells"] = "Заклинания прерывания"
 L["Interrupted spells"] = "Прерванные заклинания"
-L["Interrupted targets"] = "Прерванные цели"
-L["%s's interrupt spells"] = "%s - Прерывание заклинаний"
+L["Interrupted targets"] = "Цели прерывания"
+L["%s's interrupt spells"] = "%s - Заклинания прерывания"
 L["%s's interrupted spells"] = "%s - Прерванные заклинания"
-L["%s's interrupted targets"] = "%s - Прерванные цели"
+L["%s's interrupted targets"] = "%s - Цели прерывания"
 
 -- =================== --
 -- Power gained module --
@@ -621,24 +621,24 @@ L["%s's interrupted targets"] = "%s - Прерванные цели"
 L["Power"] = "Энергия"
 L["Power gained"] = "Получено энергии"
 L["%s's gained %s"] = "Получено %s: %s"
-L["Power gained: Mana"] = "Получено энергии: маны"
+L["Power gained: Mana"] = "Получено энергии: Мана"
 -- L["Mana gained spell list"] = true
-L["Power gained: Rage"] = "Получено энергии: ярости"
+L["Power gained: Rage"] = "Получено энергии: Ярость"
 -- L["Rage gained spell list"] = true
 L["Power gained: Energy"] = "Получено энергии: Энергия"
 -- L["Energy gained spell list"] = true
-L["Power gained: Runic Power"] = "Получено энергии: силы рун"
+L["Power gained: Runic Power"] = "Получено энергии: Сила рун"
 -- L["Runic Power gained spell list"] = true
 
 -- ====================== --
 -- resurrect module lines --
 -- ====================== --
 
-L["Resurrects"] = "Воскрешает"
-L["Resurrect spell list"] = "эаклинаний воскрешения"
-L["Resurrect spell target list"] = "целей заклинания воскрешения"
-L["Resurrect target list"] = "Воскресить цели"
-L["Resurrect target spell list"] = "целевых заклинаний воскрешения"
+L["Resurrects"] = "Воскрешения"
+L["Resurrect spell list"] = "Список заклинаний воскрешения"
+L["Resurrect spell target list"] = "Список целей заклинания воскрешения"
+L["Resurrect target list"] = "Список целей воскрешения"
+L["Resurrect target spell list"] = "Список заклинаний воскрешения по цели"
 -- L["received resurrects"] = true
 
 -- L["%s's resurrect spells"] = true
