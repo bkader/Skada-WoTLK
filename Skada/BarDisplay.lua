@@ -253,7 +253,7 @@ function mod:SetTitle(win, title)
     end
 end
 
-function mod:AnchorMoved(_, group)
+function mod:AnchorMoved(_, group, x, y)
     libwindow.SavePosition(group)
 end
 
