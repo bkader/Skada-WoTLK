@@ -42,8 +42,9 @@ Skada:AddLoadableModule(
                     else
                         local p = Skada:find_player(win:get_selected_set(), guid)
                         if p then
+                            Skada:FixPlayer(p)
                             threatTable[guid] = {
-                                id = guid,
+                                id = p.id,
                                 name = p.name,
                                 class = p.class,
                                 role = p.role,
