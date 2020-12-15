@@ -260,6 +260,8 @@ L["Append a count to set names with duplicate mob names."] =
     "Fügt eine Anzahl hinzu, um Namen, mit doppelten Gegnernamen, festzulegen."
 L["Set format"] = "Format setzen"
 L["Controls the way set names are displayed."] = "Bestimmt, wie Namen von Segmenten angezeigt werden."
+L["Memory Check"] = "Speicherprüfung"
+L["Checks memory usage and warns you if it is greater than or equal to 30mb."] = "Überprüft die Speichernutzung und warnt Sie, wenn sie größer oder gleich 30 MB ist."
 L["Data segments to keep"] = "Zu behaltende Datensegmente"
 L["The number of fight segments to keep. Persistent segments are not included in this."] =
     "Die Anzahl der Kampfsegmente, die behalten werden sollen. Ständige Segmente sind hier nicht enthalten."
@@ -418,8 +420,8 @@ L["%s's absorbed players"] = "%s absorbierte Spieler"
 L["%s's absorb spells"] = "%s absorbieren Zauber"
 
 L["Absorbs and healing"] = "Absorptionen und Heilungen"
-L["Healing and absorbs spell list"] = "Liste der heilenden und absorbierenden Zauber"
-L["Healed and absorbed players"] = "Geheilte und absorbierte Spieler"
+L["Absorbs and healing spell list"] = "Liste der heilenden und absorbierenden Zauber"
+L["Absorbed and healed players"] = "Geheilte und absorbierte Spieler"
 L["%s's absorb and healing spells"] = "%s absorbieren und heilen Zauber"
 L["%s's absorbed and healed players"] = "%s absorbierte und geheilte Spieler"
 

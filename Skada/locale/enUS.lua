@@ -237,6 +237,8 @@ L["Number set duplicates"] = true
 L["Append a count to set names with duplicate mob names."] = true
 L["Set format"] = true
 L["Controls the way set names are displayed."] = true
+L["Memory Check"] = true
+L["Checks memory usage and warns you if it is greater than or equal to 30mb."] = true
 L["Data segments to keep"] = true
 L["The number of fight segments to keep. Persistent segments are not included in this."] = true
 L["Update frequency"] = true
@@ -383,8 +385,8 @@ L["%s's absorbed players"] = true
 L["%s's absorb spells"] = true
 
 L["Absorbs and healing"] = true
-L["Healing and absorbs spell list"] = true
-L["Healed and absorbed players"] = true
+L["Absorbs and healing spell list"] = true
+L["Absorbed and healed players"] = true
 L["%s's absorb and healing spells"] = true
 L["%s's absorbed and healed players"] = true
 

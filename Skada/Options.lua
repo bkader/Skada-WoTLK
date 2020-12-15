@@ -96,6 +96,7 @@ Skada.defaults = {
         setnumber = true,
         showranks = true,
         setstokeep = 15,
+        memorycheck = true,
         tooltips = true,
         tooltippos = "smart",
         tooltiprows = 3,
@@ -528,15 +529,23 @@ Skada.options = {
                     width = "double"
                 },
                 translit = {
-                	type = "toggle",
-                	name = L["Translit"],
-                	desc = L["Make those russian letters that no one understand to be presented as western letters."],
-                	order = 18,
-                	get = function() return Skada.db.profile.translit end,
-                	set = function()
-                		Skada.db.profile.translit = not Skada.db.profile.translit
-                		Skada:ApplySettings()
-                	end
+					type = "toggle",
+					name = L["Translit"],
+					desc = L["Make those russian letters that no one understand to be presented as western letters."],
+					order = 18,
+					get = function() return Skada.db.profile.translit end,
+					set = function()
+						Skada.db.profile.translit = not Skada.db.profile.translit
+						Skada:ApplySettings()
+					end
+				},
+				memorycheck = {
+					type = "toggle",
+					name = L["Memory Check"],
+					desc = L["Checks memory usage and warns you if it is greater than or equal to 30mb."],
+					order = 97,
+					get = function() return Skada.db.profile.memorycheck end,
+					set = function() Skada.db.profile.memorycheck = not Skada.db.profile.memorycheck end
                 },
                 setstokeep = {
                     type = "range",
