@@ -95,8 +95,7 @@ local math_floor, math_max = math.floor, math.max
 local band, time = bit.band, time
 local GetNumPartyMembers, GetNumRaidMembers = GetNumPartyMembers, GetNumRaidMembers
 local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAffectingCombat, InCombatLockdown
-local UnitClass, UnitGroupRolesAssigned = UnitClass, UnitGroupRolesAssigned
-local UnitGUID, UnitName = UnitGUID, UnitName
+local UnitGUID, UnitName, UnitClass = UnitGUID, UnitName, UnitClass
 local CombatLogClearEntries = CombatLogClearEntries
 
 local COMBATLOG_OBJECT_TYPE_PET = COMBATLOG_OBJECT_TYPE_PET or 0x00001000
@@ -113,29 +112,25 @@ local RAID_FLAGS =
 -- add missing globals --
 -- =================== --
 
-local IsInParty = IsInParty or function()
-        return GetNumPartyMembers() > 0
+local IsInGroup = IsInGroup
+if not IsInGroup then
+    IsInGroup = function()
+        return (GetNumRaidMembers() > 0) or (GetNumPartyMembers() > 0)
     end
-local IsInRaid = IsInRaid or function()
-        return GetNumRaidMembers() > 0
-    end
-local IsInGroup = IsInGroup or function()
-        return IsInRaid() or IsInParty()
-    end
+end
 
 -- returns the group type and count
 local function GetGroupTypeAndCount()
-    local t, count = "player", 0
+    local count, t = 0
 
-    if IsInRaid() then
+    if GetNumRaidMembers() > 0 then
         t, count = "raid", GetNumRaidMembers()
-    elseif IsInParty() then
+    elseif GetNumPartyMembers() > 0 then
         t, count = "party", GetNumPartyMembers()
     end
 
     return t, count
 end
-Skada.GetGroupTypeAndCount = GetGroupTypeAndCount
 
 -- C_Timer instead of AceTimer
 -- shamelessly copied from Details.
@@ -1126,6 +1121,19 @@ do
         return specIdx
     end
 
+    -- proper way of getting role icon using LibGroupTalents
+    function Skada:UnitGroupRolesAssigned(unit)
+        local role = LGT:GetUnitRole(unit) or "NONE"
+        if role == "melee" or role == "caster" then
+            role = "DAMAGER"
+        elseif role == "tank" then
+            role = "TANK"
+        elseif role == "healer" then
+            role = "HEALER"
+        end
+        return role
+    end
+
     -- sometimes GUID are shown instead of proper players names
     -- this function is called and used only once per player
     function Skada:FixPlayer(player)
@@ -1138,7 +1146,7 @@ do
             if player.id and #player.id ~= 18 then
                 return player
             elseif player.id then
-                _, class, _, _, _, name = GetPlayerInfoByGUID(player.id)
+                class, _, _, _, name = select(2, GetPlayerInfoByGUID(player.id))
             end
 
             -- fix the name
@@ -1178,7 +1186,7 @@ do
                 -- if the player has been assigned a valid class,
                 -- we make sure to assign his/her role and spec
                 if player.class and self.validclass[player.class] then
-                    player.role = player.role or UnitGroupRolesAssigned(player.name) or "NONE"
+                    player.role = player.role or self:UnitGroupRolesAssigned(player.name)
                     player.spec = player.spec or self:GetPlayerSpecID(player.name, player.class)
                 end
             end
@@ -1196,7 +1204,6 @@ function Skada:find_player(set, playerid, playername)
 
         for _, p in ipairs(set.players) do
             if p.id == playerid or p.name == playername then
-                Skada:FixPlayer(p)
                 set._playeridx[playerid] = p
                 return p
             end
@@ -1514,8 +1521,8 @@ function Skada:Command(param)
         self:ToggleWindow()
     elseif param == "config" then
         self:OpenOptions()
-	elseif param == "clear" or param == "clean" then
-		self:CleanGarbage(true)
+    elseif param == "clear" or param == "clean" then
+        self:CleanGarbage(true)
     elseif param:sub(1, 6) == "report" then
         param = param:sub(7)
 
@@ -1683,29 +1690,23 @@ function Skada:GetPetOwner(petGUID)
     return pets[petGUID]
 end
 
-do
-    local function CheckPet(unit, pet)
-        local petGUID = UnitGUID(pet)
-        local unitGUID = UnitGUID(unit)
-        local unitName = UnitName(unit)
-        if petGUID and unitGUID and unitName and not pets[petGUID] then
-            pets[petGUID] = {id = unitGUID, name = unitName}
-        end
+function Skada:CheckGroup()
+    local prefix, min, max = "raid", 1, GetNumRaidMembers()
+    if max == 0 then
+        prefix, min, max = "party", 0, GetNumPartyMembers()
     end
 
-    function Skada:CheckGroup()
-        local t, count = GetGroupTypeAndCount()
-        if count > 0 then
-            for i = 1, count do
-                if UnitExists(t .. i .. "pet") then
-                    CheckPet(t .. i, t .. i .. "pet")
-                end
-            end
-        end
+    for i = min, max do
+        local unit = (i == 0) and "player" or prefix .. tostring(i)
+        local pet = (unit == "player") and "pet" or unit .. "pet"
 
-        -- Solo. Always check.
-        if UnitExists("pet") then
-            CheckPet("player", "pet")
+        if UnitExists(pet) then
+            local petGUID = UnitGUID(pet)
+            local unitGUID = UnitGUID(unit)
+            local unitName = UnitName(unit)
+            if petGUID and unitGUID and unitName and not pets[petGUID] then
+                pets[petGUID] = {id = unitGUID, name = unitName}
+            end
         end
     end
 end
@@ -1846,7 +1847,7 @@ function Skada:Reset()
     L_CloseDropDownMenus()
 
     if not InCombatLockdown() then
-		self:CleanGarbage(true)
+        self:CleanGarbage(true)
     end
 end
 
@@ -2579,24 +2580,31 @@ function Skada:OnInitialize()
     end
 
     self:ReloadSettings()
-    C_Timer.After(2, function() self:ApplySettings() end)
+    C_Timer.After(
+        2,
+        function()
+            self:ApplySettings()
+        end
+    )
 end
 
 function Skada:MemoryCheck()
-	if Skada.db.profile.memorycheck then
-	    UpdateAddOnMemoryUsage()
-	    local mem = GetAddOnMemoryUsage("Skada")
-	    if mem > 30000 then
-	        Skada:Print(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."])
-	    end
-	end
+    if self.db.profile.memorycheck then
+        UpdateAddOnMemoryUsage()
+        local mem = GetAddOnMemoryUsage("Skada")
+        if mem > 30000 then
+            self:Print(
+                L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."]
+            )
+        end
+    end
 end
 
 function Skada:CleanGarbage(clean)
-	CombatLogClearEntries()
-	if clean and not InCombatLockdown() then
-		collectgarbage("collect")
-	end
+    CombatLogClearEntries()
+    if clean and not InCombatLockdown() then
+        collectgarbage("collect")
+    end
 end
 
 function Skada:OnEnable()
@@ -2616,46 +2624,47 @@ function Skada:OnEnable()
 
     -- used to fix broken combat log
     C_Timer.NewTicker(2, self.CleanGarbage)
-    C_Timer.After(3, self.MemoryCheck)
+    C_Timer.After(
+        3,
+        function()
+            self:MemoryCheck()
+        end
+    )
 end
 
 -- ======================================================= --
 
 do
     function IsRaidInCombat()
-        local incombat = false
-        local t, count = GetGroupTypeAndCount()
-
-        if count > 0 then
-            for i = 1, count, 1 do
-                if UnitExists(t .. i) and UnitAffectingCombat(t .. i) then
-                    incombat = true
-                    break
-                end
-            end
-        elseif UnitAffectingCombat("player") then
-            incombat = true
+        local prefix, min, max = "raid", 1, GetNumRaidMembers()
+        if max == 0 then
+            prefix, min, max = "party", 0, GetNumPartyMembers()
         end
 
-        return incombat
+        for i = min, max do
+            local unit = (i == 0) and "player" or prefix .. tostring(i)
+            if UnitExists(unit) and UnitAffectingCombat(unit) then
+                return true
+            end
+        end
+
+        return false
     end
 
     function IsRaidDead()
-        local iswipe = true
-        local t, count = GetGroupTypeAndCount()
-
-        if count > 0 then
-            for i = 1, count, 1 do
-                if UnitExists(t .. i) and not UnitIsDeadOrGhost(t .. i) then
-                    iswipe = true
-                    break
-                end
-            end
-        elseif not UnitIsDeadOrGhost("player") then
-            iswipe = false
+        local prefix, min, max = "raid", 1, GetNumRaidMembers()
+        if max == 0 then
+            prefix, min, max = "party", 0, GetNumPartyMembers()
         end
 
-        return iswipe
+        for i = min, max do
+            local unit = (i == 0) and "player" or prefix .. tostring(i)
+            if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
+                return false
+            end
+        end
+
+        return true
     end
 
     function Skada:PLAYER_REGEN_DISABLED()
@@ -2772,7 +2781,12 @@ do
             tick_timer:Cancel()
         end
         update_timer, tick_timer = nil, nil
-        C_Timer.After(3, self.MemoryCheck)
+        C_Timer.After(
+            3,
+            function()
+                self:MemoryCheck()
+            end
+        )
     end
 
     function Skada:StopSegment()
@@ -2806,8 +2820,7 @@ do
 
     function Skada:StartCombat()
         deathcounter = 0
-        local _, members = GetGroupTypeAndCount()
-        startingmembers = members
+        startingmembers = select(2, GetGroupTypeAndCount())
 
         if tentativehandle and not tentativehandle._cancelled then
             tentativehandle:Cancel()

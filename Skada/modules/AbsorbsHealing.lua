@@ -714,7 +714,7 @@ Skada:AddLoadableModule(
                     }
                 else
                     local unitclass = _select(2, _UnitClass(dstName))
-                    local unitrole = UnitGroupRolesAssigned(dstName) or "NONE"
+                    local unitrole = Skada:UnitGroupRolesAssigned(dstName)
                     player.absorbs.targets[dstName] = {class = unitclass, role = unitrole, amount = 0}
                 end
             end
