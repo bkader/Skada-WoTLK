@@ -638,7 +638,7 @@ L["Resurrects"] = "Воскрешения"
 L["Resurrect spell list"] = "Список заклинаний воскрешения"
 L["Resurrect spell target list"] = "Список целей заклинания воскрешения"
 L["Resurrect target list"] = "Список целей воскрешения"
-L["Resurrect target spell list"] = "Список целей заклинания воскрешения по цели"
+L["Resurrect target spell list"] = "Список заклинаний воскрешения по цели"
 -- L["received resurrects"] = true
 
 -- L["%s's resurrect spells"] = true
