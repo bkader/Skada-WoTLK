@@ -2586,9 +2586,7 @@ function Skada:MemoryCheck()
     UpdateAddOnMemoryUsage()
     local mem = GetAddOnMemoryUsage("Skada")
     if mem > 30000 then
-        self:Print(
-            L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."]
-        )
+        Skada:Print(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."])
     end
 end
 
