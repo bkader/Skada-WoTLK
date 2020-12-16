@@ -54,7 +54,7 @@ L["Enter the name for the new window."] = "Введите имя нового о
 L["Delete window"] = "Удалить окно"
 L["Choose the window to be deleted."] = "Выберите окно для удаления."
 
-L["Deletes the chosen window."] = "Удалить все выбранные окна."
+L["Deletes the chosen window."] = "Удалить выбранное окно."
 
 L["Rename window"] = "Переименовать окно"
 L["Enter the name for the window."] = "Введите новое имя для окна."
@@ -261,8 +261,8 @@ L["Smart"] = "Умный"
 L["Follow Cursor"] = "Курсор мыши"
 
 -- disabled modules
-L["Disabled Modules"] = "Отключенные модули"
-L["Tick the modules you want to disable."] = "Выберите модули, которые хотите выключить."
+L["Disabled Modules"] = "Отключение модулей"
+L["Tick the modules you want to disable."] = "Выберите модули, которые хотите отключить."
 L["This change requires a UI reload. Are you sure?"] = "Это изменение требует перезагрузки UI. Вы уверены?"
 L["Adds a set of standard themes to Skada. Custom themes can also be used."] = "Добавляет набор стандартных тем для Skada. Также могут быть использованы пользовательские темы."
 
@@ -288,7 +288,7 @@ L["Delete theme"] = "Удалить тему"
 L["Skada summary"] = "Skada: Сводка"
 L["Left-Click to toggle windows."] = "Щелкните левой кнопкой мыши, чтобы показать или скрыть окна."
 L["Shift+Left-Click to reset."] = "Shift+ЛКМ для сброса."
-L["Right-click to open menu"] = "ПКМ для меню"
+L["Right-click to open menu"] = "ПКМ для открытия меню"
 
 -- skada menu
 L["Skada Menu"] = "Меню Skada"
@@ -332,7 +332,7 @@ L["No mode or segment selected for report."] = "Для отчёта не выб�
 -- ================== --
 
 L["Bar display"] = "Отображение полос"
-L["Bar display is the normal bar window used by most damage meters. It can be extensively styled."] = "Отображение полос - это обычное окно с полосами, которое использует большинство измерителей урона. Имеет большие возможности для кастомизации."
+L["Bar display is the normal bar window used by most damage meters. It can be extensively styled."] = "Отображение полос - это обычное окно с полосами, которое использует большинство измерителей урона. Имеет множество возможностей для кастомизации."
 
 -- ============= --
 -- Threat Module --
@@ -340,7 +340,7 @@ L["Bar display is the normal bar window used by most damage meters. It can be ex
 
 L["Threat"] = "Угроза"
 L["Threat warning"] = "Предупреждение об угрозе"
-L["Do not warn while tanking"] = "Не извещать при танковании"
+L["Do not warn while tanking"] = "Не предупреждать при танковании"
 L["Flash screen"] = "Мигание экрана"
 L["This will cause the screen to flash as a threat warning."] = "Предупреждение об угрозе будет производиться посредством мигания экрана."
 L["Shake screen"] = "Тряска экрана"
@@ -370,22 +370,22 @@ L["%s's healing spells"] = "%s - исцеляющие заклинания"
 L["%s's healed players"] = "%s - исцелил игроков"
 L["HPS"] = "ИВС"
 
-L["Total healing"] = "Всего исцеление"
+L["Total healing"] = "Всего исцеления"
 
 L["Overhealing"] = "Избыточное лечение"
 L["Overheal"] = "Переисцеление"
 
-L["Absorbs"] = "Поглощения"
--- L["Absorbed player list"] = true
--- L["Absorb spell list"] = true
--- L["%s's absorbed players"] = true
--- L["%s's absorb spells"] = true
+L["Absorbs"] = "Поглощение"
+L["Absorbed player list"] = "Поглощено на игроках"
+L["Absorb spell list"] = "Список заклинаний поглощения"
+L["%s's absorbed players"] = "%s - Поглощено на игроках"
+L["%s's absorb spells"] = "%s - Заклинания поглощения"
 
--- L["Absorbs and healing"] = "Поглощения и лечение"
--- L["Absorbs and healing spell list"] = true
--- L["Absorbed and healed players"] = true
--- L["%s's absorb and healing spells"] = true
--- L["%s's absorbed and healed players"] = true
+L["Absorbs and healing"] = "Поглощение и исцеление"
+L["Absorbs and healing spell list"] = "Список заклинаний поглощения и исцеления"
+L["Absorbed and healed players"] = "Поглощение и исцеление игроков"
+L["%s's absorb and healing spells"] =  "%s - Заклинания поглощения и исцеления"
+L["%s's absorbed and healed players"] = "%s - Поглощение и исцеление игроков"
 
 -- ============ --
 -- Auras Module --
@@ -468,7 +468,7 @@ L["Damage done"] = "Нанесено урона"
 L["%s's damage"] = "%s - урона"
 L["%s's <%s> damage"] = "%s <%s> урона"
 
--- L["Useful damage"] = true
+L["Useful damage"] = "Полезный урон"
 
 L["Damage done by spell"] = "Урон от заклинания"
 -- L["%s's sources"] = true
@@ -480,7 +480,7 @@ L["RDPS"] = "РУВС"
 L["Damage: Raid DPS"] = "Урон: УВС рейда"
 
 -- damage taken module
-L["Damage taken"] = "Полученный урон"
+L["Damage taken"] = "Получено урона"
 L["Damage taken by %s"] = "%s - Полученный урон"
 L["<%s> damage on %s"] = "Урон %s по %s"
 
