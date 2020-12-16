@@ -1,7 +1,4 @@
 local Skada = Skada
-if not Skada then
-    return
-end
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 local AceGUI = LibStub("AceGUI-3.0")
@@ -147,6 +144,8 @@ function Skada:OpenMenu(window)
                     wipe(info)
                     info.isTitle = 1
                     info.text = L["Mode"]
+                    info.notCheckable = 1
+                    info.leftPadding = 16
                     L_UIDropDownMenu_AddButton(info, level)
 
                     for i, module in ipairs(modules) do
@@ -169,6 +168,8 @@ function Skada:OpenMenu(window)
                 wipe(info)
                 info.isTitle = 1
                 info.text = L["Segment"]
+                info.notCheckable = 1
+                info.leftPadding = 16
                 L_UIDropDownMenu_AddButton(info, level)
 
                 wipe(info)
@@ -318,6 +319,8 @@ function Skada:SegmentMenu(window)
 
         info.isTitle = 1
         info.text = L["Segment"]
+        info.notCheckable = 1
+        info.leftPadding = 16
         L_UIDropDownMenu_AddButton(info, level)
 
         wipe(info)
@@ -392,6 +395,11 @@ do
             end
 
             if level == 1 then
+                info.isTitle = 1
+                info.text = L["Mode"]
+                info.notCheckable = 1
+                L_UIDropDownMenu_AddButton(info, level)
+
                 for category, modes in pairs(categorized) do
                     if category ~= OTHER then
                         wipe(info)
@@ -399,6 +407,7 @@ do
                         info.value = category
                         info.hasArrow = 1
                         info.notCheckable = 1
+                        info.padding = 16
                         L_UIDropDownMenu_AddButton(info, level)
                     end
                 end
@@ -409,6 +418,7 @@ do
                     info.value = OTHER
                     info.hasArrow = 1
                     info.notCheckable = 1
+                    info.padding = 16
                     L_UIDropDownMenu_AddButton(info, level)
                 end
             elseif level == 2 and categorized[L_UIDROPDOWNMENU_MENU_VALUE] then
