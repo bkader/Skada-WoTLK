@@ -32,15 +32,15 @@ L["Count"] = "Количество"
 L["Percent"] = "Процент"
 
 -- spell schools
--- L["Arcane"] = true
--- L["Fire"] = true
--- L["Frost"] = true
--- L["Frostfire"] = true
--- L["Holy"] = true
--- L["Nature"] = true
--- L["Naturefire"] = true
--- L["Physical"] = true
--- L["Shadow"] = true
+-- L["Arcane"] = ""
+-- L["Fire"] = ""
+-- L["Frost"] = ""
+-- L["Frostfire"] = ""
+-- L["Holy"] = ""
+-- L["Nature"] = ""
+-- L["Naturefire"] = ""
+-- L["Physical"] = ""
+-- L["Shadow"] = ""
 
 L["General options"] = "Основные настройки"
 
@@ -276,13 +276,13 @@ L["Save theme"] = "Сохранить тему"
 L["Delete theme"] = "Удалить тему"
 
 -- scroll module
--- L["Scroll"] = true
--- L["Mouse"] = true
--- L["Scrolling speed"] = true
--- L["Scroll icon"] = true
--- L["Scroll mouse button"] = true
--- L["Keybinding"] = true
--- L["Key scrolling speed"] = true
+-- L["Scroll"] = ""
+-- L["Mouse"] = ""
+-- L["Scrolling speed"] = ""
+-- L["Scroll icon"] = ""
+-- L["Scroll mouse button"] = ""
+-- L["Keybinding"] = ""
+-- L["Key scrolling speed"] = ""
 
 -- minimap button
 L["Skada summary"] = "Skada: Сводка"
@@ -376,16 +376,16 @@ L["Overhealing"] = "Избыточное лечение"
 L["Overheal"] = "Переисцеление"
 
 L["Absorbs"] = "Поглощения"
--- L["Absorbed player list"] = true
--- L["Absorb spell list"] = true
--- L["%s's absorbed players"] = true
--- L["%s's absorb spells"] = true
+-- L["Absorbed player list"] = ""
+-- L["Absorb spell list"] = ""
+-- L["%s's absorbed players"] = ""
+-- L["%s's absorb spells"] = ""
 
 -- L["Absorbs and healing"] = "Поглощения и лечение"
--- L["Absorbs and healing spell list"] = true
--- L["Absorbed and healed players"] = true
--- L["%s's absorb and healing spells"] = true
--- L["%s's absorbed and healed players"] = true
+-- L["Absorbs and healing spell list"] = ""
+-- L["Absorbed and healed players"] = ""
+-- L["%s's absorb and healing spells"] = ""
+-- L["%s's absorbed and healed players"] = ""
 
 -- ============ --
 -- Auras Module --
@@ -405,8 +405,8 @@ L["%s's debuffs"] = "%s - Дебаффы"
 L["%s's debuff targets"] = "%s - Цели дебаффа"
 L["%s's <%s> targets"] = "%s <%s> цели"
 
--- L["Sunder Counter"] = true
--- L["Sunder target list"] = true
+-- L["Sunder Counter"] = ""
+-- L["Sunder target list"] = ""
 
 -- ================= --
 -- CC Tracker Module --
@@ -415,44 +415,44 @@ L["%s's <%s> targets"] = "%s <%s> цели"
 L["CC Tracker"] = "Отслеживание Контроля"
 
 -- CC Done:
--- L["CC Done"] = true
--- L["CC Done spells"] = true
--- L["CC Done spell targets"] = true
--- L["CC Done targets"] = true
--- L["CC Done target spells"] = true
--- L["%s's CC Done <%s> targets"] = true
--- L["%s's CC Done <%s> spells"] = true
--- L["%s's CC Done spells"] = true
--- L["%s's CC Done targets"] = true
+-- L["CC Done"] = ""
+-- L["CC Done spells"] = ""
+-- L["CC Done spell targets"] = ""
+-- L["CC Done targets"] = ""
+-- L["CC Done target spells"] = ""
+-- L["%s's CC Done <%s> targets"] = ""
+-- L["%s's CC Done <%s> spells"] = ""
+-- L["%s's CC Done spells"] = ""
+-- L["%s's CC Done targets"] = ""
 
 -- CC Taken
--- L["CC Taken"] = true
--- L["CC Taken spells"] = true
--- L["CC Taken spell sources"] = true
--- L["CC Taken sources"] = true
--- L["CC Taken source spells"] = true
--- L["%s's CC Taken <%s> sources"] = true
--- L["%s's CC Taken <%s> spells"] = true
--- L["%s's CC Taken spells"] = true
--- L["%s's CC Taken sources"] = true
+-- L["CC Taken"] = ""
+-- L["CC Taken spells"] = ""
+-- L["CC Taken spell sources"] = ""
+-- L["CC Taken sources"] = ""
+-- L["CC Taken source spells"] = ""
+-- L["%s's CC Taken <%s> sources"] = ""
+-- L["%s's CC Taken <%s> spells"] = ""
+-- L["%s's CC Taken spells"] = ""
+-- L["%s's CC Taken sources"] = ""
 
 L["CC Breaks"] = "Прерываний контроля"
 L["CC Breakers"] = "Прерыватели контроля"
--- L["CC Break spells"] = true
--- L["CC Break spell targets"] = true
--- L["CC Break targets"] = true
--- L["CC Break target spells"] = true
--- L["%s's CC Break <%s> spells"] = true
--- L["%s's CC Break <%s> targets"] = true
--- L["%s's CC Break spells"] = true
--- L["%s's CC Break targets"] = true
+-- L["CC Break spells"] = ""
+-- L["CC Break spell targets"] = ""
+-- L["CC Break targets"] = ""
+-- L["CC Break target spells"] = ""
+-- L["%s's CC Break <%s> spells"] = ""
+-- L["%s's CC Break <%s> targets"] = ""
+-- L["%s's CC Break spells"] = ""
+-- L["%s's CC Break targets"] = ""
 
 -- options
 L["CC"] = "Контроль"
-L["Announce CC breaking to party"] = true
-L["Ignore Main Tanks"] = true
-L["%s on %s removed by %s"] = true
-L["%s on %s removed by %s's %s"] = true
+L["Announce CC breaking to party"] = ""
+L["Ignore Main Tanks"] = ""
+L["%s on %s removed by %s"] = ""
+L["%s on %s removed by %s's %s"] = ""
 
 -- ============= --
 -- Damage Module --
@@ -468,10 +468,10 @@ L["Damage done"] = "Нанесено урона"
 L["%s's damage"] = "%s - урона"
 L["%s's <%s> damage"] = "%s <%s> урона"
 
--- L["Useful damage"] = true
+-- L["Useful damage"] = ""
 
 L["Damage done by spell"] = "Урон от заклинания"
--- L["%s's sources"] = true
+-- L["%s's sources"] = ""
 
 L["DPS"] = "УВС"
 L["Damage: Personal DPS"] = "Урон: собственный УВС"
@@ -515,38 +515,38 @@ L["Glancing"] = "Вскользь"
 L["Crushing"] = "Сокр. удар"
 
 -- useful damage targets
--- L["Useful targets"] = true
--- L["Oozes"] = true
--- L["Princes overkilling"] = true
--- L["Adds"] = true
--- L["Halion and Inferno"] = true
--- L["Valkyrs overkilling"] = true
+-- L["Useful targets"] = ""
+-- L["Oozes"] = ""
+-- L["Princes overkilling"] = ""
+-- L["Adds"] = ""
+-- L["Halion and Inferno"] = ""
+-- L["Valkyrs overkilling"] = ""
 
 -- missing bosses entries
--- L["Cult Adherent"] = true
--- L["Cult Fanatic"] = true
--- L["Darnavan"] = true
--- L["Deformed Fanatic"] = true
--- L["Empowered Adherent"] = true
--- L["Gas Cloud"] = true
--- L["Living Inferno"] = true
--- L["Reanimated Adherent"] = true
--- L["Reanimated Fanatic"] = true
--- L["Volatile Ooze"] = true
+-- L["Cult Adherent"] = ""
+-- L["Cult Fanatic"] = ""
+-- L["Darnavan"] = ""
+-- L["Deformed Fanatic"] = ""
+-- L["Empowered Adherent"] = ""
+-- L["Gas Cloud"] = ""
+-- L["Living Inferno"] = ""
+-- L["Reanimated Adherent"] = ""
+-- L["Reanimated Fanatic"] = ""
+-- L["Volatile Ooze"] = ""
 
--- L["Kor'kron Sergeant"] = true
--- L["Kor'kron Axethrower"] = true
--- L["Kor'kron Rocketeer"] = true
--- L["Kor'kron Battle-Mage"] = true
--- L["Skybreaker Sergeant"] = true
--- L["Skybreaker Rifleman"] = true
--- L["Skybreaker Mortar Soldier"] = true
--- L["Skybreaker Sorcerer"] = true
--- L["Dream Cloud"] = true
--- L["Risen Archmage"] = true
--- L["Blazing Skeleton"] = true
--- L["Blistering Zombie"] = true
--- L["Gluttonous Abomination"] = true
+-- L["Kor'kron Sergeant"] = ""
+-- L["Kor'kron Axethrower"] = ""
+-- L["Kor'kron Rocketeer"] = ""
+-- L["Kor'kron Battle-Mage"] = ""
+-- L["Skybreaker Sergeant"] = ""
+-- L["Skybreaker Rifleman"] = ""
+-- L["Skybreaker Mortar Soldier"] = ""
+-- L["Skybreaker Sorcerer"] = ""
+-- L["Dream Cloud"] = ""
+-- L["Risen Archmage"] = ""
+-- L["Blazing Skeleton"] = ""
+-- L["Blistering Zombie"] = ""
+-- L["Gluttonous Abomination"] = ""
 
 -- ============= --
 -- Deaths Module --
@@ -596,11 +596,11 @@ L["Event's failed players"] = "Неудачи игроки события"
 -- improvement module lines --
 -- ======================== --
 
--- L["Improvement"] = true
--- L["Improvement modes"] = true
--- L["Improvement comparison"] = true
--- L["Do you want to reset your improvement data?"] = true
--- L["%s's overall data"] = true
+-- L["Improvement"] = ""
+-- L["Improvement modes"] = ""
+-- L["Improvement comparison"] = ""
+-- L["Do you want to reset your improvement data?"] = ""
+-- L["%s's overall data"] = ""
 
 -- ======================= --
 -- interrupts module lines --
@@ -622,13 +622,13 @@ L["Power"] = "Энергия"
 L["Power gained"] = "Получено энергии"
 L["%s's gained %s"] = "Получено %s: %s"
 L["Power gained: Mana"] = "Получено энергии: Мана"
--- L["Mana gained spell list"] = true
+-- L["Mana gained spell list"] = ""
 L["Power gained: Rage"] = "Получено энергии: Ярость"
--- L["Rage gained spell list"] = true
+-- L["Rage gained spell list"] = ""
 L["Power gained: Energy"] = "Получено энергии: Энергия"
--- L["Energy gained spell list"] = true
+-- L["Energy gained spell list"] = ""
 L["Power gained: Runic Power"] = "Получено энергии: Сила рун"
--- L["Runic Power gained spell list"] = true
+-- L["Runic Power gained spell list"] = ""
 
 -- ====================== --
 -- resurrect module lines --
@@ -639,9 +639,38 @@ L["Resurrect spell list"] = "Список заклинаний воскреше�
 L["Resurrect spell target list"] = "Список целей заклинания воскрешения"
 L["Resurrect target list"] = "Список целей воскрешения"
 L["Resurrect target spell list"] = "Список заклинаний воскрешения по цели"
--- L["received resurrects"] = true
+-- L["received resurrects"] = ""
 
--- L["%s's resurrect spells"] = true
--- L["%s's resurrect targets"] = true
--- L["%s's received resurrects"] = true
--- L["%s's resurrect <%s> targets"] = true
+-- L["%s's resurrect spells"] = ""
+-- L["%s's resurrect targets"] = ""
+-- L["%s's received resurrects"] = ""
+-- L["%s's resurrect <%s> targets"] = ""
+
+-- ==================== --
+-- spamage module lines --
+-- ==================== --
+
+L["Spamage"] = "Спам"
+L["Suppresses chat messages from damage meters and provides single chat-link damage statistics in a popup."] = "Подавляет сообщения чата от счетчиков урона и предоставляет статистику в одном всплывающем окне."
+L["Capture Delay"] = "Задержка захвата"
+L["How many seconds the addon waits after \"Skada: *\" lines before it assumes spam burst is over. 1 seems to work in most cases"] = "Кол-во секунд, которое аддон будет ожидать после начала спама от Skada. 1сек достаточно в большинстве случаев"
+L["Filter Custom Channels"] = "Произвольный канал"
+L["Selects the action to perform when encountering damage meter data in custom channels"] = "Отслеживать информацию в произвольном канале"
+L["Filter Guild"] = "Канал гильдии"
+L["Selects the action to perform when encountering damage meter data in guild chat"] = "Отслеживать информацию в канале гильдии"
+L["Filter Officer"] = "Офицерский канал"
+L["Selects the action to perform when encountering damage meter data in officer chat"] = "Отслеживать информацию в канале офицеров"
+L["Filter Party"] = "Канал группы"
+L["Selects the action to perform when encountering damage meter data in party chat"] = "Отслеживать информацию в канале группы"
+L["Filter Raid"] = "Канал рейда"
+L["Selects the action to perform when encountering damage meter data in raid chat"] = "Отслеживать информацию в канале рейда"
+L["Filter Say"] = "Канал \"сказать\""
+L["Selects the action to perform when encountering damage meter data in say chat"] = "Отслеживать информацию в канале \"сказать\""
+L["Filter Whisper"] = "Канал \"шепот\""
+L["Selects the action to perform when encountering damage meter whisper"] = "Отслеживать информацию в канале \"шепот\""
+L["Filter Yell"] = "Канал \"крик\""
+L["Selects the action to perform when encountering damage meter data in yell chat"] = "Отслеживать информацию в канале \"крик\""
+L["Do Nothing"] = "Не активно"
+L["Compress"] = "Слежение"
+L["Suppress"] = "Блокировать"
+L["Reported by: %s"] = "Рапорт от: %s"

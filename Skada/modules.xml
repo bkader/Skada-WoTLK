@@ -16,4 +16,5 @@
 <Script file="modules\Improvement.lua" />
 <Script file="modules\Themes.lua" />
 <Script file="modules\Scroll.lua" />
+<Script file="modules\Spamage.lua" />
 </Ui>

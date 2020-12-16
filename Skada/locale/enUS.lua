@@ -648,3 +648,32 @@ L["%s's resurrect spells"] = true
 L["%s's resurrect targets"] = true
 L["%s's received resurrects"] = true
 L["%s's resurrect <%s> targets"] = true
+
+-- ==================== --
+-- spamage module lines --
+-- ==================== --
+
+L["Spamage"] = true
+L["Suppresses chat messages from damage meters and provides single chat-link damage statistics in a popup."] = true
+L["Capture Delay"] = true
+L["How many seconds the addon waits after \"Skada: *\" lines before it assumes spam burst is over. 1 seems to work in most cases"] = true
+L["Filter Custom Channels"] = true
+L["Selects the action to perform when encountering damage meter data in custom channels"] = true
+L["Filter Guild"] = true
+L["Selects the action to perform when encountering damage meter data in guild chat"] = true
+L["Filter Officer"] = true
+L["Selects the action to perform when encountering damage meter data in officer chat"] = true
+L["Filter Party"] = true
+L["Selects the action to perform when encountering damage meter data in party chat"] = true
+L["Filter Raid"] = true
+L["Selects the action to perform when encountering damage meter data in raid chat"] = true
+L["Filter Say"] = true
+L["Selects the action to perform when encountering damage meter data in say chat"] = true
+L["Filter Whisper"] = true
+L["Selects the action to perform when encountering damage meter whisper"] = true
+L["Filter Yell"] = true
+L["Selects the action to perform when encountering damage meter data in yell chat"] = true
+L["Do Nothing"] = true
+L["Compress"] = true
+L["Suppress"] = true
+L["Reported by: %s"] = true
