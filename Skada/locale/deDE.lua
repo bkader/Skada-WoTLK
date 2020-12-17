@@ -676,7 +676,6 @@ L["Resurrect spell list"] = "Zauberliste wiederbeleben"
 L["Resurrect spell target list"] = "Liste der wiederbelebten Zauberziele"
 L["Resurrect target list"] = "Zielliste wiederbeleben"
 L["Resurrect target spell list"] = "Zielzauberliste wiederbeleben"
-L["received resurrects"] = "Auferstandene erhalten"
 
 L["%s's resurrect spells"] = "%s Wiederbelebungszauber"
 L["%s's resurrect targets"] = "%s wiederbelebte Ziele"

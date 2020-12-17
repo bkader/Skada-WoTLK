@@ -640,7 +640,6 @@ if not L then return end
 -- L["Resurrect spell target list"] = ""
 -- L["Resurrect target list"] = ""
 -- L["Resurrect target spell list"] = ""
--- L["received resurrects"] = ""
 
 -- L["%s's resurrect spells"] = ""
 -- L["%s's resurrect targets"] = ""

@@ -642,7 +642,6 @@ L["Resurrect spell list"] = true
 L["Resurrect spell target list"] = true
 L["Resurrect target list"] = true
 L["Resurrect target spell list"] = true
-L["received resurrects"] = true
 
 L["%s's resurrect spells"] = true
 L["%s's resurrect targets"] = true

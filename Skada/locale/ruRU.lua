@@ -276,13 +276,13 @@ L["Save theme"] = "Сохранить тему"
 L["Delete theme"] = "Удалить тему"
 
 -- scroll module
--- L["Scroll"] = ""
--- L["Mouse"] = ""
--- L["Scrolling speed"] = ""
--- L["Scroll icon"] = ""
--- L["Scroll mouse button"] = ""
--- L["Keybinding"] = ""
--- L["Key scrolling speed"] = ""
+L["Scroll"] = "Прокрутка"
+L["Mouse"] = "Мышь"
+L["Scrolling speed"] = "Скорость прокрутки"
+L["Scroll icon"] = "Значок прокрутки"
+L["Scroll mouse button"] = "Кнопка прокрутки мыши"
+L["Keybinding"] = "Привязка клавиш"
+L["Key scrolling speed"] = "Привязки клавиш"
 
 -- minimap button
 L["Skada summary"] = "Skada: Сводка"
@@ -405,8 +405,8 @@ L["%s's debuffs"] = "%s - Дебаффы"
 L["%s's debuff targets"] = "%s - Цели дебаффа"
 L["%s's <%s> targets"] = "%s <%s> цели"
 
--- L["Sunder Counter"] = ""
--- L["Sunder target list"] = ""
+L["Sunder Counter"] = "Раскол брони"
+L["Sunder target list"] = "Раскол брони список целей"
 
 -- ================= --
 -- CC Tracker Module --
@@ -596,11 +596,11 @@ L["Event's failed players"] = "Неудачи игроки события"
 -- improvement module lines --
 -- ======================== --
 
--- L["Improvement"] = ""
--- L["Improvement modes"] = ""
--- L["Improvement comparison"] = ""
--- L["Do you want to reset your improvement data?"] = ""
--- L["%s's overall data"] = ""
+L["Improvement"] = "Улучшение"
+L["Improvement modes"] = "Режимы улучшение"
+L["Improvement comparison"] = "Сравнение улучшений"
+L["Do you want to reset your improvement data?"] = "Вы хотите сбросить данные об улучшении?"
+L["%s's overall data"] = "%s - Данные об улучшении"
 
 -- ======================= --
 -- interrupts module lines --
@@ -639,7 +639,6 @@ L["Resurrect spell list"] = "Список заклинаний воскреше�
 L["Resurrect spell target list"] = "Список целей заклинания воскрешения"
 L["Resurrect target list"] = "Список целей воскрешения"
 L["Resurrect target spell list"] = "Список заклинаний воскрешения по цели"
--- L["received resurrects"] = ""
 
 -- L["%s's resurrect spells"] = ""
 -- L["%s's resurrect targets"] = ""
