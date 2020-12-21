@@ -301,9 +301,11 @@ Skada:AddLoadableModule(
         end
 
         function mod:ParseChatEvent(event, msg, sender, ...)
-            local hide = false
+			Skada.db.profile.spamage = Skada.db.profile.spamage or {}
+
+			local hide = false
             for _, e in _ipairs(events) do
-                if event == e and Skada.db.profile.spamage[event] > 1 then
+                if event == e and Skada.db.profile.spamage[event] and Skada.db.profile.spamage[event] > 1 then
                     local isrecount, isfirstline, message = mod:FilterLine(event, sender, msg)
                     if isrecount then
                         if isfirstline and Skada.db.profile.spamage[event] == 2 then
