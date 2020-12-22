@@ -313,10 +313,7 @@ Skada:AddLoadableModule(
             if set.time > 0 then
                 return set.damagedone / math_max(1, set.time)
             else
-                local endtime = set.endtime
-                if not endtime then
-                    endtime = time()
-                end
+                local endtime = set.endtime or time()
                 return set.damagedone / math_max(1, endtime - set.starttime)
             end
         end
@@ -1017,6 +1014,16 @@ Skada:AddLoadableModule(
             return amount / math_max(1, uptime)
         end
 
+        local function getRaidDPS(set)
+            local amount = set.damagedone - (set.overkill or 0)
+            if set.time > 0 then
+                return amount / math_max(1, set.time)
+            else
+                local endtime = set.endtime or time()
+                return amount / math_max(1, endtime - set.starttime)
+            end
+        end
+
         function mod:Update(win, set)
             local max = 0
 
@@ -1068,6 +1075,15 @@ Skada:AddLoadableModule(
 
         function mod:OnDisable()
             Skada:RemoveMode(self)
+        end
+
+        function mod:GetSetSummary(set)
+            return Skada:FormatValueText(
+                Skada:FormatNumber(set.damagedone - (set.overkill or 6)),
+                self.metadata.columns.Damage,
+                Skada:FormatNumber(getRaidDPS(set)),
+                self.metadata.columns.DPS
+            )
         end
     end
 )
@@ -1266,10 +1282,7 @@ Skada:AddLoadableModule(
             if set.time > 0 then
                 return set.damagetaken / math_max(1, set.time)
             else
-                local endtime = set.endtime
-                if not endtime then
-                    endtime = time()
-                end
+                local endtime = set.endtime or time()
                 return set.damagetaken / math_max(1, endtime - set.starttime)
             end
         end
