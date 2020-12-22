@@ -2518,12 +2518,7 @@ Skada:AddLoadableModule(
         end
 
         function mod:GetSetSummary(set)
-            return Skada:FormatValueText(
-                Skada:FormatNumber(set.friendfire),
-                self.metadata.columns.Damage,
-                _format("%02.1f%%", 100 * set.friendfire / math_max(1, set.friendfire)),
-                self.metadata.columns.Percent
-            )
+            return Skada:FormatNumber(set.friendfire)
         end
 
         function mod:SetComplete(set)
