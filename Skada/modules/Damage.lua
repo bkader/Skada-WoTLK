@@ -1814,11 +1814,11 @@ Skada:AddLoadableModule(
         function playermod:Update(win, set)
             local max = 0
 
-            if self.mobname and cached.list[self.mobname] then
-                local total = cached.list[self.mobname].amount
+            if self.mobname and cached[self.mobname] then
+                local total = cached[self.mobname].amount
                 local nr = 1
 
-                for playername, player in _pairs(cached.list[self.mobname].players) do
+                for playername, player in _pairs(cached[self.mobname].players) do
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
@@ -1850,19 +1850,18 @@ Skada:AddLoadableModule(
 
         function mod:Update(win, set)
             if set.damagedone > 0 then
-                cached.amount = set.damagedone
-                cached.list = {}
+                cached = {}
 
                 for _, player in _ipairs(set.players) do
                     if player.damagedone.amount > 0 then
                         for targetname, amount in _pairs(player.damagedone.targets) do
                             -- add damage amount to target, but before, we create it if it doesn't exist
-                            cached.list[targetname] = cached.list[targetname] or {amount = 0, players = {}}
-                            cached.list[targetname].amount = cached.list[targetname].amount + amount
+                            cached[targetname] = cached[targetname] or {amount = 0, players = {}}
+                            cached[targetname].amount = cached[targetname].amount + amount
 
                             -- add the player to the list and add his/her damage
-                            if not cached.list[targetname].players[player.name] then
-                                cached.list[targetname].players[player.name] = {
+                            if not cached[targetname].players[player.name] then
+                                cached[targetname].players[player.name] = {
                                     id = player.id,
                                     class = player.class,
                                     role = player.role,
@@ -1870,8 +1869,8 @@ Skada:AddLoadableModule(
                                     amount = 0
                                 }
                             end
-                            cached.list[targetname].players[player.name].amount =
-                                cached.list[targetname].players[player.name].amount + amount
+                            cached[targetname].players[player.name].amount =
+                                cached[targetname].players[player.name].amount + amount
                         end
                     end
                 end
@@ -1879,10 +1878,10 @@ Skada:AddLoadableModule(
 
             local max = 0
 
-            if cached.list then
+            if cached then
                 local nr = 1
 
-                for targetname, target in _pairs(cached.list) do
+                for targetname, target in _pairs(cached) do
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
@@ -1893,7 +1892,7 @@ Skada:AddLoadableModule(
                         Skada:FormatValueText(
                         Skada:FormatNumber(target.amount),
                         mod.metadata.columns.Damage,
-                        _format("%02.1f%%", 100 * target.amount / cached.amount),
+                        _format("%02.1f%%", 100 * target.amount / set.damagedone),
                         mod.metadata.columns.Percent
                     )
 
@@ -1921,6 +1920,10 @@ Skada:AddLoadableModule(
 
         function mod:AddSetAttributes(set)
             cached = {}
+        end
+
+        function mod:GetSetSummary(set)
+            return Skada:FormatNumber(set.damagedone or 0)
         end
     end
 )
@@ -2238,6 +2241,10 @@ Skada:AddLoadableModule(
 
         function mod:AddSetAttributes(set)
             cached = {}
+        end
+
+        function mod:GetSetSummary(set)
+            return Skada:FormatNumber(set.damagetaken or 0)
         end
     end
 )
