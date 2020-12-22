@@ -372,8 +372,14 @@ L["HPS"] = "ИВС"
 
 L["Total healing"] = "Всего исцеления"
 
-L["Overhealing"] = "Избыточное лечение"
+L["Overhealing"] = "Избыточное исцеление"
 L["Overheal"] = "Переисцеление"
+L["Overhealed player list"] = "Сверхлеченные игроки"
+L["Overhealing spell list"] = "Заклинания избыточного исцеления"
+L["%s's overhealing spells"] = "%s - Заклинания избыточного исцеления"
+L["%s's overhealed players"] = "%s - Сверхлеченные игроки"
+
+L["Healing and Overhealing"] = "Исцеление и Избыточное исцеление"
 
 L["Absorbs"] = "Поглощение"
 L["Absorbed player list"] = "Поглощено на игроках"

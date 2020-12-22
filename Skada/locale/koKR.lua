@@ -375,6 +375,12 @@ if not L then return end
 
 -- L["Overhealing"] = ""
 -- L["Overheal"] = ""
+-- L["Overhealed player list"] = ""
+-- L["Overhealing spell list"] = ""
+-- L["%s's overhealing spells"] = ""
+-- L["%s's overhealed players"] = ""
+
+-- L["Healing and Overhealing"] = ""
 
 -- L["Absorbs"] = ""
 -- L["Absorbed player list"] = ""
