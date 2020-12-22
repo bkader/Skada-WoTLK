@@ -659,7 +659,10 @@ do
     function Skada:OpenReportWindow(window)
         if self.reportwindow == nil then
             createReportWindow(window)
+        elseif self.reportwindow:IsShown() then
+			self.reportwindow:Hide()
+        else
+			self.reportwindow:Show()
         end
-        self.reportwindow:Show()
     end
 end
