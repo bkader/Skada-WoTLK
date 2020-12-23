@@ -407,6 +407,10 @@ L["Buffs"] = true
 L["Buff spell list"] = true
 L["%s's buffs"] = true
 
+L["Potions"] = true
+L["Potions list"] = true
+L["%s's used potions"] = true
+
 L["Debuffs"] = true
 L["Debuff spell list"] = true
 L["Debuff target list"] = true

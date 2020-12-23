@@ -404,6 +404,10 @@ L["Buffs"] = "Баффы"
 L["Buff spell list"] = "Список баффов"
 L["%s's buffs"] = "%s - Баффы"
 
+L["Potions"] = "Зелья"
+L["Potions list"] = "Список зелий"
+L["%s's used potions"] = "%s - Использованные зелья"
+
 L["Debuffs"] = "Дебаффы"
 L["Debuff spell list"] = "Список дебаффов"
 L["Debuff target list"] = "Цели дебаффа"

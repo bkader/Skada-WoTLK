@@ -1,13 +1,10 @@
 local Skada = Skada
-if not Skada then
-    return
-end
 
 --
 -- cache frequently used globals
 --
 local _pairs, _ipairs = pairs, ipairs
-local _format, _select = string.format, select
+local _format, _select, _tostring = string.format, select, tostring
 local _GetSpellInfo = GetSpellInfo
 local math_min, math_max, math_floor = math.min, math.max, math.floor
 
@@ -357,6 +354,161 @@ Skada:AddLoadableModule(
 -- ================================================================== --
 
 Skada:AddLoadableModule(
+    "Potions",
+    function(Skada, L)
+        if Skada:IsDisabled("Buffs", "Potions") then
+            return
+        end
+
+        local mod = Skada:NewModule(L["Potions"])
+        local playermod = mod:NewModule(L["Potions list"])
+
+        local potionIDs = {
+            [28494] = 22828, -- Insane Strength Potion
+            [38929] = 31677, -- Fel mana potion
+            [53909] = 40212, -- Potion of Wild Magic
+            [53908] = 40211, -- Potion of Speed
+            [53750] = 40077, -- Crazy Alchemist's Potion
+            [53761] = 40087, -- Powerful Rejuvenation Potion
+            [43185] = 33447, -- Healing Potion
+            [43186] = 33448, -- Restore Mana
+            [53753] = 40081, -- Nightmare Slumber
+            [53910] = 40213, -- Arcane Protection
+            [53911] = 40214, -- Fire Protection
+            [53913] = 40215, -- Frost Protection
+            [53914] = 40216, -- Nature Protection
+            [53915] = 40217, -- Shadow Protection
+            [53762] = 40093, -- Indestructible
+            [67490] = 42545 -- Runic Mana Injector
+        }
+
+        local _GetItemInfo = GetItemInfo
+
+        --
+        -- I have noticed that GetItemInfo sometimes doesn't return any
+        -- info about certain potions (mainly Wild Magic), so instead of
+        -- having empty data, we use the buff name.
+        --
+        local function GetPotionInfo(spellid)
+            local potionid = potionIDs[spellid] or spellid
+            local name, _, _, _, _, _, _, _, _, icon = _GetItemInfo(potionid)
+            if not name then
+                name, _, icon = _GetSpellInfo(spellid)
+            end
+            return name, icon
+        end
+
+        local cached = {}
+
+        function playermod:Enter(win, id, label)
+            self.playerid = id
+            self.playername = label
+            self.title = _format(L["%s's used potions"], label)
+        end
+
+        function playermod:Update(win, set)
+            if cached.count > 0 then
+                local nr, max = 1, 0
+
+                for name, player in _pairs(cached.players) do
+                    if name == self.playername and player.id == self.playerid then
+                        for spellid, count in _pairs(player.spells) do
+                            local d = win.dataset[nr] or {}
+                            win.dataset[nr] = d
+
+                            local potionname, poitionicon = GetPotionInfo(spellid)
+
+                            d.id = spellid
+                            d.spellid = spellid
+                            d.label = potionname
+                            d.icon = poitionicon
+
+                            d.value = count
+                            d.valuetext = _tostring(count)
+
+                            if count > max then
+                                max = count
+                            end
+
+                            nr = nr + 1
+                        end
+                    end
+                end
+
+                win.metadata.maxvalue = max
+            end
+        end
+
+        function mod:Update(win, set)
+            cached = {count = 0, players = {}}
+            for _, player in _ipairs(set.players) do
+                if player.auras then
+                    for spellid, spell in _pairs(player.auras) do
+                        if potionIDs[spellid] then
+                            cached.count = cached.count + spell.count
+
+                            -- add the player to the list.
+                            if not cached.players[player.name] then
+                                cached.players[player.name] = {
+                                    id = player.id,
+                                    class = player.class,
+                                    role = player.role,
+                                    spec = player.spec
+                                }
+                            end
+
+                            -- increment both players global potions and individual potion usage.
+                            cached.players[player.name].count = (cached.players[player.name].count or 0) + spell.count
+                            cached.players[player.name].spells = cached.players[player.name].spells or {}
+                            cached.players[player.name].spells[spellid] =
+                                (cached.players[player.name].spells[spellid] or 0) + spell.count
+                        end
+                    end
+                end
+            end
+
+            local max = 0
+            if cached.count > 0 then
+                local nr = 1
+
+                for playername, player in _pairs(cached.players) do
+                    local d = win.dataset[nr] or {}
+                    win.dataset[nr] = d
+
+                    d.id = player.id
+                    d.label = playername
+                    d.class = player.class
+                    d.role = player.role
+                    d.spec = player.spec
+
+                    d.value = player.count
+                    d.valuetext = _tostring(player.count)
+
+                    if player.count > max then
+                        max = player.count
+                    end
+
+                    nr = nr + 1
+                end
+            end
+
+            win.metadata.maxvalue = max
+        end
+
+        function mod:OnEnable()
+            self.metadata = {click1 = playermod}
+            Skada:AddMode(self, L["Buffs and Debuffs"])
+        end
+
+        function mod:OnDisable()
+            Skada:RemoveMode(self)
+        end
+    end
+)
+
+-- ================================================================== --
+
+Skada:AddLoadableModule(
     "Debuffs",
     nil,
     function(Skada, L)
@@ -371,16 +523,15 @@ Skada:AddLoadableModule(
         --
         -- used to record debuffs and rely on AuraApplied and AuraRemoved functions
         --
-        local function DebuffApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+        local function DebuffApplied(timestamp, eventtype, srcGUID, srcName, _, dstGUID, dstName, dstFlags, ...)
             if srcName == nil and #srcGUID == 0 and dstName and #dstGUID > 0 then
                 srcGUID = dstGUID
                 srcName = dstName
-                srcFlags = dstFlags
 
                 if eventtype == "SPELL_AURA_APPLIED" then
-                    AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+                    AuraApplied(timestamp, eventtype, srcGUID, srcName, dstFlags, dstGUID, dstName, dstFlags, ...)
                 else
-                    AuraRemoved(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+                    AuraRemoved(timestamp, eventtype, srcGUID, srcName, dstFlags, dstGUID, dstName, dstFlags, ...)
                 end
             end
         end
@@ -639,7 +790,7 @@ Skada:AddLoadableModule(
                     d.spec = player.spec
 
                     d.value = player.count
-                    d.valuetext = tostring(player.count)
+                    d.valuetext = _tostring(player.count)
 
                     if player.count > max then
                         max = player.count

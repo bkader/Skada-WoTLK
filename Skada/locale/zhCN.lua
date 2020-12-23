@@ -15,7 +15,7 @@ if not L then return end
 -- L["Disable"] = ""
 -- L["DISABLED"] = ""
 
--- -- common lines
+-- common lines
 -- L["Active Time"] = ""
 -- L["Segment Time"] = ""
 -- L["Click for"] = ""
@@ -31,7 +31,7 @@ if not L then return end
 -- L["Count"] = ""
 -- L["Percent"] = ""
 
--- -- spell schools
+-- spell schools
 -- L["Arcane"] = ""
 -- L["Fire"] = ""
 -- L["Frost"] = ""
@@ -44,7 +44,7 @@ if not L then return end
 
 -- L["General options"] = ""
 
--- -- windows section:
+-- windows section:
 -- L["Window"] = ""
 -- L["Windows"] = ""
 
@@ -65,7 +65,7 @@ if not L then return end
 -- L["Display system"] = ""
 -- L["Choose the system to be used for displaying data in this window."] = ""
 
--- -- bars
+-- bars
 -- L["Bars"] = ""
 -- L["Bar font"] = ""
 -- L["The font used by all bars."] = ""
@@ -119,7 +119,7 @@ if not L then return end
 -- L["Smooth bars"] = ""
 -- L["Animate bar changes smoothly rather than immediately."] = ""
 
--- -- title bar
+-- title bar
 -- L["Title bar"] = ""
 -- L["Enables the title bar."] = ""
 -- L["Include set"] = ""
@@ -139,7 +139,7 @@ if not L then return end
 -- L["The color used for the border."] = ""
 -- L["Buttons"] = ""
 
--- -- general window
+-- general window
 -- L["Background"] = ""
 -- L["Background texture"] = ""
 -- L["The texture used as the background."] = ""
@@ -160,7 +160,7 @@ if not L then return end
 -- L["Width"] = ""
 -- L["Height"] = ""
 
--- -- switching
+-- switching
 -- L["Mode switching"] = ""
 -- L["Combat mode"] = ""
 -- L["Automatically switch to set 'Current' and this mode when entering combat."] = ""
@@ -181,7 +181,7 @@ if not L then return end
 -- L["Right-click to set active set."] = ""
 -- L["Shift+Left-Click to open menu."] = ""
 
--- -- data resets
+-- data resets
 -- L["Data resets"] = ""
 -- L["Reset on entering instance"] = ""
 -- L["Controls if data is reset when you enter an instance."] = ""
@@ -193,7 +193,7 @@ if not L then return end
 -- L["Do you want to reset Skada?"] = ""
 -- L["All data has been reset."] = ""
 
--- -- general options
+-- general options
 -- L["Show minimap button"] = ""
 -- L["Toggles showing the minimap button."] = ""
 -- L["Translit"] = ""
@@ -217,9 +217,7 @@ if not L then return end
 -- L["Show rank numbers"] = ""
 -- L["Shows numbers for relative ranks for modes where it is applicable."] = ""
 -- L["Aggressive combat detection"] = ""
--- L[
---         "Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons. Meaningless on boss encounters."
---     ] = ""
+-- L["Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons. Meaningless on boss encounters."] = ""
 -- L["Autostop"] = ""
 -- L["Automatically stops the current segment after half of all raid members have died."] = ""
 -- L["Always show self"] = ""
@@ -229,8 +227,7 @@ if not L then return end
 -- L["Condensed"] = ""
 -- L["Detailed"] = ""
 -- L["Data feed"] = ""
--- L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."] =
---     true
+-- L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."] = ""
 -- L["Number set duplicates"] = ""
 -- L["Append a count to set names with duplicate mob names."] = ""
 -- L["Set format"] = ""
@@ -242,10 +239,10 @@ if not L then return end
 -- L["Update frequency"] = ""
 -- L["How often windows are updated. Shorter for faster updates. Increases CPU usage."] = ""
 
--- -- columns
+-- columns
 -- L["Columns"] = ""
 
--- -- tooltips
+-- tooltips
 -- L["Tooltips"] = ""
 -- L["Show tooltips"] = ""
 -- L["Shows tooltips with extra information in some modes."] = ""
@@ -263,13 +260,13 @@ if not L then return end
 -- L["Smart"] = ""
 -- L["Follow Cursor"] = ""
 
--- -- disabled modules
+-- disabled modules
 -- L["Disabled Modules"] = ""
 -- L["Tick the modules you want to disable."] = ""
 -- L["This change requires a UI reload. Are you sure?"] = ""
 -- L["Adds a set of standard themes to Skada. Custom themes can also be used."] = ""
 
--- -- themes module
+-- themes module
 -- L["Theme"] = ""
 -- L["Themes"] = ""
 -- L["Apply theme"] = ""
@@ -278,7 +275,7 @@ if not L then return end
 -- L["Save theme"] = ""
 -- L["Delete theme"] = ""
 
--- -- scroll module
+-- scroll module
 -- L["Scroll"] = ""
 -- L["Mouse"] = ""
 -- L["Scrolling speed"] = ""
@@ -287,20 +284,20 @@ if not L then return end
 -- L["Keybinding"] = ""
 -- L["Key scrolling speed"] = ""
 
--- -- minimap button
+-- minimap button
 -- L["Skada summary"] = ""
 -- L["Left-Click to toggle windows."] = ""
 -- L["Shift+Left-Click to reset."] = ""
 -- L["Right-click to open menu"] = ""
 
--- -- skada menu
+-- skada menu
 -- L["Skada Menu"] = ""
 -- L["Delete segment"] = ""
 -- L["Keep segment"] = ""
 -- L["Toggle window"] = ""
 -- L["Start new segment"] = ""
 
--- -- window buttons
+-- window buttons
 -- L["Configure"] = ""
 -- L["opens the configuration window"] = ""
 -- L["Resets all fight data except those marked as kept."] = ""
@@ -311,11 +308,11 @@ if not L then return end
 -- L["Report"] = ""
 -- L["Opens a dialog that lets you report your data to others in various ways."] = ""
 
--- -- default segments
+-- default segments
 -- L["Total"] = ""
 -- L["Current"] = "Current fight"
 
--- -- report module and window
+-- report module and window
 -- L["Skada: %s for %s:"] = ""
 -- L["Channel"] = ""
 -- L["Self"] = ""
@@ -330,16 +327,16 @@ if not L then return end
 -- L["There is nothing to report."] = ""
 -- L["No mode or segment selected for report."] = ""
 
--- -- ================== --
--- -- Bar Display Module --
--- -- ================== --
+-- ================== --
+-- Bar Display Module --
+-- ================== --
 
 -- L["Bar display"] = ""
 -- L["Bar display is the normal bar window used by most damage meters. It can be extensively styled."] = ""
 
--- -- ============= --
--- -- Threat Module --
--- -- ============= --
+-- ============= --
+-- Threat Module --
+-- ============= --
 -- L["Threat"] = ""
 -- L["Threat warning"] = ""
 -- L["Do not warn while tanking"] = ""
@@ -360,9 +357,9 @@ if not L then return end
 -- L["TPS"] = ""
 -- L["Threat: Personal Threat"] = ""
 
--- -- ======================== --
--- -- Absorbs & Healing Module --
--- -- ======================== --
+-- ======================== --
+-- Absorbs & Healing Module --
+-- ======================== --
 -- L["Healing"] = ""
 -- L["Healed player list"] = ""
 -- L["Healing spell list"] = ""
@@ -394,9 +391,9 @@ if not L then return end
 -- L["%s's absorb and healing spells"] = ""
 -- L["%s's absorbed and healed players"] = ""
 
--- -- ============ --
--- -- Auras Module --
--- -- ============ --
+-- ============ --
+-- Auras Module --
+-- ============ --
 
 -- L["Uptime"] = ""
 
@@ -404,6 +401,10 @@ if not L then return end
 -- L["Buffs"] = ""
 -- L["Buff spell list"] = ""
 -- L["%s's buffs"] = ""
+
+-- L["Potions"] = ""
+-- L["Potions list"] = ""
+-- L["%s's used potions"] = ""
 
 -- L["Debuffs"] = ""
 -- L["Debuff spell list"] = ""
@@ -415,13 +416,13 @@ if not L then return end
 -- L["Sunder Counter"] = ""
 -- L["Sunder target list"] = ""
 
--- -- ================= --
--- -- CC Tracker Module --
--- -- ================= --
+-- ================= --
+-- CC Tracker Module --
+-- ================= --
 
 -- L["CC Tracker"] = ""
 
--- -- CC Done:
+-- CC Done:
 -- L["CC Done"] = ""
 -- L["CC Done spells"] = ""
 -- L["CC Done spell targets"] = ""
@@ -432,7 +433,7 @@ if not L then return end
 -- L["%s's CC Done spells"] = ""
 -- L["%s's CC Done targets"] = ""
 
--- -- CC Taken
+-- CC Taken
 -- L["CC Taken"] = ""
 -- L["CC Taken spells"] = ""
 -- L["CC Taken spell sources"] = ""
@@ -454,18 +455,18 @@ if not L then return end
 -- L["%s's CC Break spells"] = ""
 -- L["%s's CC Break targets"] = ""
 
--- -- options
+-- options
 -- L["CC"] = ""
 -- L["Announce CC breaking to party"] = ""
 -- L["Ignore Main Tanks"] = ""
 -- L["%s on %s removed by %s"] = ""
 -- L["%s on %s removed by %s's %s"] = ""
 
--- -- ============= --
--- -- Damage Module --
--- -- ============= --
+-- ============= --
+-- Damage Module --
+-- ============= --
 
--- -- damage done module
+-- damage done module
 -- L["Damage"] = ""
 -- L["Damage target list"] = ""
 -- L["Damage spell list"] = ""
@@ -486,7 +487,7 @@ if not L then return end
 -- L["RDPS"] = ""
 -- L["Damage: Raid DPS"] = ""
 
--- -- damage taken module
+-- damage taken module
 -- L["Damage taken"] = ""
 -- L["Damage taken by %s"] = ""
 -- L["<%s> damage on %s"] = ""
@@ -497,31 +498,31 @@ if not L then return end
 -- L["%s's targets"] = ""
 -- L["DTPS"] = ""
 
--- -- enemy damage done module
+-- enemy damage done module
 -- L["Enemy damage done"] = ""
 -- L["Damage done per player"] = ""
 -- L["Damage from %s"] = ""
 -- L["%s's damage on %s"] = ""
 
--- -- enemy damage taken module
+-- enemy damage taken module
 -- L["Enemy damage taken"] = ""
 -- L["Damage taken per player"] = ""
 -- L["Damage on %s"] = ""
 -- L["%s's damage sources"] = ""
 
--- -- avoidance and mitigation module
+-- avoidance and mitigation module
 -- L["Avoidance & Mitigation"] = ""
 -- L["Damage breakdown"] = ""
 -- L["%s's damage breakdown"] = ""
 
--- -- friendly fire module
+-- friendly fire module
 -- L["Friendly Fire"] = ""
 
 -- L["Critical"] = ""
 -- L["Glancing"] = ""
 -- L["Crushing"] = ""
 
--- -- useful damage targets
+-- useful damage targets
 -- L["Useful targets"] = ""
 -- L["Oozes"] = ""
 -- L["Princes overkilling"] = ""
@@ -529,7 +530,7 @@ if not L then return end
 -- L["Halion and Inferno"] = ""
 -- L["Valkyrs overkilling"] = ""
 
--- -- missing bosses entries
+-- missing bosses entries
 -- L["Cult Adherent"] = ""
 -- L["Cult Fanatic"] = ""
 -- L["Darnavan"] = ""
@@ -555,9 +556,9 @@ if not L then return end
 -- L["Blistering Zombie"] = ""
 -- L["Gluttonous Abomination"] = ""
 
--- -- ============= --
--- -- Deaths Module --
--- -- ============= --
+-- ============= --
+-- Deaths Module --
+-- ============= --
 -- L["Deaths"] = ""
 -- L["%s's death"] = ""
 -- L["%s's deaths"] = ""
@@ -572,13 +573,13 @@ if not L then return end
 -- L["Health"] = ""
 -- L["Change"] = ""
 
--- -- activity module
+-- activity module
 -- L["Activity"] = ""
 -- L["Activity per target"] = ""
 
--- -- ==================== --
--- -- dispels module lines --
--- -- ==================== --
+-- ==================== --
+-- dispels module lines --
+-- ==================== --
 
 -- L["Dispels"] = ""
 
@@ -590,18 +591,18 @@ if not L then return end
 -- L["%s's dispelled spells"] = ""
 -- L["%s's dispelled targets"] = ""
 
--- -- ==================== --
--- -- failbot module lines --
--- -- ==================== --
+-- ==================== --
+-- failbot module lines --
+-- ==================== --
 
 -- L["Fails"] = ""
 -- L["%s's fails"] = ""
 -- L["Player's failed events"] = ""
 -- L["Event's failed players"] = ""
 
--- -- ======================== --
--- -- improvement module lines --
--- -- ======================== --
+-- ======================== --
+-- improvement module lines --
+-- ======================== --
 
 -- L["Improvement"] = ""
 -- L["Improvement modes"] = ""
@@ -609,9 +610,9 @@ if not L then return end
 -- L["Do you want to reset your improvement data?"] = ""
 -- L["%s's overall data"] = ""
 
--- -- ======================= --
--- -- interrupts module lines --
--- -- ======================= --
+-- ======================= --
+-- interrupts module lines --
+-- ======================= --
 
 -- L["Interrupts"] = ""
 -- L["Interrupt spells"] = ""
@@ -621,9 +622,9 @@ if not L then return end
 -- L["%s's interrupted spells"] = ""
 -- L["%s's interrupted targets"] = ""
 
--- -- =================== --
--- -- Power gained module --
--- -- =================== --
+-- =================== --
+-- Power gained module --
+-- =================== --
 
 -- L["Power"] = ""
 -- L["Power gained"] = ""
@@ -637,9 +638,9 @@ if not L then return end
 -- L["Power gained: Runic Power"] = ""
 -- L["Runic Power gained spell list"] = ""
 
--- -- ====================== --
--- -- resurrect module lines --
--- -- ====================== --
+-- ====================== --
+-- resurrect module lines --
+-- ====================== --
 
 -- L["Resurrects"] = ""
 -- L["Resurrect spell list"] = ""

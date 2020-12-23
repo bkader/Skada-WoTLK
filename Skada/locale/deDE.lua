@@ -442,6 +442,10 @@ L["Buffs"] = "Buffs"
 L["Buff spell list"] = "Liste der Buffs"
 L["%s's buffs"] = "%s Buffs"
 
+L["Potions"] = "Tränke"
+L["Potions list"] = "Tränkliste"
+L["%s's used potions"] = "%s benutzte Tränke"
+
 L["Debuffs"] = "Debuffs"
 L["Debuff spell list"] = "Liste der Debuffs"
 L["Debuff target list"] = "Debuff-Zielliste"
