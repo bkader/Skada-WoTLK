@@ -2951,15 +2951,11 @@ do
                 if not self.total then
                     self.total = createSet(L["Total"], now)
                 end
-                tentativehandle =
-                    C_Timer.After(
-                    1,
-                    function()
-                        tentative = nil
-                        tentativehandle = nil
-                        self.current = nil
-                    end
-                )
+                tentativehandle = C_Timer.NewTimer(1, function()
+					tentative = nil
+					tentativehandle = nil
+					self.current = nil
+				end, 1)
                 tentative = 0
             end
         end
