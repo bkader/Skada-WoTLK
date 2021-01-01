@@ -117,7 +117,15 @@ Skada.defaults = {
         modules = {},
         columns = {},
         report = {mode = "Damage", set = "current", channel = "Say", chantype = "preset", number = 10},
-        modulesBlocked = {},
+        modulesBlocked = {
+        	["Spamage"] = true,
+        	["Potions"] = true,
+        	["Improvement"] = true,
+        	["Power gained: Rage"] = true,
+        	["Power gained: Energy"] = true,
+        	["Power gained: Runic Power"] = true,
+        	["Useful damage"] = true,
+    	},
         windows = {windefaultscopy}
     }
 }
