@@ -2,3 +2,4 @@
 Makefile
 *.zip
 Skada-Dev.lua
+luacheck.exe
