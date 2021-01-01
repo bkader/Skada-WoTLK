@@ -33,6 +33,7 @@ Lots of things were changed, the version for **3.3.5** that you all know is no l
 * The Interrupts module was changed as well and just like the Dispels one, shows who interrupted, what was interrupted and what spells was used to interrupt.
 * Added a new module called Power, it keeps track of power gain per encounter: mana, rage, energy and runic power.
 * Added a Resurrects module to track battle resurrects during encouters. Same, who res'd who, what spell was used, on who and how many times.
+* Several other modules were added or modified, explore the addon if you want to see more.
 
 ## Themes Module
 
@@ -41,9 +42,13 @@ All you have to do is to style the window and bars the way the want it, save the
 
 ## IMPORTANT: How to install
 
-It is important to know that for most addons to properly function without issues, if to have a clean installation. If you don't proceed to a clean installation, there is a huge change that you will run into issues and errors that people who installed it the first time won't encouter ever. So, please, if you want to use it and you were at certain point using default Skada, follow the steps below:
+It is important to know that for most addons to properly function without issues, is to have a clean installation. If you don't proceed to a clean installation, there is a huge chance that you will run into issues and errors that people who installed it the first time won't encouter. So, please, if you want to use it and you were at certain point using default Skada, follow the steps below:
 
 1. Delete old Skada addon and modules: All folders which the name starts with Skada within the `InterFace\AddOns` folder must be deleted.
 2. Navigate to `WTF\Account` folder, use the search box on top right and search for "Skada". Select all files and delete them.
 3. Download the repository package and extract the `Skada` folder into `Interface\AddOns`.
 4. Start the game, enable the addon, change the settings the way you want them to be and enjoy!
+
+### Optional
+
+If you are using [ELvUI](https://github.com/ElvUI-WotLK/ElvUI) and [ElvUI_AddOnSkins](https://github.com/ElvUI-WotLK/ElvUI_AddOnSkins), simply extract the **ElvUI_AddOnSkins** folder inside your addons folder, replace the files you are asked to and that's it. Enjoy!
