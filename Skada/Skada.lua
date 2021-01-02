@@ -1844,7 +1844,7 @@ function Skada:Reset()
     dataobj.text = "n/a"
     self:UpdateDisplay(true)
     self:Print(L["All data has been reset."])
-    L_CloseDropDownMenus()
+    CloseDropDownMenus()
 
     if not InCombatLockdown() then
         self:CleanGarbage(true)
