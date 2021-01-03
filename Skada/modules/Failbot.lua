@@ -10,23 +10,24 @@ Skada:AddLoadableModule(
             return
         end
 
-        local mod = Skada:NewModule(L["Fails"])
-        local playermod = mod:NewModule(L["Player's failed events"])
-        local spellmod = mod:NewModule(L["Event's failed players"])
-
+        -- this line is moved here so that the module is not added
+        -- in case the LibFail library is missing
         local LibFail = LibStub("LibFail-1.0", true)
         if not LibFail then
             return
         end
+        local failevents = LibFail:GetSupportedEvents()
+
+        local mod = Skada:NewModule(L["Fails"])
+        local playermod = mod:NewModule(L["Player's failed events"])
+        local spellmod = mod:NewModule(L["Event's failed players"])
 
         local _pairs, _ipairs = pairs, ipairs
         local _tostring, _format = tostring, string.format
         local _GetSpellInfo = GetSpellInfo
         local _UnitGUID = UnitGUID
 
-        local failevents = LibFail:GetSupportedEvents()
-
-        local function onFail(event, who, fatal)
+        local function onFail(event, who, failtype)
             if event and who then
                 -- is th fail a valid spell?
                 local spellid = LibFail:GetEventSpellId(event)
@@ -43,10 +44,8 @@ Skada:AddLoadableModule(
                         player.fails.count = player.fails.count + 1
                         Skada.current.fails = Skada.current.fails + 1
 
-                        if not player.fails.spells[spellid] then
-                            player.fails.spells[spellid] = 0
-                        end
-                        player.fails.spells[spellid] = player.fails.spells[spellid] + 1
+                        player.fails.spells = player.fails.spells or {}
+                        player.fails.spells[spellid] = (player.fails.spells[spellid] or 0) + 1
                     end
                 end
 
@@ -57,10 +56,8 @@ Skada:AddLoadableModule(
                         player.fails.count = player.fails.count + 1
                         Skada.total.fails = Skada.total.fails + 1
 
-                        if not player.fails.spells[spellid] then
-                            player.fails.spells[spellid] = 0
-                        end
-                        player.fails.spells[spellid] = player.fails.spells[spellid] + 1
+                        player.fails.spells = player.fails.spells or {}
+                        player.fails.spells[spellid] = (player.fails.spells[spellid] or 0) + 1
                     end
                 end
             end
@@ -101,11 +98,12 @@ Skada:AddLoadableModule(
 
         function playermod:Enter(win, id, label)
             self.playerid = id
+            self.playername = label
             self.title = _format(L["%s's fails"], label)
         end
 
         function playermod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid)
+            local player = Skada:find_player(set, self.playerid, self.playername)
             local max = 0
 
             if player and player.fails.spells then
@@ -140,7 +138,7 @@ Skada:AddLoadableModule(
         function mod:Update(win, set)
             local nr, max = 1, 0
 
-            for i, player in _ipairs(set.players) do
+            for _, player in _ipairs(set.players) do
                 if player.fails.count > 0 then
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
@@ -193,7 +191,7 @@ Skada:AddLoadableModule(
 
         function mod:AddPlayerAttributes(player)
             if not player.fails then
-                player.fails = {count = 0, spells = {}}
+                player.fails = {count = 0}
             end
         end
 
@@ -202,7 +200,7 @@ Skada:AddLoadableModule(
         end
 
         function mod:SetComplete(set)
-            for i, player in _ipairs(set.players) do
+            for _, player in _ipairs(set.players) do
                 if player.fails == 0 then
                     player.fails.spells = nil
                 end
