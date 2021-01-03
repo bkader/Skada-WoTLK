@@ -118,14 +118,15 @@ Skada.defaults = {
         columns = {},
         report = {mode = "Damage", set = "current", channel = "Say", chantype = "preset", number = 10},
         modulesBlocked = {
-        	["Spamage"] = true,
-        	["Potions"] = true,
-        	["Improvement"] = true,
-        	["Power gained: Rage"] = true,
-        	["Power gained: Energy"] = true,
-        	["Power gained: Runic Power"] = true,
-        	["Useful damage"] = true,
-    	},
+            ["Spamage"] = true,
+            ["Potions"] = true,
+            ["Improvement"] = true,
+            ["Power gained: Rage"] = true,
+            ["Power gained: Energy"] = true,
+            ["Power gained: Runic Power"] = true,
+            ["Useful damage"] = true,
+            ["Damage done by spell"] = true
+        },
         windows = {windefaultscopy}
     }
 }
@@ -537,23 +538,29 @@ Skada.options = {
                     width = "double"
                 },
                 translit = {
-					type = "toggle",
-					name = L["Translit"],
-					desc = L["Make those russian letters that no one understand to be presented as western letters."],
-					order = 18,
-					get = function() return Skada.db.profile.translit end,
-					set = function()
-						Skada.db.profile.translit = not Skada.db.profile.translit
-						Skada:ApplySettings()
-					end
-				},
-				memorycheck = {
-					type = "toggle",
-					name = L["Memory Check"],
-					desc = L["Checks memory usage and warns you if it is greater than or equal to 30mb."],
-					order = 97,
-					get = function() return Skada.db.profile.memorycheck end,
-					set = function() Skada.db.profile.memorycheck = not Skada.db.profile.memorycheck end
+                    type = "toggle",
+                    name = L["Translit"],
+                    desc = L["Make those russian letters that no one understand to be presented as western letters."],
+                    order = 18,
+                    get = function()
+                        return Skada.db.profile.translit
+                    end,
+                    set = function()
+                        Skada.db.profile.translit = not Skada.db.profile.translit
+                        Skada:ApplySettings()
+                    end
+                },
+                memorycheck = {
+                    type = "toggle",
+                    name = L["Memory Check"],
+                    desc = L["Checks memory usage and warns you if it is greater than or equal to 30mb."],
+                    order = 97,
+                    get = function()
+                        return Skada.db.profile.memorycheck
+                    end,
+                    set = function()
+                        Skada.db.profile.memorycheck = not Skada.db.profile.memorycheck
+                    end
                 },
                 setstokeep = {
                     type = "range",

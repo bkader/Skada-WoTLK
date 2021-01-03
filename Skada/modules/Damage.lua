@@ -29,9 +29,6 @@ Skada:AddLoadableModule(
 
         local dpsmod = Skada:NewModule(L["DPS"])
 
-        local spellsmod = Skada:NewModule(L["Damage done by spell"])
-        local spellsourcesmod = spellsmod:NewModule(L["Damage spell sources"])
-
         local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
 
         --
@@ -634,108 +631,6 @@ Skada:AddLoadableModule(
             end
         end
 
-        do
-            local cached = {}
-
-            function spellsourcesmod:Enter(win, id, label)
-                self.spellname = label
-                self.title = format(L["%s's sources"], label)
-            end
-
-            function spellsourcesmod:Update(win, set)
-                local nr, max = 1, 0
-
-                for i, player in _ipairs(set.players) do
-                    if player.damagedone.amount > 0 and player.damagedone.spells[self.spellname] then
-                        local d = win.dataset[nr] or {}
-                        win.dataset[nr] = d
-
-                        d.id = player.id
-                        d.label = player.name
-                        d.class = player.class
-                        d.role = player.role
-                        d.spec = player.spec
-
-                        local amount = player.damagedone.spells[self.spellname].amount
-
-                        d.value = amount
-                        d.valuetext = Skada:FormatNumber(amount)
-
-                        if amount > max then
-                            max = amount
-                        end
-
-                        nr = nr + 1
-                    end
-                end
-
-                win.metadata.maxvalue = max
-            end
-
-            function spellsmod:Update(win, set)
-                cached = {}
-
-                for _, player in _ipairs(set.players) do
-                    if player.damagedone.amount > 0 then
-                        for spellname, spell in _pairs(player.damagedone.spells) do
-                            if not cached[spellname] then
-                                cached[spellname] = {
-                                    id = spell.id,
-                                    school = spell.school,
-                                    amount = spell.amount,
-                                    players = {}
-                                }
-                                cached[spellname].spellicon = _select(3, _GetSpellInfo(spell.id))
-                            else
-                                cached[spellname].amount = cached[spellname].amount + spell.amount
-                            end
-
-                            -- add the player to the list
-                            if not cached[spellname].players[player.name] then
-                                cached[spellname].players[player.name] = {
-                                    id = player.id,
-                                    class = player.class,
-                                    role = player.role,
-                                    spec = player.spec,
-                                    amount = player.damagedone.amount
-                                }
-                            end
-                        end
-                    end
-                end
-
-                local nr, max = 1, 0
-
-                for spellname, spell in _pairs(cached) do
-                    local d = win.dataset[nr] or {}
-                    win.dataset[nr] = d
-
-                    d.id = spellname
-                    d.spellid = spell.id
-                    d.label = spellname
-                    d.icon = spell.spellicon
-                    d.spellschool = spell.school
-
-                    d.value = spell.amount
-                    d.valuetext =
-                        Skada:FormatValueText(
-                        Skada:FormatNumber(spell.amount),
-                        mod.metadata.columns.Damage,
-                        format("%02.1f%%", spell.amount / set.damagedone * 100),
-                        mod.metadata.columns.Percent
-                    )
-
-                    if spell.amount > max then
-                        max = spell.amount
-                    end
-
-                    nr = nr + 1
-                end
-
-                win.metadata.maxvalue = max
-            end
-        end
-
         function mod:Update(win, set)
             local nr, max = 1, 0
 
@@ -899,8 +794,6 @@ Skada:AddLoadableModule(
                 click1 = playermod,
                 click2 = targetmod
             }
-            spellsourcesmod.metadata = {showspots = true}
-            spellsmod.metadata = {showspots = true, ordersort = true, click1 = spellsourcesmod}
 
             Skada:RegisterForCL(
                 SpellDamage,
@@ -941,13 +834,11 @@ Skada:AddLoadableModule(
 
             Skada:AddMode(self, L["Damage"])
             Skada:AddMode(dpsmod, L["Damage"])
-            Skada:AddMode(spellsmod, L["Damage"])
         end
 
         function mod:OnDisable()
             Skada:RemoveMode(self)
             Skada:RemoveMode(dpsmod)
-            Skada:RemoveMode(spellsmod)
             Skada:RemoveFeed(L["Damage: Personal DPS"])
             Skada:RemoveFeed(L["Damage: Raid DPS"])
         end
@@ -986,6 +877,152 @@ Skada:AddLoadableModule(
                 end
             end
             instanceDiff, valkyrsTable = nil, nil
+        end
+    end
+)
+
+-- =========================== --
+-- Damage done by spell Module --
+-- =========================== --
+Skada:AddLoadableModule(
+    "Damage done by spell",
+    function(Skada, L)
+        if Skada:IsDisabled("Damage", "Damage done by spell") then
+            return
+        end
+
+        local mod = Skada:NewModule(L["Damage done by spell"])
+        local sourcemod = mod:NewModule(L["Damage spell sources"])
+
+        local cached = {}
+
+        function sourcemod:Enter(win, id, label)
+            self.spellname = label
+            self.title = _format(L["%s's sources"], label)
+        end
+
+        function sourcemod:Update(win, set)
+            local max = 0
+
+            if self.spellname and cached[self.spellname] then
+                local nr = 1
+
+                local total = math_max(1, cached[self.spellname].amount)
+
+                for playername, player in _pairs(cached[self.spellname].players) do
+                    local d = win.dataset[nr] or {}
+                    win.dataset[nr] = d
+
+                    d.id = player.id
+                    d.label = playername
+                    d.class = player.class
+                    d.role = player.role
+                    d.spec = player.spec
+
+                    d.value = player.amount
+                    d.valuetext =
+                        Skada:FormatValueText(
+                        Skada:FormatNumber(player.amount),
+                        mod.metadata.columns.Damage,
+                        _format("%02.1f%%", 100 * player.amount / total),
+                        mod.metadata.columns.Percent
+                    )
+
+                    if player.amount > max then
+                        max = player.amount
+                    end
+
+                    nr = nr + 1
+                end
+            end
+
+            win.metadata.maxvalue = max
+        end
+
+        -- for performance purposes, we ignore total segment
+        function mod:Update(win, set)
+            local max = 0
+
+            if set ~= Skada.total then
+                local nr = 1
+
+                cached = {}
+                for i, player in _ipairs(set.players) do
+                    if player.damagedone.amount > 0 then
+                        for spellname, spell in _pairs(player.damagedone.spells) do
+                            if spell.amount > 0 then
+                                if not cached[spellname] then
+                                    cached[spellname] = {
+                                        id = spell.id,
+                                        school = spell.school,
+                                        amount = spell.amount,
+                                        players = {}
+                                    }
+                                else
+                                    cached[spellname].amount = cached[spellname].amount + spell.amount
+                                end
+
+                                -- add the players
+                                if not cached[spellname].players[player.name] then
+                                    cached[spellname].players[player.name] = {
+                                        id = player.id,
+                                        class = player.class,
+                                        spec = player.spec,
+                                        role = player.role,
+                                        amount = spell.amount
+                                    }
+                                else
+                                    cached[spellname].players[player.name].amount =
+                                        cached[spellname].players[player.name].amount + spell.amount
+                                end
+                            end
+                        end
+                    end
+                end
+
+                for spellname, spell in _pairs(cached) do
+                    local d = win.dataset[nr] or {}
+                    win.dataset[nr] = d
+
+                    d.id = spellname
+                    d.spellid = spell.id
+                    d.spellname = spellname
+                    d.spellschool = spell.school
+                    d.label = spellname
+                    d.icon = _select(3, _GetSpellInfo(spell.id))
+
+                    d.value = spell.amount
+                    d.valuetext =
+                        Skada:FormatValueText(
+                        Skada:FormatNumber(spell.amount),
+                        self.metadata.columns.Damage,
+                        _format("%02.1f%%", 100 * spell.amount / set.damagedone),
+                        self.metadata.columns.Percent
+                    )
+
+                    if spell.amount > max then
+                        max = spell.amount
+                    end
+
+                    nr = nr + 1
+                end
+            end
+
+            win.metadata.maxvalue = max
+        end
+
+        function mod:OnEnable()
+            sourcemod.metadata = {showspots = true}
+            mod.metadata = {
+                showspots = true,
+                click1 = sourcemod,
+                columns = {Damage = true, Percent = true}
+            }
+            Skada:AddMode(self, L["Damage"])
+        end
+
+        function mod:OnDisable()
+            Skada:RemoveMode(self)
         end
     end
 )
@@ -1103,9 +1140,6 @@ Skada:AddLoadableModule(
         local playermod = mod:NewModule(L["Damage spell list"])
         local spellmod = mod:NewModule(L["Damage spell details"])
         local sourcemod = mod:NewModule(L["Damage source list"])
-
-        local spellsmod = Skada:NewModule(L["Damage taken by spell"])
-        local spelltargetsmod = spellsmod:NewModule(L["Damage spell targets"])
 
         local function log_damage(set, dmg)
             local player = Skada:get_player(set, dmg.playerid, dmg.playername, dmg.playerflags)
@@ -1433,90 +1467,6 @@ Skada:AddLoadableModule(
             end
         end
 
-        function spelltargetsmod:Enter(win, id, label)
-            self.spellname = label
-            self.title = _format(L["%s's targets"], label)
-        end
-
-        function spelltargetsmod:Update(win, set)
-            local nr, max = 1, 0
-
-            for i, player in _ipairs(set.players) do
-                if player.damagetaken.amount > 0 and player.damagetaken.spells[self.spellname] then
-                    local d = win.dataset[nr] or {}
-                    win.dataset[nr] = d
-
-                    d.id = player.id
-                    d.label = player.name
-                    d.class = player.class
-                    d.role = player.role
-                    d.spec = player.spec
-
-                    local amount = player.damagetaken.spells[self.spellname].amount
-
-                    d.value = amount
-                    d.valuetext =
-                        Skada:FormatValueText(
-                        Skada:FormatNumber(amount),
-                        mod.metadata.columns.Damage,
-                        _format("%02.1f%%", 100 * amount / player.damagetaken.amount),
-                        mod.metadata.columns.Percent
-                    )
-
-                    if amount > max then
-                        max = amount
-                    end
-
-                    nr = nr + 1
-                end
-            end
-
-            win.metadata.maxvalue = max
-        end
-
-        function spellsmod:Update(win, set)
-            local spells, _ = {}
-
-            for i, player in _ipairs(set.players) do
-                if player.damagetaken.amount > 0 then
-                    for spellname, spell in _pairs(player.damagetaken.spells) do
-                        spells[spellname] = spells[spellname] or spell
-                    end
-                end
-            end
-
-            local nr, max = 1, 0
-
-            for spellname, spell in _pairs(spells) do
-                local d = win.dataset[nr] or {}
-                win.dataset[nr] = d
-
-                d.id = spellname
-                d.spellid = spell.id
-                d.spellname = spellname
-                d.spellschool = spell.school
-                d.label = spellname
-                d.icon = _select(3, _GetSpellInfo(spell.id))
-
-                d.value = spell.amount
-                d.valuetext =
-                    Skada:FormatValueText(
-                    Skada:FormatNumber(spell.amount),
-                    mod.metadata.columns.Damage,
-                    _format("%02.1f%%", 100 * spell.amount / set.damagetaken),
-                    mod.metadata.columns.Percent
-                )
-
-                if spell.amount > max then
-                    max = spell.amount
-                end
-
-                nr = nr + 1
-            end
-
-            win.metadata.maxvalue = max
-        end
-
         function mod:Update(win, set)
             local nr, max = 1, 0
 
@@ -1613,9 +1563,6 @@ Skada:AddLoadableModule(
                 columns = {Damage = true, DTPS = true, Percent = true}
             }
 
-            spelltargetsmod.metadata = {showspots = true}
-            spellsmod.metadata = {showspots = true, ordersort = true, click1 = spelltargetsmod}
-
             Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {dst_is_interesting_nopets = true})
             Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {dst_is_interesting_nopets = true})
             Skada:RegisterForCL(SpellDamage, "SPELL_BUILDING_DAMAGE", {dst_is_interesting_nopets = true})
@@ -1630,12 +1577,10 @@ Skada:AddLoadableModule(
             Skada:RegisterForCL(SwingMissed, "SWING_MISSED", {dst_is_interesting_nopets = true})
 
             Skada:AddMode(self, L["Damage"])
-            Skada:AddMode(spellsmod, L["Damage"])
         end
 
         function mod:OnDisable()
             Skada:RemoveMode(self)
-            Skada:RemoveMode(spellsmod)
         end
 
         function mod:AddToTooltip(set, tooltip)
@@ -1674,6 +1619,152 @@ Skada:AddLoadableModule(
                     player.damagetaken.sources = nil
                 end
             end
+        end
+    end
+)
+
+-- ============================ --
+-- Damage taken by spell Module --
+-- ============================ --
+Skada:AddLoadableModule(
+    "Damage taken by spell",
+    function(Skada, L)
+        if Skada:IsDisabled("Damage taken", "Damage taken by spell") then
+            return
+        end
+
+        local mod = Skada:NewModule(L["Damage taken by spell"])
+        local targetmod = mod:NewModule(L["Damage spell targets"])
+
+        local cached = {}
+
+        function targetmod:Enter(win, id, label)
+            self.spellname = label
+            self.title = _format(L["%s's targets"], label)
+        end
+
+        function targetmod:Update(win, set)
+            local max = 0
+
+            if set ~= Skada.total and self.spellname and cached[self.spellname] then
+                local nr = 1
+
+                local total = math_max(1, cached[self.spellname].amount)
+
+                for playername, player in _pairs(cached[self.spellname].players) do
+                    local d = win.dataset[nr] or {}
+                    win.dataset[nr] = d
+
+                    d.id = player.id
+                    d.label = playername
+                    d.class = player.class
+                    d.role = player.role
+                    d.spec = player.spec
+
+                    d.value = player.amount
+                    d.valuetext =
+                        Skada:FormatValueText(
+                        Skada:FormatNumber(player.amount),
+                        mod.metadata.columns.Damage,
+                        _format("%02.1f%%", 100 * player.amount / total),
+                        mod.metadata.columns.Percent
+                    )
+
+                    if player.amount > max then
+                        max = player.amount
+                    end
+
+                    nr = nr + 1
+                end
+            end
+
+            win.metadata.maxvalue = max
+        end
+
+        -- for performance purposes, we ignore total segment
+        function mod:Update(win, set)
+            local max = 0
+
+            if set ~= Skada.total then
+                local nr = 1
+
+                cached = {}
+                for i, player in _ipairs(set.players) do
+                    if player.damagetaken.amount > 0 then
+                        for spellname, spell in _pairs(player.damagetaken.spells) do
+                            if spell.amount > 0 then
+                                if not cached[spellname] then
+                                    cached[spellname] = {
+                                        id = spell.id,
+                                        school = spell.school,
+                                        amount = spell.amount,
+                                        players = {}
+                                    }
+                                else
+                                    cached[spellname].amount = cached[spellname].amount + spell.amount
+                                end
+
+                                -- add the players
+                                if not cached[spellname].players[player.name] then
+                                    cached[spellname].players[player.name] = {
+                                        id = player.id,
+                                        class = player.class,
+                                        spec = player.spec,
+                                        role = player.role,
+                                        amount = spell.amount
+                                    }
+                                else
+                                    cached[spellname].players[player.name].amount =
+                                        cached[spellname].players[player.name].amount + spell.amount
+                                end
+                            end
+                        end
+                    end
+                end
+
+                for spellname, spell in _pairs(cached) do
+                    local d = win.dataset[nr] or {}
+                    win.dataset[nr] = d
+
+                    d.id = spellname
+                    d.spellid = spell.id
+                    d.spellname = spellname
+                    d.spellschool = spell.school
+                    d.label = spellname
+                    d.icon = _select(3, _GetSpellInfo(spell.id))
+
+                    d.value = spell.amount
+                    d.valuetext =
+                        Skada:FormatValueText(
+                        Skada:FormatNumber(spell.amount),
+                        self.metadata.columns.Damage,
+                        _format("%02.1f%%", 100 * spell.amount / set.damagetaken),
+                        self.metadata.columns.Percent
+                    )
+
+                    if spell.amount > max then
+                        max = spell.amount
+                    end
+
+                    nr = nr + 1
+                end
+            end
+
+            win.metadata.maxvalue = max
+        end
+
+        function mod:OnEnable()
+            targetmod.metadata = {showspots = true}
+            mod.metadata = {
+                showspots = true,
+                click1 = targetmod,
+                columns = {Damage = true, Percent = true}
+            }
+            Skada:AddMode(self, L["Damage"])
+        end
+
+        function mod:OnDisable()
+            Skada:RemoveMode(self)
         end
     end
 )
