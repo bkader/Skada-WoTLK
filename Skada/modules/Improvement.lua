@@ -5,7 +5,6 @@ end
 
 Skada:AddLoadableModule(
     "Improvement",
-    nil,
     function(Skada, L)
         if Skada:IsDisabled("Improvement") then
             return

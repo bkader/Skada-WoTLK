@@ -2359,7 +2359,6 @@ Skada:AddLoadableModule(
 
 Skada:AddLoadableModule(
     "Friendly Fire",
-    nil,
     function(Skada, L)
         if Skada:IsDisabled("Friendly Fire") then
             return

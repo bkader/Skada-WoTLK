@@ -294,7 +294,6 @@ end
 
 Skada:AddLoadableModule(
     "Buffs",
-    nil,
     function(Skada, L)
         if Skada:IsDisabled("Buffs") then
             return
@@ -522,7 +521,6 @@ Skada:AddLoadableModule(
 
 Skada:AddLoadableModule(
     "Debuffs",
-    nil,
     function(Skada, L)
         if Skada:IsDisabled("Debuffs") then
             return

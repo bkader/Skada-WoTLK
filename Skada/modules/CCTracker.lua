@@ -180,7 +180,6 @@ local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 -- ======= --
 Skada:AddLoadableModule(
     "CC Done",
-    nil,
     function(Skada, L)
         if Skada:IsDisabled("CC Done") then
             return
@@ -478,7 +477,6 @@ Skada:AddLoadableModule(
 -- ======== --
 Skada:AddLoadableModule(
     "CC Taken",
-    nil,
     function(Skada, L)
         if Skada:IsDisabled("CC Taken") then
             return
@@ -781,7 +779,6 @@ Skada:AddLoadableModule(
 -- =========== --
 Skada:AddLoadableModule(
     "CC Breakers",
-    nil,
     function(Skada, L)
         if Skada:IsDisabled("CC Breakers") then
             return
