@@ -424,7 +424,13 @@ Skada:AddLoadableModule(
                             d.icon = poitionicon
 
                             d.value = count
-                            d.valuetext = _tostring(count)
+                            d.valuetext =
+                                Skada:FormatValueText(
+                                count,
+                                mod.metadata.columns.Count,
+                                _format("%02.1f%%", 100 * count / player.count),
+                                mod.metadata.columns.Percent
+                            )
 
                             if count > max then
                                 max = count
@@ -482,7 +488,13 @@ Skada:AddLoadableModule(
                     d.spec = player.spec
 
                     d.value = player.count
-                    d.valuetext = _tostring(player.count)
+                    d.valuetext =
+                        Skada:FormatValueText(
+                        player.count,
+                        self.metadata.columns.Count,
+                        _format("%02.1f%%", 100 * player.count / cached.count),
+                        self.metadata.columns.Percent
+                    )
 
                     if player.count > max then
                         max = player.count
@@ -496,7 +508,7 @@ Skada:AddLoadableModule(
         end
 
         function mod:OnEnable()
-            self.metadata = {click1 = playermod}
+            self.metadata = {click1 = playermod, columns = {Count = true, Percent = true}}
             Skada:AddMode(self, L["Buffs and Debuffs"])
         end
 
