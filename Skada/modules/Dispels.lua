@@ -229,7 +229,7 @@ Skada:AddLoadableModule(
 
         function mod:Update(win, set)
             local nr, max = 1, 0
-            for i, player in _ipairs(set.players) do
+            for _, player in _ipairs(set.players) do
                 if player.dispels.count > 0 then
                     local count = player.dispels.count
 
@@ -305,7 +305,7 @@ Skada:AddLoadableModule(
         end
 
         function mod:SetComplete(set)
-            for i, player in ipairs(set.players) do
+            for _, player in ipairs(set.players) do
                 if player.dispels.count == 0 then
                     player.dispels.spells = nil
                     player.dispels.extraspells = nil
