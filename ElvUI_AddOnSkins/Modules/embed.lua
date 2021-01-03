@@ -337,62 +337,88 @@ end
 if AS:IsAddonLODorEnabled("Skada") then
 	EMB["skadaWindows"] = {}
 
-  local function EmbedWindow(window, width, height, point, relativeFrame, relativePoint, ofsx, ofsy)
+	local function EmbedWindow(window, width, height, point, relativeFrame, relativePoint, ofsx, ofsy)
 		if not window then return end
 		local barmod = Skada.displays["bar"]
-    local offsety
-    if window.db.reversegrowth then
-      offsety = 0
+
+    if Skada.revisited then
+      local offsety = window.db.reversegrowth and 0 or (1 + (window.db.enabletitle and window.db.title.height or 0))
+
+      window.db.barwidth = width
+      window.db.background.height = height - (window.db.enabletitle and window.db.title.height or 0) - (E.PixelMode and 1 or 2)
+      window.db.barslocked = true
+
+      window.bargroup.ClearAllPoints = nil
+      window.bargroup:ClearAllPoints()
+      window.bargroup.ClearAllPoints = function() end
+      window.bargroup.SetPoint = nil
+      window.bargroup:SetPoint(point, relativeFrame, relativePoint, ofsx, -offsety)
+      window.bargroup.SetPoint = function() end
+      window.bargroup:SetParent(relativeFrame)
+      window.bargroup:ClearAllPoints()
+      window.bargroup:SetPoint(point, relativeFrame, relativePoint, ofsx, ofsy)
+      window.bargroup:SetFrameStrata("LOW")
+
+      barmod.ApplySettings(barmod, window)
     else
-      offsety = 1 + (window.db.enabletitle and window.db.title.height or 0)
+  		window.db.barwidth = width
+  		window.db.background.height = height - (window.db.enabletitle and window.db.barheight or -(E.Border + E.Spacing)) - (E.Border + E.Spacing)
+
+  		window.db.spark = false
+  		window.db.barslocked = true
+  		window.db.enablebackground = true
+
+  		window.bargroup:SetParent(relativeFrame)
+  		window.bargroup:ClearAllPoints()
+  		window.bargroup:SetPoint(point, relativeFrame, relativePoint, ofsx, window.db.reversegrowth and ofsy or -ofsy)
+
+  		window.bargroup:SetFrameStrata("LOW")
+
+  		barmod.ApplySettings(barmod, window)
+
+  		window.bargroup.bgframe:SetFrameStrata("LOW")
+  		window.bargroup.bgframe:SetFrameLevel(window.bargroup:GetFrameLevel() - 1)
     end
-
-    window.db.barwidth = width
-    window.db.background.height = height - (window.db.enabletitle and window.db.title.height or 0) - (E.PixelMode and 1 or 2)
-    window.db.spark = false
-    window.db.barslocked = true
-
-    window.bargroup.ClearAllPoints = nil
-    window.bargroup:ClearAllPoints()
-    window.bargroup.ClearAllPoints = function() end
-    window.bargroup.SetPoint = nil
-    window.bargroup:SetPoint(point, relativeFrame, relativePoint, ofsx, -offsety)
-    window.bargroup.SetPoint = function() end
-    window.bargroup:SetParent(relativeFrame)
-    window.bargroup:ClearAllPoints()
-    window.bargroup:SetPoint(point, relativeFrame, relativePoint, ofsx, ofsy)
-    window.bargroup:SetFrameStrata("LOW")
-
-    barmod.ApplySettings(barmod, window)
 	end
 
-  function EMB:EmbedSkada()
-    wipe(self.skadaWindows)
-    for _, window in pairs(Skada:GetWindows()) do
-      tinsert(self.skadaWindows, window)
-    end
+	function EMB:EmbedSkada()
+		wipe(self["skadaWindows"])
+		for _, window in pairs(Skada:GetWindows()) do
+			tinsert(self.skadaWindows, window)
+		end
 
-    local db = E.db.addOnSkins.embed
-    local numberToEmbed = 0
-    if db.embedType == "SINGLE" then
-      numberToEmbed = 1
-    elseif db.embedType == "DOUBLE" then
-      if db.rightWindow == "Skada" then numberToEmbed = numberToEmbed + 1 end
-      if db.leftWindow == "Skada" then numberToEmbed = numberToEmbed + 1 end
-    end
+		local db = E.db.addOnSkins.embed
+		local numberToEmbed = 0
 
-    if numberToEmbed == 1 then
-      local parent = self.leftFrame
-      if db.embedType == "DOUBLE" then
-        parent = db.rightWindow == "Skada" and self.rightFrame or self.leftFrame
-      end
+		if db.embedType == "SINGLE" then
+			numberToEmbed = 1
+		elseif db.embedType == "DOUBLE" then
+			if db.rightWindow == "Skada" then numberToEmbed = numberToEmbed + 1 end
+			if db.leftWindow == "Skada" then numberToEmbed = numberToEmbed + 1 end
+		end
 
-      EmbedWindow(self.skadaWindows[1], parent:GetWidth() -(E.Border*2), parent:GetHeight(), "TOPLEFT", parent, "TOPLEFT", E.Border, -E.Border)
-    elseif numberToEmbed == 2 then
-      EmbedWindow(self.skadaWindows[1], self.leftFrame:GetWidth() -(E.Border*2), self.leftFrame:GetHeight(), "TOPLEFT", self.leftFrame, "TOPLEFT", E.Border, -E.Border)
-      EmbedWindow(self.skadaWindows[2], self.rightFrame:GetWidth() -(E.Border*2), self.rightFrame:GetHeight(), "TOPRIGHT", self.rightFrame, "TOPRIGHT", -E.Border, -E.Border)
-    end
-  end
+		local point
+		if numberToEmbed == 1 then
+			local parent = self.leftFrame
+			if db.embedType == "DOUBLE" then
+				parent = db.rightWindow == "Skada" and self.rightFrame or self.leftFrame
+			end
+
+			point = self.skadaWindows[1].db.reversegrowth and "BOTTOMLEFT" or "TOPLEFT"
+			EmbedWindow(self.skadaWindows[1], parent:GetWidth() -(E.Border*2), parent:GetHeight(), point, parent, point, E.Border, E.Border)
+		elseif numberToEmbed == 2 then
+			point = self.skadaWindows[1].db.reversegrowth and "BOTTOMLEFT" or "TOPLEFT"
+			EmbedWindow(self.skadaWindows[1], self.leftFrame:GetWidth() -(E.Border*2), self.leftFrame:GetHeight(), point, self.leftFrame, point, E.Border, E.Border)
+
+			if not self.skadaWindows[2] then
+				E:Print("Please Create Skada Windows 2")
+				return
+			end
+
+			point = self.skadaWindows[2].db.reversegrowth and "BOTTOMRIGHT" or "TOPRIGHT"
+			EmbedWindow(self.skadaWindows[2], self.rightFrame:GetWidth() -(E.Border*2), self.rightFrame:GetHeight(), point, self.rightFrame, point, -E.Border, E.Border)
+		end
+	end
 end
 
 if AS:IsAddonLODorEnabled("Details") then
