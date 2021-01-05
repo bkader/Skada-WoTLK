@@ -320,8 +320,8 @@ Skada:AddLoadableModule(
         end
 
         function mod:OnEnable()
-            spellmod.metadata = {showspots = true, tooltip = buff_tooltip}
-            mod.metadata = {showspots = true, click1 = spellmod}
+            spellmod.metadata = {tooltip = buff_tooltip}
+            self.metadata = {click1 = spellmod}
 
             Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {src_is_interesting = true})
             Skada:RegisterForCL(AuraRemoved, "SPELL_AURA_REMOVED", {src_is_interesting = true})
@@ -600,7 +600,7 @@ Skada:AddLoadableModule(
 
         function mod:OnEnable()
             spellmod.metadata = {tooltip = debuff_tooltip, click1 = targetmod}
-            mod.metadata = {showspots = true, click1 = spellmod}
+            self.metadata = {click1 = spellmod}
 
             Skada:RegisterForCL(
                 DebuffApplied,
@@ -814,8 +814,8 @@ Skada:AddLoadableModule(
         end
 
         function mod:OnEnable()
-            mod.metadata = {showspots = true, click1 = targetmod}
             Skada:RegisterForCL(SunderApplied, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})
+            self.metadata = {showspots = true, click1 = targetmod}
             Skada:AddMode(self, L["Buffs and Debuffs"])
         end
 
