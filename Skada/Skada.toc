@@ -12,12 +12,14 @@
 embeds.xml
 
 locale\enUS.lua
-locale\ruRU.lua
+locale\deDE.lua
+locale\esES.lua
+locale\esMX.lua
+locale\frFR.lua
 locale\koKR.lua
+locale\ruRU.lua
 locale\zhCN.lua
 locale\zhTW.lua
-locale\frFR.lua
-locale\deDE.lua
 
 Skada.lua
 Options.lua
