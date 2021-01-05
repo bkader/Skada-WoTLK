@@ -466,7 +466,7 @@ L["%s on %s removed by %s's %s"] = "%s sur %s enlevé(e) par %s avec %s"
 -- ============= --
 
 -- damage done module
-L["Damage"] = "Dégâts"
+L["Damage"] = "Dégâts infligés"
 L["Damage target list"] = "Cibles des dégâts infligés"
 L["Damage spell list"] = "Sorts des dégâts infligés"
 L["Damage spell details"] = "Détails du sort de dégât"
@@ -518,7 +518,7 @@ L["%s's damage breakdown"] = "Détails du dégât infligé à %s"
 L["Friendly Fire"] = "Tir ami"
 
 L["Critical"] = "Critique"
-L["Glancing"] = "Érafle"""
+L["Glancing"] = "Érafle"
 L["Crushing"] = "Écrasement"
 
 -- useful damage targets
