@@ -543,6 +543,7 @@ L["Living Inferno"] = "Живое адское пламя"
 L["Reanimated Adherent"] = "Воскрешенный последователь"
 L["Reanimated Fanatic"] = "Воскрешенный фанатик"
 L["Volatile Ooze"] = "Неустойчивый слизнюк"
+L["Wicked Spirit"] = "Зловещий дух"
 
 L["Kor'kron Sergeant"] = "Кор'кронский сержант"
 L["Kor'kron Axethrower"] = "Кор'кронский метатель топоров"

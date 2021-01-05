@@ -733,7 +733,7 @@ Skada:AddLoadableModule(
             LBB["Reanimated Adherent"] = L["Reanimated Adherent"]
             LBB["Reanimated Fanatic"] = L["Reanimated Fanatic"]
             LBB["Volatile Ooze"] = L["Volatile Ooze"]
-            LBB["Wicked Spirit"] = "Wicked Spirit"
+            LBB["Wicked Spirit"] = L["Wicked Spirit"]
             LBB["Darnavan"] = L["Darnavan"]
             LBB["Living Inferno"] = L["Living Inferno"]
 

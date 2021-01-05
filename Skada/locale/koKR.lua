@@ -541,6 +541,7 @@ if not L then return end
 -- L["Reanimated Adherent"] = ""
 -- L["Reanimated Fanatic"] = ""
 -- L["Volatile Ooze"] = ""
+-- L["Wicked Spirit"] = ""
 
 -- L["Kor'kron Sergeant"] = ""
 -- L["Kor'kron Axethrower"] = ""

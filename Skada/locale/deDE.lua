@@ -210,8 +210,8 @@ L["All data has been reset."] = "Alle Daten wurden zurückgesetzt."
 -- general options
 L["Show minimap button"] = "Minikartenbutton zeigen"
 L["Toggles showing the minimap button."] = "Zeigt oder versteckt den Minikartenbutton"
--- L["Translit"] = true
--- L["Make those russian letters that no one understand to be presented as western letters."] = true
+-- L["Translit"] = ""
+-- L["Make those russian letters that no one understand to be presented as western letters."] = ""
 L["Merge pets"] = "Begleiter zusammenfügen"
 L["Merges pets with their owners. Changing this only affects new data."] =
     "Fügt Begleiter mit ihren Besitzern zusammen. Eine Änderung wirkt sich hier nur auf neue Daten aus."
@@ -516,7 +516,7 @@ L["Damage done"] = "Schaden verursacht"
 L["%s's damage"] = "%s : Schaden"
 L["%s's <%s> damage"] = "%s <%s> Schaden"
 
--- L["Useful damage"] = true
+-- L["Useful damage"] = ""
 
 L["Damage done by spell"] = "Durch Zauber verursachter Schaden"
 L["%s's sources"] = "%s Quellen"
@@ -562,38 +562,39 @@ L["Glancing"] = "Gestreift"
 L["Crushing"] = "Schmetternd"
 
 -- useful damage targets
--- L["Useful targets"] = true
--- L["Oozes"] = true
--- L["Princes overkilling"] = true
--- L["Adds"] = true
--- L["Halion and Inferno"] = true
--- L["Valkyrs overkilling"] = true
+-- L["Useful targets"] = ""
+L["Oozes"] = "Schlamm"
+-- L["Princes overkilling"] = ""
+-- L["Adds"] = ""
+L["Halion and Inferno"] = "Halion und Inferno"
+-- L["Valkyrs overkilling"] = ""
 
 -- missing bosses entries
--- L["Cult Adherent"] = true
--- L["Cult Fanatic"] = true
--- L["Darnavan"] = true
--- L["Deformed Fanatic"] = true
--- L["Empowered Adherent"] = true
--- L["Gas Cloud"] = true
--- L["Living Inferno"] = true
--- L["Reanimated Adherent"] = true
--- L["Reanimated Fanatic"] = true
--- L["Volatile Ooze"] = true
+L["Cult Adherent"] = "Treuer Kultist"
+L["Cult Fanatic"] = "Fanatischer Kultist"
+L["Darnavan"] = "Darnavan"
+L["Deformed Fanatic"] = "Deformierter Fanatiker"
+L["Empowered Adherent"] = "Machterfüllter Kultist"
+L["Gas Cloud"] = "Gaswolke"
+L["Living Inferno"] = "Lebendiges Inferno"
+L["Reanimated Adherent"] = "Wiederbelebter Kultist"
+L["Reanimated Fanatic"] = "Wiederbelebter Fanatiker"
+L["Volatile Ooze"] = "Flüchtiger Schlamm"
+L["Wicked Spirit"] = "Boshafter Geist"
 
--- L["Kor'kron Sergeant"] = true
--- L["Kor'kron Axethrower"] = true
--- L["Kor'kron Rocketeer"] = true
--- L["Kor'kron Battle-Mage"] = true
--- L["Skybreaker Sergeant"] = true
--- L["Skybreaker Rifleman"] = true
--- L["Skybreaker Mortar Soldier"] = true
--- L["Skybreaker Sorcerer"] = true
--- L["Dream Cloud"] = true
--- L["Risen Archmage"] = true
--- L["Blazing Skeleton"] = true
--- L["Blistering Zombie"] = true
--- L["Gluttonous Abomination"] = true
+L["Kor'kron Sergeant"] = "Unteroffizier der Kor'kron"
+L["Kor'kron Axethrower"] = "Axtwerfer der Kor'kron"
+L["Kor'kron Rocketeer"] = "Raketenschütze der Kor'kron"
+L["Kor'kron Battle-Mage"] = "Kriegsmagier der Kor'kron"
+L["Skybreaker Sergeant"] = "Unteroffizier der Himmelsbrecher"
+L["Skybreaker Rifleman"] = "Scharfschütze der Himmelsbrecher"
+L["Skybreaker Mortar Soldier"] = "Mörsersoldat der Himmelsbrecher"
+L["Skybreaker Sorcerer"] = "Zauberer der Himmelsbrecher"
+L["Dream Cloud"] = "Traumwolke"
+L["Risen Archmage"] = "Auferstandener Erzmagier"
+L["Blazing Skeleton"] = "Loderndes Skelett"
+L["Blistering Zombie"] = "Mörderischer Zombie"
+L["Gluttonous Abomination"] = "Gefräßige Monstrosität"
 
 -- ============= --
 -- Deaths Module --

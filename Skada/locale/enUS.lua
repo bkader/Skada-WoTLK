@@ -546,6 +546,7 @@ L["Living Inferno"] = true
 L["Reanimated Adherent"] = true
 L["Reanimated Fanatic"] = true
 L["Volatile Ooze"] = true
+L["Wicked Spirit"] = true
 
 L["Kor'kron Sergeant"] = true
 L["Kor'kron Axethrower"] = true
