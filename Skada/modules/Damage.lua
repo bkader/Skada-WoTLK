@@ -1554,7 +1554,7 @@ Skada:AddLoadableModule(
 
         function mod:OnEnable()
             spellmod.metadata = {}
-            playermod.metadata = {tooltip = playerspell_tooltip, click1 = spellmod}
+            playermod.metadata = {post_tooltip = playerspell_tooltip, click1 = spellmod}
             sourcemod.metadata = {}
             mod.metadata = {
                 showspots = true,
@@ -1787,7 +1787,7 @@ Skada:AddLoadableModule(
 
         function playermod:Enter(win, id, label)
             self.playerid = id
-            self.title = _format("%s's damage breakdown", label)
+            self.title = _format(L["%s's damage breakdown"], label)
         end
 
         function playermod:Update(win, set)
