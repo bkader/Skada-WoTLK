@@ -1215,7 +1215,7 @@ function Skada:find_player(set, playerid, playername)
 end
 
 function Skada:get_player(set, playerid, playername, playerflag)
-    local player = self:find_player(set, playerid)
+    local player = self:find_player(set, playerid, playername)
 
     local now = time()
 
@@ -2527,18 +2527,7 @@ function Skada:OnInitialize()
     end
 
     -- add Gunship adds
-    -- horde
-    BOSS.BossIDs[36960] = true -- Kor'kron Sergeant, Gunship add
-    BOSS.BossIDs[36968] = true -- Kor'kron Axethrower, Gunship add
-    BOSS.BossIDs[36982] = true -- Kor'kron Rocketeer, Gunship add
-    BOSS.BossIDs[37117] = true -- Kor'kron Battle-Mage, Gunship add
     BOSS.BossIDs[37215] = true -- Orgrim's Hammer
-
-    -- alliance
-    BOSS.BossIDs[36961] = true -- Skybreaker Sergeant, Gunship add
-    BOSS.BossIDs[36969] = true -- Skybreaker Rifleman, Gunship add
-    BOSS.BossIDs[36978] = true -- Skybreaker Mortar Soldier, Gunship add
-    BOSS.BossIDs[37116] = true -- Skybreaker Sorcerer, Gunship add
     BOSS.BossIDs[37540] = true -- The Skybreaker
 
     LBB["Kor'kron Sergeant"] = L["Kor'kron Sergeant"]
