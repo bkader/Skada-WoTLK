@@ -264,11 +264,12 @@ Skada:AddLoadableModule(
 
         function spellsmod:Enter(win, id, label)
             self.playerid = id
+            self.playername = label
             self.title = format(L["%s's CC Done spells"], label)
         end
 
         function spellsmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid)
+            local player = Skada:find_player(set, self.playerid, self.playername)
             local max = 0
 
             if player then
@@ -297,10 +298,7 @@ Skada:AddLoadableModule(
 
         function spelltargetsmod:Enter(win, id, label)
             self.spellname = label
-            local player = Skada:find_player(win:get_selected_set(), spellsmod.playerid)
-            if player then
-                self.title = format(L["%s's CC Done <%s> targets"], player.name, label)
-            end
+            self.title = format(L["%s's CC Done <%s> targets"], spellsmod.playername, label)
         end
 
         function spelltargetsmod:Update(win, set)
@@ -331,11 +329,12 @@ Skada:AddLoadableModule(
 
         function targetsmod:Enter(win, id, label)
             self.playerid = id
+            self.playername = label
             self.title = format(L["%s's CC Done targets"], label)
         end
 
         function targetsmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid)
+            local player = Skada:find_player(set, self.playerid, self.playername)
             local max = 0
 
             if player then
@@ -363,10 +362,7 @@ Skada:AddLoadableModule(
 
         function targetspellsmod:Enter(win, id, label)
             self.targetname = label
-            local player = Skada:find_player(win:get_selected_set(), spellsmod.playerid)
-            if player then
-                self.title = format("%s's CC Done <%s> spells", player.name, label)
-            end
+            self.title = format(L["%s's CC Done <%s> spells"], targetsmod.playername, label)
         end
 
         function targetspellsmod:Update(win, set)
@@ -563,11 +559,12 @@ Skada:AddLoadableModule(
 
         function spellsmod:Enter(win, id, label)
             self.playerid = id
+            self.playername = label
             self.title = format(L["%s's CC Taken spells"], label)
         end
 
         function spellsmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid)
+            local player = Skada:find_player(set, self.playerid, self.playername)
             local max = 0
 
             if player then
@@ -632,11 +629,12 @@ Skada:AddLoadableModule(
 
         function sourcesmod:Enter(win, id, label)
             self.playerid = id
+            self.playername = label
             self.title = format(L["%s's CC Taken sources"], label)
         end
 
         function sourcesmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid)
+            local player = Skada:find_player(set, self.playerid, self.playername)
             local max = 0
 
             if player then
@@ -907,11 +905,12 @@ Skada:AddLoadableModule(
 
         function spellsmod:Enter(win, id, label)
             self.playerid = id
+            self.playername = label
             self.title = format(L["%s's CC Break spells"], label)
         end
 
         function spellsmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid)
+            local player = Skada:find_player(set, self.playerid, self.playername)
             local max = 0
 
             if player then
@@ -974,11 +973,12 @@ Skada:AddLoadableModule(
 
         function targetsmod:Enter(win, id, label)
             self.playerid = id
+            self.playername = label
             self.title = format(L["%s's CC Break targets"], label)
         end
 
         function targetsmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid)
+            local player = Skada:find_player(set, self.playerid, self.playername)
             local max = 0
 
             if player then
