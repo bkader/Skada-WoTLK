@@ -551,6 +551,8 @@ if not L then return end
 -- L["Skybreaker Rifleman"] = ""
 -- L["Skybreaker Mortar Soldier"] = ""
 -- L["Skybreaker Sorcerer"] = ""
+-- L["Stinky"] = ""
+-- L["Precious"] = ""
 -- L["Dream Cloud"] = ""
 -- L["Risen Archmage"] = ""
 -- L["Blazing Skeleton"] = ""

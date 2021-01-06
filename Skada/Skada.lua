@@ -1137,6 +1137,19 @@ do
         return role
     end
 
+    -- we use this just to cache specs so we don't look for them again.
+    Skada.cached_specs = {}
+    Skada.cached_talents = {}
+    function Skada:LibGroupTalents_Update(event, guid, unit, tree_id, n1, n2, n3)
+        self.cached_talents[guid] = n1 .. "/" .. n2 .. "/" .. n3
+        local class, _, _, _, name = select(2, GetPlayerInfoByGUID(guid))
+        local specIdx = self:GetPlayerSpecID(name, class)
+        if specIdx then
+            self.cached_specs[guid] = specIdx
+        end
+    end
+    LGT.RegisterCallback(Skada, "LibGroupTalents_Update")
+
     -- sometimes GUID are shown instead of proper players names
     -- this function is called and used only once per player
     function Skada:FixPlayer(player)
@@ -1189,8 +1202,12 @@ do
                 -- if the player has been assigned a valid class,
                 -- we make sure to assign his/her role and spec
                 if player.class and self.validclass[player.class] then
-                    player.role = player.role or self:UnitGroupRolesAssigned(player.name)
-                    player.spec = player.spec or self:GetPlayerSpecID(player.name, player.class)
+                    if not player.role then
+                        player.role = self:UnitGroupRolesAssigned(player.name)
+                    end
+                    if not player.spec then
+                        player.spec = self.cached_specs[player.id] or self:GetPlayerSpecID(player.name, player.class)
+                    end
                 end
             end
         end
@@ -2527,7 +2544,18 @@ function Skada:OnInitialize()
     end
 
     -- add Gunship adds
+    -- horde
+    BOSS.BossIDs[36960] = true -- Kor'kron Sergeant, Gunship add
+    BOSS.BossIDs[36968] = true -- Kor'kron Axethrower, Gunship add
+    BOSS.BossIDs[36982] = true -- Kor'kron Rocketeer, Gunship add
+    BOSS.BossIDs[37117] = true -- Kor'kron Battle-Mage, Gunship add
     BOSS.BossIDs[37215] = true -- Orgrim's Hammer
+
+    -- alliance
+    BOSS.BossIDs[36961] = true -- Skybreaker Sergeant, Gunship add
+    BOSS.BossIDs[36969] = true -- Skybreaker Rifleman, Gunship add
+    BOSS.BossIDs[36978] = true -- Skybreaker Mortar Soldier, Gunship add
+    BOSS.BossIDs[37116] = true -- Skybreaker Sorcerer, Gunship add
     BOSS.BossIDs[37540] = true -- The Skybreaker
 
     LBB["Kor'kron Sergeant"] = L["Kor'kron Sergeant"]
@@ -3056,15 +3084,6 @@ do
                     self.current.gotboss = true
                 end
             end
-        end
-
-        --
-        -- these lines are useful for the Improvement module.
-        -- We want to mark the encounter and successul once the boss dies
-        -- so that we only keep successul boss fights.
-        --
-        if self.current and self.current.gotboss and eventtype == "UNIT_DIED" and self.current.mobname == dstName then
-            self.current.success = true
         end
 
         if

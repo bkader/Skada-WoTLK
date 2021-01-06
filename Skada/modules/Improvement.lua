@@ -30,8 +30,24 @@ Skada:AddLoadableModule(
             "Overhealing"
         }
 
-        -- events frame
-        local f = CreateFrame("Frame")
+        --
+        -- because we added some NPCs as bosses in order to fix the
+        -- Gunship Battle segment name, this module will consider them
+        -- ass bosses, thus it will record them and we don't want that.
+        -- so we make sure to skip them.
+        --
+        local blacklist = {
+            [L["Kor'kron Sergeant"]] = true,
+            [L["Kor'kron Axethrower"]] = true,
+            [L["Kor'kron Rocketeer"]] = true,
+            [L["Kor'kron Battle-Mage"]] = true,
+            [L["Skybreaker Sergeant"]] = true,
+            [L["Skybreaker Rifleman"]] = true,
+            [L["Skybreaker Mortar Soldier"]] = true,
+            [L["Skybreaker Sorcerer"]] = true,
+            [L["Stinky"]] = true,
+            [L["Precious"]] = true
+        }
 
         -- :::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -98,32 +114,29 @@ Skada:AddLoadableModule(
             return find_encounter_data(boss, starttime)
         end
 
-        local function EventHandler(self, event, ...)
-            -- sorry but we only record raid bosses
-            local inInstance, instanceType = IsInInstance()
-            if not inInstance or instanceType ~= "raid" then
-                return
-            end
-            if not Skada.current or not Skada.current.gotboss or not Skada.current.success then
-                return
-            end
+        function mod:EndSegment()
+            if Skada.last and Skada.last.gotboss and not blacklist[Skada.last.mobname] then
+                -- we only record raid bosses, nothing else.
+                local inInstance, instanceType = IsInInstance()
+                if not inInstance or instanceType ~= "raid" then
+                    return
+                end
 
-            if event == "PLAYER_REGEN_ENABLED" then
-                local boss = find_boss_data(Skada.current.mobname)
+                local boss = find_boss_data(Skada.last.mobname)
                 if not boss then
                     return
                 end
 
-                local encounter = find_encounter_data(boss, Skada.current.starttime)
+                local encounter = find_encounter_data(boss, Skada.last.starttime)
                 if not encounter then
                     return
                 end
 
-                for i, player in ipairs(Skada.current.players) do
+                for i, player in ipairs(Skada.last.players) do
                     if player.id == db.id then
                         for _, mode in ipairs(modes) do
                             if updaters[mode] then
-                                encounter.data[mode] = updaters[mode](Skada.current, player)
+                                encounter.data[mode] = updaters[mode](Skada.last, player)
                             else
                                 encounter.data[mode] = player[mode:lower()]
                             end
@@ -139,6 +152,8 @@ Skada:AddLoadableModule(
                 end
             end
         end
+
+        -- :::::::::::::::::::::::::::::::::::::::::::::::
 
         function mod_modes:Enter(win, id, label)
             self.mobid = id
@@ -282,15 +297,13 @@ Skada:AddLoadableModule(
         end
 
         function mod:OnEnable()
-            mod_comparison.metadata = {ordersort = true}
+            mod_comparison.metadata = {}
             mod_modes.metadata = {click1 = mod_comparison}
-            mod.metadata = {click1 = mod_modes}
+            self.metadata = {click1 = mod_modes}
+
+            hooksecurefunc(Skada, "EndSegment", self.EndSegment)
 
             Skada:AddMode(self)
-
-            -- register required frame events.
-            f:RegisterEvent("PLAYER_REGEN_ENABLED")
-            f:SetScript("OnEvent", EventHandler)
         end
 
         function mod:OnDisable()
