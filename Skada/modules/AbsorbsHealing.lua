@@ -378,7 +378,7 @@ Skada:AddLoadableModule(
 
                 for spellid, spell in _pairs(player.healing.spells) do
                     if spell.overhealing > 0 then
-                		local total = spell.amount + spell.overhealing
+                        local total = spell.amount + spell.overhealing
                         local spellname, _, spellicon = _GetSpellInfo(spellid)
 
                         local d = win.dataset[nr] or {}
@@ -391,9 +391,12 @@ Skada:AddLoadableModule(
                         d.spellschool = spell.school
 
                         d.value = spell.overhealing
-                        d.valuetext = Skada:FormatValueText(
-                            Skada:FormatNumber(spell.overhealing), mod.metadata.columns.Overheal,
-                            _format("%02.1f%%", 100 * spell.overhealing / math_max(1, total)), mod.metadata.columns.Percent
+                        d.valuetext =
+                            Skada:FormatValueText(
+                            Skada:FormatNumber(spell.overhealing),
+                            mod.metadata.columns.Overheal,
+                            _format("%02.1f%%", 100 * spell.overhealing / math_max(1, total)),
+                            mod.metadata.columns.Percent
                         )
 
                         if spell.overhealing > max then
@@ -423,7 +426,7 @@ Skada:AddLoadableModule(
                 for targetname, target in _pairs(player.healing.targets) do
                     local overhealed = target.overhealing or 0
                     if overhealed > 0 then
-                    	local total = target.amount + overhealed
+                        local total = target.amount + overhealed
                         local d = win.dataset[nr] or {}
                         win.dataset[nr] = d
 
@@ -434,9 +437,12 @@ Skada:AddLoadableModule(
                         d.spec = target.spec
 
                         d.value = overhealed
-                        d.valuetext = Skada:FormatValueText(
-                            Skada:FormatNumber(overhealed), mod.metadata.columns.Overheal,
-                            _format("%02.1f%%", 100 * overhealed / math_max(1, total)), mod.metadata.columns.Percent
+                        d.valuetext =
+                            Skada:FormatValueText(
+                            Skada:FormatNumber(overhealed),
+                            mod.metadata.columns.Overheal,
+                            _format("%02.1f%%", 100 * overhealed / math_max(1, total)),
+                            mod.metadata.columns.Percent
                         )
 
                         if overhealed > max then
@@ -455,8 +461,8 @@ Skada:AddLoadableModule(
             local nr, max = 1, 0
 
             for i, player in _ipairs(set.players) do
-            	if player.healing.overhealing > 0 then
-            		local total = player.healing.amount + player.healing.overhealing
+                if player.healing.overhealing > 0 then
+                    local total = player.healing.amount + player.healing.overhealing
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
@@ -467,9 +473,12 @@ Skada:AddLoadableModule(
                     d.spec = player.spec
 
                     d.value = player.healing.overhealing
-                    d.valuetext = Skada:FormatValueText(
-                    	Skada:FormatNumber(player.healing.overhealing), self.metadata.columns.Overheal,
-                    	_format("%02.1f%%", 100 * player.healing.overhealing / math_max(1, total)), self.metadata.columns.Percent
+                    d.valuetext =
+                        Skada:FormatValueText(
+                        Skada:FormatNumber(player.healing.overhealing),
+                        self.metadata.columns.Overheal,
+                        _format("%02.1f%%", 100 * player.healing.overhealing / math_max(1, total)),
+                        self.metadata.columns.Percent
                     )
 
                     if player.healing.overhealing > max then
@@ -721,11 +730,12 @@ Skada:AddLoadableModule(
                     d.spec = player.spec
 
                     d.value = player.healing.amount
-                    d.valuetext = _format(
-                    	"%s/%s (%02.1f%%)",
-                    	Skada:FormatNumber(player.healing.amount),
-                    	Skada:FormatNumber(player.healing.overhealing),
-                    	100 * player.healing.overhealing / total
+                    d.valuetext =
+                        _format(
+                        "%s/%s (%02.1f%%)",
+                        Skada:FormatNumber(player.healing.amount),
+                        Skada:FormatNumber(player.healing.overhealing),
+                        100 * player.healing.overhealing / total
                     )
 
                     if player.healing.amount > max then
@@ -1040,6 +1050,33 @@ Skada:AddLoadableModule(
             end
         end
 
+        function mod:CheckPreShields(event, timestamp)
+            if event == "ENCOUNTER_START" and Skada.current and not Skada.current.stopped then
+                local prefix, min, max = "raid", 1, _GetNumRaidMembers()
+                if max == 0 then
+                    prefix, min, max = "party", 0, _GetNumPartyMembers()
+                end
+
+                local curtime = _GetTime()
+                for n = min, max do
+                    local unit = (n == 0) and "player" or prefix .. _tostring(n)
+                    if _UnitExists(unit) and not _UnitIsDeadOrGhost(unit) then
+                        local dstName = _select(1, _UnitName(unit))
+                        for i = 0, 31 do
+                            local spellname, _, _, _, _, _, expires, unitCaster, _, _, spellid =
+                                UnitAura(unit, i, nil, "BUFF")
+                            if spellid and absorbspells[spellid] and unitCaster then
+                                shields[dstName] = shields[dstName] or {}
+                                shields[dstName][spellid] = shields[dstName][spellid] or {}
+                                shields[dstName][spellid][_select(1, _UnitName(unitCaster))] =
+                                    timestamp + expires - curtime
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
         local function process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool)
             shields[dstName] = shields[dstName] or {}
 
@@ -1150,6 +1187,13 @@ Skada:AddLoadableModule(
                 local spell = player.absorbs.spells[id]
                 if spell then
                     tooltip:AddLine(player.name .. " - " .. label)
+                    if spell.school then
+                        local c = Skada.schoolcolors[spell.school]
+                        local n = Skada.schoolnames[spell.school]
+                        if c and n then
+                            tooltip:AddLine(L[n], c.r, c.g, c.b)
+                        end
+                    end
                     if spell.min and spell.max then
                         tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.min), 255, 255, 255, 255, 255, 255)
                         tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.max), 255, 255, 255, 255, 255, 255)
@@ -1291,58 +1335,15 @@ Skada:AddLoadableModule(
             win.metadata.maxvalue = max
         end
 
-        -- flag used to stop searching for shields.
-        local checked
-
-        --
-        -- the following lines are used to check for players that were
-        -- pre-shielded before the encounter started.
-        -- because the default Skada starts recording only shields that
-        -- were applied after the combat started, with this technic, we
-        -- go through all raid/part members and check if they have shields
-        -- already, if they do, we simply added them to the list so that
-        -- we start recording and not a single absorb goes wasted.
-        -- Don't worry, this occures only once at the start.
-        --
-        function mod:CombatLogEvent(_, timestamp)
-            if Skada.current and not Skada.current.stopped and not checked then
-                local prefix, min, max = "raid", 1, _GetNumRaidMembers()
-                if max == 0 then
-                    prefix, min, max = "party", 0, _GetNumPartyMembers()
-                end
-
-                local curtime = _GetTime()
-                for n = min, max do
-                    local unit = (n == 0) and "player" or prefix .. _tostring(n)
-                    if _UnitExists(unit) and not _UnitIsDeadOrGhost(unit) then
-                        local dstName = _select(1, _UnitName(unit))
-                        for i = 0, 31 do
-                            local spellname, _, _, _, _, _, expires, unitCaster, _, _, spellid =
-                                UnitAura(unit, i, nil, "BUFF")
-                            if spellid and absorbspells[spellid] and unitCaster then
-                                shields[dstName] = shields[dstName] or {}
-                                shields[dstName][spellid] = shields[dstName][spellid] or {}
-                                shields[dstName][spellid][_select(1, _UnitName(unitCaster))] =
-                                    timestamp + expires - curtime
-                            end
-                        end
-                    end
-                end
-                checked = true
-            end
-        end
-
         function mod:OnEnable()
             spellmod.metadata = {tooltip = spell_tooltip}
             playermod.metadata = {showspots = true}
-            mod.metadata = {
+            self.metadata = {
                 showspots = true,
                 click1 = spellmod,
                 click2 = playermod,
                 columns = {Absorbs = true, Percent = true}
             }
-
-            hooksecurefunc(Skada, "CombatLogEvent", mod.CombatLogEvent)
 
             Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {src_is_interesting_nopets = true})
             Skada:RegisterForCL(AuraRemoved, "SPELL_AURA_REMOVED", {src_is_interesting_nopets = true})
@@ -1360,6 +1361,7 @@ Skada:AddLoadableModule(
             Skada:RegisterForCL(SwingMissed, "SWING_MISSED", {dst_is_interesting_nopets = true})
 
             Skada:AddMode(self, L["Absorbs and healing"])
+            Skada.RegisterCallback(self, "ENCOUNTER_START", "CheckPreShields")
         end
 
         function mod:OnDisable()
@@ -1378,7 +1380,7 @@ Skada:AddLoadableModule(
 
         function mod:AddSetAttributes(set)
             set.absorbs = set.absorbs or 0
-            shields, shieldschools, checked = {}, {}, nil
+            shields, shieldschools = {}, {}
         end
     end
 )
@@ -1657,8 +1659,10 @@ Skada:AddLoadableModule(
         function mod:GetSetSummary(set)
             local total = set.healing + set.absorbs
             return Skada:FormatValueText(
-                Skada:FormatNumber(total), self.metadata.columns.Healing,
-                Skada:FormatNumber(getRaidHPS(set)), self.metadata.columns.HPS
+                Skada:FormatNumber(total),
+                self.metadata.columns.Healing,
+                Skada:FormatNumber(getRaidHPS(set)),
+                self.metadata.columns.HPS
             )
         end
     end

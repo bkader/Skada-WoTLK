@@ -14,11 +14,11 @@ Skada:AddLoadableModule(
         local mod_modes = mod:NewModule(L["Improvement modes"])
         local mod_comparison = mod:NewModule(L["Improvement comparison"])
 
-        local UnitGUID, UnitName, UnitClass = UnitGUID, UnitName, UnitClass
-        local pairs, ipairs, select, tostring = pairs, ipairs, select, tostring
+        local _UnitGUID, _UnitName, _UnitClass = UnitGUID, UnitName, UnitClass
+        local _pairs, _ipairs, _select = pairs, ipairs, select
+        local _format, _tostring = string.format, tostring
         local date = date
 
-        local db
         local modes = {
             "ActiveTime",
             "Damage",
@@ -91,20 +91,20 @@ Skada:AddLoadableModule(
         -- :::::::::::::::::::::::::::::::::::::::::::::::
 
         local function find_boss_data(bossname)
-            db = db or SkadaImprovementDB
-            for k, v in pairs(db.bosses) do
+            mod.db = mod.db or SkadaImprovementDB
+            for k, v in _pairs(mod.db.bosses) do
                 if k == bossname then
                     return v
                 end
             end
 
             local boss = {count = 0, encounters = {}}
-            db.bosses[bossname] = boss
+            mod.db.bosses[bossname] = boss
             return find_boss_data(bossname)
         end
 
         local function find_encounter_data(boss, starttime)
-            for i, encounter in ipairs(boss.encounters) do
+            for i, encounter in _ipairs(boss.encounters) do
                 if encounter.starttime == starttime then
                     return encounter
                 end
@@ -114,94 +114,7 @@ Skada:AddLoadableModule(
             return find_encounter_data(boss, starttime)
         end
 
-        function mod:EndSegment()
-            if Skada.last and Skada.last.gotboss and not blacklist[Skada.last.mobname] then
-                -- we only record raid bosses, nothing else.
-                local inInstance, instanceType = IsInInstance()
-                if not inInstance or instanceType ~= "raid" then
-                    return
-                end
-
-                local boss = find_boss_data(Skada.last.mobname)
-                if not boss then
-                    return
-                end
-
-                local encounter = find_encounter_data(boss, Skada.last.starttime)
-                if not encounter then
-                    return
-                end
-
-                for i, player in ipairs(Skada.last.players) do
-                    if player.id == db.id then
-                        for _, mode in ipairs(modes) do
-                            if updaters[mode] then
-                                encounter.data[mode] = updaters[mode](Skada.last, player)
-                            else
-                                encounter.data[mode] = player[mode:lower()]
-                            end
-                        end
-
-                        -- increment boss count and stop
-                        boss.count = boss.count + 1
-                        if boss.count ~= #boss.encounters then
-                            boss.count = #boss.encounters
-                        end
-                        break
-                    end
-                end
-            end
-        end
-
         -- :::::::::::::::::::::::::::::::::::::::::::::::
-
-        function mod_modes:Enter(win, id, label)
-            self.mobid = id
-            self.mobname = label
-            self.title = format(L["%s's overall data"], label)
-        end
-
-        function mod_modes:Update(win, set)
-            local boss = find_boss_data(self.mobname)
-            local max = 0
-
-            if boss then
-                local nr = 1
-
-                for i, mode in ipairs(modes) do
-                    local d = win.dataset[nr] or {}
-                    win.dataset[nr] = d
-
-                    d.id = i
-                    d.label = mode
-
-                    local value, active = 0, 0
-
-                    for _, encounter in ipairs(boss.encounters) do
-                        value = value + (encounter.data[mode] or 0)
-                        active = active + (encounter.data.ActiveTime or 0)
-                    end
-
-                    d.value = value
-
-                    if mode == "ActiveTime" then
-                        d.valuetext = Skada:FormatTime(d.value)
-                    elseif mode == "Deaths" or mode == "Interrupts" or mode == "Fails" then
-                        d.valuetext = tostring(d.value)
-                    else
-                        d.valuetext = Skada:FormatNumber(d.value)
-                    end
-
-                    if i > max then
-                        max = i
-                    end
-
-                    nr = nr + 1
-                end
-            end
-
-            win.metadata.maxvalue = max
-        end
 
         function mod_comparison:Enter(win, id, label)
             self.mobid = id
@@ -229,7 +142,7 @@ Skada:AddLoadableModule(
                         if self.modename == "ActiveTime" then
                             d.valuetext = Skada:FormatTime(d.value)
                         elseif self.modename == "Deaths" or self.modename == "Interrupts" or self.modename == "Fails" then
-                            d.valuetext = tostring(d.value)
+                            d.valuetext = _tostring(d.value)
                         else
                             d.valuetext =
                                 Skada:FormatValueText(
@@ -252,25 +165,69 @@ Skada:AddLoadableModule(
             win.metadata.maxvalue = max
         end
 
-        function mod:Update(win, set)
-            if not db then
-                db = SkadaImprovementDB
+        -- :::::::::::::::::::::::::::::::::::::::::::::::
+
+        function mod_modes:Enter(win, id, label)
+            self.mobid = id
+            self.mobname = label
+            self.title = _format(L["%s's overall data"], label)
+        end
+
+        function mod_modes:Update(win, set)
+            local max = 0
+
+            local boss = find_boss_data(self.mobname)
+            if boss then
+                local nr = 1
+                for i, mode in _ipairs(modes) do
+                    local d = win.dataset[nr] or {}
+                    win.dataset[nr] = d
+
+                    d.id = i
+                    d.label = mode
+
+                    local value, active = 0, 0
+
+                    for _, encounter in _ipairs(boss.encounters) do
+                        value = value + (encounter.data[mode] or 0)
+                        active = active + (encounter.data.ActiveTime or 0)
+                    end
+
+                    d.value = value
+
+                    if mode == "ActiveTime" then
+                        d.valuetext = Skada:FormatTime(d.value)
+                    elseif mode == "Deaths" or mode == "Interrupts" or mode == "Fails" then
+                        d.valuetext = _tostring(d.value)
+                    else
+                        d.valuetext = Skada:FormatNumber(d.value)
+                    end
+
+                    if i > max then
+                        max = i
+                    end
+
+                    nr = nr + 1
+                end
             end
 
-            local nr, max = 1, 0
-            if db.bosses then
-                for name, data in pairs(db.bosses) do
+            win.metadata.maxvalue = max
+        end
+
+        -- :::::::::::::::::::::::::::::::::::::::::::::::
+
+        function mod:Update(win, set)
+            local max = 0
+            if self.db and self.db.bosses then
+                local nr = 1
+                for name, data in _pairs(self.db.bosses) do
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
                     d.id = name
                     d.label = name
                     d.value = data.count
-                    d.valuetext = tostring(data.count)
-
-                    if data.count > max then
-                        max = data.count
-                    end
+                    d.valuetext = _tostring(data.count)
 
                     if data.count > max then
                         max = data.count
@@ -287,13 +244,55 @@ Skada:AddLoadableModule(
             SkadaImprovementDB = SkadaImprovementDB or {}
             if next(SkadaImprovementDB) == nil then
                 SkadaImprovementDB = {
-                    id = UnitGUID("player"),
-                    name = UnitName("player"),
-                    class = select(2, UnitClass("player")),
+                    id = _UnitGUID("player"),
+                    name = _UnitName("player"),
+                    class = _select(2, _UnitClass("player")),
                     bosses = {}
                 }
             end
-            db = SkadaImprovementDB
+            self.db = SkadaImprovementDB
+        end
+
+        function mod:EncounterEnd(event, data)
+            if event ~= "ENCOUNTER_END" or not data then
+                return
+            end
+
+            -- we only record raid bosses, nothing else.
+            local inInstance, instanceType = IsInInstance()
+            if not inInstance or instanceType ~= "raid" then
+                return
+            end
+
+            if data.gotboss and (data.mobname and not blacklist[data.mobname]) then
+                local boss = find_boss_data(data.mobname)
+                if not boss then
+                    return
+                end
+
+                local encounter = find_encounter_data(boss, data.starttime)
+                if not encounter then
+                    return
+                end
+
+                for i, player in _ipairs(data.players) do
+                    if player.id == self.db.id then
+                        for _, mode in _ipairs(modes) do
+                            if updaters[mode] then
+                                encounter.data[mode] = updaters[mode](data, player)
+                            else
+                                encounter.data[mode] = player[mode:lower()]
+                            end
+                        end
+                        -- increment boss count and stop
+                        boss.count = boss.count + 1
+                        if boss.count ~= #boss.encounters then
+                            boss.count = #boss.encounters
+                        end
+                        break
+                    end
+                end
+            end
         end
 
         function mod:OnEnable()
@@ -301,17 +300,12 @@ Skada:AddLoadableModule(
             mod_modes.metadata = {click1 = mod_comparison}
             self.metadata = {click1 = mod_modes}
 
-            hooksecurefunc(Skada, "EndSegment", self.EndSegment)
-
             Skada:AddMode(self)
+            Skada.RegisterCallback(self, "ENCOUNTER_END", "EncounterEnd")
         end
 
         function mod:OnDisable()
             Skada:RemoveMode(self)
-
-            -- unregister frame events.
-            f:UnregisterEvent("PLAYER_REGEN_ENABLED")
-            f:SetScript("OnEvent", nil)
         end
 
         local function ask_for_reset()
@@ -334,7 +328,7 @@ Skada:AddLoadableModule(
             SkadaImprovementDB = {}
             self:OnInitialize()
             collectgarbage("collect")
-            for _, win in ipairs(Skada:GetWindows()) do
+            for _, win in _ipairs(Skada:GetWindows()) do
                 local mode = win.db.mode
                 if mode == L["Improvement"] or mode == L["Improvement modes"] or mode == L["Improvement comparison"] then
                     win:DisplayMode(mod)

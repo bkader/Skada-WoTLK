@@ -1,5 +1,6 @@
 local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceConsole-3.0", "AceEvent-3.0")
 _G.Skada = Skada
+Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 local ACD = LibStub("AceConfigDialog-3.0")
@@ -2001,8 +2002,10 @@ function Skada:FormatNumber(number)
                 return format("%02.3fB", number / 1000000000)
             elseif number > 1000000 then
                 return format("%02.2fM", number / 1000000)
-            else
+            elseif number > 1000 then
                 return format("%02.1fK", number / 1000)
+            else
+                return math_floor(number)
             end
         else
             return math_floor(number)
@@ -2747,8 +2750,8 @@ do
                 tinsert(self.char.sets, 1, self.current)
             end
         end
-
         self.last = self.current
+        self.last.started = nil
 
         self.total.time = self.total.time + self.current.time
         setPlayerActiveTimes(self.total)
@@ -2758,6 +2761,8 @@ do
             player.last = nil
         end
 
+        -- trigger ENCOUNTER_END before clearing
+        self.callbacks:Fire("ENCOUNTER_END", self.current)
         self.current = nil
 
         local numsets = 0
@@ -2972,12 +2977,18 @@ do
                     self.total = createSet(L["Total"], now)
                 end
                 tentativehandle = C_Timer.NewTimer(1, function()
-					tentative = nil
-					tentativehandle = nil
-					self.current = nil
-				end, 1)
+                	tentative = nil
+                	tentativehandle = nil
+                	self.current = nil
+                end, 1)
                 tentative = 0
             end
+        end
+
+        -- ENCOUNTER_START custom event
+        if self.current and not self.current.started then
+            self.callbacks:Fire("ENCOUNTER_START", timestamp)
+            self.current.started = true
         end
 
         if self.current and self.db.profile.autostop then
