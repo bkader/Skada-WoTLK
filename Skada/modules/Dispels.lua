@@ -159,7 +159,7 @@ Skada:AddLoadableModule(
                         d.spec = p.spec
                         d.role = p.role
                     else
-                        d.class = "UNKNOWN"
+                        d.class = Skada:GetPetOwner(target.id) and "PET" or "UNKNOWN"
                     end
 
                     d.value = target.count
