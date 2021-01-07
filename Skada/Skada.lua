@@ -2987,7 +2987,7 @@ do
 
         -- ENCOUNTER_START custom event
         if self.current and not self.current.started then
-            self.callbacks:Fire("ENCOUNTER_START", timestamp)
+            self.callbacks:Fire("ENCOUNTER_START", timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             self.current.started = true
         end
 
