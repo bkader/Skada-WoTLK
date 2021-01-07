@@ -418,6 +418,10 @@ L["%s's overhealing spells"] = "%s Überheilungszauber"
 L["%s's overhealed players"] = "%s überheilte Spieler"
 
 L["Healing and Overhealing"] = "Heilung und Überheilung"
+-- L["Healing and overhealing spells"] = ""
+-- L["Healed and overhealed players"] = ""
+-- L["%s's healing and overhealing spells"] = ""
+-- L["%s's healed and overhealed players"] = ""
 
 L["Absorbs"] = "Absorptionen"
 L["Absorbed player list"] = "Absorbierte Spielerliste"

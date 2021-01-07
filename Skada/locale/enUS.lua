@@ -383,6 +383,10 @@ L["%s's overhealing spells"] = true
 L["%s's overhealed players"] = true
 
 L["Healing and Overhealing"] = true
+L["Healing and overhealing spells"] = true
+L["Healed and overhealed players"] = true
+L["%s's healing and overhealing spells"] = true
+L["%s's healed and overhealed players"] = true
 
 L["Absorbs"] = true
 L["Absorbed player list"] = true

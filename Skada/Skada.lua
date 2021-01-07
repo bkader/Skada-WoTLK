@@ -2977,9 +2977,9 @@ do
                     self.total = createSet(L["Total"], now)
                 end
                 tentativehandle = C_Timer.NewTimer(1, function()
-                	tentative = nil
-                	tentativehandle = nil
-                	self.current = nil
+					tentative = nil
+					tentativehandle = nil
+					self.current = nil
                 end, 1)
                 tentative = 0
             end

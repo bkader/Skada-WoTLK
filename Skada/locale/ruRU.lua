@@ -380,6 +380,10 @@ L["%s's overhealing spells"] = "%s - Заклинания избыточного
 L["%s's overhealed players"] = "%s - Сверхлеченные игроки"
 
 L["Healing and Overhealing"] = "Исцеление и Избыточное исцеление"
+-- L["Healing and overhealing spells"] = ""
+-- L["Healed and overhealed players"] = ""
+-- L["%s's healing and overhealing spells"] = ""
+-- L["%s's healed and overhealed players"] = ""
 
 L["Absorbs"] = "Поглощение"
 L["Absorbed player list"] = "Поглощено на игроках"

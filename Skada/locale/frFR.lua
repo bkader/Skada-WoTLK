@@ -377,6 +377,10 @@ L["%s's overhealing spells"] = "Sorts de soin excessif de %s"
 L["%s's overhealed players"] = "Joueurs excessivement soignés par %s"
 
 L["Healing and Overhealing"] = "Soins prodigués et soins excessifs"
+L["Healing and overhealing spells"] = "Sorts des soins prodigués et des soins excessifs"
+L["Healed and overhealed players"] = "Cibles des soins prodigués et des soins excessifs"
+L["%s's healing and overhealing spells"] = "Liste des sorts de soin de %s"
+L["%s's healed and overhealed players"] = "Liste des joueurs soignés par %s"
 
 L["Absorbs"] = "Absorptions"
 L["Absorbed player list"] = "Liste des joueurs absorbés"
