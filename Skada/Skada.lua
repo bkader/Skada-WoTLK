@@ -1138,19 +1138,6 @@ do
         return role
     end
 
-    -- we use this just to cache specs so we don't look for them again.
-    Skada.cached_specs = {}
-    Skada.cached_talents = {}
-    function Skada:LibGroupTalents_Update(event, guid, unit, tree_id, n1, n2, n3)
-        self.cached_talents[guid] = n1 .. "/" .. n2 .. "/" .. n3
-        local class, _, _, _, name = select(2, GetPlayerInfoByGUID(guid))
-        local specIdx = self:GetPlayerSpecID(name, class)
-        if specIdx then
-            self.cached_specs[guid] = specIdx
-        end
-    end
-    LGT.RegisterCallback(Skada, "LibGroupTalents_Update")
-
     -- sometimes GUID are shown instead of proper players names
     -- this function is called and used only once per player
     function Skada:FixPlayer(player)
@@ -1207,7 +1194,7 @@ do
                         player.role = self:UnitGroupRolesAssigned(player.name)
                     end
                     if not player.spec then
-                        player.spec = self.cached_specs[player.id] or self:GetPlayerSpecID(player.name, player.class)
+                        player.spec = self:GetPlayerSpecID(player.name, player.class)
                     end
                 end
             end
