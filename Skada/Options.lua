@@ -52,7 +52,7 @@ Skada.windowdefaults = {
         color = {r = 0, g = 0, b = 0, a = 0.4},
         texture = "Solid",
         bordercolor = {r = 0, g = 0, b = 0, a = 0.5},
-        bordertexture = "Blizzard Party",
+        bordertexture = "None",
         borderthickness = 1,
         height = 200
     },
@@ -120,7 +120,6 @@ Skada.defaults = {
         modulesBlocked = {
             ["Spamage"] = true,
             ["Potions"] = true,
-            ["Improvement"] = true,
             ["Power gained: Rage"] = true,
             ["Power gained: Energy"] = true,
             ["Power gained: Runic Power"] = true,
