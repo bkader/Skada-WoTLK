@@ -409,6 +409,7 @@ L["%s's buffs"] = "Buffs de %s"
 
 L["Potions"] = "Potions"
 L["Potions list"] = "Liste des potions"
+L["Players list"] = "Liste des joueurs"
 L["%s's used potions"] = "Potions utilisées par %s"
 
 L["Debuffs"] = "Debuffs"

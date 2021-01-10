@@ -11,6 +11,7 @@
 <Script file="modules\Dispels.lua" />
 <Script file="modules\Interrupts.lua" />
 <Script file="modules\Power.lua" />
+<Script file="modules\Potions.lua" />
 <Script file="modules\CCTracker.lua" />
 <Script file="modules\Failbot.lua" />
 <Script file="modules\Improvement.lua" />

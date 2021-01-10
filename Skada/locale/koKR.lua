@@ -410,6 +410,7 @@ if not L then return end
 
 -- L["Potions"] = ""
 -- L["Potions list"] = ""
+-- L["Players list"] = ""
 -- L["%s's used potions"] = ""
 
 -- L["Debuffs"] = ""

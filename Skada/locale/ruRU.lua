@@ -412,6 +412,7 @@ L["%s's buffs"] = "%s - Баффы"
 
 L["Potions"] = "Зелья"
 L["Potions list"] = "Список зелий"
+L["Players list"] = "Список игроков"
 L["%s's used potions"] = "%s - Использованные зелья"
 
 L["Debuffs"] = "Дебаффы"

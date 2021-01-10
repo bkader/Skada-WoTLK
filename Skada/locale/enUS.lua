@@ -415,6 +415,7 @@ L["%s's buffs"] = true
 
 L["Potions"] = true
 L["Potions list"] = true
+L["Players list"] = true
 L["%s's used potions"] = true
 
 L["Debuffs"] = true

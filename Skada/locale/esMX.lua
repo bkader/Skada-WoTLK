@@ -410,6 +410,7 @@ L["%s's absorb spells"] = "Hechizos de absorción de %s"
 
 -- L["Potions"] = ""
 -- L["Potions list"] = ""
+-- L["Players list"] = ""
 -- L["%s's used potions"] = ""
 
 -- L["Debuffs"] = ""
