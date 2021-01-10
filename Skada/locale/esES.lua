@@ -196,6 +196,8 @@ if not L then return end
 -- general options
 -- L["Show minimap button"] = ""
 -- L["Toggles showing the minimap button."] = ""
+-- L["Shorten menus"] = ""
+-- L["Removes mode and segment menus from Skada menu to reduce its height. Menus are still accessible using window buttons."] = ""
 -- L["Translit"] = ""
 -- L["Make those russian letters that no one understand to be presented as western letters."] = ""
 -- L["Merge pets"] = ""

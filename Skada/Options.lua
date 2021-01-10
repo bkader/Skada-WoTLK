@@ -109,6 +109,7 @@ Skada.defaults = {
         hidecombat = false,
         translit = false,
         mergepets = true,
+        shortmenu = true,
         feed = "",
         showtotals = false,
         autostop = false,
@@ -315,6 +316,18 @@ Skada.options = {
                         Skada:RefreshMMButton()
                     end
                 },
+                shortmenu = {
+                    type = "toggle",
+                    name = L["Shorten menus"],
+                    desc = L["Removes mode and segment menus from Skada menu to reduce its height. Menus are still accessible using window buttons."],
+                    order = 1.1,
+                    get = function()
+                        return Skada.db.profile.shortmenu
+                    end,
+                    set = function()
+                        Skada.db.profile.shortmenu = not Skada.db.profile.shortmenu
+                    end
+                },
                 mergepets = {
                     type = "toggle",
                     name = L["Merge pets"],
@@ -325,6 +338,7 @@ Skada.options = {
                     end,
                     set = function()
                         Skada.db.profile.mergepets = not Skada.db.profile.mergepets
+                        CloseDropDownMenus()
                     end
                 },
                 showtotals = {
@@ -433,9 +447,7 @@ Skada.options = {
                 tentativecombatstart = {
                     type = "toggle",
                     name = L["Aggressive combat detection"],
-                    desc = L[
-                        "Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons. Meaningless on boss encounters."
-                    ],
+                    desc = L["Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons. Meaningless on boss encounters."],
                     order = 11,
                     get = function()
                         return Skada.db.profile.tentativecombatstart
@@ -487,9 +499,7 @@ Skada.options = {
                 datafeed = {
                     type = "select",
                     name = L["Data feed"],
-                    desc = L[
-                        "Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."
-                    ],
+                    desc = L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."],
                     order = 15,
                     values = function()
                         local feeds = {}

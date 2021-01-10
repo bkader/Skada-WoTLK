@@ -198,6 +198,8 @@ L["All data has been reset."] = true
 -- general options
 L["Show minimap button"] = true
 L["Toggles showing the minimap button."] = true
+L["Shorten menus"] = true
+L["Removes mode and segment menus from Skada menu to reduce its height. Menus are still accessible using window buttons."] = true
 L["Translit"] = true
 L["Make those russian letters that no one understand to be presented as western letters."] = true
 L["Merge pets"] = true

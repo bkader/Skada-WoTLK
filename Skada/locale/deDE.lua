@@ -210,7 +210,9 @@ L["All data has been reset."] = "Alle Daten wurden zurückgesetzt."
 -- general options
 L["Show minimap button"] = "Minikartenbutton zeigen"
 L["Toggles showing the minimap button."] = "Zeigt oder versteckt den Minikartenbutton"
--- L["Translit"] = ""
+L["Shorten menus"] = "Menüs kürzen"
+L["Removes mode and segment menus from Skada menu to reduce its height. Menus are still accessible using window buttons."] = "Modus- und Segmentmenüs aus dem Skada-Menü entfernt, um die Höhe zu verringern. Auf die Menüs kann weiterhin über Fenstertasten zugegriffen werden."
+L["Translit"] = "Translit"
 -- L["Make those russian letters that no one understand to be presented as western letters."] = ""
 L["Merge pets"] = "Begleiter zusammenfügen"
 L["Merges pets with their owners. Changing this only affects new data."] =

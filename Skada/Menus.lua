@@ -145,75 +145,77 @@ function Skada:OpenMenu(window)
             if _type(UIDROPDOWNMENU_MENU_VALUE) == "table" then
                 local window = UIDROPDOWNMENU_MENU_VALUE
 
-                -- dsplay modes only if we have modules enabled.
-                local modules = Skada:GetModes()
-                if next(modules) ~= nil then
-                    wipe(info)
-                    info.isTitle = 1
-                    info.text = L["Mode"]
-                    info.notCheckable = 1
-                    _UIDropDownMenu_AddButton(info, level)
-
-                    for i, module in _ipairs(modules) do
+                if not Skada.db.profile.shortmenu then
+                    -- dsplay modes only if we have modules enabled.
+                    local modules = Skada:GetModes()
+                    if next(modules) ~= nil then
                         wipe(info)
-                        info.text = module:GetName()
-                        info.func = function()
-                            window:DisplayMode(module)
+                        info.isTitle = 1
+                        info.text = L["Mode"]
+                        info.notCheckable = 1
+                        _UIDropDownMenu_AddButton(info, level)
+
+                        for i, module in _ipairs(modules) do
+                            wipe(info)
+                            info.text = module:GetName()
+                            info.func = function()
+                                window:DisplayMode(module)
+                            end
+                            info.checked = (window.selectedmode == module)
+                            _UIDropDownMenu_AddButton(info, level)
                         end
-                        info.checked = (window.selectedmode == module)
+
+                        wipe(info)
+                        info.disabled = 1
+                        info.notCheckable = 1
                         _UIDropDownMenu_AddButton(info, level)
                     end
 
+                    -- Display list of sets with current ticked; let user switch set by checking one.
+                    wipe(info)
+                    info.isTitle = 1
+                    info.text = L["Segment"]
+                    info.notCheckable = 1
+                    _UIDropDownMenu_AddButton(info, level)
+
+                    wipe(info)
+                    info.text = L["Total"]
+                    info.func = function()
+                        window.selectedset = "total"
+                        Skada:Wipe()
+                        Skada:UpdateDisplay(true)
+                    end
+                    info.checked = (window.selectedset == "total")
+                    _UIDropDownMenu_AddButton(info, level)
+
+                    wipe(info)
+                    info.text = L["Current"]
+                    info.func = function()
+                        window.selectedset = "current"
+                        Skada:Wipe()
+                        Skada:UpdateDisplay(true)
+                    end
+                    info.checked = (window.selectedset == "current")
+                    _UIDropDownMenu_AddButton(info, level)
+
+                    for i, set in _ipairs(Skada:get_sets()) do
+                        wipe(info)
+                        info.text = Skada:GetSetLabel(set)
+                        info.func = function()
+                            window.selectedset = i
+                            Skada:Wipe()
+                            Skada:UpdateDisplay(true)
+                        end
+                        info.checked = (window.selectedset == set.starttime)
+                        _UIDropDownMenu_AddButton(info, level)
+                    end
+
+                    -- separator
                     wipe(info)
                     info.disabled = 1
                     info.notCheckable = 1
                     _UIDropDownMenu_AddButton(info, level)
                 end
-
-                -- Display list of sets with current ticked; let user switch set by checking one.
-                wipe(info)
-                info.isTitle = 1
-                info.text = L["Segment"]
-                info.notCheckable = 1
-                _UIDropDownMenu_AddButton(info, level)
-
-                wipe(info)
-                info.text = L["Total"]
-                info.func = function()
-                    window.selectedset = "total"
-                    Skada:Wipe()
-                    Skada:UpdateDisplay(true)
-                end
-                info.checked = (window.selectedset == "total")
-                _UIDropDownMenu_AddButton(info, level)
-
-                wipe(info)
-                info.text = L["Current"]
-                info.func = function()
-                    window.selectedset = "current"
-                    Skada:Wipe()
-                    Skada:UpdateDisplay(true)
-                end
-                info.checked = (window.selectedset == "current")
-                _UIDropDownMenu_AddButton(info, level)
-
-                for i, set in _ipairs(Skada:get_sets()) do
-                    wipe(info)
-                    info.text = Skada:GetSetLabel(set)
-                    info.func = function()
-                        window.selectedset = i
-                        Skada:Wipe()
-                        Skada:UpdateDisplay(true)
-                    end
-                    info.checked = (window.selectedset == set.starttime)
-                    _UIDropDownMenu_AddButton(info, level)
-                end
-
-                -- separator
-                wipe(info)
-                info.disabled = 1
-                info.notCheckable = 1
-                _UIDropDownMenu_AddButton(info, level)
 
                 -- lock window
                 wipe(info)
