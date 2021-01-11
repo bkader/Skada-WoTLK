@@ -2710,7 +2710,7 @@ do
         if self.current and self.current.stopped then
             self.current.stopped = nil
             self.current.endtime = nil
-            self.current.time = nil
+            self.current.time = 0
         end
     end
 end
@@ -2861,10 +2861,10 @@ do
                     self.total = createSet(L["Total"], now)
                 end
                 tentativehandle = self.NewTimer(1, function()
-                	tentative = nil
-                	tentativehandle = nil
-                	self.current = nil
-                end, 1)
+					tentative = nil
+					tentativehandle = nil
+					self.current = nil
+				end, 1)
                 tentative = 0
             end
         end
@@ -3022,7 +3022,7 @@ do
     local TickerMetatable = {__index = TickerPrototype, __metatable = true}
     local waitTable = {}
 
-    local waitFrame = SkadaTimerFrame or CreateFrame("Frame", "SkadaTimerFrame", UIParent)
+    local waitFrame = _G.SkadaTimerFrame or CreateFrame("Frame", "SkadaTimerFrame", UIParent)
     waitFrame:SetScript(
         "OnUpdate",
         function(self, elapsed)
@@ -3090,7 +3090,7 @@ do
         )
     end
 
-    Skada.NewTimer = function(callback)
+    Skada.NewTimer = function(duration, callback)
         return CreateTicker(duration, callback, 1)
     end
 
