@@ -12,7 +12,7 @@ Skada:AddLoadableModule(
 
         -- cache frequently used globals
         local _pairs, _ipairs, _select = pairs, ipairs, select
-        local _format, math_max = string.format, math.max
+        local _format, _tostring, math_max = string.format, tostring, math.max
         local _GetNumPartyMembers = GetNumPartyMembers
         local _GetNumRaidMembers = GetNumRaidMembers
         local _GetItemInfo = GetItemInfo
@@ -77,12 +77,10 @@ Skada:AddLoadableModule(
                             local spellid = _select(11, UnitAura(unit, i, nil, "BUFF"))
                             if spellid and potionIDs[spellid] then
                                 -- instant recording doesn't work, so we delay it
-                                C_Timer.After(
-                                    Skada.db.profile.updatefrequency,
-                                    function()
-                                        PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid)
-                                    end
-                                )
+                                Skada.After(1, function()
+									PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid)
+                                end)
+                                break -- beause we can only have a single potion
                             end
                         end
                     end

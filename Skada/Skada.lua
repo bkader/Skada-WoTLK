@@ -136,104 +136,6 @@ local function GetGroupTypeAndCount()
     return t, count
 end
 
--- C_Timer instead of AceTimer
--- shamelessly copied from Details.
-if not C_Timer or C_Timer._version ~= 3 then
-    local setmetatable = setmetatable
-
-    C_Timer = C_Timer or {}
-    C_Timer._version = 3
-
-    local TickerPrototype = {}
-    local TickerMetatable = {
-        __index = TickerPrototype,
-        __metatable = true
-    }
-
-    local waitTable = {}
-    local waitFrame = TimerFrame or CreateFrame("Frame", "TimerFrame", UIParent)
-    waitFrame:SetScript(
-        "OnUpdate",
-        function(self, elapsed)
-            local total = #waitTable
-
-            for i = 1, total do
-                local ticker = waitTable[i]
-
-                if ticker then
-                    if ticker._cancelled then
-                        tremove(waitTable, i)
-                    elseif ticker._delay > elapsed then
-                        ticker._delay = ticker._delay - elapsed
-                        i = i + 1
-                    else
-                        ticker._callback(ticker)
-
-                        if ticker._remainingIterations == -1 then
-                            ticker._delay = ticker._duration
-                            i = i + 1
-                        elseif ticker._remainingIterations > 1 then
-                            ticker._remainingIterations = ticker._remainingIterations - 1
-                            ticker._delay = ticker._duration
-                            i = i + 1
-                        elseif ticker._remainingIterations == 1 then
-                            tremove(waitTable, i)
-                            total = total - 1
-                        end
-                    end
-                end
-            end
-
-            if #waitTable == 0 then
-                self:Hide()
-            end
-        end
-    )
-
-    local function AddDelayedCall(ticker, oldTicker)
-        if oldTicker and type(oldTicker) == "table" then
-            ticker = oldTicker
-        end
-
-        tinsert(waitTable, ticker)
-        waitFrame:Show()
-    end
-    _G.AddDelayedCall = _G.AddDelayedCall or AddDelayedCall
-
-    local function CreateTicker(duration, callback, iterations)
-        local ticker = setmetatable({}, TickerMetatable)
-        ticker._remainingIterations = iterations or -1
-        ticker._duration = duration
-        ticker._delay = duration
-        ticker._callback = callback
-
-        AddDelayedCall(ticker)
-        return ticker
-    end
-
-    function C_Timer.After(duration, callback)
-        AddDelayedCall(
-            {
-                _remainingIterations = 1,
-                _delay = duration,
-                _callback = callback
-            }
-        )
-    end
-
-    function C_Timer.NewTimer(duration, callback)
-        return CreateTicker(duration, callback, 1)
-    end
-
-    function C_Timer.NewTicker(duration, callback, iterations)
-        return CreateTicker(duration, callback, iterations)
-    end
-
-    function TickerPrototype:Cancel()
-        self._cancelled = true
-    end
-end
-
 -- ============= --
 -- needed locals --
 -- ============= --
@@ -2590,7 +2492,7 @@ function Skada:OnInitialize()
     end
 
     self:ReloadSettings()
-    C_Timer.After(
+    self.After(
         2,
         function()
             self:ApplySettings()
@@ -2633,13 +2535,8 @@ function Skada:OnEnable()
     end
 
     -- used to fix broken combat log
-    C_Timer.NewTicker(2, self.CleanGarbage)
-    C_Timer.After(
-        3,
-        function()
-            self:MemoryCheck()
-        end
-    )
+    self.NewTicker(2, function() self:CleanGarbage(false) end)
+    self.After(3, function() self:MemoryCheck() end)
 end
 
 -- ======================================================= --
@@ -2793,7 +2690,7 @@ do
             tick_timer:Cancel()
         end
         update_timer, tick_timer = nil, nil
-        C_Timer.After(
+        self.After(
             3,
             function()
                 self:MemoryCheck()
@@ -2883,13 +2780,13 @@ do
         self:UpdateDisplay(true)
 
         update_timer =
-            C_Timer.NewTicker(
+            self.NewTicker(
             self.db.profile.updatefrequency or 0.25,
             function()
                 self:UpdateDisplay()
             end
         )
-        tick_timer = C_Timer.NewTicker(1, combat_tick)
+        tick_timer = self.NewTicker(1, combat_tick)
     end
 
     -- for shaman elemental
@@ -2963,10 +2860,10 @@ do
                 if not self.total then
                     self.total = createSet(L["Total"], now)
                 end
-                tentativehandle = C_Timer.NewTimer(1, function()
-					tentative = nil
-					tentativehandle = nil
-					self.current = nil
+                tentativehandle = self.NewTimer(1, function()
+                	tentative = nil
+                	tentativehandle = nil
+                	self.current = nil
                 end, 1)
                 tentative = 0
             end
@@ -2974,7 +2871,18 @@ do
 
         -- ENCOUNTER_START custom event
         if self.current and not self.current.started then
-            self.callbacks:Fire("ENCOUNTER_START", timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+            self.callbacks:Fire(
+                "ENCOUNTER_START",
+                timestamp,
+                eventtype,
+                srcGUID,
+                srcName,
+                srcFlags,
+                dstGUID,
+                dstName,
+                dstFlags,
+                ...
+            )
             self.current.started = true
         end
 
@@ -3104,5 +3012,93 @@ do
                 end
             end
         end
+    end
+end
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--> Mimic C_Timer instead of using AceTimer
+do
+    local TickerPrototype = {}
+    local TickerMetatable = {__index = TickerPrototype, __metatable = true}
+    local waitTable = {}
+
+    local waitFrame = SkadaTimerFrame or CreateFrame("Frame", "SkadaTimerFrame", UIParent)
+    waitFrame:SetScript(
+        "OnUpdate",
+        function(self, elapsed)
+            local total = #waitTable
+            for i = 1, total do
+                local ticker = waitTable[i]
+
+                if ticker then
+                    if ticker._cancelled then
+                        tremove(waitTable, i)
+                    elseif ticker._delay > elapsed then
+                        ticker._delay = ticker._delay - elapsed
+                        i = i + 1
+                    else
+                        ticker._callback(ticker)
+
+                        if ticker._remainingIterations == -1 then
+                            ticker._delay = ticker._duration
+                            i = i + 1
+                        elseif ticker._remainingIterations > 1 then
+                            ticker._remainingIterations = ticker._remainingIterations - 1
+                            ticker._delay = ticker._duration
+                            i = i + 1
+                        elseif ticker._remainingIterations == 1 then
+                            tremove(waitTable, i)
+                            total = total - 1
+                        end
+                    end
+                end
+            end
+
+            if #waitTable == 0 then
+                self:Hide()
+            end
+        end
+    )
+
+    local function AddDelayedCall(ticker, oldTicker)
+        if oldTicker and type(oldTicker) == "table" then
+            ticker = oldTicker
+        end
+
+        tinsert(waitTable, ticker)
+        waitFrame:Show()
+    end
+
+    local function CreateTicker(duration, callback, iterations)
+        local ticker = setmetatable({}, TickerMetatable)
+        ticker._remainingIterations = iterations or -1
+        ticker._duration = duration
+        ticker._delay = duration
+        ticker._callback = callback
+
+        AddDelayedCall(ticker)
+        return ticker
+    end
+
+    Skada.After = function(duration, callback)
+        AddDelayedCall(
+            {
+                _remainingIterations = 1,
+                _delay = duration,
+                _callback = callback
+            }
+        )
+    end
+
+    Skada.NewTimer = function(callback)
+        return CreateTicker(duration, callback, 1)
+    end
+
+    Skada.NewTicker = function(duration, callback, iterations)
+        return CreateTicker(duration, callback, iterations)
+    end
+
+    function TickerPrototype:Cancel()
+        self._cancelled = true
     end
 end
