@@ -423,7 +423,7 @@ function barListPrototype:AdjustButtons()
                     0 - (max(self.button:GetHeight() - btn:GetHeight(), 0) / 2)
                 )
             else
-                btn:SetPoint("TOPRIGHT", lastbtn, "TOPLEFT", 0, 0)
+                btn:SetPoint("TOPRIGHT", lastbtn, "TOPLEFT", -2, 0)
             end
             lastbtn = btn
             nr = nr + 1

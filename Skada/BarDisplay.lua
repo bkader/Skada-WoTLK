@@ -111,8 +111,8 @@ function mod:Create(window)
         window.bargroup:AddButton(
             L["Mode"],
             L["Jump to a specific mode."],
-            "Interface\\Buttons\\UI-GuildButton-OfficerNote-Up",
-            "Interface\\Buttons\\UI-GuildButton-OfficerNote-Up",
+            "Interface\\GROUPFRAME\\UI-GROUP-MAINASSISTICON",
+            "Interface\\GROUPFRAME\\UI-GROUP-MAINASSISTICON",
             function()
                 Skada:ModeMenu(bargroup.win)
             end
