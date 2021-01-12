@@ -393,9 +393,7 @@ Skada:AddLoadableModule(
                                     type = "select",
                                     dialogControl = "LSM30_Sound",
                                     name = L["Threat sound"],
-                                    desc = L[
-                                        "The sound that will be played when your threat percentage reaches a certain point."
-                                    ],
+                                    desc = L["The sound that will be played when your threat percentage reaches a certain point."],
                                     values = AceGUIWidgetLSMlists.sound,
                                     get = function()
                                         return Skada.db.profile.modules.threatsoundname
@@ -408,9 +406,7 @@ Skada:AddLoadableModule(
                                 treshold = {
                                     type = "range",
                                     name = L["Threat threshold"],
-                                    desc = L[
-                                        "When your threat reaches this level, relative to tank, warnings are shown."
-                                    ],
+                                    desc = L["When your threat reaches this level, relative to tank, warnings are shown."],
                                     min = 0,
                                     max = 130,
                                     step = 1,

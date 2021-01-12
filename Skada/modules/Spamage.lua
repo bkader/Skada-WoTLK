@@ -198,6 +198,7 @@ Skada:AddLoadableModule(
         -- ================================================
 
         local firstlines = {
+            "^Details!: (.*)$", -- Details!
             "^Recount - (.*)$", -- Recount
             "^Skada:(.*)$", -- Modified skada
             "^Skada report on (.*) for (.*), (.*) to (.*):$", -- Skada enUS
@@ -301,9 +302,9 @@ Skada:AddLoadableModule(
         end
 
         function mod:ParseChatEvent(event, msg, sender, ...)
-			Skada.db.profile.spamage = Skada.db.profile.spamage or {}
+            Skada.db.profile.spamage = Skada.db.profile.spamage or {}
 
-			local hide = false
+            local hide = false
             for _, e in _ipairs(events) do
                 if event == e and Skada.db.profile.spamage[event] and Skada.db.profile.spamage[event] > 1 then
                     local isrecount, isfirstline, message = mod:FilterLine(event, sender, msg)
