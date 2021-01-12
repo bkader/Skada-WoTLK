@@ -4,8 +4,7 @@ if not L then
 end
 
 L["A damage meter."] = "Ein Damage-Meter."
-L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] =
-    "Die Speicherauslastung ist hoch. Du kannst Skada zurücksetzen und eine der Optionen zur automatischen Zurücksetzung aktivieren."
+L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "Die Speicherauslastung ist hoch. Du kannst Skada zurücksetzen und eine der Optionen zur automatischen Zurücksetzung aktivieren."
 
 L["Skada: Modes"] = "Skada: Modi"
 L["Skada: Fights"] = "Skada: Kämpfe"
@@ -66,8 +65,7 @@ L["Locks the bar window in place."] = "Sperrt das Fenster gegen unbeabsichtigtes
 L["Hide window"] = "Fenster ausblenden"
 L["Hides the window."] = "Blendet das Fenster aus."
 L["Display system"] = "Anzeigesystem"
-L["Choose the system to be used for displaying data in this window."] =
-    "Wähle das System, das für die Anzeige der Daten in diesem Fenster verwendet werden soll."
+L["Choose the system to be used for displaying data in this window."] = "Wähle das System, das für die Anzeige der Daten in diesem Fenster verwendet werden soll."
 
 -- bars
 L["Bars"] = "Leisten"
@@ -109,11 +107,9 @@ L["Choose the background color of the bars."] = "Wähle die Hintergrundfarbe der
 L["Spell school colors"] = "Zauberartfarben"
 L["Use spell school colors where applicable."] = "Verwendet die Farben der Zauberart, falls anwendbar."
 L["Class color bars"] = "Leisten in Klassenfarben"
-L["When possible, bars will be colored according to player class."] =
-    "Wenn möglich, werden die Leisten entsprechend der Klasse eingefärbt."
+L["When possible, bars will be colored according to player class."] = "Wenn möglich, werden die Leisten entsprechend der Klasse eingefärbt."
 L["Class color text"] = "Text in Klassenfarben"
-L["When possible, bar text will be colored according to player class."] =
-    "Wenn möglich, wird der Leistentext entsprechend der Klasse eingefärbt."
+L["When possible, bar text will be colored according to player class."] = "Wenn möglich, wird der Leistentext entsprechend der Klasse eingefärbt."
 L["Class icons"] = "Klassensymbole"
 L["Use class icons where applicable."] = "Wenn möglich, wird ein Klassensymbol vor der Leiste angezeigt."
 L["Spec icons"] = "Spezifikationssymbole"
@@ -123,8 +119,7 @@ L["Use role icons where applicable."] = "Rollensymbole verwenden, wenn dies mög
 L["Clickthrough"] = "Durchklickbar"
 L["Disables mouse clicks on bars."] = "Deaktiviert Mausklicks auf Leisten."
 L["Smooth bars"] = "Sanfte Leisten"
-L["Animate bar changes smoothly rather than immediately."] =
-    "Änderungen an Leisten werden sanft animiert anstatt sofort und sprunghaft dargestellt."
+L["Animate bar changes smoothly rather than immediately."] = "Änderungen an Leisten werden sanft animiert anstatt sofort und sprunghaft dargestellt."
 
 -- title bar
 L["Title bar"] = "Titelleiste"
@@ -163,27 +158,23 @@ L["General"] = "Allgemein"
 L["Scale"] = "Skalierung"
 L["Sets the scale of the window."] = "Legt die Skalierung des Fensters fest."
 L["Strata"] = "Schicht"
-L["This determines what other frames will be in front of the frame."] =
-    "Dies bestimmt, welche anderen Rahmen vor dem Rahmen sein werden."
+L["This determines what other frames will be in front of the frame."] = "Dies bestimmt, welche anderen Rahmen vor dem Rahmen sein werden."
 L["Width"] = "Breite"
 L["Height"] = "Höhe"
 
 -- switching
 L["Mode switching"] = "Moduswechsel"
 L["Combat mode"] = "Kampfmodus"
-L["Automatically switch to set 'Current' and this mode when entering combat."] =
-    "Bei Kampfbeginn automatisch auf das Segment des momentanen Kampfes und den eingestellten Anzeigemodus wechseln."
+L["Automatically switch to set 'Current' and this mode when entering combat."] = "Bei Kampfbeginn automatisch auf das Segment des momentanen Kampfes und den eingestellten Anzeigemodus wechseln."
 L["Return after combat"] = "Zurück nach Kampf"
 L["Return to the previous set and mode after combat ends."] = "Nach dem Kampf wieder zur vorherigen Ansicht wechseln."
 L["Wipe mode"] = "Niederlagenanzeigemodus"
-L["Automatically switch to set 'Current' and this mode after a wipe."] =
-    "Wechselt bei einer Niederlage automatisch auf das Segment des momentanen Kampfes und den hier eingestellten Anzeigemodus ."
+L["Automatically switch to set 'Current' and this mode after a wipe."] = "Wechselt bei einer Niederlage automatisch auf das Segment des momentanen Kampfes und den hier eingestellten Anzeigemodus ."
 
 L["Inline bar display"] = "Einzeilige Leistenanzeige"
 L["Inline display is a horizontal window style."] = "Die einzeilige Anzeige ist ein horizontaler Fensterstil."
 L["Fixed bar width"] = "Feste Leistenbreite"
-L["If checked, bar width is fixed. Otherwise, bar width depends on the text width."] =
-    "Das Aktivieren dieser Option macht die Leistenbreite konstant. Andernfalls ist die Leistenbreite von der Textbreite abhängig."
+L["If checked, bar width is fixed. Otherwise, bar width depends on the text width."] = "Das Aktivieren dieser Option macht die Leistenbreite konstant. Andernfalls ist die Leistenbreite von der Textbreite abhängig."
 
 L["Data text"] = "Datentext"
 L["Text color"] = "Schriftfarbe"
@@ -195,14 +186,11 @@ L["Shift+Left-Click to open menu."] = "Shift-Linksklick, um das Optionsmenü zu 
 -- data resets
 L["Data resets"] = "Daten zurücksetzen"
 L["Reset on entering instance"] = "Beim Betreten einer Instanz:"
-L["Controls if data is reset when you enter an instance."] =
-    "Legt fest, ob die Daten zurückgesetzt werden, wenn Du eine Instanz betrittst."
+L["Controls if data is reset when you enter an instance."] = "Legt fest, ob die Daten zurückgesetzt werden, wenn Du eine Instanz betrittst."
 L["Reset on joining a group"] = "Beim Beitritt in eine Gruppe:"
-L["Controls if data is reset when you join a group."] =
-    "Legt fest, ob die Daten zurückgesetzt werden, wenn Du einer Gruppe beitrittst."
+L["Controls if data is reset when you join a group."] = "Legt fest, ob die Daten zurückgesetzt werden, wenn Du einer Gruppe beitrittst."
 L["Reset on leaving a group"] = "Beim Verlassen einer Gruppe:"
-L["Controls if data is reset when you leave a group."] =
-    "Legt fest, ob die Daten zurückgesetzt werden, wenn Du eine Gruppe verlässt."
+L["Controls if data is reset when you leave a group."] = "Legt fest, ob die Daten zurückgesetzt werden, wenn Du eine Gruppe verlässt."
 L["Ask"] = "Abfragen"
 L["Do you want to reset Skada?"] = "Möchtest Du Skada zurücksetzen?"
 L["All data has been reset."] = "Alle Daten wurden zurückgesetzt."
@@ -215,61 +203,45 @@ L["Removes mode and segment menus from Skada menu to reduce its height. Menus ar
 L["Translit"] = "Translit"
 -- L["Make those russian letters that no one understand to be presented as western letters."] = ""
 L["Merge pets"] = "Begleiter zusammenfügen"
-L["Merges pets with their owners. Changing this only affects new data."] =
-    "Fügt Begleiter mit ihren Besitzern zusammen. Eine Änderung wirkt sich hier nur auf neue Daten aus."
+L["Merges pets with their owners. Changing this only affects new data."] = "Fügt Begleiter mit ihren Besitzern zusammen. Eine Änderung wirkt sich hier nur auf neue Daten aus."
 L["Show totals"] = "Summen zeigen"
-L["Shows a extra row with a summary in certain modes."] =
-    "Zeigt eine extra Zeile mit Zusammenfassungen in bestimmten Modi."
+L["Shows a extra row with a summary in certain modes."] = "Zeigt eine extra Zeile mit Zusammenfassungen in bestimmten Modi."
 L["Only keep boss fighs"] = "Nur Bosskämpfe"
-L["Boss fights will be kept with this on, and non-boss fights are discarded."] =
-    "Nur Bosskämpfe werden gespeichert. Nicht-Bosskämpfe werden verworfen."
+L["Boss fights will be kept with this on, and non-boss fights are discarded."] = "Nur Bosskämpfe werden gespeichert. Nicht-Bosskämpfe werden verworfen."
 L["Hide when solo"] = "Verstecken, wenn Solo"
-L["Hides Skada's window when not in a party or raid."] =
-    "Versteckt das Skada-Fenster, wenn Du in keiner Gruppe oder in keinem Schlachtzug bist."
+L["Hides Skada's window when not in a party or raid."] = "Versteckt das Skada-Fenster, wenn Du in keiner Gruppe oder in keinem Schlachtzug bist."
 L["Hide in PvP"] = "Im PvP verstecken"
 L["Hides Skada's window when in Battlegrounds/Arenas."] = "Skada-Fenster in Schlachtfeldern/Arenen verstecken"
 L["Hide in combat"] = "Im Kampf verbergen"
 L["Hides Skada's window when in combat."] = "Das Skada-Fenster im Kampf verstecken."
 L["Disable while hidden"] = "Deaktivieren wenn versteckt"
-L["Skada will not collect any data when automatically hidden."] =
-    "Skada sammelt keine Daten, wenn automatisch versteckt."
+L["Skada will not collect any data when automatically hidden."] = "Skada sammelt keine Daten, wenn automatisch versteckt."
 L["Sort modes by usage"] = "Modi nach Verwendung anordnen"
-L["The mode list will be sorted to reflect usage instead of alphabetically."] =
-    "Die Modusliste wird nach der Nutzung anstatt nach dem Alphabet angeordnet."
+L["The mode list will be sorted to reflect usage instead of alphabetically."] = "Die Modusliste wird nach der Nutzung anstatt nach dem Alphabet angeordnet."
 L["Show rank numbers"] = "Platzierungen zeigen"
-L["Shows numbers for relative ranks for modes where it is applicable."] =
-    "Zeige relative Platzierungen für Modis bei denen dies möglich ist."
+L["Shows numbers for relative ranks for modes where it is applicable."] = "Zeige relative Platzierungen für Modis bei denen dies möglich ist."
 L["Aggressive combat detection"] = "Aggressive Kampferkennung"
-L[
-        "Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons. Meaningless on boss encounters."
-    ] =
-    "Skada verwendet normalerweise ein sehr konservatives (simples) Kampferkennungsschema, welches am besten in Schlachtzügen funktioniert. Mithilfe dieser Option versucht Skada andere Damage-Meter zu emulieren. Sinnvoll für Dungeon-Runs. Für Bosskämpfe bedeutungslos."
+L["Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons. Meaningless on boss encounters."] = "Skada verwendet normalerweise ein sehr konservatives (simples) Kampferkennungsschema, welches am besten in Schlachtzügen funktioniert. Mithilfe dieser Option versucht Skada andere Damage-Meter zu emulieren. Sinnvoll für Dungeon-Runs. Für Bosskämpfe bedeutungslos."
 L["Autostop"] = "Früh Stoppen bei Wipe"
-L["Automatically stops the current segment after half of all raid members have died."] =
-    "Stoppt automatisch das aktuelle Segment, nachdem die Hälfte aller Schlachtzugsmitglieder gestorben sind."
+L["Automatically stops the current segment after half of all raid members have died."] = "Stoppt automatisch das aktuelle Segment, nachdem die Hälfte aller Schlachtzugsmitglieder gestorben sind."
 L["Always show self"] = "Mich immer anzeigen"
-L["Keeps the player shown last even if there is not enough space."] =
-    "Zeigt den Spieler immer im sichtbaren Bereich an, selbst wenn er eigentlich nicht sichtbar wäre (nicht genug Platz)."
+L["Keeps the player shown last even if there is not enough space."] = "Zeigt den Spieler immer im sichtbaren Bereich an, selbst wenn er eigentlich nicht sichtbar wäre (nicht genug Platz)."
 L["Number format"] = "Zahlenformat"
 L["Controls the way large numbers are displayed."] = "Legt fest, wie große Zahlen angezeigt werden."
 L["Condensed"] = "Zusammengefasst"
 L["Detailed"] = "Detailliert"
 L["Data feed"] = "Datenquelle"
-L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."] =
-    "Auswählen welche Datensammlung in der DataBroker-Ansicht angezeigt werden soll. Dies erfordert ein LDB-Anzeige-Addon, wie zum Beispiel 'Titan Panel'."
+L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."] = "Auswählen welche Datensammlung in der DataBroker-Ansicht angezeigt werden soll. Dies erfordert ein LDB-Anzeige-Addon, wie zum Beispiel 'Titan Panel'."
 L["Number set duplicates"] = "Anzahl der Duplikate"
-L["Append a count to set names with duplicate mob names."] =
-    "Fügt eine Anzahl hinzu, um Namen, mit doppelten Gegnernamen, festzulegen."
+L["Append a count to set names with duplicate mob names."] = "Fügt eine Anzahl hinzu, um Namen, mit doppelten Gegnernamen, festzulegen."
 L["Set format"] = "Format setzen"
 L["Controls the way set names are displayed."] = "Bestimmt, wie Namen von Segmenten angezeigt werden."
 L["Memory Check"] = "Speicherprüfung"
 L["Checks memory usage and warns you if it is greater than or equal to 30mb."] = "Überprüft die Speichernutzung und warnt Sie, wenn sie größer oder gleich 30 MB ist."
 L["Data segments to keep"] = "Zu behaltende Datensegmente"
-L["The number of fight segments to keep. Persistent segments are not included in this."] =
-    "Die Anzahl der Kampfsegmente, die behalten werden sollen. Ständige Segmente sind hier nicht enthalten."
+L["The number of fight segments to keep. Persistent segments are not included in this."] = "Die Anzahl der Kampfsegmente, die behalten werden sollen. Ständige Segmente sind hier nicht enthalten."
 L["Update frequency"] = "Aktualisierungsfrequenz"
-L["How often windows are updated. Shorter for faster updates. Increases CPU usage."] =
-    "Wie oft die Fenster aktualisiert werden, kürzer für schnellere Updates. Erhöht die CPU-Auslastung."
+L["How often windows are updated. Shorter for faster updates. Increases CPU usage."] = "Wie oft die Fenster aktualisiert werden, kürzer für schnellere Updates. Erhöht die CPU-Auslastung."
 
 -- columns
 L["Columns"] = "Spalten"
@@ -277,13 +249,11 @@ L["Columns"] = "Spalten"
 -- tooltips
 L["Tooltips"] = "Tooltips"
 L["Show tooltips"] = "Tooltips anzeigen"
-L["Shows tooltips with extra information in some modes."] =
-    "Zeigt Tooltips mit zusätzlicher Information in einigen Modi."
+L["Shows tooltips with extra information in some modes."] = "Zeigt Tooltips mit zusätzlicher Information in einigen Modi."
 L["Informative tooltips"] = "Informative Tooltips"
 L["Shows subview summaries in the tooltips."] = "Zeigt die Zusammenfassungen der Unteransichten in den Tooltips."
 L["Subview rows"] = "Unteransicht Zeilen"
-L["The number of rows from each subview to show when using informative tooltips."] =
-    "Die Anzahl der anzuzeigenden Zeilen von jeder Unteransicht, wenn mit informativen Tooltips gearbeitet wird."
+L["The number of rows from each subview to show when using informative tooltips."] = "Die Anzahl der anzuzeigenden Zeilen von jeder Unteransicht, wenn mit informativen Tooltips gearbeitet wird."
 L["Tooltip position"] = "Tooltip-Position"
 L["Position of the tooltips."] = "Position der QuickInfos."
 L["Default"] = "Standard"
@@ -298,8 +268,7 @@ L["Follow Cursor"] = "Follow Cursor"
 L["Disabled Modules"] = "Deaktivierte Module"
 L["Tick the modules you want to disable."] = "Hake die Module an, die du deaktivieren willst."
 L["This change requires a UI reload. Are you sure?"] = "Diese Änderung erfordert ein Neuladen des UIs. Bist du sicher?"
-L["Adds a set of standard themes to Skada. Custom themes can also be used."] =
-    "Fügt Skada eine Reihe Standardoberflächen hinzu. Benutzerdefinierte Oberflächen können ebenfalls verwendet werden."
+L["Adds a set of standard themes to Skada. Custom themes can also be used."] = "Fügt Skada eine Reihe Standardoberflächen hinzu. Benutzerdefinierte Oberflächen können ebenfalls verwendet werden."
 
 -- themes module
 L["Theme"] = "Oberfläche"
@@ -334,16 +303,16 @@ L["Start new segment"] = "Neues Segment starten"
 
 -- window buttons
 L["Configure"] = "Konfigurieren"
-L["opens the configuration window"] = "öffnet das Konfigurationsfenster"
-L["Resets all fight data except those marked as kept."] =
-    "Setzt alle Kampfdaten zurück mit Ausnahme der markierten, sie werden beibehalten."
+L["Opens the configuration window."] = "Öffnet das Konfigurationsfenster."
+L["Resets all fight data except those marked as kept."] = "Setzt alle Kampfdaten zurück mit Ausnahme der markierten, sie werden beibehalten."
 L["Segment"] = "Segment"
 L["Jump to a specific segment."] = "Wechseln zu einem bestimmten Segment."
 L["Mode"] = "Modus"
 L["Jump to a specific mode."] = "In einen bestimmten Modus springen."
 L["Report"] = "Bericht"
-L["Opens a dialog that lets you report your data to others in various ways."] =
-    "Öffnet ein Dialogfeld, damit Sie Ihre Daten an andere auf verschiedene Weise mitteilen können."
+L["Opens a dialog that lets you report your data to others in various ways."] = "Öffnet ein Dialogfeld, damit Sie Ihre Daten an andere auf verschiedene Weise mitteilen können."
+L["Stop"] = "Stopp"
+L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."] = "Stoppt oder setzt das aktuelle Segment fort. Nützlich zur Diskontierung von Daten nach einem Wipe. Kann auch so eingestellt werden, dass in den Einstellungen automatisch gestoppt wird."
 
 -- default segments
 L["Total"] = "Gesamt"
@@ -369,8 +338,7 @@ L["No mode or segment selected for report."] = "Kein Modus oder Segment zum Beri
 -- ================== --
 
 L["Bar display"] = "Leistenanzeige"
-L["Bar display is the normal bar window used by most damage meters. It can be extensively styled."] =
-    "Leistenanzeige ist das normale Leistenfenster, diese Anzeigeart wird von den meisten Schadensmetern verwendet. Sie kann optisch stark verändert werden."
+L["Bar display is the normal bar window used by most damage meters. It can be extensively styled."] = "Leistenanzeige ist das normale Leistenfenster, diese Anzeigeart wird von den meisten Schadensmetern verwendet. Sie kann optisch stark verändert werden."
 
 -- ============= --
 -- Threat Module --
@@ -385,17 +353,13 @@ L["This will cause the screen to shake as a threat warning."] = "Lässt den Bild
 L["Play sound"] = "Sound"
 L["This will play a sound as a threat warning."] = "Spielt einen Sound als Aggrowarnung."
 L["Threat sound"] = "Bedrohungssound"
-L["The sound that will be played when your threat percentage reaches a certain point."] =
-    "Der Sound, der gespielt wird, wenn die Bedrohung einen gewissen Wert erreicht."
+L["The sound that will be played when your threat percentage reaches a certain point."] = "Der Sound, der gespielt wird, wenn die Bedrohung einen gewissen Wert erreicht."
 L["Threat threshold"] = "Bedrohungsgrenzwert"
-L["When your threat reaches this level, relative to tank, warnings are shown."] =
-    "Wenn die eigene Bedrohung gegenüber dem Tank diesen Wert erreicht, werden Warnungen angezeigt."
+L["When your threat reaches this level, relative to tank, warnings are shown."] = "Wenn die eigene Bedrohung gegenüber dem Tank diesen Wert erreicht, werden Warnungen angezeigt."
 L["Show raw threat"] = "Nettobedrohung"
-L["Shows raw threat percentage relative to tank instead of modified for range."] =
-    "Zeigt Bedrohungsanteil im Vergleich zum Tank und nicht nach Entfernung."
+L["Shows raw threat percentage relative to tank instead of modified for range."] = "Zeigt Bedrohungsanteil im Vergleich zum Tank und nicht nach Entfernung."
 L["Use focus target"] = "Fokusziel benutzen"
-L["Shows threat on focus target, or focus target's target, when available."] =
-    "Zeige Bedrohung des Fokuszieles oder dessen Zieles, falls verfügbar."
+L["Shows threat on focus target, or focus target's target, when available."] = "Zeige Bedrohung des Fokuszieles oder dessen Zieles, falls verfügbar."
 L["TPS"] = "TPS"
 L["Threat: Personal Threat"] = "Bedrohung: Persönliche Bedrohung"
 

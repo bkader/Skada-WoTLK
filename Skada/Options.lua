@@ -32,7 +32,7 @@ Skada.windowdefaults = {
     specicons = true,
     showself = true,
     -- buttons
-    buttons = {menu = true, reset = true, report = true, mode = true, segment = true},
+    buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false},
     -- title options
     title = {
         height = 20,

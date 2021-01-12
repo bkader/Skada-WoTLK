@@ -300,7 +300,7 @@ L["Start new segment"] = "Nouveau segment"
 
 -- window buttons
 L["Configure"] = "Configurer"
-L["opens the configuration window"] = "Ouvre la fenêtre de configuration."
+L["Opens the configuration window."] = "Ouvre la fenêtre de configuration."
 L["Resets all fight data except those marked as kept."] = "Réinitialise les données de tous les combats sauf ceux que vous avez choisi de garder."
 L["Segment"] = "Segment"
 L["Jump to a specific segment."] = "Vous permet de sélectionner un segment spécific."
@@ -308,6 +308,8 @@ L["Mode"] = "Mode"
 L["Jump to a specific mode."] = "Vous permet de sélectionner un mode spécific."
 L["Report"] = "Rapport"
 L["Opens a dialog that lets you report your data to others in various ways."] = "Ouvre la fenête qui vous permet de rapporter les données aux autres de différentes manières."
+L["Stop"] = "Arrêter/Reprendre"
+L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."] = "Arrête ou reprend le segment en cours. Utile pour arrêter la collecte des données après un wipe. L'arrêt automatique peut être activé dans les paramètres."
 
 -- default segments
 L["Total"] = "Total"

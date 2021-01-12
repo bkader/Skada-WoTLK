@@ -221,9 +221,7 @@ L["The mode list will be sorted to reflect usage instead of alphabetically."] = 
 L["Show rank numbers"] = true
 L["Shows numbers for relative ranks for modes where it is applicable."] = true
 L["Aggressive combat detection"] = true
-L[
-        "Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons. Meaningless on boss encounters."
-    ] = true
+L["Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons. Meaningless on boss encounters."] = true
 L["Autostop"] = true
 L["Automatically stops the current segment after half of all raid members have died."] = true
 L["Always show self"] = true
@@ -233,8 +231,7 @@ L["Controls the way large numbers are displayed."] = true
 L["Condensed"] = true
 L["Detailed"] = true
 L["Data feed"] = true
-L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."] =
-    true
+L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."] = true
 L["Number set duplicates"] = true
 L["Append a count to set names with duplicate mob names."] = true
 L["Set format"] = true
@@ -306,7 +303,7 @@ L["Start new segment"] = true
 
 -- window buttons
 L["Configure"] = true
-L["opens the configuration window"] = true
+L["Opens the configuration window."] = true
 L["Resets all fight data except those marked as kept."] = true
 L["Segment"] = true
 L["Jump to a specific segment."] = true
@@ -314,6 +311,8 @@ L["Mode"] = true
 L["Jump to a specific mode."] = true
 L["Report"] = true
 L["Opens a dialog that lets you report your data to others in various ways."] = true
+L["Stop"] = "Stop/Resume"
+L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."] = true
 
 -- default segments
 L["Total"] = true

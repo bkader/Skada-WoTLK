@@ -301,7 +301,7 @@ if not L then return end
 
 -- window buttons
 -- L["Configure"] = ""
--- L["opens the configuration window"] = ""
+-- L["Opens the configuration window."] = ""
 -- L["Resets all fight data except those marked as kept."] = ""
 -- L["Segment"] = ""
 -- L["Jump to a specific segment."] = ""
@@ -309,6 +309,8 @@ if not L then return end
 -- L["Jump to a specific mode."] = ""
 -- L["Report"] = ""
 -- L["Opens a dialog that lets you report your data to others in various ways."] = ""
+-- L["Stop"] = ""
+-- L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."] = ""
 
 -- default segments
 -- L["Total"] = ""

@@ -80,7 +80,7 @@ function mod:Create(window)
         -- Add window buttons.
         window.bargroup:AddButton(
             L["Configure"],
-            L["opens the configuration window"],
+            L["Opens the configuration window."],
             "Interface\\Addons\\Skada\\media\\textures\\icon-config",
             "Interface\\Addons\\Skada\\media\\textures\\icon-config",
             function()
@@ -127,46 +127,39 @@ function mod:Create(window)
                 Skada:OpenReportWindow(bargroup.win)
             end
         )
+
+        window.bargroup:AddButton(
+            L["Stop"],
+            L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."],
+            "Interface\\CHATFRAME\\ChatFrameExpandArrow",
+            "Interface\\CHATFRAME\\ChatFrameExpandArrow",
+            function()
+                if Skada.current and Skada.current.stopped then
+                    Skada:ResumeSegment()
+                elseif Skada.current then
+                    Skada:StopSegment()
+                end
+            end
+        )
     end
     window.bargroup.win = window
     window.bargroup.RegisterCallback(mod, "AnchorMoved")
     window.bargroup.RegisterCallback(mod, "WindowResized")
     window.bargroup:EnableMouse(true)
-    window.bargroup:SetScript(
-        "OnMouseDown",
-        function(_, button)
-            if IsShiftKeyDown() then
-                Skada:OpenMenu(window)
-            elseif button == "RightButton" then
-                window:RightClick()
-            end
+    window.bargroup:SetScript("OnMouseDown", function(_, button)
+        if IsShiftKeyDown() then
+            Skada:OpenMenu(window)
+        elseif button == "RightButton" then
+            window:RightClick()
         end
-    )
-    window.bargroup.button:SetScript(
-        "OnClick",
-        function(_, button)
-            if IsShiftKeyDown() then
-                Skada:OpenMenu(window)
-            elseif button == "RightButton" then
-                window:RightClick()
-            end
+    end)
+    window.bargroup.button:SetScript("OnClick", function(_, button)
+        if IsShiftKeyDown() then
+            Skada:OpenMenu(window)
+        elseif button == "RightButton" then
+            window:RightClick()
         end
-    )
-
-    window.bargroup.button:SetScript(
-        "OnEnter",
-        function()
-            window.bargroup:SetButtonsOpacity(1)
-        end
-    )
-    window.bargroup.button:SetScript(
-        "OnLeave",
-        function()
-            if not window.bargroup.button:IsMouseOver() then
-                window.bargroup:SetButtonsOpacity(0.5)
-            end
-        end
-    )
+    end)
 
     window.bargroup:HideIcon()
 
@@ -706,11 +699,12 @@ do
         g:AdjustButtons()
 
         -- Button visibility.
-        g:ShowButton(L["Configure"], p.buttons and p.buttons.menu)
-        g:ShowButton(RESET, p.buttons and p.buttons.reset)
-        g:ShowButton(L["Segment"], p.buttons and p.buttons.segment)
-        g:ShowButton(L["Mode"], p.buttons and p.buttons.mode)
-        g:ShowButton(L["Report"], p.buttons and p.buttons.report)
+        g:ShowButton(L["Configure"], p.buttons.menu)
+        g:ShowButton(RESET, p.buttons.reset)
+        g:ShowButton(L["Segment"], p.buttons.segment)
+        g:ShowButton(L["Mode"], p.buttons.mode)
+        g:ShowButton(L["Report"], p.buttons.report)
+        g:ShowButton(L["Stop"], p.buttons.stop)
 
         -- Window
         local padtop = (p.enabletitle and not p.reversegrowth and p.title.height)
@@ -1276,6 +1270,7 @@ function mod:AddDisplayOptions(win, options)
                     report = {
                         type = "toggle",
                         name = L["Report"],
+                        desc = L["Opens a dialog that lets you report your data to others in various ways."],
                         order = 1,
                         get = function()
                             return db.buttons.report == nil or db.buttons.report
@@ -1288,6 +1283,7 @@ function mod:AddDisplayOptions(win, options)
                     mode = {
                         type = "toggle",
                         name = L["Mode"],
+                        desc = L["Jump to a specific mode."],
                         order = 2,
                         get = function()
                             return db.buttons.mode == nil or db.buttons.mode
@@ -1300,6 +1296,7 @@ function mod:AddDisplayOptions(win, options)
                     segment = {
                         type = "toggle",
                         name = L["Segment"],
+                        desc = L["Jump to a specific segment."],
                         order = 3,
                         get = function()
                             return db.buttons.segment == nil or db.buttons.segment
@@ -1312,6 +1309,7 @@ function mod:AddDisplayOptions(win, options)
                     reset = {
                         type = "toggle",
                         name = RESET,
+                        desc = L["Resets all fight data except those marked as kept."],
                         order = 4,
                         get = function()
                             return db.buttons.reset
@@ -1330,6 +1328,19 @@ function mod:AddDisplayOptions(win, options)
                         end,
                         set = function()
                             db.buttons.menu = not db.buttons.menu
+                            Skada:ApplySettings()
+                        end
+                    },
+                    stop = {
+                        type = "toggle",
+                        name = L["Stop"],
+                        desc = L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."],
+                        order = 6,
+                        get = function()
+                            return db.buttons.stop
+                        end,
+                        set = function()
+                            db.buttons.stop = not db.buttons.stop
                             Skada:ApplySettings()
                         end
                     }

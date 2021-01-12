@@ -2,6 +2,13 @@
 	<Binding name="SKADA_TOGGLE" header="SKADA" category="ADDONS">Skada:ToggleWindow()</Binding>
 	<Binding name="SKADA_RESET" category="ADDONS">Skada:ShowPopup()</Binding>
 	<Binding name="SKADA_NEWSEGMENT" category="ADDONS">Skada:NewSegment()</Binding>
-  	<Binding name="SKADA_SCROLLUP" description="Scrolls up bars.">Skada:Scroll(true)</Binding>
-  	<Binding name="SKADA_SCROLLDOWN" description="Scrolls down bars.">Skada:Scroll(false)</Binding>
+  	<Binding name="SKADA_STOP" category="ADDONS">
+		if Skada.current and Skada.current.stopped then
+			Skada:ResumeSegment()
+		elseif Skada.current then
+			Skada:StopSegment()
+		end
+  	</Binding>
+  	<Binding name="SKADA_SCROLLUP" category="ADDONS">Skada:Scroll(true)</Binding>
+  	<Binding name="SKADA_SCROLLDOWN" category="ADDONS">Skada:Scroll(false)</Binding>
 </Bindings>

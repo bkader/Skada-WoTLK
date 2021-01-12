@@ -26,6 +26,7 @@ _G.BINDING_HEADER_SKADA = "Skada"
 _G.BINDING_NAME_SKADA_TOGGLE = L["Toggle window"]
 _G.BINDING_NAME_SKADA_RESET = RESET
 _G.BINDING_NAME_SKADA_NEWSEGMENT = L["Start new segment"]
+_G.BINDING_NAME_SKADA_STOP = L["Stop"]
 
 -- Skada-Revisited flag
 Skada.revisited = true

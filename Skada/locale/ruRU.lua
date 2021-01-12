@@ -301,7 +301,7 @@ L["Start new segment"] = "Начать новый сегмент"
 
 -- window buttons
 L["Configure"] = "Конфигурация"
-L["opens the configuration window"] = "открывает окно конфигурации"
+L["Opens the configuration window."] = "Открывает окно конфигурации."
 L["Resets all fight data except those marked as kept."] = "Сбрасывает все данные боя, кроме отмеченных как сохраненные."
 L["Segment"] = "Сегмент"
 L["Jump to a specific segment."] = "Перейти к определенному сегменту."
@@ -309,6 +309,8 @@ L["Mode"] = "Режим"
 L["Jump to a specific mode."] = "Перейти в определенный режим."
 L["Report"] = "Отчет"
 L["Opens a dialog that lets you report your data to others in various ways."] = "Открывает диалоговое окно, в котором можно различными способами сообщать свои данные другим пользователям."
+L["Stop"] = "Остановить"
+L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."] = "Останавливает или возобновляет запись текущего сегмента. Полезна для сокращения объема данных при вайпе. Возможна настройка автоматической остановки в настройках."
 
 -- default segments
 L["Total"] = "Всего"
