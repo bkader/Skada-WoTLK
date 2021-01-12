@@ -2320,7 +2320,7 @@ function Skada:FrameSettings(db, include_dimensions)
             name = L["Width"],
             order = 3.3,
             min = 100,
-            max = GetScreenWidth(),
+            max = math_floor(GetScreenWidth()),
             step = 1.0,
             get = function()
                 return db.width
