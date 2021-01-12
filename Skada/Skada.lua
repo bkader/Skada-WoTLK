@@ -95,7 +95,7 @@ local wasinparty, wasininstance, wasinpvp = false
 -- cache frequently used globlas
 local tsort, tinsert, tremove, tmaxn = table.sort, table.insert, table.remove, table.maxn
 local next, pairs, ipairs, type = next, pairs, ipairs, type
-local tonumber, tostring, format = tonumber, tostring, string.format
+local tonumber, tostring, format, strsplit = tonumber, tostring, string.format, strsplit
 local math_floor, math_max = math.floor, math.max
 local band, time = bit.band, time
 local GetNumPartyMembers, GetNumRaidMembers = GetNumPartyMembers, GetNumRaidMembers
@@ -1148,7 +1148,23 @@ function Skada:get_player(set, playerid, playername, playerflag)
             end
         end
 
+        -- strip realm name in case of cross-realm feature
+        local pname, realm = strsplit("-", playername, 2)
+        player.name = pname or playername
+
         tinsert(set.players, player)
+    end
+
+    -- fix players created before had their info
+    if player.name == UNKNOWN and playername == UNKNOWN then
+        local pname, _ = strsplit("-", playername, 2) -- cross-realm
+        player.name = pname or playername
+        if not player.class then
+            player.class = select(2, UnitClass(playername))
+        end
+        if not player.role then
+            player.role = self:UnitGroupRolesAssigned(playername)
+        end
     end
 
     player.first = player.first or now
