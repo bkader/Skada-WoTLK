@@ -360,7 +360,13 @@ function mod:UpdateBar(bar, bardata, db)
     bar.label:SetText(label)
     bar.label:SetTextColor(mod:GetFontColor(db))
     bar.value = bardata.value
-    bar.class = bardata.class
+    if bardata.ignore then
+		bar.ignore = true
+    else
+	    bar.class = bardata.class
+	    bar.spec = bardata.spec
+	    bar.role = bardata.role
+    end
 
     bar.valueid = bardata.id
     bar.valuetext = bardata.label
@@ -551,7 +557,7 @@ function mod:AddDisplayOptions(win, options)
 
     options.baroptions = {
         type = "group",
-        name = "Text",
+        name = L["Text"],
         order = 3,
         args = {
             barfont = {
@@ -587,8 +593,8 @@ function mod:AddDisplayOptions(win, options)
             },
             color = {
                 type = "color",
-                name = "Font Color",
-                desc = "Font Color. \nClick 'class color' to begin.",
+                name = L["Font Color"],
+                desc = L["Font Color. \nClick \"Use class colors\" to begin."],
                 order = 0.2,
                 hasAlpha = true,
                 get = function()
@@ -622,8 +628,8 @@ function mod:AddDisplayOptions(win, options)
             },
             barwidth = {
                 type = "range",
-                name = "Width",
-                desc = "Width of bars. This only applies if the 'Fixed bar width' option is used.",
+                name = L["Width"],
+                desc = L["Width of bars. This only applies if the \"Fixed bar width\" option is used."],
                 order = 1.0,
                 min = 100,
                 max = 300,
@@ -651,8 +657,8 @@ function mod:AddDisplayOptions(win, options)
             },
             isusingclasscolors = {
                 type = "toggle",
-                name = "Use class colors",
-                desc = "Class colors:\n|cFFF58CBAExac|r-30.71M (102.7K)\nWithout:\nExac-30.71M (102.7K)",
+                name = L["Use class colors"],
+                desc = L["Class colors:\n|cFFF58CBAKader|r - 5.71M (21.7K)\n\nWithout:\nKader - 5.71M (21.7K)"],
                 order = 2,
                 get = function()
                     return db.isusingclasscolors
@@ -664,8 +670,8 @@ function mod:AddDisplayOptions(win, options)
             },
             isonnewline = {
                 type = "toggle",
-                name = "Put values on new line.",
-                desc = "New line:\nExac\n30.71M (102.1K)\n\nDivider:\nExac-30.71M (102.7K)",
+                name = L["Put values on new line."],
+                desc = L["New line:\nKader\n5.71M (21.7K)\n\nDivider:\nKader - 5.71M (21.7K)"],
                 order = 3,
                 get = function()
                     return db.isonnewline
@@ -698,8 +704,8 @@ function mod:AddDisplayOptions(win, options)
         args = {
             isusingelvuiskin = {
                 type = "toggle",
-                name = "Use ElvUI skin if avaliable.",
-                desc = "Check this to use ElvUI skin instead. \nDefault: checked",
+                name = L["Use ElvUI skin if avaliable."],
+                desc = L["Check this to use ElvUI skin instead. \nDefault: checked"],
                 order = 0.1,
                 get = function()
                     return db.isusingelvuiskin
@@ -711,8 +717,8 @@ function mod:AddDisplayOptions(win, options)
             },
             issolidbackdrop = {
                 type = "toggle",
-                name = "Use solid background.",
-                desc = "Un-check this for an opaque background.",
+                name = L["Use solid background."],
+                desc = L["Un-check this for an opaque background."],
                 order = 1.0,
                 get = function()
                     return db.issolidbackdrop

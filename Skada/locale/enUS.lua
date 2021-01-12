@@ -173,8 +173,20 @@ L["Automatically switch to set 'Current' and this mode after a wipe."] = true
 
 L["Inline bar display"] = true
 L["Inline display is a horizontal window style."] = true
+L["Text"] = true
+L["Font Color"] = true
+L["Font Color. \nClick \"Use class colors\" to begin."] = true
+L["Width of bars. This only applies if the \"Fixed bar width\" option is used."] = true
 L["Fixed bar width"] = true
 L["If checked, bar width is fixed. Otherwise, bar width depends on the text width."] = true
+L["Use class colors"] = true
+L["Class colors:\n|cFFF58CBAKader|r - 5.71M (21.7K)\n\nWithout:\nKader - 5.71M (21.7K)"] = true
+L["Put values on new line."] = true
+L["New line:\nKader\n5.71M (21.7K)\n\nDivider:\nKader - 5.71M (21.7K)"] = true
+L["Use ElvUI skin if avaliable."] = true
+L["Check this to use ElvUI skin instead. \nDefault: checked"] = true
+L["Use solid background."] = true
+L["Un-check this for an opaque background."] = true
 
 L["Data text"] = true
 L["Text color"] = true
