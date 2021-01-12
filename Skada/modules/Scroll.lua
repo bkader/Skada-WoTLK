@@ -36,7 +36,7 @@ function mod.ShowCursor(win)
         f:SetSize(32, 32)
         f:SetPoint("CENTER")
         local t = f:CreateTexture(nil, "OVERLAY")
-        t:SetTexture("Interface\\AddOns\\Skada\\textures\\icon-scroll")
+        t:SetTexture("Interface\\AddOns\\Skada\\media\\textures\\icon-scroll")
         t:SetAllPoints(f)
         t:Show()
         mod.ScrollIcon[win] = f
@@ -277,5 +277,5 @@ end
 
 hooksecurefunc(bars, "Create", mod.Create)
 hooksecurefunc(bars, "AddDisplayOptions", mod.AddDisplayOptions)
-BINDING_NAME_SKADA_SCROLLUP = COMBAT_TEXT_SCROLL_UP
-BINDING_NAME_SKADA_SCROLLDOWN = COMBAT_TEXT_SCROLL_DOWN
+_G.BINDING_NAME_SKADA_SCROLLUP = COMBAT_TEXT_SCROLL_UP
+_G.BINDING_NAME_SKADA_SCROLLDOWN = COMBAT_TEXT_SCROLL_DOWN
