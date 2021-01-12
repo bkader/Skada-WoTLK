@@ -1148,23 +1148,7 @@ function Skada:get_player(set, playerid, playername, playerflag)
             end
         end
 
-        -- strip realm name in case of cross-realm feature
-        local pname, realm = strsplit("-", playername, 2)
-        player.name = pname or playername
-
         tinsert(set.players, player)
-    end
-
-    -- fix players created before had their info
-    if player.name == UNKNOWN and playername == UNKNOWN then
-        local pname, _ = strsplit("-", playername, 2) -- cross-realm
-        player.name = pname or playername
-        if not player.class then
-            player.class = select(2, UnitClass(playername))
-        end
-        if not player.role then
-            player.role = self:UnitGroupRolesAssigned(playername)
-        end
     end
 
     player.first = player.first or now
