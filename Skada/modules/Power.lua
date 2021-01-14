@@ -52,9 +52,9 @@ Skada:AddLoadableModule(
         local function SpellEnergize(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             local spellid, spellname, spellschool, amount, powertype = ...
 
-            gain.playerid = srcGUID
-            gain.playername = srcName
-            gain.playerflags = srcFlags
+            gain.playerid = dstGUID
+            gain.playername = dstName
+            gain.playerflags = dstFlags
 
             gain.spellid = spellid
             gain.spellname = spellname
@@ -70,9 +70,9 @@ Skada:AddLoadableModule(
         local function SpellLeech(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             local spellid, spellname, spellschool, amount, powertype, extraamount = ...
 
-            gain.playerid = srcGUID
-            gain.playername = srcName
-            gain.playerflags = srcFlags
+            gain.playerid = dstGUID
+            gain.playername = dstName
+            gain.playerflags = dstFlags
 
             gain.spellid = spellid
             gain.spellname = spellname
