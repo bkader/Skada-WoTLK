@@ -13,7 +13,7 @@ Skada:AddLoadableModule(
         local _UnitHealth, _UnitHealthMax = UnitHealth, UnitHealthMax
         local _UnitIsFeignDeath = UnitIsFeignDeath
         local table_insert, table_remove = table.insert, table.remove
-        local table_sort, table_maxn = table.sort, table.maxn
+        local table_sort, table_maxn, table_concat = table.sort, table.maxn, table.concat
         local _select, _GetSpellInfo = select, GetSpellInfo
         local _ipairs, _format, _date = ipairs, string.format, date
         local math_abs, math_max = math.abs, math.max
@@ -38,6 +38,7 @@ Skada:AddLoadableModule(
 					spellid = data.spellid,
 					source = data.srcName,
 					amount = data.amount,
+					overkill = data.overkill,
 					resisted = data.resisted,
 					blocked = data.blocked,
 					absorbed = data.absorbed,
@@ -82,6 +83,7 @@ Skada:AddLoadableModule(
             data.spellname = spellname
 
             data.amount = 0 - amount
+            data.overkill = overkill
             data.resisted = resisted
             data.blocked = blocked
             data.absorbed = absorbed
@@ -105,6 +107,7 @@ Skada:AddLoadableModule(
             data.spellid = 6603
             data.spellname = MELEE
             data.amount = 0 - amount
+            data.overkill = overkill
             data.resisted = resisted
             data.blocked = blocked
             data.absorbed = absorbed
@@ -219,6 +222,27 @@ Skada:AddLoadableModule(
 
                             d.value = log.hp or 0
                             local change = (log.amount > 0 and "+" or "-") .. Skada:FormatNumber(math_abs(log.amount))
+                            local extra = {}
+                            if log.overkill and log.overkill > 0 then
+								d.overkill = log.overkill
+								table_insert(extra, "O: "..Skada:FormatNumber(log.overkill))
+                            end
+                            if log.resisted and log.resisted > 0 then
+								d.resisted = log.resisted
+								table_insert(extra, "R: "..Skada:FormatNumber(log.resisted))
+                            end
+                            if log.blocked and log.blocked > 0 then
+								d.blocked = log.blocked
+								table_insert(extra, "B: "..Skada:FormatNumber(log.blocked))
+                            end
+                            if log.absorbed and log.absorbed > 0 then
+								d.absorbed = log.absorbed
+								table_insert(extra, "A: "..Skada:FormatNumber(log.absorbed))
+                            end
+
+                            if next(extra) ~= nil then
+								change = change.." ["..table_concat(extra, ", ").."]"
+                            end
                             d.valuetext =
                                 Skada:FormatValueText(
                                 change,
@@ -335,6 +359,10 @@ Skada:AddLoadableModule(
                 if entry.amount then
                     local amount = (entry.amount < 0) and (0 - entry.amount) or entry.amount
                     tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(amount), 255, 255, 255)
+                end
+
+                if entry.overkill and entry.overkill > 0 then
+                    tooltip:AddDoubleLine("Overkill", Skada:FormatNumber(entry.overkill), 255, 255, 255)
                 end
 
                 if entry.resisted and entry.resisted > 0 then
