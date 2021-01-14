@@ -1,8 +1,4 @@
 local Skada = Skada
-if not Skada then
-    return
-end
-
 Skada:AddLoadableModule(
     "Deaths",
     function(Skada, L)
@@ -38,17 +34,16 @@ Skada:AddLoadableModule(
 
                 -- record our log
                 local deathlog = player.deathlog[1]
-                table_insert(
-                    deathlog.log,
-                    1,
-                    {
-                        spellid = data.spellid,
-                        source = data.srcName,
-                        amount = data.amount,
-                        time = ts,
-                        hp = _UnitHealth(data.dstName)
-                    }
-                )
+                table_insert(deathlog.log, 1, {
+					spellid = data.spellid,
+					source = data.srcName,
+					amount = data.amount,
+					resisted = data.resisted,
+					blocked = data.blocked,
+					absorbed = data.absorbed,
+					time = ts,
+					hp = _UnitHealth(data.dstName)
+                })
 
                 -- trim things and limit to 15
                 while table_maxn(deathlog.log) > 15 do
@@ -87,6 +82,9 @@ Skada:AddLoadableModule(
             data.spellname = spellname
 
             data.amount = 0 - amount
+            data.resisted = resisted
+            data.blocked = blocked
+            data.absorbed = absorbed
 
             log_deathlog(Skada.current, data, ts)
         end
@@ -107,6 +105,9 @@ Skada:AddLoadableModule(
             data.spellid = 6603
             data.spellname = MELEE
             data.amount = 0 - amount
+            data.resisted = resisted
+            data.blocked = blocked
+            data.absorbed = absorbed
 
             log_deathlog(Skada.current, data, ts)
         end
@@ -328,12 +329,24 @@ Skada:AddLoadableModule(
                 end
 
                 if entry.hp then
-                    tooltip:AddDoubleLine(HEALTH, Skada:FormatNumber(entry.hp), 255, 255, 255, 255, 255, 255)
+                    tooltip:AddDoubleLine(HEALTH, Skada:FormatNumber(entry.hp), 255, 255, 255)
                 end
 
                 if entry.amount then
                     local amount = (entry.amount < 0) and (0 - entry.amount) or entry.amount
-                    tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(amount), 255, 255, 255, 255, 255, 255)
+                    tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(amount), 255, 255, 255)
+                end
+
+                if entry.resisted and entry.resisted > 0 then
+                    tooltip:AddDoubleLine(RESIST, Skada:FormatNumber(entry.resisted), 255, 255, 255)
+                end
+
+                if entry.blocked and entry.blocked > 0 then
+                    tooltip:AddDoubleLine(BLOCK, Skada:FormatNumber(entry.blocked), 255, 255, 255)
+                end
+
+                if entry.absorbed and entry.absorbed > 0 then
+                    tooltip:AddDoubleLine(ABSORB, Skada:FormatNumber(entry.absorbed), 255, 255, 255)
                 end
             end
         end
