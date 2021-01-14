@@ -120,9 +120,6 @@ Skada.defaults = {
         report = {mode = "Damage", set = "current", channel = "Say", chantype = "preset", number = 10},
         modulesBlocked = {
             ["Spamage"] = true,
-            ["Power gained: Rage"] = true,
-            ["Power gained: Energy"] = true,
-            ["Power gained: Runic Power"] = true,
             ["Useful damage"] = true,
             ["Damage done by spell"] = true
         },
