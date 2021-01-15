@@ -667,6 +667,7 @@ Skada:AddLoadableModule(
             if not validTarget then
                 validTarget = {
                     -- The Lich King fight
+                    [LBB["The Lich King"]] = LBB["The Lich King"],
                     [LBB["Raging Spirit"]] = LBB["The Lich King"],
                     [LBB["Ice Sphere"]] = LBB["The Lich King"],
                     [LBB["Val'kyr Shadowguard"]] = LBB["The Lich King"],
