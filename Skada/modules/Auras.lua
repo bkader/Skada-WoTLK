@@ -475,92 +475,50 @@ Skada:AddLoadableModule(
 Skada:AddLoadableModule(
     "Sunder Counter",
     function(Skada, L)
-        if Skada:IsDisabled("Debuffs", "Sunder Count") then
+        if Skada:IsDisabled("Sunder Count") then
             return
         end
 
         local mod = Skada:NewModule(L["Sunder Counter"])
         local targetmod = mod:NewModule(L["Sunder target list"])
 
-        local cached, sunder = {}
+        local sunder
 
-        local function total_sunders(set)
-            sunder = sunder or _select(1, _GetSpellInfo(47467))
-            local total = 0
-
-            if set then
-                for _, player in ipairs(set.players) do
-                    if player.class == "WARRIOR" and player.auras then
-                        for spellid, spell in _pairs(player.auras) do
-                            if sunder == _select(1, _GetSpellInfo(spellid)) then
-                                total = total + spell.count
-                            end
-                        end
-                    end
-                end
-            end
-
-            return total
-        end
-
-        local function increment_sunder(set, playerid, playername, playerflags, spellid, dstName)
+        local function log_sunder(set, playerid, playername, playerflags, targetname)
             local player = Skada:get_player(set, playerid, playername, playerflags)
             if player then
-                player.auras = player.auras or {}
-                --
-                -- if sunder wasn't applied the first time, we make sure to call the
-                -- AuraApplied function that will handle applying it.
-                --
-                if not player.auras[spellid] then
-                    --
-                    -- otherwise, we simply increment the count
-                    AuraApplied(
-                        nil,
-                        nil,
-                        playerid,
-                        playername,
-                        playerflags,
-                        nil,
-                        dstName,
-                        nil,
-                        spellid,
-                        nil,
-                        1,
-                        "DEBUFF"
-                    )
-                else
-                    player.auras[spellid].count = (player.auras[spellid].count or 0) + 1
-                    player.auras[spellid].started = time()
+                player.sunders = player.sunders or {}
+                player.sunders.count = (player.sunders.count or 0) + 1
+                set.sunders = (set.sunders or 0) + 1
 
-                    if player.auras[spellid].targets[dstName] then
-                        player.auras[spellid].targets[dstName].count =
-                            (player.auras[spellid].targets[dstName].count or 0) + 1
-                    end
+                if targetname then
+                    player.sunders.targets = player.sunders.targets or {}
+                    player.sunders.targets[targetname] = (player.sunders.targets[targetname] or 0) + 1
                 end
             end
         end
 
         local function SunderApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             local spellid, spellname, spellschool = ...
-            if spellname == sunder then
-                increment_sunder(Skada.current, srcGUID, srcName, srcFlags, spellid, dstName)
-                increment_sunder(Skada.total, srcGUID, srcName, srcFlags, spellid, dstName)
+            if spellid == 47467 or spellname == sunder then
+                log_sunder(Skada.current, srcGUID, srcName, srcFlags, dstName)
+                log_sunder(Skada.total, srcGUID, srcName, srcFlags, dstName)
             end
         end
 
         function targetmod:Enter(win, id, label)
+            self.playerid = id
             self.playername = label
             self.title = _format(L["%s's <%s> targets"], label, sunder)
         end
 
         function targetmod:Update(win, set)
+            local player = Skada:find_player(set, self.playerid, self.playername)
             local max = 0
 
-            if cached.players and self.playername and cached.players[self.playername] then
-                local player = cached.players[self.playername]
+            if player and player.sunders.targets then
                 local nr = 1
-
-                for targetname, count in _pairs(player.targets) do
+                for targetname, count in _pairs(player.sunders.targets) do
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
@@ -568,7 +526,13 @@ Skada:AddLoadableModule(
                     d.label = targetname
 
                     d.value = count
-                    d.valuetext = _format("%d (%02.1f%%)", count, 100 * count / math_max(1, player.count))
+                    d.valuetext =
+                        Skada:FormatValueText(
+                        count,
+                        mod.metadata.columns.Count,
+                        _format("%02.1f%%", 100 * count / math_max(1, player.sunders.count or 0)),
+                        mod.metadata.columns.Percent
+                    )
 
                     if count > max then
                         max = count
@@ -577,78 +541,62 @@ Skada:AddLoadableModule(
                     nr = nr + 1
                 end
             end
+
             win.metadata.maxvalue = max
         end
 
         function mod:Update(win, set)
             sunder = sunder or _select(1, _GetSpellInfo(47467))
-            cached = {count = 0, players = {}}
-
-            for _, player in _ipairs(set.players) do
-                if player.class == "WARRIOR" and player.auras then
-                    for spellid, spell in _pairs(player.auras) do
-                        if _select(1, _GetSpellInfo(spellid)) == sunder then
-                            cached.count = cached.count + spell.count
-                            if not cached.players[player.name] then
-                                cached.players[player.name] = {
-                                    id = player.id,
-                                    class = player.class,
-                                    role = player.role,
-                                    spec = player.spec,
-                                    count = spell.count,
-                                    targets = {}
-                                }
-                            else
-                                cached.players[player.name].count = cached.players[player.name].count + spell.count
-                            end
-
-                            cached.players[player.name].targets = cached.players[player.name].targets or {}
-
-                            for targetname, target in _pairs(spell.targets) do
-                                if not cached.players[player.name].targets[targetname] then
-                                    cached.players[player.name].targets[targetname] = target.count
-                                else
-                                    cached.players[player.name].targets[targetname] =
-                                        cached.players[player.name].targets[targetname] + target.count
-                                end
-                            end
-                        end
-                    end
-                end
-            end
 
             local max = 0
+            local total = set.sunders or 0
 
-            if cached.count > 0 then
+            if total > 0 then
                 local nr = 1
 
-                for playername, player in _pairs(cached.players) do
-                    local d = win.dataset[nr] or {}
-                    win.dataset[nr] = d
+                for _, player in _ipairs(set.players) do
+                    if player.sunders then
+                        local d = win.dataset[nr] or {}
+                        win.dataset[nr] = d
 
-                    d.id = player.id or playername
-                    d.label = playername
-                    d.class = player.class
-                    d.role = player.role
-                    d.spec = player.spec
+                        d.id = player.id
+                        d.label = player.name
+                        d.class = player.class
+                        d.spec = player.spec
+                        d.role = player.role
 
-                    d.value = player.count
-                    d.valuetext = _tostring(player.count)
+                        d.value = player.sunders.count
+                        d.valuetext =
+                            Skada:FormatValueText(
+                            d.value,
+                            self.metadata.columns.Count,
+                            _format("%02.1f%%", 100 * d.value / math_max(1, total)),
+                            self.metadata.columns.Percent
+                        )
 
-                    if player.count > max then
-                        max = player.count
+                        if d.value > max then
+                            max = d.value
+                        end
+
+                        nr = nr + 1
                     end
-
-                    nr = nr + 1
                 end
             end
 
             win.metadata.maxvalue = max
         end
 
+        function mod:OnInitialize()
+            sunder = sunder or _select(1, _GetSpellInfo(47467))
+        end
+
         function mod:OnEnable()
+            self.metadata = {
+                showspots = true,
+                click1 = targetmod,
+                columns = {Count = true, Percent = true}
+            }
             Skada:RegisterForCL(SunderApplied, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})
-            self.metadata = {showspots = true, click1 = targetmod}
             Skada:AddMode(self, L["Buffs and Debuffs"])
         end
 
@@ -656,20 +604,12 @@ Skada:AddLoadableModule(
             Skada:RemoveMode(self)
         end
 
-        function mod:OnInitialize()
-            sunder = sunder or _select(1, _GetSpellInfo(47467))
-        end
-
         function mod:AddToTooltip(set, tooltip)
-            sunder = sunder or _select(1, _GetSpellInfo(47467))
-            local total = total_sunders(set)
-            if total > 0 then
-                tooltip:AddDoubleLine(sunder, total, 1, 1, 1)
-            end
+            tooltip:AddDoubleLine(sunder, set.sunders or 0, 1, 1, 1)
         end
 
         function mod:GetSetSummary(set)
-            return total_sunders(set)
+            return set.sunders or 0
         end
     end
 )
