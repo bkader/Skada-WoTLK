@@ -1,22 +1,37 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
 
+<!-- Damage category -->
 <Script file="modules\Damage.lua" />
-<Script file="modules\Threat.lua" />
-<Script file="modules\AbsorbsHealing.lua" />
-<Script file="modules\Activity.lua" />
-<Script file="modules\Deaths.lua" />
-<Script file="modules\Resurrects.lua" />
+<Script file="modules\DamageTaken.lua" />
+<Script file="modules\FriendlyFire.lua" />
+<Script file="modules\Enemies.lua" />
+
+<!-- Absorb and healing category -->
+<Script file="modules\Healing.lua" />
+<Script file="modules\Absorbs.lua" />
+
+<!-- CC Tracker and Power gained categories -->
+<Script file="modules\Power.lua" />
+<Script file="modules\CCTracker.lua" />
+
+<!-- Buffs and Debuffs category -->
 <Script file="modules\Auras.lua" />
 <Script file="modules\SunderCounter.lua" />
+
+<!-- Other category -->
+<Script file="modules\Activity.lua" />
+<Script file="modules\Deaths.lua" />
 <Script file="modules\Dispels.lua" />
-<Script file="modules\Interrupts.lua" />
-<Script file="modules\Power.lua" />
-<Script file="modules\Potions.lua" />
-<Script file="modules\CCTracker.lua" />
 <Script file="modules\Failbot.lua" />
 <Script file="modules\Improvement.lua" />
-<Script file="modules\Themes.lua" />
+<Script file="modules\Interrupts.lua" />
+<Script file="modules\Potions.lua" />
+<Script file="modules\Resurrects.lua" />
+<Script file="modules\Threat.lua" />
+
+<!-- Modules without modes -->
 <Script file="modules\Scroll.lua" />
 <Script file="modules\Spamage.lua" />
+<Script file="modules\Themes.lua" />
 </Ui>
