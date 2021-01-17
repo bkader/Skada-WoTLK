@@ -8,6 +8,7 @@
 <Script file="modules\Deaths.lua" />
 <Script file="modules\Resurrects.lua" />
 <Script file="modules\Auras.lua" />
+<Script file="modules\SunderCounter.lua" />
 <Script file="modules\Dispels.lua" />
 <Script file="modules\Interrupts.lua" />
 <Script file="modules\Power.lua" />
