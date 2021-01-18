@@ -1,6 +1,14 @@
 ## Interface: 30300
 ## Title: Skada
 ## Notes: Modular damage meter.
+## Notes-deDE: Ein Damage-Meter.
+## Notes-esES: Un medidor de daño.
+## Notes-esMX: Un medidor de daño.
+## Notes-frFR: Un damage meter.
+## Notes-koKR: 데미지 미터 모듈입니다.
+## Notes-ruRU: Измеритель урона.
+## Notes-zhCN: 模块化伤害统计。
+## Notes-zhTW: 模組化的傷害統計。
 ## Author: Zarnivoop, Kader
 ## Version: r301
 ## SavedVariables: SkadaDB
@@ -22,8 +30,8 @@ locale\zhCN.lua
 locale\zhTW.lua
 
 Skada.lua
-Options.lua
 Menus.lua
+Options.lua
 BarDisplay.lua
 InlineDisplay.lua
 BrokerDisplay.lua
