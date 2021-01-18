@@ -126,14 +126,13 @@ end
 
 -- returns the group type and count
 local function GetGroupTypeAndCount()
-    local count, t = 0
-
-    if GetNumRaidMembers() > 0 then
-        t, count = "raid", GetNumRaidMembers()
-    elseif GetNumPartyMembers() > 0 then
-        t, count = "party", GetNumPartyMembers()
+    local count, t = GetNumRaidMembers(), "raid"
+    if count == 0 then -- no raid? maybe party!
+        count, t = GetNumPartyMembers(), "party"
     end
-
+    if count == 0 then -- still 0? Then solo
+        t = "player"
+    end
     return t, count
 end
 
@@ -143,22 +142,20 @@ end
 
 local createSet, verify_set
 local find_mode, sort_modes
-local is_in_pvp, is_solo
 local IsRaidInCombat, IsRaidDead
-local setPlayerActiveTimes
 
 -- party/group
 
-function is_in_pvp()
+local function is_in_pvp()
     local t = select(2, IsInInstance())
     return (t == "pvp" or t == "arena")
 end
 
-function is_solo()
+local function is_solo()
     return (not IsInGroup())
 end
 
-function setPlayerActiveTimes(set)
+local function setPlayerActiveTimes(set)
     for i, player in ipairs(set.players) do
         if player.last then
             player.time = math_max(player.time + (player.last - player.first), 0.1)
@@ -177,17 +174,17 @@ end
 -- utilities
 
 function Skada:ShowPopup()
-    StaticPopupDialogs["ResetSkadaDialog"] = {
-        text = L["Do you want to reset Skada?"],
-        button1 = ACCEPT,
-        button2 = CANCEL,
-        timeout = 30,
-        whileDead = 0,
-        hideOnEscape = 1,
-        OnAccept = function()
-            Skada:Reset()
-        end
-    }
+	if not StaticPopupDialogs["ResetSkadaDialog"] then
+	    StaticPopupDialogs["ResetSkadaDialog"] = {
+	        text = L["Do you want to reset Skada?"],
+	        button1 = ACCEPT,
+	        button2 = CANCEL,
+	        timeout = 30,
+	        whileDead = 0,
+	        hideOnEscape = 1,
+	        OnAccept = function() Skada:Reset() end
+	    }
+	end
     StaticPopup_Show("ResetSkadaDialog")
 end
 
@@ -200,21 +197,13 @@ do
 
     -- create a new window
     function Window:new()
-        return setmetatable(
-            {
-                selectedmode = nil,
-                selectedset = nil,
-                restore_mode = nil,
-                restore_set = nil,
-                usealt = true,
-                dataset = {},
-                metadata = {},
-                display = nil,
-                history = {},
-                changed = false
-            },
-            mt
-        )
+        return setmetatable({
+			usealt = true,
+			dataset = {},
+			metadata = {},
+			history = {},
+			changed = false
+        }, mt)
     end
 
     -- add window options
@@ -500,17 +489,13 @@ do
 
     do
         function sort_modes()
-            tsort(
-                modes,
-                function(a, b)
-                    if Skada.db.profile.sortmodesbyusage and Skada.db.profile.modeclicks then
-                        return (Skada.db.profile.modeclicks[a:GetName()] or 0) >
-                            (Skada.db.profile.modeclicks[b:GetName()] or 0)
-                    else
-                        return a:GetName() < b:GetName()
-                    end
-                end
-            )
+            tsort(modes, function(a, b)
+				if Skada.db.profile.sortmodesbyusage and Skada.db.profile.modeclicks then
+					return (Skada.db.profile.modeclicks[a:GetName()] or 0) > (Skada.db.profile.modeclicks[b:GetName()] or 0)
+				else
+					return a:GetName() < b:GetName()
+				end
+            end)
         end
 
         local function click_on_mode(win, id, _, button)
@@ -644,7 +629,7 @@ do
         end
 
         if not db.buttons then
-            db.buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = true}
+            db.buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false}
         end
 
         local window = Window:new()
@@ -758,23 +743,23 @@ do
         if not mode.scanned then
             mode.scanned = true
 
-            if not mode.metadata then
-                return
-            end
+			if mode.metadata then
+				-- add columns if available
+				if mode.metadata.columns then
+					Skada:AddColumnOptions(mode)
+				end
 
-            if mode.metadata.columns then
-                Skada:AddColumnOptions(mode)
-            end
-
-            if mode.metadata.click1 then
-                scan_for_columns(mode.metadata.click1)
-            end
-            if mode.metadata.click2 then
-                scan_for_columns(mode.metadata.click2)
-            end
-            if mode.metadata.click3 then
-                scan_for_columns(mode.metadata.click3)
-            end
+				-- scan for linked modes
+				if mode.metadata.click1 then
+					scan_for_columns(mode.metadata.click1)
+				end
+				if mode.metadata.click2 then
+					scan_for_columns(mode.metadata.click2)
+				end
+				if mode.metadata.click3 then
+					scan_for_columns(mode.metadata.click3)
+				end
+			end
         end
     end
 
@@ -791,8 +776,8 @@ do
             verify_set(mode, set)
         end
 
-        tinsert(modes, mode)
         mode.category = category or OTHER
+        tinsert(modes, mode)
 
         for _, win in ipairs(windows) do
             if mode:GetName() == win.db.mode then
@@ -1071,7 +1056,10 @@ do
                 -- fix classes for others
                 player.class = "PET"
                 player.owner = self:GetPetOwner(player.id)
-            elseif not player.class then
+            end
+
+			-- still no class assigned?
+            if not player.class then
                 -- class already received from GetPlayerInfoByGUID?
                 if class then
                     -- it's a real player?
@@ -1089,16 +1077,16 @@ do
                 else
                     player.class = "UNKNOWN"
                 end
+            end
 
-                -- if the player has been assigned a valid class,
-                -- we make sure to assign his/her role and spec
-                if player.class and self.validclass[player.class] then
-                    if not player.role then
-                        player.role = self:UnitGroupRolesAssigned(player.name)
-                    end
-                    if not player.spec then
-                        player.spec = self:GetPlayerSpecID(player.name, player.class)
-                    end
+            -- if the player has been assigned a valid class,
+            -- we make sure to assign his/her role and spec
+            if player.class and self.validclass[player.class] then
+                if not player.role then
+                    player.role = self:UnitGroupRolesAssigned(player.name)
+                end
+                if not player.spec then
+                    player.spec = self:GetPlayerSpecID(player.name, player.class)
                 end
             end
         end
@@ -1757,9 +1745,7 @@ function Skada:Reset()
     self:Print(L["All data has been reset."])
     CloseDropDownMenus()
 
-    if not InCombatLockdown() then
-        self:CleanGarbage(true)
-    end
+    self:CleanGarbage(true)
 end
 
 function Skada:UpdateDisplay(force)
