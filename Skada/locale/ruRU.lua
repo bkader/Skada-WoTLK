@@ -480,10 +480,10 @@ L["CC Breakers"] = "Прерыватели контроля"
 
 -- options
 L["CC"] = "Контроль"
-L["Announce CC breaking to party"] = ""
-L["Ignore Main Tanks"] = ""
-L["%s on %s removed by %s"] = ""
-L["%s on %s removed by %s's %s"] = ""
+L["Announce CC breaking to party"] = "Объявлять прерывания контроля в группу"
+L["Ignore Main Tanks"] = "Игнорировать танков"
+L["%s on %s removed by %s"] = "%s на %s прервал %s"
+L["%s on %s removed by %s's %s"] = "%s на %s прервал %s (%s)"
 
 -- ============= --
 -- Damage Module --
