@@ -823,7 +823,7 @@ Skada:AddLoadableModule(
                         self.metadata.columns.Healing,
                         Skada:FormatNumber(getHPS(set, player)),
                         self.metadata.columns.HPS,
-                        _format("%02.1f%%", healing / (set.healing + set.absorbs) * 100),
+                        _format("%02.1f%%", 100 * healing / math_max(1, total)),
                         self.metadata.columns.Percent
                     )
 
