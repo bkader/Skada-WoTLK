@@ -1,8 +1,4 @@
 local Skada = Skada
-if not Skada then
-    return
-end
-
 Skada:AddLoadableModule(
     "Dispels",
     function(Skada, L)
@@ -22,42 +18,40 @@ Skada:AddLoadableModule(
 
         local function log_dispels(set, data)
             local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
-            if not player then
-                return
-            end
+            if player then
+                -- increment player's and set's dispels count
+                player.dispels = player.dispels or {}
+                player.dispels.count = (player.dispels.count or 0) + 1
+                set.dispels = (set.dispels or 0) + 1
 
-            -- increment player's and set's dispels count
-            player.dispels.count = player.dispels.count + 1
-            set.dispels = set.dispels + 1
-
-            -- add the dispelled spell
-            if data.spellid then
-                player.dispels.spells = player.dispels.spells or {}
-                if not player.dispels.spells[data.spellid] then
-                    player.dispels.spells[data.spellid] = {school = data.spellschool, count = 1}
-                else
-                    player.dispels.spells[data.spellid].count = player.dispels.spells[data.spellid].count + 1
+                -- add the dispelled spell
+                if data.spellid then
+                    player.dispels.spells = player.dispels.spells or {}
+                    if not player.dispels.spells[data.spellid] then
+                        player.dispels.spells[data.spellid] = {school = data.spellschool, count = 1}
+                    else
+                        player.dispels.spells[data.spellid].count = player.dispels.spells[data.spellid].count + 1
+                    end
                 end
-            end
 
-            -- add the dispelling spell
-            if data.extraspellid then
-                player.dispels.extraspells = player.dispels.extraspells or {}
-                if not player.dispels.extraspells[data.extraspellid] then
-                    player.dispels.extraspells[data.extraspellid] = {school = data.extraspellschool, count = 1}
-                else
-                    player.dispels.extraspells[data.extraspellid].count =
-                        player.dispels.extraspells[data.extraspellid].count + 1
+                -- add the dispelling spell
+                if data.extraspellid then
+                    player.dispels.extraspells = player.dispels.extraspells or {}
+                    if not player.dispels.extraspells[data.extraspellid] then
+                        player.dispels.extraspells[data.extraspellid] = {school = data.extraspellschool, count = 1}
+                    else
+                        player.dispels.extraspells[data.extraspellid].count = player.dispels.extraspells[data.extraspellid].count + 1
+                    end
                 end
-            end
 
-            -- add the dispelled target
-            if data.dstName then
-                player.dispels.targets = player.dispels.targets or {}
-                if not player.dispels.targets[data.dstName] then
-                    player.dispels.targets[data.dstName] = {id = data.dstGUID, count = 1}
-                else
-                    player.dispels.targets[data.dstName].count = player.dispels.targets[data.dstName].count + 1
+                -- add the dispelled target
+                if data.dstName then
+                    player.dispels.targets = player.dispels.targets or {}
+                    if not player.dispels.targets[data.dstName] then
+                        player.dispels.targets[data.dstName] = {id = data.dstGUID, count = 1}
+                    else
+                        player.dispels.targets[data.dstName].count = player.dispels.targets[data.dstName].count + 1
+                    end
                 end
             end
         end
@@ -119,7 +113,7 @@ Skada:AddLoadableModule(
                         Skada:FormatValueText(
                         spell.count,
                         mod.metadata.columns.Total,
-                        _format("%02.1f%%", spell.count / math_max(1, set.dispels) * 100),
+                        _format("%02.1f%%", 100 * spell.count / math_max(1, set.dispels or 0)),
                         mod.metadata.columns.Percent
                     )
 
@@ -167,7 +161,7 @@ Skada:AddLoadableModule(
                         Skada:FormatValueText(
                         target.count,
                         mod.metadata.columns.Total,
-                        _format("%02.1f%%", target.count / math_max(1, set.dispels) * 100),
+                        _format("%02.1f%%", 100 * target.count / math_max(1, set.dispels or 0)),
                         mod.metadata.columns.Percent
                     )
 
@@ -212,7 +206,7 @@ Skada:AddLoadableModule(
                         Skada:FormatValueText(
                         spell.count,
                         mod.metadata.columns.Total,
-                        _format("%02.1f%%", spell.count / math_max(1, set.dispels) * 100),
+                        _format("%02.1f%%", 100 * spell.count / math_max(1, set.dispels or 0)),
                         mod.metadata.columns.Percent
                     )
 
@@ -230,9 +224,7 @@ Skada:AddLoadableModule(
         function mod:Update(win, set)
             local nr, max = 1, 0
             for _, player in _ipairs(set.players) do
-                if player.dispels.count > 0 then
-                    local count = player.dispels.count
-
+                if player.dispels then
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
@@ -242,17 +234,17 @@ Skada:AddLoadableModule(
                     d.spec = player.spec
                     d.role = player.role
 
-                    d.value = count
+                    d.value = player.dispels.count
                     d.valuetext =
                         Skada:FormatValueText(
-                        count,
+                        player.dispels.count,
                         self.metadata.columns.Total,
-                        _format("%02.1f%%", count / math_max(1, set.dispels) * 100),
+                        _format("%02.1f%%", 100 * player.dispels.count / math_max(1, set.dispels or 0)),
                         self.metadata.columns.Percent
                     )
 
-                    if count > max then
-                        max = count
+                    if player.dispels.count > max then
+                        max = player.dispels.count
                     end
 
                     nr = nr + 1
@@ -263,10 +255,7 @@ Skada:AddLoadableModule(
         end
 
         function mod:OnEnable()
-            spellsmod.metadata = {}
-            targetsmod.metadata = {}
-            playermod.metadata = {}
-            mod.metadata = {
+            self.metadata = {
                 showspots = true,
                 click1 = spellsmod,
                 click2 = targetsmod,
@@ -285,33 +274,13 @@ Skada:AddLoadableModule(
         end
 
         function mod:AddToTooltip(set, tooltip)
-            if set.dispels > 0 then
-                tooltip:AddDoubleLine(L["Dispels"], set.dispels, 1, 1, 1)
-            end
-        end
-
-        function mod:AddPlayerAttributes(player)
-            if not player.dispels then
-                player.dispels = {count = 0}
-            end
-        end
-
-        function mod:AddSetAttributes(set)
-            set.dispels = set.dispels or 0
+			if set and set.dispels and set.dispels > 0 then
+				tooltip:AddDoubleLine(L["Dispels"], set.dispels, 1, 1, 1)
+			end
         end
 
         function mod:GetSetSummary(set)
-            return set.dispels
-        end
-
-        function mod:SetComplete(set)
-            for _, player in ipairs(set.players) do
-                if player.dispels.count == 0 then
-                    player.dispels.spells = nil
-                    player.dispels.extraspells = nil
-                    player.dispels.targets = nil
-                end
-            end
+            return set.dispels or 0
         end
     end
 )

@@ -1,7 +1,4 @@
 local Skada = Skada
-if not Skada then
-    return
-end
 Skada:AddLoadableModule(
     "Interrupts",
     function(Skada, L)
@@ -21,43 +18,42 @@ Skada:AddLoadableModule(
 
         local function log_interrupt(set, data)
             local player = Skada:find_player(set, data.playerid, data.playername)
-            if not player then
-                return
-            end
+            if player then
+	            -- increment player's and set's interrupts count
+	            player.interrupts = player.interrupts or {}
+	            player.interrupts.count = (player.interrupts.count or 0) + 1
+	            set.interrupts = (set.interrupts or 0) + 1
 
-            -- increment player's and set's interrupts count
-            player.interrupts.count = player.interrupts.count + 1
-            set.interrupts = set.interrupts + 1
+	            -- add the interrupted spell
+	            if data.spellid then
+	                player.interrupts.spells = player.interrupts.spells or {}
+	                if not player.interrupts.spells[data.spellid] then
+	                    player.interrupts.spells[data.spellid] = {school = data.spellschool, count = 1}
+	                else
+	                    player.interrupts.spells[data.spellid].count = player.interrupts.spells[data.spellid].count + 1
+	                end
+	            end
 
-            -- add the interrupted spell
-            if data.spellid then
-                player.interrupts.spells = player.interrupts.spells or {}
-                if not player.interrupts.spells[data.spellid] then
-                    player.interrupts.spells[data.spellid] = {school = data.spellschool, count = 1}
-                else
-                    player.interrupts.spells[data.spellid].count = player.interrupts.spells[data.spellid].count + 1
-                end
-            end
+	            -- add the interrupt spell
+	            if data.extraspellid then
+	                player.interrupts.extraspells = player.interrupts.extraspells or {}
+	                if not player.interrupts.extraspells[data.extraspellid] then
+	                    player.interrupts.extraspells[data.extraspellid] = {school = data.extraspellschool, count = 1}
+	                else
+	                    player.interrupts.extraspells[data.extraspellid].count =
+	                        player.interrupts.extraspells[data.extraspellid].count + 1
+	                end
+	            end
 
-            -- add the interrupt spell
-            if data.extraspellid then
-                player.interrupts.extraspells = player.interrupts.extraspells or {}
-                if not player.interrupts.extraspells[data.extraspellid] then
-                    player.interrupts.extraspells[data.extraspellid] = {school = data.extraspellschool, count = 1}
-                else
-                    player.interrupts.extraspells[data.extraspellid].count =
-                        player.interrupts.extraspells[data.extraspellid].count + 1
-                end
-            end
-
-            -- add the interrupted target
-            if data.dstName then
-                player.interrupts.targets = player.interrupts.targets or {}
-                if not player.interrupts.targets[data.dstName] then
-                    player.interrupts.targets[data.dstName] = {id = data.dstGUID, count = 1}
-                else
-                    player.interrupts.targets[data.dstName].count = player.interrupts.targets[data.dstName].count + 1
-                end
+	            -- add the interrupted target
+	            if data.dstName then
+	                player.interrupts.targets = player.interrupts.targets or {}
+	                if not player.interrupts.targets[data.dstName] then
+	                    player.interrupts.targets[data.dstName] = {id = data.dstGUID, count = 1}
+	                else
+	                    player.interrupts.targets[data.dstName].count = player.interrupts.targets[data.dstName].count + 1
+	                end
+	            end
             end
         end
 
@@ -142,7 +138,7 @@ Skada:AddLoadableModule(
             local player = Skada:find_player(set, self.playerid, self.playername)
             local max = 1
 
-            if player then
+            if player and player.interrupts.targets then
                 local nr = 1
                 for targetname, target in _pairs(player.interrupts.targets) do
                     local d = win.dataset[nr] or {}
@@ -165,7 +161,7 @@ Skada:AddLoadableModule(
                         Skada:FormatValueText(
                         target.count,
                         mod.metadata.columns.Total,
-                        _format("%02.1f%%", 100 * target.count / math_max(1, set.interrupts)),
+                        _format("%02.1f%%", 100 * target.count / math_max(1, set.interrupts or 0)),
                         mod.metadata.columns.Percent
                     )
 
@@ -190,7 +186,7 @@ Skada:AddLoadableModule(
             local player = Skada:find_player(set, self.playerid, self.playername)
             local max = 0
 
-            if player then
+            if player and player.interrupts.spells then
                 local nr = 1
 
                 for spellid, spell in _pairs(player.interrupts.spells) do
@@ -210,7 +206,7 @@ Skada:AddLoadableModule(
                         Skada:FormatValueText(
                         spell.count,
                         mod.metadata.columns.Total,
-                        _format("%02.1f%%", 100 * spell.count / math_max(1, set.interrupts)),
+                        _format("%02.1f%%", 100 * spell.count / math_max(1, set.interrupts or 0)),
                         mod.metadata.columns.Percent
                     )
 
@@ -228,7 +224,7 @@ Skada:AddLoadableModule(
         function mod:Update(win, set)
             local nr, max = 1, 0
             for _, player in _ipairs(set.players) do
-                if player.interrupts.count > 0 then
+                if player.interrupts then
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
@@ -243,7 +239,7 @@ Skada:AddLoadableModule(
                         Skada:FormatValueText(
                         player.interrupts.count,
                         self.metadata.columns.Total,
-                        _format("%02.1f%%", 100 * player.interrupts.count / math_max(1, set.interrupts)),
+                        _format("%02.1f%%", 100 * player.interrupts.count / math_max(1, set.interrupts or 0)),
                         self.metadata.columns.Percent
                     )
 
@@ -259,10 +255,7 @@ Skada:AddLoadableModule(
         end
 
         function mod:OnEnable()
-            spellsmod.metadata = {}
-            targetsmod.metadata = {}
-            playermod.metadata = {}
-            mod.metadata = {
+            self.metadata = {
                 showspots = true,
                 click1 = spellsmod,
                 click2 = targetsmod,
@@ -280,35 +273,13 @@ Skada:AddLoadableModule(
         end
 
         function mod:AddToTooltip(set, tooltip)
-            if set.interrupts > 0 then
-                tooltip:AddDoubleLine(L["Interrupts"], set.interrupts, 1, 1, 1)
-            end
+			if set and set.interrupts and set.interrupts > 0 then
+				tooltip:AddDoubleLine(L["Interrupts"], set.interrupts, 1, 1, 1)
+			end
         end
 
         function mod:GetSetSummary(set)
-            return set.interrupts
-        end
-
-        -- Called by Skada when a new player is added to a set.
-        function mod:AddPlayerAttributes(player)
-            if not player.interrupts then
-                player.interrupts = {count = 0}
-            end
-        end
-
-        -- Called by Skada when a new set is created.
-        function mod:AddSetAttributes(set)
-            set.interrupts = set.interrupts or 0
-        end
-
-        function mod:SetComplete(set)
-            for _, player in _ipairs(set.players) do
-                if player.interrupts.count == 0 then
-                    player.interrupts.spells = nil
-                    player.interrupts.extraspells = nil
-                    player.interrupts.targets = nil
-                end
-            end
+            return set.interrupts or 0
         end
     end
 )

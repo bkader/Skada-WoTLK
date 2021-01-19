@@ -256,7 +256,7 @@ Skada:AddLoadableModule(
         end
 
         function mod:GetSetSummary(set)
-            return Skada:FormatNumber(set.friendfire)
+            return Skada:FormatNumber(set.friendfire or 0)
         end
     end
 )

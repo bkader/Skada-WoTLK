@@ -20,36 +20,37 @@ Skada:AddLoadableModule(
         local _tostring, _format = tostring, string.format
         local _GetSpellInfo = GetSpellInfo
 
-        local function log_resurrect(set, data, ts)
+        local function log_resurrect(set, data)
             local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
             if player then
-                player.resurrect.count = player.resurrect.count + 1
-                set.resurrect = set.resurrect + 1
+				player.resurrect = player.resurrect or {}
+                player.resurrect.count = (player.resurrect.count or 0) + 1
+                set.resurrect = (set.resurrect or 0) + 1
 
+                -- details about spells and their targets.
+                player.resurrect.spells = player.resurrect.spells or {}
                 if not player.resurrect.spells[data.spellid] then
                     player.resurrect.spells[data.spellid] = {count = 1, school = data.spellschool, targets = {}}
                 else
                     player.resurrect.spells[data.spellid].count = player.resurrect.spells[data.spellid].count + 1
                 end
-
                 if not player.resurrect.spells[data.spellid].targets[data.dstName] then
                     player.resurrect.spells[data.spellid].targets[data.dstName] = {id = data.dstGUID, count = 1}
                 else
-                    player.resurrect.spells[data.spellid].targets[data.dstName].count =
-                        player.resurrect.spells[data.spellid].targets[data.dstName].count + 1
+                    player.resurrect.spells[data.spellid].targets[data.dstName].count = player.resurrect.spells[data.spellid].targets[data.dstName].count + 1
                 end
 
+                -- details about resurrected players and spells used on them
+                player.resurrect.targets = player.resurrect.targets or {}
                 if not player.resurrect.targets[data.dstName] then
                     player.resurrect.targets[data.dstName] = {id = data.dstGUID, count = 1, spells = {}}
                 else
                     player.resurrect.targets[data.dstName].count = player.resurrect.targets[data.dstName].count + 1
                 end
-
                 if not player.resurrect.targets[data.dstName].spells[data.spellid] then
                     player.resurrect.targets[data.dstName].spells[data.spellid] = {id = data.spellid, count = 1}
                 else
-                    player.resurrect.targets[data.dstName].spells[data.spellid].count =
-                        player.resurrect.targets[data.dstName].spells[data.spellid].count + 1
+                    player.resurrect.targets[data.dstName].spells[data.spellid].count = player.resurrect.targets[data.dstName].spells[data.spellid].count + 1
                 end
             end
         end
@@ -71,8 +72,8 @@ Skada:AddLoadableModule(
             data.spellname = spellname
             data.spellschool = spellschool
 
-            log_resurrect(Skada.current, data, ts)
-            log_resurrect(Skada.total, data, ts)
+            log_resurrect(Skada.current, data)
+            log_resurrect(Skada.total, data)
         end
 
         function spellsmod:Enter(win, id, label)
@@ -85,7 +86,7 @@ Skada:AddLoadableModule(
             local player = Skada:find_player(set, self.playerid, self.playername)
             local max = 0
 
-            if player then
+            if player and player.resurrect.spells then
                 local nr = 1
                 for spellid, spell in _pairs(player.resurrect.spells) do
                     local d = win.dataset[nr] or {}
@@ -114,11 +115,7 @@ Skada:AddLoadableModule(
 
         function spelltargetsmod:Enter(win, id, label)
             self.spellid = id
-            if spellsmod.playername then
-                self.title = format(L["%s's resurrect <%s> targets"], spellsmod.playername, label)
-            else
-                self.title = format(L["%s's resurrect targets"], label)
-            end
+            self.title = _format(L["%s's resurrect <%s> targets"], spellsmod.playername, label)
         end
 
         function spelltargetsmod:Update(win, set)
@@ -145,7 +142,7 @@ Skada:AddLoadableModule(
                     end
 
                     d.value = target.count
-                    d.valuetext = tostring(target.count)
+                    d.valuetext = _tostring(target.count)
 
                     if target.count > max then
                         max = target.count
@@ -184,7 +181,7 @@ Skada:AddLoadableModule(
                         d.spec = p.spec
                         d.role = p.role
                     else
-                        d.class = "UNKNOWN"
+                        d.class = Skada:GetPetOwner(target.id) and "PET" or "UNKNOWN"
                     end
 
                     d.value = target.count
@@ -267,8 +264,6 @@ Skada:AddLoadableModule(
         end
 
         function mod:OnEnable()
-            spelltargetsmod.metadata = {}
-            targetspellsmod.metadata = {}
             spellsmod.metadata = {click1 = spelltargetsmod}
             targetsmod.metadata = {click1 = targetspellsmod}
             self.metadata = {showspots = true, click1 = spellsmod, click2 = targetsmod}
@@ -287,32 +282,11 @@ Skada:AddLoadableModule(
         end
 
         function mod:AddToTooltip(set, tooltip)
-            if set.resurrect > 0 then
-                tooltip:AddDoubleLine(L["Resurrects"], set.resurrect, 1, 1, 1)
-            end
+			tooltip:AddDoubleLine(L["Resurrects"], set.resurrect or 0, 1, 1, 1)
         end
 
         function mod:GetSetSummary(set)
-            return set.resurrect
-        end
-
-        function mod:AddPlayerAttributes(player)
-            if not player.resurrect then
-                player.resurrect = {count = 0, spells = {}, targets = {}}
-            end
-        end
-
-        function mod:AddSetAttributes(set)
-            set.resurrect = set.resurrect or 0
-        end
-
-        function mod:SetComplete(set)
-            for i, player in _ipairs(set.players) do
-                if player.resurrect.count == 0 then
-                    player.resurrect.spells = nil
-                    player.resurrect.targets = nil
-                end
-            end
+            return set.resurrect or 0
         end
     end
 )

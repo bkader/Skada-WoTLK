@@ -1,8 +1,4 @@
 local Skada = Skada
-if not Skada then
-    return
-end
-
 Skada:AddLoadableModule(
     "Fails",
     function(Skada, L)
@@ -41,8 +37,9 @@ Skada:AddLoadableModule(
                 if Skada.current then
                     local player = Skada:get_player(Skada.current, unitGUID, who)
                     if player then
-                        player.fails.count = player.fails.count + 1
-                        Skada.current.fails = Skada.current.fails + 1
+						player.fails = player.fails or {}
+                        player.fails.count = (player.fails.count or 0) + 1
+                        Skada.current.fails = (Skada.current.fails or 0) + 1
 
                         player.fails.spells = player.fails.spells or {}
                         player.fails.spells[spellid] = (player.fails.spells[spellid] or 0) + 1
@@ -53,8 +50,9 @@ Skada:AddLoadableModule(
                 if Skada.total then
                     local player = Skada:get_player(Skada.total, unitGUID, who)
                     if player then
-                        player.fails.count = player.fails.count + 1
-                        Skada.total.fails = Skada.total.fails + 1
+						player.fails = player.fails or {}
+                        player.fails.count = (player.fails.count or 0) + 1
+                        Skada.total.fails = (Skada.total.fails or 0) + 1
 
                         player.fails.spells = player.fails.spells or {}
                         player.fails.spells[spellid] = (player.fails.spells[spellid] or 0) + 1
@@ -139,7 +137,7 @@ Skada:AddLoadableModule(
             local nr, max = 1, 0
 
             for _, player in _ipairs(set.players) do
-                if player.fails.count > 0 then
+                if player.fails then
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
@@ -168,9 +166,8 @@ Skada:AddLoadableModule(
                 LibFail:RegisterCallback(event, onFail)
             end
 
-            spellmod.metadata = {}
             playermod.metadata = {click1 = spellmod}
-            mod.metadata = {click1 = playermod}
+            self.metadata = {click1 = playermod}
 
             Skada:AddMode(self)
         end
@@ -180,30 +177,12 @@ Skada:AddLoadableModule(
         end
 
         function mod:GetSetSummary(set)
-            return set.fails
+            return set.fails or 0
         end
 
         function mod:AddToTooltip(set, tooltip)
-            if set.fails > 0 then
+            if set and set.fails and set.fails > 0 then
                 tooltip:AddDoubleLine(L["Fails"], set.fails, 1, 1, 1)
-            end
-        end
-
-        function mod:AddPlayerAttributes(player)
-            if not player.fails then
-                player.fails = {count = 0}
-            end
-        end
-
-        function mod:AddSetAttributes(set)
-            set.fails = set.fails or 0
-        end
-
-        function mod:SetComplete(set)
-            for _, player in _ipairs(set.players) do
-                if player.fails == 0 then
-                    player.fails.spells = nil
-                end
             end
         end
     end
