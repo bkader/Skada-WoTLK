@@ -239,7 +239,7 @@ Skada:AddLoadableModule(
             local nr, max = 1, 0
 
             for i, player in _ipairs(set.players) do
-                if player.resurrect.count > 0 then
+                if player.resurrect then
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
