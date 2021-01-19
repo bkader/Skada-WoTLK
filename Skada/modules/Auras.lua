@@ -223,8 +223,8 @@ local function updatefunc(auratype, win, set)
 end
 
 -- spells per player list
-local function detailupdatefunc(auratype, win, set, playerid)
-    local player = Skada:find_player(set, playerid)
+local function detailupdatefunc(auratype, win, set, playerid, playername)
+    local player = Skada:find_player(set, playerid, playername)
     if player then
         local maxtime = Skada:PlayerActiveTime(set, player)
         if maxtime and maxtime > 0 then
@@ -235,9 +235,10 @@ local function detailupdatefunc(auratype, win, set, playerid)
                 if spell.auratype == auratype then
                     local uptime = math_min(maxtime, spell.uptime)
 
-                    if spell.active > 0 and spell.started then
-                        uptime = uptime + math_floor((time() - spell.started) + 0.5)
-                    end
+                    -- FIXME
+                    -- if spell.active > 0 and spell.started then
+                    --     uptime = uptime + math_floor((time() - spell.started) + 0.5)
+                    -- end
 
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
@@ -304,11 +305,12 @@ Skada:AddLoadableModule(
 
         function spellmod:Enter(win, id, label)
             self.playerid = id
+            self.playername = label
             self.title = _format(L["%s's buffs"], label)
         end
 
         function spellmod:Update(win, set)
-            detailupdatefunc("BUFF", win, set, self.playerid)
+            detailupdatefunc("BUFF", win, set, self.playerid, self.playername)
         end
 
         function mod:Update(win, set)
@@ -420,7 +422,7 @@ Skada:AddLoadableModule(
         end
 
         function spellmod:Update(win, set)
-            detailupdatefunc("DEBUFF", win, set, self.playerid)
+            detailupdatefunc("DEBUFF", win, set, self.playerid, self.playername)
         end
 
         function mod:Update(win, set)
