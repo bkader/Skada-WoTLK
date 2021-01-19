@@ -1,11 +1,10 @@
 local Skada = Skada
-if not Skada then
-    return
-end
-
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 
 local mod = Skada:NewModule("InlineDisplay")
+mod.name = L["Inline bar display"]
+mod.description = L["Inline display is a horizontal window style."]
+Skada:AddDisplaySystem("inline", mod)
 
 local mybars = {}
 local barlibrary = {bars = {}, nextuuid = 1}
@@ -15,9 +14,10 @@ local ttactive = false
 local libwindow = LibStub("LibWindow-1.1")
 local media = LibStub("LibSharedMedia-3.0")
 
-mod.name = L["Inline bar display"]
-mod.description = L["Inline display is a horizontal window style."]
-Skada:AddDisplaySystem("inline", mod)
+local _pairs, _tostring, _type = pairs, tostring, type
+local _rep, _format, _match = string.rep, string.format, string.match
+local tinsert, tremove, tsort = table.insert, table.remove, table.sort
+local _min, _max = math.min, math.max
 
 local classcolors = {
     DEATHKNIGHT = "|cffc41f3b%s|r",
@@ -36,25 +36,25 @@ local function serial(val, name, skipnewlines, depth)
     skipnewlines = skipnewlines or false
     depth = depth or 0
 
-    local tmp = string.rep("·", depth)
+    local tmp = _rep("·", depth)
     if name then
         tmp = tmp .. name .. "="
     end
 
-    if type(val) == "table" then
+    if _type(val) == "table" then
         tmp = tmp .. "{" .. (not skipnewlines and "\n" or "")
-        for k, v in pairs(val) do
+        for k, v in _pairs(val) do
             tmp = tmp .. serial(v, k, skipnewlines, depth + 1) .. "," .. (not skipnewlines and "\n" or "")
         end
-        tmp = tmp .. string.rep(" ", depth) .. "}"
-    elseif type(val) == "number" then
-        tmp = tmp .. tostring(val)
-    elseif type(val) == "string" then
-        tmp = tmp .. string.format("%q", val)
-    elseif type(val) == "boolean" then
+        tmp = tmp .. _rep(" ", depth) .. "}"
+    elseif _type(val) == "number" then
+        tmp = tmp .. _tostring(val)
+    elseif _type(val) == "string" then
+        tmp = tmp .. _format("%q", val)
+    elseif _type(val) == "boolean" then
         tmp = tmp .. (val and "true" or "false")
     else
-        tmp = tmp .. '"[inserializeable datatype:' .. type(val) .. ']"'
+        tmp = tmp .. '"[inserializeable datatype:' .. _type(val) .. ']"'
     end
     return tmp
 end
@@ -121,14 +121,11 @@ function mod:Create(window, isnew)
     end
 
     window.frame:EnableMouse()
-    window.frame:SetScript(
-        "OnMouseDown",
-        function(frame, button)
-            if button == "RightButton" then
-                window:RightClick()
-            end
-        end
-    )
+    window.frame:SetScript("OnMouseDown", function(frame, button)
+		if button == "RightButton" then
+			window:RightClick()
+		end
+    end)
 
     libwindow.RegisterConfig(window.frame, window.db)
 
@@ -141,24 +138,18 @@ function mod:Create(window, isnew)
     window.frame:EnableMouse(true)
     window.frame:SetMovable(true)
     window.frame:RegisterForDrag("LeftButton")
-    window.frame:SetScript(
-        "OnDragStart",
-        function(frame)
-            if not window.db.barslocked then
-                GameTooltip:Hide()
-                frame.isDragging = true
-                frame:StartMoving()
-            end
-        end
-    )
-    window.frame:SetScript(
-        "OnDragStop",
-        function(frame)
-            frame:StopMovingOrSizing()
-            frame.isDragging = false
-            libwindow.SavePosition(frame)
-        end
-    )
+    window.frame:SetScript("OnDragStart", function(frame)
+		if not window.db.barslocked then
+			GameTooltip:Hide()
+			frame.isDragging = true
+			frame:StartMoving()
+		end
+	end)
+    window.frame:SetScript("OnDragStop", function(frame)
+		frame:StopMovingOrSizing()
+		frame.isDragging = false
+		libwindow.SavePosition(frame)
+	end)
 
     local titlebg = CreateFrame("Frame", "InlineTitleBackground", window.frame)
     local title = window.frame:CreateFontString("frameTitle", 6)
@@ -175,16 +166,13 @@ function mod:Create(window, isnew)
 
     titlebg:SetAllPoints(title)
     titlebg:EnableMouse(true)
-    titlebg:SetScript(
-        "OnMouseDown",
-        function(frame, button)
-            if button == "RightButton" then
-                Skada:SegmentMenu(window)
-            elseif button == "LeftButton" then
-                Skada:ModeMenu(window)
-            end
-        end
-    )
+    titlebg:SetScript("OnMouseDown", function(frame, button)
+		if button == "RightButton" then
+			Skada:SegmentMenu(window)
+		elseif button == "LeftButton" then
+			Skada:ModeMenu(window)
+		end
+	end)
 
     local skadamenubuttonbackdrop = {
         bgFile = "Interface\\Buttons\\UI-OptionsButton",
@@ -213,12 +201,7 @@ function mod:Create(window, isnew)
     menu:SetFrameLevel(9)
     menu:SetPoint("CENTER")
     menu:SetBackdrop(skadamenubuttonbackdrop)
-    menu:SetScript(
-        "OnClick",
-        function()
-            Skada:OpenMenu(window)
-        end
-    )
+    menu:SetScript("OnClick", function() Skada:OpenMenu(window) end)
 
     window.frame.menu = menu
     window.frame.skadamenubutton = title
@@ -268,20 +251,12 @@ function barlibrary:CreateBar(uuid, win)
     bar.label:SetJustifyH("LEFT")
     bar.label:SetJustifyV("MIDDLE")
     bar.bg:EnableMouse(true)
-    bar.bg:SetScript(
-        "OnMouseDown",
-        function(frame, button)
-            BarClick(win, bar, button)
-        end
-    )
-    bar.bg:SetScript(
-        "OnEnter",
-        function(frame, button)
-            ttactive = true
-            Skada:SetTooltipPosition(GameTooltip, win.frame)
-            Skada:ShowTooltip(win, bar.valueid, bar.valuetext)
-        end
-    )
+    bar.bg:SetScript("OnMouseDown", function(frame, button) BarClick(win, bar, button) end)
+    bar.bg:SetScript("OnEnter", function(frame, button)
+		ttactive = true
+		Skada:SetTooltipPosition(GameTooltip, win.frame)
+		Skada:ShowTooltip(win, bar.valueid, bar.valuetext)
+	end)
     bar.bg:SetScript("OnLeave", BarLeave)
 
     if uuid then
@@ -298,7 +273,7 @@ function barlibrary:Deposit(_bar)
     _bar.label:Hide()
 
     --place it at the front of the queue
-    table.insert(barlibrary.bars, 1, _bar)
+    tinsert(barlibrary.bars, 1, _bar)
 end
 
 function barlibrary:Withdraw(win)
@@ -316,14 +291,14 @@ function barlibrary:Withdraw(win)
             print("|c0033ff99SkadaInline|r: THIS SHOULD NEVER HAPPEN")
         end
         replacement = self:CreateBar(uuid, win)
-        table.insert(barlibrary.bars, replacement)
+        tinsert(barlibrary.bars, replacement)
     end
 
     barlibrary.bars[1].inuse = false
     barlibrary.bars[1].value = 0
     barlibrary.bars[1].label:SetJustifyH("LEFT")
     mod:ApplySettings(win)
-    return table.remove(barlibrary.bars, 1)
+    return tremove(barlibrary.bars, 1)
 end
 
 function mod:RecycleBar(_bar)
@@ -341,7 +316,7 @@ function mod:UpdateBar(bar, bardata, db)
     local label = bardata.label
     if db.isusingclasscolors then
         if bardata.class then
-            label = string.format(classcolors[bardata.class], bardata.label)
+            label = _format(classcolors[bardata.class], bardata.label)
         end
     else
         label = bardata.label
@@ -361,11 +336,11 @@ function mod:UpdateBar(bar, bardata, db)
     bar.label:SetTextColor(mod:GetFontColor(db))
     bar.value = bardata.value
     if bardata.ignore then
-		bar.ignore = true
+        bar.ignore = true
     else
-	    bar.class = bardata.class
-	    bar.spec = bardata.spec
-	    bar.role = bardata.role
+        bar.class = bardata.class
+        bar.spec = bardata.spec
+        bar.role = bardata.role
     end
 
     bar.valueid = bardata.id
@@ -381,40 +356,37 @@ function mod:Update(win)
     local wd = win.dataset
     for i = #wd, 1, -1 do
         if wd[i].label == nil then
-            table.remove(wd, i)
+            tremove(wd, i)
         end
     end
 
     local i = #mybars
     while i > 0 do
-        mod:RecycleBar(table.remove(mybars, i))
+        mod:RecycleBar(tremove(mybars, i))
         i = i - 1
     end
 
-    for k, bardata in pairs(wd) do
+    for k, bardata in _pairs(wd) do
         if bardata.id then
             local _bar = mod:GetBar(win)
-            table.insert(mybars, mod:UpdateBar(_bar, bardata, win.db))
+            tinsert(mybars, mod:UpdateBar(_bar, bardata, win.db))
         end
     end
 
-    table.sort(
-        mybars,
-        function(bar1, bar2)
-            if not bar1 or bar1.value == nil then
-                return false
-            elseif not bar2 or bar2.value == nil then
-                return true
-            else
-                return bar1.value > bar2.value
-            end
-        end
-    )
+    tsort(mybars, function(bar1, bar2)
+		if not bar1 or bar1.value == nil then
+			return false
+		elseif not bar2 or bar2.value == nil then
+			return true
+		else
+			return bar1.value > bar2.value
+		end
+	end)
 
     local yoffset = (win.db.height - win.db.barfontsize) / 2
     local left = win.frame.barstartx + 40
 
-    for key, bar in pairs(mybars) do
+    for key, bar in _pairs(mybars) do
         bar.bg:SetFrameLevel(9)
         bar.bg:SetHeight(win.db.height)
         bar.bg:SetPoint("BOTTOMLEFT", win.frame, "BOTTOMLEFT", left, 0)
@@ -495,7 +467,7 @@ function mod:ApplySettings(win)
     f.fstitle:SetTextColor(self:GetFontColor(p))
     f.fstitle:SetFont(self:GetFont(p))
 
-    for k, bar in pairs(mybars) do
+    for k, bar in _pairs(mybars) do
         bar.label:SetFont(self:GetFont(p))
         bar.label:SetTextColor(self:GetFontColor(p))
         bar.bg:EnableMouse(not p.clickthrough)
@@ -510,7 +482,7 @@ function mod:ApplySettings(win)
         f:SetHeight(p.height)
         f.fstitle:SetTextColor(255, 255, 255, 1)
         f.fstitle:SetFont(ElvUI[1]["media"].normFont, p.barfontsize, nil)
-        for k, bar in pairs(mybars) do
+        for k, bar in _pairs(mybars) do
             bar.label:SetFont(ElvUI[1]["media"].normFont, p.barfontsize, nil)
             bar.label:SetTextColor(255, 255, 255, 1)
         end
@@ -526,9 +498,7 @@ function mod:ApplySettings(win)
             backdropA = 0.8
         end
         local resolution = ({GetScreenResolutions()})[GetCurrentResolution()]
-        local mult =
-            768 / string.match(resolution, "%d+x(%d+)") /
-            (max(0.64, min(1.15, 768 / GetScreenHeight() or UIParent:GetScale())))
+        local mult = 768 / _match(resolution, "%d+x(%d+)") / (_max(0.64, _min(1.15, 768 / GetScreenHeight() or UIParent:GetScale())))
 
         fbackdrop.bgFile = ElvUI[1]["media"].blankTex
         fbackdrop.edgeFile = ElvUI[1]["media"].blankTex
