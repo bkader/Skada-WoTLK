@@ -181,21 +181,21 @@ Skada:AddLoadableModule(
 					end
 
 					if label == CRIT_ABBR and spell.criticalamount then
-						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.criticalmin), 255, 255, 255)
-						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.criticalmax), 255, 255, 255)
-						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.criticalamount / spell.critical), 255, 255, 255)
+						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.criticalmin), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.criticalmax), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.criticalamount / spell.critical), 1, 1, 1)
 					end
 
 					if label == HIT and spell.hitamount then
-						tooltip:AddDoubleLine(L["Minimum hit:"], Skada:FormatNumber(spell.hitmin), 255, 255, 255)
-						tooltip:AddDoubleLine(L["Maximum hit:"], Skada:FormatNumber(spell.hitmax), 255, 255, 255)
-						tooltip:AddDoubleLine(L["Average hit:"], Skada:FormatNumber(spell.hitamount / spell.hit), 255, 255, 255)
+						tooltip:AddDoubleLine(L["Minimum hit:"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Maximum hit:"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Average hit:"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
 					elseif label == ABSORB and spell.absorbed > 0 then
-						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.absorbed), 255, 255, 255)
+						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.absorbed), 1, 1, 1)
 					elseif label == BLOCK and spell.blocked > 0 then
-						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.blocked), 255, 255, 255)
+						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.blocked), 1, 1, 1)
 					elseif label == RESISTED and spell.resisted > 0 then
-						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.resisted), 255, 255, 255)
+						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.resisted), 1, 1, 1)
 					end
 				end
 			end

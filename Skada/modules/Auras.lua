@@ -283,9 +283,9 @@ local function aura_tooltip(win, id, label, tooltip, playerid, L)
             end
 
             -- add segment and active times
-            tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(totaltime), 255, 255, 255)
-            tooltip:AddDoubleLine(L["Uptime"], Skada:FormatTime(aura.uptime), 255, 255, 255)
-            tooltip:AddDoubleLine(L["Count"], aura.count, 255, 255, 255)
+            tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(totaltime), 1, 1, 1)
+            tooltip:AddDoubleLine(L["Uptime"], Skada:FormatTime(aura.uptime), 1, 1, 1)
+            tooltip:AddDoubleLine(L["Count"], aura.count, 1, 1, 1)
         end
     end
 end

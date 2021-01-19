@@ -346,35 +346,35 @@ Skada:AddLoadableModule(
             local entry = win.dataset[id]
             if entry and entry.spellname then
                 tooltip:AddLine(L["Spell details"] .. " - " .. _date("%H:%M:%S", entry.time))
-                tooltip:AddDoubleLine(L["Spell"], entry.spellname, 255, 255, 255, 255, 255, 255)
+                tooltip:AddDoubleLine(L["Spell"], entry.spellname, 1, 1, 1, 1, 1, 1)
 
                 if entry.source then
-                    tooltip:AddDoubleLine(L["Source"], entry.source, 255, 255, 255, 255, 255, 255)
+                    tooltip:AddDoubleLine(L["Source"], entry.source, 1, 1, 1, 1, 1, 1)
                 end
 
                 if entry.hp then
-                    tooltip:AddDoubleLine(HEALTH, Skada:FormatNumber(entry.hp), 255, 255, 255)
+                    tooltip:AddDoubleLine(HEALTH, Skada:FormatNumber(entry.hp), 1, 1, 1)
                 end
 
                 if entry.amount then
                     local amount = (entry.amount < 0) and (0 - entry.amount) or entry.amount
-                    tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(amount), 255, 255, 255)
+                    tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(amount), 1, 1, 1)
                 end
 
                 if entry.overkill and entry.overkill > 0 then
-                    tooltip:AddDoubleLine("Overkill", Skada:FormatNumber(entry.overkill), 255, 255, 255)
+                    tooltip:AddDoubleLine("Overkill", Skada:FormatNumber(entry.overkill), 1, 1, 1)
                 end
 
                 if entry.resisted and entry.resisted > 0 then
-                    tooltip:AddDoubleLine(RESIST, Skada:FormatNumber(entry.resisted), 255, 255, 255)
+                    tooltip:AddDoubleLine(RESIST, Skada:FormatNumber(entry.resisted), 1, 1, 1)
                 end
 
                 if entry.blocked and entry.blocked > 0 then
-                    tooltip:AddDoubleLine(BLOCK, Skada:FormatNumber(entry.blocked), 255, 255, 255)
+                    tooltip:AddDoubleLine(BLOCK, Skada:FormatNumber(entry.blocked), 1, 1, 1)
                 end
 
                 if entry.absorbed and entry.absorbed > 0 then
-                    tooltip:AddDoubleLine(ABSORB, Skada:FormatNumber(entry.absorbed), 255, 255, 255)
+                    tooltip:AddDoubleLine(ABSORB, Skada:FormatNumber(entry.absorbed), 1, 1, 1)
                 end
             end
         end

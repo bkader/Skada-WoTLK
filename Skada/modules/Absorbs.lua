@@ -226,38 +226,40 @@ Skada:AddLoadableModule(
 
         local function log_absorb(set, playername, dstGUID, dstName, spellid, amount)
             local player = Skada:get_player(set, _UnitGUID(playername), playername)
-            if not player then
-                return
-            end
+            if player then
+	            -- add absorbs amount
+	            player.absorbs = player.absorbs or {}
+	            player.absorbs.amount = (player.absorbs.amount or 0) + amount
+	            set.absorbs = (set.absorbs or 0) + amount
 
-            -- add absorbs amount
-            player.absorbs.amount = player.absorbs.amount + amount
-            set.absorbs = set.absorbs + amount
+	            -- record the target
+	            if dstName then
+					player.absorbs.targets = player.absorbs.targets or {}
+		            if not player.absorbs.targets[dstName] then
+		                player.absorbs.targets[dstName] = {id = dstGUID, amount = amount}
+		            else
+						player.absorbs.targets[dstName].amount = player.absorbs.targets[dstName].amount + amount
+		            end
+	            end
 
-            -- record the target
-            if not player.absorbs.targets[dstName] then
-                player.absorbs.targets[dstName] = {
-                    id = dstGUID,
-                    amount = 0
-                }
-            end
-            player.absorbs.targets[dstName].amount = player.absorbs.targets[dstName].amount + amount
+	            -- record the spell
+	            if spellid then
+					player.absorbs.spells = player.absorbs.spells or {}
+		            if not player.absorbs.spells[spellid] then
+		                player.absorbs.spells[spellid] = {count = 0, amount = 0}
+		            end
+		            local spell = player.absorbs.spells[spellid]
+		            spell.school = spell.school or shieldschools[spellid]
+		            spell.amount = spell.amount + amount
+		            spell.count = spell.count + 1
 
-            -- record the spell
-            if not player.absorbs.spells[spellid] then
-                player.absorbs.spells[spellid] = {count = 0, amount = 0}
-            end
-            local spell = player.absorbs.spells[spellid]
-            spell.school = spell.school or shieldschools[spellid]
-            spell.amount = spell.amount + amount
-            spell.count = spell.count + 1
-
-            if (not spell.min or amount < spell.min) and amount > 0 then
-                spell.min = amount
-            end
-
-            if not spell.max or amount > spell.max then
-                spell.max = amount
+		            if (not spell.min or amount < spell.min) and amount > 0 then
+		                spell.min = amount
+		            end
+		            if (not spell.max or amount > spell.max) and amount > 0 then
+		                spell.max = amount
+		            end
+	            end
             end
         end
 
@@ -303,8 +305,7 @@ Skada:AddLoadableModule(
                             if spellid and absorbspells[spellid] and unitCaster then
                                 shields[dstName] = shields[dstName] or {}
                                 shields[dstName][spellid] = shields[dstName][spellid] or {}
-                                shields[dstName][spellid][_select(1, _UnitName(unitCaster))] =
-                                    timestamp + expires - curtime
+                                shields[dstName][spellid][_select(1, _UnitName(unitCaster))] = timestamp + expires - curtime
                             end
                         end
                     end
@@ -430,19 +431,10 @@ Skada:AddLoadableModule(
                         end
                     end
                     if spell.min and spell.max then
-                        tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.min), 255, 255, 255, 255, 255, 255)
-                        tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.max), 255, 255, 255, 255, 255, 255)
+                        tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.min), 1, 1, 1)
+                        tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.max), 1, 1, 1)
                     end
-                    tooltip:AddDoubleLine(
-                        L["Average"],
-                        Skada:FormatNumber(spell.amount / spell.count),
-                        255,
-                        255,
-                        255,
-                        255,
-                        255,
-                        255
-                    )
+                    tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
                 end
             end
         end
@@ -457,7 +449,7 @@ Skada:AddLoadableModule(
             local player = Skada:find_player(set, self.playerid, self.playername)
             local max = 0
 
-            if player then
+            if player and player.absorbs.spells then
                 local nr = 1
 
                 for spellid, spell in _pairs(player.absorbs.spells) do
@@ -503,7 +495,7 @@ Skada:AddLoadableModule(
             local player = Skada:find_player(set, self.playerid, self.playername)
             local max = 0
 
-            if player then
+            if player and player.absorbs.targets then
                 local nr = 1
                 for targetname, target in _pairs(player.absorbs.targets) do
                     if target.amount > 0 then
@@ -544,11 +536,11 @@ Skada:AddLoadableModule(
         end
 
         function mod:Update(win, set)
-            local total = (set.healing or 0) + (set.absorbs or 0)
-
+            local total = set.absorbs or 0
             local nr, max = 1, 0
+
             for i, player in _ipairs(set.players) do
-                if player.absorbs.amount > 0 then
+                if player.absorbs then
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
 
@@ -563,7 +555,7 @@ Skada:AddLoadableModule(
                         Skada:FormatValueText(
                         Skada:FormatNumber(player.absorbs.amount),
                         self.metadata.columns.Absorbs,
-                        _format("%02.1f%%", player.absorbs.amount / math_max(1, set.absorbs) * 100),
+                        _format("%02.1f%%", 100 * player.absorbs.amount / math_max(1, set.absorbs or 0)),
                         self.metadata.columns.Percent
                     )
 
@@ -612,18 +604,7 @@ Skada:AddLoadableModule(
         end
 
         function mod:GetSetSummary(set)
-            return Skada:FormatNumber(set.absorbs)
-        end
-
-        function mod:AddPlayerAttributes(player)
-            if not player.absorbs then
-                player.absorbs = {amount = 0, spells = {}, targets = {}}
-            end
-        end
-
-        function mod:AddSetAttributes(set)
-            set.absorbs = set.absorbs or 0
-            shields, shieldschools = {}, {}
+            return Skada:FormatNumber(set.absorbs or 0)
         end
     end
 )
@@ -647,15 +628,19 @@ Skada:AddLoadableModule(
 
         local function getHPS(set, player)
             local totaltime = Skada:PlayerActiveTime(set, player)
-            return (player.healing.amount + player.absorbs.amount) / math_max(1, totaltime)
+            local total = 0
+            if player.healing then total = player.healing.amount end
+            if player.absorbs then total = player.absorbs.amount end
+            return total / math_max(1, totaltime)
         end
 
         local function getRaidHPS(set)
+			local total = (set.healing or 0) + (set.absorbs or 0)
             if set.time > 0 then
-                return (set.healing + set.absorbs) / math_max(1, set.time)
+                return total / math_max(1, set.time)
             else
                 local endtime = set.endtime or _time()
-                return (set.healing + set.absorbs) / math_max(1, endtime - set.starttime)
+                return total / math_max(1, endtime - set.starttime)
             end
         end
 
@@ -672,44 +657,17 @@ Skada:AddLoadableModule(
                             tooltip:AddLine(L[n], c.r, c.g, c.b)
                         end
                     end
-                    tooltip:AddDoubleLine(L["Count"], spell.count, 255, 255, 255, 255, 255, 255)
+                    tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
                     if spell.min and spell.max then
-                        tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.min), 255, 255, 255, 255, 255, 255)
-                        tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.max), 255, 255, 255, 255, 255, 255)
+                        tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.min), 1, 1, 1)
+                        tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.max), 1, 1, 1)
                     end
-                    tooltip:AddDoubleLine(
-                        L["Average"],
-                        Skada:FormatNumber(spell.amount / spell.count),
-                        255,
-                        255,
-                        255,
-                        255,
-                        255,
-                        255
-                    )
+                    tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
                     if spell.critical then
-                        tooltip:AddDoubleLine(
-                            CRIT_ABBR,
-                            _format("%02.1f%%", spell.critical / spell.count * 100),
-                            255,
-                            255,
-                            255,
-                            255,
-                            255,
-                            255
-                        )
+                        tooltip:AddDoubleLine(CRIT_ABBR, _format("%02.1f%%", spell.critical / spell.count * 100), 1, 1, 1)
                     end
                     if spell.overhealing and spell.overhealing > 0 then
-                        tooltip:AddDoubleLine(
-                            L["Overhealing"],
-                            _format("%02.1f%%", spell.overhealing / (spell.overhealing + spell.amount) * 100),
-                            255,
-                            255,
-                            255,
-                            255,
-                            255,
-                            255
-                        )
+                        tooltip:AddDoubleLine(L["Overhealing"], _format("%02.1f%%", spell.overhealing / (spell.overhealing + spell.amount) * 100), 1, 1, 1)
                     end
                 end
             end
@@ -759,7 +717,7 @@ Skada:AddLoadableModule(
                             Skada:FormatValueText(
                             Skada:FormatNumber(spell.amount),
                             mod.metadata.columns.Healing,
-                            _format("%02.1f%%", spell.amount / total * 100),
+                            _format("%02.1f%%", 100 * spell.amount / math_max(1, total)),
                             mod.metadata.columns.Percent
                         )
 
@@ -840,10 +798,13 @@ Skada:AddLoadableModule(
         end
 
         function mod:Update(win, set)
+			local total = (set.healing or 0) + (set.absorbs or 0)
             local nr, max = 1, 0
 
             for i, player in _ipairs(set.players) do
-                local healing = player.healing.amount + player.absorbs.amount
+				local healing = 0
+				if player.healing then healing = healing + player.healing.amount end
+				if player.absorbs then healing = healing + player.absorbs.amount end
 
                 if healing > 0 then
                     local d = win.dataset[nr] or {}
@@ -897,12 +858,12 @@ Skada:AddLoadableModule(
         function mod:AddToTooltip(set, tooltip)
             local total = (set.healing or 0) + (set.absorbs or 0)
             if total > 0 then
-                tooltip:AddDoubleLine(L["Healing"], Skada:FormatNumber(total), 255, 255, 255)
-                tooltip:AddDoubleLine(L["HPS"], Skada:FormatNumber(getRaidHPS(set)), 255, 255, 255)
+                tooltip:AddDoubleLine(L["Healing"], Skada:FormatNumber(total), 1, 1, 1)
+                tooltip:AddDoubleLine(L["HPS"], Skada:FormatNumber(getRaidHPS(set)), 1, 1, 1)
             end
             if set.overhealing and set.overhealing > 0 then
                 local totall = total + set.overhealing
-                tooltip:AddDoubleLine(L["Overhealing"], _format("%02.1f%%", 100 * set.overhealing / math_max(1, totall)), 255, 255, 255)
+                tooltip:AddDoubleLine(L["Overhealing"], _format("%02.1f%%", 100 * set.overhealing / math_max(1, totall)), 1, 1, 1)
             end
         end
 

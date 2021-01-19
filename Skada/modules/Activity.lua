@@ -20,9 +20,9 @@ Skada:AddLoadableModule(
                 local settime = Skada:GetSetTime(set)
                 local playertime = Skada:PlayerActiveTime(set, player)
                 tooltip:AddLine(player.name .. ": " .. L["Activity"])
-                tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 255, 255, 255)
-                tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(playertime), 255, 255, 255)
-                tooltip:AddDoubleLine(L["Activity"], _format("%02.1f%%", playertime / settime * 100), 255, 255, 255)
+                tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
+                tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(playertime), 1, 1, 1)
+                tooltip:AddDoubleLine(L["Activity"], _format("%02.1f%%", playertime / settime * 100), 1, 1, 1)
             end
         end
 

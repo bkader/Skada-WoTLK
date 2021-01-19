@@ -318,9 +318,9 @@ Skada:AddLoadableModule(
 			if player then
 				local activetime = Skada:PlayerActiveTime(set, player)
 				local totaltime = Skada:GetSetTime(set)
-				tooltip:AddDoubleLine(L["Activity"], _format("%02.1f%%", 100 * activetime / totaltime), 255, 255, 255)
-				tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 255, 255, 255)
-				tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 255, 255, 255)
+				tooltip:AddDoubleLine(L["Activity"], _format("%02.1f%%", 100 * activetime / totaltime), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
 			end
 		end
 
@@ -331,10 +331,10 @@ Skada:AddLoadableModule(
 				local activetime = Skada:PlayerActiveTime(set, player)
 				local totaltime = Skada:GetSetTime(set)
 				tooltip:AddLine(player.name .. " - " .. L["DPS"])
-				tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 255, 255, 255)
-				tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 255, 255, 255)
-				tooltip:AddDoubleLine(L["Damage done"], Skada:FormatNumber(player.damagedone.amount), 255, 255, 255)
-				tooltip:AddDoubleLine(Skada:FormatNumber(player.damagedone.amount) .. "/" .. activetime .. ":", Skada:FormatNumber(player.damagedone.amount / math_max(1, activetime)), 255, 255, 255)
+				tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Damage done"], Skada:FormatNumber(player.damagedone.amount), 1, 1, 1)
+				tooltip:AddDoubleLine(Skada:FormatNumber(player.damagedone.amount) .. "/" .. activetime .. ":", Skada:FormatNumber(player.damagedone.amount / math_max(1, activetime)), 1, 1, 1)
 			end
 		end
 
@@ -357,11 +357,11 @@ Skada:AddLoadableModule(
 				end
 
 				if spell.max and spell.min then
-					tooltip:AddDoubleLine(L["Minimum hit:"], Skada:FormatNumber(spell.min), 255, 255, 255)
-					tooltip:AddDoubleLine(L["Maximum hit:"], Skada:FormatNumber(spell.max), 255, 255, 255)
+					tooltip:AddDoubleLine(L["Minimum hit:"], Skada:FormatNumber(spell.min), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Maximum hit:"], Skada:FormatNumber(spell.max), 1, 1, 1)
 				end
-				tooltip:AddDoubleLine(L["Average hit:"], Skada:FormatNumber(spell.amount / spell.totalhits), 255, 255, 255)
-				tooltip:AddDoubleLine(L["Total hits:"], tostring(spell.totalhits), 255, 255, 255)
+				tooltip:AddDoubleLine(L["Average hit:"], Skada:FormatNumber(spell.amount / spell.totalhits), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Total hits:"], tostring(spell.totalhits), 1, 1, 1)
 			end
 		end
 
@@ -385,19 +385,19 @@ Skada:AddLoadableModule(
 					end
 
 					if label == CRIT_ABBR and spell.criticalamount then
-						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.criticalmin), 255, 255, 255)
-						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.criticalmax), 255, 255, 255)
-						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.criticalamount / spell.critical), 255, 255, 255)
+						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.criticalmin), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.criticalmax), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.criticalamount / spell.critical), 1, 1, 1)
 					elseif label == HIT and spell.hitamount then
-						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.hitmin), 255, 255, 255)
-						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.hitmax), 255, 255, 255)
-						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 255, 255, 255)
+						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
 					elseif label == ABSORB and spell.absorbed > 0 then
-						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.absorbed), 255, 255, 255)
+						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.absorbed), 1, 1, 1)
 					elseif label == BLOCK and spell.blocked > 0 then
-						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.blocked), 255, 255, 255)
+						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.blocked), 1, 1, 1)
 					elseif label == RESIST and spell.resisted > 0 then
-						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.resisted), 255, 255, 255)
+						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.resisted), 1, 1, 1)
 					end
 				end
 			end
