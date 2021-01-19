@@ -13,7 +13,7 @@ Skada:AddLoadableModule(
 		local _format, math_max = string.format, math.max
 		local _GetSpellInfo = GetSpellInfo
 
-        local sunder
+        local sunder, devastate
 
         local function log_sunder(set, playerid, playername, playerflags, targetname)
             local player = Skada:get_player(set, playerid, playername, playerflags)
@@ -31,7 +31,7 @@ Skada:AddLoadableModule(
 
         local function SunderApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             local spellid, spellname, spellschool = ...
-            if spellname == sunder then
+            if spellname == sunder or spellname == devastate then
                 log_sunder(Skada.current, srcGUID, srcName, srcFlags, dstName)
                 log_sunder(Skada.total, srcGUID, srcName, srcFlags, dstName)
             end
@@ -78,6 +78,7 @@ Skada:AddLoadableModule(
 
         function mod:Update(win, set)
             sunder = sunder or _select(1, _GetSpellInfo(47467))
+            devastate = devastate or _select(1, _GetSpellInfo(47498))
 
             local max = 0
             local total = set.sunders or 0
@@ -119,6 +120,7 @@ Skada:AddLoadableModule(
 
         function mod:OnInitialize()
             sunder = sunder or _select(1, _GetSpellInfo(47467))
+            devastate = devastate or _select(1, _GetSpellInfo(47498))
         end
 
         function mod:OnEnable()
