@@ -747,8 +747,8 @@ Skada:AddLoadableModule(
 			Skada:AddFeed(L["Damage: Personal DPS"], feed_personal_dps)
 			Skada:AddFeed(L["Damage: Raid DPS"], feed_raid_dps)
 
-			Skada:AddMode(self, L["Damage"])
-			Skada:AddMode(dpsmod, L["Damage"])
+			Skada:AddMode(self, L["Damage done"])
+			Skada:AddMode(dpsmod, L["Damage done"])
 		end
 
 		function mod:OnDisable()
@@ -933,7 +933,7 @@ Skada:AddLoadableModule(
 				click1 = sourcemod,
 				columns = {Damage = true, Percent = true}
 			}
-			Skada:AddMode(self, L["Damage"])
+			Skada:AddMode(self, L["Damage done"])
 		end
 
 		function mod:OnDisable()
@@ -1022,7 +1022,7 @@ Skada:AddLoadableModule(
 
 		function mod:OnEnable()
 			mod.metadata = {showspots = true, columns = {Damage = true, DPS = true, Percent = true}}
-			Skada:AddMode(self, L["Damage"])
+			Skada:AddMode(self, L["Damage done"])
 		end
 
 		function mod:OnDisable()

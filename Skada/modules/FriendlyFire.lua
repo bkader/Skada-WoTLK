@@ -248,7 +248,7 @@ Skada:AddLoadableModule(
                 {dst_is_interesting_nopets = true, src_is_interesting_nopets = true}
             )
 
-            Skada:AddMode(self, L["Damage"])
+            Skada:AddMode(self, L["Damage done"])
         end
 
         function mod:OnDisable()

@@ -129,7 +129,7 @@ Skada:AddLoadableModule(
 			playermod.metadata = {showspots = true}
 			mod.metadata = {click1 = playermod, columns = {Damage = true, Percent = true}}
 
-			Skada:AddMode(self, L["Damage"])
+			Skada:AddMode(self, L["Damage done"])
 		end
 
 		function mod:OnDisable()
@@ -416,7 +416,7 @@ Skada:AddLoadableModule(
 			sourcemod.metadata = {showspots = true, click1 = playermod}
 			mod.metadata = {click1 = sourcemod, columns = {Damage = true, Percent = true}}
 
-			Skada:AddMode(self, L["Damage"])
+			Skada:AddMode(self, L["Damage taken"])
 		end
 
 		function mod:OnDisable()

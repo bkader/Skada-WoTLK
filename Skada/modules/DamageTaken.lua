@@ -446,7 +446,7 @@ Skada:AddLoadableModule(
 			Skada:RegisterForCL(SpellMissed, "RANGE_MISSED", {dst_is_interesting_nopets = true})
 			Skada:RegisterForCL(SwingMissed, "SWING_MISSED", {dst_is_interesting_nopets = true})
 
-			Skada:AddMode(self, L["Damage"])
+			Skada:AddMode(self, L["Damage taken"])
 		end
 
 		function mod:OnDisable()
@@ -631,7 +631,7 @@ Skada:AddLoadableModule(
 				click1 = targetmod,
 				columns = {Damage = true, Percent = true}
 			}
-			Skada:AddMode(self, L["Damage"])
+			Skada:AddMode(self, L["Damage taken"])
 		end
 
 		function mod:OnDisable()
@@ -755,7 +755,7 @@ Skada:AddLoadableModule(
 			playermod.metadata = {}
 			mod.metadata = {showspots = true, click1 = playermod, columns = {Percent = true, Total = true}}
 
-			Skada:AddMode(self, L["Damage"])
+			Skada:AddMode(self, L["Damage taken"])
 		end
 
 		function mod:OnDisable()
