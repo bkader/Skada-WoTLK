@@ -1,12 +1,12 @@
 local Skada = Skada
 Skada:AddLoadableModule(
-    "Power",
+    "Power gained",
     function(Skada, L)
-        if Skada:IsDisabled("Power") then
+        if Skada:IsDisabled("Power gained") then
             return
         end
 
-        local mod = Skada:NewModule(L["Power"])
+        local mod = Skada:NewModule(L["Power gained"])
 
         local locales = {
             [0] = MANA,
