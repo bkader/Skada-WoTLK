@@ -684,20 +684,26 @@ Skada:AddLoadableModule(
             local max = 0
 
             if player then
-                local spells = {}
+				local total = 0
+				local spells = {}
 
-                for spellid, spell in _pairs(player.healing.spells) do
-                    spells[spellid] = CopyTable(spell)
-                end
-                for spellid, spell in _pairs(player.absorbs.spells) do
-                    if not spells[spellid] then
-                        spells[spellid] = CopyTable(spell)
-                    else
-                        spells[spellid].amount = spells[spellid].amount + spell.amount
-                    end
-                end
+				if player.healing then
+					total = total + player.healing.amount
+					for spellid, spell in _pairs(player.healing.spells) do
+						spells[spellid] = CopyTable(spell)
+					end
+				end
+				if player.absorbs then
+					total = total + player.absorbs.amount
+					for spellid, spell in _pairs(player.absorbs.spells) do
+						if not spells[spellid] then
+							spells[spellid] = CopyTable(spell)
+						else
+							spells[spellid].amount = spells[spellid].amount + spell.amount
+						end
+					end
+				end
 
-                local total = player.healing.amount + player.absorbs.amount
                 local nr = 1
                 for spellid, spell in _pairs(spells) do
                     if spell.amount > 0 then
@@ -744,20 +750,27 @@ Skada:AddLoadableModule(
             local max = 0
 
             if player then
+				local total = 0
                 local targets = {}
 
-                for targetname, target in _pairs(player.healing.targets) do
-                    targets[targetname] = CopyTable(target)
-                end
-                for targetname, target in _pairs(player.absorbs.targets) do
-                    if not targets[targetname] then
-                        targets[targetname] = CopyTable(target)
-                    else
-                        targets[targetname].amount = targets[targetname].amount + target.amount
-                    end
+				if player.healing then
+					total = total + player.healing.amount
+	                for targetname, target in _pairs(player.healing.targets) do
+	                    targets[targetname] = CopyTable(target)
+	                end
                 end
 
-                local total = player.healing.amount + player.absorbs.amount
+                if player.absorbs then
+					total = total + player.absorbs.amount
+	                for targetname, target in _pairs(player.absorbs.targets) do
+	                    if not targets[targetname] then
+	                        targets[targetname] = CopyTable(target)
+	                    else
+	                        targets[targetname].amount = targets[targetname].amount + target.amount
+	                    end
+	                end
+                end
+
                 local nr = 1
                 for targetname, target in _pairs(targets) do
                     if target.amount > 0 then
