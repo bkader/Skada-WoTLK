@@ -81,7 +81,7 @@ Skada:AddLoadableModule(
         end
 
         updaters.Interrupts = function(set, player)
-            return player.interrupts.count
+            return player.interrupts and player.interrupts.count or 0
         end
 
         updaters.Fails = function(set, player)
