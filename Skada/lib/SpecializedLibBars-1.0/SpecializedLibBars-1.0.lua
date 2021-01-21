@@ -529,7 +529,8 @@ do
 
         list.buttons = {}
 
-        list.barbackgroundcolor = {0.3, 0.3, 0.3, 0.6}, list:SetPoint("TOPLEFT", UIParent, "CENTER", 0, 0)
+        list.barbackgroundcolor = {0.3, 0.3, 0.3, 0.6}
+        list:SetPoint("TOPLEFT", UIParent, "CENTER", 0, 0)
         list:SetHeight(height)
         list:SetWidth(length)
         list:SetResizable(true)
@@ -979,6 +980,15 @@ function barListPrototype:GetBarOffset()
     return self.offset
 end
 
+function barListPrototype:SetUseSpark(use)
+	self.usespark = use
+	if bars[self] then
+		for _, v in pairs(bars[self]) do
+			v:SetUseSpark(use)
+		end
+	end
+end
+
 function barListPrototype.NOOP()
 end
 
@@ -1129,6 +1139,14 @@ end
         self:SetScript("OnSizeChanged", self.OnSizeChanged)
         self.texture = self.texture or self:CreateTexture(nil, "ARTWORK")
 
+        if not self.spark then
+			self.spark = self:CreateTexture(nil, "OVERLAY")
+			self.spark:SetTexture([[Interface\CastingBar\UI-CastingBar-Spark]])
+			self.spark:SetWidth(10)
+			self.spark:SetHeight(10)
+			self.spark:SetBlendMode("ADD")
+        end
+
         self.bgtexture = self.bgtexture or self:CreateTexture(nil, "BACKGROUND")
         self.bgtexture:SetAllPoints()
         self.bgtexture:SetVertexColor(0.3, 0.3, 0.3, 0.6)
@@ -1152,17 +1170,21 @@ end
         self.label:SetPoint("LEFT", self, "LEFT", 3, 0)
         self:ShowLabel()
 
-        local f, s, m = self.label:GetFont()
-        self.label:SetFont(f, s or 10, m)
+        do
+	        local f, s, m = self.label:GetFont()
+	        self.label:SetFont(f, s or 10, m)
 
-        self.timerLabel = self.timerLabel or self:CreateFontString(nil, "OVERLAY", "ChatFontNormal")
-        self:SetTimerLabel("")
-        self.timerLabel:ClearAllPoints()
-        self.timerLabel:SetPoint("RIGHT", self, "RIGHT", -6, 0)
-        self:HideTimerLabel()
+	        self.timerLabel = self.timerLabel or self:CreateFontString(nil, "OVERLAY", "ChatFontNormal")
+	        self:SetTimerLabel("")
+	        self.timerLabel:ClearAllPoints()
+	        self.timerLabel:SetPoint("RIGHT", self, "RIGHT", -6, 0)
+	        self:HideTimerLabel()
+        end
 
-        local f, s, m = self.timerLabel:GetFont()
-        self.timerLabel:SetFont(f, s or 10, m)
+        do
+	        local f, s, m = self.timerLabel:GetFont()
+	        self.timerLabel:SetFont(f, s or 10, m)
+        end
 
         self:SetScale(1)
         self:SetAlpha(1)
@@ -1393,6 +1415,12 @@ do
             self.icon:ClearAllPoints()
             self.icon:SetPoint("RIGHT", self, "LEFT", 0, 0)
 
+            t = self.spark
+            t:ClearAllPoints()
+            t:SetPoint("TOP", self.texture, "TOPRIGHT", 0, 7)
+            t:SetPoint("BOTTOM", self.texture, "BOTTOMRIGHT", 0, -7)
+            t:SetTexCoord(0, 1, 0, 1)
+
             t = self.texture
             t.SetValue = t.SetWidth
             t:ClearAllPoints()
@@ -1417,6 +1445,12 @@ do
         elseif o == lib.BOTTOM_TO_TOP then
             self.icon:ClearAllPoints()
             self.icon:SetPoint("TOP", self, "BOTTOM", 0, 0)
+
+            t = self.spark
+            t:ClearAllPoints()
+            t:SetPoint("LEFT", self.texture, "TOPLEFT", -7, 0)
+            t:SetPoint("RIGHT", self.texture, "TOPRIGHT", 7, 0)
+            t:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
 
             t = self.texture
             t.SetValue = t.SetHeight
@@ -1444,6 +1478,12 @@ do
             self.icon:ClearAllPoints()
             self.icon:SetPoint("LEFT", self, "RIGHT", 0, 0)
 
+			t = self.spark
+			t:ClearAllPoints()
+			t:SetPoint("TOP", self.texture, "TOPLEFT", 0, 7)
+			t:SetPoint("BOTTOM", self.texture, "BOTTOMLEFT", 0, -7)
+			t:SetTexCoord(0, 1, 0, 1)
+
             t = self.texture
             t.SetValue = t.SetWidth
             t:ClearAllPoints()
@@ -1468,6 +1508,12 @@ do
         elseif o == lib.TOP_TO_BOTTOM then
             self.icon:ClearAllPoints()
             self.icon:SetPoint("BOTTOM", self, "TOP", 0, 0)
+
+			t = self.spark
+			t:ClearAllPoints()
+			t:SetPoint("LEFT", self.texture, "BOTTOMLEFT", -7, 0)
+			t:SetPoint("RIGHT", self.texture, "BOTTOMRIGHT", 7, 0)
+			t:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
 
             t = self.texture
             t.SetValue = t.SetHeight
@@ -1560,6 +1606,12 @@ function barPrototype:SetValue(val)
         self.lastamount = amt
         self:SetTextureValue(amt, dist)
     end
+
+	if amt == 1 or amt == 0 then
+		self.spark:Hide()
+	else
+		self.spark:Show()
+	end
 
     self:UpdateColor()
 end

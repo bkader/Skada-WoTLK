@@ -114,6 +114,7 @@ if not L then return end
 -- L["Use specialization icons where applicable."] = ""
 -- L["Role icons"] = ""
 -- L["Use role icons where applicable."] = ""
+-- L["Show spark effect"] = ""
 -- L["Clickthrough"] = ""
 -- L["Disables mouse clicks on bars."] = ""
 -- L["Smooth bars"] = ""

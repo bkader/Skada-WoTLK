@@ -548,6 +548,12 @@ do
                     if Skada.db.profile.showself and data.id and data.id == UnitGUID("player") then
                         bar.fixed = true
                     end
+
+					if win.db.spark then
+						bar.spark:Show()
+					else
+						bar.spark:Hide()
+					end
                 end
 
                 if win.metadata.ordersort then
@@ -705,6 +711,14 @@ do
         g:ShowButton(L["Mode"], p.buttons.mode)
         g:ShowButton(L["Report"], p.buttons.report)
         g:ShowButton(L["Stop"], p.buttons.stop)
+
+        for _, bar in pairs(g:GetBars()) do
+			if p.spark then
+				bar.spark:Show()
+			else
+				bar.spark:Hide()
+			end
+        end
 
         -- Window
         local padtop = (p.enabletitle and not p.reversegrowth and p.title.height)
@@ -1034,7 +1048,7 @@ function mod:AddDisplayOptions(win, options)
                 type = "toggle",
                 name = L["Spec icons"],
                 desc = L["Use specialization icons where applicable."],
-                order = 24.1,
+                order = 25,
                 get = function()
                     return db.specicons
                 end,
@@ -1043,11 +1057,21 @@ function mod:AddDisplayOptions(win, options)
                     Skada:ApplySettings()
                 end
             },
+			spark = {
+				type = "toggle",
+				name = L["Show spark effect"],
+				order = 26,
+				get = function() return db.spark end,
+				set = function()
+					db.spark = not db.spark
+					Skada:ApplySettings()
+				end
+			},
             clickthrough = {
                 type = "toggle",
                 name = L["Clickthrough"],
                 desc = L["Disables mouse clicks on bars."],
-                order = 25,
+                order = 27,
                 get = function()
                     return db.clickthrough
                 end,
@@ -1060,7 +1084,7 @@ function mod:AddDisplayOptions(win, options)
                 type = "toggle",
                 name = L["Smooth bars"],
                 desc = L["Animate bar changes smoothly rather than immediately."],
-                order = 26,
+                order = 28,
                 get = function()
                     return db.smoothing
                 end,

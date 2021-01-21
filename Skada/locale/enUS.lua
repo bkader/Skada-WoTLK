@@ -116,6 +116,7 @@ L["Spec icons"] = true
 L["Use specialization icons where applicable."] = true
 L["Role icons"] = true
 L["Use role icons where applicable."] = true
+L["Show spark effect"] = true
 L["Clickthrough"] = true
 L["Disables mouse clicks on bars."] = true
 L["Smooth bars"] = true
