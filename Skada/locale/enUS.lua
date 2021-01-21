@@ -424,11 +424,6 @@ L["Buffs"] = true
 L["Buff spell list"] = true
 L["%s's buffs"] = true
 
-L["Potions"] = true
-L["Potions list"] = true
-L["Players list"] = true
-L["%s's used potions"] = true
-
 L["Debuffs"] = true
 L["Debuff spell list"] = true
 L["Debuff target list"] = true
@@ -663,6 +658,23 @@ L["Power gained: Energy"] = true
 L["Energy gained spell list"] = true
 L["Power gained: Runic Power"] = true
 L["Runic Power gained spell list"] = true
+
+-- ==================== --
+-- Parry module lines --
+-- ==================== --
+
+L["Parry"] = true
+L["Parry target list"] = true
+L["%s's parry targets"] = true
+
+-- ==================== --
+-- Potions module lines --
+-- ==================== --
+
+L["Potions"] = true
+L["Potions list"] = true
+L["Players list"] = true
+L["%s's used potions"] = true
 
 -- ====================== --
 -- resurrect module lines --

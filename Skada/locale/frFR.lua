@@ -421,11 +421,6 @@ L["Buffs"] = "Buffs"
 L["Buff spell list"] = "Liste des buffs"
 L["%s's buffs"] = "Buffs de %s"
 
-L["Potions"] = "Potions"
-L["Potions list"] = "Liste des potions"
-L["Players list"] = "Liste des joueurs"
-L["%s's used potions"] = "Potions utilisées par %s"
-
 L["Debuffs"] = "Debuffs"
 L["Debuff spell list"] = "Liste des debuffs"
 L["Debuff target list"] = "Liste des cibles du debuff"
@@ -660,6 +655,23 @@ L["Power gained: Energy"] = "Ressources: Énergie"
 L["Energy gained spell list"] = "Liste des sorts de gain d'énergie"
 L["Power gained: Runic Power"] = "Ressources: P. runique"
 L["Runic Power gained spell list"] = "Liste des sorts de gain de P. runique"
+
+-- ==================== --
+-- Parry module lines --
+-- ==================== --
+
+L["Parry"] = "Parade"
+L["Parry target list"] = "Liste des cibles de parade"
+L["%s's parry targets"] = "Cibles parées de %s"
+
+-- ==================== --
+-- Potions module lines --
+-- ==================== --
+
+L["Potions"] = "Potions"
+L["Potions list"] = "Liste des potions"
+L["Players list"] = "Liste des joueurs"
+L["%s's used potions"] = "Potions utilisées par %s"
 
 -- ====================== --
 -- resurrect module lines --

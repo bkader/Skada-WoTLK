@@ -26,6 +26,7 @@
 <Script file="modules\Failbot.lua" />
 <Script file="modules\Improvement.lua" />
 <Script file="modules\Interrupts.lua" />
+<Script file="modules\Parry.lua" />
 <Script file="modules\Potions.lua" />
 <Script file="modules\Resurrects.lua" />
 <Script file="modules\Threat.lua" />

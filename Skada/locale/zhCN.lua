@@ -422,11 +422,6 @@ if not L then return end
 -- L["Buff spell list"] = ""
 -- L["%s's buffs"] = ""
 
--- L["Potions"] = ""
--- L["Potions list"] = ""
--- L["Players list"] = ""
--- L["%s's used potions"] = ""
-
 -- L["Debuffs"] = ""
 -- L["Debuff spell list"] = ""
 -- L["Debuff target list"] = ""
@@ -661,6 +656,23 @@ if not L then return end
 -- L["Energy gained spell list"] = ""
 -- L["Power gained: Runic Power"] = ""
 -- L["Runic Power gained spell list"] = ""
+
+-- ==================== --
+-- Parry module lines --
+-- ==================== --
+
+-- L["Parry"] = ""
+-- L["Parry target list"] = ""
+-- L["%s's parry targets"] = ""
+
+-- ==================== --
+-- Potions module lines --
+-- ==================== --
+
+-- L["Potions"] = ""
+-- L["Potions list"] = ""
+-- L["Players list"] = ""
+-- L["%s's used potions"] = ""
 
 -- ====================== --
 -- resurrect module lines --

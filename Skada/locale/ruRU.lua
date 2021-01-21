@@ -424,11 +424,6 @@ L["Buffs"] = "Баффы"
 L["Buff spell list"] = "Список баффов"
 L["%s's buffs"] = "%s - Баффы"
 
-L["Potions"] = "Зелья"
-L["Potions list"] = "Список зелий"
-L["Players list"] = "Список игроков"
-L["%s's used potions"] = "%s - Использованные зелья"
-
 L["Debuffs"] = "Дебаффы"
 L["Debuff spell list"] = "Список дебаффов"
 L["Debuff target list"] = "Цели дебаффа"
@@ -663,6 +658,23 @@ L["Power gained: Energy"] = "Получено энергии: Энергия"
 -- L["Energy gained spell list"] = ""
 L["Power gained: Runic Power"] = "Получено энергии: Сила рун"
 -- L["Runic Power gained spell list"] = ""
+
+-- ==================== --
+-- Parry module lines --
+-- ==================== --
+
+L["Parry"] = "Парирование"
+L["Parry target list"] = "Список целей парирования"
+L["%s's parry targets"] = "%s парирует цели"
+
+-- ==================== --
+-- Potions module lines --
+-- ==================== --
+
+L["Potions"] = "Зелья"
+L["Potions list"] = "Список зелий"
+L["Players list"] = "Список игроков"
+L["%s's used potions"] = "%s - Использованные зелья"
 
 -- ====================== --
 -- resurrect module lines --
