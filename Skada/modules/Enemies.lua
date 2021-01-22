@@ -21,6 +21,55 @@ Skada:AddLoadableModule(
 
         local mod = Skada:NewModule(L["Enemy damage taken"])
         local enemymod = mod:NewModule(L["Damage taken per player"])
+        local playermod = mod:NewModule(L["Damage spell list"])
+
+        function playermod:Enter(win, id, label)
+            self.playerid = id
+            self.playername = label
+            self.title = _format(L["%s's damage on %s"], label, enemymod.mobname or UNKNOWN)
+        end
+
+        function playermod:Update(win, set)
+            local max = 0
+            if enemymod.mobname then
+                local player = Skada:find_player(set, self.playerid, self.playername)
+
+                if player and player.damagedone.spells then
+                    local total = player.damagedone.targets[enemymod.mobname] or 0
+                    local nr = 1
+
+                    for spellname, spell in _pairs(player.damagedone.spells) do
+						if spell.targets and spell.targets[enemymod.mobname] then
+							local amount = spell.targets[enemymod.mobname]
+
+                            local d = win.dataset[nr] or {}
+                            win.dataset[nr] = d
+
+                            d.id = spell.id
+                            d.spellid = spell.id
+                            d.label = spellname
+                            d.icon = _select(3, _GetSpellInfo(spell.id))
+
+                            d.value = amount
+                            d.valuetext = Skada:FormatValueText(
+                                Skada:FormatNumber(amount),
+                                mod.metadata.columns.Damage,
+                                _format("%02.1f%%", 100 * amount / math_max(1, total)),
+                                mod.metadata.columns.Percent
+                            )
+
+                            if amount > max then
+                                max = amount
+                            end
+
+                            nr = nr + 1
+                        end
+                    end
+                end
+            end
+
+            win.metadata.maxvalue = max
+        end
 
         function enemymod:Enter(win, id, label)
             self.mobname = label
@@ -107,7 +156,7 @@ Skada:AddLoadableModule(
         end
 
         function mod:OnEnable()
-            enemymod.metadata = {showspots = true}
+            enemymod.metadata = {showspots = true, click1 = playermod}
             mod.metadata = {click1 = enemymod, columns = {Damage = true, Percent = true}}
 
             Skada:AddMode(self, L["Damage done"])

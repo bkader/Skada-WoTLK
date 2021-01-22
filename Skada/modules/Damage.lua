@@ -134,6 +134,8 @@ Skada:AddLoadableModule(
 			end
 
 			if set == Skada.current and dmg.dstName and dmg.amount > 0 then
+				spell.targets = spell.targets or {}
+				spell.targets[dmg.dstName] = (spell.targets[dmg.dstName] or 0) + dmg.amount
 				player.damagedone.targets[dmg.dstName] = (player.damagedone.targets[dmg.dstName] or 0) + dmg.amount
 
 				-- add useful damage.
@@ -166,8 +168,8 @@ Skada:AddLoadableModule(
 								-- but the player still dpsing it. This counts as useless damage.
 								--
 								if valkyrsTable[dmg.dstGUID] < maxhp / 2 then
-									player.damagedone.targets[L["Valkyrs overkilling"]] =
-										(player.damagedone.targets[L["Valkyrs overkilling"]] or 0) + dmg.amount
+									spell.targets[L["Valkyrs overkilling"]] = (spell.targets[L["Valkyrs overkilling"]] or 0) + dmg.amount
+									player.damagedone.targets[L["Valkyrs overkilling"]] = (player.damagedone.targets[L["Valkyrs overkilling"]] or 0) + dmg.amount
 									return
 								end
 
@@ -178,8 +180,8 @@ Skada:AddLoadableModule(
 					end
 
 					-- if we are on BPC, we attempt to catch overkilling
-					local amount =
-						(validTarget[dmg.dstName] == LBB["Blood Prince Council"]) and dmg.overkill or dmg.amount
+					local amount = (validTarget[dmg.dstName] == LBB["Blood Prince Council"]) and dmg.overkill or dmg.amount
+					spell.targets[altname] = (spell.targets[altname] or 0) + amount
 					player.damagedone.targets[altname] = (player.damagedone.targets[altname] or 0) + amount
 				end
 			end
