@@ -15,10 +15,9 @@ local Translit = LibStub("LibTranslit-1.0")
 local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
 local bossNames
 
-local dataobj =
-    LDB:NewDataObject(
-    "Skada",
-    {label = "Skada", type = "data source", icon = "Interface\\Icons\\Spell_Lightning_LightningBolt01", text = "n/a"}
+local dataobj = LDB:NewDataObject(
+	"Skada",
+	{label = "Skada", type = "data source", icon = "Interface\\Icons\\Spell_Lightning_LightningBolt01", text = "n/a"}
 )
 
 -- Keybindings
@@ -2479,12 +2478,7 @@ function Skada:OnInitialize()
     end
 
     self:ReloadSettings()
-    self.After(
-        2,
-        function()
-            self:ApplySettings()
-        end
-    )
+    self.After(2, function() self:ApplySettings() end )
 end
 
 function Skada:MemoryCheck()
@@ -2492,9 +2486,7 @@ function Skada:MemoryCheck()
         UpdateAddOnMemoryUsage()
         local mem = GetAddOnMemoryUsage("Skada")
         if mem > 30000 then
-            self:Print(
-                L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."]
-            )
+            self:Print(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."])
         end
     end
 end
@@ -2522,7 +2514,7 @@ function Skada:OnEnable()
     end
 
     -- used to fix broken combat log
-    self.NewTicker(2, function() self:CleanGarbage(false) end)
+    self.NewTicker(1, function() self:CleanGarbage(false) end)
     self.After(3, function() self:MemoryCheck() end)
 end
 
@@ -2677,12 +2669,7 @@ do
             tick_timer:Cancel()
         end
         update_timer, tick_timer = nil, nil
-        self.After(
-            3,
-            function()
-                self:MemoryCheck()
-            end
-        )
+        self.After(3, function() self:MemoryCheck() end)
     end
 
     function Skada:StopSegment()
@@ -2999,6 +2986,10 @@ do
                 end
             end
         end
+
+		if self.current and eventtype == "UNIT_DIED" and self.current.gotboss and self.current.mobname == dstName then
+			self.current.success = true
+		end
     end
 end
 
@@ -3010,42 +3001,39 @@ do
     local waitTable = {}
 
     local waitFrame = _G.SkadaTimerFrame or CreateFrame("Frame", "SkadaTimerFrame", UIParent)
-    waitFrame:SetScript(
-        "OnUpdate",
-        function(self, elapsed)
-            local total = #waitTable
-            for i = 1, total do
-                local ticker = waitTable[i]
+    waitFrame:SetScript("OnUpdate", function(self, elapsed)
+        local total = #waitTable
+        for i = 1, total do
+            local ticker = waitTable[i]
 
-                if ticker then
-                    if ticker._cancelled then
-                        tremove(waitTable, i)
-                    elseif ticker._delay > elapsed then
-                        ticker._delay = ticker._delay - elapsed
+            if ticker then
+                if ticker._cancelled then
+                    tremove(waitTable, i)
+                elseif ticker._delay > elapsed then
+                    ticker._delay = ticker._delay - elapsed
+                    i = i + 1
+                else
+                    ticker._callback(ticker)
+
+                    if ticker._remainingIterations == -1 then
+                        ticker._delay = ticker._duration
                         i = i + 1
-                    else
-                        ticker._callback(ticker)
-
-                        if ticker._remainingIterations == -1 then
-                            ticker._delay = ticker._duration
-                            i = i + 1
-                        elseif ticker._remainingIterations > 1 then
-                            ticker._remainingIterations = ticker._remainingIterations - 1
-                            ticker._delay = ticker._duration
-                            i = i + 1
-                        elseif ticker._remainingIterations == 1 then
-                            tremove(waitTable, i)
-                            total = total - 1
-                        end
+                    elseif ticker._remainingIterations > 1 then
+                        ticker._remainingIterations = ticker._remainingIterations - 1
+                        ticker._delay = ticker._duration
+                        i = i + 1
+                    elseif ticker._remainingIterations == 1 then
+                        tremove(waitTable, i)
+                        total = total - 1
                     end
                 end
             end
-
-            if #waitTable == 0 then
-                self:Hide()
-            end
         end
-    )
+
+        if #waitTable == 0 then
+            self:Hide()
+        end
+    end)
 
     local function AddDelayedCall(ticker, oldTicker)
         if oldTicker and type(oldTicker) == "table" then
@@ -3068,13 +3056,11 @@ do
     end
 
     Skada.After = function(duration, callback)
-        AddDelayedCall(
-            {
-                _remainingIterations = 1,
-                _delay = duration,
-                _callback = callback
-            }
-        )
+        AddDelayedCall({
+            _remainingIterations = 1,
+            _delay = duration,
+            _callback = callback
+		})
     end
 
     Skada.NewTimer = function(duration, callback)

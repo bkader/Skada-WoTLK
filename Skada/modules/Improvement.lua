@@ -264,7 +264,7 @@ Skada:AddLoadableModule(
                 return
             end
 
-            if data.gotboss and (data.mobname and not blacklist[data.mobname]) then
+            if data.gotboss and data.success and (data.mobname and not blacklist[data.mobname]) then
                 local boss = find_boss_data(data.mobname)
                 if not boss then
                     return
