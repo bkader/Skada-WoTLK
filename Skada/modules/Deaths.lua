@@ -14,9 +14,11 @@ Skada:AddLoadableModule(
         local _UnitIsFeignDeath = UnitIsFeignDeath
         local table_insert, table_remove = table.insert, table.remove
         local table_sort, table_maxn, table_concat = table.sort, table.maxn, table.concat
-        local _select, _GetSpellInfo = select, GetSpellInfo
-        local _ipairs, _format, _date = ipairs, string.format, date
-        local math_abs, math_max = math.abs, math.max
+        local _ipairs, _select, _next = ipairs, select, next
+        local _tostring, _format, _strsub = tostring, string.format, string.sub
+        local math_abs, math_max, math_modf = math.abs, math.max, math.modf
+        local _GetSpellInfo = GetSpellInfo
+        local _date = date
 
         local function log_deathlog(set, data, ts)
             local player = Skada:get_player(set, data.dstGUID, data.dstName, data.dstFlags)
@@ -165,9 +167,20 @@ Skada:AddLoadableModule(
             log_resurrect(Skada.current, dstGUID, dstName, dstFlags)
         end
 
+		-- this function was added for a more accurate death time
+		-- this is useful in case of someone's death causing others'
+		-- death. Example: Sindragosa's unchained magic.
+		local function formatdate(ts)
+			local a, b = math_modf(ts)
+			local d = _date("%H:%M:%S", a or ts)
+			if b == 0 then return d end -- really rare to see .000
+			b = _strsub(_tostring(b), 3, 5)
+			return d.."."..b
+		end
+
         function deathlogmod:Enter(win, id, label)
             self.index = id
-            self.title = _format(L["%s's death log"], label)
+            self.title = _format(L["%s's death log"], playermod.playername)
         end
 
         do
@@ -179,7 +192,7 @@ Skada:AddLoadableModule(
             end
 
             function deathlogmod:Update(win, set)
-                local player = Skada:find_player(set, playermod.playerid)
+                local player = Skada:find_player(set, playermod.playerid, playermod.playername)
 
                 if player and self.index and player.deathlog[self.index] then
                     local deathlog = player.deathlog[self.index]
@@ -191,7 +204,7 @@ Skada:AddLoadableModule(
 
                     pre.id = nr
                     pre.time = deathlog.time
-                    pre.label = _date("%H:%M:%S", deathlog.time) .. ": " .. _format(L["%s dies"], player.name)
+                    pre.label = formatdate(deathlog.time) .. ": " .. _format(L["%s dies"], player.name)
                     pre.icon = "Interface\\Icons\\Ability_Rogue_FeignDeath"
                     pre.value = 0
                     pre.valuetext = ""
@@ -240,11 +253,10 @@ Skada:AddLoadableModule(
 								table_insert(extra, "A: "..Skada:FormatNumber(log.absorbed))
                             end
 
-                            if next(extra) ~= nil then
+                            if _next(extra) ~= nil then
 								change = change.." ["..table_concat(extra, ", ").."]"
                             end
-                            d.valuetext =
-                                Skada:FormatValueText(
+                            d.valuetext = Skada:FormatValueText(
                                 change,
                                 self.metadata.columns.Change,
                                 Skada:FormatNumber(log.hp or 0),
@@ -270,6 +282,7 @@ Skada:AddLoadableModule(
 
         function playermod:Enter(win, id, label)
             self.playerid = id
+			self.playername = label
             self.title = _format(L["%s's deaths"], label)
         end
 
@@ -301,7 +314,7 @@ Skada:AddLoadableModule(
                     end
 
                     d.value = dth and dth.time or death.time
-                    d.valuetext = _date("%H:%M:%S", d.value)
+                    d.valuetext = formatdate(d.value)
 
                     if d.value > max then
                         max = d.value
@@ -329,7 +342,7 @@ Skada:AddLoadableModule(
                     d.spec = player.spec
 
                     d.value = player.deaths
-                    d.valuetext = tostring(player.deaths)
+                    d.valuetext = _tostring(player.deaths)
 
                     if player.deaths > max then
                         max = player.deaths
@@ -345,7 +358,7 @@ Skada:AddLoadableModule(
         local function entry_tooltip(win, id, label, tooltip)
             local entry = win.dataset[id]
             if entry and entry.spellname then
-                tooltip:AddLine(L["Spell details"] .. " - " .. _date("%H:%M:%S", entry.time))
+                tooltip:AddLine(L["Spell details"] .. " - " .. formatdate(entry.time))
                 tooltip:AddDoubleLine(L["Spell"], entry.spellname, 1, 1, 1, 1, 1, 1)
 
                 if entry.source then
