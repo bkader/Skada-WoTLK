@@ -1,8 +1,4 @@
 local Skada = Skada
-if not Skada then
-    return
-end
-
 Skada:AddLoadableModule(
     "Improvement",
     function(Skada, L)
@@ -24,6 +20,7 @@ Skada:AddLoadableModule(
             "Damage",
             "DamageTaken",
             "Deaths",
+            "Dispels",
             "Fails",
             "Healing",
             "Interrupts",
@@ -80,8 +77,16 @@ Skada:AddLoadableModule(
             return total
         end
 
+        updaters.Overhealing = function(set, player)
+            return player.healing and player.healing.overhealing or 0
+        end
+
         updaters.Interrupts = function(set, player)
             return player.interrupts and player.interrupts.count or 0
+        end
+
+        updaters.Dispels = function(set, player)
+            return player.dispels and player.dispels.count or 0
         end
 
         updaters.Fails = function(set, player)
@@ -91,7 +96,8 @@ Skada:AddLoadableModule(
         -- :::::::::::::::::::::::::::::::::::::::::::::::
 
         local function find_boss_data(bossname)
-            mod.db = mod.db or SkadaImprovementDB
+            mod.db = mod.db or {}
+            mod.db.bosses = mod.db.bosses or {}
             for k, v in _pairs(mod.db.bosses) do
                 if k == bossname then
                     return v
@@ -144,12 +150,9 @@ Skada:AddLoadableModule(
                         elseif self.modename == "Deaths" or self.modename == "Interrupts" or self.modename == "Fails" then
                             d.valuetext = _tostring(d.value)
                         else
-                            d.valuetext =
-                                Skada:FormatValueText(
-                                Skada:FormatNumber(d.value),
-                                true,
-                                Skada:FormatNumber((d.value) / encounter.data.ActiveTime),
-                                true
+                            d.valuetext = Skada:FormatValueText(
+                                Skada:FormatNumber(d.value), true,
+                                Skada:FormatNumber((d.value) / encounter.data.ActiveTime), true
                             )
                         end
 
@@ -241,22 +244,20 @@ Skada:AddLoadableModule(
 
         function mod:OnInitialize()
             -- make our DB local
-            SkadaImprovementDB = SkadaImprovementDB or {}
-            if next(SkadaImprovementDB) == nil then
-                SkadaImprovementDB = {
+            Skada.char.improvement = Skada.char.improvement or {}
+            if next(Skada.char.improvement) == nil then
+                Skada.char.improvement = {
                     id = _UnitGUID("player"),
                     name = _UnitName("player"),
                     class = _select(2, _UnitClass("player")),
                     bosses = {}
                 }
             end
-            self.db = SkadaImprovementDB
+            self.db = Skada.char.improvement
         end
 
         function mod:EncounterEnd(event, data)
-            if event ~= "ENCOUNTER_END" or not data then
-                return
-            end
+            if event ~= "ENCOUNTER_END" or not data then return end
 
             -- we only record raid bosses, nothing else.
             local inInstance, instanceType = IsInInstance()
@@ -266,14 +267,10 @@ Skada:AddLoadableModule(
 
             if data.gotboss and data.success and (data.mobname and not blacklist[data.mobname]) then
                 local boss = find_boss_data(data.mobname)
-                if not boss then
-                    return
-                end
+                if not boss then return end
 
                 local encounter = find_encounter_data(boss, data.starttime)
-                if not encounter then
-                    return
-                end
+                if not encounter then return end
 
                 for i, player in _ipairs(data.players) do
                     if player.id == self.db.id then
@@ -316,16 +313,14 @@ Skada:AddLoadableModule(
                 timeout = 30,
                 whileDead = 0,
                 hideOnEscape = 1,
-                OnAccept = function()
-                    mod:Reset()
-                end
+                OnAccept = function() mod:Reset() end
             }
             StaticPopup_Show("ResetImprovementDialog")
         end
 
         function mod:Reset()
             Skada:Wipe()
-            SkadaImprovementDB = {}
+            Skada.char.improvement = {}
             self:OnInitialize()
             collectgarbage("collect")
             for _, win in _ipairs(Skada:GetWindows()) do
