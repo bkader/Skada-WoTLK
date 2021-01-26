@@ -211,18 +211,20 @@ function mod:Destroy(win)
 end
 
 function mod:Wipe(win)
-    win.bargroup:SetSortFunction(nil)
-    win.bargroup:SetBarOffset(0)
+	if win and win.bargroup then
+	    win.bargroup:SetSortFunction(nil)
+	    win.bargroup:SetBarOffset(0)
 
-    local bars = win.bargroup:GetBars()
-    if bars then
-        for _, bar in pairs(bars) do
-            bar:Hide()
-            win.bargroup:RemoveBar(bar)
-        end
-    end
+	    local bars = win.bargroup:GetBars()
+	    if bars then
+	        for _, bar in pairs(bars) do
+	            bar:Hide()
+	            win.bargroup:RemoveBar(bar)
+	        end
+	    end
 
-    win.bargroup:SortBars()
+	    win.bargroup:SortBars()
+	end
 end
 
 function mod:Show(win)
@@ -237,7 +239,7 @@ function mod:Hide(win)
 end
 
 function mod:IsShown(win)
-    return win.bargroup:IsShown()
+    return win and win.bargroup:IsShown() or false
 end
 
 function mod:SetTitle(win, title)
