@@ -194,7 +194,7 @@ Skada:AddLoadableModule(
             function deathlogmod:Update(win, set)
                 local player = Skada:find_player(set, playermod.playerid, playermod.playername)
 
-                if player and self.index and player.deathlog[self.index] then
+                if player and player.deathlog and self.index and player.deathlog[self.index] then
                     local deathlog = player.deathlog[self.index]
 
                     -- add a fake entry for the actual death
