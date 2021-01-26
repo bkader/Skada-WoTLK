@@ -629,8 +629,8 @@ Skada:AddLoadableModule(
         local function getHPS(set, player)
             local totaltime = Skada:PlayerActiveTime(set, player)
             local total = 0
-            if player.healing then total = player.healing.amount end
-            if player.absorbs then total = player.absorbs.amount end
+            if player.healing then total = total + player.healing.amount end
+            if player.absorbs then total = total + player.absorbs.amount end
             return total / math_max(1, totaltime)
         end
 
