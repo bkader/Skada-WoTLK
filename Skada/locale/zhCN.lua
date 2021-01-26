@@ -662,7 +662,7 @@ if not L then return end
 -- Parry module lines --
 -- ==================== --
 
--- L["Parry"] = ""
+-- L["Parry-haste"] = ""
 -- L["Parry target list"] = ""
 -- L["%s's parry targets"] = ""
 

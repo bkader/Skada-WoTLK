@@ -662,7 +662,7 @@ L["Interrupts"] = "Interrupciones"
 -- Parry module lines --
 -- ==================== --
 
-L["Parry"] = "Parar"
+L["Parry-haste"] = "Parar-celeridad"
 L["Parry target list"] = "Lista de objetivos de parada"
 L["%s's parry targets"] = "Objetivos de parada de %s"
 

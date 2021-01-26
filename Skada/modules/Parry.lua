@@ -1,11 +1,11 @@
 local Skada = Skada
 Skada:AddLoadableModule(
-    "Parry",
+    "Parry-haste",
     function(Skada, L)
-        if Skada:IsDisabled("Parry") then
+        if Skada:IsDisabled("Parry-haste") then
             return
         end
-        local mod = Skada:NewModule(L["Parry"])
+        local mod = Skada:NewModule(L["Parry-haste"])
         local targetmod = mod:NewModule(L["Parry target list"])
 
         local _pairs, _ipairs = pairs, ipairs

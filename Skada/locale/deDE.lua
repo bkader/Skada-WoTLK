@@ -663,7 +663,7 @@ L["Runic Power gained spell list"] = "Runenkraft hat Zauberliste gewonnen"
 -- Parry module lines --
 -- ==================== --
 
-L["Parry"] = "Parieren"
+L["Parry-haste"] = "Parieren"
 L["Parry target list"] = "Zielliste parieren"
 L["%s's parry targets"] = "%s parierte Ziele"
 

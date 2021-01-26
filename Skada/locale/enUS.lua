@@ -664,7 +664,7 @@ L["Runic Power gained spell list"] = true
 -- Parry module lines --
 -- ==================== --
 
-L["Parry"] = true
+L["Parry-haste"] = true
 L["Parry target list"] = true
 L["%s's parry targets"] = true
 

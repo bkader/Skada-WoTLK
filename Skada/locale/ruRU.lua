@@ -664,7 +664,7 @@ L["Power gained: Runic Power"] = "Получено энергии: Сила ру
 -- Parry module lines --
 -- ==================== --
 
-L["Parry"] = "Парирование"
+L["Parry-haste"] = "Парирование"
 L["Parry target list"] = "Список целей парирования"
 L["%s's parry targets"] = "%s парирует цели"
 
