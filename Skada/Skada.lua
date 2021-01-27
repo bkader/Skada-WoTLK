@@ -1153,7 +1153,7 @@ end
 -- ================== --
 do
     -- create our scan tooltip
-    local tooltip = CreateFrame("GameTooltip", "SkadaTooltip", nil, "GameTooltipTemplate")
+    local tooltip = CreateFrame("GameTooltip", "SkadaPetTooltip", nil, "GameTooltipTemplate")
     tooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
 
     local ownerPatterns = {}
@@ -1168,7 +1168,7 @@ do
     local function GetPetOwner(guid)
         tooltip:SetHyperlink("unit:" .. guid)
         for i = 2, tooltip:NumLines() do
-            local text = _G["SkadaTooltipTextLeft" .. i]:GetText()
+            local text = _G["SkadaPetTooltipTextLeft" .. i]:GetText()
             if text then
                 for _, pattern in next, ownerPatterns do
                     local owner = text:match(pattern)
