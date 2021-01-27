@@ -275,6 +275,7 @@ L["Smart"] = "Intelligent"
 L["Follow Cursor"] = "Suivre le curseur"
 
 -- disabled modules
+L["Modules"] = "Modules"
 L["Disabled Modules"] = "Modules désactivés"
 L["Tick the modules you want to disable."] = "Cocher les modules que vous souhaitez désactiver."
 L["This change requires a UI reload. Are you sure?"] = "Ce changement nécessite un rechargement de l'IU. Êtes-vous sûr ?"

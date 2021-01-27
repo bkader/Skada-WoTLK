@@ -1,7 +1,5 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "deDE", false)
-if not L then
-    return
-end
+if not L then return end
 
 L["A damage meter."] = "Ein Damage-Meter."
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "Die Speicherauslastung ist hoch. Du kannst Skada zurücksetzen und eine der Optionen zur automatischen Zurücksetzung aktivieren."
@@ -278,6 +276,7 @@ L["Smart"] = "Clever"
 L["Follow Cursor"] = "Follow Cursor"
 
 -- disabled modules
+L["Modules"] = "Module"
 L["Disabled Modules"] = "Deaktivierte Module"
 L["Tick the modules you want to disable."] = "Hake die Module an, die du deaktivieren willst."
 L["This change requires a UI reload. Are you sure?"] = "Diese Änderung erfordert ein Neuladen des UIs. Bist du sicher?"

@@ -1,7 +1,4 @@
 local Skada = Skada
-if not Skada then
-    return
-end
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 

@@ -276,6 +276,7 @@ if not L then return end
 -- L["Follow Cursor"] = ""
 
 -- disabled modules
+-- L["Modules"] = ""
 -- L["Disabled Modules"] = ""
 -- L["Tick the modules you want to disable."] = ""
 -- L["This change requires a UI reload. Are you sure?"] = ""

@@ -1,5 +1,5 @@
 --[[
-Cretis to: SpamageMeters
+Credit to: SpamageMeters
 Authors: Wrug and Cybey
 URL: https://www.curseforge.com/wow/addons/spamagemeters
 ]] --
@@ -24,7 +24,6 @@ Skada:AddLoadableModule(
         local options = {
             type = "group",
             name = L["Spamage"],
-            order = 999,
             args = {
                 CHAT_MSG_GUILD = {
                     type = "select",
@@ -192,7 +191,7 @@ Skada:AddLoadableModule(
             end
 
             -- we add module's options.
-            Skada.options.args["Spamage"] = options
+            Skada.options.args.modules.args.spamage = options
         end
 
         -- ================================================

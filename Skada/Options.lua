@@ -178,7 +178,7 @@ do
             desc = description,
             order = numorder
         }
-        self.options.args.modules.args[mod] = new
+        self.options.args.disabled.args[mod] = new
         numorder = numorder + 1
     end
 end
@@ -187,7 +187,7 @@ local deletewindow = nil
 
 Skada.options = {
     type = "group",
-    name = "Skada",
+    name = "Skada-|cffffffffRevisited|r by |cfff58cbaKader|r",
     plugins = {},
     args = {
         d = {
@@ -195,10 +195,15 @@ Skada.options = {
             name = L["A damage meter."],
             order = 0
         },
+        discord = {
+            type = "header",
+            name = "Discord Server : |c007289d9https://bitly.com/skada-rev|r",
+            order = 1
+        },
         windows = {
             type = "group",
             name = L["Windows"],
-            order = 0,
+            order = 2,
             args = {
                 create = {
                     type = "input",
@@ -246,7 +251,7 @@ Skada.options = {
         resetoptions = {
             type = "group",
             name = L["Data resets"],
-            order = 2,
+            order = 3,
             args = {
                 resetinstance = {
                     type = "select",
@@ -298,7 +303,7 @@ Skada.options = {
         generaloptions = {
             type = "group",
             name = L["General options"],
-            order = 3,
+            order = 4,
             args = {
                 mmbutton = {
                     type = "toggle",
@@ -604,13 +609,13 @@ Skada.options = {
         columns = {
             type = "group",
             name = L["Columns"],
-            order = 4,
+            order = 5,
             args = {}
         },
         tooltips = {
             type = "group",
             name = L["Tooltips"],
-            order = 4,
+            order = 6,
             args = {
                 tooltips = {
                     type = "toggle",
@@ -674,16 +679,16 @@ Skada.options = {
                 }
             }
         },
-        modules = {
+        disabled = {
             type = "group",
             name = L["Disabled Modules"],
-            order = 6,
+            order = 7,
             get = function(i)
                 return Skada.db.profile.modulesBlocked[i[#i]]
             end,
             set = function(i, value)
                 Skada.db.profile.modulesBlocked[i[#i]] = value
-                Skada.options.args.modules.args.apply.disabled = false
+                Skada.options.args.disabled.args.apply.disabled = false
             end,
             args = {
                 desc = {
@@ -704,6 +709,12 @@ Skada.options = {
                     order = 99
                 }
             }
-        }
+        },
+        modules = {
+			type = "group",
+			name = L["Modules"],
+			order = 8,
+			args = {}
+        },
     }
 }

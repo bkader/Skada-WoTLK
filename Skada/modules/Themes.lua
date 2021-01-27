@@ -1,8 +1,4 @@
 local Skada = Skada
-if not Skada then
-    return
-end
-
 Skada:AddLoadableModule(
     "Themes",
     "Adds a set of standard themes to Skada. Custom themes can also be used.",
@@ -10,6 +6,8 @@ Skada:AddLoadableModule(
         if Skada:IsDisabled("Themes") then
             return
         end
+
+        local mod = Skada:NewModule(L["Themes"])
 
         local themes = {
             {
@@ -243,12 +241,8 @@ Skada:AddLoadableModule(
                         end
                         return list
                     end,
-                    get = function()
-                        return selectedtheme
-                    end,
-                    set = function(i, name)
-                        selectedtheme = name
-                    end,
+                    get = function() return selectedtheme end,
+                    set = function(_, name) selectedtheme = name end,
                     order = 3.1
                 },
                 applywindow = {
@@ -261,12 +255,8 @@ Skada:AddLoadableModule(
                         end
                         return list
                     end,
-                    get = function()
-                        return selectedwindow
-                    end,
-                    set = function(i, name)
-                        selectedwindow = name
-                    end,
+                    get = function() return selectedwindow end,
+                    set = function(_, name) selectedwindow = name end,
                     order = 3.2
                 },
                 applybutton = {
@@ -291,19 +281,15 @@ Skada:AddLoadableModule(
                             if thetheme then
                                 for i, win in ipairs(Skada:GetWindows()) do
                                     if win.db.name == selectedwindow then
-                                        Skada:tcopy(
-                                            win.db,
-                                            thetheme,
-                                            {
-                                                "name",
-                                                "modeincombat",
-                                                "display",
-                                                "set",
-                                                "mode",
-                                                "wipemode",
-                                                "returnaftercombat"
-                                            }
-                                        )
+                                        Skada:tcopy(win.db, thetheme, {
+											"name",
+											"modeincombat",
+											"display",
+											"set",
+											"mode",
+											"wipemode",
+											"returnaftercombat"
+										})
                                         Skada:ApplySettings()
                                         Skada:Print(L["Theme applied!"])
                                     end
@@ -328,24 +314,16 @@ Skada:AddLoadableModule(
                         end
                         return list
                     end,
-                    get = function()
-                        return savewindow
-                    end,
-                    set = function(i, name)
-                        savewindow = name
-                    end,
+                    get = function() return savewindow end,
+                    set = function(_, name) savewindow = name end,
                     order = 4.1
                 },
                 savenametext = {
                     type = "input",
                     name = NAME,
                     desc = L["Name of your new theme."],
-                    get = function()
-                        return savename
-                    end,
-                    set = function(i, val)
-                        savename = val
-                    end,
+                    get = function() return savename end,
+                    set = function(_, val) savename = val end,
                     order = 4.2
                 },
                 savebutton = {
@@ -381,12 +359,8 @@ Skada:AddLoadableModule(
                         end
                         return list
                     end,
-                    get = function()
-                        return deletetheme
-                    end,
-                    set = function(i, name)
-                        deletetheme = name
-                    end,
+                    get = function() return deletetheme end,
+                    set = function(_, name) deletetheme = name end,
                     order = 5.1
                 },
                 deletebutton = {
@@ -406,6 +380,8 @@ Skada:AddLoadableModule(
             }
         }
 
-        Skada.options.args["Themes"] = options
+        function mod:OnInitialize()
+            Skada.options.args.modules.args.themes = options
+        end
     end
 )

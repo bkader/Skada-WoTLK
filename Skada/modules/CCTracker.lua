@@ -1,7 +1,4 @@
 local Skada = Skada
-if not Skada then
-    return
-end
 
 local CCSpells = {
     [118] = true, -- Polymorph (rank 1)
@@ -1077,39 +1074,36 @@ Skada:AddLoadableModule(
         end
 
         local opts = {
-            ccoptions = {
-                type = "group",
-                name = L["CC"],
-                args = {
-                    announce = {
-                        type = "toggle",
-                        name = L["Announce CC breaking to party"],
-                        get = function()
-                            return Skada.db.profile.modules.ccannounce
-                        end,
-                        set = function()
-                            Skada.db.profile.modules.ccannounce = not Skada.db.profile.modules.ccannounce
-                        end,
-                        order = 1
-                    },
-                    ignoremaintanks = {
-                        type = "toggle",
-                        name = L["Ignore Main Tanks"],
-                        get = function()
-                            return Skada.db.profile.modules.ccignoremaintanks
-                        end,
-                        set = function()
-                            Skada.db.profile.modules.ccignoremaintanks = not Skada.db.profile.modules.ccignoremaintanks
-                        end,
-                        order = 2
-                    }
+            type = "group",
+            name = L["CC"],
+            args = {
+                announce = {
+                    type = "toggle",
+                    name = L["Announce CC breaking to party"],
+                    get = function()
+                        return Skada.db.profile.modules.ccannounce
+                    end,
+                    set = function()
+                        Skada.db.profile.modules.ccannounce = not Skada.db.profile.modules.ccannounce
+                    end,
+                    order = 1
+                },
+                ignoremaintanks = {
+                    type = "toggle",
+                    name = L["Ignore Main Tanks"],
+                    get = function()
+                        return Skada.db.profile.modules.ccignoremaintanks
+                    end,
+                    set = function()
+                        Skada.db.profile.modules.ccignoremaintanks = not Skada.db.profile.modules.ccignoremaintanks
+                    end,
+                    order = 2
                 }
             }
         }
 
         function mod:OnInitialize()
-            -- Add our options.
-            tinsert(Skada.options.plugins, opts)
+			Skada.options.args.modules.args.ccoptions = opts
         end
     end
 )
