@@ -499,15 +499,6 @@ do
         barLists[self][name] = list
         list.name = name
 
-        --[[
-    list:SetBackdrop({
-      bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-      edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-      inset = 0,
-      edgeSize = 12,
-      tile = true
-    })
-    --]]
         local myfont = CreateFont("MyTitleFont")
         myfont:CopyFontObject(ChatFontSmall)
 
@@ -554,6 +545,7 @@ do
         list.resizebutton:SetFrameLevel(11)
         list.resizebutton:SetWidth(16)
         list.resizebutton:SetHeight(16)
+        list.resizebutton:SetAlpha(0)
         list.resizebutton:EnableMouse(true)
         list.resizebutton:SetScript("OnMouseDown", function(self, button)
 			local p = self:GetParent()
@@ -585,6 +577,16 @@ do
                 p.isResizing = false
                 p:SortBars()
             end
+        end)
+        list:SetScript("OnEnter", function(self)
+			if not self:IsLocked() then
+				self.resizebutton:SetAlpha(1)
+			end
+        end)
+        list:SetScript("OnLeave", function(self)
+			if not self:IsLocked() then
+				self.resizebutton:SetAlpha(0)
+			end
         end)
 
         list:ReverseGrowth(false)
@@ -647,18 +649,7 @@ function barListPrototype:SetBarHeight(height)
 end
 
 function barListPrototype:NewCounterBar(name, text, value, maxVal, icon)
-    local bar, isNew =
-        self:NewBarFromPrototype(
-        barPrototype,
-        name,
-        text,
-        value,
-        maxVal,
-        icon,
-        self.orientation,
-        self.length,
-        self.thickness
-    )
+    local bar, isNew = self:NewBarFromPrototype(barPrototype, name, text, value, maxVal, icon, self.orientation, self.length, self.thickness)
     bar.bgtexture:SetVertexColor(unpack(self.barbackgroundcolor))
     return bar, isNew
 end
