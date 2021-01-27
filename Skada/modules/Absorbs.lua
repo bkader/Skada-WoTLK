@@ -647,7 +647,11 @@ Skada:AddLoadableModule(
         local function spell_tooltip(win, id, label, tooltip)
             local player = Skada:find_player(win:get_selected_set(), spellmod.playerid)
             if player then
-                local spell = player.healing.spells[id] or player.absorbs.spells[id]
+				local spell
+				if player.healing then spell = player.healing.spells[id] end
+				if not spell and player.absorbs then
+					spell = player.absorbs.spells[id]
+				end
                 if spell then
                     tooltip:AddLine(player.name .. " - " .. label)
                     if spell.school then
