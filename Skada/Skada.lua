@@ -13,7 +13,10 @@ local Translit = LibStub("LibTranslit-1.0")
 local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
 local bossNames
 
-local dataobj = LDB:NewDataObject("Skada", {label = "Skada", type = "data source", icon = "Interface\\Icons\\Spell_Lightning_LightningBolt01", text = "n/a"})
+local dataobj = LDB:NewDataObject(
+    "Skada",
+    {label = "Skada", type = "data source", icon = "Interface\\Icons\\Spell_Lightning_LightningBolt01", text = "n/a"}
+)
 
 -- Keybindings
 _G.BINDING_HEADER_SKADA = "Skada"
@@ -104,8 +107,7 @@ local PET_FLAGS = bit.bor(COMBATLOG_OBJECT_TYPE_PET, COMBATLOG_OBJECT_TYPE_GUARD
 local COMBATLOG_OBJECT_AFFILIATION_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE or 0x00000001
 local COMBATLOG_OBJECT_AFFILIATION_PARTY = COMBATLOG_OBJECT_AFFILIATION_PARTY or 0x00000002
 local COMBATLOG_OBJECT_AFFILIATION_RAID = COMBATLOG_OBJECT_AFFILIATION_RAID or 0x00000004
-local RAID_FLAGS =
-    bit.bor(COMBATLOG_OBJECT_AFFILIATION_MINE, COMBATLOG_OBJECT_AFFILIATION_PARTY, COMBATLOG_OBJECT_AFFILIATION_RAID)
+local RAID_FLAGS = bit.bor(COMBATLOG_OBJECT_AFFILIATION_MINE, COMBATLOG_OBJECT_AFFILIATION_PARTY, COMBATLOG_OBJECT_AFFILIATION_RAID)
 
 -- =================== --
 -- add missing globals --
@@ -215,9 +217,7 @@ do
                     name = L["Rename window"],
                     desc = L["Enter the name for the window."],
                     order = 1,
-                    get = function()
-                        return db.name
-                    end,
+                    get = function() return db.name end,
                     set = function(_, val)
                         if val ~= db.name and val ~= "" then
                             local oldname = db.name
@@ -232,9 +232,7 @@ do
                     name = L["Lock window"],
                     desc = L["Locks the bar window in place."],
                     order = 2,
-                    get = function()
-                        return db.barslocked
-                    end,
+                    get = function() return db.barslocked end,
                     set = function()
                         db.barslocked = not db.barslocked
                         Skada:ApplySettings()
@@ -245,9 +243,7 @@ do
                     name = L["Hide window"],
                     desc = L["Hides the window."],
                     order = 3,
-                    get = function()
-                        return db.hidden
-                    end,
+                    get = function() return db.hidden end,
                     set = function()
                         db.hidden = not db.hidden
                         Skada:ApplySettings()
@@ -293,27 +289,17 @@ do
                         end
                         return m
                     end,
-                    get = function()
-                        return db.modeincombat
-                    end,
-                    set = function(_, mode)
-                        db.modeincombat = mode
-                    end
+                    get = function() return db.modeincombat end,
+                    set = function(_, mode) db.modeincombat = mode end
                 },
                 returnaftercombat = {
                     type = "toggle",
                     name = L["Return after combat"],
                     desc = L["Return to the previous set and mode after combat ends."],
                     order = 22,
-                    get = function()
-                        return db.returnaftercombat
-                    end,
-                    set = function()
-                        db.returnaftercombat = not db.returnaftercombat
-                    end,
-                    disabled = function()
-                        return db.returnaftercombat == nil
-                    end
+                    get = function() return db.returnaftercombat end,
+                    set = function() db.returnaftercombat = not db.returnaftercombat end,
+                    disabled = function() return db.returnaftercombat == nil end
                 },
                 wipemode = {
                     type = "select",
@@ -328,12 +314,8 @@ do
                         end
                         return m
                     end,
-                    get = function()
-                        return db.wipemode
-                    end,
-                    set = function(_, mode)
-                        db.wipemode = mode
-                    end
+                    get = function() return db.wipemode end,
+                    set = function(_, mode) db.wipemode = mode end
                 }
             }
         }
@@ -1059,21 +1041,21 @@ do
             if not player.class then
                 -- class already received from GetPlayerInfoByGUID?
                 if class then
+                    -- it's a real player?
                     player.class = class
-				-- it's a real player?
                 elseif UnitIsPlayer(player.name) then
                     player.class = select(2, UnitClass(player.name))
                 elseif player.flag and band(player.flag, 0x00000400) ~= 0 then
+                    -- pets?
                     player.class = "UNGROUPPLAYER"
                     player.role = "DAMAGER"
                     player.spec = 2
-				-- pets?
                 elseif player.flag and band(player.flag, 0x00003000) ~= 0 then
+                    --  last solution
                     player.class = "PET"
                     player.role = "DAMAGER"
                     player.owner = pets[player.id]
                     player.spec = 1
-				--  last solution
                 else
                     player.class = "UNKNOWN"
                     player.role = "DAMAGER"
@@ -2136,9 +2118,7 @@ function Skada:FrameSettings(db, include_dimensions)
                 order = 1.1,
                 width = "double",
                 values = AceGUIWidgetLSMlists.background,
-                get = function()
-                    return db.background.texture
-                end,
+                get = function() return db.background.texture end,
                 set = function(_, key)
                     db.background.texture = key
                     Skada:ApplySettings()
@@ -2149,9 +2129,7 @@ function Skada:FrameSettings(db, include_dimensions)
                 name = L["Tile"],
                 desc = L["Tile the background texture."],
                 order = 1.2,
-                get = function()
-                    return db.background.tile
-                end,
+                get = function() return db.background.tile end,
                 set = function(_, key)
                     db.background.tile = key
                     Skada:ApplySettings()
@@ -2165,9 +2143,7 @@ function Skada:FrameSettings(db, include_dimensions)
                 min = 0,
                 max = math_floor(GetScreenWidth()),
                 step = 1.0,
-                get = function()
-                    return db.background.tilesize
-                end,
+                get = function() return db.background.tilesize end,
                 set = function(_, val)
                     db.background.tilesize = val
                     Skada:ApplySettings()
@@ -2201,9 +2177,7 @@ function Skada:FrameSettings(db, include_dimensions)
                 order = 2.1,
                 width = "double",
                 values = AceGUIWidgetLSMlists.border,
-                get = function()
-                    return db.background.bordertexture
-                end,
+                get = function() return db.background.bordertexture end,
                 set = function(_, key)
                     db.background.bordertexture = key
                     Skada:ApplySettings()
@@ -2232,9 +2206,7 @@ function Skada:FrameSettings(db, include_dimensions)
                 min = 0,
                 max = 50,
                 step = 0.5,
-                get = function()
-                    return db.background.borderthickness
-                end,
+                get = function() return db.background.borderthickness end,
                 set = function(_, val)
                     db.background.borderthickness = val
                     Skada:ApplySettings()
@@ -2253,9 +2225,7 @@ function Skada:FrameSettings(db, include_dimensions)
                 min = 0.1,
                 max = 3,
                 step = 0.01,
-                get = function()
-                    return db.scale
-                end,
+                get = function() return db.scale end,
                 set = function(_, val)
                     db.scale = val
                     Skada:ApplySettings()
@@ -2275,9 +2245,7 @@ function Skada:FrameSettings(db, include_dimensions)
                     ["FULLSCREEN"] = "FULLSCREEN",
                     ["FULLSCREEN_DIALOG"] = "FULLSCREEN_DIALOG"
                 },
-                get = function()
-                    return db.strata
-                end,
+                get = function() return db.strata end,
                 set = function(_, val)
                     db.strata = val
                     Skada:ApplySettings()
@@ -2294,9 +2262,7 @@ function Skada:FrameSettings(db, include_dimensions)
             min = 100,
             max = math_floor(GetScreenWidth()),
             step = 1.0,
-            get = function()
-                return db.width
-            end,
+            get = function() return db.width end,
             set = function(_, key)
                 db.width = key
                 Skada:ApplySettings()
@@ -2310,9 +2276,7 @@ function Skada:FrameSettings(db, include_dimensions)
             min = 16,
             max = 400,
             step = 1.0,
-            get = function()
-                return db.height
-            end,
+            get = function() return db.height end,
             set = function(_, key)
                 db.height = key
                 Skada:ApplySettings()
@@ -2389,6 +2353,27 @@ function Skada:OnInitialize()
     self.db.RegisterCallback(self, "OnProfileCopied", "ReloadSettings")
     self.db.RegisterCallback(self, "OnProfileReset", "ReloadSettings")
     self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes")
+end
+
+function Skada:MemoryCheck()
+    if self.db.profile.memorycheck then
+        UpdateAddOnMemoryUsage()
+        local mem = GetAddOnMemoryUsage("Skada")
+        if mem > 30000 then
+            self:Print(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."])
+        end
+    end
+end
+
+function Skada:CleanGarbage(clean)
+    CombatLogClearEntries()
+    if clean and not InCombatLockdown() then
+        collectgarbage("collect")
+    end
+end
+
+function Skada:OnEnable()
+    self:ReloadSettings()
 
     if not self.classcolors then
         self.classcolors = {
@@ -2431,7 +2416,6 @@ function Skada:OnInitialize()
     BOSS.BossIDs[36982] = true -- Kor'kron Rocketeer, Gunship add
     BOSS.BossIDs[37117] = true -- Kor'kron Battle-Mage, Gunship add
     BOSS.BossIDs[37215] = true -- Orgrim's Hammer
-
     -- alliance
     BOSS.BossIDs[36961] = true -- Skybreaker Sergeant, Gunship add
     BOSS.BossIDs[36969] = true -- Skybreaker Rifleman, Gunship add
@@ -2480,28 +2464,6 @@ function Skada:OnInitialize()
         }
     end
 
-    self:ReloadSettings()
-    self.After(2, function() self:ApplySettings() end)
-end
-
-function Skada:MemoryCheck()
-    if self.db.profile.memorycheck then
-        UpdateAddOnMemoryUsage()
-        local mem = GetAddOnMemoryUsage("Skada")
-        if mem > 30000 then
-            self:Print(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."])
-        end
-    end
-end
-
-function Skada:CleanGarbage(clean)
-    CombatLogClearEntries()
-    if clean and not InCombatLockdown() then
-        collectgarbage("collect")
-    end
-end
-
-function Skada:OnEnable()
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:RegisterEvent("PARTY_MEMBERS_CHANGED")
     self:RegisterEvent("RAID_ROSTER_UPDATE")
@@ -2516,9 +2478,9 @@ function Skada:OnEnable()
         self.modulelist = nil
     end
 
-    -- used to fix broken combat log
-    self.NewTicker(1, function() self:CleanGarbage() end)
+    self.After(2, function() self:ApplySettings() end)
     self.After(3, function() self:MemoryCheck() end)
+    self.NewTicker(1, function() self:CleanGarbage() end)
 end
 
 -- ======================================================= --
@@ -3043,10 +3005,10 @@ do
 
     Skada.After = function(duration, callback)
         AddDelayedCall({
-			_remainingIterations = 1,
-			_delay = duration,
-			_callback = callback
-		})
+            _remainingIterations = 1,
+            _delay = duration,
+            _callback = callback
+        })
     end
 
     Skada.NewTimer = function(duration, callback)
