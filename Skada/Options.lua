@@ -714,6 +714,7 @@ Skada.options = {
 			type = "group",
 			name = L["Modules"],
 			order = 8,
+			disabled = function() return next(Skada.options.args.modules.args) == nil end,
 			args = {}
         },
     }
