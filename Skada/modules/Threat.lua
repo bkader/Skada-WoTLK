@@ -33,18 +33,19 @@ Skada:AddLoadableModule(
                         threatTable[guid] = {
                             id = guid,
                             name = name .. " (" .. pet.name .. ")",
-                            class = "PET"
+                            class = "PET",
+                            role = "DAMAGER",
+                            spec = 1
                         }
                     else
-                        local p = Skada:find_player(win:get_selected_set(), guid)
+                        local p = Skada:find_player(win:get_selected_set(), guid, name)
                         if p then
-                            Skada:FixPlayer(p)
                             threatTable[guid] = {
                                 id = p.id,
                                 name = p.name,
                                 class = p.class,
-                                role = p.role,
-                                spec = p.spec
+                                role = p.role or "DAMAGER",
+                                spec = p.spec or 2
                             }
                         end
                     end
@@ -53,13 +54,12 @@ Skada:AddLoadableModule(
                 local player = threatTable[guid]
 
                 if player then
-                    local isTanking, status, threatpct, rawthreatpct, threatvalue =
-                        _UnitDetailedThreatSituation(unit, target)
+                    local isTanking, status, threatpct, rawthreatpct, threatvalue = _UnitDetailedThreatSituation(unit, target)
+
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
                     if Skada.db.profile.modules.threatraw and threatvalue then
-                        local d = win.dataset[nr] or {}
-                        win.dataset[nr] = d
-
                         d.id = player.id
                         d.label = player.name
                         d.class = player.class
@@ -81,9 +81,6 @@ Skada:AddLoadableModule(
                             maxthreat = threatvalue
                         end
                     elseif threatpct then
-                        local d = win.dataset[nr] or {}
-                        win.dataset[nr] = d
-
                         d.id = player.id
                         d.label = player.name
                         d.class = player.class

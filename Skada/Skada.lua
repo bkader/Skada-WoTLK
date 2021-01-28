@@ -3,22 +3,17 @@ _G.Skada = Skada
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
-local ACD = LibStub("AceConfigDialog-3.0")
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 local ICON = LibStub("LibDBIcon-1.0", true)
 local LSM = LibStub("LibSharedMedia-3.0")
 local BOSS = LibStub("LibBossIDs-1.0")
-local AceConfig = LibStub("AceConfig-3.0")
 local LGT = LibStub("LibGroupTalents-1.0")
 local Translit = LibStub("LibTranslit-1.0")
 
 local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
 local bossNames
 
-local dataobj = LDB:NewDataObject(
-	"Skada",
-	{label = "Skada", type = "data source", icon = "Interface\\Icons\\Spell_Lightning_LightningBolt01", text = "n/a"}
-)
+local dataobj = LDB:NewDataObject("Skada", {label = "Skada", type = "data source", icon = "Interface\\Icons\\Spell_Lightning_LightningBolt01", text = "n/a"})
 
 -- Keybindings
 _G.BINDING_HEADER_SKADA = "Skada"
@@ -173,17 +168,17 @@ end
 -- utilities
 
 function Skada:ShowPopup()
-	if not StaticPopupDialogs["ResetSkadaDialog"] then
-	    StaticPopupDialogs["ResetSkadaDialog"] = {
-	        text = L["Do you want to reset Skada?"],
-	        button1 = ACCEPT,
-	        button2 = CANCEL,
-	        timeout = 30,
-	        whileDead = 0,
-	        hideOnEscape = 1,
-	        OnAccept = function() Skada:Reset() end
-	    }
-	end
+    if not StaticPopupDialogs["ResetSkadaDialog"] then
+        StaticPopupDialogs["ResetSkadaDialog"] = {
+            text = L["Do you want to reset Skada?"],
+            button1 = ACCEPT,
+            button2 = CANCEL,
+            timeout = 30,
+            whileDead = 0,
+            hideOnEscape = 1,
+            OnAccept = function() Skada:Reset() end
+        }
+    end
     StaticPopup_Show("ResetSkadaDialog")
 end
 
@@ -197,11 +192,11 @@ do
     -- create a new window
     function Window:new()
         return setmetatable({
-			usealt = true,
-			dataset = {},
-			metadata = {},
-			history = {},
-			changed = false
+            usealt = true,
+            dataset = {},
+            metadata = {},
+            history = {},
+            changed = false
         }, mt)
     end
 
@@ -489,11 +484,12 @@ do
     do
         function sort_modes()
             tsort(modes, function(a, b)
-				if Skada.db.profile.sortmodesbyusage and Skada.db.profile.modeclicks then
-					return (Skada.db.profile.modeclicks[a:GetName()] or 0) > (Skada.db.profile.modeclicks[b:GetName()] or 0)
-				else
-					return a:GetName() < b:GetName()
-				end
+                if Skada.db.profile.sortmodesbyusage and Skada.db.profile.modeclicks then
+                    return (Skada.db.profile.modeclicks[a:GetName()] or 0) >
+                        (Skada.db.profile.modeclicks[b:GetName()] or 0)
+                else
+                    return a:GetName() < b:GetName()
+                end
             end)
         end
 
@@ -742,23 +738,23 @@ do
         if not mode.scanned then
             mode.scanned = true
 
-			if mode.metadata then
-				-- add columns if available
-				if mode.metadata.columns then
-					Skada:AddColumnOptions(mode)
-				end
+            if mode.metadata then
+                -- add columns if available
+                if mode.metadata.columns then
+                    Skada:AddColumnOptions(mode)
+                end
 
-				-- scan for linked modes
-				if mode.metadata.click1 then
-					scan_for_columns(mode.metadata.click1)
-				end
-				if mode.metadata.click2 then
-					scan_for_columns(mode.metadata.click2)
-				end
-				if mode.metadata.click3 then
-					scan_for_columns(mode.metadata.click3)
-				end
-			end
+                -- scan for linked modes
+                if mode.metadata.click1 then
+                    scan_for_columns(mode.metadata.click1)
+                end
+                if mode.metadata.click2 then
+                    scan_for_columns(mode.metadata.click2)
+                end
+                if mode.metadata.click3 then
+                    scan_for_columns(mode.metadata.click3)
+                end
+            end
         end
     end
 
@@ -1054,27 +1050,34 @@ do
             if pets[player.id] then
                 -- fix classes for others
                 player.class = "PET"
-                player.owner = self:GetPetOwner(player.id)
+                player.role = "DAMAGER"
+                player.spec = 1
+                player.owner = pets[player.id]
             end
 
-			-- still no class assigned?
+            -- still no class assigned?
             if not player.class then
                 -- class already received from GetPlayerInfoByGUID?
                 if class then
-                    -- it's a real player?
                     player.class = class
+				-- it's a real player?
                 elseif UnitIsPlayer(player.name) then
-                    -- fix the class first
                     player.class = select(2, UnitClass(player.name))
                 elseif player.flag and band(player.flag, 0x00000400) ~= 0 then
-                    -- pets
                     player.class = "UNGROUPPLAYER"
+                    player.role = "DAMAGER"
+                    player.spec = 2
+				-- pets?
                 elseif player.flag and band(player.flag, 0x00003000) ~= 0 then
-                    --  last solution
                     player.class = "PET"
-                    player.owner = self:GetPetOwner(player.id)
+                    player.role = "DAMAGER"
+                    player.owner = pets[player.id]
+                    player.spec = 1
+				--  last solution
                 else
                     player.class = "UNKNOWN"
+                    player.role = "DAMAGER"
+                    player.spec = 2
                 end
             end
 
@@ -2032,7 +2035,7 @@ function dataobj:OnClick(button)
     end
 end
 
-function Skada:OpenOptions()
+function Skada:OpenOptions(win)
     InterfaceOptionsFrame_OpenToCategory("Skada")
 end
 
@@ -2367,19 +2370,19 @@ function Skada:OnInitialize()
 
     self.db = LibStub("AceDB-3.0"):New("SkadaDB", self.defaults, "Default")
 
-    if type(SkadaCharDB) ~= "table" then
-        SkadaCharDB = {}
-    end
+    if type(SkadaCharDB) ~= "table" then SkadaCharDB = {} end
     self.char = SkadaCharDB
     self.char.sets = self.char.sets or {}
 
-    AceConfig:RegisterOptionsTable("Skada", self.options)
-    self.optionsFrame = ACD:AddToBlizOptions("Skada", "Skada")
-
     -- Profiles
-    AceConfig:RegisterOptionsTable("Skada-Profiles", LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db))
-    self.profilesFrame = ACD:AddToBlizOptions("Skada-Profiles", "Profiles", "Skada")
+    local AceDBOptions = LibStub("AceDBOptions-3.0", true)
+    if AceDBOptions then
+        self.options.args.profiles = AceDBOptions:GetOptionsTable(self.db)
+        self.options.args.profiles.order = 999
+    end
 
+    LibStub("AceConfig-3.0"):RegisterOptionsTable("Skada", self.options)
+    self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Skada", "Skada")
     self:RegisterChatCommand("skada", "Command")
 
     self.db.RegisterCallback(self, "OnProfileChanged", "ReloadSettings")
@@ -2478,7 +2481,7 @@ function Skada:OnInitialize()
     end
 
     self:ReloadSettings()
-    self.After(2, function() self:ApplySettings() end )
+    self.After(2, function() self:ApplySettings() end)
 end
 
 function Skada:MemoryCheck()
@@ -2514,7 +2517,7 @@ function Skada:OnEnable()
     end
 
     -- used to fix broken combat log
-    self.NewTicker(1, function() self:CleanGarbage(false) end)
+    self.NewTicker(1, function() self:CleanGarbage() end)
     self.After(3, function() self:MemoryCheck() end)
 end
 
@@ -2753,13 +2756,7 @@ do
 
         self:UpdateDisplay(true)
 
-        update_timer =
-            self.NewTicker(
-            self.db.profile.updatefrequency or 0.25,
-            function()
-                self:UpdateDisplay()
-            end
-        )
+        update_timer = self.NewTicker(self.db.profile.updatefrequency or 0.25, function() self:UpdateDisplay() end)
         tick_timer = self.NewTicker(1, combat_tick)
     end
 
@@ -2835,28 +2832,17 @@ do
                     self.total = createSet(L["Total"], now)
                 end
                 tentativehandle = self.NewTimer(1, function()
-					tentative = nil
-					tentativehandle = nil
-					self.current = nil
-				end, 1)
+                    tentative = nil
+                    tentativehandle = nil
+                    self.current = nil
+                end, 1)
                 tentative = 0
             end
         end
 
         -- ENCOUNTER_START custom event
         if self.current and not self.current.started then
-            self.callbacks:Fire(
-                "ENCOUNTER_START",
-                timestamp,
-                eventtype,
-                srcGUID,
-                srcName,
-                srcFlags,
-                dstGUID,
-                dstName,
-                dstFlags,
-                ...
-            )
+            self.callbacks:Fire("ENCOUNTER_START", timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             self.current.started = true
         end
 
@@ -2987,9 +2973,9 @@ do
             end
         end
 
-		if self.current and eventtype == "UNIT_DIED" and self.current.gotboss and self.current.mobname == dstName then
-			self.current.success = true
-		end
+        if self.current and eventtype == "UNIT_DIED" and self.current.gotboss and self.current.mobname == dstName then
+            self.current.success = true
+        end
     end
 end
 
@@ -3057,9 +3043,9 @@ do
 
     Skada.After = function(duration, callback)
         AddDelayedCall({
-            _remainingIterations = 1,
-            _delay = duration,
-            _callback = callback
+			_remainingIterations = 1,
+			_delay = duration,
+			_callback = callback
 		})
     end
 
