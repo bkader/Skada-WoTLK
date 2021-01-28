@@ -18,11 +18,12 @@ Skada:AddDisplaySystem("bar", mod)
 -- specs and coordinates
 local spec_icon_file = [[Interface\AddOns\Skada\media\textures\icon-specs]]
 local spec_icon_tcoords = {
+    [1] = {0.75, 0.875, 0.125, 0.25}, --> pet
+    [2] = {0.875, 1, 0.125, 0.25}, --> unknown
     [102] = {0.375, 0.5, 0, 0.125}, --> druid balance
     [103] = {0.5, 0.625, 0, 0.125}, --> druid feral
     [104] = {0.625, 0.75, 0, 0.125}, --> druid tank
     [105] = {0.75, 0.875, 0, 0.125}, --> druid restoration
-    [1] = {0.75, 0.875, 0.125, 0.25}, --> pet
     [250] = {0, 0.125, 0, 0.125}, --> blood dk
     [251] = {0.125, 0.25, 0, 0.125}, --> frost dk
     [252] = {0.25, 0.375, 0, 0.125}, --> unholy dk
@@ -41,7 +42,6 @@ local spec_icon_tcoords = {
     [265] = {0.5, 0.625, 0.375, 0.5}, --> warlock affliction
     [266] = {0.625, 0.75, 0.375, 0.5}, --> warlock demonology
     [267] = {0.75, 0.875, 0.375, 0.5}, --> warlock destruction
-    [2] = {0.875, 1, 0.125, 0.25}, --> unknown
     [62] = {0.25, 0.375, 0.125, 0.25}, --> mage arcane
     [63] = {0.375, 0.5, 0.125, 0.25}, --> mage fire
     [64] = {0.5, 0.625, 0.125, 0.25}, --> mage frost
