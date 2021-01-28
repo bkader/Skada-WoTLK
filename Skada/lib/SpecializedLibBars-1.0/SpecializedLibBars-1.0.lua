@@ -26,8 +26,7 @@ local function errorhandler(err)
 end
 
 local function CreateDispatcher(argCount)
-    local code =
-        [[
+    local code = [[
     local xpcall, eh = ...
     local method, ARGS
     local function call() return method(ARGS) end
@@ -43,27 +42,17 @@ local function CreateDispatcher(argCount)
   ]]
 
     local ARGS = {}
-    for i = 1, argCount do
-        ARGS[i] = "arg" .. i
-    end
+    for i = 1, argCount do ARGS[i] = "arg" .. i end
     code = code:gsub("ARGS", tconcat(ARGS, ", "))
     return assert(loadstring(code, "safecall Dispatcher[" .. argCount .. "]"))(xpcall, errorhandler)
 end
 
-local Dispatchers =
-    setmetatable(
-    {},
-    {
-        __index = function(self, argCount)
-            local dispatcher = CreateDispatcher(argCount)
-            rawset(self, argCount, dispatcher)
-            return dispatcher
-        end
-    }
-)
-Dispatchers[0] = function(func)
-    return xpcall(func, errorhandler)
-end
+local Dispatchers = setmetatable({}, {__index = function(self, argCount)
+    local dispatcher = CreateDispatcher(argCount)
+    rawset(self, argCount, dispatcher)
+    return dispatcher
+end})
+Dispatchers[0] = function(func) return xpcall(func, errorhandler) end
 
 local function safecall(func, ...)
     -- we check to see if the func is passed is actually a function here and don't error when it isn't
@@ -230,10 +219,7 @@ do
             del(tremove(colors))
         end
         for i = 1, #self.colors, 5 do
-            tinsert(
-                colors,
-                new(self.colors[i], self.colors[i + 1], self.colors[i + 2], self.colors[i + 3], self.colors[i + 4])
-            )
+            tinsert(colors, new(self.colors[i], self.colors[i + 1], self.colors[i + 2], self.colors[i + 3], self.colors[i + 4]))
         end
         tsort(colors, sort_colors)
 
@@ -260,8 +246,7 @@ function lib:HasAnyBar()
 end
 
 do
-    local function NOOP()
-    end
+    local function NOOP() end
     function lib:IterateBars()
         return bars[self] and pairs(bars[self]) or NOOP
     end
@@ -301,7 +286,6 @@ end
     bar.name = name
     bar:Create(...)
     bar:SetFont(self.font, self.fontSize, self.fontFlags, self.numfont, self.numfontSize, self.numfontFlags)
-    -- bar:SetFont(self.font, self.fontSize, self.fontFlags)
 
     bars[self][name] = bar
 
@@ -317,9 +301,7 @@ function lib:NewTimerBar(name, text, time, maxTime, icon, orientation, length, t
 end
 
 function lib:ReleaseBar(name)
-    if not bars[self] then
-        return
-    end
+    if not bars[self] then return end
 
     local bar
     if type(name) == "string" then
@@ -402,7 +384,7 @@ do
 end
 
 function barListPrototype:SetButtonsOpacity(alpha)
-    for i, btn in ipairs(self.buttons) do
+    for _, btn in ipairs(self.buttons) do
         btn:SetAlpha(alpha)
     end
 end
@@ -410,18 +392,12 @@ end
 function barListPrototype:AdjustButtons()
     local nr = 0
     local lastbtn = nil
-    for i, btn in ipairs(self.buttons) do
+    for _, btn in ipairs(self.buttons) do
         btn:ClearAllPoints()
 
         if btn:IsShown() then
             if nr == 0 then
-                btn:SetPoint(
-                    "TOPRIGHT",
-                    self.button,
-                    "TOPRIGHT",
-                    -5,
-                    0 - (max(self.button:GetHeight() - btn:GetHeight(), 0) / 2)
-                )
+                btn:SetPoint("TOPRIGHT", self.button, "TOPRIGHT", -5, 0 - (max(self.button:GetHeight() - btn:GetHeight(), 0) / 2))
             else
                 btn:SetPoint("TOPRIGHT", lastbtn, "TOPLEFT", -2, 0)
             end
@@ -438,13 +414,13 @@ end
 
 function barListPrototype:SetBarBackgroundColor(r, g, b, a)
     self.barbackgroundcolor = {r, g, b, a}
-    for i, bar in pairs(self:GetBars()) do
+    for _, bar in pairs(self:GetBars()) do
         bar.bgtexture:SetVertexColor(unpack(self.barbackgroundcolor))
     end
 end
 
 function barListPrototype:ShowButton(title, visible)
-    for i, b in ipairs(self.buttons) do
+    for _, b in ipairs(self.buttons) do
         if b.title == title then
             if visible then
                 b:Show()
@@ -458,19 +434,21 @@ end
 
 do
     local function move(self)
-        if not self:GetParent().locked then
-            self.startX = self:GetParent():GetLeft()
-            self.startY = self:GetParent():GetTop()
-            self:GetParent():StartMoving()
+		local win = self:GetParent()
+        if not win.locked then
+            self.startX = win:GetLeft()
+            self.startY = win:GetTop()
+            win:StartMoving()
         end
     end
     local function stopMove(self)
-        if not self:GetParent().locked then
-            self:GetParent():StopMovingOrSizing()
-            local endX = self:GetParent():GetLeft()
-            local endY = self:GetParent():GetTop()
+		local win = self:GetParent()
+        if not win.locked then
+            win:StopMovingOrSizing()
+            local endX = win:GetLeft()
+            local endY = win:GetTop()
             if self.startX ~= endX or self.startY ~= endY then
-                self:GetParent().callbacks:Fire("AnchorMoved", self:GetParent(), endX, endY)
+                win.callbacks:Fire("AnchorMoved", win, endX, endY)
             end
         end
     end
@@ -573,18 +551,20 @@ do
             if p.isResizing == true then
                 p:StopMovingOrSizing()
                 p:SetLength(p:GetWidth())
-                p.callbacks:Fire("WindowResized", self:GetParent())
+                p.callbacks:Fire("WindowResized", p)
                 p.isResizing = false
                 p:SortBars()
             end
         end)
+		list.resizebutton:SetScript("OnEnter", function(self) self:SetAlpha(1) end)
+		list.resizebutton:SetScript("OnLeave", function(self) self:SetAlpha(0) end)
         list:SetScript("OnEnter", function(self)
-			if not self:IsLocked() then
+			if not self.locked then
 				self.resizebutton:SetAlpha(1)
 			end
         end)
         list:SetScript("OnLeave", function(self)
-			if not self:IsLocked() then
+			if not self.locked then
 				self.resizebutton:SetAlpha(0)
 			end
         end)
@@ -602,9 +582,9 @@ end
 function lib:GetBarGroup(name)
     return barLists[self] and barLists[self][name]
 end
- --
 
---[[ BarList prototype ]] function barListPrototype:NewBarFromPrototype(prototype, ...)
+--[[ BarList prototype ]]--
+function barListPrototype:NewBarFromPrototype(prototype, ...)
     local bar, isNew = lib.NewBarFromPrototype(self, prototype, ...)
     bar:SetTexture(self.texture)
     bar:SetFill(self.fill)
@@ -635,7 +615,7 @@ end
 function barListPrototype:SetEnableMouse(enablemouse)
     self.enablemouse = enablemouse
     self:EnableMouse(enablemouse)
-    for i, bar in pairs(self:GetBars()) do
+    for _, bar in pairs(self:GetBars()) do
         bar:EnableMouse(enablemouse)
     end
 end
@@ -710,9 +690,7 @@ end
 
 function barListPrototype:ShowIcon()
     self.showIcon = true
-    if not bars[self] then
-        return
-    end
+    if not bars[self] then return end
     for name, bar in pairs(bars[self]) do
         bar:ShowIcon()
     end
@@ -720,9 +698,7 @@ end
 
 function barListPrototype:HideIcon()
     self.showIcon = false
-    if not bars[self] then
-        return
-    end
+    if not bars[self] then return end
     for name, bar in pairs(bars[self]) do
         bar:HideIcon()
     end
@@ -810,9 +786,7 @@ function barListPrototype:SetColorAt(at, r, g, b, a)
 end
 
 function barListPrototype:UnsetColorAt(at)
-    if not self.colors then
-        return
-    end
+    if not self.colors then return end
     for i = 1, #self.colors, 5 do
         if self.colors[i] == at then
             for j = 1, 5 do
@@ -826,9 +800,7 @@ function barListPrototype:UnsetColorAt(at)
 end
 
 function barListPrototype:UnsetAllColors()
-    if not self.colors then
-        return
-    end
+    if not self.colors then return end
     for i = 1, #self.colors do
         tremove(self.colors)
     end
@@ -1374,9 +1346,7 @@ function barPrototype:SetColorAt(at, r, g, b, a)
 end
 
 function barPrototype:UnsetColorAt(at)
-    if not self.colors then
-        return
-    end
+    if not self.colors then return end
     for i = 1, #self.colors, 5 do
         if self.colors[i] == at then
             for j = 1, 5 do
@@ -1390,9 +1360,7 @@ function barPrototype:UnsetColorAt(at)
 end
 
 function barPrototype:UnsetAllColors()
-    if not self.colors then
-        return
-    end
+    if not self.colors then return end
     for i = 1, #self.colors do
         tremove(self.colors)
     end
@@ -1417,7 +1385,6 @@ do
             t:ClearAllPoints()
             t:SetPoint("TOPLEFT", self, "TOPLEFT")
             t:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT")
-            -- t:SetTexCoord(0, 1, 0, 1)
 
             t = self.timerLabel
             t:ClearAllPoints()
@@ -1448,7 +1415,6 @@ do
             t:ClearAllPoints()
             t:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT")
             t:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT")
-            -- t:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
 
             t = self.timerLabel
             t:ClearAllPoints()
@@ -1480,7 +1446,6 @@ do
             t:ClearAllPoints()
             t:SetPoint("TOPRIGHT", self, "TOPRIGHT")
             t:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT")
-            -- t:SetTexCoord(0, 1, 0, 1)
 
             t = self.timerLabel
             t:ClearAllPoints()
@@ -1511,7 +1476,6 @@ do
             t:ClearAllPoints()
             t:SetPoint("TOPLEFT", self, "TOPLEFT")
             t:SetPoint("TOPRIGHT", self, "TOPRIGHT")
-            -- t:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
 
             t = self.timerLabel
             t:ClearAllPoints()
