@@ -68,8 +68,7 @@ function mod:Create(window)
         -- Clear callbacks.
         window.bargroup.callbacks = LibStub:GetLibrary("CallbackHandler-1.0"):New(window.bargroup)
     else
-        window.bargroup =
-            mod:NewBarGroup(
+        window.bargroup = mod:NewBarGroup(
             window.db.name,
             nil,
             window.db.background.height,
@@ -85,9 +84,7 @@ function mod:Create(window)
             L["Opens the configuration window."],
             "Interface\\Addons\\Skada\\media\\textures\\icon-config",
             "Interface\\Addons\\Skada\\media\\textures\\icon-config",
-            function()
-                Skada:OpenMenu(bargroup.win)
-            end
+            function() Skada:OpenMenu(bargroup.win) end
         )
 
         window.bargroup:AddButton(
@@ -95,9 +92,7 @@ function mod:Create(window)
             L["Resets all fight data except those marked as kept."],
             "Interface\\Addons\\Skada\\media\\textures\\icon-reset",
             "Interface\\Addons\\Skada\\media\\textures\\icon-reset",
-            function()
-                Skada:ShowPopup(bargroup.win)
-            end
+            function() Skada:ShowPopup(bargroup.win) end
         )
 
         window.bargroup:AddButton(
@@ -105,9 +100,7 @@ function mod:Create(window)
             L["Jump to a specific segment."],
             "Interface\\Buttons\\UI-GuildButton-PublicNote-Up",
             "Interface\\Buttons\\UI-GuildButton-PublicNote-Up",
-            function()
-                Skada:SegmentMenu(bargroup.win)
-            end
+            function() Skada:SegmentMenu(bargroup.win) end
         )
 
         window.bargroup:AddButton(
@@ -115,9 +108,7 @@ function mod:Create(window)
             L["Jump to a specific mode."],
             "Interface\\GROUPFRAME\\UI-GROUP-MAINASSISTICON",
             "Interface\\GROUPFRAME\\UI-GROUP-MAINASSISTICON",
-            function()
-                Skada:ModeMenu(bargroup.win)
-            end
+            function() Skada:ModeMenu(bargroup.win) end
         )
 
         window.bargroup:AddButton(
@@ -125,9 +116,7 @@ function mod:Create(window)
             L["Opens a dialog that lets you report your data to others in various ways."],
             "Interface\\Buttons\\UI-GuildButton-MOTD-Up",
             "Interface\\Buttons\\UI-GuildButton-MOTD-Up",
-            function()
-                Skada:OpenReportWindow(bargroup.win)
-            end
+            function() Skada:OpenReportWindow(bargroup.win) end
         )
 
         window.bargroup:AddButton(
@@ -745,9 +734,8 @@ do
         g:SetBackdropColor(bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a or 1)
 
         g:SetEnableMouse(not p.clickthrough)
-        g:SetScale(p.scale)
         g:SetSmoothing(p.smoothing)
-        libwindow.SavePosition(g)
+        libwindow.SetScale(g, p.scale)
         g:SortBars()
     end
 end
