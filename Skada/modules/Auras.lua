@@ -279,7 +279,7 @@ local function aura_tooltip(win, id, label, tooltip, playerid, L)
                 local c = Skada.schoolcolors[aura.school]
                 local n = Skada.schoolnames[aura.school]
                 if c and n then
-                    tooltip:AddLine(L[n], c.r, c.g, c.b)
+                    tooltip:AddLine(n, c.r, c.g, c.b)
                 end
             end
 

@@ -31,17 +31,6 @@ if not L then return end
 -- L["Count"] = ""
 -- L["Percent"] = ""
 
--- spell schools
--- L["Arcane"] = ""
--- L["Fire"] = ""
--- L["Frost"] = ""
--- L["Frostfire"] = ""
--- L["Holy"] = ""
--- L["Nature"] = ""
--- L["Naturefire"] = ""
--- L["Physical"] = ""
--- L["Shadow"] = ""
-
 -- L["General options"] = ""
 
 -- windows section:

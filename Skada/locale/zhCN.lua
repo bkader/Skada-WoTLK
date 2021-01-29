@@ -32,17 +32,6 @@ L["Total hits:"] = "总计值："
 L["Count"] = "计数"
 L["Percent"] = "百分比"
 
--- spell schools
-L["Arcane"] = "奥术"
-L["Fire"] = "火焰"
-L["Frost"] = "冰霜"
-L["Frostfire"] = "霜火"
-L["Holy"] = "神圣"
-L["Nature"] = "自然"
-L["Naturefire"] = "自然火"
-L["Physical"] = "物理"
-L["Shadow"] = "暗影"
-
 L["General options"] = "常规选项"
 
 -- windows section:

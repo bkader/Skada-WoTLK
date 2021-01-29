@@ -31,17 +31,6 @@ L["Total hits:"] = "Aciertos totales"
 L["Count"] = "Contar"
 L["Percent"] = "Porcentaje"
 
--- spell schools
--- L["Arcane"] = ""
--- L["Fire"] = ""
--- L["Frost"] = ""
--- L["Frostfire"] = ""
--- L["Holy"] = ""
--- L["Nature"] = ""
--- L["Naturefire"] = ""
--- L["Physical"] = ""
--- L["Shadow"] = ""
-
 L["General options"] = "Opciones generales"
 
 -- windows section:

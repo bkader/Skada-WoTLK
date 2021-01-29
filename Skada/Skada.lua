@@ -46,7 +46,6 @@ do
     local SPELLSCHOOL_HOLY = 2
     local SPELLSCHOOL_FIRE = 4
     local SPELLSCHOOL_NATURE = 8
-    local SPELLSCHOOL_NATUREFIRE = SPELLSCHOOL_FIRE + SPELLSCHOOL_NATURE
     local SPELLSCHOOL_FROST = 16
     local SPELLSCHOOL_FROSTFIRE = SPELLSCHOOL_FIRE + SPELLSCHOOL_FROST
     local SPELLSCHOOL_SHADOW = 32
@@ -57,7 +56,6 @@ do
         [SPELLSCHOOL_HOLY] = {a = 1.0, r = 1.00, g = 0.90, b = 0.50}, -- Holy
         [SPELLSCHOOL_FIRE] = {a = 1.0, r = 1.00, g = 0.50, b = 0.00}, -- Fire
         [SPELLSCHOOL_NATURE] = {a = 1.0, r = 0.30, g = 1.00, b = 0.30}, -- Nature
-        [SPELLSCHOOL_NATUREFIRE] = {a = 1.0, r = 0.30, g = 1.00, b = 0.30}, -- Naturefire
         [SPELLSCHOOL_FROST] = {a = 1.0, r = 0.50, g = 1.00, b = 1.00}, -- Frost
         [SPELLSCHOOL_FROSTFIRE] = {a = 1.0, r = 0.50, g = 1.00, b = 1.00}, -- Frostfire
         [SPELLSCHOOL_SHADOW] = {a = 1.0, r = 0.50, g = 0.50, b = 1.00}, -- Shadow
@@ -65,15 +63,14 @@ do
     }
 
     Skada.schoolnames = {
-        [SPELLSCHOOL_PHYSICAL] = "Physical",
-        [SPELLSCHOOL_HOLY] = "Holy",
-        [SPELLSCHOOL_FIRE] = "Fire",
-        [SPELLSCHOOL_NATURE] = "Nature",
-        [SPELLSCHOOL_NATUREFIRE] = "Naturefire",
-        [SPELLSCHOOL_FROST] = "Frost",
-        [SPELLSCHOOL_FROSTFIRE] = "Frostfire",
-        [SPELLSCHOOL_SHADOW] = "Shadow",
-        [SPELLSCHOOL_ARCANE] = "Arcane"
+        [SPELLSCHOOL_PHYSICAL] = STRING_SCHOOL_PHYSICAL,
+        [SPELLSCHOOL_HOLY] = STRING_SCHOOL_HOLY,
+        [SPELLSCHOOL_FIRE] = STRING_SCHOOL_FIRE,
+        [SPELLSCHOOL_NATURE] = STRING_SCHOOL_NATURE,
+        [SPELLSCHOOL_FROST] = STRING_SCHOOL_FROST,
+        [SPELLSCHOOL_FROSTFIRE] = STRING_SCHOOL_FROSTFIRE,
+        [SPELLSCHOOL_SHADOW] = STRING_SCHOOL_SHADOW,
+        [SPELLSCHOOL_ARCANE] = STRING_SCHOOL_ARCANE
     }
 end
 
@@ -261,12 +258,8 @@ do
                         end
                         return list
                     end,
-                    get = function()
-                        return db.display
-                    end,
-                    set = function(_, display)
-                        self:SetDisplay(display)
-                    end
+                    get = function() return db.display end,
+                    set = function(_, display) self:SetDisplay(display) end
                 }
             }
         }

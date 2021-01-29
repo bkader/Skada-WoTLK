@@ -427,7 +427,7 @@ Skada:AddLoadableModule(
                         local c = Skada.schoolcolors[spell.school]
                         local n = Skada.schoolnames[spell.school]
                         if c and n then
-                            tooltip:AddLine(L[n], c.r, c.g, c.b)
+                            tooltip:AddLine(n, c.r, c.g, c.b)
                         end
                     end
                     if spell.min and spell.max then
@@ -664,7 +664,7 @@ Skada:AddLoadableModule(
                         local c = Skada.schoolcolors[spell.school]
                         local n = Skada.schoolnames[spell.school]
                         if c and n then
-                            tooltip:AddLine(L[n], c.r, c.g, c.b)
+                            tooltip:AddLine(n, c.r, c.g, c.b)
                         end
                     end
                     tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)

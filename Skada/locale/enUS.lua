@@ -31,17 +31,6 @@ L["Total hits:"] = true
 L["Count"] = true
 L["Percent"] = true
 
--- spell schools
-L["Arcane"] = true
-L["Fire"] = true
-L["Frost"] = true
-L["Frostfire"] = true
-L["Holy"] = true
-L["Nature"] = true
-L["Naturefire"] = true
-L["Physical"] = true
-L["Shadow"] = true
-
 L["General options"] = true
 
 -- windows section:
