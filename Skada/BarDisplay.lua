@@ -60,143 +60,194 @@ local role_icon_file, role_icon_tcoords = [[Interface\LFGFrame\UI-LFG-ICON-PORTR
 -- classes file and coordinates
 local class_icon_file, class_icon_tcoords = [[Interface\AddOns\Skada\media\textures\icon-classes]]
 
-function mod:Create(window)
-    -- Re-use bargroup if it exists.
-    window.bargroup = mod:GetBarGroup(window.db.name)
+--
+-- here we override the SpecializedLibBars default "move" and "stopMove"
+-- functions in order to to use our stretching feature.
+--
+do
+	local function move(self, button)
+		local group = self:GetParent()
+		if group then
+			if button == "MiddleButton" or IsAltKeyDown() then
+				group.stretching = true
+				group:SetBackdropColor(0, 0, 0, 0.8)
+				group:SetFrameStrata("TOOLTIP")
+				group:StartSizing("TOP")
+				group:SetScript("OnUpdate", group.SortBars)
+			elseif button == "LeftButton" and not group.locked then
+				self.startX = group:GetLeft()
+				self.startY = group:GetTop()
+				group:StartMoving()
+			end
+		end
+	end
 
-    -- Save a reference to window in bar group. Needed for some nasty callbacks.
-    if window.bargroup then
-        -- Clear callbacks.
-        window.bargroup.callbacks = LibStub:GetLibrary("CallbackHandler-1.0"):New(window.bargroup)
-    else
-        window.bargroup = mod:NewBarGroup(
-            window.db.name,
-            nil,
-            window.db.background.height,
-            window.db.barwidth,
-            window.db.barheight,
-            "SkadaBarWindow" .. window.db.name
-        )
-        local bargroup = window.bargroup -- ticket 323
+	local function stopMove(self, button)
+		local group = self:GetParent()
+		if group then
+			if button == "MiddleButton" or group.stretching then
+				group.stretching = nil
+				local color = group.win.db.background.color
+				group:SetBackdropColor(color.r, color.g, color.b, color.a or 1)
+				group:SetFrameStrata(group.win.db.strata)
+				group:StopMovingOrSizing()
+				group:SetScript("OnUpdate", nil)
+				mod:ApplySettings(group.win)
+			elseif button == "LeftButton" and not group.locked then
+				group:StopMovingOrSizing()
+				local endX = group:GetLeft()
+				local endY = group:GetTop()
+				if self.startX ~= endX or self.startY ~= endY then
+					group.callbacks:Fire("AnchorMoved", group, endX, endY)
+				end
+			end
+		end
+	end
 
-        -- Add window buttons.
-        window.bargroup:AddButton(
-            L["Configure"],
-            L["Opens the configuration window."],
-            "Interface\\Addons\\Skada\\media\\textures\\icon-config",
-            "Interface\\Addons\\Skada\\media\\textures\\icon-config",
-            function() Skada:OpenMenu(bargroup.win) end
-        )
+	function mod:Create(window)
+	    -- Re-use bargroup if it exists.
+	    window.bargroup = mod:GetBarGroup(window.db.name)
 
-        window.bargroup:AddButton(
-            RESET,
-            L["Resets all fight data except those marked as kept."],
-            "Interface\\Addons\\Skada\\media\\textures\\icon-reset",
-            "Interface\\Addons\\Skada\\media\\textures\\icon-reset",
-            function() Skada:ShowPopup(bargroup.win) end
-        )
+	    -- Save a reference to window in bar group. Needed for some nasty callbacks.
+	    if window.bargroup then
+	        -- Clear callbacks.
+	        window.bargroup.callbacks = LibStub:GetLibrary("CallbackHandler-1.0"):New(window.bargroup)
+	    else
+	        window.bargroup = mod:NewBarGroup(
+	            window.db.name,
+	            nil,
+	            window.db.background.height,
+	            window.db.barwidth,
+	            window.db.barheight,
+	            "SkadaBarWindow" .. window.db.name
+	        )
+	        local bargroup = window.bargroup -- ticket 323
 
-        window.bargroup:AddButton(
-            L["Segment"],
-            L["Jump to a specific segment."],
-            "Interface\\Buttons\\UI-GuildButton-PublicNote-Up",
-            "Interface\\Buttons\\UI-GuildButton-PublicNote-Up",
-            function() Skada:SegmentMenu(bargroup.win) end
-        )
+	        -- Add window buttons.
+	        window.bargroup:AddButton(
+	            L["Configure"],
+	            L["Opens the configuration window."],
+	            "Interface\\Addons\\Skada\\media\\textures\\icon-config",
+	            "Interface\\Addons\\Skada\\media\\textures\\icon-config",
+	            function() Skada:OpenMenu(bargroup.win) end
+	        )
 
-        window.bargroup:AddButton(
-            L["Mode"],
-            L["Jump to a specific mode."],
-            "Interface\\GROUPFRAME\\UI-GROUP-MAINASSISTICON",
-            "Interface\\GROUPFRAME\\UI-GROUP-MAINASSISTICON",
-            function() Skada:ModeMenu(bargroup.win) end
-        )
+	        window.bargroup:AddButton(
+	            RESET,
+	            L["Resets all fight data except those marked as kept."],
+	            "Interface\\Addons\\Skada\\media\\textures\\icon-reset",
+	            "Interface\\Addons\\Skada\\media\\textures\\icon-reset",
+	            function() Skada:ShowPopup(bargroup.win) end
+	        )
 
-        window.bargroup:AddButton(
-            L["Report"],
-            L["Opens a dialog that lets you report your data to others in various ways."],
-            "Interface\\Buttons\\UI-GuildButton-MOTD-Up",
-            "Interface\\Buttons\\UI-GuildButton-MOTD-Up",
-            function() Skada:OpenReportWindow(bargroup.win) end
-        )
+	        window.bargroup:AddButton(
+	            L["Segment"],
+	            L["Jump to a specific segment."],
+	            "Interface\\Buttons\\UI-GuildButton-PublicNote-Up",
+	            "Interface\\Buttons\\UI-GuildButton-PublicNote-Up",
+	            function() Skada:SegmentMenu(bargroup.win) end
+	        )
 
-        window.bargroup:AddButton(
-            L["Stop"],
-            L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."],
-            "Interface\\CHATFRAME\\ChatFrameExpandArrow",
-            "Interface\\CHATFRAME\\ChatFrameExpandArrow",
-            function()
-                if Skada.current and Skada.current.stopped then
-                    Skada:ResumeSegment()
-                elseif Skada.current then
-                    Skada:StopSegment()
-                end
-            end
-        )
-    end
-    window.bargroup.win = window
-    window.bargroup.RegisterCallback(mod, "AnchorMoved")
-    window.bargroup.RegisterCallback(mod, "WindowResized")
-    window.bargroup:EnableMouse(true)
-    window.bargroup:SetScript("OnMouseDown", function(_, button)
-        if IsShiftKeyDown() then
-            Skada:OpenMenu(window)
-        elseif button == "RightButton" then
-            window:RightClick()
-        end
-    end)
-    window.bargroup.button:SetScript("OnClick", function(_, button)
-        if IsShiftKeyDown() then
-            Skada:OpenMenu(window)
-        elseif button == "RightButton" then
-            window:RightClick()
-        end
-    end)
+	        window.bargroup:AddButton(
+	            L["Mode"],
+	            L["Jump to a specific mode."],
+	            "Interface\\GROUPFRAME\\UI-GROUP-MAINASSISTICON",
+	            "Interface\\GROUPFRAME\\UI-GROUP-MAINASSISTICON",
+	            function() Skada:ModeMenu(bargroup.win) end
+	        )
 
-    window.bargroup:HideIcon()
+	        window.bargroup:AddButton(
+	            L["Report"],
+	            L["Opens a dialog that lets you report your data to others in various ways."],
+	            "Interface\\Buttons\\UI-GuildButton-MOTD-Up",
+	            "Interface\\Buttons\\UI-GuildButton-MOTD-Up",
+	            function() Skada:OpenReportWindow(bargroup.win) end
+	        )
 
-    window.bargroup.button:GetFontString():SetWordWrap(false)
-    window.bargroup.button:GetFontString():SetPoint("LEFT", window.bargroup.button, "LEFT", 5, 1)
-    window.bargroup.button:GetFontString():SetJustifyH("LEFT")
-    window.bargroup.button:SetHeight(window.db.title.height or 15)
+	        window.bargroup:AddButton(
+	            L["Stop"],
+	            L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."],
+	            "Interface\\CHATFRAME\\ChatFrameExpandArrow",
+	            "Interface\\CHATFRAME\\ChatFrameExpandArrow",
+	            function()
+	                if Skada.current and Skada.current.stopped then
+	                    Skada:ResumeSegment()
+	                elseif Skada.current then
+	                    Skada:StopSegment()
+	                end
+	            end
+	        )
+	    end
+	    window.bargroup.win = window
+	    window.bargroup.RegisterCallback(mod, "AnchorMoved")
+	    window.bargroup.RegisterCallback(mod, "WindowResized")
+	    window.bargroup:EnableMouse(true)
+	    window.bargroup:SetScript("OnMouseDown", function(_, button)
+	        if IsShiftKeyDown() then
+	            Skada:OpenMenu(window)
+	        elseif button == "RightButton" then
+	            window:RightClick()
+	        end
+	    end)
+	    window.bargroup.button:SetScript("OnClick", function(_, button)
+	        if IsShiftKeyDown() then
+	            Skada:OpenMenu(window)
+	        elseif button == "RightButton" then
+	            window:RightClick()
+	        end
+	    end)
 
-    -- Register with LibWindow-1.0.
-    libwindow.RegisterConfig(window.bargroup, window.db)
+	    window.bargroup:HideIcon()
 
-    -- Restore window position.
-    libwindow.RestorePosition(window.bargroup)
+	    window.bargroup.button:GetFontString():SetWordWrap(false)
+	    window.bargroup.button:GetFontString():SetPoint("LEFT", window.bargroup.button, "LEFT", 5, 1)
+	    window.bargroup.button:GetFontString():SetJustifyH("LEFT")
+	    window.bargroup.button:SetHeight(window.db.title.height or 15)
 
-    if FlyPaper then
-		FlyPaper.AddFrame("Skada", window.db.name, window.bargroup)
-    end
+	    -- override moving function to add stretch feature
+	    window.bargroup.button._OnMouseDown = window.bargroup.button:GetScript("OnMouseDown")
+	    window.bargroup.button._OnMouseUp = window.bargroup.button:GetScript("OnMouseUp")
+	    window.bargroup.button:SetScript("OnMouseDown", move)
+	    window.bargroup.button:SetScript("OnMouseUp", stopMove)
 
-    if not class_icon_tcoords then -- amortized class icon coordinate adjustment
-        class_icon_tcoords = {}
-        for class, coords in pairs(CLASS_ICON_TCOORDS) do
-            class_icon_tcoords[class] = coords
-        end
-        class_icon_tcoords.ENEMY = {0, 0.25, 0.75, 1}
-        class_icon_tcoords.MONSTER = {0, 0.25, 0.75, 1}
+	    -- Register with LibWindow-1.0.
+	    libwindow.RegisterConfig(window.bargroup, window.db)
 
-        class_icon_tcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
-        class_icon_tcoords.UNGROUPPLAYER = {0.5, 0.75, 0.75, 1}
+	    -- Restore window position.
+	    libwindow.RestorePosition(window.bargroup)
 
-        class_icon_tcoords.PET = {0.25, 0.49609375, 0.75, 1}
-        class_icon_tcoords.PLAYER = {0.75, 1, 0.75, 1}
+	    if FlyPaper then
+			FlyPaper.AddFrame("Skada", window.db.name, window.bargroup)
+	    end
 
-        class_icon_tcoords.Alliance = {0.49609375, 0.7421875, 0.5, 0.75}
-        class_icon_tcoords.Horde = {0.7421875, 0.98828125, 0.5, 0.75}
-    end
+	    if not class_icon_tcoords then -- amortized class icon coordinate adjustment
+	        class_icon_tcoords = {}
+	        for class, coords in pairs(CLASS_ICON_TCOORDS) do
+	            class_icon_tcoords[class] = coords
+	        end
+	        class_icon_tcoords.ENEMY = {0, 0.25, 0.75, 1}
+	        class_icon_tcoords.MONSTER = {0, 0.25, 0.75, 1}
 
-    if not role_icon_tcoords then
-        role_icon_tcoords = {
-            DAMAGER = {0.3125, 0.63, 0.3125, 0.63},
-            HEALER = {0.3125, 0.63, 0.015625, 0.3125},
-            TANK = {0, 0.296875, 0.3125, 0.63},
-            LEADER = {0, 0.296875, 0.015625, 0.3125},
-            NONE = ""
-        }
-    end
+	        class_icon_tcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
+	        class_icon_tcoords.UNGROUPPLAYER = {0.5, 0.75, 0.75, 1}
+
+	        class_icon_tcoords.PET = {0.25, 0.49609375, 0.75, 1}
+	        class_icon_tcoords.PLAYER = {0.75, 1, 0.75, 1}
+
+	        class_icon_tcoords.Alliance = {0.49609375, 0.7421875, 0.5, 0.75}
+	        class_icon_tcoords.Horde = {0.7421875, 0.98828125, 0.5, 0.75}
+	    end
+
+	    if not role_icon_tcoords then
+	        role_icon_tcoords = {
+	            DAMAGER = {0.3125, 0.63, 0.3125, 0.63},
+	            HEALER = {0.3125, 0.63, 0.015625, 0.3125},
+	            TANK = {0, 0.296875, 0.3125, 0.63},
+	            LEADER = {0, 0.296875, 0.015625, 0.3125},
+	            NONE = ""
+	        }
+	    end
+	end
 end
 
 function mod:Destroy(win)
@@ -265,12 +316,13 @@ do
 					-- change the width of the window accordingly
 					local width = frame.win.db.barwidth
 					group.win.db.barwidth = width
-					group:SetWidth(width)
+					group:SetLength(width)
 				elseif Xanchors[anchor] then
 					-- we change the width accordingly
 					local height = frame.win.db.background.height
 					group.win.db.background.height = height
 					group:SetHeight(height)
+					group:SortBars()
 				end
 			else
 				group.win.db.snapto = nil
