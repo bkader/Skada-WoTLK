@@ -231,14 +231,6 @@ Skada:AddLoadableModule(
                             d.class = p.class
                             d.role = p.role
                             d.spec = p.spec
-						elseif Skada:GetPetOwner(target.id) then
-							d.class = "PET"
-							d.spec = 1
-							d.role = "DAMAGER"
-						else
-							d.class = "UNKNOWN"
-							d.spec = 2
-							d.role = "DAMAGER"
 						end
 
                         d.value = target.amount
@@ -415,14 +407,6 @@ Skada:AddLoadableModule(
                             d.class = p.class
                             d.role = p.role
                             d.spec = p.spec
-						elseif Skada:GetPetOwner(target.id) then
-							d.class = "PET"
-							d.spec = 1
-							d.role = "DAMAGER"
-						else
-							d.class = "UNKNOWN"
-							d.spec = 2
-							d.role = "DAMAGER"
 						end
 
                         d.value = overhealed
@@ -633,14 +617,6 @@ Skada:AddLoadableModule(
                         d.class = p.class
                         d.role = p.role
                         d.spec = p.spec
-                    elseif Skada:GetPetOwner(target.id) then
-						d.class = "PET"
-						d.spec = 1
-						d.role = "DAMAGER"
-                    else
-                        d.class = "UNKNOWN"
-                        d.spec = 2
-                        d.role = "DAMAGER"
                     end
 
                     d.value = amount
@@ -814,14 +790,6 @@ Skada:AddLoadableModule(
                         d.class = p.class
                         d.spec = p.spec
                         d.role = p.role
-                    elseif Skada:GetPetOwner(target.id) then
-						d.class = "PET"
-						d.spec = 1
-						d.role = "DAMAGER"
-                    else
-                        d.class = "UNKNOWN"
-                        d.spec = 2
-                        d.role = "DAMAGER"
                     end
 
                     d.value = target.amount + target.overhealing
