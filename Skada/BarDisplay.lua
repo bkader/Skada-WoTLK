@@ -7,6 +7,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 
 local mod = Skada:NewModule("BarDisplay", "SpecializedLibBars-1.0")
 local libwindow = LibStub("LibWindow-1.1")
+local FlyPaper = LibStub:GetLibrary("LibFlyPaper-1.1")
 local LSM = LibStub("LibSharedMedia-3.0")
 
 local tinsert, tsort = table.insert, table.sort
@@ -165,6 +166,10 @@ function mod:Create(window)
     -- Restore window position.
     libwindow.RestorePosition(window.bargroup)
 
+    if FlyPaper then
+		FlyPaper.AddFrame("Skada", window.db.name, window.bargroup)
+    end
+
     if not class_icon_tcoords then -- amortized class icon coordinate adjustment
         class_icon_tcoords = {}
         for class, coords in pairs(CLASS_ICON_TCOORDS) do
@@ -239,8 +244,40 @@ function mod:SetTitle(win, title)
     end
 end
 
-function mod:AnchorMoved(_, group, x, y)
-    libwindow.SavePosition(group)
+do
+	-- these anchors are used to correctly position the windows due
+	-- to the title bar overlapping.
+	local Xanchors = {LT = true, LB = true, LC = true, RT = true, RB = true, RC = true}
+	local Yanchors = {TL = true, TR = true, TC = true, BL = true, BR = true, BC = true}
+
+	function mod:AnchorMoved(_, group, x, y)
+		if FlyPaper then
+			local anchor, name, frame = FlyPaper.StickToClosestFrameInGroup(group, "Skada")
+			if anchor and frame then
+				group.win.db.snapto = name
+				frame.win.db.snapto = nil
+				-- fix the problem with title bar overlapping
+				if Yanchors[anchor] then
+					local tolerance = FlyPaper.GetDefaultStickyTolerance()
+					local yofs = frame.win.db.title.height - (tolerance/2)
+					FlyPaper.StickToAnchor(group, frame, anchor, 0, yofs)
+
+					-- change the width of the window accordingly
+					local width = frame.win.db.barwidth
+					group.win.db.barwidth = width
+					group:SetWidth(width)
+				elseif Xanchors[anchor] then
+					-- we change the width accordingly
+					local height = frame.win.db.background.height
+					group.win.db.background.height = height
+					group:SetHeight(height)
+				end
+			else
+				group.win.db.snapto = nil
+			end
+		end
+	    libwindow.SavePosition(group)
+	end
 end
 
 function mod:WindowResized(_, group)

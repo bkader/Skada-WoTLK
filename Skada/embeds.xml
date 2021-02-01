@@ -25,4 +25,5 @@
 <Script file="lib\LibFail-1.0\LibFail-1.0.lua"/>
 <Script file="lib\LibTalentQuery-1.0\LibTalentQuery-1.0.lua"/>
 <Script file="lib\LibGroupTalents-1.0\LibGroupTalents-1.0.lua"/>
+<Script file="lib\LibFlyPaper-1.1\LibFlyPaper-1.1.lua"/>
 </Ui>
