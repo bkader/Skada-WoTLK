@@ -31,7 +31,6 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
                         id = guid,
                         name = name .. " (" .. owner.name .. ")",
                         class = "PET",
-                        role = "DAMAGER",
                         unit = unit
                     }
                 else
@@ -40,7 +39,6 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
                         id = guid,
                         name = name,
                         class = class,
-                        role = Skada:UnitGroupRolesAssigned(unit),
                         unit = unit
                     }
                 end
@@ -59,7 +57,6 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
                     d.id = player.id
                     d.label = player.name
                     d.class = player.class
-                    d.role = player.role
 
                     d.threat = threatvalue
                     d.isTanking = isTanking
@@ -79,7 +76,6 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
                     d.id = player.id
                     d.label = player.name
                     d.class = player.class
-                    d.role = player.role
 
                     d.value = threatpct
                     d.isTanking = isTanking
