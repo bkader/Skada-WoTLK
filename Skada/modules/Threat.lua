@@ -32,7 +32,6 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
                         name = name .. " (" .. owner.name .. ")",
                         class = "PET",
                         role = "DAMAGER",
-                        spec = 1,
                         unit = unit
                     }
                 else
@@ -42,7 +41,6 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
                         name = name,
                         class = class,
                         role = Skada:UnitGroupRolesAssigned(unit),
-                        spec = Skada:GetPlayerSpecID(name, class),
                         unit = unit
                     }
                 end
@@ -62,7 +60,6 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
-                    d.spec = player.spec
 
                     d.threat = threatvalue
                     d.isTanking = isTanking
@@ -83,7 +80,6 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
                     d.label = player.name
                     d.class = player.class
                     d.role = player.role
-                    d.spec = player.spec
 
                     d.value = threatpct
                     d.isTanking = isTanking
@@ -137,9 +133,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
             end
 
             if target then
-                -- Set window title.
-                -- win.metadata.title = _UnitName(target)
-                win.bargroup.button:SetText(_UnitName(target))
+                win.metadata.title = _UnitName(target)
 
                 -- Reset our counter which we use to keep track of current index in the dataset.
                 nr = 1
@@ -213,8 +207,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
                     last_warn = time()
                 end
             else
-                -- win.metadata.title = self:GetName()
-                win.bargroup.button:SetText(self:GetName())
+                win.metadata.title = self:GetName()
             end
         end
 
