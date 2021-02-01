@@ -110,11 +110,20 @@ local RAID_FLAGS = bit.bor(COMBATLOG_OBJECT_AFFILIATION_MINE, COMBATLOG_OBJECT_A
 -- add missing globals --
 -- =================== --
 
-local IsInGroup = IsInGroup
+local IsInRaid = _G.IsInRaid
+if not IsInRaid then
+	IsInRaid = function()
+		return GetNumRaidMembers() > 0
+	end
+	_G.IsInRaid = IsInRaid
+end
+
+local IsInGroup = _G.IsInGroup
 if not IsInGroup then
 	IsInGroup = function()
-		return (GetNumRaidMembers() > 0) or (GetNumPartyMembers() > 0)
+		return (GetNumRaidMembers() == 0 and GetNumPartyMembers() > 0)
 	end
+	_G.IsInGroup = IsInGroup
 end
 
 -- returns the group type and count
@@ -142,10 +151,6 @@ local IsRaidInCombat, IsRaidDead
 local function is_in_pvp()
 	local t = select(2, IsInInstance())
 	return (t == "pvp" or t == "arena")
-end
-
-local function is_solo()
-	return (not IsInGroup())
 end
 
 local function setPlayerActiveTimes(set)
@@ -1655,7 +1660,7 @@ do
 			end
 		end
 
-		wasinparty = not (not IsInGroup())
+		wasinparty = not not IsInGroup()
 	end
 
 	function Skada:PARTY_MEMBERS_CHANGED()
@@ -2029,7 +2034,7 @@ function Skada:ApplySettings()
 		win.display:ApplySettings(win)
 	end
 
-	if (self.db.profile.hidesolo and is_solo()) or (self.db.profile.hidepvp and is_in_pvp()) then
+	if (self.db.profile.hidesolo and not IsInGroup()) or (self.db.profile.hidepvp and is_in_pvp()) then
 		self:SetActive(false)
 	else
 		self:SetActive(true)
