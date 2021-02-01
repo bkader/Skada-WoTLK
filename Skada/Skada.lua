@@ -322,6 +322,10 @@ do
 		Skada.options.args.windows.args[self.db.name] = options
 	end
 
+	function Window:SetChild(win)
+		self.child = win
+	end
+
 	-- destroy a window
 	function Window:destroy()
 		self.dataset = nil
@@ -432,6 +436,10 @@ do
 	function Window:Wipe()
 		self:Reset()
 		self.display:Wipe(self)
+
+		if self.child then
+			self.child:Wipe()
+		end
 	end
 
 	function Window:get_selected_set()
@@ -458,6 +466,11 @@ do
 
 		self.changed = true
 		self:set_mode_title()
+
+		if self.child then
+			self.child:DisplayMode(mode)
+		end
+
 		Skada:UpdateDisplay(false)
 	end
 
@@ -518,12 +531,14 @@ do
 
 			self.metadata.click = click_on_mode
 			self.metadata.maxvalue = 1
-			self.metadata.sortfunc = function(a, b)
-				return a.name < b.name
-			end
+			self.metadata.sortfunc = function(a, b) return a.name < b.name end
 
 			self.display:SetTitle(self, self.metadata.title)
 			self.changed = true
+
+			if self.child then
+				self.child:DisplayModes(settime)
+			end
 
 			Skada:UpdateDisplay(false)
 		end
@@ -553,6 +568,11 @@ do
 			self.metadata.click = click_on_set
 			self.metadata.maxvalue = 1
 			self.changed = true
+
+			if self.child then
+				self.child:DisplaySets()
+			end
+
 			Skada:UpdateDisplay(false)
 		end
 	end
@@ -1281,6 +1301,7 @@ do
 	end
 
 	local ttwin = Window:new()
+	local white = {r = 1, g = 1, b = 1}
 
 	function Skada:AddSubviewToTooltip(tooltip, win, mode, id, label)
 		if not mode then
@@ -1306,7 +1327,7 @@ do
 			for _, data in ipairs(ttwin.dataset) do
 				if data.id and nr < Skada.db.profile.tooltiprows then
 					nr = nr + 1
-					local color = {r = 1, g = 1, b = 1}
+					local color = white
 
 					if data.color then
 						color = data.color
@@ -1322,7 +1343,9 @@ do
 				end
 			end
 
-			tooltip:AddLine(" ")
+			if mode.Enter then
+				tooltip:AddLine(" ")
+			end
 		end
 	end
 end
