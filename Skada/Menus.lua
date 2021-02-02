@@ -243,6 +243,17 @@ function Skada:OpenMenu(window)
                 info.checked = not window:IsShown()
                 info.isNotRadio = 1
                 _UIDropDownMenu_AddButton(info, level)
+
+                -- snap window
+                info = _UIDropDownMenu_CreateInfo()
+                info.text = L["Snap window"]
+                info.func = function()
+                    window.db.snapto = not window.db.snapto
+                    Skada:ApplySettings()
+                end
+                info.checked = window.db.snapto
+                info.isNotRadio = 1
+                _UIDropDownMenu_AddButton(info, level)
             elseif UIDROPDOWNMENU_MENU_VALUE == "delete" then
                 for i, set in _ipairs(Skada:get_sets()) do
                     info = _UIDropDownMenu_CreateInfo()
@@ -264,6 +275,7 @@ function Skada:OpenMenu(window)
                     end
                     info.checked = set.keep
                     info.isNotRadio = 1
+                    info.keepShownOnClick = true
                     _UIDropDownMenu_AddButton(info, level)
                 end
             end
