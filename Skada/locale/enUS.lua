@@ -51,6 +51,8 @@ L["Lock window"] = true
 L["Locks the bar window in place."] = true
 L["Hide window"] = true
 L["Hides the window."] = true
+L["Snap window"] = true
+L["Allows the window to snap to other Skada windows."] = true
 L["Display system"] = true
 L["Choose the system to be used for displaying data in this window."] = true
 

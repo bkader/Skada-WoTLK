@@ -51,6 +51,8 @@ if not L then return end
 -- L["Locks the bar window in place."] = ""
 -- L["Hide window"] = ""
 -- L["Hides the window."] = ""
+-- L["Snap window"] = ""
+-- L["Allows the window to snap to other Skada windows."] = ""
 -- L["Display system"] = ""
 -- L["Choose the system to be used for displaying data in this window."] = ""
 

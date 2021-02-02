@@ -518,14 +518,15 @@ do
 
         list.offset = 0
 
-        list.resizebutton = CreateFrame("Button", "BarGroupResizeButton", list)
-        list.resizebutton:Show()
-        list.resizebutton:SetFrameLevel(11)
-        list.resizebutton:SetWidth(16)
-        list.resizebutton:SetHeight(16)
-        list.resizebutton:SetAlpha(0)
-        list.resizebutton:EnableMouse(true)
-        list.resizebutton:SetScript("OnMouseDown", function(self, button)
+        -- resize to the right
+        list.resizeright = CreateFrame("Button", "BarGroupResizeButton", list)
+        list.resizeright:Show()
+        list.resizeright:SetFrameLevel(11)
+        list.resizeright:SetWidth(12)
+        list.resizeright:SetHeight(12)
+        list.resizeright:SetAlpha(0)
+        list.resizeright:EnableMouse(true)
+        list.resizeright:SetScript("OnMouseDown", function(self, button)
 			local p = self:GetParent()
             if (button == "LeftButton") then
                 p.isResizing = true
@@ -545,7 +546,7 @@ do
                 end)
             end
         end)
-        list.resizebutton:SetScript("OnMouseUp", function(self, button)
+        list.resizeright:SetScript("OnMouseUp", function(self, button)
             local p = self:GetParent()
             local top, left = p:GetTop(), p:GetLeft()
             if p.isResizing == true then
@@ -556,16 +557,60 @@ do
                 p:SortBars()
             end
         end)
-		list.resizebutton:SetScript("OnEnter", function(self) self:SetAlpha(1) end)
-		list.resizebutton:SetScript("OnLeave", function(self) self:SetAlpha(0) end)
+		list.resizeright:SetScript("OnEnter", function(self) self:SetAlpha(1) end)
+		list.resizeright:SetScript("OnLeave", function(self) self:SetAlpha(0) end)
+
+		-- resize to the left
+        list.resizeleft = CreateFrame("Button", "BarGroupResizeButton", list)
+        list.resizeleft:Show()
+        list.resizeleft:SetFrameLevel(11)
+        list.resizeleft:SetWidth(12)
+        list.resizeleft:SetHeight(12)
+        list.resizeleft:SetAlpha(0)
+        list.resizeleft:EnableMouse(true)
+        list.resizeleft:SetScript("OnMouseDown", function(self, button)
+			local p = self:GetParent()
+            if (button == "LeftButton") then
+                p.isResizing = true
+                if p.growup then
+                    p:StartSizing("TOPLEFT")
+                else
+                    p:StartSizing("BOTTOMLEFT")
+                end
+
+                p:SetScript("OnUpdate", function()
+                    if p.isResizing then
+                        -- Adjust bar sizes.
+                        p:SetLength(p:GetWidth())
+                    else
+                        p:SetScript("OnUpdate", nil)
+                    end
+                end)
+            end
+        end)
+        list.resizeleft:SetScript("OnMouseUp", function(self, button)
+            local p = self:GetParent()
+            local top, left = p:GetTop(), p:GetLeft()
+            if p.isResizing == true then
+                p:StopMovingOrSizing()
+                p:SetLength(p:GetWidth())
+                p.callbacks:Fire("WindowResized", p)
+                p.isResizing = false
+                p:SortBars()
+            end
+        end)
+		list.resizeleft:SetScript("OnEnter", function(self) self:SetAlpha(1) end)
+		list.resizeleft:SetScript("OnLeave", function(self) self:SetAlpha(0) end)
         list:SetScript("OnEnter", function(self)
 			if not self.locked then
-				self.resizebutton:SetAlpha(1)
+				self.resizeright:SetAlpha(1)
+				self.resizeleft:SetAlpha(1)
 			end
         end)
         list:SetScript("OnLeave", function(self)
 			if not self.locked then
-				self.resizebutton:SetAlpha(0)
+				self.resizeright:SetAlpha(0)
+				self.resizeleft:SetAlpha(0)
 			end
         end)
 
@@ -635,12 +680,14 @@ function barListPrototype:NewCounterBar(name, text, value, maxVal, icon)
 end
 
 function barListPrototype:Lock()
-    self.resizebutton:Hide()
+    self.resizeright:Hide()
+    self.resizeleft:Hide()
     self.locked = true
 end
 
 function barListPrototype:Unlock()
-    self.resizebutton:Show()
+    self.resizeright:Show()
+    self.resizeleft:Show()
     self.locked = false
 end
 
@@ -844,26 +891,48 @@ function barListPrototype:ReverseGrowth(reverse)
     self.button:ClearAllPoints()
 
     if reverse then
-        self.button:SetPoint("TOPLEFT", self, "BOTTOMLEFT")
-        self.button:SetPoint("TOPRIGHT", self, "BOTTOMRIGHT")
+        self.button:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT")
+        self.button:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT")
     else
-        self.button:SetPoint("BOTTOMLEFT", self, "TOPLEFT")
-        self.button:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT")
+        self.button:SetPoint("TOPLEFT", self, "TOPLEFT")
+        self.button:SetPoint("TOPRIGHT", self, "TOPRIGHT")
     end
 
-    if self.resizebutton then
-        self.resizebutton:SetNormalTexture("Interface\\CHATFRAME\\UI-ChatIM-SizeGrabber-Up")
-        self.resizebutton:SetHighlightTexture("Interface\\CHATFRAME\\UI-ChatIM-SizeGrabber-Down")
-        self.resizebutton:ClearAllPoints()
-        if reverse then
-            self.resizebutton:GetNormalTexture():SetRotation(math.pi / 2)
-            self.resizebutton:GetHighlightTexture():SetRotation(math.pi / 2)
-            self.resizebutton:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
-        else
-            self.resizebutton:GetNormalTexture():SetRotation(0)
-            self.resizebutton:GetHighlightTexture():SetRotation(0)
-            self.resizebutton:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 0, 0)
-        end
+    if self.resizeright then
+		self.resizeright:SetNormalTexture("Interface\\CHATFRAME\\UI-ChatIM-SizeGrabber-Up")
+		self.resizeright:SetHighlightTexture("Interface\\CHATFRAME\\UI-ChatIM-SizeGrabber-Down")
+		self.resizeright:ClearAllPoints()
+
+		local normaltex = self.resizeright:GetNormalTexture()
+		local highlighttex = self.resizeright:GetHighlightTexture()
+		if reverse then
+			normaltex:SetTexCoord(0, 1, 1, 0)
+			highlighttex:SetTexCoord(0, 1, 1, 0)
+			self.resizeright:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
+		else
+			normaltex:SetTexCoord(0, 1, 0, 1)
+			highlighttex:SetTexCoord(0, 1, 0, 1)
+			self.resizeright:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 0, 0)
+		end
+    end
+
+    if self.resizeleft then
+		self.resizeleft:SetNormalTexture("Interface\\CHATFRAME\\UI-ChatIM-SizeGrabber-Up")
+		self.resizeleft:SetHighlightTexture("Interface\\CHATFRAME\\UI-ChatIM-SizeGrabber-Up", "ALPHA")
+		self.resizeleft:ClearAllPoints()
+
+		local normaltex = self.resizeleft:GetNormalTexture()
+		local highlighttex = self.resizeleft:GetHighlightTexture()
+
+		if reverse then
+			normaltex:SetTexCoord(1, 0, 1, 0)
+			highlighttex:SetTexCoord(1, 0, 1, 0)
+			self.resizeleft:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
+		else
+			normaltex:SetTexCoord(1, 0, 0, 1)
+			highlighttex:SetTexCoord(1, 0, 0, 1)
+			self.resizeleft:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 0, 0)
+		end
     end
 
     self:SortBars()
@@ -999,12 +1068,13 @@ do
         local orientation = self.orientation
         local growup = self.growup
         local spacing = self.spacing
+        local startpoint = self:IsAnchorVisible() and self.button:GetHeight() or 0
 
         local from, to
         local thickness, showIcon = self.thickness, self.showIcon
         local offset = self.offset
-        local x1, y1, x2, y2 = 0, 0, 0, 0
-        local maxbars = min(#values, floor(self:GetHeight() / (thickness + spacing)))
+        local x1, y1, x2, y2 = 0, startpoint, 0, startpoint
+        local maxbars = min(#values, floor((self:GetHeight() - startpoint) / (thickness + spacing)))
 
         local start, stop, step
         if growup then
@@ -1038,7 +1108,11 @@ do
             local v = values[i]
             if lastBar == self then
                 to = from
-                y1, y2 = 0, 0
+                if growup then
+					y1, y2 = startpoint, startpoint
+                else
+					y1, y2 = -startpoint, -startpoint
+                end
             else
                 if growup then
                     y1, y2 = spacing, spacing

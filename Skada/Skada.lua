@@ -251,11 +251,22 @@ do
 						Skada:ApplySettings()
 					end
 				},
+				snapto = {
+					type = "toggle",
+					name = L["Snap window"],
+					desc = L["Allows the window to snap to other Skada windows."],
+					order = 4,
+					get = function() return db.snapto end,
+					set = function()
+						db.snapto = not db.snapto
+						Skada:ApplySettings()
+					end
+				},
 				display = {
 					type = "select",
 					name = L["Display system"],
 					desc = L["Choose the system to be used for displaying data in this window."],
-					order = 4,
+					order = 5,
 					values = function()
 						local list = {}
 						for name, display in pairs(Skada.displays) do

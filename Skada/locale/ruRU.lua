@@ -51,6 +51,8 @@ L["Lock window"] = "Заблокировать окно"
 L["Locks the bar window in place."] = "Зафиксировать окно"
 L["Hide window"] = "Скрыть окно"
 L["Hides the window."] = "Скрыть окно"
+L["Snap window"] = "Окно привязки"
+L["Allows the window to snap to other Skada windows."] = "Позволяет привязывать окно к другим окнам Skada."
 L["Display system"] = "Система отображения"
 L["Choose the system to be used for displaying data in this window."] = "Выберите систему используемую для отображения данных в окне."
 

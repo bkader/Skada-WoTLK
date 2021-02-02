@@ -51,6 +51,8 @@ L["Lock window"] = "Bloquear ventana"
 L["Locks the bar window in place."] = "Bloquear la barra de la ventana en su lugar"
 L["Hide window"] = "Ocultar ventana"
 L["Hides the window."] = "Esconde la ventana"
+L["Snap window"] = "Ajustar ventana"
+L["Allows the window to snap to other Skada windows."] = "Permite que la ventana se ajuste a otras ventanas de Skada."
 L["Display system"] = "Sistema de visualización"
 L["Choose the system to be used for displaying data in this window."] = "Escoger el sistema para ser usado como visualización de los datos en esta ventana"
 
