@@ -249,9 +249,14 @@ do
 
 	function mod:AnchorMoved(_, group, x, y)
 		if FlyPaper and group.win.db.snapto and not group.locked then
-			local anchor, name, frame = FlyPaper.StickToClosestFrameInGroup(group, "Skada")
+			-- correction due to stupid border texture
+			local offset = group.win.db.background.borderthickness
+			local anchor, name, frame = FlyPaper.StickToClosestFrameInGroup(group, "Skada", nil, offset, offset)
+
 			if anchor and frame then
-				group.win.db.snappedto = name
+				frame.win.db.snapped[group.win.db.name] = true
+				group.win.db.snapped[name] = nil
+
 				-- change the width of the window accordingly
 				if Yanchors[anchor] then
 					local width = frame.win.db.barwidth
@@ -278,7 +283,11 @@ do
 					group:SortBars()
 				end
 			else
-				group.win.db.snappedto = nil
+				for _, win in ipairs(Skada:GetWindows()) do
+					if win.db.display == "bar" and win.db.snapped and win.db.snapped[group.win.db.name] then
+						win.db.snapped[group.win.db.name] = nil
+					end
+				end
 			end
 		end
 	    libwindow.SavePosition(group)
@@ -665,19 +674,6 @@ end
 
 -- ======================================================= --
 
-function mod:GetSnappedWindows(win)
-	local windows = {}
-	if win then
-		for _, w in ipairs(Skada:GetWindows()) do
-			if w.db.name ~= win.db.name and w.db.display == "bar" and w.db.snappedto == win.db.name then
-				tinsert(windows, w)
-			end
-		end
-	end
-
-	return windows
-end
-
 do
     local titlebackdrop = {}
     local windowbackdrop = {}
@@ -697,10 +693,14 @@ do
 				group:StartMoving()
 
 				-- move sticked windows.
-				for _, win in ipairs(mod:GetSnappedWindows(group.win)) do
-					FlyPaper.Stick(win.bargroup, group)
-					win.bargroup.button.startX = win.bargroup:GetLeft()
-					win.bargroup.button.startY = win.bargroup:GetTop()
+				local offset = group.win.db.background.borderthickness
+				for _, win in ipairs(Skada:GetWindows()) do
+					if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.snapped[win.db.name] then
+						FlyPaper.Stick(win.bargroup, group, nil, offset, offset)
+						win.bargroup.button.startX = win.bargroup:GetLeft()
+						win.bargroup.button.startY = win.bargroup:GetTop()
+						move(win.bargroup.button, "LeftButton")
+					end
 				end
 			end
 		end
@@ -723,11 +723,13 @@ do
 				local endY = group:GetTop()
 				if self.startX ~= endX or self.startY ~= endY then
 					group.callbacks:Fire("AnchorMoved", group, endX, endY)
-					-- save snapped windows position
-					for _, win in ipairs(mod:GetSnappedWindows(group.win)) do
-						local xOfs, yOfs = win.bargroup:GetLeft(), win.bargroup:GetTop()
-						if win.bargroup.startX ~= xOfs or win.bargroup.startY ~= yOfs then
-							win.bargroup.callbacks:Fire("AnchorMoved", win.bargroup, xOfs, yOfs)
+					for _, win in ipairs(Skada:GetWindows()) do
+						if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.snapped[win.db.name] then
+							local xOfs, yOfs = win.bargroup:GetLeft(), win.bargroup:GetTop()
+							if win.bargroup.startX ~= xOfs or win.bargroup.startY ~= yOfs then
+								win.bargroup.callbacks:Fire("AnchorMoved", win.bargroup, xOfs, yOfs)
+								stopMove(win.bargroup.button, "LeftButton")
+							end
 						end
 					end
 				end
@@ -820,10 +822,8 @@ do
 			end
         end
 
-        -- Window
-        local padtop = (p.enabletitle and not p.reversegrowth and p.title.height)
-        local padbottom = (p.enabletitle and p.reversegrowth and p.title.height)
-        Skada:ApplyBorder(g, p.background.bordertexture, p.background.bordercolor, p.background.borderthickness, padtop, padbottom)
+        -- Window border
+        Skada:ApplyBorder(g, p.background.bordertexture, p.background.bordercolor, p.background.borderthickness)
 
         windowbackdrop.bgFile = p.background.texturepath or LSM:Fetch("background", p.background.texture)
         windowbackdrop.tile = p.background.tile

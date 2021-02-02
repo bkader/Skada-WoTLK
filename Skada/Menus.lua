@@ -249,6 +249,13 @@ function Skada:OpenMenu(window)
                 info.text = L["Snap window"]
                 info.func = function()
                     window.db.snapto = not window.db.snapto
+                    if not window.db.snapto then
+						for _, win in ipairs(Skada:GetWindows()) do
+							if win.db.snapped[window.db.name] then
+								win.db.snapped[window.db.name] = nil
+							end
+						end
+                    end
                     Skada:ApplySettings()
                 end
                 info.checked = window.db.snapto

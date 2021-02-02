@@ -70,6 +70,7 @@ Skada.windowdefaults = {
     mode = nil,
     display = "bar",
     snapto = true,
+    snapped = {},
     smoothing = false,
     -- inline bar display
     isonnewline = false,

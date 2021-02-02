@@ -259,6 +259,13 @@ do
 					get = function() return db.snapto end,
 					set = function()
 						db.snapto = not db.snapto
+						if not db.snapto then
+							for _, win in ipairs(Skada:GetWindows()) do
+								if win.db.snapped[db.name] then
+									win.db.snapped[db.name] = nil
+								end
+							end
+						end
 						Skada:ApplySettings()
 					end
 				},
@@ -629,13 +636,13 @@ do
 			db.display = display
 		end
 
-		if not db.barbgcolor then
-			db.barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6}
-		end
+		if not db.barbgcolor then db.barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6} end
 
 		if not db.buttons then
 			db.buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false}
 		end
+
+		if not db.snapped then db.snapped = {} end
 
 		local window = Window:new()
 		window.db = db
@@ -652,9 +659,12 @@ do
 			elseif window.db.set or window.db.mode then
 				self:RestoreView(window, window.db.set, window.db.mode)
 			end
+		else
+			self:Print("Window '"..name.."' was not loaded because its display module, '"..window.db.display.."' was not found.")
 		end
 
 		self:ApplySettings()
+		return window
 	end
 
 	function Skada:DeleteWindow(name)
@@ -2211,6 +2221,7 @@ function Skada:FrameSettings(db, include_dimensions)
 				get = function() return db.background.bordertexture end,
 				set = function(_, key)
 					db.background.bordertexture = key
+					if key == "None" then db.background.borderthickness = 1 end
 					Skada:ApplySettings()
 				end
 			},
@@ -2804,18 +2815,11 @@ do
 		local dst_is_interesting = nil
 		local now = time()
 
-		if
-			not self.current and self.db.profile.tentativecombatstart and srcName and dstName and srcGUID ~= dstGUID and
-				triggerevents[eventtype]
-		 then
-			src_is_interesting =
-				band(srcFlags, RAID_FLAGS) ~= 0 or (band(srcFlags, PET_FLAGS) ~= 0 and pets[srcGUID]) or
-				players[srcGUID]
+		if not self.current and self.db.profile.tentativecombatstart and srcName and dstName and srcGUID ~= dstGUID and triggerevents[eventtype] then
+			src_is_interesting = band(srcFlags, RAID_FLAGS) ~= 0 or (band(srcFlags, PET_FLAGS) ~= 0 and pets[srcGUID]) or players[srcGUID]
 
 			if eventtype ~= "SPELL_PERIODIC_DAMAGE" then
-				dst_is_interesting =
-					band(dstFlags, RAID_FLAGS) ~= 0 or (band(dstFlags, PET_FLAGS) ~= 0 and pets[dstGUID]) or
-					players[dstGUID]
+				dst_is_interesting = band(dstFlags, RAID_FLAGS) ~= 0 or (band(dstFlags, PET_FLAGS) ~= 0 and pets[dstGUID]) or players[dstGUID]
 			end
 
 			if src_is_interesting or dst_is_interesting then
@@ -2840,10 +2844,7 @@ do
 		end
 
 		if self.current and self.db.profile.autostop then
-			if
-				self.current and eventtype == "UNIT_DIED" and
-					((band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID])
-			 then
+			if self.current and eventtype == "UNIT_DIED" and ((band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID]) then
 				deathcounter = deathcounter + 1
 				-- If we reached the treshold for stopping the segment, do so.
 				if deathcounter > 0 and deathcounter / startingmembers >= 0.5 and not self.current.stopped then
@@ -2852,25 +2853,19 @@ do
 				end
 			end
 
-			if
-				self.current and eventtype == "SPELL_RESURRECT" and
-					((band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID])
-			 then
+			if self.current and eventtype == "SPELL_RESURRECT" and ((band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID]) then
 				deathcounter = deathcounter - 1
 			end
 		end
 
 		if self.current and combatlogevents[eventtype] then
-			if self.current.stopped then
-				return
-			end
+			if self.current.stopped then return end
 
 			for _, mod in ipairs(combatlogevents[eventtype]) do
 				local fail = false
 
 				if mod.flags.src_is_interesting_nopets then
-					local src_is_interesting_nopets =
-						(band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID]
+					local src_is_interesting_nopets = (band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID]
 
 					if src_is_interesting_nopets then
 						src_is_interesting = true
@@ -2880,8 +2875,7 @@ do
 				end
 
 				if not fail and mod.flags.dst_is_interesting_nopets then
-					local dst_is_interesting_nopets =
-						(band(dstFlags, RAID_FLAGS) ~= 0 and band(dstFlags, PET_FLAGS) == 0) or players[dstGUID]
+					local dst_is_interesting_nopets = (band(dstFlags, RAID_FLAGS) ~= 0 and band(dstFlags, PET_FLAGS) == 0) or players[dstGUID]
 					if dst_is_interesting_nopets then
 						dst_is_interesting = true
 					else
@@ -2891,9 +2885,7 @@ do
 
 				if not fail and mod.flags.src_is_interesting or mod.flags.src_is_not_interesting then
 					if not src_is_interesting then
-						src_is_interesting =
-							band(srcFlags, RAID_FLAGS) ~= 0 or (band(srcFlags, PET_FLAGS) ~= 0 and pets[srcGUID]) or
-							players[srcGUID]
+						src_is_interesting = band(srcFlags, RAID_FLAGS) ~= 0 or (band(srcFlags, PET_FLAGS) ~= 0 and pets[srcGUID]) or players[srcGUID]
 					end
 
 					if mod.flags.src_is_interesting and not src_is_interesting then
@@ -2907,9 +2899,7 @@ do
 
 				if not fail and mod.flags.dst_is_interesting or mod.flags.dst_is_not_interesting then
 					if not dst_is_interesting then
-						dst_is_interesting =
-							band(dstFlags, RAID_FLAGS) ~= 0 or (band(dstFlags, PET_FLAGS) ~= 0 and pets[dstGUID]) or
-							players[dstGUID]
+						dst_is_interesting = band(dstFlags, RAID_FLAGS) ~= 0 or (band(dstFlags, PET_FLAGS) ~= 0 and pets[dstGUID]) or players[dstGUID]
 					end
 
 					if mod.flags.dst_is_interesting and not dst_is_interesting then
@@ -2945,11 +2935,7 @@ do
 			end
 		end
 
-		if
-			eventtype == "SPELL_SUMMON" and
-				(band(srcFlags, RAID_FLAGS) ~= 0 or band(srcFlags, PET_FLAGS) ~= 0 or band(srcFlags, SHAM_FLAGS) ~= 0 or
-					(band(dstFlags, PET_FLAGS) ~= 0 and pets[dstGUID]))
-		 then
+		if eventtype == "SPELL_SUMMON" and (band(srcFlags, RAID_FLAGS) ~= 0 or band(srcFlags, PET_FLAGS) ~= 0 or band(srcFlags, SHAM_FLAGS) ~= 0 or (band(dstFlags, PET_FLAGS) ~= 0 and pets[dstGUID])) then
 			-- we assign the pet the normal way
 			pets[dstGUID] = {id = srcGUID, name = srcName}
 
