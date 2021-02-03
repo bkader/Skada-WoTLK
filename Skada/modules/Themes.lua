@@ -8,6 +8,7 @@ Skada:AddLoadableModule(
         end
 
         local mod = Skada:NewModule(L["Themes"])
+        local _ipairs, tinsert, tremove = ipairs, table.insert, table.remove
 
         local themes = {
             {
@@ -234,12 +235,12 @@ Skada:AddLoadableModule(
                     width = "full",
                     values = function()
                         local list = {}
-                        for i, theme in ipairs(themes) do
+                        for i, theme in _ipairs(themes) do
                             list[theme.name] = theme.name
                         end
                         if Skada.db.profile.themes then
-                            for i, theme in ipairs(Skada.db.profile.themes) do
-                                list[theme.name] = theme.name
+                            for i, theme in _ipairs(Skada.db.profile.themes) do
+								if theme.name then list[theme.name] = theme.name end
                             end
                         end
                         return list
@@ -254,7 +255,7 @@ Skada:AddLoadableModule(
                     width = "full",
                     values = function()
                         local list = {}
-                        for i, win in ipairs(Skada:GetWindows()) do
+                        for i, win in _ipairs(Skada:GetWindows()) do
                             list[win.db.name] = win.db.name
                         end
                         return list
@@ -270,37 +271,32 @@ Skada:AddLoadableModule(
                     func = function()
                         if selectedwindow and selectedtheme then
                             local thetheme = nil
-                            for i, theme in ipairs(themes) do
+                            for i, theme in _ipairs(themes) do
                                 if theme.name == selectedtheme then
                                     thetheme = theme
+                                    break
                                 end
                             end
                             if Skada.db.profile.themes then
-                                for i, theme in ipairs(Skada.db.profile.themes) do
+                                for i, theme in _ipairs(Skada.db.profile.themes) do
                                     if theme.name == selectedtheme then
                                         thetheme = theme
+                                        break
                                     end
                                 end
                             end
 
                             if thetheme then
-                                for i, win in ipairs(Skada:GetWindows()) do
+                                for _, win in _ipairs(Skada:GetWindows()) do
                                     if win.db.name == selectedwindow then
-                                        Skada:tcopy(win.db, thetheme, {
-											"name",
-											"modeincombat",
-											"display",
-											"set",
-											"mode",
-											"wipemode",
-											"returnaftercombat"
-										})
+                                        Skada:tcopy(win.db, thetheme, {"name", "modeincombat", "display", "set", "mode", "wipemode", "returnaftercombat", "x", "y", "snapped"})
                                         Skada:ApplySettings()
                                         Skada:Print(L["Theme applied!"])
                                     end
                                 end
                             end
                         end
+                        selectedwindow, selectedtheme = nil, nil
                     end
                 },
                 header3 = {
@@ -316,7 +312,7 @@ Skada:AddLoadableModule(
                     width = "full",
                     values = function()
                         local list = {}
-                        for i, win in ipairs(Skada:GetWindows()) do
+                        for i, win in _ipairs(Skada:GetWindows()) do
                             list[win.db.name] = win.db.name
                         end
                         return list
@@ -339,15 +335,17 @@ Skada:AddLoadableModule(
                     order = 2.3,
                     width = "full",
                     func = function()
-                        for i, win in ipairs(Skada:GetWindows()) do
+                        for i, win in _ipairs(Skada:GetWindows()) do
                             if win.db.name == savewindow then
                                 Skada.db.profile.themes = Skada.db.profile.themes or {}
                                 local theme = {}
-                                Skada:tcopy(theme, win.db)
-                                theme.name = savename
-                                table.insert(Skada.db.profile.themes, theme)
+                                Skada:tcopy(theme, win.db, {"name", "snapped", "x", "y", "point"})
+                                theme.name = savename or win.db.name
+                                tinsert(Skada.db.profile.themes, theme)
                             end
                         end
+                        savewindow = nil
+                        savename = nil
                     end
                 },
                 header4 = {
@@ -364,8 +362,8 @@ Skada:AddLoadableModule(
                     values = function()
                         local list = {}
                         if Skada.db.profile.themes then
-                            for i, theme in ipairs(Skada.db.profile.themes) do
-                                list[theme.name] = theme.name
+                            for i, theme in _ipairs(Skada.db.profile.themes) do
+								if theme.name then list[theme.name] = theme.name end
                             end
                         end
                         return list
@@ -380,12 +378,14 @@ Skada:AddLoadableModule(
                     width = "full",
                     func = function()
                         if Skada.db.profile.themes then
-                            for i, theme in ipairs(Skada.db.profile.themes) do
+                            for i, theme in _ipairs(Skada.db.profile.themes) do
                                 if theme.name == deletetheme then
-                                    table.remove(Skada.db.profile.themes, i)
+                                    tremove(Skada.db.profile.themes, i)
+                                    break
                                 end
                             end
                         end
+                        deletetheme = nil
                     end
                 }
             }

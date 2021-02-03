@@ -319,13 +319,7 @@ do
 						if copywindow then
 							for _, win in ipairs(windows) do
 								if win.db.name == copywindow and win.db.display == db.display then
-									Skada:tcopy(newdb, win.db)
-									-- remove unnecessary data
-									newdb.snapped = nil
-									newdb.name = nil
-									newdb.x = nil
-									newdb.y = nil
-									newdb.point = nil
+									Skada:tcopy(newdb, win.db, {"name", "snapped", "x", "y", "point"})
 									break
 								end
 							end
@@ -669,13 +663,24 @@ do
 		return windows
 	end
 
-	function Skada:tcopy(to, from)
+	function Skada:tcopy(to, from, ...)
 		for k, v in pairs(from) do
-			if (type(v) == "table") then
-				to[k] = {}
-				self:tcopy(to[k], v)
-			else
-				to[k] = v
+			local skip = false
+			if ... then
+				for i, j in ipairs(...) do
+					if j == k then
+						skip = true
+						break
+					end
+				end
+			end
+			if not skip then
+				if type(v) == "table" then
+					to[k] = {}
+					Skada:tcopy(to[k], v, ...)
+				else
+					to[k] = v
+				end
 			end
 		end
 	end

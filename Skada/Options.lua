@@ -204,17 +204,20 @@ Skada.options = {
                     type = "input",
                     name = L["Create window"],
                     desc = L["Enter the name for the new window."],
+                    order = 1,
+                    width = "full",
                     set = function(_, val)
                         if val and val ~= "" then
                             Skada:CreateWindow(val)
                         end
-                    end,
-                    order = 1
+                    end
                 },
                 delete = {
                     type = "select",
                     name = L["Delete window"],
                     desc = L["Choose the window to be deleted."],
+                    order = 2,
+                    width = "full",
                     values = function()
                         local windows = {}
                         for _, win in ipairs(Skada:GetWindows()) do
@@ -227,20 +230,20 @@ Skada.options = {
                     end,
                     set = function(_, val)
                         deletewindow = val
-                    end,
-                    order = 2
+                    end
                 },
                 deleteexecute = {
                     type = "execute",
                     name = L["Delete window"],
                     desc = L["Deletes the chosen window."],
+                    order = 3,
+                    width = "full",
                     func = function()
                         if deletewindow then
                             Skada:DeleteWindow(deletewindow)
                         end
                         deletewindow = nil
-                    end,
-                    order = 3
+                    end
                 }
             }
         },
