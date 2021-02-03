@@ -540,6 +540,7 @@ do
                     if p.isResizing then
                         -- Adjust bar sizes.
                         p:SetLength(p:GetWidth())
+                        p.callbacks:Fire("WindowResizing", p)
                     else
                         p:SetScript("OnUpdate", nil)
                     end
@@ -582,6 +583,7 @@ do
                     if p.isResizing then
                         -- Adjust bar sizes.
                         p:SetLength(p:GetWidth())
+                        p.callbacks:Fire("WindowResizing", p)
                     else
                         p:SetScript("OnUpdate", nil)
                     end

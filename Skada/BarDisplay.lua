@@ -136,6 +136,7 @@ function mod:Create(window)
     end
     window.bargroup.win = window
     window.bargroup.RegisterCallback(mod, "AnchorMoved")
+    window.bargroup.RegisterCallback(mod, "WindowResizing")
     window.bargroup.RegisterCallback(mod, "WindowResized")
     window.bargroup:EnableMouse(true)
     window.bargroup:SetScript("OnMouseDown", function(_, button)
@@ -298,6 +299,14 @@ function mod:WindowResized(_, group)
     libwindow.SavePosition(group)
     group.win.db.background.height = group:GetHeight()
     group.win.db.barwidth = group:GetWidth()
+	if FlyPaper then
+		local offset = group.win.db.background.borderthickness
+		for _, win in ipairs(Skada:GetWindows()) do
+			if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.snapped[win.db.name] then
+				win.bargroup.callbacks:Fire("AnchorMoved", win.bargroup)
+			end
+		end
+	end
     Skada:ApplySettings()
 end
 
@@ -844,6 +853,17 @@ do
         libwindow.SetScale(g, p.scale)
         g:SortBars()
     end
+
+	function mod:WindowResizing(_, group)
+		if FlyPaper then
+			local offset = group.win.db.background.borderthickness
+			for _, win in ipairs(Skada:GetWindows()) do
+				if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.snapped[win.db.name] then
+					FlyPaper.Stick(win.bargroup, group, nil, offset, offset)
+				end
+			end
+		end
+	end
 end
 
 function mod:AddDisplayOptions(win, options)
