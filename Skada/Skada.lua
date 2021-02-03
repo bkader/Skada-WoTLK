@@ -3,6 +3,7 @@ _G.Skada = Skada
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
+local ACD = LibStub("AceConfigDialog-3.0")
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 local ICON = LibStub("LibDBIcon-1.0", true)
 local LSM = LibStub("LibSharedMedia-3.0")
@@ -192,6 +193,7 @@ end
 local Window = {}
 do
 	local mt = {__index = Window}
+	local copywindow = nil
 
 	-- create a new window
 	function Window:new()
@@ -219,6 +221,7 @@ do
 					name = L["Rename window"],
 					desc = L["Enter the name for the window."],
 					order = 1,
+					width = "full",
 					get = function() return db.name end,
 					set = function(_, val)
 						if val ~= db.name and val ~= "" then
@@ -234,6 +237,7 @@ do
 					name = L["Lock window"],
 					desc = L["Locks the bar window in place."],
 					order = 2,
+					width = "full",
 					get = function() return db.barslocked end,
 					set = function()
 						db.barslocked = not db.barslocked
@@ -245,6 +249,7 @@ do
 					name = L["Hide window"],
 					desc = L["Hides the window."],
 					order = 3,
+					width = "full",
 					get = function() return db.hidden end,
 					set = function()
 						db.hidden = not db.hidden
@@ -256,11 +261,12 @@ do
 					name = L["Snap window"],
 					desc = L["Allows the window to snap to other Skada windows."],
 					order = 4,
+					width = "full",
 					get = function() return db.snapto end,
 					set = function()
 						db.snapto = not db.snapto
 						if not db.snapto then
-							for _, win in ipairs(Skada:GetWindows()) do
+							for _, win in ipairs(windows) do
 								if win.db.snapped[db.name] then
 									win.db.snapped[db.name] = nil
 								end
@@ -274,6 +280,7 @@ do
 					name = L["Display system"],
 					desc = L["Choose the system to be used for displaying data in this window."],
 					order = 5,
+					width = "full",
 					values = function()
 						local list = {}
 						for name, display in pairs(Skada.displays) do
@@ -283,6 +290,52 @@ do
 					end,
 					get = function() return db.display end,
 					set = function(_, display) self:SetDisplay(display) end
+				},
+				copywin = {
+					type = "select",
+					name = L["Copy settings"],
+					desc = L["Choose the window from which you want to copy the settings."],
+					order = 7,
+					width = "full",
+					values = function()
+						local list = {}
+						for _, win in ipairs(windows) do
+							if win.db.name ~= db.name and win.db.display == db.display then
+								list[win.db.name] = win.db.name
+							end
+						end
+						return list
+					end,
+					get = function() return copywindow end,
+					set = function(_, val) copywindow = val end
+				},
+				copyexec = {
+					type = "execute",
+					name = L["Copy settings"],
+					order = 8,
+					width = "full",
+					func = function()
+						local newdb = {}
+						if copywindow then
+							for _, win in ipairs(windows) do
+								if win.db.name == copywindow and win.db.display == db.display then
+									Skada:tcopy(newdb, win.db)
+									-- remove unnecessary data
+									newdb.snapped = nil
+									newdb.name = nil
+									newdb.x = nil
+									newdb.y = nil
+									newdb.point = nil
+									break
+								end
+							end
+						end
+						for k, v in pairs(newdb) do
+							db[k] = v
+						end
+						Skada:ApplySettings()
+						copywindow = nil
+					end
 				}
 			}
 		}
@@ -296,7 +349,8 @@ do
 					type = "select",
 					name = L["Combat mode"],
 					desc = L["Automatically switch to set 'Current' and this mode when entering combat."],
-					order = 21,
+					order = 1,
+					width = "full",
 					values = function()
 						local m = {}
 						m[""] = L["None"]
@@ -312,7 +366,8 @@ do
 					type = "toggle",
 					name = L["Return after combat"],
 					desc = L["Return to the previous set and mode after combat ends."],
-					order = 22,
+					order = 2,
+					width = "full",
 					get = function() return db.returnaftercombat end,
 					set = function() db.returnaftercombat = not db.returnaftercombat end,
 					disabled = function() return db.returnaftercombat == nil end
@@ -321,7 +376,8 @@ do
 					type = "select",
 					name = L["Wipe mode"],
 					desc = L["Automatically switch to set 'Current' and this mode after a wipe."],
-					order = 23,
+					order = 3,
+					width = "full",
 					values = function()
 						local m = {}
 						m[""] = L["None"]
@@ -2059,7 +2115,13 @@ function dataobj:OnClick(button)
 end
 
 function Skada:OpenOptions(win)
-	InterfaceOptionsFrame_OpenToCategory("Skada")
+	ACD:SetDefaultSize("Skada", 600, 600)
+	if win then
+		ACD:Open("Skada")
+		ACD:SelectGroup("Skada", "windows", win.db.name)
+	elseif not ACD:Close("Skada") then
+		ACD:Open("Skada")
+	end
 end
 
 function Skada:RefreshMMButton()
@@ -2149,14 +2211,15 @@ function Skada:FrameSettings(db, include_dimensions)
 			bgheader = {
 				type = "header",
 				name = L["Background"],
-				order = 1
+				order = 1,
+				width = "full"
 			},
 			texture = {
 				type = "select",
 				dialogControl = "LSM30_Background",
 				name = L["Background texture"],
 				desc = L["The texture used as the background."],
-				order = 1.1,
+				order = 2,
 				width = "double",
 				values = AceGUIWidgetLSMlists.background,
 				get = function() return db.background.texture end,
@@ -2169,7 +2232,8 @@ function Skada:FrameSettings(db, include_dimensions)
 				type = "toggle",
 				name = L["Tile"],
 				desc = L["Tile the background texture."],
-				order = 1.2,
+				order = 3,
+				width = "full",
 				get = function() return db.background.tile end,
 				set = function(_, key)
 					db.background.tile = key
@@ -2180,7 +2244,8 @@ function Skada:FrameSettings(db, include_dimensions)
 				type = "range",
 				name = L["Tile size"],
 				desc = L["The size of the texture pattern."],
-				order = 1.3,
+				order = 4,
+				width = "full",
 				min = 0,
 				max = math_floor(GetScreenWidth()),
 				step = 1.0,
@@ -2194,7 +2259,8 @@ function Skada:FrameSettings(db, include_dimensions)
 				type = "color",
 				name = L["Background color"],
 				desc = L["The color of the background."],
-				order = 1.4,
+				order = 5,
+				width = "full",
 				hasAlpha = true,
 				get = function(_)
 					local c = db.background.color
@@ -2208,14 +2274,15 @@ function Skada:FrameSettings(db, include_dimensions)
 			borderheader = {
 				type = "header",
 				name = L["Border"],
-				order = 2
+				order = 6,
+				width = "full"
 			},
 			bordertexture = {
 				type = "select",
 				dialogControl = "LSM30_Border",
 				name = L["Border texture"],
 				desc = L["The texture used for the borders."],
-				order = 2.1,
+				order = 7,
 				width = "double",
 				values = AceGUIWidgetLSMlists.border,
 				get = function() return db.background.bordertexture end,
@@ -2229,7 +2296,8 @@ function Skada:FrameSettings(db, include_dimensions)
 				type = "color",
 				name = L["Border color"],
 				desc = L["The color used for the border."],
-				order = 2.2,
+				order = 8,
+				width = "full",
 				hasAlpha = true,
 				get = function(_)
 					local c = db.background.bordercolor or {r = 0, g = 0, b = 0, a = 1}
@@ -2244,7 +2312,8 @@ function Skada:FrameSettings(db, include_dimensions)
 				type = "range",
 				name = L["Border thickness"],
 				desc = L["The thickness of the borders."],
-				order = 2.3,
+				order = 9,
+				width = "full",
 				min = 0,
 				max = 50,
 				step = 0.5,
@@ -2257,13 +2326,15 @@ function Skada:FrameSettings(db, include_dimensions)
 			optionheader = {
 				type = "header",
 				name = L["General"],
-				order = 3
+				order = 10,
+				width = "full"
 			},
 			scale = {
 				type = "range",
 				name = L["Scale"],
 				desc = L["Sets the scale of the window."],
-				order = 3.1,
+				order = 11,
+				width = "full",
 				min = 0.1,
 				max = 3,
 				step = 0.01,
@@ -2277,7 +2348,8 @@ function Skada:FrameSettings(db, include_dimensions)
 				type = "select",
 				name = L["Strata"],
 				desc = L["This determines what other frames will be in front of the frame."],
-				order = 3.2,
+				order = 12,
+				width = "full",
 				values = {
 					["BACKGROUND"] = "BACKGROUND",
 					["LOW"] = "LOW",
@@ -2388,7 +2460,7 @@ function Skada:OnInitialize()
 	end
 
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("Skada", self.options)
-	self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Skada", "Skada")
+	self.optionsFrame = ACD:AddToBlizOptions("Skada", "Skada")
 	self:RegisterChatCommand("skada", "Command")
 
 	self.db.RegisterCallback(self, "OnProfileChanged", "ReloadSettings")

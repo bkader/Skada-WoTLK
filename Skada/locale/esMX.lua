@@ -55,6 +55,8 @@ L["Snap window"] = "Ajustar ventana"
 L["Allows the window to snap to other Skada windows."] = "Permite que la ventana se ajuste a otras ventanas de Skada."
 L["Display system"] = "Sistema de visualización"
 L["Choose the system to be used for displaying data in this window."] = "Escoger el sistema para ser usado como visualización de los datos en esta ventana"
+L["Copy settings"] = "Copiar configuración"
+L["Choose the window from which you want to copy the settings."] = "Elija la ventana desde la que desea copiar la configuración."
 
 -- bars
 L["Bars"] = "Barras"

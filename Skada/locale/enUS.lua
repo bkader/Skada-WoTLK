@@ -55,6 +55,8 @@ L["Snap window"] = true
 L["Allows the window to snap to other Skada windows."] = true
 L["Display system"] = true
 L["Choose the system to be used for displaying data in this window."] = true
+L["Copy settings"] = true
+L["Choose the window from which you want to copy the settings."] = true
 
 -- bars
 L["Bars"] = true

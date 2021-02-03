@@ -859,37 +859,36 @@ function mod:AddDisplayOptions(win, options)
                 dialogControl = "LSM30_Font",
                 name = L["Bar font"],
                 desc = L["The font used by all bars."],
+                order = 1,
+                width = "full",
                 values = AceGUIWidgetLSMlists.font,
-                get = function()
-                    return db.barfont
-                end,
+                get = function() return db.barfont end,
                 set = function(_, key)
                     db.barfont = key
                     Skada:ApplySettings()
-                end,
-                order = 10
+                end
             },
             barfontsize = {
                 type = "range",
                 name = L["Bar font size"],
                 desc = L["The font size of all bars."],
+                order = 2,
+                width = "full",
                 min = 7,
                 max = 40,
                 step = 1,
-                get = function()
-                    return db.barfontsize
-                end,
+                get = function() return db.barfontsize end,
                 set = function(_, size)
                     db.barfontsize = size
                     Skada:ApplySettings()
-                end,
-                order = 10.1
+                end
             },
             barfontflags = {
                 type = "select",
                 name = L["Font flags"],
                 desc = L["Sets the font flags."],
-                order = 10.2,
+                order = 3,
+                width = "full",
                 values = {
                     [""] = L["None"],
                     ["OUTLINE"] = L["Outline"],
@@ -897,9 +896,7 @@ function mod:AddDisplayOptions(win, options)
                     ["MONOCHROME"] = L["Monochrome"],
                     ["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
                 },
-                get = function()
-                    return db.barfontflags
-                end,
+                get = function() return db.barfontflags end,
                 set = function(_, key)
                     db.barfontflags = key
                     Skada:ApplySettings()
@@ -910,37 +907,36 @@ function mod:AddDisplayOptions(win, options)
                 dialogControl = "LSM30_Font",
                 name = L["Values font"],
                 desc = L["The font used by bar values."],
+                order = 4,
+                width = "full",
                 values = AceGUIWidgetLSMlists.font,
-                get = function()
-                    return db.numfont
-                end,
+                get = function() return db.numfont end,
                 set = function(_, key)
                     db.numfont = key
                     Skada:ApplySettings()
-                end,
-                order = 11
+                end
             },
             numfontsize = {
                 type = "range",
                 name = L["Values font size"],
                 desc = L["The font size of bar values."],
+                order = 5,
+                width = "full",
                 min = 7,
                 max = 40,
                 step = 1,
-                get = function()
-                    return db.numfontsize
-                end,
+                get = function() return db.numfontsize end,
                 set = function(_, size)
                     db.numfontsize = size
                     Skada:ApplySettings()
-                end,
-                order = 11.1
+                end
             },
             numfontflags = {
                 type = "select",
                 name = L["Font flags"],
                 desc = L["Sets the font flags."],
-                order = 11.2,
+                order = 6,
+                width = "full",
                 values = {
                     [""] = L["None"],
                     ["OUTLINE"] = L["Outline"],
@@ -948,9 +944,7 @@ function mod:AddDisplayOptions(win, options)
                     ["MONOCHROME"] = L["Monochrome"],
                     ["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
                 },
-                get = function()
-                    return db.numfontflags
-                end,
+                get = function() return db.numfontflags end,
                 set = function(_, key)
                     db.numfontflags = key
                     Skada:ApplySettings()
@@ -961,88 +955,82 @@ function mod:AddDisplayOptions(win, options)
                 dialogControl = "LSM30_Statusbar",
                 name = L["Bar texture"],
                 desc = L["The texture used by all bars."],
+                order = 7,
+                width = "full",
                 values = AceGUIWidgetLSMlists.statusbar,
-                get = function()
-                    return db.bartexture
-                end,
+                get = function() return db.bartexture end,
                 set = function(_, key)
                     db.bartexture = key
                     Skada:ApplySettings()
-                end,
-                order = 12
+                end
             },
             barspacing = {
                 type = "range",
                 name = L["Bar spacing"],
                 desc = L["Distance between bars."],
+                order = 8,
+                width = "full",
                 min = 0,
                 max = 10,
                 step = 1,
-                get = function()
-                    return db.barspacing
-                end,
+                get = function() return db.barspacing end,
                 set = function(_, spacing)
                     db.barspacing = spacing
                     Skada:ApplySettings()
-                end,
-                order = 13
+                end
             },
             barheight = {
                 type = "range",
                 name = L["Bar height"],
                 desc = L["The height of the bars."],
+                order = 9,
+                width = "full",
                 min = 10,
                 max = 40,
                 step = 1,
-                get = function()
-                    return db.barheight
-                end,
+                get = function() return db.barheight end,
                 set = function(_, height)
                     db.barheight = height
                     Skada:ApplySettings()
-                end,
-                order = 14
+                end
             },
             barwidth = {
                 type = "range",
                 name = L["Bar width"],
                 desc = L["The width of the bars."],
+                order = 10,
+                width = "full",
                 min = 80,
                 max = 400,
                 step = 1,
-                get = function()
-                    return db.barwidth
-                end,
+                get = function() return db.barwidth end,
                 set = function(_, width)
                     db.barwidth = width
                     Skada:ApplySettings()
-                end,
-                order = 15
+                end
             },
             barorientation = {
                 type = "select",
                 name = L["Bar orientation"],
                 desc = L["The direction the bars are drawn in."],
+                order = 11,
+                width = "full",
                 values = function()
                     return {[1] = L["Left to right"], [3] = L["Right to left"]}
                 end,
-                get = function()
-                    return db.barorientation
-                end,
+                get = function() return db.barorientation end,
                 set = function(_, orientation)
                     db.barorientation = orientation
                     Skada:ApplySettings()
-                end,
-                order = 16
+                end
             },
             reversegrowth = {
                 type = "toggle",
                 name = L["Reverse bar growth"],
                 desc = L["Bars will grow up instead of down."],
-                order = 17,
-                get = function()
-                    return db.reversegrowth
-                end,
+                order = 12,
+                width = "full",
+                get = function() return db.reversegrowth end,
                 set = function()
                     db.reversegrowth = not db.reversegrowth
                     Skada:ApplySettings()
@@ -1052,6 +1040,8 @@ function mod:AddDisplayOptions(win, options)
                 type = "color",
                 name = L["Bar color"],
                 desc = L["Choose the default color of the bars."],
+                order = 13,
+                width = "full",
                 hasAlpha = true,
                 get = function(_)
                     local c = db.barcolor
@@ -1060,13 +1050,14 @@ function mod:AddDisplayOptions(win, options)
                 set = function(_, r, g, b, a)
                     db.barcolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
                     Skada:ApplySettings()
-                end,
-                order = 18
+                end
             },
             bgcolor = {
                 type = "color",
                 name = L["Background color"],
                 desc = L["Choose the background color of the bars."],
+                order = 14,
+                width = "full",
                 hasAlpha = true,
                 get = function(_)
                     return db.barbgcolor.r, db.barbgcolor.g, db.barbgcolor.b, db.barbgcolor.a
@@ -1074,17 +1065,15 @@ function mod:AddDisplayOptions(win, options)
                 set = function(_, r, g, b, a)
                     db.barbgcolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
                     Skada:ApplySettings()
-                end,
-                order = 19
+                end
             },
             spellschoolcolors = {
                 type = "toggle",
                 name = L["Spell school colors"],
                 desc = L["Use spell school colors where applicable."],
-                order = 20,
-                get = function()
-                    return db.spellschoolcolors
-                end,
+                order = 15,
+                width = "full",
+                get = function() return db.spellschoolcolors end,
                 set = function()
                     db.spellschoolcolors = not db.spellschoolcolors
                     Skada:ApplySettings()
@@ -1094,10 +1083,9 @@ function mod:AddDisplayOptions(win, options)
                 type = "toggle",
                 name = L["Class color bars"],
                 desc = L["When possible, bars will be colored according to player class."],
-                order = 21,
-                get = function()
-                    return db.classcolorbars
-                end,
+                order = 16,
+                width = "full",
+                get = function() return db.classcolorbars end,
                 set = function()
                     db.classcolorbars = not db.classcolorbars
                     Skada:ApplySettings()
@@ -1107,10 +1095,9 @@ function mod:AddDisplayOptions(win, options)
                 type = "toggle",
                 name = L["Class color text"],
                 desc = L["When possible, bar text will be colored according to player class."],
-                order = 22,
-                get = function()
-                    return db.classcolortext
-                end,
+                order = 17,
+                width = "full",
+                get = function() return db.classcolortext end,
                 set = function()
                     db.classcolortext = not db.classcolortext
                     Skada:ApplySettings()
@@ -1120,10 +1107,9 @@ function mod:AddDisplayOptions(win, options)
                 type = "toggle",
                 name = L["Class icons"],
                 desc = L["Use class icons where applicable."],
-                order = 23,
-                get = function()
-                    return db.classicons
-                end,
+                order = 18,
+                width = "full",
+                get = function() return db.classicons end,
                 set = function()
                     db.classicons = not db.classicons
                     Skada:ApplySettings()
@@ -1133,10 +1119,9 @@ function mod:AddDisplayOptions(win, options)
                 type = "toggle",
                 name = L["Role icons"],
                 desc = L["Use role icons where applicable."],
-                order = 24,
-                get = function()
-                    return db.roleicons
-                end,
+                order = 19,
+                width = "full",
+                get = function() return db.roleicons end,
                 set = function()
                     db.roleicons = not db.roleicons
                     Skada:ApplySettings()
@@ -1146,10 +1131,9 @@ function mod:AddDisplayOptions(win, options)
                 type = "toggle",
                 name = L["Spec icons"],
                 desc = L["Use specialization icons where applicable."],
-                order = 25,
-                get = function()
-                    return db.specicons
-                end,
+                order = 20,
+                width = "full",
+                get = function() return db.specicons end,
                 set = function()
                     db.specicons = not db.specicons
                     Skada:ApplySettings()
@@ -1158,7 +1142,8 @@ function mod:AddDisplayOptions(win, options)
 			spark = {
 				type = "toggle",
 				name = L["Show spark effect"],
-				order = 26,
+				order = 21,
+				width = "full",
 				get = function() return db.spark end,
 				set = function()
 					db.spark = not db.spark
@@ -1169,10 +1154,9 @@ function mod:AddDisplayOptions(win, options)
                 type = "toggle",
                 name = L["Clickthrough"],
                 desc = L["Disables mouse clicks on bars."],
-                order = 27,
-                get = function()
-                    return db.clickthrough
-                end,
+                order = 22,
+                width = "full",
+                get = function() return db.clickthrough end,
                 set = function()
                     db.clickthrough = not db.clickthrough
                     Skada:ApplySettings()
@@ -1182,10 +1166,9 @@ function mod:AddDisplayOptions(win, options)
                 type = "toggle",
                 name = L["Smooth bars"],
                 desc = L["Animate bar changes smoothly rather than immediately."],
-                order = 28,
-                get = function()
-                    return db.smoothing
-                end,
+                order = 23,
+                width = "full",
+                get = function() return db.smoothing end,
                 set = function()
                     db.smoothing = not db.smoothing
                     Skada:ApplySettings()
@@ -1203,10 +1186,9 @@ function mod:AddDisplayOptions(win, options)
                 type = "toggle",
                 name = L["Enable"],
                 desc = L["Enables the title bar."],
-                order = 0,
-                get = function()
-                    return db.enabletitle
-                end,
+                order = 1,
+                width = "full",
+                get = function() return db.enabletitle end,
                 set = function()
                     db.enabletitle = not db.enabletitle
                     Skada:ApplySettings()
@@ -1216,10 +1198,9 @@ function mod:AddDisplayOptions(win, options)
                 type = "toggle",
                 name = L["Include set"],
                 desc = L["Include set name in title bar"],
-                order = 0.1,
-                get = function()
-                    return db.titleset
-                end,
+                order = 2,
+                width = "full",
+                get = function() return db.titleset end,
                 set = function()
                     db.titleset = not db.titleset
                     Skada:ApplySettings()
@@ -1229,13 +1210,12 @@ function mod:AddDisplayOptions(win, options)
                 type = "range",
                 name = L["Title height"],
                 desc = L["The height of the title frame."],
-                order = 0.2,
+                order = 3,
+                width = "full",
                 min = 10,
                 max = 50,
                 step = 1,
-                get = function()
-                    return db.title.height
-                end,
+                get = function() return db.title.height end,
                 set = function(_, val)
                     db.title.height = val
                     Skada:ApplySettings()
@@ -1247,10 +1227,9 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Bar font"],
                 desc = L["The font used by all bars."],
                 values = AceGUIWidgetLSMlists.font,
-                order = 0.3,
-                get = function()
-                    return db.title.font
-                end,
+                order = 4,
+                width = "full",
+                get = function() return db.title.font end,
                 set = function(_, key)
                     db.title.font = key
                     Skada:ApplySettings()
@@ -1260,13 +1239,12 @@ function mod:AddDisplayOptions(win, options)
                 type = "range",
                 name = L["Title font size"],
                 desc = L["The font size of the title bar."],
-                order = 0.4,
+                order = 5,
+                width = "full",
                 min = 7,
                 max = 40,
                 step = 1,
-                get = function()
-                    return db.title.fontsize
-                end,
+                get = function() return db.title.fontsize end,
                 set = function(_, size)
                     db.title.fontsize = size
                     Skada:ApplySettings()
@@ -1276,7 +1254,8 @@ function mod:AddDisplayOptions(win, options)
                 type = "select",
                 name = L["Font flags"],
                 desc = L["Sets the font flags."],
-                order = 0.5,
+                order = 6,
+                width = "full",
                 values = {
                     [""] = L["None"],
                     ["OUTLINE"] = L["Outline"],
@@ -1284,9 +1263,7 @@ function mod:AddDisplayOptions(win, options)
                     ["MONOCHROME"] = L["Monochrome"],
                     ["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
                 },
-                get = function()
-                    return db.title.fontflags
-                end,
+                get = function() return db.title.fontflags end,
                 set = function(_, key)
                     db.title.fontflags = key
                     Skada:ApplySettings()
@@ -1296,7 +1273,8 @@ function mod:AddDisplayOptions(win, options)
                 type = "color",
                 name = L["Title color"],
                 desc = L["The text color of the title."],
-                order = 0.6,
+                order = 7,
+                width = "full",
                 hasAlpha = true,
                 get = function(_)
                     local c = db.title.textcolor or {r = 0.9, g = 0.9, b = 0.9, a = 1}
@@ -1312,11 +1290,10 @@ function mod:AddDisplayOptions(win, options)
                 dialogControl = "LSM30_Statusbar",
                 name = L["Background texture"],
                 desc = L["The texture used as the background of the title."],
-                order = 0.7,
+                order = 8,
+                width = "full",
                 values = AceGUIWidgetLSMlists.statusbar,
-                get = function()
-                    return db.title.texture
-                end,
+                get = function() return db.title.texture end,
                 set = function(_, key)
                     db.title.texture = key
                     Skada:ApplySettings()
@@ -1326,7 +1303,8 @@ function mod:AddDisplayOptions(win, options)
                 type = "color",
                 name = L["Background color"],
                 desc = L["The background color of the title."],
-                order = 0.8,
+                order = 9,
+                width = "full",
                 hasAlpha = true,
                 get = function(_)
                     local c = db.title.color
@@ -1342,11 +1320,10 @@ function mod:AddDisplayOptions(win, options)
                 dialogControl = "LSM30_Border",
                 name = L["Border texture"],
                 desc = L["The texture used for the border of the title."],
-                order = 1,
+                order = 10,
+                width = "full",
                 values = AceGUIWidgetLSMlists.border,
-                get = function()
-                    return db.title.bordertexture
-                end,
+                get = function() return db.title.bordertexture end,
                 set = function(_, key)
                     db.title.bordertexture = key
                     Skada:ApplySettings()
@@ -1357,7 +1334,8 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Border color"],
                 desc = L["The color used for the border."],
                 hasAlpha = true,
-                order = 1.1,
+                order = 11,
+                width = "full",
                 get = function(_)
                     local c = db.title.bordercolor or {r = 0, g = 0, b = 0, a = 1}
                     return c.r, c.g, c.b, c.a
@@ -1371,13 +1349,12 @@ function mod:AddDisplayOptions(win, options)
                 type = "range",
                 name = L["Border thickness"],
                 desc = L["The thickness of the borders."],
-                order = 1.2,
+                order = 12,
+                width = "full",
                 min = 0,
                 max = 50,
                 step = 0.5,
-                get = function()
-                    return db.title.borderthickness
-                end,
+                get = function() return db.title.borderthickness end,
                 set = function(_, val)
                     db.title.borderthickness = val
                     Skada:ApplySettings()
@@ -1386,7 +1363,8 @@ function mod:AddDisplayOptions(win, options)
             buttons = {
                 type = "group",
                 name = L["Buttons"],
-                order = 20,
+                order = 13,
+                width = "full",
                 inline = true,
                 args = {
                     report = {

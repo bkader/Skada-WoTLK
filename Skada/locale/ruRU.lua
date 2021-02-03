@@ -55,6 +55,8 @@ L["Snap window"] = "Окно привязки"
 L["Allows the window to snap to other Skada windows."] = "Позволяет привязывать окно к другим окнам Skada."
 L["Display system"] = "Система отображения"
 L["Choose the system to be used for displaying data in this window."] = "Выберите систему используемую для отображения данных в окне."
+L["Copy settings"] = "Копировать настройки"
+L["Choose the window from which you want to copy the settings."] = "Выберите окно, из которого вы хотите скопировать настройки. "
 
 -- bars
 L["Bars"] = "Полосы"

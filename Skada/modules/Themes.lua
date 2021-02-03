@@ -224,11 +224,14 @@ Skada:AddLoadableModule(
                 header2 = {
                     type = "header",
                     name = L["Apply theme"],
-                    order = 3
+                    order = 1,
+                    width = "full"
                 },
                 applytheme = {
                     type = "select",
                     name = L["Theme"],
+                    order = 1.1,
+                    width = "full",
                     values = function()
                         local list = {}
                         for i, theme in ipairs(themes) do
@@ -242,12 +245,13 @@ Skada:AddLoadableModule(
                         return list
                     end,
                     get = function() return selectedtheme end,
-                    set = function(_, name) selectedtheme = name end,
-                    order = 3.1
+                    set = function(_, name) selectedtheme = name end
                 },
                 applywindow = {
                     type = "select",
                     name = L["Window"],
+                    order = 1.2,
+                    width = "full",
                     values = function()
                         local list = {}
                         for i, win in ipairs(Skada:GetWindows()) do
@@ -256,12 +260,13 @@ Skada:AddLoadableModule(
                         return list
                     end,
                     get = function() return selectedwindow end,
-                    set = function(_, name) selectedwindow = name end,
-                    order = 3.2
+                    set = function(_, name) selectedwindow = name end
                 },
                 applybutton = {
                     type = "execute",
                     name = APPLY,
+                    order = 1.3,
+                    width = "full",
                     func = function()
                         if selectedwindow and selectedtheme then
                             local thetheme = nil
@@ -296,17 +301,19 @@ Skada:AddLoadableModule(
                                 end
                             end
                         end
-                    end,
-                    order = 3.3
+                    end
                 },
                 header3 = {
                     type = "header",
                     name = L["Save theme"],
-                    order = 4
+                    order = 2,
+                    width = "full"
                 },
                 savewindow = {
                     type = "select",
                     name = L["Window"],
+                    order = 2.1,
+                    width = "full",
                     values = function()
                         local list = {}
                         for i, win in ipairs(Skada:GetWindows()) do
@@ -315,20 +322,22 @@ Skada:AddLoadableModule(
                         return list
                     end,
                     get = function() return savewindow end,
-                    set = function(_, name) savewindow = name end,
-                    order = 4.1
+                    set = function(_, name) savewindow = name end
                 },
                 savenametext = {
                     type = "input",
                     name = NAME,
                     desc = L["Name of your new theme."],
+                    order = 2.2,
+                    width = "full",
                     get = function() return savename end,
-                    set = function(_, val) savename = val end,
-                    order = 4.2
+                    set = function(_, val) savename = val end
                 },
                 savebutton = {
                     type = "execute",
                     name = SAVE,
+                    order = 2.3,
+                    width = "full",
                     func = function()
                         for i, win in ipairs(Skada:GetWindows()) do
                             if win.db.name == savewindow then
@@ -339,17 +348,19 @@ Skada:AddLoadableModule(
                                 table.insert(Skada.db.profile.themes, theme)
                             end
                         end
-                    end,
-                    order = 4.3
+                    end
                 },
                 header4 = {
                     type = "header",
                     name = L["Delete theme"],
-                    order = 5
+                    order = 3,
+                    width = "full"
                 },
                 deltheme = {
                     type = "select",
                     name = L["Theme"],
+                    order = 3.1,
+                    width = "full",
                     values = function()
                         local list = {}
                         if Skada.db.profile.themes then
@@ -360,12 +371,13 @@ Skada:AddLoadableModule(
                         return list
                     end,
                     get = function() return deletetheme end,
-                    set = function(_, name) deletetheme = name end,
-                    order = 5.1
+                    set = function(_, name) deletetheme = name end
                 },
                 deletebutton = {
                     type = "execute",
                     name = DELETE,
+                    order = 3.2,
+                    width = "full",
                     func = function()
                         if Skada.db.profile.themes then
                             for i, theme in ipairs(Skada.db.profile.themes) do
@@ -374,8 +386,7 @@ Skada:AddLoadableModule(
                                 end
                             end
                         end
-                    end,
-                    order = 5.2
+                    end
                 }
             }
         }

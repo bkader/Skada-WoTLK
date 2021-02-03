@@ -55,6 +55,8 @@ if not L then return end
 -- L["Allows the window to snap to other Skada windows."] = ""
 -- L["Display system"] = ""
 -- L["Choose the system to be used for displaying data in this window."] = ""
+-- L["Copy settings"] = ""
+-- L["Choose the window from which you want to copy the settings."] = ""
 
 -- bars
 -- L["Bars"] = ""

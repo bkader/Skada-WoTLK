@@ -56,6 +56,8 @@ L["Snap window"] = "捕捉窗口"
 L["Allows the window to snap to other Skada windows."] = "允许窗口捕捉到其他Skada窗口。"
 L["Display system"] = "显示系统"
 L["Choose the system to be used for displaying data in this window."] = "选择在窗口中显示数据的系统。"
+L["Copy settings"] = "复制设定"
+L["Choose the window from which you want to copy the settings."] = "选择要从中复制设置的窗口。"
 
 -- bars
 L["Bars"] = "统计条"
