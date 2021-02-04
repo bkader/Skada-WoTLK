@@ -342,10 +342,10 @@ if AS:IsAddonLODorEnabled("Skada") then
 		local barmod = Skada.displays["bar"]
 
     if Skada.revisited then
-      local offsety = window.db.reversegrowth and 0 or (1 + (window.db.enabletitle and window.db.title.height or 0))
+      local offsety = window.db.reversegrowth and 0 or 1
 
       window.db.barwidth = width
-      window.db.background.height = height - (window.db.enabletitle and window.db.title.height or 0) - (E.PixelMode and 1 or 2)
+      window.db.background.height = height - (E.PixelMode and 1 or 2)
       window.db.barslocked = true
 
       window.bargroup.ClearAllPoints = nil
