@@ -37,7 +37,7 @@ Skada:AddLoadableModule(
         local data = {}
 
         local function SpellMissed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-            if srcGUID ~= dstGUID and parrybosses[dstName] then
+            if parrybosses[dstName] and srcGUID ~= dstGUID then
                 local _, _, _, misstype = ...
                 if misstype == "PARRY" then
                     data.playerid = srcGUID
