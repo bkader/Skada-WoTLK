@@ -21,153 +21,109 @@ Skada:AddLoadableModule(
         local _tonumber = tonumber
         local _ShowUIPanel = ShowUIPanel
 
+        local valuestable = {[1] = L["Do Nothing"], [2] = L["Compress"], [3] = L["Suppress"]}
+
         local options = {
             type = "group",
             name = L["Spamage"],
             args = {
-                CHAT_MSG_GUILD = {
-                    type = "select",
-                    name = L["Filter Guild"],
-                    desc = L["Selects the action to perform when encountering damage meter data in guild chat"],
-                    set = function(_, val)
-                        Skada.db.profile.spamage.CHAT_MSG_GUILD = val
-                    end,
-                    get = function()
-                        return Skada.db.profile.spamage.CHAT_MSG_GUILD
-                    end,
-                    values = {
-                        [1] = L["Do Nothing"],
-                        [2] = L["Compress"],
-                        [3] = L["Suppress"]
-                    }
-                },
-                CHAT_MSG_OFFICER = {
-                    type = "select",
-                    name = L["Filter Officer"],
-                    desc = L["Selects the action to perform when encountering damage meter data in officer chat"],
-                    set = function(_, val)
-                        Skada.db.profile.spamage.CHAT_MSG_OFFICER = val
-                    end,
-                    get = function()
-                        return Skada.db.profile.spamage.CHAT_MSG_OFFICER
-                    end,
-                    values = {
-                        [1] = L["Do Nothing"],
-                        [2] = L["Compress"],
-                        [3] = L["Suppress"]
-                    }
-                },
-                CHAT_MSG_PARTY = {
-                    type = "select",
-                    name = L["Filter Party"],
-                    desc = L["Selects the action to perform when encountering damage meter data in party chat"],
-                    set = function(_, val)
-                        Skada.db.profile.spamage.CHAT_MSG_PARTY = val
-                        Skada.db.profile.spamage.CHAT_MSG_PARTY_LEADER = val
-                    end,
-                    get = function()
-                        return Skada.db.profile.spamage.CHAT_MSG_PARTY
-                    end,
-                    values = {
-                        [1] = L["Do Nothing"],
-                        [2] = L["Compress"],
-                        [3] = L["Suppress"]
-                    }
+                captureDelay = {
+                    type = "range",
+                    name = L["Capture Delay"],
+                    desc = L["How many seconds the addon waits after \"Skada: *\" lines before it assumes spam burst is over. 1 seems to work in most cases"],
+                    order = 1,
+                    width = "full",
+                    min = 1,
+                    max = 5,
+                    step = 0.1,
+                    get = function() return Skada.db.profile.spamage.captureDelay end,
+                    set = function(_, val) Skada.db.profile.spamage.captureDelay = val end
                 },
                 CHAT_MSG_RAID = {
                     type = "select",
                     name = L["Filter Raid"],
                     desc = L["Selects the action to perform when encountering damage meter data in raid chat"],
+                    order = 2,
+                    width = "full",
+                    values = valuestable,
+                    get = function() return Skada.db.profile.spamage.CHAT_MSG_RAID end,
                     set = function(_, val)
                         Skada.db.profile.spamage.CHAT_MSG_RAID = val
                         Skada.db.profile.spamage.CHAT_MSG_RAID_LEADER = val
-                    end,
-                    get = function()
-                        return Skada.db.profile.spamage.CHAT_MSG_RAID
-                    end,
-                    values = {
-                        [1] = L["Do Nothing"],
-                        [2] = L["Compress"],
-                        [3] = L["Suppress"]
-                    }
+                    end
+                },
+                CHAT_MSG_PARTY = {
+                    type = "select",
+                    name = L["Filter Party"],
+                    desc = L["Selects the action to perform when encountering damage meter data in party chat"],
+                    order = 3,
+                    width = "full",
+                    values = valuestable,
+                    get = function() return Skada.db.profile.spamage.CHAT_MSG_PARTY end,
+                    set = function(_, val)
+                        Skada.db.profile.spamage.CHAT_MSG_PARTY = val
+                        Skada.db.profile.spamage.CHAT_MSG_PARTY_LEADER = val
+                    end
+                },
+                CHAT_MSG_GUILD = {
+                    type = "select",
+                    name = L["Filter Guild"],
+                    desc = L["Selects the action to perform when encountering damage meter data in guild chat"],
+                    order = 4,
+                    width = "full",
+                    values = valuestable,
+                    get = function() return Skada.db.profile.spamage.CHAT_MSG_GUILD end,
+                    set = function(_, val) Skada.db.profile.spamage.CHAT_MSG_GUILD = val end
+                },
+                CHAT_MSG_OFFICER = {
+                    type = "select",
+                    name = L["Filter Officer"],
+                    desc = L["Selects the action to perform when encountering damage meter data in officer chat"],
+                    order = 5,
+                    width = "full",
+                    values = valuestable,
+                    get = function() return Skada.db.profile.spamage.CHAT_MSG_OFFICER end,
+                    set = function(_, val) Skada.db.profile.spamage.CHAT_MSG_OFFICER = val end
                 },
                 CHAT_MSG_SAY = {
                     type = "select",
                     name = L["Filter Say"],
                     desc = L["Selects the action to perform when encountering damage meter data in say chat"],
-                    set = function(_, val)
-                        Skada.db.profile.spamage.CHAT_MSG_SAY = val
-                    end,
-                    get = function()
-                        return Skada.db.profile.spamage.CHAT_MSG_SAY
-                    end,
-                    values = {
-                        [1] = L["Do Nothing"],
-                        [2] = L["Compress"],
-                        [3] = L["Suppress"]
-                    }
-                },
-                CHAT_MSG_WHISPER = {
-                    type = "select",
-                    name = L["Filter Whisper"],
-                    desc = L["Selects the action to perform when encountering damage meter whisper"],
-                    set = function(_, val)
-                        Skada.db.profile.spamage.CHAT_MSG_WHISPER = val
-                    end,
-                    get = function()
-                        return Skada.db.profile.spamage.CHAT_MSG_WHISPER
-                    end,
-                    values = {
-                        [1] = L["Do Nothing"],
-                        [2] = L["Compress"],
-                        [3] = L["Suppress"]
-                    }
+                    order = 6,
+                    width = "full",
+                    values = valuestable,
+                    get = function() return Skada.db.profile.spamage.CHAT_MSG_SAY end,
+                    set = function(_, val) Skada.db.profile.spamage.CHAT_MSG_SAY = val end
                 },
                 CHAT_MSG_YELL = {
                     type = "select",
                     name = L["Filter Yell"],
                     desc = L["Selects the action to perform when encountering damage meter data in yell chat"],
-                    set = function(_, val)
-                        Skada.db.profile.spamage.CHAT_MSG_YELL = val
-                    end,
-                    get = function()
-                        return Skada.db.profile.spamage.CHAT_MSG_YELL
-                    end,
-                    values = {
-                        [1] = L["Do Nothing"],
-                        [2] = L["Compress"],
-                        [3] = L["Suppress"]
-                    }
+                    order = 7,
+                    width = "full",
+                    values = valuestable,
+                    get = function() return Skada.db.profile.spamage.CHAT_MSG_YELL end,
+                    set = function(_, val) Skada.db.profile.spamage.CHAT_MSG_YELL = val end
+                },
+                CHAT_MSG_WHISPER = {
+                    type = "select",
+                    name = L["Filter Whisper"],
+                    desc = L["Selects the action to perform when encountering damage meter whisper"],
+                    order = 8,
+                    width = "full",
+                    values = valuestable,
+                    get = function() return Skada.db.profile.spamage.CHAT_MSG_WHISPER end,
+                    set = function(_, val) Skada.db.profile.spamage.CHAT_MSG_WHISPER = val end
                 },
                 CHAT_MSG_CHANNEL = {
                     type = "select",
                     name = L["Filter Custom Channels"],
                     desc = L["Selects the action to perform when encountering damage meter data in custom channels"],
-                    set = function(_, val)
-                        Skada.db.profile.spamage.CHAT_MSG_CHANNEL = val
-                    end,
-                    get = function()
-                        return Skada.db.profile.spamage.CHAT_MSG_CHANNEL
-                    end,
-                    values = {
-                        [1] = L["Do Nothing"],
-                        [2] = L["Compress"],
-                        [3] = L["Suppress"]
-                    }
-                },
-                captureDelay = {
-                    type = "range",
-                    name = L["Capture Delay"],
-                    desc = L["How many seconds the addon waits after \"Skada: *\" lines before it assumes spam burst is over. 1 seems to work in most cases"],
-                    set = function(_, val)
-                        Skada.db.profile.spamage.captureDelay = val
-                    end,
-                    get = function()
-                        return Skada.db.profile.spamage.captureDelay
-                    end,
-                    min = 1,
-                    max = 5,
-                    step = 0.1
+                    order = 9,
+                    width = "full",
+                    values = valuestable,
+                    get = function() return Skada.db.profile.spamage.CHAT_MSG_CHANNEL end,
+                    set = function(_, val) Skada.db.profile.spamage.CHAT_MSG_CHANNEL = val end
                 }
             }
         }
