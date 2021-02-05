@@ -406,6 +406,10 @@ L["Absorbed and healed players"] = true
 L["%s's absorb and healing spells"] = true
 L["%s's absorbed and healed players"] = true
 
+L["Healing received"] = true
+L["Healing player list"] = true
+L["%s's received healing"] = true
+
 -- ============ --
 -- Auras Module --
 -- ============ --

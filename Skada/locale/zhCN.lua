@@ -407,6 +407,10 @@ L["Absorbed and healed players"] = "吸收和治疗玩家列表"
 L["%s's absorb and healing spells"] = "%s的吸收和治疗法术"
 L["%s's absorbed and healed players"] = "%s的吸收和治疗玩家"
 
+L["Healing received"] = "治愈了"
+L["Healing player list"] = "治愈者名单"
+L["%s's received healing"] = "%s已康复"
+
 -- ============ --
 -- Auras Module --
 -- ============ --

@@ -209,8 +209,8 @@ L["Merge pets"] = "Fusionner familiers"
 L["Merges pets with their owners. Changing this only affects new data."] = "Fusionne les familiers avec leurs maîtres respectifs. Cela n'affectera que les nouvelles données."
 L["Show totals"] = "Afficher les totaux"
 L["Shows a extra row with a summary in certain modes."] = "Affiche une rangée supplémentaire dans certain modes contenant un résumé."
-L["Only keep boss fighs"] = "Ne garder que les boss"
-L["Boss fights will be kept with this on, and non-boss fights are discarded."] = "Les combats contre les boss seront conservés avec ceci d'activé, le reste sera jeté."
+L["Only keep boss fighs"] = "Garder uniquement les boss"
+L["Boss fights will be kept with this on, and non-boss fights are discarded."] = "Les combats contre les boss seront conservés avec ceci activé, le reste sera ignoré."
 L["Hide when solo"] = "Cacher quand seul"
 L["Hides Skada's window when not in a party or raid."] = "Cache la fenêtre de Skada quand vous n'êtes pas dans un groupe ou un raid."
 L["Hide in PvP"] = "Cacher en JcJ"
@@ -404,6 +404,10 @@ L["Absorbs and healing spell list"] = "Liste des sorts d'absorption et de soin"
 L["Absorbed and healed players"] = "Liste des joureurs absorbés et soignées"
 L["%s's absorb and healing spells"] = "Sorts d'absorption et de soin de %s"
 L["%s's absorbed and healed players"] = "Joueurs absorbés et soignés par %s"
+
+L["Healing received"] = "Soins reçus"
+L["Healing player list"] = "Liste des joueurs de soin"
+L["%s's received healing"] = "Soins reçus par %s"
 
 -- ============ --
 -- Auras Module --

@@ -406,6 +406,10 @@ L["%s's absorb spells"] = "Hechizos de absorción de %s"
 -- L["%s's absorb and healing spells"] = ""
 -- L["%s's absorbed and healed players"] = ""
 
+-- L["Healing received"] = "Curación recibida"
+-- L["Healing player list"] = "Lista de jugadores curativos"
+-- L["%s's received healing"] = "Curaciones recibidas de %s"
+
 -- ============ --
 -- Auras Module --
 -- ============ --

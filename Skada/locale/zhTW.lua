@@ -406,6 +406,10 @@ if not L then return end
 -- L["%s's absorb and healing spells"] = ""
 -- L["%s's absorbed and healed players"] = ""
 
+-- L["Healing received"] = ""
+-- L["Healing player list"] = ""
+-- L["%s's received healing"] = ""
+
 -- ============ --
 -- Auras Module --
 -- ============ --

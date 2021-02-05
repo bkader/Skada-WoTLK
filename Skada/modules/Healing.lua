@@ -878,3 +878,157 @@ Skada:AddLoadableModule(
         end
     end
 )
+
+-- ================ --
+-- Healing received --
+-- ================ --
+Skada:AddLoadableModule(
+    "Healing received",
+    function(Skada, L)
+        if Skada:IsDisabled("Healing", "Healing received") then
+            return
+        end
+
+        local mod = Skada:NewModule(L["Healing received"])
+        local playermod = mod:NewModule(L["Healing player list"])
+
+        function playermod:Enter(win, id, label)
+            self.playerid = id
+            self.playername = label
+            self.title = _format(L["%s's received healing"], label)
+        end
+
+        function playermod:Update(win, set)
+            local player = Skada:find_player(set, self.playerid, self.playername)
+            if player then
+                local max, total, sources = 0, 0, {}
+
+                for _, p in _ipairs(set.players) do
+                    if p.healing then
+                        for targetname, target in _pairs(p.healing.targets) do
+                            if target.id == player.id and targetname == player.name then
+                                total = total + target.amount -- increment total
+                                sources[p.name] = {
+                                    id = p.id,
+                                    class = p.class,
+                                    role = p.role,
+                                    spec = p.spec,
+                                    amount = target.amount,
+                                    overhealing = target.overhealing
+                                }
+                                break
+                            end
+                        end
+                    end
+                end
+
+                if total > 0 and win then
+                    local nr = 1
+
+                    for sourcename, source in _pairs(sources) do
+                        local d = win.dataset[nr] or {}
+                        win.dataset[nr] = d
+
+                        d.id = source.id
+                        d.label = sourcename
+                        d.class = source.class
+                        d.role = source.role
+                        d.spec = source.spec
+
+                        d.value = source.amount
+                        d.valuetext = Skada:FormatValueText(
+                            Skada:FormatNumber(source.amount),
+                            mod.metadata.columns.Healing,
+                            Skada:FormatNumber(source.overhealing),
+                            mod.metadata.columns.Overhealing,
+                            _format("%02.1f%%", 100 * source.amount / math_max(1, total)),
+                            mod.metadata.columns.Percent
+                        )
+
+                        if source.amount > max then
+                            max = source.amount
+                        end
+
+                        nr = nr + 1
+                    end
+
+                    win.metadata.maxvalue = max
+                end
+            end
+        end
+
+        function mod:Update(win, set)
+            if set.healing > 0 then
+                local max, players = 0, {}
+
+                for _, player in _ipairs(set.players) do
+                    if player.healing then
+                        for targetname, target in _pairs(player.healing.targets) do
+                            if not players[targetname] then
+                                players[targetname] = {
+                                    id = target.id,
+                                    amount = target.amount,
+                                    overhealing = target.overhealing
+                                }
+                            else
+                                players[targetname].amount = players[targetname].amount + target.amount
+                                players[targetname].overhealing = players[targetname].overhealing + target.overhealing
+                            end
+                        end
+                    end
+                end
+
+                if win then
+                    local nr = 1
+
+                    for playername, player in _pairs(players) do
+                        local d = win.dataset[nr] or {}
+                        win.dataset[nr] = d
+
+                        d.id = player.id
+                        d.label = playername
+
+                        local p = Skada:find_player(set, player.id, playername)
+                        if p then
+                            d.class = p.class
+                            d.role = p.role
+                            d.spec = p.spec
+                        end
+
+                        d.value = player.amount
+                        d.valuetext = Skada:FormatValueText(
+                            Skada:FormatNumber(player.amount),
+                            mod.metadata.columns.Healing,
+                            Skada:FormatNumber(player.overhealing),
+                            mod.metadata.columns.Overhealing,
+                            _format("%02.1f%%", 100 * player.amount / math_max(1, set.healing or 0)),
+                            mod.metadata.columns.Percent
+                        )
+
+                        if player.amount > max then
+                            max = player.amount
+                        end
+
+                        nr = nr + 1
+                    end
+
+                    win.metadata.maxvalue = max
+                end
+            end
+        end
+
+        function mod:OnEnable()
+            playermod.metadata = {showspots = true}
+            self.metadata = {
+				showspots = true,
+				click1 = playermod,
+				columns = {Healing = true, Overhealing = true, Percent = true}
+			}
+            Skada:AddMode(self, L["Absorbs and healing"])
+        end
+
+        function mod:OnDisable()
+            Skada:RemoveMode(self)
+        end
+    end
+)
