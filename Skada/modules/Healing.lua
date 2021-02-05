@@ -958,7 +958,7 @@ Skada:AddLoadableModule(
         end
 
         function mod:Update(win, set)
-            if set.healing > 0 then
+            if set.healing and set.healing > 0 then
                 local max, players = 0, {}
 
                 for _, player in _ipairs(set.players) do
