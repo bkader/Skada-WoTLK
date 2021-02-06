@@ -325,7 +325,7 @@ do
         local maxbars = win.db.background.height / (win.db.barheight + win.db.barspacing)
         if direction == 1 and win.bargroup:GetBarOffset() > 0 then
             win.bargroup:SetBarOffset(win.bargroup:GetBarOffset() - 1)
-        elseif direction == -1 and ((getNumberOfBars(win) - maxbars - win.bargroup:GetBarOffset()) > 0) then
+        elseif direction == -1 and ((getNumberOfBars(win) - maxbars - win.bargroup:GetBarOffset() + 1) > 0) then
             win.bargroup:SetBarOffset(win.bargroup:GetBarOffset() + 1)
         end
     end
