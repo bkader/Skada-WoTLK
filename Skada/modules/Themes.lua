@@ -394,8 +394,10 @@ Skada:AddLoadableModule(
         function mod:OnInitialize()
 			if not Skada.db.global.themes then
 				Skada.db.global.themes = {}
-				Skada:tcopy(Skada.db.global.themes, Skada.db.profile.themes)
-				Skada.db.profile.themes = nil
+				if type(Skada.db.profile.themes) == "table" then
+					Skada:tcopy(Skada.db.global.themes, Skada.db.profile.themes)
+					Skada.db.profile.themes = nil
+				end
 			end
             Skada.options.args.modules.args.themes = options
         end
