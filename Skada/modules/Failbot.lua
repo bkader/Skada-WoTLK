@@ -12,7 +12,7 @@ Skada:AddLoadableModule(
         if not LibFail then
             return
         end
-        local failevents = LibFail:GetSupportedEvents()
+		local failevents, tankevents = LibFail:GetSupportedEvents(), {}
 
         local mod = Skada:NewModule(L["Fails"])
         local playermod = mod:NewModule(L["Player's failed events"])
@@ -36,7 +36,7 @@ Skada:AddLoadableModule(
                 -- add to current set
                 if Skada.current then
                     local player = Skada:get_player(Skada.current, unitGUID, who)
-                    if player then
+                    if player and (player.role ~= "TANK" or not tankevents[event]) then
 						player.fails = player.fails or {}
                         player.fails.count = (player.fails.count or 0) + 1
                         Skada.current.fails = (Skada.current.fails or 0) + 1
@@ -49,7 +49,7 @@ Skada:AddLoadableModule(
                 -- add to total
                 if Skada.total then
                     local player = Skada:get_player(Skada.total, unitGUID, who)
-                    if player then
+                    if player and (player.role ~= "TANK" or not tankevents[event]) then
 						player.fails = player.fails or {}
                         player.fails.count = (player.fails.count or 0) + 1
                         Skada.total.fails = (Skada.total.fails or 0) + 1
@@ -96,12 +96,11 @@ Skada:AddLoadableModule(
 
         function playermod:Enter(win, id, label)
             self.playerid = id
-            self.playername = label
             self.title = _format(L["%s's fails"], label)
         end
 
         function playermod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player and player.fails.spells then
@@ -162,6 +161,9 @@ Skada:AddLoadableModule(
         end
 
         function mod:OnEnable()
+			for _, event in _ipairs(LibFail:GetFailsWhereTanksDoNotFail()) do
+				tankevents[event] = true
+			end
             for _, event in _ipairs(failevents) do
                 LibFail:RegisterCallback(event, onFail)
             end
