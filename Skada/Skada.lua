@@ -2608,25 +2608,25 @@ end
 -- ======================================================= --
 -- AddOn Synchronization
 
-do
-	function Skada:SendComm(channel, target, ...)
-		if not channel then
-			local groupType, _ = GetGroupTypeAndCount()
-			if groupType == "player" then
-				return -- with whom you want to sync man!
-			elseif groupType == "raid" then
-				channel = "RAID"
-			elseif groupType == "party" then
-				channel = "PARTY"
-			elseif groupType == "battleground" then
-				channel = "BATTLEGROUND"
-			end
-		end
-		if channel then
-			self:SendCommMessage("Skada", self:Serialize(...), channel, target)
+function Skada:SendComm(channel, target, ...)
+	if not channel then
+		local groupType, _ = GetGroupTypeAndCount()
+		if groupType == "player" then
+			return -- with whom you want to sync man!
+		elseif groupType == "raid" then
+			channel = "RAID"
+		elseif groupType == "party" then
+			channel = "PARTY"
+		elseif groupType == "battleground" then
+			channel = "BATTLEGROUND"
 		end
 	end
+	if channel then
+		self:SendCommMessage("Skada", self:Serialize(...), channel, target)
+	end
+end
 
+do
 	local function DispatchComm(sender, ok, commType, ...)
 		if ok and type(commType) == "string" then
 			Skada.callbacks:Fire("OnComm"..commType, sender, ...)
