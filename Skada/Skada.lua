@@ -123,12 +123,7 @@ local function GetGroupTypeAndCount()
 		count, t = GetNumPartyMembers(), "party"
 	end
 	if count == 0 then -- still 0? Then solo
-		local zoneType = select(2, IsInInstance())
-		if zoneType == "pvp" or zoneType == "arena" then
-			t = "battleground"
-		else
-			t = "player"
-		end
+		t = "player"
 	end
 	return t, count
 end
@@ -2617,8 +2612,11 @@ function Skada:SendComm(channel, target, ...)
 			channel = "RAID"
 		elseif groupType == "party" then
 			channel = "PARTY"
-		elseif groupType == "battleground" then
-			channel = "BATTLEGROUND"
+		else
+			local zoneType = select(2, IsInInstance())
+			if zoneType == "pvp" or zoneType == "arena" then
+				channel = "BATTLEGROUND"
+			end
 		end
 	end
 	if channel then
@@ -2642,32 +2640,30 @@ end
 
 do
 	function IsRaidInCombat()
-		local prefix, min, max = "raid", 1, GetNumRaidMembers()
-		if max == 0 then
-			prefix, min, max = "party", 0, GetNumPartyMembers()
-		end
-
-		for i = min, max do
-			local unit = (i == 0) and "player" or prefix .. tostring(i)
-			if UnitExists(unit) and UnitAffectingCombat(unit) then
-				return true
+		local prefix, count = GetGroupTypeAndCount()
+		if count > 0 then
+			for i = 1, count, 1 do
+				if UnitExists(prefix..i) and UnitAffectingCombat(prefix..i) then
+					return true
+				end
 			end
+		elseif UnitAffectingCombat("player") then
+			return true
 		end
 
 		return false
 	end
 
 	function IsRaidDead()
-		local prefix, min, max = "raid", 1, GetNumRaidMembers()
-		if max == 0 then
-			prefix, min, max = "party", 0, GetNumPartyMembers()
-		end
-
-		for i = min, max do
-			local unit = (i == 0) and "player" or prefix .. tostring(i)
-			if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
-				return false
+		local prefix, count = GetGroupTypeAndCount()
+		if count > 0 then
+			for i = 1, count, 1 do
+				if UnitExists(prefix..i) and not UnitIsDeadOrGhost(prefix..i) then
+					return false
+				end
 			end
+		elseif not UnitIsDeadOrGhost("player") then
+			return false
 		end
 
 		return true
@@ -2744,8 +2740,6 @@ do
 			player.last = nil
 		end
 
-		-- trigger ENCOUNTER_END before clearing
-		self.callbacks:Fire("ENCOUNTER_END", self.current)
 		self.current = nil
 
 		local numsets = 0
@@ -2817,7 +2811,8 @@ do
 
 	local function combat_tick()
 		if not disabled and Skada.current and not InCombatLockdown() and not IsRaidInCombat() then
-			Skada:EndSegment()
+			Skada.callbacks:Fire("ENCOUNTER_END", Skada.current)
+			Skada.After(1, function() Skada:EndSegment() end)
 		end
 	end
 
