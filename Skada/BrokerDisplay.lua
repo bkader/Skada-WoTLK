@@ -38,6 +38,8 @@ local function sortDataset(win)
 end
 
 local function formatLabel(win, data)
+	Skada.callbacks:Fire("BarUpdate", win, data)
+
     local label = ""
     if win.db.isusingclasscolors and data.class then
         label = _format(classcolors[data.class], data.label)

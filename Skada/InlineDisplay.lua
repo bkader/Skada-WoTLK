@@ -369,6 +369,7 @@ function mod:Update(win)
     for k, bardata in _pairs(wd) do
         if bardata.id then
             local _bar = mod:GetBar(win)
+			Skada.callbacks:Fire("BarUpdate", win, bardata, _bar)
             tinsert(mybars, mod:UpdateBar(_bar, bardata, win.db))
         end
     end

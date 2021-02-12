@@ -613,6 +613,8 @@ do
                     bar.order = i
                 end
 
+                Skada.callbacks:Fire("BarUpdate", win, data, bar, nr)
+
                 if win.metadata.showspots and Skada.db.profile.showranks and not data.ignore then
                     if win.db.barorientation == 1 then
                         bar:SetLabel(("%2u. %s"):format(nr, data.label))
