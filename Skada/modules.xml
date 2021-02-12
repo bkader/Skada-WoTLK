@@ -35,4 +35,5 @@
 <Script file="modules\Scroll.lua" />
 <Script file="modules\Spamage.lua" />
 <Script file="modules\Themes.lua" />
+<Script file="modules\Nickname.lua" />
 </Ui>

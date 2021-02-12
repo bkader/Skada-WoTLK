@@ -716,3 +716,18 @@ L["Do Nothing"] = "링크 미사용"
 L["Compress"] = "요약 링크"
 L["Suppress"] = "보고하지 않음"
 L["Reported by: %s"] = "%s의 보고"
+
+-- ===================== --
+-- nickname module lines --
+-- ===================== --
+
+-- L["Nickname"] = ""
+-- L["Set a nickname for you.\nNicknames are sent to group members and Skada can use them instead of your character name."] = ""
+-- L["Nickname isn't a valid string."] = ""
+-- L["Your nickname is too long, max of 12 characters is allowed."] = ""
+-- L["Only letters and two spaces are allowed."] = ""
+-- L["You can't use the same letter three times consecutively, two spaces consecutively or more then two spaces."] = ""
+-- L["Ignore Nicknames"] = ""
+-- L["When enabled, nicknames set by Skada users are ignored."] = ""
+-- L["Name display"] = ""
+-- L["Choose how names are shown on your bars."] = ""

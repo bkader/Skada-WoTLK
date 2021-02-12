@@ -716,3 +716,18 @@ L["Do Nothing"] = true
 L["Compress"] = true
 L["Suppress"] = true
 L["Reported by: %s"] = true
+
+-- ===================== --
+-- nickname module lines --
+-- ===================== --
+
+L["Nickname"] = true
+L["Set a nickname for you.\nNicknames are sent to group members and Skada can use them instead of your character name."] = true
+L["Nickname isn't a valid string."] = true
+L["Your nickname is too long, max of 12 characters is allowed."] = true
+L["Only letters and two spaces are allowed."] = true
+L["You can't use the same letter three times consecutively, two spaces consecutively or more then two spaces."] = true
+L["Ignore Nicknames"] = true
+L["When enabled, nicknames set by Skada users are ignored."] = true
+L["Name display"] = true
+L["Choose how names are shown on your bars."] = true

@@ -715,3 +715,18 @@ L["Do Nothing"] = "Ne rien faire"
 L["Compress"] = "Compresser"
 L["Suppress"] = "Supprimer"
 L["Reported by: %s"] = "Rapporté par: %s"
+
+-- ===================== --
+-- nickname module lines --
+-- ===================== --
+
+L["Nickname"] = "Surnom"
+L["Set a nickname for you.\nNicknames are sent to group members and Skada can use them instead of your character name."] = "Définissez un surnom pour vous.\nLes surnoms sont envoyés aux membres de votre groupe et Skada pourra l'utilise à la place du nom de votre personnage."
+L["Nickname isn't a valid string."] = "Le surnom contient des caractères invalides."
+L["Your nickname is too long, max of 12 characters is allowed."] = "Votre surnom est trop long, un maximum de 12 caractères est autorisé."
+L["Only letters and two spaces are allowed."] = "Seules les lettres et deux espaces sont autorisés."
+L["You can't use the same letter three times consecutively, two spaces consecutively or more then two spaces."] = "Vous ne pouvez pas utiliser la même lettre trois fois de suite, deux espaces consécutifs ou plus de deux espaces."
+L["Ignore Nicknames"] = "Ignorer les surnoms"
+L["When enabled, nicknames set by Skada users are ignored."] = "Si activé, les surnoms définis par les autres utilisateur Skada sont ignorés."
+L["Name display"] = "Format des noms"
+L["Choose how names are shown on your bars."] = "Choisissez comment les noms sont affichés sur vos barres."

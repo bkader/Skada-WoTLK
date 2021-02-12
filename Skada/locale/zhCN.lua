@@ -717,3 +717,18 @@ L["Do Nothing"] = "无动作"
 L["Compress"] = "压缩"
 L["Suppress"] = "阻止"
 L["Reported by: %s"] = "报告者：%s"
+
+-- ===================== --
+-- nickname module lines --
+-- ===================== --
+
+L["Nickname"] = "昵称"
+L["Set a nickname for you.\nNicknames are sent to group members and Skada can use them instead of your character name."] = "给自己设定一个昵称。\n昵称已发送给队员，Skada可使用它取代你的角色名字。"
+L["Nickname isn't a valid string."] = "此昵称不是有效字符串。"
+L["Your nickname is too long, max of 12 characters is allowed."] = "你的昵称太长，最多允许12个字符。"
+L["Only letters and two spaces are allowed."] = "仅允许字母及2个空格。"
+L["You can't use the same letter three times consecutively, two spaces consecutively or more then two spaces."] = "同一个字母不能连续使用3次，不能连续使用2个空格且不能超过2个空格。"
+L["Ignore Nicknames"] = "忽略昵称"
+L["When enabled, nicknames set by Skada users are ignored."] = "勾选后，Skada用户设定的昵称将被忽略。"
+L["Name display"] = "名字显示"
+L["Choose how names are shown on your bars."] = "选择统计条上名字的显示方式。"

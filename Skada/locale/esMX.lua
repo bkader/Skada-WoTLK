@@ -716,3 +716,18 @@ L["%s's parry targets"] = "Objetivos de parada de %s"
 -- L["Compress"] = ""
 -- L["Suppress"] = ""
 -- L["Reported by: %s"] = ""
+
+-- ===================== --
+-- nickname module lines --
+-- ===================== --
+
+L["Nickname"] = "Apodo"
+L["Set a nickname for you.\nNicknames are sent to group members and Skada can use them instead of your character name."] = "Reemplazar el nombre de su personaje.\nEl apodo se envía a los miembres de la hermandad, y se muestra en Details! en vez del nombre de su personaje."
+L["Nickname isn't a valid string."] = "El apodo no es una cadena válida."
+L["Your nickname is too long, max of 12 characters is allowed."] = "Su apodo es demasiado largo, se permite un máximo de 12 caracteres."
+L["Only letters and two spaces are allowed."] = "Solo se permiten letras y dos espacios."
+L["You can't use the same letter three times consecutively, two spaces consecutively or more then two spaces."] = "No puede usar la misma letra tres veces consecutivas, dos espacios consecutivos o más de dos espacios."
+L["Ignore Nicknames"] = "Ignorar apodos y avatares"
+L["When enabled, nicknames set by Skada users are ignored."] = "Cuando está habilitado, los apodos y avatares establecidos por otros miembros de la hermandad se ignoran."
+L["Name display"] = "Formato de nombres"
+L["Choose how names are shown on your bars."] = "Elija cómo se muestran los nombres en sus barras. "

@@ -1,3 +1,4 @@
+--[[ Translator: NGL#7282 ]] --
 local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "ruRU", false)
 if not L then return end
 
@@ -718,3 +719,18 @@ L["Do Nothing"] = "Не активно"
 L["Compress"] = "Сжатие"
 L["Suppress"] = "Подавление"
 L["Reported by: %s"] = "Отчет от: %s"
+
+-- ===================== --
+-- nickname module lines --
+-- ===================== --
+
+L["Nickname"] = "Псевдоним"
+L["Set a nickname for you.\nNicknames are sent to group members and Skada can use them instead of your character name."] = "Задайте ваш Псевдоним.\nПсевдонимы отправляются участникам группы и могут использоваться вместо имени вашего персонажа."
+L["Nickname isn't a valid string."] = "Неверный формат Псевдонима."
+L["Your nickname is too long, max of 12 characters is allowed."] = "Ваш Псевдоним слишком длинный, допускается не более 12 символов."
+L["Only letters and two spaces are allowed."] = "Допускаются только буквы и два пробела."
+L["You can't use the same letter three times consecutively, two spaces consecutively or more then two spaces."] = "Вы не можете использовать одну и ту же букву три раза подряд, два пробела подряд или более двух пробелов."
+L["Ignore Nicknames"] = "Игнорировать Псевдонимы"
+L["When enabled, nicknames set by Skada users are ignored."] = "Когда эта опция включена, Псевдонимы, установленные другими игроками, игнорируются."
+L["Name display"] = "Формат отображения имени"
+L["Choose how names are shown on your bars."] = "Выберите вариант отображения имени на полосах."
