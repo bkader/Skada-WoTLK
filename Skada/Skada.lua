@@ -42,38 +42,27 @@ local changed = true
 local update_timer, tick_timer
 
 -- spell schools
-do
-	local SPELLSCHOOL_PHYSICAL = 1
-	local SPELLSCHOOL_HOLY = 2
-	local SPELLSCHOOL_FIRE = 4
-	local SPELLSCHOOL_NATURE = 8
-	local SPELLSCHOOL_FROST = 16
-	local SPELLSCHOOL_FROSTFIRE = SPELLSCHOOL_FIRE + SPELLSCHOOL_FROST
-	local SPELLSCHOOL_SHADOW = 32
-	local SPELLSCHOOL_ARCANE = 64
+Skada.schoolcolors = {
+	[1] = {a = 1.0, r = 1.00, g = 1.00, b = 0.00}, -- Physical
+	[2] = {a = 1.0, r = 1.00, g = 0.90, b = 0.50}, -- Holy
+	[4] = {a = 1.0, r = 1.00, g = 0.50, b = 0.00}, -- Fire
+	[8] = {a = 1.0, r = 0.30, g = 1.00, b = 0.30}, -- Nature
+	[16] = {a = 1.0, r = 0.50, g = 1.00, b = 1.00}, -- Frost
+	[20] = {a = 1.0, r = 0.50, g = 1.00, b = 1.00}, -- Frostfire
+	[32] = {a = 1.0, r = 0.50, g = 0.50, b = 1.00}, -- Shadow
+	[64] = {a = 1.0, r = 1.00, g = 0.50, b = 1.00} -- Arcane
+}
 
-	Skada.schoolcolors = {
-		[SPELLSCHOOL_PHYSICAL] = {a = 1.0, r = 1.00, g = 1.00, b = 0.00}, -- Physical
-		[SPELLSCHOOL_HOLY] = {a = 1.0, r = 1.00, g = 0.90, b = 0.50}, -- Holy
-		[SPELLSCHOOL_FIRE] = {a = 1.0, r = 1.00, g = 0.50, b = 0.00}, -- Fire
-		[SPELLSCHOOL_NATURE] = {a = 1.0, r = 0.30, g = 1.00, b = 0.30}, -- Nature
-		[SPELLSCHOOL_FROST] = {a = 1.0, r = 0.50, g = 1.00, b = 1.00}, -- Frost
-		[SPELLSCHOOL_FROSTFIRE] = {a = 1.0, r = 0.50, g = 1.00, b = 1.00}, -- Frostfire
-		[SPELLSCHOOL_SHADOW] = {a = 1.0, r = 0.50, g = 0.50, b = 1.00}, -- Shadow
-		[SPELLSCHOOL_ARCANE] = {a = 1.0, r = 1.00, g = 0.50, b = 1.00} -- Arcane
-	}
-
-	Skada.schoolnames = {
-		[SPELLSCHOOL_PHYSICAL] = STRING_SCHOOL_PHYSICAL,
-		[SPELLSCHOOL_HOLY] = STRING_SCHOOL_HOLY,
-		[SPELLSCHOOL_FIRE] = STRING_SCHOOL_FIRE,
-		[SPELLSCHOOL_NATURE] = STRING_SCHOOL_NATURE,
-		[SPELLSCHOOL_FROST] = STRING_SCHOOL_FROST,
-		[SPELLSCHOOL_FROSTFIRE] = STRING_SCHOOL_FROSTFIRE,
-		[SPELLSCHOOL_SHADOW] = STRING_SCHOOL_SHADOW,
-		[SPELLSCHOOL_ARCANE] = STRING_SCHOOL_ARCANE
-	}
-end
+Skada.schoolnames = {
+	[1] = STRING_SCHOOL_PHYSICAL,
+	[2] = STRING_SCHOOL_HOLY,
+	[4] = STRING_SCHOOL_FIRE,
+	[8] = STRING_SCHOOL_NATURE,
+	[16] = STRING_SCHOOL_FROST,
+	[20] = STRING_SCHOOL_FROSTFIRE,
+	[32] = STRING_SCHOOL_SHADOW,
+	[64] = STRING_SCHOOL_ARCANE
+}
 
 -- list of plyaers and pets
 local players, pets = {}, {}
@@ -134,7 +123,12 @@ local function GetGroupTypeAndCount()
 		count, t = GetNumPartyMembers(), "party"
 	end
 	if count == 0 then -- still 0? Then solo
-		t = "player"
+		local zoneType = select(2, IsInInstance())
+		if zoneType == "pvp" or zoneType == "arena" then
+			t = "battleground"
+		else
+			t = "player"
+		end
 	end
 	return t, count
 end
@@ -401,6 +395,7 @@ do
 
 		local name = self.db.name or Skada.windowdefaults.name
 		Skada.options.args.windows.args[name] = nil
+		name = nil
 	end
 
 	function Window:set_mode_title()
@@ -419,6 +414,7 @@ do
 			savemode = self.history[1].title or self.history[1]:GetName()
 		end
 		self.db.mode = savemode
+		savemode = nil
 
 		if self.db.titleset then
 			local setname
@@ -442,6 +438,7 @@ do
 		end
 		self.metadata.title = name
 		self.display:SetTitle(self, name)
+		name = nil
 	end
 
 	-- change window display
@@ -563,6 +560,7 @@ do
 						sort_modes()
 					end
 					win:DisplayMode(mode)
+					mode = nil
 				end
 			elseif button == "RightButton" then
 				win:RightClick()
@@ -724,6 +722,7 @@ do
 			self:Print("Window '"..name.."' was not loaded because its display module, '"..window.db.display.."' was not found.")
 		end
 
+		isnew = nil
 		self:ApplySettings()
 		return window
 	end
@@ -904,6 +903,7 @@ function Skada:IsDisabled(...)
 	for i = 1, select("#", ...) do
 		local name = select(i, ...)
 		if self.db.profile.modulesBlocked[name] == true then
+			name = nil
 			return true
 		end
 	end
@@ -1007,8 +1007,7 @@ function Skada:GetSetTime(set)
 end
 
 function Skada:GetFormatedSetTime(set)
-	local settime = self:GetSetTime(set)
-	return self:FormatTime(settime)
+	return self:FormatTime(self:GetSetTime(set))
 end
 
 -- ================ --
@@ -1083,6 +1082,7 @@ do
 				if specIDs[playerclass][index] then
 					specIdx = specIDs[playerclass][index]
 				end
+				talantGroup, maxPoints, index = nil, nil, nil
 			end
 		end
 
@@ -1172,20 +1172,19 @@ do
 					player.spec = self:GetPlayerSpecID(player.name, player.class)
 				end
 			end
+
+			name, class = nil, nil
 		end
 	end
 end
 
-function Skada:find_player(set, playerid, playername)
-	if set and playerid then
+function Skada:find_player(set, playerid)
+	if set then
 		set._playeridx = set._playeridx or {}
 		local player = set._playeridx[playerid]
-		if player then
-			return player
-		end
-
+		if player then return player end
 		for _, p in ipairs(set.players) do
-			if p.id == playerid or p.name == playername then
+			if p.id == playerid then
 				set._playeridx[playerid] = p
 				return p
 			end
@@ -1246,6 +1245,7 @@ do
 		if title and title ~= "%s" and title:find("%s", nil, true) then
 			local pattern = title:gsub("%%s", "(.-)")
 			tinsert(ownerPatterns, pattern)
+			title, pattern = nil, nil
 		end
 	end
 
@@ -1272,10 +1272,7 @@ do
 		local owner = pets[action.playerid]
 
 		-- we try to associate pets and and guardians with their owner
-		if
-			not owner and action.playerflags and band(action.playerflags, PET_FLAGS) ~= 0 and
-				band(action.playerflags, RAID_FLAGS) ~= 0
-		 then
+		if not owner and action.playerflags and band(action.playerflags, PET_FLAGS) ~= 0 and band(action.playerflags, RAID_FLAGS) ~= 0 then
 			if band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
 				owner = {id = UnitGUID("player"), name = UnitName("player")}
 				pets[action.playerid] = owner
@@ -1287,6 +1284,7 @@ do
 						owner = {id = guid, name = ownerName}
 						pets[action.playerid] = owner
 					end
+					ownerName, guid = nil, nil
 				end
 			end
 
@@ -1311,11 +1309,9 @@ do
 end
 
 function Skada:FixMyPets(playerid, playername)
-	local owner = pets[playerid]
-	if owner then
-		return owner.id, owner.name
+	if pets[playerid] then
+		return pets[playerid].id, pets[playerid].name
 	end
-
 	return playerid, playername
 end
 
@@ -1359,6 +1355,7 @@ function Skada:SetTooltipPosition(tooltip, frame)
 			tooltip:SetPoint("TOPRIGHT", frame, "TOPLEFT", -10, 0)
 		end
 	end
+	p = nil
 end
 
 do
@@ -1422,8 +1419,10 @@ do
 						title = nr .. ". " .. title
 					end
 					tooltip:AddDoubleLine(title, data.valuetext, color.r, color.g, color.b)
+					color, title = nil, nil
 				end
 			end
+			nr = nil
 
 			if mode.Enter then
 				tooltip:AddLine(" ")
@@ -1451,6 +1450,7 @@ function Skada:ShowTooltip(win, id, label)
 				if t:NumLines() ~= numLines and hasClick then
 					t:AddLine(" ")
 				end
+				numLines = nil
 			end
 
 			if Skada.db.profile.informativetooltips then
@@ -1472,7 +1472,9 @@ function Skada:ShowTooltip(win, id, label)
 				if t:NumLines() ~= numLines and hasClick then
 					t:AddLine(" ")
 				end
+				numLines = nil
 			end
+			hasClick = nil
 
 			if win.metadata.click1 then
 				t:AddLine(L["Click for"] .. " " .. win.metadata.click1:GetName() .. ".", 0.2, 1, 0.2)
@@ -1516,12 +1518,10 @@ function Skada:Command(param)
 		local chan = w1 or "say"
 		local report_mode_name = w2 or L["Damage"]
 		local max = tonumber(w3 or 10)
+		w1, w2, w3 = nil, nil, nil
 
 		-- Sanity checks.
-		if
-			chan and (chan == "say" or chan == "guild" or chan == "raid" or chan == "party" or chan == "officer") and
-				(report_mode_name and find_mode(report_mode_name))
-		 then
+		if chan and (chan == "say" or chan == "guild" or chan == "raid" or chan == "party" or chan == "officer") and (report_mode_name and find_mode(report_mode_name)) then
 			self:Report(chan, "preset", report_mode_name, "current", max)
 		else
 			self:Print("Usage:")
@@ -1586,6 +1586,7 @@ do
 					break
 				end
 			end
+			list = nil
 		end
 
 		local report_table, report_set, report_mode
@@ -1593,9 +1594,7 @@ do
 		if not window then
 			report_mode = find_mode(report_mode_name)
 			report_set = self:find_set(report_set_name)
-			if report_set == nil then
-				return
-			end
+			if report_set == nil then return end
 
 			report_table = Window:new()
 			report_mode:Update(report_table, report_set)
@@ -1637,6 +1636,7 @@ do
 				break
 			end
 		end
+		title, label, nr = nil, nil, nil
 	end
 end
 
