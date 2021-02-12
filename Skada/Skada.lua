@@ -1,4 +1,4 @@
-local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceConsole-3.0", "AceEvent-3.0")
+local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceConsole-3.0", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0")
 _G.Skada = Skada
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
 
@@ -1172,6 +1172,8 @@ do
 					player.spec = self:GetPlayerSpecID(player.name, player.class)
 				end
 			end
+
+			self.callbacks:Fire("FixPlayer", player)
 
 			name, class = nil, nil
 		end
@@ -2492,6 +2494,7 @@ function Skada:CleanGarbage(clean)
 end
 
 function Skada:OnEnable()
+	self:RegisterComm("Skada")
 	self:ReloadSettings()
 
 	if not self.classcolors then
@@ -2600,6 +2603,39 @@ function Skada:OnEnable()
 	self.After(2, function() self:ApplySettings() end)
 	self.After(3, function() self:MemoryCheck() end)
 	self.NewTicker(1, function() self:CleanGarbage() end)
+end
+
+-- ======================================================= --
+-- AddOn Synchronization
+
+do
+	function Skada:SendComm(channel, target, ...)
+		if not channel then
+			local groupType, _ = GetGroupTypeAndCount()
+			if groupType == "player" then
+				return -- with whom you want to sync man!
+			elseif groupType == "raid" then
+				channel = "RAID"
+			elseif groupType == "party" then
+				channel = "PARTY"
+			elseif groupType == "battleground" then
+				channel = "BATTLEGROUND"
+			end
+		end
+		if channel then
+			self:SendCommMessage("Skada", self:Serialize(...), channel, target)
+		end
+	end
+
+	local function DispatchComm(sender, ok, commType, ...)
+		if ok and type(commType) == "string" then
+			Skada.callbacks:Fire("OnComm"..commType, sender, ...)
+		end
+	end
+
+	function Skada:OnCommReceived(prefix, message, channel, sender)
+		if channel then DispatchComm(sender, self:Deserialize(message)) end
+	end
 end
 
 -- ======================================================= --
