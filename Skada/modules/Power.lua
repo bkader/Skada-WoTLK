@@ -178,7 +178,7 @@ Skada:AddLoadableModule(
 
         -- player mods main update function
         function playermod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player then

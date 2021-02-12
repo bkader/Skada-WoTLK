@@ -192,7 +192,7 @@ Skada:AddLoadableModule(
             end
 
             function deathlogmod:Update(win, set)
-                local player = Skada:find_player(set, playermod.playerid, playermod.playername)
+                local player = Skada:find_player(set, playermod.playerid)
 
                 if player and player.deathlog and self.index and player.deathlog[self.index] then
                     local deathlog = player.deathlog[self.index]

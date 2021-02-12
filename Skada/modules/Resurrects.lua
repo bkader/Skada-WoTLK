@@ -83,7 +83,7 @@ Skada:AddLoadableModule(
         end
 
         function spellsmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player and player.resurrect.spells then
@@ -119,7 +119,7 @@ Skada:AddLoadableModule(
         end
 
         function spelltargetsmod:Update(win, set)
-            local player = Skada:find_player(set, spellsmod.playerid, spellsmod.playername)
+            local player = Skada:find_player(set, spellsmod.playerid)
             local max = 0
 
             if player and self.spellid and player.resurrect.spells[self.spellid] then
@@ -132,11 +132,13 @@ Skada:AddLoadableModule(
                     d.id = target.id
                     d.label = targetname
 
-                    local p = Skada:find_player(set, target.id, targetname)
+                    local p = Skada:find_player(set, target.id)
                     if p then
                         d.class = p.class
                         d.spec = p.spec
                         d.role = p.role
+                    else
+						d.class = Skada:GetPetOwner(target.id) and "PET" or "UNKNOWN"
                     end
 
                     d.value = target.count
@@ -160,7 +162,7 @@ Skada:AddLoadableModule(
         end
 
         function targetsmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player and player.resurrect.targets then
@@ -173,11 +175,13 @@ Skada:AddLoadableModule(
                     d.id = target.id
                     d.label = targetname
 
-                    local p = Skada:find_player(set, target.id, targetname)
+                    local p = Skada:find_player(set, target.id)
                     if p then
                         d.class = p.class
                         d.spec = p.spec
                         d.role = p.role
+                    else
+						d.class = Skada:GetPetOwner(target.id) and "PET" or "UNKNOWN"
                     end
 
                     d.value = target.count
@@ -200,7 +204,7 @@ Skada:AddLoadableModule(
         end
 
         function targetspellsmod:Update(win, set)
-            local player = Skada:find_player(set, targetsmod.playerid, targetsmod.playername)
+            local player = Skada:find_player(set, targetsmod.playerid)
             local max = 0
 
             if player and self.targetname and player.resurrect.targets[self.targetname] then

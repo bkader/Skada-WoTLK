@@ -90,7 +90,7 @@ Skada:AddLoadableModule(
         end
 
         function spellsmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player and player.dispels.extraspells then
@@ -135,7 +135,7 @@ Skada:AddLoadableModule(
         end
 
         function targetsmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 1
 
             if player and player.dispels.targets then
@@ -147,7 +147,7 @@ Skada:AddLoadableModule(
                     d.id = target.id
                     d.label = targetname
 
-                    local p = Skada:find_player(set, target.id, targetname)
+                    local p = Skada:find_player(set, target.id)
                     if p then
                         d.class = p.class
                         d.spec = p.spec
@@ -181,7 +181,7 @@ Skada:AddLoadableModule(
         end
 
         function playermod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player and player.dispels.spells then

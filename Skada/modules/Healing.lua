@@ -131,7 +131,7 @@ Skada:AddLoadableModule(
         end
 
         local function spell_tooltip(win, id, label, tooltip)
-            local player = Skada:find_player(win:get_selected_set(), spellsmod.playerid, spellsmod.playername)
+            local player = Skada:find_player(win:get_selected_set(), spellsmod.playerid)
             if player then
                 local spell = player.healing.spells[id]
                 if spell then
@@ -166,7 +166,7 @@ Skada:AddLoadableModule(
         end
 
         function spellsmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player and player.healing.spells then
@@ -212,7 +212,7 @@ Skada:AddLoadableModule(
         end
 
         function playersmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player and player.healing.targets then
@@ -226,11 +226,13 @@ Skada:AddLoadableModule(
                         d.id = target.id
                         d.label = targetname
 
-                        local p = Skada:find_player(set, target.id, targetname)
+                        local p = Skada:find_player(set, target.id)
                         if p then
                             d.class = p.class
                             d.role = p.role
                             d.spec = p.spec
+                        else
+							d.class = Skada:GetPetOwner(target.id) and "PET" or "MONSTER"
 						end
 
                         d.value = target.amount
@@ -340,7 +342,7 @@ Skada:AddLoadableModule(
         end
 
         function spellsmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player and player.healing.spells then
@@ -386,7 +388,7 @@ Skada:AddLoadableModule(
         end
 
         function playersmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player and player.healing.targets then
@@ -402,11 +404,13 @@ Skada:AddLoadableModule(
                         d.id = target.id
                         d.label = targetname
 
-                        local p = Skada:find_player(set, target.id, targetname)
+                        local p = Skada:find_player(set, target.id)
                         if p then
                             d.class = p.class
                             d.role = p.role
                             d.spec = p.spec
+                        else
+							d.class = Skada:GetPetOwner(target.id) and "PET" or "MONSTER"
 						end
 
                         d.value = overhealed
@@ -518,7 +522,7 @@ Skada:AddLoadableModule(
         end
 
         local function spell_tooltip(win, id, label, tooltip)
-            local player = Skada:find_player(win:get_selected_set(), spellsmod.playerid, spellsmod.playername)
+            local player = Skada:find_player(win:get_selected_set(), spellsmod.playerid)
             if player then
                 local spell = player.healing.spells[id]
                 if spell then
@@ -551,7 +555,7 @@ Skada:AddLoadableModule(
         end
 
         function spellsmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player then
@@ -598,7 +602,7 @@ Skada:AddLoadableModule(
         end
 
         function playersmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player then
@@ -612,11 +616,13 @@ Skada:AddLoadableModule(
                     d.id = target.id
                     d.label = targetname
 
-                    local p = Skada:find_player(set, target.id, targetname)
+                    local p = Skada:find_player(set, target.id)
                     if p then
                         d.class = p.class
                         d.role = p.role
                         d.spec = p.spec
+                    else
+						d.class = Skada:GetPetOwner(target.id) and "PET" or "MONSTER"
                     end
 
                     d.value = amount
@@ -723,7 +729,7 @@ Skada:AddLoadableModule(
         end
 
         function spellsmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player then
@@ -773,7 +779,7 @@ Skada:AddLoadableModule(
         end
 
         function playersmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player then
@@ -785,11 +791,13 @@ Skada:AddLoadableModule(
                     d.id = target.id
                     d.label = targetname
 
-                    local p = Skada:find_player(set, target.id, targetname)
+                    local p = Skada:find_player(set, target.id)
                     if p then
                         d.class = p.class
-                        d.spec = p.spec
                         d.role = p.role
+                        d.spec = p.spec
+                    else
+						d.class = Skada:GetPetOwner(target.id) and "PET" or "MONSTER"
                     end
 
                     d.value = target.amount + target.overhealing
@@ -899,7 +907,7 @@ Skada:AddLoadableModule(
         end
 
         function playermod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             if player then
                 local max, total, sources = 0, 0, {}
 
@@ -993,6 +1001,8 @@ Skada:AddLoadableModule(
                             d.class = p.class
                             d.role = p.role
                             d.spec = p.spec
+                        else
+							d.class = Skada:GetPetOwner(target.id) and "PET" or "MONSTER"
                         end
 
                         d.value = player.amount

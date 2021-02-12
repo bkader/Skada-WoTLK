@@ -63,7 +63,7 @@ Skada:AddLoadableModule(
         end
 
         function targetmod:Update(win, set)
-            local max, player = 0, Skada:find_player(set, self.playerid, self.playername)
+            local max, player = 0, Skada:find_player(set, self.playerid)
             if player and player.parries then
                 local nr = 1
                 local total = player.parries.count or 0
@@ -76,8 +76,7 @@ Skada:AddLoadableModule(
                     d.label = targetname
 
                     d.value = count
-                    d.valuetext =
-                        Skada:FormatValueText(
+                    d.valuetext = Skada:FormatValueText(
                         count,
                         mod.metadata.columns.Count,
                         _format("%02.1f%%", 100 * count / math_max(1, total)),

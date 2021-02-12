@@ -32,7 +32,7 @@ Skada:AddLoadableModule(
         function playermod:Update(win, set)
             local max = 0
             if enemymod.mobname then
-                local player = Skada:find_player(set, self.playerid, self.playername)
+                local player = Skada:find_player(set, self.playerid)
 
                 if player and player.damagedone.spells then
                     local total = player.damagedone.targets[enemymod.mobname] or 0
@@ -190,7 +190,7 @@ Skada:AddLoadableModule(
 
         local function spellmod_tooltip(win, id, label, tooltip)
             if label == CRIT_ABBR or label == HIT or label == ABSORB or label == BLOCK or label == RESIST then
-                local player = Skada:find_player(win:get_selected_set(), playermod.playerid, playermod.playername)
+                local player = Skada:find_player(win:get_selected_set(), playermod.playerid)
                 if not player then
                     return
                 end
@@ -300,7 +300,7 @@ Skada:AddLoadableModule(
         function playermod:Update(win, set)
             local max = 0
             if enemymod.mobname then
-                local player = Skada:find_player(set, self.playerid, self.playername)
+                local player = Skada:find_player(set, self.playerid)
 
                 if player and player.damagetaken.sources and player.damagetaken.sources[enemymod.mobname] then
                     local total = player.damagetaken.sources[enemymod.mobname]

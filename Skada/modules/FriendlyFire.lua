@@ -91,7 +91,7 @@ Skada:AddLoadableModule(
         end
 
         function targetmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player and player.friendfire.targets then
@@ -142,7 +142,7 @@ Skada:AddLoadableModule(
         end
 
         function spellmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player and player.friendfire.spells then

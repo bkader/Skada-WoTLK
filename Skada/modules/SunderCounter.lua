@@ -44,7 +44,7 @@ Skada:AddLoadableModule(
         end
 
         function targetmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player and player.sunders.targets then

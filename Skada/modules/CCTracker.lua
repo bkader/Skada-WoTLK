@@ -269,7 +269,7 @@ Skada:AddLoadableModule(
         end
 
         function spellsmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player then
@@ -303,7 +303,7 @@ Skada:AddLoadableModule(
         end
 
         function spelltargetsmod:Update(win, set)
-            local player = Skada:find_player(set, spellsmod.playerid, spellsmod.playername)
+            local player = Skada:find_player(set, spellsmod.playerid)
             local max = 0
 
             if player then
@@ -336,7 +336,7 @@ Skada:AddLoadableModule(
         end
 
         function targetsmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player and player.ccdone.targets then
@@ -349,7 +349,7 @@ Skada:AddLoadableModule(
                     d.id = target.id
                     d.label = targetname
 
-                    local p = Skada:find_player(set, target.id, targetname)
+                    local p = Skada:find_player(set, target.id)
                     if p then
 						d.class = p.class
 						d.spec = p.spec
@@ -558,7 +558,7 @@ Skada:AddLoadableModule(
         end
 
         function spellsmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player and player.cctaken.spells then
@@ -593,7 +593,7 @@ Skada:AddLoadableModule(
         end
 
         function spellsourcesmod:Update(win, set)
-            local player = Skada:find_player(set, spellsmod.playerid, spellsmod.playername)
+            local player = Skada:find_player(set, spellsmod.playerid)
             local max = 0
 
             if player and self.spellname then
@@ -627,7 +627,7 @@ Skada:AddLoadableModule(
         end
 
         function sourcesmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player and player.cctaken.sources then
@@ -640,7 +640,7 @@ Skada:AddLoadableModule(
                     d.id = target.id
                     d.label = targetname
 
-                    local p = Skada:find_player(set, target.id, targetname)
+                    local p = Skada:find_player(set, target.id)
                     if p then
 						d.class = p.class
 						d.spec = p.spec
@@ -884,7 +884,7 @@ Skada:AddLoadableModule(
         end
 
         function spellsmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player and player.ccbreaks.spells then
@@ -951,7 +951,7 @@ Skada:AddLoadableModule(
         end
 
         function targetsmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player and player.ccbreaks.targets then
@@ -964,7 +964,7 @@ Skada:AddLoadableModule(
                     d.id = target.id
                     d.label = targetname
 
-                    local p = Skada:find_player(set, target.id, targetname)
+                    local p = Skada:find_player(set, target.id)
                     if p then
 						d.class = p.class
 						d.spec = p.spec
@@ -989,7 +989,7 @@ Skada:AddLoadableModule(
 
         function targetspellsmod:Enter(win, id, label)
             self.targetname = label
-            _format(L["%s's CC Break <%s> spells"], targetsmod.playername, label)
+            self.title = _format(L["%s's CC Break <%s> spells"], targetsmod.playername, label)
         end
 
         function targetspellsmod:Update(win, set)

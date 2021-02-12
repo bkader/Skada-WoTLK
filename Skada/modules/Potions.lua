@@ -38,8 +38,8 @@ Skada:AddLoadableModule(
             [67490] = 42545 -- Runic Mana Injector
         }
 
-        local function log_potion(set, playerid, playername, spellid)
-            local player = Skada:find_player(set, playerid, playername)
+        local function log_potion(set, playerid, playername, playerflags, spellid)
+            local player = Skada:get_player(set, playerid, playername, playerflags)
             if player then
                 -- record potion usage for player and set
                 player.potions = player.potions or {}
@@ -56,8 +56,8 @@ Skada:AddLoadableModule(
         local function PotionUsed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
             local spellid, spellname, spellschool = ...
             if spellid and potionIDs[spellid] then
-                log_potion(Skada.current, srcGUID, srcName, spellid)
-                log_potion(Skada.total, srcGUID, srcName, spellid)
+                log_potion(Skada.current, srcGUID, srcName, srcFlags, spellid)
+                log_potion(Skada.total, srcGUID, srcName, srcFlags, spellid)
             end
         end
 
@@ -126,8 +126,7 @@ Skada:AddLoadableModule(
                     d.role = player.role
 
                     d.value = player.count
-                    d.valuetext =
-                        Skada:FormatValueText(
+                    d.valuetext = Skada:FormatValueText(
                         player.count,
                         mod.metadata.columns.Count,
                         _format("%02.1f%%", 100 * player.count / math_max(1, total)),
@@ -153,7 +152,7 @@ Skada:AddLoadableModule(
 
         function potionsmod:Update(win, set)
             local max = 0
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
 
             if player and player.potions.potions then
                 local nr = 1
@@ -170,8 +169,7 @@ Skada:AddLoadableModule(
                         d.icon = potionicon
 
                         d.value = count
-                        d.valuetext =
-                            Skada:FormatValueText(
+                        d.valuetext = Skada:FormatValueText(
                             count,
                             mod.metadata.columns.Count,
                             _format("%02.1f%%", 100 * count / math_max(1, player.potions.count)),
@@ -206,8 +204,7 @@ Skada:AddLoadableModule(
                     d.role = player.role
 
                     d.value = player.potions.count
-                    d.valuetext =
-                        Skada:FormatValueText(
+                    d.valuetext = Skada:FormatValueText(
                         d.value,
                         self.metadata.columns.Count,
                         _format("%02.1f%%", 100 * d.value / math_max(1, total)),

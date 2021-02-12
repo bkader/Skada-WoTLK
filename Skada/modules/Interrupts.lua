@@ -17,7 +17,7 @@ Skada:AddLoadableModule(
         local _GetSpellInfo = GetSpellInfo
 
         local function log_interrupt(set, data)
-            local player = Skada:find_player(set, data.playerid, data.playername)
+            local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
             if player then
 	            -- increment player's and set's interrupts count
 	            player.interrupts = player.interrupts or {}
@@ -90,7 +90,7 @@ Skada:AddLoadableModule(
         end
 
         function spellsmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player then
@@ -135,7 +135,7 @@ Skada:AddLoadableModule(
         end
 
         function targetsmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 1
 
             if player and player.interrupts.targets then
@@ -147,13 +147,13 @@ Skada:AddLoadableModule(
                     d.id = target.id
                     d.label = targetname
 
-                    local p = Skada:find_player(set, target.id, targetname)
+                    local p = Skada:find_player(set, target.id)
                     if p then
                         d.class = p.class
                         d.spec = p.spec
                         d.role = p.role
                     else
-                        d.class = "MONSTER"
+						d.class = Skada:GetPetOwner(target.id) and "PET" or "MONSTER"
                     end
 
                     d.value = target.count
@@ -183,7 +183,7 @@ Skada:AddLoadableModule(
         end
 
         function playermod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player and player.interrupts.spells then

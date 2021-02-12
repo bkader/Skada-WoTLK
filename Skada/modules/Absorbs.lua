@@ -446,7 +446,7 @@ Skada:AddLoadableModule(
         end
 
         function spellmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player and player.absorbs.spells then
@@ -492,7 +492,7 @@ Skada:AddLoadableModule(
         end
 
         function playermod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player and player.absorbs.targets then
@@ -505,11 +505,13 @@ Skada:AddLoadableModule(
                         d.id = targetname
                         d.label = targetname
 
-                        local p = Skada:find_player(set, target.id, targetname)
+                        local p = Skada:find_player(set, target.id)
                         if p then
                             d.class = p.class
                             d.role = p.role
                             d.spec = p.spec
+                        else
+							d.class = Skada:GetPetOwner(target.id) and "PET" or "UNKNOWN"
                         end
 
                         d.value = target.amount
@@ -682,7 +684,7 @@ Skada:AddLoadableModule(
         end
 
         function spellmod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player then
@@ -748,7 +750,7 @@ Skada:AddLoadableModule(
         end
 
         function playermod:Update(win, set)
-            local player = Skada:find_player(set, self.playerid, self.playername)
+            local player = Skada:find_player(set, self.playerid)
             local max = 0
 
             if player then
@@ -782,11 +784,13 @@ Skada:AddLoadableModule(
                         d.id = target.id
                         d.label = targetname
 
-                        local p = Skada:find_player(set, target.id, targetname)
+                        local p = Skada:find_player(set, target.id)
                         if p then
                             d.class = p.class
                             d.role = p.role
                             d.spec = p.spec
+                        else
+							d.class = Skada:GetPetOwner(target.id) and "PET" or "UNKNOWN"
                         end
 
                         d.value = target.amount
