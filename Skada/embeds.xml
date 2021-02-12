@@ -13,6 +13,7 @@
 <Include file="lib\AceGUI-3.0\AceGUI-3.0.xml"/>
 <Include file="lib\AceConfig-3.0\AceConfig-3.0.xml"/>
 <Include file="lib\AceComm-3.0\AceComm-3.0.xml"/>
+<Script file="lib\AceSerializer-3.0\AceSerializer-3.0.lua"/>
 <Script file="lib\LibSharedMedia-3.0\LibSharedMedia-3.0.lua"/>
 <Include file="lib\AceGUI-3.0-SharedMediaWidgets\widget.xml"/>
 <Script file="lib\LibWindow-1.1\LibWindow-1.1.lua"/>
