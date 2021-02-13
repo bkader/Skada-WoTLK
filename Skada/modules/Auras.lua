@@ -37,11 +37,12 @@ local function log_auraapply(set, aura)
 				player.auras[aura.spellname].school = aura.spellschool
 			end
 
-			-- if it's a debuff, we add the target.
+			-- targets for debuffs, sources for buffs
 			-- if aura.auratype == "DEBUFF" and aura.dstName then
 			if aura.dstName and aura.dstName ~= aura.playername then
-				player.auras[aura.spellname].targets = player.auras[aura.spellname].targets or {}
-				player.auras[aura.spellname].targets[aura.dstName] = (player.auras[aura.spellname].targets[aura.dstName] or 0) + 1
+				local key = (aura.auratype == "BUFF") and "sources" or "targets"
+				player.auras[aura.spellname][key] = player.auras[aura.spellname][key] or {}
+				player.auras[aura.spellname][key][aura.dstName] = (player.auras[aura.spellname][key][aura.dstName] or 0) + 1
 			end
 		end
 	end
@@ -229,13 +230,15 @@ end
 
 -- details about targets
 local function targetupdatefunc(auratype, win, set, playerid, spellname)
+	if not set or not auratype then return end
 	local player = Skada:find_player(set, playerid)
 	if not player or not player.auras then return end
 
-	if player.auras[spellname] and player.auras[spellname].targets then
+	local key = (auratype == "BUFF") and "sources" or "targets"
+	if player.auras[spellname] and player.auras[spellname][key] then
 		local nr, max = 1, 0
 		local total = player.auras[spellname].count
-		for targetname, count in _pairs(player.auras[spellname].targets) do
+		for targetname, count in _pairs(player.auras[spellname][key]) do
 			local d = win.dataset[nr] or {}
 			win.dataset[nr] = d
 
