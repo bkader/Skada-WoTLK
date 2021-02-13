@@ -62,13 +62,24 @@ local aura = {}
 local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
     local spellid, spellname, spellschool, auratype = ...
 
-    aura.playerid = srcGUID
-    aura.playername = srcName
-    aura.playerflags = srcFlags
+    if auratype == "BUFF" then
+	    aura.playerid = dstGUID
+	    aura.playername = dstName
+	    aura.playerflags = dstFlags
 
-    aura.dstGUID = dstGUID
-    aura.dstName = dstName
-    aura.dstFlags = dstFlags
+	    aura.dstGUID = srcGUID
+	    aura.dstName = srcName
+	    aura.dstFlags = srcFlags
+    else
+		aura.playerid = srcGUID
+	    aura.playername = srcName
+	    aura.playerflags = srcFlags
+
+	    aura.dstGUID = dstGUID
+	    aura.dstName = dstName
+	    aura.dstFlags = dstFlags
+    end
+
 
     aura.spellid = spellid
     aura.spellname = spellname
@@ -241,13 +252,14 @@ end
 
 -- called on SetComplete to remove active auras
 local function setcompletefunc(set, auratype)
-	if set then
-		for _, player in _ipairs(set.players) do
-			if player.auras then
-				for _, spell in _pairs(player.auras) do
-					if spell.auratype == auratype and spell.active > 0 then
-						spell.active = 0
-					end
+	if not set or not auratype then return end
+	local settime = Skada:GetSetTime(set)
+	for _, player in _ipairs(set.players) do
+		if player.auras then
+			for _, spell in _pairs(player.auras) do
+				if spell.auratype == auratype then
+					if spell.active > 0 then spell.active = 0 end
+					if spell.uptime > settime then spell.uptime = settime end
 				end
 			end
 		end
@@ -264,7 +276,16 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 
     local _GetNumRaidMembers, _GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
     local _UnitExists, _UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
-    local _UnitGUID, _UnitName = UnitGUID, UnitName
+    local _UnitGUID, _UnitName, _UnitAura = UnitGUID, UnitName, UnitAura
+
+    -- list of the auras that are ignored!
+	local blacklist = {
+		[57819] = true, -- Tabard of the Argent Crusade
+		[57820] = true, -- Tabard of the Ebon Blade
+		[57821] = true, -- Tabard of the Kirin Tor
+		[57822] = true, -- Tabard of the Wyrmrest Accord
+		[72968] = true, -- Precious's Ribbon
+	}
 
     function spellmod:Enter(win, id, label)
         self.playerid = id
@@ -301,7 +322,7 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
     end
 
 	function mod:OnDisable()
-	Skada:RemoveMode(self)
+		Skada:RemoveMode(self)
 	end
 
 	function mod:CheckBuffs(event, timestamp)
@@ -322,8 +343,8 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 				if _UnitExists(unit) and not _UnitIsDeadOrGhost(unit) then
 					local dstGUID, dstName = _UnitGUID(unit), _select(1, _UnitName(unit))
 					for i = 0, 31 do
-					local spellname, _, _, _, _, _, _, unitCaster, _, _, spellid = UnitAura(unit, i, nil, "BUFF")
-						if spellname and spellid and unitCaster then
+					local spellname, rank, _, _, _, _, _, unitCaster, _, _, spellid = _UnitAura(unit, i, nil, "BUFF")
+						if spellname and spellid and unitCaster and rank ~= SPELL_PASSIVE and not blacklist[spellid] then
 							AuraApplied(nil, nil, _UnitGUID(unitCaster), _select(1, _UnitName(unitCaster)), nil, dstGUID, dstName, nil, spellid, spellname, nil, "BUFF")
 						end
 					end
