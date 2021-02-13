@@ -419,13 +419,14 @@ L["Uptime"] = true
 L["Buffs and Debuffs"] = true
 L["Buffs"] = true
 L["Buff spell list"] = true
+L["Buff source list"] = true
 L["%s's buffs"] = true
+L["%s's <%s> sources"] = true
 
 L["Debuffs"] = true
 L["Debuff spell list"] = true
 L["Debuff target list"] = true
 L["%s's debuffs"] = true
-L["%s's debuff targets"] = true
 L["%s's <%s> targets"] = true
 
 L["Sunder Counter"] = true

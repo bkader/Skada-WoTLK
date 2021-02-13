@@ -38,7 +38,8 @@ local function log_auraapply(set, aura)
 			end
 
 			-- if it's a debuff, we add the target.
-			if aura.auratype == "DEBUFF" and aura.dstName then
+			-- if aura.auratype == "DEBUFF" and aura.dstName then
+			if aura.dstName and aura.dstName ~= aura.playername then
 				player.auras[aura.spellname].targets = player.auras[aura.spellname].targets or {}
 				player.auras[aura.spellname].targets[aura.dstName] = (player.auras[aura.spellname].targets[aura.dstName] or 0) + 1
 			end
@@ -67,18 +68,22 @@ local aura = {}
 local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
     local spellid, spellname, spellschool, auratype = ...
 
-	aura.playerid = srcGUID
-    aura.playername = srcName
-    aura.playerflags = srcFlags
-
     if auratype == "DEBUFF" then
+		aura.playerid = srcGUID
+	    aura.playername = srcName
+	    aura.playerflags = srcFlags
+
 		aura.dstGUID = dstGUID
 		aura.dstName = dstName
 		aura.dstFlags = dstFlags
-	else
-		aura.dstGUID = nil
-		aura.dstName = nil
-		aura.dstFlags = nil
+    elseif auratype == "BUFF" then
+		aura.playerid = dstGUID
+	    aura.playername = dstName
+	    aura.playerflags = dstFlags
+
+		aura.dstGUID = srcGUID
+		aura.dstName = srcName
+		aura.dstFlags = srcFlags
     end
 
     aura.spellid = spellid
@@ -303,6 +308,7 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 
     local mod = Skada:NewModule(L["Buffs"])
     local spellmod = mod:NewModule(L["Buff spell list"])
+    local targetmod = mod:NewModule(L["Buff source list"])
 
     local _GetNumRaidMembers, _GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
     local _UnitExists, _UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
@@ -316,6 +322,15 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 		[57822] = true, -- Tabard of the Wyrmrest Accord
 		[72968] = true, -- Precious's Ribbon
 	}
+
+    function targetmod:Enter(win, id, label)
+        self.spellname = label
+        self.title = _format(L["%s's <%s> sources"], spellmod.playername, label)
+    end
+
+    function targetmod:Update(win, set)
+		targetupdatefunc("BUFF", win, set, spellmod.playerid, self.spellname)
+    end
 
     function spellmod:Enter(win, id, label)
         self.playerid = id
@@ -336,7 +351,7 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
     end
 
     function mod:OnEnable()
-        spellmod.metadata = {tooltip = buff_tooltip}
+        spellmod.metadata = {tooltip = buff_tooltip, click1 = targetmod}
         self.metadata = {click1 = spellmod}
 
         Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {src_is_interesting = true})
@@ -371,11 +386,11 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 			for n = min, max do
 				local unit = (n == 0) and "player" or prefix.._tostring(n)
 				if _UnitExists(unit) and not _UnitIsDeadOrGhost(unit) then
-					local unitGUID, unitName = _UnitGUID(unit), _select(1, _UnitName(unit))
+					local dstGUID, dstName = _UnitGUID(unit), _select(1, _UnitName(unit))
 					for i = 0, 31 do
 					local spellname, rank, _, _, _, _, _, unitCaster, _, _, spellid = _UnitAura(unit, i, nil, "BUFF")
 						if spellname and spellid and unitCaster and rank ~= SPELL_PASSIVE and not blacklist[spellid] then
-							AuraApplied(nil, nil, unitGUID, unitName, nil, nil, nil, nil, spellid, spellname, nil, "BUFF")
+							AuraApplied(nil, nil, _UnitGUID(unitCaster), _select(1, _UnitName(unitCaster)), nil, dstGUID, dstName, nil, spellid, spellname, nil, "BUFF")
 						end
 					end
 				end
