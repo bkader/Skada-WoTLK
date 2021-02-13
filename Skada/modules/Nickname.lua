@@ -60,68 +60,89 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
         end
     end
 
-    function mod:OnInitialize()
-        -- store them once and for all.
-        unitName = select(1, UnitName("player"))
-        unitGUID = UnitGUID("player")
-
-        Skada.options.args.modules.args.nickname = {
-            type = "group",
-            name = L["Nickname"],
-            order = 0,
-            args = {
-                nickname = {
-                    type = "input",
-                    name = L["Nickname"],
-                    desc = L["Set a nickname for you.\nNicknames are sent to group members and Skada can use them instead of your character name."],
-                    order = 1,
-                    width = "full",
-                    get = function() return Skada.db.profile.nickname end,
-                    set = function(_, val)
-                        local okey, nickname = CheckNickname(val)
-                        if okey == true then
-                            Skada.db.profile.nickname = nickname
-                            Skada:ApplySettings()
-                        else
-                            Skada:Print(nickname)
-                        end
-                    end
-                },
-                ignore = {
-                    type = "toggle",
-                    name = L["Ignore Nicknames"],
-                    desc = L["When enabled, nicknames set by Skada users are ignored."],
-                    order = 2,
-                    width = "full",
-                    get = function() return Skada.db.profile.ignorenicknames end,
-                    set = function()
-                        Skada.db.profile.ignorenicknames = not Skada.db.profile.ignorenicknames
+    -- module options
+    local options = {
+        type = "group",
+        name = L["Nickname"],
+        order = 0,
+        args = {
+            nickname = {
+                type = "input",
+                name = L["Nickname"],
+                desc = L["Set a nickname for you.\nNicknames are sent to group members and Skada can use them instead of your character name."],
+                order = 1,
+                width = "full",
+                get = function() return Skada.db.profile.nickname end,
+                set = function(_, val)
+                    local okey, nickname = CheckNickname(val)
+                    if okey == true then
+                        Skada.db.profile.nickname = nickname
+                        mod:SetNickname(unitGUID, nickname, true)
                         Skada:ApplySettings()
+                    else
+                        Skada:Print(nickname)
                     end
-                },
-                display = {
-                    type = "select",
-                    name = L["Name display"],
-                    desc = L["Choose how names are shown on your bars."],
-                    order = 3,
-                    width = "full",
-                    values = function()
-                        return {
-                            [1] = NAME,
-                            [2] = L["Nickname"],
-                            [3] = NAME .. " (" .. L["Nickname"] .. ")",
-                            [4] = L["Nickname"] .. " (" .. NAME .. ")"
-                        }
-                    end,
-                    get = function() return Skada.db.profile.namedisplay or 1 end,
-                    set = function(_, key)
-                        Skada.db.profile.namedisplay = key
-                        Skada:ApplySettings()
-                    end
-                }
+                end
+            },
+            ignore = {
+                type = "toggle",
+                name = L["Ignore Nicknames"],
+                desc = L["When enabled, nicknames set by Skada users are ignored."],
+                order = 2,
+                width = "full",
+                get = function() return Skada.db.profile.ignorenicknames end,
+                set = function()
+                    Skada.db.profile.ignorenicknames = not Skada.db.profile.ignorenicknames
+                    Skada:ApplySettings()
+                end
+            },
+            display = {
+                type = "select",
+                name = L["Name display"],
+                desc = L["Choose how names are shown on your bars."],
+                order = 3,
+                width = "full",
+                values = function()
+                    return {
+                        [1] = NAME,
+                        [2] = L["Nickname"],
+                        [3] = NAME .. " (" .. L["Nickname"] .. ")",
+                        [4] = L["Nickname"] .. " (" .. NAME .. ")"
+                    }
+                end,
+                get = function() return Skada.db.profile.namedisplay or 1 end,
+                set = function(_, key)
+                    Skada.db.profile.namedisplay = key
+                    Skada:ApplySettings()
+                end
             }
         }
+    }
+
+    function mod:OnInitialize()
+        unitName = select(1, UnitName("player"))
+        unitGUID = UnitGUID("player")
+        Skada.options.args.modules.args.nickname = options
     end
+
+    function mod:OnEnable()
+		self:SetCacheTable()
+
+        Skada.RegisterCallback(self, "OnCommNicknameRequest")
+        Skada.RegisterCallback(self, "OnCommNicknameResponse")
+        Skada.RegisterCallback(self, "OnCommNicknameChange")
+        Skada.RegisterCallback(self, "FixPlayer")
+        Skada.RegisterCallback(self, "BarUpdate")
+        self:Hook(Skada, "find_player")
+    end
+
+    function mod:OnDisable()
+		Skada.db.global.nicknames = nil
+		self.db = nil
+    end
+
+    -----------------------------------------------------------
+    -- hooked functions
 
     -- this function only laters the data.label according to our settings.
     function mod:BarUpdate(_, win, data)
@@ -154,12 +175,41 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
                     else
                         player.nickname = unitName
                     end
-                else
-                    Skada:SendComm("WHISPER", player.name, "NicknameRequest")
+				elseif self.db and self.db.nicknames[player.id] then
+					player.nickname = self.db.nicknames[player.id]
+				else
+					Skada:SendComm("WHISPER", player.name, "NicknameRequest")
+				end
+            end
+        end
+    end
+
+    -- this function is called only once in case we don't receive
+    -- a response from the player, it will simply set his/her name
+    -- as the nickname to avoid further check.
+    function mod:find_player(_, set, guid)
+        if not Skada.db.profile.ignorenicknames and set and guid then
+            for _, player in ipairs(set.players) do
+                if player.id == guid then
+                    if not player.nickname then -- we update only if needed.
+						if self.db.nicknames[guid] then
+							player.nickname = self.db.nicknames[guid]
+						else
+							player.nickname = player.name
+						end
+                        -- update cached
+                        if set._playeridx and set._playeridx[guid] then
+							set._playeridx[guid].nickname = player.nickname
+                        end
+                    end
+                    break -- no need to go further
                 end
             end
         end
     end
+
+    -----------------------------------------------------------
+    -- sync functions
 
     -- called whenever we receive a nickname request.
     function mod:OnCommNicknameRequest(_, sender)
@@ -176,58 +226,51 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
             if not nickname or nickname == "" then
                 nickname = sender
             end
-
-            -- add it to the current set.
-            if Skada.current then
-                for _, player in ipairs(Skada.current.players) do
-                    if player.id == playerid then
-						if not player.nickname then
-							player.nickname = nickname
-						end
-                        break
-                    end
-                end
-            end
-
-            -- add it to the total set.
-            if Skada.total then
-                for _, player in ipairs(Skada.total.players) do
-                    if player.id == playerid then
-						if not player.nickname then
-							player.nickname = nickname
-						end
-                        break
-                    end
-                end
-            end
+            self:SetNickname(playerid, nickname, false)
         end
     end
 
-    -- this function is called only once in case we don't receive
-    -- a response from the player, it will simply set his/her name
-    -- as the nickname to avoid further check.
-    function mod:find_player(_, set, playerid)
-        if not Skada.db.profile.ignorenicknames and set and playerid then
-            for _, player in ipairs(set.players) do
-                if player.id == playerid then
-                    if not player.nickname then -- we update only if needed.
-                        player.nickname = player.name
-                        -- update cached
-                        if set._playeridx and set._playeridx[playerid] then
-                            set._playeridx[playerid].nickname = player.name
-                        end
-                    end
-                    break -- no need to go further
-                end
-            end
-        end
+    -- if someone in our group changes the nickname, we update the cache
+    function mod:OnCommNicknameChange(_, sender, playerid, nickname)
+		if not Skada.db.profile.ignorenicknames then
+			if not nickname or nickname == "" then
+				nickname = sender
+			end
+			if not self.db then self:SetCacheTable() end
+			self.db.nicknames[playerid] = nickname
+		end
     end
 
-    function mod:OnEnable()
-        Skada.RegisterCallback(self, "OnCommNicknameRequest")
-        Skada.RegisterCallback(self, "OnCommNicknameResponse")
-        Skada.RegisterCallback(self, "FixPlayer")
-        Skada.RegisterCallback(self, "BarUpdate")
-        self:Hook(Skada, "find_player")
+    -----------------------------------------------------------
+
+    function mod:SetNickname(guid, nickname, sync)
+		self.db.nicknames[guid] = nickname
+		if guid == unitGUID and sync then
+			Skada:SendComm(nil, nil, "NicknameChange", guid, nickname)
+		end
+    end
+
+    -----------------------------------------------------------
+    -- cache table functions
+
+    function mod:SetCacheTable()
+		self.db = Skada.db.global.nicknames or {nicknames = {}}
+		Skada.db.global.nicknames = self.db
+		self:CheckForReset()
+    end
+
+    function mod:CheckForReset()
+		if not self.db then
+			self.db = Skada.db.global.nicknames or {nicknames = {}}
+			Skada.db.global.nicknames = self.db
+		end
+
+		if not self.db.nextreset then
+			self.db.nextreset = time() + (60*60*24*15)
+			self.db.nicknames = {}
+		elseif time() > self.db.nextreset then
+			self.db.nextreset = time() + (60*60*24*15)
+			self.db.nicknames = {}
+		end
     end
 end)
