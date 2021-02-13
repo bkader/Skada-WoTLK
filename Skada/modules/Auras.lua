@@ -191,7 +191,7 @@ do
 end
 
 -- spells per player list
-local function detailupdatefunc(auratype, win, set, playerid)
+local function spellupdatefunc(auratype, win, set, playerid)
     local player = Skada:find_player(set, playerid)
     if player and player.auras then
         local maxtime = Skada:PlayerActiveTime(set, player)
@@ -220,6 +220,34 @@ local function detailupdatefunc(auratype, win, set, playerid)
             end
         end
     end
+end
+
+-- details about targets
+local function targetupdatefunc(auratype, win, set, playerid, spellname)
+	local player = Skada:find_player(set, playerid)
+	if not player or not player.auras then return end
+
+	if player.auras[spellname] and player.auras[spellname].targets then
+		local nr, max = 1, 0
+		local total = player.auras[spellname].count
+		for targetname, count in _pairs(player.auras[spellname].targets) do
+			local d = win.dataset[nr] or {}
+			win.dataset[nr] = d
+
+			d.id = nr
+			d.label = targetname
+			d.value = count
+			d.valuetext = _format("%u (%02.1f%%)", count, 100 * count / total)
+
+			if count > max then
+				max = count
+			end
+
+			nr= nr + 1
+		end
+
+		win.metadata.maxvalue = max
+	end
 end
 
 -- used to show tooltip
@@ -296,7 +324,7 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
     end
 
     function spellmod:Update(win, set)
-        detailupdatefunc("BUFF", win, set, self.playerid)
+        spellupdatefunc("BUFF", win, set, self.playerid)
     end
 
     function mod:Update(win, set)
@@ -396,32 +424,7 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
     end
 
     function targetmod:Update(win, set)
-        local player = Skada:find_player(set, spellmod.playerid)
-        local max = 0
-        if player and self.spellname and player.auras[self.spellname] then
-            local nr = 1
-
-            local total = player.auras[self.spellname].count
-
-            for targetname, count in _pairs(player.auras[self.spellname].targets) do
-                local d = win.dataset[nr] or {}
-                win.dataset[nr] = d
-
-                d.id = targetname
-                d.label = targetname
-
-                d.value = count
-                d.valuetext = _format("%u (%02.1f%%)", count, 100 * count / total)
-
-                if count > max then
-                    max = count
-                end
-
-                nr = nr + 1
-            end
-        end
-
-        win.metadata.maxvalue = max
+		targetupdatefunc("DEBUFF", win, set, spellmod.playerid, self.spellname)
     end
 
     function spellmod:Enter(win, id, label)
@@ -431,7 +434,7 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
     end
 
     function spellmod:Update(win, set)
-        detailupdatefunc("DEBUFF", win, set, self.playerid)
+        spellupdatefunc("DEBUFF", win, set, self.playerid)
     end
 
     function mod:Update(win, set)
