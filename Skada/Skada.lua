@@ -2597,7 +2597,7 @@ function Skada:OnEnable()
 
 	self.After(2, function() self:ApplySettings() end)
 	self.After(3, function() self:MemoryCheck() end)
-	self.NewTicker(1, function() self:CleanGarbage() end)
+	self.NewTicker(2, function() self:CleanGarbage() end)
 end
 
 -- ======================================================= --
@@ -2870,6 +2870,8 @@ do
 
 		update_timer = self.NewTicker(self.db.profile.updatefrequency or 0.25, function() self:UpdateDisplay() end)
 		tick_timer = self.NewTicker(1, combat_tick)
+
+		self:CleanGarbage() -- fix combatlog
 	end
 
 	-- for shaman elemental
