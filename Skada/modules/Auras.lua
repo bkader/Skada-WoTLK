@@ -32,6 +32,11 @@ local function log_auraapply(set, aura)
 				player.auras[aura.spellname].active = player.auras[aura.spellname].active + 1
 			end
 
+			-- fix the school
+			if not player.auras[aura.spellname].school and aura.spellschool then
+				player.auras[aura.spellname].school = aura.spellschool
+			end
+
 			-- if it's a debuff, we add the target.
 			if aura.auratype == "DEBUFF" and aura.dstName then
 				player.auras[aura.spellname].targets = player.auras[aura.spellname].targets or {}
@@ -62,24 +67,19 @@ local aura = {}
 local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
     local spellid, spellname, spellschool, auratype = ...
 
-    if auratype == "BUFF" then
-	    aura.playerid = dstGUID
-	    aura.playername = dstName
-	    aura.playerflags = dstFlags
+	aura.playerid = srcGUID
+    aura.playername = srcName
+    aura.playerflags = srcFlags
 
-	    aura.dstGUID = srcGUID
-	    aura.dstName = srcName
-	    aura.dstFlags = srcFlags
-    else
-		aura.playerid = srcGUID
-	    aura.playername = srcName
-	    aura.playerflags = srcFlags
-
-	    aura.dstGUID = dstGUID
-	    aura.dstName = dstName
-	    aura.dstFlags = dstFlags
+    if auratype == "DEBUFF" then
+		aura.dstGUID = dstGUID
+		aura.dstName = dstName
+		aura.dstFlags = dstFlags
+	else
+		aura.dstGUID = nil
+		aura.dstName = nil
+		aura.dstFlags = nil
     end
-
 
     aura.spellid = spellid
     aura.spellname = spellname
@@ -252,14 +252,16 @@ end
 
 -- called on SetComplete to remove active auras
 local function setcompletefunc(set, auratype)
-	if not set or not auratype then return end
-	local settime = Skada:GetSetTime(set)
-	for _, player in _ipairs(set.players) do
-		if player.auras then
-			for _, spell in _pairs(player.auras) do
-				if spell.auratype == auratype then
-					if spell.active > 0 then spell.active = 0 end
-					if spell.uptime > settime then spell.uptime = settime end
+	if set then
+		local settime = Skada:GetSetTime(set)
+		for _, player in _ipairs(set.players) do
+			if player.auras then
+				local maxtime = Skada:PlayerActiveTime(set, player)
+				for _, spell in _pairs(player.auras) do
+					if spell.auratype == auratype then
+						if spell.active > 0 then spell.active = 0 end
+						if spell.uptime > maxtime then spell.uptime = maxtime end
+					end
 				end
 			end
 		end
@@ -341,11 +343,11 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 			for n = min, max do
 				local unit = (n == 0) and "player" or prefix.._tostring(n)
 				if _UnitExists(unit) and not _UnitIsDeadOrGhost(unit) then
-					local dstGUID, dstName = _UnitGUID(unit), _select(1, _UnitName(unit))
+					local unitGUID, unitName = _UnitGUID(unit), _select(1, _UnitName(unit))
 					for i = 0, 31 do
 					local spellname, rank, _, _, _, _, _, unitCaster, _, _, spellid = _UnitAura(unit, i, nil, "BUFF")
 						if spellname and spellid and unitCaster and rank ~= SPELL_PASSIVE and not blacklist[spellid] then
-							AuraApplied(nil, nil, _UnitGUID(unitCaster), _select(1, _UnitName(unitCaster)), nil, dstGUID, dstName, nil, spellid, spellname, nil, "BUFF")
+							AuraApplied(nil, nil, unitGUID, unitName, nil, nil, nil, nil, spellid, spellname, nil, "BUFF")
 						end
 					end
 				end
