@@ -1176,7 +1176,7 @@ do
 end
 
 function Skada:find_player(set, playerid)
-	if set then
+	if set and playerid then
 		set._playeridx = set._playeridx or {}
 		local player = set._playeridx[playerid]
 		if player then return player end
