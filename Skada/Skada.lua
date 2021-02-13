@@ -2870,8 +2870,6 @@ do
 
 		update_timer = self.NewTicker(self.db.profile.updatefrequency or 0.25, function() self:UpdateDisplay() end)
 		tick_timer = self.NewTicker(1, combat_tick)
-
-		self:CleanGarbage() -- fix combatlog
 	end
 
 	-- for shaman elemental
