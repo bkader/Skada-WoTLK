@@ -1540,11 +1540,6 @@ end
 -- =============== --
 do
 	local SendChatMessage = SendChatMessage
-	if ChatThrottleLib and ChatThrottleLib.SendChatMessage then
-		SendChatMessage = function(...)
-			ChatThrottleLib:SendChatMessage("BULK", "Skada", ...)
-		end
-	end
 
 	local function escapestr(str)
 		local newstr = ""

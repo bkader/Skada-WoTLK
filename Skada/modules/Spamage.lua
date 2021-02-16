@@ -154,22 +154,38 @@ Skada:AddLoadableModule(
 
         local firstlines = {
             "^Details!: (.*)$", -- Details!
-            "^Recount - (.*)$", -- Recount
-            "^Skada:(.*)$", -- Modified skada
             "^Skada report on (.*) for (.*), (.*) to (.*):$", -- Skada enUS
-            "^Skada: Bericht für (.*) gegen (.*), (.*) bis (.*):$", -- Skada deDE, might change in new Skada version
-            "^Skada : (.*) pour (.*), de (.*) à (.*) :$", -- Skada frFR
             "^(.*) - (.*)의 Skada 보고, (.*) ~ (.*):$", -- Skada koKR
-            --Skada ruRU missing, using enUS covered above
-            "^Skada报告(.*)的(.*), (.*)到(.*):$", --Skada zhCN, might change in new Skada version
-            "^(.*)的報告來自(.*)，從(.*)到(.*)：$", -- Skada zhTW, might change in new Skada version
-            "^Skada: (.*) for (.*), (.*) - (.*):$" -- Better Skada support player details
+            "^Skada报告(.*)的(.*), (.*)到(.*):$",	-- Skada zhCN
+            "^(.*)的報告來自(.*)，從(.*)到(.*)：$",	-- Skada zhTW
+            "^Skada: (.*) for (.*), (.*) - (.*):$",	-- Better Skada support player details
+            "^Recount - (.*)$",				-- Recount
+            "^Skada: (.*) for (.*):$",		-- Skada enUS
+            "^Skada: (.*) für (.*):$",		-- Skada deDE
+            "^Skada: (.*) pour (.*):$", 	-- Skada frFR
+            "^Отчёт Skada: (.*), с (.*):$",	-- Skada ruRU
+            "^Skada: (.*) por (.*):$", 		-- Skada esES/ptBR
+            "^(.*) 의 Skada 보고 (.*):$", 	-- Skada koKR
+            "^Skada报告(.*)的(.*):$", 		-- Skada zhCN
+            "^Skada:(.*)來自(.*):$", 		-- Skada zhTW
+            "^(.*) Done for (.*)$", 		-- TinyDPS enUS
+            "^(.*) für (.*)$", 				-- TinyDPS deDE
+            "데미지량 -(.*)$", 				-- TinyDPS koKR
+            "힐량 -(.*)$", 					-- TinyDPS koKR
+            "Урон:(.*)$", 					-- TinyDPS ruRU
+            "Исцеление:(.*)$", 				-- TinyDPS ruRU
+            "^# (.*) - (.*)$", 				-- Numeration
+            "alDamageMeter : (.*)$", 		-- alDamageMeter
+            "^Details! Report for (.*)$" 	-- Details!
         }
 
         local nextlines = {
-            "^(%d+). (.*)$", --Recount and Skada
-            "^ (%d+). (.*)$", --Skada
-            "^.*%%%)$" --Skada player details
+            "^(%d+). (.*)$",	--Recount, Details! and Skada
+            "^(%d+). (.*)$",	--Skada
+            "^(.*) (.*)$",		-- Additional Skada
+            "^.*%%%)$",			--Skada player details
+            "^[+-]%d+.%d",		-- Numeration deathlog details
+            "^(%d+). (.*):(.*)(%d+)(.*)(%d+)%%(.*)%((%d+)%)$" -- TinyDPS
         }
 
         local events = {
