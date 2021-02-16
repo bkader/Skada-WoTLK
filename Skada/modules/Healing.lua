@@ -42,13 +42,11 @@ Skada:AddLoadableModule(
                         player.healing.targets[data.dstName] = {
                             id = data.dstGUID,
                             amount = amount,
-                            overhealing = data.overhealing
+                            overhealing = data.overhealing or 0
                         }
                     else
-                        player.healing.targets[data.dstName].amount =
-                            player.healing.targets[data.dstName].amount + amount
-                        player.healing.targets[data.dstName].overhealing =
-                            player.healing.targets[data.dstName].overhealing + data.overhealing
+                        player.healing.targets[data.dstName].amount = player.healing.targets[data.dstName].amount + amount
+                        player.healing.targets[data.dstName].overhealing = (player.healing.targets[data.dstName].overhealing or 0) + data.overhealing
                     end
                 end
 
