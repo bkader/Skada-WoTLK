@@ -419,9 +419,7 @@ if not L then return end
 -- L["Buffs and Debuffs"] = ""
 -- L["Buffs"] = ""
 -- L["Buff spell list"] = ""
--- L["Buff source list"] = ""
 -- L["%s's buffs"] = ""
--- L["%s's <%s> sources"] = ""
 
 -- L["Debuffs"] = ""
 -- L["Debuff spell list"] = ""

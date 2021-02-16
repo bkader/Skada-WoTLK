@@ -39,10 +39,9 @@ local function log_auraapply(set, aura)
 
 			-- targets for debuffs, sources for buffs
 			-- if aura.auratype == "DEBUFF" and aura.dstName then
-			if aura.dstName and aura.dstName ~= aura.playername then
-				local key = (aura.auratype == "BUFF") and "sources" or "targets"
-				player.auras[aura.spellname][key] = player.auras[aura.spellname][key] or {}
-				player.auras[aura.spellname][key][aura.dstName] = (player.auras[aura.spellname][key][aura.dstName] or 0) + 1
+			if aura.auratype == "DEBUFF" and aura.dstName then
+				player.auras[aura.spellname].targets = player.auras[aura.spellname].targets or {}
+				player.auras[aura.spellname].targets[aura.dstName] = (player.auras[aura.spellname].targets[aura.dstName] or 0) + 1
 			end
 		end
 	end
@@ -228,36 +227,6 @@ local function spellupdatefunc(auratype, win, set, playerid)
     end
 end
 
--- details about targets
-local function targetupdatefunc(auratype, win, set, playerid, spellname)
-	if not set or not auratype then return end
-	local player = Skada:find_player(set, playerid)
-	if not player or not player.auras then return end
-
-	local key = (auratype == "BUFF") and "sources" or "targets"
-	if player.auras[spellname] and player.auras[spellname][key] then
-		local nr, max = 1, 0
-		local total = player.auras[spellname].count
-		for targetname, count in _pairs(player.auras[spellname][key]) do
-			local d = win.dataset[nr] or {}
-			win.dataset[nr] = d
-
-			d.id = nr
-			d.label = targetname
-			d.value = count
-			d.valuetext = _format("%u (%02.1f%%)", count, 100 * count / total)
-
-			if count > max then
-				max = count
-			end
-
-			nr= nr + 1
-		end
-
-		win.metadata.maxvalue = max
-	end
-end
-
 -- used to show tooltip
 local function aura_tooltip(win, id, label, tooltip, playerid, L)
     local set = win:get_selected_set()
@@ -311,7 +280,6 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 
     local mod = Skada:NewModule(L["Buffs"])
     local spellmod = mod:NewModule(L["Buff spell list"])
-    local targetmod = mod:NewModule(L["Buff source list"])
 
     local _GetNumRaidMembers, _GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
     local _UnitExists, _UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
@@ -325,15 +293,6 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 		[57822] = true, -- Tabard of the Wyrmrest Accord
 		[72968] = true, -- Precious's Ribbon
 	}
-
-    function targetmod:Enter(win, id, label)
-        self.spellname = label
-        self.title = _format(L["%s's <%s> sources"], spellmod.playername, label)
-    end
-
-    function targetmod:Update(win, set)
-		targetupdatefunc("BUFF", win, set, spellmod.playerid, self.spellname)
-    end
 
     function spellmod:Enter(win, id, label)
         self.playerid = id
@@ -354,7 +313,7 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
     end
 
     function mod:OnEnable()
-        spellmod.metadata = {tooltip = buff_tooltip, click1 = targetmod}
+        spellmod.metadata = {tooltip = buff_tooltip}
         self.metadata = {click1 = spellmod}
 
         Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {src_is_interesting = true})
@@ -442,7 +401,30 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
     end
 
     function targetmod:Update(win, set)
-		targetupdatefunc("DEBUFF", win, set, spellmod.playerid, self.spellname)
+		local player = Skada:find_player(set, spellmod.playerid)
+		if not player or not player.auras then return end
+
+		if player.auras[self.spellname] and player.auras[self.spellname].targets then
+			local nr, max = 1, 0
+			local total = player.auras[self.spellname].count
+			for targetname, count in _pairs(player.auras[self.spellname].targets) do
+				local d = win.dataset[nr] or {}
+				win.dataset[nr] = d
+
+				d.id = nr
+				d.label = targetname
+				d.value = count
+				d.valuetext = _format("%u (%02.1f%%)", count, 100 * count / math_max(1, total))
+
+				if count > max then
+					max = count
+				end
+
+				nr = nr + 1
+			end
+
+			win.metadata.maxvalue = max
+		end
     end
 
     function spellmod:Enter(win, id, label)
