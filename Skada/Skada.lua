@@ -998,7 +998,11 @@ function Skada:DeleteSet(set)
 end
 
 function Skada:GetSetTime(set)
-	return set.time and set.time or math_max(time() - set.starttime, 0.1)
+	if set.time and set.time > 0 then
+		return set.time
+	end
+
+	return math_max(time() - set.starttime, 0.1)
 end
 
 function Skada:GetFormatedSetTime(set)
