@@ -121,9 +121,10 @@ Skada.defaults = {
         columns = {},
         report = {mode = "Damage", set = "current", channel = "Say", chantype = "preset", number = 10},
         modulesBlocked = {
-            ["Spamage"] = true,
-            ["Useful damage"] = true,
-            ["Damage done by spell"] = true
+			["Spamage"] = true,
+			["Useful damage"] = true,
+			["Damage done by spell"] = true,
+			["Avoidance & Mitigation"] = true
         },
         windows = {windefaultscopy}
     }
