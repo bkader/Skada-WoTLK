@@ -84,17 +84,12 @@ local math_floor, math_max = math.floor, math.max
 local band, time = bit.band, time
 local GetNumPartyMembers, GetNumRaidMembers = GetNumPartyMembers, GetNumRaidMembers
 local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAffectingCombat, InCombatLockdown
-local UnitGUID, UnitName, UnitClass = UnitGUID, UnitName, UnitClass
+local UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitGUID, UnitName, UnitClass, UnitIsConnected
 local CombatLogClearEntries = CombatLogClearEntries
 
-local COMBATLOG_OBJECT_TYPE_PET = COMBATLOG_OBJECT_TYPE_PET or 0x00001000
-local COMBATLOG_OBJECT_TYPE_GUARDIAN = COMBATLOG_OBJECT_TYPE_GUARDIAN or 0x00002000
-local PET_FLAGS = bit.bor(COMBATLOG_OBJECT_TYPE_PET, COMBATLOG_OBJECT_TYPE_GUARDIAN)
-
-local COMBATLOG_OBJECT_AFFILIATION_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE or 0x00000001
-local COMBATLOG_OBJECT_AFFILIATION_PARTY = COMBATLOG_OBJECT_AFFILIATION_PARTY or 0x00000002
-local COMBATLOG_OBJECT_AFFILIATION_RAID = COMBATLOG_OBJECT_AFFILIATION_RAID or 0x00000004
-local RAID_FLAGS = bit.bor(COMBATLOG_OBJECT_AFFILIATION_MINE, COMBATLOG_OBJECT_AFFILIATION_PARTY, COMBATLOG_OBJECT_AFFILIATION_RAID)
+local RAID_FLAGS = COMBATLOG_OBJECT_AFFILIATION_MINE+COMBATLOG_OBJECT_AFFILIATION_PARTY+COMBATLOG_OBJECT_AFFILIATION_RAID
+local PET_FLAGS = COMBATLOG_OBJECT_TYPE_PET+COMBATLOG_OBJECT_TYPE_GUARDIAN
+local SHAM_FLAGS = COMBATLOG_OBJECT_TYPE_NPC+COMBATLOG_OBJECT_CONTROL_NPC
 
 -- =================== --
 -- add missing globals --
@@ -1672,22 +1667,25 @@ function Skada:GetPetOwner(petGUID)
 end
 
 function Skada:CheckGroup()
-	local prefix, min, max = "raid", 1, GetNumRaidMembers()
-	if max == 0 then
-		prefix, min, max = "party", 0, GetNumPartyMembers()
-	end
-
-	for i = min, max do
-		local unit = (i == 0) and "player" or prefix .. tostring(i)
-		local pet = (unit == "player") and "pet" or unit .. "pet"
-
-		if UnitExists(pet) then
-			local petGUID = UnitGUID(pet)
-			local unitGUID = UnitGUID(unit)
-			local unitName = UnitName(unit)
-			if petGUID and unitGUID and unitName and not pets[petGUID] then
-				pets[petGUID] = {id = unitGUID, name = unitName}
+	local prefix, count = GetGroupTypeAndCount()
+	if count > 0 then
+		for i = 1, count, 1 do
+			local unit, unitpet = prefix..i, prefix..i.."pet"
+			if UnitExists(unitpet) then
+				local petGUID = UnitGUID(unitpet)
+				local unitGUID = UnitGUID(unit)
+				local unitName = select(1, UnitName(unit))
+				if petGUID and unitGUID and unitName and not pets[petGUID] then
+					pets[petGUID] = {id = unitGUID, name = unitName}
+				end
 			end
+		end
+	elseif UnitExists("pet") then
+		local petGUID = UnitGUID("pet")
+		local unitGUID = UnitGUID("player")
+		local unitName = select(1, UnitName("player"))
+		if petGUID and unitGUID and unitName and not pets[petGUID] then
+			pets[petGUID] = {id = unitGUID, name = unitName}
 		end
 	end
 end
@@ -2618,7 +2616,10 @@ function Skada:SendComm(channel, target, ...)
 			end
 		end
 	end
-	if channel then
+
+	if channel == "WHISPER" and not (target and UnitIsConnected(target)) then
+		return
+	elseif channel then
 		self:SendCommMessage("Skada", self:Serialize(...), channel, target)
 	end
 end
@@ -2870,11 +2871,6 @@ do
 		update_timer = self.NewTicker(self.db.profile.updatefrequency or 0.25, function() self:UpdateDisplay() end)
 		tick_timer = self.NewTicker(1, combat_tick)
 	end
-
-	-- for shaman elemental
-	local COMBATLOG_OBJECT_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
-	local COMBATLOG_OBJECT_CONTROL_NPC = COMBATLOG_OBJECT_CONTROL_NPC or 0x00000200
-	local SHAM_FLAGS = bit.bor(COMBATLOG_OBJECT_TYPE_NPC + COMBATLOG_OBJECT_CONTROL_NPC)
 
 	-- list of combat events that we don't care about
 	local ignoredevents = {
