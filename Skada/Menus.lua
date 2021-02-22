@@ -28,7 +28,7 @@ end
 
 -- Configuration menu.
 function Skada:OpenMenu(window)
-    self.skadamenu = self.skadamenu or _CreateFrame("Frame", "SkadaMenu")
+    self.skadamenu = self.skadamenu or _CreateFrame("Frame", "SkadaMenu", UIParent, "UIDropDownMenuTemplate")
     local skadamenu = self.skadamenu
     skadamenu.displayMode = "MENU"
 
@@ -138,7 +138,6 @@ function Skada:OpenMenu(window)
             info.func = function()
                 _CloseDropDownMenus()
             end
-            info.checked = nil
             info.notCheckable = 1
             _UIDropDownMenu_AddButton(info, level)
         elseif level == 2 then
@@ -277,8 +276,7 @@ function Skada:OpenMenu(window)
                     info.text = Skada:GetSetLabel(set)
                     info.func = function()
                         set.keep = not set.keep
-                        Skada:Wipe()
-                        Skada:UpdateDisplay(true)
+                        window:UpdateDisplay()
                     end
                     info.checked = set.keep
                     info.isNotRadio = 1
@@ -333,7 +331,7 @@ function Skada:OpenMenu(window)
 end
 
 function Skada:SegmentMenu(window)
-    self.segmentsmenu = self.segmentsmenu or _CreateFrame("Frame", "SkadaWindowButtonsSegments")
+    self.segmentsmenu = self.segmentsmenu or _CreateFrame("Frame", "SkadaWindowButtonsSegments", UIParent, "UIDropDownMenuTemplate")
     local segmentsmenu = self.segmentsmenu
     segmentsmenu.displayMode = "MENU"
 
@@ -398,7 +396,7 @@ do
     end
 
     function Skada:ModeMenu(window)
-        self.modesmenu = self.modesmenu or _CreateFrame("Frame", "SkadaWindowButtonsModes")
+        self.modesmenu = self.modesmenu or _CreateFrame("Frame", "SkadaWindowButtonsModes", UIParent, "UIDropDownMenuTemplate")
         local modesmenu = self.modesmenu
         local info = _UIDropDownMenu_CreateInfo()
 
@@ -495,12 +493,7 @@ do
             frame:SetTitle(L["Report"])
         end
 
-        frame:SetCallback(
-            "OnClose",
-            function(widget, callback)
-                destroywindow()
-            end
-        )
+        frame:SetCallback("OnClose", function(widget, callback) destroywindow() end)
 
         -- make the frame closable with Escape button
         _G.SkadaReportWindow = frame.frame
@@ -523,12 +516,9 @@ do
             for i, mode in _ipairs(Skada:GetModes()) do
                 modebox:AddItem(mode:GetName(), mode:GetName())
             end
-            modebox:SetCallback(
-                "OnValueChanged",
-                function(f, e, value)
-                    Skada.db.profile.report.mode = value
-                end
-            )
+            modebox:SetCallback("OnValueChanged", function(f, e, value)
+				Skada.db.profile.report.mode = value
+            end)
             modebox:SetValue(Skada.db.profile.report.mode or Skada:GetModes()[1])
             frame:AddChild(modebox)
 
@@ -539,12 +529,9 @@ do
             for i, set in _ipairs(Skada:get_sets()) do
                 setbox:AddItem(i, set.name)
             end
-            setbox:SetCallback(
-                "OnValueChanged",
-                function(f, e, value)
-                    Skada.db.profile.report.set = value
-                end
-            )
+            setbox:SetCallback("OnValueChanged", function(f, e, value)
+                Skada.db.profile.report.set = value
+            end)
             setbox:SetValue(Skada.db.profile.report.set or Skada.char.sets[1])
             frame:AddChild(setbox)
         end
@@ -582,32 +569,26 @@ do
         end
 
         channelbox:SetValue(origchan)
-        channelbox:SetCallback(
-            "OnValueChanged",
-            function(f, e, value)
-                Skada.db.profile.report.channel = value
-                Skada.db.profile.report.chantype = channellist[value][2]
-                if channellist[origchan][3] ~= channellist[value][3] then
-                    -- redraw in-place to add/remove whisper widget
-                    local pos = {frame:GetPoint()}
-                    destroywindow()
-                    createReportWindow(window)
-                    Skada.reportwindow:SetPoint(unpack(pos))
-                end
+        channelbox:SetCallback("OnValueChanged", function(f, e, value)
+            Skada.db.profile.report.channel = value
+            Skada.db.profile.report.chantype = channellist[value][2]
+            if channellist[origchan][3] ~= channellist[value][3] then
+                -- redraw in-place to add/remove whisper widget
+                local pos = {frame:GetPoint()}
+                destroywindow()
+                createReportWindow(window)
+                Skada.reportwindow:SetPoint(unpack(pos))
             end
-        )
+        end)
         frame:AddChild(channelbox)
 
         local lines = AceGUI:Create("Slider")
         lines:SetLabel(L["Lines"])
         lines:SetValue(Skada.db.profile.report.number ~= nil and Skada.db.profile.report.number or 10)
         lines:SetSliderValues(1, 25, 1)
-        lines:SetCallback(
-            "OnValueChanged",
-            function(self, event, value)
-                Skada.db.profile.report.number = value
-            end
-        )
+        lines:SetCallback("OnValueChanged", function(self, event, value)
+            Skada.db.profile.report.number = value
+        end)
         lines:SetFullWidth(true)
         frame:AddChild(lines)
 
@@ -616,27 +597,22 @@ do
             whisperbox:SetLabel(L["Whisper Target"])
             whisperbox:SetText(Skada.db.profile.report.target or "")
 
-            whisperbox:SetCallback(
-                "OnEnterPressed",
-                function(box, event, text)
-                    if strlenutf8(text) == #text then -- remove spaces which are always non-meaningful and can sometimes cause problems
-                        local ntext = text:gsub("%s", "")
-                        if ntext ~= text then
-                            text = ntext
-                            whisperbox:SetText(text)
-                        end
+            whisperbox:SetCallback("OnEnterPressed", function(box, event, text)
+				-- remove spaces which are always non-meaningful and can sometimes cause problems
+                if strlenutf8(text) == #text then
+                    local ntext = text:gsub("%s", "")
+                    if ntext ~= text then
+                        text = ntext
+                        whisperbox:SetText(text)
                     end
-                    Skada.db.profile.report.target = text
-                    frame.button.frame:Click()
                 end
-            )
+                Skada.db.profile.report.target = text
+                frame.button.frame:Click()
+            end)
 
-            whisperbox:SetCallback(
-                "OnTextChanged",
-                function(box, event, text)
-                    Skada.db.profile.report.target = text
-                end
-            )
+            whisperbox:SetCallback("OnTextChanged", function(box, event, text)
+                Skada.db.profile.report.target = text
+            end)
             whisperbox:SetFullWidth(true)
             frame:AddChild(whisperbox)
         end
@@ -644,42 +620,39 @@ do
         local report = AceGUI:Create("Button")
         frame.button = report
         report:SetText(L["Report"])
-        report:SetCallback(
-            "OnClick",
-            function()
-                local mode, set, channel, chantype, number =
-                    Skada.db.profile.report.mode,
-                    Skada.db.profile.report.set,
-                    Skada.db.profile.report.channel,
-                    Skada.db.profile.report.chantype,
-                    Skada.db.profile.report.number
+        report:SetCallback("OnClick", function()
+            local mode, set, channel, chantype, number =
+                Skada.db.profile.report.mode,
+                Skada.db.profile.report.set,
+                Skada.db.profile.report.channel,
+                Skada.db.profile.report.chantype,
+                Skada.db.profile.report.number
 
-                if channel == "whisper" then
-                    channel = Skada.db.profile.report.target
-                    if channel and #strtrim(channel) == 0 then
-                        channel = nil
-                    end
-                elseif channel == "target" then
-                    if UnitExists("target") then
-                        local toon, realm = UnitName("target")
-                        if realm and #realm > 0 then
-                            channel = toon .. "-" .. realm
-                        else
-                            channel = toon
-                        end
-                    else
-                        channel = nil
-                    end
+            if channel == "whisper" then
+                channel = Skada.db.profile.report.target
+                if channel and #strtrim(channel) == 0 then
+                    channel = nil
                 end
-
-                if channel and chantype and mode and set and number then
-                    Skada:Report(channel, chantype, mode, set, number, window)
-                    frame:Hide()
+            elseif channel == "target" then
+                if UnitExists("target") then
+                    local toon, realm = UnitName("target")
+                    if realm and #realm > 0 then
+                        channel = toon .. "-" .. realm
+                    else
+                        channel = toon
+                    end
                 else
-                    Skada:Print("Error: Whisper target not found")
+                    channel = nil
                 end
             end
-        )
+
+            if channel and chantype and mode and set and number then
+                Skada:Report(channel, chantype, mode, set, number, window)
+                frame:Hide()
+            else
+                Skada:Print("Error: Whisper target not found")
+            end
+        end)
 
         report:SetFullWidth(true)
         frame:AddChild(report)
