@@ -34,12 +34,9 @@ function Skada:OpenMenu(window)
 
     local info = _UIDropDownMenu_CreateInfo()
     skadamenu.initialize = function(self, level)
-        if not level then
-            return
-        end
+        if not level then return end
 
         if level == 1 then
-            -- Create the title of the menu
             info = _UIDropDownMenu_CreateInfo()
             info.isTitle = 1
             info.text = L["Skada Menu"]
@@ -55,6 +52,22 @@ function Skada:OpenMenu(window)
                 info.notCheckable = 1
                 _UIDropDownMenu_AddButton(info, level)
             end
+
+            -- create window
+			info = _UIDropDownMenu_CreateInfo()
+			info.text = L["Create window"]
+			info.func = Skada.NewWindow
+			info.notCheckable = 1
+			_UIDropDownMenu_AddButton(info, level)
+
+            -- toggle window
+            info = _UIDropDownMenu_CreateInfo()
+            info.text = L["Toggle window"]
+            info.func = function()
+                Skada:ToggleWindow()
+            end
+            info.notCheckable = 1
+            _UIDropDownMenu_AddButton(info, level)
 
             -- separator
             info = _UIDropDownMenu_CreateInfo()
@@ -90,18 +103,18 @@ function Skada:OpenMenu(window)
             info.value = "keep"
             _UIDropDownMenu_AddButton(info, level)
 
-            -- separator
+            -- start new segment
             info = _UIDropDownMenu_CreateInfo()
-            info.disabled = 1
+            info.text = L["Start new segment"]
+            info.func = function()
+                Skada:NewSegment()
+            end
             info.notCheckable = 1
             _UIDropDownMenu_AddButton(info, level)
 
-            -- toggle window
+            -- separator
             info = _UIDropDownMenu_CreateInfo()
-            info.text = L["Toggle window"]
-            info.func = function()
-                Skada:ToggleWindow()
-            end
+            info.disabled = 1
             info.notCheckable = 1
             _UIDropDownMenu_AddButton(info, level)
 
@@ -110,15 +123,6 @@ function Skada:OpenMenu(window)
             info.text = RESET
             info.func = function()
                 Skada:ShowPopup()
-            end
-            info.notCheckable = 1
-            _UIDropDownMenu_AddButton(info, level)
-
-            -- start new segment
-            info = _UIDropDownMenu_CreateInfo()
-            info.text = L["Start new segment"]
-            info.func = function()
-                Skada:NewSegment()
             end
             info.notCheckable = 1
             _UIDropDownMenu_AddButton(info, level)

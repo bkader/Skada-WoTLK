@@ -157,8 +157,8 @@ end
 -- utilities
 
 function Skada:ShowPopup()
-	if not StaticPopupDialogs["ResetSkadaDialog"] then
-		StaticPopupDialogs["ResetSkadaDialog"] = {
+	if not StaticPopupDialogs["SkadaResetDialog"] then
+		StaticPopupDialogs["SkadaResetDialog"] = {
 			text = L["Do you want to reset Skada?"],
 			button1 = ACCEPT,
 			button2 = CANCEL,
@@ -168,7 +168,56 @@ function Skada:ShowPopup()
 			OnAccept = function() Skada:Reset() end
 		}
 	end
-	StaticPopup_Show("ResetSkadaDialog")
+	StaticPopup_Show("SkadaResetDialog")
+end
+
+function Skada:NewWindow()
+    if not StaticPopupDialogs["SkadaWindowDialog"] then
+        StaticPopupDialogs["SkadaWindowDialog"] = {
+            text = L["Enter the name for the new window."],
+            button1 = CREATE,
+            button2 = CANCEL,
+            timeout = 30,
+            whileDead = 0,
+            hideOnEscape = 1,
+            hasEditBox = 1,
+            OnShow = function(self)
+                self.button1:Disable()
+                self.editBox:SetText("")
+                self.editBox:SetFocus()
+            end,
+            OnHide = function(self)
+                self.editBox:SetText("")
+                self.editBox:ClearFocus()
+            end,
+            EditBoxOnEscapePressed = function(self)
+                self:GetParent():Hide()
+            end,
+            EditBoxOnTextChanged = function(self)
+                local name = self:GetText()
+                if not name or name:trim() == "" then
+                    self:GetParent().button1:Disable()
+                else
+                    self:GetParent().button1:Enable()
+                end
+            end,
+            EditBoxOnEnterPressed = function(self)
+                local name = self:GetText()
+                if name:trim() ~= "" then
+                    Skada:CreateWindow(name)
+                end
+                self:GetParent():Hide()
+            end,
+            OnAccept = function(self)
+                local name = self.editBox:GetText()
+                if name:trim() ~= "" then
+                    Skada:CreateWindow(name)
+                end
+                self:Hide()
+            end
+        }
+    end
+    StaticPopup_Show("SkadaWindowDialog")
 end
 
 -- ================= --
