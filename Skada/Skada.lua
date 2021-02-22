@@ -374,428 +374,385 @@ do
 		self.display:AddDisplayOptions(self, options.args)
 		Skada.options.args.windows.args[self.db.name] = options
 	end
+end
 
-	function Window:SetChild(win)
-		self.child = win
+function Window:SetChild(win)
+	self.child = win
+end
+
+-- destroy a window
+function Window:destroy()
+	self.dataset = nil
+	self.display:Destroy(self)
+
+	local name = self.db.name or Skada.windowdefaults.name
+	Skada.options.args.windows.args[name] = nil
+	name = nil
+end
+
+-- change window display
+function Window:SetDisplay(name)
+	if name ~= self.db.display or self.display == nil then
+		if self.display then
+			self.display:Destroy(self)
+		end
+
+		self.db.display = name
+		self.display = Skada.displays[self.db.display]
+		self:AddOptions()
+	end
+end
+
+-- tell window to update the display of its dataset, using its display provider.
+function Window:UpdateDisplay()
+	if not self.metadata.maxvalue then
+		self.metadata.maxvalue = 0
+		for _, data in ipairs(self.dataset) do
+			if data.id and data.value > self.metadata.maxvalue then
+				self.metadata.maxvalue = data.value
+			end
+		end
 	end
 
-	-- destroy a window
-	function Window:destroy()
-		self.dataset = nil
-		self.display:Destroy(self)
+	self.display:Update(self)
+	self:set_mode_title()
+end
 
-		local name = self.db.name or Skada.windowdefaults.name
-		Skada.options.args.windows.args[name] = nil
-		name = nil
+-- called before dataset is updated.
+function Window:UpdateInProgress()
+	for _, data in ipairs(self.dataset) do
+		if data.ignore then
+			data.icon = nil
+		end
+		data.id = nil
+		data.ignore = nil
+	end
+end
+
+function Window:Show()
+	self.display:Show(self)
+end
+
+function Window:Hide()
+	self.display:Hide(self)
+end
+
+function Window:IsShown()
+	return self.display:IsShown(self)
+end
+
+function Window:Reset()
+	for _, data in ipairs(self.dataset) do
+		wipe(data)
+	end
+end
+
+function Window:Wipe()
+	self:Reset()
+	self.display:Wipe(self)
+
+	if self.child then
+		self.child:Wipe()
+	end
+end
+
+function Window:get_selected_set()
+	return Skada:find_set(self.selectedset)
+end
+
+function Window:DisplayMode(mode)
+	if type(mode) ~= "table" then
+		return
+	end
+	self:Wipe()
+
+	self.selectedplayer = nil
+	self.selectedspell = nil
+	self.selectedmode = mode
+
+	self.metadata = wipe(self.metadata or {})
+
+	if mode.metadata then
+		for key, value in pairs(mode.metadata) do
+			self.metadata[key] = value
+		end
 	end
 
-	function Window:set_mode_title()
-		if not self.selectedmode or not self.selectedset then
-			return
-		end
-		if not self.selectedmode.GetName then
-			return
-		end
-		local name = self.selectedmode.title or self.selectedmode:GetName()
+	self.changed = true
+	self:set_mode_title()
 
-		-- save window settings for RestoreView after reload
-		self.db.set = self.selectedset
-		local savemode = name
-		if self.history[1] then -- can't currently preserve a nested mode, use topmost one
-			savemode = self.history[1].title or self.history[1]:GetName()
-		end
-		self.db.mode = savemode
-		savemode = nil
+	if self.child then
+		self.child:DisplayMode(mode)
+	end
 
-		if self.db.titleset then
-			local setname
-			if self.selectedset == "current" then
-				setname = L["Current"]
-			elseif self.selectedset == "total" then
-				setname = L["Total"]
+	Skada:UpdateDisplay(false)
+end
+
+do
+	function sort_modes()
+		tsort(modes, function(a, b)
+			if Skada.db.profile.sortmodesbyusage and Skada.db.profile.modeclicks then
+				return (Skada.db.profile.modeclicks[a:GetName()] or 0) > (Skada.db.profile.modeclicks[b:GetName()] or 0)
 			else
-				local set = self:get_selected_set()
-				if set then
-					setname = Skada:GetSetLabel(set)
+				return a:GetName() < b:GetName()
+			end
+		end)
+	end
+
+	local function click_on_mode(win, id, _, button)
+		if button == "LeftButton" then
+			local mode = find_mode(id)
+			if mode then
+				if Skada.db.profile.sortmodesbyusage then
+					Skada.db.profile.modeclicks = Skada.db.profile.modeclicks or {}
+					Skada.db.profile.modeclicks[id] = (Skada.db.profile.modeclicks[id] or 0) + 1
+					sort_modes()
 				end
+				win:DisplayMode(mode)
+				mode = nil
 			end
-			if setname then
-				name = name .. ": " .. setname
-			end
-		end
-		if disabled and (self.selectedset == "current" or self.selectedset == "total") then
-			-- indicate when data collection is disabled
-			name = name .. "  |cFFFF0000" .. L["DISABLED"] .. "|r"
-		end
-		self.metadata.title = name
-		self.display:SetTitle(self, name)
-		name = nil
-	end
-
-	-- change window display
-	function Window:SetDisplay(name)
-		if name ~= self.db.display or self.display == nil then
-			if self.display then
-				self.display:Destroy(self)
-			end
-
-			self.db.display = name
-			self.display = Skada.displays[self.db.display]
-			self:AddOptions()
+		elseif button == "RightButton" then
+			win:RightClick()
 		end
 	end
 
-	-- tell window to update the display of its dataset, using its display provider.
-	function Window:UpdateDisplay()
-		if not self.metadata.maxvalue then
-			self.metadata.maxvalue = 0
-			for _, data in ipairs(self.dataset) do
-				if data.id and data.value > self.metadata.maxvalue then
-					self.metadata.maxvalue = data.value
-				end
-			end
-		end
-
-		self.display:Update(self)
-		self:set_mode_title()
-	end
-
-	-- called before dataset is updated.
-	function Window:UpdateInProgress()
-		for _, data in ipairs(self.dataset) do
-			if data.ignore then
-				data.icon = nil
-			end
-			data.id = nil
-			data.ignore = nil
-		end
-	end
-
-	function Window:Show()
-		self.display:Show(self)
-	end
-
-	function Window:Hide()
-		self.display:Hide(self)
-	end
-
-	function Window:IsShown()
-		return self.display:IsShown(self)
-	end
-
-	function Window:Reset()
-		for _, data in ipairs(self.dataset) do
-			wipe(data)
-		end
-	end
-
-	function Window:Wipe()
-		self:Reset()
-		self.display:Wipe(self)
-
-		if self.child then
-			self.child:Wipe()
-		end
-	end
-
-	function Window:get_selected_set()
-		return Skada:find_set(self.selectedset)
-	end
-
-	function Window:DisplayMode(mode)
-		if type(mode) ~= "table" then
-			return
-		end
+	function Window:DisplayModes(settime)
+		self.history = wipe(self.history or {})
 		self:Wipe()
 
 		self.selectedplayer = nil
-		self.selectedspell = nil
-		self.selectedmode = mode
+		self.selectedmode = nil
 
 		self.metadata = wipe(self.metadata or {})
+		self.metadata.title = L["Skada: Modes"]
 
-		if mode.metadata then
-			for key, value in pairs(mode.metadata) do
-				self.metadata[key] = value
+		self.db.set = settime
+
+		if settime == "current" or settime == "total" then
+			self.selectedset = settime
+		else
+			for i, set in ipairs(Skada.char.sets) do
+				if tostring(set.starttime) == settime then
+					if set.name == L["Current"] then
+						self.selectedset = "current"
+					elseif set.name == L["Total"] then
+						self.selectedset = "total"
+					else
+						self.selectedset = i
+					end
+				end
 			end
 		end
 
+		self.metadata.click = click_on_mode
+		self.metadata.maxvalue = 1
+		self.metadata.sortfunc = function(a, b) return a.name < b.name end
+
+		self.display:SetTitle(self, self.metadata.title)
 		self.changed = true
-		self:set_mode_title()
 
 		if self.child then
-			self.child:DisplayMode(mode)
+			self.child:DisplayModes(settime)
 		end
 
 		Skada:UpdateDisplay(false)
 	end
+end
 
-	do
-		function sort_modes()
-			tsort(modes, function(a, b)
-				if Skada.db.profile.sortmodesbyusage and Skada.db.profile.modeclicks then
-					return (Skada.db.profile.modeclicks[a:GetName()] or 0) > (Skada.db.profile.modeclicks[b:GetName()] or 0)
-				else
-					return a:GetName() < b:GetName()
-				end
-			end)
-		end
-
-		local function click_on_mode(win, id, _, button)
-			if button == "LeftButton" then
-				local mode = find_mode(id)
-				if mode then
-					if Skada.db.profile.sortmodesbyusage then
-						Skada.db.profile.modeclicks = Skada.db.profile.modeclicks or {}
-						Skada.db.profile.modeclicks[id] = (Skada.db.profile.modeclicks[id] or 0) + 1
-						sort_modes()
-					end
-					win:DisplayMode(mode)
-					mode = nil
-				end
-			elseif button == "RightButton" then
-				win:RightClick()
-			end
-		end
-
-		function Window:DisplayModes(settime)
-			self.history = {}
-			self:Wipe()
-
-			self.selectedplayer = nil
-			self.selectedmode = nil
-
-			self.metadata = {}
-			self.metadata.title = L["Skada: Modes"]
-
-			self.db.set = settime
-
-			if settime == "current" or settime == "total" then
-				self.selectedset = settime
-			else
-				for i, set in ipairs(Skada.char.sets) do
-					if tostring(set.starttime) == settime then
-						if set.name == L["Current"] then
-							self.selectedset = "current"
-						elseif set.name == L["Total"] then
-							self.selectedset = "total"
-						else
-							self.selectedset = i
-						end
-					end
-				end
-			end
-
-			self.metadata.click = click_on_mode
-			self.metadata.maxvalue = 1
-			self.metadata.sortfunc = function(a, b) return a.name < b.name end
-
-			self.display:SetTitle(self, self.metadata.title)
-			self.changed = true
-
-			if self.child then
-				self.child:DisplayModes(settime)
-			end
-
-			Skada:UpdateDisplay(false)
+do
+	local function click_on_set(win, id, _, button)
+		if button == "LeftButton" then
+			win:DisplayModes(id)
+		elseif button == "RightButton" then
+			win:RightClick()
 		end
 	end
 
-	do
-		local function click_on_set(win, id, _, button)
-			if button == "LeftButton" then
-				win:DisplayModes(id)
-			elseif button == "RightButton" then
-				win:RightClick()
-			end
+	function Window:DisplaySets()
+		self.history = wipe(self.history or {})
+		self:Wipe()
+
+		self.selectedplayer = nil
+		self.selectedmode = nil
+		self.selectedset = nil
+
+		self.metadata = wipe(self.metadata or {})
+		self.metadata.title = L["Skada: Fights"]
+		self.display:SetTitle(self, self.metadata.title)
+
+		self.metadata.click = click_on_set
+		self.metadata.maxvalue = 1
+		self.changed = true
+
+		if self.child then
+			self.child:DisplaySets()
 		end
 
-		function Window:DisplaySets()
-			self.history = {}
-			self:Wipe()
-
-			self.selectedplayer = nil
-			self.selectedmode = nil
-			self.selectedset = nil
-
-			self.metadata = {}
-			self.metadata.title = L["Skada: Fights"]
-			self.display:SetTitle(self, self.metadata.title)
-
-			self.metadata.click = click_on_set
-			self.metadata.maxvalue = 1
-			self.changed = true
-
-			if self.child then
-				self.child:DisplaySets()
-			end
-
-			Skada:UpdateDisplay(false)
-		end
+		Skada:UpdateDisplay(false)
 	end
+end
 
-	function Window:RightClick(_, button)
-		if self.selectedmode then
-			if #self.history > 0 then
-				self:DisplayMode(tremove(self.history))
-			else
-				self:DisplayModes(self.selectedset)
-			end
-		elseif self.selectedset then
-			self:DisplaySets()
-		end
-	end
-
-	-- ================================================== --
-
-	function Skada:GetWindows()
-		return windows
-	end
-
-	function Skada:tcopy(to, from, ...)
-		for k, v in pairs(from) do
-			local skip = false
-			if ... then
-				for i, j in ipairs(...) do
-					if j == k then
-						skip = true
-						break
-					end
-				end
-			end
-			if not skip then
-				if type(v) == "table" then
-					to[k] = {}
-					Skada:tcopy(to[k], v, ...)
-				else
-					to[k] = v
-				end
-			end
-		end
-	end
-
-	function Skada:CreateWindow(name, db, display)
-		local isnew = false
-		if not db then
-			db, isnew = {}, true
-			self:tcopy(db, Skada.windowdefaults)
-			tinsert(self.db.profile.windows, db)
-		end
-
-		if display then
-			db.display = display
-		end
-
-		if not db.barbgcolor then
-			db.barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6}
-		end
-
-		if not db.buttons then
-			db.buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false}
-		end
-
-		if not db.scale then
-			db.scale = 1
-		end
-
-		if not db.snapped then db.snapped = {} end
-
-		local window = Window:new()
-		window.db = db
-		window.db.name = name
-
-		if self.displays[window.db.display] then
-			window:SetDisplay(window.db.display or "bar")
-			window.display:Create(window)
-			tinsert(windows, window)
-			window:DisplaySets()
-
-			if isnew and find_mode(L["Damage"]) then
-				self:RestoreView(window, "current", L["Damage"])
-			elseif window.db.set or window.db.mode then
-				self:RestoreView(window, window.db.set, window.db.mode)
-			end
+function Window:RightClick(_, button)
+	if self.selectedmode then
+		if #self.history > 0 then
+			self:DisplayMode(tremove(self.history))
 		else
-			self:Print("Window '"..name.."' was not loaded because its display module, '"..window.db.display.."' was not found.")
+			self:DisplayModes(self.selectedset)
 		end
-
-		isnew = nil
-		self:ApplySettings()
-		return window
+	elseif self.selectedset then
+		self:DisplaySets()
 	end
+end
 
-	function Skada:DeleteWindow(name)
-		for i, win in ipairs(windows) do
-			if win.db.name == name then
-				win:destroy()
-				wipe(tremove(windows, i))
+-- ================================================== --
+
+function Skada:GetWindows()
+	return windows
+end
+
+function Skada:tcopy(to, from, ...)
+	for k, v in pairs(from) do
+		local skip = false
+		if ... then
+			for i, j in ipairs(...) do
+				if j == k then
+					skip = true
+					break
+				end
 			end
 		end
-
-		for i, win in ipairs(self.db.profile.windows) do
-			if win.name == name then
-				tremove(self.db.profile.windows, i)
+		if not skip then
+			if type(v) == "table" then
+				to[k] = {}
+				Skada:tcopy(to[k], v, ...)
+			else
+				to[k] = v
 			end
 		end
 	end
+end
 
-	function Skada:ToggleWindow()
+function Skada:CreateWindow(name, db, display)
+	local isnew = false
+	if not db then
+		db, isnew = {}, true
+		self:tcopy(db, Skada.windowdefaults)
+		tinsert(self.db.profile.windows, db)
+	end
+
+	if display then
+		db.display = display
+	end
+
+	if not db.barbgcolor then
+		db.barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6}
+	end
+
+	if not db.buttons then
+		db.buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false}
+	end
+
+	if not db.scale then
+		db.scale = 1
+	end
+
+	if not db.snapped then db.snapped = {} end
+
+	local window = Window:new()
+	window.db = db
+	window.db.name = name
+
+	if self.displays[window.db.display] then
+		window:SetDisplay(window.db.display or "bar")
+		window.display:Create(window)
+		tinsert(windows, window)
+		window:DisplaySets()
+
+		if isnew and find_mode(L["Damage"]) then
+			self:RestoreView(window, "current", L["Damage"])
+		elseif window.db.set or window.db.mode then
+			self:RestoreView(window, window.db.set, window.db.mode)
+		end
+	else
+		self:Print("Window '"..name.."' was not loaded because its display module, '"..window.db.display.."' was not found.")
+	end
+
+	isnew = nil
+	self:ApplySettings()
+	return window
+end
+
+function Skada:DeleteWindow(name)
+	for i, win in ipairs(windows) do
+		if win.db.name == name then
+			win:destroy()
+			wipe(tremove(windows, i))
+		end
+	end
+
+	for i, win in ipairs(self.db.profile.windows) do
+		if win.name == name then
+			tremove(self.db.profile.windows, i)
+		end
+	end
+end
+
+function Skada:ToggleWindow()
+	for _, win in ipairs(windows) do
+		if win:IsShown() then
+			win.db.hidden = true
+			win:Hide()
+		else
+			win.db.hidden = false
+			win:Show()
+		end
+	end
+end
+
+function Skada:RestoreView(win, theset, themode)
+	if theset and type(theset) == "string" and (theset == "current" or theset == "total" or theset == "last") then
+		win.selectedset = theset
+	elseif theset and type(theset) == "number" and theset <= #self.char.sets then
+		win.selectedset = theset
+	else
+		win.selectedset = "current"
+	end
+
+	changed = true
+
+	if themode then
+		win:DisplayMode(find_mode(themode) or win.selectedset)
+	else
+		win:DisplayModes(win.selectedset)
+	end
+end
+
+function Skada:Wipe()
+	for _, win in ipairs(windows) do
+		win:Wipe()
+	end
+end
+
+function Skada:SetActive(enable)
+	if enable then
 		for _, win in ipairs(windows) do
-			if win:IsShown() then
-				win.db.hidden = true
-				win:Hide()
-			else
-				win.db.hidden = false
-				win:Show()
-			end
+			win:Show()
 		end
-	end
-
-	function Skada:RestoreView(win, theset, themode)
-		if theset and type(theset) == "string" and (theset == "current" or theset == "total" or theset == "last") then
-			win.selectedset = theset
-		elseif theset and type(theset) == "number" and theset <= #self.char.sets then
-			win.selectedset = theset
-		else
-			win.selectedset = "current"
-		end
-
-		changed = true
-
-		if themode then
-			win:DisplayMode(find_mode(themode) or win.selectedset)
-		else
-			win:DisplayModes(win.selectedset)
-		end
-	end
-
-	function Skada:Wipe()
+	else
 		for _, win in ipairs(windows) do
-			win:Wipe()
+			win:Hide()
 		end
 	end
 
-	function Skada:SetActive(enable)
-		if enable then
-			for _, win in ipairs(windows) do
-				win:Show()
-			end
-		else
-			for _, win in ipairs(windows) do
-				win:Hide()
-			end
-		end
-
-		if not enable and self.db.profile.hidedisables then
-			disabled = true
-			self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-		else
-			disabled = false
-			self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "CombatLogEvent")
-		end
-
-		self:UpdateDisplay(true)
+	if not enable and self.db.profile.hidedisables then
+		disabled = true
+		self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	else
+		disabled = false
+		self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "CombatLogEvent")
 	end
+
+	self:UpdateDisplay(true)
 end
 
 -- =============== --
@@ -2069,6 +2026,49 @@ do
 			return ""
 		end
 		return SetLabelFormat(set.name or "Unknown", set.starttime, set.endtime or time())
+	end
+
+	function Window:set_mode_title()
+		if not self.selectedmode or not self.selectedset then
+			return
+		end
+		if not self.selectedmode.GetName then
+			return
+		end
+		local name = self.selectedmode.title or self.selectedmode:GetName()
+
+		-- save window settings for RestoreView after reload
+		self.db.set = self.selectedset
+		local savemode = name
+		if self.history[1] then -- can't currently preserve a nested mode, use topmost one
+			savemode = self.history[1].title or self.history[1]:GetName()
+		end
+		self.db.mode = savemode
+		savemode = nil
+
+		if self.db.titleset then
+			local setname
+			if self.selectedset == "current" then
+				setname = L["Current"]
+			elseif self.selectedset == "total" then
+				setname = L["Total"]
+			else
+				local set = self:get_selected_set()
+				if set then
+					setname = Skada:GetSetLabel(set)
+				end
+			end
+			if setname then
+				name = name .. ": " .. setname
+			end
+		end
+		if disabled and (self.selectedset == "current" or self.selectedset == "total") then
+			-- indicate when data collection is disabled
+			name = name .. "  |cFFFF0000" .. L["DISABLED"] .. "|r"
+		end
+		self.metadata.title = name
+		self.display:SetTitle(self, name)
+		name = nil
 	end
 end
 
