@@ -129,7 +129,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
             end
 
             if target then
-                win.metadata.title = _UnitName(target)
+                self.title = _UnitName(target)
 
                 -- Reset our counter which we use to keep track of current index in the dataset.
                 nr = 1
@@ -159,7 +159,6 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
                 end
 
                 win.metadata.maxvalue = maxthreat
-
                 local we_should_warn = false
 
                 -- We now have a a complete threat table.
@@ -203,7 +202,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
                     last_warn = time()
                 end
             else
-                win.metadata.title = self:GetName()
+                self.title = self:GetName()
             end
         end
 
@@ -404,7 +403,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
         end
 
         function mod:OnEnable()
-            self.metadata = {showspots = 1, wipestale = 1, columns = {Threat = true, TPS = false, Percent = true}}
+            self.metadata = {wipestale = true, columns = {Threat = true, TPS = false, Percent = true}}
             Skada:AddFeed(L["Threat: Personal Threat"], add_threat_feed)
             Skada:AddMode(self)
         end
@@ -413,5 +412,9 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
     function mod:OnDisable()
         Skada:RemoveFeed(L["Threat: Personal Threat"])
         Skada:RemoveMode(self)
+    end
+
+    function mod:SetComplete()
+		self.title = self:GetName()
     end
 end)
