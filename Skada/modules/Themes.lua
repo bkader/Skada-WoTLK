@@ -30,7 +30,7 @@ Skada:AddLoadableModule(
                 classicons = true,
                 roleicons = false,
                 showself = true,
-                buttons = {menu = true, reset = true, report = true, mode = true, segment = true},
+                buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false},
                 title = {
                     textcolor = {r = 0.9, g = 0.9, b = 0.9, a = 1},
                     height = 20,
@@ -81,7 +81,7 @@ Skada:AddLoadableModule(
                 classicons = true,
                 roleicons = false,
                 showself = true,
-                buttons = {menu = true, reset = true, report = true, mode = true, segment = true},
+                buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false},
                 title = {
                     textcolor = {r = 0.9, g = 0.9, b = 0.9, a = 1},
                     height = 18,
@@ -132,7 +132,7 @@ Skada:AddLoadableModule(
                 classicons = true,
                 roleicons = false,
                 showself = true,
-                buttons = {menu = true, reset = true, report = true, mode = true, segment = true},
+                buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false},
                 title = {
                     textcolor = {r = 0.9, g = 0.9, b = 0.9, a = 1},
                     height = 20,
@@ -179,10 +179,10 @@ Skada:AddLoadableModule(
                 clickthrough = false,
                 classcolorbars = true,
                 classcolortext = false,
-                classicons = true,
+                classicons = false,
                 roleicons = false,
                 showself = true,
-                buttons = {menu = true, reset = true, report = true, mode = true, segment = true},
+                buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false},
                 title = {
                     textcolor = {r = 1, g = 1, b = 1, a = 1},
                     height = 18,
@@ -212,7 +212,64 @@ Skada:AddLoadableModule(
                 titleset = true,
                 display = "bar",
                 snapto = true
-            }
+            },
+            {
+                name = "Omen Threat Meter",
+                barspacing = 1,
+                bartexture = "Blizzard",
+                barfont = "Friz Quadrata TT",
+                barfontflags = "",
+                barfontsize = 10,
+                numfont = "Friz Quadrata TT",
+                numfontflags = "",
+                numfontsize = 10,
+                barheight = 14,
+                barwidth = 200,
+                barorientation = 1,
+                barcolor = {r = 0.8, g = 0.05, b = 0, a = 1},
+                barbgcolor = {r = 0.3, g = 0.01, b = 0, a = 0.6},
+                barslocked = false,
+                clickthrough = false,
+                classcolorbars = true,
+                classcolortext = false,
+                classicons = false,
+				roleicons = false,
+                specicons = false,
+                spark = false,
+                smoothing = true,
+                showself = true,
+                buttons = {menu = true, reset = true, report = false, mode = true, segment = false, stop = false},
+                title = {
+                    textcolor = {r = 1, g = 1, b = 1, a = 1},
+                    height = 16,
+                    font = "Friz Quadrata TT",
+                    fontsize = 10,
+                    texture = "Blizzard",
+                    bordercolor = {r = 1, g = 0.75, b = 0, a = 1},
+                    bordertexture = "Blizzard Dialog",
+                    borderthickness = 1,
+                    color = {r = 0.2, g = 0.2, b = 0.2, a = 0},
+                    fontflags = ""
+                },
+                background = {
+                    height = 108,
+                    texture = "Blizzard Parchment",
+                    bordercolor = {r = 1, g = 1, b = 1, a = 1},
+                    bordertexture = "Blizzard Dialog",
+                    borderthickness = 1,
+                    color = {r = 1, g = 1, b = 1, a = 1},
+                    tile = false,
+                    tilesize = 0
+                },
+                strata = "LOW",
+                scale = 1,
+                hidden = false,
+                enabletitle = true,
+                titleset = false,
+                display = "bar",
+                snapto = false,
+                version = 1
+            },
         }
 
         local selectedwindow, selectedtheme
@@ -289,7 +346,7 @@ Skada:AddLoadableModule(
                             if thetheme then
                                 for _, win in _ipairs(Skada:GetWindows()) do
                                     if win.db.name == selectedwindow then
-                                        Skada:tcopy(win.db, thetheme, {"name", "modeincombat", "display", "set", "mode", "wipemode", "returnaftercombat", "x", "y", "snapped"})
+                                        Skada:tcopy(win.db, thetheme, {"name", "modeincombat", "display", "set", "wipemode", "returnaftercombat", "x", "y", "snapped"})
                                         Skada:ApplySettings()
                                         Skada:Print(L["Theme applied!"])
                                     end
