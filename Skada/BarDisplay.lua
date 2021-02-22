@@ -198,34 +198,28 @@ function mod:Create(window)
 end
 
 function mod:Destroy(win)
-    if win and win.bargroup then
-        win.bargroup:Hide()
-        win.bargroup = nil
-    end
+    win.bargroup:Hide()
+    win.bargroup = nil
 end
 
 function mod:Wipe(win)
-	if win and win.bargroup then
-	    win.bargroup:SetSortFunction(nil)
-	    win.bargroup:SetBarOffset(0)
+    win.bargroup:SetSortFunction(nil)
+    win.bargroup:SetBarOffset(0)
 
-	    local bars = win.bargroup:GetBars()
-	    if bars then
-	        for _, bar in pairs(bars) do
-	            bar:Hide()
-	            win.bargroup:RemoveBar(bar)
-	        end
-	    end
+    local bars = win.bargroup:GetBars()
+    if bars then
+        for _, bar in pairs(bars) do
+            bar:Hide()
+            win.bargroup:RemoveBar(bar)
+        end
+    end
 
-	    win.bargroup:SortBars()
-	end
+    win.bargroup:SortBars()
 end
 
 function mod:Show(win)
-    if win and win.bargroup then
-        win.bargroup:Show()
-        win.bargroup:SortBars()
-    end
+    win.bargroup:Show()
+    win.bargroup:SortBars()
 end
 
 function mod:Hide(win)
@@ -233,13 +227,11 @@ function mod:Hide(win)
 end
 
 function mod:IsShown(win)
-    return win and win.bargroup:IsShown() or false
+    return win.bargroup:IsShown()
 end
 
 function mod:SetTitle(win, title)
-    if win and win.bargroup then
-        win.bargroup.button:SetText(title)
-    end
+    win.bargroup.button:SetText(title)
 end
 
 do
