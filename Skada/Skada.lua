@@ -196,9 +196,7 @@ do
 
 		local options = {
 			type = "group",
-			name = function()
-				return db.name
-			end,
+			name = function() return db.name end,
 			args = {
 				rename = {
 					type = "input",
@@ -259,28 +257,17 @@ do
 						Skada:ApplySettings()
 					end
 				},
-				display = {
-					type = "select",
-					name = L["Display system"],
-					desc = L["Choose the system to be used for displaying data in this window."],
+				separator1 = {
+					type = "description",
+					name = " ",
 					order = 5,
-					width = "full",
-					values = function()
-						local list = {}
-						for name, display in pairs(Skada.displays) do
-							list[name] = display.name
-						end
-						return list
-					end,
-					get = function() return db.display end,
-					set = function(_, display) self:SetDisplay(display) end
+					width = "full"
 				},
 				copywin = {
 					type = "select",
 					name = L["Copy settings"],
 					desc = L["Choose the window from which you want to copy the settings."],
-					order = 7,
-					width = "full",
+					order = 6,
 					values = function()
 						local list = {}
 						for _, win in ipairs(windows) do
@@ -296,8 +283,7 @@ do
 				copyexec = {
 					type = "execute",
 					name = L["Copy settings"],
-					order = 8,
-					width = "full",
+					order = 7,
 					func = function()
 						local newdb = {}
 						if copywindow then
@@ -314,6 +300,21 @@ do
 						Skada:ApplySettings()
 						copywindow = nil
 					end
+				},
+				separator2 = {
+					type = "description",
+					name = " ",
+					order = 8,
+					width = "full"
+				},
+				delete = {
+					type = "execute",
+					name = L["Delete window"],
+					desc = L["Choose the window to be deleted."],
+					order = 9,
+					width = "full",
+					confirm = function() return L["Are you sure you want to delete this window?"] end,
+					func = function() Skada:DeleteWindow(db.name) end,
 				}
 			}
 		}
@@ -340,21 +341,11 @@ do
 					get = function() return db.modeincombat end,
 					set = function(_, mode) db.modeincombat = mode end
 				},
-				returnaftercombat = {
-					type = "toggle",
-					name = L["Return after combat"],
-					desc = L["Return to the previous set and mode after combat ends."],
-					order = 2,
-					width = "full",
-					get = function() return db.returnaftercombat end,
-					set = function() db.returnaftercombat = not db.returnaftercombat end,
-					disabled = function() return db.returnaftercombat == nil end
-				},
 				wipemode = {
 					type = "select",
 					name = L["Wipe mode"],
 					desc = L["Automatically switch to set 'Current' and this mode after a wipe."],
-					order = 3,
+					order = 2,
 					width = "full",
 					values = function()
 						local m = {}
@@ -366,6 +357,16 @@ do
 					end,
 					get = function() return db.wipemode end,
 					set = function(_, mode) db.wipemode = mode end
+				},
+				returnaftercombat = {
+					type = "toggle",
+					name = L["Return after combat"],
+					desc = L["Return to the previous set and mode after combat ends."],
+					order = 3,
+					width = "full",
+					get = function() return db.returnaftercombat end,
+					set = function() db.returnaftercombat = not db.returnaftercombat end,
+					disabled = function() return db.returnaftercombat == nil end
 				}
 			}
 		}
@@ -511,7 +512,7 @@ do
 		self.selectedspell = nil
 		self.selectedmode = mode
 
-		self.metadata = {}
+		self.metadata = wipe(self.metadata or {})
 
 		if mode.metadata then
 			for key, value in pairs(mode.metadata) do
@@ -685,10 +686,16 @@ do
 			db.display = display
 		end
 
-		if not db.barbgcolor then db.barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6} end
+		if not db.barbgcolor then
+			db.barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6}
+		end
 
 		if not db.buttons then
 			db.buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false}
+		end
+
+		if not db.scale then
+			db.scale = 1
 		end
 
 		if not db.snapped then db.snapped = {} end
@@ -1107,7 +1114,7 @@ do
 			-- ignore it if we don't have a valid GUID.
 			if player.id and #player.id ~= 18 then
 				return player
-			elseif player.id then
+			elseif player.id and #player.id == 18 then
 				class, _, _, _, name = select(2, GetPlayerInfoByGUID(player.id))
 			end
 
@@ -1857,7 +1864,7 @@ function Skada:UpdateDisplay(force)
 					end
 
 					if self.db.profile.showtotals and win.selectedmode.GetSetSummary then
-						local total, existing = 0
+						local total, existing = 0, nil
 
 						for _, data in ipairs(win.dataset) do
 							if data.id then
@@ -1911,32 +1918,32 @@ function Skada:UpdateDisplay(force)
 				win:UpdateDisplay()
 			else
 				local nr = 1
-				local d1 = win.dataset[nr] or {}
-				win.dataset[nr] = d1
+				local d = win.dataset[nr] or {}
+				win.dataset[nr] = d
 
-				d1.id = "total"
-				d1.label = L["Total"]
-				d1.value = 1
+				d.id = "total"
+				d.label = L["Total"]
+				d.value = 1
 
 				nr = nr + 1
-				local d2 = win.dataset[nr] or {}
-				win.dataset[nr] = d2
+				d = win.dataset[nr] or {}
+				win.dataset[nr] = d
 
-				d2.id = "current"
-				d2.label = L["Current"]
-				d2.value = 1
+				d.id = "current"
+				d.label = L["Current"]
+				d.value = 1
 
-				for i, set in ipairs(self.char.sets) do
+				for _, set in ipairs(self.char.sets) do
 					nr = nr + 1
-					local d3 = win.dataset[nr] or {}
-					win.dataset[nr] = d3
+					d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
-					d3.id = tostring(set.starttime)
-					d3.label = set.name
-					d3.valuetext = date("%H:%M", set.starttime) .. " - " .. date("%H:%M", set.endtime)
-					d3.value = 1
+					d.id = tostring(set.starttime)
+					d.label = set.name
+					d.valuetext = date("%H:%M", set.starttime) .. " - " .. date("%H:%M", set.endtime)
+					d.value = 1
 					if set.keep then
-						d3.emphathize = true
+						d.emphathize = true
 					end
 				end
 

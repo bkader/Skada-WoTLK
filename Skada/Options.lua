@@ -121,9 +121,9 @@ Skada.defaults = {
         columns = {},
         report = {mode = "Damage", set = "current", channel = "Say", chantype = "preset", number = 10},
         modulesBlocked = {
-			["Spamage"] = true,
-			["Useful damage"] = true,
-			["Damage done by spell"] = true,
+            ["Spamage"] = true,
+            ["Useful damage"] = true,
+            ["Damage done by spell"] = true,
 			["Avoidance & Mitigation"] = true
         },
         windows = {windefaultscopy}
@@ -185,6 +185,7 @@ do
 end
 
 local deletewindow = nil
+local newdisplay = "bar"
 
 Skada.options = {
     type = "group",
@@ -213,39 +214,22 @@ Skada.options = {
                         end
                     end
                 },
-                delete = {
-                    type = "select",
-                    name = L["Delete window"],
-                    desc = L["Choose the window to be deleted."],
-                    order = 2,
-                    width = "full",
-                    values = function()
-                        local windows = {}
-                        for _, win in ipairs(Skada:GetWindows()) do
-                            windows[win.db.name] = win.db.name
-                        end
-                        return windows
-                    end,
-                    get = function()
-                        return deletewindow
-                    end,
-                    set = function(_, val)
-                        deletewindow = val
-                    end
-                },
-                deleteexecute = {
-                    type = "execute",
-                    name = L["Delete window"],
-                    desc = L["Deletes the chosen window."],
-                    order = 3,
-                    width = "full",
-                    func = function()
-                        if deletewindow then
-                            Skada:DeleteWindow(deletewindow)
-                        end
-                        deletewindow = nil
-                    end
-                }
+				display = {
+					type = "select",
+					name = L["Display system"],
+					desc = L["Choose the system to be used for displaying data in this window."],
+					order = 2,
+					width = "full",
+					values = function()
+						local list = {}
+						for name, display in pairs(Skada.displays) do
+							list[name] = display.name
+						end
+						return list
+					end,
+					get = function() return newdisplay end,
+					set = function(_, display) newdisplay = display end
+				}
             }
         },
         resetoptions = {
@@ -285,10 +269,65 @@ Skada.options = {
                 }
             }
         },
+        tooltips = {
+            type = "group",
+            name = L["Tooltips"],
+            order = 4,
+            args = {
+                tooltips = {
+                    type = "toggle",
+                    name = L["Show tooltips"],
+                    desc = L["Shows tooltips with extra information in some modes."],
+                    order = 1,
+                    width = "full",
+                    get = function() return Skada.db.profile.tooltips end,
+                    set = function() Skada.db.profile.tooltips = not Skada.db.profile.tooltips end
+                },
+                informative = {
+                    type = "toggle",
+                    name = L["Informative tooltips"],
+                    desc = L["Shows subview summaries in the tooltips."],
+                    order = 2,
+                    width = "full",
+                    get = function() return Skada.db.profile.informativetooltips end,
+                    set = function() Skada.db.profile.informativetooltips = not Skada.db.profile.informativetooltips end
+                },
+                rows = {
+                    type = "range",
+                    name = L["Subview rows"],
+                    desc = L["The number of rows from each subview to show when using informative tooltips."],
+                    order = 3,
+                    width = "full",
+                    min = 1,
+                    max = 10,
+                    step = 1,
+                    get = function() return Skada.db.profile.tooltiprows end,
+                    set = function(_, val) Skada.db.profile.tooltiprows = val end
+                },
+                tooltippos = {
+                    type = "select",
+                    name = L["Tooltip position"],
+                    desc = L["Position of the tooltips."],
+                    order = 4,
+                    width = "full",
+                    values = {
+                        ["default"] = L["Default"],
+                        ["smart"] = L["Smart"],
+                        ["topright"] = L["Top right"],
+                        ["topleft"] = L["Top left"],
+                        ["bottomright"] = L["Bottom right"],
+                        ["bottomleft"] = L["Bottom left"],
+                        ["cursor"] = L["Follow Cursor"]
+                    },
+                    get = function() return Skada.db.profile.tooltippos end,
+                    set = function(_, opt) Skada.db.profile.tooltippos = opt end
+                }
+            }
+        },
         generaloptions = {
             type = "group",
             name = L["General options"],
-            order = 4,
+            order = 5,
             args = {
                 mmbutton = {
                     type = "toggle",
@@ -549,63 +588,8 @@ Skada.options = {
         columns = {
             type = "group",
             name = L["Columns"],
-            order = 5,
-            args = {}
-        },
-        tooltips = {
-            type = "group",
-            name = L["Tooltips"],
             order = 6,
-            args = {
-                tooltips = {
-                    type = "toggle",
-                    name = L["Show tooltips"],
-                    desc = L["Shows tooltips with extra information in some modes."],
-                    order = 1,
-                    width = "full",
-                    get = function() return Skada.db.profile.tooltips end,
-                    set = function() Skada.db.profile.tooltips = not Skada.db.profile.tooltips end
-                },
-                informative = {
-                    type = "toggle",
-                    name = L["Informative tooltips"],
-                    desc = L["Shows subview summaries in the tooltips."],
-                    order = 2,
-                    width = "full",
-                    get = function() return Skada.db.profile.informativetooltips end,
-                    set = function() Skada.db.profile.informativetooltips = not Skada.db.profile.informativetooltips end
-                },
-                rows = {
-                    type = "range",
-                    name = L["Subview rows"],
-                    desc = L["The number of rows from each subview to show when using informative tooltips."],
-                    order = 3,
-                    width = "full",
-                    min = 1,
-                    max = 10,
-                    step = 1,
-                    get = function() return Skada.db.profile.tooltiprows end,
-                    set = function(_, val) Skada.db.profile.tooltiprows = val end
-                },
-                tooltippos = {
-                    type = "select",
-                    name = L["Tooltip position"],
-                    desc = L["Position of the tooltips."],
-                    order = 4,
-                    width = "full",
-                    values = {
-                        ["default"] = L["Default"],
-                        ["smart"] = L["Smart"],
-                        ["topright"] = L["Top right"],
-                        ["topleft"] = L["Top left"],
-                        ["bottomright"] = L["Bottom right"],
-                        ["bottomleft"] = L["Bottom left"],
-                        ["cursor"] = L["Follow Cursor"]
-                    },
-                    get = function() return Skada.db.profile.tooltippos end,
-                    set = function(_, opt) Skada.db.profile.tooltippos = opt end
-                }
-            }
+            args = {}
         },
         disabled = {
             type = "group",

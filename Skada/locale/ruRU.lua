@@ -43,8 +43,7 @@ L["Enter the name for the new window."] = "Введите имя нового о
 
 L["Delete window"] = "Удалить окно"
 L["Choose the window to be deleted."] = "Выберите окно для удаления."
-
-L["Deletes the chosen window."] = "Удалить выбранное окно."
+L["Are you sure you want to delete this window?"] = "Вы уверены, что хотите удалить это окно? "
 
 L["Rename window"] = "Переименовать окно"
 L["Enter the name for the window."] = "Введите новое имя для окна."

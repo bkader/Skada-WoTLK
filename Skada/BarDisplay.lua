@@ -375,9 +375,6 @@ do
 
     local function BarClick(bar, button)
         local win, id, label = bar.win, bar.id, bar.text
-        local click1 = win.metadata.click1
-        local click2 = win.metadata.click2
-        local click3 = win.metadata.click3
 
         if button == "RightButton" and IsShiftKeyDown() then
             Skada:OpenMenu(win)
@@ -385,12 +382,12 @@ do
             win.metadata.click(win, id, label, button)
         elseif button == "RightButton" then
             win:RightClick()
-        elseif click2 and IsShiftKeyDown() then
-            showmode(win, id, label, click2)
-        elseif click3 and IsControlKeyDown() then
-            showmode(win, id, label, click3)
-        elseif click1 then
-            showmode(win, id, label, click1)
+        elseif win.metadata.click2 and IsShiftKeyDown() then
+            showmode(win, id, label, win.metadata.click2)
+        elseif win.metadata.click3 and IsControlKeyDown() then
+            showmode(win, id, label, win.metadata.click3)
+        elseif win.metadata.click1 then
+            showmode(win, id, label, win.metadata.click1)
         end
     end
 
@@ -1209,7 +1206,6 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Enable"],
                 desc = L["Enables the title bar."],
                 order = 1,
-                width = "full",
                 get = function() return db.enabletitle end,
                 set = function()
                     db.enabletitle = not db.enabletitle
@@ -1221,7 +1217,6 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Include set"],
                 desc = L["Include set name in title bar"],
                 order = 2,
-                width = "full",
                 get = function() return db.titleset end,
                 set = function()
                     db.titleset = not db.titleset

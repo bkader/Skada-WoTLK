@@ -42,7 +42,7 @@ L["Enter the name for the new window."] = "Entrez le nom de la nouvelle fenêtre
 
 L["Delete window"] = "Supprimer une fenêtre"
 L["Choose the window to be deleted."] = "Choisissez la fenêtre à supprimer"
-L["Deletes the chosen window."] = "Supprimer la fenêtre choisie"
+L["Are you sure you want to delete this window?"] = "Êtes-vous sûr de vouloir supprimer cette fenêtre?"
 
 L["Rename window"] = "Renommer la fenêtre"
 L["Enter the name for the window."] = "Entrez le nom de la fenêtre"

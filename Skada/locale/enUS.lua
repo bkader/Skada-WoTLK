@@ -42,8 +42,7 @@ L["Enter the name for the new window."] = true
 
 L["Delete window"] = true
 L["Choose the window to be deleted."] = true
-
-L["Deletes the chosen window."] = true
+L["Are you sure you want to delete this window?"] = true
 
 L["Rename window"] = true
 L["Enter the name for the window."] = true
