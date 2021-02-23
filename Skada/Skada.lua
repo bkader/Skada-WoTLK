@@ -1410,7 +1410,7 @@ do
 		end
 
 		if #ttwin.dataset > 0 then
-			tooltip:AddLine(mode.title or mode:GetName(), 1, 1, 1)
+			tooltip:AddLine(mode.title or mode:GetName())
 			local nr = 0
 
 			for _, data in ipairs(ttwin.dataset) do
