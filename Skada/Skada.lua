@@ -1002,6 +1002,7 @@ function Skada:DeleteSet(set)
 	end
 
 	self:Wipe()
+	self:CleanGarbage(true)
 	self:UpdateDisplay(true)
 end
 
