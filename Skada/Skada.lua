@@ -1681,27 +1681,29 @@ function Skada:GetPetOwner(petGUID)
 end
 
 function Skada:CheckGroup()
-	local prefix, count = GetGroupTypeAndCount()
-	if count > 0 then
-		for i = 1, count, 1 do
-			local unit, unitpet = prefix..i, prefix..i.."pet"
-			if UnitExists(unitpet) then
-				local petGUID = UnitGUID(unitpet)
-				local unitGUID = UnitGUID(unit)
-				local unitName = select(1, UnitName(unit))
-				if petGUID and unitGUID and unitName and not pets[petGUID] then
-					pets[petGUID] = {id = unitGUID, name = unitName}
-				end
-			end
-		end
-	elseif UnitExists("pet") then
-		local petGUID = UnitGUID("pet")
-		local unitGUID = UnitGUID("player")
-		local unitName = select(1, UnitName("player"))
-		if petGUID and unitGUID and unitName and not pets[petGUID] then
-			pets[petGUID] = {id = unitGUID, name = unitName}
-		end
-	end
+    local prefix, count = GetGroupTypeAndCount()
+    if count > 0 then
+        for i = 1, count, 1 do
+            local unit = ("%s%d"):format(prefix, i)
+            local unitGUID = UnitGUID(unit)
+            if unitGUID then
+                players[unitGUID] = true
+                local petGUID = UnitGUID(unit .. "pet")
+                if petGUID and not pets[petGUID] then
+                    pets[petGUID] = {id = unitGUID, name = select(1, UnitName(unit))}
+                end
+            end
+        end
+    end
+
+    local unitGUID = UnitGUID("player")
+    if unitGUID then
+		players[unitGUID] = true
+        local petGUID = UnitGUID("pet")
+        if petGUID and not pets[petGUID] then
+            pets[petGUID] = {id = unitGUID, name = select(1, UnitName("player"))}
+        end
+    end
 end
 
 function Skada:ZoneCheck()
@@ -3095,7 +3097,7 @@ do
 			end
 		end
 
-		if eventtype == "SPELL_SUMMON" and (band(srcFlags, RAID_FLAGS) ~= 0 or band(srcFlags, PET_FLAGS) ~= 0 or band(srcFlags, SHAM_FLAGS) ~= 0 or (band(dstFlags, PET_FLAGS) ~= 0 and pets[dstGUID])) then
+		if eventtype == "SPELL_SUMMON" and (band(srcFlags, RAID_FLAGS) ~= 0 or band(srcFlags, PET_FLAGS) ~= 0 or ((band(dstFlags, PET_FLAGS) ~= 0 or band(srcFlags, SHAM_FLAGS) ~= 0) and pets[dstGUID])) then
 			-- we assign the pet the normal way
 			pets[dstGUID] = {id = srcGUID, name = srcName}
 
