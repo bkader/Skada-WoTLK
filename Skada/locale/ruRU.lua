@@ -30,6 +30,7 @@ L["Average"] = "В среднем"
 L["Average hit:"] = "Среднее попадание:"
 L["Total hits:"] = "Всего попаданий:"
 L["Count"] = "Количество"
+L["Refresh"] = "Обновление"
 L["Percent"] = "Процент"
 
 L["General options"] = "Основные настройки"

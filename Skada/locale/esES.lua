@@ -29,6 +29,7 @@ L["Average"] = "Promedio"
 L["Average hit:"] = "Promedio de golpe:"
 L["Total hits:"] = "Aciertos totales"
 L["Count"] = "Contar"
+L["Refresh"] = "Actualización"
 L["Percent"] = "Porcentaje"
 
 L["General options"] = "Opciones generales"

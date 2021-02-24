@@ -29,6 +29,7 @@ if not L then return end
 -- L["Average hit:"] = ""
 -- L["Total hits:"] = ""
 -- L["Count"] = ""
+-- L["Refresh"] = ""
 -- L["Percent"] = ""
 
 -- L["General options"] = ""

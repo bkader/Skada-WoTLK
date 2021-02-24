@@ -30,6 +30,7 @@ L["Average"] = "平均"
 L["Average hit:"] = "平均值："
 L["Total hits:"] = "总计值："
 L["Count"] = "计数"
+L["Refresh"] = "更新"
 L["Percent"] = "百分比"
 
 L["General options"] = "常规选项"

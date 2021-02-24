@@ -29,6 +29,7 @@ L["Average"] = "Moyenne"
 L["Average hit:"] = "Moyenne:"
 L["Total hits:"] = "Total:"
 L["Count"] = "Compte"
+L["Refresh"] = "Réactualisation"
 L["Percent"] = "Pourcentage"
 
 L["General options"] = "Options générales"

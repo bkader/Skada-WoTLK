@@ -29,6 +29,7 @@ L["Average"] = true
 L["Average hit:"] = true
 L["Total hits:"] = true
 L["Count"] = true
+L["Refresh"] = true
 L["Percent"] = true
 
 L["General options"] = true

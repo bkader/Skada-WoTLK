@@ -12,50 +12,56 @@ local math_min, math_max, math_floor = math.min, math.max, math.floor
 -- common functions to both modules that handle aura apply/remove log
 --
 local function log_auraapply(set, aura)
-	if set then
-		local player = Skada:get_player(set, aura.playerid, aura.playername, aura.playerflags)
-		if player then
-			player.auras = player.auras or {} -- create the table.
+    if set then
+        local player = Skada:get_player(set, aura.playerid, aura.playername, aura.playerflags)
+        if player then
+            player.auras = player.auras or {} -- create the table.
 
-			-- save/update aura
-			if not player.auras[aura.spellname] then
-				player.auras[aura.spellname] = {
-					id = aura.spellid,
-					school = aura.spellschool,
-					auratype = aura.auratype,
-					active = 1,
-					uptime = 0,
-					count = 1
-				}
-			else
-				player.auras[aura.spellname].count = player.auras[aura.spellname].count + 1
-				player.auras[aura.spellname].active = player.auras[aura.spellname].active + 1
-			end
+            -- save/update aura
+            if not player.auras[aura.spellname] then
+                player.auras[aura.spellname] = {
+                    id = aura.spellid,
+                    school = aura.spellschool,
+                    auratype = aura.auratype,
+                    active = 1,
+                    uptime = 0,
+                    count = 1,
+                    refresh = 0
+                }
+            else
+                player.auras[aura.spellname].active = 1
+                player.auras[aura.spellname].count = player.auras[aura.spellname].count + 1
+            end
 
-			-- fix the school
-			if not player.auras[aura.spellname].school and aura.spellschool then
-				player.auras[aura.spellname].school = aura.spellschool
-			end
+            -- fix the school
+            if not player.auras[aura.spellname].school and aura.spellschool then
+                player.auras[aura.spellname].school = aura.spellschool
+            end
 
-			-- targets for debuffs, sources for buffs
-			-- if aura.auratype == "DEBUFF" and aura.dstName then
-			if aura.auratype == "DEBUFF" and aura.dstName then
-				player.auras[aura.spellname].targets = player.auras[aura.spellname].targets or {}
-				player.auras[aura.spellname].targets[aura.dstName] = (player.auras[aura.spellname].targets[aura.dstName] or 0) + 1
-			end
-		end
-	end
+            -- targets for debuffs, sources for buffs
+            if aura.auratype == "DEBUFF" and aura.dstName then
+                player.auras[aura.spellname].targets = player.auras[aura.spellname].targets or {}
+                player.auras[aura.spellname].targets[aura.dstName] = (player.auras[aura.spellname].targets[aura.dstName] or 0) + 1
+            end
+        end
+    end
+end
+
+local function log_aurarefresh(set, aura)
+    if set then
+        local player = Skada:get_player(set, aura.playerid, aura.playername, aura.playerflags)
+        if player and player.auras and aura.spellname and player.auras[aura.spellname] and player.auras[aura.spellname].active > 0 then
+            player.auras[aura.spellname].refresh = (player.auras[aura.spellname].refresh or 0) + 1
+        end
+    end
 end
 
 local function log_auraremove(set, aura)
-	if set then
-		local player = Skada:get_player(set, aura.playerid, aura.playername, aura.playerflags)
-		if player and player.auras and aura.spellname and player.auras[aura.spellname] then
-	        local a = player.auras[aura.spellname]
-	        if a.active > 0 then
-	            a.active = a.active - 1
-	        end
-	    end
+    if set then
+        local player = Skada:get_player(set, aura.playerid, aura.playername, aura.playerflags)
+        if player and player.auras and aura.spellname and player.auras[aura.spellname] and player.auras[aura.spellname].active > 0 then
+            player.auras[aura.spellname].active = 0
+        end
     end
 end
 
@@ -68,22 +74,29 @@ local aura = {}
 local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
     local spellid, spellname, spellschool, auratype = ...
 
-    if auratype == "DEBUFF" then
+    if auratype == "BUFF" then
+        if srcGUID == dstGUID then
+            aura.playerid = srcGUID
+            aura.playername = srcName
+            aura.playerflags = srcFlags
+        else
+            aura.playerid = dstGUID
+            aura.playername = dstName
+            aura.playerflags = dstFlags
+        end
+
+        -- clear unwanted data
+        aura.dstGUID = nil
+        aura.dstName = nil
+        aura.dstFlags = nil
+    elseif auratype == "DEBUFF" then
 		aura.playerid = srcGUID
-	    aura.playername = srcName
-	    aura.playerflags = srcFlags
+        aura.playername = srcName
+        aura.playerflags = srcFlags
 
-		aura.dstGUID = dstGUID
-		aura.dstName = dstName
-		aura.dstFlags = dstFlags
-    elseif auratype == "BUFF" then
-		aura.playerid = dstGUID
-	    aura.playername = dstName
-	    aura.playerflags = dstFlags
-
-		aura.dstGUID = srcGUID
-		aura.dstName = srcName
-		aura.dstFlags = srcFlags
+        aura.dstGUID = dstGUID
+        aura.dstName = dstName
+        aura.dstFlags = dstFlags
     end
 
     aura.spellid = spellid
@@ -96,16 +109,71 @@ local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dst
     log_auraapply(Skada.total, aura)
 end
 
+local function AuraRefresh(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+    local spellid, spellname, spellschool, auratype = ...
+
+    if auratype == "BUFF" then
+        if srcGUID == dstGUID then
+            aura.playerid = srcGUID
+            aura.playername = srcName
+            aura.playerflags = srcFlags
+        else
+            aura.playerid = dstGUID
+            aura.playername = dstName
+            aura.playerflags = dstFlags
+        end
+
+        -- clear unwanted data
+        aura.dstGUID = nil
+        aura.dstName = nil
+        aura.dstFlags = nil
+    elseif auratype == "DEBUFF" then
+        aura.playerid = srcGUID
+        aura.playername = srcName
+        aura.playerflags = srcFlags
+
+        aura.dstGUID = nil
+        aura.dstName = nil
+        aura.dstFlags = nil
+    end
+
+    aura.spellid = nil
+    aura.spellname = spellname
+    aura.spellschool = nil
+    aura.auratype = nil
+
+    Skada:FixPets(aura)
+    log_aurarefresh(Skada.current, aura)
+    log_aurarefresh(Skada.total, aura)
+end
+
 local function AuraRemoved(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
     local spellid, spellname, spellschool, auratype = ...
 
-    aura.playerid = srcGUID
-    aura.playername = srcName
-    aura.playerflags = srcFlags
+    if auratype == "BUFF" then
+        if srcGUID == dstGUID then
+            aura.playerid = srcGUID
+            aura.playername = srcName
+            aura.playerflags = srcFlags
+        else
+            aura.playerid = dstGUID
+            aura.playername = dstName
+            aura.playerflags = dstFlags
+        end
 
-    aura.dstGUID = nil
-    aura.dstName = nil
-    aura.dstFlags = nil
+        -- clear unwanted data
+        aura.dstGUID = nil
+        aura.dstName = nil
+        aura.dstFlags = nil
+    elseif auratype == "DEBUFF" then
+        aura.playerid = srcGUID
+        aura.playername = srcName
+        aura.playerflags = srcFlags
+
+        aura.dstGUID = dstGUID
+        aura.dstName = dstName
+        aura.dstFlags = dstFlags
+    end
 
     aura.spellid = nil
     aura.spellname = spellname
@@ -128,7 +196,7 @@ local function auras_tick(set)
 		for _, player in _ipairs(set.players) do
 			if player.auras then
 				for _, spell in _pairs(player.auras) do
-					if spell.active > 0 then
+					if spell.active == 1 then
 						spell.uptime = spell.uptime + 1
 					end
 				end
@@ -181,9 +249,9 @@ do
 
 	            d.id = player.id
 	            d.label = player.name
-	            d.class = player.class
-	            d.role = player.role
-	            d.spec = player.spec
+	            d.class = player.class or "PET"
+	            d.role = player.role or "DAMAGER"
+	            d.spec = player.spec or "PET"
 
 	            d.value = uptime
 	            d.valuetext = _format("%02.1f%% / %u", 100 * uptime / math_max(1, maxtime), auracount)
@@ -240,7 +308,8 @@ local function aura_tooltip(win, id, label, tooltip, playerid, L)
     if player and player.auras then
         local aura = player.auras[label]
         if aura then
-            local totaltime = math_min(Skada:GetSetTime(set), Skada:PlayerActiveTime(set, player))
+			local settime = Skada:GetSetTime(set)
+			local maxtime = math_min(settime, Skada:PlayerActiveTime(set, player))
 
             tooltip:AddLine(player.name .. ": " .. label)
 
@@ -254,9 +323,12 @@ local function aura_tooltip(win, id, label, tooltip, playerid, L)
             end
 
             -- add segment and active times
-            tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(totaltime), 1, 1, 1)
-            tooltip:AddDoubleLine(L["Uptime"], Skada:FormatTime(aura.uptime), 1, 1, 1)
             tooltip:AddDoubleLine(L["Count"], aura.count, 1, 1, 1)
+            tooltip:AddDoubleLine("Refresh", aura.refresh or 0, 1, 1, 1)
+            tooltip:AddLine(" ")
+            tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
+            tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(maxtime), 1, 1, 1)
+            tooltip:AddDoubleLine(L["Uptime"], Skada:FormatTime(aura.uptime), 1, 1, 1)
         end
     end
 end
@@ -276,6 +348,10 @@ local function setcompletefunc(set, auratype)
 				end
 			end
 		end
+	end
+	if aurasticker then
+		aurasticker:Cancel()
+		aurasticker = nil
 	end
 end
 
@@ -323,11 +399,12 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
         self.metadata = {click1 = spellmod}
 
         Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {src_is_interesting = true})
+        Skada:RegisterForCL(AuraRefresh, "SPELL_AURA_REFRESH", {src_is_interesting = true})
+        Skada:RegisterForCL(AuraRefresh, "SPELL_AURA_APPLIED_DOSE", {src_is_interesting = true})
         Skada:RegisterForCL(AuraRemoved, "SPELL_AURA_REMOVED", {src_is_interesting = true})
 
         Skada:AddMode(self, L["Buffs and Debuffs"])
         Skada.RegisterCallback(self, "ENCOUNTER_START", "CheckBuffs")
-        Skada.RegisterCallback(self, "ENCOUNTER_END", "StopTick")
     end
 
     function mod:SetComplete(set)
@@ -336,6 +413,7 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
+		Skada.UnregisterAllCallbacks(self)
 	end
 
 	function mod:CheckBuffs(event, timestamp)
@@ -365,15 +443,6 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 			end
 		end
 	end
-
-	function mod:StopTick(event, set)
-		if event == "ENCOUNTER_END" and set then
-			if aurasticker then
-				aurasticker:Cancel()
-				aurasticker = nil
-			end
-		end
-	end
 end)
 
 -- ================================================================== --
@@ -395,6 +464,8 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 
             if eventtype == "SPELL_AURA_APPLIED" then
                 AuraApplied(timestamp, eventtype, srcGUID, srcName, dstFlags, dstGUID, dstName, dstFlags, ...)
+            elseif eventtype == "SPELL_AURA_REFRESH" or eventtype == "SPELL_AURA_APPLIED_DOSE" then
+                AuraRefresh(timestamp, eventtype, srcGUID, srcName, dstFlags, dstGUID, dstName, dstFlags, ...)
             else
                 AuraRemoved(timestamp, eventtype, srcGUID, srcName, dstFlags, dstGUID, dstName, dstFlags, ...)
             end
@@ -456,15 +527,17 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
         self.metadata = {click1 = spellmod}
 
         Skada:RegisterForCL(DebuffApplied, "SPELL_AURA_APPLIED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
+        Skada:RegisterForCL(DebuffApplied, "SPELL_AURA_REFRESH", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
+        Skada:RegisterForCL(DebuffApplied, "SPELL_AURA_APPLIED_DOSE", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
         Skada:RegisterForCL(DebuffApplied, "SPELL_AURA_REMOVED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
 
         Skada:AddMode(self, L["Buffs and Debuffs"])
         Skada.RegisterCallback(self, "ENCOUNTER_START", "StartTick")
-        Skada.RegisterCallback(self, "ENCOUNTER_END", "StopTick")
     end
 
     function mod:OnDisable()
         Skada:RemoveMode(self)
+		Skada.UnregisterAllCallbacks(self)
     end
 
 	function mod:SetComplete(set)
@@ -475,15 +548,6 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 		if event == "ENCOUNTER_START" and Skada.current and not Skada.current.stopped then
 			if not aurasticker then
 				aurasticker = Skada.NewTicker(1, combat_tick)
-			end
-		end
-	end
-
-	function mod:StopTick(event, set)
-		if event == "ENCOUNTER_END" and set then
-			if aurasticker then
-				aurasticker:Cancel()
-				aurasticker = nil
 			end
 		end
 	end
