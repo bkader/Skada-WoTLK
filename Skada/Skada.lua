@@ -1237,6 +1237,10 @@ function Skada:get_player(set, playerid, playername, playerflag)
 	return player
 end
 
+function Skada:IsPlayer(playerid)
+	return players[playerid]
+end
+
 function Skada:IsBoss(GUID)
 	return GUID and BOSS.BossIDs[tonumber(GUID:sub(9, 12), 16)]
 end
@@ -1678,6 +1682,10 @@ end
 
 function Skada:GetPetOwner(petGUID)
 	return pets[petGUID]
+end
+
+function Skada:IsPet(petGUID)
+	return (pets[petGUID] ~= nil)
 end
 
 function Skada:CheckGroup()

@@ -141,6 +141,11 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
         end
     end
 
+    --
+    -- this function can be called using Skada:SendMessage function.
+    --
+    function mod:UNIT_DIED(event, ...) UnitDied(...) end
+
     local function log_resurrect(set, playerid, playername, playerflags)
         local player = Skada:get_player(set, playerid, playername, playerflags)
         if player then
@@ -395,12 +400,14 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
         Skada:RegisterForCL(SpellHeal, "SPELL_PERIODIC_HEAL", {dst_is_interesting_nopets = true})
         Skada:RegisterForCL(UnitDied, "UNIT_DIED", {dst_is_interesting_nopets = true})
         Skada:RegisterForCL(SpellResurrect, "SPELL_RESURRECT", {dst_is_interesting_nopets = true})
+		Skada.RegisterMessage(self, "UNIT_DIED")
 
         Skada:AddMode(self)
     end
 
     function mod:OnDisable()
         Skada:RemoveMode(self)
+		Skada.UnregisterMessage(self)
     end
 
     function mod:SetComplete(set)
