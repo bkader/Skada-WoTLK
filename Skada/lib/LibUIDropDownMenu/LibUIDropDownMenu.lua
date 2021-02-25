@@ -1,4 +1,4 @@
-local lib = LibStub:NewLibrary("LibUIDropDownMenu", 1)
+local lib = LibStub:NewLibrary("LibUIDropDownMenu", 1.1)
 if not lib then return end
 
 -- //////////////////////////////////////////////////////////////
@@ -14,14 +14,7 @@ local tonumber = tonumber
 local type = type
 local wipe = table.wipe
 
-local CreateFrame, GetCursorPosition, GetCVar, GetScreenHeight, GetScreenWidth, OpenColorPicker, PlaySound =
-    CreateFrame,
-    GetCursorPosition,
-    GetCVar,
-    GetScreenHeight,
-    GetScreenWidth,
-    OpenColorPicker,
-    PlaySound
+local CreateFrame, GetCursorPosition, GetCVar, GetScreenHeight, GetScreenWidth, OpenColorPicker, PlaySound = CreateFrame, GetCursorPosition, GetCVar, GetScreenHeight, GetScreenWidth, OpenColorPicker, PlaySound
 
 -- //////////////////////////////////////////////////////////////
 L_UIDROPDOWNMENU_MINBUTTONS = 8
@@ -45,6 +38,8 @@ L_UIDROPDOWNMENU_DEFAULT_TEXT_HEIGHT = nil
 L_OPEN_DROPDOWNMENUS = {}
 
 local UIDropDownMenuDelegate = CreateFrame("FRAME")
+tinsert(UISpecialFrames, "L_DropDownList1")
+tinsert(UISpecialFrames, "L_DropDownList2")
 
 function L_UIDropDownMenuDelegate_OnAttributeChanged(self, attribute, value)
     if (attribute == "createframes" and value == true) then
