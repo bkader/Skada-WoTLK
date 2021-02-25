@@ -407,7 +407,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
     function mod:OnDisable()
         Skada:RemoveMode(self)
-		Skada.UnregisterMessage(self)
+		Skada.UnregisterAllMessages(self)
     end
 
     function mod:SetComplete(set)
