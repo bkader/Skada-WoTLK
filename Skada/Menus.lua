@@ -10,10 +10,10 @@ local _GetCursorPosition = GetCursorPosition
 local _GetScreenWidth, _GetScreenHeight = GetScreenWidth, GetScreenHeight
 
 local _CreateFrame = CreateFrame
-local _UIDropDownMenu_CreateInfo = UIDropDownMenu_CreateInfo
-local _UIDropDownMenu_AddButton = UIDropDownMenu_AddButton
-local _CloseDropDownMenus = CloseDropDownMenus
-local _ToggleDropDownMenu = ToggleDropDownMenu
+local _UIDropDownMenu_CreateInfo = L_UIDropDownMenu_CreateInfo
+local _UIDropDownMenu_AddButton = L_UIDropDownMenu_AddButton
+local _CloseDropDownMenus = L_CloseDropDownMenus
+local _ToggleDropDownMenu = L_ToggleDropDownMenu
 
 -- guesses the dropdown location
 local function getDropdownPoint()
@@ -145,8 +145,8 @@ function Skada:OpenMenu(window)
             info.notCheckable = 1
             _UIDropDownMenu_AddButton(info, level)
         elseif level == 2 then
-            if _type(UIDROPDOWNMENU_MENU_VALUE) == "table" then
-                local window = UIDROPDOWNMENU_MENU_VALUE
+            if _type(L_UIDROPDOWNMENU_MENU_VALUE) == "table" then
+                local window = L_UIDROPDOWNMENU_MENU_VALUE
 
                 if not Skada.db.profile.shortmenu then
                     -- dsplay modes only if we have modules enabled.
@@ -264,7 +264,7 @@ function Skada:OpenMenu(window)
                 info.checked = window.db.snapto
                 info.isNotRadio = 1
                 _UIDropDownMenu_AddButton(info, level)
-            elseif UIDROPDOWNMENU_MENU_VALUE == "delete" then
+            elseif L_UIDROPDOWNMENU_MENU_VALUE == "delete" then
                 for i, set in _ipairs(Skada:get_sets()) do
                     info = _UIDropDownMenu_CreateInfo()
                     info.text = Skada:GetSetLabel(set)
@@ -274,7 +274,7 @@ function Skada:OpenMenu(window)
                     info.notCheckable = 1
                     _UIDropDownMenu_AddButton(info, level)
                 end
-            elseif UIDROPDOWNMENU_MENU_VALUE == "keep" then
+            elseif L_UIDROPDOWNMENU_MENU_VALUE == "keep" then
                 for i, set in _ipairs(Skada:get_sets()) do
                     info = _UIDropDownMenu_CreateInfo()
                     info.text = Skada:GetSetLabel(set)
@@ -289,7 +289,7 @@ function Skada:OpenMenu(window)
                 end
             end
         elseif level == 3 then
-            if UIDROPDOWNMENU_MENU_VALUE == "modes" then
+            if L_UIDROPDOWNMENU_MENU_VALUE == "modes" then
                 for i, module in _ipairs(Skada:GetModes()) do
                     info = _UIDropDownMenu_CreateInfo()
                     info.text = module:GetName()
@@ -299,7 +299,7 @@ function Skada:OpenMenu(window)
                     end
                     _UIDropDownMenu_AddButton(info, level)
                 end
-            elseif UIDROPDOWNMENU_MENU_VALUE == "segment" then
+            elseif L_UIDROPDOWNMENU_MENU_VALUE == "segment" then
                 info = _UIDropDownMenu_CreateInfo()
                 info.text = L["Total"]
                 info.func = function()
@@ -448,8 +448,8 @@ do
                     info.padding = 16
                     _UIDropDownMenu_AddButton(info, level)
                 end
-            elseif level == 2 and categorized[UIDROPDOWNMENU_MENU_VALUE] then
-                for i, mode in _ipairs(categorized[UIDROPDOWNMENU_MENU_VALUE]) do
+            elseif level == 2 and categorized[L_UIDROPDOWNMENU_MENU_VALUE] then
+                for i, mode in _ipairs(categorized[L_UIDROPDOWNMENU_MENU_VALUE]) do
                     info = _UIDropDownMenu_CreateInfo()
                     info.text = mode:GetName()
                     info.func = function()

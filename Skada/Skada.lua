@@ -1839,7 +1839,7 @@ function Skada:Reset()
 	dataobj.text = "n/a"
 	self:UpdateDisplay(true)
 	self:Print(L["All data has been reset."])
-	CloseDropDownMenus()
+	L_CloseDropDownMenus()
 
 	self:CleanGarbage(true)
 end

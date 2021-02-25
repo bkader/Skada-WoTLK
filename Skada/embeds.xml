@@ -1,6 +1,5 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
-
 <Script file="lib\LibStub\LibStub.lua"/>
 <Script file="lib\CallbackHandler-1.0\CallbackHandler-1.0.lua"/>
 <Script file="lib\AceAddon-3.0\AceAddon-3.0.lua"/>
@@ -27,4 +26,5 @@
 <Script file="lib\LibTalentQuery-1.0\LibTalentQuery-1.0.lua"/>
 <Script file="lib\LibGroupTalents-1.0\LibGroupTalents-1.0.lua"/>
 <Script file="lib\LibFlyPaper-1.1\LibFlyPaper-1.1.lua"/>
+<Include file="lib\LibUIDropDownMenu\LibUIDropDownMenu.xml"/>
 </Ui>

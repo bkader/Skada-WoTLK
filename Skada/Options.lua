@@ -359,7 +359,7 @@ Skada.options = {
                     get = function() return Skada.db.profile.mergepets end,
                     set = function()
                         Skada.db.profile.mergepets = not Skada.db.profile.mergepets
-                        CloseDropDownMenus()
+                        L_CloseDropDownMenus()
                     end
                 },
                 showtotals = {
