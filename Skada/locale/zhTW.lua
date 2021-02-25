@@ -504,7 +504,7 @@ if not L then return end
 -- damage taken module
 -- L["Damage taken"] = ""
 -- L["Damage taken by %s"] = ""
--- L["<%s> damage on %s"] = ""
+-- L["%s damage on %s"] = ""
 
 -- L["Damage source list"] = ""
 -- L["Damage spell sources"] = ""

@@ -71,7 +71,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
             data.spellschool = spellschool
 
             data.extraspellid = extraspellid or 6603
-            data.extraspellname = extraspellname or MELEE
+            data.extraspellname = extraspellname or L["Auto Attack"]
             data.extraspellschool = extraspellschool or 1
 
             log_dispels(Skada.current, data)

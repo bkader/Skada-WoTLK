@@ -66,7 +66,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
         data.dstFlags = dstFlags
 
         data.spellid = spellid or 6603
-        data.spellname = spellname or MELEE
+        data.spellname = spellname or L["Auto Attack"]
         data.spellschool = spellschool or 1
         data.extraspellid = extraspellid
         data.extraspellname = extraspellname

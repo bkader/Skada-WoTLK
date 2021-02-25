@@ -92,7 +92,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
         data.playerflags = dstFlags
 
         data.spellid = 6603
-        data.spellname = MELEE
+        data.spellname = L["Auto Attack"]
         data.amount = 0 - amount
         data.overkill = overkill
         data.resisted = resisted

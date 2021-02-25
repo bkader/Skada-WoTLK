@@ -31,7 +31,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 
 		-- add the spell
 		local spellname = dmg.spellname
-		if spellname == MELEE then
+		if spellname == L["Auto Attack"] then
 			spellname = spellname .. " (" .. (dmg.srcName or UNKNOWN) .. ")"
 		end
 
@@ -122,7 +122,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 	end
 
 	local function SwingDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, MELEE, 1, ...)
+		SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, L["Auto Attack"], 1, ...)
 	end
 
 	local function SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
@@ -156,7 +156,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 	end
 
 	local function SwingMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, MELEE, 1, ...)
+		SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, L["Auto Attack"], 1, ...)
 	end
 
 	local function getDTPS(set, player)
@@ -275,7 +275,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 
 	function spellmod:Enter(win, id, label)
 		self.spellname = label
-		self.title = _format(L["<%s> damage on %s"], label, playermod.playername)
+		self.title = _format(L["%s damage on %s"], label, playermod.playername)
 	end
 
 	function spellmod:Update(win, set)

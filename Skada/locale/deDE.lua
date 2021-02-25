@@ -504,7 +504,7 @@ L["Damage: Raid DPS"] = "Schaden: Raid-DPS"
 -- damage taken module
 L["Damage taken"] = "Schaden erhalten"
 L["Damage taken by %s"] = "%s : Schaden erhalten"
-L["<%s> damage on %s"] = "<%s> Schaden an %s"
+L["%s damage on %s"] = "%s Schaden an %s"
 
 L["Damage source list"] = "Schadensquellenliste"
 L["Damage spell sources"] = "Schadenszauberquellen"

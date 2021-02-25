@@ -507,7 +507,7 @@ L["Damage: Raid DPS"] = "Урон: УВС рейда"
 -- damage taken module
 L["Damage taken"] = "Получено урона"
 L["Damage taken by %s"] = "%s: Полученный урон"
-L["<%s> damage on %s"] = "%2$s: Урон от <%1$s>"
+L["%s damage on %s"] = "%2$s: Урон от %1$s"
 
 L["Damage source list"] = "Источники урона"
 L["Damage spell sources"] = "Источники заклинаний"

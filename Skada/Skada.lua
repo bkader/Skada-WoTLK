@@ -2582,6 +2582,9 @@ function Skada:OnEnable()
 		}
 	end
 
+	-- please do not localize this line!
+	L["Auto Attack"] = select(1, GetSpellInfo(6603))
+
 	-- add Gunship adds
 	-- horde
 	BOSS.BossIDs[36960] = true -- Kor'kron Sergeant, Gunship add

@@ -187,18 +187,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
-			local spellid,
-				spellname,
-				spellschool,
-				amount,
-				overkill,
-				school,
-				resisted,
-				blocked,
-				absorbed,
-				critical,
-				glancing,
-				crushing = ...
+			local spellid, spellname, spellschool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing = ...
 
 			dmg.playerid = srcGUID
 			dmg.playername = srcName
@@ -230,7 +219,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	end
 
 	local function SwingDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, MELEE, 1, ...)
+		SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, L["Auto Attack"], 1, ...)
 	end
 
 	local function SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
@@ -267,7 +256,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	end
 
 	local function SwingMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellMissed(nil, nil, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, MELEE, 1, ...)
+		SpellMissed(nil, nil, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, L["Auto Attack"], 1, ...)
 	end
 
 	local function getDPS(set, player)
@@ -419,7 +408,6 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		self.playerid = id
-		self.playername = label
 		self.title = _format(L["%s's targets"], label)
 	end
 
@@ -472,7 +460,6 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	end
 
 	function spellmod:Enter(win, id, label)
-		self.spellid = id
 		self.spellname = label
 		self.title = _format(L["%s's <%s> damage"], playermod.playername, label)
 	end
@@ -503,7 +490,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 					add_detail_bar(win, nr, L["Crushing"], spell.crushing)
 					nr = nr + 1
 				end
-				for i, misstype in _ipairs(misstypes) do
+				for _, misstype in _ipairs(misstypes) do
 					if spell[misstype] and spell[misstype] > 0 then
 						local title = _G[misstype] or _G["ACTION_SPELL_MISSED" .. misstype] or misstype
 						add_detail_bar(win, nr, title, spell[misstype])

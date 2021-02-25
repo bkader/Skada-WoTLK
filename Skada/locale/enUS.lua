@@ -504,7 +504,7 @@ L["Damage: Raid DPS"] = true
 -- damage taken module
 L["Damage taken"] = true
 L["Damage taken by %s"] = true
-L["<%s> damage on %s"] = true
+L["%s damage on %s"] = true
 
 L["Damage source list"] = true
 L["Damage spell sources"] = true

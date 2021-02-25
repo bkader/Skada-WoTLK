@@ -505,7 +505,7 @@ L["Damage: Raid DPS"] = "伤害：团队DPS"
 -- damage taken module
 L["Damage taken"] = "承受伤害"
 L["Damage taken by %s"] = "%s的承受伤害"
-L["<%s> damage on %s"] = "<%s>的伤害于%s"
+L["%s damage on %s"] = "%s的伤害于%s"
 
 L["Damage source list"] = "伤害来源列表"
 L["Damage spell sources"] = "伤害法术来源"
