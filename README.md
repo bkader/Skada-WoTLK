@@ -51,4 +51,4 @@ It is important to know that for most addons to properly function without issues
 
 ### Optional
 
-If you are using [ELvUI](https://github.com/ElvUI-WotLK/ElvUI) and [ElvUI_AddOnSkins](https://github.com/ElvUI-WotLK/ElvUI_AddOnSkins), simply extract the **ElvUI_AddOnSkins** folder inside your addons folder, replace the files you are asked to and that's it. Enjoy!
+If you are using [ELvUI](https://github.com/ElvUI-WotLK/ElvUI) and [ElvUI_AddOnSkins](https://github.com/ElvUI-WotLK/ElvUI_AddOnSkins), simply extract both **ElvUI** and **ElvUI_AddOnSkins** folders inside your addons folder, replace the files you are asked to and that's it. Enjoy!
