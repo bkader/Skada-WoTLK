@@ -30,7 +30,7 @@ L["Average"] = "平均"
 L["Average hit:"] = "平均值："
 L["Total hits:"] = "总计值："
 L["Count"] = "计数"
-L["Refresh"] = "更新"
+L["Refresh"] = "刷新"
 L["Percent"] = "百分比"
 
 L["General options"] = "常规选项"
@@ -44,7 +44,7 @@ L["Enter the name for the new window."] = "输入新窗口的名字。"
 
 L["Delete window"] = "删除窗口"
 L["Choose the window to be deleted."] = "选择要删除的窗口。"
--- L["Are you sure you want to delete this window?"] = ""
+L["Are you sure you want to delete this window?"] = "确定要删除此窗口？"
 
 L["Rename window"] = "重命名窗口"
 L["Enter the name for the window."] = "输入窗口的名字。"
