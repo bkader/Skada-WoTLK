@@ -99,7 +99,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
         local player = Skada:find_player(set, self.playerid)
         local max = 0
 
-        if player and player.fails.spells then
+        if player and player.fails then
             local nr = 1
 
             for spellid, count in _pairs(player.fails.spells) do
