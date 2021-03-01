@@ -426,7 +426,7 @@ end
 
 -- ValidateUnit
 local function ValidateUnit(r, guid)
-	local unit = r.unit	
+	local unit = r.unit
 	if (UnitGUID(unit) ~= guid) then
 		local name = r.name .. (r.realm and "-" or "") .. (r.realm or "")
 		local index = UnitInRaid(name)
@@ -956,7 +956,7 @@ function lib:GetGUIDGlyphs(guid, group)
 		end
 	end
 end
-                                        
+
 -- UnitHasGlyph
 function lib:UnitHasGlyph(unit, glyphID, group)
 	return lib:GUIDHasGlyph(UnitGUID(unit), glyphID, group)
@@ -1215,7 +1215,7 @@ do
 				if (class == "PRIEST") then
 					role = ((t1 + t2) > t3) and "healer" or "caster"
 				elseif (class == "WARRIOR") then
-					role = ((t1 + t2) > t3) and "melee" or "tank" 
+					role = ((t1 + t2) > t3) and "melee" or "tank"
 				else
 					local heavy = (t1 > t2 and t1 > t3 and 1) or (t2 > t1 and t2 > t3 and 2) or (t3 > t1 and t3 > t2 and 3) or 0
 					if (class == "PALADIN") then
