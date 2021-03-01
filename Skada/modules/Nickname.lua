@@ -123,6 +123,9 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
         unitName = select(1, UnitName("player"))
         unitGUID = UnitGUID("player")
         Skada.options.args.modules.args.nickname = options
+		if Skada.db.profile.namedisplay == nil then
+			Skada.db.profile.namedisplay = 1
+		end
     end
 
     function mod:OnEnable()
@@ -196,6 +199,7 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 							player.nickname = self.db.nicknames[guid]
 						else
 							player.nickname = player.name
+							self.db.nicknames[guid] = player.nickname
 						end
                         -- update cached
                         if set._playeridx and set._playeridx[guid] then
