@@ -4,20 +4,23 @@ Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 local ACD = LibStub("AceConfigDialog-3.0")
+local DBI = LibStub("LibDBIcon-1.0", true)
+local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
+local LBI = LibStub("LibBossIDs-1.0")
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
-local ICON = LibStub("LibDBIcon-1.0", true)
-local LSM = LibStub("LibSharedMedia-3.0")
-local BOSS = LibStub("LibBossIDs-1.0")
 local LGT = LibStub("LibGroupTalents-1.0")
+local LSM = LibStub("LibSharedMedia-3.0")
 local Translit = LibStub("LibTranslit-1.0")
 
-local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
+-- holds additional bosses or NPCs.
 local bossNames
 
-local dataobj = LDB:NewDataObject(
-	"Skada",
-	{label = "Skada", type = "data source", icon = "Interface\\Icons\\Spell_Lightning_LightningBolt01", text = "n/a"}
-)
+local dataobj = LDB:NewDataObject("Skada", {
+	label = "Skada",
+	type = "data source",
+	icon = "Interface\\Icons\\Spell_Lightning_LightningBolt01",
+	text = "n/a"
+})
 
 -- Keybindings
 _G.BINDING_HEADER_SKADA = "Skada"
@@ -1242,7 +1245,7 @@ function Skada:IsPlayer(playerid)
 end
 
 function Skada:IsBoss(GUID)
-	return GUID and BOSS.BossIDs[tonumber(GUID:sub(9, 12), 16)]
+	return GUID and LBI.BossIDs[tonumber(GUID:sub(9, 12), 16)]
 end
 
 -- ================== --
@@ -2191,12 +2194,12 @@ function Skada:OpenOptions(win)
 end
 
 function Skada:RefreshMMButton()
-	if ICON then
-		ICON:Refresh("Skada", self.db.profile.icon)
+	if DBI then
+		DBI:Refresh("Skada", self.db.profile.icon)
 		if self.db.profile.icon.hide then
-			ICON:Hide("Skada")
+			DBI:Hide("Skada")
 		else
-			ICON:Show("Skada")
+			DBI:Show("Skada")
 		end
 	end
 end
@@ -2235,8 +2238,8 @@ function Skada:ReloadSettings()
 
 	Skada:ClearAllIndexes()
 
-	if ICON and not ICON:IsRegistered("Skada") then
-		ICON:Register("Skada", dataobj, self.db.profile.icon)
+	if DBI and not DBI:IsRegistered("Skada") then
+		DBI:Register("Skada", dataobj, self.db.profile.icon)
 	end
 	self:RefreshMMButton()
 	self:ApplySettings()
@@ -2595,17 +2598,17 @@ function Skada:OnEnable()
 
 	-- add Gunship adds
 	-- horde
-	BOSS.BossIDs[36960] = true -- Kor'kron Sergeant, Gunship add
-	BOSS.BossIDs[36968] = true -- Kor'kron Axethrower, Gunship add
-	BOSS.BossIDs[36982] = true -- Kor'kron Rocketeer, Gunship add
-	BOSS.BossIDs[37117] = true -- Kor'kron Battle-Mage, Gunship add
-	BOSS.BossIDs[37215] = true -- Orgrim's Hammer
+	LBI.BossIDs[36960] = true -- Kor'kron Sergeant, Gunship add
+	LBI.BossIDs[36968] = true -- Kor'kron Axethrower, Gunship add
+	LBI.BossIDs[36982] = true -- Kor'kron Rocketeer, Gunship add
+	LBI.BossIDs[37117] = true -- Kor'kron Battle-Mage, Gunship add
+	LBI.BossIDs[37215] = true -- Orgrim's Hammer
 	-- alliance
-	BOSS.BossIDs[36961] = true -- Skybreaker Sergeant, Gunship add
-	BOSS.BossIDs[36969] = true -- Skybreaker Rifleman, Gunship add
-	BOSS.BossIDs[36978] = true -- Skybreaker Mortar Soldier, Gunship add
-	BOSS.BossIDs[37116] = true -- Skybreaker Sorcerer, Gunship add
-	BOSS.BossIDs[37540] = true -- The Skybreaker
+	LBI.BossIDs[36961] = true -- Skybreaker Sergeant, Gunship add
+	LBI.BossIDs[36969] = true -- Skybreaker Rifleman, Gunship add
+	LBI.BossIDs[36978] = true -- Skybreaker Mortar Soldier, Gunship add
+	LBI.BossIDs[37116] = true -- Skybreaker Sorcerer, Gunship add
+	LBI.BossIDs[37540] = true -- The Skybreaker
 
 	LBB["Kor'kron Sergeant"] = L["Kor'kron Sergeant"]
 	LBB["Kor'kron Axethrower"] = L["Kor'kron Axethrower"]
@@ -2976,7 +2979,7 @@ do
 	end
 
 	function Skada:IsBoss(GUID)
-		return GUID and BOSS.BossIDs[tonumber(GUID:sub(9, 12), 16)]
+		return GUID and LBI.BossIDs[tonumber(GUID:sub(9, 12), 16)]
 	end
 
 	function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
