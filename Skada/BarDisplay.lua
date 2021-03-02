@@ -62,14 +62,14 @@ local class_icon_file, class_icon_tcoords = [[Interface\AddOns\Skada\media\textu
 
 function mod:Create(window)
     -- Re-use bargroup if it exists.
-    window.bargroup = mod:GetBarGroup(window.db.name)
+    local bargroup = mod:GetBarGroup(window.db.name)
 
     -- Save a reference to window in bar group. Needed for some nasty callbacks.
-    if window.bargroup then
+    if bargroup then
         -- Clear callbacks.
-        window.bargroup.callbacks = LibStub:GetLibrary("CallbackHandler-1.0"):New(window.bargroup)
+        bargroup.callbacks = LibStub:GetLibrary("CallbackHandler-1.0"):New(bargroup)
     else
-        window.bargroup = mod:NewBarGroup(
+        bargroup = mod:NewBarGroup(
             window.db.name,
             nil,
             window.db.background.height,
@@ -77,10 +77,9 @@ function mod:Create(window)
             window.db.barheight,
             "SkadaBarWindow" .. window.db.name
         )
-        local bargroup = window.bargroup -- ticket 323
 
         -- Add window buttons.
-        window.bargroup:AddButton(
+        bargroup:AddButton(
             L["Configure"],
             L["Opens the configuration window."],
             "Interface\\Addons\\Skada\\media\\textures\\icon-config",
@@ -88,7 +87,7 @@ function mod:Create(window)
             function() Skada:OpenMenu(bargroup.win) end
         )
 
-        window.bargroup:AddButton(
+        bargroup:AddButton(
             RESET,
             L["Resets all fight data except those marked as kept."],
             "Interface\\Addons\\Skada\\media\\textures\\icon-reset",
@@ -96,7 +95,7 @@ function mod:Create(window)
             function() Skada:ShowPopup(bargroup.win) end
         )
 
-        window.bargroup:AddButton(
+        bargroup:AddButton(
             L["Segment"],
             L["Jump to a specific segment."],
             "Interface\\Buttons\\UI-GuildButton-PublicNote-Up",
@@ -104,7 +103,7 @@ function mod:Create(window)
             function() Skada:SegmentMenu(bargroup.win) end
         )
 
-        window.bargroup:AddButton(
+        bargroup:AddButton(
             L["Mode"],
             L["Jump to a specific mode."],
             "Interface\\GROUPFRAME\\UI-GROUP-MAINASSISTICON",
@@ -112,7 +111,7 @@ function mod:Create(window)
             function() Skada:ModeMenu(bargroup.win) end
         )
 
-        window.bargroup:AddButton(
+        bargroup:AddButton(
             L["Report"],
             L["Opens a dialog that lets you report your data to others in various ways."],
             "Interface\\Buttons\\UI-GuildButton-MOTD-Up",
@@ -120,7 +119,7 @@ function mod:Create(window)
             function() Skada:OpenReportWindow(bargroup.win) end
         )
 
-        window.bargroup:AddButton(
+        bargroup:AddButton(
             L["Stop"],
             L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."],
             "Interface\\CHATFRAME\\ChatFrameExpandArrow",
@@ -134,19 +133,19 @@ function mod:Create(window)
             end
         )
     end
-    window.bargroup.win = window
-    window.bargroup.RegisterCallback(mod, "AnchorMoved")
-    window.bargroup.RegisterCallback(mod, "WindowResizing")
-    window.bargroup.RegisterCallback(mod, "WindowResized")
-    window.bargroup:EnableMouse(true)
-    window.bargroup:SetScript("OnMouseDown", function(_, button)
+    bargroup.win = window
+    bargroup.RegisterCallback(mod, "AnchorMoved")
+    bargroup.RegisterCallback(mod, "WindowResizing")
+    bargroup.RegisterCallback(mod, "WindowResized")
+    bargroup:EnableMouse(true)
+    bargroup:SetScript("OnMouseDown", function(_, button)
         if IsShiftKeyDown() then
             Skada:OpenMenu(window)
         elseif button == "RightButton" then
             window:RightClick()
         end
     end)
-    window.bargroup.button:SetScript("OnClick", function(_, button)
+    bargroup.button:SetScript("OnClick", function(_, button)
         if IsShiftKeyDown() then
             Skada:OpenMenu(window)
         elseif button == "RightButton" then
@@ -154,19 +153,21 @@ function mod:Create(window)
         end
     end)
 
-    window.bargroup:HideIcon()
+    bargroup:HideIcon()
 
-    local titletext = window.bargroup.button:GetFontString()
+    local titletext = bargroup.button:GetFontString()
     titletext:SetWordWrap(false)
-    titletext:SetPoint("LEFT", window.bargroup.button, "LEFT", 5, 1)
+    titletext:SetPoint("LEFT", bargroup.button, "LEFT", 5, 1)
     titletext:SetJustifyH("LEFT")
-    window.bargroup.button:SetHeight(window.db.title.height or 15)
+    bargroup.button:SetHeight(window.db.title.height or 15)
 
     -- Register with LibWindow-1.0.
-    libwindow.RegisterConfig(window.bargroup, window.db)
+    libwindow.RegisterConfig(bargroup, window.db)
 
     -- Restore window position.
-    libwindow.RestorePosition(window.bargroup)
+    libwindow.RestorePosition(bargroup)
+
+    window.bargroup = bargroup
 
     if not class_icon_tcoords then -- amortized class icon coordinate adjustment
         class_icon_tcoords = {}
