@@ -415,6 +415,6 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
     end
 
     function mod:SetComplete()
-		self.title = self:GetName()
+		self.title = L["Threat"]
     end
 end)
