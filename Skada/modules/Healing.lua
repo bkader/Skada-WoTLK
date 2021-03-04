@@ -986,7 +986,7 @@ Skada:AddLoadableModule("Healing received", function(Skada, L)
                         d.role = p.role
                         d.spec = p.spec
                     else
-						d.class = Skada:GetPetOwner(target.id) and "PET" or "MONSTER"
+						d.class = Skada:GetPetOwner(player.id) and "PET" or "MONSTER"
                     end
 
                     d.value = player.amount
