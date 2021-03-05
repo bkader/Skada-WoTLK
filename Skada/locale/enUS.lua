@@ -644,15 +644,15 @@ L["%s's interrupted targets"] = true
 -- =================== --
 
 L["Power"] = true
-L["Power gained"] = true
+L["Power gained"] = "PG: Power gained"
 L["%s's gained %s"] = true
-L["Power gained: Mana"] = true
+L["Power gained: Mana"] = "PG: Mana"
 L["Mana gained spell list"] = true
-L["Power gained: Rage"] = true
+L["Power gained: Rage"] = "PG: Rage"
 L["Rage gained spell list"] = true
-L["Power gained: Energy"] = true
+L["Power gained: Energy"] = "PG: Energy"
 L["Energy gained spell list"] = true
-L["Power gained: Runic Power"] = true
+L["Power gained: Runic Power"] = "PG: Runic Power"
 L["Runic Power gained spell list"] = true
 
 -- ==================== --
