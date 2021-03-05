@@ -371,7 +371,7 @@ L["Threat: Personal Threat"] = true
 -- ======================== --
 -- Absorbs & Healing Module --
 -- ======================== --
-L["Healing"] = true
+L["Healing"] = "A&H: Healing"
 L["Healed player list"] = true
 L["Healing spell list"] = true
 L["%s's healing"] = true
@@ -379,34 +379,34 @@ L["%s's healing spells"] = true
 L["%s's healed players"] = true
 L["HPS"] = true
 
-L["Total healing"] = true
+L["Total healing"] = "A&H: Healing [total]"
 
-L["Overhealing"] = true
+L["Overhealing"] = "A&H: Overhealing"
 L["Overheal"] = true
 L["Overhealed player list"] = true
 L["Overhealing spell list"] = true
 L["%s's overhealing spells"] = true
 L["%s's overhealed players"] = true
 
-L["Healing and Overhealing"] = true
+L["Healing and Overhealing"] = "A&H: Healing and Overhealing"
 L["Healing and overhealing spells"] = true
 L["Healed and overhealed players"] = true
 L["%s's healing and overhealing spells"] = true
 L["%s's healed and overhealed players"] = true
 
-L["Absorbs"] = true
+L["Absorbs"] = "A&H: Absorbs"
 L["Absorbed player list"] = true
 L["Absorb spell list"] = true
 L["%s's absorbed players"] = true
 L["%s's absorb spells"] = true
 
-L["Absorbs and healing"] = true
+L["Absorbs and healing"] = "A&H: Absorbs and Healing"
 L["Absorbs and healing spell list"] = true
 L["Absorbed and healed players"] = true
 L["%s's absorb and healing spells"] = true
 L["%s's absorbed and healed players"] = true
 
-L["Healing received"] = true
+L["Healing received"] = "A&H: Healing [received]"
 L["Healing player list"] = true
 L["%s's received healing"] = true
 
@@ -416,18 +416,18 @@ L["%s's received healing"] = true
 
 L["Uptime"] = true
 
-L["Buffs and Debuffs"] = true
-L["Buffs"] = true
+L["Buffs and Debuffs"] = "Auras"
+L["Buffs"] = "Auras: Buffs"
 L["Buff spell list"] = true
 L["%s's buffs"] = true
 
-L["Debuffs"] = true
+L["Debuffs"] = "Auras: Debuffs"
 L["Debuff spell list"] = true
 L["Debuff target list"] = true
 L["%s's debuffs"] = true
 L["%s's <%s> targets"] = true
 
-L["Sunder Counter"] = true
+L["Sunder Counter"] = "Auras: Sunder Counter"
 L["Sunder target list"] = true
 
 -- ================= --
@@ -437,7 +437,7 @@ L["Sunder target list"] = true
 L["CC Tracker"] = true
 
 -- CC Done:
-L["CC Done"] = true
+L["CC Done"] = "CC: Done"
 L["CC Done spells"] = true
 L["CC Done spell targets"] = true
 L["CC Done targets"] = true
@@ -448,7 +448,7 @@ L["%s's CC Done spells"] = true
 L["%s's CC Done targets"] = true
 
 -- CC Taken
-L["CC Taken"] = true
+L["CC Taken"] = "CC: Taken"
 L["CC Taken spells"] = true
 L["CC Taken spell sources"] = true
 L["CC Taken sources"] = true
@@ -459,7 +459,7 @@ L["%s's CC Taken spells"] = true
 L["%s's CC Taken sources"] = true
 
 L["CC Breaks"] = true
-L["CC Breakers"] = true
+L["CC Breakers"] = "CC: Breakers"
 L["CC Break spells"] = true
 L["CC Break spell targets"] = true
 L["CC Break targets"] = true
@@ -481,7 +481,7 @@ L["%s on %s removed by %s's %s"] = true
 -- ============= --
 
 -- damage done module
-L["Damage"] = true
+L["Damage"] = "Damage done"
 L["Damage target list"] = true
 L["Damage spell list"] = true
 L["Damage spell details"] = true
@@ -490,12 +490,12 @@ L["Damage done"] = true
 L["%s's damage"] = true
 L["%s's <%s> damage"] = true
 
-L["Useful damage"] = true
+L["Useful damage"] = "Damage done: Useful damage"
 
-L["Damage done by spell"] = true
+L["Damage done by spell"] = "Damage done: By spell"
 L["%s's sources"] = true
 
-L["DPS"] = true
+L["DPS"] = "Damage done: DPS"
 L["Damage: Personal DPS"] = true
 
 L["RDPS"] = true
@@ -508,18 +508,18 @@ L["%s damage on %s"] = true
 
 L["Damage source list"] = true
 L["Damage spell sources"] = true
-L["Damage taken by spell"] = true
+L["Damage taken by spell"] = "Damage taken: From spells"
 L["%s's targets"] = true
 L["DTPS"] = true
 
 -- enemy damage done module
-L["Enemy damage done"] = true
+L["Enemy damage done"] = "Damage taken: From enemies"
 L["Damage done per player"] = true
 L["Damage from %s"] = true
 L["%s's damage on %s"] = true
 
 -- enemy damage taken module
-L["Enemy damage taken"] = true
+L["Enemy damage taken"] = "Damage done: Taken by enemy"
 L["Damage taken per player"] = true
 L["Damage on %s"] = true
 L["%s's damage sources"] = true
@@ -530,7 +530,7 @@ L["Damage breakdown"] = true
 L["%s's damage breakdown"] = true
 
 -- friendly fire module
-L["Friendly Fire"] = true
+L["Friendly Fire"] = "Damage done: Friendly Fire"
 
 L["Critical"] = true
 L["Glancing"] = true
@@ -576,7 +576,7 @@ L["Gluttonous Abomination"] = true
 -- ============= --
 -- Deaths Module --
 -- ============= --
-L["Deaths"] = true
+L["Deaths"] = "Etc.: Deaths"
 L["%s's death"] = true
 L["%s's deaths"] = true
 L["Death log"] = true
@@ -591,14 +591,14 @@ L["Health"] = true
 L["Change"] = true
 
 -- activity module
-L["Activity"] = true
+L["Activity"] = "Etc.: Activity"
 L["Activity per target"] = true
 
 -- ==================== --
 -- dispels module lines --
 -- ==================== --
 
-L["Dispels"] = true
+L["Dispels"] = "Etc.: Dispels"
 
 L["Dispel spell list"] = true
 L["Dispelled spell list"] = true
@@ -612,7 +612,7 @@ L["%s's dispelled targets"] = true
 -- failbot module lines --
 -- ==================== --
 
-L["Fails"] = true
+L["Fails"] = "Etc.: Fails"
 L["%s's fails"] = true
 L["Player's failed events"] = true
 L["Event's failed players"] = true
@@ -631,7 +631,7 @@ L["%s's overall data"] = true
 -- interrupts module lines --
 -- ======================= --
 
-L["Interrupts"] = true
+L["Interrupts"] = "Etc.: Interrupts"
 L["Interrupt spells"] = true
 L["Interrupted spells"] = true
 L["Interrupted targets"] = true
@@ -659,7 +659,7 @@ L["Runic Power gained spell list"] = true
 -- Parry module lines --
 -- ==================== --
 
-L["Parry-haste"] = true
+L["Parry-haste"] = "Etc.: Parry-haste"
 L["Parry target list"] = true
 L["%s's parry targets"] = true
 
@@ -667,7 +667,7 @@ L["%s's parry targets"] = true
 -- Potions module lines --
 -- ==================== --
 
-L["Potions"] = true
+L["Potions"] = "Etc.: Potions"
 L["Potions list"] = true
 L["Players list"] = true
 L["%s's used potions"] = true
@@ -676,7 +676,7 @@ L["%s's used potions"] = true
 -- resurrect module lines --
 -- ====================== --
 
-L["Resurrects"] = true
+L["Resurrects"] = "Etc.: Resurrects"
 L["Resurrect spell list"] = true
 L["Resurrect spell target list"] = true
 L["Resurrect target list"] = true
