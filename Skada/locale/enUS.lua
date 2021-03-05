@@ -486,7 +486,7 @@ L["Damage target list"] = true
 L["Damage spell list"] = true
 L["Damage spell details"] = true
 L["Damage spell targets"] = true
-L["Damage done"] = true
+L["Damage done"] = "DD: Damage done"
 L["%s's damage"] = true
 L["%s's <%s> damage"] = true
 
