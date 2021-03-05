@@ -437,7 +437,7 @@ L["Sunder target list"] = "Цели раскола брони"
 -- CC Tracker Module --
 -- ================= --
 
-L["CC Tracker"] = "Отслеживание контроля"
+L["CC Tracker"] = "Контроль"
 
 -- CC Done:
 L["CC Done"] = "Контроль: Успешный"
@@ -489,7 +489,7 @@ L["Damage target list"] = "Урон по врагам"
 L["Damage spell list"] = "Список заклинаний"
 L["Damage spell details"] = "Детали заклинания"
 L["Damage spell targets"] = "Цели заклинаний"
-L["Damage done"] = "НУ: Нанесенный урон"
+L["Damage done"] = "НУ: Нанесение урона"
 L["%s's damage"] = "%s: Урон"
 L["%s's <%s> damage"] = "%s: Урон от <%s>"
 
@@ -505,7 +505,7 @@ L["RDPS"] = "РУВС"
 L["Damage: Raid DPS"] = "Урон: УВС рейда"
 
 -- damage taken module
-L["Damage taken"] = "ПУ: Полученный урон"
+L["Damage taken"] = "ПУ: Получение урона"
 L["Damage taken by %s"] = "%s: Полученный урон"
 L["%s damage on %s"] = "%2$s: Урон от %1$s"
 
@@ -647,15 +647,15 @@ L["%s's interrupted targets"] = "%s: Цели прерывания"
 -- =================== --
 
 L["Power"] = "Энергия"
-L["Power gained"] = "Получение энергии"
+L["Power gained"] = "ПЭ: Получение энергии"
 L["%s's gained %s"] = "Получено %s: %s"
-L["Power gained: Mana"] = "Получено энергии: Мана"
+L["Power gained: Mana"] = "ПЭ: Мана"
 L["Mana gained spell list"] = "Заклинания получения маны"
-L["Power gained: Rage"] = "Получено энергии: Ярость"
+L["Power gained: Rage"] = "ПЭ: Ярость"
 L["Rage gained spell list"] = "Заклинания получения ярости"
-L["Power gained: Energy"] = "Получено энергии: Энергия"
+L["Power gained: Energy"] = "ПЭ: Энергия"
 L["Energy gained spell list"] = "Заклинания получения энергии"
-L["Power gained: Runic Power"] = "Получено энергии: Сила рун"
+L["Power gained: Runic Power"] = "ПЭ: Сила рун"
 L["Runic Power gained spell list"] = "Заклинания получения силы рун"
 
 -- ==================== --
