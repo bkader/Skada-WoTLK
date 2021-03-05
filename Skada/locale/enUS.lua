@@ -490,7 +490,7 @@ L["Damage done"] = "DD: Damage done"
 L["%s's damage"] = true
 L["%s's <%s> damage"] = true
 
-L["Useful damage"] = "DD: Useful damage"
+L["Useful damage"] = "DD: Damage [useful]"
 
 L["Damage done by spell"] = "DD: By spell"
 L["%s's sources"] = true
