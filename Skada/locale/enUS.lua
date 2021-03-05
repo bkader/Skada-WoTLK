@@ -348,7 +348,7 @@ L["Bar display is the normal bar window used by most damage meters. It can be ex
 -- ============= --
 -- Threat Module --
 -- ============= --
-L["Threat"] = true
+L["Threat"] = "Etc.: Threat"
 L["Threat warning"] = true
 L["Do not warn while tanking"] = true
 L["Flash screen"] = true
@@ -481,7 +481,7 @@ L["%s on %s removed by %s's %s"] = true
 -- ============= --
 
 -- damage done module
-L["Damage"] = "Damage done"
+L["Damage"] = "DD: Damage done"
 L["Damage target list"] = true
 L["Damage spell list"] = true
 L["Damage spell details"] = true
@@ -490,47 +490,47 @@ L["Damage done"] = true
 L["%s's damage"] = true
 L["%s's <%s> damage"] = true
 
-L["Useful damage"] = "Damage done: Useful damage"
+L["Useful damage"] = "DD: Useful damage"
 
-L["Damage done by spell"] = "Damage done: By spell"
+L["Damage done by spell"] = "DD: By spell"
 L["%s's sources"] = true
 
-L["DPS"] = "Damage done: DPS"
+L["DPS"] = "DD: DPS"
 L["Damage: Personal DPS"] = true
 
 L["RDPS"] = true
 L["Damage: Raid DPS"] = true
 
 -- damage taken module
-L["Damage taken"] = true
+L["Damage taken"] = "DT: Damage taken"
 L["Damage taken by %s"] = true
 L["%s damage on %s"] = true
 
 L["Damage source list"] = true
 L["Damage spell sources"] = true
-L["Damage taken by spell"] = "Damage taken: From spells"
+L["Damage taken by spell"] = "DT: From spells"
 L["%s's targets"] = true
 L["DTPS"] = true
 
 -- enemy damage done module
-L["Enemy damage done"] = "Damage taken: From enemies"
+L["Enemy damage done"] = "DT: From enemies"
 L["Damage done per player"] = true
 L["Damage from %s"] = true
 L["%s's damage on %s"] = true
 
 -- enemy damage taken module
-L["Enemy damage taken"] = "Damage done: Taken by enemy"
+L["Enemy damage taken"] = "DD: Taken by enemy"
 L["Damage taken per player"] = true
 L["Damage on %s"] = true
 L["%s's damage sources"] = true
 
 -- avoidance and mitigation module
-L["Avoidance & Mitigation"] = true
+L["Avoidance & Mitigation"] = "DT: Avoidance & Mitigation"
 L["Damage breakdown"] = true
 L["%s's damage breakdown"] = true
 
 -- friendly fire module
-L["Friendly Fire"] = "Damage done: Friendly Fire"
+L["Friendly Fire"] = "DD: Friendly Fire"
 
 L["Critical"] = true
 L["Glancing"] = true
@@ -621,7 +621,7 @@ L["Event's failed players"] = true
 -- improvement module lines --
 -- ======================== --
 
-L["Improvement"] = true
+L["Improvement"] = "Etc.: Improvement"
 L["Improvement modes"] = true
 L["Improvement comparison"] = true
 L["Do you want to reset your improvement data?"] = true
