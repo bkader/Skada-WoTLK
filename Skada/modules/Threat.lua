@@ -129,7 +129,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
             end
 
             if target then
-                self.title = _UnitName(target)
+                win.metadata.title = _UnitName(target)
 
                 -- Reset our counter which we use to keep track of current index in the dataset.
                 nr = 1
@@ -202,7 +202,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
                     last_warn = time()
                 end
             else
-                self.title = self:GetName()
+                win.metadata.title = self:GetName()
             end
         end
 
@@ -412,9 +412,5 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
     function mod:OnDisable()
         Skada:RemoveFeed(L["Threat: Personal Threat"])
         Skada:RemoveMode(self)
-    end
-
-    function mod:SetComplete()
-		self.title = L["Threat"]
     end
 end)
