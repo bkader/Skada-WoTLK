@@ -1878,7 +1878,11 @@ function Skada:UpdateDisplay(force)
 					win:UpdateInProgress()
 
 					if win.selectedmode.Update then
-						win.selectedmode:Update(win, set)
+                        if set then
+                            win.selectedmode:Update(win, set)
+                        else
+                            self:Print("No set available to pass to " .. win.selectedmode:GetName() .. " Update function! Try to reset Skada.")
+                        end
 					elseif win.selectedmode.GetName then
 						self:Print("Mode " .. win.selectedmode:GetName() .. " does not have an Update function!")
 					end
