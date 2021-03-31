@@ -1192,8 +1192,8 @@ do
 	                player.spec = self:GetPlayerSpecID(player.name, player.class)
 	            end
 	        else
-	            player.role = "DAMAGER" -- damager fallback
-	            player.spec = 2 -- unknown fallback
+	            player.role = player.role or "DAMAGER" -- damager fallback
+	            player.spec = player.spec or 2 -- unknown fallback
 	        end
 
 			self.callbacks:Fire("FixPlayer", player)
