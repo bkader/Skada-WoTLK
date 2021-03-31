@@ -1182,16 +1182,19 @@ do
 				end
 			end
 
-			-- if the player has been assigned a valid class,
-			-- we make sure to assign his/her role and spec
-			if player.class and self.validclass[player.class] then
-				if not player.role then
-					player.role = self:UnitGroupRolesAssigned(player.name)
-				end
-				if not player.spec then
-					player.spec = self:GetPlayerSpecID(player.name, player.class)
-				end
-			end
+	        -- if the player has been assigned a valid class,
+	        -- we make sure to assign his/her role and spec
+	        if self.validclass[player.class] then
+	            if not player.role then
+	                player.role = self:UnitGroupRolesAssigned(player.name)
+	            end
+	            if not player.spec then
+	                player.spec = self:GetPlayerSpecID(player.name, player.class)
+	            end
+	        else
+	            player.role = "DAMAGER" -- damager fallback
+	            player.spec = 2 -- unknown fallback
+	        end
 
 			self.callbacks:Fire("FixPlayer", player)
 
