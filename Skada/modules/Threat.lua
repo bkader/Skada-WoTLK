@@ -47,7 +47,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
                 threatTable[guid] = player
             end
 
-            if player then
+            if player and _UnitExists(player.unit) then
                 local isTanking, status, threatpct, rawthreatpct, threatvalue = _UnitDetailedThreatSituation(player.unit, target)
 
                 local d = win.dataset[nr] or {}
@@ -206,9 +206,10 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
             end
         end
 
-        function mod:SetComplete(set)
+        function mod:AddSetAttributes(set)
             threatTable = {}
         end
+        mod.SetComplete = mod.AddSetAttributes
     end
 
     -- Shamelessly copied from Omen - thanks!
