@@ -2860,6 +2860,8 @@ do
 			tick_timer:Cancel()
 		end
 		update_timer, tick_timer = nil, nil
+
+		self.After(2, function() self:CleanGarbage(true) end)
 		self.After(3, function() self:MemoryCheck() end)
 	end
 
