@@ -13,7 +13,7 @@ Skada:AddLoadableModule("Power gained", function(Skada, L)
 
     local _pairs, _ipairs, _select = pairs, ipairs, select
     local _format, _tostring, math_max = string.format, tostring, math.max
-    local _GetSpellInfo = GetSpellInfo
+    local _GetSpellInfo = Skada.GetSpellInfo
     local _setmetatable = setmetatable
 
     local function log_gain(set, gain)

@@ -170,7 +170,7 @@ local ExtraCCSpells = {
 
 local _pairs, _ipairs, _select = pairs, ipairs, select
 local _tostring, _format = tostring, string.format
-local _GetSpellInfo, _GetSpellLink = GetSpellInfo, GetSpellLink
+local _GetSpellInfo, _GetSpellLink = Skada.GetSpellInfo, GetSpellLink
 
 -- ======= --
 -- CC Done --

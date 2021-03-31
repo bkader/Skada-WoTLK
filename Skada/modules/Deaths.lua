@@ -13,7 +13,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
     local _ipairs, _select, _next = ipairs, select, next
     local _tostring, _format, _strsub = tostring, string.format, string.sub
     local math_abs, math_max, math_modf = math.abs, math.max, math.modf
-    local _GetSpellInfo = GetSpellInfo
+    local _GetSpellInfo = Skada.GetSpellInfo
     local _date = date
 
     local function log_deathlog(set, data, ts)

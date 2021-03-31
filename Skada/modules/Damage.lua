@@ -1,7 +1,7 @@
 local Skada = Skada
 
 local _UnitGUID = UnitGUID
-local _GetSpellInfo = GetSpellInfo
+local _GetSpellInfo = Skada.GetSpellInfo
 local _format, math_max, math_min = string.format, math.max, math.min
 local _pairs, _ipairs, _select = pairs, ipairs, select
 

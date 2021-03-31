@@ -10,7 +10,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
     -- cache frequently used globals
     local _pairs, _ipairs = pairs, ipairs
     local _format, math_max = string.format, math.max
-    local _GetSpellInfo = GetSpellInfo
+    local _GetSpellInfo = Skada.GetSpellInfo
 
     local function log_interrupt(set, data)
         local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)

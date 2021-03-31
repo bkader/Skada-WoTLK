@@ -5,7 +5,7 @@ local Skada = Skada
 --
 local _pairs, _ipairs = pairs, ipairs
 local _format, _select, _tostring = string.format, select, tostring
-local _GetSpellInfo = GetSpellInfo
+local _GetSpellInfo = Skada.GetSpellInfo
 local math_min, math_max, math_floor = math.min, math.max, math.floor
 
 --
