@@ -129,7 +129,7 @@ end
 -- because of Auto Shot, this function was added.
 function Skada.GetSpellInfo(spellid)
     local res1, res2, res3, res4, res5, res6, res7, res8, res9 = GetSpellInfo(spellid)
-    if spellid == 75 and not res3 then
+    if spellid == 75 then
         res3 = "Interface\\Icons\\Ability_Whirlwind"
     end
     return res1, res2, res3, res4, res5, res6, res7, res8, res9
