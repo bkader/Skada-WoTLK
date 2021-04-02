@@ -3,18 +3,14 @@ if not L then return end
 
 L["A damage meter."] = "Ein Damage-Meter."
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "Die Speicherauslastung ist hoch. Du kannst Skada zurücksetzen und eine der Optionen zur automatischen Zurücksetzung aktivieren."
-
 L["Skada: Modes"] = "Skada: Modi"
 L["Skada: Fights"] = "Skada: Kämpfe"
-
 L["Error: No options selected"] = "Fehler: Keine Optionen ausgewählt"
-
 L["Profiles"] = "Profile"
 L["Enable"] = "Aktivieren"
 L["ENABLED"] = "AKTIVIERT"
 L["Disable"] = "Deaktivieren"
 L["DISABLED"] = "DEAKTIVIERT"
-
 -- common lines
 L["Active Time"] = "Aktive Zeit"
 L["Segment Time"] = "Segmentzeit"
@@ -31,20 +27,15 @@ L["Total hits:"] = "Treffer insgesamt:"
 L["Count"] = "Count"
 L["Refresh"] = "Aktualisieren"
 L["Percent"] = "Prozent"
-
 L["General options"] = "Allgemeine Optionen"
-
 -- windows section:
 L["Window"] = "Fenster"
 L["Windows"] = "Fenster"
-
 L["Create window"] = "Fenster erstellen"
 L["Enter the name for the new window."] = "Gib den Namen für das neue Fenster ein."
-
 L["Delete window"] = "Fenster löschen"
 L["Choose the window to be deleted."] = "Wähle das Fenster, welches gelöscht werden soll."
 L["Are you sure you want to delete this window?"] = "Möchten Sie dieses Fenster wirklich löschen?"
-
 L["Rename window"] = "Fenster umbenennen"
 L["Enter the name for the window."] = "Gib den Namen für das Fenster ein."
 L["Lock window"] = "Fenster sperren"
@@ -57,19 +48,16 @@ L["Display system"] = "Anzeigesystem"
 L["Choose the system to be used for displaying data in this window."] = "Wähle das System, das für die Anzeige der Daten in diesem Fenster verwendet werden soll."
 L["Copy settings"] = "Einstellungen kopieren"
 L["Choose the window from which you want to copy the settings."] = "Wählen Sie das Fenster, aus dem Sie die Einstellungen kopieren möchten. "
-
 -- bars
 L["Bars"] = "Leisten"
 L["Bar font"] = "Leistenschriftart"
 L["The font used by all bars."] = "Die Schrift, die von allen Leisten verwendet wird."
 L["Bar font size"] = "Leistenschriftgröße"
 L["The font size of all bars."] = "Die Schriftgröße aller Leisten."
-
 L["Values font"] = "Werte Schriftart"
 L["The font used by bar values."] = "Die von Balkenwerten verwendete Schriftart."
 L["Values font size"] = "Werte Schriftgröße"
 L["The font size of bar values."] = "Die Schriftgröße der Balkenwerte."
-
 L["Font flags"] = "Texteffekte"
 L["Sets the font flags."] = "Setzt die Texteffekte"
 L["None"] = "Kein"
@@ -112,7 +100,6 @@ L["Clickthrough"] = "Durchklickbar"
 L["Disables mouse clicks on bars."] = "Deaktiviert Mausklicks auf Leisten."
 L["Smooth bars"] = "Sanfte Leisten"
 L["Animate bar changes smoothly rather than immediately."] = "Änderungen an Leisten werden sanft animiert anstatt sofort und sprunghaft dargestellt."
-
 -- title bar
 L["Title bar"] = "Titelleiste"
 L["Enables the title bar."] = "Aktiviert die Titelleiste."
@@ -132,7 +119,6 @@ L["The texture used for the border of the title."] = "Die Rahmentextur der Titel
 L["Border color"] = "Rahmenfarbe"
 L["The color used for the border."] = "Die für den Rahmen verwendete Farbe."
 L["Buttons"] = "Buttons"
-
 -- general window
 L["Background"] = "Hintergrund"
 L["Background texture"] = "Hintergrundtextur"
@@ -141,7 +127,6 @@ L["Tile"] = "Kacheln"
 L["Tile the background texture."] = "Kachelt die Hintergrundtextur"
 L["Tile size"] = "Kachelgröße"
 L["The size of the texture pattern."] = "Die Größe der einzelnen Kacheln."
-L["Background color"] = "Hintergrundfarbe"
 L["The color of the background."] = "Die Farbe des Hintergrunds."
 L["Border"] = "Rahmen"
 L["Border thickness"] = "Rahmenbreite"
@@ -153,7 +138,6 @@ L["Strata"] = "Schicht"
 L["This determines what other frames will be in front of the frame."] = "Dies bestimmt, welche anderen Rahmen vor dem Rahmen sein werden."
 L["Width"] = "Breite"
 L["Height"] = "Höhe"
-
 -- switching
 L["Mode switching"] = "Moduswechsel"
 L["Combat mode"] = "Kampfmodus"
@@ -162,7 +146,6 @@ L["Return after combat"] = "Zurück nach Kampf"
 L["Return to the previous set and mode after combat ends."] = "Nach dem Kampf wieder zur vorherigen Ansicht wechseln."
 L["Wipe mode"] = "Niederlagenanzeigemodus"
 L["Automatically switch to set 'Current' and this mode after a wipe."] = "Wechselt bei einer Niederlage automatisch auf das Segment des momentanen Kampfes und den hier eingestellten Anzeigemodus ."
-
 L["Inline bar display"] = "Einzeilige Leistenanzeige"
 L["Inline display is a horizontal window style."] = "Die einzeilige Anzeige ist ein horizontaler Fensterstil."
 L["Text"] = "Text"
@@ -179,14 +162,12 @@ L["Use ElvUI skin if avaliable."] = "Verwenden Sie ElvUI-Skin, falls verfügbar.
 L["Check this to use ElvUI skin instead. \nDefault: checked"] = "Aktivieren Sie diese Option, um stattdessen ElvUI-Skin zu verwenden. \nStandard: aktiviert"
 L["Use solid background."] = "Verwenden Sie soliden Hintergrund."
 L["Un-check this for an opaque background."] = "Deaktivieren Sie diese Option, um einen undurchsichtigen Hintergrund zu erhalten."
-
 L["Data text"] = "Datentext"
 L["Text color"] = "Schriftfarbe"
 L["Choose the default color."] = "Wähle die Standardfarbe."
 L["Hint: Left-Click to set active mode."] = "Hinweis: Linksklick, um den aktiven Modus festzulegen."
 L["Right-click to set active set."] = "Rechtsklick, um das aktive Segment festzulegen."
 L["Shift+Left-Click to open menu."] = "Shift-Linksklick, um das Optionsmenü zu öffnen."
-
 -- data resets
 L["Data resets"] = "Daten zurücksetzen"
 L["Reset on entering instance"] = "Beim Betreten einer Instanz:"
@@ -198,7 +179,6 @@ L["Controls if data is reset when you leave a group."] = "Legt fest, ob die Date
 L["Ask"] = "Abfragen"
 L["Do you want to reset Skada?"] = "Möchtest Du Skada zurücksetzen?"
 L["All data has been reset."] = "Alle Daten wurden zurückgesetzt."
-
 -- general options
 L["Show minimap button"] = "Minikartenbutton zeigen"
 L["Toggles showing the minimap button."] = "Zeigt oder versteckt den Minikartenbutton"
@@ -226,6 +206,8 @@ L["Show rank numbers"] = "Platzierungen zeigen"
 L["Shows numbers for relative ranks for modes where it is applicable."] = "Zeige relative Platzierungen für Modis bei denen dies möglich ist."
 L["Aggressive combat detection"] = "Aggressive Kampferkennung"
 L["Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons. Meaningless on boss encounters."] = "Skada verwendet normalerweise ein sehr konservatives (simples) Kampferkennungsschema, welches am besten in Schlachtzügen funktioniert. Mithilfe dieser Option versucht Skada andere Damage-Meter zu emulieren. Sinnvoll für Dungeon-Runs. Für Bosskämpfe bedeutungslos."
+L["Tentative Timer"] = "Vorläufiger Timer"
+L["The number of seconds Skada should wait after combat start to create a new segment.\n\nOnly works if \"Agressive combat detection\" is enabled."] = "Die Anzahl der Sekunden, die Skada nach dem Kampfstart warten sollte, um ein neues Segment zu erstellen.\n\nFunktioniert nur, wenn \"Aggressive Kampferkennung\" aktiviert ist."
 L["Autostop"] = "Früh Stoppen bei Wipe"
 L["Automatically stops the current segment after half of all raid members have died."] = "Stoppt automatisch das aktuelle Segment, nachdem die Hälfte aller Schlachtzugsmitglieder gestorben sind."
 L["Always show self"] = "Mich immer anzeigen"
@@ -246,10 +228,8 @@ L["Data segments to keep"] = "Zu behaltende Datensegmente"
 L["The number of fight segments to keep. Persistent segments are not included in this."] = "Die Anzahl der Kampfsegmente, die behalten werden sollen. Ständige Segmente sind hier nicht enthalten."
 L["Update frequency"] = "Aktualisierungsfrequenz"
 L["How often windows are updated. Shorter for faster updates. Increases CPU usage."] = "Wie oft die Fenster aktualisiert werden, kürzer für schnellere Updates. Erhöht die CPU-Auslastung."
-
 -- columns
 L["Columns"] = "Spalten"
-
 -- tooltips
 L["Tooltips"] = "Tooltips"
 L["Show tooltips"] = "Tooltips anzeigen"
@@ -267,14 +247,12 @@ L["Bottom right"] = "Unten rechts"
 L["Bottom left"] = "Unten links"
 L["Smart"] = "Clever"
 L["Follow Cursor"] = "Follow Cursor"
-
 -- disabled modules
 L["Modules"] = "Module"
 L["Disabled Modules"] = "Deaktivierte Module"
 L["Tick the modules you want to disable."] = "Hake die Module an, die du deaktivieren willst."
 L["This change requires a UI reload. Are you sure?"] = "Diese Änderung erfordert ein Neuladen des UIs. Bist du sicher?"
 L["Adds a set of standard themes to Skada. Custom themes can also be used."] = "Fügt Skada eine Reihe Standardoberflächen hinzu. Benutzerdefinierte Oberflächen können ebenfalls verwendet werden."
-
 -- themes module
 L["Theme"] = "Oberfläche"
 L["Themes"] = "Oberflächen"
@@ -283,7 +261,6 @@ L["Theme applied!"] = "Oberfläche übernommen!"
 L["Name of your new theme."] = "Name deiner neuen Oberfläche"
 L["Save theme"] = "Speichert die Oberfläche"
 L["Delete theme"] = "Löscht die Oberfläche"
-
 -- scroll module
 L["Scroll"] = "Scroll"
 L["Mouse"] = "Maus"
@@ -292,20 +269,17 @@ L["Scroll icon"] = "Bildlaufsymbol"
 L["Scroll mouse button"] = "Scroll-Maustaste"
 L["Keybinding"] = "Keybinding"
 L["Key scrolling speed"] = "Scrollgeschwindigkeit der Taste"
-
 -- minimap button
 L["Skada summary"] = "Skada Zusammenfassung"
 L["Left-Click to toggle windows."] = "Linksklick zum Ein-/Ausblenden des Skada-Fensters."
 L["Shift+Left-Click to reset."] = "Shift+Linksklick zum Zurücksetzen."
 L["Right-click to open menu"] = "Rechtsklick zum Öffnen des Menüs"
-
 -- skada menu
 L["Skada Menu"] = "Skada-Menü"
 L["Delete segment"] = "Segment löschen"
 L["Keep segment"] = "Segment behalten"
 L["Toggle window"] = "Fenster ein-/ausblenden"
 L["Start new segment"] = "Neues Segment starten"
-
 -- window buttons
 L["Configure"] = "Konfigurieren"
 L["Opens the configuration window."] = "Öffnet das Konfigurationsfenster."
@@ -318,11 +292,9 @@ L["Report"] = "Bericht"
 L["Opens a dialog that lets you report your data to others in various ways."] = "Öffnet ein Dialogfeld, damit Sie Ihre Daten an andere auf verschiedene Weise mitteilen können."
 L["Stop"] = "Stopp"
 L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."] = "Stoppt oder setzt das aktuelle Segment fort. Nützlich zur Diskontierung von Daten nach einem Wipe. Kann auch so eingestellt werden, dass in den Einstellungen automatisch gestoppt wird."
-
 -- default segments
 L["Total"] = "Gesamt"
 L["Current"] = "Momentaner Kampf"
-
 -- report module and window
 L["Skada: %s for %s:"] = "Skada: %s für %s:"
 L["Channel"] = "Kanal"
@@ -337,17 +309,10 @@ L["Officer"] = "Offizier"
 L["Lines"] = "Zeilen"
 L["There is nothing to report."] = "Es gibt nichts zu berichten."
 L["No mode or segment selected for report."] = "Kein Modus oder Segment zum Berichten ausgewählt."
-
--- ================== --
 -- Bar Display Module --
--- ================== --
-
 L["Bar display"] = "Leistenanzeige"
 L["Bar display is the normal bar window used by most damage meters. It can be extensively styled."] = "Leistenanzeige ist das normale Leistenfenster, diese Anzeigeart wird von den meisten Schadensmetern verwendet. Sie kann optisch stark verändert werden."
-
--- ============= --
 -- Threat Module --
--- ============= --
 L["Threat"] = "Bedrohung"
 L["Threat warning"] = "Threat warning"
 L["Do not warn while tanking"] = "Nicht warnen während des Tankens"
@@ -367,10 +332,7 @@ L["Use focus target"] = "Fokusziel benutzen"
 L["Shows threat on focus target, or focus target's target, when available."] = "Zeige Bedrohung des Fokuszieles oder dessen Zieles, falls verfügbar."
 L["TPS"] = "TPS"
 L["Threat: Personal Threat"] = "Bedrohung: Persönliche Bedrohung"
-
--- ======================== --
 -- Absorbs & Healing Module --
--- ======================== --
 L["Healing"] = "Heilung"
 L["Healed player list"] = "Liste der geheilten Spieler"
 L["Healing spell list"] = "Heilzauberliste"
@@ -378,64 +340,46 @@ L["%s's healing"] = "%s Heilung"
 L["%s's healing spells"] = "%s Heilzauber"
 L["%s's healed players"] = "%s geheilte Spieler"
 L["HPS"] = "HPS"
-
 L["Total healing"] = "Gesamte Heilung"
-
 L["Overhealing"] = "Überheilung"
 L["Overheal"] = "Überheilung"
 L["Overhealed player list"] = "Überheilte Spielerliste"
 L["Overhealing spell list"] = "Überheilungszauberliste"
 L["%s's overhealing spells"] = "%s Überheilungszauber"
 L["%s's overhealed players"] = "%s überheilte Spieler"
-
 L["Healing and Overhealing"] = "Heilung und Überheilung"
 -- L["Healing and overhealing spells"] = ""
 -- L["Healed and overhealed players"] = ""
 -- L["%s's healing and overhealing spells"] = ""
 -- L["%s's healed and overhealed players"] = ""
-
 L["Absorbs"] = "Absorptionen"
 L["Absorbed player list"] = "Absorbierte Spielerliste"
 L["Absorb spell list"] = "Zauberliste absorbieren"
 L["%s's absorbed players"] = "%s absorbierte Spieler"
 L["%s's absorb spells"] = "%s absorbieren Zauber"
-
 L["Absorbs and healing"] = "Absorptionen und Heilungen"
 L["Absorbs and healing spell list"] = "Liste der heilenden und absorbierenden Zauber"
 L["Absorbed and healed players"] = "Geheilte und absorbierte Spieler"
 L["%s's absorb and healing spells"] = "%s absorbieren und heilen Zauber"
 L["%s's absorbed and healed players"] = "%s absorbierte und geheilte Spieler"
-
 L["Healing received"] = "Heilung erhalten"
 L["Healing player list"] = "Heilende Spielerliste"
 L["%s's received healing"] = "%s hat eine Heilungsliste erhalten "
-
--- ============ --
 -- Auras Module --
--- ============ --
-
 L["Uptime"] = "Uptime"
-
 L["Buffs and Debuffs"] = "Buffs and Debuffs"
 L["Buffs"] = "Buffs"
 L["Buff spell list"] = "Liste der Buffs"
 L["%s's buffs"] = "%s Buffs"
-
 L["Debuffs"] = "Debuffs"
 L["Debuff spell list"] = "Liste der Debuffs"
 L["Debuff target list"] = "Debuff-Zielliste"
 L["%s's debuffs"] = "%s Debuffs"
 L["%s's <%s> targets"] = "%s <%s> Ziele"
-
 L["Sunder Counter"] = "Sunder Counter"
 L["Sunder target list"] = "Zielliste trennen"
-
--- ================= --
 -- CC Tracker Module --
--- ================= --
-
 L["CC Tracker"] = "CC Tracker"
-
 -- CC Done:
 L["CC Done"] = "CC Done"
 L["CC Done spells"] = "CC Done Spells"
@@ -446,7 +390,6 @@ L["%s's CC Done <%s> targets"] = "%s CC Done <%s> Ziele"
 L["%s's CC Done <%s> spells"] = "%s CC Done <%s> Zauber"
 L["%s's CC Done spells"] = "%s CC Done Zauber"
 L["%s's CC Done targets"] = "%s CC Done-Ziele"
-
 -- CC Taken
 L["CC Taken"] = "CC Taken"
 L["CC Taken spells"] = "CC Zauber genommen"
@@ -457,7 +400,6 @@ L["%s's CC Taken <%s> sources"] = "%s CC Taken <%s> Quellen"
 L["%s's CC Taken <%s> spells"] = "%s CC hat <%s> Zauber genommen"
 L["%s's CC Taken spells"] = "%s CC Zauber genommen"
 L["%s's CC Taken sources"] = "%s CC Taken Quellen"
-
 L["CC Breaks"] = "CC Unterbrechungen"
 L["CC Breakers"] = "CC Unterbrecher"
 L["CC Break spells"] = "CC Break Zaubersprüche"
@@ -468,18 +410,13 @@ L["%s's CC Break <%s> spells"] = "%s CC Break <%s> Zauber"
 L["%s's CC Break <%s> targets"] = "%s CC Break <%s> Ziele"
 L["%s's CC Break spells"] = "%s CC Break Zaubersprüche"
 L["%s's CC Break targets"] = "%s CC Break-Ziele"
-
 -- options
 L["CC"] = "CC"
 L["Announce CC breaking to party"] = "CC-Brechungen der Gruppe ankündigen"
 L["Ignore Main Tanks"] = "Haupttanks ignorieren"
 L["%s on %s removed by %s"] = "%s auf %s entfernt von %s"
 L["%s on %s removed by %s's %s"] = "%s auf %s entfernt durch %s's %s"
-
--- ============= --
 -- Damage Module --
--- ============= --
-
 -- damage done module
 L["Damage"] = "Schaden"
 L["Damage target list"] = "Schadenszielliste"
@@ -489,52 +426,40 @@ L["Damage spell targets"] = "Schadenszauberziele"
 L["Damage done"] = "Schaden verursacht"
 L["%s's damage"] = "%s : Schaden"
 L["%s's <%s> damage"] = "%s <%s> Schaden"
-
 -- L["Useful damage"] = ""
-
 L["Damage done by spell"] = "Durch Zauber verursachter Schaden"
 L["%s's sources"] = "%s Quellen"
-
 L["DPS"] = "DPS"
 L["Damage: Personal DPS"] = "Schaden: Persönliche DPS"
-
 L["RDPS"] = "RDPS"
 L["Damage: Raid DPS"] = "Schaden: Raid-DPS"
-
 -- damage taken module
 L["Damage taken"] = "Schaden erhalten"
 L["Damage taken by %s"] = "%s : Schaden erhalten"
 L["%s damage on %s"] = "%s Schaden an %s"
-
 L["Damage source list"] = "Schadensquellenliste"
 L["Damage spell sources"] = "Schadenszauberquellen"
 L["Damage taken by spell"] = "Schaden erhalten durch Zauber"
 L["%s's targets"] = "%s Ziele"
 L["DTPS"] = "Erlittener Schaden pro Sekunde"
-
 -- enemy damage done module
 L["Enemy damage done"] = "Gegnerischer Schaden"
 L["Damage done per player"] = "Ausgeteilter Schaden pro Spieler"
 L["Damage from %s"] = "Schaden von %s"
-
 -- enemy damage taken module
 L["Enemy damage taken"] = "Gegnerischer Schaden erhalten"
 L["Damage taken per player"] = "Erhaltener Schaden pro Spieler"
 L["Damage on %s"] = "Schaden auf %s"
 L["%s's damage sources"] = "%s Schadensquellen"
-
 -- avoidance and mitigation module
 L["Avoidance & Mitigation"] = "Vermeidung & Minderung"
 L["Damage breakdown"] = "Schadensaufschlüsselung"
 L["%s's damage breakdown"] = "%s Schadensaufschlüsselung"
-
 -- friendly fire module
 L["Friendly Fire"] = "Friendly Fire"
-
 L["Critical"] = "Kritischer Treffer"
 L["Glancing"] = "Gestreift"
 L["Crushing"] = "Schmetternd"
-
 -- useful damage targets
 -- L["Useful targets"] = ""
 L["Oozes"] = "Schlamm"
@@ -542,7 +467,6 @@ L["Oozes"] = "Schlamm"
 -- L["Adds"] = ""
 L["Halion and Inferno"] = "Halion und Inferno"
 -- L["Valkyrs overkilling"] = ""
-
 -- missing bosses entries
 L["Cult Adherent"] = "Treuer Kultist"
 L["Cult Fanatic"] = "Fanatischer Kultist"
@@ -555,7 +479,6 @@ L["Reanimated Adherent"] = "Wiederbelebter Kultist"
 L["Reanimated Fanatic"] = "Wiederbelebter Fanatiker"
 L["Volatile Ooze"] = "Flüchtiger Schlamm"
 L["Wicked Spirit"] = "Boshafter Geist"
-
 L["Kor'kron Sergeant"] = "Unteroffizier der Kor'kron"
 L["Kor'kron Axethrower"] = "Axtwerfer der Kor'kron"
 L["Kor'kron Rocketeer"] = "Raketenschütze der Kor'kron"
@@ -571,10 +494,7 @@ L["Risen Archmage"] = "Auferstandener Erzmagier"
 L["Blazing Skeleton"] = "Loderndes Skelett"
 L["Blistering Zombie"] = "Mörderischer Zombie"
 L["Gluttonous Abomination"] = "Gefräßige Monstrosität"
-
--- ============= --
 -- Deaths Module --
--- ============= --
 L["Deaths"] = "Tode"
 L["%s's death"] = "%s : Tode"
 L["%s's deaths"] = "%s : Tode"
@@ -588,48 +508,29 @@ L["Amount"] = "Betrag"
 L["Source"] = "Quelle"
 L["Health"] = "Gesundheit"
 L["Change"] = "Änderung"
-
 -- activity module
 L["Activity"] = "Aktivität"
 L["Activity per target"] = "Aktivität pro Ziel"
-
--- ==================== --
 -- dispels module lines --
--- ==================== --
-
 L["Dispels"] = "Bannungen"
-
 L["Dispel spell list"] = "Zauberliste zerstreuen"
 L["Dispelled spell list"] = "Liste der zerstreuten Zauber"
 L["Dispelled target list"] = "Liste der zerstreuten Ziele"
-
 L["%s's dispel spells"] = "%s zerstreuen Zauber"
 L["%s's dispelled spells"] = "%s zerstreute Zauber"
 L["%s's dispelled targets"] = "%s zerstreute Ziele"
-
--- ==================== --
 -- failbot module lines --
--- ==================== --
-
 L["Fails"] = "Fehler"
 L["%s's fails"] = "Fehler: %s"
 L["Player's failed events"] = "Fehlgeschlagene Ereignisse des Spielers"
 L["Event's failed players"] = "Event's Failed Players"
-
--- ======================== --
 -- improvement module lines --
--- ======================== --
-
 L["Improvement"] = "Verbesserung"
 L["Improvement modes"] = "Verbesserungsmodi"
 L["Improvement comparison"] = "Verbesserungsvergleich"
 L["Do you want to reset your improvement data?"] = "Möchten Sie Ihre Verbesserungsdaten zurücksetzen?"
 L["%s's overall data"] = "%s Gesamtdaten"
-
--- ======================= --
 -- interrupts module lines --
--- ======================= --
-
 L["Interrupts"] = "Unterbrechungen"
 L["Interrupt spells"] = "Zauber unterbrechen"
 L["Interrupted spells"] = "Unterbrochene Zauber"
@@ -637,11 +538,7 @@ L["Interrupted targets"] = "Unterbrochene Ziele"
 L["%s's interrupt spells"] = "%s Interrupt-Zauber"
 L["%s's interrupted spells"] = "%s unterbrochene Zauber"
 L["%s's interrupted targets"] = "%s unterbrochene Ziele"
-
--- =================== --
 -- Power gained module --
--- =================== --
-
 L["Power"] = "Energie"
 L["Power gained"] = "Ressourcenquellen"
 L["%s's gained %s"] = "%s hat %s gewonnen"
@@ -653,43 +550,26 @@ L["Power gained: Energy"] = "Gewonnene Kraft: Energie"
 L["Energy gained spell list"] = "Zauberliste Energie gewonnen"
 L["Power gained: Runic Power"] = "Gewonnene Kraft: Runenkraft"
 L["Runic Power gained spell list"] = "Runenkraft hat Zauberliste gewonnen"
-
--- ==================== --
 -- Parry module lines --
--- ==================== --
-
 L["Parry-haste"] = "Parieren"
 L["Parry target list"] = "Zielliste parieren"
 L["%s's parry targets"] = "%s parierte Ziele"
-
--- ==================== --
 -- Potions module lines --
--- ==================== --
-
 L["Potions"] = "Tränke"
 L["Potions list"] = "Liste der Tränke"
 L["Players list"] = "Liste der Spieler"
 L["%s's used potions"] = "%s benutzte Tränke"
-
--- ====================== --
 -- resurrect module lines --
--- ====================== --
-
 L["Resurrects"] = "Resurrects"
 L["Resurrect spell list"] = "Zauberliste wiederbeleben"
 L["Resurrect spell target list"] = "Liste der wiederbelebten Zauberziele"
 L["Resurrect target list"] = "Zielliste wiederbeleben"
 L["Resurrect target spell list"] = "Zielzauberliste wiederbeleben"
-
 L["%s's resurrect spells"] = "%s Wiederbelebungszauber"
 L["%s's resurrect targets"] = "%s wiederbelebte Ziele"
 L["%s's received resurrects"] = "%s hat Auferstehungen erhalten"
 L["%s's resurrect <%s> targets"] = "%s wiederbelebte <%s> Ziele"
-
--- ==================== --
 -- spamage module lines --
--- ==================== --
-
 L["Spamage"] = "Spamage"
 L["Suppresses chat messages from damage meters and provides single chat-link damage statistics in a popup."] = "Unterdrückt Chat-Nachrichten von Schadensmessern und stellt Statistiken zu einzelnen Chat-Link-Schäden in einem Popup bereit."
 L["Capture Delay"] = "Verzögerung"

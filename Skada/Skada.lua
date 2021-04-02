@@ -3022,11 +3022,11 @@ do
 				if not self.total then
 					self.total = createSet(L["Total"], now)
 				end
-				tentativehandle = self.NewTimer(1, function()
+				tentativehandle = self.NewTimer(self.db.profile.tentativetimer or 1, function()
 					tentative = nil
 					tentativehandle = nil
 					self.current = nil
-				end, 1)
+				end)
 				tentative = 0
 			end
 		end

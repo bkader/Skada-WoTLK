@@ -104,6 +104,7 @@ Skada.defaults = {
         tooltiprows = 3,
         informativetooltips = true,
         onlykeepbosses = false,
+        tentativetimer = 1,
         tentativecombatstart = false,
         hidesolo = false,
         hidepvp = false,
@@ -452,22 +453,11 @@ Skada.options = {
                         Skada:ApplySettings()
                     end
                 },
-                tentativecombatstart = {
-                    type = "toggle",
-                    name = L["Aggressive combat detection"],
-                    desc = L["Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons. Meaningless on boss encounters."],
-                    order = 11,
-                    width = "full",
-                    get = function() return Skada.db.profile.tentativecombatstart end,
-                    set = function()
-                        Skada.db.profile.tentativecombatstart = not Skada.db.profile.tentativecombatstart
-                    end
-                },
                 autostop = {
                     type = "toggle",
                     name = L["Autostop"],
                     desc = L["Automatically stops the current segment after half of all raid members have died."],
-                    order = 12,
+                    order = 11,
                     width = "full",
                     get = function() return Skada.db.profile.autostop end,
                     set = function() Skada.db.profile.autostop = not Skada.db.profile.autostop end
@@ -476,13 +466,35 @@ Skada.options = {
                     type = "toggle",
                     name = L["Always show self"],
                     desc = L["Keeps the player shown last even if there is not enough space."],
-                    order = 13,
+                    order = 12,
                     width = "full",
                     get = function() return Skada.db.profile.showself end,
                     set = function()
                         Skada.db.profile.showself = not Skada.db.profile.showself
                         Skada:ApplySettings()
                     end
+                },
+                tentativecombatstart = {
+                    type = "toggle",
+                    name = L["Aggressive combat detection"],
+                    desc = L["Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons. Meaningless on boss encounters."],
+                    order = 13,
+                    width = "full",
+                    get = function() return Skada.db.profile.tentativecombatstart end,
+                    set = function()
+                        Skada.db.profile.tentativecombatstart = not Skada.db.profile.tentativecombatstart
+                    end
+                },
+                tentativetimer = {
+                    type = "range",
+                    name = L["Tentative Timer"],
+                    desc = L["The number of seconds Skada should wait after combat start to create a new segment.\n\nOnly works if \"Agressive combat detection\" is enabled."],
+                    order = 13.1,
+                    min = 1, max = 5, step = 1,
+                    width = "full",
+                    disabled = function() return not Skada.db.profile.tentativecombatstart end,
+                    get = function() return Skada.db.profile.tentativetimer or 1 end,
+                    set = function(_, val) Skada.db.profile.tentativetimer = val end
                 },
                 numberformat = {
                     type = "select",

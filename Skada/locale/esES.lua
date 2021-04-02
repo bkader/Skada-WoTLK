@@ -3,18 +3,14 @@ if not L then return end
 
 L["A damage meter."] = "Un medidor de daño."
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "El uso de memoria es alto. Es posible que desee restablecer Skada y habilitar una de las opciones de restablecimiento automático."
-
 L["Skada: Modes"] = "Skada: Modos"
 L["Skada: Fights"] = "Skada: Luchas"
-
 L["Error: No options selected"] = "Error: no se seleccionaron opciones"
-
 L["Profiles"] = "Perfiles"
 L["Enable"] = "Habilitar"
 L["ENABLED"] = "HABILITADO"
 L["Disable"] = "Deshabilitar"
 L["DISABLED"] = "DESHABILITDO"
-
 -- common lines
 L["Active Time"] = "Tiempo activo"
 L["Segment Time"] = "Fragmento de tiempo"
@@ -31,20 +27,15 @@ L["Total hits:"] = "Aciertos totales"
 L["Count"] = "Contar"
 L["Refresh"] = "Actualización"
 L["Percent"] = "Porcentaje"
-
 L["General options"] = "Opciones generales"
-
 -- windows section:
 L["Window"] = "Ventana"
 L["Windows"] = "Ventanas"
-
 L["Create window"] = "Crear ventana"
 L["Enter the name for the new window."] = "Introducir el nombre para la nueva ventana"
-
 L["Delete window"] = "Borrar ventana"
 L["Choose the window to be deleted."] = "Escoger la ventana para ser borrada"
 L["Are you sure you want to delete this window?"] = "¿Está seguro de que desea eliminar esta ventana?"
-
 L["Rename window"] = "Renombrar ventana"
 L["Enter the name for the window."] = "Introducir el nombre para la ventana"
 L["Lock window"] = "Bloquear ventana"
@@ -57,19 +48,16 @@ L["Display system"] = "Sistema de visualización"
 L["Choose the system to be used for displaying data in this window."] = "Escoger el sistema para ser usado como visualización de los datos en esta ventana"
 L["Copy settings"] = "Copiar configuración"
 L["Choose the window from which you want to copy the settings."] = "Elija la ventana desde la que desea copiar la configuración."
-
 -- bars
 L["Bars"] = "Barras"
 L["Bar font"] = "Fuente de la barra"
 L["The font used by all bars."] = "La fuente usada para todas las barras"
 L["Bar font size"] = "Tamaño de fuente de la barra"
 L["The font size of all bars."] = "El tamaño de la fuente de todas las barras"
-
 L["Values font"] = "Fuente de valores"
 L["The font used by bar values."] = "La fuente utilizada por los valores de las barras."
 L["Values font size"] = "Tamaño de fuente de valores"
 L["The font size of bar values."] = "El tamaño de fuente de los valores de las barras."
-
 L["Font flags"] = "Sombra de fuente"
 L["Sets the font flags."] = "Establece la sombra de la fuente."
 L["None"] = "Nada"
@@ -112,7 +100,6 @@ L["Clickthrough"] = "Click a través de"
 L["Disables mouse clicks on bars."] = "Deshabilitar los clicks del ratón en las barras"
 L["Smooth bars"] = "Barras animadas"
 L["Animate bar changes smoothly rather than immediately."] = "Animar barras suavemente en lugar de inmediatamente."
-
 -- title bar
 L["Title bar"] = "Título de la barra"
 L["Enables the title bar."] = "Habilita la barra de título"
@@ -132,7 +119,6 @@ L["The texture used for the border of the title."] = "La textura usada como bord
 L["Border color"] = "Color del borde"
 L["The color used for the border."] = "El color utilizado para el borde."
 L["Buttons"] = "Botones"
-
 -- general window
 L["Background"] = "Fondo"
 L["Background texture"] = "Textura del fondo"
@@ -141,7 +127,6 @@ L["The texture used as the background."] = "La textura usada como fondo"
 -- L["Tile the background texture."] = ""
 -- L["Tile size"] = ""
 L["The size of the texture pattern."] = "El tamaño del patrón de textura."
-L["Background color"] = "Color del fondo"
 L["The color of the background."] = "El color del fondo"
 L["Border"] = "Borde"
 L["Border thickness"] = "Grosor del borde"
@@ -153,7 +138,6 @@ L["Sets the scale of the window."] = "Ajustar la escala de la ventana"
 L["This determines what other frames will be in front of the frame."] = "Esto determina qué otros macros estarán delante del macro."
 L["Width"] = "Anchura"
 L["Height"] = "Altura"
-
 -- switching
 L["Mode switching"] = "Modo de intercambio"
 L["Combat mode"] = "Modo de combate"
@@ -162,7 +146,6 @@ L["Return after combat"] = "Regresar tras combate"
 L["Return to the previous set and mode after combat ends."] = "Regresar al ajuste y modo previo después del fin del combate"
 L["Wipe mode"] = "Modo de wipe"
 L["Automatically switch to set 'Current' and this mode after a wipe."] = "Automáticamente cambiar entre el ajuste 'Actual' y este modo después de un wipe"
-
 -- L["Inline bar display"] = ""
 -- L["Inline display is a horizontal window style."] = ""
 -- L["Text"] = ""
@@ -179,14 +162,12 @@ L["Automatically switch to set 'Current' and this mode after a wipe."] = "Autom�
 -- L["Check this to use ElvUI skin instead. \nDefault: checked"] = ""
 -- L["Use solid background."] = ""
 -- L["Un-check this for an opaque background."] = ""
-
 -- L["Data text"] = ""
 -- L["Text color"] = ""
 -- L["Choose the default color."] = ""
 -- L["Hint: Left-Click to set active mode."] = ""
 -- L["Right-click to set active set."] = ""
 -- L["Shift+Left-Click to open menu."] = ""
-
 -- data resets
 L["Data resets"] = "Restablecimiento de datos"
 L["Reset on entering instance"] = "Restablecer al entrar en una estancia"
@@ -198,7 +179,6 @@ L["Controls if data is reset when you leave a group."] = "Controla si los datos 
 L["Ask"] = "Preguntar"
 L["Do you want to reset Skada?"] = "¿Quiere restablecer Skada?"
 L["All data has been reset."] = "Todos los datos han sido reestablecidos."
-
 -- general options
 L["Show minimap button"] = "Mostrar botón minimapa"
 L["Toggles showing the minimap button."] = "Mostrar/No mostrar el botón del minimapa"
@@ -226,6 +206,8 @@ L["Show rank numbers"] = "Mostrar números de rango"
 L["Shows numbers for relative ranks for modes where it is applicable."] = "Mostrar números para rangos relativos para los modos donde esto es aplicable"
 L["Aggressive combat detection"] = "Detección de combate agresiva"
 L["Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons. Meaningless on boss encounters."] = "Skada usualmente usa un muy conservador (simple) esquema de detección del combate que funciona mejor en bandas. Con esta opción Skada intenta emular otros medidores de daño. Útil cuando se hacen mazmorras. Insignificante en encuentros de jefes."
+L["Tentative Timer"] = "Tiempo tentativo"
+L["The number of seconds Skada should wait after combat start to create a new segment.\n\nOnly works if \"Agressive combat detection\" is enabled."] = "El número de segundos que Skada debería esperar una vez empezado el combate para crear un nuevo segmento.\n\nSolo funciona si \"Detección de combate agresiva\" está habilitado."
 L["Autostop"] = "Autoestop"
 L["Automatically stops the current segment after half of all raid members have died."] = "Detiene automáticamente el segmento actual después de que la mitad de los miembros hayan muerto."
 L["Always show self"] = "Muéstrate siempre"
@@ -246,10 +228,8 @@ L["Data segments to keep"] = "Fragmentos de datos para guardar"
 L["The number of fight segments to keep. Persistent segments are not included in this."] = "El número de fragmentos de combate para guardar. Los fragmentos permanentes no están incluídos en esto."
 L["Update frequency"] = "Frecuencia de actualización"
 L["How often windows are updated. Shorter for faster updates. Increases CPU usage."] = "Con qué frecuencia se actualizan las ventanas. Más corto para actualizaciones más rápidas. Aumenta el uso de la CPU."
-
 -- columns
 L["Columns"] = "Columnas"
-
 -- tooltips
 L["Tooltips"] = "Tooltips"
 L["Show tooltips"] = "Mostrar tooltips"
@@ -267,14 +247,12 @@ L["Bottom right"] = "Abajo a la derecha"
 L["Bottom left"] = "Abajo a la izquierda"
 L["Smart"] = "Inteligente"
 L["Follow Cursor"] = "Seguir el cursor"
-
 -- disabled modules
 L["Modules"] = "Módulos"
 L["Disabled Modules"] = "Módulos deshabilitados"
 L["Tick the modules you want to disable."] = "Marque los módulos que desea deshabilitar."
 L["This change requires a UI reload. Are you sure?"] = "Este cambio requiere una recarga de la UI. ¿Estás seguro?"
 L["Adds a set of standard themes to Skada. Custom themes can also be used."] = "Agrega un conjunto de temas estándar a Skada. También se pueden utilizar temas personalizados."
-
 -- themes module
 L["Theme"] = "Tema"
 L["Themes"] = "Temas"
@@ -283,7 +261,6 @@ L["Theme applied!"] = "¡Tema aplicado!"
 L["Name of your new theme."] = "Nombra tu nuevo tema."
 L["Save theme"] = "Guardar tema"
 L["Delete theme"] = "Eliminar tema"
-
 -- scroll module
 -- L["Scroll"] = ""
 -- L["Mouse"] = ""
@@ -292,20 +269,17 @@ L["Delete theme"] = "Eliminar tema"
 -- L["Scroll mouse button"] = ""
 -- L["Keybinding"] = ""
 -- L["Key scrolling speed"] = ""
-
 -- minimap button
 L["Skada summary"] = "Resumen de Skada"
 L["Left-Click to toggle windows."] = "Click izquierdo para abrir/cerrar ventanas"
 L["Shift+Left-Click to reset."] = "Shift+Click izquierdo para restablecer"
 L["Right-click to open menu"] = "Click derecho para abrir menú"
-
 -- skada menu
 L["Skada Menu"] = "Menú de Skada"
 L["Delete segment"] = "Borrar fragmento"
 L["Keep segment"] = "Guardar fragmento"
 L["Toggle window"] = "Abrir/Cerrar ventana"
 L["Start new segment"] = "Comenzar nuevo fragmento"
-
 -- window buttons
 L["Configure"] = "Configurar"
 L["Opens the configuration window."] = "Abre la ventana de configuración."
@@ -318,11 +292,9 @@ L["Report"] = "Informar"
 L["Opens a dialog that lets you report your data to others in various ways."] = "Abre el diálogo que te permite informar de tus datos a otros de varias maneras."
 L["Stop"] = "Parar"
 L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."] = "Para o resume el segmento actual. Útil para descontar los datos después de una muerte del grupo. Puede ser establecido para que se pare automáticamente en las opciones."
-
 -- default segments
 L["Total"] = "Total"
 L["Current"] = "Actual"
-
 -- report module and window
 -- L["Skada: %s for %s:"] = ""
 L["Channel"] = "Canal"
@@ -337,17 +309,10 @@ L["Officer"] = "Oficial"
 L["Lines"] = "Lineas"
 L["There is nothing to report."] = "No hay nada que informar."
 L["No mode or segment selected for report."] = "No hay modo o fragmento seleccionado para informe."
-
--- ================== --
 -- Bar Display Module --
--- ================== --
-
 L["Bar display"] = "Visualización de la barra"
 -- L["Bar display is the normal bar window used by most damage meters. It can be extensively styled."] = ""
-
--- ============= --
 -- Threat Module --
--- ============= --
 L["Threat"] = "Amenaza"
 L["Threat warning"] = "Aviso de amenaza"
 L["Do not warn while tanking"] = "No avisar mientras se está tanqueando"
@@ -367,10 +332,7 @@ L["Use focus target"] = "Usar el objetivo del foco"
 L["Shows threat on focus target, or focus target's target, when available."] = "Mostrar la amenaza en el objetivo del foco, o el objetivo del objetivo del foco, cuando esté disponible."
 L["TPS"] = "APS"
 L["Threat: Personal Threat"] = "Amenaza: Amenaza Personal"
-
--- ======================== --
 -- Absorbs & Healing Module --
--- ======================== --
 L["Healing"] = "Sanación"
 L["Healed player list"] = "Lista de jugadores curados"
 L["Healing spell list"] = "Lista de hechizos curativos"
@@ -378,64 +340,46 @@ L["%s's healing"] = "Curación de %s"
 L["%s's healing spells"] = "Hechizos de curación de %s"
 L["%s's healed players"] = "Jugadores curados de %s"
 L["HPS"] = "HPS"
-
 L["Total healing"] = "Curación total"
-
 L["Overhealing"] = "Curación excesiva"
 -- L["Overheal"] = ""
 -- L["Overhealed player list"] = ""
 -- L["Overhealing spell list"] = ""
 -- L["%s's overhealing spells"] = ""
 -- L["%s's overhealed players"] = ""
-
 L["Healing and Overhealing"] = "Curación y curación excesiva"
 -- L["Healing and overhealing spells"] = ""
 -- L["Healed and overhealed players"] = ""
 -- L["%s's healing and overhealing spells"] = ""
 -- L["%s's healed and overhealed players"] = ""
-
 L["Absorbs"] = "Absorbe"
 L["Absorbed player list"] = "Lista de jugadores absorbidos"
 L["Absorb spell list"] = "Lista de absorber hechizos"
 L["%s's absorbed players"] = "Jugadores absorbidos de %s"
 L["%s's absorb spells"] = "Hechizos de absorción de %s"
-
 -- L["Absorbs and healing"] = ""
 -- L["Absorbs and healing spell list"] = ""
 -- L["Absorbed and healed players"] = ""
 -- L["%s's absorb and healing spells"] = ""
 -- L["%s's absorbed and healed players"] = ""
-
 -- L["Healing received"] = "Curación recibida"
 -- L["Healing player list"] = "Lista de jugadores curativos"
 -- L["%s's received healing"] = "Curaciones recibidas de %s"
-
--- ============ --
 -- Auras Module --
--- ============ --
-
 -- L["Uptime"] = ""
-
 -- L["Buffs and Debuffs"] = ""
 -- L["Buffs"] = ""
 -- L["Buff spell list"] = ""
 -- L["%s's buffs"] = ""
-
 -- L["Debuffs"] = ""
 -- L["Debuff spell list"] = ""
 -- L["Debuff target list"] = ""
 -- L["%s's debuffs"] = ""
 -- L["%s's <%s> targets"] = ""
-
 -- L["Sunder Counter"] = ""
 -- L["Sunder target list"] = ""
-
--- ================= --
 -- CC Tracker Module --
--- ================= --
-
 -- L["CC Tracker"] = ""
-
 -- CC Done:
 -- L["CC Done"] = ""
 -- L["CC Done spells"] = ""
@@ -446,7 +390,6 @@ L["%s's absorb spells"] = "Hechizos de absorción de %s"
 -- L["%s's CC Done <%s> spells"] = ""
 -- L["%s's CC Done spells"] = ""
 -- L["%s's CC Done targets"] = ""
-
 -- CC Taken
 -- L["CC Taken"] = ""
 -- L["CC Taken spells"] = ""
@@ -457,7 +400,6 @@ L["%s's absorb spells"] = "Hechizos de absorción de %s"
 -- L["%s's CC Taken <%s> spells"] = ""
 -- L["%s's CC Taken spells"] = ""
 -- L["%s's CC Taken sources"] = ""
-
 L["CC Breaks"] = "Controles de masa rotos"
 L["CC Breakers"] = "Interruptores de controles de masas"
 -- L["CC Break spells"] = ""
@@ -468,18 +410,13 @@ L["CC Breakers"] = "Interruptores de controles de masas"
 -- L["%s's CC Break <%s> targets"] = ""
 -- L["%s's CC Break spells"] = ""
 -- L["%s's CC Break targets"] = ""
-
 -- options
 L["CC"] = "Controles de masas"
 L["Announce CC breaking to party"] = "Anunciar la ruptura de control de masas al grupo"
 L["Ignore Main Tanks"] = "Ignorar tanques principales"
 -- L["%s on %s removed by %s"] = ""
 -- L["%s on %s removed by %s's %s"] = ""
-
--- ============= --
 -- Damage Module --
--- ============= --
-
 -- damage done module
 L["Damage"] = "Daño"
 L["Damage target list"] = "Lista de objetivos de daño"
@@ -489,53 +426,41 @@ L["Damage spell targets"] = "Objetivos de hechizo de daño"
 L["Damage done"] = "Daño hecho"
 -- L["%s's damage"] = ""
 -- L["%s's <%s> damage"] = ""
-
 L["Useful damage"] = "Daño útil"
-
 L["Damage done by spell"] = "Daño causado por hechizo"
 -- L["%s's sources"] = ""
-
 L["DPS"] = "DPS"
 L["Damage: Personal DPS"] = "Daño: DPS Personal"
-
 L["RDPS"] = "DPS de Banda"
 L["Damage: Raid DPS"] = "Daño: DPS de Banda"
-
 -- damage taken module
 L["Damage taken"] = "Daño recibido"
 L["Damage taken by %s"] = "Daño recibido por %s"
 L["%s damage on %s"] = "%s daño en %s"
-
 -- L["Damage source list"] = ""
 -- L["Damage spell sources"] = ""
 L["Damage taken by spell"] = "Daño recibido por hechizos"
 -- L["%s's targets"] = ""
 L["DTPS"] = "DRPS"
-
 -- enemy damage done module
 L["Enemy damage done"] = "Daño de enemigo hecho"
 L["Damage done per player"] = "Daño hecho por jugador"
 L["Damage from %s"] = "Daño desde %s"
 L["%s's damage on %s"] = "El daño de %s - %s"
-
 -- enemy damage taken module
 L["Enemy damage taken"] = "Daño de enemigo recibido"
 L["Damage taken per player"] = "Daño recibido por jugador"
 L["Damage on %s"] = "Daño activo %s"
 -- L["%s's damage sources"] = ""
-
 -- avoidance and mitigation module
 -- L["Avoidance & Mitigation"] = ""
 -- L["Damage breakdown"] = ""
 -- L["%s's damage breakdown"] = ""
-
 -- friendly fire module
 -- L["Friendly Fire"] = ""
-
 L["Critical"] = "Crítico"
 L["Glancing"] = "Glancing"
 L["Crushing"] = "Aplastante"
-
 -- useful damage targets
 -- L["Useful targets"] = ""
 -- L["Oozes"] = ""
@@ -543,7 +468,6 @@ L["Crushing"] = "Aplastante"
 -- L["Adds"] = ""
 -- L["Halion and Inferno"] = ""
 -- L["Valkyrs overkilling"] = ""
-
 -- missing bosses entries
 -- L["Cult Adherent"] = ""
 -- L["Cult Fanatic"] = ""
@@ -556,7 +480,6 @@ L["Crushing"] = "Aplastante"
 -- L["Reanimated Fanatic"] = ""
 -- L["Volatile Ooze"] = ""
 -- L["Wicked Spirit"] = ""
-
 -- L["Kor'kron Sergeant"] = ""
 -- L["Kor'kron Axethrower"] = ""
 -- L["Kor'kron Rocketeer"] = ""
@@ -572,10 +495,7 @@ L["Crushing"] = "Aplastante"
 -- L["Blazing Skeleton"] = ""
 -- L["Blistering Zombie"] = ""
 -- L["Gluttonous Abomination"] = ""
-
--- ============= --
 -- Deaths Module --
--- ============= --
 L["Deaths"] = "Muertes"
 L["%s's death"] = "Muerte de %s"
 L["%s's deaths"] = "Muertes de %s"
@@ -589,48 +509,29 @@ L["Amount"] = "Cantidad"
 L["Source"] = "Fuente"
 L["Health"] = "Salud"
 L["Change"] = "Cambio"
-
 -- activity module
 -- L["Activity"] = ""
 -- L["Activity per target"] = ""
-
--- ==================== --
 -- dispels module lines --
--- ==================== --
-
 L["Dispels"] = "Disipaciones"
-
 -- L["Dispel spell list"] = ""
 -- L["Dispelled spell list"] = ""
 -- L["Dispelled target list"] = ""
-
 -- L["%s's dispel spells"] = ""
 -- L["%s's dispelled spells"] = ""
 -- L["%s's dispelled targets"] = ""
-
--- ==================== --
 -- failbot module lines --
--- ==================== --
-
 L["Fails"] = "Fallos"
 L["%s's fails"] = "Fallos de %s"
 L["Player's failed events"] = "Eventos fallidos del jugador"
 L["Event's failed players"] = "Jugadores fallidos del evento"
-
--- ======================== --
 -- improvement module lines --
--- ======================== --
-
 -- L["Improvement"] = ""
 -- L["Improvement modes"] = ""
 -- L["Improvement comparison"] = ""
 -- L["Do you want to reset your improvement data?"] = ""
 -- L["%s's overall data"] = ""
-
--- ======================= --
 -- interrupts module lines --
--- ======================= --
-
 L["Interrupts"] = "Interrupciones"
 -- L["Interrupt spells"] = ""
 -- L["Interrupted spells"] = ""
@@ -638,11 +539,7 @@ L["Interrupts"] = "Interrupciones"
 -- L["%s's interrupt spells"] = ""
 -- L["%s's interrupted spells"] = ""
 -- L["%s's interrupted targets"] = ""
-
--- =================== --
 -- Power gained module --
--- =================== --
-
 -- L["Power"] = "Recursos"
 -- L["Power gained"] = ""
 -- L["%s's gained %s"] = ""
@@ -654,43 +551,26 @@ L["Interrupts"] = "Interrupciones"
 -- L["Energy gained spell list"] = ""
 -- L["Power gained: Runic Power"] = ""
 -- L["Runic Power gained spell list"] = ""
-
--- ==================== --
 -- Parry module lines --
--- ==================== --
-
 L["Parry-haste"] = "Parar-celeridad"
 L["Parry target list"] = "Lista de objetivos de parada"
 L["%s's parry targets"] = "Objetivos de parada de %s"
-
--- ==================== --
 -- Potions module lines --
--- ==================== --
-
 -- L["Potions"] = ""
 -- L["Potions list"] = ""
 -- L["Players list"] = ""
 -- L["%s's used potions"] = ""
-
--- ====================== --
 -- resurrect module lines --
--- ====================== --
-
 -- L["Resurrects"] = ""
 -- L["Resurrect spell list"] = ""
 -- L["Resurrect spell target list"] = ""
 -- L["Resurrect target list"] = ""
 -- L["Resurrect target spell list"] = ""
-
 -- L["%s's resurrect spells"] = ""
 -- L["%s's resurrect targets"] = ""
 -- L["%s's received resurrects"] = ""
 -- L["%s's resurrect <%s> targets"] = ""
-
--- ==================== --
 -- spamage module lines --
--- ==================== --
-
 -- L["Spamage"] = ""
 -- L["Suppresses chat messages from damage meters and provides single chat-link damage statistics in a popup."] = ""
 L["Capture Delay"] = "Retraso de captura"
@@ -715,11 +595,7 @@ L["Do Nothing"] = "No hacer nada"
 L["Compress"] = "Comprimir"
 L["Suppress"] = "Suprimir"
 L["Reported by: %s"] = "Reportado por: %s"
-
--- ===================== --
 -- nickname module lines --
--- ===================== --
-
 L["Nickname"] = "Apodo"
 L["Set a nickname for you.\nNicknames are sent to group members and Skada can use them instead of your character name."] = "Reemplazar el nombre de su personaje.\nEl apodo se envía a los miembres de la hermandad, y se muestra en Details! en vez del nombre de su personaje."
 L["Nickname isn't a valid string."] = "El apodo no es una cadena válida."

@@ -4,18 +4,14 @@ if not L then return end
 
 L["A damage meter."] = "伤害统计器"
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "内存使用率很高。你可能需要重置Skada，并启用其中一个自动重置选项。"
-
 L["Skada: Modes"] = "Skada：模式"
 L["Skada: Fights"] = "Skada：战斗"
-
 L["Error: No options selected"] = "错误：未选择任何选项"
-
 L["Profiles"] = "配置文件"
 L["Enable"] = "启用"
 L["ENABLED"] = "已启用"
 L["Disable"] = "禁用"
 L["DISABLED"] = "已禁用"
-
 -- common lines
 L["Active Time"] = "活跃时间"
 L["Segment Time"] = "分段时间"
@@ -32,20 +28,15 @@ L["Total hits:"] = "总计值："
 L["Count"] = "计数"
 L["Refresh"] = "刷新"
 L["Percent"] = "百分比"
-
 L["General options"] = "常规选项"
-
 -- windows section:
 L["Window"] = "窗口"
 L["Windows"] = "窗口"
-
 L["Create window"] = "创建窗口"
 L["Enter the name for the new window."] = "输入新窗口的名字。"
-
 L["Delete window"] = "删除窗口"
 L["Choose the window to be deleted."] = "选择要删除的窗口。"
 L["Are you sure you want to delete this window?"] = "确定要删除此窗口？"
-
 L["Rename window"] = "重命名窗口"
 L["Enter the name for the window."] = "输入窗口的名字。"
 L["Lock window"] = "锁定窗口"
@@ -58,19 +49,16 @@ L["Display system"] = "显示系统"
 L["Choose the system to be used for displaying data in this window."] = "选择在窗口中显示数据的系统。"
 L["Copy settings"] = "复制设定"
 L["Choose the window from which you want to copy the settings."] = "选择要从中复制设置的窗口。"
-
 -- bars
 L["Bars"] = "统计条"
 L["Bar font"] = "统计条字体"
 L["The font used by all bars."] = "全部统计条所使用的字体。"
 L["Bar font size"] = "统计条字体大小"
 L["The font size of all bars."] = "全部统计条的字体大小。"
-
 L["Values font"] = "数值字体"
 L["The font used by bar values."] = "统计条数值所使用的字体。"
 L["Values font size"] = "数值字体大小"
 L["The font size of bar values."] = "统计条数值的字体大小。"
-
 L["Font flags"] = "字体风格"
 L["Sets the font flags."] = "设定字体的风格。"
 L["None"] = "无"
@@ -113,7 +101,6 @@ L["Clickthrough"] = "点击穿透"
 L["Disables mouse clicks on bars."] = "在统计条上禁用鼠标点击。"
 L["Smooth bars"] = "平滑化"
 L["Animate bar changes smoothly rather than immediately."] = "以动画平滑显示统计条变化。"
-
 -- title bar
 L["Title bar"] = "标题栏"
 L["Enables the title bar."] = "启用标题栏。"
@@ -133,7 +120,6 @@ L["The texture used for the border of the title."] = "用于标题边框的材�
 L["Border color"] = "边框颜色"
 L["The color used for the border."] = "边框所使用的颜色。"
 L["Buttons"] = "按钮"
-
 -- general window
 L["Background"] = "背景"
 L["Background texture"] = "背景材质"
@@ -142,7 +128,6 @@ L["Tile"] = "平铺"
 L["Tile the background texture."] = "平铺背景材质。"
 L["Tile size"] = "平铺尺寸"
 L["The size of the texture pattern."] = "材质图案的尺寸。"
-L["Background color"] = "背景颜色"
 L["The color of the background."] = "背景的颜色。"
 L["Border"] = "边框"
 L["Border thickness"] = "边框粗细"
@@ -154,7 +139,6 @@ L["Strata"] = "层级"
 L["This determines what other frames will be in front of the frame."] = "此项指定其他哪些框架将位于此框架的前面。"
 L["Width"] = "宽度"
 L["Height"] = "高度"
-
 -- switching
 L["Mode switching"] = "模式切换"
 L["Combat mode"] = "战斗模式"
@@ -163,7 +147,6 @@ L["Return after combat"] = "战斗后返回"
 L["Return to the previous set and mode after combat ends."] = "战斗结束后返回原先的集合和模式。"
 L["Wipe mode"] = "团灭模式"
 L["Automatically switch to set 'Current' and this mode after a wipe."] = "团灭后自动切换到“当前”集合和此模式。"
-
 L["Inline bar display"] = "直排统计条显示"
 L["Inline display is a horizontal window style."] = "直排显示是一种水平窗口样式。"
 L["Text"] = "文字"
@@ -180,14 +163,12 @@ L["Use ElvUI skin if avaliable."] = "可用时使用ElvUI皮肤。"
 L["Check this to use ElvUI skin instead. \nDefault: checked"] = "勾选此项以使用ElvUI皮肤。\n默认：勾选"
 L["Use solid background."] = "使用纯色背景。"
 L["Un-check this for an opaque background."] = "不勾选此项将使用不透明背景。"
-
 L["Data text"] = "数据文字"
 L["Text color"] = "文字颜色"
 L["Choose the default color."] = "选择默认颜色。"
 L["Hint: Left-Click to set active mode."] = "提示：左键点击：设定活跃模式。"
 L["Right-click to set active set."] = "右键点击：设定活跃集合。"
 L["Shift+Left-Click to open menu."] = "Shift+左键点击：打开菜单。"
-
 -- data resets
 L["Data resets"] = "数据重置"
 L["Reset on entering instance"] = "进本重置"
@@ -199,7 +180,6 @@ L["Controls if data is reset when you leave a group."] = "控制是否在离开�
 L["Ask"] = "询问"
 L["Do you want to reset Skada?"] = "是否要重置数据？"
 L["All data has been reset."] = "全部数据已重置。"
-
 -- general options
 L["Show minimap button"] = "显示小地图按钮"
 L["Toggles showing the minimap button."] = "开关小地图按钮的显示。"
@@ -227,6 +207,8 @@ L["Show rank numbers"] = "显示序号"
 L["Shows numbers for relative ranks for modes where it is applicable."] = "在适用处根据模式中的相对等级显示数字编号。"
 L["Aggressive combat detection"] = "激进式战斗侦测(Recount模式)"
 L["Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons. Meaningless on boss encounters."] = "Skada通常使用非常保守（简单）的战斗侦测方案，在团队副本中效果最佳。通过此选项，Skada可尝试模拟其他伤害统计插件。这在五人本中很有效，但对于BOSS战则毫无意义。"
+L["Tentative Timer"] = "试验计时器"
+L["The number of seconds to wait for combat events when engaging combat.\nSkada only creates a new segment if there are enough combat events during a set amount of time."] = "战斗开始后Skada创建新分段的等待时间(秒)。\n\n仅在启用\"激进式战斗侦测\"时生效。"
 L["Autostop"] = "自动停止"
 L["Automatically stops the current segment after half of all raid members have died."] = "团队成员超过半数阵亡时自动停止当前分段记录。"
 L["Always show self"] = "总是显示自己"
@@ -247,10 +229,8 @@ L["Data segments to keep"] = "数据分段保留"
 L["The number of fight segments to keep. Persistent segments are not included in this."] = "需要保留的战斗数据分段数量。不包括连续的分段数据。"
 L["Update frequency"] = "更新频率"
 L["How often windows are updated. Shorter for faster updates. Increases CPU usage."] = "窗口的更新频率。数字越小更新越快，但同时CPU占用越高。"
-
 -- columns
 L["Columns"] = "列"
-
 -- tooltips
 L["Tooltips"] = "鼠标提示"
 L["Show tooltips"] = "显示鼠标提示"
@@ -268,14 +248,12 @@ L["Bottom right"] = "右下"
 L["Bottom left"] = "左下"
 L["Smart"] = "智能"
 L["Follow Cursor"] = "跟随光标"
-
 -- disabled modules
 L["Modules"] = "模块"
 L["Disabled Modules"] = "禁用模块"
 L["Tick the modules you want to disable."] = "勾选要禁用的模块。"
 L["This change requires a UI reload. Are you sure?"] = "此更改需要重载界面。确定重载？"
 L["Adds a set of standard themes to Skada. Custom themes can also be used."] = "为Skada添加一套标准主题。自定义主题也能同时使用。"
-
 -- themes module
 L["Theme"] = "主题"
 L["Themes"] = "主题"
@@ -284,7 +262,6 @@ L["Theme applied!"] = "主题已应用！"
 L["Name of your new theme."] = "新主题的名称。"
 L["Save theme"] = "保存主题"
 L["Delete theme"] = "删除主题"
-
 -- scroll module
 L["Scroll"] = "滚动"
 L["Mouse"] = "鼠标"
@@ -293,20 +270,17 @@ L["Scroll icon"] = "滚动图标"
 L["Scroll mouse button"] = "滚动鼠标按钮"
 L["Keybinding"] = "按键绑定"
 L["Key scrolling speed"] = "按键滚动速度"
-
 -- minimap button
 L["Skada summary"] = "Skada概要"
 L["Left-Click to toggle windows."] = "左键：开关窗口"
 L["Shift+Left-Click to reset."] = "Shift+左键：重置"
 L["Right-click to open menu"] = "右键：打开菜单"
-
 -- skada menu
 L["Skada Menu"] = "Skada菜单"
 L["Delete segment"] = "删除分段"
 L["Keep segment"] = "保留分段"
 L["Toggle window"] = "开关窗口"
 L["Start new segment"] = "开始新分段"
-
 -- window buttons
 L["Configure"] = "配置"
 L["Opens the configuration window."] = "打开配置窗口。"
@@ -319,11 +293,9 @@ L["Report"] = "报告"
 L["Opens a dialog that lets you report your data to others in various ways."] = "打开一个可以通过各种方式向他人报告数据的对话框。"
 L["Stop"] = "停止"
 L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."] = "停止或继续当前分段。在团灭后很有用。可在设置中设为自动停止。"
-
 -- default segments
 L["Total"] = "总计"
 L["Current"] = "当前战斗"
-
 -- report module and window
 L["Skada: %s for %s:"] = "Skada：%s 对于 %s："
 L["Channel"] = "频道"
@@ -338,17 +310,10 @@ L["Officer"] = "官员"
 L["Lines"] = "线路"
 L["There is nothing to report."] = "没有可报告的内容。"
 L["No mode or segment selected for report."] = "没有为报告选定模式或分段。"
-
--- ================== --
 -- Bar Display Module --
--- ================== --
-
 L["Bar display"] = "条形图显示"
 L["Bar display is the normal bar window used by most damage meters. It can be extensively styled."] = "条形图显示是被大多数伤害统计插件所采用的普通条形图窗口。可以高度样式化。"
-
--- ============= --
 -- Threat Module --
--- ============= --
 L["Threat"] = "威胁"
 L["Threat warning"] = "威胁警告"
 L["Do not warn while tanking"] = "作为坦克时不警告"
@@ -368,10 +333,7 @@ L["Use focus target"] = "使用焦点"
 L["Shows threat on focus target, or focus target's target, when available."] = "可用时，显示对于焦点或焦点目标的威胁。"
 L["TPS"] = "TPS"
 L["Threat: Personal Threat"] = "威胁：个人威胁"
-
--- ======================== --
 -- Absorbs & Healing Module --
--- ======================== --
 L["Healing"] = "治疗"
 L["Healed player list"] = "治疗玩家列表"
 L["Healing spell list"] = "治疗法术列表"
@@ -379,64 +341,46 @@ L["%s's healing"] = "%s的治疗"
 L["%s's healing spells"] = "%s的治疗法术"
 L["%s's healed players"] = "%s治疗的玩家"
 L["HPS"] = "HPS"
-
 L["Total healing"] = "总计治疗"
-
 L["Overhealing"] = "过量治疗"
 L["Overheal"] = "过量治疗"
 L["Overhealed player list"] = "过量治疗玩家列表"
 L["Overhealing spell list"] = "过量治疗法术列表"
 L["%s's overhealing spells"] = "%s的过量治疗法术"
 L["%s's overhealed players"] = "%s过量治疗的玩家"
-
 L["Healing and Overhealing"] = "治疗和过量治疗"
 L["Healing and overhealing spells"] = "治疗和过量治疗法术"
 L["Healed and overhealed players"] = "治疗和过量治疗玩家"
 L["%s's healing and overhealing spells"] = "%s的治疗和过量治疗法术"
 L["%s's healed and overhealed players"] = "%s治疗和过量治疗的玩家"
-
 L["Absorbs"] = "吸收"
 L["Absorbed player list"] = "吸收玩家列表"
 L["Absorb spell list"] = "吸收法术列表"
 L["%s's absorbed players"] = "%s的吸收玩家"
 L["%s's absorb spells"] = "%s的吸收法术"
-
 L["Absorbs and healing"] = "吸收和治疗"
 L["Absorbs and healing spell list"] = "吸收和治疗法术列表"
 L["Absorbed and healed players"] = "吸收和治疗玩家列表"
 L["%s's absorb and healing spells"] = "%s的吸收和治疗法术"
 L["%s's absorbed and healed players"] = "%s的吸收和治疗玩家"
-
 L["Healing received"] = "受到治疗"
 L["Healing player list"] = "治疗玩家列表"
 L["%s's received healing"] = "%s受到的治疗"
-
--- ============ --
 -- Auras Module --
--- ============ --
-
 L["Uptime"] = "持续时间"
-
 L["Buffs and Debuffs"] = "Buff和Debuff"
 L["Buffs"] = "Buff"
 L["Buff spell list"] = "Buff法术列表"
 L["%s's buffs"] = "%s的Buff"
-
 L["Debuffs"] = "Debuff"
 L["Debuff spell list"] = "Debuff法术列表"
 L["Debuff target list"] = "Debuff目标列表"
 L["%s's debuffs"] = "%s的Debuff"
 L["%s's <%s> targets"] = "%s的<%s>目标"
-
 L["Sunder Counter"] = "破甲统计"
 L["Sunder target list"] = "破甲目标列表"
-
--- ================= --
 -- CC Tracker Module --
--- ================= --
-
 L["CC Tracker"] = "控制追踪"
-
 -- CC Done:
 L["CC Done"] = "成功控制"
 L["CC Done spells"] = "成功控制法术"
@@ -447,7 +391,6 @@ L["%s's CC Done <%s> targets"] = "%s的成功控制<%s>目标"
 L["%s's CC Done <%s> spells"] = "%s的成功控制<%s>法术"
 L["%s's CC Done spells"] = "%s的成功控制目标"
 L["%s's CC Done targets"] = "%s的成功控制法术"
-
 -- CC Taken
 L["CC Taken"] = "受到控制"
 L["CC Taken spells"] = "受到控制法术"
@@ -458,7 +401,6 @@ L["%s's CC Taken <%s> sources"] = "%s的受到控制<%s>来源"
 L["%s's CC Taken <%s> spells"] = "%s的受到控制<%s>法术"
 L["%s's CC Taken spells"] = "%s的受到控制法术"
 L["%s's CC Taken sources"] = "%s的受到控制来源"
-
 L["CC Breaks"] = "打破控制"
 L["CC Breakers"] = "打破控制者"
 L["CC Break spells"] = "打破控制法术"
@@ -469,18 +411,13 @@ L["%s's CC Break <%s> spells"] = "%s的打破控制<%s>法术"
 L["%s's CC Break <%s> targets"] = "%s的打破控制<%s>目标"
 L["%s's CC Break spells"] = "%s的打破控制法术"
 L["%s's CC Break targets"] = "%s的打破控制目标"
-
 -- options
 L["CC"] = "控制"
 L["Announce CC breaking to party"] = "将打破控制通报到小队"
 L["Ignore Main Tanks"] = "忽略主坦克"
 L["%s on %s removed by %s"] = "%s位于%s已被%s移除"
 L["%s on %s removed by %s's %s"] = "%s位于%s已被%s的%s移除"
-
--- ============= --
 -- Damage Module --
--- ============= --
-
 -- damage done module
 L["Damage"] = "伤害"
 L["Damage target list"] = "伤害目标"
@@ -490,53 +427,41 @@ L["Damage spell targets"] = "伤害法术目标"
 L["Damage done"] = "造成伤害"
 L["%s's damage"] = "%s的伤害"
 L["%s's <%s> damage"] = "%s的<%s>伤害"
-
 L["Useful damage"] = "有用伤害"
-
 L["Damage done by spell"] = "法术造成伤害"
 L["%s's sources"] = "%s的来源"
-
 L["DPS"] = "DPS"
 L["Damage: Personal DPS"] = "伤害：个人DPS"
-
 L["RDPS"] = "RDPS"
 L["Damage: Raid DPS"] = "伤害：团队DPS"
-
 -- damage taken module
 L["Damage taken"] = "承受伤害"
 L["Damage taken by %s"] = "%s的承受伤害"
 L["%s damage on %s"] = "%s的伤害于%s"
-
 L["Damage source list"] = "伤害来源列表"
 L["Damage spell sources"] = "伤害法术来源"
 L["Damage taken by spell"] = "承受法术伤害"
 L["%s's targets"] = "%s的目标"
 L["DTPS"] = "DTPS"
-
 -- enemy damage done module
 L["Enemy damage done"] = "敌方造成伤害"
 L["Damage done per player"] = "每人造成伤害"
 L["Damage from %s"] = "来自于%s的伤害"
 L["%s's damage on %s"] = "%s对%s的伤害"
-
 -- enemy damage taken module
 L["Enemy damage taken"] = "敌方承受伤害"
 L["Damage taken per player"] = "每人承受伤害"
 L["Damage on %s"] = "对于%s的伤害"
 L["%s's damage sources"] = "%s的伤害来源"
-
 -- avoidance and mitigation module
 L["Avoidance & Mitigation"] = "规避和缓解"
 L["Damage breakdown"] = "伤害失败"
 L["%s's damage breakdown"] = "%s的伤害失败"
-
 -- friendly fire module
 L["Friendly Fire"] = "误伤"
-
 L["Critical"] = "暴击"
 L["Glancing"] = "穿刺"
 L["Crushing"] = "碾压"
-
 -- useful damage targets
 L["Useful targets"] = "有用目标"
 L["Oozes"] = "软泥怪"
@@ -544,7 +469,6 @@ L["Princes overkilling"] = "王子过度伤害"
 L["Adds"] = "小怪"
 L["Halion and Inferno"] = "海里昂和地狱火"
 L["Valkyrs overkilling"] = "瓦格里过度伤害"
-
 -- missing bosses entries
 L["Cult Adherent"] = "教派追随者"
 L["Cult Fanatic"] = "教派狂热者"
@@ -557,7 +481,6 @@ L["Reanimated Adherent"] = "被复活的追随者"
 L["Reanimated Fanatic"] = "被复活的狂热者"
 L["Volatile Ooze"] = "不稳定的软泥怪"
 L["Wicked Spirit"] = "卑劣的灵魂"
-
 L["Kor'kron Sergeant"] = "库卡隆军士"
 L["Kor'kron Axethrower"] = "库卡隆掷斧者"
 L["Kor'kron Rocketeer"] = "库卡隆炮手"
@@ -573,10 +496,7 @@ L["Risen Archmage"] = "复生的大法师"
 L["Blazing Skeleton"] = "灼热骷髅"
 L["Blistering Zombie"] = "脓疮僵尸"
 L["Gluttonous Abomination"] = "贪食的憎恶"
-
--- ============= --
 -- Deaths Module --
--- ============= --
 L["Deaths"] = "死亡"
 L["%s's death"] = "%s的死亡"
 L["%s's deaths"] = "%s的死亡"
@@ -590,48 +510,29 @@ L["Amount"] = "数量"
 L["Source"] = "来源"
 L["Health"] = "血量"
 L["Change"] = "改变"
-
 -- activity module
 L["Activity"] = "活跃"
 L["Activity per target"] = "每个目标活跃"
-
--- ==================== --
 -- dispels module lines --
--- ==================== --
-
 L["Dispels"] = "驱散"
-
 L["Dispel spell list"] = "驱散法术列表"
 L["Dispelled spell list"] = "已驱散法术列表"
 L["Dispelled target list"] = "已驱散目标列表"
-
 L["%s's dispel spells"] = "%s的驱散法术"
 L["%s's dispelled spells"] = "%s的已驱散法术"
 L["%s's dispelled targets"] = "%s的已驱散目标"
-
--- ==================== --
 -- failbot module lines --
--- ==================== --
-
 L["Fails"] = "失误"
 L["%s's fails"] = "%s的失误"
 L["Player's failed events"] = "玩家的失误事件"
 L["Event's failed players"] = "事件的失误玩家"
-
--- ======================== --
 -- improvement module lines --
--- ======================== --
-
 L["Improvement"] = "提升"
 L["Improvement modes"] = "提升模式"
 L["Improvement comparison"] = "提升比较"
 L["Do you want to reset your improvement data?"] = "确定要重置你的提升数据？"
 L["%s's overall data"] = "%s的总体数据"
-
--- ======================= --
 -- interrupts module lines --
--- ======================= --
-
 L["Interrupts"] = "打断"
 L["Interrupt spells"] = "打断法术"
 L["Interrupted spells"] = "已打断法术"
@@ -639,11 +540,7 @@ L["Interrupted targets"] = "已打断目标"
 L["%s's interrupt spells"] = "%s的打断法术"
 L["%s's interrupted spells"] = "%s的已打断法术"
 L["%s's interrupted targets"] = "%s的已打断目标"
-
--- =================== --
 -- Power gained module --
--- =================== --
-
 L["Power"] = "能量"
 L["Power gained"] = "能量获得"
 L["%s's gained %s"] = "%s的获得%s"
@@ -655,43 +552,26 @@ L["Power gained: Energy"] = "能量获得：(刺客)能量"
 L["Energy gained spell list"] = "(刺客)能量获得法术列表"
 L["Power gained: Runic Power"] = "能量获得：符文能量"
 L["Runic Power gained spell list"] = "符文能量获得法术列表"
-
--- ==================== --
 -- Parry module lines --
--- ==================== --
-
 L["Parry-haste"] = "招架-急速"
 L["Parry target list"] = "招架目标列表"
 L["%s's parry targets"] = "%s的招架目标"
-
--- ==================== --
 -- Potions module lines --
--- ==================== --
-
 L["Potions"] = "药水"
 L["Potions list"] = "药水列表"
 L["Players list"] = "玩家列表"
 L["%s's used potions"] = "%s使用的药水"
-
--- ====================== --
 -- resurrect module lines --
--- ====================== --
-
 L["Resurrects"] = "复活"
 L["Resurrect spell list"] = "复活法术列表"
 L["Resurrect spell target list"] = "复活法术目标列表"
 L["Resurrect target list"] = "复活目标列表"
 L["Resurrect target spell list"] = "复活目标法术列表"
-
 L["%s's resurrect spells"] = "%s的复活法术"
 L["%s's resurrect targets"] = "%s的复活目标"
 L["%s's received resurrects"] = "%s收到的复活"
 L["%s's resurrect <%s> targets"] = "%s复活<%s>目标"
-
--- ==================== --
 -- spamage module lines --
--- ==================== --
-
 L["Spamage"] = "防刷屏"
 L["Suppresses chat messages from damage meters and provides single chat-link damage statistics in a popup."] = "阻止来自于伤害统计插件的聊天讯息，并提供一条简单的聊天链接，在弹出窗口中显示伤害统计信息。"
 L["Capture Delay"] = "捕获延迟"
@@ -716,11 +596,7 @@ L["Do Nothing"] = "无动作"
 L["Compress"] = "压缩"
 L["Suppress"] = "阻止"
 L["Reported by: %s"] = "报告者：%s"
-
--- ===================== --
 -- nickname module lines --
--- ===================== --
-
 L["Nickname"] = "昵称"
 L["Set a nickname for you.\nNicknames are sent to group members and Skada can use them instead of your character name."] = "给自己设定一个昵称。\n昵称已发送给队员，Skada可使用它取代你的角色名字。"
 L["Nickname isn't a valid string."] = "此昵称不是有效字符串。"

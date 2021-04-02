@@ -3,18 +3,14 @@ if not L then return end
 
 L["A damage meter."] = true
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = true
-
 L["Skada: Modes"] = true
 L["Skada: Fights"] = true
-
 L["Error: No options selected"] = true
-
 L["Profiles"] = true
 L["Enable"] = true
 L["ENABLED"] = true
 L["Disable"] = true
 L["DISABLED"] = true
-
 -- common lines
 L["Active Time"] = true
 L["Segment Time"] = true
@@ -31,20 +27,15 @@ L["Total hits:"] = true
 L["Count"] = true
 L["Refresh"] = true
 L["Percent"] = true
-
 L["General options"] = true
-
 -- windows section:
 L["Window"] = true
 L["Windows"] = true
-
 L["Create window"] = true
 L["Enter the name for the new window."] = true
-
 L["Delete window"] = true
 L["Choose the window to be deleted."] = true
 L["Are you sure you want to delete this window?"] = true
-
 L["Rename window"] = true
 L["Enter the name for the window."] = true
 L["Lock window"] = true
@@ -57,19 +48,16 @@ L["Display system"] = true
 L["Choose the system to be used for displaying data in this window."] = true
 L["Copy settings"] = true
 L["Choose the window from which you want to copy the settings."] = true
-
 -- bars
 L["Bars"] = true
 L["Bar font"] = true
 L["The font used by all bars."] = true
 L["Bar font size"] = true
 L["The font size of all bars."] = true
-
 L["Values font"] = true
 L["The font used by bar values."] = true
 L["Values font size"] = true
 L["The font size of bar values."] = true
-
 L["Font flags"] = true
 L["Sets the font flags."] = true
 L["None"] = true
@@ -112,7 +100,6 @@ L["Clickthrough"] = true
 L["Disables mouse clicks on bars."] = true
 L["Smooth bars"] = true
 L["Animate bar changes smoothly rather than immediately."] = true
-
 -- title bar
 L["Title bar"] = true
 L["Enables the title bar."] = true
@@ -132,7 +119,6 @@ L["The texture used for the border of the title."] = true
 L["Border color"] = true
 L["The color used for the border."] = true
 L["Buttons"] = true
-
 -- general window
 L["Background"] = true
 L["Background texture"] = true
@@ -141,7 +127,6 @@ L["Tile"] = true
 L["Tile the background texture."] = true
 L["Tile size"] = true
 L["The size of the texture pattern."] = true
-L["Background color"] = true
 L["The color of the background."] = true
 L["Border"] = true
 L["Border thickness"] = true
@@ -153,7 +138,6 @@ L["Strata"] = true
 L["This determines what other frames will be in front of the frame."] = true
 L["Width"] = true
 L["Height"] = true
-
 -- switching
 L["Mode switching"] = true
 L["Combat mode"] = true
@@ -162,7 +146,6 @@ L["Return after combat"] = true
 L["Return to the previous set and mode after combat ends."] = true
 L["Wipe mode"] = true
 L["Automatically switch to set 'Current' and this mode after a wipe."] = true
-
 L["Inline bar display"] = true
 L["Inline display is a horizontal window style."] = true
 L["Text"] = true
@@ -179,14 +162,12 @@ L["Use ElvUI skin if avaliable."] = true
 L["Check this to use ElvUI skin instead. \nDefault: checked"] = true
 L["Use solid background."] = true
 L["Un-check this for an opaque background."] = true
-
 L["Data text"] = true
 L["Text color"] = true
 L["Choose the default color."] = true
 L["Hint: Left-Click to set active mode."] = true
 L["Right-click to set active set."] = true
 L["Shift+Left-Click to open menu."] = true
-
 -- data resets
 L["Data resets"] = true
 L["Reset on entering instance"] = true
@@ -198,7 +179,6 @@ L["Controls if data is reset when you leave a group."] = true
 L["Ask"] = true
 L["Do you want to reset Skada?"] = true
 L["All data has been reset."] = true
-
 -- general options
 L["Show minimap button"] = true
 L["Toggles showing the minimap button."] = true
@@ -226,6 +206,8 @@ L["Show rank numbers"] = true
 L["Shows numbers for relative ranks for modes where it is applicable."] = true
 L["Aggressive combat detection"] = true
 L["Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons. Meaningless on boss encounters."] = true
+L["Tentative Timer"] = true
+L["The number of seconds Skada should wait after combat start to create a new segment.\n\nOnly works if \"Agressive combat detection\" is enabled."] = true
 L["Autostop"] = true
 L["Automatically stops the current segment after half of all raid members have died."] = true
 L["Always show self"] = true
@@ -246,10 +228,8 @@ L["Data segments to keep"] = true
 L["The number of fight segments to keep. Persistent segments are not included in this."] = true
 L["Update frequency"] = true
 L["How often windows are updated. Shorter for faster updates. Increases CPU usage."] = true
-
 -- columns
 L["Columns"] = true
-
 -- tooltips
 L["Tooltips"] = true
 L["Show tooltips"] = true
@@ -267,14 +247,12 @@ L["Bottom right"] = true
 L["Bottom left"] = true
 L["Smart"] = true
 L["Follow Cursor"] = true
-
 -- disabled modules
 L["Modules"] = true
 L["Disabled Modules"] = true
 L["Tick the modules you want to disable."] = true
 L["This change requires a UI reload. Are you sure?"] = true
 L["Adds a set of standard themes to Skada. Custom themes can also be used."] = true
-
 -- themes module
 L["Theme"] = true
 L["Themes"] = true
@@ -283,7 +261,6 @@ L["Theme applied!"] = true
 L["Name of your new theme."] = true
 L["Save theme"] = true
 L["Delete theme"] = true
-
 -- scroll module
 L["Scroll"] = true
 L["Mouse"] = true
@@ -292,20 +269,17 @@ L["Scroll icon"] = true
 L["Scroll mouse button"] = true
 L["Keybinding"] = true
 L["Key scrolling speed"] = true
-
 -- minimap button
 L["Skada summary"] = true
 L["Left-Click to toggle windows."] = true
 L["Shift+Left-Click to reset."] = true
 L["Right-click to open menu"] = true
-
 -- skada menu
 L["Skada Menu"] = true
 L["Delete segment"] = true
 L["Keep segment"] = true
 L["Toggle window"] = true
 L["Start new segment"] = true
-
 -- window buttons
 L["Configure"] = true
 L["Opens the configuration window."] = true
@@ -318,11 +292,9 @@ L["Report"] = true
 L["Opens a dialog that lets you report your data to others in various ways."] = true
 L["Stop"] = "Stop/Resume"
 L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."] = true
-
 -- default segments
 L["Total"] = true
 L["Current"] = "Current fight"
-
 -- report module and window
 L["Skada: %s for %s:"] = true
 L["Channel"] = true
@@ -337,17 +309,10 @@ L["Officer"] = true
 L["Lines"] = true
 L["There is nothing to report."] = true
 L["No mode or segment selected for report."] = true
-
--- ================== --
 -- Bar Display Module --
--- ================== --
-
 L["Bar display"] = true
 L["Bar display is the normal bar window used by most damage meters. It can be extensively styled."] = true
-
--- ============= --
 -- Threat Module --
--- ============= --
 L["Threat"] = true
 L["Threat warning"] = true
 L["Do not warn while tanking"] = true
@@ -367,10 +332,7 @@ L["Use focus target"] = true
 L["Shows threat on focus target, or focus target's target, when available."] = true
 L["TPS"] = true
 L["Threat: Personal Threat"] = true
-
--- ======================== --
 -- Absorbs & Healing Module --
--- ======================== --
 L["Healing"] = true
 L["Healed player list"] = true
 L["Healing spell list"] = true
@@ -378,64 +340,46 @@ L["%s's healing"] = true
 L["%s's healing spells"] = true
 L["%s's healed players"] = true
 L["HPS"] = true
-
 L["Total healing"] = true
-
 L["Overhealing"] = true
 L["Overheal"] = true
 L["Overhealed player list"] = true
 L["Overhealing spell list"] = true
 L["%s's overhealing spells"] = true
 L["%s's overhealed players"] = true
-
 L["Healing and Overhealing"] = true
 L["Healing and overhealing spells"] = true
 L["Healed and overhealed players"] = true
 L["%s's healing and overhealing spells"] = true
 L["%s's healed and overhealed players"] = true
-
 L["Absorbs"] = true
 L["Absorbed player list"] = true
 L["Absorb spell list"] = true
 L["%s's absorbed players"] = true
 L["%s's absorb spells"] = true
-
 L["Absorbs and healing"] = true
 L["Absorbs and healing spell list"] = true
 L["Absorbed and healed players"] = true
 L["%s's absorb and healing spells"] = true
 L["%s's absorbed and healed players"] = true
-
 L["Healing received"] = true
 L["Healing player list"] = true
 L["%s's received healing"] = true
-
--- ============ --
 -- Auras Module --
--- ============ --
-
 L["Uptime"] = true
-
 L["Buffs and Debuffs"] = true
 L["Buffs"] = true
 L["Buff spell list"] = true
 L["%s's buffs"] = true
-
 L["Debuffs"] = true
 L["Debuff spell list"] = true
 L["Debuff target list"] = true
 L["%s's debuffs"] = true
 L["%s's <%s> targets"] = true
-
 L["Sunder Counter"] = true
 L["Sunder target list"] = true
-
--- ================= --
 -- CC Tracker Module --
--- ================= --
-
 L["CC Tracker"] = true
-
 -- CC Done:
 L["CC Done"] = true
 L["CC Done spells"] = true
@@ -446,7 +390,6 @@ L["%s's CC Done <%s> targets"] = true
 L["%s's CC Done <%s> spells"] = true
 L["%s's CC Done spells"] = true
 L["%s's CC Done targets"] = true
-
 -- CC Taken
 L["CC Taken"] = true
 L["CC Taken spells"] = true
@@ -457,7 +400,6 @@ L["%s's CC Taken <%s> sources"] = true
 L["%s's CC Taken <%s> spells"] = true
 L["%s's CC Taken spells"] = true
 L["%s's CC Taken sources"] = true
-
 L["CC Breaks"] = true
 L["CC Breakers"] = true
 L["CC Break spells"] = true
@@ -468,18 +410,13 @@ L["%s's CC Break <%s> spells"] = true
 L["%s's CC Break <%s> targets"] = true
 L["%s's CC Break spells"] = true
 L["%s's CC Break targets"] = true
-
 -- options
 L["CC"] = true
 L["Announce CC breaking to party"] = true
 L["Ignore Main Tanks"] = true
 L["%s on %s removed by %s"] = true
 L["%s on %s removed by %s's %s"] = true
-
--- ============= --
 -- Damage Module --
--- ============= --
-
 -- damage done module
 L["Damage"] = true
 L["Damage target list"] = true
@@ -489,53 +426,41 @@ L["Damage spell targets"] = true
 L["Damage done"] = true
 L["%s's damage"] = true
 L["%s's <%s> damage"] = true
-
 L["Useful damage"] = true
-
 L["Damage done by spell"] = true
 L["%s's sources"] = true
-
 L["DPS"] = true
 L["Damage: Personal DPS"] = true
-
 L["RDPS"] = true
 L["Damage: Raid DPS"] = true
-
 -- damage taken module
 L["Damage taken"] = true
 L["Damage taken by %s"] = true
 L["%s damage on %s"] = true
-
 L["Damage source list"] = true
 L["Damage spell sources"] = true
 L["Damage taken by spell"] = true
 L["%s's targets"] = true
 L["DTPS"] = true
-
 -- enemy damage done module
 L["Enemy damage done"] = true
 L["Damage done per player"] = true
 L["Damage from %s"] = true
 L["%s's damage on %s"] = true
-
 -- enemy damage taken module
 L["Enemy damage taken"] = true
 L["Damage taken per player"] = true
 L["Damage on %s"] = true
 L["%s's damage sources"] = true
-
 -- avoidance and mitigation module
 L["Avoidance & Mitigation"] = true
 L["Damage breakdown"] = true
 L["%s's damage breakdown"] = true
-
 -- friendly fire module
 L["Friendly Fire"] = true
-
 L["Critical"] = true
 L["Glancing"] = true
 L["Crushing"] = true
-
 -- useful damage targets
 L["Useful targets"] = true
 L["Oozes"] = true
@@ -543,7 +468,6 @@ L["Princes overkilling"] = true
 L["Adds"] = true
 L["Halion and Inferno"] = true
 L["Valkyrs overkilling"] = true
-
 -- missing bosses entries
 L["Cult Adherent"] = true
 L["Cult Fanatic"] = true
@@ -556,7 +480,6 @@ L["Reanimated Adherent"] = true
 L["Reanimated Fanatic"] = true
 L["Volatile Ooze"] = true
 L["Wicked Spirit"] = true
-
 L["Kor'kron Sergeant"] = true
 L["Kor'kron Axethrower"] = true
 L["Kor'kron Rocketeer"] = true
@@ -572,10 +495,7 @@ L["Risen Archmage"] = true
 L["Blazing Skeleton"] = true
 L["Blistering Zombie"] = true
 L["Gluttonous Abomination"] = true
-
--- ============= --
 -- Deaths Module --
--- ============= --
 L["Deaths"] = true
 L["%s's death"] = true
 L["%s's deaths"] = true
@@ -589,48 +509,29 @@ L["Amount"] = true
 L["Source"] = true
 L["Health"] = true
 L["Change"] = true
-
 -- activity module
 L["Activity"] = true
 L["Activity per target"] = true
-
--- ==================== --
 -- dispels module lines --
--- ==================== --
-
 L["Dispels"] = true
-
 L["Dispel spell list"] = true
 L["Dispelled spell list"] = true
 L["Dispelled target list"] = true
-
 L["%s's dispel spells"] = true
 L["%s's dispelled spells"] = true
 L["%s's dispelled targets"] = true
-
--- ==================== --
 -- failbot module lines --
--- ==================== --
-
 L["Fails"] = true
 L["%s's fails"] = true
 L["Player's failed events"] = true
 L["Event's failed players"] = true
-
--- ======================== --
 -- improvement module lines --
--- ======================== --
-
 L["Improvement"] = true
 L["Improvement modes"] = true
 L["Improvement comparison"] = true
 L["Do you want to reset your improvement data?"] = true
 L["%s's overall data"] = true
-
--- ======================= --
 -- interrupts module lines --
--- ======================= --
-
 L["Interrupts"] = true
 L["Interrupt spells"] = true
 L["Interrupted spells"] = true
@@ -638,11 +539,7 @@ L["Interrupted targets"] = true
 L["%s's interrupt spells"] = true
 L["%s's interrupted spells"] = true
 L["%s's interrupted targets"] = true
-
--- =================== --
 -- Power gained module --
--- =================== --
-
 L["Power"] = true
 L["Power gained"] = true
 L["%s's gained %s"] = true
@@ -654,43 +551,26 @@ L["Power gained: Energy"] = true
 L["Energy gained spell list"] = true
 L["Power gained: Runic Power"] = true
 L["Runic Power gained spell list"] = true
-
--- ==================== --
 -- Parry module lines --
--- ==================== --
-
 L["Parry-haste"] = true
 L["Parry target list"] = true
 L["%s's parry targets"] = true
-
--- ==================== --
 -- Potions module lines --
--- ==================== --
-
 L["Potions"] = true
 L["Potions list"] = true
 L["Players list"] = true
 L["%s's used potions"] = true
-
--- ====================== --
 -- resurrect module lines --
--- ====================== --
-
 L["Resurrects"] = true
 L["Resurrect spell list"] = true
 L["Resurrect spell target list"] = true
 L["Resurrect target list"] = true
 L["Resurrect target spell list"] = true
-
 L["%s's resurrect spells"] = true
 L["%s's resurrect targets"] = true
 L["%s's received resurrects"] = true
 L["%s's resurrect <%s> targets"] = true
-
--- ==================== --
 -- spamage module lines --
--- ==================== --
-
 L["Spamage"] = true
 L["Suppresses chat messages from damage meters and provides single chat-link damage statistics in a popup."] = true
 L["Capture Delay"] = true
@@ -715,11 +595,7 @@ L["Do Nothing"] = true
 L["Compress"] = true
 L["Suppress"] = true
 L["Reported by: %s"] = true
-
--- ===================== --
 -- nickname module lines --
--- ===================== --
-
 L["Nickname"] = true
 L["Set a nickname for you.\nNicknames are sent to group members and Skada can use them instead of your character name."] = true
 L["Nickname isn't a valid string."] = true
