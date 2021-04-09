@@ -119,6 +119,7 @@ L["The texture used for the border of the title."] = "La textura usada como bord
 L["Border color"] = "Color del borde"
 L["The color used for the border."] = "El color utilizado para el borde."
 L["Buttons"] = "Botones"
+L["Show on MouseOver"] = "Mostrar botones al pasar el cursor"
 -- general window
 L["Background"] = "Fondo"
 L["Background texture"] = "Textura del fondo"

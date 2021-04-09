@@ -119,6 +119,7 @@ L["The texture used for the border of the title."] = true
 L["Border color"] = true
 L["The color used for the border."] = true
 L["Buttons"] = true
+L["Show on MouseOver"] = true
 -- general window
 L["Background"] = true
 L["Background texture"] = true

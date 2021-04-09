@@ -607,9 +607,9 @@ do
 
                 if win.metadata.showspots and Skada.db.profile.showranks and not data.ignore then
                     if win.db.barorientation == 1 then
-                        bar:SetLabel(("%2u. %s"):format(nr, data.label))
+                        bar:SetLabel(("%d. %s"):format(nr, data.label))
                     else
-                        bar:SetLabel(("%s %2u"):format(data.label, nr))
+                        bar:SetLabel(("%s .%d"):format(data.label, nr))
                     end
                 else
                     bar:SetLabel(data.label)
@@ -677,7 +677,7 @@ end
 
 do
     local titlebackdrop = {}
-    local windowbackdrop = {}
+    local windowbackdrop = {insets = {left = 0, right = 0, top = 0, bottom = 0}}
 
 	local function move(self, button)
 		local group = self:GetParent()
@@ -809,8 +809,23 @@ do
 	        g:ShowButton(L["Mode"], p.buttons.mode)
 	        g:ShowButton(L["Report"], p.buttons.report)
 	        g:ShowButton(L["Stop"], p.buttons.stop)
-
             g:AdjustButtons()
+
+			if p.title.hovermode then
+				for _, btn in ipairs(g.buttons) do btn:SetAlpha(0) end
+				g.button:SetScript("OnEnter", function(self)
+					for _, btn in ipairs(g.buttons) do btn:SetAlpha(0.25) end
+				end)
+				g.button:SetScript("OnLeave", function(self)
+					for _, btn in ipairs(g.buttons) do
+						btn:SetAlpha(MouseIsOver(self) and 0.25 or 0)
+					end
+				end)
+			else
+				for _, btn in ipairs(g.buttons) do btn:SetAlpha(0.25) end
+				g.button:SetScript("OnEnter", nil)
+				g.button:SetScript("OnLeave", nil)
+			end
         else
             g:HideAnchor()
         end
@@ -829,6 +844,18 @@ do
         windowbackdrop.bgFile = p.background.texturepath or LSM:Fetch("background", p.background.texture)
         windowbackdrop.tile = p.background.tile
         windowbackdrop.tileSize = p.background.tilesize
+        if p.enabletitle then
+        	if p.reversegrowth then
+        		windowbackdrop.insets.top = 0
+        		windowbackdrop.insets.bottom = p.title.height
+        	else
+        		windowbackdrop.insets.top = p.title.height
+        		windowbackdrop.insets.bottom = 0
+        	end
+        else
+    		windowbackdrop.insets.top = 0
+    		windowbackdrop.insets.bottom = 0
+        end
         g:SetBackdrop(windowbackdrop)
 
         local bgcolor = p.background.color
@@ -1451,6 +1478,19 @@ function mod:AddDisplayOptions(win, options)
                         end,
                         set = function()
                             db.buttons.stop = not db.buttons.stop
+                            Skada:ApplySettings()
+                        end
+                    },
+                    hovermode = {
+                        type = "toggle",
+                        name = L["Show on MouseOver"],
+                        order = 7,
+                        width = "full",
+                        get = function()
+                            return db.title.hovermode
+                        end,
+                        set = function()
+                            db.title.hovermode = not db.title.hovermode
                             Skada:ApplySettings()
                         end
                     }

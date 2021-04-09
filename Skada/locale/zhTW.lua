@@ -119,6 +119,7 @@ if not L then return end
 -- L["Border color"] = ""
 -- L["The color used for the border."] = ""
 -- L["Buttons"] = ""
+-- L["Show on MouseOver"] = ""
 -- general window
 -- L["Background"] = ""
 -- L["Background texture"] = ""

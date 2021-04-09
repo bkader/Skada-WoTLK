@@ -120,6 +120,7 @@ L["The texture used for the border of the title."] = "Текстура, испо
 L["Border color"] = "Цвет рамки"
 L["The color used for the border."] = "Цвет, используемый для рамок."
 L["Buttons"] = "Кнопки"
+L["Show on MouseOver"] = "Показывать при наведении"
 -- general window
 L["Background"] = "Фон"
 L["Background texture"] = "Текстура фона"

@@ -2200,7 +2200,7 @@ function dataobj:OnClick(button)
 end
 
 function Skada:OpenOptions(win)
-	ACD:SetDefaultSize("Skada", 600, 600)
+	ACD:SetDefaultSize("Skada", 610, 500)
 	if win then
 		ACD:Open("Skada")
 		ACD:SelectGroup("Skada", "windows", win.db.name)

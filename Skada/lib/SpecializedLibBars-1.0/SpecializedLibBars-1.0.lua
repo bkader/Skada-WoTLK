@@ -1216,7 +1216,7 @@ end
 	        self.timerLabel = self.timerLabel or self:CreateFontString(nil, "OVERLAY", "ChatFontNormal")
 	        self:SetTimerLabel("")
 	        self.timerLabel:ClearAllPoints()
-	        self.timerLabel:SetPoint("RIGHT", self, "RIGHT", -6, 0)
+	        self.timerLabel:SetPoint("RIGHT", self, "RIGHT", -3, 0)
 	        self:HideTimerLabel()
         end
 
@@ -1464,13 +1464,13 @@ do
 
             t = self.timerLabel
             t:ClearAllPoints()
-            t:SetPoint("RIGHT", self, "RIGHT", -6, 0)
+            t:SetPoint("RIGHT", self, "RIGHT", -3, 0)
             t:SetJustifyH("RIGHT")
             t:SetJustifyV("MIDDLE")
 
             t = self.label
             t:ClearAllPoints()
-            t:SetPoint("LEFT", self, "LEFT", 6, 0)
+            t:SetPoint("LEFT", self, "LEFT", 3, 0)
             t:SetPoint("RIGHT", self.timerLabel, "LEFT", 0, 0)
             t:SetJustifyH("LEFT")
             t:SetJustifyV("MIDDLE")
@@ -1525,13 +1525,13 @@ do
 
             t = self.timerLabel
             t:ClearAllPoints()
-            t:SetPoint("LEFT", self, "LEFT", 6, 0)
+            t:SetPoint("LEFT", self, "LEFT", 3, 0)
             t:SetJustifyH("LEFT")
             t:SetJustifyV("MIDDLE")
 
             t = self.label
             t:ClearAllPoints()
-            t:SetPoint("RIGHT", self, "RIGHT", -6, 0)
+            t:SetPoint("RIGHT", self, "RIGHT", -3, 0)
             t:SetPoint("LEFT", self.timerLabel, "RIGHT", 0, 0)
             t:SetJustifyH("RIGHT")
             t:SetJustifyV("MIDDLE")
