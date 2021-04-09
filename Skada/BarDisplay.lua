@@ -677,7 +677,7 @@ end
 
 do
     local titlebackdrop = {}
-    local windowbackdrop = {insets = {left = 0, right = 0, top = 0, bottom = 0}}
+    local windowbackdrop = {}
 
 	local function move(self, button)
 		local group = self:GetParent()
@@ -844,6 +844,7 @@ do
         windowbackdrop.bgFile = p.background.texturepath or LSM:Fetch("background", p.background.texture)
         windowbackdrop.tile = p.background.tile
         windowbackdrop.tileSize = p.background.tilesize
+        windowbackdrop.insets = {left = 0, right = 0, top = 0, bottom = 0}
         if p.enabletitle then
         	if p.reversegrowth then
         		windowbackdrop.insets.top = 0
@@ -852,9 +853,6 @@ do
         		windowbackdrop.insets.top = p.title.height
         		windowbackdrop.insets.bottom = 0
         	end
-        else
-    		windowbackdrop.insets.top = 0
-    		windowbackdrop.insets.bottom = 0
         end
         g:SetBackdrop(windowbackdrop)
 
