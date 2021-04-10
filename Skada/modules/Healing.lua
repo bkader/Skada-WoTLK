@@ -548,7 +548,7 @@ Skada:AddLoadableModule("Total healing", function(Skada, L)
         local player = Skada:find_player(set, self.playerid)
         local max = 0
 
-        if player then
+        if player and player.healing.spells then
             local total = (player.healing.amount or 0) + (player.healing.overhealing or 0)
             local nr = 1
             for spellid, spell in _pairs(player.healing.spells) do
@@ -595,7 +595,7 @@ Skada:AddLoadableModule("Total healing", function(Skada, L)
         local player = Skada:find_player(set, self.playerid)
         local max = 0
 
-        if player then
+        if player and player.healing.targets then
             local total = (player.healing.amount or 0) + (player.healing.overhealing or 0)
             local nr = 1
             for targetname, target in _pairs(player.healing.targets) do
@@ -719,7 +719,7 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
         local player = Skada:find_player(set, self.playerid)
         local max = 0
 
-        if player then
+        if player and player.healing.spells then
             local nr = 1
             local total = (player.healing.amount or 0) + (player.healing.overhealing or 0)
 
@@ -769,7 +769,7 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
         local player = Skada:find_player(set, self.playerid)
         local max = 0
 
-        if player then
+        if player and player.healing.targets then
             local nr = 1
             for targetname, target in _pairs(player.healing.targets) do
                 local d = win.dataset[nr] or {}

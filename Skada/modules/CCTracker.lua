@@ -259,7 +259,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
         local player = Skada:find_player(set, self.playerid)
         local max = 0
 
-        if player then
+        if player and player.ccdone.spells then
             local nr = 1
 
             for spellname, spell in _pairs(player.ccdone.spells) do
@@ -293,7 +293,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
         local player = Skada:find_player(set, spellsmod.playerid)
         local max = 0
 
-        if player then
+        if player and self.spellname then
             local nr = 1
 
             for targetname, target in _pairs(player.ccdone.spells[self.spellname].targets) do
@@ -368,7 +368,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
         local player = Skada:find_player(set, spellsmod.playerid)
         local max = 0
 
-        if player then
+        if player and self.targetname then
             local nr = 1
 
             for spellname, spell in _pairs(player.ccdone.targets[self.targetname].spells) do

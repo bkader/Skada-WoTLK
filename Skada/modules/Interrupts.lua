@@ -88,7 +88,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
         local player = Skada:find_player(set, self.playerid)
         local max = 0
 
-        if player then
+        if player and player.interrupts.extraspells then
             local nr = 1
 
             for spellid, spell in _pairs(player.interrupts.extraspells) do

@@ -175,11 +175,11 @@ Skada:AddLoadableModule("Power gained", function(Skada, L)
         local player = Skada:find_player(set, self.playerid)
         local max = 0
 
-        if player then
+        if player and player.power and self.power and player.power[self.power] then
             local nr = 1
             local total = player.power[self.power].amount or 0
 
-            for spellname, spell in _pairs(player.power[self.power].spells) do
+            for spellname, spell in _pairs(player.power[self.power].spells or {}) do
 
                 local d = win.dataset[nr] or {}
                 win.dataset[nr] = d

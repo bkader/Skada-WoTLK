@@ -374,7 +374,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		local player = Skada:find_player(set, self.playerid)
 		local max = 0
 
-		if player then
+		if player and player.damagedone.spells then
 			local nr = 1
 
 			for spellname, spell in _pairs(player.damagedone.spells) do
@@ -415,7 +415,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		local player = Skada:find_player(set, self.playerid)
 		local max = 0
 
-		if player then
+		if player and player.damagedone.targets then
 			local nr = 1
 
 			for mobname, amount in _pairs(player.damagedone.targets) do
