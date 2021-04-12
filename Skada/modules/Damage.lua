@@ -353,11 +353,11 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 					tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
 					tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
 					tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
-				elseif label == ABSORB and spell.absorbed > 0 then
+				elseif label == ABSORB and spell.absorbed and spell.absorbed > 0 then
 					tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.absorbed), 1, 1, 1)
-				elseif label == BLOCK and spell.blocked > 0 then
+				elseif label == BLOCK and spell.blocked and spell.blocked > 0 then
 					tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.blocked), 1, 1, 1)
-				elseif label == RESIST and spell.resisted > 0 then
+				elseif label == RESIST and spell.resisted and spell.resisted > 0 then
 					tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.resisted), 1, 1, 1)
 				end
 			end
