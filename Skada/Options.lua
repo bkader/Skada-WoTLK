@@ -1,8 +1,6 @@
-local Skada = Skada
-if not Skada then
-    return
-end
+assert(Skada, "Skada not found!")
 
+local Skada = Skada
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 
 Skada.resetoptions = {[1] = NO, [2] = YES, [3] = L["Ask"]}
@@ -212,7 +210,7 @@ Skada.options = {
                     width = "full",
                     set = function(_, val)
                         if val and val ~= "" then
-                            Skada:CreateWindow(val)
+                            Skada:CreateWindow(val, nil, newdisplay)
                         end
                     end
                 },
@@ -514,8 +512,7 @@ Skada.options = {
                     order = 15,
                     width = "full",
                     values = function()
-                        local feeds = {}
-                        feeds[""] = L["None"]
+                        local feeds = {[""] = NONE}
                         for name, _ in pairs(Skada:GetFeeds()) do
                             feeds[name] = name
                         end
