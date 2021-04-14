@@ -1,7 +1,9 @@
+assert(Skada, "Skada not found!")
+
 local Skada = Skada
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
-
 local mod = Skada:NewModule("InlineDisplay")
+
 mod.name = L["Inline bar display"]
 mod.description = L["Inline display is a horizontal window style."]
 Skada:AddDisplaySystem("inline", mod)
@@ -583,7 +585,7 @@ function mod:AddDisplayOptions(win, options)
                 desc = L["Sets the font flags."],
                 order = 0.3,
                 values = {
-                    [""] = L["None"],
+                    [""] = NONE,
                     ["OUTLINE"] = L["Outline"],
                     ["THICKOUTLINE"] = L["Thick outline"],
                     ["MONOCHROME"] = L["Monochrome"],

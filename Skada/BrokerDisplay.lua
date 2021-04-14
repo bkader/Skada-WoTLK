@@ -1,6 +1,7 @@
+assert(Skada, "Skada not found!")
+
 local Skada = Skada
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
-
 local name = L["Data text"]
 local mod = Skada:NewModule(name)
 mod.name = name
@@ -334,7 +335,7 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Font flags"],
                 desc = L["Sets the font flags."],
                 values = {
-                    [""] = L["None"],
+                    [""] = NONE,
                     ["OUTLINE"] = L["Outline"],
                     ["THICKOUTLINE"] = L["Thick outline"],
                     ["MONOCHROME"] = L["Monochrome"],

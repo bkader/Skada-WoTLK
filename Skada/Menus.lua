@@ -1,5 +1,6 @@
-local Skada = Skada
+assert(Skada, "Skada not found!")
 
+local Skada = Skada
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 local AceGUI = LibStub("AceGUI-3.0")
 
@@ -206,6 +207,7 @@ function Skada:OpenMenu(window)
                         info.text = Skada:GetSetLabel(set)
                         info.func = function()
                             window.selectedset = i
+                            if window.child then window.child.selectedset = i end
                             Skada:Wipe()
                             Skada:UpdateDisplay(true)
                         end
@@ -375,6 +377,7 @@ function Skada:SegmentMenu(window)
             info.text = Skada:GetSetLabel(set)
             info.func = function()
                 window.selectedset = i
+                if window.child then window.child.selectedset = i end
                 Skada:Wipe()
                 Skada:UpdateDisplay(true)
             end
