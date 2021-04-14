@@ -336,17 +336,10 @@ function barListPrototype:AddButton(title, description, normaltex, highlighttex,
     btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     btn:SetScript("OnClick", clickfunc)
     btn:SetScript("OnEnter", function(this)
-        this:SetAlpha(1.0)
         GameTooltip_SetDefaultAnchor(GameTooltip, this)
         GameTooltip:SetText(title)
-        if description then
-            GameTooltip:AddLine(description, 1, 1, 1, true)
-        end
+        GameTooltip:AddLine(description, 1, 1, 1, true)
         GameTooltip:Show()
-    end)
-    btn:SetScript("OnLeave", function(this)
-        this:SetAlpha(0.25)
-        GameTooltip:Hide()
     end)
     btn:Show()
 
