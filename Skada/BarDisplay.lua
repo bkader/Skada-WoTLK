@@ -18,6 +18,7 @@ local spec_icon_file = [[Interface\AddOns\Skada\media\textures\icon-specs]]
 local spec_icon_tcoords = {
     [1] = {0.75, 0.875, 0.125, 0.25}, --> pet
     [2] = {0.875, 1, 0.125, 0.25}, --> unknown
+    [3] = {0.625, 0.75, 0.125, 0.25}, --> monster
     [102] = {0.375, 0.5, 0, 0.125}, --> druid balance
     [103] = {0.5, 0.625, 0, 0.125}, --> druid feral
     [104] = {0.625, 0.75, 0, 0.125}, --> druid tank
