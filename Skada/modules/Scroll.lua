@@ -1,3 +1,4 @@
+assert(Skada, "Skada not found!")
 local Skada = Skada
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)

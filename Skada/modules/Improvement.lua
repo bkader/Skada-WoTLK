@@ -1,4 +1,4 @@
-local Skada = Skada
+assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Improvement", function(Skada, L)
     if Skada:IsDisabled("Improvement") then return end
 
@@ -22,6 +22,30 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
         "Healing",
         "Interrupts",
         "Overhealing"
+    }
+
+    local localized = {
+        ActiveTime = L["Active Time"],
+        Damage = L["Damage done"],
+        DamageTaken = L["Damage taken"],
+        Deaths = L["Deaths"],
+        Dispels = L["Dispels"],
+        Fails = L["Fails"],
+        Healing = L["Healing"],
+        Interrupts = L["Interrupts"],
+        Overhealing = L["Overhealing"]
+    }
+
+    local revlocalized = {
+        [L["Active Time"]] = "ActiveTime",
+        [L["Damage done"]] = "Damage",
+        [L["Damage taken"]] = "DamageTaken",
+        [L["Deaths"]] = "Deaths",
+        [L["Dispels"]] = "Dispels",
+        [L["Fails"]] = "Fails",
+        [L["Healing"]] = "Healing",
+        [L["Interrupts"]] = "Interrupts",
+        [L["Overhealing"]] = "Overhealing"
     }
 
     --
@@ -48,7 +72,7 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
     local updaters = {}
 
     updaters.ActiveTime = function(set, player)
-		return math_min(Skada:GetSetTime(set), Skada:PlayerActiveTime(set, player))
+        return math_min(Skada:GetSetTime(set), Skada:PlayerActiveTime(set, player))
     end
 
     updaters.Damage = function(set, player)
@@ -93,6 +117,9 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
     -- :::::::::::::::::::::::::::::::::::::::::::::::
 
     local function find_boss_data(bossname)
+        if not bossname then
+            return
+        end
         mod.db = mod.db or {}
         mod.db.bosses = mod.db.bosses or {}
         for k, v in _pairs(mod.db.bosses) do
@@ -120,17 +147,18 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
     -- :::::::::::::::::::::::::::::::::::::::::::::::
 
     function mod_comparison:Enter(win, id, label)
-        self.mobid = id
-        self.modename = label
-        self.title = mod_modes.mobname .. " - " .. label
+        win.mobid = id
+        win.modename = revlocalized[label] or label
+        win.title = (win.mobname or UNKNOWN) .. " - " .. label
     end
 
     function mod_comparison:Update(win, set)
         local max = 0
-        local boss = find_boss_data(mod_modes.mobname)
+        local boss = find_boss_data(win.mobname)
         if boss then
-            local nr = 1
+            win.title = win.mobname .. " - " .. (localized[win.modename] or win.modename)
 
+            local nr = 1
             for i = 1, boss.count do
                 local encounter = boss.encounters[i]
                 if encounter then
@@ -140,16 +168,18 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
                     d.id = i
                     d.label = date("%x %X", encounter.starttime)
 
-                    local value = encounter.data[self.modename]
+                    local value = encounter.data[win.modename]
                     d.value = value or 0
-                    if self.modename == "ActiveTime" then
+                    if win.modename == "ActiveTime" then
                         d.valuetext = Skada:FormatTime(d.value)
-                    elseif self.modename == "Deaths" or self.modename == "Interrupts" or self.modename == "Fails" then
+                    elseif win.modename == "Deaths" or win.modename == "Interrupts" or win.modename == "Fails" then
                         d.valuetext = _tostring(d.value)
                     else
                         d.valuetext = Skada:FormatValueText(
-                            Skada:FormatNumber(d.value), true,
-                            Skada:FormatNumber((d.value) / encounter.data.ActiveTime), true
+                            Skada:FormatNumber(d.value),
+                            true,
+                            Skada:FormatNumber((d.value) / encounter.data.ActiveTime),
+                            true
                         )
                     end
 
@@ -168,23 +198,25 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
     -- :::::::::::::::::::::::::::::::::::::::::::::::
 
     function mod_modes:Enter(win, id, label)
-        self.mobid = id
-        self.mobname = label
-        self.title = _format(L["%s's overall data"], label)
+        win.mobid = id
+        win.mobname = label
+        win.title = _format(L["%s's overall data"], label)
     end
 
     function mod_modes:Update(win, set)
         local max = 0
 
-        local boss = find_boss_data(self.mobname)
+        local boss = find_boss_data(win.mobname)
         if boss then
+            win.title = _format(L["%s's overall data"], win.mobname)
+
             local nr = 1
             for i, mode in _ipairs(modes) do
                 local d = win.dataset[nr] or {}
                 win.dataset[nr] = d
 
                 d.id = i
-                d.label = mode
+                d.label = localized[mode] or mode
 
                 local value, active = 0, 0
 
@@ -237,6 +269,7 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
             end
         end
         win.metadata.maxvalue = max
+        win.title = L["Improvement"]
     end
 
     function mod:OnInitialize()
@@ -254,7 +287,9 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
     end
 
     function mod:EncounterEnd(event, data)
-        if event ~= "ENCOUNTER_END" or not data then return end
+        if event ~= "ENCOUNTER_END" or not data then
+            return
+        end
 
         -- we only record raid bosses, nothing else.
         local inInstance, instanceType = IsInInstance()
@@ -264,10 +299,14 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 
         if data.gotboss and data.success and (data.mobname and not blacklist[data.mobname]) then
             local boss = find_boss_data(data.mobname)
-            if not boss then return end
+            if not boss then
+                return
+            end
 
             local encounter = find_encounter_data(boss, data.starttime)
-            if not encounter then return end
+            if not encounter then
+                return
+            end
 
             for i, player in _ipairs(data.players) do
                 if player.id == self.db.id then
@@ -310,7 +349,9 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
             timeout = 30,
             whileDead = 0,
             hideOnEscape = 1,
-            OnAccept = function() mod:Reset() end
+            OnAccept = function()
+                mod:Reset()
+            end
         }
         StaticPopup_Show("ResetImprovementDialog")
     end

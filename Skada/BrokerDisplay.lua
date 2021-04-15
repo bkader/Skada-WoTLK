@@ -28,18 +28,18 @@ local classcolors = {
 
 local function sortDataset(win)
     tsort(win.dataset, function(a, b)
-		if not a or a.value == nil then
-			return false
-		elseif not b or b.value == nil then
-			return true
-		else
-			return a.value > b.value
-		end
-	end)
+        if not a or a.value == nil then
+            return false
+        elseif not b or b.value == nil then
+            return true
+        else
+            return a.value > b.value
+        end
+    end)
 end
 
 local function formatLabel(win, data)
-	Skada.callbacks:Fire("BarUpdate", win, data)
+    Skada.callbacks:Fire("BarUpdate", win, data)
 
     local label = ""
     if win.db.isusingclasscolors and data.class then
@@ -80,11 +80,11 @@ local function tooltipHandler(win, tooltip)
 
     sortDataset(win)
     if #win.dataset > 0 then
-		tooltip:AddLine(" ")
-		local n = 0 -- used to fix spots starting from 2
+        tooltip:AddLine(" ")
+        local n = 0 -- used to fix spots starting from 2
         for i, data in _ipairs(win.dataset) do
             if data.id and not data.ignore and i < 30 then
-				n = n + 1
+                n = n + 1
                 local label = formatLabel(win, data)
                 local value = formatValue(win, data)
 
@@ -136,27 +136,27 @@ function mod:Create(win, isnew)
         win.frame:SetScript("OnEnter", function(frame) tooltipHandler(win, GameTooltip) end)
         win.frame:SetScript("OnLeave", function(frame) GameTooltip:Hide() end)
         win.frame:SetScript("OnDragStart", function(frame)
-			if not win.db.barslocked then
-				GameTooltip:Hide()
-				frame.isDragging = true
-				frame:StartMoving()
-			end
-		end)
+            if not win.db.barslocked then
+                GameTooltip:Hide()
+                frame.isDragging = true
+                frame:StartMoving()
+            end
+        end)
         win.frame:SetScript("OnDragStop", function(frame)
-			frame:StopMovingOrSizing()
-			frame.isDragging = false
-			libwindow.SavePosition(frame)
-		end)
+            frame:StopMovingOrSizing()
+            frame.isDragging = false
+            libwindow.SavePosition(frame)
+        end)
     end
 
     -- LDB object
     if not win.obj then
         win.obj = ldb:NewDataObject("Skada: " .. win.db.name, {
-			type = "data source",
-			text = "",
-			OnTooltipShow = function(tooltip) tooltipHandler(win, tooltip) end,
-			OnClick = function(frame, button) clickHandler(win, frame, button) end
-		})
+            type = "data source",
+            text = "",
+            OnTooltipShow = function(tooltip) tooltipHandler(win, tooltip) end,
+            OnClick = function(frame, button) clickHandler(win, frame, button) end
+        })
     end
 
     mod:ApplySettings(win)
@@ -270,7 +270,9 @@ function mod:AddDisplayOptions(win, options)
                 type = "toggle",
                 name = "Use frame",
                 desc = "Shows a standalone frame. Not needed if you are using an LDB display provider such as Titan Panel or ChocolateBar.",
-                get = function() return db.useframe end,
+                get = function()
+                    return db.useframe
+                end,
                 set = function(win, key)
                     db.useframe = key
                     Skada:ApplySettings()
@@ -282,7 +284,9 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Class color text"],
                 desc = L["When possible, bar text will be colored according to player class."],
                 order = 0.1,
-                get = function() return db.isusingclasscolors end,
+                get = function()
+                    return db.isusingclasscolors
+                end,
                 set = function()
                     db.isusingclasscolors = not db.isusingclasscolors
                     Skada:ApplySettings()
@@ -309,7 +313,9 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Bar font"],
                 desc = L["The font used by all bars."],
                 values = AceGUIWidgetLSMlists.font,
-                get = function() return db.barfont end,
+                get = function()
+                    return db.barfont
+                end,
                 set = function(win, key)
                     db.barfont = key
                     Skada:ApplySettings()
@@ -323,7 +329,9 @@ function mod:AddDisplayOptions(win, options)
                 min = 7,
                 max = 40,
                 step = 1,
-                get = function() return db.barfontsize end,
+                get = function()
+                    return db.barfontsize
+                end,
                 set = function(win, size)
                     db.barfontsize = size
                     Skada:ApplySettings()
@@ -341,7 +349,9 @@ function mod:AddDisplayOptions(win, options)
                     ["MONOCHROME"] = L["Monochrome"],
                     ["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
                 },
-                get = function() return db.barfontflags end,
+                get = function()
+                    return db.barfontflags
+                end,
                 set = function(win, key)
                     db.barfontflags = key
                     Skada:ApplySettings()

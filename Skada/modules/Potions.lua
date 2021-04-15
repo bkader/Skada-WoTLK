@@ -1,4 +1,4 @@
-local Skada = Skada
+assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Potions", function(Skada, L)
     if Skada:IsDisabled("Potions") then return end
 
@@ -8,7 +8,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 
     -- cache frequently used globals
     local _pairs, _ipairs, _select = pairs, ipairs, select
-    local _format, _tostring, math_max = string.format, tostring, math.max
+    local _format, _strsub, _tostring, math_max = string.format, string.sub, tostring, math.max
     local _GetNumPartyMembers = GetNumPartyMembers
     local _GetNumRaidMembers = GetNumRaidMembers
     local _GetItemInfo = GetItemInfo
@@ -69,13 +69,11 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
                 local unit = (n == 0) and "player" or prefix .. _tostring(n)
                 if _UnitExists(unit) and not _UnitIsDeadOrGhost(unit) then
                     local playerid, playername = _UnitGUID(unit), _UnitName(unit)
-                    for i = 0, 31 do
+                    for i = 1, 32 do
                         local spellid = _select(11, UnitAura(unit, i, nil, "BUFF"))
                         if spellid and potionIDs[spellid] then
                             -- instant recording doesn't work, so we delay it
-                            Skada.After(1, function()
-								PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid)
-                            end)
+                            Skada.After(1, function() PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid) end)
                             break -- beause we can only have a single potion
                         end
                     end
@@ -85,21 +83,21 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
     end
 
     function playersmod:Enter(win, id, label)
-        self.potionid = id
-        self.title = label
+        win.potionid, win.potionname = id, label
+        win.title = label
     end
 
     function playersmod:Update(win, set)
         local max = 0
 
-        if self.potionid then
-            local nr = 1
+        if win.potionid then
+            win.title = win.potionname
 
-            local total, players = 0, {}
+            local nr, total, players = 1, 0, {}
 
             for _, player in _ipairs(set.players) do
-                if player.potions and player.potions.potions[self.potionid] then
-                    local count = player.potions.potions[self.potionid]
+                if player.potions and player.potions.potions[win.potionid] then
+                    local count = player.potions.potions[win.potionid]
                     total = total + count
                     players[player.name] = {
                         id = player.id,
@@ -141,20 +139,31 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
     end
 
     function potionsmod:Enter(win, id, label)
-        self.playerid = id
-        self.playername = label
-        self.title = _format(L["%s's used potions"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's used potions"], label)
+    end
+
+    local function RequestPotion(potionid)
+        if potionid and potionid ~= nil and potionid ~= "" and potionid ~= 0 and _strsub(potionid, 1, 1) ~= "s" then
+            GameTooltip:SetHyperlink("item:" .. potionid .. ":0:0:0:0:0:0:0")
+            GameTooltip:Hide()
+        end
     end
 
     function potionsmod:Update(win, set)
         local max = 0
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid)
 
         if player and player.potions.potions then
-            local nr = 1
+            win.title = _format(L["%s's used potions"], player.name)
 
+            local nr = 1
             for potionid, count in _pairs(player.potions.potions) do
                 local potionname, potionlink, _, _, _, _, _, _, _, potionicon = _GetItemInfo(potionid)
+                if not potionname then
+                    RequestPotion(potionid)
+                end
+
                 if potionname then
                     local d = win.dataset[nr] or {}
                     win.dataset[nr] = d
@@ -200,7 +209,8 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
                 d.role = player.role
 
                 d.value = player.potions.count
-                d.valuetext = Skada:FormatValueText(
+                d.valuetext =
+                    Skada:FormatValueText(
                     d.value,
                     self.metadata.columns.Count,
                     _format("%02.1f%%", 100 * d.value / math_max(1, total)),
@@ -216,6 +226,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
         end
 
         win.metadata.maxvalue = max
+        win.title = L["Potions"]
     end
 
     function mod:OnEnable()

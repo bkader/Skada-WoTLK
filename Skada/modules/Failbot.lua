@@ -1,4 +1,4 @@
-local Skada = Skada
+assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Fails", function(Skada, L)
     if Skada:IsDisabled("Fails") then return end
 
@@ -8,8 +8,8 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
     if not LibFail then
         return
     end
-	local failevents = LibFail:GetSupportedEvents()
-	local tankevents
+    local failevents = LibFail:GetSupportedEvents()
+    local tankevents
 
     local mod = Skada:NewModule(L["Fails"])
     local playermod = mod:NewModule(L["Player's failed events"])
@@ -24,7 +24,9 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
         if event and who then
             -- is th fail a valid spell?
             local spellid = LibFail:GetEventSpellId(event)
-            if not spellid then return end
+            if not spellid then
+                return
+            end
 
             local unitGUID = _UnitGUID(who)
             if not unitGUID then return end
@@ -33,7 +35,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
             if Skada.current then
                 local player = Skada:get_player(Skada.current, unitGUID, who)
                 if player and (player.role ~= "TANK" or not tankevents[event]) then
-					player.fails = player.fails or {}
+                    player.fails = player.fails or {}
                     player.fails.count = (player.fails.count or 0) + 1
                     Skada.current.fails = (Skada.current.fails or 0) + 1
 
@@ -46,7 +48,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
             if Skada.total then
                 local player = Skada:get_player(Skada.total, unitGUID, who)
                 if player and (player.role ~= "TANK" or not tankevents[event]) then
-					player.fails = player.fails or {}
+                    player.fails = player.fails or {}
                     player.fails.count = (player.fails.count or 0) + 1
                     Skada.total.fails = (Skada.total.fails or 0) + 1
 
@@ -58,15 +60,15 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
     end
 
     function spellmod:Enter(win, id, label)
-        self.spellid = id
-        self.title = _format(L["%s's fails"], label)
+        win.spellid, win.spellname = id, label
+        win.title = _format(L["%s's fails"], label)
     end
 
     function spellmod:Update(win, set)
         local nr, max = 1, 0
 
         for _, player in _ipairs(set.players) do
-            if player.fails and player.fails.spells[self.spellid] then
+            if player.fails and player.fails.spells[win.spellid] then
                 local d = win.dataset[nr] or {}
                 win.dataset[nr] = d
 
@@ -76,7 +78,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
                 d.role = player.role
                 d.spec = player.spec
 
-                d.value = player.fails.spells[self.spellid]
+                d.value = player.fails.spells[win.spellid]
                 d.valuetext = _tostring(d.value)
 
                 if d.value > max then
@@ -88,20 +90,22 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
         end
 
         win.metadata.maxvalue = max
+        win.title = _format(L["%s's fails"], win.spellname or UNKNOWN)
     end
 
     function playermod:Enter(win, id, label)
-        self.playerid = id
-        self.title = _format(L["%s's fails"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's fails"], label)
     end
 
     function playermod:Update(win, set)
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid, win.playername)
         local max = 0
 
         if player and player.fails then
-            local nr = 1
+            win.title = _format(L["%s's fails"], player.name)
 
+            local nr = 1
             for spellid, count in _pairs(player.fails.spells) do
                 local spellname, _, spellicon = _GetSpellInfo(spellid)
                 if spellname then
@@ -154,20 +158,21 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
         end
 
         win.metadata.maxvalue = max
+        win.title = L["Fails"]
     end
 
     function mod:OnInitialize()
-		tankevents = {}
-		for _, event in _ipairs(LibFail:GetFailsWhereTanksDoNotFail()) do
-			tankevents[event] = true
-		end
+        tankevents = {}
+        for _, event in _ipairs(LibFail:GetFailsWhereTanksDoNotFail()) do
+            tankevents[event] = true
+        end
         for _, event in _ipairs(failevents) do
             LibFail:RegisterCallback(event, onFail)
         end
     end
 
     function mod:OnEnable()
-		if not tankevents then self:OnInitialize() end
+        if not tankevents then self:OnInitialize() end
         playermod.metadata = {click1 = spellmod}
         self.metadata = {click1 = playermod}
 

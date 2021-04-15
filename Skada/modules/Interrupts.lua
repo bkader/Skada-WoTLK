@@ -1,4 +1,4 @@
-local Skada = Skada
+assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Interrupts", function(Skada, L)
     if Skada:IsDisabled("Interrupts") then return end
 
@@ -79,18 +79,18 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
     end
 
     function spellsmod:Enter(win, id, label)
-        self.playerid = id
-        self.playername = label
-        self.title = _format(L["%s's interrupted spells"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's interrupted spells"], label)
     end
 
     function spellsmod:Update(win, set)
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid)
         local max = 0
 
         if player and player.interrupts.extraspells then
-            local nr = 1
+            win.title = _format(L["%s's interrupted spells"], player.name)
 
+            local nr = 1
             for spellid, spell in _pairs(player.interrupts.extraspells) do
                 local d = win.dataset[nr] or {}
                 win.dataset[nr] = d
@@ -123,16 +123,17 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
     end
 
     function targetsmod:Enter(win, id, label)
-        self.playerid = id
-        self.playername = label
-        self.title = _format(L["%s's interrupted targets"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's interrupted targets"], label)
     end
 
     function targetsmod:Update(win, set)
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid)
         local max = 1
 
         if player and player.interrupts.targets then
+            win.title = _format(L["%s's interrupted targets"], player.name)
+
             local nr = 1
             for targetname, target in _pairs(player.interrupts.targets) do
                 local d = win.dataset[nr] or {}
@@ -141,15 +142,22 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
                 d.id = target.id
                 d.label = targetname
 
-                local p = Skada:find_player(set, target.id)
-                if p then
-                    d.class = p.class
-                    d.spec = p.spec
-                    d.role = p.role
-                else
-					d.class = Skada:GetPetOwner(target.id) and "PET" or "MONSTER"
-                    d.spec = "DAMAGER"
+                if not target.class then
+                    local p = Skada:find_player(set, target.id, targetname)
+                    if p then
+                        target.class = p.class
+                        target.role = p.role
+                        target.spec = p.spec
+                    else
+                        target.class = "UNKNOWN"
+                        target.role = "DAMAGER"
+                        target.spec = 2
+                    end
                 end
+
+                d.class = target.class
+                d.role = target.role
+                d.spec = target.spec
 
                 d.value = target.count
                 d.valuetext = Skada:FormatValueText(
@@ -171,18 +179,18 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
     end
 
     function playermod:Enter(win, id, label)
-        self.playerid = id
-        self.playername = label
-        self.title = _format(L["%s's interrupt spells"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's interrupt spells"], label)
     end
 
     function playermod:Update(win, set)
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid)
         local max = 0
 
         if player and player.interrupts.spells then
-            local nr = 1
+            win.title = _format(L["%s's interrupt spells"], player.name)
 
+            local nr = 1
             for spellid, spell in _pairs(player.interrupts.spells) do
                 local d = win.dataset[nr] or {}
                 win.dataset[nr] = d
@@ -244,6 +252,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
         end
 
         win.metadata.maxvalue = max
+        win.title = L["Interrupts"]
     end
 
     function mod:OnEnable()
@@ -265,9 +274,9 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
     end
 
     function mod:AddToTooltip(set, tooltip)
-		if set and set.interrupts and set.interrupts > 0 then
-			tooltip:AddDoubleLine(L["Interrupts"], set.interrupts, 1, 1, 1)
-		end
+        if set and set.interrupts and set.interrupts > 0 then
+            tooltip:AddDoubleLine(L["Interrupts"], set.interrupts, 1, 1, 1)
+        end
     end
 
     function mod:GetSetSummary(set)

@@ -1,4 +1,4 @@
-local Skada = Skada
+assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Dispels", function(Skada, L)
     if Skada:IsDisabled("Dispels") then return end
 
@@ -80,18 +80,18 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
     end
 
     function spellsmod:Enter(win, id, label)
-        self.playerid = id
-        self.playername = label
-        self.title = _format(L["%s's dispelled spells"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's dispelled spells"], label)
     end
 
     function spellsmod:Update(win, set)
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid, win.playername)
         local max = 0
 
         if player and player.dispels.extraspells then
-            local nr = 1
+            win.title = _format(L["%s's dispelled spells"], player.name)
 
+            local nr = 1
             for spellid, spell in _pairs(player.dispels.extraspells) do
                 local spellname, _, spellicon = _GetSpellInfo(spellid)
 
@@ -124,16 +124,17 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
     end
 
     function targetsmod:Enter(win, id, label)
-        self.playerid = id
-        self.playername = label
-        self.title = _format(L["%s's dispelled targets"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's dispelled targets"], label)
     end
 
     function targetsmod:Update(win, set)
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid, win.playername)
         local max = 1
 
         if player and player.dispels.targets then
+            win.title = _format(L["%s's dispelled targets"], player.name)
+
             local nr = 1
             for targetname, target in _pairs(player.dispels.targets) do
                 local d = win.dataset[nr] or {}
@@ -142,12 +143,22 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
                 d.id = target.id
                 d.label = targetname
 
-                local p = Skada:find_player(set, target.id)
-                if p then
-                    d.class = p.class
-                    d.spec = p.spec
-                    d.role = p.role
+                if not target.class then
+                    local p = Skada:find_player(set, target.id, targetname)
+                    if p then
+                        target.class = p.class
+                        target.role = p.role
+                        target.spec = p.spec
+                    else
+                        target.class = "PET"
+                        target.role = "DAMAGER"
+                        target.spec = 1
+                    end
                 end
+
+                d.class = target.class
+                d.spec = target.spec
+                d.role = target.role
 
                 d.value = target.count
                 d.valuetext = Skada:FormatValueText(
@@ -169,18 +180,18 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
     end
 
     function playermod:Enter(win, id, label)
-        self.playerid = id
-        self.playername = label
-        self.title = _format(L["%s's dispel spells"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's dispel spells"], label)
     end
 
     function playermod:Update(win, set)
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid, win.playername)
         local max = 0
 
         if player and player.dispels.spells then
-            local nr = 1
+            win.title = _format(L["%s's dispel spells"], player.name)
 
+            local nr = 1
             for spellid, spell in _pairs(player.dispels.spells) do
                 local spellname, _, spellicon = _GetSpellInfo(spellid)
 
@@ -242,6 +253,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
         end
 
         win.metadata.maxvalue = max
+        win.title = L["Dispels"]
     end
 
     function mod:OnEnable()
@@ -264,9 +276,9 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
     end
 
     function mod:AddToTooltip(set, tooltip)
-		if set and set.dispels and set.dispels > 0 then
-			tooltip:AddDoubleLine(L["Dispels"], set.dispels, 1, 1, 1)
-		end
+        if set and set.dispels and set.dispels > 0 then
+            tooltip:AddDoubleLine(L["Dispels"], set.dispels, 1, 1, 1)
+        end
     end
 
     function mod:GetSetSummary(set)

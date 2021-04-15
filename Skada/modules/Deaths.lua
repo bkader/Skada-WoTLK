@@ -1,4 +1,4 @@
-local Skada = Skada
+assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Deaths", function(Skada, L)
     if Skada:IsDisabled("Deaths") then return end
 
@@ -33,15 +33,15 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
             -- record our log
             local deathlog = player.deathlog[1]
             table_insert(deathlog.log, 1, {
-				spellid = data.spellid,
-				source = data.srcName,
-				amount = data.amount,
-				overkill = data.overkill,
-				resisted = data.resisted,
-				blocked = data.blocked,
-				absorbed = data.absorbed,
-				time = ts,
-				hp = _UnitHealth(data.playername)
+                spellid = data.spellid,
+                source = data.srcName,
+                amount = data.amount,
+                overkill = data.overkill,
+                resisted = data.resisted,
+                blocked = data.blocked,
+                absorbed = data.absorbed,
+                time = ts,
+                hp = _UnitHealth(data.playername)
             })
 
             -- trim things and limit to 20
@@ -144,7 +144,9 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
     --
     -- this function can be called using Skada:SendMessage function.
     --
-    function mod:UNIT_DIED(event, ...) UnitDied(...) end
+    function mod:UNIT_DIED(event, ...)
+        UnitDied(...)
+    end
 
     local function log_resurrect(set, playerid, playername, playerflags)
         local player = Skada:get_player(set, playerid, playername, playerflags)
@@ -157,20 +159,22 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
         log_resurrect(Skada.current, dstGUID, dstName, dstFlags)
     end
 
-	-- this function was added for a more accurate death time
-	-- this is useful in case of someone's death causing others'
-	-- death. Example: Sindragosa's unchained magic.
-	local function formatdate(ts)
-		local a, b = math_modf(ts)
-		local d = _date("%H:%M:%S", a or ts)
-		if b == 0 then return d end -- really rare to see .000
-		b = _strsub(_tostring(b), 3, 5)
-		return d.."."..b
-	end
+    -- this function was added for a more accurate death time
+    -- this is useful in case of someone's death causing others'
+    -- death. Example: Sindragosa's unchained magic.
+    local function formatdate(ts)
+        local a, b = math_modf(ts)
+        local d = _date("%H:%M:%S", a or ts)
+        if b == 0 then
+            return d
+        end -- really rare to see .000
+        b = _strsub(_tostring(b), 3, 5)
+        return d .. "." .. b
+    end
 
     function deathlogmod:Enter(win, id, label)
         self.index = id
-        self.title = _format(L["%s's death log"], playermod.playername)
+        win.title = _format(L["%s's death log"], win.playername or UNKNOWN)
     end
 
     do
@@ -182,14 +186,14 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
         end
 
         function deathlogmod:Update(win, set)
-            local player = Skada:find_player(set, playermod.playerid)
+            local player = Skada:find_player(set, win.playerid)
+            win.title = _format(L["%s's death log"], win.playername or UNKNOWN)
 
             if player and player.deathlog and self.index and player.deathlog[self.index] then
                 local deathlog = player.deathlog[self.index]
 
                 -- add a fake entry for the actual death
-                local nr = 1
-                local pre = win.dataset[nr] or {}
+                local nr, pre = 1, win.dataset[nr] or {}
                 win.dataset[nr] = pre
 
                 pre.id = nr
@@ -227,24 +231,24 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
                         local change = (log.amount > 0 and "+" or "-") .. Skada:FormatNumber(math_abs(log.amount))
                         local extra = {}
                         if log.overkill and log.overkill > 0 then
-							d.overkill = log.overkill
-							table_insert(extra, "O: "..Skada:FormatNumber(log.overkill))
+                            d.overkill = log.overkill
+                            table_insert(extra, "O: " .. Skada:FormatNumber(log.overkill))
                         end
                         if log.resisted and log.resisted > 0 then
-							d.resisted = log.resisted
-							table_insert(extra, "R: "..Skada:FormatNumber(log.resisted))
+                            d.resisted = log.resisted
+                            table_insert(extra, "R: " .. Skada:FormatNumber(log.resisted))
                         end
                         if log.blocked and log.blocked > 0 then
-							d.blocked = log.blocked
-							table_insert(extra, "B: "..Skada:FormatNumber(log.blocked))
+                            d.blocked = log.blocked
+                            table_insert(extra, "B: " .. Skada:FormatNumber(log.blocked))
                         end
                         if log.absorbed and log.absorbed > 0 then
-							d.absorbed = log.absorbed
-							table_insert(extra, "A: "..Skada:FormatNumber(log.absorbed))
+                            d.absorbed = log.absorbed
+                            table_insert(extra, "A: " .. Skada:FormatNumber(log.absorbed))
                         end
 
                         if _next(extra) ~= nil then
-							change = change.." ["..table_concat(extra, ", ").."]"
+                            change = change .. " [" .. table_concat(extra, ", ") .. "]"
                         end
                         d.valuetext = Skada:FormatValueText(
                             change,
@@ -271,18 +275,18 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
     end
 
     function playermod:Enter(win, id, label)
-        self.playerid = id
-		self.playername = label
-        self.title = _format(L["%s's deaths"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's deaths"], label)
     end
 
     function playermod:Update(win, set)
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid)
         local max = 0
 
         if player and player.deathlog then
-            local nr = 1
+            win.title = _format(L["%s's deaths"], player.name)
 
+            local nr = 1
             for i, death in _ipairs(player.deathlog) do
                 local d = win.dataset[nr] or {}
                 win.dataset[nr] = d
@@ -343,6 +347,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
         end
 
         win.metadata.maxvalue = max
+        win.title = L["Deaths"]
     end
 
     local function entry_tooltip(win, id, label, tooltip)
@@ -400,14 +405,14 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
         Skada:RegisterForCL(SpellHeal, "SPELL_PERIODIC_HEAL", {dst_is_interesting_nopets = true})
         Skada:RegisterForCL(UnitDied, "UNIT_DIED", {dst_is_interesting_nopets = true})
         Skada:RegisterForCL(SpellResurrect, "SPELL_RESURRECT", {dst_is_interesting_nopets = true})
-		Skada.RegisterMessage(self, "UNIT_DIED")
+        Skada.RegisterMessage(self, "UNIT_DIED")
 
         Skada:AddMode(self)
     end
 
     function mod:OnDisable()
         Skada:RemoveMode(self)
-		Skada.UnregisterAllMessages(self)
+        Skada.UnregisterAllMessages(self)
     end
 
     function mod:SetComplete(set)

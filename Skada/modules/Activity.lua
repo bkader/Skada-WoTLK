@@ -1,10 +1,10 @@
-local Skada = Skada
+assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Activity", function(Skada, L)
     if Skada:IsDisabled("Activity") then return end
 
     local mod = Skada:NewModule(L["Activity"])
     local _date, _ipairs, _format = date, ipairs, string.format
-	local math_min, math_max = math.min, math.max
+    local math_min, math_max = math.min, math.max
 
     local function activity_tooltip(win, id, label, tooltip)
         local set = win:get_selected_set()
@@ -30,9 +30,13 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
 
             d.id = player.id
             d.label = player.name
-            d.class = player.class
-            d.role = player.role
-            d.spec = player.spec
+            if player.class then
+                d.class = player.class
+                d.role = player.role
+                d.spec = player.spec
+            else
+                d.class = Skada:IsBoss(player.id) and "MONSTER" or "PET"
+            end
 
             d.value = playertime
             d.valuetext = Skada:FormatValueText(

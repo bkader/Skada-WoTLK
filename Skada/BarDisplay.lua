@@ -393,7 +393,7 @@ do
     local function BarEnter(bar)
         local win, id, label = bar.win, bar.id, bar.text
         ttactive = true
-        Skada:SetTooltipPosition(GameTooltip, win.bargroup)
+        Skada:SetTooltipPosition(GameTooltip, win.bargroup, win.db.display)
         Skada:ShowTooltip(win, id, label)
     end
 
@@ -417,7 +417,7 @@ do
         local bar = icon.bar
         local win = bar.win
         if bar.link and win and win.bargroup then
-            Skada:SetTooltipPosition(GameTooltip, win.bargroup)
+            Skada:SetTooltipPosition(GameTooltip, win.bargroup, win.db.display)
             GameTooltip:SetHyperlink(bar.link)
             GameTooltip:Show()
         end

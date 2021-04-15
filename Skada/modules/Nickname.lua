@@ -1,4 +1,4 @@
-local Skada = Skada
+assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Nickname", function(Skada, L)
     if Skada:IsDisabled("Nickname") then return end
 
@@ -65,14 +65,22 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
         type = "group",
         name = L["Nickname"],
         order = 0,
+        get = function(i)
+            return Skada.db.profile[i[#i]]
+        end,
+        set = function(i, val)
+            Skada.db.profile[i[#i]] = val
+            Skada:ApplySettings()
+        end,
         args = {
             nickname = {
                 type = "input",
                 name = L["Nickname"],
                 desc = L["Set a nickname for you.\nNicknames are sent to group members and Skada can use them instead of your character name."],
                 order = 1,
-                width = "full",
-                get = function() return Skada.db.profile.nickname end,
+                get = function()
+                    return Skada.db.profile.nickname
+                end,
                 set = function(_, val)
                     local okey, nickname = CheckNickname(val)
                     if okey == true then
@@ -84,24 +92,11 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
                     end
                 end
             },
-            ignore = {
-                type = "toggle",
-                name = L["Ignore Nicknames"],
-                desc = L["When enabled, nicknames set by Skada users are ignored."],
-                order = 2,
-                width = "full",
-                get = function() return Skada.db.profile.ignorenicknames end,
-                set = function()
-                    Skada.db.profile.ignorenicknames = not Skada.db.profile.ignorenicknames
-                    Skada:ApplySettings()
-                end
-            },
-            display = {
+            namedisplay = {
                 type = "select",
                 name = L["Name display"],
                 desc = L["Choose how names are shown on your bars."],
-                order = 3,
-                width = "full",
+                order = 2,
                 values = function()
                     return {
                         [1] = NAME,
@@ -109,12 +104,14 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
                         [3] = NAME .. " (" .. L["Nickname"] .. ")",
                         [4] = L["Nickname"] .. " (" .. NAME .. ")"
                     }
-                end,
-                get = function() return Skada.db.profile.namedisplay or 1 end,
-                set = function(_, key)
-                    Skada.db.profile.namedisplay = key
-                    Skada:ApplySettings()
                 end
+            },
+            ignorenicknames = {
+                type = "toggle",
+                name = L["Ignore Nicknames"],
+                desc = L["When enabled, nicknames set by Skada users are ignored."],
+                order = 3,
+                width = "full"
             }
         }
     }
@@ -123,13 +120,13 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
         unitName = select(1, UnitName("player"))
         unitGUID = UnitGUID("player")
         Skada.options.args.modules.args.nickname = options
-		if Skada.db.profile.namedisplay == nil then
-			Skada.db.profile.namedisplay = 1
-		end
+        if Skada.db.profile.namedisplay == nil then
+            Skada.db.profile.namedisplay = 1
+        end
     end
 
     function mod:OnEnable()
-		self:SetCacheTable()
+        self:SetCacheTable()
 
         Skada.RegisterCallback(self, "OnCommNicknameRequest")
         Skada.RegisterCallback(self, "OnCommNicknameResponse")
@@ -140,8 +137,8 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
     end
 
     function mod:OnDisable()
-		Skada.db.global.nicknames = nil
-		self.db = nil
+        Skada.db.global.nicknames = nil
+        self.db = nil
     end
 
     -----------------------------------------------------------
@@ -149,12 +146,16 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 
     -- this function only laters the data.label according to our settings.
     function mod:BarUpdate(_, win, data)
-        if Skada.db.profile.ignorenicknames then return end
-        if not win or not data or not data.label then return end
+        if Skada.db.profile.ignorenicknames then
+            return
+        end
+        if not win or not data or not data.label then
+            return
+        end
 
         if (data.class or data.role) and (Skada.db.profile.namedisplay or 0) > 1 then
             local player = Skada:find_player(win:get_selected_set(), data.id)
-            if player and player.nickname ~= "" and player.nickname ~= player.name then
+            if player and player.nickname and player.nickname ~= "" and player.nickname ~= player.name then
                 if Skada.db.profile.namedisplay == 2 then
                     data.label = player.nickname
                 elseif Skada.db.profile.namedisplay == 3 then
@@ -178,11 +179,11 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
                     else
                         player.nickname = unitName
                     end
-				elseif self.db and self.db.nicknames[player.id] then
-					player.nickname = self.db.nicknames[player.id]
-				else
-					Skada:SendComm("WHISPER", player.name, "NicknameRequest")
-				end
+                elseif self.db and self.db.nicknames[player.id] then
+                    player.nickname = self.db.nicknames[player.id]
+                else
+                    Skada:SendComm("WHISPER", player.name, "NicknameRequest")
+                end
             end
         end
     end
@@ -195,15 +196,15 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
             for _, player in ipairs(set.players) do
                 if player.id == guid then
                     if not player.nickname then -- we update only if needed.
-						if self.db.nicknames[guid] then
-							player.nickname = self.db.nicknames[guid]
-						else
-							player.nickname = player.name
-							self.db.nicknames[guid] = player.nickname
-						end
+                        if self.db.nicknames[guid] then
+                            player.nickname = self.db.nicknames[guid]
+                        else
+                            player.nickname = player.name
+                            self.db.nicknames[guid] = player.nickname
+                        end
                         -- update cached
                         if set._playeridx and set._playeridx[guid] then
-							set._playeridx[guid].nickname = player.nickname
+                            set._playeridx[guid].nickname = player.nickname
                         end
                     end
                     break -- no need to go further
@@ -236,45 +237,47 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 
     -- if someone in our group changes the nickname, we update the cache
     function mod:OnCommNicknameChange(_, sender, playerid, nickname)
-		if not Skada.db.profile.ignorenicknames then
-			if not nickname or nickname == "" then
-				nickname = sender
-			end
-			if not self.db then self:SetCacheTable() end
-			self.db.nicknames[playerid] = nickname
-		end
+        if not Skada.db.profile.ignorenicknames then
+            if not nickname or nickname == "" then
+                nickname = sender
+            end
+            if not self.db then
+                self:SetCacheTable()
+            end
+            self.db.nicknames[playerid] = nickname
+        end
     end
 
     -----------------------------------------------------------
 
     function mod:SetNickname(guid, nickname, sync)
-		self.db.nicknames[guid] = nickname
-		if guid == unitGUID and sync then
-			Skada:SendComm(nil, nil, "NicknameChange", guid, nickname)
-		end
+        self.db.nicknames[guid] = nickname
+        if guid == unitGUID and sync then
+            Skada:SendComm(nil, nil, "NicknameChange", guid, nickname)
+        end
     end
 
     -----------------------------------------------------------
     -- cache table functions
 
     function mod:SetCacheTable()
-		self.db = Skada.db.global.nicknames or {nicknames = {}}
-		Skada.db.global.nicknames = self.db
-		self:CheckForReset()
+        self.db = Skada.db.global.nicknames or {nicknames = {}}
+        Skada.db.global.nicknames = self.db
+        self:CheckForReset()
     end
 
     function mod:CheckForReset()
-		if not self.db then
-			self.db = Skada.db.global.nicknames or {nicknames = {}}
-			Skada.db.global.nicknames = self.db
-		end
+        if not self.db then
+            self.db = Skada.db.global.nicknames or {nicknames = {}}
+            Skada.db.global.nicknames = self.db
+        end
 
-		if not self.db.nextreset then
-			self.db.nextreset = time() + (60*60*24*15)
-			self.db.nicknames = {}
-		elseif time() > self.db.nextreset then
-			self.db.nextreset = time() + (60*60*24*15)
-			self.db.nicknames = {}
-		end
+        if not self.db.nextreset then
+            self.db.nextreset = time() + (60 * 60 * 24 * 15)
+            self.db.nicknames = {}
+        elseif time() > self.db.nextreset then
+            self.db.nextreset = time() + (60 * 60 * 24 * 15)
+            self.db.nicknames = {}
+        end
     end
 end)

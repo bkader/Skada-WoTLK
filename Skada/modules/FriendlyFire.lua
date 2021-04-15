@@ -1,4 +1,4 @@
-local Skada = Skada
+assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
     if Skada:IsDisabled("Friendly Fire") then return end
 
@@ -45,6 +45,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
     local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
         if srcGUID ~= dstGUID then
             local spellid, spellname, spellschool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing = ...
+
             dmg.playerid = srcGUID
             dmg.playername = srcName
             dmg.playerflags = srcFlags
@@ -81,18 +82,18 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
     end
 
     function targetmod:Enter(win, id, label)
-        self.playerid = id
-        self.playername = label
-        self.title = _format(L["%s's targets"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's targets"], label)
     end
 
     function targetmod:Update(win, set)
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid, win.playername)
         local max = 0
 
         if player and player.friendfire.targets then
-            local nr = 1
+            win.title = _format(L["%s's targets"], player.name)
 
+            local nr = 1
             for targetname, target in _pairs(player.friendfire.targets) do
                 local d = win.dataset[nr] or {}
                 win.dataset[nr] = d
@@ -100,15 +101,22 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
                 d.id = target.id
                 d.label = targetname
 
-                local p = Skada:find_player(set, target.id)
-                if p then
-                    d.class = p.class
-                    d.role = p.role
-                    d.spec = p.spec
-                else
-					d.class = Skada:GetPetOwner(target.id) and "PET" or "UNKNOWN"
-                    d.role = "DAMAGER"
+                if not target.class then
+                    local p = Skada:find_player(set, target.id, targetname)
+                    if p then
+                        target.class = p.class
+                        target.role = p.role
+                        target.spec = p.spec
+                    else
+                        target.class = "PET"
+                        target.role = "DAMAGER"
+                        target.spec = 1
+                    end
                 end
+
+                d.class = target.class
+                d.role = target.role
+                d.spec = target.spec
 
                 d.value = target.amount
                 d.valuetext = Skada:FormatValueText(
@@ -130,18 +138,18 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
     end
 
     function spellmod:Enter(win, id, label)
-        self.playerid = id
-        self.playername = label
-        self.title = _format(L["%s's damage"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's damage"], label)
     end
 
     function spellmod:Update(win, set)
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid, win.playername)
         local max = 0
 
         if player and player.friendfire.spells then
-            local nr = 1
+            win.title = _format(L["%s's damage"], player.name)
 
+            local nr = 1
             for spellid, spell in _pairs(player.friendfire.spells) do
                 local d = win.dataset[nr] or {}
                 win.dataset[nr] = d
@@ -202,6 +210,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
         end
 
         win.metadata.maxvalue = max
+        win.title = L["Friendly Fire"]
     end
 
     function mod:OnEnable()

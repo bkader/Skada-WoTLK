@@ -1,4 +1,4 @@
-local Skada = Skada
+assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Power gained", function(Skada, L)
     if Skada:IsDisabled("Power gained") then return end
 
@@ -35,9 +35,14 @@ Skada:AddLoadableModule("Power gained", function(Skada, L)
 
                 -- record the spell
                 if not player.power[gain.type].spells[gain.spellname] then
-                    player.power[gain.type].spells[gain.spellname] = {id = gain.spellid, school = gain.spellschool, amount = 0}
+                    player.power[gain.type].spells[gain.spellname] = {
+                        id = gain.spellid,
+                        school = gain.spellschool,
+                        amount = 0
+                    }
                 end
-                player.power[gain.type].spells[gain.spellname].amount = player.power[gain.type].spells[gain.spellname].amount + gain.amount
+                player.power[gain.type].spells[gain.spellname].amount =
+                    player.power[gain.type].spells[gain.spellname].amount + gain.amount
             end
         end
     end
@@ -90,18 +95,12 @@ Skada:AddLoadableModule("Power gained", function(Skada, L)
 
     -- allows us to create a module for each power type.
     function basemod:Create(power, modname, playermodname)
-        local pmode = {
-            metadata = {},
-            name = playermodname
-        }
+        local pmode = {metadata = {}, name = playermodname}
         _setmetatable(pmode, playermod_mt)
 
         local instance = {
             playermod = pmode,
-            metadata = {
-                showspots = true,
-                click1 = pmode
-            },
+            metadata = {showspots = true, click1 = pmode},
             name = modname
         }
         instance.power = power
@@ -149,6 +148,7 @@ Skada:AddLoadableModule("Power gained", function(Skada, L)
         end
 
         win.metadata.maxvalue = max
+        win.title = self.name
     end
 
     -- base function used to return sets summaries
@@ -165,22 +165,21 @@ Skada:AddLoadableModule("Power gained", function(Skada, L)
 
     -- player mods common Enter function.
     function playermod:Enter(win, id, label)
-        self.playerid = id
-        self.playername = label
-        self.title = _format(L["%s's gained %s"], label, locales[self.power])
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's gained %s"], label, locales[self.power])
     end
 
     -- player mods main update function
     function playermod:Update(win, set)
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid)
         local max = 0
 
         if player and player.power and self.power and player.power[self.power] then
+            win.title = _format(L["%s's gained %s"], player.name, locales[self.power])
             local nr = 1
-            local total = player.power[self.power].amount or 0
+            local nr, total = 1, player.power[self.power].amount or 0
 
             for spellname, spell in _pairs(player.power[self.power].spells or {}) do
-
                 local d = win.dataset[nr] or {}
                 win.dataset[nr] = d
 

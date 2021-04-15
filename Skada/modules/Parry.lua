@@ -1,8 +1,7 @@
-local Skada = Skada
+assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Parry-haste", function(Skada, L)
-    if Skada:IsDisabled("Parry-haste") then
-        return
-    end
+    if Skada:IsDisabled("Parry-haste") then return end
+
     local mod = Skada:NewModule(L["Parry-haste"])
     local targetmod = mod:NewModule(L["Parry target list"])
 
@@ -55,17 +54,16 @@ Skada:AddLoadableModule("Parry-haste", function(Skada, L)
     end
 
     function targetmod:Enter(win, id, label)
-        self.playerid = id
-        self.playername = label
-        self.title = _format(L["%s's parry targets"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's parry targets"], label)
     end
 
     function targetmod:Update(win, set)
-        local max, player = 0, Skada:find_player(set, self.playerid)
+        local max, player = 0, Skada:find_player(set, win.playerid, win.playername)
         if player and player.parries then
-            local nr = 1
-            local total = player.parries.count or 0
+            win.title = _format(L["%s's parry targets"], player.name)
 
+            local nr, total = 1, player.parries.count or 0
             for targetname, count in _pairs(player.parries.targets) do
                 local d = win.dataset[nr] or {}
                 win.dataset[nr] = d
@@ -128,6 +126,7 @@ Skada:AddLoadableModule("Parry-haste", function(Skada, L)
         end
 
         win.metadata.maxvalue = max
+        win.title = L["Parry-haste"]
     end
 
     function mod:OnEnable()

@@ -74,9 +74,15 @@ end
 local function showmode(win, id, label, mode)
     if win.selectedmode then
         tinsert(win.history, win.selectedmode)
+        if win.child then
+            tinsert(win.child.history, win.selectedmode)
+        end
     end
     if mode.Enter then
         mode:Enter(win, id, label)
+        if win.child then
+            mode:Enter(win.child, id, label)
+        end
     end
     win:DisplayMode(mode)
 end
@@ -108,6 +114,7 @@ function mod:Create(window, isnew)
         window.frame = CreateFrame("Frame", window.db.name .. "InlineFrame", UIParent)
         window.frame.win = window
         window.frame:SetFrameLevel(5)
+        window.frame:SetClampedToScreen(true)
 
         if window.db.height == 15 then
             window.db.height = 23
@@ -124,9 +131,9 @@ function mod:Create(window, isnew)
 
     window.frame:EnableMouse()
     window.frame:SetScript("OnMouseDown", function(frame, button)
-		if button == "RightButton" then
-			window:RightClick()
-		end
+        if button == "RightButton" then
+            window:RightClick()
+        end
     end)
 
     libwindow.RegisterConfig(window.frame, window.db)
@@ -141,17 +148,17 @@ function mod:Create(window, isnew)
     window.frame:SetMovable(true)
     window.frame:RegisterForDrag("LeftButton")
     window.frame:SetScript("OnDragStart", function(frame)
-		if not window.db.barslocked then
-			GameTooltip:Hide()
-			frame.isDragging = true
-			frame:StartMoving()
-		end
-	end)
+        if not window.db.barslocked then
+            GameTooltip:Hide()
+            frame.isDragging = true
+            frame:StartMoving()
+        end
+    end)
     window.frame:SetScript("OnDragStop", function(frame)
-		frame:StopMovingOrSizing()
-		frame.isDragging = false
-		libwindow.SavePosition(frame)
-	end)
+        frame:StopMovingOrSizing()
+        frame.isDragging = false
+        libwindow.SavePosition(frame)
+    end)
 
     local titlebg = CreateFrame("Frame", "InlineTitleBackground", window.frame)
     local title = window.frame:CreateFontString("frameTitle", 6)
@@ -169,12 +176,12 @@ function mod:Create(window, isnew)
     titlebg:SetAllPoints(title)
     titlebg:EnableMouse(true)
     titlebg:SetScript("OnMouseDown", function(frame, button)
-		if button == "RightButton" then
-			Skada:SegmentMenu(window)
-		elseif button == "LeftButton" then
-			Skada:ModeMenu(window)
-		end
-	end)
+        if button == "RightButton" then
+            Skada:SegmentMenu(window)
+        elseif button == "LeftButton" then
+            Skada:ModeMenu(window)
+        end
+    end)
 
     local skadamenubuttonbackdrop = {
         bgFile = "Interface\\Buttons\\UI-OptionsButton",
@@ -255,10 +262,10 @@ function barlibrary:CreateBar(uuid, win)
     bar.bg:EnableMouse(true)
     bar.bg:SetScript("OnMouseDown", function(frame, button) BarClick(win, bar, button) end)
     bar.bg:SetScript("OnEnter", function(frame, button)
-		ttactive = true
-		Skada:SetTooltipPosition(GameTooltip, win.frame)
-		Skada:ShowTooltip(win, bar.valueid, bar.valuetext)
-	end)
+        ttactive = true
+        Skada:SetTooltipPosition(GameTooltip, win.frame, win.db.display)
+        Skada:ShowTooltip(win, bar.valueid, bar.valuetext)
+    end)
     bar.bg:SetScript("OnLeave", BarLeave)
 
     if uuid then
@@ -318,7 +325,7 @@ function mod:UpdateBar(bar, bardata, db)
     local label = bardata.label
     if db.isusingclasscolors then
         if bardata.class then
-            label = _format(classcolors[bardata.class], bardata.label)
+            label = _format(classcolors[bardata.class] or "|cffffffff%s|r", bardata.label)
         end
     else
         label = bardata.label
@@ -371,20 +378,20 @@ function mod:Update(win)
     for k, bardata in _pairs(wd) do
         if bardata.id then
             local _bar = mod:GetBar(win)
-			Skada.callbacks:Fire("BarUpdate", win, bardata, _bar)
+            Skada.callbacks:Fire("BarUpdate", win, bardata, _bar)
             tinsert(mybars, mod:UpdateBar(_bar, bardata, win.db))
         end
     end
 
     tsort(mybars, function(bar1, bar2)
-		if not bar1 or bar1.value == nil then
-			return false
-		elseif not bar2 or bar2.value == nil then
-			return true
-		else
-			return bar1.value > bar2.value
-		end
-	end)
+        if not bar1 or bar1.value == nil then
+            return false
+        elseif not bar2 or bar2.value == nil then
+            return true
+        else
+            return bar1.value > bar2.value
+        end
+    end)
 
     local yoffset = (win.db.height - win.db.barfontsize) / 2
     local left = win.frame.barstartx + 40
@@ -567,7 +574,7 @@ function mod:AddDisplayOptions(win, options)
             color = {
                 type = "color",
                 name = L["Font Color"],
-                desc = L["Font Color. \nClick \"Use class colors\" to begin."],
+                desc = L['Font Color. \nClick "Use class colors" to begin.'],
                 order = 0.2,
                 hasAlpha = true,
                 get = function()
@@ -602,7 +609,7 @@ function mod:AddDisplayOptions(win, options)
             barwidth = {
                 type = "range",
                 name = L["Width"],
-                desc = L["Width of bars. This only applies if the \"Fixed bar width\" option is used."],
+                desc = L['Width of bars. This only applies if the "Fixed bar width" option is used.'],
                 order = 1.0,
                 min = 100,
                 max = 300,

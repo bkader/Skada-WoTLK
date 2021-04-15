@@ -1,4 +1,4 @@
-local Skada = Skada
+assert(Skada, "Skada not found!")
 
 -- cache frequently used globals
 local _pairs, _ipairs, _select = pairs, ipairs, select
@@ -10,9 +10,7 @@ local _GetSpellInfo = Skada.GetSpellInfo
 -- ============== --
 
 Skada:AddLoadableModule("Healing", function(Skada, L)
-    if Skada:IsDisabled("Healing") then
-        return
-    end
+    if Skada:IsDisabled("Healing") then return end
 
     local mod = Skada:NewModule(L["Healing"])
     local playersmod = mod:NewModule(L["Healed player list"])
@@ -127,7 +125,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
     end
 
     local function spell_tooltip(win, id, label, tooltip)
-        local player = Skada:find_player(win:get_selected_set(), spellsmod.playerid)
+        local player = Skada:find_player(win:get_selected_set(), win.playerid)
         if player then
             local spell = player.healing.spells[id]
             if spell then
@@ -135,9 +133,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
                 if spell.school then
                     local c = Skada.schoolcolors[spell.school]
                     local n = Skada.schoolnames[spell.school]
-                    if c and n then
-                        tooltip:AddLine(n, c.r, c.g, c.b)
-                    end
+                    if c and n then tooltip:AddLine(n, c.r, c.g, c.b) end
                 end
                 tooltip:AddDoubleLine(L["Total"], spell.count, 1, 1, 1)
                 if spell.min and spell.max then
@@ -156,18 +152,18 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
     end
 
     function spellsmod:Enter(win, id, label)
-        self.playerid = id
-        self.playername = label
-        self.title = _format(L["%s's healing spells"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's healing spells"], label)
     end
 
     function spellsmod:Update(win, set)
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid, win.playername)
         local max = 0
 
         if player and player.healing.spells then
-            local nr = 1
+            win.title = _format(L["%s's healing spells"], player.name)
 
+            local nr = 1
             for spellid, spell in _pairs(player.healing.spells) do
                 if spell.amount > 0 then
                     local spellname, _, spellicon = _GetSpellInfo(spellid)
@@ -202,18 +198,18 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
     end
 
     function playersmod:Enter(win, id, label)
-        self.playerid = id
-        self.playername = label
-        self.title = _format(L["%s's healed players"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's healed players"], label)
     end
 
     function playersmod:Update(win, set)
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid, win.playername)
         local max = 0
 
         if player and player.healing.targets then
-            local nr = 1
+            win.title = _format(L["%s's healed players"], player.name)
 
+            local nr = 1
             for targetname, target in _pairs(player.healing.targets) do
                 if target.amount > 0 then
                     local d = win.dataset[nr] or {}
@@ -222,14 +218,22 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
                     d.id = target.id
                     d.label = targetname
 
-                    local p = Skada:find_player(set, target.id)
-                    if p then
-                        d.class = p.class
-                        d.role = p.role
-                        d.spec = p.spec
-                    else
-						d.class = Skada:GetPetOwner(target.id) and "PET" or "MONSTER"
-					end
+                    if not target.class then
+                        local p = Skada:find_player(set, target.id, targetname)
+                        if p then
+                            target.class = p.class
+                            target.role = p.role
+                            target.spec = p.spec
+                        else
+                            target.class = "PET"
+                            target.role = "DAMAGER"
+                            target.spec = 1
+                        end
+                    end
+
+                    d.class = target.class
+                    d.role = target.role
+                    d.spec = target.spec
 
                     d.value = target.amount
                     d.valuetext = Skada:FormatValueText(
@@ -284,6 +288,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
         end
 
         win.metadata.maxvalue = max
+        win.title = L["Healing"]
     end
 
     function mod:OnEnable()
@@ -321,26 +326,25 @@ end)
 -- ================== --
 
 Skada:AddLoadableModule("Overhealing", function(Skada, L)
-    if Skada:IsDisabled("Healing", "Overhealing") then
-        return
-    end
+    if Skada:IsDisabled("Healing", "Overhealing") then return end
+
     local mod = Skada:NewModule(L["Overhealing"])
     local playersmod = mod:NewModule(L["Overhealed player list"])
     local spellsmod = mod:NewModule(L["Overhealing spell list"])
 
     function spellsmod:Enter(win, id, label)
-        self.playerid = id
-        self.playername = label
-        self.title = _format(L["%s's overhealing spells"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's overhealing spells"], label)
     end
 
     function spellsmod:Update(win, set)
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid, win.playername)
         local max = 0
 
         if player and player.healing.spells then
-            local nr, total = 1, player.healing.overhealing or 0
+            win.title = _format(L["%s's overhealing spells"], player.name)
 
+            local nr, total = 1, player.healing.overhealing or 0
             for spellid, spell in _pairs(player.healing.spells) do
                 if spell.overhealing > 0 then
                     local spellname, _, spellicon = _GetSpellInfo(spellid)
@@ -375,19 +379,18 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
     end
 
     function playersmod:Enter(win, id, label)
-        self.playerid = id
-        self.playername = label
-        self.title = _format(L["%s's overhealed players"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's overhealed players"], label)
     end
 
     function playersmod:Update(win, set)
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid, win.playername)
         local max = 0
 
         if player and player.healing.targets then
-            local total = (player.healing.amount or 0) + (player.healing.overhealing or 0)
-            local nr = 1
+            win.title = _format(L["%s's overhealed players"], player.name)
 
+            local nr, total = 1, ((player.healing.amount or 0) + (player.healing.overhealing or 0))
             for targetname, target in _pairs(player.healing.targets) do
                 local overhealed = target.overhealing or 0
                 if overhealed > 0 then
@@ -397,14 +400,22 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
                     d.id = target.id
                     d.label = targetname
 
-                    local p = Skada:find_player(set, target.id)
-                    if p then
-                        d.class = p.class
-                        d.role = p.role
-                        d.spec = p.spec
-                    else
-						d.class = Skada:GetPetOwner(target.id) and "PET" or "MONSTER"
-					end
+                    if not target.class then
+                        local p = Skada:find_player(set, target.id, targetname)
+                        if p then
+                            target.class = p.class
+                            target.role = p.role
+                            target.spec = p.spec
+                        else
+                            target.class = "PET"
+                            target.role = "DAMAGER"
+                            target.spec = 1
+                        end
+                    end
+
+                    d.class = target.class
+                    d.role = target.role
+                    d.spec = target.spec
 
                     d.value = overhealed
                     d.valuetext = Skada:FormatValueText(
@@ -458,10 +469,11 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
         end
 
         win.metadata.maxvalue = max
+        win.title = L["Overhealing"]
     end
 
     function mod:OnEnable()
-		playersmod.metadata = {showspots = true}
+        playersmod.metadata = {showspots = true}
         self.metadata = {
             showspots = true,
             click1 = spellsmod,
@@ -488,12 +500,13 @@ Skada:AddLoadableModule("Total healing", function(Skada, L)
     if Skada:IsDisabled("Healing", "Total healing") then
         return
     end
+
     local mod = Skada:NewModule(L["Total healing"])
     local playersmod = mod:NewModule(L["Healed player list"])
     local spellsmod = mod:NewModule(L["Healing spell list"])
 
     local function getHPS(set, player)
-    	local totaltime = math_min(Skada:GetSetTime(set), Skada:PlayerActiveTime(set, player))
+        local totaltime = math_min(Skada:GetSetTime(set), Skada:PlayerActiveTime(set, player))
         local amount = 0
         if player.healing then
             amount = (player.healing.amount or 0) + (player.healing.overhealing or 0)
@@ -506,13 +519,12 @@ Skada:AddLoadableModule("Total healing", function(Skada, L)
         if set.time > 0 then
             return amount / math_max(1, set.time)
         else
-            local endtime = set.endtime or _time()
-            return amount / math_max(1, endtime - set.starttime)
+            return amount / math_max(1, (set.endtime or _time()) - set.starttime)
         end
     end
 
     local function spell_tooltip(win, id, label, tooltip)
-        local player = Skada:find_player(win:get_selected_set(), spellsmod.playerid)
+        local player = Skada:find_player(win:get_selected_set(), win.playerid)
         if player then
             local spell = player.healing.spells[id]
             if spell then
@@ -520,9 +532,7 @@ Skada:AddLoadableModule("Total healing", function(Skada, L)
                 if spell.school then
                     local c = Skada.schoolcolors[spell.school]
                     local n = Skada.schoolnames[spell.school]
-                    if c and n then
-                        tooltip:AddLine(n, c.r, c.g, c.b)
-                    end
+                    if c and n then tooltip:AddLine(n, c.r, c.g, c.b) end
                 end
                 if spell.min and spell.max then
                     tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.min), 1, 1, 1)
@@ -539,18 +549,18 @@ Skada:AddLoadableModule("Total healing", function(Skada, L)
     end
 
     function spellsmod:Enter(win, id, label)
-        self.playerid = id
-        self.playername = label
-        self.title = _format(L["%s's healing spells"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's healing spells"], label)
     end
 
     function spellsmod:Update(win, set)
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid, win.playername)
         local max = 0
 
         if player and player.healing.spells then
-            local total = (player.healing.amount or 0) + (player.healing.overhealing or 0)
-            local nr = 1
+            win.title = _format(L["%s's healing spells"], player.name)
+
+            local nr, total = 1, ((player.healing.amount or 0) + (player.healing.overhealing or 0))
             for spellid, spell in _pairs(player.healing.spells) do
                 local amount = (spell.amount or 0) + (spell.overhealing or 0)
                 if amount > 0 then
@@ -586,18 +596,18 @@ Skada:AddLoadableModule("Total healing", function(Skada, L)
     end
 
     function playersmod:Enter(win, id, label)
-        self.playerid = id
-        self.playername = label
-        self.title = _format(L["%s's healed players"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's healed players"], label)
     end
 
     function playersmod:Update(win, set)
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid, win.playername)
         local max = 0
 
         if player and player.healing.targets then
-            local total = (player.healing.amount or 0) + (player.healing.overhealing or 0)
-            local nr = 1
+            win.title = _format(L["%s's healed players"], player.name)
+
+            local nr, total = 1, ((player.healing.amount or 0) + (player.healing.overhealing or 0))
             for targetname, target in _pairs(player.healing.targets) do
                 local amount = (target.amount or 0) + (target.overhealing or 0)
                 local d = win.dataset[nr] or {}
@@ -606,14 +616,22 @@ Skada:AddLoadableModule("Total healing", function(Skada, L)
                 d.id = target.id
                 d.label = targetname
 
-                local p = Skada:find_player(set, target.id)
-                if p then
-                    d.class = p.class
-                    d.role = p.role
-                    d.spec = p.spec
-                else
-					d.class = Skada:GetPetOwner(target.id) and "PET" or "MONSTER"
+                if not target.class then
+                    local p = Skada:find_player(set, target.id, targetname)
+                    if p then
+                        target.class = p.class
+                        target.role = p.role
+                        target.spec = p.spec
+                    else
+                        target.class = "PET"
+                        target.role = "DAMAGER"
+                        target.spec = 1
+                    end
                 end
+
+                d.class = target.class
+                d.role = target.role
+                d.spec = target.spec
 
                 d.value = amount
                 d.valuetext = Skada:FormatValueText(
@@ -651,7 +669,8 @@ Skada:AddLoadableModule("Total healing", function(Skada, L)
                 d.spec = player.spec
 
                 d.value = amount
-                d.valuetext = Skada:FormatValueText( Skada:FormatNumber(amount),
+                d.valuetext = Skada:FormatValueText(
+                    Skada:FormatNumber(amount),
                     self.metadata.columns.Healing,
                     Skada:FormatNumber(getHPS(set, player)),
                     self.metadata.columns.HPS,
@@ -668,10 +687,11 @@ Skada:AddLoadableModule("Total healing", function(Skada, L)
         end
 
         win.metadata.maxvalue = max
+        win.title = L["Total healing"]
     end
 
     function mod:OnEnable()
-		playersmod.metadata = {showspots = true}
+        playersmod.metadata = {showspots = true}
         spellsmod.metadata = {tooltip = spell_tooltip}
         self.metadata = {
             showspots = true,
@@ -705,24 +725,24 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
     if Skada:IsDisabled("Healing", "Healing and Overhealing") then
         return
     end
+
     local mod = Skada:NewModule(L["Healing and Overhealing"])
     local spellsmod = mod:NewModule(L["Healing and overhealing spells"])
     local playersmod = mod:NewModule(L["Healed and overhealed players"])
 
     function spellsmod:Enter(win, id, label)
-        self.playerid = id
-        self.playername = label
-        self.title = _format(L["%s's healing and overhealing spells"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's healing and overhealing spells"], label)
     end
 
     function spellsmod:Update(win, set)
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid, win.playername)
         local max = 0
 
         if player and player.healing.spells then
-            local nr = 1
-            local total = (player.healing.amount or 0) + (player.healing.overhealing or 0)
+            win.title = _format(L["%s's healing and overhealing spells"], player.name)
 
+            local nr, total = 1, ((player.healing.amount or 0) + (player.healing.overhealing or 0))
             for spellid, spell in _pairs(player.healing.spells) do
                 local amount = spell.amount + spell.overhealing
                 if amount > 0 then
@@ -760,16 +780,17 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
     end
 
     function playersmod:Enter(win, id, label)
-        self.playerid = id
-        self.playername = label
-        self.title = _format(L["%s's healed and overhealed players"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's healed and overhealed players"], label)
     end
 
     function playersmod:Update(win, set)
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid, win.playername)
         local max = 0
 
         if player and player.healing.targets then
+            win.title = _format(L["%s's healed and overhealed players"], player.name)
+
             local nr = 1
             for targetname, target in _pairs(player.healing.targets) do
                 local d = win.dataset[nr] or {}
@@ -778,14 +799,22 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
                 d.id = target.id
                 d.label = targetname
 
-                local p = Skada:find_player(set, target.id)
-                if p then
-                    d.class = p.class
-                    d.role = p.role
-                    d.spec = p.spec
-                else
-					d.class = Skada:GetPetOwner(target.id) and "PET" or "MONSTER"
+                if not target.class then
+                    local p = Skada:find_player(set, target.id, targetname)
+                    if p then
+                        target.class = p.class
+                        target.role = p.role
+                        target.spec = p.spec
+                    else
+                        target.class = "PET"
+                        target.role = "DAMAGER"
+                        target.spec = 1
+                    end
                 end
+
+                d.class = target.class
+                d.role = target.role
+                d.spec = target.spec
 
                 d.value = target.amount + target.overhealing
                 d.valuetext = Skada:FormatValueText(
@@ -842,6 +871,7 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
         end
 
         win.metadata.maxvalue = max
+        win.title = L["Healing and Overhealing"]
     end
 
     function mod:OnEnable()
@@ -876,6 +906,7 @@ end)
 -- ================ --
 -- Healing received --
 -- ================ --
+
 Skada:AddLoadableModule("Healing received", function(Skada, L)
     if Skada:IsDisabled("Healing", "Healing received") then
         return
@@ -885,14 +916,15 @@ Skada:AddLoadableModule("Healing received", function(Skada, L)
     local playermod = mod:NewModule(L["Healing player list"])
 
     function playermod:Enter(win, id, label)
-        self.playerid = id
-        self.playername = label
-        self.title = _format(L["%s's received healing"], label)
+        win.playerid, win.playername = id, label
+        win.title = _format(L["%s's received healing"], label)
     end
 
     function playermod:Update(win, set)
-        local player = Skada:find_player(set, self.playerid)
+        local player = Skada:find_player(set, win.playerid, win.playername)
         if player then
+            win.title = _format(L["%s's received healing"], player.name)
+
             local max, total, sources = 0, 0, {}
 
             for _, p in _ipairs(set.players) do
@@ -950,18 +982,28 @@ Skada:AddLoadableModule("Healing received", function(Skada, L)
     end
 
     function mod:Update(win, set)
+        local max = 0
         if set.healing and set.healing > 0 then
-            local max, players = 0, {}
+            local players = {}
 
             for _, player in _ipairs(set.players) do
                 if player.healing then
                     for targetname, target in _pairs(player.healing.targets) do
+                        if not target.class then
+                            local p = Skada:find_player(set, target.id, targetname)
+                            if p then
+                                target.class = p.class
+                                target.role = p.role
+                                target.spec = p.spec
+                            else
+                                target.class = "PET"
+                                target.role = "DAMAGER"
+                                target.spec = 1
+                            end
+                        end
+
                         if not players[targetname] then
-                            players[targetname] = {
-                                id = target.id,
-                                amount = target.amount,
-                                overhealing = target.overhealing
-                            }
+                            players[targetname] = CopyTable(target)
                         else
                             players[targetname].amount = players[targetname].amount + target.amount
                             players[targetname].overhealing = players[targetname].overhealing + target.overhealing
@@ -980,14 +1022,9 @@ Skada:AddLoadableModule("Healing received", function(Skada, L)
                     d.id = player.id
                     d.label = playername
 
-                    local p = Skada:find_player(set, player.id, playername)
-                    if p then
-                        d.class = p.class
-                        d.role = p.role
-                        d.spec = p.spec
-                    else
-						d.class = Skada:GetPetOwner(player.id) and "PET" or "MONSTER"
-                    end
+                    d.class = player.class
+                    d.role = player.role
+                    d.spec = player.spec
 
                     d.value = player.amount
                     d.valuetext = Skada:FormatValueText(
@@ -1005,19 +1042,20 @@ Skada:AddLoadableModule("Healing received", function(Skada, L)
 
                     nr = nr + 1
                 end
-
-                win.metadata.maxvalue = max
             end
         end
+
+        win.metadata.maxvalue = max
+        win.title = L["Healing received"]
     end
 
     function mod:OnEnable()
         playermod.metadata = {showspots = true}
         self.metadata = {
-			showspots = true,
-			click1 = playermod,
-			columns = {Healing = true, Overhealing = true, Percent = true}
-		}
+            showspots = true,
+            click1 = playermod,
+            columns = {Healing = true, Overhealing = true, Percent = true}
+        }
         Skada:AddMode(self, L["Absorbs and healing"])
     end
 

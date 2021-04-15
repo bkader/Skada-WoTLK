@@ -1,6 +1,6 @@
-local Skada = Skada
+assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Threat", function(Skada, L)
-	if Skada:IsDisabled("Threat") then return end
+    if Skada:IsDisabled("Threat") then return end
 
     local mod = Skada:NewModule(L["Threat"])
     local media = LibStub("LibSharedMedia-3.0")
@@ -111,25 +111,16 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
             local target = nil
             if _UnitExists("target") and not _UnitIsFriend("player", "target") then
                 target = "target"
-            elseif
-                Skada.db.profile.modules.threatfocustarget and _UnitExists("focus") and
-                    not _UnitIsFriend("player", "focus")
-             then
+            elseif Skada.db.profile.modules.threatfocustarget and _UnitExists("focus") and not _UnitIsFriend("player", "focus") then
                 target = "focus"
-            elseif
-                Skada.db.profile.modules.threatfocustarget and _UnitExists("focustarget") and
-                    not _UnitIsFriend("player", "focustarget")
-             then
+            elseif Skada.db.profile.modules.threatfocustarget and _UnitExists("focustarget") and not _UnitIsFriend("player", "focustarget") then
                 target = "focustarget"
-            elseif
-                _UnitExists("target") and _UnitIsFriend("player", "target") and _UnitExists("targettarget") and
-                    not _UnitIsFriend("player", "targettarget")
-             then
+            elseif _UnitExists("target") and _UnitIsFriend("player", "target") and _UnitExists("targettarget") and not _UnitIsFriend("player", "targettarget") then
                 target = "targettarget"
             end
 
             if target then
-                win.metadata.title = _UnitName(target)
+                win.title = _UnitName(target)
 
                 -- Reset our counter which we use to keep track of current index in the dataset.
                 nr = 1
@@ -169,17 +160,18 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
                             -- Warn if this is ourselves and we are over the treshold.
                             local percent = 100 * data.value / math_max(0.000001, maxthreat)
                             if data.label == _UnitName("player") then
-                                if Skada.db.profile.modules.threattreshold and
-									Skada.db.profile.modules.threattreshold < percent and
-									(not data.isTanking or not Skada.db.profile.modules.notankwarnings) then
+                                if Skada.db.profile.modules.threattreshold and Skada.db.profile.modules.threattreshold < percent and (not data.isTanking or not Skada.db.profile.modules.notankwarnings) then
                                     we_should_warn = true
                                 end
                             end
 
                             data.valuetext = Skada:FormatValueText(
-                                format_threatvalue(data.threat), self.metadata.columns.Threat,
-                                getTPS(data.threat), self.metadata.columns.TPS,
-                                _format("%02.1f%%", percent), self.metadata.columns.Percent
+                                format_threatvalue(data.threat),
+                                self.metadata.columns.Threat,
+                                getTPS(data.threat),
+                                self.metadata.columns.TPS,
+                                _format("%02.1f%%", percent),
+                                self.metadata.columns.Percent
                             )
                         else
                             data.id = nil
@@ -202,7 +194,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
                     last_warn = time()
                 end
             else
-                win.metadata.title = self:GetName()
+                win.title = L["Threat"]
             end
         end
 
@@ -299,6 +291,12 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
         local opts = {
             type = "group",
             name = L["Threat"],
+            get = function(i)
+                return Skada.db.profile.modules[i[#i]]
+            end,
+            set = function(i, val)
+                Skada.db.profile.modules[i[#i]] = val
+            end,
             args = {
                 warnings = {
                     type = "group",
@@ -310,50 +308,38 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
                         notankwarnings = {
                             type = "toggle",
                             name = L["Do not warn while tanking"],
-                            order = 1,
-                            width = "full",
-                            get = function() return Skada.db.profile.modules.notankwarnings end,
-                            set = function() Skada.db.profile.modules.notankwarnings = not Skada.db.profile.modules.notankwarnings end
+                            order = 1
                         },
-                        flash = {
+                        threatflash = {
                             type = "toggle",
                             name = L["Flash screen"],
                             desc = L["This will cause the screen to flash as a threat warning."],
-                            order = 2,
-                            width = "full",
-                            get = function() return Skada.db.profile.modules.threatflash end,
-                            set = function(self, val) Skada.db.profile.modules.threatflash = val end
+                            order = 2
                         },
-                        shake = {
+                        threatshake = {
                             type = "toggle",
                             name = L["Shake screen"],
                             desc = L["This will cause the screen to shake as a threat warning."],
-                            order = 3,
-                            width = "full",
-                            get = function() return Skada.db.profile.modules.threatshake end,
-                            set = function(self, val) Skada.db.profile.modules.threatshake = not Skada.db.profile.modules.threatshake end
+                            order = 3
                         },
-                        playsound = {
+                        threatsound = {
                             type = "toggle",
                             name = L["Play sound"],
                             desc = L["This will play a sound as a threat warning."],
-                            order = 4,
-                            width = "full",
-                            get = function() return Skada.db.profile.modules.threatsound end,
-                            set = function(self, val) Skada.db.profile.modules.threatsound = not Skada.db.profile.modules.threatsound end
+                            order = 4
                         },
-                        sound = {
+                        threatsoundname = {
                             type = "select",
-                            dialogControl = "LSM30_Sound",
                             name = L["Threat sound"],
-                            desc = L["The sound that will be played when your threat percentage reaches a certain point."],
+                            desc = L[
+                                "The sound that will be played when your threat percentage reaches a certain point."
+                            ],
                             order = 5,
                             width = "full",
-                            values = AceGUIWidgetLSMlists.sound,
-                            get = function() return Skada.db.profile.modules.threatsoundname end,
-                            set = function(self, val) Skada.db.profile.modules.threatsoundname = val end
+                            dialogControl = "LSM30_Sound",
+                            values = AceGUIWidgetLSMlists.sound
                         },
-                        treshold = {
+                        threattreshold = {
                             type = "range",
                             name = L["Threat threshold"],
                             desc = L["When your threat reaches this level, relative to tank, warnings are shown."],
@@ -361,29 +347,21 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
                             width = "full",
                             min = 0,
                             max = 130,
-                            step = 1,
-                            get = function() return Skada.db.profile.modules.threattreshold end,
-                            set = function(self, val) Skada.db.profile.modules.threattreshold = val end
+                            step = 1
                         }
                     }
                 },
-                rawthreat = {
+                threatraw = {
                     type = "toggle",
                     name = L["Show raw threat"],
                     desc = L["Shows raw threat percentage relative to tank instead of modified for range."],
-                    order = 2,
-                    width = "full",
-                    get = function() return Skada.db.profile.modules.threatraw end,
-                    set = function() Skada.db.profile.modules.threatraw = not Skada.db.profile.modules.threatraw end
+                    order = 2
                 },
-                focustarget = {
+                threatfocustarget = {
                     type = "toggle",
                     name = L["Use focus target"],
                     desc = L["Shows threat on focus target, or focus target's target, when available."],
-                    order = 3,
-                    width = "full",
-                    get = function() return Skada.db.profile.modules.threatfocustarget end,
-                    set = function() Skada.db.profile.modules.threatfocustarget = not Skada.db.profile.modules.threatfocustarget end
+                    order = 3
                 }
             }
         }
