@@ -55,11 +55,11 @@ function Skada:OpenMenu(window)
             end
 
             -- create window
-			info = _UIDropDownMenu_CreateInfo()
-			info.text = L["Create window"]
-			info.func = Skada.NewWindow
-			info.notCheckable = 1
-			_UIDropDownMenu_AddButton(info, level)
+            info = _UIDropDownMenu_CreateInfo()
+            info.text = L["Create window"]
+            info.func = Skada.NewWindow
+            info.notCheckable = 1
+            _UIDropDownMenu_AddButton(info, level)
 
             -- toggle window
             info = _UIDropDownMenu_CreateInfo()
@@ -186,6 +186,9 @@ function Skada:OpenMenu(window)
                     info.text = L["Total"]
                     info.func = function()
                         window.selectedset = "total"
+                        if window.child then
+                            window.child.selectedset = "total"
+                        end
                         Skada:Wipe()
                         Skada:UpdateDisplay(true)
                     end
@@ -196,6 +199,9 @@ function Skada:OpenMenu(window)
                     info.text = L["Current"]
                     info.func = function()
                         window.selectedset = "current"
+                        if window.child then
+                            window.child.selectedset = "current"
+                        end
                         Skada:Wipe()
                         Skada:UpdateDisplay(true)
                     end
@@ -207,7 +213,9 @@ function Skada:OpenMenu(window)
                         info.text = Skada:GetSetLabel(set)
                         info.func = function()
                             window.selectedset = i
-                            if window.child then window.child.selectedset = i end
+                            if window.child then
+                                window.child.selectedset = i
+                            end
                             Skada:Wipe()
                             Skada:UpdateDisplay(true)
                         end
@@ -255,11 +263,11 @@ function Skada:OpenMenu(window)
                 info.func = function()
                     window.db.snapto = not window.db.snapto
                     if not window.db.snapto then
-						for _, win in ipairs(Skada:GetWindows()) do
-							if win.db.snapped[window.db.name] then
-								win.db.snapped[window.db.name] = nil
-							end
-						end
+                        for _, win in ipairs(Skada:GetWindows()) do
+                            if win.db.snapped[window.db.name] then
+                                win.db.snapped[window.db.name] = nil
+                            end
+                        end
                     end
                     Skada:ApplySettings()
                 end
@@ -343,9 +351,7 @@ function Skada:SegmentMenu(window)
 
     local info = _UIDropDownMenu_CreateInfo()
     segmentsmenu.initialize = function(self, level)
-        if not level then
-            return
-        end
+        if not level then return end
 
         info.isTitle = 1
         info.text = L["Segment"]
@@ -356,6 +362,9 @@ function Skada:SegmentMenu(window)
         info.text = L["Total"]
         info.func = function()
             window.selectedset = "total"
+            if window.child then
+                window.child.selectedset = "total"
+            end
             Skada:Wipe()
             Skada:UpdateDisplay(true)
         end
@@ -366,6 +375,9 @@ function Skada:SegmentMenu(window)
         info.text = L["Current"]
         info.func = function()
             window.selectedset = "current"
+            if window.child then
+                window.child.selectedset = "current"
+            end
             Skada:Wipe()
             Skada:UpdateDisplay(true)
         end
@@ -377,7 +389,9 @@ function Skada:SegmentMenu(window)
             info.text = Skada:GetSetLabel(set)
             info.func = function()
                 window.selectedset = i
-                if window.child then window.child.selectedset = i end
+                if window.child then
+                    window.child.selectedset = i
+                end
                 Skada:Wipe()
                 Skada:UpdateDisplay(true)
             end
@@ -403,7 +417,8 @@ do
     end
 
     function Skada:ModeMenu(window)
-        self.modesmenu = self.modesmenu or _CreateFrame("Frame", "SkadaWindowButtonsModes", UIParent, "UIDropDownMenuTemplate")
+        self.modesmenu =
+            self.modesmenu or _CreateFrame("Frame", "SkadaWindowButtonsModes", UIParent, "UIDropDownMenuTemplate")
         local modesmenu = self.modesmenu
         local info = _UIDropDownMenu_CreateInfo()
 
@@ -524,7 +539,7 @@ do
                 modebox:AddItem(mode:GetName(), mode:GetName())
             end
             modebox:SetCallback("OnValueChanged", function(f, e, value)
-				Skada.db.profile.report.mode = value
+                Skada.db.profile.report.mode = value
             end)
             modebox:SetValue(Skada.db.profile.report.mode or Skada:GetModes()[1])
             frame:AddChild(modebox)
@@ -605,7 +620,7 @@ do
             whisperbox:SetText(Skada.db.profile.report.target or "")
 
             whisperbox:SetCallback("OnEnterPressed", function(box, event, text)
-				-- remove spaces which are always non-meaningful and can sometimes cause problems
+                -- remove spaces which are always non-meaningful and can sometimes cause problems
                 if strlenutf8(text) == #text then
                     local ntext = text:gsub("%s", "")
                     if ntext ~= text then
