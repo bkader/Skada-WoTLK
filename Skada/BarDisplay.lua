@@ -346,19 +346,27 @@ end
 -- ======================================================= --
 
 do
+    local function inserthistory(win)
+        tinsert(win.history, win.selectedmode)
+        if win.child then
+            inserthistory(win.child)
+        end
+    end
+
+    local function onEnter(win, id, label, mode)
+        mode:Enter(win, id, label)
+        if win.child then
+            onEnter(win.child, id, label, mode)
+        end
+    end
+
     local function showmode(win, id, label, mode)
         if win.selectedmode then
-            tinsert(win.history, win.selectedmode)
-            if win.child then
-                tinsert(win.child.history, win.selectedmode)
-            end
+            inserthistory(win)
         end
 
         if mode.Enter then
-            mode:Enter(win, id, label)
-            if win.child then
-                mode:Enter(win.child, id, label)
-            end
+            onEnter(win, id, label, mode)
         end
 
         win:DisplayMode(mode)

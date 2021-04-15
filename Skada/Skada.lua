@@ -609,6 +609,13 @@ function Window:get_selected_set()
 	return Skada:find_set(self.selectedset)
 end
 
+function Window:set_selected_set(set)
+    self.selectedset = set
+    if self.child then
+        self.child:set_selected_set(set)
+    end
+end
+
 function Window:DisplayMode(mode)
 	if type(mode) ~= "table" then
 		return
@@ -743,9 +750,6 @@ function Window:RightClick(_, button)
 	if self.selectedmode then
 		if #self.history > 0 then
 			self:DisplayMode(tremove(self.history))
-			if self.child then
-				tremove(self.child.history)
-			end
 		else
 			self:DisplayModes(self.selectedset)
 		end

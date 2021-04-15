@@ -48,10 +48,7 @@ end
 local function log_aurarefresh(set, aura)
     if set then
         local player = Skada:get_player(set, aura.playerid, aura.playername, aura.playerflags)
-        if
-            player and player.auras and aura.spellname and player.auras[aura.spellname] and
-                player.auras[aura.spellname].active > 0
-         then
+        if player and player.auras and aura.spellname and player.auras[aura.spellname] and player.auras[aura.spellname].active > 0 then
             player.auras[aura.spellname].refresh = (player.auras[aura.spellname].refresh or 0) + 1
         end
     end

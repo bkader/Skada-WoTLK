@@ -185,10 +185,7 @@ function Skada:OpenMenu(window)
                     info = _UIDropDownMenu_CreateInfo()
                     info.text = L["Total"]
                     info.func = function()
-                        window.selectedset = "total"
-                        if window.child then
-                            window.child.selectedset = "total"
-                        end
+                        window:set_selected_set("total")
                         Skada:Wipe()
                         Skada:UpdateDisplay(true)
                     end
@@ -198,10 +195,7 @@ function Skada:OpenMenu(window)
                     info = _UIDropDownMenu_CreateInfo()
                     info.text = L["Current"]
                     info.func = function()
-                        window.selectedset = "current"
-                        if window.child then
-                            window.child.selectedset = "current"
-                        end
+                        window:set_selected_set("current")
                         Skada:Wipe()
                         Skada:UpdateDisplay(true)
                     end
@@ -212,10 +206,7 @@ function Skada:OpenMenu(window)
                         info = _UIDropDownMenu_CreateInfo()
                         info.text = Skada:GetSetLabel(set)
                         info.func = function()
-                            window.selectedset = i
-                            if window.child then
-                                window.child.selectedset = i
-                            end
+                            window:set_selected_set(i)
                             Skada:Wipe()
                             Skada:UpdateDisplay(true)
                         end
@@ -361,10 +352,7 @@ function Skada:SegmentMenu(window)
         info = _UIDropDownMenu_CreateInfo()
         info.text = L["Total"]
         info.func = function()
-            window.selectedset = "total"
-            if window.child then
-                window.child.selectedset = "total"
-            end
+            window:set_selected_set("total")
             Skada:Wipe()
             Skada:UpdateDisplay(true)
         end
@@ -374,10 +362,7 @@ function Skada:SegmentMenu(window)
         info = _UIDropDownMenu_CreateInfo()
         info.text = L["Current"]
         info.func = function()
-            window.selectedset = "current"
-            if window.child then
-                window.child.selectedset = "current"
-            end
+            window:set_selected_set("current")
             Skada:Wipe()
             Skada:UpdateDisplay(true)
         end
@@ -388,10 +373,7 @@ function Skada:SegmentMenu(window)
             info = _UIDropDownMenu_CreateInfo()
             info.text = Skada:GetSetLabel(set)
             info.func = function()
-                window.selectedset = i
-                if window.child then
-                    window.child.selectedset = i
-                end
+                window:set_selected_set(i)
                 Skada:Wipe()
                 Skada:UpdateDisplay(true)
             end
