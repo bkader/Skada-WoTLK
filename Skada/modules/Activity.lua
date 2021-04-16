@@ -54,6 +54,7 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
         end
 
         win.metadata.maxvalue = settime
+        win.title = L["Activity"]
     end
 
     function mod:OnEnable()

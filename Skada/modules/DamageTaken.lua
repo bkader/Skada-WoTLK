@@ -615,6 +615,7 @@ Skada:AddLoadableModule("Damage taken by spell", function(Skada, L)
         end
 
         win.metadata.maxvalue = max
+        win.title = L["Damage taken by spell"]
     end
 
     function mod:OnEnable()
