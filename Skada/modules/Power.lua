@@ -26,6 +26,7 @@ Skada:AddLoadableModule("Power gained", function(Skada, L)
             local player = Skada:get_player(set, gain.playerid, gain.playername, gain.playerflags)
             if player then
                 -- make sure tables are created.
+                player.power = player.power or {}
                 player.power[gain.type] = player.power[gain.type] or {amount = 0, spells = {}}
                 set.power[gain.type] = set.power[gain.type] or 0
 
@@ -41,8 +42,7 @@ Skada:AddLoadableModule("Power gained", function(Skada, L)
                         amount = 0
                     }
                 end
-                player.power[gain.type].spells[gain.spellname].amount =
-                    player.power[gain.type].spells[gain.spellname].amount + gain.amount
+                player.power[gain.type].spells[gain.spellname].amount = player.power[gain.type].spells[gain.spellname].amount + gain.amount
             end
         end
     end
