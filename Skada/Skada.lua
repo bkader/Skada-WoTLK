@@ -90,8 +90,7 @@ local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAf
 local UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitGUID, UnitName, UnitClass, UnitIsConnected
 local CombatLogClearEntries = CombatLogClearEntries
 
-local RAID_FLAGS =
-    COMBATLOG_OBJECT_AFFILIATION_MINE + COMBATLOG_OBJECT_AFFILIATION_PARTY + COMBATLOG_OBJECT_AFFILIATION_RAID
+local RAID_FLAGS = COMBATLOG_OBJECT_AFFILIATION_MINE + COMBATLOG_OBJECT_AFFILIATION_PARTY + COMBATLOG_OBJECT_AFFILIATION_RAID
 local PET_FLAGS = COMBATLOG_OBJECT_TYPE_PET + COMBATLOG_OBJECT_TYPE_GUARDIAN
 local SHAM_FLAGS = COMBATLOG_OBJECT_TYPE_NPC + COMBATLOG_OBJECT_CONTROL_NPC
 
@@ -248,16 +247,12 @@ do
 
     -- create a new window
     function Window:new()
-        return setmetatable(
-            {
-                usealt = true,
-                dataset = {},
-                metadata = {},
-                history = {},
-                changed = false
-            },
-            mt
-        )
+        return setmetatable({
+            dataset = {},
+            metadata = {},
+            history = {},
+            changed = false
+        }, mt)
     end
 
     -- add window options
@@ -420,7 +415,7 @@ do
                     return list
                 end,
                 get = function()
-                    return db.child
+                    return db.child or ""
                 end,
                 set = function(_, child)
                     db.child = child == "" and nil or child
@@ -846,6 +841,8 @@ function Skada:DeleteWindow(name)
         if win.db.name == name then
             win:destroy()
             wipe(tremove(windows, i))
+        elseif win.db.child == name then
+            win.db.child, win.child = nil, nil
         end
     end
 
@@ -1418,10 +1415,7 @@ do
         local owner = pets[action.playerid]
 
         -- we try to associate pets and and guardians with their owner
-        if
-            not owner and action.playerflags and band(action.playerflags, PET_FLAGS) ~= 0 and
-                band(action.playerflags, RAID_FLAGS) ~= 0
-         then
+        if not owner and action.playerflags and band(action.playerflags, PET_FLAGS) ~= 0 and band(action.playerflags, RAID_FLAGS) ~= 0 then
             if band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
                 owner = {id = UnitGUID("player"), name = UnitName("player")}
                 pets[action.playerid] = owner
@@ -1674,10 +1668,7 @@ function Skada:Command(param)
         w1, w2, w3 = nil, nil, nil
 
         -- Sanity checks.
-        if
-            chan and (chan == "say" or chan == "guild" or chan == "raid" or chan == "party" or chan == "officer") and
-                (report_mode_name and find_mode(report_mode_name))
-         then
+        if chan and (chan == "say" or chan == "guild" or chan == "raid" or chan == "party" or chan == "officer") and (report_mode_name and find_mode(report_mode_name)) then
             self:Report(chan, "preset", report_mode_name, "current", max)
         else
             self:Print("Usage:")
@@ -1863,10 +1854,7 @@ function Skada:ZoneCheck()
     local isininstance = inInstance and (instanceType == "party" or instanceType == "raid")
     local isinpvp = is_in_pvp()
 
-    if
-        isininstance and wasininstance ~= nil and not wasininstance and self.db.profile.reset.instance ~= 1 and
-            Skada:CanReset()
-     then
+    if isininstance and wasininstance ~= nil and not wasininstance and self.db.profile.reset.instance ~= 1 and Skada:CanReset() then
         if self.db.profile.reset.instance == 3 then
             self:ShowPopup()
         else
@@ -2023,10 +2011,7 @@ function Skada:UpdateDisplay(force)
                         if set then
                             win.selectedmode:Update(win, set)
                         else
-                            self:Print(
-                                "No set available to pass to " ..
-                                    win.selectedmode:GetName() .. " Update function! Try to reset Skada."
-                            )
+                            self:Print("No set available to pass to " .. win.selectedmode:GetName() .. " Update function! Try to reset Skada.")
                         end
                     elseif win.selectedmode.GetName then
                         self:Print("Mode " .. win.selectedmode:GetName() .. " does not have an Update function!")
@@ -2767,18 +2752,8 @@ function Skada:OnEnable()
     -- please do not localize this line!
     L["Auto Attack"] = select(1, GetSpellInfo(6603))
 
-    -- add Gunship adds
-    -- horde
-    LBI.BossIDs[36960] = true -- Kor'kron Sergeant, Gunship add
-    LBI.BossIDs[36968] = true -- Kor'kron Axethrower, Gunship add
-    LBI.BossIDs[36982] = true -- Kor'kron Rocketeer, Gunship add
-    LBI.BossIDs[37117] = true -- Kor'kron Battle-Mage, Gunship add
+    -- Gunship
     LBI.BossIDs[37215] = true -- Orgrim's Hammer
-    -- alliance
-    LBI.BossIDs[36961] = true -- Skybreaker Sergeant, Gunship add
-    LBI.BossIDs[36969] = true -- Skybreaker Rifleman, Gunship add
-    LBI.BossIDs[36978] = true -- Skybreaker Mortar Soldier, Gunship add
-    LBI.BossIDs[37116] = true -- Skybreaker Sorcerer, Gunship add
     LBI.BossIDs[37540] = true -- The Skybreaker
 
     LBB["Kor'kron Sergeant"] = L["Kor'kron Sergeant"]
@@ -3145,9 +3120,27 @@ do
     }
 
     -- bosses to be be ignored for smart stop feature
+    -- this was added because the following NPCs are
+    -- used to fix segment names, as soon as they die
+    -- skada will stop collecting and to prevent this
+    -- we have to ignore them.
     local dumbbosses = {
+        -- Icecrown Gunship Battle
+        [LBB["Icecrown Gunship Battle"]] = true,
+        [L["Kor'kron Sergeant"]] = true,
+        [L["Kor'kron Axethrower"]] = true,
+        [L["Kor'kron Rocketeer"]] = true,
+        [L["Kor'kron Battle-Mage"]] = true,
+        [L["Skybreaker Sergeant"]] = true,
+        [L["Skybreaker Rifleman"]] = true,
+        [L["Skybreaker Mortar Soldier"]] = true,
+        [L["Skybreaker Sorcerer"]] = true,
+        -- Valithria Dreamwalker
         [LBB["Valithria Dreamwalker"]] = true,
-        [LBB["Icecrown Gunship Battle"]] = true
+        [L["Dream Cloud"]] = true,
+        [L["Blazing Skeleton"]] = true,
+        [L["Blistering Zombie"]] = true,
+        [L["Gluttonous Abomination"]] = true
     }
 
     local combatlogevents = {}
@@ -3222,8 +3215,7 @@ do
                 local fail = false
 
                 if mod.flags.src_is_interesting_nopets then
-                    local src_is_interesting_nopets =
-                        (band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID]
+                    local src_is_interesting_nopets = (band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID]
 
                     if src_is_interesting_nopets then
                         src_is_interesting = true
@@ -3233,8 +3225,7 @@ do
                 end
 
                 if not fail and mod.flags.dst_is_interesting_nopets then
-                    local dst_is_interesting_nopets =
-                        (band(dstFlags, RAID_FLAGS) ~= 0 and band(dstFlags, PET_FLAGS) == 0) or players[dstGUID]
+                    local dst_is_interesting_nopets = (band(dstFlags, RAID_FLAGS) ~= 0 and band(dstFlags, PET_FLAGS) == 0) or players[dstGUID]
                     if dst_is_interesting_nopets then
                         dst_is_interesting = true
                     else
@@ -3315,10 +3306,10 @@ do
             end
         end
 
-        if self.current and eventtype == "UNIT_DIED" and self.current.gotboss and self.current.mobname == dstName then
+        if self.current and self.current.gotboss and self.current.mobname == dstName and (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") then
             self.current.success = true
-            if self.db.profile.smartstop and not dumbbosses[self.current.mobname] then
-                self.callbacks:Fire("ENCOUNTER_END", Skada.current)
+            if self.db.profile.smartstop and not dumbbosses[dstName] then
+                self.callbacks:Fire("ENCOUNTER_END", self.current)
                 self.After(1, function() self:StopSegment() end)
             end
         end
