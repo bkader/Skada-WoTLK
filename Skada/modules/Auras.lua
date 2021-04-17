@@ -249,7 +249,7 @@ do
         return count, uptime
     end
 
-    function updatefunc(auratype, win, set)
+    function updatefunc(auratype, win, set, title)
         if not set or not auratype then
             return
         end
@@ -283,11 +283,12 @@ do
             end
         end
         win.metadata.maxvalue = max
+        win.title = title
     end
 end
 
 -- spells per player list
-local function spellupdatefunc(auratype, win, set, playerid, playername)
+local function spellupdatefunc(auratype, win, set, playerid, playername, fmt)
     if not set or not auratype then
         return
     end
@@ -297,6 +298,7 @@ local function spellupdatefunc(auratype, win, set, playerid, playername)
         local maxtime = math_min(Skada:GetSetTime(set), Skada:PlayerActiveTime(set, player))
         if maxtime and maxtime > 0 then
             win.metadata.maxvalue = maxtime
+            if fmt then win.title = format(fmt, player.name) end
             local nr = 1
 
             for spellname, spell in _pairs(player.auras) do
@@ -405,13 +407,11 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
     end
 
     function spellmod:Update(win, set)
-        win.title = _format(L["%s's buffs"], win.playername or UNKNOWN)
-        spellupdatefunc("BUFF", win, set, win.playerid, win.playername)
+        spellupdatefunc("BUFF", win, set, win.playerid, win.playername, L["%s's buffs"])
     end
 
     function mod:Update(win, set)
-        win.title = L["Buffs"]
-        updatefunc("BUFF", win, set)
+        updatefunc("BUFF", win, set, L["Buffs"])
     end
 
     local function buff_tooltip(win, set, label, tooltip)
@@ -546,13 +546,11 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
     end
 
     function spellmod:Update(win, set)
-        win.title = _format(L["%s's debuffs"], win.playername or UNKNOWN)
-        spellupdatefunc("DEBUFF", win, set, win.playerid, win.playername)
+        spellupdatefunc("DEBUFF", win, set, win.playerid, win.playername, L["%s's debuffs"])
     end
 
     function mod:Update(win, set)
-        win.title = L["Debuffs"]
-        updatefunc("DEBUFF", win, set)
+        updatefunc("DEBUFF", win, set, L["Debuffs"])
     end
 
     local function debuff_tooltip(win, set, label, tooltip)
