@@ -389,8 +389,12 @@ function barListPrototype:AdjustButtons()
         btn:ClearAllPoints()
 
         if btn:IsShown() then
-            if nr == 0 then
+            if nr == 0 and self.orientation == 3 then
+                btn:SetPoint("TOPLEFT", self.button, "TOPLEFT", 5, 0 - (max(self.button:GetHeight() - btn:GetHeight(), 0) / 2))
+            elseif nr == 0 then
                 btn:SetPoint("TOPRIGHT", self.button, "TOPRIGHT", -5, 0 - (max(self.button:GetHeight() - btn:GetHeight(), 0) / 2))
+            elseif self.orientation == 3 then
+                btn:SetPoint("TOPLEFT", lastbtn, "TOPRIGHT", 2, 0)
             else
                 btn:SetPoint("TOPRIGHT", lastbtn, "TOPLEFT", -2, 0)
             end
@@ -398,10 +402,17 @@ function barListPrototype:AdjustButtons()
             nr = nr + 1
         end
     end
-    if lastbtn then
-        self.button:GetFontString():SetPoint("RIGHT", lastbtn, "LEFT")
+
+    self.button.text:SetJustifyH(self.orientation == 3 and "RIGHT" or "LEFT")
+    if lastbtn and self.orientation == 3 then
+        self.button.text:SetPoint("LEFT", lastbtn, "RIGHT")
+        self.button.text:SetPoint("RIGHT", self.button, "RIGHT", -5, 0)
+    elseif lastbtn then
+        self.button.text:SetPoint("LEFT", self.button, "LEFT", 5, 0)
+        self.button.text:SetPoint("RIGHT", lastbtn, "LEFT")
     else
-        self.button:GetFontString():SetPoint("RIGHT", self.button, "RIGHT")
+        self.button.text:SetPoint("LEFT", self.button, "LEFT", 5, 0)
+        self.button.text:SetPoint("RIGHT", self.button, "RIGHT", -5, 0)
     end
 end
 
@@ -477,6 +488,7 @@ do
         list.button:SetText(name)
         list.button:SetBackdrop(frame_defaults)
         list.button:SetNormalFontObject(myfont)
+        list.button.text = list.button:GetFontString()
 
         list.length = length or 200
         list.thickness = thickness or 15
