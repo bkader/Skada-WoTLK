@@ -3127,7 +3127,7 @@ do
     -- used to fix segment names, as soon as they die
     -- skada will stop collecting and to prevent this
     -- we have to ignore them.
-    local dumbbosses = {
+    local ignoredbosses = {
         -- Icecrown Gunship Battle
         [LBB["Icecrown Gunship Battle"]] = true,
         [L["Kor'kron Sergeant"]] = true,
@@ -3144,10 +3144,46 @@ do
         [L["Blazing Skeleton"]] = true,
         [L["Blistering Zombie"]] = true,
         [L["Gluttonous Abomination"]] = true,
-        -- Trial of the Crusader
-        [LBB["Gormok the Impaler"]] = true,
-        [LBB["Acidmaw"]] = true,
-        [LBB["Dreadscale"]] = true
+        [37985] = true,
+        [36791] = true,
+        [37934] = true,
+        [37886] = true,
+        -- Trial of the Crusader --
+        -- Northrend Beats
+        [34796] = true, -- Gormok
+        [35144] = true, -- Acidmaw
+        [34799] = true, -- Dreadscale
+        -- Faction champions
+        [34461] = true, -- Tyrius Duskblade <Death Knight>
+        [34460] = true, -- Kavina Grovesong <Druid>
+        [34469] = true, -- Melador Valestrider <Druid>
+        [34467] = true, -- Alyssia Moonstalker <Hunter>
+        [34468] = true, -- Noozle Whizzlestick <Mage>
+        [34465] = true, -- Velanaa <Paladin>
+        [34471] = true, -- Baelnor Lightbearer <Paladin>
+        [34466] = true, -- Anthar Forgemender <Priest>
+        [34473] = true, -- Brienna Nightfell <Priest>
+        [34472] = true, -- Irieth Shadowstep <Rogue>
+        [34470] = true, -- Saamul <Shaman>
+        [34463] = true, -- Shaabad <Shaman>
+        [34474] = true, -- Serissa Grimdabbler <Warlock>
+        [34475] = true, -- Shocuul <Warrior>
+        [34458] = true, -- Gorgrim Shadowcleave <Death Knight>
+        [34451] = true, -- Birana Stormhoof <Druid>
+        [34459] = true, -- Erin Misthoof <Druid>
+        [34448] = true, -- Ruj'kah <Hunter>
+        [34449] = true, -- Ginselle Blightslinger <Mage>
+        [34445] = true, -- Liandra Suncaller <Paladin>
+        [34456] = true, -- Malithas Brightblade <Paladin>
+        [34447] = true, -- Caiphus the Stern <Priest>
+        [34441] = true, -- Vivienne Blackwhisper <Priest>
+        [34454] = true, -- Maz'dinah <Rogue>
+        [34444] = true, -- Thrakgar	<Shaman>
+        [34455] = true, -- Broln Stouthorn <Shaman>
+        [34450] = true, -- Harkzog <Warlock>
+        [34453] = true, -- Narrhok Steelbreaker <Warrior>
+        [35610] = true, -- Cat <Ruj'kah's Pet / Alyssia Moonstalker's Pet>
+        [35465] = true -- Zhaagrym <Harkzog's Minion / Serissa Grimdabbler's Minion>
     }
 
     local combatlogevents = {}
@@ -3242,9 +3278,7 @@ do
 
                 if not fail and mod.flags.src_is_interesting or mod.flags.src_is_not_interesting then
                     if not src_is_interesting then
-                        src_is_interesting =
-                            band(srcFlags, RAID_FLAGS) ~= 0 or (band(srcFlags, PET_FLAGS) ~= 0 and pets[srcGUID]) or
-                            players[srcGUID]
+                        src_is_interesting = band(srcFlags, RAID_FLAGS) ~= 0 or (band(srcFlags, PET_FLAGS) ~= 0 and pets[srcGUID]) or players[srcGUID]
                     end
 
                     if mod.flags.src_is_interesting and not src_is_interesting then
@@ -3258,9 +3292,7 @@ do
 
                 if not fail and mod.flags.dst_is_interesting or mod.flags.dst_is_not_interesting then
                     if not dst_is_interesting then
-                        dst_is_interesting =
-                            band(dstFlags, RAID_FLAGS) ~= 0 or (band(dstFlags, PET_FLAGS) ~= 0 and pets[dstGUID]) or
-                            players[dstGUID]
+                        dst_is_interesting = band(dstFlags, RAID_FLAGS) ~= 0 or (band(dstFlags, PET_FLAGS) ~= 0 and pets[dstGUID]) or players[dstGUID]
                     end
 
                     if mod.flags.dst_is_interesting and not dst_is_interesting then
@@ -3315,7 +3347,7 @@ do
 
         if self.current and self.current.gotboss and self.current.mobname == dstName and (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") then
             self.current.success = true
-            if self.db.profile.smartstop and not dumbbosses[dstName] then
+            if self.db.profile.smartstop and not (ignoredbosses[dstName] or ignoredbosses[tonumber(dstGUID:sub(9, 12), 16)]) then
                 self.callbacks:Fire("ENCOUNTER_END", self.current)
                 self.After(1, function() self:StopSegment() end)
             end
