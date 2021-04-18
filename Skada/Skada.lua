@@ -3144,6 +3144,10 @@ do
         [L["Blazing Skeleton"]] = true,
         [L["Blistering Zombie"]] = true,
         [L["Gluttonous Abomination"]] = true
+        -- Trial of the Crusader
+        [LBB["Gormok the Impaler"]] = true,
+        [LBB["Acidmaw"]] = true,
+        [LBB["Dreadscale"]] = true,
     }
 
     local combatlogevents = {}
