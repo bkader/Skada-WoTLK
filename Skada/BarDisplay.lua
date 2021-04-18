@@ -1169,11 +1169,24 @@ function mod:AddDisplayOptions(win, options)
                     Skada:ApplySettings()
                 end
             },
+            combattimer = {
+                type = "toggle",
+                name = L["Encounter timer"],
+                desc = L["When enabled, a stopwatch is shown on the left side of the text."],
+                order = 3,
+                get = function()
+                    return db.combattimer
+                end,
+                set = function()
+                    db.combattimer = not db.combattimer
+                    Skada:ApplySettings()
+                end
+            },
             height = {
                 type = "range",
                 name = L["Title height"],
                 desc = L["The height of the title frame."],
-                order = 3,
+                order = 4,
                 width = "full",
                 min = 10,
                 max = 50,
@@ -1185,14 +1198,14 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Bar font"],
                 desc = L["The font used by all bars."],
                 values = AceGUIWidgetLSMlists.font,
-                order = 4,
+                order = 5,
                 width = "full"
             },
             fontsize = {
                 type = "range",
                 name = L["Title font size"],
                 desc = L["The font size of the title bar."],
-                order = 5,
+                order = 6,
                 width = "full",
                 min = 7,
                 max = 40,
@@ -1202,7 +1215,7 @@ function mod:AddDisplayOptions(win, options)
                 type = "select",
                 name = L["Font flags"],
                 desc = L["Sets the font flags."],
-                order = 6,
+                order = 7,
                 width = "full",
                 values = {
                     [""] = NONE,
@@ -1216,7 +1229,7 @@ function mod:AddDisplayOptions(win, options)
                 type = "color",
                 name = L["Title color"],
                 desc = L["The text color of the title."],
-                order = 7,
+                order = 8,
                 width = "full",
                 hasAlpha = true,
                 get = function()
@@ -1233,7 +1246,7 @@ function mod:AddDisplayOptions(win, options)
                 dialogControl = "LSM30_Statusbar",
                 name = L["Background texture"],
                 desc = L["The texture used as the background of the title."],
-                order = 8,
+                order = 9,
                 width = "full",
                 values = AceGUIWidgetLSMlists.statusbar
             },
@@ -1241,7 +1254,7 @@ function mod:AddDisplayOptions(win, options)
                 type = "color",
                 name = L["Background color"],
                 desc = L["The background color of the title."],
-                order = 9,
+                order = 10,
                 width = "full",
                 hasAlpha = true,
                 get = function(_)
@@ -1257,7 +1270,7 @@ function mod:AddDisplayOptions(win, options)
                 dialogControl = "LSM30_Border",
                 name = L["Border texture"],
                 desc = L["The texture used for the border of the title."],
-                order = 10,
+                order = 11,
                 width = "full",
                 values = AceGUIWidgetLSMlists.border
             },
@@ -1266,7 +1279,7 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Border color"],
                 desc = L["The color used for the border."],
                 hasAlpha = true,
-                order = 11,
+                order = 12,
                 width = "full",
                 get = function()
                     return db.title.bordercolor.r, db.title.bordercolor.g, db.title.bordercolor.b, db.title.bordercolor.a
@@ -1280,7 +1293,7 @@ function mod:AddDisplayOptions(win, options)
                 type = "range",
                 name = L["Border thickness"],
                 desc = L["The thickness of the borders."],
-                order = 12,
+                order = 13,
                 width = "full",
                 min = 0,
                 max = 50,
@@ -1289,7 +1302,7 @@ function mod:AddDisplayOptions(win, options)
             buttons = {
                 type = "group",
                 name = L["Buttons"],
-                order = 13,
+                order = 14,
                 width = "full",
                 inline = true,
                 get = function(i)

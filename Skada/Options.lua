@@ -65,6 +65,7 @@ Skada.windowdefaults = {
     hidden = false,
     enabletitle = true,
     titleset = true,
+    combattimer = false,
     set = "current",
     mode = nil,
     display = "bar",

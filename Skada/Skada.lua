@@ -2262,6 +2262,9 @@ do
         if disabled and (self.selectedset == "current" or self.selectedset == "total") then
             -- indicate when data collection is disabled
             name = name .. "  |cFFFF0000" .. L["DISABLED"] .. "|r"
+        elseif self.db.enabletitle and self.db.combattimer and (self.selectedset == "current" or self.selectedset == "last") and (Skada.current or Skada.last) then
+            -- thanks Details! for the idea.
+            name = format("[%s] %s", Skada:GetFormatedSetTime(Skada.current or Skada.last), name)
         end
         self.metadata.title = name
         self.display:SetTitle(self, name)

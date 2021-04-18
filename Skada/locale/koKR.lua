@@ -106,6 +106,8 @@ if not L then return end
 -- L["Enables the title bar."] = ""
 -- L["Include set"] = ""
 -- L["Include set name in title bar"] = ""
+-- L["Encounter timer"] = ""
+-- L["When enabled, a stopwatch is shown on the left side of the text."] = ""
 -- L["Title height"] = ""
 -- L["The height of the title frame."] = ""
 -- L["Title font size"] = ""
