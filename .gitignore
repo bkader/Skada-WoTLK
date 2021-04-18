@@ -1,5 +1,6 @@
 .luacheckrc
 luacheck.exe
 Makefile
+_dev
 *.zip
 Skada-Dev.lua
