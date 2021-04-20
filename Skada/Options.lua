@@ -439,7 +439,8 @@ Skada.options = {
                     type = "toggle",
                     name = L["Smart stop"],
                     desc = L["Automatically stops the current segment after the boss has died.\nUseful to avoid collecting data in case of a combat bug."],
-                    order = 14
+                    order = 14,
+                    disabled = true
                 },
                 tentativecombatstart = {
                     type = "toggle",
@@ -512,11 +513,11 @@ Skada.options = {
                     type = "toggle",
                     name = L["Memory Check"],
                     desc = function()
-                        local num = Skada.db.profile.setstokeep or 15
-                        if num <= 2 then num = 5
-                        elseif num <= 5 then num = num * 2.25
-                        else num = num * 2 end
-                        return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], num)
+                        if Skada.db.profile.setstokeep == 0 then
+                            return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], 30)
+                        end
+
+                        return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], (Skada.db.profile.setstokeep * 1.25) + 5)
                     end,
                     order = 97,
                     width = "full"

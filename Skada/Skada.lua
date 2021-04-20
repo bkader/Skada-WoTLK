@@ -2780,13 +2780,11 @@ function Skada:MemoryCheck()
         UpdateAddOnMemoryUsage()
         local mem = GetAddOnMemoryUsage("Skada")
 
-        local compare = self.db.profile.setstokeep or 15
-        if compare <= 2 then
-            compare = 5000
-        elseif compare <= 10 then
-            compare = compare * 2250
+        local compare
+        if self.db.profile.setstokeep == 0 then
+            compare = 30000
         else
-            compare = compare * 2000
+            compare = (self.db.profile.setstokeep * 1250) + 5000
         end
 
         if mem > compare then
