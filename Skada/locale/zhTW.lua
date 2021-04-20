@@ -229,7 +229,7 @@ if not L then return end
 -- L["Set format"] = ""
 -- L["Controls the way set names are displayed."] = ""
 -- L["Memory Check"] = ""
--- L["Checks memory usage and warns you if it is greater than or equal to 30mb."] = ""
+-- L["Checks memory usage and warns you if it is greater than or equal to %dmb."] = ""
 -- L["Data segments to keep"] = ""
 -- L["The number of fight segments to keep. Persistent segments are not included in this."] = ""
 -- L["Update frequency"] = ""

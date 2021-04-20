@@ -2,6 +2,7 @@ assert(Skada, "Skada not found!")
 
 local Skada = Skada
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
+local fmt = string.format
 
 Skada.resetoptions = {[1] = NO, [2] = YES, [3] = L["Ask"]}
 
@@ -510,7 +511,13 @@ Skada.options = {
                 memorycheck = {
                     type = "toggle",
                     name = L["Memory Check"],
-                    desc = L["Checks memory usage and warns you if it is greater than or equal to 30mb."],
+                    desc = function()
+                        local num = Skada.db.profile.setstokeep or 15
+                        if num == 0 then num = 3
+                        elseif num <= 5 then num = num * 2.25
+                        else num = num * 2 end
+                        return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], num)
+                    end,
                     order = 97,
                     width = "full"
                 },
