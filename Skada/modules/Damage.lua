@@ -594,21 +594,6 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
     -- used to record damage on useful targets
     --
     function mod:OnInitialize()
-        --
-        -- we make sure to add our missing entries to LibBabble-Boss
-        --
-        LBB["Cult Adherent"] = L["Cult Adherent"]
-        LBB["Cult Fanatic"] = L["Cult Fanatic"]
-        LBB["Deformed Fanatic"] = L["Deformed Fanatic"]
-        LBB["Empowered Adherent"] = L["Empowered Adherent"]
-        LBB["Gas Cloud"] = L["Gas Cloud"]
-        LBB["Reanimated Adherent"] = L["Reanimated Adherent"]
-        LBB["Reanimated Fanatic"] = L["Reanimated Fanatic"]
-        LBB["Volatile Ooze"] = L["Volatile Ooze"]
-        LBB["Wicked Spirit"] = L["Wicked Spirit"]
-        LBB["Darnavan"] = L["Darnavan"]
-        LBB["Living Inferno"] = L["Living Inferno"]
-
         if not groupName then
             groupName = {
                 [LBB["The Lich King"]] = L["Useful targets"],
@@ -626,25 +611,25 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
                 [LBB["Raging Spirit"]] = LBB["The Lich King"],
                 [LBB["Ice Sphere"]] = LBB["The Lich King"],
                 [LBB["Val'kyr Shadowguard"]] = LBB["The Lich King"],
-                [LBB["Wicked Spirit"]] = LBB["The Lich King"],
+                [L["Wicked Spirit"]] = LBB["The Lich King"],
                 -- Professor Putricide
-                [LBB["Gas Cloud"]] = LBB["Professor Putricide"],
-                [LBB["Volatile Ooze"]] = LBB["Professor Putricide"],
+                [L["Gas Cloud"]] = LBB["Professor Putricide"],
+                [L["Volatile Ooze"]] = LBB["Professor Putricide"],
                 -- Blood Prince Council
                 [LBB["Prince Valanar"]] = LBB["Blood Prince Council"],
                 [LBB["Prince Taldaram"]] = LBB["Blood Prince Council"],
                 [LBB["Prince Keleseth"]] = LBB["Blood Prince Council"],
                 -- Lady Deathwhisper
-                [LBB["Cult Adherent"]] = LBB["Lady Deathwhisper"],
-                [LBB["Empowered Adherent"]] = LBB["Lady Deathwhisper"],
-                [LBB["Reanimated Adherent"]] = LBB["Lady Deathwhisper"],
-                [LBB["Cult Fanatic"]] = LBB["Lady Deathwhisper"],
-                [LBB["Deformed Fanatic"]] = LBB["Lady Deathwhisper"],
-                [LBB["Reanimated Fanatic"]] = LBB["Lady Deathwhisper"],
-                [LBB["Darnavan"]] = LBB["Lady Deathwhisper"],
+                [L["Cult Adherent"]] = LBB["Lady Deathwhisper"],
+                [L["Empowered Adherent"]] = LBB["Lady Deathwhisper"],
+                [L["Reanimated Adherent"]] = LBB["Lady Deathwhisper"],
+                [L["Cult Fanatic"]] = LBB["Lady Deathwhisper"],
+                [L["Deformed Fanatic"]] = LBB["Lady Deathwhisper"],
+                [L["Reanimated Fanatic"]] = LBB["Lady Deathwhisper"],
+                [L["Darnavan"]] = LBB["Lady Deathwhisper"],
                 -- Halion
                 [LBB["Halion"]] = LBB["Halion"],
-                [LBB["Living Inferno"]] = LBB["Halion"]
+                [L["Living Inferno"]] = LBB["Halion"]
             }
         end
     end
