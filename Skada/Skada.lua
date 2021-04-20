@@ -1389,13 +1389,11 @@ do
         [37886] = LBB["Valithria Dreamwalker"], -- Gluttonous Abomination
         [37934] = LBB["Valithria Dreamwalker"], -- Blistering Zombie
         [37985] = LBB["Valithria Dreamwalker"], -- Dream Cloud
-
         -- [[ Naxxramas ]] --
         [16062] = LBB["The Four Horsemen"], -- Highlord Mograine
         [16063] = LBB["The Four Horsemen"], -- Sir Zeliek
         [16064] = LBB["The Four Horsemen"], -- Thane Korth'azz
         [16065] = LBB["The Four Horsemen"], -- Lady Blaumeux
-
         -- [[ Trial of the Crusader ]] --
         [34796] = LBB["The Beasts of Northrend"], -- Gormok
         [35144] = LBB["The Beasts of Northrend"], -- Acidmaw
@@ -1545,25 +1543,24 @@ end
 -- ================= --
 
 function Skada:SetTooltipPosition(tooltip, frame, display)
-    local p = self.db.profile.tooltippos
-    if p == "default" then
+    if self.db.profile.tooltippos == "default" then
         tooltip:SetOwner(UIParent, "ANCHOR_NONE")
         tooltip:SetPoint("BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -40, 40)
-    elseif p == "topleft" then
+    elseif self.db.profile.tooltippos == "topleft" then
         tooltip:SetOwner(frame, "ANCHOR_NONE")
         tooltip:SetPoint("TOPRIGHT", frame, "TOPLEFT")
-    elseif p == "topright" then
+    elseif self.db.profile.tooltippos == "topright" then
         tooltip:SetOwner(frame, "ANCHOR_NONE")
         tooltip:SetPoint("TOPLEFT", frame, "TOPRIGHT")
-    elseif p == "bottomleft" then
+    elseif self.db.profile.tooltippos == "bottomleft" then
         tooltip:SetOwner(frame, "ANCHOR_NONE")
         tooltip:SetPoint("BOTTOMRIGHT", frame, "BOTTOMLEFT")
-    elseif p == "bottomright" then
+    elseif self.db.profile.tooltippos == "bottomright" then
         tooltip:SetOwner(frame, "ANCHOR_NONE")
         tooltip:SetPoint("BOTTOMLEFT", frame, "BOTTOMRIGHT")
-    elseif p == "cursor" then
+    elseif self.db.profile.tooltippos == "cursor" then
         tooltip:SetOwner(frame, "ANCHOR_CURSOR")
-    elseif p == "smart" and frame then
+    elseif self.db.profile.tooltippos == "smart" and frame then
         if display == "inline" then
             tooltip:SetOwner(frame, "ANCHOR_CURSOR")
         elseif frame:GetLeft() < (GetScreenWidth() / 2) then
@@ -1574,7 +1571,6 @@ function Skada:SetTooltipPosition(tooltip, frame, display)
             tooltip:SetPoint("TOPRIGHT", frame, "TOPLEFT", -10, 0)
         end
     end
-    p = nil
 end
 
 do
@@ -1643,7 +1639,6 @@ do
                     color, title = nil, nil
                 end
             end
-            nr = nil
 
             if mode.Enter then
                 tooltip:AddLine(" ")
@@ -2954,7 +2949,6 @@ do
         end
 
         local now = time()
-
         if not self.db.profile.onlykeepbosses or self.current.gotboss then
             if self.current.mobname ~= nil and now - self.current.starttime > 5 then
                 self.current.endtime = self.current.endtime or now
@@ -3047,6 +3041,7 @@ do
 
         self.After(2, function() self:CleanGarbage(true) end)
         self.After(3, function() self:MemoryCheck() end)
+        self.callbacks:Fire("ENCOUNTER_END", self.current)
     end
 
     function Skada:StopSegment()
@@ -3072,10 +3067,9 @@ do
     local tentative, tentativehandle
     local deathcounter, startingmembers = 0, 0
 
-    local function combat_tick()
-        if not disabled and Skada.current and not IsRaidInCombat() then
-            Skada.callbacks:Fire("ENCOUNTER_END", Skada.current)
-            Skada.After(1, function() Skada:EndSegment() end)
+    function Skada:Tick()
+        if not disabled and self.current and not IsRaidInCombat() then
+            self.After(1, function() self:EndSegment() end)
         end
     end
 
@@ -3132,7 +3126,7 @@ do
         self:UpdateDisplay(true)
 
         update_timer = self.NewTicker(self.db.profile.updatefrequency or 0.25, function() self:UpdateDisplay() end)
-        tick_timer = self.NewTicker(1, combat_tick)
+        tick_timer = self.NewTicker(1, function() Skada:Tick() end)
     end
 
     -- list of combat events that we don't care about
@@ -3152,7 +3146,7 @@ do
         ["SPELL_BUILDING_DAMAGE"] = true
     }
 
-    -- events used to trigger combat
+    -- events used to trigger combat for aggressive combat detection
     local triggerevents = {
         ["RANGE_DAMAGE"] = true,
         ["SPELL_BUILDING_DAMAGE"] = true,
@@ -3210,8 +3204,10 @@ do
                 deathcounter = deathcounter + 1
                 -- If we reached the treshold for stopping the segment, do so.
                 if deathcounter > 0 and deathcounter / startingmembers >= 0.5 and not self.current.stopped then
-                    self:Print("Stopping for wipe.")
-                    self:StopSegment()
+                    self.After(1, function()
+                        self:Print("Stopping for wipe.")
+                        self:StopSegment()
+                    end)
                 end
             elseif eventtype == "SPELL_RESURRECT" and ((band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID]) then
                 deathcounter = deathcounter - 1
