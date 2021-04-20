@@ -513,7 +513,7 @@ Skada.options = {
                     name = L["Memory Check"],
                     desc = function()
                         local num = Skada.db.profile.setstokeep or 15
-                        if num == 0 then num = 3
+                        if num <= 2 then num = 5
                         elseif num <= 5 then num = num * 2.25
                         else num = num * 2 end
                         return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], num)

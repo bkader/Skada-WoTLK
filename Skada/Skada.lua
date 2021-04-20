@@ -12,9 +12,6 @@ local LGT = LibStub("LibGroupTalents-1.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local Translit = LibStub("LibTranslit-1.0")
 
--- holds additional bosses or NPCs.
-local bossNames
-
 local dataobj = LDB:NewDataObject("Skada", {
     label = "Skada",
     type = "data source",
@@ -1317,10 +1314,11 @@ function Skada:find_player(set, playerid, playername)
             end
         end
         -- needed for bosses.
-        if self:IsBoss(playerid) and playername then
+        local isboss, _, bossname = self:IsBoss(playerid)
+        if isboss then
             player = {
                 id = playerid,
-                name = playername,
+                name = bossname or playername,
                 class = "MONSTER",
                 role = "DAMAGER",
                 spec = 3
@@ -1370,8 +1368,84 @@ function Skada:IsPlayer(playerid)
     return players[playerid]
 end
 
-function Skada:IsBoss(GUID)
-    return GUID and LBI.BossIDs[tonumber(GUID:sub(9, 12), 16)]
+do
+    local custom = {
+        -- [[ Icecrown Citadel ]] --
+        [36960] = LBB["Icecrown Gunship Battle"], -- Kor'kron Sergeant
+        [36961] = LBB["Icecrown Gunship Battle"], -- Skybreaker Sergeant
+        [36968] = LBB["Icecrown Gunship Battle"], -- Kor'kron Axethrower
+        [36969] = LBB["Icecrown Gunship Battle"], -- Skybreaker Rifleman
+        [36978] = LBB["Icecrown Gunship Battle"], -- Skybreaker Mortar Soldier
+        [36982] = LBB["Icecrown Gunship Battle"], -- Kor'kron Rocketeer
+        [37116] = LBB["Icecrown Gunship Battle"], -- Skybreaker Sorcerer
+        [37117] = LBB["Icecrown Gunship Battle"], -- Kor'kron Battle-Mage
+        [37215] = LBB["Icecrown Gunship Battle"], -- Orgrim's Hammer
+        [37540] = LBB["Icecrown Gunship Battle"], -- The Skybreaker
+        [37970] = LBB["Blood Prince Council"], -- Prince Valanar
+        [37972] = LBB["Blood Prince Council"], -- Prince Keleseth
+        [37973] = LBB["Blood Prince Council"], -- Prince Taldaram
+        [36791] = LBB["Valithria Dreamwalker"], -- Blazing Skeleton
+        [37868] = LBB["Valithria Dreamwalker"], -- Risen Archmage
+        [37886] = LBB["Valithria Dreamwalker"], -- Gluttonous Abomination
+        [37934] = LBB["Valithria Dreamwalker"], -- Blistering Zombie
+        [37985] = LBB["Valithria Dreamwalker"], -- Dream Cloud
+
+        -- [[ Naxxramas ]] --
+        [16062] = LBB["The Four Horsemen"], -- Highlord Mograine
+        [16063] = LBB["The Four Horsemen"], -- Sir Zeliek
+        [16064] = LBB["The Four Horsemen"], -- Thane Korth'azz
+        [16065] = LBB["The Four Horsemen"], -- Lady Blaumeux
+
+        -- [[ Trial of the Crusader ]] --
+        [34796] = LBB["The Beasts of Northrend"], -- Gormok
+        [35144] = LBB["The Beasts of Northrend"], -- Acidmaw
+        [34799] = LBB["The Beasts of Northrend"], -- Dreadscale
+        [34797] = LBB["The Beasts of Northrend"], -- Icehowl
+        [34441] = LBB["Faction Champions"], -- Vivienne Blackwhisper <Priest>
+        [34444] = LBB["Faction Champions"], -- Thrakgar	<Shaman>
+        [34445] = LBB["Faction Champions"], -- Liandra Suncaller <Paladin>
+        [34447] = LBB["Faction Champions"], -- Caiphus the Stern <Priest>
+        [34448] = LBB["Faction Champions"], -- Ruj'kah <Hunter>
+        [34449] = LBB["Faction Champions"], -- Ginselle Blightslinger <Mage>
+        [34450] = LBB["Faction Champions"], -- Harkzog <Warlock>
+        [34451] = LBB["Faction Champions"], -- Birana Stormhoof <Druid>
+        [34453] = LBB["Faction Champions"], -- Narrhok Steelbreaker <Warrior>
+        [34454] = LBB["Faction Champions"], -- Maz'dinah <Rogue>
+        [34455] = LBB["Faction Champions"], -- Broln Stouthorn <Shaman>
+        [34456] = LBB["Faction Champions"], -- Malithas Brightblade <Paladin>
+        [34458] = LBB["Faction Champions"], -- Gorgrim Shadowcleave <Death Knight>
+        [34459] = LBB["Faction Champions"], -- Erin Misthoof <Druid>
+        [34460] = LBB["Faction Champions"], -- Kavina Grovesong <Druid>
+        [34461] = LBB["Faction Champions"], -- Tyrius Duskblade <Death Knight>
+        [34463] = LBB["Faction Champions"], -- Shaabad <Shaman>
+        [34465] = LBB["Faction Champions"], -- Velanaa <Paladin>
+        [34466] = LBB["Faction Champions"], -- Anthar Forgemender <Priest>
+        [34467] = LBB["Faction Champions"], -- Alyssia Moonstalker <Hunter>
+        [34468] = LBB["Faction Champions"], -- Noozle Whizzlestick <Mage>
+        [34469] = LBB["Faction Champions"], -- Melador Valestrider <Druid>
+        [34470] = LBB["Faction Champions"], -- Saamul <Shaman>
+        [34471] = LBB["Faction Champions"], -- Baelnor Lightbearer <Paladin>
+        [34472] = LBB["Faction Champions"], -- Irieth Shadowstep <Rogue>
+        [34473] = LBB["Faction Champions"], -- Brienna Nightfell <Priest>
+        [34474] = LBB["Faction Champions"], -- Serissa Grimdabbler <Warlock>
+        [34475] = LBB["Faction Champions"], -- Shocuul <Warrior>
+        [35465] = LBB["Faction Champions"], -- Zhaagrym <Harkzog's Minion / Serissa Grimdabbler's Minion>
+        [35610] = LBB["Faction Champions"], -- Cat <Ruj'kah's Pet / Alyssia Moonstalker's Pet>
+        [34496] = LBB["The Twin Val'kyr"], -- Eydis Darkbane
+        [34497] = LBB["The Twin Val'kyr"] -- Fjola Lightbane
+    }
+
+    function Skada:IsBoss(guid)
+        if guid then
+            local id = tonumber(guid:sub(9, 12), 16)
+            if LBI.BossIDs[id] then
+                return true, id, false
+            elseif custom[id] then
+                return true, id, custom[id]
+            end
+        end
+        return false, nil, false
+    end
 end
 
 -- ================== --
@@ -1854,7 +1928,7 @@ function Skada:ZoneCheck()
     local isininstance = inInstance and (instanceType == "party" or instanceType == "raid")
     local isinpvp = is_in_pvp()
 
-    if isininstance and wasininstance ~= nil and not wasininstance and self.db.profile.reset.instance ~= 1 and Skada:CanReset() then
+    if isininstance and wasininstance ~= nil and not wasininstance and self.db.profile.reset.instance ~= 1 and self:CanReset() then
         if self.db.profile.reset.instance == 3 then
             self:ShowPopup()
         else
@@ -1881,12 +1955,6 @@ function Skada:ZoneCheck()
     else
         wasinpvp = false
     end
-end
-
-function Skada:PLAYER_ENTERING_WORLD()
-    self:ZoneCheck()
-    wasinparty = IsInGroup()
-    self:CheckGroup()
 end
 
 do
@@ -1916,6 +1984,16 @@ do
         end
 
         wasinparty = not (not IsInGroup())
+    end
+
+    function Skada:PLAYER_ENTERING_WORLD()
+        self:ZoneCheck()
+        if not wasinparty then
+            self.After(1, function()
+                check_for_join_and_leave()
+                self:CheckGroup()
+            end)
+        end
     end
 
     function Skada:PARTY_MEMBERS_CHANGED()
@@ -2701,7 +2779,17 @@ function Skada:MemoryCheck()
     if self.db.profile.memorycheck then
         UpdateAddOnMemoryUsage()
         local mem = GetAddOnMemoryUsage("Skada")
-        if mem > 30000 then
+
+        local compare = self.db.profile.setstokeep or 15
+        if compare <= 2 then
+            compare = 5000
+        elseif compare <= 10 then
+            compare = compare * 2250
+        else
+            compare = compare * 2000
+        end
+
+        if mem > compare then
             self:Print(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."])
         end
     end
@@ -2755,54 +2843,12 @@ function Skada:OnEnable()
     -- please do not localize this line!
     L["Auto Attack"] = select(1, GetSpellInfo(6603))
 
-    -- Gunship
-    LBI.BossIDs[37215] = true -- Orgrim's Hammer
-    LBI.BossIDs[37540] = true -- The Skybreaker
-
-    LBB["Kor'kron Sergeant"] = L["Kor'kron Sergeant"]
-    LBB["Kor'kron Axethrower"] = L["Kor'kron Axethrower"]
-    LBB["Kor'kron Rocketeer"] = L["Kor'kron Rocketeer"]
-    LBB["Kor'kron Battle-Mage"] = L["Kor'kron Battle-Mage"]
-    LBB["Skybreaker Sergeant"] = L["Skybreaker Sergeant"]
-    LBB["Skybreaker Rifleman"] = L["Skybreaker Rifleman"]
-    LBB["Skybreaker Mortar Soldier"] = L["Skybreaker Mortar Soldier"]
-    LBB["Skybreaker Sorcerer"] = L["Skybreaker Sorcerer"]
-
-    -- we add some adds to LibBabble-Boss so we can fix the
-    -- set name later to use the "real" boss name instead
-    LBB["Dream Cloud"] = L["Dream Cloud"]
-    LBB["Blazing Skeleton"] = L["Blazing Skeleton"]
-    LBB["Blistering Zombie"] = L["Blistering Zombie"]
-    LBB["Gluttonous Abomination"] = L["Gluttonous Abomination"]
-
-    if not bossNames then
-        bossNames = {
-            -- Icecrown Gunship Battle
-            [LBB["Kor'kron Sergeant"]] = LBB["Icecrown Gunship Battle"],
-            [LBB["Kor'kron Axethrower"]] = LBB["Icecrown Gunship Battle"],
-            [LBB["Kor'kron Rocketeer"]] = LBB["Icecrown Gunship Battle"],
-            [LBB["Kor'kron Battle-Mage"]] = LBB["Icecrown Gunship Battle"],
-            [LBB["Skybreaker Sergeant"]] = LBB["Icecrown Gunship Battle"],
-            [LBB["Skybreaker Rifleman"]] = LBB["Icecrown Gunship Battle"],
-            [LBB["Skybreaker Mortar Soldier"]] = LBB["Icecrown Gunship Battle"],
-            [LBB["Skybreaker Sorcerer"]] = LBB["Icecrown Gunship Battle"],
-            -- Blood Prince Council
-            [LBB["Prince Valanar"]] = LBB["Blood Prince Council"],
-            [LBB["Prince Taldaram"]] = LBB["Blood Prince Council"],
-            [LBB["Prince Keleseth"]] = LBB["Blood Prince Council"],
-            -- Valithria Dreamwalker
-            [LBB["Dream Cloud"]] = LBB["Valithria Dreamwalker"],
-            [LBB["Blazing Skeleton"]] = LBB["Valithria Dreamwalker"],
-            [LBB["Blistering Zombie"]] = LBB["Valithria Dreamwalker"],
-            [LBB["Gluttonous Abomination"]] = LBB["Valithria Dreamwalker"]
-        }
-    end
-
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:RegisterEvent("PARTY_MEMBERS_CHANGED")
     self:RegisterEvent("RAID_ROSTER_UPDATE")
     self:RegisterEvent("UNIT_PET")
     self:RegisterEvent("PLAYER_REGEN_DISABLED")
+    self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "ZoneCheck")
     self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "CombatLogEvent")
 
     if self.modulelist then
@@ -2869,7 +2915,7 @@ do
                     return true
                 end
             end
-        elseif UnitAffectingCombat("player") then
+        elseif UnitAffectingCombat("player") or InCombatLockdown() then
             return true
         end
 
@@ -2917,11 +2963,6 @@ do
                 self.current.time = math_max(self.current.endtime - self.current.starttime, 0.1)
                 setPlayerActiveTimes(self.current)
                 self.current.stopped = nil
-
-                -- try to fix Gunship and Valithria set names.
-                if bossNames[self.current.mobname] then
-                    self.current.mobname = bossNames[self.current.mobname]
-                end
 
                 local setname = self.current.mobname
                 if self.db.profile.setnumber then
@@ -3034,7 +3075,7 @@ do
     local deathcounter, startingmembers = 0, 0
 
     local function combat_tick()
-        if not disabled and Skada.current and not InCombatLockdown() and not IsRaidInCombat() then
+        if not disabled and Skada.current and not IsRaidInCombat() then
             Skada.callbacks:Fire("ENCOUNTER_END", Skada.current)
             Skada.After(1, function() Skada:EndSegment() end)
         end
@@ -3122,79 +3163,11 @@ do
         ["SWING_DAMAGE"] = true
     }
 
-    -- bosses to be be ignored for smart stop feature
-    -- this was added because the following NPCs are
-    -- used to fix segment names, as soon as they die
-    -- skada will stop collecting and to prevent this
-    -- we have to ignore them.
-    local ignoredbosses = {
-        -- Icecrown Gunship Battle
-        [LBB["Icecrown Gunship Battle"]] = true,
-        [L["Kor'kron Sergeant"]] = true,
-        [L["Kor'kron Axethrower"]] = true,
-        [L["Kor'kron Rocketeer"]] = true,
-        [L["Kor'kron Battle-Mage"]] = true,
-        [L["Skybreaker Sergeant"]] = true,
-        [L["Skybreaker Rifleman"]] = true,
-        [L["Skybreaker Mortar Soldier"]] = true,
-        [L["Skybreaker Sorcerer"]] = true,
-        -- Valithria Dreamwalker
-        [LBB["Valithria Dreamwalker"]] = true,
-        [L["Dream Cloud"]] = true,
-        [L["Blazing Skeleton"]] = true,
-        [L["Blistering Zombie"]] = true,
-        [L["Gluttonous Abomination"]] = true,
-        [37985] = true,
-        [36791] = true,
-        [37934] = true,
-        [37886] = true,
-        -- Trial of the Crusader --
-        -- Northrend Beats
-        [34796] = true, -- Gormok
-        [35144] = true, -- Acidmaw
-        [34799] = true, -- Dreadscale
-        -- Faction champions
-        [34461] = true, -- Tyrius Duskblade <Death Knight>
-        [34460] = true, -- Kavina Grovesong <Druid>
-        [34469] = true, -- Melador Valestrider <Druid>
-        [34467] = true, -- Alyssia Moonstalker <Hunter>
-        [34468] = true, -- Noozle Whizzlestick <Mage>
-        [34465] = true, -- Velanaa <Paladin>
-        [34471] = true, -- Baelnor Lightbearer <Paladin>
-        [34466] = true, -- Anthar Forgemender <Priest>
-        [34473] = true, -- Brienna Nightfell <Priest>
-        [34472] = true, -- Irieth Shadowstep <Rogue>
-        [34470] = true, -- Saamul <Shaman>
-        [34463] = true, -- Shaabad <Shaman>
-        [34474] = true, -- Serissa Grimdabbler <Warlock>
-        [34475] = true, -- Shocuul <Warrior>
-        [34458] = true, -- Gorgrim Shadowcleave <Death Knight>
-        [34451] = true, -- Birana Stormhoof <Druid>
-        [34459] = true, -- Erin Misthoof <Druid>
-        [34448] = true, -- Ruj'kah <Hunter>
-        [34449] = true, -- Ginselle Blightslinger <Mage>
-        [34445] = true, -- Liandra Suncaller <Paladin>
-        [34456] = true, -- Malithas Brightblade <Paladin>
-        [34447] = true, -- Caiphus the Stern <Priest>
-        [34441] = true, -- Vivienne Blackwhisper <Priest>
-        [34454] = true, -- Maz'dinah <Rogue>
-        [34444] = true, -- Thrakgar	<Shaman>
-        [34455] = true, -- Broln Stouthorn <Shaman>
-        [34450] = true, -- Harkzog <Warlock>
-        [34453] = true, -- Narrhok Steelbreaker <Warrior>
-        [35610] = true, -- Cat <Ruj'kah's Pet / Alyssia Moonstalker's Pet>
-        [35465] = true -- Zhaagrym <Harkzog's Minion / Serissa Grimdabbler's Minion>
-    }
-
     local combatlogevents = {}
 
     function Skada:RegisterForCL(func, event, flags)
         combatlogevents[event] = combatlogevents[event] or {}
         tinsert(combatlogevents[event], {["func"] = func, ["flags"] = flags})
-    end
-
-    function Skada:IsBoss(GUID)
-        return GUID and LBI.BossIDs[tonumber(GUID:sub(9, 12), 16)]
     end
 
     function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
@@ -3235,16 +3208,14 @@ do
         end
 
         if self.current and self.db.profile.autostop then
-            if self.current and eventtype == "UNIT_DIED" and ((band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID]) then
+            if eventtype == "UNIT_DIED" and ((band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID]) then
                 deathcounter = deathcounter + 1
                 -- If we reached the treshold for stopping the segment, do so.
                 if deathcounter > 0 and deathcounter / startingmembers >= 0.5 and not self.current.stopped then
                     self:Print("Stopping for wipe.")
                     self:StopSegment()
                 end
-            end
-
-            if self.current and eventtype == "SPELL_RESURRECT" and ((band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID]) then
+            elseif eventtype == "SPELL_RESURRECT" and ((band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID]) then
                 deathcounter = deathcounter - 1
             end
         end
@@ -3321,8 +3292,9 @@ do
 
         if self.current and src_is_interesting and not self.current.gotboss then
             if band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
-                self.current.mobname = dstName
-                if not self.current.gotboss and self:IsBoss(dstGUID) then
+                local isboss, _, bossname = self:IsBoss(dstGUID)
+                self.current.mobname = bossname or dstName
+                if not self.current.gotboss and isboss then
                     self.current.gotboss = true
                 end
             end
@@ -3338,7 +3310,7 @@ do
                 fixed = false
                 for pet, owner in pairs(pets) do
                     if pets[owner.id] then
-                        Skada:AssignPet(pets[owner.id].id, pets[owner.id].name, pet)
+                        self:AssignPet(pets[owner.id].id, pets[owner.id].name, pet)
                         fixed = true
                     end
                 end
@@ -3347,10 +3319,6 @@ do
 
         if self.current and self.current.gotboss and self.current.mobname == dstName and (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") then
             self.current.success = true
-            if self.db.profile.smartstop and not (ignoredbosses[dstName] or ignoredbosses[tonumber(dstGUID:sub(9, 12), 16)]) then
-                self.callbacks:Fire("ENCOUNTER_END", self.current)
-                self.After(1, function() self:StopSegment() end)
-            end
         end
     end
 end

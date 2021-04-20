@@ -48,25 +48,6 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
         [L["Overhealing"]] = "Overhealing"
     }
 
-    --
-    -- because we added some NPCs as bosses in order to fix the
-    -- Gunship Battle segment name, this module will consider them
-    -- ass bosses, thus it will record them and we don't want that.
-    -- so we make sure to skip them.
-    --
-    local blacklist = {
-        [L["Kor'kron Sergeant"]] = true,
-        [L["Kor'kron Axethrower"]] = true,
-        [L["Kor'kron Rocketeer"]] = true,
-        [L["Kor'kron Battle-Mage"]] = true,
-        [L["Skybreaker Sergeant"]] = true,
-        [L["Skybreaker Rifleman"]] = true,
-        [L["Skybreaker Mortar Soldier"]] = true,
-        [L["Skybreaker Sorcerer"]] = true,
-        [L["Stinky"]] = true,
-        [L["Precious"]] = true
-    }
-
     -- :::::::::::::::::::::::::::::::::::::::::::::::
 
     local updaters = {}
@@ -297,7 +278,7 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
             return
         end
 
-        if data.gotboss and data.success and (data.mobname and not blacklist[data.mobname]) then
+        if data.gotboss and data.mobname and data.success then
             local boss = find_boss_data(data.mobname)
             if not boss then
                 return
