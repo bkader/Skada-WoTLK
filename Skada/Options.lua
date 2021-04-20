@@ -117,6 +117,7 @@ Skada.defaults = {
         feed = "",
         showtotals = false,
         autostop = false,
+        smartstop = false,
         sortmodesbyusage = false,
         updatefrequency = 0.25,
         modules = {},
