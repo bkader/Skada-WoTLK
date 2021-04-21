@@ -383,6 +383,10 @@ do
 
         if button == "RightButton" and IsShiftKeyDown() then
             Skada:OpenMenu(win)
+        elseif button == "RightButton" and IsAltKeyDown() then
+            Skada:ModeMenu(win)
+        elseif button == "RightButton" and IsControlKeyDown() then
+            Skada:SegmentMenu(win)
         elseif win.metadata.click then
             win.metadata.click(win, id, label, button)
         elseif button == "RightButton" then
