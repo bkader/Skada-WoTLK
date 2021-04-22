@@ -14,7 +14,7 @@ mod.description = L["Bar display is the normal bar window used by most damage me
 Skada:AddDisplaySystem("bar", mod)
 
 -- specs and coordinates
-local spec_icon_file = [[Interface\AddOns\Skada\media\textures\icon-specs]]
+local spec_icon_file = [[Interface\AddOns\Skada\Media\Textures\icon-specs]]
 local spec_icon_tcoords = {
     [1] = {0.75, 0.875, 0.125, 0.25}, --> pet
     [2] = {0.875, 1, 0.125, 0.25}, --> unknown
@@ -56,7 +56,7 @@ local spec_icon_tcoords = {
 local role_icon_file, role_icon_tcoords = [[Interface\LFGFrame\UI-LFG-ICON-PORTRAITROLES]]
 
 -- classes file and coordinates
-local class_icon_file, class_icon_tcoords = [[Interface\AddOns\Skada\media\textures\icon-classes]]
+local class_icon_file, class_icon_tcoords = [[Interface\AddOns\Skada\Media\Textures\icon-classes]]
 
 function mod:Create(window)
     -- Re-use bargroup if it exists.
@@ -80,16 +80,16 @@ function mod:Create(window)
         bargroup:AddButton(
             L["Configure"],
             L["Opens the configuration window."],
-            "Interface\\Addons\\Skada\\media\\textures\\icon-config",
-            "Interface\\Addons\\Skada\\media\\textures\\icon-config",
+            "Interface\\Addons\\Skada\\Media\\Textures\\icon-config",
+            "Interface\\Addons\\Skada\\Media\\Textures\\icon-config",
             function() Skada:OpenMenu(bargroup.win) end
         )
 
         bargroup:AddButton(
             RESET,
             L["Resets all fight data except those marked as kept."],
-            "Interface\\Addons\\Skada\\media\\textures\\icon-reset",
-            "Interface\\Addons\\Skada\\media\\textures\\icon-reset",
+            "Interface\\Addons\\Skada\\Media\\Textures\\icon-reset",
+            "Interface\\Addons\\Skada\\Media\\Textures\\icon-reset",
             function() Skada:ShowPopup(bargroup.win) end
         )
 

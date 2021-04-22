@@ -17,23 +17,12 @@
 ## X-License: MIT/X
 ## X-Category: Combat
 
-embeds.xml
-
-locale\enUS.lua
-locale\deDE.lua
-locale\esES.lua
-locale\esMX.lua
-locale\frFR.lua
-locale\koKR.lua
-locale\ruRU.lua
-locale\zhCN.lua
-locale\zhTW.lua
-
+Embeds.xml
+Locales.xml
 Skada.lua
 Menus.lua
 Options.lua
 BarDisplay.lua
 InlineDisplay.lua
 BrokerDisplay.lua
-
-modules.xml
+Modules.xml

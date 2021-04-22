@@ -597,3 +597,5 @@ L["Ignore Nicknames"] = true
 L["When enabled, nicknames set by Skada users are ignored."] = true
 L["Name display"] = true
 L["Choose how names are shown on your bars."] = true
+-- encounters module lines --
+L["Encounters"] = true

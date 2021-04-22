@@ -31,9 +31,7 @@ Skada:AddLoadableModule("Spamage", "Suppresses chat messages from damage meters 
             captureDelay = {
                 type = "range",
                 name = L["Capture Delay"],
-                desc = L[
-                    'How many seconds the addon waits after "Skada: *" lines before it assumes spam burst is over. 1 seems to work in most cases'
-                ],
+                desc = L['How many seconds the addon waits after "Skada: *" lines before it assumes spam burst is over. 1 seems to work in most cases'],
                 order = 1,
                 width = "full",
                 min = 1,

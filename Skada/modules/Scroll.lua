@@ -34,7 +34,7 @@ function mod.ShowCursor(win)
         f:SetSize(32, 32)
         f:SetPoint("CENTER")
         local t = f:CreateTexture(nil, "OVERLAY")
-        t:SetTexture("Interface\\AddOns\\Skada\\media\\textures\\icon-scroll")
+        t:SetTexture("Interface\\AddOns\\Skada\\Media\\Textures\\icon-scroll")
         t:SetAllPoints(f)
         t:Show()
         mod.ScrollIcon[win] = f

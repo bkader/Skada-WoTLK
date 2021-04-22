@@ -2,38 +2,38 @@
 ..\FrameXML\UI.xsd">
 
 <!-- Damage category -->
-<Script file="modules\Damage.lua" />
-<Script file="modules\DamageTaken.lua" />
-<Script file="modules\FriendlyFire.lua" />
-<Script file="modules\Enemies.lua" />
+<Script file="Modules\Damage.lua" />
+<Script file="Modules\DamageTaken.lua" />
+<Script file="Modules\FriendlyFire.lua" />
+<Script file="Modules\Enemies.lua" />
 
 <!-- Absorb and healing category -->
-<Script file="modules\Healing.lua" />
-<Script file="modules\Absorbs.lua" />
+<Script file="Modules\Healing.lua" />
+<Script file="Modules\Absorbs.lua" />
 
 <!-- CC Tracker and Power gained categories -->
-<Script file="modules\Power.lua" />
-<Script file="modules\CCTracker.lua" />
+<Script file="Modules\Power.lua" />
+<Script file="Modules\CCTracker.lua" />
 
 <!-- Buffs and Debuffs category -->
-<Script file="modules\Auras.lua" />
-<Script file="modules\SunderCounter.lua" />
+<Script file="Modules\Auras.lua" />
+<Script file="Modules\SunderCounter.lua" />
 
 <!-- Other category -->
-<Script file="modules\Activity.lua" />
-<Script file="modules\Deaths.lua" />
-<Script file="modules\Dispels.lua" />
-<Script file="modules\Failbot.lua" />
-<Script file="modules\Improvement.lua" />
-<Script file="modules\Interrupts.lua" />
-<Script file="modules\Parry.lua" />
-<Script file="modules\Potions.lua" />
-<Script file="modules\Resurrects.lua" />
-<Script file="modules\Threat.lua" />
+<Script file="Modules\Activity.lua" />
+<Script file="Modules\Deaths.lua" />
+<Script file="Modules\Dispels.lua" />
+<Script file="Modules\Failbot.lua" />
+<Script file="Modules\Improvement.lua" />
+<Script file="Modules\Interrupts.lua" />
+<Script file="Modules\Parry.lua" />
+<Script file="Modules\Potions.lua" />
+<Script file="Modules\Resurrects.lua" />
+<Script file="Modules\Threat.lua" />
 
 <!-- Modules without modes -->
-<Script file="modules\Scroll.lua" />
-<Script file="modules\Spamage.lua" />
-<Script file="modules\Themes.lua" />
-<Script file="modules\Nickname.lua" />
+<Script file="Modules\Scroll.lua" />
+<Script file="Modules\Spamage.lua" />
+<Script file="Modules\Themes.lua" />
+<Script file="Modules\Nickname.lua" />
 </Ui>
