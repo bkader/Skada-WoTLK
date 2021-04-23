@@ -1,5 +1,5 @@
 ## Interface: 30300
-## Title: Skada (|c00ffffffRevisited|r)
+## Title: Skada
 ## Notes: Modular damage meter.
 ## Notes-deDE: Ein Damage-Meter.
 ## Notes-esES: Un medidor de daño.

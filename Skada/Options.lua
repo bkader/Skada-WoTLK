@@ -1,6 +1,7 @@
 assert(Skada, "Skada not found!")
 
 local Skada = Skada
+Skada.version = GetAddOnMetadata("Skada", "Version")
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 local fmt = string.format
 
@@ -194,7 +195,7 @@ local newdisplay = "bar"
 
 Skada.options = {
     type = "group",
-    name = "Skada-|cffffffffRev|r by |cfff58cbaKader|r",
+    name = "Skada |cffffffff"..Skada.version.."|r by |cfff58cbaKader|r",
     get = function(i)
         return Skada.db.profile[i[#i]]
     end,

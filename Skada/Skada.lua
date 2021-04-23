@@ -1633,7 +1633,7 @@ do
 
                     local title = data.label
                     if mode.metadata and mode.metadata.showspots then
-                        title = nr .. ". " .. title
+                        title = "|cffffffff"..nr .. ".|r " .. title
                     end
                     tooltip:AddDoubleLine(title, data.valuetext, color.r, color.g, color.b)
                     color, title = nil, nil
