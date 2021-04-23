@@ -597,3 +597,9 @@ L["Ignore Nicknames"] = true
 L["When enabled, nicknames set by Skada users are ignored."] = true
 L["Name display"] = true
 L["Choose how names are shown on your bars."] = true
+-- player score module lines --
+L["Player Score"] = true
+L["Raid Score"] = true
+L["Score"] = true
+L["%s's Score"] = true
+L["Damage mitigated"] = true
