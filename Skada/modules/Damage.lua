@@ -262,8 +262,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
     end
 
     local function getDPS(set, player)
-        local uptime = math_min(Skada:GetSetTime(set), Skada:PlayerActiveTime(set, player))
-        return player.damagedone.amount / math_max(1, uptime)
+        return player.damagedone.amount / math_max(1, Skada:PlayerActiveTime(set, player))
     end
 
     local function getRaidDPS(set)
@@ -280,7 +279,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
         local player = Skada:find_player(set, id)
         if player then
             local totaltime = Skada:GetSetTime(set)
-            local activetime = math_min(totaltime, Skada:PlayerActiveTime(set, player))
+            local activetime = Skada:PlayerActiveTime(set, player)
             tooltip:AddDoubleLine(L["Activity"], _format("%02.1f%%", 100 * activetime / totaltime), 1, 1, 1)
             tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
             tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
@@ -292,7 +291,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
         local player = Skada:find_player(set, id)
         if player then
             local totaltime = Skada:GetSetTime(set)
-            local activetime = math_min(totaltime, Skada:PlayerActiveTime(set, player))
+            local activetime = Skada:PlayerActiveTime(set, player)
             tooltip:AddLine(player.name .. " - " .. L["DPS"])
             tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
             tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
@@ -882,9 +881,8 @@ Skada:AddLoadableModule("Useful damage", function(Skada, L)
     local mod = Skada:NewModule(L["Useful damage"])
 
     local function getDPS(set, player)
-        local uptime = math_min(Skada:GetSetTime(set), Skada:PlayerActiveTime(set, player))
         local amount = player.damagedone.amount - (player.overkill or 0)
-        return amount / math_max(1, uptime)
+        return amount / math_max(1, Skada:PlayerActiveTime(set, player))
     end
 
     local function getRaidDPS(set)

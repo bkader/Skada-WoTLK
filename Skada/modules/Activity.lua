@@ -11,7 +11,7 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
         local player = Skada:find_player(set, id)
         if player then
             local settime = Skada:GetSetTime(set)
-            local playertime = math_min(Skada:PlayerActiveTime(set, player), settime)
+            local playertime = Skada:PlayerActiveTime(set, player)
             tooltip:AddLine(player.name .. ": " .. L["Activity"])
             tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
             tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(playertime), 1, 1, 1)
@@ -26,7 +26,7 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
             local d = win.dataset[nr] or {}
             win.dataset[nr] = d
 
-            local playertime = math_min(Skada:PlayerActiveTime(set, player), settime)
+            local playertime = Skada:PlayerActiveTime(set, player)
 
             d.id = player.id
             d.label = player.name

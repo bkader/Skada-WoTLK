@@ -110,9 +110,8 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
     end
 
     local function getHPS(set, player)
-        local totaltime = math_min(Skada:GetSetTime(set), Skada:PlayerActiveTime(set, player))
         local healing = player.healing and player.healing.amount or 0
-        return healing / math_max(1, totaltime)
+        return healing / math_max(1, Skada:PlayerActiveTime(set, player))
     end
 
     local function getRaidHPS(set)
@@ -506,12 +505,8 @@ Skada:AddLoadableModule("Total healing", function(Skada, L)
     local spellsmod = mod:NewModule(L["Healing spell list"])
 
     local function getHPS(set, player)
-        local totaltime = math_min(Skada:GetSetTime(set), Skada:PlayerActiveTime(set, player))
-        local amount = 0
-        if player.healing then
-            amount = (player.healing.amount or 0) + (player.healing.overhealing or 0)
-        end
-        return amount / math_max(1, totaltime)
+        local healing = player.healing and ((player.healing.amount or 0) + (player.healing.overhealing or 0)) or 0
+        return amount / math_max(1, Skada:PlayerActiveTime(set, player))
     end
 
     local function getRaidHPS(set)

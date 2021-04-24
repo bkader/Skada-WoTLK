@@ -53,7 +53,7 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
     local updaters = {}
 
     updaters.ActiveTime = function(set, player)
-        return math_min(Skada:GetSetTime(set), Skada:PlayerActiveTime(set, player))
+        return Skada:PlayerActiveTime(set, player)
     end
 
     updaters.Damage = function(set, player)

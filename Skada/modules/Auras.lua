@@ -260,7 +260,7 @@ do
         for _, player in _ipairs(set.players) do
             local auracount, aurauptime = countauras(player.auras or {}, auratype)
             if auracount > 0 then
-                local maxtime = math_min(settime, Skada:PlayerActiveTime(set, player))
+                local maxtime = Skada:PlayerActiveTime(set, player)
                 local uptime = aurauptime / auracount
 
                 local d = win.dataset[nr] or {}
@@ -295,7 +295,7 @@ local function spellupdatefunc(auratype, win, set, playerid, playername, fmt)
 
     local player = Skada:find_player(set, playerid, playername)
     if player and player.auras then
-        local maxtime = math_min(Skada:GetSetTime(set), Skada:PlayerActiveTime(set, player))
+        local maxtime = Skada:PlayerActiveTime(set, player)
         if maxtime and maxtime > 0 then
             win.metadata.maxvalue = maxtime
             if fmt then win.title = format(fmt, player.name) end
@@ -332,7 +332,7 @@ local function aura_tooltip(win, id, label, tooltip, playerid, playername, L)
         local aura = player.auras[label]
         if aura then
             local settime = Skada:GetSetTime(set)
-            local maxtime = math_min(settime, Skada:PlayerActiveTime(set, player))
+            local maxtime = Skada:PlayerActiveTime(set, player)
 
             tooltip:AddLine(player.name .. ": " .. label)
 
@@ -360,7 +360,7 @@ local function setcompletefunc(set, auratype)
         local settime = Skada:GetSetTime(set)
         for _, player in _ipairs(set.players) do
             if player.auras then
-                local maxtime = math_min(Skada:GetSetTime(set), Skada:PlayerActiveTime(set, player))
+                local maxtime = Skada:PlayerActiveTime(set, player)
                 for _, spell in _pairs(player.auras) do
                     if spell.auratype == auratype then
                         if spell.active > 0 then

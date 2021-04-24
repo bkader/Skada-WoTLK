@@ -160,8 +160,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
     end
 
     local function getDTPS(set, player)
-        local uptime = math_min(Skada:GetSetTime(set), Skada:PlayerActiveTime(set, player))
-        return player.damagetaken.amount / math_max(1, uptime)
+        return player.damagetaken.amount / math_max(1, Skada:PlayerActiveTime(set, player))
     end
 
     local function getRaidDTPS(set)
@@ -326,8 +325,6 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
             if player.damagetaken.amount > 0 then
                 local d = win.dataset[nr] or {}
                 win.dataset[nr] = d
-
-                local totaltime = math_min(settime, Skada:PlayerActiveTime(set, player))
 
                 d.id = player.id
                 d.label = player.name

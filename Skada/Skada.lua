@@ -80,7 +80,7 @@ local wasinparty, wasininstance, wasinpvp = false
 local tsort, tinsert, tremove, tmaxn = table.sort, table.insert, table.remove, table.maxn
 local next, pairs, ipairs, type = next, pairs, ipairs, type
 local tonumber, tostring, format, strsplit = tonumber, tostring, string.format, strsplit
-local math_floor, math_max = math.floor, math.max
+local math_floor, math_max, math_min = math.floor, math.max, math.min
 local band, time = bit.band, time
 local GetNumPartyMembers, GetNumRaidMembers = GetNumPartyMembers, GetNumRaidMembers
 local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAffectingCombat, InCombatLockdown
@@ -163,7 +163,7 @@ function Skada:PlayerActiveTime(set, player)
     if (not set.endtime or set.stopped) and player.first then
         maxtime = maxtime + player.last - player.first
     end
-    return maxtime
+    return math_min(maxtime, self:GetSetTime(set))
 end
 
 -- utilities

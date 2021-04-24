@@ -614,23 +614,16 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
     local _time = time
 
     local function getHPS(set, player)
-        local totaltime = Skada:PlayerActiveTime(set, player)
-        local total = 0
-        if player.healing then
-            total = total + player.healing.amount
-        end
-        if player.absorbs then
-            total = total + player.absorbs.amount
-        end
-        return total / math_max(1, totaltime)
+        local healing = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
+        return healing / math_max(1, Skada:PlayerActiveTime(set, player))
     end
 
     local function getRaidHPS(set)
-        local total = (set.healing or 0) + (set.absorbs or 0)
+        local healing = (set.healing or 0) + (set.absorbs or 0)
         if set.time > 0 then
-            return total / math_max(1, set.time)
+            return healing / math_max(1, set.time)
         else
-            return total / math_max(1, (set.endtime or _time()) - set.starttime)
+            return healing / math_max(1, (set.endtime or _time()) - set.starttime)
         end
     end
 
@@ -638,11 +631,9 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
         local set = win:get_selected_set()
         local player = Skada:find_player(set, id)
         if player then
-            local totaltime = Skada:GetSetTime(set)
-            local activetime = math_min(totaltime, Skada:PlayerActiveTime(set, player))
             tooltip:AddLine(player.name .. " - " .. L["HPS"])
-            tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
-            tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
+            tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(Skada:GetSetTime(set)), 1, 1, 1)
+            tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(Skada:PlayerActiveTime(set, player)), 1, 1, 1)
 
             local healing = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
             local total = (set.healing or 0) + (set.absorbs or 0)
