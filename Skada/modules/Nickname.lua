@@ -77,6 +77,9 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
                 name = L["Nickname"],
                 desc = L["Set a nickname for you.\nNicknames are sent to group members and Skada can use them instead of your character name."],
                 order = 1,
+                get = function()
+                    return Skada.db.profile.nickname or UnitName("player")
+                end,
                 set = function(_, val)
                     local okey, nickname = CheckNickname(val)
                     if okey == true then
