@@ -30,19 +30,12 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
         return mitigation
     end
 
-    local function GetSetMitigation(set)
-        local mitigation = 0
-        if set and set.players then
-            for _, player in ipairs(set.players) do
-                mitigation = mitigation + GetPlayerMitigation(player)
-            end
-        end
-        return mitigation
-    end
-
     local function CalculateScore(damage, healing, mitigation, damagetaken, role)
-        damagetaken = (damagetaken == 0) and mindamagetaken or damagetaken
-        return (damage * (multipliers.damage[role] or 1) + healing * (multipliers.healing[role] or 1) + mitigation * (multipliers.mitigation[role] or 1)) / damagetaken
+        local score = 0
+        score = score + damage * (multipliers.damage[role] or 1)
+        score = score + healing * (multipliers.healing[role] or 1)
+        score = score + mitigation * (multipliers.mitigation[role] or 1)
+        return score / damagetaken
     end
 
     local function GetSetScore(set)
@@ -52,8 +45,7 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
             for _, player in ipairs(set.players) do
                 local damage = player.damagedone and player.damagedone.amount or 0
                 local healing = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
-                local mitigation = GetPlayerMitigation(player)
-                local damagetaken = player.damagetaken and player.damagetaken.amount or 0
+                local damagetaken, mitigation = GetPlayerMitigation(player)
                 score = score + CalculateScore(damage, healing, mitigation, damagetaken, player.role or "NONE")
                 count = count + 1
             end
@@ -67,12 +59,14 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 
     local function score_tooltip(win, id, label, tooltip)
         local player = Skada:find_player(win:get_selected_set(), id)
-        if not player then return end
+        if not player then
+            return
+        end
 
         tooltip:AddLine(format(L["%s's Score"], player.name))
 
-        local damage = player.damagedone and player.damagedone.amount or 0
-        tooltip:AddDoubleLine(L["Damage"], Skada:FormatNumber(damage), 1, 1, 1, 1, 1, 1)
+        local damagedone = player.damagedone and player.damagedone.amount or 0
+        tooltip:AddDoubleLine(L["Damage"], Skada:FormatNumber(damagedone), 1, 1, 1, 1, 1, 1)
 
         local healing = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
         tooltip:AddDoubleLine(L["Healing"], Skada:FormatNumber(healing), 1, 1, 1, 0, 1, 0)
@@ -83,15 +77,23 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
         local mitigation = GetPlayerMitigation(player)
         tooltip:AddDoubleLine(L["Damage mitigated"], Skada:FormatNumber(mitigation), 1, 1, 1, 1, 1, 0)
 
-        local score = 0
+        local role = player.role
+        if not role then
+            role = "NONE"
+        elseif role == "TANK" then
+            damagetaken = damagetaken - mitigation
+        end
+
+        local score
         if damagetaken < mindamagetaken then
             score = 0
-            if player.role ~= "NONE" then
+            if role ~= "NONE" then
                 damagetaken = mindamagetaken
             end
         end
+
         if damagetaken >= mindamagetaken then
-            score = CalculateScore(damage, healing, mitigation, damagetaken, player.role)
+            score = CalculateScore(damagedone, healing, mitigation, damagetaken, player.role)
         end
         tooltip:AddDoubleLine(L["Score"], format("%.1f", score), 1, 1, 1)
     end
@@ -101,22 +103,26 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 
         for _, player in ipairs(set.players) do
             local damagedone = player.damagedone and player.damagedone.amount or 0
-            local healing = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
+            local healing =
+                (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
             local mitigation = GetPlayerMitigation(player)
             local damagetaken = player.damagetaken and player.damagetaken.amount or 0
 
-            local role = player.role or "NONE"
-            if role == "TANK" then
+            local role = player.role
+            if not role then
+                role = "NONE"
+            elseif role == "TANK" then
                 damagetaken = damagetaken - mitigation
             end
 
-            local score = 0
+            local score
             if damagetaken < mindamagetaken then
                 score = 0
                 if role ~= "NONE" then
                     damagetaken = mindamagetaken
                 end
             end
+
             if damagetaken >= mindamagetaken then
                 score = CalculateScore(damagedone, healing, mitigation, damagetaken, player.role)
             end
