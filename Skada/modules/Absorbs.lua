@@ -905,6 +905,7 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 
     function hpsmode:Update(win, set)
         local max, nr = 0, 1
+        local total = getRaidHPS(set)
 
         for _, player in ipairs(set.players) do
             local hps = getHPS(set, player)
@@ -919,7 +920,12 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
                 d.spec = player.spec or 1
 
                 d.value = hps
-                d.valuetext = Skada:FormatNumber(hps)
+                d.valuetext = Skada:FormatValueText(
+                    Skada:FormatNumber(hps),
+                    self.metadata.columns.HPS,
+                    _format("%02.1f%%", 100 * hps / math_max(1, total)),
+                    self.metadata.columns.Percent
+                )
 
                 if hps > max then
                     max = hps
@@ -946,7 +952,8 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
             showspots = true,
             tooltip = hps_tooltip,
             click1 = playermod,
-            click2 = spellmod
+            click2 = spellmod,
+            columns = {HPS = true, Percent = true}
         }
 
         Skada:AddFeed(L["Healing: Personal HPS"], feed_personal_hps)

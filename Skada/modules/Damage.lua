@@ -25,7 +25,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
     local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
 
     --
-    -- hold the name of targets used to record useful damage
+    -- holds the name of targets used to record useful damage
     --
     local groupName, validTarget
 
@@ -561,6 +561,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
     function dpsmod:Update(win, set)
         local nr, max = 1, 0
+        local total = getRaidDPS(set)
 
         for i, player in _ipairs(set.players) do
             local dps = getDPS(set, player)
@@ -576,7 +577,12 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
                 d.spec = player.spec
 
                 d.value = dps
-                d.valuetext = Skada:FormatNumber(dps)
+                d.valuetext = Skada:FormatValueText(
+                    Skada:FormatNumber(dps),
+                    self.metadata.columns.DPS,
+                    _format("%02.1f%%", 100 * dps / math_max(1, total)),
+                    self.metadata.columns.Percent
+                )
 
                 if dps > max then
                     max = dps
@@ -650,7 +656,8 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
             showspots = true,
             tooltip = dps_tooltip,
             click1 = playermod,
-            click2 = targetmod
+            click2 = targetmod,
+            columns = {DPS = true, Percent = true}
         }
 
         Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {src_is_interesting = true, dst_is_not_interesting = true})
@@ -721,6 +728,7 @@ end)
 -- =========================== --
 -- Damage done by spell Module --
 -- =========================== --
+
 Skada:AddLoadableModule("Damage done by spell", function(Skada, L)
     if Skada:IsDisabled("Damage", "Damage done by spell") then return end
 
