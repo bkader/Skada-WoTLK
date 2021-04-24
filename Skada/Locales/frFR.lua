@@ -544,7 +544,7 @@ L["Energy gained spell list"] = "Liste des sorts de gain d'énergie"
 L["Power gained: Runic Power"] = "Ressources: P. runique"
 L["Runic Power gained spell list"] = "Liste des sorts de gain de P. runique"
 -- Parry module lines --
-L["Parry"] = "Parade-hâte"
+L["Parry-haste"] = "Parade-hâte"
 L["Parry target list"] = "Liste des cibles de parade"
 L["%s's parry targets"] = "Cibles parées de %s"
 -- Potions module lines --
