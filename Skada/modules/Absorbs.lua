@@ -942,8 +942,8 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
         hpsmode.metadata = {
             showspots = true,
             tooltip = hps_tooltip,
-            click1 = playermod,
-            click2 = spellmod,
+            click1 = spellmod,
+            click2 = playermod,
             columns = {HPS = true, Percent = true}
         }
 
