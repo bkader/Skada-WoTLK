@@ -39,29 +39,47 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
     end
 
     local function GetSetScore(set)
-        local score = 0
+        local raidscore = 0
         if set and set.players then
             local count = 0
             for _, player in ipairs(set.players) do
                 local damage = player.damagedone and player.damagedone.amount or 0
                 local healing = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
-                local damagetaken, mitigation = GetPlayerMitigation(player)
-                score = score + CalculateScore(damage, healing, mitigation, damagetaken, player.role or "NONE")
+                local mitigation = GetPlayerMitigation(player)
+                local damagetaken = player.damagetaken and player.damagetaken.amount or 0
+
+                local role = player.role
+                if not role then
+                    role = "NONE"
+                elseif role == "TANK" then
+                    damagetaken = damagetaken - mitigation
+                end
+
+                local score
+                if damagetaken < mindamagetaken then
+                    score = 0
+                    if role ~= "NONE" then
+                        damagetaken = mindamagetaken
+                    end
+                end
+
+                if damagetaken >= mindamagetaken then
+                    score = CalculateScore(damage, healing, mitigation, damagetaken, player.role)
+                end
+                raidscore = raidscore + score
                 count = count + 1
             end
 
             if count > 0 then
-                score = score / count
+                raidscore = raidscore / count
             end
         end
-        return score
+        return raidscore
     end
 
     local function score_tooltip(win, id, label, tooltip)
         local player = Skada:find_player(win:get_selected_set(), id)
-        if not player then
-            return
-        end
+        if not player then return end
 
         tooltip:AddLine(format(L["%s's Score"], player.name))
 
