@@ -64,7 +64,6 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
     local options = {
         type = "group",
         name = L["Nickname"],
-        order = 0,
         get = function(i)
             return Skada.db.profile[i[#i]]
         end,
@@ -78,9 +77,6 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
                 name = L["Nickname"],
                 desc = L["Set a nickname for you.\nNicknames are sent to group members and Skada can use them instead of your character name."],
                 order = 1,
-                get = function()
-                    return Skada.db.profile.nickname
-                end,
                 set = function(_, val)
                     local okey, nickname = CheckNickname(val)
                     if okey == true then
@@ -97,14 +93,12 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
                 name = L["Name display"],
                 desc = L["Choose how names are shown on your bars."],
                 order = 2,
-                values = function()
-                    return {
-                        [1] = NAME,
-                        [2] = L["Nickname"],
-                        [3] = NAME .. " (" .. L["Nickname"] .. ")",
-                        [4] = L["Nickname"] .. " (" .. NAME .. ")"
-                    }
-                end
+                values = {
+                    [1] = NAME,
+                    [2] = L["Nickname"],
+                    [3] = NAME .. " (" .. L["Nickname"] .. ")",
+                    [4] = L["Nickname"] .. " (" .. NAME .. ")"
+                }
             },
             ignorenicknames = {
                 type = "toggle",
