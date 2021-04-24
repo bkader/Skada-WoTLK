@@ -543,11 +543,11 @@ do
         local channellist = {
             whisper = {L["Whisper"], "whisper", true},
             target = {L["Whisper Target"], "whisper"},
-            say = {L["Say"], "preset"},
-            raid = {L["Raid"], "preset"},
-            party = {L["Party"], "preset"},
-            guild = {L["Guild"], "preset"},
-            officer = {L["Officer"], "preset"},
+            say = {CHAT_MSG_SAY, "preset"},
+            raid = {CHAT_MSG_RAID, "preset"},
+            party = {CHAT_MSG_PARTY, "preset"},
+            guild = {CHAT_MSG_GUILD, "preset"},
+            officer = {CHAT_MSG_OFFICER, "preset"},
             self = {L["Self"], "self"}
         }
 
