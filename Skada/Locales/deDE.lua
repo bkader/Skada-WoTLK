@@ -224,6 +224,12 @@ L["Condensed"] = "Zusammengefasst"
 L["Detailed"] = "Detailliert"
 L["Data feed"] = "Datenquelle"
 L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."] = "Auswählen welche Datensammlung in der DataBroker-Ansicht angezeigt werden soll. Dies erfordert ein LDB-Anzeige-Addon, wie zum Beispiel 'Titan Panel'."
+L["Time measure"] = "Zeitmessung"
+L["Activity time"] = "Aktivzeit"
+L["Effective time"] = "Effektivzeit"
+L.timemesure_desc = [=[|cFFFFFF00Aktivität|r: Die Teilnehmer-Uhr stoppt, wenn er inaktiv ist, und läuft bei Aktivitäten weiter. Gewöhnliche Art zur Messung von DpS und HpS.
+
+|cFFFFFF00Effektiv|r: gebräuchlich für Ranglisten. Diese Methode nutzt die Kampfzeit für DpS-/HpS-Messungen aller Schlachtzugteilnehmer.]=]
 L["Number set duplicates"] = "Anzahl der Duplikate"
 L["Append a count to set names with duplicate mob names."] = "Fügt eine Anzahl hinzu, um Namen, mit doppelten Gegnernamen, festzulegen."
 L["Set format"] = "Format setzen"

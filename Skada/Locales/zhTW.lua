@@ -224,6 +224,12 @@ if not L then return end
 -- L["Detailed"] = ""
 -- L["Data feed"] = ""
 -- L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."] = ""
+L["Time measure"] = "時間測量方式"
+L["Activity time"] = "活躍時間"
+L["Effective time"] = "介面效果微調"
+L.timemesure_desc = [=[|cFFFFFF00活躍時間|r: 每一位團隊成員停止活動時，便會暫停各自的計時，並在恢復後再次開始計時。這是用來測量 DPS 和 HPS 最常用的方法。
+
+|cFFFFFF00有效時間|r: 用於排名，此方法會使用整場戰鬥時間來測量所有團隊成員的 DPS 和 HPS。]=]
 -- L["Number set duplicates"] = ""
 -- L["Append a count to set names with duplicate mob names."] = ""
 -- L["Set format"] = ""

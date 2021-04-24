@@ -224,6 +224,12 @@ L["Condensed"] = "Condensado"
 L["Detailed"] = "Detallado"
 L["Data feed"] = "Recolecta de datos"
 L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."] = "Escoger que datos recogidos son mostrados en la vista del DataBroker. Esto requiere un addon de mostrar LDB como Titan Panel."
+L["Time measure"] = "Medida de tiempo"
+L["Activity time"] = "Tiempo activo"
+L["Effective time"] = "Tiempo efectivo"
+L.timemesure_desc = [=[|cFFFFFF00Actividad|r: el temporizador de cada miembro de la banda se pone en espera si se detiene su actividad y vuelve a contar cuando se reanuda, forma común de medir DPS y SPS.
+
+|cFFFFFF00Efectivo|r: utilizado en las clasificaciones, este método utiliza el tiempo de combate transcurrido para medir el DPS y el SPS de todos los miembros de la banda.]=]
 L["Number set duplicates"] = "Número de duplicados"
 L["Append a count to set names with duplicate mob names."] = "Agregue un recuento para establecer nombres con nombres de segmento duplicados."
 L["Set format"] = "Formato del conjunto"

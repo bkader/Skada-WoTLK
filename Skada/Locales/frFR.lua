@@ -225,6 +225,12 @@ L["Condensed"] = "Condensé"
 L["Detailed"] = "Détaillé"
 L["Data feed"] = "Flux de données"
 L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."] = "Choisissez le flux de données à afficher sur le greffon DataBlocker. Ceci nécessite un addon d'affichage LDB, tel que Titan Panel."
+L["Time measure"] = "Mesure du temps"
+L["Activity time"] = "Temps d'activité"
+L["Effective time"] = "Temps effectif"
+L.timemesure_desc = [=[|cFFFFFF00Activité|r : le chronomètre de chaque membre du raid est mis en pause si son activité est interrompue et reprend le compte quand l'activité reprend, méthode commune de mesure des DPS et HPS.
+
+|cFFFFFF00Effective|r : utilisée pour les classements, cette méthode utilise le temps de combat écoulé pour mesurer le DPS et le HPS de tous les membres du raid.]=]
 L["Number set duplicates"] = "Nombre de doublons"
 L["Append a count to set names with duplicate mob names."] = "Ajoute un compteur aux noms d'ensemble ayant des noms de monstres dupliqués."
 L["Set format"] = "Format des ensembles"

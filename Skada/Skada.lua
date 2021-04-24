@@ -159,11 +159,16 @@ local function setPlayerActiveTimes(set)
 end
 
 function Skada:PlayerActiveTime(set, player)
+    local settime = self:GetSetTime(set)
+    if self.effectivetime then
+        return settime
+    end
+
     local maxtime = (player.time > 0) and player.time or 0
     if (not set.endtime or set.stopped) and player.first then
         maxtime = maxtime + player.last - player.first
     end
-    return math_min(maxtime, self:GetSetTime(set))
+    return math_min(maxtime, settime)
 end
 
 -- utilities
@@ -1633,7 +1638,7 @@ do
 
                     local title = data.label
                     if mode.metadata and mode.metadata.showspots then
-                        title = "|cffffffff"..nr .. ".|r " .. title
+                        title = "|cffffffff" .. nr .. ".|r " .. title
                     end
                     tooltip:AddDoubleLine(title, data.valuetext, color.r, color.g, color.b)
                     color, title = nil, nil
@@ -2431,6 +2436,7 @@ function Skada:ApplySettings()
         end
     end
 
+    self.effectivetime = (self.db.profile.timemesure == 2)
     self:UpdateDisplay(true)
 end
 
@@ -2834,7 +2840,7 @@ function Skada:OnEnable()
     end
 
     -- please do not localize this line!
-    L["Auto Attack"] = select(1, GetSpellInfo(6603))
+    L["Auto Attack"] = select(1, GetSpellInfo(6603)) or MELEE
 
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:RegisterEvent("PARTY_MEMBERS_CHANGED")
@@ -3069,7 +3075,7 @@ do
 
     function Skada:Tick()
         if not disabled and self.current and not IsRaidInCombat() then
-            self.After(1, function() self:EndSegment() end)
+            self:EndSegment()
         end
     end
 
@@ -3204,10 +3210,8 @@ do
                 deathcounter = deathcounter + 1
                 -- If we reached the treshold for stopping the segment, do so.
                 if deathcounter > 0 and deathcounter / startingmembers >= 0.5 and not self.current.stopped then
-                    self.After(1, function()
-                        self:Print("Stopping for wipe.")
-                        self:StopSegment()
-                    end)
+                    self:Print("Stopping for wipe.")
+                    self:StopSegment()
                 end
             elseif eventtype == "SPELL_RESURRECT" and ((band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID]) then
                 deathcounter = deathcounter - 1

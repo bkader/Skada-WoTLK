@@ -223,6 +223,12 @@ if not L then return end
 -- L["Condensed"] = ""
 -- L["Detailed"] = ""
 -- L["Data feed"] = ""
+L["Time measure"] = "시간 측정"
+L["Activity time"] = "활동 시간"
+L["Effective time"] = "실질 시간"
+L.timemesure_desc = [=[|cFFFFFF00활동 시간|r: 각 공격대원의 타이머가 해당 공대원의 활동이 중단되면 초읽기를 중지했다가 활동 재개시 다시 초읽기에 들어갑니다. Dps와 Hps 산출의 일반적인 방법입니다.
+
+|cFFFFFF00실질 시간|r: 순위를 매길때 쓰입니다, 이 방법은 모든 공격대원의 Dps와 Hps를 산출하기 위해 측정된 전투 시간을 사용합니다.]=]
 -- L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."] = ""
 -- L["Number set duplicates"] = ""
 -- L["Append a count to set names with duplicate mob names."] = ""

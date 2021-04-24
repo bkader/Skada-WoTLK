@@ -225,6 +225,11 @@ L["Condensed"] = "简短"
 L["Detailed"] = "详细"
 L["Data feed"] = "数据反馈"
 L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."] = "选择显示在DataBroker上的数据反馈。需要一个LDB显示插件，例如Titan Panel泰坦信息条。"
+L["Time measure"] = "时间测量"
+L["Activity time"] = "活跃时间"
+L["Effective time"] = "有效时间"
+L.timemesure_desc = [=[|cFFFFFF00活动|r：如果活动停止，每个团队成员的计时器将被暂停，并且当恢复时，每个团队成员的计时器将再次计数，常用的测量方法Dps和Hps
+|cFFFFFF00有效|r：用于排名，此方法使用经过的战斗时间来测量所有团队成员的Dps和Hps]=]
 L["Number set duplicates"] = "数字集重复"
 L["Append a count to set names with duplicate mob names."] = "在集合名称中附加一个重复怪物名字的计数。"
 L["Set format"] = "集合格式"

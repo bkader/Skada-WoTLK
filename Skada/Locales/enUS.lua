@@ -224,6 +224,12 @@ L["Condensed"] = true
 L["Detailed"] = true
 L["Data feed"] = true
 L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."] = true
+L["Time measure"] = true
+L["Activity time"] = true
+L["Effective time"] = true
+L.timemesure_desc = [=[|cFFFFFF00Activity|r: the timer of each raid member is put on hold if their activity is ceased and back again to count when resumed, common way of measuring DPS and HPS.
+
+|cFFFFFF00Effective|r: used on rankings, this method uses the elapsed combat time to measure the DPS and HPS of all raid members.]=]
 L["Number set duplicates"] = true
 L["Append a count to set names with duplicate mob names."] = true
 L["Set format"] = true

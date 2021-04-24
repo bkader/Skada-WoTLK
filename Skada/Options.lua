@@ -143,7 +143,7 @@ function Skada:AddColumnOptions(mod)
             type = "group",
             name = mod:GetName(),
             order = 0,
-            width = "full",
+            width = "double",
             inline = true,
             args = {}
         }
@@ -195,7 +195,7 @@ local newdisplay = "bar"
 
 Skada.options = {
     type = "group",
-    name = "Skada |cffffffff"..Skada.version.."|r by |cfff58cbaKader|r",
+    name = "Skada |cffffffff" .. Skada.version .. "|r by |cfff58cbaKader|r",
     get = function(i)
         return Skada.db.profile[i[#i]]
     end,
@@ -224,7 +224,7 @@ Skada.options = {
                     name = L["Create window"],
                     desc = L["Enter the name for the new window."],
                     order = 1,
-                    width = "full",
+                    width = "double",
                     set = function(_, val)
                         if val and val ~= "" then
                             Skada:CreateWindow(val, nil, newdisplay)
@@ -236,7 +236,7 @@ Skada.options = {
                     name = L["Display system"],
                     desc = L["Choose the system to be used for displaying data in this window."],
                     order = 2,
-                    width = "full",
+                    width = "double",
                     values = function()
                         local list = {}
                         for name, display in pairs(Skada.displays) do
@@ -275,7 +275,7 @@ Skada.options = {
                     name = L["Reset on entering instance"],
                     desc = L["Controls if data is reset when you enter an instance."],
                     order = 1,
-                    width = "full",
+                    width = "double",
                     values = function()
                         return Skada.resetoptions
                     end
@@ -285,7 +285,7 @@ Skada.options = {
                     name = L["Reset on joining a group"],
                     desc = L["Controls if data is reset when you join a group."],
                     order = 2,
-                    width = "full",
+                    width = "double",
                     values = function()
                         return Skada.resetoptions
                     end
@@ -295,7 +295,7 @@ Skada.options = {
                     name = L["Reset on leaving a group"],
                     desc = L["Controls if data is reset when you leave a group."],
                     order = 3,
-                    width = "full",
+                    width = "double",
                     values = function()
                         return Skada.resetoptions
                     end
@@ -324,7 +324,7 @@ Skada.options = {
                     name = L["Subview rows"],
                     desc = L["The number of rows from each subview to show when using informative tooltips."],
                     order = 3,
-                    width = "full",
+                    width = "double",
                     min = 1,
                     max = 10,
                     step = 1
@@ -334,7 +334,7 @@ Skada.options = {
                     name = L["Tooltip position"],
                     desc = L["Position of the tooltips."],
                     order = 4,
-                    width = "full",
+                    width = "double",
                     values = {
                         ["default"] = L["Default"],
                         ["smart"] = L["Smart"],
@@ -437,29 +437,21 @@ Skada.options = {
                     desc = L["Automatically stops the current segment after half of all raid members have died."],
                     order = 13
                 },
-                smartstop = {
-                    type = "toggle",
-                    name = L["Smart stop"],
-                    desc = L["Automatically stops the current segment after the boss has died.\nUseful to avoid collecting data in case of a combat bug."],
-                    order = 14,
-                    disabled = true
-                },
                 tentativecombatstart = {
                     type = "toggle",
                     name = L["Aggressive combat detection"],
                     desc = L["Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons. Meaningless on boss encounters."],
-                    order = 15,
-                    width = "full"
+                    order = 15
                 },
                 tentativetimer = {
                     type = "range",
                     name = L["Tentative Timer"],
                     desc = L['The number of seconds Skada should wait after combat start to create a new segment.\n\nOnly works if "Agressive combat detection" is enabled.'],
-                    order = 15.1,
+                    order = 16,
                     min = 1,
                     max = 5,
                     step = 1,
-                    width = "full",
+                    width = "double",
                     disabled = function()
                         return not Skada.db.profile.tentativecombatstart
                     end,
@@ -467,26 +459,23 @@ Skada.options = {
                         return not Skada.db.profile.tentativecombatstart
                     end
                 },
-                feed = {
+                timemesure = {
                     type = "select",
-                    name = L["Data feed"],
-                    desc = L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."],
-                    order = 16,
-                    width = "full",
-                    values = function()
-                        local feeds = {[""] = NONE}
-                        for name, _ in pairs(Skada:GetFeeds()) do
-                            feeds[name] = name
-                        end
-                        return feeds
+                    name = L["Time measure"],
+                    desc = L.timemesure_desc,
+                    order = 17,
+                    width = "double",
+                    values = {[1] = L["Activity time"], [2] = L["Effective time"]},
+                    get = function()
+                        return Skada.db.profile.timemesure or 1
                     end
                 },
                 numberformat = {
                     type = "select",
                     name = L["Number format"],
                     desc = L["Controls the way large numbers are displayed."],
-                    order = 17,
-                    width = "full",
+                    order = 18,
+                    width = "double",
                     values = function()
                         return {[1] = L["Condensed"], [2] = L["Detailed"]}
                     end
@@ -495,21 +484,43 @@ Skada.options = {
                     type = "select",
                     name = L["Set format"],
                     desc = L["Controls the way set names are displayed."],
-                    order = 18,
-                    width = "full",
+                    order = 19,
+                    width = "double",
                     values = Skada:SetLabelFormats()
                 },
                 setnumber = {
                     type = "toggle",
                     name = L["Number set duplicates"],
                     desc = L["Append a count to set names with duplicate mob names."],
-                    order = 19
+                    order = 20
                 },
                 translit = {
                     type = "toggle",
                     name = L["Translit"],
                     desc = L["Make those russian letters that no one understand to be presented as western letters."],
-                    order = 20
+                    order = 21
+                },
+                feed = {
+                    type = "select",
+                    name = L["Data feed"],
+                    desc = L[
+                        "Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."
+                    ],
+                    order = 22,
+                    width = "double",
+                    values = function()
+                        local feeds = {[""] = NONE}
+                        for name, _ in pairs(Skada:GetFeeds()) do
+                            feeds[name] = name
+                        end
+                        return feeds
+                    end
+                },
+                separator1 = {
+                    type = "description",
+                    name = " ",
+                    order = 23,
+                    width = "full"
                 },
                 memorycheck = {
                     type = "toggle",
@@ -522,14 +533,14 @@ Skada.options = {
                         return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], (Skada.db.profile.setstokeep * 1.25) + 5)
                     end,
                     order = 97,
-                    width = "full"
+                    width = "double"
                 },
                 setstokeep = {
                     type = "range",
                     name = L["Data segments to keep"],
                     desc = L["The number of fight segments to keep. Persistent segments are not included in this."],
                     order = 98,
-                    width = "full",
+                    width = "double",
                     min = 0,
                     max = 99,
                     step = 1
@@ -539,7 +550,7 @@ Skada.options = {
                     name = L["Update frequency"],
                     desc = L["How often windows are updated. Shorter for faster updates. Increases CPU usage."],
                     order = 99,
-                    width = "full",
+                    width = "double",
                     min = 0.10,
                     max = 1,
                     step = 0.05,
@@ -557,7 +568,7 @@ Skada.options = {
             type = "group",
             name = L["Disabled Modules"],
             order = 7,
-            width = "full",
+            width = "double",
             get = function(i)
                 return Skada.db.profile.modulesBlocked[i[#i]]
             end,
@@ -569,13 +580,13 @@ Skada.options = {
                 desc = {
                     type = "description",
                     name = L["Tick the modules you want to disable."],
-                    width = "full",
+                    width = "double",
                     order = 0
                 },
                 apply = {
                     type = "execute",
                     name = APPLY,
-                    width = "full",
+                    width = "double",
                     func = ReloadUI,
                     confirm = function()
                         return L["This change requires a UI reload. Are you sure?"]
@@ -589,7 +600,7 @@ Skada.options = {
             type = "group",
             name = L["Modules"],
             order = 8,
-            width = "full",
+            width = "double",
             disabled = function()
                 return next(Skada.options.args.modules.args) == nil
             end,

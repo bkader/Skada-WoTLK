@@ -223,6 +223,12 @@ L["Condensed"] = "Кратко"
 L["Detailed"] = "Детально"
 L["Data feed"] = "Подача данных" --?
 L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."] = "Выберите, какие данные выводить в DataBroker. Для этого требуется, аддон который поддерживает отображение LDB, к примеру Titan Panel."
+L["Time measure"] = "Мера времени"
+L["Activity time"] = "По активности"
+L["Effective time"] = "По эффективности"
+L.timemesure_desc = [=[|cFFFFFF00Активный|r: таймер каждого участника рейда ставится на удержание, если их активность прекращается, и снова подсчитывается при возобновлении, общий способ измерения УВС и ИВС.
+
+|cFFFFFF00Эффективный|r: используется в рейтинге, этот метод использует прошедшее боевое время для измерения УВС и ИВС - всех участников рейда.]=]
 L["Number set duplicates"] = "Количество дубликатов"
 L["Append a count to set names with duplicate mob names."] = "Добавлять счетчик для противников с одинаковыми именами."
 L["Set format"] = "Установить формат"
