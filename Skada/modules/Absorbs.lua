@@ -2,8 +2,9 @@ assert(Skada, "Skada not found!")
 
 -- cache frequently used globals
 local _pairs, _ipairs, _select = pairs, ipairs, select
-local _format, math_max = string.format, math.max
+local _format, math_max, math_min = string.format, math.max, math.min
 local _GetSpellInfo = Skada.GetSpellInfo
+local _UnitGUID = UnitGUID
 
 -- ============== --
 -- Absorbs module --
@@ -17,8 +18,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
     local playermod = mod:NewModule(L["Absorbed player list"])
 
     local _GetNumRaidMembers, _GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
-    local _UnitExists, _UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
-    local _UnitGUID, _UnitName = UnitGUID, UnitName
+    local _UnitName, _UnitExists, _UnitIsDeadOrGhost = UnitName, UnitExists, UnitIsDeadOrGhost
     local _tostring, _GetTime, _band = tostring, GetTime, bit.band
 
     local absorbspells = {
@@ -609,6 +609,7 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
     local mod = Skada:NewModule(L["Absorbs and healing"])
     local playermod = mod:NewModule(L["Absorbed and healed players"])
     local spellmod = mod:NewModule(L["Absorbs and healing spell list"])
+    local hpsmode = mod:NewModule(L["HPS"])
 
     local _time = time
 
@@ -630,6 +631,22 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
             return total / math_max(1, set.time)
         else
             return total / math_max(1, (set.endtime or _time()) - set.starttime)
+        end
+    end
+
+    local function hps_tooltip(win, id, label, tooltip)
+        local set = win:get_selected_set()
+        local player = Skada:find_player(set, id)
+        if player then
+            local totaltime = Skada:GetSetTime(set)
+            local activetime = math_min(totaltime, Skada:PlayerActiveTime(set, player))
+            tooltip:AddLine(player.name .. " - " .. L["HPS"])
+            tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
+            tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
+
+            local healing = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
+            local total = (set.healing or 0) + (set.absorbs or 0)
+            tooltip:AddDoubleLine(L["Absorbs and healing"], _format("%s (%02.1f%%)", Skada:FormatNumber(healing), 100 * healing / math_max(1, total)), 1, 1, 1)
         end
     end
 
@@ -867,6 +884,55 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
         win.title = L["Absorbs and healing"]
     end
 
+    local function feed_personal_hps()
+        if Skada.current then
+            local player = Skada:find_player(Skada.current, _UnitGUID("player"))
+            if player then
+                return Skada:FormatNumber(getHPS(Skada.current, player)) .. " " .. L["HPS"]
+            end
+        end
+    end
+
+    local function feed_raid_hps()
+        if Skada.current then
+            return Skada:FormatNumber(getRaidHPS(Skada.current)) .. " " .. L["RHPS"]
+        end
+    end
+
+    function hpsmode:GetSetSummary(set)
+        return Skada:FormatNumber(getRaidHPS(set))
+    end
+
+    function hpsmode:Update(win, set)
+        local max, nr = 0, 1
+
+        for _, player in ipairs(set.players) do
+            local hps = getHPS(set, player)
+            if hps > 0 then
+                local d = win.dataset[nr] or {}
+                win.dataset[nr] = d
+
+                d.id = player.id
+                d.label = player.name
+                d.class = player.class or "PET"
+                d.role = player.role or "DAMAGER"
+                d.spec = player.spec or 1
+
+                d.value = hps
+                d.valuetext = Skada:FormatNumber(hps)
+
+                if hps > max then
+                    max = hps
+                end
+
+                nr = nr + 1
+            end
+        end
+
+        win.metadata.maxvalue = max
+        win.title = L["HPS"]
+    end
+
     function mod:OnEnable()
         spellmod.metadata = {tooltip = spell_tooltip}
         playermod.metadata = {showspots = true}
@@ -876,12 +942,25 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
             click2 = playermod,
             columns = {Healing = true, HPS = true, Percent = true}
         }
+        hpsmode.metadata = {
+            showspots = true,
+            tooltip = hps_tooltip,
+            click1 = playermod,
+            click2 = spellmod
+        }
+
+        Skada:AddFeed(L["Healing: Personal HPS"], feed_personal_hps)
+        Skada:AddFeed(L["Healing: Raid HPS"], feed_raid_hps)
 
         Skada:AddMode(self, L["Absorbs and healing"])
+        Skada:AddMode(hpsmode, L["Absorbs and healing"])
     end
 
     function mod:OnDisable()
         Skada:RemoveMode(self)
+        Skada:RemoveMode(hpsmode)
+        Skada:RemoveFeed(L["Healing: Personal HPS"])
+        Skada:RemoveFeed(L["Healing: Raid HPS"])
     end
 
     function mod:AddToTooltip(set, tooltip)
