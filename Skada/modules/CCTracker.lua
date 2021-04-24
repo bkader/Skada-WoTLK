@@ -1123,29 +1123,21 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
     local opts = {
         type = "group",
-        name = L["CC"],
+        name = L["CC Breakers"],
+        get = function(i) return Skada.db.profile.modules[i[#i]] end,
+        set = function(i, val) Skada.db.profile.modules[i[#i]] = val end,
         args = {
-            announce = {
+            ccannounce = {
                 type = "toggle",
                 name = L["Announce CC breaking to party"],
                 order = 1,
-                get = function()
-                    return Skada.db.profile.modules.ccannounce
-                end,
-                set = function()
-                    Skada.db.profile.modules.ccannounce = not Skada.db.profile.modules.ccannounce
-                end
+                width = "full"
             },
-            ignoremaintanks = {
+            ccignoremaintanks = {
                 type = "toggle",
                 name = L["Ignore Main Tanks"],
                 order = 2,
-                get = function()
-                    return Skada.db.profile.modules.ccignoremaintanks
-                end,
-                set = function()
-                    Skada.db.profile.modules.ccignoremaintanks = not Skada.db.profile.modules.ccignoremaintanks
-                end
+                width = "full"
             }
         }
     }
