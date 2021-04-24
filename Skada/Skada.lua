@@ -139,9 +139,7 @@ end
 -- needed locals --
 -- ============= --
 
-local createSet, verify_set
-local find_mode, sort_modes
-local IsRaidInCombat, IsRaidDead
+local sort_modes
 
 -- party/group
 
@@ -655,7 +653,7 @@ do
 
     local function click_on_mode(win, id, _, button)
         if button == "LeftButton" then
-            local mode = find_mode(id)
+            local mode = Skada:find_mode(id)
             if mode then
                 if Skada.db.profile.sortmodesbyusage then
                     Skada.db.profile.modeclicks = Skada.db.profile.modeclicks or {}
@@ -824,7 +822,7 @@ function Skada:CreateWindow(name, db, display)
         tinsert(windows, window)
         window:DisplaySets()
 
-        if isnew and find_mode(L["Damage"]) then
+        if isnew and self:find_mode(L["Damage"]) then
             self:RestoreView(window, "current", L["Damage"])
         elseif window.db.set or window.db.mode then
             self:RestoreView(window, window.db.set, window.db.mode)
@@ -879,7 +877,7 @@ function Skada:RestoreView(win, theset, themode)
     changed = true
 
     if themode then
-        win:DisplayMode(find_mode(themode) or win.selectedset)
+        win:DisplayMode(self:find_mode(themode) or win.selectedset)
     else
         win:DisplayModes(win.selectedset)
     end
@@ -917,7 +915,7 @@ end
 -- MODES FUNCTIONS --
 -- =============== --
 
-function find_mode(name)
+function Skada:find_mode(name)
     for _, mode in ipairs(modes) do
         if mode:GetName() == name then
             return mode
@@ -952,15 +950,15 @@ do
 
     function Skada:AddMode(mode, category)
         if self.total then
-            verify_set(mode, self.total)
+            self:VerifySet(mode, self.total)
         end
 
         if self.current then
-            verify_set(mode, self.current)
+            self:VerifySet(mode, self.current)
         end
 
         for _, set in ipairs(self.char.sets) do
-            verify_set(mode, set)
+            self:VerifySet(mode, set)
         end
 
         mode.category = category or OTHER
@@ -1043,16 +1041,16 @@ end
 -- SETS FUNCTIONS --
 -- =============== --
 
-function createSet(setname, starttime)
+function Skada:CreateSet(setname, starttime)
     starttime = starttime or time()
     local set = {players = {}, name = setname, starttime = starttime, last_action = starttime, time = 0}
     for _, mode in ipairs(modes) do
-        verify_set(mode, set)
+        self:VerifySet(mode, set)
     end
     return set
 end
 
-function verify_set(mode, set)
+function Skada:VerifySet(mode, set)
     if mode.AddSetAttributes then
         mode:AddSetAttributes(set)
     end
@@ -1655,10 +1653,10 @@ end
 function Skada:ShowTooltip(win, id, label)
     local t = GameTooltip
 
-    if Skada.db.profile.tooltips then
-        if win.metadata.is_modelist and Skada.db.profile.informativetooltips then
+    if self.db.profile.tooltips then
+        if win.metadata.is_modelist and self.db.profile.informativetooltips then
             t:ClearLines()
-            Skada:AddSubviewToTooltip(t, win, find_mode(id), id, label)
+            self:AddSubviewToTooltip(t, win, self:find_mode(id), id, label)
             t:Show()
         elseif win.metadata.click1 or win.metadata.click2 or win.metadata.click3 or win.metadata.tooltip then
             t:ClearLines()
@@ -1674,15 +1672,15 @@ function Skada:ShowTooltip(win, id, label)
                 numLines = nil
             end
 
-            if Skada.db.profile.informativetooltips then
+            if self.db.profile.informativetooltips then
                 if win.metadata.click1 then
-                    Skada:AddSubviewToTooltip(t, win, win.metadata.click1, id, label)
+                    self:AddSubviewToTooltip(t, win, win.metadata.click1, id, label)
                 end
                 if win.metadata.click2 then
-                    Skada:AddSubviewToTooltip(t, win, win.metadata.click2, id, label)
+                    self:AddSubviewToTooltip(t, win, win.metadata.click2, id, label)
                 end
                 if win.metadata.click3 then
-                    Skada:AddSubviewToTooltip(t, win, win.metadata.click3, id, label)
+                    self:AddSubviewToTooltip(t, win, win.metadata.click3, id, label)
                 end
             end
 
@@ -1742,7 +1740,7 @@ function Skada:Command(param)
         w1, w2, w3 = nil, nil, nil
 
         -- Sanity checks.
-        if chan and (chan == "say" or chan == "guild" or chan == "raid" or chan == "party" or chan == "officer") and (report_mode_name and find_mode(report_mode_name)) then
+        if chan and (chan == "say" or chan == "guild" or chan == "raid" or chan == "party" or chan == "officer") and (report_mode_name and self:find_mode(report_mode_name)) then
             self:Report(chan, "preset", report_mode_name, "current", max)
         else
             self:Print("Usage:")
@@ -1808,7 +1806,7 @@ do
         local report_table, report_set, report_mode
 
         if not window then
-            report_mode = find_mode(report_mode_name)
+            report_mode = self:find_mode(report_mode_name)
             report_set = self:find_set(report_set_name)
             if report_set == nil then
                 return
@@ -2031,12 +2029,12 @@ function Skada:Reset()
 
     if self.current ~= nil then
         wipe(self.current)
-        self.current = createSet(L["Current"])
+        self.current = self:CreateSet(L["Current"])
     end
 
     if self.total ~= nil then
         wipe(self.total)
-        self.total = createSet(L["Total"])
+        self.total = self:CreateSet(L["Total"])
         self.char.total = self.total
     end
     self.last = nil
@@ -2906,7 +2904,7 @@ end
 -- ======================================================= --
 
 do
-    function IsRaidInCombat()
+    function Skada:IsRaidInCombat()
         local prefix, count = GetGroupTypeAndCount()
         if count > 0 then
             for i = 1, count, 1 do
@@ -2921,7 +2919,7 @@ do
         return false
     end
 
-    function IsRaidDead()
+    function Skada:IsRaidDead()
         local prefix, count = GetGroupTypeAndCount()
         if count > 0 then
             for i = 1, count, 1 do
@@ -3021,7 +3019,7 @@ do
             win:Wipe()
             changed = true
 
-            if win.db.wipemode ~= "" and IsRaidDead() then
+            if win.db.wipemode ~= "" and self:IsRaidDead() then
                 self:RestoreView(win, "current", win.db.wipemode)
             elseif win.db.returnaftercombat and win.restore_mode and win.restore_set then
                 if win.restore_set ~= win.selectedset or win.restore_mode ~= win.selectedmode then
@@ -3074,7 +3072,7 @@ do
     local deathcounter, startingmembers = 0, 0
 
     function Skada:Tick()
-        if not disabled and self.current and not IsRaidInCombat() then
+        if not disabled and self.current and not self:IsRaidInCombat() then
             self:EndSegment()
         end
     end
@@ -3097,17 +3095,17 @@ do
         local starttime = time()
 
         if not self.current then
-            self.current = createSet(L["Current"], starttime)
+            self.current = self:CreateSet(L["Current"], starttime)
         end
 
         if self.total == nil then
-            self.total = createSet(L["Total"], starttime)
+            self.total = self:CreateSet(L["Total"], starttime)
             self.char.total = self.total
         end
 
         for _, win in ipairs(windows) do
             if win.db.modeincombat ~= "" then
-                local mymode = find_mode(win.db.modeincombat)
+                local mymode = self:find_mode(win.db.modeincombat)
 
                 if mymode ~= nil then
                     if win.db.returnaftercombat then
@@ -3185,10 +3183,10 @@ do
             end
 
             if src_is_interesting or dst_is_interesting then
-                self.current = createSet(L["Current"], now)
+                self.current = self:CreateSet(L["Current"], now)
 
                 if not self.total then
-                    self.total = createSet(L["Total"], now)
+                    self.total = self:CreateSet(L["Total"], now)
                 end
                 tentativehandle = self.NewTimer(self.db.profile.tentativetimer or 1, function()
                     tentative = nil
