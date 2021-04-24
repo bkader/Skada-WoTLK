@@ -22,7 +22,7 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
         local mitigation = 0
 
         if player.damagetaken and player.damagetaken.spells then
-            for spellname, spell in pairs(player.damagetaken.spells) do
+            for _, spell in pairs(player.damagetaken.spells) do
                 mitigation = mitigation + (spell.blocked or 0) + (spell.absorbed or 0) + (spell.resisted or 0)
             end
         end
