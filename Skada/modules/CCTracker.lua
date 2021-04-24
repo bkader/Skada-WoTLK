@@ -1131,13 +1131,13 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
                 type = "toggle",
                 name = L["Announce CC breaking to party"],
                 order = 1,
-                width = "full"
+                width = "double"
             },
             ccignoremaintanks = {
                 type = "toggle",
                 name = L["Ignore Main Tanks"],
                 order = 2,
-                width = "full"
+                width = "double"
             }
         }
     }

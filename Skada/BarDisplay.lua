@@ -926,25 +926,13 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Bar font"],
                 desc = L["The font used by all bars."],
                 order = 1,
-                width = "full",
                 values = AceGUIWidgetLSMlists.font
-            },
-            barfontsize = {
-                type = "range",
-                name = L["Bar font size"],
-                desc = L["The font size of all bars."],
-                order = 2,
-                width = "full",
-                min = 6,
-                max = 40,
-                step = 1
             },
             barfontflags = {
                 type = "select",
                 name = L["Font flags"],
                 desc = L["Sets the font flags."],
-                order = 3,
-                width = "full",
+                order = 2,
                 values = {
                     [""] = NONE,
                     ["OUTLINE"] = L["Outline"],
@@ -952,6 +940,16 @@ function mod:AddDisplayOptions(win, options)
                     ["MONOCHROME"] = L["Monochrome"],
                     ["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
                 }
+            },
+            barfontsize = {
+                type = "range",
+                name = L["Bar font size"],
+                desc = L["The font size of all bars."],
+                order = 3,
+                width = "double",
+                min = 6,
+                max = 40,
+                step = 1
             },
             numfont = {
                 type = "select",
@@ -959,25 +957,13 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Values font"],
                 desc = L["The font used by bar values."],
                 order = 4,
-                width = "full",
                 values = AceGUIWidgetLSMlists.font
-            },
-            numfontsize = {
-                type = "range",
-                name = L["Values font size"],
-                desc = L["The font size of bar values."],
-                order = 5,
-                width = "full",
-                min = 6,
-                max = 40,
-                step = 1
             },
             numfontflags = {
                 type = "select",
                 name = L["Font flags"],
                 desc = L["Sets the font flags."],
-                order = 6,
-                width = "full",
+                order = 5,
                 values = {
                     [""] = NONE,
                     ["OUTLINE"] = L["Outline"],
@@ -986,13 +972,23 @@ function mod:AddDisplayOptions(win, options)
                     ["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
                 }
             },
+            numfontsize = {
+                type = "range",
+                name = L["Values font size"],
+                desc = L["The font size of bar values."],
+                order = 6,
+                width = "double",
+                min = 6,
+                max = 40,
+                step = 1
+            },
             bartexture = {
                 type = "select",
                 dialogControl = "LSM30_Statusbar",
                 name = L["Bar texture"],
                 desc = L["The texture used by all bars."],
                 order = 7,
-                width = "full",
+                width = "double",
                 values = AceGUIWidgetLSMlists.statusbar
             },
             barspacing = {
@@ -1000,7 +996,7 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Bar spacing"],
                 desc = L["Distance between bars."],
                 order = 8,
-                width = "full",
+                width = "double",
                 min = 0,
                 max = 10,
                 step = 1
@@ -1010,7 +1006,6 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Bar height"],
                 desc = L["The height of the bars."],
                 order = 9,
-                width = "full",
                 min = 10,
                 max = 40,
                 step = 1
@@ -1020,7 +1015,6 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Bar width"],
                 desc = L["The width of the bars."],
                 order = 10,
-                width = "full",
                 min = 80,
                 max = 400,
                 step = 1
@@ -1030,7 +1024,7 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Bar orientation"],
                 desc = L["The direction the bars are drawn in."],
                 order = 11,
-                width = "full",
+                width = "double",
                 values = {[1] = L["Left to right"], [3] = L["Right to left"]}
             },
             reversegrowth = {
@@ -1038,14 +1032,13 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Reverse bar growth"],
                 desc = L["Bars will grow up instead of down."],
                 order = 12,
-                width = "full"
+                width = "double"
             },
             color = {
                 type = "color",
                 name = L["Bar color"],
                 desc = L["Choose the default color of the bars."],
                 order = 13,
-                width = "full",
                 hasAlpha = true,
                 get = function()
                     return db.barcolor.r, db.barcolor.g, db.barcolor.b, db.barcolor.a
@@ -1060,7 +1053,6 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Background color"],
                 desc = L["Choose the background color of the bars."],
                 order = 14,
-                width = "full",
                 hasAlpha = true,
                 get = function(_)
                     return db.barbgcolor.r, db.barbgcolor.g, db.barbgcolor.b, db.barbgcolor.a
@@ -1075,62 +1067,62 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Spell school colors"],
                 desc = L["Use spell school colors where applicable."],
                 order = 15,
-                width = "full"
+                width = "double"
             },
             classcolorbars = {
                 type = "toggle",
                 name = L["Class color bars"],
                 desc = L["When possible, bars will be colored according to player class."],
                 order = 16,
-                width = "full"
+                width = "double"
             },
             classcolortext = {
                 type = "toggle",
                 name = L["Class color text"],
                 desc = L["When possible, bar text will be colored according to player class."],
                 order = 17,
-                width = "full"
+                width = "double"
             },
             classicons = {
                 type = "toggle",
                 name = L["Class icons"],
                 desc = L["Use class icons where applicable."],
                 order = 18,
-                width = "full"
+                width = "double"
             },
             roleicons = {
                 type = "toggle",
                 name = L["Role icons"],
                 desc = L["Use role icons where applicable."],
                 order = 19,
-                width = "full"
+                width = "double"
             },
             specicons = {
                 type = "toggle",
                 name = L["Spec icons"],
                 desc = L["Use specialization icons where applicable."],
                 order = 20,
-                width = "full"
+                width = "double"
             },
             spark = {
                 type = "toggle",
                 name = L["Show spark effect"],
                 order = 21,
-                width = "full"
+                width = "double"
             },
             clickthrough = {
                 type = "toggle",
                 name = L["Clickthrough"],
                 desc = L["Disables mouse clicks on bars."],
                 order = 22,
-                width = "full"
+                width = "double"
             },
             smoothing = {
                 type = "toggle",
                 name = L["Smooth bars"],
                 desc = L["Animate bar changes smoothly rather than immediately."],
                 order = 23,
-                width = "full"
+                width = "double"
             }
         }
     }
@@ -1152,6 +1144,7 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Enable"],
                 desc = L["Enables the title bar."],
                 order = 1,
+                width = "double",
                 get = function()
                     return db.enabletitle
                 end,
@@ -1186,41 +1179,19 @@ function mod:AddDisplayOptions(win, options)
                     Skada:ApplySettings()
                 end
             },
-            height = {
-                type = "range",
-                name = L["Title height"],
-                desc = L["The height of the title frame."],
-                order = 4,
-                width = "full",
-                min = 10,
-                max = 50,
-                step = 1
-            },
             font = {
                 type = "select",
                 dialogControl = "LSM30_Font",
                 name = L["Bar font"],
                 desc = L["The font used by all bars."],
                 values = AceGUIWidgetLSMlists.font,
-                order = 5,
-                width = "full"
-            },
-            fontsize = {
-                type = "range",
-                name = L["Title font size"],
-                desc = L["The font size of the title bar."],
-                order = 6,
-                width = "full",
-                min = 7,
-                max = 40,
-                step = 1
+                order = 4
             },
             fontflags = {
                 type = "select",
                 name = L["Font flags"],
                 desc = L["Sets the font flags."],
-                order = 7,
-                width = "full",
+                order = 5,
                 values = {
                     [""] = NONE,
                     ["OUTLINE"] = L["Outline"],
@@ -1233,8 +1204,8 @@ function mod:AddDisplayOptions(win, options)
                 type = "color",
                 name = L["Title color"],
                 desc = L["The text color of the title."],
-                order = 8,
-                width = "full",
+                order = 6,
+                width = "double",
                 hasAlpha = true,
                 get = function()
                     local c = db.title.textcolor or {r = 0.9, g = 0.9, b = 0.9, a = 1}
@@ -1245,13 +1216,31 @@ function mod:AddDisplayOptions(win, options)
                     Skada:ApplySettings()
                 end
             },
+            fontsize = {
+                type = "range",
+                name = L["Title font size"],
+                desc = L["The font size of the title bar."],
+                order = 7,
+                min = 7,
+                max = 40,
+                step = 1
+            },
+            height = {
+                type = "range",
+                name = L["Title height"],
+                desc = L["The height of the title frame."],
+                order = 8,
+                min = 10,
+                max = 50,
+                step = 1
+            },
             texture = {
                 type = "select",
                 dialogControl = "LSM30_Statusbar",
                 name = L["Background texture"],
                 desc = L["The texture used as the background of the title."],
                 order = 9,
-                width = "full",
+                width = "double",
                 values = AceGUIWidgetLSMlists.statusbar
             },
             color = {
@@ -1259,7 +1248,7 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Background color"],
                 desc = L["The background color of the title."],
                 order = 10,
-                width = "full",
+                width = "double",
                 hasAlpha = true,
                 get = function(_)
                     return db.title.color.r, db.title.color.g, db.title.color.b, db.title.color.a
@@ -1275,7 +1264,7 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Border texture"],
                 desc = L["The texture used for the border of the title."],
                 order = 11,
-                width = "full",
+                width = "double",
                 values = AceGUIWidgetLSMlists.border
             },
             bordercolor = {
@@ -1284,7 +1273,7 @@ function mod:AddDisplayOptions(win, options)
                 desc = L["The color used for the border."],
                 hasAlpha = true,
                 order = 12,
-                width = "full",
+                width = "double",
                 get = function()
                     return db.title.bordercolor.r, db.title.bordercolor.g, db.title.bordercolor.b, db.title.bordercolor.a
                 end,
@@ -1298,7 +1287,7 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Border thickness"],
                 desc = L["The thickness of the borders."],
                 order = 13,
-                width = "full",
+                width = "double",
                 min = 0,
                 max = 50,
                 step = 0.5
@@ -1307,7 +1296,7 @@ function mod:AddDisplayOptions(win, options)
                 type = "group",
                 name = L["Buttons"],
                 order = 14,
-                width = "full",
+                width = "double",
                 inline = true,
                 get = function(i)
                     return db.buttons[i[#i]]
@@ -1356,7 +1345,7 @@ function mod:AddDisplayOptions(win, options)
                         type = "toggle",
                         name = L["Show on MouseOver"],
                         order = 7,
-                        width = "full",
+                        width = "double",
                         get = function()
                             return db.title.hovermode
                         end,

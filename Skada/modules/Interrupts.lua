@@ -324,13 +324,15 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
             interruptannounce = {
                 type = "toggle",
                 name = L["Announce Interrupts"],
-                order = 1
+                order = 1,
+                width = "double"
             },
             interruptchannel = {
                 type = "select",
                 name = L["Channel"],
+                values = {AUTO = INSTANCE, SAY = CHAT_MSG_SAY, YELL = CHAT_MSG_YELL, SELF = L["Self"]},
                 order = 2,
-                values = {AUTO = INSTANCE, SAY = CHAT_MSG_SAY, YELL = CHAT_MSG_YELL, SELF = L["Self"]}
+                width = "double"
             }
         }
     }

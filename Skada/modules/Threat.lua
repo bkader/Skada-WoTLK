@@ -303,7 +303,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
                     name = L["Threat warning"],
                     inline = true,
                     order = 1,
-                    width = "full",
+                    width = "double",
                     args = {
                         notankwarnings = {
                             type = "toggle",
@@ -335,7 +335,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
                                 "The sound that will be played when your threat percentage reaches a certain point."
                             ],
                             order = 5,
-                            width = "full",
+                            width = "double",
                             dialogControl = "LSM30_Sound",
                             values = AceGUIWidgetLSMlists.sound
                         },
@@ -344,7 +344,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
                             name = L["Threat threshold"],
                             desc = L["When your threat reaches this level, relative to tank, warnings are shown."],
                             order = 6,
-                            width = "full",
+                            width = "double",
                             min = 0,
                             max = 130,
                             step = 1

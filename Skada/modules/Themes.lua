@@ -327,7 +327,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
                         type = "execute",
                         name = APPLY,
                         order = 3,
-                        width = "full",
+                        width = "double",
                         func = function()
                             if selectedwindow and selectedtheme then
                                 local thetheme = nil
@@ -401,7 +401,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
                         type = "execute",
                         name = SAVE,
                         order = 3,
-                        width = "full",
+                        width = "double",
                         func = function()
                             for i, win in _ipairs(Skada:GetWindows()) do
                                 if win.db.name == savewindow then
@@ -428,7 +428,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
                         type = "select",
                         name = L["Theme"],
                         order = 1,
-                        width = "full",
+                        width = "double",
                         values = function()
                             local list = {}
                             if Skada.db.global.themes then
@@ -451,7 +451,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
                         type = "execute",
                         name = DELETE,
                         order = 2,
-                        width = "full",
+                        width = "double",
                         func = function()
                             if Skada.db.global.themes then
                                 for i, theme in _ipairs(Skada.db.global.themes) do

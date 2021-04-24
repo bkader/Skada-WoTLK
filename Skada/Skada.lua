@@ -272,7 +272,7 @@ do
                     name = L["Rename window"],
                     desc = L["Enter the name for the window."],
                     order = 1,
-                    width = "full",
+                    width = "double",
                     get = function()
                         return db.name
                     end,
@@ -390,7 +390,7 @@ do
                     name = L["Delete window"],
                     desc = L["Choose the window to be deleted."],
                     order = 9,
-                    width = "full",
+                    width = "double",
                     confirm = function()
                         return L["Are you sure you want to delete this window?"]
                     end,
@@ -495,7 +495,7 @@ do
                     name = L["Return after combat"],
                     desc = L["Return to the previous set and mode after combat ends."],
                     order = 3,
-                    width = "full",
+                    width = "double",
                     get = function()
                         return db.returnaftercombat
                     end,
@@ -2497,7 +2497,7 @@ function Skada:FrameSettings(db, include_dimensions)
                 type = "header",
                 name = L["Background"],
                 order = 1,
-                width = "full"
+                width = "double"
             },
             texture = {
                 type = "select",
@@ -2520,7 +2520,7 @@ function Skada:FrameSettings(db, include_dimensions)
                 name = L["Tile"],
                 desc = L["Tile the background texture."],
                 order = 3,
-                width = "full",
+                width = "double",
                 get = function()
                     return db.background.tile
                 end,
@@ -2534,7 +2534,7 @@ function Skada:FrameSettings(db, include_dimensions)
                 name = L["Tile size"],
                 desc = L["The size of the texture pattern."],
                 order = 4,
-                width = "full",
+                width = "double",
                 min = 0,
                 max = math_floor(GetScreenWidth()),
                 step = 1.0,
@@ -2551,7 +2551,7 @@ function Skada:FrameSettings(db, include_dimensions)
                 name = L["Background color"],
                 desc = L["The color of the background."],
                 order = 5,
-                width = "full",
+                width = "double",
                 hasAlpha = true,
                 get = function(_)
                     local c = db.background.color
@@ -2566,7 +2566,7 @@ function Skada:FrameSettings(db, include_dimensions)
                 type = "header",
                 name = L["Border"],
                 order = 6,
-                width = "full"
+                width = "double"
             },
             bordertexture = {
                 type = "select",
@@ -2592,7 +2592,7 @@ function Skada:FrameSettings(db, include_dimensions)
                 name = L["Border color"],
                 desc = L["The color used for the border."],
                 order = 8,
-                width = "full",
+                width = "double",
                 hasAlpha = true,
                 get = function(_)
                     local c = db.background.bordercolor or {r = 0, g = 0, b = 0, a = 1}
@@ -2608,7 +2608,7 @@ function Skada:FrameSettings(db, include_dimensions)
                 name = L["Border thickness"],
                 desc = L["The thickness of the borders."],
                 order = 9,
-                width = "full",
+                width = "double",
                 min = 0,
                 max = 50,
                 step = 0.5,
@@ -2624,14 +2624,14 @@ function Skada:FrameSettings(db, include_dimensions)
                 type = "header",
                 name = L["General"],
                 order = 10,
-                width = "full"
+                width = "double"
             },
             scale = {
                 type = "range",
                 name = L["Scale"],
                 desc = L["Sets the scale of the window."],
                 order = 11,
-                width = "full",
+                width = "double",
                 min = 0.1,
                 max = 3,
                 step = 0.01,
@@ -2648,7 +2648,7 @@ function Skada:FrameSettings(db, include_dimensions)
                 name = L["Strata"],
                 desc = L["This determines what other frames will be in front of the frame."],
                 order = 12,
-                width = "full",
+                width = "double",
                 values = {
                     ["BACKGROUND"] = "BACKGROUND",
                     ["LOW"] = "LOW",

@@ -28,28 +28,18 @@ Skada:AddLoadableModule("Spamage", "Suppresses chat messages from damage meters 
             Skada.db.profile.spamage[i[#i]] = val
         end,
         args = {
-            captureDelay = {
-                type = "range",
-                name = L["Capture Delay"],
-                desc = L['How many seconds the addon waits after "Skada: *" lines before it assumes spam burst is over. 1 seems to work in most cases'],
-                order = 1,
-                width = "full",
-                min = 1,
-                max = 5,
-                step = 0.1
-            },
             CHAT_MSG_RAID = {
                 type = "select",
                 name = L["Filter Raid"],
                 desc = L["Selects the action to perform when encountering damage meter data in raid chat"],
-                order = 2,
+                order = 1,
                 values = valuestable
             },
             CHAT_MSG_PARTY = {
                 type = "select",
                 name = L["Filter Party"],
                 desc = L["Selects the action to perform when encountering damage meter data in party chat"],
-                order = 3,
+                order = 2,
                 values = valuestable,
                 set = function(_, val)
                     Skada.db.profile.spamage.CHAT_MSG_PARTY = val
@@ -60,44 +50,54 @@ Skada:AddLoadableModule("Spamage", "Suppresses chat messages from damage meters 
                 type = "select",
                 name = L["Filter Guild"],
                 desc = L["Selects the action to perform when encountering damage meter data in guild chat"],
-                order = 4,
+                order = 3,
                 values = valuestable
             },
             CHAT_MSG_OFFICER = {
                 type = "select",
                 name = L["Filter Officer"],
                 desc = L["Selects the action to perform when encountering damage meter data in officer chat"],
-                order = 5,
+                order = 4,
                 values = valuestable
             },
             CHAT_MSG_SAY = {
                 type = "select",
                 name = L["Filter Say"],
                 desc = L["Selects the action to perform when encountering damage meter data in say chat"],
-                order = 6,
+                order = 5,
                 values = valuestable
             },
             CHAT_MSG_YELL = {
                 type = "select",
                 name = L["Filter Yell"],
                 desc = L["Selects the action to perform when encountering damage meter data in yell chat"],
-                order = 7,
+                order = 6,
                 values = valuestable
             },
             CHAT_MSG_WHISPER = {
                 type = "select",
                 name = L["Filter Whisper"],
                 desc = L["Selects the action to perform when encountering damage meter whisper"],
-                order = 8,
+                order = 7,
                 values = valuestable
             },
             CHAT_MSG_CHANNEL = {
                 type = "select",
                 name = L["Filter Custom Channels"],
                 desc = L["Selects the action to perform when encountering damage meter data in custom channels"],
-                order = 9,
+                order = 8,
                 values = valuestable
-            }
+            },
+            captureDelay = {
+                type = "range",
+                name = L["Capture Delay"],
+                desc = L['How many seconds the addon waits after "Skada: *" lines before it assumes spam burst is over. 1 seems to work in most cases'],
+                order = 99,
+                width = "double",
+                min = 1,
+                max = 5,
+                step = 0.1
+            },
         }
     }
 
