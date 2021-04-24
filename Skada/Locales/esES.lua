@@ -533,6 +533,8 @@ L["Interrupted targets"] = "Objetivos interrumpidos "
 L["%s's interrupt spells"] = "Hechizos de interrupción de %s"
 L["%s's interrupted spells"] = "Hechizos interrumpidos de %s"
 L["%s's interrupted targets"] = "Objetivos interrumpidos de %s"
+L["Announce Interrupts"] = "Anunciar interrupciones"
+L["%s interrupted!"] = "¡%s interrumpida!"
 -- Power gained module --
 L["Power"] = "Recursos"
 L["Power gained"] = "Recursos obtenidos "

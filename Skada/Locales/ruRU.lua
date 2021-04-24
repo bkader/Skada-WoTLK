@@ -532,6 +532,8 @@ L["Interrupted targets"] = "Цели прерывания"
 L["%s's interrupt spells"] = "%s: Заклинания прерывания"
 L["%s's interrupted spells"] = "%s: Прерванные заклинания"
 L["%s's interrupted targets"] = "%s: Цели прерывания"
+L["Announce Interrupts"] = "Объявлять прерывания"
+L["%s interrupted!"] = "%s прервано!"
 -- Power gained module --
 L["Power"] = "Энергия"
 L["Power gained"] = "Получено энергии"

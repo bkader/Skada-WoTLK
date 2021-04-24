@@ -532,6 +532,8 @@ L["Interrupted targets"] = "Unterbrochene Ziele"
 L["%s's interrupt spells"] = "%s Interrupt-Zauber"
 L["%s's interrupted spells"] = "%s unterbrochene Zauber"
 L["%s's interrupted targets"] = "%s unterbrochene Ziele"
+L["Announce Interrupts"] = "Unterbrechungen bekannt geben"
+L["%s interrupted!"] = "%s unterbrochen!"
 -- Power gained module --
 L["Power"] = "Energie"
 L["Power gained"] = "Ressourcenquellen"

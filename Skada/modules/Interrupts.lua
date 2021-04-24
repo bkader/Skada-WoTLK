@@ -6,11 +6,16 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
     local spellsmod = mod:NewModule(L["Interrupted spells"])
     local targetsmod = mod:NewModule(L["Interrupted targets"])
     local playermod = mod:NewModule(L["Interrupt spells"])
+    local playerGUID
 
     -- cache frequently used globals
     local _pairs, _ipairs = pairs, ipairs
     local _format, math_max = string.format, math.max
     local _GetSpellInfo = Skada.GetSpellInfo
+    local _UnitGUID = UnitGUID
+    local _GetSpellLink = GetSpellLink
+    local _IsInInstance = IsInInstance
+    local _SendChatMessage = SendChatMessage
 
     local function log_interrupt(set, data)
         local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
@@ -76,6 +81,27 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
         log_interrupt(Skada.current, data)
         log_interrupt(Skada.total, data)
+
+        if srcGUID == playerGUID and (IsInGroup() or IsInRaid()) and Skada.db.profile.modules.interruptannounce then
+            local spelllink = _GetSpellLink(extraspellid or extraspellname) or extraspellname
+
+            local channel = Skada.db.profile.modules.interruptchannel or "SAY"
+            if channel == "SELF" then
+                Skada:Print(_format("%s interrupted!", extraspellname))
+                return
+            end
+
+            if channel == "AUTO" then
+                local zoneType = select(2, _IsInInstance())
+                if zoneType == "pvp" or zoneType == "arena" then
+                    channel = "BATTLEGROUND"
+                elseif zoneType == "party" or zoneType == "raid" then
+                    channel = zoneType:upper()
+                end
+            end
+
+            _SendChatMessage(_format("%s interrupted!", spelllink), channel)
+        end
     end
 
     function spellsmod:Enter(win, id, label)
@@ -231,9 +257,9 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
                 d.id = player.id
                 d.label = player.name
-                d.class = player.class
-                d.role = player.role
-                d.spec = player.spec
+                d.class = player.class or "PET"
+                d.role = player.role or "DAMAGER"
+                d.spec = player.spec or 1
 
                 d.value = player.interrupts.count
                 d.valuetext = Skada:FormatValueText(
@@ -256,6 +282,8 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
     end
 
     function mod:OnEnable()
+        playerGUID = playerGUID or _UnitGUID("player")
+
         self.metadata = {
             showspots = true,
             click1 = spellsmod,
@@ -281,5 +309,39 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
     function mod:GetSetSummary(set)
         return set.interrupts or 0
+    end
+
+    local opts = {
+        type = "group",
+        name = L["Interrupts"],
+        get = function(i)
+            return Skada.db.profile.modules[i[#i]]
+        end,
+        set = function(i, val)
+            Skada.db.profile.modules[i[#i]] = val
+        end,
+        args = {
+            interruptannounce = {
+                type = "toggle",
+                name = L["Announce Interrupts"],
+                order = 1
+            },
+            interruptchannel = {
+                type = "select",
+                name = L["Channel"],
+                order = 2,
+                values = {AUTO = INSTANCE, SAY = CHAT_MSG_SAY, YELL = CHAT_MSG_YELL, SELF = L["Self"]}
+            }
+        }
+    }
+
+    function mod:OnInitialize()
+        playerGUID = playerGUID or _UnitGUID("player")
+
+        if not Skada.db.profile.modules.interruptchannel then
+            Skada.db.profile.modules.interruptchannel = "SAY"
+        end
+
+        Skada.options.args.modules.args.interrupts = opts
     end
 end)

@@ -533,6 +533,8 @@ if not L then return end
 -- L["%s's interrupt spells"] = ""
 -- L["%s's interrupted spells"] = ""
 -- L["%s's interrupted targets"] = ""
+-- L["Announce Interrupts"] = ""
+-- L["%s interrupted!"] = ""
 -- Power gained module --
 -- L["Power"] = ""
 -- L["Power gained"] = ""

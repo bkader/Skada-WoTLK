@@ -533,6 +533,8 @@ L["Interrupted targets"] = true
 L["%s's interrupt spells"] = true
 L["%s's interrupted spells"] = true
 L["%s's interrupted targets"] = true
+L["Announce Interrupts"] = true
+L["%s interrupted!"] = true
 -- Power gained module --
 L["Power"] = true
 L["Power gained"] = true

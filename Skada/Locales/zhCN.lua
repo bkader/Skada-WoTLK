@@ -534,6 +534,8 @@ L["Interrupted targets"] = "已打断目标"
 L["%s's interrupt spells"] = "%s的打断法术"
 L["%s's interrupted spells"] = "%s的已打断法术"
 L["%s's interrupted targets"] = "%s的已打断目标"
+L["Announce Interrupts"] = "通报打断"
+L["%s interrupted!"] = "%s 打断!"
 -- Power gained module --
 L["Power"] = "能量"
 L["Power gained"] = "能量获得"
