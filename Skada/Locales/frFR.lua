@@ -603,4 +603,7 @@ L["Player Score"] = "Score des joueurs"
 L["Raid Score"] = "Score du raid"
 L["Score"] = "Score"
 L["%s's Score"] = "Score de %s"
+-- damage mitigated lines --
 L["Damage mitigated"] = "Dégâts mitigés"
+L["%s's mitigated damage"] = "Dégâts mitigés de %s"
+L["%s's <%s> mitigated damage"] = "Dégâts mitigés de %s <%s>"

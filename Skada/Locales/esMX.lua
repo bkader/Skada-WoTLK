@@ -602,4 +602,7 @@ L["Player Score"] = "Puntuación del jugador"
 L["Raid Score"] = "Puntaje de grupo"
 L["Score"] = "Puntaje"
 L["%s's Score"] = "Puntuación de %s"
-L["Damage mitigated"] = "Daño mitigado "
+-- damage mitigated lines --
+L["Damage mitigated"] = "Daño mitigado"
+L["%s's mitigated damage"] = "Daño mitigado de %s"
+L["%s's <%s> mitigated damage"] = "Daño mitigado de %s <%s>"

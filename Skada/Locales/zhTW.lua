@@ -602,4 +602,7 @@ L["Reported by: %s"] = "已回報由%s"
 -- L["Raid Score"] = ""
 -- L["Score"] = ""
 -- L["%s's Score"] = ""
+-- damage mitigated lines --
 -- L["Damage mitigated"] = ""
+-- L["%s's mitigated damage"] = ""
+-- L["%s's <%s> mitigated damage"] = ""

@@ -601,4 +601,7 @@ L["Player Score"] = "Оценка игроков"
 L["Raid Score"] = "Групповой рейтинг"
 L["Score"] = "Оценка"
 L["%s's Score"] = "Оценка %s"
+-- damage mitigated lines --
 L["Damage mitigated"] = "Урон уменьшен"
+L["%s's mitigated damage"] = "Урон уменьшен - %s"
+L["%s's <%s> mitigated damage"] = "Урон уменьшен - %s <%s>"

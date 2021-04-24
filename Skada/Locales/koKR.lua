@@ -602,4 +602,7 @@ L["Reported by: %s"] = "%s의 보고"
 -- L["Raid Score"] = ""
 -- L["Score"] = ""
 -- L["%s's Score"] = ""
+-- damage mitigated lines --
 -- L["Damage mitigated"] = ""
+-- L["%s's mitigated damage"] = ""
+-- L["%s's <%s> mitigated damage"] = ""

@@ -602,5 +602,8 @@ L["Choose how names are shown on your bars."] = "选择统计条上名字的显�
 L["Player Score"] = "球员得分"
 L["Raid Score"] = "突袭分数"
 L["Score"] = "得分"
-L["%s's Score"] = true
-L["Damage mitigated"] = true
+L["%s's Score"] = "%s的评分"
+-- damage mitigated lines --
+L["Damage mitigated"] = "损害减轻"
+L["%s's mitigated damage"] = "%s减少的伤害"
+L["%s's <%s> mitigated damage"] = "%s<%s>减少的伤害"

@@ -602,4 +602,7 @@ L["Player Score"] = true
 L["Raid Score"] = true
 L["Score"] = true
 L["%s's Score"] = true
+-- damage mitigated lines --
 L["Damage mitigated"] = true
+L["%s's mitigated damage"] = true
+L["%s's <%s> mitigated damage"] = true
