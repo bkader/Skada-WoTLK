@@ -401,18 +401,26 @@ do
     end
 
     local ttactive = false
+    local barbackdrop = {bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16}
 
     local function BarEnter(bar)
         local win, id, label = bar.win, bar.id, bar.text
         ttactive = true
         Skada:SetTooltipPosition(GameTooltip, win.bargroup, win.db.display)
         Skada:ShowTooltip(win, id, label)
+        if not win.db.disablehighlight then
+            bar:SetBackdrop(barbackdrop)
+            bar:SetBackdropColor(0.7, 0.7, 0.7, 0.6)
+        end
     end
 
-    local function BarLeave()
+    local function BarLeave(bar)
         if ttactive then
             GameTooltip:Hide()
             ttactive = false
+        end
+        if not bar.win.db.disablehighlight then
+            bar:SetBackdrop(nil)
         end
     end
 
@@ -591,6 +599,8 @@ do
                     elseif data.class and win.db.classcolorbars then
                         color = Skada.classcolors[data.class] or color
                     end
+
+                    color.a = win.db.disablehighlight and color.a or 0.85
                     bar:SetColorAt(0, color.r, color.g, color.b, color.a or 1)
 
                     if data.class and win.db.classcolortext then
@@ -1062,66 +1072,73 @@ function mod:AddDisplayOptions(win, options)
                     Skada:ApplySettings()
                 end
             },
+            disablehighlight = {
+                type = "toggle",
+                name = L["Disable bar highlight"],
+                desc = L["Hovering a bar won't make it brighter."],
+                order = 15,
+                width = "double"
+            },
             spellschoolcolors = {
                 type = "toggle",
                 name = L["Spell school colors"],
                 desc = L["Use spell school colors where applicable."],
-                order = 15,
+                order = 16,
                 width = "double"
             },
             classcolorbars = {
                 type = "toggle",
                 name = L["Class color bars"],
                 desc = L["When possible, bars will be colored according to player class."],
-                order = 16,
+                order = 17,
                 width = "double"
             },
             classcolortext = {
                 type = "toggle",
                 name = L["Class color text"],
                 desc = L["When possible, bar text will be colored according to player class."],
-                order = 17,
+                order = 18,
                 width = "double"
             },
             classicons = {
                 type = "toggle",
                 name = L["Class icons"],
                 desc = L["Use class icons where applicable."],
-                order = 18,
+                order = 19,
                 width = "double"
             },
             roleicons = {
                 type = "toggle",
                 name = L["Role icons"],
                 desc = L["Use role icons where applicable."],
-                order = 19,
+                order = 20,
                 width = "double"
             },
             specicons = {
                 type = "toggle",
                 name = L["Spec icons"],
                 desc = L["Use specialization icons where applicable."],
-                order = 20,
+                order = 21,
                 width = "double"
             },
             spark = {
                 type = "toggle",
                 name = L["Show spark effect"],
-                order = 21,
+                order = 22,
                 width = "double"
             },
             clickthrough = {
                 type = "toggle",
                 name = L["Clickthrough"],
                 desc = L["Disables mouse clicks on bars."],
-                order = 22,
+                order = 23,
                 width = "double"
             },
             smoothing = {
                 type = "toggle",
                 name = L["Smooth bars"],
                 desc = L["Animate bar changes smoothly rather than immediately."],
-                order = 23,
+                order = 24,
                 width = "double"
             }
         }

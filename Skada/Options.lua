@@ -61,6 +61,7 @@ Skada.windowdefaults = {
     strata = "LOW",
     scale = 1,
     reversegrowth = false,
+    disablehighlight = false,
     modeincombat = "",
     returnaftercombat = false,
     wipemode = "",

@@ -80,6 +80,8 @@ if not L then return end
 -- L["Right to left"] = ""
 -- L["Reverse bar growth"] = ""
 -- L["Bars will grow up instead of down."] = ""
+-- L["Disable bar highlight"] = ""
+-- L["Hovering a bar won't make it brighter."] = ""
 -- L["Bar color"] = ""
 -- L["Choose the default color of the bars."] = ""
 -- L["Background color"] = ""
