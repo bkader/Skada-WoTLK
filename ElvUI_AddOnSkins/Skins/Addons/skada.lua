@@ -47,11 +47,11 @@ S:AddCallbackForAddon("Skada", "Skada", function()
                 if win.db.reversegrowth then
                     skada.backdrop:SetPoint("LEFT", skada, "LEFT", -E.Border, 0)
                     skada.backdrop:SetPoint("RIGHT", skada, "RIGHT", E.Border, 0)
-                    skada.backdrop:SetPoint("BOTTOM", skada.button, "TOP", 0, win.db.enabletitle and E.Spacing or -win.db.title.height - E.Border)
+                    skada.backdrop:SetPoint("BOTTOM", skada.button, "TOP", 0, -((win.db.enabletitle and win.db.title.height or 0) + E.Border))
                 else
                     skada.backdrop:SetPoint("LEFT", skada, "LEFT", -E.Border, 0)
                     skada.backdrop:SetPoint("RIGHT", skada, "RIGHT", E.Border, 0)
-                    skada.backdrop:SetPoint("TOP", skada.button, "BOTTOM", 0, win.db.enabletitle and -E.Spacing or win.db.title.height + E.Border)
+                    skada.backdrop:SetPoint("TOP", skada.button, "BOTTOM", 0, (win.db.enabletitle and win.db.title.height or 0) + E.Border)
                 end
             end
         elseif win.db.enablebackground then
