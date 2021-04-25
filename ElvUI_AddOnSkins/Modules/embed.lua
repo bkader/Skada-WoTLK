@@ -373,7 +373,7 @@ if AS:IsAddonLODorEnabled("Skada") then
 
         if Skada.revisited then
             window.db.scale = 1
-            window.db.background.height = height + (window.db.enabletitle and E.Spacing or 0) - (E.Border + E.Spacing)
+            window.db.background.height = height + (window.db.enabletitle and window.db.title.height or 0) - (E.Border + E.Spacing)
 
             local offsety = window.db.reversegrowth and 0 or E.Border
             window.bargroup.ClearAllPoints = nil
