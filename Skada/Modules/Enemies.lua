@@ -155,7 +155,7 @@ Skada:AddLoadableModule("Enemy damage taken", function(Skada, L)
     end
 
     function mod:OnEnable()
-        enemymod.metadata = {showspots = true, ordersort = true, click1 = playermod}
+        enemymod.metadata = {showspots = true, click1 = playermod}
         mod.metadata = {click1 = enemymod, columns = {Damage = true, Percent = true}}
 
         Skada:AddMode(self, L["Damage done"])
@@ -409,7 +409,7 @@ Skada:AddLoadableModule("Enemy damage done", function(Skada, L)
     function mod:OnEnable()
         spellmod.metadata = {tooltip = spellmod_tooltip}
         playermod.metadata = {click1 = spellmod}
-        enemymod.metadata = {showspots = true, ordersort = true, click1 = playermod}
+        enemymod.metadata = {showspots = true, click1 = playermod}
         mod.metadata = {click1 = enemymod, columns = {Damage = true, Percent = true}}
 
         Skada:AddMode(self, L["Damage taken"])

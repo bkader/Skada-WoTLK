@@ -100,7 +100,7 @@ Skada:AddLoadableModule("Power gained", function(Skada, L)
 
         local instance = {
             playermod = pmode,
-            metadata = {showspots = true, ordersort = true, click1 = pmode},
+            metadata = {showspots = true, click1 = pmode},
             name = modname
         }
         instance.power = power

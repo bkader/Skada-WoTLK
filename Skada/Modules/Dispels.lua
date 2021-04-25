@@ -263,7 +263,6 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
     function mod:OnEnable()
         self.metadata = {
             showspots = true,
-            ordersort = true,
             click1 = spellsmod,
             click2 = targetsmod,
             click3 = playermod,

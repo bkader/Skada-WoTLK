@@ -169,7 +169,7 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
     end
 
     function mod:OnEnable()
-        self.metadata = {showspots = true, ordersort = true, tooltip = score_tooltip}
+        self.metadata = {showspots = true, tooltip = score_tooltip}
         Skada:AddMode(self)
     end
 

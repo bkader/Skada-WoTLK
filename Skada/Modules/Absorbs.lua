@@ -565,10 +565,9 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
     function mod:OnEnable()
         spellmod.metadata = {tooltip = spell_tooltip}
-        playermod.metadata = {showspots = true, ordersort = true}
+        playermod.metadata = {showspots = true}
         self.metadata = {
             showspots = true,
-            ordersort = true,
             click1 = spellmod,
             click2 = playermod,
             columns = {Absorbs = true, Percent = true}
@@ -944,17 +943,15 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 
     function mod:OnEnable()
         spellmod.metadata = {tooltip = spell_tooltip}
-        playermod.metadata = {showspots = true, ordersort = true}
+        playermod.metadata = {showspots = true}
         mod.metadata = {
             showspots = true,
-            ordersort = true,
             click1 = spellmod,
             click2 = playermod,
             columns = {Healing = true, HPS = true, Percent = true}
         }
         hpsmode.metadata = {
             showspots = true,
-            ordersort = true,
             tooltip = hps_tooltip,
             click1 = spellmod,
             click2 = playermod,

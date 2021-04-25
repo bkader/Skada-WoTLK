@@ -218,7 +218,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
     end
 
     function mod:OnEnable()
-        targetmod.metadata = {showspots = true, ordersort = true}
+        targetmod.metadata = {showspots = true}
         self.metadata = {
             showspots = true,
             click1 = spellmod,

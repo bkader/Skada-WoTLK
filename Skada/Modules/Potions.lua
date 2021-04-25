@@ -251,7 +251,6 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
         potionsmod.metadata = {click1 = playersmod}
         self.metadata = {
             showspots = true,
-            ordersort = true,
             click1 = potionsmod,
             columns = {Count = true, Percent = true}
         }

@@ -423,7 +423,6 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
         sourcemod.metadata = {}
         mod.metadata = {
             showspots = true,
-            ordersort = true,
             click1 = playermod,
             click2 = sourcemod,
             columns = {Damage = true, DTPS = true, Percent = true}
@@ -620,7 +619,6 @@ Skada:AddLoadableModule("Damage taken by spell", function(Skada, L)
         targetmod.metadata = {showspots = true}
         mod.metadata = {
             showspots = true,
-            ordersort = true,
             click1 = targetmod,
             columns = {Damage = true, Percent = true}
         }
@@ -740,7 +738,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 
     function mod:OnEnable()
         playermod.metadata = {}
-        mod.metadata = {showspots = true, ordersort = true, click1 = playermod, columns = {Percent = true, Total = true}}
+        mod.metadata = {showspots = true, click1 = playermod, columns = {Percent = true, Total = true}}
 
         Skada:AddMode(self, L["Damage taken"])
     end
@@ -954,7 +952,6 @@ Skada:AddLoadableModule("Damage mitigated", function(Skada, L)
         playermod.metadata = {click1 = spellmod}
         self.metadata = {
             showspots = true,
-            ordersort = true,
             click1 = playermod,
             columns = {Amount = true, Total = true, Percent = true}
         }

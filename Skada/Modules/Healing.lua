@@ -299,7 +299,6 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
         playersmod.metadata = {showspots = true}
         self.metadata = {
             showspots = true,
-            ordersort = true,
             click1 = spellsmod,
             click2 = playersmod,
             columns = {Healing = true, HPS = true, Percent = true}
@@ -480,7 +479,6 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
         playersmod.metadata = {showspots = true}
         self.metadata = {
             showspots = true,
-            ordersort = true,
             click1 = spellsmod,
             click2 = playersmod,
             columns = {Overheal = true, Percent = true}
@@ -698,7 +696,6 @@ Skada:AddLoadableModule("Total healing", function(Skada, L)
         spellsmod.metadata = {tooltip = spell_tooltip}
         self.metadata = {
             showspots = true,
-            ordersort = true,
             click1 = spellsmod,
             click2 = playersmod,
             columns = {Healing = true, HPS = true, Percent = true}
@@ -884,7 +881,6 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
         playersmod.metadata = {showspots = true}
         self.metadata = {
             showspots = true,
-            ordersort = true,
             click1 = spellsmod,
             click2 = playersmod,
             columns = {Healing = true, Overheal = true, Percent = true}
@@ -1074,7 +1070,6 @@ Skada:AddLoadableModule("Healing received", function(Skada, L)
         playermod.metadata = {showspots = true}
         self.metadata = {
             showspots = true,
-            ordersort = true,
             click1 = playermod,
             columns = {Healing = true, Overhealing = true, Percent = true}
         }

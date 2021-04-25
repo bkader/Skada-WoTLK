@@ -419,9 +419,7 @@ do
             GameTooltip:Hide()
             ttactive = false
         end
-        if not bar.win.db.disablehighlight then
-            bar:SetBackdrop(nil)
-        end
+        bar:SetBackdrop(nil)
     end
 
     local function BarResize(bar)

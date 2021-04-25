@@ -645,7 +645,6 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
         targetmod.metadata = {}
         mod.metadata = {
             showspots = true,
-            ordersort = true,
             post_tooltip = damage_tooltip,
             click1 = playermod,
             click2 = targetmod,
@@ -654,7 +653,6 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
         dpsmod.metadata = {
             showspots = true,
-            ordersort = true,
             tooltip = dps_tooltip,
             click1 = playermod,
             click2 = targetmod,
@@ -857,7 +855,6 @@ Skada:AddLoadableModule("Damage done by spell", function(Skada, L)
         sourcemod.metadata = {showspots = true}
         mod.metadata = {
             showspots = true,
-            ordersort = true,
             click1 = sourcemod,
             columns = {Damage = true, Percent = true}
         }
@@ -943,7 +940,7 @@ Skada:AddLoadableModule("Useful damage", function(Skada, L)
     end
 
     function mod:OnEnable()
-        mod.metadata = {showspots = true, ordersort = true, columns = {Damage = true, DPS = true, Percent = true}}
+        mod.metadata = {showspots = true, columns = {Damage = true, DPS = true, Percent = true}}
         Skada:AddMode(self, L["Damage done"])
     end
 

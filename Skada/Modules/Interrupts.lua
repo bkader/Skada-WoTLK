@@ -290,7 +290,6 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
         self.metadata = {
             showspots = true,
-            ordersort = true,
             click1 = spellsmod,
             click2 = targetsmod,
             click3 = playermod,

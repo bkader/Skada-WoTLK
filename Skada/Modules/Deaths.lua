@@ -389,7 +389,6 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
     function mod:OnEnable()
         deathlogmod.metadata = {
-            ordersort = true,
             tooltip = entry_tooltip,
             columns = {Change = true, Health = true, Percent = true}
         }

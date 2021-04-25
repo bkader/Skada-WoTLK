@@ -286,7 +286,7 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
     function mod:OnEnable()
         spellsmod.metadata = {click1 = spelltargetsmod}
         targetsmod.metadata = {click1 = targetspellsmod}
-        self.metadata = {showspots = true, ordersort = true, click1 = spellsmod, click2 = targetsmod}
+        self.metadata = {showspots = true, click1 = spellsmod, click2 = targetsmod}
 
         Skada:RegisterForCL(SpellResurrect, "SPELL_RESURRECT", {src_is_interesting = true, dst_is_interesting = true})
 
