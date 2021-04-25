@@ -1,54 +1,166 @@
-# Skada Revisited
+# Skada 1.8.4 for WoTLK (_Revisited_)
 
 I am simply a huge fan of **Skada**, I prefer it to other damage meters for several reasons. No need to judge me, it's after all a personal preference.
 
-## What's new?
+* [What's the difference?](#whats-the-difference)
+* [How to install](#how-to-install)
+* [Modules](#modules)
+	* [Absorbs](#absorbs)
+	* [Activity](#activity)
+	* [Buffs and Debuffs](#buffs-and-debuffs)
+	* [CC Tracker (_Done, Taken and Breakers_)](#cc-tracker)
+	* [Damage](#damage)
+	* [Damage taken](#damage-taken)
+	* [Deaths](#deaths)
+	* [Dispels, Interrupts and Resurrects](#dispels-interrupts-and-resurrects)
+	* [Enemies](#enemies)
+	* [Failbot](#failbot)
+	* [Friendly Fire](#friendly-fire)
+	* [Healing](#healing)
+	* [Improvement](#improvement)
+	* [Nickname](#nickname)
+	* [Parry-haste](#parry-haste)
+	* [Player Score](#player-score)
+	* [Potions](#potions)
+	* [Power gains](#power-gains)
+	* [Scroll](#scroll)
+	* [Spamage](#spamage)
+	* [Sunder Counter (_Sunder Armor_)](#sunder-counter)
+	* [Themes](#themes)
+	* [Threat](#threat)
 
-Lots of things were changed, the version for **3.3.5** that you all know is no longer the same. Everything works the same but with much more details and way better performance.
+## What's the difference?
 
-## Core Modifications
+Almost everything was changed, starting from the default version that was available for **v3.3.5** of the game up to what you can see on the addon.
 
-* No more several addons aka modules to enable or disable, everything is within a single addon.
-* Data collection was tweaked in a way to save memory and to avoid double writting but instead single time writting and each module manipulates the data the way it needs to present it.
-* Added windows buttons just like recount: Reset, Segments, Modes and Report.
-* Added the possibility to scroll holding the mouse wheel or by key binding up and down scrolling.
-* The tooltip is now smart and positions itself depending on the window position.
-* No more Bar display background, no struggle with the window height and width. Resize it on-the-go.
-* Added class icons, role icons, clicthrough and bar smoothing (aka animating).
-* Lots of other settings were added, explore it and compare it to the default one you were using.
+- It is now an **all-in-one** addon as opposed to what it was, modules can de enabled or disabled easily on the config panel.
+- Data collection was simplified and reduced teremendously and modules reply on each other to function (_more explained later_).
+- Several accessibility found here and there on the net and judged useful were added to the addon as modules (_window buttons, mouse & keyboard scroll, themes...etc_).
+- Unlike before, windows are resizable using the resize handles found at both bottom corners.
+- Bars are more fancy, colored by not only class but also spell school colors.
+- Bars display icons for both players and spells (_spell tooltips as well for the latter_).
 
-## Modules Modifications
+## How to install
 
-* The Absorbs and healing was slightly tweaked to show details log.
-* Debuff uptime was completely changed and now it tracks both buffs (or procs) and debuffs, with much more details!
-* Added a CC Tracker module containig: the old CC Breakers (untouched), CC Done and CC Taken.
-* All damage module were completely rewritten for more fexibility and details but names kept the same to not confuse Skada users.
-* Added a Damage done by spell module, useful to see which spell did the most damage for the selected segment or total.
-* Added a Friendly Fire module, its name says what it does.
-* Added a Avoidance & Mitigation, useful for tanks and shows how many hits were dodged, blocked, parried...etc
-* The Deaths module was completely rewritten and now it keeps track of all deaths and keeps all death logs. Skada's default behavior is to wipe the log after the player is resurrected.
-* The Dispels module was completely rewritten and now shows what was dispelled, what was used to dispel, targets and sources.
-* The Failbot was changed too and now stores proper data and presents proper fail event names.
-* Added an Improvement module that stores all your bosses fights with overall details, useful to compare yourself to yourself instead of comparing to others. The data is stored per character for this one.
-* The Interrupts module was changed as well and just like the Dispels one, shows who interrupted, what was interrupted and what spells was used to interrupt.
-* Added a new module called Power, it keeps track of power gain per encounter: mana, rage, energy and runic power.
-* Added a Resurrects module to track battle resurrects during encouters. Same, who res'd who, what spell was used, on who and how many times.
-* Several other modules were added or modified, explore the addon if you want to see more.
+1. If you used the default on **Skada** before, please make sure to delete all its files from `Interface\AddOns` folder as well as all its _SavedVariables_ from `WTF` folder (_just delete all `Skada.lua` and `Skada.lua.bak` for this folder. Use the search box for quick delete). If you are new, skip this step.
+2. [Download the package](https://github.com/bkader/Skada-Revisited/archive/refs/heads/main.zip).
+3. Open the Zip package inside which you will find a single folder named `Skada-Revisited-main`.
+4. Extract or drag and drop the unique folder `Skada` into your `Interface\AddOns` folder.
+5. (optional) If you are using **ElvUI**, please make sure to extract the provided folders as well so that your ElvUI installation properly handles the new Skada.
 
-## Themes Module
+## Modules
 
-It is now possible to use default provided themes or simply make your own.
-All you have to do is to style the window and bars the way the want it, save the theme and voilà!
+The modules are the same you are used to see on default **Skada** but completely rewritten from the ground up to really give justice the the _combatlog_, by recording and showing everything related to it (_almost everything_).
 
-## IMPORTANT: How to install
+### Absorbs
 
-It is important to know that for most addons to properly function without issues, is to have a clean installation. If you don't proceed to a clean installation, there is a huge chance that you will run into issues and errors that people who installed it the first time won't encouter. So, please, if you want to use it and you were at certain point using default Skada, follow the steps below:
+Because _WoTLK_ has no event to record the absorbs, auras priority system was used to give the best and most accurate numbers possible. It gives you access to _Absorbs_, _Absorb spells_ and _Absorb targets_.
+This module has a sub-module called `Absorbs and healing` that requires both Absorbs and healing to be enabled because it collects data from both.
 
-1. Delete old Skada addon and modules: All folders which the name starts with Skada within the `InterFace\AddOns` folder must be deleted.
-2. Navigate to `WTF\Account` folder, use the search box on top right and search for "Skada". Select all files and delete them.
-3. Download the repository package and extract the `Skada` folder into `Interface\AddOns`.
-4. Start the game, enable the addon, change the settings the way you want them to be and enjoy!
+### Activity
 
-### Optional
+Shows players activity in the raid, or what's called _Active Time_.
 
-If you are using [ELvUI](https://github.com/ElvUI-WotLK/ElvUI) and [ElvUI_AddOnSkins](https://github.com/ElvUI-WotLK/ElvUI_AddOnSkins), simply extract both **ElvUI** and **ElvUI_AddOnSkins** folders inside your addons folder, replace the files you are asked to and that's it. Enjoy!
+### Buffs and Debuffs
+
+This module shows players buffs and their uptime, debuffs and their uptime and targets.
+
+### CC Tracker
+ 
+1. **CC Done** & **CC Taken**: unlike default ones, they now provided details info about spells used to CC and targets/sources.
+2. **CC Breakers** : this was rewritten a bit, it is almost like the old one but optimized and provided like other CC modules, spell and target details.
+
+### Damage
+
+This module shows detailed data about damage done, giving you access to _Damage spell list_ and _Damage target list_ and has three sub-modules:
+
+1. **DPS**: obviously, shows the dps of raid members depending on the time measurement you choose (_active or effective_) and it gives you access to the same data as its parent.
+2. **Damage done by spell**: this module shows a list of all spells used in your raid with their damage and the percentage of damage to the total. Clicking on a spell gives you access to the _Damage source list_, aka list of players that used that spell.
+3. **Useful damage**: a useful damage is the damage required for the target to die, anything above it is called _Overkill_, this module shows the damage done in your raid without the overkill, it means all the damage that was required for all your raid targets to reach 0 health.
+
+### Damage taken
+
+Shows the damage taken by players of your raid with details about damage spells and damage sources. It provides three sub-modules:
+
+1. **Damage taken by spell**: the same as the _Damage done by spell_ but for damage your raid took, clicking a spell bar shows the list of players with the damage they took from it.
+2. **Avoidance & Mitigation**: a pure tank module that gives you info about damage avoidance and mitigation (absorb, dodge, misses, blocks ... etc).
+3. **Damage mitigated**: shows data about the damage that was aborbed, blocked or resisted, giving you access to _Damage spell list_ which gives you access to _Damage spell details_, all in the concept of mitigated damage.
+
+### Deaths
+
+This module was completely rewritter and unlike the default one, it keeps all player deaths and not only one and the deathlog provided spell details (absorb, resist, block, overkill ... etc).
+
+### Dispels, Interrupts and Resurrects
+
+These module do what they are named after, and unlike before, they provide more data: spells dispelled/interrupted, spells used to dispel/interrupt, targets dispelled/interrupted, spells user to resurrect, targets resurrected and resurrect spells used on the select player (_too many boring details right?_).
+
+### Enemies
+
+The following modules require _Damage_ or _Damage taken_ modules to be enabled in order to work, because as said before, **Skada** no longer records duplicates and unnecessary data that can be found on other modules.
+
+1. **Enemy damage done**: shows the list of targets that damage players during the combat with the damage they've done. Clicking on an enemy bar gives you access to the list of players that were damaged by the enemy, and clicking on a players shows you the spells used on the selected player by the selected enemy. One level deeper and you will see details about the select spell that was used on the selected player by the selected enemy.
+2. **Enemy damage taken**: shows the list of enemies your party/raid members damaged during the combat with the total damage they took. Clicking on an enemy gives you access to the list of players that damage the selected enemy and clicking on a player shows you the spells that the selected player used on the selected enemy.
+
+### Failbot
+
+Unlike the default Failbot module, it displays proper spell names and clicking on a players shows their fails, then clicking on a fail will show you the list of players that fail the selected even. If you are a tank don't you worry, events that are not considered fails for the tank won't be counted for you.
+
+### Friendly Fire
+
+As its name states, it shows the damage players do to each other (_it doesn't count damage you do to youself_). It gives you access to _Damage spell list_ and _Damage target list_.
+
+### Healing
+This module shows the _effective healing_ which means it substructs the _overhealing_ as his one is a sub-module of it. It gives you access to _Healing spell list_ and _Healing spell targets_ and it comes with four (4) sub-modules:
+
+1. **Overhealing**: the _Healing_ module keeps the effective healing and all overheals are shown when using this module, giving you access to _Overhealing spell list_ and _Overhealed player list_.
+2. **Total healing**: this module shows the data of _Healing_ and _Overhealing_ combined, giving you access to _Healing spell list_ and _Healing player list_.
+3. **Healing and Overhealing**: so you don't get confused, this module is made for pure comparison between players healing and overhealing, showing on its bars these data as well as the percentage of overhealing. It gives you access as well to _Healing spell list_ and _Healing player list_.
+4. **Healing received**: shows the list of players by their received healing and gives you access to the list of players that healed them.
+
+### Improvement
+
+Use to track your character improvement. It records your boss data in raids only and allows you to compare compare your performance on the same target on different dates.
+
+### Nickname
+
+This module allows you to set a nickname for your character (_for example: the name of the main character if you are playing on an alt_), this name will be displayed on main bars instead of your character's name. All other Skada users and have nicknames enabled will see that name as well.
+
+### Parry-haste
+
+Tracks all parry-hastes caused by players in your raid with access to the targets that parried them. Note that this module only records data for bosses that actionly parry-haste.
+
+### Player Score
+
+A simple module that evaluates and scores the player performance in the raid, using a simple formula:
+`(damagedone x fact1 + healingdone x fact2 + mitigation x fact3) / damagetaken)`. fact1-3 are mutipliers that depend on the player's role (_damager, healer or tank_).
+
+### Potions
+
+Tracks potions usage during an encounter. It even tracks and prints out to you **pre-potions**.
+
+### Power gains
+
+It records mana, range, energy and runic power gained by players (_happiness of hunter's pet is treated as energy_). Clicking a bar shows you the spells responsible for the gain.
+
+### Scroll
+
+It provides additional options for scrolling the bar displays. its main features are:
+
+* Allows the middle-button to act as a scroll wheel for people missing wheel hardware (many laptops).
+* Provides keybinds for scrolling the bar displays.
+
+### Spamage
+
+Suppresses chat messages from damage meters and provides single chat-link damage statistics in a popup. Useful if you don't spam on your chat window.
+
+### Sunder Counter
+
+Counts and shows the _Sunder Armor_ usage by warriors.
+
+### Themes
+
+It allows you to create themes that you can use if you want to change windows look. Themes can be created, applied and deleted (_probably Shared as well in the future if I don't forget to add it_).
+
+### Threat
+
+I think you already know what this module is used for, so no need to talk more about it. Oh and yes! You can use it instead of Omen or use both, it's up to you and it's a matter of personal preferences.

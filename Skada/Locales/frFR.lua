@@ -466,7 +466,7 @@ L["Damage taken per player"] = "Dégâts subis par joueur"
 L["Damage on %s"] = "Dégâts infligés à %s"
 L["%s's damage sources"] = "Sources des dégâts subis par %s"
 -- avoidance and mitigation module
-L["Avoidance & Mitigation"] = "Évitement et atténuation"
+L["Avoidance & Mitigation"] = "Évitement et mitigation"
 L["Damage breakdown"] = "Détails du dégât infligé"
 L["%s's damage breakdown"] = "Détails du dégât infligé à %s"
 -- friendly fire module
