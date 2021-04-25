@@ -1,6 +1,6 @@
 assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Potions", function(Skada, L)
-    if Skada:IsDisabled("Potions") then return end
+    if Skada:IsDisabled("Potions") then  end
 
     local mod = Skada:NewModule(L["Potions"])
     local potionsmod = mod:NewModule(L["Potions list"])
@@ -102,8 +102,8 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
                     players[player.name] = {
                         id = player.id,
                         class = player.class,
-                        spec = player.spec,
                         role = player.role,
+                        spec = player.spec,
                         count = count
                     }
                 end
@@ -116,8 +116,8 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
                 d.id = player.id
                 d.label = playername
                 d.class = player.class
-                d.spec = player.spec
                 d.role = player.role
+                d.spec = player.spec
 
                 d.value = player.count
                 d.valuetext = Skada:FormatValueText(
@@ -204,13 +204,12 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 
                 d.id = player.id
                 d.label = player.name
-                d.class = player.class
-                d.spec = player.spec
-                d.role = player.role
+                d.class = player.class or "PET"
+                d.role = player.role or "DAMAGER"
+                d.spec = player.spec or 1
 
                 d.value = player.potions.count
-                d.valuetext =
-                    Skada:FormatValueText(
+                d.valuetext = Skada:FormatValueText(
                     d.value,
                     self.metadata.columns.Count,
                     _format("%02.1f%%", 100 * d.value / math_max(1, total)),
@@ -232,7 +231,12 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
     function mod:OnEnable()
         playersmod.metadata = {}
         potionsmod.metadata = {click1 = playersmod}
-        self.metadata = {click1 = potionsmod, columns = {Count = true, Percent = true}}
+        self.metadata = {
+            showspots = true,
+            ordersort = true,
+            click1 = potionsmod,
+            columns = {Count = true, Percent = true}
+        }
         Skada:RegisterForCL(PotionUsed, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})
         Skada:AddMode(self)
         Skada.RegisterCallback(self, "ENCOUNTER_START", "CheckPrePot")

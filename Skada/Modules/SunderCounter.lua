@@ -122,6 +122,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
     function mod:OnEnable()
         self.metadata = {
             showspots = true,
+            ordersort = true,
             click1 = targetmod,
             columns = {Count = true, Percent = true}
         }

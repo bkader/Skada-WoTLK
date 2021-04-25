@@ -146,9 +146,13 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
                 if not target.class then
                     local p = Skada:find_player(set, target.id, targetname)
                     if p then
-                        target.class = p.class
-                        target.role = p.role
-                        target.spec = p.spec
+                        target.class = p.class or "PET"
+                        target.role = p.role or "DAMAGER"
+                        target.spec = p.spec or 1
+                    elseif Skada:IsBoss(target.id) then
+                        target.class = "MONSTER"
+                        target.role = "DAMAGER"
+                        target.spec = 3
                     else
                         target.class = "PET"
                         target.role = "DAMAGER"
@@ -232,9 +236,9 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 
                 d.id = player.id
                 d.label = player.name
-                d.class = player.class
-                d.spec = player.spec
-                d.role = player.role
+                d.class = player.class or "PET"
+                d.spec = player.spec or "DAMAGER"
+                d.role = player.role or 1
 
                 d.value = player.dispels.count
                 d.valuetext = Skada:FormatValueText(
@@ -259,6 +263,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
     function mod:OnEnable()
         self.metadata = {
             showspots = true,
+            ordersort = true,
             click1 = spellsmod,
             click2 = targetsmod,
             click3 = playermod,

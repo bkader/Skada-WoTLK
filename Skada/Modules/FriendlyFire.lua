@@ -104,9 +104,13 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
                 if not target.class then
                     local p = Skada:find_player(set, target.id, targetname)
                     if p then
-                        target.class = p.class
-                        target.role = p.role
-                        target.spec = p.spec
+                        target.class = p.class or "PET"
+                        target.role = p.role or "DAMAGER"
+                        target.spec = p.spec or 1
+                    elseif Skada:IsBoss(target.id) then
+                        target.class = "MONSTER"
+                        target.role = "DAMAGER"
+                        target.spec = 3
                     else
                         target.class = "PET"
                         target.role = "DAMAGER"
@@ -189,9 +193,9 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
                 d.id = player.id
                 d.label = player.name
-                d.class = player.class
-                d.role = player.role
-                d.spec = player.spec
+                d.class = player.class or "PET"
+                d.role = player.role or "DAMAGER"
+                d.spec = player.spec or 1
 
                 d.value = player.friendfire.amount
                 d.valuetext = Skada:FormatValueText(
@@ -214,7 +218,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
     end
 
     function mod:OnEnable()
-        targetmod.metadata = {showspots = true}
+        targetmod.metadata = {showspots = true, ordersort = true}
         self.metadata = {
             showspots = true,
             click1 = spellmod,

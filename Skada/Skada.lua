@@ -156,9 +156,9 @@ local function setPlayerActiveTimes(set)
     end
 end
 
-function Skada:PlayerActiveTime(set, player)
+function Skada:PlayerActiveTime(set, player, active)
     local settime = self:GetSetTime(set)
-    if self.effectivetime then
+    if self.effectivetime and not active then
         return settime
     end
 

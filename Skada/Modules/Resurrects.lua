@@ -129,9 +129,13 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
                 if not target.class then
                     local p = Skada:find_player(set, target.id, targetname)
                     if p then
-                        target.class = p.class
-                        target.role = p.role
-                        target.spec = p.spec
+                        target.class = p.class or "PET"
+                        target.role = p.role or "DAMAGER"
+                        target.spec = p.spec or 1
+                    elseif Skada:IsBoss(target.id) then
+                        target.class = "MONSTER"
+                        target.role = "DAMAGER"
+                        target.spec = 3
                     else
                         target.class = "PET"
                         target.role = "DAMAGER"
@@ -180,9 +184,13 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
                 if not target.class then
                     local p = Skada:find_player(set, target.id, targetname)
                     if p then
-                        target.class = p.class
-                        target.role = p.role
-                        target.spec = p.spec
+                        target.class = p.class or "PET"
+                        target.role = p.role or "DAMAGER"
+                        target.spec = p.spec or 1
+                    elseif Skada:IsBoss(target.id) then
+                        target.class = "MONSTER"
+                        target.role = "DAMAGER"
+                        target.spec = 3
                     else
                         target.class = "PET"
                         target.role = "DAMAGER"
@@ -256,9 +264,9 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 
                 d.id = player.id
                 d.label = player.name
-                d.class = player.class
-                d.role = player.role
-                d.spec = player.spec
+                d.class = player.class or "PET"
+                d.role = player.role or "DAMAGER"
+                d.spec = player.spec or 1
 
                 d.value = player.resurrect.count
                 d.valuetext = _tostring(player.resurrect.count)
@@ -278,7 +286,7 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
     function mod:OnEnable()
         spellsmod.metadata = {click1 = spelltargetsmod}
         targetsmod.metadata = {click1 = targetspellsmod}
-        self.metadata = {showspots = true, click1 = spellsmod, click2 = targetsmod}
+        self.metadata = {showspots = true, ordersort = true, click1 = spellsmod, click2 = targetsmod}
 
         Skada:RegisterForCL(SpellResurrect, "SPELL_RESURRECT", {src_is_interesting = true, dst_is_interesting = true})
 

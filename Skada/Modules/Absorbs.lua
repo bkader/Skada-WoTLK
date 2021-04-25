@@ -490,9 +490,13 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
                     if not target.class then
                         local p = Skada:find_player(set, target.id, targetname)
                         if p then
-                            target.class = p.class
-                            target.role = p.role
-                            target.spec = p.spec
+                            target.class = p.class or "PET"
+                            target.role = p.role or "DAMAGER"
+                            target.spec = p.spec or 1
+                        elseif Skada:IsBoss(target.id) then
+                            target.class = "MONSTER"
+                            target.role = "DAMAGER"
+                            target.spec = 3
                         else
                             target.class = "PET"
                             target.role = "DAMAGER"
@@ -535,9 +539,9 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
                 d.id = player.id
                 d.label = player.name
-                d.class = player.class
-                d.role = player.role
-                d.spec = player.spec
+                d.class = player.class or "PET"
+                d.role = player.role or "DAMAGER"
+                d.spec = player.spec or 1
 
                 d.value = player.absorbs.amount
                 d.valuetext = Skada:FormatValueText(
@@ -561,9 +565,10 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
     function mod:OnEnable()
         spellmod.metadata = {tooltip = spell_tooltip}
-        playermod.metadata = {showspots = true}
+        playermod.metadata = {showspots = true, ordersort = true}
         self.metadata = {
             showspots = true,
+            ordersort = true,
             click1 = spellmod,
             click2 = playermod,
             columns = {Absorbs = true, Percent = true}
@@ -633,7 +638,7 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
         if player then
             tooltip:AddLine(player.name .. " - " .. L["HPS"])
             tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(Skada:GetSetTime(set)), 1, 1, 1)
-            tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(Skada:PlayerActiveTime(set, player)), 1, 1, 1)
+            tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(Skada:PlayerActiveTime(set, player, true)), 1, 1, 1)
 
             local healing = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
             local total = (set.healing or 0) + (set.absorbs or 0)
@@ -759,9 +764,13 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
                     if not target.class then -- cache missing data once.
                         local p = Skada:find_player(set, target.id, targetname)
                         if p then
-                            target.class = p.class
-                            target.role = p.role
-                            target.spec = p.spec
+                            target.class = p.class or "PET"
+                            target.role = p.role or "DAMAGER"
+                            target.spec = p.spec or 1
+                        elseif Skada:IsBoss(target.id) then
+                            target.class = "MONSTER"
+                            target.role = "DAMAGER"
+                            target.spec = 3
                         else
                             target.class = "PET"
                             target.role = "DAMAGER"
@@ -779,9 +788,13 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
                     if not target.class then -- cache data.
                         local p = Skada:find_player(set, target.id, targetname)
                         if p then
-                            target.class = p.class
-                            target.role = p.role
-                            target.spec = p.spec
+                            target.class = p.class or "PET"
+                            target.role = p.role or "DAMAGER"
+                            target.spec = p.spec or 1
+                        elseif Skada:IsBoss(target.id) then
+                            target.class = "MONSTER"
+                            target.role = "DAMAGER"
+                            target.spec = 3
                         else
                             target.class = "PET"
                             target.role = "DAMAGER"
@@ -805,7 +818,6 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 
                     d.id = target.id
                     d.label = targetname
-
                     d.class = target.class
                     d.role = target.role
                     d.spec = target.spec
@@ -849,9 +861,9 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 
                 d.id = player.id
                 d.label = player.name
-                d.class = player.class
-                d.role = player.role
-                d.spec = player.spec
+                d.class = player.class or "PET"
+                d.role = player.role or "DAMAGER"
+                d.spec = player.spec or 1
 
                 d.value = healing
                 d.valuetext = Skada:FormatValueText(
@@ -932,15 +944,17 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 
     function mod:OnEnable()
         spellmod.metadata = {tooltip = spell_tooltip}
-        playermod.metadata = {showspots = true}
+        playermod.metadata = {showspots = true, ordersort = true}
         mod.metadata = {
             showspots = true,
+            ordersort = true,
             click1 = spellmod,
             click2 = playermod,
             columns = {Healing = true, HPS = true, Percent = true}
         }
         hpsmode.metadata = {
             showspots = true,
+            ordersort = true,
             tooltip = hps_tooltip,
             click1 = spellmod,
             click2 = playermod,

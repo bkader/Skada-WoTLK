@@ -282,7 +282,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
             local activetime = Skada:PlayerActiveTime(set, player)
             tooltip:AddDoubleLine(L["Activity"], _format("%02.1f%%", 100 * activetime / totaltime), 1, 1, 1)
             tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
-            tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
+            tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(Skada:PlayerActiveTime(set, player, true)), 1, 1, 1)
         end
     end
 
@@ -294,9 +294,9 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
             local activetime = Skada:PlayerActiveTime(set, player)
             tooltip:AddLine(player.name .. " - " .. L["DPS"])
             tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
-            tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
+            tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(Skada:PlayerActiveTime(set, player, true)), 1, 1, 1)
             tooltip:AddDoubleLine(L["Damage done"], Skada:FormatNumber(player.damagedone.amount), 1, 1, 1)
-            tooltip:AddDoubleLine(Skada:FormatNumber(player.damagedone.amount) .. "/" .. activetime .. ":", Skada:FormatNumber(player.damagedone.amount / math_max(1, activetime)), 1, 1, 1)
+            tooltip:AddDoubleLine(Skada:FormatNumber(player.damagedone.amount) .. "/" .. Skada:FormatTime(activetime), Skada:FormatNumber(player.damagedone.amount / math_max(1, activetime)), 1, 1, 1)
         end
     end
 
@@ -511,9 +511,9 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
                 d.id = player.id
                 d.label = player.name
-                d.class = player.class
-                d.role = player.role
-                d.spec = player.spec
+                d.class = player.class or "PET"
+                d.role = player.role or "DAMAGER"
+                d.spec = player.spec or 1
 
                 local dps = getDPS(set, player)
 
@@ -571,9 +571,9 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
                 d.id = player.id
                 d.label = player.name
-                d.class = player.class
-                d.role = player.role
-                d.spec = player.spec
+                d.class = player.class or "PET"
+                d.role = player.role or "DAMAGER"
+                d.spec = player.spec or 1
 
                 d.value = dps
                 d.valuetext = Skada:FormatValueText(
@@ -645,6 +645,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
         targetmod.metadata = {}
         mod.metadata = {
             showspots = true,
+            ordersort = true,
             post_tooltip = damage_tooltip,
             click1 = playermod,
             click2 = targetmod,
@@ -653,6 +654,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
         dpsmod.metadata = {
             showspots = true,
+            ordersort = true,
             tooltip = dps_tooltip,
             click1 = playermod,
             click2 = targetmod,
@@ -756,9 +758,9 @@ Skada:AddLoadableModule("Damage done by spell", function(Skada, L)
 
                 d.id = player.id
                 d.label = playername
-                d.class = player.class
-                d.role = player.role
-                d.spec = player.spec
+                d.class = player.class or "PET"
+                d.role = player.role or "DAMAGER"
+                d.spec = player.spec or 1
 
                 d.value = player.amount
                 d.valuetext = Skada:FormatValueText(
@@ -855,6 +857,7 @@ Skada:AddLoadableModule("Damage done by spell", function(Skada, L)
         sourcemod.metadata = {showspots = true}
         mod.metadata = {
             showspots = true,
+            ordersort = true,
             click1 = sourcemod,
             columns = {Damage = true, Percent = true}
         }
@@ -909,9 +912,9 @@ Skada:AddLoadableModule("Useful damage", function(Skada, L)
 
                     d.id = player.id
                     d.label = player.name
-                    d.class = player.class
-                    d.role = player.role
-                    d.spec = player.spec
+                    d.class = player.class or "PET"
+                    d.role = player.role or "DAMAGER"
+                    d.spec = player.spec or 1
 
                     local amount = player.damagedone.amount - (player.overkill or 0)
                     local dps = getDPS(set, player)
@@ -940,7 +943,7 @@ Skada:AddLoadableModule("Useful damage", function(Skada, L)
     end
 
     function mod:OnEnable()
-        mod.metadata = {showspots = true, columns = {Damage = true, DPS = true, Percent = true}}
+        mod.metadata = {showspots = true, ordersort = true, columns = {Damage = true, DPS = true, Percent = true}}
         Skada:AddMode(self, L["Damage done"])
     end
 

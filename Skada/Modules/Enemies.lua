@@ -93,9 +93,9 @@ Skada:AddLoadableModule("Enemy damage taken", function(Skada, L)
 
                     d.id = player.id
                     d.label = player.name
-                    d.class = player.class
-                    d.spec = player.spec
-                    d.role = player.role
+                    d.class = player.class or "PET"
+                    d.role = player.role or "DAMAGER"
+                    d.spec = player.spec or 1
 
                     d.value = amount
                     d.valuetext = Skada:FormatValueText(
@@ -155,7 +155,7 @@ Skada:AddLoadableModule("Enemy damage taken", function(Skada, L)
     end
 
     function mod:OnEnable()
-        enemymod.metadata = {showspots = true, click1 = playermod}
+        enemymod.metadata = {showspots = true, ordersort = true, click1 = playermod}
         mod.metadata = {click1 = enemymod, columns = {Damage = true, Percent = true}}
 
         Skada:AddMode(self, L["Damage done"])
@@ -346,9 +346,9 @@ Skada:AddLoadableModule("Enemy damage done", function(Skada, L)
 
                     d.id = player.id
                     d.label = player.name
-                    d.class = player.class
-                    d.spec = player.spec
-                    d.role = player.spec
+                    d.class = player.class or "PET"
+                    d.role = player.role or "DAMAGER"
+                    d.spec = player.spec or 1
 
                     d.value = player.damagetaken.sources[win.mobname]
                     d.valuetext = Skada:FormatValueText(
@@ -409,7 +409,7 @@ Skada:AddLoadableModule("Enemy damage done", function(Skada, L)
     function mod:OnEnable()
         spellmod.metadata = {tooltip = spellmod_tooltip}
         playermod.metadata = {click1 = spellmod}
-        enemymod.metadata = {showspots = true, click1 = playermod}
+        enemymod.metadata = {showspots = true, ordersort = true, click1 = playermod}
         mod.metadata = {click1 = enemymod, columns = {Damage = true, Percent = true}}
 
         Skada:AddMode(self, L["Damage taken"])

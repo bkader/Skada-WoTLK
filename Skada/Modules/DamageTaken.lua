@@ -328,9 +328,9 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 
                 d.id = player.id
                 d.label = player.name
-                d.class = player.class
-                d.role = player.role
-                d.spec = player.spec
+                d.class = player.class or "PET"
+                d.role = player.role or "DAMAGER"
+                d.spec = player.spec or 1
 
                 d.value = player.damagetaken.amount
                 d.valuetext = Skada:FormatValueText(
@@ -423,6 +423,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
         sourcemod.metadata = {}
         mod.metadata = {
             showspots = true,
+            ordersort = true,
             click1 = playermod,
             click2 = sourcemod,
             columns = {Damage = true, DTPS = true, Percent = true}
@@ -519,9 +520,9 @@ Skada:AddLoadableModule("Damage taken by spell", function(Skada, L)
 
                 d.id = player.id
                 d.label = playername
-                d.class = player.class
-                d.role = player.role
-                d.spec = player.spec
+                d.class = player.class or "PET"
+                d.role = player.role or "DAMAGER"
+                d.spec = player.spec or 1
 
                 d.value = player.amount
                 d.valuetext = Skada:FormatValueText(
@@ -570,9 +571,9 @@ Skada:AddLoadableModule("Damage taken by spell", function(Skada, L)
                             if not cached[spellname].players[player.name] then
                                 cached[spellname].players[player.name] = {
                                     id = player.id,
-                                    class = player.class,
-                                    spec = player.spec,
-                                    role = player.role,
+                                    class = player.class or "PET",
+                                    role = player.role or "DAMAGER",
+                                    spec = player.spec or 1,
                                     amount = spell.amount
                                 }
                             else
@@ -619,6 +620,7 @@ Skada:AddLoadableModule("Damage taken by spell", function(Skada, L)
         targetmod.metadata = {showspots = true}
         mod.metadata = {
             showspots = true,
+            ordersort = true,
             click1 = targetmod,
             columns = {Damage = true, Percent = true}
         }
@@ -693,9 +695,9 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 
                 d.id = player.id
                 d.label = player.name
-                d.class = player.class
-                d.role = player.role
-                d.spec = player.spec
+                d.class = player.class or "PET"
+                d.role = player.role or "DAMAGER"
+                d.spec = player.spec or 1
 
                 local total, avoid = 0, 0
                 for spellname, spell in _pairs(player.damagetaken.spells) do
@@ -738,7 +740,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 
     function mod:OnEnable()
         playermod.metadata = {}
-        mod.metadata = {showspots = true, click1 = playermod, columns = {Percent = true, Total = true}}
+        mod.metadata = {showspots = true, ordersort = true, click1 = playermod, columns = {Percent = true, Total = true}}
 
         Skada:AddMode(self, L["Damage taken"])
     end
@@ -923,7 +925,7 @@ Skada:AddLoadableModule("Damage mitigated", function(Skada, L)
                 d.id = player.id
                 d.label = player.name
                 d.class = player.class or "PET"
-                d.role = player.role or "NONE"
+                d.role = player.role or "DAMAGER"
                 d.spec = player.spec or 1
 
                 d.value = mit
@@ -952,6 +954,7 @@ Skada:AddLoadableModule("Damage mitigated", function(Skada, L)
         playermod.metadata = {click1 = spellmod}
         self.metadata = {
             showspots = true,
+            ordersort = true,
             click1 = playermod,
             columns = {Amount = true, Total = true, Percent = true}
         }

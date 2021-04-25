@@ -104,9 +104,9 @@ Skada:AddLoadableModule("Parry-haste", function(Skada, L)
 
                     d.id = player.id
                     d.label = player.name
-                    d.class = player.class
-                    d.spec = player.spec
-                    d.role = player.role
+                    d.class = player.class or "PET"
+                    d.role = player.role or "DAMAGER"
+                    d.spec = player.spec or 1
 
                     d.value = player.parries.count
                     d.valuetext = Skada:FormatValueText(

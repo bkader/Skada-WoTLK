@@ -11,7 +11,7 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
         local player = Skada:find_player(set, id)
         if player then
             local settime = Skada:GetSetTime(set)
-            local playertime = Skada:PlayerActiveTime(set, player)
+            local playertime = Skada:PlayerActiveTime(set, player, true)
             tooltip:AddLine(player.name .. ": " .. L["Activity"])
             tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
             tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(playertime), 1, 1, 1)
@@ -26,17 +26,26 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
             local d = win.dataset[nr] or {}
             win.dataset[nr] = d
 
-            local playertime = Skada:PlayerActiveTime(set, player)
+            local playertime = Skada:PlayerActiveTime(set, player, true)
 
             d.id = player.id
             d.label = player.name
-            if player.class then
-                d.class = player.class
-                d.role = player.role
-                d.spec = player.spec
-            else
-                d.class = Skada:IsBoss(player.id) and "MONSTER" or "PET"
+
+            if not player.class then
+                if Skada:IsBoss(player.id) then
+                    player.class = "MONSTER"
+                    player.role = "DAMAGER"
+                    player.spec = 3
+                else
+                    player.class = "PET"
+                    player.role = "DAMAGER"
+                    player.spec = 1
+                end
             end
+
+            d.class = player.class
+            d.role = player.role
+            d.spec = player.spec
 
             d.value = playertime
             d.valuetext = Skada:FormatValueText(
@@ -60,6 +69,7 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
     function mod:OnEnable()
         mod.metadata = {
             showspots = true,
+            ordersort = true,
             tooltip = activity_tooltip,
             columns = {["Active Time"] = true, Percent = true}
         }

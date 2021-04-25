@@ -171,13 +171,17 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
                 if not target.class then
                     local p = Skada:find_player(set, target.id, targetname)
                     if p then
-                        target.class = p.class
-                        target.role = p.role
-                        target.spec = p.spec
-                    else
-                        target.class = "UNKNOWN"
+                        target.class = p.class or "PET"
+                        target.role = p.role or "DAMAGER"
+                        target.spec = p.spec or 1
+                    elseif Skada:IsBoss(target.id) then
+                        target.class = "MONSTER"
                         target.role = "DAMAGER"
-                        target.spec = 2
+                        target.spec = 3
+                    else
+                        target.class = "PET"
+                        target.role = "DAMAGER"
+                        target.spec = 1
                     end
                 end
 
@@ -286,6 +290,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
         self.metadata = {
             showspots = true,
+            ordersort = true,
             click1 = spellsmod,
             click2 = targetsmod,
             click3 = playermod,

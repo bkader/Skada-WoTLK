@@ -307,13 +307,17 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
                 if not target.class then
                     local p = Skada:find_player(set, target.id, targetname)
                     if p then
-                        target.class = p.class
-                        target.role = p.role
-                        target.spec = p.spec
-                    else
-                        target.class = "UNKNOWN"
+                        target.class = p.class or "PET"
+                        target.role = p.role or "DAMAGER"
+                        target.spec = p.spec or 1
+                    elseif Skada:IsBoss(target.id) then
+                        target.class = "MONSTER"
                         target.role = "DAMAGER"
-                        target.spec = 2
+                        target.spec = 3
+                    else
+                        target.class = "PET"
+                        target.role = "DAMAGER"
+                        target.spec = 1
                     end
                 end
 
@@ -357,13 +361,17 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
                 if not target.class then
                     local p = Skada:find_player(set, target.id, targetname)
                     if p then
-                        target.class = p.class
-                        target.role = p.role
-                        target.spec = p.spec
-                    else
-                        target.class = "UNKNOWN"
+                        target.class = p.class or "PET"
+                        target.role = p.role or "DAMAGER"
+                        target.spec = p.spec or 1
+                    elseif Skada:IsBoss(target.id) then
+                        target.class = "MONSTER"
                         target.role = "DAMAGER"
-                        target.spec = 2
+                        target.spec = 3
+                    else
+                        target.class = "PET"
+                        target.role = "DAMAGER"
+                        target.spec = 1
                     end
                 end
 
@@ -429,9 +437,9 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
                 d.id = player.id
                 d.label = player.name
-                d.class = player.class
-                d.role = player.role
-                d.spec = player.spec
+                d.class = player.class or "PET"
+                d.role = player.role or "DAMAGER"
+                d.spec = player.spec or 1
 
                 d.value = player.ccdone.count
                 d.valuetext = _tostring(player.ccdone.count)
@@ -450,7 +458,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
     function mod:OnEnable()
         spellsmod.metadata = {click1 = spelltargetsmod}
         targetsmod.metadata = {click1 = targetspellsmod}
-        self.metadata = {showspots = true, click1 = spellsmod, click2 = targetsmod}
+        self.metadata = {showspots = true, ordersort = true, click1 = spellsmod, click2 = targetsmod}
 
         Skada:RegisterForCL(SpellAuraApplied, "SPELL_AURA_APPLIED", {src_is_interesting = true})
         Skada:RegisterForCL(SpellAuraApplied, "SPELL_AURA_REFRESH", {src_is_interesting = true})
@@ -612,13 +620,17 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
                 if not source.class then
                     local p = Skada:find_player(set, source.id, sourcename)
                     if p then
-                        source.class = p.class
-                        source.role = p.role
-                        source.spec = p.spec
-                    else
-                        source.class = "UNKNOWN"
+                        source.class = p.class or "PET"
+                        source.role = p.role or "DAMAGER"
+                        source.spec = p.spec or 1
+                    elseif Skada:IsBoss(source.id) then
+                        source.class = "MONSTER"
                         source.role = "DAMAGER"
                         source.spec = 3
+                    else
+                        source.class = "PET"
+                        source.role = "DAMAGER"
+                        source.spec = 1
                     end
                 end
 
@@ -663,13 +675,17 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
                 if not target.class then
                     local p = Skada:find_player(set, target.id, targetname)
                     if p then
-                        target.class = p.class
-                        target.role = p.role
-                        target.spec = p.spec
-                    else
-                        target.class = "UNKNOWN"
+                        target.class = p.class or "PET"
+                        target.role = p.role or "DAMAGER"
+                        target.spec = p.spec or 1
+                    elseif Skada:IsBoss(target.id) then
+                        target.class = "MONSTER"
                         target.role = "DAMAGER"
-                        target.spec = 2
+                        target.spec = 3
+                    else
+                        target.class = "PET"
+                        target.role = "DAMAGER"
+                        target.spec = 1
                     end
                 end
 
@@ -736,9 +752,9 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
                 d.id = player.id
                 d.label = player.name
-                d.class = player.class
-                d.role = player.role
-                d.spec = player.spec
+                d.class = player.class or "PET"
+                d.role = player.role or "DAMAGER"
+                d.spec = player.spec or 1
 
                 d.value = player.cctaken.count
                 d.valuetext = _tostring(player.cctaken.count)
@@ -758,7 +774,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
     function mod:OnEnable()
         spellsmod.metadata = {click1 = spellsourcesmod}
         sourcesmod.metadata = {click1 = sourcespellsmod}
-        self.metadata = {click1 = spellsmod, click2 = sourcesmod, showspots = true}
+        self.metadata = {showspots = true, ordersort = true, click1 = spellsmod, click2 = sourcesmod}
 
         Skada:RegisterForCL(SpellAuraApplied, "SPELL_AURA_APPLIED", {dst_is_interesting = true})
         Skada:RegisterForCL(SpellAuraApplied, "SPELL_AURA_REFRESH", {dst_is_interesting = true})
@@ -1099,7 +1115,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
     function mod:OnEnable()
         spellsmod.metadata = {click1 = spelltargetsmod}
         targetsmod.metadata = {click1 = targetspellsmod}
-        self.metadata = {showspots = true, click1 = spellsmod, click2 = targetsmod}
+        self.metadata = {showspots = true, ordersort = true, click1 = spellsmod, click2 = targetsmod}
 
         Skada:RegisterForCL(SpellAuraBroken, "SPELL_AURA_BROKEN", {src_is_interesting = true})
         Skada:RegisterForCL(SpellAuraBroken, "SPELL_AURA_BROKEN_SPELL", {src_is_interesting = true})

@@ -110,8 +110,8 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
     end
 
     local function getHPS(set, player)
-        local healing = player.healing and player.healing.amount or 0
-        return healing / math_max(1, Skada:PlayerActiveTime(set, player))
+        local amount = player.healing and player.healing.amount or 0
+        return amount / math_max(1, Skada:PlayerActiveTime(set, player))
     end
 
     local function getRaidHPS(set)
@@ -220,9 +220,13 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
                     if not target.class then
                         local p = Skada:find_player(set, target.id, targetname)
                         if p then
-                            target.class = p.class
-                            target.role = p.role
-                            target.spec = p.spec
+                            target.class = p.class or "PET"
+                            target.role = p.role or "DAMAGER"
+                            target.spec = p.spec or 1
+                        elseif Skada:IsBoss(target.id) then
+                            target.class = "MONSTER"
+                            target.role = "DAMAGER"
+                            target.spec = 3
                         else
                             target.class = "PET"
                             target.role = "DAMAGER"
@@ -264,9 +268,9 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 
                 d.id = player.id
                 d.label = player.name
-                d.class = player.class
-                d.role = player.role
-                d.spec = player.spec
+                d.class = player.class or "PET"
+                d.role = player.role or "DAMAGER"
+                d.spec = player.spec or 1
 
                 d.value = player.healing.amount
                 d.valuetext = Skada:FormatValueText(
@@ -295,6 +299,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
         playersmod.metadata = {showspots = true}
         self.metadata = {
             showspots = true,
+            ordersort = true,
             click1 = spellsmod,
             click2 = playersmod,
             columns = {Healing = true, HPS = true, Percent = true}
@@ -475,6 +480,7 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
         playersmod.metadata = {showspots = true}
         self.metadata = {
             showspots = true,
+            ordersort = true,
             click1 = spellsmod,
             click2 = playersmod,
             columns = {Overheal = true, Percent = true}
@@ -496,16 +502,14 @@ end)
 -- ==================== --
 
 Skada:AddLoadableModule("Total healing", function(Skada, L)
-    if Skada:IsDisabled("Healing", "Total healing") then
-        return
-    end
+    if Skada:IsDisabled("Healing", "Total healing") then return end
 
     local mod = Skada:NewModule(L["Total healing"])
     local playersmod = mod:NewModule(L["Healed player list"])
     local spellsmod = mod:NewModule(L["Healing spell list"])
 
     local function getHPS(set, player)
-        local healing = player.healing and ((player.healing.amount or 0) + (player.healing.overhealing or 0)) or 0
+        local amount = player.healing and ((player.healing.amount or 0) + (player.healing.overhealing or 0)) or 0
         return amount / math_max(1, Skada:PlayerActiveTime(set, player))
     end
 
@@ -614,9 +618,13 @@ Skada:AddLoadableModule("Total healing", function(Skada, L)
                 if not target.class then
                     local p = Skada:find_player(set, target.id, targetname)
                     if p then
-                        target.class = p.class
-                        target.role = p.role
-                        target.spec = p.spec
+                        target.class = p.class or "PET"
+                        target.role = p.role or "DAMAGER"
+                        target.spec = p.spec or 1
+                    elseif Skada:IsBoss(target.id) then
+                        target.class = "MONSTER"
+                        target.role = "DAMAGER"
+                        target.spec = 3
                     else
                         target.class = "PET"
                         target.role = "DAMAGER"
@@ -659,9 +667,9 @@ Skada:AddLoadableModule("Total healing", function(Skada, L)
 
                 d.id = player.id
                 d.label = player.name
-                d.class = player.class
-                d.role = player.role
-                d.spec = player.spec
+                d.class = player.class or "PET"
+                d.role = player.role or "DAMAGER"
+                d.spec = player.spec or 1
 
                 d.value = amount
                 d.valuetext = Skada:FormatValueText(
@@ -690,6 +698,7 @@ Skada:AddLoadableModule("Total healing", function(Skada, L)
         spellsmod.metadata = {tooltip = spell_tooltip}
         self.metadata = {
             showspots = true,
+            ordersort = true,
             click1 = spellsmod,
             click2 = playersmod,
             columns = {Healing = true, HPS = true, Percent = true}
@@ -717,9 +726,7 @@ end)
 -- ============================== --
 
 Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
-    if Skada:IsDisabled("Healing", "Healing and Overhealing") then
-        return
-    end
+    if Skada:IsDisabled("Healing", "Healing and Overhealing") then return end
 
     local mod = Skada:NewModule(L["Healing and Overhealing"])
     local spellsmod = mod:NewModule(L["Healing and overhealing spells"])
@@ -797,9 +804,13 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
                 if not target.class then
                     local p = Skada:find_player(set, target.id, targetname)
                     if p then
-                        target.class = p.class
-                        target.role = p.role
-                        target.spec = p.spec
+                        target.class = p.class or "PET"
+                        target.role = p.role or "DAMAGER"
+                        target.spec = p.spec or 1
+                    elseif Skada:IsBoss(target.id) then
+                        target.class = "MONSTER"
+                        target.role = "DAMAGER"
+                        target.spec = 3
                     else
                         target.class = "PET"
                         target.role = "DAMAGER"
@@ -843,9 +854,9 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
 
                 d.id = player.id
                 d.label = player.name
-                d.class = player.class
-                d.role = player.role
-                d.spec = player.spec
+                d.class = player.class or "PET"
+                d.role = player.role or "DAMAGER"
+                d.spec = player.spec or 1
 
                 d.value = total
                 d.valuetext = Skada:FormatValueText(
@@ -873,6 +884,7 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
         playersmod.metadata = {showspots = true}
         self.metadata = {
             showspots = true,
+            ordersort = true,
             click1 = spellsmod,
             click2 = playersmod,
             columns = {Healing = true, Overheal = true, Percent = true}
@@ -903,9 +915,7 @@ end)
 -- ================ --
 
 Skada:AddLoadableModule("Healing received", function(Skada, L)
-    if Skada:IsDisabled("Healing", "Healing received") then
-        return
-    end
+    if Skada:IsDisabled("Healing", "Healing received") then return end
 
     local mod = Skada:NewModule(L["Healing received"])
     local playermod = mod:NewModule(L["Healing player list"])
@@ -927,6 +937,19 @@ Skada:AddLoadableModule("Healing received", function(Skada, L)
                     for targetname, target in _pairs(p.healing.targets) do
                         if target.id == player.id and targetname == player.name then
                             total = total + target.amount -- increment total
+
+                            if not target.class then
+                                if Skada:IsBoss(target.id) then
+                                    target.class = "MONSTER"
+                                    target.role = "DAMAGER"
+                                    target.spec = 3
+                                else
+                                    target.class = "PET"
+                                    target.role = "DAMAGER"
+                                    target.spec = 1
+                                end
+                            end
+
                             sources[p.name] = {
                                 id = p.id,
                                 class = p.class,
@@ -987,9 +1010,13 @@ Skada:AddLoadableModule("Healing received", function(Skada, L)
                         if not target.class then
                             local p = Skada:find_player(set, target.id, targetname)
                             if p then
-                                target.class = p.class
-                                target.role = p.role
-                                target.spec = p.spec
+                                target.class = p.class or "PET"
+                                target.role = p.role or "DAMAGER"
+                                target.spec = p.spec or 1
+                            elseif Skada:IsBoss(target.id) then
+                                target.class = "MONSTER"
+                                target.role = "DAMAGER"
+                                target.spec = 3
                             else
                                 target.class = "PET"
                                 target.role = "DAMAGER"
@@ -1016,7 +1043,6 @@ Skada:AddLoadableModule("Healing received", function(Skada, L)
 
                     d.id = player.id
                     d.label = playername
-
                     d.class = player.class
                     d.role = player.role
                     d.spec = player.spec
@@ -1048,6 +1074,7 @@ Skada:AddLoadableModule("Healing received", function(Skada, L)
         playermod.metadata = {showspots = true}
         self.metadata = {
             showspots = true,
+            ordersort = true,
             click1 = playermod,
             columns = {Healing = true, Overhealing = true, Percent = true}
         }

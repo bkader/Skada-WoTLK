@@ -100,7 +100,7 @@ Skada:AddLoadableModule("Power gained", function(Skada, L)
 
         local instance = {
             playermod = pmode,
-            metadata = {showspots = true, click1 = pmode},
+            metadata = {showspots = true, ordersort = true, click1 = pmode},
             name = modname
         }
         instance.power = power
@@ -127,9 +127,9 @@ Skada:AddLoadableModule("Power gained", function(Skada, L)
 
                 d.id = player.id
                 d.label = player.name
-                d.class = player.class
-                d.spec = player.spec
-                d.role = player.role
+                d.class = player.class or "PET"
+                d.role = player.role or "DAMAGER"
+                d.spec = player.spec or 1
 
                 d.value = player.power[self.power].amount
                 d.valuetext = Skada:FormatValueText(
