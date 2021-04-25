@@ -961,7 +961,7 @@ do
             self:VerifySet(mode, set)
         end
 
-        mode.category = category or MISCELLANEOUS
+        mode.category = category or OTHER
         tinsert(modes, mode)
 
         for _, win in ipairs(windows) do

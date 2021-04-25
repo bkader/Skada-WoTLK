@@ -391,8 +391,8 @@ do
     local categorized
 
     local function sort_modes(a, b)
-        local a_score = (a.category == MISCELLANEOUS) and 1000 or 0
-        local b_score = (b.category == MISCELLANEOUS) and 1000 or 0
+        local a_score = (a.category == OTHER) and 1000 or 0
+        local b_score = (b.category == OTHER) and 1000 or 0
         a_score = a_score + (sbyte(a.category, 1) * 10) + sbyte(a:GetName(), 1)
         b_score = b_score + (sbyte(b.category, 1) * 10) + sbyte(b:GetName(), 1)
         return a_score < b_score
@@ -428,7 +428,7 @@ do
                 _UIDropDownMenu_AddButton(info, level)
 
                 for category, modes in _pairs(categorized) do
-                    if category ~= MISCELLANEOUS then
+                    if category ~= OTHER then
                         info = _UIDropDownMenu_CreateInfo()
                         info.text = category
                         info.value = category
@@ -439,10 +439,10 @@ do
                     end
                 end
 
-                if categorized[MISCELLANEOUS] then
+                if categorized[OTHER] then
                     info = _UIDropDownMenu_CreateInfo()
-                    info.text = MISCELLANEOUS
-                    info.value = MISCELLANEOUS
+                    info.text = OTHER
+                    info.value = OTHER
                     info.hasArrow = 1
                     info.notCheckable = 1
                     info.padding = 16
