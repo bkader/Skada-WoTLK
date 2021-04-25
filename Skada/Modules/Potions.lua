@@ -1,12 +1,13 @@
 assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Potions", function(Skada, L)
-    if Skada:IsDisabled("Potions") then  end
+    if Skada:IsDisabled("Potions") then end
 
     local mod = Skada:NewModule(L["Potions"])
     local potionsmod = mod:NewModule(L["Potions list"])
     local playersmod = mod:NewModule(L["Players list"])
 
     -- cache frequently used globals
+    local _pairs, _ipairs, _select, tconcat = pairs, ipairs, select, table.concat
     local _pairs, _ipairs, _select = pairs, ipairs, select
     local _format, _strsub, _tostring, math_max = string.format, string.sub, tostring, math.max
     local _GetNumPartyMembers = GetNumPartyMembers
@@ -14,6 +15,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
     local _GetItemInfo = GetItemInfo
     local _UnitExists, _UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
     local _UnitGUID, _UnitName = UnitGUID, UnitName
+    local _UnitClass, _UnitBuff = UnitClass, UnitBuff
 
     local potionIDs = {
         [28494] = 22828, -- Insane Strength Potion
@@ -33,6 +35,9 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
         [53762] = 40093, -- Indestructible
         [67490] = 42545 -- Runic Mana Injector
     }
+
+    local prepotion = {}
+    local prepottStr = "|c%s%s|r |T%s:14:14:0:0:64:64:0:64:0:64|t"
 
     local function log_potion(set, playerid, playername, playerflags, spellid)
         local player = Skada:get_player(set, playerid, playername, playerflags)
@@ -69,15 +74,28 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
                 local unit = (n == 0) and "player" or prefix .. _tostring(n)
                 if _UnitExists(unit) and not _UnitIsDeadOrGhost(unit) then
                     local playerid, playername = _UnitGUID(unit), _UnitName(unit)
+                    local class = _select(2, _UnitClass(unit))
                     for i = 1, 32 do
-                        local spellid = _select(11, UnitAura(unit, i, nil, "BUFF"))
+                        local _, _, icon, _, _, _, _, _, _, _, spellid = _UnitBuff(unit, i)
                         if spellid and potionIDs[spellid] then
                             -- instant recording doesn't work, so we delay it
                             Skada.After(1, function() PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid) end)
+
+                            -- add to print out:
+                            if class and Skada.validclass[class] then
+                                local colorStr = Skada.classcolors[class].colorStr or "ffffffff"
+                                tinsert(prepotion, _format(prepottStr, colorStr, playername, icon))
+                            end
+
                             break -- beause we can only have a single potion
                         end
                     end
                 end
+            end
+
+            if next(prepotion) then
+                Skada:Print(_format("pre-potion: %s", tconcat(prepotion, ", ")))
+                prepotion = {}
             end
         end
     end

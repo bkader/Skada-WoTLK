@@ -2805,20 +2805,20 @@ function Skada:OnEnable()
 
     if not self.classcolors then
         self.classcolors = {
-            ["DEATHKNIGHT"] = {r = 0.77, g = 0.12, b = 0.23},
-            ["DRUID"] = {r = 1, g = 0.49, b = 0.04},
-            ["ENEMY"] = {r = 0.94117, g = 0, 0.0196, b = 1},
-            ["HUNTER"] = {r = 0.67, g = 0.83, b = 0.45},
-            ["MAGE"] = {r = 0.41, g = 0.8, b = 0.94},
-            ["NEUTRAL"] = {r = 1, g = 1, b = 0},
-            ["PALADIN"] = {r = 0.96, g = 0.55, b = 0.73},
-            ["PET"] = {r = 0.3, g = 0.4, b = 0.5},
-            ["PRIEST"] = {r = 1, g = 1, b = 1},
-            ["ROGUE"] = {r = 1, g = 0.96, b = 0.41},
-            ["SHAMAN"] = {r = 0, g = 0.44, b = 0.87},
-            ["UNKNOWN"] = {r = 0.2, g = 0.2, b = 0.2},
-            ["WARLOCK"] = {r = 0.58, g = 0.51, b = 0.79},
-            ["WARRIOR"] = {r = 0.78, g = 0.61, b = 0.43}
+            ["DEATHKNIGHT"] = {r = 0.77, g = 0.12, b = 0.23, colorStr = "ffc41f3b"},
+            ["DRUID"] = {r = 1, g = 0.49, b = 0.04, colorStr = "ffff7d0a"},
+            ["ENEMY"] = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"},
+            ["HUNTER"] = {r = 0.67, g = 0.83, b = 0.45, colorStr = "ffabd473"},
+            ["MAGE"] = {r = 0.41, g = 0.8, b = 0.94, colorStr = "ff3fc7eb"},
+            ["NEUTRAL"] = {r = 1, g = 1, b = 0, colorStr = "ffffff00"},
+            ["PALADIN"] = {r = 0.96, g = 0.55, b = 0.73, colorStr = "fff58cba"},
+            ["PET"] = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"},
+            ["PRIEST"] = {r = 1, g = 1, b = 1, colorStr = "ffffffff"},
+            ["ROGUE"] = {r = 1, g = 0.96, b = 0.41, colorStr = "fffff569"},
+            ["SHAMAN"] = {r = 0, g = 0.44, b = 0.87, colorStr = "ff0070de"},
+            ["UNKNOWN"] = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"},
+            ["WARLOCK"] = {r = 0.58, g = 0.51, b = 0.79, colorStr = "ff8788ee"},
+            ["WARRIOR"] = {r = 0.78, g = 0.61, b = 0.43, colorStr = "ffc79c6e"}
         }
     end
 
