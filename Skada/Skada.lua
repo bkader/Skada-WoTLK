@@ -1,4 +1,4 @@
-local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceConsole-3.0", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0")
+local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceConsole-3.0", "AceEvent-3.0", "AceComm-3.0")
 _G.Skada = Skada
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
 
@@ -2863,31 +2863,42 @@ end
 -- ======================================================= --
 -- AddOn Synchronization
 
-function Skada:SendComm(channel, target, ...)
-    if not channel then
-        local groupType, _ = GetGroupTypeAndCount()
-        if groupType == "player" then
-            return -- with whom you want to sync man!
-        elseif groupType == "raid" then
-            channel = "RAID"
-        elseif groupType == "party" then
-            channel = "PARTY"
-        else
-            local zoneType = select(2, IsInInstance())
-            if zoneType == "pvp" or zoneType == "arena" then
-                channel = "BATTLEGROUND"
+do
+    local AceSerializer = LibStub("AceSerializer-3.0")
+    local LibCompress = LibStub("LibCompress")
+
+    local function Serialize(...)
+        return LibCompress:CompressHuffman(AceSerializer:Serialize(...))
+    end
+
+    local function Deserialize(msg)
+        return AceSerializer:Deserialize(LibCompress:DecompressHuffman(msg))
+    end
+
+    function Skada:SendComm(channel, target, ...)
+        if not channel then
+            local groupType, _ = GetGroupTypeAndCount()
+            if groupType == "player" then
+                return -- with whom you want to sync man!
+            elseif groupType == "raid" then
+                channel = "RAID"
+            elseif groupType == "party" then
+                channel = "PARTY"
+            else
+                local zoneType = select(2, IsInInstance())
+                if zoneType == "pvp" or zoneType == "arena" then
+                    channel = "BATTLEGROUND"
+                end
             end
+        end
+
+        if channel == "WHISPER" and not (target and UnitIsConnected(target)) then
+            return
+        elseif channel then
+            self:SendCommMessage("Skada", Serialize(...), channel, target)
         end
     end
 
-    if channel == "WHISPER" and not (target and UnitIsConnected(target)) then
-        return
-    elseif channel then
-        self:SendCommMessage("Skada", self:Serialize(...), channel, target)
-    end
-end
-
-do
     local function DispatchComm(sender, ok, commType, ...)
         if ok and type(commType) == "string" then
             Skada.callbacks:Fire("OnComm" .. commType, sender, ...)
@@ -2896,7 +2907,7 @@ do
 
     function Skada:OnCommReceived(prefix, message, channel, sender)
         if channel then
-            DispatchComm(sender, self:Deserialize(message))
+            DispatchComm(sender, Deserialize(message))
         end
     end
 end
