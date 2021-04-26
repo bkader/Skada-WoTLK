@@ -2075,7 +2075,6 @@ function Skada:UpdateDisplay(force)
     for _, win in ipairs(windows) do
         if (changed or win.changed) or self.current then
             win.changed = false
-            win:SetChild(win.db.child)
 
             if win.selectedmode then
                 local set = win:get_selected_set()
@@ -2419,6 +2418,7 @@ end
 
 function Skada:ApplySettings()
     for _, win in ipairs(windows) do
+        win:SetChild(win.db.child)
         win.display:ApplySettings(win)
     end
 
