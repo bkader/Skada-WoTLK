@@ -1333,8 +1333,8 @@ function Skada:find_player(set, playerid, playername)
 end
 
 function Skada:get_player(set, playerid, playername, playerflag)
+    if not set or not playerid then return end
     local player = self:find_player(set, playerid, playername)
-
     local now = time()
 
     if not player then
