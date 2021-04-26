@@ -341,6 +341,7 @@ function barListPrototype:AddButton(title, description, normaltex, highlighttex,
         GameTooltip:AddLine(description, 1, 1, 1, true)
         GameTooltip:Show()
     end)
+    btn:SetScript("OnLeave", function() GameTooltip:Hide() end)
     btn:Show()
 
     tinsert(self.buttons, btn)

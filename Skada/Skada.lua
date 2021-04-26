@@ -1006,7 +1006,7 @@ function Skada:AddLoadableModule(name, description, func)
     self.modulelist = self.modulelist or {}
     self.modulelist[#self.modulelist + 1] = func
 
-    self:AddLoadableModuleCheckbox(name, L[name], description and L[description])
+    self:AddLoadableModuleCheckbox(name, name, description)
 end
 
 function Skada:IsDisabled(...)

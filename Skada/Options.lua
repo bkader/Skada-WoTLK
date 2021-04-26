@@ -177,18 +177,12 @@ function Skada:AddColumnOptions(mod)
     end
 end
 
-do
-    local numorder = 1
-    function Skada:AddLoadableModuleCheckbox(mod, name, description)
-        local new = {
-            type = "toggle",
-            name = name,
-            desc = description,
-            order = numorder
-        }
-        self.options.args.disabled.args[mod] = new
-        numorder = numorder + 1
-    end
+function Skada:AddLoadableModuleCheckbox(mod, name, description)
+    self.options.args.disabled.args[mod] = {
+        type = "toggle",
+        name = _G.name or L[name],
+        desc = description and L[description]
+    }
 end
 
 local deletewindow = nil
