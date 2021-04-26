@@ -59,6 +59,7 @@ function Skada:OpenMenu(window)
             info.text = L["Create window"]
             info.func = Skada.NewWindow
             info.notCheckable = 1
+            info.padding = 16
             _UIDropDownMenu_AddButton(info, level)
 
             -- toggle window
@@ -68,6 +69,7 @@ function Skada:OpenMenu(window)
                 Skada:ToggleWindow()
             end
             info.notCheckable = 1
+            info.padding = 16
             _UIDropDownMenu_AddButton(info, level)
 
             -- separator
@@ -80,28 +82,31 @@ function Skada:OpenMenu(window)
             if not window or (window and window.selectedmode) then
                 info = _UIDropDownMenu_CreateInfo()
                 info.text = L["Report"]
+                info.value = "report"
                 info.func = function()
                     Skada:OpenReportWindow(window)
                 end
-                info.value = "report"
                 info.notCheckable = 1
+                info.padding = 16
                 _UIDropDownMenu_AddButton(info, level)
             end
 
             -- delete segment menu
             info = _UIDropDownMenu_CreateInfo()
             info.text = L["Delete segment"]
+            info.value = "delete"
             info.hasArrow = 1
             info.notCheckable = 1
-            info.value = "delete"
+            info.padding = 16
             _UIDropDownMenu_AddButton(info, level)
 
             -- keep segment
             info = _UIDropDownMenu_CreateInfo()
             info.text = L["Keep segment"]
-            info.notCheckable = 1
-            info.hasArrow = 1
             info.value = "keep"
+            info.hasArrow = 1
+            info.notCheckable = 1
+            info.padding = 16
             _UIDropDownMenu_AddButton(info, level)
 
             -- start new segment
@@ -111,6 +116,7 @@ function Skada:OpenMenu(window)
                 Skada:NewSegment()
             end
             info.notCheckable = 1
+            info.padding = 16
             _UIDropDownMenu_AddButton(info, level)
 
             -- separator
@@ -126,6 +132,7 @@ function Skada:OpenMenu(window)
                 Skada:ShowPopup()
             end
             info.notCheckable = 1
+            info.padding = 16
             _UIDropDownMenu_AddButton(info, level)
 
             -- Configure
@@ -135,6 +142,7 @@ function Skada:OpenMenu(window)
                 Skada:OpenOptions(window)
             end
             info.notCheckable = 1
+            info.padding = 16
             _UIDropDownMenu_AddButton(info, level)
 
             -- Close menu item
@@ -144,6 +152,7 @@ function Skada:OpenMenu(window)
                 _CloseDropDownMenus()
             end
             info.notCheckable = 1
+            info.padding = 16
             _UIDropDownMenu_AddButton(info, level)
         elseif level == 2 then
             if _type(L_UIDROPDOWNMENU_MENU_VALUE) == "table" then
@@ -264,6 +273,16 @@ function Skada:OpenMenu(window)
                 end
                 info.checked = window.db.snapto
                 info.isNotRadio = 1
+                _UIDropDownMenu_AddButton(info, level)
+
+                -- delete window
+                info = _UIDropDownMenu_CreateInfo()
+                info.text = L["Delete window"]
+                info.func = function()
+                    return Skada:DeleteWindow(window.db.name)
+                end
+                info.notCheckable = 1
+                info.leftPadding = 16
                 _UIDropDownMenu_AddButton(info, level)
             elseif L_UIDROPDOWNMENU_MENU_VALUE == "delete" then
                 for i, set in _ipairs(Skada:get_sets()) do

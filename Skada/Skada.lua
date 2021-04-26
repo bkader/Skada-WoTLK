@@ -142,10 +142,11 @@ end
 local sort_modes
 
 -- party/group
-
-local function is_in_pvp()
-    local t = select(2, IsInInstance())
-    return (t == "pvp" or t == "arena")
+function Skada:IsInPVP()
+    if not self.instanceType then
+        self.instanceType = select(2, IsInInstance())
+    end
+    return (self.instanceType == "pvp" or self.instanceType == "arena")
 end
 
 local function setPlayerActiveTimes(set)
@@ -189,8 +190,8 @@ function Skada:ShowPopup()
 end
 
 function Skada:NewWindow()
-    if not StaticPopupDialogs["SkadaWindowDialog"] then
-        StaticPopupDialogs["SkadaWindowDialog"] = {
+    if not StaticPopupDialogs["SkadaCreateWindowDialog"] then
+        StaticPopupDialogs["SkadaCreateWindowDialog"] = {
             text = L["Enter the name for the new window."],
             button1 = CREATE,
             button2 = CANCEL,
@@ -234,7 +235,7 @@ function Skada:NewWindow()
             end
         }
     end
-    StaticPopup_Show("SkadaWindowDialog")
+    StaticPopup_Show("SkadaCreateWindowDialog")
 end
 
 -- ================= --
@@ -393,7 +394,7 @@ do
                         return L["Are you sure you want to delete this window?"]
                     end,
                     func = function()
-                        Skada:DeleteWindow(db.name)
+                        Skada:DeleteWindow(db.name, true)
                     end
                 }
             }
@@ -836,20 +837,43 @@ function Skada:CreateWindow(name, db, display)
     return window
 end
 
-function Skada:DeleteWindow(name)
-    for i, win in ipairs(windows) do
-        if win.db.name == name then
-            win:destroy()
-            wipe(tremove(windows, i))
-        elseif win.db.child == name then
-            win.db.child, win.child = nil, nil
+do
+    local function DeleteWindow(name)
+        for i, win in ipairs(windows) do
+            if win.db.name == name then
+                win:destroy()
+                wipe(tremove(windows, i))
+            elseif win.db.child == name then
+                win.db.child, win.child = nil, nil
+            end
+        end
+
+        for i, win in ipairs(Skada.db.profile.windows) do
+            if win.name == name then
+                tremove(Skada.db.profile.windows, i)
+            end
         end
     end
 
-    for i, win in ipairs(self.db.profile.windows) do
-        if win.name == name then
-            tremove(self.db.profile.windows, i)
+    function Skada:DeleteWindow(name, internal)
+        if internal then
+            return DeleteWindow(name)
         end
+
+        if not StaticPopupDialogs["SkadaDeleteWindowDialog"] then
+            StaticPopupDialogs["SkadaDeleteWindowDialog"] = {
+                text = L["Are you sure you want to delete this window?"],
+                button1 = YES,
+                button2 = NO,
+                timeout = 30,
+                whileDead = 0,
+                hideOnEscape = 1,
+                OnAccept = function()
+                    return DeleteWindow(name)
+                end
+            }
+        end
+        StaticPopup_Show("SkadaDeleteWindowDialog")
     end
 end
 
@@ -1334,6 +1358,7 @@ end
 
 function Skada:get_player(set, playerid, playername, playerflag)
     if not set or not playerid then return end
+
     local player = self:find_player(set, playerid, playername)
     local now = time()
 
@@ -1923,8 +1948,10 @@ end
 
 function Skada:ZoneCheck()
     local inInstance, instanceType = IsInInstance()
+    self.instanceType = instanceType
+
     local isininstance = inInstance and (instanceType == "party" or instanceType == "raid")
-    local isinpvp = is_in_pvp()
+    local isinpvp = self:IsInPVP()
 
     if isininstance and wasininstance ~= nil and not wasininstance and self.db.profile.reset.instance ~= 1 and self:CanReset() then
         if self.db.profile.reset.instance == 3 then
@@ -1935,10 +1962,10 @@ function Skada:ZoneCheck()
     end
 
     if self.db.profile.hidepvp then
-        if is_in_pvp() then
-            Skada:SetActive(false)
+        if isinpvp then
+            self:SetActive(false)
         elseif wasinpvp then
-            Skada:SetActive(true)
+            self:SetActive(true)
         end
     end
 
@@ -1976,7 +2003,7 @@ do
                 Skada:Reset()
             end
 
-            if Skada.db.profile.hidesolo and not (Skada.db.profile.hidepvp and is_in_pvp()) then
+            if Skada.db.profile.hidesolo and not (Skada.db.profile.hidepvp and Skada:IsInPVP()) then
                 Skada:SetActive(true)
             end
         end
@@ -2422,7 +2449,7 @@ function Skada:ApplySettings()
         win.display:ApplySettings(win)
     end
 
-    if (self.db.profile.hidesolo and not IsInGroup()) or (self.db.profile.hidepvp and is_in_pvp()) then
+    if (self.db.profile.hidesolo and not IsInGroup()) or (self.db.profile.hidepvp and self:IsInPVP()) then
         self:SetActive(false)
     else
         self:SetActive(true)
@@ -2885,7 +2912,8 @@ do
             elseif groupType == "party" then
                 channel = "PARTY"
             else
-                local zoneType = select(2, IsInInstance())
+                local zoneType = self.instanceType or select(2, IsInInstance())
+                self.instanceType = zoneType -- update it
                 if zoneType == "pvp" or zoneType == "arena" then
                     channel = "BATTLEGROUND"
                 end
@@ -2914,165 +2942,167 @@ end
 
 -- ======================================================= --
 
-do
-    function Skada:IsRaidInCombat()
-        local prefix, count = GetGroupTypeAndCount()
-        if count > 0 then
-            for i = 1, count, 1 do
-                if UnitExists(prefix .. i) and UnitAffectingCombat(prefix .. i) then
-                    return true
-                end
-            end
-        elseif UnitAffectingCombat("player") or InCombatLockdown() then
-            return true
-        end
-
-        return false
+function Skada:IsRaidInCombat()
+    if InCombatLockdown() then
+    	return true
     end
 
-    function Skada:IsRaidDead()
-        local prefix, count = GetGroupTypeAndCount()
-        if count > 0 then
-            for i = 1, count, 1 do
-                if UnitExists(prefix .. i) and not UnitIsDeadOrGhost(prefix .. i) then
-                    return false
-                end
+    local prefix, count = GetGroupTypeAndCount()
+    if count > 0 then
+        for i = 1, count, 1 do
+            if UnitExists(prefix .. i) and UnitAffectingCombat(prefix .. i) then
+                return true
             end
-        elseif not UnitIsDeadOrGhost("player") then
-            return false
         end
-
+    elseif UnitAffectingCombat("player") then
         return true
     end
 
-    function Skada:PLAYER_REGEN_DISABLED()
-        if not disabled and not self.current then
-            self:StartCombat()
+    return false
+end
+
+function Skada:IsRaidDead()
+    local prefix, count = GetGroupTypeAndCount()
+    if count > 0 then
+        for i = 1, count, 1 do
+            if UnitExists(prefix .. i) and not UnitIsDeadOrGhost(prefix .. i) then
+                return false
+            end
         end
+    elseif not UnitIsDeadOrGhost("player") then
+        return false
     end
 
-    function Skada:NewSegment()
-        if self.current then
-            self:EndSegment()
-            self:StartCombat()
-        end
+    return true
+end
+
+function Skada:PLAYER_REGEN_DISABLED()
+    if not disabled and not self.current then
+        self:StartCombat()
+    end
+end
+
+function Skada:NewSegment()
+    if self.current then
+        self:EndSegment()
+        self:StartCombat()
+    end
+end
+
+function Skada:EndSegment()
+    if not self.current then
+        return
     end
 
-    function Skada:EndSegment()
-        if not self.current then
-            return
-        end
+    local now = time()
+    if not self.db.profile.onlykeepbosses or self.current.gotboss then
+        if self.current.mobname ~= nil and now - self.current.starttime > 5 then
+            self.current.endtime = self.current.endtime or now
+            self.current.time = math_max(self.current.endtime - self.current.starttime, 0.1)
+            setPlayerActiveTimes(self.current)
+            self.current.stopped = nil
 
-        local now = time()
-        if not self.db.profile.onlykeepbosses or self.current.gotboss then
-            if self.current.mobname ~= nil and now - self.current.starttime > 5 then
-                self.current.endtime = self.current.endtime or now
-                self.current.time = math_max(self.current.endtime - self.current.starttime, 0.1)
-                setPlayerActiveTimes(self.current)
-                self.current.stopped = nil
-
-                local setname = self.current.mobname
-                if self.db.profile.setnumber then
-                    local max = 0
-                    for _, set in ipairs(self.char.sets) do
-                        if set.name == setname and max == 0 then
-                            max = 1
-                        else
-                            local n, c = set.name:match("^(.-)%s*%((%d+)%)$")
-                            if n == setname then
-                                max = math_max(max, tonumber(c) or 0)
-                            end
+            local setname = self.current.mobname
+            if self.db.profile.setnumber then
+                local max = 0
+                for _, set in ipairs(self.char.sets) do
+                    if set.name == setname and max == 0 then
+                        max = 1
+                    else
+                        local n, c = set.name:match("^(.-)%s*%((%d+)%)$")
+                        if n == setname then
+                            max = math_max(max, tonumber(c) or 0)
                         end
                     end
-                    if max > 0 then
-                        setname = format("%s (%s)", setname, max + 1)
-                    end
                 end
-                self.current.name = setname
-
-                for _, mode in ipairs(modes) do
-                    if mode.SetComplete then
-                        mode:SetComplete(self.current)
-                    end
+                if max > 0 then
+                    setname = format("%s (%s)", setname, max + 1)
                 end
-
-                tinsert(self.char.sets, 1, self.current)
             end
-        end
-        self.last = self.current
-        self.last.started = nil
+            self.current.name = setname
 
-        self.total.time = self.total.time + self.current.time
-        setPlayerActiveTimes(self.total)
-
-        for _, player in ipairs(self.total.players) do
-            player.first = nil
-            player.last = nil
-        end
-
-        self.current = nil
-
-        local numsets = 0
-        for _, set in ipairs(self.char.sets) do
-            if not set.keep then
-                numsets = numsets + 1
-            end
-        end
-
-        for i = tmaxn(self.char.sets), 1, -1 do
-            if numsets > self.db.profile.setstokeep and not self.char.sets[i].keep then
-                tremove(self.char.sets, i)
-                numsets = numsets - 1
-            end
-        end
-
-        for _, win in ipairs(windows) do
-            win:Wipe()
-            changed = true
-
-            if win.db.wipemode ~= "" and self:IsRaidDead() then
-                self:RestoreView(win, "current", win.db.wipemode)
-            elseif win.db.returnaftercombat and win.restore_mode and win.restore_set then
-                if win.restore_set ~= win.selectedset or win.restore_mode ~= win.selectedmode then
-                    self:RestoreView(win, win.restore_set, win.restore_mode)
-
-                    win.restore_mode, win.restore_set = nil, nil
+            for _, mode in ipairs(modes) do
+                if mode.SetComplete then
+                    mode:SetComplete(self.current)
                 end
             end
 
-            if not win.db.hidden and self.db.profile.hidecombat and (not self.db.profile.hidesolo or IsInGroup()) then
-                win:Hide()
-            end
+            tinsert(self.char.sets, 1, self.current)
         end
+    end
+    self.last = self.current
+    self.last.started = nil
 
-        self:UpdateDisplay(true)
-        if update_timer and not update_timer._cancelled then
-            update_timer:Cancel()
-        end
-        if tick_timer and not tick_timer._cancelled then
-            tick_timer:Cancel()
-        end
-        update_timer, tick_timer = nil, nil
+    self.total.time = self.total.time + self.current.time
+    setPlayerActiveTimes(self.total)
 
-        self.After(2, function() self:CleanGarbage(true) end)
-        self.After(3, function() self:MemoryCheck() end)
-        self.callbacks:Fire("ENCOUNTER_END", self.current)
+    for _, player in ipairs(self.total.players) do
+        player.first = nil
+        player.last = nil
     end
 
-    function Skada:StopSegment()
-        if self.current then
-            self.current.stopped = true
-            self.current.endtime = time()
-            self.current.time = math_max(self.current.endtime - self.current.starttime, 0.1)
+    self.current = nil
+
+    local numsets = 0
+    for _, set in ipairs(self.char.sets) do
+        if not set.keep then
+            numsets = numsets + 1
         end
     end
 
-    function Skada:ResumeSegment()
-        if self.current and self.current.stopped then
-            self.current.stopped = nil
-            self.current.endtime = nil
-            self.current.time = 0
+    for i = tmaxn(self.char.sets), 1, -1 do
+        if numsets > self.db.profile.setstokeep and not self.char.sets[i].keep then
+            tremove(self.char.sets, i)
+            numsets = numsets - 1
         end
+    end
+
+    for _, win in ipairs(windows) do
+        win:Wipe()
+        changed = true
+
+        if win.db.wipemode ~= "" and self:IsRaidDead() then
+            self:RestoreView(win, "current", win.db.wipemode)
+        elseif win.db.returnaftercombat and win.restore_mode and win.restore_set then
+            if win.restore_set ~= win.selectedset or win.restore_mode ~= win.selectedmode then
+                self:RestoreView(win, win.restore_set, win.restore_mode)
+
+                win.restore_mode, win.restore_set = nil, nil
+            end
+        end
+
+        if not win.db.hidden and self.db.profile.hidecombat and (not self.db.profile.hidesolo or IsInGroup()) then
+            win:Hide()
+        end
+    end
+
+    self:UpdateDisplay(true)
+    if update_timer and not update_timer._cancelled then
+        update_timer:Cancel()
+    end
+    if tick_timer and not tick_timer._cancelled then
+        tick_timer:Cancel()
+    end
+    update_timer, tick_timer = nil, nil
+
+    self.After(2, function() self:CleanGarbage(true) end)
+    self.After(3, function() self:MemoryCheck() end)
+    self.callbacks:Fire("ENCOUNTER_END", self.current)
+end
+
+function Skada:StopSegment()
+    if self.current then
+        self.current.stopped = true
+        self.current.endtime = time()
+        self.current.time = math_max(self.current.endtime - self.current.starttime, 0.1)
+    end
+end
+
+function Skada:ResumeSegment()
+    if self.current and self.current.stopped then
+        self.current.stopped = nil
+        self.current.endtime = nil
+        self.current.time = 0
     end
 end
 
@@ -3178,9 +3208,7 @@ do
     end
 
     function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-        if ignoredevents[eventtype] then
-            return
-        end
+        if ignoredevents[eventtype] then return end
 
         local src_is_interesting = nil
         local dst_is_interesting = nil
