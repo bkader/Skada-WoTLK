@@ -136,6 +136,7 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
     function mod:OnDisable()
         Skada.db.global.nicknames = nil
         self.db = nil
+        self:UnHook(Skada, "find_player")
     end
 
     -----------------------------------------------------------

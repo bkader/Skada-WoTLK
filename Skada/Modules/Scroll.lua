@@ -108,21 +108,14 @@ local hooked = {}
 function mod.Create(self, win)
     debug("Create")
     if win.bargroup and not hooked[win.bargroup] then
-        win.bargroup:HookScript(
-            "OnMouseDown",
-            function(frame, button)
-                if button == db.button then
-                    mod.BeginScroll(win)
-                end
+        win.bargroup:HookScript("OnMouseDown", function(frame, button)
+            if button == db.button then
+                mod.BeginScroll(win)
             end
-        )
-        hooksecurefunc(
-            win.bargroup,
-            "SortBars",
-            function()
-                mod.HookMore(win)
-            end
-        )
+        end)
+        hooksecurefunc(win.bargroup, "SortBars", function()
+            mod.HookMore(win)
+        end)
         windows[win] = true
         hooked[win.bargroup] = true
     end
