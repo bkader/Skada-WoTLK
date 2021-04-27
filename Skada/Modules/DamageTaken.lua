@@ -651,7 +651,6 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
         local max = 0
 
         if temp[win.playerid] then
-            local nr = 1
             local nr, p = 1, temp[win.playerid]
             win.title = _format(L["%s's damage breakdown"], p.name)
 
@@ -800,7 +799,7 @@ Skada:AddLoadableModule("Damage mitigated", function(Skada, L)
             d.valuetext = Skada:FormatValueText(
                 Skada:FormatNumber(spell.blocked),
                 mod.metadata.columns.Amount,
-                _format("%02.1f%%", 100 * spell.blocked / total),
+                _format("%02.1f%%", 100 * spell.blocked / math_max(1, total)),
                 mod.metadata.columns.Percent
             )
 
@@ -821,7 +820,7 @@ Skada:AddLoadableModule("Damage mitigated", function(Skada, L)
             d.valuetext = Skada:FormatValueText(
                 Skada:FormatNumber(spell.absorbed),
                 mod.metadata.columns.Amount,
-                _format("%02.1f%%", 100 * spell.absorbed / total),
+                _format("%02.1f%%", 100 * spell.absorbed / math_max(1, total)),
                 mod.metadata.columns.Percent
             )
 
@@ -842,7 +841,7 @@ Skada:AddLoadableModule("Damage mitigated", function(Skada, L)
             d.valuetext = Skada:FormatValueText(
                 Skada:FormatNumber(spell.resisted),
                 mod.metadata.columns.Amount,
-                _format("%02.1f%%", 100 * spell.resisted / total),
+                _format("%02.1f%%", 100 * spell.resisted / math_max(1, total)),
                 mod.metadata.columns.Percent
             )
 
