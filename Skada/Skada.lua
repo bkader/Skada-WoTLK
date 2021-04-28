@@ -1803,27 +1803,13 @@ end
 do
 	local SendChatMessage = SendChatMessage
 
-	local function escapestr(str)
-		local newstr = ""
-		for i = 1, str:len() do
-			local n = str:sub(i, i)
-			newstr = newstr .. n
-			if n == "|" then
-				newstr = newstr .. n
-			end
-		end
-		return (newstr ~= "") and newstr or str
-	end
-
 	local function sendchat(msg, chan, chantype)
-		msg = escapestr(msg)
-
 		if chantype == "self" then
 			Skada:Print(msg)
 		elseif chantype == "channel" then
 			SendChatMessage(msg, "CHANNEL", nil, chan)
 		elseif chantype == "preset" then
-			SendChatMessage(msg, string.upper(chan))
+			SendChatMessage(msg, chan:upper())
 		elseif chantype == "whisper" then
 			SendChatMessage(msg, "WHISPER", nil, chan)
 		elseif chantype == "bnet" then
@@ -1881,10 +1867,11 @@ do
 		local nr = 1
 		for _, data in ipairs(report_table.dataset) do
 			if data.id and not data.ignore then
+				local label = data.reportlabel or (data.spellid and GetSpellLink(data.spellid)) or data.label
 				if report_mode.metadata and report_mode.metadata.showspots then
-					sendchat(format("%2u. %s   %s", nr, data.label, data.valuetext), channel, chantype)
+					sendchat(format("%2u. %s   %s", nr, label, data.valuetext), channel, chantype)
 				else
-					sendchat(format("%s   %s", data.label, data.valuetext), channel, chantype)
+					sendchat(format("%s   %s", label, data.valuetext), channel, chantype)
 				end
 				nr = nr + 1
 			end
