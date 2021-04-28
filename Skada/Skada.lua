@@ -2911,11 +2911,11 @@ do
 	local AceSerializer = LibStub("AceSerializer-3.0")
 	local LibCompress = LibStub("LibCompress")
 
-	local function Serialize(...)
+	function Skada:Serialize(...)
 		return LibCompress:CompressHuffman(AceSerializer:Serialize(...))
 	end
 
-	local function Deserialize(msg)
+	function Skada:Deserialize(msg)
 		return AceSerializer:Deserialize(LibCompress:DecompressHuffman(msg))
 	end
 
@@ -2940,7 +2940,7 @@ do
 		if channel == "WHISPER" and not (target and UnitIsConnected(target)) then
 			return
 		elseif channel then
-			self:SendCommMessage("Skada", Serialize(...), channel, target)
+			self:SendCommMessage("Skada", self:Serialize(...), channel, target)
 		end
 	end
 
@@ -2952,7 +2952,7 @@ do
 
 	function Skada:OnCommReceived(prefix, message, channel, sender)
 		if channel then
-			DispatchComm(sender, Deserialize(message))
+			DispatchComm(sender, self:Deserialize(message))
 		end
 	end
 end
