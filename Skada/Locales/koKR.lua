@@ -236,6 +236,8 @@ L.timemesure_desc = [=[|cFFFFFF00활동 시간|r: 각 공격대원의 타이머�
 -- L["Append a count to set names with duplicate mob names."] = ""
 -- L["Set format"] = ""
 -- L["Controls the way set names are displayed."] = ""
+-- L["Links in reports"] = ""
+-- L["When possible, use links in the report messages."] = ""
 -- L["Memory Check"] = ""
 -- L["Checks memory usage and warns you if it is greater than or equal to %dmb."] = ""
 -- L["Data segments to keep"] = ""

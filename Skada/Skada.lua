@@ -86,6 +86,7 @@ local GetNumPartyMembers, GetNumRaidMembers = GetNumPartyMembers, GetNumRaidMemb
 local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAffectingCombat, InCombatLockdown
 local UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitGUID, UnitName, UnitClass, UnitIsConnected
 local CombatLogClearEntries = CombatLogClearEntries
+local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 
 local RAID_FLAGS = COMBATLOG_OBJECT_AFFILIATION_MINE + COMBATLOG_OBJECT_AFFILIATION_PARTY + COMBATLOG_OBJECT_AFFILIATION_RAID
 local PET_FLAGS = COMBATLOG_OBJECT_TYPE_PET + COMBATLOG_OBJECT_TYPE_GUARDIAN
@@ -150,7 +151,7 @@ function Skada:IsInPVP()
 end
 
 local function setPlayerActiveTimes(set)
-	for i, player in ipairs(set.players) do
+	for _, player in ipairs(set.players) do
 		if player.last then
 			player.time = math_max(player.time + (player.last - player.first), 0.1)
 		end
@@ -605,7 +606,7 @@ function Window:Wipe()
 end
 
 function Window:get_selected_set()
-	return Skada:find_set(self.selectedset)
+	return Skada:GetSet(self.selectedset)
 end
 
 function Window:set_selected_set(set)
@@ -1096,11 +1097,11 @@ function Skada:VerifySet(mode, set)
 	end
 end
 
-function Skada:get_sets()
+function Skada:GetSets()
 	return self.char.sets
 end
 
-function Skada:find_set(s)
+function Skada:GetSet(s)
 	if s == "current" then
 		if self.current ~= nil then
 			return self.current
@@ -1194,7 +1195,7 @@ do
 
 	local function GetDruidSubSpec(unit)
 		-- 57881 : Natural Reaction -- used by druid tanks
-		local points = LGT:UnitHasTalent(unit, GetSpellInfo(57881), LGT:GetActiveTalentGroup(unit))
+		local points = LGT:UnitHasTalent(unit, self.GetSpellInfo(57881), LGT:GetActiveTalentGroup(unit))
 		if points and points > 0 then
 			return 3 -- druid tank
 		else
@@ -1280,11 +1281,11 @@ do
 
 			-- fix the pet classes
 			if pets[player.id] then
+				-- fix classes for others
 				player.class = "PET"
 				player.role = "DAMAGER"
 				player.spec = 1
 				player.owner = pets[player.id]
-			-- fix classes for others
 			elseif self:IsBoss(player.id) then
 				player.class = "MONSTER"
 				player.role = "DAMAGER"
@@ -1305,11 +1306,11 @@ do
 					player.spec = 2
 				-- pets?
 				elseif player.flag and band(player.flag, 0x00003000) ~= 0 then
-					--  last solution
 					player.class = "PET"
 					player.role = "DAMAGER"
 					player.owner = pets[player.id]
 					player.spec = 1
+				--  last solution
 				else
 					player.class = "UNKNOWN"
 					player.role = "DAMAGER"
@@ -1350,7 +1351,7 @@ function Skada:find_player(set, playerid, playername)
 				return p
 			end
 		end
-		-- needed for bosses.
+		-- needed for certain bosses
 		local isboss, _, bossname = self:IsBoss(playerid)
 		if isboss then
 			player = {
@@ -1833,7 +1834,7 @@ do
 
 		if not window then
 			report_mode = self:find_mode(report_mode_name)
-			report_set = self:find_set(report_set_name)
+			report_set = self:GetSet(report_set_name)
 			if report_set == nil then
 				return
 			end
@@ -1867,9 +1868,13 @@ do
 		local nr = 1
 		for _, data in ipairs(report_table.dataset) do
 			if data.id and not data.ignore then
-				local label = data.reportlabel or (data.spellid and GetSpellLink(data.spellid)) or data.label
+				local label = data.label
+				if self.db.profile.reportlinks and (data.reportlabel or data.spellid or data.hyperlink) then
+					label = data.reportlabel or data.hyperlink or GetSpellLink(data.spellid) or data.label
+				end
+				-- local label = data.reportlabel or (data.spellid and GetSpellLink(data.spellid)) or data.label
 				if report_mode.metadata and report_mode.metadata.showspots then
-					sendchat(format("%2u. %s   %s", nr, label, data.valuetext), channel, chantype)
+					sendchat(format("%s. %s   %s", nr, label, data.valuetext), channel, chantype)
 				else
 					sendchat(format("%s   %s", label, data.valuetext), channel, chantype)
 				end
@@ -2870,7 +2875,7 @@ function Skada:OnEnable()
 	end
 
 	-- please do not localize this line!
-	L["Auto Attack"] = select(1, GetSpellInfo(6603)) or MELEE
+	L["Auto Attack"] = select(1, self.GetSpellInfo(6603)) or MELEE
 
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("PARTY_MEMBERS_CHANGED")

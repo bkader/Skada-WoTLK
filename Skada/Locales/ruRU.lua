@@ -234,6 +234,8 @@ L.timemesure_desc = [=[|cFFFFFF00Активный|r: таймер каждого
 L["Number set duplicates"] = "Количество дубликатов"
 L["Append a count to set names with duplicate mob names."] = "Добавлять счетчик для противников с одинаковыми именами."
 L["Set format"] = "Установить формат"
+L["Links in reports"] = "Ссылки в отчетах"
+L["When possible, use links in the report messages."] = "По возможности используйте ссылки в сообщениях с отчетами."
 L["Memory Check"] = "Проверка памяти"
 L["Checks memory usage and warns you if it is greater than or equal to %dmb."] = "Проверяет использование памяти и предупреждает, если оно больше или равно %d МБ."
 L["Controls the way set names are displayed."] = "Настройка форматирования заголовков для боя."

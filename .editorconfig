@@ -10,7 +10,7 @@ insert_final_newline = false
 indent_style = tab
 tab_width = 4
 
-[*/lib/**.{lua,xml,toc}]
+[*/Libs/**.{lua,xml,toc}]
 trim_trailing_whitespace = false
 insert_final_newline = none
 
