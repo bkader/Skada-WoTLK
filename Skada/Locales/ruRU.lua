@@ -376,6 +376,7 @@ L["%s's absorbed and healed players"] = "%s: Поглощение и исцел�
 L["Healing received"] = "Получено исцеление"
 L["Healing player list"] = "Исцеляющие игроки"
 L["%s's received healing"] = "%s: Полученное исцеление"
+L["Healing done by spell"] = "Исцеление с помощью заклинаний"
 -- Auras Module --
 L["Uptime"] = "Время"
 L["Buffs and Debuffs"] = "Бафы и Дебафы"

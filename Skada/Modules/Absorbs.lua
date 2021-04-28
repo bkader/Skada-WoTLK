@@ -994,3 +994,124 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
         )
     end
 end)
+
+-- ===================== --
+-- Healing done by spell --
+-- ===================== --
+
+Skada:AddLoadableModule("Healing done by spell", function(Skada, L)
+    if Skada:IsDisabled("Healing", "Absorbs", "Healing done by spell") then
+        return
+    end
+
+    local mod = Skada:NewModule(L["Healing done by spell"])
+    local spells
+
+    local function CacheSpells(set)
+        spells = {}
+        for _, player in _ipairs(set.players) do
+            if player.healing and player.healing.spells then
+                for spellid, spell in _pairs(player.healing.spells) do
+                    if not spells[spellid] then
+                        spells[spellid] = CopyTable(spell)
+                    else
+                        spells[spellid].amount = spells[spellid].amount + spell.amount
+                        spells[spellid].count = (spells[spellid].count or 0) + (spell.count or 0)
+                        spells[spellid].overhealing = (spells[spellid].overhealing or 0) + (spell.overhealing or 0)
+                    end
+                end
+            end
+            if player.absorbs and player.absorbs.spells then
+                for spellid, spell in _pairs(player.absorbs.spells) do
+                    if not spells[spellid] then
+                        spells[spellid] = CopyTable(spell)
+                    else
+                        spells[spellid].amount = spells[spellid].amount + spell.amount
+                        spells[spellid].count = (spells[spellid].count or 0) + (spell.count or 0)
+                    end
+                end
+            end
+        end
+    end
+
+    local function spell_tooltip(win, id, label, tooltip)
+        local set = win:get_selected_set()
+        if not set then return end
+
+        if not spells then CacheSpells(set) end
+
+        local spell = spells[id]
+        if spell then
+            local total = (set.healing or 0) + (set.absorbs or 0)
+            local overheal = (set.overhealing or 0)
+
+            tooltip:AddLine(_GetSpellInfo(id))
+            if spell.school then
+                local c = Skada.schoolcolors[spell.school]
+                local n = Skada.schoolnames[spell.school]
+                if c and n then tooltip:AddLine(n, c.r, c.g, c.b) end
+            end
+
+            if spell.count then
+                tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
+            end
+            tooltip:AddDoubleLine(L["Healing"], _format("%s (%02.1f%%)", Skada:FormatNumber(spell.amount), 100 * spell.amount / math_max(1, total)), 1, 1, 1)
+            if spell.overhealing then
+                tooltip:AddDoubleLine(L["Overhealing"], _format("%s (%02.1f%%)", Skada:FormatNumber(spell.overhealing), 100 * spell.overhealing / math_max(1, overheal) ), 1, 1, 1)
+            end
+        end
+    end
+
+    function mod:Update(win, set)
+        local max = 0
+        if set then
+            CacheSpells(set)
+
+            local total = (set.healing or 0) + (set.absorbs or 0)
+            local nr = 1
+
+            for spellid, spell in _pairs(spells) do
+                local d = win.dataset[nr] or {}
+                win.dataset[nr] = d
+
+                local spellname, _, spellicon = _GetSpellInfo(spellid)
+
+                d.id = spellid
+                d.spellid = spellid
+                d.label = spellname
+                d.icon = spellicon
+                d.spellschool = spell.school
+
+                d.value = spell.amount
+                d.valuetext = Skada:FormatValueText(
+                    Skada:FormatNumber(spell.amount),
+                    self.metadata.columns.Healing,
+                    _format("%02.1f%%", 100 * spell.amount / math_max(1, total)),
+                    self.metadata.columns.Percent
+                )
+
+                if spell.amount > max then
+                    max = spell.amount
+                end
+
+                nr = nr + 1
+            end
+        end
+
+        win.metadata.maxvalue = max
+        win.title = L["Healing done by spell"]
+    end
+
+    function mod:OnEnable()
+        self.metadata = {
+            showspots = true,
+            tooltip = spell_tooltip,
+            columns = {Healing = true, Percent = true}
+        }
+        Skada:AddMode(self, L["Absorbs and healing"])
+    end
+
+    function mod:OnDisable()
+        Skada:RemoveMode(self, L["Absorbs and healing"])
+    end
+end)

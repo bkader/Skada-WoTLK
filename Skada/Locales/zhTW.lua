@@ -377,6 +377,7 @@ L.timemesure_desc = [=[|cFFFFFF00活躍時間|r: 每一位團隊成員停止活�
 -- L["Healing received"] = ""
 -- L["Healing player list"] = ""
 -- L["%s's received healing"] = ""
+-- L["Healing done by spell"] = ""
 -- Auras Module --
 -- L["Uptime"] = ""
 -- L["Buffs and Debuffs"] = ""

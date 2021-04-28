@@ -812,8 +812,7 @@ Skada:AddLoadableModule("Damage done by spell", function(Skada, L)
                                     amount = spell.amount
                                 }
                             else
-                                cached[spellname].players[player.name].amount =
-                                    cached[spellname].players[player.name].amount + spell.amount
+                                cached[spellname].players[player.name].amount = cached[spellname].players[player.name].amount + spell.amount
                             end
                         end
                     end

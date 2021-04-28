@@ -378,6 +378,7 @@ L["%s's absorbed and healed players"] = "Joueurs absorbés et soignés par %s"
 L["Healing received"] = "Soins reçus"
 L["Healing player list"] = "Liste des joueurs de soin"
 L["%s's received healing"] = "Soins reçus par %s"
+L["Healing done by spell"] = "Soins prodigués par sort"
 -- Auras Module --
 L["Uptime"] = "Durée"
 L["Buffs and Debuffs"] = "Buffs et debuffs"

@@ -377,6 +377,7 @@ L["%s's absorbed and healed players"] = "%s的吸收和治疗玩家"
 L["Healing received"] = "受到治疗"
 L["Healing player list"] = "治疗玩家列表"
 L["%s's received healing"] = "%s受到的治疗"
+L["Healing done by spell"] = "治疗法术列表"
 -- Auras Module --
 L["Uptime"] = "持续时间"
 L["Buffs and Debuffs"] = "Buff和Debuff"
