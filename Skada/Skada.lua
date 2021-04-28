@@ -1298,7 +1298,7 @@ do
 				if class then
 					player.class = class
 				-- it's a real player?
-				elseif UnitIsPlayer(player.name) or self:IsPlayer(player.flags) then
+				elseif UnitIsPlayer(player.name) or self:IsPlayer(player.flag) then
 					player.class = select(2, UnitClass(player.name))
 				elseif player.flag and band(player.flag, 0x00000400) ~= 0 then
 					player.class = "UNGROUPPLAYER"
@@ -1352,14 +1352,26 @@ function Skada:find_player(set, playerid, playername)
 			end
 		end
 		-- needed for certain bosses
-		local isboss, _, bossname = self:IsBoss(playerid)
+		local isboss, npcid, npcname = self:IsBoss(playerid)
 		if isboss then
 			player = {
 				id = playerid,
-				name = bossname or playername,
+				name = npcname or playername,
 				class = "MONSTER",
 				role = "DAMAGER",
 				spec = 3
+			}
+			set._playeridx[playerid] = player
+			return player
+		end
+		-- this our last hope!
+		if npcid and npcid > 0 then
+			player = {
+				id = playerid,
+				name = npcname or playername,
+				class = "PET",
+				role = "DAMAGER",
+				spec = 1
 			}
 			set._playeridx[playerid] = player
 			return player
@@ -1944,18 +1956,18 @@ function Skada:CheckGroup()
 				players[unitGUID] = true
 				local petGUID = UnitGUID(unit .. "pet")
 				if petGUID and not pets[petGUID] then
-					pets[petGUID] = {id = unitGUID, name = select(1, UnitName(unit))}
+					self:AssignPet(unitGUID, select(1, UnitName(unit)), petGUID)
 				end
 			end
 		end
 	end
 
-	local unitGUID = UnitGUID("player")
-	if unitGUID then
-		players[unitGUID] = true
+	local playerGUID = UnitGUID("player")
+	if playerGUID then
+		players[playerGUID] = true
 		local petGUID = UnitGUID("pet")
 		if petGUID and not pets[petGUID] then
-			pets[petGUID] = {id = unitGUID, name = select(1, UnitName("player"))}
+			self:AssignPet(playerGUID, select(1, UnitName("player")), petGUID)
 		end
 	end
 end
@@ -3225,9 +3237,7 @@ do
 	end
 
 	function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		if ignoredevents[eventtype] then
-			return
-		end
+		if ignoredevents[eventtype] then return end
 
 		local src_is_interesting = nil
 		local dst_is_interesting = nil
