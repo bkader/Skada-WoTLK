@@ -14,12 +14,6 @@ tab_width = 4
 trim_trailing_whitespace = false
 insert_final_newline = none
 
-[*.{yml,gitattributes,gitignore}]
+[*.{md,yml,gitattributes,gitignore}]
 indent_style = space
 indent_size = 2
-
-[*.md]
-charset = utf-8
-end_of_line = lf
-trim_trailing_whitespace = false
-insert_final_newline = true
