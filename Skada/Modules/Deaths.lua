@@ -15,6 +15,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
     local math_abs, math_max, math_modf = math.abs, math.max, math.modf
     local _GetSpellInfo = Skada.GetSpellInfo
     local _date = date
+    local _
 
     local function log_deathlog(set, data, ts)
         local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
@@ -232,19 +233,19 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
                         local extra = {}
                         if log.overkill and log.overkill > 0 then
                             d.overkill = log.overkill
-                            table_insert(extra, "O: " .. Skada:FormatNumber(log.overkill))
+                            table_insert(extra, "O: " .. Skada:FormatNumber(math_abs(log.overkill)))
                         end
                         if log.resisted and log.resisted > 0 then
                             d.resisted = log.resisted
-                            table_insert(extra, "R: " .. Skada:FormatNumber(log.resisted))
+                            table_insert(extra, "R: " .. Skada:FormatNumber(math_abs(log.resisted)))
                         end
                         if log.blocked and log.blocked > 0 then
                             d.blocked = log.blocked
-                            table_insert(extra, "B: " .. Skada:FormatNumber(log.blocked))
+                            table_insert(extra, "B: " .. Skada:FormatNumber(math_abs(log.blocked)))
                         end
                         if log.absorbed and log.absorbed > 0 then
                             d.absorbed = log.absorbed
-                            table_insert(extra, "A: " .. Skada:FormatNumber(log.absorbed))
+                            table_insert(extra, "A: " .. Skada:FormatNumber(math_abs(log.absorbed)))
                         end
 
                         if _next(extra) ~= nil then
@@ -298,8 +299,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
                 local dth = death.log[1]
 
                 if dth and dth.spellid then
-                    d.label = _select(1, _GetSpellInfo(dth.spellid))
-                    d.icon = _select(3, _GetSpellInfo(dth.spellid))
+                    d.label, _, d.icon = _GetSpellInfo(dth.spellid)
                     d.spellid = dth.spellid
                 elseif dth and dth.source then
                     d.label = dth.source
@@ -389,6 +389,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
     function mod:OnEnable()
         deathlogmod.metadata = {
+            ordersort = true,
             tooltip = entry_tooltip,
             columns = {Change = true, Health = true, Percent = true}
         }
