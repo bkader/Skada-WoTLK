@@ -1103,21 +1103,38 @@ function mod:AddDisplayOptions(win, options)
                 name = L["Class icons"],
                 desc = L["Use class icons where applicable."],
                 order = 19,
-                width = "double"
+                width = "double",
+                disabled = function()
+                    return (db.specicons or db.roleicons)
+                end
             },
             roleicons = {
                 type = "toggle",
                 name = L["Role icons"],
                 desc = L["Use role icons where applicable."],
                 order = 20,
-                width = "double"
+                width = "double",
+                set = function()
+                    db.roleicons = not db.roleicons
+                    if db.roleicons and not db.classicons then
+                        db.classicons = true
+                    end
+                    Skada:ReloadSettings()
+                end
             },
             specicons = {
                 type = "toggle",
                 name = L["Spec icons"],
                 desc = L["Use specialization icons where applicable."],
                 order = 21,
-                width = "double"
+                width = "double",
+                set = function()
+                    db.specicons = not db.specicons
+                    if db.specicons and not db.classicons then
+                        db.classicons = true
+                    end
+                    Skada:ReloadSettings()
+                end
             },
             spark = {
                 type = "toggle",
