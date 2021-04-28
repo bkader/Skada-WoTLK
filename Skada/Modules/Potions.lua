@@ -1,6 +1,6 @@
 assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Potions", function(Skada, L)
-    if Skada:IsDisabled("Potions") then end
+    if Skada:IsDisabled("Potions") then return end
 
     local mod = Skada:NewModule(L["Potions"])
     local potionsmod = mod:NewModule(L["Potions list"])
@@ -65,6 +65,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
     -- we use this function to record pre-pots as well.
     function mod:CheckPrePot(event)
         if event == "ENCOUNTER_START" then
+            prepotion = {}
             local prefix, min, max = "raid", 1, _GetNumRaidMembers()
             if max == 0 then
                 prefix, min, max = "party", 0, _GetNumPartyMembers()
@@ -91,11 +92,6 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
                         end
                     end
                 end
-            end
-
-            if next(prepotion) then
-                Skada:Print(_format("pre-potion: %s", tconcat(prepotion, ", ")))
-                prepotion = {}
             end
         end
     end
@@ -265,5 +261,12 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 
     function mod:GetSetSummary(set)
         return set.potions or 0
+    end
+
+    function mod:SetComplete(set)
+        if next(prepotion) then
+            Skada:Print(_format("pre-potion: %s", tconcat(prepotion, ", ")))
+        end
+        prepotion = {}
     end
 end)
