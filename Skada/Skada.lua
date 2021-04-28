@@ -1364,6 +1364,18 @@ function Skada:find_player(set, playerid, playername)
 			set._playeridx[playerid] = player
 			return player
 		end
+		-- last hope for a pet
+		if playerid and playername then
+			player = {
+				id = playerid,
+				name = playername,
+				class = "PET",
+				role = "DAMAGER",
+				spec = 1
+			}
+			set._playeridx[playerid] = player
+			return player
+		end
 	end
 end
 

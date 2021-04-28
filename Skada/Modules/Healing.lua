@@ -1024,7 +1024,7 @@ Skada:AddLoadableModule("Healing received", function(Skada, L)
 							players[targetname] = CopyTable(target)
 						else
 							players[targetname].amount = players[targetname].amount + target.amount
-							players[targetname].overhealing = players[targetname].overhealing + target.overhealing
+							players[targetname].overhealing = (players[targetname].overhealing or 0) + (target.overhealing or 0)
 						end
 					end
 				end
