@@ -64,7 +64,7 @@ Skada.schoolnames = {
 	[64] = STRING_SCHOOL_ARCANE
 }
 
--- list of plyaers and pets
+-- list of players and pets
 local players, pets = {}, {}
 
 -- list of feeds & selected feed
@@ -1298,7 +1298,7 @@ do
 				if class then
 					player.class = class
 				-- it's a real player?
-				elseif UnitIsPlayer(player.name) then
+				elseif UnitIsPlayer(player.name) or self:IsPlayer(player.flags) then
 					player.class = select(2, UnitClass(player.name))
 				elseif player.flag and band(player.flag, 0x00000400) ~= 0 then
 					player.class = "UNGROUPPLAYER"
@@ -1364,18 +1364,6 @@ function Skada:find_player(set, playerid, playername)
 			set._playeridx[playerid] = player
 			return player
 		end
-		-- last hope for a pet
-		if playerid and playername then
-			player = {
-				id = playerid,
-				name = playername,
-				class = "PET",
-				role = "DAMAGER",
-				spec = 1
-			}
-			set._playeridx[playerid] = player
-			return player
-		end
 	end
 end
 
@@ -1417,8 +1405,14 @@ function Skada:get_player(set, playerid, playername, playerflag)
 	return player
 end
 
-function Skada:IsPlayer(playerid)
-	return players[playerid]
+-- the function now accepts GUID or Flag
+function Skada:IsPlayer(arg)
+	if arg and players[arg] then
+		return true
+	elseif arg and band(arg, 0x00000400) ~= 0 then
+		return true
+	end
+	return false
 end
 
 do
@@ -1489,13 +1483,14 @@ do
 	function Skada:IsBoss(guid)
 		if guid then
 			local id = tonumber(guid:sub(9, 12), 16)
-			if LBI.BossIDs[id] then
-				return true, id, false
-			elseif custom[id] then
+			if id and LBI.BossIDs[id] then
+				return true, id, custom[id]
+			elseif id and custom[id] then
 				return true, id, custom[id]
 			end
+			return nil, id, nil
 		end
-		return false, nil, false
+		return nil, nil, nil
 	end
 end
 
