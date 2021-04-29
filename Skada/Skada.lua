@@ -1338,7 +1338,7 @@ do
 	end
 end
 
-function Skada:find_player(set, playerid, playername)
+function Skada:find_player(set, playerid, playername, strict)
 	if set and playerid then
 		set._playeridx = set._playeridx or {}
 		local player = set._playeridx[playerid]
@@ -1365,7 +1365,7 @@ function Skada:find_player(set, playerid, playername)
 			return player
 		end
 		-- this our last hope!
-		if npcid and npcid > 0 then
+		if (npcid and npcid > 0) and not strict then
 			player = {
 				id = playerid,
 				name = npcname or playername,
@@ -1384,7 +1384,7 @@ function Skada:get_player(set, playerid, playername, playerflag)
 		return
 	end
 
-	local player = self:find_player(set, playerid, playername)
+	local player = self:find_player(set, playerid, playername, true)
 	local now = time()
 
 	if not player then
