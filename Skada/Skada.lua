@@ -2922,13 +2922,26 @@ end
 do
 	local AceSerializer = LibStub("AceSerializer-3.0")
 	local LibCompress = LibStub("LibCompress")
+	local encodeTable
 
 	function Skada:Serialize(...)
-		return LibCompress:CompressHuffman(AceSerializer:Serialize(...))
+		encodeTable = encodeTable or LibCompress:GetAddonEncodeTable()
+
+		local result = LibCompress:CompressHuffman(AceSerializer:Serialize(...))
+		return encodeTable:Encode(result)
 	end
 
 	function Skada:Deserialize(msg)
-		return AceSerializer:Deserialize(LibCompress:DecompressHuffman(msg))
+		encodeTable = encodeTable or LibCompress:GetAddonEncodeTable()
+
+		local data, err = encodeTable:Decode(data), "Error decoding"
+		if data then
+			data, err = LibCompress:DecompressHuffman(data)
+			if data then
+				return AceSerializer:Deserialize(data)
+			end
+		end
+		return false, err
 	end
 
 	function Skada:SendComm(channel, target, ...)
