@@ -118,7 +118,7 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 		unitGUID = UnitGUID("player")
 		Skada.options.args.modules.args.nickname = options
 		if Skada.db.profile.namedisplay == nil then
-			Skada.db.profile.namedisplay = 1
+			Skada.db.profile.namedisplay = 2
 		end
 	end
 
