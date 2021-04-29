@@ -1351,6 +1351,8 @@ function Skada:find_player(set, playerid, playername, strict)
 				return p
 			end
 		end
+		if strict then return end
+
 		-- needed for certain bosses
 		local isboss, npcid, npcname = self:IsBoss(playerid)
 		if isboss then
@@ -1365,7 +1367,7 @@ function Skada:find_player(set, playerid, playername, strict)
 			return player
 		end
 		-- this our last hope!
-		if (npcid and npcid > 0) and not strict then
+		if npcid and npcid > 0 then
 			player = {
 				id = playerid,
 				name = npcname or playername,
