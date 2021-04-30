@@ -1195,7 +1195,7 @@ do
 
 	local function GetDruidSubSpec(unit)
 		-- 57881 : Natural Reaction -- used by druid tanks
-		local points = LGT:UnitHasTalent(unit, self.GetSpellInfo(57881), LGT:GetActiveTalentGroup(unit))
+		local points = LGT:UnitHasTalent(unit, Skada.GetSpellInfo(57881), LGT:GetActiveTalentGroup(unit))
 		if points and points > 0 then
 			return 3 -- druid tank
 		else
