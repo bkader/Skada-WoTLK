@@ -1000,11 +1000,10 @@ end)
 -- ===================== --
 
 Skada:AddLoadableModule("Healing done by spell", function(Skada, L)
-	if Skada:IsDisabled("Healing", "Absorbs", "Healing done by spell") then
-		return
-	end
+	if Skada:IsDisabled("Healing", "Absorbs", "Healing done by spell") then return end
 
 	local mod = Skada:NewModule(L["Healing done by spell"])
+	local spellmod = mod:NewModule(L["Healing spell sources"])
 	local spells
 
 	local function CacheSpells(set)
@@ -1019,6 +1018,20 @@ Skada:AddLoadableModule("Healing done by spell", function(Skada, L)
 						spells[spellid].count = (spells[spellid].count or 0) + (spell.count or 0)
 						spells[spellid].overhealing = (spells[spellid].overhealing or 0) + (spell.overhealing or 0)
 					end
+					spells[spellid].sources = spells[spellid].sources or {}
+					-- add spell source
+					if not spells[spellid].sources[player.name] then
+						spells[spellid].sources[player.name] = {
+							id = player.id,
+							class = player.class or "PET",
+							role = player.role or "DAMAGER",
+							spec = player.spec or 1,
+							amount = spell.amount
+						}
+					else
+						spells[spellid].sources[player.name].amount =
+							(spells[spellid].sources[player.name].amount or 0) + spell.amount
+					end
 				end
 			end
 			if player.absorbs and player.absorbs.spells then
@@ -1028,6 +1041,20 @@ Skada:AddLoadableModule("Healing done by spell", function(Skada, L)
 					else
 						spells[spellid].amount = spells[spellid].amount + spell.amount
 						spells[spellid].count = (spells[spellid].count or 0) + (spell.count or 0)
+					end
+					-- add spell source
+					spells[spellid].sources = spells[spellid].sources or {}
+					if not spells[spellid].sources[player.name] then
+						spells[spellid].sources[player.name] = {
+							id = player.id,
+							class = player.class or "PET",
+							role = player.role or "DAMAGER",
+							spec = player.spec or 1,
+							amount = spell.amount
+						}
+					else
+						spells[spellid].sources[player.name].amount =
+							(spells[spellid].sources[player.name].amount or 0) + spell.amount
 					end
 				end
 			end
@@ -1057,9 +1084,52 @@ Skada:AddLoadableModule("Healing done by spell", function(Skada, L)
 			end
 			tooltip:AddDoubleLine(L["Healing"], _format("%s (%02.1f%%)", Skada:FormatNumber(spell.amount), 100 * spell.amount / math_max(1, total)), 1, 1, 1)
 			if spell.overhealing then
-				tooltip:AddDoubleLine(L["Overhealing"], _format("%s (%02.1f%%)", Skada:FormatNumber(spell.overhealing), 100 * spell.overhealing / math_max(1, overheal) ), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Overhealing"], _format("%s (%02.1f%%)", Skada:FormatNumber(spell.overhealing), 100 * spell.overhealing / math_max(1, overheal)), 1, 1, 1)
 			end
 		end
+	end
+
+	function spellmod:Enter(win, id, label)
+		win.spellid, win.spellname = id, label
+		win.title = _format(L["%s's sources"], label)
+	end
+
+	function spellmod:Update(win, set)
+		local max = 0
+		if set then
+			CacheSpells(set)
+			local spell = spells[win.spellid]
+			if spell then
+				win.title = _format(L["%s's sources"], win.spellname)
+
+				local nr = 1
+				for playername, player in _pairs(spell.sources) do
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
+
+					d.id = player.id
+					d.label = playername
+					d.class = player.class
+					d.role = player.role
+					d.spec = player.spec
+
+					d.value = player.amount
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatNumber(player.amount),
+						mod.metadata.columns.Healing,
+						_format("%02.1f%%", 100 * player.amount / math_max(1, spell.amount)),
+						mod.metadata.columns.Percent
+					)
+
+					if player.amount > max then
+						max = player.amount
+					end
+
+					nr = nr + 1
+				end
+			end
+		end
+		win.metadata.maxvalue = max
 	end
 
 	function mod:Update(win, set)
@@ -1106,6 +1176,7 @@ Skada:AddLoadableModule("Healing done by spell", function(Skada, L)
 		self.metadata = {
 			showspots = true,
 			tooltip = spell_tooltip,
+			click1 = spellmod,
 			columns = {Healing = true, Percent = true}
 		}
 		Skada:AddMode(self, L["Absorbs and healing"])

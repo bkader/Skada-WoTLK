@@ -382,6 +382,7 @@ L["Healing received"] = true
 L["Healing player list"] = true
 L["%s's received healing"] = true
 L["Healing done by spell"] = true
+L["Healing spell sources"] = true
 -- Auras Module --
 L["Uptime"] = true
 L["Buffs and Debuffs"] = true

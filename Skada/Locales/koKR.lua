@@ -382,6 +382,7 @@ L.timemesure_desc = [=[|cFFFFFF00활동 시간|r: 각 공격대원의 타이머�
 -- L["Healing player list"] = ""
 -- L["%s's received healing"] = ""
 -- L["Healing done by spell"] = ""
+-- L["Healing spell sources"] = ""
 -- Auras Module --
 -- L["Uptime"] = ""
 -- L["Buffs and Debuffs"] = ""

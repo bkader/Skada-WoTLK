@@ -385,6 +385,7 @@ L["Healing received"] = "Soins reçus"
 L["Healing player list"] = "Liste des joueurs de soin"
 L["%s's received healing"] = "Soins reçus par %s"
 L["Healing done by spell"] = "Soins prodigués par sort"
+L["Healing spell sources"] = "Sources du sort de soin"
 -- Auras Module --
 L["Uptime"] = "Durée"
 L["Buffs and Debuffs"] = "Buffs et debuffs"

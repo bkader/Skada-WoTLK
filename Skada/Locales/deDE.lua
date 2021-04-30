@@ -382,6 +382,7 @@ L["Healing received"] = "Heilung erhalten"
 L["Healing player list"] = "Heilende Spielerliste"
 L["%s's received healing"] = "%s hat eine Heilungsliste erhalten "
 L["Healing done by spell"] = "Heilung durch Zauber"
+L["Healing spell sources"] = "Quellen des Heilzaubers"
 -- Auras Module --
 L["Uptime"] = "Uptime"
 L["Buffs and Debuffs"] = "Buffs and Debuffs"

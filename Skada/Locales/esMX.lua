@@ -1,3 +1,4 @@
+--[[ Translators: Ícar#8167 / Septimun#8954 ]] --
 local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "esMX", false)
 if not L then return end
 
@@ -381,9 +382,10 @@ L["%s's absorbed and healed players"] = "Objetivos absorbidos y sanados de %s"
 L["Healing received"] = "Curación recibida"
 L["Healing player list"] = "Lista de objetivos curativos"
 L["%s's received healing"] = "Sanación recibida por %s"
-L["Healing done by spell"] = "Curación realizada por hechizo"
+L["Healing done by spell"] = "Sanación hecha por hechizo"
+L["Healing spell sources"] = "Fuentes del hechizo de sanación"
 -- Auras Module --
--- L["Uptime"] = ""
+L["Uptime"] = "Duración"
 L["Buffs and Debuffs"] = "Beneficios y Perjuicios"
 L["Buffs"] = "Beneficios"
 L["Buff spell list"] = "Hechizos de beneficios"
@@ -455,7 +457,7 @@ L["Damage taken"] = "Daño recibido"
 L["Damage taken by %s"] = "Daño recibido por %s"
 L["%s damage on %s"] = "%s daño en %s"
 L["Damage source list"] = "Fuentes de daño"
-L["Damage spell sources"] = "Fuentes de hechizos de daño "
+L["Damage spell sources"] = "Fuentes de hechizos de daño"
 L["Damage taken by spell"] = "Daño recibido por hechizos"
 L["%s's targets"] = "Objetivos de %s"
 L["DTPS"] = "DRPS"
