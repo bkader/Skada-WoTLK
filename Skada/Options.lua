@@ -108,6 +108,7 @@ Skada.defaults = {
 		tooltiprows = 3,
 		informativetooltips = true,
 		onlykeepbosses = false,
+		alwayskeepbosses = false,
 		tentativetimer = 3,
 		tentativecombatstart = false,
 		hidesolo = false,
@@ -383,53 +384,59 @@ Skada.options = {
 					desc = L["Boss fights will be kept with this on, and non-boss fights are discarded."],
 					order = 5
 				},
+				alwayskeepbosses = {
+					type = "toggle",
+					name = L["Always keep boss fights"],
+					desc = L["Boss fights will be kept with this on and will not be affected by Skada reset."],
+					order = 6
+				},
 				hidesolo = {
 					type = "toggle",
 					name = L["Hide when solo"],
 					desc = L["Hides Skada's window when not in a party or raid."],
-					order = 6
+					order = 7
 				},
 				hidepvp = {
 					type = "toggle",
 					name = L["Hide in PvP"],
 					desc = L["Hides Skada's window when in Battlegrounds/Arenas."],
-					order = 7
+					order = 8
 				},
 				hidecombat = {
 					type = "toggle",
 					name = L["Hide in combat"],
 					desc = L["Hides Skada's window when in combat."],
-					order = 8
+					order = 9
 				},
 				hidedisables = {
 					type = "toggle",
 					name = L["Disable while hidden"],
 					desc = L["Skada will not collect any data when automatically hidden."],
-					order = 9
+					order = 10
 				},
 				sortmodesbyusage = {
 					type = "toggle",
 					name = L["Sort modes by usage"],
 					desc = L["The mode list will be sorted to reflect usage instead of alphabetically."],
-					order = 10
+					order = 11
 				},
 				showranks = {
 					type = "toggle",
 					name = L["Show rank numbers"],
 					desc = L["Shows numbers for relative ranks for modes where it is applicable."],
-					order = 11
+					order = 12
 				},
 				showself = {
 					type = "toggle",
 					name = L["Always show self"],
 					desc = L["Keeps the player shown last even if there is not enough space."],
-					order = 12
+					order = 13
 				},
 				autostop = {
 					type = "toggle",
 					name = L["Autostop"],
 					desc = L["Automatically stops the current segment after half of all raid members have died."],
-					order = 13
+					order = 14
 				},
 				tentativecombatstart = {
 					type = "toggle",

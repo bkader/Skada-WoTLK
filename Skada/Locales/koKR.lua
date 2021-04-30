@@ -198,6 +198,8 @@ if not L then return end
 -- L["Shows a extra row with a summary in certain modes."] = ""
 -- L["Only keep boss fighs"] = ""
 -- L["Boss fights will be kept with this on, and non-boss fights are discarded."] = ""
+-- L["Always keep boss fights"] = ""
+-- L["Boss fights will be kept with this on and will not be affected by Skada reset."] = ""
 -- L["Hide when solo"] = ""
 -- L["Hides Skada's window when not in a party or raid."] = ""
 -- L["Hide in PvP"] = ""

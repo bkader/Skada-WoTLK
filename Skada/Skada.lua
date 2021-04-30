@@ -5,7 +5,8 @@ Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 local ACD = LibStub("AceConfigDialog-3.0")
 local DBI = LibStub("LibDBIcon-1.0", true)
-local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
+local LBB = LibStub("LibBabble-Boss-3.0"):GetUnstrictLookupTable()
+local LBBr = LibStub("LibBabble-Boss-3.0"):GetReverseLookupTable()
 local LBI = LibStub("LibBossIDs-1.0")
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 local LGT = LibStub("LibGroupTalents-1.0")
@@ -1446,6 +1447,7 @@ do
 		[37970] = LBB["Blood Prince Council"], -- Prince Valanar
 		[37972] = LBB["Blood Prince Council"], -- Prince Keleseth
 		[37973] = LBB["Blood Prince Council"], -- Prince Taldaram
+		[36789] = LBB["Valithria Dreamwalker"], -- Valithria Dreamwalker
 		[36791] = LBB["Valithria Dreamwalker"], -- Blazing Skeleton
 		[37868] = LBB["Valithria Dreamwalker"], -- Risen Archmage
 		[37886] = LBB["Valithria Dreamwalker"], -- Gluttonous Abomination
@@ -1496,16 +1498,15 @@ do
 	}
 
 	function Skada:IsBoss(guid)
+		local isboss, npcid, npcname = false
 		if guid then
 			local id = tonumber(guid:sub(9, 12), 16)
-			if id and LBI.BossIDs[id] then
-				return true, id, custom[id]
-			elseif id and custom[id] then
-				return true, id, custom[id]
+			if id and (LBI.BossIDs[id] or custom[id]) then
+				isboss, npcid = true, id
+				npcname = LBB[custom[id]] or LBBr[custom[id]] or custom[id]
 			end
-			return nil, id, nil
 		end
-		return nil, nil, nil
+		return isboss, npcid, npcname
 	end
 end
 
@@ -3075,8 +3076,14 @@ function Skada:EndSegment()
 			tinsert(self.char.sets, 1, self.current)
 		end
 	end
+
+
 	self.last = self.current
 	self.last.started = nil
+
+	if self.last.gotboss and self.db.profile.alwayskeepbosses then
+		self.last.keep = true
+	end
 
 	self.total.time = self.total.time + self.current.time
 	setPlayerActiveTimes(self.total)
