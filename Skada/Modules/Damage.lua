@@ -474,6 +474,23 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
 				local nr = 1
 
+				if spell.overkill and spell.overkill > 0 then
+					local total = (spell.amount or 0) + spell.overkill
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
+
+					d.id = L["Overkill"]
+					d.label = L["Overkill"]
+					d.value = spell.overkill
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatNumber(spell.overkill),
+						mod.metadata.columns.Damage,
+						_format("%02.1f%%", 100 * spell.overkill / math_max(1, total)),
+						mod.metadata.columns.Percent
+					)
+					nr = nr + 1
+				end
+
 				if spell.hit and spell.hit > 0 then
 					add_detail_bar(win, nr, HIT, spell.hit)
 					nr = nr + 1
@@ -496,10 +513,6 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 						add_detail_bar(win, nr, title, spell[misstype])
 						nr = nr + 1
 					end
-				end
-				if spell.overkill and spell.overkill > 0 then
-					add_detail_bar(win, nr, L["Overkill"], spell.overkill)
-					nr = nr + 1
 				end
 			end
 		end
