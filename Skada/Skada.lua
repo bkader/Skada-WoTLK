@@ -2935,10 +2935,11 @@ do
 		return encodeTable:Encode(result)
 	end
 
-	function Skada:Deserialize(msg)
+	function Skada:Deserialize(data)
 		encodeTable = encodeTable or LibCompress:GetAddonEncodeTable()
 
-		local data, err = encodeTable:Decode(data), "Error decoding"
+		local err
+		data, err = encodeTable:Decode(data), "Error decoding"
 		if data then
 			data, err = LibCompress:DecompressHuffman(data)
 			if data then
