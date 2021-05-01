@@ -148,6 +148,12 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 	function mod:OnDisable()
 		Skada.db.global.nicknames = nil
 		self.db = nil
+
+		Skada.UnregisterCallback(self, "OnCommNicknameRequest")
+		Skada.UnregisterCallback(self, "OnCommNicknameResponse")
+		Skada.UnregisterCallback(self, "OnCommNicknameChange")
+		Skada.UnregisterCallback(self, "FixPlayer")
+		Skada.UnregisterCallback(self, "BarUpdate")
 		self:UnHook(Skada, "find_player")
 	end
 
