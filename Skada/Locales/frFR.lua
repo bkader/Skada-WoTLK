@@ -454,6 +454,7 @@ L["DPS"] = "DPS"
 L["Damage: Personal DPS"] = "Dégâts : DPS personnel"
 L["RDPS"] = "RDPS"
 L["Damage: Raid DPS"] = "Dégâts : DPS du raid"
+L["Overkill"] = "Excès de dégâts"
 -- damage taken module
 L["Damage taken"] = "Dégâts subis"
 L["Damage taken by %s"] = "Dégâts subis par %s"

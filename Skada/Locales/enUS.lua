@@ -451,6 +451,7 @@ L["DPS"] = true
 L["Damage: Personal DPS"] = true
 L["RDPS"] = true
 L["Damage: Raid DPS"] = true
+L["Overkill"] = true
 -- damage taken module
 L["Damage taken"] = true
 L["Damage taken by %s"] = true

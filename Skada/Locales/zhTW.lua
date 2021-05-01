@@ -451,6 +451,7 @@ L.timemesure_desc = [=[|cFFFFFF00活躍時間|r: 每一位團隊成員停止活�
 -- L["Damage: Personal DPS"] = ""
 -- L["RDPS"] = ""
 -- L["Damage: Raid DPS"] = ""
+-- L["Overkill"] = ""
 -- damage taken module
 -- L["Damage taken"] = ""
 -- L["Damage taken by %s"] = ""

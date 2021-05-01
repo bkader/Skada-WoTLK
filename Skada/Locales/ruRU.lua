@@ -450,6 +450,7 @@ L["DPS"] = "УВС"
 L["Damage: Personal DPS"] = "Урон: собственный УВС"
 L["RDPS"] = "РУВС"
 L["Damage: Raid DPS"] = "Урон: УВС рейда"
+L["Overkill"] = "Избыточный урон"
 -- damage taken module
 L["Damage taken"] = "Получено урона"
 L["Damage taken by %s"] = "%s: Полученный урон"

@@ -497,6 +497,10 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 						nr = nr + 1
 					end
 				end
+				if spell.overkill and spell.overkill > 0 then
+					add_detail_bar(win, nr, L["Overkill"], spell.overkill)
+					nr = nr + 1
+				end
 			end
 		end
 	end

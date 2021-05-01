@@ -451,6 +451,7 @@ L["DPS"] = "DPS"
 L["Damage: Personal DPS"] = "伤害：个人DPS"
 L["RDPS"] = "RDPS"
 L["Damage: Raid DPS"] = "伤害：团队DPS"
+L["Overkill"] = "过量伤害"
 -- damage taken module
 L["Damage taken"] = "承受伤害"
 L["Damage taken by %s"] = "%s的承受伤害"
