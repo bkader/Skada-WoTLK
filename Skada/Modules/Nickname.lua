@@ -69,7 +69,6 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 		end,
 		set = function(i, val)
 			Skada.db.profile[i[#i]] = val
-			Skada:ApplySettings()
 		end,
 		args = {
 			nickname = {
@@ -85,7 +84,6 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 					if okey == true then
 						Skada.db.profile.nickname = (nickname == "") and unitName or nickname
 						mod:SetNickname(unitGUID, nickname, true)
-						Skada:ApplySettings()
 					else
 						Skada:Print(nickname)
 					end
@@ -119,7 +117,6 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 				func = function()
 					Skada.db.global.nicknames = wipe(Skada.db.global.nicknames or {})
 					mod.db.nicknames = Skada.db.global.nicknames
-					Skada:ApplySettings()
 				end
 			}
 		}
