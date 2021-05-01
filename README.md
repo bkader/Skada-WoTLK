@@ -5,29 +5,29 @@ I am simply a huge fan of **Skada**, I prefer it to other damage meters for seve
 * [What's the difference?](#whats-the-difference)
 * [How to install](#how-to-install)
 * [Modules](#modules)
-	* [Absorbs](#absorbs)
-	* [Activity](#activity)
-	* [Buffs and Debuffs](#buffs-and-debuffs)
-	* [CC Tracker (_Done, Taken and Breakers_)](#cc-tracker)
-	* [Damage](#damage)
-	* [Damage taken](#damage-taken)
-	* [Deaths](#deaths)
-	* [Dispels, Interrupts and Resurrects](#dispels-interrupts-and-resurrects)
-	* [Enemies](#enemies)
-	* [Failbot](#failbot)
-	* [Friendly Fire](#friendly-fire)
-	* [Healing](#healing)
-	* [Improvement](#improvement)
-	* [Nickname](#nickname)
-	* [Parry-haste](#parry-haste)
-	* [Player Score](#player-score)
-	* [Potions](#potions)
-	* [Power gains](#power-gains)
-	* [Scroll](#scroll)
-	* [Spamage](#spamage)
-	* [Sunder Counter (_Sunder Armor_)](#sunder-counter)
-	* [Themes](#themes)
-	* [Threat](#threat)
+  * [Absorbs](#absorbs)
+  * [Activity](#activity)
+  * [Buffs and Debuffs](#buffs-and-debuffs)
+  * [CC Tracker (_Done, Taken and Breakers_)](#cc-tracker)
+  * [Damage](#damage)
+  * [Damage taken](#damage-taken)
+  * [Deaths](#deaths)
+  * [Dispels, Interrupts and Resurrects](#dispels-interrupts-and-resurrects)
+  * [Enemies](#enemies)
+  * [Failbot](#failbot)
+  * [Friendly Fire](#friendly-fire)
+  * [Healing](#healing)
+  * [Improvement](#improvement)
+  * [Nickname](#nickname)
+  * [Parry-haste](#parry-haste)
+  * [Player Score](#player-score)
+  * [Potions](#potions)
+  * [Power gains](#power-gains)
+  * [Scroll](#scroll)
+  * [Spamage](#spamage)
+  * [Sunder Counter (_Sunder Armor_)](#sunder-counter)
+  * [Themes](#themes)
+  * [Threat](#threat)
 
 ## What's the difference?
 
@@ -66,7 +66,7 @@ Shows players activity in the raid, or what's called _Active Time_.
 This module shows players buffs and their uptime, debuffs and their uptime and targets.
 
 ### CC Tracker
- 
+
 1. **CC Done** & **CC Taken**: unlike default ones, they now provided details info about spells used to CC and targets/sources.
 2. **CC Breakers** : this was rewritten a bit, it is almost like the old one but optimized and provided like other CC modules, spell and target details.
 
@@ -77,6 +77,7 @@ This module shows detailed data about damage done, giving you access to _Damage 
 1. **DPS**: obviously, shows the dps of raid members depending on the time measurement you choose (_active or effective_) and it gives you access to the same data as its parent.
 2. **Damage done by spell**: this module shows a list of all spells used in your raid with their damage and the percentage of damage to the total. Clicking on a spell gives you access to the _Damage source list_, aka list of players that used that spell.
 3. **Useful damage**: a useful damage is the damage required for the target to die, anything above it is called _Overkill_, this module shows the damage done in your raid without the overkill, it means all the damage that was required for all your raid targets to reach 0 health.
+4. **Overkill**: this module does the reverse of what _Useful damage_ does, it only lists players overkill with the list of their overkill spells.
 
 ### Damage taken
 
@@ -116,6 +117,7 @@ This module shows the _effective healing_ which means it substructs the _overhea
 2. **Total healing**: this module shows the data of _Healing_ and _Overhealing_ combined, giving you access to _Healing spell list_ and _Healing player list_.
 3. **Healing and Overhealing**: so you don't get confused, this module is made for pure comparison between players healing and overhealing, showing on its bars these data as well as the percentage of overhealing. It gives you access as well to _Healing spell list_ and _Healing player list_.
 4. **Healing received**: shows the list of players by their received healing and gives you access to the list of players that healed them.
+5. **Healing done by spell**: it lists the healing spells used during the selected segment. Clicking on a spell shows the list of players who used it with the amount.
 
 ### Improvement
 
