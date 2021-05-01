@@ -2489,7 +2489,7 @@ function Skada:ApplySettings()
 		self:SetActive(true)
 
 		for _, win in ipairs(windows) do
-			if win.db.hidden and win:IsShown() then
+			if (win.db.hidden or (not win.db.hidden and self.db.profile.showcombat)) and win:IsShown() then
 				win:Hide()
 			end
 		end
@@ -2844,7 +2844,7 @@ function Skada:MemoryCheck()
 		if self.db.profile.setstokeep == 0 then
 			compare = 30000
 		else
-			compare = (self.db.profile.setstokeep * 1250) + 5000
+			compare = (self.db.profile.setstokeep * 1150) + 5000
 		end
 
 		if mem > compare then
@@ -3079,7 +3079,6 @@ function Skada:EndSegment()
 		end
 	end
 
-
 	self.last = self.current
 	self.last.started = nil
 
@@ -3125,8 +3124,12 @@ function Skada:EndSegment()
 			end
 		end
 
-		if not win.db.hidden and self.db.profile.hidecombat and (not self.db.profile.hidesolo or IsInGroup()) then
-			win:Hide()
+		if not win.db.hidden and (not self.db.profile.hidesolo or IsInGroup()) then
+			if self.db.profile.showcombat and win:IsShown() then
+				win:Hide()
+			elseif self.db.profile.hidecombat and not win:IsShown() then
+				win:Show()
+			end
 		end
 	end
 
@@ -3217,8 +3220,12 @@ do
 				end
 			end
 
-			if not win.db.hidden and self.db.profile.hidecombat then
-				win:Hide()
+			if not win.db.hidden then
+				if self.db.profile.showcombat and not win:IsShown() then
+					win:Show()
+				elseif self.db.profile.hidecombat and win:IsShown() then
+					win:Hide()
+				end
 			end
 		end
 

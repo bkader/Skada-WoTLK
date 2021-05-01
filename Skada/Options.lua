@@ -115,6 +115,7 @@ Skada.defaults = {
 		hidepvp = false,
 		hidedisables = true,
 		hidecombat = false,
+		showcombat = false,
 		translit = false,
 		mergepets = true,
 		shortmenu = true,
@@ -407,49 +408,69 @@ Skada.options = {
 					type = "toggle",
 					name = L["Hide in combat"],
 					desc = L["Hides Skada's window when in combat."],
-					order = 9
+					order = 9,
+					set = function()
+						Skada.db.profile.hidecombat = not Skada.db.profile.hidecombat
+						if Skada.db.profile.hidecombat then
+							Skada.db.profile.showcombat = false
+						end
+						Skada:ApplySettings()
+					end
+				},
+				showcombat = {
+					type = "toggle",
+					name = L["Show in combat"],
+					desc = L["Shows Skada's window when in combat."],
+					order = 10,
+					set = function()
+						Skada.db.profile.showcombat = not Skada.db.profile.showcombat
+						if Skada.db.profile.showcombat then
+							Skada.db.profile.hidecombat = false
+						end
+						Skada:ApplySettings()
+					end
 				},
 				hidedisables = {
 					type = "toggle",
 					name = L["Disable while hidden"],
 					desc = L["Skada will not collect any data when automatically hidden."],
-					order = 10
+					order = 11
 				},
 				sortmodesbyusage = {
 					type = "toggle",
 					name = L["Sort modes by usage"],
 					desc = L["The mode list will be sorted to reflect usage instead of alphabetically."],
-					order = 11
+					order = 12
 				},
 				showranks = {
 					type = "toggle",
 					name = L["Show rank numbers"],
 					desc = L["Shows numbers for relative ranks for modes where it is applicable."],
-					order = 12
+					order = 13
 				},
 				showself = {
 					type = "toggle",
 					name = L["Always show self"],
 					desc = L["Keeps the player shown last even if there is not enough space."],
-					order = 13
+					order = 14
 				},
 				autostop = {
 					type = "toggle",
 					name = L["Autostop"],
 					desc = L["Automatically stops the current segment after half of all raid members have died."],
-					order = 14
+					order = 15
 				},
 				tentativecombatstart = {
 					type = "toggle",
 					name = L["Aggressive combat detection"],
 					desc = L["Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons. Meaningless on boss encounters."],
-					order = 15
+					order = 16
 				},
 				tentativetimer = {
 					type = "range",
 					name = L["Tentative Timer"],
 					desc = L['The number of seconds Skada should wait after combat start to create a new segment.\n\nOnly works if "Agressive combat detection" is enabled.'],
-					order = 16,
+					order = 17,
 					min = 1,
 					max = 5,
 					step = 1,
@@ -465,7 +486,7 @@ Skada.options = {
 					type = "select",
 					name = L["Time measure"],
 					desc = L.timemesure_desc,
-					order = 17,
+					order = 18,
 					width = "double",
 					values = {[1] = L["Activity time"], [2] = L["Effective time"]},
 					get = function()
@@ -476,7 +497,7 @@ Skada.options = {
 					type = "select",
 					name = L["Number format"],
 					desc = L["Controls the way large numbers are displayed."],
-					order = 18,
+					order = 19,
 					width = "double",
 					values = function()
 						return {[1] = L["Condensed"], [2] = L["Detailed"]}
@@ -486,7 +507,7 @@ Skada.options = {
 					type = "select",
 					name = L["Set format"],
 					desc = L["Controls the way set names are displayed."],
-					order = 19,
+					order = 20,
 					width = "double",
 					values = Skada:SetLabelFormats()
 				},
@@ -494,19 +515,19 @@ Skada.options = {
 					type = "toggle",
 					name = L["Number set duplicates"],
 					desc = L["Append a count to set names with duplicate mob names."],
-					order = 20
+					order = 21
 				},
 				translit = {
 					type = "toggle",
 					name = L["Translit"],
 					desc = L["Make those russian letters that no one understand to be presented as western letters."],
-					order = 21
+					order = 22
 				},
 				feed = {
 					type = "select",
 					name = L["Data feed"],
 					desc = L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."],
-					order = 22,
+					order = 23,
 					width = "double",
 					values = function()
 						local feeds = {[""] = NONE}
@@ -519,7 +540,7 @@ Skada.options = {
 				separator1 = {
 					type = "description",
 					name = " ",
-					order = 23,
+					order = 24,
 					width = "full"
 				},
 				reportlinks = {
@@ -535,7 +556,7 @@ Skada.options = {
 						if Skada.db.profile.setstokeep == 0 then
 							return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], 30)
 						end
-						return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], (Skada.db.profile.setstokeep * 1.25) + 5)
+						return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], (Skada.db.profile.setstokeep * 1.15) + 5)
 					end,
 					order = 97
 				},

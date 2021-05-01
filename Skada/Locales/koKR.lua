@@ -206,6 +206,8 @@ if not L then return end
 -- L["Hides Skada's window when in Battlegrounds/Arenas."] = ""
 -- L["Hide in combat"] = ""
 -- L["Hides Skada's window when in combat."] = ""
+-- L["Show in combat"] = ""
+-- L["Shows Skada's window when in combat."] = ""
 -- L["Disable while hidden"] = ""
 -- L["Skada will not collect any data when automatically hidden."] = ""
 -- L["Sort modes by usage"] = ""
