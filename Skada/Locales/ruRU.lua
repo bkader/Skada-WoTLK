@@ -610,6 +610,8 @@ L["Ignore Nicknames"] = "Игнорировать Псевдонимы"
 L["When enabled, nicknames set by Skada users are ignored."] = "Когда эта опция включена, Псевдонимы, установленные другими игроками, игнорируются."
 L["Name display"] = "Формат отображения имени"
 L["Choose how names are shown on your bars."] = "Выберите вариант отображения имени на полосах."
+L["Clear Cache"] = "Очистить кэш"
+L["Are you sure you want clear cached nicknames?"] = "Вы уверены, что хотите очистить кешированные никнеймы?"
 -- player score module lines --
 L["Player Score"] = "Оценка игроков"
 L["Raid Score"] = "Групповой рейтинг"

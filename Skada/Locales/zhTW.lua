@@ -611,6 +611,8 @@ L["Reported by: %s"] = "已回報由%s"
 -- L["When enabled, nicknames set by Skada users are ignored."] = ""
 -- L["Name display"] = ""
 -- L["Choose how names are shown on your bars."] = ""
+-- L["Clear Cache"] = ""
+-- L["Are you sure you want clear cached nicknames?"] = ""
 -- player score module lines --
 -- L["Player Score"] = ""
 -- L["Raid Score"] = ""

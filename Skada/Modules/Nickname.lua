@@ -83,7 +83,7 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 				set = function(_, val)
 					local okey, nickname = CheckNickname(val)
 					if okey == true then
-						Skada.db.profile.nickname = nickname
+						Skada.db.profile.nickname = (nickname == "") and unitName or nickname
 						mod:SetNickname(unitGUID, nickname, true)
 						Skada:ApplySettings()
 					else
@@ -109,6 +109,18 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 				desc = L["When enabled, nicknames set by Skada users are ignored."],
 				order = 3,
 				width = "full"
+			},
+			reset = {
+				type = "execute",
+				name = L["Clear Cache"],
+				order = 4,
+				width = "double",
+				confirm = function() return L["Are you sure you want clear cached nicknames?"] end,
+				func = function()
+					Skada.db.global.nicknames = wipe(Skada.db.global.nicknames or {})
+					mod.db.nicknames = Skada.db.global.nicknames
+					Skada:ApplySettings()
+				end
 			}
 		}
 	}
@@ -196,12 +208,9 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 					if not player.nickname then -- we update only if needed.
 						if self.db.nicknames[guid] then
 							player.nickname = self.db.nicknames[guid]
-						else
-							player.nickname = player.name
-							self.db.nicknames[guid] = player.nickname
 						end
 						-- update cached
-						if set._playeridx and set._playeridx[guid] then
+						if player.nickname and set._playeridx and set._playeridx[guid] then
 							set._playeridx[guid].nickname = player.nickname
 						end
 					end
@@ -216,34 +225,28 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 
 	-- called whenever we receive a nickname request.
 	function mod:OnCommNicknameRequest(_, sender)
-		if not Skada.db.profile.ignorenicknames then
-			Skada:SendComm("WHISPER", sender, "NicknameResponse", unitGUID, Skada.db.profile.nickname)
-		end
+		Skada:SendComm("WHISPER", sender, "NicknameResponse", unitGUID, Skada.db.profile.nickname)
 	end
 
 	-- called whenever we receive a nickname response
 	function mod:OnCommNicknameResponse(_, sender, playerid, nickname)
-		if not Skada.db.profile.ignorenicknames then
-			-- the player didn't send us the nickname or doesn't
-			-- have a nickname set? Set it to his/her name anyways.
-			if not nickname or nickname == "" then
-				nickname = sender
-			end
-			self:SetNickname(playerid, nickname, false)
+		-- the player didn't send us the nickname or doesn't
+		-- have a nickname set? Set it to his/her name anyways.
+		if not nickname or nickname == "" then
+			nickname = sender
 		end
+		self:SetNickname(playerid, nickname)
 	end
 
 	-- if someone in our group changes the nickname, we update the cache
 	function mod:OnCommNicknameChange(_, sender, playerid, nickname)
-		if not Skada.db.profile.ignorenicknames then
-			if not nickname or nickname == "" then
-				nickname = sender
-			end
-			if not self.db then
-				self:SetCacheTable()
-			end
-			self.db.nicknames[playerid] = nickname
+		if not nickname or nickname == "" then
+			nickname = sender
 		end
+		if not self.db then
+			self:SetCacheTable()
+		end
+		self.db.nicknames[playerid] = nickname
 	end
 
 	-----------------------------------------------------------

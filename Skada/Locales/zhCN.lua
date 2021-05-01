@@ -611,6 +611,8 @@ L["Ignore Nicknames"] = "忽略昵称"
 L["When enabled, nicknames set by Skada users are ignored."] = "勾选后，Skada用户设定的昵称将被忽略。"
 L["Name display"] = "名字显示"
 L["Choose how names are shown on your bars."] = "选择统计条上名字的显示方式。"
+L["Clear Cache"] = "清除缓存"
+L["Are you sure you want clear cached nicknames?"] = "您确定要清除缓存的昵称吗？"
 -- player score module lines --
 L["Player Score"] = "玩家评分"
 L["Raid Score"] = "团队评分"

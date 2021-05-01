@@ -612,6 +612,8 @@ L["Ignore Nicknames"] = "Ignorar apodos y avatares"
 L["When enabled, nicknames set by Skada users are ignored."] = "Cuando está habilitado, los apodos y avatares establecidos por otros miembros de la hermandad se ignoran."
 L["Name display"] = "Formato de nombres"
 L["Choose how names are shown on your bars."] = "Elija cómo se muestran los nombres en sus barras."
+L["Clear Cache"] = "Limpiar cache"
+L["Are you sure you want clear cached nicknames?"] = "¿Estás seguro de que quieres borrar los apodos almacenados en caché?"
 -- player score module lines --
 L["Player Score"] = "Puntuación del jugador"
 L["Raid Score"] = "Puntaje de grupo"
