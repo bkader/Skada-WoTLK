@@ -129,6 +129,7 @@ Skada.defaults = {
 		report = {mode = "Damage", set = "current", channel = "Say", chantype = "preset", number = 10},
 		modulesBlocked = {
 			["Spamage"] = true,
+			["Overkill"] = true,
 			["Useful damage"] = true,
 			["Damage done by spell"] = true,
 			["Avoidance & Mitigation"] = true
