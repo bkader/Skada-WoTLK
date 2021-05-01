@@ -623,6 +623,7 @@ function Window:DisplayMode(mode)
 	end
 	self:Wipe()
 
+	self.notitleset = nil
 	self.selectedmode = mode
 	self.metadata = wipe(self.metadata or {})
 
@@ -2378,7 +2379,7 @@ do
 		self.db.mode = savemode
 		savemode = nil
 
-		if self.db.titleset and self.db.display ~= "inline" then
+		if self.db.titleset and not self.notitleset and self.db.display ~= "inline" then
 			local setname
 			if self.selectedset == "current" then
 				setname = L["Current"]

@@ -119,8 +119,11 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				target = "targettarget"
 			end
 
+			win.title = L["Threat"]
+			win.notitleset = true
+
 			if target then
-				win.title = _UnitName(target)
+				win.title = _UnitName(target) or L["Threat"]
 
 				-- Reset our counter which we use to keep track of current index in the dataset.
 				nr = 1
@@ -193,8 +196,6 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 
 					last_warn = time()
 				end
-			else
-				win.title = L["Threat"]
 			end
 		end
 
