@@ -137,6 +137,7 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 		local max = 0
 		local boss = find_boss_data(win.mobname)
 		if boss then
+			win.notitleset = true
 			win.title = win.mobname .. " - " .. (localized[win.modename] or win.modename)
 
 			local nr = 1
@@ -189,6 +190,7 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 
 		local boss = find_boss_data(win.mobname)
 		if boss then
+			win.notitleset = true
 			win.title = _format(L["%s's overall data"], win.mobname)
 
 			local nr = 1
@@ -250,6 +252,7 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 			end
 		end
 		win.metadata.maxvalue = max
+		win.notitleset = true
 		win.title = L["Improvement"]
 	end
 
