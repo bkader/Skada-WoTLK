@@ -483,10 +483,10 @@ L["Crushing"] = "Aplastante"
 -- useful damage targets
 L["Useful targets"] = "Objetivos útiles"
 L["Oozes"] = "Oozes"
-L["Princes overkilling"] = "Daño excesivo de los príncipes"
+L["Princes overkilling"] = "Daño excesivo en los príncipes"
 L["Adds"] = "Adds"
 L["Halion and Inferno"] = "Halion y Inferno"
-L["Valkyrs overkilling"] = "Daño excesivo de Valkyrs"
+L["Valkyrs overkilling"] = "Daño excesivo en Valkyrs"
 -- missing bosses entries
 L["Cult Adherent"] = "Partidario del Culto"
 L["Cult Fanatic"] = "Fanático del Culto"
