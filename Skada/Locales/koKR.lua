@@ -451,7 +451,6 @@ L.timemesure_desc = [=[|cFFFFFF00활동 시간|r: 각 공격대원의 타이머�
 -- L["Damage: Personal DPS"] = ""
 -- L["RDPS"] = ""
 -- L["Damage: Raid DPS"] = ""
--- L["Overkill"] = ""
 -- damage taken module
 -- L["Damage taken"] = ""
 -- L["Damage taken by %s"] = ""
@@ -623,3 +622,7 @@ L["Reported by: %s"] = "%s의 보고"
 -- L["Damage mitigated"] = ""
 -- L["%s's mitigated damage"] = ""
 -- L["%s's <%s> mitigated damage"] = ""
+-- overkill module lines --
+-- L["Overkill"] = ""
+-- L["Overkill spell list"] = ""
+-- L["%s's overkill"] = ""

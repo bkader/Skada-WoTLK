@@ -451,7 +451,6 @@ L["DPS"] = true
 L["Damage: Personal DPS"] = true
 L["RDPS"] = true
 L["Damage: Raid DPS"] = true
-L["Overkill"] = true
 -- damage taken module
 L["Damage taken"] = true
 L["Damage taken by %s"] = true
@@ -623,3 +622,7 @@ L["%s's Score"] = true
 L["Damage mitigated"] = true
 L["%s's mitigated damage"] = true
 L["%s's <%s> mitigated damage"] = true
+-- overkill module lines --
+L["Overkill"] = true
+L["Overkill spell list"] = true
+L["%s's overkill"] = true

@@ -720,7 +720,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
 	function mod:AddPlayerAttributes(player)
 		if not player.damagedone then
-			player.damagedone = {amount = 0, overkil = 0, spells = {}, targets = {}}
+			player.damagedone = {amount = 0, overkill = 0, spells = {}, targets = {}}
 		end
 	end
 
@@ -882,9 +882,9 @@ Skada:AddLoadableModule("Damage done by spell", function(Skada, L)
 	end
 end)
 
--- ================== --
+-- ==================== --
 -- Useful Damage Module --
--- ================== --
+-- ==================== --
 --
 -- this module uses the data from Damage module and
 -- show the "effective" damage and dps by substructing
@@ -971,5 +971,109 @@ Skada:AddLoadableModule("Useful damage", function(Skada, L)
 			Skada:FormatNumber(getRaidDPS(set)),
 			self.metadata.columns.DPS
 		)
+	end
+end)
+
+-- ============== --
+-- Overkill Module --
+-- ============== --
+
+Skada:AddLoadableModule("Overkill", function(Skada, L)
+	if Skada:IsDisabled("Damage", "Overkill") then return end
+
+	local mod = Skada:NewModule(L["Overkill"])
+	local playermod = mod:NewModule(L["Overkill spell list"])
+
+	function playermod:Enter(win, id, label)
+		win.playerid, win.playername = id, label
+		win.title = _format(L["%s's overkill"], label)
+	end
+
+	function playermod:Update(win, set)
+		local max = 0
+		local player = Skada:find_player(set, win.playerid, win.plana)
+		if player and player.overkill and player.overkill > 0 then
+			win.title = _format(L["%s's overkill"], player.name)
+
+			local nr = 1
+			for spellname, spell in _pairs(player.damagedone.spells) do
+				if spell.overkill and spell.overkill > 0 then
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
+
+					d.id = spell.id
+					d.label = spellname
+					d.spellid = spell.id
+					d.spellschool = spell.school
+					d.icon = _select(3, _GetSpellInfo(spell.id))
+
+					d.value = spell.overkill
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatNumber(spell.overkill),
+						mod.metadata.columns.Damage,
+						_format("%02.1f%%", 100 * spell.overkill / player.overkill),
+						mod.metadata.columns.Percent
+					)
+
+					if spell.overkill > max then
+						max = spell.overkill
+					end
+
+					nr = nr + 1
+				end
+			end
+		end
+		win.metadata.maxvalue = max
+	end
+
+	function mod:Update(win, set)
+		local max = 0
+		local total = set.overkill or 0
+
+		if total > 0 then
+			local nr = 1
+			for _, player in _ipairs(set.players) do
+				if player.overkill and player.overkill > 0 then
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
+
+					d.id = player.id
+					d.label = player.name
+					d.class = player.class or "PET"
+					d.role = player.role or "DAMAGER"
+					d.spec = player.spec or 1
+
+					d.value = player.overkill
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatNumber(player.overkill),
+						self.metadata.columns.Damage,
+						_format("%02.1f%%", 100 * player.overkill / total),
+						self.metadata.columns.Percent
+					)
+
+					if player.overkill > max then
+						max = player.overkill
+					end
+
+					nr = nr + 1
+				end
+			end
+		end
+
+		win.metadata.maxvalue = max
+		win.title = L["Overkill"]
+	end
+
+	function mod:OnEnable()
+		self.metadata = {
+			showspots = true,
+			click1 = playermod,
+			columns = {Damage = true, Percent = true}
+		}
+		Skada:AddMode(self, L["Damage done"])
+	end
+
+	function mod:OnDisable()
+		Skada:RemoveMode(self, L["Damage done"])
 	end
 end)
