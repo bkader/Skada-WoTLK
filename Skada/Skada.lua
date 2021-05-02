@@ -145,10 +145,8 @@ local sort_modes
 
 -- party/group
 function Skada:IsInPVP()
-	if not self.instanceType then
-		self.instanceType = select(2, IsInInstance())
-	end
-	return (self.instanceType == "pvp" or self.instanceType == "arena")
+	local instanceType = select(2, IsInInstance())
+	return (instanceType == "pvp" or instanceType == "arena")
 end
 
 local function setPlayerActiveTimes(set)
@@ -1979,7 +1977,6 @@ end
 
 function Skada:ZoneCheck()
 	local inInstance, instanceType = IsInInstance()
-	self.instanceType = instanceType
 
 	local isininstance = inInstance and (instanceType == "party" or instanceType == "raid")
 	local isinpvp = self:IsInPVP()
@@ -2960,8 +2957,7 @@ do
 			elseif groupType == "party" then
 				channel = "PARTY"
 			else
-				local zoneType = self.instanceType or select(2, IsInInstance())
-				self.instanceType = zoneType -- update it
+				local zoneType = select(2, IsInInstance())
 				if zoneType == "pvp" or zoneType == "arena" then
 					channel = "BATTLEGROUND"
 				end
