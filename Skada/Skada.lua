@@ -879,12 +879,13 @@ do
 				timeout = 30,
 				whileDead = 0,
 				hideOnEscape = 1,
-				OnAccept = function()
-					return DeleteWindow(name)
+				OnAccept = function(self, data)
+					L_CloseDropDownMenus()
+					return DeleteWindow(data)
 				end
 			}
 		end
-		StaticPopup_Show("SkadaDeleteWindowDialog")
+		StaticPopup_Show("SkadaDeleteWindowDialog", nil, nil, name)
 	end
 end
 
@@ -1981,10 +1982,7 @@ function Skada:ZoneCheck()
 	local isininstance = inInstance and (instanceType == "party" or instanceType == "raid")
 	local isinpvp = self:IsInPVP()
 
-	if
-		isininstance and wasininstance ~= nil and not wasininstance and self.db.profile.reset.instance ~= 1 and
-			self:CanReset()
-	 then
+	if isininstance and wasininstance ~= nil and not wasininstance and self.db.profile.reset.instance ~= 1 and self:CanReset() then
 		if self.db.profile.reset.instance == 3 then
 			self:ShowPopup()
 		else
@@ -2000,17 +1998,9 @@ function Skada:ZoneCheck()
 		end
 	end
 
-	if isininstance then
-		wasininstance = true
-	else
-		wasininstance = false
-	end
-
-	if isinpvp then
-		wasinpvp = true
-	else
-		wasinpvp = false
-	end
+	wasininstance = (isininstance == true)
+	wasinpvp = (isinpvp == true)
+	wasinparty = (IsInGroup() or IsInRaid())
 end
 
 do
