@@ -314,31 +314,31 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		local found_sources, found_src, found_shield_id
 
 		for shield_id, sources in pairs(shields[dstName]) do
-			-- twin val'kyr light essence and we took fire damage?
+			-- Twin Val'kyr light essence and we took fire damage?
 			if shield_id == 65686 then
-				--twin val'kyr dark essence and we took shadow damage?
 				if _band(spellschool, 0x4) == spellschool then
 					return
 				end
+			-- Twin Val'kyr dark essence and we took shadow damage?
 			elseif shield_id == 65684 then
-				-- Frost Ward and we took frost damage?
 				if _band(spellschool, 0x20) == spellschool then
 					return
 				end
+			-- Frost Ward and we took frost damage?
 			elseif mage_frost_ward[shield_id] then
-				-- Fire Ward and we took fire damage?
 				if _band(spellschool, 0x10) == spellschool then
 					found_shield_id = shield_id
 					found_sources = sources
 					break
 				end
+			-- Fire Ward and we took fire damage?
 			elseif mage_fire_ward[shield_id] then
-				-- Shadow Ward and we took shadow damage?
 				if _band(spellschool, 0x4) == spellschool then
 					found_shield_id = shield_id
 					found_sources = sources
 					break
 				end
+			-- Shadow Ward and we took shadow damage?
 			elseif warlock_shadow_ward[shield_id] then
 				if _band(spellschool, 0x20) == spellschool then
 					found_shield_id = shield_id
@@ -529,33 +529,36 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	end
 
 	function mod:Update(win, set)
-		local total = set.absorbs or 0
-		local nr, max = 1, 0
+		local max = 0
 
-		for i, player in _ipairs(set.players) do
-			if player.absorbs then
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+		if set then
+			local nr, total = 1, set.absorbs or 0
 
-				d.id = player.id
-				d.label = player.name
-				d.class = player.class or "PET"
-				d.role = player.role or "DAMAGER"
-				d.spec = player.spec or 1
+			for _, player in _ipairs(set.players) do
+				if player.absorbs then
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
-				d.value = player.absorbs.amount
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatNumber(player.absorbs.amount),
-					self.metadata.columns.Absorbs,
-					_format("%02.1f%%", 100 * player.absorbs.amount / math_max(1, set.absorbs or 0)),
-					self.metadata.columns.Percent
-				)
+					d.id = player.id
+					d.label = player.name
+					d.class = player.class or "PET"
+					d.role = player.role or "DAMAGER"
+					d.spec = player.spec or 1
 
-				if player.absorbs.amount > max then
-					max = player.absorbs.amount
+					d.value = player.absorbs.amount
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatNumber(player.absorbs.amount),
+						self.metadata.columns.Absorbs,
+						_format("%02.1f%%", 100 * player.absorbs.amount / math_max(1, set.absorbs or 0)),
+						self.metadata.columns.Percent
+					)
+
+					if player.absorbs.amount > max then
+						max = player.absorbs.amount
+					end
+
+					nr = nr + 1
 				end
-
-				nr = nr + 1
 			end
 		end
 
@@ -606,9 +609,7 @@ end)
 -- ========================== --
 
 Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
-	if Skada:IsDisabled("Healing", "Absorbs", "Absorbs and healing") then
-		return
-	end
+	if Skada:IsDisabled("Healing", "Absorbs", "Absorbs and healing") then return end
 
 	local mod = Skada:NewModule(L["Absorbs and healing"])
 	local playermod = mod:NewModule(L["Absorbed and healed players"])
@@ -842,43 +843,46 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 	end
 
 	function mod:Update(win, set)
-		local total = (set.healing or 0) + (set.absorbs or 0)
-		local nr, max = 1, 0
+		local max = 0
 
-		for i, player in _ipairs(set.players) do
-			local healing = 0
-			if player.healing then
-				healing = healing + player.healing.amount
-			end
-			if player.absorbs then
-				healing = healing + player.absorbs.amount
-			end
+		if set then
+			local nr, total = 1, (set.healing or 0) + (set.absorbs or 0)
 
-			if healing > 0 then
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
-
-				d.id = player.id
-				d.label = player.name
-				d.class = player.class or "PET"
-				d.role = player.role or "DAMAGER"
-				d.spec = player.spec or 1
-
-				d.value = healing
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatNumber(healing),
-					self.metadata.columns.Healing,
-					Skada:FormatNumber(getHPS(set, player)),
-					self.metadata.columns.HPS,
-					_format("%02.1f%%", 100 * healing / math_max(1, total)),
-					self.metadata.columns.Percent
-				)
-
-				if healing > max then
-					max = healing
+			for _, player in _ipairs(set.players) do
+				local healing = 0
+				if player.healing then
+					healing = healing + player.healing.amount
+				end
+				if player.absorbs then
+					healing = healing + player.absorbs.amount
 				end
 
-				nr = nr + 1
+				if healing > 0 then
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
+
+					d.id = player.id
+					d.label = player.name
+					d.class = player.class or "PET"
+					d.role = player.role or "DAMAGER"
+					d.spec = player.spec or 1
+
+					d.value = healing
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatNumber(healing),
+						self.metadata.columns.Healing,
+						Skada:FormatNumber(getHPS(set, player)),
+						self.metadata.columns.HPS,
+						_format("%02.1f%%", 100 * healing / math_max(1, total)),
+						self.metadata.columns.Percent
+					)
+
+					if healing > max then
+						max = healing
+					end
+
+					nr = nr + 1
+				end
 			end
 		end
 
@@ -1137,8 +1141,7 @@ Skada:AddLoadableModule("Healing done by spell", function(Skada, L)
 		if set then
 			CacheSpells(set)
 
-			local total = (set.healing or 0) + (set.absorbs or 0)
-			local nr = 1
+			local nr, total = 1, (set.healing or 0) + (set.absorbs or 0)
 
 			for spellid, spell in _pairs(spells) do
 				local d = win.dataset[nr] or {}
