@@ -258,7 +258,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		local max = 0
 
-		if player and player.ccdone.spells then
+		if player and player.ccdone and player.ccdone.spells then
 			win.title = _format(L["%s's CC Done spells"], player.name)
 
 			local nr = 1
@@ -347,7 +347,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		local max = 0
 
-		if player and player.ccdone.targets then
+		if player and player.ccdone and player.ccdone.targets then
 			win.title = _format(L["%s's CC Done targets"], player.name)
 
 			local nr = 1

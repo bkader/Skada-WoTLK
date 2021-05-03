@@ -430,7 +430,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		local max = 0
 
-		if player and player.absorbs.spells then
+		if player and player.absorbs and player.absorbs.spells then
 			win.title = _format(L["%s's absorb spells"], player.name)
 
 			local nr = 1
@@ -475,7 +475,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		local max = 0
 
-		if player and player.absorbs.targets then
+		if player and player.absorbs and player.absorbs.targets then
 			win.title = _format(L["%s's absorbed players"], player.name)
 
 			local nr = 1

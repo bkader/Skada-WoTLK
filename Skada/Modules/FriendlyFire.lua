@@ -90,7 +90,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		local max = 0
 
-		if player and player.friendfire.targets then
+		if player and player.friendfire and player.friendfire.targets then
 			win.title = _format(L["%s's targets"], player.name)
 
 			local nr = 1
@@ -150,7 +150,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		local max = 0
 
-		if player and player.friendfire.spells then
+		if player and player.friendfire and player.friendfire.spells then
 			win.title = _format(L["%s's damage"], player.name)
 
 			local nr = 1

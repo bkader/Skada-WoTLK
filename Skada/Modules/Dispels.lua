@@ -88,7 +88,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		local max = 0
 
-		if player and player.dispels.extraspells then
+		if player and player.dispels and player.dispels.extraspells then
 			win.title = _format(L["%s's dispelled spells"], player.name)
 
 			local nr = 1
@@ -132,7 +132,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		local max = 1
 
-		if player and player.dispels.targets then
+		if player and player.dispels and player.dispels.targets then
 			win.title = _format(L["%s's dispelled targets"], player.name)
 
 			local nr = 1
@@ -192,7 +192,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		local max = 0
 
-		if player and player.dispels.spells then
+		if player and player.dispels and player.dispels.spells then
 			win.title = _format(L["%s's dispel spells"], player.name)
 
 			local nr = 1
@@ -229,6 +229,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 
 	function mod:Update(win, set)
 		local nr, max = 1, 0
+
 		for _, player in _ipairs(set.players) do
 			if player.dispels then
 				local d = win.dataset[nr] or {}

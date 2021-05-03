@@ -180,7 +180,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid)
 		local max = 0
 
-		if player and player.damagetaken.spells then
+		if player and player.damagetaken and player.damagetaken.spells then
 			win.title = _format(L["Damage taken by %s"], player.name)
 
 			local nr = 1
@@ -222,7 +222,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid)
 		local max = 0
 
-		if player and player.damagetaken.sources then
+		if player and player.damagetaken and player.damagetaken.sources then
 			win.title = _format(L["%s's damage sources"], player.name)
 
 			local nr = 1
@@ -279,7 +279,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 	function spellmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid)
 
-		if player and player.damagetaken.spells then
+		if player and player.damagetaken and player.damagetaken.spells then
 			local spell = player.damagetaken.spells[win.spellname]
 
 			if spell then

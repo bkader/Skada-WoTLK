@@ -370,7 +370,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		local max = 0
 
-		if player and player.damagedone.spells then
+		if player and player.damagedone and player.damagedone.spells then
 			win.title = _format(L["%s's damage"], player.name)
 
 			local nr = 1
@@ -412,7 +412,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		local max = 0
 
-		if player and player.damagedone.targets then
+		if player and player.damagedone and player.damagedone.targets then
 			win.title = _format(L["%s's targets"], player.name)
 
 			local nr = 1
@@ -465,7 +465,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	function spellmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
-		if player and player.damagedone.spells then
+		if player and player.damagedone and player.damagedone.spells then
 			local spell = player.damagedone.spells[win.spellname]
 
 			if spell then
@@ -914,7 +914,7 @@ Skada:AddLoadableModule("Useful damage", function(Skada, L)
 	function mod:Update(win, set)
 		local max = 0
 
-		if set and set.damagedone > 0 then
+		if set and set.damagedone and set.damagedone > 0 then
 			local total = set.damagedone - (set.overkill or 0)
 			local nr = 1
 
