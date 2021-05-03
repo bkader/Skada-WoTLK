@@ -257,7 +257,7 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 	function mod:Update(win, set)
 		local nr, max = 1, 0
 
-		for i, player in _ipairs(set.players) do
+		for _, player in _ipairs(set.players) do
 			if player.resurrect then
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d

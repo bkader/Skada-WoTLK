@@ -186,7 +186,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 	function mod:Update(win, set)
 		local nr, max = 1, 0
 
-		for i, player in _pairs(set.players) do
+		for _, player in _pairs(set.players) do
 			if player.friendfire and player.friendfire.amount > 0 then
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d

@@ -121,8 +121,7 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 
 		for _, player in ipairs(set.players) do
 			local damagedone = player.damagedone and player.damagedone.amount or 0
-			local healing =
-				(player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
+			local healing = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
 			local mitigation = GetPlayerMitigation(player)
 			local damagetaken = player.damagetaken and player.damagetaken.amount or 0
 

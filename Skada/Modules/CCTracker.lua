@@ -430,7 +430,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 	function mod:Update(win, set)
 		local max, nr = 0, 1
-		for i, player in _ipairs(set.players) do
+		for _, player in _ipairs(set.players) do
 			if player.ccdone then
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
@@ -745,7 +745,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 	function mod:Update(win, set)
 		local max, nr = 0, 1
-		for i, player in _ipairs(set.players) do
+		for _, player in _ipairs(set.players) do
 			if player.cctaken then
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
@@ -1086,7 +1086,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 	function mod:Update(win, set)
 		local nr, max = 1, 0
-		for i, player in _ipairs(set.players) do
+		for _, player in _ipairs(set.players) do
 			if player.ccbreaks then
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d

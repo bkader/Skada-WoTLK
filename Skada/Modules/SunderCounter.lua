@@ -39,6 +39,11 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 	end
 
 	function targetmod:Update(win, set)
+		if not sunder then
+			sunder = _select(1, _GetSpellInfo(47467))
+			devastate = _select(1, _GetSpellInfo(47498))
+		end
+
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		local max = 0
 
@@ -73,14 +78,15 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 	end
 
 	function mod:Update(win, set)
-		sunder = sunder or _select(1, _GetSpellInfo(47467))
-		devastate = devastate or _select(1, _GetSpellInfo(47498))
+		if not sunder then
+			sunder = _select(1, _GetSpellInfo(47467))
+			devastate = _select(1, _GetSpellInfo(47498))
+		end
 
 		local max = 0
-		local total = set.sunders or 0
 
-		if total > 0 then
-			local nr = 1
+		if set and set.sunders then
+			local nr, total = 1, set.sunders
 
 			for _, player in _ipairs(set.players) do
 				if player.sunders then
@@ -115,8 +121,8 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 	end
 
 	function mod:OnInitialize()
-		sunder = sunder or _select(1, _GetSpellInfo(47467))
-		devastate = devastate or _select(1, _GetSpellInfo(47498))
+		sunder = _select(1, _GetSpellInfo(47467))
+		devastate = _select(1, _GetSpellInfo(47498))
 	end
 
 	function mod:OnEnable()

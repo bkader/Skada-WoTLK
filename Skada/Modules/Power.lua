@@ -117,33 +117,36 @@ Skada:AddLoadableModule("Power gained", function(Skada, L)
 	-- this is the main module update function that shows the list
 	-- of players depending on the selected power gain type.
 	function basemod:Update(win, set)
-		local nr, max = 1, 0
-		local total = set.power[self.power] or 0
+		local max = 0
 
-		for _, player in _ipairs(set.players) do
-			if player.power[self.power] then
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+		if set and set.power and self.power then
+			local nr, total = 1, set.power[self.power] or 0
 
-				d.id = player.id
-				d.label = player.name
-				d.class = player.class or "PET"
-				d.role = player.role or "DAMAGER"
-				d.spec = player.spec or 1
+			for _, player in _ipairs(set.players) do
+				if player.power[self.power] then
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
-				d.value = player.power[self.power].amount
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatNumber(d.value),
-					mod.metadata.columns.Amount,
-					_format("%02.1f%%", 100 * d.value / math_max(1, total)),
-					mod.metadata.columns.Percent
-				)
+					d.id = player.id
+					d.label = player.name
+					d.class = player.class or "PET"
+					d.role = player.role or "DAMAGER"
+					d.spec = player.spec or 1
 
-				if d.value > max then
-					max = d.value
+					d.value = player.power[self.power].amount
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatNumber(d.value),
+						mod.metadata.columns.Amount,
+						_format("%02.1f%%", 100 * d.value / math_max(1, total)),
+						mod.metadata.columns.Percent
+					)
+
+					if d.value > max then
+						max = d.value
+					end
+
+					nr = nr + 1
 				end
-
-				nr = nr + 1
 			end
 		end
 

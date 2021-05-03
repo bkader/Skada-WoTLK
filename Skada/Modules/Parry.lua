@@ -92,7 +92,7 @@ Skada:AddLoadableModule("Parry-haste", function(Skada, L)
 
 	function mod:Update(win, set)
 		local max = 0
-		local total = set.parries or 0
+		local total = set and set.parries or 0
 
 		if total > 0 then
 			local nr = 1

@@ -521,7 +521,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	function mod:Update(win, set)
 		local nr, max = 1, 0
 
-		for i, player in _ipairs(set.players) do
+		for _, player in _ipairs(set.players) do
 			if player.damagedone.amount > 0 then
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
@@ -579,7 +579,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		local nr, max = 1, 0
 		local total = getRaidDPS(set)
 
-		for i, player in _ipairs(set.players) do
+		for _, player in _ipairs(set.players) do
 			local dps = getDPS(set, player)
 
 			if dps > 0 then
@@ -804,7 +804,7 @@ Skada:AddLoadableModule("Damage done by spell", function(Skada, L)
 			local nr = 1
 
 			cached = {}
-			for i, player in _ipairs(set.players) do
+			for _, player in _ipairs(set.players) do
 				if player.damagedone.amount > 0 then
 					for spellname, spell in _pairs(player.damagedone.spells) do
 						if spell.amount > 0 then

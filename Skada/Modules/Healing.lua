@@ -445,6 +445,7 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 
 		if set then
 			local nr, total = 1, (set.healing or 0) + (set.overhealing or 0)
+
 			for _, player in _ipairs(set.players) do
 				if player.healing and player.healing.overhealing > 0 then
 					local d = win.dataset[nr] or {}

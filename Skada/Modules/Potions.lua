@@ -208,33 +208,36 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	end
 
 	function mod:Update(win, set)
-		local nr, max = 1, 0
-		local total = set.potions or 0
+		local max = 0
 
-		for _, player in _ipairs(set.players) do
-			if player.potions and player.potions.count > 0 then
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+		if set and set.potions then
+			local nr, total = 1, set.potions
 
-				d.id = player.id
-				d.label = player.name
-				d.class = player.class or "PET"
-				d.role = player.role or "DAMAGER"
-				d.spec = player.spec or 1
+			for _, player in _ipairs(set.players) do
+				if player.potions and player.potions.count > 0 then
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
-				d.value = player.potions.count
-				d.valuetext = Skada:FormatValueText(
-					d.value,
-					self.metadata.columns.Count,
-					_format("%02.1f%%", 100 * d.value / math_max(1, total)),
-					self.metadata.columns.Percent
-				)
+					d.id = player.id
+					d.label = player.name
+					d.class = player.class or "PET"
+					d.role = player.role or "DAMAGER"
+					d.spec = player.spec or 1
 
-				if d.value > max then
-					max = d.value
+					d.value = player.potions.count
+					d.valuetext = Skada:FormatValueText(
+						d.value,
+						self.metadata.columns.Count,
+						_format("%02.1f%%", 100 * d.value / math_max(1, total)),
+						self.metadata.columns.Percent
+					)
+
+					if d.value > max then
+						max = d.value
+					end
+
+					nr = nr + 1
 				end
-
-				nr = nr + 1
 			end
 		end
 
