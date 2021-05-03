@@ -27,6 +27,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 			end
 
 			-- create a log entry if it doesn't exist.
+			player.deathlog = player.deathlog or {}
 			if not player.deathlog[1] then
 				player.deathlog[1] = {time = 0, log = {}}
 			end
