@@ -1421,11 +1421,11 @@ function Skada:get_player(set, playerid, playername, playerflags)
 	return player
 end
 
--- the function now accepts GUID or Flag
 function Skada:IsPlayer(arg)
 	if arg and players[arg] then
 		return true
-	elseif arg and band(arg, 0x00000400) ~= 0 then
+	end
+	if arg and band(arg, 0x00000400) ~= 0 then
 		return true
 	end
 	return false
