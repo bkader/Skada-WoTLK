@@ -1299,7 +1299,7 @@ do
 				if class then
 					player.class = class
 				-- it's a real player?
-				elseif UnitIsPlayer(player.name) or self:IsPlayer(player.flag) then
+				elseif UnitIsPlayer(player.name) or self:IsPlayer(player.id, player.flag) then
 					player.class = select(2, UnitClass(player.name))
 				elseif player.flag and band(player.flag, 0x00000400) ~= 0 then
 					player.class = "UNGROUPPLAYER"
@@ -1421,9 +1421,11 @@ function Skada:get_player(set, playerid, playername, playerflags)
 	return player
 end
 
--- the function now accepts GUID or Flag
-function Skada:IsPlayer(arg)
-	if arg and (players[arg] ~= nil or band(arg, 0x00000400) ~= 0) then
+function Skada:IsPlayer(guid, flags)
+	if guid and players[guid] then
+		return true
+	end
+	if flags and band(flags, 0x00000400) ~= 0 then
 		return true
 	end
 	return false
