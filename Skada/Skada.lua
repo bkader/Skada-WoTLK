@@ -1884,7 +1884,7 @@ do
 			return
 		end
 
-		local title = window.title or report_mode.title or report_mode:GetName()
+		local title = (window and window.title) or report_mode.title or report_mode:GetName()
 		local label = (report_mode_name == L["Improvement"]) and UnitName("player") or Skada:GetSetLabel(report_set)
 		sendchat(format(L["Skada: %s for %s:"], title, label), channel, chantype)
 
