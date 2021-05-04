@@ -19,6 +19,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 	local playermod = mod:NewModule(L["Damage spell list"])
 	local spellmod = mod:NewModule(L["Damage spell details"])
 	local sourcemod = mod:NewModule(L["Damage source list"])
+	local dtpsmod = mod:NewModule(L["DTPS"])
 
 	local function log_damage(set, dmg)
 		local player = Skada:get_player(set, dmg.playerid, dmg.playername, dmg.playerflags)
@@ -99,6 +100,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 
 		dmg.srcGUID = srcGUID
 		dmg.srcName = srcName
+		dmg.srcFlags = srcFlags
 
 		dmg.playerid = dstGUID
 		dmg.playername = dstName
@@ -130,6 +132,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 
 		dmg.srcGUID = srcGUID
 		dmg.srcName = srcName
+		dmg.srcFlags = srcFlags
 
 		dmg.playerid = dstGUID
 		dmg.playername = dstName
@@ -317,6 +320,46 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 		end
 	end
 
+	function dtpsmod:GetSetSummary(set)
+		return Skada:FormatNumber(getRaidDTPS(set))
+	end
+
+	function dtpsmod:Update(win, set)
+		local nr, max = 1, 0
+		local total = getRaidDTPS(set)
+
+		for _, player in _ipairs(set.players) do
+			local dps = getDTPS(set, player)
+
+			if dps > 0 then
+				local d = win.dataset[nr] or {}
+				win.dataset[nr] = d
+
+				d.id = player.id
+				d.label = player.name
+				d.class = player.class or "PET"
+				d.role = player.role or "DAMAGER"
+				d.spec = player.spec or 1
+
+				d.value = dps
+				d.valuetext = Skada:FormatValueText(
+					Skada:FormatNumber(dps),
+					self.metadata.columns.DPS,
+					_format("%02.1f%%", 100 * dps / math_max(1, total)),
+					self.metadata.columns.Percent
+				)
+
+				if dps > max then
+					max = dps
+				end
+				nr = nr + 1
+			end
+		end
+
+		win.metadata.maxvalue = max
+		win.title = L["DTPS"]
+	end
+
 	function mod:Update(win, set)
 		local nr, max = 1, 0
 		local settime = Skada:GetSetTime(set)
@@ -366,9 +409,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 			if spell.school then
 				local c = Skada.schoolcolors[spell.school]
 				local n = Skada.schoolnames[spell.school]
-				if c and n then
-					tooltip:AddLine(n, c.r, c.g, c.b)
-				end
+				if c and n then tooltip:AddLine(n, c.r, c.g, c.b) end
 			end
 
 			if spell.max and spell.min then
@@ -393,9 +434,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 				if spell.school then
 					local c = Skada.schoolcolors[spell.school]
 					local n = Skada.schoolnames[spell.school]
-					if c and n then
-						tooltip:AddLine(n, c.r, c.g, c.b)
-					end
+					if c and n then tooltip:AddLine(n, c.r, c.g, c.b) end
 				end
 
 				if label == CRIT_ABBR and spell.criticalamount then
@@ -427,6 +466,12 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 			click2 = sourcemod,
 			columns = {Damage = true, DTPS = true, Percent = true}
 		}
+		dtpsmod.metadata = {
+			showspots = true,
+			click1 = playermod,
+			click2 = sourcemod,
+			columns = {DPS = true, Percent = true}
+		}
 
 		Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {dst_is_interesting_nopets = true})
@@ -442,10 +487,12 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 		Skada:RegisterForCL(SwingMissed, "SWING_MISSED", {dst_is_interesting_nopets = true})
 
 		Skada:AddMode(self, L["Damage taken"])
+		Skada:AddMode(dtpsmod, L["Damage taken"])
 	end
 
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
+		Skada:RemoveMode(dtpsmod)
 	end
 
 	function mod:AddToTooltip(set, tooltip)
