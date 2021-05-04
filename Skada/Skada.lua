@@ -1383,7 +1383,7 @@ function Skada:find_player(set, playerid, playername, strict)
 	end
 end
 
-function Skada:get_player(set, playerid, playername, playerflag)
+function Skada:get_player(set, playerid, playername, playerflags)
 	if not set or not playerid then
 		return
 	end
@@ -1399,7 +1399,7 @@ function Skada:get_player(set, playerid, playername, playerflag)
 		player = {
 			id = playerid,
 			name = playername,
-			flag = playerflag,
+			flag = playerflags,
 			first = now,
 			time = 0
 		}
