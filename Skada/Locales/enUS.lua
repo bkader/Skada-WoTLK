@@ -28,6 +28,9 @@ L["Count"] = true
 L["Refresh"] = true
 L["Percent"] = true
 L["General options"] = true
+L["|cffffff00First Hit|r: %s from %s"] = true
+L["|cffffbb00First Hit|r: *?*"] = true
+L["|cffffbb00Boss First Target|r: %s (%s)"] = true
 -- windows section:
 L["Window"] = true
 L["Windows"] = true

@@ -39,7 +39,7 @@ local disabled = false
 local changed = true
 
 -- update & tick timers
-local update_timer, tick_timer
+local update_timer, tick_timer, pull_timer
 
 -- spell schools
 Skada.schoolcolors = {
@@ -3153,7 +3153,10 @@ function Skada:EndSegment()
 	if tick_timer and not tick_timer._cancelled then
 		tick_timer:Cancel()
 	end
-	update_timer, tick_timer = nil, nil
+	if pull_timer and not pull_timer._cancelled then
+		pull_timer:Cancel()
+	end
+	update_timer, tick_timer, pull_timer = nil, nil, nil
 
 	self.After(2, function() self:CleanGarbage(true) end)
 	self.After(3, function() self:MemoryCheck() end)
@@ -3177,6 +3180,34 @@ function Skada:ResumeSegment()
 end
 
 -- ======================================================= --
+
+-- thank you Details!
+local function WhoPulled(self)
+	-- first hit
+	local hitline = self.HitBy or L["|cffffbb00First Hit|r: *?*"]
+	Skada:Print(hitline)
+
+	-- firt boss target
+	local targetline
+	for i = 1, 4 do
+		local boss = "boss" .. i
+		if not UnitExists(boss) then
+			break -- no need
+		end
+
+		local bossname = UnitName(boss)
+		local target = select(1, UnitName(boss .. "target"))
+		local class = select(2, UnitClass(boss .. "target"))
+
+		if class and Skada.classcolors[class] then
+			target = "|c" .. Skada.classcolors[class].colorStr .. target .. "|r"
+		end
+		targetline = format(L["|cffffbb00Boss First Target|r: %s (%s)"], target, bossname)
+	end
+	if targetline then
+		Skada:Print(targetline)
+	end
+end
 
 do
 	local tentative, tentativehandle
@@ -3384,6 +3415,18 @@ do
 							tentativehandle = nil
 							self:StartCombat()
 						end
+					end
+
+					-- pull timer
+					if not pull_timer and triggerevents[eventtype] then
+						local link = self.GetSpellLink(select(1, ...)) or self.GetSpellInfo(select(1, ...))
+						pull_timer = self.NewTicker(0.5, function() WhoPulled(pull_timer) end, 1)
+						local puller = srcName or UNKNOWN
+						local class = select(2, UnitClass(srcName))
+						if class and self.classcolors[class] then
+							puller = "|c" .. self.classcolors[class].colorStr .. srcName .. "|r"
+						end
+						pull_timer.HitBy = format(L["|cffffff00First Hit|r: %s from %s"], link or "", puller)
 					end
 				end
 			end

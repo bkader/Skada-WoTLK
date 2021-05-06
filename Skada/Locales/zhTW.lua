@@ -28,6 +28,9 @@ if not L then return end
 -- L["Refresh"] = ""
 -- L["Percent"] = ""
 -- L["General options"] = ""
+-- L["|cffffff00First Hit|r: %s from %s"] = ""
+-- L["|cffffbb00First Hit|r: *?*"] = ""
+-- L["|cffffbb00Boss First Target|r: %s (%s)"] = ""
 -- windows section:
 -- L["Window"] = ""
 -- L["Windows"] = ""
