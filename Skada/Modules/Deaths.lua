@@ -13,7 +13,8 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	local _ipairs, _select, _next = ipairs, select, next
 	local _tostring, _format, _strsub = tostring, string.format, string.sub
 	local math_abs, math_max, math_modf = math.abs, math.max, math.modf
-	local _GetSpellInfo, _GetspellLink = Skada.GetSpellInfo, GetSpellLink
+	local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+	local _GetspellLink = Skada.GetSpellLink or GetSpellLink
 	local _date = date
 	local _
 
@@ -102,6 +103,30 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		data.absorbed = absorbed
 
 		log_deathlog(Skada.current, data, ts)
+	end
+
+	local function EnvironmentDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		local envtype = ...
+		local spellid, spellname, spellschool
+
+		if envtype == "Falling" or envtype == "FALLING" then
+			spellid, spellschool, spellname = 3, 1, ACTION_ENVIRONMENTAL_DAMAGE_FALLING
+		elseif envtype == "Drowning" or envtype == "DROWNING" then
+			spellid, spellschool, spellname = 4, 1, ACTION_ENVIRONMENTAL_DAMAGE_DROWNING
+		elseif envtype == "Fatigue" or envtype == "FATIGUE" then
+			spellid, spellschool, spellname = 5, 1, ACTION_ENVIRONMENTAL_DAMAGE_FATIGUE
+		elseif envtype == "Fire" or envtype == "FIRE" then
+			spellid, spellschool, spellname = 6, 4, ACTION_ENVIRONMENTAL_DAMAGE_FIRE
+		elseif envtype == "Lava" or envtype == "LAVA" then
+			spellid, spellschool, spellname = 7, 4, ACTION_ENVIRONMENTAL_DAMAGE_LAVA
+		elseif envtype == "Slime" or envtype == "SLIME" then
+			spellid, spellschool, spellname = 8, 8, ACTION_ENVIRONMENTAL_DAMAGE_SLIME
+		end
+
+		if spellid and spellname then
+			srcName, dstGUID, dstName = ENVIRONMENTAL_DAMAGE, Skada:FixMyPets(dstGUID, dstName)
+			SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, nil, select(2, ...))
+		end
 	end
 
 	local function SpellHeal(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
@@ -403,8 +428,12 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		Skada:RegisterForCL(SpellDamage, "SPELL_BUILDING_DAMAGE", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, "RANGE_DAMAGE", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SwingDamage, "SWING_DAMAGE", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(SwingDamage, "SWING_DAMAGE", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(EnvironmentDamage, "ENVIRONMENTAL_DAMAGE", {dst_is_interesting_nopets = true})
+
 		Skada:RegisterForCL(SpellHeal, "SPELL_HEAL", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellHeal, "SPELL_PERIODIC_HEAL", {dst_is_interesting_nopets = true})
+
 		Skada:RegisterForCL(UnitDied, "UNIT_DIED", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellResurrect, "SPELL_RESURRECT", {dst_is_interesting_nopets = true})
 		Skada.RegisterMessage(self, "UNIT_DIED")
