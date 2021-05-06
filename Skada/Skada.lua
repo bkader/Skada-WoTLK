@@ -127,13 +127,15 @@ local function GetGroupTypeAndCount()
 	return t, count
 end
 
--- because of Auto Shot, this function was added.
+-- we need to use custom icons for certain spells.
 function Skada.GetSpellInfo(spellid)
 	local res1, res2, res3, res4, res5, res6, res7, res8, res9
 	if spellid then
 		res1, res2, res3, res4, res5, res6, res7, res8, res9 = GetSpellInfo(spellid)
 		if spellid == 75 then
-			res3 = "Interface\\Icons\\Ability_Whirlwind"
+			res3 = "Interface\\Icons\\INV_Weapon_Bow_07"
+		elseif (spellid == 6603 or spellid == L["Auto Attack"]) and res1 == L["Auto Attack"] then
+			res3 = "Interface\\Icons\\INV_Sword_04"
 		end
 	end
 	return res1, res2, res3, res4, res5, res6, res7, res8, res9
@@ -2890,7 +2892,7 @@ function Skada:OnEnable()
 	end
 
 	-- please do not localize this line!
-	L["Auto Attack"] = select(1, self.GetSpellInfo(6603)) or MELEE
+	L["Auto Attack"] = select(1, GetSpellInfo(6603)) or MELEE
 
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("PARTY_MEMBERS_CHANGED")
