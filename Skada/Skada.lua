@@ -128,17 +128,38 @@ local function GetGroupTypeAndCount()
 end
 
 -- we need to use custom icons for certain spells.
-function Skada.GetSpellInfo(spellid)
-	local res1, res2, res3, res4, res5, res6, res7, res8, res9
-	if spellid then
-		res1, res2, res3, res4, res5, res6, res7, res8, res9 = GetSpellInfo(spellid)
-		if spellid == 75 then
-			res3 = "Interface\\Icons\\INV_Weapon_Bow_07"
-		elseif (spellid == 6603 or spellid == L["Auto Attack"]) and res1 == L["Auto Attack"] then
-			res3 = "Interface\\Icons\\INV_Sword_04"
+do
+	local custom = {
+		[3] = {ACTION_ENVIRONMENTAL_DAMAGE_FALLING, "Interface\\Icons\\ability_rogue_quickrecovery"},
+		[4] = {ACTION_ENVIRONMENTAL_DAMAGE_DROWNING, "Interface\\Icons\\spell_shadow_demonbreath"},
+		[5] = {ACTION_ENVIRONMENTAL_DAMAGE_FATIGUE, "Interface\\Icons\\ability_creature_cursed_05"},
+		[6] = {ACTION_ENVIRONMENTAL_DAMAGE_FIRE, "Interface\\Icons\\spell_fire_fire"},
+		[7] = {ACTION_ENVIRONMENTAL_DAMAGE_LAVA, "Interface\\Icons\\spell_shaman_lavaflow"},
+		[8] = {ACTION_ENVIRONMENTAL_DAMAGE_SLIME, "Interface\\Icons\\inv_misc_slime_01"}
+	}
+
+	function Skada.GetSpellInfo(spellid)
+		local res1, res2, res3, res4, res5, res6, res7, res8, res9
+		if spellid then
+			if custom[spellid] then
+				res1, res3 = unpack(custom[spellid])
+			else
+				res1, res2, res3, res4, res5, res6, res7, res8, res9 = GetSpellInfo(spellid)
+				if spellid == 75 then
+					res3 = "Interface\\Icons\\INV_Weapon_Bow_07"
+				elseif spellid == 6603 and res1 == L["Auto Attack"] then
+					res3 = "Interface\\Icons\\INV_Sword_04"
+				end
+			end
+		end
+		return res1, res2, res3, res4, res5, res6, res7, res8, res9
+	end
+
+	function Skada.GetSpellLink(spellid)
+		if not custom[spellid] then
+			return GetSpellLink(spellid)
 		end
 	end
-	return res1, res2, res3, res4, res5, res6, res7, res8, res9
 end
 
 -- ============= --
