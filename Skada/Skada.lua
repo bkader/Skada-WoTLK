@@ -88,9 +88,12 @@ local UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitGUID, UnitName, UnitC
 local CombatLogClearEntries = CombatLogClearEntries
 local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 
-local RAID_FLAGS = COMBATLOG_OBJECT_AFFILIATION_MINE + COMBATLOG_OBJECT_AFFILIATION_PARTY + COMBATLOG_OBJECT_AFFILIATION_RAID
-local PET_FLAGS = COMBATLOG_OBJECT_TYPE_PET + COMBATLOG_OBJECT_TYPE_GUARDIAN
-local SHAM_FLAGS = COMBATLOG_OBJECT_TYPE_NPC + COMBATLOG_OBJECT_CONTROL_NPC
+local BITMASK_MINE = 0x00000001
+local BITMASK_GROUP = 0x00000007
+local BITMASK_PETS = 0x00003000
+local BITMASK_PLAYER = 0x00000400
+local BITMASK_FRIENDLY = 0x00000010
+local BITMASK_HOSTILE = 0x00000040
 
 -- =================== --
 -- add missing globals --
@@ -1300,12 +1303,12 @@ do
 				-- it's a real player?
 				elseif UnitIsPlayer(player.name) or self:IsPlayer(player.id, player.flag) then
 					player.class = select(2, UnitClass(player.name))
-				elseif player.flag and band(player.flag, 0x00000400) ~= 0 then
+				elseif player.flag and band(player.flag, BITMASK_PLAYER) ~= 0 then
 					player.class = "UNGROUPPLAYER"
 					player.role = "DAMAGER"
 					player.spec = 2
 				-- pets?
-				elseif player.flag and band(player.flag, 0x00003000) ~= 0 then
+				elseif player.flag and band(player.flag, BITMASK_PETS) ~= 0 then
 					player.class = "PET"
 					player.role = "DAMAGER"
 					player.owner = pets[player.id]
@@ -1424,7 +1427,7 @@ function Skada:IsPlayer(guid, flags)
 	if guid and players[guid] then
 		return true
 	end
-	if flags and band(flags, 0x00000400) ~= 0 then
+	if flags and band(flags, BITMASK_PLAYER) ~= 0 then
 		return true
 	end
 	return false
@@ -1552,8 +1555,8 @@ do
 		local owner = pets[action.playerid]
 
 		-- we try to associate pets and and guardians with their owner
-		if not owner and action.playerflags and band(action.playerflags, PET_FLAGS) ~= 0 and band(action.playerflags, RAID_FLAGS) ~= 0 then
-			if band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
+		if not owner and action.playerflags and band(action.playerflags, BITMASK_PETS) ~= 0 and band(action.playerflags, BITMASK_GROUP) ~= 0 then
+			if band(action.playerflags, BITMASK_MINE) ~= 0 then
 				owner = {id = UnitGUID("player"), name = UnitName("player")}
 				pets[action.playerid] = owner
 			else
@@ -3263,10 +3266,10 @@ do
 		local now = time()
 
 		if not self.current and self.db.profile.tentativecombatstart and srcName and dstName and srcGUID ~= dstGUID and triggerevents[eventtype] then
-			src_is_interesting = band(srcFlags, RAID_FLAGS) ~= 0 or (band(srcFlags, PET_FLAGS) ~= 0 and pets[srcGUID]) or players[srcGUID]
+			src_is_interesting = band(srcFlags, BITMASK_GROUP) ~= 0 or (band(srcFlags, BITMASK_PETS) ~= 0 and pets[srcGUID]) or players[srcGUID]
 
 			if eventtype ~= "SPELL_PERIODIC_DAMAGE" then
-				dst_is_interesting = band(dstFlags, RAID_FLAGS) ~= 0 or (band(dstFlags, PET_FLAGS) ~= 0 and pets[dstGUID]) or players[dstGUID]
+				dst_is_interesting = band(dstFlags, BITMASK_GROUP) ~= 0 or (band(dstFlags, BITMASK_PETS) ~= 0 and pets[dstGUID]) or players[dstGUID]
 			end
 
 			if src_is_interesting or dst_is_interesting then
@@ -3291,14 +3294,14 @@ do
 		end
 
 		if self.current and self.db.profile.autostop then
-			if eventtype == "UNIT_DIED" and ((band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID]) then
+			if eventtype == "UNIT_DIED" and ((band(srcFlags, BITMASK_GROUP) ~= 0 and band(srcFlags, BITMASK_PETS) == 0) or players[srcGUID]) then
 				deathcounter = deathcounter + 1
 				-- If we reached the treshold for stopping the segment, do so.
 				if deathcounter > 0 and deathcounter / startingmembers >= 0.5 and not self.current.stopped then
 					self:Print("Stopping for wipe.")
 					self:StopSegment()
 				end
-			elseif eventtype == "SPELL_RESURRECT" and ((band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID]) then
+			elseif eventtype == "SPELL_RESURRECT" and ((band(srcFlags, BITMASK_GROUP) ~= 0 and band(srcFlags, BITMASK_PETS) == 0) or players[srcGUID]) then
 				deathcounter = deathcounter - 1
 			end
 		end
@@ -3310,7 +3313,7 @@ do
 				local fail = false
 
 				if mod.flags.src_is_interesting_nopets then
-					local src_is_interesting_nopets = (band(srcFlags, RAID_FLAGS) ~= 0 and band(srcFlags, PET_FLAGS) == 0) or players[srcGUID]
+					local src_is_interesting_nopets = (band(srcFlags, BITMASK_GROUP) ~= 0 and band(srcFlags, BITMASK_PETS) == 0) or players[srcGUID]
 
 					if src_is_interesting_nopets then
 						src_is_interesting = true
@@ -3320,7 +3323,7 @@ do
 				end
 
 				if not fail and mod.flags.dst_is_interesting_nopets then
-					local dst_is_interesting_nopets = (band(dstFlags, RAID_FLAGS) ~= 0 and band(dstFlags, PET_FLAGS) == 0) or players[dstGUID]
+					local dst_is_interesting_nopets = (band(dstFlags, BITMASK_GROUP) ~= 0 and band(dstFlags, BITMASK_PETS) == 0) or players[dstGUID]
 					if dst_is_interesting_nopets then
 						dst_is_interesting = true
 					else
@@ -3330,28 +3333,20 @@ do
 
 				if not fail and mod.flags.src_is_interesting or mod.flags.src_is_not_interesting then
 					if not src_is_interesting then
-						src_is_interesting = band(srcFlags, RAID_FLAGS) ~= 0 or (band(srcFlags, PET_FLAGS) ~= 0 and pets[srcGUID]) or players[srcGUID]
+						src_is_interesting = band(srcFlags, BITMASK_GROUP) ~= 0 or (band(srcFlags, BITMASK_PETS) ~= 0 and pets[srcGUID]) or players[srcGUID]
 					end
 
-					if mod.flags.src_is_interesting and not src_is_interesting then
-						fail = true
-					end
-
-					if mod.flags.src_is_not_interesting and src_is_interesting then
+					if (mod.flags.src_is_interesting and not src_is_interesting) or (mod.flags.src_is_not_interesting and src_is_interesting) then
 						fail = true
 					end
 				end
 
 				if not fail and mod.flags.dst_is_interesting or mod.flags.dst_is_not_interesting then
 					if not dst_is_interesting then
-						dst_is_interesting = band(dstFlags, RAID_FLAGS) ~= 0 or (band(dstFlags, PET_FLAGS) ~= 0 and pets[dstGUID]) or players[dstGUID]
+						dst_is_interesting = band(dstFlags, BITMASK_GROUP) ~= 0 or (band(dstFlags, BITMASK_PETS) ~= 0 and pets[dstGUID]) or players[dstGUID]
 					end
 
-					if mod.flags.dst_is_interesting and not dst_is_interesting then
-						fail = true
-					end
-
-					if mod.flags.dst_is_not_interesting and dst_is_interesting then
+					if (mod.flags.dst_is_interesting and not dst_is_interesting) or (mod.flags.dst_is_not_interesting and dst_is_interesting) then
 						fail = true
 					end
 				end
@@ -3372,7 +3367,7 @@ do
 		end
 
 		if self.current and src_is_interesting and not self.current.gotboss then
-			if band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+			if band(dstFlags, BITMASK_HOSTILE) ~= 0 and band(dstFlags, BITMASK_PLAYER) == 0 and band(dstFlags, BITMASK_PETS) == 0 then
 				local isboss, _, bossname = self:IsBoss(dstGUID)
 				self.current.mobname = bossname or dstName
 				if not self.current.gotboss and isboss then
@@ -3381,7 +3376,7 @@ do
 			end
 		end
 
-		if eventtype == "SPELL_SUMMON" and (band(srcFlags, RAID_FLAGS) ~= 0 or band(srcFlags, PET_FLAGS) ~= 0 or ((band(dstFlags, PET_FLAGS) ~= 0 or band(srcFlags, SHAM_FLAGS) ~= 0) and pets[dstGUID])) then
+		if eventtype == "SPELL_SUMMON" and (band(srcFlags, BITMASK_GROUP) ~= 0 or band(srcFlags, BITMASK_PETS) ~= 0 or (band(dstFlags, BITMASK_PETS) ~= 0 and pets[dstGUID])) then
 			-- we assign the pet the normal way
 			self:AssignPet(srcGUID, srcName, dstGUID)
 
