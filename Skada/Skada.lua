@@ -3390,7 +3390,7 @@ do
 		end
 
 		if self.current and src_is_interesting and not self.current.gotboss then
-			if band(dstFlags, BITMASK_HOSTILE) ~= 0 and band(dstFlags, BITMASK_PLAYER) == 0 and band(dstFlags, BITMASK_PETS) == 0 then
+			if band(dstFlags, BITMASK_HOSTILE) ~= 0 and band(dstFlags, BITMASK_PETS) == 0 then
 				local isboss, _, bossname = self:IsBoss(dstGUID)
 				self.current.mobname = bossname or dstName
 				if not self.current.gotboss and isboss then
