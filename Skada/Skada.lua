@@ -6,7 +6,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 local ACD = LibStub("AceConfigDialog-3.0")
 local DBI = LibStub("LibDBIcon-1.0", true)
 local LBB = LibStub("LibBabble-Boss-3.0"):GetUnstrictLookupTable()
-local LBBr = LibStub("LibBabble-Boss-3.0"):GetReverseLookupTable()
 local LBI = LibStub("LibBossIDs-1.0")
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 local LGT = LibStub("LibGroupTalents-1.0")
@@ -1353,10 +1352,10 @@ function Skada:find_player(set, playerid, playername, strict)
 			end
 		end
 
-		if strict then return end
+		if strict or not playername then return end
 
 		-- needed for certain bosses
-		local isboss, _, npcname = self:IsBoss(playerid)
+		local isboss, _, npcname = self:IsBoss(playerid, playername)
 		if isboss then
 			player = {
 				id = playerid,
@@ -1497,13 +1496,15 @@ do
 		[34497] = LBB["The Twin Val'kyr"] -- Fjola Lightbane
 	}
 
-	function Skada:IsBoss(guid)
+	function Skada:IsBoss(guid, name)
 		local isboss, npcid, npcname = false
 		if guid then
 			local id = tonumber(guid:sub(9, 12), 16)
 			if id and (LBI.BossIDs[id] or custom[id]) then
 				isboss, npcid = true, id
-				npcname = LBB[custom[id]] or LBBr[custom[id]] or custom[id]
+				if custom[id] then
+					npcname = (name and name ~= custom[id]) and name or custom[id]
+				end
 			end
 		end
 		return isboss, npcid, npcname
