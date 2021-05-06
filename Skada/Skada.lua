@@ -3195,14 +3195,15 @@ local function WhoPulled(self)
 			break -- no need
 		end
 
-		local bossname = UnitName(boss)
-		local target = select(1, UnitName(boss .. "target"))
-		local class = select(2, UnitClass(boss .. "target"))
+		local target = UnitName(boss .. "target")
+		if target then
+			local class = select(2, UnitClass(boss .. "target"))
 
-		if class and Skada.classcolors[class] then
-			target = "|c" .. Skada.classcolors[class].colorStr .. target .. "|r"
+			if class and Skada.classcolors[class] then
+				target = "|c" .. Skada.classcolors[class].colorStr .. target .. "|r"
+			end
+			targetline = format(L["|cffffbb00Boss First Target|r: %s (%s)"], target, UnitName(boss) or UNKNOWN)
 		end
-		targetline = format(L["|cffffbb00Boss First Target|r: %s (%s)"], target, bossname)
 	end
 	if targetline then
 		Skada:Print(targetline)
