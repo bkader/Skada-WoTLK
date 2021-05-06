@@ -31,7 +31,7 @@ Skada:AddLoadableModule("Power gained", function(Skada, L)
 				set.power[gain.type] = set.power[gain.type] or 0
 
 				-- add the amounts.
-				player.power[gain.type].amount = player.power[gain.type].amount + gain.amount
+				player.power[gain.type].amount = (player.power[gain.type].amount or 0) + gain.amount
 				set.power[gain.type] = set.power[gain.type] + gain.amount
 
 				-- record the spell

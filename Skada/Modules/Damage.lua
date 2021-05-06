@@ -71,8 +71,9 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			return
 		end
 
+		player.damagedone = player.damagedone or {}
+		player.damagedone.amount = (player.damagedone.amount or 0) + dmg.amount
 		set.damagedone = set.damagedone + dmg.amount
-		player.damagedone.amount = player.damagedone.amount + dmg.amount
 
 		if not player.damagedone.spells[dmg.spellname] then
 			player.damagedone.spells[dmg.spellname] = {

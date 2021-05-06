@@ -27,7 +27,8 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 			return
 		end
 
-		player.damagetaken.amount = player.damagetaken.amount + dmg.amount
+		player.damagetaken = player.damagetaken or {}
+		player.damagetaken.amount = (player.damagetaken.amount or 0) + dmg.amount
 		set.damagetaken = set.damagetaken + dmg.amount
 
 		-- add the spell

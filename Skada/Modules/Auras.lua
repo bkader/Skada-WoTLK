@@ -28,7 +28,7 @@ local function log_auraapply(set, aura)
 				}
 			else
 				player.auras[aura.spellname].active = 1
-				player.auras[aura.spellname].count = player.auras[aura.spellname].count + 1
+				player.auras[aura.spellname].count = (player.auras[aura.spellname].count or 0) + 1
 			end
 
 			-- fix the school
