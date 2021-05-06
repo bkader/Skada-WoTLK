@@ -17,7 +17,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 
 	local _pairs, _ipairs = pairs, ipairs
 	local _tostring, _format = tostring, string.format
-	local _GetSpellInfo = Skada.GetSpellInfo
+	local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local _UnitGUID = UnitGUID
 
 	local function onFail(event, who, failtype)

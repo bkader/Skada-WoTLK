@@ -3,7 +3,7 @@ assert(Skada, "Skada not found!")
 -- cache frequently used globals
 local _pairs, _ipairs, _select = pairs, ipairs, select
 local _format, math_max = string.format, math.max
-local _GetSpellInfo = Skada.GetSpellInfo
+local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 
 -- list of miss types
 local misstypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}

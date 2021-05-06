@@ -11,11 +11,11 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	-- cache frequently used globals
 	local _pairs, _ipairs = pairs, ipairs
 	local _format, math_max = string.format, math.max
-	local _GetSpellInfo = Skada.GetSpellInfo
 	local _UnitGUID = UnitGUID
-	local _GetSpellLink = GetSpellLink
 	local _IsInInstance = IsInInstance
 	local _SendChatMessage = SendChatMessage
+	local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+	local _GetSpellLink = Skada.GetSpellLink or GetSpellLink
 
 	local function log_interrupt(set, data)
 		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)

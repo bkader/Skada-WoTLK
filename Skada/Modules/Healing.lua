@@ -3,7 +3,7 @@ assert(Skada, "Skada not found!")
 -- cache frequently used globals
 local _pairs, _ipairs, _select = pairs, ipairs, select
 local _format, math_max, math_min, _time = string.format, math.max, math.min, time
-local _GetSpellInfo = Skada.GetSpellInfo
+local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 
 -- ============== --
 -- Healing module --

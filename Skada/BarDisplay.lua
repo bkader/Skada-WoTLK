@@ -8,6 +8,7 @@ local FlyPaper = LibStub:GetLibrary("LibFlyPaper-1.1", true)
 local LSM = LibStub("LibSharedMedia-3.0")
 
 local tinsert, tsort = table.insert, table.sort
+local _GetSpellLink = Skada.GetSpellLink or GetSpellLink
 
 mod.name = L["Bar display"]
 mod.description = L["Bar display is the normal bar window used by most damage meters. It can be extensively styled."]
@@ -540,7 +541,7 @@ do
 
 							bar.link = nil
 							if data.spellid then
-								bar.link = GetSpellLink(data.spellid)
+								bar.link = _GetSpellLink(data.spellid)
 							elseif data.hyperlink then
 								bar.link = data.hyperlink
 							end

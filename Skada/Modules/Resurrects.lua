@@ -10,7 +10,7 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 
 	local _select, _pairs, _ipairs = select, pairs, ipairs
 	local _tostring, _format = tostring, string.format
-	local _GetSpellInfo = Skada.GetSpellInfo
+	local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 
 	local function log_resurrect(set, data)
 		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)

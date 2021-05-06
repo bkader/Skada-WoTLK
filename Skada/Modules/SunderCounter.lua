@@ -7,7 +7,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 	local _pairs, _ipairs, _select = pairs, ipairs, select
 	local _format, math_max = string.format, math.max
-	local _GetSpellInfo = Skada.GetSpellInfo
+	local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 
 	local sunder, devastate
 
