@@ -88,12 +88,30 @@ local UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitGUID, UnitName, UnitC
 local CombatLogClearEntries = CombatLogClearEntries
 local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 
-local BITMASK_MINE = 0x00000001
-local BITMASK_GROUP = 0x00000007
-local BITMASK_PETS = 0x00003000
-local BITMASK_PLAYER = 0x00000400
-local BITMASK_FRIENDLY = 0x00000010
-local BITMASK_HOSTILE = 0x00000040
+-- affiliation
+local COMBATLOG_OBJECT_AFFILIATION_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE or 0x00000001
+local COMBATLOG_OBJECT_AFFILIATION_PARTY = COMBATLOG_OBJECT_AFFILIATION_PARTY or 0x00000002
+local COMBATLOG_OBJECT_AFFILIATION_RAID = COMBATLOG_OBJECT_AFFILIATION_RAID or 0x00000004
+local COMBATLOG_OBJECT_AFFILIATION_MASK = COMBATLOG_OBJECT_AFFILIATION_MASK or 0x0000000F
+
+-- reaction
+local COMBATLOG_OBJECT_REACTION_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY or 0x00000010
+local COMBATLOG_OBJECT_REACTION_HOSTILE = COMBATLOG_OBJECT_REACTION_HOSTILE or 0x00000040
+local COMBATLOG_OBJECT_REACTION_MASK = COMBATLOG_OBJECT_REACTION_MASK or 0x000000F0
+
+-- ownership
+local COMBATLOG_OBJECT_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100
+local COMBATLOG_OBJECT_CONTROL_NPC = COMBATLOG_OBJECT_CONTROL_NPC or 0x00000200
+local COMBATLOG_OBJECT_CONTROL_MASK = COMBATLOG_OBJECT_CONTROL_MASK or 0x00000300
+
+-- unit type
+local COMBATLOG_OBJECT_TYPE_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER or 0x00000400
+local COMBATLOG_OBJECT_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
+local COMBATLOG_OBJECT_TYPE_PET = COMBATLOG_OBJECT_TYPE_PET or 0x00001000
+local COMBATLOG_OBJECT_TYPE_GUARDIAN = COMBATLOG_OBJECT_TYPE_GUARDIAN or 0x00002000
+
+local BITMASK_GROUP = COMBATLOG_OBJECT_AFFILIATION_MINE + COMBATLOG_OBJECT_AFFILIATION_PARTY + COMBATLOG_OBJECT_AFFILIATION_RAID
+local BITMASK_PETS = COMBATLOG_OBJECT_TYPE_PET + COMBATLOG_OBJECT_TYPE_GUARDIAN
 
 -- =================== --
 -- add missing globals --
@@ -1326,7 +1344,7 @@ do
 				-- it's a real player?
 				elseif UnitIsPlayer(player.name) or self:IsPlayer(player.id, player.flag) then
 					player.class = select(2, UnitClass(player.name))
-				elseif player.flag and band(player.flag, BITMASK_PLAYER) ~= 0 then
+				elseif player.flag and band(player.flag, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0 then
 					player.class = "UNGROUPPLAYER"
 					player.role = "DAMAGER"
 					player.spec = 2
@@ -1450,7 +1468,7 @@ function Skada:IsPlayer(guid, flags)
 	if guid and players[guid] then
 		return true
 	end
-	if flags and band(flags, BITMASK_PLAYER) ~= 0 then
+	if flags and band(flags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0 then
 		return true
 	end
 	return false
@@ -1579,7 +1597,7 @@ do
 
 		-- we try to associate pets and and guardians with their owner
 		if not owner and action.playerflags and band(action.playerflags, BITMASK_PETS) ~= 0 and band(action.playerflags, BITMASK_GROUP) ~= 0 then
-			if band(action.playerflags, BITMASK_MINE) ~= 0 then
+			if band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
 				owner = {id = UnitGUID("player"), name = UnitName("player")}
 				pets[action.playerid] = owner
 			else
@@ -3434,7 +3452,7 @@ do
 		end
 
 		if self.current and src_is_interesting and not self.current.gotboss then
-			if band(dstFlags, BITMASK_HOSTILE) ~= 0 and band(dstFlags, BITMASK_PETS) == 0 then
+			if band(dstFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) ~= 0 and band(dstFlags, BITMASK_PETS) == 0 then
 				local isboss, _, bossname = self:IsBoss(dstGUID)
 				self.current.mobname = bossname or dstName
 				if not self.current.gotboss and isboss then
