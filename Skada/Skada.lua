@@ -1582,6 +1582,7 @@ do
 
 		local owner
 
+		-- this is a temporary thing until I find a more accurate way.
 		for _, player in ipairs(Skada.current.players) do
 			if player.flags and player.flags == ownerFlags then
 				owner = {id = player.id, name = player.name}
