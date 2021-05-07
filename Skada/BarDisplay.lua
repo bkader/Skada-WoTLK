@@ -1075,36 +1075,31 @@ function mod:AddDisplayOptions(win, options)
 				type = "toggle",
 				name = L["Disable bar highlight"],
 				desc = L["Hovering a bar won't make it brighter."],
-				order = 15,
-				width = "double"
+				order = 15
 			},
 			spellschoolcolors = {
 				type = "toggle",
 				name = L["Spell school colors"],
 				desc = L["Use spell school colors where applicable."],
-				order = 16,
-				width = "double"
+				order = 16
 			},
 			classcolorbars = {
 				type = "toggle",
 				name = L["Class color bars"],
 				desc = L["When possible, bars will be colored according to player class."],
-				order = 17,
-				width = "double"
+				order = 17
 			},
 			classcolortext = {
 				type = "toggle",
 				name = L["Class color text"],
 				desc = L["When possible, bar text will be colored according to player class."],
-				order = 18,
-				width = "double"
+				order = 18
 			},
 			classicons = {
 				type = "toggle",
 				name = L["Class icons"],
 				desc = L["Use class icons where applicable."],
 				order = 19,
-				width = "double",
 				disabled = function()
 					return (db.specicons or db.roleicons)
 				end
@@ -1114,7 +1109,6 @@ function mod:AddDisplayOptions(win, options)
 				name = L["Role icons"],
 				desc = L["Use role icons where applicable."],
 				order = 20,
-				width = "double",
 				set = function()
 					db.roleicons = not db.roleicons
 					if db.roleicons and not db.classicons then
@@ -1128,7 +1122,6 @@ function mod:AddDisplayOptions(win, options)
 				name = L["Spec icons"],
 				desc = L["Use specialization icons where applicable."],
 				order = 21,
-				width = "double",
 				set = function()
 					db.specicons = not db.specicons
 					if db.specicons and not db.classicons then
@@ -1140,22 +1133,19 @@ function mod:AddDisplayOptions(win, options)
 			spark = {
 				type = "toggle",
 				name = L["Show spark effect"],
-				order = 22,
-				width = "double"
+				order = 22
 			},
 			clickthrough = {
 				type = "toggle",
 				name = L["Clickthrough"],
 				desc = L["Disables mouse clicks on bars."],
-				order = 23,
-				width = "double"
+				order = 23
 			},
 			smoothing = {
 				type = "toggle",
 				name = L["Smooth bars"],
 				desc = L["Animate bar changes smoothly rather than immediately."],
-				order = 24,
-				width = "double"
+				order = 24
 			}
 		}
 	}
