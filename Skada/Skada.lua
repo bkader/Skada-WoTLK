@@ -81,37 +81,32 @@ local tsort, tinsert, tremove, tmaxn = table.sort, table.insert, table.remove, t
 local next, pairs, ipairs, type = next, pairs, ipairs, type
 local tonumber, tostring, format, strsplit = tonumber, tostring, string.format, strsplit
 local math_floor, math_max, math_min = math.floor, math.max, math.min
-local band, time = bit.band, time
+local band, bor, time = bit.band, bit.bor, time
 local GetNumPartyMembers, GetNumRaidMembers = GetNumPartyMembers, GetNumRaidMembers
 local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAffectingCombat, InCombatLockdown
 local UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitGUID, UnitName, UnitClass, UnitIsConnected
 local CombatLogClearEntries = CombatLogClearEntries
 local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 
--- affiliation
 local COMBATLOG_OBJECT_AFFILIATION_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE or 0x00000001
 local COMBATLOG_OBJECT_AFFILIATION_PARTY = COMBATLOG_OBJECT_AFFILIATION_PARTY or 0x00000002
 local COMBATLOG_OBJECT_AFFILIATION_RAID = COMBATLOG_OBJECT_AFFILIATION_RAID or 0x00000004
 local COMBATLOG_OBJECT_AFFILIATION_MASK = COMBATLOG_OBJECT_AFFILIATION_MASK or 0x0000000F
 
--- reaction
 local COMBATLOG_OBJECT_REACTION_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY or 0x00000010
-local COMBATLOG_OBJECT_REACTION_HOSTILE = COMBATLOG_OBJECT_REACTION_HOSTILE or 0x00000040
 local COMBATLOG_OBJECT_REACTION_MASK = COMBATLOG_OBJECT_REACTION_MASK or 0x000000F0
 
--- ownership
 local COMBATLOG_OBJECT_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100
-local COMBATLOG_OBJECT_CONTROL_NPC = COMBATLOG_OBJECT_CONTROL_NPC or 0x00000200
 local COMBATLOG_OBJECT_CONTROL_MASK = COMBATLOG_OBJECT_CONTROL_MASK or 0x00000300
 
--- unit type
 local COMBATLOG_OBJECT_TYPE_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER or 0x00000400
 local COMBATLOG_OBJECT_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
 local COMBATLOG_OBJECT_TYPE_PET = COMBATLOG_OBJECT_TYPE_PET or 0x00001000
 local COMBATLOG_OBJECT_TYPE_GUARDIAN = COMBATLOG_OBJECT_TYPE_GUARDIAN or 0x00002000
 
-local BITMASK_GROUP = COMBATLOG_OBJECT_AFFILIATION_MINE + COMBATLOG_OBJECT_AFFILIATION_PARTY + COMBATLOG_OBJECT_AFFILIATION_RAID
-local BITMASK_PETS = COMBATLOG_OBJECT_TYPE_PET + COMBATLOG_OBJECT_TYPE_GUARDIAN
+local BITMASK_GROUP = bor(COMBATLOG_OBJECT_AFFILIATION_MINE, COMBATLOG_OBJECT_AFFILIATION_PARTY, COMBATLOG_OBJECT_AFFILIATION_RAID)
+local BITMASK_PETS = bor(COMBATLOG_OBJECT_TYPE_PET, COMBATLOG_OBJECT_TYPE_GUARDIAN)
+local BITMASK_OWNERS = bor(COMBATLOG_OBJECT_AFFILIATION_MASK, COMBATLOG_OBJECT_REACTION_MASK, COMBATLOG_OBJECT_CONTROL_MASK)
 
 -- =================== --
 -- add missing globals --
@@ -1457,7 +1452,6 @@ function Skada:get_player(set, playerid, playername, playerflags)
 	-- not all modules provide playerflags
 	if playerflags and not (player.flags or player.flags == playerflags) then
 		player.flags = playerflags
-		self:FixPlayer(player, true)
 	end
 
 	player.first = player.first or now
@@ -1575,7 +1569,30 @@ do
 		end
 	end
 
-	local function GetPetOwner(guid)
+	local function GetPetOwnerFromFlags(flags)
+		if not Skada.current then return end
+
+		-- we first create the owner flag
+		local ownerFlags = band(flags, BITMASK_OWNERS)
+		if band(flags, COMBATLOG_OBJECT_CONTROL_PLAYER) ~= 0 then
+			ownerFlags = ownerFlags + COMBATLOG_OBJECT_TYPE_PLAYER
+		else
+			ownerFlags = ownerFlags + COMBATLOG_OBJECT_TYPE_NPC
+		end
+
+		local owner
+
+		for _, player in ipairs(Skada.current.players) do
+			if player.flags and player.flags == ownerFlags then
+				owner = {id = player.id, name = player.name}
+				break
+			end
+		end
+
+		return owner
+	end
+
+	local function GetPetOwnerFromTooltip(guid)
 		tooltip:SetHyperlink("unit:" .. guid)
 		for i = 2, tooltip:NumLines() do
 			local text = _G["SkadaPetTooltipTextLeft" .. i]:GetText()
@@ -1597,11 +1614,17 @@ do
 
 		-- we try to associate pets and and guardians with their owner
 		if not owner and action.playerflags and band(action.playerflags, BITMASK_PETS) ~= 0 and band(action.playerflags, BITMASK_GROUP) ~= 0 then
+			-- my own pets or guardians?
 			if band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
 				owner = {id = UnitGUID("player"), name = UnitName("player")}
-				pets[action.playerid] = owner
-			else
-				local ownerName = GetPetOwner(action.playerid)
+			end
+
+			-- party/raid pets or guardians?
+			owner = owner or GetPetOwnerFromFlags(action.playerflags)
+
+			-- not found? our last hope is the tooltip
+			if not owner then
+				local ownerName = GetPetOwnerFromTooltip(action.playerid)
 				if ownerName then
 					local guid = UnitGUID(ownerName)
 					if players[guid] then
@@ -1612,7 +1635,11 @@ do
 				end
 			end
 
-			if not owner then
+			-- here, if we have an onwer we cache, otherwise we use
+			-- name instead of guid so we don't have multiple entities.
+			if owner then
+				pets[action.playerid] = owner
+			else
 				action.playerid = action.playername
 			end
 		end
@@ -3446,7 +3473,7 @@ do
 		end
 
 		if self.current and src_is_interesting and not self.current.gotboss then
-			if band(dstFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) ~= 0 and band(dstFlags, BITMASK_PETS) == 0 then
+			if band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
 				local isboss, _, bossname = self:IsBoss(dstGUID)
 				self.current.mobname = bossname or dstName
 				if not self.current.gotboss and isboss then
