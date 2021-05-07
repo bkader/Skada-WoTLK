@@ -1299,7 +1299,7 @@ do
 
 	-- sometimes GUID are shown instead of proper players names
 	-- this function is called and used only once per player
-	function Skada:FixPlayer(player)
+	function Skada:FixPlayer(player, force)
 		if player.id and player.name then
 			-- collect some info from the player's guid
 			local name, class, _
@@ -1319,7 +1319,7 @@ do
 			end
 
 			-- use LibTranslit to convert cyrillic letters into western letters.
-			if self.db.profile.translit and Translit then
+			if self.db.profile.translit and Translit and not force then
 				player.name = Translit:Transliterate(player.name, "!")
 			end
 
@@ -1337,19 +1337,19 @@ do
 			end
 
 			-- still no class assigned?
-			if not player.class then
+			if force or not player.class then
 				-- class already received from GetPlayerInfoByGUID?
 				if class then
 					player.class = class
 				-- it's a real player?
-				elseif UnitIsPlayer(player.name) or self:IsPlayer(player.id, player.flag) then
+				elseif UnitIsPlayer(player.name) or self:IsPlayer(player.id, player.flags) then
 					player.class = select(2, UnitClass(player.name))
-				elseif player.flag and band(player.flag, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0 then
+				elseif player.flags and band(player.flags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0 then
 					player.class = "UNGROUPPLAYER"
 					player.role = "DAMAGER"
 					player.spec = 2
 				-- pets?
-				elseif player.flag and band(player.flag, BITMASK_PETS) ~= 0 then
+				elseif player.flags and band(player.flags, BITMASK_PETS) ~= 0 then
 					player.class = "PET"
 					player.role = "DAMAGER"
 					player.owner = pets[player.id]
@@ -1365,10 +1365,10 @@ do
 			-- if the player has been assigned a valid class,
 			-- we make sure to assign his/her role and spec
 			if self.validclass[player.class] then
-				if not player.role then
+				if force or not player.role then
 					player.role = self:UnitGroupRolesAssigned(player.name)
 				end
-				if not player.spec then
+				if force or not player.spec then
 					player.spec = self:GetPlayerSpecID(player.name, player.class)
 				end
 			else
@@ -1427,22 +1427,18 @@ function Skada:find_player(set, playerid, playername, strict)
 end
 
 function Skada:get_player(set, playerid, playername, playerflags)
-	if not set or not playerid then
-		return
-	end
+	if not set or not playerid then return end
 
 	local player = self:find_player(set, playerid, playername, true)
 	local now = time()
 
 	if not player then
-		if not playername then
-			return
-		end
+		if not playername then return end
 
 		player = {
 			id = playerid,
 			name = playername,
-			flag = playerflags,
+			flags = playerflags,
 			first = now,
 			time = 0
 		}
@@ -1456,6 +1452,12 @@ function Skada:get_player(set, playerid, playername, playerflags)
 		end
 
 		tinsert(set.players, player)
+	end
+
+	-- not all modules provide playerflags
+	if playerflags and not (player.flags or player.flags == playerflags) then
+		player.flags = playerflags
+		self:FixPlayer(player, true)
 	end
 
 	player.first = player.first or now
@@ -1589,9 +1591,7 @@ do
 	end
 
 	function Skada:FixPets(action)
-		if not action or not action.playername or not action.playerid then
-			return
-		end
+		if not action or not action.playername or not action.playerid then return end
 
 		local owner = pets[action.playerid]
 
@@ -1707,9 +1707,7 @@ do
 	local white = {r = 1, g = 1, b = 1}
 
 	function Skada:AddSubviewToTooltip(tooltip, win, mode, id, label)
-		if not mode then
-			return
-		end
+		if not mode then return end
 
 		local ttwin = win.ttwin or Window:new()
 		win.ttwin = ttwin
@@ -2394,12 +2392,8 @@ do
 	end
 
 	function Window:set_mode_title()
-		if not self.selectedmode or not self.selectedset then
-			return
-		end
-		if not self.selectedmode.GetName then
-			return
-		end
+		if not self.selectedmode or not self.selectedset then return end
+		if not self.selectedmode.GetName then return end
 		local name = self.title or self.selectedmode.title or self.selectedmode:GetName()
 
 		-- save window settings for RestoreView after reload
