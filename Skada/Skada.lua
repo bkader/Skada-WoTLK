@@ -1620,8 +1620,10 @@ do
 				owner = {id = UnitGUID("player"), name = UnitName("player")}
 			end
 
-			-- party/raid pets or guardians?
-			owner = owner or GetPetOwnerFromFlags(action.playerflags)
+			-- party/raid pets or guardians? -- TODO: find better solution
+			-- if not owner then
+			-- 	owner = GetPetOwnerFromFlags(action.playerflags)
+			-- end
 
 			-- not found? our last hope is the tooltip
 			if not owner then
@@ -1630,7 +1632,6 @@ do
 					local guid = UnitGUID(ownerName)
 					if players[guid] then
 						owner = {id = guid, name = ownerName}
-						pets[action.playerid] = owner
 					end
 					ownerName, guid = nil, nil
 				end
@@ -1641,7 +1642,9 @@ do
 			if owner then
 				pets[action.playerid] = owner
 			else
-				action.playerid = action.playername
+				-- action.playerid = action.playername -- TODO: find better solution
+				-- we ignore it until we find a better solutin
+				action = wipe(action or {})
 			end
 		end
 
@@ -1658,6 +1661,7 @@ do
 			end
 		end
 	end
+
 end
 
 function Skada:FixMyPets(playerid, playername)
