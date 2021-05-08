@@ -2092,7 +2092,7 @@ do
 			local ver = convertVersion(self.version)
 
 			if version and ver and (version > ver) and not self.versionChecked then
-				self:Print(L["Skada is out of date. You can download the newest version from |cffffbb00https://github.com/bkader/Skada-Revisited|r"])
+				self:Print(L["Skada is out of date. You can download the newest version from |cffffbb00https://github.com/bkader/Skada-WoTLK|r"])
 				self.versionChecked = true
 			end
 		end

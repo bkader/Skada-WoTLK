@@ -4,7 +4,7 @@ if not L then return end
 
 L["A damage meter."] = "Измеритель урона."
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "Использование памяти слишком высокое. Вы можете сбросить данные Skada и включить один из вариантов автоматического сброса."
-L["Skada is out of date. You can download the newest version from |cffffbb00https://github.com/bkader/Skada-Revisited|r"] = "Skada устарел. Вы можете скачать последнюю версию с |cffffbb00https://github.com/bkader/Skada-Revisited|r"
+L["Skada is out of date. You can download the newest version from |cffffbb00https://github.com/bkader/Skada-WoTLK|r"] = "Skada устарел. Вы можете скачать последнюю версию с |cffffbb00https://github.com/bkader/Skada-WoTLK|r"
 L["Skada: Modes"] = "Skada: Режимы"
 L["Skada: Fights"] = "Skada: Бои"
 L["Error: No options selected"] = "Ошибка: параметры не выбраны"

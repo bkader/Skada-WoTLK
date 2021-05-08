@@ -4,7 +4,7 @@ if not L then return end
 
 L["A damage meter."] = "伤害统计器"
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "内存使用率很高。你可能需要重置Skada，并启用其中一个自动重置选项。"
-L["Skada is out of date. You can download the newest version from |cffffbb00https://github.com/bkader/Skada-Revisited|r"] = "Skada已过期。你可以在|cffffbb00https://github.com/bkader/Skada-Revisited|r下载到最新的版本。"
+L["Skada is out of date. You can download the newest version from |cffffbb00https://github.com/bkader/Skada-WoTLK|r"] = "Skada已过期。你可以在|cffffbb00https://github.com/bkader/Skada-WoTLK|r下载到最新的版本。"
 L["Skada: Modes"] = "Skada：模式"
 L["Skada: Fights"] = "Skada：战斗"
 L["Error: No options selected"] = "错误：未选择任何选项"

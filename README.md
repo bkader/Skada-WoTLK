@@ -1,4 +1,4 @@
-# Skada 1.8.4 for WoTLK (_Revisited_)
+# Skada for WoTLK (_Revisited_)
 
 I am simply a huge fan of **Skada**, I prefer it to other damage meters for several reasons. No need to judge me, it's after all a personal preference.
 
@@ -43,8 +43,8 @@ Almost everything was changed, starting from the default version that was availa
 ## How to install
 
 1. If you used the default on **Skada** before, please make sure to delete all its files from `Interface\AddOns` folder as well as all its _SavedVariables_ from `WTF` folder (_just delete all `Skada.lua` and `Skada.lua.bak` for this folder. Use the search box for quick delete). If you are new, skip this step.
-2. [Download the package](https://github.com/bkader/Skada-Revisited/archive/refs/heads/main.zip).
-3. Open the Zip package inside which you will find a single folder named `Skada-Revisited-main`.
+2. [Download the package](https://github.com/bkader/Skada-WoTLK/archive/refs/heads/main.zip).
+3. Open the Zip package inside which you will find a single folder named `Skada-WoTLK-main`.
 4. Extract or drag and drop the unique folder `Skada` into your `Interface\AddOns` folder.
 5. (optional) If you are using **ElvUI**, please make sure to extract the provided folders as well so that your ElvUI installation properly handles the new Skada.
 
