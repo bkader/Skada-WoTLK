@@ -2082,11 +2082,16 @@ do
 		version_timer = nil
 	end
 
+	local function convertVersion(ver)
+		return tonumber(type(ver) == "string" and ver:gsub("%.", "", 1) or ver)
+	end
+
 	function Skada:OnCommVersionCheck(sender, version)
 		if sender and sender ~= UnitName("player") and version then
-			version = tonumber(version)
-			local ver = tonumber(self.version)
-			if version > ver and not self.versionChecked then
+			version = convertVersion(version)
+			local ver = convertVersion(self.version)
+
+			if version and ver and (version > ver) and not self.versionChecked then
 				self:Print(L["Skada is out of date. You can download the newest version from |cffffbb00https://github.com/bkader/Skada-Revisited|r"])
 				self.versionChecked = true
 			end
@@ -2130,7 +2135,7 @@ do
 			end)
 		end
 
-		version_timer = version_timer or Skada.NewTimer(10, CheckVersion)
+		version_timer = version_timer or self.NewTimer(10, CheckVersion)
 	end
 
 	function Skada:PARTY_MEMBERS_CHANGED()
@@ -2144,7 +2149,7 @@ do
 		end
 		if count ~= version_count then
 			if count > 1 and count > version_count then
-				version_timer = version_timer or Skada.NewTimer(10, CheckVersion)
+				version_timer = version_timer or self.NewTimer(10, CheckVersion)
 			end
 			version_count = count
 		end
