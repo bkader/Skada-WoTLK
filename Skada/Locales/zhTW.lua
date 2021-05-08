@@ -189,6 +189,8 @@ if not L then return end
 -- L["Ask"] = ""
 -- L["Do you want to reset Skada?"] = ""
 -- L["All data has been reset."] = ""
+-- L["Skip reset dialog"] = ""
+-- L["Enable this if you want Skada to reset without the confirmation dialog."] = ""
 -- general options
 -- L["Show minimap button"] = ""
 -- L["Toggles showing the minimap button."] = ""

@@ -210,7 +210,12 @@ end
 
 -- utilities
 
-function Skada:ShowPopup()
+function Skada:ShowPopup(win, force)
+	if Skada.db.profile.skippopup and not force then
+		Skada:Reset()
+		return
+	end
+
 	if not StaticPopupDialogs["SkadaResetDialog"] then
 		StaticPopupDialogs["SkadaResetDialog"] = {
 			text = L["Do you want to reset Skada?"],
@@ -2059,7 +2064,7 @@ function Skada:ZoneCheck()
 
 	if isininstance and wasininstance ~= nil and not wasininstance and self.db.profile.reset.instance ~= 1 and self:CanReset() then
 		if self.db.profile.reset.instance == 3 then
-			self:ShowPopup()
+			self:ShowPopup(nil, true)
 		else
 			self:Reset()
 		end
@@ -2105,7 +2110,7 @@ do
 	local function check_for_join_and_leave()
 		if not IsInGroup() and wasinparty then
 			if Skada.db.profile.reset.leave == 3 and Skada:CanReset() then
-				Skada:ShowPopup()
+				Skada:ShowPopup(nil, true)
 			elseif Skada.db.profile.reset.leave == 2 and Skada:CanReset() then
 				Skada:Reset()
 			end
@@ -2117,7 +2122,7 @@ do
 
 		if IsInGroup() and not wasinparty then
 			if Skada.db.profile.reset.join == 3 and Skada:CanReset() then
-				Skada:ShowPopup()
+				Skada:ShowPopup(nil, true)
 			elseif Skada.db.profile.reset.join == 2 and Skada:CanReset() then
 				Skada:Reset()
 			end

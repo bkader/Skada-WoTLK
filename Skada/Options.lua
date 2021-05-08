@@ -95,6 +95,7 @@ Skada:tcopy(windefaultscopy, Skada.windowdefaults)
 Skada.defaults = {
 	profile = {
 		reset = {instance = 1, join = 3, leave = 1},
+		skippopup = false,
 		icon = {hide = false, radius = 80, minimapPos = 195},
 		numberformat = 1,
 		setformat = 3,
@@ -275,9 +276,7 @@ Skada.options = {
 					desc = L["Controls if data is reset when you enter an instance."],
 					order = 1,
 					width = "double",
-					values = function()
-						return Skada.resetoptions
-					end
+					values = Skada.resetoptions
 				},
 				join = {
 					type = "select",
@@ -285,9 +284,7 @@ Skada.options = {
 					desc = L["Controls if data is reset when you join a group."],
 					order = 2,
 					width = "double",
-					values = function()
-						return Skada.resetoptions
-					end
+					values = Skada.resetoptions
 				},
 				leave = {
 					type = "select",
@@ -295,9 +292,23 @@ Skada.options = {
 					desc = L["Controls if data is reset when you leave a group."],
 					order = 3,
 					width = "double",
-					values = function()
-						return Skada.resetoptions
-					end
+					values = Skada.resetoptions
+				},
+				sep = {
+					type = "description",
+					name = " ",
+					order = 4,
+					width = "full"
+				},
+				skippopup = {
+					type = "toggle",
+					name = L["Skip reset dialog"],
+					desc = L["Enable this if you want Skada to reset without the confirmation dialog."],
+					descStyle = "inline",
+					order = 5,
+					width = "double",
+					get = function() return Skada.db.profile.skippopup end,
+					set = function() Skada.db.profile.skippopup = not Skada.db.profile.skippopup end
 				}
 			}
 		},

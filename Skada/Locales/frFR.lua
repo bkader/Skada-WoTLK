@@ -190,6 +190,8 @@ L["Controls if data is reset when you leave a group."] = "Détermine si les donn
 L["Ask"] = "Demander"
 L["Do you want to reset Skada?"] = "Voulez-vous réinitialiser Skada?"
 L["All data has been reset."] = "Toutes les données ont été réinitialisées."
+L["Skip reset dialog"] = "Réinitialiser sans confirmation"
+L["Enable this if you want Skada to reset without the confirmation dialog."] = "Si activé, Skada sera réinitialisé sans afficher la boîte de confirmation."
 -- general options
 L["Show minimap button"] = "Bouton de la minicarte"
 L["Toggles showing the minimap button."] = "Affiche ou non l'icône de la minicarte."

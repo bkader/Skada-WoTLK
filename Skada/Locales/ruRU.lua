@@ -190,6 +190,8 @@ L["Controls if data is reset when you leave a group."] = "Управление �
 L["Ask"] = "Уточнить"
 L["Do you want to reset Skada?"] = "Вы хотите сбросить Scada?"
 L["All data has been reset."] = "Все данные были сброшены."
+L["Skip reset dialog"] = "Пропустить диалог сброса"
+L["Enable this if you want Skada to reset without the confirmation dialog."] = "Включите это, если хотите, чтобы Skada сбрасывалась без диалогового окна подтверждения."
 -- general options
 L["Show minimap button"] = "Показывать кнопку у миникарты"
 L["Toggles showing the minimap button."] = "Отобразить/скрыть кнопку у миникарты."

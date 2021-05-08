@@ -356,12 +356,12 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 	end
 
 	local Default_ShowPopup = Skada.ShowPopup
-	function Skada:ShowPopup(win)
-		if win and win.db.mode == L["Improvement"] then
+	function Skada:ShowPopup(win, force)
+		if win and win.db and win.db.mode == L["Improvement"] then
 			ask_for_reset()
 			return
 		end
 
-		return Default_ShowPopup()
+		return Default_ShowPopup(Skada, win, force)
 	end
 end)
