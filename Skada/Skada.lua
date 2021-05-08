@@ -2075,6 +2075,24 @@ function Skada:ZoneCheck()
 end
 
 do
+	local version_count, version_timer = 0
+
+	local function CheckVersion()
+		Skada:SendComm(nil, nil, "VersionCheck", Skada.version)
+		version_timer = nil
+	end
+
+	function Skada:OnCommVersionCheck(sender, version)
+		if sender and sender ~= UnitName("player") and version then
+			version = tonumber(version)
+			local ver = tonumber(self.version)
+			if version => ver and not self.versionChecked then
+				self:Print(L["Skada is out of date. You can download the newest version from |cffffbb00https://github.com/bkader/Skada-Revisited|r"])
+				self.versionChecked = true
+			end
+		end
+	end
+
 	local function check_for_join_and_leave()
 		if not IsInGroup() and wasinparty then
 			if Skada.db.profile.reset.leave == 3 and Skada:CanReset() then
@@ -2111,11 +2129,25 @@ do
 				self:CheckGroup()
 			end)
 		end
+
+		version_timer = version_timer or Skada.NewTimer(10, CheckVersion)
 	end
 
 	function Skada:PARTY_MEMBERS_CHANGED()
 		check_for_join_and_leave()
 		self:CheckGroup()
+
+		-- version check
+		local t, count = GetGroupTypeAndCount()
+		if t == "party" then
+			count = count + 1
+		end
+		if count ~= version_count then
+			if count > 1 and count > version_count then
+				version_timer = version_timer or Skada.NewTimer(10, CheckVersion)
+			end
+			version_count = count
+		end
 	end
 	Skada.RAID_ROSTER_UPDATE = Skada.PARTY_MEMBERS_CHANGED
 end
@@ -3026,16 +3058,24 @@ do
 		elseif channel then
 			self:SendCommMessage("Skada", self:Serialize(...), channel, target)
 		end
+
 	end
 
 	local function DispatchComm(sender, ok, commType, ...)
 		if ok and type(commType) == "string" then
-			Skada.callbacks:Fire("OnComm" .. commType, sender, ...)
+			local func = "OnComm" .. commType
+
+			if type(Skada[func]) ~= "function" then
+				Skada.callbacks:Fire(func, sender, ...)
+				return
+			end
+
+			Skada[func](Skada, sender, ...)
 		end
 	end
 
 	function Skada:OnCommReceived(prefix, message, channel, sender)
-		if channel then
+		if prefix == "Skada" and channel and sender then
 			DispatchComm(sender, self:Deserialize(message))
 		end
 	end
