@@ -147,8 +147,8 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 		end
 
 		if spellid and spellname then
-			srcName, dstGUID, dstName = ENVIRONMENTAL_DAMAGE, Skada:FixMyPets(dstGUID, dstName)
-			SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, nil, select(2, ...))
+			dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName)
+			SpellDamage(timestamp, eventtype, nil, ENVIRONMENTAL_DAMAGE, nil, dstGUID, dstName, dstFlags, spellid, spellname, nil, select(2, ...))
 		end
 	end
 
