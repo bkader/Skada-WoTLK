@@ -2086,7 +2086,7 @@ do
 		if sender and sender ~= UnitName("player") and version then
 			version = tonumber(version)
 			local ver = tonumber(self.version)
-			if version => ver and not self.versionChecked then
+			if version > ver and not self.versionChecked then
 				self:Print(L["Skada is out of date. You can download the newest version from |cffffbb00https://github.com/bkader/Skada-Revisited|r"])
 				self.versionChecked = true
 			end
