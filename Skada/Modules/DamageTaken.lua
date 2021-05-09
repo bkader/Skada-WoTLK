@@ -23,13 +23,11 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 
 	local function log_damage(set, dmg)
 		local player = Skada:get_player(set, dmg.playerid, dmg.playername, dmg.playerflags)
-		if not player then
-			return
-		end
+		if not player then return end
 
 		player.damagetaken = player.damagetaken or {}
 		player.damagetaken.amount = (player.damagetaken.amount or 0) + dmg.amount
-		set.damagetaken = set.damagetaken + dmg.amount
+		set.damagetaken = (set.damagetaken or 0) + dmg.amount
 
 		-- add the spell
 		local spellname = dmg.spellname
@@ -38,7 +36,15 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 		end
 
 		player.damagetaken.spells = player.damagetaken.spells or {}
-		local spell = player.damagetaken.spells[spellname] or {id = dmg.spellid, school = dmg.spellschool, source = dmg.srcName, amount = 0}
+		if not player.damagetaken.spells[spellname] then
+			player.damagetaken.spells[spellname] = {
+				id = dmg.spellid,
+				school = dmg.spellschool,
+				source = dmg.srcName,
+				amount = 0
+			}
+		end
+		local spell = player.damagetaken.spells[spellname]
 		player.damagetaken.spells[spellname] = spell
 		spell.totalhits = (spell.totalhits or 0) + 1
 		spell.amount = spell.amount + dmg.amount
@@ -90,7 +96,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 			spell.resisted = (spell.resisted or 0) + dmg.resisted
 		end
 
-		if set == Skada.current and dmg.srcName and dmg.amount > 0 then
+		if dmg.srcName and dmg.amount > 0 then
 			player.damagetaken.sources = player.damagetaken.sources or {}
 			player.damagetaken.sources[dmg.srcName] = (player.damagetaken.sources[dmg.srcName] or 0) + dmg.amount
 		end
@@ -500,19 +506,21 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 			columns = {DPS = true, Percent = true}
 		}
 
-		Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_BUILDING_DAMAGE", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellDamage, "DAMAGE_SPLIT", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, "RANGE_DAMAGE", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellDamage, "SPELL_BUILDING_DAMAGE", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellDamage, "SPELL_EXTRA_ATTACKS", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SwingDamage, "SWING_DAMAGE", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(EnvironmentDamage, "ENVIRONMENTAL_DAMAGE", {dst_is_interesting_nopets = true})
 
-		Skada:RegisterForCL(SpellMissed, "SPELL_MISSED", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellMissed, "SPELL_PERIODIC_MISSED", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellMissed, "SPELL_BUILDING_MISSED", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellMissed, "DAMAGE_SHIELD_MISSED", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellMissed, "RANGE_MISSED", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellMissed, "SPELL_BUILDING_MISSED", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellMissed, "SPELL_MISSED", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellMissed, "SPELL_PERIODIC_MISSED", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SwingMissed, "SWING_MISSED", {dst_is_interesting_nopets = true})
 
 		Skada:AddMode(self, L["Damage taken"])

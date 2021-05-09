@@ -40,6 +40,7 @@ local changed = true
 
 -- update & tick timers
 local update_timer, tick_timer, pull_timer
+local checkVersion, convertVersion
 
 -- spell schools
 Skada.schoolcolors = {
@@ -1396,11 +1397,9 @@ function Skada:find_player(set, playerid, playername, strict)
 			end
 		end
 
-		if strict or not playername then return end
-
 		-- needed for certain bosses
 		local isboss, _, npcname = self:IsBoss(playerid, playername)
-		if isboss then
+		if isboss and (npcname or playername) then
 			player = {
 				id = playerid,
 				name = npcname or playername,
@@ -1411,8 +1410,9 @@ function Skada:find_player(set, playerid, playername, strict)
 			set._playeridx[playerid] = player
 			return player
 		end
+
 		-- this our last hope!
-		if playerid and playername then
+		if not strict and playerid and playername then
 			player = {
 				id = playerid,
 				name = playername,
@@ -1897,7 +1897,7 @@ function Skada:Command(param)
 		self:Print(format("%-20s", "/skada toggle"))
 		self:Print(format("%-20s", "/skada newsegment"))
 		self:Print(format("%-20s", "/skada config"))
-		self:Print(format("%-20s", "/skada clear"))
+		self:Print(format("%-20s", "/skada clean"))
 	end
 end
 
@@ -2086,13 +2086,13 @@ end
 do
 	local version_count, version_timer = 0
 
-	local function CheckVersion()
+	function checkVersion()
 		Skada:SendComm(nil, nil, "VersionCheck", Skada.version)
 		version_timer = nil
 	end
 
-	local function convertVersion(ver)
-		return tonumber(type(ver) == "string" and ver:gsub("%.", "", 1) or ver)
+	function convertVersion(ver)
+		return tonumber(type(ver) == "string" and ver:gsub("%.", "") or ver)
 	end
 
 	function Skada:OnCommVersionCheck(sender, version)
@@ -2144,7 +2144,7 @@ do
 			end)
 		end
 
-		version_timer = version_timer or self.NewTimer(10, CheckVersion)
+		version_timer = version_timer or self.NewTimer(10, checkVersion)
 	end
 
 	function Skada:PARTY_MEMBERS_CHANGED()
@@ -2158,7 +2158,7 @@ do
 		end
 		if count ~= version_count then
 			if count > 1 and count > version_count then
-				version_timer = version_timer or self.NewTimer(10, CheckVersion)
+				version_timer = version_timer or self.NewTimer(10, checkVersion)
 			end
 			version_count = count
 		end
@@ -2597,6 +2597,14 @@ function Skada:ApplySettings()
 
 	self.effectivetime = (self.db.profile.timemesure == 2)
 	self:UpdateDisplay(true)
+
+	-- in case of future code change or database structure changes, this
+	-- code here will be used to perform any database modifications.
+	local curversion = convertVersion(self.version)
+	if type(self.db.global.version) ~= "number" or curversion > self.db.global.version then
+		self.callbacks:Fire("SKADA_CORE_UPDATE", self.db.global.version)
+		self.db.global.version = curversion
+	end
 end
 
 function Skada:ReloadSettings()
@@ -3513,7 +3521,7 @@ do
 					end
 
 					-- pull timer
-					if not pull_timer and triggerevents[eventtype] then
+					if triggerevents[eventtype] and not pull_timer and srcFlags and band(srcFlags, BITMASK_GROUP) ~= 0 then
 						local link = self.GetSpellLink(select(1, ...)) or self.GetSpellInfo(select(1, ...)) or self.GetSpellLink(6603)
 						pull_timer = self.NewTicker(0.5, function() WhoPulled(pull_timer) end, 1)
 						local puller = srcName or UNKNOWN

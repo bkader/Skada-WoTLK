@@ -67,14 +67,13 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
 	local function log_damage(set, dmg)
 		local player = Skada:get_player(set, dmg.playerid, dmg.playername, dmg.playerflags)
-		if not player then
-			return
-		end
+		if not player then return end
 
 		player.damagedone = player.damagedone or {}
 		player.damagedone.amount = (player.damagedone.amount or 0) + dmg.amount
-		set.damagedone = set.damagedone + dmg.amount
+		set.damagedone = (set.damagedone or 0) + dmg.amount
 
+		player.damagedone.spells = player.damagedone.spells or {}
 		if not player.damagedone.spells[dmg.spellname] then
 			player.damagedone.spells[dmg.spellname] = {
 				id = dmg.spellid,
@@ -82,8 +81,6 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 				school = dmg.spellschool
 			}
 		end
-
-		player.damagedone.spells = player.damagedone.spells or {}
 		local spell = player.damagedone.spells[dmg.spellname]
 		spell.totalhits = (spell.totalhits or 0) + 1
 		spell.amount = spell.amount + dmg.amount
@@ -131,7 +128,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			set.overkill = (set.overkill or 0) + dmg.overkill
 		end
 
-		if set == Skada.current and dmg.dstName and dmg.amount > 0 then
+		if dmg.dstName and dmg.amount > 0 then
 			spell.targets = spell.targets or {}
 			spell.targets[dmg.dstName] = (spell.targets[dmg.dstName] or 0) + dmg.amount
 
@@ -168,10 +165,8 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 							-- but the player still dpsing it. This counts as useless damage.
 							--
 							if valkyrsTable[dmg.dstGUID] < maxhp / 2 then
-								spell.targets[L["Valkyrs overkilling"]] =
-									(spell.targets[L["Valkyrs overkilling"]] or 0) + dmg.amount
-								player.damagedone.targets[L["Valkyrs overkilling"]] =
-									(player.damagedone.targets[L["Valkyrs overkilling"]] or 0) + dmg.amount
+								spell.targets[L["Valkyrs overkilling"]] = (spell.targets[L["Valkyrs overkilling"]] or 0) + dmg.amount
+								player.damagedone.targets[L["Valkyrs overkilling"]] = (player.damagedone.targets[L["Valkyrs overkilling"]] or 0) + dmg.amount
 								return
 							end
 
@@ -681,18 +676,20 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		}
 
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_BUILDING_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(SpellDamage, "DAMAGE_SPLIT", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellDamage, "RANGE_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
-
+		Skada:RegisterForCL(SpellDamage, "SPELL_BUILDING_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(SpellDamage, "SPELL_EXTRA_ATTACKS", {src_is_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SwingDamage, "SWING_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SwingMissed, "SWING_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
 
-		Skada:RegisterForCL(SpellMissed, "SPELL_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellMissed, "SPELL_PERIODIC_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(SpellMissed, "DAMAGE_SHIELD_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellMissed, "RANGE_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellMissed, "SPELL_BUILDING_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(SpellMissed, "SPELL_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(SpellMissed, "SPELL_PERIODIC_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(SwingMissed, "SWING_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
 
 		Skada:AddFeed(L["Damage: Personal DPS"], feed_personal_dps)
 		Skada:AddFeed(L["Damage: Raid DPS"], feed_raid_dps)
