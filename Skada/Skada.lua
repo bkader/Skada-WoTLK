@@ -3514,7 +3514,7 @@ do
 
 					-- pull timer
 					if not pull_timer and triggerevents[eventtype] then
-						local link = self.GetSpellLink(select(1, ...)) or self.GetSpellInfo(select(1, ...))
+						local link = self.GetSpellLink(select(1, ...)) or self.GetSpellInfo(select(1, ...)) or self.GetSpellLink(6603)
 						pull_timer = self.NewTicker(0.5, function() WhoPulled(pull_timer) end, 1)
 						local puller = srcName or UNKNOWN
 						local class = select(2, UnitClass(srcName))
