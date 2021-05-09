@@ -124,7 +124,7 @@ end
 local IsInGroup = _G.IsInGroup
 if not IsInGroup then
 	IsInGroup = function()
-		return (GetNumRaidMembers() == 0 and GetNumPartyMembers() > 0)
+		return (GetNumPartyMembers() > 0 or GetNumRaidMembers() > 0)
 	end
 	_G.IsInGroup = IsInGroup
 end
