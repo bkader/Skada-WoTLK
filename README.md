@@ -2,6 +2,8 @@
 
 I am simply a huge fan of **Skada**, I prefer it to other damage meters for several reasons. No need to judge me, it's after all a personal preference.
 
+Though it's not required and I have never asked for it but people keep asking for it, if you want to show love and support, your PayPal donations are most welcome to **bkader[at]email.com**.
+
 * [What's the difference?](#whats-the-difference)
 * [How to install](#how-to-install)
 * [Modules](#modules)
