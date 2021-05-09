@@ -2099,10 +2099,13 @@ do
 		if sender and sender ~= UnitName("player") and version then
 			version = convertVersion(version)
 			local ver = convertVersion(self.version)
-
-			if version and ver and (version > ver) and not self.versionChecked then
+			if not (version and ver) then
+				return
+			elseif (version > ver) and not self.versionChecked then
 				self:Print(L["Skada is out of date. You can download the newest version from |cffffbb00https://github.com/bkader/Skada-WoTLK|r"])
 				self.versionChecked = true
+			elseif (version < ver) then
+				Skada:SendComm("WHISPER", sender, "VersionCheck", Skada.version)
 			end
 		end
 	end
