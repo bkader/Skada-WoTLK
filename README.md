@@ -2,7 +2,11 @@
 
 I am simply a huge fan of **Skada**, I prefer it to other damage meters for several reasons. No need to judge me, it's after all a personal preference.
 
+## Show Love & Support
+
 Though it's not required and I have never asked for it but people keep asking for it, if you want to show love and support, your PayPal donations are most welcome to **bkader[at]email.com**.
+
+## Table of content
 
 * [What's the difference?](#whats-the-difference)
 * [How to install](#how-to-install)
@@ -88,6 +92,7 @@ Shows the damage taken by players of your raid with details about damage spells 
 1. **Damage taken by spell**: the same as the _Damage done by spell_ but for damage your raid took, clicking a spell bar shows the list of players with the damage they took from it.
 2. **Avoidance & Mitigation**: a pure tank module that gives you info about damage avoidance and mitigation (absorb, dodge, misses, blocks ... etc).
 3. **Damage mitigated**: shows data about the damage that was aborbed, blocked or resisted, giving you access to _Damage spell list_ which gives you access to _Damage spell details_, all in the concept of mitigated damage.
+4. **DTPS** (_Damage taken per second_): the data is already shown as a column in _Damage taken_ module, but this module can be handy for some.
 
 ### Deaths
 
@@ -120,6 +125,7 @@ This module shows the _effective healing_ which means it substructs the _overhea
 3. **Healing and Overhealing**: so you don't get confused, this module is made for pure comparison between players healing and overhealing, showing on its bars these data as well as the percentage of overhealing. It gives you access as well to _Healing spell list_ and _Healing player list_.
 4. **Healing received**: shows the list of players by their received healing and gives you access to the list of players that healed them.
 5. **Healing done by spell**: it lists the healing spells used during the selected segment. Clicking on a spell shows the list of players who used it with the amount.
+6. **HOS** (_healing per second_): even if it is already shown in Absorbs and healing, some people want to see it just like **DPS**, so it's available as a module as well.
 
 ### Improvement
 
