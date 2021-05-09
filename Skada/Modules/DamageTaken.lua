@@ -37,6 +37,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 			spellname = spellname .. " (" .. (dmg.srcName or UNKNOWN) .. ")"
 		end
 
+		player.damagetaken.spells = player.damagetaken.spells or {}
 		local spell = player.damagetaken.spells[spellname] or {id = dmg.spellid, school = dmg.spellschool, source = dmg.srcName, amount = 0}
 		player.damagetaken.spells[spellname] = spell
 		spell.totalhits = (spell.totalhits or 0) + 1
@@ -90,6 +91,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 		end
 
 		if set == Skada.current and dmg.srcName and dmg.amount > 0 then
+			player.damagetaken.sources = player.damagetaken.sources or {}
 			player.damagetaken.sources[dmg.srcName] = (player.damagetaken.sources[dmg.srcName] or 0) + dmg.amount
 		end
 	end

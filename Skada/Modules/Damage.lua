@@ -83,6 +83,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			}
 		end
 
+		player.damagedone.spells = player.damagedone.spells or {}
 		local spell = player.damagedone.spells[dmg.spellname]
 		spell.totalhits = (spell.totalhits or 0) + 1
 		spell.amount = spell.amount + dmg.amount
@@ -133,6 +134,8 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		if set == Skada.current and dmg.dstName and dmg.amount > 0 then
 			spell.targets = spell.targets or {}
 			spell.targets[dmg.dstName] = (spell.targets[dmg.dstName] or 0) + dmg.amount
+
+			player.damagedone.targets = player.damagedone.targets or {}
 			player.damagedone.targets[dmg.dstName] = (player.damagedone.targets[dmg.dstName] or 0) + dmg.amount
 
 			-- add useful damage.
