@@ -3314,6 +3314,7 @@ local function WhoPulled(self)
 				target = "|c" .. Skada.classcolors[class].colorStr .. target .. "|r"
 			end
 			targetline = format(L["|cffffbb00Boss First Target|r: %s (%s)"], target, UnitName(boss) or UNKNOWN)
+			break -- no need
 		end
 	end
 	if targetline then
