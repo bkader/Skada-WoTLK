@@ -302,6 +302,7 @@ L["Shift+Left-Click to reset."] = true
 L["Right-click to open menu"] = true
 -- skada menu
 L["Skada Menu"] = true
+L["Select segment"] = true
 L["Delete segment"] = true
 L["Keep segment"] = true
 L["Toggle window"] = true

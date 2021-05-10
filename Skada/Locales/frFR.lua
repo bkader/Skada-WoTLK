@@ -305,9 +305,10 @@ L["Shift+Left-Click to reset."] = "Shift+clic-gauche pour réinitialiser."
 L["Right-click to open menu"] = "Clic-droit pour ouvrir le menu."
 -- skada menu
 L["Skada Menu"] = "Menu Skada"
-L["Delete segment"] = "Supprimer segment"
-L["Keep segment"] = "Garder segment"
-L["Toggle window"] = "Afficher la fenêtre"
+L["Select segment"] = "Choix de segment"
+L["Delete segment"] = "Suppr. un segment"
+L["Keep segment"] = "Garder un segment"
+L["Toggle window"] = "Basculer l'affichage"
 L["Start new segment"] = "Nouveau segment"
 -- window buttons
 L["Configure"] = "Configurer"

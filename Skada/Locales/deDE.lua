@@ -240,7 +240,6 @@ L["Time measure"] = "Zeitmessung"
 L["Activity time"] = "Aktivzeit"
 L["Effective time"] = "Effektivzeit"
 L.timemesure_desc = [=[|cFFFFFF00Aktivität|r: Die Teilnehmer-Uhr stoppt, wenn er inaktiv ist, und läuft bei Aktivitäten weiter. Gewöhnliche Art zur Messung von DpS und HpS.
-
 |cFFFFFF00Effektiv|r: gebräuchlich für Ranglisten. Diese Methode nutzt die Kampfzeit für DpS-/HpS-Messungen aller Schlachtzugteilnehmer.]=]
 L["Number set duplicates"] = "Anzahl der Duplikate"
 L["Append a count to set names with duplicate mob names."] = "Fügt eine Anzahl hinzu, um Namen, mit doppelten Gegnernamen, festzulegen."
@@ -302,6 +301,7 @@ L["Shift+Left-Click to reset."] = "Shift+Linksklick zum Zurücksetzen."
 L["Right-click to open menu"] = "Rechtsklick zum Öffnen des Menüs"
 -- skada menu
 L["Skada Menu"] = "Skada-Menü"
+L["Select segment"] = "Segment auswählen"
 L["Delete segment"] = "Segment löschen"
 L["Keep segment"] = "Segment behalten"
 L["Toggle window"] = "Fenster ein-/ausblenden"

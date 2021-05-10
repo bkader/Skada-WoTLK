@@ -303,6 +303,7 @@ L.timemesure_desc = [=[|cFFFFFF00活躍時間|r: 每一位團隊成員停止活�
 -- skada menu
 -- L["Skada Menu"] = ""
 -- L["Delete segment"] = ""
+-- L["Select segment"] = ""
 -- L["Keep segment"] = ""
 -- L["Toggle window"] = ""
 -- L["Start new segment"] = ""

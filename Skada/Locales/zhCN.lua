@@ -302,6 +302,7 @@ L["Shift+Left-Click to reset."] = "Shift+左键：重置"
 L["Right-click to open menu"] = "右键：打开菜单"
 -- skada menu
 L["Skada Menu"] = "Skada菜单"
+L["Select segment"] = "选择细分"
 L["Delete segment"] = "删除分段"
 L["Keep segment"] = "保留分段"
 L["Toggle window"] = "开关窗口"

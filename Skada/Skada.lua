@@ -1885,10 +1885,7 @@ function Skada:Command(param)
 		w1, w2, w3 = nil, nil, nil
 
 		-- Sanity checks.
-		if
-			chan and (chan == "say" or chan == "guild" or chan == "raid" or chan == "party" or chan == "officer") and
-				(report_mode_name and self:find_mode(report_mode_name))
-		 then
+		if chan and (chan == "say" or chan == "guild" or chan == "raid" or chan == "party" or chan == "officer") and (report_mode_name and self:find_mode(report_mode_name)) then
 			self:Report(chan, "preset", report_mode_name, "current", max)
 		else
 			self:Print("Usage:")
@@ -1896,13 +1893,13 @@ function Skada:Command(param)
 		end
 	else
 		self:Print("Usage:")
-		self:Print(format("%-20s", "/skada report [raid|guild|party|officer|say] [mode] [max lines]"))
-		self:Print(format("%-20s", "/skada reset"))
-		self:Print(format("%-20s", "/skada toggle"))
-		self:Print(format("%-20s", "/skada newsegment"))
-		self:Print(format("%-20s", "/skada config"))
-		self:Print(format("%-20s", "/skada clean"))
-		self:Print(format("%-20s", "/skada website"))
+		self:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33report|r [raid|guild|party|officer|say] [mode] [max lines]"))
+		self:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33reset|r"))
+		self:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33toggle|r"))
+		self:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33newsegment|r"))
+		self:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33config|r"))
+		self:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33clean|r"))
+		self:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33website|r"))
 	end
 end
 

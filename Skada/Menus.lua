@@ -38,12 +38,6 @@ function Skada:OpenMenu(window)
 		if not level then return end
 
 		if level == 1 then
-			info = _UIDropDownMenu_CreateInfo()
-			info.isTitle = 1
-			info.text = L["Skada Menu"]
-			info.notCheckable = 1
-			_UIDropDownMenu_AddButton(info, level)
-
 			-- window menus
 			for i, win in _ipairs(Skada:GetWindows()) do
 				info = _UIDropDownMenu_CreateInfo()
@@ -86,6 +80,16 @@ function Skada:OpenMenu(window)
 				info.func = function()
 					Skada:OpenReportWindow(window)
 				end
+				info.notCheckable = 1
+				info.padding = 16
+				_UIDropDownMenu_AddButton(info, level)
+			end
+
+			if window then
+				info = _UIDropDownMenu_CreateInfo()
+				info.text = L["Select segment"]
+				info.value = "segment"
+				info.hasArrow = 1
 				info.notCheckable = 1
 				info.padding = 16
 				_UIDropDownMenu_AddButton(info, level)
@@ -184,7 +188,6 @@ function Skada:OpenMenu(window)
 						_UIDropDownMenu_AddButton(info, level)
 					end
 
-					-- Display list of sets with current ticked; let user switch set by checking one.
 					info = _UIDropDownMenu_CreateInfo()
 					info.isTitle = 1
 					info.text = L["Segment"]
@@ -219,6 +222,7 @@ function Skada:OpenMenu(window)
 							Skada:Wipe()
 							Skada:UpdateDisplay(true)
 						end
+						info.colorCode = set.gotboss and (set.success and "|cff00ff00" or "|cffff0000") or "|cffffffff"
 						info.checked = (window.selectedset == set.starttime)
 						_UIDropDownMenu_AddButton(info, level)
 					end
@@ -284,6 +288,39 @@ function Skada:OpenMenu(window)
 				info.notCheckable = 1
 				info.leftPadding = 16
 				_UIDropDownMenu_AddButton(info, level)
+			elseif L_UIDROPDOWNMENU_MENU_VALUE == "segment" then
+				info = _UIDropDownMenu_CreateInfo()
+				info.text = L["Total"]
+				info.func = function()
+					window:set_selected_set("total")
+					Skada:Wipe()
+					Skada:UpdateDisplay(true)
+				end
+				info.checked = (window.selectedset == "total")
+				_UIDropDownMenu_AddButton(info, level)
+
+				info = _UIDropDownMenu_CreateInfo()
+				info.text = L["Current"]
+				info.func = function()
+					window:set_selected_set("current")
+					Skada:Wipe()
+					Skada:UpdateDisplay(true)
+				end
+				info.checked = (window.selectedset == "current")
+				_UIDropDownMenu_AddButton(info, level)
+
+				for i, set in _ipairs(Skada:GetSets()) do
+					info = _UIDropDownMenu_CreateInfo()
+					info.text = Skada:GetSetLabel(set)
+					info.func = function()
+						window:set_selected_set(i)
+						Skada:Wipe()
+						Skada:UpdateDisplay(true)
+					end
+					info.checked = (window.selectedset == i)
+					info.colorCode = set.gotboss and (set.success and "|cff00ff00" or "|cffff0000") or "|cffffffff"
+					_UIDropDownMenu_AddButton(info, level)
+				end
 			elseif L_UIDROPDOWNMENU_MENU_VALUE == "delete" then
 				for i, set in _ipairs(Skada:GetSets()) do
 					info = _UIDropDownMenu_CreateInfo()
@@ -292,6 +329,7 @@ function Skada:OpenMenu(window)
 						Skada:DeleteSet(set)
 					end
 					info.notCheckable = 1
+					info.colorCode = set.gotboss and (set.success and "|cff00ff00" or "|cffff0000") or "|cffffffff"
 					_UIDropDownMenu_AddButton(info, level)
 				end
 			elseif L_UIDROPDOWNMENU_MENU_VALUE == "keep" then
@@ -305,6 +343,7 @@ function Skada:OpenMenu(window)
 					info.checked = set.keep
 					info.isNotRadio = 1
 					info.keepShownOnClick = true
+					info.colorCode = set.gotboss and (set.success and "|cff00ff00" or "|cffff0000") or "|cffffffff"
 					_UIDropDownMenu_AddButton(info, level)
 				end
 			end
@@ -362,12 +401,6 @@ function Skada:SegmentMenu(window)
 	local info = _UIDropDownMenu_CreateInfo()
 	segmentsmenu.initialize = function(self, level)
 		if not level then return end
-
-		info.isTitle = 1
-		info.text = L["Segment"]
-		info.notCheckable = 1
-		_UIDropDownMenu_AddButton(info, level)
-
 		info = _UIDropDownMenu_CreateInfo()
 		info.text = L["Total"]
 		info.func = function()
@@ -397,6 +430,7 @@ function Skada:SegmentMenu(window)
 				Skada:UpdateDisplay(true)
 			end
 			info.checked = (window.selectedset == i)
+			info.colorCode = set.gotboss and (set.success and "|cff00ff00" or "|cffff0000") or "|cffffffff"
 			_UIDropDownMenu_AddButton(info, level)
 		end
 	end
@@ -441,11 +475,6 @@ do
 			end
 
 			if level == 1 then
-				info.isTitle = 1
-				info.text = L["Mode"]
-				info.notCheckable = 1
-				_UIDropDownMenu_AddButton(info, level)
-
 				for category, modes in _pairs(categorized) do
 					if category ~= OTHER then
 						info = _UIDropDownMenu_CreateInfo()
@@ -539,9 +568,7 @@ do
 			for i, mode in _ipairs(Skada:GetModes()) do
 				modebox:AddItem(mode:GetName(), mode:GetName())
 			end
-			modebox:SetCallback("OnValueChanged", function(f, e, value)
-				Skada.db.profile.report.mode = value
-			end)
+			modebox:SetCallback("OnValueChanged", function(f, e, value) Skada.db.profile.report.mode = value end)
 			modebox:SetValue(Skada.db.profile.report.mode or Skada:GetModes()[1])
 			frame:AddChild(modebox)
 
@@ -552,9 +579,7 @@ do
 			for i, set in _ipairs(Skada:GetSets()) do
 				setbox:AddItem(i, set.name)
 			end
-			setbox:SetCallback("OnValueChanged", function(f, e, value)
-				Skada.db.profile.report.set = value
-			end)
+			setbox:SetCallback("OnValueChanged", function(f, e, value) Skada.db.profile.report.set = value end)
 			setbox:SetValue(Skada.db.profile.report.set or Skada.char.sets[1])
 			frame:AddChild(setbox)
 		end

@@ -301,6 +301,7 @@ L["Shift+Left-Click to reset."] = "Shift+ЛКМ - Сброса."
 L["Right-click to open menu"] = "ПКМ - Открыть меню"
 -- skada menu
 L["Skada Menu"] = "Меню Skada"
+L["Select segment"] = "Выбрать сегмент"
 L["Delete segment"] = "Удалить сегмент"
 L["Keep segment"] = "Хранить сегмент"
 L["Toggle window"] = "Открыть/закрыть окно"

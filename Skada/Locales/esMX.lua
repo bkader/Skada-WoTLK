@@ -241,7 +241,6 @@ L["Time measure"] = "Medida de tiempo"
 L["Activity time"] = "Tiempo activo"
 L["Effective time"] = "Tiempo efectivo"
 L.timemesure_desc = [=[|cFFFFFF00Actividad|r: el temporizador de cada miembro de la banda se pone en espera si se detiene su actividad y vuelve a contar cuando se reanuda, forma común de medir DPS y SPS.
-
 |cFFFFFF00Efectivo|r: utilizado en las clasificaciones, este método utiliza el tiempo de combate transcurrido para medir el DPS y el SPS de todos los miembros de la banda.]=]
 L["Number set duplicates"] = "Número de duplicados"
 L["Append a count to set names with duplicate mob names."] = "Agregue un recuento para establecer nombres con nombres de segmento duplicados."
@@ -252,7 +251,7 @@ L["When possible, use links in the report messages."] = "Cuando sea posible, uti
 L["Memory Check"] = "Verificar de la memoria"
 L["Checks memory usage and warns you if it is greater than or equal to %dmb."] = "Comprueba el uso de la memoria y le advierte si es mayor o igual a %dMB."
 L["Data segments to keep"] = "Fragmentos de datos para guardar"
-L["The number of fight segments to keep. Persistent segments are not included in this."] = "El número de fragmentos de combate para guardar. Los fragmentos permanentes no están incluídos en esto."
+L["The number of fight segments to keep. Persistent segments are not included in this."] = "El número de segmentos de combate para guardar. Los segmentos permanentes no están incluídos en esto."
 L["Update frequency"] = "Frecuencia de actualización"
 L["How often windows are updated. Shorter for faster updates. Increases CPU usage."] = "Con qué frecuencia se actualizan las ventanas. Más corto para actualizaciones más rápidas. Aumenta el uso de la CPU."
 -- columns
@@ -303,10 +302,11 @@ L["Shift+Left-Click to reset."] = "Shift+Click izquierdo para restablecer"
 L["Right-click to open menu"] = "Click derecho para abrir menú"
 -- skada menu
 L["Skada Menu"] = "Menú de Skada"
-L["Delete segment"] = "Borrar fragmento"
-L["Keep segment"] = "Guardar fragmento"
+L["Select segment"] = "Seleccionar segmento"
+L["Delete segment"] = "Borrar segmento"
+L["Keep segment"] = "Guardar segmento"
 L["Toggle window"] = "Abrir/Cerrar ventana"
-L["Start new segment"] = "Comenzar nuevo fragmento"
+L["Start new segment"] = "Comenzar nuevo segmento"
 -- window buttons
 L["Configure"] = "Configurar"
 L["Opens the configuration window."] = "Abre la ventana de configuración."
@@ -330,7 +330,7 @@ L["Whisper"] = "Susurro"
 L["Whisper Target"] = "Susurrar objetivo"
 L["Lines"] = "Lineas"
 L["There is nothing to report."] = "No hay nada que informar."
-L["No mode or segment selected for report."] = "No hay modo o fragmento seleccionado para informe."
+L["No mode or segment selected for report."] = "No hay modo o segmento seleccionado para informe."
 -- Bar Display Module --
 L["Bar display"] = "Visualización de la barra"
 L["Bar display is the normal bar window used by most damage meters. It can be extensively styled."] = "Lo que muestra la barra es la normal usada por la mayoría de extensiones Medidores de Daño. Puede ser profusamente customizada."

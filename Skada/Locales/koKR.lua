@@ -302,6 +302,7 @@ L.timemesure_desc = [=[|cFFFFFF00활동 시간|r: 각 공격대원의 타이머�
 -- L["Right-click to open menu"] = ""
 -- skada menu
 -- L["Skada Menu"] = ""
+-- L["Select segment"] = ""
 -- L["Delete segment"] = ""
 -- L["Keep segment"] = ""
 -- L["Toggle window"] = ""
