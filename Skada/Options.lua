@@ -1,7 +1,6 @@
 assert(Skada, "Skada not found!")
 
 local Skada = Skada
-Skada.version = GetAddOnMetadata("Skada", "Version")
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 local fmt = string.format
 

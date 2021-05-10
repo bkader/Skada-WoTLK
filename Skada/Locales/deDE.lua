@@ -3,7 +3,7 @@ if not L then return end
 
 L["A damage meter."] = "Ein Damage-Meter."
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "Die Speicherauslastung ist hoch. Du kannst Skada zurücksetzen und eine der Optionen zur automatischen Zurücksetzung aktivieren."
-L["Skada is out of date. You can download the newest version from |cffffbb00https://github.com/bkader/Skada-WoTLK|r"] = "Skada ist nicht aktuell. Du kannst die neuste Version bei |cffffbb00https://github.com/bkader/Skada-WoTLK|r herunterladen"
+L["Skada is out of date. You can download the newest version from |cffffbb00%s|r"] = "Skada ist nicht aktuell. Du kannst die neuste Version bei |cffffbb00%s|r herunterladen"
 L["Skada: Modes"] = "Skada: Modi"
 L["Skada: Fights"] = "Skada: Kämpfe"
 L["Error: No options selected"] = "Fehler: Keine Optionen ausgewählt"

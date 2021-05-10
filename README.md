@@ -4,7 +4,7 @@ I am simply a huge fan of **Skada**, I prefer it to other damage meters for seve
 
 ## Show Love & Support
 
-Though it's not required and I have never asked for it but people keep asking for it, if you want to show love and support, your PayPal donations are most welcome to **bkader[at]email.com**.
+Though it's not required and I have never asked for it but people keep asking for it, if you want to show some love and support, PayPal donations are most welcome at **bkader[at]email.com**.
 
 ## Table of content
 

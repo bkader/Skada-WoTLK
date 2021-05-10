@@ -1,6 +1,8 @@
 local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceConsole-3.0", "AceEvent-3.0", "AceComm-3.0")
 _G.Skada = Skada
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
+Skada.version = GetAddOnMetadata("Skada", "Version")
+Skada.website = GetAddOnMetadata("Skada", "X-Website")
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 local ACD = LibStub("AceConfigDialog-3.0")
@@ -211,8 +213,8 @@ end
 
 -- utilities
 
-function Skada:ShowPopup(win, force)
-	if Skada.db.profile.skippopup and not force then
+function Skada:ShowPopup(win, popup)
+	if Skada.db.profile.skippopup and not popup then
 		Skada:Reset()
 		return
 	end
@@ -1870,6 +1872,8 @@ function Skada:Command(param)
 		self:OpenOptions()
 	elseif param == "clear" or param == "clean" then
 		self:CleanGarbage(true)
+	elseif param == "website" or param == "github" then
+		self:Print(format("|cffffbb00%s|r", self.website))
 	elseif param:sub(1, 6) == "report" then
 		param = param:sub(7)
 
@@ -1898,6 +1902,7 @@ function Skada:Command(param)
 		self:Print(format("%-20s", "/skada newsegment"))
 		self:Print(format("%-20s", "/skada config"))
 		self:Print(format("%-20s", "/skada clean"))
+		self:Print(format("%-20s", "/skada website"))
 	end
 end
 
@@ -2102,9 +2107,9 @@ do
 			if not (version and ver) or self.versionChecked then return end
 
 			if (version > ver) then
-				self:Print(L["Skada is out of date. You can download the newest version from |cffffbb00https://github.com/bkader/Skada-WoTLK|r"])
+				self:Print(format(L["Skada is out of date. You can download the newest version from |cffffbb00%s|r"], self.website))
 			elseif (version < ver) then
-				Skada:SendComm("WHISPER", sender, "VersionCheck", Skada.version)
+				self:SendComm("WHISPER", sender, "VersionCheck", self.version)
 			end
 
 			self.versionChecked = true
@@ -2191,7 +2196,7 @@ function Skada:CanReset()
 	return false
 end
 
-function Skada:Reset()
+function Skada:Reset(force)
 	self:Wipe()
 	players, pets = {}, {}
 	self:CheckGroup()
@@ -2209,7 +2214,7 @@ function Skada:Reset()
 	self.last = nil
 
 	for i = tmaxn(self.char.sets), 1, -1 do
-		if not self.char.sets[i].keep then
+		if not self.char.sets[i].keep or force then
 			wipe(tremove(self.char.sets, i))
 		end
 	end

@@ -3,7 +3,7 @@ if not L then return end
 
 L["A damage meter."] = true
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = true
-L["Skada is out of date. You can download the newest version from |cffffbb00https://github.com/bkader/Skada-WoTLK|r"] = true
+L["Skada is out of date. You can download the newest version from |cffffbb00%s|r"] = true
 L["Skada: Modes"] = true
 L["Skada: Fights"] = true
 L["Error: No options selected"] = true
