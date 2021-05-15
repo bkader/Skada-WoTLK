@@ -3544,23 +3544,25 @@ do
 						end
 					end
 
-					-- pull timer
-					if self.db.profile.firsthit and triggerevents[eventtype] and not pull_timer and srcFlags and band(srcFlags, BITMASK_GROUP) ~= 0 then
-						local link = (eventtype == "SWING_DAMAGE") and self.GetSpellLink(6603) or self.GetSpellLink(select(1, ...)) or self.GetSpellInfo(select(1, ...))
-						pull_timer = self.NewTicker(0.5, function() WhoPulled(pull_timer) end, 1)
-						local puller = pets[srcGUID] and pets[srcGUID].name or srcName or UNKNOWN
-						local class = select(2, UnitClass(puller))
-						if class and self.classcolors[class] then
-							puller = "|c" .. self.classcolors[class].colorStr .. puller .. "|r"
-						end
-						if self:IsPet(srcGUID, srcFlags) then
-							puller = puller.." ("..PET..")"
-						end
-						pull_timer.HitBy = format(L["|cffffff00First Hit|r: %s from %s"], link or "", puller)
-					end
 				end
 			end
 		end
+
+		-- pull timer
+		if self.db.profile.firsthit and self.current and triggerevents[eventtype] and InCombatLockdown() and not pull_timer and srcFlags and band(srcFlags, BITMASK_GROUP) ~= 0 then
+			local link = (eventtype == "SWING_DAMAGE") and self.GetSpellLink(6603) or self.GetSpellLink(select(1, ...)) or self.GetSpellInfo(select(1, ...))
+			pull_timer = self.NewTimer(0.5, function() WhoPulled(pull_timer) end)
+			local puller = pets[srcGUID] and pets[srcGUID].name or srcName or UNKNOWN
+			local class = select(2, UnitClass(puller))
+			if class and self.classcolors[class] then
+				puller = "|c" .. self.classcolors[class].colorStr .. puller .. "|r"
+			end
+			if self:IsPet(srcGUID, srcFlags) then
+				puller = puller .. " (" .. PET .. ")"
+			end
+			pull_timer.HitBy = format(L["|cffffff00First Hit|r: %s from %s"], link or "", puller)
+		end
+
 
 		if self.current and src_is_interesting and not self.current.gotboss then
 			if band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
