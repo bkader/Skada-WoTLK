@@ -29,6 +29,7 @@ L["Count"] = true
 L["Refresh"] = true
 L["Percent"] = true
 L["General options"] = true
+L["First hit"] = true
 L["|cffffff00First Hit|r: %s from %s"] = true
 L["|cffffbb00First Hit|r: *?*"] = true
 L["|cffffbb00Boss First Target|r: %s (%s)"] = true
@@ -574,6 +575,7 @@ L["Potions"] = true
 L["Potions list"] = true
 L["Players list"] = true
 L["%s's used potions"] = true
+L["Pre-potion"] = true
 -- resurrect module lines --
 L["Resurrects"] = true
 L["Resurrect spell list"] = true

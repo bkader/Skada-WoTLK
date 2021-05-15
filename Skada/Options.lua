@@ -125,6 +125,7 @@ Skada.defaults = {
 		smartstop = false,
 		sortmodesbyusage = false,
 		updatefrequency = 0.25,
+		firsthit = true,
 		modules = {},
 		columns = {},
 		report = {mode = "Damage", set = "current", channel = "Say", chantype = "preset", number = 10},
@@ -552,6 +553,11 @@ Skada.options = {
 					name = " ",
 					order = 24,
 					width = "full"
+				},
+				firsthit = {
+					type = "toggle",
+					name = L["First hit"],
+					order = 95
 				},
 				reportlinks = {
 					type = "toggle",

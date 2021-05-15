@@ -64,7 +64,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 
 	-- we use this function to record pre-pots as well.
 	function mod:CheckPrePot(event)
-		if event == "ENCOUNTER_START" then
+		if Skada.db.profile.prepotion and event == "ENCOUNTER_START" then
 			prepotion = {}
 			local prefix, min, max = "raid", 1, _GetNumRaidMembers()
 			if max == 0 then
@@ -245,6 +245,18 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 		win.title = L["Potions"]
 	end
 
+	function mod:OnInitialize()
+		if Skada.db.profile.prepotion == nil then
+			Skada.db.profile.prepotion = true
+		end
+
+		Skada.options.args.generaloptions.args.prepotion = {
+			type = "toggle",
+			name = L["Pre-potion"],
+			order = 94
+		}
+	end
+
 	function mod:OnEnable()
 		playersmod.metadata = {}
 		potionsmod.metadata = {click1 = playersmod}
@@ -267,9 +279,9 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	end
 
 	function mod:SetComplete(set)
-		if next(prepotion) then
+		if Skada.db.profile.prepotion and next(prepotion) ~= nil then
 			Skada:Print(_format("pre-potion: %s", tconcat(prepotion, ", ")))
+			prepotion = {}
 		end
-		prepotion = {}
 	end
 end)

@@ -29,6 +29,7 @@ if not L then return end
 -- L["Refresh"] = ""
 -- L["Percent"] = ""
 -- L["General options"] = ""
+-- L["First hit"] = ""
 -- L["|cffffff00First Hit|r: %s from %s"] = ""
 -- L["|cffffbb00First Hit|r: *?*"] = ""
 -- L["|cffffbb00Boss First Target|r: %s (%s)"] = ""
@@ -574,6 +575,7 @@ L.timemesure_desc = [=[|cFFFFFF00活躍時間|r: 每一位團隊成員停止活�
 -- L["Potions list"] = ""
 -- L["Players list"] = ""
 -- L["%s's used potions"] = ""
+-- L["Pre-potion"] = "Pre-potion"
 -- resurrect module lines --
 -- L["Resurrects"] = ""
 -- L["Resurrect spell list"] = ""

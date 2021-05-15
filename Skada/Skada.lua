@@ -2028,8 +2028,16 @@ function Skada:GetPetOwner(petGUID)
 	return pets[petGUID]
 end
 
-function Skada:IsPet(petGUID)
-	return (pets[petGUID] ~= nil)
+function Skada:IsPet(petGUID, petFlags)
+	if petGUID and pets[petGUID] then
+		return true
+	end
+
+	if petFlags and band(petFlags, BITMASK_PETS) ~= 0 then
+		return true
+	end
+
+	return false
 end
 
 function Skada:CheckGroup()
@@ -3159,9 +3167,7 @@ function Skada:NewSegment()
 end
 
 function Skada:EndSegment()
-	if not self.current then
-		return
-	end
+	if not self.current then return end
 
 	local now = time()
 	if not self.db.profile.onlykeepbosses or self.current.gotboss then
@@ -3255,16 +3261,27 @@ function Skada:EndSegment()
 	end
 
 	self:UpdateDisplay(true)
-	if update_timer and not update_timer._cancelled then
-		update_timer:Cancel()
+
+	if update_timer then
+		if not update_timer._cancelled then
+			update_timer:Cancel()
+		end
+		update_timer = nil
 	end
-	if tick_timer and not tick_timer._cancelled then
-		tick_timer:Cancel()
+
+	if tick_timer then
+		if not tick_timer._cancelled then
+			tick_timer:Cancel()
+		end
+		tick_timer = nil
 	end
-	if pull_timer and not pull_timer._cancelled then
-		pull_timer:Cancel()
+
+	if pull_timer then
+		if not pull_timer._cancelled then
+			pull_timer:Cancel()
+		end
+		pull_timer = nil
 	end
-	update_timer, tick_timer, pull_timer = nil, nil, nil
 
 	self.After(2, function() self:CleanGarbage(true) end)
 	self.After(3, function() self:MemoryCheck() end)
@@ -3442,7 +3459,7 @@ do
 				if not self.total then
 					self.total = self:CreateSet(L["Total"], now)
 				end
-				tentativehandle = self.NewTimer(self.db.profile.tentativetimer or 1, function()
+				tentativehandle = self.NewTimer(self.db.profile.tentativetimer or 3, function()
 					tentative = nil
 					tentativehandle = nil
 					self.current = nil
@@ -3528,13 +3545,16 @@ do
 					end
 
 					-- pull timer
-					if triggerevents[eventtype] and not pull_timer and srcFlags and band(srcFlags, BITMASK_GROUP) ~= 0 then
-						local link = self.GetSpellLink(select(1, ...)) or self.GetSpellInfo(select(1, ...)) or self.GetSpellLink(6603)
+					if self.db.profile.firsthit and triggerevents[eventtype] and not pull_timer and srcFlags and band(srcFlags, BITMASK_GROUP) ~= 0 then
+						local link = (eventtype == "SWING_DAMAGE") and self.GetSpellLink(6603) or self.GetSpellLink(select(1, ...)) or self.GetSpellInfo(select(1, ...))
 						pull_timer = self.NewTicker(0.5, function() WhoPulled(pull_timer) end, 1)
-						local puller = srcName or UNKNOWN
-						local class = select(2, UnitClass(srcName))
+						local puller = pets[srcGUID] and pets[srcGUID].name or srcName or UNKNOWN
+						local class = select(2, UnitClass(puller))
 						if class and self.classcolors[class] then
-							puller = "|c" .. self.classcolors[class].colorStr .. srcName .. "|r"
+							puller = "|c" .. self.classcolors[class].colorStr .. puller .. "|r"
+						end
+						if self:IsPet(srcGUID, srcFlags) then
+							puller = puller.." ("..PET..")"
 						end
 						pull_timer.HitBy = format(L["|cffffff00First Hit|r: %s from %s"], link or "", puller)
 					end
