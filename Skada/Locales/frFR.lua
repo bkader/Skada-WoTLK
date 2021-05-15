@@ -301,7 +301,7 @@ L["Keybinding"] = "Raccourci"
 L["Key scrolling speed"] = "Vitesse de défilement du raccourci"
 -- minimap button
 L["Skada summary"] = "Résumé Skada"
-L["Left-Click to toggle windows."] = "clic-gauche pour afficher/cacher les fenêtres."
+L["Left-Click to toggle windows."] = "Clic-gauche pour afficher/cacher les fenêtres."
 L["Shift+Left-Click to reset."] = "Shift+clic-gauche pour réinitialiser."
 L["Right-click to open menu"] = "Clic-droit pour ouvrir le menu."
 -- skada menu
