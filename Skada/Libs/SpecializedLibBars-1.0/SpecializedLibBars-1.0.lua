@@ -546,18 +546,14 @@ do
 					p:StartSizing("BOTTOMRIGHT")
 				end
 
-				p:SetScript(
-					"OnUpdate",
-					function()
-						if p.isResizing then
-							-- Adjust bar sizes.
-							p:SetLength(p:GetWidth())
-							p.callbacks:Fire("WindowResizing", p)
-						else
-							p:SetScript("OnUpdate", nil)
-						end
+				p:SetScript("OnUpdate", function()
+					if p.isResizing then
+						p:SetLength(p:GetWidth())
+						p.callbacks:Fire("WindowResizing", p)
+					else
+						p:SetScript("OnUpdate", nil)
 					end
-				)
+				end)
 			end
 		end)
 		list.resizeright:SetScript("OnMouseUp", function(self, button)
@@ -592,18 +588,14 @@ do
 					p:StartSizing("BOTTOMLEFT")
 				end
 
-				p:SetScript(
-					"OnUpdate",
-					function()
-						if p.isResizing then
-							-- Adjust bar sizes.
-							p:SetLength(p:GetWidth())
-							p.callbacks:Fire("WindowResizing", p)
-						else
-							p:SetScript("OnUpdate", nil)
-						end
+				p:SetScript("OnUpdate", function()
+					if p.isResizing then
+						p:SetLength(p:GetWidth())
+						p.callbacks:Fire("WindowResizing", p)
+					else
+						p:SetScript("OnUpdate", nil)
 					end
-				)
+				end)
 			end
 		end)
 		list.resizeleft:SetScript("OnMouseUp", function(self, button)
@@ -1103,26 +1095,28 @@ do
 		local x1, y1, x2, y2 = 0, startpoint, 0, startpoint
 		local maxbars = min(#values, floor((self:GetHeight() - startpoint) / (thickness + spacing)))
 
-		local start, stop, step
+		local start, stop, step, fixnum
 		if growup then
 			from = "BOTTOM"
 			to = "TOP"
 			start = min(#values, maxbars + offset)
 			stop = min(#values, 1 + offset)
 			step = -1
+			fixnum = start
 		else
 			from = "TOP"
 			to = "BOTTOM"
 			start = min(1 + offset, #values)
 			stop = min(maxbars + offset, #values)
 			step = 1
+			fixnum = stop
 		end
 
 		-- Fixed bar replaces the last bar
-		if has_fixed and stop < #values then
-			for i = stop + 1, #values, 1 do
+		if has_fixed and fixnum < #values then
+			for i = fixnum + 1, #values, 1 do
 				if values[i].fixed then
-					tinsert(values, stop, values[i])
+					tinsert(values, fixnum, values[i])
 					break
 				end
 			end
