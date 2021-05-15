@@ -178,7 +178,7 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 	-- if it's the player themselves, we use what's stored.
 	-- otherwise we requrest the nickname from the other skada user.
 	function mod:FixPlayer(_, player)
-		if not Skada.db.profile.ignorenicknames and player.id and player.name then
+		if not Skada.db.profile.ignorenicknames and player.id and player.name and not Skada:IsPet(player.id) then
 			if not player.nickname then
 				if player.id == unitGUID then
 					if Skada.db.profile.nickname and Skada.db.profile.nickname ~= "" then
@@ -199,7 +199,7 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 	-- a response from the player, it will simply set his/her name
 	-- as the nickname to avoid further check.
 	function mod:find_player(_, set, guid)
-		if not Skada.db.profile.ignorenicknames and set and guid then
+		if not Skada.db.profile.ignorenicknames and set and guid and not Skada:IsPet(guid) then
 			for _, player in ipairs(set.players) do
 				if player.id == guid then
 					if not player.nickname then -- we update only if needed.
