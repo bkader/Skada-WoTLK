@@ -1540,7 +1540,14 @@ do
 		[35465] = LBB["Faction Champions"], -- Zhaagrym <Harkzog's Minion / Serissa Grimdabbler's Minion>
 		[35610] = LBB["Faction Champions"], -- Cat <Ruj'kah's Pet / Alyssia Moonstalker's Pet>
 		[34496] = LBB["The Twin Val'kyr"], -- Eydis Darkbane
-		[34497] = LBB["The Twin Val'kyr"] -- Fjola Lightbane
+		[34497] = LBB["The Twin Val'kyr"], -- Fjola Lightbane
+		-- [[ Ulduar ]] --
+		[32930] = LBB["Kologarn"], -- Kologarn
+		[32933] = LBB["Kologarn"], -- Left Arm
+		[32934] = LBB["Kologarn"], -- Right Arm
+		[33288] = LBB["Yogg-Saron"], -- Yogg-Saron
+		[33890] = LBB["Yogg-Saron"], -- Brain of Yogg-Saron
+		[33136] = LBB["Yogg-Saron"] -- Guardian of Yogg-Saron
 	}
 
 	function Skada:IsBoss(guid, name)
@@ -2672,7 +2679,7 @@ function Skada:FrameSettings(db, include_dimensions)
 	local obj = {
 		type = "group",
 		name = L["Window"],
-		order = 2,
+		order = 3,
 		args = {
 			bgheader = {
 				type = "header",
