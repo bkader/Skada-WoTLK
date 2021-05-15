@@ -1551,9 +1551,9 @@ do
 	}
 
 	function Skada:IsBoss(guid, name)
-		local isboss, npcid, npcname = false
+		local isboss, npcid, npcname = false, 0, nil
 		if guid then
-			local id = tonumber(guid:sub(9, 12), 16)
+			local id = tonumber(guid:sub(8, 12), 16)
 			if id and (LBI.BossIDs[id] or custom[id]) then
 				isboss, npcid = true, id
 				if custom[id] then
@@ -2500,7 +2500,7 @@ do
 		self.db.mode = savemode
 		savemode = nil
 
-		if self.db.titleset and not self.notitleset and self.db.display ~= "inline" then
+		if self.db.titleset and self.db.display ~= "inline" then
 			local setname
 			if self.selectedset == "current" then
 				setname = L["Current"]
@@ -2512,7 +2512,7 @@ do
 					setname = Skada:GetSetLabel(set)
 				end
 			end
-			if setname then
+			if setname and not self.notitleset then
 				name = name .. ": " .. setname
 			end
 		end
