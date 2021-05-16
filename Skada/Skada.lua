@@ -1129,6 +1129,7 @@ function Skada:CreateSet(setname, starttime)
 	for _, mode in ipairs(modes) do
 		self:VerifySet(mode, set)
 	end
+	self.callbacks:Fire("SKADA_DATA_SETCREATED", set)
 	return set
 end
 
@@ -1165,35 +1166,34 @@ function Skada:GetSet(s)
 end
 
 function Skada:DeleteSet(set)
-	if not set then
-		return
-	end
+	if set then
+		for i, s in ipairs(self.char.sets) do
+			if s == set then
+				local todel = tremove(self.char.sets, i)
+				self.callbacks:Fire("SKADA_DATA_SETDELETED", i, todel)
 
-	for i, s in ipairs(self.char.sets) do
-		if s == set then
-			wipe(tremove(self.char.sets, i))
-
-			if set == self.last then
-				self.last = nil
-			end
-
-			-- Don't leave windows pointing to deleted sets
-			for _, win in ipairs(windows) do
-				if win.selectedset == i or win:get_selected_set() == set then
-					win.selectedset = "current"
-					win.changed = true
-				elseif (tonumber(win.selectedset) or 0) > i then
-					win.selectedset = win.selectedset - 1
-					win.changed = true
+				if set == self.last then
+					self.last = nil
 				end
-			end
-			break
-		end
-	end
 
-	self:Wipe()
-	self:CleanGarbage(true)
-	self:UpdateDisplay(true)
+				-- Don't leave windows pointing to deleted sets
+				for _, win in ipairs(windows) do
+					if win.selectedset == i or win:get_selected_set() == set then
+						win.selectedset = "current"
+						win.changed = true
+					elseif (tonumber(win.selectedset) or 0) > i then
+						win.selectedset = win.selectedset - 1
+						win.changed = true
+					end
+				end
+				break
+			end
+		end
+
+		self:Wipe()
+		self:CleanGarbage(true)
+		self:UpdateDisplay(true)
+	end
 end
 
 function Skada:GetSetTime(set)
@@ -1310,7 +1310,7 @@ do
 			-- the only way to fix this error is to literally
 			-- ignore it if we don't have a valid GUID.
 			if player.id and #player.id ~= 18 then
-				self.callbacks:Fire("FixPlayer", player)
+				self.callbacks:Fire("SKADA_PLAYER_FIX", player)
 				return player
 			elseif player.id and #player.id == 18 then
 				class, _, _, _, name = select(2, GetPlayerInfoByGUID(player.id))
@@ -1379,7 +1379,7 @@ do
 				player.spec = player.spec or 2 -- unknown fallback
 			end
 
-			self.callbacks:Fire("FixPlayer", player)
+			self.callbacks:Fire("SKADA_PLAYER_FIX", player)
 			name, class = nil, nil
 		end
 	end
@@ -1389,32 +1389,33 @@ function Skada:find_player(set, playerid, playername, strict)
 	if set and playerid then
 		set._playeridx = set._playeridx or {}
 		local player = set._playeridx[playerid]
-		if player then
-			return player
-		end
-		for _, p in ipairs(set.players) do
-			if p.id == playerid then
-				set._playeridx[playerid] = p
-				return p
+		if not player then
+			for _, p in ipairs(set.players) do
+				if p.id == playerid then
+					set._playeridx[playerid] = p
+					player = p
+					break
+				end
 			end
 		end
 
-		-- needed for certain bosses
-		local isboss, _, npcname = self:IsBoss(playerid, playername)
-		if isboss and (npcname or playername) then
-			player = {
-				id = playerid,
-				name = npcname or playername,
-				class = "MONSTER",
-				role = "DAMAGER",
-				spec = 3
-			}
-			set._playeridx[playerid] = player
-			return player
+		if not player then
+			-- needed for certain bosses
+			local isboss, _, npcname = self:IsBoss(playerid, playername)
+			if isboss and (npcname or playername) then
+				player = {
+					id = playerid,
+					name = npcname or playername,
+					class = "MONSTER",
+					role = "DAMAGER",
+					spec = 3
+				}
+				set._playeridx[playerid] = player
+			end
 		end
 
 		-- this our last hope!
-		if not strict and playerid and playername then
+		if not (player or strict) and playerid and playername then
 			player = {
 				id = playerid,
 				name = playername,
@@ -1423,8 +1424,10 @@ function Skada:find_player(set, playerid, playername, strict)
 				spec = 1
 			}
 			set._playeridx[playerid] = player
-			return player
 		end
+
+		self.callbacks:Fire("SKADA_PLAYER_FIND", player)
+		return player
 	end
 end
 
@@ -1464,6 +1467,7 @@ function Skada:get_player(set, playerid, playername, playerflags)
 	player.first = player.first or now
 	player.last = now
 	changed = true
+	self.callbacks:Fire("SKADA_PLAYER_GET", player)
 	return player
 end
 
@@ -1718,7 +1722,13 @@ function Skada:SetTooltipPosition(tooltip, frame, display)
 	elseif self.db.profile.tooltippos == "smart" and frame then
 		if display == "inline" then
 			tooltip:SetOwner(frame, "ANCHOR_CURSOR")
-		elseif frame:GetLeft() < (GetScreenWidth() / 2) then
+			return
+		end
+
+		-- use effective scale so the tooltip doesn't become dumb
+		-- if the window is scaled up.
+		local s = frame:GetEffectiveScale() + 0.5
+		if (frame:GetLeft() * s) < (GetScreenWidth() / 2) then
 			tooltip:SetOwner(frame, "ANCHOR_NONE")
 			tooltip:SetPoint("TOPLEFT", frame, "TOPRIGHT", 10, 0)
 		else
@@ -2029,6 +2039,7 @@ end
 
 function Skada:AssignPet(ownerGUID, ownerName, petGUID)
 	pets[petGUID] = {id = ownerGUID, name = ownerName}
+	self.callbacks:Fire("SKADA_PET_ASSIGN", petGUID, ownerGUID, ownerName)
 end
 
 function Skada:GetPetOwner(petGUID)
@@ -2243,6 +2254,7 @@ function Skada:Reset(force)
 	self:Print(L["All data has been reset."])
 	L_CloseDropDownMenus()
 
+	self.callbacks:Fire("SKADA_DATA_RESET")
 	self:CleanGarbage(true)
 end
 
@@ -3292,7 +3304,7 @@ function Skada:EndSegment()
 
 	self.After(2, function() self:CleanGarbage(true) end)
 	self.After(3, function() self:MemoryCheck() end)
-	self.callbacks:Fire("ENCOUNTER_END", self.current)
+	self.callbacks:Fire("COMBAT_ENCOUNTER_END", self.current)
 end
 
 function Skada:StopSegment()
@@ -3475,9 +3487,9 @@ do
 			end
 		end
 
-		-- ENCOUNTER_START custom event
+		-- COMBAT_ENCOUNTER_START custom event
 		if self.current and not self.current.started then
-			self.callbacks:Fire("ENCOUNTER_START", timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+			self.callbacks:Fire("COMBAT_ENCOUNTER_START", timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 			self.current.started = true
 		end
 
@@ -3487,6 +3499,7 @@ do
 				-- If we reached the treshold for stopping the segment, do so.
 				if deathcounter > 0 and deathcounter / startingmembers >= 0.5 and not self.current.stopped then
 					self:Print("Stopping for wipe.")
+					self.callbacks:Fire("COMBAT_BOSS_WIPE", self.current)
 					self:StopSegment()
 				end
 			elseif eventtype == "SPELL_RESURRECT" and ((band(srcFlags, BITMASK_GROUP) ~= 0 and band(srcFlags, BITMASK_PETS) == 0) or players[srcGUID]) then
@@ -3577,6 +3590,7 @@ do
 				self.current.mobname = bossname or dstName
 				if not self.current.gotboss and isboss then
 					self.current.gotboss = true
+					self.callbacks:Fire("COMBAT_BOSS_FOUND", bossname)
 				end
 			end
 		end
@@ -3600,6 +3614,7 @@ do
 
 		if self.current and self.current.gotboss and self.current.mobname == dstName and (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") then
 			self.current.success = true
+			self.callbacks:Fire("COMBAT_BOSS_DEFEATED", self.current)
 		end
 	end
 end

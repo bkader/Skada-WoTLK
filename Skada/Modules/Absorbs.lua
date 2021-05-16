@@ -284,7 +284,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	end
 
 	function mod:CheckPreShields(event, timestamp)
-		if event == "ENCOUNTER_START" and Skada.current and not Skada.current.stopped then
+		if event == "COMBAT_ENCOUNTER_START" and Skada.current and not Skada.current.stopped then
 			local prefix, min, max = "raid", 1, _GetNumRaidMembers()
 			if max == 0 then
 				prefix, min, max = "party", 0, _GetNumPartyMembers()
@@ -591,11 +591,12 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		Skada:RegisterForCL(SpellMissed, "RANGE_MISSED", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SwingMissed, "SWING_MISSED", {dst_is_interesting_nopets = true})
 
+		Skada.RegisterCallback(self, "COMBAT_ENCOUNTER_START", "CheckPreShields")
 		Skada:AddMode(self, L["Absorbs and healing"])
-		Skada.RegisterCallback(self, "ENCOUNTER_START", "CheckPreShields")
 	end
 
 	function mod:OnDisable()
+		Skada.UnregisterAllCallbacks(self)
 		Skada:RemoveMode(self)
 	end
 

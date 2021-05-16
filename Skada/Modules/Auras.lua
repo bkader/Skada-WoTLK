@@ -435,8 +435,8 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 		Skada:RegisterForCL(AuraRefresh, "SPELL_AURA_APPLIED_DOSE", {src_is_interesting = true})
 		Skada:RegisterForCL(AuraRemoved, "SPELL_AURA_REMOVED", {src_is_interesting = true})
 
+		Skada.RegisterCallback(self, "COMBAT_ENCOUNTER_START", "CheckBuffs")
 		Skada:AddMode(self, L["Buffs and Debuffs"])
-		Skada.RegisterCallback(self, "ENCOUNTER_START", "CheckBuffs")
 	end
 
 	function mod:SetComplete(set)
@@ -444,12 +444,12 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 	end
 
 	function mod:OnDisable()
-		Skada:RemoveMode(self)
 		Skada.UnregisterAllCallbacks(self)
+		Skada:RemoveMode(self)
 	end
 
 	function mod:CheckBuffs(event, timestamp)
-		if event == "ENCOUNTER_START" and Skada.current and not Skada.current.stopped then
+		if event == "COMBAT_ENCOUNTER_START" and Skada.current and not Skada.current.stopped then
 			-- we start our auras ticker if not started
 			if not aurasticker then
 				aurasticker = Skada.NewTicker(1, combat_tick)
@@ -567,7 +567,7 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 		Skada:RegisterForCL(DebuffApplied, "SPELL_AURA_REMOVED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
 
 		Skada:AddMode(self, L["Buffs and Debuffs"])
-		Skada.RegisterCallback(self, "ENCOUNTER_START", "StartTick")
+		Skada.RegisterCallback(self, "COMBAT_ENCOUNTER_START", "StartTick")
 	end
 
 	function mod:OnDisable()
@@ -580,7 +580,7 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 	end
 
 	function mod:StartTick(event)
-		if event == "ENCOUNTER_START" and Skada.current and not Skada.current.stopped then
+		if event == "COMBAT_ENCOUNTER_START" and Skada.current and not Skada.current.stopped then
 			if not aurasticker then
 				aurasticker = Skada.NewTicker(1, combat_tick)
 			end

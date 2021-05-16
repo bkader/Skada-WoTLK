@@ -64,7 +64,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 
 	-- we use this function to record pre-pots as well.
 	function mod:CheckPrePot(event)
-		if Skada.db.profile.prepotion and event == "ENCOUNTER_START" then
+		if Skada.db.profile.prepotion and event == "COMBAT_ENCOUNTER_START" then
 			prepotion = {}
 			local prefix, min, max = "raid", 1, _GetNumRaidMembers()
 			if max == 0 then
@@ -266,11 +266,12 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 			columns = {Count = true, Percent = true}
 		}
 		Skada:RegisterForCL(PotionUsed, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})
+		Skada.RegisterCallback(self, "COMBAT_ENCOUNTER_START", "CheckPrePot")
 		Skada:AddMode(self)
-		Skada.RegisterCallback(self, "ENCOUNTER_START", "CheckPrePot")
 	end
 
 	function mod:OnDisable()
+		Skada.UnregisterAllCallbacks(self)
 		Skada:RemoveMode(self)
 	end
 

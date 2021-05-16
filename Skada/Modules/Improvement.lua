@@ -98,9 +98,7 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 	-- :::::::::::::::::::::::::::::::::::::::::::::::
 
 	local function find_boss_data(bossname)
-		if not bossname then
-			return
-		end
+		if not bossname then return end
 		mod.db = mod.db or {}
 		mod.db.bosses = mod.db.bosses or {}
 		for k, v in _pairs(mod.db.bosses) do
@@ -109,8 +107,7 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 			end
 		end
 
-		local boss = {count = 0, encounters = {}}
-		mod.db.bosses[bossname] = boss
+		mod.db.bosses[bossname] = {count = 0, encounters = {}}
 		return find_boss_data(bossname)
 	end
 
@@ -270,33 +267,23 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 		self.db = Skada.char.improvement
 	end
 
-	function mod:EncounterEnd(event, data)
-		if event ~= "ENCOUNTER_END" or not data then
-			return
-		end
+	function mod:BossDefeated(event, set)
+		if event == "COMBAT_BOSS_DEFEATED" and set then
+			-- we only record raid bosses, nothing else.
+			local inInstance, instanceType = IsInInstance()
+			if not inInstance or instanceType ~= "raid" then return end
 
-		-- we only record raid bosses, nothing else.
-		local inInstance, instanceType = IsInInstance()
-		if not inInstance or instanceType ~= "raid" then
-			return
-		end
+			local boss = find_boss_data(set.mobname)
+			if not boss then return end
 
-		if data.gotboss and data.mobname and data.success then
-			local boss = find_boss_data(data.mobname)
-			if not boss then
-				return
-			end
+			local encounter = find_encounter_data(boss, set.starttime)
+			if not encounter then return end
 
-			local encounter = find_encounter_data(boss, data.starttime)
-			if not encounter then
-				return
-			end
-
-			for i, player in _ipairs(data.players) do
+			for _, player in _ipairs(set.players) do
 				if player.id == self.db.id then
 					for _, mode in _ipairs(modes) do
 						if updaters[mode] then
-							encounter.data[mode] = updaters[mode](data, player)
+							encounter.data[mode] = updaters[mode](set, player)
 						else
 							encounter.data[mode] = player[mode:lower()]
 						end
@@ -317,11 +304,12 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 		mod_modes.metadata = {click1 = mod_comparison}
 		self.metadata = {click1 = mod_modes}
 
+		Skada.RegisterCallback(self, "COMBAT_BOSS_DEFEATED", "BossDefeated")
 		Skada:AddMode(self)
-		Skada.RegisterCallback(self, "ENCOUNTER_END", "EncounterEnd")
 	end
 
 	function mod:OnDisable()
+		Skada.UnregisterAllCallbacks(self)
 		Skada:RemoveMode(self)
 	end
 

@@ -137,7 +137,7 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 		Skada.RegisterCallback(self, "OnCommNicknameRequest")
 		Skada.RegisterCallback(self, "OnCommNicknameResponse")
 		Skada.RegisterCallback(self, "OnCommNicknameChange")
-		Skada.RegisterCallback(self, "FixPlayer")
+		Skada.RegisterCallback(self, "SKADA_PLAYER_FIX", "FixPlayer")
 		Skada.RegisterCallback(self, "BarUpdate")
 		self:Hook(Skada, "find_player")
 	end
@@ -177,8 +177,8 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 	-- we make sure to add the player's nickname if not set.
 	-- if it's the player themselves, we use what's stored.
 	-- otherwise we requrest the nickname from the other skada user.
-	function mod:FixPlayer(_, player)
-		if not Skada.db.profile.ignorenicknames and player.id and player.name and not Skada:IsPet(player.id) then
+	function mod:FixPlayer(event, player)
+		if event == "SKADA_PLAYER_FIX" and not Skada.db.profile.ignorenicknames and player.id and player.name and not Skada:IsPet(player.id) then
 			if not player.nickname then
 				if player.id == unitGUID then
 					if Skada.db.profile.nickname and Skada.db.profile.nickname ~= "" then
@@ -221,12 +221,14 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 	-- sync functions
 
 	-- called whenever we receive a nickname request.
-	function mod:OnCommNicknameRequest(_, sender)
+	function mod:OnCommNicknameRequest(event, sender)
+		if event ~= "OnCommNicknameRequest" then return end
 		Skada:SendComm("WHISPER", sender, "NicknameResponse", unitGUID, Skada.db.profile.nickname)
 	end
 
 	-- called whenever we receive a nickname response
-	function mod:OnCommNicknameResponse(_, sender, playerid, nickname)
+	function mod:OnCommNicknameResponse(event, sender, playerid, nickname)
+		if event ~= "OnCommNicknameResponse" then return end
 		-- the player didn't send us the nickname or doesn't
 		-- have a nickname set? Set it to his/her name anyways.
 		if not nickname or nickname == "" then
@@ -236,7 +238,8 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 	end
 
 	-- if someone in our group changes the nickname, we update the cache
-	function mod:OnCommNicknameChange(_, sender, playerid, nickname)
+	function mod:OnCommNicknameChange(event, sender, playerid, nickname)
+		if event ~= "OnCommNicknameChange" then return end
 		if not nickname or nickname == "" then
 			nickname = sender
 		end
