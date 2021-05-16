@@ -88,7 +88,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 		end
 
 		heal.playerid = srcGUID
-		heal.playername = srcGUID
+		heal.playername = srcName
 		heal.playerflags = srcFlags
 
 		heal.dstGUID = dstGUID
