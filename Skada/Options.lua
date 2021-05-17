@@ -185,7 +185,7 @@ end
 function Skada:AddLoadableModuleCheckbox(mod, name, description)
 	self.options.args.disabled.args[mod] = {
 		type = "toggle",
-		name = _G.name or L[name],
+		name = _G[name] or L[name],
 		desc = description and L[description]
 	}
 end

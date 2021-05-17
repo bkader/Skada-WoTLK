@@ -18,7 +18,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	local playermod = mod:NewModule(L["Absorbed player list"])
 
 	local _GetNumRaidMembers, _GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
-	local _UnitName, _UnitExists, _UnitIsDeadOrGhost = UnitName, UnitExists, UnitIsDeadOrGhost
+	local _UnitName, _UnitExists, _UnitBuff, _UnitIsDeadOrGhost = UnitName, UnitExists, UnitBuff, UnitIsDeadOrGhost
 	local _tostring, _GetTime, _band = tostring, GetTime, bit.band
 
 	local absorbspells = {
@@ -296,7 +296,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 				if _UnitExists(unit) and not _UnitIsDeadOrGhost(unit) then
 					local dstName = _select(1, _UnitName(unit))
 					for i = 1, 32 do
-						local spellname, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitAura(unit, i, nil, "BUFF")
+						local spellname, _, _, _, _, _, expires, unitCaster, _, _, spellid = _UnitBuff(unit, i)
 						if spellid and absorbspells[spellid] and unitCaster then
 							shields[dstName] = shields[dstName] or {}
 							shields[dstName][spellid] = shields[dstName][spellid] or {}
@@ -443,6 +443,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					d.id = spellid
 					d.spellid = spellid
 					d.label = spellname
+					d.text = spellname .. (spell.ishot and L["HoT"] or "")
 					d.icon = spellicon
 					d.spellschool = spell.school
 
@@ -621,15 +622,15 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 
 	local function getHPS(set, player)
 		local healing = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
-		return healing / math_max(1, Skada:PlayerActiveTime(set, player))
+		return healing / math_max(1, Skada:PlayerActiveTime(set, player)), healing
 	end
 
 	local function getRaidHPS(set)
 		local healing = (set.healing or 0) + (set.absorbs or 0)
 		if set.time > 0 then
-			return healing / math_max(1, set.time)
+			return healing / math_max(1, set.time), healing
 		else
-			return healing / math_max(1, (set.endtime or _time()) - set.starttime)
+			return healing / math_max(1, (set.endtime or _time()) - set.starttime), healing
 		end
 	end
 
@@ -720,9 +721,10 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 					win.dataset[nr] = d
 
 					d.id = spellid
-					d.label = spellname
-					d.icon = spellicon
 					d.spellid = spellid
+					d.label = spellname
+					d.text = spellname .. (spell.ishot and L["HoT"] or "")
+					d.icon = spellicon
 					d.spellschool = spell.school
 
 					d.value = spell.amount
@@ -847,16 +849,10 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 		local max = 0
 
 		if set then
-			local nr, total = 1, (set.healing or 0) + (set.absorbs or 0)
+			local nr, total = 1, _select(2, getRaidHPS(set))
 
 			for _, player in _ipairs(set.players) do
-				local healing = 0
-				if player.healing then
-					healing = healing + player.healing.amount
-				end
-				if player.absorbs then
-					healing = healing + player.absorbs.amount
-				end
+				local hps, healing = getHPS(set, player)
 
 				if healing > 0 then
 					local d = win.dataset[nr] or {}
@@ -872,7 +868,7 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(healing),
 						self.metadata.columns.Healing,
-						Skada:FormatNumber(getHPS(set, player)),
+						Skada:FormatNumber(hps),
 						self.metadata.columns.HPS,
 						_format("%02.1f%%", 100 * healing / math_max(1, total)),
 						self.metadata.columns.Percent
@@ -1153,6 +1149,7 @@ Skada:AddLoadableModule("Healing done by spell", function(Skada, L)
 				d.id = spellid
 				d.spellid = spellid
 				d.label = spellname
+				d.text = spellname .. (spell.ishot and L["HoT"] or "")
 				d.icon = spellicon
 				d.spellschool = spell.school
 

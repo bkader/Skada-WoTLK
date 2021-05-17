@@ -44,29 +44,6 @@ local changed = true
 local update_timer, tick_timer, pull_timer
 local checkVersion, convertVersion
 
--- spell schools
-Skada.schoolcolors = {
-	[1] = {a = 1.0, r = 1.00, g = 1.00, b = 0.00}, -- Physical
-	[2] = {a = 1.0, r = 1.00, g = 0.90, b = 0.50}, -- Holy
-	[4] = {a = 1.0, r = 1.00, g = 0.50, b = 0.00}, -- Fire
-	[8] = {a = 1.0, r = 0.30, g = 1.00, b = 0.30}, -- Nature
-	[16] = {a = 1.0, r = 0.50, g = 1.00, b = 1.00}, -- Frost
-	[20] = {a = 1.0, r = 0.50, g = 1.00, b = 1.00}, -- Frostfire
-	[32] = {a = 1.0, r = 0.50, g = 0.50, b = 1.00}, -- Shadow
-	[64] = {a = 1.0, r = 1.00, g = 0.50, b = 1.00} -- Arcane
-}
-
-Skada.schoolnames = {
-	[1] = STRING_SCHOOL_PHYSICAL,
-	[2] = STRING_SCHOOL_HOLY,
-	[4] = STRING_SCHOOL_FIRE,
-	[8] = STRING_SCHOOL_NATURE,
-	[16] = STRING_SCHOOL_FROST,
-	[20] = STRING_SCHOOL_FROSTFIRE,
-	[32] = STRING_SCHOOL_SHADOW,
-	[64] = STRING_SCHOOL_ARCANE
-}
-
 -- list of players and pets
 local players, pets = {}, {}
 
@@ -97,9 +74,12 @@ local COMBATLOG_OBJECT_AFFILIATION_RAID = COMBATLOG_OBJECT_AFFILIATION_RAID or 0
 local COMBATLOG_OBJECT_AFFILIATION_MASK = COMBATLOG_OBJECT_AFFILIATION_MASK or 0x0000000F
 
 local COMBATLOG_OBJECT_REACTION_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY or 0x00000010
+local COMBATLOG_OBJECT_REACTION_NEUTRAL = COMBATLOG_OBJECT_REACTION_NEUTRAL or 0x00000020
+local COMBATLOG_OBJECT_REACTION_HOSTILE = COMBATLOG_OBJECT_REACTION_HOSTILE or 0x00000040
 local COMBATLOG_OBJECT_REACTION_MASK = COMBATLOG_OBJECT_REACTION_MASK or 0x000000F0
 
 local COMBATLOG_OBJECT_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100
+local COMBATLOG_OBJECT_CONTROL_NPC = COMBATLOG_OBJECT_CONTROL_NPC or 0x00000200
 local COMBATLOG_OBJECT_CONTROL_MASK = COMBATLOG_OBJECT_CONTROL_MASK or 0x00000300
 
 local COMBATLOG_OBJECT_TYPE_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER or 0x00000400
@@ -110,6 +90,7 @@ local COMBATLOG_OBJECT_TYPE_GUARDIAN = COMBATLOG_OBJECT_TYPE_GUARDIAN or 0x00002
 local BITMASK_GROUP = bor(COMBATLOG_OBJECT_AFFILIATION_MINE, COMBATLOG_OBJECT_AFFILIATION_PARTY, COMBATLOG_OBJECT_AFFILIATION_RAID)
 local BITMASK_PETS = bor(COMBATLOG_OBJECT_TYPE_PET, COMBATLOG_OBJECT_TYPE_GUARDIAN)
 local BITMASK_OWNERS = bor(COMBATLOG_OBJECT_AFFILIATION_MASK, COMBATLOG_OBJECT_REACTION_MASK, COMBATLOG_OBJECT_CONTROL_MASK)
+local BITMASK_ENEMY = bor(COMBATLOG_OBJECT_REACTION_NEUTRAL, COMBATLOG_OBJECT_REACTION_HOSTILE)
 
 -- =================== --
 -- add missing globals --
@@ -176,6 +157,38 @@ do
 			return GetSpellLink(spellid)
 		end
 	end
+end
+
+function Skada.UnitClass(guid, flags)
+	local locClass, engClass = UnitClass(guid)
+
+	if not (locClass and engClass) and guid then
+		local class = select(2, GetPlayerInfoByGUID(guid))
+		if class then
+			locClass, engClass = Skada.classnames[class], class
+		else
+			local isboss, npcid = Skada:IsBoss(guid)
+			if isboss or npcid ~= 0 then
+				locClass, engClass = Skada.classnames.MONSTER, "MONSTER"
+			end
+		end
+	end
+
+	if not (locClass and engClass) and flags then
+		if band(flags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0 then
+			locClass, engClass = Skada.classnames.PLAYER, "PLAYER"
+		elseif band(flags, BITMASK_PETS) ~= 0 then
+			locClass, engClass = Skada.classnames.PET, "PET"
+		elseif band(flags, BITMASK_ENEMY) ~= 0 then
+			locClass, engClass = Skada.classnames.ENEMY, "ENEMY"
+		end
+	end
+
+	if not (locClass and engClass) then
+		locClass, engClass = Skada.classnames.UNKNOWN, "UNKNOWN"
+	end
+
+	return locClass, engClass
 end
 
 -- ============= --
@@ -1348,7 +1361,7 @@ do
 				elseif UnitIsPlayer(player.name) or self:IsPlayer(player.id, player.flags) then
 					player.class = select(2, UnitClass(player.name))
 				elseif player.flags and band(player.flags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0 then
-					player.class = "UNGROUPPLAYER"
+					player.class = "PLAYER"
 					player.role = "DAMAGER"
 					player.spec = 2
 				-- pets?
@@ -1794,7 +1807,7 @@ do
 						color = Skada.classcolors[data.class]
 					end
 
-					local title = data.label
+					local title = data.text or data.label
 					if mode.metadata and mode.metadata.showspots then
 						title = "|cffffffff" .. nr .. ".|r " .. title
 					end
@@ -1990,11 +2003,10 @@ do
 		local nr = 1
 		for _, data in ipairs(report_table.dataset) do
 			if data.id and not data.ignore then
-				local label = data.label
+				local label = data.text or data.label
 				if self.db.profile.reportlinks and (data.reportlabel or data.spellid or data.hyperlink) then
-					label = data.reportlabel or data.hyperlink or GetSpellLink(data.spellid) or data.label
+					label = data.reportlabel or data.hyperlink or self.GetSpellLink(data.spellid) or data.text or data.label
 				end
-				-- local label = data.reportlabel or (data.spellid and GetSpellLink(data.spellid)) or data.label
 				if report_mode.metadata and report_mode.metadata.showspots then
 					sendchat(format("%s. %s   %s", nr, label, data.valuetext), channel, chantype)
 				else
@@ -2495,7 +2507,7 @@ do
 		if not set then
 			return ""
 		end
-		return SetLabelFormat(set.name or "Unknown", set.starttime, set.endtime or time())
+		return SetLabelFormat(set.name or UNKNOWN, set.starttime, set.endtime or time())
 	end
 
 	function Window:set_mode_title()
@@ -2974,6 +2986,172 @@ function Skada:OnInitialize()
 	self.db.RegisterCallback(self, "OnProfileCopied", "ReloadSettings")
 	self.db.RegisterCallback(self, "OnProfileReset", "ReloadSettings")
 	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes")
+
+	-- spell school colors
+	self.schoolcolors = {
+		[1] = {a = 1.00, r = 1.00, g = 1.00, b = 0.00}, -- Physical
+		[2] = {a = 1.00, r = 1.00, g = 0.90, b = 0.50}, -- Holy
+		[4] = {a = 1.00, r = 1.00, g = 0.50, b = 0.00}, -- Fire
+		[8] = {a = 1.00, r = 0.30, g = 1.00, b = 0.30}, -- Nature
+		[16] = {a = 1.00, r = 0.50, g = 1.00, b = 1.00}, -- Frost
+		[20] = {a = 1.00, r = 0.50, g = 1.00, b = 1.00}, -- Frostfire
+		[32] = {a = 1.00, r = 0.50, g = 0.50, b = 1.00}, -- Shadow
+		[64] = {a = 1.00, r = 1.00, g = 0.50, b = 1.00} -- Arcane
+	}
+
+	-- spell school names
+	self.schoolnames = {
+		[1] = STRING_SCHOOL_PHYSICAL:gsub("%(", ""):gsub("%)", ""),
+		[2] = STRING_SCHOOL_HOLY:gsub("%(", ""):gsub("%)", ""),
+		[4] = STRING_SCHOOL_FIRE:gsub("%(", ""):gsub("%)", ""),
+		[8] = STRING_SCHOOL_NATURE:gsub("%(", ""):gsub("%)", ""),
+		[16] = STRING_SCHOOL_FROST:gsub("%(", ""):gsub("%)", ""),
+		[20] = STRING_SCHOOL_FROSTFIRE:gsub("%(", ""):gsub("%)", ""),
+		[32] = STRING_SCHOOL_SHADOW:gsub("%(", ""):gsub("%)", ""),
+		[64] = STRING_SCHOOL_ARCANE:gsub("%(", ""):gsub("%)", "")
+	}
+
+	-- class names
+	self.classnames = {}
+	for k, v in pairs(LOCALIZED_CLASS_NAMES_MALE) do
+		self.classnames[k] = v
+	end
+	-- custom
+	self.classnames.ENEMY = ENEMY
+	self.classnames.MONSTER = EXAMPLE_TARGET_MONSTER
+	self.classnames.PLAYER = PLAYER
+	self.classnames.PET = PET
+	self.classnames.ALLIANCE = FACTION_ALLIANCE
+	self.classnames.HORDE = FACTION_HORDE
+	self.classnames.UNKNOWN = UNKNOWN
+
+	-- class colors
+	self.classcolors = {
+		-- valid
+		DEATHKNIGHT = {r = 0.77, g = 0.12, b = 0.23, colorStr = "ffc41f3b"},
+		DRUID = {r = 1, g = 0.49, b = 0.04, colorStr = "ffff7d0a"},
+		HUNTER = {r = 0.67, g = 0.83, b = 0.45, colorStr = "ffabd473"},
+		MAGE = {r = 0.41, g = 0.8, b = 0.94, colorStr = "ff3fc7eb"},
+		PALADIN = {r = 0.96, g = 0.55, b = 0.73, colorStr = "fff58cba"},
+		PRIEST = {r = 1, g = 1, b = 1, colorStr = "ffffffff"},
+		ROGUE = {r = 1, g = 0.96, b = 0.41, colorStr = "fffff569"},
+		SHAMAN = {r = 0, g = 0.44, b = 0.87, colorStr = "ff0070de"},
+		WARLOCK = {r = 0.58, g = 0.51, b = 0.79, colorStr = "ff8788ee"},
+		WARRIOR = {r = 0.78, g = 0.61, b = 0.43, colorStr = "ffc79c6e"},
+		-- custom
+		ENEMY = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"},
+		MONSTER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"},
+		PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"},
+		PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"},
+		ALLIANCE = {r = 0.09, g = 0.2, b = 0.047, colorStr = "ff173372"},
+		HORDE = {r = 0.58, g = 0.1137, b = 0.0353, colorStr = "ff941d09"},
+		UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
+	}
+
+	-- valid classes
+	self.validclass = {
+		DEATHKNIGHT = true,
+		DRUID = true,
+		HUNTER = true,
+		MAGE = true,
+		PALADIN = true,
+		PRIEST = true,
+		ROGUE = true,
+		SHAMAN = true,
+		WARLOCK = true,
+		WARRIOR = true
+	}
+
+	-- class icon file & coordinates
+	self.classiconfile = [[Interface\AddOns\Skada\Media\Textures\icon-classes]]
+	self.classicontcoords = {}
+	for class, coords in pairs(CLASS_ICON_TCOORDS) do
+		self.classicontcoords[class] = coords
+	end
+	self.classicontcoords.ALLIANCE = {0.49609375, 0.7421875, 0.5, 0.75}
+	self.classicontcoords.ENEMY = {0, 0.25, 0.75, 1}
+	self.classicontcoords.HORDE = {0.7421875, 0.98828125, 0.5, 0.75}
+	self.classicontcoords.MONSTER = {0, 0.25, 0.75, 1}
+	self.classicontcoords.PET = {0.25, 0.49609375, 0.75, 1}
+	self.classicontcoords.PLAYER = {0.75, 1, 0.75, 1}
+	self.classicontcoords.UNGROUPPLAYER = {0.5, 0.75, 0.75, 1}
+	self.classicontcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
+
+	-- role icon file and coordinates
+	self.roleiconfile = [[Interface\LFGFrame\UI-LFG-ICON-PORTRAITROLES]]
+	self.roleicontcoords = {
+		DAMAGER = {0.3125, 0.63, 0.3125, 0.63},
+		HEALER = {0.3125, 0.63, 0.015625, 0.3125},
+		TANK = {0, 0.296875, 0.3125, 0.63},
+		LEADER = {0, 0.296875, 0.015625, 0.3125},
+		NONE = ""
+	}
+
+	-- spec icon file and coordinates
+	self.speciconfile = [[Interface\AddOns\Skada\Media\Textures\icon-specs]]
+	self.specicontcoords = {
+		[1] = {0.75, 0.875, 0.125, 0.25}, --> pet
+		[2] = {0.875, 1, 0.125, 0.25}, --> unknown
+		[3] = {0.625, 0.75, 0.125, 0.25}, --> monster
+		[102] = {0.375, 0.5, 0, 0.125}, --> druid balance
+		[103] = {0.5, 0.625, 0, 0.125}, --> druid feral
+		[104] = {0.625, 0.75, 0, 0.125}, --> druid tank
+		[105] = {0.75, 0.875, 0, 0.125}, --> druid restoration
+		[250] = {0, 0.125, 0, 0.125}, --> blood dk
+		[251] = {0.125, 0.25, 0, 0.125}, --> frost dk
+		[252] = {0.25, 0.375, 0, 0.125}, --> unholy dk
+		[253] = {0.875, 1, 0, 0.125}, --> hunter beast mastery
+		[254] = {0, 0.125, 0.125, 0.25}, --> hunter marksmalship
+		[255] = {0.125, 0.25, 0.125, 0.25}, --> hunter survival
+		[256] = {0.375, 0.5, 0.25, 0.375}, --> priest discipline
+		[257] = {0.5, 0.625, 0.25, 0.375}, --> priest holy
+		[258] = {0.625, 0.75, 0.25, 0.375}, --> priest shadow
+		[259] = {0.75, 0.875, 0.25, 0.375}, --> rogue assassination
+		[260] = {0.875, 1, 0.25, 0.375}, --> rogue combat
+		[261] = {0, 0.125, 0.375, 0.5}, --> rogue subtlty
+		[262] = {0.125, 0.25, 0.375, 0.5}, --> shaman elemental
+		[263] = {0.25, 0.375, 0.375, 0.5}, --> shamel enhancement
+		[264] = {0.375, 0.5, 0.375, 0.5}, --> shaman restoration
+		[265] = {0.5, 0.625, 0.375, 0.5}, --> warlock affliction
+		[266] = {0.625, 0.75, 0.375, 0.5}, --> warlock demonology
+		[267] = {0.75, 0.875, 0.375, 0.5}, --> warlock destruction
+		[62] = {0.25, 0.375, 0.125, 0.25}, --> mage arcane
+		[63] = {0.375, 0.5, 0.125, 0.25}, --> mage fire
+		[64] = {0.5, 0.625, 0.125, 0.25}, --> mage frost
+		[65] = {0, 0.125, 0.25, 0.375}, --> paladin holy
+		[66] = {0.125, 0.25, 0.25, 0.375}, --> paladin protection
+		[70] = {0.25, 0.375, 0.25, 0.375}, --> paladin ret
+		[71] = {0.875, 1, 0.375, 0.5}, --> warrior arms
+		[72] = {0, 0.125, 0.5, 0.625}, --> warrior fury
+		[73] = {0.125, 0.25, 0.5, 0.625} --> warrior protection
+	}
+end
+
+function Skada:OnEnable()
+	self:RegisterComm("Skada")
+	self:ReloadSettings()
+
+	-- please do not localize this line!
+	L["Auto Attack"] = select(1, GetSpellInfo(6603)) or MELEE
+
+	self:RegisterEvent("PLAYER_ENTERING_WORLD")
+	self:RegisterEvent("PARTY_MEMBERS_CHANGED")
+	self:RegisterEvent("RAID_ROSTER_UPDATE")
+	self:RegisterEvent("UNIT_PET")
+	self:RegisterEvent("PLAYER_REGEN_DISABLED")
+	self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "ZoneCheck")
+	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "CombatLogEvent")
+
+	if self.modulelist then
+		for i = 1, #self.modulelist do
+			self.modulelist[i](self, L)
+		end
+		self.modulelist = nil
+	end
+
+	self.NewTicker(2, function() self:CleanGarbage() end)
+	self.After(2, function() self:ApplySettings() end)
+	self.After(3, function() self:MemoryCheck() end)
 end
 
 function Skada:MemoryCheck()
@@ -2999,67 +3177,6 @@ function Skada:CleanGarbage(clean)
 	if clean and not InCombatLockdown() then
 		collectgarbage("collect")
 	end
-end
-
-function Skada:OnEnable()
-	self:RegisterComm("Skada")
-	self:ReloadSettings()
-
-	if not self.classcolors then
-		self.classcolors = {
-			["DEATHKNIGHT"] = {r = 0.77, g = 0.12, b = 0.23, colorStr = "ffc41f3b"},
-			["DRUID"] = {r = 1, g = 0.49, b = 0.04, colorStr = "ffff7d0a"},
-			["ENEMY"] = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"},
-			["HUNTER"] = {r = 0.67, g = 0.83, b = 0.45, colorStr = "ffabd473"},
-			["MAGE"] = {r = 0.41, g = 0.8, b = 0.94, colorStr = "ff3fc7eb"},
-			["NEUTRAL"] = {r = 1, g = 1, b = 0, colorStr = "ffffff00"},
-			["PALADIN"] = {r = 0.96, g = 0.55, b = 0.73, colorStr = "fff58cba"},
-			["PET"] = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"},
-			["PRIEST"] = {r = 1, g = 1, b = 1, colorStr = "ffffffff"},
-			["ROGUE"] = {r = 1, g = 0.96, b = 0.41, colorStr = "fffff569"},
-			["SHAMAN"] = {r = 0, g = 0.44, b = 0.87, colorStr = "ff0070de"},
-			["UNKNOWN"] = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"},
-			["WARLOCK"] = {r = 0.58, g = 0.51, b = 0.79, colorStr = "ff8788ee"},
-			["WARRIOR"] = {r = 0.78, g = 0.61, b = 0.43, colorStr = "ffc79c6e"}
-		}
-	end
-
-	if not self.validclass then
-		self.validclass = {
-			["DEATHKNIGHT"] = true,
-			["DRUID"] = true,
-			["HUNTER"] = true,
-			["MAGE"] = true,
-			["PALADIN"] = true,
-			["PRIEST"] = true,
-			["ROGUE"] = true,
-			["SHAMAN"] = true,
-			["WARLOCK"] = true,
-			["WARRIOR"] = true
-		}
-	end
-
-	-- please do not localize this line!
-	L["Auto Attack"] = select(1, GetSpellInfo(6603)) or MELEE
-
-	self:RegisterEvent("PLAYER_ENTERING_WORLD")
-	self:RegisterEvent("PARTY_MEMBERS_CHANGED")
-	self:RegisterEvent("RAID_ROSTER_UPDATE")
-	self:RegisterEvent("UNIT_PET")
-	self:RegisterEvent("PLAYER_REGEN_DISABLED")
-	self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "ZoneCheck")
-	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "CombatLogEvent")
-
-	if self.modulelist then
-		for i = 1, #self.modulelist do
-			self.modulelist[i](self, L)
-		end
-		self.modulelist = nil
-	end
-
-	self.NewTicker(2, function() self:CleanGarbage() end)
-	self.After(2, function() self:ApplySettings() end)
-	self.After(3, function() self:MemoryCheck() end)
 end
 
 -- ======================================================= --
@@ -3360,6 +3477,7 @@ do
 	local deathcounter, startingmembers = 0, 0
 
 	function Skada:Tick()
+		self.callbacks:Fire("COMBAT_ENCOUNTER_TICK", self.current)
 		if not disabled and self.current and not self:IsRaidInCombat() then
 			self:EndSegment()
 		end

@@ -14,50 +14,10 @@ mod.name = L["Bar display"]
 mod.description = L["Bar display is the normal bar window used by most damage meters. It can be extensively styled."]
 Skada:AddDisplaySystem("bar", mod)
 
--- specs and coordinates
-local spec_icon_file = [[Interface\AddOns\Skada\Media\Textures\icon-specs]]
-local spec_icon_tcoords = {
-	[1] = {0.75, 0.875, 0.125, 0.25}, --> pet
-	[2] = {0.875, 1, 0.125, 0.25}, --> unknown
-	[3] = {0.625, 0.75, 0.125, 0.25}, --> monster
-	[102] = {0.375, 0.5, 0, 0.125}, --> druid balance
-	[103] = {0.5, 0.625, 0, 0.125}, --> druid feral
-	[104] = {0.625, 0.75, 0, 0.125}, --> druid tank
-	[105] = {0.75, 0.875, 0, 0.125}, --> druid restoration
-	[250] = {0, 0.125, 0, 0.125}, --> blood dk
-	[251] = {0.125, 0.25, 0, 0.125}, --> frost dk
-	[252] = {0.25, 0.375, 0, 0.125}, --> unholy dk
-	[253] = {0.875, 1, 0, 0.125}, --> hunter beast mastery
-	[254] = {0, 0.125, 0.125, 0.25}, --> hunter marksmalship
-	[255] = {0.125, 0.25, 0.125, 0.25}, --> hunter survival
-	[256] = {0.375, 0.5, 0.25, 0.375}, --> priest discipline
-	[257] = {0.5, 0.625, 0.25, 0.375}, --> priest holy
-	[258] = {0.625, 0.75, 0.25, 0.375}, --> priest shadow
-	[259] = {0.75, 0.875, 0.25, 0.375}, --> rogue assassination
-	[260] = {0.875, 1, 0.25, 0.375}, --> rogue combat
-	[261] = {0, 0.125, 0.375, 0.5}, --> rogue subtlty
-	[262] = {0.125, 0.25, 0.375, 0.5}, --> shaman elemental
-	[263] = {0.25, 0.375, 0.375, 0.5}, --> shamel enhancement
-	[264] = {0.375, 0.5, 0.375, 0.5}, --> shaman restoration
-	[265] = {0.5, 0.625, 0.375, 0.5}, --> warlock affliction
-	[266] = {0.625, 0.75, 0.375, 0.5}, --> warlock demonology
-	[267] = {0.75, 0.875, 0.375, 0.5}, --> warlock destruction
-	[62] = {0.25, 0.375, 0.125, 0.25}, --> mage arcane
-	[63] = {0.375, 0.5, 0.125, 0.25}, --> mage fire
-	[64] = {0.5, 0.625, 0.125, 0.25}, --> mage frost
-	[65] = {0, 0.125, 0.25, 0.375}, --> paladin holy
-	[66] = {0.125, 0.25, 0.25, 0.375}, --> paladin protection
-	[70] = {0.25, 0.375, 0.25, 0.375}, --> paladin ret
-	[71] = {0.875, 1, 0.375, 0.5}, --> warrior arms
-	[72] = {0, 0.125, 0.5, 0.625}, --> warrior fury
-	[73] = {0.125, 0.25, 0.5, 0.625} --> warrior protection
-}
-
--- role icons and coordinates
-local role_icon_file, role_icon_tcoords = [[Interface\LFGFrame\UI-LFG-ICON-PORTRAITROLES]]
-
--- classes file and coordinates
-local class_icon_file, class_icon_tcoords = [[Interface\AddOns\Skada\Media\Textures\icon-classes]]
+-- class, role & specs
+local class_icon_file, class_icon_tcoords
+local role_icon_file, role_icon_tcoords
+local spec_icon_file, spec_icon_tcoords
 
 function mod:Create(window)
 	-- Re-use bargroup if it exists.
@@ -168,32 +128,10 @@ function mod:Create(window)
 
 	window.bargroup = bargroup
 
-	if not class_icon_tcoords then -- amortized class icon coordinate adjustment
-		class_icon_tcoords = {}
-		for class, coords in pairs(CLASS_ICON_TCOORDS) do
-			class_icon_tcoords[class] = coords
-		end
-		class_icon_tcoords.ENEMY = {0, 0.25, 0.75, 1}
-		class_icon_tcoords.MONSTER = {0, 0.25, 0.75, 1}
-
-		class_icon_tcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
-		class_icon_tcoords.UNGROUPPLAYER = {0.5, 0.75, 0.75, 1}
-
-		class_icon_tcoords.PET = {0.25, 0.49609375, 0.75, 1}
-		class_icon_tcoords.PLAYER = {0.75, 1, 0.75, 1}
-
-		class_icon_tcoords.Alliance = {0.49609375, 0.7421875, 0.5, 0.75}
-		class_icon_tcoords.Horde = {0.7421875, 0.98828125, 0.5, 0.75}
-	end
-
-	if not role_icon_tcoords then
-		role_icon_tcoords = {
-			DAMAGER = {0.3125, 0.63, 0.3125, 0.63},
-			HEALER = {0.3125, 0.63, 0.015625, 0.3125},
-			TANK = {0, 0.296875, 0.3125, 0.63},
-			LEADER = {0, 0.296875, 0.015625, 0.3125},
-			NONE = ""
-		}
+	if not class_icon_tcoords then
+		class_icon_file, class_icon_tcoords = Skada.classiconfile, Skada.classicontcoords
+		role_icon_file, role_icon_tcoords = Skada.roleiconfile, Skada.roleicontcoords
+		spec_icon_file, spec_icon_tcoords = Skada.speciconfile, Skada.specicontcoords
 	end
 end
 
@@ -589,7 +527,7 @@ do
 					end
 
 					-- set bar color
-					local color = win.db.barcolor or Skada.classcolors.NEUTRAL
+					local color = win.db.barcolor or {r = 1, g = 1, b = 0}
 
 					if data.color then
 						color = data.color
@@ -632,12 +570,12 @@ do
 
 				if win.metadata.showspots and Skada.db.profile.showranks and not data.ignore then
 					if win.db.barorientation == 1 then
-						bar:SetLabel(("%d. %s"):format(nr, data.label))
+						bar:SetLabel(("%d. %s"):format(nr, data.text or data.label))
 					else
-						bar:SetLabel(("%s .%d"):format(data.label, nr))
+						bar:SetLabel(("%s .%d"):format(data.text or data.label, nr))
 					end
 				else
-					bar:SetLabel(data.label)
+					bar:SetLabel(data.text or data.label)
 				end
 				bar:SetTimerLabel(data.valuetext)
 

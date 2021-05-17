@@ -322,13 +322,13 @@ function mod:GetBar(win)
 end
 
 function mod:UpdateBar(bar, bardata, db)
-	local label = bardata.label
+	local label = bardata.text or bardata.label
 	if db.isusingclasscolors then
 		if bardata.class then
-			label = _format(classcolors[bardata.class] or "|cffffffff%s|r", bardata.label)
+			label = _format(classcolors[bardata.class] or "|cffffffff%s|r", bardata.text or bardata.label)
 		end
 	else
-		label = bardata.label
+		label = bardata.text or bardata.label
 	end
 
 	if bardata.valuetext then
@@ -353,7 +353,7 @@ function mod:UpdateBar(bar, bardata, db)
 	end
 
 	bar.valueid = bardata.id
-	bar.valuetext = bardata.label
+	bar.valuetext = bardata.text or bardata.label
 	return bar
 end
 
