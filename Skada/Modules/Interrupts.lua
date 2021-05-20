@@ -11,7 +11,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	-- cache frequently used globals
 	local _pairs, _ipairs = pairs, ipairs
 	local _format, math_max = string.format, math.max
-	local _UnitGUID = UnitGUID
+	local _UnitGUID, _UnitClass = UnitGUID, Skada.UnitClass
 	local _IsInInstance = IsInInstance
 	local _SendChatMessage = SendChatMessage
 	local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
@@ -49,7 +49,14 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 			if data.dstName then
 				player.interrupts.targets = player.interrupts.targets or {}
 				if not player.interrupts.targets[data.dstName] then
-					player.interrupts.targets[data.dstName] = {id = data.dstGUID, count = 1}
+					local class, role, spec = select(2, _UnitClass(data.dstGUID, data.dstFlags, set))
+					player.interrupts.targets[data.dstName] = {
+						id = data.dstGUID,
+						class = class,
+						role = role,
+						spec = spec,
+						count = 1
+					}
 				else
 					player.interrupts.targets[data.dstName].count = player.interrupts.targets[data.dstName].count + 1
 				end
@@ -82,12 +89,17 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 		log_interrupt(Skada.current, data)
 		log_interrupt(Skada.total, data)
 
-		if srcGUID == playerGUID and (IsInGroup() or IsInRaid()) and Skada.db.profile.modules.interruptannounce then
+		if Skada.db.profile.modules.interruptannounce and IsInGroup() and srcGUID == playerGUID then
 			local spelllink = _GetSpellLink(extraspellid or extraspellname) or extraspellname
+			local output = _format(L["%s interrupted!"], spelllink)
+
+			if spellid and spellname then
+				output = _format(L["%s interrupted with %s!"], spelllink, _GetSpellLink(spellid or spellname) or spellname)
+			end
 
 			local channel = Skada.db.profile.modules.interruptchannel or "SAY"
 			if channel == "SELF" then
-				Skada:Print(_format("%s interrupted!", extraspellname))
+				Skada:Print(output)
 				return
 			end
 
@@ -100,7 +112,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 				end
 			end
 
-			_SendChatMessage(_format("%s interrupted!", spelllink), channel)
+			_SendChatMessage(output, channel)
 		end
 	end
 
@@ -111,41 +123,42 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 	function spellsmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid)
-		local max = 0
-
-		if player and player.interrupts.extraspells then
+		if player then
 			win.title = _format(L["%s's interrupted spells"], player.name)
+			local total = player.interrupts and player.interrupts.count or 0
 
-			local nr = 1
-			for spellid, spell in _pairs(player.interrupts.extraspells) do
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+			if total > 0 and player.interrupts.extraspells then
+				local maxvalue, nr = 0, 1
 
-				local spellname, _, spellicon = _GetSpellInfo(spellid)
+				for spellid, spell in _pairs(player.interrupts.extraspells) do
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
-				d.id = spellid
-				d.spellid = spellid
-				d.label = spellname
-				d.icon = spellicon
-				d.spellschool = spell.school
+					local spellname, _, spellicon = _GetSpellInfo(spellid)
+					d.id = spellid
+					d.spellid = spellid
+					d.label = spellname
+					d.icon = spellicon
+					d.spellschool = spell.school
 
-				d.value = spell.count
-				d.valuetext = Skada:FormatValueText(
-					spell.count,
-					mod.metadata.columns.Total,
-					_format("%02.1f%%", 100 * spell.count / math_max(1, set.interrupts)),
-					mod.metadata.columns.Percent
-				)
+					d.value = spell.count
+					d.valuetext = Skada:FormatValueText(
+						spell.count,
+						mod.metadata.columns.Total,
+						_format("%02.1f%%", 100 * spell.count / total),
+						mod.metadata.columns.Percent
+					)
 
-				if spell.count > max then
-					max = spell.count
+					if spell.count > maxvalue then
+						maxvalue = spell.count
+					end
+
+					nr = nr + 1
 				end
 
-				nr = nr + 1
+				win.metadata.maxvalue = maxvalue
 			end
 		end
-
-		win.metadata.maxvalue = max
 	end
 
 	function targetsmod:Enter(win, id, label)
@@ -155,57 +168,41 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 	function targetsmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid)
-		local max = 1
-
-		if player and player.interrupts.targets then
+		if player then
 			win.title = _format(L["%s's interrupted targets"], player.name)
+			local total = player.interrupts and player.interrupts.count or 0
 
-			local nr = 1
-			for targetname, target in _pairs(player.interrupts.targets) do
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+			if total > 0 and player.interrupts.targets then
+				local maxvalue, nr = 0, 1
 
-				d.id = target.id
-				d.label = targetname
+				for targetname, target in _pairs(player.interrupts.targets) do
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
-				if not target.class then
-					local p = Skada:find_player(set, target.id, targetname)
-					if p then
-						target.class = p.class or "PET"
-						target.role = p.role or "DAMAGER"
-						target.spec = p.spec or 1
-					elseif Skada:IsBoss(target.id) then
-						target.class = "MONSTER"
-						target.role = "DAMAGER"
-						target.spec = 3
-					else
-						target.class = "PET"
-						target.role = "DAMAGER"
-						target.spec = 1
+					d.id = target.id
+					d.label = targetname
+					d.class = target.class
+					d.role = target.role
+					d.spec = target.spec
+
+					d.value = target.count
+					d.valuetext = Skada:FormatValueText(
+						target.count,
+						mod.metadata.columns.Total,
+						_format("%02.1f%%", 100 * target.count / math_max(1, set.interrupts or 0)),
+						mod.metadata.columns.Percent
+					)
+
+					if target.count > maxvalue then
+						maxvalue = target.count
 					end
+
+					nr = nr + 1
 				end
 
-				d.class = target.class
-				d.role = target.role
-				d.spec = target.spec
-
-				d.value = target.count
-				d.valuetext = Skada:FormatValueText(
-					target.count,
-					mod.metadata.columns.Total,
-					_format("%02.1f%%", 100 * target.count / math_max(1, set.interrupts or 0)),
-					mod.metadata.columns.Percent
-				)
-
-				if target.count > max then
-					max = target.count
-				end
-
-				nr = nr + 1
+				win.metadata.maxvalue = maxvalue
 			end
 		end
-
-		win.metadata.maxvalue = max
 	end
 
 	function playermod:Enter(win, id, label)
@@ -215,79 +212,81 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid)
-		local max = 0
-
-		if player and player.interrupts.spells then
+		if player then
 			win.title = _format(L["%s's interrupt spells"], player.name)
+			local total = player.interrupts and player.interrupts.count or 0
 
-			local nr = 1
-			for spellid, spell in _pairs(player.interrupts.spells) do
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+			if total > 0 and player.interrupts.spells then
+				local maxvalue, nr = 0, 1
 
-				local spellname, _, spellicon = _GetSpellInfo(spellid)
+				for spellid, spell in _pairs(player.interrupts.spells) do
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
-				d.id = spellid
-				d.spellid = spellid
-				d.label = spellname
-				d.icon = spellicon
-				d.spellschool = spell.school
+					local spellname, _, spellicon = _GetSpellInfo(spellid)
+					d.id = spellid
+					d.spellid = spellid
+					d.label = spellname
+					d.icon = spellicon
+					d.spellschool = spell.school
 
-				d.value = spell.count
-				d.valuetext = Skada:FormatValueText(
-					spell.count,
-					mod.metadata.columns.Total,
-					_format("%02.1f%%", 100 * spell.count / math_max(1, set.interrupts or 0)),
-					mod.metadata.columns.Percent
-				)
+					d.value = spell.count
+					d.valuetext = Skada:FormatValueText(
+						spell.count,
+						mod.metadata.columns.Total,
+						_format("%02.1f%%", 100 * spell.count / total),
+						mod.metadata.columns.Percent
+					)
 
-				if spell.count > max then
-					max = spell.count
+					if spell.count > maxvalue then
+						maxvalue = spell.count
+					end
+					nr = nr + 1
 				end
-
-				nr = nr + 1
+				win.metadata.maxvalue = maxvalue
 			end
 		end
-
-		win.metadata.maxvalue = max
 	end
 
 	function mod:Update(win, set)
-		local nr, max = 1, 0
-		for _, player in _ipairs(set.players) do
-			if player.interrupts then
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
-
-				d.id = player.id
-				d.label = player.name
-				d.class = player.class or "PET"
-				d.role = player.role or "DAMAGER"
-				d.spec = player.spec or 1
-
-				d.value = player.interrupts.count
-				d.valuetext = Skada:FormatValueText(
-					player.interrupts.count,
-					self.metadata.columns.Total,
-					_format("%02.1f%%", 100 * player.interrupts.count / math_max(1, set.interrupts or 0)),
-					self.metadata.columns.Percent
-				)
-
-				if player.interrupts.count > max then
-					max = player.interrupts.count
-				end
-
-				nr = nr + 1
-			end
-		end
-
-		win.metadata.maxvalue = max
 		win.title = L["Interrupts"]
+		local total = set.interrupts or 0
+
+		if total > 0 then
+			local maxvalue, nr = 0, 1
+
+			for _, player in _ipairs(set.players) do
+				if player.interrupts and (player.interrupts.count or 0) > 0 then
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
+
+					d.id = player.id
+					d.label = player.name
+					d.class = player.class or "PET"
+					d.role = player.role or "DAMAGER"
+					d.spec = player.spec or 1
+
+					d.value = player.interrupts.count
+					d.valuetext = Skada:FormatValueText(
+						player.interrupts.count,
+						self.metadata.columns.Total,
+						_format("%02.1f%%", 100 * player.interrupts.count / total),
+						self.metadata.columns.Percent
+					)
+
+					if player.interrupts.count > maxvalue then
+						maxvalue = player.interrupts.count
+					end
+					nr = nr + 1
+				end
+			end
+
+			win.metadata.maxvalue = maxvalue
+		end
 	end
 
 	function mod:OnEnable()
 		playerGUID = playerGUID or _UnitGUID("player")
-
 		self.metadata = {
 			showspots = true,
 			click1 = spellsmod,
@@ -297,7 +296,6 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 		}
 
 		Skada:RegisterForCL(SpellInterrupt, "SPELL_INTERRUPT", {src_is_interesting = true})
-
 		Skada:AddMode(self)
 	end
 
@@ -306,7 +304,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	end
 
 	function mod:AddToTooltip(set, tooltip)
-		if set and set.interrupts and set.interrupts > 0 then
+		if set and (set.interrupts or 0) > 0 then
 			tooltip:AddDoubleLine(L["Interrupts"], set.interrupts, 1, 1, 1)
 		end
 	end
@@ -343,11 +341,9 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 	function mod:OnInitialize()
 		playerGUID = playerGUID or _UnitGUID("player")
-
 		if not Skada.db.profile.modules.interruptchannel then
 			Skada.db.profile.modules.interruptchannel = "SAY"
 		end
-
 		Skada.options.args.modules.args.interrupts = opts
 	end
 end)

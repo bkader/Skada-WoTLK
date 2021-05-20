@@ -159,16 +159,38 @@ do
 	end
 end
 
-function Skada.UnitClass(guid, flags)
-	local locClass, engClass = UnitClass(guid)
+function Skada.UnitClass(guid, flags, set)
+	if guid then
+		--
+		-- the user can provide a set as 3rd argument that they can
+		-- use to retireve the class.
+		-- If a player is found, it returns the role and spec as well
+		--
+		if set and set.players then
+			for _, p in ipairs(set.players) do
+				if p.id == guid then
+					return Skada.classnames[p.class], p.class, p.role, p.spec
+				end
+			end
+		end
 
-	if not (locClass and engClass) and guid then
+		-- attempt for the current set
+		if Skada.current then
+			for _, p in ipairs(Skada.current.players or {}) do
+				if p.id == guid then
+					return Skada.classnames[p.class], p.class
+				end
+			end
+		end
+
 		local class = select(2, GetPlayerInfoByGUID(guid))
 		if class then
 			locClass, engClass = Skada.classnames[class], class
 		else
 			local isboss, npcid = Skada:IsBoss(guid)
-			if isboss or npcid ~= 0 then
+			if isboss then
+				locClass, engClass = Skada.classnames.BOSS, "BOSS"
+			elseif npcid ~= 0 then
 				locClass, engClass = Skada.classnames.MONSTER, "MONSTER"
 			end
 		end
@@ -217,11 +239,15 @@ function Skada:PlayerActiveTime(set, player, active)
 		return settime
 	end
 
-	local maxtime = (player.time > 0) and player.time or 0
-	if (not set.endtime or set.stopped) and player.first then
-		maxtime = maxtime + player.last - player.first
+	if player then
+		local maxtime = ((player.time or 0) > 0) and player.time or 0
+		if set and (not set.endtime or set.stopped) and player.first then
+			maxtime = maxtime + (player.last or 0) - player.first
+		end
+		settime = math_min(maxtime, settime)
 	end
-	return math_min(maxtime, settime)
+
+	return settime
 end
 
 -- utilities
@@ -669,20 +695,22 @@ end
 
 function Window:set_selected_set(set)
 	self.selectedset = set
+	self:RestoreView()
 	if self.child then
 		self.child:set_selected_set(set)
 	end
 end
 
 function Window:DisplayMode(mode)
-	if type(mode) ~= "table" then
-		return
-	end
+	if type(mode) ~= "table" then return end
 	self:Wipe()
 
-	self.notitleset = nil
 	self.selectedmode = mode
 	self.metadata = wipe(self.metadata or {})
+
+	if mode and self.parentitle ~= mode:GetName() and Skada:GetModule(mode:GetName(), true) then
+		self.parentitle = mode:GetName()
+	end
 
 	if mode.metadata then
 		for key, value in pairs(mode.metadata) do
@@ -704,8 +732,7 @@ do
 	function sort_modes()
 		tsort(modes, function(a, b)
 			if Skada.db.profile.sortmodesbyusage and Skada.db.profile.modeclicks then
-				return (Skada.db.profile.modeclicks[a:GetName()] or 0) >
-					(Skada.db.profile.modeclicks[b:GetName()] or 0)
+				return (Skada.db.profile.modeclicks[a:GetName()] or 0) > (Skada.db.profile.modeclicks[b:GetName()] or 0)
 			else
 				return a:GetName() < b:GetName()
 			end
@@ -1117,7 +1144,6 @@ end
 
 do
 	local numorder = 5
-
 	function Skada:AddDisplaySystem(key, mod)
 		self.displays[key] = mod
 		if mod.description then
@@ -1198,6 +1224,7 @@ function Skada:DeleteSet(set)
 						win.selectedset = win.selectedset - 1
 						win.changed = true
 					end
+					win:RestoreView()
 				end
 				break
 			end
@@ -1210,11 +1237,15 @@ function Skada:DeleteSet(set)
 end
 
 function Skada:GetSetTime(set)
-	if set.time and set.time > 0 then
-		return set.time
+	local settime = 0
+	if set then
+		if (set.time or 0) > 0 then
+			settime = set.time
+		else
+			settime = math_max(time() - set.starttime, 0.1)
+		end
 	end
-
-	return math_max(time() - set.starttime, 0.1)
+	return settime
 end
 
 function Skada:GetFormatedSetTime(set)
@@ -1346,10 +1377,15 @@ do
 				player.role = "DAMAGER"
 				player.spec = 1
 				player.owner = pets[player.id]
-			elseif self:IsBoss(player.id) then
-				player.class = "MONSTER"
-				player.role = "DAMAGER"
-				player.spec = 3
+			else
+				local isboss, npcid = self:IsBoss(player.id)
+				if isboss then
+					player.class = "BOSS"
+					player.role = "DAMAGER"
+				elseif npcid ~= 0 then
+					player.class = "MONSTER"
+					player.role = "DAMAGER"
+				end
 			end
 
 			-- still no class assigned?
@@ -1570,12 +1606,14 @@ do
 	function Skada:IsBoss(guid, name)
 		local isboss, npcid, npcname = false, 0, nil
 		if guid then
-			local id = tonumber(guid:sub(8, 12), 16)
+			local id = tonumber(guid:sub(9, 12), 16)
 			if id and (LBI.BossIDs[id] or custom[id]) then
 				isboss, npcid = true, id
 				if custom[id] then
 					npcname = (name and name ~= custom[id]) and name or custom[id]
 				end
+			elseif id ~= 0 then
+				npcid = id
 			end
 		end
 		return isboss, npcid, npcname
@@ -1692,7 +1730,6 @@ do
 			end
 		end
 	end
-
 end
 
 function Skada:FixMyPets(playerid, playername)
@@ -1970,9 +2007,7 @@ do
 		if not window then
 			report_mode = self:find_mode(report_mode_name)
 			report_set = self:GetSet(report_set_name)
-			if report_set == nil then
-				return
-			end
+			if report_set == nil then return end
 
 			report_table = Window:new()
 			report_mode:Update(report_table, report_set)
@@ -2182,7 +2217,7 @@ do
 	function Skada:PLAYER_ENTERING_WORLD()
 		self:ZoneCheck()
 		if not wasinparty then
-			self.After(1, function()
+			self.After(2, function()
 				check_for_join_and_leave()
 				self:CheckGroup()
 			end)
@@ -2232,6 +2267,14 @@ function Skada:CanReset()
 end
 
 function Skada:Reset(force)
+	if force then
+		self.char.sets = wipe(self.char.sets or {})
+		self.char.total = nil
+		self:Reset()
+		self.After(3, function() self:ReloadSettings() end)
+		return
+	end
+
 	self:Wipe()
 	players, pets = {}, {}
 	self:CheckGroup()
@@ -2249,7 +2292,7 @@ function Skada:Reset(force)
 	self.last = nil
 
 	for i = tmaxn(self.char.sets), 1, -1 do
-		if not self.char.sets[i].keep or force then
+		if not self.char.sets[i].keep then
 			wipe(tremove(self.char.sets, i))
 		end
 	end
@@ -2258,6 +2301,7 @@ function Skada:Reset(force)
 		if win.selectedset ~= "total" then
 			win.selectedset = "current"
 			win.changed = true
+			win:RestoreView()
 		end
 	end
 
@@ -2429,22 +2473,45 @@ function Skada:FormatTime(sec)
 end
 
 function Skada:FormatValueText(...)
-	local value1, bool1, value2, bool2, value3, bool3 = ...
+	local value1, bool1, value2, bool2, value3, bool3, value4, bool4 = ...
 
-	if bool1 and bool2 and bool3 then
-		return value1 .. " (" .. value2 .. ", " .. value3 .. ")"
-	elseif bool1 and bool2 then
-		return value1 .. " (" .. value2 .. ")"
-	elseif bool1 and bool3 then
-		return value1 .. " (" .. value3 .. ")"
-	elseif bool2 and bool3 then
-		return value2 .. " (" .. value3 .. ")"
-	elseif bool2 then
+	if bool4 and value4 then
+		if bool3 and value3 then
+			if bool2 and value2 then
+				if bool1 and value1 then
+					return value1 .. " [" .. value4 .. "] (" .. value2 .. ", " .. value3 .. ")"
+				end
+				return value2 .. " (" .. value3 .. ", " .. value4 .. ")"
+			elseif bool1 and value1 then
+				return value1 .. " (" .. value3 .. ", " .. value4 .. ")"
+			end
+			return value3 .. " (" .. value4 .. ")"
+		elseif bool2 and value2 then
+			if bool1 and value1 then
+				return value1 .. " (" .. value2 .. ", " .. value4 .. ")"
+			end
+			return value2 .. " (" .. value3 .. ")"
+		elseif bool1 and value1 then
+			return value1 .. " (" .. value4 .. ")"
+		end
+		return value4
+	elseif bool3 and value3 then
+		if bool2 and value2 then
+			if bool1 and value1 then
+				return value1 .. " (" .. value2 .. ", " .. value3 .. ")"
+			end
+			return value1 .. " (" .. value2 .. ")"
+		elseif bool1 and value1 then
+			return value1 .. " (" .. value3 .. ")"
+		end
 		return value2
-	elseif bool1 then
+	elseif bool2 and value2 then
+		if bool1 and value1 then
+			return value1 .. " (" .. value2 .. ")"
+		end
 		return value1
-	elseif bool3 then
-		return value3
+	elseif bool1 and value1 then
+		return value1
 	end
 end
 
@@ -2513,7 +2580,7 @@ do
 	function Window:set_mode_title()
 		if not self.selectedmode or not self.selectedset then return end
 		if not self.selectedmode.GetName then return end
-		local name = self.title or self.selectedmode.title or self.selectedmode:GetName()
+		local name = self.title or self.parentitle or self.selectedmode.title or self.selectedmode:GetName()
 
 		-- save window settings for RestoreView after reload
 		self.db.set = self.selectedset
@@ -2524,7 +2591,7 @@ do
 		self.db.mode = savemode
 		savemode = nil
 
-		if self.db.titleset and self.db.display ~= "inline" then
+		if self.db.titleset and not self.selectedmode.notitleset and self.db.display ~= "inline" then
 			local setname
 			if self.selectedset == "current" then
 				setname = L["Current"]
@@ -2536,20 +2603,36 @@ do
 					setname = Skada:GetSetLabel(set)
 				end
 			end
-			if setname and not self.notitleset then
+			if setname then
 				name = name .. ": " .. setname
 			end
 		end
 		if disabled and (self.selectedset == "current" or self.selectedset == "total") then
 			-- indicate when data collection is disabled
 			name = name .. "  |cFFFF0000" .. L["DISABLED"] .. "|r"
-		elseif self.db.enabletitle and self.db.combattimer and (self.selectedset == "current" or self.selectedset == "last") and (Skada.current or Skada.last) then
+		elseif not self.selectedmode.notitleset and self.db.enabletitle and self.db.combattimer and (self.selectedset == "current" or self.selectedset == "last") and (Skada.current or Skada.last) then
 			-- thanks Details! for the idea.
 			name = format("[%s] %s", Skada:GetFormatedSetTime(Skada.current or Skada.last), name)
 		end
 		self.metadata.title = name
 		self.display:SetTitle(self, name)
 		name = nil
+	end
+end
+
+function Window:RestoreView(theset, themode)
+	if self.history[1] then
+		-- clear history and title
+		self.history, self.title = wipe(self.history or {}), nil
+
+		-- all all stuff that were registered by modules
+		self.playerid, self.playername = nil, nil
+		self.spellid, self.spellname = nil, nil
+		self.targetid, self.targetname = nil, nil
+
+		-- force menu to close and let Skada handle the rest
+		L_CloseDropDownMenus()
+		Skada:RestoreView(self, theset or self.selectedset, themode or self.db.mode)
 	end
 end
 
@@ -2582,7 +2665,7 @@ function dataobj:OnEnter()
 
 	self.tooltip:AddLine(L["Left-Click to toggle windows."])
 	self.tooltip:AddLine(L["Shift+Left-Click to reset."])
-	self.tooltip:AddLine(L["Right-click to open menu"])
+	self.tooltip:AddLine(L["Right-click to open menu."])
 
 	self.tooltip:Show()
 end
@@ -2649,6 +2732,11 @@ function Skada:ApplySettings()
 	if type(self.db.global.version) ~= "number" or curversion > self.db.global.version then
 		self.callbacks:Fire("SKADA_CORE_UPDATE", self.db.global.version)
 		self.db.global.version = curversion
+	end
+	if type(self.char.version) ~= "number" or curversion > self.char.version then
+		self.callbacks:Fire("SKADA_DATA_UPDATE", self.char.version)
+		self:Reset(true)
+		self.char.version = curversion
 	end
 end
 
@@ -3019,10 +3107,9 @@ function Skada:OnInitialize()
 	-- custom
 	self.classnames.ENEMY = ENEMY
 	self.classnames.MONSTER = EXAMPLE_TARGET_MONSTER
+	self.classnames.BOSS = BOSS
 	self.classnames.PLAYER = PLAYER
 	self.classnames.PET = PET
-	self.classnames.ALLIANCE = FACTION_ALLIANCE
-	self.classnames.HORDE = FACTION_HORDE
 	self.classnames.UNKNOWN = UNKNOWN
 
 	-- class colors
@@ -3041,10 +3128,9 @@ function Skada:OnInitialize()
 		-- custom
 		ENEMY = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"},
 		MONSTER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"},
+		BOSS = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"},
 		PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"},
 		PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"},
-		ALLIANCE = {r = 0.09, g = 0.2, b = 0.047, colorStr = "ff173372"},
-		HORDE = {r = 0.58, g = 0.1137, b = 0.0353, colorStr = "ff941d09"},
 		UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
 	}
 
@@ -3068,13 +3154,11 @@ function Skada:OnInitialize()
 	for class, coords in pairs(CLASS_ICON_TCOORDS) do
 		self.classicontcoords[class] = coords
 	end
-	self.classicontcoords.ALLIANCE = {0.49609375, 0.7421875, 0.5, 0.75}
 	self.classicontcoords.ENEMY = {0, 0.25, 0.75, 1}
-	self.classicontcoords.HORDE = {0.7421875, 0.98828125, 0.5, 0.75}
+	self.classicontcoords.BOSS = {0.75, 1, 0.5, 0.75}
 	self.classicontcoords.MONSTER = {0, 0.25, 0.75, 1}
-	self.classicontcoords.PET = {0.25, 0.49609375, 0.75, 1}
+	self.classicontcoords.PET = {0.25, 0.5, 0.75, 1}
 	self.classicontcoords.PLAYER = {0.75, 1, 0.75, 1}
-	self.classicontcoords.UNGROUPPLAYER = {0.5, 0.75, 0.75, 1}
 	self.classicontcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
 
 	-- role icon file and coordinates
@@ -3230,7 +3314,6 @@ do
 		elseif channel then
 			self:SendCommMessage("Skada", self:Serialize(...), channel, target)
 		end
-
 	end
 
 	local function DispatchComm(sender, ok, commType, ...)
@@ -3583,7 +3666,7 @@ do
 		local dst_is_interesting = nil
 		local now = time()
 
-		if not self.current and self.db.profile.tentativecombatstart and srcName and dstName and srcGUID ~= dstGUID and triggerevents[eventtype] then
+		if not self.current and self.db.profile.tentativecombatstart and triggerevents[eventtype] and srcName and dstName and srcGUID ~= dstGUID then
 			src_is_interesting = band(srcFlags, BITMASK_GROUP) ~= 0 or (band(srcFlags, BITMASK_PETS) ~= 0 and pets[srcGUID]) or players[srcGUID]
 
 			if eventtype ~= "SPELL_PERIODIC_DAMAGE" then
@@ -3681,26 +3764,51 @@ do
 							self:StartCombat()
 						end
 					end
-
 				end
 			end
 		end
 
 		-- pull timer
-		if self.db.profile.firsthit and self.current and triggerevents[eventtype] and InCombatLockdown() and not pull_timer and srcFlags and band(srcFlags, BITMASK_GROUP) ~= 0 then
-			local link = (eventtype == "SWING_DAMAGE") and self.GetSpellLink(6603) or self.GetSpellLink(select(1, ...)) or self.GetSpellInfo(select(1, ...))
-			pull_timer = self.NewTimer(0.5, function() WhoPulled(pull_timer) end)
-			local puller = pets[srcGUID] and pets[srcGUID].name or srcName or UNKNOWN
-			local class = select(2, UnitClass(puller))
-			if class and self.classcolors[class] then
-				puller = "|c" .. self.classcolors[class].colorStr .. puller .. "|r"
-			end
-			if self:IsPet(srcGUID, srcFlags) then
-				puller = puller .. " (" .. PET .. ")"
-			end
-			pull_timer.HitBy = format(L["|cffffff00First Hit|r: %s from %s"], link or "", puller)
-		end
+		if self.db.profile.firsthit and (triggerevents[eventtype] or eventtype == "SPELL_CAST_SUCCESS") and not pull_timer then
+			if (band(srcFlags, BITMASK_GROUP) ~= 0 and self:IsBoss(dstGUID)) or self:IsBoss(srcGUID) then
+				local puller
 
+				-- close distance?
+				if self:IsBoss(srcGUID) then
+					puller = srcName -- the boss name
+					if self:IsPet(dstGUID, dstFlags) then
+						puller = puller .. " (" .. dstName .. ")"
+					else
+						local class = select(2, UnitClass(dstName))
+						if class and self.classcolors[class] then
+							puller = puller .. " (|c" .. self.classcolors[class].colorStr .. dstName .. "|r)"
+						else
+							puller = puller .. " (" .. dstName .. ")"
+						end
+					end
+				elseif pets[srcGUID] then
+					local class = select(2, UnitClass(pets[srcGUID].name))
+					if class and self.classcolors[class] then
+						puller = "|c" .. self.classcolors[class].colorStr .. pets[srcGUID].name .. "|r (" .. PET .. ")"
+					else
+						puller = pets[srcGUID].name .. " (" .. PET .. ")"
+					end
+				else
+					local class = select(2, UnitClass(srcName))
+					if class and self.classcolors[class] then
+						puller = "|c" .. self.classcolors[class].colorStr .. srcName .. "|r"
+					else
+						puller = srcName
+					end
+				end
+
+				if puller then
+					local link = (eventtype == "SWING_DAMAGE") and self.GetSpellLink(6603) or self.GetSpellLink(select(1, ...)) or self.GetSpellInfo(select(1, ...))
+					pull_timer = self.NewTimer(0.5, function() WhoPulled(pull_timer) end)
+					pull_timer.HitBy = format(L["|cffffff00First Hit|r: %s from %s"], link or "", puller)
+				end
+			end
+		end
 
 		if self.current and src_is_interesting and not self.current.gotboss then
 			if band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then

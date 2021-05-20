@@ -616,7 +616,7 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 	local mod = Skada:NewModule(L["Absorbs and healing"])
 	local playermod = mod:NewModule(L["Absorbed and healed players"])
 	local spellmod = mod:NewModule(L["Absorbs and healing spell list"])
-	local hpsmode = mod:NewModule(L["HPS"])
+	local hpsmode = Skada:NewModule(L["HPS"])
 
 	local _time = time
 

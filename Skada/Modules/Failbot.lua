@@ -5,9 +5,8 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	-- this line is moved here so that the module is not added
 	-- in case the LibFail library is missing
 	local LibFail = LibStub("LibFail-1.0", true)
-	if not LibFail then
-		return
-	end
+	if not LibFail then return end
+
 	local failevents = LibFail:GetSupportedEvents()
 	local tankevents
 
@@ -20,42 +19,35 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local _UnitGUID = UnitGUID
 
+	local function log_fail(set, playerid, playername, spellid)
+		if set then
+			local player = Skada:find_player(set, playerid, playername)
+			if player and (player.role ~= "TANK" or not tankevents[event]) then
+				-- players
+				player.fails = player.fails or {count = 0, spells = {}}
+				player.fails.count = (player.fails.count or 0) + 1
+				player.fails.spells = player.fails.spells or {}
+				player.fails.spells[spellid] = (player.fails.spells[spellid] or 0) + 1
+
+				-- set
+				set.fails = set.fails or {count = 0, spells = {}}
+				set.fails.count = (set.fails.count or 0) + 1
+				set.fails.spells = set.fails.spells or {}
+				set.fails.spells[spellid] = (set.fails.spells[spellid] or 0) + 1
+			end
+		end
+	end
+
 	local function onFail(event, who, failtype)
 		if event and who then
-			-- is th fail a valid spell?
 			local spellid = LibFail:GetEventSpellId(event)
-			if not spellid then
-				return
-			end
+			if not spellid then return end
 
 			local unitGUID = _UnitGUID(who)
 			if not unitGUID then return end
 
-			-- add to current set
-			if Skada.current then
-				local player = Skada:get_player(Skada.current, unitGUID, who)
-				if player and (player.role ~= "TANK" or not tankevents[event]) then
-					player.fails = player.fails or {}
-					player.fails.count = (player.fails.count or 0) + 1
-					Skada.current.fails = (Skada.current.fails or 0) + 1
-
-					player.fails.spells = player.fails.spells or {}
-					player.fails.spells[spellid] = (player.fails.spells[spellid] or 0) + 1
-				end
-			end
-
-			-- add to total
-			if Skada.total then
-				local player = Skada:get_player(Skada.total, unitGUID, who)
-				if player and (player.role ~= "TANK" or not tankevents[event]) then
-					player.fails = player.fails or {}
-					player.fails.count = (player.fails.count or 0) + 1
-					Skada.total.fails = (Skada.total.fails or 0) + 1
-
-					player.fails.spells = player.fails.spells or {}
-					player.fails.spells[spellid] = (player.fails.spells[spellid] or 0) + 1
-				end
-			end
+			log_fail(Skada.current, unitGUID, who, spellid)
+			log_fail(Skada.total, unitGUID, who, spellid)
 		end
 	end
 
@@ -65,32 +57,44 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	end
 
 	function spellmod:Update(win, set)
-		local nr, max = 1, 0
+		win.title = _format(L["%s's fails"], win.spellname or UNKNOWN)
 
-		for _, player in _ipairs(set.players) do
-			if player.fails and player.fails.spells[win.spellid] then
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
-
-				d.id = player.id
-				d.label = player.name
-				d.class = player.class or "PET"
-				d.role = player.role or "DAMAGER"
-				d.spec = player.spec or 1
-
-				d.value = player.fails.spells[win.spellid]
-				d.valuetext = _tostring(d.value)
-
-				if d.value > max then
-					max = d.value
-				end
-
-				nr = nr + 1
-			end
+		local total = 0
+		if set.fails and set.fails.spells and set.fails.spells[win.spellid] then
+			total = set.fails.spells[win.spellid]
 		end
 
-		win.metadata.maxvalue = max
-		win.title = _format(L["%s's fails"], win.spellname or UNKNOWN)
+		if total > 0 then
+			local maxvalue, nr = 0, 1
+
+			for _, player in _ipairs(set.players) do
+				if player.fails and player.fails.spells[win.spellid] then
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
+
+					d.id = player.id
+					d.label = player.name
+					d.class = player.class or "PET"
+					d.role = player.role or "DAMAGER"
+					d.spec = player.spec or 1
+
+					d.value = player.fails.spells[win.spellid]
+					d.valuetext = Skada:FormatValueText(
+						d.value,
+						mod.metadata.columns.Count,
+						_format("%02.1f%%", 100 * d.value / total),
+						mod.metadata.columns.Percent
+					)
+
+					if d.value > maxvalue then
+						maxvalue = d.value
+					end
+					nr = nr + 1
+				end
+			end
+
+			win.metadata.maxvalue = maxvalue
+		end
 	end
 
 	function playermod:Enter(win, id, label)
@@ -100,15 +104,15 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
-		local max = 0
-
-		if player and player.fails then
+		if player then
 			win.title = _format(L["%s's fails"], player.name)
+			local total = player.fails and player.fails.count or 0
 
-			local nr = 1
-			for spellid, count in _pairs(player.fails.spells) do
-				local spellname, _, spellicon = _GetSpellInfo(spellid)
-				if spellname then
+			if total > 0 and player.fails.spells then
+				local maxvalue, nr = 0, 1
+
+				for spellid, count in _pairs(player.fails.spells) do
+					local spellname, _, spellicon = _GetSpellInfo(spellid)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -118,47 +122,58 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 					d.icon = spellicon
 
 					d.value = count
-					d.valuetext = _tostring(count)
+					d.valuetext = Skada:FormatValueText(
+						count,
+						mod.metadata.columns.Count,
+						_format("%02.1f%%", 100 * count / total),
+						mod.metadata.columns.Percent
+					)
 
-					if count > max then
-						max = count
+					if count > maxvalue then
+						maxvalue = count
 					end
-
 					nr = nr + 1
 				end
+
+				win.metadata.maxvalue = maxvalue
 			end
 		end
-
-		win.metadata.maxvalue = max
 	end
 
 	function mod:Update(win, set)
-		local nr, max = 1, 0
-
-		for _, player in _ipairs(set.players) do
-			if player.fails then
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
-
-				d.id = player.id
-				d.label = player.name
-				d.class = player.class or "PET"
-				d.role = player.role or "DAMAGER"
-				d.spec = player.spec or 1
-
-				d.value = player.fails.count
-				d.valuetext = _tostring(player.fails.count)
-
-				if d.value > max then
-					max = d.value
-				end
-
-				nr = nr + 1
-			end
-		end
-
-		win.metadata.maxvalue = max
 		win.title = L["Fails"]
+		local total = set.fails and (set.fails.count or 0) or 0
+
+		if total > 0 then
+			local maxvalue, nr = 0, 1
+
+			for _, player in _ipairs(set.players) do
+				if player.fails and (player.fails.count or 0) > 0 then
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
+
+					d.id = player.id
+					d.label = player.name
+					d.class = player.class or "PET"
+					d.role = player.role or "DAMAGER"
+					d.spec = player.spec or 1
+
+					d.value = player.fails.count
+					d.valuetext = Skada:FormatValueText(
+						player.fails.count,
+						self.metadata.columns.Count,
+						_format("%02.1f%%", 100 * player.fails.count / total),
+						self.metadata.columns.Percent
+					)
+
+					if d.value > player.fails.count then
+						player.fails.count = d.value
+					end
+					nr = nr + 1
+				end
+			end
+			win.metadata.maxvalue = maxvalue
+		end
 	end
 
 	function mod:OnInitialize()
@@ -172,9 +187,11 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		if not tankevents then self:OnInitialize() end
+		if not tankevents then
+			self:OnInitialize()
+		end
 		playermod.metadata = {click1 = spellmod}
-		self.metadata = {click1 = playermod}
+		self.metadata = {click1 = playermod, columns = {Count = true, Percent = false}}
 
 		Skada:AddMode(self)
 	end
@@ -184,12 +201,12 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return set.fails or 0
+		return set.fails and set.fails.count or 0
 	end
 
 	function mod:AddToTooltip(set, tooltip)
-		if set and set.fails and set.fails > 0 then
-			tooltip:AddDoubleLine(L["Fails"], set.fails, 1, 1, 1)
+		if set and set.fails and (set.fails.count or 0) > 0 then
+			tooltip:AddDoubleLine(L["Fails"], set.fails.count, 1, 1, 1)
 		end
 	end
 end)

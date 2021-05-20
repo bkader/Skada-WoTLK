@@ -3,8 +3,9 @@ assert(Skada, "Skada not found!")
 -- cache frequently used globals
 local _pairs, _ipairs = pairs, ipairs
 local _format, _select, _tostring = string.format, select, tostring
+local math_min, math_max = math.min, math.max
 local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-local math_min, math_max, math_floor = math.min, math.max, math.floor
+local _UnitClass = Skada.UnitClass
 
 --
 -- common functions to both modules that handle aura apply/remove log
@@ -39,7 +40,15 @@ local function log_auraapply(set, aura)
 			-- targets for debuffs, sources for buffs
 			if aura.auratype == "DEBUFF" and aura.dstName then
 				player.auras[aura.spellname].targets = player.auras[aura.spellname].targets or {}
-				player.auras[aura.spellname].targets[aura.dstName] = (player.auras[aura.spellname].targets[aura.dstName] or 0) + 1
+				if not player.auras[aura.spellname].targets[aura.dstName] then
+					player.auras[aura.spellname].targets[aura.dstName] = {
+						id = aura.dstGUID,
+						class = _select(2, _UnitClass(aura.dstGUID, aura.dstFlags)),
+						count = 1
+					}
+				else
+					player.auras[aura.spellname].targets[aura.dstName].count = player.auras[aura.spellname].targets[aura.dstName].count + 1
+				end
 			end
 		end
 	end
@@ -57,9 +66,7 @@ end
 local function log_auraremove(set, aura)
 	if set and aura and aura.spellname then
 		local player = Skada:get_player(set, aura.playerid, aura.playername, aura.playerflags)
-		if not player or not player.auras or not player.auras[aura.spellname] then
-			return
-		end
+		if not player or not player.auras or not player.auras[aura.spellname] then return end
 		if player.auras[aura.spellname].auratype == aura.auratype and player.auras[aura.spellname].active > 0 then
 			player.auras[aura.spellname].active = 0
 		end
@@ -73,17 +80,19 @@ end
 local aura = {}
 
 local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, spellschool, auratype)
-	local passed = false
+	local passed
 
-	if auratype == "DEBUFF" then
+	if auratype == "DEBUFF" and not Skada:IsDisabled("Debuffs") then
 		if Skada:IsPlayer(srcGUID) or Skada:IsPet(srcGUID) then
 			aura.playerid = srcGUID
 			aura.playername = srcName
 			aura.playerflags = srcFlags
+			aura.dstGUID = dstGUID
 			aura.dstName = dstName
+			aura.dstFlags = dstFlags
 			passed = true
 		end
-	elseif auratype == "BUFF" then
+	elseif auratype == "BUFF" and not Skada:IsDisabled("Buffs") then
 		if srcGUID == dstGUID and Skada:IsPlayer(srcGUID) then
 			aura.playerid = srcGUID
 			aura.playername = srcName
@@ -98,7 +107,9 @@ local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dst
 				passed = true
 			end
 		end
+		aura.dstGUID = nil
 		aura.dstName = nil
+		aura.dstFlags = nil
 	end
 
 	if not passed then
@@ -117,17 +128,19 @@ local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dst
 end
 
 local function AuraRefresh(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, spellschool, auratype)
-	local passed = false
+	local passed
 
-	if auratype == "DEBUFF" then
+	if auratype == "DEBUFF" and not Skada:IsDisabled("Debuffs") then
 		if Skada:IsPlayer(srcGUID) or Skada:IsPet(srcGUID) then
 			aura.playerid = srcGUID
 			aura.playername = srcName
 			aura.playerflags = srcFlags
+			aura.dstGUID = dstGUID
 			aura.dstName = dstName
+			aura.dstFlags = dstFlags
 			passed = true
 		end
-	elseif auratype == "BUFF" then
+	elseif auratype == "BUFF" and not Skada:IsDisabled("Buffs") then
 		if srcGUID == dstGUID and Skada:IsPlayer(srcGUID) then
 			aura.playerid = srcGUID
 			aura.playername = srcName
@@ -142,7 +155,9 @@ local function AuraRefresh(timestamp, eventtype, srcGUID, srcName, srcFlags, dst
 				passed = true
 			end
 		end
+		aura.dstGUID = nil
 		aura.dstName = nil
+		aura.dstFlags = nil
 	end
 
 	if not passed then
@@ -161,9 +176,9 @@ local function AuraRefresh(timestamp, eventtype, srcGUID, srcName, srcFlags, dst
 end
 
 local function AuraRemoved(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, spellschool, auratype)
-	local passed = false
+	local passed
 
-	if auratype == "DEBUFF" then
+	if auratype == "DEBUFF" and not Skada:IsDisabled("Debuffs") then
 		if Skada:IsPlayer(srcGUID) or Skada:IsPet(srcGUID) then
 			aura.playerid = srcGUID
 			aura.playername = srcName
@@ -171,7 +186,7 @@ local function AuraRemoved(timestamp, eventtype, srcGUID, srcName, srcFlags, dst
 			aura.dstName = dstName
 			passed = true
 		end
-	elseif auratype == "BUFF" then
+	elseif auratype == "BUFF" and not Skada:IsDisabled("Buffs") then
 		if srcGUID == dstGUID and Skada:IsPlayer(srcGUID) then
 			aura.playerid = srcGUID
 			aura.playername = srcName
@@ -214,7 +229,7 @@ local function auras_tick(set, auratype)
 		for _, player in _ipairs(set.players) do
 			if player.auras then
 				for _, spell in _pairs(player.auras) do
-					if spell.auratype == auratype and spell.active == 1 then
+					if spell.auratype == auratype and (spell.active or 0) == 1 then
 						spell.uptime = spell.uptime + 1
 					end
 				end
@@ -235,7 +250,7 @@ local updatefunc
 do
 	local function countauras(auras, auratype)
 		local count, uptime = 0, 0
-		for _, spell in _pairs(auras) do
+		for spellname, spell in _pairs(auras or {}) do
 			if spell.auratype == auratype then
 				count = count + 1
 				uptime = uptime + (spell.uptime or 0)
@@ -245,59 +260,58 @@ do
 	end
 
 	function updatefunc(auratype, win, set, title)
-		if not set or not auratype then return end
-
+		win.title = title or UNKNOWN
 		local settime = Skada:GetSetTime(set)
-		local nr, max = 1, 0
 
-		for _, player in _ipairs(set.players) do
-			local auracount, aurauptime = countauras(player.auras or {}, auratype)
-			if auracount > 0 then
-				local maxtime = Skada:PlayerActiveTime(set, player, true)
-				local uptime = aurauptime / auracount
+		if settime > 0 and auratype then
+			local maxvalue, nr = 0, 1
 
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+			for _, player in _ipairs(set.players) do
+				local auracount, aurauptime = countauras(player.auras, auratype)
 
-				d.id = player.id
-				d.label = player.name
-				d.class = player.class or "PET"
-				d.role = player.role or "DAMAGER"
-				d.spec = player.spec or 1
+				if auracount > 0 and aurauptime > 0 then
+					local maxtime = Skada:PlayerActiveTime(set, player, true)
+					local uptime = aurauptime / auracount
 
-				d.value = uptime
-				d.valuetext = _format("%02.1f%% / %u", 100 * uptime / math_max(1, maxtime), auracount)
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
-				if uptime > max then
-					max = uptime
+					d.id = player.id
+					d.label = player.name
+					d.class = player.class or "PET"
+					d.role = player.role or "DAMAGER"
+					d.spec = player.spec or 1
+
+					d.value = uptime
+					d.valuetext = _format("%u (%02.1f%%)", auracount, 100 * uptime / math_max(1, maxtime))
+
+					if uptime > maxvalue then
+						maxvalue = uptime
+					end
+					nr = nr + 1
 				end
-
-				nr = nr + 1
 			end
+
+			win.metadata.maxvalue = maxvalue
 		end
-		win.metadata.maxvalue = max
-		win.title = title
 	end
 end
 
 -- spells per player list
 local function spellupdatefunc(auratype, win, set, playerid, playername, fmt)
-	if not set or not auratype then return end
-
 	local player = Skada:find_player(set, playerid, playername)
-	if player and player.auras then
+	if player then
+		if fmt then -- set window title
+			win.title = _format(fmt, player.name)
+		end
+
 		local maxtime = Skada:PlayerActiveTime(set, player, true)
-		local maxvalue = 0
-		if maxtime and maxtime > 0 then
-			if fmt then
-				win.title = format(fmt, player.name)
-			end
-			local nr = 1
+		if maxtime > 0 and player.auras then
+			local maxvalue, nr = 0, 1
 
 			for spellname, spell in _pairs(player.auras) do
 				if spell.auratype == auratype then
 					local uptime = math_min(maxtime, spell.uptime)
-
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -313,7 +327,6 @@ local function spellupdatefunc(auratype, win, set, playerid, playername, fmt)
 					if uptime > maxvalue then
 						maxvalue = uptime
 					end
-
 					nr = nr + 1
 				end
 			end
@@ -326,29 +339,36 @@ end
 -- used to show tooltip
 local function aura_tooltip(win, id, label, tooltip, playerid, playername, L)
 	local set = win:get_selected_set()
+
 	local player = Skada:find_player(set, playerid, playername)
 	if player and player.auras then
 		local aura = player.auras[label]
+
 		if aura then
 			local settime = Skada:GetSetTime(set)
-			local maxtime = Skada:PlayerActiveTime(set, player, true)
 
-			tooltip:AddLine(player.name .. ": " .. label)
+			if settime > 0 then
+				local maxtime = Skada:PlayerActiveTime(set, player, true)
 
-			-- add spell school if provided
-			if aura.school then
-				local c = Skada.schoolcolors[aura.school]
-				local n = Skada.schoolnames[aura.school]
-				if c and n then tooltip:AddLine(n, c.r, c.g, c.b) end
+				tooltip:AddLine(player.name .. ": " .. label)
+
+				-- add spell school if provided
+				if aura.school then
+					local c = Skada.schoolcolors[aura.school]
+					local n = Skada.schoolnames[aura.school]
+					if c and n then
+						tooltip:AddLine(n, c.r, c.g, c.b)
+					end
+				end
+
+				-- add segment and active times
+				tooltip:AddDoubleLine(L["Count"], aura.count, 1, 1, 1)
+				tooltip:AddDoubleLine(L["Refresh"], aura.refresh or 0, 1, 1, 1)
+				tooltip:AddLine(" ")
+				tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(maxtime), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Uptime"], Skada:FormatTime(aura.uptime), 1, 1, 1)
 			end
-
-			-- add segment and active times
-			tooltip:AddDoubleLine(L["Count"], aura.count, 1, 1, 1)
-			tooltip:AddDoubleLine(L["Refresh"], aura.refresh or 0, 1, 1, 1)
-			tooltip:AddLine(" ")
-			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
-			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(maxtime), 1, 1, 1)
-			tooltip:AddDoubleLine(L["Uptime"], Skada:FormatTime(aura.uptime), 1, 1, 1)
 		end
 	end
 end
@@ -356,11 +376,10 @@ end
 -- called on SetComplete to remove active auras
 local function setcompletefunc(set, auratype)
 	if set and auratype then
-		local settime = Skada:GetSetTime(set)
 		for _, player in _ipairs(set.players) do
 			if player.auras then
 				local maxtime = Skada:PlayerActiveTime(set, player, true)
-				for _, spell in _pairs(player.auras) do
+				for spellname, spell in _pairs(player.auras) do
 					if spell.auratype == auratype then
 						if spell.active > 0 then
 							spell.active = 0
@@ -368,7 +387,7 @@ local function setcompletefunc(set, auratype)
 						if spell.uptime > maxtime then
 							spell.uptime = maxtime
 						elseif spell.uptime == 0 then
-							spell = nil
+							player.auras[spellname] = nil -- delete 0 uptime
 						end
 					end
 				end
@@ -379,7 +398,7 @@ end
 
 -- ================================================================== --
 
-Skada:AddLoadableModule("Buffs",function(Skada, L)
+Skada:AddLoadableModule("Buffs", function(Skada, L)
 	if Skada:IsDisabled("Buffs") then return end
 
 	local mod = Skada:NewModule(L["Buffs"])
@@ -508,32 +527,38 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
-		if not player or not player.auras then
-			return
-		end
 
-		win.title = _format(L["%s's <%s> targets"], player.name, win.spellname or UNKNOWN)
+		if player then
+			win.title = _format(L["%s's <%s> targets"], player.name, win.spellname or UNKNOWN)
 
-		if player.auras[win.spellname] and player.auras[win.spellname].targets then
-			local nr, max = 1, 0
-			local total = player.auras[win.spellname].count
-			for targetname, count in _pairs(player.auras[win.spellname].targets) do
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
-
-				d.id = nr
-				d.label = targetname
-				d.value = count
-				d.valuetext = _format("%u (%02.1f%%)", count, 100 * count / math_max(1, total))
-
-				if count > max then
-					max = count
-				end
-
-				nr = nr + 1
+			local total = 0
+			if player.auras and player.auras[win.spellname] then
+				total = player.auras[win.spellname].count or 0
 			end
 
-			win.metadata.maxvalue = max
+			if total > 0 and player.auras[win.spellname].targets then
+				local maxvalue, nr = 0, 1
+
+				for targetname, target in _pairs(player.auras[win.spellname].targets) do
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
+
+					d.id = target.id or targetname
+					d.label = targetname
+					d.class = target.class
+
+					d.value = target.count
+					d.valuetext = _format("%u (%02.1f%%)", target.count, 100 * target.count / total)
+
+					if target.count > maxvalue then
+						maxvalue = target.count
+					end
+
+					nr = nr + 1
+				end
+
+				win.metadata.maxvalue = maxvalue
+			end
 		end
 	end
 
@@ -561,7 +586,7 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		spellmod.metadata = {tooltip = debuff_tooltip, click1 = targetmod}
+		spellmod.metadata = {post_tooltip = debuff_tooltip, click1 = targetmod}
 		self.metadata = {click1 = spellmod}
 
 		Skada:RegisterForCL(DebuffApplied, "SPELL_AURA_APPLIED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})

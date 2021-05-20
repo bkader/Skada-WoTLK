@@ -1,8 +1,7 @@
 assert(Skada, "Skada not found!")
 
 -- cache frequently used globals
-local _pairs, _ipairs, _select = pairs, ipairs, select
-local _format, math_max = string.format, math.max
+local _pairs, _ipairs, _select, _format = pairs, ipairs, select, string.format
 local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 
 -- list of miss types
@@ -29,8 +28,8 @@ Skada:AddLoadableModule("Enemy damage taken", function(Skada, L)
 				if spell then
 					tooltip:AddLine(player.name .. " - " .. win.spellname)
 
-					if win.mobname and spell.sources and spell.sources[win.mobname] then
-						spell = spell.sources[win.mobname]
+					if win.targetname and spell.sources and spell.sources[win.targetname] then
+						spell = spell.sources[win.targetname]
 					end
 
 					if spell.school then
@@ -78,7 +77,7 @@ Skada:AddLoadableModule("Enemy damage taken", function(Skada, L)
 
 	function spellmod:Enter(win, id, label)
 		win.spellname = label
-		win.title = _format(L["%s's <%s> damage on %s"], win.playername or UNKNOWN, label, win.mobname or UNKNOWN)
+		win.title = _format(L["%s's <%s> damage on %s"], win.playername or UNKNOWN, label, win.targetname or UNKNOWN)
 	end
 
 	function spellmod:Update(win, set)
@@ -89,12 +88,12 @@ Skada:AddLoadableModule("Enemy damage taken", function(Skada, L)
 
 			for spellname, spell in _pairs(player.damagedone.spells) do
 				if spellname == win.spellname then
-					if win.mobname and spell.sources and spell.sources[win.mobname] then
-						spell = spell.sources[win.mobname]
+					if win.targetname and spell.sources and spell.sources[win.targetname] then
+						spell = spell.sources[win.targetname]
 					end
 
 					win.metadata.maxvalue = spell.totalhits
-					win.title = _format(L["%s's <%s> damage on %s"], player.name, spellname, win.mobname)
+					win.title = _format(L["%s's <%s> damage on %s"], player.name, spellname, win.targetname)
 
 					if spell.hit and spell.hit > 0 then
 						add_detail_bar(win, nr, HIT, spell.hit)
@@ -130,22 +129,25 @@ Skada:AddLoadableModule("Enemy damage taken", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = _format(L["%s's damage on %s"], label, win.mobname or UNKNOWN)
+		win.title = _format(L["%s's damage on %s"], label, win.targetname or UNKNOWN)
 	end
 
 	function playermod:Update(win, set)
-		local max = 0
-		if win.mobname then
-			local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:find_player(set, win.playerid, win.playername)
+		if player then
+			win.title = _format(L["%s's damage on %s"], player.name, win.targetname or UNKNOWN)
 
-			if player and player.damagedone and player.damagedone.spells then
-				win.title = _format(L["%s's damage on %s"], player.name, win.mobname)
+			local total = 0
+			if player.damagedone and player.damagedone.targets and player.damagedone.targets[win.targetname] then
+				total = player.damagedone.targets[win.targetname].amount
+			end
 
-				local nr, total = 1, player.damagedone.targets[win.mobname].amount or 0
+			if total > 0 and player.damagedone.spells then
+				local maxvalue, nr = 0, 1
 
 				for spellname, spell in _pairs(player.damagedone.spells) do
-					if spell.targets and spell.targets[win.mobname] then
-						local amount = spell.targets[win.mobname].amount
+					if spell.targets and spell.targets[win.targetname] then
+						local amount = spell.targets[win.targetname].amount
 
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
@@ -161,44 +163,39 @@ Skada:AddLoadableModule("Enemy damage taken", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(amount),
 							mod.metadata.columns.Damage,
-							_format("%02.1f%%", 100 * amount / math_max(1, total)),
+							_format("%02.1f%%", 100 * amount / total),
 							mod.metadata.columns.Percent
 						)
 
-						if amount > max then
-							max = amount
+						if amount > maxvalue then
+							maxvalue = amount
 						end
-
 						nr = nr + 1
 					end
 				end
+
+				win.metadata.maxvalue = maxvalue
 			end
 		end
-
-		win.metadata.maxvalue = max
 	end
 
 	function enemymod:Enter(win, id, label)
-		win.mobname = label
+		win.targetname = label
 		win.title = _format(L["Damage on %s"], label)
 	end
 
 	function enemymod:Update(win, set)
-		local total, max = 0, 0
-		if win.mobname then
-			win.title = _format(L["Damage on %s"], win.mobname)
+		win.title = _format(L["Damage on %s"], win.targetname or UNKNOWN)
+		local total = 0
+		if win.targetname and set.damagedone and set.damagedone.targets and set.damagedone.targets[win.targetname] then
+			total = set.damagedone.targets[win.targetname]
+		end
+
+		if total > 0 then
+			local maxvalue, nr = 0, 1
 
 			for _, player in _ipairs(set.players) do
-				if player.damagedone and player.damagedone.targets and player.damagedone.targets[win.mobname] then
-					total = total + player.damagedone.targets[win.mobname].amount
-				end
-			end
-
-			local nr = 1
-			for _, player in _ipairs(set.players) do
-				if player.damagedone and player.damagedone.targets and player.damagedone.targets[win.mobname] then
-					local amount = player.damagedone.targets[win.mobname].amount
-
+				if player.damagedone and player.damagedone.targets and player.damagedone.targets[win.targetname] then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -208,24 +205,23 @@ Skada:AddLoadableModule("Enemy damage taken", function(Skada, L)
 					d.role = player.role or "DAMAGER"
 					d.spec = player.spec or 1
 
-					d.value = amount
+					d.value = player.damagedone.targets[win.targetname].amount
 					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(amount),
+						Skada:FormatNumber(d.value),
 						mod.metadata.columns.Damage,
-						_format("%02.1f%%", 100 * amount / math_max(1, total)),
+						_format("%02.1f%%", 100 * d.value / total),
 						mod.metadata.columns.Percent
 					)
 
-					if amount > max then
-						max = amount
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
-
 					nr = nr + 1
 				end
 			end
-		end
 
-		win.metadata.maxvalue = max
+			win.metadata.maxvalue = maxvalue
+		end
 	end
 
 	function mod:GetEnemies(set)
@@ -234,7 +230,14 @@ Skada:AddLoadableModule("Enemy damage taken", function(Skada, L)
 			if player.damagedone and player.damagedone.targets then
 				for enemyname, enemy in _pairs(player.damagedone.targets) do
 					if not enemies[enemyname] then
-						enemies[enemyname] = CopyTable(enemy)
+						enemies[enemyname] = {
+							id = enemy.id,
+							class = enemy.class,
+							amount = enemy.amount,
+							absorbed = enemy.absorbed,
+							blocked = enemy.blocked,
+							resisted = enemy.resisted
+						}
 					else
 						enemies[enemyname].amount = (enemies[enemyname].amount or 0) + (enemy.amount or 0)
 						enemies[enemyname].absorbed = (enemies[enemyname].absorbed or 0) + (enemy.absorbed or 0)
@@ -248,34 +251,38 @@ Skada:AddLoadableModule("Enemy damage taken", function(Skada, L)
 	end
 
 	function mod:Update(win, set)
-		local enemies = self:GetEnemies(set)
-		local nr, max = 1, 0
+		win.title = L["Enemy damage taken"]
+		local total = set.damagedone and set.damagedone.amount or 0
 
-		for enemyname, enemy in _pairs(enemies) do
-			local d = win.dataset[nr] or {}
-			win.dataset[nr] = d
+		if total > 0 then
+			local enemies = self:GetEnemies(set)
+			local maxvalue, nr = 0, 1
 
-			d.id = enemyname
-			d.label = enemyname
-			d.class = enemy.class or "MONSTER"
+			for enemyname, enemy in _pairs(enemies) do
+				local d = win.dataset[nr] or {}
+				win.dataset[nr] = d
 
-			d.value = enemy.amount
-			d.valuetext = Skada:FormatValueText(
-				Skada:FormatNumber(enemy.amount),
-				mod.metadata.columns.Damage,
-				_format("%02.1f%%", 100 * enemy.amount / math_max(1, set.damagedone.amount)),
-				mod.metadata.columns.Percent
-			)
+				d.id = enemyname
+				d.label = enemyname
+				d.class = enemy.class or "ENEMY"
 
-			if enemy.amount > max then
-				max = enemy.amount
+				d.value = enemy.amount
+				d.valuetext = Skada:FormatValueText(
+					Skada:FormatNumber(enemy.amount),
+					mod.metadata.columns.Damage,
+					_format("%02.1f%%", 100 * enemy.amount / total),
+					mod.metadata.columns.Percent
+				)
+
+				if enemy.amount > maxvalue then
+					maxvalue = enemy.amount
+				end
+
+				nr = nr + 1
 			end
 
-			nr = nr + 1
+			win.metadata.maxvalue = maxvalue
 		end
-
-		win.metadata.maxvalue = max
-		win.title = L["Enemy damage taken"]
 	end
 
 	function mod:OnEnable()
@@ -292,7 +299,7 @@ Skada:AddLoadableModule("Enemy damage taken", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return Skada:FormatNumber(set.damagedone.amount)
+		return Skada:FormatNumber(set.damagedone and set.damagedone.amount or 0)
 	end
 end)
 
@@ -317,8 +324,8 @@ Skada:AddLoadableModule("Enemy damage done", function(Skada, L)
 				if spell then
 					tooltip:AddLine(player.name .. " - " .. win.spellname)
 
-					if win.mobname and spell.sources and spell.sources[win.mobname] then
-						spell = spell.sources[win.mobname]
+					if win.targetname and spell.sources and spell.sources[win.targetname] then
+						spell = spell.sources[win.targetname]
 					end
 
 					if spell.school then
@@ -371,18 +378,17 @@ Skada:AddLoadableModule("Enemy damage done", function(Skada, L)
 
 	function spellmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
-
 		if player and player.damagetaken and player.damagetaken.spells then
 			local nr = 1
 
 			for spellname, spell in _pairs(player.damagetaken.spells) do
 				if spellname == win.spellname then
-					if win.mobname and spell.sources and spell.sources[win.mobname] then
-						spell = spell.sources[win.mobname]
+					if win.targetname and spell.sources and spell.sources[win.targetname] then
+						spell = spell.sources[win.targetname]
 					end
 
 					win.metadata.maxvalue = spell.totalhits
-					win.title = _format(L["%s's <%s> damage on %s"], win.mobname, spellname, player.name)
+					win.title = _format(L["%s's <%s> damage on %s"], win.targetname, spellname, player.name)
 
 					if spell.hit and spell.hit > 0 then
 						add_detail_bar(win, nr, HIT, spell.hit)
@@ -418,21 +424,24 @@ Skada:AddLoadableModule("Enemy damage done", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = _format(L["%s's damage on %s"], win.mobname or UNKNOWN, label)
+		win.title = _format(L["%s's damage on %s"], win.targetname or UNKNOWN, label)
 	end
 
 	function playermod:Update(win, set)
-		local max = 0
-		if win.mobname then
-			local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:find_player(set, win.playerid, win.playername)
+		if player then
+			win.title = _format(L["%s's damage on %s"], win.targetname or UNKNOWN, player.name)
 
-			if player and player.damagetaken and player.damagetaken.sources and player.damagetaken.sources[win.mobname] then
-				win.title = _format(L["%s's damage on %s"], win.mobname, player.name)
+			local total = 0
+			if player.damagetaken and player.damagetaken.sources and player.damagetaken.sources[win.targetname] then
+				total = player.damagetaken.sources[win.targetname].amount or 0
+			end
 
-				local nr, total = 1, set.damagetaken.sources[win.mobname]
+			if total > 0 and player.damagetaken.spells then
+				local maxvalue, nr = 0, 1
 
 				for spellname, spell in _pairs(player.damagetaken.spells) do
-					if spell.sources and spell.sources[win.mobname] then
+					if spell.sources and spell.sources[win.targetname] then
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
@@ -443,68 +452,69 @@ Skada:AddLoadableModule("Enemy damage done", function(Skada, L)
 						d.icon = _select(3, _GetSpellInfo(spell.id))
 						d.spellschool = spell.school
 
-						local amount = spell.sources[win.mobname].amount
+						local amount = spell.sources[win.targetname].amount
 						d.value = amount
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(amount),
 							mod.metadata.columns.Damage,
-							_format("%02.1f%%", 100 * amount / math_max(1, total)),
+							_format("%02.1f%%", 100 * amount / total),
 							mod.metadata.columns.Percent
 						)
 
-						if amount > max then
-							max = amount
+						if amount > maxvalue then
+							maxvalue = amount
 						end
-
 						nr = nr + 1
 					end
 				end
+
+				win.metadata.maxvalue = maxvalue
 			end
 		end
-
-		win.metadata.maxvalue = max
 	end
 
 	function enemymod:Enter(win, id, label)
-		win.mobname = label
+		win.targetname = label
 		win.title = _format(L["%s's damage"], label)
 	end
 
 	function enemymod:Update(win, set)
-		local max = 0
-		if win.mobname and set.damagetaken.sources[win.mobname] then
-			win.title = _format(L["%s's damage"], win.mobname)
+		if win.targetname then
+			win.title = _format(L["%s's damage"], win.targetname)
 
-			local nr, total = 1, set.damagetaken.sources[win.mobname]
-			for _, player in _ipairs(set.players) do
-				if player.damagetaken and player.damagetaken.sources and player.damagetaken.sources[win.mobname] then
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+			local total = (set.damagetaken and set.damagetaken.sources) and set.damagetaken.sources[win.targetname] or 0
+			if total > 0 then
+				local maxvalue, nr = 0, 1
 
-					d.id = player.id
-					d.label = player.name
-					d.class = player.class or "PET"
-					d.role = player.role or "DAMAGER"
-					d.spec = player.spec or 1
+				for _, player in _ipairs(set.players) do
+					if player.damagetaken and player.damagetaken.sources and player.damagetaken.sources[win.targetname] then
+						local d = win.dataset[nr] or {}
+						win.dataset[nr] = d
 
-					d.value = player.damagetaken.sources[win.mobname].amount
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(d.value),
-						mod.metadata.columns.Damage,
-						_format("%02.1f%%", 100 * d.value / math_max(1, total)),
-						mod.metadata.columns.Percent
-					)
+						d.id = player.id
+						d.label = player.name
+						d.class = player.class or "PET"
+						d.role = player.role or "DAMAGER"
+						d.spec = player.spec or 1
 
-					if d.value > max then
-						max = d.value
+						d.value = player.damagetaken.sources[win.targetname].amount
+						d.valuetext = Skada:FormatValueText(
+							Skada:FormatNumber(d.value),
+							mod.metadata.columns.Damage,
+							_format("%02.1f%%", 100 * d.value / total),
+							mod.metadata.columns.Percent
+						)
+
+						if d.value > maxvalue then
+							maxvalue = d.value
+						end
+						nr = nr + 1
 					end
-
-					nr = nr + 1
 				end
+
+				win.metadata.maxvalue = maxvalue
 			end
 		end
-
-		win.metadata.maxvalue = max
 	end
 
 	function mod:GetEnemies(set)
@@ -514,6 +524,14 @@ Skada:AddLoadableModule("Enemy damage done", function(Skada, L)
 				for enemyname, enemy in _pairs(player.damagetaken.sources) do
 					if not enemies[enemyname] then
 						enemies[enemyname] = CopyTable(enemy)
+						enemies[enemyname] = {
+							id = enemy.id,
+							class = enemy.class,
+							amount = enemy.amount,
+							absorbed = enemy.absorbed,
+							blocked = enemy.blocked,
+							resisted = enemy.resisted
+						}
 					else
 						enemies[enemyname].amount = (enemies[enemyname].amount or 0) + (enemy.amount or 0)
 						enemies[enemyname].absorbed = (enemies[enemyname].absorbed or 0) + (enemy.absorbed or 0)
@@ -527,34 +545,37 @@ Skada:AddLoadableModule("Enemy damage done", function(Skada, L)
 	end
 
 	function mod:Update(win, set)
-		local enemies = self:GetEnemies(set)
+		win.title = L["Enemy damage done"]
+		local total = set.damagetaken and set.damagetaken.amount or 0
 
-		local nr, max = 1, 0
-		for enemyname, enemy in _pairs(enemies) do
-			local d = win.dataset[nr] or {}
-			win.dataset[nr] = d
+		if total > 0 then
+			local enemies = self:GetEnemies(set)
+			local maxvalue, nr = 0, 1
 
-			d.id = enemyname
-			d.label = enemyname
-			d.class = enemy.class or "MONSTER"
+			for enemyname, enemy in _pairs(enemies) do
+				local d = win.dataset[nr] or {}
+				win.dataset[nr] = d
 
-			d.value = enemy.amount
-			d.valuetext = Skada:FormatValueText(
-				Skada:FormatNumber(enemy.amount),
-				mod.metadata.columns.Damage,
-				_format("%02.1f%%", 100 * enemy.amount / math_max(1, set.damagetaken.amount)),
-				mod.metadata.columns.Percent
-			)
+				d.id = enemy.id or enemyname
+				d.label = enemyname
+				d.class = enemy.class or "ENEMY"
 
-			if enemy.amount > max then
-				max = enemy.amount
+				d.value = enemy.amount
+				d.valuetext = Skada:FormatValueText(
+					Skada:FormatNumber(enemy.amount),
+					mod.metadata.columns.Damage,
+					_format("%02.1f%%", 100 * enemy.amount / total),
+					mod.metadata.columns.Percent
+				)
+
+				if enemy.amount > maxvalue then
+					maxvalue = enemy.amount
+				end
+				nr = nr + 1
 			end
 
-			nr = nr + 1
+			win.metadata.maxvalue = maxvalue
 		end
-
-		win.metadata.maxvalue = max
-		win.title = L["Enemy damage done"]
 	end
 
 	function mod:OnEnable()
@@ -571,6 +592,6 @@ Skada:AddLoadableModule("Enemy damage done", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return Skada:FormatNumber(set.damagetaken.amount)
+		return Skada:FormatNumber(set.damagetaken and set.damagetaken.amount or 0)
 	end
 end)

@@ -6,15 +6,14 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 	local spellmod = mod:NewModule(L["Damage spell list"])
 	local targetmod = mod:NewModule(L["Damage target list"])
 
-	local _pairs, _ipairs = pairs, ipairs
-	local _format, math_max = string.format, math.max
-	local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+	local _pairs, _ipairs, _select, _format = pairs, ipairs, select, string.format
+	local _UnitClass, _GetSpellInfo = Skada.UnitClass, Skada.GetSpellInfo or GetSpellInfo
 
 	local function log_damage(set, dmg)
 		local player = Skada:get_player(set, dmg.playerid, dmg.playername, dmg.playerflags)
 		if player then
 			-- add player and set friendly fire:
-			player.friendfire = player.friendfire or {}
+			player.friendfire = player.friendfire or {amount = 0}
 			player.friendfire.amount = (player.friendfire.amount or 0) + dmg.amount
 			set.friendfire = (set.friendfire or 0) + dmg.amount
 
@@ -32,7 +31,14 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 			if dmg.dstName then
 				player.friendfire.targets = player.friendfire.targets or {}
 				if not player.friendfire.targets[dmg.dstName] then
-					player.friendfire.targets[dmg.dstName] = {id = dmg.dstGUID, amount = dmg.amount}
+					local class, role, spec = _select(2, _UnitClass(dmg.dstGUID, dmg.dstFlags, set))
+					player.friendfire.targets[dmg.dstName] = {
+						id = dmg.dstGUID,
+						class = class,
+						role = role,
+						spec = spec,
+						amount = dmg.amount
+					}
 				else
 					player.friendfire.targets[dmg.dstName].amount = (player.friendfire.targets[dmg.dstName].amount or 0) + dmg.amount
 				end
@@ -88,57 +94,40 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
-		local max = 0
-
-		if player and player.friendfire and player.friendfire.targets then
+		if player then
 			win.title = _format(L["%s's targets"], player.name)
+			local total = player.friendfire and player.friendfire.amount or 0
 
-			local nr = 1
-			for targetname, target in _pairs(player.friendfire.targets) do
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+			if total > 0 and player.friendfire.targets then
+				local maxvalue, nr = 0, 1
 
-				d.id = target.id
-				d.label = targetname
+				for targetname, target in _pairs(player.friendfire.targets) do
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
-				if not target.class then
-					local p = Skada:find_player(set, target.id, targetname)
-					if p then
-						target.class = p.class or "PET"
-						target.role = p.role or "DAMAGER"
-						target.spec = p.spec or 1
-					elseif Skada:IsBoss(target.id) then
-						target.class = "MONSTER"
-						target.role = "DAMAGER"
-						target.spec = 3
-					else
-						target.class = "PET"
-						target.role = "DAMAGER"
-						target.spec = 1
+					d.id = target.id
+					d.label = targetname
+					d.class = target.class
+					d.role = target.role
+					d.spec = target.spec
+
+					d.value = target.amount
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatNumber(target.amount),
+						mod.metadata.columns.Damage,
+						_format("%02.1f%%", 100 * target.amount / total),
+						mod.metadata.columns.Percent
+					)
+
+					if target.amount > maxvalue then
+						maxvalue = target.amount
 					end
+					nr = nr + 1
 				end
 
-				d.class = target.class
-				d.role = target.role
-				d.spec = target.spec
-
-				d.value = target.amount
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatNumber(target.amount),
-					mod.metadata.columns.Damage,
-					_format("%02.1f%%", 100 * target.amount / math_max(1, set.friendfire or 0)),
-					mod.metadata.columns.Percent
-				)
-
-				if target.amount > max then
-					max = target.amount
-				end
-
-				nr = nr + 1
+				win.metadata.maxvalue = maxvalue
 			end
 		end
-
-		win.metadata.maxvalue = max
 	end
 
 	function spellmod:Enter(win, id, label)
@@ -148,73 +137,78 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
 	function spellmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
-		local max = 0
-
-		if player and player.friendfire and player.friendfire.spells then
+		if player then
 			win.title = _format(L["%s's damage"], player.name)
+			local total = player.friendfire and player.friendfire.amount or 0
 
-			local nr = 1
-			for spellid, spell in _pairs(player.friendfire.spells) do
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+			if total > 0 and player.friendfire.spells then
+				local maxvalue, nr = 0, 1
 
-				local spellname, _, spellicon = _GetSpellInfo(spellid)
+				for spellid, spell in _pairs(player.friendfire.spells) do
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
-				d.id = spellid
-				d.spellid = spellid
-				d.label = spellname
-				d.icon = spellicon
+					local spellname, _, spellicon = _GetSpellInfo(spellid)
+					d.id = spellid
+					d.spellid = spellid
+					d.label = spellname
+					d.icon = spellicon
+					d.spellschool = spell.school
 
-				d.value = spell.amount
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatNumber(spell.amount),
-					mod.metadata.columns.Damage,
-					_format("%02.1f%%", 100 * spell.amount / math_max(1, set.friendfire or 0)),
-					mod.metadata.columns.Percent
-				)
+					d.value = spell.amount
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatNumber(spell.amount),
+						mod.metadata.columns.Damage,
+						_format("%02.1f%%", 100 * spell.amount / total),
+						mod.metadata.columns.Percent
+					)
 
-				if spell.amount > max then
-					max = spell.amount
+					if spell.amount > maxvalue then
+						maxvalue = spell.amount
+					end
+					nr = nr + 1
 				end
 
-				nr = nr + 1
+				win.metadata.maxvalue = maxvalue
 			end
 		end
-		win.metadata.maxvalue = max
 	end
 
 	function mod:Update(win, set)
-		local nr, max = 1, 0
-
-		for _, player in _pairs(set.players) do
-			if player.friendfire and player.friendfire.amount > 0 then
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
-
-				d.id = player.id
-				d.label = player.name
-				d.class = player.class or "PET"
-				d.role = player.role or "DAMAGER"
-				d.spec = player.spec or 1
-
-				d.value = player.friendfire.amount
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatNumber(player.friendfire.amount),
-					self.metadata.columns.Damage,
-					_format("%02.1f%%", 100 * player.friendfire.amount / math_max(1, set.friendfire or 0)),
-					self.metadata.columns.Percent
-				)
-
-				if player.friendfire.amount > max then
-					max = player.friendfire.amount
-				end
-
-				nr = nr + 1
-			end
-		end
-
-		win.metadata.maxvalue = max
 		win.title = L["Friendly Fire"]
+		local total = set.friendfire or 0
+
+		if total > 0 then
+			local maxvalue, nr = 0, 1
+
+			for _, player in _pairs(set.players) do
+				if player.friendfire and (player.friendfire.amount or 0) > 0 then
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
+
+					d.id = player.id
+					d.label = player.name
+					d.class = player.class or "PET"
+					d.role = player.role or "DAMAGER"
+					d.spec = player.spec or 1
+
+					d.value = player.friendfire.amount
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatNumber(player.friendfire.amount),
+						self.metadata.columns.Damage,
+						_format("%02.1f%%", 100 * player.friendfire.amount / total),
+						self.metadata.columns.Percent
+					)
+
+					if player.friendfire.amount > maxvalue then
+						maxvalue = player.friendfire.amount
+					end
+
+					nr = nr + 1
+				end
+			end
+			win.metadata.maxvalue = maxvalue
+		end
 	end
 
 	function mod:OnEnable()

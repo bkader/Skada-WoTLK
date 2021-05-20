@@ -23,7 +23,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 		if player then
 			-- et player maxhp if not already set
-			if player.maxhp == 0 then
+			if (player.maxhp or 0) == 0 then
 				player.maxhp = math_max(_UnitHealthMax(player.name) or 0, player.maxhp or 0)
 			end
 
@@ -153,8 +153,9 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	local function log_death(set, playerid, playername, playerflags, ts)
 		local player = Skada:get_player(set, playerid, playername, playerflags)
 		if player then
-			set.deaths = set.deaths + 1
-			player.deaths = player.deaths + 1
+			set.deaths = (set.deaths or 0) + 1
+			player.deaths = (player.deaths or 0) + 1
+			player.deathlog = player.deathlog or {}
 			if player.deathlog[1] then
 				player.deathlog[1].time = ts
 			end
@@ -213,11 +214,17 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		end
 
 		function deathlogmod:Update(win, set)
-			local player = Skada:find_player(set, win.playerid)
-			win.title = _format(L["%s's death log"], win.playername or UNKNOWN)
+			local player = Skada:find_player(set, win.playerid, win.playername)
+			if player and self.index then
+				win.title = _format(L["%s's death log"], win.playername or UNKNOWN)
 
-			if player and player.deathlog and self.index and player.deathlog[self.index] then
-				local deathlog = player.deathlog[self.index]
+				local deathlog
+				if player.deathlog and player.deathlog[self.index] then
+					deathlog = player.deathlog[self.index]
+				end
+				if not deathlog then return end
+
+				win.metadata.maxvalue = player.maxhp
 
 				-- add a fake entry for the actual death
 				local nr, pre = 1, win.dataset[nr] or {}
@@ -257,34 +264,37 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 						d.value = log.hp or 0
 						local change = (log.amount > 0 and "+" or "-") .. Skada:FormatNumber(math_abs(log.amount))
-						local extra = {}
-						if log.overkill and log.overkill > 0 then
+						local extra
+						if (log.overkill or 0) > 0 then
+							extra = extra or {}
 							d.overkill = log.overkill
-							table_insert(extra, "O: " .. Skada:FormatNumber(math_abs(log.overkill)))
+							table_insert(extra, "O:" .. Skada:FormatNumber(math_abs(log.overkill)))
 						end
-						if log.resisted and log.resisted > 0 then
+						if (log.resisted or 0) > 0 then
+							extra = extra or {}
 							d.resisted = log.resisted
-							table_insert(extra, "R: " .. Skada:FormatNumber(math_abs(log.resisted)))
+							table_insert(extra, "R:" .. Skada:FormatNumber(math_abs(log.resisted)))
 						end
-						if log.blocked and log.blocked > 0 then
+						if (log.blocked or 0) > 0 then
+							extra = extra or {}
 							d.blocked = log.blocked
-							table_insert(extra, "B: " .. Skada:FormatNumber(math_abs(log.blocked)))
+							table_insert(extra, "B:" .. Skada:FormatNumber(math_abs(log.blocked)))
 						end
-						if log.absorbed and log.absorbed > 0 then
+						if (log.absorbed or 0) > 0 then
+							extra = extra or {}
 							d.absorbed = log.absorbed
-							table_insert(extra, "A: " .. Skada:FormatNumber(math_abs(log.absorbed)))
+							table_insert(extra, "A:" .. Skada:FormatNumber(math_abs(log.absorbed)))
 						end
 
-						if _next(extra) ~= nil then
-							change = change .. " [" .. table_concat(extra, ", ") .. "]"
-						end
 						d.valuetext = Skada:FormatValueText(
 							change,
 							self.metadata.columns.Change,
 							Skada:FormatNumber(log.hp or 0),
 							self.metadata.columns.Health,
-							_format("%02.1f%%", (log.hp or 1) / (player.maxhp or 1) * 100),
-							self.metadata.columns.Percent
+							_format("%02.1f%%", 100 * (log.hp or 1) / (player.maxhp or 1)),
+							self.metadata.columns.Percent,
+							extra and table_concat(extra, ", "),
+							self.metadata.columns.OTHER
 						)
 
 						if log.amount > 0 then
@@ -292,12 +302,9 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 						else
 							d.color = red
 						end
-
 						nr = nr + 1
 					end
 				end
-
-				win.metadata.maxvalue = player.maxhp
 			end
 		end
 	end
@@ -309,72 +316,76 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid)
-		local max = 0
 
-		if player and player.deathlog then
+		if player then
 			win.title = _format(L["%s's deaths"], player.name)
 
-			local nr = 1
-			for i, death in _ipairs(player.deathlog) do
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+			if (player.deaths or 0) > 0 and player.deathlog then
+				local maxvalue, nr = 0, 1
 
-				d.id = i
-				d.time = death.time
-				d.icon = "Interface\\Icons\\Ability_Rogue_FeignDeath"
+				for i, death in _ipairs(player.deathlog) do
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
-				local dth = death.log[1]
+					d.id = i
+					d.time = death.time
+					d.icon = "Interface\\Icons\\Ability_Rogue_FeignDeath"
 
-				if dth and dth.spellid then
-					d.label, _, d.icon = _GetSpellInfo(dth.spellid)
-					d.spellid = dth.spellid
-				elseif dth and dth.source then
-					d.label = dth.source
-				else
-					d.label = set.name or UNKNOWN
+					local dth = death.log[1]
+
+					if dth and dth.spellid then
+						d.label, _, d.icon = _GetSpellInfo(dth.spellid)
+						d.spellid = dth.spellid
+					elseif dth and dth.source then
+						d.label = dth.source
+					else
+						d.label = set.name or UNKNOWN
+					end
+
+					d.value = dth and dth.time or death.time
+					d.valuetext = formatdate(d.value)
+
+					if d.value > maxvalue then
+						maxvalue = d.value
+					end
+					nr = nr + 1
 				end
 
-				d.value = dth and dth.time or death.time
-				d.valuetext = formatdate(d.value)
-
-				if d.value > max then
-					max = d.value
-				end
-
-				nr = nr + 1
+				win.metadata.maxvalue = maxvalue
 			end
 		end
-
-		win.metadata.maxvalue = max
 	end
 
 	function mod:Update(win, set)
-		local nr, max = 1, 0
-
-		for _, player in _ipairs(set.players) do
-			if player.deaths > 0 then
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
-
-				d.id = player.id
-				d.label = player.name
-				d.class = player.class or "PET"
-				d.role = player.role or "DAMAGER"
-				d.spec = player.spec or 1
-
-				d.value = player.deaths
-				d.valuetext = _tostring(player.deaths)
-
-				if player.deaths > max then
-					max = player.deaths
-				end
-
-				nr = nr + 1
-			end
-		end
-
-		win.metadata.maxvalue = max
 		win.title = L["Deaths"]
+		local total = set.deaths or 0
+
+		if total > 0 then
+			local maxvalue, nr = 0, 1
+
+			for _, player in _ipairs(set.players) do
+				if (player.deaths or 0) > 0 then
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
+
+					d.id = player.id
+					d.label = player.name
+					d.class = player.class or "PET"
+					d.role = player.role or "DAMAGER"
+					d.spec = player.spec or 1
+
+					d.value = player.deaths
+					d.valuetext = _tostring(player.deaths)
+
+					if player.deaths > maxvalue then
+						maxvalue = player.deaths
+					end
+					nr = nr + 1
+				end
+			end
+
+			win.metadata.maxvalue = maxvalue
+		end
 	end
 
 	local function entry_tooltip(win, id, label, tooltip)
@@ -418,10 +429,10 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		deathlogmod.metadata = {
 			ordersort = true,
 			tooltip = entry_tooltip,
-			columns = {Change = true, Health = true, Percent = true}
+			columns = {Change = true, OTHER = true, Health = true, Percent = true}
 		}
 		playermod.metadata = {click1 = deathlogmod}
-		mod.metadata = {click1 = playermod}
+		self.metadata = {click1 = playermod}
 
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SPLIT", {dst_is_interesting_nopets = true})
@@ -452,9 +463,9 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 	function mod:SetComplete(set)
 		for _, player in _ipairs(set.players) do
-			if player.deaths == 0 then
+			if player.deaths and player.deaths == 0 then
 				player.deathlog = nil
-			elseif player.deathlog then
+			elseif player.deaths and player.deathlog then
 				while table_maxn(player.deathlog) > player.deaths do
 					table_remove(player.deathlog, 1)
 				end
@@ -463,24 +474,12 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	end
 
 	function mod:AddToTooltip(set, tooltip)
-		if set.deaths > 0 then
+		if (set.deaths or 0) > 0 then
 			tooltip:AddDoubleLine(DEATHS, set.deaths, 1, 1, 1)
 		end
 	end
 
 	function mod:GetSetSummary(set)
-		return set.deaths
-	end
-
-	function mod:AddPlayerAttributes(player, set)
-		if not player.deaths then
-			player.deaths = 0
-			player.maxhp = math_max(_UnitHealthMax(player.name) or 0, player.maxhp or 0)
-			player.deathlog = {}
-		end
-	end
-
-	function mod:AddSetAttributes(set)
-		set.deaths = set.deaths or 0
+		return set.deaths or 0
 	end
 end)

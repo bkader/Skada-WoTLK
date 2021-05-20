@@ -303,7 +303,7 @@ L["Key scrolling speed"] = true
 L["Skada summary"] = true
 L["Left-Click to toggle windows."] = true
 L["Shift+Left-Click to reset."] = true
-L["Right-click to open menu"] = true
+L["Right-click to open menu."] = true
 -- skada menu
 L["Skada Menu"] = true
 L["Select segment"] = true
@@ -561,9 +561,10 @@ L["%s's interrupted spells"] = true
 L["%s's interrupted targets"] = true
 L["Announce Interrupts"] = true
 L["%s interrupted!"] = true
+L["%s interrupted with %s!"] = true
 -- Power gained module --
 L["Power"] = true
-L["Power gained"] = true
+L["Resources"] = true
 L["%s's gained %s"] = true
 L["Power gained: Mana"] = true
 L["Mana gained spell list"] = true
@@ -586,13 +587,9 @@ L["Pre-potion"] = true
 -- resurrect module lines --
 L["Resurrects"] = true
 L["Resurrect spell list"] = true
-L["Resurrect spell target list"] = true
 L["Resurrect target list"] = true
-L["Resurrect target spell list"] = true
 L["%s's resurrect spells"] = true
 L["%s's resurrect targets"] = true
-L["%s's received resurrects"] = true
-L["%s's resurrect <%s> targets"] = true
 -- spamage module lines --
 L["Spamage"] = true
 L["Suppresses chat messages from damage meters and provides single chat-link damage statistics in a popup."] = true

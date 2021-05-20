@@ -120,7 +120,6 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 			end
 
 			win.title = L["Threat"]
-			win.notitleset = true
 
 			if target then
 				win.title = _UnitName(target) or L["Threat"]
@@ -384,6 +383,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 
 		function mod:OnEnable()
 			self.metadata = {wipestale = true, columns = {Threat = true, TPS = false, Percent = true}}
+			self.notitleset = true
 			Skada:AddFeed(L["Threat: Personal Threat"], add_threat_feed)
 			Skada:AddMode(self)
 		end

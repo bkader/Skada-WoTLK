@@ -9,7 +9,6 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 	local _UnitGUID, _UnitName, _UnitClass = UnitGUID, UnitName, UnitClass
 	local _pairs, _ipairs, _select = pairs, ipairs, select
 	local _format, _tostring = string.format, tostring
-	local math_min = math.min
 	local date = date
 
 	local modes = {
@@ -47,8 +46,6 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 		[L["Interrupts"]] = "Interrupts",
 		[L["Overhealing"]] = "Overhealing"
 	}
-
-	-- :::::::::::::::::::::::::::::::::::::::::::::::
 
 	local updaters = {}
 
@@ -95,10 +92,10 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 		return player.fails and player.fails.count or 0
 	end
 
-	-- :::::::::::::::::::::::::::::::::::::::::::::::
-
 	local function find_boss_data(bossname)
-		if not bossname then return end
+		if not bossname then
+			return
+		end
 		mod.db = mod.db or {}
 		mod.db.bosses = mod.db.bosses or {}
 		for k, v in _pairs(mod.db.bosses) do
@@ -122,22 +119,17 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 		return find_encounter_data(boss, starttime)
 	end
 
-	-- :::::::::::::::::::::::::::::::::::::::::::::::
-
 	function mod_comparison:Enter(win, id, label)
-		win.mobid = id
-		win.modename = revlocalized[label] or label
-		win.title = (win.mobname or UNKNOWN) .. " - " .. label
+		win.targetid, win.modename = id, revlocalized[label] or label
+		win.title = (win.targetname or UNKNOWN) .. " - " .. label
 	end
 
 	function mod_comparison:Update(win, set)
-		local max = 0
-		local boss = find_boss_data(win.mobname)
+		local boss = find_boss_data(win.targetname)
 		if boss then
-			win.notitleset = true
-			win.title = win.mobname .. " - " .. (localized[win.modename] or win.modename)
+			win.title = (win.targetname or UNKNOWN) .. " - " .. (localized[win.modename] or win.modename)
+			local maxvalue, nr = 0, 1
 
-			local nr = 1
 			for i = 1, boss.count do
 				local encounter = boss.encounters[i]
 				if encounter then
@@ -162,35 +154,28 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 						)
 					end
 
-					if d.value > max then
-						max = d.value
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
-
 					nr = nr + 1
 				end
 			end
-		end
 
-		win.metadata.maxvalue = max
+			win.metadata.maxvalue = maxvalue
+		end
 	end
 
-	-- :::::::::::::::::::::::::::::::::::::::::::::::
-
 	function mod_modes:Enter(win, id, label)
-		win.mobid = id
-		win.mobname = label
+		win.targetid, win.targetname = id, label
 		win.title = _format(L["%s's overall data"], label)
 	end
 
 	function mod_modes:Update(win, set)
-		local max = 0
-
-		local boss = find_boss_data(win.mobname)
+		local boss = find_boss_data(win.targetname)
 		if boss then
-			win.notitleset = true
-			win.title = _format(L["%s's overall data"], win.mobname)
+			win.title = _format(L["%s's overall data"], win.targetname or UNKNOWN)
+			local maxvalue, nr = 0, 1
 
-			local nr = 1
 			for i, mode in _ipairs(modes) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
@@ -215,42 +200,42 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 					d.valuetext = Skada:FormatNumber(d.value)
 				end
 
-				if i > max then
-					max = i
+				if i > maxvalue then
+					maxvalue = i
 				end
 
 				nr = nr + 1
 			end
-		end
 
-		win.metadata.maxvalue = max
+			win.metadata.maxvalue = maxvalue
+		end
 	end
 
-	-- :::::::::::::::::::::::::::::::::::::::::::::::
-
 	function mod:Update(win, set)
-		local max = 0
+		win.title = L["Improvement"]
+
 		if self.db and self.db.bosses then
-			local nr = 1
+			local maxvalue, nr = 0, 1
+
 			for name, data in _pairs(self.db.bosses) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
 				d.id = name
 				d.label = name
+				d.class = "BOSS"
 				d.value = data.count
 				d.valuetext = _tostring(data.count)
 
-				if data.count > max then
-					max = data.count
+				if data.count > maxvalue then
+					maxvalue = data.count
 				end
 
 				nr = nr + 1
 			end
+
+			win.metadata.maxvalue = maxvalue
 		end
-		win.metadata.maxvalue = max
-		win.notitleset = true
-		win.title = L["Improvement"]
 	end
 
 	function mod:OnInitialize()
@@ -303,6 +288,11 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 		mod_comparison.metadata = {}
 		mod_modes.metadata = {click1 = mod_comparison}
 		self.metadata = {click1 = mod_modes}
+
+		-- ignore title set
+		self.notitleset = true
+		mod_modes.notitleset = true
+		mod_comparison.notitleset = true
 
 		Skada.RegisterCallback(self, "COMBAT_BOSS_DEFEATED", "BossDefeated")
 		Skada:AddMode(self)

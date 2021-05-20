@@ -3,67 +3,60 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
 	if Skada:IsDisabled("Activity") then return end
 
 	local mod = Skada:NewModule(L["Activity"])
-	local _date, _ipairs, _format = date, ipairs, string.format
-	local math_min, math_max = math.min, math.max
+	local _date, _ipairs, _format, math_max = date, ipairs, string.format, math.max
 
 	local function activity_tooltip(win, id, label, tooltip)
 		local set = win:get_selected_set()
-		local player = Skada:find_player(set, id)
+		local player = Skada:find_player(set, id, label)
 		if player then
 			local settime = Skada:GetSetTime(set)
-			local playertime = Skada:PlayerActiveTime(set, player, true)
-			tooltip:AddLine(player.name .. ": " .. L["Activity"])
-			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
-			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(playertime), 1, 1, 1)
-			tooltip:AddDoubleLine(L["Activity"], _format("%02.1f%%", 100 * playertime / math_max(1, settime)), 1, 1, 1)
+			if settime > 0 then
+				local activetime = Skada:PlayerActiveTime(set, player, true)
+				tooltip:AddLine(player.name .. ": " .. L["Activity"])
+				tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Activity"], _format("%02.1f%%", 100 * activetime / math_max(1, settime)), 1, 1, 1)
+			end
 		end
 	end
 
 	function mod:Update(win, set)
+		win.title = L["Activity"]
 		local settime = Skada:GetSetTime(set)
-		local nr, max = 1, 0
-		for i, player in _ipairs(set.players) do
-			local d = win.dataset[nr] or {}
-			win.dataset[nr] = d
 
-			local playertime = Skada:PlayerActiveTime(set, player, true)
+		if settime > 0 then
+			local maxvalue, nr = 0, 1
 
-			d.id = player.id
-			d.label = player.name
+			for _, player in _ipairs(set.players) do
+				local activetime = Skada:PlayerActiveTime(set, player, true)
 
-			if not player.class then
-				if Skada:IsBoss(player.id) then
-					player.class = "MONSTER"
-					player.role = "DAMAGER"
-					player.spec = 3
-				else
-					player.class = "PET"
-					player.role = "DAMAGER"
-					player.spec = 1
+				if activetime > 0 then
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
+
+					d.id = player.id
+					d.label = player.name
+					d.class = player.class or "PET"
+					d.role = player.role or "DAMAGER"
+					d.spec = player.spec or 1
+
+					d.value = activetime
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatTime(activetime),
+						self.metadata.columns["Active Time"],
+						_format("%02.1f%%", 100 * activetime / settime),
+						self.metadata.columns.Percent
+					)
+
+					if activetime > maxvalue then
+						maxvalue = activetime
+					end
+					nr = nr + 1
 				end
 			end
 
-			d.class = player.class
-			d.role = player.role
-			d.spec = player.spec
-
-			d.value = playertime
-			d.valuetext = Skada:FormatValueText(
-				Skada:FormatTime(playertime),
-				self.metadata.columns["Active Time"],
-				_format("%02.1f%%", 100 * playertime / math_max(1, settime)),
-				self.metadata.columns.Percent
-			)
-
-			if playertime > max then
-				max = playertime
-			end
-
-			nr = nr + 1
+			win.metadata.maxvalue = maxvalue
 		end
-
-		win.metadata.maxvalue = settime
-		win.title = L["Activity"]
 	end
 
 	function mod:OnEnable()

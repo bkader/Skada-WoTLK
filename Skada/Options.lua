@@ -165,7 +165,7 @@ function Skada:AddColumnOptions(mod)
 			-- Add column option.
 			local col = {
 				type = "toggle",
-				name = L[colname] or colname,
+				name = _G[colname] or L[colname],
 				get = function()
 					return mod.metadata.columns[colname]
 				end,

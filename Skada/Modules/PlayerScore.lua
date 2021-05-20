@@ -117,7 +117,7 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 	end
 
 	function mod:Update(win, set)
-		local max, nr = 0, 1
+		local maxvalue, nr = 0, 1
 
 		for _, player in ipairs(set.players) do
 			local damagedone = player.damagedone and player.damagedone.amount or 0
@@ -156,14 +156,14 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 			d.value = score
 			d.valuetext = format("%.1f", score)
 
-			if score > max then
-				max = score
+			if score > maxvalue then
+				maxvalue = score
 			end
 
 			nr = nr + 1
 		end
 
-		win.metadata.maxvalue = max
+		win.metadata.maxvalue = maxvalue
 		win.title = L["Player Score"]
 	end
 

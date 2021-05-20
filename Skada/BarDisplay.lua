@@ -100,14 +100,14 @@ function mod:Create(window)
 	bargroup:SetScript("OnMouseDown", function(_, button)
 		if IsShiftKeyDown() then
 			Skada:OpenMenu(window)
-		elseif button == "RightButton" then
+		elseif button == "RightButton" and not IsAltKeyDown() then
 			window:RightClick()
 		end
 	end)
 	bargroup.button:SetScript("OnClick", function(_, button)
 		if IsShiftKeyDown() then
 			Skada:OpenMenu(window)
-		elseif button == "RightButton" then
+		elseif button == "RightButton" and not IsAltKeyDown() then
 			window:RightClick()
 		end
 	end)
@@ -141,18 +141,20 @@ function mod:Destroy(win)
 end
 
 function mod:Wipe(win)
-	win.bargroup:SetSortFunction(nil)
-	win.bargroup:SetBarOffset(0)
+	if win and win.bargroup then
+		win.bargroup:SetSortFunction(nil)
+		win.bargroup:SetBarOffset(0)
 
-	local bars = win.bargroup:GetBars()
-	if bars then
-		for _, bar in pairs(bars) do
-			bar:Hide()
-			win.bargroup:RemoveBar(bar)
+		local bars = win.bargroup:GetBars()
+		if bars then
+			for _, bar in pairs(bars) do
+				bar:Hide()
+				win.bargroup:RemoveBar(bar)
+			end
 		end
-	end
 
-	win.bargroup:SortBars()
+		win.bargroup:SortBars()
+	end
 end
 
 function mod:Show(win)
