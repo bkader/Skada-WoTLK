@@ -409,6 +409,29 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, nil, nil, 1, ...)
 	end
 
+	local function EnvironmentDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		local envtype, _, _, _, _, _, absorbed = ...
+		if (absorbed or 0) > 0 then
+			local spellschool
+
+			if envtype == "Falling" or envtype == "FALLING" then
+				spellschool = 1
+			elseif envtype == "Drowning" or envtype == "DROWNING" then
+				spellschool = 1
+			elseif envtype == "Fatigue" or envtype == "FATIGUE" then
+				spellschool = 1
+			elseif envtype == "Fire" or envtype == "FIRE" then
+				spellschool = 4
+			elseif envtype == "Lava" or envtype == "LAVA" then
+				spellschool = 4
+			elseif envtype == "Slime" or envtype == "SLIME" then
+				spellschool = 8
+			end
+
+			process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool or 1)
+		end
+	end
+
 	local function spell_tooltip(win, id, label, tooltip)
 		local player = Skada:find_player(win:get_selected_set(), win.playerid, win.playername)
 		if player then
@@ -582,6 +605,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		Skada:RegisterForCL(SpellDamage, "SPELL_BUILDING_DAMAGE", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, "RANGE_DAMAGE", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SwingDamage, "SWING_DAMAGE", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(EnvironmentDamage, "ENVIRONMENTAL_DAMAGE", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellMissed, "SPELL_MISSED", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellMissed, "SPELL_PERIODIC_MISSED", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellMissed, "SPELL_BUILDING_MISSED", {dst_is_interesting_nopets = true})
