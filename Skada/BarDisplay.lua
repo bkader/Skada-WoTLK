@@ -223,6 +223,7 @@ do
 				end
 			end
 		end
+		L_CloseDropDownMenus()
 		libwindow.SavePosition(group)
 	end
 end
