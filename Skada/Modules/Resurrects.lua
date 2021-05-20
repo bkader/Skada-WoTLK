@@ -191,7 +191,8 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 			showspots = true,
 			click1 = playermod,
 			click2 = targetmod,
-			columns = {Count = true, Percent = false}
+			columns = {Count = true, Percent = false},
+			icon = "Interface\\Icons\\spell_nature_reincarnation"
 		}
 
 		Skada:RegisterForCL(SpellResurrect, "SPELL_RESURRECT", {src_is_interesting = true, dst_is_interesting = true})

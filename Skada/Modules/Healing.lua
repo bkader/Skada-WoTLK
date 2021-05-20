@@ -295,7 +295,8 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 			showspots = true,
 			click1 = spellsmod,
 			click2 = playersmod,
-			columns = {Healing = true, HPS = true, Percent = true}
+			columns = {Healing = true, HPS = true, Percent = true},
+			icon = "Interface\\Icons\\spell_nature_healingtouch"
 		}
 
 		Skada:RegisterForCL(SpellHeal, "SPELL_HEAL", {src_is_interesting = true})
@@ -464,7 +465,8 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 			showspots = true,
 			click1 = spellsmod,
 			click2 = playersmod,
-			columns = {Overheal = true, Percent = true}
+			columns = {Overheal = true, Percent = true},
+			icon = "Interface\\Icons\\spell_holy_holybolt"
 		}
 		Skada:AddMode(self, L["Absorbs and healing"])
 	end
@@ -673,7 +675,8 @@ Skada:AddLoadableModule("Total healing", function(Skada, L)
 			showspots = true,
 			click1 = spellsmod,
 			click2 = playersmod,
-			columns = {Healing = true, HPS = true, Percent = true}
+			columns = {Healing = true, HPS = true, Percent = true},
+			icon = "Interface\\Icons\\spell_holy_flashheal"
 		}
 		Skada:AddMode(self, L["Absorbs and healing"])
 	end
@@ -845,7 +848,8 @@ Skada:AddLoadableModule("Healing and overhealing", function(Skada, L)
 			showspots = true,
 			click1 = spellmod,
 			click2 = targetmod,
-			columns = {Healing = true, Overheal = true, Percent = true}
+			columns = {Healing = true, Overheal = true, Percent = true},
+			icon = "Interface\\Icons\\spell_holy_prayerofhealing02"
 		}
 		Skada:AddMode(self, L["Absorbs and healing"])
 	end
@@ -1000,7 +1004,8 @@ Skada:AddLoadableModule("Healing taken", function(Skada, L)
 		self.metadata = {
 			showspots = true,
 			click1 = playermod,
-			columns = {Healing = true, Overhealing = true, Percent = true}
+			columns = {Healing = true, Overhealing = true, Percent = true},
+			icon = "Interface\\Icons\\spell_nature_resistnature"
 		}
 		Skada:AddMode(self, L["Absorbs and healing"])
 	end

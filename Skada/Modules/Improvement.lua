@@ -287,7 +287,7 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 	function mod:OnEnable()
 		mod_comparison.metadata = {}
 		mod_modes.metadata = {click1 = mod_comparison}
-		self.metadata = {click1 = mod_modes}
+		self.metadata = {click1 = mod_modes, icon = "Interface\\Icons\\spell_shaman_improvedreincarnation"}
 
 		-- ignore title set
 		self.notitleset = true

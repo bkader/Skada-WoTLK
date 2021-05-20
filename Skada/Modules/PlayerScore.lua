@@ -168,7 +168,7 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		self.metadata = {showspots = true, tooltip = score_tooltip}
+		self.metadata = {showspots = true, tooltip = score_tooltip, icon = "Interface\\Icons\\spell_misc_emotionangry"}
 		Skada:AddMode(self)
 	end
 

@@ -796,7 +796,8 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			post_tooltip = damage_tooltip,
 			click1 = playermod,
 			click2 = targetmod,
-			columns = {Damage = true, DPS = true, Percent = true}
+			columns = {Damage = true, DPS = true, Percent = true},
+			icon = "Interface\\Icons\\spell_fire_firebolt"
 		}
 
 		dpsmod.metadata = {
@@ -804,7 +805,8 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			tooltip = dps_tooltip,
 			click1 = playermod,
 			click2 = targetmod,
-			columns = {DPS = true, Percent = true}
+			columns = {DPS = true, Percent = true},
+			icon = "Interface\\Icons\\inv_misc_pocketwatch_01"
 		}
 
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {src_is_interesting = true, dst_is_not_interesting = true})
@@ -1013,7 +1015,8 @@ Skada:AddLoadableModule("Damage done by spell", function(Skada, L)
 		self.metadata = {
 			showspots = true,
 			click1 = sourcemod,
-			columns = {Damage = true, Percent = true}
+			columns = {Damage = true, Percent = true},
+			icon = "Interface\\Icons\\spell_nature_lightning"
 		}
 		Skada:AddMode(self, L["Damage done"])
 	end
@@ -1094,7 +1097,11 @@ Skada:AddLoadableModule("Useful damage", function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		mod.metadata = {showspots = true, columns = {Damage = true, DPS = true, Percent = true}}
+		mod.metadata = {
+			showspots = true,
+			columns = {Damage = true, DPS = true, Percent = true},
+			icon = "Interface\\Icons\\spell_fire_fireball02"
+		}
 		Skada:AddMode(self, L["Damage done"])
 	end
 
@@ -1212,7 +1219,8 @@ Skada:AddLoadableModule("Overkill", function(Skada, L)
 		self.metadata = {
 			showspots = true,
 			click1 = playermod,
-			columns = {Damage = true, Percent = true}
+			columns = {Damage = true, Percent = true},
+			icon = "Interface\\Icons\\spell_fire_incinerate"
 		}
 		Skada:AddMode(self, L["Damage done"])
 	end

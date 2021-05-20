@@ -487,7 +487,8 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 			ordersort = true,
 			click1 = playermod,
 			click2 = targetmod,
-			columns = {Count = true, Percent = false}
+			columns = {Count = true, Percent = false},
+			icon = "Interface\\Icons\\spell_frost_chainsofice"
 		}
 
 		Skada:RegisterForCL(SpellAuraApplied, "SPELL_AURA_APPLIED", {src_is_interesting = true})
@@ -807,7 +808,8 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 			ordersort = true,
 			click1 = playermod,
 			click2 = sourcemod,
-			columns = {Count = true, Percent = false}
+			columns = {Count = true, Percent = false},
+			icon = "Interface\\Icons\\spell_frost_frostnova"
 		}
 
 		Skada:RegisterForCL(SpellAuraApplied, "SPELL_AURA_APPLIED", {dst_is_interesting = true})
@@ -1171,7 +1173,8 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 			ordersort = true,
 			click1 = playermod,
 			click2 = targetmod,
-			columns = {Count = true, Percent = false}
+			columns = {Count = true, Percent = false},
+			icon = "Interface\\Icons\\spell_holy_sealofvalor"
 		}
 
 		Skada:RegisterForCL(SpellAuraBroken, "SPELL_AURA_BROKEN", {src_is_interesting = true})

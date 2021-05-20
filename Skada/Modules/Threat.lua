@@ -382,7 +382,11 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 		end
 
 		function mod:OnEnable()
-			self.metadata = {wipestale = true, columns = {Threat = true, TPS = false, Percent = true}}
+			self.metadata = {
+				wipestale = true,
+				columns = {Threat = true, TPS = false, Percent = true},
+				icon = "Interface\\Icons\\ability_physical_taunt"
+			}
 			self.notitleset = true
 			Skada:AddFeed(L["Threat: Personal Threat"], add_threat_feed)
 			Skada:AddMode(self)

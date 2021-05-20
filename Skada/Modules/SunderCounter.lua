@@ -151,7 +151,8 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 		self.metadata = {
 			showspots = true,
 			click1 = targetmod,
-			columns = {Count = true, Percent = true}
+			columns = {Count = true, Percent = true},
+			icon = "Interface\\Icons\\ability_warrior_sunder"
 		}
 		Skada:RegisterForCL(SunderApplied, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})
 		Skada:AddMode(self, L["Buffs and Debuffs"])

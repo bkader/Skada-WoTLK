@@ -266,7 +266,8 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 		self.metadata = {
 			showspots = true,
 			click1 = playermod,
-			columns = {Count = true, Percent = true}
+			columns = {Count = true, Percent = true},
+			icon = "Interface\\Icons\\inv_potion_27"
 		}
 
 		Skada:RegisterForCL(PotionUsed, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})

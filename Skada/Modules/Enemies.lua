@@ -289,7 +289,11 @@ Skada:AddLoadableModule("Enemy damage taken", function(Skada, L)
 		spellmod.metadata = {tooltip = spellmod_tooltip}
 		playermod.metadata = {click1 = spellmod}
 		enemymod.metadata = {showspots = true, click1 = playermod}
-		mod.metadata = {click1 = enemymod, columns = {Damage = true, Percent = true}}
+		self.metadata = {
+			click1 = enemymod,
+			columns = {Damage = true, Percent = true},
+			icon = "Interface\\Icons\\spell_holy_crusaderstrike"
+		}
 
 		Skada:AddMode(self, L["Damage done"])
 	end
@@ -582,7 +586,11 @@ Skada:AddLoadableModule("Enemy damage done", function(Skada, L)
 		spellmod.metadata = {tooltip = spellmod_tooltip}
 		playermod.metadata = {click1 = spellmod}
 		enemymod.metadata = {showspots = true, click1 = playermod}
-		mod.metadata = {click1 = enemymod, columns = {Damage = true, Percent = true}}
+		self.metadata = {
+			click1 = enemymod,
+			columns = {Damage = true, Percent = true},
+			icon = "Interface\\Icons\\spell_shadow_shadowbolt"
+		}
 
 		Skada:AddMode(self, L["Damage taken"])
 	end

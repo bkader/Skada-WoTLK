@@ -473,7 +473,7 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 
 	function mod:OnEnable()
 		spellmod.metadata = {tooltip = buff_tooltip}
-		self.metadata = {click1 = spellmod}
+		self.metadata = {click1 = spellmod, icon = "Interface\\Icons\\spell_magic_greaterblessingofkings"}
 
 		Skada:RegisterForCL(BuffApplied, "SPELL_AURA_APPLIED", {src_is_interesting = true})
 		Skada:RegisterForCL(AuraRefresh, "SPELL_AURA_REFRESH", {src_is_interesting = true})
@@ -587,7 +587,7 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 
 	function mod:OnEnable()
 		spellmod.metadata = {post_tooltip = debuff_tooltip, click1 = targetmod}
-		self.metadata = {click1 = spellmod}
+		self.metadata = {click1 = spellmod, icon = "Interface\\Icons\\spell_shadow_shadowwordpain"}
 
 		Skada:RegisterForCL(DebuffApplied, "SPELL_AURA_APPLIED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
 		Skada:RegisterForCL(DebuffApplied, "SPELL_AURA_REFRESH", {dst_is_interesting_nopets = true, src_is_not_interesting = true})

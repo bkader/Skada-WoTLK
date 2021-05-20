@@ -292,7 +292,8 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 			click1 = spellsmod,
 			click2 = targetsmod,
 			click3 = playermod,
-			columns = {Total = true, Percent = true}
+			columns = {Total = true, Percent = true},
+			icon = "Interface\\Icons\\ability_kick"
 		}
 
 		Skada:RegisterForCL(SpellInterrupt, "SPELL_INTERRUPT", {src_is_interesting = true})

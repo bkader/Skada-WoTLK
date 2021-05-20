@@ -260,7 +260,8 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 			click1 = spellmod,
 			click2 = targetmod,
 			click3 = playermod,
-			columns = {Total = true, Percent = true}
+			columns = {Total = true, Percent = true},
+			icon = "Interface\\Icons\\spell_arcane_massdispel"
 		}
 
 		Skada:RegisterForCL(SpellDispel, "SPELL_DISPEL", {src_is_interesting = true})

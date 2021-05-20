@@ -671,13 +671,15 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 			showspots = true,
 			click1 = playermod,
 			click2 = sourcemod,
-			columns = {Damage = true, DTPS = true, Percent = true}
+			columns = {Damage = true, DTPS = true, Percent = true},
+			icon = "Interface\\Icons\\ability_mage_frostfirebolt"
 		}
 		dtpsmod.metadata = {
 			showspots = true,
 			click1 = playermod,
 			click2 = sourcemod,
-			columns = {DTPS = true, Percent = true}
+			columns = {DTPS = true, Percent = true},
+			icon = "Interface\\Icons\\spell_fire_twilightpyroblast"
 		}
 
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {dst_is_interesting_nopets = true})
@@ -872,7 +874,8 @@ Skada:AddLoadableModule("Damage taken by spell", function(Skada, L)
 		self.metadata = {
 			showspots = true,
 			click1 = playermod,
-			columns = {Damage = true, Percent = true}
+			columns = {Damage = true, Percent = true},
+			icon = "Interface\\Icons\\spell_arcane_starfire"
 		}
 		Skada:AddMode(self, L["Damage taken"])
 	end
@@ -994,7 +997,8 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 		self.metadata = {
 			showspots = true,
 			click1 = playermod,
-			columns = {Percent = true, Count = true, Total = true}
+			columns = {Percent = true, Count = true, Total = true},
+			icon = "Interface\\Icons\\ability_warrior_shieldwall"
 		}
 
 		Skada:AddMode(self, L["Damage taken"])
@@ -1242,7 +1246,8 @@ Skada:AddLoadableModule("Damage mitigated", function(Skada, L)
 		self.metadata = {
 			showspots = true,
 			click1 = playermod,
-			columns = {Amount = true, Total = true, Percent = true}
+			columns = {Amount = true, Total = true, Percent = true},
+			icon = "Interface\\Icons\\spell_shadow_shadowward"
 		}
 		Skada:AddMode(self, L["Damage taken"])
 	end

@@ -133,7 +133,8 @@ Skada:AddLoadableModule("Parry-haste", function(Skada, L)
 		self.metadata = {
 			showspots = true,
 			click1 = targetmod,
-			columns = {Count = true, Percent = true}
+			columns = {Count = true, Percent = true},
+			icon = "Interface\\Icons\\ability_parry"
 		}
 
 		Skada:RegisterForCL(SpellMissed, "SPELL_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})

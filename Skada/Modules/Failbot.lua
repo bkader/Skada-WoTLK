@@ -190,8 +190,13 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 		if not tankevents then
 			self:OnInitialize()
 		end
+
 		playermod.metadata = {click1 = spellmod}
-		self.metadata = {click1 = playermod, columns = {Count = true, Percent = false}}
+		self.metadata = {
+			click1 = playermod,
+			columns = {Count = true, Percent = false},
+			icon = "Interface\\Icons\\ability_creature_cursed_01"
+		}
 
 		Skada:AddMode(self)
 	end

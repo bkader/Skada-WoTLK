@@ -15,7 +15,7 @@
 ## SavedVariablesPerCharacter: SkadaCharDB
 ## DefaultState: enabled
 ## Author: Zarnivoop, Kader
-## Version: 1.8.46
+## Version: 1.8.50
 ## X-License: MIT/X
 ## X-Category: Combat
 ## X-Website: https://github.com/bkader/Skada-WoTLK

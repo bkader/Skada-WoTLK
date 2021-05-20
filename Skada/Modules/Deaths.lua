@@ -432,7 +432,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 			columns = {Change = true, OTHER = true, Health = true, Percent = true}
 		}
 		playermod.metadata = {click1 = deathlogmod}
-		self.metadata = {click1 = playermod}
+		self.metadata = {click1 = playermod, icon = "Interface\\Icons\\ability_rogue_feigndeath"}
 
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SPLIT", {dst_is_interesting_nopets = true})

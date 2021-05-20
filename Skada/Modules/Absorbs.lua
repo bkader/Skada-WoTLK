@@ -569,7 +569,8 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 			showspots = true,
 			click1 = spellmod,
 			click2 = playermod,
-			columns = {Absorbs = true, Percent = true}
+			columns = {Absorbs = true, Percent = true},
+			icon = "Interface\\Icons\\spell_holy_powerwordshield"
 		}
 
 		Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {src_is_interesting_nopets = true})
@@ -918,14 +919,16 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 			showspots = true,
 			click1 = spellmod,
 			click2 = playermod,
-			columns = {Healing = true, HPS = true, Percent = true}
+			columns = {Healing = true, HPS = true, Percent = true},
+			icon = "Interface\\Icons\\spell_holy_healingfocus"
 		}
 		hpsmode.metadata = {
 			showspots = true,
 			tooltip = hps_tooltip,
 			click1 = spellmod,
 			click2 = playermod,
-			columns = {HPS = true, Percent = true}
+			columns = {HPS = true, Percent = true},
+			icon = "Interface\\Icons\\spell_nature_rejuvenation"
 		}
 
 		Skada:AddFeed(L["Healing: Personal HPS"], feed_personal_hps)
@@ -1151,7 +1154,8 @@ Skada:AddLoadableModule("Healing done by spell", function(Skada, L)
 			showspots = true,
 			tooltip = spell_tooltip,
 			click1 = spellmod,
-			columns = {Healing = true, Percent = true}
+			columns = {Healing = true, Percent = true},
+			icon = "Interface\\Icons\\spell_nature_healingwavelesser"
 		}
 		Skada:AddMode(self, L["Absorbs and healing"])
 	end

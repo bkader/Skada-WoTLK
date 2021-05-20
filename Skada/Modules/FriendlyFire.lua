@@ -217,7 +217,8 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 			showspots = true,
 			click1 = spellmod,
 			click2 = targetmod,
-			columns = {Damage = true, Percent = true}
+			columns = {Damage = true, Percent = true},
+			icon = "Interface\\Icons\\inv_gizmo_supersappercharge"
 		}
 
 		Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
