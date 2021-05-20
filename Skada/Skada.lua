@@ -1606,7 +1606,7 @@ do
 	function Skada:IsBoss(guid, name)
 		local isboss, npcid, npcname = false, 0, nil
 		if guid then
-			local id = tonumber(guid:sub(9, 12), 16)
+			local id = tonumber(guid:sub(8, 12), 16)
 			if id and (LBI.BossIDs[id] or custom[id]) then
 				isboss, npcid = true, id
 				if custom[id] then
