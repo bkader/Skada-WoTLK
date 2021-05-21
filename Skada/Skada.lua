@@ -848,6 +848,7 @@ function Window:RightClick(_, button)
 	elseif self.selectedset then
 		self:DisplaySets()
 	end
+	L_CloseDropDownMenus() -- always close
 end
 
 -- ================================================== --

@@ -227,7 +227,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 		Skada:RegisterForCL(SpellDamage, "RANGE_DAMAGE", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
 		Skada:RegisterForCL(SwingDamage, "SWING_DAMAGE", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
 
-		Skada:AddMode(self, L["Damage done"])
+		Skada:AddMode(self, L["Damage Done"])
 	end
 
 	function mod:OnDisable()

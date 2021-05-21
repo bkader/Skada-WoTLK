@@ -66,6 +66,8 @@ local function clickHandler(win, frame, button)
 	elseif button == "RightButton" then
 		Skada:SegmentMenu(win)
 	end
+
+	L_CloseDropDownMenus() -- always close
 end
 
 local function tooltipHandler(win, tooltip)

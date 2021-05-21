@@ -504,6 +504,7 @@ do
 						window:DisplayMode(mode)
 						_CloseDropDownMenus()
 					end
+					info.icon = mode.metadata and mode.metadata.icon
 					info.checked = (window.selectedmode == mode or window.parenttitle == mode:GetName())
 					_UIDropDownMenu_AddButton(info, level)
 				end

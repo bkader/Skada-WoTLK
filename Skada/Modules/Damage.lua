@@ -364,11 +364,11 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 				end
 
 				if spell.max and spell.min then
-					tooltip:AddDoubleLine(L["Minimum hit:"], Skada:FormatNumber(spell.min), 1, 1, 1)
-					tooltip:AddDoubleLine(L["Maximum hit:"], Skada:FormatNumber(spell.max), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.min), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.max), 1, 1, 1)
 				end
-				tooltip:AddDoubleLine(L["Average hit:"], Skada:FormatNumber((spell.amount or 0) / spell.totalhits), 1, 1, 1)
-				tooltip:AddDoubleLine(L["Total hits:"], tostring(spell.totalhits), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber((spell.amount or 0) / spell.totalhits), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Total hits"], tostring(spell.totalhits), 1, 1, 1)
 			end
 		end
 	end
@@ -422,13 +422,13 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 				end
 
 				if target.max and target.min then
-					tooltip:AddDoubleLine(L["Minimum hit:"], Skada:FormatNumber(target.min), 1, 1, 1)
-					tooltip:AddDoubleLine(L["Maximum hit:"], Skada:FormatNumber(target.max), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(target.min), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(target.max), 1, 1, 1)
 				end
 
 				tooltip:AddLine(" ")
 				tooltip:AddLine(_format(L["%s's damage breakdown"], label))
-				tooltip:AddDoubleLine(L["Total hits:"], target.totalhits or 0, 1, 1, 1)
+				tooltip:AddDoubleLine(L["Total hits"], target.totalhits or 0, 1, 1, 1)
 				if (target.hit or 0) > 0 then
 					tooltip:AddDoubleLine(HIT, _format("%d (%02.1f%%)", target.hit, 100 * target.hit / math_max(1, target.totalhits or 0)), 1, 1, 1)
 				end
@@ -765,7 +765,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		Skada:AddFeed(L["Damage: Personal DPS"], feed_personal_dps)
 		Skada:AddFeed(L["Damage: Raid DPS"], feed_raid_dps)
 
-		Skada:AddMode(self, L["Damage done"])
+		Skada:AddMode(self, L["Damage Done"])
 	end
 
 	function mod:OnDisable()
@@ -834,7 +834,7 @@ Skada:AddLoadableModule("DPS", function(Skada, L)
 			tooltip:AddLine(player.name .. " - " .. L["DPS"])
 			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(Skada:PlayerActiveTime(set, player, true)), 1, 1, 1)
-			tooltip:AddDoubleLine(L["Damage done"], Skada:FormatNumber(player.damagedone.amount), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Damage Done"], Skada:FormatNumber(player.damagedone.amount), 1, 1, 1)
 			tooltip:AddDoubleLine(Skada:FormatNumber(amount) .. "/" .. Skada:FormatTime(activetime), Skada:FormatNumber(dps), 1, 1, 1)
 		end
 	end
@@ -888,11 +888,11 @@ Skada:AddLoadableModule("DPS", function(Skada, L)
 			icon = "Interface\\Icons\\inv_misc_pocketwatch_01"
 		}
 
-		Skada:AddMode(self, L["Damage done"])
+		Skada:AddMode(self, L["Damage Done"])
 	end
 
 	function mod:OnDisable()
-		Skada:RemoveMode(self, L["Damage done"])
+		Skada:RemoveMode(self, L["Damage Done"])
 	end
 
 	function mod:GetSetSummary(set)
@@ -904,10 +904,10 @@ end)
 -- Damage done by spell module --
 -- =========================== --
 
-Skada:AddLoadableModule("Damage done by spell", function(Skada, L)
-	if Skada:IsDisabled("Damage", "Damage done by spell") then return end
+Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
+	if Skada:IsDisabled("Damage", "Damage Done By Spell") then return end
 
-	local mod = Skada:NewModule(L["Damage done by spell"])
+	local mod = Skada:NewModule(L["Damage Done By Spell"])
 	local sourcemod = mod:NewModule(L["Damage spell sources"])
 
 	local cached = Skada:WeakTable()
@@ -962,7 +962,7 @@ Skada:AddLoadableModule("Damage done by spell", function(Skada, L)
 	-- NOTE: use at your own risk
 	--
 	function mod:Update(win, set)
-		win.title = L["Damage done by spell"]
+		win.title = L["Damage Done By Spell"]
 
 		if win and win.selectedset ~= "total" then
 			cached = wipe(cached or {})
@@ -1039,7 +1039,7 @@ Skada:AddLoadableModule("Damage done by spell", function(Skada, L)
 			columns = {Damage = true, Percent = true},
 			icon = "Interface\\Icons\\spell_nature_lightning"
 		}
-		Skada:AddMode(self, L["Damage done"])
+		Skada:AddMode(self, L["Damage Done"])
 	end
 
 	function mod:OnDisable()
@@ -1056,10 +1056,10 @@ end)
 -- the overkill from the amount of damage done.
 --
 
-Skada:AddLoadableModule("Useful damage", function(Skada, L)
-	if Skada:IsDisabled("Damage", "Useful damage") then return end
+Skada:AddLoadableModule("Useful Damage", function(Skada, L)
+	if Skada:IsDisabled("Damage", "Useful Damage") then return end
 
-	local mod = Skada:NewModule(L["Useful damage"])
+	local mod = Skada:NewModule(L["Useful Damage"])
 
 	local function getDPS(set, player)
 		local amount = player.damagedone and ((player.damagedone.amount or 0) - (player.damagedone.overkill or 0)) or 0
@@ -1076,7 +1076,7 @@ Skada:AddLoadableModule("Useful damage", function(Skada, L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Useful damage"]
+		win.title = L["Useful Damage"]
 		local total = _select(2, getRaidDPS(set))
 
 		if total > 0 then
@@ -1123,7 +1123,7 @@ Skada:AddLoadableModule("Useful damage", function(Skada, L)
 			columns = {Damage = true, DPS = true, Percent = true},
 			icon = "Interface\\Icons\\spell_fire_fireball02"
 		}
-		Skada:AddMode(self, L["Damage done"])
+		Skada:AddMode(self, L["Damage Done"])
 	end
 
 	function mod:OnDisable()
@@ -1243,10 +1243,10 @@ Skada:AddLoadableModule("Overkill", function(Skada, L)
 			columns = {Damage = true, Percent = true},
 			icon = "Interface\\Icons\\spell_fire_incinerate"
 		}
-		Skada:AddMode(self, L["Damage done"])
+		Skada:AddMode(self, L["Damage Done"])
 	end
 
 	function mod:OnDisable()
-		Skada:RemoveMode(self, L["Damage done"])
+		Skada:RemoveMode(self, L["Damage Done"])
 	end
 end)

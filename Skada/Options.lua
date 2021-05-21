@@ -132,8 +132,8 @@ Skada.defaults = {
 		modulesBlocked = {
 			["Spamage"] = true,
 			["Overkill"] = true,
-			["Useful damage"] = true,
-			["Damage done by spell"] = true,
+			["Useful Damage"] = true,
+			["Damage Done By Spell"] = true,
 			["Avoidance & Mitigation"] = true
 		},
 		windows = {windefaultscopy}

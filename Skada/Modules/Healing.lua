@@ -484,10 +484,10 @@ end)
 -- Total healing module --
 -- ==================== --
 
-Skada:AddLoadableModule("Total healing", function(Skada, L)
-	if Skada:IsDisabled("Healing", "Total healing") then return end
+Skada:AddLoadableModule("Total Healing", function(Skada, L)
+	if Skada:IsDisabled("Healing", "Total Healing") then return end
 
-	local mod = Skada:NewModule(L["Total healing"])
+	local mod = Skada:NewModule(L["Total Healing"])
 	local playersmod = mod:NewModule(L["Healed player list"])
 	local spellsmod = mod:NewModule(L["Healing spell list"])
 
@@ -629,7 +629,7 @@ Skada:AddLoadableModule("Total healing", function(Skada, L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Total healing"]
+		win.title = L["Total Healing"]
 		local total = _select(2, getRaidHPS(set))
 
 		if total > 0 then
@@ -876,10 +876,10 @@ end)
 -- Healing taken --
 -- ================ --
 
-Skada:AddLoadableModule("Healing taken", function(Skada, L)
-	if Skada:IsDisabled("Healing", "Healing taken") then return end
+Skada:AddLoadableModule("Healing Taken", function(Skada, L)
+	if Skada:IsDisabled("Healing", "Healing Taken") then return end
 
-	local mod = Skada:NewModule(L["Healing taken"])
+	local mod = Skada:NewModule(L["Healing Taken"])
 	local playermod = mod:NewModule(L["Healing player list"])
 
 	function playermod:Enter(win, id, label)
@@ -948,7 +948,7 @@ Skada:AddLoadableModule("Healing taken", function(Skada, L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Healing taken"]
+		win.title = L["Healing Taken"]
 		local total = set.healing or 0
 
 		if total > 0 then

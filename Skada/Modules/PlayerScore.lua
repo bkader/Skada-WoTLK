@@ -3,7 +3,7 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 	-- Because we adopted the method of not storing everything
 	-- and rather use what's available, this module won't be storing
 	-- any unnecessary data but grab it from other modules.
-	if Skada:IsDisabled("Damage", "Damage taken", "Absorbs", "Healing", "Player Score") then
+	if Skada:IsDisabled("Damage", "Damage Taken", "Absorbs", "Healing", "Player Score") then
 		return
 	end
 
@@ -90,10 +90,10 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 		tooltip:AddDoubleLine(L["Healing"], Skada:FormatNumber(healing), 1, 1, 1, 0, 1, 0)
 
 		local damagetaken = player.damagetaken and player.damagetaken.amount or 0
-		tooltip:AddDoubleLine(L["Damage taken"], Skada:FormatNumber(damagetaken), 1, 1, 1, 1, 0, 0)
+		tooltip:AddDoubleLine(L["Damage Taken"], Skada:FormatNumber(damagetaken), 1, 1, 1, 1, 0, 0)
 
 		local mitigation = GetPlayerMitigation(player)
-		tooltip:AddDoubleLine(L["Damage mitigated"], Skada:FormatNumber(mitigation), 1, 1, 1, 1, 1, 0)
+		tooltip:AddDoubleLine(L["Damage Mitigated"], Skada:FormatNumber(mitigation), 1, 1, 1, 1, 1, 0)
 
 		local role = player.role
 		if not role then

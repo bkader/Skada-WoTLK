@@ -13,10 +13,10 @@ local misstypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MI
 -- Damage Taken Module --
 -- =================== --
 
-Skada:AddLoadableModule("Damage taken", function(Skada, L)
-	if Skada:IsDisabled("Damage taken") then return end
+Skada:AddLoadableModule("Damage Taken", function(Skada, L)
+	if Skada:IsDisabled("Damage Taken") then return end
 
-	local mod = Skada:NewModule(L["Damage taken"])
+	local mod = Skada:NewModule(L["Damage Taken"])
 	local playermod = mod:NewModule(L["Damage spell list"])
 	local spellmod = mod:NewModule(L["Damage spell details"])
 	local sourcemod = mod:NewModule(L["Damage source list"])
@@ -299,7 +299,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 				end
 
 				tooltip:AddDoubleLine(L["Total"], Skada:FormatNumber(total), 1, 1, 1)
-				tooltip:AddDoubleLine(L["Damage taken"], Skada:FormatNumber(spell.amount or 0), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Damage Taken"], Skada:FormatNumber(spell.amount or 0), 1, 1, 1)
 
 				if overkill then
 					tooltip:AddDoubleLine(L["Overkill"], _format("%s (%02.1f%%)", Skada:FormatNumber(overkill), 100 * overkill / math_max(total)), 1, 1, 1)
@@ -317,10 +317,10 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 
 				if spell.max and spell.min then
 					tooltip:AddLine(" ")
-					tooltip:AddDoubleLine(L["Minimum hit:"], Skada:FormatNumber(spell.min), 1, 1, 1)
-					tooltip:AddDoubleLine(L["Maximum hit:"], Skada:FormatNumber(spell.max), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.min), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.max), 1, 1, 1)
 				end
-				tooltip:AddDoubleLine(L["Average hit:"], Skada:FormatNumber(spell.amount / spell.totalhits), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.totalhits), 1, 1, 1)
 			end
 		end
 	end
@@ -374,13 +374,13 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 				end
 
 				if source.max and source.min then
-					tooltip:AddDoubleLine(L["Minimum hit:"], Skada:FormatNumber(source.min), 1, 1, 1)
-					tooltip:AddDoubleLine(L["Maximum hit:"], Skada:FormatNumber(source.max), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(source.min), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(source.max), 1, 1, 1)
 				end
 
 				tooltip:AddLine(" ")
 				tooltip:AddLine(_format(L["%s's damage breakdown"], player.name))
-				tooltip:AddDoubleLine(L["Total hits:"], source.totalhits or 0, 1, 1, 1)
+				tooltip:AddDoubleLine(L["Total hits"], source.totalhits or 0, 1, 1, 1)
 				if (source.hit or 0) > 0 then
 					tooltip:AddDoubleLine(HIT, _format("%d (%02.1f%%)", source.hit, 100 * source.hit / math_max(1, source.totalhits or 0)), 1, 1, 1)
 				end
@@ -585,7 +585,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Damage taken"]
+		win.title = L["Damage Taken"]
 		local total = _select(2, getRaidDTPS(set))
 
 		if total > 0 then
@@ -654,7 +654,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 		Skada:RegisterForCL(SpellMissed, "SPELL_PERIODIC_MISSED", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SwingMissed, "SWING_MISSED", {dst_is_interesting_nopets = true})
 
-		Skada:AddMode(self, L["Damage taken"])
+		Skada:AddMode(self, L["Damage Taken"])
 	end
 
 	function mod:OnDisable()
@@ -664,7 +664,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 	function mod:AddToTooltip(set, tooltip)
 		local dps, amount = getRaidDTPS(set)
 		if amount > 0 then
-			tooltip:AddDoubleLine(L["Damage taken"], Skada:FormatNumber(amount), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Damage Taken"], Skada:FormatNumber(amount), 1, 1, 1)
 			tooltip:AddDoubleLine(L["DTPS"], Skada:FormatNumber(dps), 1, 1, 1)
 		end
 	end
@@ -699,9 +699,9 @@ end)
 -- ============================== --
 
 Skada:AddLoadableModule("DTPS", function(Skada, L)
-	if Skada:IsDisabled("Damage taken", "DTPS") then return end
+	if Skada:IsDisabled("Damage Taken", "DTPS") then return end
 
-	local parentmod = Skada:GetModule(L["Damage taken"], true)
+	local parentmod = Skada:GetModule(L["Damage Taken"], true)
 	if not parentmod then return end
 
 	local mod = Skada:NewModule(L["DTPS"])
@@ -756,7 +756,7 @@ Skada:AddLoadableModule("DTPS", function(Skada, L)
 			icon = "Interface\\Icons\\spell_fire_twilightpyroblast"
 		}
 
-		Skada:AddMode(self, L["Damage taken"])
+		Skada:AddMode(self, L["Damage Taken"])
 	end
 
 	function mod:OnDisable()
@@ -772,10 +772,10 @@ end)
 -- Damage taken by spell Module --
 -- ============================ --
 
-Skada:AddLoadableModule("Damage taken by spell", function(Skada, L)
-	if Skada:IsDisabled("Damage taken", "Damage taken by spell") then return end
+Skada:AddLoadableModule("Damage Taken By Spell", function(Skada, L)
+	if Skada:IsDisabled("Damage Taken", "Damage Taken By Spell") then return end
 
-	local mod = Skada:NewModule(L["Damage taken by spell"])
+	local mod = Skada:NewModule(L["Damage Taken By Spell"])
 	local playermod = mod:NewModule(L["Damage spell targets"])
 
 	local cached = Skada:WeakTable()
@@ -821,7 +821,7 @@ Skada:AddLoadableModule("Damage taken by spell", function(Skada, L)
 
 	-- for performance purposes, we ignore total segment
 	function mod:Update(win, set)
-		win.title = L["Damage taken by spell"]
+		win.title = L["Damage Taken By Spell"]
 
 		if win.selectedset ~= "total" then
 			local total = set.damagetaken and set.damagetaken.amount or 0
@@ -900,7 +900,7 @@ Skada:AddLoadableModule("Damage taken by spell", function(Skada, L)
 			columns = {Damage = true, Percent = true},
 			icon = "Interface\\Icons\\spell_arcane_starfire"
 		}
-		Skada:AddMode(self, L["Damage taken"])
+		Skada:AddMode(self, L["Damage Taken"])
 	end
 
 	function mod:OnDisable()
@@ -913,10 +913,10 @@ end)
 -- ============================= --
 
 Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
-	if Skada:IsDisabled("Damage taken", "Avoidance & Mitigation") then return end
+	if Skada:IsDisabled("Damage Taken", "Avoidance & Mitigation") then return end
 
 	local mod = Skada:NewModule(L["Avoidance & Mitigation"])
-	local playermod = mod:NewModule(L["Damage breakdown"])
+	local playermod = mod:NewModule(L["Damage Breakdown"])
 
 	local temp = Skada:WeakTable()
 
@@ -1024,7 +1024,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 			icon = "Interface\\Icons\\ability_warrior_shieldwall"
 		}
 
-		Skada:AddMode(self, L["Damage taken"])
+		Skada:AddMode(self, L["Damage Taken"])
 	end
 
 	function mod:OnDisable()
@@ -1036,10 +1036,10 @@ end)
 -- Damage mitigated --
 -- ================ --
 
-Skada:AddLoadableModule("Damage mitigated", function(Skada, L)
-	if Skada:IsDisabled("Damage taken", "Damage mitigated") then return end
+Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
+	if Skada:IsDisabled("Damage Taken", "Damage Mitigated") then return end
 
-	local mod = Skada:NewModule(L["Damage mitigated"])
+	local mod = Skada:NewModule(L["Damage Mitigated"])
 	local playermod = mod:NewModule(L["Damage spell list"])
 	local spellmod = mod:NewModule(L["Damage spell details"])
 
@@ -1097,8 +1097,8 @@ Skada:AddLoadableModule("Damage mitigated", function(Skada, L)
 				nr = nr + 1
 				d = win.dataset[nr] or {}
 				win.dataset[nr] = d
-				d.id = L["Damage taken"]
-				d.label = L["Damage taken"]
+				d.id = L["Damage Taken"]
+				d.label = L["Damage Taken"]
 				d.value = spell.amount or 0
 				d.valuetext =
 					Skada:FormatValueText(
@@ -1224,7 +1224,7 @@ Skada:AddLoadableModule("Damage mitigated", function(Skada, L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Damage mitigated"]
+		win.title = L["Damage Mitigated"]
 
 		if set.damagetaken and (set.damagetaken.amount) > 0 then
 			local maxvalue, nr = 0, 1
@@ -1272,7 +1272,7 @@ Skada:AddLoadableModule("Damage mitigated", function(Skada, L)
 			columns = {Amount = true, Total = true, Percent = true},
 			icon = "Interface\\Icons\\spell_shadow_shadowward"
 		}
-		Skada:AddMode(self, L["Damage taken"])
+		Skada:AddMode(self, L["Damage Taken"])
 	end
 
 	function mod:OnDisable()

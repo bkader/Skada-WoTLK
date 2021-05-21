@@ -107,6 +107,7 @@ local function BarClick(win, bar, button)
 	elseif click1 then
 		showmode(win, id, label, click1)
 	end
+	L_CloseDropDownMenus() -- always close
 end
 
 function mod:Create(window, isnew)

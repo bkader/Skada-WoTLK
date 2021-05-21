@@ -25,8 +25,8 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 
 	local localized = {
 		ActiveTime = L["Active Time"],
-		Damage = L["Damage done"],
-		DamageTaken = L["Damage taken"],
+		Damage = L["Damage Done"],
+		DamageTaken = L["Damage Taken"],
 		Deaths = L["Deaths"],
 		Dispels = L["Dispels"],
 		Fails = L["Fails"],
@@ -37,8 +37,8 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 
 	local revlocalized = {
 		[L["Active Time"]] = "ActiveTime",
-		[L["Damage done"]] = "Damage",
-		[L["Damage taken"]] = "DamageTaken",
+		[L["Damage Done"]] = "Damage",
+		[L["Damage Taken"]] = "DamageTaken",
 		[L["Deaths"]] = "Deaths",
 		[L["Dispels"]] = "Dispels",
 		[L["Fails"]] = "Fails",

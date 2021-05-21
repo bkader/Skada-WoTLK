@@ -340,6 +340,7 @@ do
 		elseif win.metadata.click1 then
 			showmode(win, id, label, win.metadata.click1)
 		end
+		L_CloseDropDownMenus() -- always close
 	end
 
 	local ttactive = false

@@ -11,10 +11,10 @@ local misstypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MI
 -- Enemy damage taken module --
 -- ======================== --
 
-Skada:AddLoadableModule("Enemy damage taken", function(Skada, L)
-	if Skada:IsDisabled("Damage", "Enemy damage taken") then return end
+Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
+	if Skada:IsDisabled("Damage", "Enemy Damage Taken") then return end
 
-	local mod = Skada:NewModule(L["Enemy damage taken"])
+	local mod = Skada:NewModule(L["Enemy Damage Taken"])
 	local enemymod = mod:NewModule(L["Damage taken per player"])
 	local playermod = enemymod:NewModule(L["Damage spell list"])
 	local spellmod = playermod:NewModule(L["Damage spell details"])
@@ -45,9 +45,9 @@ Skada:AddLoadableModule("Enemy damage taken", function(Skada, L)
 					end
 
 					if label == HIT and spell.hitamount then
-						tooltip:AddDoubleLine(L["Minimum hit:"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
-						tooltip:AddDoubleLine(L["Maximum hit:"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
-						tooltip:AddDoubleLine(L["Average hit:"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
 					elseif label == ABSORB and spell.absorbed and spell.absorbed > 0 then
 						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.absorbed), 1, 1, 1)
 					elseif label == BLOCK and spell.blocked and spell.blocked > 0 then
@@ -251,7 +251,7 @@ Skada:AddLoadableModule("Enemy damage taken", function(Skada, L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Enemy damage taken"]
+		win.title = L["Enemy Damage Taken"]
 		local total = set.damagedone and set.damagedone.amount or 0
 
 		if total > 0 then
@@ -292,10 +292,10 @@ Skada:AddLoadableModule("Enemy damage taken", function(Skada, L)
 		self.metadata = {
 			click1 = enemymod,
 			columns = {Damage = true, Percent = true},
-			icon = "Interface\\Icons\\spell_holy_crusaderstrike"
+			icon = "Interface\\Icons\\spell_fire_felflamebolt"
 		}
 
-		Skada:AddMode(self, L["Damage done"])
+		Skada:AddMode(self, L["Enemies"])
 	end
 
 	function mod:OnDisable()
@@ -311,10 +311,10 @@ end)
 -- Enemy damage done module --
 -- ========================= --
 
-Skada:AddLoadableModule("Enemy damage done", function(Skada, L)
-	if Skada:IsDisabled("Damage taken", "Enemy damage done") then return end
+Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
+	if Skada:IsDisabled("Damage Taken", "Enemy Damage Done") then return end
 
-	local mod = Skada:NewModule(L["Enemy damage done"])
+	local mod = Skada:NewModule(L["Enemy Damage Done"])
 	local enemymod = mod:NewModule(L["Damage done per player"])
 	local playermod = enemymod:NewModule(L["Damage spell list"])
 	local spellmod = playermod:NewModule(L["Damage spell details"])
@@ -345,9 +345,9 @@ Skada:AddLoadableModule("Enemy damage done", function(Skada, L)
 					end
 
 					if label == HIT and spell.hitamount then
-						tooltip:AddDoubleLine(L["Minimum hit:"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
-						tooltip:AddDoubleLine(L["Maximum hit:"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
-						tooltip:AddDoubleLine(L["Average hit:"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
 					elseif label == ABSORB and spell.absorbed and spell.absorbed > 0 then
 						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.absorbed), 1, 1, 1)
 					elseif label == BLOCK and spell.blocked and spell.blocked > 0 then
@@ -549,7 +549,7 @@ Skada:AddLoadableModule("Enemy damage done", function(Skada, L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Enemy damage done"]
+		win.title = L["Enemy Damage Done"]
 		local total = set.damagetaken and set.damagetaken.amount or 0
 
 		if total > 0 then
@@ -592,7 +592,7 @@ Skada:AddLoadableModule("Enemy damage done", function(Skada, L)
 			icon = "Interface\\Icons\\spell_shadow_shadowbolt"
 		}
 
-		Skada:AddMode(self, L["Damage taken"])
+		Skada:AddMode(self, L["Enemies"])
 	end
 
 	function mod:OnDisable()
