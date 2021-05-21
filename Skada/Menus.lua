@@ -49,7 +49,7 @@ function Skada:OpenMenu(window)
 
 			-- create window
 			info = _UIDropDownMenu_CreateInfo()
-			info.text = L["Create window"]
+			info.text = L["Create Window"]
 			info.func = Skada.NewWindow
 			info.notCheckable = 1
 			info.padding = 16
@@ -236,7 +236,7 @@ function Skada:OpenMenu(window)
 
 				-- lock window
 				info = _UIDropDownMenu_CreateInfo()
-				info.text = L["Lock window"]
+				info.text = L["Lock Window"]
 				info.func = function()
 					window.db.barslocked = not window.db.barslocked
 					Skada:ApplySettings()
@@ -247,7 +247,7 @@ function Skada:OpenMenu(window)
 
 				-- hide window
 				info = _UIDropDownMenu_CreateInfo()
-				info.text = L["Hide window"]
+				info.text = L["Hide Window"]
 				info.func = function()
 					if window:IsShown() then
 						window.db.hidden = true
@@ -263,7 +263,7 @@ function Skada:OpenMenu(window)
 
 				-- snap window
 				info = _UIDropDownMenu_CreateInfo()
-				info.text = L["Snap window"]
+				info.text = L["Sticky Window"]
 				info.func = function()
 					window.db.snapto = not window.db.snapto
 					if not window.db.snapto then
@@ -281,7 +281,7 @@ function Skada:OpenMenu(window)
 
 				-- delete window
 				info = _UIDropDownMenu_CreateInfo()
-				info.text = L["Delete window"]
+				info.text = L["Delete Window"]
 				info.func = function()
 					return Skada:DeleteWindow(window.db.name)
 				end

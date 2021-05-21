@@ -365,7 +365,7 @@ do
 			args = {
 				rename = {
 					type = "input",
-					name = L["Rename window"],
+					name = L["Rename Window"],
 					desc = L["Enter the name for the window."],
 					order = 1,
 					width = "double",
@@ -383,7 +383,7 @@ do
 				},
 				display = {
 					type = "select",
-					name = L["Display system"],
+					name = L["Display System"],
 					desc = L["Choose the system to be used for displaying data in this window."],
 					order = 2,
 					values = function()
@@ -403,7 +403,7 @@ do
 				},
 				locked = {
 					type = "toggle",
-					name = L["Lock window"],
+					name = L["Lock Window"],
 					desc = L["Locks the bar window in place."],
 					order = 4,
 					get = function()
@@ -416,7 +416,7 @@ do
 				},
 				hidden = {
 					type = "toggle",
-					name = L["Hide window"],
+					name = L["Hide Window"],
 					desc = L["Hides the window."],
 					order = 5,
 					get = function()
@@ -435,7 +435,7 @@ do
 				},
 				copywin = {
 					type = "select",
-					name = L["Copy settings"],
+					name = L["Copy Settings"],
 					desc = L["Choose the window from which you want to copy the settings."],
 					order = 8,
 					values = function()
@@ -456,7 +456,7 @@ do
 				},
 				copyexec = {
 					type = "execute",
-					name = L["Copy settings"],
+					name = L["Copy Settings"],
 					order = 9,
 					func = function()
 						local newdb = {}
@@ -483,7 +483,7 @@ do
 				},
 				delete = {
 					type = "execute",
-					name = L["Delete window"],
+					name = L["Delete Window"],
 					desc = L["Choose the window to be deleted."],
 					order = 9,
 					width = "double",
@@ -500,7 +500,7 @@ do
 		if db.display == "bar" then
 			options.args.child = {
 				type = "select",
-				name = L["Child window"],
+				name = L["Child Window"],
 				desc = L["A child window will replicate the parent window actions."],
 				order = 3,
 				values = function()
@@ -523,8 +523,8 @@ do
 
 			options.args.snapto = {
 				type = "toggle",
-				name = L["Snap window"],
-				desc = L["Allows the window to snap to other Skada windows."],
+				name = L["Sticky Window"],
+				desc = L["Allows the window to stick to other Skada windows."],
 				order = 6,
 				get = function()
 					return db.snapto

@@ -1017,10 +1017,10 @@ end)
 -- Healing done by spell --
 -- ===================== --
 
-Skada:AddLoadableModule("Healing done by spell", function(Skada, L)
-	if Skada:IsDisabled("Healing", "Absorbs", "Healing done by spell") then return end
+Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
+	if Skada:IsDisabled("Healing", "Absorbs", "Healing Done By Spell") then return end
 
-	local mod = Skada:NewModule(L["Healing done by spell"])
+	local mod = Skada:NewModule(L["Healing Done By Spell"])
 	local spellmod = mod:NewModule(L["Healing spell sources"])
 	local spells
 
@@ -1157,7 +1157,7 @@ Skada:AddLoadableModule("Healing done by spell", function(Skada, L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Healing done by spell"]
+		win.title = L["Healing Done By Spell"]
 		local total = (set.healing or 0) + (set.absorbs or 0)
 
 		if total > 0 then

@@ -181,14 +181,14 @@ do
 	local Yanchors = {TL = true, TR = true, TC = true, BL = true, BR = true, BC = true}
 
 	function mod:AnchorMoved(_, group, x, y)
-		if FlyPaper and group.win.db.snapto and not group.locked then
+		if FlyPaper and group.win.db.sticky and not group.locked then
 			-- correction due to stupid border texture
 			local offset = group.win.db.background.borderthickness
 			local anchor, name, frame = FlyPaper.StickToClosestFrameInGroup(group, "Skada", nil, offset, offset)
 
 			if anchor and frame then
-				frame.win.db.snapped[group.win.db.name] = true
-				group.win.db.snapped[name] = nil
+				frame.win.db.sticked[group.win.db.name] = true
+				group.win.db.sticked[name] = nil
 
 				-- change the width of the window accordingly
 				if Yanchors[anchor] then
@@ -217,8 +217,8 @@ do
 				end
 			else
 				for _, win in ipairs(Skada:GetWindows()) do
-					if win.db.display == "bar" and win.db.snapped and win.db.snapped[group.win.db.name] then
-						win.db.snapped[group.win.db.name] = nil
+					if win.db.display == "bar" and win.db.sticked and win.db.sticked[group.win.db.name] then
+						win.db.sticked[group.win.db.name] = nil
 					end
 				end
 			end
@@ -235,7 +235,7 @@ function mod:WindowResized(_, group)
 	if FlyPaper then
 		local offset = group.win.db.background.borderthickness
 		for _, win in ipairs(Skada:GetWindows()) do
-			if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.snapped[win.db.name] then
+			if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
 				win.bargroup.callbacks:Fire("AnchorMoved", win.bargroup)
 			end
 		end
@@ -663,7 +663,7 @@ do
 				-- move sticked windows.
 				local offset = group.win.db.background.borderthickness
 				for _, win in ipairs(Skada:GetWindows()) do
-					if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.snapped[win.db.name] then
+					if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
 						FlyPaper.Stick(win.bargroup, group, nil, offset, offset)
 						win.bargroup.button.startX = win.bargroup:GetLeft()
 						win.bargroup.button.startY = win.bargroup:GetTop()
@@ -692,7 +692,7 @@ do
 				if self.startX ~= endX or self.startY ~= endY then
 					group.callbacks:Fire("AnchorMoved", group, endX, endY)
 					for _, win in ipairs(Skada:GetWindows()) do
-						if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.snapped[win.db.name] then
+						if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
 							local xOfs, yOfs = win.bargroup:GetLeft(), win.bargroup:GetTop()
 							if win.bargroup.startX ~= xOfs or win.bargroup.startY ~= yOfs then
 								win.bargroup.callbacks:Fire("AnchorMoved", win.bargroup, xOfs, yOfs)
@@ -832,7 +832,7 @@ do
 		local bgcolor = p.background.color
 		g:SetBackdropColor(bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a or 1)
 
-		if FlyPaper and p.snapto then
+		if FlyPaper and p.sticky then
 			FlyPaper.AddFrame("Skada", p.name, g)
 			g.button:SetScript("OnMouseDown", move)
 			g.button:SetScript("OnMouseUp", stopMove)
@@ -848,7 +848,7 @@ do
 		if FlyPaper then
 			local offset = group.win.db.background.borderthickness
 			for _, win in ipairs(Skada:GetWindows()) do
-				if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.snapped[win.db.name] then
+				if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
 					FlyPaper.Stick(win.bargroup, group, nil, offset, offset)
 				end
 			end
