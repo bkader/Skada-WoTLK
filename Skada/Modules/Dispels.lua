@@ -59,7 +59,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 		end
 	end
 
-	local data = {}
+	local data = Skada:WeakTable()
 
 	local function SpellDispel(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if eventtype ~= "SPELL_DISPEL_FAILED" then

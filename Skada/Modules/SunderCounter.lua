@@ -35,7 +35,8 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 		end
 	end
 
-	local data = {}
+	local data = Skada:WeakTable()
+
 	local function SunderApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, spellname, spellschool = ...
 		if spellname == sunder or spellname == devastate then

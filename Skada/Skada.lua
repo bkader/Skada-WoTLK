@@ -14,6 +14,22 @@ local LGT = LibStub("LibGroupTalents-1.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local Translit = LibStub("LibTranslit-1.0")
 
+-- cache frequently used globlas
+local tsort, tinsert, tremove, tmaxn = table.sort, table.insert, table.remove, table.maxn
+local next, pairs, ipairs, type = next, pairs, ipairs, type
+local tonumber, tostring, format, strsplit = tonumber, tostring, string.format, strsplit
+local math_floor, math_max, math_min = math.floor, math.max, math.min
+local band, bor, time, setmetatable = bit.band, bit.bor, time, setmetatable
+local GetNumPartyMembers, GetNumRaidMembers = GetNumPartyMembers, GetNumRaidMembers
+local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAffectingCombat, InCombatLockdown
+local UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitGUID, UnitName, UnitClass, UnitIsConnected
+local CombatLogClearEntries = CombatLogClearEntries
+local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
+
+-- weak table
+local weaktable = {__mode = "v"}
+Skada.weaktable = weaktable
+
 local dataobj = LDB:NewDataObject("Skada", {
 	label = "Skada",
 	type = "data source",
@@ -32,7 +48,7 @@ BINDING_NAME_SKADA_STOP = L["Stop"]
 Skada.revisited = true
 
 -- available display types
-Skada.displays = {}
+Skada.displays = setmetatable({}, weaktable)
 
 -- flag to check if disabled
 local disabled = false
@@ -45,28 +61,18 @@ local update_timer, tick_timer, pull_timer
 local checkVersion, convertVersion
 
 -- list of players and pets
-local players, pets = {}, {}
+local players = setmetatable({}, weaktable)
+local pets = setmetatable({}, weaktable)
 
 -- list of feeds & selected feed
-local feeds, selectedfeed = {}
+local feeds, selectedfeed = setmetatable({}, weaktable)
 
 -- lists of modules and windows
-local modes, windows = {}, {}
+local modes = setmetatable({}, weaktable)
+local windows = setmetatable({}, weaktable)
 
 -- flags for party, instance and ovo
 local wasinparty, wasininstance, wasinpvp = false
-
--- cache frequently used globlas
-local tsort, tinsert, tremove, tmaxn = table.sort, table.insert, table.remove, table.maxn
-local next, pairs, ipairs, type = next, pairs, ipairs, type
-local tonumber, tostring, format, strsplit = tonumber, tostring, string.format, strsplit
-local math_floor, math_max, math_min = math.floor, math.max, math.min
-local band, bor, time = bit.band, bit.bor, time
-local GetNumPartyMembers, GetNumRaidMembers = GetNumPartyMembers, GetNumRaidMembers
-local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAffectingCombat, InCombatLockdown
-local UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitGUID, UnitName, UnitClass, UnitIsConnected
-local CombatLogClearEntries = CombatLogClearEntries
-local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 
 local COMBATLOG_OBJECT_AFFILIATION_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE or 0x00000001
 local COMBATLOG_OBJECT_AFFILIATION_PARTY = COMBATLOG_OBJECT_AFFILIATION_PARTY or 0x00000002
@@ -708,8 +714,8 @@ function Window:DisplayMode(mode)
 	self.selectedmode = mode
 	self.metadata = wipe(self.metadata or {})
 
-	if mode and self.parentitle ~= mode:GetName() and Skada:GetModule(mode:GetName(), true) then
-		self.parentitle = mode:GetName()
+	if mode and self.parenttitle ~= mode:GetName() and Skada:GetModule(mode:GetName(), true) then
+		self.parenttitle = mode:GetName()
 	end
 
 	if mode.metadata then
@@ -852,6 +858,10 @@ function Skada:tlength(tbl)
 		len = len + 1
 	end
 	return len
+end
+
+function Skada:WeakTable(tbl)
+	return setmetatable(tbl or {}, weaktable)
 end
 
 function Skada:tcopy(to, from, ...)
@@ -2363,7 +2373,7 @@ function Skada:UpdateDisplay(force)
 						d.id = "total"
 						d.label = L["Total"]
 						d.ignore = true
-						d.icon = dataobj.icon
+						d.icon = win.selectedmode.metadata.icon or dataobj.icon
 						d.value = total
 						d.valuetext = win.selectedmode:GetSetSummary(set)
 						if not existing then
@@ -2580,7 +2590,7 @@ do
 	function Window:set_mode_title()
 		if not self.selectedmode or not self.selectedset then return end
 		if not self.selectedmode.GetName then return end
-		local name = self.title or self.parentitle or self.selectedmode.title or self.selectedmode:GetName()
+		local name = self.title or self.parenttitle or self.selectedmode.title or self.selectedmode:GetName()
 
 		-- save window settings for RestoreView after reload
 		self.db.set = self.selectedset

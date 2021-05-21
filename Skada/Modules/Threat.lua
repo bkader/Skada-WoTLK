@@ -15,7 +15,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 		local nr, max = 1, 0
 		local maxthreat = 0
 
-		local threatTable = {}
+		local threatTable = Skada:WeakTable()
 
 		local function add_to_threattable(win, unit, target)
 			local guid = _UnitGUID(unit)
@@ -199,7 +199,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 		end
 
 		function mod:AddSetAttributes(set)
-			threatTable = {}
+			threatTable = Skada:WeakTable()
 		end
 		mod.SetComplete = mod.AddSetAttributes
 	end

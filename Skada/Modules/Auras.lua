@@ -77,7 +77,7 @@ end
 -- common functions handling SPELL_AURA_APPLIED and SPELL_AURA_REMOVED
 --
 
-local aura = {}
+local aura = Skada:WeakTable()
 
 local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, spellschool, auratype)
 	local passed
@@ -113,7 +113,7 @@ local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dst
 	end
 
 	if not passed then
-		aura = {} -- clean it
+		aura = Skada:WeakTable() -- clean it
 		return
 	end
 
@@ -161,7 +161,7 @@ local function AuraRefresh(timestamp, eventtype, srcGUID, srcName, srcFlags, dst
 	end
 
 	if not passed then
-		aura = {} -- clean it
+		aura = Skada:WeakTable() -- clean it
 		return
 	end
 
@@ -205,7 +205,7 @@ local function AuraRemoved(timestamp, eventtype, srcGUID, srcName, srcFlags, dst
 	end
 
 	if not passed then
-		aura = {} -- clean it
+		aura = Skada:WeakTable() -- clean it
 		return
 	end
 

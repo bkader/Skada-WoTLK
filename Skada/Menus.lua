@@ -178,7 +178,7 @@ function Skada:OpenMenu(window)
 							info.func = function()
 								window:DisplayMode(module)
 							end
-							info.checked = (window.selectedmode == module)
+							info.checked = (window.selectedmode == module or window.parenttitle == module:GetName())
 							_UIDropDownMenu_AddButton(info, level)
 						end
 
@@ -504,7 +504,7 @@ do
 						window:DisplayMode(mode)
 						_CloseDropDownMenus()
 					end
-					info.checked = (window.selectedmode == mode)
+					info.checked = (window.selectedmode == mode or window.parenttitle == mode:GetName())
 					_UIDropDownMenu_AddButton(info, level)
 				end
 			end

@@ -41,7 +41,7 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 		end
 	end
 
-	local data = {}
+	local data = Skada:WeakTable()
 
 	local function SpellResurrect(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, _, spellschool = ...

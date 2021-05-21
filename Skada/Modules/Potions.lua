@@ -36,8 +36,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 		[67490] = 42545 -- Runic Mana Injector
 	}
 
-	local prepotion = {}
-	local prepottStr = "|c%s%s|r |T%s:14:14:0:0:64:64:0:64:0:64|t"
+	local prepottStr, prepotion = "|c%s%s|r |T%s:14:14:0:0:64:64:0:64:0:64|t"
 
 	local function log_potion(set, playerid, playername, playerflags, spellid)
 		local player = Skada:get_player(set, playerid, playername, playerflags)
@@ -65,7 +64,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	-- we use this function to record pre-pots as well.
 	function mod:CheckPrePot(event)
 		if event == "COMBAT_ENCOUNTER_START" then
-			prepotion = {}
+			prepotion = Skada:WeakTable()
 
 			local prefix, min, max = "raid", 1, _GetNumRaidMembers()
 			if max == 0 then
@@ -285,9 +284,8 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	end
 
 	function mod:SetComplete(set)
-		if Skada.db.profile.prepotion and next(prepotion) ~= nil then
+		if Skada.db.profile.prepotion and next(prepotion or {}) ~= nil then
 			Skada:Print(_format("pre-potion: %s", tconcat(prepotion, ", ")))
 		end
-		prepotion = {}
 	end
 end)

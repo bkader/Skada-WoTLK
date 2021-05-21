@@ -20,8 +20,6 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	local spellmod = playermod:NewModule(L["Damage spell details"])
 	local targetmod = mod:NewModule(L["Damage target list"])
 
-	local dpsmod = Skada:NewModule(L["DPS"])
-
 	local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
 
 	--
@@ -248,7 +246,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		end
 	end
 
-	local dmg = {}
+	local dmg = Skada:WeakTable()
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
@@ -328,6 +326,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		local amount = player.damagedone and player.damagedone.amount or 0
 		return amount / math_max(1, Skada:PlayerActiveTime(set, player)), amount
 	end
+	mod.getDPS = getDPS
 
 	local function getRaidDPS(set)
 		local amount = set.damagedone and set.damagedone.amount or 0
@@ -337,6 +336,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			return amount / math_max(1, (set.endtime or time()) - set.starttime), amount
 		end
 	end
+	mod.getRaidDPS = getRaidDPS
 
 	local function damage_tooltip(win, id, label, tooltip)
 		local set = win:get_selected_set()
@@ -347,21 +347,6 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			tooltip:AddDoubleLine(L["Activity"], _format("%02.1f%%", 100 * activetime / totaltime), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(Skada:PlayerActiveTime(set, player, true)), 1, 1, 1)
-		end
-	end
-
-	local function dps_tooltip(win, id, label, tooltip)
-		local set = win:get_selected_set()
-		local player = Skada:find_player(set, id)
-		if player then
-			local totaltime = Skada:GetSetTime(set)
-			local activetime = Skada:PlayerActiveTime(set, player)
-			local dps, amount = getDPS(set, player)
-			tooltip:AddLine(player.name .. " - " .. L["DPS"])
-			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
-			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(Skada:PlayerActiveTime(set, player, true)), 1, 1, 1)
-			tooltip:AddDoubleLine(L["Damage done"], Skada:FormatNumber(player.damagedone.amount), 1, 1, 1)
-			tooltip:AddDoubleLine(Skada:FormatNumber(amount) .. "/" .. Skada:FormatTime(activetime), Skada:FormatNumber(dps), 1, 1, 1)
 		end
 	end
 
@@ -646,45 +631,6 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		end
 	end
 
-	function dpsmod:Update(win, set)
-		win.title = L["DPS"]
-		local total = getRaidDPS(set)
-
-		if total > 0 then
-			local maxvalue, nr = 0, 1
-
-			for _, player in _ipairs(set.players) do
-				local amount = getDPS(set, player)
-
-				if amount > 0 then
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
-
-					d.id = player.id
-					d.label = player.name
-					d.class = player.class or "PET"
-					d.role = player.role or "DAMAGER"
-					d.spec = player.spec or 1
-
-					d.value = amount
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(amount),
-						self.metadata.columns.DPS,
-						_format("%02.1f%%", 100 * amount / total),
-						self.metadata.columns.Percent
-					)
-
-					if amount > maxvalue then
-						maxvalue = amount
-					end
-					nr = nr + 1
-				end
-			end
-
-			win.metadata.maxvalue = maxvalue
-		end
-	end
-
 	function mod:Update(win, set)
 		win.title = L["Damage"]
 		local total = _select(2, getRaidDPS(set))
@@ -800,15 +746,6 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			icon = "Interface\\Icons\\spell_fire_firebolt"
 		}
 
-		dpsmod.metadata = {
-			showspots = true,
-			tooltip = dps_tooltip,
-			click1 = playermod,
-			click2 = targetmod,
-			columns = {DPS = true, Percent = true},
-			icon = "Interface\\Icons\\inv_misc_pocketwatch_01"
-		}
-
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SPLIT", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellDamage, "RANGE_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
@@ -829,24 +766,18 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		Skada:AddFeed(L["Damage: Raid DPS"], feed_raid_dps)
 
 		Skada:AddMode(self, L["Damage done"])
-		Skada:AddMode(dpsmod, L["Damage done"])
 	end
 
 	function mod:OnDisable()
 		Skada:RemoveFeed(L["Damage: Personal DPS"])
 		Skada:RemoveFeed(L["Damage: Raid DPS"])
 		Skada:RemoveMode(self)
-		Skada:RemoveMode(dpsmod)
 	end
 
 	function mod:AddToTooltip(set, tooltip)
 		local dps, amount = getRaidDPS(set)
 		tooltip:AddDoubleLine(L["Damage"], Skada:FormatNumber(amount), 1, 1, 1)
 		tooltip:AddDoubleLine(L["DPS"], Skada:FormatNumber(dps), 1, 1, 1)
-	end
-
-	function dpsmod:GetSetSummary(set)
-		return Skada:FormatNumber(getRaidDPS(set))
 	end
 
 	function mod:GetSetSummary(set)
@@ -879,6 +810,96 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	end
 end)
 
+-- ============================= --
+-- Damage done per second module --
+-- ============================= --
+
+Skada:AddLoadableModule("DPS", function(Skada, L)
+	if Skada:IsDisabled("Damage", "DPS") then return end
+
+	local parentmod = Skada:GetModule(L["Damage"], true)
+	if not parentmod then return end
+
+	local mod = Skada:NewModule(L["DPS"])
+	local getDPS = parentmod.getDPS
+	local getRaidDPS = parentmod.getRaidDPS
+
+	local function dps_tooltip(win, id, label, tooltip)
+		local set = win:get_selected_set()
+		local player = Skada:find_player(set, id)
+		if player then
+			local totaltime = Skada:GetSetTime(set)
+			local activetime = Skada:PlayerActiveTime(set, player)
+			local dps, amount = getDPS(set, player)
+			tooltip:AddLine(player.name .. " - " .. L["DPS"])
+			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(Skada:PlayerActiveTime(set, player, true)), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Damage done"], Skada:FormatNumber(player.damagedone.amount), 1, 1, 1)
+			tooltip:AddDoubleLine(Skada:FormatNumber(amount) .. "/" .. Skada:FormatTime(activetime), Skada:FormatNumber(dps), 1, 1, 1)
+		end
+	end
+
+	function mod:Update(win, set)
+		win.title = L["DPS"]
+		local total = getRaidDPS(set)
+
+		if total > 0 then
+			local maxvalue, nr = 0, 1
+
+			for _, player in _ipairs(set.players) do
+				local amount = getDPS(set, player)
+
+				if amount > 0 then
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
+
+					d.id = player.id
+					d.label = player.name
+					d.class = player.class or "PET"
+					d.role = player.role or "DAMAGER"
+					d.spec = player.spec or 1
+
+					d.value = amount
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatNumber(amount),
+						self.metadata.columns.DPS,
+						_format("%02.1f%%", 100 * amount / total),
+						self.metadata.columns.Percent
+					)
+
+					if amount > maxvalue then
+						maxvalue = amount
+					end
+					nr = nr + 1
+				end
+			end
+
+			win.metadata.maxvalue = maxvalue
+		end
+	end
+
+	function mod:OnEnable()
+		self.metadata = {
+			showspots = true,
+			tooltip = dps_tooltip,
+			click1 = parentmod.metadata.click1,
+			click2 = parentmod.metadata.click2,
+			columns = {DPS = true, Percent = true},
+			icon = "Interface\\Icons\\inv_misc_pocketwatch_01"
+		}
+
+		Skada:AddMode(self, L["Damage done"])
+	end
+
+	function mod:OnDisable()
+		Skada:RemoveMode(self, L["Damage done"])
+	end
+
+	function mod:GetSetSummary(set)
+		return Skada:FormatNumber(getRaidDPS(set))
+	end
+end)
+
 -- =========================== --
 -- Damage done by spell module --
 -- =========================== --
@@ -889,7 +910,7 @@ Skada:AddLoadableModule("Damage done by spell", function(Skada, L)
 	local mod = Skada:NewModule(L["Damage done by spell"])
 	local sourcemod = mod:NewModule(L["Damage spell sources"])
 
-	local cached = {}
+	local cached = Skada:WeakTable()
 
 	function sourcemod:Enter(win, id, label)
 		win.spellname = label

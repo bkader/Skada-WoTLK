@@ -219,7 +219,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		[47986] = 30 -- rank 9
 	}
 
-	local shieldschools = {}
+	local shieldschools = Skada:WeakTable()
 
 	local function log_absorb(set, playername, dstGUID, dstName, dstFlags, spellid, amount)
 		local player = Skada:get_player(set, _UnitGUID(playername), playername)
@@ -267,7 +267,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		end
 	end
 
-	local shields = {}
+	local shields = Skada:WeakTable()
 
 	local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, spellname, spellschool, auratype = ...
@@ -636,7 +636,6 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 	local mod = Skada:NewModule(L["Absorbs and healing"])
 	local playermod = mod:NewModule(L["Absorbed and healed players"])
 	local spellmod = mod:NewModule(L["Absorbs and healing spells"])
-	local hpsmode = Skada:NewModule(L["HPS"])
 
 	local _time = time
 
@@ -644,6 +643,7 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 		local healing = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
 		return healing / math_max(1, Skada:PlayerActiveTime(set, player)), healing
 	end
+	mod.getHPS = getHPS
 
 	local function getRaidHPS(set)
 		local healing = (set.healing or 0) + (set.absorbs or 0)
@@ -653,6 +653,7 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 			return healing / math_max(1, (set.endtime or _time()) - set.starttime), healing
 		end
 	end
+	mod.getRaidHPS = getRaidHPS
 
 	local function hps_tooltip(win, id, label, tooltip)
 		local set = win:get_selected_set()
@@ -894,11 +895,66 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 		end
 	end
 
-	function hpsmode:GetSetSummary(set)
-		return Skada:FormatNumber(getRaidHPS(set))
+	function mod:OnEnable()
+		spellmod.metadata = {tooltip = spell_tooltip}
+		playermod.metadata = {showspots = true}
+		self.metadata = {
+			showspots = true,
+			click1 = spellmod,
+			click2 = playermod,
+			columns = {Healing = true, HPS = true, Percent = true},
+			icon = "Interface\\Icons\\spell_holy_healingfocus"
+		}
+
+		Skada:AddFeed(L["Healing: Personal HPS"], feed_personal_hps)
+		Skada:AddFeed(L["Healing: Raid HPS"], feed_raid_hps)
+
+		Skada:AddMode(self, L["Absorbs and healing"])
 	end
 
-	function hpsmode:Update(win, set)
+	function mod:OnDisable()
+		Skada:RemoveMode(self)
+		Skada:RemoveFeed(L["Healing: Personal HPS"])
+		Skada:RemoveFeed(L["Healing: Raid HPS"])
+	end
+
+	function mod:AddToTooltip(set, tooltip)
+		local hps, total = getRaidHPS(set)
+		if total > 0 then
+			tooltip:AddDoubleLine(L["Healing"], Skada:FormatNumber(total), 1, 1, 1)
+			tooltip:AddDoubleLine(L["HPS"], Skada:FormatNumber(hps), 1, 1, 1)
+		end
+		if (set.overhealing or 0) > 0 then
+			total = total + set.overhealing
+			tooltip:AddDoubleLine(L["Overhealing"], _format("%02.1f%%", 100 * set.overhealing / math_max(1, total)), 1, 1, 1)
+		end
+	end
+
+	function mod:GetSetSummary(set)
+		local hps, total = getRaidHPS(set)
+		return Skada:FormatValueText(
+			Skada:FormatNumber(total),
+			self.metadata.columns.Healing,
+			Skada:FormatNumber(hps),
+			self.metadata.columns.HPS
+		)
+	end
+end)
+
+-- ============================== --
+-- Healing done per second module --
+-- ============================== --
+
+Skada:AddLoadableModule("HPS", function(Skada, L)
+	if Skada:IsDisabled("Absorbs and healing", "HPS") then return end
+
+	local parentmod = Skada:GetModule(L["Absorbs and healing"], true)
+	if not parentmod then return end
+
+	local mod = Skada:NewModule(L["HPS"])
+	local getHPS, getRaidHPS = parentmod.getHPS, parentmod.getRaidHPS
+
+	function mod:Update(win, set)
 		win.title = L["HPS"]
 		local total = getRaidHPS(set)
 
@@ -937,58 +993,23 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		spellmod.metadata = {tooltip = spell_tooltip}
-		playermod.metadata = {showspots = true}
 		self.metadata = {
 			showspots = true,
-			click1 = spellmod,
-			click2 = playermod,
-			columns = {Healing = true, HPS = true, Percent = true},
-			icon = "Interface\\Icons\\spell_holy_healingfocus"
-		}
-		hpsmode.metadata = {
-			showspots = true,
 			tooltip = hps_tooltip,
-			click1 = spellmod,
-			click2 = playermod,
+			click1 = parentmod.metadata.click1,
+			click2 = parentmod.metadata.click2,
 			columns = {HPS = true, Percent = true},
 			icon = "Interface\\Icons\\spell_nature_rejuvenation"
 		}
-
-		Skada:AddFeed(L["Healing: Personal HPS"], feed_personal_hps)
-		Skada:AddFeed(L["Healing: Raid HPS"], feed_raid_hps)
-
 		Skada:AddMode(self, L["Absorbs and healing"])
-		Skada:AddMode(hpsmode, L["Absorbs and healing"])
 	end
 
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
-		Skada:RemoveMode(hpsmode)
-		Skada:RemoveFeed(L["Healing: Personal HPS"])
-		Skada:RemoveFeed(L["Healing: Raid HPS"])
-	end
-
-	function mod:AddToTooltip(set, tooltip)
-		local hps, total = getRaidHPS(set)
-		if total > 0 then
-			tooltip:AddDoubleLine(L["Healing"], Skada:FormatNumber(total), 1, 1, 1)
-			tooltip:AddDoubleLine(L["HPS"], Skada:FormatNumber(hps), 1, 1, 1)
-		end
-		if (set.overhealing or 0) > 0 then
-			total = total + set.overhealing
-			tooltip:AddDoubleLine(L["Overhealing"], _format("%02.1f%%", 100 * set.overhealing / math_max(1, total)), 1, 1, 1)
-		end
 	end
 
 	function mod:GetSetSummary(set)
-		local hps, total = getRaidHPS(set)
-		return Skada:FormatValueText(
-			Skada:FormatNumber(total),
-			self.metadata.columns.Healing,
-			Skada:FormatNumber(hps),
-			self.metadata.columns.HPS
-		)
+		return Skada:FormatNumber(getRaidHPS(set))
 	end
 end)
 
@@ -1004,7 +1025,7 @@ Skada:AddLoadableModule("Healing done by spell", function(Skada, L)
 	local spells
 
 	local function CacheSpells(set)
-		spells = {}
+		spells = Skada:WeakTable()
 		for _, player in _ipairs(set.players) do
 			if player.healing and player.healing.spells then
 				for spellid, spell in _pairs(player.healing.spells) do

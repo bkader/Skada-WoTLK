@@ -20,7 +20,6 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 	local playermod = mod:NewModule(L["Damage spell list"])
 	local spellmod = mod:NewModule(L["Damage spell details"])
 	local sourcemod = mod:NewModule(L["Damage source list"])
-	local dtpsmod = Skada:NewModule(L["DTPS"])
 
 	local function log_extra_data(spell, dmg, set, player)
 		if not (spell and dmg) then return end
@@ -150,7 +149,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 		end
 	end
 
-	local dmg = {}
+	local dmg = Skada:WeakTable()
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, spellname, spellschool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing = ...
@@ -251,6 +250,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 			return amount / math_max(1, (set.endtime or time()) - set.starttime), amount
 		end
 	end
+	mod.getDTPS = getDTPS
 
 	local function getRaidDTPS(set)
 		local amount = set.damagetaken and set.damagetaken.amount or 0
@@ -260,6 +260,7 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 			return amount / math_max(1, (set.endtime or time()) - set.starttime), amount
 		end
 	end
+	mod.getRaidDTPS = getRaidDTPS
 
 	local function playermod_tooltip(win, id, label, tooltip)
 		local player = Skada:find_player(win:get_selected_set(), win.playerid)
@@ -583,45 +584,6 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 		end
 	end
 
-	function dtpsmod:Update(win, set)
-		win.title = L["DTPS"]
-		local total = getRaidDTPS(set)
-
-		if total > 0 then
-			local maxvalue, nr = 0, 1
-
-			for _, player in _ipairs(set.players) do
-				local amount = getDTPS(set, player)
-
-				if amount > 0 then
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
-
-					d.id = player.id
-					d.label = player.name
-					d.class = player.class or "PET"
-					d.role = player.role or "DAMAGER"
-					d.spec = player.spec or 1
-
-					d.value = amount
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(amount),
-						self.metadata.columns.DTPS,
-						_format("%02.1f%%", 100 * amount / total),
-						self.metadata.columns.Percent
-					)
-
-					if amount > maxvalue then
-						maxvalue = amount
-					end
-					nr = nr + 1
-				end
-			end
-
-			win.metadata.maxvalue = maxvalue
-		end
-	end
-
 	function mod:Update(win, set)
 		win.title = L["Damage taken"]
 		local total = _select(2, getRaidDTPS(set))
@@ -674,13 +636,6 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 			columns = {Damage = true, DTPS = true, Percent = true},
 			icon = "Interface\\Icons\\ability_mage_frostfirebolt"
 		}
-		dtpsmod.metadata = {
-			showspots = true,
-			click1 = playermod,
-			click2 = sourcemod,
-			columns = {DTPS = true, Percent = true},
-			icon = "Interface\\Icons\\spell_fire_twilightpyroblast"
-		}
 
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SPLIT", {dst_is_interesting_nopets = true})
@@ -700,12 +655,10 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 		Skada:RegisterForCL(SwingMissed, "SWING_MISSED", {dst_is_interesting_nopets = true})
 
 		Skada:AddMode(self, L["Damage taken"])
-		Skada:AddMode(dtpsmod, L["Damage taken"])
 	end
 
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
-		Skada:RemoveMode(dtpsmod)
 	end
 
 	function mod:AddToTooltip(set, tooltip)
@@ -714,10 +667,6 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 			tooltip:AddDoubleLine(L["Damage taken"], Skada:FormatNumber(amount), 1, 1, 1)
 			tooltip:AddDoubleLine(L["DTPS"], Skada:FormatNumber(dps), 1, 1, 1)
 		end
-	end
-
-	function dtpsmod:GetSetSummary(set)
-		return Skada:FormatNumber(getRaidDTPS(set))
 	end
 
 	function mod:GetSetSummary(set)
@@ -745,6 +694,80 @@ Skada:AddLoadableModule("Damage taken", function(Skada, L)
 	end
 end)
 
+-- ============================== --
+-- Damage taken per second module --
+-- ============================== --
+
+Skada:AddLoadableModule("DTPS", function(Skada, L)
+	if Skada:IsDisabled("Damage taken", "DTPS") then return end
+
+	local parentmod = Skada:GetModule(L["Damage taken"], true)
+	if not parentmod then return end
+
+	local mod = Skada:NewModule(L["DTPS"])
+	local getDTPS = parentmod.getDTPS
+	local getRaidDTPS = parentmod.getRaidDTPS
+
+	function mod:Update(win, set)
+		win.title = L["DTPS"]
+		local total = getRaidDTPS(set)
+
+		if total > 0 then
+			local maxvalue, nr = 0, 1
+
+			for _, player in _ipairs(set.players) do
+				local amount = getDTPS(set, player)
+
+				if amount > 0 then
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
+
+					d.id = player.id
+					d.label = player.name
+					d.class = player.class or "PET"
+					d.role = player.role or "DAMAGER"
+					d.spec = player.spec or 1
+
+					d.value = amount
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatNumber(amount),
+						self.metadata.columns.DTPS,
+						_format("%02.1f%%", 100 * amount / total),
+						self.metadata.columns.Percent
+					)
+
+					if amount > maxvalue then
+						maxvalue = amount
+					end
+					nr = nr + 1
+				end
+			end
+
+			win.metadata.maxvalue = maxvalue
+		end
+	end
+
+	function mod:OnEnable()
+		self.metadata = {
+			showspots = true,
+			click1 = parentmod.metadata.click1,
+			click2 = parentmod.metadata.click2,
+			columns = {DTPS = true, Percent = true},
+			icon = "Interface\\Icons\\spell_fire_twilightpyroblast"
+		}
+
+		Skada:AddMode(self, L["Damage taken"])
+	end
+
+	function mod:OnDisable()
+		Skada:RemoveMode(self)
+	end
+
+	function mod:GetSetSummary(set)
+		return Skada:FormatNumber(getRaidDTPS(set))
+	end
+end)
+
 -- ============================ --
 -- Damage taken by spell Module --
 -- ============================ --
@@ -755,7 +778,7 @@ Skada:AddLoadableModule("Damage taken by spell", function(Skada, L)
 	local mod = Skada:NewModule(L["Damage taken by spell"])
 	local playermod = mod:NewModule(L["Damage spell targets"])
 
-	local cached = {}
+	local cached = Skada:WeakTable()
 
 	function playermod:Enter(win, id, label)
 		win.spellname = label
@@ -895,7 +918,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 	local mod = Skada:NewModule(L["Avoidance & Mitigation"])
 	local playermod = mod:NewModule(L["Damage breakdown"])
 
-	local temp = {}
+	local temp = Skada:WeakTable()
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label

@@ -84,7 +84,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 		end
 	end
 
-	local heal = {}
+	local heal = Skada:WeakTable()
 
 	local function SpellHeal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, spellname, spellschool, amount, overhealing, absorbed, critical = ...
