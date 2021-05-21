@@ -256,12 +256,14 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 			Skada.options.args.Tweaks.args.prepotion = {
 				type = "toggle",
 				name = L["Pre-potion"],
+				desc = L["Prints pre-potion after the end of the combat."],
 				order = 1
 			}
 		else
 			Skada.options.args.generaloptions.args.prepotion = {
 				type = "toggle",
 				name = L["Pre-potion"],
+				desc = L["Prints pre-potion after the end of the combat."],
 				order = 94
 			}
 		end
@@ -293,7 +295,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 
 	function mod:SetComplete(set)
 		if Skada.db.profile.prepotion and next(prepotion or {}) ~= nil then
-			Skada:Print(_format("pre-potion: %s", tconcat(prepotion, ", ")))
+			Skada:Print(_format(L["pre-potion: %s"], tconcat(prepotion, ", ")))
 		end
 	end
 end)

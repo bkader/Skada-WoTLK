@@ -2380,7 +2380,7 @@ function Skada:UpdateDisplay(force)
 						d.id = "total"
 						d.label = L["Total"]
 						d.ignore = true
-						d.icon = win.selectedmode.metadata.icon or dataobj.icon
+						d.icon = (self.db.profile.moduleicons and win.selectedmode.metadata) and win.selectedmode.metadata.icon or dataobj.icon
 						d.value = total
 						d.valuetext = win.selectedmode:GetSetSummary(set)
 						if not existing then
@@ -2404,9 +2404,7 @@ function Skada:UpdateDisplay(force)
 					if set and mode.GetSetSummary ~= nil then
 						d.valuetext = mode:GetSetSummary(set)
 					end
-					if mode.metadata and mode.metadata.icon then
-						d.icon = mode.metadata.icon
-					end
+					d.icon = (self.db.profile.moduleicons and mode.metadata) and mode.metadata.icon
 				end
 
 				win.metadata.ordersort = true

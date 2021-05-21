@@ -137,7 +137,14 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 				firsthit = {
 					type = "toggle",
 					name = L["First hit"],
+					desc = L["Prints a message of the first hit before combat.\nOnly works for boss encounters."],
 					order = 1
+				},
+				moduleicons = {
+					type = "toggle",
+					name = L["Module Icons"],
+					desc = L["Enable this if you want to show module icons on windows and menus."],
+					order = 2
 				}
 			}
 		}

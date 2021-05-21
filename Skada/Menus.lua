@@ -30,11 +30,10 @@ end
 -- Configuration menu.
 function Skada:OpenMenu(window)
 	self.skadamenu = self.skadamenu or _CreateFrame("Frame", "SkadaMenu", UIParent, "UIDropDownMenuTemplate")
-	local skadamenu = self.skadamenu
-	skadamenu.displayMode = "MENU"
+	self.skadamenu.displayMode = "MENU"
 
 	local info = _UIDropDownMenu_CreateInfo()
-	skadamenu.initialize = function(self, level)
+	self.skadamenu.initialize = function(self, level)
 		if not level then return end
 
 		if level == 1 then
@@ -178,6 +177,7 @@ function Skada:OpenMenu(window)
 							info.func = function()
 								window:DisplayMode(module)
 							end
+							info.icon = (Skada.db.profile.moduleicons and module.metadata) and module.metadata.icon
 							info.checked = (window.selectedmode == module or window.parenttitle == module:GetName())
 							_UIDropDownMenu_AddButton(info, level)
 						end
@@ -389,17 +389,16 @@ function Skada:OpenMenu(window)
 	end
 
 	local x, y
-	skadamenu.point, x, y = getDropdownPoint()
-	_ToggleDropDownMenu(1, nil, skadamenu, "UIParent", x, y)
+	self.skadamenu.point, x, y = getDropdownPoint()
+	_ToggleDropDownMenu(1, nil, self.skadamenu, "UIParent", x, y)
 end
 
 function Skada:SegmentMenu(window)
 	self.segmentsmenu = self.segmentsmenu or _CreateFrame("Frame", "SkadaWindowButtonsSegments", UIParent, "UIDropDownMenuTemplate")
-	local segmentsmenu = self.segmentsmenu
-	segmentsmenu.displayMode = "MENU"
+	self.segmentsmenu.displayMode = "MENU"
 
 	local info = _UIDropDownMenu_CreateInfo()
-	segmentsmenu.initialize = function(self, level)
+	self.segmentsmenu.initialize = function(self, level)
 		if not level then return end
 		info = _UIDropDownMenu_CreateInfo()
 		info.text = L["Total"]
@@ -436,8 +435,8 @@ function Skada:SegmentMenu(window)
 	end
 
 	local x, y
-	segmentsmenu.point, x, y = getDropdownPoint()
-	_ToggleDropDownMenu(1, nil, segmentsmenu, "UIParent", x, y)
+	self.segmentsmenu.point, x, y = getDropdownPoint()
+	_ToggleDropDownMenu(1, nil, self.segmentsmenu, "UIParent", x, y)
 end
 
 do
@@ -452,9 +451,7 @@ do
 	end
 
 	function Skada:ModeMenu(window)
-		self.modesmenu =
-			self.modesmenu or _CreateFrame("Frame", "SkadaWindowButtonsModes", UIParent, "UIDropDownMenuTemplate")
-		local modesmenu = self.modesmenu
+		self.modesmenu = self.modesmenu or _CreateFrame("Frame", "SkadaWindowButtonsModes", UIParent, "UIDropDownMenuTemplate")
 		local info = _UIDropDownMenu_CreateInfo()
 
 		-- so we call it only once.
@@ -468,8 +465,8 @@ do
 			tsort(categorized, sort_modes)
 		end
 
-		modesmenu.displayMode = "MENU"
-		modesmenu.initialize = function(self, level)
+		self.modesmenu.displayMode = "MENU"
+		self.modesmenu.initialize = function(self, level)
 			if not level then
 				return
 			end
@@ -504,7 +501,7 @@ do
 						window:DisplayMode(mode)
 						_CloseDropDownMenus()
 					end
-					info.icon = mode.metadata and mode.metadata.icon
+					info.icon = (Skada.db.profile.moduleicons and mode.metadata) and mode.metadata.icon
 					info.checked = (window.selectedmode == mode or window.parenttitle == mode:GetName())
 					_UIDropDownMenu_AddButton(info, level)
 				end
@@ -512,8 +509,8 @@ do
 		end
 
 		local x, y
-		modesmenu.point, x, y = getDropdownPoint()
-		_ToggleDropDownMenu(1, nil, modesmenu, "UIParent", x, y)
+		self.modesmenu.point, x, y = getDropdownPoint()
+		_ToggleDropDownMenu(1, nil, self.modesmenu, "UIParent", x, y)
 	end
 end
 

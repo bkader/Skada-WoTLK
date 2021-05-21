@@ -237,7 +237,6 @@ L["Time measure"] = true
 L["Activity time"] = true
 L["Effective time"] = true
 L.timemesure_desc = [=[|cFFFFFF00Activity|r: the timer of each raid member is put on hold if their activity is ceased and back again to count when resumed, common way of measuring DPS and HPS.
-
 |cFFFFFF00Effective|r: used on rankings, this method uses the elapsed combat time to measure the DPS and HPS of all raid members.]=]
 L["Number set duplicates"] = true
 L["Append a count to set names with duplicate mob names."] = true
@@ -577,6 +576,8 @@ L["Potions list"] = true
 L["Players list"] = true
 L["%s's used potions"] = true
 L["Pre-potion"] = true
+L["pre-potion: %s"] = true
+L["Prints pre-potion after the end of the combat."] = true
 -- resurrect module lines --
 L["Resurrects"] = true
 L["Resurrect spell list"] = true
@@ -640,3 +641,6 @@ L["First hit"] = true
 L["|cffffff00First Hit|r: %s from %s"] = true
 L["|cffffbb00First Hit|r: *?*"] = true
 L["|cffffbb00Boss First Target|r: %s (%s)"] = true
+L["Prints a message of the first hit before combat.\nOnly works for boss encounters."] = true
+L["Module Icons"] = true
+L["Enable this if you want to show module icons on windows and menus."] = true
