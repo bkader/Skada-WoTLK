@@ -252,11 +252,19 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 			Skada.db.profile.prepotion = true
 		end
 
-		Skada.options.args.generaloptions.args.prepotion = {
-			type = "toggle",
-			name = L["Pre-potion"],
-			order = 94
-		}
+		if Skada.options.args.Tweaks then
+			Skada.options.args.Tweaks.args.prepotion = {
+				type = "toggle",
+				name = L["Pre-potion"],
+				order = 1
+			}
+		else
+			Skada.options.args.generaloptions.args.prepotion = {
+				type = "toggle",
+				name = L["Pre-potion"],
+				order = 94
+			}
+		end
 	end
 
 	function mod:OnEnable()

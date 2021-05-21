@@ -57,7 +57,7 @@ local disabled = false
 local changed = true
 
 -- update & tick timers
-local update_timer, tick_timer, pull_timer
+local update_timer, tick_timer
 local checkVersion, convertVersion
 
 -- list of players and pets
@@ -97,6 +97,12 @@ local BITMASK_GROUP = bor(COMBATLOG_OBJECT_AFFILIATION_MINE, COMBATLOG_OBJECT_AF
 local BITMASK_PETS = bor(COMBATLOG_OBJECT_TYPE_PET, COMBATLOG_OBJECT_TYPE_GUARDIAN)
 local BITMASK_OWNERS = bor(COMBATLOG_OBJECT_AFFILIATION_MASK, COMBATLOG_OBJECT_REACTION_MASK, COMBATLOG_OBJECT_CONTROL_MASK)
 local BITMASK_ENEMY = bor(COMBATLOG_OBJECT_REACTION_NEUTRAL, COMBATLOG_OBJECT_REACTION_HOSTILE)
+
+-- to allow external usage
+Skada.BITMASK_GROUP = BITMASK_GROUP
+Skada.BITMASK_PETS = BITMASK_PETS
+Skada.BITMASK_OWNERS = BITMASK_OWNERS
+Skada.BITMASK_ENEMY = BITMASK_ENEMY
 
 -- =================== --
 -- add missing globals --
@@ -3506,13 +3512,6 @@ function Skada:EndSegment()
 		tick_timer = nil
 	end
 
-	if pull_timer then
-		if not pull_timer._cancelled then
-			pull_timer:Cancel()
-		end
-		pull_timer = nil
-	end
-
 	self.After(2, function() self:CleanGarbage(true) end)
 	self.After(3, function() self:MemoryCheck() end)
 	self.callbacks:Fire("COMBAT_ENCOUNTER_END", self.current)
@@ -3531,38 +3530,6 @@ function Skada:ResumeSegment()
 		self.current.stopped = nil
 		self.current.endtime = nil
 		self.current.time = 0
-	end
-end
-
--- ======================================================= --
-
--- thank you Details!
-local function WhoPulled(self)
-	-- first hit
-	local hitline = self.HitBy or L["|cffffbb00First Hit|r: *?*"]
-	Skada:Print(hitline)
-
-	-- firt boss target
-	local targetline
-	for i = 1, 4 do
-		local boss = "boss" .. i
-		if not UnitExists(boss) then
-			break -- no need
-		end
-
-		local target = UnitName(boss .. "target")
-		if target then
-			local class = select(2, UnitClass(boss .. "target"))
-
-			if class and Skada.classcolors[class] then
-				target = "|c" .. Skada.classcolors[class].colorStr .. target .. "|r"
-			end
-			targetline = format(L["|cffffbb00Boss First Target|r: %s (%s)"], target, UnitName(boss) or UNKNOWN)
-			break -- no need
-		end
-	end
-	if targetline then
-		Skada:Print(targetline)
 	end
 end
 
@@ -3775,48 +3742,6 @@ do
 							self:StartCombat()
 						end
 					end
-				end
-			end
-		end
-
-		-- pull timer
-		if self.db.profile.firsthit and (triggerevents[eventtype] or eventtype == "SPELL_CAST_SUCCESS") and not pull_timer then
-			if (band(srcFlags, BITMASK_GROUP) ~= 0 and self:IsBoss(dstGUID)) or self:IsBoss(srcGUID) then
-				local puller
-
-				-- close distance?
-				if self:IsBoss(srcGUID) then
-					puller = srcName -- the boss name
-					if self:IsPet(dstGUID, dstFlags) then
-						puller = puller .. " (" .. dstName .. ")"
-					else
-						local class = select(2, UnitClass(dstName))
-						if class and self.classcolors[class] then
-							puller = puller .. " (|c" .. self.classcolors[class].colorStr .. dstName .. "|r)"
-						else
-							puller = puller .. " (" .. dstName .. ")"
-						end
-					end
-				elseif pets[srcGUID] then
-					local class = select(2, UnitClass(pets[srcGUID].name))
-					if class and self.classcolors[class] then
-						puller = "|c" .. self.classcolors[class].colorStr .. pets[srcGUID].name .. "|r (" .. PET .. ")"
-					else
-						puller = pets[srcGUID].name .. " (" .. PET .. ")"
-					end
-				else
-					local class = select(2, UnitClass(srcName))
-					if class and self.classcolors[class] then
-						puller = "|c" .. self.classcolors[class].colorStr .. srcName .. "|r"
-					else
-						puller = srcName
-					end
-				end
-
-				if puller then
-					local link = (eventtype == "SWING_DAMAGE") and self.GetSpellLink(6603) or self.GetSpellLink(select(1, ...)) or self.GetSpellInfo(select(1, ...))
-					pull_timer = self.NewTimer(0.5, function() WhoPulled(pull_timer) end)
-					pull_timer.HitBy = format(L["|cffffff00First Hit|r: %s from %s"], link or "", puller)
 				end
 			end
 		end

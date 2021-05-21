@@ -1,6 +1,9 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
 
+<!-- Tweaks must be loaded first -->
+<Script file="Modules\Tweaks.lua" />
+
 <!-- Damage category -->
 <Script file="Modules\Damage.lua" />
 <Script file="Modules\DamageTaken.lua" />
@@ -33,8 +36,8 @@
 <Script file="Modules\Threat.lua" />
 
 <!-- Modules without modes -->
+<Script file="Modules\Nickname.lua" />
 <Script file="Modules\Scroll.lua" />
 <Script file="Modules\Spamage.lua" />
 <Script file="Modules\Themes.lua" />
-<Script file="Modules\Nickname.lua" />
 </Ui>

@@ -170,7 +170,7 @@ function mod.AddDisplayOptions(self, win, options)
 	Skada.options.args.scrolloptions = {
 		type = "group",
 		name = L["Scroll"],
-		order = 100,
+		order = 998,
 		set = function(info, val)
 			db[info[#info]] = val
 			debug(info[#info] .. " set to: " .. tostring(val))
