@@ -26,10 +26,6 @@ L["Count"] = true
 L["Refresh"] = true
 L["Percent"] = true
 L["General options"] = true
-L["First hit"] = true
-L["|cffffff00First Hit|r: %s from %s"] = true
-L["|cffffbb00First Hit|r: *?*"] = true
-L["|cffffbb00Boss First Target|r: %s (%s)"] = true
 L["HoT"] = " (|cffb7b7a4HoT|r)"
 L["DoT"] = " (|cffb7b7a4DoT|r)"
 -- windows section:
@@ -638,3 +634,9 @@ L["%s's <%s> mitigated damage"] = true
 L["Overkill"] = true
 L["Overkill spell list"] = true
 L["%s's overkill"] = true
+-- tweaks module lines --
+L["Tweaks"] = true
+L["First hit"] = true
+L["|cffffff00First Hit|r: %s from %s"] = true
+L["|cffffbb00First Hit|r: *?*"] = true
+L["|cffffbb00Boss First Target|r: %s (%s)"] = true
