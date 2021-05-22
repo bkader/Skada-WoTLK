@@ -295,7 +295,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 			icon = "Interface\\Icons\\spell_fire_felflamebolt"
 		}
 
-		Skada:AddMode(self, L["Enemies"])
+		Skada:AddMode(self, L["Damage Done"])
 	end
 
 	function mod:OnDisable()
@@ -592,7 +592,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 			icon = "Interface\\Icons\\spell_shadow_shadowbolt"
 		}
 
-		Skada:AddMode(self, L["Enemies"])
+		Skada:AddMode(self, L["Damage Taken"])
 	end
 
 	function mod:OnDisable()
