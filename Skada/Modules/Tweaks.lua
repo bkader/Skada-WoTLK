@@ -65,8 +65,8 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 					if Skada:IsBoss(srcGUID) then
 						puller = srcName -- the boss name
 						if Skada:IsPet(dstGUID, dstFlags) then
-							puller = puller .. " (" .. dstName .. ")"
-						else
+							puller = puller .. " (" .. (dstName or UNKNOWN) .. ")"
+						elseif dstName then
 							local class = select(2, UnitClass(dstName))
 							if class and Skada.classcolors[class] then
 								puller = puller .. " (|c" .. Skada.classcolors[class].colorStr .. dstName .. "|r)"
@@ -74,7 +74,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 								puller = puller .. " (" .. dstName .. ")"
 							end
 						end
-					else
+					elseif srcGUID then
 						local owner = Skada:GetPetOwner(srcGUID)
 						if owner then
 							local class = select(2, UnitClass(owner.name))
@@ -84,7 +84,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 							else
 								puller = owner.name .. " (" .. PET .. ")"
 							end
-						else
+						elseif srcName then
 							local class = select(2, UnitClass(srcName))
 							if class and Skada.classcolors[class] then
 								puller = "|c" .. Skada.classcolors[class].colorStr .. srcName .. "|r"
