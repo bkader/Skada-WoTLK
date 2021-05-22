@@ -180,7 +180,7 @@ function Skada.UnitClass(guid, flags, set)
 		--
 		set = set or Skada.current -- use current set if none is provided.
 		if set and set.players then
-			for _, p in ipairs(set.players) do
+			for _, p in self:IteratePlayers(set) do
 				if p.id == guid then
 					return Skada.classnames[p.class], p.class, p.role, p.spec
 				end
@@ -235,7 +235,7 @@ function Skada:IsInPVP()
 end
 
 local function setPlayerActiveTimes(set)
-	for _, player in ipairs(set.players) do
+	for _, player in Skada:IteratePlayers(set) do
 		if player.last then
 			player.time = math_max(player.time + (player.last - player.first), 0.1)
 		end
@@ -437,7 +437,7 @@ do
 					order = 8,
 					values = function()
 						local list = {}
-						for _, win in ipairs(windows) do
+						for _, win in Skada:IterateWindows() do
 							if win.db.name ~= db.name and win.db.display == db.display then
 								list[win.db.name] = win.db.name
 							end
@@ -458,7 +458,7 @@ do
 					func = function()
 						local newdb = {}
 						if copywindow then
-							for _, win in ipairs(windows) do
+							for _, win in Skada:IterateWindows() do
 								if win.db.name == copywindow and win.db.display == db.display then
 									Skada:tcopy(newdb, win.db, {"name", "snapped", "x", "y", "point"})
 									break
@@ -502,7 +502,7 @@ do
 				order = 3,
 				values = function()
 					local list = {[""] = NONE}
-					for _, win in ipairs(windows) do
+					for _, win in Skada:IterateWindows() do
 						if win.db.name ~= db.name and win.db.child ~= db.name and win.db.display == db.display then
 							list[win.db.name] = win.db.name
 						end
@@ -529,7 +529,7 @@ do
 				set = function()
 					db.snapto = not db.snapto
 					if not db.snapto then
-						for _, win in ipairs(windows) do
+						for _, win in Skada:IterateWindows() do
 							if win.db.snapped[db.name] then
 								win.db.snapped[db.name] = nil
 							end
@@ -613,7 +613,7 @@ function Window:SetChild(win)
 	elseif type(win) == "table" then
 		self.child = win
 	elseif type(win) == "string" and win:trim() ~= "" then
-		for _, w in ipairs(windows) do
+		for _, w in Skada:IterateWindows() do
 			if w.db.name == win then
 				self.child = w
 				return
@@ -952,7 +952,7 @@ end
 
 do
 	local function DeleteWindow(name)
-		for i, win in ipairs(windows) do
+		for i, win in Skada:IterateWindows() do
 			if win.db.name == name then
 				win:destroy()
 				wipe(tremove(windows, i))
@@ -992,7 +992,7 @@ do
 end
 
 function Skada:ToggleWindow()
-	for _, win in ipairs(windows) do
+	for _, win in self:IterateWindows() do
 		if win:IsShown() then
 			win.db.hidden = true
 			win:Hide()
@@ -1022,18 +1022,18 @@ function Skada:RestoreView(win, theset, themode)
 end
 
 function Skada:Wipe()
-	for _, win in ipairs(windows) do
+	for _, win in self:IterateWindows() do
 		win:Wipe()
 	end
 end
 
 function Skada:SetActive(enable)
 	if enable then
-		for _, win in ipairs(windows) do
+		for _, win in self:IterateWindows() do
 			win:Show()
 		end
 	else
-		for _, win in ipairs(windows) do
+		for _, win in self:IterateWindows() do
 			win:Hide()
 		end
 	end
@@ -1102,7 +1102,7 @@ do
 		mode.category = category or OTHER
 		tinsert(modes, mode)
 
-		for _, win in ipairs(windows) do
+		for _, win in self:IterateWindows() do
 			if mode:GetName() == win.db.mode then
 				self:RestoreView(win, win.db.set, mode:GetName())
 			end
@@ -1119,7 +1119,7 @@ do
 		scan_for_columns(mode)
 		sort_modes()
 
-		for _, win in ipairs(windows) do
+		for _, win in self:IterateWindows() do
 			win:Wipe()
 		end
 
@@ -1133,6 +1133,24 @@ end
 
 function Skada:GetModes()
 	return modes
+end
+
+-- iteration functions
+
+function Skada:IterateModes()
+	return ipairs(modes)
+end
+
+function Skada:IterateSets()
+	return ipairs(self.char.sets or {})
+end
+
+function Skada:IterateWindows()
+	return ipairs(windows)
+end
+
+function Skada:IteratePlayers(set)
+	return ipairs(set and set.players or {})
 end
 
 function Skada:AddLoadableModule(name, description, func)
@@ -1194,7 +1212,7 @@ function Skada:VerifySet(mode, set)
 	end
 
 	if mode.AddPlayerAttributes then
-		for _, player in ipairs(set.players) do
+		for _, player in self:IteratePlayers(set) do
 			mode:AddPlayerAttributes(player, set)
 		end
 	end
@@ -1232,7 +1250,7 @@ function Skada:DeleteSet(set)
 				end
 
 				-- Don't leave windows pointing to deleted sets
-				for _, win in ipairs(windows) do
+				for _, win in self:IterateWindows() do
 					if win.selectedset == i or win:get_selected_set() == set then
 						win.selectedset = "current"
 						win.changed = true
@@ -1455,7 +1473,7 @@ function Skada:find_player(set, playerid, playername, strict)
 		set._playeridx = set._playeridx or {}
 		local player = set._playeridx[playerid]
 		if not player then
-			for _, p in ipairs(set.players) do
+			for _, p in self:IteratePlayers(set) do
 				if p.id == playerid then
 					set._playeridx[playerid] = p
 					player = p
@@ -2313,7 +2331,7 @@ function Skada:Reset(force)
 		end
 	end
 
-	for _, win in ipairs(windows) do
+	for _, win in self:IterateWindows() do
 		if win.selectedset ~= "total" then
 			win.selectedset = "current"
 			win.changed = true
@@ -2342,7 +2360,7 @@ function Skada:UpdateDisplay(force)
 		end
 	end
 
-	for _, win in ipairs(windows) do
+	for _, win in self:IterateWindows() do
 		if (changed or win.changed) or self.current then
 			win.changed = false
 
@@ -2721,7 +2739,7 @@ function Skada:RefreshMMButton()
 end
 
 function Skada:ApplySettings()
-	for _, win in ipairs(windows) do
+	for _, win in self:IterateWindows() do
 		win:SetChild(win.db.child)
 		win.display:ApplySettings(win)
 	end
@@ -2731,7 +2749,7 @@ function Skada:ApplySettings()
 	else
 		self:SetActive(true)
 
-		for _, win in ipairs(windows) do
+		for _, win in self:IterateWindows() do
 			if (win.db.hidden or (not win.db.hidden and self.db.profile.showcombat)) and win:IsShown() then
 				win:Hide()
 			end
@@ -2756,7 +2774,7 @@ function Skada:ApplySettings()
 end
 
 function Skada:ReloadSettings()
-	for _, win in ipairs(windows) do
+	for _, win in self:IterateWindows() do
 		win:destroy()
 	end
 	windows = {}
@@ -3471,7 +3489,7 @@ function Skada:EndSegment()
 		end
 	end
 
-	for _, win in ipairs(windows) do
+	for _, win in self:IterateWindows() do
 		win:Wipe()
 		changed = true
 
@@ -3568,7 +3586,7 @@ do
 			self.char.total = self.total
 		end
 
-		for _, win in ipairs(windows) do
+		for _, win in self:IterateWindows() do
 			if win.db.modeincombat ~= "" then
 				local mymode = self:find_mode(win.db.modeincombat)
 
