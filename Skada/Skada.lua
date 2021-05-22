@@ -1136,15 +1136,15 @@ function Skada:GetModes()
 end
 
 function Skada:AddLoadableModule(name, description, func)
-	if type(description) == "function" then
-		func = description
-		description = nil
-	end
-
 	self.modulelist = self.modulelist or {}
-	self.modulelist[#self.modulelist + 1] = func
 
-	self:AddLoadableModuleCheckbox(name, name, description)
+	if type(description) == "function" then
+		self.modulelist[#self.modulelist + 1] = description
+		self:AddLoadableModuleCheckbox(name, name)
+	else
+		self.modulelist[#self.modulelist + 1] = func
+		self:AddLoadableModuleCheckbox(name, name, description)
+	end
 end
 
 function Skada:IsDisabled(...)

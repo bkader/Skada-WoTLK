@@ -15,6 +15,7 @@ local _UIDropDownMenu_CreateInfo = L_UIDropDownMenu_CreateInfo
 local _UIDropDownMenu_AddButton = L_UIDropDownMenu_AddButton
 local _CloseDropDownMenus = L_CloseDropDownMenus
 local _ToggleDropDownMenu = L_ToggleDropDownMenu
+local _UIDropDownMenu_AddSeparator = L_UIDropDownMenu_AddSeparator
 
 -- guesses the dropdown location
 local function getDropdownPoint()
@@ -66,11 +67,7 @@ function Skada:OpenMenu(window)
 			info.padding = 16
 			_UIDropDownMenu_AddButton(info, level)
 
-			-- separator
-			info = _UIDropDownMenu_CreateInfo()
-			info.disabled = 1
-			info.notCheckable = 1
-			_UIDropDownMenu_AddButton(info, level)
+			_UIDropDownMenu_AddSeparator(info, level)
 
 			-- Can't report if we are not in a mode.
 			if not window or (window and window.selectedmode) then
@@ -123,11 +120,7 @@ function Skada:OpenMenu(window)
 			info.padding = 16
 			_UIDropDownMenu_AddButton(info, level)
 
-			-- separator
-			info = _UIDropDownMenu_CreateInfo()
-			info.disabled = 1
-			info.notCheckable = 1
-			_UIDropDownMenu_AddButton(info, level)
+			_UIDropDownMenu_AddSeparator(info, level)
 
 			-- reset
 			info = _UIDropDownMenu_CreateInfo()
@@ -228,11 +221,7 @@ function Skada:OpenMenu(window)
 						_UIDropDownMenu_AddButton(info, level)
 					end
 
-					-- separator
-					info = _UIDropDownMenu_CreateInfo()
-					info.disabled = 1
-					info.notCheckable = 1
-					_UIDropDownMenu_AddButton(info, level)
+					_UIDropDownMenu_AddSeparator(info, level)
 				end
 
 				-- lock window
@@ -422,6 +411,8 @@ function Skada:SegmentMenu(window)
 		end
 		info.checked = (window.selectedset == "current")
 		_UIDropDownMenu_AddButton(info, level)
+
+		_UIDropDownMenu_AddSeparator(info, level)
 
 		for i, set in _ipairs(Skada:GetSets()) do
 			info = _UIDropDownMenu_CreateInfo()
