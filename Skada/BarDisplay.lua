@@ -9,6 +9,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 local tinsert, tsort = table.insert, table.sort
 local _GetSpellLink = Skada.GetSpellLink or GetSpellLink
+local _CloseDropDownMenus = L_CloseDropDownMenus
 
 mod.name = L["Bar display"]
 mod.description = L["Bar display is the normal bar window used by most damage meters. It can be extensively styled."]
@@ -100,18 +101,23 @@ function mod:Create(window)
 	bargroup:SetScript("OnMouseDown", function(_, button)
 		if IsShiftKeyDown() then
 			Skada:OpenMenu(window)
-		elseif button == "RightButton" and not IsAltKeyDown() then
+		elseif button == "RightButton" and IsControlKeyDown() then
+			Skada:SegmentMenu(window)
+		elseif button == "RightButton" and IsAltKeyDown() then
+			Skada:ModeMenu(window)
+		elseif button == "RightButton" then
 			window:RightClick()
 		end
 	end)
 	bargroup.button:SetScript("OnClick", function(_, button)
 		if IsShiftKeyDown() then
 			Skada:OpenMenu(window)
+		elseif button == "RightButton" and IsControlKeyDown() then
+			Skada:SegmentMenu(window)
 		elseif button == "RightButton" and not IsAltKeyDown() then
 			window:RightClick()
 		end
 	end)
-
 	bargroup:HideIcon()
 
 	local titletext = bargroup.button:GetFontString()
@@ -127,6 +133,12 @@ function mod:Create(window)
 	libwindow.RestorePosition(bargroup)
 
 	window.bargroup = bargroup
+
+	-- backward compat
+	if window.db.snapped or not window.db.sticked then
+		window.db.sticky, window.db.sticked = true, {}
+		window.db.snapped, window.db.snapto = nil, false
+	end
 
 	if not class_icon_tcoords then
 		class_icon_file, class_icon_tcoords = Skada.classiconfile, Skada.classicontcoords
@@ -223,7 +235,7 @@ do
 				end
 			end
 		end
-		L_CloseDropDownMenus()
+		_CloseDropDownMenus()
 		libwindow.SavePosition(group)
 	end
 end
@@ -312,10 +324,19 @@ do
 		end
 
 		win:DisplayMode(mode)
+		_CloseDropDownMenus()
 	end
 
 	local function BarClickIgnore(bar, button)
-		if bar.win and button == "RightButton" then
+		if not bar.win then
+			return
+		elseif IsShiftKeyDown() and button == "RightButton" then
+			Skada:OpenMenu(bar.win)
+		elseif IsControlKeyDown() and button == "RightButton" then
+			Skada:SegmentMenu(bar.win)
+		elseif IsAltKeyDown() and button == "RightButton" then
+			Skada:ModeMenu(bar.win)
+		elseif button == "RightButton" then
 			bar.win:RightClick()
 		end
 	end
@@ -340,7 +361,6 @@ do
 		elseif win.metadata.click1 then
 			showmode(win, id, label, win.metadata.click1)
 		end
-		L_CloseDropDownMenus() -- always close
 	end
 
 	local ttactive = false
@@ -427,11 +447,7 @@ do
 
 		local hasicon = false
 		for _, data in ipairs(win.dataset) do
-			if
-				(data.icon and not data.ignore) or (data.spec and win.db.specicons) or
-					(data.class and win.db.classicons) or
-					(data.role and win.db.roleicons)
-			 then
+			if (data.icon and not data.ignore) or (data.spec and win.db.specicons) or (data.class and win.db.classicons) or (data.role and win.db.roleicons) then
 				hasicon = true
 			end
 		end
@@ -650,8 +666,9 @@ do
 		local group = self:GetParent()
 		if group then
 			if button == "MiddleButton" or IsAltKeyDown() then
+				_CloseDropDownMenus()
 				group.stretching = true
-				group:SetBackdropColor(0, 0, 0, 1)
+				group:SetBackdropColor(0, 0, 0, 0.9)
 				group:SetFrameStrata("TOOLTIP")
 				group:StartSizing("TOP")
 				group:SetScript("OnUpdate", group.SortBars)
