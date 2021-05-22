@@ -276,7 +276,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 		args = {
 			apply = {
 				type = "group",
-				name = L["Apply theme"],
+				name = L["Apply Theme"],
 				inline = true,
 				order = 1,
 				args = {

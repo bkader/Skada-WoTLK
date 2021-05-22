@@ -41,7 +41,7 @@ local dataobj = LDB:NewDataObject("Skada", {
 BINDING_HEADER_SKADA = "Skada"
 BINDING_NAME_SKADA_TOGGLE = L["Toggle window"]
 BINDING_NAME_SKADA_RESET = RESET
-BINDING_NAME_SKADA_NEWSEGMENT = L["Start new segment"]
+BINDING_NAME_SKADA_NEWSEGMENT = L["Start New Segment"]
 BINDING_NAME_SKADA_STOP = L["Stop"]
 
 -- Skada-Revisited flag
@@ -545,7 +545,7 @@ do
 
 		options.args.switchoptions = {
 			type = "group",
-			name = L["Mode switching"],
+			name = L["Mode Switching"],
 			order = 4,
 			args = {
 				modeincombat = {
@@ -687,14 +687,16 @@ function Window:IsShown()
 end
 
 function Window:Reset()
-	for _, data in ipairs(self.dataset) do
+	for _, data in ipairs(self.dataset or {}) do
 		wipe(data)
 	end
 end
 
 function Window:Wipe()
 	self:Reset()
-	self.display:Wipe(self)
+	if self.display then
+		self.display:Wipe(self)
+	end
 
 	if self.child then
 		self.child:Wipe()

@@ -1094,7 +1094,7 @@ function mod:AddDisplayOptions(win, options)
 
 	options.titleoptions = {
 		type = "group",
-		name = L["Title bar"],
+		name = L["Title Bar"],
 		order = 2,
 		get = function(i)
 			return db.title[i[#i]]

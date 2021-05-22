@@ -105,7 +105,7 @@ L["Disables mouse clicks on bars."] = "바를 클릭할 수 없도록 합니다.
 L["Smooth bars"] = "부드러운 바"
 L["Animate bar changes smoothly rather than immediately."] = "바를 즉시 변경하지 않고 부드럽게 변경시킵니다."
 -- title bar
-L["Title bar"] = "제목 바"
+L["Title Bar"] = "제목 바"
 L["Enables the title bar."] = "제목 표시줄을 활성화합니다."
 L["Include set"] = "세트 포함"
 L["Include set name in title bar"] = "제목 바에 세트 이름 포함"
@@ -146,7 +146,7 @@ L["This determines what other frames will be in front of the frame."] = "프레�
 L["Width"] = "너비"
 L["Height"] = "높이"
 -- switching
-L["Mode switching"] = "모드 전환"
+L["Mode Switching"] = "모드 전환"
 L["Combat mode"] = "전투 모드"
 L["Automatically switch to set 'Current' and this mode when entering combat."] = "전투 시작시 자동으로 '현재' 세분화의 이 모드로 전환합니다."
 L["Return after combat"] = "전투 후 돌아가기"
@@ -176,7 +176,7 @@ L["Hint: Left-Click to set active mode."] = "힌트: 활성화 모드를 설정�
 L["Right-click to set active set."] = "활성화 세트를 설정하려면 오른쪽-클릭하세요."
 L["Shift+Left-Click to open menu."] = "Shift+왼쪽-클릭으로 메뉴를 엽니다."
 -- data resets
-L["Data resets"] = "자료 초기화"
+L["Data Resets"] = "자료 초기화"
 L["Reset on entering instance"] = "인스턴스 입장 시 초기화"
 L["Controls if data is reset when you enter an instance."] = "인스턴스 입장 시 자료를 초기화할 지 설정합니다."
 L["Reset on joining a group"] = "파티/공격대 참여 시 초기화"
@@ -280,7 +280,7 @@ L["Adds a set of standard themes to Skada. Custom themes can also be used."] = "
 -- themes module
 L["Theme"] = "테마"
 L["Themes"] = "테마"
-L["Apply theme"] = "테마 적용"
+L["Apply Theme"] = "테마 적용"
 L["Theme applied!"] = "테마 적용!"
 L["Name of your new theme."] = "당신의 새로운 테마의 이름입니다."
 L["Save theme"] = "테마 저장"
@@ -300,11 +300,11 @@ L["Shift+Left-Click to reset."] = "Shift+왼쪽-클릭으로 초기화합니다.
 L["Right-click to open menu."] = "메뉴를 열려면 오른쪽 클릭."
 -- skada menu
 L["Skada Menu"] = "Skada 메뉴"
-L["Select segment"] = "선택 세그먼트"
-L["Delete segment"] = "세분화 삭제"
-L["Keep segment"] = "세분화 유지"
+L["Select Segment"] = "선택 세그먼트"
+L["Delete Segment"] = "세분화 삭제"
+L["Keep Segment"] = "세분화 유지"
 L["Toggle window"] = "창 표시 전환"
-L["Start new segment"] = "새로운 세분화 시작"
+L["Start New Segment"] = "새로운 세분화 시작"
 -- window buttons
 L["Configure"] = "설정"
 L["Opens the configuration window."] = "설정 창 열기"

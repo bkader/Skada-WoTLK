@@ -104,7 +104,7 @@ L["Disables mouse clicks on bars."] = true
 L["Smooth bars"] = true
 L["Animate bar changes smoothly rather than immediately."] = true
 -- title bar
-L["Title bar"] = true
+L["Title Bar"] = true
 L["Enables the title bar."] = true
 L["Include set"] = true
 L["Include set name in title bar"] = true
@@ -145,7 +145,7 @@ L["This determines what other frames will be in front of the frame."] = true
 L["Width"] = true
 L["Height"] = true
 -- switching
-L["Mode switching"] = true
+L["Mode Switching"] = true
 L["Combat mode"] = true
 L["Automatically switch to set 'Current' and this mode when entering combat."] = true
 L["Return after combat"] = true
@@ -175,7 +175,7 @@ L["Hint: Left-Click to set active mode."] = true
 L["Right-click to set active set."] = true
 L["Shift+Left-Click to open menu."] = true
 -- data resets
-L["Data resets"] = true
+L["Data Resets"] = true
 L["Reset on entering instance"] = true
 L["Controls if data is reset when you enter an instance."] = true
 L["Reset on joining a group"] = true
@@ -278,7 +278,7 @@ L["Adds a set of standard themes to Skada. Custom themes can also be used."] = t
 -- themes module
 L["Theme"] = true
 L["Themes"] = true
-L["Apply theme"] = true
+L["Apply Theme"] = true
 L["Theme applied!"] = true
 L["Name of your new theme."] = true
 L["Save theme"] = true
@@ -298,11 +298,11 @@ L["Shift+Left-Click to reset."] = true
 L["Right-click to open menu."] = true
 -- skada menu
 L["Skada Menu"] = true
-L["Select segment"] = true
-L["Delete segment"] = true
-L["Keep segment"] = true
+L["Select Segment"] = true
+L["Delete Segment"] = true
+L["Keep Segment"] = true
 L["Toggle window"] = true
-L["Start new segment"] = true
+L["Start New Segment"] = true
 -- window buttons
 L["Configure"] = true
 L["Opens the configuration window."] = true

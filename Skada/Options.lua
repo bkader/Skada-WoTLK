@@ -261,7 +261,7 @@ Skada.options = {
 		},
 		resetoptions = {
 			type = "group",
-			name = L["Data resets"],
+			name = L["Data Resets"],
 			order = 3,
 			get = function(i)
 				return Skada.db.profile.reset[i[#i]]

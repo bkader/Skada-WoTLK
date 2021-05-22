@@ -86,7 +86,7 @@ function Skada:OpenMenu(window)
 
 			if window then
 				info = _UIDropDownMenu_CreateInfo()
-				info.text = L["Select segment"]
+				info.text = L["Select Segment"]
 				info.value = "segment"
 				info.hasArrow = 1
 				info.notCheckable = 1
@@ -96,7 +96,7 @@ function Skada:OpenMenu(window)
 
 			-- delete segment menu
 			info = _UIDropDownMenu_CreateInfo()
-			info.text = L["Delete segment"]
+			info.text = L["Delete Segment"]
 			info.value = "delete"
 			info.hasArrow = 1
 			info.notCheckable = 1
@@ -105,7 +105,7 @@ function Skada:OpenMenu(window)
 
 			-- keep segment
 			info = _UIDropDownMenu_CreateInfo()
-			info.text = L["Keep segment"]
+			info.text = L["Keep Segment"]
 			info.value = "keep"
 			info.hasArrow = 1
 			info.notCheckable = 1
@@ -114,7 +114,7 @@ function Skada:OpenMenu(window)
 
 			-- start new segment
 			info = _UIDropDownMenu_CreateInfo()
-			info.text = L["Start new segment"]
+			info.text = L["Start New Segment"]
 			info.func = function()
 				Skada:NewSegment()
 			end
@@ -262,22 +262,24 @@ function Skada:OpenMenu(window)
 				_UIDropDownMenu_AddButton(info, level)
 
 				-- snap window
-				info = _UIDropDownMenu_CreateInfo()
-				info.text = L["Sticky Window"]
-				info.func = function()
-					window.db.snapto = not window.db.snapto
-					if not window.db.snapto then
-						for _, win in ipairs(Skada:GetWindows()) do
-							if win.db.snapped[window.db.name] then
-								win.db.snapped[window.db.name] = nil
+				if window.db.display == "bar" then
+					info = _UIDropDownMenu_CreateInfo()
+					info.text = L["Sticky Window"]
+					info.func = function()
+						window.db.snapto = not window.db.snapto
+						if not window.db.snapto then
+							for _, win in ipairs(Skada:GetWindows()) do
+								if win.db.snapped[window.db.name] then
+									win.db.snapped[window.db.name] = nil
+								end
 							end
 						end
+						Skada:ApplySettings()
 					end
-					Skada:ApplySettings()
+					info.checked = window.db.snapto
+					info.isNotRadio = 1
+					_UIDropDownMenu_AddButton(info, level)
 				end
-				info.checked = window.db.snapto
-				info.isNotRadio = 1
-				_UIDropDownMenu_AddButton(info, level)
 
 				-- delete window
 				info = _UIDropDownMenu_CreateInfo()
