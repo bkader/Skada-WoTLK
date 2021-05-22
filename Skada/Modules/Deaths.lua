@@ -222,7 +222,9 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 				if player.deathlog and player.deathlog[self.index] then
 					deathlog = player.deathlog[self.index]
 				end
-				if not deathlog then return end
+				if not deathlog then
+					return
+				end
 
 				win.metadata.maxvalue = player.maxhp
 
@@ -251,8 +253,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 						d.id = nr
 						d.spellid = log.spellid
-						d.label = _format("%2.2f: %s", diff or 0, spellname or UNKNOWN)
-						d.reportlabel = _format("%2.2f: %s", diff or 0, _GetspellLink(log.spellid) or spellname or UNKNOWN)
+						d.label = _format("%02.2f: %s", diff or 0, spellname or UNKNOWN)
 						d.icon = spellicon
 						d.time = log.time
 
@@ -264,6 +265,8 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 						d.value = log.hp or 0
 						local change = (log.amount > 0 and "+" or "-") .. Skada:FormatNumber(math_abs(log.amount))
+						d.reportlabel = _format("%02.2f: %s   %s [%s]", diff or 0, _GetspellLink(log.spellid) or spellname or UNKNOWN, change, Skada:FormatNumber(log.hp or 0))
+
 						local extra
 						if (log.overkill or 0) > 0 then
 							extra = extra or {}
@@ -286,15 +289,18 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 							table_insert(extra, "A:" .. Skada:FormatNumber(math_abs(log.absorbed)))
 						end
 
+						if extra then
+							change = "(|cffff0000*|r) " .. change
+							d.reportlabel = d.reportlabel .. " (" .. table_concat(extra, " - ") .. ")"
+						end
+
 						d.valuetext = Skada:FormatValueText(
 							change,
 							self.metadata.columns.Change,
 							Skada:FormatNumber(log.hp or 0),
 							self.metadata.columns.Health,
 							_format("%02.1f%%", 100 * (log.hp or 1) / (player.maxhp or 1)),
-							self.metadata.columns.Percent,
-							extra and table_concat(extra, ", "),
-							self.metadata.columns.OTHER
+							self.metadata.columns.Percent
 						)
 
 						if log.amount > 0 then
@@ -408,7 +414,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 			end
 
 			if entry.overkill and entry.overkill > 0 then
-				tooltip:AddDoubleLine("Overkill", Skada:FormatNumber(entry.overkill), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Overkill"], Skada:FormatNumber(entry.overkill), 1, 1, 1)
 			end
 
 			if entry.resisted and entry.resisted > 0 then
@@ -429,7 +435,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		deathlogmod.metadata = {
 			ordersort = true,
 			tooltip = entry_tooltip,
-			columns = {Change = true, OTHER = true, Health = true, Percent = true}
+			columns = {Change = true, Health = true, Percent = true}
 		}
 		playermod.metadata = {click1 = deathlogmod}
 		self.metadata = {click1 = playermod, icon = "Interface\\Icons\\ability_rogue_feigndeath"}

@@ -2072,17 +2072,28 @@ do
 		local nr = 1
 		for _, data in ipairs(report_table.dataset) do
 			if ((barid and barid == data.id) or (data.id and not barid)) and not data.ignore then
-				local label = data.text or data.label
-				if self.db.profile.reportlinks and (data.reportlabel or data.spellid or data.hyperlink) then
-					label = data.reportlabel or data.hyperlink or self.GetSpellLink(data.spellid) or data.text or data.label
-				end
-				if report_mode.metadata and report_mode.metadata.showspots then
-					sendchat(format("%s. %s   %s", nr, label, data.valuetext), channel, chantype)
+				local label
+				if data.reportlabel then
+					label = data.reportlabel
+				elseif self.db.profile.reportlinks and (data.spellid or data.hyperlink) then
+					label = format("%s   %s", data.hyperlink or self.GetSpellLink(data.spellid) or data.text or data.label, data.valuetext)
 				else
-					sendchat(format("%s   %s", label, data.valuetext), channel, chantype)
+					label = format("%s   %s", data.text or data.label, data.valuetext)
 				end
+
+				if label and report_mode.metadata and report_mode.metadata.showspots then
+					sendchat(format("%s. %s", nr, label), channel, chantype)
+				elseif label then
+					sendchat(label, channel, chantype)
+				end
+
+				if barid then
+					break
+				end
+
 				nr = nr + 1
 			end
+
 			if nr > max then
 				break
 			end
