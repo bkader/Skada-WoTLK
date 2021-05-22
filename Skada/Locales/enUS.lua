@@ -172,7 +172,7 @@ L["Data text"] = true
 L["Text color"] = true
 L["Choose the default color."] = true
 L["Hint: Left-Click to set active mode."] = true
-L["Right-click to set active set."] = true
+L["Right-Click to set active set."] = true
 L["Shift+Left-Click to open menu."] = true
 -- data resets
 L["Data Resets"] = true
@@ -292,16 +292,16 @@ L["Scroll mouse button"] = true
 L["Keybinding"] = true
 L["Key scrolling speed"] = true
 -- minimap button
-L["Skada summary"] = true
-L["Left-Click to toggle windows."] = true
-L["Shift+Left-Click to reset."] = true
-L["Right-click to open menu."] = true
+L["Skada Summary"] = true
+L["|cffeda55fLeft-Click|r to toggle windows."] = true
+L["|cffeda55fShift+Left-Click|r to reset."] = true
+L["|cffeda55fRight-Click|r to open menu."] = true
 -- skada menu
 L["Skada Menu"] = true
 L["Select Segment"] = true
 L["Delete Segment"] = true
 L["Keep Segment"] = true
-L["Toggle window"] = true
+L["Toggle Windows"] = true
 L["Start New Segment"] = true
 -- window buttons
 L["Configure"] = true

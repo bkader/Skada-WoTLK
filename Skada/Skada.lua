@@ -39,7 +39,7 @@ local dataobj = LDB:NewDataObject("Skada", {
 
 -- Keybindings
 BINDING_HEADER_SKADA = "Skada"
-BINDING_NAME_SKADA_TOGGLE = L["Toggle window"]
+BINDING_NAME_SKADA_TOGGLE = L["Toggle Windows"]
 BINDING_NAME_SKADA_RESET = RESET
 BINDING_NAME_SKADA_NEWSEGMENT = L["Start New Segment"]
 BINDING_NAME_SKADA_STOP = L["Stop"]
@@ -1859,7 +1859,7 @@ do
 
 					if data.color then
 						color = data.color
-					elseif data.class and Skada.classcolors[data.class] then
+					elseif data.class and Skada.validclass[data.class] then
 						color = Skada.classcolors[data.class]
 					end
 
@@ -1925,13 +1925,13 @@ function Skada:ShowTooltip(win, id, label)
 			hasClick = nil
 
 			if win.metadata.click1 then
-				t:AddLine(L["Click for"] .. " " .. win.metadata.click1:GetName() .. ".", 0.2, 1, 0.2)
+				t:AddLine(L["Click for"] .. " |cff00ff00" .. win.metadata.click1:GetName() .. "|r.", 1, 0.82, 0)
 			end
 			if win.metadata.click2 then
-				t:AddLine(L["Shift-Click for"] .. " " .. win.metadata.click2:GetName() .. ".", 0.2, 1, 0.2)
+				t:AddLine(L["Shift-Click for"] .. " |cff00ff00" .. win.metadata.click2:GetName() .. "|r.", 1, 0.82, 0)
 			end
 			if win.metadata.click3 then
-				t:AddLine(L["Control-Click for"] .. " " .. win.metadata.click3:GetName() .. ".", 0.2, 1, 0.2)
+				t:AddLine(L["Control-Click for"] .. " |cff00ff00" .. win.metadata.click3:GetName() .. "|r.", 1, 0.82, 0)
 			end
 
 			t:Show()
@@ -2668,7 +2668,8 @@ function dataobj:OnEnter()
 		set = Skada.char.sets[1]
 	end
 	if set then
-		self.tooltip:AddLine(L["Skada summary"], 0, 1, 0)
+		self.tooltip:AddDoubleLine(L["Skada Summary"], Skada.version, 1, 1, 0, 0.96, 0.55, 0.73)
+		self.tooltip:AddLine(" ")
 		self.tooltip:AddDoubleLine(L["Segment Time"], Skada:GetFormatedSetTime(set), 1, 1, 1)
 		for _, mode in ipairs(modes) do
 			if mode.AddToTooltip ~= nil then
@@ -2677,12 +2678,12 @@ function dataobj:OnEnter()
 		end
 		self.tooltip:AddLine(" ")
 	else
-		self.tooltip:AddLine("Skada", 1, 1, 1)
+		self.tooltip:AddDoubleLine("Skada", Skada.version, 1, 1, 0, 0.96, 0.55, 0.73)
 	end
 
-	self.tooltip:AddLine(L["Left-Click to toggle windows."])
-	self.tooltip:AddLine(L["Shift+Left-Click to reset."])
-	self.tooltip:AddLine(L["Right-click to open menu."])
+	self.tooltip:AddLine(L["|cffeda55fLeft-Click|r to toggle windows."], 0.2, 1, 0.2)
+	self.tooltip:AddLine(L["|cffeda55fShift+Left-Click|r to reset."], 0.2, 1, 0.2)
+	self.tooltip:AddLine(L["|cffeda55fRight-Click|r to open menu."], 0.2, 1, 0.2)
 
 	self.tooltip:Show()
 end

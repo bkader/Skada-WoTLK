@@ -101,7 +101,7 @@ local function tooltipHandler(win, tooltip)
 
 	tooltip:AddLine(" ")
 	tooltip:AddLine(L["Hint: Left-Click to set active mode."], 0, 1, 0)
-	tooltip:AddLine(L["Right-click to set active set."], 0, 1, 0)
+	tooltip:AddLine(L["Right-Click to set active set."], 0, 1, 0)
 	tooltip:AddLine(L["Shift+Left-Click to open menu."], 0, 1, 0)
 
 	tooltip:Show()

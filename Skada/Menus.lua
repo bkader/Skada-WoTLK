@@ -44,6 +44,7 @@ function Skada:OpenMenu(window)
 				info.hasArrow = 1
 				info.value = win
 				info.notCheckable = 1
+				info.colorCode = (window and window == win) and "|cffffd100"
 				_UIDropDownMenu_AddButton(info, level)
 			end
 
@@ -57,7 +58,7 @@ function Skada:OpenMenu(window)
 
 			-- toggle window
 			info = _UIDropDownMenu_CreateInfo()
-			info.text = L["Toggle window"]
+			info.text = L["Toggle Windows"]
 			info.func = function()
 				Skada:ToggleWindow()
 			end
