@@ -266,17 +266,17 @@ function Skada:OpenMenu(window)
 					info = _UIDropDownMenu_CreateInfo()
 					info.text = L["Sticky Window"]
 					info.func = function()
-						window.db.snapto = not window.db.snapto
-						if not window.db.snapto then
+						window.db.sticky = not window.db.sticky
+						if not window.db.sticky then
 							for _, win in ipairs(Skada:GetWindows()) do
-								if win.db.snapped[window.db.name] then
-									win.db.snapped[window.db.name] = nil
+								if win.db.sticked[window.db.name] then
+									win.db.sticked[window.db.name] = nil
 								end
 							end
 						end
 						Skada:ApplySettings()
 					end
-					info.checked = window.db.snapto
+					info.checked = window.db.sticky
 					info.isNotRadio = 1
 					_UIDropDownMenu_AddButton(info, level)
 				end
