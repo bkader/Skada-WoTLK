@@ -178,6 +178,7 @@ function Skada.UnitClass(guid, flags, set)
 		-- use to retireve the class.
 		-- If a player is found, it returns the role and spec as well
 		--
+		set = set or Skada.current -- use current set if none is provided.
 		if set and set.players then
 			for _, p in ipairs(set.players) do
 				if p.id == guid then
@@ -186,13 +187,9 @@ function Skada.UnitClass(guid, flags, set)
 			end
 		end
 
-		-- attempt for the current set
-		if Skada.current then
-			for _, p in ipairs(Skada.current.players or {}) do
-				if p.id == guid then
-					return Skada.classnames[p.class], p.class
-				end
-			end
+		-- is it a pet?
+		if pets[guid] then
+			return Skada.classnames.PET, "PET"
 		end
 
 		local class = select(2, GetPlayerInfoByGUID(guid))
@@ -2668,7 +2665,7 @@ function dataobj:OnEnter()
 		set = Skada.char.sets[1]
 	end
 	if set then
-		self.tooltip:AddDoubleLine(L["Skada Summary"], Skada.version, 1, 1, 0, 0.96, 0.55, 0.73)
+		self.tooltip:AddDoubleLine(L["Skada Summary"], Skada.version)
 		self.tooltip:AddLine(" ")
 		self.tooltip:AddDoubleLine(L["Segment Time"], Skada:GetFormatedSetTime(set), 1, 1, 1)
 		for _, mode in ipairs(modes) do
@@ -2678,7 +2675,7 @@ function dataobj:OnEnter()
 		end
 		self.tooltip:AddLine(" ")
 	else
-		self.tooltip:AddDoubleLine("Skada", Skada.version, 1, 1, 0, 0.96, 0.55, 0.73)
+		self.tooltip:AddDoubleLine("Skada", Skada.version)
 	end
 
 	self.tooltip:AddLine(L["|cffeda55fLeft-Click|r to toggle windows."], 0.2, 1, 0.2)
