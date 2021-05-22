@@ -1,11 +1,9 @@
 assert(Skada, "Skada not found!")
 
 -- cache frequently used globals
-local _pairs, _ipairs = pairs, ipairs
-local _format, _select, _tostring = string.format, select, tostring
+local _pairs, _format, _select, _tostring = pairs, string.format, select, tostring
 local math_min, math_max = math.min, math.max
-local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-local _UnitClass = Skada.UnitClass
+local _UnitClass, _GetSpellInfo = Skada.UnitClass, Skada.GetSpellInfo or GetSpellInfo
 
 --
 -- common functions to both modules that handle aura apply/remove log
@@ -226,7 +224,7 @@ end
 --
 local function auras_tick(set, auratype)
 	if set and auratype then
-		for _, player in _ipairs(set.players) do
+		for _, player in Skada:IteratePlayers(set) do
 			if player.auras then
 				for _, spell in _pairs(player.auras) do
 					if spell.auratype == auratype and (spell.active or 0) == 1 then
@@ -266,7 +264,7 @@ do
 		if settime > 0 and auratype then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				local auracount, aurauptime = countauras(player.auras, auratype)
 
 				if auracount > 0 and aurauptime > 0 then
@@ -376,7 +374,7 @@ end
 -- called on SetComplete to remove active auras
 local function setcompletefunc(set, auratype)
 	if set and auratype then
-		for _, player in _ipairs(set.players) do
+		for _, player in Skada:IteratePlayers(set) do
 			if player.auras then
 				local maxtime = Skada:PlayerActiveTime(set, player, true)
 				for spellname, spell in _pairs(player.auras) do

@@ -177,7 +177,7 @@ local ExtraCCSpells = {
 	[67890] = 4 -- Cobalt Frag Bomb
 }
 
-local _pairs, _ipairs, _select, _format = pairs, ipairs, select, string.format
+local _pairs, _select, _format = pairs, select, string.format
 local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local _GetSpellLink = Skada.GetSpellLink or GetSpellLink
 local _UnitClass = Skada.UnitClass
@@ -450,7 +450,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				if player.ccdone and (player.ccdone.count or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
@@ -772,7 +772,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				if player.cctaken and (player.cctaken.count or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
@@ -1138,7 +1138,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				if player.ccbreaks and (player.ccbreaks.count or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d

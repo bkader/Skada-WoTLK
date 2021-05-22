@@ -194,7 +194,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				if player.damagedone and player.damagedone.targets and player.damagedone.targets[win.targetname] then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
@@ -226,7 +226,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 	function mod:GetEnemies(set)
 		local enemies = {}
-		for _, player in _ipairs(set.players) do
+		for _, player in Skada:IteratePlayers(set) do
 			if player.damagedone and player.damagedone.targets then
 				for enemyname, enemy in _pairs(player.damagedone.targets) do
 					if not enemies[enemyname] then
@@ -490,7 +490,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 			if total > 0 then
 				local maxvalue, nr = 0, 1
 
-				for _, player in _ipairs(set.players) do
+				for _, player in Skada:IteratePlayers(set) do
 					if player.damagetaken and player.damagetaken.sources and player.damagetaken.sources[win.targetname] then
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
@@ -523,7 +523,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 
 	function mod:GetEnemies(set)
 		local enemies = {}
-		for _, player in _ipairs(set.players) do
+		for _, player in Skada:IteratePlayers(set) do
 			if player.damagetaken and player.damagetaken.sources then
 				for enemyname, enemy in _pairs(player.damagetaken.sources) do
 					if not enemies[enemyname] then

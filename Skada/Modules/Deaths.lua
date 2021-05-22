@@ -363,7 +363,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				if (player.deaths or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
@@ -462,7 +462,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	end
 
 	function mod:SetComplete(set)
-		for _, player in _ipairs(set.players) do
+		for _, player in Skada:IteratePlayers(set) do
 			if player.deaths and player.deaths == 0 then
 				player.deathlog = nil
 			elseif player.deaths and player.deathlog then

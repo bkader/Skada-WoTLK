@@ -9,8 +9,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	local playerGUID
 
 	-- cache frequently used globals
-	local _pairs, _ipairs = pairs, ipairs
-	local _format, math_max = string.format, math.max
+	local _pairs, _format, math_max = pairs, string.format, math.max
 	local _UnitGUID, _UnitClass = UnitGUID, Skada.UnitClass
 	local _IsInInstance = IsInInstance
 	local _SendChatMessage = SendChatMessage
@@ -255,7 +254,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				if player.interrupts and (player.interrupts.count or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d

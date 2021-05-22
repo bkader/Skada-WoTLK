@@ -638,7 +638,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				local dps, amount = getDPS(set, player)
 
 				if amount > 0 then
@@ -800,7 +800,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			set.damagedone.targets = nil
 		end
 		-- clear players.
-		for _, player in _ipairs(set.players) do
+		for _, player in Skada:IteratePlayers(set) do
 			if player.damagedone and player.damagedone.amount == 0 then
 				player.damagedone.spells = nil
 				player.damagedone.targets = nil
@@ -846,7 +846,7 @@ Skada:AddLoadableModule("DPS", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				local amount = getDPS(set, player)
 
 				if amount > 0 then
@@ -967,7 +967,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 		if win and win.selectedset ~= "total" then
 			cached = wipe(cached or {})
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				if player.damagedone and player.damagedone.spells then
 					for spellname, spell in _pairs(player.damagedone.spells) do
 						if spell.amount > 0 then
@@ -1082,7 +1082,7 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				local dps, amount = getDPS(set, player)
 
 				if amount > 0 then
@@ -1205,7 +1205,7 @@ Skada:AddLoadableModule("Overkill", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				if player.damagedone and (player.damagedone.overkill or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d

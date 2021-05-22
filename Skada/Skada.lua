@@ -180,7 +180,7 @@ function Skada.UnitClass(guid, flags, set)
 		--
 		set = set or Skada.current -- use current set if none is provided.
 		if set and set.players then
-			for _, p in self:IteratePlayers(set) do
+			for _, p in Skada:IteratePlayers(set) do
 				if p.id == guid then
 					return Skada.classnames[p.class], p.class, p.role, p.spec
 				end

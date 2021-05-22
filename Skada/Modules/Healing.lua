@@ -1,8 +1,8 @@
 assert(Skada, "Skada not found!")
 
 -- cache frequently used globals
-local _pairs, _ipairs, _select = pairs, ipairs, select
-local _format, math_max, math_min, _time = string.format, math.max, math.min, time
+local _pairs, _select, _format = pairs, select, string.format
+local math_max, math_min, _time = math.max, math.min, time
 local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 
 -- ============== --
@@ -255,7 +255,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				local hps, amount = getHPS(set, player)
 				if amount > 0 then
 					local d = win.dataset[nr] or {}
@@ -428,7 +428,7 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 		if (set.overhealing or 0) > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				if player.healing and (player.healing.overhealing or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
@@ -635,7 +635,7 @@ Skada:AddLoadableModule("Total Healing", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				local hps, amount = getHPS(set, player)
 				if amount > 0 then
 					local d = win.dataset[nr] or {}
@@ -809,7 +809,7 @@ Skada:AddLoadableModule("Healing and overhealing", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				if player.healing then
 					local amount = (player.healing.amount or 0) + (player.healing.overhealing or 0)
 					local d = win.dataset[nr] or {}
@@ -894,7 +894,7 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 
 			local total, sources = 0, {}
 
-			for _, p in _ipairs(set.players) do
+			for _, p in Skada:IteratePlayers(set) do
 				if p.healing and p.healing.targets then
 					for targetname, target in _pairs(p.healing.targets) do
 						if target.id == player.id and targetname == player.name then
@@ -954,7 +954,7 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 		if total > 0 then
 			local players = {}
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				if player.healing then
 					for targetname, target in _pairs(player.healing.targets) do
 						if not players[targetname] then

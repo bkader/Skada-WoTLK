@@ -264,7 +264,7 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 			local encounter = find_encounter_data(boss, set.starttime)
 			if not encounter then return end
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				if player.id == self.db.id then
 					for _, mode in _ipairs(modes) do
 						if updaters[mode] then

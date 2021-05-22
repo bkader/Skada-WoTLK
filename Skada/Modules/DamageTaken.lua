@@ -591,7 +591,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				local dtps, amount = getDTPS(set, player)
 
 				if amount > 0 then
@@ -685,7 +685,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 			set.damagetaken.sources = nil
 		end
 		-- clear players.
-		for _, player in _ipairs(set.players) do
+		for _, player in Skada:IteratePlayers(set) do
 			if player.damagetaken and player.damagetaken.amount == 0 then
 				player.damagetaken.spells = nil
 				player.damagetaken.sources = nil
@@ -715,7 +715,7 @@ Skada:AddLoadableModule("DTPS", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				local amount = getDTPS(set, player)
 
 				if amount > 0 then
@@ -828,7 +828,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(Skada, L)
 			if total == 0 then return end
 
 			cached = {}
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				if player.damagetaken and (player.damagetaken.amount or 0) > 0 then
 					for spellname, spell in _pairs(player.damagetaken.spells) do
 						if spell.amount > 0 then
@@ -960,7 +960,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 		if set.damagetaken and (set.damagetaken.amount or 0) > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				if player.damagetaken and (player.damagetaken.amount or 0) > 0 then
 					local tmp = {name = player.name, data = {}}
 
@@ -1229,7 +1229,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 		if set.damagetaken and (set.damagetaken.amount) > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				local amount, total = getMIT(player)
 
 				if amount > 0 then

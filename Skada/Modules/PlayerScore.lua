@@ -8,8 +8,7 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 	end
 
 	local mod = Skada:NewModule(L["Player Score"])
-
-	local ipairs, format = ipairs, string.format
+	local format = string.format
 
 	local mindamagetaken = 100000
 	local multipliers = {
@@ -42,7 +41,7 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 		local raidscore = 0
 		if set and set.players then
 			local count = 0
-			for _, player in ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				local damage = player.damagedone and player.damagedone.amount or 0
 				local healing = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
 				local mitigation = GetPlayerMitigation(player)
@@ -119,7 +118,7 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 	function mod:Update(win, set)
 		local maxvalue, nr = 0, 1
 
-		for _, player in ipairs(set.players) do
+		for _, player in Skada:IteratePlayers(set) do
 			local damagedone = player.damagedone and player.damagedone.amount or 0
 			local healing = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
 			local mitigation = GetPlayerMitigation(player)

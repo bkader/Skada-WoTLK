@@ -200,7 +200,7 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 	-- as the nickname to avoid further check.
 	function mod:find_player(_, set, guid)
 		if not Skada.db.profile.ignorenicknames and set and guid and not Skada:IsPet(guid) then
-			for _, player in ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				if player.id == guid then
 					if not player.nickname then -- we update only if needed.
 						if self.db.nicknames[guid] then

@@ -5,7 +5,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 	local mod = Skada:NewModule(L["Sunder Counter"])
 	local targetmod = mod:NewModule(L["Sunder target list"])
 
-	local _pairs, _ipairs, _select, _format = pairs, ipairs, select, string.format
+	local _pairs, _select, _format = pairs, select, string.format
 	local _UnitClass, _GetSpellInfo = Skada.UnitClass, Skada.GetSpellInfo or GetSpellInfo
 
 	local sunder, devastate
@@ -113,7 +113,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				if player.sunders and (player.sunders.count > 0) then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d

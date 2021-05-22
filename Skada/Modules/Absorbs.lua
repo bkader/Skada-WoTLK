@@ -1,10 +1,9 @@
 assert(Skada, "Skada not found!")
 
 -- cache frequently used globals
-local _pairs, _ipairs, _select = pairs, ipairs, select
-local _format, math_max, math_min = string.format, math.max, math.min
-local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-local _UnitGUID = UnitGUID
+local _pairs, _select, _format = pairs, select, string.format
+local math_min, math_max = math.min, math.max
+local _UnitGUID, _GetSpellInfo = UnitGUID, Skada.GetSpellInfo or GetSpellInfo
 
 -- ============== --
 -- Absorbs module --
@@ -555,7 +554,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				if player.absorbs and (player.absorbs.amount or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
@@ -846,7 +845,7 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				local hps, amount = getHPS(set, player)
 
 				if amount > 0 then
@@ -1026,7 +1025,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 
 	local function CacheSpells(set)
 		spells = Skada:WeakTable()
-		for _, player in _ipairs(set.players) do
+		for _, player in Skada:IteratePlayers(set) do
 			if player.healing and player.healing.spells then
 				for spellid, spell in _pairs(player.healing.spells) do
 					if (spell.amount or 0) > 0 then

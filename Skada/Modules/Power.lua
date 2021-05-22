@@ -11,7 +11,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 		[6] = RUNIC_POWER
 	}
 
-	local _pairs, _ipairs, _select, _format = pairs, ipairs, select, string.format
+	local _pairs, _select, _format = pairs, select, string.format
 	local _setmetatable, _GetSpellInfo = setmetatable, Skada.GetSpellInfo or GetSpellInfo
 
 	local function log_gain(set, gain)
@@ -120,7 +120,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 			if total > 0 then
 				local maxvalue, nr = 0, 1
 
-				for _, player in _ipairs(set.players) do
+				for _, player in Skada:IteratePlayers(set) do
 					if player.power[self.power] then
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d

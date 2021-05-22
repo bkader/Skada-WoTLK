@@ -8,9 +8,8 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 	local playermod = mod:NewModule(L["Dispel spell list"])
 
 	-- cache frequently used globals
-	local _pairs, _ipairs, _format = pairs, ipairs, string.format
-	local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-	local _UnitClass = Skada.UnitClass
+	local _pairs, _format = pairs, string.format
+	local _UnitClass, _GetSpellInfo = Skada.UnitClass, Skada.GetSpellInfo or GetSpellInfo
 
 	local function log_dispels(set, data)
 		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
@@ -224,7 +223,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				if player.dispels and (player.dispels.count or 0) then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d

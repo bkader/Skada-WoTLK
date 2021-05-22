@@ -67,7 +67,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				if player.fails and player.fails.spells[win.spellid] then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
@@ -147,7 +147,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in _ipairs(set.players) do
+			for _, player in Skada:IteratePlayers(set) do
 				if player.fails and (player.fails.count or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
