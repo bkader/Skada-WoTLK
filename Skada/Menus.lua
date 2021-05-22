@@ -536,7 +536,7 @@ do
 		local frame = Skada.reportwindow
 		frame:SetLayout("List")
 		frame:EnableResize(false)
-		frame:SetWidth(250)
+		frame:SetWidth(225)
 		frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
 
 		if window then
@@ -557,9 +557,23 @@ do
 			frame:SetHeight(height + 57)
 		end
 
+		local barid
 		if window then
 			Skada.db.profile.report.set = window.selectedset
 			Skada.db.profile.report.mode = window.db.mode
+
+			-- report a specific line
+			local linebox = AceGUI:Create("Dropdown")
+			linebox:SetLabel(L["Line"])
+			linebox:SetList({[""] = NONE})
+			for _, bar in _ipairs(window.dataset) do
+				if bar.id and not bar.ignore then
+					linebox:AddItem(bar.id, _format("%s   %s", bar.text or bar.label, bar.valuetext))
+				end
+			end
+			linebox:SetCallback("OnValueChanged", function(f, e, value) barid = (value ~= "") and value or nil end)
+			linebox:SetValue(barid or "")
+			frame:AddChild(linebox)
 		else
 			-- Mode, default last chosen or first available.
 			local modebox = AceGUI:Create("Dropdown")
@@ -695,7 +709,7 @@ do
 			end
 
 			if channel and chantype and mode and set and number then
-				Skada:Report(channel, chantype, mode, set, number, window)
+				Skada:Report(channel, chantype, mode, set, number, window, barid)
 				frame:Hide()
 			else
 				Skada:Print("Error: Whisper target not found")

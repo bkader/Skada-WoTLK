@@ -2024,7 +2024,7 @@ do
 		end
 	end
 
-	function Skada:Report(channel, chantype, report_mode_name, report_set_name, max, window)
+	function Skada:Report(channel, chantype, report_mode_name, report_set_name, max, window, barid)
 		if chantype == "channel" then
 			local list = {GetChannelList()}
 			for i = 1, table.getn(list) / 2 do
@@ -2071,7 +2071,7 @@ do
 
 		local nr = 1
 		for _, data in ipairs(report_table.dataset) do
-			if data.id and not data.ignore then
+			if ((barid and barid == data.id) or (data.id and not barid)) and not data.ignore then
 				local label = data.text or data.label
 				if self.db.profile.reportlinks and (data.reportlabel or data.spellid or data.hyperlink) then
 					label = data.reportlabel or data.hyperlink or self.GetSpellLink(data.spellid) or data.text or data.label

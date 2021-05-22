@@ -324,6 +324,7 @@ L["Channel"] = true
 L["Self"] = true
 L["Whisper"] = true
 L["Whisper Target"] = true
+L["Line"] = true
 L["Lines"] = true
 L["There is nothing to report."] = true
 L["No mode or segment selected for report."] = true
