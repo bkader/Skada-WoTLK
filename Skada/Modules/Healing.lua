@@ -147,7 +147,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 				end
 				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
 				if (spell.critical or 0) > 0 then
-					tooltip:AddDoubleLine(CRIT_ABBR, _format("%02.1f%%", 100 * spell.critical / math_max(1, spell.count)), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Critical"], _format("%02.1f%%", 100 * spell.critical / math_max(1, spell.count)), 1, 1, 1)
 				end
 				if (spell.overhealing or 0) > 0 then
 					tooltip:AddDoubleLine(L["Overhealing"], _format("%02.1f%%", 100 * spell.overhealing / math_max(1, spell.overhealing + spell.amount)), 1, 1, 1)

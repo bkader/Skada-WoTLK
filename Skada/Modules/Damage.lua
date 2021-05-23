@@ -412,13 +412,13 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 				end
 
 				if absorbed then
-					tooltip:AddDoubleLine(ABSORB, _format("%s (%02.1f%%)", Skada:FormatNumber(absorbed), 100 * absorbed / math_max(total)), 1, 1, 1)
+					tooltip:AddDoubleLine(L["ABSORB"], _format("%s (%02.1f%%)", Skada:FormatNumber(absorbed), 100 * absorbed / math_max(total)), 1, 1, 1)
 				end
 				if blocked then
-					tooltip:AddDoubleLine(BLOCK, _format("%s (%02.1f%%)", Skada:FormatNumber(blocked), 100 * blocked / math_max(total)), 1, 1, 1)
+					tooltip:AddDoubleLine(L["BLOCK"], _format("%s (%02.1f%%)", Skada:FormatNumber(blocked), 100 * blocked / math_max(total)), 1, 1, 1)
 				end
 				if resisted then
-					tooltip:AddDoubleLine(RESIST, _format("%s (%02.1f%%)", Skada:FormatNumber(resisted), 100 * resisted / math_max(total)), 1, 1, 1)
+					tooltip:AddDoubleLine(L["RESIST"], _format("%s (%02.1f%%)", Skada:FormatNumber(resisted), 100 * resisted / math_max(total)), 1, 1, 1)
 				end
 
 				if target.max and target.min then
@@ -430,15 +430,14 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 				tooltip:AddLine(_format(L["%s's damage breakdown"], label))
 				tooltip:AddDoubleLine(L["Total hits"], target.totalhits or 0, 1, 1, 1)
 				if (target.hit or 0) > 0 then
-					tooltip:AddDoubleLine(HIT, _format("%d (%02.1f%%)", target.hit, 100 * target.hit / math_max(1, target.totalhits or 0)), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Hit"], _format("%d (%02.1f%%)", target.hit, 100 * target.hit / math_max(1, target.totalhits or 0)), 1, 1, 1)
 				end
 				if (target.critical or 0) > 0 then
-					tooltip:AddDoubleLine(CRIT_ABBR, _format("%d (%02.1f%%)", target.critical, 100 * target.critical / math_max(1, target.totalhits or 0)), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Critical"], _format("%d (%02.1f%%)", target.critical, 100 * target.critical / math_max(1, target.totalhits or 0)), 1, 1, 1)
 				end
 				for _, misstype in _ipairs(misstypes) do
 					if (target[misstype] or 0) > 0 then
-						local title = _G[misstype] or _G["ACTION_SPELL_MISSED" .. misstype] or misstype
-						tooltip:AddDoubleLine(title, _format("%d (%02.1f%%)", target[misstype], 100 * target[misstype] / math_max(1, target.totalhits or 0)), 1, 1, 1)
+						tooltip:AddDoubleLine(L[misstype], _format("%d (%02.1f%%)", target[misstype], 100 * target[misstype] / math_max(1, target.totalhits or 0)), 1, 1, 1)
 					end
 				end
 			end
@@ -446,7 +445,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	end
 
 	local function spellmod_tooltip(win, id, label, tooltip)
-		if label == CRIT_ABBR or label == HIT or label == ABSORB or label == BLOCK or label == RESIST then
+		if label == L["Critical"] or label == L["Hit"] or label == L["ABSORB"] or label == L["BLOCK"] or label == L["RESIST"] then
 			local player = Skada:find_player(win:get_selected_set(), win.playerid)
 			if player and player.damagedone then
 				local spell = player.damagedone.spells and player.damagedone.spells[win.spellname]
@@ -459,19 +458,19 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 						if c and n then tooltip:AddLine(n, c.r, c.g, c.b) end
 					end
 
-					if label == CRIT_ABBR and spell.criticalamount then
+					if label == L["Critical"] and spell.criticalamount then
 						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.criticalmin), 1, 1, 1)
 						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.criticalmax), 1, 1, 1)
 						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.criticalamount / spell.critical), 1, 1, 1)
-					elseif label == HIT and spell.hitamount then
+					elseif label == L["Hit"] and spell.hitamount then
 						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
 						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
 						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
-					elseif label == ABSORB and (spell.absorbed or 0) > 0 then
+					elseif label == L["ABSORB"] and (spell.absorbed or 0) > 0 then
 						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.absorbed), 1, 1, 1)
-					elseif label == BLOCK and (spell.blocked or 0) > 0 then
+					elseif label == L["BLOCK"] and (spell.blocked or 0) > 0 then
 						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.blocked), 1, 1, 1)
-					elseif label == RESIST and (spell.resisted or 0) > 0 then
+					elseif label == L["RESIST"] and (spell.resisted or 0) > 0 then
 						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.resisted), 1, 1, 1)
 					end
 				end
@@ -611,10 +610,10 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 				end
 
 				if (spell.hit or 0) > 0 then
-					nr = add_detail_bar(win, nr, HIT, spell.hit)
+					nr = add_detail_bar(win, nr, L["Hit"], spell.hit)
 				end
 				if (spell.critical or 0) > 0 then
-					nr = add_detail_bar(win, nr, CRIT_ABBR, spell.critical)
+					nr = add_detail_bar(win, nr, L["Critical"], spell.critical)
 				end
 				if (spell.glancing or 0) > 0 then
 					nr = add_detail_bar(win, nr, L["Glancing"], spell.glancing)
@@ -624,7 +623,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 				end
 				for _, misstype in _ipairs(misstypes) do
 					if (spell[misstype] or 0) > 0 then
-						nr = add_detail_bar(win, nr, _G[misstype] or _G["ACTION_SPELL_MISSED" .. misstype] or misstype, spell[misstype])
+						nr = add_detail_bar(win, nr, L[misstype], spell[misstype])
 					end
 				end
 			end

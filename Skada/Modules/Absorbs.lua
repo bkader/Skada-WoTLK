@@ -260,7 +260,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					spell.min = amount
 				end
 				if (not spell.max or amount > spell.max) and amount > 0 then
-					spell.maxvalue = amount
+					spell.max = amount
 				end
 			end
 		end
@@ -693,7 +693,7 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 				end
 				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
 				if (spell.critical or 0) > 0 then
-					tooltip:AddDoubleLine(CRIT_ABBR, _format("%02.1f%%", 100 * spell.critical / spell.count), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Critical"], _format("%02.1f%%", 100 * spell.critical / spell.count), 1, 1, 1)
 				end
 				if (spell.overhealing or 0) > 0 then
 					tooltip:AddDoubleLine(L["Overhealing"], _format("%02.1f%%", 100 * spell.overhealing / (spell.overhealing + spell.amount)), 1, 1, 1)

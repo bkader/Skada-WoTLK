@@ -20,7 +20,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	local spellmod = playermod:NewModule(L["Damage spell details"])
 
 	local function spellmod_tooltip(win, id, label, tooltip)
-		if label == CRIT_ABBR or label == HIT or label == ABSORB or label == BLOCK or label == RESIST then
+		if label == L["Critical"] or label == L["Hit"] or label == L["ABSORB"] or label == L["BLOCK"] or label == L["RESIST"] then
 			local player = Skada:find_player(win:get_selected_set(), win.playerid, win.playername)
 			if player and player.damagedone and player.damagedone.spells then
 				local spell = player.damagedone.spells[win.spellname]
@@ -38,21 +38,21 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 						if c and n then tooltip:AddLine(n, c.r, c.g, c.b) end
 					end
 
-					if label == CRIT_ABBR and spell.criticalamount then
+					if label == L["Critical"] and spell.criticalamount then
 						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.criticalmin), 1, 1, 1)
 						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.criticalmax), 1, 1, 1)
 						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.criticalamount / spell.critical), 1, 1, 1)
 					end
 
-					if label == HIT and spell.hitamount then
+					if label == L["Hit"] and spell.hitamount then
 						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
 						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
 						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
-					elseif label == ABSORB and spell.absorbed and spell.absorbed > 0 then
+					elseif label == L["ABSORB"] and spell.absorbed and spell.absorbed > 0 then
 						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.absorbed), 1, 1, 1)
-					elseif label == BLOCK and spell.blocked and spell.blocked > 0 then
+					elseif label == L["BLOCK"] and spell.blocked and spell.blocked > 0 then
 						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.blocked), 1, 1, 1)
-					elseif label == RESISTED and spell.resisted and spell.resisted > 0 then
+					elseif label == L["RESIST"]ED and spell.resisted and spell.resisted > 0 then
 						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.resisted), 1, 1, 1)
 					end
 				end
@@ -96,12 +96,12 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 					win.title = _format(L["%s's <%s> damage on %s"], player.name, spellname, win.targetname)
 
 					if spell.hit and spell.hit > 0 then
-						add_detail_bar(win, nr, HIT, spell.hit)
+						add_detail_bar(win, nr, L["Hit"], spell.hit)
 						nr = nr + 1
 					end
 
 					if spell.critical and spell.critical > 0 then
-						add_detail_bar(win, nr, CRIT_ABBR, spell.critical)
+						add_detail_bar(win, nr, L["Critical"], spell.critical)
 						nr = nr + 1
 					end
 
@@ -117,8 +117,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 					for i, misstype in _ipairs(misstypes) do
 						if spell[misstype] and spell[misstype] > 0 then
-							local title = _G[misstype] or _G["ACTION_SPELL_MISSED" .. misstype] or misstype
-							add_detail_bar(win, nr, title, spell[misstype])
+							add_detail_bar(win, nr, L[misstype], spell[misstype])
 							nr = nr + 1
 						end
 					end
@@ -320,7 +319,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 	local spellmod = playermod:NewModule(L["Damage spell details"])
 
 	local function spellmod_tooltip(win, id, label, tooltip)
-		if label == CRIT_ABBR or label == HIT or label == ABSORB or label == BLOCK or label == RESIST then
+		if label == L["Critical"] or label == L["Hit"] or label == L["ABSORB"] or label == L["BLOCK"] or label == L["RESIST"] then
 			local player = Skada:find_player(win:get_selected_set(), win.playerid, win.playername)
 			if player and player.damagetaken and player.damagetaken.spells then
 				local spell = player.damagetaken.spells[win.spellname]
@@ -338,21 +337,21 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 						if c and n then tooltip:AddLine(n, c.r, c.g, c.b) end
 					end
 
-					if label == CRIT_ABBR and spell.criticalamount then
+					if label == L["Critical"] and spell.criticalamount then
 						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.criticalmin), 1, 1, 1)
 						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.criticalmax), 1, 1, 1)
 						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.criticalamount / spell.critical), 1, 1, 1)
 					end
 
-					if label == HIT and spell.hitamount then
+					if label == L["Hit"] and spell.hitamount then
 						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
 						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
 						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
-					elseif label == ABSORB and spell.absorbed and spell.absorbed > 0 then
+					elseif label == L["ABSORB"] and spell.absorbed and spell.absorbed > 0 then
 						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.absorbed), 1, 1, 1)
-					elseif label == BLOCK and spell.blocked and spell.blocked > 0 then
+					elseif label == L["BLOCK"] and spell.blocked and spell.blocked > 0 then
 						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.blocked), 1, 1, 1)
-					elseif label == RESISTED and spell.resisted and spell.resisted > 0 then
+					elseif label == L["RESIST"]ED and spell.resisted and spell.resisted > 0 then
 						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.resisted), 1, 1, 1)
 					end
 				end
@@ -395,12 +394,12 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 					win.title = _format(L["%s's <%s> damage on %s"], win.targetname, spellname, player.name)
 
 					if spell.hit and spell.hit > 0 then
-						add_detail_bar(win, nr, HIT, spell.hit)
+						add_detail_bar(win, nr, L["Hit"], spell.hit)
 						nr = nr + 1
 					end
 
 					if spell.critical and spell.critical > 0 then
-						add_detail_bar(win, nr, CRIT_ABBR, spell.critical)
+						add_detail_bar(win, nr, L["Critical"], spell.critical)
 						nr = nr + 1
 					end
 
@@ -416,8 +415,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 
 					for i, misstype in _ipairs(misstypes) do
 						if spell[misstype] and spell[misstype] > 0 then
-							local title = _G[misstype] or _G["ACTION_SPELL_MISSED" .. misstype] or misstype
-							add_detail_bar(win, nr, title, spell[misstype])
+							add_detail_bar(win, nr, L[misstype], spell[misstype])
 							nr = nr + 1
 						end
 					end
