@@ -28,6 +28,20 @@ L["Percent"] = true
 L["General Options"] = true
 L["HoT"] = " (|cffb7b7a4HoT|r)"
 L["DoT"] = " (|cffb7b7a4DoT|r)"
+L["Hit"] = true
+L["Critical"] = true
+L["Crushing"] = true
+L["Glancing"] = true
+L["ABSORB"] = "Absorb"
+L["BLOCK"] = "Block"
+L["DEFLECT"] = "Deflect"
+L["DODGE"] = "Dodge"
+L["EVADE"] = "Evade"
+L["IMMUNE"] = "Immune"
+L["MISS"] = "Miss"
+L["PARRY"] = "Parry"
+L["REFLECT"] = "Reflect"
+L["RESIST"] = "Resist"
 -- windows section:
 L["Window"] = true
 L["Windows"] = true
@@ -486,9 +500,6 @@ L["Damage Breakdown"] = true
 L["%s's damage breakdown"] = true
 -- friendly fire module
 L["Friendly Fire"] = true
-L["Critical"] = true
-L["Glancing"] = true
-L["Crushing"] = true
 -- useful damage targets
 L["Useful targets"] = true
 L["Oozes"] = true
