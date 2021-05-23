@@ -52,7 +52,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.absorbed), 1, 1, 1)
 					elseif label == L["BLOCK"] and spell.blocked and spell.blocked > 0 then
 						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.blocked), 1, 1, 1)
-					elseif label == L["RESIST"]ED and spell.resisted and spell.resisted > 0 then
+					elseif label == L["RESIST"] and spell.resisted and spell.resisted > 0 then
 						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.resisted), 1, 1, 1)
 					end
 				end
@@ -351,7 +351,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.absorbed), 1, 1, 1)
 					elseif label == L["BLOCK"] and spell.blocked and spell.blocked > 0 then
 						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.blocked), 1, 1, 1)
-					elseif label == L["RESIST"]ED and spell.resisted and spell.resisted > 0 then
+					elseif label == L["RESIST"] and spell.resisted and spell.resisted > 0 then
 						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.resisted), 1, 1, 1)
 					end
 				end
