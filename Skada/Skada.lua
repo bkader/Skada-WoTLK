@@ -460,7 +460,7 @@ do
 						if copywindow then
 							for _, win in Skada:IterateWindows() do
 								if win.db.name == copywindow and win.db.display == db.display then
-									Skada:tcopy(newdb, win.db, {"name", "snapped", "x", "y", "point"})
+									Skada:tcopy(newdb, win.db, {"name", "sticked", "x", "y", "point"})
 									break
 								end
 							end
@@ -518,20 +518,20 @@ do
 				end
 			}
 
-			options.args.snapto = {
+			options.args.sticky = {
 				type = "toggle",
 				name = L["Sticky Window"],
 				desc = L["Allows the window to stick to other Skada windows."],
 				order = 6,
 				get = function()
-					return db.snapto
+					return db.sticky
 				end,
 				set = function()
-					db.snapto = not db.snapto
-					if not db.snapto then
+					db.sticky = not db.sticky
+					if not db.sticky then
 						for _, win in Skada:IterateWindows() do
-							if win.db.snapped[db.name] then
-								win.db.snapped[db.name] = nil
+							if win.db.sticked[db.name] then
+								win.db.sticked[db.name] = nil
 							end
 						end
 					end
@@ -922,8 +922,9 @@ function Skada:CreateWindow(name, db, display)
 		db.scale = 1
 	end
 
-	if not db.snapped then
-		db.snapped = {}
+	if db.snapped or not db.sticked then
+		db.sticky, db.sticked = true, {}
+		db.snapto, db.snapped = false, nil
 	end
 
 	local window = Window:new()

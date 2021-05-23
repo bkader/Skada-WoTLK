@@ -134,12 +134,6 @@ function mod:Create(window)
 
 	window.bargroup = bargroup
 
-	-- backward compat
-	if window.db.snapped or not window.db.sticked then
-		window.db.sticky, window.db.sticked = true, {}
-		window.db.snapped, window.db.snapto = nil, false
-	end
-
 	if not class_icon_tcoords then
 		class_icon_file, class_icon_tcoords = Skada.classiconfile, Skada.classicontcoords
 		role_icon_file, role_icon_tcoords = Skada.roleiconfile, Skada.roleicontcoords
