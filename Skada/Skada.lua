@@ -356,19 +356,19 @@ do
 
 		local options = {
 			type = "group",
-			name = function()
-				return db.name
+			name = function() return db.name end,
+			get = function(i) return db[i[#i]] end,
+			set = function(i, val)
+				db[i[#i]] = val
+				Skada:ApplySettings()
 			end,
 			args = {
-				rename = {
+				name = {
 					type = "input",
 					name = L["Rename Window"],
 					desc = L["Enter the name for the window."],
 					order = 1,
 					width = "double",
-					get = function()
-						return db.name
-					end,
 					set = function(_, val)
 						if val ~= db.name and val ~= "" then
 							local oldname = db.name
@@ -390,51 +390,34 @@ do
 						end
 						return list
 					end,
-					get = function()
-						return db.display
-					end,
 					set = function(_, display)
 						db.display = display
 						Skada:ReloadSettings()
 					end
 				},
-				locked = {
+				barslocked = {
 					type = "toggle",
 					name = L["Lock Window"],
 					desc = L["Locks the bar window in place."],
-					order = 4,
-					get = function()
-						return db.barslocked
-					end,
-					set = function()
-						db.barslocked = not db.barslocked
-						Skada:ApplySettings()
-					end
+					order = 4
 				},
 				hidden = {
 					type = "toggle",
 					name = L["Hide Window"],
 					desc = L["Hides the window."],
-					order = 5,
-					get = function()
-						return db.hidden
-					end,
-					set = function()
-						db.hidden = not db.hidden
-						Skada:ApplySettings()
-					end
+					order = 5
 				},
 				separator1 = {
 					type = "description",
 					name = " ",
-					order = 7,
+					order = 8,
 					width = "full"
 				},
 				copywin = {
 					type = "select",
 					name = L["Copy Settings"],
 					desc = L["Choose the window from which you want to copy the settings."],
-					order = 8,
+					order = 9,
 					values = function()
 						local list = {}
 						for _, win in Skada:IterateWindows() do
@@ -444,17 +427,13 @@ do
 						end
 						return list
 					end,
-					get = function()
-						return copywindow
-					end,
-					set = function(_, val)
-						copywindow = val
-					end
+					get = function() return copywindow end,
+					set = function(_, val) copywindow = val end
 				},
 				copyexec = {
 					type = "execute",
 					name = L["Copy Settings"],
-					order = 9,
+					order = 10,
 					func = function()
 						local newdb = {}
 						if copywindow then
@@ -475,21 +454,17 @@ do
 				separator2 = {
 					type = "description",
 					name = " ",
-					order = 10,
+					order = 11,
 					width = "full"
 				},
 				delete = {
 					type = "execute",
 					name = L["Delete Window"],
 					desc = L["Choose the window to be deleted."],
-					order = 9,
+					order = 12,
 					width = "double",
-					confirm = function()
-						return L["Are you sure you want to delete this window?"]
-					end,
-					func = function()
-						Skada:DeleteWindow(db.name, true)
-					end
+					confirm = function() return L["Are you sure you want to delete this window?"] end,
+					func = function() Skada:DeleteWindow(db.name, true) end
 				}
 			}
 		}
@@ -509,9 +484,7 @@ do
 					end
 					return list
 				end,
-				get = function()
-					return db.child or ""
-				end,
+				get = function() return db.child or "" end,
 				set = function(_, child)
 					db.child = child == "" and nil or child
 					Skada:ReloadSettings()
@@ -523,9 +496,6 @@ do
 				name = L["Sticky Window"],
 				desc = L["Allows the window to stick to other Skada windows."],
 				order = 6,
-				get = function()
-					return db.sticky
-				end,
 				set = function()
 					db.sticky = not db.sticky
 					if not db.sticky then
@@ -537,6 +507,14 @@ do
 					end
 					Skada:ApplySettings()
 				end
+			}
+
+			options.args.snapto = {
+				type = "toggle",
+				name = L["Snap to best fit"],
+				desc = L["Snaps the window size to best fit when resizing."],
+				order = 7,
+				disabled = true
 			}
 		end
 
@@ -556,12 +534,6 @@ do
 							m[mode:GetName()] = mode:GetName()
 						end
 						return m
-					end,
-					get = function()
-						return db.modeincombat
-					end,
-					set = function(_, mode)
-						db.modeincombat = mode
 					end
 				},
 				wipemode = {
@@ -575,12 +547,6 @@ do
 							m[mode:GetName()] = mode:GetName()
 						end
 						return m
-					end,
-					get = function()
-						return db.wipemode
-					end,
-					set = function(_, mode)
-						db.wipemode = mode
 					end
 				},
 				returnaftercombat = {
@@ -589,14 +555,8 @@ do
 					desc = L["Return to the previous set and mode after combat ends."],
 					order = 3,
 					width = "double",
-					get = function()
-						return db.returnaftercombat
-					end,
-					set = function()
-						db.returnaftercombat = not db.returnaftercombat
-					end,
 					disabled = function()
-						return db.returnaftercombat == nil
+						return (db.modeincombat == "" and db.wipemode == "")
 					end
 				}
 			}

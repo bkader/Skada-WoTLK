@@ -71,6 +71,7 @@ Skada.windowdefaults = {
 	set = "current",
 	mode = nil,
 	display = "bar",
+	child = "",
 	snapto = false,
 	sticky = true,
 	sticked = {},
