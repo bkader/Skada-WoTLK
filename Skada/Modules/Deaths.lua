@@ -47,8 +47,8 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 				hp = _UnitHealth(data.playername)
 			})
 
-			-- trim things and limit to 20
-			while table_maxn(deathlog.log) > 20 do
+			-- trim things and limit to 15
+			while table_maxn(deathlog.log) > 15 do
 				table_remove(deathlog.log)
 			end
 		end
