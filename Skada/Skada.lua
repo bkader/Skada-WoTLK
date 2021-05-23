@@ -3246,16 +3246,9 @@ end
 function Skada:MemoryCheck()
 	if self.db.profile.memorycheck then
 		UpdateAddOnMemoryUsage()
-		local mem = GetAddOnMemoryUsage("Skada")
 
-		local compare
-		if self.db.profile.setstokeep == 0 then
-			compare = 30000
-		else
-			compare = (self.db.profile.setstokeep * 1150) + 5000
-		end
-
-		if mem > compare then
+		local compare = 30 + (self.db.profile.setstokeep * 1.25)
+		if GetAddOnMemoryUsage("Skada") > (compare * 1024) then
 			self:Print(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."])
 		end
 	end

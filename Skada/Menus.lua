@@ -101,14 +101,16 @@ function Skada:OpenMenu(window)
 			info.padding = 16
 			_UIDropDownMenu_AddButton(info, level)
 
-			-- keep segment
-			info = _UIDropDownMenu_CreateInfo()
-			info.text = L["Keep Segment"]
-			info.value = "keep"
-			info.hasArrow = 1
-			info.notCheckable = 1
-			info.padding = 16
-			_UIDropDownMenu_AddButton(info, level)
+			if Skada.db.profile.setstokeep > 0 then
+				-- keep segment
+				info = _UIDropDownMenu_CreateInfo()
+				info.text = L["Keep Segment"]
+				info.value = "keep"
+				info.hasArrow = 1
+				info.notCheckable = 1
+				info.padding = 16
+				_UIDropDownMenu_AddButton(info, level)
+			end
 
 			-- start new segment
 			info = _UIDropDownMenu_CreateInfo()

@@ -568,7 +568,7 @@ Skada.options = {
 						if Skada.db.profile.setstokeep == 0 then
 							return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], 30)
 						end
-						return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], (Skada.db.profile.setstokeep * 1.15) + 5)
+						return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], 30 + (Skada.db.profile.setstokeep * 1.25))
 					end,
 					order = 97
 				},
