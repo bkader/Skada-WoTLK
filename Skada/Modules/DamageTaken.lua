@@ -7,7 +7,7 @@ local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local _UnitClass = Skada.UnitClass
 
 -- list of miss types
-local misstypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}
+local misstypes = {"DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT"}
 
 -- =================== --
 -- Damage Taken Module --
@@ -306,13 +306,13 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 				end
 
 				if absorbed then
-					tooltip:AddDoubleLine(L["ABSORB"], _format("%s (%02.1f%%)", Skada:FormatNumber(absorbed), 100 * absorbed / math_max(total)), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Absorbed"], _format("%s (%02.1f%%)", Skada:FormatNumber(absorbed), 100 * absorbed / math_max(total)), 1, 1, 1)
 				end
 				if blocked then
-					tooltip:AddDoubleLine(L["BLOCK"], _format("%s (%02.1f%%)", Skada:FormatNumber(blocked), 100 * blocked / math_max(total)), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Blocked"], _format("%s (%02.1f%%)", Skada:FormatNumber(blocked), 100 * blocked / math_max(total)), 1, 1, 1)
 				end
 				if resisted then
-					tooltip:AddDoubleLine(L["RESIST"], _format("%s (%02.1f%%)", Skada:FormatNumber(resisted), 100 * resisted / math_max(total)), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Resisted"], _format("%s (%02.1f%%)", Skada:FormatNumber(resisted), 100 * resisted / math_max(total)), 1, 1, 1)
 				end
 
 				if spell.max and spell.min then
@@ -364,13 +364,13 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 				end
 
 				if absorbed then
-					tooltip:AddDoubleLine(L["ABSORB"], _format("%s (%02.1f%%)", Skada:FormatNumber(absorbed), 100 * absorbed / math_max(total)), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Absorbed"], _format("%s (%02.1f%%)", Skada:FormatNumber(absorbed), 100 * absorbed / math_max(total)), 1, 1, 1)
 				end
 				if blocked then
-					tooltip:AddDoubleLine(L["BLOCK"], _format("%s (%02.1f%%)", Skada:FormatNumber(blocked), 100 * blocked / math_max(total)), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Blocked"], _format("%s (%02.1f%%)", Skada:FormatNumber(blocked), 100 * blocked / math_max(total)), 1, 1, 1)
 				end
 				if resisted then
-					tooltip:AddDoubleLine(L["RESIST"], _format("%s (%02.1f%%)", Skada:FormatNumber(resisted), 100 * resisted / math_max(total)), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Resisted"], _format("%s (%02.1f%%)", Skada:FormatNumber(resisted), 100 * resisted / math_max(total)), 1, 1, 1)
 				end
 
 				if source.max and source.min then
@@ -380,9 +380,9 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 
 				tooltip:AddLine(" ")
 				tooltip:AddLine(_format(L["%s's damage breakdown"], player.name))
-				tooltip:AddDoubleLine(L["Total hits"], source.totalhits or 0, 1, 1, 1)
+				tooltip:AddDoubleLine(L["Total Hits"], source.totalhits or 0, 1, 1, 1)
 				if (source.hit or 0) > 0 then
-					tooltip:AddDoubleLine(L["Hit"], _format("%d (%02.1f%%)", source.hit, 100 * source.hit / math_max(1, source.totalhits or 0)), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Hits"], _format("%d (%02.1f%%)", source.hit, 100 * source.hit / math_max(1, source.totalhits or 0)), 1, 1, 1)
 				end
 				if (source.critical or 0) > 0 then
 					tooltip:AddDoubleLine(L["Critical"], _format("%d (%02.1f%%)", source.critical, 100 * source.critical / math_max(1, source.totalhits or 0)), 1, 1, 1)
@@ -397,7 +397,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 	end
 
 	local function spellmod_tooltip(win, id, label, tooltip)
-		if label == L["Critical"] or label == L["Hit"] or label == L["ABSORB"] or label == L["BLOCK"] or label == L["RESIST"] then
+		if label == L["Hits"] or label == L["Critical"] then
 			local player = Skada:find_player(win:get_selected_set(), win.playerid)
 			if player and player.damagetaken then
 				local spell = player.damagetaken.spells and player.damagetaken.spells[win.spellname]
@@ -410,20 +410,14 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 						if c and n then tooltip:AddLine(n, c.r, c.g, c.b) end
 					end
 
-					if label == L["Critical"] and spell.criticalamount then
-						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.criticalmin), 1, 1, 1)
-						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.criticalmax), 1, 1, 1)
-						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.criticalamount / spell.critical), 1, 1, 1)
-					elseif label == L["Hit"] and spell.hitamount then
+					if label == L["Hits"] and spell.hitamount then
 						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
 						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
 						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
-					elseif label == L["ABSORB"] and spell.absorbed and spell.absorbed > 0 then
-						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.absorbed), 1, 1, 1)
-					elseif label == L["BLOCK"] and spell.blocked and spell.blocked > 0 then
-						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.blocked), 1, 1, 1)
-					elseif label == L["RESIST"] and spell.resisted and spell.resisted > 0 then
-						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.resisted), 1, 1, 1)
+					elseif label == L["Critical"] and spell.criticalamount then
+						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.criticalmin), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.criticalmax), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.criticalamount / spell.critical), 1, 1, 1)
 					end
 				end
 			end
@@ -517,23 +511,19 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 		end
 	end
 
-	local function add_detail_bar(win, nr, title, value)
+	local function add_detail_bar(win, nr, title, value, total)
 		local d = win.dataset[nr] or {}
 		win.dataset[nr] = d
 
 		d.id = title
 		d.label = title
 		d.value = value
-		if title == L["Total"] then
-			d.valuetext = value
-		else
-			d.valuetext = Skada:FormatValueText(
-				value,
-				mod.metadata.columns.Damage,
-				_format("%02.1f%%", 100 * value / math_max(1, win.metadata.maxvalue)),
-				mod.metadata.columns.Percent
-			)
-		end
+		d.valuetext = Skada:FormatValueText(
+			total and Skada:FormatNumber(value) or value,
+			mod.metadata.columns.Damage,
+			_format("%02.1f%%", 100 * value / math_max(1, total or win.metadata.maxvalue)),
+			mod.metadata.columns.Percent
+		)
 		nr = nr + 1
 		return nr
 	end
@@ -557,26 +547,68 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 			if spell then
 				win.metadata.maxvalue = spell.totalhits
 
+				local total = (spell.amount or 0)
+				local absorbed, blocked, resisted, overkill
+
+				if (spell.absorbed or 0) > 0 then
+					total = total + spell.absorbed
+					absorbed = spell.absorbed
+				end
+
+				if (spell.blocked or 0) > 0 then
+					total = total + spell.blocked
+					blocked = spell.blocked
+				end
+
+				if (spell.resisted or 0) > 0 then
+					total = total + spell.resisted
+					resisted = spell.resisted
+				end
+
+				if (spell.overkill or 0) > 0 then
+					total = total + spell.overkill
+					overkill = spell.overkill
+				end
+
 				local nr = 1
-				nr = add_detail_bar(win, nr, L["Total"], spell.totalhits)
+
+				if absorbed then
+					nr = add_detail_bar(win, nr, L["Absorbed"], absorbed, total)
+				end
+
+				if blocked then
+					nr = add_detail_bar(win, nr, L["Blocked"], blocked, total)
+				end
+
+				if resisted then
+					nr = add_detail_bar(win, nr, L["Resisted"], resisted, total)
+				end
+
+				if overkill then
+					nr = add_detail_bar(win, nr, L["Overkill"], overkill, total)
+				end
+
+				nr = add_detail_bar(win, nr, L["Total Hits"], spell.totalhits or 0)
 
 				if (spell.hit or 0) > 0 then
-					nr = add_detail_bar(win, nr, L["Hit"], spell.hit)
+					nr = add_detail_bar(win, nr, L["Hits"], spell.hit)
 				end
+
 				if (spell.critical or 0) > 0 then
 					nr = add_detail_bar(win, nr, L["Critical"], spell.critical)
 				end
+
 				if (spell.glancing or 0) > 0 then
 					nr = add_detail_bar(win, nr, L["Glancing"], spell.glancing)
 				end
+
 				if (spell.crushing or 0) > 0 then
 					nr = add_detail_bar(win, nr, L["Crushing"], spell.crushing)
 				end
 
 				for _, misstype in _ipairs(misstypes) do
 					if (spell[misstype] or 0) > 0 then
-						local title = L[misstype]
-						nr = add_detail_bar(win, nr, title, spell[misstype])
+						nr = add_detail_bar(win, nr, L[misstype], spell[misstype])
 					end
 				end
 			end
@@ -1113,8 +1145,8 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 					d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = L["ABSORB"]
-					d.label = L["ABSORB"]
+					d.id = L["Absorbed"]
+					d.label = L["Absorbed"]
 					d.value = spell.absorbed
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(spell.absorbed),
@@ -1133,8 +1165,8 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 					d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = L["BLOCK"]
-					d.label = L["BLOCK"]
+					d.id = L["Blocked"]
+					d.label = L["Blocked"]
 					d.value = spell.blocked
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(spell.blocked),
@@ -1153,8 +1185,8 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 					d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = L["RESIST"]
-					d.label = L["RESIST"]
+					d.id = L["Resisted"]
+					d.label = L["Resisted"]
 					d.value = spell.resisted
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(spell.resisted),
