@@ -22,10 +22,171 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	local _tostring, _GetTime, _band = tostring, GetTime, bit.band
 
 	local absorbspells = {
-		[48707] = 5,
-		[51052] = 10,
-		[51271] = 20,
-		[62606] = 10,
+		[48707] = 5, -- Anti-Magic Shell (rank 1)
+		[51052] = 10, -- Anti-Magic Zone( (rank 1)
+		[51271] = 20, -- Unbreakable Armor
+		[62606] = 10, -- Savage Defense
+		[11426] = 60, -- Ice Barrier (rank 1)
+		[13031] = 60, -- Ice Barrier (rank 2)
+		[13032] = 60, -- Ice Barrier (rank 3)
+		[13033] = 60, -- Ice Barrier (rank 4)
+		[27134] = 60, -- Ice Barrier (rank 5)
+		[33405] = 60, -- Ice Barrier (rank 6)
+		[43038] = 60, -- Ice Barrier (rank 7)
+		[43039] = 60, -- Ice Barrier (rank 8)
+		[6143] = 30, -- Frost Ward (rank 1)
+		[8461] = 30, -- Frost Ward (rank 2)
+		[8462] = 30, -- Frost Ward (rank 3)
+		[10177] = 30, -- Frost Ward (rank 4)
+		[28609] = 30, -- Frost Ward (rank 5)
+		[32796] = 30, -- Frost Ward (rank 6)
+		[43012] = 30, -- Frost Ward (rank 7)
+		[1463] = 60, --  Mana shield (rank 1)
+		[8494] = 60, --  Mana shield (rank 2)
+		[8495] = 60, --  Mana shield (rank 3)
+		[10191] = 60, --  Mana shield (rank 4)
+		[10192] = 60, --  Mana shield (rank 5)
+		[10193] = 60, --  Mana shield (rank 6)
+		[27131] = 60, --  Mana shield (rank 7)
+		[43019] = 60, --  Mana shield (rank 8)
+		[43020] = 60, --  Mana shield (rank 9)
+		[543] = 30, -- Fire Ward (rank 1)
+		[8457] = 30, -- Fire Ward (rank 2)
+		[8458] = 30, -- Fire Ward (rank 3)
+		[10223] = 30, -- Fire Ward (rank 4)
+		[10225] = 30, -- Fire Ward (rank 5)
+		[27128] = 30, -- Fire Ward (rank 6)
+		[43010] = 30, -- Fire Ward (rank 7)
+		[58597] = 6, -- Sacred Shield
+		[17] = 30, -- Power Word: Shield (rank 1)
+		[592] = 30, -- Power Word: Shield (rank 2)
+		[600] = 30, -- Power Word: Shield (rank 3)
+		[3747] = 30, -- Power Word: Shield (rank 4)
+		[6065] = 30, -- Power Word: Shield (rank 5)
+		[6066] = 30, -- Power Word: Shield (rank 6)
+		[10898] = 30, -- Power Word: Shield (rank 7)
+		[10899] = 30, -- Power Word: Shield (rank 8)
+		[10900] = 30, -- Power Word: Shield (rank 9)
+		[10901] = 30, -- Power Word: Shield (rank 10)
+		[25217] = 30, -- Power Word: Shield (rank 11)
+		[25218] = 30, -- Power Word: Shield (rank 12)
+		[48065] = 30, -- Power Word: Shield (rank 13)
+		[48066] = 30, -- Power Word: Shield (rank 14)
+		[47509] = 12, -- Divine Aegis (rank 1)
+		[47511] = 12, -- Divine Aegis (rank 2)
+		[47515] = 12, -- Divine Aegis (rank 3)
+		[47753] = 12, -- Divine Aegis (rank 1)
+		[54704] = 12, -- Divine Aegis (rank 1)
+		[47788] = 10, -- Guardian Spirit
+		[7812] = 30, -- Sacrifice (rank 1)
+		[19438] = 30, -- Sacrifice (rank 2)
+		[19440] = 30, -- Sacrifice (rank 3)
+		[19441] = 30, -- Sacrifice (rank 4)
+		[19442] = 30, -- Sacrifice (rank 5)
+		[19443] = 30, -- Sacrifice (rank 6)
+		[27273] = 30, -- Sacrifice (rank 7)
+		[47985] = 30, -- Sacrifice (rank 8)
+		[47986] = 30, -- Sacrifice (rank 9)
+		[6229] = 30, -- Shadow Ward (rank 1)
+		[11739] = 30, -- Shadow Ward (rank 1)
+		[11740] = 30, -- Shadow Ward (rank 2)
+		[28610] = 30, -- Shadow Ward (rank 3)
+		[47890] = 30, -- Shadow Ward (rank 4)
+		[47891] = 30, -- Shadow Ward (rank 5)
+		[29674] = 86400, -- Lesser Ward of Shielding
+		[29719] = 86400, -- Greater Ward of Shielding
+		[29701] = 86400, -- Greater Shielding
+		[28538] = 120, -- Major Holy Protection Potion
+		[28537] = 120, -- Major Shadow Protection Potion
+		[28536] = 120, --  Major Arcane Protection Potion
+		[28513] = 120, -- Major Nature Protection Potion
+		[28512] = 120, -- Major Frost Protection Potion
+		[28511] = 120, -- Major Fire Protection Potion
+		[7233] = 120, -- Fire Protection Potion
+		[7239] = 120, -- Frost Protection Potion
+		[7242] = 120, -- Shadow Protection Potion
+		[7245] = 120, -- Holy Protection Potion
+		[7254] = 120, -- Nature Protection Potion
+		[53915] = 120, -- Mighty Shadow Protection Potion
+		[53914] = 120, -- Mighty Nature Protection Potion
+		[53913] = 120, -- Mighty Frost Protection Potion
+		[53911] = 120, -- Mighty Fire Protection Potion
+		[53910] = 120, -- Mighty Arcane Protection Potion
+		[17548] = 120, --  Greater Shadow Protection Potion
+		[17546] = 120, -- Greater Nature Protection Potion
+		[17545] = 120, -- Greater Holy Protection Potion
+		[17544] = 120, -- Greater Frost Protection Potion
+		[17543] = 120, -- Greater Fire Protection Potion
+		[17549] = 120, -- Greater Arcane Protection Potion
+		[28527] = 15, -- Fel Blossom
+		[29432] = 3600, -- Frozen Rune
+		[36481] = 4, -- Arcane Barrier (TK Kael'Thas) Shield
+		[57350] = 6, -- Darkmoon Card: Illusion
+		[17252] = 30, -- Mark of the Dragon Lord (LBRS epic ring)
+		[25750] = 15, -- Defiler's Talisman/Talisman of Arathor
+		[25747] = 15, -- Defiler's Talisman/Talisman of Arathor
+		[25746] = 15, -- Defiler's Talisman/Talisman of Arathor
+		[23991] = 15, -- Defiler's Talisman/Talisman of Arathor
+		[31000] = 300, -- Pendant of Shadow's End Usage
+		[30997] = 300, -- Pendant of Frozen Flame Usage
+		[31002] = 300, -- Pendant of the Null Rune
+		[30999] = 300, -- Pendant of Withering
+		[30994] = 300, -- Pendant of Thawing
+		[31000] = 300, -- Pendant of Shadow's End
+		[23506] = 20, -- Arena Grand Master
+		[12561] = 60, -- Goblin Construction Helmet
+		[31771] = 20, -- Runed Fungalcap
+		[21956] = 10, -- Mark of Resolution
+		[29506] = 20, -- The Burrower's Shell
+		[4057] = 60, -- Flame Deflector
+		[4077] = 60, -- Ice Deflector
+		[39228] = 20, -- Argussian Compass (may not be an actual absorb)
+		[27779] = 30, -- Divine Protection (Priest dungeon set 1/2)
+		[11657] = 20, -- Jang'thraze (Zul Farrak)
+		[10368] = 15, -- Uther's Strength
+		[37515] = 15, -- Warbringer Armor Proc
+		[42137] = 86400, -- Greater Rune of Warding Proc
+		[26467] = 30, -- Scarab Brooch
+		[26470] = 8, -- Scarab Brooch
+		[27539] = 6, -- Thick Obsidian Breatplate
+		[28810] = 30, -- Faith Set Proc Armor of Faith
+		[54808] = 12, -- Noise Machine Sonic Shield
+		[55019] = 12, -- Sonic Shield
+		[64413] = 8, -- Val'anyr, Hammer of Ancient Kings Protection of Ancient Kings
+		[40322] = 30, -- Teron's Vengeful Spirit Ghost - Spirit Shield
+		[65874] = 15, -- Twin Val'kyr's: Shield of Darkness (175000)
+		[67257] = 15, -- Twin Val'kyr's: Shield of Darkness (300000)
+		[67256] = 15, -- Twin Val'kyr's: Shield of Darkness (700000)
+		[67258] = 15, -- Twin Val'kyr's: Shield of Darkness (1200000)
+		[65858] = 15, -- Twin Val'kyr's: Shield of Lights (175000)
+		[67260] = 15, -- Twin Val'kyr's: Shield of Lights (300000)
+		[67259] = 15, -- Twin Val'kyr's: Shield of Lights (700000)
+		[67261] = 15, -- Twin Val'kyr's: Shield of Lights (1200000)
+		[65686] = 86400, -- Twin Val'kyr: Light Essence
+		[65684] = 86400 -- Twin Val'kyr: Dark Essence86400
+	}
+
+	local mage_fire_ward = { -- Fire Ward
+		[543] = 30,
+		[8457] = 30,
+		[8458] = 30,
+		[10223] = 30,
+		[10225] = 30,
+		[27128] = 30,
+		[43010] = 30
+	}
+
+	local mage_frost_ward = { -- Frost Ward
+		[6143] = 30,
+		[8461] = 30,
+		[8462] = 30,
+		[10177] = 30,
+		[28609] = 30,
+		[32796] = 30,
+		[43012] = 30
+	}
+
+	local mage_ice_barrier = { -- Ice Barrier
 		[11426] = 60,
 		[13031] = 60,
 		[13032] = 60,
@@ -33,51 +194,19 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		[27134] = 60,
 		[33405] = 60,
 		[43038] = 60,
-		[43039] = 60,
-		[6143] = 30,
-		[8461] = 30,
-		[8462] = 30,
-		[10177] = 30,
-		[28609] = 30,
-		[32796] = 30,
-		[43012] = 30,
-		[1463] = 60,
-		[8494] = 60,
-		[8495] = 60,
-		[10191] = 60,
-		[10192] = 60,
-		[10193] = 60,
-		[27131] = 60,
-		[43019] = 60,
-		[43020] = 60,
-		[543] = 30,
-		[8457] = 30,
-		[8458] = 30,
-		[10223] = 30,
-		[10225] = 30,
-		[27128] = 30,
-		[43010] = 30,
-		[58597] = 6,
-		[17] = 30,
-		[592] = 30,
-		[600] = 30,
-		[3747] = 30,
-		[6065] = 30,
-		[6066] = 30,
-		[10898] = 30,
-		[10899] = 30,
-		[10900] = 30,
-		[10901] = 30,
-		[25217] = 30,
-		[25218] = 30,
-		[48065] = 30,
-		[48066] = 30,
-		[47509] = 12,
-		[47511] = 12,
-		[47515] = 12,
-		[47753] = 12,
-		[54704] = 12,
-		[47788] = 10,
+		[43039] = 60
+	}
+
+	local warlock_shadow_ward = { -- Shadow Ward
+		[6229] = 30,
+		[11739] = 30,
+		[11740] = 30,
+		[28610] = 30,
+		[47890] = 30,
+		[47891] = 30
+	}
+
+	local warlock_sacrifice = { -- Sacrifice
 		[7812] = 30,
 		[19438] = 30,
 		[19440] = 30,
@@ -86,136 +215,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		[19443] = 30,
 		[27273] = 30,
 		[47985] = 30,
-		[47986] = 30,
-		[6229] = 30,
-		[11739] = 30,
-		[11740] = 30,
-		[28610] = 30,
-		[47890] = 30,
-		[47891] = 30,
-		[29674] = 86400,
-		[29719] = 86400,
-		[29701] = 86400,
-		[28538] = 120,
-		[28537] = 120,
-		[28536] = 120,
-		[28513] = 120,
-		[28512] = 120,
-		[28511] = 120,
-		[7233] = 120,
-		[7239] = 120,
-		[7242] = 120,
-		[7245] = 120,
-		[7254] = 120,
-		[53915] = 120,
-		[53914] = 120,
-		[53913] = 120,
-		[53911] = 120,
-		[53910] = 120,
-		[17548] = 120,
-		[17546] = 120,
-		[17545] = 120,
-		[17544] = 120,
-		[17543] = 120,
-		[17549] = 120,
-		[28527] = 15,
-		[29432] = 3600,
-		[36481] = 4,
-		[57350] = 6,
-		[17252] = 30,
-		[25750] = 15,
-		[25747] = 15,
-		[25746] = 15,
-		[23991] = 15,
-		[31000] = 300,
-		[30997] = 300,
-		[31002] = 300,
-		[30999] = 300,
-		[30994] = 300,
-		[23506] = 20,
-		[12561] = 60,
-		[31771] = 20,
-		[21956] = 10,
-		[29506] = 20,
-		[4057] = 60,
-		[4077] = 60,
-		[39228] = 20,
-		[27779] = 30,
-		[11657] = 20,
-		[10368] = 15,
-		[37515] = 15,
-		[42137] = 86400,
-		[26467] = 30,
-		[26470] = 8,
-		[27539] = 6,
-		[28810] = 30,
-		[54808] = 12,
-		[55019] = 12,
-		-- [64411] = 15, -- it doesn't absorb by itself, it requires healing
-		[64413] = 8,
-		[40322] = 30,
-		[65874] = 15,
-		[67257] = 15,
-		[67256] = 15,
-		[67258] = 15,
-		[65858] = 15,
-		[67260] = 15,
-		[67259] = 15,
-		[67261] = 15,
-		[65686] = 86400,
-		[65684] = 86400
-	}
-
-	local mage_fire_ward = {
-		[543] = 30, -- Fire Ward (Mage) Rank 1
-		[8457] = 30,
-		[8458] = 30,
-		[10223] = 30,
-		[10225] = 30,
-		[27128] = 30,
-		[43010] = 30 -- Rank 7
-	}
-
-	local mage_frost_ward = {
-		[6143] = 30, -- Frost Ward (Mage) Rank 1
-		[8461] = 30,
-		[8462] = 30,
-		[10177] = 30,
-		[28609] = 30,
-		[32796] = 30,
-		[43012] = 30 -- Rank 7
-	}
-
-	local mage_ice_barrier = {
-		[11426] = 60, -- Ice Barrier (Mage) Rank 1
-		[13031] = 60,
-		[13032] = 60,
-		[13033] = 60,
-		[27134] = 60,
-		[33405] = 60,
-		[43038] = 60,
-		[43039] = 60 -- Rank 8
-	}
-
-	local warlock_shadow_ward = {
-		[6229] = 30, -- Shadow Ward (warlock) Rank 1
-		[11739] = 30,
-		[11740] = 30,
-		[28610] = 30,
-		[47890] = 30,
-		[47891] = 30 -- Rank 6
-	}
-
-	local warlock_sacrifice = {
-		[7812] = 30, -- Sacrifice (warlock) Rank 1
-		[19438] = 30,
-		[19440] = 30,
-		[19441] = 30,
-		[19442] = 30,
-		[19443] = 30,
-		[27273] = 30,
-		[47985] = 30,
-		[47986] = 30 -- rank 9
+		[47986] = 30
 	}
 
 	local shieldschools = Skada:WeakTable()
@@ -302,7 +302,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 				local unit = (n == 0) and "player" or prefix .. _tostring(n)
 				if _UnitExists(unit) and not _UnitIsDeadOrGhost(unit) then
 					local dstName = _select(1, _UnitName(unit))
-					for i = 1, 32 do
+					for i = 1, 40 do
 						local spellname, _, _, _, _, _, expires, unitCaster, _, _, spellid = _UnitBuff(unit, i)
 						if spellid and absorbspells[spellid] and unitCaster then
 							shields[dstName] = shields[dstName] or {}
@@ -320,7 +320,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 		local found_sources, found_src, found_shield_id
 
-		for shield_id, sources in pairs(shields[dstName]) do
+		for shield_id, sources in _pairs(shields[dstName]) do
 			-- Twin Val'kyr light essence and we took fire damage?
 			if shield_id == 65686 then
 				if _band(spellschool, 0x4) == spellschool then
@@ -354,7 +354,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 				end
 			else
 				local mintime
-				for shield_src, ts in pairs(sources) do
+				for shield_src, ts in _pairs(sources) do
 					local starttime = ts - timestamp
 					if starttime > 0 and (mintime == nil or starttime < mintime) then
 						found_src = shield_src
@@ -365,10 +365,10 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 			end
 		end
 
-		-- we didn't found any source byt we have a shield?
+		-- we didn't find any source but we have a shield?
 		if not found_src and found_sources then
 			local mintime
-			for shield_src, ts in pairs(found_sources) do
+			for shield_src, ts in _pairs(found_sources) do
 				local starttime = ts - timestamp
 				if starttime > 0 and (mintime == nil or starttime < mintime) then
 					found_src = shield_src
