@@ -13,7 +13,7 @@ L["ENABLED"] = "啟用"
 L["Disable"] = "停用"
 L["DISABLED"] = "停用"
 -- common lines
-L["Mode Details"] = "更多細節"
+L["More Details"] = "更多細節"
 L["Active Time"] = "活躍時間"
 L["Segment Time"] = "分段時間"
 L["Click for"] = "點擊後為"
@@ -647,9 +647,11 @@ L["Are you sure you want clear cached nicknames?"] = "您确定要清除缓存�
 -- L["%s's mitigated damage"] = ""
 -- L["%s's <%s> mitigated damage"] = ""
 -- overkill module lines --
--- L["Overkill"] = ""
--- L["Overkill spell list"] = ""
--- L["%s's overkill"] = ""
+L["Overkill"] = "過度損壞"
+L["Overkill spell list"] = "過度傷害法術"
+L["Overkill target list"] = "過度損壞的目標"
+L["%s's overkill spells"] = "%s過度傷害法術"
+L["%s's overkill targets"] = "%s過度損壞的目標"
 -- tweaks module lines --
 L["Tweaks"] = "調整"
 -- L["First hit"] = ""

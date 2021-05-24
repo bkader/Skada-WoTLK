@@ -13,7 +13,7 @@ L["ENABLED"] = true
 L["Disable"] = true
 L["DISABLED"] = true
 -- common lines
-L["Mode Details"] = true
+L["More Details"] = true
 L["Active Time"] = true
 L["Segment Time"] = true
 L["Click for"] = true
@@ -649,7 +649,9 @@ L["%s's <%s> mitigated damage"] = true
 -- overkill module lines --
 L["Overkill"] = true
 L["Overkill spell list"] = true
-L["%s's overkill"] = true
+L["Overkill target list"] = true
+L["%s's overkill spells"] = true
+L["%s's overkill targets"] = true
 -- tweaks module lines --
 L["Tweaks"] = true
 L["First hit"] = true
