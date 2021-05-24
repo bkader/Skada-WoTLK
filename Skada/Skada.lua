@@ -156,7 +156,7 @@ do
 				res1, res2, res3, res4, res5, res6, res7, res8, res9 = GetSpellInfo(spellid)
 				if spellid == 75 then
 					res3 = "Interface\\Icons\\INV_Weapon_Bow_07"
-				elseif spellid == 6603 and res1 == L["Auto Attack"] then
+				elseif spellid == 6603 then
 					res3 = "Interface\\Icons\\INV_Sword_04"
 				end
 			end
@@ -3223,8 +3223,8 @@ function Skada:OnEnable()
 	self:RegisterComm("Skada")
 	self:ReloadSettings()
 
-	-- please do not localize this line!
-	L["Auto Attack"] = select(1, GetSpellInfo(6603)) or MELEE
+	-- we use this to be able to localize it
+	L["Auto Attack"] = MELEE
 
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("PARTY_MEMBERS_CHANGED")
