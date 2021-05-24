@@ -13,6 +13,7 @@ L["ENABLED"] = true
 L["Disable"] = true
 L["DISABLED"] = true
 -- common lines
+L["Mode Details"] = true
 L["Active Time"] = true
 L["Segment Time"] = true
 L["Click for"] = true

@@ -13,6 +13,7 @@ L["ENABLED"] = "활성화됨"
 L["Disable"] = "비활성화"
 L["DISABLED"] = "비활성화됨"
 -- common lines
+L["Mode Details"] = "자세한 내용은"
 L["Active Time"] = "활동 시간"
 L["Segment Time"] = "세분화 시간"
 L["Click for"] = "클릭 ->"

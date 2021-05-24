@@ -13,6 +13,7 @@ L["ENABLED"] = "ACTIVÉ"
 L["Disable"] = "Désactiver"
 L["DISABLED"] = "DÉSACTIVÉ"
 -- common lines
+L["Mode Details"] = "Plus de détails"
 L["Active Time"] = "Temps d'activité"
 L["Segment Time"] = "Temps du segment"
 L["Click for"] = "Cliquer pour"

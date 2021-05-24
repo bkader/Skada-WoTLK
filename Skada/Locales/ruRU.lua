@@ -14,6 +14,7 @@ L["ENABLED"] = "ВКЛЮЧЕН"
 L["Disable"] = "Отключить"
 L["DISABLED"] = "ВЫКЛЮЧЕН"
 -- common lines
+L["Mode Details"] = "Подробнее"
 L["Active Time"] = "Время активности"
 L["Segment Time"] = "Время сегмента"
 L["Click for"] = "ЛКМ -"

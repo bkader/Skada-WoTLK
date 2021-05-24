@@ -13,6 +13,7 @@ L["ENABLED"] = "啟用"
 L["Disable"] = "停用"
 L["DISABLED"] = "停用"
 -- common lines
+L["Mode Details"] = "更多細節"
 L["Active Time"] = "活躍時間"
 L["Segment Time"] = "分段時間"
 L["Click for"] = "點擊後為"

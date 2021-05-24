@@ -14,6 +14,8 @@ L["ENABLED"] = "已启用"
 L["Disable"] = "禁用"
 L["DISABLED"] = "已禁用"
 -- common lines
+L["Mode Details"] = "更多细节"
+L["Mode Details"] = "자세한 내용은"
 L["Active Time"] = "活跃时间"
 L["Segment Time"] = "分段时间"
 L["Click for"] = "点击后为"
