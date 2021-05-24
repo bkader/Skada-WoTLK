@@ -228,33 +228,20 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 			player.absorbs.amount = (player.absorbs.amount or 0) + amount
 			set.absorbs = (set.absorbs or 0) + amount
 
-			-- record the target
-			if dstName then
-				player.absorbs.targets = player.absorbs.targets or {}
-				if not player.absorbs.targets[dstName] then
-					local class, role, spec = _select(2, _UnitClass(dstGUID, dstFlags, set))
-					player.absorbs.targets[dstName] = {
-						id = dstGUID,
-						class = class,
-						role = role,
-						spec = spec,
-						amount = amount
-					}
-				else
-					player.absorbs.targets[dstName].amount = player.absorbs.targets[dstName].amount + amount
-				end
-			end
-
 			-- record the spell
 			if spellid then
-				player.absorbs.spells = player.absorbs.spells or {}
-				if not player.absorbs.spells[spellid] then
-					player.absorbs.spells[spellid] = {count = 0, amount = 0}
+				local spell = player.absorbs.spells and player.absorbs.spells[spellid]
+				if not spell then
+					player.absorbs.spells = player.absorbs.spells or {}
+					spell = {count = 0, amount = 0}
+					player.absorbs.spells[spellid] = spell
+				else
+					if not spell.school and shieldschools[spellid] then
+						spell.school = shieldschools[spellid]
+					end
+					spell.amount = (spell.amount or 0) + amount
+					spell.count = (spell.count or 0) + 1
 				end
-				local spell = player.absorbs.spells[spellid]
-				spell.school = spell.school or shieldschools[spellid]
-				spell.amount = spell.amount + amount
-				spell.count = spell.count + 1
 
 				if (not spell.min or amount < spell.min) and amount > 0 then
 					spell.min = amount
@@ -263,13 +250,32 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					spell.max = amount
 				end
 			end
+
+			-- record the target
+			if dstName then
+				local target = player.absorbs.targets and player.absorbs.targets[dstName]
+				if not target then
+					player.absorbs.targets = player.absorbs.targets or {}
+					local class, role, spec = _select(2, _UnitClass(dstGUID, dstFlags, set))
+					target = {
+						id = dstGUID,
+						class = class,
+						role = role,
+						spec = spec,
+						amount = amount
+					}
+					player.absorbs.targets[dstName] = target
+				else
+					target.amount = (target.amount or 0) + amount
+				end
+			end
 		end
 	end
 
 	local shields = Skada:WeakTable()
 
 	local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, spellname, spellschool, auratype = ...
+		local spellid, spellname, spellschool = ...
 		if absorbspells[spellid] then
 			shields[dstName] = shields[dstName] or {}
 			shields[dstName][spellid] = shields[dstName][spellid] or {}
@@ -281,7 +287,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	end
 
 	local function AuraRemoved(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, spellname, spellschool, auratype = ...
+		local spellid, spellname, spellschool = ...
 		if absorbspells[spellid] then
 			shields[dstName] = shields[dstName] or {}
 			if shields[dstName] and shields[dstName][spellid] and shields[dstName][spellid][srcName] then
@@ -305,9 +311,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					for i = 1, 40 do
 						local spellname, _, _, _, _, _, expires, unitCaster, _, _, spellid = _UnitBuff(unit, i)
 						if spellid and absorbspells[spellid] and unitCaster then
-							shields[dstName] = shields[dstName] or {}
-							shields[dstName][spellid] = shields[dstName][spellid] or {}
-							shields[dstName][spellid][_GetUnitName(unitCaster)] = timestamp + expires - curtime
+							AuraApplied(timestamp + expires - curtime, nil, nil, _GetUnitName(unitCaster), nil, nil, dstName, nil, spellid, spellname)
 						end
 					end
 				end
@@ -478,7 +482,6 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 						d.id = spellid
 						d.spellid = spellid
 						d.label = spellname
-						d.text = spellname .. (spell.ishot and L["HoT"] or "")
 						d.icon = spellicon
 						d.spellschool = spell.school
 
@@ -605,6 +608,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		Skada:RegisterForCL(SpellDamage, "RANGE_DAMAGE", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SwingDamage, "SWING_DAMAGE", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(EnvironmentDamage, "ENVIRONMENTAL_DAMAGE", {dst_is_interesting_nopets = true})
+
 		Skada:RegisterForCL(SpellMissed, "SPELL_MISSED", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellMissed, "SPELL_PERIODIC_MISSED", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellMissed, "SPELL_BUILDING_MISSED", {dst_is_interesting_nopets = true})
@@ -622,6 +626,11 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 	function mod:GetSetSummary(set)
 		return Skada:FormatNumber(set.absorbs or 0)
+	end
+
+	function mod:SetComplete(set)
+		shields = Skada:WeakTable()
+		shieldschools = Skada:WeakTable()
 	end
 end)
 
@@ -662,8 +671,7 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(Skada:GetSetTime(set)), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(Skada:PlayerActiveTime(set, player, true)), 1, 1, 1)
 
-			local healing =
-				(player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
+			local healing = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
 			local total = (set.healing or 0) + (set.absorbs or 0)
 			tooltip:AddDoubleLine(L["Absorbs and healing"], _format("%s (%02.1f%%)", Skada:FormatNumber(healing), 100 * healing / math_max(1, total)), 1, 1, 1)
 		end
@@ -686,7 +694,9 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 					local n = Skada.schoolnames[spell.school]
 					if c and n then tooltip:AddLine(n, c.r, c.g, c.b) end
 				end
-				tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
+				if (spell.count or 0) > 0 then
+					tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
+				end
 				if spell.min and spell.max then
 					tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.min), 1, 1, 1)
 					tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.max), 1, 1, 1)
@@ -1080,9 +1090,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 
 	local function spell_tooltip(win, id, label, tooltip)
 		local set = win:get_selected_set()
-		if not set then
-			return
-		end
+		if not set then return end
 
 		if not spells then
 			CacheSpells(set)

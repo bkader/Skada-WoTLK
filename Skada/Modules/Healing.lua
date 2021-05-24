@@ -33,42 +33,19 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 			player.healing.overhealing = (player.healing.overhealing or 0) + (data.overhealing or 0)
 			set.overhealing = (set.overhealing or 0) + (data.overhealing or 0)
 
-			-- record the target
-			if data.dstName then
-				player.healing.targets = player.healing.targets or {}
-				if not player.healing.targets[data.dstName] then
-					local class, role, spec = _select(2, _UnitClass(data.dstGUID, data.dstFlags, set))
-					player.healing.targets[data.dstName] = {
-						id = data.dstGUID,
-						class = class,
-						role = role,
-						spec = spec,
-						amount = amount,
-						overhealing = data.overhealing or 0
-					}
-				else
-					player.healing.targets[data.dstName].amount = player.healing.targets[data.dstName].amount + amount
-					player.healing.targets[data.dstName].overhealing = (player.healing.targets[data.dstName].overhealing or 0) + data.overhealing
-				end
-			end
-
 			-- record the spell
 			if data.spellid then
-				player.healing.spells = player.healing.spells or {}
-				if not player.healing.spells[data.spellid] then
-					player.healing.spells[data.spellid] = {
-						school = data.spellschool,
-						count = 0,
-						amount = 0,
-						overhealing = 0
-					}
+				local spell = player.healing.spells and player.healing.spells[data.spellid]
+				if not spell then
+					player.healing.spells = player.healing.spells or {}
+					spell = {school = data.spellschool, count = 0, amount = 0, overhealing = 0}
+					player.healing.spells[data.spellid] = spell
 				end
 
-				local spell = player.healing.spells[data.spellid]
-				spell.count = spell.count + 1
+				spell.count = (spell.count or 0) + 1
 				spell.ishot = tick or nil
-				spell.amount = spell.amount + amount
-				spell.overhealing = spell.overhealing + data.overhealing
+				spell.amount = (spell.amount or 0) + amount
+				spell.overhealing = (spell.overhealing or 0) + data.overhealing
 
 				if (not spell.min or amount < spell.min) and amount > 0 then
 					spell.min = amount
@@ -80,6 +57,27 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 				if data.critical then
 					spell.critical = (spell.critical or 0) + 1
 				end
+			end
+
+			-- record the target
+			if data.dstName then
+				local target = player.healing.targets and player.healing.targets[data.dstName]
+				if not target then
+					player.healing.targets = player.healing.targets or {}
+					local class, role, spec = _select(2, _UnitClass(data.dstGUID, data.dstFlags, set))
+					target = {
+						id = data.dstGUID,
+						class = class,
+						role = role,
+						spec = spec,
+						amount = 0,
+						overhealing = 0
+					}
+					player.healing.targets[data.dstName] = target
+				end
+
+				target.amount = (target.amount or 0) + amount
+				target.overhealing = (target.overhealing or 0) + data.overhealing
 			end
 		end
 	end
