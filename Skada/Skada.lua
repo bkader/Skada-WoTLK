@@ -57,7 +57,7 @@ local disabled = false
 local changed = true
 
 -- update & tick timers
-local update_timer, tick_timer
+local update_timer, tick_timer, clean_timer
 local checkVersion, convertVersion
 
 -- list of players and pets
@@ -2169,6 +2169,7 @@ do
 
 	function checkVersion()
 		Skada:SendComm(nil, nil, "VersionCheck", Skada.version)
+		version_timer:Cancel()
 		version_timer = nil
 	end
 
@@ -2229,7 +2230,8 @@ do
 			end)
 		end
 
-		version_timer = version_timer or self.NewTimer(10, checkVersion)
+		version_timer = self.NewTimer(10, checkVersion)
+		clean_timer = self.NewTicker(60, function() collectgarbage("collect") end)
 	end
 
 	function Skada:PARTY_MEMBERS_CHANGED()
@@ -2584,7 +2586,7 @@ do
 	function Window:set_mode_title()
 		if not self.selectedmode or not self.selectedset then return end
 		if not self.selectedmode.GetName then return end
-		local name = self.title or self.parenttitle or self.selectedmode.title or self.selectedmode:GetName()
+		local name = self.parenttitle or self.selectedmode.title or self.selectedmode:GetName()
 
 		-- save window settings for RestoreView after reload
 		self.db.set = self.selectedset
@@ -2595,6 +2597,7 @@ do
 		self.db.mode = savemode
 		savemode = nil
 
+		name = self.title or name
 		if self.db.titleset and not self.selectedmode.notitleset and self.db.display ~= "inline" then
 			local setname
 			if self.selectedset == "current" then
@@ -3459,11 +3462,10 @@ function Skada:EndSegment()
 		changed = true
 
 		if win.db.wipemode ~= "" and self:IsRaidDead() then
-			self:RestoreView(win, "current", win.db.wipemode)
+			win:RestoreView("current", win.db.wipemode)
 		elseif win.db.returnaftercombat and win.restore_mode and win.restore_set then
 			if win.restore_set ~= win.selectedset or win.restore_mode ~= win.selectedmode then
-				self:RestoreView(win, win.restore_set, win.restore_mode)
-
+				win:RestoreView(win.restore_set, win.restore_mode)
 				win.restore_mode, win.restore_set = nil, nil
 			end
 		end
@@ -3491,6 +3493,10 @@ function Skada:EndSegment()
 			tick_timer:Cancel()
 		end
 		tick_timer = nil
+	end
+
+	if not clean_timer then
+		clean_timer = self.NewTicker(60, function() collectgarbage("collect") end)
 	end
 
 	self.After(2, function() self:CleanGarbage(true) end)
@@ -3522,6 +3528,11 @@ do
 		self.callbacks:Fire("COMBAT_ENCOUNTER_TICK", self.current)
 		if not disabled and self.current and not self:IsRaidInCombat() then
 			self:EndSegment()
+		end
+
+		if clean_timer then
+			clean_timer:Cancel()
+			clean_timer = nil
 		end
 	end
 

@@ -10,6 +10,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 	local _UnitExists, _UnitIsFriend = UnitExists, UnitIsFriend
 	local _GetUnitName, _UnitClass, _UnitGUID = GetUnitName, UnitClass, UnitGUID
 	local _UnitDetailedThreatSituation = UnitDetailedThreatSituation
+	local _InCombatLockdown = InCombatLockdown
 
 	do
 		local nr, max = 1, 0
@@ -108,6 +109,12 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 		local last_warn = time()
 
 		function mod:Update(win, set)
+			win.title = L["Threat"]
+
+			if not Skada:IsRaidInCombat() then
+				return
+			end
+
 			local target = nil
 			if _UnitExists("target") and not _UnitIsFriend("player", "target") then
 				target = "target"
@@ -118,8 +125,6 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 			elseif _UnitExists("target") and _UnitIsFriend("player", "target") and _UnitExists("targettarget") and not _UnitIsFriend("player", "targettarget") then
 				target = "targettarget"
 			end
-
-			win.title = L["Threat"]
 
 			if target then
 				win.title = _GetUnitName(target) or L["Threat"]
@@ -257,7 +262,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				else
 					x, y = random(-8, 8), random(-8, 8)
 				end
-				if WorldFrame:IsProtected() and InCombatLockdown() then
+				if WorldFrame:IsProtected() and _InCombatLockdown() then
 					if not shaker.fail then
 						shaker.fail = true
 					end
@@ -331,9 +336,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 						threatsoundname = {
 							type = "select",
 							name = L["Threat sound"],
-							desc = L[
-								"The sound that will be played when your threat percentage reaches a certain point."
-							],
+							desc = L["The sound that will be played when your threat percentage reaches a certain point."],
 							order = 5,
 							width = "double",
 							dialogControl = "LSM30_Sound",
