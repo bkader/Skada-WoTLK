@@ -3,6 +3,9 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 	if Skada:IsDisabled("Nickname") then return end
 
 	local mod = Skada:NewModule(L["Nickname"], "AceHook-3.0")
+	local type, time = type, time
+	local strlen, strfind, strgsub = string.len, string.find, string.gsub
+	local UnitGUID, GetUnitName = UnitGUID, GetUnitName
 	local unitName, unitGUID
 	local CheckNickname
 
@@ -22,7 +25,7 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 		local function check_repeated(char)
 			if char == "  " then
 				have_repeated = true
-			elseif string.len(char) > 2 then
+			elseif strlen(char) > 2 then
 				have_repeated = true
 			elseif char == " " then
 				count_spaces = count_spaces + 1
@@ -36,19 +39,19 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 
 			name = trim(name)
 
-			local len = string.len(name)
+			local len = strlen(name)
 			if len > 12 then
 				return false, L["Your nickname is too long, max of 12 characters is allowed."]
 			end
 
-			local notallow = string.find(name, "[^a-zA-Z�������%s]")
+			local notallow = strfind(name, "[^a-zA-Z�������%s]")
 			if notallow then
 				return false, L["Only letters and two spaces are allowed."]
 			end
 
 			have_repeated = false
 			count_spaces = 0
-			string.gsub(name, ".", "\0%0%0"):gsub("(.)%z%1", "%1"):gsub("%z.([^%z]+)", check_repeated)
+			strgsub(name, ".", "\0%0%0"):gsub("(.)%z%1", "%1"):gsub("%z.([^%z]+)", check_repeated)
 			if count_spaces > 2 then
 				have_repeated = true
 			end
@@ -77,7 +80,7 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 				desc = L["Set a nickname for you.\nNicknames are sent to group members and Skada can use them instead of your character name."],
 				order = 1,
 				get = function()
-					return Skada.db.profile.nickname or UnitName("player")
+					return Skada.db.profile.nickname or GetUnitName("player")
 				end,
 				set = function(_, val)
 					local okey, nickname = CheckNickname(val)
@@ -123,7 +126,7 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 	}
 
 	function mod:OnInitialize()
-		unitName = select(1, UnitName("player"))
+		unitName = GetUnitName("player")
 		unitGUID = UnitGUID("player")
 		Skada.options.args.modules.args.nickname = options
 		if Skada.db.profile.namedisplay == nil then

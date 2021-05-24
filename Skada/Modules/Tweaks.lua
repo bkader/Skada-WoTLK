@@ -5,7 +5,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 	local mod = Skada:NewModule(L["Tweaks"], "AceHook-3.0")
 
 	local select, band, format = select, bit.band, string.format
-	local UnitExists, UnitName, UnitClass = UnitExists, UnitName, UnitClass
+	local UnitExists, GetUnitName, UnitClass = UnitExists, GetUnitName, UnitClass
 	local GetSpellLink, GetSpellInfo = Skada.GetSpellLink, Skada.GetSpellInfo
 
 	local BITMASK_GROUP = Skada.BITMASK_GROUP
@@ -29,14 +29,14 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 				break -- no need
 			end
 
-			local target = UnitName(boss .. "target")
+			local target = GetUnitName(boss .. "target")
 			if target then
 				local class = select(2, UnitClass(boss .. "target"))
 
 				if class and Skada.classcolors[class] then
 					target = "|c" .. Skada.classcolors[class].colorStr .. target .. "|r"
 				end
-				targetline = format(L["|cffffbb00Boss First Target|r: %s (%s)"], target, UnitName(boss) or UNKNOWN)
+				targetline = format(L["|cffffbb00Boss First Target|r: %s (%s)"], target, GetUnitName(boss) or UNKNOWN)
 				break -- no need
 			end
 		end

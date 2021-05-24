@@ -17,7 +17,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	local playermod = mod:NewModule(L["Absorbed player list"])
 
 	local _GetNumRaidMembers, _GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
-	local _UnitName, _UnitExists, _UnitBuff = UnitName, UnitExists, UnitBuff
+	local _GetUnitName, _UnitExists, _UnitBuff = GetUnitName, UnitExists, UnitBuff
 	local _UnitIsDeadOrGhost, _UnitClass = UnitIsDeadOrGhost, Skada.UnitClass
 	local _tostring, _GetTime, _band = tostring, GetTime, bit.band
 
@@ -301,13 +301,13 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 			for n = min, max do
 				local unit = (n == 0) and "player" or prefix .. _tostring(n)
 				if _UnitExists(unit) and not _UnitIsDeadOrGhost(unit) then
-					local dstName = _select(1, _UnitName(unit))
+					local dstName = _GetUnitName(unit)
 					for i = 1, 40 do
 						local spellname, _, _, _, _, _, expires, unitCaster, _, _, spellid = _UnitBuff(unit, i)
 						if spellid and absorbspells[spellid] and unitCaster then
 							shields[dstName] = shields[dstName] or {}
 							shields[dstName][spellid] = shields[dstName][spellid] or {}
-							shields[dstName][spellid][_select(1, _UnitName(unitCaster))] = timestamp + expires - curtime
+							shields[dstName][spellid][_GetUnitName(unitCaster)] = timestamp + expires - curtime
 						end
 					end
 				end

@@ -13,7 +13,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	local _GetNumRaidMembers = GetNumRaidMembers
 	local _GetItemInfo = GetItemInfo
 	local _UnitExists, _UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
-	local _UnitGUID, _UnitName = UnitGUID, UnitName
+	local _UnitGUID, _GetUnitName = UnitGUID, GetUnitName
 	local _UnitClass, _UnitBuff = UnitClass, UnitBuff
 
 	local potionIDs = {
@@ -73,7 +73,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 			for n = min, max do
 				local unit = (n == 0) and "player" or prefix .. _tostring(n)
 				if _UnitExists(unit) and not _UnitIsDeadOrGhost(unit) then
-					local playerid, playername = _UnitGUID(unit), _UnitName(unit)
+					local playerid, playername = _UnitGUID(unit), _GetUnitName(unit)
 					local class = _select(2, _UnitClass(unit))
 					for i = 1, 40 do
 						local _, _, icon, _, _, _, _, _, _, _, spellid = _UnitBuff(unit, i)

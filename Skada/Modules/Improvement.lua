@@ -6,7 +6,7 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 	local mod_modes = mod:NewModule(L["Improvement modes"])
 	local mod_comparison = mod:NewModule(L["Improvement comparison"])
 
-	local _UnitGUID, _UnitName, _UnitClass = UnitGUID, UnitName, UnitClass
+	local _UnitGUID, _GetUnitName, _UnitClass = UnitGUID, GetUnitName, UnitClass
 	local _pairs, _ipairs, _select = pairs, ipairs, select
 	local _format, _tostring = string.format, tostring
 	local date = date
@@ -244,7 +244,7 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 		if next(Skada.char.improvement) == nil then
 			Skada.char.improvement = {
 				id = _UnitGUID("player"),
-				name = _UnitName("player"),
+				name = _GetUnitName("player"),
 				class = _select(2, _UnitClass("player")),
 				bosses = {}
 			}
