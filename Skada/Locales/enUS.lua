@@ -34,9 +34,8 @@ L["Critical"] = true
 L["Critical Hits"] = true
 L["Crushing"] = true
 L["Glancing"] = true
-L["Absorbed"] = true
-L["Blocked"] = true
-L["Resisted"] = true
+L["ABSORB"] = "Absorbed"
+L["BLOCK"] = "Blocked"
 L["DEFLECT"] = "Deflect"
 L["DODGE"] = "Dodge"
 L["EVADE"] = "Evade"
@@ -44,6 +43,7 @@ L["IMMUNE"] = "Immune"
 L["MISS"] = "Miss"
 L["PARRY"] = "Parry"
 L["REFLECT"] = "Reflect"
+L["RESIST"] = "Resisted"
 -- windows section:
 L["Window"] = true
 L["Windows"] = true
@@ -650,9 +650,7 @@ L["%s's <%s> mitigated damage"] = true
 -- overkill module lines --
 L["Overkill"] = true
 L["Overkill spell list"] = true
-L["Overkill target list"] = true
 L["%s's overkill spells"] = true
-L["%s's overkill targets"] = true
 -- tweaks module lines --
 L["Tweaks"] = true
 L["First hit"] = true
