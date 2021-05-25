@@ -1369,17 +1369,13 @@ do
 			if pets[player.id] then
 				-- fix classes for others
 				player.class = "PET"
-				player.role = "DAMAGER"
-				player.spec = 1
 				player.owner = pets[player.id]
 			else
 				local isboss, npcid = self:IsBoss(player.id)
 				if isboss then
 					player.class = "BOSS"
-					player.role = "DAMAGER"
-				elseif npcid ~= 0 then
+				elseif (npcid or 0) > 0 then
 					player.class = "MONSTER"
-					player.role = "DAMAGER"
 				end
 			end
 
@@ -1393,19 +1389,13 @@ do
 					player.class = select(2, UnitClass(player.name))
 				elseif player.flags and band(player.flags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0 then
 					player.class = "PLAYER"
-					player.role = "DAMAGER"
-					player.spec = 2
 				-- pets?
 				elseif player.flags and band(player.flags, BITMASK_PETS) ~= 0 then
 					player.class = "PET"
-					player.role = "DAMAGER"
 					player.owner = pets[player.id]
-					player.spec = 1
 				--  last solution
 				else
 					player.class = "UNKNOWN"
-					player.role = "DAMAGER"
-					player.spec = 2
 				end
 			end
 
@@ -1418,9 +1408,6 @@ do
 				if force or not player.spec then
 					player.spec = self:GetPlayerSpecID(player.name, player.class)
 				end
-			else
-				player.role = player.role or "DAMAGER" -- damager fallback
-				player.spec = player.spec or 2 -- unknown fallback
 			end
 
 			self.callbacks:Fire("SKADA_PLAYER_FIX", player)
@@ -1430,7 +1417,7 @@ do
 end
 
 function Skada:find_player(set, playerid, playername, strict)
-	if set and playerid then
+	if set and playerid and playerid ~= "total" then
 		set._playeridx = set._playeridx or {}
 		local player = set._playeridx[playerid]
 		if not player then
@@ -1445,14 +1432,19 @@ function Skada:find_player(set, playerid, playername, strict)
 
 		if not player then
 			-- needed for certain bosses
-			local isboss, _, npcname = self:IsBoss(playerid, playername)
-			if isboss and (npcname or playername) then
+			local isboss, npcid, npcname = self:IsBoss(playerid, playername)
+			if isboss then
 				player = {
 					id = playerid,
 					name = npcname or playername,
-					class = "MONSTER",
-					role = "DAMAGER",
-					spec = 3
+					class = "BOSS"
+				}
+				set._playeridx[playerid] = player
+			elseif (npcid or 0) > 0 then
+				player = {
+					id = playerid,
+					name = npcname or playername,
+					class = "MONSTER"
 				}
 				set._playeridx[playerid] = player
 			end
@@ -1463,9 +1455,7 @@ function Skada:find_player(set, playerid, playername, strict)
 			player = {
 				id = playerid,
 				name = playername,
-				class = "PET",
-				role = "DAMAGER",
-				spec = 1
+				class = "PET"
 			}
 			set._playeridx[playerid] = player
 		end
@@ -1607,7 +1597,7 @@ do
 				if custom[id] then
 					npcname = (name and name ~= custom[id]) and name or custom[id]
 				end
-			elseif id ~= 0 then
+			elseif (id or 0) > 0 then
 				npcid = id
 			end
 		end
