@@ -3741,10 +3741,11 @@ do
 		if self.current and src_is_interesting and not self.current.gotboss then
 			if band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
 				local isboss, _, bossname = self:IsBoss(dstGUID)
-				self.current.mobname = bossname or dstName
 				if not self.current.gotboss and isboss then
+					self.current.mobname = bossname or dstName
 					self.current.gotboss = true
-					self.callbacks:Fire("COMBAT_BOSS_FOUND", bossname)
+				elseif not self.current.mobname then
+					self.current.mobname = dstName
 				end
 			end
 		end
