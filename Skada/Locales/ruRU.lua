@@ -352,11 +352,12 @@ L["Bar display is the normal bar window used by most damage meters. It can be ex
 -- Threat Module --
 L["Threat"] = "Угроза"
 L["Threat warning"] = "Предупреждение об угрозе"
-L["Do not warn while tanking"] = "Не предупреждать при танковании"
 L["Flash screen"] = "Мигание экрана"
 L["This will cause the screen to flash as a threat warning."] = "Предупреждение об угрозе будет производиться посредством мигания экрана."
 L["Shake screen"] = "Тряска экрана"
 L["This will cause the screen to shake as a threat warning."] = "Предупреждение об угрозе будет производиться посредством тряски экрана."
+L["Warning Message"] = "Оповещения"
+L["Print a message to screen when you accumulate too much threat."] = "Выводить сообщение на экран, когда вы вырабатываете слишком много угрозы."
 L["Play sound"] = "Проиграть звук"
 L["This will play a sound as a threat warning."] = "Предупреждение об угрозе будет производиться посредством звукового сигнала."
 L["Threat sound"] = "Звук угрозы"
@@ -367,6 +368,8 @@ L["Show raw threat"] = "Показать необработанную угроз
 L["Shows raw threat percentage relative to tank instead of modified for range."] = "Показывает процент необработанной угрозы относительно танка, а не модифицированный для диапазона."
 L["Use focus target"] = "Использовать цель фокуса"
 L["Shows threat on focus target, or focus target's target, when available."] = "Показывает угрозу цели фокуса, или цели цели фокуса, если доступно."
+L["Disable while tanking"] = "Отключать при танковании"
+L["Test warnings"] = "Тестирование предупреждений"
 L["TPS"] = "УгВС"
 L["Threat: Personal Threat"] = "Угроза: Своя Угроза"
 -- Absorbs & Healing Module --

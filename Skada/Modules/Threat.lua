@@ -2,8 +2,8 @@ assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Threat", function(Skada, L)
 	if Skada:IsDisabled("Threat") then return end
 
-	local mod = Skada:NewModule(L["Threat"])
-	local media = LibStub("LibSharedMedia-3.0")
+	local mod = Skada:NewModule(L["Threat"], "LibSink-2.0")
+	local LSM = LibStub("LibSharedMedia-3.0")
 
 	local _ipairs, _select, _format = ipairs, select, string.format
 	local tinsert, math_max = table.insert, math.max
@@ -11,10 +11,12 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 	local _GetUnitName, _UnitClass, _UnitGUID = GetUnitName, UnitClass, UnitGUID
 	local _UnitDetailedThreatSituation = UnitDetailedThreatSituation
 	local _InCombatLockdown = InCombatLockdown
+	local _PlaySoundFile = PlaySoundFile
+	local _GetNumPartyMembers, _GetNumRaidMembers = GetNumPartyMembers, GetNumRaidMembers
+	local mypercent
 
 	do
-		local nr, max = 1, 0
-		local maxthreat = 0
+		local nr, maxthreat = 1, 0
 
 		local threatTable = Skada:WeakTable()
 
@@ -54,7 +56,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
-				if Skada.db.profile.modules.threatraw and threatvalue then
+				if mod.db.rawvalue and threatvalue then
 					d.id = player.id
 					d.label = player.name
 					d.class = player.class
@@ -82,7 +84,6 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 					d.isTanking = isTanking
 					d.threat = threatvalue
 				end
-
 				nr = nr + 1
 			end
 		end
@@ -100,7 +101,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 		local function getTPS(threatvalue)
 			local tps = "0"
 			if Skada.current then
-				local totaltime = time() - Skada.current.starttime
+				local totaltime = time() - (Skada.current.starttime or 0)
 				tps = format_threatvalue(threatvalue / math_max(1, totaltime))
 			end
 			return tps
@@ -111,16 +112,14 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 		function mod:Update(win, set)
 			win.title = L["Threat"]
 
-			if not Skada:IsRaidInCombat() then
-				return
-			end
+			if not Skada:IsRaidInCombat() then return end
 
 			local target = nil
 			if _UnitExists("target") and not _UnitIsFriend("player", "target") then
 				target = "target"
-			elseif Skada.db.profile.modules.threatfocustarget and _UnitExists("focus") and not _UnitIsFriend("player", "focus") then
+			elseif self.db.focustarget and _UnitExists("focus") and not _UnitIsFriend("player", "focus") then
 				target = "focus"
-			elseif Skada.db.profile.modules.threatfocustarget and _UnitExists("focustarget") and not _UnitIsFriend("player", "focustarget") then
+			elseif self.db.focustarget and _UnitExists("focustarget") and not _UnitIsFriend("player", "focustarget") then
 				target = "focustarget"
 			elseif _UnitExists("target") and _UnitIsFriend("player", "target") and _UnitExists("targettarget") and not _UnitIsFriend("player", "targettarget") then
 				target = "targettarget"
@@ -135,9 +134,9 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				-- Reset out max threat value.
 				maxthreat = 0
 
-				local _pref, _min, _max = "raid", 1, GetNumRaidMembers()
+				local _pref, _min, _max = "raid", 1, _GetNumRaidMembers()
 				if _max == 0 then
-					_pref, _min, _max = "party", 0, GetNumPartyMembers()
+					_pref, _min, _max = "party", 0, _GetNumPartyMembers()
 				end
 
 				for i = _min, _max do
@@ -152,7 +151,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				end
 
 				-- If we are going by raw threat we got the max threat from above; otherwise it's always 100.
-				if not Skada.db.profile.modules.threatraw then
+				if not self.db.rawvalue then
 					maxthreat = 100
 				end
 
@@ -161,13 +160,14 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 
 				-- We now have a a complete threat table.
 				-- Now we need to add valuetext.
-				for i, data in _ipairs(win.dataset) do
+				for _, data in _ipairs(win.dataset) do
 					if data.id then
 						if data.threat and data.threat > 0 then
 							-- Warn if this is ourselves and we are over the treshold.
 							local percent = 100 * data.value / math_max(0.000001, maxthreat)
 							if data.label == _GetUnitName("player") then
-								if Skada.db.profile.modules.threattreshold and Skada.db.profile.modules.threattreshold < percent and (not data.isTanking or not Skada.db.profile.modules.notankwarnings) then
+								mypercent = percent
+								if self.db.threshold and self.db.threshold < percent and (not data.isTanking or not self.db.notankwarnings) then
 									we_should_warn = true
 								end
 							end
@@ -188,16 +188,12 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 
 				-- Warn
 				if we_should_warn and time() - last_warn > 2 then
-					if Skada.db.profile.modules.threatflash then
-						self:Flash()
-					end
-					if Skada.db.profile.modules.threatshake then
-						self:Shake()
-					end
-					if Skada.db.profile.modules.threatsound then
-						PlaySoundFile(media:Fetch("sound", Skada.db.profile.modules.threatsoundname))
-					end
-
+					self:Warn(
+						self.db.sound,
+						self.db.flash,
+						self.db.shake,
+						self.db.message and (mypercent and _format(THREAT_TOOLTIP, mypercent) or COMBAT_THREAT_INCREASE_1)
+					)
 					last_warn = time()
 				end
 			end
@@ -222,12 +218,9 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 			flasher.texture:SetTexture("Interface\\FullScreenTextures\\LowHealth")
 			flasher.texture:SetAllPoints(UIParent)
 			flasher.texture:SetBlendMode("ADD")
-			flasher:SetScript("OnShow", function(self)
-				self.elapsed = 0
-				self:SetAlpha(0)
-			end)
+			flasher:SetScript("OnShow", function(self) self:SetAlpha(0) end)
 			flasher:SetScript("OnUpdate", function(self, elapsed)
-				elapsed = self.elapsed + elapsed
+				elapsed = (self.elapsed or 0) + elapsed
 				if elapsed < 2.6 then
 					local alpha = elapsed % 1.3
 					if alpha < 0.15 then
@@ -254,8 +247,17 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 		if not shaker then
 			shaker = CreateFrame("Frame", "SkadaThreatShaker", UIParent)
 			shaker:Hide()
+			shaker:SetScript("OnShow", function(self)
+				-- Store old worldframe positions, we need them all, people have frame modifiers for it
+				if not self.originalPoints then
+					self.originalPoints = {}
+					for i = 1, WorldFrame:GetNumPoints() do
+						tinsert(self.originalPoints, {WorldFrame:GetPoint(i)})
+					end
+				end
+			end)
 			shaker:SetScript("OnUpdate", function(self, elapsed)
-				elapsed = self.elapsed + elapsed
+				elapsed = (self.elapsed or 0) + elapsed
 				local x, y = 0, 0 -- Resets to original position if we're supposed to stop.
 				if elapsed >= 0.8 then
 					self:Hide()
@@ -276,20 +278,26 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				end
 				self.elapsed = elapsed
 			end)
-			shaker:SetScript("OnShow", function(self)
-				-- Store old worldframe positions, we need them all, people have frame modifiers for it
-				if not self.originalPoints then
-					self.originalPoints = {}
-					for i = 1, WorldFrame:GetNumPoints() do
-						tinsert(self.originalPoints, {WorldFrame:GetPoint(i)})
-					end
-				end
-				self.elapsed = 0
-			end)
 			self.ShakerFrame = shaker
 		end
 
 		shaker:Show()
+	end
+
+	-- Shamelessly copied from Omen - thanks!
+	function mod:Warn(sound, flash, shake, message)
+		if sound then
+			_PlaySoundFile(LSM:Fetch("sound", self.db.soundfile))
+		end
+		if flash then
+			self:Flash()
+		end
+		if shake then
+			self:Shake()
+		end
+		if message then
+			self:Pour(message, 1, 0, 0, nil, 24, "OUTLINE", true)
+		end
 	end
 
 	do
@@ -297,87 +305,125 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 			type = "group",
 			name = L["Threat"],
 			get = function(i)
-				return Skada.db.profile.modules[i[#i]]
+				return mod.db[i[#i]]
 			end,
 			set = function(i, val)
-				Skada.db.profile.modules[i[#i]] = val
+				mod.db[i[#i]] = val
 			end,
 			args = {
-				warnings = {
+				warning = {
 					type = "group",
 					name = L["Threat warning"],
 					inline = true,
 					order = 1,
-					width = "double",
 					args = {
-						notankwarnings = {
-							type = "toggle",
-							name = L["Do not warn while tanking"],
-							order = 1
-						},
-						threatflash = {
+						flash = {
 							type = "toggle",
 							name = L["Flash screen"],
 							desc = L["This will cause the screen to flash as a threat warning."],
-							order = 2
+							order = 1
 						},
-						threatshake = {
+						shake = {
 							type = "toggle",
 							name = L["Shake screen"],
 							desc = L["This will cause the screen to shake as a threat warning."],
+							order = 2
+						},
+						message = {
+							type = "toggle",
+							name = L["Warning Message"],
+							desc = L["Print a message to screen when you accumulate too much threat."],
 							order = 3
 						},
-						threatsound = {
+						sound = {
 							type = "toggle",
 							name = L["Play sound"],
 							desc = L["This will play a sound as a threat warning."],
 							order = 4
 						},
-						threatsoundname = {
+						soundfile = {
 							type = "select",
 							name = L["Threat sound"],
-							desc = L["The sound that will be played when your threat percentage reaches a certain point."],
+							desc = L[
+								"The sound that will be played when your threat percentage reaches a certain point."
+							],
 							order = 5,
-							width = "double",
 							dialogControl = "LSM30_Sound",
 							values = AceGUIWidgetLSMlists.sound
 						},
-						threattreshold = {
+						threshold = {
 							type = "range",
 							name = L["Threat threshold"],
 							desc = L["When your threat reaches this level, relative to tank, warnings are shown."],
 							order = 6,
-							width = "double",
-							min = 0,
+							min = 60,
 							max = 130,
 							step = 1
 						}
 					}
 				},
-				threatraw = {
+				output = mod:GetSinkAce3OptionsDataTable(),
+				rawvalue = {
 					type = "toggle",
 					name = L["Show raw threat"],
 					desc = L["Shows raw threat percentage relative to tank instead of modified for range."],
-					order = 2
+					order = 3
 				},
-				threatfocustarget = {
+				focustarget = {
 					type = "toggle",
 					name = L["Use focus target"],
 					desc = L["Shows threat on focus target, or focus target's target, when available."],
-					order = 3
+					order = 4
+				},
+				notankwarnings = {
+					type = "toggle",
+					name = L["Disable while tanking"],
+					order = 5
+				},
+				test = {
+					type = "execute",
+					name = L["Test warnings"],
+					order = 6,
+					func = function()
+						mod:Warn(mod.db.sound, mod.db.flash, mod.db.shake, mod.db.message and L["Test warnings"])
+					end
 				}
 			}
 		}
 
 		function mod:OnInitialize()
+			if not Skada.db.profile.modules.threat then
+				Skada.db.profile.modules.threat = {
+					sound = true,
+					flash = true,
+					shake = false,
+					message = false,
+					sinkOptions = {},
+					threshold = 90,
+					soundfile = "Fel Nova",
+					notankwarnings = true
+				}
+			end
+			self.db = Skada.db.profile.modules.threat
+			self:SetSinkStorage(mod.db.sinkOptions)
 			Skada.options.args.modules.args.threat = opts
+
+			Skada.options.args.modules.args.threat.args.output.order = 2
+			Skada.options.args.modules.args.threat.args.output.inline = true
+			Skada.options.args.modules.args.threat.args.output.hidden = function()
+				return not self.db.message
+			end
+			Skada.options.args.modules.args.threat.args.output.disabled = function()
+				return not self.db.message
+			end
 		end
 	end
 
 	do
 		local function add_threat_feed()
 			if Skada.current and _UnitExists("target") then
-				local isTanking, status, threatpct, rawthreatpct, threatvalue = _UnitDetailedThreatSituation("player", "target")
+				local isTanking, status, threatpct, rawthreatpct, threatvalue =
+					_UnitDetailedThreatSituation("player", "target")
 				if threatpct then
 					return _format("%02.1f%%", threatpct)
 				end

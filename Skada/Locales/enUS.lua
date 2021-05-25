@@ -352,11 +352,12 @@ L["Bar display is the normal bar window used by most damage meters. It can be ex
 -- Threat Module --
 L["Threat"] = true
 L["Threat warning"] = true
-L["Do not warn while tanking"] = true
 L["Flash screen"] = true
 L["This will cause the screen to flash as a threat warning."] = true
 L["Shake screen"] = true
 L["This will cause the screen to shake as a threat warning."] = true
+L["Warning Message"] = true
+L["Print a message to screen when you accumulate too much threat."] = true
 L["Play sound"] = true
 L["This will play a sound as a threat warning."] = true
 L["Threat sound"] = true
@@ -367,6 +368,8 @@ L["Show raw threat"] = true
 L["Shows raw threat percentage relative to tank instead of modified for range."] = true
 L["Use focus target"] = true
 L["Shows threat on focus target, or focus target's target, when available."] = true
+L["Disable while tanking"] = true
+L["Test warnings"] = true
 L["TPS"] = true
 L["Threat: Personal Threat"] = true
 -- Absorbs & Healing Module --

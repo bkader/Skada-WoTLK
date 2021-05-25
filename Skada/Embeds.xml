@@ -27,4 +27,5 @@
 <Include file="Libs\LibGroupTalents-1.0\lib.xml"/>
 <Script file="Libs\LibFlyPaper-1.1\LibFlyPaper-1.1.lua"/>
 <Include file="Libs\LibUIDropDownMenu\LibUIDropDownMenu.xml"/>
+<Script file="Libs\LibSink-2.0\LibSink-2.0.lua"/>
 </Ui>
