@@ -455,7 +455,7 @@ do
 		return a_score < b_score
 	end
 
-	function Skada:ModeMenu(window)
+	function Skada:ModeMenu(win)
 		self.modesmenu = self.modesmenu or _CreateFrame("Frame", "SkadaWindowButtonsModes", UIParent, "UIDropDownMenuTemplate")
 
 		-- so we call it only once.
@@ -484,6 +484,9 @@ do
 						info.hasArrow = 1
 						info.notCheckable = 1
 						info.padding = 16
+						if win and win.selectedmode and win.selectedmode.category == category then
+							info.colorCode = "|cffffd100"
+						end
 						_UIDropDownMenu_AddButton(info, level)
 					end
 				end
@@ -495,6 +498,9 @@ do
 					info.hasArrow = 1
 					info.notCheckable = 1
 					info.padding = 16
+					if win and win.selectedmode and win.selectedmode.category == category then
+						info.colorCode = "|cffffd100"
+					end
 					_UIDropDownMenu_AddButton(info, level)
 				end
 			elseif level == 2 and categorized[L_UIDROPDOWNMENU_MENU_VALUE] then
@@ -502,11 +508,23 @@ do
 					info = _UIDropDownMenu_CreateInfo()
 					info.text = mode:GetName()
 					info.func = function()
-						window:DisplayMode(mode)
+						win:DisplayMode(mode)
 						_CloseDropDownMenus()
 					end
-					info.icon = (Skada.db.profile.moduleicons and mode.metadata) and mode.metadata.icon
-					info.checked = (window.selectedmode == mode or window.parenttitle == mode:GetName())
+
+					if win and win.selectedmode and win.selectedmode:GetName() == mode:GetName() then
+						info.checked = 1
+						info.colorCode = "|cffffd100"
+					end
+
+					if Skada.db.profile.moduleicons then
+						info.icon = mode.metadata and mode.metadata.icon
+						info.tCoordLeft = 0.065
+						info.tCoordRight = 0.935
+						info.tCoordTop = 0.065
+						info.tCoordBottom = 0.935
+						info.padding = 8
+					end
 					_UIDropDownMenu_AddButton(info, level)
 				end
 			end

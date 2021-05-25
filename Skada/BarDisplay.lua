@@ -18,7 +18,6 @@ Skada:AddDisplaySystem("bar", mod)
 -- class, role & specs
 local class_icon_file, class_icon_tcoords
 local role_icon_file, role_icon_tcoords
-
 local specicons = {
 	-- Death Knight
 	[250] = "Interface\\Icons\\spell_deathknight_bloodpresence", --> Blood
@@ -568,7 +567,7 @@ do
 
 					if data.spec and win.db.specicons and specicons[data.spec] then
 						bar:ShowIcon()
-						bar:SetIcon(specicons[data.spec])
+						bar:SetIconWithCoord(specicons[data.spec], {0.065, 0.935, 0.065, 0.935})
 					elseif data.role and data.role ~= "NONE" and win.db.roleicons then
 						bar:ShowIcon()
 						bar:SetIconWithCoord(role_icon_file, role_icon_tcoords[data.role])
