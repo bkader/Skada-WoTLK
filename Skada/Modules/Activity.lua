@@ -65,7 +65,7 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
 			ordersort = true,
 			tooltip = activity_tooltip,
 			columns = {["Active Time"] = true, Percent = true},
-			icon = "Interface\\Icons\\inv_misc_pocketwatch_02"
+			icon = "Interface\\Icons\\spell_nature_timestop"
 		}
 		Skada:AddMode(self)
 	end

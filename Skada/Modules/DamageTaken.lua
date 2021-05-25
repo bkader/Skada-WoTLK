@@ -584,7 +584,7 @@ Skada:AddLoadableModule("DTPS", function(Skada, L)
 			click1 = parentmod.metadata.click1,
 			click2 = parentmod.metadata.click2,
 			columns = {DTPS = true, Percent = true},
-			icon = "Interface\\Icons\\spell_fire_twilightpyroblast"
+			icon = "Interface\\Icons\\inv_misc_pocketwatch_02"
 		}
 
 		Skada:AddMode(self, L["Damage Taken"])

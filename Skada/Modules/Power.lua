@@ -230,10 +230,10 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 		Skada:RegisterForCL(SpellLeech, "SPELL_LEECH", {src_is_interesting = true})
 		Skada:RegisterForCL(SpellLeech, "SPELL_PERIODIC_LEECH", {src_is_interesting = true})
 
-		manamod.metadata.icon = "Interface\\Icons\\spell_shadow_siphonmana"
+		manamod.metadata.icon = "Interface\\Icons\\inv_elemental_primal_mana"
 		ragemod.metadata.icon = "Interface\\Icons\\ability_racial_bloodrage"
-		energymod.metadata.icon = "Interface\\Icons\\achievement_guildperk_happyhour"
-		runicmod.metadata.icon = "Interface\\Icons\\inv_misc_rune_02"
+		energymod.metadata.icon = "Interface\\Icons\\spell_holy_circleofrenewal"
+		runicmod.metadata.icon = "Interface\\Icons\\inv_misc_rune_09"
 		Skada:AddMode(manamod, L["Resources"])
 		Skada:AddMode(ragemod, L["Resources"])
 		Skada:AddMode(energymod, L["Resources"])

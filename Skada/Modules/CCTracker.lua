@@ -811,7 +811,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 			click1 = playermod,
 			click2 = sourcemod,
 			columns = {Count = true, Percent = false},
-			icon = "Interface\\Icons\\spell_frost_frostnova"
+			icon = "Interface\\Icons\\spell_magic_polymorphrabbit"
 		}
 
 		Skada:RegisterForCL(SpellAuraApplied, "SPELL_AURA_APPLIED", {dst_is_interesting = true})
