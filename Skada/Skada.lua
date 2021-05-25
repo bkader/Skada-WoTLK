@@ -3097,6 +3097,20 @@ function Skada:OnInitialize()
 		[64] = STRING_SCHOOL_ARCANE:gsub("%(", ""):gsub("%)", "")
 	}
 
+	-- valid classes
+	self.validclass = {
+		DEATHKNIGHT = true,
+		DRUID = true,
+		HUNTER = true,
+		MAGE = true,
+		PALADIN = true,
+		PRIEST = true,
+		ROGUE = true,
+		SHAMAN = true,
+		WARLOCK = true,
+		WARRIOR = true
+	}
+
 	-- class names
 	self.classnames = {}
 	for k, v in pairs(LOCALIZED_CLASS_NAMES_MALE) do
@@ -3132,20 +3146,6 @@ function Skada:OnInitialize()
 		UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
 	}
 
-	-- valid classes
-	self.validclass = {
-		DEATHKNIGHT = true,
-		DRUID = true,
-		HUNTER = true,
-		MAGE = true,
-		PALADIN = true,
-		PRIEST = true,
-		ROGUE = true,
-		SHAMAN = true,
-		WARLOCK = true,
-		WARRIOR = true
-	}
-
 	-- class icon file & coordinates
 	self.classiconfile = [[Interface\AddOns\Skada\Media\Textures\icon-classes]]
 	self.classicontcoords = {}
@@ -3167,45 +3167,6 @@ function Skada:OnInitialize()
 		TANK = {0, 0.296875, 0.3125, 0.63},
 		LEADER = {0, 0.296875, 0.015625, 0.3125},
 		NONE = ""
-	}
-
-	-- spec icon file and coordinates
-	self.speciconfile = [[Interface\AddOns\Skada\Media\Textures\icon-specs]]
-	self.specicontcoords = {
-		[1] = {0.75, 0.875, 0.125, 0.25}, --> pet
-		[2] = {0.875, 1, 0.125, 0.25}, --> unknown
-		[3] = {0.625, 0.75, 0.125, 0.25}, --> monster
-		[102] = {0.375, 0.5, 0, 0.125}, --> druid balance
-		[103] = {0.5, 0.625, 0, 0.125}, --> druid feral
-		[104] = {0.625, 0.75, 0, 0.125}, --> druid tank
-		[105] = {0.75, 0.875, 0, 0.125}, --> druid restoration
-		[250] = {0, 0.125, 0, 0.125}, --> blood dk
-		[251] = {0.125, 0.25, 0, 0.125}, --> frost dk
-		[252] = {0.25, 0.375, 0, 0.125}, --> unholy dk
-		[253] = {0.875, 1, 0, 0.125}, --> hunter beast mastery
-		[254] = {0, 0.125, 0.125, 0.25}, --> hunter marksmalship
-		[255] = {0.125, 0.25, 0.125, 0.25}, --> hunter survival
-		[256] = {0.375, 0.5, 0.25, 0.375}, --> priest discipline
-		[257] = {0.5, 0.625, 0.25, 0.375}, --> priest holy
-		[258] = {0.625, 0.75, 0.25, 0.375}, --> priest shadow
-		[259] = {0.75, 0.875, 0.25, 0.375}, --> rogue assassination
-		[260] = {0.875, 1, 0.25, 0.375}, --> rogue combat
-		[261] = {0, 0.125, 0.375, 0.5}, --> rogue subtlty
-		[262] = {0.125, 0.25, 0.375, 0.5}, --> shaman elemental
-		[263] = {0.25, 0.375, 0.375, 0.5}, --> shamel enhancement
-		[264] = {0.375, 0.5, 0.375, 0.5}, --> shaman restoration
-		[265] = {0.5, 0.625, 0.375, 0.5}, --> warlock affliction
-		[266] = {0.625, 0.75, 0.375, 0.5}, --> warlock demonology
-		[267] = {0.75, 0.875, 0.375, 0.5}, --> warlock destruction
-		[62] = {0.25, 0.375, 0.125, 0.25}, --> mage arcane
-		[63] = {0.375, 0.5, 0.125, 0.25}, --> mage fire
-		[64] = {0.5, 0.625, 0.125, 0.25}, --> mage frost
-		[65] = {0, 0.125, 0.25, 0.375}, --> paladin holy
-		[66] = {0.125, 0.25, 0.25, 0.375}, --> paladin protection
-		[70] = {0.25, 0.375, 0.25, 0.375}, --> paladin ret
-		[71] = {0.875, 1, 0.375, 0.5}, --> warrior arms
-		[72] = {0, 0.125, 0.5, 0.625}, --> warrior fury
-		[73] = {0.125, 0.25, 0.5, 0.625} --> warrior protection
 	}
 end
 

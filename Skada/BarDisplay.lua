@@ -18,7 +18,50 @@ Skada:AddDisplaySystem("bar", mod)
 -- class, role & specs
 local class_icon_file, class_icon_tcoords
 local role_icon_file, role_icon_tcoords
-local spec_icon_file, spec_icon_tcoords
+
+local specicons = {
+	-- Death Knight
+	[250] = "Interface\\Icons\\spell_deathknight_bloodpresence", --> Blood
+	[251] = "Interface\\Icons\\spell_deathknight_frostpresence", --> Frost
+	[252] = "Interface\\Icons\\spell_deathknight_unholypresence", --> Unholy
+	-- Druid
+	[102] = "Interface\\Icons\\spell_nature_starfall", --> Balance
+	[103] = "Interface\\Icons\\ability_druid_catform", --> Feral
+	[104] = "Interface\\Icons\\ability_racial_bearform", --> Tank
+	[105] = "Interface\\Icons\\spell_nature_healingtouch", --> Restoration
+	-- Hunter
+	[253] = "Interface\\Icons\\ability_hunter_beasttaming", --> Beastmastery
+	[254] = "Interface\\Icons\\ability_hunter_focusedaim", --> Marksmalship
+	[255] = "Interface\\Icons\\ability_hunter_swiftstrike", --> Survival
+	-- Mage
+	[62] = "Interface\\Icons\\spell_holy_magicalsentry", --> Arcane (or: spell_arcane_blast)
+	[63] = "Interface\\Icons\\spell_fire_flamebolt", --> Fire
+	[64] = "Interface\\Icons\\spell_frost_frostbolt02", --> Frost
+	-- Paldin
+	[65] = "Interface\\Icons\\spell_holy_holybolt", --> Holy
+	[66] = "Interface\\Icons\\spell_holy_devotionaura", --> Protection (or: spell_holy_avengersshield)
+	[70] = "Interface\\Icons\\spell_holy_auraoflight", --> Ret
+	-- Priest
+	[256] = "Interface\\Icons\\spell_holy_powerwordshield", --> Discipline
+	[257] = "Interface\\Icons\\spell_holy_guardianspirit", --> Holy
+	[258] = "Interface\\Icons\\spell_shadow_shadowwordpain", --> Shadow
+	-- Rogue
+	[259] = "Interface\\Icons\\ability_rogue_eviscerate", --> Assassination (or: ability_rogue_shadowstrikes)
+	[260] = "Interface\\Icons\\ability_backstab", --> Combat
+	[261] = "Interface\\Icons\\ability_stealth", --> Subtlty
+	-- Shaman
+	[262] = "Interface\\Icons\\spell_nature_lightning", --> Elemental
+	[263] = "Interface\\Icons\\spell_nature_lightningshield", --> Enhancement (or: spell_shaman_improvedstormstrike)
+	[264] = "Interface\\Icons\\spell_nature_healingwavegreater", --> Restoration
+	-- Warlock
+	[265] = "Interface\\Icons\\spell_shadow_deathcoil", --> Affliction
+	[266] = "Interface\\Icons\\spell_shadow_metamorphosis", --> Demonology
+	[267] = "Interface\\Icons\\spell_shadow_rainoffire", --> Destruction
+	-- Warrior
+	[71] = "Interface\\Icons\\ability_warrior_savageblow", --> Arms
+	[72] = "Interface\\Icons\\ability_warrior_innerrage", --> Fury (or: ability_warrior_titansgrip)
+	[73] = "Interface\\Icons\\ability_warrior_defensivestance" --> Protection (or: ability_warrior_safeguard)
+}
 
 function mod:Create(window)
 	-- Re-use bargroup if it exists.
@@ -137,7 +180,6 @@ function mod:Create(window)
 	if not class_icon_tcoords then
 		class_icon_file, class_icon_tcoords = Skada.classiconfile, Skada.classicontcoords
 		role_icon_file, role_icon_tcoords = Skada.roleiconfile, Skada.roleicontcoords
-		spec_icon_file, spec_icon_tcoords = Skada.speciconfile, Skada.specicontcoords
 	end
 end
 
@@ -524,9 +566,9 @@ do
 						bar.missingclass = nil
 					end
 
-					if data.spec and win.db.specicons and spec_icon_tcoords[data.spec] then
+					if data.spec and win.db.specicons and specicons[data.spec] then
 						bar:ShowIcon()
-						bar:SetIconWithCoord(spec_icon_file, spec_icon_tcoords[data.spec])
+						bar:SetIcon(specicons[data.spec])
 					elseif data.role and data.role ~= "NONE" and win.db.roleicons then
 						bar:ShowIcon()
 						bar:SetIconWithCoord(role_icon_file, role_icon_tcoords[data.role])
