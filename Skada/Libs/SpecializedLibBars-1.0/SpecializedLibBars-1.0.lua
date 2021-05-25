@@ -513,8 +513,8 @@ do
 		list:SetHeight(height)
 		list:SetWidth(length)
 		list:SetResizable(true)
-		list:SetMinResize(60, 40)
-		list:SetMaxResize(800, 800)
+		list:SetMinResize(80, 60)
+		list:SetMaxResize(800, 600)
 
 		list.showIcon = true
 		list.showLabel = true

@@ -700,13 +700,20 @@ do
 	local function move(self, button)
 		local group = self:GetParent()
 		if group then
-			if button == "MiddleButton" or IsAltKeyDown() then
+			if button == "MiddleButton" or IsAltKeyDown() or (group.locked and button == "LeftButton") then
 				_CloseDropDownMenus()
-				group.stretching = true
+				group.isStretching = true
 				group:SetBackdropColor(0, 0, 0, 0.9)
 				group:SetFrameStrata("TOOLTIP")
 				group:StartSizing("TOP")
-				group:SetScript("OnUpdate", group.SortBars)
+				group:SetScript("OnUpdate", function(self, elapsed)
+					local height = self:GetHeight()
+					if height >= 800 then
+						self:StopMovingOrSizing()
+					else
+						self:SortBars()
+					end
+				end)
 			elseif button == "LeftButton" and not group.locked then
 				self.startX = group:GetLeft()
 				self.startY = group:GetTop()
@@ -729,8 +736,8 @@ do
 	local function stopMove(self, button)
 		local group = self:GetParent()
 		if group then
-			if button == "MiddleButton" or group.stretching then
-				group.stretching = nil
+			if button == "MiddleButton" or group.isStretching then
+				group.isStretching = nil
 				local color = group.win.db.background.color
 				group:SetBackdropColor(color.r, color.g, color.b, color.a or 1)
 				group:SetFrameStrata(group.win.db.strata)
