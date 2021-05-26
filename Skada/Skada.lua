@@ -199,8 +199,10 @@ function Skada.UnitClass(guid, flags, set)
 			local isboss, npcid = Skada:IsBoss(guid)
 			if isboss then
 				locClass, engClass = Skada.classnames.BOSS, "BOSS"
-			elseif npcid ~= 0 then
+			elseif (npcid or 0) > 0 then
 				locClass, engClass = Skada.classnames.MONSTER, "MONSTER"
+			elseif npcid == 0 and flags and band(flags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0 then
+				locClass, engClass = Skada.classnames.PLAYER, "PLAYER"
 			end
 		end
 	end

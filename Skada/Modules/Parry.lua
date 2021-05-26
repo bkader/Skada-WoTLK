@@ -6,6 +6,7 @@ Skada:AddLoadableModule("Parry-haste", function(Skada, L)
 	local targetmod = mod:NewModule(L["Parry target list"])
 
 	local _pairs, _format, _select = pairs, string.format, select
+	local _UnitClass = Skada.UnitClass
 
 	local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
 	local parrybosses = {
@@ -26,24 +27,27 @@ Skada:AddLoadableModule("Parry-haste", function(Skada, L)
 			set.parries = (set.parries or 0) + 1
 
 			player.parries.targets = player.parries.targets or {}
-			player.parries.targets[data.dstName] = (player.parries.targets[data.dstName] or 0) + 1
+			if not player.parries.targets[data.dstName] then
+				player.parries.targets[data.dstName] = {id = data.dstGUID, count = 1}
+			else
+				player.parries.targets[data.dstName].count = (player.parries.targets[data.dstName].count or 0) + 1
+			end
 		end
 	end
 
 	local data = Skada:WeakTable()
 
 	local function SpellMissed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		if parrybosses[dstName] and srcGUID ~= dstGUID then
-			if _select(4, ...) == "PARRY" then
-				data.playerid = srcGUID
-				data.playername = srcName
-				data.playerflags = srcFlags
-				data.dstName = dstName
+		if parrybosses[dstName] and srcGUID ~= dstGUID and _select(4, ...) == "PARRY" then
+			data.playerid = srcGUID
+			data.playername = srcName
+			data.playerflags = srcFlags
+			data.dstGUID = dstGUID
+			data.dstName = dstName
 
-				Skada:FixPets(data)
-				log_parry(Skada.current, data)
-				log_parry(Skada.total, data)
-			end
+			Skada:FixPets(data)
+			log_parry(Skada.current, data)
+			log_parry(Skada.total, data)
 		end
 	end
 
@@ -65,24 +69,24 @@ Skada:AddLoadableModule("Parry-haste", function(Skada, L)
 			if total > 0 and player.parries.targets then
 				local maxvalue, nr = 0, 1
 
-				for targetname, count in _pairs(player.parries.targets) do
+				for targetname, target in _pairs(player.parries.targets) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = targetname
+					d.id = target.id or targetname
 					d.label = targetname
-					d.class = "MONSTER"
+					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
 
-					d.value = count
+					d.value = target.count
 					d.valuetext = Skada:FormatValueText(
-						count,
+						target.count,
 						mod.metadata.columns.Count,
-						_format("%02.1f%%", 100 * count / total),
+						_format("%02.1f%%", 100 * target.count / total),
 						mod.metadata.columns.Percent
 					)
 
-					if count > maxvalue then
-						maxvalue = count
+					if target.count > maxvalue then
+						maxvalue = target.count
 					end
 					nr = nr + 1
 				end
@@ -107,8 +111,8 @@ Skada:AddLoadableModule("Parry-haste", function(Skada, L)
 					d.id = player.id
 					d.label = player.name
 					d.class = player.class or "PET"
-					d.role = player.role or "DAMAGER"
-					d.spec = player.spec or 1
+					d.role = player.role
+					d.spec = player.spec
 
 					d.value = player.parries.count
 					d.valuetext = Skada:FormatValueText(

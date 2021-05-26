@@ -653,7 +653,9 @@ L["%s's <%s> mitigated damage"] = "Daño mitigado de %s <%s>"
 -- overkill module lines --
 L["Overkill"] = "Exceso de daño"
 L["Overkill spell list"] = "Hechizos con exceso de daño"
+L["Overkill target list"] = "Objetivos con exceso de daño"
 L["%s's overkill spells"] = "Hechizos exagerados de %s"
+L["%s's overkill targets"] = "Objetivos exagerados de %s"
 -- tweaks module lines --
 L["Tweaks"] = "Ajustes"
 L["First hit"] = "Primer golpe"

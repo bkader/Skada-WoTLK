@@ -48,14 +48,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 			if data.dstName then
 				player.interrupts.targets = player.interrupts.targets or {}
 				if not player.interrupts.targets[data.dstName] then
-					local class, role, spec = select(2, _UnitClass(data.dstGUID, data.dstFlags, set))
-					player.interrupts.targets[data.dstName] = {
-						id = data.dstGUID,
-						class = class,
-						role = role,
-						spec = spec,
-						count = 1
-					}
+					player.interrupts.targets[data.dstName] = {id = data.dstGUID, count = 1}
 				else
 					player.interrupts.targets[data.dstName].count = player.interrupts.targets[data.dstName].count + 1
 				end
@@ -180,9 +173,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 					d.id = target.id
 					d.label = targetname
-					d.class = target.class
-					d.role = target.role
-					d.spec = target.spec
+					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(
@@ -262,8 +253,8 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 					d.id = player.id
 					d.label = player.name
 					d.class = player.class or "PET"
-					d.role = player.role or "DAMAGER"
-					d.spec = player.spec or 1
+					d.role = player.role
+					d.spec = player.spec
 
 					d.value = player.interrupts.count
 					d.valuetext = Skada:FormatValueText(

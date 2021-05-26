@@ -3,7 +3,7 @@ assert(Skada, "Skada not found!")
 -- cache frequently used globals
 local _pairs, _ipairs, _select = pairs, ipairs, select
 local _format, math_max, math_min = string.format, math.max, math.min
-local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+local _GetSpellInfo, _UnitClass = Skada.GetSpellInfo or GetSpellInfo, Skada.UnitClass
 
 -- list of miss types
 local misstypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}
@@ -36,18 +36,27 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 		local spell = player.damagetaken.spells and player.damagetaken.spells[spellname]
 		if not spell then
 			player.damagetaken.spells = player.damagetaken.spells or {}
-			spell = {id = dmg.spellid, school = dmg.spellschool, amount = 0}
+			spell = {
+				id = dmg.spellid,
+				school = dmg.spellschool,
+				amount = 0,
+				isdot = tick or nil
+			}
 			player.damagetaken.spells[spellname] = spell
 		elseif dmg.spellschool and dmg.spellschool ~= spell.school then
 			spellname = spellname .. " (" .. (Skada.schoolnames[dmg.spellschool] or OTHER) .. ")"
 			if not player.damagetaken.spells[spellname] then
-				player.damagetaken.spells[spellname] = {id = dmg.spellid, school = dmg.spellschool, amount = 0}
+				player.damagetaken.spells[spellname] = {
+					id = dmg.spellid,
+					school = dmg.spellschool,
+					amount = 0,
+					isdot = tick or nil
+				}
 			end
 			spell = player.damagetaken.spells[spellname]
 		end
 
 		spell.count = (spell.count or 0) + 1
-		spell.isdot = tick or nil -- DoT
 		spell.amount = spell.amount + dmg.amount
 
 		if spell.max == nil or dmg.amount > spell.max then
@@ -102,9 +111,18 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 
 		if dmg.srcName and dmg.amount > 0 then
 			spell.sources = spell.sources or {}
-			spell.sources[dmg.srcName] = (spell.sources[dmg.srcName] or 0) + dmg.amount
+			if not spell.sources[dmg.srcName] then
+				spell.sources[dmg.srcName] = {id = dmg.srcGUID, amount = dmg.amount}
+			else
+				spell.sources[dmg.srcName].amount = spell.sources[dmg.srcName].amount + dmg.amount
+			end
+
 			player.damagetaken.sources = player.damagetaken.sources or {}
-			player.damagetaken.sources[dmg.srcName] = (player.damagetaken.sources[dmg.srcName] or 0) + dmg.amount
+			if not player.damagetaken.sources[dmg.srcName] then
+				player.damagetaken.sources[dmg.srcName] = {id = dmg.srcGUID, amount = dmg.amount}
+			else
+				player.damagetaken.sources[dmg.srcName].amount = player.damagetaken.sources[dmg.srcName].amount + dmg.amount
+			end
 		end
 	end
 
@@ -332,23 +350,24 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 			if total > 0 and player.damagetaken.sources then
 				local maxvalue, nr = 0, 1
 
-				for targetname, amount in _pairs(player.damagetaken.sources) do
+				for sourcename, source in _pairs(player.damagetaken.sources) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = targetname
-					d.label = targetname
+					d.id = source.id or sourcename
+					d.label = sourcename
+					d.class, d.role, d.spec = _select(2, _UnitClass(source.id, nil, set))
 
-					d.value = amount
+					d.value = source.amount
 					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(amount),
+						Skada:FormatNumber(source.amount),
 						mod.metadata.columns.Damage,
-						_format("%02.1f%%", 100 * amount / total),
+						_format("%02.1f%%", 100 * source.amount / total),
 						mod.metadata.columns.Percent
 					)
 
-					if amount > maxvalue then
-						maxvalue = amount
+					if source.amount > maxvalue then
+						maxvalue = source.amount
 					end
 					nr = nr + 1
 				end
@@ -515,11 +534,9 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 
 	function mod:SetComplete(set)
 		for _, player in Skada:IteratePlayers(set) do
-			if player.damagetaken then
-				if player.damagetaken.amount == 0 then
-					player.damagetaken.spells = nil
-					player.damagetaken.sources = nil
-				end
+			if player.damagetaken and player.damagetaken.amount == 0 then
+				player.damagetaken.spells = nil
+				player.damagetaken.sources = nil
 			end
 		end
 	end
@@ -913,7 +930,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 				win.dataset[nr] = d
 
 				-- start of total bar --
-				d.id = L["Total"]
+				d.id = "Total"
 				d.label = L["Total"]
 				d.value = total
 				d.valuetext = Skada:FormatNumber(total)
@@ -923,7 +940,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 				nr = nr + 1
 				d = win.dataset[nr] or {}
 				win.dataset[nr] = d
-				d.id = L["Damage Taken"]
+				d.id = "Damage Taken"
 				d.label = L["Damage Taken"]
 				d.value = spell.amount
 				d.valuetext = Skada:FormatValueText(
@@ -939,7 +956,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 					d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = L["ABSORB"]
+					d.id = "ABSORB"
 					d.label = L["ABSORB"]
 					d.value = spell.absorbed
 					d.valuetext = Skada:FormatValueText(
@@ -959,7 +976,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 					d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = L["BLOCK"]
+					d.id = "BLOCK"
 					d.label = L["BLOCK"]
 					d.value = spell.blocked
 					d.valuetext = Skada:FormatValueText(
@@ -979,7 +996,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 					d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = L["RESIST"]
+					d.id = "RESIST"
 					d.label = L["RESIST"]
 					d.value = spell.resisted
 					d.valuetext = Skada:FormatValueText(

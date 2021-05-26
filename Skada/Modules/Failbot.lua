@@ -75,8 +75,8 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 					d.id = player.id
 					d.label = player.name
 					d.class = player.class or "PET"
-					d.role = player.role or "DAMAGER"
-					d.spec = player.spec or 1
+					d.role = player.role
+					d.spec = player.spec
 
 					d.value = player.fails.spells[win.spellid]
 					d.valuetext = Skada:FormatValueText(
@@ -155,8 +155,8 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 					d.id = player.id
 					d.label = player.name
 					d.class = player.class or "PET"
-					d.role = player.role or "DAMAGER"
-					d.spec = player.spec or 1
+					d.role = player.role
+					d.spec = player.spec
 
 					d.value = player.fails.count
 					d.valuetext = Skada:FormatValueText(

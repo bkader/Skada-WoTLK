@@ -11,7 +11,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	local _format, _strsub, _tostring, math_max = string.format, string.sub, tostring, math.max
 	local _GetNumPartyMembers = GetNumPartyMembers
 	local _GetNumRaidMembers = GetNumRaidMembers
-	local _GetItemInfo = GetItemInfo
+	local _GetItemInfo, _GetSpellInfo = GetItemInfo, Skada.GetSpellInfo
 	local _UnitExists, _UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
 	local _UnitGUID, _GetUnitName = UnitGUID, GetUnitName
 	local _UnitClass, _UnitBuff = UnitClass, UnitBuff
@@ -35,7 +35,8 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 		[67490] = 42545 -- Runic Mana Injector
 	}
 
-	local prepottStr, prepotion = "|c%s%s|r |T%s:14:14:0:0:64:64:0:64:0:64|t"
+	local prepotionStr, potionStr = "|c%s%s|r %s", "|T%s:14:14:0:0:64:64:0:64:0:64|t"
+	local prepotion
 
 	local function log_potion(set, playerid, playername, playerflags, spellid)
 		local player = Skada:get_player(set, playerid, playername, playerflags)
@@ -75,22 +76,27 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 				if _UnitExists(unit) and not _UnitIsDeadOrGhost(unit) then
 					local playerid, playername = _UnitGUID(unit), _GetUnitName(unit)
 					local class = _select(2, _UnitClass(unit))
-					for i = 1, 40 do
-						local _, _, icon, _, _, _, _, _, _, _, spellid = _UnitBuff(unit, i)
+
+					local potions = {} -- holds used potions
+
+					for potionid, _ in _pairs(potionIDs) do
+						local _, _, icon, _, _, _, _, _, _, _, spellid = _UnitBuff(unit, _GetSpellInfo(potionid))
 						if spellid and potionIDs[spellid] then
 							-- instant recording doesn't work, so we delay it
-							Skada.After(1, function()
-								PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid)
-							end)
-
-							-- add to print out:
-							if class and Skada.validclass[class] then
-								local colorStr = Skada.classcolors[class].colorStr or "ffffffff"
-								tinsert(prepotion, _format(prepottStr, colorStr, playername, icon))
-							end
-
-							break -- beause we can only have one potion
+							Skada.After(
+								1,
+								function()
+									PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid)
+								end
+							)
+							tinsert(potions, _format(potionStr, icon))
 						end
+					end
+
+					-- add to print out:
+					if next(potions) ~= nil and class and Skada.validclass[class] then
+						local colorStr = Skada.classcolors[class].colorStr or "ffffffff"
+						tinsert(prepotion, _format(prepotionStr, colorStr, playername, tconcat(potions, " ")))
 					end
 				end
 			end
@@ -275,7 +281,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 			showspots = true,
 			click1 = playermod,
 			columns = {Count = true, Percent = true},
-			icon = "Interface\\Icons\\inv_potion_27"
+			icon = "Interface\\Icons\\inv_potion_110"
 		}
 
 		Skada:RegisterForCL(PotionUsed, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})

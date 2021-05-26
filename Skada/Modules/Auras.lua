@@ -3,7 +3,7 @@ assert(Skada, "Skada not found!")
 -- cache frequently used globals
 local _pairs, _format, _select, _tostring = pairs, string.format, select, tostring
 local math_min, math_max = math.min, math.max
-local _UnitClass, _GetSpellInfo = Skada.UnitClass, Skada.GetSpellInfo or GetSpellInfo
+local _GetSpellInfo, _UnitClass = Skada.GetSpellInfo or GetSpellInfo, Skada.UnitClass
 
 --
 -- common functions to both modules that handle aura apply/remove log
@@ -39,11 +39,7 @@ local function log_auraapply(set, aura)
 			if aura.auratype == "DEBUFF" and aura.dstName then
 				player.auras[aura.spellname].targets = player.auras[aura.spellname].targets or {}
 				if not player.auras[aura.spellname].targets[aura.dstName] then
-					player.auras[aura.spellname].targets[aura.dstName] = {
-						id = aura.dstGUID,
-						class = _select(2, _UnitClass(aura.dstGUID, aura.dstFlags)),
-						count = 1
-					}
+					player.auras[aura.spellname].targets[aura.dstName] = {id = aura.dstGUID, count = 1}
 				else
 					player.auras[aura.spellname].targets[aura.dstName].count = player.auras[aura.spellname].targets[aura.dstName].count + 1
 				end
@@ -277,8 +273,8 @@ do
 					d.id = player.id
 					d.label = player.name
 					d.class = player.class or "PET"
-					d.role = player.role or "DAMAGER"
-					d.spec = player.spec or 1
+					d.role = player.role
+					d.spec = player.spec
 
 					d.value = uptime
 					d.valuetext = _format("%u (%02.1f%%)", auracount, 100 * uptime / math_max(1, maxtime))
@@ -543,7 +539,7 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class = target.class
+					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
 
 					d.value = target.count
 					d.valuetext = _format("%u (%02.1f%%)", target.count, 100 * target.count / total)

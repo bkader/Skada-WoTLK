@@ -654,7 +654,9 @@ L["Damage Mitigated"] = "피해 완화"
 -- overkill module lines --
 L["Overkill"] = "과도한 손상"
 L["Overkill spell list"] = "과도한 피해 주문"
+L["Overkill target list"] = "과도한 피해 대상"
 L["%s's overkill spells"] = "%s의 과도한 피해 주문"
+L["%s's overkill targets"] = "%s의 과도한 피해 대상"
 -- tweaks module lines --
 L["Tweaks"] = "개선"
 L["First hit"] = "첫 번째 히트"

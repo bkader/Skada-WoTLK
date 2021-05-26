@@ -13,8 +13,8 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 	if Skada:IsDisabled("Healing") then return end
 
 	local mod = Skada:NewModule(L["Healing"])
-	local playersmod = mod:NewModule(L["Healed player list"])
-	local spellsmod = mod:NewModule(L["Healing spell list"])
+	local targetmod = mod:NewModule(L["Healed player list"])
+	local playermod = mod:NewModule(L["Healing spell list"])
 
 	local _UnitClass = Skada.UnitClass
 
@@ -38,12 +38,12 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 				local spell = player.healing.spells and player.healing.spells[data.spellid]
 				if not spell then
 					player.healing.spells = player.healing.spells or {}
-					spell = {school = data.spellschool, count = 0, amount = 0, overhealing = 0}
-					player.healing.spells[data.spellid] = spell
+					player.healing.spells[data.spellid] = {school = data.spellschool}
+					spell = player.healing.spells[data.spellid]
 				end
 
-				spell.count = (spell.count or 0) + 1
 				spell.ishot = tick or nil
+				spell.count = (spell.count or 0) + 1
 				spell.amount = (spell.amount or 0) + amount
 				spell.overhealing = (spell.overhealing or 0) + data.overhealing
 
@@ -64,15 +64,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 				local target = player.healing.targets and player.healing.targets[data.dstName]
 				if not target then
 					player.healing.targets = player.healing.targets or {}
-					local class, role, spec = _select(2, _UnitClass(data.dstGUID, data.dstFlags, set))
-					target = {
-						id = data.dstGUID,
-						class = class,
-						role = role,
-						spec = spec,
-						amount = 0,
-						overhealing = 0
-					}
+					target = {id = data.dstGUID}
 					player.healing.targets[data.dstName] = target
 				end
 
@@ -123,7 +115,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 		end
 	end
 
-	local function spell_tooltip(win, id, label, tooltip)
+	local function playermod_tooltip(win, id, label, tooltip)
 		local player = Skada:find_player(win:get_selected_set(), win.playerid)
 		if player then
 			local spell
@@ -154,12 +146,12 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 		end
 	end
 
-	function spellsmod:Enter(win, id, label)
+	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
 		win.title = _format(L["%s's healing spells"], label)
 	end
 
-	function spellsmod:Update(win, set)
+	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
 			win.title = _format(L["%s's healing spells"], player.name)
@@ -201,12 +193,12 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 		end
 	end
 
-	function playersmod:Enter(win, id, label)
+	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
 		win.title = _format(L["%s's healed players"], label)
 	end
 
-	function playersmod:Update(win, set)
+	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
 			win.title = _format(L["%s's healed players"], player.name)
@@ -222,9 +214,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 
 						d.id = target.id or targetname
 						d.label = targetname
-						d.class = target.class
-						d.role = target.role
-						d.spec = target.spec
+						d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
 
 						d.value = target.amount
 						d.valuetext = Skada:FormatValueText(
@@ -262,7 +252,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 					d.id = player.id
 					d.label = player.name
 					d.class = player.class or "PET"
-					d.role = player.role or "DAMAGER"
+					d.role = player.role
 					d.spec = player.spec
 
 					d.value = amount
@@ -287,12 +277,12 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		spellsmod.metadata = {tooltip = spell_tooltip}
-		playersmod.metadata = {showspots = true}
+		playermod.metadata = {tooltip = playermod_tooltip}
+		targetmod.metadata = {showspots = true}
 		self.metadata = {
 			showspots = true,
-			click1 = spellsmod,
-			click2 = playersmod,
+			click1 = playermod,
+			click2 = targetmod,
 			columns = {Healing = true, HPS = true, Percent = true},
 			icon = "Interface\\Icons\\spell_nature_healingtouch"
 		}
@@ -395,9 +385,7 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 
 						d.id = target.id or targetname
 						d.label = targetname
-						d.class = target.class
-						d.role = target.role
-						d.spec = target.spec
+						d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
 
 						local total = (target.amount or 0) + target.overhealing
 						d.value = target.overhealing / total
@@ -433,7 +421,7 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 
 					d.id = player.id
 					d.label = player.name
-					d.class = player.class
+					d.class = player.class or "PET"
 					d.role = player.role
 					d.spec = player.spec
 
@@ -602,9 +590,7 @@ Skada:AddLoadableModule("Total Healing", function(Skada, L)
 
 						d.id = target.id or targetname
 						d.label = targetname
-						d.class = target.class
-						d.role = target.role
-						d.spec = target.spec
+						d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
 
 						d.value = amount
 						d.valuetext = Skada:FormatValueText(
@@ -642,7 +628,7 @@ Skada:AddLoadableModule("Total Healing", function(Skada, L)
 					d.id = player.id
 					d.label = player.name
 					d.class = player.class or "PET"
-					d.role = player.role or "DAMAGER"
+					d.role = player.role
 					d.spec = player.spec
 
 					d.value = amount
@@ -775,9 +761,7 @@ Skada:AddLoadableModule("Healing and overhealing", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class = target.class
-					d.role = target.role
-					d.spec = target.spec
+					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
 
 					d.value = (target.amount or 0) + (target.overhealing or 0)
 					d.valuetext = Skada:FormatValueText(
@@ -816,7 +800,7 @@ Skada:AddLoadableModule("Healing and overhealing", function(Skada, L)
 					d.id = player.id
 					d.label = player.name
 					d.class = player.class or "PET"
-					d.role = player.role or "DAMAGER"
+					d.role = player.role
 					d.spec = player.spec
 
 					d.value = total
@@ -915,29 +899,31 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 				local maxvalue, nr = 0, 1
 
 				for sourcename, source in _pairs(sources) do
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					if (source.amount or 0) > 0 then
+						local d = win.dataset[nr] or {}
+						win.dataset[nr] = d
 
-					d.id = source.id
-					d.label = sourcename
-					d.class = source.class
-					d.role = source.role
-					d.spec = source.spec
+						d.id = source.id
+						d.label = sourcename
+						d.class = source.class
+						d.role = source.role
+						d.spec = source.spec
 
-					d.value = source.amount
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(source.amount),
-						mod.metadata.columns.Healing,
-						Skada:FormatNumber(source.overhealing),
-						mod.metadata.columns.Overhealing,
-						_format("%02.1f%%", 100 * source.amount / math_max(1, total)),
-						mod.metadata.columns.Percent
-					)
+						d.value = source.amount
+						d.valuetext = Skada:FormatValueText(
+							Skada:FormatNumber(source.amount),
+							mod.metadata.columns.Healing,
+							Skada:FormatNumber(source.overhealing),
+							mod.metadata.columns.Overhealing,
+							_format("%02.1f%%", 100 * source.amount / math_max(1, total)),
+							mod.metadata.columns.Percent
+						)
 
-					if source.amount > maxvalue then
-						maxvalue = source.amount
+						if source.amount > maxvalue then
+							maxvalue = source.amount
+						end
+						nr = nr + 1
 					end
-					nr = nr + 1
 				end
 
 				win.metadata.maxvalue = maxvalue
@@ -973,7 +959,7 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 
 				d.id = player.id
 				d.label = playername
-				d.class = player.class
+				d.class = player.class or "PET"
 				d.role = player.role
 				d.spec = player.spec
 

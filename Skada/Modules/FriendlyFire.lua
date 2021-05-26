@@ -31,14 +31,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 			if dmg.dstName then
 				player.friendfire.targets = player.friendfire.targets or {}
 				if not player.friendfire.targets[dmg.dstName] then
-					local class, role, spec = _select(2, _UnitClass(dmg.dstGUID, dmg.dstFlags, set))
-					player.friendfire.targets[dmg.dstName] = {
-						id = dmg.dstGUID,
-						class = class,
-						role = role,
-						spec = spec,
-						amount = dmg.amount
-					}
+					player.friendfire.targets[dmg.dstName] = {id = dmg.dstGUID, amount = dmg.amount}
 				else
 					player.friendfire.targets[dmg.dstName].amount = (player.friendfire.targets[dmg.dstName].amount or 0) + dmg.amount
 				end
@@ -105,11 +98,9 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = target.id
+					d.id = target.id or targetname
 					d.label = targetname
-					d.class = target.class
-					d.role = target.role
-					d.spec = target.spec
+					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
 
 					d.value = target.amount
 					d.valuetext = Skada:FormatValueText(
@@ -189,8 +180,8 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 					d.id = player.id
 					d.label = player.name
 					d.class = player.class or "PET"
-					d.role = player.role or "DAMAGER"
-					d.spec = player.spec or 1
+					d.role = player.role
+					d.spec = player.spec
 
 					d.value = player.friendfire.amount
 					d.valuetext = Skada:FormatValueText(

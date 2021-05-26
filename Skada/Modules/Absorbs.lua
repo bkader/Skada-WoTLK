@@ -3,7 +3,8 @@ assert(Skada, "Skada not found!")
 -- cache frequently used globals
 local _pairs, _select, _format = pairs, select, string.format
 local math_min, math_max = math.min, math.max
-local _UnitGUID, _GetSpellInfo = UnitGUID, Skada.GetSpellInfo or GetSpellInfo
+local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+local _UnitGUID, _UnitClass = UnitGUID, Skada.UnitClass
 
 -- ============== --
 -- Absorbs module --
@@ -13,12 +14,12 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	if Skada:IsDisabled("Absorbs") then return end
 
 	local mod = Skada:NewModule(L["Absorbs"])
-	local spellmod = mod:NewModule(L["Absorb spell list"])
-	local playermod = mod:NewModule(L["Absorbed player list"])
+	local playermod = mod:NewModule(L["Absorb spell list"])
+	local targetmod = mod:NewModule(L["Absorbed player list"])
 
 	local _GetNumRaidMembers, _GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
 	local _GetUnitName, _UnitExists, _UnitBuff = GetUnitName, UnitExists, UnitBuff
-	local _UnitIsDeadOrGhost, _UnitClass = UnitIsDeadOrGhost, Skada.UnitClass
+	local _UnitIsDeadOrGhost = UnitIsDeadOrGhost
 	local _tostring, _GetTime, _band = tostring, GetTime, bit.band
 
 	local absorbspells = {
@@ -256,18 +257,10 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 				local target = player.absorbs.targets and player.absorbs.targets[dstName]
 				if not target then
 					player.absorbs.targets = player.absorbs.targets or {}
-					local class, role, spec = _select(2, _UnitClass(dstGUID, dstFlags, set))
-					target = {
-						id = dstGUID,
-						class = class,
-						role = role,
-						spec = spec,
-						amount = amount
-					}
+					target = {id = dstGUID}
 					player.absorbs.targets[dstName] = target
-				else
-					target.amount = (target.amount or 0) + amount
 				end
+				target.amount = (target.amount or 0) + amount
 			end
 		end
 	end
@@ -435,7 +428,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		end
 	end
 
-	local function spell_tooltip(win, id, label, tooltip)
+	local function playermod_tooltip(win, id, label, tooltip)
 		local player = Skada:find_player(win:get_selected_set(), win.playerid, win.playername)
 		if player then
 			local spell
@@ -459,12 +452,12 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		end
 	end
 
-	function spellmod:Enter(win, id, label)
+	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
 		win.title = _format(L["%s's absorb spells"], label)
 	end
 
-	function spellmod:Update(win, set)
+	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
 			win.title = _format(L["%s's absorb spells"], player.name)
@@ -505,12 +498,12 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		end
 	end
 
-	function playermod:Enter(win, id, label)
+	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
 		win.title = _format(L["%s's absorbed players"], label)
 	end
 
-	function playermod:Update(win, set)
+	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
 			win.title = _format(L["%s's absorbed players"], player.name)
@@ -526,9 +519,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 						d.id = target.id or targetname
 						d.label = targetname
-						d.class = target.class or "PET"
-						d.role = target.role or "DAMAGER"
-						d.spec = target.spec
+						d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
 
 						d.value = target.amount
 						d.valuetext = Skada:FormatValueText(
@@ -565,8 +556,8 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					d.id = player.id
 					d.label = player.name
 					d.class = player.class or "PET"
-					d.role = player.role or "DAMAGER"
-					d.spec = player.spec or 1
+					d.role = player.role
+					d.spec = player.spec
 
 					d.value = player.absorbs.amount
 					d.valuetext = Skada:FormatValueText(
@@ -588,12 +579,12 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		spellmod.metadata = {tooltip = spell_tooltip}
-		playermod.metadata = {showspots = true}
+		playermod.metadata = {tooltip = playermod_tooltip}
+		targetmod.metadata = {showspots = true}
 		self.metadata = {
 			showspots = true,
-			click1 = spellmod,
-			click2 = playermod,
+			click1 = playermod,
+			click2 = targetmod,
 			columns = {Absorbs = true, Percent = true},
 			icon = "Interface\\Icons\\spell_holy_powerwordshield"
 		}
@@ -642,8 +633,8 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 	if Skada:IsDisabled("Healing", "Absorbs", "Absorbs and healing") then return end
 
 	local mod = Skada:NewModule(L["Absorbs and healing"])
-	local playermod = mod:NewModule(L["Absorbed and healed players"])
-	local spellmod = mod:NewModule(L["Absorbs and healing spells"])
+	local targetmod = mod:NewModule(L["Absorbed and healed players"])
+	local playermod = mod:NewModule(L["Absorbs and healing spells"])
 
 	local _time = time
 
@@ -671,13 +662,14 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(Skada:GetSetTime(set)), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(Skada:PlayerActiveTime(set, player, true)), 1, 1, 1)
 
-			local healing = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
+			local healing =
+				(player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
 			local total = (set.healing or 0) + (set.absorbs or 0)
 			tooltip:AddDoubleLine(L["Absorbs and healing"], _format("%s (%02.1f%%)", Skada:FormatNumber(healing), 100 * healing / math_max(1, total)), 1, 1, 1)
 		end
 	end
 
-	local function spell_tooltip(win, id, label, tooltip)
+	local function playermod_tooltip(win, id, label, tooltip)
 		local player = Skada:find_player(win:get_selected_set(), win.playerid, win.playername)
 		if player then
 			local spell
@@ -689,6 +681,7 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 			end
 			if spell then
 				tooltip:AddLine(player.name .. " - " .. label)
+
 				if spell.school then
 					local c = Skada.schoolcolors[spell.school]
 					local n = Skada.schoolnames[spell.school]
@@ -712,12 +705,12 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 		end
 	end
 
-	function spellmod:Enter(win, id, label)
+	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
 		win.title = _format(L["%s's absorb and healing spells"], label)
 	end
 
-	function spellmod:Update(win, set)
+	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
 			win.title = _format(L["%s's absorb and healing spells"], player.name)
@@ -779,12 +772,12 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 		end
 	end
 
-	function playermod:Enter(win, id, label)
+	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
 		win.title = _format(L["%s's absorbed and healed players"], label)
 	end
 
-	function playermod:Update(win, set)
+	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
 			win.title = _format(L["%s's absorbed and healed players"], player.name)
@@ -806,11 +799,6 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 					else
 						targets[targetname].amount = targets[targetname].amount + target.amount
 					end
-					if not targets[targetname].class and target.class then
-						targets[targetname].class = target.class
-						targets[targetname].role = target.role
-						targets[targetname].spec = target.spec
-					end
 				end
 			end
 
@@ -822,11 +810,9 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
-						d.id = target.id
+						d.id = target.id or targetname
 						d.label = targetname
-						d.class = target.class
-						d.role = target.role
-						d.spec = target.spec
+						d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
 
 						d.value = target.amount
 						d.valuetext = Skada:FormatValueText(
@@ -865,8 +851,8 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 					d.id = player.id
 					d.label = player.name
 					d.class = player.class or "PET"
-					d.role = player.role or "DAMAGER"
-					d.spec = player.spec or 1
+					d.role = player.role
+					d.spec = player.spec
 
 					d.value = amount
 					d.valuetext = Skada:FormatValueText(
@@ -905,12 +891,12 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		spellmod.metadata = {tooltip = spell_tooltip}
-		playermod.metadata = {showspots = true}
+		playermod.metadata = {tooltip = playermod_tooltip}
+		targetmod.metadata = {showspots = true}
 		self.metadata = {
 			showspots = true,
-			click1 = spellmod,
-			click2 = playermod,
+			click1 = playermod,
+			click2 = targetmod,
 			columns = {Healing = true, HPS = true, Percent = true},
 			icon = "Interface\\Icons\\spell_holy_healingfocus"
 		}
@@ -922,9 +908,9 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 	end
 
 	function mod:OnDisable()
-		Skada:RemoveMode(self)
 		Skada:RemoveFeed(L["Healing: Personal HPS"])
 		Skada:RemoveFeed(L["Healing: Raid HPS"])
+		Skada:RemoveMode(self)
 	end
 
 	function mod:AddToTooltip(set, tooltip)
@@ -979,8 +965,8 @@ Skada:AddLoadableModule("HPS", function(Skada, L)
 					d.id = player.id
 					d.label = player.name
 					d.class = player.class or "PET"
-					d.role = player.role or "DAMAGER"
-					d.spec = player.spec or 1
+					d.role = player.role
+					d.spec = player.spec
 
 					d.value = amount
 					d.valuetext = Skada:FormatValueText(
@@ -1140,7 +1126,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 
 					d.id = player.id
 					d.label = playername
-					d.class = player.class
+					d.class = player.class or "PET"
 					d.role = player.role
 					d.spec = player.spec
 
@@ -1213,6 +1199,6 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 	end
 
 	function mod:OnDisable()
-		Skada:RemoveMode(self, L["Absorbs and healing"])
+		Skada:RemoveMode(self)
 	end
 end)

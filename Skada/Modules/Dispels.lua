@@ -43,14 +43,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 			if data.dstName then
 				player.dispels.targets = player.dispels.targets or {}
 				if not player.dispels.targets[data.dstName] then
-					local class, role, spec = select(2, _UnitClass(data.dstGUID, data.dstFlags, set))
-					player.dispels.targets[data.dstName] = {
-						id = data.dstGUID,
-						class = class,
-						role = role,
-						spec = spec,
-						count = 1
-					}
+					player.dispels.targets[data.dstName] = {id = data.dstGUID, count = 1}
 				else
 					player.dispels.targets[data.dstName].count = player.dispels.targets[data.dstName].count + 1
 				end
@@ -148,9 +141,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class = target.class
-					d.role = target.role or "DAMAGER"
-					d.spec = target.spec
+					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(
@@ -231,8 +222,8 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 					d.id = player.id
 					d.label = player.name
 					d.class = player.class or "PET"
-					d.spec = player.spec or "DAMAGER"
-					d.role = player.role or 1
+					d.spec = player.spec
+					d.role = player.role
 
 					d.value = player.dispels.count
 					d.valuetext = Skada:FormatValueText(

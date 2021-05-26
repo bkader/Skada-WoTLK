@@ -2,7 +2,7 @@ assert(Skada, "Skada not found!")
 
 -- cache frequently used globals
 local _pairs, _select, _format, math_max = pairs, select, string.format, math.max
-local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+local _GetSpellInfo, _UnitClass = Skada.GetSpellInfo or GetSpellInfo, Skada.UnitClass
 
 -- list of miss types
 local misstypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}
@@ -30,14 +30,14 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 			local total = 0
 			if player.damagedone and player.damagedone.targets and win.targetname then
-				total = player.damagedone.targets[win.targetname] or 0
+				total = player.damagedone.targets[win.targetname].amount or 0
 			end
 
 			if total > 0 and player.damagedone.spells then
 				local maxvalue, nr = 0, 1
 
 				for spellname, spell in _pairs(player.damagedone.spells) do
-					if spell.targets[win.targetname] then
+					if spell.targets[win.targetname] and (spell.targets[win.targetname].amount or 0) > 0 then
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
@@ -48,7 +48,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 						d.icon = _select(3, _GetSpellInfo(spell.id))
 						d.spellschool = spell.school
 
-						d.value = spell.targets[win.targetname]
+						d.value = spell.targets[win.targetname].amount
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(d.value),
 							mod.metadata.columns.Damage,
@@ -81,27 +81,29 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 			local maxvalue, nr = 0, 1
 			for _, player in Skada:IteratePlayers(set) do
 				if player.damagedone and player.damagedone.targets and player.damagedone.targets[win.targetname] then
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					if (player.damagedone.targets[win.targetname].amount or 0) > 0 then
+						local d = win.dataset[nr] or {}
+						win.dataset[nr] = d
 
-					d.id = player.id
-					d.label = player.name
-					d.class = player.class or "PET"
-					d.role = player.role
-					d.spec = player.spec
+						d.id = player.id
+						d.label = player.name
+						d.class = player.class or "PET"
+						d.role = player.role
+						d.spec = player.spec
 
-					d.value = player.damagedone.targets[win.targetname]
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(d.value),
-						mod.metadata.columns.Damage,
-						_format("%02.1f%%", 100 * d.value / total),
-						mod.metadata.columns.Percent
-					)
+						d.value = player.damagedone.targets[win.targetname].amount
+						d.valuetext = Skada:FormatValueText(
+							Skada:FormatNumber(d.value),
+							mod.metadata.columns.Damage,
+							_format("%02.1f%%", 100 * d.value / total),
+							mod.metadata.columns.Percent
+						)
 
-					if d.value > maxvalue then
-						maxvalue = d.value
+						if d.value > maxvalue then
+							maxvalue = d.value
+						end
+						nr = nr + 1
 					end
-					nr = nr + 1
 				end
 			end
 
@@ -113,8 +115,12 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 		local enemies = {}
 		for _, player in Skada:IteratePlayers(set) do
 			if player.damagedone and player.damagedone.targets then
-				for name, amount in _pairs(player.damagedone.targets) do
-					enemies[name] = (enemies[name] or 0) + amount
+				for name, tbl in _pairs(player.damagedone.targets) do
+					if not enemies[name] then
+						enemies[name] = {id = tbl.id, amount = tbl.amount}
+					else
+						enemies[name].amount = (enemies[name].amount or 0) + tbl.amount
+					end
 				end
 			end
 		end
@@ -129,24 +135,24 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 			local enemies = self:GetEnemies(set)
 			local maxvalue, nr = 0, 1
 
-			for name, amount in _pairs(enemies) do
+			for enemyname, enemy in _pairs(enemies) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
-				d.id = name
-				d.label = name
-				d.class = (set.gotboss and name == set.name) and "BOSS" or "ENEMY"
+				d.id = enemy.id or enemyname
+				d.label = enemyname
+				d.class, d.role, d.spec = _select(2, _UnitClass(enemy.id, nil, set))
 
-				d.value = amount
+				d.value = enemy.amount
 				d.valuetext = Skada:FormatValueText(
-					Skada:FormatNumber(amount),
+					Skada:FormatNumber(enemy.amount),
 					mod.metadata.columns.Damage,
-					_format("%02.1f%%", 100 * amount / total),
+					_format("%02.1f%%", 100 * enemy.amount / total),
 					mod.metadata.columns.Percent
 				)
 
-				if amount > maxvalue then
-					maxvalue = amount
+				if enemy.amount > maxvalue then
+					maxvalue = enemy.amount
 				end
 				nr = nr + 1
 			end
@@ -198,14 +204,14 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 
 			local total = 0
 			if player.damagetaken and player.damagetaken.sources and win.targetname then
-				total = player.damagetaken.sources[win.targetname] or 0
+				total = player.damagetaken.sources[win.targetname].amount or 0
 			end
 
 			if total > 0 and player.damagetaken.spells then
 				local maxvalue, nr = 0, 1
 
 				for spellname, spell in _pairs(player.damagetaken.spells) do
-					if spell.sources[win.targetname] then
+					if spell.sources[win.targetname] and (spell.sources[win.targetname].amount or 0) > 0 then
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
@@ -216,7 +222,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 						d.icon = _select(3, _GetSpellInfo(spell.id))
 						d.spellschool = spell.school
 
-						d.value = spell.sources[win.targetname]
+						d.value = spell.sources[win.targetname].amount
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(d.value),
 							mod.metadata.columns.Damage,
@@ -249,27 +255,29 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 			local maxvalue, nr = 0, 1
 			for _, player in Skada:IteratePlayers(set) do
 				if player.damagetaken and player.damagetaken.sources and player.damagetaken.sources[win.targetname] then
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					if (player.damagetaken.sources[win.targetname].amount or 0) > 0 then
+						local d = win.dataset[nr] or {}
+						win.dataset[nr] = d
 
-					d.id = player.id
-					d.label = player.name
-					d.class = player.class or "PET"
-					d.role = player.role
-					d.spec = player.spec
+						d.id = player.id
+						d.label = player.name
+						d.class = player.class or "PET"
+						d.role = player.role
+						d.spec = player.spec
 
-					d.value = player.damagetaken.sources[win.targetname]
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(d.value),
-						mod.metadata.columns.Damage,
-						_format("%02.1f%%", 100 * d.value / total),
-						mod.metadata.columns.Percent
-					)
+						d.value = player.damagetaken.sources[win.targetname].amount
+						d.valuetext = Skada:FormatValueText(
+							Skada:FormatNumber(d.value),
+							mod.metadata.columns.Damage,
+							_format("%02.1f%%", 100 * d.value / total),
+							mod.metadata.columns.Percent
+						)
 
-					if d.value > maxvalue then
-						maxvalue = d.value
+						if d.value > maxvalue then
+							maxvalue = d.value
+						end
+						nr = nr + 1
 					end
-					nr = nr + 1
 				end
 			end
 
@@ -281,8 +289,12 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 		local enemies = {}
 		for _, player in Skada:IteratePlayers(set) do
 			if player.damagetaken and player.damagetaken.sources then
-				for name, amount in _pairs(player.damagetaken.sources) do
-					enemies[name] = (enemies[name] or 0) + amount
+				for name, tbl in _pairs(player.damagetaken.sources) do
+					if not enemies[name] then
+						enemies[name] = {id = tbl.id, amount = tbl.amount}
+					else
+						enemies[name].amount = (enemies[name].amount or 0) + amount
+					end
 				end
 			end
 		end
@@ -297,26 +309,28 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 			local enemies = self:GetEnemies(set)
 			local maxvalue, nr = 0, 1
 
-			for name, amount in _pairs(enemies) do
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+			for enemyname, enemy in _pairs(enemies) do
+				if (enemy.amount or 0) > 0 then
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
-				d.id = name
-				d.label = name
-				d.class = (set.gotboss and name == set.name) and "BOSS" or "ENEMY"
+					d.id = enemy.id or enemyname
+					d.label = enemyname
+					d.class, d.role, d.spec = _select(2, _UnitClass(enemy.id, nil, set))
 
-				d.value = amount
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatNumber(amount),
-					mod.metadata.columns.Damage,
-					_format("%02.1f%%", 100 * amount / total),
-					mod.metadata.columns.Percent
-				)
+					d.value = enemy.amount
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatNumber(enemy.amount),
+						mod.metadata.columns.Damage,
+						_format("%02.1f%%", 100 * enemy.amount / total),
+						mod.metadata.columns.Percent
+					)
 
-				if amount > maxvalue then
-					maxvalue = amount
+					if enemy.amount > maxvalue then
+						maxvalue = enemy.amount
+					end
+					nr = nr + 1
 				end
-				nr = nr + 1
 			end
 
 			win.metadata.maxvalue = maxvalue

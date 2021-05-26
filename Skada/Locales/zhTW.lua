@@ -653,7 +653,9 @@ L["Are you sure you want clear cached nicknames?"] = "您确定要清除缓存�
 -- overkill module lines --
 L["Overkill"] = "過度損壞"
 L["Overkill spell list"] = "過度傷害法術"
+L["Overkill target list"] = "過度損壞的目標"
 L["%s's overkill spells"] = "%s過度傷害法術"
+L["%s's overkill targets"] = "%s過度損壞的目標"
 -- tweaks module lines --
 L["Tweaks"] = "調整"
 -- L["First hit"] = ""

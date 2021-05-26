@@ -652,7 +652,9 @@ L["%s's <%s> mitigated damage"] = "Урон уменьшен - %s <%s>"
 -- overkill module lines --
 L["Overkill"] = "Избыточный урон"
 L["Overkill spell list"] = "Заклинания чрезмерного урона"
+L["Overkill target list"] = "Цели чрезмерного урона"
 L["%s's overkill spells"] = "Заклинания чрезмерного урона - %s"
+L["%s's overkill targets"] = "Цели чрезмерного урона - %s"
 -- tweaks module lines --
 L["Tweaks"] = "Настройки"
 L["First hit"] = "Первый удар"

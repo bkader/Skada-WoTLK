@@ -237,12 +237,6 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 					player.ccdone.targets[cc.dstName].count = player.ccdone.targets[cc.dstName].count + 1
 					player.ccdone.targets[cc.dstName].spells[cc.spellid] = (player.ccdone.targets[cc.dstName].spells[cc.spellid] or 0) + 1
 				end
-
-				if not spell.targets[cc.dstName].class then
-					local class = _select(2, _UnitClass(cc.dstGUID, cc.dstFlags))
-					spell.targets[cc.dstName].class = class
-					player.ccdone.targets[cc.dstName].class = class
-				end
 			end
 		end
 	end
@@ -335,7 +329,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class = target.class or "UNKNOWN"
+					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(
@@ -375,9 +369,9 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = target.id
+					d.id = target.id or targetname
 					d.label = targetname
-					d.class = target.class
+					d.class, d.role, d.spec =_select(2, _UnitClass(target.id, nil, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(
@@ -458,8 +452,8 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 					d.id = player.id
 					d.label = player.name
 					d.class = player.class or "PET"
-					d.role = player.role or "DAMAGER"
-					d.spec = player.spec or 1
+					d.role = player.role
+					d.spec = player.spec
 
 					d.value = player.ccdone.count
 					d.valuetext = Skada:FormatValueText(
@@ -559,12 +553,6 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 					player.cctaken.sources[cc.dstName].count = player.cctaken.sources[cc.dstName].count + 1
 					player.cctaken.sources[cc.dstName].spells[cc.spellid] = (player.cctaken.sources[cc.dstName].spells[cc.spellid] or 0) + 1
 				end
-
-				if not spell.sources[cc.dstName].class then
-					local class = _select(2, _UnitClass(cc.dstGUID, cc.dstFlags))
-					spell.sources[cc.dstName].class = class
-					player.cctaken.sources[cc.dstName].class = class
-				end
 			end
 		end
 	end
@@ -615,7 +603,6 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 					d.label = spellname
 					d.icon = spellicon
 					d.spellschool = GetSpellSchool(spellid)
-					d.school = spell.school
 
 					d.value = spell.count
 					d.valuetext = Skada:FormatValueText(
@@ -657,7 +644,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 					d.id = source.id or sourcename
 					d.label = sourcename
-					d.class = source.class
+					d.class, d.role, d.spec = _select(2, _UnitClass(source.id, nil, set))
 
 					d.value = source.count
 					d.valuetext = Skada:FormatValueText(
@@ -699,7 +686,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 					d.id = source.id or sourcename
 					d.label = sourcename
-					d.class = source.class
+					d.class, d.role, d.spec = _select(2, _UnitClass(source.id, nil, set))
 
 					d.value = source.count
 					d.valuetext = Skada:FormatValueText(
@@ -780,8 +767,8 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 					d.id = player.id
 					d.label = player.name
 					d.class = player.class or "PET"
-					d.role = player.role or "DAMAGER"
-					d.spec = player.spec or 1
+					d.role = player.role
+					d.spec = player.spec
 
 					d.value = player.cctaken.count
 					d.valuetext = Skada:FormatValueText(
@@ -886,12 +873,6 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 				else
 					player.ccbreaks.targets[cc.dstName].count = player.ccbreaks.targets[cc.dstName].count + 1
 					player.ccbreaks.targets[cc.dstName].spells[cc.spellid] = (player.ccbreaks.targets[cc.dstName].spells[cc.spellid] or 0) + 1
-				end
-
-				if not spell.targets[cc.dstName].class then
-					local class = _select(2, _UnitClass(cc.dstGUID, cc.dstFlags))
-					spell.targets[cc.dstName].class = class
-					player.ccbreaks.targets[cc.dstName].class = class
 				end
 			end
 		end
@@ -1023,7 +1004,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class = target.class
+					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(
@@ -1065,7 +1046,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class = target.class
+					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(
@@ -1145,7 +1126,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 					d.id = player.id
 					d.label = player.name
-					d.class = player.class
+					d.class = player.class or "PET"
 					d.role = player.role
 					d.spec = player.spec
 

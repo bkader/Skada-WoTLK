@@ -27,14 +27,7 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 			-- target
 			player.resurrect.targets = player.resurrect.targets or {}
 			if not player.resurrect.targets[data.dstName] then
-				local class, role, spec = _select(2, _UnitClass(data.dstGUID, data.dstFlags, set))
-				player.resurrect.targets[data.dstName] = {
-					id = data.dstGUID,
-					class = class,
-					role = role,
-					spec = spec,
-					count = 1
-				}
+				player.resurrect.targets[data.dstName] = {id = data.dstGUID, count = 1}
 			else
 				player.resurrect.targets[data.dstName].count = player.resurrect.targets[data.dstName].count + 1
 			end
@@ -125,9 +118,7 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class = target.class or "PET"
-					d.role = target.role or "DAMAGER"
-					d.spec = target.spec or 1
+					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(

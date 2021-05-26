@@ -653,7 +653,9 @@ L["%s's <%s> mitigated damage"] = true
 -- overkill module lines --
 L["Overkill"] = true
 L["Overkill spell list"] = true
+L["Overkill target list"] = true
 L["%s's overkill spells"] = true
+L["%s's overkill targets"] = true
 -- tweaks module lines --
 L["Tweaks"] = true
 L["First hit"] = true

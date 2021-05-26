@@ -654,7 +654,9 @@ L["%s's <%s> mitigated damage"] = "%s的<%s>减免伤害"
 -- overkill module lines --
 L["Overkill"] = "过度杀伤"
 L["Overkill spell list"] = "过度杀伤法术列表"
+L["Overkill target list"] = "过度杀伤目标列表"
 L["%s's overkill spells"] = "%s 过度杀伤法术"
+L["%s's overkill targets"] = "%s 过度杀伤目标"
 -- tweaks module lines --
 L["Tweaks"] = "调整"
 L["First hit"] = "第一击"
