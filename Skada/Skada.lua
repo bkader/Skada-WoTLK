@@ -3190,26 +3190,15 @@ function Skada:OnInitialize()
 	self.classnames.UNKNOWN = UNKNOWN
 
 	-- class colors
-	self.classcolors = {
-		-- valid
-		DEATHKNIGHT = {r = 0.77, g = 0.12, b = 0.23, colorStr = "ffc41f3b"},
-		DRUID = {r = 1, g = 0.49, b = 0.04, colorStr = "ffff7d0a"},
-		HUNTER = {r = 0.67, g = 0.83, b = 0.45, colorStr = "ffabd473"},
-		MAGE = {r = 0.41, g = 0.8, b = 0.94, colorStr = "ff3fc7eb"},
-		PALADIN = {r = 0.96, g = 0.55, b = 0.73, colorStr = "fff58cba"},
-		PRIEST = {r = 1, g = 1, b = 1, colorStr = "ffffffff"},
-		ROGUE = {r = 1, g = 0.96, b = 0.41, colorStr = "fffff569"},
-		SHAMAN = {r = 0, g = 0.44, b = 0.87, colorStr = "ff0070de"},
-		WARLOCK = {r = 0.58, g = 0.51, b = 0.79, colorStr = "ff8788ee"},
-		WARRIOR = {r = 0.78, g = 0.61, b = 0.43, colorStr = "ffc79c6e"},
-		-- custom
-		ENEMY = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"},
-		MONSTER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"},
-		BOSS = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"},
-		PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"},
-		PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"},
-		UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
-	}
+	self.classcolors = {}
+	self:tcopy(self.classcolors, CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)
+	-- add our custom classes
+	self.classcolors.ENEMY = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
+	self.classcolors.MONSTER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
+	self.classcolors.BOSS = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
+	self.classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
+	self.classcolors.PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"}
+	self.classcolors.UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
 
 	-- class icon file & coordinates
 	self.classiconfile = [[Interface\AddOns\Skada\Media\Textures\icon-classes]]
