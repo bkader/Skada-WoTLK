@@ -2511,6 +2511,15 @@ function Skada:FormatNumber(number)
 			else
 				return math_floor(number)
 			end
+		elseif self.db.profile.numberformat == 2 then
+			local formatted = tostring(math_floor(number))
+			while true do
+				formatted, k = formatted:gsub("^(-?%d+)(%d%d%d)", "%1,%2")
+				if k == 0 then
+					break
+				end
+			end
+			return formatted
 		else
 			return math_floor(number)
 		end

@@ -511,9 +511,7 @@ Skada.options = {
 					desc = L["Controls the way large numbers are displayed."],
 					order = 19,
 					width = "double",
-					values = function()
-						return {[1] = L["Condensed"], [2] = L["Detailed"]}
-					end
+					values = {[1] = L["Condensed"], [2] = L["Comma"], [3] = L["Detailed"]}
 				},
 				setformat = {
 					type = "select",

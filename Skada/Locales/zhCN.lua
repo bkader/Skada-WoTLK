@@ -250,6 +250,7 @@ L["Controls the way large numbers are displayed."] = "控制大数字的显示�
 L["Condensed"] = "简短"
 L["Detailed"] = "详细"
 L["Combined"] = "合计"
+L["Comma"] = "逗号"
 L["Data feed"] = "数据反馈"
 L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."] = "选择显示在DataBroker上的数据反馈。需要一个LDB显示插件，例如Titan Panel泰坦信息条。"
 L["Time measure"] = "时间测量"

@@ -249,6 +249,7 @@ L["Controls the way large numbers are displayed."] = "큰 숫자의 표시 방�
 L["Condensed"] = "요약"
 L["Detailed"] = "상세"
 L["Combined"] = "결함"
+L["Comma"] = "반점"
 L["Data feed"] = "자료 제공"
 L["Time measure"] = "시간 측정"
 L["Activity time"] = "활동 시간"

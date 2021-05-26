@@ -248,6 +248,7 @@ L["Controls the way large numbers are displayed."] = "Legt fest, wie große Zahl
 L["Condensed"] = "Zusammengefasst"
 L["Detailed"] = "Detailliert"
 L["Combined"] = "Kombiniert"
+L["Comma"] = "Komma"
 L["Data feed"] = "Datenquelle"
 L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."] = "Auswählen welche Datensammlung in der DataBroker-Ansicht angezeigt werden soll. Dies erfordert ein LDB-Anzeige-Addon, wie zum Beispiel 'Titan Panel'."
 L["Time measure"] = "Zeitmessung"

@@ -249,6 +249,7 @@ L["Controls the way large numbers are displayed."] = "Выбор вида ото
 L["Condensed"] = "Кратко"
 L["Detailed"] = "Детально"
 L["Combined"] = "Совместный"
+L["Comma"] = "Запятая"
 L["Data feed"] = "Подача данных" --?
 L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."] = "Выберите, какие данные выводить в DataBroker. Для этого требуется, аддон который поддерживает отображение LDB, к примеру Titan Panel."
 L["Time measure"] = "Мера времени"

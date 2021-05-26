@@ -248,6 +248,7 @@ L["Controls the way large numbers are displayed."] = true
 L["Condensed"] = true
 L["Detailed"] = true
 L["Combined"] = true
+L["Comma"] = true
 L["Data feed"] = true
 L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."] = true
 L["Time measure"] = true

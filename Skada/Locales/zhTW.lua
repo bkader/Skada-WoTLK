@@ -248,6 +248,7 @@ L["Controls the way large numbers are displayed."] = "控制數字的顯示位�
 L["Condensed"] = "簡易的"
 L["Detailed"] = "詳細的"
 L["Combined"] = "組合的"
+L["Comma"] = "逗號"
 L["Data feed"] = "資料來源"
 L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."] = "選擇需要顯示在DataBroker上的資料來源。需要一個LDB的顯示插件，例如Titan Panel。"
 L["Time measure"] = "時間測量方式"
