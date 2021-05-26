@@ -433,7 +433,9 @@ function Skada:SegmentMenu(window)
 					Skada:UpdateDisplay(true)
 				end
 				info.checked = (window.selectedset == i)
-				info.colorCode = set.gotboss and (set.success and "|cff00ff00" or "|cffff0000") or "|cffffffff"
+				if set.gotboss then
+					info.colorCode = set.success and "|cff00ff00" or "|cffff0000"
+				end
 				_UIDropDownMenu_AddButton(info, level)
 			end
 		end
