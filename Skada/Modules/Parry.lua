@@ -81,7 +81,7 @@ Skada:AddLoadableModule("Parry-haste", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						target.count,
 						mod.metadata.columns.Count,
-						_format("%02.1f%%", 100 * target.count / total),
+						_format("%.1f%%", 100 * target.count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -118,7 +118,7 @@ Skada:AddLoadableModule("Parry-haste", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						d.value,
 						self.metadata.columns.Count,
-						_format("%02.1f%%", 100 * d.value / total),
+						_format("%.1f%%", 100 * d.value / total),
 						self.metadata.columns.Percent
 					)
 

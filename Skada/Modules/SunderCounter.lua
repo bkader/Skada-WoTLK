@@ -77,7 +77,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						target.count,
 						mod.metadata.columns.Count,
-						_format("%02.1f%%", 100 * target.count / total),
+						_format("%.1f%%", 100 * target.count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -119,7 +119,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						player.sunders.count,
 						self.metadata.columns.Count,
-						_format("%02.1f%%", 100 * player.sunders.count / total),
+						_format("%.1f%%", 100 * player.sunders.count / total),
 						self.metadata.columns.Percent
 					)
 

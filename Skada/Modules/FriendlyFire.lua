@@ -106,7 +106,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(target.amount),
 						mod.metadata.columns.Damage,
-						_format("%02.1f%%", 100 * target.amount / total),
+						_format("%.1f%%", 100 * target.amount / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -150,7 +150,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(spell.amount),
 						mod.metadata.columns.Damage,
-						_format("%02.1f%%", 100 * spell.amount / total),
+						_format("%.1f%%", 100 * spell.amount / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -187,7 +187,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(player.friendfire.amount),
 						self.metadata.columns.Damage,
-						_format("%02.1f%%", 100 * player.friendfire.amount / total),
+						_format("%.1f%%", 100 * player.friendfire.amount / total),
 						self.metadata.columns.Percent
 					)
 

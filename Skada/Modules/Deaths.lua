@@ -299,7 +299,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 							self.metadata.columns.Change,
 							Skada:FormatNumber(log.hp or 0),
 							self.metadata.columns.Health,
-							_format("%02.1f%%", 100 * (log.hp or 1) / (player.maxhp or 1)),
+							_format("%.1f%%", 100 * (log.hp or 1) / (player.maxhp or 1)),
 							self.metadata.columns.Percent
 						)
 

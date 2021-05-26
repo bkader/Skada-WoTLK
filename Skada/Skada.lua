@@ -2512,14 +2512,8 @@ function Skada:FormatNumber(number)
 				return math_floor(number)
 			end
 		elseif self.db.profile.numberformat == 2 then
-			local formatted = tostring(math_floor(number))
-			while true do
-				formatted, k = formatted:gsub("^(-?%d+)(%d%d%d)", "%1,%2")
-				if k == 0 then
-					break
-				end
-			end
-			return formatted
+			local left, num, right = tostring(math_floor(number)):match("^([^%d]*%d)(%d*)(.-)$")
+			return left .. (num:reverse():gsub("(%d%d%d)", "%1,"):reverse()) .. right
 		else
 			return math_floor(number)
 		end

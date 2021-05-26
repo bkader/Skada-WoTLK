@@ -82,7 +82,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						d.value,
 						mod.metadata.columns.Count,
-						_format("%02.1f%%", 100 * d.value / total),
+						_format("%.1f%%", 100 * d.value / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -125,7 +125,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						count,
 						mod.metadata.columns.Count,
-						_format("%02.1f%%", 100 * count / total),
+						_format("%.1f%%", 100 * count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -162,7 +162,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						player.fails.count,
 						self.metadata.columns.Count,
-						_format("%02.1f%%", 100 * player.fails.count / total),
+						_format("%.1f%%", 100 * player.fails.count / total),
 						self.metadata.columns.Percent
 					)
 

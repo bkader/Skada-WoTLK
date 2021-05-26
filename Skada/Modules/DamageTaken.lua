@@ -320,7 +320,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(spell.amount),
 						mod.metadata.columns.Damage,
-						_format("%02.1f%%", 100 * spell.amount / total),
+						_format("%.1f%%", 100 * spell.amount / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -362,7 +362,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(source.amount),
 						mod.metadata.columns.Damage,
-						_format("%02.1f%%", 100 * source.amount / total),
+						_format("%.1f%%", 100 * source.amount / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -387,7 +387,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 		d.valuetext = Skada:FormatValueText(
 			value,
 			mod.metadata.columns.Damage,
-			_format("%02.1f%%", 100 * value / math_max(1, win.metadata.maxvalue)),
+			_format("%.1f%%", 100 * value / math_max(1, win.metadata.maxvalue)),
 			percent and mod.metadata.columns.Percent
 		)
 		nr = nr + 1
@@ -466,7 +466,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 						self.metadata.columns.Damage,
 						Skada:FormatNumber(dtps),
 						self.metadata.columns.DTPS,
-						_format("%02.1f%%", 100 * amount / total),
+						_format("%.1f%%", 100 * amount / total),
 						self.metadata.columns.Percent
 					)
 
@@ -580,7 +580,7 @@ Skada:AddLoadableModule("DTPS", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(amount),
 						self.metadata.columns.DTPS,
-						_format("%02.1f%%", 100 * amount / total),
+						_format("%.1f%%", 100 * amount / total),
 						self.metadata.columns.Percent
 					)
 
@@ -653,7 +653,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(Skada, L)
 				d.valuetext = Skada:FormatValueText(
 					Skada:FormatNumber(player.amount),
 					mod.metadata.columns.Damage,
-					_format("%02.1f%%", 100 * player.amount / total),
+					_format("%.1f%%", 100 * player.amount / total),
 					mod.metadata.columns.Percent
 				)
 
@@ -727,7 +727,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(Skada, L)
 				d.valuetext = Skada:FormatValueText(
 					Skada:FormatNumber(spell.amount),
 					self.metadata.columns.Damage,
-					_format("%02.1f%%", 100 * spell.amount / total),
+					_format("%.1f%%", 100 * spell.amount / total),
 					self.metadata.columns.Percent
 				)
 
@@ -790,7 +790,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 
 				d.value = 100 * count / player.total
 				d.valuetext = Skada:FormatValueText(
-					_format("%02.1f%%", d.value),
+					_format("%.1f%%", d.value),
 					mod.metadata.columns.Percent,
 					count,
 					mod.metadata.columns.Count,
@@ -846,7 +846,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 
 						d.value = 100 * avoid / total
 						d.valuetext = Skada:FormatValueText(
-							_format("%02.1f%%", d.value),
+							_format("%.1f%%", d.value),
 							self.metadata.columns.Percent,
 							avoid,
 							self.metadata.columns.Count,
@@ -946,7 +946,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 				d.valuetext = Skada:FormatValueText(
 					Skada:FormatNumber(amount),
 					mod.metadata.columns.Amount,
-					_format("%02.1f%%", 100 * amount / total),
+					_format("%.1f%%", 100 * amount / total),
 					mod.metadata.columns.Percent
 				)
 				-- end of amount bar --
@@ -962,7 +962,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(spell.absorbed),
 						mod.metadata.columns.Amount,
-						_format("%02.1f%%", 100 * spell.absorbed / math_max(1, total)),
+						_format("%.1f%%", 100 * spell.absorbed / math_max(1, total)),
 						mod.metadata.columns.Percent
 					)
 
@@ -982,7 +982,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(spell.blocked),
 						mod.metadata.columns.Amount,
-						_format("%02.1f%%", 100 * spell.blocked / math_max(1, total)),
+						_format("%.1f%%", 100 * spell.blocked / math_max(1, total)),
 						mod.metadata.columns.Percent
 					)
 
@@ -1002,7 +1002,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(spell.resisted),
 						mod.metadata.columns.Amount,
-						_format("%02.1f%%", 100 * spell.resisted / math_max(1, total)),
+						_format("%.1f%%", 100 * spell.resisted / math_max(1, total)),
 						mod.metadata.columns.Percent
 					)
 
@@ -1049,7 +1049,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 							mod.metadata.columns.Amount,
 							Skada:FormatNumber(total),
 							mod.metadata.columns.Total,
-							_format("%02.1f%%", 100 * amount / total),
+							_format("%.1f%%", 100 * amount / total),
 							mod.metadata.columns.Percent
 						)
 
@@ -1090,7 +1090,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 						self.metadata.columns.Amount,
 						Skada:FormatNumber(total),
 						self.metadata.columns.Total,
-						_format("%02.1f%%", 100 * amount / total),
+						_format("%.1f%%", 100 * amount / total),
 						self.metadata.columns.Percent
 					)
 

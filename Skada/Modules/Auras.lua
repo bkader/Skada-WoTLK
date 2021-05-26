@@ -316,7 +316,7 @@ local function spellupdatefunc(auratype, win, set, playerid, playername, fmt)
 					d.spellschool = spell.school
 
 					d.value = uptime
-					d.valuetext = _format("%02.1f%%", 100 * uptime / maxtime)
+					d.valuetext = _format("%.1f%%", 100 * uptime / maxtime)
 
 					if uptime > maxvalue then
 						maxvalue = uptime

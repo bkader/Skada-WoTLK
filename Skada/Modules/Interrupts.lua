@@ -137,7 +137,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						spell.count,
 						mod.metadata.columns.Total,
-						_format("%02.1f%%", 100 * spell.count / total),
+						_format("%.1f%%", 100 * spell.count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -179,7 +179,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						target.count,
 						mod.metadata.columns.Total,
-						_format("%02.1f%%", 100 * target.count / math_max(1, set.interrupts or 0)),
+						_format("%.1f%%", 100 * target.count / math_max(1, set.interrupts or 0)),
 						mod.metadata.columns.Percent
 					)
 
@@ -224,7 +224,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						spell.count,
 						mod.metadata.columns.Total,
-						_format("%02.1f%%", 100 * spell.count / total),
+						_format("%.1f%%", 100 * spell.count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -260,7 +260,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						player.interrupts.count,
 						self.metadata.columns.Total,
-						_format("%02.1f%%", 100 * player.interrupts.count / total),
+						_format("%.1f%%", 100 * player.interrupts.count / total),
 						self.metadata.columns.Percent
 					)
 

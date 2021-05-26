@@ -15,7 +15,7 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
 				tooltip:AddLine(player.name .. ": " .. L["Activity"])
 				tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
 				tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
-				tooltip:AddDoubleLine(L["Activity"], _format("%02.1f%%", 100 * activetime / math_max(1, settime)), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Activity"], _format("%.1f%%", 100 * activetime / math_max(1, settime)), 1, 1, 1)
 			end
 		end
 	end
@@ -44,7 +44,7 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatTime(activetime),
 						self.metadata.columns["Active Time"],
-						_format("%02.1f%%", 100 * activetime / settime),
+						_format("%.1f%%", 100 * activetime / settime),
 						self.metadata.columns.Percent
 					)
 

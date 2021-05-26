@@ -177,7 +177,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 								self.metadata.columns.Threat,
 								getTPS(data.threat),
 								self.metadata.columns.TPS,
-								_format("%02.1f%%", percent),
+								_format("%.1f%%", percent),
 								self.metadata.columns.Percent
 							)
 						else
@@ -429,7 +429,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				local isTanking, status, threatpct, rawthreatpct, threatvalue =
 					_UnitDetailedThreatSituation("player", "target")
 				if threatpct then
-					return _format("%02.1f%%", threatpct)
+					return _format("%.1f%%", threatpct)
 				end
 			end
 		end

@@ -144,7 +144,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 				d.valuetext = Skada:FormatValueText(
 					player.count,
 					mod.metadata.columns.Count,
-					_format("%02.1f%%", 100 * player.count / total),
+					_format("%.1f%%", 100 * player.count / total),
 					mod.metadata.columns.Percent
 				)
 
@@ -198,7 +198,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							count,
 							mod.metadata.columns.Count,
-							_format("%02.1f%%", 100 * count / total),
+							_format("%.1f%%", 100 * count / total),
 							mod.metadata.columns.Percent
 						)
 
@@ -237,7 +237,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						d.value,
 						self.metadata.columns.Count,
-						_format("%02.1f%%", 100 * d.value / total),
+						_format("%.1f%%", 100 * d.value / total),
 						self.metadata.columns.Percent
 					)
 

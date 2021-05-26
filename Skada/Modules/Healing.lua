@@ -137,10 +137,10 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 				end
 				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
 				if (spell.critical or 0) > 0 then
-					tooltip:AddDoubleLine(L["Critical"], _format("%02.1f%%", 100 * spell.critical / math_max(1, spell.count)), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Critical"], _format("%.1f%%", 100 * spell.critical / math_max(1, spell.count)), 1, 1, 1)
 				end
 				if (spell.overhealing or 0) > 0 then
-					tooltip:AddDoubleLine(L["Overhealing"], _format("%02.1f%%", 100 * spell.overhealing / math_max(1, spell.overhealing + spell.amount)), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Overhealing"], _format("%.1f%%", 100 * spell.overhealing / math_max(1, spell.overhealing + spell.amount)), 1, 1, 1)
 				end
 			end
 		end
@@ -177,7 +177,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(spell.amount),
 							mod.metadata.columns.Healing,
-							_format("%02.1f%%", 100 * spell.amount / total),
+							_format("%.1f%%", 100 * spell.amount / total),
 							mod.metadata.columns.Percent
 						)
 
@@ -220,7 +220,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(target.amount),
 							mod.metadata.columns.Healing,
-							_format("%02.1f%%", 100 * target.amount / total),
+							_format("%.1f%%", 100 * target.amount / total),
 							mod.metadata.columns.Percent
 						)
 
@@ -261,7 +261,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 						self.metadata.columns.Healing,
 						Skada:FormatNumber(hps),
 						self.metadata.columns.HPS,
-						_format("%02.1f%%", 100 * amount / total),
+						_format("%.1f%%", 100 * amount / total),
 						self.metadata.columns.Percent
 					)
 
@@ -349,7 +349,7 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(spell.overhealing),
 							mod.metadata.columns.Overheal,
-							_format("%02.1f%%", 100 * d.value),
+							_format("%.1f%%", 100 * d.value),
 							mod.metadata.columns.Percent
 						)
 
@@ -392,7 +392,7 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(target.overhealing),
 							mod.metadata.columns.Overheal,
-							_format("%02.1f%%", 100 * d.value),
+							_format("%.1f%%", 100 * d.value),
 							mod.metadata.columns.Percent
 						)
 
@@ -430,7 +430,7 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(player.healing.overhealing),
 						self.metadata.columns.Overheal,
-						_format("%02.1f%%", 100 * d.value),
+						_format("%.1f%%", 100 * d.value),
 						self.metadata.columns.Percent
 					)
 
@@ -515,7 +515,7 @@ Skada:AddLoadableModule("Total Healing", function(Skada, L)
 				tooltip:AddDoubleLine(L["Total"], Skada:FormatNumber(spell.amount + spell.overhealing), 1, 1, 1)
 				tooltip:AddDoubleLine(L["Healing"], Skada:FormatNumber(spell.amount), 1, 1, 1)
 				tooltip:AddDoubleLine(L["Overhealing"], Skada:FormatNumber(spell.overhealing), 1, 1, 1)
-				tooltip:AddDoubleLine(L["Overheal"], _format("%02.1f%%", 100 * spell.overhealing / math_max(1, spell.overhealing + spell.amount)), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Overheal"], _format("%.1f%%", 100 * spell.overhealing / math_max(1, spell.overhealing + spell.amount)), 1, 1, 1)
 			end
 		end
 	end
@@ -552,7 +552,7 @@ Skada:AddLoadableModule("Total Healing", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(amount),
 							mod.metadata.columns.Healing,
-							_format("%02.1f%%", 100 * amount / total),
+							_format("%.1f%%", 100 * amount / total),
 							mod.metadata.columns.Percent
 						)
 
@@ -596,7 +596,7 @@ Skada:AddLoadableModule("Total Healing", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(amount),
 							mod.metadata.columns.Healing,
-							_format("%02.1f%%", 100 * amount / total),
+							_format("%.1f%%", 100 * amount / total),
 							mod.metadata.columns.Percent
 						)
 
@@ -637,7 +637,7 @@ Skada:AddLoadableModule("Total Healing", function(Skada, L)
 						self.metadata.columns.Healing,
 						Skada:FormatNumber(hps),
 						self.metadata.columns.HPS,
-						_format("%02.1f%%", 100 * amount / total),
+						_format("%.1f%%", 100 * amount / total),
 						self.metadata.columns.Percent
 					)
 
@@ -725,7 +725,7 @@ Skada:AddLoadableModule("Healing and overhealing", function(Skada, L)
 							mod.metadata.columns.Healing,
 							Skada:FormatNumber(spell.overhealing),
 							mod.metadata.columns.Overheal,
-							_format("%02.1f%%", 100 * spell.overhealing / amount),
+							_format("%.1f%%", 100 * spell.overhealing / amount),
 							mod.metadata.columns.Percent
 						)
 
@@ -769,7 +769,7 @@ Skada:AddLoadableModule("Healing and overhealing", function(Skada, L)
 						mod.metadata.columns.Healing,
 						Skada:FormatNumber(target.overhealing),
 						mod.metadata.columns.Overheal,
-						_format("%02.1f%%", 100 * target.overhealing / math_max(1, d.value)),
+						_format("%.1f%%", 100 * target.overhealing / math_max(1, d.value)),
 						mod.metadata.columns.Percent
 					)
 
@@ -809,7 +809,7 @@ Skada:AddLoadableModule("Healing and overhealing", function(Skada, L)
 						self.metadata.columns.Healing,
 						Skada:FormatNumber(player.healing.overhealing or 0),
 						self.metadata.columns.Overheal,
-						_format("%02.1f%%", 100 * player.healing.overhealing / total),
+						_format("%.1f%%", 100 * player.healing.overhealing / total),
 						self.metadata.columns.Percent
 					)
 
@@ -848,7 +848,7 @@ Skada:AddLoadableModule("Healing and overhealing", function(Skada, L)
 			self.metadata.columns.Healing,
 			Skada:FormatNumber(overhealing),
 			self.metadata.columns.Overheal,
-			_format("%02.1f%%", 100 * overhealing / math_max(1, healing + overhealing)),
+			_format("%.1f%%", 100 * overhealing / math_max(1, healing + overhealing)),
 			self.metadata.columns.Percent
 		)
 	end
@@ -915,7 +915,7 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 							mod.metadata.columns.Healing,
 							Skada:FormatNumber(source.overhealing),
 							mod.metadata.columns.Overhealing,
-							_format("%02.1f%%", 100 * source.amount / math_max(1, total)),
+							_format("%.1f%%", 100 * source.amount / math_max(1, total)),
 							mod.metadata.columns.Percent
 						)
 
@@ -969,7 +969,7 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 					mod.metadata.columns.Healing,
 					Skada:FormatNumber(player.overhealing),
 					mod.metadata.columns.Overhealing,
-					_format("%02.1f%%", 100 * player.amount / total),
+					_format("%.1f%%", 100 * player.amount / total),
 					mod.metadata.columns.Percent
 				)
 

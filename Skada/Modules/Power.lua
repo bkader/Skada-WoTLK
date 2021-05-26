@@ -135,7 +135,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(d.value),
 							mod.metadata.columns.Amount,
-							_format("%02.1f%%", 100 * d.value / total),
+							_format("%.1f%%", 100 * d.value / total),
 							mod.metadata.columns.Percent
 						)
 
@@ -200,7 +200,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(d.value),
 						mod.metadata.columns.Amount,
-						_format("%02.1f%%", 100 * d.value / total),
+						_format("%.1f%%", 100 * d.value / total),
 						mod.metadata.columns.Percent
 					)
 

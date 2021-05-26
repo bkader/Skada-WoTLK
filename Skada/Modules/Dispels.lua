@@ -106,7 +106,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						spell.count,
 						mod.metadata.columns.Total,
-						_format("%02.1f%%", 100 * spell.count / total),
+						_format("%.1f%%", 100 * spell.count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -147,7 +147,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						target.count,
 						mod.metadata.columns.Total,
-						_format("%02.1f%%", 100 * target.count / total),
+						_format("%.1f%%", 100 * target.count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -192,7 +192,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						d.value,
 						mod.metadata.columns.Total,
-						_format("%02.1f%%", 100 * d.value / total),
+						_format("%.1f%%", 100 * d.value / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -229,7 +229,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						player.dispels.count,
 						self.metadata.columns.Total,
-						_format("%02.1f%%", 100 * player.dispels.count / total),
+						_format("%.1f%%", 100 * player.dispels.count / total),
 						self.metadata.columns.Percent
 					)
 

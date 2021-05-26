@@ -293,7 +293,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						spell.count,
 						mod.metadata.columns.Count,
-						_format("%02.1f%%", 100 * spell.count / total),
+						_format("%.1f%%", 100 * spell.count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -335,7 +335,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						target.count,
 						mod.metadata.columns.Count,
-						_format("%02.1f%%", 100 * target.count / total),
+						_format("%.1f%%", 100 * target.count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -377,7 +377,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						target.count,
 						mod.metadata.columns.Count,
-						_format("%02.1f%%", 100 * target.count / total),
+						_format("%.1f%%", 100 * target.count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -422,7 +422,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						count,
 						mod.metadata.columns.Count,
-						_format("%02.1f%%", 100 * count / total),
+						_format("%.1f%%", 100 * count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -459,7 +459,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						player.ccdone.count,
 						self.metadata.columns.Count,
-						_format("%02.1f%%", 100 * player.ccdone.count / total),
+						_format("%.1f%%", 100 * player.ccdone.count / total),
 						self.metadata.columns.Percent
 					)
 
@@ -608,7 +608,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						spell.count,
 						mod.metadata.columns.Count,
-						_format("%02.1f%%", 100 * spell.count / total),
+						_format("%.1f%%", 100 * spell.count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -650,7 +650,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						source.count,
 						mod.metadata.columns.Count,
-						_format("%02.1f%%", 100 * source.count / total),
+						_format("%.1f%%", 100 * source.count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -692,7 +692,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						source.count,
 						mod.metadata.columns.Count,
-						_format("%02.1f%%", 100 * source.count / total),
+						_format("%.1f%%", 100 * source.count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -737,7 +737,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						count,
 						mod.metadata.columns.Count,
-						_format("%02.1f%%", 100 * count / total),
+						_format("%.1f%%", 100 * count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -774,7 +774,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						player.cctaken.count,
 						self.metadata.columns.Count,
-						_format("%02.1f%%", 100 * player.cctaken.count / total),
+						_format("%.1f%%", 100 * player.cctaken.count / total),
 						self.metadata.columns.Percent
 					)
 
@@ -968,7 +968,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						spell.count,
 						mod.metadata.columns.Count,
-						_format("%02.1f%%", 100 * spell.count / total),
+						_format("%.1f%%", 100 * spell.count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -1010,7 +1010,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						target.count,
 						mod.metadata.columns.Count,
-						_format("%02.1f%%", 100 * target.count / total),
+						_format("%.1f%%", 100 * target.count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -1052,7 +1052,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						target.count,
 						mod.metadata.columns.Count,
-						_format("%02.1f%%", 100 * target.count / total),
+						_format("%.1f%%", 100 * target.count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -1097,7 +1097,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						count,
 						mod.metadata.columns.Count,
-						_format("%02.1f%%", 100 * count / total),
+						_format("%.1f%%", 100 * count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -1134,7 +1134,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						player.ccbreaks.count,
 						self.metadata.columns.Count,
-						_format("%02.1f%%", 100 * player.ccbreaks.count / total),
+						_format("%.1f%%", 100 * player.ccbreaks.count / total),
 						self.metadata.columns.Percent
 					)
 

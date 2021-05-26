@@ -329,7 +329,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		if player then
 			local totaltime = Skada:GetSetTime(set)
 			local activetime = Skada:PlayerActiveTime(set, player)
-			tooltip:AddDoubleLine(L["Activity"], _format("%02.1f%%", 100 * activetime / totaltime), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Activity"], _format("%.1f%%", 100 * activetime / totaltime), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(Skada:PlayerActiveTime(set, player, true)), 1, 1, 1)
 		end
@@ -425,7 +425,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(spell.amount),
 							mod.metadata.columns.Damage,
-							_format("%02.1f%%", 100 * spell.amount / total),
+							_format("%.1f%%", 100 * spell.amount / total),
 							mod.metadata.columns.Percent
 						)
 
@@ -467,7 +467,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(target.amount),
 						mod.metadata.columns.Damage,
-						_format("%02.1f%%", 100 * target.amount / total),
+						_format("%.1f%%", 100 * target.amount / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -492,7 +492,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		d.valuetext = Skada:FormatValueText(
 			value,
 			mod.metadata.columns.Damage,
-			_format("%02.1f%%", 100 * value / math_max(1, win.metadata.maxvalue)),
+			_format("%.1f%%", 100 * value / math_max(1, win.metadata.maxvalue)),
 			percent and mod.metadata.columns.Percent
 		)
 		nr = nr + 1
@@ -571,7 +571,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 						self.metadata.columns.Damage,
 						Skada:FormatNumber(dps),
 						self.metadata.columns.DPS,
-						_format("%02.1f%%", 100 * amount / total),
+						_format("%.1f%%", 100 * amount / total),
 						self.metadata.columns.Percent
 					)
 
@@ -767,7 +767,7 @@ Skada:AddLoadableModule("DPS", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(amount),
 						self.metadata.columns.DPS,
-						_format("%02.1f%%", 100 * amount / total),
+						_format("%.1f%%", 100 * amount / total),
 						self.metadata.columns.Percent
 					)
 
@@ -844,7 +844,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(player.amount),
 						mod.metadata.columns.Damage,
-						_format("%02.1f%%", 100 * player.amount / total),
+						_format("%.1f%%", 100 * player.amount / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -919,7 +919,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 				d.valuetext = Skada:FormatValueText(
 					Skada:FormatNumber(spell.amount),
 					self.metadata.columns.Damage,
-					_format("%02.1f%%", 100 * spell.amount / total),
+					_format("%.1f%%", 100 * spell.amount / total),
 					self.metadata.columns.Percent
 				)
 
@@ -1003,7 +1003,7 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 						self.metadata.columns.Damage,
 						Skada:FormatNumber(dps),
 						self.metadata.columns.DPS,
-						_format("%02.1f%%", 100 * amount / total),
+						_format("%.1f%%", 100 * amount / total),
 						self.metadata.columns.Percent
 					)
 
@@ -1082,7 +1082,7 @@ Skada:AddLoadableModule("Overkill", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(spell.overkill),
 							mod.metadata.columns.Damage,
-							_format("%02.1f%%", 100 * spell.overkill / total),
+							_format("%.1f%%", 100 * spell.overkill / total),
 							mod.metadata.columns.Percent
 						)
 
@@ -1125,7 +1125,7 @@ Skada:AddLoadableModule("Overkill", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(target.overkill),
 							mod.metadata.columns.Damage,
-							_format("%02.1f%%", 100 * target.overkill / total),
+							_format("%.1f%%", 100 * target.overkill / total),
 							mod.metadata.columns.Percent
 						)
 
@@ -1163,7 +1163,7 @@ Skada:AddLoadableModule("Overkill", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(player.overkill),
 						self.metadata.columns.Damage,
-						_format("%02.1f%%", 100 * player.overkill / total),
+						_format("%.1f%%", 100 * player.overkill / total),
 						self.metadata.columns.Percent
 					)
 

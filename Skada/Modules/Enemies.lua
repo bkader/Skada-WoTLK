@@ -52,7 +52,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(d.value),
 							mod.metadata.columns.Damage,
-							_format("%02.1f%%", 100 * d.value / total),
+							_format("%.1f%%", 100 * d.value / total),
 							mod.metadata.columns.Percent
 						)
 
@@ -95,7 +95,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(d.value),
 							mod.metadata.columns.Damage,
-							_format("%02.1f%%", 100 * d.value / total),
+							_format("%.1f%%", 100 * d.value / total),
 							mod.metadata.columns.Percent
 						)
 
@@ -147,7 +147,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 				d.valuetext = Skada:FormatValueText(
 					Skada:FormatNumber(enemy.amount),
 					mod.metadata.columns.Damage,
-					_format("%02.1f%%", 100 * enemy.amount / total),
+					_format("%.1f%%", 100 * enemy.amount / total),
 					mod.metadata.columns.Percent
 				)
 
@@ -226,7 +226,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(d.value),
 							mod.metadata.columns.Damage,
-							_format("%02.1f%%", 100 * d.value / total),
+							_format("%.1f%%", 100 * d.value / total),
 							mod.metadata.columns.Percent
 						)
 
@@ -269,7 +269,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(d.value),
 							mod.metadata.columns.Damage,
-							_format("%02.1f%%", 100 * d.value / total),
+							_format("%.1f%%", 100 * d.value / total),
 							mod.metadata.columns.Percent
 						)
 
@@ -322,7 +322,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(enemy.amount),
 						mod.metadata.columns.Damage,
-						_format("%02.1f%%", 100 * enemy.amount / total),
+						_format("%.1f%%", 100 * enemy.amount / total),
 						mod.metadata.columns.Percent
 					)
 
