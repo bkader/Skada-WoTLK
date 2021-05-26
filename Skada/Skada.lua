@@ -1034,13 +1034,13 @@ function Skada:SetActive(enable)
 	end
 
 	if not enable and self.db.profile.hidedisables then
-		if not disabled then -- print a message when we change state
+		if not disabled then
 			self:Debug(L["Data Collection"] .. " " .. "|cFFFF0000" .. L["DISABLED"] .. "|r")
 		end
 		disabled = true
 		self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	else
-		if disabled then -- print a message when we change state
+		if disabled then
 			self:Debug(L["Data Collection"] .. " " .. "|cFF00FF00" .. L["ENABLED"] .. "|r")
 		end
 		disabled = false
@@ -2219,8 +2219,10 @@ do
 
 	function checkVersion()
 		Skada:SendComm(nil, nil, "VersionCheck", Skada.version)
-		version_timer:Cancel()
-		version_timer = nil
+		if version_timer then
+			version_timer:Cancel()
+			version_timer = nil
+		end
 	end
 
 	function convertVersion(ver)
@@ -3255,6 +3257,20 @@ function Skada:OnEnable()
 	self.NewTicker(2, function() self:CleanGarbage() end)
 	self.After(2, function() self:ApplySettings() end)
 	self.After(3, function() self:MemoryCheck() end)
+
+	if _G.BigWigs then
+		self:RegisterMessage("BigWigs_Message", "BigWigs")
+		self.bossmod = true
+	elseif self.bossmod then
+		self.bossmod = nil
+	end
+end
+
+function Skada:BigWigs(_, _, event)
+	if event == "bosskill" and self.current and self.current.gotboss then
+		self.current.success = true
+		self.callbacks:Fire("COMBAT_BOSS_DEFEATED", self.current)
+	end
 end
 
 function Skada:MemoryCheck()
@@ -3453,6 +3469,11 @@ function Skada:EndSegment()
 		player.last = nil
 	end
 
+	self.callbacks:Fire("COMBAT_PLAYER_LEAVE", self.current)
+	if self.current.gotboss then
+		self.callbacks:Fire("COMBAT_ENCOUNTER_END", self.current)
+	end
+
 	self.current = nil
 
 	local numsets = 0
@@ -3513,10 +3534,6 @@ function Skada:EndSegment()
 
 	self.After(2, function() self:CleanGarbage(true) end)
 	self.After(3, function() self:MemoryCheck() end)
-	self.callbacks:Fire("COMBAT_PLAYER_LEAVE", self.current)
-	if self.current.gotboss then
-		self.callbacks:Fire("COMBAT_ENCOUNTER_END", self.current)
-	end
 end
 
 function Skada:StopSegment()
@@ -3676,7 +3693,7 @@ do
 		end
 
 		if self.current and not self.current.started then
-			self.callbacks:Fire("COMBAT_PLAYER_ENTER", timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+			self.callbacks:Fire("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 			self.current.started = true
 		end
 
@@ -3686,8 +3703,10 @@ do
 				-- If we reached the treshold for stopping the segment, do so.
 				if deathcounter > 0 and deathcounter / startingmembers >= 0.5 and not self.current.stopped then
 					self:Print("Stopping for wipe.")
-					self.callbacks:Fire("COMBAT_BOSS_WIPE", self.current)
 					self:StopSegment()
+					if self.current.gotboss then
+						self.callbacks:Fire("COMBAT_BOSS_WIPE", self.current)
+					end
 				end
 			elseif eventtype == "SPELL_RESURRECT" and ((band(srcFlags, BITMASK_GROUP) ~= 0 and band(srcFlags, BITMASK_PETS) == 0) or players[srcGUID]) then
 				deathcounter = deathcounter - 1
@@ -3785,9 +3804,11 @@ do
 			end
 		end
 
-		if self.current and self.current.gotboss and self.current.mobname == dstName and (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") then
-			self.current.success = true
-			self.callbacks:Fire("COMBAT_BOSS_DEFEATED", self.current)
+		if not self.bossmod and self.current and self.current.gotboss and (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") then
+			if dstName and self.current.mobname == dstName then
+				self.current.success = true
+				self.callbacks:Fire("COMBAT_BOSS_DEFEATED", self.current)
+			end
 		end
 	end
 end

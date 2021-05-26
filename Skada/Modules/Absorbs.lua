@@ -289,8 +289,8 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		end
 	end
 
-	function mod:CheckPreShields(event, timestamp)
-		if event == "COMBAT_PLAYER_ENTER" and Skada.current and not Skada.current.stopped then
+	function mod:CheckPreShields(event, set, timestamp)
+		if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped then
 			local prefix, min, max = "raid", 1, _GetNumRaidMembers()
 			if max == 0 then
 				prefix, min, max = "party", 0, _GetNumPartyMembers()

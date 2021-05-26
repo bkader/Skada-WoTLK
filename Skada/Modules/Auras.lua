@@ -436,8 +436,8 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 		end
 	end
 
-	function mod:CheckBuffs(event, timestamp)
-		if event == "COMBAT_PLAYER_ENTER" and Skada.current and not Skada.current.stopped then
+	function mod:CheckBuffs(event, set, timestamp)
+		if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped then
 			-- let's now check for buffs put before the combat started.
 			local prefix, min, max = "raid", 1, _GetNumRaidMembers()
 			if max == 0 then
