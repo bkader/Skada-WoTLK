@@ -421,7 +421,7 @@ do
 					desc = L["Choose the window from which you want to copy the settings."],
 					order = 9,
 					values = function()
-						local list = {}
+						local list = {[""] = NONE}
 						for _, win in Skada:IterateWindows() do
 							if win.db.name ~= db.name and win.db.display == db.display then
 								list[win.db.name] = win.db.name
@@ -429,13 +429,14 @@ do
 						end
 						return list
 					end,
-					get = function() return copywindow end,
-					set = function(_, val) copywindow = val end
+					get = function() return copywindow or "" end,
+					set = function(_, val) copywindow = (val == "") and nil or val end
 				},
 				copyexec = {
 					type = "execute",
 					name = L["Copy Settings"],
 					order = 10,
+					disabled = function() return (copywindow == nil) end,
 					func = function()
 						local newdb = {}
 						if copywindow then
@@ -861,6 +862,11 @@ function Skada:GetWindows()
 end
 
 function Skada:CreateWindow(name, db, display)
+	name = name and name:trim() or "Skada"
+	if not name or name == "" then
+		name = "Skada" -- default
+	end
+
 	local isnew = false
 	if not db then
 		db, isnew = {}, true
@@ -872,18 +878,11 @@ function Skada:CreateWindow(name, db, display)
 		db.display = display
 	end
 
-	if not db.barbgcolor then
-		db.barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6}
-	end
+	db.barbgcolor = db.barbgcolor or {r = 0.3, g = 0.3, b = 0.3, a = 0.6}
+	db.buttons = db.buttons or {menu = true, reset = true, report = true, mode = true, segment = true, stop = false}
+	db.scale = db.scale or 1
 
-	if not db.buttons then
-		db.buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false}
-	end
-
-	if not db.scale then
-		db.scale = 1
-	end
-
+	-- backward compatibility
 	if db.snapped or not db.sticked then
 		db.sticky, db.sticked = true, {}
 		db.snapto, db.snapped = false, nil
@@ -891,6 +890,25 @@ function Skada:CreateWindow(name, db, display)
 
 	local window = Window:new()
 	window.db = db
+
+	-- avoid duplicate names
+	do
+		local num = 0
+		for _, win in Skada:IterateWindows() do
+			if win.db.name == name and num == 0 then
+				num = 1
+			else
+				local n, c = win.db.name:match("^(.-)%s*%((%d+)%)$")
+				if n == name then
+					num = math_max(num, tonumber(c) or 0)
+				end
+			end
+		end
+		if num > 0 then
+			name = format("%s (%s)", name, num + 1)
+		end
+	end
+
 	window.db.name = name
 
 	if self.displays[window.db.display] then
@@ -905,10 +923,14 @@ function Skada:CreateWindow(name, db, display)
 			self:RestoreView(window, window.db.set, window.db.mode)
 		end
 	else
-		self:Print("Window '" .. name .. "' was not loaded because its display module, '" .. window.db.display .. "' was not found.")
+		self:Print(
+			"Window '" ..
+				name ..
+					"' was not loaded because its display module, '" ..
+						(window.db.display or UNKNOWN) .. "' was not found."
+		)
 	end
 
-	isnew = nil
 	self:ApplySettings()
 	return window
 end
@@ -1935,12 +1957,12 @@ function Skada:Command(param)
 
 		local chan = w1 or "say"
 		local report_mode_name = w2 or L["Damage"]
-		local max = tonumber(w3 or 10)
+		local num = tonumber(w3 or 10)
 		w1, w2, w3 = nil, nil, nil
 
 		-- Sanity checks.
 		if chan and (chan == "say" or chan == "guild" or chan == "raid" or chan == "party" or chan == "officer") and (report_mode_name and self:find_mode(report_mode_name)) then
-			self:Report(chan, "preset", report_mode_name, "current", max)
+			self:Report(chan, "preset", report_mode_name, "current", num)
 		else
 			self:Print("Usage:")
 			self:Print(format("%-20s", "/skada report [raid|guild|party|officer|say] [mode] [max lines]"))
@@ -1977,7 +1999,7 @@ do
 		end
 	end
 
-	function Skada:Report(channel, chantype, report_mode_name, report_set_name, max, window, barid)
+	function Skada:Report(channel, chantype, report_mode_name, report_set_name, maxlines, window, barid)
 		if chantype == "channel" then
 			local list = {GetChannelList()}
 			for i = 1, table.getn(list) / 2 do
@@ -2047,7 +2069,7 @@ do
 				nr = nr + 1
 			end
 
-			if nr > max then
+			if nr > maxlines then
 				break
 			end
 		end
@@ -3352,19 +3374,19 @@ function Skada:EndSegment()
 
 			local setname = self.current.mobname
 			if self.db.profile.setnumber then
-				local max = 0
+				local num = 0
 				for _, set in ipairs(self.char.sets) do
-					if set.name == setname and max == 0 then
-						max = 1
+					if set.name == setname and num == 0 then
+						num = 1
 					else
 						local n, c = set.name:match("^(.-)%s*%((%d+)%)$")
 						if n == setname then
-							max = math_max(max, tonumber(c) or 0)
+							num = math_max(num, tonumber(c) or 0)
 						end
 					end
 				end
-				if max > 0 then
-					setname = format("%s (%s)", setname, max + 1)
+				if num > 0 then
+					setname = format("%s (%s)", setname, num + 1)
 				end
 			end
 			self.current.name = setname
