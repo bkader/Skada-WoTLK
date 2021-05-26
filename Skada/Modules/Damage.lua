@@ -419,7 +419,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 						d.label = spellname
 						d.text = spellname .. (spell.isdot and L["DoT"] or "")
 						d.icon = _select(3, _GetSpellInfo(spell.id))
-						d.school = spell.school
+						d.spellschool = spell.school
 
 						d.value = spell.amount
 						d.valuetext = Skada:FormatValueText(
