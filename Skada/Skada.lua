@@ -1386,7 +1386,7 @@ do
 
 			-- use LibTranslit to convert cyrillic letters into western letters.
 			if self.db.profile.translit and Translit and not force then
-				player.name = Translit:Transliterate(player.name, "!")
+				player.altname = Translit:Transliterate(player.name, "!")
 			end
 
 			-- fix the pet classes

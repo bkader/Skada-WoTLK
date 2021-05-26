@@ -147,7 +147,7 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 			win.dataset[nr] = d
 
 			d.id = player.id
-			d.label = player.name
+			d.label = player.altname or player.name
 			d.class = player.class or "PET"
 			d.role = (role == "NONE") and "UNKNOWN" or role
 			d.spec = player.spec or 1

@@ -152,7 +152,7 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 					win.dataset[nr] = d
 
 					d.id = player.id
-					d.label = player.name
+					d.label = player.altname or player.name
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec

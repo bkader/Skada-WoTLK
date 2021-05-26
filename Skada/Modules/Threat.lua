@@ -58,7 +58,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 
 				if mod.db.rawvalue and threatvalue then
 					d.id = player.id
-					d.label = player.name
+					d.label = player.altname or player.name
 					d.class = player.class
 
 					d.threat = threatvalue
@@ -77,7 +77,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 					end
 				elseif threatpct then
 					d.id = player.id
-					d.label = player.name
+					d.label = player.altname or player.name
 					d.class = player.class
 
 					d.value = threatpct
