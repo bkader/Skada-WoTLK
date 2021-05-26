@@ -663,5 +663,7 @@ L["|cffffff00First Hit|r: %s from %s"] = "|cffffff00Первый удар|r: %s 
 L["|cffffbb00First Hit|r: *?*"] = "|cffffbb00Первый удар|r: *?*"
 L["|cffffbb00Boss First Target|r: %s (%s)"] = "|cffffbb00Босс первая цель|r: %s (%s)"
 L["Prints a message of the first hit before combat.\nOnly works for boss encounters."] = "Отображает в чате первый нанесенный удар.\nРаботает только для сражений с боссами."
+-- L["Smart Stop"] = ""
+-- L["Automatically stops the current segment after the boss has died.\nUseful to avoid collecting data in case of a combat bug."] = ""
 L["Module Icons"] = "Значки модулей"
 L["Enable this if you want to show module icons on windows and menus."] = "При включении значки модулей будут отображаться в окнах и меню."

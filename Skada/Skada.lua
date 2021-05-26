@@ -1,4 +1,4 @@
-local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceConsole-3.0", "AceEvent-3.0", "AceComm-3.0")
+local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceEvent-3.0", "AceHook-3.0", "AceConsole-3.0", "AceComm-3.0")
 _G.Skada = Skada
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
 Skada.version = GetAddOnMetadata("Skada", "Version")
@@ -3261,6 +3261,9 @@ function Skada:OnEnable()
 	if _G.BigWigs then
 		self:RegisterMessage("BigWigs_Message", "BigWigs")
 		self.bossmod = true
+	elseif _G.DBM then
+		self:SecureHook(DBM, "EndCombat", "DBM")
+		self.bossmod = true
 	elseif self.bossmod then
 		self.bossmod = nil
 	end
@@ -3268,6 +3271,15 @@ end
 
 function Skada:BigWigs(_, _, event)
 	if event == "bosskill" and self.current and self.current.gotboss then
+		self:Debug("COMBAT_BOSS_DEFEATED: BigWigs")
+		self.current.success = true
+		self.callbacks:Fire("COMBAT_BOSS_DEFEATED", self.current)
+	end
+end
+
+function Skada:DBM(_, mod, wipe)
+	if self.current and self.current.gotboss and not wipe and (mod and mod.combatInfo) then
+		self:Debug("COMBAT_BOSS_DEFEATED: DBM")
 		self.current.success = true
 		self.callbacks:Fire("COMBAT_BOSS_DEFEATED", self.current)
 	end
@@ -3702,11 +3714,9 @@ do
 				deathcounter = deathcounter + 1
 				-- If we reached the treshold for stopping the segment, do so.
 				if deathcounter > 0 and deathcounter / startingmembers >= 0.5 and not self.current.stopped then
+					self.callbacks:Fire("COMBAT_PLAYER_WIPE", self.current)
 					self:Print("Stopping for wipe.")
 					self:StopSegment()
-					if self.current.gotboss then
-						self.callbacks:Fire("COMBAT_BOSS_WIPE", self.current)
-					end
 				end
 			elseif eventtype == "SPELL_RESURRECT" and ((band(srcFlags, BITMASK_GROUP) ~= 0 and band(srcFlags, BITMASK_PETS) == 0) or players[srcGUID]) then
 				deathcounter = deathcounter - 1

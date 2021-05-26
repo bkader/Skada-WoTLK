@@ -79,8 +79,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 						if owner then
 							local class = select(2, UnitClass(owner.name))
 							if class and Skada.classcolors[class] then
-								puller =
-									"|c" .. Skada.classcolors[class].colorStr .. owner.name .. "|r (" .. PET .. ")"
+								puller = "|c" .. Skada.classcolors[class].colorStr .. owner.name .. "|r (" .. PET .. ")"
 							else
 								puller = owner.name .. " (" .. PET .. ")"
 							end
@@ -106,9 +105,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 
 	function mod:EndSegment()
 		if pull_timer then
-			if not pull_timer._cancelled then
-				pull_timer:Cancel()
-			end
+			pull_timer:Cancel()
 			pull_timer = nil
 		end
 	end
@@ -119,6 +116,10 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 		-- first hit.
 		if Skada.db.profile.firsthit == nil then
 			Skada.db.profile.firsthit = true
+		end
+		-- smart stop
+		if Skada.db.profile.smartstop == nil then
+			Skada.db.profile.smartstop = false
 		end
 
 		-- options.
@@ -140,18 +141,46 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 					desc = L["Prints a message of the first hit before combat.\nOnly works for boss encounters."],
 					order = 1
 				},
+				smartstop = {
+					type = "toggle",
+					name = L["Smart Stop"],
+					desc = L["Automatically stops the current segment after the boss has died.\nUseful to avoid collecting data in case of a combat bug."],
+					order = 2
+				},
 				moduleicons = {
 					type = "toggle",
 					name = L["Module Icons"],
 					desc = L["Enable this if you want to show module icons on windows and menus."],
-					order = 2
+					order = 3
 				}
 			}
 		}
 	end
 
+	function mod:BossDefeated(event, set)
+		if not (event == "COMBAT_BOSS_DEFEATED" and set) then
+			return
+		end
+
+		-- sorry but this feature requires a BossMod to work properly
+		if Skada.db.profile.smartstop and Skada.bossmod then
+			Skada.After(5, function()
+				if not set.endtime then
+					Skada:Print(L["Smart Stop"])
+					Skada:StopSegment()
+				end
+			end)
+		end
+	end
+
 	function mod:OnEnable()
 		self:SecureHook(Skada, "CombatLogEvent")
 		self:SecureHook(Skada, "EndSegment")
+		Skada.RegisterCallback(self, "COMBAT_BOSS_DEFEATED", "BossDefeated")
+	end
+
+	function mod:OnDisable()
+		self:UnhookAll()
+		Skada.UnregisterAllCallbacks(self)
 	end
 end)

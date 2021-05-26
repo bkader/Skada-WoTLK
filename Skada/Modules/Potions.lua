@@ -262,7 +262,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 				type = "toggle",
 				name = L["Pre-potion"],
 				desc = L["Prints pre-potion after the end of the combat."],
-				order = 1
+				order = 0
 			}
 		else
 			Skada.options.args.generaloptions.args.prepotion = {
