@@ -437,7 +437,7 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 	end
 
 	function mod:CheckBuffs(event, timestamp)
-		if event == "COMBAT_ENCOUNTER_START" and Skada.current and not Skada.current.stopped then
+		if event == "COMBAT_PLAYER_ENTER" and Skada.current and not Skada.current.stopped then
 			-- let's now check for buffs put before the combat started.
 			local prefix, min, max = "raid", 1, _GetNumRaidMembers()
 			if max == 0 then
@@ -474,7 +474,7 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 		Skada:RegisterForCL(AuraRefresh, "SPELL_AURA_APPLIED_DOSE", {src_is_interesting = true})
 		Skada:RegisterForCL(AuraRemoved, "SPELL_AURA_REMOVED", {src_is_interesting = true})
 
-		Skada.RegisterCallback(self, "COMBAT_ENCOUNTER_START", "CheckBuffs")
+		Skada.RegisterCallback(self, "COMBAT_PLAYER_ENTER", "CheckBuffs")
 		Skada.RegisterCallback(self, "COMBAT_ENCOUNTER_TICK", "Tick")
 
 		Skada:AddMode(self, L["Buffs and Debuffs"])

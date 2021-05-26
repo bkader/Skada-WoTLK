@@ -3513,7 +3513,10 @@ function Skada:EndSegment()
 
 	self.After(2, function() self:CleanGarbage(true) end)
 	self.After(3, function() self:MemoryCheck() end)
-	self.callbacks:Fire("COMBAT_ENCOUNTER_END", self.current)
+	self.callbacks:Fire("COMBAT_PLAYER_LEAVE", self.current)
+	if self.current.gotboss then
+		self.callbacks:Fire("COMBAT_ENCOUNTER_END", self.current)
+	end
 end
 
 function Skada:StopSegment()
@@ -3672,9 +3675,8 @@ do
 			end
 		end
 
-		-- COMBAT_ENCOUNTER_START custom event
 		if self.current and not self.current.started then
-			self.callbacks:Fire("COMBAT_ENCOUNTER_START", timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+			self.callbacks:Fire("COMBAT_PLAYER_ENTER", timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 			self.current.started = true
 		end
 
@@ -3759,6 +3761,7 @@ do
 				if not self.current.gotboss and isboss then
 					self.current.mobname = bossname or dstName
 					self.current.gotboss = true
+					self.callbacks:Fire("COMBAT_ENCOUNTER_START", self.current)
 				elseif not self.current.mobname then
 					self.current.mobname = dstName
 				end
