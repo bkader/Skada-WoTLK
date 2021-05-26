@@ -3261,7 +3261,7 @@ function Skada:OnEnable()
 	if _G.BigWigs then
 		self:RegisterMessage("BigWigs_Message", "BigWigs")
 		self.bossmod = true
-	elseif _G.DBM then
+	elseif _G.DBM and _G.DBM.EndCombat then
 		self:SecureHook(DBM, "EndCombat", "DBM")
 		self.bossmod = true
 	elseif self.bossmod then
