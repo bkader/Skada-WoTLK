@@ -173,11 +173,7 @@ end
 
 function Skada.UnitClass(guid, flags, set)
 	if guid then
-		--
-		-- the user can provide a set as 3rd argument that they can
-		-- use to retireve the class.
 		-- If a player is found, it returns the role and spec as well
-		--
 		set = set or Skada.current -- use current set if none is provided.
 		if set and set.players then
 			for _, p in Skada:IteratePlayers(set) do
@@ -190,6 +186,15 @@ function Skada.UnitClass(guid, flags, set)
 		-- is it a pet?
 		if pets[guid] then
 			return Skada.classnames.PET, "PET"
+		end
+
+		-- cache guid to classes.
+		if set and set._classes then
+			for id, class in pairs(set._classes) do
+				if id == guid then
+					return Skada.classnames[class], class
+				end
+			end
 		end
 
 		local class = select(2, GetPlayerInfoByGUID(guid))
@@ -219,6 +224,11 @@ function Skada.UnitClass(guid, flags, set)
 
 	if not (locClass and engClass) then
 		locClass, engClass = Skada.classnames.UNKNOWN, "UNKNOWN"
+	end
+
+	if set and guid then
+		set._classes = set._classes or {}
+		set._classes[guid] = engClass
 	end
 
 	return locClass, engClass
