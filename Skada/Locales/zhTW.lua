@@ -7,6 +7,7 @@ L["Memory usage is high. You may want to reset Skada, and enable one of the auto
 L["Skada: Modes"] = "Skada:模組"
 L["Skada: Fights"] = "Skada:戰鬥"
 -- L["Error: No options selected"] = ""
+L["Data Collection"] = "數據收集"
 L["Profiles"] = "設定檔"
 L["Enable"] = "啟用"
 L["ENABLED"] = "啟用"

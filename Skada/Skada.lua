@@ -1034,14 +1034,35 @@ function Skada:SetActive(enable)
 	end
 
 	if not enable and self.db.profile.hidedisables then
+		if not disabled then -- print a message when we change state
+			self:Debug(L["Data Collection"] .. " " .. "|cFFFF0000" .. L["DISABLED"] .. "|r")
+		end
 		disabled = true
 		self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	else
+		if disabled then -- print a message when we change state
+			self:Debug(L["Data Collection"] .. " " .. "|cFF00FF00" .. L["ENABLED"] .. "|r")
+		end
 		disabled = false
 		self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "CombatLogEvent")
 	end
 
 	self:UpdateDisplay(true)
+end
+
+function Skada:Debug(...)
+	if self.db.profile.debug then
+		local msg = ""
+		for i = 1, select("#", ...) do
+			local v = tostring(select(i, ...))
+			if #msg > 0 then
+				msg = msg .. ", "
+			end
+			msg = msg .. v
+		end
+
+		print("|cFF33FF99Skada Debug|r: " .. msg)
+	end
 end
 
 -- =============== --
@@ -1955,6 +1976,9 @@ function Skada:Command(param)
 		self:NewSegment()
 	elseif param == "toggle" then
 		self:ToggleWindow()
+	elseif param == "debug" then
+		self.db.profile.debug = not self.db.profile.debug
+		Skada:Print("Debug mode "..(self.db.profile.debug and ("|cFF00FF00"..L["ENABLED"].."|r") or ("|cFFFF0000"..L["DISABLED"].."|r")))
 	elseif param == "config" then
 		self:OpenOptions()
 	elseif param == "clear" or param == "clean" then
@@ -1987,6 +2011,7 @@ function Skada:Command(param)
 		self:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33config|r"))
 		self:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33clean|r"))
 		self:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33website|r"))
+		self:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33debug|r"))
 	end
 end
 
@@ -3361,6 +3386,7 @@ end
 
 function Skada:PLAYER_REGEN_DISABLED()
 	if not disabled and not self.current then
+		self:Debug("StartCombat: PLAYER_REGEN_DISABLED")
 		self:StartCombat()
 	end
 end
@@ -3513,6 +3539,7 @@ do
 	function Skada:Tick()
 		self.callbacks:Fire("COMBAT_ENCOUNTER_TICK", self.current)
 		if not disabled and self.current and not self:IsRaidInCombat() then
+			self:Debug("EndSegment: Tick")
 			self:EndSegment()
 		end
 
@@ -3532,6 +3559,7 @@ do
 		end
 
 		if update_timer then
+			self:Debug("EndSegment: StartCombat")
 			self:EndSegment()
 		end
 
@@ -3717,6 +3745,7 @@ do
 						if tentative == 5 then
 							tentativehandle:Cancel()
 							tentativehandle = nil
+							self:Debug("StartCombat: tentative combat")
 							self:StartCombat()
 						end
 					end

@@ -8,6 +8,7 @@ L["Skada is out of date. You can download the newest version from |cffffbb00%s|r
 L["Skada: Modes"] = "Skada：模式"
 L["Skada: Fights"] = "Skada：战斗"
 L["Error: No options selected"] = "错误：未选择任何选项"
+L["Data Collection"] = "数据收集"
 L["Profiles"] = "配置文件"
 L["Enable"] = "启用"
 L["ENABLED"] = "已启用"

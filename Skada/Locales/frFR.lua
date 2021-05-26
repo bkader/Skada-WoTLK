@@ -7,6 +7,7 @@ L["Skada is out of date. You can download the newest version from |cffffbb00%s|r
 L["Skada: Modes"] = "Skada: Modes"
 L["Skada: Fights"] = "Skada : Combats"
 L["Error: No options selected"] = "Erreur: aucune option sélectionnée"
+L["Data Collection"] = "Collecte de données"
 L["Profiles"] = "Profils"
 L["Enable"] = "Activer"
 L["ENABLED"] = "ACTIVÉ"

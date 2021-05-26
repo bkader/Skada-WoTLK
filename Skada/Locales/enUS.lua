@@ -7,6 +7,7 @@ L["Skada is out of date. You can download the newest version from |cffffbb00%s|r
 L["Skada: Modes"] = true
 L["Skada: Fights"] = true
 L["Error: No options selected"] = true
+L["Data Collection"] = true
 L["Profiles"] = true
 L["Enable"] = true
 L["ENABLED"] = true
