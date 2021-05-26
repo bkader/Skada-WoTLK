@@ -218,9 +218,12 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 			flasher.texture:SetTexture("Interface\\FullScreenTextures\\LowHealth")
 			flasher.texture:SetAllPoints(UIParent)
 			flasher.texture:SetBlendMode("ADD")
-			flasher:SetScript("OnShow", function(self) self:SetAlpha(0) end)
+			flasher:SetScript("OnShow", function(self)
+				self.elapsed = 0
+				self:SetAlpha(0)
+			end)
 			flasher:SetScript("OnUpdate", function(self, elapsed)
-				elapsed = (self.elapsed or 0) + elapsed
+				elapsed = self.elapsed + elapsed
 				if elapsed < 2.6 then
 					local alpha = elapsed % 1.3
 					if alpha < 0.15 then
@@ -255,9 +258,10 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 						tinsert(self.originalPoints, {WorldFrame:GetPoint(i)})
 					end
 				end
+				self.elapsed = 0
 			end)
 			shaker:SetScript("OnUpdate", function(self, elapsed)
-				elapsed = (self.elapsed or 0) + elapsed
+				elapsed = self.elapsed + elapsed
 				local x, y = 0, 0 -- Resets to original position if we're supposed to stop.
 				if elapsed >= 0.8 then
 					self:Hide()
