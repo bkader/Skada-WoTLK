@@ -1735,6 +1735,7 @@ do
 				action.playerid = owner.id
 				action.playername = owner.name
 			else
+				action.playerid = action.playername
 				action.playername = action.playername .. " (" .. owner.name .. ")"
 			end
 		end
