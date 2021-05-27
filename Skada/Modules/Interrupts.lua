@@ -9,7 +9,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	local playerGUID
 
 	-- cache frequently used globals
-	local _pairs, _format, math_max = pairs, string.format, math.max
+	local _pairs, _select, _format, math_max = pairs, select, string.format, math.max
 	local _UnitGUID, _UnitClass = UnitGUID, Skada.UnitClass
 	local _IsInInstance = IsInInstance
 	local _SendChatMessage = SendChatMessage
