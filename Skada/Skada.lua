@@ -172,6 +172,8 @@ do
 end
 
 function Skada.UnitClass(guid, flags, set)
+	local engClass, locClass
+
 	if guid then
 		-- If a player is found, it returns the role and spec as well
 		set = set or Skada.current -- use current set if none is provided.
