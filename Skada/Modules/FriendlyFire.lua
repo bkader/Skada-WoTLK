@@ -31,7 +31,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 			if dmg.dstName then
 				player.friendfire.targets = player.friendfire.targets or {}
 				if not player.friendfire.targets[dmg.dstName] then
-					player.friendfire.targets[dmg.dstName] = {id = dmg.dstGUID, flags = data.dstFlags, amount = dmg.amount}
+					player.friendfire.targets[dmg.dstName] = {id = dmg.dstGUID, flags = dmg.dstFlags, amount = dmg.amount}
 				else
 					player.friendfire.targets[dmg.dstName].amount = (player.friendfire.targets[dmg.dstName].amount or 0) + dmg.amount
 				end

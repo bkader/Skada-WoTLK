@@ -121,7 +121,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 				local maxvalue, nr = 0, 1
 
 				for _, player in Skada:IteratePlayers(set) do
-					if player.power[self.power] then
+					if player.power and player.power[self.power] then
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
