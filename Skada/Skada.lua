@@ -468,7 +468,7 @@ do
 						if copywindow then
 							for _, win in Skada:IterateWindows() do
 								if win.db.name == copywindow and win.db.display == db.display then
-									Skada:tcopy(newdb, win.db, {"name", "sticked", "x", "y", "point"})
+									Skada:tcopy(newdb, win.db, {"name", "sticked", "x", "y", "point", "snapped"})
 									break
 								end
 							end
