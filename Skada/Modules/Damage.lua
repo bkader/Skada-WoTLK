@@ -231,7 +231,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		end
 	end
 
-	local dmg = Skada:WeakTable()
+	local dmg = {}
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
@@ -814,7 +814,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 	local mod = Skada:NewModule(L["Damage Done By Spell"])
 	local sourcemod = mod:NewModule(L["Damage spell sources"])
 
-	local cached = Skada:WeakTable()
+	local cached = {}
 
 	function sourcemod:Enter(win, id, label)
 		win.spellname = label
@@ -867,7 +867,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 			local total = set.damagedone or 0
 			if total == 0 then return end
 
-			cached = Skada:WeakTable(wipe(cached or {}))
+			cached = wipe(cached or {})
 
 			for _, player in Skada:IteratePlayers(set) do
 				if player.damagedone and player.damagedone.spells then

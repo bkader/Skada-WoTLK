@@ -241,7 +241,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 		end
 	end
 
-	local data = Skada:WeakTable()
+	local data = {}
 
 	local function SpellAuraApplied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid = ...
@@ -557,7 +557,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 		end
 	end
 
-	local data = Skada:WeakTable()
+	local data = {}
 
 	local function SpellAuraApplied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid = ...
@@ -878,7 +878,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 		end
 	end
 
-	local data = Skada:WeakTable()
+	local data = {}
 
 	local function SpellAuraBroken(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, spellname, _, extraspellid, extraspellname, _, auratype = ...

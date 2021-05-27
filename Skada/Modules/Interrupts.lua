@@ -56,7 +56,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 		end
 	end
 
-	local data = Skada:WeakTable()
+	local data = {}
 
 	local function SpellInterrupt(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, spellname, spellschool, extraspellid, extraspellname, extraschool = ...

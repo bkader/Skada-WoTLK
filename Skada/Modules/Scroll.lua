@@ -91,7 +91,7 @@ function mod.OnUpdate(f, elap)
 	end
 end
 
-local windows = Skada:WeakTable()
+local windows = {}
 function Skada:Scroll(up)
 	debug("Scroll " .. (up and "up" or "down"))
 	for win, _ in pairs(windows) do
@@ -104,7 +104,7 @@ end
 mod.frame = CreateFrame("Button", "SkadaScrollHiddenFrame", UIParent)
 mod.frame:SetScript("OnUpdate", mod.OnUpdate)
 
-local hooked = Skada:WeakTable()
+local hooked = {}
 function mod.Create(self, win)
 	debug("Create")
 	if win.bargroup and not hooked[win.bargroup] then

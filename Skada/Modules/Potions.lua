@@ -64,7 +64,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	-- we use this function to record pre-pots as well.
 	function mod:CheckPrePot(event)
 		if event == "COMBAT_PLAYER_ENTER" then
-			prepotion = Skada:WeakTable()
+			prepotion = {}
 
 			local prefix, min, max = "raid", 1, _GetNumRaidMembers()
 			if max == 0 then

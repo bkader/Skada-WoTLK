@@ -48,7 +48,7 @@ BINDING_NAME_SKADA_STOP = L["Stop"]
 Skada.revisited = true
 
 -- available display types
-Skada.displays = setmetatable({}, weaktable)
+Skada.displays = {}
 
 -- flag to check if disabled
 local disabled = false
@@ -61,15 +61,13 @@ local update_timer, tick_timer, clean_timer
 local checkVersion, convertVersion
 
 -- list of players and pets
-local players = setmetatable({}, weaktable)
-local pets = setmetatable({}, weaktable)
+local players, pets = {}, {}
 
 -- list of feeds & selected feed
-local feeds, selectedfeed = setmetatable({}, weaktable)
+local feeds, selectedfeed = {}
 
 -- lists of modules and windows
-local modes = setmetatable({}, weaktable)
-local windows = setmetatable({}, weaktable)
+local modes, windows = {}, {}
 
 -- flags for party, instance and ovo
 local wasinparty, wasininstance, wasinpvp = false

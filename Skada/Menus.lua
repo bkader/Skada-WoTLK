@@ -500,7 +500,7 @@ do
 					info.hasArrow = 1
 					info.notCheckable = 1
 					info.padding = 16
-					if win and win.selectedmode and win.selectedmode.category == category then
+					if win and win.selectedmode and win.selectedmode.category == OTHER then
 						info.colorCode = "|cffffd100"
 					end
 					_UIDropDownMenu_AddButton(info, level)

@@ -219,7 +219,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		[47986] = 30
 	}
 
-	local shieldschools = Skada:WeakTable()
+	local shieldschools = {}
 
 	local function log_absorb(set, playername, dstGUID, dstName, dstFlags, spellid, amount)
 		local player = Skada:get_player(set, _UnitGUID(playername), playername)
@@ -265,7 +265,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		end
 	end
 
-	local shields = Skada:WeakTable()
+	local shields = {}
 
 	local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, spellname, spellschool = ...
@@ -618,8 +618,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	end
 
 	function mod:SetComplete(set)
-		shields = Skada:WeakTable()
-		shieldschools = Skada:WeakTable()
+		shields, shieldschools = {}, {}
 	end
 end)
 
@@ -713,7 +712,7 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 		if player then
 			win.title = _format(L["%s's absorb and healing spells"], player.name)
 
-			local total, spells = 0, Skada:WeakTable()
+			local total, spells = 0, {}
 
 			if player.healing and (player.healing.amount or 0) > 0 then
 				total = total + player.healing.amount
@@ -1015,7 +1014,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 	local spells
 
 	local function CacheSpells(set)
-		spells = Skada:WeakTable()
+		spells = {}
 		for _, player in Skada:IteratePlayers(set) do
 			if player.healing and player.healing.spells then
 				for spellid, spell in _pairs(player.healing.spells) do

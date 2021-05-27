@@ -43,7 +43,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 		end
 	end
 
-	local gain = Skada:WeakTable()
+	local gain = {}
 
 	local function SpellEnergize(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, _, spellschool, amount, powertype = ...

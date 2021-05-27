@@ -39,7 +39,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 		end
 	end
 
-	local dmg = Skada:WeakTable()
+	local dmg = {}
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then

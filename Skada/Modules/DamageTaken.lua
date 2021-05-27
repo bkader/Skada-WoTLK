@@ -126,7 +126,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 		end
 	end
 
-	local dmg = Skada:WeakTable()
+	local dmg = {}
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, spellname, spellschool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing = ...
@@ -745,7 +745,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(Skada, L)
 		targetmod.metadata = {showspots = true}
 		self.metadata = {
 			showspots = true,
-			click1 = playermod,
+			click1 = targetmod,
 			columns = {Damage = true, Percent = true},
 			icon = "Interface\\Icons\\spell_arcane_starfire"
 		}
@@ -767,7 +767,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 	local mod = Skada:NewModule(L["Avoidance & Mitigation"])
 	local playermod = mod:NewModule(L["Damage Breakdown"])
 
-	local temp = Skada:WeakTable()
+	local temp = {}
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
@@ -944,9 +944,9 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 				d.label = L["Damage Taken"]
 				d.value = spell.amount
 				d.valuetext = Skada:FormatValueText(
-					Skada:FormatNumber(amount),
+					Skada:FormatNumber(spell.amount),
 					mod.metadata.columns.Amount,
-					_format("%.1f%%", 100 * amount / total),
+					_format("%.1f%%", 100 * spell.amount / total),
 					mod.metadata.columns.Percent
 				)
 				-- end of amount bar --

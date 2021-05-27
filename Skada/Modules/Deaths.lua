@@ -54,7 +54,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		end
 	end
 
-	local data = Skada:WeakTable()
+	local data = {}
 
 	local function SpellDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, spellname, spellschool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing = ...

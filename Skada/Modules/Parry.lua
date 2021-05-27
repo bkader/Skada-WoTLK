@@ -35,7 +35,7 @@ Skada:AddLoadableModule("Parry-haste", function(Skada, L)
 		end
 	end
 
-	local data = Skada:WeakTable()
+	local data = {}
 
 	local function SpellMissed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if parrybosses[dstName] and srcGUID ~= dstGUID and _select(4, ...) == "PARRY" then
