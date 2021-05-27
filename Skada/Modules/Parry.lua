@@ -75,7 +75,7 @@ Skada:AddLoadableModule("Parry-haste", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
+					d.class = "BOSS"
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(

@@ -117,7 +117,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 			if player.damagedone and player.damagedone.targets then
 				for name, tbl in _pairs(player.damagedone.targets) do
 					if not enemies[name] then
-						enemies[name] = {id = tbl.id, amount = tbl.amount}
+						enemies[name] = {id = tbl.id, flags = tbl.flags, amount = tbl.amount}
 					else
 						enemies[name].amount = (enemies[name].amount or 0) + tbl.amount
 					end
@@ -141,7 +141,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 				d.id = enemy.id or enemyname
 				d.label = enemyname
-				d.class, d.role, d.spec = _select(2, _UnitClass(enemy.id, nil, set))
+				d.class, d.role, d.spec = _select(2, _UnitClass(enemy.id, enemy.flags, set))
 
 				d.value = enemy.amount
 				d.valuetext = Skada:FormatValueText(
@@ -291,7 +291,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 			if player.damagetaken and player.damagetaken.sources then
 				for name, tbl in _pairs(player.damagetaken.sources) do
 					if not enemies[name] then
-						enemies[name] = {id = tbl.id, amount = tbl.amount}
+						enemies[name] = {id = tbl.id, flags = tbl.flags, amount = tbl.amount}
 					else
 						enemies[name].amount = (enemies[name].amount or 0) + amount
 					end
@@ -316,7 +316,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 
 					d.id = enemy.id or enemyname
 					d.label = enemyname
-					d.class, d.role, d.spec = _select(2, _UnitClass(enemy.id, nil, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(enemy.id, enemy.flags, set))
 
 					d.value = enemy.amount
 					d.valuetext = Skada:FormatValueText(

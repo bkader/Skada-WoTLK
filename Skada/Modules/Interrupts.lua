@@ -48,7 +48,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 			if data.dstName then
 				player.interrupts.targets = player.interrupts.targets or {}
 				if not player.interrupts.targets[data.dstName] then
-					player.interrupts.targets[data.dstName] = {id = data.dstGUID, count = 1}
+					player.interrupts.targets[data.dstName] = {id = data.dstGUID, flags = data.dstFlags, count = 1}
 				else
 					player.interrupts.targets[data.dstName].count = player.interrupts.targets[data.dstName].count + 1
 				end
@@ -173,7 +173,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 					d.id = target.id
 					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(

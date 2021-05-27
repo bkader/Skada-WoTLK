@@ -143,14 +143,14 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		if dmg.dstName and dmg.amount > 0 then
 			spell.targets = spell.targets or {}
 			if not spell.targets[dmg.dstName] then
-				spell.targets[dmg.dstName] = {id = dmg.dstGUID, amount = dmg.amount}
+				spell.targets[dmg.dstName] = {id = dmg.dstGUID, flags = dmg.dstFlags, amount = dmg.amount}
 			else
 				spell.targets[dmg.dstName].amount = spell.targets[dmg.dstName].amount + dmg.amount
 			end
 
 			player.damagedone.targets = player.damagedone.targets or {}
 			if not player.damagedone.targets[dmg.dstName] then
-				player.damagedone.targets[dmg.dstName] = {id = dmg.dstGUID, amount = dmg.amount}
+				player.damagedone.targets[dmg.dstName] = {id = dmg.dstGUID, flags = dmg.dstFlags, amount = dmg.amount}
 			else
 				player.damagedone.targets[dmg.dstName].amount = player.damagedone.targets[dmg.dstName].amount + dmg.amount
 			end
@@ -190,7 +190,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 							if valkyrsTable[dmg.dstGUID] < maxhp / 2 then
 								if not spell.targets[L["Valkyrs overkilling"]] then
 									spell.targets[L["Valkyrs overkilling"]] = {
-										id = "Valkyrs overkilling",
+										flags = dmg.dstFlags,
 										amount = dmg.amount
 									}
 								else
@@ -198,7 +198,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 								end
 								if not player.damagedone.targets[L["Valkyrs overkilling"]] then
 									player.damagedone.targets[L["Valkyrs overkilling"]] = {
-										id = "Valkyrs overkilling",
+										flags = dmg.dstFlags,
 										amount = dmg.amount
 									}
 								else
@@ -217,13 +217,13 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 				local amount = (validTarget[dmg.dstName] == LBB["Blood Prince Council"]) and dmg.overkill or dmg.amount
 
 				if not spell.targets[altname] then
-					spell.targets[altname] = {id = altname, amount = amount}
+					spell.targets[altname] = {flags = dmg.dstFlags, amount = amount}
 				else
 					spell.targets[altname].amount = spell.targets[altname].amount + amount
 				end
 
 				if not player.damagedone.targets[altname] then
-					player.damagedone.targets[altname] = {id = altname, amount = amount}
+					player.damagedone.targets[altname] = {flags = dmg.dstFlags, amount = amount}
 				else
 					player.damagedone.targets[altname].amount = player.damagedone.targets[altname].amount + amount
 				end
@@ -461,7 +461,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
 
 					d.value = target.amount
 					d.valuetext = Skada:FormatValueText(
@@ -1119,7 +1119,7 @@ Skada:AddLoadableModule("Overkill", function(Skada, L)
 
 						d.id = target.id or targetname
 						d.label = targetname
-						d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
+						d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
 
 						d.value = target.overkill
 						d.valuetext = Skada:FormatValueText(

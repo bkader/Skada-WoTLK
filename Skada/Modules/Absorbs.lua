@@ -257,7 +257,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 				local target = player.absorbs.targets and player.absorbs.targets[dstName]
 				if not target then
 					player.absorbs.targets = player.absorbs.targets or {}
-					target = {id = dstGUID}
+					target = {id = dstGUID, flags = dstFlags}
 					player.absorbs.targets[dstName] = target
 				end
 				target.amount = (target.amount or 0) + amount
@@ -517,7 +517,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 						d.id = target.id or targetname
 						d.label = targetname
-						d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
+						d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
 
 						d.value = target.amount
 						d.valuetext = Skada:FormatValueText(
@@ -807,7 +807,7 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 
 						d.id = target.id or targetname
 						d.label = targetname
-						d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
+						d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
 
 						d.value = target.amount
 						d.valuetext = Skada:FormatValueText(

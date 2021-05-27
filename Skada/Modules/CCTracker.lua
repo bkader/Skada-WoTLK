@@ -225,14 +225,14 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 			if cc.dstName then
 				spell.targets = spell.targets or {}
 				if not spell.targets[cc.dstName] then
-					spell.targets[cc.dstName] = {id = cc.dstGUID, count = 1}
+					spell.targets[cc.dstName] = {id = cc.dstGUID, flags = cc.dstFlags, count = 1}
 				else
 					spell.targets[cc.dstName].count = spell.targets[cc.dstName].count + 1
 				end
 
 				player.ccdone.targets = player.ccdone.targets or {}
 				if not player.ccdone.targets[cc.dstName] then
-					player.ccdone.targets[cc.dstName] = {id = cc.dstGUID, count = 1, spells = {[cc.spellid] = 1}}
+					player.ccdone.targets[cc.dstName] = {id = cc.dstGUID, flags = cc.dstFlags, count = 1, spells = {[cc.spellid] = 1}}
 				else
 					player.ccdone.targets[cc.dstName].count = player.ccdone.targets[cc.dstName].count + 1
 					player.ccdone.targets[cc.dstName].spells[cc.spellid] = (player.ccdone.targets[cc.dstName].spells[cc.spellid] or 0) + 1
@@ -329,7 +329,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(
@@ -371,7 +371,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec =_select(2, _UnitClass(target.id, nil, set))
+					d.class, d.role, d.spec =_select(2, _UnitClass(target.id, target.flags, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(
@@ -541,14 +541,14 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 			if cc.dstName then
 				spell.sources = spell.sources or {}
 				if not spell.sources[cc.dstName] then
-					spell.sources[cc.dstName] = {id = cc.dstGUID, count = 1}
+					spell.sources[cc.dstName] = {id = cc.dstGUID, flags = cc.dstFlags, count = 1}
 				else
 					spell.sources[cc.dstName].count = spell.sources[cc.dstName].count + 1
 				end
 
 				player.cctaken.sources = player.cctaken.sources or {}
 				if not player.cctaken.sources[cc.dstName] then
-					player.cctaken.sources[cc.dstName] = {id = cc.dstGUID, count = 1, spells = {[cc.spellid] = 1}}
+					player.cctaken.sources[cc.dstName] = {id = cc.dstGUID, flags = cc.dstFlags, count = 1, spells = {[cc.spellid] = 1}}
 				else
 					player.cctaken.sources[cc.dstName].count = player.cctaken.sources[cc.dstName].count + 1
 					player.cctaken.sources[cc.dstName].spells[cc.spellid] = (player.cctaken.sources[cc.dstName].spells[cc.spellid] or 0) + 1
@@ -644,7 +644,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 					d.id = source.id or sourcename
 					d.label = sourcename
-					d.class, d.role, d.spec = _select(2, _UnitClass(source.id, nil, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(source.id, source.flags, set))
 
 					d.value = source.count
 					d.valuetext = Skada:FormatValueText(
@@ -686,7 +686,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 					d.id = source.id or sourcename
 					d.label = sourcename
-					d.class, d.role, d.spec = _select(2, _UnitClass(source.id, nil, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(source.id, source.flags, set))
 
 					d.value = source.count
 					d.valuetext = Skada:FormatValueText(
@@ -862,14 +862,14 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 			if cc.dstName then
 				spell.targets = spell.targets or {}
 				if not spell.targets[cc.dstName] then
-					spell.targets[cc.dstName] = {id = cc.dstGUID, count = 1}
+					spell.targets[cc.dstName] = {id = cc.dstGUID, flags = cc.dstFlags, count = 1}
 				else
 					spell.targets[cc.dstName].count = spell.targets[cc.dstName].count + 1
 				end
 
 				player.ccbreaks.targets = player.ccbreaks.targets or {}
 				if not player.ccbreaks.targets[cc.dstName] then
-					player.ccbreaks.targets[cc.dstName] = {id = cc.dstGUID, count = 1, spells = {[cc.spellid] = 1}}
+					player.ccbreaks.targets[cc.dstName] = {id = cc.dstGUID, flags = cc.dstFlags, count = 1, spells = {[cc.spellid] = 1}}
 				else
 					player.ccbreaks.targets[cc.dstName].count = player.ccbreaks.targets[cc.dstName].count + 1
 					player.ccbreaks.targets[cc.dstName].spells[cc.spellid] = (player.ccbreaks.targets[cc.dstName].spells[cc.spellid] or 0) + 1
@@ -1004,7 +1004,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(
@@ -1046,7 +1046,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(

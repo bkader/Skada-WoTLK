@@ -172,65 +172,81 @@ do
 end
 
 function Skada.UnitClass(guid, flags, set)
-	local engClass, locClass
+	local locClass, engClass
 
 	if guid then
-		-- If a player is found, it returns the role and spec as well
-		set = set or Skada.current -- use current set if none is provided.
-		if set and set.players then
-			for _, p in Skada:IteratePlayers(set) do
-				if p.id == guid then
-					return Skada.classnames[p.class], p.class, p.role, p.spec
+		set = set or Skada.current
+
+		if set then
+			-- an exisiting player?
+			for _, player in Skada:IteratePlayers(set) do
+				if player.id == guid then
+					return Skada.classnames[player.class], player.class, player.role, player.spec
 				end
 			end
-		end
 
-		-- is it a pet?
-		if pets[guid] then
-			return Skada.classnames.PET, "PET"
-		end
+			-- make sure to create the classes table.
+			set._classes = set._classes or {}
 
-		-- cache guid to classes.
-		if set and set._classes then
+			-- an already cached unit
 			for id, class in pairs(set._classes) do
 				if id == guid then
 					return Skada.classnames[class], class
 				end
 			end
-		end
 
-		local class = select(2, GetPlayerInfoByGUID(guid))
-		if class then
-			locClass, engClass = Skada.classnames[class], class
-		else
-			local isboss, npcid = Skada:IsBoss(guid)
-			if isboss then
-				locClass, engClass = Skada.classnames.BOSS, "BOSS"
-			elseif (npcid or 0) > 0 then
-				locClass, engClass = Skada.classnames.MONSTER, "MONSTER"
-			elseif npcid == 0 and flags and band(flags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0 then
-				locClass, engClass = Skada.classnames.PLAYER, "PLAYER"
+			-- a pet? This only works for current segment
+			if pets[guid] then
+				locClass, engClass = Skada.classnames.PET, "PET"
 			end
 		end
-	end
 
-	if not (locClass and engClass) and flags then
-		if band(flags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0 then
-			locClass, engClass = Skada.classnames.PLAYER, "PLAYER"
-		elseif band(flags, BITMASK_PETS) ~= 0 then
-			locClass, engClass = Skada.classnames.PET, "PET"
-		elseif band(flags, BITMASK_ENEMY) ~= 0 then
-			locClass, engClass = Skada.classnames.ENEMY, "ENEMY"
+		-- a valid guid?
+		if not engClass and tonumber(guid) ~= nil then
+			-- real player?
+			local class = select(2, GetPlayerInfoByGUID(guid))
+			if class then
+				locClass, engClass = Skada.classnames[class], class
+			else
+				local isboss, npcid = Skada:IsBoss(guid)
+				-- possible boss?
+				if isboss then
+					-- possible npc (monster or pet)
+					locClass, engClass = Skada.classnames.BOSS, "BOSS"
+				elseif (npcid or 0) > 0 then
+					-- player maybe?
+					-- use the flags first
+					if flags and band(flags, BITMASK_PETS) ~= 0 then
+						locClass, engClass = Skada.classnames.PET, "PET"
+					else
+						locClass, engClass = Skada.classnames.MONSTER, "MONSTER"
+					end
+				elseif npcid == 0 and flags and band(flags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0 then
+					locClass, engClass = Skada.classnames.PLAYER, "PLAYER"
+				end
+			end
 		end
-	end
 
-	if not (locClass and engClass) then
-		locClass, engClass = Skada.classnames.UNKNOWN, "UNKNOWN"
-	end
+		if not engClass and flags then
+			if band(flags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0 then
+				locClass, engClass = Skada.classnames.PLAYER, "PLAYER"
+			elseif band(flags, BITMASK_PETS) ~= 0 then
+				locClass, engClass = Skada.classnames.PET, "PET"
+			elseif band(flags, COMBATLOG_OBJECT_TYPE_NPC) ~= 0 then
+				locClass, engClass = Skada.classnames.MONSTER, "MONSTER"
+			elseif band(flags, BITMASK_ENEMY) ~= 0 then
+				locClass, engClass = Skada.classnames.ENEMY, "ENEMY"
+			end
+		end
 
-	if set and guid then
-		set._classes = set._classes or {}
-		set._classes[guid] = engClass
+		-- everything failed!
+		if not engClass then
+			locClass, engClass = Skada.classnames.UNKNOWN, "UNKNOWN"
+		end
+
+		if set and not set._classes[guid] then
+			set._classes[guid] = engClass
+		end
 	end
 
 	return locClass, engClass

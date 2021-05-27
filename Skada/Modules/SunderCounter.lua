@@ -20,7 +20,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 			if data.dstName then
 				player.sunders.targets = player.sunders.targets or {}
 				if not player.sunders.targets[data.dstName] then
-					player.sunders.targets[data.dstName] = {id = data.dstGUID, count = 1}
+					player.sunders.targets[data.dstName] = {id = data.dstGUID, flags = data.dstFlags, count = 1}
 				else
 					player.sunders.targets[data.dstName].count = (player.sunders.targets[data.dstName].count or 0) + 1
 				end
@@ -71,7 +71,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(

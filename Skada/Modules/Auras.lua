@@ -39,7 +39,7 @@ local function log_auraapply(set, aura)
 			if aura.auratype == "DEBUFF" and aura.dstName then
 				player.auras[aura.spellname].targets = player.auras[aura.spellname].targets or {}
 				if not player.auras[aura.spellname].targets[aura.dstName] then
-					player.auras[aura.spellname].targets[aura.dstName] = {id = aura.dstGUID, count = 1}
+					player.auras[aura.spellname].targets[aura.dstName] = {id = aura.dstGUID, flags = aura.dstFlags, count = 1}
 				else
 					player.auras[aura.spellname].targets[aura.dstName].count = player.auras[aura.spellname].targets[aura.dstName].count + 1
 				end
@@ -539,7 +539,7 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
 
 					d.value = target.count
 					d.valuetext = _format("%u (%02.1f%%)", target.count, 100 * target.count / total)

@@ -31,7 +31,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 			if dmg.dstName then
 				player.friendfire.targets = player.friendfire.targets or {}
 				if not player.friendfire.targets[dmg.dstName] then
-					player.friendfire.targets[dmg.dstName] = {id = dmg.dstGUID, amount = dmg.amount}
+					player.friendfire.targets[dmg.dstName] = {id = dmg.dstGUID, flags = data.dstFlags, amount = dmg.amount}
 				else
 					player.friendfire.targets[dmg.dstName].amount = (player.friendfire.targets[dmg.dstName].amount or 0) + dmg.amount
 				end
@@ -51,6 +51,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
 			dmg.dstGUID = dstGUID
 			dmg.dstName = dstName
+			dmg.dstFlags = dstFlags
 
 			dmg.spellid = spellid
 			dmg.spellschool = school
@@ -70,6 +71,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
 			dmg.dstGUID = dstGUID
 			dmg.dstName = dstName
+			dmg.dstFlags = dstFlags
 
 			dmg.spellid = 6603
 			dmg.spellschool = 1
@@ -100,7 +102,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, nil, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
 
 					d.value = target.amount
 					d.valuetext = Skada:FormatValueText(

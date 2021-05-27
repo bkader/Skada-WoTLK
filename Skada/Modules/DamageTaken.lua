@@ -112,14 +112,14 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 		if dmg.srcName and dmg.amount > 0 then
 			spell.sources = spell.sources or {}
 			if not spell.sources[dmg.srcName] then
-				spell.sources[dmg.srcName] = {id = dmg.srcGUID, amount = dmg.amount}
+				spell.sources[dmg.srcName] = {id = dmg.srcGUID, flags = dmg.srcFlags, amount = dmg.amount}
 			else
 				spell.sources[dmg.srcName].amount = spell.sources[dmg.srcName].amount + dmg.amount
 			end
 
 			player.damagetaken.sources = player.damagetaken.sources or {}
 			if not player.damagetaken.sources[dmg.srcName] then
-				player.damagetaken.sources[dmg.srcName] = {id = dmg.srcGUID, amount = dmg.amount}
+				player.damagetaken.sources[dmg.srcName] = {id = dmg.srcGUID, flags = dmg.srcFlags, amount = dmg.amount}
 			else
 				player.damagetaken.sources[dmg.srcName].amount = player.damagetaken.sources[dmg.srcName].amount + dmg.amount
 			end
@@ -356,7 +356,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 
 					d.id = source.id or sourcename
 					d.label = sourcename
-					d.class, d.role, d.spec = _select(2, _UnitClass(source.id, nil, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(source.id, source.flags, set))
 
 					d.value = source.amount
 					d.valuetext = Skada:FormatValueText(
