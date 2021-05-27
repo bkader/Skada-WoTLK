@@ -277,7 +277,7 @@ do
 					d.spec = player.spec
 
 					d.value = uptime
-					d.valuetext = _format("%u (%02.1f%%)", auracount, 100 * uptime / math_max(1, maxtime))
+					d.valuetext = _format("%u (%.1f%%)", auracount, 100 * uptime / math_max(1, maxtime))
 
 					if uptime > maxvalue then
 						maxvalue = uptime
@@ -542,7 +542,7 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 					d.class, d.role, d.spec = _select(2, _UnitClass(d.id, target.flags, set))
 
 					d.value = target.count
-					d.valuetext = _format("%u (%02.1f%%)", target.count, 100 * target.count / total)
+					d.valuetext = _format("%u (%.1f%%)", target.count, 100 * target.count / total)
 
 					if target.count > maxvalue then
 						maxvalue = target.count
