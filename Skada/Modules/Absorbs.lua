@@ -481,7 +481,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(spell.amount),
 						mod.metadata.columns.Absorbs,
-						_format("%02.1f%%", 100 * spell.amount / total),
+						_format("%.1f%%", 100 * spell.amount / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -517,13 +517,13 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 						d.id = target.id or targetname
 						d.label = targetname
-						d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
+						d.class, d.role, d.spec = _select(2, _UnitClass(d.id, target.flags, set))
 
 						d.value = target.amount
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(target.amount),
 							mod.metadata.columns.Absorbs,
-							_format("%02.1f%%", 100 * target.amount / total),
+							_format("%.1f%%", 100 * target.amount / total),
 							mod.metadata.columns.Percent
 						)
 
@@ -561,7 +561,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(player.absorbs.amount),
 						self.metadata.columns.Absorbs,
-						_format("%02.1f%%", 100 * player.absorbs.amount / total),
+						_format("%.1f%%", 100 * player.absorbs.amount / total),
 						self.metadata.columns.Percent
 					)
 
@@ -662,7 +662,7 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 			local healing =
 				(player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
 			local total = (set.healing or 0) + (set.absorbs or 0)
-			tooltip:AddDoubleLine(L["Absorbs and healing"], _format("%s (%02.1f%%)", Skada:FormatNumber(healing), 100 * healing / math_max(1, total)), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Absorbs and healing"], _format("%s (%.1f%%)", Skada:FormatNumber(healing), 100 * healing / math_max(1, total)), 1, 1, 1)
 		end
 	end
 
@@ -693,10 +693,10 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 				end
 				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
 				if (spell.critical or 0) > 0 then
-					tooltip:AddDoubleLine(L["Critical"], _format("%02.1f%%", 100 * spell.critical / spell.count), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Critical"], _format("%.1f%%", 100 * spell.critical / spell.count), 1, 1, 1)
 				end
 				if (spell.overhealing or 0) > 0 then
-					tooltip:AddDoubleLine(L["Overhealing"], _format("%02.1f%%", 100 * spell.overhealing / (spell.overhealing + spell.amount)), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Overhealing"], _format("%.1f%%", 100 * spell.overhealing / (spell.overhealing + spell.amount)), 1, 1, 1)
 				end
 			end
 		end
@@ -751,7 +751,7 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(spell.amount),
 						mod.metadata.columns.Healing,
-						_format("%02.1f%%", 100 * spell.amount / math_max(1, total)),
+						_format("%.1f%%", 100 * spell.amount / math_max(1, total)),
 						mod.metadata.columns.Percent
 					)
 
@@ -806,13 +806,13 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 
 						d.id = target.id or targetname
 						d.label = targetname
-						d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
+						d.class, d.role, d.spec = _select(2, _UnitClass(d.id, target.flags, set))
 
 						d.value = target.amount
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(target.amount),
 							mod.metadata.columns.Healing,
-							_format("%02.1f%%", 100 * target.amount / total),
+							_format("%.1f%%", 100 * target.amount / total),
 							mod.metadata.columns.Percent
 						)
 
@@ -854,7 +854,7 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 						self.metadata.columns.Healing,
 						Skada:FormatNumber(hps),
 						self.metadata.columns.HPS,
-						_format("%02.1f%%", 100 * amount / total),
+						_format("%.1f%%", 100 * amount / total),
 						self.metadata.columns.Percent
 					)
 
@@ -915,7 +915,7 @@ Skada:AddLoadableModule("Absorbs and healing", function(Skada, L)
 		end
 		if (set.overhealing or 0) > 0 then
 			total = total + set.overhealing
-			tooltip:AddDoubleLine(L["Overhealing"], _format("%02.1f%%", 100 * set.overhealing / math_max(1, total)), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Overhealing"], _format("%.1f%%", 100 * set.overhealing / math_max(1, total)), 1, 1, 1)
 		end
 	end
 
@@ -966,7 +966,7 @@ Skada:AddLoadableModule("HPS", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(amount),
 						self.metadata.columns.HPS,
-						_format("%02.1f%%", 100 * amount / total),
+						_format("%.1f%%", 100 * amount / total),
 						self.metadata.columns.Percent
 					)
 
@@ -1092,9 +1092,9 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 				if spell.count then
 					tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
 				end
-				tooltip:AddDoubleLine(L["Healing"], _format("%s (%02.1f%%)", Skada:FormatNumber(spell.amount), 100 * spell.amount / math_max(1, total)), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Healing"], _format("%s (%.1f%%)", Skada:FormatNumber(spell.amount), 100 * spell.amount / math_max(1, total)), 1, 1, 1)
 				if (spell.overhealing or 0) > 0 then
-					tooltip:AddDoubleLine(L["Overhealing"], _format("%s (%02.1f%%)", Skada:FormatNumber(spell.overhealing), 100 * spell.overhealing / math_max(1, overheal)), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Overhealing"], _format("%s (%.1f%%)", Skada:FormatNumber(spell.overhealing), 100 * spell.overhealing / math_max(1, overheal)), 1, 1, 1)
 				end
 			end
 		end
@@ -1128,7 +1128,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(player.amount),
 						mod.metadata.columns.Healing,
-						_format("%02.1f%%", 100 * player.amount / math_max(1, spell.amount)),
+						_format("%.1f%%", 100 * player.amount / math_max(1, spell.amount)),
 						mod.metadata.columns.Percent
 					)
 
@@ -1167,7 +1167,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 				d.valuetext = Skada:FormatValueText(
 					Skada:FormatNumber(spell.amount),
 					self.metadata.columns.Healing,
-					_format("%02.1f%%", 100 * spell.amount / total),
+					_format("%.1f%%", 100 * spell.amount / total),
 					self.metadata.columns.Percent
 				)
 
