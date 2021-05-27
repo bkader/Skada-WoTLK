@@ -1486,49 +1486,38 @@ end
 function Skada:find_player(set, playerid, playername, strict)
 	if set and playerid and playerid ~= "total" then
 		set._playeridx = set._playeridx or {}
+
 		local player = set._playeridx[playerid]
-		if not player then
-			for _, p in self:IteratePlayers(set) do
-				if p.id == playerid then
-					set._playeridx[playerid] = p
-					player = p
-					break
-				end
+		if player then
+			return player
+		end
+
+		-- search the set
+		for _, p in self:IteratePlayers(set) do
+			if p.id == playerid then
+				set._playeridx[playerid] = p
+				return p
 			end
 		end
 
-		if not player then
-			-- needed for certain bosses
-			local isboss, npcid, npcname = self:IsBoss(playerid, playername)
-			if isboss then
-				player = {
-					id = playerid,
-					name = npcname or playername,
-					class = "BOSS"
-				}
-				set._playeridx[playerid] = player
-			elseif (npcid or 0) > 0 then
-				player = {
-					id = playerid,
-					name = npcname or playername,
-					class = "MONSTER"
-				}
-				set._playeridx[playerid] = player
-			end
-		end
-
-		-- this our last hope!
-		if not (player or strict) and playerid and playername then
+		-- needed for certain bosses
+		local isboss, npcid, npcname = self:IsBoss(playerid, playername)
+		if isboss then
 			player = {
 				id = playerid,
-				name = playername,
-				class = "PET"
+				name = npcname or playername,
+				class = "BOSS"
 			}
 			set._playeridx[playerid] = player
+			return player
 		end
 
-		self.callbacks:Fire("SKADA_PLAYER_FIND", player)
-		return player
+		if strict then
+			return player
+		end
+
+		-- last hope
+		return {id = playerid, name = playername or UNKNOWN, class = "PET"}
 	end
 end
 
