@@ -179,6 +179,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	local function log_resurrect(set, playerid, playername, playerflags)
 		local player = Skada:get_player(set, playerid, playername, playerflags)
 		if player then
+			player.deathlog = player.deathlog or {}
 			table_insert(player.deathlog, 1, {time = 0, log = {}})
 		end
 	end
