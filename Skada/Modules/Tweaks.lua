@@ -164,7 +164,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 
 		-- sorry but this feature requires a BossMod to work properly
 		if Skada.db.profile.smartstop and Skada.bossmod then
-			Skada.After(5, function()
+			Skada.After(7, function()
 				if not set.endtime then
 					Skada:Print(L["Smart Stop"])
 					Skada:StopSegment()
