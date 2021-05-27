@@ -1658,7 +1658,7 @@ do
 	function Skada:IsBoss(guid, name)
 		local isboss, npcid, npcname = false, 0, nil
 		if guid then
-			local id = tonumber(guid:sub(8, 12), 16)
+			local id = tonumber(guid:sub(9, 12), 16)
 			if id and (LBI.BossIDs[id] or custom[id]) then
 				isboss, npcid = true, id
 				if custom[id] then
@@ -1730,56 +1730,52 @@ do
 	end
 
 	function Skada:FixPets(action)
-		if not action or not action.playername or not action.playerid then return end
+		if action and action.playerid and action.playername then
+			local owner = pets[action.playerid]
 
-		local owner = pets[action.playerid]
+			-- we try to associate pets and and guardians with their owner
+			if not owner and action.playerflags and band(action.playerflags, BITMASK_PETS) ~= 0 and band(action.playerflags, BITMASK_GROUP) ~= 0 then
+				-- my own pets or guardians?
+				if band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
+					owner = {id = UnitGUID("player"), name = GetUnitName("player")}
+				end
 
-		-- we try to associate pets and and guardians with their owner
-		if not owner and action.playerflags and band(action.playerflags, BITMASK_PETS) ~= 0 and band(action.playerflags, BITMASK_GROUP) ~= 0 then
-			-- my own pets or guardians?
-			if band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
-				owner = {id = UnitGUID("player"), name = GetUnitName("player")}
-			end
+				-- party/raid pets or guardians? -- TODO: find better solution
+				-- if not owner then
+				-- 	owner = GetPetOwnerFromFlags(action.playerflags)
+				-- end
 
-			-- party/raid pets or guardians? -- TODO: find better solution
-			-- if not owner then
-			-- 	owner = GetPetOwnerFromFlags(action.playerflags)
-			-- end
-
-			-- not found? our last hope is the tooltip
-			if not owner then
-				local ownerName = GetPetOwnerFromTooltip(action.playerid)
-				if ownerName then
-					local guid = UnitGUID(ownerName)
-					if players[guid] then
-						owner = {id = guid, name = ownerName}
+				-- not found? our last hope is the tooltip
+				if not owner then
+					local ownerName = GetPetOwnerFromTooltip(action.playerid)
+					if ownerName then
+						local guid = UnitGUID(ownerName)
+						if players[guid] then
+							owner = {id = guid, name = ownerName}
+						end
 					end
-					ownerName, guid = nil, nil
+				end
+
+				if not owner then
+					action.playerid = action.playername -- TODO: find better solution
+				elseif not pets[action.playerid] then
+					pets[action.playerid] = owner
 				end
 			end
 
-			-- here, if we have an onwer we cache, otherwise we use
-			-- name instead of guid so we don't have multiple entities.
 			if owner then
-				pets[action.playerid] = owner
-			else
-				-- action.playerid = action.playername -- TODO: find better solution
-				-- we ignore it until we find a better solutin
-				action = wipe(action or {})
-			end
-		end
+				if self.db.profile.mergepets then
+					if action.spellname then
+						action.spellname = action.spellname .. " (" .. action.playername .. ")"
+					end
 
-		if owner then
-			if self.db.profile.mergepets then
-				if action.spellname then
-					action.spellname = action.spellname .. " (" .. action.playername .. ")"
+					action.playerid = owner.id
+					action.playername = owner.name
+				else
+					-- just append the creature id to the player
+					action.playerid = owner.id .. tonumber(action.playerid:sub(9, 12), 16)
+					action.playername = action.playername .. " (" .. owner.name .. ")"
 				end
-
-				action.playerid = owner.id
-				action.playername = owner.name
-			else
-				action.playerid = action.playername
-				action.playername = action.playername .. " (" .. owner.name .. ")"
 			end
 		end
 	end
