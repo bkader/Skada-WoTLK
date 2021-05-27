@@ -209,7 +209,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 
 						d.id = target.id or targetname
 						d.label = targetname
-						d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
+						d.class, d.role, d.spec = _select(2, _UnitClass(d.id, target.flags, set))
 
 						d.value = target.amount
 						d.valuetext = Skada:FormatValueText(
@@ -380,7 +380,7 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 
 						d.id = target.id or targetname
 						d.label = targetname
-						d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
+						d.class, d.role, d.spec = _select(2, _UnitClass(d.id, target.flags, set))
 
 						local total = (target.amount or 0) + target.overhealing
 						d.value = target.overhealing / total
@@ -585,7 +585,7 @@ Skada:AddLoadableModule("Total Healing", function(Skada, L)
 
 						d.id = target.id or targetname
 						d.label = targetname
-						d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
+						d.class, d.role, d.spec = _select(2, _UnitClass(d.id, target.flags, set))
 
 						d.value = amount
 						d.valuetext = Skada:FormatValueText(
@@ -756,7 +756,7 @@ Skada:AddLoadableModule("Healing and overhealing", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(d.id, target.flags, set))
 
 					d.value = (target.amount or 0) + (target.overhealing or 0)
 					d.valuetext = Skada:FormatValueText(
@@ -980,7 +980,7 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 
 				d.id = player.id
 				d.label = playername
-				d.class, d.role, d.spec = _select(2, _UnitClass(player.id, player.flags, set))
+				d.class, d.role, d.spec = _select(2, _UnitClass(d.id, player.flags, set))
 
 				d.value = player.amount
 				d.valuetext = Skada:FormatValueText(

@@ -37,7 +37,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 				local maxvalue, nr = 0, 1
 
 				for spellname, spell in _pairs(player.damagedone.spells) do
-					if spell.targets[win.targetname] and (spell.targets[win.targetname].amount or 0) > 0 then
+					if spell.targets and spell.targets[win.targetname] and (spell.targets[win.targetname].amount or 0) > 0 then
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
@@ -141,7 +141,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 				d.id = enemy.id or enemyname
 				d.label = enemyname
-				d.class, d.role, d.spec = _select(2, _UnitClass(enemy.id, enemy.flags, set))
+				d.class, d.role, d.spec = _select(2, _UnitClass(d.id, enemy.flags, set))
 
 				d.value = enemy.amount
 				d.valuetext = Skada:FormatValueText(
@@ -211,7 +211,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 				local maxvalue, nr = 0, 1
 
 				for spellname, spell in _pairs(player.damagetaken.spells) do
-					if spell.sources[win.targetname] and (spell.sources[win.targetname].amount or 0) > 0 then
+					if spell.sources and spell.sources[win.targetname] and (spell.sources[win.targetname].amount or 0) > 0 then
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
@@ -293,7 +293,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 					if not enemies[name] then
 						enemies[name] = {id = tbl.id, flags = tbl.flags, amount = tbl.amount}
 					else
-						enemies[name].amount = (enemies[name].amount or 0) + amount
+						enemies[name].amount = (enemies[name].amount or 0) + tbl.amount
 					end
 				end
 			end
@@ -316,7 +316,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 
 					d.id = enemy.id or enemyname
 					d.label = enemyname
-					d.class, d.role, d.spec = _select(2, _UnitClass(enemy.id, enemy.flags, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(d.id, enemy.flags, set))
 
 					d.value = enemy.amount
 					d.valuetext = Skada:FormatValueText(

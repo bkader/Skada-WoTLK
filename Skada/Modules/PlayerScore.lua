@@ -10,7 +10,7 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 	local mod = Skada:NewModule(L["Player Score"])
 	local format = string.format
 
-	local mindamagetaken = 100000
+	local mindamagetaken = 75000
 	local multipliers = {
 		damage = {NONE = 1.0, TANK = 1.5, HEALER = 1.0, DAMAGER = 2.0},
 		healing = {NONE = 1.0, TANK = 1.5, HEALER = 2.0, DAMAGER = 1.0},

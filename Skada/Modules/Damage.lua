@@ -161,56 +161,54 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			end
 
 			-- add useful damage.
-			if validTarget[dmg.dstName] then
+			local diff = get_raid_diff()
+			if (diff == "10n" or diff == "25n" or diff == "10h" or diff == "25h") and validTarget[dmg.dstName] then
 				local altname = groupName[validTarget[dmg.dstName]]
 
 				-- same name, ignore to not have double damage.
-				if altname == dmg.dstName then return end
+				if altname == dmg.dstName or not altname then return end
 
-				-- useful damage on Val'kyrs
-				if dmg.dstName == LBB["Val'kyr Shadowguard"] then
-					local diff = get_raid_diff()
+				-- useful damage on Val'kyrs (heroic mode only)
+				if dmg.dstName == LBB["Val'kyr Shadowguard"] and (diff == "10h" or diff == "25h") then
+					-- we make sure to always have a table.
+					valkyrsTable = valkyrsTable or {}
 
-					-- useful damage accounts only on heroic mode.
-					if diff == "10h" or diff == "25h" then
-						-- we make sure to always have a table.
-						valkyrsTable = valkyrsTable or {}
+					-- valkyr's max health depending on the difficulty
+					local maxhp = (diff == "10h") and valkyr10hp or valkyr25hp
 
-						-- valkyr's max health depending on the difficulty
-						local maxhp = diff == "10h" and valkyr10hp or valkyr25hp
-
-						-- we make sure to add our valkyr to the table
-						if not valkyrsTable[dmg.dstGUID] then
-							valkyrsTable[dmg.dstGUID] = maxhp - dmg.amount
-						else
-							--
-							-- here, the valkyr was already recorded, it reached half its health
-							-- but the player still dpsing it. This counts as useless damage.
-							--
-							if valkyrsTable[dmg.dstGUID] < maxhp / 2 then
-								if not spell.targets[L["Valkyrs overkilling"]] then
-									spell.targets[L["Valkyrs overkilling"]] = {
-										flags = dmg.dstFlags,
-										amount = dmg.amount
-									}
-								else
-									spell.targets[L["Valkyrs overkilling"]].amount = spell.targets[L["Valkyrs overkilling"]].amount + dmg.amount
-								end
-								if not player.damagedone.targets[L["Valkyrs overkilling"]] then
-									player.damagedone.targets[L["Valkyrs overkilling"]] = {
-										flags = dmg.dstFlags,
-										amount = dmg.amount
-									}
-								else
-									player.damagedone.targets[L["Valkyrs overkilling"]].amount = player.damagedone.targets[L["Valkyrs overkilling"]].amount + dmg.amount
-								end
-								return
+					-- we make sure to add our valkyr to the table
+					if not valkyrsTable[dmg.dstGUID] then
+						valkyrsTable[dmg.dstGUID] = maxhp - dmg.amount
+					else
+						--
+						-- here, the valkyr was already recorded, it reached half its health
+						-- but the player still dpsing it. This counts as useless damage.
+						--
+						if valkyrsTable[dmg.dstGUID] < maxhp / 2 then
+							if not spell.targets[L["Valkyrs overkilling"]] then
+								spell.targets[L["Valkyrs overkilling"]] = {
+									flags = dmg.dstFlags,
+									amount = dmg.amount
+								}
+							else
+								spell.targets[L["Valkyrs overkilling"]].amount = spell.targets[L["Valkyrs overkilling"]].amount + dmg.amount
 							end
-
-							-- deducte the damage
-							valkyrsTable[dmg.dstGUID] = valkyrsTable[dmg.dstGUID] - dmg.amount
+							if not player.damagedone.targets[L["Valkyrs overkilling"]] then
+								player.damagedone.targets[L["Valkyrs overkilling"]] = {
+									flags = dmg.dstFlags,
+									amount = dmg.amount
+								}
+							else
+								player.damagedone.targets[L["Valkyrs overkilling"]].amount = player.damagedone.targets[L["Valkyrs overkilling"]].amount + dmg.amount
+							end
+							return
 						end
+
+						-- deducte the damage
+						valkyrsTable[dmg.dstGUID] = valkyrsTable[dmg.dstGUID] - dmg.amount
 					end
+
+					return
 				end
 
 				-- if we are on BPC, we attempt to catch overkilling
@@ -461,7 +459,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(d.id, target.flags, set))
 
 					d.value = target.amount
 					d.valuetext = Skada:FormatValueText(
@@ -1119,7 +1117,7 @@ Skada:AddLoadableModule("Overkill", function(Skada, L)
 
 						d.id = target.id or targetname
 						d.label = targetname
-						d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
+						d.class, d.role, d.spec = _select(2, _UnitClass(d.id, target.flags, set))
 
 						d.value = target.overkill
 						d.valuetext = Skada:FormatValueText(

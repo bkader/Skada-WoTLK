@@ -329,7 +329,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(d.id, target.flags, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(
@@ -371,7 +371,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec =_select(2, _UnitClass(target.id, target.flags, set))
+					d.class, d.role, d.spec =_select(2, _UnitClass(d.id, target.flags, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(
@@ -644,7 +644,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 					d.id = source.id or sourcename
 					d.label = sourcename
-					d.class, d.role, d.spec = _select(2, _UnitClass(source.id, source.flags, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(d.id, source.flags, set))
 
 					d.value = source.count
 					d.valuetext = Skada:FormatValueText(
@@ -686,7 +686,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 					d.id = source.id or sourcename
 					d.label = sourcename
-					d.class, d.role, d.spec = _select(2, _UnitClass(source.id, source.flags, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(d.id, source.flags, set))
 
 					d.value = source.count
 					d.valuetext = Skada:FormatValueText(
@@ -1004,7 +1004,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(d.id, target.flags, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(
@@ -1046,7 +1046,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(d.id, target.flags, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(

@@ -513,10 +513,10 @@ L["Friendly Fire"] = "Dégâts aux alliés"
 -- useful damage targets
 L["Useful targets"] = "Dégât utile"
 L["Oozes"] = "Limons"
-L["Princes overkilling"] = "Dégât exagéré: Princes"
+L["Princes overkilling"] = "Dégât exagéré sur les Princes"
 -- L["Adds"] = ""
 L["Halion and Inferno"] = "Halion et Inferno"
-L["Valkyrs overkilling"] = "Dégât exagéré: Valkyrs"
+L["Valkyrs overkilling"] = "Dégât exagéré sur les Valkyrs"
 -- missing bosses entries
 L["Cult Adherent"] = "Adhérent du culte"
 L["Cult Fanatic"] = "Fanatique du culte"

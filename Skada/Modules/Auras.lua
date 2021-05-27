@@ -539,7 +539,7 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(d.id, target.flags, set))
 
 					d.value = target.count
 					d.valuetext = _format("%u (%02.1f%%)", target.count, 100 * target.count / total)

@@ -356,7 +356,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 
 					d.id = source.id or sourcename
 					d.label = sourcename
-					d.class, d.role, d.spec = _select(2, _UnitClass(source.id, source.flags, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(d.id, source.flags, set))
 
 					d.value = source.amount
 					d.valuetext = Skada:FormatValueText(

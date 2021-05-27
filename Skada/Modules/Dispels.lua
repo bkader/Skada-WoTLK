@@ -141,7 +141,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(target.id, target.flags, set))
+					d.class, d.role, d.spec = _select(2, _UnitClass(d.id, target.flags, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(
