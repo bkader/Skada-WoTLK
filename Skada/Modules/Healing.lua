@@ -285,7 +285,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 		Skada:RegisterForCL(SpellHeal, "SPELL_HEAL", {src_is_interesting = true})
 		Skada:RegisterForCL(SpellHeal, "SPELL_PERIODIC_HEAL", {src_is_interesting = true})
 
-		Skada:AddMode(self, L["Absorbs and healing"])
+		Skada:AddMode(self, L["Absorbs and Healing"])
 	end
 
 	function mod:OnDisable()
@@ -449,7 +449,7 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 			columns = {Overheal = true, Percent = true},
 			icon = "Interface\\Icons\\spell_holy_holybolt"
 		}
-		Skada:AddMode(self, L["Absorbs and healing"])
+		Skada:AddMode(self, L["Absorbs and Healing"])
 	end
 
 	function mod:OnDisable()
@@ -657,7 +657,7 @@ Skada:AddLoadableModule("Total Healing", function(Skada, L)
 			columns = {Healing = true, HPS = true, Percent = true},
 			icon = "Interface\\Icons\\spell_holy_flashheal"
 		}
-		Skada:AddMode(self, L["Absorbs and healing"])
+		Skada:AddMode(self, L["Absorbs and Healing"])
 	end
 
 	function mod:OnDisable()
@@ -679,10 +679,10 @@ end)
 -- Healing and overhealing module --
 -- ============================== --
 
-Skada:AddLoadableModule("Healing and overhealing", function(Skada, L)
-	if Skada:IsDisabled("Healing", "Healing and overhealing") then return end
+Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
+	if Skada:IsDisabled("Healing", "Healing and Overhealing") then return end
 
-	local mod = Skada:NewModule(L["Healing and overhealing"])
+	local mod = Skada:NewModule(L["Healing and Overhealing"])
 	local spellmod = mod:NewModule(L["Heal and overheal spells"])
 	local targetmod = mod:NewModule(L["Healed and overhealed players"])
 
@@ -780,7 +780,7 @@ Skada:AddLoadableModule("Healing and overhealing", function(Skada, L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Healing and overhealing"]
+		win.title = L["Healing and Overhealing"]
 		local total = (set.healing or 0) + (set.overhealing or 0)
 
 		if total > 0 then
@@ -828,7 +828,7 @@ Skada:AddLoadableModule("Healing and overhealing", function(Skada, L)
 			columns = {Healing = true, Overheal = true, Percent = true},
 			icon = "Interface\\Icons\\spell_holy_prayerofhealing02"
 		}
-		Skada:AddMode(self, L["Absorbs and healing"])
+		Skada:AddMode(self, L["Absorbs and Healing"])
 	end
 
 	function mod:OnDisable()
@@ -1010,7 +1010,7 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 			columns = {Healing = true, Overhealing = true, Percent = true},
 			icon = "Interface\\Icons\\spell_nature_resistnature"
 		}
-		Skada:AddMode(self, L["Absorbs and healing"])
+		Skada:AddMode(self, L["Absorbs and Healing"])
 	end
 
 	function mod:OnDisable()

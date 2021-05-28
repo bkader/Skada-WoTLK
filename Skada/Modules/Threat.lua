@@ -110,6 +110,10 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 		local last_warn = time()
 
 		function mod:Update(win, set)
+			if not self.db then
+				self.db = Skada.db.profile.modules.threat
+			end
+
 			win.title = L["Threat"]
 
 			if not Skada:IsRaidInCombat() then return end
@@ -435,6 +439,9 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 		end
 
 		function mod:OnEnable()
+			if not self.db then
+				self.db = Skada.db.profile.modules.threat
+			end
 			self.metadata = {
 				wipestale = true,
 				columns = {Threat = true, TPS = false, Percent = true},

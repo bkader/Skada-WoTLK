@@ -2688,11 +2688,11 @@ function Window:RestoreView(theset, themode)
 		self.playerid, self.playername = nil, nil
 		self.spellid, self.spellname = nil, nil
 		self.targetid, self.targetname = nil, nil
-
-		-- force menu to close and let Skada handle the rest
-		L_CloseDropDownMenus()
-		Skada:RestoreView(self, theset or self.selectedset, themode or self.db.mode)
 	end
+
+	-- force menu to close and let Skada handle the rest
+	L_CloseDropDownMenus()
+	Skada:RestoreView(self, theset or self.selectedset, themode or self.db.mode)
 end
 
 -- ======================================================= --

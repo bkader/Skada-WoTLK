@@ -190,7 +190,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 
 	local mod = Skada:NewModule(L["Enemy Damage Done"])
 	local enemymod = mod:NewModule(L["Damage done per player"])
-	local playermod = mod:NewModule(L["Damage spell list"])
+	local playermod = enemymod:NewModule(L["Damage spell list"])
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
