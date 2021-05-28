@@ -137,10 +137,13 @@ Skada.defaults = {
 			["Damage Mitigated"] = true,
 			["Healing and overhealing"] = true,
 			["Healing Done By Spell"] = true,
+			["HPS"] = true,
 			["Improvement"] = true,
+			["Overhealing"] = true,
 			["Overkill"] = true,
 			["Player Score"] = true,
 			["Spamage"] = true,
+			["Parry-haste"] = true,
 			["Useful Damage"] = true
 		},
 		windows = {windefaultscopy}
