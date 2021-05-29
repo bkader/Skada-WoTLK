@@ -2513,45 +2513,22 @@ function Skada:FormatTime(sec)
 end
 
 function Skada:FormatValueText(...)
-	local value1, bool1, value2, bool2, value3, bool3, value4, bool4 = ...
+	local value1, bool1, value2, bool2, value3, bool3 = ...
 
-	if bool4 and value4 then
-		if bool3 and value3 then
-			if bool2 and value2 then
-				if bool1 and value1 then
-					return value1 .. " [" .. value4 .. "] (" .. value2 .. ", " .. value3 .. ")"
-				end
-				return value2 .. " (" .. value3 .. ", " .. value4 .. ")"
-			elseif bool1 and value1 then
-				return value1 .. " (" .. value3 .. ", " .. value4 .. ")"
-			end
-			return value3 .. " (" .. value4 .. ")"
-		elseif bool2 and value2 then
-			if bool1 and value1 then
-				return value1 .. " (" .. value2 .. ", " .. value4 .. ")"
-			end
-			return value2 .. " (" .. value3 .. ")"
-		elseif bool1 and value1 then
-			return value1 .. " (" .. value4 .. ")"
-		end
-		return value4
-	elseif bool3 and value3 then
-		if bool2 and value2 then
-			if bool1 and value1 then
-				return value1 .. " (" .. value2 .. ", " .. value3 .. ")"
-			end
-			return value1 .. " (" .. value2 .. ")"
-		elseif bool1 and value1 then
-			return value1 .. " (" .. value3 .. ")"
-		end
+	if bool1 and bool2 and bool3 then
+		return value1 .. " (" .. value2 .. ", " .. value3 .. ")"
+	elseif bool1 and bool2 then
+		return value1 .. " (" .. value2 .. ")"
+	elseif bool1 and bool3 then
+		return value1 .. " (" .. value3 .. ")"
+	elseif bool2 and bool3 then
+		return value2 .. " (" .. value3 .. ")"
+	elseif bool2 then
 		return value2
-	elseif bool2 and value2 then
-		if bool1 and value1 then
-			return value1 .. " (" .. value2 .. ")"
-		end
+	elseif bool1 then
 		return value1
-	elseif bool1 and value1 then
-		return value1
+	elseif bool3 then
+		return value3
 	end
 end
 
