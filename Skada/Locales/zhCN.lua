@@ -587,7 +587,7 @@ L["Energy gained spell list"] = "(刺客)能量获得法术列表"
 L["Power gained: Runic Power"] = "能量获得：符文能量"
 L["Runic Power gained spell list"] = "符文能量获得法术列表"
 -- Parry module lines --
-L["Parry-haste"] = "招架-急速"
+L["Parry-Haste"] = "招架-急速"
 L["Parry target list"] = "招架目标列表"
 L["%s's parry targets"] = "%s的招架目标"
 -- Potions module lines --

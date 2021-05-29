@@ -143,7 +143,6 @@ Skada.defaults = {
 			["Overkill"] = true,
 			["Player Score"] = true,
 			["Spamage"] = true,
-			["Parry-haste"] = true,
 			["Useful Damage"] = true
 		},
 		windows = {windefaultscopy}

@@ -587,7 +587,7 @@ L["Energy gained spell list"] = "기력 획득 주문 목록"
 L["Power gained: Runic Power"] = "룬 마력 획득"
 L["Runic Power gained spell list"] = "룬 마력 획득 주문 목록"
 -- Parry module lines --
--- L["Parry-haste"] = ""
+-- L["Parry-Haste"] = ""
 -- L["Parry target list"] = ""
 -- L["%s's parry targets"] = ""
 -- Potions module lines --

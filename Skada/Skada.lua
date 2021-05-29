@@ -538,13 +538,13 @@ do
 				end
 			}
 
-			options.args.snapto = {
-				type = "toggle",
-				name = L["Snap to best fit"],
-				desc = L["Snaps the window size to best fit when resizing."],
-				order = 7,
-				disabled = true
-			}
+			-- options.args.snapto = {
+			-- 	type = "toggle",
+			-- 	name = L["Snap to best fit"],
+			-- 	desc = L["Snaps the window size to best fit when resizing."],
+			-- 	order = 7,
+			-- 	disabled = true
+			-- }
 		end
 
 		options.args.switchoptions = {

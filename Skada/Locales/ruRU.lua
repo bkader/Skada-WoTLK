@@ -587,7 +587,7 @@ L["Energy gained spell list"] = "Заклинания получения эне�
 L["Power gained: Runic Power"] = "Получено энергии: Сила рун"
 L["Runic Power gained spell list"] = "Заклинания получения силы рун"
 -- Parry module lines --
-L["Parry-haste"] = "Парирование"
+L["Parry-Haste"] = "Парирование"
 L["Parry target list"] = "Цели парирования"
 L["%s's parry targets"] = "%s - Парированные цели"
 -- Potions module lines --

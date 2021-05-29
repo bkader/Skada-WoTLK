@@ -1,8 +1,8 @@
 assert(Skada, "Skada not found!")
-Skada:AddLoadableModule("Parry-haste", function(Skada, L)
-	if Skada:IsDisabled("Parry-haste") then return end
+Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
+	if Skada:IsDisabled("Parry-Haste") then return end
 
-	local mod = Skada:NewModule(L["Parry-haste"])
+	local mod = Skada:NewModule(L["Parry-Haste"])
 	local targetmod = mod:NewModule(L["Parry target list"])
 
 	local _pairs, _format, _select = pairs, string.format, select
@@ -97,7 +97,7 @@ Skada:AddLoadableModule("Parry-haste", function(Skada, L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Parry-haste"]
+		win.title = L["Parry-Haste"]
 		local total = set.parries or 0
 
 		if total > 0 then

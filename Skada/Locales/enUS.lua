@@ -586,7 +586,7 @@ L["Energy gained spell list"] = true
 L["Power gained: Runic Power"] = true
 L["Runic Power gained spell list"] = true
 -- Parry module lines --
-L["Parry-haste"] = true
+L["Parry-Haste"] = true
 L["Parry target list"] = true
 L["%s's parry targets"] = true
 -- Potions module lines --
