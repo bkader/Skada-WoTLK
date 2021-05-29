@@ -15,6 +15,14 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 
 	local pull_timer
 
+	local ignoredspells = {
+		[1130] = true,
+		[14323] = true,
+		[14324] = true,
+		[14325] = true,
+		[53338] = true
+	}
+
 	-- thank you Details!
 	local function WhoPulled(self)
 		-- first hit
@@ -58,6 +66,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 		function mod:CombatLogEvent(_, _, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 			-- pull timer
 			if Skada.db.profile.firsthit and (triggerevents[eventtype] or eventtype == "SPELL_CAST_SUCCESS") and not pull_timer then
+				if ignoredspells[select(1, ...)] then return end
 				if (band(srcFlags, BITMASK_GROUP) ~= 0 and Skada:IsBoss(dstGUID)) or Skada:IsBoss(srcGUID) then
 					local puller
 
