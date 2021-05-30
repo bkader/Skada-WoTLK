@@ -226,12 +226,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 	mod.getDTPS = getDTPS
 
 	local function getRaidDTPS(set)
-		local amount = set.damagetaken or 0
-		if set.time > 0 then
-			return amount / math_max(1, set.time), amount
-		else
-			return amount / math_max(1, (set.endtime or time()) - set.starttime), amount
-		end
+		return (set.damagetaken or 0) / math_max(1, Skada:GetSetTime(set)), (set.damagetaken or 0)
 	end
 	mod.getRaidDTPS = getRaidDTPS
 

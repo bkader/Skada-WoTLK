@@ -104,12 +104,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 	end
 
 	local function getRaidHPS(set)
-		if set.time > 0 then
-			return (set.healing or 0) / math_max(1, set.time), (set.healing or 0)
-		else
-			local endtime = set.endtime or _time()
-			return (set.healing or 0) / math_max(1, endtime - set.starttime), (set.healing or 0)
-		end
+		return (set.healing or 0) / math_max(1, Skada:GetSetTime(set)), (set.healing or 0)
 	end
 
 	local function playermod_tooltip(win, id, label, tooltip)
@@ -479,11 +474,7 @@ Skada:AddLoadableModule("Total Healing", function(Skada, L)
 
 	local function getRaidHPS(set)
 		local amount = (set.healing or 0) + (set.overhealing or 0)
-		if set.time > 0 then
-			return amount / math_max(1, set.time), amount
-		else
-			return amount / math_max(1, (set.endtime or _time()) - set.starttime), amount
-		end
+		return amount / math_max(1, Skada:GetSetTime(set)), amount
 	end
 
 	local function spell_tooltip(win, id, label, tooltip)

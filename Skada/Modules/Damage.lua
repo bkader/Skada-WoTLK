@@ -312,12 +312,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	mod.getDPS = getDPS
 
 	local function getRaidDPS(set)
-		local amount = set.damagedone or 0
-		if set.time > 0 then
-			return amount / math_max(1, set.time), amount
-		else
-			return amount / math_max(1, (set.endtime or time()) - set.starttime), amount
-		end
+		return (set.damagedone or 0) / math_max(1, Skada:GetSetTime(set)), (set.damagedone or 0)
 	end
 	mod.getRaidDPS = getRaidDPS
 
@@ -968,11 +963,7 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 
 	local function getRaidDPS(set)
 		local amount = (set.damagedone or 0) - (set.overkill or 0)
-		if set.time > 0 then
-			return amount / math_max(1, set.time), amount
-		else
-			return amount / math_max(1, (set.endtime or time()) - set.starttime), amount
-		end
+		return amount / math_max(1, Skada:GetSetTime(set)), amount
 	end
 
 	function mod:Update(win, set)

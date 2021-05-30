@@ -3160,8 +3160,8 @@ function Skada:OnInitialize()
 		WARRIOR = {r = 0.78, g = 0.61, b = 0.43, colorStr = "ffc79c6e"},
 		-- custom
 		ENEMY = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"},
-		MONSTER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"},
-		BOSS = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"},
+		MONSTER = {r = 0.549, g = 0.388, b = 0.404, colorStr = "ff8c6367"},
+		BOSS = {r = 0.203, g = 0.345, b = 0.525, colorStr = "345886"},
 		PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"},
 		PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"},
 		UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}

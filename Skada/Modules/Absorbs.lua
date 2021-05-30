@@ -743,18 +743,14 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 	local _time = time
 
 	local function getHPS(set, player)
-		local healing = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
-		return healing / math_max(1, Skada:PlayerActiveTime(set, player)), healing
+		local amount = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
+		return amount / math_max(1, Skada:PlayerActiveTime(set, player)), amount
 	end
 	mod.getHPS = getHPS
 
 	local function getRaidHPS(set)
-		local healing = (set.healing or 0) + (set.absorbs or 0)
-		if set.time > 0 then
-			return healing / math_max(1, set.time), healing
-		else
-			return healing / math_max(1, (set.endtime or _time()) - set.starttime), healing
-		end
+		local amount = (set.healing or 0) + (set.absorbs or 0)
+		return amount / math_max(1, Skada:GetSetTime(set)), amount
 	end
 	mod.getRaidHPS = getRaidHPS
 
