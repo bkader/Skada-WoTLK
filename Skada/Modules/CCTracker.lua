@@ -538,20 +538,20 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 			end
 
 			-- record target
-			if cc.dstName then
+			if cc.srcName then
 				spell.sources = spell.sources or {}
-				if not spell.sources[cc.dstName] then
-					spell.sources[cc.dstName] = {id = cc.dstGUID, flags = cc.dstFlags, count = 1}
+				if not spell.sources[cc.srcName] then
+					spell.sources[cc.srcName] = {id = cc.srcGUID, flags = cc.srcFlags, count = 1}
 				else
-					spell.sources[cc.dstName].count = spell.sources[cc.dstName].count + 1
+					spell.sources[cc.srcName].count = spell.sources[cc.srcName].count + 1
 				end
 
 				player.cctaken.sources = player.cctaken.sources or {}
-				if not player.cctaken.sources[cc.dstName] then
-					player.cctaken.sources[cc.dstName] = {id = cc.dstGUID, flags = cc.dstFlags, count = 1, spells = {[cc.spellid] = 1}}
+				if not player.cctaken.sources[cc.srcName] then
+					player.cctaken.sources[cc.srcName] = {id = cc.srcGUID, flags = cc.srcFlags, count = 1, spells = {[cc.spellid] = 1}}
 				else
-					player.cctaken.sources[cc.dstName].count = player.cctaken.sources[cc.dstName].count + 1
-					player.cctaken.sources[cc.dstName].spells[cc.spellid] = (player.cctaken.sources[cc.dstName].spells[cc.spellid] or 0) + 1
+					player.cctaken.sources[cc.srcName].count = player.cctaken.sources[cc.srcName].count + 1
+					player.cctaken.sources[cc.srcName].spells[cc.spellid] = (player.cctaken.sources[cc.srcName].spells[cc.spellid] or 0) + 1
 				end
 			end
 		end
