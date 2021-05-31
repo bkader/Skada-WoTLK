@@ -169,82 +169,49 @@ do
 	end
 end
 
-function Skada.UnitClass(guid, flags, set)
-	local locClass, engClass
+function Skada.UnitClass(guid, flags, set, nocache)
+	set = set or Skada.current
 
-	if guid then
-		set = set or Skada.current
-
-		if set then
-			-- an exisiting player?
-			for _, player in Skada:IteratePlayers(set) do
-				if player.id == guid then
-					return Skada.classnames[player.class], player.class, player.role, player.spec
-				end
-			end
-
-			-- make sure to create the classes table.
-			set._classes = set._classes or {}
-
-			-- an already cached unit
-			for id, class in pairs(set._classes) do
-				if id == guid then
-					return Skada.classnames[class], class
-				end
-			end
-
-			-- a pet? This only works for current segment
-			if pets[guid] then
-				locClass, engClass = Skada.classnames.PET, "PET"
+	if set then
+		-- an existing player
+		for _, p in Skada:IteratePlayers(set) do
+			if p.id == guid then
+				return Skada.classnames[p.class], p.class, p.role, p.spec
 			end
 		end
+		set._classes = set._classes or {}
 
-		-- a valid guid?
-		if not engClass and tonumber(guid) ~= nil then
-			-- real player?
+		-- a cached class
+		for id, class in pairs(set._classes) do
+			if id == guid then
+				return Skada.classnames[class], class
+			end
+		end
+	end
+
+	local locClass, engClass = Skada.classnames.UNKNOWN, "UNKNOWN"
+
+	if Skada:IsPet(guid, flags) then
+		locClass, engClass = Skada.classnames.PET, "PET"
+	elseif Skada:IsBoss(guid) then
+		locClass, engClass = Skada.classnames.BOSS, "BOSS"
+	elseif Skada:IsCreature(guid, flags) then
+		locClass, engClass = Skada.classnames.MONSTER, "MONSTER"
+	elseif Skada:IsPlayer(guid, flags) then
+		if tonumber(guid) ~= 0 then
 			local class = select(2, GetPlayerInfoByGUID(guid))
 			if class then
 				locClass, engClass = Skada.classnames[class], class
-			else
-				local isboss, npcid = Skada:IsBoss(guid)
-				-- possible boss?
-				if isboss then
-					-- possible npc (monster or pet)
-					locClass, engClass = Skada.classnames.BOSS, "BOSS"
-				elseif (npcid or 0) > 0 then
-					-- player maybe?
-					-- use the flags first
-					if flags and band(flags, BITMASK_PETS) ~= 0 then
-						locClass, engClass = Skada.classnames.PET, "PET"
-					else
-						locClass, engClass = Skada.classnames.MONSTER, "MONSTER"
-					end
-				elseif npcid == 0 and flags and band(flags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0 then
-					locClass, engClass = Skada.classnames.PLAYER, "PLAYER"
-				end
 			end
 		end
 
-		if not engClass and flags then
-			if band(flags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0 then
-				locClass, engClass = Skada.classnames.PLAYER, "PLAYER"
-			elseif band(flags, BITMASK_PETS) ~= 0 then
-				locClass, engClass = Skada.classnames.PET, "PET"
-			elseif band(flags, COMBATLOG_OBJECT_TYPE_NPC) ~= 0 then
-				locClass, engClass = Skada.classnames.MONSTER, "MONSTER"
-			elseif band(flags, BITMASK_ENEMY) ~= 0 then
-				locClass, engClass = Skada.classnames.ENEMY, "ENEMY"
-			end
-		end
-
-		-- everything failed!
 		if not engClass then
-			locClass, engClass = Skada.classnames.UNKNOWN, "UNKNOWN"
+			locClass, engClass = Skada.classnames.PLAYER, "PLAYER"
 		end
+	end
 
-		if set and not set._classes[guid] then
-			set._classes[guid] = engClass
-		end
+	if not nocache and (set and set._classes[guid] ~= engClass) then
+		set._classes[guid] = engClass
 	end
 
 	return locClass, engClass
@@ -1408,77 +1375,30 @@ do
 
 	-- sometimes GUID are shown instead of proper players names
 	-- this function is called and used only once per player
-	function Skada:FixPlayer(player, force)
+	function Skada:FixPlayer(player)
 		if player.id and player.name then
-			-- collect some info from the player's guid
-			local name, class, _
-
-			-- the only way to fix this error is to literally
-			-- ignore it if we don't have a valid GUID.
-			if player.id and #player.id ~= 18 then
-				self.callbacks:Fire("SKADA_PLAYER_FIX", player)
-				return player
-			elseif player.id and #player.id == 18 then
-				class, _, _, _, name = select(2, GetPlayerInfoByGUID(player.id))
-			end
-
-			-- fix the name
-			if player.id == player.name and name and name ~= player.name then
-				player.name = name
-			end
-
 			-- use LibTranslit to convert cyrillic letters into western letters.
-			if self.db.profile.translit and Translit and not force then
+			if self.db.profile.translit and Translit then
 				player.altname = Translit:Transliterate(player.name, "!")
 			end
 
-			-- fix the pet classes
-			if pets[player.id] then
-				-- fix classes for others
-				player.class = "PET"
-				player.owner = pets[player.id]
-			else
-				local isboss, npcid = self:IsBoss(player.id)
-				if isboss then
-					player.class = "BOSS"
-				elseif (npcid or 0) > 0 then
-					player.class = "MONSTER"
-				end
-			end
+			if not player.class then
+				local class = player.class or select(2, self.UnitClass(player.id, player.flags))
+				player.class = class
 
-			-- still no class assigned?
-			if force or not player.class then
-				-- class already received from GetPlayerInfoByGUID?
-				if class then
-					player.class = class
-				-- it's a real player?
-				elseif UnitIsPlayer(player.name) or self:IsPlayer(player.id, player.flags) then
-					player.class = select(2, UnitClass(player.name))
-				elseif player.flags and band(player.flags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0 then
-					player.class = "PLAYER"
-				-- pets?
-				elseif player.flags and band(player.flags, BITMASK_PETS) ~= 0 then
-					player.class = "PET"
-					player.owner = pets[player.id]
-				--  last solution
-				else
-					player.class = "UNKNOWN"
-				end
-			end
-
-			-- if the player has been assigned a valid class,
-			-- we make sure to assign his/her role and spec
-			if self.validclass[player.class] then
-				if force or not player.role then
-					player.role = self:UnitGroupRolesAssigned(player.name)
-				end
-				if force or not player.spec then
-					player.spec = self:GetPlayerSpecID(player.name, player.class)
+				-- if the player has been assigned a valid class,
+				-- we make sure to assign his/her role and spec
+				if self.validclass[player.class] then
+					if not player.role then
+						player.role = self:UnitGroupRolesAssigned(player.name)
+					end
+					if not player.spec then
+						player.spec = self:GetPlayerSpecID(player.name, player.class)
+					end
 				end
 			end
 
 			self.callbacks:Fire("SKADA_PLAYER_FIX", player)
-			name, class = nil, nil
 		end
 	end
 end
@@ -1562,11 +1482,11 @@ function Skada:get_player(set, playerid, playername, playerflags)
 end
 
 function Skada:IsPlayer(guid, flags)
-	if guid and players[guid] then
-		return true
+	if guid then
+		return (players[guid] or not self:IsCreature(guid, flags))
 	end
-	if flags and band(flags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0 then
-		return true
+	if flags then
+		return (band(flags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0)
 	end
 	return false
 end
@@ -1653,11 +1573,20 @@ do
 				if custom[id] then
 					npcname = (name and name ~= custom[id]) and name or custom[id]
 				end
-			elseif (id or 0) > 0 then
+			elseif self:IsCreature(guid) then
 				npcid = id
 			end
 		end
 		return isboss, npcid, npcname
+	end
+
+	function Skada:IsCreature(guid, flags)
+		if guid then
+			return (band(guid:sub(1, 5), 0x00F) == 3 or band(guid:sub(1, 5), 0x00F) == 5)
+		elseif flags then
+			return (band(flags, COMBATLOG_OBJECT_TYPE_NPC) ~= 0)
+		end
+		return false
 	end
 end
 
