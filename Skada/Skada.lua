@@ -1989,6 +1989,10 @@ function Skada:Command(param)
 		param = param:sub(7)
 
 		local w1, w2, w3 = self:GetArgs(param, 3)
+		if w3 == nil and tonumber(w2) ~= nil then
+			w3 = w2
+			w2 = nil
+		end
 
 		local chan = w1 or "say"
 		local report_mode_name = w2 or L["Damage"]
@@ -2050,8 +2054,8 @@ do
 		local report_table, report_set, report_mode
 
 		if not window then
-			report_mode = self:find_mode(report_mode_name)
-			report_set = self:GetSet(report_set_name)
+			report_mode = self:find_mode(report_mode_name or L["Damage"])
+			report_set = self:GetSet(report_set_name or "current")
 			if report_set == nil then return end
 
 			report_table = Window:new()
@@ -2080,7 +2084,7 @@ do
 		local label = (report_mode_name == L["Improvement"]) and GetUnitName("player") or Skada:GetSetLabel(report_set)
 		sendchat(format(L["Skada: %s for %s:"], title, label), channel, chantype)
 
-		local nr = 1
+		local nr, maxlines = 1, maxlines or 10
 		for _, data in ipairs(report_table.dataset) do
 			if ((barid and barid == data.id) or (data.id and not barid)) and not data.ignore then
 				local label
