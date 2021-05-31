@@ -3,10 +3,12 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 	if Skada:IsDisabled("Nickname") then return end
 
 	local mod = Skada:NewModule(L["Nickname"], "AceHook-3.0")
+	local Translit = LibStub("LibTranslit-1.0", true)
+
 	local type, time = type, time
 	local strlen, strfind, strgsub = string.len, string.find, string.gsub
-	local UnitGUID, GetUnitName = UnitGUID, GetUnitName
-	local unitName, unitGUID
+	local UnitGUID, UnitName = UnitGUID, UnitName
+	local unitName, unitGUID = UnitName("player"), UnitGUID("player")
 	local CheckNickname
 
 	do
@@ -80,7 +82,7 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 				desc = L["Set a nickname for you.\nNicknames are sent to group members and Skada can use them instead of your character name."],
 				order = 1,
 				get = function()
-					return Skada.db.profile.nickname or GetUnitName("player")
+					return Skada.db.profile.nickname or UnitName("player")
 				end,
 				set = function(_, val)
 					local okey, nickname = CheckNickname(val)
@@ -116,7 +118,9 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 				name = L["Clear Cache"],
 				order = 4,
 				width = "double",
-				confirm = function() return L["Are you sure you want clear cached nicknames?"] end,
+				confirm = function()
+					return L["Are you sure you want clear cached nicknames?"]
+				end,
 				func = function()
 					Skada.db.global.nicknames = wipe(Skada.db.global.nicknames or {})
 					mod.db.nicknames = Skada.db.global.nicknames
@@ -126,8 +130,6 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 	}
 
 	function mod:OnInitialize()
-		unitName = GetUnitName("player")
-		unitGUID = UnitGUID("player")
 		Skada.options.args.modules.args.nickname = options
 		if Skada.db.profile.namedisplay == nil then
 			Skada.db.profile.namedisplay = 2
@@ -140,9 +142,8 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 		Skada.RegisterCallback(self, "OnCommNicknameRequest")
 		Skada.RegisterCallback(self, "OnCommNicknameResponse")
 		Skada.RegisterCallback(self, "OnCommNicknameChange")
-		Skada.RegisterCallback(self, "SKADA_PLAYER_FIX", "FixPlayer")
-		Skada.RegisterCallback(self, "BarUpdate")
-		self:Hook(Skada, "find_player")
+		self:Hook(Skada, "FixPlayer")
+		self:RawHook(Skada, "FormatName")
 	end
 
 	function mod:OnDisable()
@@ -154,69 +155,44 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 	-----------------------------------------------------------
 	-- hooked functions
 
-	-- this function only laters the data.label according to our settings.
-	function mod:BarUpdate(_, win, data)
-		if Skada.db.profile.ignorenicknames then
-			return
-		end
-		if not win or not data or not data.label then
-			return
+	function mod:FormatName(_, name, guid)
+		local nickname = guid and self.db.nicknames[guid]
+		if not nickname and name == unitName then
+			nickname = Skada.db.profile.nickname
 		end
 
-		if (data.class or data.role) and (Skada.db.profile.namedisplay or 0) > 1 then
-			local player = Skada:find_player(win:get_selected_set(), data.id)
-			if player and player.nickname and player.nickname ~= "" and player.nickname ~= player.name then
-				if Skada.db.profile.namedisplay == 2 then
-					data.label = player.nickname
-				elseif Skada.db.profile.namedisplay == 3 then
-					data.label = player.name .. " (" .. player.nickname .. ")"
-				elseif Skada.db.profile.namedisplay == 4 then
-					data.label = player.nickname .. " (" .. player.name .. ")"
-				end
+		if Skada.db.profile.translit and Translit then
+			if nickname and nickname ~= name then
+				nickname = Translit:Transliterate(nickname, "!")
+			end
+			name = Translit:Transliterate(name, "!")
+		end
+
+		if nickname and nickname ~= name and Skada.db.profile.namedisplay > 1 then
+			if Skada.db.profile.namedisplay == 2 then
+				name = nickname
+			elseif Skada.db.profile.namedisplay == 3 then
+				name = name .. " (" .. nickname .. ")"
+			elseif Skada.db.profile.namedisplay == 4 then
+				name = nickname .. " (" .. name .. ")"
 			end
 		end
+
+		return name
 	end
 
 	-- we make sure to add the player's nickname if not set.
 	-- if it's the player themselves, we use what's stored.
 	-- otherwise we requrest the nickname from the other skada user.
-	function mod:FixPlayer(event, player)
-		if event == "SKADA_PLAYER_FIX" and not Skada.db.profile.ignorenicknames and player.id and player.name and not Skada:IsPet(player.id, player.flags) then
-			if not player.nickname then
-				if player.id == unitGUID then
-					if Skada.db.profile.nickname and Skada.db.profile.nickname ~= "" then
-						player.nickname = Skada.db.profile.nickname
-					else
-						player.nickname = unitName
-					end
-				elseif self.db and self.db.nicknames[player.id] then
-					player.nickname = self.db.nicknames[player.id]
-				else
-					Skada:SendComm("WHISPER", player.name, "NicknameRequest")
-				end
-			end
+	function mod:FixPlayer(_, player)
+		if Skada.db.profile.ignorenicknames or Skada:IsPet(player.id, player.flags) then
+			return
 		end
-	end
-
-	-- this function is called only once in case we don't receive
-	-- a response from the player, it will simply set his/her name
-	-- as the nickname to avoid further check.
-	function mod:find_player(_, set, guid)
-		if not Skada.db.profile.ignorenicknames and set and guid and not Skada:IsPet(guid) then
-			for _, player in Skada:IteratePlayers(set) do
-				if player.id == guid then
-					if not player.nickname then -- we update only if needed.
-						if self.db.nicknames[guid] then
-							player.nickname = self.db.nicknames[guid]
-						end
-						-- update cached
-						if player.nickname and set._playeridx and set._playeridx[guid] then
-							set._playeridx[guid].nickname = player.nickname
-						end
-					end
-					break -- no need to go further
-				end
-			end
+		if player.id == unitGUID and player.name == unitName then
+			return
+		end
+		if player.id and player.name and not self.db.nicknames[player.id] then
+			Skada:SendComm("WHISPER", player.name, "NicknameRequest")
 		end
 	end
 
@@ -225,13 +201,17 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 
 	-- called whenever we receive a nickname request.
 	function mod:OnCommNicknameRequest(event, sender)
-		if event ~= "OnCommNicknameRequest" then return end
+		if event ~= "OnCommNicknameRequest" then
+			return
+		end
 		Skada:SendComm("WHISPER", sender, "NicknameResponse", unitGUID, Skada.db.profile.nickname)
 	end
 
 	-- called whenever we receive a nickname response
 	function mod:OnCommNicknameResponse(event, sender, playerid, nickname)
-		if event ~= "OnCommNicknameResponse" then return end
+		if event ~= "OnCommNicknameResponse" then
+			return
+		end
 		-- the player didn't send us the nickname or doesn't
 		-- have a nickname set? Set it to his/her name anyways.
 		if not nickname or nickname == "" then
@@ -242,7 +222,9 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 
 	-- if someone in our group changes the nickname, we update the cache
 	function mod:OnCommNicknameChange(event, sender, playerid, nickname)
-		if event ~= "OnCommNicknameChange" then return end
+		if event ~= "OnCommNicknameChange" then
+			return
+		end
 		if not nickname or nickname == "" then
 			nickname = sender
 		end

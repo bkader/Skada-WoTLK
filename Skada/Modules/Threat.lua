@@ -8,7 +8,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 	local _ipairs, _select, _format = ipairs, select, string.format
 	local tinsert, math_max = table.insert, math.max
 	local _UnitExists, _UnitIsFriend = UnitExists, UnitIsFriend
-	local _GetUnitName, _UnitClass, _UnitGUID = GetUnitName, UnitClass, UnitGUID
+	local _UnitName, _UnitClass, _UnitGUID = UnitName, UnitClass, UnitGUID
 	local _UnitDetailedThreatSituation = UnitDetailedThreatSituation
 	local _InCombatLockdown = InCombatLockdown
 	local _PlaySoundFile = PlaySoundFile
@@ -25,7 +25,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 			local player = threatTable[guid]
 
 			if not player and _UnitExists(unit) then
-				local name = _GetUnitName(unit)
+				local name = _UnitName(unit)
 
 				-- is is a pet?
 				local owner = Skada:GetPetOwner(guid)
@@ -58,7 +58,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 
 				if mod.db.rawvalue and threatvalue then
 					d.id = player.id
-					d.label = player.altname or player.name
+					d.label = Skada:FormatName(player.name, player.id)
 					d.class = player.class
 
 					d.threat = threatvalue
@@ -77,7 +77,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 					end
 				elseif threatpct then
 					d.id = player.id
-					d.label = player.altname or player.name
+					d.label = Skada:FormatName(player.name, player.id)
 					d.class = player.class
 
 					d.value = threatpct
@@ -130,7 +130,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 			end
 
 			if target then
-				win.title = _GetUnitName(target) or L["Threat"]
+				win.title = _UnitName(target) or L["Threat"]
 
 				-- Reset our counter which we use to keep track of current index in the dataset.
 				nr = 1
@@ -169,7 +169,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 						if data.threat and data.threat > 0 then
 							-- Warn if this is ourselves and we are over the treshold.
 							local percent = 100 * data.value / math_max(0.000001, maxthreat)
-							if data.label == _GetUnitName("player") then
+							if data.label == _UnitName("player") then
 								mypercent = percent
 								if self.db.threshold and self.db.threshold < percent and (not data.isTanking or not self.db.notankwarnings) then
 									we_should_warn = true

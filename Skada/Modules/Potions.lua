@@ -13,7 +13,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	local _GetNumRaidMembers = GetNumRaidMembers
 	local _GetItemInfo, _GetSpellInfo = GetItemInfo, Skada.GetSpellInfo
 	local _UnitExists, _UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
-	local _UnitGUID, _GetUnitName = UnitGUID, GetUnitName
+	local _UnitGUID, _UnitName = UnitGUID, UnitName
 	local _UnitClass, _UnitBuff = UnitClass, UnitBuff
 
 	local potionIDs = {
@@ -74,7 +74,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 			for n = min, max do
 				local unit = (n == 0) and "player" or prefix .. _tostring(n)
 				if _UnitExists(unit) and not _UnitIsDeadOrGhost(unit) then
-					local playerid, playername = _UnitGUID(unit), _GetUnitName(unit)
+					local playerid, playername = _UnitGUID(unit), _UnitName(unit)
 					local class = _select(2, _UnitClass(unit))
 
 					local potions = {} -- holds used potions
@@ -135,7 +135,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 				win.dataset[nr] = d
 
 				d.id = playerid
-				d.label = player.altname or player.name
+				d.label = Skada:FormatName(player.name, player.id)
 				d.class = player.class
 				d.role = player.role
 				d.spec = player.spec
@@ -228,7 +228,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 					win.dataset[nr] = d
 
 					d.id = player.id
-					d.label = player.altname or player.name
+					d.label = Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec

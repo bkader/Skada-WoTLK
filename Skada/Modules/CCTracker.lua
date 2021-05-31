@@ -450,7 +450,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 					win.dataset[nr] = d
 
 					d.id = player.id
-					d.label = player.altname or player.name
+					d.label = Skada:FormatName(player.name, player.id)
 					d.class = player.class or "PET"
 					d.role = player.role
 					d.spec = player.spec
@@ -765,7 +765,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 					win.dataset[nr] = d
 
 					d.id = player.id
-					d.label = player.altname or player.name
+					d.label = Skada:FormatName(player.name, player.id)
 					d.class = player.class or "PET"
 					d.role = player.role
 					d.spec = player.spec
@@ -835,7 +835,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 	local targetspellmod = targetmod:NewModule(L["CC Break target spells"])
 
 	local _tostring = tostring
-	local _UnitExists, _GetUnitName = UnitExists, GetUnitName
+	local _UnitExists, _UnitName = UnitExists, UnitName
 	local _GetNumRaidMembers, _GetPartyAssignment = GetNumRaidMembers, GetPartyAssignment
 	local _IsInInstance, _UnitInRaid = IsInInstance, UnitInRaid
 	local _SendChatMessage = SendChatMessage
@@ -915,7 +915,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 				-- Loop through our raid and return if src is a main tank.
 				for i = 1, _GetNumRaidMembers() do
 					local unit = "raid" .. _tostring(i)
-					if _UnitExists(unit) and _GetUnitName(unit) == srcName then
+					if _UnitExists(unit) and _UnitName(unit) == srcName then
 						if GetPartyAssignment("MAINTANK", unit) or GetPartyAssignment("MAINASSIST", unit) then
 							return
 						end
@@ -1125,7 +1125,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 					win.dataset[nr] = d
 
 					d.id = player.id
-					d.label = player.altname or player.name
+					d.label = Skada:FormatName(player.name, player.id)
 					d.class = player.class or "PET"
 					d.role = player.role
 					d.spec = player.spec

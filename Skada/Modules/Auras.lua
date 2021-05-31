@@ -271,7 +271,7 @@ do
 					win.dataset[nr] = d
 
 					d.id = player.id
-					d.label = player.altname or player.name
+					d.label = Skada:FormatName(player.name, player.id)
 					d.class = player.class or "PET"
 					d.role = player.role
 					d.spec = player.spec
@@ -400,7 +400,7 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 
 	local _GetNumRaidMembers, _GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
 	local _UnitExists, _UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
-	local _UnitGUID, _GetUnitName, _UnitBuff = UnitGUID, GetUnitName, UnitBuff
+	local _UnitGUID, _UnitName, _UnitBuff = UnitGUID, UnitName, UnitBuff
 
 	-- list of the auras that are ignored!
 	local blacklist = {
@@ -447,11 +447,11 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 			for n = min, max do
 				local unit = (n == 0) and "player" or prefix .. _tostring(n)
 				if _UnitExists(unit) and not _UnitIsDeadOrGhost(unit) then
-					local dstGUID, dstName = _UnitGUID(unit), _GetUnitName(unit)
+					local dstGUID, dstName = _UnitGUID(unit), _UnitName(unit)
 					for i = 1, 40 do
 						local spellname, rank, _, _, _, _, _, unitCaster, _, _, spellid = _UnitBuff(unit, i)
 						if spellname and spellid and unitCaster and rank ~= SPELL_PASSIVE and not blacklist[spellid] then
-							AuraApplied(nil, nil, _UnitGUID(unitCaster), _GetUnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, spellname, nil, "BUFF")
+							AuraApplied(nil, nil, _UnitGUID(unitCaster), _UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, spellname, nil, "BUFF")
 						end
 					end
 				end

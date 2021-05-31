@@ -12,7 +12,7 @@ local LBI = LibStub("LibBossIDs-1.0")
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 local LGT = LibStub("LibGroupTalents-1.0")
 local LSM = LibStub("LibSharedMedia-3.0")
-local Translit = LibStub("LibTranslit-1.0")
+local Translit = LibStub("LibTranslit-1.0", true)
 
 -- cache frequently used globlas
 local tsort, tinsert, tremove, tmaxn = table.sort, table.insert, table.remove, table.maxn
@@ -1377,11 +1377,6 @@ do
 	-- this function is called and used only once per player
 	function Skada:FixPlayer(player)
 		if player.id and player.name then
-			-- use LibTranslit to convert cyrillic letters into western letters.
-			if self.db.profile.translit and Translit then
-				player.altname = Translit:Transliterate(player.name, "!")
-			end
-
 			if not player.class then
 				local class = player.class or select(2, self.UnitClass(player.id, player.flags))
 				player.class = class
@@ -2445,6 +2440,13 @@ function Skada:FormatTime(sec)
 	end
 end
 
+function Skada:FormatName(name, guid)
+	if self.db.profile.translit and Translit then
+		name = Translit:Transliterate(name, "!")
+	end
+	return name
+end
+
 function Skada:FormatValueText(...)
 	local value1, bool1, value2, bool2, value3, bool3 = ...
 
@@ -3225,6 +3227,10 @@ do
 	end
 
 	function Skada:SendComm(channel, target, ...)
+		if target == GetUnitName("player") then
+			return
+		end
+
 		if not channel then
 			local groupType, _ = GetGroupTypeAndCount()
 			if groupType == "player" then

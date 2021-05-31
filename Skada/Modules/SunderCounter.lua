@@ -110,7 +110,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 					win.dataset[nr] = d
 
 					d.id = player.id
-					d.label = player.altname or player.name
+					d.label = Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.spec = player.spec
 					d.role = player.role

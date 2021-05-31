@@ -18,7 +18,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	local targetmod = mod:NewModule(L["Absorbed player list"])
 
 	local _GetNumRaidMembers, _GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
-	local _GetUnitName, _UnitExists, _UnitBuff = GetUnitName, UnitExists, UnitBuff
+	local _UnitName, _UnitExists, _UnitBuff = UnitName, UnitExists, UnitBuff
 	local _UnitIsDeadOrGhost = UnitIsDeadOrGhost
 	local _tostring, _GetTime, _band = tostring, GetTime, bit.band
 	local tinsert, tremove, tsort = table.insert, table.remove, table.sort
@@ -430,11 +430,11 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 			for n = min, max do
 				local unit = (n == 0) and "player" or prefix .. _tostring(n)
 				if _UnitExists(unit) and not _UnitIsDeadOrGhost(unit) then
-					local dstName, dstGUID = _GetUnitName(unit), _UnitGUID(unit)
+					local dstName, dstGUID = _UnitName(unit), _UnitGUID(unit)
 					for i = 1, 40 do
 						local spellname, _, _, _, _, _, expires, unitCaster, _, _, spellid = _UnitBuff(unit, i)
 						if spellid and absorbspells[spellid] and unitCaster then
-							AuraApplied(timestamp + expires - curtime, nil, _UnitGUID(unitCaster), _GetUnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
+							AuraApplied(timestamp + expires - curtime, nil, _UnitGUID(unitCaster), _UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
 						end
 					end
 				end
@@ -659,7 +659,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					win.dataset[nr] = d
 
 					d.id = player.id
-					d.label = player.altname or player.name
+					d.label = Skada:FormatName(player.name, player.id)
 					d.class = player.class or "PET"
 					d.role = player.role
 					d.spec = player.spec
@@ -958,7 +958,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 					win.dataset[nr] = d
 
 					d.id = player.id
-					d.label = player.altname or player.name
+					d.label = Skada:FormatName(player.name, player.id)
 					d.class = player.class or "PET"
 					d.role = player.role
 					d.spec = player.spec
@@ -1072,7 +1072,7 @@ Skada:AddLoadableModule("HPS", function(Skada, L)
 					win.dataset[nr] = d
 
 					d.id = player.id
-					d.label = player.altname or player.name
+					d.label = Skada:FormatName(player.name, player.id)
 					d.class = player.class or "PET"
 					d.role = player.role
 					d.spec = player.spec

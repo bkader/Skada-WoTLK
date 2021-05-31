@@ -251,7 +251,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 					win.dataset[nr] = d
 
 					d.id = player.id
-					d.label = player.altname or player.name
+					d.label = Skada:FormatName(player.name, player.id)
 					d.class = player.class or "PET"
 					d.role = player.role
 					d.spec = player.spec
