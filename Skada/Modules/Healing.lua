@@ -515,7 +515,7 @@ Skada:AddLoadableModule("Total Healing", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
 			win.title = _format(L["%s's healing spells"], player.name)
-			local total = player.healing and ((player.healing.amount or 0) + (player.healing.overhealing or 0)) or 9
+			local total = player.healing and ((player.healing.amount or 0) + (player.healing.overhealing or 0)) or 0
 
 			if total > 0 and player.healing.spells then
 				local maxvalue, nr = 0, 1
