@@ -1562,7 +1562,7 @@ do
 	function Skada:IsBoss(guid, name)
 		local isboss, npcid, npcname = false, 0, nil
 		if guid then
-			local id = tonumber(guid:sub(9, 12), 16)
+			local id = tonumber(guid:sub(9, 12), 16) or 0
 			if id and (LBI.BossIDs[id] or custom[id]) then
 				isboss, npcid = true, id
 				if custom[id] then
@@ -1576,9 +1576,9 @@ do
 	end
 
 	function Skada:IsCreature(guid, flags)
-		if guid then
+		if tonumber(guid) then
 			return (band(guid:sub(1, 5), 0x00F) == 3 or band(guid:sub(1, 5), 0x00F) == 5)
-		elseif flags then
+		elseif tonumber(flags) then
 			return (band(flags, COMBATLOG_OBJECT_TYPE_NPC) ~= 0)
 		end
 		return false
