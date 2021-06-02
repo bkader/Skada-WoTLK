@@ -5,6 +5,17 @@ local _pairs, _format, _select, _tostring = pairs, string.format, select, tostri
 local math_min, math_max = math.min, math.max
 local _GetSpellInfo, _UnitClass = Skada.GetSpellInfo or GetSpellInfo, Skada.UnitClass
 
+-- list of the auras that are ignored!
+local blacklist = {
+	[57819] = true, -- Tabard of the Argent Crusade
+	[57820] = true, -- Tabard of the Ebon Blade
+	[57821] = true, -- Tabard of the Kirin Tor
+	[57822] = true, -- Tabard of the Wyrmrest Accord
+	[72968] = true, -- Precious's Ribbon
+	[57723] = true, -- Exhaustion (Heroism)
+	[57724] = true -- Sated (Bloodlust)
+}
+
 --
 -- common functions to both modules that handle aura apply/remove log
 --
@@ -74,6 +85,8 @@ end
 local aura = {}
 
 local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, spellschool, auratype)
+	if blacklist[spellid] then return end
+
 	local passed
 
 	if auratype == "DEBUFF" and not Skada:IsDisabled("Debuffs") then
@@ -122,6 +135,8 @@ local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dst
 end
 
 local function AuraRefresh(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, spellschool, auratype)
+	if blacklist[spellid] then return end
+
 	local passed
 
 	if auratype == "DEBUFF" and not Skada:IsDisabled("Debuffs") then
@@ -170,6 +185,8 @@ local function AuraRefresh(timestamp, eventtype, srcGUID, srcName, srcFlags, dst
 end
 
 local function AuraRemoved(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, spellschool, auratype)
+	if blacklist[spellid] then return end
+
 	local passed
 
 	if auratype == "DEBUFF" and not Skada:IsDisabled("Debuffs") then
@@ -401,15 +418,6 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 	local _GetNumRaidMembers, _GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
 	local _UnitExists, _UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
 	local _UnitGUID, _UnitName, _UnitBuff = UnitGUID, UnitName, UnitBuff
-
-	-- list of the auras that are ignored!
-	local blacklist = {
-		[57819] = true, -- Tabard of the Argent Crusade
-		[57820] = true, -- Tabard of the Ebon Blade
-		[57821] = true, -- Tabard of the Kirin Tor
-		[57822] = true, -- Tabard of the Wyrmrest Accord
-		[72968] = true -- Precious's Ribbon
-	}
 
 	function spellmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
