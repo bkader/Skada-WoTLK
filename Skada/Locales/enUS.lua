@@ -475,6 +475,7 @@ L["%s's damage"] = true
 L["%s's <%s> damage"] = true
 L["%s's <%s> damage on %s"] = true
 L["Useful Damage"] = true
+L["Useful damage on %s"] = true
 L["Damage Done By Spell"] = true
 L["%s's sources"] = true
 L["DPS"] = true

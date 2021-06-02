@@ -17,6 +17,59 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	local mod = Skada:NewModule(L["Enemy Damage Taken"])
 	local enemymod = mod:NewModule(L["Damage taken per player"])
 	local playermod = enemymod:NewModule(L["Damage spell list"])
+	local detailmod = enemymod:NewModule(L["Damage Breakdown"])
+
+	local function add_detail_bar(win, nr, title, value)
+		local d = win.dataset[nr] or {}
+		win.dataset[nr] = d
+
+		d.id = title
+		d.label = title
+		d.value = value
+		d.valuetext = Skada:FormatValueText(
+			Skada:FormatNumber(value),
+			mod.metadata.columns.Damage,
+			_format("%.1f%%", 100 * value / math_max(1, win.metadata.maxvalue)),
+			mod.metadata.columns.Percent
+		)
+
+		nr = nr + 1
+		return nr
+	end
+
+	function detailmod:Enter(win, id, label)
+		win.playerid, win.playername = id, label
+		win.title = _format(L["%s's damage on %s"], label, win.targetname or UNKNOWN)
+	end
+
+	function detailmod:Update(win, set)
+		local player = Skada:find_player(set, win.playerid, win.playername)
+		if player then
+			win.title = _format(L["%s's damage on %s"], player.name, win.targetname or UNKNOWN)
+
+			local total, amount, target = 0, 0
+			if player.damagedone and player.damagedone.targets and player.damagedone.targets[win.targetname] then
+				target = player.damagedone.targets[win.targetname]
+				amount = target.amount or 0
+				total = amount + (target.overkill or 0)
+			end
+
+			if total > 0 and target then
+				win.metadata.maxvalue = total
+
+				local nr = add_detail_bar(win, 1, L["Total"], total)
+				nr = add_detail_bar(win, nr, L["Damage Done"], amount)
+
+				if (target.useful or 0) > 0 then
+					nr = add_detail_bar(win, nr, L["Useful Damage"], target.useful)
+				end
+
+				if (target.overkill or 0) > 0 then
+					nr = add_detail_bar(win, nr, L["Overkill"], target.overkill)
+				end
+			end
+		end
+	end
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
@@ -44,7 +97,9 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 						d.id = spell.id
 						d.spellid = spell.id
 						d.label = spellname
-						d.text = spellname .. (spell.isdot and L["DoT"] or "")
+						if spell.isdot then
+							d.text = spellname .. L["DoT"]
+						end
 						d.icon = _select(3, _GetSpellInfo(spell.id))
 						d.spellschool = spell.school
 
@@ -162,7 +217,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		enemymod.metadata = {showspots = true, click1 = playermod}
+		enemymod.metadata = {showspots = true, click1 = playermod, click2 = detailmod}
 		self.metadata = {
 			click1 = enemymod,
 			columns = {Damage = true, Percent = true},
@@ -218,7 +273,9 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 						d.id = spell.id
 						d.spellid = spell.id
 						d.label = spellname
-						d.text = spellname .. (spell.isdot and L["DoT"] or "")
+						if spell.isdot then
+							d.text = spellname .. L["DoT"]
+						end
 						d.icon = _select(3, _GetSpellInfo(spell.id))
 						d.spellschool = spell.school
 

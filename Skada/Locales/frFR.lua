@@ -478,6 +478,7 @@ L["%s's damage"] = "Dégâts de %s"
 L["%s's <%s> damage"] = "Dégâts de %s par <%s>"
 L["%s's <%s> damage on %s"] = "Dégâts de %s <%s> sur %s"
 L["Useful Damage"] = "Dégâts utiles"
+L["Useful damage on %s"] = "Dégâts utiles sur %s"
 L["Damage Done By Spell"] = "Dégâts infligés par sort"
 L["%s's sources"] = "Source de %s"
 L["DPS"] = "DPS"
@@ -506,8 +507,8 @@ L["Damage on %s"] = "Dégâts infligés à %s"
 L["%s's damage sources"] = "Sources des dégâts subis par %s"
 -- avoidance and mitigation module
 L["Avoidance & Mitigation"] = "Évitement et mitigation"
-L["Damage Breakdown"] = "Détails du dégât infligé"
-L["%s's damage breakdown"] = "Détails du dégât infligé à %s"
+L["Damage Breakdown"] = "Détails des dégâts"
+L["%s's damage breakdown"] = "Détails des dégâts de %s"
 -- friendly fire module
 L["Friendly Fire"] = "Dégâts aux alliés"
 -- useful damage targets
