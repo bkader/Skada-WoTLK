@@ -1477,10 +1477,10 @@ function Skada:get_player(set, playerid, playername, playerflags)
 end
 
 function Skada:IsPlayer(guid, flags)
-	if guid then
+	if tonumber(guid) then
 		return (players[guid] or not self:IsCreature(guid, flags))
 	end
-	if flags then
+	if tonumber(flags) then
 		return (band(flags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0)
 	end
 	return false
@@ -1578,7 +1578,8 @@ do
 	function Skada:IsCreature(guid, flags)
 		if tonumber(guid) then
 			return (band(guid:sub(1, 5), 0x00F) == 3 or band(guid:sub(1, 5), 0x00F) == 5)
-		elseif tonumber(flags) then
+		end
+		if tonumber(flags) then
 			return (band(flags, COMBATLOG_OBJECT_TYPE_NPC) ~= 0)
 		end
 		return false
@@ -1644,11 +1645,11 @@ do
 	end
 
 	function Skada:IsPet(petGUID, petFlags)
-		if petGUID and (pets[petGUID] or GetPetOwnerFromTooltip(petGUID)) then
+		if tonumber(petGUID) and (pets[petGUID] or GetPetOwnerFromTooltip(petGUID)) then
 			return true
 		end
 
-		if petFlags and band(petFlags, BITMASK_PETS) ~= 0 then
+		if tonumber(petFlags) and band(petFlags, BITMASK_PETS) ~= 0 then
 			return true
 		end
 
