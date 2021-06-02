@@ -666,5 +666,7 @@ L["|cffffbb00Boss First Target|r: %s (%s)"] = true
 L["Prints a message of the first hit before combat.\nOnly works for boss encounters."] = true
 L["Smart Stop"] = true
 L["Automatically stops the current segment after the boss has died.\nUseful to avoid collecting data in case of a combat bug."] = true
+L["Duration"] = true
+L["For how long Skada should wait before stopping the segment."] = true
 L["Module Icons"] = true
 L["Enable this if you want to show module icons on windows and menus."] = true

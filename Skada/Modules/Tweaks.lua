@@ -126,9 +126,12 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 		if Skada.db.profile.firsthit == nil then
 			Skada.db.profile.firsthit = true
 		end
-		-- smart stop
+		-- smart stop & duration
 		if Skada.db.profile.smartstop == nil then
 			Skada.db.profile.smartstop = false
+		end
+		if Skada.db.profile.smartwait == nil then
+			Skada.db.profile.smartwait = 7
 		end
 
 		-- options.
@@ -150,17 +153,42 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 					desc = L["Prints a message of the first hit before combat.\nOnly works for boss encounters."],
 					order = 1
 				},
-				smartstop = {
-					type = "toggle",
-					name = L["Smart Stop"],
-					desc = L["Automatically stops the current segment after the boss has died.\nUseful to avoid collecting data in case of a combat bug."],
-					order = 2
-				},
 				moduleicons = {
 					type = "toggle",
 					name = L["Module Icons"],
 					desc = L["Enable this if you want to show module icons on windows and menus."],
-					order = 3
+					order = 2
+				},
+				smartsep = {
+					type = "description",
+					name = " ",
+					order = 95,
+					width = "full"
+				},
+				smartheader = {
+					type = "header",
+					name = L["Smart Stop"],
+					order = 95.1
+				},
+				smartdesc = {
+					type = "description",
+					name = L["Automatically stops the current segment after the boss has died.\nUseful to avoid collecting data in case of a combat bug."],
+					fontSize = "medium",
+					order = 95.2,
+					width = "full"
+				},
+				smartstop = {
+					type = "toggle",
+					name = L["Enable"],
+					order = 95.3
+				},
+				smartwait = {
+					type = "range",
+					name = L["Duration"],
+					desc = L["For how long Skada should wait before stopping the segment."],
+					disabled = function() return not Skada.db.profile.smartstop end,
+					min = 1, max = 10, step = 0.5, bigStep = 1,
+					order = 95.4
 				}
 			}
 		}
@@ -173,7 +201,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 
 		-- sorry but this feature requires a BossMod to work properly
 		if Skada.db.profile.smartstop and Skada.bossmod then
-			Skada.After(7, function()
+			Skada.After(Skada.db.profile.smartwait or 5, function()
 				if not set.endtime then
 					Skada:Print(L["Smart Stop"])
 					Skada:StopSegment()

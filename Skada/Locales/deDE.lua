@@ -664,5 +664,7 @@ L["|cffffbb00Boss First Target|r: %s (%s)"] = "|cffffbb00Boss erstes Ziel|r: %s 
 -- L["Prints a message of the first hit before combat.\nOnly works for boss encounters."] = ""
 L["Smart Stop"] = "Smart Stop"
 L["Automatically stops the current segment after the boss has died.\nUseful to avoid collecting data in case of a combat bug."] = "Stoppt automatisch das aktuelle Segment, nachdem der Boss gestorben ist.\nNützlich, um die Datenerfassung im Falle eines Kampffehlers zu vermeiden."
+L["Duration"] = "Dauer"
+L["For how long Skada should wait before stopping the segment."] = "Wie lange Skada warten soll, bevor die Strecke gestoppt wird."
 -- L["Module Icons"] = ""
 -- L["Enable this if you want to show module icons on windows and menus."] = ""

@@ -667,5 +667,7 @@ L["|cffffbb00Boss First Target|r: %s (%s)"] = "|cffffbb00Первая цель �
 L["Prints a message of the first hit before combat.\nOnly works for boss encounters."] = "Отображает в чате первый нанесенный удар.\nРаботает только для сражений с боссами."
 L["Smart Stop"] = "Останавливать после смерти босса"
 L["Automatically stops the current segment after the boss has died.\nUseful to avoid collecting data in case of a combat bug."] = "Автоматически останавливает текущий сегмент после смерти босса.\nПолезно для остановки сбора данных при зависании режима боя."
+L["Duration"] = "Время ожидания"
+L["For how long Skada should wait before stopping the segment."] = "Как долго Skada должен ждать, прежде чем остановить сегмент?"
 L["Module Icons"] = "Значки модулей"
 L["Enable this if you want to show module icons on windows and menus."] = "При включении значки модулей будут отображаться в окнах и меню."
