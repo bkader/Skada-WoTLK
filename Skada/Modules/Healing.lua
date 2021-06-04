@@ -917,7 +917,7 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(source.amount),
 						mod.metadata.columns.Healing,
-						Skada:FormatNumber(source.overhealing),
+						Skada:FormatNumber(source.overhealing or 0),
 						mod.metadata.columns.Overhealing,
 						_format("%.1f%%", 100 * source.amount / math_max(1, total)),
 						mod.metadata.columns.Percent
