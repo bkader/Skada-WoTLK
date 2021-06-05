@@ -585,17 +585,19 @@ do
 			Skada.db.profile.report.mode = window.db.mode
 
 			-- report a specific line
-			local linebox = AceGUI:Create("Dropdown")
-			linebox:SetLabel(L["Line"])
-			linebox:SetList({[""] = NONE})
-			for _, bar in _ipairs(window.dataset) do
-				if bar.id and not bar.ignore then
-					linebox:AddItem(bar.id, _format("%s   %s", bar.text or bar.label, bar.valuetext))
+			if window.selectedset and window.selectedmode then
+				local linebox = AceGUI:Create("Dropdown")
+				linebox:SetLabel(L["Line"])
+				linebox:SetList({[""] = NONE})
+				for _, bar in _ipairs(window.dataset) do
+					if bar.id and not bar.ignore then
+						linebox:AddItem(bar.id, _format("%s   %s", bar.text or bar.label, bar.valuetext))
+					end
 				end
+				linebox:SetCallback("OnValueChanged", function(f, e, value) barid = (value ~= "") and value or nil end)
+				linebox:SetValue(barid or "")
+				frame:AddChild(linebox)
 			end
-			linebox:SetCallback("OnValueChanged", function(f, e, value) barid = (value ~= "") and value or nil end)
-			linebox:SetValue(barid or "")
-			frame:AddChild(linebox)
 		else
 			-- Mode, default last chosen or first available.
 			local modebox = AceGUI:Create("Dropdown")
