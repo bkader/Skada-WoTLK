@@ -17,7 +17,6 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	local playermod = mod:NewModule(L["Absorb spell list"])
 	local targetmod = mod:NewModule(L["Absorbed player list"])
 
-	local _GetNumRaidMembers, _GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
 	local _UnitName, _UnitExists, _UnitBuff = UnitName, UnitExists, UnitBuff
 	local _UnitIsDeadOrGhost = UnitIsDeadOrGhost
 	local _tostring, _GetTime, _band = tostring, GetTime, bit.band
@@ -421,13 +420,10 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 	function mod:CheckPreShields(event, set, timestamp)
 		if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped then
-			local prefix, min, max = "raid", 1, _GetNumRaidMembers()
-			if max == 0 then
-				prefix, min, max = "party", 0, _GetNumPartyMembers()
-			end
+			local prefix, min_member, max_member = Skada:GetGroupTypeAndCount()
 
 			local curtime = _GetTime()
-			for n = min, max do
+			for n = min_member, max_member do
 				local unit = (n == 0) and "player" or prefix .. _tostring(n)
 				if _UnitExists(unit) and not _UnitIsDeadOrGhost(unit) then
 					local dstName, dstGUID = _UnitName(unit), _UnitGUID(unit)

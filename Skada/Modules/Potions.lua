@@ -9,8 +9,6 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	-- cache frequently used globals
 	local _pairs, _select, tconcat = pairs, select, table.concat
 	local _format, _strsub, _tostring, math_max = string.format, string.sub, tostring, math.max
-	local _GetNumPartyMembers = GetNumPartyMembers
-	local _GetNumRaidMembers = GetNumRaidMembers
 	local _GetItemInfo, _GetSpellInfo = GetItemInfo, Skada.GetSpellInfo
 	local _UnitExists, _UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
 	local _UnitGUID, _UnitName = UnitGUID, UnitName
@@ -66,12 +64,9 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 		if event == "COMBAT_PLAYER_ENTER" then
 			prepotion = {}
 
-			local prefix, min, max = "raid", 1, _GetNumRaidMembers()
-			if max == 0 then
-				prefix, min, max = "party", 0, _GetNumPartyMembers()
-			end
+			local prefix, min_member, max_member = Skada:GetGroupTypeAndCount()
 
-			for n = min, max do
+			for n = min_member, max_member do
 				local unit = (n == 0) and "player" or prefix .. _tostring(n)
 				if _UnitExists(unit) and not _UnitIsDeadOrGhost(unit) then
 					local playerid, playername = _UnitGUID(unit), _UnitName(unit)
@@ -83,12 +78,9 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 						local _, _, icon, _, _, _, _, _, _, _, spellid = _UnitBuff(unit, _GetSpellInfo(potionid))
 						if spellid and potionIDs[spellid] then
 							-- instant recording doesn't work, so we delay it
-							Skada.After(
-								1,
-								function()
-									PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid)
-								end
-							)
+							Skada.After(1, function()
+								PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid)
+							end)
 							tinsert(potions, _format(potionStr, icon))
 						end
 					end

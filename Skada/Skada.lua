@@ -1,4 +1,4 @@
-local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceEvent-3.0", "AceHook-3.0", "AceConsole-3.0", "AceComm-3.0")
+local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceEvent-3.0", "AceHook-3.0", "AceConsole-3.0", "AceComm-3.0", "LibCompat-1.0")
 _G.Skada = Skada
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
 Skada.version = GetAddOnMetadata("Skada", "Version")
@@ -102,72 +102,9 @@ Skada.BITMASK_PETS = BITMASK_PETS
 Skada.BITMASK_OWNERS = BITMASK_OWNERS
 Skada.BITMASK_ENEMY = BITMASK_ENEMY
 
--- =================== --
--- add missing globals --
--- =================== --
-
-local IsInRaid = _G.IsInRaid
-if not IsInRaid then
-	IsInRaid = function()
-		return GetNumRaidMembers() > 0
-	end
-	_G.IsInRaid = IsInRaid
-end
-
-local IsInGroup = _G.IsInGroup
-if not IsInGroup then
-	IsInGroup = function()
-		return (GetNumPartyMembers() > 0 or GetNumRaidMembers() > 0)
-	end
-	_G.IsInGroup = IsInGroup
-end
-
--- returns the group type and count
-local function GetGroupTypeAndCount()
-	local count, t = GetNumRaidMembers(), "raid"
-	if count == 0 then -- no raid? maybe party!
-		count, t = GetNumPartyMembers(), "party"
-	end
-	if count == 0 then -- still 0? Then solo
-		t = "player"
-	end
-	return t, count
-end
-
--- we need to use custom icons for certain spells.
-do
-	local custom = {
-		[3] = {ACTION_ENVIRONMENTAL_DAMAGE_FALLING, "Interface\\Icons\\ability_rogue_quickrecovery"},
-		[4] = {ACTION_ENVIRONMENTAL_DAMAGE_DROWNING, "Interface\\Icons\\spell_shadow_demonbreath"},
-		[5] = {ACTION_ENVIRONMENTAL_DAMAGE_FATIGUE, "Interface\\Icons\\ability_creature_cursed_05"},
-		[6] = {ACTION_ENVIRONMENTAL_DAMAGE_FIRE, "Interface\\Icons\\spell_fire_fire"},
-		[7] = {ACTION_ENVIRONMENTAL_DAMAGE_LAVA, "Interface\\Icons\\spell_shaman_lavaflow"},
-		[8] = {ACTION_ENVIRONMENTAL_DAMAGE_SLIME, "Interface\\Icons\\inv_misc_slime_01"}
-	}
-
-	function Skada.GetSpellInfo(spellid)
-		local res1, res2, res3, res4, res5, res6, res7, res8, res9
-		if spellid then
-			if custom[spellid] then
-				res1, res3 = unpack(custom[spellid])
-			else
-				res1, res2, res3, res4, res5, res6, res7, res8, res9 = GetSpellInfo(spellid)
-				if spellid == 75 then
-					res3 = "Interface\\Icons\\INV_Weapon_Bow_07"
-				elseif spellid == 6603 then
-					res3 = "Interface\\Icons\\INV_Sword_04"
-				end
-			end
-		end
-		return res1, res2, res3, res4, res5, res6, res7, res8, res9
-	end
-
-	function Skada.GetSpellLink(spellid)
-		if not custom[spellid] then
-			return GetSpellLink(spellid)
-		end
-	end
-end
+-- ================ --
+-- custom functions --
+-- ================ --
 
 function Skada.UnitClass(guid, flags, set, nocache)
 	set = set or Skada.current
@@ -191,13 +128,7 @@ function Skada.UnitClass(guid, flags, set, nocache)
 
 	local locClass, engClass = Skada.classnames.UNKNOWN, "UNKNOWN"
 
-	if Skada:IsPet(guid, flags) then
-		locClass, engClass = Skada.classnames.PET, "PET"
-	elseif Skada:IsBoss(guid) then
-		locClass, engClass = Skada.classnames.BOSS, "BOSS"
-	elseif Skada:IsCreature(guid, flags) then
-		locClass, engClass = Skada.classnames.MONSTER, "MONSTER"
-	elseif Skada:IsPlayer(guid, flags) then
+	if Skada:IsPlayer(guid, flags) then
 		if tonumber(guid) ~= 0 then
 			local class = select(2, GetPlayerInfoByGUID(guid))
 			if class then
@@ -208,6 +139,12 @@ function Skada.UnitClass(guid, flags, set, nocache)
 		if not engClass then
 			locClass, engClass = Skada.classnames.PLAYER, "PLAYER"
 		end
+	elseif Skada:IsPet(guid, flags) then
+		locClass, engClass = Skada.classnames.PET, "PET"
+	elseif Skada:IsBoss(guid) then
+		locClass, engClass = Skada.classnames.BOSS, "BOSS"
+	elseif Skada:IsCreature(guid, flags) then
+		locClass, engClass = Skada.classnames.MONSTER, "MONSTER"
 	end
 
 	if not nocache and (set and set._classes[guid] ~= engClass) then
@@ -222,12 +159,6 @@ end
 -- ============= --
 
 local sort_modes
-
--- party/group
-function Skada:IsInPVP()
-	local instanceType = select(2, IsInInstance())
-	return (instanceType == "pvp" or instanceType == "arena")
-end
 
 local function setPlayerActiveTimes(set)
 	for _, player in Skada:IteratePlayers(set) do
@@ -2070,9 +2001,9 @@ end
 -- ======================================================= --
 
 function Skada:CheckGroup()
-	local prefix, count = GetGroupTypeAndCount()
-	if count > 0 then
-		for i = 1, count, 1 do
+	local prefix, min_member, max_member = self:GetGroupTypeAndCount()
+	if prefix then
+		for i = min_member, max_member do
 			local unit = ("%s%d"):format(prefix, i)
 			local unitGUID = UnitGUID(unit)
 			if unitGUID then
@@ -2099,7 +2030,7 @@ function Skada:ZoneCheck()
 	local inInstance, instanceType = IsInInstance()
 
 	local isininstance = inInstance and (instanceType == "party" or instanceType == "raid")
-	local isinpvp = self:IsInPVP()
+	local isinpvp = self:IsInPvP()
 
 	if isininstance and wasininstance ~= nil and not wasininstance and self.db.profile.reset.instance ~= 1 and self:CanReset() then
 		if self.db.profile.reset.instance == 3 then
@@ -2119,7 +2050,7 @@ function Skada:ZoneCheck()
 
 	wasininstance = (isininstance == true)
 	wasinpvp = (isinpvp == true)
-	wasinparty = (IsInGroup() or IsInRaid())
+	wasinparty = self:IsInGroup()
 end
 
 do
@@ -2154,7 +2085,7 @@ do
 	end
 
 	local function check_for_join_and_leave()
-		if not IsInGroup() and wasinparty then
+		if not Skada:IsInGroup() and wasinparty then
 			if Skada.db.profile.reset.leave == 3 and Skada:CanReset() then
 				Skada:ShowPopup(nil, true)
 			elseif Skada.db.profile.reset.leave == 2 and Skada:CanReset() then
@@ -2166,19 +2097,19 @@ do
 			end
 		end
 
-		if IsInGroup() and not wasinparty then
+		if Skada:IsInGroup() and not wasinparty then
 			if Skada.db.profile.reset.join == 3 and Skada:CanReset() then
 				Skada:ShowPopup(nil, true)
 			elseif Skada.db.profile.reset.join == 2 and Skada:CanReset() then
 				Skada:Reset()
 			end
 
-			if Skada.db.profile.hidesolo and not (Skada.db.profile.hidepvp and Skada:IsInPVP()) then
+			if Skada.db.profile.hidesolo and not (Skada.db.profile.hidepvp and Skada:IsInPvP()) then
 				Skada:SetActive(true)
 			end
 		end
 
-		wasinparty = not (not IsInGroup())
+		wasinparty = not (not Skada:IsInGroup())
 	end
 
 	function Skada:PLAYER_ENTERING_WORLD()
@@ -2199,7 +2130,7 @@ do
 		self:CheckGroup()
 
 		-- version check
-		local t, count = GetGroupTypeAndCount()
+		local t, count = self:GetGroupTypeAndCount()
 		if t == "party" then
 			count = count + 1
 		end
@@ -2666,7 +2597,7 @@ function Skada:ApplySettings()
 		win.display:ApplySettings(win)
 	end
 
-	if (self.db.profile.hidesolo and not IsInGroup()) or (self.db.profile.hidepvp and self:IsInPVP()) then
+	if (self.db.profile.hidesolo and not self:IsInGroup()) or (self.db.profile.hidepvp and self:IsInPvP()) then
 		self:SetActive(false)
 	else
 		self:SetActive(true)
@@ -3082,26 +3013,14 @@ function Skada:OnInitialize()
 	self.classnames.UNKNOWN = UNKNOWN
 
 	-- class colors
-	self.classcolors = {
-		-- valid
-		DEATHKNIGHT = {r = 0.77, g = 0.12, b = 0.23, colorStr = "ffc41f3b"},
-		DRUID = {r = 1, g = 0.49, b = 0.04, colorStr = "ffff7d0a"},
-		HUNTER = {r = 0.67, g = 0.83, b = 0.45, colorStr = "ffabd473"},
-		MAGE = {r = 0.41, g = 0.8, b = 0.94, colorStr = "ff3fc7eb"},
-		PALADIN = {r = 0.96, g = 0.55, b = 0.73, colorStr = "fff58cba"},
-		PRIEST = {r = 1, g = 1, b = 1, colorStr = "ffffffff"},
-		ROGUE = {r = 1, g = 0.96, b = 0.41, colorStr = "fffff569"},
-		SHAMAN = {r = 0, g = 0.44, b = 0.87, colorStr = "ff0070de"},
-		WARLOCK = {r = 0.58, g = 0.51, b = 0.79, colorStr = "ff8788ee"},
-		WARRIOR = {r = 0.78, g = 0.61, b = 0.43, colorStr = "ffc79c6e"},
-		-- custom
-		ENEMY = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"},
-		MONSTER = {r = 0.549, g = 0.388, b = 0.404, colorStr = "ff8c6367"},
-		BOSS = {r = 0.203, g = 0.345, b = 0.525, colorStr = "345886"},
-		PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"},
-		PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"},
-		UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
-	}
+	self.classcolors = self:GetClassColorsTable()
+	-- custom
+	self.classcolors.ENEMY = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
+	self.classcolors.MONSTER = {r = 0.549, g = 0.388, b = 0.404, colorStr = "ff8c6367"}
+	self.classcolors.BOSS = {r = 0.203, g = 0.345, b = 0.525, colorStr = "345886"}
+	self.classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
+	self.classcolors.PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"}
+	self.classcolors.UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
 
 	-- class icon file & coordinates
 	self.classiconfile = [[Interface\AddOns\Skada\Media\Textures\icon-classes]]
@@ -3233,12 +3152,12 @@ do
 		end
 
 		if not channel then
-			local groupType, _ = GetGroupTypeAndCount()
-			if groupType == "player" then
+			local t = self:GetGroupTypeAndCount()
+			if t == nil then
 				return -- with whom you want to sync man!
-			elseif groupType == "raid" then
+			elseif t == "raid" then
 				channel = "RAID"
-			elseif groupType == "party" then
+			elseif t == "party" then
 				channel = "PARTY"
 			else
 				local zoneType = select(2, IsInInstance())
@@ -3276,40 +3195,6 @@ do
 end
 
 -- ======================================================= --
-
-function Skada:IsRaidInCombat()
-	if InCombatLockdown() then
-		return true
-	end
-
-	local prefix, count = GetGroupTypeAndCount()
-	if count > 0 then
-		for i = 1, count, 1 do
-			if UnitExists(prefix .. i) and UnitAffectingCombat(prefix .. i) then
-				return true
-			end
-		end
-	elseif UnitAffectingCombat("player") then
-		return true
-	end
-
-	return false
-end
-
-function Skada:IsRaidDead()
-	local prefix, count = GetGroupTypeAndCount()
-	if count > 0 then
-		for i = 1, count, 1 do
-			if UnitExists(prefix .. i) and not UnitIsDeadOrGhost(prefix .. i) then
-				return false
-			end
-		end
-	elseif not UnitIsDeadOrGhost("player") then
-		return false
-	end
-
-	return true
-end
 
 function Skada:PLAYER_REGEN_DISABLED()
 	if not disabled and not self.current then
@@ -3405,7 +3290,7 @@ function Skada:EndSegment()
 		win:Wipe()
 		changed = true
 
-		if win.db.wipemode ~= "" and self:IsRaidDead() then
+		if win.db.wipemode ~= "" and self:IsGroupDead() then
 			win:RestoreView("current", win.db.wipemode)
 		elseif win.db.returnaftercombat and win.restore_mode and win.restore_set then
 			if win.restore_set ~= win.selectedset or win.restore_mode ~= win.selectedmode then
@@ -3414,7 +3299,7 @@ function Skada:EndSegment()
 			end
 		end
 
-		if not win.db.hidden and (not self.db.profile.hidesolo or IsInGroup()) then
+		if not win.db.hidden and (not self.db.profile.hidesolo or self:IsInGroup()) then
 			if self.db.profile.showcombat and win:IsShown() then
 				win:Hide()
 			elseif self.db.profile.hidecombat and not win:IsShown() then
@@ -3469,7 +3354,7 @@ do
 
 	function Skada:Tick()
 		self.callbacks:Fire("COMBAT_ENCOUNTER_TICK", self.current)
-		if not disabled and self.current and not self:IsRaidInCombat() then
+		if not disabled and self.current and not self:IsGroupInCombat() then
 			self:Debug("EndSegment: Tick")
 			self:EndSegment()
 		end
@@ -3482,7 +3367,7 @@ do
 
 	function Skada:StartCombat()
 		deathcounter = 0
-		startingmembers = select(2, GetGroupTypeAndCount())
+		startingmembers = select(3, self:GetGroupTypeAndCount())
 
 		if tentativehandle and not tentativehandle._cancelled then
 			tentativehandle:Cancel()
@@ -3713,94 +3598,15 @@ do
 			end
 		end
 
-		if not self.bossmod and self.current and self.current.gotboss and (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") then
+		if self.current and self.current.gotboss and (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") then
 			if dstName and self.current.mobname == dstName then
-				self.current.success = true
-				self.callbacks:Fire("COMBAT_BOSS_DEFEATED", self.current)
-			end
-		end
-	end
-end
-
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---> Mimic C_Timer instead of using AceTimer
-do
-	local TickerPrototype = {}
-	local TickerMetatable = {__index = TickerPrototype, __metatable = true}
-	local waitTable = {}
-
-	local waitFrame = _G.SkadaTimerFrame or CreateFrame("Frame", "SkadaTimerFrame", UIParent)
-	waitFrame:SetScript("OnUpdate", function(self, elapsed)
-		local total = #waitTable
-		for i = 1, total do
-			local ticker = waitTable[i]
-
-			if ticker then
-				if ticker._cancelled then
-					tremove(waitTable, i)
-				elseif ticker._delay > elapsed then
-					ticker._delay = ticker._delay - elapsed
-					i = i + 1
-				else
-					ticker._callback(ticker)
-
-					if ticker._remainingIterations == -1 then
-						ticker._delay = ticker._duration
-						i = i + 1
-					elseif ticker._remainingIterations > 1 then
-						ticker._remainingIterations = ticker._remainingIterations - 1
-						ticker._delay = ticker._duration
-						i = i + 1
-					elseif ticker._remainingIterations == 1 then
-						tremove(waitTable, i)
-						total = total - 1
+				self.After(self.db.profile.updatefrequency or 0.25, function()
+					if self.current.success == nil then
+						self.current.success = true
+						self.callbacks:Fire("COMBAT_BOSS_DEFEATED", self.current)
 					end
-				end
+				end)
 			end
 		end
-
-		if #waitTable == 0 then
-			self:Hide()
-		end
-	end)
-
-	local function AddDelayedCall(ticker, oldTicker)
-		if oldTicker and type(oldTicker) == "table" then
-			ticker = oldTicker
-		end
-
-		tinsert(waitTable, ticker)
-		waitFrame:Show()
-	end
-
-	local function CreateTicker(duration, callback, iterations)
-		local ticker = setmetatable({}, TickerMetatable)
-		ticker._remainingIterations = iterations or -1
-		ticker._duration = duration
-		ticker._delay = duration
-		ticker._callback = callback
-
-		AddDelayedCall(ticker)
-		return ticker
-	end
-
-	Skada.After = function(duration, callback)
-		AddDelayedCall({
-			_remainingIterations = 1,
-			_delay = duration,
-			_callback = callback
-		})
-	end
-
-	Skada.NewTimer = function(duration, callback)
-		return CreateTicker(duration, callback, 1)
-	end
-
-	Skada.NewTicker = function(duration, callback, iterations)
-		return CreateTicker(duration, callback, iterations)
-	end
-
-	function TickerPrototype:Cancel()
-		self._cancelled = true
 	end
 end
