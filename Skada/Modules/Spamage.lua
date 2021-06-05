@@ -105,16 +105,16 @@ Skada:AddLoadableModule("Spamage", "Suppresses chat messages from damage meters 
 		-- we make sure to add default options if not set
 		if not Skada.db.profile.spamage then
 			Skada.db.profile.spamage = {
-				CHAT_MSG_CHANNEL = 1,
-				CHAT_MSG_GUILD = 1,
-				CHAT_MSG_OFFICER = 1,
-				CHAT_MSG_PARTY = 1,
-				CHAT_MSG_PARTY_LEADER = 1,
-				CHAT_MSG_RAID = 1,
-				CHAT_MSG_RAID_LEADER = 1,
-				CHAT_MSG_SAY = 1,
-				CHAT_MSG_WHISPER = 1,
-				CHAT_MSG_YELL = 1,
+				CHAT_MSG_CHANNEL = 2,
+				CHAT_MSG_GUILD = 2,
+				CHAT_MSG_OFFICER = 2,
+				CHAT_MSG_PARTY = 2,
+				CHAT_MSG_PARTY_LEADER = 2,
+				CHAT_MSG_RAID = 2,
+				CHAT_MSG_RAID_LEADER = 2,
+				CHAT_MSG_SAY = 2,
+				CHAT_MSG_WHISPER = 2,
+				CHAT_MSG_YELL = 2,
 				captureDelay = 1.0
 			}
 		end
