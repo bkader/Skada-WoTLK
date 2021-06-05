@@ -11,10 +11,12 @@ Skada:AddLoadableModule("Spamage", "Suppresses chat messages from damage meters 
 	local mod = Skada:NewModule(L["Spamage"], "AceHook-3.0")
 
 	-- cache frequently used global
-	local _ipairs, _GetTime = ipairs, GetTime
-	local _match, _format = string.match, string.format
-	local _tonumber = tonumber
-	local _ShowUIPanel = ShowUIPanel
+	local find, format, gsub, split = string.find, string.format, string.gsub, string.split
+	local tinsert = table.insert
+	local ipairs, tonumber, GetTime = ipairs, tonumber, GetTime
+	local ShowUIPanel = ShowUIPanel
+
+	local ItemRefTooltip = ItemRefTooltip
 
 	local valuestable = {[1] = L["Do Nothing"], [2] = L["Compress"], [3] = L["Suppress"]}
 
@@ -97,7 +99,7 @@ Skada:AddLoadableModule("Spamage", "Suppresses chat messages from damage meters 
 				min = 1,
 				max = 5,
 				step = 0.1
-			},
+			}
 		}
 	}
 
@@ -171,13 +173,16 @@ Skada:AddLoadableModule("Spamage", "Suppresses chat messages from damage meters 
 		"CHAT_MSG_RAID_LEADER",
 		"CHAT_MSG_SAY",
 		"CHAT_MSG_WHISPER",
+		"CHAT_MSG_WHISPER_INFORM",
+		"CHAT_MSG_BN_WHISPER",
+		"CHAT_MSG_BN_WHISPER_INFORM",
 		"CHAT_MSG_YELL"
 	}
 
 	local meters = {}
 
 	function mod:OnEnable()
-		for _, e in _ipairs(events) do
+		for _, e in ipairs(events) do
 			ChatFrame_AddMessageEventFilter(e, self.ParseChatEvent)
 		end
 		self:RawHook("SetItemRef", "ParseLink", true)
@@ -185,7 +190,7 @@ Skada:AddLoadableModule("Spamage", "Suppresses chat messages from damage meters 
 
 	function mod:OnDisable()
 		Skada.db.profile.spamage = nil
-		for _, e in _ipairs(events) do
+		for _, e in ipairs(events) do
 			ChatFrame_RemoveMessageEventFilter(e, self.ParseChatEvent)
 		end
 	end
@@ -193,52 +198,61 @@ Skada:AddLoadableModule("Spamage", "Suppresses chat messages from damage meters 
 	-- the real deal --
 
 	function mod:FilterLine(event, source, msg, ...)
-		for _, v in _ipairs(nextlines) do
-			if _match(msg, v) then
-				local curtime = _GetTime()
-				for i, j in _ipairs(meters) do
-					local elapsed = curtime - j.time
-					if j.src == source and j.evt == event and elapsed < Skada.db.profile.spamage.captureDelay then
+		for _, line in ipairs(nextlines) do
+			if msg:match(line) then
+				local curtime = GetTime()
+
+				for _, meter in ipairs(meters) do
+					local elapsed = curtime - meter.time
+
+					if meter.src == source and meter.evt == event and elapsed < 1 then
 						local toInsert = true
-						for a, b in _ipairs(j.data) do
-							if (b == msg) then
+
+						for _, b in ipairs(meter.data) do
+							if b == msg then
 								toInsert = false
 							end
 						end
 
 						if toInsert then
-							tinsert(j.data, msg)
+							tinsert(meter.data, msg)
 						end
+
 						return true, false, nil
 					end
 				end
 			end
 		end
 
-		for k, v in _ipairs(firstlines) do
-			local newid = 0
-			if _match(msg, v) then
-				local curtime = _GetTime()
+		for i, line in ipairs(firstlines) do
+			local newID = 0
 
-				-- if there is already a meter running, we avoid duplicates.
-				for i, j in _ipairs(meters) do
-					local elapsed = curtime - j.time
-					if j.src == source and j.evt == event and elapsed < Skada.db.profile.spamage.captureDelay then
-						newid = i
-						return true, true, _format("|HSKSP:%1$d|h|cFFFFFF00[%2$s]|r|h", newid or 0, msg or "nil")
+			if msg:match(line) then
+				local curtime = GetTime()
+
+				if find(msg, "|cff(.+)|r") then
+					msg = gsub(msg, "|cff%w%w%w%w%w%w", "")
+					msg = gsub(msg, "|r", "")
+				end
+
+				for id, meter in ipairs(meters) do
+					local elapsed = curtime - meter.time
+
+					if meter.src == source and meter.evt == event and elapsed < 1 then
+						newID = id
+						return true, true, format("|HSKSP:%1$d|h|cFFFFFF00[%2$s]|r|h", newID or 0, msg or "nil")
 					end
 				end
 
-				local meter = {src = source, evt = event, time = curtime, data = {}, title = msg}
-				tinsert(meters, meter)
+				tinsert(meters, {src = source, evt = event, time = curtime, data = {}, title = msg})
 
-				for i, j in _ipairs(meters) do
-					if j.src == source and j.evt == event and j.time == curtime then
-						newid = i
+				for id, meter in ipairs(meters) do
+					if meter.src == source and meter.evt == event and meter.time == curtime then
+						newID = id
 					end
 				end
 
-				return true, true, _format("|HSKSP:%1$d|h|cFFFFFF00[%2$s]|r|h", newid or 0, msg or "nil")
+				return true, true, format("|HSKSP:%1$d|h|cFFFFFF00[%2$s]|r|h", newID or 0, msg or "nil")
 			end
 		end
 
@@ -246,55 +260,57 @@ Skada:AddLoadableModule("Spamage", "Suppresses chat messages from damage meters 
 	end
 
 	function mod:ParseChatEvent(event, msg, sender, ...)
-		Skada.db.profile.spamage = Skada.db.profile.spamage or {}
+		if Skada.db.profile.spamage == nil then
+			Skada.db.profile.spamage = {}
+		end
 
 		local hide = false
-		for _, e in _ipairs(events) do
-			if event == e and Skada.db.profile.spamage[event] and Skada.db.profile.spamage[event] > 1 then
-				local isrecount, isfirstline, message = mod:FilterLine(event, sender, msg)
-				if isrecount then
-					if isfirstline and Skada.db.profile.spamage[event] == 2 then
-						msg = message
-					else
-						hide = true
+		for _, e in ipairs(events) do
+			if event == e then
+				if Skada.db.profile.spamage[event] and Skada.db.profile.spamage[event] > 1 then
+					local ismeter, isfirstline, message = mod:FilterLine(event, sender, msg)
+					if ismeter then
+						if isfirstline then
+							msg = message
+						else
+							hide = true
+						end
 					end
 				end
+				break
 			end
 		end
 
 		if not hide then
 			return false, msg, sender, ...
 		end
+
 		return true
 	end
 
 	function mod:ParseLink(link, text, button, chatframe)
-		local linktype, id = strsplit(":", link)
+		local linktype, id = split(":", link)
 
 		if linktype == "SKSP" then
-			local meter_id = _tonumber(id)
+			local meterid = tonumber(id)
+
 			ShowUIPanel(ItemRefTooltip)
+
 			if not ItemRefTooltip:IsShown() then
 				ItemRefTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE")
 			end
 
 			ItemRefTooltip:ClearLines()
-			ItemRefTooltip:AddLine(meters[meter_id].title)
-			ItemRefTooltip:AddLine(_format(L["Reported by: %s"], meters[meter_id].src))
-			ItemRefTooltip:AddLine(" ")
+			ItemRefTooltip:AddLine(meters[meterid].title)
+			ItemRefTooltip:AddLine(format(L["Reported by: %s"], meters[meterid].src))
 
-			for k, v in _ipairs(meters[meter_id].data) do
-				local left, right = _match(v, "^(.*)  (.*)$")
-				if left and right then
-					ItemRefTooltip:AddDoubleLine(left, right, 1, 1, 1, 1, 1, 1)
-				else
-					ItemRefTooltip:AddLine(v, 1, 1, 1)
-				end
+			for _, line in ipairs(meters[meterid].data) do
+				ItemRefTooltip:AddLine(line, 1, 1, 1)
 			end
 
 			ItemRefTooltip:Show()
 		else
-			return mod.hooks["SetItemRef"](link, text, button, chatframe)
+			return mod.hooks.SetItemRef(link, text, button, chatframe)
 		end
 	end
 end)
