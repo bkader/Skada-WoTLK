@@ -94,7 +94,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
-						d.id = spell.id
+						d.id = spellname
 						d.spellid = spell.id
 						d.label = spellname
 						if spell.isdot then
@@ -270,7 +270,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
-						d.id = spell.id
+						d.id = spellname
 						d.spellid = spell.id
 						d.label = spellname
 						if spell.isdot then
