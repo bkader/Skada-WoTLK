@@ -95,7 +95,7 @@ S:AddCallbackForAddon("Skada", "Skada", function()
 
 	hooksecurefunc(Skada, "SetTooltipPosition", function(self, tt, frame)
 		if self.db.profile.tooltippos == "default" then
-			if not E:HasMoverBeenMoved("TooltipMover") then
+			if not E:HasMoverBeenMoved("ElvTooltipMover") then
 				if ElvUI_ContainerFrame and ElvUI_ContainerFrame:IsShown() then
 					tt:Point("BOTTOMRIGHT", ElvUI_ContainerFrame, "TOPRIGHT", 0, 18)
 				elseif RightChatPanel:IsShown() and RightChatPanel:GetAlpha() == 1 then
@@ -104,16 +104,16 @@ S:AddCallbackForAddon("Skada", "Skada", function()
 					tt:Point("BOTTOMRIGHT", RightChatPanel, "BOTTOMRIGHT", 0, 18)
 				end
 			else
-				local point = E:GetScreenQuadrant(TooltipMover)
+				local point = E:GetScreenQuadrant(ElvTooltipMover)
 
 				if point == "TOPLEFT" then
-					tt:SetPoint("TOPLEFT", TooltipMover)
+					tt:SetPoint("TOPLEFT", ElvTooltipMover)
 				elseif point == "TOPRIGHT" then
-					tt:SetPoint("TOPRIGHT", TooltipMover)
+					tt:SetPoint("TOPRIGHT", ElvTooltipMover)
 				elseif point == "BOTTOMLEFT" or point == "LEFT" then
-					tt:SetPoint("BOTTOMLEFT", TooltipMover)
+					tt:SetPoint("BOTTOMLEFT", ElvTooltipMover)
 				else
-					tt:SetPoint("BOTTOMRIGHT", TooltipMover)
+					tt:SetPoint("BOTTOMRIGHT", ElvTooltipMover)
 				end
 			end
 		end
