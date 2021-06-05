@@ -1947,9 +1947,9 @@ do
 				if data.reportlabel then
 					label = data.reportlabel
 				elseif self.db.profile.reportlinks and (data.spellid or data.hyperlink) then
-					label = format("%s   %s", data.hyperlink or self.GetSpellLink(data.spellid) or data.text or data.label, data.valuetext)
+					label = format("%s   %s", data.hyperlink or self.GetSpellLink(data.spellid) or data.label, data.valuetext)
 				else
-					label = format("%s   %s", data.text or data.label, data.valuetext)
+					label = format("%s   %s", data.label, data.valuetext)
 				end
 
 				if label and report_mode.metadata and report_mode.metadata.showspots then
