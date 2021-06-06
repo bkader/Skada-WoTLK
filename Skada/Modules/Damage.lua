@@ -60,7 +60,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		return instanceDiff
 	end
 
-	local valkyrsTable
+	local valkyrsTable = {}
 	local valkyr10hp, valkyr25hp = 1900000, 2992000
 
 	local function log_damage(set, dmg, tick)
@@ -160,72 +160,65 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 				player.damagedone.targets[dmg.dstName].overkill = (player.damagedone.targets[dmg.dstName].overkill or 0) + dmg.overkill
 			end
 
-			-- add useful damage.
-			local diff = get_raid_diff()
-			if (diff == "10n" or diff == "25n" or diff == "10h" or diff == "25h") and validTarget[dmg.dstName] then
-				local altname = groupName[validTarget[dmg.dstName]]
+			-- useful damage on Val'kyrs (heroic mode only)
+			if dmg.dstName == LBB["Val'kyr Shadowguard"] then
+				-- other useful damage stuff
+				local diff = get_raid_diff()
+				if not (diff == "10h" or diff == "25h") then return end
 
-				-- same name, ignore to not have double damage.
-				if altname == dmg.dstName or not altname then return end
+				local maxhp = (diff == "10h") and valkyr10hp or valkyr25hp
 
-				-- useful damage on Val'kyrs (heroic mode only)
-				if dmg.dstName == LBB["Val'kyr Shadowguard"] and (diff == "10h" or diff == "25h") then
-					-- we make sure to always have a table.
-					valkyrsTable = valkyrsTable or {}
+				-- we make sure to always have a table.
+				if not valkyrsTable[dmg.dstGUID] then
+					valkyrsTable[dmg.dstGUID] = maxhp
+				end
 
-					-- valkyr's max health depending on the difficulty
-					local maxhp = (diff == "10h") and valkyr10hp or valkyr25hp
+				--
+				-- here, the valkyr was already recorded, it reached half its health
+				-- but the player still dpsing it. This counts as useless damage.
+				--
+				if valkyrsTable[dmg.dstGUID] < maxhp / 2 then
+					if not spell.targets[L["Valkyrs overkilling"]] then
+						spell.targets[L["Valkyrs overkilling"]] = {flags = dmg.dstFlags, amount = 0}
+					end
+					spell.targets[L["Valkyrs overkilling"]].amount = spell.targets[L["Valkyrs overkilling"]].amount + dmg.amount
 
-					-- we make sure to add our valkyr to the table
-					if not valkyrsTable[dmg.dstGUID] then
-						valkyrsTable[dmg.dstGUID] = maxhp - dmg.amount
-					else
-						--
-						-- here, the valkyr was already recorded, it reached half its health
-						-- but the player still dpsing it. This counts as useless damage.
-						--
-						if valkyrsTable[dmg.dstGUID] < maxhp / 2 then
-							if not spell.targets[L["Valkyrs overkilling"]] then
-								spell.targets[L["Valkyrs overkilling"]] = {
-									flags = dmg.dstFlags,
-									amount = dmg.amount
-								}
-							else
-								spell.targets[L["Valkyrs overkilling"]].amount = spell.targets[L["Valkyrs overkilling"]].amount + dmg.amount
-							end
-							if not player.damagedone.targets[L["Valkyrs overkilling"]] then
-								player.damagedone.targets[L["Valkyrs overkilling"]] = {
-									flags = dmg.dstFlags,
-									amount = dmg.amount
-								}
-							else
-								player.damagedone.targets[L["Valkyrs overkilling"]].amount = player.damagedone.targets[L["Valkyrs overkilling"]].amount + dmg.amount
-							end
-							return
-						end
+					if not player.damagedone.targets[L["Valkyrs overkilling"]] then
+						player.damagedone.targets[L["Valkyrs overkilling"]] = {flags = dmg.dstFlags, amount = 0}
+					end
+					player.damagedone.targets[L["Valkyrs overkilling"]].amount = player.damagedone.targets[L["Valkyrs overkilling"]].amount + dmg.amount
 
-						-- deducte the damage
-						valkyrsTable[dmg.dstGUID] = valkyrsTable[dmg.dstGUID] - dmg.amount
-						player.damagedone.targets[dmg.dstName].useful = (player.damagedone.targets[dmg.dstName].useful or 0) + dmg.amount
+					-- clean the table.
+					if valkyrsTable[dmg.dstGUID] <= 0 then
+						valkyrsTable[dmg.dstGUID] = nil
 					end
 
 					return
 				end
 
+				-- deducte the damage
+				valkyrsTable[dmg.dstGUID] = valkyrsTable[dmg.dstGUID] - dmg.amount
+				player.damagedone.targets[dmg.dstName].useful = (player.damagedone.targets[dmg.dstName].useful or 0) + dmg.amount
+
+			-- other useful targets
+			elseif validTarget[dmg.dstName] then
+				local altname = groupName[validTarget[dmg.dstName]]
+
+				-- same name, ignore to not have double damage.
+				if altname == dmg.dstName or not altname then return end
+
 				-- if we are on BPC, we attempt to catch overkilling
 				local amount = (validTarget[dmg.dstName] == LBB["Blood Prince Council"]) and dmg.overkill or dmg.amount
 
 				if not spell.targets[altname] then
-					spell.targets[altname] = {flags = dmg.dstFlags, amount = amount}
-				else
-					spell.targets[altname].amount = spell.targets[altname].amount + amount
+					spell.targets[altname] = {flags = dmg.dstFlags, amount = 0}
 				end
+				spell.targets[altname].amount = spell.targets[altname].amount + amount
 
 				if not player.damagedone.targets[altname] then
-					player.damagedone.targets[altname] = {flags = dmg.dstFlags, amount = amount}
-				else
-					player.damagedone.targets[altname].amount = player.damagedone.targets[altname].amount + amount
+					player.damagedone.targets[altname] = {flags = dmg.dstFlags, amount = 0}
 				end
+				player.damagedone.targets[altname].amount = player.damagedone.targets[altname].amount + amount
 			end
 		end
 	end
@@ -710,7 +703,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 				player.damagedone.targets = nil
 			end
 		end
-		instanceDiff, valkyrsTable = nil, nil
+		instanceDiff, valkyrsTable = nil, {}
 	end
 end)
 
