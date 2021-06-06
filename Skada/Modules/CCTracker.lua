@@ -905,7 +905,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 		-- Optional announce
 		srcName = srcName_modified or srcName
-		if Skada.db.profile.modules.ccannounce and IsInRaid() and _UnitInRaid(srcName) then
+		if Skada.db.profile.modules.ccannounce and Skada:IsInRaid() and _UnitInRaid(srcName) then
 			local instanceType = _select(2, _IsInInstance())
 			if instanceType == "pvp" then
 				return

@@ -2130,7 +2130,7 @@ do
 		self:CheckGroup()
 
 		-- version check
-		local t, count = self:GetGroupTypeAndCount()
+		local t, _, count = self:GetGroupTypeAndCount()
 		if t == "party" then
 			count = count + 1
 		end
@@ -3600,10 +3600,11 @@ do
 
 		if self.current and self.current.gotboss and (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") then
 			if dstName and self.current.mobname == dstName then
+				local set = self.current -- catch it before it goes away
 				self.After(self.db.profile.updatefrequency or 0.25, function()
-					if self.current.success == nil then
-						self.current.success = true
-						self.callbacks:Fire("COMBAT_BOSS_DEFEATED", self.current)
+					if set and set.success == nil then
+						set.success = true
+						self.callbacks:Fire("COMBAT_BOSS_DEFEATED", set)
 					end
 				end)
 			end

@@ -116,7 +116,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 
 			win.title = L["Threat"]
 
-			if not Skada:IsRaidInCombat() then return end
+			if not Skada:IsGroupInCombat() then return end
 
 			local target = nil
 			if _UnitExists("target") and not _UnitIsFriend("player", "target") then

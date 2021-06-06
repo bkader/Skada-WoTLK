@@ -81,7 +81,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 		log_interrupt(Skada.current, data)
 		log_interrupt(Skada.total, data)
 
-		if Skada.db.profile.modules.interruptannounce and IsInGroup() and srcGUID == playerGUID then
+		if Skada.db.profile.modules.interruptannounce and Skada:IsInGroup() and srcGUID == playerGUID then
 			local spelllink = _GetSpellLink(extraspellid or extraspellname) or extraspellname
 			local output = _format(L["%s interrupted!"], spelllink)
 
