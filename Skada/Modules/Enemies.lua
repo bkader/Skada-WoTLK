@@ -47,18 +47,16 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 		if player then
 			win.title = _format(L["%s's damage on %s"], player.name, win.targetname or UNKNOWN)
 
-			local total, amount, target = 0, 0
+			local total, target = 0
 			if player.damagedone and player.damagedone.targets and player.damagedone.targets[win.targetname] then
 				target = player.damagedone.targets[win.targetname]
-				amount = target.amount or 0
-				total = amount + (target.overkill or 0)
+				total = target.amount or 0
 			end
 
 			if total > 0 and target then
 				win.metadata.maxvalue = total
 
-				local nr = add_detail_bar(win, 1, L["Total"], total)
-				nr = add_detail_bar(win, nr, L["Damage Done"], amount)
+				local nr = add_detail_bar(win, 1, L["Damage Done"], total)
 
 				if (target.useful or 0) > 0 then
 					nr = add_detail_bar(win, nr, L["Useful Damage"], target.useful)

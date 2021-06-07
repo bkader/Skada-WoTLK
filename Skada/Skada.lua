@@ -57,7 +57,7 @@ local disabled = false
 local changed = true
 
 -- update & tick timers
-local update_timer, tick_timer, clean_timer
+local update_timer, tick_timer
 local checkVersion, convertVersion
 
 -- list of players and pets
@@ -2122,7 +2122,6 @@ do
 		end
 
 		version_timer = self.NewTimer(10, checkVersion)
-		clean_timer = self.NewTicker(60, function() collectgarbage("collect") end)
 	end
 
 	function Skada:PARTY_MEMBERS_CHANGED()
@@ -3324,10 +3323,6 @@ function Skada:EndSegment()
 		tick_timer = nil
 	end
 
-	if not clean_timer then
-		clean_timer = self.NewTicker(60, function() collectgarbage("collect") end)
-	end
-
 	self.After(2, function() self:CleanGarbage(true) end)
 	self.After(3, function() self:MemoryCheck() end)
 end
@@ -3353,15 +3348,10 @@ do
 	local deathcounter, startingmembers = 0, 0
 
 	function Skada:Tick()
-		self.callbacks:Fire("COMBAT_ENCOUNTER_TICK", self.current)
+		self.callbacks:Fire("COMBAT_PLAYER_TICK", self.current)
 		if not disabled and self.current and not self:IsGroupInCombat() then
 			self:Debug("EndSegment: Tick")
 			self:EndSegment()
-		end
-
-		if clean_timer then
-			clean_timer:Cancel()
-			clean_timer = nil
 		end
 	end
 
