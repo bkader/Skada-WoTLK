@@ -157,7 +157,7 @@ Skada:AddLoadableModule("Spamage", "Suppresses chat messages from damage meters 
 	local nextlines = {
 		"^(%d+). (.*)$", --Recount, Details! and Skada
 		"^(%d+). (.*)$", --Skada
-		"^(.*) (.*)$", -- Additional Skada
+		"^(.*)  (.*)$", -- Additional Skada
 		"^.*%%%)$", --Skada player details
 		"^[+-]%d+.%d", -- Numeration deathlog details
 		"^(%d+). (.*):(.*)(%d+)(.*)(%d+)%%(.*)%((%d+)%)$" -- TinyDPS
