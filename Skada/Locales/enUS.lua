@@ -502,6 +502,8 @@ L["Enemy Damage Taken"] = true
 L["Damage taken per player"] = true
 L["Damage on %s"] = true
 L["%s's damage sources"] = true
+-- enemy healing done module
+L["Enemy Healing Done"] = true
 -- avoidance and mitigation module
 L["Avoidance & Mitigation"] = true
 L["Damage Breakdown"] = true

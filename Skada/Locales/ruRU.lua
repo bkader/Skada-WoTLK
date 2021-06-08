@@ -503,6 +503,8 @@ L["Enemy Damage Taken"] = "Получено урона врагом"
 L["Damage taken per player"] = "Получено урона от игроков"
 L["Damage on %s"] = "Урон по %s"
 L["%s's damage sources"] = "%s - Источники урона"
+-- enemy healing done module
+L["Enemy Healing Done"] = "Произведено исцеления врагом"
 -- avoidance and mitigation module
 L["Avoidance & Mitigation"] = "Избегание и уменьшение урона"
 L["Damage Breakdown"] = "Детали повреждений"

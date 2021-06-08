@@ -502,6 +502,8 @@ L["Enemy Damage Taken"] = "敵方的承受傷害"
 L["Damage taken per player"] = "每位玩家的承受傷害"
 -- L["Damage on %s"] = ""
 -- L["%s's damage sources"] = ""
+-- enemy healing done module
+L["Enemy Healing Done"] = "敵方造成治療"
 -- avoidance and mitigation module
 -- L["Avoidance & Mitigation"] = ""
 -- L["Damage Breakdown"] = ""

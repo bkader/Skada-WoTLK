@@ -496,15 +496,17 @@ L["%s's targets"] = "Cibles de %s"
 L["DTPS"] = "DSPS"
 -- enemy damage done module
 L["Enemies"] = "Ennemis"
-L["Enemy Damage Done"] = "Dégâts infligés (ennemis)"
+L["Enemy Damage Done"] = "Dégâts infligés (Ennemi)"
 L["Damage done per player"] = "Dégâts infligés par joueur"
 L["Damage from %s"] = "Dégâts subis par %s"
 L["%s's damage on %s"] = "Dégâts de %s sur %s"
 -- enemy damage taken module
-L["Enemy Damage Taken"] = "Dégâts subis (ennemis)"
+L["Enemy Damage Taken"] = "Dégâts subis (Ennemi)"
 L["Damage taken per player"] = "Dégâts subis par joueur"
 L["Damage on %s"] = "Dégâts infligés à %s"
 L["%s's damage sources"] = "Sources des dégâts subis par %s"
+-- enemy healing done module
+L["Enemy Healing Done"] = "Soins prodigués (Ennemi)"
 -- avoidance and mitigation module
 L["Avoidance & Mitigation"] = "Évitement et mitigation"
 L["Damage Breakdown"] = "Détails des dégâts"

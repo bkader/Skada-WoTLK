@@ -502,6 +502,8 @@ L["Enemy Damage Taken"] = "Daño de enemigo recibido"
 L["Damage taken per player"] = "Daño recibido por jugador"
 L["Damage on %s"] = "Daño activo %s"
 L["%s's damage sources"] = "Fuentes de daño de %s"
+-- enemy healing done module
+L["Enemy Healing Done"] = "Sanación de Enemigos"
 -- avoidance and mitigation module
 L["Avoidance & Mitigation"] = "Evitación y mitigación"
 L["Damage Breakdown"] = "Detalles de daños"
