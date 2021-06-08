@@ -34,7 +34,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	-- useless multiple calls that return the same thing
 	-- This value is set to nil on SetComplete
 	--
-	local instanceDiff, valkyrMaxHP, valkyrHalfHP
+	local instanceDiff, valkyrsTable, valkyrMaxHP, valkyrHalfHP
 
 	local function get_raid_diff()
 		if not instanceDiff then
@@ -170,7 +170,8 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			set.overkill = (set.overkill or 0) + dmg.overkill
 		end
 
-		if dmg.dstName and dmg.amount > 0 then
+		-- to reduce memory, we don't record about targets to the total
+		if set.name == L["Current"] and dmg.dstName and dmg.amount > 0 then
 			spell.targets = spell.targets or {}
 			if not spell.targets[dmg.dstName] then
 				spell.targets[dmg.dstName] = {id = dmg.dstGUID, flags = dmg.dstFlags, amount = dmg.amount}
@@ -197,12 +198,12 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 				if altname == dmg.dstName or not altname then return end
 
 				if dmg.dstGUID and IsValkyr(dmg.dstGUID) then
-					if not set.valkyrsTable or not set.valkyrsTable[dmg.dstGUID] then
-						set.valkyrsTable = set.valkyrsTable or {}
-						set.valkyrsTable[dmg.dstGUID] = ValkyrHealthMax() - dmg.amount
+					if not valkyrsTable or not valkyrsTable[dmg.dstGUID] then
+						valkyrsTable = valkyrsTable or Skada:WeakTable()
+						valkyrsTable[dmg.dstGUID] = ValkyrHealthMax() - dmg.amount
 						player.damagedone.targets[dmg.dstName].useful = (player.damagedone.targets[dmg.dstName].useful or 0) + dmg.amount
 					else
-						if set.valkyrsTable[dmg.dstGUID] <= valkyrHalfHP then
+						if valkyrsTable[dmg.dstGUID] <= valkyrHalfHP then
 							if not spell.targets[L["Valkyrs overkilling"]] then
 								spell.targets[L["Valkyrs overkilling"]] = {flags = dmg.dstFlags, amount = dmg.amount}
 							else
@@ -218,7 +219,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 							return
 						end
 
-						set.valkyrsTable[dmg.dstGUID] = set.valkyrsTable[dmg.dstGUID] - dmg.amount
+						valkyrsTable[dmg.dstGUID] = valkyrsTable[dmg.dstGUID] - dmg.amount
 						player.damagedone.targets[dmg.dstName].useful = (player.damagedone.targets[dmg.dstName].useful or 0) + dmg.amount
 					end
 				end
@@ -724,13 +725,8 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 				player.damagedone.targets = nil
 			end
 		end
-		instanceDiff = nil
-
-		-- the follwing data are cleared only for valkyrs set
-		if set.valkyrsTable then
-			set.valkyrsTable = nil
-			valkyrMaxHP, valkyrHalfHP = nil, nil
-		end
+		instanceDiff, valkyrsTable = nil, nil
+		valkyrMaxHP, valkyrHalfHP = nil, nil
 	end
 end)
 
