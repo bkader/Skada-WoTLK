@@ -270,6 +270,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 				if validTarget[dmg.enemyname] then
 					local altname = groupName[validTarget[dmg.enemyname]]
 					if not altname or altname == dmg.enemyname then return end
+					if altname == L["Halion and Inferno"] and GetRaidDiff() ~= "25h" then return end
 
 					if IsValkyr(dmg.enemyid) then
 						if not (valkyrsTable and valkyrsTable[dmg.enemyid]) then
