@@ -6,8 +6,9 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 	local spellmod = mod:NewModule(L["Damage spell list"])
 	local targetmod = mod:NewModule(L["Damage target list"])
 
-	local _pairs, _select, _format = pairs, select, string.format
-	local _UnitClass, _GetSpellInfo = Skada.UnitClass, Skada.GetSpellInfo or GetSpellInfo
+	local pairs, select, format = pairs, select, string.format
+	local UnitClass, GetSpellInfo = Skada.UnitClass, Skada.GetSpellInfo or GetSpellInfo
+	local _
 
 	local function log_damage(set, dmg)
 		local player = Skada:get_player(set, dmg.playerid, dmg.playername, dmg.playerflags)
@@ -27,11 +28,11 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 				end
 			end
 
-			-- record targets
-			if dmg.dstName then
+			-- saving this to total set may become a memory hog deluxe.
+			if set == Skada.current and dmg.dstName then
 				player.friendfire.targets = player.friendfire.targets or {}
 				if not player.friendfire.targets[dmg.dstName] then
-					player.friendfire.targets[dmg.dstName] = {id = dmg.dstGUID, flags = dmg.dstFlags, amount = dmg.amount}
+					player.friendfire.targets[dmg.dstName] = {id = dmg.dstGUID, amount = dmg.amount}
 				else
 					player.friendfire.targets[dmg.dstName].amount = (player.friendfire.targets[dmg.dstName].amount or 0) + dmg.amount
 				end
@@ -51,7 +52,6 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
 			dmg.dstGUID = dstGUID
 			dmg.dstName = dstName
-			dmg.dstFlags = dstFlags
 
 			dmg.spellid = spellid
 			dmg.spellschool = school
@@ -65,13 +65,13 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 	local function SwingDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
 			local amount, overkill, school, resisted, blocked, absorbed = ...
+
 			dmg.playerid = srcGUID
 			dmg.playername = srcName
 			dmg.playerflags = srcFlags
 
 			dmg.dstGUID = dstGUID
 			dmg.dstName = dstName
-			dmg.dstFlags = dstFlags
 
 			dmg.spellid = 6603
 			dmg.spellschool = 1
@@ -84,31 +84,31 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = _format(L["%s's targets"], label)
+		win.title = format(L["%s's targets"], label)
 	end
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = _format(L["%s's targets"], player.name)
+			win.title = format(L["%s's targets"], player.name)
 			local total = player.friendfire and player.friendfire.amount or 0
 
 			if total > 0 and player.friendfire.targets then
 				local maxvalue, nr = 0, 1
 
-				for targetname, target in _pairs(player.friendfire.targets) do
+				for targetname, target in pairs(player.friendfire.targets) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = target.id or targetname
+					d.id = target.id
 					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(d.id, target.flags, set))
+					d.class, d.role, d.spec = select(2, UnitClass(d.id, target.flags, set))
 
 					d.value = target.amount
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(target.amount),
 						mod.metadata.columns.Damage,
-						_format("%.1f%%", 100 * target.amount / total),
+						format("%.1f%%", 100 * target.amount / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -125,34 +125,32 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
 	function spellmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = _format(L["%s's damage"], label)
+		win.title = format(L["%s's damage"], label)
 	end
 
 	function spellmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = _format(L["%s's damage"], player.name)
+			win.title = format(L["%s's damage"], player.name)
 			local total = player.friendfire and player.friendfire.amount or 0
 
 			if total > 0 and player.friendfire.spells then
 				local maxvalue, nr = 0, 1
 
-				for spellid, spell in _pairs(player.friendfire.spells) do
+				for spellid, spell in pairs(player.friendfire.spells) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					local spellname, _, spellicon = _GetSpellInfo(spellid)
 					d.id = spellid
 					d.spellid = spellid
-					d.label = spellname
-					d.icon = spellicon
+					d.label, _, d.icon = GetSpellInfo(spellid)
 					d.spellschool = spell.school
 
 					d.value = spell.amount
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(spell.amount),
 						mod.metadata.columns.Damage,
-						_format("%.1f%%", 100 * spell.amount / total),
+						format("%.1f%%", 100 * spell.amount / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -189,7 +187,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(player.friendfire.amount),
 						self.metadata.columns.Damage,
-						_format("%.1f%%", 100 * player.friendfire.amount / total),
+						format("%.1f%%", 100 * player.friendfire.amount / total),
 						self.metadata.columns.Percent
 					)
 
@@ -210,6 +208,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 			showspots = true,
 			click1 = spellmod,
 			click2 = targetmod,
+			nototalclick = {targetmod},
 			columns = {Damage = true, Percent = true},
 			icon = "Interface\\Icons\\inv_gizmo_supersappercharge"
 		}

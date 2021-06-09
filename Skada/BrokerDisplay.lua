@@ -11,7 +11,7 @@ local ldb = LibStub:GetLibrary("LibDataBroker-1.1")
 local libwindow = LibStub("LibWindow-1.1")
 local media = LibStub("LibSharedMedia-3.0")
 
-local tsort, _format, _ipairs = table.sort, string.format, ipairs
+local tsort, format, ipairs = table.sort, string.format, ipairs
 
 local classcolors = {
 	DEATHKNIGHT = "|cffc41f3b%s|r",
@@ -43,7 +43,7 @@ local function formatLabel(win, data)
 
 	local label = ""
 	if win.db.isusingclasscolors and data.class then
-		label = _format(classcolors[data.class], data.text or data.label)
+		label = format(classcolors[data.class], data.text or data.label)
 	else
 		label = data.text or data.label
 	end
@@ -84,14 +84,14 @@ local function tooltipHandler(win, tooltip)
 	if #win.dataset > 0 then
 		tooltip:AddLine(" ")
 		local n = 0 -- used to fix spots starting from 2
-		for i, data in _ipairs(win.dataset) do
+		for i, data in ipairs(win.dataset) do
 			if data.id and not data.ignore and i < 30 then
 				n = n + 1
 				local label = formatLabel(win, data)
 				local value = formatValue(win, data)
 
 				if win.metadata.showspots and Skada.db.profile.showranks then
-					label = _format("%2u. %s", n, label)
+					label = format("%2u. %s", n, label)
 				end
 
 				tooltip:AddDoubleLine(label or "", value or "", color.r, color.g, color.b, color.r, color.g, color.b)

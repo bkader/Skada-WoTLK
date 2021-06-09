@@ -8,8 +8,9 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 	local playermod = mod:NewModule(L["Dispel spell list"])
 
 	-- cache frequently used globals
-	local _pairs, _select, _format = pairs, select, string.format
-	local _UnitClass, _GetSpellInfo = Skada.UnitClass, Skada.GetSpellInfo or GetSpellInfo
+	local pairs, select, format = pairs, select, string.format
+	local UnitClass, GetSpellInfo = Skada.UnitClass, Skada.GetSpellInfo or GetSpellInfo
+	local _
 
 	local function log_dispels(set, data)
 		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
@@ -18,6 +19,9 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 			player.dispels = player.dispels or {}
 			player.dispels.count = (player.dispels.count or 0) + 1
 			set.dispels = (set.dispels or 0) + 1
+
+			-- saving this to total set may become a memory hog deluxe.
+			if set ~= Skada.current then return end
 
 			-- add the dispelled spell
 			if data.spellid then
@@ -43,7 +47,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 			if data.dstName then
 				player.dispels.targets = player.dispels.targets or {}
 				if not player.dispels.targets[data.dstName] then
-					player.dispels.targets[data.dstName] = {id = data.dstGUID, flags = data.dstFlags, count = 1}
+					player.dispels.targets[data.dstName] = {id = data.dstGUID, count = 1}
 				else
 					player.dispels.targets[data.dstName].count = player.dispels.targets[data.dstName].count + 1
 				end
@@ -63,11 +67,9 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 
 			data.dstGUID = dstGUID
 			data.dstName = dstName
-			data.dstFlags = dstFlags
 
 			data.spellid = spellid
 			data.spellschool = spellschool
-
 			data.extraspellid = extraspellid or 6603
 			data.extraspellname = extraspellname or L["Auto Attack"]
 			data.extraspellschool = extraspellschool or 1
@@ -79,39 +81,37 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 
 	function spellmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = _format(L["%s's dispelled spells"], label)
+		win.title = format(L["%s's dispelled spells"], label)
 	end
 
 	function spellmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = _format(L["%s's dispelled spells"], player.name)
+			win.title = format(L["%s's dispelled spells"], player.name)
 			local total = player.dispels and player.dispels.count or 0
 
 			if total > 0 and player.dispels.extraspells then
 				local maxvalue, nr = 0, 1
 
-				for spellid, spell in _pairs(player.dispels.extraspells) do
+				for spellid, spell in pairs(player.dispels.extraspells) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					local spellname, _, spellicon = _GetSpellInfo(spellid)
 					d.id = spellid
 					d.spellid = spellid
-					d.label = spellname
-					d.icon = spellicon
+					d.label, _, d.icon = GetSpellInfo(spellid)
 					d.spellschool = spell.school
 
-					d.value = spell.count
+					d.value = spell.count or 0
 					d.valuetext = Skada:FormatValueText(
-						spell.count,
+						d.value,
 						mod.metadata.columns.Total,
-						_format("%.1f%%", 100 * spell.count / total),
+						format("%.1f%%", 100 * d.value / total),
 						mod.metadata.columns.Percent
 					)
 
-					if spell.count > maxvalue then
-						maxvalue = spell.count
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end
@@ -123,31 +123,31 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = _format(L["%s's dispelled targets"], label)
+		win.title = format(L["%s's dispelled targets"], label)
 	end
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = _format(L["%s's dispelled targets"], player.name)
+			win.title = format(L["%s's dispelled targets"], player.name)
 			local total = player.dispels and player.dispels.count or 0
 
 			if total > 0 and player.dispels.targets then
 				local maxvalue, nr = 0, 1
 
-				for targetname, target in _pairs(player.dispels.targets) do
+				for targetname, target in pairs(player.dispels.targets) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(d.id, target.flags, set))
+					d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(
 						target.count,
 						mod.metadata.columns.Total,
-						_format("%.1f%%", 100 * target.count / total),
+						format("%.1f%%", 100 * target.count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -165,34 +165,31 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = _format(L["%s's dispel spells"], label)
+		win.title = format(L["%s's dispel spells"], label)
 	end
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = _format(L["%s's dispel spells"], player.name)
+			win.title = format(L["%s's dispel spells"], player.name)
 			local total = player.dispels and (player.dispels.count or 0) or 0
 
 			if total > 0 and player.dispels.spells then
 				local maxvalue, nr = 0, 1
 
-				for spellid, spell in _pairs(player.dispels.spells) do
+				for spellid, spell in pairs(player.dispels.spells) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					local spellname, _, spellicon = _GetSpellInfo(spellid)
-					d.id = spellid
 					d.spellid = spellid
-					d.label = spellname
-					d.icon = spellicon
+					d.label, _, d.icon = GetSpellInfo(spellid)
 					d.spellschool = spell.school
 
 					d.value = spell.count or 0
 					d.valuetext = Skada:FormatValueText(
 						d.value,
 						mod.metadata.columns.Total,
-						_format("%.1f%%", 100 * d.value / total),
+						format("%.1f%%", 100 * d.value / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -229,7 +226,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						player.dispels.count,
 						self.metadata.columns.Total,
-						_format("%.1f%%", 100 * player.dispels.count / total),
+						format("%.1f%%", 100 * player.dispels.count / total),
 						self.metadata.columns.Percent
 					)
 
@@ -250,6 +247,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 			click1 = spellmod,
 			click2 = targetmod,
 			click3 = playermod,
+			nototalclick = {spellmod, targetmod, playermod},
 			columns = {Total = true, Percent = true},
 			icon = "Interface\\Icons\\spell_arcane_massdispel"
 		}

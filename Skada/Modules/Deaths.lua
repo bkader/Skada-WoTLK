@@ -6,16 +6,16 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	local playermod = mod:NewModule(L["Player's deaths"])
 	local deathlogmod = mod:NewModule(L["Death log"])
 
-	local _UnitHealth, _UnitHealthMax = UnitHealth, UnitHealthMax
-	local _UnitIsFeignDeath = UnitIsFeignDeath
-	local table_insert, table_remove = table.insert, table.remove
-	local table_sort, table_maxn, table_concat = table.sort, table.maxn, table.concat
-	local _ipairs, _select, _next = ipairs, select, next
-	local _tostring, _format, _strsub = tostring, string.format, string.sub
-	local math_abs, math_max, math_modf = math.abs, math.max, math.modf
-	local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-	local _GetspellLink = Skada.GetSpellLink or GetSpellLink
-	local _date = date
+	local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
+	local UnitIsFeignDeath = UnitIsFeignDeath
+	local tinsert, tremove = table.insert, table.remove
+	local tsort, tmaxn, tconcat = table.sort, table.maxn, table.concat
+	local ipairs = ipairs
+	local tostring, format, strsub = tostring, string.format, string.sub
+	local abs, max, modf = math.abs, math.max, math.modf
+	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+	local GetspellLink = Skada.GetSpellLink or GetSpellLink
+	local date = date
 	local _
 
 	local function log_deathlog(set, data, ts)
@@ -24,7 +24,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		if player then
 			-- et player maxhp if not already set
 			if (player.maxhp or 0) == 0 then
-				player.maxhp = math_max(_UnitHealthMax(player.name) or 0, player.maxhp or 0)
+				player.maxhp = max(UnitHealthMax(player.name) or 0, player.maxhp or 0)
 			end
 
 			-- create a log entry if it doesn't exist.
@@ -35,7 +35,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 			-- record our log
 			local deathlog = player.deathlog[1]
-			table_insert(deathlog.log, 1, {
+			tinsert(deathlog.log, 1, {
 				spellid = data.spellid,
 				source = data.srcName,
 				amount = data.amount,
@@ -44,12 +44,12 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 				blocked = data.blocked,
 				absorbed = data.absorbed,
 				time = ts,
-				hp = _UnitHealth(data.playername)
+				hp = UnitHealth(data.playername)
 			})
 
 			-- trim things and limit to 15
-			while table_maxn(deathlog.log) > 15 do
-				table_remove(deathlog.log)
+			while tmaxn(deathlog.log) > 15 do
+				tremove(deathlog.log)
 			end
 		end
 	end
@@ -145,7 +145,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 		data.spellid = spellid
 		data.spellname = spellname
-		data.amount = amount
+		data.amount = max(0, amount - (overhealing or 0))
 
 		log_deathlog(Skada.current, data, ts)
 	end
@@ -163,7 +163,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	end
 
 	local function UnitDied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		if not _UnitIsFeignDeath(dstName) then
+		if not UnitIsFeignDeath(dstName) then
 			log_death(Skada.current, dstGUID, dstName, dstFlags, ts)
 			log_death(Skada.total, dstGUID, dstName, dstFlags, ts)
 		end
@@ -180,7 +180,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		local player = Skada:get_player(set, playerid, playername, playerflags)
 		if player then
 			player.deathlog = player.deathlog or {}
-			table_insert(player.deathlog, 1, {time = 0, log = {}})
+			tinsert(player.deathlog, 1, {time = 0, log = {}})
 		end
 	end
 
@@ -192,18 +192,18 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	-- this is useful in case of someone's death causing others'
 	-- death. Example: Sindragosa's unchained magic.
 	local function formatdate(ts)
-		local a, b = math_modf(ts)
-		local d = _date("%H:%M:%S", a or ts)
+		local a, b = modf(ts)
+		local d = date("%H:%M:%S", a or ts)
 		if b == 0 then
 			return d
 		end -- really rare to see .000
-		b = _strsub(_tostring(b), 3, 5)
+		b = strsub(tostring(b), 3, 5)
 		return d .. "." .. b
 	end
 
 	function deathlogmod:Enter(win, id, label)
 		self.index = id
-		win.title = _format(L["%s's death log"], win.playername or UNKNOWN)
+		win.title = format(L["%s's death log"], win.playername or UNKNOWN)
 	end
 
 	do
@@ -217,7 +217,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		function deathlogmod:Update(win, set)
 			local player = Skada:find_player(set, win.playerid, win.playername)
 			if player and self.index then
-				win.title = _format(L["%s's death log"], win.playername or UNKNOWN)
+				win.title = format(L["%s's death log"], win.playername or UNKNOWN)
 
 				local deathlog
 				if player.deathlog and player.deathlog[self.index] then
@@ -235,26 +235,26 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 				pre.id = nr
 				pre.time = deathlog.time
-				pre.label = formatdate(deathlog.time) .. ": " .. _format(L["%s dies"], player.name)
+				pre.label = formatdate(deathlog.time) .. ": " .. format(L["%s dies"], player.name)
 				pre.icon = "Interface\\Icons\\Ability_Rogue_FeignDeath"
 				pre.value = 0
 				pre.valuetext = ""
 
 				nr = nr + 1
 
-				table_sort(deathlog.log, sort_logs)
+				tsort(deathlog.log, sort_logs)
 
-				for i, log in _ipairs(deathlog.log) do
+				for i, log in ipairs(deathlog.log) do
 					local diff = tonumber(log.time) - tonumber(deathlog.time)
 					if diff > -30 then
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
-						local spellname, _, spellicon = _GetSpellInfo(log.spellid)
+						local spellname, _, spellicon = GetSpellInfo(log.spellid)
 
 						d.id = nr
 						d.spellid = log.spellid
-						d.label = _format("%02.2f: %s", diff or 0, spellname or UNKNOWN)
+						d.label = format("%02.2f: %s", diff or 0, spellname or UNKNOWN)
 						d.icon = spellicon
 						d.time = log.time
 
@@ -265,34 +265,34 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 						d.spellname = spellname
 
 						d.value = log.hp or 0
-						local change = (log.amount > 0 and "+" or "-") .. Skada:FormatNumber(math_abs(log.amount))
-						d.reportlabel = _format("%02.2f: %s   %s [%s]", diff or 0, _GetspellLink(log.spellid) or spellname or UNKNOWN, change, Skada:FormatNumber(log.hp or 0))
+						local change = (log.amount > 0 and "+" or "-") .. Skada:FormatNumber(abs(log.amount))
+						d.reportlabel =format("%02.2f: %s   %s [%s]", diff or 0, GetspellLink(log.spellid) or spellname or UNKNOWN, change, Skada:FormatNumber(log.hp or 0))
 
 						local extra
 						if (log.overkill or 0) > 0 then
 							extra = extra or {}
 							d.overkill = log.overkill
-							table_insert(extra, "O:" .. Skada:FormatNumber(math_abs(log.overkill)))
+							tinsert(extra, "O:" .. Skada:FormatNumber(abs(log.overkill)))
 						end
 						if (log.resisted or 0) > 0 then
 							extra = extra or {}
 							d.resisted = log.resisted
-							table_insert(extra, "R:" .. Skada:FormatNumber(math_abs(log.resisted)))
+							tinsert(extra, "R:" .. Skada:FormatNumber(abs(log.resisted)))
 						end
 						if (log.blocked or 0) > 0 then
 							extra = extra or {}
 							d.blocked = log.blocked
-							table_insert(extra, "B:" .. Skada:FormatNumber(math_abs(log.blocked)))
+							tinsert(extra, "B:" .. Skada:FormatNumber(abs(log.blocked)))
 						end
 						if (log.absorbed or 0) > 0 then
 							extra = extra or {}
 							d.absorbed = log.absorbed
-							table_insert(extra, "A:" .. Skada:FormatNumber(math_abs(log.absorbed)))
+							tinsert(extra, "A:" .. Skada:FormatNumber(abs(log.absorbed)))
 						end
 
 						if extra then
 							change = "(|cffff0000*|r) " .. change
-							d.reportlabel = d.reportlabel .. " (" .. table_concat(extra, " - ") .. ")"
+							d.reportlabel = d.reportlabel .. " (" .. tconcat(extra, " - ") .. ")"
 						end
 
 						d.valuetext = Skada:FormatValueText(
@@ -300,7 +300,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 							self.metadata.columns.Change,
 							Skada:FormatNumber(log.hp or 0),
 							self.metadata.columns.Health,
-							_format("%.1f%%", 100 * (log.hp or 1) / (player.maxhp or 1)),
+							format("%.1f%%", 100 * (log.hp or 1) / (player.maxhp or 1)),
 							self.metadata.columns.Percent
 						)
 
@@ -318,19 +318,19 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = _format(L["%s's deaths"], label)
+		win.title = format(L["%s's deaths"], label)
 	end
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid)
 
 		if player then
-			win.title = _format(L["%s's deaths"], player.name)
+			win.title = format(L["%s's deaths"], player.name)
 
 			if (player.deaths or 0) > 0 and player.deathlog then
 				local maxvalue, nr = 0, 1
 
-				for i, death in _ipairs(player.deathlog) do
+				for i, death in ipairs(player.deathlog) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -341,7 +341,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 					local dth = death.log[1]
 
 					if dth and dth.spellid then
-						d.label, _, d.icon = _GetSpellInfo(dth.spellid)
+						d.label, _, d.icon = GetSpellInfo(dth.spellid)
 						d.spellid = dth.spellid
 					elseif dth and dth.source then
 						d.label = dth.source
@@ -382,7 +382,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 					d.spec = player.spec
 
 					d.value = player.deaths
-					d.valuetext = _tostring(player.deaths)
+					d.valuetext = tostring(player.deaths)
 
 					if player.deaths > maxvalue then
 						maxvalue = player.deaths
@@ -439,7 +439,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 			columns = {Change = true, Health = true, Percent = true}
 		}
 		playermod.metadata = {click1 = deathlogmod}
-		self.metadata = {click1 = playermod, icon = "Interface\\Icons\\ability_rogue_feigndeath"}
+		self.metadata = {click1 = playermod, nototalclick = {playermod}, icon = "Interface\\Icons\\ability_rogue_feigndeath"}
 
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SPLIT", {dst_is_interesting_nopets = true})
@@ -473,8 +473,8 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 			if player.deaths and player.deaths == 0 then
 				player.deathlog = nil
 			elseif player.deaths and player.deathlog then
-				while table_maxn(player.deathlog) > player.deaths do
-					table_remove(player.deathlog, 1)
+				while tmaxn(player.deathlog) > player.deaths do
+					tremove(player.deathlog, 1)
 				end
 			end
 		end

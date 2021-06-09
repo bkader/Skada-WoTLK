@@ -5,8 +5,8 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 	local mod = Skada:NewModule(L["Sunder Counter"])
 	local targetmod = mod:NewModule(L["Sunder target list"])
 
-	local _pairs, _select, _format = pairs, select, string.format
-	local _UnitClass, _GetSpellInfo = Skada.UnitClass, Skada.GetSpellInfo or GetSpellInfo
+	local pairs, select, format = pairs, select, string.format
+	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 
 	local sunder, devastate
 
@@ -17,13 +17,9 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 			player.sunders.count = (player.sunders.count or 0) + 1
 			set.sunders = (set.sunders or 0) + 1
 
-			if data.dstName then
+			if set == Skada.current and data.dstName then
 				player.sunders.targets = player.sunders.targets or {}
-				if not player.sunders.targets[data.dstName] then
-					player.sunders.targets[data.dstName] = {id = data.dstGUID, flags = data.dstFlags, count = 1}
-				else
-					player.sunders.targets[data.dstName].count = (player.sunders.targets[data.dstName].count or 0) + 1
-				end
+				player.sunders.targets[data.dstName] = (player.sunders.targets[data.dstName] or 0) + 1
 			end
 		end
 	end
@@ -36,10 +32,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 			data.playerid = srcGUID
 			data.playername = srcName
 			data.playerflags = srcFlags
-
-			data.dstGUID = dstGUID
 			data.dstName = dstName
-			data.dstFlags = dstFlags
 
 			log_sunder(Skada.current, data)
 			log_sunder(Skada.total, data)
@@ -48,41 +41,39 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = _format(L["%s's <%s> targets"], label, sunder)
+		win.title = format(L["%s's <%s> targets"], label, sunder)
 	end
 
 	function targetmod:Update(win, set)
 		if not sunder then
-			sunder = _select(1, _GetSpellInfo(47467))
-			devastate = _select(1, _GetSpellInfo(47498))
+			sunder = GetSpellInfo(47467)
+			devastate = GetSpellInfo(47498)
 		end
 
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = _format(L["%s's <%s> targets"], player.name, sunder)
+			win.title = format(L["%s's <%s> targets"], player.name, sunder)
 			local total = player.sunders and player.sunders.count or 0
 
 			if total > 0 and player.sunders.targets then
 				local maxvalue, nr = 0, 1
 
-				for targetname, target in _pairs(player.sunders.targets) do
+				for targetname, count in pairs(player.sunders.targets) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = target.id or targetname
+					d.id = targetname
 					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(d.id, target.flags, set))
-
-					d.value = target.count
+					d.value = count
 					d.valuetext = Skada:FormatValueText(
-						target.count,
+						count,
 						mod.metadata.columns.Count,
-						_format("%.1f%%", 100 * target.count / total),
+						format("%.1f%%", 100 * count / total),
 						mod.metadata.columns.Percent
 					)
 
-					if target.count > maxvalue then
-						maxvalue = target.count
+					if count > maxvalue then
+						maxvalue = count
 					end
 					nr = nr + 1
 				end
@@ -94,8 +85,8 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 	function mod:Update(win, set)
 		if not sunder then
-			sunder = _select(1, _GetSpellInfo(47467))
-			devastate = _select(1, _GetSpellInfo(47498))
+			sunder = GetSpellInfo(47467)
+			devastate = GetSpellInfo(47498)
 		end
 
 		win.title = L["Sunder Counter"]
@@ -119,7 +110,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						player.sunders.count,
 						self.metadata.columns.Count,
-						_format("%.1f%%", 100 * player.sunders.count / total),
+						format("%.1f%%", 100 * player.sunders.count / total),
 						self.metadata.columns.Percent
 					)
 
@@ -135,14 +126,15 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 	end
 
 	function mod:OnInitialize()
-		sunder = _select(1, _GetSpellInfo(47467))
-		devastate = _select(1, _GetSpellInfo(47498))
+		sunder = GetSpellInfo(47467)
+		devastate = GetSpellInfo(47498)
 	end
 
 	function mod:OnEnable()
 		self.metadata = {
 			showspots = true,
 			click1 = targetmod,
+			nototalclick = {targetmod},
 			columns = {Count = true, Percent = true},
 			icon = "Interface\\Icons\\ability_warrior_sunder"
 		}
@@ -155,7 +147,9 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 	end
 
 	function mod:AddToTooltip(set, tooltip)
-		tooltip:AddDoubleLine(sunder, set.sunders or 0, 1, 1, 1)
+		if set and (set.sunders or 0) > 0 then
+			tooltip:AddDoubleLine(sunder, set.sunders or 0, 1, 1, 1)
+		end
 	end
 
 	function mod:GetSetSummary(set)

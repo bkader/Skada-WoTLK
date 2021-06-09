@@ -430,7 +430,6 @@ L["CC Tracker"] = true
 -- CC Done:
 L["CC Done"] = true
 L["CC Done spells"] = true
-L["CC Done spell targets"] = true
 L["CC Done targets"] = true
 L["CC Done target spells"] = true
 L["%s's CC Done <%s> targets"] = true
@@ -440,7 +439,6 @@ L["%s's CC Done targets"] = true
 -- CC Taken
 L["CC Taken"] = true
 L["CC Taken spells"] = true
-L["CC Taken spell sources"] = true
 L["CC Taken sources"] = true
 L["CC Taken source spells"] = true
 L["%s's CC Taken <%s> sources"] = true
@@ -450,7 +448,6 @@ L["%s's CC Taken sources"] = true
 L["CC Breaks"] = true
 L["CC Breakers"] = true
 L["CC Break spells"] = true
-L["CC Break spell targets"] = true
 L["CC Break targets"] = true
 L["CC Break target spells"] = true
 L["%s's CC Break <%s> spells"] = true
@@ -502,6 +499,8 @@ L["Enemy Damage Taken"] = true
 L["Damage taken per player"] = true
 L["Damage on %s"] = true
 L["%s's damage sources"] = true
+-- enemy healing done module
+L["Enemy Healing Done"] = true
 -- avoidance and mitigation module
 L["Avoidance & Mitigation"] = true
 L["Damage Breakdown"] = true
@@ -573,7 +572,6 @@ L["%s's interrupted spells"] = true
 L["%s's interrupted targets"] = true
 L["Announce Interrupts"] = true
 L["%s interrupted!"] = true
-L["%s interrupted with %s!"] = true
 -- Power gained module --
 L["Power"] = true
 L["Resources"] = true

@@ -7,12 +7,12 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	local potionmod = mod:NewModule(L["Players list"])
 
 	-- cache frequently used globals
-	local _pairs, _select, tconcat = pairs, select, table.concat
-	local _format, _strsub, _tostring, math_max = string.format, string.sub, tostring, math.max
-	local _GetItemInfo, _GetSpellInfo = GetItemInfo, Skada.GetSpellInfo
-	local _UnitExists, _UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
-	local _UnitGUID, _UnitName = UnitGUID, UnitName
-	local _UnitClass, _UnitBuff = UnitClass, UnitBuff
+	local pairs, select, tconcat = pairs, select, table.concat
+	local format, strsub, tostring = string.format, string.sub, tostring
+	local GetItemInfo, GetSpellInfo = GetItemInfo, Skada.GetSpellInfo
+	local UnitExists, UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
+	local UnitGUID, UnitName = UnitGUID, UnitName
+	local UnitClass, UnitBuff = UnitClass, UnitBuff
 
 	local potionIDs = {
 		[28494] = 22828, -- Insane Strength Potion
@@ -67,28 +67,26 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 			local prefix, min_member, max_member = Skada:GetGroupTypeAndCount()
 
 			for n = min_member, max_member do
-				local unit = (n == 0) and "player" or prefix .. _tostring(n)
-				if _UnitExists(unit) and not _UnitIsDeadOrGhost(unit) then
-					local playerid, playername = _UnitGUID(unit), _UnitName(unit)
-					local class = _select(2, _UnitClass(unit))
+				local unit = (n == 0) and "player" or prefix .. tostring(n)
+				if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
+					local playerid, playername = UnitGUID(unit), UnitName(unit)
+					local class = select(2, UnitClass(unit))
 
 					local potions = {} -- holds used potions
 
-					for potionid, _ in _pairs(potionIDs) do
-						local _, _, icon, _, _, _, _, _, _, _, spellid = _UnitBuff(unit, _GetSpellInfo(potionid))
+					for potionid, _ in pairs(potionIDs) do
+						local _, _, icon, _, _, _, _, _, _, _, spellid = UnitBuff(unit, GetSpellInfo(potionid))
 						if spellid and potionIDs[spellid] then
 							-- instant recording doesn't work, so we delay it
-							Skada.After(1, function()
-								PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid)
-							end)
-							tinsert(potions, _format(potionStr, icon))
+							Skada.After(1, function() PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid) end)
+							tinsert(potions, format(potionStr, icon))
 						end
 					end
 
 					-- add to print out:
 					if next(potions) ~= nil and class and Skada.validclass[class] then
 						local colorStr = Skada.classcolors[class].colorStr or "ffffffff"
-						tinsert(prepotion, _format(prepotionStr, colorStr, playername, tconcat(potions, " ")))
+						tinsert(prepotion, format(prepotionStr, colorStr, playername, tconcat(potions, " ")))
 					end
 				end
 			end
@@ -106,7 +104,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 		local total, players = 0, {}
 		if win.potionid then
 			for _, player in Skada:IteratePlayers(set) do
-				if player.potions and player.potions.potions[win.potionid] then
+				if player.potions and player.potions.potions and player.potions.potions[win.potionid] then
 					total = total + player.potions.potions[win.potionid]
 					players[player.id] = {
 						name = player.name,
@@ -122,7 +120,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for playerid, player in _pairs(players) do
+			for playerid, player in pairs(players) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -136,7 +134,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 				d.valuetext = Skada:FormatValueText(
 					player.count,
 					mod.metadata.columns.Count,
-					_format("%.1f%%", 100 * player.count / total),
+					format("%.1f%%", 100 * player.count / total),
 					mod.metadata.columns.Percent
 				)
 
@@ -152,11 +150,11 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = _format(L["%s's used potions"], label)
+		win.title = format(L["%s's used potions"], label)
 	end
 
 	local function RequestPotion(potionid)
-		if potionid and potionid ~= nil and potionid ~= "" and potionid ~= 0 and _strsub(potionid, 1, 1) ~= "s" then
+		if potionid and potionid ~= nil and potionid ~= "" and potionid ~= 0 and strsub(potionid, 1, 1) ~= "s" then
 			GameTooltip:SetHyperlink("item:" .. potionid .. ":0:0:0:0:0:0:0")
 			GameTooltip:Hide()
 		end
@@ -165,14 +163,14 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid)
 		if player then
-			win.title = _format(L["%s's used potions"], player.name)
+			win.title = format(L["%s's used potions"], player.name)
 			local total = player.potions and player.potions.count or 0
 
 			if total > 0 and player.potions.potions then
 				local maxvalue, nr = 0, 1
 
-				for potionid, count in _pairs(player.potions.potions) do
-					local potionname, potionlink, _, _, _, _, _, _, _, potionicon = _GetItemInfo(potionid)
+				for potionid, count in pairs(player.potions.potions) do
+					local potionname, potionlink, _, _, _, _, _, _, _, potionicon = GetItemInfo(potionid)
 					if not potionname then
 						RequestPotion(potionid)
 					end
@@ -190,7 +188,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							count,
 							mod.metadata.columns.Count,
-							_format("%.1f%%", 100 * count / total),
+							format("%.1f%%", 100 * count / total),
 							mod.metadata.columns.Percent
 						)
 
@@ -229,7 +227,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						d.value,
 						self.metadata.columns.Count,
-						_format("%.1f%%", 100 * d.value / total),
+						format("%.1f%%", 100 * d.value / total),
 						self.metadata.columns.Percent
 					)
 
@@ -292,7 +290,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 
 	function mod:SetComplete(set)
 		if Skada.db.profile.prepotion and next(prepotion or {}) ~= nil then
-			Skada:Print(_format(L["pre-potion: %s"], tconcat(prepotion, ", ")))
+			Skada:Print(format(L["pre-potion: %s"], tconcat(prepotion, ", ")))
 		end
 	end
 end)

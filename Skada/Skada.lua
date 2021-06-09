@@ -18,7 +18,7 @@ local Translit = LibStub("LibTranslit-1.0", true)
 local tsort, tinsert, tremove, tmaxn = table.sort, table.insert, table.remove, table.maxn
 local next, pairs, ipairs, type = next, pairs, ipairs, type
 local tonumber, tostring, format, strsplit = tonumber, tostring, string.format, strsplit
-local math_floor, math_max, math_min = math.floor, math.max, math.min
+local floor, max, min = math.floor, math.max, math.min
 local band, bor, time, setmetatable = bit.band, bit.bor, time, setmetatable
 local GetNumPartyMembers, GetNumRaidMembers = GetNumPartyMembers, GetNumRaidMembers
 local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAffectingCombat, InCombatLockdown
@@ -163,7 +163,7 @@ local sort_modes
 local function setPlayerActiveTimes(set)
 	for _, player in Skada:IteratePlayers(set) do
 		if player.last then
-			player.time = math_max(player.time + (player.last - player.first), 0.1)
+			player.time = max(player.time + (player.last - player.first), 0.1)
 		end
 	end
 end
@@ -179,7 +179,7 @@ function Skada:PlayerActiveTime(set, player, active)
 		if set and (not set.endtime or set.stopped) and player.first then
 			maxtime = maxtime + (player.last or 0) - player.first
 		end
-		settime = math_min(maxtime, settime)
+		settime = min(maxtime, settime)
 	end
 
 	return settime
@@ -824,7 +824,7 @@ function Skada:CreateWindow(name, db, display)
 			else
 				local n, c = win.db.name:match("^(.-)%s*%((%d+)%)$")
 				if n == name then
-					num = math_max(num, tonumber(c) or 0)
+					num = max(num, tonumber(c) or 0)
 				end
 			end
 		end
@@ -1068,7 +1068,7 @@ function Skada:IterateModes()
 end
 
 function Skada:IterateSets()
-	return ipairs(self.char.sets or {})
+	return ipairs(self.char.sets)
 end
 
 function Skada:IterateWindows()
@@ -1202,7 +1202,7 @@ function Skada:GetSetTime(set)
 		if (set.time or 0) > 0 then
 			settime = set.time
 		else
-			settime = math_max(time() - set.starttime, 0.1)
+			settime = max(time() - set.starttime, 0.1)
 		end
 	end
 	return settime
@@ -1219,14 +1219,15 @@ end
 function Skada:ClearIndexes(set)
 	if set then
 		set._playeridx = nil
+		self.callbacks:Fire("SKADA_DATA_CLEARSETINDEX", set)
 	end
 end
 
 function Skada:ClearAllIndexes()
-	Skada:ClearIndexes(self.current)
-	Skada:ClearIndexes(self.char.total)
-	for _, set in pairs(self.char.sets) do
-		Skada:ClearIndexes(set)
+	self:ClearIndexes(self.current)
+	self:ClearIndexes(self.char.total)
+	for _, set in self:IterateSets() do
+		self:ClearIndexes(set)
 	end
 end
 
@@ -1755,64 +1756,67 @@ do
 			end
 		end
 	end
-end
 
-function Skada:ShowTooltip(win, id, label)
-	local t = GameTooltip
+	local function ignoredTotalClick(win, click)
+		if win and win.selectedset == "total" and win.metadata and win.metadata.nototalclick and click then
+			return tContains(win.metadata.nototalclick, click)
+		end
+	end
 
-	if self.db.profile.tooltips then
-		if win.metadata.is_modelist and self.db.profile.informativetooltips then
-			t:ClearLines()
-			self:AddSubviewToTooltip(t, win, self:find_mode(id), id, label)
-			t:Show()
-		elseif win.metadata.click1 or win.metadata.click2 or win.metadata.click3 or win.metadata.tooltip then
-			t:ClearLines()
-			local hasClick = win.metadata.click1 or win.metadata.click2 or win.metadata.click3
+	function Skada:ShowTooltip(win, id, label)
+		local t = GameTooltip
 
-			if win.metadata.tooltip then
-				local numLines = t:NumLines()
-				win.metadata.tooltip(win, id, label, t)
+		if self.db.profile.tooltips then
+			if win.metadata.is_modelist and self.db.profile.informativetooltips then
+				t:ClearLines()
+				self:AddSubviewToTooltip(t, win, self:find_mode(id), id, label)
+				t:Show()
+			elseif win.metadata.click1 or win.metadata.click2 or win.metadata.click3 or win.metadata.tooltip then
+				t:ClearLines()
+				local hasClick = win.metadata.click1 or win.metadata.click2 or win.metadata.click3
 
-				if t:NumLines() ~= numLines and hasClick then
-					t:AddLine(" ")
+				if win.metadata.tooltip then
+					local numLines = t:NumLines()
+					win.metadata.tooltip(win, id, label, t)
+
+					if t:NumLines() ~= numLines and hasClick then
+						t:AddLine(" ")
+					end
 				end
-				numLines = nil
-			end
 
-			if self.db.profile.informativetooltips then
-				if win.metadata.click1 then
-					self:AddSubviewToTooltip(t, win, win.metadata.click1, id, label)
+				if self.db.profile.informativetooltips then
+					if win.metadata.click1 and not ignoredTotalClick(win, win.metadata.click1) then
+						self:AddSubviewToTooltip(t, win, win.metadata.click1, id, label)
+					end
+					if win.metadata.click2 and not ignoredTotalClick(win, win.metadata.click2) then
+						self:AddSubviewToTooltip(t, win, win.metadata.click2, id, label)
+					end
+					if win.metadata.click3 and not ignoredTotalClick(win, win.metadata.click3) then
+						self:AddSubviewToTooltip(t, win, win.metadata.click3, id, label)
+					end
 				end
-				if win.metadata.click2 then
-					self:AddSubviewToTooltip(t, win, win.metadata.click2, id, label)
+
+				if win.metadata.post_tooltip then
+					local numLines = t:NumLines()
+					win.metadata.post_tooltip(win, id, label, t)
+
+					if t:NumLines() ~= numLines and hasClick then
+						t:AddLine(" ")
+					end
 				end
-				if win.metadata.click3 then
-					self:AddSubviewToTooltip(t, win, win.metadata.click3, id, label)
+
+				if win.metadata.click1 and not ignoredTotalClick(win, win.metadata.click1) then
+					t:AddLine(L["Click for"] .. " |cff00ff00" .. win.metadata.click1:GetName() .. "|r.", 1, 0.82, 0)
 				end
-			end
-
-			if win.metadata.post_tooltip then
-				local numLines = t:NumLines()
-				win.metadata.post_tooltip(win, id, label, t)
-
-				if t:NumLines() ~= numLines and hasClick then
-					t:AddLine(" ")
+				if win.metadata.click2 and not ignoredTotalClick(win, win.metadata.click2) then
+					t:AddLine(L["Shift-Click for"] .. " |cff00ff00" .. win.metadata.click2:GetName() .. "|r.", 1, 0.82, 0)
 				end
-				numLines = nil
-			end
-			hasClick = nil
+				if win.metadata.click3 and not ignoredTotalClick(win, win.metadata.click3) then
+					t:AddLine(L["Control-Click for"] .. " |cff00ff00" .. win.metadata.click3:GetName() .. "|r.", 1, 0.82, 0)
+				end
 
-			if win.metadata.click1 then
-				t:AddLine(L["Click for"] .. " |cff00ff00" .. win.metadata.click1:GetName() .. "|r.", 1, 0.82, 0)
+				t:Show()
 			end
-			if win.metadata.click2 then
-				t:AddLine(L["Shift-Click for"] .. " |cff00ff00" .. win.metadata.click2:GetName() .. "|r.", 1, 0.82, 0)
-			end
-			if win.metadata.click3 then
-				t:AddLine(L["Control-Click for"] .. " |cff00ff00" .. win.metadata.click3:GetName() .. "|r.", 1, 0.82, 0)
-			end
-
-			t:Show()
 		end
 	end
 end
@@ -2347,13 +2351,13 @@ function Skada:FormatNumber(number)
 			elseif number > 1000 then
 				return format("%02.1fK", number / 1000)
 			else
-				return math_floor(number)
+				return floor(number)
 			end
 		elseif self.db.profile.numberformat == 2 then
-			local left, num, right = tostring(math_floor(number)):match("^([^%d]*%d)(%d*)(.-)$")
+			local left, num, right = tostring(floor(number)):match("^([^%d]*%d)(%d*)(.-)$")
 			return left .. (num:reverse():gsub("(%d%d%d)", "%1,"):reverse()) .. right
 		else
-			return math_floor(number)
+			return floor(number)
 		end
 	end
 end
@@ -2361,13 +2365,13 @@ end
 function Skada:FormatTime(sec)
 	if sec then
 		if sec >= 3600 then
-			local h = math_floor(sec / 3600)
-			local m = math_floor(sec / 60 - (h * 60))
-			local s = math_floor(sec - h * 3600 - m * 60)
+			local h = floor(sec / 3600)
+			local m = floor(sec / 60 - (h * 60))
+			local s = floor(sec - h * 3600 - m * 60)
 			return format("%02.f:%02.f:%02.f", h, m, s)
 		end
 
-		return format("%02.f:%02.f", math_floor(sec / 60), math_floor(sec % 60))
+		return format("%02.f:%02.f", floor(sec / 60), floor(sec % 60))
 	end
 end
 
@@ -2721,7 +2725,7 @@ function Skada:FrameSettings(db, include_dimensions)
 				order = 4,
 				width = "double",
 				min = 0,
-				max = math_floor(GetScreenWidth()),
+				max = floor(GetScreenWidth()),
 				step = 1.0,
 				get = function()
 					return db.background.tilesize
@@ -2860,7 +2864,7 @@ function Skada:FrameSettings(db, include_dimensions)
 			name = L["Width"],
 			order = 4.3,
 			min = 100,
-			max = math_floor(GetScreenWidth()),
+			max = floor(GetScreenWidth()),
 			step = 1.0,
 			get = function()
 				return db.width
@@ -3216,7 +3220,7 @@ function Skada:EndSegment()
 	if not self.db.profile.onlykeepbosses or self.current.gotboss then
 		if self.current.mobname ~= nil and now - self.current.starttime > 5 then
 			self.current.endtime = self.current.endtime or now
-			self.current.time = math_max(self.current.endtime - self.current.starttime, 0.1)
+			self.current.time = max(self.current.endtime - self.current.starttime, 0.1)
 			setPlayerActiveTimes(self.current)
 			self.current.stopped = nil
 
@@ -3229,7 +3233,7 @@ function Skada:EndSegment()
 					else
 						local n, c = set.name:match("^(.-)%s*%((%d+)%)$")
 						if n == setname then
-							num = math_max(num, tonumber(c) or 0)
+							num = max(num, tonumber(c) or 0)
 						end
 					end
 				end
@@ -3264,9 +3268,9 @@ function Skada:EndSegment()
 		player.last = nil
 	end
 
-	self.callbacks:Fire("COMBAT_PLAYER_LEAVE", self.current)
+	self.callbacks:Fire("COMBAT_PLAYER_LEAVE", self.current, self.total)
 	if self.current.gotboss then
-		self.callbacks:Fire("COMBAT_ENCOUNTER_END", self.current)
+		self.callbacks:Fire("COMBAT_ENCOUNTER_END", self.current, self.total)
 	end
 
 	self.current = nil
@@ -3331,7 +3335,7 @@ function Skada:StopSegment()
 	if self.current then
 		self.current.stopped = true
 		self.current.endtime = time()
-		self.current.time = math_max(self.current.endtime - self.current.starttime, 0.1)
+		self.current.time = max(self.current.endtime - self.current.starttime, 0.1)
 	end
 end
 
@@ -3348,7 +3352,7 @@ do
 	local deathcounter, startingmembers = 0, 0
 
 	function Skada:Tick()
-		self.callbacks:Fire("COMBAT_PLAYER_TICK", self.current)
+		self.callbacks:Fire("COMBAT_PLAYER_TICK", self.current, self.total)
 		if not disabled and self.current and not self:IsGroupInCombat() then
 			self:Debug("EndSegment: Tick")
 			self:EndSegment()

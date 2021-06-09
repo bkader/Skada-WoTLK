@@ -3,7 +3,7 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
 	if Skada:IsDisabled("Activity") then return end
 
 	local mod = Skada:NewModule(L["Activity"])
-	local _date, _format, math_max = date, string.format, math.max
+	local date, format, max = date, string.format, math.max
 
 	local function activity_tooltip(win, id, label, tooltip)
 		local set = win:get_selected_set()
@@ -15,7 +15,7 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
 				tooltip:AddLine(player.name .. ": " .. L["Activity"])
 				tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
 				tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
-				tooltip:AddDoubleLine(L["Activity"], _format("%.1f%%", 100 * activetime / math_max(1, settime)), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Activity"], format("%.1f%%", 100 * activetime / max(1, settime)), 1, 1, 1)
 			end
 		end
 	end
@@ -44,7 +44,7 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatTime(activetime),
 						self.metadata.columns["Active Time"],
-						_format("%.1f%%", 100 * activetime / settime),
+						format("%.1f%%", 100 * activetime / settime),
 						self.metadata.columns.Percent
 					)
 
@@ -79,7 +79,7 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
 			return Skada:FormatValueText(
 				Skada:GetFormatedSetTime(set),
 				self.metadata.columns["Active Time"],
-				_format("%s - %s", _date("%H:%M", set.starttime), _date("%H:%M", set.endtime)),
+				format("%s - %s", date("%H:%M", set.starttime), date("%H:%M", set.endtime)),
 				self.metadata.columns.Percent
 			)
 		end

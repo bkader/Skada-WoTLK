@@ -177,10 +177,10 @@ local ExtraCCSpells = {
 	[67890] = 4 -- Cobalt Frag Bomb
 }
 
-local _pairs, _select, _format = pairs, select, string.format
-local _GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-local _GetSpellLink = Skada.GetSpellLink or GetSpellLink
-local _UnitClass = Skada.UnitClass
+local pairs, select, format = pairs, select, string.format
+local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+local GetSpellLink, UnitClass = Skada.GetSpellLink or GetSpellLink, Skada.UnitClass
+local _
 
 local function GetSpellSchool(spellid)
 	if CCSpells[spellid] and CCSpells[spellid] ~= true then
@@ -199,7 +199,6 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 	local mod = Skada:NewModule(L["CC Done"])
 	local playermod = mod:NewModule(L["CC Done spells"])
-	local playerspellmod = playermod:NewModule(L["CC Done spell targets"])
 	local targetmod = mod:NewModule(L["CC Done targets"])
 	local targetpellmod = targetmod:NewModule(L["CC Done target spells"])
 
@@ -212,27 +211,14 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 			set.ccdone = (set.ccdone or 0) + 1
 
 			-- record the spell and its targets.
-			local spell = player.ccdone.spells and player.ccdone.spells[cc.spellid]
-			if not spell then
-				player.ccdone.spells = player.ccdone.spells or {}
-				spell = {count = 1}
-				player.ccdone.spells[cc.spellid] = spell
-			else
-				spell.count = spell.count + 1
-			end
+			player.ccdone.spells = player.ccdone.spells or {}
+			player.ccdone.spells[cc.spellid] = (player.ccdone.spells[cc.spellid] or 0) + 1
 
-			-- record target
-			if cc.dstName then
-				spell.targets = spell.targets or {}
-				if not spell.targets[cc.dstName] then
-					spell.targets[cc.dstName] = {id = cc.dstGUID, flags = cc.dstFlags, count = 1}
-				else
-					spell.targets[cc.dstName].count = spell.targets[cc.dstName].count + 1
-				end
-
+			-- saving this to total set may become a memory hog deluxe.
+			if set == Skada.current and cc.dstName then
 				player.ccdone.targets = player.ccdone.targets or {}
 				if not player.ccdone.targets[cc.dstName] then
-					player.ccdone.targets[cc.dstName] = {id = cc.dstGUID, flags = cc.dstFlags, count = 1, spells = {[cc.spellid] = 1}}
+					player.ccdone.targets[cc.dstName] = {id = cc.dstGUID, count = 1, spells = {[cc.spellid] = 1}}
 				else
 					player.ccdone.targets[cc.dstName].count = player.ccdone.targets[cc.dstName].count + 1
 					player.ccdone.targets[cc.dstName].spells[cc.spellid] = (player.ccdone.targets[cc.dstName].spells[cc.spellid] or 0) + 1
@@ -253,7 +239,6 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 			data.dstGUID = dstGUID
 			data.dstName = dstName
-			data.dstFlags = dstFlags
 
 			data.spellid = spellid
 
@@ -264,83 +249,39 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = _format(L["%s's CC Done spells"], label)
+		win.title = format(L["%s's CC Done spells"], label)
 	end
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = _format(L["%s's CC Done spells"], player.name)
+			win.title = format(L["%s's CC Done spells"], player.name)
 			local total = player.ccdone and player.ccdone.count or 0
 
 			if total > 0 and player.ccdone.spells then
 				local maxvalue, nr = 0, 1
 
-				for spellid, spell in _pairs(player.ccdone.spells) do
-					local spellname, _, spellicon = _GetSpellInfo(spellid)
+				for spellid, count in pairs(player.ccdone.spells) do
 
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label = spellname
-					d.icon = spellicon
+					d.label, _, d.icon = GetSpellInfo(spellid)
 					d.spellschool = GetSpellSchool(spellid)
 
-					d.value = spell.count
+					d.value = count
 					d.valuetext = Skada:FormatValueText(
-						spell.count,
+						count,
 						mod.metadata.columns.Count,
-						_format("%.1f%%", 100 * spell.count / total),
+						format("%.1f%%", 100 * count / total),
 						mod.metadata.columns.Percent
 					)
 
-					if spell.count > maxvalue then
-						maxvalue = spell.count
-					end
-					nr = nr + 1
-				end
-
-				win.metadata.maxvalue = maxvalue
-			end
-		end
-	end
-
-	function playerspellmod:Enter(win, id, label)
-		win.spellid, win.spellname = id, label
-		win.title = _format(L["%s's CC Done <%s> targets"], win.playername or UNKNOWN, label)
-	end
-
-	function playerspellmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
-
-		if player then
-			win.title = _format(L["%s's CC Done <%s> targets"], player.name, win.spellname or UNKNOWN)
-			local total = player.ccdone and player.ccdone.count or 0
-
-			if total > 0 and player.ccdone.spells and player.ccdone.spells[win.spellid] then
-				local maxvalue, nr = 0, 1
-
-				for targetname, target in _pairs(player.ccdone.spells[win.spellid].targets or {}) do
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
-
-					d.id = target.id or targetname
-					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(d.id, target.flags, set))
-
-					d.value = target.count
-					d.valuetext = Skada:FormatValueText(
-						target.count,
-						mod.metadata.columns.Count,
-						_format("%.1f%%", 100 * target.count / total),
-						mod.metadata.columns.Percent
-					)
-
-					if target.count > maxvalue then
-						maxvalue = target.count
+					if count > maxvalue then
+						maxvalue = count
 					end
 					nr = nr + 1
 				end
@@ -352,32 +293,32 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = _format(L["%s's CC Done targets"], label)
+		win.title = format(L["%s's CC Done targets"], label)
 	end
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = _format(L["%s's CC Done targets"], player.name)
+			win.title = format(L["%s's CC Done targets"], player.name)
 			local total = player.ccdone and player.ccdone.count or 0
 
 			if total > 0 and player.ccdone.targets then
 				local maxvalue, nr = 0, 1
 
-				for targetname, target in _pairs(player.ccdone.targets) do
+				for targetname, target in pairs(player.ccdone.targets) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec =_select(2, _UnitClass(d.id, target.flags, set))
+					d.class, d.role, d.spec =select(2, UnitClass(d.id, nil, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(
 						target.count,
 						mod.metadata.columns.Count,
-						_format("%.1f%%", 100 * target.count / total),
+						format("%.1f%%", 100 * target.count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -394,35 +335,33 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 	function targetpellmod:Enter(win, id, label)
 		win.targetname = label
-		win.title = _format(L["%s's CC Done <%s> spells"], win.playername or UNKNOWN, label)
+		win.title = format(L["%s's CC Done <%s> spells"], win.playername or UNKNOWN, label)
 	end
 
 	function targetpellmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = _format(L["%s's CC Done <%s> spells"], player.name, win.targetname or UNKNOWN)
+			win.title = format(L["%s's CC Done <%s> spells"], player.name, win.targetname or UNKNOWN)
 			local total = player.ccdone and player.ccdone.count or 0
 
 			if total > 0 and player.ccdone.targets and player.ccdone.targets[win.targetname] then
 				local maxvalue, nr = 0, 1
 
-				for spellid, count in _pairs(player.ccdone.targets[win.targetname].spells or {}) do
-					local spellname, _, spellicon = _GetSpellInfo(spellid)
+				for spellid, count in pairs(player.ccdone.targets[win.targetname].spells or {}) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label = spellname
-					d.icon = spellicon
+					d.label, _, d.icon = GetSpellInfo(spellid)
 					d.spellschool = GetSpellSchool(spellid)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
 						count,
 						mod.metadata.columns.Count,
-						_format("%.1f%%", 100 * count / total),
+						format("%.1f%%", 100 * count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -459,7 +398,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						player.ccdone.count,
 						self.metadata.columns.Count,
-						_format("%.1f%%", 100 * player.ccdone.count / total),
+						format("%.1f%%", 100 * player.ccdone.count / total),
 						self.metadata.columns.Percent
 					)
 
@@ -475,13 +414,13 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		playermod.metadata = {click1 = playerspellmod}
 		targetmod.metadata = {click1 = targetpellmod}
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
 			click1 = playermod,
 			click2 = targetmod,
+			nototalclick = {targetmod},
 			columns = {Count = true, Percent = false},
 			icon = "Interface\\Icons\\spell_frost_chainsofice"
 		}
@@ -515,7 +454,6 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 	local mod = Skada:NewModule(L["CC Taken"])
 	local playermod = mod:NewModule(L["CC Taken spells"])
-	local playerspellmod = playermod:NewModule(L["CC Taken spell sources"])
 	local sourcemod = mod:NewModule(L["CC Taken sources"])
 	local sourcespellmod = sourcemod:NewModule(L["CC Taken source spells"])
 
@@ -528,27 +466,14 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 			set.cctaken = (set.cctaken or 0) + 1
 
 			-- record the spell and its sources.
-			local spell = player.cctaken.spells and player.cctaken.spells[cc.spellid]
-			if not spell then
-				player.cctaken.spells = player.cctaken.spells or {}
-				spell = {count = 1}
-				player.cctaken.spells[cc.spellid] = spell
-			else
-				spell.count = spell.count + 1
-			end
+			player.cctaken.spells = player.cctaken.spells or {}
+			player.cctaken.spells[cc.spellid] = (player.cctaken.spells[cc.spellid] or 0) + 1
 
-			-- record target
-			if cc.srcName then
-				spell.sources = spell.sources or {}
-				if not spell.sources[cc.srcName] then
-					spell.sources[cc.srcName] = {id = cc.srcGUID, flags = cc.srcFlags, count = 1}
-				else
-					spell.sources[cc.srcName].count = spell.sources[cc.srcName].count + 1
-				end
-
+			-- saving this to total set may become a memory hog deluxe.
+			if set == Skada.current and cc.srcName then
 				player.cctaken.sources = player.cctaken.sources or {}
 				if not player.cctaken.sources[cc.srcName] then
-					player.cctaken.sources[cc.srcName] = {id = cc.srcGUID, flags = cc.srcFlags, count = 1, spells = {[cc.spellid] = 1}}
+					player.cctaken.sources[cc.srcName] = {id = cc.srcGUID, count = 1, spells = {[cc.spellid] = 1}}
 				else
 					player.cctaken.sources[cc.srcName].count = player.cctaken.sources[cc.srcName].count + 1
 					player.cctaken.sources[cc.srcName].spells[cc.spellid] = (player.cctaken.sources[cc.srcName].spells[cc.spellid] or 0) + 1
@@ -565,7 +490,6 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 		if CCSpells[spellid] or ExtraCCSpells[spellid] then
 			data.srcGUID = srcGUID
 			data.srcName = srcName
-			data.srcFlags = srcFlags
 
 			data.playerid = dstGUID
 			data.playername = dstName
@@ -580,82 +504,38 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = _format(L["%s's CC Taken spells"], label)
+		win.title = format(L["%s's CC Taken spells"], label)
 	end
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = _format(L["%s's CC Taken spells"], player.name)
+			win.title = format(L["%s's CC Taken spells"], player.name)
 			local total = player.cctaken and player.cctaken.count or 0
 
 			if total > 0 and player.cctaken.spells then
 				local maxvalue, nr = 0, 1
 
-				for spellid, spell in _pairs(player.cctaken.spells) do
-					local spellname, _, spellicon = _GetSpellInfo(spellid)
+				for spellid, count in pairs(player.cctaken.spells) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label = spellname
-					d.icon = spellicon
+					d.label, _, d.icon = GetSpellInfo(spellid)
 					d.spellschool = GetSpellSchool(spellid)
 
-					d.value = spell.count
+					d.value = count
 					d.valuetext = Skada:FormatValueText(
-						spell.count,
+						count,
 						mod.metadata.columns.Count,
-						_format("%.1f%%", 100 * spell.count / total),
+						format("%.1f%%", 100 * count / total),
 						mod.metadata.columns.Percent
 					)
 
-					if spell.count > maxvalue then
-						maxvalue = spell.count
-					end
-					nr = nr + 1
-				end
-
-				win.metadata.maxvalue = maxvalue
-			end
-		end
-	end
-
-	function playerspellmod:Enter(win, id, label)
-		win.spellid, win.spellname = id, label
-		win.title = _format(L["%s's CC Taken <%s> sources"], win.playername or UNKNOWN, label)
-	end
-
-	function playerspellmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
-
-		if player then
-			win.title = _format(L["%s's CC Taken <%s> sources"], player.name, win.spellname or UNKNOWN)
-			local total = player.cctaken and player.cctaken.count or 0
-
-			if total > 0 and player.cctaken.spells and player.cctaken.spells[win.spellid] then
-				local maxvalue, nr = 0, 1
-
-				for sourcename, source in _pairs(player.cctaken.spells[win.spellid].sources or {}) do
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
-
-					d.id = source.id or sourcename
-					d.label = sourcename
-					d.class, d.role, d.spec = _select(2, _UnitClass(d.id, source.flags, set))
-
-					d.value = source.count
-					d.valuetext = Skada:FormatValueText(
-						source.count,
-						mod.metadata.columns.Count,
-						_format("%.1f%%", 100 * source.count / total),
-						mod.metadata.columns.Percent
-					)
-
-					if source.count > maxvalue then
-						maxvalue = source.count
+					if count > maxvalue then
+						maxvalue = count
 					end
 					nr = nr + 1
 				end
@@ -667,32 +547,32 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 	function sourcemod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = _format(L["%s's CC Taken sources"], label)
+		win.title = format(L["%s's CC Taken sources"], label)
 	end
 
 	function sourcemod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = _format(L["%s's CC Taken sources"], player.name)
+			win.title = format(L["%s's CC Taken sources"], player.name)
 			local total = player.cctaken and player.cctaken.count or 0
 
 			if total > 0 and player.cctaken.sources then
 				local maxvalue, nr = 0, 1
 
-				for sourcename, source in _pairs(player.cctaken.sources) do
+				for sourcename, source in pairs(player.cctaken.sources) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
 					d.id = source.id or sourcename
 					d.label = sourcename
-					d.class, d.role, d.spec = _select(2, _UnitClass(d.id, source.flags, set))
+					d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
 
 					d.value = source.count
 					d.valuetext = Skada:FormatValueText(
 						source.count,
 						mod.metadata.columns.Count,
-						_format("%.1f%%", 100 * source.count / total),
+						format("%.1f%%", 100 * source.count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -709,35 +589,33 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 	function sourcespellmod:Enter(win, id, label)
 		win.targetname = label
-		win.title = _format(L["%s's CC Taken <%s> sources"], win.playername or UNKNOWN, label)
+		win.title = format(L["%s's CC Taken <%s> sources"], win.playername or UNKNOWN, label)
 	end
 
 	function sourcespellmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = _format(L["%s's CC Taken <%s> sources"], player.name, win.targetname or UNKNOWN)
+			win.title = format(L["%s's CC Taken <%s> sources"], player.name, win.targetname or UNKNOWN)
 			local total = player.cctaken and player.cctaken.count or 0
 
 			if total > 0 and player.cctaken.sources and player.cctaken.sources[win.targetname] then
 				local maxvalue, nr = 0, 1
 
-				for spellid, count in _pairs(player.cctaken.sources[win.targetname].spells or {}) do
-					local spellname, _, spellicon = _GetSpellInfo(spellid)
+				for spellid, count in pairs(player.cctaken.sources[win.targetname].spells or {}) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label = spellname
-					d.icon = spellicon
+					d.label, _, d.icon = GetSpellInfo(spellid)
 					d.spellschool = GetSpellSchool(spellid)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
 						count,
 						mod.metadata.columns.Count,
-						_format("%.1f%%", 100 * count / total),
+						format("%.1f%%", 100 * count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -774,7 +652,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						player.cctaken.count,
 						self.metadata.columns.Count,
-						_format("%.1f%%", 100 * player.cctaken.count / total),
+						format("%.1f%%", 100 * player.cctaken.count / total),
 						self.metadata.columns.Percent
 					)
 
@@ -790,13 +668,13 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		playermod.metadata = {click1 = playerspellmod}
 		sourcemod.metadata = {click1 = sourcespellmod}
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
 			click1 = playermod,
 			click2 = sourcemod,
+			nototalclick = {sourcemod},
 			columns = {Count = true, Percent = false},
 			icon = "Interface\\Icons\\spell_magic_polymorphrabbit"
 		}
@@ -830,15 +708,14 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 	local mod = Skada:NewModule(L["CC Breakers"])
 	local playermod = mod:NewModule(L["CC Break spells"])
-	local playerspellmod = playermod:NewModule(L["CC Break spell targets"])
 	local targetmod = mod:NewModule(L["CC Break targets"])
 	local targetspellmod = targetmod:NewModule(L["CC Break target spells"])
 
-	local _tostring = tostring
-	local _UnitExists, _UnitName = UnitExists, UnitName
-	local _GetNumRaidMembers, _GetPartyAssignment = GetNumRaidMembers, GetPartyAssignment
-	local _IsInInstance, _UnitInRaid = IsInInstance, UnitInRaid
-	local _SendChatMessage = SendChatMessage
+	local tostring = tostring
+	local UnitExists, UnitName = UnitExists, UnitName
+	local GetNumRaidMembers, GetPartyAssignment = GetNumRaidMembers, GetPartyAssignment
+	local IsInInstance, UnitInRaid = IsInInstance, UnitInRaid
+	local SendChatMessage = SendChatMessage
 
 	local function log_ccbreak(set, data)
 		local player = Skada:get_player(set, data.playerid, data.playername)
@@ -849,27 +726,14 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 			set.ccbreaks = (set.ccbreaks or 0) + 1
 
 			-- record the spell and its targets.
-			local spell = player.ccbreaks.spells and player.ccbreaks.spells[cc.spellid]
-			if not spell then
-				player.ccbreaks.spells = player.ccbreaks.spells or {}
-				spell = {count = 1}
-				player.ccbreaks.spells[cc.spellid] = spell
-			else
-				spell.count = spell.count + 1
-			end
+			player.ccbreaks.spells = player.ccbreaks.spells or {}
+			player.ccbreaks.spells[cc.spellid] = (player.ccbreaks.spells[cc.spellid] or 0) + 1
 
-			-- record target
-			if cc.dstName then
-				spell.targets = spell.targets or {}
-				if not spell.targets[cc.dstName] then
-					spell.targets[cc.dstName] = {id = cc.dstGUID, flags = cc.dstFlags, count = 1}
-				else
-					spell.targets[cc.dstName].count = spell.targets[cc.dstName].count + 1
-				end
-
+			-- saving this to total set may become a memory hog deluxe.
+			if set == Skada.current and cc.dstName then
 				player.ccbreaks.targets = player.ccbreaks.targets or {}
 				if not player.ccbreaks.targets[cc.dstName] then
-					player.ccbreaks.targets[cc.dstName] = {id = cc.dstGUID, flags = cc.dstFlags, count = 1, spells = {[cc.spellid] = 1}}
+					player.ccbreaks.targets[cc.dstName] = {id = cc.dstGUID, count = 1, spells = {[cc.spellid] = 1}}
 				else
 					player.ccbreaks.targets[cc.dstName].count = player.ccbreaks.targets[cc.dstName].count + 1
 					player.ccbreaks.targets[cc.dstName].spells[cc.spellid] = (player.ccbreaks.targets[cc.dstName].spells[cc.spellid] or 0) + 1
@@ -884,9 +748,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 		local spellid, spellname, _, extraspellid, extraspellname, _, auratype = ...
 		if not CCSpells[spellid] then return end
 
-		local petid = srcGUID
-		local petname = srcName
-
+		local petid, petname = srcGUID, srcName
 		local srcGUID_modified, srcName_modified = Skada:FixMyPets(srcGUID, srcName)
 
 		data.playerid = srcGUID_modified or srcGUID
@@ -905,17 +767,17 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 		-- Optional announce
 		srcName = srcName_modified or srcName
-		if Skada.db.profile.modules.ccannounce and Skada:IsInRaid() and _UnitInRaid(srcName) then
-			local instanceType = _select(2, _IsInInstance())
+		if Skada.db.profile.modules.ccannounce and Skada:IsInRaid() and UnitInRaid(srcName) then
+			local instanceType = select(2, IsInInstance())
 			if instanceType == "pvp" then
 				return
 			end
 			-- Ignore main tanks and main assist?
 			if Skada.db.profile.modules.ccignoremaintanks then
 				-- Loop through our raid and return if src is a main tank.
-				for i = 1, _GetNumRaidMembers() do
-					local unit = "raid" .. _tostring(i)
-					if _UnitExists(unit) and _UnitName(unit) == srcName then
+				for i = 1, GetNumRaidMembers() do
+					local unit = "raid" .. tostring(i)
+					if UnitExists(unit) and UnitName(unit) == srcName then
 						if GetPartyAssignment("MAINTANK", unit) or GetPartyAssignment("MAINASSIST", unit) then
 							return
 						end
@@ -931,49 +793,47 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 			-- Go ahead and announce it.
 			if extraspellname then
-				_SendChatMessage(_format(L["%s on %s removed by %s's %s"], spellname, dstName, srcName, _GetSpellLink(extraspellid)), "RAID")
+				SendChatMessage(format(L["%s on %s removed by %s's %s"], spellname, dstName, srcName, GetSpellLink(extraspellid)), "RAID")
 			else
-				_SendChatMessage(_format(L["%s on %s removed by %s"], spellname, dstName, srcName), "RAID")
+				SendChatMessage(format(L["%s on %s removed by %s"], spellname, dstName, srcName), "RAID")
 			end
 		end
 	end
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = _format(L["%s's CC Break spells"], label)
+		win.title = format(L["%s's CC Break spells"], label)
 	end
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = _format(L["%s's CC Break spells"], player.name)
+			win.title = format(L["%s's CC Break spells"], player.name)
 			local total = player.ccbreaks and player.ccbreaks.count or 0
 
 			if total > 0 and player.ccbreaks.spells then
 				local maxvalue, nr = 0, 1
 
-				for spellid, spell in _pairs(player.ccbreaks.spells) do
-					local spellname, _, spellicon = _GetSpellInfo(spellid)
+				for spellid, count in pairs(player.ccbreaks.spells) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
 					d.id = spellname
 					d.spellid = spell.id
-					d.label = spellname
-					d.icon = spellicon
+					d.label, _, d.icon = GetSpellInfo(spellid)
 					d.spellschool = GetSpellSchool(spellid)
 
-					d.value = spell.count
+					d.value = count
 					d.valuetext = Skada:FormatValueText(
-						spell.count,
+						count,
 						mod.metadata.columns.Count,
-						_format("%.1f%%", 100 * spell.count / total),
+						format("%.1f%%", 100 * count / total),
 						mod.metadata.columns.Percent
 					)
 
-					if spell.count > maxvalue then
-						maxvalue = spell.count
+					if count > maxvalue then
+						maxvalue = count
 					end
 					nr = nr + 1
 				end
@@ -983,76 +843,34 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 		end
 	end
 
-	function playerspellmod:Enter(win, id, label)
-		win.spellid, win.spellname = id, label
-		win.title = _format(L["%s's CC Break <%s> targets"], win.playername or UNKNOWN, label)
-	end
-
-	function playerspellmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
-
-		if player then
-			win.title = _format(L["%s's CC Break <%s> targets"], player.name, win.spellname or UNKNOWN)
-			local total = player.ccbreaks and player.ccbreaks.count or 0
-
-			if total > 0 and player.ccbreaks.spells and player.ccbreaks.spells[win.spellid] then
-				local maxvalue, nr = 0, 1
-
-				for targetname, target in _pairs(player.ccbreaks.spells[win.spellid].target or {}) do
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
-
-					d.id = target.id or targetname
-					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(d.id, target.flags, set))
-
-					d.value = target.count
-					d.valuetext = Skada:FormatValueText(
-						target.count,
-						mod.metadata.columns.Count,
-						_format("%.1f%%", 100 * target.count / total),
-						mod.metadata.columns.Percent
-					)
-
-					if target.count > maxvalue then
-						maxvalue = target.count
-					end
-					nr = nr + 1
-				end
-
-				win.metadata.maxvalue = maxvalue
-			end
-		end
-	end
-
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = _format(L["%s's CC Break targets"], label)
+		win.title = format(L["%s's CC Break targets"], label)
 	end
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = _format(L["%s's CC Break targets"], player.name)
+			win.title = format(L["%s's CC Break targets"], player.name)
 			local total = player.ccbreaks and player.ccbreaks.count or 0
 
 			if total > 0 and player.ccbreaks.targets then
 				local maxvalue, nr = 0, 1
 
-				for targetname, target in _pairs(player.ccbreaks.targets) do
+				for targetname, target in pairs(player.ccbreaks.targets) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = _select(2, _UnitClass(d.id, target.flags, set))
+					d.class, d.role, d.spec = select(2, UnitClass(d.id, target.flags, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(
 						target.count,
 						mod.metadata.columns.Count,
-						_format("%.1f%%", 100 * target.count / total),
+						format("%.1f%%", 100 * target.count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -1069,35 +887,33 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 	function targetspellmod:Enter(win, id, label)
 		win.targetname = label
-		win.title = _format(L["%s's CC Break <%s> spells"], win.playername or UNKNOWN, label)
+		win.title = format(L["%s's CC Break <%s> spells"], win.playername or UNKNOWN, label)
 	end
 
 	function targetspellmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = _format(L["%s's CC Break <%s> spells"], player.name, win.targetname or UNKNOWN)
+			win.title = format(L["%s's CC Break <%s> spells"], player.name, win.targetname or UNKNOWN)
 			local total = player.ccbreaks and player.ccbreaks.count or 0
 
 			if total > 0 and player.ccbreaks.targets and player.ccbreaks.targets[win.targetname] then
 				local maxvalue, nr = 0, 1
 
-				for spellid, count in _pairs(player.ccbreaks.targets[win.targetname].spells or {}) do
-					local spellname, _, spellicon = _GetSpellInfo(spellid)
+				for spellid, count in pairs(player.ccbreaks.targets[win.targetname].spells or {}) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label = spellname
-					d.icon = spellicon
+					d.label, _, d.icon = GetSpellInfo(spellid)
 					d.spellschool = GetSpellSchool(spellid)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
 						count,
 						mod.metadata.columns.Count,
-						_format("%.1f%%", 100 * count / total),
+						format("%.1f%%", 100 * count / total),
 						mod.metadata.columns.Percent
 					)
 
@@ -1134,7 +950,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						player.ccbreaks.count,
 						self.metadata.columns.Count,
-						_format("%.1f%%", 100 * player.ccbreaks.count / total),
+						format("%.1f%%", 100 * player.ccbreaks.count / total),
 						self.metadata.columns.Percent
 					)
 
@@ -1150,13 +966,13 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		playermod.metadata = {click1 = playerspellmod}
 		targetmod.metadata = {click1 = targetspellmod}
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
 			click1 = playermod,
 			click2 = targetmod,
+			nototalclick = {targetmod},
 			columns = {Count = true, Percent = false},
 			icon = "Interface\\Icons\\spell_holy_sealofvalor"
 		}

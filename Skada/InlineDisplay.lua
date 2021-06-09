@@ -85,29 +85,31 @@ local function showmode(win, id, label, mode)
 		end
 	end
 	win:DisplayMode(mode)
+	L_CloseDropDownMenus() -- always close
+end
+
+local function ignoredClick(win, click)
+	if win and win.selectedset == "total" and win.metadata and win.metadata.nototalclick and click then
+		return tContains(win.metadata.nototalclick, click)
+	end
 end
 
 local function BarClick(win, bar, button)
 	local id, label = bar.valueid, bar.valuetext
 
-	local click1 = win.metadata.click1
-	local click2 = win.metadata.click2
-	local click3 = win.metadata.click3
-
 	if button == "RightButton" and IsShiftKeyDown() then
 		Skada:OpenMenu(win)
-	elseif win.metadata.click then
+	elseif win.metadata.click and not ignoredClick(win, win.metadata.click) then
 		win.metadata.click(win, id, label, button)
 	elseif button == "RightButton" then
 		win:RightClick()
-	elseif click2 and IsShiftKeyDown() then
-		showmode(win, id, label, click2)
-	elseif click3 and IsControlKeyDown() then
-		showmode(win, id, label, click3)
-	elseif click1 then
-		showmode(win, id, label, click1)
+	elseif win.metadata.click2 and IsShiftKeyDown() and not ignoredClick(win, win.metadata.click2) then
+		showmode(win, id, label, win.metadata.click2)
+	elseif win.metadata.click3 and IsControlKeyDown() and not ignoredClick(win, win.metadata.click3) then
+		showmode(win, id, label, win.metadata.click3)
+	elseif win.metadata.click1 and not ignoredClick(win, win.metadata.click1) then
+		showmode(win, id, label, win.metadata.click1)
 	end
-	L_CloseDropDownMenus() -- always close
 end
 
 function mod:Create(window, isnew)

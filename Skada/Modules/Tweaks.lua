@@ -131,7 +131,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 			Skada.db.profile.smartstop = false
 		end
 		if Skada.db.profile.smartwait == nil then
-			Skada.db.profile.smartwait = 7
+			Skada.db.profile.smartwait = 5
 		end
 
 		-- options.

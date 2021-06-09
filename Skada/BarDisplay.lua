@@ -376,6 +376,12 @@ do
 		end
 	end
 
+	local function ignoredClick(win, click)
+		if win and win.selectedset == "total" and win.metadata and win.metadata.nototalclick and click then
+			return tContains(win.metadata.nototalclick, click)
+		end
+	end
+
 	local function BarClick(bar, button)
 		local win, id, label = bar.win, bar.id, bar.text
 
@@ -385,15 +391,15 @@ do
 			Skada:ModeMenu(win)
 		elseif button == "RightButton" and IsControlKeyDown() then
 			Skada:SegmentMenu(win)
-		elseif win.metadata.click then
+		elseif win.metadata.click and not ignoredClick(win, win.metadata.click) then
 			win.metadata.click(win, id, label, button)
 		elseif button == "RightButton" then
 			win:RightClick()
-		elseif win.metadata.click2 and IsShiftKeyDown() then
+		elseif win.metadata.click2 and not ignoredClick(win, win.metadata.click2) and IsShiftKeyDown() then
 			showmode(win, id, label, win.metadata.click2)
-		elseif win.metadata.click3 and IsControlKeyDown() then
+		elseif win.metadata.click3 and not ignoredClick(win, win.metadata.click3) and IsControlKeyDown() then
 			showmode(win, id, label, win.metadata.click3)
-		elseif win.metadata.click1 then
+		elseif win.metadata.click1 and not ignoredClick(win, win.metadata.click1) then
 			showmode(win, id, label, win.metadata.click1)
 		end
 	end

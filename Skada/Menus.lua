@@ -5,12 +5,12 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 local AceGUI = LibStub("AceGUI-3.0")
 
 local tinsert, tsort = table.insert, table.sort
-local _pairs, _ipairs, _type = pairs, ipairs, type
-local _format, sbyte = string.format, string.byte
-local _GetCursorPosition = GetCursorPosition
-local _GetScreenWidth, _GetScreenHeight = GetScreenWidth, GetScreenHeight
+local pairs, ipairs, type = pairs, ipairs, type
+local format, sbyte = string.format, string.byte
+local GetCursorPosition = GetCursorPosition
+local GetScreenWidth, GetScreenHeight = GetScreenWidth, GetScreenHeight
 
-local _CreateFrame = CreateFrame
+local CreateFrame = CreateFrame
 local _UIDropDownMenu_CreateInfo = L_UIDropDownMenu_CreateInfo
 local _UIDropDownMenu_AddButton = L_UIDropDownMenu_AddButton
 local _CloseDropDownMenus = L_CloseDropDownMenus
@@ -19,18 +19,18 @@ local _UIDropDownMenu_AddSeparator = L_UIDropDownMenu_AddSeparator
 
 -- guesses the dropdown location
 local function getDropdownPoint()
-	local x, y = _GetCursorPosition(UIParent)
+	local x, y = GetCursorPosition(UIParent)
 	x = x / UIParent:GetEffectiveScale()
 	y = y / UIParent:GetEffectiveScale()
 
-	local point = (x > _GetScreenWidth() / 2) and "RIGHT" or "LEFT"
-	point = ((y > _GetScreenHeight() / 2) and "TOP" or "BOTTOM") .. point
+	local point = (x > GetScreenWidth() / 2) and "RIGHT" or "LEFT"
+	point = ((y > GetScreenHeight() / 2) and "TOP" or "BOTTOM") .. point
 	return point, x, y
 end
 
 -- Configuration menu.
 function Skada:OpenMenu(window)
-	self.skadamenu = self.skadamenu or _CreateFrame("Frame", "SkadaMenu", UIParent, "UIDropDownMenuTemplate")
+	self.skadamenu = self.skadamenu or CreateFrame("Frame", "SkadaMenu", UIParent, "UIDropDownMenuTemplate")
 	self.skadamenu.displayMode = "MENU"
 	self.skadamenu.initialize = function(self, level)
 		if not level then return
@@ -154,7 +154,7 @@ function Skada:OpenMenu(window)
 			info.padding = 16
 			_UIDropDownMenu_AddButton(info, level)
 		elseif level == 2 then
-			if _type(L_UIDROPDOWNMENU_MENU_VALUE) == "table" then
+			if type(L_UIDROPDOWNMENU_MENU_VALUE) == "table" then
 				local window = L_UIDROPDOWNMENU_MENU_VALUE
 
 				if not Skada.db.profile.shortmenu then
@@ -167,7 +167,7 @@ function Skada:OpenMenu(window)
 						info.notCheckable = 1
 						_UIDropDownMenu_AddButton(info, level)
 
-						for _, mode in _ipairs(modes) do
+						for _, mode in ipairs(modes) do
 							info = _UIDropDownMenu_CreateInfo()
 							info.text = mode:GetName()
 							info.func = function()
@@ -260,7 +260,7 @@ function Skada:OpenMenu(window)
 					info.func = function()
 						window.db.sticky = not window.db.sticky
 						if not window.db.sticky then
-							for _, win in _ipairs(Skada:GetWindows()) do
+							for _, win in ipairs(Skada:GetWindows()) do
 								if win.db.sticked[window.db.name] then
 									win.db.sticked[window.db.name] = nil
 								end
@@ -307,7 +307,7 @@ function Skada:OpenMenu(window)
 				if #sets > 0 then
 					_UIDropDownMenu_AddSeparator(info, level)
 
-					for i, set in _ipairs(sets) do
+					for i, set in ipairs(sets) do
 						info = _UIDropDownMenu_CreateInfo()
 						info.text = Skada:GetSetLabel(set)
 						info.func = function()
@@ -393,7 +393,7 @@ function Skada:OpenMenu(window)
 end
 
 function Skada:SegmentMenu(window)
-	self.segmentsmenu = self.segmentsmenu or _CreateFrame("Frame", "SkadaWindowButtonsSegments", UIParent, "UIDropDownMenuTemplate")
+	self.segmentsmenu = self.segmentsmenu or CreateFrame("Frame", "SkadaWindowButtonsSegments", UIParent, "UIDropDownMenuTemplate")
 	self.segmentsmenu.displayMode = "MENU"
 	self.segmentsmenu.initialize = function(self, level)
 		if not level then return
@@ -424,7 +424,7 @@ function Skada:SegmentMenu(window)
 		if #sets > 0 then
 			_UIDropDownMenu_AddSeparator(info, level)
 
-			for i, set in _ipairs(sets) do
+			for i, set in ipairs(sets) do
 				info = _UIDropDownMenu_CreateInfo()
 				info.text = Skada:GetSetLabel(set)
 				info.func = function()
@@ -458,7 +458,7 @@ do
 	end
 
 	function Skada:ModeMenu(win)
-		self.modesmenu = self.modesmenu or _CreateFrame("Frame", "SkadaWindowButtonsModes", UIParent, "UIDropDownMenuTemplate")
+		self.modesmenu = self.modesmenu or CreateFrame("Frame", "SkadaWindowButtonsModes", UIParent, "UIDropDownMenuTemplate")
 
 		-- so we call it only once.
 		if categorized == nil then
@@ -478,7 +478,7 @@ do
 			local info
 
 			if level == 1 then
-				for category, modes in _pairs(categorized) do
+				for category, modes in pairs(categorized) do
 					if category ~= OTHER then
 						info = _UIDropDownMenu_CreateInfo()
 						info.text = category
@@ -506,7 +506,7 @@ do
 					_UIDropDownMenu_AddButton(info, level)
 				end
 			elseif level == 2 and categorized[L_UIDROPDOWNMENU_MENU_VALUE] then
-				for _, mode in _ipairs(categorized[L_UIDROPDOWNMENU_MENU_VALUE]) do
+				for _, mode in ipairs(categorized[L_UIDROPDOWNMENU_MENU_VALUE]) do
 					info = _UIDropDownMenu_CreateInfo()
 					info.text = mode:GetName()
 					info.func = function()
@@ -562,7 +562,7 @@ do
 		frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
 
 		if window then
-			frame:SetTitle(L["Report"] .. _format(" - %s", window.db.name))
+			frame:SetTitle(L["Report"] .. format(" - %s", window.db.name))
 		else
 			frame:SetTitle(L["Report"])
 		end
@@ -589,9 +589,9 @@ do
 				local linebox = AceGUI:Create("Dropdown")
 				linebox:SetLabel(L["Line"])
 				linebox:SetList({[""] = NONE})
-				for _, bar in _ipairs(window.dataset) do
+				for _, bar in ipairs(window.dataset) do
 					if bar.id and not bar.ignore then
-						linebox:AddItem(bar.id, _format("%s   %s", bar.text or bar.label, bar.valuetext))
+						linebox:AddItem(bar.id, format("%s   %s", bar.text or bar.label, bar.valuetext))
 					end
 				end
 				linebox:SetCallback("OnValueChanged", function(f, e, value) barid = (value ~= "") and value or nil end)
@@ -637,7 +637,7 @@ do
 		for i = 1, #list, 2 do
 			local chan = list[i + 1]
 			if chan ~= "Trade" and chan ~= "General" and chan ~= "LocalDefense" and chan ~= "LookingForGroup" then -- These should be localized.
-				channellist[chan] = {_format("%s: %d/%s", L["Channel"], list[i], chan), "channel"}
+				channellist[chan] = {format("%s: %d/%s", L["Channel"], list[i], chan), "channel"}
 			end
 		end
 
@@ -645,7 +645,7 @@ do
 		local channelbox = AceGUI:Create("Dropdown")
 		channelbox:SetLabel(L["Channel"])
 		channelbox:SetList({})
-		for chan, kind in _pairs(channellist) do
+		for chan, kind in pairs(channellist) do
 			channelbox:AddItem(chan, kind[1])
 		end
 

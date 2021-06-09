@@ -6,10 +6,10 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 	local mod_modes = mod:NewModule(L["Improvement modes"])
 	local mod_comparison = mod:NewModule(L["Improvement comparison"])
 
-	local _UnitGUID, _UnitName, _UnitClass = UnitGUID, UnitName, UnitClass
-	local _pairs, _ipairs, _select = pairs, ipairs, select
-	local _format, _tostring = string.format, tostring
+	local pairs, ipairs, select = pairs, ipairs, select
+	local format, tostring = string.format, tostring
 	local date = date
+	local playerid = UnitGUID("player")
 
 	local modes = {
 		"ActiveTime",
@@ -97,19 +97,18 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 			return
 		end
 		mod.db = mod.db or {}
-		mod.db.bosses = mod.db.bosses or {}
-		for k, v in _pairs(mod.db.bosses) do
+		for k, v in pairs(mod.db) do
 			if k == bossname then
 				return v
 			end
 		end
 
-		mod.db.bosses[bossname] = {count = 0, encounters = {}}
+		mod.db[bossname] = {count = 0, encounters = {}}
 		return find_boss_data(bossname)
 	end
 
 	local function find_encounter_data(boss, starttime)
-		for i, encounter in _ipairs(boss.encounters) do
+		for i, encounter in ipairs(boss.encounters) do
 			if encounter.starttime == starttime then
 				return encounter
 			end
@@ -125,40 +124,35 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 	end
 
 	function mod_comparison:Update(win, set)
+		win.title = (win.targetname or UNKNOWN) .. " - " .. (localized[win.modename] or win.modename)
 		local boss = find_boss_data(win.targetname)
-		if boss then
-			win.title = (win.targetname or UNKNOWN) .. " - " .. (localized[win.modename] or win.modename)
+
+		if boss and boss.encounters then
 			local maxvalue, nr = 0, 1
 
-			for i = 1, boss.count do
-				local encounter = boss.encounters[i]
-				if encounter then
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+			for i, encounter in ipairs(boss.encounters) do
+				local d = win.dataset[nr] or {}
+				win.dataset[nr] = d
 
-					d.id = i
-					d.label = date("%x %X", encounter.starttime)
+				d.id = i
+				d.label = date("%x %X", encounter.starttime)
 
-					local value = encounter.data[win.modename]
-					d.value = value or 0
-					if win.modename == "ActiveTime" then
-						d.valuetext = Skada:FormatTime(d.value)
-					elseif win.modename == "Deaths" or win.modename == "Interrupts" or win.modename == "Fails" then
-						d.valuetext = _tostring(d.value)
-					else
-						d.valuetext = Skada:FormatValueText(
-							Skada:FormatNumber(d.value),
-							true,
-							Skada:FormatNumber((d.value) / encounter.data.ActiveTime),
-							true
-						)
-					end
-
-					if d.value > maxvalue then
-						maxvalue = d.value
-					end
-					nr = nr + 1
+				d.value = encounter.data[win.modename] or 0
+				if win.modename == "ActiveTime" then
+					d.valuetext = Skada:FormatTime(d.value)
+				elseif win.modename == "Deaths" or win.modename == "Interrupts" or win.modename == "Fails" then
+					d.valuetext = tostring(d.value)
+				else
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatNumber(d.value), true,
+						Skada:FormatNumber((d.value) / encounter.data.ActiveTime), true
+					)
 				end
+
+				if d.value > maxvalue then
+					maxvalue = d.value
+				end
+				nr = nr + 1
 			end
 
 			win.metadata.maxvalue = maxvalue
@@ -167,16 +161,17 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 
 	function mod_modes:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = _format(L["%s's overall data"], label)
+		win.title = format(L["%s's overall data"], label)
 	end
 
 	function mod_modes:Update(win, set)
+		win.title = format(L["%s's overall data"], win.targetname or UNKNOWN)
 		local boss = find_boss_data(win.targetname)
-		if boss then
-			win.title = _format(L["%s's overall data"], win.targetname or UNKNOWN)
-			local maxvalue, nr = 0, 1
 
-			for i, mode in _ipairs(modes) do
+		if boss then
+			win.metadata.maxvalue = 1
+			local nr = 1
+			for i, mode in ipairs(modes) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -185,7 +180,7 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 
 				local value, active = 0, 0
 
-				for _, encounter in _ipairs(boss.encounters) do
+				for _, encounter in ipairs(boss.encounters) do
 					value = value + (encounter.data[mode] or 0)
 					active = active + (encounter.data.ActiveTime or 0)
 				end
@@ -195,29 +190,22 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 				if mode == "ActiveTime" then
 					d.valuetext = Skada:FormatTime(d.value)
 				elseif mode == "Deaths" or mode == "Interrupts" or mode == "Fails" then
-					d.valuetext = _tostring(d.value)
+					d.valuetext = tostring(d.value)
 				else
 					d.valuetext = Skada:FormatNumber(d.value)
 				end
-
-				if i > maxvalue then
-					maxvalue = i
-				end
-
 				nr = nr + 1
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
 	function mod:Update(win, set)
 		win.title = L["Improvement"]
 
-		if self.db and self.db.bosses then
+		if self.db then
 			local maxvalue, nr = 0, 1
 
-			for name, data in _pairs(self.db.bosses) do
+			for name, data in pairs(self.db) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -225,12 +213,11 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 				d.label = name
 				d.class = "BOSS"
 				d.value = data.count
-				d.valuetext = _tostring(data.count)
+				d.valuetext = tostring(data.count)
 
 				if data.count > maxvalue then
 					maxvalue = data.count
 				end
-
 				nr = nr + 1
 			end
 
@@ -242,12 +229,10 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 		-- make our DB local
 		Skada.char.improvement = Skada.char.improvement or {}
 		if next(Skada.char.improvement) == nil then
-			Skada.char.improvement = {
-				id = _UnitGUID("player"),
-				name = _UnitName("player"),
-				class = _select(2, _UnitClass("player")),
-				bosses = {}
-			}
+			Skada.char.improvement = {}
+		elseif Skada.char.improvement.id then
+			local bosses = Skada.char.improvement.bosses
+			Skada.char.improvement = bosses
 		end
 		self.db = Skada.char.improvement
 	end
@@ -265,8 +250,8 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 			if not encounter then return end
 
 			for _, player in Skada:IteratePlayers(set) do
-				if player.id == self.db.id then
-					for _, mode in _ipairs(modes) do
+				if player.id == playerid then
+					for _, mode in ipairs(modes) do
 						if updaters[mode] then
 							encounter.data[mode] = updaters[mode](set, player)
 						else
@@ -323,7 +308,7 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 		Skada.char.improvement = {}
 		self:OnInitialize()
 		collectgarbage("collect")
-		for _, win in _ipairs(Skada:GetWindows()) do
+		for _, win in ipairs(Skada:GetWindows()) do
 			local mode = win.db.mode
 			if mode == L["Improvement"] or mode == L["Improvement modes"] or mode == L["Improvement comparison"] then
 				win:DisplayMode(mod)
