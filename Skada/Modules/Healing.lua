@@ -340,7 +340,7 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 						d.value = spell.overheal / (spell.amount + spell.overheal)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(spell.overheal),
-							mod.metadata.columns.Overheal,
+							mod.metadata.columns.Overhealing,
 							format("%.1f%%", 100 * d.value),
 							mod.metadata.columns.Percent
 						)
@@ -382,7 +382,7 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 						d.value = target.overheal / (target.amount + target.overheal)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(target.overheal),
-							mod.metadata.columns.Overheal,
+							mod.metadata.columns.Overhealing,
 							format("%.1f%%", 100 * d.value),
 							mod.metadata.columns.Percent
 						)
@@ -420,7 +420,7 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 					d.value = player.healing.overheal / total
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(player.healing.overheal),
-						self.metadata.columns.Overheal,
+						self.metadata.columns.Overhealing,
 						format("%.1f%%", 100 * d.value),
 						self.metadata.columns.Percent
 					)
@@ -443,7 +443,7 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 			click1 = spellsmod,
 			click2 = playersmod,
 			nototalclick = {playersmod},
-			columns = {Overheal = true, Percent = true},
+			columns = {Overhealing = true, Percent = true},
 			icon = "Interface\\Icons\\spell_holy_holybolt"
 		}
 		Skada:AddMode(self, L["Absorbs and Healing"])
@@ -719,7 +719,7 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
 							Skada:FormatNumber(spell.amount),
 							mod.metadata.columns.Healing,
 							Skada:FormatNumber(spell.overheal),
-							mod.metadata.columns.Overheal,
+							mod.metadata.columns.Overhealing,
 							format("%.1f%%", 100 * spell.overheal / amount),
 							mod.metadata.columns.Percent
 						)
@@ -763,7 +763,7 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
 						Skada:FormatNumber(d.value),
 						mod.metadata.columns.Healing,
 						Skada:FormatNumber(target.overheal),
-						mod.metadata.columns.Overheal,
+						mod.metadata.columns.Overhealing,
 						format("%.1f%%", 100 * target.overheal / max(1, d.value)),
 						mod.metadata.columns.Percent
 					)
@@ -803,7 +803,7 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
 						Skada:FormatNumber(amount),
 						self.metadata.columns.Healing,
 						Skada:FormatNumber(player.healing.overheal or 0),
-						self.metadata.columns.Overheal,
+						self.metadata.columns.Overhealing,
 						format("%.1f%%", 100 * player.healing.overheal / total),
 						self.metadata.columns.Percent
 					)
@@ -826,7 +826,7 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
 			click1 = spellmod,
 			click2 = targetmod,
 			nototalclick = {targetmod},
-			columns = {Healing = true, Overheal = true, Percent = true},
+			columns = {Healing = true, Overhealing = true, Percent = true},
 			icon = "Interface\\Icons\\spell_holy_prayerofhealing02"
 		}
 		Skada:AddMode(self, L["Absorbs and Healing"])
@@ -843,7 +843,7 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
 			Skada:FormatNumber(healing),
 			self.metadata.columns.Healing,
 			Skada:FormatNumber(overheal),
-			self.metadata.columns.Overheal,
+			self.metadata.columns.Overhealing,
 			format("%.1f%%", 100 * overheal / max(1, healing + overheal)),
 			self.metadata.columns.Percent
 		)

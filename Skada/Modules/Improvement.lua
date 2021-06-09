@@ -77,7 +77,7 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 	end
 
 	updaters.Overhealing = function(set, player)
-		return player.healing and player.healing.overhealing or 0
+		return player.healing and player.healing.overheal or 0
 	end
 
 	updaters.Interrupts = function(set, player)

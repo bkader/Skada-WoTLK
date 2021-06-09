@@ -387,7 +387,6 @@ L["RHPS"] = true
 L["Healing: Raid HPS"] = true
 L["Total Healing"] = true
 L["Overhealing"] = true
-L["Overheal"] = true
 L["Overhealed player list"] = true
 L["Overheal spell list"] = true
 L["%s's overheal spells"] = true

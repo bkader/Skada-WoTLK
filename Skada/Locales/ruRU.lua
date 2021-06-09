@@ -389,7 +389,6 @@ L["RHPS"] = "RHPS"
 L["Healing: Raid HPS"] = "Исцеление: ИВС рейда"
 L["Total Healing"] = "Исцеление - Всего"
 L["Overhealing"] = "Исцеление - Избыточное"
-L["Overheal"] = "Избыточное исцеление" --?
 L["Overhealed player list"] = "Избыточно исцеленные игроки"
 L["Overheal spell list"] = "Заклинания избыточного исцеления"
 L["%s's overheal spells"] = "%s - Заклинания избыточного исцеления"
