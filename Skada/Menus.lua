@@ -447,13 +447,13 @@ function Skada:SegmentMenu(window)
 end
 
 do
-	local categorized
+	local categorized, categories
 
-	local function sort_modes(a, b)
-		local a_score = (a.category == OTHER) and 1000 or 0
-		local b_score = (b.category == OTHER) and 1000 or 0
-		a_score = a_score + (sbyte(a.category, 1) * 10) + sbyte(a:GetName(), 1)
-		b_score = b_score + (sbyte(b.category, 1) * 10) + sbyte(b:GetName(), 1)
+	local function sort_categories(a, b)
+		local a_score = (a == OTHER) and 1000 or 0
+		local b_score = (b == OTHER) and 1000 or 0
+		a_score = a_score + (sbyte(a, 1) * 10) + sbyte(a, 1)
+		b_score = b_score + (sbyte(b, 1) * 10) + sbyte(b, 1)
 		return a_score < b_score
 	end
 
@@ -462,45 +462,31 @@ do
 
 		-- so we call it only once.
 		if categorized == nil then
-			categorized = {}
+			categories, categorized = {}, {}
 			for _, mode in Skada:IterateModes() do
 				categorized[mode.category] = categorized[mode.category] or {}
 				tinsert(categorized[mode.category], mode)
+				if not tContains(categories, mode.category) then
+					tinsert(categories, mode.category)
+				end
 			end
-			tsort(categorized, sort_modes)
+			tsort(categories, sort_categories)
 		end
 
 		self.modesmenu.displayMode = "MENU"
 		self.modesmenu.initialize = function(self, level)
-			if not level then
-				return
-			end
+			if not level then return end
 			local info
 
 			if level == 1 then
-				for category, modes in pairs(categorized) do
-					if category ~= OTHER then
-						info = _UIDropDownMenu_CreateInfo()
-						info.text = category
-						info.value = category
-						info.hasArrow = 1
-						info.notCheckable = 1
-						info.padding = 16
-						if win and win.selectedmode and win.selectedmode.category == category then
-							info.colorCode = "|cffffd100"
-						end
-						_UIDropDownMenu_AddButton(info, level)
-					end
-				end
-
-				if categorized[OTHER] then
+				for _, category in ipairs(categories) do
 					info = _UIDropDownMenu_CreateInfo()
-					info.text = OTHER
-					info.value = OTHER
+					info.text = category
+					info.value = category
 					info.hasArrow = 1
 					info.notCheckable = 1
 					info.padding = 16
-					if win and win.selectedmode and win.selectedmode.category == OTHER then
+					if win and win.selectedmode and win.selectedmode.category == category then
 						info.colorCode = "|cffffd100"
 					end
 					_UIDropDownMenu_AddButton(info, level)
