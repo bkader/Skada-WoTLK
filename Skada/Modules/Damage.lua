@@ -802,6 +802,8 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 	local playermod = mod:NewModule(L["Damage spell list"])
 	local targetmod = mod:NewModule(L["Damage target list"])
 	local detailmod = targetmod:NewModule(L["More Details"])
+	local Enemies = Skada:GetModule("Enemies", true)
+	local UnitClass = Skada.UnitClass
 
 	local function getDPS(set, player)
 		local amount = player.damagedone and (player.damagedone.amount - (player.damagedone.overkill or 0)) or 0
@@ -871,28 +873,59 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 			win.title = format(L["%s's targets"], player.name)
 			local total = select(2, getDPS(set, player))
 
-			if total > 0 and player.damagedone.targets then
+			if total > 0 then
 				local maxvalue, nr = 0, 1
 
-				for targetname, target in pairs(player.damagedone.targets) do
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+				if Enemies and set.enemies then
+					for _, e in ipairs(set.enemies) do
+						if e.damagetaken and e.damagetaken.sources and e.damagetaken.sources[player.name] then
+							if (e.damagetaken.sources[player.name].useful or 0) > 0 then
+								local d = win.dataset[nr] or {}
+								win.dataset[nr] = d
 
-					d.id = targetname
-					d.label = targetname
+								d.id = e.name
+								d.label = e.name
 
-					d.value = max(0, (target.amount or 0) - (target.overkill or 0))
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(d.value),
-						mod.metadata.columns.Damage,
-						format("%.1f%%", 100 * d.value / total),
-						mod.metadata.columns.Percent
-					)
+								d.value = e.damagetaken.sources[player.name].useful
+								d.valuetext = Skada:FormatValueText(
+									Skada:FormatNumber(d.value),
+									mod.metadata.columns.Damage,
+									format("%.1f%%", 100 * d.value / total),
+									mod.metadata.columns.Percent
+								)
 
-					if d.value > maxvalue then
-						maxvalue = d.value
+								if d.value > maxvalue then
+									maxvalue = d.value
+								end
+								nr = nr + 1
+							end
+						end
 					end
-					nr = nr + 1
+				end
+
+				-- if nr is still set to one, it means nothing was created.
+				if nr == 1 and player.damagedone.targets then
+					for targetname, target in pairs(player.damagedone.targets) do
+						local d = win.dataset[nr] or {}
+						win.dataset[nr] = d
+
+						d.id = targetname
+						d.label = targetname
+
+						d.value = max(0, (target.amount or 0) - (target.overkill or 0))
+						d.valuetext =
+							Skada:FormatValueText(
+							Skada:FormatNumber(d.value),
+							mod.metadata.columns.Damage,
+							format("%.1f%%", 100 * d.value / total),
+							mod.metadata.columns.Percent
+						)
+
+						if d.value > maxvalue then
+							maxvalue = d.value
+						end
+						nr = nr + 1
+					end
 				end
 
 				win.metadata.maxvalue = maxvalue
@@ -908,19 +941,35 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 	function detailmod:Update(win, set)
 		win.title = format(L["Useful damage on %s"], win.targetname or UNKNOWN)
 
-		local total, players = 0, {}
+		local total, players, found = 0, {}
 
-		for _, player in Skada:IteratePlayers(set) do
-			if player.damagedone and player.damagedone.targets and player.damagedone.targets[win.targetname] then
-				local amount = max(0, player.damagedone.targets[win.targetname].amount - player.damagedone.targets[win.targetname].overkill)
-				total = total + amount
-				players[player.name] = {
-					id = player.id,
-					class = player.class,
-					role = player.role,
-					spec = player.spec,
-					amount = amount
-				}
+		if Enemies then
+			local enemy = Enemies:find_enemy(set, win.targetname)
+			if enemy and enemy.damagetaken and (enemy.damagetaken.useful or 0) > 0 then
+				total = enemy.damagetaken.useful
+
+				for sourcename, source in pairs(enemy.damagetaken.sources) do
+					if (source.useful or 0) > 0 then
+						players[sourcename] = {id = source.id, amount = source.useful}
+						found = true
+					end
+				end
+			end
+		end
+		if not found then
+			total = 0 -- reset total
+			for _, player in Skada:IteratePlayers(set) do
+				if player.damagedone and player.damagedone.targets and player.damagedone.targets[win.targetname] then
+					local amount = max(0, player.damagedone.targets[win.targetname].amount - player.damagedone.targets[win.targetname].overkill)
+					total = total + amount
+					players[player.name] = {
+						id = player.id,
+						class = player.class,
+						role = player.role,
+						spec = player.spec,
+						amount = amount
+					}
+				end
 			end
 		end
 
@@ -933,9 +982,13 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 
 				d.id = player.id
 				d.label = Skada:FormatName(playername)
-				d.class = player.class or "PET"
-				d.role = player.role
-				d.spec = player.spec
+				if not player.class then
+					d.class, d.role, d.spec = select(2, UnitClass(player.id, nil, set))
+				else
+					d.class = player.class or "PET"
+					d.role = player.role
+					d.spec = player.spec
+				end
 
 				d.value = player.amount
 				d.valuetext = Skada:FormatValueText(

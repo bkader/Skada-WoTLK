@@ -766,9 +766,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 				local nr = add_detail_bar(win, 1, L["Damage Done"], total)
 
 				-- useful damage
-				if (enemy.damagedone.targets[player.name].useful or 0) > 0 then
-					nr = add_detail_bar(win, nr, L["Useful Damage"], enemy.damagedone.targets[player.name].useful)
-				elseif (enemy.damagedone.targets[player.name].overkill or 0) > 0 then
+				if (enemy.damagedone.targets[player.name].overkill or 0) > 0 then
 					nr = add_detail_bar(win, nr, L["Useful Damage"], max(0, total - enemy.damagedone.targets[player.name].overkill))
 					nr = add_detail_bar(win, nr, L["Overkill"], enemy.damagedone.targets[player.name].overkill)
 				end
