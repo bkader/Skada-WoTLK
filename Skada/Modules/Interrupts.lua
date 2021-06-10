@@ -108,6 +108,8 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 					channel = "BATTLEGROUND"
 				elseif zoneType == "party" or zoneType == "raid" then
 					channel = zoneType:upper()
+				else
+					channel = Skada:IsInRaid() and "RAID" or "PARTY"
 				end
 			end
 
