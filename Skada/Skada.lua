@@ -53,9 +53,6 @@ Skada.displays = {}
 -- flag to check if disabled
 local disabled = false
 
--- flag used to check if we need an update
-local changed = true
-
 -- update & tick timers
 local update_timer, tick_timer
 local checkVersion, convertVersion
@@ -917,7 +914,7 @@ function Skada:RestoreView(win, theset, themode)
 		win.selectedset = "current"
 	end
 
-	changed = true
+	self.changed = true
 
 	if themode then
 		win:DisplayMode(self:find_mode(themode) or win.selectedset)
@@ -1049,7 +1046,7 @@ do
 			win:Wipe()
 		end
 
-		changed = true
+		self.changed = true
 	end
 end
 
@@ -1403,7 +1400,7 @@ function Skada:get_player(set, playerid, playername, playerflags)
 
 	player.first = player.first or now
 	player.last = now
-	changed = true
+	self.changed = true
 	self.callbacks:Fire("SKADA_PLAYER_GET", player)
 	return player
 end
@@ -2218,7 +2215,7 @@ end
 
 function Skada:UpdateDisplay(force)
 	if force then
-		changed = true
+		self.changed = true
 	end
 
 	if selectedfeed ~= nil then
@@ -2229,7 +2226,7 @@ function Skada:UpdateDisplay(force)
 	end
 
 	for _, win in self:IterateWindows() do
-		if (changed or win.changed) or self.current then
+		if (self.changed or win.changed) or self.current then
 			win.changed = false
 
 			if win.selectedmode then
@@ -2336,7 +2333,7 @@ function Skada:UpdateDisplay(force)
 		end
 	end
 
-	changed = false
+	self.changed = nil
 end
 
 -- ======================================================= --
@@ -3293,7 +3290,7 @@ function Skada:EndSegment()
 
 	for _, win in self:IterateWindows() do
 		win:Wipe()
-		changed = true
+		self.changed = true
 
 		if win.db.wipemode ~= "" and self:IsGroupDead() then
 			win:RestoreView("current", win.db.wipemode)
