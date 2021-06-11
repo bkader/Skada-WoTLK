@@ -802,7 +802,6 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 	local playermod = mod:NewModule(L["Damage spell list"])
 	local targetmod = mod:NewModule(L["Damage target list"])
 	local detailmod = targetmod:NewModule(L["More Details"])
-	local Enemies = Skada:GetModule("Enemies", true)
 	local UnitClass = Skada.UnitClass
 
 	local function getDPS(set, player)
@@ -876,8 +875,8 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 			if total > 0 then
 				local maxvalue, nr = 0, 1
 
-				if Enemies and set.enemies then
-					for _, e in ipairs(set.enemies) do
+				if Skada.IterateEnemies then
+					for _, e in Skada.IterateEnemies(set) do
 						if e.damagetaken and e.damagetaken.sources and e.damagetaken.sources[player.name] then
 							if (e.damagetaken.sources[player.name].useful or 0) > 0 then
 								local d = win.dataset[nr] or {}
@@ -943,8 +942,8 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 
 		local total, players, found = 0, {}
 
-		if Enemies then
-			local enemy = Enemies:find_enemy(set, win.targetname)
+		if Skada.find_enemy then
+			local enemy = Skada:find_enemy(set, win.targetname)
 			if enemy and enemy.damagetaken and (enemy.damagetaken.useful or 0) > 0 then
 				total = enemy.damagetaken.useful
 

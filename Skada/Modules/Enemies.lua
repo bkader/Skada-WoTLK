@@ -18,7 +18,7 @@ do
 	end
 
 	-- returns the enemy active time
-	function Enemies:EnemyActiveTime(set, enemy, active)
+	function Skada:EnemyActiveTime(set, enemy, active)
 		local settime = Skada:GetSetTime(set)
 		if Skada.effectivetime and not active then
 			return settime
@@ -44,7 +44,7 @@ do
 	end
 end
 
-function Enemies:find_enemy(set, name)
+function Skada:find_enemy(set, name)
 	if set and name then
 		set._enemyidx = set._enemyidx or {}
 
@@ -62,7 +62,7 @@ function Enemies:find_enemy(set, name)
 	end
 end
 
-function Enemies:get_enemy(set, guid, name, flags)
+function Skada:get_enemy(set, guid, name, flags)
 	if set and guid then
 		local enemy = self:find_enemy(set, name)
 		local now = time()
@@ -86,9 +86,13 @@ function Enemies:get_enemy(set, guid, name, flags)
 	end
 end
 
+function Skada:IterateEnemies(set)
+	return ipairs(set and set.enemies or {})
+end
+
 local function EnemyClass(name, set)
 	local class = "UNKNOWN"
-	local e = Enemies:find_enemy(set, name)
+	local e = Skada:find_enemy(set, name)
 	if e and e.class then
 		class = e.class
 	end
@@ -189,7 +193,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	end
 
 	local function log_custom_damage(set, guid, name, flags, srcGUID, srcName, spellid, spellschool, amount, tick)
-		local e = Enemies:get_enemy(set, guid, name, flags)
+		local e = Skada:get_enemy(set, guid, name, flags)
 		if e then
 			e.damagetaken = e.damagetaken or {}
 			e.damagetaken.amount = (e.damagetaken.amount or 0) + amount
@@ -222,7 +226,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	end
 
 	local function log_damage(set, dmg, tick)
-		local enemy = Enemies:get_enemy(set, dmg.enemyid, dmg.enemyname, dmg.enemyflags)
+		local enemy = Skada:get_enemy(set, dmg.enemyid, dmg.enemyname, dmg.enemyflags)
 		if enemy then
 			enemy.damagetaken = enemy.damagetaken or {}
 			enemy.damagetaken.amount = (enemy.damagetaken.amount or 0) + dmg.amount
@@ -348,7 +352,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 	local function getDTPS(set, enemy)
 		local amount = enemy.damagetaken and enemy.damagetaken.amount or 0
-		return amount / max(1, Enemies:EnemyActiveTime(set, enemy)), amount
+		return amount / max(1, Skada:EnemyActiveTime(set, enemy)), amount
 	end
 
 	local function getEnemiesDTPS(set)
@@ -380,7 +384,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 	function detailmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
-		local enemy = Enemies:find_enemy(set, win.targetname)
+		local enemy = Skada:find_enemy(set, win.targetname)
 		if player and enemy then
 			win.title = format(L["%s's damage on %s"], player.name, enemy.name)
 			local total = 0
@@ -413,7 +417,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's damage on %s"], player.name, win.targetname or UNKNOWN)
-			local total, enemy = 0, Enemies:find_enemy(set, win.targetname)
+			local total, enemy = 0, Skada:find_enemy(set, win.targetname)
 			if enemy and enemy.damagetaken and enemy.damagetaken.sources then
 				total = enemy.damagetaken.sources[player.name] and enemy.damagetaken.sources[player.name].amount or 0
 			end
@@ -463,7 +467,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 	function enemymod:Update(win, set)
 		win.title = format(L["Damage on %s"], win.targetname or UNKNOWN)
-		local enemy = Enemies:find_enemy(set, win.targetname)
+		local enemy = Skada:find_enemy(set, win.targetname)
 		local total = enemy and select(2, getDTPS(set, enemy)) or 0
 
 		if total > 0 and enemy.damagetaken.sources then
@@ -502,7 +506,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 	function spellmod:Update(win, set)
 		win.title = format(L["Damage on %s"], win.targetname or UNKNOWN)
-		local enemy = Enemies:find_enemy(set, win.targetname)
+		local enemy = Skada:find_enemy(set, win.targetname)
 		local total = enemy and select(2, getDTPS(set, enemy)) or 0
 
 		if total > 0 and enemy.damagetaken.spells then
@@ -660,7 +664,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 	local detailmod = mod:NewModule(L["Damage Breakdown"])
 
 	local function log_damage(set, dmg, tick)
-		local enemy = Enemies:get_enemy(set, dmg.enemyid, dmg.enemyname, dmg.enemyflags)
+		local enemy = Skada:get_enemy(set, dmg.enemyid, dmg.enemyname, dmg.enemyflags)
 		if enemy then
 			enemy.damagedone = enemy.damagedone or {}
 			enemy.damagedone.amount = (enemy.damagedone.amount or 0) + dmg.amount
@@ -748,7 +752,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 
 	local function getDPS(set, enemy)
 		local amount = enemy.damagedone and enemy.damagedone.amount or 0
-		return amount / max(1, Enemies:EnemyActiveTime(set, enemy)), amount
+		return amount / max(1, Skada:EnemyActiveTime(set, enemy)), amount
 	end
 
 	local function getEnemiesDPS(set)
@@ -780,7 +784,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 
 	function detailmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
-		local enemy = Enemies:find_enemy(set, win.targetname)
+		local enemy = Skada:find_enemy(set, win.targetname)
 		if player and enemy then
 			win.title = format(L["%s's damage on %s"], enemy.name, player.name)
 			local total = 0
@@ -811,7 +815,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's damage on %s"], win.targetname or UNKNOWN, player.name)
-			local total, enemy = 0, Enemies:find_enemy(set, win.targetname)
+			local total, enemy = 0, Skada:find_enemy(set, win.targetname)
 			if enemy and enemy.damagedone and enemy.damagedone.targets then
 				total = enemy.damagedone.targets[player.name] and enemy.damagedone.targets[player.name].amount or 0
 			end
@@ -861,7 +865,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 
 	function enemymod:Update(win, set)
 		win.title = format(L["Damage from %s"], win.targetname or UNKNOWN)
-		local enemy = Enemies:find_enemy(set, win.targetname)
+		local enemy = Skada:find_enemy(set, win.targetname)
 		local total = enemy and select(2, getDPS(set, enemy)) or 0
 
 		if total > 0 and enemy.damagedone.targets then
@@ -900,7 +904,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 
 	function spellmod:Update(win, set)
 		win.title = format(L["%s's damage"], win.targetname or UNKNOWN)
-		local enemy = Enemies:find_enemy(set, win.targetname)
+		local enemy = Skada:find_enemy(set, win.targetname)
 		local total = enemy and select(2, getDPS(set, enemy)) or 0
 
 		if total > 0 and enemy.damagedone.spells then
@@ -1011,7 +1015,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 	local spellmod = mod:NewModule(L["Healing spell list"])
 
 	local function log_heal(set, data, tick)
-		local e = Enemies:get_enemy(set, data.enemyid, data.enemyname, data.enemyflags)
+		local e = Skada:get_enemy(set, data.enemyid, data.enemyname, data.enemyflags)
 		if e then
 			local overheal = data.overheal or 0
 			local amount = max(0, data.amount - overheal)
@@ -1091,7 +1095,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 
 	local function getHPS(set, enemy)
 		local amount = enemy.healing and enemy.healing.amount or 0
-		return amount / max(1, Enemies:EnemyActiveTime(set, enemy)), amount
+		return amount / max(1, Skada:EnemyActiveTime(set, enemy)), amount
 	end
 
 	local function getEnemiesHPS(set)
@@ -1105,7 +1109,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 
 	function targetmod:Update(win, set)
 		win.title = format(L["%s's healed players"], win.targetname or UNKNOWN)
-		local enemy = Enemies:find_enemy(set, win.targetname)
+		local enemy = Skada:find_enemy(set, win.targetname)
 		local total = enemy and select(2, getHPS(set, enemy)) or 0
 
 		if total > 0 and enemy.healing.targets then
@@ -1144,7 +1148,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 
 	function spellmod:Update(win, set)
 		win.title = format(L["%s's healing spells"], win.targetname or UNKNOWN)
-		local enemy = Enemies:find_enemy(set, win.targetname)
+		local enemy = Skada:find_enemy(set, win.targetname)
 		local total = enemy and select(2, getHPS(set, enemy)) or 0
 
 		if total > 0 and enemy.healing.spells then
