@@ -228,16 +228,29 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 			enemy.damagetaken.amount = (enemy.damagetaken.amount or 0) + dmg.amount
 			set.edamagetaken = (set.edamagetaken or 0) + dmg.amount
 
-			local spell = enemy.damagetaken.spells and enemy.damagetaken.spells[dmg.spellid]
+			local spellname = dmg.spellname
+			local spell = enemy.damagetaken.spells and enemy.damagetaken.spells[spellname]
 			if not spell then
 				enemy.damagetaken.spells = enemy.damagetaken.spells or {}
-				enemy.damagetaken.spells[dmg.spellid] = {
+				enemy.damagetaken.spells[spellname] = {
+					id = dmg.spellid,
 					school = dmg.spellschool,
 					amount = 0,
 					overkill = 0,
 					isdot = tick or nil
 				}
-				spell = enemy.damagetaken.spells[dmg.spellid]
+				spell = enemy.damagetaken.spells[spellname]
+			elseif dmg.spellschool and dmg.spellschool ~= spell.school then
+				spellname = spellname .. " (" .. (Skada.schoolnames[dmg.spellschool] or OTHER) .. ")"
+				if not enemy.damagetaken.spells[spellname] then
+					enemy.damagetaken.spells[spellname] = {
+						id = dmg.spellid,
+						school = dmg.spellschool,
+						amount = 0,
+						isdot = tick or nil
+					}
+				end
+				spell = enemy.damagetaken.spells[spellname]
 			end
 
 			spell.count = (spell.count or 0) + 1
@@ -279,7 +292,8 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 							-- useful damage
 							enemy.damagetaken.useful = (enemy.damagetaken.useful or 0) + dmg.amount
-							enemy.damagetaken.sources[dmg.srcName].useful = (enemy.damagetaken.sources[dmg.srcName].useful or 0) + dmg.amount
+							enemy.damagetaken.sources[dmg.srcName].useful =
+								(enemy.damagetaken.sources[dmg.srcName].useful or 0) + dmg.amount
 						else
 							if valkyrsTable[dmg.enemyid] <= valkyrHalfHP then
 								log_custom_damage(set, dmg.enemyid, L["Valkyrs overkilling"], dmg.enemyflags, dmg.srcGUID, dmg.srcName, dmg.spellid, dmg.spellschool, dmg.amount - overkill, tick)
@@ -288,7 +302,8 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 							valkyrsTable[dmg.enemyid] = valkyrsTable[dmg.enemyid] - dmg.amount
 							enemy.damagetaken.useful = (enemy.damagetaken.useful or 0) + dmg.amount
-							enemy.damagetaken.sources[dmg.srcName].useful = (enemy.damagetaken.sources[dmg.srcName].useful or 0) + dmg.amount
+							enemy.damagetaken.sources[dmg.srcName].useful =
+								(enemy.damagetaken.sources[dmg.srcName].useful or 0) + dmg.amount
 
 							if valkyrsTable[dmg.enemyid] <= valkyrHalfHP then
 								local amount = valkyrHalfHP - valkyrsTable[dmg.enemyid] - overkill
@@ -307,7 +322,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	local dmg = {}
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, _, spellschool, amount, overkill = ...
+		local spellid, spellname, spellschool, amount, overkill = ...
 		if srcName and dstName then
 			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName)
 
@@ -318,6 +333,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 			dmg.srcName = srcName
 
 			dmg.spellid = spellid
+			dmg.spellname = spellname
 			dmg.spellschool = spellschool
 			dmg.amount = amount
 			dmg.overkill = overkill
@@ -327,7 +343,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	end
 
 	local function SwingDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellDamage(nil, nil, srcGUID, srcName, nil, dstGUID, dstName, dstFlags, 6603, nil, 1, ...)
+		SpellDamage(nil, nil, srcGUID, srcName, nil, dstGUID, dstName, dstFlags, 6603, L["Auto Attack"], 1, ...)
 	end
 
 	local function getDTPS(set, enemy)
@@ -405,17 +421,16 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 			if total > 0 and enemy.damagetaken.spells then
 				local maxvalue, nr = 0, 1
 
-				for spellid, spell in pairs(enemy.damagetaken.spells) do
+				for spellname, spell in pairs(enemy.damagetaken.spells) do
 					if spell.sources and spell.sources[player.name] then
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
-						d.id = spellid
-						d.spellid = spellid
+						d.id = spell.id
+						d.spellid = spell.id
+						d.label = spellname
+						d.icon = select(3, GetSpellInfo(spell.id))
 						d.spellschool = spell.school
-
-						local spellname, _, spellicon = GetSpellInfo(spellid)
-						d.label, d.icon = spellname, spellicon
 
 						if spell.isdot then
 							d.text = spellname .. L["DoT"]
@@ -493,16 +508,15 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 		if total > 0 and enemy.damagetaken.spells then
 			local maxvalue, nr = 0, 1
 
-			for spellid, spell in pairs(enemy.damagetaken.spells) do
+			for spellname, spell in pairs(enemy.damagetaken.spells) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
-				d.id = spellid
-				d.spellid = spellid
+				d.id = spell.id
+				d.spellid = spell.id
+				d.label = spellname
+				d.icon = select(3, GetSpellInfo(spell.id))
 				d.spellschool = spell.school
-
-				local spellname, _, spellicon = GetSpellInfo(spellid)
-				d.label, d.icon = spellname, spellicon
 
 				if spell.isdot then
 					d.text = spellname .. L["DoT"]
@@ -652,16 +666,29 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 			enemy.damagedone.amount = (enemy.damagedone.amount or 0) + dmg.amount
 			set.edamagedone = (set.edamagedone or 0) + dmg.amount
 
-			local spell = enemy.damagedone.spells and enemy.damagedone.spells[dmg.spellid]
+			local spellname = dmg.spellname
+			local spell = enemy.damagedone.spells and enemy.damagedone.spells[spellname]
 			if not spell then
 				enemy.damagedone.spells = enemy.damagedone.spells or {}
-				enemy.damagedone.spells[dmg.spellid] = {
+				enemy.damagedone.spells[spellname] = {
+					id = dmg.spellid,
 					school = dmg.spellschool,
 					amount = 0,
 					overkill = 0,
 					isdot = tick or nil
 				}
-				spell = enemy.damagedone.spells[dmg.spellid]
+				spell = enemy.damagedone.spells[spellname]
+			elseif dmg.spellschool and dmg.spellschool ~= spell.school then
+				spellname = spellname .. " (" .. (Skada.schoolnames[dmg.spellschool] or OTHER) .. ")"
+				if not enemy.damagedone.spells[spellname] then
+					enemy.damagedone.spells[spellname] = {
+						id = dmg.spellid,
+						school = dmg.spellschool,
+						amount = 0,
+						isdot = tick or nil
+					}
+				end
+				spell = enemy.damagedone.spells[spellname]
 			end
 
 			spell.count = (spell.count or 0) + 1
@@ -697,7 +724,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 	local dmg = {}
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, _, spellschool, amount, overkill = ...
+		local spellid, spellname, spellschool, amount, overkill = ...
 		if srcName and dstName then
 			dmg.enemyid = srcGUID
 			dmg.enemyname = srcName
@@ -706,6 +733,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 			dmg.dstName = dstName
 
 			dmg.spellid = spellid
+			dmg.spellname = spellname
 			dmg.spellschool = spellschool
 			dmg.amount = amount
 			dmg.overkill = overkill
@@ -715,7 +743,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 	end
 
 	local function SwingDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellDamage(nil, nil, srcGUID, srcName, nil, dstGUID, dstName, dstFlags, 6603, nil, 1, ...)
+		SpellDamage(nil, nil, srcGUID, srcName, nil, dstGUID, dstName, dstFlags, 6603, L["Auto Attack"], 1, ...)
 	end
 
 	local function getDPS(set, enemy)
@@ -783,89 +811,45 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's damage on %s"], win.targetname or UNKNOWN, player.name)
-
-			if player.damagetaken and player.damagetaken.sources and player.damagetaken.sources[win.targetname] then
-				local total = player.damagetaken.sources[win.targetname] or 0
-
-				if total > 0 and player.damagetaken.spells then
-					local maxvalue, nr = 0, 1
-
-					for spellname, spell in pairs(player.damagetaken.spells) do
-						if spell.sources and (spell.sources[win.targetname] or 0) > 0 then
-							local d = win.dataset[nr] or {}
-							win.dataset[nr] = d
-
-							d.id = spellname
-							d.spellid = spell.id
-							d.label = spellname
-							d.icon = select(3, GetSpellInfo(spell.id))
-							d.spellschool = spell.school
-
-							if spell.isdot then
-								d.text = spellname .. L["DoT"]
-							end
-
-							d.value = spell.sources[win.targetname]
-							d.valuetext = Skada:FormatValueText(
-								Skada:FormatNumber(d.value),
-								mod.metadata.columns.Damage,
-								format("%.1f%%", 100 * d.value / total),
-								mod.metadata.columns.Percent
-							)
-
-							if d.value > maxvalue then
-								maxvalue = d.value
-							end
-							nr = nr + 1
-						end
-					end
-
-					win.metadata.maxvalue = maxvalue
-					return
-				end
+			local total, enemy = 0, Enemies:find_enemy(set, win.targetname)
+			if enemy and enemy.damagedone and enemy.damagedone.targets then
+				total = enemy.damagedone.targets[player.name] and enemy.damagedone.targets[player.name].amount or 0
 			end
 
-			if win.targetname then
-				local enemy = Enemies:find_enemy(set, win.targetname)
-				local total = 0
-				if enemy and enemy.damagedone and enemy.damagedone.targets then
-					total = enemy.damagedone.targets[player.name].amount or 0
-				end
+			if total > 0 and enemy.damagedone.spells then
+				local maxvalue, nr = 0, 1
 
-				if total > 0 and enemy.damagedone.spells then
-					local maxvalue, nr = 0, 1
+				for spellname, spell in pairs(enemy.damagedone.spells) do
+					if spell.targets and spell.targets[player.name] then
+						local d = win.dataset[nr] or {}
+						win.dataset[nr] = d
 
-					for spellid, spell in pairs(enemy.damagedone.spells) do
-						if spell.sources and (spell.sources[player.name]) then
-							local d = win.dataset[nr] or {}
-							win.dataset[nr] = d
+						d.id = spell.id
+						d.spellid = spell.id
+						d.label = spellname
+						d.icon = select(3, GetSpellInfo(spell.id))
+						d.spellschool = spell.school
 
-							d.id = spellid
-							d.spellid = spellid
-							d.label, _, d.icon = GetSpellInfo(spellid)
-							d.spellschool = spell.school
-
-							if spell.isdot then
-								d.text = d.label .. L["DoT"]
-							end
-
-							d.value = spell.sources[player.name].amount or 0
-							d.valuetext = Skada:FormatValueText(
-								Skada:FormatNumber(d.value),
-								mod.metadata.columns.Damage,
-								format("%.1f%%", 100 * d.value / total),
-								mod.metadata.columns.Percent
-							)
-
-							if d.value > maxvalue then
-								maxvalue = d.value
-							end
-							nr = nr + 1
+						if spell.isdot then
+							d.text = spellname .. L["DoT"]
 						end
-					end
 
-					win.metadata.maxvalue = maxvalue
+						d.value = spell.targets[player.name].amount
+						d.valuetext = Skada:FormatValueText(
+							Skada:FormatNumber(d.value),
+							mod.metadata.columns.Damage,
+							format("%.1f%%", 100 * d.value / total),
+							mod.metadata.columns.Percent
+						)
+
+						if d.value > maxvalue then
+							maxvalue = d.value
+						end
+						nr = nr + 1
+					end
 				end
+
+				win.metadata.maxvalue = maxvalue
 			end
 		end
 	end
@@ -922,16 +906,15 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 		if total > 0 and enemy.damagedone.spells then
 			local maxvalue, nr = 0, 1
 
-			for spellid, spell in pairs(enemy.damagedone.spells) do
+			for spellname, spell in pairs(enemy.damagedone.spells) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
-				d.id = spellid
-				d.spellid = spellid
+				d.id = spell.id
+				d.spellid = spell.id
+				d.label = spellname
+				d.icon = select(3, GetSpellInfo(spell.id))
 				d.spellschool = spell.school
-
-				local spellname, _, spellicon = GetSpellInfo(spellid)
-				d.label, d.icon = spellname, spellicon
 
 				if spell.isdot then
 					d.text = spellname .. L["DoT"]
@@ -1174,12 +1157,9 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 				d.id = spellid
 				d.spellid = spellid
 				d.spellschool = spell.school
-
-				local spellname, _, spellicon = GetSpellInfo(spellid)
-				d.label, d.icon = spellname, spellicon
-
+				d.label, _, d.icon = GetSpellInfo(spellid)
 				if spell.ishot then
-					d.text = spellname .. L["HoT"]
+					d.text = d.label .. L["HoT"]
 				end
 
 				d.value = spell.amount

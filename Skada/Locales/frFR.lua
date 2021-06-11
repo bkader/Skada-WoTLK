@@ -494,7 +494,7 @@ L["DTPS"] = "DSPS"
 L["Enemies"] = "Ennemis"
 L["Enemy Damage Done"] = "Dégâts infligés (Ennemi)"
 L["Damage done per player"] = "Dégâts infligés par joueur"
-L["Damage from %s"] = "Dégâts subis par %s"
+L["Damage from %s"] = "Dégâts infligés par %s"
 L["%s's damage on %s"] = "Dégâts de %s sur %s"
 -- enemy damage taken module
 L["Enemy Damage Taken"] = "Dégâts subis (Ennemi)"
