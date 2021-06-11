@@ -28,7 +28,6 @@ local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 
 -- weak table
 local weaktable = {__mode = "v"}
-Skada.weaktable = weaktable
 
 local dataobj = LDB:NewDataObject("Skada", {
 	label = "Skada",
@@ -58,13 +57,15 @@ local update_timer, tick_timer
 local checkVersion, convertVersion
 
 -- list of players and pets
-local players, pets = {}, {}
+local players = setmetatable({}, weaktable)
+local pets = setmetatable({}, weaktable)
 
 -- list of feeds & selected feed
-local feeds, selectedfeed = {}
+local feeds, selectedfeed = setmetatable({}, weaktable)
 
 -- lists of modules and windows
-local modes, windows = {}, {}
+local modes = setmetatable({}, weaktable)
+local windows = setmetatable({}, weaktable)
 
 -- flags for party, instance and ovo
 local wasinparty, wasininstance, wasinpvp = false
