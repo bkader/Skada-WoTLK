@@ -1522,10 +1522,11 @@ end
 
 do
 	-- create our scan tooltip
+	local GAME_LOCALE = GetLocale()
 	local tooltip = CreateFrame("GameTooltip", "SkadaPetTooltip", nil, "GameTooltipTemplate")
 	tooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
 
-	function GetRussianPetOwner(text, name)
+	local function GetRussianPetOwner(text, name)
 		for gender = 2, 3 do
 			for decset = 1, GetNumDeclensionSets(name, gender) do
 				local genitive = DeclineName(name, gender, decset)
@@ -1537,7 +1538,6 @@ do
 		return false
 	end
 
-	local GAME_LOCALE = GetLocale()
 	local function GetPetOwnerFromTooltip(guid)
 		if not Skada.current then return end
 		tooltip:SetHyperlink("unit:" .. guid)
