@@ -19,11 +19,13 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 			local player = Skada:find_player(set, playerid, playername)
 			if player and (player.role ~= "TANK" or not tankevents[event]) then
 				set.fails = (set.fails or 0) + 1
-				player.fails = player.fails or {count = 0, spells = {}}
+				player.fails = player.fails or {count = 0}
 				player.fails.count = (player.fails.count or 0) + 1
 
-				player.fails.spells = player.fails.spells or {}
-				player.fails.spells[spellid] = (player.fails.spells[spellid] or 0) + 1
+				if set == Skada.current and spellid then
+					player.fails.spells = player.fails.spells or {}
+					player.fails.spells[spellid] = (player.fails.spells[spellid] or 0) + 1
+				end
 			end
 		end
 	end
@@ -191,6 +193,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 		playermod.metadata = {click1 = spellmod}
 		self.metadata = {
 			click1 = playermod,
+			nototalclick = {playermod},
 			columns = {Count = true, Percent = false},
 			icon = "Interface\\Icons\\ability_creature_cursed_01"
 		}

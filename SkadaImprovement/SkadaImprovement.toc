@@ -1,0 +1,12 @@
+## Interface: 30300
+## Title: Skada - Improvement
+## Notes: Saves your character boss encouters data to track your improvement.
+## Dependencies: Skada
+## SavedVariablesPerCharacter: SkadaImprovementDB
+## DefaultState: enabled
+## Author: Kader
+## X-Website: https://github.com/bkader/Skada-WoTLK
+## X-Email: bkader@email.com
+
+Locales.lua
+SkadaImprovement.lua

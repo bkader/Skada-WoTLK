@@ -34,10 +34,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 				if set == Skada.current then
 					player.power[gain.type].spells = player.power[gain.type].spells or {}
 					if not player.power[gain.type].spells[gain.spellid] then
-						player.power[gain.type].spells[gain.spellid] = {
-							school = gain.spellschool,
-							amount = gain.amount
-						}
+						player.power[gain.type].spells[gain.spellid] = {school = gain.spellschool, amount = gain.amount}
 					else
 						player.power[gain.type].spells[gain.spellid].amount = (player.power[gain.type].spells[gain.spellid].amount or 0) + gain.amount
 					end

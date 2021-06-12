@@ -555,12 +555,6 @@ L["Fails"] = true
 L["%s's fails"] = true
 L["Player's failed events"] = true
 L["Event's failed players"] = true
--- improvement module lines --
-L["Improvement"] = true
-L["Improvement modes"] = true
-L["Improvement comparison"] = true
-L["Do you want to reset your improvement data?"] = true
-L["%s's overall data"] = true
 -- interrupts module lines --
 L["Interrupts"] = true
 L["Interrupt spells"] = true
@@ -655,6 +649,7 @@ L["Overkill target list"] = true
 L["%s's overkill spells"] = true
 L["%s's overkill targets"] = true
 -- tweaks module lines --
+L["Improvement"] = true
 L["Tweaks"] = true
 L["First hit"] = true
 L["|cffffff00First Hit|r: %s from %s"] = true

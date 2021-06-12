@@ -2646,6 +2646,21 @@ function Skada:ReloadSettings()
 	end
 	self:RefreshMMButton()
 	self:ApplySettings()
+
+	-- fix setstokeep
+	if (self.db.profile.setstokeep or 0) > 30 then
+		self.db.profile.setstokeep = 30
+	end
+
+	-- remove old improvement data
+	if self.char.improvement then
+		if self.char.improvement.bosses then
+			SkadaImprovementDB = CopyTable(self.char.improvement.bosses or {})
+		else
+			SkadaImprovementDB = CopyTable(self.char.improvement)
+		end
+		self.char.improvement = nil
+	end
 end
 
 -- ======================================================= --

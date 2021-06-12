@@ -27,7 +27,6 @@
 <Script file="Modules\Deaths.lua" />
 <Script file="Modules\Dispels.lua" />
 <Script file="Modules\Failbot.lua" />
-<Script file="Modules\Improvement.lua" />
 <Script file="Modules\Interrupts.lua" />
 <Script file="Modules\Parry.lua" />
 <Script file="Modules\PlayerScore.lua" />

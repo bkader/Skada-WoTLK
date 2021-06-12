@@ -587,7 +587,7 @@ Skada.options = {
 					order = 98,
 					width = "double",
 					min = 0,
-					max = 99,
+					max = 30,
 					step = 1
 				},
 				updatefrequency = {

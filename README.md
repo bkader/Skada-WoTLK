@@ -2,6 +2,15 @@
 
 I am simply a huge fan of **Skada**, I prefer it to other damage meters for several reasons. No need to judge me, it's after all a personal preference.
 
+## How to install
+
+1. If you used the default on **Skada** before, please make sure to delete all its files from `Interface\AddOns` folder as well as all its _SavedVariables_ from `WTF` folder (_just delete all `Skada.lua` and `Skada.lua.bak` for this folder. Use the search box for quick delete). If you are new, skip this step.
+2. [Download the package](https://github.com/bkader/Skada-WoTLK/archive/refs/heads/main.zip).
+3. Open the Zip package inside which you will find a single folder named `Skada-WoTLK-main`.
+4. Extract or drag and drop the unique folder `Skada` into your `Interface\AddOns` folder.
+5. If you want to use `SkadaImprovement` module, drop it there as well.
+6. (optional) If you are using **ElvUI**, please make sure to extract the provided folders as well so that your ElvUI installation properly handles the new Skada.
+
 ## Show Love & Support
 
 Though it's not required and I have never asked for it but people keep asking for it, if you want to show some love and support, PayPal donations are most welcome at **bkader[at]email.com**.
@@ -45,14 +54,6 @@ Almost everything was changed, starting from the default version that was availa
 - Unlike before, windows are resizable using the resize handles found at both bottom corners.
 - Bars are more fancy, colored by not only class but also spell school colors.
 - Bars display icons for both players and spells (_spell tooltips as well for the latter_).
-
-## How to install
-
-1. If you used the default on **Skada** before, please make sure to delete all its files from `Interface\AddOns` folder as well as all its _SavedVariables_ from `WTF` folder (_just delete all `Skada.lua` and `Skada.lua.bak` for this folder. Use the search box for quick delete). If you are new, skip this step.
-2. [Download the package](https://github.com/bkader/Skada-WoTLK/archive/refs/heads/main.zip).
-3. Open the Zip package inside which you will find a single folder named `Skada-WoTLK-main`.
-4. Extract or drag and drop the unique folder `Skada` into your `Interface\AddOns` folder.
-5. (optional) If you are using **ElvUI**, please make sure to extract the provided folders as well so that your ElvUI installation properly handles the new Skada.
 
 ## Modules
 

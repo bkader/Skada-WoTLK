@@ -155,9 +155,11 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		if player then
 			set.deaths = (set.deaths or 0) + 1
 			player.deaths = (player.deaths or 0) + 1
-			player.deathlog = player.deathlog or {}
-			if player.deathlog[1] then
-				player.deathlog[1].time = ts
+			if set == Skada.current then
+				player.deathlog = player.deathlog or {}
+				if player.deathlog[1] then
+					player.deathlog[1].time = ts
+				end
 			end
 		end
 	end

@@ -30,11 +30,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 			if data.spellid then
 				player.interrupts.spells = player.interrupts.spells or {}
 				if not player.interrupts.spells[data.spellid] then
-					player.interrupts.spells[data.spellid] = {
-						id = data.spellid,
-						school = data.spellschool,
-						count = 1
-					}
+					player.interrupts.spells[data.spellid] = {school = data.spellschool, count = 1}
 				else
 					player.interrupts.spells[data.spellid].count = player.interrupts.spells[data.spellid].count + 1
 				end
@@ -44,11 +40,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 			if data.extraspellid then
 				player.interrupts.extraspells = player.interrupts.extraspells or {}
 				if not player.interrupts.extraspells[data.extraspellid] then
-					player.interrupts.extraspells[data.extraspellid] = {
-						id = data.extraspellid,
-						school = data.extraspellschool,
-						count = 1
-					}
+					player.interrupts.extraspells[data.extraspellid] = {school = data.extraspellschool, count = 1}
 				else
 					player.interrupts.extraspells[data.extraspellid].count = player.interrupts.extraspells[data.extraspellid].count + 1
 				end
@@ -58,8 +50,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 			if data.dstName then
 				player.interrupts.targets = player.interrupts.targets or {}
 				if not player.interrupts.targets[data.dstName] then
-					local class, role, spec = select(2, UnitClass(data.dstGUID, data.dstFlags, set, true))
-					player.interrupts.targets[data.dstName] = {class = class, role = role, spec = spec, count = 1}
+					player.interrupts.targets[data.dstName] = {id = data.dstGUID, count = 1}
 				else
 					player.interrupts.targets[data.dstName].count = player.interrupts.targets[data.dstName].count + 1
 				end
@@ -177,11 +168,9 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = targetname
+					d.id = target.id or targetname
 					d.label = targetname
-					d.class = target.class
-					d.role = target.role
-					d.spec = target.spec
+					d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(

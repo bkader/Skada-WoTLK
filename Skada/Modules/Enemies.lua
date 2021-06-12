@@ -296,8 +296,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 							-- useful damage
 							enemy.damagetaken.useful = (enemy.damagetaken.useful or 0) + dmg.amount
-							enemy.damagetaken.sources[dmg.srcName].useful =
-								(enemy.damagetaken.sources[dmg.srcName].useful or 0) + dmg.amount
+							enemy.damagetaken.sources[dmg.srcName].useful = (enemy.damagetaken.sources[dmg.srcName].useful or 0) + dmg.amount
 						else
 							if valkyrsTable[dmg.enemyid] <= valkyrHalfHP then
 								log_custom_damage(set, dmg.enemyid, L["Valkyrs overkilling"], dmg.enemyflags, dmg.srcGUID, dmg.srcName, dmg.spellid, dmg.spellschool, dmg.amount - overkill, tick)
@@ -306,8 +305,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 							valkyrsTable[dmg.enemyid] = valkyrsTable[dmg.enemyid] - dmg.amount
 							enemy.damagetaken.useful = (enemy.damagetaken.useful or 0) + dmg.amount
-							enemy.damagetaken.sources[dmg.srcName].useful =
-								(enemy.damagetaken.sources[dmg.srcName].useful or 0) + dmg.amount
+							enemy.damagetaken.sources[dmg.srcName].useful = (enemy.damagetaken.sources[dmg.srcName].useful or 0) + dmg.amount
 
 							if valkyrsTable[dmg.enemyid] <= valkyrHalfHP then
 								local amount = valkyrHalfHP - valkyrsTable[dmg.enemyid] - overkill
