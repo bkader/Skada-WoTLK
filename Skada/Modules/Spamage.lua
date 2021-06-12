@@ -138,6 +138,7 @@ Skada:AddLoadableModule("Spamage", "Suppresses chat messages from damage meters 
 		"^Skada: (.*) for (.*):$", -- Skada enUS
 		"^Skada: (.*) für (.*):$", -- Skada deDE
 		"^Skada: (.*) pour (.*):$", -- Skada frFR
+		"^Skada: (.*) для (.*):$", -- Skada ruRU
 		"^Отчёт Skada: (.*), с (.*):$", -- Skada ruRU
 		"^Skada: (.*) por (.*):$", -- Skada esES/ptBR
 		"^(.*) 의 Skada 보고 (.*):$", -- Skada koKR
@@ -155,8 +156,9 @@ Skada:AddLoadableModule("Spamage", "Suppresses chat messages from damage meters 
 	}
 
 	local nextlines = {
-		"^(%d+). (.*)$", --Recount, Details! and Skada
-		"^(%d+). (.*)$", --Skada
+		"^(%d+)%. (.*)$", -- Recount, Skada
+		"^ (%d+). (.*)$", -- Skada
+		"^(%d+). (.*)$", -- Recount, Details! and Skada
 		"^(.*)  (.*)$", -- Additional Skada
 		"^.*%%%)$", --Skada player details
 		"^[+-]%d+.%d", -- Numeration deathlog details
