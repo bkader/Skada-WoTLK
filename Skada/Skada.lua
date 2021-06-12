@@ -53,7 +53,7 @@ Skada.displays = {}
 local disabled = false
 
 -- update & tick timers
-local update_timer, tick_timer
+local update_timer, tick_timer, version_timer
 local checkVersion, convertVersion
 
 -- list of players and pets
@@ -2053,7 +2053,7 @@ function Skada:ZoneCheck()
 end
 
 do
-	local version_count, version_timer = 0
+	local version_count = 0
 
 	function checkVersion()
 		Skada:SendComm(nil, nil, "VersionCheck", Skada.version)
