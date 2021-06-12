@@ -55,6 +55,7 @@ local disabled = false
 -- update & tick timers
 local update_timer, tick_timer, version_timer
 local checkVersion, convertVersion
+local check_for_join_and_leave
 
 -- list of players and pets
 local players = setmetatable({}, weaktable)
@@ -2083,7 +2084,7 @@ do
 		end
 	end
 
-	local function check_for_join_and_leave()
+	function check_for_join_and_leave()
 		if not Skada:IsInGroup() and wasinparty then
 			if Skada.db.profile.reset.leave == 3 and Skada:CanReset() then
 				Skada:ShowPopup(nil, true)
