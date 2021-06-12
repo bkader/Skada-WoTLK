@@ -22,7 +22,7 @@ local floor, max, min = math.floor, math.max, math.min
 local band, bor, time, setmetatable = bit.band, bit.bor, time, setmetatable
 local GetNumPartyMembers, GetNumRaidMembers = GetNumPartyMembers, GetNumRaidMembers
 local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAffectingCombat, InCombatLockdown
-local UnitGUID, GetUnitName, UnitClass, UnitIsConnected = UnitGUID, GetUnitName, UnitClass, UnitIsConnected
+local UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitGUID, UnitName, UnitClass, UnitIsConnected
 local CombatLogClearEntries = CombatLogClearEntries
 local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 
@@ -1594,11 +1594,8 @@ do
 			if not owner and action.playerflags and band(action.playerflags, BITMASK_PETS) ~= 0 and band(action.playerflags, BITMASK_GROUP) ~= 0 then
 				-- my own pets or guardians?
 				if band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
-					owner = {id = UnitGUID("player"), name = GetUnitName("player")}
-				end
-
-				-- not found? our last hope is the tooltip
-				if not owner then
+					owner = {id = UnitGUID("player"), name = UnitName("player")}
+				else
 					owner = GetPetOwnerFromTooltip(action.playerid)
 				end
 
@@ -1939,7 +1936,7 @@ do
 		end
 
 		local title = (window and window.title) or report_mode.title or report_mode:GetName()
-		local label = (report_mode_name == L["Improvement"]) and GetUnitName("player") or Skada:GetSetLabel(report_set)
+		local label = (report_mode_name == L["Improvement"]) and UnitName("player") or Skada:GetSetLabel(report_set)
 		sendchat(format(L["Skada: %s for %s:"], title, label), channel, chantype)
 
 		local nr, maxlines = 1, maxlines or 10
@@ -2012,7 +2009,7 @@ function Skada:CheckGroup()
 				players[unitGUID] = true
 				local petGUID = UnitGUID(unit .. "pet")
 				if petGUID and not pets[petGUID] then
-					self:AssignPet(unitGUID, GetUnitName(unit), petGUID)
+					self:AssignPet(unitGUID, UnitName(unit), petGUID)
 				end
 			end
 		end
@@ -2023,7 +2020,7 @@ function Skada:CheckGroup()
 		players[playerGUID] = true
 		local petGUID = UnitGUID("pet")
 		if petGUID and not pets[petGUID] then
-			self:AssignPet(playerGUID, GetUnitName("player"), petGUID)
+			self:AssignPet(playerGUID, UnitName("player"), petGUID)
 		end
 	end
 end
@@ -2071,7 +2068,7 @@ do
 	end
 
 	function Skada:OnCommVersionCheck(sender, version)
-		if sender and sender ~= GetUnitName("player") and version then
+		if sender and sender ~= UnitName("player") and version then
 			version = convertVersion(version)
 			local ver = convertVersion(self.version)
 			if not (version and ver) or self.versionChecked then return end
@@ -2112,18 +2109,6 @@ do
 		end
 
 		wasinparty = not (not Skada:IsInGroup())
-	end
-
-	function Skada:PLAYER_ENTERING_WORLD()
-		self:ZoneCheck()
-		if not wasinparty then
-			self.After(2, function()
-				check_for_join_and_leave()
-				self:CheckGroup()
-			end)
-		end
-
-		version_timer = self.NewTimer(10, checkVersion)
 	end
 
 	function Skada:PARTY_MEMBERS_CHANGED()
@@ -3071,7 +3056,6 @@ function Skada:OnEnable()
 	-- we use this to be able to localize it
 	L["Auto Attack"] = MELEE
 
-	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("PARTY_MEMBERS_CHANGED")
 	self:RegisterEvent("RAID_ROSTER_UPDATE")
 	self:RegisterEvent("UNIT_PET")
@@ -3099,6 +3083,14 @@ function Skada:OnEnable()
 	elseif self.bossmod then
 		self.bossmod = nil
 	end
+
+	self:ZoneCheck()
+	self.After(1, function() self:CheckGroup() end)
+	if not wasinparty then
+		self.After(2, function() check_for_join_and_leave() end)
+	end
+
+	version_timer = self.NewTimer(10, checkVersion)
 end
 
 function Skada:BigWigs(_, _, event)
@@ -3165,7 +3157,7 @@ do
 	end
 
 	function Skada:SendComm(channel, target, ...)
-		if target == GetUnitName("player") then
+		if target == UnitName("player") then
 			return
 		end
 
