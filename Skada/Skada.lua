@@ -1578,6 +1578,7 @@ do
 			if band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
 				owner = {id = UnitGUID("player"), name = UnitName("player")}
 				pets[action.playerid] = owner
+				self:SendComm(nil, nil, "AssignPet", owner.id, action.playerid)
 			else
 				local ownername = GetPetOwnerFromTooltip(action.playerid)
 				if ownername then
@@ -1590,8 +1591,11 @@ do
 			end
 
 			if not owner then
-				-- in order to create a single entry
-				action.playerid = action.playername
+				action = wipe(action or {})
+				-- if you really don't care about the pets being shown at
+				-- the bottom of the list, please comment out the line above
+				-- and simply use the line below:
+				-- action.playerid = action.playername
 			end
 		end
 
@@ -1608,6 +1612,12 @@ do
 				action.playername = action.playername .. " (" .. owner.name .. ")"
 			end
 		end
+	end
+end
+
+function Skada:OnCommAssignPet(playername, playerid, pet)
+	if playerid and players[playerid] and playername and pet then
+		self:AssignPet(playerid, playername, pet)
 	end
 end
 
