@@ -1522,115 +1522,121 @@ end
 -- ================== --
 
 do
-	-- create our scan tooltip
-	local GAME_LOCALE = GetLocale()
-	local tooltip = CreateFrame("GameTooltip", "SkadaPetTooltip", nil, "GameTooltipTemplate")
-	tooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
-
-	local function GetRussianPetOwner(text, name)
-		for gender = 2, 3 do
-			for decset = 1, GetNumDeclensionSets(name, gender) do
-				local genitive = DeclineName(name, gender, decset)
-				if text:find(genitive) then
-					return true
-				end
-			end
+	local ownerPatterns = {}
+	for i = 1, 12 do
+		local title = _G["UNITNAME_SUMMON_TITLE" .. i]
+		if title and title ~= "%s" and title:find("%s", nil, true) then
+			local pattern = title:gsub("%%s", "(.-)")
+			tinsert(ownerPatterns, pattern)
 		end
-		return false
 	end
 
-	local function GetPetOwnerFromTooltip(guid)
-		if not Skada.current then return end
-		tooltip:SetHyperlink("unit:" .. guid)
-
-		for i = 2, tooltip:NumLines() do
-			local text = _G["SkadaPetTooltipTextLeft" .. i] and _G["SkadaPetTooltipTextLeft" .. i]:GetText()
-			if text and text ~= "" then
-				for _, p in Skada:IteratePlayers(Skada.current) do
-					local playername = p.name:gsub("%-.*", "") -- remove realm
-					if GAME_LOCALE == "ruRU" then
-						if text and GetRussianPetOwner(text, playername) then
-							return {id = p.id, name = p.name}
-						else
-							if text:find(playername) then
-								return {id = p.id, name = p.name}
-							end
-						end
-					else
-						if text:find(playername) then
-							return {id = p.id, name = p.name}
-						end
+	local GAME_LOCALE = GetLocale()
+	local UnitSex = UnitSex
+	local function GetRussianPetOwnerID(owner)
+		if GAME_LOCALE == "ruRU" and Skada.current then
+			for _, p in ipairs(Skada.current.players) do
+				local sex = UnitSex(p.name)
+				for decset = 1, GetNumDeclensionSets(p.name, sex) do
+					local name = DeclineName(p.name, sex, decset)
+					if owner == name then
+						return p.id
 					end
 				end
 			end
 		end
 	end
 
-	function Skada:AssignPet(ownerGUID, ownerName, petGUID)
-		pets[petGUID] = {id = ownerGUID, name = ownerName}
-		self.callbacks:Fire("SKADA_PET_ASSIGN", petGUID, ownerGUID, ownerName)
-	end
+	local tooltip = CreateFrame("GameTooltip", "SkadaPetTooltip", nil, "GameTooltipTemplate")
+	local function GetPetOwnerFromTooltip(guid)
+		tooltip:SetHyperlink("unit:" .. (guid or ""))
+		tooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
 
-	function Skada:GetPetOwner(petGUID)
-		return pets[petGUID] or GetPetOwnerFromTooltip(petGUID)
-	end
-
-	function Skada:IsPet(petGUID, petFlags)
-		if tonumber(petGUID) and (pets[petGUID] or GetPetOwnerFromTooltip(petGUID)) then
-			return true
+		for i = 2, tooltip:NumLines() do
+			local text = _G["SkadaPetTooltipTextLeft" .. i]:GetText()
+			if text then
+				for _, pattern in next, ownerPatterns do
+					local owner = text:math(pattern)
+					if owner then
+						return owner
+					end
+				end
+			end
 		end
-
-		if tonumber(petFlags) and band(petFlags, BITMASK_PETS) ~= 0 then
-			return true
-		end
-
-		return false
 	end
 
 	function Skada:FixPets(action)
-		if action and action.playerid and action.playername then
-			local owner = pets[action.playerid]
+		if not (action and action.playerid and action.playername) then
+			return
+		end
 
-			-- we try to associate pets and and guardians with their owner
-			if not owner and action.playerflags and band(action.playerflags, BITMASK_PETS) ~= 0 and band(action.playerflags, BITMASK_GROUP) ~= 0 then
-				-- my own pets or guardians?
-				if band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
-					owner = {id = UnitGUID("player"), name = UnitName("player")}
-				else
-					owner = GetPetOwnerFromTooltip(action.playerid)
-				end
+		local owner = pets[action.playerid]
 
-				if not owner then
-					-- action.playerid = action.playername -- in order to create a single entry
-					action = wipe(action or {}) -- ignore them
-				elseif not pets[action.playerid] then
-					pets[action.playerid] = owner
+		-- we try to associate pets and and guardians with their owner
+		if not owner and action.playerflags and band(action.playerflags, BITMASK_PETS) ~= 0 and band(action.playerflags, BITMASK_GROUP) ~= 0 then
+			-- my own pets or guardians?
+			if band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
+				owner = {id = UnitGUID("player"), name = UnitName("player")}
+				pets[action.playerid] = owner
+			else
+				local ownername = GetPetOwnerFromTooltip(action.playerid)
+				if ownername then
+					local guid = UnitGUID(ownername) or GetRussianPetOwnerID(ownername)
+					if players[guid] then
+						owner = {id = guid, name = ownername}
+						pets[action.playerid] = owner
+					end
 				end
 			end
 
-			if owner then
-				if self.db.profile.mergepets then
-					if action.spellname then
-						action.spellname = action.spellname .. " (" .. action.playername .. ")"
-					end
+			if not owner then
+				-- action.playerid = action.playername -- in order to create a single entry
+				action = wipe(action or {}) -- ignore them
+			end
+		end
 
-					action.playerid = owner.id
-					action.playername = owner.name
-				else
-					-- just append the creature id to the player
-					action.playerid = owner.id .. tonumber(action.playerid:sub(9, 12), 16)
-					action.playername = action.playername .. " (" .. owner.name .. ")"
+		if owner then
+			if self.db.profile.mergepets then
+				if action.spellname then
+					action.spellname = action.spellname .. " (" .. action.playername .. ")"
 				end
+				action.playerid = owner.id
+				action.playername = owner.name
+			else
+				-- just append the creature id to the player
+				action.playerid = owner.id .. tonumber(action.playerid:sub(9, 12), 16)
+				action.playername = action.playername .. " (" .. owner.name .. ")"
 			end
 		end
 	end
 end
 
-function Skada:FixMyPets(playerid, playername)
-	if pets[playerid] then
-		return pets[playerid].id, pets[playerid].name
+function Skada:FixMyPets(guid, name)
+	if pets[guid] then
+		return pets[guid].id, pets[guid].name
 	end
-	return playerid, playername
+	return guid, name
+end
+
+function Skada:AssignPet(ownerGUID, ownerName, petGUID)
+	pets[petGUID] = {id = ownerGUID, name = ownerName}
+	self.callbacks:Fire("SKADA_PET_ASSIGN", petGUID, ownerGUID, ownerName)
+end
+
+function Skada:GetPetOwner(petGUID)
+	return pets[petGUID]
+end
+
+function Skada:IsPet(petGUID, petFlags)
+	if tonumber(petGUID) and pets[petGUID] then
+		return true
+	end
+
+	if tonumber(petFlags) and band(petFlags, BITMASK_PETS) ~= 0 then
+		return true
+	end
+
+	return false
 end
 
 function Skada:PetDebug()
