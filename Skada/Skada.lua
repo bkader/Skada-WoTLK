@@ -1420,19 +1420,15 @@ function Skada:IsPlayer(guid, flags, name)
 	if guid and players[guid] then
 		return true
 	end
-
 	if name and UnitIsPlayer(name) then
 		return true
 	end
-
 	if tonumber(flags) then
 		return (band(flags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0)
 	end
-
 	if not self:IsCreature(guid, flags) then
 		return true
 	end
-
 	return false
 end
 
