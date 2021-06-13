@@ -192,18 +192,18 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 		return valkyrMaxHP
 	end
 
-	local function log_custom_damage(set, guid, name, flags, srcGUID, srcName, spellid, spellschool, amount, tick)
+	local function log_custom_damage(set, guid, name, flags, srcGUID, srcName, spellid, spellname, spellschool, amount, tick)
 		local e = Skada:get_enemy(set, guid, name, flags)
 		if e then
 			e.damagetaken = e.damagetaken or {}
 			e.damagetaken.amount = (e.damagetaken.amount or 0) + amount
 
 			-- spell
-			local spell = e.damagetaken.spells and e.damagetaken.spells[spellid]
+			local spell = e.damagetaken.spells and e.damagetaken.spells[spellname]
 			if not spell then
 				e.damagetaken.spells = e.damagetaken.spells or {}
-				e.damagetaken.spells[spellid] = {school = spellschool, amount = 0, isdot = tick or nil}
-				spell = e.damagetaken.spells[spellid]
+				e.damagetaken.spells[spellname] = {id = spellid, school = spellschool, amount = 0, isdot = tick or nil}
+				spell = e.damagetaken.spells[spellname]
 			end
 
 			spell.count = (spell.count or 0) + 1
@@ -299,7 +299,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 							enemy.damagetaken.sources[dmg.srcName].useful = (enemy.damagetaken.sources[dmg.srcName].useful or 0) + dmg.amount
 						else
 							if valkyrsTable[dmg.enemyid] <= valkyrHalfHP then
-								log_custom_damage(set, dmg.enemyid, L["Valkyrs overkilling"], dmg.enemyflags, dmg.srcGUID, dmg.srcName, dmg.spellid, dmg.spellschool, dmg.amount - overkill, tick)
+								log_custom_damage(set, dmg.enemyid, L["Valkyrs overkilling"], dmg.enemyflags, dmg.srcGUID, dmg.srcName, dmg.spellid, dmg.spellname, dmg.spellschool, dmg.amount - overkill, tick)
 								return
 							end
 
@@ -309,13 +309,13 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 							if valkyrsTable[dmg.enemyid] <= valkyrHalfHP then
 								local amount = valkyrHalfHP - valkyrsTable[dmg.enemyid] - overkill
-								log_custom_damage(set, dmg.enemyid, L["Valkyrs overkilling"], dmg.enemyflags, dmg.srcGUID, dmg.srcName, dmg.spellid, dmg.spellschool, amount, tick)
+								log_custom_damage(set, dmg.enemyid, L["Valkyrs overkilling"], dmg.enemyflags, dmg.srcGUID, dmg.srcName, dmg.spellid, dmg.spellname, dmg.spellschool, amount, tick)
 							end
 						end
 					end
 
 					local amount = (altname == L["Princes overkilling"]) and overkill or dmg.amount
-					log_custom_damage(set, dmg.enemyid, altname, dmg.enemyflags, dmg.srcGUID, dmg.srcName, dmg.spellid, dmg.spellschool, amount, tick)
+					log_custom_damage(set, dmg.enemyid, altname, dmg.enemyflags, dmg.srcGUID, dmg.srcName, dmg.spellid, dmg.spellname, dmg.spellschool, amount, tick)
 				end
 			end
 		end
