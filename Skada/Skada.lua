@@ -1309,8 +1309,17 @@ do
 	function Skada:FixPlayer(player)
 		if player.id and player.name then
 			if not player.class then
-				local class = player.class or select(2, self.UnitClass(player.id, player.flags))
-				player.class = class
+				if self:IsPet(player.id, player.flags) then
+					player.class = "PET"
+				elseif self:IsBoss(player.id) then
+					player.class = "BOSS"
+				elseif self:IsCreature(player.id, player.flags) then
+					player.class = "MONSTER"
+				elseif self:IsPlayer(player.id, player.flags, player.name) then
+					player.class = select(2, self.UnitClass(player.id, player.flags))
+				else
+					player.class = "UNKNOWN"
+				end
 
 				-- if the player has been assigned a valid class,
 				-- we make sure to assign his/her role and spec
@@ -1407,7 +1416,10 @@ function Skada:get_player(set, playerid, playername, playerflags)
 	return player
 end
 
-function Skada:IsPlayer(guid, flags)
+function Skada:IsPlayer(guid, flags, name)
+	if name and UnitIsPlayer(name) then
+		return true
+	end
 	if tonumber(guid) then
 		return (players[guid] or not self:IsCreature(guid, flags))
 	end
