@@ -96,21 +96,25 @@ local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dst
 	if Skada:IsPet(dstGUID, dstFlags) then
 		passed = false
 	elseif auratype == "DEBUFF" and not Skada:IsDisabled("Debuffs") then
-		aura.playerid = srcGUID
-		aura.playername = srcName
-		aura.playerflags = srcFlags
-		aura.dstGUID = dstGUID
-		aura.dstName = dstName
-		aura.dstFlags = dstFlags
-		passed = true
+		if Skada:IsPlayer(srcGUID, srcFlags, srcName) then
+			aura.playerid = srcGUID
+			aura.playername = srcName
+			aura.playerflags = srcFlags
+			aura.dstGUID = dstGUID
+			aura.dstName = dstName
+			aura.dstFlags = dstFlags
+			passed = true
+		end
 	elseif auratype == "BUFF" and not Skada:IsDisabled("Buffs") then
-		aura.playerid = dstGUID
-		aura.playername = dstName
-		aura.playerflags = dstFlags
-		aura.dstGUID = nil
-		aura.dstName = nil
-		aura.dstFlags = nil
-		passed = true
+		if Skada:IsPlayer(dstGUID, dstFlags, dstName) then
+			aura.playerid = dstGUID
+			aura.playername = dstName
+			aura.playerflags = dstFlags
+			aura.dstGUID = nil
+			aura.dstName = nil
+			aura.dstFlags = nil
+			passed = true
+		end
 	end
 
 	if not passed then
@@ -135,21 +139,25 @@ local function AuraRefresh(timestamp, eventtype, srcGUID, srcName, srcFlags, dst
 	if Skada:IsPet(dstGUID, dstFlags) then
 		passed = false
 	elseif auratype == "DEBUFF" and not Skada:IsDisabled("Debuffs") then
-		aura.playerid = srcGUID
-		aura.playername = srcName
-		aura.playerflags = srcFlags
-		aura.dstGUID = dstGUID
-		aura.dstName = dstName
-		aura.dstFlags = dstFlags
-		passed = true
+		if Skada:IsPlayer(srcGUID, srcFlags, srcName) then
+			aura.playerid = srcGUID
+			aura.playername = srcName
+			aura.playerflags = srcFlags
+			aura.dstGUID = dstGUID
+			aura.dstName = dstName
+			aura.dstFlags = dstFlags
+			passed = true
+		end
 	elseif auratype == "BUFF" and not Skada:IsDisabled("Buffs") then
-		aura.playerid = dstGUID
-		aura.playername = dstName
-		aura.playerflags = dstFlags
-		aura.dstGUID = nil
-		aura.dstName = nil
-		aura.dstFlags = nil
-		passed = true
+		if Skada:IsPlayer(dstGUID, dstFlags, dstName) then
+			aura.playerid = dstGUID
+			aura.playername = dstName
+			aura.playerflags = dstFlags
+			aura.dstGUID = nil
+			aura.dstName = nil
+			aura.dstFlags = nil
+			passed = true
+		end
 	end
 
 	if not passed then
@@ -174,21 +182,25 @@ local function AuraRemoved(timestamp, eventtype, srcGUID, srcName, srcFlags, dst
 	if Skada:IsPet(dstGUID, dstFlags) then
 		passed = false
 	elseif auratype == "DEBUFF" and not Skada:IsDisabled("Debuffs") then
-		aura.playerid = srcGUID
-		aura.playername = srcName
-		aura.playerflags = srcFlags
-		aura.dstGUID = dstGUID
-		aura.dstName = dstName
-		aura.dstFlags = dstFlags
-		passed = true
+		if Skada:IsPlayer(srcGUID, srcFlags, srcName) then
+			aura.playerid = srcGUID
+			aura.playername = srcName
+			aura.playerflags = srcFlags
+			aura.dstGUID = dstGUID
+			aura.dstName = dstName
+			aura.dstFlags = dstFlags
+			passed = true
+		end
 	elseif auratype == "BUFF" and not Skada:IsDisabled("Buffs") then
-		aura.playerid = dstGUID
-		aura.playername = dstName
-		aura.playerflags = dstFlags
-		aura.dstGUID = nil
-		aura.dstName = nil
-		aura.dstFlags = nil
-		passed = true
+		if Skada:IsPlayer(dstGUID, dstFlags, dstName) then
+			aura.playerid = dstGUID
+			aura.playername = dstName
+			aura.playerflags = dstFlags
+			aura.dstGUID = nil
+			aura.dstName = nil
+			aura.dstFlags = nil
+			passed = true
+		end
 	end
 
 	if not passed then

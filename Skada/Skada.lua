@@ -1417,15 +1417,22 @@ function Skada:get_player(set, playerid, playername, playerflags)
 end
 
 function Skada:IsPlayer(guid, flags, name)
+	if guid and players[guid] then
+		return true
+	end
+
 	if name and UnitIsPlayer(name) then
 		return true
 	end
-	if tonumber(guid) then
-		return (players[guid] or not self:IsCreature(guid, flags))
-	end
+
 	if tonumber(flags) then
 		return (band(flags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0)
 	end
+
+	if not self:IsCreature(guid, flags) then
+		return true
+	end
+
 	return false
 end
 
