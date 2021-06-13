@@ -386,7 +386,7 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 	local spellmod = mod:NewModule(L["Buff spell list"])
 
 	local UnitExists, UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
-	local UnitGUID, UnitName, _UnitBuff = UnitGUID, UnitName, UnitBuff
+	local UnitGUID, UnitName, UnitBuff = UnitGUID, UnitName, UnitBuff
 
 	function spellmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
@@ -423,9 +423,13 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 				if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
 					local dstGUID, dstName = UnitGUID(unit), UnitName(unit)
 					for i = 1, 40 do
-						local spellname, rank, _, _, _, _, _, unitCaster, _, _, spellid = _UnitBuff(unit, i)
-						if spellname and spellid and unitCaster and rank ~= SPELL_PASSIVE and not blacklist[spellid] then
-							AuraApplied(nil, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, nil, nil, "BUFF")
+						local rank, _, _, _, _, _, unitCaster, _, _, spellid = select(2, UnitBuff(unit, i))
+						if spellid then
+							if unitCaster and rank ~= SPELL_PASSIVE and not blacklist[spellid] then
+								AuraApplied(nil, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, nil, nil, "BUFF")
+							end
+						else
+							break -- no buff at all
 						end
 					end
 				end
@@ -567,7 +571,7 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 		Skada:RegisterForCL(DebuffApplied, "SPELL_AURA_REFRESH", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
 		Skada:RegisterForCL(DebuffApplied, "SPELL_AURA_APPLIED_DOSE", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
 		Skada:RegisterForCL(DebuffApplied, "SPELL_AURA_REMOVED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
-		Skada:RegisterForCL(DebuffApplied, "SPELL__AURA_REMOVED_DOSE", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
+		Skada:RegisterForCL(DebuffApplied, "SPELL_AURA_REMOVED_DOSE", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
 
 		Skada.RegisterCallback(self, "COMBAT_PLAYER_TICK", "Tick")
 		Skada:AddMode(self, L["Buffs and Debuffs"])
