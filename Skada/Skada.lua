@@ -1590,8 +1590,8 @@ do
 			end
 
 			if not owner then
-				-- action.playerid = action.playername -- in order to create a single entry
-				action = wipe(action or {}) -- ignore them
+				-- in order to create a single entry
+				action.playerid = action.playername
 			end
 		end
 
@@ -3205,7 +3205,7 @@ do
 	end
 
 	function Skada:OnCommReceived(prefix, message, channel, sender)
-		if prefix == "Skada" and channel and sender then
+		if prefix == "Skada" and channel and sender and sender ~= UnitName("player") then
 			DispatchComm(sender, self:Deserialize(message))
 		end
 	end
