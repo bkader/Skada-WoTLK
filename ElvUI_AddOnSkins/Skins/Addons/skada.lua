@@ -87,7 +87,7 @@ S:AddCallbackForAddon("Skada", "Skada", function()
 
 	if Skada.revisited then
 		hooksecurefunc(Skada, "UpdateDisplay", function()
-			if not InCombatLockdown() then
+			if EMB:CheckEmbed("Skada") then
 				EMB:EmbedSkada()
 			end
 		end)
