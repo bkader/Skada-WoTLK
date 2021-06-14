@@ -713,11 +713,9 @@ do
 				group:SetFrameStrata("TOOLTIP")
 				group:StartSizing("TOP")
 				group:SetScript("OnUpdate", function(self, elapsed)
-					local height = self:GetHeight()
-					if height >= 800 then
+					self:SortBars()
+					if self:GetHeight() >= 450 then
 						self:StopMovingOrSizing()
-					else
-						self:SortBars()
 					end
 				end)
 			elseif button == "LeftButton" and not group.locked then
