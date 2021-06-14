@@ -27,8 +27,8 @@ L["Count"] = true
 L["Refresh"] = true
 L["Percent"] = true
 L["General Options"] = true
-L["HoT"] = " (|cffb7b7a4HoT|r)"
-L["DoT"] = " (|cffb7b7a4DoT|r)"
+L["HoT"] = " (HoT)"
+L["DoT"] = " (DoT)"
 L["Hits"] = true
 L["Normal Hits"] = true
 L["Critical"] = true
@@ -481,7 +481,7 @@ L["Damage: Raid DPS"] = true
 -- damage taken module
 L["Damage Taken"] = true
 L["Damage taken by %s"] = true
-L["%s damage on %s"] = true
+L["%s's damage on %s"] = true
 L["Damage source list"] = true
 L["Damage spell sources"] = true
 L["Damage Taken By Spell"] = true
@@ -492,7 +492,6 @@ L["Enemies"] = true
 L["Enemy Damage Done"] = true
 L["Damage done per player"] = true
 L["Damage from %s"] = true
-L["%s's damage on %s"] = true
 -- enemy damage taken module
 L["Enemy Damage Taken"] = true
 L["Damage taken per player"] = true

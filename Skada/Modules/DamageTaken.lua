@@ -17,8 +17,9 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 
 	local mod = Skada:NewModule(L["Damage Taken"])
 	local playermod = mod:NewModule(L["Damage spell list"])
-	local spellmod = mod:NewModule(L["Damage spell details"])
+	local spellmod = playermod:NewModule(L["Damage spell details"])
 	local sourcemod = mod:NewModule(L["Damage source list"])
+	local detailmod = sourcemod:NewModule(L["Damage spell list"])
 
 	local function log_damage(set, dmg, tick)
 		local player = Skada:get_player(set, dmg.playerid, dmg.playername, dmg.playerflags)
@@ -28,30 +29,16 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 		player.damagetaken.amount = (player.damagetaken.amount or 0) + dmg.amount
 		set.damagetaken = (set.damagetaken or 0) + dmg.amount
 
-		local spellname = dmg.spellname
-		if spellname == L["Auto Attack"] then
-			spellname = spellname .. " (" .. (dmg.srcName or UNKNOWN) .. ")"
-		end
-
+		local spellname = dmg.spellname .. (tick and L["DoT"] or "")
 		local spell = player.damagetaken.spells and player.damagetaken.spells[spellname]
 		if not spell then
 			player.damagetaken.spells = player.damagetaken.spells or {}
-			spell = {
-				id = dmg.spellid,
-				school = dmg.spellschool,
-				amount = 0,
-				isdot = tick or nil
-			}
+			spell = {id = dmg.spellid, school = dmg.spellschool, amount = 0}
 			player.damagetaken.spells[spellname] = spell
 		elseif dmg.spellschool and dmg.spellschool ~= spell.school then
 			spellname = spellname .. " (" .. (Skada.schoolnames[dmg.spellschool] or OTHER) .. ")"
 			if not player.damagetaken.spells[spellname] then
-				player.damagetaken.spells[spellname] = {
-					id = dmg.spellid,
-					school = dmg.spellschool,
-					amount = 0,
-					isdot = tick or nil
-				}
+				player.damagetaken.spells[spellname] = {id = dmg.spellid, school = dmg.spellschool, amount = 0}
 			end
 			spell = player.damagetaken.spells[spellname]
 		end
@@ -227,7 +214,9 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 				if spell.school then
 					local c = Skada.schoolcolors[spell.school]
 					local n = Skada.schoolnames[spell.school]
-					if c and n then tooltip:AddLine(n, c.r, c.g, c.b) end
+					if c and n then
+						tooltip:AddLine(n, c.r, c.g, c.b)
+					end
 				end
 
 				if spell.max and spell.min then
@@ -240,7 +229,10 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 	end
 
 	local function spellmod_tooltip(win, id, label, tooltip)
-		if label == L["Critical Hits"] or label == L["Normal Hits"] or label == L.ABSORB or label == L.BLOCK or label == L.RESIST then
+		if
+			label == L["Critical Hits"] or label == L["Normal Hits"] or label == L.ABSORB or label == L.BLOCK or
+				label == L.RESIST
+		 then
 			local player = Skada:find_player(win:get_selected_set(), win.playerid)
 			if player and player.damagetaken then
 				local spell = player.damagetaken.spells and player.damagetaken.spells[win.spellname]
@@ -250,7 +242,9 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 					if spell.school then
 						local c = Skada.schoolcolors[spell.school]
 						local n = Skada.schoolnames[spell.school]
-						if c and n then tooltip:AddLine(n, c.r, c.g, c.b) end
+						if c and n then
+							tooltip:AddLine(n, c.r, c.g, c.b)
+						end
 					end
 
 					if label == L["Critical Hits"] and spell.criticalamount then
@@ -297,10 +291,6 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 					d.label = spellname
 					d.icon = select(3, GetSpellInfo(spell.id))
 					d.spellschool = spell.school
-
-					if spell.isdot then
-						d.text = spellname .. L["DoT"]
-					end
 
 					d.value = spell.amount
 					d.valuetext = Skada:FormatValueText(
@@ -386,14 +376,14 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 
 	function spellmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format(L["%s damage on %s"], label, win.playername or UNKNOWN)
+		win.title = format(L["%s's damage on %s"], label, win.playername or UNKNOWN)
 	end
 
 	function spellmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid)
 
 		if player then
-			win.title = format(L["%s damage on %s"], win.spellname or UNKNOWN, player.name)
+			win.title = format(L["%s's damage on %s"], win.spellname or UNKNOWN, player.name)
 
 			local spell
 			if player.damagetaken and player.damagetaken.spells then
@@ -426,6 +416,56 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 						nr = add_detail_bar(win, nr, L[misstype], spell[misstype], true)
 					end
 				end
+			end
+		end
+	end
+
+	function detailmod:Enter(win, id, label)
+		win.targetname = label
+		win.title = format(L["%s's damage on %s"], label, win.playername or UNKNOWN)
+	end
+
+	function detailmod:Update(win, set)
+		local player = Skada:find_player(set, win.playerid)
+
+		if player then
+			win.title = format(L["%s's damage on %s"], win.targetname or UNKNOWN, player.name)
+
+			local total = 0
+			if player.damagetaken and player.damagetaken.sources and win.targetname then
+				total = player.damagetaken.sources[win.targetname] or 0
+			end
+
+			if total > 0 and player.damagetaken.spells then
+				local maxvalue, nr = 0, 1
+
+				for spellname, spell in pairs(player.damagetaken.spells) do
+					if spell.sources and (spell.sources[win.targetname] or 0) > 0 then
+						local d = win.dataset[nr] or {}
+						win.dataset[nr] = d
+
+						d.id = spellname
+						d.spellid = spell.id
+						d.label = spellname
+						d.icon = select(3, GetSpellInfo(spell.id))
+						d.spellschool = spell.school
+
+						d.value = spell.sources[win.targetname]
+						d.valuetext = Skada:FormatValueText(
+							Skada:FormatNumber(d.value),
+							mod.metadata.columns.Damage,
+							format("%.1f%%", 100 * d.value / total),
+							mod.metadata.columns.Percent
+						)
+
+						if d.value > maxvalue then
+							maxvalue = d.value
+						end
+						nr = nr + 1
+					end
+				end
+
+				win.metadata.maxvalue = maxvalue
 			end
 		end
 	end
@@ -474,6 +514,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 	function mod:OnEnable()
 		spellmod.metadata = {tooltip = spellmod_tooltip}
 		playermod.metadata = {post_tooltip = playermod_tooltip, click1 = spellmod}
+		sourcemod.metadata = {click1 = detailmod}
 		self.metadata = {
 			showspots = true,
 			click1 = playermod,
@@ -678,7 +719,6 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(Skada, L)
 								cached[spellname] = {
 									id = spell.id,
 									school = spell.school,
-									isdot = spell.isdot,
 									amount = spell.amount,
 									players = {}
 								}
@@ -714,10 +754,6 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(Skada, L)
 				d.label = spellname
 				d.icon = select(3, GetSpellInfo(spell.id))
 				d.spellschool = spell.school
-
-				if spell.isdot then
-					d.text = spellname .. L["DoT"]
-				end
 
 				d.value = spell.amount
 				d.valuetext = Skada:FormatValueText(
@@ -842,12 +878,9 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 
 						d.value = 100 * avoid / total
 						d.valuetext = Skada:FormatValueText(
-							format("%.1f%%", d.value),
-							self.metadata.columns.Percent,
-							avoid,
-							self.metadata.columns.Count,
-							total,
-							self.metadata.columns.Total
+							format("%.1f%%", d.value), self.metadata.columns.Percent,
+							avoid, self.metadata.columns.Count,
+							total, self.metadata.columns.Total
 						)
 
 						if d.value > maxvalue then
@@ -945,7 +978,6 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 
 				local nr = add_detail_bar(win, 1, L["Total"], win.metadata.maxvalue)
 				nr = add_detail_bar(win, nr, L["Damage Taken"], spell.amount)
-				-- end of amount bar --
 
 				if (spell.absorbed or 0) > 0 then
 					nr = add_detail_bar(win, nr, L["ABSORB"], spell.absorbed)
@@ -989,10 +1021,6 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 						d.label = spellname
 						d.icon = select(3, GetSpellInfo(spell.id))
 						d.spellschool = spell.school
-
-						if spell.isdot then
-							d.text = spellname .. L["DoT"]
-						end
 
 						d.value = amount
 						d.valuetext = Skada:FormatValueText(
