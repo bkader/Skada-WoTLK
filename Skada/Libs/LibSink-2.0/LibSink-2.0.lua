@@ -359,7 +359,7 @@ local customHandlersEnabled = {
 }
 
 -- Default to version 5 or higher now
-local msbtVersion = tonumber(string.match(GetAddOnMetadata("MikScrollingBattleText", "Version") or "","^%d+\.%d+")) or 5
+local msbtVersion = tonumber(string.match(GetAddOnMetadata("MikScrollingBattleText", "Version") or "","^%d+%.%d+")) or 5
 local isMSBTFive = math.floor(msbtVersion) > 4 and true or nil
 if isMSBTFive then
 	customHandlersEnabled.MikSBT = function()
