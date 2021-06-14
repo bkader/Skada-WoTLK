@@ -19,6 +19,7 @@ S:AddCallbackForAddon("Skada", "Skada", function()
 			options.titleoptions.args.margin = nil
 			options.titleoptions.args.color = nil
 		end)
+		AS:SkinLibrary("LibUIDropDownMenu")
 	end
 
 	hooksecurefunc(Skada.displays["bar"], "ApplySettings", function(_, win)
@@ -47,13 +48,14 @@ S:AddCallbackForAddon("Skada", "Skada", function()
 				if win.db.reversegrowth then
 					skada.backdrop:SetPoint("LEFT", skada, "LEFT", -E.Border, 0)
 					skada.backdrop:SetPoint("RIGHT", skada, "RIGHT", E.Border, 0)
-					skada.backdrop:SetPoint("BOTTOM", skada.button, "TOP", 0, -((win.db.enabletitle and win.db.title.height or 0) + E.Border))
+					skada.backdrop:SetPoint("BOTTOM", skada.button, "TOP", 0, -(win.db.title.height + E.Border))
 				else
 					skada.backdrop:SetPoint("LEFT", skada, "LEFT", -E.Border, 0)
 					skada.backdrop:SetPoint("RIGHT", skada, "RIGHT", E.Border, 0)
-					skada.backdrop:SetPoint("TOP", skada.button, "BOTTOM", 0, (win.db.enabletitle and win.db.title.height or 0) + E.Border)
+					skada.backdrop:SetPoint("TOP", skada.button, "BOTTOM", 0, win.db.title.height + E.Border)
 				end
 			end
+
 		elseif win.db.enablebackground then
 			skada.bgframe:SetTemplate(E.db.addOnSkins.skadaTemplate, E.db.addOnSkins.skadaTemplate == "Default" and E.db.addOnSkins.skadaTemplateGloss or false)
 
@@ -62,11 +64,11 @@ S:AddCallbackForAddon("Skada", "Skada", function()
 				if win.db.reversegrowth then
 					skada.bgframe:SetPoint("LEFT", skada.button, "LEFT", -E.Border, 0)
 					skada.bgframe:SetPoint("RIGHT", skada.button, "RIGHT", E.Border, 0)
-					skada.bgframe:SetPoint("BOTTOM", skada.button, "TOP", 0, -margin)
+					skada.bgframe:SetPoint("BOTTOM", skada.button, "TOP", 0, win.db.enabletitle and E.Spacing or -win.db.barheight - E.Border)
 				else
 					skada.bgframe:SetPoint("LEFT", skada.button, "LEFT", -E.Border, 0)
 					skada.bgframe:SetPoint("RIGHT", skada.button, "RIGHT", E.Border, 0)
-					skada.bgframe:SetPoint("TOP", skada.button, "BOTTOM", 0, margin)
+					skada.bgframe:SetPoint("TOP", skada.button, "BOTTOM", 0, win.db.enabletitle and -E.Spacing or win.db.barheight + E.Border)
 				end
 			end
 		end
