@@ -867,6 +867,8 @@ do
 		for i, win in ipairs(Skada.db.profile.windows) do
 			if win.name == name then
 				tremove(Skada.db.profile.windows, i)
+			elseif win.sticked and win.sticked[name] then
+				win.sticked[name] = nil
 			end
 		end
 	end
