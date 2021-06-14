@@ -706,7 +706,7 @@ do
 	local function move(self, button)
 		local group = self:GetParent()
 		if group then
-			if button == "MiddleButton" or IsAltKeyDown() or (group.locked and button == "LeftButton") then
+			if button == "MiddleButton" then
 				_CloseDropDownMenus()
 				group.isStretching = true
 				group:SetBackdropColor(0, 0, 0, 0.9)
@@ -740,7 +740,7 @@ do
 	local function stopMove(self, button)
 		local group = self:GetParent()
 		if group then
-			if button == "MiddleButton" or group.isStretching then
+			if group.isStretching then
 				group.isStretching = nil
 				local color = group.win.db.background.color
 				group:SetBackdropColor(color.r, color.g, color.b, color.a or 1)
