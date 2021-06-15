@@ -199,7 +199,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 			return
 		end
 
-		if Skada.db.profile.smartstop and Skada.bossmod then
+		if Skada.db.profile.smartstop then
 			Skada.After(Skada.db.profile.smartwait or 5, function()
 				if not set.endtime then
 					Skada:Print(L["Smart Stop"])
