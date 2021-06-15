@@ -67,7 +67,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 			-- pull timer
 			if Skada.db.profile.firsthit and (triggerevents[eventtype] or eventtype == "SPELL_CAST_SUCCESS") and not pull_timer then
 				if ignoredspells[select(1, ...)] then return end
-				if (band(srcFlags, BITMASK_GROUP) ~= 0 and Skada:IsBoss(dstGUID)) or Skada:IsBoss(srcGUID) then
+				if srcName and dstName and ((band(srcFlags, BITMASK_GROUP) ~= 0 and Skada:IsBoss(dstGUID)) or (band(dstFlags, BITMASK_GROUP) ~= 0 and Skada:IsBoss(srcGUID))) then
 					local puller
 
 					-- close distance?
@@ -83,7 +83,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 								puller = puller .. " (" .. dstName .. ")"
 							end
 						end
-					elseif srcGUID then
+					else
 						local owner = Skada:GetPetOwner(srcGUID)
 						if owner then
 							local class = select(2, UnitClass(owner.name))
@@ -187,7 +187,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 					name = L["Duration"],
 					desc = L["For how long Skada should wait before stopping the segment."],
 					disabled = function() return not Skada.db.profile.smartstop end,
-					min = 1, max = 10, step = 0.5, bigStep = 1,
+					min = 0, max = 10, step = 0.01, bigStep = 0.1,
 					order = 95.4
 				}
 			}
@@ -199,7 +199,6 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 			return
 		end
 
-		-- sorry but this feature requires a BossMod to work properly
 		if Skada.db.profile.smartstop and Skada.bossmod then
 			Skada.After(Skada.db.profile.smartwait or 5, function()
 				if not set.endtime then
