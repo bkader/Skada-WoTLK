@@ -1583,50 +1583,41 @@ do
 	end
 
 	function Skada:FixPets(action)
-		if not (action and action.playerid and action.playername) then
-			return
-		end
+		if action and self:IsPet(action.playerid, action.playerflags) then
+			local owner = pets[action.playerid]
 
-		local owner = pets[action.playerid]
-
-		-- we try to associate pets and and guardians with their owner
-		if not owner and action.playerflags and band(action.playerflags, BITMASK_PETS) ~= 0 and band(action.playerflags, BITMASK_GROUP) ~= 0 then
-			-- my own pets or guardians?
-			if band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
+			if not owner and action.playerflags and band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
 				owner = {id = UnitGUID("player"), name = UnitName("player")}
 				pets[action.playerid] = owner
 				self:SendComm(nil, nil, "AssignPet", owner.id, action.playerid)
-			else
-				local ownername = GetPetOwnerFromTooltip(action.playerid)
-				if ownername then
-					local guid = UnitGUID(ownername) or GetRussianPetOwnerID(ownername)
+			end
+
+			if not owner then
+				local ownerName = GetPetOwnerFromTooltip(action.playerid)
+				if ownerName then
+					local guid = UnitGUID(ownerName) or GetRussianPetOwnerID(ownerName)
 					if players[guid] then
-						owner = {id = guid, name = ownername}
+						owner = {id = guid, name = ownerName}
 						pets[action.playerid] = owner
 					end
 				end
 			end
 
-			if not owner then
-				action = wipe(action or {})
-				-- if you really don't care about the pets being shown at
-				-- the bottom of the list, please comment out the line above
-				-- and simply use the line below:
-				-- action.playerid = action.playername
-			end
-		end
-
-		if owner then
-			if self.db.profile.mergepets then
-				if action.spellname then
-					action.spellname = action.spellname .. " (" .. action.playername .. ")"
+			if owner then
+				if self.db.profile.mergepets then
+					if action.spellname then
+						action.spellname = action.spellname .. " (" .. action.playername .. ")"
+					end
+					action.playerid = owner.id
+					action.playername = owner.name
+				else
+					-- just append the creature id to the player
+					action.playerid = owner.id .. tonumber(action.playerid:sub(9, 12), 16)
+					action.playername = action.playername .. " (" .. owner.name .. ")"
 				end
-				action.playerid = owner.id
-				action.playername = owner.name
 			else
-				-- just append the creature id to the player
-				action.playerid = owner.id .. tonumber(action.playerid:sub(9, 12), 16)
-				action.playername = action.playername .. " (" .. owner.name .. ")"
+				-- action.playerid = action.playername -- create a single entry
+				action = wipe(action or {})
 			end
 		end
 	end
