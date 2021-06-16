@@ -107,6 +107,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		local spellid, _, _, amount, overheal, absorbed = ...
 
 		srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+		dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName, dstFlags)
 
 		data.srcGUID = srcGUID
 		data.srcName = srcName
