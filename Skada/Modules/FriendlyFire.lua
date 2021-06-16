@@ -44,7 +44,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
-			local spellid, spellname, spellschool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing = ...
+			local spellid, spellname, spellschool, amount, overkill, school, resisted, blocked, absorbed = ...
 
 			dmg.playerid = srcGUID
 			dmg.playername = srcName

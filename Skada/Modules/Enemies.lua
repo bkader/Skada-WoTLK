@@ -234,22 +234,16 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 			local spell = enemy.damagetaken.spells and enemy.damagetaken.spells[spellname]
 			if not spell then
 				enemy.damagetaken.spells = enemy.damagetaken.spells or {}
-				enemy.damagetaken.spells[spellname] = {
-					id = dmg.spellid,
-					school = dmg.spellschool,
-					amount = 0,
-					overkill = 0
-				}
-				spell = enemy.damagetaken.spells[spellname]
-			elseif dmg.spellschool and dmg.spellschool ~= spell.school then
-				spellname = spellname .. " (" .. (Skada.schoolnames[dmg.spellschool] or OTHER) .. ")"
+				spell = {id = dmg.spellid, school = dmg.spellschool, amount = 0, overkill = 0}
+				enemy.damagetaken.spells[spellname] = spell
+			elseif dmg.spellid and dmg.spellid ~= spell.id then
+				if dmg.spellschool and dmg.spellschool ~= spell.school then
+					spellname = spellname .. " (" .. (Skada.schoolnames[dmg.spellschool] or OTHER) .. ")"
+				else
+					spellname = GetSpellInfo(dmg.spellid)
+				end
 				if not enemy.damagetaken.spells[spellname] then
-					enemy.damagetaken.spells[spellname] = {
-						id = dmg.spellid,
-						school = dmg.spellschool,
-						amount = 0,
-						overkill = 0
-					}
+					enemy.damagetaken.spells[spellname] = {id = dmg.spellid, school = dmg.spellschool, amount = 0, overkill = 0}
 				end
 				spell = enemy.damagetaken.spells[spellname]
 			end
@@ -324,7 +318,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, spellname, spellschool, amount, overkill = ...
 		if srcName and dstName then
-			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName)
+			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 
 			dmg.enemyid = dstGUID
 			dmg.enemyname = dstName
@@ -662,23 +656,25 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 			local spell = enemy.damagedone.spells and enemy.damagedone.spells[spellname]
 			if not spell then
 				enemy.damagedone.spells = enemy.damagedone.spells or {}
-				enemy.damagedone.spells[spellname] = {
-					id = dmg.spellid,
-					school = dmg.spellschool,
-					amount = 0
-				}
-				spell = enemy.damagedone.spells[spellname]
-			elseif dmg.spellschool and dmg.spellschool ~= spell.school then
-				spellname = spellname .. " (" .. (Skada.schoolnames[dmg.spellschool] or OTHER) .. ")"
+				spell = {id = dmg.spellid, school = dmg.spellschool, amount = 0, overkill = 0}
+				enemy.damagedone.spells[spellname] = spell
+			elseif dmg.spellid and dmg.spellid ~= spell.id then
+				if dmg.spellschool and dmg.spellschool ~= spell.school then
+					spellname = spellname .. " (" .. (Skada.schoolnames[dmg.spellschool] or OTHER) .. ")"
+				else
+					spellname = GetSpellInfo(dmg.spellid)
+				end
 				if not enemy.damagedone.spells[spellname] then
 					enemy.damagedone.spells[spellname] = {
 						id = dmg.spellid,
 						school = dmg.spellschool,
-						amount = 0
+						amount = 0,
+						overkill = 0
 					}
 				end
 				spell = enemy.damagedone.spells[spellname]
 			end
+
 			spell.amount = spell.amount + dmg.amount
 
 			if dmg.dstName and dmg.amount > 0 then

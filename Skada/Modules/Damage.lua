@@ -36,8 +36,12 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			player.damagedone.spells = player.damagedone.spells or {}
 			spell = {id = dmg.spellid, school = dmg.spellschool, amount = 0}
 			player.damagedone.spells[spellname] = spell
-		elseif dmg.spellschool and dmg.spellschool ~= spell.school then
-			spellname = spellname .. " (" .. (Skada.schoolnames[dmg.spellschool] or OTHER) .. ")"
+		elseif dmg.spellid and dmg.spellid ~= spell.id then
+			if dmg.spellschool and dmg.spellschool ~= spell.school then
+				spellname = spellname .. " (" .. (Skada.schoolnames[dmg.spellschool] or OTHER) .. ")"
+			else
+				spellname = GetSpellInfo(dmg.spellid)
+			end
 			if not player.damagedone.spells[spellname] then
 				player.damagedone.spells[spellname] = {id = dmg.spellid, school = dmg.spellschool, amount = 0}
 			end

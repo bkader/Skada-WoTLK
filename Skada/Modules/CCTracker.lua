@@ -749,7 +749,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 		if not CCSpells[spellid] then return end
 
 		local petid, petname = srcGUID, srcName
-		local srcGUID_modified, srcName_modified = Skada:FixMyPets(srcGUID, srcName)
+		local srcGUID_modified, srcName_modified = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 
 		data.playerid = srcGUID_modified or srcGUID
 		data.playername = srcName_modified or srcName

@@ -35,8 +35,12 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 			player.damagetaken.spells = player.damagetaken.spells or {}
 			spell = {id = dmg.spellid, school = dmg.spellschool, amount = 0}
 			player.damagetaken.spells[spellname] = spell
-		elseif dmg.spellschool and dmg.spellschool ~= spell.school then
-			spellname = spellname .. " (" .. (Skada.schoolnames[dmg.spellschool] or OTHER) .. ")"
+		elseif dmg.spellid and dmg.spellid ~= spell.id then
+			if dmg.spellschool and dmg.spellschool ~= spell.school then
+				spellname = spellname .. " (" .. (Skada.schoolnames[dmg.spellschool] or OTHER) .. ")"
+			else
+				spellname = GetSpellInfo(dmg.spellid)
+			end
 			if not player.damagetaken.spells[spellname] then
 				player.damagetaken.spells[spellname] = {id = dmg.spellid, school = dmg.spellschool, amount = 0}
 			end
@@ -156,7 +160,6 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 		end
 
 		if spellid and spellname then
-			dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName)
 			SpellDamage(nil, nil, nil, ENVIRONMENTAL_DAMAGE, nil, dstGUID, dstName, dstFlags, spellid, spellname, nil, select(2, ...))
 		end
 	end

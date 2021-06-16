@@ -57,16 +57,16 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	local data = {}
 
 	local function SpellDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, spellname, spellschool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing = ...
+		local spellid, spellname, _, amount, overkill, school, resisted, blocked, absorbed = ...
 
-		local dstGUID_modified, dstName_modified = Skada:FixMyPets(dstGUID, dstName)
+		dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName, srcFlags)
 
 		data.srcGUID = srcGUID
 		data.srcName = srcName
 		data.srcFlags = srcFlags
 
-		data.playerid = dstGUID_modified or dstGUID
-		data.playername = dstName_modified or dstName
+		data.playerid = dstGUID
+		data.playername = dstName
 		data.playerflags = dstFlags
 
 		data.spellid = spellid
@@ -82,70 +82,49 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	end
 
 	local function SwingDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local amount, overkill, spellschool, resisted, blocked, absorbed, critical, glancing, crushing = ...
+		SpellDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, L["Auto Attack"], nil, ...)
+	end
 
-		local dstGUID_modified, dstName_modified = Skada:FixMyPets(dstGUID, dstName)
+	local function EnvironmentDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		local envtype = ...
+		local spellid, spellname
+
+		if envtype == "Falling" or envtype == "FALLING" then
+			spellid, spellname = 3, ACTION_ENVIRONMENTAL_DAMAGE_FALLING
+		elseif envtype == "Drowning" or envtype == "DROWNING" then
+			spellid, spellname = 4, ACTION_ENVIRONMENTAL_DAMAGE_DROWNING
+		elseif envtype == "Fatigue" or envtype == "FATIGUE" then
+			spellid, spellname = 5, ACTION_ENVIRONMENTAL_DAMAGE_FATIGUE
+		elseif envtype == "Fire" or envtype == "FIRE" then
+			spellid, spellname = 6, ACTION_ENVIRONMENTAL_DAMAGE_FIRE
+		elseif envtype == "Lava" or envtype == "LAVA" then
+			spellid, spellname = 7, ACTION_ENVIRONMENTAL_DAMAGE_LAVA
+		elseif envtype == "Slime" or envtype == "SLIME" then
+			spellid, spellname = 8, ACTION_ENVIRONMENTAL_DAMAGE_SLIME
+		end
+
+		if spellid and spellname then
+			SpellDamage(ts, event, nil, ENVIRONMENTAL_DAMAGE, nil, dstGUID, dstName, dstFlags, spellid, spellname, nil, select(2, ...))
+		end
+	end
+
+	local function SpellHeal(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		local spellid, spellname, _, amount, overheal, absorbed = ...
+
+		srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+		dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName, dstFlags)
 
 		data.srcGUID = srcGUID
 		data.srcName = srcName
 		data.srcFlags = srcFlags
 
-		data.playerid = dstGUID_modified or dstGUID
-		data.playername = dstName_modified or dstName
-		data.playerflags = dstFlags
-
-		data.spellid = 6603
-		data.spellname = L["Auto Attack"]
-		data.amount = 0 - amount
-		data.overkill = overkill
-		data.resisted = resisted
-		data.blocked = blocked
-		data.absorbed = absorbed
-
-		log_deathlog(Skada.current, data, ts)
-	end
-
-	local function EnvironmentDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local envtype = ...
-		local spellid, spellname, spellschool
-
-		if envtype == "Falling" or envtype == "FALLING" then
-			spellid, spellschool, spellname = 3, 1, ACTION_ENVIRONMENTAL_DAMAGE_FALLING
-		elseif envtype == "Drowning" or envtype == "DROWNING" then
-			spellid, spellschool, spellname = 4, 1, ACTION_ENVIRONMENTAL_DAMAGE_DROWNING
-		elseif envtype == "Fatigue" or envtype == "FATIGUE" then
-			spellid, spellschool, spellname = 5, 1, ACTION_ENVIRONMENTAL_DAMAGE_FATIGUE
-		elseif envtype == "Fire" or envtype == "FIRE" then
-			spellid, spellschool, spellname = 6, 4, ACTION_ENVIRONMENTAL_DAMAGE_FIRE
-		elseif envtype == "Lava" or envtype == "LAVA" then
-			spellid, spellschool, spellname = 7, 4, ACTION_ENVIRONMENTAL_DAMAGE_LAVA
-		elseif envtype == "Slime" or envtype == "SLIME" then
-			spellid, spellschool, spellname = 8, 8, ACTION_ENVIRONMENTAL_DAMAGE_SLIME
-		end
-
-		if spellid and spellname then
-			dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName)
-			SpellDamage(timestamp, eventtype, nil, ENVIRONMENTAL_DAMAGE, nil, dstGUID, dstName, dstFlags, spellid, spellname, nil, select(2, ...))
-		end
-	end
-
-	local function SpellHeal(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, spellname, spellschool, amount, overhealing, absorbed, critical = ...
-
-		local srcGUID_modified, srcName_modified = Skada:FixMyPets(srcGUID, srcName)
-		local dstGUID_modified, dstName_modified = Skada:FixMyPets(dstGUID, dstName)
-
-		data.srcGUID = dstGUID_modified or srcGUID
-		data.srcName = dstName_modified or srcName
-		data.srcFlags = srcFlags
-
-		data.playerid = dstGUID_modified or dstGUID
-		data.playername = dstName_modified or dstName
+		data.playerid = dstGUID
+		data.playername = dstName
 		data.playerflags = dstFlags
 
 		data.spellid = spellid
 		data.spellname = spellname
-		data.amount = max(0, amount - (overhealing or 0))
+		data.amount = max(0, amount - (overheal or 0))
 
 		log_deathlog(Skada.current, data, ts)
 	end
