@@ -1621,19 +1621,40 @@ do
 			end
 		end
 	end
-end
 
-function Skada:OnCommAssignPet(playername, playerid, pet)
-	if playerid and players[playerid] and playername and pet then
-		self:AssignPet(playerid, playername, pet)
+	function Skada:FixMyPets(playerid, playername, playerflags)
+		if self:IsPet(playerid, playerflags) then
+			if pets[playerid] then
+				return pets[playerid].id, pets[playerid].name
+			end
+
+			if playerflags and band(playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
+				pets[playerid] = {id = UnitGUID("player"), name = UnitName("player")}
+				self:SendComm(nil, nil, "AssignPet", pets[playerid].id, playerid)
+				return pets[playerid].id, pets[playerid].name
+			end
+
+			-- not cached meanwhile?
+			if not pets[playerid] then
+				local ownerName = GetPetOwnerFromTooltip(playerid)
+				if ownerName then
+					local guid = UnitGUID(ownerName) or GetRussianPetOwnerID(ownerName)
+					if guid and players[guid] then
+						pets[playerid] = {id = guid, name = ownerName}
+						return pets[playerid].id, pets[playerid].name
+					end
+				end
+			end
+		end
+
+		return playerid, playername
 	end
 end
 
-function Skada:FixMyPets(guid, name)
-	if pets[guid] then
-		return pets[guid].id, pets[guid].name
+function Skada:OnCommAssignPet(ownerName, ownerGUID, petGUID)
+	if ownerGUID and players[ownerGUID] and ownerName and petGUID and not pets[petGUID] then
+		self:AssignPet(ownerGUID, ownerName, petGUID)
 	end
-	return guid, name
 end
 
 function Skada:AssignPet(ownerGUID, ownerName, petGUID)
@@ -1646,7 +1667,7 @@ function Skada:GetPetOwner(petGUID)
 end
 
 function Skada:IsPet(petGUID, petFlags)
-	if tonumber(petGUID) and pets[petGUID] then
+	if petGUID and pets[petGUID] then
 		return true
 	end
 
