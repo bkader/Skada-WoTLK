@@ -57,21 +57,16 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	local data = {}
 
 	local function SpellDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, spellname, _, amount, overkill, school, resisted, blocked, absorbed = ...
-
-		dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName, srcFlags)
+		local spellid, _, _, amount, overkill, _, resisted, blocked, absorbed = ...
 
 		data.srcGUID = srcGUID
 		data.srcName = srcName
-		data.srcFlags = srcFlags
 
 		data.playerid = dstGUID
 		data.playername = dstName
 		data.playerflags = dstFlags
 
 		data.spellid = spellid
-		data.spellname = spellname
-
 		data.amount = 0 - amount
 		data.overkill = overkill
 		data.resisted = resisted
@@ -87,44 +82,45 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 	local function EnvironmentDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local envtype = ...
-		local spellid, spellname
+		local spellid
 
 		if envtype == "Falling" or envtype == "FALLING" then
-			spellid, spellname = 3, ACTION_ENVIRONMENTAL_DAMAGE_FALLING
+			spellid = 3
 		elseif envtype == "Drowning" or envtype == "DROWNING" then
-			spellid, spellname = 4, ACTION_ENVIRONMENTAL_DAMAGE_DROWNING
+			spellid = 4
 		elseif envtype == "Fatigue" or envtype == "FATIGUE" then
-			spellid, spellname = 5, ACTION_ENVIRONMENTAL_DAMAGE_FATIGUE
+			spellid = 5
 		elseif envtype == "Fire" or envtype == "FIRE" then
-			spellid, spellname = 6, ACTION_ENVIRONMENTAL_DAMAGE_FIRE
+			spellid = 6
 		elseif envtype == "Lava" or envtype == "LAVA" then
-			spellid, spellname = 7, ACTION_ENVIRONMENTAL_DAMAGE_LAVA
+			spellid = 7
 		elseif envtype == "Slime" or envtype == "SLIME" then
-			spellid, spellname = 8, ACTION_ENVIRONMENTAL_DAMAGE_SLIME
+			spellid = 8
 		end
 
-		if spellid and spellname then
-			SpellDamage(ts, event, nil, ENVIRONMENTAL_DAMAGE, nil, dstGUID, dstName, dstFlags, spellid, spellname, nil, select(2, ...))
+		if spellid then
+			SpellDamage(ts, event, nil, ENVIRONMENTAL_DAMAGE, nil, dstGUID, dstName, dstFlags, spellid, nil, nil, select(2, ...))
 		end
 	end
 
 	local function SpellHeal(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, spellname, _, amount, overheal, absorbed = ...
+		local spellid, _, _, amount, overheal, absorbed = ...
 
 		srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
-		dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName, dstFlags)
 
 		data.srcGUID = srcGUID
 		data.srcName = srcName
-		data.srcFlags = srcFlags
 
 		data.playerid = dstGUID
 		data.playername = dstName
 		data.playerflags = dstFlags
 
 		data.spellid = spellid
-		data.spellname = spellname
 		data.amount = max(0, amount - (overheal or 0))
+		data.overkill = nil
+		data.resisted = nil
+		data.blocked = nil
+		data.absorbed = nil
 
 		log_deathlog(Skada.current, data, ts)
 	end
@@ -176,7 +172,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		local a, b = modf(ts)
 		local d = date("%H:%M:%S", a or ts)
 		if b == 0 then
-			return d
+			return d .. ".000"
 		end -- really rare to see .000
 		b = strsub(tostring(b), 3, 5)
 		return d .. "." .. b
@@ -204,9 +200,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 				if player.deathlog and player.deathlog[self.index] then
 					deathlog = player.deathlog[self.index]
 				end
-				if not deathlog then
-					return
-				end
+				if not deathlog then return end
 
 				win.metadata.maxvalue = player.maxhp
 
@@ -247,7 +241,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 						d.value = log.hp or 0
 						local change = (log.amount > 0 and "+" or "-") .. Skada:FormatNumber(abs(log.amount))
-						d.reportlabel =format("%02.2f: %s   %s [%s]", diff or 0, GetspellLink(log.spellid) or spellname or UNKNOWN, change, Skada:FormatNumber(log.hp or 0))
+						d.reportlabel = format("%02.2f: %s   %s [%s]", diff or 0, GetspellLink(log.spellid) or spellname or UNKNOWN, change, Skada:FormatNumber(log.hp or 0))
 
 						local extra
 						if (log.overkill or 0) > 0 then
