@@ -86,6 +86,18 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			end
 		end
 
+		if (dmg.absorbed or 0) > 0 then
+			spell.absorbed = (spell.absorbed or 0) + dmg.absorbed
+		end
+
+		if (dmg.blocked or 0) > 0 then
+			spell.blocked = (spell.blocked or 0) + dmg.blocked
+		end
+
+		if (dmg.resisted or 0) > 0 then
+			spell.resisted = (spell.resisted or 0) + dmg.resisted
+		end
+
 		-- add the damage overkill
 		local overkill = dmg.overkill or 0
 		player.damagedone.overkill = (player.damagedone.overkill or 0) + overkill

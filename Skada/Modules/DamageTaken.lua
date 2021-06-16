@@ -85,17 +85,17 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 			end
 		end
 
-		if dmg.absorbed then
+		if (dmg.absorbed or 0) > 0 then
 			spell.absorbed = (spell.absorbed or 0) + dmg.absorbed
 			player.damagetaken.absorbed = (player.damagetaken.absorbed or 0) + dmg.absorbed
 		end
 
-		if dmg.blocked then
+		if (dmg.blocked or 0) > 0 then
 			spell.blocked = (spell.blocked or 0) + dmg.blocked
 			player.damagetaken.blocked = (player.damagetaken.blocked or 0) + dmg.blocked
 		end
 
-		if dmg.resisted then
+		if (dmg.resisted or 0) > 0 then
 			spell.resisted = (spell.resisted or 0) + dmg.resisted
 			player.damagetaken.resisted = (player.damagetaken.resisted or 0) + dmg.resisted
 		end
