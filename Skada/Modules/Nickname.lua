@@ -122,8 +122,8 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 					return L["Are you sure you want clear cached nicknames?"]
 				end,
 				func = function()
-					Skada.db.global.nicknames = wipe(Skada.db.global.nicknames or {})
-					mod.db.nicknames = Skada.db.global.nicknames
+					Skada.db.global.nicknames = wipe(Skada.db.global.nicknames or {cache = {}})
+					mod.db = Skada.db.global.nicknames
 				end
 			}
 		}
@@ -131,9 +131,6 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 
 	function mod:OnInitialize()
 		Skada.options.args.modules.args.nickname = options
-		if Skada.db.profile.namedisplay == nil then
-			Skada.db.profile.namedisplay = 2
-		end
 	end
 
 	function mod:OnEnable()
@@ -142,6 +139,7 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 		Skada.RegisterCallback(self, "OnCommNicknameRequest")
 		Skada.RegisterCallback(self, "OnCommNicknameResponse")
 		Skada.RegisterCallback(self, "OnCommNicknameChange")
+		Skada.RegisterCallback(self, "SKADA_CORE_UPDATE", "Reset")
 		self:Hook(Skada, "get_player")
 		self:Hook(Skada, "EndSegment")
 		self:RawHook(Skada, "FormatName")
@@ -157,7 +155,7 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 	-- hooked functions
 
 	function mod:FormatName(_, name, guid)
-		local nickname = guid and self.db.nicknames[guid]
+		local nickname = guid and self.db.cache[guid]
 		if not nickname and name == unitName then
 			nickname = Skada.db.profile.nickname
 		end
@@ -202,7 +200,7 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 			end
 
 			-- send request
-			if playerid and playername and not requested[playerid] and not self.db.nicknames[playerid] then
+			if playerid and playername and not requested[playerid] and not self.db.cache[playerid] then
 				Skada:SendComm("WHISPER", playername, "NicknameRequest")
 				requested[playerid] = true
 			end
@@ -245,14 +243,14 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 			if not self.db then
 				self:SetCacheTable()
 			end
-			self.db.nicknames[playerid] = nickname
+			self.db.cache[playerid] = nickname
 		end
 	end
 
 	-----------------------------------------------------------
 
 	function mod:SetNickname(guid, nickname, sync)
-		self.db.nicknames[guid] = nickname
+		self.db.cache[guid] = nickname
 		if guid == unitGUID and sync then
 			Skada:SendComm(nil, nil, "NicknameChange", guid, nickname)
 		end
@@ -262,23 +260,34 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 	-- cache table functions
 
 	function mod:SetCacheTable()
-		self.db = Skada.db.global.nicknames or {nicknames = {}}
+		self.db = Skada.db.global.nicknames or {cache = {}}
 		Skada.db.global.nicknames = self.db
 		self:CheckForReset()
 	end
 
 	function mod:CheckForReset()
 		if not self.db then
-			self.db = Skada.db.global.nicknames or {nicknames = {}}
+			self.db = Skada.db.global.nicknames or {cache = {}}
 			Skada.db.global.nicknames = self.db
 		end
 
-		if not self.db.nextreset then
-			self.db.nextreset = time() + (60 * 60 * 24 * 15)
-			self.db.nicknames = {}
-		elseif time() > self.db.nextreset then
-			self.db.nextreset = time() + (60 * 60 * 24 * 15)
-			self.db.nicknames = {}
+		if not self.db.reset then
+			self.db.reset = time() + (60 * 60 * 24 * 15)
+			self.db.cache = {}
+		elseif time() > self.db.reset then
+			self.db.reset = time() + (60 * 60 * 24 * 15)
+			self.db.cache = {}
+		end
+	end
+
+	function mod:Reset(event)
+		if event == "SKADA_CORE_UPDATE" then
+			if Skada.db.profile.namedisplay == nil then
+				Skada.db.profile.namedisplay = 2
+			end
+
+			Skada.db.global.nicknames = nil
+			self:SetCacheTable()
 		end
 	end
 end)
