@@ -18,13 +18,12 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 		if set then
 			local player = Skada:find_player(set, playerid, playername)
 			if player and (player.role ~= "TANK" or not tankevents[event]) then
-				set.fails = (set.fails or 0) + 1
-				player.fails = player.fails or {count = 0}
-				player.fails.count = (player.fails.count or 0) + 1
+				player.fail = (player.fail or 0) + 1
+				set.fail = (set.fail or 0) + 1
 
 				if set == Skada.current and spellid then
-					player.fails.spells = player.fails.spells or {}
-					player.fails.spells[spellid] = (player.fails.spells[spellid] or 0) + 1
+					player.fail_spells = player.fail_spells or {}
+					player.fail_spells[spellid] = (player.fail_spells[spellid] or 0) + 1
 				end
 			end
 		end
@@ -50,19 +49,19 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 
 	function spellmod:Update(win, set)
 		win.title = format(L["%s's fails"], win.spellname or UNKNOWN)
-		if (set.fails or 0) > 0 then
+		if (set.fail or 0) > 0 then
 			local total, players = 0, {}
 
 			for _, player in Skada:IteratePlayers(set) do
-				if player.fails and player.fails.spells and player.fails.spells[win.spellid] then
+				if player.fail_spells and player.fail_spells[win.spellid] then
 					players[player.name] = {
 						id = player.id,
 						class = player.class,
 						role = player.role,
 						spec = player.spec,
-						count = player.fails.spells[win.spellid]
+						count = player.fail_spells[win.spellid]
 					}
-					total = total + player.fails.spells[win.spellid]
+					total = total + player.fail_spells[win.spellid]
 				end
 			end
 
@@ -107,18 +106,18 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's fails"], player.name)
-			local total = player.fails and player.fails.count or 0
+			local total = player.fail or 0
 
-			if total > 0 and player.fails.spells then
+			if total > 0 and player.fail_spells then
 				local maxvalue, nr = 0, 1
 
-				for spellid, count in pairs(player.fails.spells) do
+				for spellid, count in pairs(player.fail_spells) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
 					d.id = spellid
-					d.label, _, d.icon = GetSpellInfo(spellid)
 					d.spellid = spellid
+					d.label, _, d.icon = GetSpellInfo(spellid)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
@@ -141,13 +140,13 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 
 	function mod:Update(win, set)
 		win.title = L["Fails"]
-		local total = set.fails or 0
+		local total = set.fail or 0
 
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
 			for _, player in Skada:IteratePlayers(set) do
-				if player.fails and (player.fails.count or 0) > 0 then
+				if (player.fail or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -157,16 +156,16 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 					d.role = player.role
 					d.spec = player.spec
 
-					d.value = player.fails.count
+					d.value = player.fail
 					d.valuetext = Skada:FormatValueText(
-						player.fails.count,
+						player.fail,
 						self.metadata.columns.Count,
-						format("%.1f%%", 100 * player.fails.count / total),
+						format("%.1f%%", 100 * player.fail / total),
 						self.metadata.columns.Percent
 					)
 
-					if d.value > player.fails.count then
-						player.fails.count = d.value
+					if d.value > player.fail then
+						player.fail = d.value
 					end
 					nr = nr + 1
 				end
@@ -206,12 +205,12 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return set.fails or 0
+		return set.fail or 0
 	end
 
 	function mod:AddToTooltip(set, tooltip)
-		if set and (set.fails or 0) > 0 then
-			tooltip:AddDoubleLine(L["Fails"], set.fails, 1, 1, 1)
+		if set and (set.fail or 0) > 0 then
+			tooltip:AddDoubleLine(L["Fails"], set.fail, 1, 1, 1)
 		end
 	end
 end)

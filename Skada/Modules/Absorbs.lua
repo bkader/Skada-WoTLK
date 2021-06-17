@@ -228,17 +228,16 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 			Skada:AddActiveTime(player, (player.role == "HEALER" and amount > 0))
 
 			-- add absorbs amount
-			player.absorbs = player.absorbs or {}
-			player.absorbs.amount = (player.absorbs.amount or 0) + amount
-			set.absorbs = (set.absorbs or 0) + amount
+			player.absorb = (player.absorb or 0) + amount
+			set.absorb = (set.absorb or 0) + amount
 
 			-- record the spell
 			if spellid then
-				local spell = player.absorbs.spells and player.absorbs.spells[spellid]
+				local spell = player.absorb_spells and player.absorb_spells[spellid]
 				if not spell then
-					player.absorbs.spells = player.absorbs.spells or {}
+					player.absorb_spells = player.absorb_spells or {}
 					spell = {count = 1, amount = amount, school = spellschool}
-					player.absorbs.spells[spellid] = spell
+					player.absorb_spells[spellid] = spell
 				else
 					if not spell.school and shieldschools[spellid] then
 						spell.school = shieldschools[spellid]
@@ -257,11 +256,11 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 			-- saving this to total set may become a memory hog deluxe.
 			if set == Skada.current and dstName and amount > 0 then
-				local target = player.absorbs.targets and player.absorbs.targets[dstName]
+				local target = player.absorb_targets and player.absorb_targets[dstName]
 				if not target then
-					player.absorbs.targets = player.absorbs.targets or {}
+					player.absorb_targets = player.absorb_targets or {}
 					target = {id = dstGUID, amount = amount}
-					player.absorbs.targets[dstName] = target
+					player.absorb_targets[dstName] = target
 				else
 					target.amount = target.amount + amount
 				end
@@ -538,10 +537,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	local function playermod_tooltip(win, id, label, tooltip)
 		local player = Skada:find_player(win:get_selected_set(), win.playerid, win.playername)
 		if player then
-			local spell
-			if player.absorbs and player.absorbs.spells then
-				spell = player.absorbs.spells[id]
-			end
+			local spell = player.absorb_spells and player.absorb_spells[id]
 
 			if spell then
 				tooltip:AddLine(player.name .. " - " .. label)
@@ -568,12 +564,12 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's absorb spells"], player.name)
-			local total = player.absorbs and player.absorbs.amount or 0
+			local total = player.absorb or 0
 
-			if total > 0 and player.absorbs.spells then
+			if total > 0 and player.absorb_spells then
 				local maxvalue, nr = 0, 1
 
-				for spellid, spell in pairs(player.absorbs.spells) do
+				for spellid, spell in pairs(player.absorb_spells) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -610,33 +606,31 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's absorbed players"], player.name)
-			local total = player.absorbs and player.absorbs.amount or 0
+			local total = player.absorb or 0
 
-			if total > 0 and player.absorbs.targets then
+			if total > 0 and player.absorb_targets then
 				local maxvalue, nr = 0, 1
 
-				for targetname, target in pairs(player.absorbs.targets) do
-					if (target.amount or 0) > 0 then
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+				for targetname, target in pairs(player.absorb_targets) do
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
-						d.id = target.id or targetname
-						d.label = targetname
-						d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
+					d.id = target.id or targetname
+					d.label = targetname
+					d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
 
-						d.value = target.amount
-						d.valuetext = Skada:FormatValueText(
-							Skada:FormatNumber(target.amount),
-							mod.metadata.columns.Absorbs,
-							format("%.1f%%", 100 * target.amount / total),
-							mod.metadata.columns.Percent
-						)
+					d.value = target.amount
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatNumber(target.amount),
+						mod.metadata.columns.Absorbs,
+						format("%.1f%%", 100 * target.amount / total),
+						mod.metadata.columns.Percent
+					)
 
-						if target.amount > maxvalue then
-							maxvalue = target.amount
-						end
-						nr = nr + 1
+					if target.amount > maxvalue then
+						maxvalue = target.amount
 					end
+					nr = nr + 1
 				end
 
 				win.metadata.maxvalue = maxvalue
@@ -646,13 +640,13 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 	function mod:Update(win, set)
 		win.title = L["Absorbs"]
-		local total = set.absorbs or 0
+		local total = set.absorb or 0
 
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
 			for _, player in Skada:IteratePlayers(set) do
-				if player.absorbs and (player.absorbs.amount or 0) > 0 then
+				if (player.absorb or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -662,16 +656,16 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					d.role = player.role
 					d.spec = player.spec
 
-					d.value = player.absorbs.amount
+					d.value = player.absorb
 					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(player.absorbs.amount),
+						Skada:FormatNumber(player.absorb),
 						self.metadata.columns.Absorbs,
-						format("%.1f%%", 100 * player.absorbs.amount / total),
+						format("%.1f%%", 100 * player.absorb / total),
 						self.metadata.columns.Percent
 					)
 
-					if player.absorbs.amount > maxvalue then
-						maxvalue = player.absorbs.amount
+					if player.absorb > maxvalue then
+						maxvalue = player.absorb
 					end
 					nr = nr + 1
 				end
@@ -720,7 +714,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return Skada:FormatNumber(set.absorbs or 0)
+		return Skada:FormatNumber(set.absorb or 0)
 	end
 
 	function mod:SetComplete(set)
@@ -740,13 +734,13 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 	local playermod = mod:NewModule(L["Absorbs and healing spells"])
 
 	local function getHPS(set, player)
-		local amount = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
+		local amount = (player.heal or 0) + (player.absorb or 0)
 		return amount / max(1, Skada:PlayerActiveTime(set, player)), amount
 	end
 	mod.getHPS = getHPS
 
 	local function getRaidHPS(set)
-		local amount = (set.healing or 0) + (set.absorbs or 0)
+		local amount = (set.heal or 0) + (set.absorb or 0)
 		return amount / max(1, Skada:GetSetTime(set)), amount
 	end
 	mod.getRaidHPS = getRaidHPS
@@ -759,22 +753,18 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(Skada:GetSetTime(set)), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(Skada:PlayerActiveTime(set, player, true)), 1, 1, 1)
 
-			local healing = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
-			local total = (set.healing or 0) + (set.absorbs or 0)
-			tooltip:AddDoubleLine(L["Absorbs and Healing"], format("%s (%02.1f%%)", Skada:FormatNumber(healing), 100 * healing / max(1, total)), 1, 1, 1)
+			local amount = (player.heal or 0) + (player.absorb or 0)
+			local total = (set.heal or 0) + (set.absorb or 0)
+			tooltip:AddDoubleLine(L["Absorbs and Healing"], format("%s (%02.1f%%)", Skada:FormatNumber(amount), 100 * amount / max(1, total)), 1, 1, 1)
 		end
 	end
 
 	local function playermod_tooltip(win, id, label, tooltip)
 		local player = Skada:find_player(win:get_selected_set(), win.playerid, win.playername)
 		if player then
-			local spell
-			if player.healing and player.healing.spells then
-				spell = player.healing.spells[id]
-			end
-			if not spell and player.absorbs and player.absorbs.spells then
-				spell = player.absorbs.spells[id]
-			end
+			local spell = player.heal_spells and player.heal_spells[id]
+			spell = spell or player.absorb_spells and player.absorb_spells[id]
+
 			if spell then
 				tooltip:AddLine(player.name .. " - " .. label)
 
@@ -811,13 +801,13 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 		if player then
 			win.title = format(L["%s's absorb and healing spells"], player.name)
 
-			local total = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
+			local total = (player.heal or 0) + (player.absorb or 0)
 
 			if total > 0 then
 				local maxvalue, nr = 0, 1
 
-				if player.healing and player.healing.spells then
-					for spellid, spell in pairs(player.healing.spells) do
+				if player.heal_spells then
+					for spellid, spell in pairs(player.heal_spells) do
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
@@ -845,8 +835,8 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 					end
 				end
 
-				if player.absorbs and player.absorbs.spells then
-					for spellid, spell in pairs(player.absorbs.spells) do
+				if player.absorb_spells then
+					for spellid, spell in pairs(player.absorb_spells) do
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
@@ -887,9 +877,9 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 
 			local total, targets = 0, {}
 
-			if player.healing and (player.healing.amount or 0) > 0 then
-				total = total + player.healing.amount
-				for targetname, target in pairs(player.healing.targets) do
+			if (player.heal or 0) > 0 and player.heal_targets then
+				total = total + player.heal
+				for targetname, target in pairs(player.heal_targets) do
 					targets[targetname] = {
 						id = target.id,
 						amount = target.amount,
@@ -898,9 +888,9 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 				end
 			end
 
-			if player.absorbs and (player.absorbs.amount or 0) > 0 then
-				total = total + player.absorbs.amount
-				for targetname, target in pairs(player.absorbs.targets) do
+			if (player.absorb or 0) > 0 and player.absorb_targets then
+				total = total + player.absorb
+				for targetname, target in pairs(player.absorb_targets) do
 					if not targets[targetname] then
 						targets[targetname] = {
 							id = target.id,
@@ -1056,10 +1046,9 @@ Skada:AddLoadableModule("HPS", function(Skada, L)
 	if Skada:IsDisabled("Absorbs and Healing", "HPS") then return end
 
 	local parentmod = Skada:GetModule(L["Absorbs and Healing"], true)
-	if not parentmod then return end
+	local getHPS, getRaidHPS = parentmod.getHPS, parentmod.getRaidHPS
 
 	local mod = Skada:NewModule(L["HPS"])
-	local getHPS, getRaidHPS = parentmod.getHPS, parentmod.getRaidHPS
 
 	function mod:Update(win, set)
 		win.title = L["HPS"]
@@ -1135,8 +1124,8 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 	local function CacheSpells(set)
 		spells = {}
 		for _, player in Skada:IteratePlayers(set) do
-			if player.healing and player.healing.spells then
-				for spellid, spell in pairs(player.healing.spells) do
+			if player.heal and player.heal_spells then
+				for spellid, spell in pairs(player.heal_spells) do
 					if (spell.amount or 0) > 0 then
 						if not spells[spellid] then
 							spells[spellid] = {
@@ -1171,8 +1160,8 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 					end
 				end
 			end
-			if player.absorbs and player.absorbs.spells then
-				for spellid, spell in pairs(player.absorbs.spells) do
+			if player.absorb_spells then
+				for spellid, spell in pairs(player.absorb_spells) do
 					if not spells[spellid] then
 						spells[spellid] = {
 							count = spell.count,
@@ -1213,7 +1202,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 
 		local spell = spells[id]
 		if spell then
-			local total = (set.healing or 0) + (set.absorbs or 0)
+			local total = (set.heal or 0) + (set.absorb or 0)
 			if total > 0 then
 				local overheal = (set.overheal or 0)
 
@@ -1241,7 +1230,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 	end
 
 	function spellmod:Update(win, set)
-		local healing = (set.healing or 0) + (set.absorbs or 0)
+		local healing = (set.heal or 0) + (set.absorb or 0)
 		if healing > 0 then
 			CacheSpells(set)
 			local spell = spells[win.spellid]
@@ -1280,7 +1269,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 
 	function mod:Update(win, set)
 		win.title = L["Healing Done By Spell"]
-		local total = (set.healing or 0) + (set.absorbs or 0)
+		local total = (set.heal or 0) + (set.absorb or 0)
 
 		if total > 0 then
 			CacheSpells(set)

@@ -3,7 +3,7 @@ assert(Skada, "Skada not found!")
 -- cache frequently used globals
 local pairs, format, select, tostring = pairs, string.format, select, tostring
 local min, max = math.min, math.max
-local GetSpellInfo, UnitClass = Skada.GetSpellInfo or GetSpellInfo, Skada.UnitClass
+local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local _
 
 -- list of the auras that are ignored!
@@ -14,7 +14,8 @@ local blacklist = {
 	[57822] = true, -- Tabard of the Wyrmrest Accord
 	[72968] = true, -- Precious's Ribbon
 	[57723] = true, -- Exhaustion (Heroism)
-	[57724] = true -- Sated (Bloodlust)
+	[57724] = true, -- Sated (Bloodlust)
+	[57940] = true -- Essence of Wintergrasp
 }
 
 --
@@ -50,11 +51,7 @@ local function log_auraapply(set, aura)
 			-- saving this to total set may become a memory hog deluxe.
 			if set == Skada.current and aura.auratype == "DEBUFF" and aura.dstName then
 				player.auras[aura.spellid].targets = player.auras[aura.spellid].targets or {}
-				if not player.auras[aura.spellid].targets[aura.dstName] then
-					player.auras[aura.spellid].targets[aura.dstName] = {id = aura.dstGUID, count = 1}
-				else
-					player.auras[aura.spellid].targets[aura.dstName].count = player.auras[aura.spellid].targets[aura.dstName].count + 1
-				end
+				player.auras[aura.spellid].targets[aura.dstName] = (player.auras[aura.spellid].targets[aura.dstName] or 0) + 1
 			end
 		end
 	end
@@ -72,7 +69,9 @@ end
 local function log_auraremove(set, aura)
 	if set and aura and aura.spellid then
 		local player = Skada:get_player(set, aura.playerid, aura.playername, aura.playerflags)
-		if not player or not player.auras or not player.auras[aura.spellid] then return end
+		if not player or not player.auras or not player.auras[aura.spellid] then
+			return
+		end
 		if player.auras[aura.spellid].auratype == aura.auratype and player.auras[aura.spellid].active > 0 then
 			player.auras[aura.spellid].active = player.auras[aura.spellid].active - 1
 			if player.auras[aura.spellid].active < 0 then
@@ -353,7 +352,9 @@ local function aura_tooltip(win, id, label, tooltip, playerid, playername, L)
 				if aura.school then
 					local c = Skada.schoolcolors[aura.school]
 					local n = Skada.schoolnames[aura.school]
-					if c and n then tooltip:AddLine(n, c.r, c.g, c.b) end
+					if c and n then
+						tooltip:AddLine(n, c.r, c.g, c.b)
+					end
 				end
 
 				-- add segment and active times
@@ -526,19 +527,18 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 			if total > 0 and player.auras[win.spellid].targets then
 				local maxvalue, nr = 0, 1
 
-				for targetname, target in pairs(player.auras[win.spellid].targets) do
+				for targetname, count in pairs(player.auras[win.spellid].targets) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = target.id or targetname
+					d.id = targetname
 					d.label = targetname
-					d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
 
-					d.value = target.count
-					d.valuetext = format("%u (%.1f%%)", target.count, 100 * target.count / total)
+					d.value = count
+					d.valuetext = format("%u (%.1f%%)", count, 100 * count / total)
 
-					if target.count > maxvalue then
-						maxvalue = target.count
+					if count > maxvalue then
+						maxvalue = count
 					end
 
 					nr = nr + 1

@@ -219,37 +219,34 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 
 	-- called whenever we receive a nickname request.
 	function mod:OnCommNicknameRequest(event, sender)
-		if event ~= "OnCommNicknameRequest" then
-			return
+		if event == "OnCommNicknameRequest" and sender then
+			Skada:SendComm("WHISPER", sender, "NicknameResponse", unitGUID, Skada.db.profile.nickname)
 		end
-		Skada:SendComm("WHISPER", sender, "NicknameResponse", unitGUID, Skada.db.profile.nickname)
 	end
 
 	-- called whenever we receive a nickname response
 	function mod:OnCommNicknameResponse(event, sender, playerid, nickname)
-		if event ~= "OnCommNicknameResponse" then
-			return
+		if event == "OnCommNicknameResponse" then
+			-- the player didn't send us the nickname or doesn't
+			-- have a nickname set? Set it to his/her name anyways.
+			if not nickname or nickname == "" then
+				nickname = sender
+			end
+			self:SetNickname(playerid, nickname)
 		end
-		-- the player didn't send us the nickname or doesn't
-		-- have a nickname set? Set it to his/her name anyways.
-		if not nickname or nickname == "" then
-			nickname = sender
-		end
-		self:SetNickname(playerid, nickname)
 	end
 
 	-- if someone in our group changes the nickname, we update the cache
 	function mod:OnCommNicknameChange(event, sender, playerid, nickname)
-		if event ~= "OnCommNicknameChange" then
-			return
+		if event == "OnCommNicknameChange" then
+			if not nickname or nickname == "" then
+				nickname = sender
+			end
+			if not self.db then
+				self:SetCacheTable()
+			end
+			self.db.nicknames[playerid] = nickname
 		end
-		if not nickname or nickname == "" then
-			nickname = sender
-		end
-		if not self.db then
-			self:SetCacheTable()
-		end
-		self.db.nicknames[playerid] = nickname
 	end
 
 	-----------------------------------------------------------

@@ -7,35 +7,25 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 	local targetmod = mod:NewModule(L["Damage target list"])
 
 	local pairs, select, format = pairs, select, string.format
-	local UnitClass, GetSpellInfo = Skada.UnitClass, Skada.GetSpellInfo or GetSpellInfo
+	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local _
 
 	local function log_damage(set, dmg)
 		local player = Skada:get_player(set, dmg.playerid, dmg.playername, dmg.playerflags)
 		if player then
-			-- add player and set friendly fire:
-			player.friendfire = player.friendfire or {amount = 0}
-			player.friendfire.amount = (player.friendfire.amount or 0) + dmg.amount
+			Skada:AddActiveTime(player, dmg.amount > 0)
+
+			player.friendfire = (player.friendfire or 0) + dmg.amount
 			set.friendfire = (set.friendfire or 0) + dmg.amount
 
-			-- save the spell first.
-			if dmg.spellid then
-				player.friendfire.spells = player.friendfire.spells or {}
-				if not player.friendfire.spells[dmg.spellid] then
-					player.friendfire.spells[dmg.spellid] = {school = dmg.spellschool, amount = dmg.amount}
-				else
-					player.friendfire.spells[dmg.spellid].amount = (player.friendfire.spells[dmg.spellid].amount or 0) + dmg.amount
-				end
-			end
+			-- spell
+			player.friendfire_spells = player.friendfire_spells or {}
+			player.friendfire_spells[dmg.spellid] = (player.friendfire_spells[dmg.spellid] or 0) + dmg.amount
 
 			-- saving this to total set may become a memory hog deluxe.
 			if set == Skada.current and dmg.dstName then
-				player.friendfire.targets = player.friendfire.targets or {}
-				if not player.friendfire.targets[dmg.dstName] then
-					player.friendfire.targets[dmg.dstName] = {id = dmg.dstGUID, amount = dmg.amount}
-				else
-					player.friendfire.targets[dmg.dstName].amount = (player.friendfire.targets[dmg.dstName].amount or 0) + dmg.amount
-				end
+				player.friendfire_targets = player.friendfire_targets or {}
+				player.friendfire_targets[dmg.dstName] = (player.friendfire_targets[dmg.dstName] or 0) + dmg.amount
 			end
 		end
 	end
@@ -44,17 +34,14 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
-			local spellid, spellname, spellschool, amount, overkill, school, resisted, blocked, absorbed = ...
+			local spellid, _, _, amount, overkill, _, _, blocked, absorbed = ...
 
 			dmg.playerid = srcGUID
 			dmg.playername = srcName
 			dmg.playerflags = srcFlags
 
-			dmg.dstGUID = dstGUID
 			dmg.dstName = dstName
-
 			dmg.spellid = spellid
-			dmg.spellschool = school
 			dmg.amount = (amount or 0) + (overkill or 0) + (absorbed or 0)
 
 			log_damage(Skada.current, dmg)
@@ -63,23 +50,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 	end
 
 	local function SwingDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		if srcGUID ~= dstGUID then
-			local amount, overkill, school, resisted, blocked, absorbed = ...
-
-			dmg.playerid = srcGUID
-			dmg.playername = srcName
-			dmg.playerflags = srcFlags
-
-			dmg.dstGUID = dstGUID
-			dmg.dstName = dstName
-
-			dmg.spellid = 6603
-			dmg.spellschool = 1
-			dmg.amount = (amount or 0) + (overkill or 0) + (absorbed or 0)
-
-			log_damage(Skada.current, dmg)
-			log_damage(Skada.total, dmg)
-		end
+		SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, nil, nil, ...)
 	end
 
 	function targetmod:Enter(win, id, label)
@@ -91,29 +62,28 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's targets"], player.name)
-			local total = player.friendfire and player.friendfire.amount or 0
+			local total = player.friendfire or 0
 
-			if total > 0 and player.friendfire.targets then
+			if total > 0 and player.friendfire_targets then
 				local maxvalue, nr = 0, 1
 
-				for targetname, target in pairs(player.friendfire.targets) do
+				for targetname, amount in pairs(player.friendfire_targets) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = target.id
+					d.id = targetname
 					d.label = targetname
-					d.class, d.role, d.spec = select(2, UnitClass(d.id, target.flags, set))
 
-					d.value = target.amount
+					d.value = amount
 					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(target.amount),
+						Skada:FormatNumber(amount),
 						mod.metadata.columns.Damage,
-						format("%.1f%%", 100 * target.amount / total),
+						format("%.1f%%", 100 * amount / total),
 						mod.metadata.columns.Percent
 					)
 
-					if target.amount > maxvalue then
-						maxvalue = target.amount
+					if amount > maxvalue then
+						maxvalue = amount
 					end
 					nr = nr + 1
 				end
@@ -132,30 +102,29 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's damage"], player.name)
-			local total = player.friendfire and player.friendfire.amount or 0
+			local total = player.friendfire or 0
 
-			if total > 0 and player.friendfire.spells then
+			if total > 0 and player.friendfire_spells then
 				local maxvalue, nr = 0, 1
 
-				for spellid, spell in pairs(player.friendfire.spells) do
+				for spellid, amount in pairs(player.friendfire_spells) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
 					d.id = spellid
 					d.spellid = spellid
 					d.label, _, d.icon = GetSpellInfo(spellid)
-					d.spellschool = spell.school
 
-					d.value = spell.amount
+					d.value = amount
 					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(spell.amount),
+						Skada:FormatNumber(amount),
 						mod.metadata.columns.Damage,
-						format("%.1f%%", 100 * spell.amount / total),
+						format("%.1f%%", 100 * amount / total),
 						mod.metadata.columns.Percent
 					)
 
-					if spell.amount > maxvalue then
-						maxvalue = spell.amount
+					if amount > maxvalue then
+						maxvalue = amount
 					end
 					nr = nr + 1
 				end
@@ -173,7 +142,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 			local maxvalue, nr = 0, 1
 
 			for _, player in Skada:IteratePlayers(set) do
-				if player.friendfire and (player.friendfire.amount or 0) > 0 then
+				if (player.friendfire or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -183,18 +152,17 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 					d.role = player.role
 					d.spec = player.spec
 
-					d.value = player.friendfire.amount
+					d.value = player.friendfire
 					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(player.friendfire.amount),
+						Skada:FormatNumber(player.friendfire),
 						self.metadata.columns.Damage,
-						format("%.1f%%", 100 * player.friendfire.amount / total),
+						format("%.1f%%", 100 * player.friendfire / total),
 						self.metadata.columns.Percent
 					)
 
-					if player.friendfire.amount > maxvalue then
-						maxvalue = player.friendfire.amount
+					if player.friendfire > maxvalue then
+						maxvalue = player.friendfire
 					end
-
 					nr = nr + 1
 				end
 			end
@@ -213,10 +181,13 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 			icon = "Interface\\Icons\\inv_gizmo_supersappercharge"
 		}
 
-		Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_BUILDING_DAMAGE", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellDamage, "DAMAGE_SPLIT", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, "RANGE_DAMAGE", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellDamage, "SPELL_BUILDING_DAMAGE", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellDamage, "SPELL_EXTRA_ATTACKS", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
 		Skada:RegisterForCL(SwingDamage, "SWING_DAMAGE", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
 
 		Skada:AddMode(self, L["Damage Done"])

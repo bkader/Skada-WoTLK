@@ -55,11 +55,11 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 	end
 
 	updaters.Damage = function(set, player)
-		return player.damagedone and player.damagedone.amount or 0
+		return player.damage or 0
 	end
 
 	updaters.DamageTaken = function(set, player)
-		return player.damagetaken and player.damagetaken.amount or 0
+		return player.damagetaken or 0
 	end
 
 	updaters.Deaths = function(set, player)
@@ -67,30 +67,23 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 	end
 
 	updaters.Healing = function(set, player)
-		local total = 0
-		if player.healing then
-			total = total + player.healing.amount
-		end
-		if player.absorbs then
-			total = total + player.absorbs.amount
-		end
-		return total
+		return (player.heal or 0) + (player.absorb or 0)
 	end
 
 	updaters.Overhealing = function(set, player)
-		return player.healing and player.healing.overheal or 0
+		return player.overheal or 0
 	end
 
 	updaters.Interrupts = function(set, player)
-		return player.interrupts and player.interrupts.count or 0
+		return player.interrupt or 0
 	end
 
 	updaters.Dispels = function(set, player)
-		return player.dispels and player.dispels.count or 0
+		return player.dispel or 0
 	end
 
 	updaters.Fails = function(set, player)
-		return player.fails and player.fails.count or 0
+		return player.fail or 0
 	end
 
 	local function find_boss_data(bossname)

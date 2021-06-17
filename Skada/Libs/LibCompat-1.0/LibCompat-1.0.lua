@@ -234,7 +234,7 @@ do
 				if spellid == 75 then
 					res3 = "Interface\\Icons\\INV_Weapon_Bow_07"
 				elseif spellid == 6603 then
-					res3 = "Interface\\Icons\\INV_Sword_04"
+					res1, res3 = MELEE, "Interface\\Icons\\INV_Sword_04"
 				end
 			end
 		end

@@ -20,8 +20,8 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 	local function GetPlayerMitigation(player)
 		local mitigation = 0
 
-		if player.damagetaken and player.damagetaken.spells then
-			for _, spell in pairs(player.damagetaken.spells) do
+		if player.damagetaken_spells then
+			for _, spell in pairs(player.damagetaken_spells) do
 				mitigation = mitigation + (spell.blocked or 0) + (spell.absorbed or 0) + (spell.resisted or 0)
 			end
 		end
@@ -42,10 +42,10 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 		if set and set.players then
 			local count = 0
 			for _, player in Skada:IteratePlayers(set) do
-				local damage = player.damagedone and player.damagedone.amount or 0
-				local healing = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
+				local damage = player.damage or 0
+				local healing = (player.heal or 0) + (player.absorb or 0)
 				local mitigation = GetPlayerMitigation(player)
-				local damagetaken = player.damagetaken and player.damagetaken.amount or 0
+				local damagetaken = player.damagetaken or 0
 
 				local role = player.role
 				if not role then
@@ -78,17 +78,19 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 
 	local function score_tooltip(win, id, label, tooltip)
 		local player = Skada:find_player(win:get_selected_set(), id)
-		if not player then return end
+		if not player then
+			return
+		end
 
 		tooltip:AddLine(format(L["%s's Score"], player.name))
 
-		local damagedone = player.damagedone and player.damagedone.amount or 0
+		local damagedone = player.damage or 0
 		tooltip:AddDoubleLine(L["Damage"], Skada:FormatNumber(damagedone), 1, 1, 1, 1, 1, 1)
 
-		local healing = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
+		local healing = (player.heal or 0) + (player.absorb or 0)
 		tooltip:AddDoubleLine(L["Healing"], Skada:FormatNumber(healing), 1, 1, 1, 0, 1, 0)
 
-		local damagetaken = player.damagetaken and player.damagetaken.amount or 0
+		local damagetaken = player.damagetaken or 0
 		tooltip:AddDoubleLine(L["Damage Taken"], Skada:FormatNumber(damagetaken), 1, 1, 1, 1, 0, 0)
 
 		local mitigation = GetPlayerMitigation(player)
@@ -119,10 +121,10 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 		local maxvalue, nr = 0, 1
 
 		for _, player in Skada:IteratePlayers(set) do
-			local damagedone = player.damagedone and player.damagedone.amount or 0
-			local healing = (player.healing and player.healing.amount or 0) + (player.absorbs and player.absorbs.amount or 0)
+			local damagedone = player.damage or 0
+			local healing = (player.heal or 0) + (player.absorb or 0)
 			local mitigation = GetPlayerMitigation(player)
-			local damagetaken = player.damagetaken and player.damagetaken.amount or 0
+			local damagetaken = player.damagetaken or 0
 
 			local role = player.role
 			if not role then
@@ -167,7 +169,11 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		self.metadata = {showspots = true, tooltip = score_tooltip, icon = "Interface\\Icons\\spell_misc_emotionangry"}
+		self.metadata = {
+			showspots = true,
+			tooltip = score_tooltip,
+			icon = "Interface\\Icons\\spell_misc_emotionangry"
+		}
 		Skada:AddMode(self)
 	end
 

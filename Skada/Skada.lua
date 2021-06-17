@@ -3069,7 +3069,7 @@ function Skada:OnInitialize()
 	for class, coords in pairs(CLASS_ICON_TCOORDS) do
 		self.classicontcoords[class] = coords
 	end
-	self.classicontcoords.ENEMY = {0, 0.25, 0.75, 1}
+	self.classicontcoords.ENEMY = {0.5, 0.75, 0.5, 0.75}
 	self.classicontcoords.BOSS = {0.75, 1, 0.5, 0.75}
 	self.classicontcoords.MONSTER = {0, 0.25, 0.75, 1}
 	self.classicontcoords.PET = {0.25, 0.5, 0.75, 1}
@@ -3090,9 +3090,6 @@ end
 function Skada:OnEnable()
 	self:RegisterComm("Skada")
 	self:ReloadSettings()
-
-	-- we use this to be able to localize it
-	L["Auto Attack"] = MELEE
 
 	self:RegisterEvent("PARTY_MEMBERS_CHANGED")
 	self:RegisterEvent("RAID_ROSTER_UPDATE")

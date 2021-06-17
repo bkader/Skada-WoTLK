@@ -21,13 +21,12 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 	local function log_parry(set, data)
 		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
 		if player then
-			player.parries = player.parries or {}
-			player.parries.count = (player.parries.count or 0) + 1
-			set.parries = (set.parries or 0) + 1
+			player.parry = (player.parry or 0) + 1
+			set.parry = (set.parry or 0) + 1
 
 			if set == Skada.current then
-				player.parries.targets = player.parries.targets or {}
-				player.parries.targets[data.dstName] = (player.parries.targets[data.dstName] or 0) + 1
+				player.parry_targets = player.parry_targets or {}
+				player.parry_targets[data.dstName] = (player.parry_targets[data.dstName] or 0) + 1
 			end
 		end
 	end
@@ -60,12 +59,12 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's parry targets"], player.name)
-			local total = player.parries and player.parries.count or 0
+			local total = player.parry or 0
 
-			if total > 0 and player.parries.targets then
+			if total > 0 and player.parry_targets then
 				local maxvalue, nr = 0, 1
 
-				for targetname, count in pairs(player.parries.targets) do
+				for targetname, count in pairs(player.parry_targets) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -94,13 +93,13 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 
 	function mod:Update(win, set)
 		win.title = L["Parry-Haste"]
-		local total = set.parries or 0
+		local total = set.parry or 0
 
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
 			for _, player in Skada:IteratePlayers(set) do
-				if player.parries then
+				if player.parry then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -110,7 +109,7 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 					d.role = player.role
 					d.spec = player.spec
 
-					d.value = player.parries.count
+					d.value = player.parry
 					d.valuetext = Skada:FormatValueText(
 						d.value,
 						self.metadata.columns.Count,
@@ -134,7 +133,7 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 			showspots = true,
 			click1 = targetmod,
 			nototalclick = {targetmod},
-			columns = {Count = true, Percent = true},
+			columns = {Count = true, Percent = false},
 			icon = "Interface\\Icons\\ability_parry"
 		}
 
@@ -149,6 +148,6 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return set.parries or 0
+		return set.parry or 0
 	end
 end)

@@ -40,19 +40,20 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 		local player = Skada:get_player(set, playerid, playername, playerflags)
 		if player then
 			-- record potion usage for player and set
-			player.potions = player.potions or {}
-			player.potions.count = (player.potions.count or 0) + 1
-			set.potions = (set.potions or 0) + 1
+			player.potion = (player.potion or 0) + 1
+			set.potion = (set.potion or 0) + 1
 
 			-- record the potion
-			local potionid = potionIDs[spellid]
-			player.potions.potions = player.potions.potions or {}
-			player.potions.potions[potionid] = (player.potions.potions[potionid] or 0) + 1
+			if spellid then
+				local potionid = potionIDs[spellid]
+				player.potion_spells = player.potion_spells or {}
+				player.potion_spells[potionid] = (player.potion_spells[potionid] or 0) + 1
+			end
 		end
 	end
 
 	local function PotionUsed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, spellname, spellschool = ...
+		local spellid = ...
 		if spellid and potionIDs[spellid] then
 			log_potion(Skada.current, srcGUID, srcName, srcFlags, spellid)
 			log_potion(Skada.total, srcGUID, srcName, srcFlags, spellid)
@@ -104,14 +105,14 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 		local total, players = 0, {}
 		if win.potionid then
 			for _, player in Skada:IteratePlayers(set) do
-				if player.potions and player.potions.potions and player.potions.potions[win.potionid] then
-					total = total + player.potions.potions[win.potionid]
+				if player.potion_spells and player.potion_spells[win.potionid] then
+					total = total + player.potion_spells[win.potionid]
 					players[player.id] = {
 						name = player.name,
 						class = player.class,
 						role = player.role,
 						spec = player.spec,
-						count = player.potions.potions[win.potionid]
+						count = player.potion_spells[win.potionid]
 					}
 				end
 			end
@@ -164,12 +165,12 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid)
 		if player then
 			win.title = format(L["%s's used potions"], player.name)
-			local total = player.potions and player.potions.count or 0
+			local total = player.potion or 0
 
-			if total > 0 and player.potions.potions then
+			if total > 0 and player.potion_spells then
 				local maxvalue, nr = 0, 1
 
-				for potionid, count in pairs(player.potions.potions) do
+				for potionid, count in pairs(player.potion_spells) do
 					local potionname, potionlink, _, _, _, _, _, _, _, potionicon = GetItemInfo(potionid)
 					if not potionname then
 						RequestPotion(potionid)
@@ -207,13 +208,13 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 
 	function mod:Update(win, set)
 		win.title = L["Potions"]
-		local total = set.potions or 0
+		local total = set.potion or 0
 
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
 			for _, player in Skada:IteratePlayers(set) do
-				if player.potions and (player.potions.count or 0) > 0 then
+				if (player.potion or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -223,16 +224,16 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 					d.role = player.role
 					d.spec = player.spec
 
-					d.value = player.potions.count
+					d.value = player.potion
 					d.valuetext = Skada:FormatValueText(
-						d.value,
+						player.potion,
 						self.metadata.columns.Count,
-						format("%.1f%%", 100 * d.value / total),
+						format("%.1f%%", 100 * player.potion / total),
 						self.metadata.columns.Percent
 					)
 
-					if d.value > maxvalue then
-						maxvalue = d.value
+					if player.potion > maxvalue then
+						maxvalue = player.potion
 					end
 					nr = nr + 1
 				end
@@ -285,7 +286,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return set.potions or 0
+		return set.potion or 0
 	end
 
 	function mod:SetComplete(set)

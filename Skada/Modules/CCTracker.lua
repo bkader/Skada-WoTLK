@@ -206,22 +206,21 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 		local player = Skada:get_player(set, cc.playerid, cc.playername, cc.playerflags)
 		if player then
 			-- increment the count.
-			player.ccdone = player.ccdone or {}
-			player.ccdone.count = (player.ccdone.count or 0) + 1
+			player.ccdone = (player.ccdone or 0) + 1
 			set.ccdone = (set.ccdone or 0) + 1
 
 			-- record the spell and its targets.
-			player.ccdone.spells = player.ccdone.spells or {}
-			player.ccdone.spells[cc.spellid] = (player.ccdone.spells[cc.spellid] or 0) + 1
+			player.ccdone_spells = player.ccdone_spells or {}
+			player.ccdone_spells[cc.spellid] = (player.ccdone_spells[cc.spellid] or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
 			if set == Skada.current and cc.dstName then
-				player.ccdone.targets = player.ccdone.targets or {}
-				if not player.ccdone.targets[cc.dstName] then
-					player.ccdone.targets[cc.dstName] = {id = cc.dstGUID, count = 1, spells = {[cc.spellid] = 1}}
+				player.ccdone_targets = player.ccdone_targets or {}
+				if not player.ccdone_targets[cc.dstName] then
+					player.ccdone_targets[cc.dstName] = {id = cc.dstGUID, count = 1, spells = {[cc.spellid] = 1}}
 				else
-					player.ccdone.targets[cc.dstName].count = player.ccdone.targets[cc.dstName].count + 1
-					player.ccdone.targets[cc.dstName].spells[cc.spellid] = (player.ccdone.targets[cc.dstName].spells[cc.spellid] or 0) + 1
+					player.ccdone_targets[cc.dstName].count = player.ccdone_targets[cc.dstName].count + 1
+					player.ccdone_targets[cc.dstName].spells[cc.spellid] = (player.ccdone_targets[cc.dstName].spells[cc.spellid] or 0) + 1
 				end
 			end
 		end
@@ -257,13 +256,12 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 		if player then
 			win.title = format(L["%s's CC Done spells"], player.name)
-			local total = player.ccdone and player.ccdone.count or 0
+			local total = player.ccdone or 0
 
-			if total > 0 and player.ccdone.spells then
+			if total > 0 and player.ccdone_spells then
 				local maxvalue, nr = 0, 1
 
-				for spellid, count in pairs(player.ccdone.spells) do
-
+				for spellid, count in pairs(player.ccdone_spells) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -301,18 +299,18 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 		if player then
 			win.title = format(L["%s's CC Done targets"], player.name)
-			local total = player.ccdone and player.ccdone.count or 0
+			local total = player.ccdone or 0
 
-			if total > 0 and player.ccdone.targets then
+			if total > 0 and player.ccdone_targets then
 				local maxvalue, nr = 0, 1
 
-				for targetname, target in pairs(player.ccdone.targets) do
+				for targetname, target in pairs(player.ccdone_targets) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec =select(2, UnitClass(d.id, nil, set))
+					d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
 
 					d.value = target.count
 					d.valuetext = Skada:FormatValueText(
@@ -343,12 +341,12 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 		if player then
 			win.title = format(L["%s's CC Done <%s> spells"], player.name, win.targetname or UNKNOWN)
-			local total = player.ccdone and player.ccdone.count or 0
+			local total = player.ccdone or 0
 
-			if total > 0 and player.ccdone.targets and player.ccdone.targets[win.targetname] then
+			if total > 0 and player.ccdone_targets and player.ccdone_targets[win.targetname] then
 				local maxvalue, nr = 0, 1
 
-				for spellid, count in pairs(player.ccdone.targets[win.targetname].spells or {}) do
+				for spellid, count in pairs(player.ccdone_targets[win.targetname].spells or {}) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -384,7 +382,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 			local maxvalue, nr = 0, 1
 
 			for _, player in Skada:IteratePlayers(set) do
-				if player.ccdone and (player.ccdone.count or 0) > 0 then
+				if (player.ccdone or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -394,16 +392,16 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 					d.role = player.role
 					d.spec = player.spec
 
-					d.value = player.ccdone.count
+					d.value = player.ccdone
 					d.valuetext = Skada:FormatValueText(
-						player.ccdone.count,
+						player.ccdone,
 						self.metadata.columns.Count,
-						format("%.1f%%", 100 * player.ccdone.count / total),
+						format("%.1f%%", 100 * player.ccdone / total),
 						self.metadata.columns.Percent
 					)
 
-					if player.ccdone.count > maxvalue then
-						maxvalue = player.ccdone.count
+					if player.ccdone > maxvalue then
+						maxvalue = player.ccdone
 					end
 					nr = nr + 1
 				end
@@ -461,22 +459,21 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 		local player = Skada:get_player(set, cc.playerid, cc.playername, cc.playerflags)
 		if player then
 			-- increment the count.
-			player.cctaken = player.cctaken or {}
-			player.cctaken.count = (player.cctaken.count or 0) + 1
+			player.cctaken = (player.cctaken or 0) + 1
 			set.cctaken = (set.cctaken or 0) + 1
 
 			-- record the spell and its sources.
-			player.cctaken.spells = player.cctaken.spells or {}
-			player.cctaken.spells[cc.spellid] = (player.cctaken.spells[cc.spellid] or 0) + 1
+			player.cctaken_spells = player.cctaken_spells or {}
+			player.cctaken_spells[cc.spellid] = (player.cctaken_spells[cc.spellid] or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
 			if set == Skada.current and cc.srcName then
-				player.cctaken.sources = player.cctaken.sources or {}
-				if not player.cctaken.sources[cc.srcName] then
-					player.cctaken.sources[cc.srcName] = {id = cc.srcGUID, count = 1, spells = {[cc.spellid] = 1}}
+				player.cctaken_sources = player.cctaken_sources or {}
+				if not player.cctaken_sources[cc.srcName] then
+					player.cctaken_sources[cc.srcName] = {id = cc.srcGUID, count = 1, spells = {[cc.spellid] = 1}}
 				else
-					player.cctaken.sources[cc.srcName].count = player.cctaken.sources[cc.srcName].count + 1
-					player.cctaken.sources[cc.srcName].spells[cc.spellid] = (player.cctaken.sources[cc.srcName].spells[cc.spellid] or 0) + 1
+					player.cctaken_sources[cc.srcName].count = player.cctaken_sources[cc.srcName].count + 1
+					player.cctaken_sources[cc.srcName].spells[cc.spellid] = (player.cctaken_sources[cc.srcName].spells[cc.spellid] or 0) + 1
 				end
 			end
 		end
@@ -512,12 +509,12 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 		if player then
 			win.title = format(L["%s's CC Taken spells"], player.name)
-			local total = player.cctaken and player.cctaken.count or 0
+			local total = player.cctaken or 0
 
-			if total > 0 and player.cctaken.spells then
+			if total > 0 and player.cctaken_spells then
 				local maxvalue, nr = 0, 1
 
-				for spellid, count in pairs(player.cctaken.spells) do
+				for spellid, count in pairs(player.cctaken_spells) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -555,12 +552,12 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 		if player then
 			win.title = format(L["%s's CC Taken sources"], player.name)
-			local total = player.cctaken and player.cctaken.count or 0
+			local total = player.cctaken or 0
 
-			if total > 0 and player.cctaken.sources then
+			if total > 0 and player.cctaken_sources then
 				local maxvalue, nr = 0, 1
 
-				for sourcename, source in pairs(player.cctaken.sources) do
+				for sourcename, source in pairs(player.cctaken_sources) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -597,12 +594,12 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 		if player then
 			win.title = format(L["%s's CC Taken <%s> sources"], player.name, win.targetname or UNKNOWN)
-			local total = player.cctaken and player.cctaken.count or 0
+			local total = player.cctaken or 0
 
-			if total > 0 and player.cctaken.sources and player.cctaken.sources[win.targetname] then
+			if total > 0 and player.cctaken_sources and player.cctaken_sources[win.targetname] then
 				local maxvalue, nr = 0, 1
 
-				for spellid, count in pairs(player.cctaken.sources[win.targetname].spells or {}) do
+				for spellid, count in pairs(player.cctaken_sources[win.targetname].spells or {}) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -638,7 +635,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 			local maxvalue, nr = 0, 1
 
 			for _, player in Skada:IteratePlayers(set) do
-				if player.cctaken and (player.cctaken.count or 0) > 0 then
+				if (player.cctaken or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -648,16 +645,16 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 					d.role = player.role
 					d.spec = player.spec
 
-					d.value = player.cctaken.count
+					d.value = player.cctaken
 					d.valuetext = Skada:FormatValueText(
-						player.cctaken.count,
+						player.cctaken,
 						self.metadata.columns.Count,
-						format("%.1f%%", 100 * player.cctaken.count / total),
+						format("%.1f%%", 100 * player.cctaken / total),
 						self.metadata.columns.Percent
 					)
 
-					if player.cctaken.count > maxvalue then
-						maxvalue = player.cctaken.count
+					if player.cctaken > maxvalue then
+						maxvalue = player.cctaken
 					end
 					nr = nr + 1
 				end
@@ -721,22 +718,21 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 		local player = Skada:get_player(set, data.playerid, data.playername)
 		if player then
 			-- increment the count.
-			player.ccbreaks = player.ccbreaks or {}
-			player.ccbreaks.count = (player.ccbreaks.count or 0) + 1
-			set.ccbreaks = (set.ccbreaks or 0) + 1
+			player.ccbreak = (player.ccbreak or 0) + 1
+			set.ccbreak = (set.ccbreak or 0) + 1
 
 			-- record the spell and its targets.
-			player.ccbreaks.spells = player.ccbreaks.spells or {}
-			player.ccbreaks.spells[cc.spellid] = (player.ccbreaks.spells[cc.spellid] or 0) + 1
+			player.ccbreak_spells = player.ccbreak_spells or {}
+			player.ccbreak_spells[cc.spellid] = (player.ccbreak_spells[cc.spellid] or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
 			if set == Skada.current and cc.dstName then
-				player.ccbreaks.targets = player.ccbreaks.targets or {}
-				if not player.ccbreaks.targets[cc.dstName] then
-					player.ccbreaks.targets[cc.dstName] = {id = cc.dstGUID, count = 1, spells = {[cc.spellid] = 1}}
+				player.ccbreak_targets = player.ccbreak_targets or {}
+				if not player.ccbreak_targets[cc.dstName] then
+					player.ccbreak_targets[cc.dstName] = {id = cc.dstGUID, count = 1, spells = {[cc.spellid] = 1}}
 				else
-					player.ccbreaks.targets[cc.dstName].count = player.ccbreaks.targets[cc.dstName].count + 1
-					player.ccbreaks.targets[cc.dstName].spells[cc.spellid] = (player.ccbreaks.targets[cc.dstName].spells[cc.spellid] or 0) + 1
+					player.ccbreak_targets[cc.dstName].count = player.ccbreak_targets[cc.dstName].count + 1
+					player.ccbreak_targets[cc.dstName].spells[cc.spellid] = (player.ccbreak_targets[cc.dstName].spells[cc.spellid] or 0) + 1
 				end
 			end
 		end
@@ -768,10 +764,8 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 		-- Optional announce
 		srcName = srcName_modified or srcName
 		if Skada.db.profile.modules.ccannounce and Skada:IsInRaid() and UnitInRaid(srcName) then
-			local instanceType = select(2, IsInInstance())
-			if instanceType == "pvp" then
-				return
-			end
+			if select(2, IsInInstance()) == "pvp" then return end
+
 			-- Ignore main tanks and main assist?
 			if Skada.db.profile.modules.ccignoremaintanks then
 				-- Loop through our raid and return if src is a main tank.
@@ -810,12 +804,12 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 		if player then
 			win.title = format(L["%s's CC Break spells"], player.name)
-			local total = player.ccbreaks and player.ccbreaks.count or 0
+			local total = player.ccbreak or 0
 
-			if total > 0 and player.ccbreaks.spells then
+			if total > 0 and player.ccbreak_spells then
 				local maxvalue, nr = 0, 1
 
-				for spellid, count in pairs(player.ccbreaks.spells) do
+				for spellid, count in pairs(player.ccbreak_spells) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -853,12 +847,12 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 		if player then
 			win.title = format(L["%s's CC Break targets"], player.name)
-			local total = player.ccbreaks and player.ccbreaks.count or 0
+			local total = player.ccbreak or 0
 
-			if total > 0 and player.ccbreaks.targets then
+			if total > 0 and player.ccbreak_targets then
 				local maxvalue, nr = 0, 1
 
-				for targetname, target in pairs(player.ccbreaks.targets) do
+				for targetname, target in pairs(player.ccbreak_targets) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -895,12 +889,12 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 		if player then
 			win.title = format(L["%s's CC Break <%s> spells"], player.name, win.targetname or UNKNOWN)
-			local total = player.ccbreaks and player.ccbreaks.count or 0
+			local total = player.ccbreak or 0
 
-			if total > 0 and player.ccbreaks.targets and player.ccbreaks.targets[win.targetname] then
+			if total > 0 and player.ccbreak_targets and player.ccbreak_targets[win.targetname] then
 				local maxvalue, nr = 0, 1
 
-				for spellid, count in pairs(player.ccbreaks.targets[win.targetname].spells or {}) do
+				for spellid, count in pairs(player.ccbreak_targets[win.targetname].spells or {}) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -930,13 +924,13 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 	function mod:Update(win, set)
 		win.title = L["CC Breakers"]
-		local total = set.ccbreaks or 0
+		local total = set.ccbreak or 0
 
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
 			for _, player in Skada:IteratePlayers(set) do
-				if player.ccbreaks and (player.ccbreaks.count or 0) > 0 then
+				if (player.ccbreak or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -946,16 +940,16 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 					d.role = player.role
 					d.spec = player.spec
 
-					d.value = player.ccbreaks.count
+					d.value = player.ccbreak
 					d.valuetext = Skada:FormatValueText(
-						player.ccbreaks.count,
+						player.ccbreak,
 						self.metadata.columns.Count,
-						format("%.1f%%", 100 * player.ccbreaks.count / total),
+						format("%.1f%%", 100 * player.ccbreak / total),
 						self.metadata.columns.Percent
 					)
 
-					if player.ccbreaks.count > maxvalue then
-						maxvalue = player.ccbreaks.count
+					if player.ccbreak > maxvalue then
+						maxvalue = player.ccbreak
 					end
 					nr = nr + 1
 				end
@@ -988,13 +982,13 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 	end
 
 	function mod:AddToTooltip(set, tooltip)
-		if (set.ccbreaks or 0) > 0 then
-			tooltip:AddDoubleLine(L["CC Breaks"], set.ccbreaks, 1, 1, 1)
+		if (set.ccbreak or 0) > 0 then
+			tooltip:AddDoubleLine(L["CC Breaks"], set.ccbreak, 1, 1, 1)
 		end
 	end
 
 	function mod:GetSetSummary(set)
-		return set.ccbreaks or 0
+		return set.ccbreak or 0
 	end
 
 	local opts = {

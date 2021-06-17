@@ -13,13 +13,12 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 	local function log_sunder(set, data)
 		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
 		if player then
-			player.sunders = player.sunders or {}
-			player.sunders.count = (player.sunders.count or 0) + 1
-			set.sunders = (set.sunders or 0) + 1
+			set.sunder = (set.sunder or 0) + 1
+			player.sunder = (player.sunder or 0) + 1
 
 			if set == Skada.current and data.dstName then
-				player.sunders.targets = player.sunders.targets or {}
-				player.sunders.targets[data.dstName] = (player.sunders.targets[data.dstName] or 0) + 1
+				player.sunder_targets = player.sunder_targets or {}
+				player.sunder_targets[data.dstName] = (player.sunder_targets[data.dstName] or 0) + 1
 			end
 		end
 	end
@@ -27,7 +26,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 	local data = {}
 
 	local function SunderApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, spellname, spellschool = ...
+		local spellname = select(2, ...)
 		if spellname == sunder or spellname == devastate then
 			data.playerid = srcGUID
 			data.playername = srcName
@@ -53,12 +52,12 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's <%s> targets"], player.name, sunder)
-			local total = player.sunders and player.sunders.count or 0
+			local total = player.sunder or 0
 
-			if total > 0 and player.sunders.targets then
+			if total > 0 and player.sunder_targets then
 				local maxvalue, nr = 0, 1
 
-				for targetname, count in pairs(player.sunders.targets) do
+				for targetname, count in pairs(player.sunder_targets) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -90,13 +89,13 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 		end
 
 		win.title = L["Sunder Counter"]
-		local total = set.sunders or 0
+		local total = set.sunder or 0
 
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
 			for _, player in Skada:IteratePlayers(set) do
-				if player.sunders and (player.sunders.count > 0) then
+				if (player.sunder or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -106,16 +105,16 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 					d.spec = player.spec
 					d.role = player.role
 
-					d.value = player.sunders.count
+					d.value = player.sunder
 					d.valuetext = Skada:FormatValueText(
-						player.sunders.count,
+						player.sunder,
 						self.metadata.columns.Count,
-						format("%.1f%%", 100 * player.sunders.count / total),
+						format("%.1f%%", 100 * player.sunder / total),
 						self.metadata.columns.Percent
 					)
 
-					if player.sunders.count > maxvalue then
-						maxvalue = player.sunders.count
+					if player.sunder > maxvalue then
+						maxvalue = player.sunder
 					end
 					nr = nr + 1
 				end
@@ -147,12 +146,12 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 	end
 
 	function mod:AddToTooltip(set, tooltip)
-		if set and (set.sunders or 0) > 0 then
-			tooltip:AddDoubleLine(sunder, set.sunders or 0, 1, 1, 1)
+		if set and (set.sunder or 0) > 0 then
+			tooltip:AddDoubleLine(sunder, set.sunder or 0, 1, 1, 1)
 		end
 	end
 
 	function mod:GetSetSummary(set)
-		return set.sunders or 0
+		return set.sunder or 0
 	end
 end)

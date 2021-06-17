@@ -77,7 +77,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	end
 
 	local function SwingDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, L["Auto Attack"], nil, ...)
+		SpellDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, MELEE, nil, ...)
 	end
 
 	local function EnvironmentDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
@@ -129,8 +129,8 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	local function log_death(set, playerid, playername, playerflags, ts)
 		local player = Skada:get_player(set, playerid, playername, playerflags)
 		if player then
-			set.deaths = (set.deaths or 0) + 1
-			player.deaths = (player.deaths or 0) + 1
+			set.death = (set.death or 0) + 1
+			player.death = (player.death or 0) + 1
 			if set == Skada.current then
 				player.deathlog = player.deathlog or {}
 				if player.deathlog[1] then
@@ -201,7 +201,9 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 				if player.deathlog and player.deathlog[self.index] then
 					deathlog = player.deathlog[self.index]
 				end
-				if not deathlog then return end
+				if not deathlog then
+					return
+				end
 
 				win.metadata.maxvalue = player.maxhp
 
@@ -303,7 +305,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		if player then
 			win.title = format(L["%s's deaths"], player.name)
 
-			if (player.deaths or 0) > 0 and player.deathlog then
+			if (player.death or 0) > 0 and player.deathlog then
 				local maxvalue, nr = 0, 1
 
 				for i, death in ipairs(player.deathlog) do
@@ -341,13 +343,13 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 	function mod:Update(win, set)
 		win.title = L["Deaths"]
-		local total = set.deaths or 0
+		local total = set.death or 0
 
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
 			for _, player in Skada:IteratePlayers(set) do
-				if (player.deaths or 0) > 0 then
+				if (player.death or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -357,11 +359,11 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 					d.role = player.role
 					d.spec = player.spec
 
-					d.value = player.deaths
-					d.valuetext = tostring(player.deaths)
+					d.value = player.death
+					d.valuetext = tostring(player.death)
 
-					if player.deaths > maxvalue then
-						maxvalue = player.deaths
+					if player.death > maxvalue then
+						maxvalue = player.death
 					end
 					nr = nr + 1
 				end
@@ -415,7 +417,11 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 			columns = {Change = true, Health = true, Percent = true}
 		}
 		playermod.metadata = {click1 = deathlogmod}
-		self.metadata = {click1 = playermod, nototalclick = {playermod}, icon = "Interface\\Icons\\ability_rogue_feigndeath"}
+		self.metadata = {
+			click1 = playermod,
+			nototalclick = {playermod},
+			icon = "Interface\\Icons\\ability_rogue_feigndeath"
+		}
 
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SPLIT", {dst_is_interesting_nopets = true})
@@ -446,23 +452,26 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 	function mod:SetComplete(set)
 		for _, player in Skada:IteratePlayers(set) do
-			if player.deaths == nil then
-				player.deathlog = nil
+			if (player.death or 0) == 0 then
+				player.deathlog, player.maxhp = nil, nil
 			elseif player.deathlog then
-				while tmaxn(player.deathlog) > (player.deaths or 0) do
+				while tmaxn(player.deathlog) > (player.death or 0) do
 					tremove(player.deathlog, 1)
+				end
+				if #player.deathlog == 0 then
+					player.deathlog = nil
 				end
 			end
 		end
 	end
 
 	function mod:AddToTooltip(set, tooltip)
-		if (set.deaths or 0) > 0 then
-			tooltip:AddDoubleLine(DEATHS, set.deaths, 1, 1, 1)
+		if (set.death or 0) > 0 then
+			tooltip:AddDoubleLine(DEATHS, set.death, 1, 1, 1)
 		end
 	end
 
 	function mod:GetSetSummary(set)
-		return set.deaths or 0
+		return set.death or 0
 	end
 end)

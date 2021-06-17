@@ -4,15 +4,10 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 
 	local mod = Skada:NewModule(L["Resources"])
 
-	local locales, _ = {
-		[0] = MANA,
-		[1] = RAGE,
-		[3] = ENERGY,
-		[6] = RUNIC_POWER
-	}
-
 	local pairs, format = pairs, string.format
 	local setmetatable, GetSpellInfo = setmetatable, Skada.GetSpellInfo or GetSpellInfo
+
+	local locales, _ = {[0] = MANA, [1] = RAGE, [3] = ENERGY, [6] = RUNIC_POWER}
 
 	local function log_gain(set, gain)
 		if gain.type == nil then
@@ -20,6 +15,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 		elseif gain.type == 2 or gain.type == 4 then
 			gain.type = 3 -- Focus & Happiness treated as Energy
 		end
+
 		if locales[gain.type] then
 			local player = Skada:get_player(set, gain.playerid, gain.playername, gain.playerflags)
 			if player then
@@ -33,11 +29,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 
 				if set == Skada.current then
 					player.power[gain.type].spells = player.power[gain.type].spells or {}
-					if not player.power[gain.type].spells[gain.spellid] then
-						player.power[gain.type].spells[gain.spellid] = {school = gain.spellschool, amount = gain.amount}
-					else
-						player.power[gain.type].spells[gain.spellid].amount = (player.power[gain.type].spells[gain.spellid].amount or 0) + gain.amount
-					end
+					player.power[gain.type].spells[gain.spellid] = (player.power[gain.type].spells[gain.spellid] or 0) + gain.amount
 				end
 			end
 		end
@@ -46,14 +38,13 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 	local gain = {}
 
 	local function SpellEnergize(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, _, spellschool, amount, powertype = ...
+		local spellid, _, _, amount, powertype = ...
 
 		gain.playerid = dstGUID
 		gain.playername = dstName
 		gain.playerflags = dstFlags
 
 		gain.spellid = spellid
-		gain.spellschool = spellschool
 		gain.amount = amount
 		gain.type = powertype
 
@@ -63,14 +54,13 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 	end
 
 	local function SpellLeech(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, _, spellschool, amount, powertype, extraamount = ...
+		local spellid, _, _, amount, powertype, extraamount = ...
 
 		gain.playerid = dstGUID
 		gain.playername = dstName
 		gain.playerflags = dstFlags
 
 		gain.spellid = spellid
-		gain.spellschool = spellschool
 		gain.amount = amount
 		gain.type = powertype
 
@@ -99,11 +89,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 
 		pmode.power = power
 		instance.power = power
-		instance.metadata = {
-			showspots = true,
-			click1 = pmode,
-			nototalclick = {pmode}
-		}
+		instance.metadata = {showspots = true, click1 = pmode, nototalclick = {pmode}}
 
 		return instance
 	end
@@ -177,16 +163,15 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 			if total > 0 and player.power[self.power].spells then
 				local maxvalue, nr = 0, 1
 
-				for spellid, spell in pairs(player.power[self.power].spells or {}) do
+				for spellid, amount in pairs(player.power[self.power].spells or {}) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
 					d.id = spellid
 					d.spellid = spellid
-					d.spellschool = spell.school
 					d.label, _, d.icon = GetSpellInfo(spellid)
 
-					d.value = spell.amount
+					d.value = amount
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(d.value),
 						mod.metadata.columns.Amount,
