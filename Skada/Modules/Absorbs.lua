@@ -223,8 +223,10 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	local shieldschools = {}
 
 	local function log_absorb(set, playerid, playername, playerflags, dstGUID, dstName, spellid, spellschool, amount)
-		local player = Skada:get_player(set, UnitGUID(playername), playername)
+		local player = Skada:get_player(set, playerid, playername, playerflags)
 		if player then
+			Skada:AddActiveTime(player, (player.role == "HEALER" and amount > 0))
+
 			-- add absorbs amount
 			player.absorbs = player.absorbs or {}
 			player.absorbs.amount = (player.absorbs.amount or 0) + amount

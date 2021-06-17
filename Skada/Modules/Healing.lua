@@ -21,6 +21,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 		if player then
 			-- get rid of overheal
 			local amount = max(0, data.amount - data.overheal)
+			Skada:AddActiveTime(player, (player.role == "HEALER" and amount > 0 and not data.ispet))
 
 			-- record the healing
 			player.healing = player.healing or {}
@@ -94,7 +95,9 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 		heal.absorbed = absorbed
 		heal.critical = critical
 
+		heal.ispet = nil
 		Skada:FixPets(heal)
+
 		log_heal(Skada.current, heal, eventtype == "SPELL_PERIODIC_HEAL")
 		log_heal(Skada.total, heal, eventtype == "SPELL_PERIODIC_HEAL")
 	end

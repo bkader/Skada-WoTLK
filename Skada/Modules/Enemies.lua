@@ -8,42 +8,6 @@ local pairs, ipairs, select = pairs, ipairs, select
 local format, min, max = string.format, math.min, math.max
 local UnitClass, GetSpellInfo = Skada.UnitClass, Skada.GetSpellInfo
 
-do
-	local function setEnemyActiveTimes(set)
-		for _, e in ipairs(set.enemies or {}) do
-			if e.last then
-				e.time = max(e.time + (e.last - e.first), 0.1)
-			end
-		end
-	end
-
-	-- returns the enemy active time
-	function Skada:EnemyActiveTime(set, enemy, active)
-		local settime = Skada:GetSetTime(set)
-		if Skada.effectivetime and not active then
-			return settime
-		end
-
-		if enemy then
-			local maxtime = ((enemy.time or 0) > 0) and enemy.time or 0
-			if set and (not set.endtime or set.stopped) and enemy.first then
-				maxtime = maxtime + (enemy.last or 0) - enemy.first
-			end
-			settime = min(maxtime, settime)
-		end
-
-		return settime
-	end
-
-	function Enemies:EndSegment(_, set)
-		if set and not Skada.db.profile.onlykeepbosses or Skada.current.gotboss then
-			if set.mobname ~= nil and time() - set.starttime > 5 then
-				setEnemyActiveTimes(set)
-			end
-		end
-	end
-end
-
 function Skada:find_enemy(set, name)
 	if set and name then
 		set._enemyidx = set._enemyidx or {}
@@ -69,18 +33,10 @@ function Skada:get_enemy(set, guid, name, flags)
 
 		if not enemy then
 			if not name then return end
-			enemy = {
-				id = guid,
-				name = name,
-				class = select(2, UnitClass(guid, flags)),
-				first = now,
-				time = 0
-			}
+			enemy = {id = guid, name = name, class = select(2, UnitClass(guid, flags))}
 			tinsert(set.enemies, enemy)
 		end
 
-		enemy.first = enemy.first or now
-		enemy.last = now
 		self.changed = true
 		return enemy
 	end
@@ -114,7 +70,6 @@ end
 function Enemies:OnEnable()
 	Skada.RegisterCallback(self, "SKADA_DATA_SETCREATED", "CreateSet")
 	Skada.RegisterCallback(self, "SKADA_DATA_CLEARSETINDEX", "ClearIndexes")
-	Skada.RegisterCallback(self, "COMBAT_PLAYER_LEAVE", "EndSegment")
 end
 
 function Enemies:OnDisable()
@@ -276,7 +231,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 					-- 10h and 25h valkyrs.
 					if IsValkyr(dmg.enemyid) then
 						if not (valkyrsTable and valkyrsTable[dmg.enemyid]) then
-							valkyrsTable = valkyrsTable or Skada:WeakTable()
+							valkyrsTable = valkyrsTable or {}
 							valkyrsTable[dmg.enemyid] = ValkyrHealthMax() - dmg.amount
 
 							-- useful damage
@@ -342,7 +297,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 	local function getDTPS(set, enemy)
 		local amount = enemy.damagetaken and enemy.damagetaken.amount or 0
-		return amount / max(1, Skada:EnemyActiveTime(set, enemy)), amount
+		return amount / max(1, Skada:GetSetTime(set)), amount
 	end
 
 	local function getEnemiesDTPS(set)
@@ -717,7 +672,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 
 	local function getDPS(set, enemy)
 		local amount = enemy.damagedone and enemy.damagedone.amount or 0
-		return amount / max(1, Skada:EnemyActiveTime(set, enemy)), amount
+		return amount / max(1, Skada:GetSetTime(set)), amount
 	end
 
 	local function getEnemiesDPS(set)
@@ -997,7 +952,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 
 	local function getHPS(set, enemy)
 		local amount = enemy.healing and enemy.healing.amount or 0
-		return amount / max(1, Skada:EnemyActiveTime(set, enemy)), amount
+		return amount / max(1, Skada:GetSetTime(set)), amount
 	end
 
 	local function getEnemiesHPS(set)

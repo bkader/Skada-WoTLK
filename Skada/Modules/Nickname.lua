@@ -142,7 +142,8 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 		Skada.RegisterCallback(self, "OnCommNicknameRequest")
 		Skada.RegisterCallback(self, "OnCommNicknameResponse")
 		Skada.RegisterCallback(self, "OnCommNicknameChange")
-		self:Hook(Skada, "FixPlayer")
+		self:Hook(Skada, "get_player")
+		self:Hook(Skada, "EndSegment")
 		self:RawHook(Skada, "FormatName")
 	end
 
@@ -181,18 +182,35 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 		return name
 	end
 
-	-- we make sure to add the player's nickname if not set.
-	-- if it's the player themselves, we use what's stored.
-	-- otherwise we requrest the nickname from the other skada user.
-	function mod:FixPlayer(_, player)
-		if Skada.db.profile.ignorenicknames or Skada:IsPet(player.id, player.flags) then
-			return
+	---------------------------------------------------------------------------
+	-- nickname request
+
+	do
+		-- we save player to whom we sent nickname request
+		-- so we only request it once.
+		local requested = {}
+
+		function mod:get_player(_, set, playerid, playername, playerflags)
+			-- nicknames ignored or the player isn't a real player?
+			if Skada.db.profile.ignorenicknames or not Skada:IsPlayer(playerid, playerflags) then
+				return
+			end
+
+			-- is it me?
+			if playerid == unitGUID and playername == unitName then
+				return
+			end
+
+			-- send request
+			if playerid and playername and not requested[playerid] and not self.db.nicknames[playerid] then
+				Skada:SendComm("WHISPER", playername, "NicknameRequest")
+				requested[playerid] = true
+			end
 		end
-		if player.id == unitGUID and player.name == unitName then
-			return
-		end
-		if player.id and player.name and not self.db.nicknames[player.id] then
-			Skada:SendComm("WHISPER", player.name, "NicknameRequest")
+
+		-- we hook this function as well in order to clear cached requests
+		function mod:EndSegment()
+			requested = {}
 		end
 	end
 

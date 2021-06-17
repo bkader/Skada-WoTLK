@@ -26,6 +26,8 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		local player = Skada:get_player(set, dmg.playerid, dmg.playername, dmg.playerflags)
 		if not player then return end
 
+		Skada:AddActiveTime(player, (player.role ~= "HEALER" and dmg.amount > 0 and not dmg.ispet))
+
 		player.damagedone = player.damagedone or {}
 		player.damagedone.amount = (player.damagedone.amount or 0) + dmg.amount
 		set.damagedone = (set.damagedone or 0) + dmg.amount
@@ -149,6 +151,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			dmg.crushing = crushing
 			dmg.missed = nil
 
+			dmg.ispet = nil
 			Skada:FixPets(dmg)
 
 			log_damage(Skada.current, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
@@ -157,7 +160,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	end
 
 	local function SwingDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellDamage(nil, nil, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, L["Auto Attack"], 1, ...)
+		SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, L["Auto Attack"], 1, ...)
 	end
 
 	local function SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
@@ -183,15 +186,16 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			dmg.crushing = nil
 			dmg.missed = misstype
 
+			dmg.ispet = nil
 			Skada:FixPets(dmg)
 
-			log_damage(Skada.current, dmg)
-			log_damage(Skada.total, dmg)
+			log_damage(Skada.current, dmg, eventtype == "SPELL_PERIODIC_MISSED")
+			log_damage(Skada.total, dmg, eventtype == "SPELL_PERIODIC_MISSED")
 		end
 	end
 
 	local function SwingMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellMissed(nil, nil, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, L["Auto Attack"], 1, ...)
+		SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, L["Auto Attack"], 1, ...)
 	end
 
 	local function getDPS(set, player)
