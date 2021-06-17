@@ -21,12 +21,29 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	local detailmod = targetmod:NewModule(L["Damage spell list"])
 
 	local UnitGUID = UnitGUID
+	local tContains = tContains
+
+	-- spells on the list above are ignored when it comes
+	-- to updating player's active time.
+	local blacklist = {
+		-- Retribution Aura (rank 1 to 7)
+		7294, 10298, 10299, 10300, 10301, 27150, 54043,
+		-- Molten Armor (rank 1 to 3)
+		30482, 43045, 43046,
+		-- Lightning Shield (rank 1 to 11)
+		324, 325, 905, 945, 8134, 10431, 10432, 25469, 25472, 49280, 49281,
+		-- Fire Shield (rank 1 to 7)
+		2947, 8316, 8317, 11770, 11771, 27269, 47983
+	}
 
 	local function log_damage(set, dmg, tick)
 		local player = Skada:get_player(set, dmg.playerid, dmg.playername, dmg.playerflags)
 		if not player then return end
 
-		Skada:AddActiveTime(player, (player.role ~= "HEALER" and dmg.amount > 0 and not dmg.petname))
+		-- update activity
+		if player.role ~= "HEALER" and dmg.amount > 0 and not dmg.petname then
+			Skada:AddActiveTime(player, (dmg.spellid and not tContains(blacklist, dmg.spellid)))
+		end
 
 		player.damage = (player.damage or 0) + dmg.amount
 		set.damage = (set.damage or 0) + dmg.amount
