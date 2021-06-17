@@ -1577,7 +1577,7 @@ do
 			end
 
 			if owner then
-				action.ispet = true -- used for active time calculation
+				action.petname = action.playername
 
 				if self.db.profile.mergepets then
 					if action.spellname then
@@ -1591,7 +1591,6 @@ do
 					action.playername = action.playername .. " (" .. owner.name .. ")"
 				end
 			else
-				action.ispet = nil
 				action = wipe(action or {})
 				-- action.playerid = action.playername -- create a single entry
 			end
