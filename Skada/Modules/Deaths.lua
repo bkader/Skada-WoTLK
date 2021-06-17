@@ -446,10 +446,10 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 	function mod:SetComplete(set)
 		for _, player in Skada:IteratePlayers(set) do
-			if player.deaths and player.deaths == 0 then
+			if player.deaths == nil then
 				player.deathlog = nil
-			elseif player.deaths and player.deathlog then
-				while tmaxn(player.deathlog) > player.deaths do
+			elseif player.deathlog then
+				while tmaxn(player.deathlog) > (player.deaths or 0) do
 					tremove(player.deathlog, 1)
 				end
 			end
