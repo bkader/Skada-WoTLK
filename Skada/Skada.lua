@@ -1343,54 +1343,81 @@ function Skada:find_player(set, playerid, playername, strict)
 	end
 end
 
--- finds a player table or creates it if not found
-function Skada:get_player(set, playerid, playername, playerflags)
-	local player = self:find_player(set, playerid, playername, true)
+do
+	local function fix_player(player)
+		if player then
+			if Skada:IsPet(player.id, player.flags) then
+				player.class = "PET"
+			elseif Skada:IsBoss(player.id) then
+				player.class = "BOSS"
+			elseif Skada:IsCreature(player.id, player.flags) then
+				player.class = "MONSTER"
+			elseif Skada:IsPlayer(player.id, player.flags, player.name) then
+				player.class = select(2, UnitClass(player.name))
+			else
+				player.class = "UNKNOWN"
+			end
 
-	if not player then
-		if not playername then
-			return
-		end
-
-		player = {id = playerid, name = playername, flags = playerflags, time = 0}
-
-		if self:IsPet(playerid, playerflags) then
-			player.class = "PET"
-		elseif self:IsBoss(playerid) then
-			player.class = "BOSS"
-		elseif self:IsCreature(playerid, playerflags) then
-			player.class = "MONSTER"
-		elseif self:IsPlayer(playerid, playerflags, playername) then
-			player.class = select(2, self.UnitClass(playerid, playerflags))
-		else
-			player.class = "UNKNOWN"
-		end
-
-		if self.validclass[player.class] then
-			player.role = self:UnitGroupRolesAssigned(playername)
-			player.spec = self:GetPlayerSpecID(playername, playerclass)
-		end
-
-		for _, mode in ipairs(modes) do
-			if mode.AddPlayerAttributes ~= nil then
-				mode:AddPlayerAttributes(player, set)
+			if Skada.validclass[player.class] then
+				player.role = Skada:UnitGroupRolesAssigned(player.name)
+				player.spec = Skada:GetPlayerSpecID(player.name, player.class)
 			end
 		end
-
-		tinsert(set.players, player)
 	end
 
-	-- not all modules provide playerflags
-	if playerflags and not (player.flags or player.flags == playerflags) then
-		player.flags = playerflags
+	-- finds a player table or creates it if not found
+	function Skada:get_player(set, playerid, playername, playerflags)
+		local player = self:find_player(set, playerid, playername, true)
+
+		if not player then
+			if not playername then
+				return
+			end
+
+			player = {id = playerid, name = playername, flags = playerflags, time = 0}
+
+			if self:IsPet(playerid, playerflags) then
+				player.class = "PET"
+			elseif self:IsBoss(playerid) then
+				player.class = "BOSS"
+			elseif self:IsCreature(playerid, playerflags) then
+				player.class = "MONSTER"
+			elseif self:IsPlayer(playerid, playerflags, playername) then
+				player.class = select(2, UnitClass(playername))
+			else
+				player.class = "UNKNOWN"
+			end
+
+			if self.validclass[player.class] then
+				player.role = self:UnitGroupRolesAssigned(playername)
+				player.spec = self:GetPlayerSpecID(playername, player.class)
+			end
+
+			for _, mode in ipairs(modes) do
+				if mode.AddPlayerAttributes ~= nil then
+					mode:AddPlayerAttributes(player, set)
+				end
+			end
+
+			if player.class == "UNKNOWN" then
+				self.After(2, function() fix_player(player) end)
+			end
+
+			tinsert(set.players, player)
+		end
+
+		-- not all modules provide playerflags
+		if playerflags and not (player.flags or player.flags == playerflags) then
+			player.flags = playerflags
+		end
+
+		-- total set has "last" always removed.
+		player.last = player.last or GetTime()
+
+		self.changed = true
+		self.callbacks:Fire("SKADA_PLAYER_GET", player)
+		return player
 	end
-
-	-- total set has "last" always removed.
-	player.last = player.last or GetTime()
-
-	self.changed = true
-	self.callbacks:Fire("SKADA_PLAYER_GET", player)
-	return player
 end
 
 -- checks if the unit is a player
