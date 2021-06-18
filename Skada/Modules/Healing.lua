@@ -98,7 +98,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 	end
 
 	local function getHPS(set, player)
-		local amount = player.heal and player.heal or 0
+		local amount = player.heal or 0
 		return amount / max(1, Skada:PlayerActiveTime(set, player)), amount
 	end
 
@@ -737,7 +737,7 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
-		if player and player.heal and player.heal_targets then
+		if player then
 			win.title = L:F("%s's healed and overhealed players", player.name)
 			local total = (player.heal or 0) + (player.overheal or 0)
 
@@ -781,7 +781,7 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
 			local maxvalue, nr = 0, 1
 
 			for _, player in Skada:IteratePlayers(set) do
-				if player.heal then
+				if (player.heal or 0) > 0 then
 					local amount = player.heal + (player.overheal or 0)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
@@ -796,7 +796,7 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(amount),
 						self.metadata.columns.Healing,
-						Skada:FormatNumber(player.overheal or 0),
+						Skada:FormatNumber(player.overheal),
 						self.metadata.columns.Overhealing,
 						format("%.1f%%", 100 * player.overheal / total),
 						self.metadata.columns.Percent

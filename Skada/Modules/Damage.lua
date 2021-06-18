@@ -873,12 +873,13 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 	local UnitClass = Skada.UnitClass
 
 	local function getDPS(set, player)
+		local amount = max(0, (player.damage or 0) - (player.overkill or 0))
 		local amount = player.damage and (player.damage - (player.overkill or 0)) or 0
 		return amount / max(1, Skada:PlayerActiveTime(set, player)), amount
 	end
 
 	local function getRaidDPS(set)
-		local amount = (set.damage or 0) - (set.overkill or 0)
+		local amount = max(0, (set.damage or 0) - (set.overkill or 0))
 		return amount / max(1, Skada:GetSetTime(set)), amount
 	end
 

@@ -99,7 +99,7 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 			local maxvalue, nr = 0, 1
 
 			for _, player in Skada:IteratePlayers(set) do
-				if player.parry then
+				if (player.parry or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 

@@ -1123,7 +1123,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 	local function CacheSpells(set)
 		spells = {}
 		for _, player in Skada:IteratePlayers(set) do
-			if player.heal and player.heal_spells then
+			if player.heal_spells then
 				for spellid, spell in pairs(player.heal_spells) do
 					if (spell.amount or 0) > 0 then
 						if not spells[spellid] then
