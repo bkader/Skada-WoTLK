@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local _, Skada = ...
 Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 	if Skada:IsDisabled("Friendly Fire") then return end
 
@@ -8,7 +8,6 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
 	local pairs, select, format = pairs, select, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-	local _
 
 	local function log_damage(set, dmg)
 		local player = Skada:get_player(set, dmg.playerid, dmg.playername, dmg.playerflags)
@@ -55,13 +54,13 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's targets"], label)
+		win.title = L:F("%s's targets", label)
 	end
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = format(L["%s's targets"], player.name)
+			win.title = L:F("%s's targets", player.name)
 			local total = player.friendfire or 0
 
 			if total > 0 and player.friendfire_targets then
@@ -95,13 +94,13 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
 	function spellmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's damage"], label)
+		win.title = L:F("%s's damage", label)
 	end
 
 	function spellmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = format(L["%s's damage"], player.name)
+			win.title = L:F("%s's damage", player.name)
 			local total = player.friendfire or 0
 
 			if total > 0 and player.friendfire_spells then

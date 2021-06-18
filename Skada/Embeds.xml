@@ -8,7 +8,6 @@
 <Script file="Libs\AceHook-3.0\AceHook-3.0.lua"/>
 <Script file="Libs\AceDB-3.0\AceDB-3.0.lua"/>
 <Script file="Libs\AceDBOptions-3.0\AceDBOptions-3.0.lua"/>
-<Script file="Libs\AceLocale-3.0\AceLocale-3.0.lua"/>
 <Include file="Libs\AceGUI-3.0\AceGUI-3.0.xml"/>
 <Include file="Libs\AceConfig-3.0\AceConfig-3.0.xml"/>
 <Include file="Libs\AceComm-3.0\AceComm-3.0.xml"/>

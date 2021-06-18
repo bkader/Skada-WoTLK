@@ -1,8 +1,6 @@
-assert(Skada, "Skada not found!")
-local Skada = Skada
+local _, Skada = ...
 
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
-
+local L = Skada.L
 local mod = Skada:NewModule(L["Scroll"])
 local bars = Skada:GetModule("BarDisplay")
 

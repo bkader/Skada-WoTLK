@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local _, Skada = ...
 Skada:AddLoadableModule("Tweaks", function(Skada, L)
 	if Skada:IsDisabled("Tweaks") then return end
 
@@ -44,7 +44,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 				if class and Skada.classcolors[class] then
 					target = "|c" .. Skada.classcolors[class].colorStr .. target .. "|r"
 				end
-				targetline = format(L["|cffffbb00Boss First Target|r: %s (%s)"], target, UnitName(boss) or UNKNOWN)
+				targetline = L:F("|cffffbb00Boss First Target|r: %s (%s)", target, UnitName(boss) or UNKNOWN)
 				break -- no need
 			end
 		end
@@ -105,7 +105,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 					if puller then
 						local link = (eventtype == "SWING_DAMAGE") and GetSpellLink(6603) or GetSpellLink(select(1, ...)) or GetSpellInfo(select(1, ...))
 						pull_timer = Skada.NewTimer(0.5, function() WhoPulled(pull_timer) end)
-						pull_timer.HitBy = format(L["|cffffff00First Hit|r: %s from %s"], link or "", puller)
+						pull_timer.HitBy = L:F("|cffffff00First Hit|r: %s from %s", link or "", puller)
 					end
 				end
 			end

@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local _, Skada = ...
 Skada:AddLoadableModule("Potions", function(Skada, L)
 	if Skada:IsDisabled("Potions") then return end
 
@@ -151,7 +151,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's used potions"], label)
+		win.title = L:F("%s's used potions", label)
 	end
 
 	local function RequestPotion(potionid)
@@ -164,7 +164,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid)
 		if player then
-			win.title = format(L["%s's used potions"], player.name)
+			win.title = L:F("%s's used potions", player.name)
 			local total = player.potion or 0
 
 			if total > 0 and player.potion_spells then
@@ -291,7 +291,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 
 	function mod:SetComplete(set)
 		if Skada.db.profile.prepotion and next(prepotion or {}) ~= nil then
-			Skada:Print(format(L["pre-potion: %s"], tconcat(prepotion, ", ")))
+			Skada:Print(L:F("pre-potion: %s", tconcat(prepotion, ", ")))
 		end
 	end
 end)

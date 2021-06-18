@@ -1,7 +1,6 @@
-assert(Skada, "Skada not found!")
+local _, Skada = ...
+local L = Skada.L
 
-local Skada = Skada
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 local name = L["Data text"]
 local mod = Skada:NewModule(name)
 mod.name = name
@@ -91,7 +90,7 @@ local function tooltipHandler(win, tooltip)
 				local value = formatValue(win, data)
 
 				if win.metadata.showspots and Skada.db.profile.showranks then
-					label = format("%2u. %s", n, label)
+					label = format("%s. %s", n, label)
 				end
 
 				tooltip:AddDoubleLine(label or "", value or "", color.r, color.g, color.b, color.r, color.g, color.b)

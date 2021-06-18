@@ -1,8 +1,7 @@
-assert(Skada, "Skada not found!")
+local _, Skada = ...
 
-local Skada = Skada
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 local mod = Skada:NewModule("InlineDisplay")
+local L = Skada.L
 
 mod.name = L["Inline bar display"]
 mod.description = L["Inline display is a horizontal window style."]
@@ -16,10 +15,9 @@ local ttactive = false
 local libwindow = LibStub("LibWindow-1.1")
 local media = LibStub("LibSharedMedia-3.0")
 
-local _pairs, _tostring, _type = pairs, tostring, type
-local _rep, _format, _match = string.rep, string.format, string.match
+local pairs, tostring, type = pairs, tostring, type
+local strrep, format, _match = string.rep, string.format, string.match
 local tinsert, tremove, tsort = table.insert, table.remove, table.sort
-local _min, _max = math.min, math.max
 
 local classcolors = {
 	DEATHKNIGHT = "|cffc41f3b%s|r",
@@ -38,25 +36,25 @@ local function serial(val, name, skipnewlines, depth)
 	skipnewlines = skipnewlines or false
 	depth = depth or 0
 
-	local tmp = _rep("·", depth)
+	local tmp = strrep("·", depth)
 	if name then
 		tmp = tmp .. name .. "="
 	end
 
-	if _type(val) == "table" then
+	if type(val) == "table" then
 		tmp = tmp .. "{" .. (not skipnewlines and "\n" or "")
-		for k, v in _pairs(val) do
+		for k, v in pairs(val) do
 			tmp = tmp .. serial(v, k, skipnewlines, depth + 1) .. "," .. (not skipnewlines and "\n" or "")
 		end
-		tmp = tmp .. _rep(" ", depth) .. "}"
-	elseif _type(val) == "number" then
-		tmp = tmp .. _tostring(val)
-	elseif _type(val) == "string" then
-		tmp = tmp .. _format("%q", val)
-	elseif _type(val) == "boolean" then
+		tmp = tmp .. strrep(" ", depth) .. "}"
+	elseif type(val) == "number" then
+		tmp = tmp .. tostring(val)
+	elseif type(val) == "string" then
+		tmp = tmp .. format("%q", val)
+	elseif type(val) == "boolean" then
 		tmp = tmp .. (val and "true" or "false")
 	else
-		tmp = tmp .. '"[inserializeable datatype:' .. _type(val) .. ']"'
+		tmp = tmp .. '"[inserializeable datatype:' .. type(val) .. ']"'
 	end
 	return tmp
 end
@@ -328,7 +326,7 @@ function mod:UpdateBar(bar, bardata, db)
 	local label = bardata.text or bardata.label
 	if db.isusingclasscolors then
 		if bardata.class then
-			label = _format(classcolors[bardata.class] or "|cffffffff%s|r", bardata.text or bardata.label)
+			label = format(classcolors[bardata.class] or "|cffffffff%s|r", bardata.text or bardata.label)
 		end
 	else
 		label = bardata.text or bardata.label
@@ -378,7 +376,7 @@ function mod:Update(win)
 		i = i - 1
 	end
 
-	for k, bardata in _pairs(wd) do
+	for k, bardata in pairs(wd) do
 		if bardata.id then
 			local _bar = mod:GetBar(win)
 			Skada.callbacks:Fire("BarUpdate", win, bardata, _bar)
@@ -399,7 +397,7 @@ function mod:Update(win)
 	local yoffset = (win.db.height - win.db.barfontsize) / 2
 	local left = win.frame.barstartx + 40
 
-	for key, bar in _pairs(mybars) do
+	for key, bar in pairs(mybars) do
 		bar.bg:SetFrameLevel(9)
 		bar.bg:SetHeight(win.db.height)
 		bar.bg:SetPoint("BOTTOMLEFT", win.frame, "BOTTOMLEFT", left, 0)
@@ -480,7 +478,7 @@ function mod:ApplySettings(win)
 	f.fstitle:SetTextColor(self:GetFontColor(p))
 	f.fstitle:SetFont(self:GetFont(p))
 
-	for k, bar in _pairs(mybars) do
+	for k, bar in pairs(mybars) do
 		bar.label:SetFont(self:GetFont(p))
 		bar.label:SetTextColor(self:GetFontColor(p))
 		bar.bg:EnableMouse(not p.clickthrough)
@@ -495,7 +493,7 @@ function mod:ApplySettings(win)
 		f:SetHeight(p.height)
 		f.fstitle:SetTextColor(255, 255, 255, 1)
 		f.fstitle:SetFont(ElvUI[1]["media"].normFont, p.barfontsize, nil)
-		for k, bar in _pairs(mybars) do
+		for k, bar in pairs(mybars) do
 			bar.label:SetFont(ElvUI[1]["media"].normFont, p.barfontsize, nil)
 			bar.label:SetTextColor(255, 255, 255, 1)
 		end
@@ -511,7 +509,7 @@ function mod:ApplySettings(win)
 			backdropA = 0.8
 		end
 		local resolution = ({GetScreenResolutions()})[GetCurrentResolution()]
-		local mult = 768 / _match(resolution, "%d+x(%d+)") / (_max(0.64, _min(1.15, 768 / GetScreenHeight() or UIParent:GetScale())))
+		local mult = 768 / _match(resolution, "%d+x(%d+)") / (max(0.64, min(1.15, 768 / GetScreenHeight() or UIParent:GetScale())))
 
 		fbackdrop.bgFile = ElvUI[1]["media"].blankTex
 		fbackdrop.edgeFile = ElvUI[1]["media"].blankTex

@@ -1,7 +1,6 @@
-assert(Skada, "Skada not found!")
+local _, Skada = ...
 
-local Skada = Skada
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
+local L = Skada.L
 local AceGUI = LibStub("AceGUI-3.0")
 
 local tinsert, tsort = table.insert, table.sort

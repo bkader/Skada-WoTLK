@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local _, Skada = ...
 Skada:AddLoadableModule("Player Score", function(Skada, L)
 	-- Because we adopted the method of not storing everything
 	-- and rather use what's available, this module won't be storing
@@ -82,7 +82,7 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 			return
 		end
 
-		tooltip:AddLine(format(L["%s's Score"], player.name))
+		tooltip:AddLine(L:F("%s's Score", player.name))
 
 		local damagedone = player.damage or 0
 		tooltip:AddDoubleLine(L["Damage"], Skada:FormatNumber(damagedone), 1, 1, 1, 1, 1, 1)

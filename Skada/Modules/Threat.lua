@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local _, Skada = ...
 Skada:AddLoadableModule("Threat", function(Skada, L)
 	if Skada:IsDisabled("Threat") then return end
 

@@ -8,8 +8,7 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 	local mod_comparison = mod:NewModule(L["Improvement comparison"])
 
 	local pairs, ipairs, select = pairs, ipairs, select
-	local format, tostring = string.format, tostring
-	local date = date
+	local date, tostring = date, tostring
 	local playerid = UnitGUID("player")
 
 	local modes = {
@@ -155,11 +154,11 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 
 	function mod_modes:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = format(L["%s's overall data"], label)
+		win.title = L:F("%s's overall data", label)
 	end
 
 	function mod_modes:Update(win, set)
-		win.title = format(L["%s's overall data"], win.targetname or UNKNOWN)
+		win.title = L:F("%s's overall data", win.targetname or UNKNOWN)
 		local boss = find_boss_data(win.targetname)
 
 		if boss then
@@ -238,7 +237,7 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 	end
 
 	function mod:BossDefeated(event, set)
-		if event == "COMBAT_BOSS_DEFEATED" and set then
+		if event == "COMBAT_BOSS_DEFEATED" and set and set.success then
 			-- we only record raid bosses, nothing else.
 			local inInstance, instanceType = IsInInstance()
 			if not inInstance or instanceType ~= "raid" then return end
@@ -307,7 +306,8 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 
 	function mod:Reset()
 		Skada:Wipe()
-		SkadaImprovementDB = {}
+		SkadaImprovementDB = wipe(SkadaImprovementDB or {})
+		self.db = nil
 		self:OnInitialize()
 		collectgarbage("collect")
 		for _, win in ipairs(Skada:GetWindows()) do

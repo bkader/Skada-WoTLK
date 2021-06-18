@@ -1,10 +1,9 @@
-assert(Skada, "Skada not found!")
+local _, Skada = ...
 
 -- cache frequently used globals
 local pairs, format, select, tostring = pairs, string.format, select, tostring
 local min, max = math.min, math.max
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-local _
 
 -- list of the auras that are ignored!
 local blacklist = {
@@ -403,7 +402,7 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 
 	function spellmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's buffs"], label)
+		win.title = L:F("%s's buffs", label)
 	end
 
 	function spellmod:Update(win, set)
@@ -510,14 +509,14 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format(L["%s's <%s> targets"], win.playername or UNKNOWN, label)
+		win.title = L:F("%s's <%s> targets", win.playername or UNKNOWN, label)
 	end
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = format(L["%s's <%s> targets"], player.name, win.spellname or UNKNOWN)
+			win.title = L:F("%s's <%s> targets", player.name, win.spellname or UNKNOWN)
 
 			local total = 0
 			if player.auras and player.auras[win.spellid] then
@@ -551,7 +550,7 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 
 	function spellmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's debuffs"], label)
+		win.title = L:F("%s's debuffs", label)
 	end
 
 	function spellmod:Update(win, set)

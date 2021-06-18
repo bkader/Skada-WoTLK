@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local _, Skada = ...
 Skada:AddLoadableModule("Activity", function(Skada, L)
 	if Skada:IsDisabled("Activity") then return end
 

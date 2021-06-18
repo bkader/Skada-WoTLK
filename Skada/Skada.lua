@@ -1,10 +1,12 @@
-local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceEvent-3.0", "AceHook-3.0", "AceComm-3.0", "LibCompat-1.0")
+local _, addon = ...
+local Skada = LibStub("AceAddon-3.0"):NewAddon(addon, "Skada", "AceEvent-3.0", "AceHook-3.0", "AceComm-3.0", "LibCompat-1.0")
 _G.Skada = Skada
+
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
 Skada.version = GetAddOnMetadata("Skada", "Version")
 Skada.website = GetAddOnMetadata("Skada", "X-Website")
 
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
+local L = Skada.L
 local ACD = LibStub("AceConfigDialog-3.0")
 local DBI = LibStub("LibDBIcon-1.0", true)
 local LBB = LibStub("LibBabble-Boss-3.0"):GetUnstrictLookupTable()
@@ -1559,7 +1561,6 @@ do
 	local GetPetOwnerFromTooltip
 	do
 		local pettooltip = CreateFrame("GameTooltip", "SkadaPetTooltip", nil, "GameTooltipTemplate")
-		local GAME_LOCALE = GetLocale()
 		local GetNumDeclensionSets, DeclineName = GetNumDeclensionSets, DeclineName
 
 		-- attempts to find the player guid on Russian clients.
@@ -1587,7 +1588,7 @@ do
 					if text and text ~= "" then
 						for _, p in ipairs(Skada.current.players) do
 							local playername = p.name:gsub("%-.*", "")
-							if (GAME_LOCALE == "ruRU" and FindNameDeclension(text, playername)) or text:find(playername) then
+							if (Skada.locale == "ruRU" and FindNameDeclension(text, playername)) or text:find(playername) then
 								return p.id, p.name
 							end
 						end
@@ -1987,7 +1988,7 @@ do
 
 		local title = (window and window.title) or report_mode.title or report_mode:GetName()
 		local label = (report_mode_name == L["Improvement"]) and UnitName("player") or Skada:GetSetLabel(report_set)
-		sendchat(format(L["Skada: %s for %s:"], title, label), channel, chantype)
+		sendchat(L:F("Skada: %s for %s:", title, label), channel, chantype)
 
 		local nr, maxlines = 1, maxlines or 10
 		for _, data in ipairs(report_table.dataset) do
@@ -2125,7 +2126,7 @@ do
 			end
 
 			if (version > ver) then
-				self:Print(format(L["Skada is out of date. You can download the newest version from |cffffbb00%s|r"], self.website))
+				self:Print(L:F("Skada is out of date. You can download the newest version from |cffffbb00%s|r", self.website))
 			elseif (version < ver) then
 				self:SendComm("WHISPER", sender, "VersionCheck", self.version)
 			end
@@ -3017,6 +3018,12 @@ function Skada:OnInitialize()
 	self.db.RegisterCallback(self, "OnProfileReset", "ReloadSettings")
 	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes")
 
+	self:ReloadSettings()
+	self.After(2, function() self:ApplySettings() end)
+end
+
+function Skada:OnEnable()
+
 	-- spell school colors
 	self.schoolcolors = {
 		[1] = {a = 1.00, r = 1.00, g = 1.00, b = 0.00}, -- Physical
@@ -3100,11 +3107,7 @@ function Skada:OnInitialize()
 		LEADER = {0, 0.296875, 0.015625, 0.3125},
 		NONE = ""
 	}
-end
-
-function Skada:OnEnable()
 	self:RegisterComm("Skada")
-	self:ReloadSettings()
 
 	self:RegisterEvent("PARTY_MEMBERS_CHANGED")
 	self:RegisterEvent("RAID_ROSTER_UPDATE")
@@ -3121,7 +3124,6 @@ function Skada:OnEnable()
 	end
 
 	self.NewTicker(2, function() self:CleanGarbage() end)
-	self.After(2, function() self:ApplySettings() end)
 	self.After(3, function() self:MemoryCheck() end)
 
 	if _G.BigWigs then

@@ -1,5 +1,6 @@
-local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "zhTW", false)
-if not L then return end
+local _, Skada = ...
+if Skada.locale ~= "zhTW" then return end
+local L = Skada.L
 
 L["A damage meter."] = "一個傷害統計。"
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "記憶體使用過高，你或許想要重置Skada，並且啟用一個自動重設的選項。"

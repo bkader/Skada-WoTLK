@@ -1,11 +1,10 @@
-assert(Skada, "Skada not found!")
+local _, Skada = ...
 
 -- cache frequently used globals
 local pairs, ipairs, select = pairs, ipairs, select
 local format, max = string.format, math.max
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local UnitGUID, UnitClass = UnitGUID, Skada.UnitClass
-local _
 
 -- ============== --
 -- Absorbs module --
@@ -557,13 +556,13 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's absorb spells"], label)
+		win.title = L:F("%s's absorb spells", label)
 	end
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = format(L["%s's absorb spells"], player.name)
+			win.title = L:F("%s's absorb spells", player.name)
 			local total = player.absorb or 0
 
 			if total > 0 and player.absorb_spells then
@@ -599,13 +598,13 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's absorbed players"], label)
+		win.title = L:F("%s's absorbed players", label)
 	end
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = format(L["%s's absorbed players"], player.name)
+			win.title = L:F("%s's absorbed players", player.name)
 			local total = player.absorb or 0
 
 			if total > 0 and player.absorb_targets then
@@ -793,13 +792,13 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's absorb and healing spells"], label)
+		win.title = L:F("%s's absorb and healing spells", label)
 	end
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = format(L["%s's absorb and healing spells"], player.name)
+			win.title = L:F("%s's absorb and healing spells", player.name)
 
 			local total = (player.heal or 0) + (player.absorb or 0)
 
@@ -867,13 +866,13 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's absorbed and healed players"], label)
+		win.title = L:F("%s's absorbed and healed players", label)
 	end
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = format(L["%s's absorbed and healed players"], player.name)
+			win.title = L:F("%s's absorbed and healed players", player.name)
 
 			local total, targets = 0, {}
 
@@ -1226,7 +1225,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 
 	function spellmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format(L["%s's sources"], label)
+		win.title = L:F("%s's sources", label)
 	end
 
 	function spellmod:Update(win, set)
@@ -1235,7 +1234,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 			CacheSpells(set)
 			local spell = spells[win.spellid]
 			if spell then
-				win.title = format(L["%s's sources"], win.spellname or UNKNOWN)
+				win.title = L:F("%s's sources", win.spellname or UNKNOWN)
 				local maxvalue, nr = 0, 1
 
 				for playername, player in pairs(spell.sources) do

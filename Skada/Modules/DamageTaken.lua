@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local _, Skada = ...
 
 -- cache frequently used globals
 local pairs, ipairs, select = pairs, ipairs, select
@@ -268,14 +268,14 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["Damage taken by %s"], label)
+		win.title = L:F("Damage taken by %s", label)
 	end
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid)
 
 		if player then
-			win.title = format(L["Damage taken by %s"], player.name or UNKNOWN)
+			win.title = L:F("Damage taken by %s", player.name or UNKNOWN)
 			local total = select(2, getDTPS(set, player))
 
 			if total > 0 and player.damagetaken_spells then
@@ -312,14 +312,14 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 
 	function sourcemod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's damage sources"], label)
+		win.title = L:F("%s's damage sources", label)
 	end
 
 	function sourcemod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid)
 
 		if player then
-			win.title = format(L["%s's damage sources"], player.name)
+			win.title = L:F("%s's damage sources", player.name)
 			local total = select(2, getDTPS(set, player))
 
 			if total > 0 and player.damagetaken_sources then
@@ -375,14 +375,14 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 
 	function spellmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format(L["%s's damage on %s"], label, win.playername or UNKNOWN)
+		win.title = L:F("%s's damage on %s", label, win.playername or UNKNOWN)
 	end
 
 	function spellmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid)
 
 		if player then
-			win.title = format(L["%s's damage on %s"], win.spellname or UNKNOWN, player.name)
+			win.title = L:F("%s's damage on %s", win.spellname or UNKNOWN, player.name)
 
 			local spell = player.damagetaken_spells and player.damagetaken_spells[win.spellname]
 
@@ -418,14 +418,14 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 
 	function detailmod:Enter(win, id, label)
 		win.targetname = label
-		win.title = format(L["%s's damage on %s"], label, win.playername or UNKNOWN)
+		win.title = L:F("%s's damage on %s", label, win.playername or UNKNOWN)
 	end
 
 	function detailmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid)
 
 		if player then
-			win.title = format(L["%s's damage on %s"], win.targetname or UNKNOWN, player.name)
+			win.title = L:F("%s's damage on %s", win.targetname or UNKNOWN, player.name)
 
 			local total = player.damagetaken_sources and player.damagetaken_sources[win.targetname] or 0
 
@@ -655,11 +655,11 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format(L["%s's targets"], label)
+		win.title = L:F("%s's targets", label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's targets"], win.spellname or UNKNOWN)
+		win.title = L:F("%s's targets", win.spellname or UNKNOWN)
 		if win.selectedset ~= "total" and win.spellname and cached[win.spellname] then
 			local total = max(1, cached[win.spellname].amount or 0)
 			local maxvalue, nr = 0, 1
@@ -793,13 +793,13 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's damage breakdown"], label)
+		win.title = L:F("%s's damage breakdown", label)
 	end
 
 	function playermod:Update(win, set)
 		if temp[win.playerid] then
 			local player = temp[win.playerid]
-			win.title = format(L["%s's damage breakdown"], player.name)
+			win.title = L:F("%s's damage breakdown", player.name)
 
 			local maxvalue, nr = 0, 1
 
@@ -953,14 +953,14 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 
 	function spellmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format(L["%s's <%s> mitigated damage"], win.playername or UNKNOWN, label)
+		win.title = L:F("%s's <%s> mitigated damage", win.playername or UNKNOWN, label)
 	end
 
 	function spellmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid)
 
 		if player then
-			win.title = format(L["%s's <%s> mitigated damage"], player.name, win.spellname or UNKNOWN)
+			win.title = L:F("%s's <%s> mitigated damage", player.name, win.spellname or UNKNOWN)
 
 			local spell = player.damagetaken_spells and player.damagetaken_spells[win.spellname]
 
@@ -988,14 +988,14 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's mitigated damage"], label)
+		win.title = L:F("%s's mitigated damage", label)
 	end
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = format(L["%s's mitigated damage"], player.name)
+			win.title = L:F("%s's mitigated damage", player.name)
 			local ptotal = select(2, getMIT(player))
 
 			if ptotal > 0 and player.damagetaken_spells then

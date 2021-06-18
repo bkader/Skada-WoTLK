@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local _, Skada = ...
 Skada:AddLoadableModule("Deaths", function(Skada, L)
 	if Skada:IsDisabled("Deaths") then return end
 
@@ -16,7 +16,6 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetspellLink = Skada.GetSpellLink or GetSpellLink
 	local date = date
-	local _
 
 	local function log_deathlog(set, data, ts)
 		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
@@ -181,7 +180,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 	function deathlogmod:Enter(win, id, label)
 		self.index = id
-		win.title = format(L["%s's death log"], win.playername or UNKNOWN)
+		win.title = L:F("%s's death log", win.playername or UNKNOWN)
 	end
 
 	do
@@ -195,7 +194,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		function deathlogmod:Update(win, set)
 			local player = Skada:find_player(set, win.playerid, win.playername)
 			if player and self.index then
-				win.title = format(L["%s's death log"], win.playername or UNKNOWN)
+				win.title = L:F("%s's death log", win.playername or UNKNOWN)
 
 				local deathlog
 				if player.deathlog and player.deathlog[self.index] then
@@ -213,7 +212,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 				pre.id = nr
 				pre.time = deathlog.time
-				pre.label = formatdate(deathlog.time) .. ": " .. format(L["%s dies"], player.name)
+				pre.label = formatdate(deathlog.time) .. ": " .. L:F("%s dies", player.name)
 				pre.icon = "Interface\\Icons\\Ability_Rogue_FeignDeath"
 				pre.value = 0
 				pre.valuetext = ""
@@ -296,14 +295,14 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's deaths"], label)
+		win.title = L:F("%s's deaths", label)
 	end
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid)
 
 		if player then
-			win.title = format(L["%s's deaths"], player.name)
+			win.title = L:F("%s's deaths", player.name)
 
 			if (player.death or 0) > 0 and player.deathlog then
 				local maxvalue, nr = 0, 1

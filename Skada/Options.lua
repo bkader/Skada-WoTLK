@@ -1,8 +1,5 @@
-assert(Skada, "Skada not found!")
-
-local Skada = Skada
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
-local fmt = string.format
+local _, Skada = ...
+local L = Skada.L
 
 Skada.resetoptions = {[1] = NO, [2] = YES, [3] = L["Ask"]}
 
@@ -75,7 +72,7 @@ Skada.windowdefaults = {
 	snapto = false,
 	sticky = true,
 	sticked = {},
-	smoothing = false,
+	smoothing = true,
 	-- inline bar display
 	isonnewline = false,
 	isusingclasscolors = true,
@@ -574,9 +571,9 @@ Skada.options = {
 					name = L["Memory Check"],
 					desc = function()
 						if Skada.db.profile.setstokeep == 0 then
-							return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], 30)
+							return L:F("Checks memory usage and warns you if it is greater than or equal to %dmb.", 30)
 						end
-						return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], 30 + (Skada.db.profile.setstokeep * 1.25))
+						return L:F("Checks memory usage and warns you if it is greater than or equal to %dmb.", 30 + (Skada.db.profile.setstokeep * 1.25))
 					end,
 					order = 97
 				},

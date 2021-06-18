@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local _, Skada = ...
 Skada:AddLoadableModule("Dispels", function(Skada, L)
 	if Skada:IsDisabled("Dispels") then return end
 
@@ -10,9 +10,8 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 	-- cache frequently used globals
 	local pairs, select, format = pairs, select, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-	local _
 
-	local function log_dispels(set, data)
+	local function log_dispel(set, data)
 		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
 		if player then
 			-- increment player's and set's dispels count
@@ -56,20 +55,20 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 			data.spellid = spellid
 			data.extraspellid = extraspellid or 6603
 
-			log_dispels(Skada.current, data)
-			log_dispels(Skada.total, data)
+			log_dispel(Skada.current, data)
+			log_dispel(Skada.total, data)
 		end
 	end
 
 	function spellmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's dispelled spells"], label)
+		win.title = L:F("%s's dispelled spells", label)
 	end
 
 	function spellmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = format(L["%s's dispelled spells"], player.name)
+			win.title = L:F("%s's dispelled spells", player.name)
 			local total = player.dispel or 0
 
 			if total > 0 and player.dispel_dspells then
@@ -104,13 +103,13 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's dispelled targets"], label)
+		win.title = L:F("%s's dispelled targets", label)
 	end
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = format(L["%s's dispelled targets"], player.name)
+			win.title = L:F("%s's dispelled targets", player.name)
 			local total = player.dispel or 0
 
 			if total > 0 and player.dispel_targets then
@@ -145,13 +144,13 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's dispel spells"], label)
+		win.title = L:F("%s's dispel spells", label)
 	end
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = format(L["%s's dispel spells"], player.name)
+			win.title = L:F("%s's dispel spells", player.name)
 			local total = player.dispel or 0
 
 			if total > 0 and player.dispel_spells then
@@ -192,7 +191,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 			local maxvalue, nr = 0, 1
 
 			for _, player in Skada:IteratePlayers(set) do
-				if (player.dispel or 0) then
+				if (player.dispel or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 

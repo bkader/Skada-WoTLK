@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local _, Skada = ...
 
 local LibFail = LibStub("LibFail-1.0", true)
 if not LibFail then return end
@@ -12,7 +12,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 
 	local pairs, ipairs, format = pairs, ipairs, string.format
 	local GetSpellInfo, UnitGUID = Skada.GetSpellInfo or GetSpellInfo, UnitGUID
-	local failevents, tankevents, _ = LibFail:GetSupportedEvents()
+	local failevents, tankevents = LibFail:GetSupportedEvents()
 
 	local function log_fail(set, playerid, playername, spellid)
 		if set then
@@ -44,11 +44,11 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 
 	function spellmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format(L["%s's fails"], label)
+		win.title = L:F("%s's fails", label)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's fails"], win.spellname or UNKNOWN)
+		win.title = L:F("%s's fails", win.spellname or UNKNOWN)
 		if (set.fail or 0) > 0 then
 			local total, players = 0, {}
 
@@ -99,13 +99,13 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's fails"], label)
+		win.title = L:F("%s's fails", label)
 	end
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = format(L["%s's fails"], player.name)
+			win.title = L:F("%s's fails", player.name)
 			local total = player.fail or 0
 
 			if total > 0 and player.fail_spells then
