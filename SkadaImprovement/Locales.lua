@@ -4,11 +4,11 @@ if not Skada then return end
 local L = Skada.L
 
 -- default to enUS/enGB
-L["Improvement"] = true
-L["Improvement modes"] = true
-L["Improvement comparison"] = true
-L["Do you want to reset your improvement data?"] = true
-L["%s's overall data"] = true
+L["Improvement"] = "Improvement"
+L["Improvement modes"] = "Improvement modes"
+L["Improvement comparison"] = "Improvement comparison"
+L["Do you want to reset your improvement data?"] = "Do you want to reset your improvement data?"
+L["%s's overall data"] = "%s's overall data"
 
 -- deDE
 if Skada.locale == "deDE" then

@@ -664,7 +664,6 @@ L["Overkill target list"] = true
 L["%s's overkill spells"] = true
 L["%s's overkill targets"] = true
 -- tweaks module lines --
-L["Improvement"] = true
 L["Tweaks"] = true
 L["First hit"] = true
 L["|cffffff00First Hit|r: %s from %s"] = true

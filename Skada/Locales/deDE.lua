@@ -648,7 +648,6 @@ L["Overkill target list"] = "Overkill-Zielliste"
 L["%s's overkill spells"] = "Overkill-Zauber - %s"
 L["%s's overkill targets"] = "Overkill-Ziele - %s"
 -- tweaks module lines --
-L["Improvement"] = "Verbesserung"
 L["Tweaks"] = "Tweaks"
 L["First hit"] = "Erster Treffer"
 L["|cffffff00First Hit|r: %s from %s"] = "|cffffff00Erster Treffer|r: %s von %s"

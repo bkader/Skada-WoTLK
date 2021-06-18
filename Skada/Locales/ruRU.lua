@@ -650,7 +650,6 @@ L["Overkill target list"] = "Цели избыточного урона"
 L["%s's overkill spells"] = "Заклинания избыточного урона - %s"
 L["%s's overkill targets"] = "Цели избыточного урона - %s"
 -- tweaks module lines --
-L["Improvement"] = "Улучшение"
 L["Tweaks"] = "Настройки"
 L["First hit"] = "Первый удар"
 L["|cffffff00First Hit|r: %s from %s"] = "|cffffff00Первый удар|r: %s от %s"

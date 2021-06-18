@@ -650,7 +650,6 @@ L["Overkill target list"] = "과도한 피해 대상"
 L["%s's overkill spells"] = "%s의 과도한 피해 주문"
 L["%s's overkill targets"] = "%s의 과도한 피해 대상"
 -- tweaks module lines --
--- L["Improvement"] = ""
 L["Tweaks"] = "개선"
 L["First hit"] = "첫 번째 히트"
 L["|cffffff00First Hit|r: %s from %s"] = "|cffffff00첫 번째 히트|r: %2$s의 %1$s"

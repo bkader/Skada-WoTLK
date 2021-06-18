@@ -650,7 +650,6 @@ L["Overkill target list"] = "过度杀伤目标列表"
 L["%s's overkill spells"] = "%s 过度杀伤法术"
 L["%s's overkill targets"] = "%s 过度杀伤目标"
 -- tweaks module lines --
-L["Improvement"] = "提升"
 L["Tweaks"] = "调整"
 L["First hit"] = "第一击"
 L["|cffffff00First Hit|r: %s from %s"] = "|cffffff00第一击|r : 从%2$s%1$s"
