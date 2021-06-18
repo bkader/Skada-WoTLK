@@ -1,4 +1,4 @@
-local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceEvent-3.0", "AceHook-3.0", "AceConsole-3.0", "AceComm-3.0", "LibCompat-1.0")
+local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceEvent-3.0", "AceHook-3.0", "AceComm-3.0", "LibCompat-1.0")
 _G.Skada = Skada
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
 Skada.version = GetAddOnMetadata("Skada", "Version")
@@ -973,8 +973,11 @@ function Skada:SetActive(enable)
 	self:UpdateDisplay(true)
 end
 
-function Skada:Debug(...)
-	if self.db.profile.debug then
+-------------------------------------------------------------------------------
+-- print and debug
+
+do
+	local function formatMsg(...)
 		local msg = ""
 		for i = 1, select("#", ...) do
 			local v = tostring(select(i, ...))
@@ -983,8 +986,17 @@ function Skada:Debug(...)
 			end
 			msg = msg .. v
 		end
+		return msg
+	end
 
-		print("|cFF33FF99Skada Debug|r: " .. msg)
+	function Skada:Print(...)
+		print("|cff33ff99Skada|r: " .. formatMsg(...))
+	end
+
+	function Skada:Debug(...)
+		if self.db.profile.debug then
+			print("|cff33ff99Skada Debug|r: " .. formatMsg(...))
+		end
 	end
 end
 
@@ -1858,28 +1870,28 @@ end
 -------------------------------------------------------------------------------
 -- slash commands
 
-function Skada:Command(param)
-	if param == "pets" then
-		self:PetDebug()
-	elseif param == "reset" then
-		self:Reset()
-	elseif param == "newsegment" then
-		self:NewSegment()
-	elseif param == "toggle" then
-		self:ToggleWindow()
-	elseif param == "debug" then
-		self.db.profile.debug = not self.db.profile.debug
-		self:Print("Debug mode " .. (self.db.profile.debug and ("|cFF00FF00" .. L["ENABLED"] .. "|r") or ("|cFFFF0000" .. L["DISABLED"] .. "|r")))
-	elseif param == "config" then
-		self:OpenOptions()
-	elseif param == "clear" or param == "clean" then
-		self:CleanGarbage(true)
-	elseif param == "website" or param == "github" then
-		self:Print(format("|cffffbb00%s|r", self.website))
-	elseif param:sub(1, 6) == "report" then
-		param = param:sub(7)
+local function SlashCommandHandler(cmd)
+	if cmd == "pets" then
+		Skada:PetDebug()
+	elseif cmd == "reset" then
+		Skada:Reset()
+	elseif cmd == "newsegment" then
+		Skada:NewSegment()
+	elseif cmd == "toggle" then
+		Skada:ToggleWindow()
+	elseif cmd == "debug" then
+		Skada.db.profile.debug = not Skada.db.profile.debug
+		Skada:Print("Debug mode " .. (Skada.db.profile.debug and ("|cFF00FF00" .. L["ENABLED"] .. "|r") or ("|cFFFF0000" .. L["DISABLED"] .. "|r")))
+	elseif cmd == "config" then
+		Skada:OpenOptions()
+	elseif cmd == "clear" or cmd == "clean" then
+		Skada:CleanGarbage(true)
+	elseif cmd == "website" or cmd == "github" then
+		Skada:Print(format("|cffffbb00%s|r", Skada.website))
+	elseif cmd:sub(1, 6) == "report" then
+		cmd = cmd:sub(7)
 
-		local w1, w2, w3 = self:GetArgs(param, 3)
+		local w1, w2, w3 = strsplit(" ", cmd, 3)
 		if w3 == nil and tonumber(w2) ~= nil then
 			w3 = w2
 			w2 = nil
@@ -1891,22 +1903,22 @@ function Skada:Command(param)
 		w1, w2, w3 = nil, nil, nil
 
 		-- Sanity checks.
-		if chan and (chan == "say" or chan == "guild" or chan == "raid" or chan == "party" or chan == "officer") and (report_mode_name and self:find_mode(report_mode_name)) then
-			self:Report(chan, "preset", report_mode_name, "current", num)
+		if chan and (chan == "say" or chan == "guild" or chan == "raid" or chan == "party" or chan == "officer") and (report_mode_name and Skada:find_mode(report_mode_name)) then
+			Skada:Report(chan, "preset", report_mode_name, "current", num)
 		else
-			self:Print("Usage:")
-			self:Print(format("%-20s", "/skada report [raid|guild|party|officer|say] [mode] [max lines]"))
+			Skada:Print("Usage:")
+			Skada:Print(format("%-20s", "/skada report [raid|guild|party|officer|say] [mode] [max lines]"))
 		end
 	else
-		self:Print("Usage:")
-		self:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33report|r [raid|guild|party|officer|say] [mode] [max lines]"))
-		self:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33reset|r"))
-		self:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33toggle|r"))
-		self:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33newsegment|r"))
-		self:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33config|r"))
-		self:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33clean|r"))
-		self:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33website|r"))
-		self:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33debug|r"))
+		Skada:Print("Usage:")
+		Skada:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33report|r [raid|guild|party|officer|say] [mode] [max lines]"))
+		Skada:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33reset|r"))
+		Skada:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33toggle|r"))
+		Skada:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33newsegment|r"))
+		Skada:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33config|r"))
+		Skada:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33clean|r"))
+		Skada:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33website|r"))
+		Skada:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33debug|r"))
 	end
 end
 
@@ -2995,7 +3007,10 @@ function Skada:OnInitialize()
 
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("Skada", self.options)
 	self.optionsFrame = ACD:AddToBlizOptions("Skada", "Skada")
-	self:RegisterChatCommand("skada", "Command")
+
+	-- Slash Command Handler
+	SLASH_SKADA1 = "/skada"
+	SlashCmdList.SKADA = SlashCommandHandler
 
 	self.db.RegisterCallback(self, "OnProfileChanged", "ReloadSettings")
 	self.db.RegisterCallback(self, "OnProfileCopied", "ReloadSettings")
