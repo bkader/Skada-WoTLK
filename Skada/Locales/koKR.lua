@@ -163,6 +163,7 @@ L["Scale"] = "크기 비율"
 L["Sets the scale of the window."] = "창의 크기 비율을 설정합니다."
 L["Strata"] = "우선순위"
 L["This determines what other frames will be in front of the frame."] = "프레임 앞에 어떤 다른 프레임을 표시할 지 선택합니다."
+L["Clamped To Screen"] = "화면에 고정"
 L["Width"] = "너비"
 L["Height"] = "높이"
 -- switching

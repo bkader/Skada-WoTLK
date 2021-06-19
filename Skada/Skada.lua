@@ -2895,6 +2895,19 @@ function Skada:FrameSettings(db, include_dimensions)
 					db.strata = val
 					Skada:ApplySettings()
 				end
+			},
+			clamped = {
+				type = "toggle",
+				name = L["Clamped To Screen"],
+				order = 13,
+				width = "double",
+				get = function()
+					return db.clamped
+				end,
+				set = function(_, val)
+					db.clamped = val
+					Skada:ApplySettings()
+				end
 			}
 		}
 	}

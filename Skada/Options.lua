@@ -72,7 +72,8 @@ Skada.windowdefaults = {
 	snapto = false,
 	sticky = true,
 	sticked = {},
-	smoothing = true,
+	clamped = true,
+	smoothing = false,
 	-- inline bar display
 	isonnewline = false,
 	isusingclasscolors = true,

@@ -177,6 +177,7 @@ L["Scale"] = true
 L["Sets the scale of the window."] = true
 L["Strata"] = true
 L["This determines what other frames will be in front of the frame."] = true
+L["Clamped To Screen"] = true
 L["Width"] = true
 L["Height"] = true
 -- switching

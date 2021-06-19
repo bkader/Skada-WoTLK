@@ -162,6 +162,7 @@ L["Scale"] = "比例"
 L["Sets the scale of the window."] = "設定視窗比例。"
 L["Strata"] = "層級"
 L["This determines what other frames will be in front of the frame."] = "這決定了那些其他的框架會在此框架之前。"
+L["Clamped To Screen"] = "固定到屏幕"
 L["Width"] = "寬度"
 L["Height"] = "高度"
 -- switching

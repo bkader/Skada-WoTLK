@@ -901,6 +901,7 @@ do
 		end
 
 		g:SetEnableMouse(not p.clickthrough)
+		g:SetClampedToScreen(p.clamped)
 		g:SetSmoothing(p.smoothing)
 		libwindow.SetScale(g, p.scale)
 		g:SortBars()

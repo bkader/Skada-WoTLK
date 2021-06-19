@@ -164,6 +164,7 @@ L["Scale"] = "缩放"
 L["Sets the scale of the window."] = "设定窗口的缩放比例。"
 L["Strata"] = "层级"
 L["This determines what other frames will be in front of the frame."] = "此项指定其他哪些框架将位于此框架的前面。"
+L["Clamped To Screen"] = "固定到屏幕"
 L["Width"] = "宽度"
 L["Height"] = "高度"
 -- switching

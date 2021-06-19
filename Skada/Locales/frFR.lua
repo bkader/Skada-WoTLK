@@ -163,6 +163,7 @@ L["Scale"] = "Échelle"
 L["Sets the scale of the window."] = "Définit l'échelle de la fenêtre."
 L["Strata"] = "Couche"
 L["This determines what other frames will be in front of the frame."] = "Ceci détermine quels autres cadres sont placés devant le cadre."
+L["Clamped To Screen"] = "Épingler à l'écran"
 L["Width"] = "Largeur"
 L["Height"] = "Hauteur"
 -- switching

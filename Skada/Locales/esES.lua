@@ -163,6 +163,7 @@ L["Scale"] = "Escala"
 L["Sets the scale of the window."] = "Ajustar la escala de la ventana"
 -- L["Strata"] = ""
 L["This determines what other frames will be in front of the frame."] = "Esto determina qué otros macros estarán delante del macro."
+L["Clamped To Screen"] = "Mantener en la pantalla"
 L["Width"] = "Anchura"
 L["Height"] = "Altura"
 -- switching

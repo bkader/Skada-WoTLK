@@ -479,7 +479,6 @@ do
 
 		local list = setmetatable(CreateFrame("Frame", frameName, UIParent), barListPrototype_mt)
 		list:SetMovable(true)
-		list:SetClampedToScreen(true)
 		list.enablemouse = true
 
 		list.callbacks = list.callbacks or CallbackHandler:New(list)
