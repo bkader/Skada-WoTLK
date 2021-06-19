@@ -1359,23 +1359,33 @@ end
 
 do
 	local function fix_player(player)
-		if player then
-			if Skada:IsPet(player.id, player.flags) then
-				player.class = "PET"
-			elseif Skada:IsBoss(player.id) then
-				player.class = "BOSS"
-			elseif Skada:IsCreature(player.id, player.flags) then
-				player.class = "MONSTER"
-			elseif Skada:IsPlayer(player.id, player.flags, player.name) then
-				player.class = select(2, UnitClass(player.name))
-			else
-				player.class = "UNKNOWN"
+		if player.id and player.name then
+			if not player.class then
+				if Skada:IsPet(player.id, player.flags) then
+					player.class = "PET"
+				elseif Skada:IsBoss(player.id) then
+					player.class = "BOSS"
+				elseif Skada:IsCreature(player.id, player.flags) then
+					player.class = "MONSTER"
+				elseif Skada:IsPlayer(player.id, player.flags, player.name) then
+					player.class = select(2, Skada.UnitClass(player.id, player.flags))
+				else
+					player.class = "UNKNOWN"
+				end
 			end
 
+			-- if the player has been assigned a valid class,
+			-- we make sure to assign his/her role and spec
 			if Skada.validclass[player.class] then
-				player.role = Skada:UnitGroupRolesAssigned(player.name)
-				player.spec = Skada:GetPlayerSpecID(player.name, player.class)
+				if not player.role then
+					player.role = Skada:UnitGroupRolesAssigned(player.name)
+				end
+				if not player.spec then
+					player.spec = Skada:GetPlayerSpecID(player.name, player.class)
+				end
 			end
+
+			Skada.callbacks:Fire("SKADA_PLAYER_FIX", player)
 		end
 	end
 
@@ -1390,31 +1400,12 @@ do
 
 			player = {id = playerid, name = playername, flags = playerflags, time = 0}
 
-			if self:IsPet(playerid, playerflags) then
-				player.class = "PET"
-			elseif self:IsBoss(playerid) then
-				player.class = "BOSS"
-			elseif self:IsCreature(playerid, playerflags) then
-				player.class = "MONSTER"
-			elseif self:IsPlayer(playerid, playerflags, playername) then
-				player.class = select(2, UnitClass(playername))
-			else
-				player.class = "UNKNOWN"
-			end
-
-			if self.validclass[player.class] then
-				player.role = self:UnitGroupRolesAssigned(playername)
-				player.spec = self:GetPlayerSpecID(playername, player.class)
-			end
+			fix_player(player)
 
 			for _, mode in ipairs(modes) do
 				if mode.AddPlayerAttributes ~= nil then
 					mode:AddPlayerAttributes(player, set)
 				end
-			end
-
-			if player.class == "UNKNOWN" then
-				self.After(2, function() fix_player(player) end)
 			end
 
 			tinsert(set.players, player)
