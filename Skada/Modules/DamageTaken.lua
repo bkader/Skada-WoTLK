@@ -174,6 +174,12 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 
 		dmg.amount = 0
 		dmg.overkill = 0
+		dmg.resisted = nil
+		dmg.blocked = nil
+		dmg.absorbed = nil
+		dmg.critical = nil
+		dmg.glancing = nil
+		dmg.crushing = nil
 		dmg.missed = misstype
 
 		if misstype == "ABSORB" then
@@ -184,8 +190,8 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 			dmg.resisted = amount
 		end
 
-		log_damage(Skada.current, dmg)
-		log_damage(Skada.total, dmg)
+		log_damage(Skada.current, dmg, eventtype == "SPELL_PERIODIC_MISSED")
+		log_damage(Skada.total, dmg, eventtype == "SPELL_PERIODIC_MISSED")
 	end
 
 	local function SwingMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)

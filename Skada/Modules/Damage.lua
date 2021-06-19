@@ -202,6 +202,14 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			dmg.crushing = nil
 			dmg.missed = misstype
 
+			if misstype == "ABSORB" then
+				dmg.absorbed = amount
+			elseif misstype == "BLOCK" then
+				dmg.blocked = amount
+			elseif misstype == "RESIST" then
+				dmg.resisted = amount
+			end
+
 			dmg.petname = nil
 			Skada:FixPets(dmg)
 
@@ -266,10 +274,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	end
 
 	local function spellmod_tooltip(win, id, label, tooltip)
-		if
-			label == L["Critical Hits"] or label == L["Normal Hits"] or label == L.ABSORB or label == L.BLOCK or
-				label == L.RESIST
-		 then
+		if label == L["Critical Hits"] or label == L["Normal Hits"] or label == L.ABSORB or label == L.BLOCK or label == L.RESIST then
 			local player = Skada:find_player(win:get_selected_set(), win.playerid)
 			if player then
 				local spell = player.damage_spells and player.damage_spells[win.spellname]
