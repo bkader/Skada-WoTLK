@@ -2991,39 +2991,6 @@ function Skada:OnInitialize()
 	LSM:Register("sound", "Wham!", [[Sound\Doodad\PVP_Lordaeron_Door_Open.wav]])
 	LSM:Register("sound", "You Will Die!", [[Sound\Creature\CThun\CThunYouWillDIe.wav]])
 
-	self.db = LibStub("AceDB-3.0"):New("SkadaDB", self.defaults, "Default")
-
-	if type(SkadaCharDB) ~= "table" then
-		SkadaCharDB = {}
-	end
-	self.char = SkadaCharDB
-	self.char.sets = self.char.sets or {}
-
-	-- Profiles
-	local AceDBOptions = LibStub("AceDBOptions-3.0", true)
-	if AceDBOptions then
-		self.options.args.profiles = AceDBOptions:GetOptionsTable(self.db)
-		self.options.args.profiles.order = 999
-	end
-
-	LibStub("AceConfig-3.0"):RegisterOptionsTable("Skada", self.options)
-	self.optionsFrame = ACD:AddToBlizOptions("Skada", "Skada")
-
-	-- Slash Command Handler
-	SLASH_SKADA1 = "/skada"
-	SlashCmdList.SKADA = SlashCommandHandler
-
-	self.db.RegisterCallback(self, "OnProfileChanged", "ReloadSettings")
-	self.db.RegisterCallback(self, "OnProfileCopied", "ReloadSettings")
-	self.db.RegisterCallback(self, "OnProfileReset", "ReloadSettings")
-	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes")
-
-	self:ReloadSettings()
-	self.After(2, function() self:ApplySettings() end)
-end
-
-function Skada:OnEnable()
-
 	-- spell school colors
 	self.schoolcolors = {
 		[1] = {a = 1.00, r = 1.00, g = 1.00, b = 0.00}, -- Physical
@@ -3107,6 +3074,39 @@ function Skada:OnEnable()
 		LEADER = {0, 0.296875, 0.015625, 0.3125},
 		NONE = ""
 	}
+
+	self.db = LibStub("AceDB-3.0"):New("SkadaDB", self.defaults, "Default")
+
+	if type(SkadaCharDB) ~= "table" then
+		SkadaCharDB = {}
+	end
+	self.char = SkadaCharDB
+	self.char.sets = self.char.sets or {}
+
+	-- Profiles
+	local AceDBOptions = LibStub("AceDBOptions-3.0", true)
+	if AceDBOptions then
+		self.options.args.profiles = AceDBOptions:GetOptionsTable(self.db)
+		self.options.args.profiles.order = 999
+	end
+
+	LibStub("AceConfig-3.0"):RegisterOptionsTable("Skada", self.options)
+	self.optionsFrame = ACD:AddToBlizOptions("Skada", "Skada")
+
+	self.db.RegisterCallback(self, "OnProfileChanged", "ReloadSettings")
+	self.db.RegisterCallback(self, "OnProfileCopied", "ReloadSettings")
+	self.db.RegisterCallback(self, "OnProfileReset", "ReloadSettings")
+	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes")
+
+	self:ReloadSettings()
+	self.After(2, function() self:ApplySettings() end)
+end
+
+function Skada:OnEnable()
+	-- Slash Command Handler
+	SLASH_SKADA1 = "/skada"
+	SlashCmdList.SKADA = SlashCommandHandler
+
 	self:RegisterComm("Skada")
 
 	self:RegisterEvent("PARTY_MEMBERS_CHANGED")
