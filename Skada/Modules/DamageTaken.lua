@@ -485,7 +485,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 
 					d.id = player.id
 					d.label = Skada:FormatName(player.name, player.id)
-					d.class = player.class or "PET"
+					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
 
@@ -602,7 +602,7 @@ Skada:AddLoadableModule("DTPS", function(Skada, L)
 
 					d.id = player.id
 					d.label = Skada:FormatName(player.name, player.id)
-					d.class = player.class or "PET"
+					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
 
@@ -676,7 +676,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(Skada, L)
 
 				d.id = player.id
 				d.label = playername
-				d.class = player.class or "PET"
+				d.class = player.class
 				d.role = player.role
 				d.spec = player.spec
 
@@ -726,7 +726,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(Skada, L)
 							if not cached[spellname].players[player.name] then
 								cached[spellname].players[player.name] = {
 									id = player.id,
-									class = player.class or "PET",
+									class = player.class,
 									role = player.role,
 									spec = player.spec,
 									amount = spell.amount
@@ -868,7 +868,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 
 						d.id = player.id
 						d.label = Skada:FormatName(player.name, player.id)
-						d.class = player.class or "PET"
+						d.class = player.class
 						d.role = player.role
 						d.spec = player.spec
 
@@ -1057,7 +1057,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 
 					d.id = player.id
 					d.label = Skada:FormatName(player.name, player.id)
-					d.class = player.class or "PET"
+					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
 

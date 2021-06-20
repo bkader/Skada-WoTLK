@@ -651,7 +651,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 					d.id = player.id
 					d.label = Skada:FormatName(player.name, player.id)
-					d.class = player.class or "PET"
+					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
 
@@ -950,7 +950,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 
 					d.id = player.id
 					d.label = Skada:FormatName(player.name, player.id)
-					d.class = player.class or "PET"
+					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
 
@@ -1064,7 +1064,7 @@ Skada:AddLoadableModule("HPS", function(Skada, L)
 
 					d.id = player.id
 					d.label = Skada:FormatName(player.name, player.id)
-					d.class = player.class or "PET"
+					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
 
@@ -1243,7 +1243,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 
 					d.id = player.id
 					d.label = playername
-					d.class = player.class or "PET"
+					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
 

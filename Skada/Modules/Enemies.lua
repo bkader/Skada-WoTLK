@@ -172,6 +172,9 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 					e.damagetaken_sources[playername] = {id = playerid, amount = amount}
 				else
 					e.damagetaken_sources[playername].amount = e.damagetaken_sources[playername].amount + amount
+					if not e.damagetaken_sources[playername].id and playerid then
+						e.damagetaken_sources[playername].id = playerid
+					end
 				end
 			end
 		end
@@ -195,6 +198,9 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 					e.damagetaken_sources[dmg.srcName] = {id = dmg.srcGUID, amount = dmg.amount}
 				else
 					e.damagetaken_sources[dmg.srcName].amount = e.damagetaken_sources[dmg.srcName].amount + dmg.amount
+					if not e.damagetaken_sources[dmg.srcName].id and dmg.srcGUID then
+						e.damagetaken_sources[dmg.srcName].id = dmg.srcGUID
+					end
 				end
 
 				if validTarget[dmg.enemyname] then
@@ -206,8 +212,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 							-- useful damage
 							e.damagetaken_useful = (e.damagetaken_useful or 0) + dmg.amount
-							e.damagetaken_sources[dmg.srcName].useful =
-								(e.damagetaken_sources[dmg.srcName].useful or 0) + dmg.amount
+							e.damagetaken_sources[dmg.srcName].useful = (e.damagetaken_sources[dmg.srcName].useful or 0) + dmg.amount
 						else
 							if valkyrsTable[dmg.enemyid] <= valkyrHalfHP then
 								log_custom_damage(set, L["Valkyrs overkilling"], dmg.srcGUID, dmg.srcName, dmg.spellid, dmg.amount - dmg.overkill)
@@ -216,8 +221,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 							valkyrsTable[dmg.enemyid] = valkyrsTable[dmg.enemyid] - dmg.amount
 							e.damagetaken_useful = (e.damagetaken_useful or 0) + dmg.amount
-							e.damagetaken_sources[dmg.srcName].useful =
-								(e.damagetaken_sources[dmg.srcName].useful or 0) + dmg.amount
+							e.damagetaken_sources[dmg.srcName].useful = (e.damagetaken_sources[dmg.srcName].useful or 0) + dmg.amount
 
 							if valkyrsTable[dmg.enemyid] <= valkyrHalfHP then
 								local amount = valkyrHalfHP - valkyrsTable[dmg.enemyid] - dmg.overkill
@@ -261,7 +265,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	end
 
 	local function SwingDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellDamage(nil, nil, srcGUID, srcName, nil, dstGUID, dstName, dstFlags, 6603, nil, nil, ...)
+		SpellDamage(timestamp, eventtype, srcGUID, srcName, nil, dstGUID, dstName, dstFlags, 6603, nil, nil, ...)
 	end
 
 	local function getDTPS(set, enemy)
@@ -307,9 +311,9 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
-				d.id = player.id
+				d.id = player.id or playername
 				d.label = Skada:FormatName(playername)
-				d.class, d.role, d.spec = select(2, UnitClass(player.id, nil, set))
+				d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
 
 				d.value = player.amount
 				d.valuetext = Skada:FormatValueText(
@@ -556,9 +560,9 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
-				d.id = target.id
+				d.id = target.id or targetname
 				d.label = Skada:FormatName(targetname)
-				d.class, d.role, d.spec = select(2, UnitClass(target.id, nil, set))
+				d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
 
 				d.value = target.amount
 				d.valuetext = Skada:FormatValueText(

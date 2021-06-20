@@ -518,7 +518,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
 					d.id = player.id
 					d.label = Skada:FormatName(player.name, player.id)
-					d.class = player.class or "PET"
+					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
 
@@ -670,7 +670,7 @@ Skada:AddLoadableModule("DPS", function(Skada, L)
 
 					d.id = player.id
 					d.label = Skada:FormatName(player.name, player.id)
-					d.class = player.class or "PET"
+					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
 
@@ -748,7 +748,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 
 					d.id = player.id
 					d.label = playername
-					d.class = player.class or "PET"
+					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
 
@@ -1054,7 +1054,7 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 				if not player.class then
 					d.class, d.role, d.spec = select(2, UnitClass(player.id, nil, set, true))
 				else
-					d.class = player.class or "PET"
+					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
 				end
@@ -1093,7 +1093,7 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 
 					d.id = player.id
 					d.label = Skada:FormatName(player.name, player.id)
-					d.class = player.class or "PET"
+					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
 
@@ -1309,7 +1309,7 @@ Skada:AddLoadableModule("Overkill", function(Skada, L)
 
 					d.id = player.id
 					d.label = Skada:FormatName(player.name, player.id)
-					d.class = player.class or "PET"
+					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
 

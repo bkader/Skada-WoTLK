@@ -105,7 +105,7 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 
 					d.id = player.id
 					d.label = Skada:FormatName(player.name, player.id)
-					d.class = player.class or "PET"
+					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
 

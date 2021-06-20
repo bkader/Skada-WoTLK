@@ -150,7 +150,7 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 
 			d.id = player.id
 			d.label = Skada:FormatName(player.name, player.id)
-			d.class = player.class or "PET"
+			d.class = player.class
 			d.role = (role == "NONE") and "UNKNOWN" or role
 			d.spec = player.spec or 1
 
