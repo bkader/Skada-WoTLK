@@ -313,6 +313,16 @@ function LibCompat.tCopy(to, from, ...)
 	end
 end
 
+function LibCompat.SafePack(...)
+	local tbl = {...}
+	tbl.n = select("#", ...)
+	return tbl
+end
+
+function LibCompat.SafeUnpack(tbl)
+	return unpack(tbl, 1, tbl.n)
+end
+
 -------------------------------------------------------------------------------
 
 local mixins = {
@@ -335,7 +345,9 @@ local mixins = {
 	"tIndexOf",
 	"tContains",
 	"tAppendAll",
-	"tCopy"
+	"tCopy",
+	"SafePack",
+	"SafeUnpack"
 }
 
 function LibCompat:Embed(target)
