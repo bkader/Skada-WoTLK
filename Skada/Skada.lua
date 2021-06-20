@@ -2049,7 +2049,7 @@ function Skada:CheckGroup()
 			local unit = ("%s%d"):format(prefix, i)
 			local unitGUID = UnitGUID(unit)
 			if unitGUID then
-				players[unitGUID] = true
+				players[unitGUID] = unit
 				local petGUID = UnitGUID(unit .. "pet")
 				if petGUID and not pets[petGUID] then
 					self:AssignPet(unitGUID, UnitName(unit), petGUID)
@@ -2060,7 +2060,7 @@ function Skada:CheckGroup()
 
 	local playerGUID = UnitGUID("player")
 	if playerGUID then
-		players[playerGUID] = true
+		players[playerGUID] = "player"
 		local petGUID = UnitGUID("pet")
 		if petGUID and not pets[petGUID] then
 			self:AssignPet(playerGUID, UnitName("player"), petGUID)
