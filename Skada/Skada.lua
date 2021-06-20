@@ -381,7 +381,7 @@ do
 						if copywindow then
 							for _, win in Skada:IterateWindows() do
 								if win.db.name == copywindow and win.db.display == db.display then
-									Skada:tcopy(newdb, win.db, {"name", "sticked", "x", "y", "point", "snapped"})
+									Skada.tCopy(newdb, win.db, {"name", "sticked", "x", "y", "point", "snapped"})
 									break
 								end
 							end
@@ -753,41 +753,6 @@ function Window:RightClick(_, button)
 end
 
 -------------------------------------------------------------------------------
--- table functions
-
--- returns the length of the selected table
-function Skada:tlength(tbl)
-	local len = 0
-	for _ in pairs(tbl) do
-		len = len + 1
-	end
-	return len
-end
-
--- copies a table from another
-function Skada:tcopy(to, from, ...)
-	for k, v in pairs(from) do
-		local skip = false
-		if ... then
-			for i, j in ipairs(...) do
-				if j == k then
-					skip = true
-					break
-				end
-			end
-		end
-		if not skip then
-			if type(v) == "table" then
-				to[k] = {}
-				Skada:tcopy(to[k], v, ...)
-			else
-				to[k] = v
-			end
-		end
-	end
-end
-
--------------------------------------------------------------------------------
 -- windows and misc
 
 function Skada:GetWindows()
@@ -803,7 +768,7 @@ function Skada:CreateWindow(name, db, display)
 	local isnew = false
 	if not db then
 		db, isnew = {}, true
-		self:tcopy(db, Skada.windowdefaults)
+		self.tCopy(db, Skada.windowdefaults)
 		tinsert(self.db.profile.windows, db)
 	end
 

@@ -349,7 +349,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 								if thetheme then
 									for _, win in ipairs(Skada:GetWindows()) do
 										if win.db.name == selectedwindow then
-											Skada:tcopy(win.db, thetheme, {"name", "modeincombat", "display", "set", "wipemode", "returnaftercombat", "x", "y", "snapped"})
+											Skada.tCopy(win.db, thetheme, {"name", "modeincombat", "display", "set", "wipemode", "returnaftercombat", "x", "y", "snapped"})
 											Skada:ApplySettings()
 											Skada:Print(L["Theme applied!"])
 										end
@@ -407,7 +407,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 								if win.db.name == savewindow then
 									Skada.db.global.themes = Skada.db.global.themes or {}
 									local theme = {}
-									Skada:tcopy(theme, win.db, {"name", "snapped", "x", "y", "point"})
+									Skada.tCopy(theme, win.db, {"name", "snapped", "x", "y", "point"})
 									theme.name = savename or win.db.name
 									tinsert(Skada.db.global.themes, theme)
 								end
@@ -473,7 +473,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 		if not Skada.db.global.themes then
 			Skada.db.global.themes = {}
 			if type(Skada.db.profile.themes) == "table" then
-				Skada:tcopy(Skada.db.global.themes, Skada.db.profile.themes)
+				Skada.tCopy(Skada.db.global.themes, Skada.db.profile.themes)
 				Skada.db.profile.themes = nil
 			end
 		end

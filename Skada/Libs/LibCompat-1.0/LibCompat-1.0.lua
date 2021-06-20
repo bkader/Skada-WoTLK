@@ -1,10 +1,10 @@
 --
 -- **LibCompat-1.0** provided few handy functions that can be embed to addons.
--- This library was originally created for Skada 1.8.50 for WoTLK.
+-- This library was originally created for Skada as of 1.8.50.
 -- @author: Kader B (https://github.com/bkader)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0", 1
+local MAJOR, MINOR = "LibCompat-1.0", 2
 
 local LibCompat, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not LibCompat then return end
@@ -247,15 +247,95 @@ do
 		end
 	end
 end
+
+-------------------------------------------------------------------------------
+
+do
+	local ceil, floor = math.ceil, math.floor
+
+	function LibCompat.Round(val)
+		return (val < 0) and ceil(val - 0.5) or floor(val + 0.5)
+	end
+
+	function LibCompat.Clamp(val, minval, maxval)
+		return (val > maxval) and maxval or (val < minval) and minval or val
+	end
+end
+
+-------------------------------------------------------------------------------
+
+function LibCompat.tlength(tbl)
+	local len = 0
+	for _ in pairs(tbl) do
+		len = len + 1
+	end
+	return len
+end
+
+function LibCompat.tIndexOf(tbl, item)
+	for i, v in ipairs(tbl) do
+		if item == v then
+			return i
+		end
+	end
+end
+
+function LibCompat.tContains(tbl, item)
+	return LibCompat.tIndexOf(tbl, item) ~= nil
+end
+
+function LibCompat.tAppendAll(tbl, elems)
+	for _, elem in ipairs(elems) do
+		tinsert(tbl, elem)
+	end
+end
+
+-- copies a table from another
+function LibCompat.tCopy(to, from, ...)
+	for k, v in pairs(from) do
+		local skip = false
+		if ... then
+			for i, j in ipairs(...) do
+				if j == k then
+					skip = true
+					break
+				end
+			end
+		end
+		if not skip then
+			if type(v) == "table" then
+				to[k] = {}
+				LibCompat.tCopy(to[k], v, ...)
+			else
+				to[k] = v
+			end
+		end
+	end
+end
+
 -------------------------------------------------------------------------------
 
 local mixins = {
-	"IsInRaid", "IsInParty", "IsInGroup", "IsInPvP",
+	"IsInRaid",
+	"IsInParty",
+	"IsInGroup",
+	"IsInPvP",
 	"GetGroupTypeAndCount",
-	"After", "NewTimer", "NewTicker",
-	"IsGroupDead", "IsGroupInCombat",
+	"After",
+	"NewTimer",
+	"NewTicker",
+	"IsGroupDead",
+	"IsGroupInCombat",
 	"GetClassColorsTable",
-	"GetSpellInfo", "GetSpellLink"
+	"GetSpellInfo",
+	"GetSpellLink",
+	"Round",
+	"Clamp",
+	"tlength",
+	"tIndexOf",
+	"tContains",
+	"tAppendAll",
+	"tCopy"
 }
 
 function LibCompat:Embed(target)
