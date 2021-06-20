@@ -173,6 +173,10 @@ function mod:Create(window)
 	-- Restore window position.
 	libwindow.RestorePosition(bargroup)
 
+	local maxbars = window.db.background.height / (window.db.barheight + window.db.barspacing)
+	if window.db.enabletitle then maxbars = maxbars - 1 end
+	bargroup:SetMaxBars(math.floor(maxbars))
+
 	window.bargroup = bargroup
 
 	if not class_icon_tcoords then
@@ -293,22 +297,17 @@ function mod:WindowResized(_, group)
 end
 
 do
-	local function getNumberOfBars(win)
-		local bars = win.bargroup:GetBars()
-		local n = 0
-		for _, _ in pairs(bars) do
-			n = n + 1
-		end
-		return n
-	end
-
 	local function OnMouseWheel(frame, direction)
 		local win = frame.win
-		local maxbars = win.db.background.height / (win.db.barheight + win.db.barspacing)
-		if direction == 1 and win.bargroup:GetBarOffset() > 0 then
-			win.bargroup:SetBarOffset(win.bargroup:GetBarOffset() - 1)
-		elseif direction == -1 and ((getNumberOfBars(win) - maxbars - win.bargroup:GetBarOffset() + 1) > 0) then
-			win.bargroup:SetBarOffset(win.bargroup:GetBarOffset() + 1)
+
+		local maxbars = win.bargroup:GetMaxBars()
+		local numbars = win.bargroup:GetNumBars()
+		local offset = win.bargroup:GetBarOffset()
+
+		if direction == 1 and offset > 0 then
+			win.bargroup:SetBarOffset(offset - 1)
+		elseif direction == -1 and ((numbars - maxbars - offset + 1) > 0) then
+			win.bargroup:SetBarOffset(offset + 1)
 		end
 	end
 
