@@ -265,7 +265,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	end
 
 	local function SwingDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellDamage(timestamp, eventtype, srcGUID, srcName, nil, dstGUID, dstName, dstFlags, 6603, nil, nil, ...)
+		SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, nil, nil, ...)
 	end
 
 	local function getDTPS(set, enemy)
