@@ -2688,8 +2688,21 @@ function Skada:FrameSettings(db, include_dimensions)
 	local obj = {
 		type = "group",
 		name = L["Window"],
+		get = function(i)
+			return db[i[#i]]
+		end,
+		set = function(i, val)
+			db[i[#i]] = val
+			Skada:ApplySettings()
+		end,
 		order = 3,
 		args = {
+			clamped = {
+				type = "toggle",
+				name = L["Clamped To Screen"],
+				order = 0,
+				width = "double"
+			},
 			bgheader = {
 				type = "header",
 				name = L["Background"],
@@ -2750,7 +2763,7 @@ function Skada:FrameSettings(db, include_dimensions)
 				order = 5,
 				width = "double",
 				hasAlpha = true,
-				get = function(_)
+				get = function()
 					local c = db.background.color
 					return c.r, c.g, c.b, c.a
 				end,
@@ -2791,7 +2804,7 @@ function Skada:FrameSettings(db, include_dimensions)
 				order = 8,
 				width = "double",
 				hasAlpha = true,
-				get = function(_)
+				get = function()
 					local c = db.background.bordercolor or {r = 0, g = 0, b = 0, a = 1}
 					return c.r, c.g, c.b, c.a
 				end,
@@ -2832,13 +2845,7 @@ function Skada:FrameSettings(db, include_dimensions)
 				min = 0.1,
 				max = 3,
 				step = 0.01,
-				get = function()
-					return db.scale
-				end,
-				set = function(_, val)
-					db.scale = val
-					Skada:ApplySettings()
-				end
+				bigStep = 0.1
 			},
 			strata = {
 				type = "select",
@@ -2854,27 +2861,7 @@ function Skada:FrameSettings(db, include_dimensions)
 					["DIALOG"] = "DIALOG",
 					["FULLSCREEN"] = "FULLSCREEN",
 					["FULLSCREEN_DIALOG"] = "FULLSCREEN_DIALOG"
-				},
-				get = function()
-					return db.strata
-				end,
-				set = function(_, val)
-					db.strata = val
-					Skada:ApplySettings()
-				end
-			},
-			clamped = {
-				type = "toggle",
-				name = L["Clamped To Screen"],
-				order = 13,
-				width = "double",
-				get = function()
-					return db.clamped
-				end,
-				set = function(_, val)
-					db.clamped = val
-					Skada:ApplySettings()
-				end
+				}
 			}
 		}
 	}
@@ -2886,14 +2873,7 @@ function Skada:FrameSettings(db, include_dimensions)
 			order = 4.3,
 			min = 100,
 			max = floor(GetScreenWidth()),
-			step = 1.0,
-			get = function()
-				return db.width
-			end,
-			set = function(_, key)
-				db.width = key
-				Skada:ApplySettings()
-			end
+			step = 1.0
 		}
 
 		obj.args.height = {
@@ -2902,14 +2882,7 @@ function Skada:FrameSettings(db, include_dimensions)
 			order = 4.4,
 			min = 16,
 			max = 400,
-			step = 1.0,
-			get = function()
-				return db.height
-			end,
-			set = function(_, key)
-				db.height = key
-				Skada:ApplySettings()
-			end
+			step = 1.0
 		}
 	end
 
