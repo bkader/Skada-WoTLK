@@ -236,28 +236,30 @@ do
 				frame.win.db.sticked[group.win.db.name] = true
 				group.win.db.sticked[name] = nil
 
+				local scale = frame.win.db.scale or 1
+
+				-- bar spacing first
+				group.win.db.barspacing = frame.win.db.barspacing * scale
+				group:SetSpacing(group.win.db.barspacing)
+
 				-- change the width of the window accordingly
 				if Yanchors[anchor] then
 					-- we change things related to height
-					local width = frame.win.db.barwidth
-					group.win.db.barwidth = width
-					group:SetLength(width)
+					group.win.db.barwidth = frame.win.db.barwidth * scale
+					group:SetLength(group.win.db.barwidth)
 				elseif Xanchors[anchor] then
 					-- window height
-					local height = frame.win.db.background.height
-					group.win.db.background.height = height
-					group:SetHeight(height)
+					group.win.db.background.height = frame.win.db.background.height * scale
+					group:SetHeight(group.win.db.background.height)
 
 					-- title bar height
-					local titleheight = frame.win.db.title.height
-					group.win.db.title.height = titleheight
-					group.button:SetHeight(titleheight)
+					group.win.db.title.height = frame.win.db.title.height * scale
+					group.button:SetHeight(group.win.db.title.height)
 					group:AdjustButtons()
 
 					-- bars height
-					local barheight = frame.win.db.barheight
-					group.win.db.barheight = barheight
-					group:SetBarHeight(barheight)
+					group.win.db.barheight = frame.win.db.barheight * scale
+					group:SetBarHeight(group.win.db.barheight)
 
 					group:SortBars()
 				end
@@ -269,6 +271,7 @@ do
 				end
 			end
 		end
+
 		_CloseDropDownMenus()
 		libwindow.SavePosition(group)
 	end
