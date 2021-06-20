@@ -2044,21 +2044,26 @@ end
 
 function Skada:CheckGroup()
 	local prefix, min_member, max_member = self:GetGroupTypeAndCount()
-	for i = min_member, max_member do
-		local unit = (i == 0) and "player" or prefix .. tostring(i)
-		if UnitExists(unit) then
-			local guid = UnitGUID(unit)
-			if guid then
-				players[guid] = unit -- we use unit just in case.
-				if UnitExists(unit .. "pet") then
-					local name, server = UnitName(unit)
-					if server and server ~= "" then
-						name = name .. "-" .. server
-					end
-
-					self:AssignPet(guid, name, UnitGUID(unit .. "pet"))
+	if prefix then
+		for i = min_member, max_member do
+			local unit = ("%s%d"):format(prefix, i)
+			local unitGUID = UnitGUID(unit)
+			if unitGUID then
+				players[unitGUID] = true
+				local petGUID = UnitGUID(unit .. "pet")
+				if petGUID and not pets[petGUID] then
+					self:AssignPet(unitGUID, UnitName(unit), petGUID)
 				end
 			end
+		end
+	end
+
+	local playerGUID = UnitGUID("player")
+	if playerGUID then
+		players[playerGUID] = true
+		local petGUID = UnitGUID("pet")
+		if petGUID and not pets[petGUID] then
+			self:AssignPet(playerGUID, UnitName("player"), petGUID)
 		end
 	end
 end
@@ -2170,21 +2175,8 @@ do
 	Skada.RAID_ROSTER_UPDATE = Skada.PARTY_MEMBERS_CHANGED
 end
 
-function Skada:UNIT_PET(_, unit)
-	if unit and UnitExists(unit) then
-		local guid = UnitGUID(unit)
-		if guid and players[guid] then
-			self.After(0.1, function()
-				if UnitExists(unit .. "pet") then
-					local name, server = UnitName(unit)
-					if server and server ~= "" then
-						name = name .. "-" .. server
-					end
-					self:AssignPet(guid, name, UnitGUID(unit .. "pet"))
-				end
-			end)
-		end
-	end
+function Skada:UNIT_PET()
+	self:CheckGroup()
 end
 
 -------------------------------------------------------------------------------
