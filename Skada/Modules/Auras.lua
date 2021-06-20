@@ -2,7 +2,7 @@ local _, Skada = ...
 
 -- cache frequently used globals
 local pairs, format, select, tostring = pairs, string.format, select, tostring
-local min, max = math.min, math.max
+local min, max, floor = math.min, math.max, math.floor
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 
 -- list of the auras that are ignored!
@@ -241,6 +241,12 @@ end
 -- make sure to create generic functions that will handle things
 --
 
+-- we use this custom function in order to round up player
+-- active time because of how auras were ticking.
+local function PlayerActiveTime(set, player)
+	return floor(Skada:PlayerActiveTime(set, player, true))
+end
+
 -- main module update function
 local updatefunc
 do
@@ -266,7 +272,7 @@ do
 				local auracount, aurauptime = countauras(player.auras, auratype)
 
 				if auracount > 0 and aurauptime > 0 then
-					local maxtime = Skada:PlayerActiveTime(set, player, true)
+					local maxtime = PlayerActiveTime(set, player)
 					local uptime = aurauptime / auracount
 
 					local d = win.dataset[nr] or {}
@@ -301,7 +307,7 @@ local function spellupdatefunc(auratype, win, set, playerid, playername, fmt)
 			win.title = format(fmt, player.name)
 		end
 
-		local maxtime = Skada:PlayerActiveTime(set, player, true)
+		local maxtime = PlayerActiveTime(set, player)
 		if maxtime > 0 and player.auras then
 			local maxvalue, nr = 0, 1
 
@@ -343,7 +349,7 @@ local function aura_tooltip(win, id, label, tooltip, playerid, playername, L)
 			local settime = Skada:GetSetTime(set)
 
 			if settime > 0 then
-				local maxtime = Skada:PlayerActiveTime(set, player, true)
+				local maxtime = PlayerActiveTime(set, player)
 
 				tooltip:AddLine(player.name .. ": " .. label)
 
