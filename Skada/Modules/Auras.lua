@@ -379,7 +379,7 @@ local function setcompletefunc(set, auratype)
 	if set and auratype then
 		for _, player in Skada:IteratePlayers(set) do
 			if player.auras then
-				local maxtime = Skada:PlayerActiveTime(set, player, true)
+				local maxtime = PlayerActiveTime(set, player, true)
 				for spellid, spell in pairs(player.auras) do
 					if spell.auratype == auratype then
 						spell.active = nil
