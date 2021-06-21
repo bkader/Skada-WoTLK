@@ -274,8 +274,10 @@ function mod:OnMouseWheel(_, frame, direction)
 
 	if direction == 1 and offset > 0 then
 		win.bargroup:SetBarOffset(offset - 1)
+		mod:Update(win)
 	elseif direction == -1 and ((numbars - maxbars - offset) > 0) then
 		win.bargroup:SetBarOffset(offset + 1)
+		mod:Update(win)
 	end
 end
 
@@ -489,9 +491,7 @@ do
 	end
 
 	function mod:Update(win)
-		if not win or not win.bargroup then
-			return
-		end
+		if not win or not win.bargroup then return end
 		win.bargroup.button:SetText(win.metadata.title)
 
 		if win.metadata.showspots then
@@ -521,9 +521,15 @@ do
 			end
 		end
 
+		local maxbars = win.bargroup:GetMaxBars()
+		local offset = win.bargroup:GetBarOffset()
 		local nr = 1
-		for i, data in ipairs(win.dataset) do
-			if data.id then
+
+		local index, data
+		for i = 0, maxbars do
+			index = i + offset
+			data = win.dataset[index]
+			if data and data.id then
 				local barid = data.id
 				local barlabel = data.label
 
@@ -662,12 +668,7 @@ do
 				end
 
 				if data.backgroundcolor then
-					bar.bgtexture:SetVertexColor(
-						data.backgroundcolor.r,
-						data.backgroundcolor.g,
-						data.backgroundcolor.b,
-						data.backgroundcolor.a or 1
-					)
+					bar.bgtexture:SetVertexColor(data.backgroundcolor.r, data.backgroundcolor.g, data.backgroundcolor.b, data.backgroundcolor.a or 1)
 				end
 
 				if data.backgroundwidth then
@@ -682,7 +683,7 @@ do
 				end
 
 				if not data.ignore then
-					nr = nr + 1
+					nr = index + 1
 				end
 			end
 		end
@@ -696,13 +697,8 @@ do
 			end
 		end
 
-		if win.metadata.ordersort then
-			win.bargroup:SetSortFunction(bar_order_sort)
-			win.bargroup:SortBars()
-		else
-			win.bargroup:SetSortFunction(nil)
-			win.bargroup:SortBars()
-		end
+		win.bargroup:SetSortFunction(win.metadata.ordersort and bar_order_sort or nil)
+		win.bargroup:SortBars()
 	end
 end
 
