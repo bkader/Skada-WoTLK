@@ -1,4 +1,4 @@
-local _, Skada = ...
+assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Resurrects", function(Skada, L)
 	if Skada:IsDisabled("Resurrects") then return end
 
@@ -8,6 +8,7 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 
 	local select, pairs, format = select, pairs, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+	local _
 
 	local function log_resurrect(set, data)
 		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
@@ -42,13 +43,13 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's resurrect spells", label)
+		win.title = format(L["%s's resurrect spells"], label)
 	end
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = L:F("%s's resurrect spells", player.name)
+			win.title = format(L["%s's resurrect spells"], player.name)
 			local total = player.ress or 0
 
 			if total > 0 and player.ress_spells then
@@ -83,13 +84,13 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's resurrect targets", label)
+		win.title = format(L["%s's resurrect targets"], label)
 	end
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = L:F("%s's resurrect targets", player.name)
+			win.title = format(L["%s's resurrect targets"], player.name)
 			local total = player.ress or 0
 
 			if total > 0 and player.ress_targets then

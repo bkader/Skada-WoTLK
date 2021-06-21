@@ -1,7 +1,7 @@
-local _, Skada = ...
+assert(Skada, "Skada not found!")
 
 local Enemies = Skada:NewModule("Enemies")
-local L = Skada.L
+local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 
 -- frequently used globals --
 local pairs, ipairs, select = pairs, ipairs, select
@@ -136,8 +136,17 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	local function ValkyrHealthMax()
 		if not valkyrMaxHP then
 			local prefix, min_member, max_member = Skada:GetGroupTypeAndCount()
-			for i = min_member, max_member do
-				local unit = ((i == 0) and "player" or prefix .. i) .. "target"
+			if prefix then
+				for i = min_member, max_member do
+					local unit = ((i == 0) and "player" or prefix .. i) .. "target"
+					if UnitExists(unit) and IsValkyr(UnitGUID(unit), true) then
+						valkyrMaxHP = UnitHealthMax(unit)
+						valkyrHalfHP = floor(valkyrMaxHP / 2)
+						return valkyrMaxHP
+					end
+				end
+			else
+				local unit = "playertarget"
 				if UnitExists(unit) and IsValkyr(UnitGUID(unit), true) then
 					valkyrMaxHP = UnitHealthMax(unit)
 					valkyrHalfHP = floor(valkyrMaxHP / 2)
@@ -282,7 +291,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 		local p = Skada:find_player(set, id, label)
 		local e = Skada:find_enemy(set, win.targetname)
 		if p and e and e.damagetaken_sources and e.damagetaken_sources[p.name] then
-			tooltip:AddLine(L:F("%s's damage breakdown", p.name))
+			tooltip:AddLine(format(L["%s's damage breakdown"], p.name))
 
 			local total = e.damagetaken_sources[p.name].amount
 			tooltip:AddDoubleLine(L["Damage Done"], Skada:FormatNumber(total), 1, 1, 1)
@@ -296,11 +305,11 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 	function enemymod:Enter(win, id, label)
 		win.targetname = label
-		win.title = L:F("Damage on %s", label)
+		win.title = format(L["Damage on %s"], label)
 	end
 
 	function enemymod:Update(win, set)
-		win.title = L:F("Damage on %s", win.targetname or UNKNOWN)
+		win.title = format(L["Damage on %s"], win.targetname or UNKNOWN)
 		local enemy = Skada:find_enemy(set, win.targetname)
 		local total = enemy and select(2, getDTPS(set, enemy)) or 0
 
@@ -335,11 +344,11 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 	function spellmod:Enter(win, id, label)
 		win.targetname = label
-		win.title = L:F("Damage on %s", label)
+		win.title = format(L["Damage on %s"], label)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = L:F("Damage on %s", win.targetname or UNKNOWN)
+		win.title = format(L["Damage on %s"], win.targetname or UNKNOWN)
 		local enemy = Skada:find_enemy(set, win.targetname)
 		local total = enemy and select(2, getDTPS(set, enemy)) or 0
 
@@ -545,11 +554,11 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 
 	function enemymod:Enter(win, id, label)
 		win.targetname = label
-		win.title = L:F("Damage from %s", label)
+		win.title = format(L["Damage from %s"], label)
 	end
 
 	function enemymod:Update(win, set)
-		win.title = L:F("Damage from %s", win.targetname or UNKNOWN)
+		win.title = format(L["Damage from %s"], win.targetname or UNKNOWN)
 		local enemy = Skada:find_enemy(set, win.targetname)
 		local total = enemy and select(2, getDPS(set, enemy)) or 0
 
@@ -584,11 +593,11 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 
 	function spellmod:Enter(win, id, label)
 		win.targetname = label
-		win.title = L:F("%s's damage", label)
+		win.title = format(L["%s's damage"], label)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = L:F("%s's damage", win.targetname or UNKNOWN)
+		win.title = format(L["%s's damage"], win.targetname or UNKNOWN)
 		local enemy = Skada:find_enemy(set, win.targetname)
 		local total = enemy and select(2, getDPS(set, enemy)) or 0
 
@@ -739,11 +748,11 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.targetname = label
-		win.title = L:F("%s's healed players", label)
+		win.title = format(L["%s's healed players"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = L:F("%s's healed players", win.targetname or UNKNOWN)
+		win.title = format(L["%s's healed players"], win.targetname or UNKNOWN)
 		local enemy = Skada:find_enemy(set, win.targetname)
 		local total = enemy and select(2, getHPS(set, enemy)) or 0
 
@@ -778,11 +787,11 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 
 	function spellmod:Enter(win, id, label)
 		win.targetname = label
-		win.title = L:F("%s's healing spells", label)
+		win.title = format(L["%s's healing spells"], label)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = L:F("%s's healing spells", win.targetname or UNKNOWN)
+		win.title = format(L["%s's healing spells"], win.targetname or UNKNOWN)
 		local enemy = Skada:find_enemy(set, win.targetname)
 		local total = enemy and select(2, getHPS(set, enemy)) or 0
 

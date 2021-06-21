@@ -1,21 +1,5 @@
-local _, Skada = ...
-
-local setmetatable, rawset, format = setmetatable, rawset, string.format
-
-local L = setmetatable({}, {
-	__newindex = function(self, key, value)
-		rawset(self, key, value == true and key or value)
-	end,
-	__index = function(self, key)
-		return key
-	end
-})
-function L:F(line, ...)
-	line = L[line]
-	return format(line, ...)
-end
-Skada.L = L
-Skada.locale = GetLocale()
+local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "enUS", true)
+if not L then return end
 
 L["A damage meter."] = true
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = true
@@ -665,6 +649,7 @@ L["Overkill target list"] = true
 L["%s's overkill spells"] = true
 L["%s's overkill targets"] = true
 -- tweaks module lines --
+L["Improvement"] = true
 L["Tweaks"] = true
 L["First hit"] = true
 L["|cffffff00First Hit|r: %s from %s"] = true

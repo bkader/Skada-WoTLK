@@ -1,4 +1,4 @@
-local _, Skada = ...
+assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 	if Skada:IsDisabled("Sunder Counter") then return end
 
@@ -7,6 +7,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 	local pairs, select, format = pairs, select, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+	local _
 
 	local sunder, devastate
 
@@ -40,7 +41,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's <%s> targets", label, sunder)
+		win.title = format(L["%s's <%s> targets"], label, sunder)
 	end
 
 	function targetmod:Update(win, set)
@@ -51,7 +52,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = L:F("%s's <%s> targets", player.name, sunder)
+			win.title = format(L["%s's <%s> targets"], player.name, sunder)
 			local total = player.sunder or 0
 
 			if total > 0 and player.sunder_targets then

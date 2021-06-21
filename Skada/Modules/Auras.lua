@@ -1,4 +1,4 @@
-local _, Skada = ...
+assert(Skada, "Skada not found!")
 
 -- cache frequently used globals
 local pairs, format, select, tostring = pairs, string.format, select, tostring
@@ -408,7 +408,7 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 
 	function spellmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's buffs", label)
+		win.title = format(L["%s's buffs"], label)
 	end
 
 	function spellmod:Update(win, set)
@@ -436,19 +436,33 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 			-- let's now check for buffs put before the combat started.
 			local prefix, min_member, max_member = Skada:GetGroupTypeAndCount()
 
-			for n = min_member, max_member do
-				local unit = (n == 0) and "player" or prefix .. tostring(n)
-				if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
-					local dstGUID, dstName = UnitGUID(unit), UnitName(unit)
-					for i = 1, 40 do
-						local rank, _, _, _, _, _, unitCaster, _, _, spellid = select(2, UnitBuff(unit, i))
-						if spellid then
-							if unitCaster and rank ~= SPELL_PASSIVE and not blacklist[spellid] then
-								AuraApplied(nil, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, nil, nil, "BUFF")
+			if prefix then
+				for n = min_member, max_member do
+					local unit = (n == 0) and "player" or prefix .. tostring(n)
+					if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
+						local dstGUID, dstName = UnitGUID(unit), UnitName(unit)
+						for i = 1, 40 do
+							local rank, _, _, _, _, _, unitCaster, _, _, spellid = select(2, UnitBuff(unit, i))
+							if spellid then
+								if unitCaster and rank ~= SPELL_PASSIVE and not blacklist[spellid] then
+									AuraApplied(nil, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, nil, nil, "BUFF")
+								end
+							else
+								break -- no buff at all
 							end
-						else
-							break -- no buff at all
 						end
+					end
+				end
+			else
+				local dstGUID, dstName = UnitGUID("player"), UnitName("player")
+				for i = 1, 40 do
+					local rank, _, _, _, _, _, unitCaster, _, _, spellid = select(2, UnitBuff("player", i))
+					if spellid then
+						if unitCaster and rank ~= SPELL_PASSIVE and not blacklist[spellid] then
+							AuraApplied(nil, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, nil, nil, "BUFF")
+						end
+					else
+						break -- no buff at all
 					end
 				end
 			end
@@ -515,14 +529,14 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = L:F("%s's <%s> targets", win.playername or UNKNOWN, label)
+		win.title = format(L["%s's <%s> targets"], win.playername or UNKNOWN, label)
 	end
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = L:F("%s's <%s> targets", player.name, win.spellname or UNKNOWN)
+			win.title = format(L["%s's <%s> targets"], player.name, win.spellname or UNKNOWN)
 
 			local total = 0
 			if player.auras and player.auras[win.spellid] then
@@ -556,7 +570,7 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 
 	function spellmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's debuffs", label)
+		win.title = format(L["%s's debuffs"], label)
 	end
 
 	function spellmod:Update(win, set)

@@ -1,7 +1,6 @@
 --[[ Translator: NGL#7282 ]] --
-local _, Skada = ...
-if Skada.locale ~= "ruRU" then return end
-local L = Skada.L
+local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "ruRU", false)
+if not L then return end
 
 L["A damage meter."] = "Измеритель урона."
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "Использование памяти слишком велико. Вы можете сбросить данные Skada и включить один из вариантов автоматического сброса."
@@ -651,6 +650,7 @@ L["Overkill target list"] = "Цели избыточного урона"
 L["%s's overkill spells"] = "Заклинания избыточного урона - %s"
 L["%s's overkill targets"] = "Цели избыточного урона - %s"
 -- tweaks module lines --
+L["Improvement"] = "Улучшение"
 L["Tweaks"] = "Настройки"
 L["First hit"] = "Первый удар"
 L["|cffffff00First Hit|r: %s from %s"] = "|cffffff00Первый удар|r: %s от %s"

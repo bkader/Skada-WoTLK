@@ -1,4 +1,4 @@
-local _, Skada = ...
+assert(Skada, "Skada not found!")
 
 local CCSpells = {
 	[118] = true, -- Polymorph (rank 1)
@@ -247,14 +247,14 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's CC Done spells", label)
+		win.title = format(L["%s's CC Done spells"], label)
 	end
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = L:F("%s's CC Done spells", player.name)
+			win.title = format(L["%s's CC Done spells"], player.name)
 			local total = player.ccdone or 0
 
 			if total > 0 and player.ccdone_spells then
@@ -290,14 +290,14 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's CC Done targets", label)
+		win.title = format(L["%s's CC Done targets"], label)
 	end
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = L:F("%s's CC Done targets", player.name)
+			win.title = format(L["%s's CC Done targets"], player.name)
 			local total = player.ccdone or 0
 
 			if total > 0 and player.ccdone_targets then
@@ -332,14 +332,14 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 	function targetpellmod:Enter(win, id, label)
 		win.targetname = label
-		win.title = L:F("%s's CC Done <%s> spells", win.playername or UNKNOWN, label)
+		win.title = format(L["%s's CC Done <%s> spells"], win.playername or UNKNOWN, label)
 	end
 
 	function targetpellmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = L:F("%s's CC Done <%s> spells", player.name, win.targetname or UNKNOWN)
+			win.title = format(L["%s's CC Done <%s> spells"], player.name, win.targetname or UNKNOWN)
 			local total = player.ccdone or 0
 
 			if total > 0 and player.ccdone_targets and player.ccdone_targets[win.targetname] then
@@ -500,14 +500,14 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's CC Taken spells", label)
+		win.title = format(L["%s's CC Taken spells"], label)
 	end
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = L:F("%s's CC Taken spells", player.name)
+			win.title = format(L["%s's CC Taken spells"], player.name)
 			local total = player.cctaken or 0
 
 			if total > 0 and player.cctaken_spells then
@@ -543,14 +543,14 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 	function sourcemod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's CC Taken sources", label)
+		win.title = format(L["%s's CC Taken sources"], label)
 	end
 
 	function sourcemod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = L:F("%s's CC Taken sources", player.name)
+			win.title = format(L["%s's CC Taken sources"], player.name)
 			local total = player.cctaken or 0
 
 			if total > 0 and player.cctaken_sources then
@@ -585,14 +585,14 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 	function sourcespellmod:Enter(win, id, label)
 		win.targetname = label
-		win.title = L:F("%s's CC Taken <%s> sources", win.playername or UNKNOWN, label)
+		win.title = format(L["%s's CC Taken <%s> sources"], win.playername or UNKNOWN, label)
 	end
 
 	function sourcespellmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = L:F("%s's CC Taken <%s> sources", player.name, win.targetname or UNKNOWN)
+			win.title = format(L["%s's CC Taken <%s> sources"], player.name, win.targetname or UNKNOWN)
 			local total = player.cctaken or 0
 
 			if total > 0 and player.cctaken_sources and player.cctaken_sources[win.targetname] then
@@ -786,23 +786,23 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 			-- Go ahead and announce it.
 			if extraspellname then
-				SendChatMessage(L:F("%s on %s removed by %s's %s", spellname, dstName, srcName, GetSpellLink(extraspellid)), "RAID")
+				SendChatMessage(format(L["%s on %s removed by %s's %s"], spellname, dstName, srcName, GetSpellLink(extraspellid)), "RAID")
 			else
-				SendChatMessage(L:F("%s on %s removed by %s", spellname, dstName, srcName), "RAID")
+				SendChatMessage(format(L["%s on %s removed by %s"], spellname, dstName, srcName), "RAID")
 			end
 		end
 	end
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's CC Break spells", label)
+		win.title = format(L["%s's CC Break spells"], label)
 	end
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = L:F("%s's CC Break spells", player.name)
+			win.title = format(L["%s's CC Break spells"], player.name)
 			local total = player.ccbreak or 0
 
 			if total > 0 and player.ccbreak_spells then
@@ -838,14 +838,14 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's CC Break targets", label)
+		win.title = format(L["%s's CC Break targets"], label)
 	end
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = L:F("%s's CC Break targets", player.name)
+			win.title = format(L["%s's CC Break targets"], player.name)
 			local total = player.ccbreak or 0
 
 			if total > 0 and player.ccbreak_targets then
@@ -880,14 +880,14 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 	function targetspellmod:Enter(win, id, label)
 		win.targetname = label
-		win.title = L:F("%s's CC Break <%s> spells", win.playername or UNKNOWN, label)
+		win.title = format(L["%s's CC Break <%s> spells"], win.playername or UNKNOWN, label)
 	end
 
 	function targetspellmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 
 		if player then
-			win.title = L:F("%s's CC Break <%s> spells", player.name, win.targetname or UNKNOWN)
+			win.title = format(L["%s's CC Break <%s> spells"], player.name, win.targetname or UNKNOWN)
 			local total = player.ccbreak or 0
 
 			if total > 0 and player.ccbreak_targets and player.ccbreak_targets[win.targetname] then

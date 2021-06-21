@@ -4,7 +4,7 @@ Authors: Wrug and Cybey
 URL: https://www.curseforge.com/wow/addons/spamagemeters
 ]] --
 
-local _, Skada = ...
+assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Spamage", "Suppresses chat messages from damage meters and provides single chat-link damage statistics in a popup.", function(Skada, L)
 	if Skada:IsDisabled("Spamage") then return end
 
@@ -304,7 +304,7 @@ Skada:AddLoadableModule("Spamage", "Suppresses chat messages from damage meters 
 
 			ItemRefTooltip:ClearLines()
 			ItemRefTooltip:AddLine(meters[meterid].title)
-			ItemRefTooltip:AddLine(L:F("Reported by: %s", meters[meterid].src))
+			ItemRefTooltip:AddLine(format(L["Reported by: %s"], meters[meterid].src))
 
 			for _, line in ipairs(meters[meterid].data) do
 				ItemRefTooltip:AddLine(line, 1, 1, 1)

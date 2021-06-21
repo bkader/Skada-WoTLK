@@ -1,8 +1,9 @@
-local _, Skada = ...
+assert(Skada, "Skada not found!")
 
 -- cache frequently used globals
 local pairs, select, format, max = pairs, select, string.format, math.max
 local GetSpellInfo, UnitClass = Skada.GetSpellInfo or GetSpellInfo, Skada.UnitClass
+local _
 
 -- ============== --
 -- Healing module --
@@ -138,13 +139,13 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's healing spells", label)
+		win.title = format(L["%s's healing spells"], label)
 	end
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = L:F("%s's healing spells", player.name)
+			win.title = format(L["%s's healing spells"], player.name)
 			local total = select(2, getHPS(set, player))
 
 			if total > 0 and player.heal_spells then
@@ -183,13 +184,13 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's healed players", label)
+		win.title = format(L["%s's healed players"], label)
 	end
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = L:F("%s's healed players", player.name)
+			win.title = format(L["%s's healed players"], player.name)
 			local total = getHPS(set, player)
 
 			if total > 0 and player.heal_targets then
@@ -307,13 +308,13 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 
 	function spellsmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's overheal spells", label)
+		win.title = format(L["%s's overheal spells"], label)
 	end
 
 	function spellsmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = L:F("%s's overheal spells", player.name)
+			win.title = format(L["%s's overheal spells"], player.name)
 
 			if player.heal_spells then
 				local maxvalue, nr = 0, 1
@@ -354,13 +355,13 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 
 	function playersmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's overhealed players", label)
+		win.title = format(L["%s's overhealed players"], label)
 	end
 
 	function playersmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = L:F("%s's overhealed players", player.name)
+			win.title = format(L["%s's overhealed players"], player.name)
 
 			if player.heal_targets then
 				local maxvalue, nr = 0, 1
@@ -508,13 +509,13 @@ Skada:AddLoadableModule("Total Healing", function(Skada, L)
 
 	function spellsmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's healing spells", label)
+		win.title = format(L["%s's healing spells"], label)
 	end
 
 	function spellsmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = L:F("%s's healing spells", player.name)
+			win.title = format(L["%s's healing spells"], player.name)
 			local total = (player.heal or 0) + (player.overheal or 0)
 
 			if total > 0 and player.heal_spells then
@@ -557,13 +558,13 @@ Skada:AddLoadableModule("Total Healing", function(Skada, L)
 
 	function playersmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's healed players", label)
+		win.title = format(L["%s's healed players"], label)
 	end
 
 	function playersmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = L:F("%s's healed players", player.name)
+			win.title = format(L["%s's healed players"], player.name)
 			local total = (player.heal or 0) + (player.overheal or 0)
 
 			if total > 0 and player.heal_targets then
@@ -681,13 +682,13 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
 
 	function spellmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's heal and overheal spells", label)
+		win.title = format(L["%s's heal and overheal spells"], label)
 	end
 
 	function spellmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = L:F("%s's heal and overheal spells", player.name)
+			win.title = format(L["%s's heal and overheal spells"], player.name)
 			local total = (player.heal or 0) + (player.overheal or 0)
 
 			if total > 0 and player.heal_spells then
@@ -732,13 +733,13 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's healed and overhealed players", label)
+		win.title = format(L["%s's healed and overhealed players"], label)
 	end
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = L:F("%s's healed and overhealed players", player.name)
+			win.title = format(L["%s's healed and overhealed players"], player.name)
 			local total = (player.heal or 0) + (player.overheal or 0)
 
 			if total > 0 and player.heal_targets then
@@ -856,13 +857,13 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's received healing", label)
+		win.title = format(L["%s's received healing"], label)
 	end
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = L:F("%s's received healing", player.name)
+			win.title = format(L["%s's received healing"], player.name)
 
 			local total, sources = 0, {}
 

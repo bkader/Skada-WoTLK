@@ -1,12 +1,11 @@
-local _, addon = ...
-local Skada = LibStub("AceAddon-3.0"):NewAddon(addon, "Skada", "AceEvent-3.0", "AceHook-3.0", "AceComm-3.0", "LibCompat-1.0")
+local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceConsole-3.0", "AceEvent-3.0", "AceHook-3.0", "AceComm-3.0", "LibCompat-1.0")
 _G.Skada = Skada
 
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
 Skada.version = GetAddOnMetadata("Skada", "Version")
 Skada.website = GetAddOnMetadata("Skada", "X-Website")
 
-local L = Skada.L
+local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 local ACD = LibStub("AceConfigDialog-3.0")
 local DBI = LibStub("LibDBIcon-1.0", true)
 local LBB = LibStub("LibBabble-Boss-3.0"):GetUnstrictLookupTable()
@@ -961,10 +960,6 @@ do
 		return msg
 	end
 
-	function Skada:Print(...)
-		print("|cff33ff99Skada|r: " .. formatMsg(...))
-	end
-
 	function Skada:Debug(...)
 		if self.db.profile.debug then
 			print("|cff33ff99Skada Debug|r: " .. formatMsg(...))
@@ -1338,7 +1333,9 @@ do
 				elseif Skada:IsCreature(player.id, player.flags) then
 					player.class = "MONSTER"
 				elseif Skada:IsPlayer(player.id, player.flags, player.name) then
-					player.class = select(2, Skada.UnitClass(player.id, player.flags))
+					local class = select(2, UnitClass(player.name))
+					class = class or select(2, Skada.UnitClass(player.id, player.flags))
+					player.class = class
 				else
 					player.class = "UNKNOWN"
 				end
@@ -1929,7 +1926,7 @@ do
 
 		local title = (window and window.title) or report_mode.title or report_mode:GetName()
 		local label = (report_mode_name == L["Improvement"]) and UnitName("player") or Skada:GetSetLabel(report_set)
-		sendchat(L:F("Skada: %s for %s:", title, label), channel, chantype)
+		sendchat(format(L["Skada: %s for %s:"], title, label), channel, chantype)
 
 		local nr, maxlines = 1, maxlines or 10
 		for _, data in ipairs(report_table.dataset) do
@@ -2067,7 +2064,7 @@ do
 			end
 
 			if (version > ver) then
-				self:Print(L:F("Skada is out of date. You can download the newest version from |cffffbb00%s|r", self.website))
+				self:Print(format(L["Skada is out of date. You can download the newest version from |cffffbb00%s|r"], self.website))
 			elseif (version < ver) then
 				self:SendComm("WHISPER", sender, "VersionCheck", self.version)
 			end

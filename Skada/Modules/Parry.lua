@@ -1,4 +1,4 @@
-local _, Skada = ...
+assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 	if Skada:IsDisabled("Parry-Haste") then return end
 
@@ -52,13 +52,13 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's parry targets", label)
+		win.title = format(L["%s's parry targets"], label)
 	end
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = L:F("%s's parry targets", player.name)
+			win.title = format(L["%s's parry targets"], player.name)
 			local total = player.parry or 0
 
 			if total > 0 and player.parry_targets then

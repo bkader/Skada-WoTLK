@@ -1,7 +1,7 @@
-local _, Skada = ...
+assert(Skada, "Skada not found!")
 
 local mod = Skada:NewModule("BarDisplay", "SpecializedLibBars-1.0")
-local L = Skada.L
+local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 local libwindow = LibStub("LibWindow-1.1")
 local FlyPaper = LibStub:GetLibrary("LibFlyPaper-1.1", true)
 local LSM = LibStub("LibSharedMedia-3.0")
@@ -294,10 +294,8 @@ function mod:OnMouseWheel(_, frame, direction)
 
 	if direction == 1 and offset > 0 then
 		win.bargroup:SetBarOffset(offset - 1)
-		mod:Update(win)
 	elseif direction == -1 and ((numbars - maxbars - offset) > 0) then
 		win.bargroup:SetBarOffset(offset + 1)
-		mod:Update(win)
 	end
 end
 
@@ -317,29 +315,27 @@ do
 				frame.win.db.sticked[group.win.db.name] = true
 				group.win.db.sticked[name] = nil
 
-				local scale = frame.win.db.scale or 1
-
 				-- bar spacing first
-				group.win.db.barspacing = frame.win.db.barspacing * scale
+				group.win.db.barspacing = frame.win.db.barspacing
 				group:SetSpacing(group.win.db.barspacing)
 
 				-- change the width of the window accordingly
 				if Yanchors[anchor] then
 					-- we change things related to height
-					group.win.db.barwidth = frame.win.db.barwidth * scale
+					group.win.db.barwidth = frame.win.db.barwidth
 					group:SetLength(group.win.db.barwidth)
 				elseif Xanchors[anchor] then
 					-- window height
-					group.win.db.background.height = frame.win.db.background.height * scale
+					group.win.db.background.height = frame.win.db.background.height
 					group:SetHeight(group.win.db.background.height)
 
 					-- title bar height
-					group.win.db.title.height = frame.win.db.title.height * scale
+					group.win.db.title.height = frame.win.db.title.height
 					group.button:SetHeight(group.win.db.title.height)
 					group:AdjustButtons()
 
 					-- bars height
-					group.win.db.barheight = frame.win.db.barheight * scale
+					group.win.db.barheight = frame.win.db.barheight
 					group:SetBarHeight(group.win.db.barheight)
 
 					group:SortBars()
@@ -541,15 +537,9 @@ do
 			end
 		end
 
-		local maxbars = win.bargroup:GetMaxBars()
-		local offset = win.bargroup:GetBarOffset()
 		local nr = 1
-
-		local index, data
-		for i = 0, maxbars do
-			index = i + offset
-			data = win.dataset[index]
-			if data and data.id then
+		for i, data in ipairs(win.dataset) do
+			if data.id then
 				local barid = data.id
 				local barlabel = data.label
 
@@ -703,7 +693,7 @@ do
 				end
 
 				if not data.ignore then
-					nr = index + 1
+					nr = nr + 1
 				end
 			end
 		end

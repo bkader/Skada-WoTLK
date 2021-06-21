@@ -1,4 +1,4 @@
-local _, Skada = ...
+assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Resources", function(Skada, L)
 	if Skada:IsDisabled("Resources") then return end
 
@@ -6,6 +6,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 
 	local pairs, format = pairs, string.format
 	local setmetatable, GetSpellInfo = setmetatable, Skada.GetSpellInfo or GetSpellInfo
+	local _
 
 	local locales = {[0] = MANA, [1] = RAGE, [3] = ENERGY, [6] = RUNIC_POWER}
 
@@ -146,12 +147,12 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 	-- player mods common Enter function.
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's gained %s", label, locales[self.power])
+		win.title = format(L["%s's gained %s"], label, locales[self.power])
 	end
 
 	-- player mods main update function
 	function playermod:Update(win, set)
-		win.title = L:F("%s's gained %s", win.playername or UNKNOWN, self.power and locales[self.power] or UNKNOWN)
+		win.title = format(L["%s's gained %s"], win.playername or UNKNOWN, self.power and locales[self.power] or UNKNOWN)
 		local player = Skada:find_player(set, win.playerid)
 		if player then
 			local total = 0

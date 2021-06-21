@@ -1,4 +1,4 @@
-local _, Skada = ...
+assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	if Skada:IsDisabled("Interrupts") then return end
 
@@ -6,7 +6,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	local spellmod = mod:NewModule(L["Interrupted spells"])
 	local targetmod = mod:NewModule(L["Interrupted targets"])
 	local playermod = mod:NewModule(L["Interrupt spells"])
-	local playerid
+	local playerid, _
 
 	-- cache frequently used globals
 	local pairs, select, format, max = pairs, select, string.format, math.max
@@ -72,7 +72,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 			local channel = Skada.db.profile.modules.interruptchannel or "SAY"
 			if channel == "SELF" then
-				Skada:Print(L:F("%s interrupted!", spelllink or dstName))
+				Skada:Print(format(L["%s interrupted!"], spelllink or dstName))
 				return
 			end
 
@@ -87,19 +87,19 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 				end
 			end
 
-			SendChatMessage(L:F("%s interrupted!", spelllink or dstName), channel)
+			SendChatMessage(format(L["%s interrupted!"], spelllink or dstName), channel)
 		end
 	end
 
 	function spellmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's interrupted spells", label)
+		win.title = format(L["%s's interrupted spells"], label)
 	end
 
 	function spellmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid)
 		if player then
-			win.title = L:F("%s's interrupted spells", player.name)
+			win.title = format(L["%s's interrupted spells"], player.name)
 			local total = player.interrupt or 0
 
 			if total > 0 and player.interrupt_ispells then
@@ -134,13 +134,13 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's interrupted targets", label)
+		win.title = format(L["%s's interrupted targets"], label)
 	end
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid)
 		if player then
-			win.title = L:F("%s's interrupted targets", player.name)
+			win.title = format(L["%s's interrupted targets"], player.name)
 			local total = player.interrupt or 0
 
 			if total > 0 and player.interrupt_targets then
@@ -174,13 +174,13 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = L:F("%s's interrupt spells", label)
+		win.title = format(L["%s's interrupt spells"], label)
 	end
 
 	function playermod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid)
 		if player then
-			win.title = L:F("%s's interrupt spells", player.name)
+			win.title = format(L["%s's interrupt spells"], player.name)
 			local total = player.interrupt or 0
 
 			if total > 0 and player.interrupt_spells then

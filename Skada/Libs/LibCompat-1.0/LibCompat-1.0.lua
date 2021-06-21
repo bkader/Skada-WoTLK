@@ -7,7 +7,9 @@
 local MAJOR, MINOR = "LibCompat-1.0", 2
 
 local LibCompat, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
-if not LibCompat then return end
+if not LibCompat then
+	return
+end
 
 LibCompat.embeds = LibCompat.embeds or {}
 
@@ -55,7 +57,8 @@ function LibCompat:IsGroupDead()
 	local prefix, min_member, max_member = self:GetGroupTypeAndCount()
 	if prefix then
 		for i = min_member, max_member do
-			if UnitExists(prefix .. i) and not UnitIsDeadOrGhost(prefix .. i) then
+			local unit = (i == 0) and "player" or prefix .. i
+			if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
 				return false
 			end
 		end
@@ -72,7 +75,8 @@ function LibCompat:IsGroupInCombat()
 	local prefix, min_member, max_member = self:GetGroupTypeAndCount()
 	if prefix then
 		for i = min_member, max_member do
-			if UnitExists(prefix .. i) and UnitAffectingCombat(prefix .. i) then
+			local unit = (i == 0) and "player" or prefix .. i
+			if UnitExists(unit) and UnitAffectingCombat(unit) then
 				return true
 			end
 		end
@@ -250,44 +254,12 @@ end
 
 -------------------------------------------------------------------------------
 
-do
-	local ceil, floor = math.ceil, math.floor
-
-	function LibCompat.Round(val)
-		return (val < 0) and ceil(val - 0.5) or floor(val + 0.5)
-	end
-
-	function LibCompat.Clamp(val, minval, maxval)
-		return (val > maxval) and maxval or (val < minval) and minval or val
-	end
-end
-
--------------------------------------------------------------------------------
-
 function LibCompat.tlength(tbl)
 	local len = 0
 	for _ in pairs(tbl) do
 		len = len + 1
 	end
 	return len
-end
-
-function LibCompat.tIndexOf(tbl, item)
-	for i, v in ipairs(tbl) do
-		if item == v then
-			return i
-		end
-	end
-end
-
-function LibCompat.tContains(tbl, item)
-	return LibCompat.tIndexOf(tbl, item) ~= nil
-end
-
-function LibCompat.tAppendAll(tbl, elems)
-	for _, elem in ipairs(elems) do
-		tinsert(tbl, elem)
-	end
 end
 
 -- copies a table from another
@@ -311,16 +283,6 @@ function LibCompat.tCopy(to, from, ...)
 			end
 		end
 	end
-end
-
-function LibCompat.SafePack(...)
-	local tbl = {...}
-	tbl.n = select("#", ...)
-	return tbl
-end
-
-function LibCompat.SafeUnpack(tbl)
-	return unpack(tbl, 1, tbl.n)
 end
 
 -------------------------------------------------------------------------------
@@ -353,15 +315,8 @@ local mixins = {
 	"GetClassColorsTable",
 	"GetSpellInfo",
 	"GetSpellLink",
-	"Round",
-	"Clamp",
 	"tlength",
-	"tIndexOf",
-	"tContains",
-	"tAppendAll",
 	"tCopy",
-	"SafePack",
-	"SafeUnpack",
 	"EscapeStr"
 }
 

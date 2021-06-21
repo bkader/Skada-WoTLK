@@ -1,6 +1,6 @@
-local _, Skada = ...
-if Skada.locale ~= "frFR" then return end
-local L = Skada.L
+--[[ Translator: Kader B ]] --
+local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "frFR", false)
+if not L then return end
 
 L["A damage meter."] = "Un \"damage meter\"."
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "L'utilisation de la mémoire est élevée. Vous devriez réinitialiser Skada et activer une des options de réinitialisation automatique."
@@ -653,6 +653,7 @@ L["Overkill target list"] = "Cibles des dégâts excessifs"
 L["%s's overkill spells"] = "Sorts des dégâts excessifs de %s"
 L["%s's overkill targets"] = "Cibles des dégâts excessifs de %s"
 -- tweaks module lines --
+L["Improvement"] = "Amélioration"
 L["Tweaks"] = "Ajustements"
 L["First hit"] = "Première attaque"
 L["|cffffff00First Hit|r: %s from %s"] = "|cffffff00Première attaque|r: %s de %s"

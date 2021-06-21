@@ -1,4 +1,4 @@
-local _, Skada = ...
+assert(Skada, "Skada not found!")
 Skada:AddLoadableModule("Threat", function(Skada, L)
 	if Skada:IsDisabled("Threat") then return end
 
@@ -138,14 +138,21 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				maxthreat = 0
 
 				local prefix, min_member, max_member = Skada:GetGroupTypeAndCount()
-				for i = min_member, max_member do
-					local unit = (i == 0) and "player" or prefix .. tostring(i)
-					if UnitExists(unit) then
-						add_to_threattable(win, unit, target)
+				if prefix then
+					for i = min_member, max_member do
+						local unit = (i == 0) and "player" or prefix .. tostring(i)
+						if UnitExists(unit) then
+							add_to_threattable(win, unit, target)
 
-						if UnitExists(unit .. "pet") then
-							add_to_threattable(win, unit .. "pet", target)
+							if UnitExists(unit .. "pet") then
+								add_to_threattable(win, unit .. "pet", target)
+							end
 						end
+					end
+				else
+					add_to_threattable(win, "player", target)
+					if UnitExists("playerpet") then
+						add_to_threattable(win, "playerpet", target)
 					end
 				end
 

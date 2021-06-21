@@ -1,6 +1,5 @@
-local _, Skada = ...
-if Skada.locale ~= "koKR" then return end
-local L = Skada.L
+local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "koKR", false)
+if not L then return end
 
 L["A damage meter."] = "데미지 미터기입니다."
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "메모리 사용량이 높습니다. Skada 초기화가 필요할 수 있으며, 자동 초기화 옵션 중 하나를 활성화하세요."
@@ -651,6 +650,7 @@ L["Overkill target list"] = "과도한 피해 대상"
 L["%s's overkill spells"] = "%s의 과도한 피해 주문"
 L["%s's overkill targets"] = "%s의 과도한 피해 대상"
 -- tweaks module lines --
+-- L["Improvement"] = ""
 L["Tweaks"] = "개선"
 L["First hit"] = "첫 번째 히트"
 L["|cffffff00First Hit|r: %s from %s"] = "|cffffff00첫 번째 히트|r: %2$s의 %1$s"
