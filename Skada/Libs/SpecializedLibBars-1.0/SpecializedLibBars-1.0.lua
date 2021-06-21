@@ -706,7 +706,7 @@ function barListPrototype:IsLocked()
 end
 
 function barListPrototype:SetMaxBars(num)
-	self.maxBars = num
+	self.maxBars = floor(num)
 end
 
 function barListPrototype:GetMaxBars()
@@ -1100,8 +1100,7 @@ do
 		local thickness, showIcon = self.thickness, self.showIcon
 		local offset = self.offset
 		local x1, y1, x2, y2 = 0, startpoint, 0, startpoint
-		local maxbars = min(#values, floor((self:GetHeight() - startpoint) / (thickness + spacing)))
-		self:SetMaxBars(maxbars)
+		local maxbars = min(#values, self:GetMaxBars())
 
 		local start, stop, step, fixnum
 		if growup then

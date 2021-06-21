@@ -175,7 +175,7 @@ function mod:Create(window)
 
 	local maxbars = window.db.background.height / (window.db.barheight + window.db.barspacing)
 	if window.db.enabletitle then maxbars = maxbars - 1 end
-	bargroup:SetMaxBars(math.floor(maxbars))
+	bargroup:SetMaxBars(maxbars)
 
 	window.bargroup = bargroup
 
@@ -306,7 +306,7 @@ do
 
 		if direction == 1 and offset > 0 then
 			win.bargroup:SetBarOffset(offset - 1)
-		elseif direction == -1 and ((numbars - maxbars - offset + 1) > 0) then
+		elseif direction == -1 and ((numbars - maxbars - offset) > 0) then
 			win.bargroup:SetBarOffset(offset + 1)
 		end
 	end
@@ -899,6 +899,11 @@ do
 			g.button:SetScript("OnMouseDown", move)
 			g.button:SetScript("OnMouseUp", stopMove)
 		end
+
+		-- update max bars as well
+		local maxbars = p.background.height / (p.barheight + p.barspacing)
+		if p.enabletitle then maxbars = maxbars - 1 end
+		g:SetMaxBars(maxbars)
 
 		g:SetEnableMouse(not p.clickthrough)
 		g:SetClampedToScreen(p.clamped)
