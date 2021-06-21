@@ -135,6 +135,10 @@ function mod:Create(window)
 		)
 	end
 	bargroup.win = window
+
+	bargroup.RegisterCallback(mod, "BarClick")
+	bargroup.RegisterCallback(mod, "BarEnter")
+	bargroup.RegisterCallback(mod, "BarLeave")
 	bargroup.RegisterCallback(mod, "AnchorMoved")
 	bargroup.RegisterCallback(mod, "WindowResizing")
 	bargroup.RegisterCallback(mod, "WindowResized")
@@ -222,6 +226,30 @@ end
 
 function mod:SetTitle(win, title)
 	win.bargroup.button:SetText(title)
+end
+
+do
+	local ttactive = false
+	local barbackdrop = {bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16}
+
+	function mod:BarEnter(_, bar, motion)
+		local win, id, label = bar.win, bar.id, bar.text
+		ttactive = true
+		Skada:SetTooltipPosition(GameTooltip, win.bargroup, win.db.display)
+		Skada:ShowTooltip(win, id, label)
+		if not win.db.disablehighlight then
+			bar:SetBackdrop(barbackdrop)
+			bar:SetBackdropColor(0.7, 0.7, 0.7, 0.6)
+		end
+	end
+
+	function mod:BarLeave(_, bar, motion)
+		if ttactive then
+			GameTooltip:Hide()
+			ttactive = false
+		end
+		bar:SetBackdrop(nil)
+	end
 end
 
 do
@@ -383,7 +411,7 @@ do
 		end
 	end
 
-	local function BarClick(bar, button)
+	function mod:BarClick(_, bar, button)
 		local win, id, label = bar.win, bar.id, bar.text
 
 		if button == "RightButton" and IsShiftKeyDown() then
@@ -403,28 +431,6 @@ do
 		elseif win.metadata.click1 and not ignoredClick(win, win.metadata.click1) then
 			showmode(win, id, label, win.metadata.click1)
 		end
-	end
-
-	local ttactive = false
-	local barbackdrop = {bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16}
-
-	local function BarEnter(bar)
-		local win, id, label = bar.win, bar.id, bar.text
-		ttactive = true
-		Skada:SetTooltipPosition(GameTooltip, win.bargroup, win.db.display)
-		Skada:ShowTooltip(win, id, label)
-		if not win.db.disablehighlight then
-			bar:SetBackdrop(barbackdrop)
-			bar:SetBackdropColor(0.7, 0.7, 0.7, 0.6)
-		end
-	end
-
-	local function BarLeave(bar)
-		if ttactive then
-			GameTooltip:Hide()
-			ttactive = false
-		end
-		bar:SetBackdrop(nil)
 	end
 
 	local function BarResize(bar)
@@ -556,14 +562,13 @@ do
 						end
 
 						bar:EnableMouse(true)
-						bar:SetScript("OnEnter", BarEnter)
-						bar:SetScript("OnLeave", BarLeave)
-						bar:SetScript("OnMouseDown", BarClick)
 					else
 						bar:SetScript("OnEnter", nil)
 						bar:SetScript("OnLeave", nil)
 						bar:SetScript("OnMouseDown", BarClickIgnore)
+						bar:EnableMouse(false)
 					end
+
 					bar:SetValue(data.value)
 
 					if not data.class and (win.db.classicons or win.db.classcolorbars or win.db.classcolortext) then

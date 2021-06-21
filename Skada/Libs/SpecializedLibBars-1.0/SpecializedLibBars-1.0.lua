@@ -18,9 +18,7 @@ local abs, min, max, floor = _G.math.abs, _G.math.min, _G.math.max, _G.math.floo
 local tsort, tinsert, tremove, tconcat = _G.table.sort, tinsert, tremove, _G.table.concat
 local next, pairs, assert, error, type, xpcall = next, pairs, assert, error, type, xpcall
 
---[[
-   xpcall safecall implementation
-]]
+--[[ xpcall safecall implementation ]]--
 local function errorhandler(err)
 	return geterrorhandler()(err)
 end
@@ -39,7 +37,7 @@ local function CreateDispatcher(argCount)
 	end
 
 	return dispatch
-  ]]
+	]]
 
 	local ARGS = {}
 	for i = 1, argCount do
@@ -539,11 +537,7 @@ do
 			local p = self:GetParent()
 			if (button == "LeftButton") then
 				p.isResizing = true
-				if p.growup then
-					p:StartSizing("TOPRIGHT")
-				else
-					p:StartSizing("BOTTOMRIGHT")
-				end
+				p:StartSizing(p.growup and "TOPRIGHT" or "BOTTOMRIGHT")
 
 				p:SetScript("OnUpdate", function()
 					if p.isResizing then
@@ -581,11 +575,7 @@ do
 			local p = self:GetParent()
 			if (button == "LeftButton") then
 				p.isResizing = true
-				if p.growup then
-					p:StartSizing("TOPLEFT")
-				else
-					p:StartSizing("BOTTOMLEFT")
-				end
+				p:StartSizing(p.growup and "TOPLEFT" or "BOTTOMLEFT")
 
 				p:SetScript("OnUpdate", function()
 					if p.isResizing then
@@ -1185,18 +1175,25 @@ end
 ---[[ Bar methods ]] ---
 do
 	local function barClick(self, button)
-		self:GetParent().callbacks:Fire("BarClick", self:GetParent(), button)
-	end
-	local function barEnter(self, button)
-		self:GetParent().callbacks:Fire("BarEnter", self:GetParent(), button)
-	end
-	local function barLeave(self, button)
-		self:GetParent().callbacks:Fire("BarLeave", self:GetParent(), button)
+		self:GetParent().callbacks:Fire("BarClick", self, button)
 	end
 
-	local DEFAULT_ICON = 134400
+	local function barEnter(self, motion)
+		self:GetParent().callbacks:Fire("BarEnter", self, motion)
+	end
+
+	local function barLeave(self, motion)
+		self:GetParent().callbacks:Fire("BarLeave", self, motion)
+	end
+
+	local DEFAULT_ICON = [[Interface\Icons\INV_Misc_QuestionMark]]
 	function barPrototype:Create(text, value, maxVal, icon, orientation, length, thickness)
 		self.callbacks = self.callbacks or CallbackHandler:New(self)
+
+		self:SetScript("OnMouseDown", barClick)
+		self:SetScript("OnEnter", barEnter)
+		self:SetScript("OnLeave", barLeave)
+
 		self:SetScript("OnSizeChanged", self.OnSizeChanged)
 		self.texture = self.texture or self:CreateTexture(nil, "ARTWORK")
 
