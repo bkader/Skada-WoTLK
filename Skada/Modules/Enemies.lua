@@ -37,8 +37,8 @@ function Skada:get_enemy(set, guid, name, flags)
 
 			enemy = {id = guid or name, name = name}
 
-			if (guid and flags) then
-				enemy.class = select(2, UnitClass(guid, flags))
+			if guid or flags then
+				enemy.class = select(2, UnitClass(guid, flags, set))
 			else
 				enemy.class = "ENEMY"
 			end
@@ -180,10 +180,8 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 				if not e.damagetaken_sources[playername] then
 					e.damagetaken_sources[playername] = {id = playerid, amount = amount}
 				else
+					e.damagetaken_sources[playername].id = e.damagetaken_sources[playername].id or playerid -- GUID fix
 					e.damagetaken_sources[playername].amount = e.damagetaken_sources[playername].amount + amount
-					if not e.damagetaken_sources[playername].id and playerid then
-						e.damagetaken_sources[playername].id = playerid
-					end
 				end
 			end
 		end
@@ -206,10 +204,8 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 				if not e.damagetaken_sources[dmg.srcName] then
 					e.damagetaken_sources[dmg.srcName] = {id = dmg.srcGUID, amount = dmg.amount}
 				else
+					e.damagetaken_sources[dmg.srcName].id = e.damagetaken_sources[dmg.srcName].id or dmg.srcGUID -- GUID fix
 					e.damagetaken_sources[dmg.srcName].amount = e.damagetaken_sources[dmg.srcName].amount + dmg.amount
-					if not e.damagetaken_sources[dmg.srcName].id and dmg.srcGUID then
-						e.damagetaken_sources[dmg.srcName].id = dmg.srcGUID
-					end
 				end
 
 				if validTarget[dmg.enemyname] then
@@ -498,7 +494,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 	local enemymod = mod:NewModule(L["Damage taken per player"])
 	local spellmod = mod:NewModule(L["Damage spell list"])
 
-	local function log_damage(set, dmg, tick)
+	local function log_damage(set, dmg)
 		local e = Skada:get_enemy(set, dmg.enemyid, dmg.enemyname, dmg.enemyflags)
 		if e then
 			e.damage = (e.damage or 0) + dmg.amount
@@ -515,6 +511,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 				if not e.damage_targets[dmg.dstName] then
 					e.damage_targets[dmg.dstName] = {id = dmg.dstGUID, amount = dmg.amount}
 				else
+					e.damage_targets[dmg.dstName].id = e.damage_targets[dmg.dstName].id or dmg.dstGUID -- GUID fix
 					e.damage_targets[dmg.dstName].amount = e.damage_targets[dmg.dstName].amount + dmg.amount
 				end
 			end

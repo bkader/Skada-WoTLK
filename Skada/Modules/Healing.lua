@@ -65,6 +65,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 					target = {id = data.dstGUID, amount = amount, overheal = data.overheal}
 					player.heal_targets[data.dstName] = target
 				else
+					target.id = target.id or data.dstGUID -- GUID fix
 					target.amount = target.amount + amount
 					target.overheal = target.overheal + data.overheal
 				end

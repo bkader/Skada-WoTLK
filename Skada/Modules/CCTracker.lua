@@ -218,6 +218,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 				if not player.ccdone_targets[cc.dstName] then
 					player.ccdone_targets[cc.dstName] = {id = cc.dstGUID, count = 1, spells = {[cc.spellid] = 1}}
 				else
+					player.ccdone_targets[cc.dstName].id = player.ccdone_targets[cc.dstName].id or cc.dstGUID -- GUID fix
 					player.ccdone_targets[cc.dstName].count = player.ccdone_targets[cc.dstName].count + 1
 					player.ccdone_targets[cc.dstName].spells[cc.spellid] = (player.ccdone_targets[cc.dstName].spells[cc.spellid] or 0) + 1
 				end
@@ -471,6 +472,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 				if not player.cctaken_sources[cc.srcName] then
 					player.cctaken_sources[cc.srcName] = {id = cc.srcGUID, count = 1, spells = {[cc.spellid] = 1}}
 				else
+					player.cctaken_sources[cc.srcName].id = player.cctaken_sources[cc.srcName].id or cc.srcGUID -- GUID fix
 					player.cctaken_sources[cc.srcName].count = player.cctaken_sources[cc.srcName].count + 1
 					player.cctaken_sources[cc.srcName].spells[cc.spellid] = (player.cctaken_sources[cc.srcName].spells[cc.spellid] or 0) + 1
 				end
@@ -730,6 +732,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 				if not player.ccbreak_targets[cc.dstName] then
 					player.ccbreak_targets[cc.dstName] = {id = cc.dstGUID, count = 1, spells = {[cc.spellid] = 1}}
 				else
+					player.ccbreak_targets[cc.dstName].id = player.ccbreak_targets[cc.dstName].id or cc.dstGUID -- GUID fix
 					player.ccbreak_targets[cc.dstName].count = player.ccbreak_targets[cc.dstName].count + 1
 					player.ccbreak_targets[cc.dstName].spells[cc.spellid] = (player.ccbreak_targets[cc.dstName].spells[cc.spellid] or 0) + 1
 				end

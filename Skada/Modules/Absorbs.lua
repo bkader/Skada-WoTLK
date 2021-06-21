@@ -261,6 +261,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					target = {id = dstGUID, amount = amount}
 					player.absorb_targets[dstName] = target
 				else
+					target.id = target.id or dstGUID -- GUID fix
 					target.amount = target.amount + amount
 				end
 			end
