@@ -139,6 +139,7 @@ function mod:Create(window)
 	bargroup.RegisterCallback(mod, "BarClick")
 	bargroup.RegisterCallback(mod, "BarEnter")
 	bargroup.RegisterCallback(mod, "BarLeave")
+	bargroup.RegisterCallback(mod, "OnMouseWheel")
 	bargroup.RegisterCallback(mod, "AnchorMoved")
 	bargroup.RegisterCallback(mod, "WindowResizing")
 	bargroup.RegisterCallback(mod, "WindowResized")
@@ -253,6 +254,31 @@ do
 end
 
 do
+	local function OnMouseWheel(frame, direction)
+		local win = frame.win
+
+		local maxbars = win.bargroup:GetMaxBars()
+		local numbars = win.bargroup:GetNumBars()
+		local offset = win.bargroup:GetBarOffset()
+
+		if direction == 1 and offset > 0 then
+			win.bargroup:SetBarOffset(offset - 1)
+		elseif direction == -1 and ((numbars - maxbars - offset) > 0) then
+			win.bargroup:SetBarOffset(offset + 1)
+		end
+	end
+
+	function mod:OnMouseWheel(_, frame, direction)
+		if not frame then
+			mod.framedummy = mod.framedummy or {}
+			mod.framedummy.win = win
+			frame = mod.framedummy
+		end
+		OnMouseWheel(frame, direction)
+	end
+end
+
+do
 	-- these anchors are used to correctly position the windows due
 	-- to the title bar overlapping.
 	local Xanchors = {LT = true, LB = true, LC = true, RT = true, RB = true, RC = true}
@@ -324,41 +350,14 @@ function mod:WindowResized(_, group)
 	Skada:ApplySettings()
 end
 
-do
-	local function OnMouseWheel(frame, direction)
-		local win = frame.win
-
-		local maxbars = win.bargroup:GetMaxBars()
-		local numbars = win.bargroup:GetNumBars()
-		local offset = win.bargroup:GetBarOffset()
-
-		if direction == 1 and offset > 0 then
-			win.bargroup:SetBarOffset(offset - 1)
-		elseif direction == -1 and ((numbars - maxbars - offset) > 0) then
-			win.bargroup:SetBarOffset(offset + 1)
-		end
-	end
-
-	function mod:OnMouseWheel(win, frame, direction)
-		if not frame then
-			mod.framedummy = mod.framedummy or {}
-			mod.framedummy.win = win
-			frame = mod.framedummy
-		end
-		OnMouseWheel(frame, direction)
-	end
-
-	function mod:CreateBar(win, name, label, value, maxvalue, icon, o)
-		local bar, isnew = win.bargroup:NewCounterBar(name, label, value, maxvalue, icon, o)
-		bar.win = win
-		bar:EnableMouseWheel(true)
-		bar:SetScript("OnMouseWheel", OnMouseWheel)
-		bar.iconFrame:SetScript("OnEnter", nil)
-		bar.iconFrame:SetScript("OnLeave", nil)
-		bar.iconFrame:SetScript("OnMouseDown", nil)
-		bar.iconFrame:EnableMouse(false)
-		return bar, isnew
-	end
+function mod:CreateBar(win, name, label, value, maxvalue, icon, o)
+	local bar, isnew = win.bargroup:NewCounterBar(name, label, value, maxvalue, icon, o)
+	bar.win = win
+	bar.iconFrame:SetScript("OnEnter", nil)
+	bar.iconFrame:SetScript("OnLeave", nil)
+	bar.iconFrame:SetScript("OnMouseDown", nil)
+	bar.iconFrame:EnableMouse(false)
+	return bar, isnew
 end
 
 -- ======================================================= --

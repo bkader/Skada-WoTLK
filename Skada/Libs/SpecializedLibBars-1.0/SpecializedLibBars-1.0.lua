@@ -522,7 +522,6 @@ do
 
 		list.texture = DEFAULT_TEXTURE
 		list.spacing = 0
-
 		list.offset = 0
 
 		-- resize to the right
@@ -538,7 +537,6 @@ do
 			if (button == "LeftButton") then
 				p.isResizing = true
 				p:StartSizing(p.growup and "TOPRIGHT" or "BOTTOMRIGHT")
-
 				p:SetScript("OnUpdate", function()
 					if p.isResizing then
 						p:SetLength(p:GetWidth())
@@ -576,7 +574,6 @@ do
 			if (button == "LeftButton") then
 				p.isResizing = true
 				p:StartSizing(p.growup and "TOPLEFT" or "BOTTOMLEFT")
-
 				p:SetScript("OnUpdate", function()
 					if p.isResizing then
 						p:SetLength(p:GetWidth())
@@ -1186,6 +1183,10 @@ do
 		self:GetParent().callbacks:Fire("BarLeave", self, motion)
 	end
 
+	local function mouseWheel(self, direction)
+		self:GetParent().callbacks:Fire("OnMouseWheel", self:GetParent(), direction)
+	end
+
 	local DEFAULT_ICON = [[Interface\Icons\INV_Misc_QuestionMark]]
 	function barPrototype:Create(text, value, maxVal, icon, orientation, length, thickness)
 		self.callbacks = self.callbacks or CallbackHandler:New(self)
@@ -1193,6 +1194,9 @@ do
 		self:SetScript("OnMouseDown", barClick)
 		self:SetScript("OnEnter", barEnter)
 		self:SetScript("OnLeave", barLeave)
+
+		self:EnableMouseWheel(true)
+		self:SetScript("OnMouseWheel", mouseWheel)
 
 		self:SetScript("OnSizeChanged", self.OnSizeChanged)
 		self.texture = self.texture or self:CreateTexture(nil, "ARTWORK")
