@@ -75,7 +75,7 @@ Skada.windowdefaults = {
 	sticky = true,
 	sticked = {},
 	clamped = true,
-	smoothing = false,
+	smoothing = true,
 	-- inline bar display
 	isonnewline = false,
 	isusingclasscolors = true,
@@ -126,7 +126,7 @@ Skada.defaults = {
 		autostop = false,
 		smartstop = false,
 		sortmodesbyusage = false,
-		updatefrequency = 0.25,
+		updatefrequency = 0.5,
 		modules = {},
 		columns = {},
 		report = {mode = "Damage", set = "current", channel = "Say", chantype = "preset", number = 10},
