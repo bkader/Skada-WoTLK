@@ -1370,6 +1370,11 @@ do
 
 			player = {id = playerid, name = playername, flags = playerflags, time = 0}
 
+			-- set class right away
+			if players[playerid] then
+				player.class = select(2, UnitClass(players[playerid]))
+			end
+
 			fix_player(player)
 
 			for _, mode in ipairs(modes) do
@@ -1566,7 +1571,6 @@ do
 			if not owner and action.playerflags and band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
 				owner = {id = UnitGUID("player"), name = UnitName("player")}
 				pets[action.playerid] = owner
-				self:SendComm(nil, nil, "AssignPet", owner.id, action.playerid)
 			end
 
 			if not owner then
@@ -1598,43 +1602,17 @@ do
 		end
 	end
 
-	function Skada:FixMyPets(playerid, playername, playerflags)
-		if self:IsPet(playerid, playerflags) then
-			if pets[playerid] then
-				return pets[playerid].id, pets[playerid].name
-			end
-
-			if playerflags and band(playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
-				pets[playerid] = {id = UnitGUID("player"), name = UnitName("player")}
-				self:SendComm(nil, nil, "AssignPet", pets[playerid].id, playerid)
-				return pets[playerid].id, pets[playerid].name
-			end
-
-			-- not cached meanwhile?
-			if not pets[playerid] then
-				local ownerGUID, ownerName = GetPetOwnerFromTooltip(playerid)
-				if ownerGUID and ownerName then
-					pets[playerid] = {id = ownerGuid, name = ownerName}
-					return ownerGUID, ownerName
-				end
-			end
+	function Skada:FixMyPets(playerid, playername)
+		if pets[playerid] then
+			return pets[playerid].id, pets[playerid].name
 		end
 
 		return playerid, playername
 	end
 end
 
-function Skada:OnCommAssignPet(ownerName, ownerGUID, petGUID)
-	if ownerGUID and players[ownerGUID] and ownerName and petGUID and not pets[petGUID] then
-		self:AssignPet(ownerGUID, ownerName, petGUID)
-	end
-end
-
 function Skada:AssignPet(ownerGUID, ownerName, petGUID)
-	if petGUID and not pets[petGUID] then
-		pets[petGUID] = {id = ownerGUID, name = ownerName}
-		self.callbacks:Fire("SKADA_PET_ASSIGN", petGUID, ownerGUID, ownerName)
-	end
+	pets[petGUID] = {id = ownerGUID, name = ownerName}
 end
 
 function Skada:GetPetOwner(petGUID)
@@ -1891,11 +1869,6 @@ end
 
 do
 	local SendChatMessage = SendChatMessage
-	if ChatThrottleLib and ChatThrottleLib.SendChatMessage then
-		SendChatMessage = function(...)
-			ChatThrottleLib:SendChatMessage("BULK", "Skada", ...)
-		end
-	end
 
 	local function sendchat(msg, chan, chantype)
 		if chantype == "self" then
@@ -2036,7 +2009,7 @@ function Skada:CheckGroup()
 	local playerGUID = UnitGUID("player")
 	if playerGUID then
 		players[playerGUID] = "player"
-		local petGUID = UnitGUID("pet")
+		local petGUID = UnitGUID("playerpet")
 		if petGUID and not pets[petGUID] then
 			self:AssignPet(playerGUID, UnitName("player"), petGUID)
 		end
@@ -3454,7 +3427,9 @@ do
 
 			if src_is_interesting or dst_is_interesting then
 				self.current = self:CreateSet(L["Current"], now)
-				self.total = self.total or self:CreateSet(L["Total"], now)
+				if not self.total then
+					self.total = self:CreateSet(L["Total"], now)
+				end
 
 				tentativehandle = self.NewTimer(self.db.profile.tentativetimer or 3, function()
 					tentative = nil

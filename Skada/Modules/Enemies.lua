@@ -248,7 +248,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, _, spellschool, amount, overkill = ...
 		if srcName and dstName then
-			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName)
 
 			dmg.enemyid = dstGUID
 			dmg.enemyname = dstName
