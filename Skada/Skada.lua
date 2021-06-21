@@ -577,6 +577,10 @@ function Window:IsShown()
 end
 
 function Window:Reset()
+	if self.display and self.display.Reset then
+		return self.display:Reset(self)
+	end
+
 	for _, data in ipairs(self.dataset or {}) do
 		wipe(data)
 	end

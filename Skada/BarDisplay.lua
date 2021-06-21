@@ -212,6 +212,18 @@ function mod:Wipe(win)
 	end
 end
 
+function mod:Reset(win)
+	if win and win.bargroup then
+		local maxbars = win.bargroup:GetMaxBars()
+		for i, data in ipairs(win.dataset) do
+			wipe(data)
+			if i > maxbars then
+				tremove(win.dataset, i)
+			end
+		end
+	end
+end
+
 function mod:Show(win)
 	win.bargroup:Show()
 	win.bargroup:SortBars()
@@ -253,28 +265,19 @@ do
 	end
 end
 
-do
-	local function OnMouseWheel(frame, direction)
-		local win = frame.win
+function mod:OnMouseWheel(_, frame, direction)
+	local win = frame.win
 
-		local maxbars = win.bargroup:GetMaxBars()
-		local numbars = win.bargroup:GetNumBars()
-		local offset = win.bargroup:GetBarOffset()
+	local maxbars = win.bargroup:GetMaxBars()
+	local numbars = #win.dataset
+	local offset = win.bargroup:GetBarOffset()
 
-		if direction == 1 and offset > 0 then
-			win.bargroup:SetBarOffset(offset - 1)
-		elseif direction == -1 and ((numbars - maxbars - offset) > 0) then
-			win.bargroup:SetBarOffset(offset + 1)
-		end
-	end
-
-	function mod:OnMouseWheel(_, frame, direction)
-		if not frame then
-			mod.framedummy = mod.framedummy or {}
-			mod.framedummy.win = win
-			frame = mod.framedummy
-		end
-		OnMouseWheel(frame, direction)
+	if direction == 1 and offset > 0 then
+		win.bargroup:SetBarOffset(offset - 1)
+		mod:Update(win)
+	elseif direction == -1 and ((numbars - maxbars - offset) > 0) then
+		win.bargroup:SetBarOffset(offset + 1)
+		mod:Update(win)
 	end
 end
 
@@ -347,6 +350,11 @@ function mod:WindowResized(_, group)
 			end
 		end
 	end
+
+	local maxbars = group.win.db.background.height / (group.win.db.barheight + group.win.db.barspacing)
+	if group.win.db.enabletitle then maxbars = maxbars - 1 end
+	group:SetMaxBars(maxbars)
+
 	Skada:ApplySettings()
 end
 
