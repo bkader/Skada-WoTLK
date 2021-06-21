@@ -218,7 +218,7 @@ function mod:Reset(win)
 		for i, data in ipairs(win.dataset) do
 			wipe(data)
 			if i > maxbars then
-				tremove(win.dataset, i)
+				win.dataset[i] = nil
 			end
 		end
 	end
@@ -500,7 +500,7 @@ do
 			tsort(win.dataset, value_sort)
 		end
 
-		local hasicon = false
+		local hasicon
 		for _, data in ipairs(win.dataset) do
 			if (data.icon and not data.ignore) or (data.spec and win.db.specicons) or (data.class and win.db.classicons) or (data.role and win.db.roleicons) then
 				hasicon = true
