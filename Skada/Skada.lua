@@ -1573,7 +1573,7 @@ do
 			if not owner then
 				local ownerGUID, ownerName = GetPetOwnerFromTooltip(action.playerid)
 				if ownerGUID and ownerName then
-					owner = {id = ownerGuid, name = ownerName}
+					owner = {id = ownerGUID, name = ownerName}
 					pets[action.playerid] = owner
 				end
 			end
@@ -2388,11 +2388,7 @@ do
 
 		local timelabel = ""
 		if starttime and endtime and fmt > 1 then
-			local duration = SecondsToTime(endtime - starttime, false, false, 2)
-
-			Skada.getsetlabel_fs = Skada.getsetlabel_fs or UIParent:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
-			Skada.getsetlabel_fs:SetText(duration)
-			duration = "(" .. Skada.getsetlabel_fs:GetText() .. ")"
+			local duration = "(" .. SecondsToTime(endtime - starttime, false, false, 2) .. ")"
 
 			if fmt == 2 then
 				timelabel = duration
