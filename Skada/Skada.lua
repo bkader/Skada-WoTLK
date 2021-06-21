@@ -23,7 +23,7 @@ local floor, max, min = math.floor, math.max, math.min
 local band, bor, time, setmetatable = bit.band, bit.bor, time, setmetatable
 local GetNumPartyMembers, GetNumRaidMembers = GetNumPartyMembers, GetNumRaidMembers
 local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAffectingCombat, InCombatLockdown
-local UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitGUID, UnitName, UnitClass, UnitIsConnected
+local UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected
 local CombatLogClearEntries = CombatLogClearEntries
 local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
@@ -1609,7 +1609,9 @@ do
 end
 
 function Skada:AssignPet(ownerGUID, ownerName, petGUID)
-	pets[petGUID] = {id = ownerGUID, name = ownerName}
+	if ownerGUID and ownerName and petGUID and not pets[petGUID] then
+		pets[petGUID] = {id = ownerGUID, name = ownerName}
+	end
 end
 
 function Skada:GetPetOwner(petGUID)
@@ -2120,8 +2122,17 @@ do
 	Skada.RAID_ROSTER_UPDATE = Skada.PARTY_MEMBERS_CHANGED
 end
 
-function Skada:UNIT_PET()
-	self:CheckGroup()
+function Skada:UNIT_PET(_, unit)
+	if unit then
+		local guid = UnitGUID(unit)
+		if guid and players[guid] then
+			self.After(0.1, function()
+				if UnitExists(unit .. "pet") then
+					self:AssignPet(guid, UnitName(unit), UnitGUID(unit .. "pet"))
+				end
+			end)
+		end
+	end
 end
 
 -------------------------------------------------------------------------------
