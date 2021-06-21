@@ -207,7 +207,7 @@ Skada:AddLoadableModule("Spamage", "Suppresses chat messages from damage meters 
 				for _, meter in ipairs(meters) do
 					local elapsed = curtime - meter.time
 
-					if meter.src == source and meter.evt == event and elapsed < 1 then
+					if meter.src == source and meter.evt == event and elapsed < Skada.db.profile.spamage.captureDelay then
 						local toInsert = true
 
 						for _, b in ipairs(meter.data) do
@@ -240,7 +240,7 @@ Skada:AddLoadableModule("Spamage", "Suppresses chat messages from damage meters 
 				for id, meter in ipairs(meters) do
 					local elapsed = curtime - meter.time
 
-					if meter.src == source and meter.evt == event and elapsed < 1 then
+					if meter.src == source and meter.evt == event and elapsed < Skada.db.profile.spamage.captureDelay then
 						newID = id
 						return true, true, format("|HSKSP:%1$d|h|cFFFFFF00[%2$s]|r|h", newID or 0, msg or "nil")
 					end
