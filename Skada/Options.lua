@@ -336,7 +336,8 @@ Skada.options = {
 					type = "toggle",
 					name = L["Informative tooltips"],
 					desc = L["Shows subview summaries in the tooltips."],
-					order = 2
+					order = 2,
+					disabled = function() return not Skada.db.profile.tooltips end
 				},
 				tooltiprows = {
 					type = "range",
@@ -345,7 +346,8 @@ Skada.options = {
 					order = 3,
 					min = 1,
 					max = 10,
-					step = 1
+					step = 1,
+					disabled = function() return not Skada.db.profile.tooltips end
 				},
 				tooltippos = {
 					type = "select",
@@ -360,7 +362,8 @@ Skada.options = {
 						["bottomright"] = L["Bottom right"],
 						["bottomleft"] = L["Bottom left"],
 						["cursor"] = L["Follow Cursor"]
-					}
+					},
+					disabled = function() return not Skada.db.profile.tooltips end
 				}
 			}
 		},

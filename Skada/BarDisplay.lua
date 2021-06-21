@@ -7,16 +7,16 @@ local FlyPaper = LibStub:GetLibrary("LibFlyPaper-1.1", true)
 local LSM = LibStub("LibSharedMedia-3.0")
 
 local tinsert, tsort = table.insert, table.sort
-local _GetSpellLink = Skada.GetSpellLink or GetSpellLink
-local _CloseDropDownMenus = L_CloseDropDownMenus
+local GetSpellLink = Skada.GetSpellLink or GetSpellLink
+local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
 
 mod.name = L["Bar display"]
 mod.description = L["Bar display is the normal bar window used by most damage meters. It can be extensively styled."]
 Skada:AddDisplaySystem("bar", mod)
 
 -- class, role & specs
-local class_icon_file, class_icon_tcoords
-local role_icon_file, role_icon_tcoords
+local classiconfile, classicontcoords
+local roleiconfile, roleicontcoords
 local specicons = {
 	-- Death Knight
 	[250] = "Interface\\Icons\\spell_deathknight_bloodpresence", --> Blood
@@ -184,9 +184,29 @@ function mod:Create(window)
 
 	window.bargroup = bargroup
 
-	if not class_icon_tcoords then
-		class_icon_file, class_icon_tcoords = Skada.classiconfile, Skada.classicontcoords
-		role_icon_file, role_icon_tcoords = Skada.roleiconfile, Skada.roleicontcoords
+	if not classicontcoords then
+		-- class icon file and texture coordinates
+		classiconfile = [[Interface\AddOns\Skada\Media\Textures\icon-classes]]
+		classicontcoords = {}
+		for class, coords in pairs(CLASS_ICON_TCOORDS) do
+			classicontcoords[class] = coords
+		end
+		classicontcoords.ENEMY = {0.5, 0.75, 0.5, 0.75}
+		classicontcoords.BOSS = {0.75, 1, 0.5, 0.75}
+		classicontcoords.MONSTER = {0, 0.25, 0.75, 1}
+		classicontcoords.PET = {0.25, 0.5, 0.75, 1}
+		classicontcoords.PLAYER = {0.75, 1, 0.75, 1}
+		classicontcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
+
+		-- role icon file and texture coordinates
+		roleiconfile = [[Interface\LFGFrame\UI-LFG-ICON-PORTRAITROLES]]
+		roleicontcoords = {
+			DAMAGER = {0.3125, 0.63, 0.3125, 0.63},
+			HEALER = {0.3125, 0.63, 0.015625, 0.3125},
+			TANK = {0, 0.296875, 0.3125, 0.63},
+			LEADER = {0, 0.296875, 0.015625, 0.3125},
+			NONE = ""
+		}
 	end
 end
 
@@ -333,7 +353,7 @@ do
 			end
 		end
 
-		_CloseDropDownMenus()
+		CloseDropDownMenus()
 		libwindow.SavePosition(group)
 	end
 end
@@ -395,7 +415,7 @@ do
 		end
 
 		win:DisplayMode(mode)
-		_CloseDropDownMenus()
+		CloseDropDownMenus()
 	end
 
 	local function BarClickIgnore(bar, button)
@@ -558,7 +578,7 @@ do
 
 							bar.link = nil
 							if data.spellid then
-								bar.link = _GetSpellLink(data.spellid)
+								bar.link = GetSpellLink(data.spellid)
 							elseif data.hyperlink then
 								bar.link = data.hyperlink
 							end
@@ -593,14 +613,14 @@ do
 						bar:SetIconWithCoord(specicons[data.spec], {0.065, 0.935, 0.065, 0.935})
 					elseif data.role and data.role ~= "NONE" and win.db.roleicons then
 						bar:ShowIcon()
-						bar:SetIconWithCoord(role_icon_file, role_icon_tcoords[data.role])
-					elseif data.class and win.db.classicons and class_icon_tcoords[data.class] then
+						bar:SetIconWithCoord(roleiconfile, roleicontcoords[data.role])
+					elseif data.class and win.db.classicons and classicontcoords[data.class] then
 						bar:ShowIcon()
-						bar:SetIconWithCoord(class_icon_file, class_icon_tcoords[data.class])
+						bar:SetIconWithCoord(classiconfile, classicontcoords[data.class])
 					elseif not data.ignore and not data.spellid then
 						if data.icon and not bar:IsIconShown() then
 							bar:ShowIcon()
-							bar:SetIconWithCoord(class_icon_file, class_icon_tcoords["PLAYER"])
+							bar:SetIconWithCoord(classiconfile, classicontcoords["PLAYER"])
 						end
 					end
 
@@ -712,7 +732,7 @@ do
 		local group = self:GetParent()
 		if group then
 			if button == "MiddleButton" then
-				_CloseDropDownMenus()
+				CloseDropDownMenus()
 				group.isStretching = true
 				group:SetBackdropColor(0, 0, 0, 0.9)
 				group:SetFrameStrata("TOOLTIP")

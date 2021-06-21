@@ -27,6 +27,7 @@ local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAf
 local UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitGUID, UnitName, UnitClass, UnitIsConnected
 local CombatLogClearEntries = CombatLogClearEntries
 local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
+local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
 
 local dataobj = LDB:NewDataObject("Skada", {
 	label = "Skada",
@@ -753,7 +754,7 @@ function Window:RightClick(_, button)
 	elseif self.selectedset then
 		self:DisplaySets()
 	end
-	L_CloseDropDownMenus() -- always close
+	CloseDropDownMenus() -- always close
 end
 
 -------------------------------------------------------------------------------
@@ -867,7 +868,7 @@ do
 				whileDead = 0,
 				hideOnEscape = 1,
 				OnAccept = function(self, data)
-					L_CloseDropDownMenus()
+					CloseDropDownMenus()
 					ACD:Close("Skada") -- to avoid errors
 					return DeleteWindow(data)
 				end
@@ -2207,7 +2208,7 @@ function Skada:Reset(force)
 	dataobj.text = "n/a"
 	self:UpdateDisplay(true)
 	self:Print(L["All data has been reset."])
-	L_CloseDropDownMenus()
+	CloseDropDownMenus()
 
 	self.callbacks:Fire("SKADA_DATA_RESET")
 	self:CleanGarbage(true)
@@ -2518,7 +2519,7 @@ function Window:RestoreView(theset, themode)
 	end
 
 	-- force menu to close and let Skada handle the rest
-	L_CloseDropDownMenus()
+	CloseDropDownMenus()
 	Skada:RestoreView(self, theset or self.selectedset, themode or self.db.mode)
 end
 
@@ -2939,6 +2940,33 @@ function Skada:OnInitialize()
 	LSM:Register("sound", "Wham!", [[Sound\Doodad\PVP_Lordaeron_Door_Open.wav]])
 	LSM:Register("sound", "You Will Die!", [[Sound\Creature\CThun\CThunYouWillDIe.wav]])
 
+	self.db = LibStub("AceDB-3.0"):New("SkadaDB", self.defaults, "Default")
+
+	if type(SkadaCharDB) ~= "table" then
+		SkadaCharDB = {}
+	end
+	self.char = SkadaCharDB
+	self.char.sets = self.char.sets or {}
+
+	-- Profiles
+	local AceDBOptions = LibStub("AceDBOptions-3.0", true)
+	if AceDBOptions then
+		self.options.args.profiles = AceDBOptions:GetOptionsTable(self.db)
+		self.options.args.profiles.order = 999
+	end
+
+	LibStub("AceConfig-3.0"):RegisterOptionsTable("Skada", self.options)
+	self.optionsFrame = ACD:AddToBlizOptions("Skada", "Skada")
+
+	-- Slash Command Handler
+	SLASH_SKADA1 = "/skada"
+	SlashCmdList.SKADA = SlashCommandHandler
+
+	self.db.RegisterCallback(self, "OnProfileChanged", "ReloadSettings")
+	self.db.RegisterCallback(self, "OnProfileCopied", "ReloadSettings")
+	self.db.RegisterCallback(self, "OnProfileReset", "ReloadSettings")
+	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes")
+
 	-- spell school colors
 	self.schoolcolors = {
 		[1] = {a = 1.00, r = 1.00, g = 1.00, b = 0.00}, -- Physical
@@ -2999,61 +3027,10 @@ function Skada:OnInitialize()
 	self.classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
 	self.classcolors.PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"}
 	self.classcolors.UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
-
-	-- class icon file & coordinates
-	self.classiconfile = [[Interface\AddOns\Skada\Media\Textures\icon-classes]]
-	self.classicontcoords = {}
-	for class, coords in pairs(CLASS_ICON_TCOORDS) do
-		self.classicontcoords[class] = coords
-	end
-	self.classicontcoords.ENEMY = {0.5, 0.75, 0.5, 0.75}
-	self.classicontcoords.BOSS = {0.75, 1, 0.5, 0.75}
-	self.classicontcoords.MONSTER = {0, 0.25, 0.75, 1}
-	self.classicontcoords.PET = {0.25, 0.5, 0.75, 1}
-	self.classicontcoords.PLAYER = {0.75, 1, 0.75, 1}
-	self.classicontcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
-
-	-- role icon file and coordinates
-	self.roleiconfile = [[Interface\LFGFrame\UI-LFG-ICON-PORTRAITROLES]]
-	self.roleicontcoords = {
-		DAMAGER = {0.3125, 0.63, 0.3125, 0.63},
-		HEALER = {0.3125, 0.63, 0.015625, 0.3125},
-		TANK = {0, 0.296875, 0.3125, 0.63},
-		LEADER = {0, 0.296875, 0.015625, 0.3125},
-		NONE = ""
-	}
-
-	self.db = LibStub("AceDB-3.0"):New("SkadaDB", self.defaults, "Default")
-
-	if type(SkadaCharDB) ~= "table" then
-		SkadaCharDB = {}
-	end
-	self.char = SkadaCharDB
-	self.char.sets = self.char.sets or {}
-
-	-- Profiles
-	local AceDBOptions = LibStub("AceDBOptions-3.0", true)
-	if AceDBOptions then
-		self.options.args.profiles = AceDBOptions:GetOptionsTable(self.db)
-		self.options.args.profiles.order = 999
-	end
-
-	LibStub("AceConfig-3.0"):RegisterOptionsTable("Skada", self.options)
-	self.optionsFrame = ACD:AddToBlizOptions("Skada", "Skada")
-
-	self.db.RegisterCallback(self, "OnProfileChanged", "ReloadSettings")
-	self.db.RegisterCallback(self, "OnProfileCopied", "ReloadSettings")
-	self.db.RegisterCallback(self, "OnProfileReset", "ReloadSettings")
-	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes")
-
-	self:ReloadSettings()
-	self.After(2, function() self:ApplySettings() end)
 end
 
 function Skada:OnEnable()
-	-- Slash Command Handler
-	SLASH_SKADA1 = "/skada"
-	SlashCmdList.SKADA = SlashCommandHandler
+	self:ReloadSettings()
 
 	self:RegisterComm("Skada")
 
@@ -3071,6 +3048,7 @@ function Skada:OnEnable()
 		self.modulelist = nil
 	end
 
+	self.After(2, function() self:ApplySettings() end)
 	self.NewTicker(2, function() self:CleanGarbage() end)
 	self.After(3, function() self:MemoryCheck() end)
 

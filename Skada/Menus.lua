@@ -10,11 +10,11 @@ local GetCursorPosition = GetCursorPosition
 local GetScreenWidth, GetScreenHeight = GetScreenWidth, GetScreenHeight
 
 local CreateFrame = CreateFrame
-local _UIDropDownMenu_CreateInfo = L_UIDropDownMenu_CreateInfo
-local _UIDropDownMenu_AddButton = L_UIDropDownMenu_AddButton
-local _CloseDropDownMenus = L_CloseDropDownMenus
-local _ToggleDropDownMenu = L_ToggleDropDownMenu
-local _UIDropDownMenu_AddSeparator = L_UIDropDownMenu_AddSeparator
+local UIDropDownMenu_CreateInfo = L_UIDropDownMenu_CreateInfo or UIDropDownMenu_CreateInfo
+local UIDropDownMenu_AddButton = L_UIDropDownMenu_AddButton or UIDropDownMenu_AddButton
+local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
+local ToggleDropDownMenu = L_ToggleDropDownMenu or ToggleDropDownMenu
+local UIDropDownMenu_AddSeparator = L_UIDropDownMenu_AddSeparator or UIDropDownMenu_AddSeparator
 
 -- guesses the dropdown location
 local function getDropdownPoint()
@@ -39,38 +39,38 @@ function Skada:OpenMenu(window)
 		if level == 1 then
 			-- window menus
 			for _, win in Skada:IterateWindows() do
-				info = _UIDropDownMenu_CreateInfo()
+				info = UIDropDownMenu_CreateInfo()
 				info.text = win.db.name
 				info.hasArrow = 1
 				info.value = win
 				info.notCheckable = 1
 				info.colorCode = (window and window == win) and "|cffffd100"
-				_UIDropDownMenu_AddButton(info, level)
+				UIDropDownMenu_AddButton(info, level)
 			end
 
 			-- create window
-			info = _UIDropDownMenu_CreateInfo()
+			info = UIDropDownMenu_CreateInfo()
 			info.text = L["Create Window"]
 			info.func = Skada.NewWindow
 			info.notCheckable = 1
 			info.padding = 16
-			_UIDropDownMenu_AddButton(info, level)
+			UIDropDownMenu_AddButton(info, level)
 
 			-- toggle window
-			info = _UIDropDownMenu_CreateInfo()
+			info = UIDropDownMenu_CreateInfo()
 			info.text = L["Toggle Windows"]
 			info.func = function()
 				Skada:ToggleWindow()
 			end
 			info.notCheckable = 1
 			info.padding = 16
-			_UIDropDownMenu_AddButton(info, level)
+			UIDropDownMenu_AddButton(info, level)
 
-			_UIDropDownMenu_AddSeparator(info, level)
+			UIDropDownMenu_AddSeparator(info, level)
 
 			-- Can't report if we are not in a mode.
 			if not window or (window and window.selectedmode) then
-				info = _UIDropDownMenu_CreateInfo()
+				info = UIDropDownMenu_CreateInfo()
 				info.text = L["Report"]
 				info.value = "report"
 				info.func = function()
@@ -78,80 +78,80 @@ function Skada:OpenMenu(window)
 				end
 				info.notCheckable = 1
 				info.padding = 16
-				_UIDropDownMenu_AddButton(info, level)
+				UIDropDownMenu_AddButton(info, level)
 			end
 
 			if window then
-				info = _UIDropDownMenu_CreateInfo()
+				info = UIDropDownMenu_CreateInfo()
 				info.text = L["Select Segment"]
 				info.value = "segment"
 				info.hasArrow = 1
 				info.notCheckable = 1
 				info.padding = 16
-				_UIDropDownMenu_AddButton(info, level)
+				UIDropDownMenu_AddButton(info, level)
 			end
 
 			-- delete segment menu
-			info = _UIDropDownMenu_CreateInfo()
+			info = UIDropDownMenu_CreateInfo()
 			info.text = L["Delete Segment"]
 			info.value = "delete"
 			info.hasArrow = 1
 			info.notCheckable = 1
 			info.padding = 16
-			_UIDropDownMenu_AddButton(info, level)
+			UIDropDownMenu_AddButton(info, level)
 
 			if Skada.db.profile.setstokeep > 0 then
 				-- keep segment
-				info = _UIDropDownMenu_CreateInfo()
+				info = UIDropDownMenu_CreateInfo()
 				info.text = L["Keep Segment"]
 				info.value = "keep"
 				info.hasArrow = 1
 				info.notCheckable = 1
 				info.padding = 16
-				_UIDropDownMenu_AddButton(info, level)
+				UIDropDownMenu_AddButton(info, level)
 			end
 
 			-- start new segment
-			info = _UIDropDownMenu_CreateInfo()
+			info = UIDropDownMenu_CreateInfo()
 			info.text = L["Start New Segment"]
 			info.func = function()
 				Skada:NewSegment()
 			end
 			info.notCheckable = 1
 			info.padding = 16
-			_UIDropDownMenu_AddButton(info, level)
+			UIDropDownMenu_AddButton(info, level)
 
-			_UIDropDownMenu_AddSeparator(info, level)
+			UIDropDownMenu_AddSeparator(info, level)
 
 			-- reset
-			info = _UIDropDownMenu_CreateInfo()
+			info = UIDropDownMenu_CreateInfo()
 			info.text = RESET
 			info.func = function()
 				Skada:ShowPopup()
 			end
 			info.notCheckable = 1
 			info.padding = 16
-			_UIDropDownMenu_AddButton(info, level)
+			UIDropDownMenu_AddButton(info, level)
 
 			-- Configure
-			info = _UIDropDownMenu_CreateInfo()
+			info = UIDropDownMenu_CreateInfo()
 			info.text = L["Configure"]
 			info.func = function()
 				Skada:OpenOptions(window)
 			end
 			info.notCheckable = 1
 			info.padding = 16
-			_UIDropDownMenu_AddButton(info, level)
+			UIDropDownMenu_AddButton(info, level)
 
 			-- Close menu item
-			info = _UIDropDownMenu_CreateInfo()
+			info = UIDropDownMenu_CreateInfo()
 			info.text = CLOSE
 			info.func = function()
-				_CloseDropDownMenus()
+				CloseDropDownMenus()
 			end
 			info.notCheckable = 1
 			info.padding = 16
-			_UIDropDownMenu_AddButton(info, level)
+			UIDropDownMenu_AddButton(info, level)
 		elseif level == 2 then
 			if type(L_UIDROPDOWNMENU_MENU_VALUE) == "table" then
 				local window = L_UIDROPDOWNMENU_MENU_VALUE
@@ -160,36 +160,36 @@ function Skada:OpenMenu(window)
 					-- dsplay modes only if we have modules enabled.
 					local modes = Skada:GetModes()
 					if #modes > 0 then
-						info = _UIDropDownMenu_CreateInfo()
+						info = UIDropDownMenu_CreateInfo()
 						info.isTitle = 1
 						info.text = L["Mode"]
 						info.notCheckable = 1
-						_UIDropDownMenu_AddButton(info, level)
+						UIDropDownMenu_AddButton(info, level)
 
 						for _, mode in ipairs(modes) do
-							info = _UIDropDownMenu_CreateInfo()
+							info = UIDropDownMenu_CreateInfo()
 							info.text = mode:GetName()
 							info.func = function()
 								window:DisplayMode(mode)
 							end
 							info.icon = (Skada.db.profile.modeicons and mode.metadata) and mode.metadata.icon
 							info.checked = (window.selectedmode == mode or window.parenttitle == mode:GetName())
-							_UIDropDownMenu_AddButton(info, level)
+							UIDropDownMenu_AddButton(info, level)
 						end
 
-						info = _UIDropDownMenu_CreateInfo()
+						info = UIDropDownMenu_CreateInfo()
 						info.disabled = 1
 						info.notCheckable = 1
-						_UIDropDownMenu_AddButton(info, level)
+						UIDropDownMenu_AddButton(info, level)
 					end
 
-					info = _UIDropDownMenu_CreateInfo()
+					info = UIDropDownMenu_CreateInfo()
 					info.isTitle = 1
 					info.text = L["Segment"]
 					info.notCheckable = 1
-					_UIDropDownMenu_AddButton(info, level)
+					UIDropDownMenu_AddButton(info, level)
 
-					info = _UIDropDownMenu_CreateInfo()
+					info = UIDropDownMenu_CreateInfo()
 					info.text = L["Total"]
 					info.func = function()
 						window:set_selected_set("total")
@@ -197,9 +197,9 @@ function Skada:OpenMenu(window)
 						Skada:UpdateDisplay(true)
 					end
 					info.checked = (window.selectedset == "total")
-					_UIDropDownMenu_AddButton(info, level)
+					UIDropDownMenu_AddButton(info, level)
 
-					info = _UIDropDownMenu_CreateInfo()
+					info = UIDropDownMenu_CreateInfo()
 					info.text = L["Current"]
 					info.func = function()
 						window:set_selected_set("current")
@@ -207,10 +207,10 @@ function Skada:OpenMenu(window)
 						Skada:UpdateDisplay(true)
 					end
 					info.checked = (window.selectedset == "current")
-					_UIDropDownMenu_AddButton(info, level)
+					UIDropDownMenu_AddButton(info, level)
 
 					for i, set in Skada:IterateSets() do
-						info = _UIDropDownMenu_CreateInfo()
+						info = UIDropDownMenu_CreateInfo()
 						info.text = Skada:GetSetLabel(set)
 						info.func = function()
 							window:set_selected_set(i)
@@ -219,14 +219,14 @@ function Skada:OpenMenu(window)
 						end
 						info.colorCode = set.gotboss and (set.success and "|cff00ff00" or "|cffff0000") or "|cffffffff"
 						info.checked = (window.selectedset == set.starttime)
-						_UIDropDownMenu_AddButton(info, level)
+						UIDropDownMenu_AddButton(info, level)
 					end
 
-					_UIDropDownMenu_AddSeparator(info, level)
+					UIDropDownMenu_AddSeparator(info, level)
 				end
 
 				-- lock window
-				info = _UIDropDownMenu_CreateInfo()
+				info = UIDropDownMenu_CreateInfo()
 				info.text = L["Lock Window"]
 				info.func = function()
 					window.db.barslocked = not window.db.barslocked
@@ -234,10 +234,10 @@ function Skada:OpenMenu(window)
 				end
 				info.checked = window.db.barslocked
 				info.isNotRadio = 1
-				_UIDropDownMenu_AddButton(info, level)
+				UIDropDownMenu_AddButton(info, level)
 
 				-- hide window
-				info = _UIDropDownMenu_CreateInfo()
+				info = UIDropDownMenu_CreateInfo()
 				info.text = L["Hide Window"]
 				info.func = function()
 					if window:IsShown() then
@@ -250,11 +250,11 @@ function Skada:OpenMenu(window)
 				end
 				info.checked = not window:IsShown()
 				info.isNotRadio = 1
-				_UIDropDownMenu_AddButton(info, level)
+				UIDropDownMenu_AddButton(info, level)
 
 				-- snap window
 				if window.db.display == "bar" then
-					info = _UIDropDownMenu_CreateInfo()
+					info = UIDropDownMenu_CreateInfo()
 					info.text = L["Sticky Window"]
 					info.func = function()
 						window.db.sticky = not window.db.sticky
@@ -269,20 +269,20 @@ function Skada:OpenMenu(window)
 					end
 					info.checked = window.db.sticky
 					info.isNotRadio = 1
-					_UIDropDownMenu_AddButton(info, level)
+					UIDropDownMenu_AddButton(info, level)
 				end
 
 				-- delete window
-				info = _UIDropDownMenu_CreateInfo()
+				info = UIDropDownMenu_CreateInfo()
 				info.text = L["Delete Window"]
 				info.func = function()
 					return Skada:DeleteWindow(window.db.name)
 				end
 				info.notCheckable = 1
 				info.leftPadding = 16
-				_UIDropDownMenu_AddButton(info, level)
+				UIDropDownMenu_AddButton(info, level)
 			elseif L_UIDROPDOWNMENU_MENU_VALUE == "segment" then
-				info = _UIDropDownMenu_CreateInfo()
+				info = UIDropDownMenu_CreateInfo()
 				info.text = L["Total"]
 				info.func = function()
 					window:set_selected_set("total")
@@ -290,9 +290,9 @@ function Skada:OpenMenu(window)
 					Skada:UpdateDisplay(true)
 				end
 				info.checked = (window.selectedset == "total")
-				_UIDropDownMenu_AddButton(info, level)
+				UIDropDownMenu_AddButton(info, level)
 
-				info = _UIDropDownMenu_CreateInfo()
+				info = UIDropDownMenu_CreateInfo()
 				info.text = L["Current"]
 				info.func = function()
 					window:set_selected_set("current")
@@ -300,14 +300,14 @@ function Skada:OpenMenu(window)
 					Skada:UpdateDisplay(true)
 				end
 				info.checked = (window.selectedset == "current")
-				_UIDropDownMenu_AddButton(info, level)
+				UIDropDownMenu_AddButton(info, level)
 
 				local sets = Skada:GetSets()
 				if #sets > 0 then
-					_UIDropDownMenu_AddSeparator(info, level)
+					UIDropDownMenu_AddSeparator(info, level)
 
 					for i, set in ipairs(sets) do
-						info = _UIDropDownMenu_CreateInfo()
+						info = UIDropDownMenu_CreateInfo()
 						info.text = Skada:GetSetLabel(set)
 						info.func = function()
 							window:set_selected_set(i)
@@ -316,23 +316,23 @@ function Skada:OpenMenu(window)
 						end
 						info.checked = (window.selectedset == i)
 						info.colorCode = set.gotboss and (set.success and "|cff00ff00" or "|cffff0000") or "|cffffffff"
-						_UIDropDownMenu_AddButton(info, level)
+						UIDropDownMenu_AddButton(info, level)
 					end
 				end
 			elseif L_UIDROPDOWNMENU_MENU_VALUE == "delete" then
 				for _, set in Skada:IterateSets() do
-					info = _UIDropDownMenu_CreateInfo()
+					info = UIDropDownMenu_CreateInfo()
 					info.text = Skada:GetSetLabel(set)
 					info.func = function()
 						Skada:DeleteSet(set)
 					end
 					info.notCheckable = 1
 					info.colorCode = set.gotboss and (set.success and "|cff00ff00" or "|cffff0000") or "|cffffffff"
-					_UIDropDownMenu_AddButton(info, level)
+					UIDropDownMenu_AddButton(info, level)
 				end
 			elseif L_UIDROPDOWNMENU_MENU_VALUE == "keep" then
 				for _, set in Skada:IterateSets() do
-					info = _UIDropDownMenu_CreateInfo()
+					info = UIDropDownMenu_CreateInfo()
 					info.text = Skada:GetSetLabel(set)
 					info.func = function()
 						set.keep = not set.keep
@@ -342,45 +342,45 @@ function Skada:OpenMenu(window)
 					info.isNotRadio = 1
 					info.keepShownOnClick = true
 					info.colorCode = set.gotboss and (set.success and "|cff00ff00" or "|cffff0000") or "|cffffffff"
-					_UIDropDownMenu_AddButton(info, level)
+					UIDropDownMenu_AddButton(info, level)
 				end
 			end
 		elseif level == 3 then
 			if L_UIDROPDOWNMENU_MENU_VALUE == "modes" then
 				for _, mode in Skada:IterateModes() do
-					info = _UIDropDownMenu_CreateInfo()
+					info = UIDropDownMenu_CreateInfo()
 					info.text = mode:GetName()
 					info.checked = (Skada.db.profile.report.mode == mode:GetName())
 					info.func = function()
 						Skada.db.profile.report.mode = mode:GetName()
 					end
-					_UIDropDownMenu_AddButton(info, level)
+					UIDropDownMenu_AddButton(info, level)
 				end
 			elseif L_UIDROPDOWNMENU_MENU_VALUE == "segment" then
-				info = _UIDropDownMenu_CreateInfo()
+				info = UIDropDownMenu_CreateInfo()
 				info.text = L["Total"]
 				info.func = function()
 					Skada.db.profile.report.set = "total"
 				end
 				info.checked = (Skada.db.profile.report.set == "total")
-				_UIDropDownMenu_AddButton(info, level)
+				UIDropDownMenu_AddButton(info, level)
 
-				info = _UIDropDownMenu_CreateInfo()
+				info = UIDropDownMenu_CreateInfo()
 				info.text = L["Current"]
 				info.func = function()
 					Skada.db.profile.report.set = "current"
 				end
 				info.checked = (Skada.db.profile.report.set == "current")
-				_UIDropDownMenu_AddButton(info, level)
+				UIDropDownMenu_AddButton(info, level)
 
 				for i, set in Skada:IterateSets() do
-					info = _UIDropDownMenu_CreateInfo()
+					info = UIDropDownMenu_CreateInfo()
 					info.text = Skada:GetSetLabel(set)
 					info.func = function()
 						Skada.db.profile.report.set = i
 					end
 					info.checked = (Skada.db.profile.report.set == i)
-					_UIDropDownMenu_AddButton(info, level)
+					UIDropDownMenu_AddButton(info, level)
 				end
 			end
 		end
@@ -388,7 +388,7 @@ function Skada:OpenMenu(window)
 
 	local x, y
 	self.skadamenu.point, x, y = getDropdownPoint()
-	_ToggleDropDownMenu(1, nil, self.skadamenu, "UIParent", x, y)
+	ToggleDropDownMenu(1, nil, self.skadamenu, "UIParent", x, y)
 end
 
 function Skada:SegmentMenu(window)
@@ -399,7 +399,7 @@ function Skada:SegmentMenu(window)
 		end
 		local info
 
-		info = _UIDropDownMenu_CreateInfo()
+		info = UIDropDownMenu_CreateInfo()
 		info.text = L["Total"]
 		info.func = function()
 			window:set_selected_set("total")
@@ -407,9 +407,9 @@ function Skada:SegmentMenu(window)
 			Skada:UpdateDisplay(true)
 		end
 		info.checked = (window.selectedset == "total")
-		_UIDropDownMenu_AddButton(info, level)
+		UIDropDownMenu_AddButton(info, level)
 
-		info = _UIDropDownMenu_CreateInfo()
+		info = UIDropDownMenu_CreateInfo()
 		info.text = L["Current"]
 		info.func = function()
 			window:set_selected_set("current")
@@ -417,14 +417,14 @@ function Skada:SegmentMenu(window)
 			Skada:UpdateDisplay(true)
 		end
 		info.checked = (window.selectedset == "current")
-		_UIDropDownMenu_AddButton(info, level)
+		UIDropDownMenu_AddButton(info, level)
 
 		local sets = Skada:GetSets()
 		if #sets > 0 then
-			_UIDropDownMenu_AddSeparator(info, level)
+			UIDropDownMenu_AddSeparator(info, level)
 
 			for i, set in ipairs(sets) do
-				info = _UIDropDownMenu_CreateInfo()
+				info = UIDropDownMenu_CreateInfo()
 				info.text = Skada:GetSetLabel(set)
 				info.func = function()
 					window:set_selected_set(i)
@@ -435,14 +435,14 @@ function Skada:SegmentMenu(window)
 				if set.gotboss then
 					info.colorCode = set.success and "|cff00ff00" or "|cffff0000"
 				end
-				_UIDropDownMenu_AddButton(info, level)
+				UIDropDownMenu_AddButton(info, level)
 			end
 		end
 	end
 
 	local x, y
 	self.segmentsmenu.point, x, y = getDropdownPoint()
-	_ToggleDropDownMenu(1, nil, self.segmentsmenu, "UIParent", x, y)
+	ToggleDropDownMenu(1, nil, self.segmentsmenu, "UIParent", x, y)
 end
 
 do
@@ -479,7 +479,7 @@ do
 
 			if level == 1 then
 				for _, category in ipairs(categories) do
-					info = _UIDropDownMenu_CreateInfo()
+					info = UIDropDownMenu_CreateInfo()
 					info.text = category
 					info.value = category
 					info.hasArrow = 1
@@ -488,15 +488,15 @@ do
 					if win and win.selectedmode and win.selectedmode.category == category then
 						info.colorCode = "|cffffd100"
 					end
-					_UIDropDownMenu_AddButton(info, level)
+					UIDropDownMenu_AddButton(info, level)
 				end
 			elseif level == 2 and categorized[L_UIDROPDOWNMENU_MENU_VALUE] then
 				for _, mode in ipairs(categorized[L_UIDROPDOWNMENU_MENU_VALUE]) do
-					info = _UIDropDownMenu_CreateInfo()
+					info = UIDropDownMenu_CreateInfo()
 					info.text = mode:GetName()
 					info.func = function()
 						win:DisplayMode(mode)
-						_CloseDropDownMenus()
+						CloseDropDownMenus()
 					end
 
 					if win and win.selectedmode and win.selectedmode:GetName() == mode:GetName() then
@@ -512,14 +512,14 @@ do
 						info.tCoordBottom = 0.935
 						info.padding = 8
 					end
-					_UIDropDownMenu_AddButton(info, level)
+					UIDropDownMenu_AddButton(info, level)
 				end
 			end
 		end
 
 		local x, y
 		self.modesmenu.point, x, y = getDropdownPoint()
-		_ToggleDropDownMenu(1, nil, self.modesmenu, "UIParent", x, y)
+		ToggleDropDownMenu(1, nil, self.modesmenu, "UIParent", x, y)
 	end
 end
 
