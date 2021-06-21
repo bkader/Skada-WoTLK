@@ -1891,6 +1891,11 @@ end
 
 do
 	local SendChatMessage = SendChatMessage
+	if ChatThrottleLib and ChatThrottleLib.SendChatMessage then
+		SendChatMessage = function(...)
+			ChatThrottleLib:SendChatMessage("BULK", "Skada", ...)
+		end
+	end
 
 	local function sendchat(msg, chan, chantype)
 		if chantype == "self" then
