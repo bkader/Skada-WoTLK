@@ -325,6 +325,20 @@ end
 
 -------------------------------------------------------------------------------
 
+function LibCompat.EscapeStr(str)
+	local res = ""
+	for i = 1, str:len() do
+		local n = str:sub(i, i)
+		res = res .. n
+		if n == "|" then
+			res = res .. n
+		end
+	end
+	return (res ~= "") and res or str
+end
+
+-------------------------------------------------------------------------------
+
 local mixins = {
 	"IsInRaid",
 	"IsInParty",
@@ -347,7 +361,8 @@ local mixins = {
 	"tAppendAll",
 	"tCopy",
 	"SafePack",
-	"SafeUnpack"
+	"SafeUnpack",
+	"EscapeStr"
 }
 
 function LibCompat:Embed(target)
