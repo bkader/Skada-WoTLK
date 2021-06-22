@@ -170,7 +170,7 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 			name = Translit:Transliterate(name, "!")
 		end
 
-		if nickname and nickname ~= name and Skada.db.profile.namedisplay > 1 then
+		if nickname and nickname ~= name and (Skada.db.profile.namedisplay or 0) > 1 then
 			if Skada.db.profile.namedisplay == 2 then
 				name = nickname
 			elseif Skada.db.profile.namedisplay == 3 then
