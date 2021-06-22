@@ -1,5 +1,4 @@
 _dev
-.luacheckrc
 luacheck.exe
 Makefile
 *.zip
