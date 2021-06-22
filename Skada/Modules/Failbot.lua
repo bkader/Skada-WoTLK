@@ -10,7 +10,8 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	local playermod = mod:NewModule(L["Player's failed events"])
 	local spellmod = mod:NewModule(L["Event's failed players"])
 
-	local pairs, ipairs, format = pairs, ipairs, string.format
+	local pairs, ipairs = pairs, ipairs
+	local tostring, format = tostring, string.format
 	local GetSpellInfo, UnitGUID = Skada.GetSpellInfo or GetSpellInfo, UnitGUID
 	local failevents, tankevents = LibFail:GetSupportedEvents()
 	local _
@@ -206,7 +207,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return set.fail or 0
+		return tostring(set.fail or 0), set.fail or 0
 	end
 
 	function mod:AddToTooltip(set, tooltip)

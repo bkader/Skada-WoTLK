@@ -468,6 +468,6 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return set.death or 0
+		return tostring(set.death or 0), set.death or 0
 	end
 end)

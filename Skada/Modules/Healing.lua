@@ -287,12 +287,13 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
+		local hps, value = getRaidHPS(set)
 		return Skada:FormatValueText(
-			Skada:FormatNumber(set.heal or 0),
+			Skada:FormatNumber(value),
 			self.metadata.columns.Healing,
-			Skada:FormatNumber(getRaidHPS(set)),
+			Skada:FormatNumber(hps),
 			self.metadata.columns.HPS
-		)
+		), value
 	end
 end)
 
@@ -451,7 +452,7 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return Skada:FormatNumber(set.overheal or 0)
+		return Skada:FormatNumber(set.overheal or 0), set.overheal or 0
 	end
 end)
 
@@ -660,13 +661,13 @@ Skada:AddLoadableModule("Total Healing", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		local hps, total = getRaidHPS(set)
+		local hps, value = getRaidHPS(set)
 		return Skada:FormatValueText(
-			Skada:FormatNumber(total),
+			Skada:FormatNumber(value),
 			self.metadata.columns.Healing,
 			Skada:FormatNumber(hps),
 			self.metadata.columns.HPS
-		)
+		), value
 	end
 end)
 
@@ -835,14 +836,16 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
 	function mod:GetSetSummary(set)
 		local healing = set.heal or 0
 		local overheal = set.overheal or 0
+
+		local value = healing + overheal
 		return Skada:FormatValueText(
 			Skada:FormatNumber(healing),
 			self.metadata.columns.Healing,
 			Skada:FormatNumber(overheal),
 			self.metadata.columns.Overhealing,
-			format("%.1f%%", 100 * overheal / max(1, healing + overheal)),
+			format("%.1f%%", 100 * overheal / max(1, value)),
 			self.metadata.columns.Percent
-		)
+		), value
 	end
 end)
 

@@ -718,7 +718,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return Skada:FormatNumber(set.absorb or 0)
+		return Skada:FormatNumber(set.absorb or 0), set.absorb or 0
 	end
 
 	function mod:SetComplete(set)
@@ -1032,13 +1032,13 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		local hps, total = getRaidHPS(set)
+		local hps, value = getRaidHPS(set)
 		return Skada:FormatValueText(
-			Skada:FormatNumber(total),
+			Skada:FormatNumber(value),
 			self.metadata.columns.Healing,
 			Skada:FormatNumber(hps),
 			self.metadata.columns.HPS
-		)
+		), value
 	end
 end)
 
@@ -1124,7 +1124,8 @@ Skada:AddLoadableModule("HPS", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return Skada:FormatNumber(getRaidHPS(set))
+		local value = getRaidHPS(set)
+		return Skada:FormatNumber(value), value
 	end
 end)
 

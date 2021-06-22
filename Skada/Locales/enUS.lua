@@ -431,27 +431,18 @@ L["CC Tracker"] = true
 L["CC Done"] = true
 L["CC Done spells"] = true
 L["CC Done targets"] = true
-L["CC Done target spells"] = true
-L["%s's CC Done <%s> targets"] = true
-L["%s's CC Done <%s> spells"] = true
 L["%s's CC Done spells"] = true
 L["%s's CC Done targets"] = true
 -- CC Taken
 L["CC Taken"] = true
 L["CC Taken spells"] = true
 L["CC Taken sources"] = true
-L["CC Taken source spells"] = true
-L["%s's CC Taken <%s> sources"] = true
-L["%s's CC Taken <%s> spells"] = true
 L["%s's CC Taken spells"] = true
 L["%s's CC Taken sources"] = true
 L["CC Breaks"] = true
 L["CC Breakers"] = true
 L["CC Break spells"] = true
 L["CC Break targets"] = true
-L["CC Break target spells"] = true
-L["%s's CC Break <%s> spells"] = true
-L["%s's CC Break <%s> targets"] = true
 L["%s's CC Break spells"] = true
 L["%s's CC Break targets"] = true
 -- options

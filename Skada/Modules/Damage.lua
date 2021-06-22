@@ -607,13 +607,13 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		local dps, amount = getRaidDPS(set)
+		local dps, value = getRaidDPS(set)
 		return Skada:FormatValueText(
-			Skada:FormatNumber(amount),
+			Skada:FormatNumber(value),
 			self.metadata.columns.Damage,
 			Skada:FormatNumber(dps),
 			self.metadata.columns.DPS
-		)
+		), value
 	end
 
 	function mod:SetComplete(set)
@@ -712,7 +712,8 @@ Skada:AddLoadableModule("DPS", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return Skada:FormatNumber(getRaidDPS(set))
+		local value = getRaidDPS(set)
+		return Skada:FormatNumber(value), value
 	end
 end)
 
@@ -1136,13 +1137,13 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		local dps, amount = getRaidDPS(set)
+		local dps, value = getRaidDPS(set)
 		return Skada:FormatValueText(
-			Skada:FormatNumber(amount),
+			Skada:FormatNumber(value),
 			self.metadata.columns.Damage,
 			Skada:FormatNumber(dps),
 			self.metadata.columns.DPS
-		)
+		), value
 	end
 end)
 

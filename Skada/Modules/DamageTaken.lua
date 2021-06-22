@@ -554,13 +554,13 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		local dtps, amount = getRaidDTPS(set)
+		local dtps, value = getRaidDTPS(set)
 		return Skada:FormatValueText(
-			Skada:FormatNumber(amount),
+			Skada:FormatNumber(value),
 			self.metadata.columns.Damage,
 			Skada:FormatNumber(dtps),
 			self.metadata.columns.DTPS
-		)
+		), value
 	end
 
 	function mod:SetComplete(set)
@@ -643,7 +643,8 @@ Skada:AddLoadableModule("DTPS", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return Skada:FormatNumber(getRaidDTPS(set))
+		local value = getRaidDTPS(set)
+		return Skada:FormatNumber(value), value
 	end
 end)
 

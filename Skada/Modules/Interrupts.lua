@@ -9,7 +9,8 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	local playerid, _
 
 	-- cache frequently used globals
-	local pairs, select, format, max = pairs, select, string.format, math.max
+	local pairs, select, max = pairs, select, math.max
+	local tostring, format = tostring, string.format
 	local UnitGUID, IsInInstance, SendChatMessage = UnitGUID, IsInInstance, SendChatMessage
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
@@ -276,7 +277,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return set.interrupt or 0
+		return tostring(set.interrupt or 0), set.interrupt or 0
 	end
 
 	local opts = {

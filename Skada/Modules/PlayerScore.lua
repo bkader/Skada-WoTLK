@@ -183,6 +183,6 @@ Skada:AddLoadableModule("Player Score", function(Skada, L)
 
 	function mod:GetSetSummary(set)
 		local score = set and GetSetScore(set) or 0
-		return format("%.1f", score)
+		return format("%.1f", score), score
 	end
 end)

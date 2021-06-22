@@ -2136,11 +2136,15 @@ function Skada:UpdateDisplay(force)
 					end
 
 					if self.db.profile.showtotals and win.selectedmode.GetSetSummary then
-						local total, existing = 0, nil
+						local valuetext, total = win.selectedmode:GetSetSummary(set)
+						local existing  -- an existing bar?
 
-						for _, data in win:IterateDataset() do
-							if data.id then
-								total = total + data.value
+						if not total then
+							total = 0
+							for _, data in win:IterateDataset() do
+								if data.id then
+									total = total + data.value
+								end
 							end
 							if not existing and not data.id then
 								existing = data
@@ -2152,12 +2156,10 @@ function Skada:UpdateDisplay(force)
 						d.id = "total"
 						d.label = L["Total"]
 						d.ignore = true
-						d.icon = (self.db.profile.moduleicons and win.selectedmode.metadata) and win.selectedmode.metadata.icon or dataobj.icon
 						d.value = total
 						d.valuetext = win.selectedmode:GetSetSummary(set)
-						if not existing then
-							tinsert(win.dataset, 1, d)
-						end
+						if not existing then tinsert(win.dataset, 1, d) end
+						self.callbacks:Fire("SKADA_MODE_BAR", d, win.selectedmode)
 					end
 				end
 
@@ -2176,7 +2178,7 @@ function Skada:UpdateDisplay(force)
 					if set and mode.GetSetSummary ~= nil then
 						d.valuetext = mode:GetSetSummary(set)
 					end
-					d.icon = (self.db.profile.moduleicons and mode.metadata) and mode.metadata.icon
+					self.callbacks:Fire("SKADA_MODE_BAR", d, mode)
 				end
 
 				win.metadata.ordersort = true

@@ -75,13 +75,12 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		if set then
-			return Skada:FormatValueText(
-				Skada:GetFormatedSetTime(set),
-				self.metadata.columns["Active Time"],
-				format("%s - %s", date("%H:%M", set.starttime), date("%H:%M", set.endtime)),
-				self.metadata.columns.Percent
-			)
-		end
+		local value = Skada:GetSetTime(set)
+		return Skada:FormatValueText(
+			Skada:FormatTime(value),
+			self.metadata.columns["Active Time"],
+			format("%s - %s", date("%H:%M", set.starttime), date("%H:%M", set.endtime)),
+			self.metadata.columns.Percent
+		), value
 	end
 end)

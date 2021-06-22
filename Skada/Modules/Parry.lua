@@ -5,7 +5,8 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 	local mod = Skada:NewModule(L["Parry-Haste"])
 	local targetmod = mod:NewModule(L["Parry target list"])
 
-	local pairs, format, select = pairs, string.format, select
+	local pairs, select = pairs, select
+	local tostring, format = tostring, string.format
 
 	local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
 	local parrybosses = {
@@ -148,6 +149,6 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return set.parry or 0
+		return tostring(set.parry or 0), set.parry or 0
 	end
 end)

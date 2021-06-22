@@ -137,10 +137,9 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 	-- base function used to return sets summaries
 	function basemod:GetSetSummary(set)
 		if set and set.power and self.power ~= nil then
-			if self.power == 0 then
-				return Skada:FormatNumber(set.power[self.power] or 0)
-			end
-			return set.power[self.power] or 0
+			local value = set.power[self.power] or 0
+			local valuetext = (self.power == 0) and Skada:FormatNumber(value) or value
+			return valuetext, value
 		end
 	end
 

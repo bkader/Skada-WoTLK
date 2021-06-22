@@ -284,7 +284,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return set.potion or 0
+		return tostring(set.potion or 0), set.potion or 0
 	end
 
 	function mod:SetComplete(set)

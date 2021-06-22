@@ -198,6 +198,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return Skada:FormatNumber(set.friendfire or 0)
+		local value = set.friendfire or 0
+		return Skada:FormatNumber(value), value
 	end
 end)

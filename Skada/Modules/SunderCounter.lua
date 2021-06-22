@@ -5,7 +5,8 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 	local mod = Skada:NewModule(L["Sunder Counter"])
 	local targetmod = mod:NewModule(L["Sunder target list"])
 
-	local pairs, select, format = pairs, select, string.format
+	local pairs, select = pairs, select
+	local tostring, format = tostring, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local _
 
@@ -153,6 +154,6 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return set.sunder or 0
+		return tostring(set.sunder or 0), set.sunder or 0
 	end
 end)

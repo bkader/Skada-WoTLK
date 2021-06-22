@@ -504,14 +504,7 @@ do
 						info.colorCode = "|cffffd100"
 					end
 
-					if Skada.db.profile.moduleicons then
-						info.icon = mode.metadata and mode.metadata.icon
-						info.tCoordLeft = 0.065
-						info.tCoordRight = 0.935
-						info.tCoordTop = 0.065
-						info.tCoordBottom = 0.935
-						info.padding = 8
-					end
+					Skada.callbacks:Fire("SKADA_MODE_MENU", info, mode)
 					UIDropDownMenu_AddButton(info, level)
 				end
 			end

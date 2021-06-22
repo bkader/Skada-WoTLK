@@ -59,7 +59,6 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 			["RANGE_DAMAGE"] = true,
 			["SPELL_BUILDING_DAMAGE"] = true,
 			["SPELL_DAMAGE"] = true,
-			["SPELL_PERIODIC_DAMAGE"] = true,
 			["SWING_DAMAGE"] = true
 		}
 
@@ -209,10 +208,29 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 		end
 	end
 
+	function mod:ModuleIconsBar(_, bar, mode)
+		if Skada.db.profile.moduleicons and bar and mode and mode.metadata then
+			bar.icon = mode.metadata.icon
+		end
+	end
+
+	function mod:ModuleIconsMenu(_, info, mode)
+		if Skada.db.profile.moduleicons and info and mode and mode.metadata then
+			info.icon = mode.metadata and mode.metadata.icon
+			info.tCoordLeft = 0.065
+			info.tCoordRight = 0.935
+			info.tCoordTop = 0.065
+			info.tCoordBottom = 0.935
+			info.padding = 8
+		end
+	end
+
 	function mod:OnEnable()
 		self:SecureHook(Skada, "CombatLogEvent")
 		self:SecureHook(Skada, "EndSegment")
 		Skada.RegisterCallback(self, "COMBAT_BOSS_DEFEATED", "BossDefeated")
+		Skada.RegisterCallback(self, "SKADA_MODE_BAR", "ModuleIconsBar")
+		Skada.RegisterCallback(self, "SKADA_MODE_MENU", "ModuleIconsMenu")
 	end
 
 	function mod:OnDisable()

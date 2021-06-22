@@ -8,7 +8,8 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 	local playermod = mod:NewModule(L["Dispel spell list"])
 
 	-- cache frequently used globals
-	local pairs, select, format = pairs, select, string.format
+	local pairs, select = pairs, select
+	local tostring, format = tostring, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local _
 
@@ -249,6 +250,6 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return set.dispel or 0
+		return tostring(set.dispel or 0), set.dispel or 0
 	end
 end)
