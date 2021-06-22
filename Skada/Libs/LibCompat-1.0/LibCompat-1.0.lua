@@ -7,13 +7,11 @@
 local MAJOR, MINOR = "LibCompat-1.0", 2
 
 local LibCompat, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
-if not LibCompat then
-	return
-end
+if not LibCompat then return end
 
 LibCompat.embeds = LibCompat.embeds or {}
 
-local pairs, select = pairs, select
+local pairs, select, tinsert = pairs, select, table.insert
 local CreateFrame = CreateFrame
 local GetNumRaidMembers = GetNumRaidMembers
 local GetNumPartyMembers = GetNumPartyMembers
@@ -21,6 +19,47 @@ local UnitExists = UnitExists
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local InCombatLockdown = InCombatLockdown
 local IsInInstance = IsInInstance
+
+-------------------------------------------------------------------------------
+
+function LibCompat.tlength(tbl)
+	local len = 0
+	for _ in pairs(tbl) do
+		len = len + 1
+	end
+	return len
+end
+
+-- copies a table from another
+function LibCompat.tCopy(to, from, ...)
+	for k, v in pairs(from) do
+		local skip = false
+		if ... then
+			for i, j in ipairs(...) do
+				if j == k then
+					skip = true
+					break
+				end
+			end
+		end
+		if not skip then
+			if type(v) == "table" then
+				to[k] = {}
+				LibCompat.tCopy(to[k], v, ...)
+			else
+				to[k] = v
+			end
+		end
+	end
+end
+
+function LibCompat.tAppendAll(tbl, elems)
+	for _, elem in ipairs(elems) do
+		tinsert(tbl, elem)
+	end
+end
+
+-------------------------------------------------------------------------------
 
 function LibCompat:IsInRaid()
 	return (GetNumRaidMembers() > 0)
@@ -254,39 +293,6 @@ end
 
 -------------------------------------------------------------------------------
 
-function LibCompat.tlength(tbl)
-	local len = 0
-	for _ in pairs(tbl) do
-		len = len + 1
-	end
-	return len
-end
-
--- copies a table from another
-function LibCompat.tCopy(to, from, ...)
-	for k, v in pairs(from) do
-		local skip = false
-		if ... then
-			for i, j in ipairs(...) do
-				if j == k then
-					skip = true
-					break
-				end
-			end
-		end
-		if not skip then
-			if type(v) == "table" then
-				to[k] = {}
-				LibCompat.tCopy(to[k], v, ...)
-			else
-				to[k] = v
-			end
-		end
-	end
-end
-
--------------------------------------------------------------------------------
-
 function LibCompat.EscapeStr(str)
 	local res = ""
 	for i = 1, str:len() do
@@ -297,6 +303,131 @@ function LibCompat.EscapeStr(str)
 		end
 	end
 	return (res ~= "") and res or str
+end
+
+-------------------------------------------------------------------------------
+
+do
+	local LGT = LibStub("LibGroupTalents-1.0")
+	local GetPlayerInfoByGUID = GetPlayerInfoByGUID
+	local UnitExists, UnitClass, UnitName = UnitExists, UnitClass, UnitName
+	local MAX_TALENT_TABS = MAX_TALENT_TABS or 3
+
+	-- list of class to specs
+	local specIDs = {
+		["MAGE"] = {62, 63, 64},
+		["PRIEST"] = {256, 257, 258},
+		["ROGUE"] = {259, 260, 261},
+		["WARLOCK"] = {265, 266, 267},
+		["WARRIOR"] = {71, 72, 73},
+		["PALADIN"] = {65, 66, 70},
+		["DEATHKNIGHT"] = {250, 251, 252},
+		["DRUID"] = {102, 103, 104, 105},
+		["HUNTER"] = {253, 254, 255},
+		["SHAMAN"] = {262, 263, 264}
+	}
+
+	local Guid2Talent = {}
+	local Guid2Spec = {}
+	local Guid2Unit = {}
+
+	-- checks if the feral druid is a cat or tank spec
+	local function GetDruidSubSpec(unit)
+		-- 57881 : Natural Reaction -- used by druid tanks
+		local points = LGT:UnitHasTalent(unit, LibCompat.GetSpellInfo(57881), LGT:GetActiveTalentGroup(unit))
+		return (points and points > 0) and 3 or 2
+	end
+
+	function LibCompat.GetSpecialization(unit, class)
+		unit = unit or "player"
+		class = class or select(2, UnitClass(unit))
+
+		local spec  -- start with nil
+
+		if unit and specIDs[class] then
+			local talentGroup = LGT:GetActiveTalentGroup(unit)
+			local maxPoints, index = 0, 0
+
+			for i = 1, MAX_TALENT_TABS do
+				local _, _, pointsSpent = LGT:GetTalentTabInfo(unit, i, talentGroup)
+				if pointsSpent ~= nil then
+					if maxPoints < pointsSpent then
+						maxPoints = pointsSpent
+						if class == "DRUID" and i >= 2 then
+							if i == 3 then
+								index = 4
+							elseif i == 2 then
+								index = GetDruidSubSpec(unit)
+							end
+						else
+							index = i
+						end
+					end
+				end
+			end
+
+			spec = specIDs[class][index]
+		end
+
+		return spec
+	end
+
+	function LibCompat.UnitGroupRolesAssigned(unit)
+		local role = LGT:GetUnitRole(unit) or "NONE"
+		if role == "melee" or role == "caster" then
+			role = "DAMAGER"
+		elseif role == "tank" then
+			role = "TANK"
+		elseif role == "healer" then
+			role = "HEALER"
+		end
+		return role
+	end
+
+	function LibCompat.GetGUIDTalentString(guid)
+		-- already cached?
+		if Guid2Talent[guid] then
+			return Guid2Talent[guid]
+		end
+
+		local n1, n2, n3 = select(2, LGT:GetGUIDTalentSpec(guid))
+		if n1 and n2 and n3 then
+			Guid2Talent[guid] = n1 .. "/" .. n2 .. "/" .. n3
+			return Guid2Talent[guid]
+		end
+
+		return ""
+	end
+
+	function LibCompat.GetGUIDSpecialization(guid)
+		if Guid2Spec[guid] then
+			return Guid2Spec[guid]
+		end
+
+		local unit = Guid2Unit[guid]
+		if unit and UnitExists(unit) then
+			local spec = self.GetSpecialization(unit, class)
+			if spec then
+				Guid2Spec[guid] = spec
+				return Guid2Spec[guid]
+			end
+		end
+	end
+
+	function LibCompat:LibGroupTalents_Update(event, guid, unit, tree_id, n1, n2, n3)
+		-- cache guid to unit
+		Guid2Unit[guid] = unit
+
+		-- cache talent strings
+		Guid2Talent[guid] = n1 .. "/" .. n2 .. "/" .. n3
+
+		local class = select(2, GetPlayerInfoByGUID(guid)) or select(2, UnitClass(unit))
+		local spec = self.GetSpecialization(unit, class)
+		if spec then
+			Guid2Spec[guid] = spec
+		end
+	end
+	LGT.RegisterCallback(LibCompat, "LibGroupTalents_Update")
 end
 
 -------------------------------------------------------------------------------
@@ -317,7 +448,12 @@ local mixins = {
 	"GetSpellLink",
 	"tlength",
 	"tCopy",
-	"EscapeStr"
+	"tAppendAll",
+	"EscapeStr",
+	"GetSpecialization",
+	"UnitGroupRolesAssigned",
+	"GetGUIDTalentString",
+	"GetGUIDSpecialization"
 }
 
 function LibCompat:Embed(target)

@@ -1212,83 +1212,6 @@ function Skada:ClearAllIndexes()
 end
 
 -------------------------------------------------------------------------------
--- specialization and role functions
-
-do
-	-- list of class to specs
-	local specIDs = {
-		["MAGE"] = {62, 63, 64},
-		["PRIEST"] = {256, 257, 258},
-		["ROGUE"] = {259, 260, 261},
-		["WARLOCK"] = {265, 266, 267},
-		["WARRIOR"] = {71, 72, 73},
-		["PALADIN"] = {65, 66, 70},
-		["DEATHKNIGHT"] = {250, 251, 252},
-		["DRUID"] = {102, 103, 104, 105},
-		["HUNTER"] = {253, 254, 255},
-		["SHAMAN"] = {262, 263, 264}
-	}
-
-	-- checks if the feral druid is a cat or tank spec
-	local function GetDruidSubSpec(unit)
-		-- 57881 : Natural Reaction -- used by druid tanks
-		local points = LGT:UnitHasTalent(unit, Skada.GetSpellInfo(57881), LGT:GetActiveTalentGroup(unit))
-		return (points and points > 0) and 3 or 2
-	end
-
-	-- returns the spec id
-	function Skada:GetPlayerSpecID(playername, playerclass)
-		local specIdx = 0
-
-		if playername then
-			playerclass = playerclass or select(2, UnitClass(playername))
-			if playerclass and specIDs[playerclass] then
-				local talantGroup = LGT:GetActiveTalentGroup(playername)
-				local maxPoints, index = 0, 0
-
-				for i = 1, MAX_TALENT_TABS do
-					local name, icon, pointsSpent = LGT:GetTalentTabInfo(playername, i, talantGroup)
-					if pointsSpent ~= nil then
-						if maxPoints < pointsSpent then
-							maxPoints = pointsSpent
-							if playerclass == "DRUID" and i >= 2 then
-								if i == 3 then
-									index = 4
-								elseif i == 2 then
-									index = GetDruidSubSpec(playername)
-								end
-							else
-								index = i
-							end
-						end
-					end
-				end
-
-				if specIDs[playerclass][index] then
-					specIdx = specIDs[playerclass][index]
-				end
-				talantGroup, maxPoints, index = nil, nil, nil
-			end
-		end
-
-		return specIdx
-	end
-end
-
--- proper way of getting role icon using LibGroupTalents
-function Skada:UnitGroupRolesAssigned(unit)
-	local role = LGT:GetUnitRole(unit) or "NONE"
-	if role == "melee" or role == "caster" then
-		role = "DAMAGER"
-	elseif role == "tank" then
-		role = "TANK"
-	elseif role == "healer" then
-		role = "HEALER"
-	end
-	return role
-end
-
--------------------------------------------------------------------------------
 -- player functions
 
 -- finds a player that was already recorded
@@ -1349,14 +1272,12 @@ do
 			-- we make sure to assign his/her role and spec
 			if Skada.validclass[player.class] then
 				if not player.role then
-					player.role = Skada:UnitGroupRolesAssigned(player.name)
+					player.role = Skada.UnitGroupRolesAssigned(player.name)
 				end
 				if not player.spec then
-					player.spec = Skada:GetPlayerSpecID(player.name, player.class)
+					player.spec = Skada.GetGUIDSpecialization(player.id)
 				end
 			end
-
-			Skada.callbacks:Fire("SKADA_PLAYER_FIX", player)
 		end
 	end
 
@@ -2330,15 +2251,14 @@ end
 function Skada:FormatNumber(number)
 	if number then
 		if self.db.profile.numberformat == 1 then
-			if number > 1000000000 then
+			if number > 999999999 then
 				return format("%02.3fB", number / 1000000000)
-			elseif number > 1000000 then
+			elseif number > 999999 then
 				return format("%02.2fM", number / 1000000)
-			elseif number > 1000 then
+			elseif number > 999 then
 				return format("%02.1fK", number / 1000)
-			else
-				return floor(number)
 			end
+			return floor(number)
 		elseif self.db.profile.numberformat == 2 then
 			local left, num, right = tostring(floor(number)):match("^([^%d]*%d)(%d*)(.-)$")
 			return left .. (num:reverse():gsub("(%d%d%d)", "%1,"):reverse()) .. right
