@@ -294,8 +294,10 @@ function mod:OnMouseWheel(_, frame, direction)
 
 	if direction == 1 and offset > 0 then
 		win.bargroup:SetBarOffset(offset - 1)
+		mod:Update(win, true)
 	elseif direction == -1 and ((numbars - maxbars - offset) > 0) then
 		win.bargroup:SetBarOffset(offset + 1)
+		mod:Update(win, true)
 	end
 end
 
@@ -506,26 +508,28 @@ do
 		return a and b and a.order and b.order and a.order < b.order
 	end
 
-	function mod:Update(win)
+	function mod:Update(win, latecall)
 		if not win or not win.bargroup then return end
 		win.bargroup.button:SetText(win.metadata.title)
 
-		if win.metadata.showspots then
-			tsort(win.dataset, value_sort)
-		end
-
-		local hasicon
-		for _, data in win:IterateDataset() do
-			if (data.icon and not data.ignore) or (data.spec and win.db.specicons) or (data.class and win.db.classicons) or (data.role and win.db.roleicons) then
-				hasicon = true
+		if not latecall then
+			if win.metadata.showspots then
+				tsort(win.dataset, value_sort)
 			end
-		end
 
-		if hasicon and not win.bargroup.showIcon then
-			win.bargroup:ShowIcon()
-		end
-		if not hasicon and win.bargroup.showIcon then
-			win.bargroup:HideIcon()
+			local hasicon
+			for _, data in win:IterateDataset() do
+				if (data.icon and not data.ignore) or (data.spec and win.db.specicons) or (data.class and win.db.classicons) or (data.role and win.db.roleicons) then
+					hasicon = true
+				end
+			end
+
+			if hasicon and not win.bargroup.showIcon then
+				win.bargroup:ShowIcon()
+			end
+			if not hasicon and win.bargroup.showIcon then
+				win.bargroup:HideIcon()
+			end
 		end
 
 		if win.metadata.wipestale then
@@ -537,9 +541,15 @@ do
 			end
 		end
 
-		local nr = 1
-		for i, data in win:IterateDataset() do
-			if data.id then
+		local maxbars = win.bargroup:GetMaxBars()
+		local offset = win.bargroup:GetBarOffset()
+		local nr = offset + 1
+		local index, data
+
+		for i = 0, maxbars do
+			index = i + offset
+			data = win.dataset[index]
+			if data and data.id then
 				local barid = data.id
 				local barlabel = data.label
 
@@ -693,7 +703,7 @@ do
 				end
 
 				if not data.ignore then
-					nr = nr + 1
+					nr = index + 1
 				end
 			end
 		end
