@@ -2155,6 +2155,7 @@ function Skada:UpdateDisplay(force)
 						local d = existing or {}
 						d.id = "total"
 						d.label = L["Total"]
+						d.icon = dataobj.icon
 						d.ignore = true
 						d.value = total
 						d.valuetext = win.selectedmode:GetSetSummary(set)
