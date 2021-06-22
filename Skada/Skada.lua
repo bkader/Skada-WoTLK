@@ -1568,7 +1568,6 @@ do
 			if not owner and action.playerflags and band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
 				owner = {id = UnitGUID("player"), name = UnitName("player")}
 				pets[action.playerid] = owner
-				self:SendComm(nil, nil, "AssignPet", owner.id, action.playerid)
 			end
 
 			if not owner then
@@ -1608,10 +1607,6 @@ do
 
 		return playerid, playername
 	end
-end
-
-function Skada:OnCommAssignPet(ownerName, ownerGUID, petGUID)
-	self:AssignPet(ownerGUID, ownerName, petGUID)
 end
 
 function Skada:AssignPet(ownerGUID, ownerName, petGUID)
