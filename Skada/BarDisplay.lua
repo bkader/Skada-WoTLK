@@ -220,12 +220,9 @@ function mod:Wipe(win)
 		win.bargroup:SetSortFunction(nil)
 		win.bargroup:SetBarOffset(0)
 
-		local bars = win.bargroup:GetBars()
-		if bars then
-			for _, bar in pairs(bars) do
-				bar:Hide()
-				win.bargroup:RemoveBar(bar)
-			end
+		for _, bar in win.bargroup:IterateBars() do
+			bar:Hide()
+			win.bargroup:RemoveBar(bar)
 		end
 
 		win.bargroup:SortBars()
@@ -533,11 +530,8 @@ do
 		end
 
 		if win.metadata.wipestale then
-			local bars = win.bargroup:GetBars()
-			if bars then
-				for _, bar in pairs(bars) do
-					bar.checked = false
-				end
+			for _, bar in win.bargroup:IterateBars() do
+				bar.checked = false
 			end
 		end
 
@@ -685,7 +679,12 @@ do
 				end
 
 				if data.backgroundcolor then
-					bar.bgtexture:SetVertexColor(data.backgroundcolor.r, data.backgroundcolor.g, data.backgroundcolor.b, data.backgroundcolor.a or 1)
+					bar.bgtexture:SetVertexColor(
+						data.backgroundcolor.r,
+						data.backgroundcolor.g,
+						data.backgroundcolor.b,
+						data.backgroundcolor.a or 1
+					)
 				end
 
 				if data.backgroundwidth then
@@ -706,8 +705,7 @@ do
 		end
 
 		if win.metadata.wipestale then
-			local bars = win.bargroup:GetBars()
-			for name, bar in pairs(bars) do
+			for _, bar in win.bargroup:IterateBars() do
 				if not bar.checked then
 					win.bargroup:RemoveBar(bar)
 				end

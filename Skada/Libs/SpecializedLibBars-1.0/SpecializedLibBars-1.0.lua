@@ -247,12 +247,8 @@ function lib:HasAnyBar()
 	return not (not (bars[self] and next(bars[self])))
 end
 
-do
-	local function NOOP()
-	end
-	function lib:IterateBars()
-		return bars[self] and pairs(bars[self]) or NOOP
-	end
+function lib:IterateBars()
+	return pairs(bars[self] or {})
 end
 
 -- Convenient method to create a new, empty bar prototype
