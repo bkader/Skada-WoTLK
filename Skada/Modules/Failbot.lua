@@ -15,7 +15,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	local failevents, tankevents = LibFail:GetSupportedEvents()
 	local _
 
-	local function log_fail(set, playerid, playername, spellid)
+	local function log_fail(set, playerid, playername, spellid, event)
 		if set then
 			local player = Skada:find_player(set, playerid, playername)
 			if player and (player.role ~= "TANK" or not tankevents[event]) then
@@ -36,8 +36,8 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 			if spellid then
 				local unitGUID = UnitGUID(who)
 				if unitGUID then
-					log_fail(Skada.current, unitGUID, who, spellid)
-					log_fail(Skada.total, unitGUID, who, spellid)
+					log_fail(Skada.current, unitGUID, who, spellid, event)
+					log_fail(Skada.total, unitGUID, who, spellid, event)
 				end
 			end
 		end
@@ -92,9 +92,9 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 					end
 					nr = nr + 1
 				end
-			end
 
-			win.metadata.maxvalue = maxvalue
+				win.metadata.maxvalue = maxvalue
+			end
 		end
 	end
 

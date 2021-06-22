@@ -10,6 +10,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 	-- cache frequently used globals
 	local pairs, select, format = pairs, select, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+	local _
 
 	local function log_dispel(set, data)
 		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)

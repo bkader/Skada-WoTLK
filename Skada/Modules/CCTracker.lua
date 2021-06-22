@@ -180,6 +180,7 @@ local ExtraCCSpells = {
 local pairs, select, format = pairs, select, string.format
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local GetSpellLink, UnitClass = Skada.GetSpellLink or GetSpellLink, Skada.UnitClass
+local _
 
 local function GetSpellSchool(spellid)
 	if CCSpells[spellid] and CCSpells[spellid] ~= true then
@@ -715,8 +716,8 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 	local IsInInstance, UnitInRaid = IsInInstance, UnitInRaid
 	local SendChatMessage = SendChatMessage
 
-	local function log_ccbreak(set, data)
-		local player = Skada:get_player(set, data.playerid, data.playername)
+	local function log_ccbreak(set, cc)
+		local player = Skada:get_player(set, cc.playerid, cc.playername)
 		if player then
 			-- increment the count.
 			player.ccbreak = (player.ccbreak or 0) + 1
@@ -815,8 +816,8 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = spellname
-					d.spellid = spell.id
+					d.id = spellid
+					d.spellid = spellid
 					d.label, _, d.icon = GetSpellInfo(spellid)
 					d.spellschool = GetSpellSchool(spellid)
 
@@ -833,9 +834,9 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 					end
 					nr = nr + 1
 				end
-			end
 
-			win.metadata.maxvalue = maxvalue
+				win.metadata.maxvalue = maxvalue
+			end
 		end
 	end
 

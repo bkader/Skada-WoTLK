@@ -5,6 +5,7 @@ local pairs, ipairs, select = pairs, ipairs, select
 local format, max = string.format, math.max
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local UnitGUID, UnitClass = UnitGUID, Skada.UnitClass
+local _
 
 -- ============== --
 -- Absorbs module --
@@ -427,17 +428,19 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 			local prefix, min_member, max_member = Skada:GetGroupTypeAndCount()
 
 			if prefix then
-				local unit = (n == 0) and "player" or prefix .. tostring(n)
-				if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
-					local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
-					for i = 1, 40 do
-						local spellname, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitBuff(unit, i)
-						if spellid then
-							if absorbspells[spellid] and unitCaster then
-								AuraApplied(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
+				for n = min_member, max_member do
+					local unit = (n == 0) and "player" or prefix .. tostring(n)
+					if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
+						local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
+						for i = 1, 40 do
+							local spellname, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitBuff(unit, i)
+							if spellid then
+								if absorbspells[spellid] and unitCaster then
+									AuraApplied(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
+								end
+							else
+								break -- nothing found
 							end
-						else
-							break -- nothing found
 						end
 					end
 				end
@@ -473,19 +476,19 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					return
 				end
 			-- Frost Ward and we took frost damage?
-			elseif mage_frost_ward[shield_id] then
+			elseif mage_frost_ward[absorb.spellid] then
 				if band(spellschool, 0x10) == spellschool then
 					found = absorb
 					break
 				end
 			-- Fire Ward and we took fire damage?
-			elseif mage_fire_ward[shield_id] then
+			elseif mage_fire_ward[absorb.spellid] then
 				if band(spellschool, 0x4) == spellschool then
 					found = absorb
 					break
 				end
 			-- Shadow Ward and we took shadow damage?
-			elseif warlock_shadow_ward[shield_id] then
+			elseif warlock_shadow_ward[absorb.spellid] then
 				if band(spellschool, 0x20) == spellschool then
 					found = absorb
 					break
@@ -1065,6 +1068,20 @@ Skada:AddLoadableModule("HPS", function(Skada, L)
 	local getHPS, getRaidHPS = parentmod.getHPS, parentmod.getRaidHPS
 
 	local mod = Skada:NewModule(L["HPS"])
+
+	local function hps_tooltip(win, id, label, tooltip)
+		local set = win:get_selected_set()
+		local player = Skada:find_player(set, id)
+		if player then
+			tooltip:AddLine(player.name .. " - " .. L["HPS"])
+			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(Skada:GetSetTime(set)), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(Skada:PlayerActiveTime(set, player, true)), 1, 1, 1)
+
+			local amount = (player.heal or 0) + (player.absorb or 0)
+			local total = (set.heal or 0) + (set.absorb or 0)
+			tooltip:AddDoubleLine(L["Absorbs and Healing"], format("%s (%02.1f%%)", Skada:FormatNumber(amount), 100 * amount / max(1, total)), 1, 1, 1)
+		end
+	end
 
 	function mod:Update(win, set)
 		win.title = L["HPS"]

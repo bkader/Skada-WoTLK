@@ -8,6 +8,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
 	local pairs, select, format = pairs, select, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+	local _
 
 	local function log_damage(set, dmg)
 		local player = Skada:get_player(set, dmg.playerid, dmg.playername, dmg.playerflags)

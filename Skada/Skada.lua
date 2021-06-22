@@ -1936,7 +1936,8 @@ do
 		local label = (report_mode_name == L["Improvement"]) and UnitName("player") or Skada:GetSetLabel(report_set)
 		sendchat(format(L["Skada: %s for %s:"], title, label), channel, chantype)
 
-		local nr, maxlines = 1, maxlines or 10
+		maxlines = maxlines or 10
+		local nr = 1
 		for _, data in ipairs(report_table.dataset) do
 			if ((barid and barid == data.id) or (data.id and not barid)) and not data.ignore then
 				local label

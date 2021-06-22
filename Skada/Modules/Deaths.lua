@@ -15,7 +15,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	local abs, max, modf = math.abs, math.max, math.modf
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetspellLink = Skada.GetSpellLink or GetSpellLink
-	local date = date
+	local date, _ = date
 
 	local function log_deathlog(set, data, ts)
 		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
@@ -207,7 +207,8 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 				win.metadata.maxvalue = player.maxhp
 
 				-- add a fake entry for the actual death
-				local nr, pre = 1, win.dataset[nr] or {}
+				local nr = 1
+				local pre = win.dataset[nr] or {}
 				win.dataset[nr] = pre
 
 				pre.id = nr
@@ -245,29 +246,25 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 						local change = (log.amount > 0 and "+" or "-") .. Skada:FormatNumber(abs(log.amount))
 						d.reportlabel = format("%02.2f: %s   %s [%s]", diff or 0, GetspellLink(log.spellid) or spellname or UNKNOWN, change, Skada:FormatNumber(log.hp or 0))
 
-						local extra
+						local extra = {}
 						if (log.overkill or 0) > 0 then
-							extra = extra or {}
 							d.overkill = log.overkill
 							tinsert(extra, "O:" .. Skada:FormatNumber(abs(log.overkill)))
 						end
 						if (log.resisted or 0) > 0 then
-							extra = extra or {}
 							d.resisted = log.resisted
 							tinsert(extra, "R:" .. Skada:FormatNumber(abs(log.resisted)))
 						end
 						if (log.blocked or 0) > 0 then
-							extra = extra or {}
 							d.blocked = log.blocked
 							tinsert(extra, "B:" .. Skada:FormatNumber(abs(log.blocked)))
 						end
 						if (log.absorbed or 0) > 0 then
-							extra = extra or {}
 							d.absorbed = log.absorbed
 							tinsert(extra, "A:" .. Skada:FormatNumber(abs(log.absorbed)))
 						end
 
-						if extra then
+						if next(extra) then
 							change = "(|cffff0000*|r) " .. change
 							d.reportlabel = d.reportlabel .. " (" .. tconcat(extra, " - ") .. ")"
 						end

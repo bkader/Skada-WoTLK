@@ -4,6 +4,7 @@ assert(Skada, "Skada not found!")
 local pairs, format, select, tostring = pairs, string.format, select, tostring
 local min, max, floor = math.min, math.max, math.floor
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+local _
 
 -- list of the auras that are ignored!
 local blacklist = {

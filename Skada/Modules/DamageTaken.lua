@@ -139,20 +139,20 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 
 	local function EnvironmentDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local envtype = ...
-		local spellid, spellname, spellschool
+		local spellid, spellname
 
 		if envtype == "Falling" or envtype == "FALLING" then
-			spellid, spellschool, spellname = 3, 1, ACTION_ENVIRONMENTAL_DAMAGE_FALLING
+			spellid, spellname = 3, ACTION_ENVIRONMENTAL_DAMAGE_FALLING
 		elseif envtype == "Drowning" or envtype == "DROWNING" then
-			spellid, spellschool, spellname = 4, 1, ACTION_ENVIRONMENTAL_DAMAGE_DROWNING
+			spellid, spellname = 4, ACTION_ENVIRONMENTAL_DAMAGE_DROWNING
 		elseif envtype == "Fatigue" or envtype == "FATIGUE" then
-			spellid, spellschool, spellname = 5, 1, ACTION_ENVIRONMENTAL_DAMAGE_FATIGUE
+			spellid, spellname = 5, ACTION_ENVIRONMENTAL_DAMAGE_FATIGUE
 		elseif envtype == "Fire" or envtype == "FIRE" then
-			spellid, spellschool, spellname = 6, 4, ACTION_ENVIRONMENTAL_DAMAGE_FIRE
+			spellid, spellname = 6, ACTION_ENVIRONMENTAL_DAMAGE_FIRE
 		elseif envtype == "Lava" or envtype == "LAVA" then
-			spellid, spellschool, spellname = 7, 4, ACTION_ENVIRONMENTAL_DAMAGE_LAVA
+			spellid, spellname = 7, ACTION_ENVIRONMENTAL_DAMAGE_LAVA
 		elseif envtype == "Slime" or envtype == "SLIME" then
-			spellid, spellschool, spellname = 8, 8, ACTION_ENVIRONMENTAL_DAMAGE_SLIME
+			spellid, spellname = 8, ACTION_ENVIRONMENTAL_DAMAGE_SLIME
 		end
 
 		if spellid and spellname then
@@ -372,7 +372,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 		)
 
 		if value > win.metadata.maxvalue then
-			win.metadata.maxvalue = maxvalue
+			win.metadata.maxvalue = value
 		end
 
 		nr = nr + 1
@@ -950,7 +950,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 		)
 
 		if value > win.metadata.maxvalue then
-			win.metadata.maxvalue = maxvalue
+			win.metadata.maxvalue = value
 		end
 
 		nr = nr + 1
