@@ -37,7 +37,7 @@ local specicons = {
 	[64] = "Interface\\Icons\\spell_frost_frostbolt02", --> Frost
 	-- Paldin
 	[65] = "Interface\\Icons\\spell_holy_holybolt", --> Holy
-	[66] = "Interface\\Icons\\spell_holy_devotionaura", --> Protection (or: spell_holy_avengersshield)
+	[66] = "Interface\\Icons\\ability_paladin_shieldofthetemplar", --> Protection (or: spell_holy_devotionaura)
 	[70] = "Interface\\Icons\\spell_holy_auraoflight", --> Ret
 	-- Priest
 	[256] = "Interface\\Icons\\spell_holy_powerwordshield", --> Discipline
@@ -49,7 +49,7 @@ local specicons = {
 	[261] = "Interface\\Icons\\ability_stealth", --> Subtlty
 	-- Shaman
 	[262] = "Interface\\Icons\\spell_nature_lightning", --> Elemental
-	[263] = "Interface\\Icons\\spell_nature_lightningshield", --> Enhancement (or: spell_shaman_improvedstormstrike)
+	[263] = "Interface\\Icons\\spell_shaman_improvedstormstrike", --> Enhancement (or: spell_nature_lightningshield)
 	[264] = "Interface\\Icons\\spell_nature_healingwavegreater", --> Restoration
 	-- Warlock
 	[265] = "Interface\\Icons\\spell_shadow_deathcoil", --> Affliction
