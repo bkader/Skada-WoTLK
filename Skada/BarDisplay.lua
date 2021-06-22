@@ -550,10 +550,7 @@ do
 			index = i + offset
 			data = win.dataset[index]
 			if data and data.id then
-				local barid = data.id
-				local barlabel = data.label
-
-				local bar = win.bargroup:GetBar(barid)
+				local bar = win.bargroup:GetBar(data.id)
 
 				if bar and bar.missingclass and data.class and not data.ignore then
 					bar:Hide()
@@ -567,9 +564,9 @@ do
 					bar:SetMaxValue(win.metadata.maxvalue or 1)
 				else
 					-- Initialization of bars.
-					bar = mod:CreateBar(win, barid, barlabel, data.value, win.metadata.maxvalue or 1, data.icon, false)
+					bar = mod:CreateBar(win, data.id, data.label, data.value, win.metadata.maxvalue or 1, data.icon, false)
 					bar.id = data.id
-					bar.text = barlabel
+					bar.text = data.label
 					bar.fixed = false
 
 					if not data.ignore then
