@@ -2137,7 +2137,7 @@ function Skada:UpdateDisplay(force)
 
 					if self.db.profile.showtotals and win.selectedmode.GetSetSummary then
 						local valuetext, total = win.selectedmode:GetSetSummary(set)
-						local existing  -- an existing bar?
+						local existing = nil  -- an existing bar?
 
 						if not total then
 							total = 0
@@ -2145,9 +2145,9 @@ function Skada:UpdateDisplay(force)
 								if data.id then
 									total = total + data.value
 								end
-							end
-							if not existing and not data.id then
-								existing = data
+								if not existing and not data.id then
+									existing = data
+								end
 							end
 						end
 						total = total + 1
