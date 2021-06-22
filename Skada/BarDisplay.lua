@@ -291,10 +291,8 @@ function mod:OnMouseWheel(_, frame, direction)
 
 	if direction == 1 and offset > 0 then
 		win.bargroup:SetBarOffset(offset - 1)
-		mod:Update(win, true)
 	elseif direction == -1 and ((numbars - maxbars - offset) > 0) then
 		win.bargroup:SetBarOffset(offset + 1)
-		mod:Update(win, true)
 	end
 end
 
