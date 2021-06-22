@@ -9,7 +9,6 @@ I am simply a huge fan of **Skada**, I prefer it to other damage meters for seve
 3. Open the Zip package inside which you will find a single folder named `Skada-WoTLK-main`.
 4. Extract or drag and drop the unique folder `Skada` into your `Interface\AddOns` folder.
 5. If you want to use `SkadaImprovement` module, drop it there as well.
-6. (optional) If you are using **ElvUI**, please make sure to extract the provided folder as well so that your ElvUI installation properly handles the new Skada skin.
 
 ## Show Love & Support
 
