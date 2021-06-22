@@ -1790,8 +1790,6 @@ do
 	local SendChatMessage = SendChatMessage
 
 	local function sendchat(msg, chan, chantype)
-		msg = Skada.EscapeStr(msg)
-
 		if chantype == "self" then
 			Skada:Print(msg)
 		elseif chantype == "channel" then
@@ -1856,7 +1854,14 @@ do
 		local nr = 1
 		for _, data in report_table:IterateDataset() do
 			if ((barid and barid == data.id) or (data.id and not barid)) and not data.ignore then
-				local label = format("%s   %s", data.label, data.valuetext)
+				local label
+				if data.reportlabel then
+					label = data.reportlabel
+				elseif self.db.profile.reportlinks and (data.spellid or data.hyperlink) then
+					label = format("%s   %s", data.hyperlink or self.GetSpellLink(data.spellid) or data.label, data.valuetext)
+				else
+					label = format("%s   %s", data.label, data.valuetext)
+				end
 
 				if label and report_mode.metadata and report_mode.metadata.showspots then
 					sendchat(format("%s. %s", nr, label), channel, chantype)
@@ -2293,7 +2298,7 @@ function Skada:FormatValueText(...)
 end
 
 do
-	local numsetfmts = 8
+	local numsetfmts, fakeFrame = 8
 
 	local function SetLabelFormat(name, starttime, endtime, fmt)
 		fmt = fmt or Skada.db.profile.setformat
@@ -2304,7 +2309,11 @@ do
 
 		local timelabel = ""
 		if starttime and endtime and fmt > 1 then
-			local duration = "(" .. SecondsToTime(endtime - starttime, false, false, 2) .. ")"
+			fakeFrame = fakeFrame or CreateFrame("Frame")
+			local duration = SecondsToTime(endtime - starttime, false, false, 2)
+			Skada.getsetlabel_fs = Skada.getsetlabel_fs or fakeFrame:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
+			Skada.getsetlabel_fs:SetText(duration)
+			duration = "(" .. Skada.getsetlabel_fs:GetText() .. ")"
 
 			if fmt == 2 then
 				timelabel = duration

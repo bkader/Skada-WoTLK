@@ -570,8 +570,7 @@ Skada.options = {
 					type = "toggle",
 					name = L["Links in reports"],
 					desc = L["When possible, use links in the report messages."],
-					order = 96,
-					disabled = true
+					order = 96
 				},
 				memorycheck = {
 					type = "toggle",
