@@ -19,7 +19,9 @@ exclude_files = {
 	"./.luarocks",
 	"**/Libs/**/*.lua",
 	"**/Libs/**/**/*.lua",
-	".luacheckrc"
+	".luacheckrc",
+    "ElvUI_AddOnSkins/*",
+    "_dev/*",
 }
 
 ignore = {
