@@ -1610,13 +1610,8 @@ do
 end
 
 function Skada:AssignPet(ownerGUID, ownerName, petGUID)
-	pets[petGUID] = {id = ownerGUID, name = ownerName}
-
-	-- pet summoned by another pet?
-	for guid, owner in pairs(pets) do
-		if pets[owner.id] then
-			pets[guid] = {id = owner.id, name = owner.name}
-		end
+	if ownerGUID and ownerName and petGUID and not pets[petGUID] then
+		pets[petGUID] = {id = ownerGUID, name = ownerName}
 	end
 end
 
@@ -3547,6 +3542,13 @@ do
 		if eventtype == "SPELL_SUMMON" and (band(srcFlags, BITMASK_GROUP) ~= 0 or band(srcFlags, BITMASK_PETS) ~= 0 or (band(dstFlags, BITMASK_PETS) ~= 0 and pets[dstGUID])) then
 			-- we assign the pet the normal way
 			self:AssignPet(srcGUID, srcName, dstGUID)
+
+			-- we fix the table by searching through the complete list
+			for pet, owner in pairs(pets) do
+				if pets[owner.id] then
+					self:AssignPet(pets[owner.id].id, pets[owner.id].name, pet)
+				end
+			end
 		end
 
 		if self.current and self.current.gotboss and (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") then
