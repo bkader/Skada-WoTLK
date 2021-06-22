@@ -3544,16 +3544,16 @@ do
 			self:AssignPet(srcGUID, srcName, dstGUID)
 
 			-- we fix the table by searching through the complete list
-			local fixed = true
-			while fixed do
-				fixed = false
-				for pet, owner in pairs(pets) do
-					if pets[owner.id] then
-						self:AssignPet(pets[owner.id].id, pets[owner.id].name, pet)
-						fixed = true
-					end
-				end
-			end
+			-- local fixed = true
+			-- while fixed do
+			-- 	fixed = false
+			-- 	for pet, owner in pairs(pets) do
+			-- 		if pets[owner.id] then
+			-- 			self:AssignPet(pets[owner.id].id, pets[owner.id].name, pet)
+			-- 			fixed = true
+			-- 		end
+			-- 	end
+			-- end
 		end
 
 		if self.current and self.current.gotboss and (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") then
