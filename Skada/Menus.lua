@@ -166,7 +166,7 @@ function Skada:OpenMenu(window)
 						info.notCheckable = 1
 						UIDropDownMenu_AddButton(info, level)
 
-						for _, mode in ipairs(modes) do
+						for _, mode in Skada:IterateModes() do
 							info = UIDropDownMenu_CreateInfo()
 							info.text = mode:GetName()
 							info.func = function()
@@ -259,7 +259,7 @@ function Skada:OpenMenu(window)
 					info.func = function()
 						window.db.sticky = not window.db.sticky
 						if not window.db.sticky then
-							for _, win in ipairs(Skada:GetWindows()) do
+							for _, win in Skada:IterateWindows() do
 								if win.db.sticked[window.db.name] then
 									win.db.sticked[window.db.name] = nil
 								end
@@ -574,7 +574,7 @@ do
 				local linebox = AceGUI:Create("Dropdown")
 				linebox:SetLabel(L["Line"])
 				linebox:SetList({[""] = NONE})
-				for _, bar in ipairs(window.dataset) do
+				for _, bar in window:IterateDataset() do
 					if bar.id and not bar.ignore then
 						linebox:AddItem(bar.id, format("%s   %s", bar.text or bar.label, bar.valuetext))
 					end

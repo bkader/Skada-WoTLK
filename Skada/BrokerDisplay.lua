@@ -10,7 +10,8 @@ local ldb = LibStub:GetLibrary("LibDataBroker-1.1")
 local libwindow = LibStub("LibWindow-1.1")
 local media = LibStub("LibSharedMedia-3.0")
 
-local tsort, format, ipairs = table.sort, string.format, ipairs
+local tsort, format = table.sort, string.format
+local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
 
 local classcolors = {
 	DEATHKNIGHT = "|cffc41f3b%s|r",
@@ -64,7 +65,7 @@ local function clickHandler(win, frame, button)
 		Skada:SegmentMenu(win)
 	end
 
-	L_CloseDropDownMenus() -- always close
+	CloseDropDownMenus() -- always close
 end
 
 local function tooltipHandler(win, tooltip)
@@ -81,7 +82,7 @@ local function tooltipHandler(win, tooltip)
 	if #win.dataset > 0 then
 		tooltip:AddLine(" ")
 		local n = 0 -- used to fix spots starting from 2
-		for i, data in ipairs(win.dataset) do
+		for i, data in win:IterateDataset() do
 			if data.id and not data.ignore and i < 30 then
 				n = n + 1
 				local label = formatLabel(win, data)

@@ -166,7 +166,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 
 				-- We now have a a complete threat table.
 				-- Now we need to add valuetext.
-				for _, data in ipairs(win.dataset) do
+				for _, data in win:IterateDataset() do
 					if data.id then
 						if data.threat and data.threat > 0 then
 							-- Warn if this is ourselves and we are over the treshold.

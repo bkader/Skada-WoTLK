@@ -464,7 +464,7 @@ do
 					order = 1,
 					values = function()
 						local m = {[""] = NONE}
-						for _, mode in ipairs(Skada:GetModes()) do
+						for _, mode in Skada:IterateModes() do
 							m[mode:GetName()] = mode:GetName()
 						end
 						return m
@@ -477,7 +477,7 @@ do
 					order = 2,
 					values = function()
 						local m = {[""] = NONE}
-						for _, mode in ipairs(Skada:GetModes()) do
+						for _, mode in Skada:IterateModes() do
 							m[mode:GetName()] = mode:GetName()
 						end
 						return m
@@ -542,7 +542,7 @@ end
 function Window:UpdateDisplay()
 	if not self.metadata.maxvalue then
 		self.metadata.maxvalue = 0
-		for _, data in ipairs(self.dataset) do
+		for _, data in self:IterateDataset() do
 			if data.id and data.value > self.metadata.maxvalue then
 				self.metadata.maxvalue = data.value
 			end
@@ -555,7 +555,7 @@ end
 
 -- called before dataset is updated.
 function Window:UpdateInProgress()
-	for _, data in ipairs(self.dataset) do
+	for _, data in self:IterateDataset() do
 		if data.ignore then
 			data.icon = nil
 		end
@@ -581,7 +581,7 @@ function Window:Reset()
 		return self.display:Reset(self)
 	end
 
-	for _, data in ipairs(self.dataset or {}) do
+	for _, data in self:IterateDataset() do
 		wipe(data)
 	end
 end
@@ -681,7 +681,7 @@ do
 		if settime == "current" or settime == "total" then
 			self.selectedset = settime
 		else
-			for i, set in ipairs(Skada.char.sets) do
+			for i, set in Skada:IterateSets() do
 				if tostring(set.starttime) == settime then
 					if set.name == L["Current"] then
 						self.selectedset = "current"
@@ -971,7 +971,7 @@ end
 -- mode functions
 
 function Skada:find_mode(name)
-	for _, mode in ipairs(modes) do
+	for _, mode in Skada:IterateModes() do
 		if mode:GetName() == name then
 			return mode
 		end
@@ -1013,7 +1013,7 @@ do
 			self:VerifySet(mode, self.current)
 		end
 
-		for _, set in ipairs(self.char.sets) do
+		for _, set in self:IterateSets() do
 			self:VerifySet(mode, set)
 		end
 
@@ -1072,6 +1072,10 @@ function Skada:IteratePlayers(set)
 	return ipairs(set and set.players or {})
 end
 
+function Window:IterateDataset()
+	return ipairs(self.dataset or {})
+end
+
 -------------------------------------------------------------------------------
 -- modules functions
 
@@ -1122,7 +1126,7 @@ end
 function Skada:CreateSet(setname, starttime)
 	starttime = starttime or time()
 	local set = {players = {}, name = setname, starttime = starttime, last_action = starttime, time = 0}
-	for _, mode in ipairs(modes) do
+	for _, mode in self:IterateModes() do
 		self:VerifySet(mode, set)
 	end
 	self.callbacks:Fire("SKADA_DATA_SETCREATED", set)
@@ -1161,7 +1165,7 @@ end
 -- deletes a set
 function Skada:DeleteSet(set)
 	if set then
-		for i, s in ipairs(self.char.sets) do
+		for i, s in self:IterateSets() do
 			if s == set then
 				local todel = tremove(self.char.sets, i)
 				self.callbacks:Fire("SKADA_DATA_SETDELETED", i, todel)
@@ -1374,7 +1378,7 @@ do
 
 			fix_player(player)
 
-			for _, mode in ipairs(modes) do
+			for _, mode in self:IterateModes() do
 				if mode.AddPlayerAttributes ~= nil then
 					mode:AddPlayerAttributes(player, set)
 				end
@@ -1549,7 +1553,7 @@ do
 				for i = 2, pettooltip:NumLines() do
 					local text = _G["SkadaPetTooltipTextLeft" .. i]:GetText()
 					if text and text ~= "" then
-						for _, p in ipairs(Skada.current.players) do
+						for _, p in Skada:IteratePlayers(Skada.total) do
 							local playername = p.name:gsub("%-.*", "")
 							if (Skada.locale == "ruRU" and FindNameDeclension(text, playername)) or text:find(playername) then
 								return p.id, p.name
@@ -1719,7 +1723,7 @@ do
 			tooltip:AddLine(ttwin.title or mode.title or mode:GetName())
 			local nr = 0
 
-			for _, data in ipairs(ttwin.dataset) do
+			for _, data in ttwin:IterateDataset() do
 				if data.id and nr < Skada.db.profile.tooltiprows then
 					nr = nr + 1
 					local color = white
@@ -1935,7 +1939,7 @@ do
 
 		maxlines = maxlines or 10
 		local nr = 1
-		for _, data in ipairs(report_table.dataset) do
+		for _, data in report_table:IterateDataset() do
 			if ((barid and barid == data.id) or (data.id and not barid)) and not data.ignore then
 				local label = format("%s   %s", data.label, data.valuetext)
 
@@ -2140,7 +2144,7 @@ function Skada:CanReset()
 		return true
 	end
 
-	for _, set in ipairs(self.char.sets) do
+	for _, set in self:IterateSets() do
 		if not set.keep then
 			return true
 		end
@@ -2232,7 +2236,7 @@ function Skada:UpdateDisplay(force)
 					if self.db.profile.showtotals and win.selectedmode.GetSetSummary then
 						local total, existing = 0, nil
 
-						for _, data in ipairs(win.dataset) do
+						for _, data in win:IterateDataset() do
 							if data.id then
 								total = total + data.value
 							end
@@ -2259,7 +2263,7 @@ function Skada:UpdateDisplay(force)
 			elseif win.selectedset then
 				local set = win:get_selected_set()
 
-				for m, mode in ipairs(modes) do
+				for m, mode in self:IterateModes() do
 					local d = win.dataset[m] or {}
 					win.dataset[m] = d
 
@@ -2297,7 +2301,7 @@ function Skada:UpdateDisplay(force)
 				d.label = L["Current"]
 				d.value = 1
 
-				for _, set in ipairs(self.char.sets) do
+				for _, set in self:IterateSets() do
 					nr = nr + 1
 					d = win.dataset[nr] or {}
 					win.dataset[nr] = d
@@ -2520,7 +2524,7 @@ function dataobj:OnEnter()
 		self.tooltip:AddDoubleLine(L["Skada Summary"], Skada.version)
 		self.tooltip:AddLine(" ")
 		self.tooltip:AddDoubleLine(L["Segment Time"], Skada:GetFormatedSetTime(set), 1, 1, 1)
-		for _, mode in ipairs(modes) do
+		for _, mode in Skada:IterateModes() do
 			if mode.AddToTooltip ~= nil then
 				mode:AddToTooltip(set, self.tooltip)
 			end
@@ -3188,7 +3192,7 @@ function Skada:EndSegment()
 			local setname = self.current.mobname
 			if self.db.profile.setnumber then
 				local num = 0
-				for _, set in ipairs(self.char.sets) do
+				for _, set in self:IterateSets() do
 					if set.name == setname and num == 0 then
 						num = 1
 					else
@@ -3204,7 +3208,7 @@ function Skada:EndSegment()
 			end
 			self.current.name = setname
 
-			for _, mode in ipairs(modes) do
+			for _, mode in self:IterateModes() do
 				if mode.SetComplete then
 					mode:SetComplete(self.current)
 				end
@@ -3223,7 +3227,7 @@ function Skada:EndSegment()
 
 	self.total.time = self.total.time + self.current.time
 
-	for _, player in ipairs(self.total.players) do
+	for _, player in self:IteratePlayers(self.total) do
 		player.last = nil
 	end
 
@@ -3235,7 +3239,7 @@ function Skada:EndSegment()
 	self.current = nil
 
 	local numsets = 0
-	for _, set in ipairs(self.char.sets) do
+	for _, set in self:IterateSets() do
 		if not set.keep then
 			numsets = numsets + 1
 		end

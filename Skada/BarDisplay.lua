@@ -235,7 +235,7 @@ end
 function mod:Reset(win)
 	if win and win.bargroup then
 		local maxbars = win.bargroup:GetMaxBars()
-		for i, data in ipairs(win.dataset) do
+		for i, data in win:IterateDataset() do
 			wipe(data)
 			if i > maxbars then
 				win.dataset[i] = nil
@@ -341,7 +341,7 @@ do
 					group:SortBars()
 				end
 			else
-				for _, win in ipairs(Skada:GetWindows()) do
+				for _, win in Skada:IterateWindows() do
 					if win.db.display == "bar" and win.db.sticked and win.db.sticked[group.win.db.name] then
 						win.db.sticked[group.win.db.name] = nil
 					end
@@ -360,7 +360,7 @@ function mod:WindowResized(_, group)
 	group.win.db.barwidth = group:GetWidth()
 	if FlyPaper then
 		local offset = group.win.db.background.borderthickness
-		for _, win in ipairs(Skada:GetWindows()) do
+		for _, win in Skada:IterateWindows() do
 			if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
 				win.bargroup.callbacks:Fire("AnchorMoved", win.bargroup)
 			end
@@ -515,7 +515,7 @@ do
 		end
 
 		local hasicon
-		for _, data in ipairs(win.dataset) do
+		for _, data in win:IterateDataset() do
 			if (data.icon and not data.ignore) or (data.spec and win.db.specicons) or (data.class and win.db.classicons) or (data.role and win.db.roleicons) then
 				hasicon = true
 			end
@@ -538,7 +538,7 @@ do
 		end
 
 		local nr = 1
-		for i, data in ipairs(win.dataset) do
+		for i, data in win:IterateDataset() do
 			if data.id then
 				local barid = data.id
 				local barlabel = data.label
@@ -740,7 +740,7 @@ do
 
 				-- move sticked windows.
 				local offset = group.win.db.background.borderthickness
-				for _, win in ipairs(Skada:GetWindows()) do
+				for _, win in Skada:IterateWindows() do
 					if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
 						FlyPaper.Stick(win.bargroup, group, nil, offset, offset)
 						win.bargroup.button.startX = win.bargroup:GetLeft()
@@ -769,7 +769,7 @@ do
 				local endY = group:GetTop()
 				if self.startX ~= endX or self.startY ~= endY then
 					group.callbacks:Fire("AnchorMoved", group, endX, endY)
-					for _, win in ipairs(Skada:GetWindows()) do
+					for _, win in Skada:IterateWindows() do
 						if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
 							local xOfs, yOfs = win.bargroup:GetLeft(), win.bargroup:GetTop()
 							if win.bargroup.startX ~= xOfs or win.bargroup.startY ~= yOfs then
@@ -931,7 +931,7 @@ do
 	function mod:WindowResizing(_, group)
 		if FlyPaper then
 			local offset = group.win.db.background.borderthickness
-			for _, win in ipairs(Skada:GetWindows()) do
+			for _, win in Skada:IterateWindows() do
 				if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
 					FlyPaper.Stick(win.bargroup, group, nil, offset, offset)
 				end
