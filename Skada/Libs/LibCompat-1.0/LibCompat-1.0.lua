@@ -293,7 +293,7 @@ function LibCompat.EscapeStr(str)
 		local n = str:sub(i, i)
 		res = res .. n
 		if n == "|" then
-			res = res .. n
+			res = res .. "\124"
 		end
 	end
 	return (res ~= "") and res or str

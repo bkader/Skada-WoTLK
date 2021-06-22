@@ -1871,6 +1871,8 @@ do
 	local SendChatMessage = SendChatMessage
 
 	local function sendchat(msg, chan, chantype)
+		msg = Skada.EscapeStr(msg)
+
 		if chantype == "self" then
 			Skada:Print(msg)
 		elseif chantype == "channel" then
@@ -1935,14 +1937,7 @@ do
 		local nr = 1
 		for _, data in ipairs(report_table.dataset) do
 			if ((barid and barid == data.id) or (data.id and not barid)) and not data.ignore then
-				local label
-				if data.reportlabel then
-					label = data.reportlabel
-				elseif self.db.profile.reportlinks and (data.spellid or data.hyperlink) then
-					label = format("%s   %s", data.hyperlink or self.GetSpellLink(data.spellid) or data.label, data.valuetext)
-				else
-					label = format("%s   %s", data.label, data.valuetext)
-				end
+				local label = format("%s   %s", data.label, data.valuetext)
 
 				if label and report_mode.metadata and report_mode.metadata.showspots then
 					sendchat(format("%s. %s", nr, label), channel, chantype)
