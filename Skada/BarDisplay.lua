@@ -505,28 +505,26 @@ do
 		return a and b and a.order and b.order and a.order < b.order
 	end
 
-	function mod:Update(win, latecall)
+	function mod:Update(win)
 		if not win or not win.bargroup then return end
 		win.bargroup.button:SetText(win.metadata.title)
 
-		if not latecall then
-			if win.metadata.showspots then
-				tsort(win.dataset, value_sort)
-			end
+		if win.metadata.showspots then
+			tsort(win.dataset, value_sort)
+		end
 
-			local hasicon
-			for _, data in win:IterateDataset() do
-				if (data.icon and not data.ignore) or (data.spec and win.db.specicons) or (data.class and win.db.classicons) or (data.role and win.db.roleicons) then
-					hasicon = true
-				end
+		local hasicon
+		for _, data in win:IterateDataset() do
+			if (data.icon and not data.ignore) or (data.spec and win.db.specicons) or (data.class and win.db.classicons) or (data.role and win.db.roleicons) then
+				hasicon = true
 			end
+		end
 
-			if hasicon and not win.bargroup.showIcon then
-				win.bargroup:ShowIcon()
-			end
-			if not hasicon and win.bargroup.showIcon then
-				win.bargroup:HideIcon()
-			end
+		if hasicon and not win.bargroup.showIcon then
+			win.bargroup:ShowIcon()
+		end
+		if not hasicon and win.bargroup.showIcon then
+			win.bargroup:HideIcon()
 		end
 
 		if win.metadata.wipestale then
@@ -535,15 +533,9 @@ do
 			end
 		end
 
-		local maxbars = win.bargroup:GetMaxBars()
-		local offset = win.bargroup:GetBarOffset()
-		local nr = offset + 1
-		local index, data
-
-		for i = 0, maxbars do
-			index = i + offset
-			data = win.dataset[index]
-			if data and data.id then
+		local nr = 1
+		for i, data in ipairs(win.dataset) do
+			if data.id then
 				local bar = win.bargroup:GetBar(data.id)
 
 				if bar and bar.missingclass and data.class and not data.ignore then
@@ -699,7 +691,7 @@ do
 				end
 
 				if not data.ignore then
-					nr = index + 1
+					nr = nr + 1
 				end
 			end
 		end
