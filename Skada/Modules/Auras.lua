@@ -435,38 +435,21 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 	function mod:CheckBuffs(event, set, timestamp)
 		if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped then
 			-- let's now check for buffs put before the combat started.
-			local prefix, min_member, max_member = Skada:GetGroupTypeAndCount()
-
-			if prefix then
-				for n = min_member, max_member do
-					local unit = (n == 0) and "player" or prefix .. tostring(n)
-					if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
-						local dstGUID, dstName = UnitGUID(unit), UnitName(unit)
-						for i = 1, 40 do
-							local rank, _, _, _, _, _, unitCaster, _, _, spellid = select(2, UnitBuff(unit, i))
-							if spellid then
-								if unitCaster and rank ~= SPELL_PASSIVE and not blacklist[spellid] then
-									AuraApplied(nil, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, nil, nil, "BUFF")
-								end
-							else
-								break -- no buff at all
+			Skada:GroupIterator(function(unit)
+				if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
+					local dstGUID, dstName = UnitGUID(unit), UnitName(unit)
+					for i = 1, 40 do
+						local rank, _, _, _, _, _, unitCaster, _, _, spellid = select(2, UnitBuff(unit, i))
+						if spellid then
+							if unitCaster and rank ~= SPELL_PASSIVE and not blacklist[spellid] then
+								AuraApplied(nil, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, nil, nil, "BUFF")
 							end
+						else
+							break -- no buff at all
 						end
 					end
 				end
-			else
-				local dstGUID, dstName = UnitGUID("player"), UnitName("player")
-				for i = 1, 40 do
-					local rank, _, _, _, _, _, unitCaster, _, _, spellid = select(2, UnitBuff("player", i))
-					if spellid then
-						if unitCaster and rank ~= SPELL_PASSIVE and not blacklist[spellid] then
-							AuraApplied(nil, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, nil, nil, "BUFF")
-						end
-					else
-						break -- no buff at all
-					end
-				end
-			end
+			end)
 		end
 	end
 

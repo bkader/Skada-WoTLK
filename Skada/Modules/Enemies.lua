@@ -135,29 +135,20 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 	local function ValkyrHealthMax()
 		if not valkyrMaxHP then
-			local prefix, min_member, max_member = Skada:GetGroupTypeAndCount()
-			if prefix then
-				for i = min_member, max_member do
-					local unit = ((i == 0) and "player" or prefix .. i) .. "target"
-					if UnitExists(unit) and IsValkyr(UnitGUID(unit), true) then
-						valkyrMaxHP = UnitHealthMax(unit)
-						valkyrHalfHP = floor(valkyrMaxHP / 2)
-						return valkyrMaxHP
-					end
-				end
-			else
-				local unit = "playertarget"
-				if UnitExists(unit) and IsValkyr(UnitGUID(unit), true) then
-					valkyrMaxHP = UnitHealthMax(unit)
+			Skada:GroupIterator(function(unit)
+				if valkyrMaxHP then return end -- a single player is enough
+				if UnitExists(unit .. "target") and IsValkyr(UnitGUID(unit .. "target"), true) then
+					valkyrMaxHP = UnitHealthMax(unit .. "target")
 					valkyrHalfHP = floor(valkyrMaxHP / 2)
-					return valkyrMaxHP
 				end
-			end
+			end)
 
 			-- fallback values
-			valkyrMaxHP = (GetRaidDiff() == "25h") and 2992000 or 1417500
-			valkyrHalfHP = floor(valkyrMaxHP / 2)
-			return valkyrMaxHP
+			if not valkyrMaxHP then
+				valkyrMaxHP = (GetRaidDiff() == "25h") and 2992000 or 1417500
+				valkyrHalfHP = floor(valkyrMaxHP / 2)
+				return valkyrMaxHP
+			end
 		end
 
 		return valkyrMaxHP

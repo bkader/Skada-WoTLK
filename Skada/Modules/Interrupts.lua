@@ -72,7 +72,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 			local channel = Skada.db.profile.modules.interruptchannel or "SAY"
 			if channel == "SELF" then
-				Skada:Print(format(L["%s interrupted!"], spelllink or dstName))
+				Skada:Printf(L["%s interrupted!"], spelllink or dstName)
 				return
 			end
 

@@ -427,36 +427,21 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 			local curtime = GetTime()
 			local prefix, min_member, max_member = Skada:GetGroupTypeAndCount()
 
-			if prefix then
-				for n = min_member, max_member do
-					local unit = (n == 0) and "player" or prefix .. tostring(n)
-					if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
-						local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
-						for i = 1, 40 do
-							local spellname, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitBuff(unit, i)
-							if spellid then
-								if absorbspells[spellid] and unitCaster then
-									AuraApplied(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
-								end
-							else
-								break -- nothing found
+			Skada:GroupIterator(function(unit)
+				if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
+					local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
+					for i = 1, 40 do
+						local expires, unitCaster, _, _, spellid = select(7, UnitBuff(unit, i))
+						if spellid then
+							if absorbspells[spellid] and unitCaster then
+								AuraApplied(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
 							end
+						else
+							break -- nothing found
 						end
 					end
 				end
-			else
-				local dstName, dstGUID = UnitName("player"), UnitGUID("player")
-				for i = 1, 40 do
-					local spellname, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitBuff("player", i)
-					if spellid then
-						if absorbspells[spellid] and unitCaster then
-							AuraApplied(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
-						end
-					else
-						break -- nothing found
-					end
-				end
-			end
+			end)
 		end
 	end
 

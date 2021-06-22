@@ -19,7 +19,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 
 		local threatTable = {}
 
-		local function add_to_threattable(win, unit, target)
+		local function add_to_threattable(unit, target, win)
 			local guid = UnitGUID(unit)
 			local player = threatTable[guid]
 
@@ -137,24 +137,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				-- Reset out max threat value.
 				maxthreat = 0
 
-				local prefix, min_member, max_member = Skada:GetGroupTypeAndCount()
-				if prefix then
-					for i = min_member, max_member do
-						local unit = (i == 0) and "player" or prefix .. tostring(i)
-						if UnitExists(unit) then
-							add_to_threattable(win, unit, target)
-
-							if UnitExists(unit .. "pet") then
-								add_to_threattable(win, unit .. "pet", target)
-							end
-						end
-					end
-				else
-					add_to_threattable(win, "player", target)
-					if UnitExists("playerpet") then
-						add_to_threattable(win, "playerpet", target)
-					end
-				end
+				Skada:GroupIterator(add_to_threattable, target, win)
 
 				-- If we are going by raw threat we got the max threat from above; otherwise it's always 100.
 				if not self.db.rawvalue then

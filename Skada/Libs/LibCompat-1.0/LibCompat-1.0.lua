@@ -13,12 +13,70 @@ LibCompat.embeds = LibCompat.embeds or {}
 
 local pairs, select, tinsert = pairs, select, table.insert
 local CreateFrame = CreateFrame
-local GetNumRaidMembers = GetNumRaidMembers
-local GetNumPartyMembers = GetNumPartyMembers
 local UnitExists = UnitExists
-local UnitIsDeadOrGhost = UnitIsDeadOrGhost
-local InCombatLockdown = InCombatLockdown
-local IsInInstance = IsInInstance
+
+-------------------------------------------------------------------------------
+
+do
+	local tconcat = table.concat
+	local tostring = tostring
+
+	local tmp = {}
+	local function Print(self, frame, ...)
+		local n = 0
+		if self ~= LibCompat then
+			n = n + 1
+			tmp[n] = "|cff33ff99" .. tostring(self) .. "|r:"
+		end
+		for i = 1, select("#", ...) do
+			n = n + 1
+			tmp[n] = tostring(select(i, ...))
+		end
+		frame:AddMessage(tconcat(tmp, " ", 1, n))
+	end
+
+	function LibCompat:Print(...)
+		local frame = ...
+		if type(frame) == "table" and frame.AddMessage then
+			return Print(self, frame, select(2, ...))
+		end
+		return Print(self, DEFAULT_CHAT_FRAME, ...)
+	end
+
+	function LibCompat:Printf(...)
+		local frame = ...
+		if type(frame) == "table" and frame.AddMessage then
+			return Print(self, frame, format(select(2, ...)))
+		else
+			return Print(self, DEFAULT_CHAT_FRAME, format(...))
+		end
+	end
+end
+
+-------------------------------------------------------------------------------
+
+do
+	local pcall = pcall
+
+	local function DispatchError(err)
+		LibCompat:Print("|cffff9900Error|r:" .. (err or "<no error given>"))
+	end
+
+	function LibCompat:QuickDispatch(func, ...)
+		if type(func) ~= "function" then
+			return
+		end
+
+		local ok, err = pcall(func, ...)
+
+		if not ok then
+			DispatchError(err)
+			return
+		end
+
+		return true
+	end
+end
 
 -------------------------------------------------------------------------------
 
@@ -61,71 +119,92 @@ end
 
 -------------------------------------------------------------------------------
 
-function LibCompat:IsInRaid()
-	return (GetNumRaidMembers() > 0)
-end
+do
+	local GetNumRaidMembers = GetNumRaidMembers
+	local GetNumPartyMembers = GetNumPartyMembers
+	local UnitAffectingCombat = UnitAffectingCombat
+	local InCombatLockdown = InCombatLockdown
+	local UnitIsDeadOrGhost = UnitIsDeadOrGhost
+	local IsInInstance = IsInInstance
 
-function LibCompat:IsInParty()
-	return (GetNumPartyMembers() > 0)
-end
-
-function LibCompat:IsInGroup()
-	return (self:IsInRaid() or self:IsInParty())
-end
-
-function LibCompat:IsInPvP()
-	local instanceType = select(2, IsInInstance())
-	return (instanceType == "pvp" or instanceType == "arena")
-end
-
-function LibCompat:GetGroupTypeAndCount()
-	local prefix, min_member, max_member = "raid", 1, GetNumRaidMembers()
-
-	if max_member == 0 then
-		prefix, min_member, max_member = "party", 0, GetNumPartyMembers()
+	function LibCompat:IsInRaid()
+		return (GetNumRaidMembers() > 0)
 	end
 
-	if max_member == 0 then
-		prefix, min_member, max_member = nil, 0, 0
+	function LibCompat:IsInParty()
+		return (GetNumPartyMembers() > 0)
 	end
 
-	return prefix, min_member, max_member
-end
+	function LibCompat:IsInGroup()
+		return (self:IsInRaid() or self:IsInParty())
+	end
 
-function LibCompat:IsGroupDead()
-	local prefix, min_member, max_member = self:GetGroupTypeAndCount()
-	if prefix then
-		for i = min_member, max_member do
-			local unit = (i == 0) and "player" or prefix .. i
-			if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
-				return false
+	function LibCompat:IsInPvP()
+		local instanceType = select(2, IsInInstance())
+		return (instanceType == "pvp" or instanceType == "arena")
+	end
+
+	function LibCompat:GetGroupTypeAndCount()
+		local prefix, min_member, max_member = "raid", 1, GetNumRaidMembers()
+
+		if max_member == 0 then
+			prefix, min_member, max_member = "party", 0, GetNumPartyMembers()
+		end
+
+		if max_member == 0 then
+			prefix, min_member, max_member = nil, 0, 0
+		end
+
+		return prefix, min_member, max_member
+	end
+
+	function LibCompat:IsGroupDead()
+		local prefix, min_member, max_member = self:GetGroupTypeAndCount()
+		if prefix then
+			for i = min_member, max_member do
+				local unit = (i == 0) and "player" or prefix .. i
+				if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
+					return false
+				end
 			end
 		end
-	end
 
-	if not UnitIsDeadOrGhost("player") then
-		return false
-	end
-
-	return true
-end
-
-function LibCompat:IsGroupInCombat()
-	local prefix, min_member, max_member = self:GetGroupTypeAndCount()
-	if prefix then
-		for i = min_member, max_member do
-			local unit = (i == 0) and "player" or prefix .. i
-			if UnitExists(unit) and UnitAffectingCombat(unit) then
-				return true
-			end
+		if not UnitIsDeadOrGhost("player") then
+			return false
 		end
-	end
 
-	if UnitAffectingCombat("player") or InCombatLockdown() then
 		return true
 	end
 
-	return false
+	function LibCompat:IsGroupInCombat()
+		local prefix, min_member, max_member = self:GetGroupTypeAndCount()
+		if prefix then
+			for i = min_member, max_member do
+				local unit = (i == 0) and "player" or prefix .. i
+				if UnitExists(unit) and UnitAffectingCombat(unit) then
+					return true
+				end
+			end
+		end
+
+		if UnitAffectingCombat("player") or InCombatLockdown() then
+			return true
+		end
+
+		return false
+	end
+
+	function LibCompat:GroupIterator(func, ...)
+		local prefix, min_member, max_member = self:GetGroupTypeAndCount()
+		if prefix then
+			for i = min_member, max_member do
+				local unit = (i == 0) and "player" or prefix .. i
+				self:QuickDispatch(func, unit, ...)
+			end
+		else
+			self:QuickDispatch(func, "player", ...)
+		end
+	end
 end
 
 -------------------------------------------------------------------------------
@@ -433,22 +512,27 @@ end
 -------------------------------------------------------------------------------
 
 local mixins = {
+	"After",
+	"After",
+	"NewTimer",
+	"NewTicker",
+	"Print",
+	"Printf",
+	"QuickDispatch",
+	"tlength",
+	"tCopy",
+	"tAppendAll",
 	"IsInRaid",
 	"IsInParty",
 	"IsInGroup",
 	"IsInPvP",
 	"GetGroupTypeAndCount",
-	"After",
-	"NewTimer",
-	"NewTicker",
 	"IsGroupDead",
 	"IsGroupInCombat",
+	"GroupIterator",
 	"GetClassColorsTable",
 	"GetSpellInfo",
 	"GetSpellLink",
-	"tlength",
-	"tCopy",
-	"tAppendAll",
 	"EscapeStr",
 	"GetSpecialization",
 	"UnitGroupRolesAssigned",

@@ -1,4 +1,4 @@
-local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceConsole-3.0", "AceEvent-3.0", "AceHook-3.0", "AceComm-3.0", "LibCompat-1.0")
+local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceEvent-3.0", "AceHook-3.0", "AceComm-3.0", "LibCompat-1.0")
 _G.Skada = Skada
 
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
@@ -825,7 +825,7 @@ function Skada:CreateWindow(name, db, display)
 			self:RestoreView(window, window.db.set, window.db.mode)
 		end
 	else
-		self:Print("Window '" .. name .. "' was not loaded because its display module, '" .. (window.db.display or UNKNOWN) .. "' was not found.")
+		self:Printf("Window '%s' was not loaded because its display module, '%s' was not found.", name, window.db.display or UNKNOWN)
 	end
 
 	self:ApplySettings()
@@ -947,8 +947,8 @@ end
 -------------------------------------------------------------------------------
 -- print and debug
 
-do
-	local function formatMsg(...)
+function Skada:Debug(...)
+	if self.db.profile.debug then
 		local msg = ""
 		for i = 1, select("#", ...) do
 			local v = tostring(select(i, ...))
@@ -957,13 +957,7 @@ do
 			end
 			msg = msg .. v
 		end
-		return msg
-	end
-
-	function Skada:Debug(...)
-		if self.db.profile.debug then
-			print("|cff33ff99Skada Debug|r: " .. formatMsg(...))
-		end
+		print("|cff33ff99Skada Debug|r: " .. msg)
 	end
 end
 
@@ -1550,9 +1544,9 @@ end
 
 function Skada:PetDebug()
 	self:CheckGroup()
-	self:Print("pets:")
+	self:Print(PETS)
 	for pet, owner in pairs(pets) do
-		self:Print("pet " .. pet .. " belongs to " .. owner.id .. ", " .. owner.name)
+		self:Printf("pet %s belongs to %s, %s", pet, owner.id, owner.name)
 	end
 end
 
@@ -1754,7 +1748,7 @@ local function SlashCommandHandler(cmd)
 	elseif cmd == "clear" or cmd == "clean" then
 		Skada:CleanGarbage(true)
 	elseif cmd == "website" or cmd == "github" then
-		Skada:Print(format("|cffffbb00%s|r", Skada.website))
+		Skada:Printf("|cffffbb00%s|r", Skada.website)
 	elseif cmd:sub(1, 6) == "report" then
 		cmd = cmd:sub(7)
 
@@ -1774,18 +1768,18 @@ local function SlashCommandHandler(cmd)
 			Skada:Report(chan, "preset", report_mode_name, "current", num)
 		else
 			Skada:Print("Usage:")
-			Skada:Print(format("%-20s", "/skada report [raid|guild|party|officer|say] [mode] [max lines]"))
+			Skada:Printf("%-20s", "/skada report [raid|guild|party|officer|say] [mode] [max lines]")
 		end
 	else
 		Skada:Print("Usage:")
-		Skada:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33report|r [raid|guild|party|officer|say] [mode] [max lines]"))
-		Skada:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33reset|r"))
-		Skada:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33toggle|r"))
-		Skada:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33newsegment|r"))
-		Skada:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33config|r"))
-		Skada:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33clean|r"))
-		Skada:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33website|r"))
-		Skada:Print(format("%-20s", "|cffffaeae/skada|r |cffffff33debug|r"))
+		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33report|r [raid|guild|party|officer|say] [mode] [max lines]")
+		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33reset|r")
+		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33toggle|r")
+		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33newsegment|r")
+		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33config|r")
+		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33clean|r")
+		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33website|r")
+		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33debug|r")
 	end
 end
 
@@ -1912,29 +1906,16 @@ end
 -------------------------------------------------------------------------------
 
 function Skada:CheckGroup()
-	local prefix, min_member, max_member = self:GetGroupTypeAndCount()
-	if prefix then
-		for i = min_member, max_member do
-			local unit = ("%s%d"):format(prefix, i)
-			local unitGUID = UnitGUID(unit)
-			if unitGUID then
-				players[unitGUID] = unit
-				local petGUID = UnitGUID(unit .. "pet")
-				if petGUID and not pets[petGUID] then
-					self:AssignPet(unitGUID, UnitName(unit), petGUID)
-				end
+	self:GroupIterator(function(unit)
+		local unitGUID = UnitGUID(unit)
+		if unitGUID then
+			players[unitGUID] = unit
+			local petGUID = UnitGUID(unit .. "pet")
+			if petGUID and not pets[petGUID] then
+				self:AssignPet(unitGUID, UnitName(unit), petGUID)
 			end
 		end
-	end
-
-	local playerGUID = UnitGUID("player")
-	if playerGUID then
-		players[playerGUID] = "player"
-		local petGUID = UnitGUID("playerpet")
-		if petGUID and not pets[petGUID] then
-			self:AssignPet(playerGUID, UnitName("player"), petGUID)
-		end
-	end
+	end)
 end
 
 function Skada:ZoneCheck()
@@ -1988,7 +1969,7 @@ do
 			end
 
 			if (version > ver) then
-				self:Print(format(L["Skada is out of date. You can download the newest version from |cffffbb00%s|r"], self.website))
+				self:Printf(L["Skada is out of date. You can download the newest version from |cffffbb00%s|r"], self.website)
 			elseif (version < ver) then
 				self:SendComm("WHISPER", sender, "VersionCheck", self.version)
 			end
@@ -2148,10 +2129,10 @@ function Skada:UpdateDisplay(force)
 						if set then
 							win.selectedmode:Update(win, set)
 						else
-							self:Print("No set available to pass to " .. win.selectedmode:GetName() .. " Update function! Try to reset Skada.")
+							self:Printf("No set available to pass to %s Update function! Try to reset Skada.", win.selectedmode:GetName())
 						end
 					elseif win.selectedmode.GetName then
-						self:Print("Mode " .. win.selectedmode:GetName() .. " does not have an Update function!")
+						self:Print("Mode %s does not have an Update function!", win.selectedmode:GetName())
 					end
 
 					if self.db.profile.showtotals and win.selectedmode.GetSetSummary then
