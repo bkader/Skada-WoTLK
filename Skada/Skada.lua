@@ -3544,9 +3544,14 @@ do
 			self:AssignPet(srcGUID, srcName, dstGUID)
 
 			-- we fix the table by searching through the complete list
-			for pet, owner in pairs(pets) do
-				if pets[owner.id] then
-					self:AssignPet(pets[owner.id].id, pets[owner.id].name, pet)
+			local fixed = true
+			while fixed do
+				fixed = false
+				for pet, owner in pairs(pets) do
+					if pets[owner.id] then
+						pets[pet] = {id = pets[owner.id].id, name = pets[owner.id].name}
+						fixed = true
+					end
 				end
 			end
 		end
