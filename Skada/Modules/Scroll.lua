@@ -80,10 +80,10 @@ function mod.OnUpdate(f, elap)
 	local step = (win.db.barheight + win.db.barspacing) / (win.bargroup:GetEffectiveScale() * db.speed)
 	while math.abs(newpos - mod.ypos) > step do
 		if newpos > mod.ypos then
-			bars:OnMouseWheel(win, nil, 1)
+			bars:OnMouseWheel(nil, win.bargroup, 1)
 			mod.ypos = mod.ypos + step
 		else
-			bars:OnMouseWheel(win, nil, -1)
+			bars:OnMouseWheel(nil, win.bargroup, -1)
 			mod.ypos = mod.ypos - step
 		end
 	end
@@ -94,7 +94,7 @@ function Skada:Scroll(up)
 	debug("Scroll " .. (up and "up" or "down"))
 	for win, _ in pairs(windows) do
 		for i = 1, db.kspeed do
-			bars:OnMouseWheel(win, nil, up and 1 or -1)
+			bars:OnMouseWheel(nil, win.bargroup, up and 1 or -1)
 		end
 	end
 end
