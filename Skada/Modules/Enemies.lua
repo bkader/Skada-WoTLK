@@ -308,7 +308,8 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 				win.dataset[nr] = d
 
 				d.id = player.id or playername
-				d.label = Skada:FormatName(playername)
+				d.label = playername
+				d.text = Skada:FormatName(playername, d.id)
 				d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
 
 				d.value = player.amount
@@ -558,7 +559,8 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 				win.dataset[nr] = d
 
 				d.id = target.id or targetname
-				d.label = Skada:FormatName(targetname)
+				d.label = targetname
+				d.text = Skada:FormatName(targetname, d.id)
 				d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
 
 				d.value = target.amount

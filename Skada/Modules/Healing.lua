@@ -238,7 +238,8 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 					win.dataset[nr] = d
 
 					d.id = player.id
-					d.label = Skada:FormatName(player.name, player.id)
+					d.label = player.name
+					d.text = Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -409,7 +410,8 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 					win.dataset[nr] = d
 
 					d.id = player.id
-					d.label = Skada:FormatName(player.name, player.id)
+					d.label = player.name
+					d.text = Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -616,7 +618,8 @@ Skada:AddLoadableModule("Total Healing", function(Skada, L)
 					win.dataset[nr] = d
 
 					d.id = player.id
-					d.label = Skada:FormatName(player.name, player.id)
+					d.label = player.name
+					d.text = Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -790,7 +793,8 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
 					win.dataset[nr] = d
 
 					d.id = player.id
-					d.label = Skada:FormatName(player.name, player.id)
+					d.label = player.name
+					d.text = Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
