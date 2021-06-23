@@ -689,6 +689,14 @@ function barListPrototype:IsLocked()
 end
 
 function barListPrototype:SetMaxBars(num)
+	if (num or 0) == 0 then
+		num = self:GetHeight() / (self.thickness + self.spacing)
+	end
+
+	if self:IsAnchorVisible() then
+		local height = self:GetHeight() + self.spacing
+		num = ((num - 1) * ((height - self.button:GetHeight()) / height)) + 1
+	end
 	self.maxBars = floor(num)
 end
 

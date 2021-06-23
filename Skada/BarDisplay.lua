@@ -178,10 +178,7 @@ function mod:Create(window)
 	-- Restore window position.
 	libwindow.RestorePosition(bargroup)
 
-	local maxbars = window.db.background.height / (window.db.barheight + window.db.barspacing)
-	if window.db.enabletitle then maxbars = maxbars - 1 end
-	bargroup:SetMaxBars(maxbars)
-
+	bargroup:SetMaxBars()
 	window.bargroup = bargroup
 
 	if not classicontcoords then
@@ -364,10 +361,7 @@ function mod:WindowResized(_, group)
 		end
 	end
 
-	local maxbars = group.win.db.background.height / (group.win.db.barheight + group.win.db.barspacing)
-	if group.win.db.enabletitle then maxbars = maxbars - 1 end
-	group:SetMaxBars(maxbars)
-
+	group:SetMaxBars()
 	Skada:ApplySettings()
 end
 
@@ -911,11 +905,7 @@ do
 			g.button:SetScript("OnMouseUp", stopMove)
 		end
 
-		-- update max bars as well
-		local maxbars = p.background.height / (p.barheight + p.barspacing)
-		if p.enabletitle then maxbars = maxbars - 1 end
-		g:SetMaxBars(maxbars)
-
+		g:SetMaxBars()
 		g:SetEnableMouse(not p.clickthrough)
 		g:SetClampedToScreen(p.clamped)
 		g:SetSmoothing(p.smoothing)
