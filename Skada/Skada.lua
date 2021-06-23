@@ -1266,10 +1266,10 @@ do
 			-- we make sure to assign his/her role and spec
 			if Skada.validclass[player.class] then
 				if not player.role then
-					player.role = Skada.UnitGroupRolesAssigned(player.name)
+					player.role = Skada.GetGUIDRole(player.id)
 				end
 				if not player.spec then
-					player.spec = Skada.GetGUIDSpecialization(player.id)
+					player.spec = Skada.GetSpecialization(player.name, player.class)
 				end
 			end
 		end

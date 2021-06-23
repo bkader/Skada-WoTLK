@@ -13,7 +13,6 @@ LibCompat.embeds = LibCompat.embeds or {}
 
 local pairs, select, tinsert = pairs, select, table.insert
 local CreateFrame = CreateFrame
-local UnitExists = UnitExists
 
 -------------------------------------------------------------------------------
 
@@ -66,14 +65,11 @@ do
 		if type(func) ~= "function" then
 			return
 		end
-
 		local ok, err = pcall(func, ...)
-
 		if not ok then
 			DispatchError(err)
 			return
 		end
-
 		return true
 	end
 end
@@ -126,6 +122,7 @@ do
 	local InCombatLockdown = InCombatLockdown
 	local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 	local IsInInstance = IsInInstance
+	local UnitExists = UnitExists
 
 	function LibCompat:IsInRaid()
 		return (GetNumRaidMembers() > 0)
@@ -382,9 +379,7 @@ end
 
 do
 	local LGT = LibStub("LibGroupTalents-1.0")
-	local GetPlayerInfoByGUID = GetPlayerInfoByGUID
-	local UnitExists, UnitClass, UnitName = UnitExists, UnitClass, UnitName
-	local MAX_TALENT_TABS = MAX_TALENT_TABS or 3
+	local UnitClass, MAX_TALENT_TABS = UnitClass, MAX_TALENT_TABS or 3
 
 	-- list of class to specs
 	local specIDs = {
@@ -445,62 +440,26 @@ do
 		return spec
 	end
 
-	function LibCompat.UnitGroupRolesAssigned(unit)
-		local role = LGT:GetUnitRole(unit) or "NONE"
-		if role == "melee" or role == "caster" then
-			role = "DAMAGER"
-		elseif role == "tank" then
-			role = "TANK"
-		elseif role == "healer" then
-			role = "HEALER"
-		end
-		return role
-	end
-
-	function LibCompat.GetGUIDTalentString(guid)
-		-- already cached?
-		if Guid2Talent[guid] then
-			return Guid2Talent[guid]
-		end
-
-		local n1, n2, n3 = select(2, LGT:GetGUIDTalentSpec(guid))
-		if n1 and n2 and n3 then
-			Guid2Talent[guid] = n1 .. "/" .. n2 .. "/" .. n3
-			return Guid2Talent[guid]
-		end
-
-		return ""
-	end
-
-	function LibCompat.GetGUIDSpecialization(guid)
-		if Guid2Spec[guid] then
-			return Guid2Spec[guid]
-		end
-
-		local unit = Guid2Unit[guid]
-		if unit and UnitExists(unit) then
-			local spec = self.GetSpecialization(unit, class)
-			if spec then
-				Guid2Spec[guid] = spec
-				return Guid2Spec[guid]
+	do
+		local function GetTrueRole(role)
+			if role == "melee" or role == "caster" then
+				role = "DAMAGER"
+			elseif role == "tank" then
+				role = "TANK"
+			elseif role == "healer" then
+				role = "HEALER"
 			end
+			return role
+		end
+
+		function LibCompat.GetUnitRole(unit)
+			return GetTrueRole(LGT:GetUnitRole(unit) or "NONE")
+		end
+
+		function LibCompat.GetGUIDRole(guid)
+			return GetTrueRole(LGT:GetGUIDRole(guid) or "NONE")
 		end
 	end
-
-	function LibCompat:LibGroupTalents_Update(event, guid, unit, newSpec, n1, n2, n3, ...)
-		-- cache guid to unit
-		Guid2Unit[guid] = unit
-
-		-- cache talent strings
-		Guid2Talent[guid] = n1 .. "/" .. n2 .. "/" .. n3
-
-		local class = select(2, GetPlayerInfoByGUID(guid)) or select(2, UnitClass(unit))
-		local spec = self.GetSpecialization(unit, class)
-		if spec then
-			Guid2Spec[guid] = spec
-		end
-	end
-	LGT.RegisterCallback(LibCompat, "LibGroupTalents_Update")
 end
 
 -------------------------------------------------------------------------------
@@ -529,9 +488,8 @@ local mixins = {
 	"GetSpellLink",
 	"EscapeStr",
 	"GetSpecialization",
-	"UnitGroupRolesAssigned",
-	"GetGUIDTalentString",
-	"GetGUIDSpecialization"
+	"GetUnitRole",
+	"GetGUIDRole"
 }
 
 function LibCompat:Embed(target)
