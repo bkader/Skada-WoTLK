@@ -34,12 +34,11 @@ local function log_auraapply(set, aura)
 					auratype = aura.auratype,
 					active = 1,
 					uptime = 0,
-					count = 1,
-					refresh = 0
+					count = 1
 				}
 			else
-				player.auras[aura.spellid].active = player.auras[aura.spellid].active + 1
-				player.auras[aura.spellid].count = player.auras[aura.spellid].count + 1
+				player.auras[aura.spellid].active = (player.auras[aura.spellid].active or 0) + 1
+				player.auras[aura.spellid].count = (player.auras[aura.spellid].count or 0) + 1
 			end
 
 			-- fix the school
@@ -61,7 +60,7 @@ local function log_aurarefresh(set, aura)
 	if set and aura then
 		local player = Skada:get_player(set, aura.playerid, aura.playername, aura.playerflags)
 		if player and player.auras and aura.spellid and player.auras[aura.spellid] and player.auras[aura.spellid].active > 0 then
-			player.auras[aura.spellid].refresh = player.auras[aura.spellid].refresh + 1
+			player.auras[aura.spellid].refresh = (player.auras[aura.spellid].refresh or 0) + 1
 		end
 	end
 end
@@ -366,7 +365,9 @@ local function aura_tooltip(win, id, label, tooltip, playerid, playername, L)
 
 				-- add segment and active times
 				tooltip:AddDoubleLine(L["Count"], aura.count, 1, 1, 1)
-				tooltip:AddDoubleLine(L["Refresh"], aura.refresh or 0, 1, 1, 1)
+				if (aura.refresh or 0) > 0 then
+					tooltip:AddDoubleLine(L["Refresh"], aura.refresh or 0, 1, 1, 1)
+				end
 				tooltip:AddLine(" ")
 				tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
 				tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(maxtime), 1, 1, 1)
