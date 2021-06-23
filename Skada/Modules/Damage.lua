@@ -17,8 +17,9 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	local mod = Skada:NewModule(L["Damage"])
 	local playermod = mod:NewModule(L["Damage spell list"])
 	local spellmod = playermod:NewModule(L["Damage spell details"])
+	local sdetailmod = spellmod:NewModule(L["Damage Breakdown"])
 	local targetmod = mod:NewModule(L["Damage target list"])
-	local detailmod = targetmod:NewModule(L["Damage spell list"])
+	local tdetailmod = targetmod:NewModule(L["Damage spell list"])
 
 	local UnitGUID = UnitGUID
 	local tContains = tContains
@@ -245,36 +246,8 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		end
 	end
 
-	local function playermod_tooltip(win, id, label, tooltip)
-		local player = Skada:find_player(win:get_selected_set(), win.playerid)
-		if player then
-			local spell = player.damage_spells and player.damage_spells[label]
-			if spell then
-				tooltip:AddLine(player.name .. " - " .. label)
-
-				if spell.school then
-					local c = Skada.schoolcolors[spell.school]
-					local n = Skada.schoolnames[spell.school]
-					if c and n then
-						tooltip:AddLine(n, c.r, c.g, c.b)
-					end
-				end
-
-				if spell.max and spell.min then
-					tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.min), 1, 1, 1)
-					tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.max), 1, 1, 1)
-				end
-				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
-
-				if (spell.overkill or 0) > 0 then
-					tooltip:AddDoubleLine(L["Overkill"], Skada:FormatNumber(spell.overkill), 1, 1, 1)
-				end
-			end
-		end
-	end
-
 	local function spellmod_tooltip(win, id, label, tooltip)
-		if label == L["Critical Hits"] or label == L["Normal Hits"] or label == L.ABSORB or label == L.BLOCK or label == L.RESIST then
+		if label == L["Critical Hits"] or label == L["Normal Hits"] then
 			local player = Skada:find_player(win:get_selected_set(), win.playerid)
 			if player then
 				local spell = player.damage_spells and player.damage_spells[win.spellname]
@@ -297,12 +270,6 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
 						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
 						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
-					elseif label == L.ABSORB and (spell.absorbed or 0) > 0 then
-						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.absorbed), 1, 1, 1)
-					elseif label == L.BLOCK and (spell.blocked or 0) > 0 then
-						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.blocked), 1, 1, 1)
-					elseif label == L.RESIST and (spell.resisted or 0) > 0 then
-						tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(spell.resisted), 1, 1, 1)
 					end
 				end
 			end
@@ -393,7 +360,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		end
 	end
 
-	local function add_detail_bar(win, nr, title, value, percent)
+	local function add_detail_bar(win, nr, title, value, percent, fmt)
 		local d = win.dataset[nr] or {}
 		win.dataset[nr] = d
 
@@ -401,9 +368,9 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		d.label = title
 		d.value = value
 		d.valuetext = Skada:FormatValueText(
-			value,
+			fmt and Skada:FormatNumber(value) or value,
 			mod.metadata.columns.Damage,
-			format("%.1f%%", 100 * value / max(1, win.metadata.maxvalue)),
+			format("%.1f%%", 100 * d.value / max(1, win.metadata.maxvalue)),
 			percent and mod.metadata.columns.Percent
 		)
 		nr = nr + 1
@@ -454,12 +421,52 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		end
 	end
 
-	function detailmod:Enter(win, id, label)
+	function sdetailmod:Enter(win, id, label)
+		win.spellname = label
+		win.title = format(L["%s's damage breakdown"], label)
+	end
+
+	function sdetailmod:Update(win, set)
+		local player = Skada:find_player(set, win.playerid, win.playername)
+		if player then
+			win.title = format(L["%s's damage breakdown"], win.spellname or UNKNOWN)
+
+			local spell = win.spellname and player.damage_spells and player.damage_spells[win.spellname]
+
+			if spell then
+				local absorbed = spell.absorbed or 0
+				local blocked = spell.blocked or 0
+				local resisted = spell.resisted or 0
+
+				win.metadata.maxvalue = spell.amount + absorbed + blocked + resisted
+
+				local nr = add_detail_bar(win, 1, L["Damage"], win.metadata.maxvalue, nil, true)
+
+				if (spell.overkill or 0) > 0 then
+					nr = add_detail_bar(win, nr, L["Overkill"], spell.overkill, true, true)
+				end
+
+				if absorbed > 0 then
+					nr = add_detail_bar(win, nr, L["ABSORB"], absorbed, true, true)
+				end
+
+				if blocked > 0 then
+					nr = add_detail_bar(win, nr, L["BLOCK"], blocked, true, true)
+				end
+
+				if resisted > 0 then
+					nr = add_detail_bar(win, nr, L["RESIST"], resisted, true, true)
+				end
+			end
+		end
+	end
+
+	function tdetailmod:Enter(win, id, label)
 		win.targetname = label
 		win.title = format(L["%s's damage on %s"], win.playername or UNKNOWN, label)
 	end
 
-	function detailmod:Update(win, set)
+	function tdetailmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's damage on %s"], player.name, win.targetname or UNKNOWN)
@@ -561,8 +568,8 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
 	function mod:OnEnable()
 		spellmod.metadata = {tooltip = spellmod_tooltip}
-		playermod.metadata = {post_tooltip = playermod_tooltip, click1 = spellmod}
-		targetmod.metadata = {click1 = detailmod}
+		playermod.metadata = {click1 = spellmod, click2 = sdetailmod}
+		targetmod.metadata = {click1 = tdetailmod}
 		self.metadata = {
 			showspots = true,
 			post_tooltip = damage_tooltip,
