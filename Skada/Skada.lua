@@ -3229,7 +3229,7 @@ do
 
 	function Skada:Tick()
 		self.callbacks:Fire("COMBAT_PLAYER_TICK", self.current, self.total)
-		if not disabled and self.current and not self:IsGroupInCombat() then
+		if not disabled and self.current and not InCombatLockdown() and not self:IsGroupInCombat() then
 			self:Debug("EndSegment: Tick")
 			self:EndSegment()
 		end

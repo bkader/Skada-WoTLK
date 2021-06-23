@@ -162,17 +162,14 @@ do
 		local prefix, min_member, max_member = self:GetGroupTypeAndCount()
 		if prefix then
 			for i = min_member, max_member do
-				local unit = (i == 0) and "player" or prefix .. i
+				local unit = (i == 0) and "player" or ("%s%d"):format(prefix, i)
 				if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
 					return false
 				end
 			end
-		end
-
-		if not UnitIsDeadOrGhost("player") then
+		elseif not UnitIsDeadOrGhost("player") then
 			return false
 		end
-
 		return true
 	end
 
@@ -180,17 +177,14 @@ do
 		local prefix, min_member, max_member = self:GetGroupTypeAndCount()
 		if prefix then
 			for i = min_member, max_member do
-				local unit = (i == 0) and "player" or prefix .. i
+				local unit = (i == 0) and "player" or ("%s%d"):format(prefix, i)
 				if UnitExists(unit) and UnitAffectingCombat(unit) then
 					return true
 				end
 			end
-		end
-
-		if UnitAffectingCombat("player") or InCombatLockdown() then
+		elseif UnitAffectingCombat("player") then
 			return true
 		end
-
 		return false
 	end
 
@@ -198,7 +192,7 @@ do
 		local prefix, min_member, max_member = self:GetGroupTypeAndCount()
 		if prefix then
 			for i = min_member, max_member do
-				local unit = (i == 0) and "player" or prefix .. i
+				local unit = (i == 0) and "player" or ("%s%d"):format(prefix, i)
 				self:QuickDispatch(func, unit, ...)
 			end
 		else
@@ -493,7 +487,7 @@ do
 		end
 	end
 
-	function LibCompat:LibGroupTalents_Update(event, guid, unit, tree_id, n1, n2, n3)
+	function LibCompat:LibGroupTalents_Update(event, guid, unit, newSpec, n1, n2, n3, ...)
 		-- cache guid to unit
 		Guid2Unit[guid] = unit
 
