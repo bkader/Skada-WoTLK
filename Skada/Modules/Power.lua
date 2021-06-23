@@ -81,11 +81,9 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 	-- allows us to create a module for each power type.
 	function basemod:Create(power, modname, playermodname)
 		local instance = Skada:NewModule(modname)
-		instance.name = modname
 		setmetatable(instance, basemod_mt)
 
 		local pmode = instance:NewModule(playermodname)
-		pmode.name = playermodname
 		setmetatable(pmode, playermod_mt)
 
 		pmode.power = power
