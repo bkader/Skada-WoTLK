@@ -1854,15 +1854,13 @@ do
 		local nr = 1
 		for _, data in report_table:IterateDataset() do
 			if ((barid and barid == data.id) or (data.id and not barid)) and not data.ignore then
-				local pattern = report_mode.metadata.showspots and "%s   %s" or "%s: %s"
-
 				local label
 				if data.reportlabel then
 					label = data.reportlabel
 				elseif self.db.profile.reportlinks and (data.spellid or data.hyperlink) then
-					label = format(pattern, data.hyperlink or self.GetSpellLink(data.spellid) or data.label, data.valuetext)
+					label = format("%s   %s", data.hyperlink or self.GetSpellLink(data.spellid) or data.label, data.valuetext)
 				else
-					label = format(pattern, data.label, data.valuetext)
+					label = format("%s   %s", data.label, data.valuetext)
 				end
 
 				if label and report_mode.metadata and report_mode.metadata.showspots then
