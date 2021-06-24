@@ -126,7 +126,7 @@ end
 local function log_aurarefresh(set, aura)
 	if set and aura then
 		local player = Skada:get_player(set, aura.playerid, aura.playername, aura.playerflags)
-		if player and player.auras and aura.spellid and player.auras[aura.spellid] and player.auras[aura.spellid].active > 0 then
+		if player and player.auras and aura.spellid and player.auras[aura.spellid] and (player.auras[aura.spellid].active or 0) > 0 then
 			player.auras[aura.spellid].refresh = (player.auras[aura.spellid].refresh or 0) + 1
 		end
 	end
@@ -138,7 +138,7 @@ local function log_auraremove(set, aura)
 		if not player or not player.auras or not player.auras[aura.spellid] then
 			return
 		end
-		if player.auras[aura.spellid].auratype == aura.auratype and player.auras[aura.spellid].active > 0 then
+		if player.auras[aura.spellid].auratype == aura.auratype and (player.auras[aura.spellid].active or 0) > 0 then
 			player.auras[aura.spellid].active = player.auras[aura.spellid].active - 1
 			if player.auras[aura.spellid].active < 0 then
 				player.auras[aura.spellid].active = 0
