@@ -1309,6 +1309,14 @@ do
 			player.flags = playerflags
 		end
 
+		-- fix players created before their info was received
+		if player.name == UNKNOWN and playername ~= UNKNOWN then
+			player.name = playername
+			player.class = select(2, UnitClass(playername))
+			player.role = self.GetGUIDRole(playerid)
+			player.spec = self.GetSpecialization(playername, player.class)
+		end
+
 		-- total set has "last" always removed.
 		player.last = player.last or GetTime()
 
