@@ -176,7 +176,7 @@ function Skada:PlayerActiveTime(set, player, active)
 	local settime = self:GetSetTime(set)
 
 	if player and (self.db.profile.timemesure ~= 2 or active) then
-		settime = min(player.time or 0, settime)
+		settime = self.Clamp(player.time or 0, 0.1, settime)
 	end
 
 	return settime

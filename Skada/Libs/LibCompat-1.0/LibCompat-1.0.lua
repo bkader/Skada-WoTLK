@@ -115,6 +115,18 @@ end
 
 -------------------------------------------------------------------------------
 
+function LibCompat.Clamp(val, minval, maxval)
+	if val > maxval then
+		return maxval
+	elseif val < minval then
+		return minval
+	else
+		return val
+	end
+end
+
+-------------------------------------------------------------------------------
+
 do
 	local GetNumRaidMembers = GetNumRaidMembers
 	local GetNumPartyMembers = GetNumPartyMembers
@@ -475,6 +487,7 @@ local mixins = {
 	"tlength",
 	"tCopy",
 	"tAppendAll",
+	"Clamp",
 	"IsInRaid",
 	"IsInParty",
 	"IsInGroup",
