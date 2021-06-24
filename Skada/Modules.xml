@@ -37,6 +37,5 @@
 <!-- Modules without modes -->
 <Script file="Modules\Nickname.lua" />
 <Script file="Modules\Scroll.lua" />
-<Script file="Modules\Spamage.lua" />
 <Script file="Modules\Themes.lua" />
 </Ui>
