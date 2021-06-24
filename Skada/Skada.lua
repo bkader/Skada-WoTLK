@@ -1277,6 +1277,8 @@ do
 
 	-- finds a player table or creates it if not found
 	function Skada:get_player(set, playerid, playername, playerflags)
+		if not set or not playerid then return end
+
 		local player = self:find_player(set, playerid, playername, true)
 
 		if not player then
