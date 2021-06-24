@@ -415,6 +415,11 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 			icon = "Interface\\Icons\\spell_fire_felflamebolt"
 		}
 
+		local damagemod = Skada:GetModule(L["Damage"], true)
+		if damagemod then
+			enemymod.metadata.click1 = damagemod:GetModule(L["Damage target list"], true)
+		end
+
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SPLIT", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellDamage, "RANGE_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
@@ -664,6 +669,11 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 			columns = {Damage = true, DPS = false, Percent = true},
 			icon = "Interface\\Icons\\spell_shadow_shadowbolt"
 		}
+
+		local damagemod = Skada:GetModule(L["Damage Taken"])
+		if damagemod then
+			enemymod.metadata = {click1 = damagemod:GetModule(L["Damage source list"], true)}
+		end
 
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SPLIT", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
