@@ -6,17 +6,84 @@ local min, max, floor = math.min, math.max, math.floor
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local _
 
--- list of the auras that are ignored!
-local blacklist = {
-	[57819] = true, -- Tabard of the Argent Crusade
-	[57820] = true, -- Tabard of the Ebon Blade
-	[57821] = true, -- Tabard of the Kirin Tor
-	[57822] = true, -- Tabard of the Wyrmrest Accord
-	[72968] = true, -- Precious's Ribbon
-	[57723] = true, -- Exhaustion (Heroism)
-	[57724] = true, -- Sated (Bloodlust)
-	[57940] = true -- Essence of Wintergrasp
-}
+-- we use this custom function in order to round up player
+-- active time because of how auras were ticking.
+local function PlayerActiveTime(set, player)
+	return floor(Skada:PlayerActiveTime(set, player, true))
+end
+
+local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
+do
+	local main = Skada:NewModule(L["Buffs and Debuffs"])
+
+	function main:OnEnable()
+		if not Skada:IsDisabled("Buffs", "Debuffs") then
+			Skada.RegisterCallback(self, "COMBAT_PLAYER_TICK", "Tick")
+			Skada.RegisterCallback(self, "COMBAT_PLAYER_LEAVE", "Clean")
+		end
+	end
+
+	function main:OnDisable()
+		Skada.UnregisterAllCallbacks(self)
+	end
+
+	-- simply adds 1sec to the active spells
+	local function auras_tick(set)
+		if set then
+			for _, player in Skada:IteratePlayers(set) do
+				if player.auras then
+					for _, spell in pairs(player.auras) do
+						if (spell.active or 0) > 0 then
+							spell.uptime = spell.uptime + 1
+						end
+					end
+				end
+			end
+		end
+	end
+
+	function main:Tick(event, current, total)
+		if event == "COMBAT_PLAYER_TICK" and current and not current.stopped then
+			auras_tick(current)
+			auras_tick(total)
+
+			if self.cleaned then self.cleaned = nil end
+		end
+	end
+
+	local function setcomplete(set)
+		if set then
+			for _, player in Skada:IteratePlayers(set) do
+				if player.auras then
+					local maxtime = PlayerActiveTime(set, player, true)
+					for spellid, spell in pairs(player.auras) do
+						spell.active = nil
+						if spell.uptime > maxtime then
+							spell.uptime = maxtime
+						elseif spell.uptime == 0 then
+							player.auras[spellid] = nil -- delete 0 uptime
+						end
+					end
+				end
+			end
+		end
+	end
+
+	function main:Clean(event, current, total)
+		if not self.cleaned then
+			setcomplete(current)
+			setcomplete(total)
+			self.cleaned = true
+		end
+	end
+end
+
+-- ================================================================== --
+
+--
+-- to avoid repeating same functions for both modules, we make
+-- make sure to create generic functions that will handle things
+--
 
 --
 -- common functions to both modules that handle aura apply/remove log
@@ -80,173 +147,6 @@ local function log_auraremove(set, aura)
 	end
 end
 
---
--- common functions handling SPELL_AURA_APPLIED and SPELL_AURA_REMOVED
---
-
-local aura = {}
-
-local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
-	if blacklist[spellid] then return end
-
-	local passed
-
-	if Skada:IsPet(dstGUID, dstFlags) then
-		passed = false
-	elseif auratype == "DEBUFF" and not Skada:IsDisabled("Debuffs") then
-		if Skada:IsPlayer(srcGUID, srcFlags, srcName) then
-			aura.playerid = srcGUID
-			aura.playername = srcName
-			aura.playerflags = srcFlags
-			aura.dstGUID = dstGUID
-			aura.dstName = dstName
-			aura.dstFlags = dstFlags
-			passed = true
-		end
-	elseif auratype == "BUFF" and not Skada:IsDisabled("Buffs") then
-		if Skada:IsPlayer(dstGUID, dstFlags, dstName) then
-			aura.playerid = dstGUID
-			aura.playername = dstName
-			aura.playerflags = dstFlags
-			aura.dstGUID = nil
-			aura.dstName = nil
-			aura.dstFlags = nil
-			passed = true
-		end
-	end
-
-	if not passed then
-		aura = {} -- clean it
-		return
-	end
-
-	aura.spellid = spellid
-	aura.spellschool = spellschool
-	aura.auratype = auratype
-
-	Skada:FixPets(aura)
-	log_auraapply(Skada.current, aura)
-	log_auraapply(Skada.total, aura)
-end
-
-local function AuraRefresh(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
-	if blacklist[spellid] then return end
-
-	local passed
-
-	if Skada:IsPet(dstGUID, dstFlags) then
-		passed = false
-	elseif auratype == "DEBUFF" and not Skada:IsDisabled("Debuffs") then
-		if Skada:IsPlayer(srcGUID, srcFlags, srcName) then
-			aura.playerid = srcGUID
-			aura.playername = srcName
-			aura.playerflags = srcFlags
-			aura.dstGUID = dstGUID
-			aura.dstName = dstName
-			aura.dstFlags = dstFlags
-			passed = true
-		end
-	elseif auratype == "BUFF" and not Skada:IsDisabled("Buffs") then
-		if Skada:IsPlayer(dstGUID, dstFlags, dstName) then
-			aura.playerid = dstGUID
-			aura.playername = dstName
-			aura.playerflags = dstFlags
-			aura.dstGUID = nil
-			aura.dstName = nil
-			aura.dstFlags = nil
-			passed = true
-		end
-	end
-
-	if not passed then
-		aura = {} -- clean it
-		return
-	end
-
-	aura.spellid = spellid
-	aura.spellschool = spellschool
-	aura.auratype = auratype
-
-	Skada:FixPets(aura)
-	log_aurarefresh(Skada.current, aura)
-	log_aurarefresh(Skada.total, aura)
-end
-
-local function AuraRemoved(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
-	if blacklist[spellid] then return end
-
-	local passed
-
-	if Skada:IsPet(dstGUID, dstFlags) then
-		passed = false
-	elseif auratype == "DEBUFF" and not Skada:IsDisabled("Debuffs") then
-		if Skada:IsPlayer(srcGUID, srcFlags, srcName) then
-			aura.playerid = srcGUID
-			aura.playername = srcName
-			aura.playerflags = srcFlags
-			aura.dstGUID = dstGUID
-			aura.dstName = dstName
-			aura.dstFlags = dstFlags
-			passed = true
-		end
-	elseif auratype == "BUFF" and not Skada:IsDisabled("Buffs") then
-		if Skada:IsPlayer(dstGUID, dstFlags, dstName) then
-			aura.playerid = dstGUID
-			aura.playername = dstName
-			aura.playerflags = dstFlags
-			aura.dstGUID = nil
-			aura.dstName = nil
-			aura.dstFlags = nil
-			passed = true
-		end
-	end
-
-	if not passed then
-		aura = {} -- clean it
-		return
-	end
-
-	aura.spellid = spellid
-	aura.spellschool = nil
-	aura.auratype = auratype
-
-	Skada:FixPets(aura)
-	log_auraremove(Skada.current, aura)
-	log_auraremove(Skada.total, aura)
-end
-
--- ================================================================== --
-
---
--- simply adds 1sec to the active spells
---
-local function auras_tick(set, auratype)
-	if set and auratype then
-		for _, player in Skada:IteratePlayers(set) do
-			if player.auras then
-				for _, spell in pairs(player.auras) do
-					if spell.auratype == auratype and (spell.active or 0) > 0 then
-						spell.uptime = spell.uptime + 1
-					end
-				end
-			end
-		end
-	end
-end
-
--- ================================================================== --
-
---
--- to avoid repeating same functions for both modules, we make
--- make sure to create generic functions that will handle things
---
-
--- we use this custom function in order to round up player
--- active time because of how auras were ticking.
-local function PlayerActiveTime(set, player)
-	return floor(Skada:PlayerActiveTime(set, player, true))
-end
-
 -- main module update function
 local updatefunc
 do
@@ -261,7 +161,7 @@ do
 		return count, uptime
 	end
 
-	function updatefunc(auratype, win, set, title)
+	function updatefunc(auratype, win, set, title, mod)
 		win.title = title or UNKNOWN
 		local settime = Skada:GetSetTime(set)
 
@@ -286,7 +186,12 @@ do
 					d.spec = player.spec
 
 					d.value = uptime
-					d.valuetext = format("%u (%.1f%%)", auracount, 100 * uptime / max(1, maxtime))
+					d.valuetext = Skada:FormatValueText(
+						auracount,
+						mod.metadata.columns.Count,
+						format("%.1f%%", 100 * uptime / max(1, maxtime)),
+						mod.metadata.columns.Percent
+					)
 
 					if uptime > maxvalue then
 						maxvalue = uptime
@@ -301,7 +206,7 @@ do
 end
 
 -- spells per player list
-local function spellupdatefunc(auratype, win, set, playerid, playername, fmt)
+local function spellupdatefunc(auratype, win, set, playerid, playername, fmt, mod)
 	local player = Skada:find_player(set, playerid, playername)
 	if player then
 		if fmt then -- set window title
@@ -324,7 +229,12 @@ local function spellupdatefunc(auratype, win, set, playerid, playername, fmt)
 					d.spellschool = spell.school
 
 					d.value = uptime
-					d.valuetext = format("%.1f%%", 100 * uptime / maxtime)
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatTime(uptime),
+						mod.metadata.columns.Uptime,
+						format("%.1f%%", 100 * uptime / maxtime),
+						mod.metadata.columns.Percent
+					)
 
 					if uptime > maxvalue then
 						maxvalue = uptime
@@ -339,7 +249,7 @@ local function spellupdatefunc(auratype, win, set, playerid, playername, fmt)
 end
 
 -- used to show tooltip
-local function aura_tooltip(win, id, label, tooltip, playerid, playername, L)
+local function aura_tooltip(win, id, label, tooltip, playerid, playername)
 	local set = win:get_selected_set()
 
 	local player = Skada:find_player(set, playerid, playername)
@@ -377,27 +287,6 @@ local function aura_tooltip(win, id, label, tooltip, playerid, playername, L)
 	end
 end
 
--- called on SetComplete to remove active auras
-local function setcompletefunc(set, auratype)
-	if set and auratype then
-		for _, player in Skada:IteratePlayers(set) do
-			if player.auras then
-				local maxtime = PlayerActiveTime(set, player, true)
-				for spellid, spell in pairs(player.auras) do
-					if spell.auratype == auratype then
-						spell.active = nil
-						if spell.uptime > maxtime then
-							spell.uptime = maxtime
-						elseif spell.uptime == 0 then
-							player.auras[spellid] = nil -- delete 0 uptime
-						end
-					end
-				end
-			end
-		end
-	end
-end
-
 -- ================================================================== --
 
 Skada:AddLoadableModule("Buffs", function(Skada, L)
@@ -409,28 +298,62 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 	local UnitExists, UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
 	local UnitGUID, UnitName, UnitBuff = UnitGUID, UnitName, UnitBuff
 
+	-- list of the auras that are ignored!
+	local blacklist = {
+		[57819] = true, -- Tabard of the Argent Crusade
+		[57820] = true, -- Tabard of the Ebon Blade
+		[57821] = true, -- Tabard of the Kirin Tor
+		[57822] = true, -- Tabard of the Wyrmrest Accord
+		[72968] = true, -- Precious's Ribbon
+		[57723] = true, -- Exhaustion (Heroism)
+		[57724] = true, -- Sated (Bloodlust)
+		[57940] = true -- Essence of Wintergrasp
+	}
+
 	function spellmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
 		win.title = format(L["%s's buffs"], label)
 	end
 
 	function spellmod:Update(win, set)
-		spellupdatefunc("BUFF", win, set, win.playerid, win.playername, L["%s's buffs"])
+		spellupdatefunc("BUFF", win, set, win.playerid, win.playername, L["%s's buffs"], mod)
 	end
 
 	function mod:Update(win, set)
-		updatefunc("BUFF", win, set, L["Buffs"])
+		updatefunc("BUFF", win, set, L["Buffs"], mod)
 	end
 
 	local function buff_tooltip(win, set, label, tooltip)
-		aura_tooltip(win, set, label, tooltip, win.playerid, win.playername, L)
+		aura_tooltip(win, set, label, tooltip, win.playerid, win.playername)
 	end
 
-	local function BuffApplied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
-		if auratype == "BUFF" and spellid == 27827 then -- Spirit of Redemption (Holy Priest)
-			Skada:SendMessage("UNIT_DIED", ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, nil, spellschool, auratype)
-		else
-			AuraApplied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, nil, spellschool, auratype)
+	local aura = {}
+
+	local function handleBuff(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
+		if auratype == "BUFF" and not blacklist[spellid] and Skada:IsPlayer(dstGUID, dstFlags, dstName) then
+			if spellid == 27827 then -- Spirit of Redemption (Holy Priest)
+				Skada:SendMessage("UNIT_DIED", ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, nil, spellschool, auratype)
+				return
+			end
+
+			aura.playerid = dstGUID
+			aura.playername = dstName
+			aura.playerflags = dstFlags
+
+			aura.spellid = spellid
+			aura.spellschool = spellschool
+			aura.auratype = auratype
+
+			if event == "SPELL_AURA_APPLIED" then
+				log_auraapply(Skada.current, aura)
+				log_auraapply(Skada.total, aura)
+			elseif event == "SPELL_AURA_REFRESH" or event == "SPELL_AURA_APPLIED_DOSE" then
+				log_aurarefresh(Skada.current, aura)
+				log_aurarefresh(Skada.total, aura)
+			elseif event == "SPELL_AURA_REMOVED" then
+				log_auraremove(Skada.current, aura)
+				log_auraremove(Skada.total, aura)
+			end
 		end
 	end
 
@@ -443,8 +366,8 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 					for i = 1, 40 do
 						local rank, _, _, _, _, _, unitCaster, _, _, spellid = select(2, UnitBuff(unit, i))
 						if spellid then
-							if unitCaster and rank ~= SPELL_PASSIVE and not blacklist[spellid] then
-								AuraApplied(nil, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, nil, nil, "BUFF")
+							if unitCaster and rank ~= SPELL_PASSIVE then
+								handleBuff(nil, "SPELL_AURA_APPLIED", UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, nil, nil, "BUFF")
 							end
 						else
 							break -- no buff at all
@@ -455,37 +378,26 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 		end
 	end
 
-	function mod:Tick(event, current, total)
-		if event == "COMBAT_PLAYER_TICK" and current and not current.stopped then
-			auras_tick(current, "BUFF")
-			if total then
-				auras_tick(total, "BUFF")
-			end
-		end
-	end
-
 	function mod:OnEnable()
 		spellmod.metadata = {tooltip = buff_tooltip}
-		self.metadata = {click1 = spellmod, icon = "Interface\\Icons\\spell_magic_greaterblessingofkings"}
+		self.metadata = {
+			click1 = spellmod,
+			columns = {Count = true, Uptime = true, Percent = true},
+			icon = "Interface\\Icons\\spell_magic_greaterblessingofkings"
+		}
 
-		Skada:RegisterForCL(BuffApplied, "SPELL_AURA_APPLIED", {src_is_interesting = true})
-		Skada:RegisterForCL(AuraRefresh, "SPELL_AURA_REFRESH", {src_is_interesting = true})
-		Skada:RegisterForCL(AuraRefresh, "SPELL_AURA_APPLIED_DOSE", {src_is_interesting = true})
-		Skada:RegisterForCL(AuraRemoved, "SPELL_AURA_REMOVED", {src_is_interesting = true})
+		Skada:RegisterForCL(handleBuff, "SPELL_AURA_APPLIED", {dst_is_interesting = true})
+		Skada:RegisterForCL(handleBuff, "SPELL_AURA_REFRESH", {dst_is_interesting = true})
+		Skada:RegisterForCL(handleBuff, "SPELL_AURA_APPLIED_DOSE", {dst_is_interesting = true})
+		Skada:RegisterForCL(handleBuff, "SPELL_AURA_REMOVED", {dst_is_interesting = true})
 
 		Skada.RegisterCallback(self, "COMBAT_PLAYER_ENTER", "CheckBuffs")
-		Skada.RegisterCallback(self, "COMBAT_PLAYER_TICK", "Tick")
 
 		Skada:AddMode(self, L["Buffs and Debuffs"])
 	end
 
 	function mod:OnDisable()
-		Skada.UnregisterAllCallbacks(self)
 		Skada:RemoveMode(self)
-	end
-
-	function mod:SetComplete(set)
-		setcompletefunc(set, "BUFF")
 	end
 end)
 
@@ -498,17 +410,34 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 	local spellmod = mod:NewModule(L["Debuff spell list"])
 	local targetmod = spellmod:NewModule(L["Debuff target list"])
 
-	local function DebuffApplied(ts, event, srcGUID, srcName, _, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
-		if srcName == nil and #srcGUID == 0 and dstName and #dstGUID > 0 then
-			srcGUID = dstGUID
-			srcName = dstName
+	local aura = {}
+
+	local function handleDebuff(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, spellschool, auratype)
+		if auratype == "DEBUFF" then
+			if srcName == nil and #srcGUID == 0 and dstName and #dstGUID > 0 then
+				srcGUID = dstGUID
+				srcName = dstName
+				srcFlags = dstFlags
+			end
+
+			aura.playerid = srcGUID
+			aura.playername = srcName
+			aura.playerflags = srcFlags
+
+			aura.dstName = dstName
+			aura.spellid = spellid
+			aura.spellschool = spellschool
+			aura.auratype = auratype
 
 			if event == "SPELL_AURA_APPLIED" then
-				AuraApplied(ts, event, srcGUID, srcName, dstFlags, dstGUID, dstName, dstFlags, spellid, nil, spellschool, auratype)
+				log_auraapply(Skada.current, aura)
+				log_auraapply(Skada.total, aura)
 			elseif event == "SPELL_AURA_REFRESH" or event == "SPELL_AURA_APPLIED_DOSE" then
-				AuraRefresh(ts, event, srcGUID, srcName, dstFlags, dstGUID, dstName, dstFlags, spellid, nil, spellschool, auratype)
-			elseif event == "SPELL_AURA_REMOVED" or event == "SPELL_AURA_REMOVED_DOSE" then
-				AuraRemoved(ts, event, srcGUID, srcName, dstFlags, dstGUID, dstName, dstFlags, spellid, nil, spellschool, auratype)
+				log_aurarefresh(Skada.current, aura)
+				log_aurarefresh(Skada.total, aura)
+			elseif event == "SPELL_AURA_REMOVED" then
+				log_auraremove(Skada.current, aura)
+				log_auraremove(Skada.total, aura)
 			end
 		end
 	end
@@ -560,46 +489,34 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 	end
 
 	function spellmod:Update(win, set)
-		spellupdatefunc("DEBUFF", win, set, win.playerid, win.playername, L["%s's debuffs"])
+		spellupdatefunc("DEBUFF", win, set, win.playerid, win.playername, L["%s's debuffs"], mod)
 	end
 
 	function mod:Update(win, set)
-		updatefunc("DEBUFF", win, set, L["Debuffs"])
+		updatefunc("DEBUFF", win, set, L["Debuffs"], mod)
 	end
 
 	local function debuff_tooltip(win, set, label, tooltip)
-		aura_tooltip(win, set, label, tooltip, win.playerid, win.playername, L)
-	end
-
-	function mod:Tick(event, current, total)
-		if event == "COMBAT_PLAYER_TICK" and current and not current.stopped then
-			auras_tick(current, "DEBUFF")
-			if total then
-				auras_tick(total, "DEBUFF")
-			end
-		end
+		aura_tooltip(win, set, label, tooltip, win.playerid, win.playername)
 	end
 
 	function mod:OnEnable()
 		spellmod.metadata = {post_tooltip = debuff_tooltip, click1 = targetmod, nototalclick = {targetmod}}
-		self.metadata = {click1 = spellmod, icon = "Interface\\Icons\\spell_shadow_shadowwordpain"}
+		self.metadata = {
+			click1 = spellmod,
+			columns = {Count = true, Uptime = true, Percent = true},
+			icon = "Interface\\Icons\\spell_shadow_shadowwordpain"
+		}
 
-		Skada:RegisterForCL(DebuffApplied, "SPELL_AURA_APPLIED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
-		Skada:RegisterForCL(DebuffApplied, "SPELL_AURA_REFRESH", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
-		Skada:RegisterForCL(DebuffApplied, "SPELL_AURA_APPLIED_DOSE", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
-		Skada:RegisterForCL(DebuffApplied, "SPELL_AURA_REMOVED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
-		Skada:RegisterForCL(DebuffApplied, "SPELL_AURA_REMOVED_DOSE", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
+		Skada:RegisterForCL(handleDebuff, "SPELL_AURA_APPLIED", {src_is_interesting = true})
+		Skada:RegisterForCL(handleDebuff, "SPELL_AURA_REFRESH", {src_is_interesting = true})
+		Skada:RegisterForCL(handleDebuff, "SPELL_AURA_APPLIED_DOSE", {src_is_interesting = true})
+		Skada:RegisterForCL(handleDebuff, "SPELL_AURA_REMOVED", {src_is_interesting = true})
 
-		Skada.RegisterCallback(self, "COMBAT_PLAYER_TICK", "Tick")
 		Skada:AddMode(self, L["Buffs and Debuffs"])
 	end
 
 	function mod:OnDisable()
-		Skada.UnregisterAllCallbacks(self)
 		Skada:RemoveMode(self)
-	end
-
-	function mod:SetComplete(set)
-		setcompletefunc(set, "DEBUFF")
 	end
 end)

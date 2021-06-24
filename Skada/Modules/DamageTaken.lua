@@ -50,13 +50,6 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 		spell.count = (spell.count or 0) + 1
 		spell.amount = spell.amount + dmg.amount
 
-		if spell.max == nil or dmg.amount > spell.max then
-			spell.max = dmg.amount
-		end
-
-		if (spell.min == nil or dmg.amount < spell.min) and not dmg.missed then
-			spell.min = dmg.amount
-		end
 		if dmg.critical then
 			spell.critical = (spell.critical or 0) + 1
 			spell.criticalamount = (spell.criticalamount or 0) + dmg.amount
