@@ -16,11 +16,12 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 	local pull_timer
 
 	local ignoredspells = {
-		[1130] = true,
-		[14323] = true,
-		[14324] = true,
-		[14325] = true,
-		[53338] = true
+		[1130] = true, -- Hunter's Mark (rank 1)
+		[14323] = true, -- Hunter's Mark (rank 2)
+		[14324] = true, -- Hunter's Mark (rank 3)
+		[14325] = true, -- Hunter's Mark (rank 4)
+		[53338] = true, -- Hunter's Mark (rank 5)
+		[60122] = true  -- Baby Spice
 	}
 
 	-- thank you Details!
