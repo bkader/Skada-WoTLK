@@ -238,6 +238,46 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		end
 	end
 
+	local function playermod_tooltip(win, id, label, tooltip)
+		local player = Skada:find_player(win:get_selected_set(), win.playerid)
+		if player then
+			local spell = player.damage_spells and player.damage_spells[label]
+			if spell then
+				tooltip:AddLine(player.name .. " - " .. label)
+
+				if spell.school then
+					local c = Skada.schoolcolors[spell.school]
+					local n = Skada.schoolnames[spell.school]
+					if c and n then
+						tooltip:AddLine(n, c.r, c.g, c.b)
+					end
+				end
+
+				if (spell.hitmin or 0) > 0 then
+					local spellmin = spell.hitmin
+					if spell.criticalmin and spell.criticalmin < spellmin then
+						spellmin = spell.criticalmin
+					end
+					tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
+				end
+
+				if (spell.hitmax or 0) > 0 then
+					local spellmax = spell.hitmax
+					if spell.criticalmax and spell.criticalmax < spellmax then
+						spellmax = spell.criticalmax
+					end
+					tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
+				end
+
+				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
+
+				if (spell.overkill or 0) > 0 then
+					tooltip:AddDoubleLine(L["Overkill"], Skada:FormatNumber(spell.overkill), 1, 1, 1)
+				end
+			end
+		end
+	end
+
 	local function spellmod_tooltip(win, id, label, tooltip)
 		if label == L["Critical Hits"] or label == L["Normal Hits"] then
 			local player = Skada:find_player(win:get_selected_set(), win.playerid)
@@ -560,7 +600,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
 	function mod:OnEnable()
 		spellmod.metadata = {tooltip = spellmod_tooltip}
-		playermod.metadata = {click1 = spellmod, click2 = sdetailmod}
+		playermod.metadata = {click1 = spellmod, click2 = sdetailmod, post_tooltip = playermod_tooltip}
 		targetmod.metadata = {click1 = tdetailmod}
 		self.metadata = {
 			showspots = true,
@@ -713,8 +753,7 @@ Skada:AddLoadableModule("DPS", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		local value = getRaidDPS(set)
-		return Skada:FormatNumber(value), value
+		return Skada:FormatNumber(getRaidDPS(set))
 	end
 end)
 

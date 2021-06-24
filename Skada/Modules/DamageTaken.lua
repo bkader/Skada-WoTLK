@@ -203,6 +203,42 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 	end
 	mod.getRaidDTPS = getRaidDTPS
 
+	local function playermod_tooltip(win, id, label, tooltip)
+		local player = Skada:find_player(win:get_selected_set(), win.playerid)
+		if player then
+			local spell = player.damagetaken_spells and player.damagetaken_spells[label]
+			if spell then
+				tooltip:AddLine(label .. " - " .. player.name)
+
+				if spell.school then
+					local c = Skada.schoolcolors[spell.school]
+					local n = Skada.schoolnames[spell.school]
+					if c and n then
+						tooltip:AddLine(n, c.r, c.g, c.b)
+					end
+				end
+
+				if (spell.hitmin or 0) > 0 then
+					local spellmin = spell.hitmin
+					if spell.criticalmin and spell.criticalmin < spellmin then
+						spellmin = spell.criticalmin
+					end
+					tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
+				end
+
+				if (spell.hitmax or 0) > 0 then
+					local spellmax = spell.hitmax
+					if spell.criticalmax and spell.criticalmax < spellmax then
+						spellmax = spell.criticalmax
+					end
+					tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
+				end
+
+				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber((spell.amount or 0) / spell.count), 1, 1, 1)
+			end
+		end
+	end
+
 	local function spellmod_tooltip(win, id, label, tooltip)
 		if label == L["Critical Hits"] or label == L["Normal Hits"] then
 			local player = Skada:find_player(win:get_selected_set(), win.playerid)
@@ -515,7 +551,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 
 	function mod:OnEnable()
 		spellmod.metadata = {tooltip = spellmod_tooltip}
-		playermod.metadata = {click1 = spellmod, click2 = sdetailmod}
+		playermod.metadata = {click1 = spellmod, click2 = sdetailmod, post_tooltip = playermod_tooltip}
 		sourcemod.metadata = {click1 = tdetailmod}
 		self.metadata = {
 			showspots = true,
@@ -647,8 +683,7 @@ Skada:AddLoadableModule("DTPS", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		local value = getRaidDTPS(set)
-		return Skada:FormatNumber(value), value
+		return Skada:FormatNumber(getRaidDTPS(set))
 	end
 end)
 

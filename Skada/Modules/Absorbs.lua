@@ -1127,8 +1127,7 @@ Skada:AddLoadableModule("HPS", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		local value = getRaidHPS(set)
-		return Skada:FormatNumber(value), value
+		return Skada:FormatNumber(getRaidHPS(set))
 	end
 end)
 
