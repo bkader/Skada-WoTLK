@@ -1490,6 +1490,20 @@ do
 		end
 	end
 
+	local function GetPetOwnerUnit(guid)
+		local prefix, min_member, max_member = Skada:GetGroupTypeAndCount()
+		if prefix then
+			for i = min_member, max_member do
+				local unit = (i == 0) and "player" or format("%s%d", prefix, i)
+				if UnitExists(unit .. "pet") and UnitGUID(unit .. "pet") == guid then
+					return unit
+				end
+			end
+		elseif UnitGUID("playerpet") == guid then
+			return "player"
+		end
+	end
+
 	function Skada:FixPets(action)
 		if action and self:IsPet(action.playerid, action.playerflags) then
 			local owner = pets[action.playerid]
@@ -1497,6 +1511,14 @@ do
 			if not owner and action.playerflags and band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
 				owner = {id = UnitGUID("player"), name = UnitName("player")}
 				pets[action.playerid] = owner
+			end
+
+			if not owner then
+				local ownerUnit = GetPetOwnerUnit(action.playerid)
+				if ownerUnit then
+					owner = {id = UnitGUID(ownerUnit), name = UnitName(ownerUnit)}
+					pets[action.playerid] = owner
+				end
 			end
 
 			if not owner then
@@ -2041,7 +2063,7 @@ do
 end
 
 function Skada:UNIT_PET(_, unit)
-	if unit then
+	if unit and unit ~= "target" and unit ~= "focus" and unit ~= "npc" and unit ~= "mouseover" then
 		local guid = UnitGUID(unit)
 		if guid and players[guid] then
 			self.After(0.1, function()

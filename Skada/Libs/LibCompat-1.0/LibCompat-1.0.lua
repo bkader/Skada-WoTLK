@@ -11,7 +11,7 @@ if not LibCompat then return end
 
 LibCompat.embeds = LibCompat.embeds or {}
 
-local pairs, select, tinsert = pairs, select, table.insert
+local pairs, select, tinsert, format = pairs, select, table.insert, string.format
 local CreateFrame = CreateFrame
 
 -------------------------------------------------------------------------------
@@ -171,7 +171,7 @@ do
 		local prefix, min_member, max_member = self:GetGroupTypeAndCount()
 		if prefix then
 			for i = min_member, max_member do
-				local unit = (i == 0) and "player" or ("%s%d"):format(prefix, i)
+				local unit = (i == 0) and "player" or format("%s%d", prefix, i)
 				if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
 					return false
 				end
@@ -186,7 +186,7 @@ do
 		local prefix, min_member, max_member = self:GetGroupTypeAndCount()
 		if prefix then
 			for i = min_member, max_member do
-				local unit = (i == 0) and "player" or ("%s%d"):format(prefix, i)
+				local unit = (i == 0) and "player" or format("%s%d", prefix, i)
 				if UnitExists(unit) and UnitAffectingCombat(unit) then
 					return true
 				end
@@ -201,7 +201,7 @@ do
 		local prefix, min_member, max_member = self:GetGroupTypeAndCount()
 		if prefix then
 			for i = min_member, max_member do
-				local unit = (i == 0) and "player" or ("%s%d"):format(prefix, i)
+				local unit = (i == 0) and "player" or format("%s%d", prefix, i)
 				self:QuickDispatch(func, unit, ...)
 			end
 		else
