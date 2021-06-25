@@ -228,7 +228,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 
 				if (spell.hitmax or 0) > 0 then
 					local spellmax = spell.hitmax
-					if spell.criticalmax and spell.criticalmax < spellmax then
+					if spell.criticalmax and spell.criticalmax > spellmax then
 						spellmax = spell.criticalmax
 					end
 					tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
