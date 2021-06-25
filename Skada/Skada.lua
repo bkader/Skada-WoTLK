@@ -150,6 +150,14 @@ function Skada.UnitClass(guid, flags, set, nocache)
 	return locClass, engClass
 end
 
+local function UnitFullName(unit)
+	local name, realm = UnitName(unit)
+	if realm and realm ~= "" then
+		name = name .. "-" .. realm
+	end
+	return name
+end
+
 -------------------------------------------------------------------------------
 -- Active / Effetive time functions
 
