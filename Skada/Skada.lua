@@ -1378,6 +1378,9 @@ do
 		[16063] = LBB["The Four Horsemen"], -- Sir Zeliek
 		[16064] = LBB["The Four Horsemen"], -- Thane Korth'azz
 		[16065] = LBB["The Four Horsemen"], -- Lady Blaumeux
+		[15930] = LBB["Thaddius"], -- Feugen
+		[15929] = LBB["Thaddius"], -- Stalagg
+		[15928] = LBB["Thaddius"], -- Thaddius
 		-- [[ Trial of the Crusader ]] --
 		[34796] = LBB["The Beasts of Northrend"], -- Gormok
 		[35144] = LBB["The Beasts of Northrend"], -- Acidmaw
