@@ -270,10 +270,6 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 				end
 
 				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
-
-				if (spell.overkill or 0) > 0 then
-					tooltip:AddDoubleLine(L["Overkill"], Skada:FormatNumber(spell.overkill), 1, 1, 1)
-				end
 			end
 		end
 	end
