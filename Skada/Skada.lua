@@ -330,6 +330,7 @@ do
 					name = L["Display System"],
 					desc = L["Choose the system to be used for displaying data in this window."],
 					order = 2,
+					width = "double",
 					values = function()
 						local list = {}
 						for name, display in pairs(Skada.displays) do
@@ -439,6 +440,15 @@ do
 					db.child = child == "" and nil or child
 					Skada:ReloadSettings()
 				end
+			}
+
+			options.args.childmode = {
+				type = "select",
+				name = L["Child Window Mode"],
+				order = 4,
+				values = {[0] = ALL, [1] = L["Segment"], [2] = L["Mode"]},
+				get = function() return db.childmode or 0 end,
+				disabled = function() return not (db.child and db.child ~= "") end
 			}
 
 			options.args.sticky = {
@@ -600,7 +610,7 @@ function Window:Wipe()
 		self.display:Wipe(self)
 	end
 
-	if self.child then
+	if self.child and self.db.childmode == 0 then
 		self.child:Wipe()
 	end
 end
@@ -612,7 +622,7 @@ end
 function Window:set_selected_set(set)
 	self.selectedset = set
 	self:RestoreView()
-	if self.child then
+	if self.child and self.db.childmode <= 1 then
 		self.child:set_selected_set(set)
 	end
 end
@@ -639,7 +649,7 @@ function Window:DisplayMode(mode)
 	self.changed = true
 	self:set_mode_title()
 
-	if self.child then
+	if self.child and self.db.childmode ~= 1 then
 		self.child:DisplayMode(mode)
 	end
 
@@ -711,7 +721,7 @@ do
 		self.display:SetTitle(self, self.metadata.title)
 		self.changed = true
 
-		if self.child then
+		if self.child and self.db.childmode == 0 then
 			self.child:DisplayModes(settime)
 		end
 
@@ -743,7 +753,7 @@ do
 		self.metadata.maxvalue = 1
 		self.changed = true
 
-		if self.child then
+		if self.child and self.db.childmode == 0 then
 			self.child:DisplaySets()
 		end
 
@@ -797,6 +807,9 @@ function Skada:CreateWindow(name, db, display)
 		db.sticky, db.sticked = true, {}
 		db.snapto, db.snapped = false, nil
 	end
+
+	-- child window mode
+	db.childmode = db.childmode or 0
 
 	local window = Window:new()
 	window.db = db

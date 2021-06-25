@@ -380,14 +380,14 @@ end
 do
 	local function inserthistory(win)
 		tinsert(win.history, win.selectedmode)
-		if win.child then
+		if win.child and win.db.childmode ~= 1 then
 			inserthistory(win.child)
 		end
 	end
 
 	local function onEnter(win, id, label, mode)
 		mode:Enter(win, id, label)
-		if win.child then
+		if win.child and win.db.childmode ~= 1 then
 			onEnter(win.child, id, label, mode)
 		end
 	end

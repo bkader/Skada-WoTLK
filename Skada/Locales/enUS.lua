@@ -57,6 +57,7 @@ L["Rename Window"] = true
 L["Enter the name for the window."] = true
 L["Child Window"] = true
 L["A child window will replicate the parent window actions."] = true
+L["Child Window Mode"] = true
 L["Lock Window"] = true
 L["Locks the bar window in place."] = true
 L["Hide Window"] = true
