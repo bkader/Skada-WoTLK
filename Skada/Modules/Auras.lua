@@ -397,6 +397,7 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 	end
 
 	function mod:OnDisable()
+		Skada.UnregisterAllCallbacks(self)
 		Skada:RemoveMode(self)
 	end
 end)
