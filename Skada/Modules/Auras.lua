@@ -9,7 +9,7 @@ local _
 -- we use this custom function in order to round up player
 -- active time because of how auras were ticking.
 local function PlayerActiveTime(set, player)
-	return floor(Skada:PlayerActiveTime(set, player, true))
+	return floor(Skada:PlayerActiveTime(set, player))
 end
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
@@ -276,7 +276,7 @@ local function aura_tooltip(win, id, label, tooltip, playerid, playername)
 			local settime = Skada:GetSetTime(set)
 
 			if settime > 0 then
-				local maxtime = PlayerActiveTime(set, player)
+				local maxtime = Skada:PlayerActiveTime(set, player, true)
 
 				tooltip:AddLine(player.name .. ": " .. label)
 
