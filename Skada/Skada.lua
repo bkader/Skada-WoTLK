@@ -2571,7 +2571,7 @@ function Skada:ApplySettings()
 		self.callbacks:Fire("SKADA_CORE_UPDATE", self.db.global.version)
 		self.db.global.version = curversion
 	end
-	if type(self.char.version) ~= "number" or curversion > self.char.version then
+	if type(self.char.version) ~= "number" or (curversion - self.char.version) >= 5 then
 		self.callbacks:Fire("SKADA_DATA_UPDATE", self.char.version)
 		self:Reset(true)
 		self.char.version = curversion
