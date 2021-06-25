@@ -70,7 +70,7 @@ end
 
 local function tooltipHandler(win, tooltip)
 	if win.db.useframe then
-		Skada:SetTooltipPosition(tooltip, win.frame)
+		Skada:SetTooltipPosition(tooltip, win.frame, nil, win)
 	end
 
 	-- Default color.

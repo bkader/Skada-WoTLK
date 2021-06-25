@@ -810,6 +810,7 @@ function Skada:CreateWindow(name, db, display)
 
 	-- child window mode
 	db.childmode = db.childmode or 0
+	db.tooltippos = db.tooltippos or "NONE"
 
 	local window = Window:new()
 	window.db = db
@@ -1610,22 +1611,15 @@ end
 -- tooltip functions
 
 -- sets the tooltip position
-function Skada:SetTooltipPosition(tooltip, frame, display)
-	if self.db.profile.tooltippos == "default" then
+function Skada:SetTooltipPosition(tooltip, frame, display, win)
+	if win and win.db.tooltippos ~= "NONE" then
+		local anchor = win.db.tooltippos:find("TOP") and "TOP" or "BOTTOM"
+		anchor = anchor .. (win.db.tooltippos:find("LEFT") and "RIGHT" or "LEFT")
+		tooltip:SetOwner(UIParent, "ANCHOR_NONE")
+		tooltip:SetPoint(anchor, frame, win.db.tooltippos)
+	elseif self.db.profile.tooltippos == "default" then
 		tooltip:SetOwner(UIParent, "ANCHOR_NONE")
 		tooltip:SetPoint("BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -40, 40)
-	elseif self.db.profile.tooltippos == "topleft" then
-		tooltip:SetOwner(frame, "ANCHOR_NONE")
-		tooltip:SetPoint("TOPRIGHT", frame, "TOPLEFT")
-	elseif self.db.profile.tooltippos == "topright" then
-		tooltip:SetOwner(frame, "ANCHOR_NONE")
-		tooltip:SetPoint("TOPLEFT", frame, "TOPRIGHT")
-	elseif self.db.profile.tooltippos == "bottomleft" then
-		tooltip:SetOwner(frame, "ANCHOR_NONE")
-		tooltip:SetPoint("BOTTOMRIGHT", frame, "BOTTOMLEFT")
-	elseif self.db.profile.tooltippos == "bottomright" then
-		tooltip:SetOwner(frame, "ANCHOR_NONE")
-		tooltip:SetPoint("BOTTOMLEFT", frame, "BOTTOMRIGHT")
 	elseif self.db.profile.tooltippos == "cursor" then
 		tooltip:SetOwner(frame, "ANCHOR_CURSOR")
 	elseif self.db.profile.tooltippos == "smart" and frame then
@@ -1644,6 +1638,11 @@ function Skada:SetTooltipPosition(tooltip, frame, display)
 			tooltip:SetOwner(frame, "ANCHOR_NONE")
 			tooltip:SetPoint("TOPRIGHT", frame, "TOPLEFT", -10, 0)
 		end
+	else
+		local anchor = self.db.profile.tooltippos:find("top") and "TOP" or "BOTTOM"
+		anchor = anchor .. (self.db.profile.tooltippos:find("left") and "RIGHT" or "LEFT")
+		tooltip:SetOwner(frame, "ANCHOR_NONE")
+		tooltip:SetPoint(anchor, frame, self.db.profile.tooltippos)
 	end
 end
 
@@ -2658,7 +2657,6 @@ function Skada:FrameSettings(db, include_dimensions)
 				type = "toggle",
 				name = L["Clamped To Screen"],
 				order = 0,
-				width = "double"
 			},
 			bgheader = {
 				type = "header",
@@ -2809,7 +2807,6 @@ function Skada:FrameSettings(db, include_dimensions)
 				name = L["Strata"],
 				desc = L["This determines what other frames will be in front of the frame."],
 				order = 12,
-				width = "double",
 				values = {
 					["BACKGROUND"] = "BACKGROUND",
 					["LOW"] = "LOW",
@@ -2818,7 +2815,21 @@ function Skada:FrameSettings(db, include_dimensions)
 					["DIALOG"] = "DIALOG",
 					["FULLSCREEN"] = "FULLSCREEN",
 					["FULLSCREEN_DIALOG"] = "FULLSCREEN_DIALOG"
-				}
+				},
+			},
+			tooltippos = {
+				type = "select",
+				name = L["Tooltip position"],
+				desc = L["Position of the tooltips."],
+				order = 13,
+				values = {
+					["NONE"] = NONE,
+					["TOPRIGHT"] = L["Top right"],
+					["TOPLEFT"] = L["Top left"],
+					["BOTTOMRIGHT"] = L["Bottom right"],
+					["BOTTOMLEFT"] = L["Bottom left"]
+				},
+				get = function() return db.tooltippos or "NONE" end
 			}
 		}
 	}

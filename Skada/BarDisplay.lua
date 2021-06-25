@@ -262,7 +262,7 @@ do
 	function mod:BarEnter(_, bar, motion)
 		local win, id, label = bar.win, bar.id, bar.text
 		ttactive = true
-		Skada:SetTooltipPosition(GameTooltip, win.bargroup, win.db.display)
+		Skada:SetTooltipPosition(GameTooltip, win.bargroup, win.db.display, win)
 		Skada:ShowTooltip(win, id, label)
 		if not win.db.disablehighlight then
 			bar:SetBackdrop(barbackdrop)
@@ -460,7 +460,7 @@ do
 		local bar = icon.bar
 		local win = bar.win
 		if bar.link and win and win.bargroup then
-			Skada:SetTooltipPosition(GameTooltip, win.bargroup, win.db.display)
+			Skada:SetTooltipPosition(GameTooltip, win.bargroup, win.db.display, win)
 			GameTooltip:SetHyperlink(bar.link)
 			GameTooltip:Show()
 		end
