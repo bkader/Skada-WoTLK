@@ -52,28 +52,11 @@ do
 		end
 	end
 
-	function main:SingleTick(set, playerid, playername, playerflags, spellid, spellschool)
-		if set and playerid and spellid then
-			local player = Skada:get_player(set, playerid, playername, playerflags)
-			if player and player.auras then
-				if not player.auras[spellid] then
-					player.auras[spellid] = {
-						school = spellschool,
-						auratype = "BUFF",
-						uptime = 1
-					}
-				else
-					player.auras[spellid].uptime = player.auras[spellid].uptime + 1
-				end
-			end
-		end
-	end
-
 	local function setcomplete(set)
 		if set then
+			local maxtime = Skada:GetSetTime(set)
 			for _, player in Skada:IteratePlayers(set) do
 				if player.auras then
-					local maxtime = PlayerActiveTime(set, player, true)
 					for spellid, spell in pairs(player.auras) do
 						spell.active = nil
 						if spell.uptime > maxtime then
@@ -352,6 +335,22 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 		aura_tooltip(win, set, label, tooltip, win.playerid, win.playername)
 	end
 
+	local function log_specialtick(set, aura)
+		local player = Skada:get_player(set, aura.playerid, aura.playername, aura.playerflags)
+		if player then
+			player.auras = player.auras or {} -- create the table.
+			if not player.auras[aura.spellid] then
+				player.auras[aura.spellid] = {
+					school = aura.spellschool,
+					auratype = "BUFF",
+					uptime = 1
+				}
+			else
+				player.auras[aura.spellid].uptime = player.auras[aura.spellid].uptime + 1
+			end
+		end
+	end
+
 	local aura = {}
 
 	local function handleBuff(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
@@ -380,8 +379,16 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 				log_auraremove(Skada.total, aura)
 			end
 		elseif event == "SPELL_PERIODIC_ENERGIZE" and speciallist[spellid] and Skada:IsPlayer(dstGUID, dstFlags, dstName) then
-			main:SingleTick(Skada.current, dstGUID, dstName, dstFlags, spellid, spellschool)
-			main:SingleTick(Skada.total, dstGUID, dstName, dstFlags, spellid, spellschool)
+			aura.playerid = dstGUID
+			aura.playername = dstName
+			aura.playerflags = dstFlags
+
+			aura.spellid = spellid
+			aura.spellschool = spellschool
+			aura.auratype = "BUFF"
+
+			log_specialtick(Skada.current, aura)
+			log_specialtick(Skada.total, aura)
 		end
 	end
 
