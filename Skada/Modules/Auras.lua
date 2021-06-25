@@ -13,9 +13,8 @@ local function PlayerActiveTime(set, player)
 end
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
+local main = Skada:NewModule(L["Buffs and Debuffs"])
 do
-	local main = Skada:NewModule(L["Buffs and Debuffs"])
-
 	function main:OnEnable()
 		if not Skada:IsDisabled("Buffs", "Debuffs") then
 			Skada.RegisterCallback(self, "COMBAT_PLAYER_TICK", "Tick")
@@ -47,7 +46,26 @@ do
 			auras_tick(current)
 			auras_tick(total)
 
-			if self.cleaned then self.cleaned = nil end
+			if self.cleaned then
+				self.cleaned = nil
+			end
+		end
+	end
+
+	function main:SingleTick(set, playerid, playername, playerflags, spellid, spellschool)
+		if set and playerid and spellid then
+			local player = Skada:get_player(set, playerid, playername, playerflags)
+			if player and player.auras then
+				if not player.auras[spellid] then
+					player.auras[spellid] = {
+						school = spellschool,
+						auratype = "BUFF",
+						uptime = 1
+					}
+				else
+					player.auras[spellid].uptime = player.auras[spellid].uptime + 1
+				end
+			end
 		end
 	end
 
@@ -135,9 +153,7 @@ end
 local function log_auraremove(set, aura)
 	if set and aura and aura.spellid then
 		local player = Skada:get_player(set, aura.playerid, aura.playername, aura.playerflags)
-		if not player or not player.auras or not player.auras[aura.spellid] then
-			return
-		end
+		if not player or not player.auras or not player.auras[aura.spellid] then return end
 		if player.auras[aura.spellid].auratype == aura.auratype and (player.auras[aura.spellid].active or 0) > 0 then
 			player.auras[aura.spellid].active = player.auras[aura.spellid].active - 1
 			if player.auras[aura.spellid].active < 0 then
@@ -274,11 +290,15 @@ local function aura_tooltip(win, id, label, tooltip, playerid, playername)
 				end
 
 				-- add segment and active times
-				tooltip:AddDoubleLine(L["Count"], aura.count, 1, 1, 1)
-				if (aura.refresh or 0) > 0 then
-					tooltip:AddDoubleLine(L["Refresh"], aura.refresh or 0, 1, 1, 1)
+				if aura.count or aura.refresh then
+					if (aura.count or 0) > 0 then
+						tooltip:AddDoubleLine(L["Count"], aura.count, 1, 1, 1)
+					end
+					if (aura.refresh or 0) > 0 then
+						tooltip:AddDoubleLine(L["Refresh"], aura.refresh or 0, 1, 1, 1)
+					end
+					tooltip:AddLine(" ")
 				end
-				tooltip:AddLine(" ")
 				tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
 				tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(maxtime), 1, 1, 1)
 				tooltip:AddDoubleLine(L["Uptime"], Skada:FormatTime(aura.uptime), 1, 1, 1)
@@ -308,6 +328,11 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 		[57723] = true, -- Exhaustion (Heroism)
 		[57724] = true, -- Sated (Bloodlust)
 		[57940] = true -- Essence of Wintergrasp
+	}
+
+	-- list of spells that don't trigger SPELL_AURA_x events
+	local speciallist = {
+		[57669] = true -- Replenishment
 	}
 
 	function spellmod:Enter(win, id, label)
@@ -354,6 +379,9 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 				log_auraremove(Skada.current, aura)
 				log_auraremove(Skada.total, aura)
 			end
+		elseif event == "SPELL_PERIODIC_ENERGIZE" and speciallist[spellid] and Skada:IsPlayer(dstGUID, dstFlags, dstName) then
+			main:SingleTick(Skada.current, dstGUID, dstName, dstFlags, spellid, spellschool)
+			main:SingleTick(Skada.total, dstGUID, dstName, dstFlags, spellid, spellschool)
 		end
 	end
 
@@ -390,6 +418,7 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 		Skada:RegisterForCL(handleBuff, "SPELL_AURA_REFRESH", {dst_is_interesting = true})
 		Skada:RegisterForCL(handleBuff, "SPELL_AURA_APPLIED_DOSE", {dst_is_interesting = true})
 		Skada:RegisterForCL(handleBuff, "SPELL_AURA_REMOVED", {dst_is_interesting = true})
+		Skada:RegisterForCL(handleBuff, "SPELL_PERIODIC_ENERGIZE", {dst_is_interesting = true})
 
 		Skada.RegisterCallback(self, "COMBAT_PLAYER_ENTER", "CheckBuffs")
 
@@ -470,7 +499,12 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 					d.label = targetname
 
 					d.value = count
-					d.valuetext = format("%u (%.1f%%)", count, 100 * count / total)
+					d.valuetext = Skada:FormatValueText(
+						count,
+						mod.metadata.columns.Count,
+						format("%.1f%%", 100 * count / total),
+						mod.metadata.columns.Percent
+					)
 
 					if count > maxvalue then
 						maxvalue = count
