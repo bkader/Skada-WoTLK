@@ -349,13 +349,31 @@ do
 end
 
 function mod:WindowResized(_, group)
+	local db, height = group.win.db, group:GetHeight()
+
+	-- Snap to best fit
+	if db.snapto then
+		local maxbars = group:GuessMaxBars(true)
+		local snapheight = height
+
+		if db.enabletitle then
+			snapheight = db.title.height + ((db.barheight + db.barspacing) * maxbars) - db.barspacing
+		else
+			snapheight = ((db.barheight + db.barspacing) * maxbars) - db.barspacing
+		end
+
+		height = snapheight
+	end
+
 	libwindow.SavePosition(group)
-	group.win.db.background.height = group:GetHeight()
-	group.win.db.barwidth = group:GetWidth()
+	db.background.height = height
+	db.barwidth = group:GetWidth()
+
+	-- resize sticked windows as well.
 	if FlyPaper then
-		local offset = group.win.db.background.borderthickness
+		local offset = db.background.borderthickness
 		for _, win in Skada:IterateWindows() do
-			if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
+			if win.db.display == "bar" and win.bargroup:IsShown() and db.sticked[win.db.name] then
 				win.bargroup.callbacks:Fire("AnchorMoved", win.bargroup)
 			end
 		end

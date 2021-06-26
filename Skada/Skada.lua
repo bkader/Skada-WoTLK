@@ -468,6 +468,13 @@ do
 					Skada:ApplySettings()
 				end
 			}
+
+			options.args.snapto = {
+				type = "toggle",
+				name = L["Snap to best fit"],
+				desc = L["Snaps the window size to best fit when resizing."],
+				order = 7
+			}
 		end
 
 		options.args.switchoptions = {

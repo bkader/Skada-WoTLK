@@ -688,19 +688,23 @@ function barListPrototype:IsLocked()
 	return self.locked
 end
 
-function barListPrototype:SetMaxBars(num)
-	if (num or 0) == 0 then
-		num = self:GetHeight() / (self.thickness + self.spacing)
-	end
+function barListPrototype:GuessMaxBars(round)
+	local maxBars = self:GetHeight() / (self.thickness + self.spacing)
 
 	if self:IsAnchorVisible() then
 		local height = self:GetHeight() + self.spacing
-		num = ((num - 1) * ((height - self.button:GetHeight()) / height)) + 1
+		maxBars = ((maxBars - 1) * ((height - self.button:GetHeight()) / height)) + 1
 	end
-	self.maxBars = floor(num)
+
+	return round and floor(maxBars + 0.5) or floor(maxBars)
+end
+
+function barListPrototype:SetMaxBars(num)
+	self.maxBars = ((num or 0) > 0) and floor(num) or self:GuessMaxBars()
 end
 
 function barListPrototype:GetMaxBars()
+	self.maxBars = self.maxBars or self:GuessMaxBars()
 	return self.maxBars
 end
 
