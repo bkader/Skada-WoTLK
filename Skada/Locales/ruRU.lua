@@ -589,6 +589,7 @@ L["%s's resurrect spells"] = "%s - Заклинания воскрешения"
 L["%s's resurrect targets"] = "%s - Цели воскрешения"
 -- nickname module lines --
 L["Nickname"] = "Псевдоним"
+L["Name"] = "Имя"
 L["Set a nickname for you.\nNicknames are sent to group members and Skada can use them instead of your character name."] = "Задайте ваш Псевдоним.\nПсевдонимы отправляются участникам группы и могут использоваться вместо имени вашего персонажа."
 L["Nickname isn't a valid string."] = "Неверный формат Псевдонима."
 L["Your nickname is too long, max of 12 characters is allowed."] = "Ваш Псевдоним слишком длинный, допускается не более 12 символов."

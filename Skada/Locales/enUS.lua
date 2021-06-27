@@ -589,6 +589,7 @@ L["%s's resurrect spells"] = true
 L["%s's resurrect targets"] = true
 -- nickname module lines --
 L["Nickname"] = true
+L["Name"] = NAME
 L["Set a nickname for you.\nNicknames are sent to group members and Skada can use them instead of your character name."] = true
 L["Nickname isn't a valid string."] = true
 L["Your nickname is too long, max of 12 characters is allowed."] = true

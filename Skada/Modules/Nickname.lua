@@ -100,10 +100,10 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 				desc = L["Choose how names are shown on your bars."],
 				order = 2,
 				values = {
-					[1] = NAME,
+					[1] = L["Name"],
 					[2] = L["Nickname"],
-					[3] = NAME .. " (" .. L["Nickname"] .. ")",
-					[4] = L["Nickname"] .. " (" .. NAME .. ")"
+					[3] = L["Name"] .. " (" .. L["Nickname"] .. ")",
+					[4] = L["Nickname"] .. " (" .. L["Name"] .. ")"
 				}
 			},
 			ignorenicknames = {
