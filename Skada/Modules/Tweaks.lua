@@ -275,7 +275,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 
 		-- old spamage module
 		if type(Skada.db.profile.spamage) == "table" or Skada.db.profile.spamage == nil then
-			Skada.db.profile.spamage = true
+			Skada.db.profile.spamage = false
 		end
 
 		-- options.

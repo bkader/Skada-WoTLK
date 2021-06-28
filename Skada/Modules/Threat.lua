@@ -41,6 +41,8 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 						id = guid,
 						name = name,
 						class = class,
+						role = Skada.GetUnitRole(unit),
+						spec = Skada.GetSpecialization(unit, class),
 						unit = unit
 					}
 				end
@@ -60,6 +62,8 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 					d.label = player.name
 					d.text = Skada:FormatName(player.name, player.id)
 					d.class = player.class
+					d.role = player.role
+					d.spec = player.spec
 
 					d.threat = threatvalue
 					d.isTanking = isTanking
@@ -80,6 +84,8 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 					d.label = player.name
 					d.text = Skada:FormatName(player.name, player.id)
 					d.class = player.class
+					d.role = player.role
+					d.spec = player.spec
 
 					d.value = threatpct
 					d.isTanking = isTanking
@@ -139,7 +145,12 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				-- Reset out max threat value.
 				maxthreat = 0
 
-				Skada:GroupIterator(add_to_threattable, target, win)
+				Skada:GroupIterator(function(unit)
+					add_to_threattable(unit, target, win)
+					if UnitExists(unit .. "pet") then
+						add_to_threattable(unit .. "pet", target, win)
+					end
+				end)
 
 				-- If we are going by raw threat we got the max threat from above; otherwise it's always 100.
 				if not self.db.rawvalue then
