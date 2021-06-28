@@ -24,7 +24,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	local UnitGUID = UnitGUID
 	local tContains = tContains
 
-	-- spells on the list above are ignored when it comes
+	-- spells on the list below are ignored when it comes
 	-- to updating player's active time.
 	local blacklist = {
 		-- Retribution Aura (rank 1 to 7)
@@ -37,13 +37,47 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		2947, 8316, 8317, 11770, 11771, 27269, 47983
 	}
 
+	-- spells on the list below are used to update player's active time
+	-- no matter their role or damage amount, since pets aren't considered.
+	local whitelist = {
+		-- The Oculus
+		[49840] = true, -- Shock Lance (Amber Drake)
+		[50232] = true, -- Searing Wrath (Ruby Drake)
+		[50341] = true, -- Touch the Nightmare (Emerald Drake)
+		[50344] = true, -- Dream Funnel (Emerald Drake)
+		-- Eye of Eternity: Wyrmrest Skytalon
+		[56091] = true, -- Flame Spike
+		[56092] = true, -- Engulf in Flames
+		-- Naxxramas: Instructor Razuvious
+		[61696] = true, -- Blood Strike (Death Knight Understudy)
+		-- Ulduar - Flame Leviathan
+		[62306] = true, -- Salvaged Demolisher: Hurl Boulder
+		[62308] = true, -- Salvaged Demolisher: Ram
+		[62490] = true, -- Salvaged Demolisher: Hurl Pyrite Barrel
+		[62634] = true, -- Salvaged Demolisher Mechanic Seat: Mortar
+		[64979] = true, -- Salvaged Demolisher Mechanic Seat: Anti-Air Rocket
+		[62345] = true, -- Salvaged Siege Engine: Ram
+		[62346] = true, -- Salvaged Siege Engine: Steam Rush
+		[62522] = true, -- Salvaged Siege Engine: Electroshock
+		[62358] = true, -- Salvaged Siege Turret: Fire Cannon
+		[62359] = true, -- Salvaged Siege Turret: Anti-Air Rocket
+		[62974] = true, -- Salvaged Chopper: Sonic Horn
+		-- Icecrown Citadel
+		[69399] = true, -- Cannon Blast (Gunship Battle Cannons)
+		[70175] = true, -- Incinerating Blast (Gunship Battle Cannons)
+		[70539] = 5.5, -- Regurgitated Ooze (Mutated Abomination)
+		[70542] = true -- Mutated Slash (Mutated Abomination)
+	}
+
 	local function log_damage(set, dmg, tick)
 		local player = Skada:get_player(set, dmg.playerid, dmg.playername, dmg.playerflags)
 		if not player then return end
 
 		-- update activity
-		if player.role ~= "HEALER" and dmg.amount > 0 and not dmg.petname then
-			Skada:AddActiveTime(player, (dmg.spellid and not tContains(blacklist, dmg.spellid)))
+		if whitelist[dmg.spellid] ~= nil then
+			Skada:AddActiveTime(player, (dmg.amount > 0), tonumber(whitelist[dmg.spellid]))
+		elseif player.role ~= "HEALER" and not dmg.petname then
+			Skada:AddActiveTime(player, (dmg.amount > 0 and not tContains(blacklist, dmg.spellid)))
 		end
 
 		player.damage = (player.damage or 0) + dmg.amount

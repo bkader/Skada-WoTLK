@@ -183,23 +183,26 @@ end
 function Skada:PlayerActiveTime(set, player, active)
 	local settime = self:GetSetTime(set)
 
-	if player and (self.db.profile.timemesure ~= 2 or active) then
-		settime = self.Clamp(player.time or 0, 0.1, settime)
+	if player and (self.db.profile.timemesure ~= 2 or active) and player.time then
+		settime = (player.time > 0) and player.time or settime
 	end
 
 	return settime
 end
 
 -- updates the player's active time
-function Skada:AddActiveTime(player, condition)
-	if player and condition then
+function Skada:AddActiveTime(player, cond, diff)
+	if player and cond then
 		local now = GetTime()
 		local delta = now - player.last
-		if delta > 3.5 then
+
+		if (diff or 0) > 0 and delta > diff then
+			delta = diff
+		elseif delta > 3.5 then
 			delta = 3.5
 		end
-		delta = floor(100 * delta + 0.5) / 100
 
+		delta = floor(100 * delta + 0.5) / 100
 		player.last = now
 		player.time = player.time + delta
 	end
@@ -1811,19 +1814,30 @@ local function SlashCommandHandler(cmd)
 		Skada:CleanGarbage(true)
 	elseif cmd == "website" or cmd == "github" then
 		Skada:Printf("|cffffbb00%s|r", Skada.website)
+	elseif cmd == "timemesure" or cmd == "measure" then
+		if Skada.db.profile.timemesure == 2 then
+			Skada.db.profile.timemesure = 1
+			Skada:Print(L["Time measure"] .. ": " .. L["Activity time"])
+			Skada:ApplySettings()
+		elseif Skada.db.profile.timemesure == 1 then
+			Skada.db.profile.timemesure = 2
+			Skada:Print(L["Time measure"] .. ": " .. L["Effective time"])
+			Skada:ApplySettings()
+		end
+	elseif cmd == "numformat" then
+		Skada.db.profile.numberformat = Skada.db.profile.numberformat + 1
+		if Skada.db.profile.numberformat > 3 then
+			Skada.db.profile.numberformat = 1
+		end
+		Skada:ApplySettings()
 	elseif cmd:sub(1, 6) == "report" then
-		cmd = cmd:sub(7)
+		cmd = cmd:sub(7):trim()
 
 		local w1, w2, w3 = strsplit(" ", cmd, 3)
-		if w3 == nil and tonumber(w2) ~= nil then
-			w3 = w2
-			w2 = nil
-		end
 
-		local chan = w1 or "say"
+		local chan = w1 and w1:trim() or "say"
 		local report_mode_name = w2 or L["Damage"]
 		local num = tonumber(w3 or 10)
-		w1, w2, w3 = nil, nil, nil
 
 		-- Sanity checks.
 		if chan and (chan == "say" or chan == "guild" or chan == "raid" or chan == "party" or chan == "officer") and (report_mode_name and Skada:find_mode(report_mode_name)) then
@@ -1838,6 +1852,8 @@ local function SlashCommandHandler(cmd)
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33reset|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33toggle|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33newsegment|r")
+		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33numformat|r")
+		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33measure|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33config|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33clean|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33website|r")
