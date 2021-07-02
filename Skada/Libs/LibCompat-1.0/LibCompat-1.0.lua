@@ -208,6 +208,49 @@ do
 			self:QuickDispatch(func, "player", ...)
 		end
 	end
+
+	function LibCompat:UnitFromGUID(guid)
+		local prefix, min_member, max_member = self:GetGroupTypeAndCount()
+		if prefix then
+			for i = min_member, max_member do
+				local unit = (i == 0) and "player" or format("%s%d", prefix, i)
+				if UnitExists(unit) and UnitGUID(unit) == guid then
+					return unit
+				elseif UnitExists(unit .. "pet") and UnitGUID(unit .. "pet") then
+					return unit .. "pet"
+				end
+			end
+		elseif UnitGUID("player") == guid then
+			return "player"
+		elseif UnitExists("playerpet") and UnitGUID("playerpet") == guid then
+			return "playerpet"
+		end
+	end
+
+	function LibCompat:ClassFromGUID(guid)
+		local class
+		local unit = self:UnitFromGUID(guid)
+		if unit and unit:find("pet") then
+			class = "PET"
+		elseif unit then
+			class = select(2, UnitClass(unit))
+		end
+		return class, unit
+	end
+
+	function LibCompat:UnitHealthPercent(unit, guid)
+		local health, maxhealth = UnitHealth(unit), UnitHealthMax(unit)
+		if not health and guid then
+			unit = self:UnitFromGUID(guid)
+			if unit then
+				health, maxhealth = UnitHealth(unit), UnitHealthMax(unit)
+			end
+		end
+
+		if health and maxhealth then
+			return floor(100 * health / maxhealth)
+		end
+	end
 end
 
 -------------------------------------------------------------------------------
@@ -316,6 +359,14 @@ do
 
 	function TickerPrototype:Cancel()
 		self._cancelled = true
+	end
+
+	LibCompat.CancelAllTimers = function()
+		for i = 1, #waitTable do
+			if waitTable[i] and not waitTable[i]._cancelled then
+				waitTable[i]:Cancel()
+			end
+		end
 	end
 
 	LibCompat.After = function(duration, callback)
@@ -478,9 +529,9 @@ end
 
 local mixins = {
 	"After",
-	"After",
 	"NewTimer",
 	"NewTicker",
+	"CancelAllTimers",
 	"Print",
 	"Printf",
 	"QuickDispatch",
@@ -496,6 +547,9 @@ local mixins = {
 	"IsGroupDead",
 	"IsGroupInCombat",
 	"GroupIterator",
+	"UnitFromGUID",
+	"ClassFromGUID",
+	"UnitHealthPercent",
 	"GetClassColorsTable",
 	"GetSpellInfo",
 	"GetSpellLink",

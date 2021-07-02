@@ -18,6 +18,8 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	local playermod = mod:NewModule(L["Absorb spell list"])
 	local targetmod = mod:NewModule(L["Absorbed player list"])
 
+	local LGT = LibStub("LibGroupTalents-1.0")
+
 	local UnitName, UnitExists, UnitBuff = UnitName, UnitExists, UnitBuff
 	local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 	local tostring, GetTime, band = tostring, GetTime, bit.band
@@ -27,6 +29,12 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		[48707] = 5, -- Anti-Magic Shell (rank 1)
 		[51052] = 10, -- Anti-Magic Zone( (rank 1)
 		[51271] = 20, -- Unbreakable Armor
+		[49189] = 86400, -- Will of Necropolis (rank 1)
+		[50149] = 86400, -- Will of Necropolis (rank 2)
+		[50150] = 86400, -- Will of Necropolis (rank 3)
+		[49145] = 86400, -- Spell Deflection (rank 1)
+		[49495] = 86400, -- Spell Deflection (rank 2)
+		[49497] = 86400, -- Spell Deflection (rank 3)
 		[62606] = 10, -- Savage Defense
 		[11426] = 60, -- Ice Barrier (rank 1)
 		[13031] = 60, -- Ice Barrier (rank 2)
@@ -60,6 +68,12 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		[27128] = 30, -- Fire Ward (rank 6)
 		[43010] = 30, -- Fire Ward (rank 7)
 		[58597] = 6, -- Sacred Shield
+		[31850] = 86400, -- Ardent Defender (rank 1)
+		[31851] = 86400, -- Ardent Defender (rank 2)
+		[31852] = 86400, -- Ardent Defender (rank 3)
+		[31228] = 86400, -- Cheat Death (rank 1)
+		[31229] = 86400, -- Cheat Death (rank 2)
+		[31230] = 86400, -- Cheat Death (rank 3)
 		[17] = 30, -- Power Word: Shield (rank 1)
 		[592] = 30, -- Power Word: Shield (rank 2)
 		[600] = 30, -- Power Word: Shield (rank 3)
@@ -168,57 +182,12 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		[65684] = 86400 -- Twin Val'kyr: Dark Essence86400
 	}
 
-	local mage_fire_ward = { -- Fire Ward
-		[543] = 30,
-		[8457] = 30,
-		[8458] = 30,
-		[10223] = 30,
-		[10225] = 30,
-		[27128] = 30,
-		[43010] = 30
-	}
-
-	local mage_frost_ward = { -- Frost Ward
-		[6143] = 30,
-		[8461] = 30,
-		[8462] = 30,
-		[10177] = 30,
-		[28609] = 30,
-		[32796] = 30,
-		[43012] = 30
-	}
-
-	local mage_ice_barrier = { -- Ice Barrier
-		[11426] = 60,
-		[13031] = 60,
-		[13032] = 60,
-		[13033] = 60,
-		[27134] = 60,
-		[33405] = 60,
-		[43038] = 60,
-		[43039] = 60
-	}
-
-	local warlock_shadow_ward = { -- Shadow Ward
-		[6229] = 30,
-		[11739] = 30,
-		[11740] = 30,
-		[28610] = 30,
-		[47890] = 30,
-		[47891] = 30
-	}
-
-	local warlock_sacrifice = { -- Sacrifice
-		[7812] = 30,
-		[19438] = 30,
-		[19440] = 30,
-		[19441] = 30,
-		[19442] = 30,
-		[19443] = 30,
-		[27273] = 30,
-		[47985] = 30,
-		[47986] = 30
-	}
+	local priest_divine_aegis = {47509, 47511, 47515, 47753, 54704} -- Divine Aegis
+	local mage_fire_ward = {543, 8457, 8458, 10223, 10225, 27128, 43010} -- Fire Ward
+	local mage_frost_ward = {6143, 8461, 8462, 10177, 28609, 32796, 43012} -- Frost Ward
+	local mage_ice_barrier = {11426, 13031, 13032, 13033, 27134, 33405, 43038, 43039} -- Ice Barrier
+	local warlock_shadow_ward = {6229, 11739, 11740, 28610, 47890, 47891} -- Shadow Ward
+	local warlock_sacrifice = {7812, 19438, 19440, 19441, 19442, 19443, 27273, 47985, 47986} -- Sacrifice
 
 	local shieldschools = {}
 
@@ -271,6 +240,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 	local shields = {}
 
+	-- https://github.com/TrinityCore/TrinityCore/blob/5d82995951c2be99b99b7b78fa12505952e86af7/src/server/game/Spells/Auras/SpellAuraEffects.h#L316
 	local function SortShields(a, b)
 		local a_spellid, b_spellid = a.spellid, b.spellid
 
@@ -293,26 +263,26 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		end
 
 		-- Frost Ward
-		if mage_frost_ward[a_spellid] then
+		if tContains(mage_frost_ward, a_spellid) then
 			return true
 		end
-		if mage_frost_ward[b_spellid] then
+		if tContains(mage_frost_ward, b_spellid) then
 			return false
 		end
 
 		-- Fire Ward
-		if mage_fire_ward[a_spellid] then
+		if tContains(mage_fire_ward, a_spellid) then
 			return true
 		end
-		if mage_fire_ward[b_spellid] then
+		if tContains(mage_fire_ward, b_spellid) then
 			return false
 		end
 
 		-- Shadow Ward
-		if warlock_shadow_ward[a_spellid] then
+		if tContains(warlock_shadow_ward, a_spellid) then
 			return true
 		end
-		if warlock_shadow_ward[b_spellid] then
+		if tContains(warlock_shadow_ward, b_spellid) then
 			return false
 		end
 
@@ -333,30 +303,38 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		end
 
 		-- Divine Aegis
-		if a_spellid == 47753 then
+		if tContains(priest_divine_aegis, a_spellid) then
 			return true
 		end
-		if b_spellid == 47753 then
+		if tContains(priest_divine_aegis, b_spellid) then
 			return false
 		end
 
 		-- Ice Barrier
-		if mage_ice_barrier[a_spellid] then
+		if tContains(mage_ice_barrier, a_spellid) then
 			return true
 		end
-		if mage_ice_barrier[b_spellid] then
+		if tContains(mage_ice_barrier, b_spellid) then
 			return false
 		end
 
 		-- Sacrifice
-		if warlock_sacrifice[a_spellid] then
+		if tContains(warlock_sacrifice, a_spellid) then
 			return true
 		end
-		if warlock_sacrifice[b_spellid] then
+		if tContains(warlock_sacrifice, b_spellid) then
 			return false
 		end
 
-		return (a.timestamp < b.timestamp)
+		-- Anti-Magic Shell
+		if a_spellid == 48707 then
+			return true
+		end
+		if b_spellid == 48707 then
+			return false
+		end
+
+		return (a.timestamp > b.timestamp)
 	end
 
 	local function RemoveShield(dstName, srcGUID, spellid)
@@ -370,7 +348,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	end
 
 	local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, spellname, spellschool = ...
+		local spellid, _, spellschool = ...
 		if absorbspells[spellid] and dstName then
 			shields[dstName] = shields[dstName] or {}
 
@@ -409,7 +387,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	end
 
 	local function AuraRemoved(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, spellname, spellschool = ...
+		local spellid, _, spellschool = ...
 		if absorbspells[spellid] then
 			shields[dstName] = shields[dstName] or {}
 
@@ -422,30 +400,50 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		end
 	end
 
-	function mod:CheckPreShields(event, set, timestamp)
-		if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped then
-			local curtime = GetTime()
-			local prefix, min_member, max_member = Skada:GetGroupTypeAndCount()
+	do
+		-- some effects aren't shields but rather special effects, such us talents.
+		-- in order to track them, we simply add them as fake shields before all.
+		-- I don't know the whole list of effects but, if you want to add yours
+		-- please do : CLASS = {[index] = {spellid, spellschool}}
+		local permanentspells = {
+			DEATHKNIGHT = {{50150, 1}, {49497, 1}},
+			PALADIN = {{31852, 1}},
+			ROGUE = {{31230, 1}}
+		}
 
-			Skada:GroupIterator(function(unit)
-				if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
-					local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
-					for i = 1, 40 do
-						local expires, unitCaster, _, _, spellid = select(7, UnitBuff(unit, i))
-						if spellid then
-							if absorbspells[spellid] and unitCaster then
-								AuraApplied(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
+		function mod:CheckPreShields(event, set, timestamp)
+			if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped then
+				local curtime = GetTime()
+				Skada:GroupIterator(function(unit)
+					if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
+						local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
+						for i = 1, 40 do
+							local expires, unitCaster, _, _, spellid = select(7, UnitBuff(unit, i))
+							if spellid then
+								if absorbspells[spellid] and unitCaster then
+									AuraApplied(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
+								end
+							else
+								break -- nothing found
 							end
-						else
-							break -- nothing found
+						end
+
+						-- fake permanent shields.
+						local class = select(2, _G.UnitClass(unit))
+						if permanentspells[class] then
+							for i, spell in ipairs(permanentspells[class]) do
+								if LGT:GUIDHasTalent(dstGUID, GetSpellInfo(spell[1]), LGT:GetActiveTalentGroup(unit)) then
+									AuraApplied(timestamp - i, nil, dstGUID, dstGUID, nil, dstGUID, dstName, nil, spell[1], nil, spell[2])
+								end
+							end
 						end
 					end
-				end
-			end)
+				end)
+			end
 		end
 	end
 
-	local function process_absorb(timestamp, dstGUID, dstName, amount, spellschool)
+	local function process_absorb(timestamp, dstGUID, dstName, absorbed, spellschool)
 		shields[dstName] = shields[dstName] or {}
 		local found
 
@@ -461,20 +459,33 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					return
 				end
 			-- Frost Ward and we took frost damage?
-			elseif mage_frost_ward[absorb.spellid] then
+			elseif tContains(mage_frost_ward, absorb.spellid) then
 				if band(spellschool, 0x10) == spellschool then
 					found = absorb
 					break
 				end
 			-- Fire Ward and we took fire damage?
-			elseif mage_fire_ward[absorb.spellid] then
+			elseif tContains(mage_fire_ward, absorb.spellid) then
 				if band(spellschool, 0x4) == spellschool then
 					found = absorb
 					break
 				end
 			-- Shadow Ward and we took shadow damage?
-			elseif warlock_shadow_ward[absorb.spellid] then
+			elseif tContains(warlock_shadow_ward, absorb.spellid) then
 				if band(spellschool, 0x20) == spellschool then
+					found = absorb
+					break
+				end
+			-- Anti-Magic for magic damage.
+			elseif absorb.spellid == 48707 then
+				if band(spellschool, 0x1) ~= spellschool then
+					found = absorb
+					break
+				end
+			-- Will of Necropolis at less than 35% health.
+			elseif absorb.spellid == 50150 then
+				local hpPercent = Skada:UnitHealthPercent(dstName, dstGUID)
+				if hpPercent and hpPercent <= 36 then
 					found = absorb
 					break
 				end
@@ -485,39 +496,36 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		end
 
 		if found then
-			log_absorb(Skada.current, found.srcGUID, found.srcName, found.srcFlags, dstGUID, dstName, found.spellid, found.school, amount)
-			log_absorb(Skada.total, found.srcGUID, found.srcName, found.srcFlags, dstGUID, dstName, found.spellid, found.school, amount)
+			log_absorb(Skada.current, found.srcGUID, found.srcName, found.srcFlags, dstGUID, dstName, found.spellid, found.school, absorbed)
+			log_absorb(Skada.total, found.srcGUID, found.srcName, found.srcFlags, dstGUID, dstName, found.spellid, found.school, absorbed)
 		end
 	end
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local _, _, spellschool, _, _, _, _, _, absorbed = ...
-		if absorbed and absorbed > 0 and dstName and shields[dstName] and srcName then
-			process_absorb(timestamp, dstGUID, dstName, absorbed, spellschool)
-		end
-	end
-
-	local function SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local _, _, spellschool, misstype, absorbed = ...
-		if misstype == "ABSORB" and absorbed > 0 and dstName and shields[dstName] and srcName then
+		local spellschool, _, _, _, _, _, absorbed = select(3, ...)
+		if (absorbed or 0) > 0 and dstName and shields[dstName] then
 			process_absorb(timestamp, dstGUID, dstName, absorbed, spellschool)
 		end
 	end
 
 	local function SwingDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local _, _, spellschool, _, _, absorbed = ...
-		if absorbed and absorbed > 0 and dstName and shields[dstName] and srcName then
+		SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, nil, 1, ...)
+	end
+
+	local function SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		local spellschool, misstype, absorbed = select(3, ...)
+		if misstype == "ABSORB" and (absorbed or 0) > 0 and dstName and shields[dstName] then
 			process_absorb(timestamp, dstGUID, dstName, absorbed, spellschool)
 		end
 	end
 
 	local function SwingMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, nil, nil, 1, ...)
+		SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, nil, 1, ...)
 	end
 
 	local function EnvironmentDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local envtype, _, _, _, _, _, absorbed = ...
-		if (absorbed or 0) > 0 then
+		if (absorbed or 0) > 0 and dstName and shields[dstName] then
 			local spellschool = 1
 
 			if envtype == "Falling" or envtype == "FALLING" then
@@ -548,7 +556,9 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 				if spell.school then
 					local c = Skada.schoolcolors[spell.school]
 					local n = Skada.schoolnames[spell.school]
-					if c and n then tooltip:AddLine(n, c.r, c.g, c.b) end
+					if c and n then
+						tooltip:AddLine(n, c.r, c.g, c.b)
+					end
 				end
 				if spell.min and spell.max then
 					tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.min), 1, 1, 1)
