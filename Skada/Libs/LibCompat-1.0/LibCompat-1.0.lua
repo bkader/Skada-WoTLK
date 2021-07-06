@@ -248,7 +248,7 @@ do
 		end
 
 		if health and maxhealth then
-			return floor(100 * health / maxhealth)
+			return floor(100 * health / maxhealth), health, maxhealth
 		end
 	end
 end

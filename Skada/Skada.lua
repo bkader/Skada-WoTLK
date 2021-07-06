@@ -2026,6 +2026,7 @@ function Skada:ZoneCheck()
 	wasininstance = (isininstance == true)
 	wasinpvp = (isinpvp == true)
 	wasinparty = self:IsInGroup()
+	self.callbacks:Fire("SKADA_ZONE_CHECK")
 end
 
 do
