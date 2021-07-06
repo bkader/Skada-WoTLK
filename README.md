@@ -1,4 +1,4 @@
-# Skada for WoTLK (_Revisited - v1.8.63_)
+# Skada for WoTLK (_Revisited - v1.8.64_)
 
 I am simply a huge fan of **Skada**, I prefer it to other damage meters for several reasons. No need to judge me, it's after all a personal preference.
 
