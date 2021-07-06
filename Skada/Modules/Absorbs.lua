@@ -473,7 +473,9 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 			for srcName, shield in pairs(spells) do
 				if shield.ts > timestamp then
 					if spellid == 65686 and band(spellschool, 0x4) == spellschool then -- Light Essence vs Fire Damage
+						return -- don't record
 					elseif spellid == 65684 and band(spellschool, 0x20) == spellschool then -- Dark Essence vs Shadow Damage
+						return -- don't record
 					elseif tContains(mage_frost_ward, spellid) and band(spellschool, 0x10) ~= spellschool then -- Frost Ward vs Frost Damage
 					elseif tContains(mage_fire_ward, spellid) and band(spellschool, 0x4) ~= spellschool then -- Fire Ward vs Fire Damage
 					elseif tContains(warlock_shadow_ward, spellid) and band(spellschool, 0x20) ~= spellschool then -- Shadow Ward vs Shadow Damage
