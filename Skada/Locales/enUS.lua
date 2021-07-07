@@ -531,6 +531,10 @@ L["Amount"] = true
 L["Source"] = true
 L["Health"] = true
 L["Change"] = true
+L["Events Amount"] = true
+L["Set the amount of events the death log should record."] = true
+L["Minimum Healing"] = true
+L["Ignore heal events that are below this threshold."] = true
 -- activity module
 L["Activity"] = true
 L["Activity per target"] = true

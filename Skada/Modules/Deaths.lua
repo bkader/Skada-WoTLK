@@ -39,6 +39,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 				source = data.srcName,
 				amount = data.amount,
 				overkill = data.overkill,
+				overheal = data.overheal,
 				resisted = data.resisted,
 				blocked = data.blocked,
 				absorbed = data.absorbed,
@@ -46,8 +47,8 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 				hp = UnitHealth(data.playername)
 			})
 
-			-- trim things and limit to 15
-			while tmaxn(deathlog.log) > 15 do
+			-- trim things and limit to 15 (custom value now)
+			while tmaxn(deathlog.log) > (Skada.db.profile.modules.deathlogevents or 15) do
 				tremove(deathlog.log)
 			end
 		end
@@ -68,6 +69,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		data.spellid = spellid
 		data.amount = 0 - amount
 		data.overkill = overkill
+		data.overheal = nil
 		data.resisted = resisted
 		data.blocked = blocked
 		data.absorbed = absorbed
@@ -103,26 +105,28 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	end
 
 	local function SpellHeal(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, _, _, amount, overheal, absorbed = ...
+		local spellid, _, _, amount, overheal = ...
+		if amount > (Skada.db.profile.modules.deathlogthreshold or 0) then
+			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName)
+			dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName)
 
-		srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName)
-		dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName)
+			data.srcGUID = srcGUID
+			data.srcName = srcName
 
-		data.srcGUID = srcGUID
-		data.srcName = srcName
+			data.playerid = dstGUID
+			data.playername = dstName
+			data.playerflags = dstFlags
 
-		data.playerid = dstGUID
-		data.playername = dstName
-		data.playerflags = dstFlags
+			data.spellid = spellid
+			data.amount = max(0, amount - (overheal or 0))
+			data.overheal = overheal
+			data.overkill = nil
+			data.resisted = nil
+			data.blocked = nil
+			data.absorbed = nil
 
-		data.spellid = spellid
-		data.amount = max(0, amount - (overheal or 0))
-		data.overkill = nil
-		data.resisted = nil
-		data.blocked = nil
-		data.absorbed = nil
-
-		log_deathlog(Skada.current, data, ts)
+			log_deathlog(Skada.current, data, ts)
+		end
 	end
 
 	local function log_death(set, playerid, playername, playerflags, ts)
@@ -243,7 +247,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 						d.spellname = spellname
 
 						d.value = log.hp or 0
-						local change = (log.amount > 0 and "+" or "-") .. Skada:FormatNumber(abs(log.amount))
+						local change = (log.amount >= 0 and "+" or "-") .. Skada:FormatNumber(abs(log.amount))
 						d.reportlabel = format("%02.2f: %s   %s [%s]", diff or 0, GetspellLink(log.spellid) or spellname or UNKNOWN, change, Skada:FormatNumber(log.hp or 0))
 
 						local extra = {}
@@ -278,7 +282,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 							self.metadata.columns.Percent
 						)
 
-						if log.amount > 0 then
+						if log.amount >= 0 then
 							d.color = green
 						else
 							d.color = red
@@ -312,18 +316,16 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 					d.time = death.time
 					d.icon = "Interface\\Icons\\Ability_Rogue_FeignDeath"
 
-					local dth = death.log[1]
-
-					if dth and dth.spellid then
-						d.label, _, d.icon = GetSpellInfo(dth.spellid)
-						d.spellid = dth.spellid
-					elseif dth and dth.source then
-						d.label = dth.source
+					if death.log[1] and death.log[1].spellid then
+						d.label, _, d.icon = GetSpellInfo(death.log[1].spellid)
+						d.spellid = death.log[1].spellid
+					elseif death.log[1] and death.log[1].source then
+						d.label = death.log[1].source
 					else
 						d.label = set.name or UNKNOWN
 					end
 
-					d.value = dth and dth.time or death.time
+					d.value = death.time
 					d.valuetext = formatdate(d.value)
 
 					if d.value > maxvalue then
@@ -356,12 +358,18 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 					d.role = player.role
 					d.spec = player.spec
 
-					d.value = player.death
-					d.valuetext = tostring(player.death)
-
-					if player.death > maxvalue then
-						maxvalue = player.death
+					if player.deathlog then
+						d.value = player.deathlog[1].time
+						d.valuetext = format("%s (%d)", Skada:FormatTime(player.deathlog[1].time - set.starttime), player.death)
+					else
+						d.value = player.death
+						d.valuetext = tostring(player.death)
 					end
+
+					if d.value > maxvalue then
+						maxvalue = d.value
+					end
+
 					nr = nr + 1
 				end
 			end
@@ -389,20 +397,22 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 				tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(amount), 1, 1, 1)
 			end
 
-			if entry.overkill and entry.overkill > 0 then
+			if (entry.overkill or 0) > 0 then
 				tooltip:AddDoubleLine(L["Overkill"], Skada:FormatNumber(entry.overkill), 1, 1, 1)
+			elseif (entry.overheal or 0) > 0 then
+				tooltip:AddDoubleLine(L["Overheal"], Skada:FormatNumber(entry.overheal), 1, 1, 1)
 			end
 
-			if entry.resisted and entry.resisted > 0 then
-				tooltip:AddDoubleLine(RESIST, Skada:FormatNumber(entry.resisted), 1, 1, 1)
+			if (entry.resisted or 0) > 0 then
+				tooltip:AddDoubleLine(L.RESIST, Skada:FormatNumber(entry.resisted), 1, 1, 1)
 			end
 
-			if entry.blocked and entry.blocked > 0 then
-				tooltip:AddDoubleLine(BLOCK, Skada:FormatNumber(entry.blocked), 1, 1, 1)
+			if (entry.blocked or 0) > 0 then
+				tooltip:AddDoubleLine(L.BLOCK, Skada:FormatNumber(entry.blocked), 1, 1, 1)
 			end
 
-			if entry.absorbed and entry.absorbed > 0 then
-				tooltip:AddDoubleLine(ABSORB, Skada:FormatNumber(entry.absorbed), 1, 1, 1)
+			if (entry.absorbed or 0) > 0 then
+				tooltip:AddDoubleLine(L.ABSORB, Skada:FormatNumber(entry.absorbed), 1, 1, 1)
 			end
 		end
 	end
@@ -470,5 +480,56 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 	function mod:GetSetSummary(set)
 		return tostring(set.death or 0), set.death or 0
+	end
+
+	do
+		local options
+		local function GetOptions()
+			if not options then
+				options = {
+					type = "group",
+					name = L["Death log"],
+					get = function(i)
+						return Skada.db.profile.modules[i[#i]]
+					end,
+					set = function(i, val)
+						Skada.db.profile.modules[i[#i]] = val
+					end,
+					args = {
+						deathlogevents = {
+							type = "range",
+							name = L["Events Amount"],
+							desc = L["Set the amount of events the death log should record."],
+							order = 1,
+							min = 5,
+							max = 45,
+							step = 1
+						},
+						deathlogthreshold = {
+							type = "range",
+							name = L["Minimum Healing"],
+							desc = L["Ignore heal events that are below this threshold."],
+							order = 2,
+							min = 0,
+							max = 10000,
+							step = 1,
+							bigStep = 10
+						}
+					}
+				}
+			end
+			return options
+		end
+
+		function mod:OnInitialize()
+			if Skada.db.profile.modules.deathlogevents == nil then
+				Skada.db.profile.modules.deathlogevents = 15
+			end
+			if Skada.db.profile.modules.deathlogthreshold == nil then
+				Skada.db.profile.modules.deathlogthreshold = 0
+			end
+
+			Skada.options.args.modules.args.deathlog = GetOptions()
+		end
 	end
 end)
