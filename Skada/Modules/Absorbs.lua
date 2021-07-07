@@ -192,7 +192,6 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	local heals = {}
 	local shields = {}
 	local shieldamounts = {}
-	local shieldschools = {}
 
 	local shieldvalues = {
 		[48066] = {avg = 10000, cap = 11000}, -- Power Word: Shield
@@ -224,8 +223,8 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					spell = {count = 1, amount = amount, school = spellschool}
 					player.absorb_spells[spellid] = spell
 				else
-					if not spell.school and shieldschools[spellid] then
-						spell.school = shieldschools[spellid]
+					if not spell.school and spellschool then
+						spell.school = spellschool
 					end
 					spell.amount = (spell.amount or 0) + amount
 					if not nocount then
@@ -844,7 +843,6 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		heals = {}
 		shields = {}
 		shieldamounts = {}
-		shieldschools = {}
 	end
 	mod.SetComplete = mod.AddSetAttributes
 end)
