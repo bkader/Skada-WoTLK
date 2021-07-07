@@ -530,7 +530,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 				end
 			elseif tContains(priest_divine_aegis, s.spellid) then -- Divine Aegis
 				s.amount = min((UnitLevel(dstName) or 80) * 125, s.amount)
-			elseif tContains(priest_divine_aegis, s.spellid) then -- Protection of Ancient Kings
+			elseif s.spellid == 64413 then -- Protection of Ancient Kings
 				s.amount = min(20000, s.amount)
 			end
 		end
