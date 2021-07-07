@@ -47,8 +47,8 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 				hp = UnitHealth(data.playername)
 			})
 
-			-- trim things and limit to 15 (custom value now)
-			while tmaxn(deathlog.log) > (Skada.db.profile.modules.deathlogevents or 15) do
+			-- trim things and limit to 14 (custom value now)
+			while tmaxn(deathlog.log) > (Skada.db.profile.modules.deathlogevents or 14) do
 				tremove(deathlog.log)
 			end
 		end
@@ -501,8 +501,8 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 							name = L["Events Amount"],
 							desc = L["Set the amount of events the death log should record."],
 							order = 1,
-							min = 5,
-							max = 45,
+							min = 4,
+							max = 24,
 							step = 1
 						},
 						deathlogthreshold = {
@@ -523,7 +523,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 		function mod:OnInitialize()
 			if Skada.db.profile.modules.deathlogevents == nil then
-				Skada.db.profile.modules.deathlogevents = 15
+				Skada.db.profile.modules.deathlogevents = 14
 			end
 			if Skada.db.profile.modules.deathlogthreshold == nil then
 				Skada.db.profile.modules.deathlogthreshold = 0
