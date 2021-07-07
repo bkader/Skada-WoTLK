@@ -320,11 +320,11 @@ function Skada:OpenMenu(window)
 					end
 				end
 			elseif L_UIDROPDOWNMENU_MENU_VALUE == "delete" then
-				for _, set in Skada:IterateSets() do
+				for i, set in Skada:IterateSets() do
 					info = UIDropDownMenu_CreateInfo()
 					info.text = Skada:GetSetLabel(set)
 					info.func = function()
-						Skada:DeleteSet(set)
+						Skada:DeleteSet(set, i)
 					end
 					info.notCheckable = 1
 					info.colorCode = set.gotboss and (set.success and "|cff00ff00" or "|cffff0000") or "|cffffffff"

@@ -1189,30 +1189,35 @@ function Skada:GetSet(s)
 end
 
 -- deletes a set
-function Skada:DeleteSet(set)
-	if set then
+function Skada:DeleteSet(set, index)
+	if not (set and index) then
 		for i, s in self:IterateSets() do
-			if s == set then
-				local todel = tremove(self.char.sets, i)
-				self.callbacks:Fire("SKADA_DATA_SETDELETED", i, todel)
-
-				if set == self.last then
-					self.last = nil
-				end
-
-				-- Don't leave windows pointing to deleted sets
-				for _, win in self:IterateWindows() do
-					if win.selectedset == i or win:get_selected_set() == set then
-						win.selectedset = "current"
-						win.changed = true
-					elseif (tonumber(win.selectedset) or 0) > i then
-						win.selectedset = win.selectedset - 1
-						win.changed = true
-					end
-					win:RestoreView()
-				end
+			if (i == index) or (set == s) then
+				set = set or s
+				index = index or i
 				break
 			end
+		end
+	end
+
+	if set and index then
+		local todel = tremove(self.char.sets, index)
+		self.callbacks:Fire("SKADA_DATA_SETDELETED", index, todel)
+
+		if set == self.last then
+			self.last = nil
+		end
+
+		-- Don't leave windows pointing to a deleted sets
+		for _, win in self:IterateWindows() do
+			if win.selectedset == index or win:get_selected_set() == set then
+				win.selectedset = "current"
+				win.changed = true
+			elseif (tonumber(win.selectedset) or 0) > index then
+				win.selectedset = win.selectedset - 1
+				win.changed = true
+			end
+			win:RestoreView()
 		end
 
 		self:Wipe()

@@ -76,7 +76,7 @@ end
 
 -------------------------------------------------------------------------------
 
-function LibCompat.tlength(tbl)
+function LibCompat.tLength(tbl)
 	local len = 0
 	for _ in pairs(tbl) do
 		len = len + 1
@@ -535,7 +535,7 @@ local mixins = {
 	"Print",
 	"Printf",
 	"QuickDispatch",
-	"tlength",
+	"tLength",
 	"tCopy",
 	"tAppendAll",
 	"Clamp",
