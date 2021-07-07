@@ -417,11 +417,11 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 					d.spec = player.spec
 
 					local total = player.heal + player.overheal
-					d.value = player.overheal / total
+					d.value = player.overheal
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(player.overheal),
 						self.metadata.columns.Overhealing,
-						format("%.1f%%", 100 * d.value),
+						format("%.1f%%", 100 * player.overheal / total),
 						self.metadata.columns.Percent
 					)
 
