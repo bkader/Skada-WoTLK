@@ -232,7 +232,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 					if not altname or altname == dmg.enemyname then return end
 					if altname == L["Halion and Inferno"] and GetRaidDiff() ~= "25h" then return end
 
-					local amount = (altname == L["Princes overkilling"]) and dmg.overkill or dmg.amount
+					local amount = (altname == L["Princes overkilling"]) and dmg.overkill or max(0, dmg.amount - dmg.overkill)
 					log_custom_damage(set, altname, dmg.srcGUID, dmg.srcName, dmg.spellid, amount)
 				end
 			end
@@ -254,7 +254,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 			dmg.spellid = spellid
 			dmg.amount = amount
-			dmg.overkill = overkill
+			dmg.overkill = overkill or 0
 
 			log_damage(Skada.current, dmg)
 		end
