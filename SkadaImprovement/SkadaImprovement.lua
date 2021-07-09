@@ -154,11 +154,11 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 
 	function mod_modes:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = L:F("%s's overall data", label)
+		win.title = L["%s's overall data"]:format(label)
 	end
 
 	function mod_modes:Update(win, set)
-		win.title = L:F("%s's overall data", win.targetname or UNKNOWN)
+		win.title = L["%s's overall data"]:format(win.targetname or UNKNOWN)
 		local boss = find_boss_data(win.targetname)
 
 		if boss then
