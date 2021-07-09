@@ -514,13 +514,11 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		for _, s in pairs(shieldsPopped) do
 			if s.full and shieldamounts[s.srcName] and shieldamounts[s.srcName][s.spellid] then
 				s.amount = shieldamounts[s.srcName][s.spellid]
-			elseif s.spellid == 50150 and s.points then -- Will of Necropolis
+			elseif (s.spellid == 50150 or s.spellid == 31852) and s.points then -- Will of Necropolis / Ardent Defender
 				local hppercent = Skada:UnitHealthPercent(dstName, dstGUID)
 				if hppercent <= 35 then
 					s.amount = floor(total * 0.05 * s.points)
 				end
-			elseif s.spellid == 31852 and s.points then -- Ardent Defender
-				s.amount = ceil(total * 0.65 * s.points)
 			elseif s.spellid == 49497 and s.points then -- Spell Deflection
 				s.amount = floor(total * 0.15 * s.points)
 			elseif s.spellid == 31230 and s.points then -- Cheat Death
