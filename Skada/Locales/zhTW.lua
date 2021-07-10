@@ -336,6 +336,7 @@ L["Report"] = "報告"
 L["Opens a dialog that lets you report your data to others in various ways."] = "打開一個對話框，讓你以各種方式報告數據給他人。"
 L["Stop"] = "停止"
 L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."] = "停止或恢復當前區段。用於滅團後停止收集數據。也可在設置中設為自動停止。"
+L["Quick Access"] = "快速訪問"
 -- default segments
 L["Total"] = "總體的"
 L["Current"] = "目前的"

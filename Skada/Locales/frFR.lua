@@ -340,6 +340,7 @@ L["Report"] = "Rapport"
 L["Opens a dialog that lets you report your data to others in various ways."] = "Ouvre la fenêtre qui vous permet de rapporter les données aux autres de différentes manières."
 L["Stop"] = "Arrêter/Reprendre"
 L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."] = "Arrête ou reprend le segment en cours. Utile pour arrêter la collecte des données après un wipe. L'arrêt automatique peut être activé dans les paramètres."
+L["Quick Access"] = "Accès rapide"
 -- default segments
 L["Total"] = "Total"
 L["Current"] = "Actuel"

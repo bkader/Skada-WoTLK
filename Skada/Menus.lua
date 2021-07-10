@@ -67,6 +67,17 @@ function Skada:OpenMenu(window)
 
 			UIDropDownMenu_AddSeparator(info, level)
 
+			-- quick access menu
+			info = UIDropDownMenu_CreateInfo()
+			info.text = L["Quick Access"]
+			info.value = "shortcut"
+			info.hasArrow = 1
+			info.notCheckable = 1
+			info.padding = 16
+			UIDropDownMenu_AddButton(info, level)
+
+			UIDropDownMenu_AddSeparator(info, level)
+
 			-- Can't report if we are not in a mode.
 			if not window or (window and window.selectedmode) then
 				info = UIDropDownMenu_CreateInfo()
@@ -135,11 +146,9 @@ function Skada:OpenMenu(window)
 			-- Configure
 			info = UIDropDownMenu_CreateInfo()
 			info.text = L["Configure"]
-			info.value = "options"
 			info.func = function()
 				Skada:OpenOptions(window)
 			end
-			info.hasArrow = 1
 			info.notCheckable = 1
 			info.padding = 16
 			UIDropDownMenu_AddButton(info, level)
@@ -345,7 +354,7 @@ function Skada:OpenMenu(window)
 					info.colorCode = set.gotboss and (set.success and "|cff00ff00" or "|cffff0000") or "|cffffffff"
 					UIDropDownMenu_AddButton(info, level)
 				end
-			elseif L_UIDROPDOWNMENU_MENU_VALUE == "options" then
+			elseif L_UIDROPDOWNMENU_MENU_VALUE == "shortcut" then
 				-- time measure
 				info = UIDropDownMenu_CreateInfo()
 				info.text = L["Time measure"]
@@ -409,13 +418,41 @@ function Skada:OpenMenu(window)
 
 				UIDropDownMenu_AddSeparator(info, level)
 
-				-- Configure
+				-- number format
 				info = UIDropDownMenu_CreateInfo()
-				info.text = L["Configure"]
-				info.func = function()
-					Skada:OpenOptions(window)
-				end
+				info.text = OTHER
+				info.isTitle = 1
 				info.notCheckable = 1
+				UIDropDownMenu_AddButton(info, level)
+
+				info = UIDropDownMenu_CreateInfo()
+				info.text = L["Show totals"]
+				info.func = function()
+					Skada.db.profile.showtotals = not Skada.db.profile.showtotals
+					Skada:ReloadSettings()
+				end
+				info.checked = (Skada.db.profile.showtotals == true)
+				info.isNotRadio = 1
+				UIDropDownMenu_AddButton(info, level)
+
+				info = UIDropDownMenu_CreateInfo()
+				info.text = L["Show rank numbers"]
+				info.func = function()
+					Skada.db.profile.showranks = not Skada.db.profile.showranks
+					Skada:ApplySettings()
+				end
+				info.checked = (Skada.db.profile.showranks == true)
+				info.isNotRadio = 1
+				UIDropDownMenu_AddButton(info, level)
+
+				info = UIDropDownMenu_CreateInfo()
+				info.text = L["Always show self"]
+				info.func = function()
+					Skada.db.profile.showself = not Skada.db.profile.showself
+					Skada:ApplySettings()
+				end
+				info.checked = (Skada.db.profile.showself == true)
+				info.isNotRadio = 1
 				UIDropDownMenu_AddButton(info, level)
 			end
 		elseif level == 3 then

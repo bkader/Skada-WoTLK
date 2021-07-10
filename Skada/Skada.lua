@@ -2632,6 +2632,11 @@ function Skada:ReloadSettings()
 		self.db.profile.setstokeep = 30
 	end
 
+	-- fix time measure
+	if self.db.profile.timemesure == nil then
+		self.db.profile.timemesure = 1
+	end
+
 	-- remove old improvement data
 	if self.char.improvement then
 		if self.char.improvement.bosses then
