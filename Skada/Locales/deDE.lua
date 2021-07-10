@@ -165,6 +165,9 @@ L["This determines what other frames will be in front of the frame."] = "Dies be
 L["Clamped To Screen"] = "An Bildschirm anheften"
 L["Width"] = "Breite"
 L["Height"] = "Höhe"
+L["Position Settings"] = "Positionsbedingte Einstellungen"
+L["X Offset"] = "X-Versatz"
+L["Y Offset"] = "Y-Versatz"
 -- switching
 L["Mode Switching"] = "Moduswechsel"
 L["Combat mode"] = "Kampfmodus"

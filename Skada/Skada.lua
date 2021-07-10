@@ -2687,201 +2687,210 @@ function Skada:FrameSettings(db, include_dimensions)
 		end,
 		order = 3,
 		args = {
-			clamped = {
-				type = "toggle",
-				name = L["Clamped To Screen"],
+			position = {
+				type = "group",
+				name = L["Position Settings"],
+				inline = true,
 				order = 0,
+				args = {
+					clamped = {
+						type = "toggle",
+						name = L["Clamped To Screen"],
+						order = 0,
+						width = "double"
+					},
+					scale = {
+						type = "range",
+						name = L["Scale"],
+						desc = L["Sets the scale of the window."],
+						order = 5,
+						width = "double",
+						min = 0.1,
+						max = 3,
+						step = 0.01,
+						bigStep = 0.1
+					},
+					strata = {
+						type = "select",
+						name = L["Strata"],
+						desc = L["This determines what other frames will be in front of the frame."],
+						order = 6,
+						values = {
+							["BACKGROUND"] = "BACKGROUND",
+							["LOW"] = "LOW",
+							["MEDIUM"] = "MEDIUM",
+							["HIGH"] = "HIGH",
+							["DIALOG"] = "DIALOG",
+							["FULLSCREEN"] = "FULLSCREEN",
+							["FULLSCREEN_DIALOG"] = "FULLSCREEN_DIALOG"
+						}
+					},
+					tooltippos = {
+						type = "select",
+						name = L["Tooltip position"],
+						desc = L["Position of the tooltips."],
+						order = 7,
+						values = {
+							["NONE"] = NONE,
+							["TOPRIGHT"] = L["Top right"],
+							["TOPLEFT"] = L["Top left"],
+							["BOTTOMRIGHT"] = L["Bottom right"],
+							["BOTTOMLEFT"] = L["Bottom left"]
+						},
+						get = function()
+							return db.tooltippos or "NONE"
+						end
+					}
+				}
 			},
-			bgheader = {
-				type = "header",
+			background = {
+				type = "group",
 				name = L["Background"],
+				inline = true,
 				order = 1,
-				width = "double"
+				args = {
+					texture = {
+						type = "select",
+						dialogControl = "LSM30_Background",
+						name = L["Background texture"],
+						desc = L["The texture used as the background."],
+						order = 1,
+						width = "double",
+						values = AceGUIWidgetLSMlists.background,
+						get = function()
+							return db.background.texture
+						end,
+						set = function(_, key)
+							db.background.texture = key
+							Skada:ApplySettings()
+						end
+					},
+					tile = {
+						type = "toggle",
+						name = L["Tile"],
+						desc = L["Tile the background texture."],
+						order = 2,
+						width = "double",
+						get = function()
+							return db.background.tile
+						end,
+						set = function(_, key)
+							db.background.tile = key
+							Skada:ApplySettings()
+						end
+					},
+					tilesize = {
+						type = "range",
+						name = L["Tile size"],
+						desc = L["The size of the texture pattern."],
+						order = 3,
+						width = "double",
+						min = 0,
+						max = floor(GetScreenWidth()),
+						step = 1.0,
+						get = function()
+							return db.background.tilesize
+						end,
+						set = function(_, val)
+							db.background.tilesize = val
+							Skada:ApplySettings()
+						end
+					},
+					color = {
+						type = "color",
+						name = L["Background color"],
+						desc = L["The color of the background."],
+						order = 4,
+						width = "double",
+						hasAlpha = true,
+						get = function()
+							local c = db.background.color
+							return c.r, c.g, c.b, c.a
+						end,
+						set = function(_, r, g, b, a)
+							db.background.color = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
+							Skada:ApplySettings()
+						end
+					}
+				}
 			},
-			texture = {
-				type = "select",
-				dialogControl = "LSM30_Background",
-				name = L["Background texture"],
-				desc = L["The texture used as the background."],
-				order = 2,
-				width = "double",
-				values = AceGUIWidgetLSMlists.background,
-				get = function()
-					return db.background.texture
-				end,
-				set = function(_, key)
-					db.background.texture = key
-					Skada:ApplySettings()
-				end
-			},
-			tile = {
-				type = "toggle",
-				name = L["Tile"],
-				desc = L["Tile the background texture."],
-				order = 3,
-				width = "double",
-				get = function()
-					return db.background.tile
-				end,
-				set = function(_, key)
-					db.background.tile = key
-					Skada:ApplySettings()
-				end
-			},
-			tilesize = {
-				type = "range",
-				name = L["Tile size"],
-				desc = L["The size of the texture pattern."],
-				order = 4,
-				width = "double",
-				min = 0,
-				max = floor(GetScreenWidth()),
-				step = 1.0,
-				get = function()
-					return db.background.tilesize
-				end,
-				set = function(_, val)
-					db.background.tilesize = val
-					Skada:ApplySettings()
-				end
-			},
-			color = {
-				type = "color",
-				name = L["Background color"],
-				desc = L["The color of the background."],
-				order = 5,
-				width = "double",
-				hasAlpha = true,
-				get = function()
-					local c = db.background.color
-					return c.r, c.g, c.b, c.a
-				end,
-				set = function(_, r, g, b, a)
-					db.background.color = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
-					Skada:ApplySettings()
-				end
-			},
-			borderheader = {
-				type = "header",
+			border = {
+				type = "group",
 				name = L["Border"],
-				order = 6,
-				width = "double"
-			},
-			bordertexture = {
-				type = "select",
-				dialogControl = "LSM30_Border",
-				name = L["Border texture"],
-				desc = L["The texture used for the borders."],
-				order = 7,
-				width = "double",
-				values = AceGUIWidgetLSMlists.border,
-				get = function()
-					return db.background.bordertexture
-				end,
-				set = function(_, key)
-					db.background.bordertexture = key
-					if key == "None" then
-						db.background.borderthickness = 1
-					end
-					Skada:ApplySettings()
-				end
-			},
-			bordercolor = {
-				type = "color",
-				name = L["Border color"],
-				desc = L["The color used for the border."],
-				order = 8,
-				width = "double",
-				hasAlpha = true,
-				get = function()
-					local c = db.background.bordercolor or {r = 0, g = 0, b = 0, a = 1}
-					return c.r, c.g, c.b, c.a
-				end,
-				set = function(_, r, g, b, a)
-					db.background.bordercolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
-					Skada:ApplySettings()
-				end
-			},
-			thickness = {
-				type = "range",
-				name = L["Border thickness"],
-				desc = L["The thickness of the borders."],
-				order = 9,
-				width = "double",
-				min = 0,
-				max = 50,
-				step = 0.5,
-				get = function()
-					return db.background.borderthickness
-				end,
-				set = function(_, val)
-					db.background.borderthickness = val
-					Skada:ApplySettings()
-				end
-			},
-			optionheader = {
-				type = "header",
-				name = L["General"],
-				order = 10,
-				width = "double"
-			},
-			scale = {
-				type = "range",
-				name = L["Scale"],
-				desc = L["Sets the scale of the window."],
-				order = 11,
-				width = "double",
-				min = 0.1,
-				max = 3,
-				step = 0.01,
-				bigStep = 0.1
-			},
-			strata = {
-				type = "select",
-				name = L["Strata"],
-				desc = L["This determines what other frames will be in front of the frame."],
-				order = 12,
-				values = {
-					["BACKGROUND"] = "BACKGROUND",
-					["LOW"] = "LOW",
-					["MEDIUM"] = "MEDIUM",
-					["HIGH"] = "HIGH",
-					["DIALOG"] = "DIALOG",
-					["FULLSCREEN"] = "FULLSCREEN",
-					["FULLSCREEN_DIALOG"] = "FULLSCREEN_DIALOG"
-				},
-			},
-			tooltippos = {
-				type = "select",
-				name = L["Tooltip position"],
-				desc = L["Position of the tooltips."],
-				order = 13,
-				values = {
-					["NONE"] = NONE,
-					["TOPRIGHT"] = L["Top right"],
-					["TOPLEFT"] = L["Top left"],
-					["BOTTOMRIGHT"] = L["Bottom right"],
-					["BOTTOMLEFT"] = L["Bottom left"]
-				},
-				get = function() return db.tooltippos or "NONE" end
+				inline = true,
+				order = 2,
+				args = {
+					bordertexture = {
+						type = "select",
+						dialogControl = "LSM30_Border",
+						name = L["Border texture"],
+						desc = L["The texture used for the borders."],
+						order = 1,
+						width = "double",
+						values = AceGUIWidgetLSMlists.border,
+						get = function()
+							return db.background.bordertexture
+						end,
+						set = function(_, key)
+							db.background.bordertexture = key
+							if key == "None" then
+								db.background.borderthickness = 1
+							end
+							Skada:ApplySettings()
+						end
+					},
+					bordercolor = {
+						type = "color",
+						name = L["Border color"],
+						desc = L["The color used for the border."],
+						order = 2,
+						width = "double",
+						hasAlpha = true,
+						get = function()
+							local c = db.background.bordercolor or {r = 0, g = 0, b = 0, a = 1}
+							return c.r, c.g, c.b, c.a
+						end,
+						set = function(_, r, g, b, a)
+							db.background.bordercolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
+							Skada:ApplySettings()
+						end
+					},
+					thickness = {
+						type = "range",
+						name = L["Border thickness"],
+						desc = L["The thickness of the borders."],
+						order = 3,
+						width = "double",
+						min = 0,
+						max = 50,
+						step = 0.5,
+						get = function()
+							return db.background.borderthickness
+						end,
+						set = function(_, val)
+							db.background.borderthickness = val
+							Skada:ApplySettings()
+						end
+					}
+				}
 			}
 		}
 	}
 
 	if include_dimensions then
-		obj.args.width = {
+		obj.args.position.args.width = {
 			type = "range",
 			name = L["Width"],
-			order = 4.3,
+			order = 1,
 			min = 100,
 			max = floor(GetScreenWidth()),
 			step = 1.0
 		}
 
-		obj.args.height = {
+		obj.args.position.args.height = {
 			type = "range",
 			name = L["Height"],
-			order = 4.4,
+			order = 2,
 			min = 16,
 			max = 400,
 			step = 1.0

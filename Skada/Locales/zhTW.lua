@@ -165,6 +165,9 @@ L["This determines what other frames will be in front of the frame."] = "這決�
 L["Clamped To Screen"] = "固定到屏幕"
 L["Width"] = "寬度"
 L["Height"] = "高度"
+L["Position Settings"] = "位置設定"
+L["X Offset"] = "水平位置"
+L["Y Offset"] = "垂直位置"
 -- switching
 L["Mode Switching"] = "轉換模組"
 L["Combat mode"] = "戰鬥模組"

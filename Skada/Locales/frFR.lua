@@ -167,6 +167,9 @@ L["This determines what other frames will be in front of the frame."] = "Ceci d�
 L["Clamped To Screen"] = "Épingler à l'écran"
 L["Width"] = "Largeur"
 L["Height"] = "Hauteur"
+L["Position Settings"] = "Paramètres de position"
+L["X Offset"] = "Décalage X"
+L["Y Offset"] = "Décalage Y"
 -- switching
 L["Mode Switching"] = "Changement de vue"
 L["Combat mode"] = "Mode en combat"

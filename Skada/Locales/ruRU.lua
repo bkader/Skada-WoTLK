@@ -165,6 +165,9 @@ L["This determines what other frames will be in front of the frame."] = "Это 
 L["Clamped To Screen"] = "Закрепить на экране"
 L["Width"] = "Ширина"
 L["Height"] = "Высота"
+L["Position Settings"] = "Настройки размера и расположения"
+L["X Offset"] = "Смещение по X"
+L["Y Offset"] = "Смещение по Y"
 -- switching
 L["Mode Switching"] = "Смена режима"
 L["Combat mode"] = "Режим битвы"

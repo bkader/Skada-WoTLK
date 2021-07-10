@@ -165,6 +165,9 @@ L["This determines what other frames will be in front of the frame."] = true
 L["Clamped To Screen"] = true
 L["Width"] = true
 L["Height"] = true
+L["Position Settings"] = true
+L["X Offset"] = true
+L["Y Offset"] = true
 -- switching
 L["Mode Switching"] = true
 L["Combat mode"] = true

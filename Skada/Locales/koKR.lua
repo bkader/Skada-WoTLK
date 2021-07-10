@@ -166,6 +166,9 @@ L["This determines what other frames will be in front of the frame."] = "프레�
 L["Clamped To Screen"] = "화면에 고정"
 L["Width"] = "너비"
 L["Height"] = "높이"
+L["Position Settings"] = "위치 설정"
+L["X Offset"] = "X 좌표"
+L["Y Offset"] = "Y 좌표"
 -- switching
 L["Mode Switching"] = "모드 전환"
 L["Combat mode"] = "전투 모드"

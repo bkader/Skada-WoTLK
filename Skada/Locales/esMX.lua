@@ -165,6 +165,9 @@ L["This determines what other frames will be in front of the frame."] = "Esto de
 L["Clamped To Screen"] = "Mantener en la pantalla"
 L["Width"] = "Anchura"
 L["Height"] = "Altura"
+L["Position Settings"] = "Configuración de posición"
+L["X Offset"] = "X Posicion"
+L["Y Offset"] = "Y Posicion"
 -- switching
 L["Mode Switching"] = "Modo de intercambio"
 L["Combat mode"] = "Modo de combate"

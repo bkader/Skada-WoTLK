@@ -1411,5 +1411,66 @@ function mod:AddDisplayOptions(win, options)
 		}
 	}
 
-	options.windowoptions = Skada:FrameSettings(db, false)
+	options.windowoptions = Skada:FrameSettings(db)
+
+	-- add custom
+	options.windowoptions.args.position.args.barwidth = {
+		type = "range",
+		name = L["Width"],
+		order = 1,
+		min = 80,
+		max = 500,
+		step = 0.01,
+		bigStep = 1
+	}
+	options.windowoptions.args.position.args.height = {
+		type = "range",
+		name = L["Height"],
+		order = 2,
+		min = 60,
+		max = 500,
+		step = 0.01,
+		bigStep = 1,
+		get = function()
+			return db.background.height
+		end,
+		set = function(_, val)
+			db.background.height = val
+			Skada:ApplySettings()
+		end
+	}
+
+	local x, y = floor(GetScreenWidth()), floor(GetScreenHeight())
+	options.windowoptions.args.position.args.x = {
+		type = "range",
+		name = L["X Offset"],
+		order = 3,
+		min = -x,
+		max = x,
+		step = 0.01,
+		bigStep = 1,
+		set = function(_, val)
+			local window = mod:GetBarGroup(db.name)
+			if window then
+				db.x = val
+				libwindow.RestorePosition(window)
+			end
+		end
+	}
+	options.windowoptions.args.position.args.y = {
+		type = "range",
+		name = L["Y Offset"],
+		order = 4,
+		min = -y,
+		max = y,
+		step = 0.01,
+		bigStep = 1,
+		set = function(_, val)
+			local window = mod:GetBarGroup(db.name)
+			if window then
+				db.y = val
+				libwindow.RestorePosition(window)
+			end
+		end
+	}
 end
