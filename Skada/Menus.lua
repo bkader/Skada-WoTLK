@@ -32,8 +32,7 @@ function Skada:OpenMenu(window)
 	self.skadamenu = self.skadamenu or CreateFrame("Frame", "SkadaMenu", UIParent, "UIDropDownMenuTemplate")
 	self.skadamenu.displayMode = "MENU"
 	self.skadamenu.initialize = function(self, level)
-		if not level then return
-		end
+		if not level then return end
 		local info
 
 		if level == 1 then
@@ -136,9 +135,11 @@ function Skada:OpenMenu(window)
 			-- Configure
 			info = UIDropDownMenu_CreateInfo()
 			info.text = L["Configure"]
+			info.value = "options"
 			info.func = function()
 				Skada:OpenOptions(window)
 			end
+			info.hasArrow = 1
 			info.notCheckable = 1
 			info.padding = 16
 			UIDropDownMenu_AddButton(info, level)
@@ -344,6 +345,78 @@ function Skada:OpenMenu(window)
 					info.colorCode = set.gotboss and (set.success and "|cff00ff00" or "|cffff0000") or "|cffffffff"
 					UIDropDownMenu_AddButton(info, level)
 				end
+			elseif L_UIDROPDOWNMENU_MENU_VALUE == "options" then
+				-- time measure
+				info = UIDropDownMenu_CreateInfo()
+				info.text = L["Time measure"]
+				info.isTitle = 1
+				info.notCheckable = 1
+				UIDropDownMenu_AddButton(info, level)
+
+				info = UIDropDownMenu_CreateInfo()
+				info.text = L["Activity time"]
+				info.func = function()
+					Skada.db.profile.timemesure = 1
+					Skada:ApplySettings()
+				end
+				info.checked = (Skada.db.profile.timemesure == 1)
+				UIDropDownMenu_AddButton(info, level)
+
+				info = UIDropDownMenu_CreateInfo()
+				info.text = L["Effective time"]
+				info.func = function()
+					Skada.db.profile.timemesure = 2
+					Skada:ApplySettings()
+				end
+				info.checked = (Skada.db.profile.timemesure == 2)
+				UIDropDownMenu_AddButton(info, level)
+
+				UIDropDownMenu_AddSeparator(info, level)
+
+				-- number format
+				info = UIDropDownMenu_CreateInfo()
+				info.text = L["Number format"]
+				info.isTitle = 1
+				info.notCheckable = 1
+				UIDropDownMenu_AddButton(info, level)
+
+				info = UIDropDownMenu_CreateInfo()
+				info.text = L["Condensed"]
+				info.func = function()
+					Skada.db.profile.numberformat = 1
+					Skada:ApplySettings()
+				end
+				info.checked = (Skada.db.profile.numberformat == 1)
+				UIDropDownMenu_AddButton(info, level)
+
+				info = UIDropDownMenu_CreateInfo()
+				info.text = L["Comma"]
+				info.func = function()
+					Skada.db.profile.numberformat = 2
+					Skada:ApplySettings()
+				end
+				info.checked = (Skada.db.profile.numberformat == 2)
+				UIDropDownMenu_AddButton(info, level)
+
+				info = UIDropDownMenu_CreateInfo()
+				info.text = L["Detailed"]
+				info.func = function()
+					Skada.db.profile.numberformat = 3
+					Skada:ApplySettings()
+				end
+				info.checked = (Skada.db.profile.numberformat == 3)
+				UIDropDownMenu_AddButton(info, level)
+
+				UIDropDownMenu_AddSeparator(info, level)
+
+				-- Configure
+				info = UIDropDownMenu_CreateInfo()
+				info.text = L["Configure"]
+				info.func = function()
+					Skada:OpenOptions(window)
+				end
+				info.notCheckable = 1
+				UIDropDownMenu_AddButton(info, level)
 			end
 		elseif level == 3 then
 			if L_UIDROPDOWNMENU_MENU_VALUE == "modes" then
