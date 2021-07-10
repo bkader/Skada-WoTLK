@@ -25,160 +25,155 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	local GetTime, band = GetTime, bit.band
 	local tinsert, tsort, tContains = table.insert, table.sort, tContains
 
+	-- INCOMPLETE
+	-- the following list is incomplete due to the lack of testing for different
+	-- shield ranks. Feel free to provide any helpful data possible to complete it.
+	-- Note: some of the caps are used as backup because their amounts are calculated later.
 	local absorbspells = {
-		[48707] = 5, -- Anti-Magic Shell (rank 1)
-		[51052] = 10, -- Anti-Magic Zone( (rank 1)
-		[49189] = 86400, -- Will of Necropolis (rank 1)
-		[50149] = 86400, -- Will of Necropolis (rank 2)
-		[50150] = 86400, -- Will of Necropolis (rank 3)
-		[49145] = 86400, -- Spell Deflection (rank 1)
-		[49495] = 86400, -- Spell Deflection (rank 2)
-		[49497] = 86400, -- Spell Deflection (rank 3)
-		[62606] = 10, -- Savage Defense
-		[11426] = 60, -- Ice Barrier (rank 1)
-		[13031] = 60, -- Ice Barrier (rank 2)
-		[13032] = 60, -- Ice Barrier (rank 3)
-		[13033] = 60, -- Ice Barrier (rank 4)
-		[27134] = 60, -- Ice Barrier (rank 5)
-		[33405] = 60, -- Ice Barrier (rank 6)
-		[43038] = 60, -- Ice Barrier (rank 7)
-		[43039] = 60, -- Ice Barrier (rank 8)
-		[6143] = 30, -- Frost Ward (rank 1)
-		[8461] = 30, -- Frost Ward (rank 2)
-		[8462] = 30, -- Frost Ward (rank 3)
-		[10177] = 30, -- Frost Ward (rank 4)
-		[28609] = 30, -- Frost Ward (rank 5)
-		[32796] = 30, -- Frost Ward (rank 6)
-		[43012] = 30, -- Frost Ward (rank 7)
-		[1463] = 60, --  Mana shield (rank 1)
-		[8494] = 60, --  Mana shield (rank 2)
-		[8495] = 60, --  Mana shield (rank 3)
-		[10191] = 60, --  Mana shield (rank 4)
-		[10192] = 60, --  Mana shield (rank 5)
-		[10193] = 60, --  Mana shield (rank 6)
-		[27131] = 60, --  Mana shield (rank 7)
-		[43019] = 60, --  Mana shield (rank 8)
-		[43020] = 60, --  Mana shield (rank 9)
-		[543] = 30, -- Fire Ward (rank 1)
-		[8457] = 30, -- Fire Ward (rank 2)
-		[8458] = 30, -- Fire Ward (rank 3)
-		[10223] = 30, -- Fire Ward (rank 4)
-		[10225] = 30, -- Fire Ward (rank 5)
-		[27128] = 30, -- Fire Ward (rank 6)
-		[43010] = 30, -- Fire Ward (rank 7)
-		[58597] = 6, -- Sacred Shield
-		[31850] = 86400, -- Ardent Defender (rank 1)
-		[31851] = 86400, -- Ardent Defender (rank 2)
-		[31852] = 86400, -- Ardent Defender (rank 3)
-		[31228] = 86400, -- Cheat Death (rank 1)
-		[31229] = 86400, -- Cheat Death (rank 2)
-		[31230] = 86400, -- Cheat Death (rank 3)
-		[17] = 30, -- Power Word: Shield (rank 1)
-		[592] = 30, -- Power Word: Shield (rank 2)
-		[600] = 30, -- Power Word: Shield (rank 3)
-		[3747] = 30, -- Power Word: Shield (rank 4)
-		[6065] = 30, -- Power Word: Shield (rank 5)
-		[6066] = 30, -- Power Word: Shield (rank 6)
-		[10898] = 30, -- Power Word: Shield (rank 7)
-		[10899] = 30, -- Power Word: Shield (rank 8)
-		[10900] = 30, -- Power Word: Shield (rank 9)
-		[10901] = 30, -- Power Word: Shield (rank 10)
-		[25217] = 30, -- Power Word: Shield (rank 11)
-		[25218] = 30, -- Power Word: Shield (rank 12)
-		[48065] = 30, -- Power Word: Shield (rank 13)
-		[48066] = 30, -- Power Word: Shield (rank 14)
-		[47509] = 12, -- Divine Aegis (rank 1)
-		[47511] = 12, -- Divine Aegis (rank 2)
-		[47515] = 12, -- Divine Aegis (rank 3)
-		[47753] = 12, -- Divine Aegis (rank 1)
-		[54704] = 12, -- Divine Aegis (rank 1)
-		[47788] = 10, -- Guardian Spirit
-		[7812] = 30, -- Sacrifice (rank 1)
-		[19438] = 30, -- Sacrifice (rank 2)
-		[19440] = 30, -- Sacrifice (rank 3)
-		[19441] = 30, -- Sacrifice (rank 4)
-		[19442] = 30, -- Sacrifice (rank 5)
-		[19443] = 30, -- Sacrifice (rank 6)
-		[27273] = 30, -- Sacrifice (rank 7)
-		[47985] = 30, -- Sacrifice (rank 8)
-		[47986] = 30, -- Sacrifice (rank 9)
-		[6229] = 30, -- Shadow Ward (rank 1)
-		[11739] = 30, -- Shadow Ward (rank 1)
-		[11740] = 30, -- Shadow Ward (rank 2)
-		[28610] = 30, -- Shadow Ward (rank 3)
-		[47890] = 30, -- Shadow Ward (rank 4)
-		[47891] = 30, -- Shadow Ward (rank 5)
-		[29674] = 86400, -- Lesser Ward of Shielding
-		[29719] = 86400, -- Greater Ward of Shielding
-		[29701] = 86400, -- Greater Shielding
-		[28538] = 120, -- Major Holy Protection Potion
-		[28537] = 120, -- Major Shadow Protection Potion
-		[28536] = 120, --  Major Arcane Protection Potion
-		[28513] = 120, -- Major Nature Protection Potion
-		[28512] = 120, -- Major Frost Protection Potion
-		[28511] = 120, -- Major Fire Protection Potion
-		[7233] = 120, -- Fire Protection Potion
-		[7239] = 120, -- Frost Protection Potion
-		[7242] = 120, -- Shadow Protection Potion
-		[7245] = 120, -- Holy Protection Potion
-		[7254] = 120, -- Nature Protection Potion
-		[53915] = 120, -- Mighty Shadow Protection Potion
-		[53914] = 120, -- Mighty Nature Protection Potion
-		[53913] = 120, -- Mighty Frost Protection Potion
-		[53911] = 120, -- Mighty Fire Protection Potion
-		[53910] = 120, -- Mighty Arcane Protection Potion
-		[17548] = 120, --  Greater Shadow Protection Potion
-		[17546] = 120, -- Greater Nature Protection Potion
-		[17545] = 120, -- Greater Holy Protection Potion
-		[17544] = 120, -- Greater Frost Protection Potion
-		[17543] = 120, -- Greater Fire Protection Potion
-		[17549] = 120, -- Greater Arcane Protection Potion
-		[28527] = 15, -- Fel Blossom
-		[29432] = 3600, -- Frozen Rune
-		[36481] = 4, -- Arcane Barrier (TK Kael'Thas) Shield
-		[57350] = 6, -- Darkmoon Card: Illusion
-		[17252] = 30, -- Mark of the Dragon Lord (LBRS epic ring)
-		[25750] = 15, -- Defiler's Talisman/Talisman of Arathor
-		[25747] = 15, -- Defiler's Talisman/Talisman of Arathor
-		[25746] = 15, -- Defiler's Talisman/Talisman of Arathor
-		[23991] = 15, -- Defiler's Talisman/Talisman of Arathor
-		[31000] = 300, -- Pendant of Shadow's End Usage
-		[30997] = 300, -- Pendant of Frozen Flame Usage
-		[31002] = 300, -- Pendant of the Null Rune
-		[30999] = 300, -- Pendant of Withering
-		[30994] = 300, -- Pendant of Thawing
-		[31000] = 300, -- Pendant of Shadow's End
-		[23506] = 20, -- Arena Grand Master
-		[12561] = 60, -- Goblin Construction Helmet
-		[31771] = 20, -- Runed Fungalcap
-		[21956] = 10, -- Mark of Resolution
-		[29506] = 20, -- The Burrower's Shell
-		[4057] = 60, -- Flame Deflector
-		[4077] = 60, -- Ice Deflector
-		[39228] = 20, -- Argussian Compass (may not be an actual absorb)
-		[27779] = 30, -- Divine Protection (Priest dungeon set 1/2)
-		[11657] = 20, -- Jang'thraze (Zul Farrak)
-		[10368] = 15, -- Uther's Strength
-		[37515] = 15, -- Warbringer Armor Proc
-		[42137] = 86400, -- Greater Rune of Warding Proc
-		[26467] = 30, -- Scarab Brooch
-		[26470] = 8, -- Scarab Brooch
-		[27539] = 6, -- Thick Obsidian Breatplate
-		[28810] = 30, -- Faith Set Proc Armor of Faith
-		[54808] = 12, -- Noise Machine Sonic Shield
-		[55019] = 12, -- Sonic Shield
-		[64413] = 8, -- Val'anyr, Hammer of Ancient Kings Protection of Ancient Kings
-		[40322] = 30, -- Teron's Vengeful Spirit Ghost - Spirit Shield
-		[65874] = 15, -- Twin Val'kyr's: Shield of Darkness (175000)
-		[67257] = 15, -- Twin Val'kyr's: Shield of Darkness (300000)
-		[67256] = 15, -- Twin Val'kyr's: Shield of Darkness (700000)
-		[67258] = 15, -- Twin Val'kyr's: Shield of Darkness (1200000)
-		[65858] = 15, -- Twin Val'kyr's: Shield of Lights (175000)
-		[67260] = 15, -- Twin Val'kyr's: Shield of Lights (300000)
-		[67259] = 15, -- Twin Val'kyr's: Shield of Lights (700000)
-		[67261] = 15, -- Twin Val'kyr's: Shield of Lights (1200000)
-		[65686] = 86400, -- Twin Val'kyr: Light Essence
-		[65684] = 86400 -- Twin Val'kyr: Dark Essence86400
+		[48707] = {dur = 5}, -- Anti-Magic Shell (rank 1)
+		[51052] = {dur = 10}, -- Anti-Magic Zone( (rank 1)
+		[50150] = {dur = 86400}, -- Will of Necropolis
+		[49497] = {dur = 86400}, -- Spell Deflection
+		[62606] = {dur = 10, avg = 1600, cap = 2500}, -- Savage Defense
+		[11426] = {dur = 60}, -- Ice Barrier (rank 1)
+		[13031] = {dur = 60}, -- Ice Barrier (rank 2)
+		[13032] = {dur = 60}, -- Ice Barrier (rank 3)
+		[13033] = {dur = 60}, -- Ice Barrier (rank 4)
+		[27134] = {dur = 60}, -- Ice Barrier (rank 5)
+		[33405] = {dur = 60}, -- Ice Barrier (rank 6)
+		[43038] = {dur = 60}, -- Ice Barrier (rank 7)
+		[43039] = {dur = 60, avg = 6500, cap = 8300}, -- Ice Barrier (rank 8)
+		[6143] = {dur = 30}, -- Frost Ward (rank 1)
+		[8461] = {dur = 30}, -- Frost Ward (rank 2)
+		[8462] = {dur = 30}, -- Frost Ward (rank 3)
+		[10177] = {dur = 30}, -- Frost Ward (rank 4)
+		[28609] = {dur = 30}, -- Frost Ward (rank 5)
+		[32796] = {dur = 30}, -- Frost Ward (rank 6)
+		[43012] = {dur = 30, avg = 5200, cap = 7000}, -- Frost Ward (rank 7)
+		[1463] = {dur = 60}, --  Mana shield (rank 1)
+		[8494] = {dur = 60}, --  Mana shield (rank 2)
+		[8495] = {dur = 60}, --  Mana shield (rank 3)
+		[10191] = {dur = 60}, --  Mana shield (rank 4)
+		[10192] = {dur = 60}, --  Mana shield (rank 5)
+		[10193] = {dur = 60}, --  Mana shield (rank 6)
+		[27131] = {dur = 60}, --  Mana shield (rank 7)
+		[43019] = {dur = 60}, --  Mana shield (rank 8)
+		[43020] = {dur = 60, avg = 4500, cap = 6300}, --  Mana shield (rank 9)
+		[543] = {dur = 30}, -- Fire Ward (rank 1)
+		[8457] = {dur = 30}, -- Fire Ward (rank 2)
+		[8458] = {dur = 30}, -- Fire Ward (rank 3)
+		[10223] = {dur = 30}, -- Fire Ward (rank 4)
+		[10225] = {dur = 30}, -- Fire Ward (rank 5)
+		[27128] = {dur = 30}, -- Fire Ward (rank 6)
+		[43010] = {dur = 30, avg = 5200, cap = 7000}, -- Fire Ward (rank 7)
+		[58597] = {dur = 6, avg = 4400, cap = 6000}, -- Sacred Shield
+		[31852] = {dur = 86400}, -- Ardent Defender
+		[31230] = {dur = 86400}, -- Cheat Death
+		[17] = {dur = 30}, -- Power Word: Shield (rank 1)
+		[592] = {dur = 30}, -- Power Word: Shield (rank 2)
+		[600] = {dur = 30}, -- Power Word: Shield (rank 3)
+		[3747] = {dur = 30}, -- Power Word: Shield (rank 4)
+		[6065] = {dur = 30}, -- Power Word: Shield (rank 5)
+		[6066] = {dur = 30}, -- Power Word: Shield (rank 6)
+		[10898] = {dur = 30, cap = 848}, -- Power Word: Shield (rank 7)
+		[10899] = {dur = 30, cap = 1050}, -- Power Word: Shield (rank 8)
+		[10900] = {dur = 30, cap = 1800}, -- Power Word: Shield (rank 9)
+		[10901] = {dur = 30, cap = 4170}, -- Power Word: Shield (rank 10)
+		[25217] = {dur = 30, cap = 6200}, -- Power Word: Shield (rank 11)
+		[25218] = {dur = 30, cap = 8160}, -- Power Word: Shield (rank 12)
+		[48065] = {dur = 30, cap = 10900}, -- Power Word: Shield (rank 13)
+		[48066] = {dur = 30, avg = 10000, cap = 11400}, -- Power Word: Shield (rank 14)
+		[47509] = {dur = 12}, -- Divine Aegis (rank 1)
+		[47511] = {dur = 12}, -- Divine Aegis (rank 2)
+		[47515] = {dur = 12}, -- Divine Aegis (rank 3)
+		[47753] = {dur = 12, cap = 10000}, -- Divine Aegis (rank 1)
+		[54704] = {dur = 12, cap = 10000}, -- Divine Aegis (rank 1)
+		[47788] = {dur = 10}, -- Guardian Spirit
+		[7812] = {dur = 30}, -- Sacrifice (rank 1)
+		[19438] = {dur = 30}, -- Sacrifice (rank 2)
+		[19440] = {dur = 30}, -- Sacrifice (rank 3)
+		[19441] = {dur = 30}, -- Sacrifice (rank 4)
+		[19442] = {dur = 30}, -- Sacrifice (rank 5)
+		[19443] = {dur = 30}, -- Sacrifice (rank 6)
+		[27273] = {dur = 30}, -- Sacrifice (rank 7)
+		[47985] = {dur = 30}, -- Sacrifice (rank 8)
+		[47986] = {dur = 30}, -- Sacrifice (rank 9)
+		[6229] = {dur = 30}, -- Shadow Ward (rank 1)
+		[11739] = {dur = 30}, -- Shadow Ward (rank 1)
+		[11740] = {dur = 30}, -- Shadow Ward (rank 2)
+		[28610] = {dur = 30}, -- Shadow Ward (rank 3)
+		[47890] = {dur = 30}, -- Shadow Ward (rank 4)
+		[47891] = {dur = 30, avg = 6500, cap = 8300}, -- Shadow Ward (rank 5)
+		[29674] = {dur = 86400, cap = 1000}, -- Lesser Ward of Shielding
+		[29719] = {dur = 86400, cap = 4000}, -- Greater Ward of Shielding
+		[29701] = {dur = 86400, cap = 4000}, -- Greater Shielding
+		[28538] = {dur = 120, avg = 3400, cap = 4000}, -- Major Holy Protection Potion
+		[28537] = {dur = 120, avg = 3400, cap = 4000}, -- Major Shadow Protection Potion
+		[28536] = {dur = 120, avg = 3400, cap = 4000}, --  Major Arcane Protection Potion
+		[28513] = {dur = 120, avg = 3400, cap = 4000}, -- Major Nature Protection Potion
+		[28512] = {dur = 120, avg = 3400, cap = 4000}, -- Major Frost Protection Potion
+		[28511] = {dur = 120, avg = 3400, cap = 4000}, -- Major Fire Protection Potion
+		[7233] = {dur = 120, avg = 1300, cap = 1625}, -- Fire Protection Potion
+		[7239] = {dur = 120, avg = 1800, cap = 2250}, -- Frost Protection Potion
+		[7242] = {dur = 120, avg = 1800, cap = 2250}, -- Shadow Protection Potion
+		[7245] = {dur = 120, avg = 1800, cap = 2250}, -- Holy Protection Potion
+		[7254] = {dur = 120, avg = 1800, cap = 2250}, -- Nature Protection Potion
+		[53915] = {dur = 120, avg = 5100, cap = 6000}, -- Mighty Shadow Protection Potion
+		[53914] = {dur = 120, avg = 5100, cap = 6000}, -- Mighty Nature Protection Potion
+		[53913] = {dur = 120, avg = 5100, cap = 6000}, -- Mighty Frost Protection Potion
+		[53911] = {dur = 120, avg = 5100, cap = 6000}, -- Mighty Fire Protection Potion
+		[53910] = {dur = 120, avg = 5100, cap = 6000}, -- Mighty Arcane Protection Potion
+		[17548] = {dur = 120, avg = 2600, cap = 3250}, --  Greater Shadow Protection Potion
+		[17546] = {dur = 120, avg = 2600, cap = 3250}, -- Greater Nature Protection Potion
+		[17545] = {dur = 120, avg = 2600, cap = 3250}, -- Greater Holy Protection Potion
+		[17544] = {dur = 120, avg = 2600, cap = 3250}, -- Greater Frost Protection Potion
+		[17543] = {dur = 120, avg = 2600, cap = 3250}, -- Greater Fire Protection Potion
+		[17549] = {dur = 120, avg = 2600, cap = 3250}, -- Greater Arcane Protection Potion
+		[28527] = {dur = 15, avg = 1000, cap = 1250}, -- Fel Blossom
+		[29432] = {dur = 3600, avg = 2000, cap = 2500}, -- Frozen Rune
+		[36481] = {dur = 4, cap = 100000}, -- Arcane Barrier (TK Kael'Thas) Shield
+		[57350] = {dur = 6, cap = 1500}, -- Darkmoon Card: Illusion
+		[17252] = {dur = 1800, cap = 500}, -- Mark of the Dragon Lord (LBRS epic ring)
+		[25750] = {dur = 15, avg = 151, cap = 302}, -- Defiler's Talisman/Talisman of Arathor
+		[25747] = {dur = 15, avg = 344, cap = 378}, -- Defiler's Talisman/Talisman of Arathor
+		[25746] = {dur = 15, avg = 435, cap = 478}, -- Defiler's Talisman/Talisman of Arathor
+		[23991] = {dur = 15, avg = 550, cap = 605}, -- Defiler's Talisman/Talisman of Arathor
+		[31000] = {dur = 300, avg = 1800, cap = 2700}, -- Pendant of Shadow's End Usage
+		[30997] = {dur = 300, avg = 1800, cap = 2700}, -- Pendant of Frozen Flame Usage
+		[31002] = {dur = 300, avg = 1800, cap = 2700}, -- Pendant of the Null Rune
+		[30999] = {dur = 300, avg = 1800, cap = 2700}, -- Pendant of Withering
+		[30994] = {dur = 300, avg = 1800, cap = 2700}, -- Pendant of Thawing
+		[31000] = {dur = 300, avg = 1800, cap = 2700}, -- Pendant of Shadow's End
+		[23506] = {dur = 20, avg = 1000, cap = 1250}, -- Arena Grand Master
+		[12561] = {dur = 60, avg = 400, cap = 500}, -- Goblin Construction Helmet
+		[31771] = {dur = 20, cap = 440}, -- Runed Fungalcap
+		[21956] = {dur = 10, cap = 500}, -- Mark of Resolution
+		[29506] = {dur = 20, cap = 900}, -- The Burrower's Shell
+		[4057] = {dur = 60, cap = 500}, -- Flame Deflector
+		[4077] = {dur = 60, cap = 600}, -- Ice Deflector
+		[39228] = {dur = 20, cap = 1150}, -- Argussian Compass (may not be an actual absorb)
+		[27779] = {dur = 30, cap = 350}, -- Divine Protection (Priest dungeon set 1/2)
+		[11657] = {dur = 20, avg = 70, cap = 85}, -- Jang'thraze (Zul Farrak)
+		[10368] = {dur = 15, cap = 200}, -- Uther's Light Effect
+		[37515] = {dur = 15, cap = 200}, -- Blade Turning
+		[42137] = {dur = 86400, cap = 400}, -- Greater Rune of Warding
+		[26467] = {dur = 30, cap = 1000}, -- Scarab Brooch
+		[26470] = {dur = 8, cap = 1000}, -- Persistent Shield
+		[27539] = {dur = 6, avg = 300, cap = 500}, -- Thick Obsidian Breatplate
+		[28810] = {dur = 30, cap = 500}, -- Faith Set Proc Armor of Faith
+		[55019] = {dur = 12, cap = 1100}, -- Sonic Shield
+		[64413] = {dur = 8, cap = 20000}, -- Val'anyr, Hammer of Ancient Kings Protection of Ancient Kings
+		[40322] = {dur = 30, avg = 12000, cap = 12600}, -- Teron's Vengeful Spirit Ghost - Spirit Shield
+		[65874] = {dur = 15, cap = 175000}, -- Twin Val'kyr's: Shield of Darkness
+		[67257] = {dur = 15, cap = 300000}, -- Twin Val'kyr's: Shield of Darkness
+		[67256] = {dur = 15, cap = 700000}, -- Twin Val'kyr's: Shield of Darkness
+		[67258] = {dur = 15, cap = 1200000}, -- Twin Val'kyr's: Shield of Darkness
+		[65858] = {dur = 15, cap = 175000}, -- Twin Val'kyr's: Shield of Lights
+		[67260] = {dur = 15, cap = 300000}, -- Twin Val'kyr's: Shield of Lights
+		[67259] = {dur = 15, cap = 700000}, -- Twin Val'kyr's: Shield of Lights
+		[67261] = {dur = 15, cap = 1200000}, -- Twin Val'kyr's: Shield of Lights
+		[65686] = {dur = 86400, cap = 1000000}, -- Twin Val'kyr: Light Essence
+		[65684] = {dur = 86400, cap = 1000000} -- Twin Val'kyr: Dark Essence86400
 	}
 
 	local priest_divine_aegis = {47509, 47511, 47515, 47753, 54704} -- Divine Aegis
@@ -192,17 +187,6 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	local heals = {}
 	local shields = {}
 	local shieldamounts = {}
-
-	local shieldvalues = {
-		[48066] = {avg = 10000, cap = 11000}, -- Power Word: Shield
-		[58597] = {avg = 4400, cap = 6000}, -- Sacred Shield
-		[62606] = {avg = 1600, cap = 2500}, -- Savage Defense (backup)
-		[47891] = {avg = 6500, cap = 8300}, -- Shadow Ward
-		[43020] = {avg = 4500, cap = 6300}, -- Mana Shield
-		[43010] = {avg = 5200, cap = 7000}, -- Fire Ward
-		[43012] = {avg = 5200, cap = 7000}, -- Frost Ward
-		[43039] = {avg = 6500, cap = 8300} -- Ice Barrier
-	}
 
 	local function log_absorb(set, playerid, playername, dstGUID, dstName, spellid, spellschool, amount, nocount)
 		if (amount or 0) <= 0 then return end
@@ -381,7 +365,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 				amount = UnitHealthMax(dstName) * 0.5
 			elseif spellid == 62606 and UnitAttackPower(dstName) then -- Savage Defender
 				amount = UnitAttackPower(dstName) * 0.25
-			elseif shieldvalues[spellid] then
+			elseif absorbspells[spellid].cap then
 				if shieldamounts[srcName] and shieldamounts[srcName][spellid] then
 					shields[dstName][spellid][srcName] = {
 						srcGUID = srcGUID,
@@ -389,12 +373,12 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 						school = spellschool,
 						points = points,
 						amount = shieldamounts[srcName][spellid],
-						ts = timestamp + absorbspells[spellid] + 0.1,
+						ts = timestamp + absorbspells[spellid].dur + 0.1,
 						full = true
 					}
 					return
 				else
-					amount = shieldvalues[spellid].avg
+					amount = absorbspells[spellid].avg or absorbspells[spellid].cap or 1000
 				end
 			elseif (spellid ~= 50150 and spellid ~= 49497) then
 				amount = 1000 -- default
@@ -406,7 +390,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 				school = spellschool,
 				points = points,
 				amount = floor(amount * zoneModifier),
-				ts = timestamp + absorbspells[spellid] + 0.1,
+				ts = timestamp + absorbspells[spellid].dur + 0.1,
 				full = true
 			}
 		end
@@ -471,15 +455,24 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		for spellid, spells in pairs(shields[dstName]) do
 			for srcName, shield in pairs(spells) do
 				if shield.ts > timestamp then
-					if spellid == 65686 and band(spellschool, 0x4) == spellschool then -- Light Essence vs Fire Damage
+					-- Light Essence vs Fire Damage
+					if spellid == 65686 and band(spellschool, 0x4) == spellschool then
 						return -- don't record
-					elseif spellid == 65684 and band(spellschool, 0x20) == spellschool then -- Dark Essence vs Shadow Damage
+					-- Dark Essence vs Shadow Damage
+					elseif spellid == 65684 and band(spellschool, 0x20) == spellschool then
 						return -- don't record
-					elseif tContains(mage_frost_ward, spellid) and band(spellschool, 0x10) ~= spellschool then -- Frost Ward vs Frost Damage
-					elseif tContains(mage_fire_ward, spellid) and band(spellschool, 0x4) ~= spellschool then -- Fire Ward vs Fire Damage
-					elseif tContains(warlock_shadow_ward, spellid) and band(spellschool, 0x20) ~= spellschool then -- Shadow Ward vs Shadow Damage
-					elseif spellid == 49497 and band(spellschool, 0x1) == spellschool then -- Spell Deflection vs a Physical damage.
-					elseif spellid == 62606 and band(spellschool, 0x1) ~= spellschool then -- Savage Defense vs a non-Physical damage.
+					-- Frost Ward vs Frost Damage
+					elseif tContains(mage_frost_ward, spellid) and band(spellschool, 0x10) ~= spellschool then
+						-- nothing
+					-- Fire Ward vs Fire Damage
+					elseif tContains(mage_fire_ward, spellid) and band(spellschool, 0x4) ~= spellschool then
+						-- nothing
+					-- Shadow Ward vs Shadow Damage
+					elseif tContains(warlock_shadow_ward, spellid) and band(spellschool, 0x20) ~= spellschool then
+						-- nothing
+					-- Anti-Magic, Spell Deflection, Savage Defense
+					elseif (spellid == 48707 or spellid == 49497 or spellid == 62606) and band(spellschool, 0x1) == spellschool then
+						-- nothing
 					else
 						tinsert(shieldsPopped, {
 							srcGUID = shield.srcGUID,
@@ -487,7 +480,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 							spellid = shield.spellid,
 							school = shield.school,
 							points = shield.points,
-							ts = shield.ts - absorbspells[shield.spellid],
+							ts = shield.ts - absorbspells[shield.spellid].dur,
 							amount = shield.amount,
 							full = shield.full
 						})
@@ -501,10 +494,10 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		if count <= 0 then return end
 
 		-- if the player has a single shield and it broke, we update its max absorb
-		if count == 1 and broken and shieldsPopped[1].full and shieldvalues[shieldsPopped[1].spellid] then
+		if count == 1 and broken and shieldsPopped[1].full and absorbspells[shieldsPopped[1].spellid].cap then
 			local s = shieldsPopped[1]
 			shieldamounts[s.srcName] = shieldamounts[s.srcName] or {}
-			if (not shieldamounts[s.srcName][s.spellid] or shieldamounts[s.srcName][s.spellid] < absorbed) and absorbed < (shieldvalues[s.spellid].cap * zoneModifier) then
+			if (not shieldamounts[s.srcName][s.spellid] or shieldamounts[s.srcName][s.spellid] < absorbed) and absorbed < (absorbspells[s.spellid].cap * zoneModifier) then
 				shieldamounts[s.srcName][s.spellid] = absorbed
 			end
 		end
@@ -553,9 +546,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 			local s = shieldsPopped[i]
 			-- whoops! No shield?
-			if not s then
-				break
-			end
+			if not s then break end
 
 			-- we store the previous shield to use later in case of
 			-- any missing abosrb amount that wasn't properly added.
