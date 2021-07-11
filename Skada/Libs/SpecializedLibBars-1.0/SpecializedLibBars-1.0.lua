@@ -1221,26 +1221,17 @@ do
 		self.bgtexture:SetAllPoints()
 		self.bgtexture:SetVertexColor(0.3, 0.3, 0.3, 0.6)
 
-		-- this frame holds the icon and handles mouse inputs.
-		if not self.iconFrame then
-			self.iconFrame = CreateFrame("Frame", nil, self)
-			self.iconFrame:SetSize(thickness, thickness)
-			local t = self.iconFrame:CreateTexture(nil, "BACKGROUND")
-			t:SetTexture([[Interface\Buttons\WHITE8X8]])
-			t:SetVertexColor(0, 0, 0, 0.75)
-		end
-
-		if not self.icon then
-			self.icon = self.iconFrame:CreateTexture(nil, "OVERLAY")
-			self.icon:SetPoint("TOPLEFT", self.iconFrame, "TOPLEFT")
-			self.icon:SetPoint("BOTTOMRIGHT", self.iconFrame, "BOTTOMRIGHT")
-			self.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
-		end
-
+		self.icon = self.icon or self:CreateTexture(nil, "OVERLAY")
+		self.icon:SetPoint("LEFT", self, "LEFT", 0, 0)
 		self:SetIcon(icon or DEFAULT_ICON)
 		if icon then
 			self:ShowIcon()
 		end
+		self.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+
+		-- Lame frame solely used for handling mouse input on icon.
+		self.iconFrame = self.iconFrame or CreateFrame("Frame", nil, self)
+		self.iconFrame:SetAllPoints(self.icon)
 
 		self.label = self.label or self:CreateFontString(nil, "OVERLAY", "ChatFontNormal")
 		self.label:SetWordWrap(false)
@@ -1488,8 +1479,8 @@ do
 		local o = self.orientation
 		local t
 		if o == lib.LEFT_TO_RIGHT then
-			self.iconFrame:ClearAllPoints()
-			self.iconFrame:SetPoint("RIGHT", self, "LEFT", 0, 0)
+			self.icon:ClearAllPoints()
+			self.icon:SetPoint("RIGHT", self, "LEFT", 0, 0)
 
 			t = self.spark
 			t:ClearAllPoints()
@@ -1518,8 +1509,8 @@ do
 
 			self.bgtexture:SetTexCoord(0, 1, 0, 1)
 		elseif o == lib.BOTTOM_TO_TOP then
-			self.iconFrame:ClearAllPoints()
-			self.iconFrame:SetPoint("TOP", self, "BOTTOM", 0, 0)
+			self.icon:ClearAllPoints()
+			self.icon:SetPoint("TOP", self, "BOTTOM", 0, 0)
 
 			t = self.spark
 			t:ClearAllPoints()
@@ -1549,8 +1540,8 @@ do
 
 			self.bgtexture:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
 		elseif o == lib.RIGHT_TO_LEFT then
-			self.iconFrame:ClearAllPoints()
-			self.iconFrame:SetPoint("LEFT", self, "RIGHT", 0, 0)
+			self.icon:ClearAllPoints()
+			self.icon:SetPoint("LEFT", self, "RIGHT", 0, 0)
 
 			t = self.spark
 			t:ClearAllPoints()
@@ -1579,8 +1570,8 @@ do
 
 			self.bgtexture:SetTexCoord(0, 1, 0, 1)
 		elseif o == lib.TOP_TO_BOTTOM then
-			self.iconFrame:ClearAllPoints()
-			self.iconFrame:SetPoint("BOTTOM", self, "TOP", 0, 0)
+			self.icon:ClearAllPoints()
+			self.icon:SetPoint("BOTTOM", self, "TOP", 0, 0)
 
 			t = self.spark
 			t:ClearAllPoints()
@@ -1626,7 +1617,8 @@ do
 		local height = thickness
 		barPrototype.super.SetWidth(self, width)
 		barPrototype.super.SetHeight(self, height)
-		self.iconFrame:SetWidth(thickness, thickness)
+		self.icon:SetWidth(thickness)
+		self.icon:SetHeight(thickness)
 	end
 
 	function barPrototype:SetLength(length)
