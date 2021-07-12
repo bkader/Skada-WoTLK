@@ -332,7 +332,7 @@ function barListPrototype:AddButton(title, description, normaltex, highlighttex,
 	btn:SetNormalTexture(normaltex)
 	btn:SetHighlightTexture(highlighttex, 1.0)
 	btn:SetAlpha(0.25)
-	btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+	btn:RegisterForClicks("AnyUp")
 	btn:SetScript("OnClick", clickfunc)
 	btn:SetScript("OnEnter", function(this)
 		GameTooltip_SetDefaultAnchor(GameTooltip, this)
