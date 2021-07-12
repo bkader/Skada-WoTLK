@@ -364,7 +364,8 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 			elseif (spellid == 48707 or spellid == 51052) and UnitHealthMax(dstName) then -- Anti-Magic Shell/Zone
 				amount = UnitHealthMax(dstName) * 0.5
 			elseif spellid == 62606 and UnitAttackPower(dstName) then -- Savage Defender
-				amount = UnitAttackPower(dstName) * 0.25
+				local base, posBuff, negBuff = UnitAttackPower(dstName)
+				amount = (base + posBuff + negBuff) * 0.25
 			elseif absorbspells[spellid].cap then
 				if shieldamounts[srcName] and shieldamounts[srcName][spellid] then
 					shields[dstName][spellid][srcName] = {
