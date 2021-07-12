@@ -629,7 +629,29 @@ function Window:get_selected_set()
 	return Skada:GetSet(self.selectedset)
 end
 
-function Window:set_selected_set(set)
+function Window:set_selected_set(set, step)
+	if step ~= nil then
+		local count = #Skada.char.sets
+		if count > 0 then
+			if type(self.selectedset) == "number" then
+				set = self.selectedset + step
+				if set < 1 then
+					set = "current"
+				elseif set > count then
+					set = "total"
+				end
+			elseif self.selectedset == "current" then
+				set = (step == 1) and 1 or "total"
+			elseif self.selectedset == "total" then
+				set = (step == 1) and "current" or count
+			end
+		elseif self.selectedset == "total" then
+			set = "current"
+		elseif self.selectedset == "current" then
+			set = "total"
+		end
+	end
+
 	self.selectedset = set
 	self:RestoreView()
 	if self.child and self.db.childmode <= 1 then

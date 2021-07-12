@@ -101,7 +101,15 @@ function mod:Create(window)
 			L["Jump to a specific segment."],
 			"Interface\\Buttons\\UI-GuildButton-PublicNote-Up",
 			"Interface\\Buttons\\UI-GuildButton-PublicNote-Up",
-			function() Skada:SegmentMenu(bargroup.win) end
+			function(_, button)
+				if button == "RightButton" then
+					bargroup.win:set_selected_set(nil, IsModifierKeyDown() and 1 or -1)
+				elseif button == "MiddleButton" then
+					bargroup.win:set_selected_set("current")
+				else
+					Skada:SegmentMenu(bargroup.win)
+				end
+			end
 		)
 
 		bargroup:AddButton(
