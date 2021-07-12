@@ -498,7 +498,8 @@ Skada.options = {
 					order = 17,
 					min = 1,
 					max = 10,
-					step = 1,
+					step = 0.1,
+					bigStep = 1,
 					width = "double",
 					disabled = function()
 						return not Skada.db.profile.tentativecombatstart

@@ -2787,7 +2787,8 @@ function Skada:FrameSettings(db, include_dimensions)
 						width = "double",
 						min = 0,
 						max = floor(GetScreenWidth()),
-						step = 1.0,
+						step = 0.1,
+						bigStep = 1,
 						get = function()
 							return db.background.tilesize
 						end,
@@ -2863,7 +2864,8 @@ function Skada:FrameSettings(db, include_dimensions)
 						width = "double",
 						min = 0,
 						max = 50,
-						step = 0.5,
+						step = 0.01,
+						bigStep = 0.5,
 						get = function()
 							return db.background.borderthickness
 						end,
@@ -2884,7 +2886,8 @@ function Skada:FrameSettings(db, include_dimensions)
 			order = 1,
 			min = 100,
 			max = floor(GetScreenWidth()),
-			step = 1.0
+			step = 0.01,
+			bigStep = 1
 		}
 
 		obj.args.position.args.height = {
@@ -2893,7 +2896,8 @@ function Skada:FrameSettings(db, include_dimensions)
 			order = 2,
 			min = 16,
 			max = 400,
-			step = 1.0
+			step = 0.01,
+			bigStep = 1
 		}
 	end
 

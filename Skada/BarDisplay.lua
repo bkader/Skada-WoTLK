@@ -1037,7 +1037,8 @@ function mod:AddDisplayOptions(win, options)
 				width = "double",
 				min = 0,
 				max = 10,
-				step = 1
+				step = 0.01,
+				bigStep = 1
 			},
 			barheight = {
 				type = "range",
@@ -1046,7 +1047,8 @@ function mod:AddDisplayOptions(win, options)
 				order = 9,
 				min = 10,
 				max = 40,
-				step = 1
+				step = 0.01,
+				bigStep = 1
 			},
 			barwidth = {
 				type = "range",
@@ -1055,7 +1057,8 @@ function mod:AddDisplayOptions(win, options)
 				order = 10,
 				min = 80,
 				max = 400,
-				step = 1
+				step = 0.01,
+				bigStep = 1
 			},
 			barorientation = {
 				type = "select",
