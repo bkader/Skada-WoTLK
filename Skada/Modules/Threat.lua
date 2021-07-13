@@ -189,7 +189,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				end
 
 				-- Warn
-				if we_should_warn and time() - last_warn > 2 then
+				if we_should_warn and time() - last_warn > (self.db.frequency or 2) then
 					self:Warn(
 						self.db.sound,
 						self.db.flash,
@@ -350,18 +350,25 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 						soundfile = {
 							type = "select",
 							name = L["Threat sound"],
-							desc = L[
-								"The sound that will be played when your threat percentage reaches a certain point."
-							],
+							desc = L["The sound that will be played when your threat percentage reaches a certain point."],
 							order = 5,
+							width = "double",
 							dialogControl = "LSM30_Sound",
 							values = AceGUIWidgetLSMlists.sound
+						},
+						frequency = {
+							type = "range",
+							name = L["Update frequency"],
+							order = 6,
+							min = 2,
+							max = 15,
+							step = 1
 						},
 						threshold = {
 							type = "range",
 							name = L["Threat threshold"],
 							desc = L["When your threat reaches this level, relative to tank, warnings are shown."],
-							order = 6,
+							order = 7,
 							min = 60,
 							max = 130,
 							step = 1
@@ -405,6 +412,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 					shake = false,
 					message = false,
 					sinkOptions = {},
+					frequency = 2,
 					threshold = 90,
 					soundfile = "Fel Nova",
 					notankwarnings = true
