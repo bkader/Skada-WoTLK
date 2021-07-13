@@ -579,6 +579,10 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellschool, amount, _, _, _, _, absorbed = select(3, ...)
+
+		-- uncomment the line below if you want to exclude Fury of Frostmourne damage.
+		-- if select(1, ...) == 72350 then return end
+
 		if (absorbed or 0) > 0 and dstName and shields[dstName] then
 			process_absorb(timestamp, dstGUID, dstName, absorbed, spellschool, amount, amount > absorbed)
 		end
