@@ -34,7 +34,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 		[67490] = 42545 -- Runic Mana Injector
 	}
 
-	local prepotionStr, potionStr = "|c%s%s|r %s", "|T%s:14:14:0:0:64:64:0:64:0:64|t"
+	local prepotionStr, potionStr = "|c%s%s|r %s", "|T%s:14:14:1:-2:64:64:2:64:2:64|t"
 	local prepotion
 
 	local function log_potion(set, playerid, playername, playerflags, spellid)
