@@ -368,6 +368,7 @@ L["Play sound"] = true
 L["This will play a sound as a threat warning."] = true
 L["Threat sound"] = true
 L["The sound that will be played when your threat percentage reaches a certain point."] = true
+L["Warning Frequency"] = true
 L["Threat threshold"] = true
 L["When your threat reaches this level, relative to tank, warnings are shown."] = true
 L["Show raw threat"] = true

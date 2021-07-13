@@ -358,7 +358,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 						},
 						frequency = {
 							type = "range",
-							name = L["Update frequency"],
+							name = L["Warning Frequency"],
 							order = 6,
 							min = 2,
 							max = 15,
