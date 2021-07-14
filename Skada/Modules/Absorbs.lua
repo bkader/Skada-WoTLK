@@ -2,7 +2,7 @@ assert(Skada, "Skada not found!")
 
 -- cache frequently used globals
 local pairs, ipairs, select, format = pairs, ipairs, select, string.format
-local max, min, floor, ceil = math.max, math.min, math.floor, math.ceil
+local max, min, floor = math.max, math.min, math.floor
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local UnitGUID, UnitClass = UnitGUID, Skada.UnitClass
 local _
@@ -75,14 +75,14 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		[3747] = {dur = 30}, -- Power Word: Shield (rank 4)
 		[6065] = {dur = 30}, -- Power Word: Shield (rank 5)
 		[6066] = {dur = 30}, -- Power Word: Shield (rank 6)
-		[10898] = {dur = 30, cap = 848}, -- Power Word: Shield (rank 7)
-		[10899] = {dur = 30, cap = 1050}, -- Power Word: Shield (rank 8)
-		[10900] = {dur = 30, cap = 1800}, -- Power Word: Shield (rank 9)
-		[10901] = {dur = 30, cap = 4170}, -- Power Word: Shield (rank 10)
-		[25217] = {dur = 30, cap = 6200}, -- Power Word: Shield (rank 11)
-		[25218] = {dur = 30, cap = 8160}, -- Power Word: Shield (rank 12)
-		[48065] = {dur = 30, cap = 10900}, -- Power Word: Shield (rank 13)
-		[48066] = {dur = 30, avg = 10000, cap = 11400}, -- Power Word: Shield (rank 14)
+		[10898] = {dur = 30, avg = 721, cap = 848}, -- Power Word: Shield (rank 7)
+		[10899] = {dur = 30, avg = 898, cap = 1057}, -- Power Word: Shield (rank 8)
+		[10900] = {dur = 30, avg = 1543, cap = 1816}, -- Power Word: Shield (rank 9)
+		[10901] = {dur = 30, avg = 3643, cap = 4288}, -- Power Word: Shield (rank 10)
+		[25217] = {dur = 30, avg = 5436, cap = 6398}, -- Power Word: Shield (rank 11)
+		[25218] = {dur = 30, avg = 7175, cap = 8444}, -- Power Word: Shield (rank 12)
+		[48065] = {dur = 30, avg = 9596, cap = 11293}, -- Power Word: Shield (rank 13)
+		[48066] = {dur = 30, avg = 10000, cap = 11769}, -- Power Word: Shield (rank 14)
 		[47509] = {dur = 12}, -- Divine Aegis (rank 1)
 		[47511] = {dur = 12}, -- Divine Aegis (rank 2)
 		[47515] = {dur = 12}, -- Divine Aegis (rank 3)
@@ -508,22 +508,27 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		for _, s in pairs(shieldsPopped) do
 			if s.full and shieldamounts[s.srcName] and shieldamounts[s.srcName][s.spellid] then
 				s.amount = shieldamounts[s.srcName][s.spellid]
-			elseif (s.spellid == 50150 or s.spellid == 31852) and s.points then -- Will of Necropolis / Ardent Defender
+			elseif s.spellid == 50150 and s.points then -- Will of Necropolis
 				local hppercent = Skada:UnitHealthPercent(dstName, dstGUID)
 				if hppercent <= 35 then
 					s.amount = floor(total * 0.05 * s.points)
 				end
 			elseif s.spellid == 49497 and s.points then -- Spell Deflection
 				s.amount = floor(total * 0.15 * s.points)
+			elseif s.spellid == 31852 and s.points then -- Ardent Defender
+				local hppercent = Skada:UnitHealthPercent(dstName, dstGUID)
+				if hppercent <= 35 then
+					s.amount = floor(total * 0.0667 * s.points)
+				end
 			elseif s.spellid == 31230 and s.points then -- Cheat Death
 				local maxhealth = select(3, Skada:UnitHealthPercent(dstName, dstGUID))
 				if maxhealth then
 					s.amount = floor(maxhealth * 0.1)
 				end
 			elseif tContains(priest_divine_aegis, s.spellid) then -- Divine Aegis
-				s.amount = min((UnitLevel(dstName) or 80) * 125, s.amount)
+				s.amount = min((UnitLevel(dstName) or 80) * 125, floor(s.amount))
 			elseif s.spellid == 64413 then -- Protection of Ancient Kings
-				s.amount = min(20000, s.amount)
+				s.amount = min(20000, floor(s.amount))
 			end
 		end
 
