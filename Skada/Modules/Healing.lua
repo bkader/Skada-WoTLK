@@ -923,6 +923,7 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 
 					d.id = source.id
 					d.label = sourcename
+					d.text = Skada:FormatName(sourcename, source.id)
 					d.class = source.class
 					d.role = source.role
 					d.spec = source.spec
@@ -993,6 +994,7 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 
 				d.id = player.id
 				d.label = playername
+				d.text = Skada:FormatName(playername, player.id)
 				d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
 
 				d.value = player.amount
