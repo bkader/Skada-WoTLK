@@ -902,7 +902,8 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 									class = p.class,
 									role = p.role,
 									spec = p.spec,
-									amount = target.amount
+									amount = target.amount,
+									overheal = 0
 								}
 							else
 								sources[p.name].amount = sources[p.name].amount + target.amount
@@ -957,11 +958,16 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 			for _, player in Skada:IteratePlayers(set) do
 				if player.heal_targets then
 					for targetname, target in pairs(player.heal_targets) do
-						players[targetname] = {
-							id = target.id,
-							amount = target.amount,
-							overheal = target.overheal
-						}
+						if not players[targetname] then
+							players[targetname] = {
+								id = target.id,
+								amount = target.amount,
+								overheal = target.overheal
+							}
+						else
+							players[targetname].amount = players[targetname].amount + target.amount
+							players[targetname].overheal = players[targetname].overheal + target.overheal
+						end
 					end
 				end
 				if player.absorb_targets then
