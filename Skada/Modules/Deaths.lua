@@ -360,7 +360,12 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 					if player.deathlog then
 						d.value = player.deathlog[1].time
-						d.valuetext = format("%s (%d)", Skada:FormatTime(player.deathlog[1].time - set.starttime), player.death)
+						d.valuetext = Skada:FormatValueText(
+							Skada:FormatTime(player.deathlog[1].time - set.starttime),
+							self.metadata.columns.Survivability,
+							player.death,
+							self.metadata.columns.Count
+						)
 					else
 						d.value = player.death
 						d.valuetext = tostring(player.death)
@@ -427,6 +432,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		self.metadata = {
 			click1 = playermod,
 			nototalclick = {playermod},
+			columns = {Survivability = false, Count = true},
 			icon = "Interface\\Icons\\ability_rogue_feigndeath"
 		}
 
