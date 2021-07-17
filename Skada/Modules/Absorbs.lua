@@ -32,7 +32,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	local absorbspells = {
 		[48707] = {dur = 5}, -- Anti-Magic Shell (rank 1)
 		[51052] = {dur = 10}, -- Anti-Magic Zone( (rank 1)
-		[50150] = {dur = 86400}, -- Will of Necropolis
+		[50150] = {dur = 86400}, -- Will of the Necropolis
 		[49497] = {dur = 86400}, -- Spell Deflection
 		[62606] = {dur = 10, avg = 1600, cap = 2500}, -- Savage Defense
 		[11426] = {dur = 60}, -- Ice Barrier (rank 1)
@@ -193,7 +193,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 		local player = Skada:get_player(set, playerid, playername)
 		if player then
-			Skada:AddActiveTime(player, (player.role == "HEALER" and not nocount))
+			Skada:AddActiveTime(player, (player.role ~= "DAMAGER" and not nocount))
 
 			-- add absorbs amount
 			player.absorb = (player.absorb or 0) + amount
@@ -295,10 +295,10 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		end
 
 		-- Fel Blossom
-		if a_spellid == 58597 then
+		if a_spellid == 28527 then
 			return false
 		end
-		if b_spellid == 58597 then
+		if b_spellid == 28527 then
 			return true
 		end
 
@@ -334,6 +334,22 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 			return true
 		end
 
+		-- Will of the Necropolis
+		if a_spellid == 50150 then
+			return false
+		end
+		if b_spellid == 50150 then
+			return true
+		end
+
+		-- Ardent Defender
+		if a_spellid == 66233 then
+			return false
+		end
+		if b_spellid == 66233 then
+			return true
+		end
+
 		return (a.ts > b.ts)
 	end
 
@@ -355,17 +371,14 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 			if tContains(priest_divine_aegis, spellid) then -- Divine Aegis
 				if heals[dstName] and heals[dstName][srcName] and heals[dstName][srcName].ts > timestamp - 0.2 then
-					amount = amount + (heals[dstName][srcName].amount * 0.3)
+					amount = min((UnitLevel(srcName) or 80) * 125, amount + (heals[dstName][srcName].amount * 0.3 * zoneModifier))
 				end
 			elseif spellid == 64413 then -- Protection of Ancient Kings (Vala'nyr)
 				if heals[dstName] and heals[dstName][srcName] and heals[dstName][srcName].ts > timestamp - 0.2 then
-					amount = amount + (heals[dstName][srcName].amount * 0.15)
+					amount = min(20000, amount + (heals[dstName][srcName].amount * 0.15))
 				end
 			elseif (spellid == 48707 or spellid == 51052) and UnitHealthMax(dstName) then -- Anti-Magic Shell/Zone
 				amount = UnitHealthMax(dstName) * 0.5
-			elseif spellid == 62606 and (UnitAttackPower(dstName) or 0) > 0 then -- Savage Defender
-				local base, posBuff, negBuff = UnitAttackPower(dstName)
-				amount = (base + posBuff + negBuff) * 0.25
 			elseif absorbspells[spellid].cap then
 				if shieldamounts[srcName] and shieldamounts[srcName][spellid] then
 					shields[dstName][spellid][srcName] = {
@@ -379,10 +392,10 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					}
 					return
 				else
-					amount = absorbspells[spellid].avg or absorbspells[spellid].cap or 1000
+					amount = (absorbspells[spellid].avg or absorbspells[spellid].cap or 1000) * zoneModifier
 				end
-			elseif (spellid ~= 50150 and spellid ~= 49497) then
-				amount = 1000 -- default
+			else
+				amount = 1000 * zoneModifier -- default
 			end
 
 			shields[dstName][spellid][srcName] = {
@@ -390,7 +403,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 				spellid = spellid,
 				school = spellschool,
 				points = points,
-				amount = floor(amount * zoneModifier),
+				amount = floor(amount),
 				ts = timestamp + absorbspells[spellid].dur + 0.1,
 				full = true
 			}
@@ -448,10 +461,10 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		end
 	end
 
-	local function process_absorb(timestamp, dstGUID, dstName, absorbed, spellschool, total, broken)
+	local function process_absorb(timestamp, dstGUID, dstName, absorbed, spellschool, damage, broke)
 		shields[dstName] = shields[dstName] or {}
 		local shieldsPopped = {}
-		local count = 0
+		local count, total = 0, damage + absorbed
 
 		for spellid, spells in pairs(shields[dstName]) do
 			for srcName, shield in pairs(spells) do
@@ -495,7 +508,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		if count <= 0 then return end
 
 		-- if the player has a single shield and it broke, we update its max absorb
-		if count == 1 and broken and shieldsPopped[1].full and absorbspells[shieldsPopped[1].spellid].cap then
+		if count == 1 and broke and shieldsPopped[1].full and absorbspells[shieldsPopped[1].spellid].cap then
 			local s = shieldsPopped[1]
 			shieldamounts[s.srcName] = shieldamounts[s.srcName] or {}
 			if (not shieldamounts[s.srcName][s.spellid] or shieldamounts[s.srcName][s.spellid] < absorbed) and absorbed < (absorbspells[s.spellid].cap * zoneModifier) then
@@ -505,30 +518,19 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 		-- we loop through available shields and make sure to update
 		-- their maximum absorb values.
-		for _, s in pairs(shieldsPopped) do
+		for _, s in ipairs(shieldsPopped) do
 			if s.full and shieldamounts[s.srcName] and shieldamounts[s.srcName][s.spellid] then
 				s.amount = shieldamounts[s.srcName][s.spellid]
-			elseif s.spellid == 50150 and s.points then -- Will of Necropolis
+			elseif s.spellid == 50150 and s.points then -- Will of the Necropolis
 				local hppercent = Skada:UnitHealthPercent(dstName, dstGUID)
-				if hppercent <= 35 then
-					s.amount = floor(total * 0.05 * s.points)
-				end
+				s.amount = (hppercent <= 36) and floor(total * 0.05 * s.points) or 0
 			elseif s.spellid == 49497 and s.points then -- Spell Deflection
 				s.amount = floor(total * 0.15 * s.points)
 			elseif s.spellid == 66233 and s.points then -- Ardent Defender
 				local hppercent = Skada:UnitHealthPercent(dstName, dstGUID)
-				if hppercent <= 35 then
-					s.amount = floor(total * 0.0667 * s.points)
-				end
+				s.amount = (hppercent <= 36) and floor(total * 0.0667 * s.points) or 0
 			elseif s.spellid == 31230 and s.points then -- Cheat Death
-				local maxhealth = select(3, Skada:UnitHealthPercent(dstName, dstGUID))
-				if maxhealth then
-					s.amount = floor(maxhealth * 0.1)
-				end
-			elseif tContains(priest_divine_aegis, s.spellid) then -- Divine Aegis
-				s.amount = min((UnitLevel(dstName) or 80) * 125, floor(s.amount))
-			elseif s.spellid == 64413 then -- Protection of Ancient Kings
-				s.amount = min(20000, floor(s.amount))
+				s.amount = floor(select(3, Skada:UnitHealthPercent(dstName, dstGUID)) * 0.1)
 			end
 		end
 
@@ -545,7 +547,6 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 				if amount > 0 and pshield then
 					log_absorb(Skada.current, pshield.srcGUID, pshield.srcName, dstGUID, dstName, pshield.spellid, pshield.school, amount, true)
 					log_absorb(Skada.total, pshield.srcGUID, pshield.srcName, dstGUID, dstName, pshield.spellid, pshield.school, amount, true)
-					pshield = nil
 				end
 				break
 			end
@@ -560,7 +561,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 			-- if the amount can be handled by the shield itself, we just
 			-- attribute it and break, no need to check for more.
-			if s.amount > amount then
+			if s.amount >= amount then
 				-- arriving at this point means that the shield broke,
 				-- so we make sure to remove it first, use its max
 				-- abosrb value then use the difference for the rest.
@@ -649,6 +650,9 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					if c and n then
 						tooltip:AddLine(n, c.r, c.g, c.b)
 					end
+				end
+				if (spell.count or 0) > 0 then
+					tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
 				end
 				if spell.min and spell.max then
 					tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.min), 1, 1, 1)
@@ -839,6 +843,8 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	end
 
 	function mod:AddSetAttributes(set)
+		self:ZoneModifier()
+
 		heals = {}
 		shields = {}
 		shieldamounts = {}
