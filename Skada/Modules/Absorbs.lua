@@ -67,7 +67,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		[27128] = {dur = 30}, -- Fire Ward (rank 6)
 		[43010] = {dur = 30, avg = 5200, cap = 7000}, -- Fire Ward (rank 7)
 		[58597] = {dur = 6, avg = 4400, cap = 6000}, -- Sacred Shield
-		[31852] = {dur = 86400}, -- Ardent Defender
+		[66233] = {dur = 86400}, -- Ardent Defender
 		[31230] = {dur = 86400}, -- Cheat Death
 		[17] = {dur = 30}, -- Power Word: Shield (rank 1)
 		[592] = {dur = 30}, -- Power Word: Shield (rank 2)
@@ -409,9 +409,9 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		-- in order to track them, we simply add them as fake shields before all.
 		-- I don't know the whole list of effects but, if you want to add yours
 		-- please do : CLASS = {[index] = {spellid, spellschool}}
-		local permanentspells = {
+		local passivespells = {
 			DEATHKNIGHT = {{50150, 1}, {49497, 1}},
-			PALADIN = {{31852, 1}},
+			PALADIN = {{66233, 1}},
 			ROGUE = {{31230, 1}}
 		}
 
@@ -432,13 +432,13 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 							end
 						end
 
-						-- fake permanent shields.
+						-- passive shields.
 						local class = select(2, _G.UnitClass(unit))
-						if permanentspells[class] then
-							for i, spell in ipairs(permanentspells[class]) do
+						if passivespells[class] then
+							for _, spell in ipairs(passivespells[class]) do
 								local points = LGT:GUIDHasTalent(dstGUID, GetSpellInfo(spell[1]), LGT:GetActiveTalentGroup(unit))
 								if points then
-									AuraApplied(timestamp + i, nil, dstGUID, dstGUID, nil, dstGUID, dstName, nil, spell[1], nil, spell[2], nil, points)
+									AuraApplied(timestamp - 60, nil, dstGUID, dstGUID, nil, dstGUID, dstName, nil, spell[1], nil, spell[2], nil, points)
 								end
 							end
 						end
@@ -515,7 +515,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 				end
 			elseif s.spellid == 49497 and s.points then -- Spell Deflection
 				s.amount = floor(total * 0.15 * s.points)
-			elseif s.spellid == 31852 and s.points then -- Ardent Defender
+			elseif s.spellid == 66233 and s.points then -- Ardent Defender
 				local hppercent = Skada:UnitHealthPercent(dstName, dstGUID)
 				if hppercent <= 35 then
 					s.amount = floor(total * 0.0667 * s.points)
@@ -571,7 +571,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 				break
 			else
 				-- if the "points" key exists, we don't remove the shield because
-				-- for us it means it's a permanent shield that should always be kept.
+				-- for us it means it's a passive shield that should always be kept.
 				if s.points == nil then
 					shields[dstName][s.spellid][s.srcName] = nil
 				end
