@@ -164,6 +164,10 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		[55019] = {dur = 12, cap = 1100}, -- Sonic Shield
 		[64413] = {dur = 8, cap = 20000}, -- Val'anyr, Hammer of Ancient Kings Protection of Ancient Kings
 		[40322] = {dur = 30, avg = 12000, cap = 12600}, -- Teron's Vengeful Spirit Ghost - Spirit Shield
+		[71586] = {dur = 10, cap = 6400}, -- Hardened Skin (Corroded Skeleton Key)
+		[60218] = {dur = 10, avg = 140, cap = 4000}, -- Essence of Gossamer
+		[57350] = {dur = 6, cap = 1500}, -- Illusionary Barrier (Darkmoon Card: Illusion)
+		[70845] = {dur = 10}, -- Stoicism
 		[65874] = {dur = 15, cap = 175000}, -- Twin Val'kyr's: Shield of Darkness
 		[67257] = {dur = 15, cap = 300000}, -- Twin Val'kyr's: Shield of Darkness
 		[67256] = {dur = 15, cap = 700000}, -- Twin Val'kyr's: Shield of Darkness
@@ -379,6 +383,8 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 				end
 			elseif (spellid == 48707 or spellid == 51052) and UnitHealthMax(dstName) then -- Anti-Magic Shell/Zone
 				amount = UnitHealthMax(dstName) * 0.5
+			elseif spellid == 70845 and UnitHealthMax(dstName) then -- Stoicism
+				amount = UnitHealthMax(dstName) * 0.2
 			elseif absorbspells[spellid].cap then
 				if shieldamounts[srcName] and shieldamounts[srcName][spellid] then
 					shields[dstName][spellid][srcName] = {
