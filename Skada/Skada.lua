@@ -2530,7 +2530,7 @@ end
 function dataobj:OnEnter()
 	self.tooltip = self.tooltip or GameTooltip
 	self.tooltip:SetOwner(self, "ANCHOR_NONE")
-	self.tooltip:SetPoint("TOPLEFT", self, "BOTTOMLEFT")
+	self.tooltip:SetPoint("TOPRIGHT", self, "BOTTOMRIGHT")
 	self.tooltip:ClearLines()
 
 	local set
