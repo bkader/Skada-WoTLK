@@ -62,11 +62,18 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 		}
 
 		function mod:CombatLogEvent(_, _, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-			-- ignore Fury of Frostmourne: this will remove the spell from all modules
-			if Skada.db.profile.fofrostmourne and eventtype == "SPELL_DAMAGE" then
-				if select(2, ...) == fofrostmourne or fofspells[select(1, ...)] then
-					return
+			-- Fury of Frostmourne
+			if eventtype == "SPELL_DAMAGE" and (select(2, ...) == fofrostmourne or fofspells[select(1, ...)]) then
+				-- the segment should be flagged as success.
+				if Skada.current and not Skada.current.success then
+					local set = Skada.current -- catch it before it goes away
+					Skada.After(Skada.db.profile.updatefrequency or 0.25, function()
+						set.success = true
+						Skada.callbacks:Fire("COMBAT_BOSS_DEFEATED", set)
+					end)
 				end
+				-- ignore the spell
+				if Skada.db.profile.fofrostmourne then return end
 			end
 
 			-- first hit
