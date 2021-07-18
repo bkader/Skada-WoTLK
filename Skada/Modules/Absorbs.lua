@@ -354,6 +354,14 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 			return true
 		end
 
+		-- Hardened Skin (Corroded Skeleton Key)
+		if a_spellid == 71586 then
+			return false
+		end
+		if b_spellid == 71586 then
+			return true
+		end
+
 		return (a.ts > b.ts)
 	end
 
