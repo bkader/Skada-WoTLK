@@ -8,8 +8,9 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 	local UnitExists, UnitName, UnitClass = UnitExists, UnitName, UnitClass
 	local GetSpellLink, GetSpellInfo = Skada.GetSpellLink, Skada.GetSpellInfo
 
-	local BITMASK_GROUP = bit.bor(COMBATLOG_OBJECT_AFFILIATION_MINE, COMBATLOG_OBJECT_AFFILIATION_PARTY, COMBATLOG_OBJECT_AFFILIATION_RAID)
+	local BITMASK_GROUP = Skada.BITMASK_GROUP or bit.bor(COMBATLOG_OBJECT_AFFILIATION_MINE, COMBATLOG_OBJECT_AFFILIATION_PARTY, COMBATLOG_OBJECT_AFFILIATION_RAID)
 	local pull_timer, channelEvents
+	local fofspells, fofrostmourne = {[72350] = true, [72351] = true}
 
 	local ignoredspells = {
 		[1130] = true, -- Hunter's Mark (rank 1)
@@ -61,8 +62,15 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 		}
 
 		function mod:CombatLogEvent(_, _, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-			-- pull timer
-			if (triggerevents[eventtype] or eventtype == "SPELL_CAST_SUCCESS") and not pull_timer and not ignoredspells[select(1, ...)] then
+			-- ignore Fury of Frostmourne: this will remove the spell from all modules
+			if Skada.db.profile.fofrostmourne and eventtype == "SPELL_DAMAGE" then
+				if select(2, ...) == fofrostmourne or fofspells[select(1, ...)] then
+					return
+				end
+			end
+
+			-- first hit
+			if Skada.db.profile.firsthit and (triggerevents[eventtype] or eventtype == "SPELL_CAST_SUCCESS") and not pull_timer and not ignoredspells[select(1, ...)] then
 				if srcName and dstName and ((band(srcFlags, BITMASK_GROUP) ~= 0 and Skada:IsBoss(dstGUID)) or (band(dstFlags, BITMASK_GROUP) ~= 0 and Skada:IsBoss(srcGUID))) then
 					local puller
 
@@ -105,6 +113,8 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 					end
 				end
 			end
+
+			self.hooks[Skada].CombatLogEvent(Skada, nil, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		end
 	end
 
@@ -279,6 +289,9 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 			Skada.db.profile.spamage = false
 		end
 
+		-- Fury of Frostmourne
+		fofrostmourne = fofrostmourne or GetSpellInfo(72351)
+
 		-- options.
 		Skada.options.args.Tweaks = {
 			type = "group",
@@ -309,6 +322,12 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 					name = L["Filter DPS meters Spam"],
 					desc = L["Suppresses chat messages from damage meters and provides single chat-link damage statistics in a popup."],
 					order = 3
+				},
+				fofrostmourne = {
+					type = "toggle",
+					name = fofrostmourne,
+					desc = format(L["Enable this if you want to ignore |cffffbb00%s|r."], fofrostmourne),
+					order = 4
 				},
 				smartsep = {
 					type = "description",
@@ -379,12 +398,13 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 	end
 
 	function mod:ApplySettings()
-		-- first hit
-		if Skada.db.profile.firsthit then
+		fofrostmourne = fofrostmourne or GetSpellInfo(72351)
+
+		if (Skada.db.profile.firsthit or Skada.db.profile.fofrostmourne) then
 			if not self:IsHooked(Skada, "CombatLogEvent") then
-				self:SecureHook(Skada, "CombatLogEvent")
+				self:RawHook(Skada, "CombatLogEvent", true)
 			end
-			if not self:IsHooked(Skada, "EndSegment") then
+			if Skada.db.profile.firsthit and not self:IsHooked(Skada, "EndSegment") then
 				self:SecureHook(Skada, "EndSegment")
 			end
 		else

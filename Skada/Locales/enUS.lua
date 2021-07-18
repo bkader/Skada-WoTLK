@@ -643,3 +643,4 @@ L["Duration"] = true
 L["For how long Skada should wait before stopping the segment."] = true
 L["Module Icons"] = true
 L["Enable this if you want to show module icons on windows and menus."] = true
+L["Enable this if you want to ignore |cffffbb00%s|r."] = true
