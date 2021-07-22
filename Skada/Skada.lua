@@ -1470,9 +1470,16 @@ do
 		[34496] = LBB["The Twin Val'kyr"], -- Eydis Darkbane
 		[34497] = LBB["The Twin Val'kyr"], -- Fjola Lightbane
 		-- [[ Ulduar ]] --
+		[32857] = LBB["The Iron Council"], -- Stormcaller Brundir
+		[32867] = LBB["The Iron Council"], -- Steelbreaker
+		[32927] = LBB["The Iron Council"], -- Runemaster Molgeim
 		[32930] = LBB["Kologarn"], -- Kologarn
 		[32933] = LBB["Kologarn"], -- Left Arm
 		[32934] = LBB["Kologarn"], -- Right Arm
+		[33515] = LBB["Auriaya"], -- Auriaya
+		[34014] = LBB["Auriaya"], -- Sanctum Sentry
+		[34035] = LBB["Auriaya"], -- Feral Defender
+		[32882] = LBB["Thorim"], -- Jormungar Behemoth
 		[33288] = LBB["Yogg-Saron"], -- Yogg-Saron
 		[33890] = LBB["Yogg-Saron"], -- Brain of Yogg-Saron
 		[33136] = LBB["Yogg-Saron"] -- Guardian of Yogg-Saron
