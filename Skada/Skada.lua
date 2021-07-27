@@ -214,7 +214,7 @@ end
 -- skada reset dialog
 function Skada:ShowPopup(win, popup)
 	if Skada.db.profile.skippopup and not popup then
-		Skada:Reset()
+		Skada:Reset(IsShiftKeyDown())
 		return
 	end
 
@@ -226,7 +226,7 @@ function Skada:ShowPopup(win, popup)
 			timeout = 30,
 			whileDead = 0,
 			hideOnEscape = 1,
-			OnAccept = function() Skada:Reset() end
+			OnAccept = function() Skada:Reset(IsShiftKeyDown()) end
 		}
 	end
 	StaticPopup_Show("SkadaResetDialog")
@@ -1834,7 +1834,7 @@ local function SlashCommandHandler(cmd)
 	if cmd == "pets" then
 		Skada:PetDebug()
 	elseif cmd == "reset" then
-		Skada:Reset()
+		Skada:Reset(IsShiftKeyDown())
 	elseif cmd == "newsegment" then
 		Skada:NewSegment()
 	elseif cmd == "toggle" then
