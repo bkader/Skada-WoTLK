@@ -544,7 +544,7 @@ Skada.options = {
 				translit = {
 					type = "toggle",
 					name = L["Translit"],
-					desc = L["Make those russian letters that no one understand to be presented as western letters."],
+					desc = L["Make those russian letters that no one understands to be presented as western letters."],
 					order = 22
 				},
 				feed = {

@@ -3243,7 +3243,7 @@ function Skada:EndSegment()
 		if self.current.mobname ~= nil and now - self.current.starttime > 5 then
 			self.current.endtime = self.current.endtime or now
 			self.current.time = max(self.current.endtime - self.current.starttime, 0.1)
-			self.current.stopped = nil
+			self.current.started, self.current.stopped = nil, nil
 
 			local setname = self.current.mobname
 			if self.db.profile.setnumber then
@@ -3274,31 +3274,22 @@ function Skada:EndSegment()
 		end
 	end
 
-	self.last = self.current
-	self.last.started = nil
-
-	if self.last.gotboss and self.db.profile.alwayskeepbosses then
-		self.last.keep = true
-	end
-
-	self.total.time = self.total.time + self.current.time
-
-	for _, player in self:IteratePlayers(self.total) do
-		player.last = nil
-	end
-
 	self.callbacks:Fire("COMBAT_PLAYER_LEAVE", self.current, self.total)
 	if self.current.gotboss then
 		self.callbacks:Fire("COMBAT_ENCOUNTER_END", self.current, self.total)
 	end
 
+	self.last = self.current
+	self.total.time = self.total.time + self.current.time
+
 	self.current = nil
+	for _, player in self:IteratePlayers(self.total) do
+		player.last = nil
+	end
 
 	local numsets = 0
 	for _, set in self:IterateSets() do
-		if not set.keep then
-			numsets = numsets + 1
-		end
+		if not set.keep then numsets = numsets + 1 end
 	end
 
 	for i = tmaxn(self.char.sets), 1, -1 do
@@ -3587,6 +3578,9 @@ do
 				if not self.current.gotboss and isboss then
 					self.current.mobname = bossname or dstName
 					self.current.gotboss = true
+					if self.db.profile.alwayskeepbosses then
+						self.current.keep = true
+					end
 					self.callbacks:Fire("COMBAT_ENCOUNTER_START", self.current)
 				elseif not self.current.mobname then
 					self.current.mobname = dstName
