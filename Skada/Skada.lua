@@ -24,7 +24,6 @@ local band, bor, time, setmetatable = bit.band, bit.bor, time, setmetatable
 local GetNumPartyMembers, GetNumRaidMembers = GetNumPartyMembers, GetNumRaidMembers
 local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAffectingCombat, InCombatLockdown
 local UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected
-local CombatLogClearEntries = CombatLogClearEntries
 local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
 
@@ -1243,7 +1242,6 @@ function Skada:DeleteSet(set, index)
 		end
 
 		self:Wipe()
-		self:CleanGarbage(true)
 		self:UpdateDisplay(true)
 	end
 end
@@ -1844,8 +1842,6 @@ local function SlashCommandHandler(cmd)
 		Skada:Print("Debug mode " .. (Skada.db.profile.debug and ("|cFF00FF00" .. L["ENABLED"] .. "|r") or ("|cFFFF0000" .. L["DISABLED"] .. "|r")))
 	elseif cmd == "config" then
 		Skada:OpenOptions()
-	elseif cmd == "clear" or cmd == "clean" then
-		Skada:CleanGarbage(true)
 	elseif cmd == "website" or cmd == "github" then
 		Skada:Printf("|cffffbb00%s|r", Skada.website)
 	elseif cmd == "timemesure" or cmd == "measure" then
@@ -1889,7 +1885,6 @@ local function SlashCommandHandler(cmd)
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33numformat|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33measure|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33config|r")
-		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33clean|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33website|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33debug|r")
 	end
@@ -2218,7 +2213,6 @@ function Skada:Reset(force)
 	CloseDropDownMenus()
 
 	self.callbacks:Fire("SKADA_DATA_RESET")
-	self:CleanGarbage(true)
 end
 
 function Skada:UpdateDisplay(force)
@@ -3088,7 +3082,6 @@ function Skada:OnEnable()
 	end
 
 	self.After(2, function() self:ApplySettings() end)
-	self.NewTicker(2, function() self:CleanGarbage() end)
 	self.After(3, function() self:MemoryCheck() end)
 
 	if _G.BigWigs then
@@ -3134,13 +3127,6 @@ function Skada:MemoryCheck()
 		if GetAddOnMemoryUsage("Skada") > (compare * 1024) then
 			self:Print(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."])
 		end
-	end
-end
-
-function Skada:CleanGarbage(clean)
-	CombatLogClearEntries()
-	if clean and not InCombatLockdown() then
-		collectgarbage("collect")
 	end
 end
 
@@ -3337,7 +3323,6 @@ function Skada:EndSegment()
 		tick_timer = nil
 	end
 
-	self.After(2, function() self:CleanGarbage(true) end)
 	self.After(3, function() self:MemoryCheck() end)
 end
 

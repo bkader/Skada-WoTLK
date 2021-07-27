@@ -53,6 +53,9 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 		end
 	end
 
+	---------------------------------------------------------------------------
+	-- CombatLogEvent Hook
+
 	do
 		local triggerevents = {
 			["RANGE_DAMAGE"] = true,
@@ -62,7 +65,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 		}
 
 		function mod:CombatLogEvent(_, _, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-			-- Fury of Frostmourne
+			-- The Lich King fight & Fury of Frostmourne
 			if eventtype == "SPELL_DAMAGE" and (select(2, ...) == fofrostmourne or fofspells[select(1, ...)]) then
 				-- the segment should be flagged as success.
 				if Skada.current and not Skada.current.success then
@@ -133,6 +136,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 	end
 
 	---------------------------------------------------------------------------
+	-- DPSLink filter
 
 	do
 		local find, gsub, split, tonumber = string.find, string.gsub, string.split, tonumber
@@ -277,6 +281,73 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 	end
 
 	---------------------------------------------------------------------------
+	-- CombatLog Fix
+
+	do
+		local setmetatable, rawset, rawget = setmetatable, rawset, rawget
+		local GetTime, CombatLogClearEntries, CombatLogGetNumEntries = GetTime, CombatLogClearEntries, CombatLogGetNumEntries
+
+		local frame, zonetype, throttle
+		local playerspells = setmetatable({}, {__index = function(t, name)
+			local cost = select(4, GetSpellInfo(name))
+			rawset(t, name, not (not (cost and cost > 0)))
+			return rawget(t, name)
+		end})
+
+		local function OnUpdate(self, elapsed)
+			if not self.timeout then return end
+			self.timeout = self.timeout - elapsed
+			if self.timeout > 0 then return end
+			self:Hide()
+
+			-- was the last combat event within a second of cast succeeding?
+			if self.lastEvent and (GetTime() - self.lastEvent) <= 1 then return end
+
+			if not throttle or throttle < GetTime() then
+				Skada:Debug(format("%d filtered/%d events found. Cleared combat log, as it broke.", CombatLogGetNumEntries(), CombatLogGetNumEntries(true)))
+				throttle = GetTime() + 60
+			end
+
+			CombatLogClearEntries()
+		end
+
+		local function OnEvent(self, event, ...)
+			if event == "COMBAT_LOG_EVENT_UNFILTERED" then
+				self.lastEvent = ... -- timestamp
+			elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
+				local unit, spellname = ...
+				if unit == "player" and spellname and playerspells[spellname] then
+					self.timeout = 0.5
+					self:Show()
+				end
+			elseif event == "ZONE_CHANGED_NEW_AREA" then
+				local zt = select(2, IsInInstance())
+				if zonetype and zt ~= zonetype then
+					CombatLogClearEntries()
+				end
+				zonetype = zt
+			end
+		end
+
+		function mod:CombatLogFix()
+			if Skada.db.profile.combatlogfix and not frame then
+				frame = CreateFrame("Frame")
+				frame:SetScript("OnUpdate", OnUpdate)
+				frame:SetScript("OnEvent", OnEvent)
+				frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+				frame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+				frame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+				frame:Hide()
+			elseif not Skada.db.profile.combatlogfix and frame then
+				frame:UnregisterAllEvents()
+				frame:SetScript("OnUpdate", nil)
+				frame:SetScript("OnEvent", nil)
+				frame = nil
+			end
+		end
+	end
+
+	---------------------------------------------------------------------------
 
 	function mod:OnInitialize()
 		-- first hit.
@@ -289,6 +360,10 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 		end
 		if Skada.db.profile.smartwait == nil then
 			Skada.db.profile.smartwait = 5
+		end
+		-- combatlog fix
+		if Skada.db.profile.combatlogfix == nil then
+			Skada.db.profile.combatlogfix = true
 		end
 
 		-- old spamage module
@@ -330,11 +405,17 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 					desc = L["Suppresses chat messages from damage meters and provides single chat-link damage statistics in a popup."],
 					order = 3
 				},
+				combatlogfix = {
+					type = "toggle",
+					name = L["Fix Combat Log"],
+					desc = L["Keeps the combat log from breaking without munging it completely."],
+					order = 4
+				},
 				fofrostmourne = {
 					type = "toggle",
 					name = fofrostmourne,
 					desc = format(L["Enable this if you want to ignore |cffffbb00%s|r."], fofrostmourne),
-					order = 4
+					order = 5
 				},
 				smartsep = {
 					type = "description",
@@ -407,6 +488,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 	function mod:ApplySettings()
 		fofrostmourne = fofrostmourne or GetSpellInfo(72351)
 
+		-- first hit or fury of frostmourne
 		if (Skada.db.profile.firsthit or Skada.db.profile.fofrostmourne) then
 			if not self:IsHooked(Skada, "CombatLogEvent") then
 				self:RawHook(Skada, "CombatLogEvent", true)
@@ -423,6 +505,9 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 				self:Unhook(Skada, "EndSegment")
 			end
 		end
+
+		-- combatlog fix
+		self:CombatLogFix()
 
 		-- smart stop
 		if Skada.db.profile.smartstop then
