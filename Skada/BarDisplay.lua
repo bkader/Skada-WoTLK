@@ -754,13 +754,15 @@ do
 				group:StartMoving()
 
 				-- move sticked windows.
-				local offset = group.win.db.background.borderthickness
-				for _, win in Skada:IterateWindows() do
-					if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
-						FlyPaper.Stick(win.bargroup, group, nil, offset, offset)
-						win.bargroup.button.startX = win.bargroup:GetLeft()
-						win.bargroup.button.startY = win.bargroup:GetTop()
-						move(win.bargroup.button, "LeftButton")
+				if FlyPaper and group.win.db.sticky and not group.win.db.hidden then
+					local offset = group.win.db.background.borderthickness
+					for _, win in Skada:IterateWindows() do
+						if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
+							FlyPaper.Stick(win.bargroup, group, nil, offset, offset)
+							win.bargroup.button.startX = win.bargroup:GetLeft()
+							win.bargroup.button.startY = win.bargroup:GetTop()
+							move(win.bargroup.button, "LeftButton")
+						end
 					end
 				end
 			end
@@ -784,12 +786,14 @@ do
 				local endY = group:GetTop()
 				if self.startX ~= endX or self.startY ~= endY then
 					group.callbacks:Fire("AnchorMoved", group, endX, endY)
-					for _, win in Skada:IterateWindows() do
-						if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
-							local xOfs, yOfs = win.bargroup:GetLeft(), win.bargroup:GetTop()
-							if win.bargroup.startX ~= xOfs or win.bargroup.startY ~= yOfs then
-								win.bargroup.callbacks:Fire("AnchorMoved", win.bargroup, xOfs, yOfs)
-								stopMove(win.bargroup.button, "LeftButton")
+					if FlyPaper and group.win.db.sticky and not group.win.db.hidden then
+						for _, win in Skada:IterateWindows() do
+							if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
+								local xOfs, yOfs = win.bargroup:GetLeft(), win.bargroup:GetTop()
+								if win.bargroup.startX ~= xOfs or win.bargroup.startY ~= yOfs then
+									win.bargroup.callbacks:Fire("AnchorMoved", win.bargroup, xOfs, yOfs)
+									stopMove(win.bargroup.button, "LeftButton")
+								end
 							end
 						end
 					end
@@ -800,9 +804,7 @@ do
 
 	-- Called by Skada windows when window settings have changed.
 	function mod:ApplySettings(win)
-		if not win or not win.bargroup then
-			return
-		end
+		if not win or not win.bargroup then return end
 
 		local g = win.bargroup
 		g:SetFrameLevel(1)
@@ -925,11 +927,15 @@ do
 		local bgcolor = p.background.color
 		g:SetBackdropColor(bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a or 1)
 
-		if FlyPaper and p.sticky then
-			FlyPaper.AddFrame("Skada", p.name, g)
-			g.button:SetScript("OnMouseDown", move)
-			g.button:SetScript("OnMouseUp", stopMove)
+		if FlyPaper then
+			if p.sticky and not p.hidden then
+				FlyPaper.AddFrame("Skada", p.name, g)
+			else
+				FlyPaper.RemoveFrame("Skada", p.name)
+			end
 		end
+		g.button:SetScript("OnMouseDown", move)
+		g.button:SetScript("OnMouseUp", stopMove)
 
 		g:SetMaxBars()
 		g:SetEnableMouse(not p.clickthrough)

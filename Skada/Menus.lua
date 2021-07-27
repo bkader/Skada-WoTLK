@@ -257,6 +257,7 @@ function Skada:OpenMenu(window)
 						window.db.hidden = false
 						window:Show()
 					end
+					Skada:ApplySettings()
 				end
 				info.checked = not window:IsShown()
 				info.isNotRadio = 1
