@@ -319,6 +319,7 @@ L["Key scrolling speed"] = "키 스크롤 속도"
 -- minimap button
 L["Skada Summary"] = "Skada 요약"
 L["|cffeda55fLeft-Click|r to toggle windows."] = "창을 전환하려면 왼쪽 버튼을 클릭하십시오."
+L["|cffeda55fCtrl+Left-Click|r to show/hide windows."] = "Ctrl+왼쪽-창 표시/숨기기."
 L["|cffeda55fShift+Left-Click|r to reset."] = "Shift+왼쪽-클릭으로 초기화합니다."
 L["|cffeda55fRight-Click|r to open menu."] = "메뉴를 열려면 오른쪽 클릭."
 -- skada menu
@@ -326,7 +327,8 @@ L["Skada Menu"] = "Skada 메뉴"
 L["Select Segment"] = "선택 세그먼트"
 L["Delete Segment"] = "세분화 삭제"
 L["Keep Segment"] = "세분화 유지"
-L["Toggle Windows"] = "창 표시 전환"
+L["Toggle Windows"] = "창 전환"
+L["Show/Hide Windows"] = "창 표시/숨기기"
 L["Start New Segment"] = "새로운 세분화 시작"
 -- window buttons
 L["Configure"] = "설정"

@@ -37,6 +37,7 @@ local dataobj = LDB:NewDataObject("Skada", {
 -- Keybindings
 BINDING_HEADER_SKADA = "Skada"
 BINDING_NAME_SKADA_TOGGLE = L["Toggle Windows"]
+BINDING_NAME_SKADA_SHOWHIDE = L["Show/Hide Windows"]
 BINDING_NAME_SKADA_RESET = RESET
 BINDING_NAME_SKADA_NEWSEGMENT = L["Start New Segment"]
 BINDING_NAME_SKADA_STOP = L["Stop"]
@@ -943,6 +944,12 @@ function Skada:ToggleWindow()
 	end
 end
 
+-- global show/hide windows
+function Skada:ShowHide()
+	self.db.profile.hidden = not self.db.profile.hidden
+	self:ApplySettings()
+end
+
 -- restores a view for the selected window
 function Skada:RestoreView(win, theset, themode)
 	if theset and type(theset) == "string" and (theset == "current" or theset == "total" or theset == "last") then
@@ -970,6 +977,10 @@ function Skada:Wipe()
 end
 
 function Skada:SetActive(enable)
+	if enable and self.db.profile.hidden then
+		enable = false
+	end
+
 	if enable then
 		for _, win in self:IterateWindows() do
 			win:Show()
@@ -1837,6 +1848,16 @@ local function SlashCommandHandler(cmd)
 		Skada:NewSegment()
 	elseif cmd == "toggle" then
 		Skada:ToggleWindow()
+	elseif cmd == "show" then
+		if Skada.db.profile.hidden then
+			Skada.db.profile.hidden = false
+			Skada:ApplySettings()
+		end
+	elseif cmd == "hide" then
+		if not Skada.db.profile.hidden then
+			Skada.db.profile.hidden = true
+			Skada:ApplySettings()
+		end
 	elseif cmd == "debug" then
 		Skada.db.profile.debug = not Skada.db.profile.debug
 		Skada:Print("Debug mode " .. (Skada.db.profile.debug and ("|cFF00FF00" .. L["ENABLED"] .. "|r") or ("|cFFFF0000" .. L["DISABLED"] .. "|r")))
@@ -1881,6 +1902,8 @@ local function SlashCommandHandler(cmd)
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33report|r [raid|guild|party|officer|say] [mode] [max lines]")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33reset|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33toggle|r")
+		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33show|r")
+		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33hide|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33newsegment|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33numformat|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33measure|r")
@@ -2555,6 +2578,7 @@ function dataobj:OnEnter()
 	end
 
 	self.tooltip:AddLine(L["|cffeda55fLeft-Click|r to toggle windows."], 0.2, 1, 0.2)
+	self.tooltip:AddLine(L["|cffeda55fCtrl+Left-Click|r to show/hide windows."], 0.2, 1, 0.2)
 	self.tooltip:AddLine(L["|cffeda55fShift+Left-Click|r to reset."], 0.2, 1, 0.2)
 	self.tooltip:AddLine(L["|cffeda55fRight-Click|r to open menu."], 0.2, 1, 0.2)
 
@@ -2566,7 +2590,10 @@ function dataobj:OnLeave()
 end
 
 function dataobj:OnClick(button)
-	if button == "LeftButton" and IsShiftKeyDown() then
+	if button == "LeftButton" and IsControlKeyDown() then
+		Skada.db.profile.hidden = not Skada.db.profile.hidden
+		Skada:ApplySettings()
+	elseif button == "LeftButton" and IsShiftKeyDown() then
 		Skada:ShowPopup()
 	elseif button == "LeftButton" then
 		Skada:ToggleWindow()

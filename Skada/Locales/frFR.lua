@@ -321,7 +321,8 @@ L["Keybinding"] = "Raccourci"
 L["Key scrolling speed"] = "Vitesse de défilement du raccourci"
 -- minimap button
 L["Skada Summary"] = "Résumé Skada"
-L["|cffeda55fLeft-Click|r to toggle windows."] = "|cffeda55fClic-gauche|r pour afficher/cacher les fenêtres."
+L["|cffeda55fLeft-Click|r to toggle windows."] = "|cffeda55fClic-gauche|r pour basculer l'affichage des fenêtres."
+L["|cffeda55fCtrl+Left-Click|r to show/hide windows."] = "|cffeda55fCtrl+clic-gauche|r pour afficher/cacher les fenêtres."
 L["|cffeda55fShift+Left-Click|r to reset."] = "|cffeda55fShift+clic-gauche|r pour réinitialiser."
 L["|cffeda55fRight-Click|r to open menu."] = "|cffeda55fClic-droit|r pour ouvrir le menu."
 -- skada menu
@@ -330,6 +331,7 @@ L["Select Segment"] = "Choix de segment"
 L["Delete Segment"] = "Suppr. un segment"
 L["Keep Segment"] = "Garder un segment"
 L["Toggle Windows"] = "Basculer l'affichage"
+L["Show/Hide Windows"] = "Afficher/Cacher les fenêtres"
 L["Start New Segment"] = "Nouveau segment"
 -- window buttons
 L["Configure"] = "Configurer"

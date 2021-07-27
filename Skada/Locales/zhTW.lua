@@ -318,14 +318,16 @@ L["Delete theme"] = "刪除主題"
 -- minimap button
 L["Skada Summary"] = "Skada一覽"
 -- L["|cffeda55fLeft-Click|r to toggle windows."] = ""
-L["|cffeda55fShift+Left-Click|r to reset."] = "Shift+左鍵點|r擊進行重置。"
+L["|cffeda55fCtrl+Left-Click|r to show/hide windows."] = "|cffeda55fCtrl+左鍵點|r顯示/隱藏窗口。"
+L["|cffeda55fShift+Left-Click|r to reset."] = "|cffeda55fShift+左鍵點|r擊進行重置。"
 L["|cffeda55fRight-Click|r to open menu."] = "右鍵點擊開啟選單。"
 -- skada menu
 L["Skada Menu"] = "Skada 選單"
 L["Delete Segment"] = "刪除分段資料"
 L["Select Segment"] = "选择细分"
 L["Keep Segment"] = "保留分段資料"
-L["Toggle Windows"] = "切換視窗"
+L["Toggle Windows"] = "切換窗口"
+L["Show/Hide Windows"] = "顯示/隱藏窗口"
 L["Start New Segment"] = "開始新的分段"
 -- window buttons
 L["Configure"] = "設定"

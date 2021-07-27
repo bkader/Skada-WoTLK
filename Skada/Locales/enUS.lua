@@ -317,6 +317,7 @@ L["Key scrolling speed"] = true
 -- minimap button
 L["Skada Summary"] = true
 L["|cffeda55fLeft-Click|r to toggle windows."] = true
+L["|cffeda55fCtrl+Left-Click|r to show/hide windows."] = true
 L["|cffeda55fShift+Left-Click|r to reset."] = true
 L["|cffeda55fRight-Click|r to open menu."] = true
 -- skada menu
@@ -325,6 +326,7 @@ L["Select Segment"] = true
 L["Delete Segment"] = true
 L["Keep Segment"] = true
 L["Toggle Windows"] = true
+L["Show/Hide Windows"] = true
 L["Start New Segment"] = true
 -- window buttons
 L["Configure"] = true
