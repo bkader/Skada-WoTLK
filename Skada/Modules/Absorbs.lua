@@ -16,7 +16,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 	local mod = Skada:NewModule(L["Absorbs"])
 	local playermod = mod:NewModule(L["Absorb spell list"])
-	local targetmod = mod:NewModule(L["Absorbed player list"])
+	local targetmod = mod:NewModule(L["Absorbed target list"])
 
 	local LGT = LibStub("LibGroupTalents-1.0")
 
@@ -233,8 +233,8 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 				local target = player.absorb_targets and player.absorb_targets[dstName]
 				if not target then
 					player.absorb_targets = player.absorb_targets or {}
-					target = {id = dstGUID, amount = amount}
-					player.absorb_targets[dstName] = target
+					player.absorb_targets[dstName] = {id = dstGUID, amount = amount}
+					target = player.absorb_targets[dstName]
 				else
 					target.id = target.id or dstGUID -- GUID fix
 					target.amount = target.amount + amount
@@ -576,14 +576,14 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 			-- if the amount can be handled by the shield itself, we just
 			-- attribute it and break, no need to check for more.
 			if s.amount >= amount then
-				-- arriving at this point means that the shield broke,
-				-- so we make sure to remove it first, use its max
-				-- abosrb value then use the difference for the rest.
 				shields[dstName][s.spellid][s.srcName].amount = s.amount - amount
 				shields[dstName][s.spellid][s.srcName].full = nil
 				log_absorb(Skada.current, s.srcGUID, s.srcName, dstGUID, dstName, s.spellid, s.school, amount)
 				log_absorb(Skada.total, s.srcGUID, s.srcName, dstGUID, dstName, s.spellid, s.school, amount)
 				break
+			-- arriving at this point means that the shield broke,
+			-- so we make sure to remove it first, use its max
+			-- abosrb value then use the difference for the rest.
 			else
 				-- if the "points" key exists, we don't remove the shield because
 				-- for us it means it's a passive shield that should always be kept.
@@ -717,13 +717,13 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's absorbed players"], label)
+		win.title = format(L["%s's absorbed targets"], label)
 	end
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = format(L["%s's absorbed players"], player.name)
+			win.title = format(L["%s's absorbed targets"], player.name)
 			local total = player.absorb or 0
 
 			if total > 0 and player.absorb_targets then
@@ -870,7 +870,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 	if Skada:IsDisabled("Healing", "Absorbs", "Absorbs and Healing") then return end
 
 	local mod = Skada:NewModule(L["Absorbs and Healing"])
-	local targetmod = mod:NewModule(L["Absorbed and healed players"])
+	local targetmod = mod:NewModule(L["Absorbed and healed targets"])
 	local playermod = mod:NewModule(L["Absorbs and healing spells"])
 
 	local function getHPS(set, player)
@@ -1007,13 +1007,13 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's absorbed and healed players"], label)
+		win.title = format(L["%s's absorbed and healed targets"], label)
 	end
 
 	function targetmod:Update(win, set)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
-			win.title = format(L["%s's absorbed and healed players"], player.name)
+			win.title = format(L["%s's absorbed and healed targets"], player.name)
 
 			local total, targets = 0, {}
 

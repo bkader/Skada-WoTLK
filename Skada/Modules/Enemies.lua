@@ -698,7 +698,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 	if Skada:IsDisabled("Enemy Healing Done") then return end
 
 	local mod = Skada:NewModule(L["Enemy Healing Done"])
-	local targetmod = mod:NewModule(L["Healed player list"])
+	local targetmod = mod:NewModule(L["Healed target list"])
 	local spellmod = mod:NewModule(L["Healing spell list"])
 
 	local function log_heal(set, data)
@@ -748,11 +748,11 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 
 	function targetmod:Enter(win, id, label)
 		win.targetname = label
-		win.title = format(L["%s's healed players"], label)
+		win.title = format(L["%s's healed targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's healed players"], win.targetname or UNKNOWN)
+		win.title = format(L["%s's healed targets"], win.targetname or UNKNOWN)
 		local enemy = Skada:find_enemy(set, win.targetname)
 		local total = enemy and select(2, getHPS(set, enemy)) or 0
 
