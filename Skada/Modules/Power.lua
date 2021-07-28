@@ -96,7 +96,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 	-- this is the main module update function that shows the list
 	-- of players depending on the selected power gain type.
 	function basemod:Update(win, set)
-		win.title = self.name or UNKNOWN
+		win.title = self.moduleName or UNKNOWN
 		local total = (set and set.power and self.power ~= nil) and set.power[self.power] or 0
 
 		if total > 0 then
