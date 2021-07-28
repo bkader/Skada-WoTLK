@@ -9,8 +9,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 	local GetSpellLink, GetSpellInfo = Skada.GetSpellLink, Skada.GetSpellInfo
 
 	local BITMASK_GROUP = Skada.BITMASK_GROUP or bit.bor(COMBATLOG_OBJECT_AFFILIATION_MINE, COMBATLOG_OBJECT_AFFILIATION_PARTY, COMBATLOG_OBJECT_AFFILIATION_RAID)
-	local pull_timer, channelEvents
-	local fofspells, fofrostmourne = {[72350] = true, [72351] = true}
+	local pull_timer, channelEvents, fofrostmourne
 
 	local ignoredspells = {
 		[1130] = true, -- Hunter's Mark (rank 1)
@@ -66,7 +65,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 
 		function mod:CombatLogEvent(_, _, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 			-- The Lich King fight & Fury of Frostmourne
-			if eventtype == "SPELL_DAMAGE" and (select(2, ...) == fofrostmourne or fofspells[select(1, ...)]) then
+			if select(1, ...) == 72350 or select(2, ...) == fofrostmourne then
 				-- the segment should be flagged as success.
 				if Skada.current and not Skada.current.success then
 					local set = Skada.current -- catch it before it goes away
