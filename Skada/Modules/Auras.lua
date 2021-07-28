@@ -172,7 +172,7 @@ do
 
 				if auracount > 0 and aurauptime > 0 then
 					local maxtime = PlayerActiveTime(set, player)
-					local uptime = aurauptime / auracount
+					local uptime = min(floor(aurauptime / auracount), maxtime)
 
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
@@ -184,16 +184,16 @@ do
 					d.role = player.role
 					d.spec = player.spec
 
-					d.value = uptime
+					d.value = uptime / max(1, maxtime)
 					d.valuetext = Skada:FormatValueText(
 						auracount,
 						mod.metadata.columns.Count,
-						format("%.1f%%", 100 * uptime / max(1, maxtime)),
+						format("%.1f%%", 100 * d.value),
 						mod.metadata.columns.Percent
 					)
 
-					if uptime > maxvalue then
-						maxvalue = uptime
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end
@@ -308,8 +308,6 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 		[57821] = true, -- Tabard of the Kirin Tor
 		[57822] = true, -- Tabard of the Wyrmrest Accord
 		[72968] = true, -- Precious's Ribbon
-		[57723] = true, -- Exhaustion (Heroism)
-		[57724] = true, -- Sated (Bloodlust)
 		[57940] = true -- Essence of Wintergrasp
 	}
 
@@ -447,15 +445,24 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 	local spellmod = mod:NewModule(L["Debuff spell list"])
 	local targetmod = spellmod:NewModule(L["Debuff target list"])
 
+	-- list of the auras that are ignored!
+	local blacklist = {
+		[57723] = true, -- Exhaustion (Heroism)
+		[57724] = true -- Sated (Bloodlust)
+	}
+
 	local aura = {}
 
 	local function handleDebuff(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, spellschool, auratype)
-		if auratype == "DEBUFF" then
+		if auratype == "DEBUFF" and not blacklist[spellid] then
 			if srcName == nil and #srcGUID == 0 and dstName and #dstGUID > 0 then
 				srcGUID = dstGUID
 				srcName = dstName
 				srcFlags = dstFlags
 			end
+
+			-- we only record players
+			if not Skada:IsPlayer(srcGUID, srcFlags, srcName) then return end
 
 			aura.playerid = srcGUID
 			aura.playername = srcName
