@@ -668,8 +668,8 @@ function Window:DisplayMode(mode)
 	self.selectedmode = mode
 	self.metadata = wipe(self.metadata or {})
 
-	if mode and self.parenttitle ~= mode:GetName() and Skada:GetModule(mode:GetName(), true) then
-		self.parenttitle = mode:GetName()
+	if mode and self.parentmode ~= mode and Skada:GetModule(mode:GetName(), true) then
+		self.parentmode = mode
 	end
 
 	if mode.metadata then
@@ -2494,7 +2494,7 @@ do
 			return
 		end
 
-		local name = self.parenttitle or self.selectedmode.title or self.selectedmode:GetName()
+		local name = (self.parentmode and self.parentmode:GetName()) or self.selectedmode.title or self.selectedmode:GetName()
 
 		-- save window settings for RestoreView after reload
 		self.db.set = self.selectedset

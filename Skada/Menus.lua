@@ -183,7 +183,7 @@ function Skada:OpenMenu(window)
 								window:DisplayMode(mode)
 							end
 							info.icon = (Skada.db.profile.modeicons and mode.metadata) and mode.metadata.icon
-							info.checked = (window.selectedmode == mode or window.parenttitle == mode:GetName())
+							info.checked = (window.selectedmode == mode or window.parentmode == mode)
 							UIDropDownMenu_AddButton(info, level)
 						end
 
@@ -596,7 +596,7 @@ do
 					info.hasArrow = 1
 					info.notCheckable = 1
 					info.padding = 16
-					if win and win.selectedmode and win.selectedmode.category == category then
+					if win and win.selectedmode and (win.selectedmode.category == category or (win.parentmode and win.parentmode.category == category)) then
 						info.colorCode = "|cffffd100"
 					end
 					UIDropDownMenu_AddButton(info, level)
@@ -610,7 +610,7 @@ do
 						CloseDropDownMenus()
 					end
 
-					if win and win.selectedmode and win.selectedmode:GetName() == mode:GetName() then
+					if win and win.selectedmode and (win.selectedmode == mode or win.parentmode == mode) then
 						info.checked = 1
 						info.colorCode = "|cffffd100"
 					end
