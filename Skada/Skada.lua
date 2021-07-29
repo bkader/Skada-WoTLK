@@ -1863,6 +1863,8 @@ local function SlashCommandHandler(cmd)
 		Skada:Print("Debug mode " .. (Skada.db.profile.debug and ("|cFF00FF00" .. L["ENABLED"] .. "|r") or ("|cFFFF0000" .. L["DISABLED"] .. "|r")))
 	elseif cmd == "config" then
 		Skada:OpenOptions()
+	elseif cmd == "clear" or cmd == "clean" then
+		Skada:CleanGarbage()
 	elseif cmd == "website" or cmd == "github" then
 		Skada:Printf("|cffffbb00%s|r", Skada.website)
 	elseif cmd == "timemesure" or cmd == "measure" then
@@ -1908,6 +1910,7 @@ local function SlashCommandHandler(cmd)
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33numformat|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33measure|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33config|r")
+		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33clean|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33website|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33debug|r")
 	end
@@ -2232,6 +2235,7 @@ function Skada:Reset(force)
 
 	dataobj.text = "n/a"
 	self:UpdateDisplay(true)
+	self:CleanGarbage()
 	self:Print(L["All data has been reset."])
 	CloseDropDownMenus()
 
@@ -3154,6 +3158,15 @@ function Skada:MemoryCheck()
 		if GetAddOnMemoryUsage("Skada") > (compare * 1024) then
 			self:Print(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."])
 		end
+	end
+end
+
+-- this can be used to clear combat log and garbage.
+-- note that "collect" isn't used because it blocks all execution for too long.
+function Skada:CleanGarbage()
+	CombatLogClearEntries()
+	if not InCombatLockdown() then
+		collectgarbage()
 	end
 end
 
