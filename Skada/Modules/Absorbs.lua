@@ -570,6 +570,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 				-- a previous shield, we attributed dumbly to it.
 				-- the "true" at the end is so we don't update the spell count or active time.
 				if amount > 0 and pshield then
+					amount = ((pshield.amount or 0) > 0) and min(pshield.amount, amount) or amount
 					log_absorb(Skada.current, pshield.srcGUID, pshield.srcName, dstGUID, dstName, pshield.spellid, pshield.school, amount, true)
 					log_absorb(Skada.total, pshield.srcGUID, pshield.srcName, dstGUID, dstName, pshield.spellid, pshield.school, amount, true)
 				end
