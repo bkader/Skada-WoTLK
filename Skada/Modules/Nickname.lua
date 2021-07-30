@@ -88,7 +88,7 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 					local okey, nickname = CheckNickname(val)
 					if okey == true then
 						Skada.db.profile.nickname = (nickname == "") and unitName or nickname
-						mod:SetNickname(unitGUID, nickname, true)
+						mod:SetNickname(unitGUID, Skada.db.profile.nickname, true)
 					else
 						Skada:Print(nickname)
 					end
@@ -122,8 +122,9 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 					return L["Are you sure you want clear cached nicknames?"]
 				end,
 				func = function()
-					Skada.db.global.nicknames = wipe(Skada.db.global.nicknames or {cache = {}})
-					mod.db = Skada.db.global.nicknames
+					Skada.db.global.nicknames.reset = nil
+					Skada.db.global.nicknames.cache = wipe(Skada.db.global.nicknames.cache or {})
+					mod:SetCacheTable()
 				end
 			}
 		}
