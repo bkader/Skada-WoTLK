@@ -455,6 +455,16 @@ function Skada:OpenMenu(window)
 				info.checked = (Skada.db.profile.showself == true)
 				info.isNotRadio = 1
 				UIDropDownMenu_AddButton(info, level)
+
+				info = UIDropDownMenu_CreateInfo()
+				info.text = L["Aggressive combat detection"]
+				info.func = function()
+					Skada.db.profile.tentativecombatstart = not Skada.db.profile.tentativecombatstart
+					Skada:ApplySettings()
+				end
+				info.checked = (Skada.db.profile.tentativecombatstart == true)
+				info.isNotRadio = 1
+				UIDropDownMenu_AddButton(info, level)
 			end
 		elseif level == 3 then
 			if L_UIDROPDOWNMENU_MENU_VALUE == "modes" then
