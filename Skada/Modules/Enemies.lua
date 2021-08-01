@@ -670,7 +670,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 			icon = "Interface\\Icons\\spell_shadow_shadowbolt"
 		}
 
-		local damagemod = Skada:GetModule(L["Damage Taken"])
+		local damagemod = Skada:GetModule(L["Damage Taken"], true)
 		if damagemod then
 			enemymod.metadata = {click1 = damagemod:GetModule(L["Damage source list"], true)}
 		end
