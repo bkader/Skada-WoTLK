@@ -933,13 +933,18 @@ end
 
 -- toggles windows visibility
 function Skada:ToggleWindow()
-	for _, win in self:IterateWindows() do
-		if win:IsShown() then
-			win.db.hidden = true
-			win:Hide()
-		else
-			win.db.hidden = false
-			win:Show()
+	if self.db.profile.hidden then
+		self.db.profile.hidden = false
+		self:ApplySettings()
+	else
+		for _, win in self:IterateWindows() do
+			if win:IsShown() then
+				win.db.hidden = true
+				win:Hide()
+			else
+				win.db.hidden = false
+				win:Show()
+			end
 		end
 	end
 end
