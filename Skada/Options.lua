@@ -206,7 +206,7 @@ local newdisplay = "bar"
 
 Skada.options = {
 	type = "group",
-	name = "Skada |cffffffff" .. Skada.version .. "|r by |cfff58cbaKader|r",
+	name = "Skada v|cffffffff" .. Skada.version,
 	get = function(i)
 		return Skada.db.profile[i[#i]]
 	end,

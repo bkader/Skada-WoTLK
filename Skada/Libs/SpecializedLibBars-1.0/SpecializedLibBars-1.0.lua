@@ -1449,6 +1449,10 @@ function barPrototype:SetColorAt(at, r, g, b, a)
 	self:UpdateColor()
 end
 
+function barPrototype:SetOpacity(a)
+	self:SetColorAt(self.colors[1], self.colors[2], self.colors[3], self.colors[4], a or self.colors[5])
+end
+
 function barPrototype:UnsetColorAt(at)
 	if not self.colors then
 		return
