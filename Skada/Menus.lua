@@ -324,16 +324,6 @@ function Skada:OpenMenu(window)
 				info.checked = (window.db.combattimer == true)
 				info.isNotRadio = 1
 				UIDropDownMenu_AddButton(info, level)
-
-				info = UIDropDownMenu_CreateInfo()
-				info.text = L["Clamped To Screen"]
-				info.func = function()
-					window.db.clamped = not window.db.clamped
-					Skada:ApplySettings()
-				end
-				info.checked = (window.db.clamped == true)
-				info.isNotRadio = 1
-				UIDropDownMenu_AddButton(info, level)
 			elseif L_UIDROPDOWNMENU_MENU_VALUE == "segment" then
 				info = UIDropDownMenu_CreateInfo()
 				info.text = L["Total"]
