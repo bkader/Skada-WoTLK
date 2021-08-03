@@ -615,7 +615,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
 	local function feed_personal_dps()
 		if Skada.current then
-			local player = Skada:find_player(Skada.current, UnitGUID("player"))
+			local player = Skada:find_player(Skada.current, Skada.myGUID)
 			if player then
 				return Skada:FormatNumber(getDPS(Skada.current, player)) .. " " .. L["DPS"]
 			end

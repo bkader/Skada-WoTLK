@@ -657,7 +657,7 @@ do
 						bar.timerLabel:SetTextColor(1, 1, 1, 1)
 					end
 
-					if Skada.db.profile.showself and data.id and data.id == UnitGUID("player") then
+					if Skada.db.profile.showself and data.id and data.id == Skada.myGUID then
 						bar.fixed = true
 					end
 

@@ -1592,7 +1592,7 @@ do
 			local owner = pets[action.playerid]
 
 			if not owner and action.playerflags and band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
-				owner = {id = UnitGUID("player"), name = UnitName("player")}
+				owner = {id = self.myGUID, name = self.myName}
 				pets[action.playerid] = owner
 			end
 
@@ -1985,7 +1985,7 @@ do
 		end
 
 		local title = (window and window.title) or report_mode.title or report_mode:GetName()
-		local label = (report_mode_name == L["Improvement"]) and UnitName("player") or Skada:GetSetLabel(report_set)
+		local label = (report_mode_name == L["Improvement"]) and self.myName or Skada:GetSetLabel(report_set)
 		sendchat(format(L["Skada: %s for %s:"], title, label), channel, chantype)
 
 		maxlines = maxlines or 10
@@ -2105,7 +2105,7 @@ do
 	end
 
 	function Skada:OnCommVersionCheck(sender, version)
-		if sender and sender ~= UnitName("player") and version then
+		if sender and sender ~= self.myName and version then
 			version = convertVersion(version)
 			local ver = convertVersion(self.version)
 			if not (version and ver) or self.versionChecked then
@@ -3096,6 +3096,9 @@ function Skada:OnInitialize()
 	self.classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
 	self.classcolors.PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"}
 	self.classcolors.UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
+
+	-- well, me!
+	self.myGUID, self.myName = UnitGUID("player"), UnitName("player")
 end
 
 function Skada:OnEnable()
@@ -3205,7 +3208,7 @@ do
 	end
 
 	function Skada:SendComm(channel, target, ...)
-		if target == UnitName("player") then return end
+		if target == self.myName then return end
 
 		if not channel then
 			local t = self:GetGroupTypeAndCount()
@@ -3244,7 +3247,7 @@ do
 	end
 
 	function Skada:OnCommReceived(prefix, message, channel, sender)
-		if prefix == "Skada" and channel and sender and sender ~= UnitName("player") then
+		if prefix == "Skada" and channel and sender and sender ~= self.myName then
 			DispatchComm(sender, self:Deserialize(message))
 		end
 	end

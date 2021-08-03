@@ -6,7 +6,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	local spellmod = mod:NewModule(L["Interrupted spells"])
 	local targetmod = mod:NewModule(L["Interrupted targets"])
 	local playermod = mod:NewModule(L["Interrupt spells"])
-	local playerid, _
+	local _
 
 	-- cache frequently used globals
 	local pairs, select, max = pairs, select, math.max
@@ -68,7 +68,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 		log_interrupt(Skada.current, data)
 		log_interrupt(Skada.total, data)
 
-		if Skada.db.profile.modules.interruptannounce and Skada:IsInGroup() and srcGUID == playerid then
+		if Skada.db.profile.modules.interruptannounce and Skada:IsInGroup() and srcGUID == Skada.myGUID then
 			local spelllink = GetSpellLink(extraspellid or extraspellname) or extraspellname
 
 			local channel = Skada.db.profile.modules.interruptchannel or "SAY"
@@ -252,7 +252,6 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		playerid = playerid or UnitGUID("player")
 		self.metadata = {
 			showspots = true,
 			click1 = spellmod,
@@ -308,7 +307,6 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	}
 
 	function mod:OnInitialize()
-		playerid = playerid or UnitGUID("player")
 		if not Skada.db.profile.modules.interruptchannel then
 			Skada.db.profile.modules.interruptchannel = "SAY"
 		end
