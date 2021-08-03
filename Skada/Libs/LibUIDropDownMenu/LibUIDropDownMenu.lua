@@ -271,6 +271,8 @@ function L_UIDropDownMenu_AddSeparator(info, level)
     info.isUninteractable = true
     info.notCheckable = true
     info.iconOnly = true
+    info.padding = nil
+    info.leftPadding = nil
     info.icon = [[Interface\AddOns\Skada\Libs\LibUIDropDownMenu\UI-TooltipDivider-Transparent]]
     info.tCoordLeft = 0
     info.tCoordRight = 1
