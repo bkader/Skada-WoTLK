@@ -29,7 +29,7 @@ Skada.windowdefaults = {
 	roleicons = false,
 	specicons = true,
 	spark = true,
-	showself = true,
+	showself = false,
 	-- buttons
 	buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false},
 	-- title options
@@ -102,6 +102,7 @@ Skada.defaults = {
 		setformat = 3,
 		setnumber = true,
 		showranks = true,
+		showself = false,
 		setstokeep = 15,
 		reportlinks = false,
 		memorycheck = true,

@@ -292,6 +292,48 @@ function Skada:OpenMenu(window)
 				info.notCheckable = 1
 				info.leftPadding = 16
 				UIDropDownMenu_AddButton(info, level)
+
+				UIDropDownMenu_AddSeparator(info, level)
+
+				info = UIDropDownMenu_CreateInfo()
+				info.text = L["Always show self"]
+				info.func = function()
+					window.db.showself = not window.db.showself
+					Skada:ApplySettings()
+				end
+				info.checked = (window.db.showself == true)
+				info.isNotRadio = 1
+				UIDropDownMenu_AddButton(info, level)
+
+				info = UIDropDownMenu_CreateInfo()
+				info.text = L["Include set"]
+				info.func = function()
+					window.db.titleset = not window.db.titleset
+					Skada:ApplySettings()
+				end
+				info.checked = (window.db.titleset == true)
+				info.isNotRadio = 1
+				UIDropDownMenu_AddButton(info, level)
+
+				info = UIDropDownMenu_CreateInfo()
+				info.text = L["Encounter timer"]
+				info.func = function()
+					window.db.combattimer = not window.db.combattimer
+					Skada:ApplySettings()
+				end
+				info.checked = (window.db.combattimer == true)
+				info.isNotRadio = 1
+				UIDropDownMenu_AddButton(info, level)
+
+				info = UIDropDownMenu_CreateInfo()
+				info.text = L["Clamped To Screen"]
+				info.func = function()
+					window.db.clamped = not window.db.clamped
+					Skada:ApplySettings()
+				end
+				info.checked = (window.db.clamped == true)
+				info.isNotRadio = 1
+				UIDropDownMenu_AddButton(info, level)
 			elseif L_UIDROPDOWNMENU_MENU_VALUE == "segment" then
 				info = UIDropDownMenu_CreateInfo()
 				info.text = L["Total"]

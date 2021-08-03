@@ -24,7 +24,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 			classcolortext = false,
 			classicons = true,
 			roleicons = false,
-			showself = true,
+			showself = false,
 			buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false},
 			title = {
 				textcolor = {r = 0.9, g = 0.9, b = 0.9, a = 1},
@@ -75,7 +75,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 			classcolortext = false,
 			classicons = true,
 			roleicons = false,
-			showself = true,
+			showself = false,
 			buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false},
 			title = {
 				textcolor = {r = 0.9, g = 0.9, b = 0.9, a = 1},
@@ -126,7 +126,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 			classcolortext = false,
 			classicons = true,
 			roleicons = false,
-			showself = true,
+			showself = false,
 			buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false},
 			title = {
 				textcolor = {r = 0.9, g = 0.9, b = 0.9, a = 1},
@@ -176,7 +176,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 			classcolortext = false,
 			classicons = false,
 			roleicons = false,
-			showself = true,
+			showself = false,
 			buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false},
 			title = {
 				textcolor = {r = 1, g = 1, b = 1, a = 1},
@@ -232,7 +232,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 			specicons = false,
 			spark = false,
 			smoothing = true,
-			showself = true,
+			showself = false,
 			buttons = {menu = true, reset = true, report = false, mode = true, segment = false, stop = false},
 			title = {
 				textcolor = {r = 1, g = 1, b = 1, a = 1},

@@ -657,7 +657,7 @@ do
 						bar.timerLabel:SetTextColor(1, 1, 1, 1)
 					end
 
-					if Skada.db.profile.showself and data.id and data.id == Skada.myGUID then
+					if win.bargroup.showself and data.id == Skada.myGUID then
 						bar.fixed = true
 					end
 
@@ -944,6 +944,9 @@ do
 		g.button:SetScript("OnMouseDown", move)
 		g.button:SetScript("OnMouseUp", stopMove)
 
+		-- make player's bar fixed.
+		g.showself = Skada.db.profile.showself or p.showself
+
 		g:SetMaxBars()
 		g:SetEnableMouse(not p.clickthrough)
 		g:SetClampedToScreen(p.clamped)
@@ -1093,14 +1096,19 @@ function mod:AddDisplayOptions(win, options)
 				type = "toggle",
 				name = L["Reverse bar growth"],
 				desc = L["Bars will grow up instead of down."],
-				order = 12,
-				width = "double"
+				order = 12
+			},
+			showself = {
+				type = "toggle",
+				name = L["Always show self"],
+				desc = L["Keeps the player shown last even if there is not enough space."],
+				order = 13
 			},
 			color = {
 				type = "color",
 				name = L["Bar color"],
 				desc = L["Choose the default color of the bars."],
-				order = 13,
+				order = 14,
 				hasAlpha = true,
 				get = function()
 					return db.barcolor.r, db.barcolor.g, db.barcolor.b, db.barcolor.a
@@ -1114,7 +1122,7 @@ function mod:AddDisplayOptions(win, options)
 				type = "color",
 				name = L["Background color"],
 				desc = L["Choose the background color of the bars."],
-				order = 14,
+				order = 15,
 				hasAlpha = true,
 				get = function(_)
 					return db.barbgcolor.r, db.barbgcolor.g, db.barbgcolor.b, db.barbgcolor.a
@@ -1128,25 +1136,25 @@ function mod:AddDisplayOptions(win, options)
 				type = "toggle",
 				name = L["Disable bar highlight"],
 				desc = L["Hovering a bar won't make it brighter."],
-				order = 15
+				order = 16
 			},
 			spellschoolcolors = {
 				type = "toggle",
 				name = L["Spell school colors"],
 				desc = L["Use spell school colors where applicable."],
-				order = 16
+				order = 17
 			},
 			classcolorbars = {
 				type = "toggle",
 				name = L["Class color bars"],
 				desc = L["When possible, bars will be colored according to player class."],
-				order = 17
+				order = 18
 			},
 			classcolortext = {
 				type = "toggle",
 				name = L["Class color text"],
 				desc = L["When possible, bar text will be colored according to player class."],
-				order = 18
+				order = 19
 			},
 			classicons = {
 				type = "toggle",
@@ -1186,19 +1194,19 @@ function mod:AddDisplayOptions(win, options)
 			spark = {
 				type = "toggle",
 				name = L["Show spark effect"],
-				order = 22
+				order = 23
 			},
 			clickthrough = {
 				type = "toggle",
 				name = L["Clickthrough"],
 				desc = L["Disables mouse clicks on bars."],
-				order = 23
+				order = 24
 			},
 			smoothing = {
 				type = "toggle",
 				name = L["Smooth bars"],
 				desc = L["Animate bar changes smoothly rather than immediately."],
-				order = 24
+				order = 25
 			}
 		}
 	}
