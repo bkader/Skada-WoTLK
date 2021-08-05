@@ -358,17 +358,23 @@ do
 					desc = L["Hides the window."],
 					order = 5
 				},
+				clamped = {
+					type = "toggle",
+					name = L["Clamped To Screen"],
+					desc = L["Toggle whether to permit movement out of screen."],
+					order = 8
+				},
 				separator1 = {
 					type = "description",
 					name = " ",
-					order = 8,
+					order = 9,
 					width = "full"
 				},
 				copywin = {
 					type = "select",
 					name = L["Copy Settings"],
 					desc = L["Choose the window from which you want to copy the settings."],
-					order = 9,
+					order = 10,
 					values = function()
 						local list = {[""] = NONE}
 						for _, win in Skada:IterateWindows() do
@@ -384,7 +390,7 @@ do
 				copyexec = {
 					type = "execute",
 					name = L["Copy Settings"],
-					order = 10,
+					order = 11,
 					disabled = function()
 						return (copywindow == nil)
 					end,
@@ -408,14 +414,14 @@ do
 				separator2 = {
 					type = "description",
 					name = " ",
-					order = 11,
+					order = 98,
 					width = "full"
 				},
 				delete = {
 					type = "execute",
 					name = L["Delete Window"],
 					desc = L["Choose the window to be deleted."],
-					order = 12,
+					order = 99,
 					width = "double",
 					confirm = function() return L["Are you sure you want to delete this window?"] end,
 					func = function() Skada:DeleteWindow(db.name, true) end
@@ -2752,12 +2758,6 @@ function Skada:FrameSettings(db, include_dimensions)
 				inline = true,
 				order = 0,
 				args = {
-					clamped = {
-						type = "toggle",
-						name = L["Clamped To Screen"],
-						order = 0,
-						width = "double"
-					},
 					scale = {
 						type = "range",
 						name = L["Scale"],

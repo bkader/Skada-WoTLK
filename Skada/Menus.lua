@@ -235,6 +235,13 @@ function Skada:OpenMenu(window)
 					UIDropDownMenu_AddSeparator(info, level)
 				end
 
+				-- window
+				info = UIDropDownMenu_CreateInfo()
+				info.text = L["Window"]
+				info.isTitle = 1
+				info.notCheckable = 1
+				UIDropDownMenu_AddButton(info, level)
+
 				-- lock window
 				info = UIDropDownMenu_CreateInfo()
 				info.text = L["Lock Window"]
@@ -283,17 +290,25 @@ function Skada:OpenMenu(window)
 					UIDropDownMenu_AddButton(info, level)
 				end
 
-				-- delete window
+				-- clamped to screen
 				info = UIDropDownMenu_CreateInfo()
-				info.text = L["Delete Window"]
+				info.text = L["Clamped To Screen"]
 				info.func = function()
-					return Skada:DeleteWindow(window.db.name)
+					window.db.clamped = not window.db.clamped
+					Skada:ApplySettings()
 				end
-				info.notCheckable = 1
-				info.leftPadding = 16
+				info.checked = window.db.clamped
+				info.isNotRadio = 1
 				UIDropDownMenu_AddButton(info, level)
 
 				UIDropDownMenu_AddSeparator(info, level)
+
+				-- window
+				info = UIDropDownMenu_CreateInfo()
+				info.text = L["Options"]
+				info.isTitle = 1
+				info.notCheckable = 1
+				UIDropDownMenu_AddButton(info, level)
 
 				info = UIDropDownMenu_CreateInfo()
 				info.text = L["Always show self"]
@@ -323,6 +338,19 @@ function Skada:OpenMenu(window)
 				end
 				info.checked = (window.db.combattimer == true)
 				info.isNotRadio = 1
+				UIDropDownMenu_AddButton(info, level)
+
+				UIDropDownMenu_AddSeparator(info, level)
+
+				-- delete window
+				info = UIDropDownMenu_CreateInfo()
+				info.text = L["Delete Window"]
+				info.func = function()
+					return Skada:DeleteWindow(window.db.name)
+				end
+				info.notCheckable = 1
+				info.leftPadding = 16
+				info.colorCode = "|cffeb4c34"
 				UIDropDownMenu_AddButton(info, level)
 			elseif L_UIDROPDOWNMENU_MENU_VALUE == "segment" then
 				info = UIDropDownMenu_CreateInfo()
