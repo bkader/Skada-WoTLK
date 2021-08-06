@@ -247,20 +247,26 @@ function mod:Reset(win)
 end
 
 function mod:Show(win)
-	win.bargroup:Show()
-	win.bargroup:SortBars()
+	if win and win.bargroup then
+		win.bargroup:Show()
+		win.bargroup:SortBars()
+	end
 end
 
 function mod:Hide(win)
-	win.bargroup:Hide()
+	if win and win.bargroup then
+		win.bargroup:Hide()
+	end
 end
 
 function mod:IsShown(win)
-	return win.bargroup:IsShown()
+	return (win and win.bargroup and win.bargroup:IsShown())
 end
 
 function mod:SetTitle(win, title)
-	win.bargroup.button:SetText(title)
+	if win and win.bargroup then
+		win.bargroup.button:SetText(title)
+	end
 end
 
 do
