@@ -1244,8 +1244,7 @@ function Skada:DeleteSet(set, index)
 	end
 
 	if set and index then
-		local todel = tremove(self.char.sets, index)
-		self.callbacks:Fire("SKADA_DATA_SETDELETED", index, todel)
+		self.callbacks:Fire("SKADA_DATA_SETDELETED", index, tremove(self.char.sets, index))
 
 		if set == self.last then
 			self.last = nil
@@ -3133,8 +3132,10 @@ function Skada:OnEnable()
 		self.bossmod = nil
 	end
 
-	self:ZoneCheck()
-	self.After(1, function() self:CheckGroup() end)
+	self.After(1, function()
+		self:ZoneCheck()
+		self:CheckGroup()
+	end)
 	if not wasinparty then
 		self.After(2, check_for_join_and_leave)
 	end

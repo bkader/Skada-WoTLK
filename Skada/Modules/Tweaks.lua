@@ -307,7 +307,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 				throttle = GetTime() + 60
 			end
 
-			CombatLogClearEntries()
+			Skada.After(0.1, CombatLogClearEntries)
 		end
 
 		local function OnEvent(self, event, ...)
@@ -322,9 +322,15 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 			elseif event == "ZONE_CHANGED_NEW_AREA" then
 				local zt = select(2, IsInInstance())
 				if zonetype and zt ~= zonetype then
-					CombatLogClearEntries()
+					Skada.After(0.5, CombatLogClearEntries)
 				end
 				zonetype = zt
+			end
+		end
+
+		function mod:COMBAT_PLAYER_ENTER()
+			if Skada.db.profile.combatlogfix then
+				Skada.After(0.5, CombatLogClearEntries)
 			end
 		end
 
@@ -337,11 +343,15 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 				frame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 				frame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 				frame:Hide()
+
+				Skada.RegisterCallback(self, "COMBAT_PLAYER_ENTER")
 			elseif not Skada.db.profile.combatlogfix and frame then
 				frame:UnregisterAllEvents()
 				frame:SetScript("OnUpdate", nil)
 				frame:SetScript("OnEvent", nil)
 				frame = nil
+
+				Skada.UnregisterCallback(self, "COMBAT_PLAYER_ENTER")
 			end
 		end
 	end
