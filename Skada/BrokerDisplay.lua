@@ -41,7 +41,7 @@ end
 local function formatLabel(win, data)
 	local label = ""
 	if win.db.isusingclasscolors and data.class then
-		label = format(classcolors[data.class], data.text or data.label)
+		label = format(classcolors[data.class], data.text or data.label or UNKNOWN)
 	else
 		label = data.text or data.label
 	end
