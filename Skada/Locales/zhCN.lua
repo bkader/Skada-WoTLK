@@ -332,6 +332,8 @@ L["Keep Segment"] = "保留分段"
 L["Toggle Windows"] = "开关窗口"
 L["Show/Hide Windows"] = "显示/隐藏窗口"
 L["Start New Segment"] = "开始新分段"
+L["Select All"] = "全选"
+L["Deselect All"] = "取消全选"
 -- window buttons
 L["Configure"] = "配置"
 L["Opens the configuration window."] = "打开配置窗口。"

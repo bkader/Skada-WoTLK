@@ -332,6 +332,8 @@ L["Keep Segment"] = "세분화 유지"
 L["Toggle Windows"] = "창 전환"
 L["Show/Hide Windows"] = "창 표시/숨기기"
 L["Start New Segment"] = "새로운 세분화 시작"
+L["Select All"] = "모두 선택"
+L["Deselect All"] = "모두 선택 해제"
 -- window buttons
 L["Configure"] = "설정"
 L["Opens the configuration window."] = "설정 창 열기"

@@ -330,6 +330,8 @@ L["Keep Segment"] = "Segment behalten"
 L["Toggle Windows"] = "Fenster umschalten"
 L["Show/Hide Windows"] = "Fenster anzeigen/ausblenden"
 L["Start New Segment"] = "Neues Segment starten"
+L["Select All"] = "Wählen Sie Alle"
+L["Deselect All"] = "Alle abwählen"
 -- window buttons
 L["Configure"] = "Konfigurieren"
 L["Opens the configuration window."] = "Öffnet das Konfigurationsfenster."

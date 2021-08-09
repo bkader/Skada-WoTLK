@@ -402,7 +402,14 @@ function Skada:OpenMenu(window)
 					UIDropDownMenu_AddButton(info, level)
 				end
 			elseif L_UIDROPDOWNMENU_MENU_VALUE == "keep" then
+				local num, kept = 0, 0
+
 				for _, set in Skada:IterateSets() do
+					num = num + 1
+					if set.keep then
+						kept = kept + 1
+					end
+
 					info = UIDropDownMenu_CreateInfo()
 					info.text = Skada:GetSetLabel(set)
 					info.func = function()
@@ -413,6 +420,36 @@ function Skada:OpenMenu(window)
 					info.isNotRadio = 1
 					info.keepShownOnClick = true
 					info.colorCode = set.gotboss and (set.success and "|cff00ff00" or "|cffff0000") or "|cffffffff"
+					UIDropDownMenu_AddButton(info, level)
+				end
+
+				if num > 0 then
+					UIDropDownMenu_AddSeparator(info, level)
+
+					info = UIDropDownMenu_CreateInfo()
+					info.text = L["Select All"]
+					info.func = function()
+						for _, s in Skada:IterateSets() do
+							s.keep = true
+						end
+						window:UpdateDisplay()
+					end
+					info.notCheckable = 1
+					info.leftPadding = 16
+					info.disabled = (num == kept)
+					UIDropDownMenu_AddButton(info, level)
+
+					info = UIDropDownMenu_CreateInfo()
+					info.text = L["Deselect All"]
+					info.func = function()
+						for _, s in Skada:IterateSets() do
+							s.keep = nil
+						end
+						window:UpdateDisplay()
+					end
+					info.notCheckable = 1
+					info.leftPadding = 16
+					info.disabled = (kept == 0)
 					UIDropDownMenu_AddButton(info, level)
 				end
 			elseif L_UIDROPDOWNMENU_MENU_VALUE == "shortcut" then

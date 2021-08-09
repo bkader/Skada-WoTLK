@@ -1220,6 +1220,20 @@ function Skada:GetSets()
 	return self.char.sets
 end
 
+-- returns the number of sets and how many are kept
+function Skada:GetNumSets()
+	local num, kept = 0, 0
+
+	for _, s in self:IterateSets() do
+		num = num + 1
+		if s.keep then
+			kept = kept + 1
+		end
+	end
+
+	return num, kept
+end
+
 -- returns the selected set table.
 function Skada:GetSet(s)
 	if s == "current" then

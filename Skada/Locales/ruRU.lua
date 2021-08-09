@@ -331,6 +331,8 @@ L["Keep Segment"] = "Хранить сегмент"
 L["Toggle Windows"] = "Окно переключения"
 L["Show/Hide Windows"] = "Открыть/закрыть Окна"
 L["Start New Segment"] = "Начать новый сегмент"
+L["Select All"] = "Выбрать все"
+L["Deselect All"] = "Снять все"
 -- window buttons
 L["Configure"] = "Конфигурация"
 L["Opens the configuration window."] = "Открывает окно конфигурации."

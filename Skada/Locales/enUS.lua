@@ -330,6 +330,8 @@ L["Keep Segment"] = true
 L["Toggle Windows"] = true
 L["Show/Hide Windows"] = true
 L["Start New Segment"] = true
+L["Select All"] = true
+L["Deselect All"] = true
 -- window buttons
 L["Configure"] = true
 L["Opens the configuration window."] = true
