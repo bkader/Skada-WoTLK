@@ -294,8 +294,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 		end})
 
 		local function OnUpdate(self, elapsed)
-			if not self.timeout then return end
-			self.timeout = self.timeout - elapsed
+			self.timeout = (self.timeout or 0) - elapsed
 			if self.timeout > 0 then return end
 			self:Hide()
 
@@ -307,6 +306,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 				throttle = GetTime() + 60
 			end
 
+			Skada:Debug("CombatLogClearEntries: Tweaks")
 			Skada.After(0.1, CombatLogClearEntries)
 		end
 
