@@ -1231,7 +1231,7 @@ function Skada:GetNumSets()
 		end
 	end
 
-	return num, kept
+	return num, kept, num - kept
 end
 
 -- returns the selected set table.
@@ -3336,15 +3336,13 @@ function Skada:EndSegment()
 		player.last = nil
 	end
 
-	local numsets = 0
-	for _, set in self:IterateSets() do
-		if not set.keep then numsets = numsets + 1 end
-	end
-
-	for i = tmaxn(self.char.sets), 1, -1 do
-		if numsets > self.db.profile.setstokeep and not self.char.sets[i].keep then
-			tremove(self.char.sets, i)
-			numsets = numsets - 1
+	local maxsets, _, numsets = self:GetNumSets()
+	if numsets > 0 then
+		for i = maxsets, 1, -1 do
+			if numsets > self.db.profile.setstokeep and not self.char.sets[i].keep then
+				tremove(self.char.sets, i)
+				numsets = numsets - 1
+			end
 		end
 	end
 
