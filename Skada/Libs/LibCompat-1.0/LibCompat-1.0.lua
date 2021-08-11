@@ -597,6 +597,7 @@ local mixins = {
 	"IsGroupDead",
 	"IsGroupInCombat",
 	"GroupIterator",
+	"UnitFullName",
 	"UnitFromGUID",
 	"ClassFromGUID",
 	"UnitHealthPercent",
