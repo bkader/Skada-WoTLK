@@ -40,6 +40,50 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
             </Layer>
         </Layers>
         <Frames>
+			<Button name="$parentColorSwatch" hidden="true">
+				<Size>
+					<AbsDimension x="16" y="16" />
+				</Size>
+				<Anchors>
+					<Anchor point="RIGHT">
+						<Offset>
+							<AbsDimension x="-6" y="0" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+			<Layers>
+				<Layer level="BACKGROUND">
+					<Texture name="$parentSwatchBg">
+						<Size>
+							<AbsDimension x="14" y="14" />
+						</Size>
+						<Anchors>
+							<Anchor point="CENTER">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Color r="1.0" g="1.0" b="1.0" />
+					</Texture>
+				</Layer>
+			</Layers>
+			<Scripts>
+				<OnClick>
+					L_UIDropDownMenuButton_OpenColorPicker(self:GetParent());
+				</OnClick>
+				<OnEnter>
+					L_CloseDropDownMenus(self:GetParent():GetParent():GetID() + 1);
+					_G[self:GetName().."SwatchBg"]:SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+					L_UIDropDownMenu_StopCounting(self:GetParent():GetParent());
+				</OnEnter>
+				<OnLeave>
+					_G[self:GetName().."SwatchBg"]:SetVertexColor(HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b);
+					L_UIDropDownMenu_StartCounting(self:GetParent():GetParent());
+				</OnLeave>
+			</Scripts>
+			<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\ChatFrameColorSwatch" />
+			</Button>
             <Button name="$parentExpandArrow" hidden="true">
                 <Size><AbsDimension x="16" y="16" /></Size>
                 <Anchors>

@@ -506,10 +506,6 @@ do
 		["SHAMAN"] = {262, 263, 264}
 	}
 
-	local Guid2Talent = {}
-	local Guid2Spec = {}
-	local Guid2Unit = {}
-
 	-- checks if the feral druid is a cat or tank spec
 	local function GetDruidSubSpec(unit)
 		-- 57881 : Natural Reaction -- used by druid tanks

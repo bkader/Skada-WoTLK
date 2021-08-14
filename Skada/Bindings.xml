@@ -1,6 +1,6 @@
 <Bindings>
 	<Binding name="SKADA_TOGGLE" header="SKADA" category="ADDONS">Skada:ToggleWindow()</Binding>
-	<Binding name="SKADA_SHOWHIDE" header="SKADA" category="ADDONS">Skada:ShowHide()</Binding>
+	<Binding name="SKADA_SHOWHIDE" category="ADDONS">Skada:ShowHide()</Binding>
 	<Binding name="SKADA_RESET" category="ADDONS">Skada:ShowPopup()</Binding>
 	<Binding name="SKADA_NEWSEGMENT" category="ADDONS">Skada:NewSegment()</Binding>
   	<Binding name="SKADA_STOP" category="ADDONS">
