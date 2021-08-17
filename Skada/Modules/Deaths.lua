@@ -145,8 +145,42 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 	local function UnitDied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if not UnitIsFeignDeath(dstName) then
+			if Skada.db.profile.modules.deathannounce then --and Skada:IsInGroup() then
+				local player = Skada:find_player(Skada.current, dstGUID, dstName)
+				if player and player.deathlog and player.deathlog[1] then
+					local log
+					for _, lo in ipairs(player.deathlog[1].log) do
+						if lo.amount and lo.amount < 0 then
+							log = lo
+							break
+						end
+					end
+
+					if log then
+						local output = log.source .. " > " .. dstName .. " (" .. GetSpellInfo(log.spellid) ..") " .. log.amount .. " ["
+						if log.overkill then
+							output = output .. "O:"..log.overkill
+						end
+						if log.resisted then
+							output = output .. ", R:"..log.resisted
+						end
+						if log.blocked then
+							output = output .. ", B:"..log.blocked
+						end
+						if log.absorbed then
+							output = output .. ", A:"..log.absorbed
+						end
+
+						output = output .. "]"
+
+						Skada:Print(output)
+					end
+				end
+			end
+
 			log_death(Skada.current, dstGUID, dstName, dstFlags, ts)
 			log_death(Skada.total, dstGUID, dstName, dstFlags, ts)
+
 		end
 	end
 
@@ -520,6 +554,41 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 							max = 10000,
 							step = 1,
 							bigStep = 10
+						},
+						sep = {
+							type = "description",
+							name = " ",
+							order = 3,
+							width = "full"
+						},
+						announce = {
+							type = "group",
+							name = L["Announce Deaths"],
+							inline = true,
+							order = 4,
+							args = {
+								anndesc = {
+									type = "description",
+									name = L["Announces information about the last hit the person took before they died."],
+									fontSize = "medium",
+									width = "full",
+									order = 4
+								},
+								deathannounce = {
+									type = "toggle",
+									name = L["Enable"],
+									order = 5
+								},
+								deathchannel = {
+									type = "select",
+									name = L["Channel"],
+									values = {AUTO = INSTANCE, SAY = CHAT_MSG_SAY, YELL = CHAT_MSG_YELL, SELF = L["Self"]},
+									order = 6,
+									disabled = function()
+										return not Skada.db.profile.modules.deathannounce
+									end
+								}
+							}
 						}
 					}
 				}
@@ -533,6 +602,9 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 			end
 			if Skada.db.profile.modules.deathlogthreshold == nil then
 				Skada.db.profile.modules.deathlogthreshold = 0
+			end
+			if Skada.db.profile.modules.deathchannel == nil then
+				Skada.db.profile.modules.deathchannel = "AUTO"
 			end
 
 			Skada.options.args.modules.args.deathlog = GetOptions()

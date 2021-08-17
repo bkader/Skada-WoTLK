@@ -1,5 +1,9 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "koKR", false)
-if not L then return end
+if not L then
+	return
+elseif not LOCALE_koKR then -- just in case
+	LOCALE_koKR = true
+end
 
 L["A damage meter."] = "데미지 미터기입니다."
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "메모리 사용량이 높습니다. Skada 초기화가 필요할 수 있으며, 자동 초기화 옵션 중 하나를 활성화하세요."

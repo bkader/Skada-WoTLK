@@ -1582,7 +1582,7 @@ do
 					if text and text ~= "" then
 						for _, p in Skada:IteratePlayers(Skada.total) do
 							local playername = p.name:gsub("%-.*", "")
-							if (Skada.locale == "ruRU" and FindNameDeclension(text, playername)) or text:find(playername) then
+							if (LOCALE_ruRU and FindNameDeclension(text, playername)) or text:find(playername) then
 								return p.id, p.name
 							end
 						end
