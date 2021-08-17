@@ -1,10 +1,6 @@
 --[[ Translator: NGL#7282 ]] --
 local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "ruRU", false)
-if not L then
-	return
-elseif not LOCALE_ruRU then -- just in case
-	LOCALE_ruRU = true
-end
+if not L then return end
 
 L["A damage meter."] = "Измеритель урона."
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "Использование памяти слишком велико. Вы можете сбросить данные Skada и включить один из вариантов автоматического сброса."
@@ -385,8 +381,9 @@ L["When your threat reaches this level, relative to tank, warnings are shown."] 
 L["Show raw threat"] = "Показать необработанную угрозу"
 L["Shows raw threat percentage relative to tank instead of modified for range."] = "Показывает процент необработанной угрозы относительно танка, а не модифицированный для диапазона."
 L["Use focus target"] = "Использовать цель фокуса"
-L["Shows threat on focus target, or focus target's target, when available."] = "Показывает угрозу цели фокуса, или цели цели фокуса, если доступно."
+L["Tells Skada to additionally check your 'focus' and 'focustarget' before your 'target' and 'targettarget' in that order for threat display."] = "Выполнять дополнительную проверку вашего 'focus' перед проверкой 'target' и 'targettarget' на наличие угрозы для ее отображения."
 L["Disable while tanking"] = "Отключать при танковании"
+L["Do not give out any warnings if Defensive Stance, Bear Form, Righteous Fury or Frost Presence is active."] = "Не выводить предупреждений, если на вас активна Оборонительная стойка, Облик медведя, Праведное неистовство или Власть льда."
 L["Test warnings"] = "Тестирование предупреждений"
 L["TPS"] = "УгВС"
 L["Threat: Personal Threat"] = "Угроза: Своя Угроза"

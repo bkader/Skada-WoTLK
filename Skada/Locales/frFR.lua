@@ -1,10 +1,6 @@
 --[[ Translator: Kader B ]] --
 local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "frFR", false)
-if not L then
-	return
-elseif not LOCALE_frFR then -- just in case
-	LOCALE_frFR = true
-end
+if not L then return end
 
 L["A damage meter."] = "Un \"damage meter\"."
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "L'utilisation de la mémoire est élevée. Vous devriez réinitialiser Skada et activer une des options de réinitialisation automatique."
@@ -389,9 +385,10 @@ L["When your threat reaches this level, relative to tank, warnings are shown."] 
 L["Show raw threat"] = "Menace brute"
 L["Shows raw threat percentage relative to tank instead of modified for range."] = "Affiche le pourcentage brut de menace par rapport au tank au lieu de celui modifié selon la portée."
 L["Use focus target"] = "Utiliser cible de la focal."
-L["Shows threat on focus target, or focus target's target, when available."] = "Affiche la menace envers la cible de la focalisation ou la cible de la cible de la focalisation le cas échéant."
+L["Tells Skada to additionally check your 'focus' and 'focustarget' before your 'target' and 'targettarget' in that order for threat display."] = "Demande à Skada de vérifier également votre focalisation et la cible de votre focalisation (dans cet ordre) pour l'affichage de la menace."
 L["Test warnings"] = "Test d'avertissement"
 L["Disable while tanking"] = "Désactiver en tankant"
+L["Do not give out any warnings if Defensive Stance, Bear Form, Righteous Fury or Frost Presence is active."] = "Ne donne aucun avertissement si vous êtes en posture défensive, en forme d'ours, sous fureur vertueuse ou en présence de givre."
 L["TPS"] = "MPS"
 L["Threat: Personal Threat"] = "Menace : Menace perso."
 -- Absorbs & Healing Module --

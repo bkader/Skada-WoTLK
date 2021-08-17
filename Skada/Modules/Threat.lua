@@ -12,12 +12,10 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 	local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 	local InCombatLockdown = InCombatLockdown
 	local PlaySoundFile = PlaySoundFile
-	local mypercent
 
 	do
-		local nr, maxthreat = 1, 0
-
-		local threatTable = {}
+		local nr, maxthreat, last_warn, mypercent = 1, 0, time(), nil
+		local threatUnits, threatTable = {"focus", "focustarget", "target", "targettarget"}
 
 		local function add_to_threattable(unit, target, win)
 			local guid = UnitGUID(unit)
@@ -52,46 +50,41 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 			end
 
 			if player and UnitExists(player.unit) then
-				local isTanking, status, threatpct, rawthreatpct, threatvalue = UnitDetailedThreatSituation(player.unit, target)
+				local isTanking, _, threatpct, rawthreatpct, threatvalue = UnitDetailedThreatSituation(player.unit, target)
 
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				if threatvalue then
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
-				if mod.db.rawvalue and threatvalue then
 					d.id = player.id
 					d.label = player.name
 					d.text = Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
-
-					d.threat = threatvalue
 					d.isTanking = isTanking
 
-					if threatvalue < 0 then
-						-- Show real threat.
-						d.value = threatvalue + 410065408
-						d.threat = threatvalue + 410065408
-					else
-						d.value = threatvalue
+					if mod.db.rawvalue then
+						if threatvalue < 0 then
+							d.value = threatvalue + 410065408
+							d.threat = threatvalue + 410065408
+							d.color = {r = 0.5, g = 0.5, b = 0.5}
+						else
+							d.value = threatvalue
+							d.threat = threatvalue
+							d.color = nil
+						end
+
+					elseif threatpct then
+						d.value = threatpct
+						d.threat = threatvalue
 					end
 
-					if threatvalue > maxthreat then
-						maxthreat = threatvalue
+					if d.value > maxthreat then
+						maxthreat = d.value
 					end
-				elseif threatpct then
-					d.id = player.id
-					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
-					d.class = player.class
-					d.role = player.role
-					d.spec = player.spec
-
-					d.value = threatpct
-					d.isTanking = isTanking
-					d.threat = threatvalue
+					nr = nr + 1
 				end
-				nr = nr + 1
 			end
 		end
 
@@ -105,6 +98,16 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 			end
 		end
 
+		local function find_threat_unit()
+			local n = mod.db.focustarget and 1 or 3
+			for i = n, 4 do
+				local u = threatUnits[i]
+				if UnitExists(u) and not UnitIsPlayer(u) and UnitCanAttack("player", u) and UnitHealth(u) > 0 then
+					return u
+				end
+			end
+		end
+
 		local function getTPS(threatvalue)
 			local tps = "0"
 			if Skada.current then
@@ -113,8 +116,6 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 			end
 			return tps
 		end
-
-		local last_warn = time()
 
 		function mod:Update(win, set)
 			if not self.db then
@@ -125,16 +126,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 
 			if not Skada:IsGroupInCombat() then return end
 
-			local target = nil
-			if UnitExists("target") and not UnitIsFriend("player", "target") then
-				target = "target"
-			elseif self.db.focustarget and UnitExists("focus") and not UnitIsFriend("player", "focus") then
-				target = "focus"
-			elseif self.db.focustarget and UnitExists("focustarget") and not UnitIsFriend("player", "focustarget") then
-				target = "focustarget"
-			elseif UnitExists("target") and UnitIsFriend("player", "target") and UnitExists("targettarget") and not UnitIsFriend("player", "targettarget") then
-				target = "targettarget"
-			end
+			local target = find_threat_unit()
 
 			if target then
 				win.title = UnitName(target) or L["Threat"]
@@ -170,7 +162,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 							if data.label == Skada.myName then
 								mypercent = percent
 								if self.db.threshold and self.db.threshold < percent and (not data.isTanking or not self.db.notankwarnings) then
-									we_should_warn = true
+									we_should_warn = (data.color == nil)
 								end
 							end
 
@@ -202,9 +194,12 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 		end
 
 		function mod:AddSetAttributes(set)
-			threatTable = {}
+			threatTable = Skada.NewTable()
 		end
-		mod.SetComplete = mod.AddSetAttributes
+
+		function mod:SetComplete(set)
+			Skada.DelTable(threatTable)
+		end
 	end
 
 	-- Shamelessly copied from Omen - thanks!
@@ -385,12 +380,13 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				focustarget = {
 					type = "toggle",
 					name = L["Use focus target"],
-					desc = L["Shows threat on focus target, or focus target's target, when available."],
+					desc = L["Tells Skada to additionally check your 'focus' and 'focustarget' before your 'target' and 'targettarget' in that order for threat display."],
 					order = 4
 				},
 				notankwarnings = {
 					type = "toggle",
 					name = L["Disable while tanking"],
+					desc = L["Do not give out any warnings if Defensive Stance, Bear Form, Righteous Fury or Frost Presence is active."],
 					order = 5
 				},
 				test = {
@@ -436,8 +432,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 	do
 		local function add_threat_feed()
 			if Skada.current and UnitExists("target") then
-				local isTanking, status, threatpct, rawthreatpct, threatvalue =
-					UnitDetailedThreatSituation("player", "target")
+				local isTanking, _, threatpct, rawthreatpct, threatvalue = UnitDetailedThreatSituation("player", "target")
 				if threatpct then
 					return format("%.1f%%", threatpct)
 				end

@@ -1,10 +1,5 @@
 --[[ Translators: Ícar#8167 / Septimun#8954 ]] --
-local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "esES", false)
-if not L then
-	return
-elseif not LOCALE_esES then -- just in case
-	LOCALE_esES = true
-end
+if not L then return end
 
 L["A damage meter."] = "Un medidor de daño."
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "El uso de memoria es alto. Es posible que desee restablecer Skada y habilitar una de las opciones de restablecimiento automático."
@@ -385,8 +380,9 @@ L["When your threat reaches this level, relative to tank, warnings are shown."] 
 L["Show raw threat"] = "Mostrar amenaza cruda"
 L["Shows raw threat percentage relative to tank instead of modified for range."] = "Mostrar porcentaje de amenaza cruda relativa al tanque en lugar de modificada por rango."
 L["Use focus target"] = "Usar el objetivo del foco"
-L["Shows threat on focus target, or focus target's target, when available."] = "Mostrar la amenaza en el objetivo del foco, o el objetivo del objetivo del foco, cuando esté disponible."
+L["Tells Skada to additionally check your 'focus' and 'focustarget' before your 'target' and 'targettarget' in that order for threat display."] = "Indica a Skada que adicionalmente revise tu 'foco' y 'objetivo de foco' antes que tu 'objetivo' y 'objetivo de objetivo' en ese orden en la ventana de amenaza."
 L["Disable while tanking"] = "Desactivar cuándo eres el tanque"
+L["Do not give out any warnings if Defensive Stance, Bear Form, Righteous Fury or Frost Presence is active."] = "No dar ninguna alerta si Actitud defensiva, Forma de oso, Furia recta o Presencia de Escarcha está activado."
 L["Test warnings"] = "Avisos de Prueba"
 L["TPS"] = "APS"
 L["Threat: Personal Threat"] = "Amenaza: Amenaza Personal"

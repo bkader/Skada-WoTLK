@@ -1,9 +1,5 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "deDE", false)
-if not L then
-	return
-elseif not LOCALE_deDE then -- just in case
-	LOCALE_deDE = true
-end
+if not L then return end
 
 L["A damage meter."] = "Ein Damage-Meter."
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "Die Speicherauslastung ist hoch. Du kannst Skada zurücksetzen und eine der Optionen zur automatischen Zurücksetzung aktivieren."
@@ -384,8 +380,9 @@ L["When your threat reaches this level, relative to tank, warnings are shown."] 
 L["Show raw threat"] = "Nettobedrohung"
 L["Shows raw threat percentage relative to tank instead of modified for range."] = "Zeigt Bedrohungsanteil im Vergleich zum Tank und nicht nach Entfernung."
 L["Use focus target"] = "Fokusziel benutzen"
-L["Shows threat on focus target, or focus target's target, when available."] = "Zeige Bedrohung des Fokuszieles oder dessen Zieles, falls verfügbar."
+L["Tells Skada to additionally check your 'focus' and 'focustarget' before your 'target' and 'targettarget' in that order for threat display."] = "Lässt Skada zusätzlich den Fokus und das Fokusziel vor dem Ziel, und dem Ziel des Ziels für die Bedrohungsanzeige überprüfen"
 L["Disable while tanking"] = "Beim Tanken deaktivieren"
+L["Do not give out any warnings if Defensive Stance, Bear Form, Righteous Fury or Frost Presence is active."] = "Gibt keine Warnmeldungen aus wenn Verteidigungshaltung, Bärengestalt, Zorn der Gerechtigkeit oder Frost Präsenz aktiv sind."
 L["Test warnings"] = "Testwarnung"
 L["TPS"] = "TPS"
 L["Threat: Personal Threat"] = "Bedrohung: Persönliche Bedrohung"

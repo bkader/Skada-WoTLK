@@ -4,6 +4,7 @@ _G.Skada = Skada
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
 Skada.version = GetAddOnMetadata("Skada", "Version")
 Skada.website = GetAddOnMetadata("Skada", "X-Website")
+Skada.locale = Skada.locale or GetLocale()
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 local ACD = LibStub("AceConfigDialog-3.0")
@@ -148,14 +149,6 @@ function Skada.UnitClass(guid, flags, set, nocache)
 	end
 
 	return locClass, engClass
-end
-
-local function UnitFullName(unit)
-	local name, realm = UnitName(unit)
-	if realm and realm ~= "" then
-		name = name .. "-" .. realm
-	end
-	return name
 end
 
 -------------------------------------------------------------------------------
@@ -1582,7 +1575,7 @@ do
 					if text and text ~= "" then
 						for _, p in Skada:IteratePlayers(Skada.total) do
 							local playername = p.name:gsub("%-.*", "")
-							if (LOCALE_ruRU and FindNameDeclension(text, playername)) or text:find(playername) then
+							if (Skada.locale == "ruRU" and FindNameDeclension(text, playername)) or text:find(playername) then
 								return p.id, p.name
 							end
 						end

@@ -1,9 +1,5 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "zhTW", false)
-if not L then
-	return
-elseif not LOCALE_zhTW then -- just in case
-	LOCALE_zhTW = true
-end
+if not L then return end
 
 L["A damage meter."] = "一個傷害統計。"
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "記憶體使用過高，你或許想要重置Skada，並且啟用一個自動重設的選項。"
@@ -385,8 +381,9 @@ L["When your threat reaches this level, relative to tank, warnings are shown."] 
 L["Show raw threat"] = "顯示原始威脅值"
 L["Shows raw threat percentage relative to tank instead of modified for range."] = "顯示與坦克之間的原始威脅值百分比。"
 L["Use focus target"] = "使用專注目標"
-L["Shows threat on focus target, or focus target's target, when available."] = "當有設定時可顯示專注目標或專注目標的目標的威脅值。"
+L["Tells Skada to additionally check your 'focus' and 'focustarget' before your 'target' and 'targettarget' in that order for threat display."] = "讓 Skada 額外檢查您的「focus」和「focus目標」位於「目標」和「目標的目標」之前的順序顯示威脅."
 L["Disable while tanking"] = "當為坦克時關閉警報"
+L["Do not give out any warnings if Defensive Stance, Bear Form, Righteous Fury or Frost Presence is active."] = "如果在防禦姿態,熊形態,正義之怒與冰霜系時,不顯示警報."
 L["Test warnings"] = "測試警報"
 L["TPS"] = "每秒威脅值"
 L["Threat: Personal Threat"] = "威脅值:個人的威脅值"

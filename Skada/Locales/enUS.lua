@@ -380,8 +380,9 @@ L["When your threat reaches this level, relative to tank, warnings are shown."] 
 L["Show raw threat"] = true
 L["Shows raw threat percentage relative to tank instead of modified for range."] = true
 L["Use focus target"] = true
-L["Shows threat on focus target, or focus target's target, when available."] = true
+L["Tells Skada to additionally check your 'focus' and 'focustarget' before your 'target' and 'targettarget' in that order for threat display."] = true
 L["Disable while tanking"] = true
+L["Do not give out any warnings if Defensive Stance, Bear Form, Righteous Fury or Frost Presence is active."] = true
 L["Test warnings"] = true
 L["TPS"] = true
 L["Threat: Personal Threat"] = true

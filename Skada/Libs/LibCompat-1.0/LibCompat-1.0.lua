@@ -4,14 +4,16 @@
 -- @author: Kader B (https://github.com/bkader)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0", 3
+local MAJOR, MINOR = "LibCompat-1.0", 4
 
 local LibCompat, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not LibCompat then return end
 
 LibCompat.embeds = LibCompat.embeds or {}
 
-local pairs, select, tinsert, format = pairs, select, table.insert, string.format
+local pairs, ipairs, select, type = pairs, ipairs, select, type
+local tinsert, tremove, wipe = table.insert, table.remove, wipe
+local setmetatable, format = setmetatable, string.format
 local CreateFrame = CreateFrame
 
 -------------------------------------------------------------------------------
@@ -110,6 +112,13 @@ end
 function LibCompat.tAppendAll(tbl, elems)
 	for _, elem in ipairs(elems) do
 		tinsert(tbl, elem)
+	end
+end
+
+do
+	local weaktable = {__mode = "v"}
+	function LibCompat.WeakTable(t)
+		return setmetatable(wipe(t or {}), weaktable)
 	end
 end
 
@@ -337,9 +346,6 @@ end
 -- C_Timer mimic
 
 do
-	local type, setmetatable = type, setmetatable
-	local tinsert, tremove = table.insert, table.remove
-
 	local Timer = {}
 
 	local TickerPrototype = {}
@@ -582,6 +588,7 @@ local mixins = {
 	"tLength",
 	"tCopy",
 	"tAppendAll",
+	"WeakTable",
 	"Clamp",
 	"IsInRaid",
 	"IsInParty",
@@ -612,6 +619,7 @@ function LibCompat:Embed(target)
 	for k, v in pairs(mixins) do
 		target[v] = self[v]
 	end
+	target.locale = target.locale or GetLocale()
 	self.embeds[target] = true
 	return target
 end

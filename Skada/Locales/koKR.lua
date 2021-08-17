@@ -1,9 +1,5 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "koKR", false)
-if not L then
-	return
-elseif not LOCALE_koKR then -- just in case
-	LOCALE_koKR = true
-end
+if not L then return end
 
 L["A damage meter."] = "데미지 미터기입니다."
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "메모리 사용량이 높습니다. Skada 초기화가 필요할 수 있으며, 자동 초기화 옵션 중 하나를 활성화하세요."
@@ -386,8 +382,9 @@ L["When your threat reaches this level, relative to tank, warnings are shown."] 
 L["Show raw threat"] = "기본 위협 표시"
 L["Shows raw threat percentage relative to tank instead of modified for range."] = "원거리에서 변경된 위협 수준 백분율 대신 방어 전담과 비교하여 기본 위협 수준 백분율을 표시합니다."
 L["Use focus target"] = "주시 대상 사용"
-L["Shows threat on focus target, or focus target's target, when available."] = "가능하다면 주시 대상 또는 주시 대상의 대상의 위협 수준을 표시합니다."
+L["Tells Skada to additionally check your 'focus' and 'focustarget' before your 'target' and 'targettarget' in that order for threat display."] = "Skada에 당신의 '대상'과 '대상의 대상'에 대한 위협을 표시하기 위해 추가로 당신의 '주시'와 '주시 대상'을 검사합니다."
 L["Disable while tanking"] = "방어전담시 사용 안함"
+L["Do not give out any warnings if Defensive Stance, Bear Form, Righteous Fury or Frost Presence is active."] = "방어 태세, 곰 변신, 정의의 격노나 냉기의 형상일때 모든 경고를 보이지 않습니다."
 L["Test warnings"] = "테스트 경고"
 L["TPS"] = "TPS"
 L["Threat: Personal Threat"] = "위협 수준: 개인 위협 수준"
