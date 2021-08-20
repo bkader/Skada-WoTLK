@@ -1,4 +1,5 @@
 --[[ Translators: Ícar#8167 / Septimun#8954 ]] --
+local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "esES", false)
 if not L then return end
 
 L["A damage meter."] = "Un medidor de daño."
