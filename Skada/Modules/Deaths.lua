@@ -224,6 +224,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	do
 		local green = {r = 0, g = 255, b = 0, a = 1}
 		local red = {r = 255, g = 0, b = 0, a = 1}
+		local extra
 
 		local function sort_logs(a, b)
 			return a and b and a.time > b.time
@@ -284,7 +285,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 						local change = (log.amount >= 0 and "+" or "-") .. Skada:FormatNumber(abs(log.amount))
 						d.reportlabel = format("%02.2f: %s   %s [%s]", diff or 0, GetspellLink(log.spellid) or spellname or UNKNOWN, change, Skada:FormatNumber(log.hp or 0))
 
-						local extra = {}
+						extra = wipe(extra or {})
 						if (log.overkill or 0) > 0 then
 							d.overkill = log.overkill
 							tinsert(extra, "O:" .. Skada:FormatNumber(abs(log.overkill)))

@@ -796,8 +796,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 
 	local mod = Skada:NewModule(L["Damage Done By Spell"])
 	local sourcemod = mod:NewModule(L["Damage spell sources"])
-
-	local cached = {}
+	local cacheTable
 
 	function sourcemod:Enter(win, id, label)
 		win.spellname = label
@@ -807,13 +806,13 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 	function sourcemod:Update(win, set)
 		win.title = format(L["%s's sources"], win.spellname or UNKNOWN)
 
-		if win.spellname and cached[win.spellname] then
-			local total = cached[win.spellname].amount or 0
+		if win.spellname and cacheTable[win.spellname] then
+			local total = cacheTable[win.spellname].amount or 0
 
 			if total > 0 then
 				local maxvalue, nr = 0, 1
 
-				for playername, player in pairs(cached[win.spellname].players) do
+				for playername, player in pairs(cacheTable[win.spellname].players) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -848,28 +847,26 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 
 		if win.selectedset ~= "total" then
 			local total = set.damage or 0
-			if total == 0 then
-				return
-			end
+			if total == 0 then return end
 
-			cached = wipe(cached or {})
+			cacheTable = wipe(cacheTable or {})
 
 			for _, player in Skada:IteratePlayers(set) do
 				if player.damage_spells then
 					for spellname, spell in pairs(player.damage_spells) do
-						if not cached[spellname] then
-							cached[spellname] = {
+						if not cacheTable[spellname] then
+							cacheTable[spellname] = {
 								id = spell.id,
 								school = spell.school,
 								amount = spell.amount,
 								players = {}
 							}
 						else
-							cached[spellname].amount = cached[spellname].amount + spell.amount
+							cacheTable[spellname].amount = cacheTable[spellname].amount + spell.amount
 						end
 
-						if not cached[spellname].players[player.name] then
-							cached[spellname].players[player.name] = {
+						if not cacheTable[spellname].players[player.name] then
+							cacheTable[spellname].players[player.name] = {
 								id = player.id,
 								class = player.class,
 								role = player.role,
@@ -877,8 +874,8 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 								amount = spell.amount
 							}
 						else
-							cached[spellname].players[player.name].amount =
-								cached[spellname].players[player.name].amount + spell.amount
+							cacheTable[spellname].players[player.name].amount =
+								cacheTable[spellname].players[player.name].amount + spell.amount
 						end
 					end
 				end
@@ -886,7 +883,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 
 			local maxvalue, nr = 0, 1
 
-			for spellname, spell in pairs(cached) do
+			for spellname, spell in pairs(cacheTable) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 

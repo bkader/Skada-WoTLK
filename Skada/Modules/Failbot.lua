@@ -14,7 +14,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	local tostring, format = tostring, string.format
 	local GetSpellInfo, UnitGUID = Skada.GetSpellInfo or GetSpellInfo, UnitGUID
 	local failevents, tankevents = LibFail:GetSupportedEvents()
-	local _
+	local cacheTable, _
 
 	local function log_fail(set, playerid, playername, spellid, event)
 		if set then
@@ -52,11 +52,12 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	function spellmod:Update(win, set)
 		win.title = format(L["%s's fails"], win.spellname or UNKNOWN)
 		if (set.fail or 0) > 0 then
-			local total, players = 0, {}
+			cacheTable = wipe(cacheTable or {})
+			local total = 0
 
 			for _, player in Skada:IteratePlayers(set) do
 				if player.fail_spells and player.fail_spells[win.spellid] then
-					players[player.name] = {
+					cacheTable[player.name] = {
 						id = player.id,
 						class = player.class,
 						role = player.role,
@@ -70,7 +71,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 			if total > 0 then
 				local maxvalue, nr = 0, 1
 
-				for playername, player in pairs(players) do
+				for playername, player in pairs(cacheTable) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 

@@ -194,12 +194,9 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 		end
 
 		function mod:AddSetAttributes(set)
-			threatTable = Skada.NewTable()
+			threatTable = wipe(threatTable or {})
 		end
-
-		function mod:SetComplete(set)
-			Skada.DelTable(threatTable)
-		end
+		mod.SetComplete = mod.AddSetAttributes
 	end
 
 	-- Shamelessly copied from Omen - thanks!

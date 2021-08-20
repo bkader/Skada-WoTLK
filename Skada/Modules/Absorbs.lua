@@ -189,9 +189,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	local warlock_sacrifice = {7812, 19438, 19440, 19441, 19442, 19443, 27273, 47985, 47986} -- Sacrifice
 
 	local zoneModifier = 1
-	local heals = {}
-	local shields = {}
-	local shieldamounts = {}
+	local heals, shields, shieldamounts
 
 	local function log_absorb(set, playerid, playername, dstGUID, dstName, spellid, spellschool, amount, nocount)
 		if (amount or 0) <= 0 then return end
@@ -911,10 +909,9 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 	function mod:AddSetAttributes(set)
 		self:ZoneModifier()
-
-		heals = {}
-		shields = {}
-		shieldamounts = {}
+		heals = wipe(heals or {})
+		shields = wipe(shields or {})
+		shieldamounts = wipe(shieldamounts or {})
 	end
 	mod.SetComplete = mod.AddSetAttributes
 end)
