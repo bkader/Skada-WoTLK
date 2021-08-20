@@ -579,20 +579,6 @@ do
 				if bar then
 					bar:SetValue(data.value)
 					bar:SetMaxValue(win.metadata.maxvalue or 1)
-
-					-- set bar color
-					local color = win.db.barcolor or {r = 1, g = 1, b = 0}
-
-					if data.color then
-						color = data.color
-					elseif data.spellschool and win.db.spellschoolcolors then
-						color = Skada.schoolcolors[data.spellschool] or color
-					elseif data.class and win.db.classcolorbars then
-						color = Skada.classcolors[data.class] or color
-					end
-
-					color.a = win.db.disablehighlight and (color.a or 1) or 0.85
-					bar:SetColorAt(0, color.r, color.g, color.b, color.a or 1)
 				else
 					-- Initialization of bars.
 					bar = mod:CreateBar(win, data.id, data.label, data.value, win.metadata.maxvalue or 1, data.icon, false)
