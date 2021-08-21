@@ -187,7 +187,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 							if log.absorbed then
 								tinsert(extra, "A:" .. Skada:FormatNumber(log.absorbed))
 							end
-							output = tconcat(extra, " - ") .. "]"
+							output = output .. tconcat(extra, " - ") .. "]"
 							delTable(extra)
 						end
 
