@@ -196,30 +196,9 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 			"CHAT_MSG_YELL"
 		}
 
-		local meters = {}
+		local meters = Skada.WeakTable()
 
 		function mod:FilterLine(event, source, msg, ...)
-			for _, line in ipairs(nextlines) do
-				if msg:match(line) then
-					local curtime = GetTime()
-					for _, meter in ipairs(meters) do
-						local elapsed = curtime - meter.time
-						if meter.src == source and meter.evt == event and elapsed < 1 then
-							local toInsert = true
-							for _, b in ipairs(meter.data) do
-								if b == msg then
-									toInsert = false
-								end
-							end
-							if toInsert then
-								tinsert(meter.data, msg)
-							end
-							return true, false, nil
-						end
-					end
-				end
-			end
-
 			for i, line in ipairs(firstlines) do
 				local newID = 0
 				if msg:match(line) then
@@ -244,6 +223,28 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 					return true, true, format("|HSKSP:%1$d|h|cffffff00[%2$s]|r|h", newID or 0, msg or "nil")
 				end
 			end
+
+			for _, line in ipairs(nextlines) do
+				if msg:match(line) then
+					local curtime = GetTime()
+					for _, meter in ipairs(meters) do
+						local elapsed = curtime - meter.time
+						if meter.src == source and meter.evt == event and elapsed < 1 then
+							local toInsert = true
+							for _, b in ipairs(meter.data) do
+								if b == msg then
+									toInsert = false
+								end
+							end
+							if toInsert then
+								tinsert(meter.data, msg)
+							end
+							return true, false, nil
+						end
+					end
+				end
+			end
+
 			return false, false, nil
 		end
 
@@ -269,6 +270,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 				ItemRefTooltip:ClearLines()
 				ItemRefTooltip:AddLine(meters[meterid].title)
 				ItemRefTooltip:AddLine(format(L["Reported by: %s"], meters[meterid].src))
+				ItemRefTooltip:AddLine(" ")
 				for _, line in ipairs(meters[meterid].data) do
 					ItemRefTooltip:AddLine(line, 1, 1, 1)
 				end

@@ -554,6 +554,8 @@ L["Events Amount"] = "이벤트 금액"
 L["Set the amount of events the death log should record."] = "사망 기록에 기록해야하는 이벤트의 양을 설정합니다."
 L["Minimum Healing"] = "최소 치유"
 L["Ignore heal events that are below this threshold."] = "이 임계 값보다 낮은 치유 이벤트는 무시하십시오."
+L["Announce Deaths"] = "사망 발표"
+L["Announces information about the last hit the player took before they died."] = "플레이어가 죽기 전에 마지막으로 한 명중을 알려줍니다."
 -- activity module
 L["Activity"] = "활동"
 -- L["Activity per target"] = ""

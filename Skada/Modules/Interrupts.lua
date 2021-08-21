@@ -11,7 +11,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	-- cache frequently used globals
 	local pairs, select, max = pairs, select, math.max
 	local tostring, format = tostring, string.format
-	local UnitGUID, IsInInstance, SendChatMessage = UnitGUID, IsInInstance, SendChatMessage
+	local UnitGUID, IsInInstance = UnitGUID, IsInInstance
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 
@@ -73,8 +73,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 			local channel = Skada.db.profile.modules.interruptchannel or "SAY"
 			if channel == "SELF" then
-				Skada:Printf(L["%s interrupted!"], spelllink or dstName)
-				return
+				return Skada:SendChat(format(L["%s interrupted!"], spelllink or dstName), nil, "self")
 			end
 
 			if channel == "AUTO" then
@@ -88,7 +87,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 				end
 			end
 
-			SendChatMessage(format(L["%s interrupted!"], spelllink or dstName), channel)
+			Skada:SendChat(format(L["%s interrupted!"], spelllink or dstName), channel, "preset")
 		end
 	end
 

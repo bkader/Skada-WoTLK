@@ -553,6 +553,8 @@ L["Events Amount"] = "事件數量"
 L["Set the amount of events the death log should record."] = "設置死亡日誌應記錄的事件數量。"
 L["Minimum Healing"] = "最小癒合"
 L["Ignore heal events that are below this threshold."] = "忽略低於此閾值的修復事件。"
+L["Announce Deaths"] = "宣布死亡"
+L["Announces information about the last hit the player took before they died."] = "宣布玩家死前最後一次命中。"
 -- activity module
 L["Activity"] = "活躍度"
 -- L["Activity per target"] = ""

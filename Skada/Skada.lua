@@ -1939,7 +1939,7 @@ end
 do
 	local SendChatMessage = SendChatMessage
 
-	local function sendchat(msg, chan, chantype)
+	function Skada:SendChat(msg, chan, chantype)
 		if chantype == "self" then
 			Skada:Print(msg)
 		elseif chantype == "channel" then
@@ -1998,7 +1998,7 @@ do
 
 		local title = (window and window.title) or report_mode.title or report_mode:GetName()
 		local label = (report_mode_name == L["Improvement"]) and self.myName or Skada:GetSetLabel(report_set)
-		sendchat(format(L["Skada: %s for %s:"], title, label), channel, chantype)
+		self:SendChat(format(L["Skada: %s for %s:"], title, label), channel, chantype)
 
 		maxlines = maxlines or 10
 		local nr = 1
@@ -2014,9 +2014,9 @@ do
 				end
 
 				if label and report_mode.metadata and report_mode.metadata.showspots then
-					sendchat(format("%s. %s", nr, label), channel, chantype)
+					self:SendChat(format("%s. %s", nr, label), channel, chantype)
 				elseif label then
-					sendchat(label, channel, chantype)
+					self:SendChat(label, channel, chantype)
 				end
 
 				if barid then

@@ -5,6 +5,7 @@ local pairs, ipairs, select, format = pairs, ipairs, select, string.format
 local max, min, floor = math.max, math.min, math.floor
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local UnitGUID, UnitClass = UnitGUID, Skada.UnitClass
+local newTable, delTable = Skada.newTable, Skada.delTable
 local _
 
 -- ============== --
@@ -486,7 +487,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 	local function process_absorb(timestamp, dstGUID, dstName, absorbed, spellschool, damage, broke)
 		shields[dstName] = shields[dstName] or {}
-		local shieldsPopped = {}
+		local shieldsPopped = newTable()
 		local count, total = 0, damage + absorbed
 
 		for spellid, spells in pairs(shields[dstName]) do
@@ -604,6 +605,8 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 				amount = amount - s.amount
 			end
 		end
+
+		delTable(shieldsPopped)
 	end
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
@@ -909,11 +912,16 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 	function mod:AddSetAttributes(set)
 		self:ZoneModifier()
-		heals = wipe(heals or {})
-		shields = wipe(shields or {})
-		shieldamounts = wipe(shieldamounts or {})
+		heals = newTable()
+		shields = newTable()
+		shieldamounts = newTable()
 	end
-	mod.SetComplete = mod.AddSetAttributes
+
+	function mod:SetComplete(set)
+		delTable(heals)
+		delTable(shields)
+		delTable(shieldamounts)
+	end
 end)
 
 -- ========================== --

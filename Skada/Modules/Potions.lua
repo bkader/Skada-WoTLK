@@ -13,6 +13,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	local UnitExists, UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
 	local UnitGUID, UnitName = UnitGUID, UnitName
 	local UnitClass, UnitBuff = UnitClass, UnitBuff
+	local newTable, delTable = Skada.newTable, Skada.delTable
 	local _
 
 	local potionIDs = {
@@ -64,15 +65,14 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	-- we use this function to record pre-pots as well.
 	function mod:CheckPrePot(event)
 		if event == "COMBAT_PLAYER_ENTER" then
-			prepotion = {}
+			prepotion = newTable()
 
 			Skada:GroupIterator(function(unit)
 				if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
 					local playerid, playername = UnitGUID(unit), UnitName(unit)
 					local class = select(2, UnitClass(unit))
 
-					local potions = {} -- holds used potions
-
+					local potions = newTable() -- holds used potions
 					for potionid, _ in pairs(potionIDs) do
 						local _, _, icon, _, _, _, _, _, _, _, spellid = UnitBuff(unit, GetSpellInfo(potionid))
 						if spellid and potionIDs[spellid] then
@@ -87,6 +87,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 						local colorStr = Skada.classcolors[class].colorStr or "ffffffff"
 						tinsert(prepotion, format(prepotionStr, colorStr, playername, tconcat(potions, " ")))
 					end
+					delTable(potions)
 				end
 			end)
 		end
@@ -100,7 +101,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	function potionmod:Update(win, set)
 		win.title = win.potionname or UNKNOWN
 
-		local total, players = 0, {}
+		local total, players = 0, newTable()
 		if win.potionid then
 			for _, player in Skada:IteratePlayers(set) do
 				if player.potion_spells and player.potion_spells[win.potionid] then
@@ -146,6 +147,8 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 
 			win.metadata.maxvalue = maxvalue
 		end
+
+		delTable(players)
 	end
 
 	function playermod:Enter(win, id, label)
@@ -293,5 +296,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 		if Skada.db.profile.prepotion and next(prepotion or {}) ~= nil then
 			Skada:Printf(L["pre-potion: %s"], tconcat(prepotion, ", "))
 		end
+
+		delTable(prepotion)
 	end
 end)

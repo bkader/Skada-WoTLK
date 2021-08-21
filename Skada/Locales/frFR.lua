@@ -557,6 +557,8 @@ L["Events Amount"] = "Nombre d'événments"
 L["Set the amount of events the death log should record."] = "Choisissez le nombre d'événments que le journal de mort doit enregistrer."
 L["Minimum Healing"] = "Minimum des soins"
 L["Ignore heal events that are below this threshold."] = "Ignorer tous les soins prodigués inférieurs à ce seuil."
+L["Announce Deaths"] = "Annoncer les morts"
+L["Announces information about the last hit the player took before they died."] = "Annonce le dernier coup que la personne a reçu avant de mourir."
 -- activity module
 L["Activity"] = "Activité"
 L["Activity per target"] = "Activité par cible"

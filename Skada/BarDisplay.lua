@@ -1166,7 +1166,7 @@ function mod:AddDisplayOptions(win, options)
 				type = "toggle",
 				name = L["Class icons"],
 				desc = L["Use class icons where applicable."],
-				order = 19,
+				order = 20,
 				disabled = function()
 					return (db.specicons or db.roleicons)
 				end
@@ -1175,7 +1175,7 @@ function mod:AddDisplayOptions(win, options)
 				type = "toggle",
 				name = L["Role icons"],
 				desc = L["Use role icons where applicable."],
-				order = 20,
+				order = 21,
 				set = function()
 					db.roleicons = not db.roleicons
 					if db.roleicons and not db.classicons then
@@ -1188,7 +1188,7 @@ function mod:AddDisplayOptions(win, options)
 				type = "toggle",
 				name = L["Spec icons"],
 				desc = L["Use specialization icons where applicable."],
-				order = 21,
+				order = 22,
 				set = function()
 					db.specicons = not db.specicons
 					if db.specicons and not db.classicons then

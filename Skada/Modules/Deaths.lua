@@ -15,7 +15,8 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	local abs, max, modf = math.abs, math.max, math.modf
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetspellLink = Skada.GetSpellLink or GetSpellLink
-	local date, _ = date
+	local newTable, delTable = Skada.newTable, Skada.delTable
+	local date, zoneType, _ = date
 
 	local function log_deathlog(set, data, ts)
 		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
@@ -145,6 +146,62 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 	local function UnitDied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if not UnitIsFeignDeath(dstName) then
+			if Skada.db.profile.modules.deathannounce and Skada:IsInGroup() then
+				if zoneType == "pvp" or zoneType == "arena" then
+					log_death(Skada.current, dstGUID, dstName, dstFlags, ts)
+					log_death(Skada.total, dstGUID, dstName, dstFlags, ts)
+					return
+				end
+
+				local player = Skada:find_player(Skada.current, dstGUID, dstName)
+				if player and player.deathlog and player.deathlog[1] then
+					local log
+					for _, lo in ipairs(player.deathlog[1].log) do
+						if lo.amount and lo.amount < 0 then
+							log = lo
+							break
+						end
+					end
+
+					if log then
+						local output = format(
+							"Skada: %s > %s (%s) %s",
+							log.source or UNKNOWN,
+							dstName or UNKNOWN,
+							GetSpellInfo(log.spellid) or UNKNOWN,
+							Skada:FormatNumber(0 - log.amount)
+						)
+
+						if log.overkill or log.resisted or log.blocked or log.absorbed then
+							output = output .. " ["
+							local extra = newTable()
+							if log.overkill then
+								tinsert(extra, "O:" .. Skada:FormatNumber(log.overkill))
+							end
+							if log.resisted then
+								tinsert(extra, "R:" .. Skada:FormatNumber(log.resisted))
+							end
+							if log.blocked then
+								tinsert(extra, "B:" .. Skada:FormatNumber(log.blocked))
+							end
+							if log.absorbed then
+								tinsert(extra, "A:" .. Skada:FormatNumber(log.absorbed))
+							end
+							output = tconcat(extra, " - ") .. "]"
+							delTable(extra)
+						end
+
+						if Skada.db.profile.modules.deathchannel == "SELF" then
+							Skada:SendChat(output, nil, "self")
+						elseif Skada.db.profile.modules.deathchannel == "GUILD" then
+							Skada:SendChat(output, "GUILD", "preset")
+						else
+							Skada:SendChat(output, Skada:IsInRaid() and "RAID" or "PARTY", "preset")
+						end
+					end
+				end
+			end
+
 			log_death(Skada.current, dstGUID, dstName, dstFlags, ts)
 			log_death(Skada.total, dstGUID, dstName, dstFlags, ts)
 		end
@@ -190,7 +247,6 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	do
 		local green = {r = 0, g = 255, b = 0, a = 1}
 		local red = {r = 255, g = 0, b = 0, a = 1}
-		local newTable, delTable = Skada.newTable, Skada.delTable
 
 		local function sort_logs(a, b)
 			return a and b and a.time > b.time
@@ -492,6 +548,11 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		return tostring(set.death or 0), set.death or 0
 	end
 
+	function mod:AddSetAttributes(set)
+		zoneType = select(2, IsInInstance())
+	end
+	mod.SetComplete = mod.AddSetAttributes
+
 	do
 		local options
 		local function GetOptions()
@@ -524,6 +585,41 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 							max = 10000,
 							step = 1,
 							bigStep = 10
+						},
+						sep = {
+							type = "description",
+							name = " ",
+							order = 3,
+							width = "full"
+						},
+						announce = {
+							type = "group",
+							name = L["Announce Deaths"],
+							inline = true,
+							order = 4,
+							args = {
+								anndesc = {
+									type = "description",
+									name = L["Announces information about the last hit the player took before they died."],
+									fontSize = "medium",
+									width = "full",
+									order = 4
+								},
+								deathannounce = {
+									type = "toggle",
+									name = L["Enable"],
+									order = 5
+								},
+								deathchannel = {
+									type = "select",
+									name = L["Channel"],
+									values = {AUTO = INSTANCE, SELF = L["Self"], GUILD = GUILD},
+									order = 6,
+									disabled = function()
+										return not Skada.db.profile.modules.deathannounce
+									end
+								}
+							}
 						}
 					}
 				}

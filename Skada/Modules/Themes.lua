@@ -4,6 +4,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 
 	local mod = Skada:NewModule(L["Themes"])
 	local ipairs, tinsert, tremove = ipairs, table.insert, table.remove
+	local list
 
 	local themes = {
 		{
@@ -285,7 +286,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 						name = L["Theme"],
 						order = 1,
 						values = function()
-							local list = {}
+							list = Skada.WeakTable(list)
 							for i, theme in ipairs(themes) do
 								list[theme.name] = theme.name
 							end
@@ -310,7 +311,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 						name = L["Window"],
 						order = 2,
 						values = function()
-							local list = {}
+							list = Skada.WeakTable(list)
 							for i, win in ipairs(Skada:GetWindows()) do
 								list[win.db.name] = win.db.name
 							end
@@ -349,7 +350,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 								if thetheme then
 									for _, win in ipairs(Skada:GetWindows()) do
 										if win.db.name == selectedwindow then
-											Skada.tCopy(win.db, thetheme, {"name", "modeincombat", "display", "set", "wipemode", "returnaftercombat", "x", "y", "snapped"})
+											Skada.tCopy(win.db, thetheme, {"name", "modeincombat", "display", "set", "wipemode", "returnaftercombat", "x", "y", "sticked"})
 											Skada:ApplySettings()
 											Skada:Print(L["Theme applied!"])
 										end
@@ -372,7 +373,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 						name = L["Window"],
 						order = 1,
 						values = function()
-							local list = {}
+							list = Skada.WeakTable(list)
 							for i, win in ipairs(Skada:GetWindows()) do
 								list[win.db.name] = win.db.name
 							end
@@ -407,7 +408,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 								if win.db.name == savewindow then
 									Skada.db.global.themes = Skada.db.global.themes or {}
 									local theme = {}
-									Skada.tCopy(theme, win.db, {"name", "snapped", "x", "y", "point"})
+									Skada.tCopy(theme, win.db, {"name", "sticked", "x", "y", "point"})
 									theme.name = savename or win.db.name
 									tinsert(Skada.db.global.themes, theme)
 								end
@@ -430,7 +431,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 						order = 1,
 						width = "double",
 						values = function()
-							local list = {}
+							list = Skada.WeakTable(list)
 							if Skada.db.global.themes then
 								for i, theme in ipairs(Skada.db.global.themes) do
 									if theme.name then

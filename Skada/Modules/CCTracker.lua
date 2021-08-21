@@ -610,7 +610,6 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 	local UnitExists, UnitName = UnitExists, UnitName
 	local GetNumRaidMembers, GetPartyAssignment = GetNumRaidMembers, GetPartyAssignment
 	local IsInInstance, UnitInRaid = IsInInstance, UnitInRaid
-	local SendChatMessage = SendChatMessage
 
 	local function log_ccbreak(set, cc)
 		local player = Skada:get_player(set, cc.playerid, cc.playername)
@@ -680,9 +679,9 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 			-- Go ahead and announce it.
 			if extraspellname then
-				SendChatMessage(format(L["%s on %s removed by %s's %s"], spellname, dstName, srcName, GetSpellLink(extraspellid)), "RAID")
+				Skada:SendChat(format(L["%s on %s removed by %s's %s"], spellname, dstName, srcName, GetSpellLink(extraspellid)), "RAID", "preset")
 			else
-				SendChatMessage(format(L["%s on %s removed by %s"], spellname, dstName, srcName), "RAID")
+				Skada:SendChat(format(L["%s on %s removed by %s"], spellname, dstName, srcName), "RAID", "preset")
 			end
 		end
 	end

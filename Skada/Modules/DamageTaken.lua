@@ -841,7 +841,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 
 	local mod = Skada:NewModule(L["Avoidance & Mitigation"])
 	local playermod = mod:NewModule(L["Damage Breakdown"])
-	local temp = {}
+	local cacheTable
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
@@ -849,8 +849,8 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 	end
 
 	function playermod:Update(win, set)
-		if temp[win.playerid] then
-			local player = temp[win.playerid]
+		if cacheTable[win.playerid] then
+			local player = cacheTable[win.playerid]
 			win.title = format(L["%s's damage breakdown"], player.name)
 
 			local maxvalue, nr = 0, 1
@@ -886,6 +886,8 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 		win.title = L["Avoidance & Mitigation"]
 
 		if (set.damagetaken or 0) > 0 then
+			cacheTable = Skada.WeakTable(cacheTable)
+
 			local maxvalue, nr = 0, 1
 
 			for _, player in Skada:IteratePlayers(set) do
@@ -907,7 +909,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 					if avoid > 0 then
 						tmp.total = total
 						tmp.avoid = avoid
-						temp[player.id] = tmp
+						cacheTable[player.id] = tmp
 
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
@@ -933,8 +935,8 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 							maxvalue = d.value
 						end
 						nr = nr + 1
-					elseif temp[player.id] then
-						temp[player.id] = nil
+					elseif cacheTable[player.id] then
+						cacheTable[player.id] = nil
 					end
 				end
 			end

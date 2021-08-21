@@ -553,6 +553,8 @@ L["Events Amount"] = "Количество событий"
 L["Set the amount of events the death log should record."] = "Задает количество событий отображаемое в журнале смерти."
 L["Minimum Healing"] = "Минимальное исцеление"
 L["Ignore heal events that are below this threshold."] = "Игнорировать события исцеления ниже этого порога."
+L["Announce Deaths"] = "Объявить Смерти"
+L["Announces information about the last hit the player took before they died."] = "Объявляет последний удар игрок принял перед смертью."
 -- activity module
 L["Activity"] = "Активность"
 L["Activity per target"] = "Активность на цель"
