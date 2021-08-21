@@ -696,7 +696,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(Skada, L)
 
 	local mod = Skada:NewModule(L["Damage Taken By Spell"])
 	local targetmod = mod:NewModule(L["Damage spell targets"])
-	local cacheTable
+	local newTable, delTable, cacheTable = Skada.newTable, Skada.delTable
 
 	function targetmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
@@ -705,16 +705,38 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(Skada, L)
 
 	function targetmod:Update(win, set)
 		win.title = format(L["%s's targets"], win.spellname or UNKNOWN)
-		if win.selectedset ~= "total" and win.spellname and cacheTable[win.spellname] then
-			local total = max(1, cacheTable[win.spellname].amount or 0)
+		if win.spellname then
+			cacheTable = newTable()
+			local total = 0
+			for _, player in Skada:IteratePlayers(set) do
+				if player.damagetaken_spells and player.damagetaken_spells[win.spellname] then
+					if (player.damagetaken_spells[win.spellname].amount or 0) > 0 then
+						cacheTable[player.id] = {
+							name = player.name,
+							class = player.class,
+							role = player.role,
+							spec = player.spec,
+							amount = player.damagetaken_spells[win.spellname].amount
+						}
+						total = total + cacheTable[player.id].amount
+					end
+				end
+			end
+
+			if total == 0 then
+				delTable(cacheTable)
+				return
+			end
+
 			local maxvalue, nr = 0, 1
 
-			for playername, player in pairs(cacheTable[win.spellname].players or {}) do
+			for playerid, player in pairs(cacheTable) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
-				d.id = player.id
-				d.label = playername
+				d.id = playerid
+				d.label = player.name
+				d.text = Skada:FormatName(player.name, playerid)
 				d.class = player.class
 				d.role = player.role
 				d.spec = player.spec
@@ -734,78 +756,64 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(Skada, L)
 			end
 
 			win.metadata.maxvalue = maxvalue
+			delTable(cacheTable)
 		end
 	end
 
-	-- for performance purposes, we ignore total segment
 	function mod:Update(win, set)
 		win.title = L["Damage Taken By Spell"]
 
-		if win.selectedset ~= "total" then
-			local total = set.damagetaken or 0
-			if total == 0 then return end
+		local total = set.damagetaken or 0
+		if total == 0 then return end
 
-			cacheTable = wipe(cacheTable or {})
-			for _, player in Skada:IteratePlayers(set) do
-				if (player.damagetaken or 0) > 0 and player.damagetaken_spells then
-					for spellname, spell in pairs(player.damagetaken_spells) do
-						if spell.amount > 0 then
-							if not cacheTable[spellname] then
-								cacheTable[spellname] = {
-									id = spell.id,
-									school = spell.school,
-									amount = spell.amount,
-									players = {}
-								}
-							else
-								cacheTable[spellname].amount = cacheTable[spellname].amount + spell.amount
-							end
+		cacheTable = newTable()
 
-							-- add the players
-							if not cacheTable[spellname].players[player.name] then
-								cacheTable[spellname].players[player.name] = {
-									id = player.id,
-									class = player.class,
-									role = player.role,
-									spec = player.spec,
-									amount = spell.amount
-								}
-							else
-								cacheTable[spellname].players[player.name].amount = cacheTable[spellname].players[player.name].amount + spell.amount
-							end
+		for _, player in Skada:IteratePlayers(set) do
+			if player.damagetaken_spells then
+				for spellname, spell in pairs(player.damagetaken_spells) do
+					if spell.amount > 0 then
+						if not cacheTable[spellname] then
+							cacheTable[spellname] = {
+								id = spell.id,
+								school = spell.school,
+								amount = spell.amount
+							}
+						else
+							cacheTable[spellname].amount = cacheTable[spellname].amount + spell.amount
 						end
 					end
 				end
 			end
-
-			local maxvalue, nr = 0, 1
-
-			for spellname, spell in pairs(cacheTable) do
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
-
-				d.id = spellname
-				d.spellid = spell.id
-				d.label = spellname
-				d.icon = select(3, GetSpellInfo(spell.id))
-				d.spellschool = spell.school
-
-				d.value = spell.amount
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatNumber(spell.amount),
-					self.metadata.columns.Damage,
-					format("%.1f%%", 100 * spell.amount / total),
-					self.metadata.columns.Percent
-				)
-
-				if spell.amount > maxvalue then
-					maxvalue = spell.amount
-				end
-				nr = nr + 1
-			end
-
-			win.metadata.maxvalue = maxvalue
 		end
+
+		local maxvalue, nr = 0, 1
+
+		for spellname, spell in pairs(cacheTable) do
+			local d = win.dataset[nr] or {}
+			win.dataset[nr] = d
+
+			d.id = spellname
+			d.spellid = spell.id
+			d.label = spellname
+			d.icon = select(3, GetSpellInfo(spell.id))
+			d.spellschool = spell.school
+
+			d.value = spell.amount
+			d.valuetext = Skada:FormatValueText(
+				Skada:FormatNumber(spell.amount),
+				self.metadata.columns.Damage,
+				format("%.1f%%", 100 * spell.amount / total),
+				self.metadata.columns.Percent
+			)
+
+			if spell.amount > maxvalue then
+				maxvalue = spell.amount
+			end
+			nr = nr + 1
+		end
+
+		win.metadata.maxvalue = maxvalue
+		delTable(cacheTable)
 	end
 
 	function mod:OnEnable()

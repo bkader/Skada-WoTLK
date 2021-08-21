@@ -553,8 +553,6 @@ L["Events Amount"] = true
 L["Set the amount of events the death log should record."] = true
 L["Minimum Healing"] = true
 L["Ignore heal events that are below this threshold."] = true
-L["Announce Deaths"] = true
-L["Announces information about the last hit the person took before they died."] = true
 -- activity module
 L["Activity"] = true
 L["Activity per target"] = true

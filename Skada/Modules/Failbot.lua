@@ -14,7 +14,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	local tostring, format = tostring, string.format
 	local GetSpellInfo, UnitGUID = Skada.GetSpellInfo or GetSpellInfo, UnitGUID
 	local failevents, tankevents = LibFail:GetSupportedEvents()
-	local cacheTable, _
+	local _
 
 	local function log_fail(set, playerid, playername, spellid, event)
 		if set then
@@ -44,6 +44,18 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 		end
 	end
 
+	local function countFail(set, spellid)
+		local count = 0
+		if set and spellid then
+			for _, player in Skada:IteratePlayers(set) do
+				if player.fail_spells and player.fail_spells[spellid] then
+					count = count + player.fail_spells[spellid]
+				end
+			end
+		end
+		return count
+	end
+
 	function spellmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
 		win.title = format(L["%s's fails"], label)
@@ -51,38 +63,24 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 
 	function spellmod:Update(win, set)
 		win.title = format(L["%s's fails"], win.spellname or UNKNOWN)
-		if (set.fail or 0) > 0 then
-			cacheTable = wipe(cacheTable or {})
-			local total = 0
+
+		local total = countFail(set, win.spellid or 0)
+		if total > 0 then
+			local maxvalue, nr = 0, 1
 
 			for _, player in Skada:IteratePlayers(set) do
 				if player.fail_spells and player.fail_spells[win.spellid] then
-					cacheTable[player.name] = {
-						id = player.id,
-						class = player.class,
-						role = player.role,
-						spec = player.spec,
-						count = player.fail_spells[win.spellid]
-					}
-					total = total + player.fail_spells[win.spellid]
-				end
-			end
-
-			if total > 0 then
-				local maxvalue, nr = 0, 1
-
-				for playername, player in pairs(cacheTable) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
 					d.id = player.id
-					d.label = playername
-					d.text = Skada:FormatName(playername, player.id)
+					d.label = player.name
+					d.text = Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
 
-					d.value = player.count
+					d.value = player.fail_spells[win.spellid]
 					d.valuetext = Skada:FormatValueText(
 						d.value,
 						mod.metadata.columns.Count,
@@ -95,9 +93,9 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 					end
 					nr = nr + 1
 				end
-
-				win.metadata.maxvalue = maxvalue
 			end
+
+			win.metadata.maxvalue = maxvalue
 		end
 	end
 

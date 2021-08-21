@@ -12,6 +12,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 	local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 	local InCombatLockdown = InCombatLockdown
 	local PlaySoundFile = PlaySoundFile
+	local newTable, delTable = Skada.newTable, Skada.delTable
 
 	do
 		local nr, maxthreat, last_warn, mypercent = 1, 0, time(), nil
@@ -194,9 +195,12 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 		end
 
 		function mod:AddSetAttributes(set)
-			threatTable = wipe(threatTable or {})
+			threatTable = newTable()
 		end
-		mod.SetComplete = mod.AddSetAttributes
+
+		function mod:SetComplete(set)
+			delTable(threatTable)
+		end
 	end
 
 	-- Shamelessly copied from Omen - thanks!

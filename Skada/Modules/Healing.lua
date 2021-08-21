@@ -1084,7 +1084,7 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 	local mod = Skada:NewModule(L["Healing Taken"])
 	local sourcemod = mod:NewModule(L["Healing source list"])
 	local spellmod = sourcemod:NewModule(L["Healing spell list"])
-	local cacheTable
+	local newTable, delTable, cacheTable = Skada.newTable, Skada.delTable
 
 	function spellmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
@@ -1179,7 +1179,7 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 		if player then
 			win.title = format(L["%s's received healing"], player.name)
 
-			cacheTable = wipe(cacheTable or {})
+			cacheTable = newTable()
 			local total = 0
 
 			for _, p in Skada:IteratePlayers(set) do
@@ -1253,6 +1253,8 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 
 				win.metadata.maxvalue = maxvalue
 			end
+
+			delTable(cacheTable)
 		end
 	end
 
@@ -1261,7 +1263,7 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 		local total = set.heal or 0
 
 		if total > 0 then
-			cacheTable = wipe(cacheTable or {})
+			cacheTable = newTable()
 
 			for _, player in Skada:IteratePlayers(set) do
 				if player.heal_targets then
@@ -1321,6 +1323,7 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 			end
 
 			win.metadata.maxvalue = maxvalue
+			delTable(cacheTable)
 		end
 	end
 

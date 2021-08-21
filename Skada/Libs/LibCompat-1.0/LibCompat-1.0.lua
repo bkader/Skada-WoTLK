@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0", 4
+local MAJOR, MINOR = "LibCompat-1.0", 5
 
 local LibCompat, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not LibCompat then return end
@@ -119,6 +119,34 @@ do
 	local weaktable = {__mode = "v"}
 	function LibCompat.WeakTable(t)
 		return setmetatable(wipe(t or {}), weaktable)
+	end
+
+	-- Shamelessly copied from Omen - thanks!
+	local tablePool = {}
+	setmetatable(tablePool, {__mode = "kv"})
+
+	-- get a new table
+	function LibCompat.newTable()
+		local t = next(tablePool) or {}
+		tablePool[t] = nil
+		return t
+	end
+
+	-- delete table and return to pool
+	function LibCompat.delTable(t, recursive)
+		if type(t) == "table" then
+			for k, v in pairs(t) do
+				if recursive and type(v) == "table" then
+					LibCompat.delTable(v, recursive)
+				end
+				t[k] = nil
+			end
+			t[true] = true
+			t[true] = nil
+			setmetatable(t, nil)
+			tablePool[t] = true
+		end
+		return nil
 	end
 end
 
@@ -589,6 +617,8 @@ local mixins = {
 	"tCopy",
 	"tAppendAll",
 	"WeakTable",
+	"newTable",
+	"delTable",
 	"Clamp",
 	"IsInRaid",
 	"IsInParty",
