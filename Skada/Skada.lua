@@ -2388,9 +2388,10 @@ end
 -------------------------------------------------------------------------------
 -- format functions
 
-function Skada:FormatNumber(number)
+function Skada:FormatNumber(number, fmt)
 	if number then
-		if self.db.profile.numberformat == 1 then
+		fmt = fmt or self.db.profile.numberformat or 1
+		if fmt == 1 then
 			if number > 999999999 then
 				return format("%02.3fB", number / 1000000000)
 			elseif number > 999999 then
@@ -2399,7 +2400,7 @@ function Skada:FormatNumber(number)
 				return format("%02.1fK", number / 1000)
 			end
 			return floor(number)
-		elseif self.db.profile.numberformat == 2 then
+		elseif fmt == 2 then
 			local left, num, right = tostring(floor(number)):match("^([^%d]*%d)(%d*)(.-)$")
 			return left .. (num:reverse():gsub("(%d%d%d)", "%1,"):reverse()) .. right
 		else

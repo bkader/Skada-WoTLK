@@ -169,23 +169,23 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 							log.source or UNKNOWN,
 							dstName or UNKNOWN,
 							GetSpellInfo(log.spellid) or UNKNOWN,
-							Skada:FormatNumber(0 - log.amount)
+							Skada:FormatNumber(0 - log.amount, 1)
 						)
 
 						if log.overkill or log.resisted or log.blocked or log.absorbed then
 							output = output .. " ["
 							local extra = newTable()
 							if log.overkill then
-								tinsert(extra, "O:" .. Skada:FormatNumber(log.overkill))
+								tinsert(extra, "O:" .. Skada:FormatNumber(log.overkill, 1))
 							end
 							if log.resisted then
-								tinsert(extra, "R:" .. Skada:FormatNumber(log.resisted))
+								tinsert(extra, "R:" .. Skada:FormatNumber(log.resisted, 1))
 							end
 							if log.blocked then
-								tinsert(extra, "B:" .. Skada:FormatNumber(log.blocked))
+								tinsert(extra, "B:" .. Skada:FormatNumber(log.blocked, 1))
 							end
 							if log.absorbed then
-								tinsert(extra, "A:" .. Skada:FormatNumber(log.absorbed))
+								tinsert(extra, "A:" .. Skada:FormatNumber(log.absorbed, 1))
 							end
 							output = output .. tconcat(extra, " - ") .. "]"
 							delTable(extra)
