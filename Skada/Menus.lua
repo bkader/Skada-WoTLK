@@ -432,7 +432,6 @@ function Skada:OpenMenu(window)
 						for _, s in Skada:IterateSets() do
 							s.keep = true
 						end
-						window:UpdateDisplay()
 					end
 					info.notCheckable = 1
 					info.leftPadding = 16
@@ -445,7 +444,6 @@ function Skada:OpenMenu(window)
 						for _, s in Skada:IterateSets() do
 							s.keep = nil
 						end
-						window:UpdateDisplay()
 					end
 					info.notCheckable = 1
 					info.leftPadding = 16

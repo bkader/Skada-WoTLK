@@ -3,7 +3,9 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 
 local name = L["Data text"]
 local mod = Skada:NewModule(name)
+
 mod.name = name
+mod.description = L["Data text acts as an LDB data feed. It can be integrated in any LDB display such as Titan Panel or ChocolateBar. It also has an optional internal frame."]
 Skada:AddDisplaySystem("broker", mod)
 
 local ldb = LibStub:GetLibrary("LibDataBroker-1.1")
@@ -275,7 +277,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function(win, key)
 					db.useframe = key
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end,
 				order = 0.0
 			},
@@ -289,7 +291,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function()
 					db.isusingclasscolors = not db.isusingclasscolors
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			},
 			color = {
@@ -303,7 +305,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function(i, r, g, b, a)
 					db.textcolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end,
 				order = 4
 			},
@@ -318,7 +320,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function(win, key)
 					db.barfont = key
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end,
 				order = 1
 			},
@@ -334,7 +336,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function(win, size)
 					db.barfontsize = size
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end,
 				order = 2
 			},
@@ -354,7 +356,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function(win, key)
 					db.barfontflags = key
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end,
 				order = 3
 			}

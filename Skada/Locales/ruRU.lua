@@ -195,6 +195,7 @@ L["Check this to use ElvUI skin instead. \nDefault: checked"] = "Установ�
 L["Use solid background."] = "Используйте сплошной фон."
 L["Un-check this for an opaque background."] = "Снимите флажок для непрозрачного фона."
 L["Data text"] = "Текстовые данные"
+L["Data text acts as an LDB data feed. It can be integrated in any LDB display such as Titan Panel or ChocolateBar. It also has an optional internal frame."] = "Текст данных актов действует в качестве LDB канала данных. Он может быть интегрирован в любой LDB дисплей, такие как, Titan Panel или Chocolate Bar. Он также имеет дополнительною внутреннюю рамку."
 L["Text color"] = "Цвет текста"
 L["Choose the default color."] = "Выберите цвет по умолчанию."
 L["Hint: Left-Click to set active mode."] = "ЛКМ - Выбор активного режима."

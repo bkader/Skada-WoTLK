@@ -197,6 +197,7 @@ L["Check this to use ElvUI skin instead. \nDefault: checked"] = "勾选此项以
 L["Use solid background."] = "使用纯色背景。"
 L["Un-check this for an opaque background."] = "不勾选此项将使用不透明背景。"
 L["Data text"] = "数据文字"
+L["Data text acts as an LDB data feed. It can be integrated in any LDB display such as Titan Panel or ChocolateBar. It also has an optional internal frame."] = "数据文本作为一个 LDB 数据聚合。可以集成在任何 LDB 显示，如 Titan Panel 或 ChocolateBar。它也有一个可选的内部框架。"
 L["Text color"] = "文字颜色"
 L["Choose the default color."] = "选择默认颜色。"
 L["Hint: Left-Click to set active mode."] = "提示：左键点击：设定活跃模式。"

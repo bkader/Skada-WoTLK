@@ -207,7 +207,7 @@ local newdisplay = "bar"
 
 Skada.options = {
 	type = "group",
-	name = "Skada v|cffffffff" .. Skada.version,
+	name = fmt("Skada |cffffffff%s|r", Skada.version),
 	get = function(i)
 		return Skada.db.profile[i[#i]]
 	end,
@@ -223,7 +223,7 @@ Skada.options = {
 	args = {
 		discord = {
 			type = "header",
-			name = "Discord Server : |c007289d9https://bitly.com/skada-rev|r",
+			name = fmt("Discord Server: |c007289d9%s|r", Skada.discord),
 			order = 1
 		},
 		windows = {
@@ -262,12 +262,6 @@ Skada.options = {
 					set = function(_, display)
 						newdisplay = display
 					end
-				},
-				separator1 = {
-					type = "description",
-					name = " ",
-					order = 3,
-					width = "full"
 				}
 			}
 		},

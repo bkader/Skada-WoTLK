@@ -3,7 +3,7 @@ if not L then return end
 
 L["A damage meter."] = "一個傷害統計。"
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "記憶體使用過高，你或許想要重置Skada，並且啟用一個自動重設的選項。"
--- L["Skada is out of date. You can download the newest version from |cffffbb00%s|r"] = ""
+L["Skada is out of date. You can download the newest version from |cffffbb00%s|r"] = "Skada 已過期. 你可以在 |cffffbb00%s|r 下載到最新的版本."
 L["Skada: Modes"] = "Skada:模組"
 L["Skada: Fights"] = "Skada:戰鬥"
 -- L["Error: No options selected"] = ""
@@ -195,6 +195,7 @@ L["If checked, bar width is fixed. Otherwise, bar width depends on the text widt
 -- L["Use solid background."] = ""
 -- L["Un-check this for an opaque background."] = ""
 L["Data text"] = "數據文字"
+L["Data text acts as an LDB data feed. It can be integrated in any LDB display such as Titan Panel or ChocolateBar. It also has an optional internal frame."] = "數據文字行為類似LDB數據輸出。它可以整合在任何像是泰坦面板與巧克力棒的LDB顯示中。它也有一個可選的內部框架。"
 L["Text color"] = "文字顏色"
 L["Choose the default color."] = "選擇預設顏色。"
 L["Hint: Left-Click to set active mode."] = "提示：左鍵點擊來設定啟動模式。"

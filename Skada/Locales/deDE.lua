@@ -195,6 +195,7 @@ L["Check this to use ElvUI skin instead. \nDefault: checked"] = "Aktivieren Sie 
 L["Use solid background."] = "Verwenden Sie soliden Hintergrund."
 L["Un-check this for an opaque background."] = "Deaktivieren Sie diese Option, um einen undurchsichtigen Hintergrund zu erhalten."
 L["Data text"] = "Datentext"
+L["Data text acts as an LDB data feed. It can be integrated in any LDB display such as Titan Panel or ChocolateBar. It also has an optional internal frame."] = "Der Datentext verhält sich wie ein DataBroker-Plugin. Es kann in eine beliebige LDB-Anzeige wie Titan Panel, ChocolateBar, Bazooka etc. integriert werden. Skada kann diesen Datentext auch ohne ein solches, zusätzliches Addon anzeigen."
 L["Text color"] = "Schriftfarbe"
 L["Choose the default color."] = "Wähle die Standardfarbe."
 L["Hint: Left-Click to set active mode."] = "Hinweis: Linksklick, um den aktiven Modus festzulegen."

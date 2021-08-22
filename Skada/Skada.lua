@@ -3,7 +3,8 @@ _G.Skada = Skada
 
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
 Skada.version = GetAddOnMetadata("Skada", "Version")
-Skada.website = GetAddOnMetadata("Skada", "X-Website")
+Skada.website = GetAddOnMetadata("Skada", "X-Website") or "https://github.com/bkader/Skada-WoTLK"
+Skada.discord = GetAddOnMetadata("Skada", "X-Discord") or "https://bitly.com/skada-rev"
 Skada.locale = Skada.locale or GetLocale()
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
@@ -11,7 +12,7 @@ local ACD = LibStub("AceConfigDialog-3.0")
 local DBI = LibStub("LibDBIcon-1.0", true)
 local LBB = LibStub("LibBabble-Boss-3.0"):GetUnstrictLookupTable()
 local LBI = LibStub("LibBossIDs-1.0")
-local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
+local LDB = LibStub("LibDataBroker-1.1")
 local LGT = LibStub("LibGroupTalents-1.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local Translit = LibStub("LibTranslit-1.0", true)
@@ -303,7 +304,7 @@ do
 			get = function(i) return db[i[#i]] end,
 			set = function(i, val)
 				db[i[#i]] = val
-				Skada:ApplySettings()
+				Skada:ApplySettings(db.name)
 			end,
 			args = {
 				name = {
@@ -400,7 +401,7 @@ do
 						for k, v in pairs(newdb) do
 							db[k] = v
 						end
-						Skada:ApplySettings()
+						Skada:ApplySettings(db.name)
 						copywindow = nil
 					end
 				},
@@ -467,7 +468,7 @@ do
 							end
 						end
 					end
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			}
 
@@ -545,7 +546,9 @@ end
 -- destroy a window
 function Window:destroy()
 	self.dataset = nil
-	self.display:Destroy(self)
+	if self.display then
+		self.display:Destroy(self)
+	end
 
 	local name = self.db.name or Skada.windowdefaults.name
 	Skada.options.args.windows.args[name] = nil
@@ -1166,13 +1169,13 @@ end
 
 -- add a display system
 do
-	local numorder = 5
+	local numorder = 3
 	function Skada:AddDisplaySystem(key, mod)
 		self.displays[key] = mod
 		if mod.description then
 			Skada.options.args.windows.args[key .. "desc"] = {
 				type = "description",
-				name = format("|cffffd700%s|r: %s", mod.name, mod.description),
+				name = format("\n|cffffd700%s|r:\n%s", mod.name, mod.description),
 				fontSize = "medium",
 				order = numorder
 			}
@@ -1737,15 +1740,14 @@ do
 		end
 	end
 
-	local ttwin = Window:new()
-	local white = {r = 1, g = 1, b = 1}
+	local white, ttwin = {r = 1, g = 1, b = 1}
 
 	function Skada:AddSubviewToTooltip(tooltip, win, mode, id, label)
 		if not mode then
 			return
 		end
 
-		local ttwin = win.ttwin or Window:new()
+		ttwin = win.ttwin or Window:new()
 		win.ttwin = ttwin
 		wipe(ttwin.dataset)
 
@@ -1884,6 +1886,8 @@ local function SlashCommandHandler(cmd)
 		Skada:CleanGarbage()
 	elseif cmd == "website" or cmd == "github" then
 		Skada:Printf("|cffffbb00%s|r", Skada.website)
+	elseif cmd == "discord" then
+		Skada:Printf("|cffffbb00%s|r", Skada.discord)
 	elseif cmd == "timemesure" or cmd == "measure" then
 		if Skada.db.profile.timemesure == 2 then
 			Skada.db.profile.timemesure = 1
@@ -1929,6 +1933,7 @@ local function SlashCommandHandler(cmd)
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33config|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33clean|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33website|r")
+		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33discord|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33debug|r")
 	end
 end
@@ -2645,10 +2650,12 @@ function Skada:RefreshMMButton()
 	end
 end
 
-function Skada:ApplySettings()
+function Skada:ApplySettings(name)
 	for _, win in Skada:IterateWindows() do
-		win:SetChild(win.db.child)
-		win.display:ApplySettings(win)
+		if name == nil or (name and win.db.name == name) then
+			win:SetChild(win.db.child)
+			win.display:ApplySettings(win)
+		end
 	end
 
 	if (Skada.db.profile.hidesolo and not Skada:IsInGroup()) or (Skada.db.profile.hidepvp and Skada:IsInPvP()) then
@@ -2755,7 +2762,7 @@ function Skada:FrameSettings(db, include_dimensions)
 		end,
 		set = function(i, val)
 			db[i[#i]] = val
-			Skada:ApplySettings()
+			Skada:ApplySettings(db.name)
 		end,
 		order = 3,
 		args = {
@@ -2828,7 +2835,7 @@ function Skada:FrameSettings(db, include_dimensions)
 						end,
 						set = function(_, key)
 							db.background.texture = key
-							Skada:ApplySettings()
+							Skada:ApplySettings(db.name)
 						end
 					},
 					tile = {
@@ -2842,7 +2849,7 @@ function Skada:FrameSettings(db, include_dimensions)
 						end,
 						set = function(_, key)
 							db.background.tile = key
-							Skada:ApplySettings()
+							Skada:ApplySettings(db.name)
 						end
 					},
 					tilesize = {
@@ -2860,7 +2867,7 @@ function Skada:FrameSettings(db, include_dimensions)
 						end,
 						set = function(_, val)
 							db.background.tilesize = val
-							Skada:ApplySettings()
+							Skada:ApplySettings(db.name)
 						end
 					},
 					color = {
@@ -2876,7 +2883,7 @@ function Skada:FrameSettings(db, include_dimensions)
 						end,
 						set = function(_, r, g, b, a)
 							db.background.color = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
-							Skada:ApplySettings()
+							Skada:ApplySettings(db.name)
 						end
 					}
 				}
@@ -2903,7 +2910,7 @@ function Skada:FrameSettings(db, include_dimensions)
 							if key == "None" then
 								db.background.borderthickness = 1
 							end
-							Skada:ApplySettings()
+							Skada:ApplySettings(db.name)
 						end
 					},
 					bordercolor = {
@@ -2919,7 +2926,7 @@ function Skada:FrameSettings(db, include_dimensions)
 						end,
 						set = function(_, r, g, b, a)
 							db.background.bordercolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
-							Skada:ApplySettings()
+							Skada:ApplySettings(db.name)
 						end
 					},
 					thickness = {
@@ -2937,7 +2944,7 @@ function Skada:FrameSettings(db, include_dimensions)
 						end,
 						set = function(_, val)
 							db.background.borderthickness = val
-							Skada:ApplySettings()
+							Skada:ApplySettings(db.name)
 						end
 					}
 				}

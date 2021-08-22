@@ -19,6 +19,7 @@
 ## X-License: MIT/X
 ## X-Category: Combat
 ## X-Website: https://github.com/bkader/Skada-WoTLK
+## X-Discord: https://bitly.com/skada-rev
 ## X-Email: bkader@email.com
 
 Embeds.xml

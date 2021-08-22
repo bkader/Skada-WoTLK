@@ -551,7 +551,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function(win, key)
 					db.barfont = key
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			},
 			barfontsize = {
@@ -567,7 +567,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function(win, size)
 					db.barfontsize = size
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			},
 			color = {
@@ -582,7 +582,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function(win, r, g, b, a)
 					db.title.textcolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a or 1.0}
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			},
 			barfontflags = {
@@ -602,7 +602,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function(win, key)
 					db.barfontflags = key
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			},
 			barwidth = {
@@ -618,7 +618,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function(win, key)
 					db.barwidth = key
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			},
 			fixedbarwidth = {
@@ -631,7 +631,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function()
 					db.fixedbarwidth = not db.fixedbarwidth
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			},
 			isusingclasscolors = {
@@ -644,7 +644,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function(win, key)
 					db.isusingclasscolors = key
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			},
 			isonnewline = {
@@ -657,7 +657,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function(win, key)
 					db.isonnewline = key
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			},
 			clickthrough = {
@@ -670,7 +670,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function()
 					db.clickthrough = not db.clickthrough
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			}
 		}
@@ -691,7 +691,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function(win, key)
 					db.isusingelvuiskin = key
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			},
 			issolidbackdrop = {
@@ -704,7 +704,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function(win, key)
 					db.issolidbackdrop = key
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			}
 		}

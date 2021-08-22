@@ -195,6 +195,7 @@ L["Check this to use ElvUI skin instead. \nDefault: checked"] = true
 L["Use solid background."] = true
 L["Un-check this for an opaque background."] = true
 L["Data text"] = true
+L["Data text acts as an LDB data feed. It can be integrated in any LDB display such as Titan Panel or ChocolateBar. It also has an optional internal frame."] = true
 L["Text color"] = true
 L["Choose the default color."] = true
 L["Hint: Left-Click to set active mode."] = true

@@ -953,7 +953,7 @@ do
 		-- make player's bar fixed.
 		g.showself = Skada.db.profile.showself or p.showself
 
-		g:SetMaxBars()
+		g:SetMaxBars(g:GetMaxBars())
 		g:SetEnableMouse(not p.clickthrough)
 		g:SetClampedToScreen(p.clamped)
 		g:SetSmoothing(p.smoothing)
@@ -985,7 +985,7 @@ function mod:AddDisplayOptions(win, options)
 		end,
 		set = function(i, val)
 			db[i[#i]] = val
-			Skada:ApplySettings()
+			Skada:ApplySettings(db.name)
 		end,
 		args = {
 			barfont = {
@@ -1121,7 +1121,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function(_, r, g, b, a)
 					db.barcolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			},
 			bgcolor = {
@@ -1135,7 +1135,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function(_, r, g, b, a)
 					db.barbgcolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			},
 			disablehighlight = {
@@ -1226,7 +1226,7 @@ function mod:AddDisplayOptions(win, options)
 		end,
 		set = function(i, val)
 			db.title[i[#i]] = val
-			Skada:ApplySettings()
+			Skada:ApplySettings(db.name)
 		end,
 		args = {
 			enable = {
@@ -1240,7 +1240,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function()
 					db.enabletitle = not db.enabletitle
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			},
 			titleset = {
@@ -1253,7 +1253,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function()
 					db.titleset = not db.titleset
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			},
 			combattimer = {
@@ -1266,7 +1266,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function()
 					db.combattimer = not db.combattimer
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			},
 			font = {
@@ -1303,7 +1303,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function(_, r, g, b, a)
 					db.title.textcolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			},
 			fontsize = {
@@ -1345,7 +1345,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function(_, r, g, b, a)
 					db.title.color = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			},
 			bordertexture = {
@@ -1369,7 +1369,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function(_, r, g, b, a)
 					db.title.bordercolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end
 			},
 			thickness = {
@@ -1393,7 +1393,7 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				set = function(i, val)
 					db.buttons[i[#i]] = val
-					Skada:ApplySettings()
+					Skada:ApplySettings(db.name)
 				end,
 				args = {
 					report = {
@@ -1441,7 +1441,7 @@ function mod:AddDisplayOptions(win, options)
 						end,
 						set = function()
 							db.title.hovermode = not db.title.hovermode
-							Skada:ApplySettings()
+							Skada:ApplySettings(db.name)
 						end
 					}
 				}
@@ -1474,7 +1474,7 @@ function mod:AddDisplayOptions(win, options)
 		end,
 		set = function(_, val)
 			db.background.height = val
-			Skada:ApplySettings()
+			Skada:ApplySettings(db.name)
 		end
 	}
 

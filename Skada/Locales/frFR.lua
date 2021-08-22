@@ -197,6 +197,7 @@ L["Check this to use ElvUI skin instead. \nDefault: checked"] = "Cochez pour uti
 L["Use solid background."] = "Utiliser un fond opaque."
 L["Un-check this for an opaque background."] = "Décochez pour un fond opaque."
 L["Data text"] = "Texte de données"
+L["Data text acts as an LDB data feed. It can be integrated in any LDB display such as Titan Panel or ChocolateBar. It also has an optional internal frame."] = "Les textes de données agissent comme une source LDB. Ils peuvent être intégrés dans n'importe quel affichage LDB comme Titan Panel ou ChocolateBar. Ils ont également un fenêtre interne optionnelle."
 L["Text color"] = "Couleur du texte"
 L["Choose the default color."] = "Choisissez la couleur par défaut."
 L["Hint: Left-Click to set active mode."] = "Astuce : clic-gauche pour activer."
