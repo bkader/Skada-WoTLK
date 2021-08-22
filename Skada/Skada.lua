@@ -213,7 +213,7 @@ function Skada:ShowPopup(win, popup)
 
 	if not StaticPopupDialogs["SkadaResetDialog"] then
 		StaticPopupDialogs["SkadaResetDialog"] = {
-			text = L["Do you want to reset Skada?"],
+			text = L["Do you want to reset Skada?\nHold SHIFT to reset all data."],
 			button1 = ACCEPT,
 			button2 = CANCEL,
 			timeout = 30,
@@ -2216,7 +2216,7 @@ function Skada:Reset(force)
 		self.char.sets = wipe(self.char.sets or {})
 		self.char.total = nil
 		self:Reset()
-		self.After(3, function() self:ReloadSettings() end)
+		self.After(3, Skada.ReloadSettings)
 		return
 	end
 
@@ -2646,77 +2646,77 @@ function Skada:RefreshMMButton()
 end
 
 function Skada:ApplySettings()
-	for _, win in self:IterateWindows() do
+	for _, win in Skada:IterateWindows() do
 		win:SetChild(win.db.child)
 		win.display:ApplySettings(win)
 	end
 
-	if (self.db.profile.hidesolo and not self:IsInGroup()) or (self.db.profile.hidepvp and self:IsInPvP()) then
-		self:SetActive(false)
+	if (Skada.db.profile.hidesolo and not Skada:IsInGroup()) or (Skada.db.profile.hidepvp and Skada:IsInPvP()) then
+		Skada:SetActive(false)
 	else
-		self:SetActive(true)
+		Skada:SetActive(true)
 
-		for _, win in self:IterateWindows() do
-			if (win.db.hidden or (not win.db.hidden and self.db.profile.showcombat)) and win:IsShown() then
+		for _, win in Skada:IterateWindows() do
+			if (win.db.hidden or (not win.db.hidden and Skada.db.profile.showcombat)) and win:IsShown() then
 				win:Hide()
 			end
 		end
 	end
 
-	self:UpdateDisplay(true)
+	Skada:UpdateDisplay(true)
 
 	-- in case of future code change or database structure changes, this
 	-- code here will be used to perform any database modifications.
-	local curversion = convertVersion(self.version)
-	if type(self.db.global.version) ~= "number" or curversion > self.db.global.version then
-		self.callbacks:Fire("SKADA_CORE_UPDATE", self.db.global.version)
-		self.db.global.version = curversion
+	local curversion = convertVersion(Skada.version)
+	if type(Skada.db.global.version) ~= "number" or curversion > Skada.db.global.version then
+		Skada.callbacks:Fire("SKADA_CORE_UPDATE", Skada.db.global.version)
+		Skada.db.global.version = curversion
 	end
-	if type(self.char.version) ~= "number" or (curversion - self.char.version) >= 5 then
-		self.callbacks:Fire("SKADA_DATA_UPDATE", self.char.version)
-		self:Reset(true)
-		self.char.version = curversion
+	if type(Skada.char.version) ~= "number" or (curversion - Skada.char.version) >= 5 then
+		Skada.callbacks:Fire("SKADA_DATA_UPDATE", Skada.char.version)
+		Skada:Reset(true)
+		Skada.char.version = curversion
 	end
 end
 
 function Skada:ReloadSettings()
-	for _, win in self:IterateWindows() do
+	for _, win in Skada:IterateWindows() do
 		win:destroy()
 	end
 	windows = {}
 
-	for _, win in ipairs(self.db.profile.windows) do
-		self:CreateWindow(win.name, win)
+	for _, win in ipairs(Skada.db.profile.windows) do
+		Skada:CreateWindow(win.name, win)
 	end
 
-	self.total = self.char.total
+	Skada.total = Skada.char.total
 
 	Skada:ClearAllIndexes()
 
 	if DBI and not DBI:IsRegistered("Skada") then
-		DBI:Register("Skada", dataobj, self.db.profile.icon)
+		DBI:Register("Skada", dataobj, Skada.db.profile.icon)
 	end
-	self:RefreshMMButton()
-	self:ApplySettings()
+	Skada:RefreshMMButton()
+	Skada:ApplySettings()
 
 	-- fix setstokeep
-	if (self.db.profile.setstokeep or 0) > 30 then
-		self.db.profile.setstokeep = 30
+	if (Skada.db.profile.setstokeep or 0) > 30 then
+		Skada.db.profile.setstokeep = 30
 	end
 
 	-- fix time measure
-	if self.db.profile.timemesure == nil then
-		self.db.profile.timemesure = 1
+	if Skada.db.profile.timemesure == nil then
+		Skada.db.profile.timemesure = 1
 	end
 
 	-- remove old improvement data
-	if self.char.improvement then
-		if self.char.improvement.bosses then
-			SkadaImprovementDB = CopyTable(self.char.improvement.bosses or {})
+	if Skada.char.improvement then
+		if Skada.char.improvement.bosses then
+			SkadaImprovementDB = CopyTable(Skada.char.improvement.bosses or {})
 		else
-			SkadaImprovementDB = CopyTable(self.char.improvement)
+			SkadaImprovementDB = CopyTable(Skada.char.improvement)
 		end
-		self.char.improvement = nil
+		Skada.char.improvement = nil
 	end
 end
 
@@ -3127,8 +3127,8 @@ function Skada:OnEnable()
 		self.modulelist = nil
 	end
 
-	self.After(2, function() self:ApplySettings() end)
-	self.After(3, function() self:MemoryCheck() end)
+	self.After(2, Skada.ApplySettings)
+	self.After(3, Skada.MemoryCheck)
 
 	if _G.BigWigs then
 		self:RegisterMessage("BigWigs_Message", "BigWigs")
@@ -3168,12 +3168,12 @@ function Skada:DBM(_, mod, wipe)
 end
 
 function Skada:MemoryCheck()
-	if self.db.profile.memorycheck then
+	if Skada.db.profile.memorycheck then
 		UpdateAddOnMemoryUsage()
 
-		local compare = 30 + (self.db.profile.setstokeep * 1.25)
+		local compare = 30 + (Skada.db.profile.setstokeep * 1.25)
 		if GetAddOnMemoryUsage("Skada") > (compare * 1024) then
-			self:Print(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."])
+			Skada:Print(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."])
 		end
 	end
 end
@@ -3378,7 +3378,7 @@ function Skada:EndSegment()
 		tick_timer = nil
 	end
 
-	self.After(3, function() self:MemoryCheck() end)
+	self.After(3, Skada.MemoryCheck)
 end
 
 function Skada:StopSegment()
