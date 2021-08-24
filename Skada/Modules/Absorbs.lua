@@ -1327,7 +1327,7 @@ end)
 -- ============================== --
 
 Skada:AddLoadableModule("HPS", function(Skada, L)
-	if Skada:IsDisabled("Absorbs and Healing", "HPS") then return end
+	if Skada:IsDisabled("Absorbs", "Healing", "Absorbs and Healing", "HPS") then return end
 
 	local parentmod = Skada:GetModule(L["Absorbs and Healing"], true)
 	local getHPS, getRaidHPS = parentmod.getHPS, parentmod.getRaidHPS
