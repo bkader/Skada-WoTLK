@@ -474,8 +474,16 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 				if not set.endtime then
 					Skada:Print(L["Smart Stop"])
 					Skada:StopSegment()
+					Skada:RegisterEvent("PLAYER_REGEN_ENABLED")
 				end
 			end)
+		end
+	end
+
+	function Skada:PLAYER_REGEN_ENABLED()
+		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+		if self.current and self.current.stopped then
+			self:EndSegment()
 		end
 	end
 
