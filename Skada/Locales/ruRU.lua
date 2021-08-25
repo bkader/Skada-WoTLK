@@ -508,6 +508,11 @@ L["Enemy Damage Taken"] = "Получено урона врагом"
 L["Damage taken per player"] = "Получено урона от игроков"
 L["Damage on %s"] = "Урон по %s"
 L["%s's damage sources"] = "%s - Источники урона"
+L["%s below %s%%"] = "%s ниже %s%%"
+L["%s - Phase %s"] = "%s - Фаза %s"
+L["%s - Phase 1"] = "%s - Фаза 1"
+L["%s - Phase 2"] = "%s - Фаза 2"
+L["%s - Phase 3"] = "%s - Фаза 3"
 -- enemy healing done module
 L["Enemy Healing Done"] = "Произведено исцеления врагом"
 -- avoidance and mitigation module

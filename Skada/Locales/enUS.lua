@@ -508,6 +508,11 @@ L["Enemy Damage Taken"] = true
 L["Damage taken per player"] = true
 L["Damage on %s"] = true
 L["%s's damage sources"] = true
+L["%s below %s%%"] = true
+L["%s - Phase %s"] = true
+L["%s - Phase 1"] = true
+L["%s - Phase 2"] = true
+L["%s - Phase 3"] = true
 -- enemy healing done module
 L["Enemy Healing Done"] = true
 -- avoidance and mitigation module

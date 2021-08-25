@@ -512,6 +512,11 @@ L["Enemy Damage Taken"] = "Dégâts subis (Ennemi)"
 L["Damage taken per player"] = "Dégâts subis par joueur"
 L["Damage on %s"] = "Dégâts infligés à %s"
 L["%s's damage sources"] = "Sources des dégâts subis par %s"
+L["%s below %s%%"] = "%s à partir de %s%%"
+L["%s - Phase %s"] = "%s - Phase %s"
+L["%s - Phase 1"] = "%s - Phase 1"
+L["%s - Phase 2"] = "%s - Phase 2"
+L["%s - Phase 3"] = "%s - Phase 3"
 -- enemy healing done module
 L["Enemy Healing Done"] = "Soins prodigués (Ennemi)"
 -- avoidance and mitigation module

@@ -509,6 +509,11 @@ L["Enemy Damage Taken"] = "적이 받은 피해"
 L["Damage taken per player"] = "플레이어별 받은 피해"
 L["Damage on %s"] = "피해 -> %s"
 -- L["%s's damage sources"] = ""
+L["%s below %s%%"] = "%s %s%% 미만"
+L["%s - Phase %s"] = "%s - 위상 %s"
+L["%s - Phase 1"] = "%s - 위상 1"
+L["%s - Phase 2"] = "%s - 위상 2"
+L["%s - Phase 3"] = "%s - 위상 3"
 -- enemy healing done module
 L["Enemy Healing Done"] = "적의 치유량"
 -- avoidance and mitigation module

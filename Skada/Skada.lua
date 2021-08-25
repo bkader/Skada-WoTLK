@@ -1602,30 +1602,40 @@ do
 		end
 	end
 
+	local function CommonFixPets(guid, flags)
+		if guid and pets[guid] then
+			return pets[guid]
+		end
+
+		-- flags is provided and it is mine.
+		if guid and flags and band(flags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
+			pets[guid] = {id = Skada.myGUID, name = Skada.myName}
+			return pets[guid]
+		end
+
+		-- no owner yet?
+		if guid then
+			-- guess the pet from roster.
+			local ownerUnit = GetPetOwnerUnit(guid)
+			if ownerUnit then
+				pets[guid] = {id = UnitGUID(ownerUnit), name = UnitName(ownerUnit)}
+				return pets[guid]
+			end
+
+			-- guess the pet from tooltip.
+			local ownerGUID, ownerName = GetPetOwnerFromTooltip(guid)
+			if ownerGUID and ownerName then
+				pets[guid] = {id = ownerGUID, name = ownerName}
+				return pets[guid]
+			end
+		end
+
+		return nil
+	end
+
 	function Skada:FixPets(action)
 		if action and self:IsPet(action.playerid, action.playerflags) then
-			local owner = pets[action.playerid]
-
-			if not owner and action.playerflags and band(action.playerflags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
-				owner = {id = self.myGUID, name = self.myName}
-				pets[action.playerid] = owner
-			end
-
-			if not owner then
-				local ownerUnit = GetPetOwnerUnit(action.playerid)
-				if ownerUnit then
-					owner = {id = UnitGUID(ownerUnit), name = UnitName(ownerUnit)}
-					pets[action.playerid] = owner
-				end
-			end
-
-			if not owner then
-				local ownerGUID, ownerName = GetPetOwnerFromTooltip(action.playerid)
-				if ownerGUID and ownerName then
-					owner = {id = ownerGUID, name = ownerName}
-					pets[action.playerid] = owner
-				end
-			end
+			local owner = pets[action.playerid] or CommonFixPets(action.playerid, action.playerflags)
 
 			if owner then
 				action.petname = action.playername
@@ -1649,9 +1659,18 @@ do
 		end
 	end
 
-	function Skada:FixMyPets(playerid, playername)
+	function Skada:FixMyPets(playerid, playername, playerflags)
+		if players[playerid] then
+			return playerid, playername
+		end
+
 		if pets[playerid] then
-			return pets[playerid].id, pets[playerid].name
+			return pets[playerid].id or playerid, pets[playerid].name or playername
+		end
+
+		local owner = CommonFixPets(playerid, playerflags)
+		if owner then
+			return owner.id or playerid, owner.name or playername
 		end
 
 		return playerid, playername

@@ -507,6 +507,11 @@ L["Enemy Damage Taken"] = "Gegnerischer Schaden erhalten"
 L["Damage taken per player"] = "Erhaltener Schaden pro Spieler"
 L["Damage on %s"] = "Schaden auf %s"
 L["%s's damage sources"] = "%s Schadensquellen"
+L["%s below %s%%"] = "%s unter %s%%"
+L["%s - Phase %s"] = "%s - Phase %s"
+L["%s - Phase 1"] = "%s - Phase 1"
+L["%s - Phase 2"] = "%s - Phase 2"
+L["%s - Phase 3"] = "%s - Phase 3"
 -- enemy healing done module
 L["Enemy Healing Done"] = "Gegnerische Gewirkte Heilung"
 -- avoidance and mitigation module

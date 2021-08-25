@@ -509,6 +509,11 @@ L["Enemy Damage Taken"] = "敌方承受伤害"
 L["Damage taken per player"] = "每人承受伤害"
 L["Damage on %s"] = "对于%s的伤害"
 L["%s's damage sources"] = "%s的伤害来源"
+L["%s below %s%%"] = "%s - %s%%"
+L["%s - Phase %s"] = "%s - 第 %s 阶段"
+L["%s - Phase 1"] = "%s - 第 1 阶段"
+L["%s - Phase 2"] = "%s - 第 2 阶段"
+L["%s - Phase 3"] = "%s - 第 3 阶段"
 -- enemy healing done module
 L["Enemy Healing Done"] = "敌方的治疗"
 -- avoidance and mitigation module
