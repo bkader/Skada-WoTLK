@@ -701,6 +701,7 @@ end
 
 function barListPrototype:SetMaxBars(num)
 	self.maxBars = ((num or 0) > 0) and floor(num) or self:GuessMaxBars()
+	self:SortBars()
 end
 
 function barListPrototype:GetMaxBars()

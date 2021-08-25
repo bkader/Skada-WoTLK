@@ -953,7 +953,9 @@ do
 		-- make player's bar fixed.
 		g.showself = Skada.db.profile.showself or p.showself
 
-		g:SetMaxBars(g:GetMaxBars())
+		g:SetMaxBars()
+		g:SetScript("OnShow", function(self) self:SetMaxBars() end)
+
 		g:SetEnableMouse(not p.clickthrough)
 		g:SetClampedToScreen(p.clamped)
 		g:SetSmoothing(p.smoothing)
