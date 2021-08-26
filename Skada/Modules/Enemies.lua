@@ -273,11 +273,11 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 					local unit = customUnitsTable[dmg.enemyid]
 					-- started with less than max?
 					if unit.max and unit.curr <= unit.max then
-						unit.max = nil
 						if unit.useful then
 							e.damagetaken_useful = (e.damagetaken_useful or 0) + unit.max - unit.curr
 							e.damagetaken_sources[dmg.srcName].useful = (e.damagetaken_sources[dmg.srcName].useful or 0) + unit.max - unit.curr
 						end
+						unit.max = nil
 					elseif unit.curr >= unit.watch then
 						unit.curr = unit.curr - dmg.amount
 

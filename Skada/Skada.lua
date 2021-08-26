@@ -2416,11 +2416,11 @@ function Skada:FormatNumber(number, fmt)
 	if number then
 		fmt = fmt or self.db.profile.numberformat or 1
 		if fmt == 1 then
-			if number > 999999999 then
+			if number > 999999999 or number < -999999999 then
 				return format("%02.3fB", number / 1000000000)
-			elseif number > 999999 then
+			elseif number > 999999 or number < -999999 then
 				return format("%02.2fM", number / 1000000)
-			elseif number > 999 then
+			elseif number > 999 or number < -999 then
 				return format("%02.1fK", number / 1000)
 			end
 			return floor(number)
