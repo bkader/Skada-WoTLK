@@ -603,6 +603,8 @@ L["Runic Power gained spell list"] = "Заклинания получения с
 L["Parry-Haste"] = "Пари-хаст"
 L["Parry target list"] = "Парировавшие цели"
 L["%s's parry targets"] = "%s - Парированные цели"
+L["Announce Parries"] = "Объявить парирует"
+L["%s parried %s (%s)"] = "%s парировал %s (%s)"
 -- Potions module lines --
 L["Potions"] = "Зелья"
 L["Potions list"] = "Список зелий"

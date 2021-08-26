@@ -64,71 +64,6 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 		end
 	end
 
-	-- module options
-	local options = {
-		type = "group",
-		name = L["Nickname"],
-		get = function(i)
-			return Skada.db.profile[i[#i]]
-		end,
-		set = function(i, val)
-			Skada.db.profile[i[#i]] = val
-		end,
-		args = {
-			nickname = {
-				type = "input",
-				name = L["Nickname"],
-				desc = L["Set a nickname for you.\nNicknames are sent to group members and Skada can use them instead of your character name."],
-				order = 1,
-				get = function()
-					return Skada.db.profile.nickname or Skada.myName
-				end,
-				set = function(_, val)
-					local okey, nickname = CheckNickname(val)
-					if okey == true then
-						Skada.db.profile.nickname = (nickname == "") and Skada.myName or nickname
-						mod:SendNickname(true)
-					else
-						Skada:Print(nickname)
-					end
-				end
-			},
-			namedisplay = {
-				type = "select",
-				name = L["Name display"],
-				desc = L["Choose how names are shown on your bars."],
-				order = 2,
-				values = {
-					[1] = L["Name"],
-					[2] = L["Nickname"],
-					[3] = L["Name"] .. " (" .. L["Nickname"] .. ")",
-					[4] = L["Nickname"] .. " (" .. L["Name"] .. ")"
-				}
-			},
-			ignorenicknames = {
-				type = "toggle",
-				name = L["Ignore Nicknames"],
-				desc = L["When enabled, nicknames set by Skada users are ignored."],
-				order = 3,
-				width = "full"
-			},
-			reset = {
-				type = "execute",
-				name = L["Clear Cache"],
-				order = 4,
-				width = "double",
-				confirm = function()
-					return L["Are you sure you want clear cached nicknames?"]
-				end,
-				func = function()
-					Skada.db.global.nicknames.reset = nil
-					Skada.db.global.nicknames.cache = wipe(Skada.db.global.nicknames.cache or {})
-					mod:SetCacheTable()
-				end
-			}
-		}
-	}
-
 	function mod:OnEvent(event)
 		if self.sendCooldown > time() then
 			if not self.sendTimer or self.sendTimer._cancelled then
@@ -166,7 +101,70 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 		if Skada.db.profile.namedisplay == nil then
 			Skada.db.profile.namedisplay = 2
 		end
-		Skada.options.args.modules.args.nickname = options
+
+		Skada.options.args.modules.args.nickname = {
+			type = "group",
+			name = L["Nickname"],
+			get = function(i)
+				return Skada.db.profile[i[#i]]
+			end,
+			set = function(i, val)
+				Skada.db.profile[i[#i]] = val
+			end,
+			args = {
+				nickname = {
+					type = "input",
+					name = L["Nickname"],
+					desc = L["Set a nickname for you.\nNicknames are sent to group members and Skada can use them instead of your character name."],
+					order = 1,
+					get = function()
+						return Skada.db.profile.nickname or Skada.myName
+					end,
+					set = function(_, val)
+						local okey, nickname = CheckNickname(val)
+						if okey == true then
+							Skada.db.profile.nickname = (nickname == "") and Skada.myName or nickname
+							mod:SendNickname(true)
+						else
+							Skada:Print(nickname)
+						end
+					end
+				},
+				namedisplay = {
+					type = "select",
+					name = L["Name display"],
+					desc = L["Choose how names are shown on your bars."],
+					order = 2,
+					values = {
+						[1] = L["Name"],
+						[2] = L["Nickname"],
+						[3] = L["Name"] .. " (" .. L["Nickname"] .. ")",
+						[4] = L["Nickname"] .. " (" .. L["Name"] .. ")"
+					}
+				},
+				ignorenicknames = {
+					type = "toggle",
+					name = L["Ignore Nicknames"],
+					desc = L["When enabled, nicknames set by Skada users are ignored."],
+					order = 3,
+					width = "full"
+				},
+				reset = {
+					type = "execute",
+					name = L["Clear Cache"],
+					order = 4,
+					width = "double",
+					confirm = function()
+						return L["Are you sure you want clear cached nicknames?"]
+					end,
+					func = function()
+						Skada.db.global.nicknames.reset = nil
+						Skada.db.global.nicknames.cache = wipe(Skada.db.global.nicknames.cache or {})
+						mod:SetCacheTable()
+					end
+				}
+			}
+		}
 	end
 
 	function mod:OnEnable()

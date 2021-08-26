@@ -602,6 +602,8 @@ L["Runic Power gained spell list"] = "Runenkraft hat Zauberliste gewonnen"
 L["Parry-Haste"] = "Parieren"
 L["Parry target list"] = "Zielliste parieren"
 L["%s's parry targets"] = "%s parierte Ziele"
+L["Announce Parries"] = "Parry ankündigen"
+L["%s parried %s (%s)"] = "%s parierte %s (%s)"
 -- Potions module lines --
 L["Potions"] = "Tränke"
 L["Potions list"] = "Liste der Tränke"

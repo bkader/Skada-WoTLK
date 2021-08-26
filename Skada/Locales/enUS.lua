@@ -603,6 +603,9 @@ L["Runic Power gained spell list"] = true
 L["Parry-Haste"] = true
 L["Parry target list"] = true
 L["%s's parry targets"] = true
+L["%s's parry targets"] = true
+L["Announce Parries"] = true
+L["%s parried %s (%s)"] = true
 -- Potions module lines --
 L["Potions"] = true
 L["Potions list"] = true

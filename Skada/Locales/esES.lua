@@ -603,6 +603,8 @@ L["Runic Power gained spell list"] = "Hechizos de poder rúnico ganado"
 L["Parry-Haste"] = "Parar-celeridad"
 L["Parry target list"] = "Lista de objetivos de parada"
 L["%s's parry targets"] = "Objetivos de parada de %s"
+L["Announce Parries"] = "Anunciar parrias"
+L["%s parried %s (%s)"] = "%s paró a %s (%s)"
 -- Potions module lines --
 L["Potions"] = "Pociones"
 L["Potions list"] = "Lista de pociones"

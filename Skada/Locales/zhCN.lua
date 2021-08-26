@@ -604,6 +604,8 @@ L["Runic Power gained spell list"] = "符文能量获得法术列表"
 L["Parry-Haste"] = "招架-急速"
 L["Parry target list"] = "招架目标列表"
 L["%s's parry targets"] = "%s的招架目标"
+L["Announce Parries"] = "宣布招架"
+L["%s parried %s (%s)"] = "%s招架%s (%s)"
 -- Potions module lines --
 L["Potions"] = "药水"
 L["Potions list"] = "药水列表"

@@ -4,7 +4,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 
 	local mod = Skada:NewModule(L["Themes"])
 	local ipairs, tinsert, tremove = ipairs, table.insert, table.remove
-	local list
+	local newTable, delTable, list = Skada.newTable, Skada.delTable
 
 	local themes = {
 		{
@@ -271,205 +271,6 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 	local selectedwindow, selectedtheme
 	local savewindow, savename, deletetheme
 
-	local options = {
-		type = "group",
-		name = L["Themes"],
-		args = {
-			apply = {
-				type = "group",
-				name = L["Apply Theme"],
-				inline = true,
-				order = 1,
-				args = {
-					applytheme = {
-						type = "select",
-						name = L["Theme"],
-						order = 1,
-						values = function()
-							list = Skada.WeakTable(list)
-							for i, theme in ipairs(themes) do
-								list[theme.name] = theme.name
-							end
-							if Skada.db.global.themes then
-								for i, theme in ipairs(Skada.db.global.themes) do
-									if theme.name then
-										list[theme.name] = theme.name
-									end
-								end
-							end
-							return list
-						end,
-						get = function()
-							return selectedtheme
-						end,
-						set = function(_, name)
-							selectedtheme = name
-						end
-					},
-					applywindow = {
-						type = "select",
-						name = L["Window"],
-						order = 2,
-						values = function()
-							list = Skada.WeakTable(list)
-							for i, win in ipairs(Skada:GetWindows()) do
-								list[win.db.name] = win.db.name
-							end
-							return list
-						end,
-						get = function()
-							return selectedwindow
-						end,
-						set = function(_, name)
-							selectedwindow = name
-						end
-					},
-					applybutton = {
-						type = "execute",
-						name = APPLY,
-						order = 3,
-						width = "double",
-						func = function()
-							if selectedwindow and selectedtheme then
-								local thetheme = nil
-								for i, theme in ipairs(themes) do
-									if theme.name == selectedtheme then
-										thetheme = theme
-										break
-									end
-								end
-								if Skada.db.global.themes then
-									for i, theme in ipairs(Skada.db.global.themes) do
-										if theme.name == selectedtheme then
-											thetheme = theme
-											break
-										end
-									end
-								end
-
-								if thetheme then
-									for _, win in ipairs(Skada:GetWindows()) do
-										if win.db.name == selectedwindow then
-											Skada.tCopy(win.db, thetheme, {"name", "modeincombat", "display", "set", "wipemode", "returnaftercombat", "x", "y", "sticked"})
-											Skada:ApplySettings()
-											Skada:Print(L["Theme applied!"])
-										end
-									end
-								end
-							end
-							selectedwindow, selectedtheme = nil, nil
-						end
-					}
-				}
-			},
-			save = {
-				type = "group",
-				name = L["Save theme"],
-				inline = true,
-				order = 2,
-				args = {
-					savewindow = {
-						type = "select",
-						name = L["Window"],
-						order = 1,
-						values = function()
-							list = Skada.WeakTable(list)
-							for i, win in ipairs(Skada:GetWindows()) do
-								list[win.db.name] = win.db.name
-							end
-							return list
-						end,
-						get = function()
-							return savewindow
-						end,
-						set = function(_, name)
-							savewindow = name
-						end
-					},
-					savenametext = {
-						type = "input",
-						name = NAME,
-						desc = L["Name of your new theme."],
-						order = 2,
-						get = function()
-							return savename
-						end,
-						set = function(_, val)
-							savename = val
-						end
-					},
-					savebutton = {
-						type = "execute",
-						name = SAVE,
-						order = 3,
-						width = "double",
-						func = function()
-							for i, win in ipairs(Skada:GetWindows()) do
-								if win.db.name == savewindow then
-									Skada.db.global.themes = Skada.db.global.themes or {}
-									local theme = {}
-									Skada.tCopy(theme, win.db, {"name", "sticked", "x", "y", "point"})
-									theme.name = savename or win.db.name
-									tinsert(Skada.db.global.themes, theme)
-								end
-							end
-							savewindow = nil
-							savename = nil
-						end
-					}
-				}
-			},
-			delete = {
-				type = "group",
-				name = L["Delete theme"],
-				inline = true,
-				order = 3,
-				args = {
-					deltheme = {
-						type = "select",
-						name = L["Theme"],
-						order = 1,
-						width = "double",
-						values = function()
-							list = Skada.WeakTable(list)
-							if Skada.db.global.themes then
-								for i, theme in ipairs(Skada.db.global.themes) do
-									if theme.name then
-										list[theme.name] = theme.name
-									end
-								end
-							end
-							return list
-						end,
-						get = function()
-							return deletetheme
-						end,
-						set = function(_, name)
-							deletetheme = name
-						end
-					},
-					deletebutton = {
-						type = "execute",
-						name = DELETE,
-						order = 2,
-						width = "double",
-						func = function()
-							if Skada.db.global.themes then
-								for i, theme in ipairs(Skada.db.global.themes) do
-									if theme.name == deletetheme then
-										tremove(Skada.db.global.themes, i)
-										break
-									end
-								end
-							end
-							deletetheme = nil
-						end
-					}
-				}
-			}
-		}
-	}
-
 	function mod:OnInitialize()
 		if not Skada.db.global.themes then
 			Skada.db.global.themes = {}
@@ -478,6 +279,207 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 				Skada.db.profile.themes = nil
 			end
 		end
-		Skada.options.args.modules.args.themes = options
+
+		Skada.options.args.modules.args.themes = {
+			type = "group",
+			name = L["Themes"],
+			args = {
+				apply = {
+					type = "group",
+					name = L["Apply Theme"],
+					inline = true,
+					order = 1,
+					args = {
+						applytheme = {
+							type = "select",
+							name = L["Theme"],
+							order = 1,
+							values = function()
+								list = newTable()
+								for i, theme in ipairs(themes) do
+									list[theme.name] = theme.name
+								end
+								if Skada.db.global.themes then
+									for i, theme in ipairs(Skada.db.global.themes) do
+										if theme.name then
+											list[theme.name] = theme.name
+										end
+									end
+								end
+								return list
+							end,
+							get = function()
+								return selectedtheme
+							end,
+							set = function(_, name)
+								selectedtheme = name
+								delTable(list)
+							end
+						},
+						applywindow = {
+							type = "select",
+							name = L["Window"],
+							order = 2,
+							values = function()
+								list = newTable()
+								for i, win in ipairs(Skada:GetWindows()) do
+									list[win.db.name] = win.db.name
+								end
+								return list
+							end,
+							get = function()
+								return selectedwindow
+							end,
+							set = function(_, name)
+								selectedwindow = name
+							end
+						},
+						applybutton = {
+							type = "execute",
+							name = APPLY,
+							order = 3,
+							width = "double",
+							func = function()
+								if selectedwindow and selectedtheme then
+									local thetheme = nil
+									for i, theme in ipairs(themes) do
+										if theme.name == selectedtheme then
+											thetheme = theme
+											break
+										end
+									end
+									if Skada.db.global.themes then
+										for i, theme in ipairs(Skada.db.global.themes) do
+											if theme.name == selectedtheme then
+												thetheme = theme
+												break
+											end
+										end
+									end
+
+									if thetheme then
+										for _, win in ipairs(Skada:GetWindows()) do
+											if win.db.name == selectedwindow then
+												Skada.tCopy(win.db, thetheme, {"name", "modeincombat", "display", "set", "wipemode", "returnaftercombat", "x", "y", "sticked"})
+												Skada:ApplySettings()
+												Skada:Print(L["Theme applied!"])
+											end
+										end
+									end
+								end
+								selectedwindow, selectedtheme = nil, nil
+							end
+						}
+					}
+				},
+				save = {
+					type = "group",
+					name = L["Save theme"],
+					inline = true,
+					order = 2,
+					args = {
+						savewindow = {
+							type = "select",
+							name = L["Window"],
+							order = 1,
+							values = function()
+								list = newTable()
+								for i, win in ipairs(Skada:GetWindows()) do
+									list[win.db.name] = win.db.name
+								end
+								return list
+							end,
+							get = function()
+								return savewindow
+							end,
+							set = function(_, name)
+								savewindow = name
+								delTable(list)
+							end
+						},
+						savenametext = {
+							type = "input",
+							name = NAME,
+							desc = L["Name of your new theme."],
+							order = 2,
+							get = function()
+								return savename
+							end,
+							set = function(_, val)
+								savename = val
+							end
+						},
+						savebutton = {
+							type = "execute",
+							name = SAVE,
+							order = 3,
+							width = "double",
+							func = function()
+								for i, win in ipairs(Skada:GetWindows()) do
+									if win.db.name == savewindow then
+										Skada.db.global.themes = Skada.db.global.themes or {}
+										local theme = {}
+										Skada.tCopy(theme, win.db, {"name", "sticked", "x", "y", "point"})
+										theme.name = savename or win.db.name
+										tinsert(Skada.db.global.themes, theme)
+									end
+								end
+								savewindow = nil
+								savename = nil
+							end
+						}
+					}
+				},
+				delete = {
+					type = "group",
+					name = L["Delete theme"],
+					inline = true,
+					order = 3,
+					args = {
+						deltheme = {
+							type = "select",
+							name = L["Theme"],
+							order = 1,
+							width = "double",
+							values = function()
+								list = newTable()
+								if Skada.db.global.themes then
+									for i, theme in ipairs(Skada.db.global.themes) do
+										if theme.name then
+											list[theme.name] = theme.name
+										end
+									end
+								end
+								return list
+							end,
+							get = function()
+								return deletetheme
+							end,
+							set = function(_, name)
+								deletetheme = name
+								delTable(list)
+							end
+						},
+						deletebutton = {
+							type = "execute",
+							name = DELETE,
+							order = 2,
+							width = "double",
+							func = function()
+								if Skada.db.global.themes then
+									for i, theme in ipairs(Skada.db.global.themes) do
+										if theme.name == deletetheme then
+											tremove(Skada.db.global.themes, i)
+											break
+										end
+									end
+								end
+								deletetheme = nil
+							end
+						}
+					}
+				}
+			}
+		}
 	end
 end)

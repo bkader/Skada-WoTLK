@@ -603,6 +603,8 @@ L["Runic Power gained spell list"] = "符能獲得來源"
 -- L["Parry-Haste"] = ""
 -- L["Parry target list"] = ""
 -- L["%s's parry targets"] = ""
+-- L["Announce Parries"] = ""
+-- L["%s parried %s (%s)"] = ""
 -- Potions module lines --
 -- L["Potions"] = ""
 -- L["Potions list"] = ""

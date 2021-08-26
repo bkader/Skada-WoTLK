@@ -279,36 +279,35 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 		return tostring(set.interrupt or 0), set.interrupt or 0
 	end
 
-	local opts = {
-		type = "group",
-		name = L["Interrupts"],
-		get = function(i)
-			return Skada.db.profile.modules[i[#i]]
-		end,
-		set = function(i, val)
-			Skada.db.profile.modules[i[#i]] = val
-		end,
-		args = {
-			interruptannounce = {
-				type = "toggle",
-				name = L["Announce Interrupts"],
-				order = 1,
-				width = "double"
-			},
-			interruptchannel = {
-				type = "select",
-				name = L["Channel"],
-				values = {AUTO = INSTANCE, SAY = CHAT_MSG_SAY, YELL = CHAT_MSG_YELL, SELF = L["Self"]},
-				order = 2,
-				width = "double"
-			}
-		}
-	}
-
 	function mod:OnInitialize()
 		if not Skada.db.profile.modules.interruptchannel then
 			Skada.db.profile.modules.interruptchannel = "SAY"
 		end
-		Skada.options.args.modules.args.interrupts = opts
+
+		Skada.options.args.modules.args.interrupts = {
+			type = "group",
+			name = L["Interrupts"],
+			get = function(i)
+				return Skada.db.profile.modules[i[#i]]
+			end,
+			set = function(i, val)
+				Skada.db.profile.modules[i[#i]] = val
+			end,
+			args = {
+				interruptannounce = {
+					type = "toggle",
+					name = L["Announce Interrupts"],
+					order = 1,
+					width = "double"
+				},
+				interruptchannel = {
+					type = "select",
+					name = L["Channel"],
+					values = {AUTO = INSTANCE, SAY = CHAT_MSG_SAY, YELL = CHAT_MSG_YELL, SELF = L["Self"]},
+					order = 2,
+					width = "double"
+				}
+			}
+		}
 	end
 end)

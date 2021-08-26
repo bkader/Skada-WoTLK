@@ -28,6 +28,10 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 			if set == Skada.current then
 				player.parry_targets = player.parry_targets or {}
 				player.parry_targets[data.dstName] = (player.parry_targets[data.dstName] or 0) + 1
+
+				if Skada.db.profile.modules.parryannounce then
+					Skada:SendChat(format(L["%s parried %s (%s)"], data.dstName, data.playername, player.parry_targets[data.dstName] or 1), Skada.db.profile.modules.parrychannel, "preset")
+				end
 			end
 		end
 	end
@@ -152,5 +156,36 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 
 	function mod:GetSetSummary(set)
 		return tostring(set.parry or 0), set.parry or 0
+	end
+
+	function mod:OnInitialize()
+		if not Skada.db.profile.modules.parrychannel then
+			Skada.db.profile.modules.parrychannel = "AUTO"
+		end
+		Skada.options.args.modules.args.Parry = {
+			type = "group",
+			name = self.moduleName,
+			get = function(i)
+				return Skada.db.profile.modules[i[#i]]
+			end,
+			set = function(i, val)
+				Skada.db.profile.modules[i[#i]] = val
+			end,
+			args = {
+				parryannounce = {
+					type = "toggle",
+					name = L["Announce Parries"],
+					order = 1,
+					width = "double"
+				},
+				parrychannel = {
+					type = "select",
+					name = L["Channel"],
+					values = {AUTO = INSTANCE, SELF = L["Self"]},
+					order = 2,
+					width = "double"
+				}
+			}
+		}
 	end
 end)
