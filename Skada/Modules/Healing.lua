@@ -16,8 +16,14 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 	local playermod = mod:NewModule(L["Healing spell list"])
 	local targetmod = mod:NewModule(L["Healed target list"])
 	local spellmod = targetmod:NewModule(L["Healing spell list"])
+	local tContains = tContains
+
+	-- spells in the following table will be ignored.
+	local ignoredSpells = {}
 
 	local function log_heal(set, data, tick)
+		if data.spellid and tContains(ignoredSpells, data.spellid) then return end
+
 		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
 		if player then
 			-- get rid of overheal

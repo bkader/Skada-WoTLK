@@ -10,12 +10,16 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 	-- cache frequently used globals
 	local pairs, select, max = pairs, select, math.max
-	local tostring, format = tostring, string.format
+	local tostring, format, tContains = tostring, string.format, tContains
 	local UnitGUID, IsInInstance = UnitGUID, IsInInstance
-	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
+	local GetSpellInfo, GetSpellLink = Skada.GetSpellInfo or GetSpellInfo, Skada.GetSpellLink or GetSpellLink
+
+	-- spells in the following table will be ignored.
+	local ignoredSpells = {}
 
 	local function log_interrupt(set, data)
+		if (data.spellid and tContains(ignoredSpells, data.spellid)) or (data.extraspellid and tContains(ignoredSpells, data.extraspellid)) then return end
+
 		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
 		if player then
 			-- increment player's and set's interrupts count

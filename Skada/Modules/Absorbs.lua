@@ -192,8 +192,11 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	local zoneModifier = 1
 	local heals, shields, shieldamounts
 
+	-- spells in the following table will be ignored.
+	local ignoredSpells = {}
+
 	local function log_absorb(set, playerid, playername, dstGUID, dstName, spellid, spellschool, amount, nocount)
-		if (amount or 0) <= 0 then return end
+		if (spellid and tContains(ignoredSpells, spellid)) or (amount or 0) <= 0 then return end
 
 		local player = Skada:get_player(set, playerid, playername)
 		if player then

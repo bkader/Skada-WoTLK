@@ -10,10 +10,15 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 	-- cache frequently used globals
 	local pairs, select = pairs, select
 	local tostring, format = tostring, string.format
-	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+	local GetSpellInfo, tContains = Skada.GetSpellInfo or GetSpellInfo, tContains
 	local _
 
+	-- spells in the following table will be ignored.
+	local ignoredSpells = {}
+
 	local function log_dispel(set, data)
+		if (data.spellid and tContains(ignoredSpells, data.spellid)) or (data.extraspellid and tContains(ignoredSpells, data.extraspellid)) then return end
+
 		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
 		if player then
 			-- increment player's and set's dispels count

@@ -4,14 +4,17 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 
 	local mod = Skada:NewModule(L["Resources"])
 
-	local pairs, format = pairs, string.format
+	local pairs, format, tContains = pairs, string.format, tContains
 	local setmetatable, GetSpellInfo = setmetatable, Skada.GetSpellInfo or GetSpellInfo
 	local _
 
 	local locales = {[0] = MANA, [1] = RAGE, [3] = ENERGY, [6] = RUNIC_POWER}
 
+	-- spells in the following table will be ignored.
+	local ignoredSpells = {}
+
 	local function log_gain(set, gain)
-		if gain.type == nil then
+		if (gain.spellid and tContains(ignoredSpells, gain.spellid)) or gain.type == nil then
 			return
 		elseif gain.type == 2 or gain.type == 4 then
 			gain.type = 3 -- Focus & Happiness treated as Energy

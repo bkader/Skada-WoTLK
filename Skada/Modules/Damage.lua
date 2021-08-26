@@ -69,7 +69,12 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		[70542] = true -- Mutated Slash (Mutated Abomination)
 	}
 
+	-- spells in the following table will be ignored.
+	local ignoredSpells = {}
+
 	local function log_damage(set, dmg, tick)
+		if dmg.spellid and tContains(ignoredSpells, dmg.spellid) then return end
+
 		local player = Skada:get_player(set, dmg.playerid, dmg.playername, dmg.playerflags)
 		if not player then return end
 

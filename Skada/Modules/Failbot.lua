@@ -11,22 +11,25 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	local spellmod = mod:NewModule(L["Event's failed players"])
 
 	local pairs, ipairs = pairs, ipairs
-	local tostring, format = tostring, string.format
+	local tostring, format, tContains = tostring, string.format, tContains
 	local GetSpellInfo, UnitGUID = Skada.GetSpellInfo or GetSpellInfo, UnitGUID
 	local failevents, tankevents = LibFail:GetSupportedEvents()
 	local _
 
-	local function log_fail(set, playerid, playername, spellid, event)
-		if set then
-			local player = Skada:find_player(set, playerid, playername)
-			if player and (player.role ~= "TANK" or not tankevents[event]) then
-				player.fail = (player.fail or 0) + 1
-				set.fail = (set.fail or 0) + 1
+	-- spells in the following table will be ignored.
+	local ignoredSpells = {}
 
-				if set == Skada.current and spellid then
-					player.fail_spells = player.fail_spells or {}
-					player.fail_spells[spellid] = (player.fail_spells[spellid] or 0) + 1
-				end
+	local function log_fail(set, playerid, playername, spellid, event)
+		if (spellid and tContains(ignoredSpells, spellid)) or not set then return end
+
+		local player = Skada:find_player(set, playerid, playername)
+		if player and (player.role ~= "TANK" or not tankevents[event]) then
+			player.fail = (player.fail or 0) + 1
+			set.fail = (set.fail or 0) + 1
+
+			if set == Skada.current and spellid then
+				player.fail_spells = player.fail_spells or {}
+				player.fail_spells[spellid] = (player.fail_spells[spellid] or 0) + 1
 			end
 		end
 	end

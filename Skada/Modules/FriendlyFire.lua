@@ -7,10 +7,15 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 	local targetmod = mod:NewModule(L["Damage target list"])
 
 	local pairs, select, format = pairs, select, string.format
-	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+	local GetSpellInfo, tContains = Skada.GetSpellInfo or GetSpellInfo, tContains
 	local _
 
+	-- spells in the following table will be ignored.
+	local ignoredSpells = {}
+
 	local function log_damage(set, dmg)
+		if dmg.spellid and tContains(ignoredSpells, dmg.spellid) then return end
+
 		local player = Skada:get_player(set, dmg.playerid, dmg.playername, dmg.playerflags)
 		if player then
 			Skada:AddActiveTime(player, dmg.amount > 0)

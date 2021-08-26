@@ -7,6 +7,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 local pairs, ipairs, select = pairs, ipairs, select
 local format, min, max = string.format, math.min, math.max
 local UnitClass, GetSpellInfo = Skada.UnitClass, Skada.GetSpellInfo
+local tContains = tContains
 local _
 
 function Skada:find_enemy(set, name)
@@ -238,7 +239,12 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 		end
 	end
 
+	-- spells in the following table will be ignored.
+	local ignoredSpells = {}
+
 	local function log_damage(set, dmg)
+		if dmg.spellid and tContains(ignoredSpells, dmg.spellid) then return end
+
 		local e = Skada:get_enemy(set, dmg.enemyid, dmg.enemyname, dmg.enemyflags)
 		if e then
 			e.damagetaken = (e.damagetaken or 0) + dmg.amount
@@ -513,7 +519,12 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 	local enemymod = mod:NewModule(L["Damage taken per player"])
 	local spellmod = mod:NewModule(L["Damage spell list"])
 
+	-- spells in the following table will be ignored.
+	local ignoredSpells = {}
+
 	local function log_damage(set, dmg)
+		if dmg.spellid and tContains(ignoredSpells, dmg.spellid) then return end
+
 		local e = Skada:get_enemy(set, dmg.enemyid, dmg.enemyname, dmg.enemyflags)
 		if e then
 			e.damage = (e.damage or 0) + dmg.amount
@@ -723,7 +734,12 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 	local targetmod = mod:NewModule(L["Healed target list"])
 	local spellmod = mod:NewModule(L["Healing spell list"])
 
+	-- spells in the following table will be ignored.
+	local ignoredSpells = {}
+
 	local function log_heal(set, data)
+		if data.spellid and tContains(ignoredSpells, data.spellid) then return end
+
 		local e = Skada:get_enemy(set, data.enemyid, data.enemyname, data.enemyflags)
 		if e then
 			e.heal = (e.heal or 0) + data.amount
