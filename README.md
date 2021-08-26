@@ -2,6 +2,7 @@
 
 ![Discord](https://img.shields.io/discord/795698054371868743?label=discord)
 ![GitHub last commit](https://img.shields.io/github/last-commit/bkader/Skada-WoTLK)
+![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/bkader/Skada-WoTLK?label=version)
 
 I am simply a huge fan of **Skada**, I prefer it to other damage meters for several reasons. No need to judge me, it's after all a personal preference.
 
