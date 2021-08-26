@@ -1,4 +1,7 @@
-# Skada for WoTLK (_Revisited - v1.8.66_)
+# Skada for WoTLK (_Revisited - v1.8.67_)
+
+![Discord](https://img.shields.io/discord/795698054371868743?label=discord)
+![GitHub last commit](https://img.shields.io/github/last-commit/bkader/Skada-WoTLK)
 
 I am simply a huge fan of **Skada**, I prefer it to other damage meters for several reasons. No need to judge me, it's after all a personal preference.
 
@@ -12,7 +15,7 @@ I am simply a huge fan of **Skada**, I prefer it to other damage meters for seve
 
 ## Show Love & Support
 
-Though it's not required and I have never asked for it but people keep asking for it, if you want to show some love and support, PayPal donations are most welcome at **bkader[at]email.com**.
+Though it's not required, if you want to show some love and support, PayPal donations are most welcome at **bkader[at]mail.com** or @[Buy Me a Coffee](https://www.buymeacoffee.com/bkader).
 
 ## Table of content
 
