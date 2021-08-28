@@ -1660,7 +1660,7 @@ do
 	end
 
 	function Skada:FixMyPets(playerid, playername, playerflags)
-		if players[playerid] then
+		if players[playerid] or not self:IsPet(playerid, playername, playerflags) then
 			return playerid, playername
 		end
 

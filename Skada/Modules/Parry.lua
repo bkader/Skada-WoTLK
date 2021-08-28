@@ -40,7 +40,7 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 
 	local function SpellMissed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if parrybosses[dstName] and srcGUID ~= dstGUID and select(4, ...) == "PARRY" then
-			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName)
+			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 
 			data.playerid = srcGUID
 			data.playername = srcName
