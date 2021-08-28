@@ -137,7 +137,7 @@ do
 		if type(t) == "table" then
 			for k, v in pairs(t) do
 				if recursive and type(v) == "table" then
-					self.delTable(v, recursive)
+					LibCompat.delTable(v, recursive)
 				end
 				t[k] = nil
 			end
@@ -186,7 +186,7 @@ do
 	end
 
 	function LibCompat.GetNumGroupMembers()
-		return self:IsInRaid() and GetNumRaidMembers() or GetNumPartyMembers()
+		return LibCompat:IsInRaid() and GetNumRaidMembers() or GetNumPartyMembers()
 	end
 
 	function LibCompat.GetNumSubgroupMembers()
@@ -194,9 +194,9 @@ do
 	end
 
 	function LibCompat:GetGroupTypeAndCount()
-		if self:IsInRaid() then
+		if LibCompat:IsInRaid() then
 			return "raid", 1, GetNumRaidMembers()
-		elseif self:IsInGroup() then
+		elseif LibCompat:IsInGroup() then
 			return "party", 0, GetNumPartyMembers()
 		else
 			return nil, 0, 0
@@ -206,8 +206,8 @@ do
 	function LibCompat:IsGroupDead()
 		if not UnitIsDeadOrGhost("player") then
 			return false
-		elseif self:IsInGroup() then
-			local prefix, min_member, max_member = self:GetGroupTypeAndCount()
+		elseif LibCompat:IsInGroup() then
+			local prefix, min_member, max_member = LibCompat:GetGroupTypeAndCount()
 			for i = min_member, max_member do
 				local unit = (i == 0) and "player" or format("%s%d", prefix, i)
 				if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
@@ -221,8 +221,8 @@ do
 	function LibCompat:IsGroupInCombat()
 		if UnitAffectingCombat("player") then
 			return true
-		elseif self:IsInGroup() then
-			local prefix, min_member, max_member = self:GetGroupTypeAndCount()
+		elseif LibCompat:IsInGroup() then
+			local prefix, min_member, max_member = LibCompat:GetGroupTypeAndCount()
 			for i = min_member, max_member do
 				local unit = (i == 0) and "player" or format("%s%d", prefix, i)
 				if UnitExists(unit) and UnitAffectingCombat(unit) then
@@ -234,16 +234,16 @@ do
 	end
 
 	function LibCompat:GroupIterator(func, ...)
-		if self:IsInRaid() then
+		if LibCompat:IsInRaid() then
 			for i = 1, GetNumRaidMembers() do
-				self:QuickDispatch(func, format("raid%d", i), ...)
+				LibCompat:QuickDispatch(func, format("raid%d", i), ...)
 			end
-		elseif self:IsInGroup() then
+		elseif LibCompat:IsInGroup() then
 			for i = 0, 4 do
-				self:QuickDispatch(func, (i == 0) and "player" or format("party%d", i), ...)
+				LibCompat:QuickDispatch(func, (i == 0) and "player" or format("party%d", i), ...)
 			end
 		else
-			self:QuickDispatch(func, "player", ...)
+			LibCompat:QuickDispatch(func, "player", ...)
 		end
 	end
 
@@ -263,7 +263,7 @@ do
 		end
 
 		if not unitId then
-			self:GroupIterator(function(unit)
+			LibCompat:GroupIterator(function(unit)
 				if unitId then
 					return
 				elseif UnitExists(unit) and UnitGUID(unit) == guid then
@@ -296,7 +296,7 @@ do
 	end
 
 	function LibCompat:GetClassFromGUID(guid)
-		local unit = self:GetUnitIdFromGUID(guid)
+		local unit = LibCompat:GetUnitIdFromGUID(guid)
 		if unit and unit:find("pet") then
 			return "PET", unit
 		end
@@ -311,11 +311,11 @@ do
 	end
 
 	function LibCompat:GetUnitCreatureId(unit)
-		return self:GetCreatureId(UnitGUID(unit))
+		return LibCompat:GetCreatureId(UnitGUID(unit))
 	end
 
 	function LibCompat:UnitHealthInfo(unit, guid)
-		unit = unit or guid and self:GetUnitIdFromGUID(guid)
+		unit = unit or guid and LibCompat:GetUnitIdFromGUID(guid)
 		local health, maxhealth = UnitHealth(unit), UnitHealthMax(unit)
 		if health and maxhealth then
 			return floor(100 * health / maxhealth), health, maxhealth
@@ -324,7 +324,7 @@ do
 	LibCompat.UnitHealthPercent = LibCompat.UnitHealthInfo -- backwards compatibility
 
 	function LibCompat:UnitPowerInfo(unit, guid, powerType)
-		unit = unit or guid and self:GetUnitIdFromGUID(guid)
+		unit = unit or guid and LibCompat:GetUnitIdFromGUID(guid)
 		local power, maxpower = UnitPower(unit, powerType), UnitPowerMax(unit, powerType)
 		if power and maxpower then
 			return floor(100 * power / maxpower), power, maxpower
@@ -339,7 +339,7 @@ do
 	local GetRealNumRaidMembers, GetRaidRosterInfo = GetRealNumRaidMembers, GetRaidRosterInfo
 
 	function LibCompat.UnitIsGroupLeader(unit)
-		if self:IsInRaid() then
+		if LibCompat:IsInRaid() then
 			if unit == "player" then
 				return IsRaidLeader()
 			end
@@ -571,7 +571,7 @@ do
 	-- checks if the feral druid is a cat or tank spec
 	local function GetDruidSubSpec(unit)
 		-- 57881 : Natural Reaction -- used by druid tanks
-		local points = LGT:UnitHasTalent(unit, self.GetSpellInfo(57881), LGT:GetActiveTalentGroup(unit))
+		local points = LGT:UnitHasTalent(unit, LibCompat.GetSpellInfo(57881), LGT:GetActiveTalentGroup(unit))
 		return (points and points > 0) and 3 or 2
 	end
 
