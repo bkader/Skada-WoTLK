@@ -315,8 +315,18 @@ do
 	end
 
 	function LibCompat:UnitHealthInfo(unit, guid)
-		unit = unit or guid and LibCompat:GetUnitIdFromGUID(guid)
-		local health, maxhealth = UnitHealth(unit), UnitHealthMax(unit)
+		local health, maxhealth
+		if unit and UnitExists(unit) then
+			health, maxhealth = UnitHealth(unit), UnitHealthMax(unit)
+		end
+
+		if not health and guid then
+			unit = LibCompat:GetUnitIdFromGUID(guid)
+			if unit then
+				health, maxhealth = UnitHealth(unit), UnitHealthMax(unit)
+			end
+		end
+
 		if health and maxhealth then
 			return floor(100 * health / maxhealth), health, maxhealth
 		end
@@ -324,8 +334,18 @@ do
 	LibCompat.UnitHealthPercent = LibCompat.UnitHealthInfo -- backwards compatibility
 
 	function LibCompat:UnitPowerInfo(unit, guid, powerType)
-		unit = unit or guid and LibCompat:GetUnitIdFromGUID(guid)
-		local power, maxpower = UnitPower(unit, powerType), UnitPowerMax(unit, powerType)
+		local power, maxpower
+		if unit and UnitExists(unit) then
+			power, maxpower = UnitPower(unit, powerType), UnitPowerMax(unit, powerType)
+		end
+
+		if not power and guid then
+			unit = LibCompat:GetUnitIdFromGUID(guid)
+			if unit then
+				power, maxpower = UnitPower(unit, powerType), UnitPowerMax(unit, powerType)
+			end
+		end
+
 		if power and maxpower then
 			return floor(100 * power / maxpower), power, maxpower
 		end
