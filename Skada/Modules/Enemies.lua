@@ -7,7 +7,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 local pairs, ipairs, select = pairs, ipairs, select
 local format, min, max = string.format, math.min, math.max
 local UnitClass, GetSpellInfo = Skada.UnitClass, Skada.GetSpellInfo
-local tContains = tContains
 local _
 
 function Skada:find_enemy(set, name)
@@ -96,57 +95,9 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	local enemymod = mod:NewModule(L["Damage taken per player"])
 	local spellmod = mod:NewModule(L["Damage spell details"])
 
-	local type, newTable, delTable = type, Skada.newTable, Skada.delTable
 	local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
-
-	local instanceDiff, customUnitsTable
-
-	-- this table holds the units to which the damage done is
-	-- collected into a new fake unit.
-	local customGroups = {
-		-- The Lich King: Useful targets
-		[LBB["The Lich King"]] = L["Useful targets"],
-		[LBB["Raging Spirit"]] = L["Useful targets"],
-		[LBB["Ice Sphere"]] = L["Useful targets"],
-		[LBB["Val'kyr Shadowguard"]] = L["Useful targets"],
-		[L["Wicked Spirit"]] = L["Useful targets"],
-		-- Professor Putricide: Oozes
-		[L["Gas Cloud"]] = L["Oozes"],
-		[L["Volatile Ooze"]] = L["Oozes"],
-		-- Blood Prince Council: Princes overkilling
-		[LBB["Prince Valanar"]] = L["Princes overkilling"],
-		[LBB["Prince Taldaram"]] = L["Princes overkilling"],
-		[LBB["Prince Keleseth"]] = L["Princes overkilling"],
-		-- Lady Deathwhisper: Adds
-		[L["Cult Adherent"]] = L["Adds"],
-		[L["Empowered Adherent"]] = L["Adds"],
-		[L["Reanimated Adherent"]] = L["Adds"],
-		[L["Cult Fanatic"]] = L["Adds"],
-		[L["Deformed Fanatic"]] = L["Adds"],
-		[L["Reanimated Fanatic"]] = L["Adds"],
-		[L["Darnavan"]] = L["Adds"],
-		-- Halion: Halion and Inferno
-		[LBB["Halion"]] = L["Halion and Inferno"],
-		[L["Living Inferno"]] = L["Halion and Inferno"]
-	}
-
-	-- this table holds units that should create a fake unit
-	-- at certain health percentage. Useful in case you want
-	-- to collect damage done to the units at certain phases.
-	local customUnits = {
-		-- Icecrown Citadel:
-		[36855] = {start = 0, text = L["%s - Phase 2"], power = 0}, -- Lady Deathwhisper
-		[36678] = {start = 0.35, text = L["%s - Phase 3"]}, -- Professor Putricide
-		[36853] = {start = 0.35, text = L["%s - Phase 2"]}, -- Sindragosa
-		[36980] = {start = 0.15}, -- Ice Tomb (Sindragosa)
-		[36609] = {name = L["Valkyrs overkilling"], diff = {"10h", "25h"}, start = 0.5, useful = true}, -- Valkyrs overkilling
-		[36597] = {start = 0.4, text = L["%s - Phase 3"]}, -- The Lich King
-		-- Trial of the Crusader
-		[34564] = {start = 0.3, text = L["%s - Phase 2"]}, -- Anub'arak
-		-- The Ruby Sanctum (works only if you're inside or remain outisde because of GUIDs)
-		-- [39863] = {start = 0.5, text = L["%s - Phase 3"]}, -- Halion
-		-- [40142] = {start = 0.5, text = L["%s - Phase 3"]}, -- Halion (twilight realm)
-	}
+	local groupName, validTarget, instanceDiff
+	local valkyrsTable, valkyrMaxHP, valkyrHalfHP
 
 	local function GetRaidDiff()
 		if not instanceDiff then
@@ -174,45 +125,33 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 		return instanceDiff
 	end
 
-	local function IsCustomUnit(guid, name)
-		if customUnitsTable and customUnitsTable[guid] then
-			return true
+	local function IsValkyr(guid, skip)
+		local isvalkyr = tonumber(guid) and (tonumber(guid:sub(9, 12), 16) == 36609) or false
+		if isvalkyr and not skip then
+			return (GetRaidDiff() == "10h" or GetRaidDiff() == "25h") or false
 		end
+		return isvalkyr
+	end
 
-		local id = Skada:GetCreatureId(guid)
-
-		local unit = id and customUnits[id]
-		if unit then
-			-- difficulty check.
-			if unit.diff ~= nil then
-				if type(unit.diff) == "table" and not tContains(unit.diff, GetRaidDiff()) then
-					return false
-				elseif type(unit.diff) == "string" and GetRaidDiff() ~= unit.diff then
-					return false
+	local function ValkyrHealthMax()
+		if not valkyrMaxHP then
+			Skada:GroupIterator(function(unit)
+				if valkyrMaxHP then return end -- a single player is enough
+				if UnitExists(unit .. "target") and IsValkyr(UnitGUID(unit .. "target"), true) then
+					valkyrMaxHP = UnitHealthMax(unit .. "target")
+					valkyrHalfHP = floor(valkyrMaxHP / 2)
 				end
+			end)
+
+			-- fallback values
+			if not valkyrMaxHP then
+				valkyrMaxHP = (GetRaidDiff() == "25h") and 2992000 or 1417500
+				valkyrHalfHP = floor(valkyrMaxHP / 2)
+				return valkyrMaxHP
 			end
-
-			customUnitsTable = customUnitsTable or newTable()
-			customUnitsTable[guid] = {}
-
-			if unit.name == nil then
-				customUnitsTable[guid].name = format(unit.text or L["%s below %s%%"], name or UNKNOWN, unit.start * 100)
-			else
-				customUnitsTable[guid].name = unit.name
-			end
-
-			if unit.power ~= nil then
-				customUnitsTable[guid].curr, customUnitsTable[guid].max = select(2, Skada:UnitPowerInfo(nil, guid, unit.power))
-			else
-				customUnitsTable[guid].curr, customUnitsTable[guid].max = select(2, Skada:UnitHealthInfo(nil, guid))
-			end
-			customUnitsTable[guid].watch = floor(customUnitsTable[guid].max * (unit.start or 0.5))
-
-			customUnitsTable[guid].useful = unit.useful
-			return true
 		end
 
-		return false
+		return valkyrMaxHP
 	end
 
 	local function log_custom_damage(set, name, playerid, playername, spellid, amount)
@@ -239,12 +178,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 		end
 	end
 
-	-- spells in the following table will be ignored.
-	local ignoredSpells = {}
-
 	local function log_damage(set, dmg)
-		if dmg.spellid and tContains(ignoredSpells, dmg.spellid) then return end
-
 		local e = Skada:get_enemy(set, dmg.enemyid, dmg.enemyname, dmg.enemyflags)
 		if e then
 			e.damagetaken = (e.damagetaken or 0) + dmg.amount
@@ -265,44 +199,46 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 					e.damagetaken_sources[dmg.srcName].amount = e.damagetaken_sources[dmg.srcName].amount + dmg.amount
 				end
 
-				-- the rest is dne only for raids, sorry.
-				if GetRaidDiff() == nil or GetRaidDiff() == "unknown" then return end
+				if validTarget[dmg.enemyname] then
+					-- 10h and 25h valkyrs.
+					if IsValkyr(dmg.enemyid) then
+						if not (valkyrsTable and valkyrsTable[dmg.enemyid]) then
+							valkyrsTable = valkyrsTable or {}
+							valkyrsTable[dmg.enemyid] = ValkyrHealthMax() - dmg.amount
 
-				-- custom units
-				if IsCustomUnit(dmg.enemyid, dmg.enemyname) then
-					local unit = customUnitsTable[dmg.enemyid]
-					-- started with less than max?
-					if unit.max and unit.curr <= unit.max then
-						if unit.useful then
-							e.damagetaken_useful = (e.damagetaken_useful or 0) + unit.max - unit.curr
-							e.damagetaken_sources[dmg.srcName].useful = (e.damagetaken_sources[dmg.srcName].useful or 0) + unit.max - unit.curr
-						end
-						unit.max = nil
-					elseif unit.curr >= unit.watch then
-						unit.curr = unit.curr - dmg.amount
-
-						if unit.curr < unit.watch then
-							local amount = unit.watch - unit.curr - dmg.overkill
-							log_custom_damage(set, unit.name, dmg.srcGUID, dmg.srcName, dmg.spellid, amount)
-
-							if unit.useful then
-								e.damagetaken_useful = (e.damagetaken_useful or 0) + dmg.amount - dmg.overkill - amount
-								e.damagetaken_sources[dmg.srcName].useful = (e.damagetaken_sources[dmg.srcName].useful or 0) + dmg.amount - dmg.overkill - amount
+							-- useful damage
+							e.damagetaken_useful = (e.damagetaken_useful or 0) + dmg.amount
+							e.damagetaken_sources[dmg.srcName].useful = (e.damagetaken_sources[dmg.srcName].useful or 0) + dmg.amount
+						else
+							if valkyrsTable[dmg.enemyid] <= valkyrHalfHP then
+								log_custom_damage(set, L["Valkyrs overkilling"], dmg.srcGUID, dmg.srcName, dmg.spellid, dmg.amount - dmg.overkill)
+								return
 							end
-						elseif unit.useful then
-							e.damagetaken_useful = (e.damagetaken_useful or 0) + dmg.amount - dmg.overkill
-							e.damagetaken_sources[dmg.srcName].useful = (e.damagetaken_sources[dmg.srcName].useful or 0) + dmg.amount - dmg.overkill
+
+							valkyrsTable[dmg.enemyid] = valkyrsTable[dmg.enemyid] - dmg.amount
+
+							if valkyrsTable[dmg.enemyid] <= valkyrHalfHP then
+								local amount = valkyrHalfHP - valkyrsTable[dmg.enemyid] - dmg.overkill
+								log_custom_damage(set, L["Valkyrs overkilling"], dmg.srcGUID, dmg.srcName, dmg.spellid, amount)
+								e.damagetaken_useful = (e.damagetaken_useful or 0) + dmg.amount - amount
+								e.damagetaken_sources[dmg.srcName].useful = (e.damagetaken_sources[dmg.srcName].useful or 0) + dmg.amount - amount
+							else
+								e.damagetaken_useful = (e.damagetaken_useful or 0) + dmg.amount
+								e.damagetaken_sources[dmg.srcName].useful = (e.damagetaken_sources[dmg.srcName].useful or 0) + dmg.amount
+							end
 						end
-					elseif not unit.max then
-						log_custom_damage(set, unit.name, dmg.srcGUID, dmg.srcName, dmg.spellid, dmg.amount - dmg.overkill)
 					end
-				end
 
-				if customGroups[dmg.enemyname] and customGroups[dmg.enemyname] ~= dmg.enemyname then
-					if customGroups[dmg.enemyname] == L["Halion and Inferno"] and GetRaidDiff() ~= "25h" then return end
-
-					local amount = (customGroups[dmg.enemyname] == L["Princes overkilling"]) and dmg.overkill or dmg.amount
-					log_custom_damage(set, customGroups[dmg.enemyname], dmg.srcGUID, dmg.srcName, dmg.spellid, amount)
+					local altname = groupName[validTarget[dmg.enemyname]]
+					if not altname or altname == dmg.enemyname then
+						return
+					elseif altname == L["Halion and Inferno"] and GetRaidDiff() ~= "25h" then
+						return
+					elseif altname == L["Princes overkilling"] then
+						log_custom_damage(set, altname, dmg.srcGUID, dmg.srcName, dmg.spellid, dmg.overkill)
+					else
+						log_custom_damage(set, altname, dmg.srcGUID, dmg.srcName, dmg.spellid, dmg.amount)
+					end
 				end
 			end
 		end
@@ -505,7 +441,48 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	end
 
 	function mod:SetComplete(set)
-		customUnitsTable, instanceDiff = delTable(customUnitsTable), nil
+		instanceDiff, valkyrsTable, valkyrMaxHP, valkyrHalfHP = nil, nil, nil, nil
+	end
+
+	function mod:OnInitialize()
+		if not groupName then
+			groupName = {
+				[LBB["The Lich King"]] = L["Useful targets"],
+				[LBB["Professor Putricide"]] = L["Oozes"],
+				[LBB["Blood Prince Council"]] = L["Princes overkilling"],
+				[LBB["Lady Deathwhisper"]] = L["Adds"],
+				[LBB["Halion"]] = L["Halion and Inferno"]
+			}
+		end
+
+		if not validTarget then
+			validTarget = {
+				-- The Lich King fight
+				[LBB["The Lich King"]] = LBB["The Lich King"],
+				[LBB["Raging Spirit"]] = LBB["The Lich King"],
+				[LBB["Ice Sphere"]] = LBB["The Lich King"],
+				[LBB["Val'kyr Shadowguard"]] = LBB["The Lich King"],
+				[L["Wicked Spirit"]] = LBB["The Lich King"],
+				-- Professor Putricide
+				[L["Gas Cloud"]] = LBB["Professor Putricide"],
+				[L["Volatile Ooze"]] = LBB["Professor Putricide"],
+				-- Blood Prince Council
+				[LBB["Prince Valanar"]] = LBB["Blood Prince Council"],
+				[LBB["Prince Taldaram"]] = LBB["Blood Prince Council"],
+				[LBB["Prince Keleseth"]] = LBB["Blood Prince Council"],
+				-- Lady Deathwhisper
+				[L["Cult Adherent"]] = LBB["Lady Deathwhisper"],
+				[L["Empowered Adherent"]] = LBB["Lady Deathwhisper"],
+				[L["Reanimated Adherent"]] = LBB["Lady Deathwhisper"],
+				[L["Cult Fanatic"]] = LBB["Lady Deathwhisper"],
+				[L["Deformed Fanatic"]] = LBB["Lady Deathwhisper"],
+				[L["Reanimated Fanatic"]] = LBB["Lady Deathwhisper"],
+				[L["Darnavan"]] = LBB["Lady Deathwhisper"],
+				-- Halion
+				[LBB["Halion"]] = LBB["Halion"],
+				[L["Living Inferno"]] = LBB["Halion"]
+			}
+		end
 	end
 end)
 
@@ -519,12 +496,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 	local enemymod = mod:NewModule(L["Damage taken per player"])
 	local spellmod = mod:NewModule(L["Damage spell list"])
 
-	-- spells in the following table will be ignored.
-	local ignoredSpells = {}
-
 	local function log_damage(set, dmg)
-		if dmg.spellid and tContains(ignoredSpells, dmg.spellid) then return end
-
 		local e = Skada:get_enemy(set, dmg.enemyid, dmg.enemyname, dmg.enemyflags)
 		if e then
 			e.damage = (e.damage or 0) + dmg.amount
@@ -734,12 +706,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 	local targetmod = mod:NewModule(L["Healed target list"])
 	local spellmod = mod:NewModule(L["Healing spell list"])
 
-	-- spells in the following table will be ignored.
-	local ignoredSpells = {}
-
 	local function log_heal(set, data)
-		if data.spellid and tContains(ignoredSpells, data.spellid) then return end
-
 		local e = Skada:get_enemy(set, data.enemyid, data.enemyname, data.enemyflags)
 		if e then
 			e.heal = (e.heal or 0) + data.amount
