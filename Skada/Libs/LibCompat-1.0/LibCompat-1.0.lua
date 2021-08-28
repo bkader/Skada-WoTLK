@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0", 6
+local MAJOR, MINOR = "LibCompat-1.0", 7
 
 local LibCompat, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not LibCompat then return end
@@ -101,7 +101,7 @@ function LibCompat.tCopy(to, from, ...)
 		if not skip then
 			if type(v) == "table" then
 				to[k] = {}
-				LibCompat.tCopy(to[k], v, ...)
+				self.tCopy(to[k], v, ...)
 			else
 				to[k] = v
 			end
@@ -137,7 +137,7 @@ do
 		if type(t) == "table" then
 			for k, v in pairs(t) do
 				if recursive and type(v) == "table" then
-					LibCompat.delTable(v, recursive)
+					self.delTable(v, recursive)
 				end
 				t[k] = nil
 			end
@@ -153,25 +153,17 @@ end
 -------------------------------------------------------------------------------
 
 function LibCompat.Clamp(val, minval, maxval)
-	if val > maxval then
-		return maxval
-	elseif val < minval then
-		return minval
-	else
-		return val
-	end
+	return (val > maxval) and maxval or (val < minval) and minval or val
 end
 
 -------------------------------------------------------------------------------
 
 do
-	local GetNumRaidMembers = GetNumRaidMembers
-	local GetNumPartyMembers = GetNumPartyMembers
-	local UnitAffectingCombat = UnitAffectingCombat
-	local InCombatLockdown = InCombatLockdown
-	local UnitIsDeadOrGhost = UnitIsDeadOrGhost
-	local IsInInstance = IsInInstance
-	local UnitExists = UnitExists
+	local GetNumRaidMembers, GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
+	local UnitAffectingCombat, UnitIsDeadOrGhost = UnitAffectingCombat, UnitIsDeadOrGhost
+	local UnitExists, IsInInstance = UnitExists, IsInInstance
+	local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
+	local UnitPower, UnitPowerMax = UnitPower, UnitPowerMax
 
 	function LibCompat:IsInRaid()
 		return (GetNumRaidMembers() > 0)
@@ -182,16 +174,19 @@ do
 	end
 
 	function LibCompat:IsInGroup()
-		return (LibCompat:IsInRaid() or LibCompat:IsInParty())
+		return (GetNumRaidMembers() > 0 or GetNumPartyMembers() > 0)
 	end
 
-	function LibCompat:IsInPvP()
-		local instanceType = select(2, IsInInstance())
-		return (instanceType == "pvp" or instanceType == "arena")
+	do
+		local instanceType
+		function LibCompat:IsInPvP()
+			instanceType = select(2, IsInInstance())
+			return (instanceType == "pvp" or instanceType == "arena")
+		end
 	end
 
 	function LibCompat.GetNumGroupMembers()
-		return LibCompat:IsInRaid() and GetNumRaidMembers() or GetNumPartyMembers()
+		return self:IsInRaid() and GetNumRaidMembers() or GetNumPartyMembers()
 	end
 
 	function LibCompat.GetNumSubgroupMembers()
@@ -199,58 +194,56 @@ do
 	end
 
 	function LibCompat:GetGroupTypeAndCount()
-		local prefix, min_member, max_member = "raid", 1, GetNumRaidMembers()
-
-		if max_member == 0 then
-			prefix, min_member, max_member = "party", 0, GetNumPartyMembers()
+		if self:IsInRaid() then
+			return "raid", 1, GetNumRaidMembers()
+		elseif self:IsInGroup() then
+			return "party", 0, GetNumPartyMembers()
+		else
+			return nil, 0, 0
 		end
-
-		if max_member == 0 then
-			prefix, min_member, max_member = nil, 0, 0
-		end
-
-		return prefix, min_member, max_member
 	end
 
 	function LibCompat:IsGroupDead()
-		local prefix, min_member, max_member = LibCompat:GetGroupTypeAndCount()
-		if prefix then
+		if not UnitIsDeadOrGhost("player") then
+			return false
+		elseif self:IsInGroup() then
+			local prefix, min_member, max_member = self:GetGroupTypeAndCount()
 			for i = min_member, max_member do
 				local unit = (i == 0) and "player" or format("%s%d", prefix, i)
 				if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
 					return false
 				end
 			end
-		elseif not UnitIsDeadOrGhost("player") then
-			return false
 		end
 		return true
 	end
 
 	function LibCompat:IsGroupInCombat()
-		local prefix, min_member, max_member = LibCompat:GetGroupTypeAndCount()
-		if prefix then
+		if UnitAffectingCombat("player") then
+			return true
+		elseif self:IsInGroup() then
+			local prefix, min_member, max_member = self:GetGroupTypeAndCount()
 			for i = min_member, max_member do
 				local unit = (i == 0) and "player" or format("%s%d", prefix, i)
 				if UnitExists(unit) and UnitAffectingCombat(unit) then
 					return true
 				end
 			end
-		elseif UnitAffectingCombat("player") then
-			return true
 		end
 		return false
 	end
 
 	function LibCompat:GroupIterator(func, ...)
-		local prefix, min_member, max_member = LibCompat:GetGroupTypeAndCount()
-		if prefix then
-			for i = min_member, max_member do
-				local unit = (i == 0) and "player" or format("%s%d", prefix, i)
-				LibCompat:QuickDispatch(func, unit, ...)
+		if self:IsInRaid() then
+			for i = 1, GetNumRaidMembers() do
+				self:QuickDispatch(func, format("raid%d", i), ...)
+			end
+		elseif self:IsInGroup() then
+			for i = 0, 4 do
+				self:QuickDispatch(func, (i == 0) and "player" or format("party%d", i), ...)
 			end
 		else
-			LibCompat:QuickDispatch(func, "player", ...)
+			self:QuickDispatch(func, "player", ...)
 		end
 	end
 
@@ -260,47 +253,57 @@ do
 		return namerealm
 	end
 
-	function LibCompat:UnitFromGUID(guid)
-		local prefix, min_member, max_member = LibCompat:GetGroupTypeAndCount()
-		if prefix then
-			for i = min_member, max_member do
-				local unit = (i == 0) and "player" or format("%s%d", prefix, i)
-				if UnitExists(unit) and UnitGUID(unit) == guid then
-					return unit
-				elseif UnitExists(unit .. "pet") and UnitGUID(unit .. "pet") then
-					return unit .. "pet"
-				elseif UnitExists(unit .. "target") and UnitGUID(unit .. "target") == guid then
-					return unit .. "target"
-				elseif UnitExists(unit .. "pettarget") and UnitGUID(unit .. "pettarget") == guid then
-					return unit .. "pettarget"
-				end
-			end
-		elseif UnitGUID("player") == guid then
-			return "player"
-		elseif UnitExists("playerpet") and UnitGUID("playerpet") == guid then
-			return "playerpet"
-		elseif UnitExists("target") and UnitGUID("target") == guid then
-			return "target"
-		elseif UnitExists("focus") and UnitGUID("focus") == guid then
-			return "focus"
-		else
-			for i = 1, 4 do
-				if UnitExists("boss" .. i) and UnitGUID("boss" .. i) == guid then
-					return "boss" .. i
-				end
+	function LibCompat:GetUnitIdFromGUID(guid)
+		local unitId
+		for i = 1, 4 do
+			if UnitExists("boss" .. i) and UnitGUID("boss" .. i) == guid then
+				unitId = "boss" .. i
+				break
 			end
 		end
+
+		if not unitId then
+			self:GroupIterator(function(unit)
+				if unitId then
+					return
+				elseif UnitExists(unit) and UnitGUID(unit) == guid then
+					unitId = unit
+				elseif UnitExists(unit .. "pet") and UnitGUID(unit .. "pet") == guid then
+					unitId = unit .. "pet"
+				elseif UnitExists(unit .. "target") and UnitGUID(unit .. "target") == guid then
+					unitId = unit .. "target"
+				elseif UnitExists(unit .. "pettarget") and UnitGUID(unit .. "pettarget") == guid then
+					unitId = unit .. "pettarget"
+				end
+			end)
+		end
+
+		if not unitId then
+			if UnitExists("target") and UnitGUID("target") == guid then
+				unitId = "target"
+			elseif UnitExists("focus") and UnitGUID("focus") == guid then
+				unitId = "focus"
+			elseif UnitExists("targettarget") and UnitGUID("targettarget") == guid then
+				unitId = "targettarget"
+			elseif UnitExists("focustarget") and UnitGUID("focustarget") == guid then
+				unitId = "focustarget"
+			elseif UnitExists("mouseover") and UnitGUID("mouseover") == guid then
+				unitId = "mouseover"
+			end
+		end
+
+		return unitId
 	end
 
-	function LibCompat:ClassFromGUID(guid)
-		local class
-		local unit = LibCompat:UnitFromGUID(guid)
+	function LibCompat:GetClassFromGUID(guid)
+		local unit = self:GetUnitIdFromGUID(guid)
 		if unit and unit:find("pet") then
-			class = "PET"
-		elseif unit then
-			class = select(2, UnitClass(unit))
+			return "PET", unit
 		end
-		return class, unit
+		if UnitExists(unit) then
+			return select(2, UnitClass(unit)), unit
+		end
+		return nil, unit
 	end
 
 	function LibCompat:GetCreatureId(guid)
@@ -308,22 +311,12 @@ do
 	end
 
 	function LibCompat:GetUnitCreatureId(unit)
-		return LibCompat:GetCreatureId(UnitGUID(unit))
+		return self:GetCreatureId(UnitGUID(unit))
 	end
 
 	function LibCompat:UnitHealthInfo(unit, guid)
-		local health, maxhealth
-		if unit then
-			health, maxhealth = UnitHealth(unit), UnitHealthMax(unit)
-		end
-
-		if not health and guid then
-			unit = LibCompat:UnitFromGUID(guid)
-			if unit then
-				health, maxhealth = UnitHealth(unit), UnitHealthMax(unit)
-			end
-		end
-
+		unit = unit or guid and self:GetUnitIdFromGUID(guid)
+		local health, maxhealth = UnitHealth(unit), UnitHealthMax(unit)
 		if health and maxhealth then
 			return floor(100 * health / maxhealth), health, maxhealth
 		end
@@ -331,18 +324,8 @@ do
 	LibCompat.UnitHealthPercent = LibCompat.UnitHealthInfo -- backwards compatibility
 
 	function LibCompat:UnitPowerInfo(unit, guid, powerType)
-		local power, maxpower
-		if unit then
-			power, maxpower = UnitPower(unit, powerType), UnitPowerMax(unit, powerType)
-		end
-
-		if not power and guid then
-			unit = LibCompat:UnitFromGUID(guid)
-			if unit then
-				power, maxpower = UnitPower(unit, powerType), UnitPowerMax(unit, powerType)
-			end
-		end
-
+		unit = unit or guid and self:GetUnitIdFromGUID(guid)
+		local power, maxpower = UnitPower(unit, powerType), UnitPowerMax(unit, powerType)
 		if power and maxpower then
 			return floor(100 * power / maxpower), power, maxpower
 		end
@@ -356,7 +339,7 @@ do
 	local GetRealNumRaidMembers, GetRaidRosterInfo = GetRealNumRaidMembers, GetRaidRosterInfo
 
 	function LibCompat.UnitIsGroupLeader(unit)
-		if LibCompat:IsInRaid() then
+		if self:IsInRaid() then
 			if unit == "player" then
 				return IsRaidLeader()
 			end
@@ -588,7 +571,7 @@ do
 	-- checks if the feral druid is a cat or tank spec
 	local function GetDruidSubSpec(unit)
 		-- 57881 : Natural Reaction -- used by druid tanks
-		local points = LGT:UnitHasTalent(unit, LibCompat.GetSpellInfo(57881), LGT:GetActiveTalentGroup(unit))
+		local points = LGT:UnitHasTalent(unit, self.GetSpellInfo(57881), LGT:GetActiveTalentGroup(unit))
 		return (points and points > 0) and 3 or 2
 	end
 
@@ -676,8 +659,8 @@ local mixins = {
 	"IsGroupInCombat",
 	"GroupIterator",
 	"UnitFullName",
-	"UnitFromGUID",
-	"ClassFromGUID",
+	"GetUnitIdFromGUID",
+	"GetClassFromGUID",
 	"GetCreatureId",
 	"GetUnitCreatureId",
 	"UnitHealthInfo",
