@@ -101,7 +101,7 @@ function LibCompat.tCopy(to, from, ...)
 		if not skip then
 			if type(v) == "table" then
 				to[k] = {}
-				self.tCopy(to[k], v, ...)
+				LibCompat.tCopy(to[k], v, ...)
 			else
 				to[k] = v
 			end
