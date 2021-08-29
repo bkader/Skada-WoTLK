@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0", 7
+local MAJOR, MINOR = "LibCompat-1.0", 8
 
 local LibCompat, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not LibCompat then return end
@@ -263,6 +263,20 @@ do
 		end
 
 		if not unitId then
+			if UnitExists("target") and UnitGUID("target") == guid then
+				unitId = "target"
+			elseif UnitExists("focus") and UnitGUID("focus") == guid then
+				unitId = "focus"
+			elseif UnitExists("targettarget") and UnitGUID("targettarget") == guid then
+				unitId = "targettarget"
+			elseif UnitExists("focustarget") and UnitGUID("focustarget") == guid then
+				unitId = "focustarget"
+			elseif UnitExists("mouseover") and UnitGUID("mouseover") == guid then
+				unitId = "mouseover"
+			end
+		end
+
+		if not unitId then
 			LibCompat:GroupIterator(function(unit)
 				if unitId then
 					return
@@ -276,20 +290,6 @@ do
 					unitId = unit .. "pettarget"
 				end
 			end)
-		end
-
-		if not unitId then
-			if UnitExists("target") and UnitGUID("target") == guid then
-				unitId = "target"
-			elseif UnitExists("focus") and UnitGUID("focus") == guid then
-				unitId = "focus"
-			elseif UnitExists("targettarget") and UnitGUID("targettarget") == guid then
-				unitId = "targettarget"
-			elseif UnitExists("focustarget") and UnitGUID("focustarget") == guid then
-				unitId = "focustarget"
-			elseif UnitExists("mouseover") and UnitGUID("mouseover") == guid then
-				unitId = "mouseover"
-			end
 		end
 
 		return unitId
@@ -571,82 +571,84 @@ end
 -------------------------------------------------------------------------------
 
 do
-	local LGT = LibStub("LibGroupTalents-1.0")
-	local UnitClass, MAX_TALENT_TABS = UnitClass, MAX_TALENT_TABS or 3
+	local LGT = LibStub("LibGroupTalents-1.0", true)
+	if LGT then
+		local UnitClass, MAX_TALENT_TABS = UnitClass, MAX_TALENT_TABS or 3
 
-	-- list of class to specs
-	local specIDs = {
-		["MAGE"] = {62, 63, 64},
-		["PRIEST"] = {256, 257, 258},
-		["ROGUE"] = {259, 260, 261},
-		["WARLOCK"] = {265, 266, 267},
-		["WARRIOR"] = {71, 72, 73},
-		["PALADIN"] = {65, 66, 70},
-		["DEATHKNIGHT"] = {250, 251, 252},
-		["DRUID"] = {102, 103, 104, 105},
-		["HUNTER"] = {253, 254, 255},
-		["SHAMAN"] = {262, 263, 264}
-	}
+		-- list of class to specs
+		local specIDs = {
+			["MAGE"] = {62, 63, 64},
+			["PRIEST"] = {256, 257, 258},
+			["ROGUE"] = {259, 260, 261},
+			["WARLOCK"] = {265, 266, 267},
+			["WARRIOR"] = {71, 72, 73},
+			["PALADIN"] = {65, 66, 70},
+			["DEATHKNIGHT"] = {250, 251, 252},
+			["DRUID"] = {102, 103, 104, 105},
+			["HUNTER"] = {253, 254, 255},
+			["SHAMAN"] = {262, 263, 264}
+		}
 
-	-- checks if the feral druid is a cat or tank spec
-	local function GetDruidSubSpec(unit)
-		-- 57881 : Natural Reaction -- used by druid tanks
-		local points = LGT:UnitHasTalent(unit, LibCompat.GetSpellInfo(57881), LGT:GetActiveTalentGroup(unit))
-		return (points and points > 0) and 3 or 2
-	end
+		-- checks if the feral druid is a cat or tank spec
+		local function GetDruidSubSpec(unit)
+			-- 57881 : Natural Reaction -- used by druid tanks
+			local points = LGT:UnitHasTalent(unit, LibCompat.GetSpellInfo(57881), LGT:GetActiveTalentGroup(unit))
+			return (points and points > 0) and 3 or 2
+		end
 
-	function LibCompat.GetSpecialization(unit, class)
-		unit = unit or "player"
-		class = class or select(2, UnitClass(unit))
+		function LibCompat.GetSpecialization(unit, class)
+			unit = unit or "player"
+			class = class or select(2, UnitClass(unit))
 
-		local spec  -- start with nil
+			local spec  -- start with nil
 
-		if unit and specIDs[class] then
-			local talentGroup = LGT:GetActiveTalentGroup(unit)
-			local maxPoints, index = 0, 0
+			if unit and specIDs[class] then
+				local talentGroup = LGT:GetActiveTalentGroup(unit)
+				local maxPoints, index = 0, 0
 
-			for i = 1, MAX_TALENT_TABS do
-				local _, _, pointsSpent = LGT:GetTalentTabInfo(unit, i, talentGroup)
-				if pointsSpent ~= nil then
-					if maxPoints < pointsSpent then
-						maxPoints = pointsSpent
-						if class == "DRUID" and i >= 2 then
-							if i == 3 then
-								index = 4
-							elseif i == 2 then
-								index = GetDruidSubSpec(unit)
+				for i = 1, MAX_TALENT_TABS do
+					local _, _, pointsSpent = LGT:GetTalentTabInfo(unit, i, talentGroup)
+					if pointsSpent ~= nil then
+						if maxPoints < pointsSpent then
+							maxPoints = pointsSpent
+							if class == "DRUID" and i >= 2 then
+								if i == 3 then
+									index = 4
+								elseif i == 2 then
+									index = GetDruidSubSpec(unit)
+								end
+							else
+								index = i
 							end
-						else
-							index = i
 						end
 					end
 				end
+
+				spec = specIDs[class][index]
 			end
 
-			spec = specIDs[class][index]
+			return spec
 		end
 
-		return spec
-	end
-
-	do
-		local function GetTrueRole(role)
-			if role == "melee" or role == "caster" then
-				role = "DAMAGER"
-			elseif role == "tank" then
-				role = "TANK"
-			elseif role == "healer" then
-				role = "HEALER"
+		do
+			local function GetTrueRole(role)
+				if role == "melee" or role == "caster" then
+					role = "DAMAGER"
+				elseif role == "tank" then
+					role = "TANK"
+				elseif role == "healer" then
+					role = "HEALER"
+				end
+				return role
 			end
-			return role
-		end
 
-		function LibCompat.GetUnitRole(unit)
-			return GetTrueRole(LGT:GetUnitRole(unit) or "NONE")
-		end
+			function LibCompat.GetUnitRole(unit)
+				return GetTrueRole(LGT:GetUnitRole(unit) or "NONE")
+			end
 
-		function LibCompat.GetGUIDRole(guid)
-			return GetTrueRole(LGT:GetGUIDRole(guid) or "NONE")
+			function LibCompat.GetGUIDRole(guid)
+				return GetTrueRole(LGT:GetGUIDRole(guid) or "NONE")
+			end
 		end
 	end
 end
