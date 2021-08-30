@@ -99,7 +99,9 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	local type, newTable, delTable = type, Skada.newTable, Skada.delTable
 	local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
 
-	local instanceDiff, customUnitsTable
+	local instanceDiff, customUnitsTable, customUnitsInfo
+	local UnitExists, UnitGUID = UnitExists, UnitGUID
+	local UnitHealthMax, UnitPowerMax = UnitHealthMax, UnitPowerMax
 
 	-- this table holds the units to which the damage done is
 	-- collected into a new fake unit.
@@ -138,10 +140,11 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 		[36855] = {start = 0, text = L["%s - Phase 2"], power = 0}, -- Lady Deathwhisper
 		[36678] = {start = 0.35, text = L["%s - Phase 3"]}, -- Professor Putricide
 		[36853] = {start = 0.35, text = L["%s - Phase 2"]}, -- Sindragosa
-		[36609] = {name = L["Valkyrs overkilling"], diff = {"10h", "25h"}, start = 0.5, useful = true}, -- Valkyrs overkilling
-		[36597] = {start = 0.4, text = L["%s - Phase 3"]}, -- The Lich King
+		[36597] = {start = 0.4, stop = 0.1, text = L["%s - Phase 3"]}, -- The Lich King
+		[36609] = {name = L["Valkyrs overkilling"], diff = {"10h", "25h"}, start = 0.5, useful = true, values = {["10h"] = 1417500, ["25h"] = 2992000}}, -- Valkyrs overkilling
 		-- Trial of the Crusader
-		[34564] = {start = 0.3, text = L["%s - Phase 2"]} -- Anub'arak
+		[34564] = {start = 0.3, text = L["%s - Phase 2"]}, -- Anub'arak
+		[32482] = {start = 0.5, text = L["%s - Phase 2"], useful = true} -- Anub'arak
 	}
 
 	local function GetRaidDiff()
@@ -166,16 +169,52 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 				end
 			end
 		end
-
 		return instanceDiff
 	end
 
-	local function IsCustomUnit(guid, name)
+	local function CustomUnitsMaxValue(id, guid, tbl)
+		if id and customUnitsInfo and customUnitsInfo[id] then
+			return customUnitsInfo[id]
+		end
+
+		local maxval
+		Skada:GroupIterator(function(unit)
+			if maxval then
+				return -- a single player is enough
+			elseif UnitExists(unit .. "target") and UnitGUID(unit .. "target") == guid then
+				maxval = tbl.power and UnitPowerMax(unit .. "target", tbl.power) or UnitHealthMax(unit .. "target")
+			elseif UnitExists(unit .. "pettarget") and UnitGUID(unit .. "pettarget") == guid then
+				maxval = tbl.power and UnitPowerMax(unit .. "pettarget", tbl.power) or UnitHealthMax(unit .. "pettarget")
+			end
+		end)
+
+		if not maxval and tbl.values then
+			maxval = tbl.values[GetRaidDiff()]
+		end
+
+		if not maxval then
+			if tbl.power ~= nil then
+				maxval = select(3, Skada:UnitPowerInfo(nil, guid, tbl.power))
+			else
+				maxval = select(3, Skada:UnitHealthInfo(nil, guid))
+			end
+		end
+
+		if maxval then
+			customUnitsInfo = customUnitsInfo or newTable()
+			customUnitsInfo[id] = maxval
+		end
+
+		return maxval
+	end
+
+	local function IsCustomUnit(guid, name, amount, overkill)
 		if guid and customUnitsTable and customUnitsTable[guid] then
 			return (customUnitsTable[guid] ~= -1)
 		end
 
-		local unit = customUnits[Skada:GetCreatureId(guid)]
+		local id = Skada:GetCreatureId(guid)
+		local unit = id and customUnits[id]
 		if unit then
 			customUnitsTable = customUnitsTable or newTable()
 
@@ -184,25 +223,21 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 				return false
 			end
 
-			local curval, maxval
-			if unit.power ~= nil then
-				curval, maxval = select(2, Skada:UnitPowerInfo(nil, guid, unit.power))
-			else
-				curval, maxval = select(2, Skada:UnitHealthInfo(nil, guid))
-			end
-
-			if not (curval and maxval) then
+			local maxval = CustomUnitsMaxValue(id, guid, unit)
+			if not maxval then
 				customUnitsTable[guid] = -1
 				return false
+			else
+				curval = maxval - amount - overkill
 			end
 
 			customUnitsTable[guid] = {
 				name = unit.name or format(unit.text or L["%s below %s%%"], name or UNKNOWN, (unit.start or 1) * 100),
 				guid = guid,
-				curr = curval,
-				max = maxval,
+				curval = curval,
 				minval = floor(maxval * (unit.stop or 0)),
 				maxval = floor(maxval * (unit.start or 1)),
+				full = maxval,
 				useful = unit.useful
 			}
 			return true
@@ -265,41 +300,41 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 				if GetRaidDiff() == nil or GetRaidDiff() == "unknown" then return end
 
 				-- custom units
-				if IsCustomUnit(dmg.enemyid, dmg.enemyname) then
+				if IsCustomUnit(dmg.enemyid, dmg.enemyname, dmg.amount, dmg.overkill) then
 					local unit = customUnitsTable[dmg.enemyid]
 					-- started with less than max?
-					if unit.max and unit.curr <= unit.max then
+					if unit.full then
 						if unit.useful then
-							e.damagetaken_useful = (e.damagetaken_useful or 0) + unit.max - unit.curr
-							e.damagetaken_sources[dmg.srcName].useful = (e.damagetaken_sources[dmg.srcName].useful or 0) + unit.max - unit.curr
+							e.damagetaken_useful = (e.damagetaken_useful or 0) + unit.full - unit.curval
+							e.damagetaken_sources[dmg.srcName].useful = (e.damagetaken_sources[dmg.srcName].useful or 0) + unit.full - unit.curval
 						end
-						unit.max = nil
-					elseif unit.curr >= unit.maxval then
-						unit.curr = unit.curr - dmg.amount
-
-						if unit.curr < unit.maxval then
-							local amount = unit.maxval - unit.curr - dmg.overkill
-							log_custom_damage(set, unit.name, dmg.srcGUID, dmg.srcName, dmg.spellid, amount)
-
-							if unit.useful then
-								e.damagetaken_useful = (e.damagetaken_useful or 0) + dmg.amount - amount
-								e.damagetaken_sources[dmg.srcName].useful = (e.damagetaken_sources[dmg.srcName].useful or 0) + dmg.amount - amount
-							end
-						elseif unit.useful then
-							e.damagetaken_useful = (e.damagetaken_useful or 0) + dmg.amount - dmg.overkill
-							e.damagetaken_sources[dmg.srcName].useful = (e.damagetaken_sources[dmg.srcName].useful or 0) + dmg.amount - dmg.overkill
-						end
-					elseif unit.curr >= unit.minval then
-						unit.curr = unit.curr - dmg.amount
+						unit.full = nil
+					elseif unit.curval >= unit.maxval then
 						local amount = dmg.amount - dmg.overkill
-						if unit.curr < unit.minval then
-							amount = amount - (unit.minval - unit.curr)
-							customUnitsTable[unit.guid] = -1 -- ignore it later.
+						unit.curval = unit.curval - amount
+
+						if unit.curval <= unit.maxval then
+							log_custom_damage(set, unit.name, dmg.srcGUID, dmg.srcName, dmg.spellid, unit.maxval - unit.curval)
+							amount = amount - (unit.maxval - unit.curval)
+						end
+						if unit.useful then
+							e.damagetaken_useful = (e.damagetaken_useful or 0) + amount
+							e.damagetaken_sources[dmg.srcName].useful = (e.damagetaken_sources[dmg.srcName].useful or 0) + amount
+						end
+					elseif unit.curval >= unit.minval then
+						local amount = dmg.amount - dmg.overkill
+						unit.curval = unit.curval - amount
+
+						if unit.curval <= unit.minval then
+							amount = amount - (unit.minval - unit.curval)
 						end
 						log_custom_damage(set, unit.name, dmg.srcGUID, dmg.srcName, dmg.spellid, amount)
+					else
+						customUnitsTable[unit.guid] = -1 -- remove it
 					end
 				end
 
+				-- custom groups
 				if customGroups[dmg.enemyname] and customGroups[dmg.enemyname] ~= dmg.enemyname then
 					if customGroups[dmg.enemyname] == L["Halion and Inferno"] and GetRaidDiff() ~= "25h" then
 						return
@@ -510,7 +545,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	end
 
 	function mod:SetComplete(set)
-		customUnitsTable, instanceDiff = delTable(customUnitsTable), nil
+		customUnitsTable, customUnitsInfo, instanceDiff = delTable(customUnitsTable), delTable(customUnitsInfo), nil
 	end
 end)
 
