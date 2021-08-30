@@ -13,6 +13,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	local tostring, format, tContains = tostring, string.format, tContains
 	local UnitGUID, IsInInstance = UnitGUID, IsInInstance
 	local GetSpellInfo, GetSpellLink = Skada.GetSpellInfo or GetSpellInfo, Skada.GetSpellLink or GetSpellLink
+	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
 
 	-- spells in the following table will be ignored.
 	local ignoredSpells = {}
@@ -72,7 +73,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 		log_interrupt(Skada.current, data)
 		log_interrupt(Skada.total, data)
 
-		if Skada.db.profile.modules.interruptannounce and Skada:IsInGroup() and srcGUID == Skada.myGUID then
+		if Skada.db.profile.modules.interruptannounce and IsInGroup() and srcGUID == Skada.myGUID then
 			local spelllink = GetSpellLink(extraspellid or extraspellname) or extraspellname
 
 			local channel = Skada.db.profile.modules.interruptchannel or "SAY"
@@ -87,7 +88,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 				elseif zoneType == "party" or zoneType == "raid" then
 					channel = zoneType:upper()
 				else
-					channel = Skada:IsInRaid() and "RAID" or "PARTY"
+					channel = IsInRaid() and "RAID" or "PARTY"
 				end
 			end
 

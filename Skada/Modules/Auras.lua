@@ -298,7 +298,7 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 	local mod = Skada:NewModule(L["Buffs"])
 	local spellmod = mod:NewModule(L["Buff spell list"])
 
-	local UnitExists, UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
+	local GroupIterator, UnitExists, UnitIsDeadOrGhost = Skada.GroupIterator, UnitExists, UnitIsDeadOrGhost
 	local UnitGUID, UnitName, UnitBuff = UnitGUID, UnitName, UnitBuff
 
 	-- list of the auras that are ignored!
@@ -393,7 +393,7 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 	function mod:CheckBuffs(event, set, timestamp)
 		if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped then
 			-- let's now check for buffs put before the combat started.
-			Skada:GroupIterator(function(unit)
+			GroupIterator(function(unit)
 				if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
 					local dstGUID, dstName = UnitGUID(unit), UnitName(unit)
 					for i = 1, 40 do

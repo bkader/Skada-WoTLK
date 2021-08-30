@@ -22,8 +22,9 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 	local LGT = LibStub("LibGroupTalents-1.0")
 
+	local GroupIterator = Skada.GroupIterator
 	local UnitName, UnitExists, UnitBuff = UnitName, UnitExists, UnitBuff
-	local UnitIsDeadOrGhost = UnitIsDeadOrGhost
+	local UnitIsDeadOrGhost, UnitHealthInfo = UnitIsDeadOrGhost, Skada.UnitHealthInfo
 	local GetTime, band = GetTime, bit.band
 	local tinsert, tsort, tContains = table.insert, table.sort, tContains
 
@@ -458,7 +459,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		function mod:CheckPreShields(event, set, timestamp)
 			if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped then
 				local curtime = GetTime()
-				Skada:GroupIterator(function(unit)
+				GroupIterator(function(unit)
 					if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
 						local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
 						for i = 1, 40 do
@@ -549,15 +550,15 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 			if s.full and shieldamounts[s.srcName] and shieldamounts[s.srcName][s.spellid] then
 				s.amount = shieldamounts[s.srcName][s.spellid]
 			elseif s.spellid == 50150 and s.points then -- Will of the Necropolis
-				local hppercent = Skada:UnitHealthInfo(dstName, dstGUID)
+				local hppercent = UnitHealthInfo(dstName, dstGUID)
 				s.amount = (hppercent <= 36) and floor(total * 0.05 * s.points) or 0
 			elseif s.spellid == 49497 and s.points then -- Spell Deflection
 				s.amount = floor(total * 0.15 * s.points)
 			elseif s.spellid == 66233 and s.points then -- Ardent Defender
-				local hppercent = Skada:UnitHealthInfo(dstName, dstGUID)
+				local hppercent = UnitHealthInfo(dstName, dstGUID)
 				s.amount = (hppercent <= 36) and floor(total * 0.0667 * s.points) or 0
 			elseif s.spellid == 31230 and s.points then -- Cheat Death
-				s.amount = floor(select(3, Skada:UnitHealthInfo(dstName, dstGUID)) * 0.1)
+				s.amount = floor(select(3, UnitHealthInfo(dstName, dstGUID)) * 0.1)
 			end
 		end
 

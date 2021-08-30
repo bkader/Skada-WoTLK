@@ -16,6 +16,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetspellLink = Skada.GetSpellLink or GetSpellLink
 	local newTable, delTable = Skada.newTable, Skada.delTable
+	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
 	local date, zoneType, _ = date
 
 	local function log_deathlog(set, data, ts)
@@ -146,7 +147,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 	local function UnitDied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if not UnitIsFeignDeath(dstName) then
-			if Skada.db.profile.modules.deathannounce and Skada:IsInGroup() then
+			if Skada.db.profile.modules.deathannounce and IsInGroup() then
 				if zoneType == "pvp" or zoneType == "arena" then
 					log_death(Skada.current, dstGUID, dstName, dstFlags, ts)
 					log_death(Skada.total, dstGUID, dstName, dstFlags, ts)
@@ -196,7 +197,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 						elseif Skada.db.profile.modules.deathchannel == "GUILD" then
 							Skada:SendChat(output, "GUILD", "preset")
 						else
-							Skada:SendChat(output, Skada:IsInRaid() and "RAID" or "PARTY", "preset")
+							Skada:SendChat(output, IsInRaid() and "RAID" or "PARTY", "preset")
 						end
 					end
 				end

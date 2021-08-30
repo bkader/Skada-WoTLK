@@ -10,6 +10,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	local pairs, select, tconcat = pairs, select, table.concat
 	local format, strsub, tostring = string.format, string.sub, tostring
 	local GetItemInfo, GetSpellInfo = GetItemInfo, Skada.GetSpellInfo
+	local GroupIterator = Skada.GroupIterator
 	local UnitExists, UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
 	local UnitGUID, UnitName = UnitGUID, UnitName
 	local UnitClass, UnitBuff = UnitClass, UnitBuff
@@ -67,7 +68,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 		if event == "COMBAT_PLAYER_ENTER" then
 			prepotion = newTable()
 
-			Skada:GroupIterator(function(unit)
+			GroupIterator(function(unit)
 				if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
 					local playerid, playername = UnitGUID(unit), UnitName(unit)
 					local class = select(2, UnitClass(unit))
@@ -77,7 +78,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 						local _, _, icon, _, _, _, _, _, _, _, spellid = UnitBuff(unit, GetSpellInfo(potionid))
 						if spellid and potionIDs[spellid] then
 							-- instant recording doesn't work, so we delay it
-							Skada.After(1, function() PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid) end)
+							Skada.After(1, PotionUsed, nil, nil, playerid, playername, nil, nil, nil, nil, spellid)
 							tinsert(potions, format(potionStr, icon))
 						end
 					end

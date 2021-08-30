@@ -607,7 +607,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 	local playermod = mod:NewModule(L["CC Break spells"])
 	local targetmod = mod:NewModule(L["CC Break targets"])
 
-	local UnitExists, UnitName = UnitExists, UnitName
+	local UnitExists, UnitName, IsInRaid = UnitExists, UnitName, Skada.IsInRaid
 	local GetNumRaidMembers, GetPartyAssignment = GetNumRaidMembers, GetPartyAssignment
 	local IsInInstance, UnitInRaid = IsInInstance, UnitInRaid
 
@@ -655,7 +655,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 		-- Optional announce
 		srcName = srcName_modified or srcName
-		if Skada.db.profile.modules.ccannounce and Skada:IsInRaid() and UnitInRaid(srcName) then
+		if Skada.db.profile.modules.ccannounce and IsInRaid() and UnitInRaid(srcName) then
 			if select(2, IsInInstance()) == "pvp" then return end
 
 			-- Ignore main tanks and main assist?

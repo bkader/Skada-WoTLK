@@ -100,6 +100,8 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
 
 	local instanceDiff, customUnitsTable, customUnitsInfo
+	local GroupIterator, GetCreatureId = Skada.GroupIterator, Skada.GetCreatureId
+	local UnitHealthInfo, UnitPowerInfo = Skada.UnitHealthInfo, Skada.UnitPowerInfo
 	local UnitExists, UnitGUID = UnitExists, UnitGUID
 	local UnitHealthMax, UnitPowerMax = UnitHealthMax, UnitPowerMax
 
@@ -177,7 +179,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 		end
 
 		local maxval
-		Skada:GroupIterator(function(unit)
+		GroupIterator(function(unit)
 			if maxval then
 				return -- a single player is enough
 			elseif UnitExists(unit .. "target") and UnitGUID(unit .. "target") == guid then
@@ -193,9 +195,9 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 		if not maxval then
 			if tbl.power ~= nil then
-				maxval = select(3, Skada:UnitPowerInfo(nil, guid, tbl.power))
+				maxval = select(3, UnitPowerInfo(nil, guid, tbl.power))
 			else
-				maxval = select(3, Skada:UnitHealthInfo(nil, guid))
+				maxval = select(3, UnitHealthInfo(nil, guid))
 			end
 		end
 
@@ -212,7 +214,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 			return (customUnitsTable[guid] ~= -1)
 		end
 
-		local id = Skada:GetCreatureId(guid)
+		local id = GetCreatureId(guid)
 		local unit = id and customUnits[id]
 		if unit then
 			customUnitsTable = customUnitsTable or newTable()

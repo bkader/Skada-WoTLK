@@ -13,7 +13,6 @@ local DBI = LibStub("LibDBIcon-1.0", true)
 local LBB = LibStub("LibBabble-Boss-3.0"):GetUnstrictLookupTable()
 local LBI = LibStub("LibBossIDs-1.0")
 local LDB = LibStub("LibDataBroker-1.1")
-local LGT = LibStub("LibGroupTalents-1.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local Translit = LibStub("LibTranslit-1.0", true)
 
@@ -1352,7 +1351,7 @@ do
 
 			-- if the player has been assigned a valid class,
 			-- we make sure to assign his/her role and spec
-			if Skada.validclass[player.class] then
+			if Skada.validclass[player.class] and not (player.role or player.spec) then
 				if not player.role then
 					player.role = Skada.GetGUIDRole(player.id)
 				end
@@ -1398,11 +1397,12 @@ do
 		end
 
 		-- fix players created before their info was received
-		if player.name == UNKNOWN and playername ~= UNKNOWN then
-			player.name = playername
-			player.class = select(2, UnitClass(playername))
-			player.role = self.GetGUIDRole(playerid)
-			player.spec = self.GetSpecialization(playername, player.class)
+		if (player.name == UNKNOWN and playername ~= UNKNOWN) or (player.name == player.id and playername ~= player.id) then
+			player.name = (player.id == self.myGUID or playerid == self.myGUID) and self.myName or playername
+			player.fixtimer = player.fixtimer or self.NewTimer(3, function() fix_player(player) end)
+		elseif player.hotfix then
+			player.fixtimer:Cancel()
+			player.fixtimer = nil
 		end
 
 		-- total set has "last" always removed.
@@ -1589,7 +1589,7 @@ do
 	end
 
 	local function GetPetOwnerUnit(guid)
-		local prefix, min_member, max_member = Skada:GetGroupTypeAndCount()
+		local prefix, min_member, max_member = Skada.GetGroupTypeAndCount()
 		if prefix then
 			for i = min_member, max_member do
 				local unit = (i == 0) and "player" or format("%s%d", prefix, i)
@@ -2085,7 +2085,7 @@ end
 -------------------------------------------------------------------------------
 
 function Skada:CheckGroup()
-	self:GroupIterator(function(unit)
+	self.GroupIterator(function(unit)
 		local unitGUID = UnitGUID(unit)
 		if unitGUID then
 			players[unitGUID] = unit
@@ -2101,7 +2101,7 @@ function Skada:ZoneCheck()
 	local inInstance, instanceType = IsInInstance()
 
 	local isininstance = inInstance and (instanceType == "party" or instanceType == "raid")
-	local isinpvp = self:IsInPvP()
+	local isinpvp = self.IsInPvP()
 
 	if isininstance and wasininstance ~= nil and not wasininstance and self.db.profile.reset.instance ~= 1 and self:CanReset() then
 		if self.db.profile.reset.instance == 3 then
@@ -2121,7 +2121,7 @@ function Skada:ZoneCheck()
 
 	wasininstance = (isininstance == true)
 	wasinpvp = (isinpvp == true)
-	wasinparty = self:IsInGroup()
+	wasinparty = self.IsInGroup()
 	self.callbacks:Fire("SKADA_ZONE_CHECK")
 end
 
@@ -2159,7 +2159,7 @@ do
 	end
 
 	function check_for_join_and_leave()
-		if not Skada:IsInGroup() and wasinparty then
+		if not Skada.IsInGroup() and wasinparty then
 			if Skada.db.profile.reset.leave == 3 and Skada:CanReset() then
 				Skada:ShowPopup(nil, true)
 			elseif Skada.db.profile.reset.leave == 2 and Skada:CanReset() then
@@ -2171,19 +2171,19 @@ do
 			end
 		end
 
-		if Skada:IsInGroup() and not wasinparty then
+		if Skada.IsInGroup() and not wasinparty then
 			if Skada.db.profile.reset.join == 3 and Skada:CanReset() then
 				Skada:ShowPopup(nil, true)
 			elseif Skada.db.profile.reset.join == 2 and Skada:CanReset() then
 				Skada:Reset()
 			end
 
-			if Skada.db.profile.hidesolo and not (Skada.db.profile.hidepvp and Skada:IsInPvP()) then
+			if Skada.db.profile.hidesolo and not (Skada.db.profile.hidepvp and Skada.IsInPvP()) then
 				Skada:SetActive(true)
 			end
 		end
 
-		wasinparty = not (not Skada:IsInGroup())
+		wasinparty = not (not Skada.IsInGroup())
 	end
 
 	function Skada:PARTY_MEMBERS_CHANGED()
@@ -2191,7 +2191,7 @@ do
 		self:CheckGroup()
 
 		-- version check
-		local t, _, count = self:GetGroupTypeAndCount()
+		local t, _, count = self.GetGroupTypeAndCount()
 		if t == "party" then
 			count = count + 1
 		end
@@ -2677,7 +2677,7 @@ function Skada:ApplySettings(name)
 		end
 	end
 
-	if (Skada.db.profile.hidesolo and not Skada:IsInGroup()) or (Skada.db.profile.hidepvp and Skada:IsInPvP()) then
+	if (Skada.db.profile.hidesolo and not Skada.IsInGroup()) or (Skada.db.profile.hidepvp and Skada.IsInPvP()) then
 		Skada:SetActive(false)
 	else
 		Skada:SetActive(true)
@@ -3121,7 +3121,7 @@ function Skada:OnInitialize()
 	self.classnames.UNKNOWN = UNKNOWN
 
 	-- class colors
-	self.classcolors = self:GetClassColorsTable()
+	self.classcolors = self.GetClassColorsTable()
 	-- custom
 	self.classcolors.ENEMY = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
 	self.classcolors.MONSTER = {r = 0.549, g = 0.388, b = 0.404, colorStr = "ff8c6367"}
@@ -3129,12 +3129,12 @@ function Skada:OnInitialize()
 	self.classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
 	self.classcolors.PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"}
 	self.classcolors.UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
-
-	-- well, me!
-	self.myGUID, self.myName = UnitGUID("player"), UnitName("player")
 end
 
 function Skada:OnEnable()
+	-- well, me!
+	self.myGUID, self.myName = UnitGUID("player"), UnitName("player")
+
 	self:ReloadSettings()
 
 	self:RegisterComm("Skada")
@@ -3246,7 +3246,7 @@ do
 		if target == self.myName then return end
 
 		if not channel then
-			local t = self:GetGroupTypeAndCount()
+			local t = self.GetGroupTypeAndCount()
 			if t == nil then
 				return -- with whom you want to sync man!
 			elseif t == "raid" then
@@ -3370,7 +3370,7 @@ function Skada:EndSegment()
 		win:Wipe()
 		self.changed = true
 
-		if win.db.wipemode ~= "" and self:IsGroupDead() then
+		if win.db.wipemode ~= "" and self.IsGroupDead() then
 			win:RestoreView("current", win.db.wipemode)
 		elseif win.db.returnaftercombat and win.restore_mode and win.restore_set then
 			if win.restore_set ~= win.selectedset or win.restore_mode ~= win.selectedmode then
@@ -3379,7 +3379,7 @@ function Skada:EndSegment()
 			end
 		end
 
-		if not win.db.hidden and (not self.db.profile.hidesolo or self:IsInGroup()) then
+		if not win.db.hidden and (not self.db.profile.hidesolo or self.IsInGroup()) then
 			if self.db.profile.showcombat and win:IsShown() then
 				win:Hide()
 			elseif self.db.profile.hidecombat and not win:IsShown() then
@@ -3429,7 +3429,7 @@ do
 
 	function Skada:Tick()
 		self.callbacks:Fire("COMBAT_PLAYER_TICK", self.current, self.total)
-		if not disabled and self.current and not InCombatLockdown() and not self:IsGroupInCombat() then
+		if not disabled and self.current and not InCombatLockdown() and not self.IsGroupInCombat() then
 			self:Debug("EndSegment: Tick")
 			self:EndSegment()
 		end
@@ -3437,7 +3437,7 @@ do
 
 	function Skada:StartCombat()
 		deathcounter = 0
-		startingmembers = select(3, self:GetGroupTypeAndCount())
+		startingmembers = select(3, self.GetGroupTypeAndCount())
 
 		if tentativehandle and not tentativehandle._cancelled then
 			tentativehandle:Cancel()
@@ -3493,7 +3493,7 @@ do
 		self:UpdateDisplay(true)
 
 		update_timer = self.NewTicker(self.db.profile.updatefrequency or 0.25, function() self:UpdateDisplay() end)
-		tick_timer = self.NewTicker(1, function() Skada:Tick() end)
+		tick_timer = self.NewTicker(1, function() self:Tick() end)
 	end
 
 	-- list of combat events that we don't care about

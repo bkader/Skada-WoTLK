@@ -7,10 +7,10 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 
 	local ipairs, select, format = ipairs, select, string.format
 	local tinsert, max = table.insert, math.max
-	local UnitExists, UnitIsFriend = UnitExists, UnitIsFriend
+	local GroupIterator, UnitExists, UnitIsFriend = Skada.GroupIterator, UnitExists, UnitIsFriend
 	local UnitName, UnitClass, UnitGUID = UnitName, UnitClass, UnitGUID
 	local UnitDetailedThreatSituation = UnitDetailedThreatSituation
-	local InCombatLockdown = InCombatLockdown
+	local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.GroupIterator
 	local PlaySoundFile = PlaySoundFile
 	local newTable, delTable = Skada.newTable, Skada.delTable
 
@@ -125,7 +125,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 
 			win.title = L["Threat"]
 
-			if not Skada:IsGroupInCombat() then return end
+			if not IsGroupInCombat() then return end
 
 			local target = find_threat_unit()
 
@@ -138,7 +138,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				-- Reset out max threat value.
 				maxthreat = 0
 
-				Skada:GroupIterator(function(unit)
+				GroupIterator(function(unit)
 					add_to_threattable(unit, target, win)
 					if UnitExists(unit .. "pet") then
 						add_to_threattable(unit .. "pet", target, win)
