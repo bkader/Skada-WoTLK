@@ -522,7 +522,7 @@ L["%s's damage breakdown"] = "%s - Детали повреждений"
 -- friendly fire module
 L["Friendly Fire"] = "Урон - По союзникам"
 -- useful damage targets
-L["Useful targets"] = "Полезные цели" -- The Lich King
+L["Important targets"] = "Важные враги" -- The Lich King
 L["Oozes"] = "Слизнюки" -- Professor Putricide
 L["Princes overkilling"] = "Принцы - избыточный урон" -- Blood Prince Council
 L["Adds"] = "Прислужники" -- Lady Deathwhisper

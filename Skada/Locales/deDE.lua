@@ -521,7 +521,7 @@ L["%s's damage breakdown"] = "%s Schadensaufschlüsselung"
 -- friendly fire module
 L["Friendly Fire"] = "Friendly Fire"
 -- useful damage targets
-L["Useful targets"] = "Nützliche Feinde"
+L["Important targets"] = "Wichtige Feinde"
 L["Oozes"] = "Schlamm"
 L["Princes overkilling"] = "Prinzen overkilling"
 -- L["Adds"] = ""

@@ -522,7 +522,7 @@ L["%s's damage breakdown"] = true
 -- friendly fire module
 L["Friendly Fire"] = true
 -- useful damage targets
-L["Useful targets"] = true
+L["Important targets"] = true
 L["Oozes"] = true
 L["Princes overkilling"] = true
 L["Adds"] = true

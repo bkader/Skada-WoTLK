@@ -523,7 +523,7 @@ L["%s's damage breakdown"] = "%s的伤害失败"
 -- friendly fire module
 L["Friendly Fire"] = "误伤"
 -- useful damage targets
-L["Useful targets"] = "有用目标"
+L["Important targets"] = "重要目标"
 L["Oozes"] = "软泥怪"
 L["Princes overkilling"] = "王子过度伤害"
 L["Adds"] = "小怪"

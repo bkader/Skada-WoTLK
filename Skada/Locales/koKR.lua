@@ -523,7 +523,7 @@ L["Enemy Healing Done"] = "적의 치유량"
 -- friendly fire module
 L["Friendly Fire"] = "아군에게 준 피해"
 -- useful damage targets
--- L["Useful targets"] = ""
+L["Important targets"] = "중요한 적들"
 -- L["Oozes"] = ""
 -- L["Princes overkilling"] = ""
 -- L["Adds"] = ""

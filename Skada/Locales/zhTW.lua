@@ -522,8 +522,8 @@ L["Enemy Healing Done"] = "敵方造成治療"
 -- friendly fire module
 L["Friendly Fire"] = "隊友誤傷"
 -- useful damage targets
--- L["Useful targets"] = ""
--- L["Oozes"] = ""
+L["Important targets"] = "重要目標"
+L["Oozes"] = "滲出"
 -- L["Princes overkilling"] = ""
 -- L["Adds"] = ""
 -- L["Halion and Inferno"] = ""

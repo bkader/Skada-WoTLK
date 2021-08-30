@@ -107,11 +107,11 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	-- collected into a new fake unit.
 	local customGroups = {
 		-- The Lich King: Useful targets
-		[LBB["The Lich King"]] = L["Useful targets"],
-		[LBB["Raging Spirit"]] = L["Useful targets"],
-		[LBB["Ice Sphere"]] = L["Useful targets"],
-		[LBB["Val'kyr Shadowguard"]] = L["Useful targets"],
-		[L["Wicked Spirit"]] = L["Useful targets"],
+		[LBB["The Lich King"]] = L["Important targets"],
+		[LBB["Raging Spirit"]] = L["Important targets"],
+		[LBB["Ice Sphere"]] = L["Important targets"],
+		[LBB["Val'kyr Shadowguard"]] = L["Important targets"],
+		[L["Wicked Spirit"]] = L["Important targets"],
 		-- Professor Putricide: Oozes
 		[L["Gas Cloud"]] = L["Oozes"],
 		[L["Volatile Ooze"]] = L["Oozes"],
@@ -143,8 +143,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 		[36597] = {start = 0.4, stop = 0.1, text = L["%s - Phase 3"]}, -- The Lich King
 		[36609] = {name = L["Valkyrs overkilling"], diff = {"10h", "25h"}, start = 0.5, useful = true, values = {["10h"] = 1417500, ["25h"] = 2992000}}, -- Valkyrs overkilling
 		-- Trial of the Crusader
-		[34564] = {start = 0.3, text = L["%s - Phase 2"]}, -- Anub'arak
-		[32482] = {start = 0.5, text = L["%s - Phase 2"], useful = true} -- Anub'arak
+		[34564] = {start = 0.3, text = L["%s - Phase 2"]} -- Anub'arak
 	}
 
 	local function GetRaidDiff()
