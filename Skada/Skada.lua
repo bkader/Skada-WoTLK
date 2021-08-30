@@ -1518,16 +1518,14 @@ do
 	-- returns a boolean, boss id and boss name or custom name
 	function Skada:IsBoss(guid, name)
 		local isboss, npcid, npcname = false, 0, nil
-		if guid then
-			local id = tonumber(guid:sub(9, 12), 16) or 0
-			if id and (LBI.BossIDs[id] or custom[id]) then
-				isboss, npcid = true, id
-				if custom[id] then
-					npcname = (name and name ~= custom[id]) and name or custom[id]
-				end
-			elseif self:IsCreature(guid) then
-				npcid = id
+		local id = self.GetCreatureId(guid)
+		if id and (LBI.BossIDs[id] or custom[id]) then
+			isboss, npcid = true, id
+			if custom[id] then
+				npcname = (name and name ~= custom[id]) and name or custom[id]
 			end
+		elseif self:IsCreature(guid) then
+			npcid = id
 		end
 		return isboss, npcid, npcname
 	end
