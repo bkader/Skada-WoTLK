@@ -13,6 +13,7 @@ L["Enable"] = "활성화"
 L["ENABLED"] = "활성화됨"
 L["Disable"] = "비활성화"
 L["DISABLED"] = "비활성화됨"
+L["Stopping for wipe."] = "때문에 닦아의 중지."
 -- common lines
 L["More Details"] = "자세한 내용은"
 L["Active Time"] = "활동 시간"
@@ -633,11 +634,6 @@ L["When enabled, nicknames set by Skada users are ignored."] = "활성화되면 
 -- L["Choose how names are shown on your bars."] = ""
 L["Clear Cache"] = "캐시 지우기"
 L["Are you sure you want clear cached nicknames?"] = "캐시 된 별명을 지우시겠습니까?"
--- player score module lines --
--- L["Player Score"] = ""
--- L["Raid Score"] = ""
--- L["Score"] = ""
--- L["%s's Score"] = ""
 -- damage mitigated lines --
 L["Damage Mitigated"] = "피해 완화"
 -- L["%s's mitigated damage"] = ""

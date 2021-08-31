@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0", 10
+local MAJOR, MINOR = "LibCompat-1.0", 11
 
 local LibCompat, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not LibCompat then return end
@@ -13,6 +13,7 @@ LibCompat.embeds = LibCompat.embeds or {}
 
 local pairs, ipairs, select, type = pairs, ipairs, select, type
 local tinsert, tremove, wipe = table.insert, table.remove, wipe
+local floor, ceil, max = math.floor, math.ceil, math.max
 local setmetatable, format = setmetatable, string.format
 local CreateFrame = CreateFrame
 
@@ -172,8 +173,6 @@ end
 -------------------------------------------------------------------------------
 
 do
-	local floor, ceil = math.floor, math.ceil
-
 	local function Round(val)
 		return (val < 0.0) and ceil(val - 0.5) or floor(val + 0.5)
 	end
@@ -249,47 +248,98 @@ do
 		end
 	end
 
-	local function IsGroupDead()
-		if not UnitIsDeadOrGhost("player") then
-			return false
-		elseif IsInGroup() then
-			local prefix, min_member, max_member = GetGroupTypeAndCount()
-			for i = min_member, max_member do
-				local unit = (i == 0) and "player" or format("%s%d", prefix, i)
-				if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
-					return false
+	local UnitIterator, roster, raid
+	do
+		local rmem, pmem, step, count
+
+		local function SelfIterator()
+			while step do
+				local unit, owner
+				if step == 1 then
+					unit, owner, step = "player", nil, 2
+				elseif step == 2 then
+					unit, owner, step = "playerpet", "player", nil
 				end
+				if unit and UnitExists(unit) then
+					return unit, owner
+				end
+			end
+		end
+
+		local function PartyIterator()
+			while step do
+				local unit, owner
+				if step <= 2 then
+					unit, owner = SelfIterator()
+					step = step or 3
+				elseif step == 3 then
+					unit, owner, step = format("party%d", count), nil, 4
+				elseif step == 4 then
+					unit, owner = format("partypet%d", count), format("party%d", count)
+					count = count + 1
+					step = count <= pmem and 3 or nil
+				end
+				if unit and UnitExists(unit) then
+					return unit, owner
+				end
+			end
+		end
+
+		local function RaidIterator()
+			while step do
+				local unit, owner
+				if step == 1 then
+					unit, owner, step = format("raid%d", count), nil, 2
+				elseif step == 2 then
+					unit, owner = format("raidpet%d", count), format("raid%d", count)
+					count = count + 1
+					step = count <= rmem and 1 or nil
+				end
+				if unit and UnitExists(unit) then
+					return unit, owner
+				end
+			end
+		end
+
+		function UnitIterator()
+			rmem, step = GetNumRaidMembers(), 1
+			if rmem == 0 then
+				pmem = GetNumPartyMembers()
+				if pmem == 0 then
+					return SelfIterator, false
+				end
+				count = 1
+				return PartyIterator, false
+			end
+			count = 1
+			return RaidIterator, true
+		end
+	end
+
+	local function IsGroupDead()
+		roster, raid = UnitIterator()
+		for unit in roster do
+			if not UnitIsDeadOrGhost(unit) then
+				return false
 			end
 		end
 		return true
 	end
 
 	local function IsGroupInCombat()
-		if UnitAffectingCombat("player") then
-			return true
-		elseif IsInGroup() then
-			local prefix, min_member, max_member = GetGroupTypeAndCount()
-			for i = min_member, max_member do
-				local unit = (i == 0) and "player" or format("%s%d", prefix, i)
-				if UnitExists(unit) and UnitAffectingCombat(unit) then
-					return true
-				end
+		roster, raid = UnitIterator()
+		for unit in roster do
+			if UnitAffectingCombat(unit) then
+				return true
 			end
 		end
 		return false
 	end
 
 	local function GroupIterator(func, ...)
-		if IsInRaid() then
-			for i = 1, GetNumRaidMembers() do
-				LibCompat.QuickDispatch(func, format("raid%d", i), ...)
-			end
-		elseif IsInGroup() then
-			for i = 0, 4 do
-				LibCompat.QuickDispatch(func, (i == 0) and "player" or format("party%d", i), ...)
-			end
-		else
-			LibCompat.QuickDispatch(func, "player", ...)
+		roster, raid = UnitIterator()
+		for unit, owner in roster do
+			LibCompat.QuickDispatch(func, unit, owner, ...)
 		end
 	end
 
@@ -300,56 +350,45 @@ do
 	end
 
 	local function GetUnitIdFromGUID(guid)
-		local unitId
 		for i = 1, 4 do
 			if UnitExists("boss" .. i) and UnitGUID("boss" .. i) == guid then
-				unitId = "boss" .. i
-				break
+				return "boss" .. i
 			end
 		end
 
-		if not unitId then
-			if UnitExists("target") and UnitGUID("target") == guid then
-				unitId = "target"
-			elseif UnitExists("focus") and UnitGUID("focus") == guid then
-				unitId = "focus"
-			elseif UnitExists("targettarget") and UnitGUID("targettarget") == guid then
-				unitId = "targettarget"
-			elseif UnitExists("focustarget") and UnitGUID("focustarget") == guid then
-				unitId = "focustarget"
-			elseif UnitExists("mouseover") and UnitGUID("mouseover") == guid then
-				unitId = "mouseover"
+		if UnitExists("target") and UnitGUID("target") == guid then
+			return "target"
+		elseif UnitExists("focus") and UnitGUID("focus") == guid then
+			return "focus"
+		elseif UnitExists("targettarget") and UnitGUID("targettarget") == guid then
+			return "targettarget"
+		elseif UnitExists("focustarget") and UnitGUID("focustarget") == guid then
+			return "focustarget"
+		elseif UnitExists("mouseover") and UnitGUID("mouseover") == guid then
+			return "mouseover"
+		end
+
+		roster, raid = UnitIterator()
+		for unit in roster do
+			if UnitGUID(unit) == guid then
+				return unit
+			elseif UnitExists(unit .. "target") and UnitGUID(unit .. "target") == guid then
+				return unit .. "target"
 			end
 		end
-
-		if not unitId then
-			GroupIterator(function(unit)
-				if unitId then
-					return
-				elseif UnitExists(unit) and UnitGUID(unit) == guid then
-					unitId = unit
-				elseif UnitExists(unit .. "pet") and UnitGUID(unit .. "pet") == guid then
-					unitId = unit .. "pet"
-				elseif UnitExists(unit .. "target") and UnitGUID(unit .. "target") == guid then
-					unitId = unit .. "target"
-				elseif UnitExists(unit .. "pettarget") and UnitGUID(unit .. "pettarget") == guid then
-					unitId = unit .. "pettarget"
-				end
-			end)
-		end
-
-		return unitId
 	end
 
 	local function GetClassFromGUID(guid)
 		local unit = GetUnitIdFromGUID(guid)
+		local class
 		if unit and unit:find("pet") then
-			return "PET", unit
+			class = "PET"
+		elseif unit and unit:find("boss") then
+			class = "BOSS"
+		elseif unit then
+			class = select(2, UnitClass(unit))
 		end
-		if UnitExists(unit) then
-			return select(2, UnitClass(unit)), unit
-		end
-		return nil, unit
+		return class, unit
 	end
 
 	local function GetCreatureId(guid)
@@ -361,39 +400,27 @@ do
 	end
 
 	local function UnitHealthInfo(unit, guid)
-		local health, maxhealth
+		unit = unit or guid and GetUnitIdFromGUID(guid)
+		local percent, health, maxhealth
 		if unit and UnitExists(unit) then
 			health, maxhealth = UnitHealth(unit), UnitHealthMax(unit)
-		end
-
-		if not health and guid then
-			unit = GetUnitIdFromGUID(guid)
-			if unit then
-				health, maxhealth = UnitHealth(unit), UnitHealthMax(unit)
+			if health and maxhealth then
+				percent = 100 * health / max(1, maxhealth), health, maxhealth
 			end
 		end
-
-		if health and maxhealth then
-			return floor(100 * health / maxhealth), health, maxhealth
-		end
+		return percent, health, maxhealth
 	end
 
 	local function UnitPowerInfo(unit, guid, powerType)
-		local power, maxpower
+		unit = unit or guid and GetUnitIdFromGUID(guid)
+		local percent, power, maxpower
 		if unit and UnitExists(unit) then
 			power, maxpower = UnitPower(unit, powerType), UnitPowerMax(unit, powerType)
-		end
-
-		if not power and guid then
-			unit = GetUnitIdFromGUID(guid)
-			if unit then
-				power, maxpower = UnitPower(unit, powerType), UnitPowerMax(unit, powerType)
+			if power and maxpower then
+				percent = 100 * power / max(1, maxpower), power, maxpower
 			end
 		end
-
-		if power and maxpower then
-			return floor(100 * power / maxpower), power, maxpower
-		end
+		return percent, power, maxpower
 	end
 
 	LibCompat.IsInRaid = IsInRaid
@@ -406,6 +433,7 @@ do
 	LibCompat.IsGroupDead = IsGroupDead
 	LibCompat.IsGroupInCombat = IsGroupInCombat
 	LibCompat.GroupIterator = GroupIterator
+	LibCompat.UnitIterator = UnitIterator
 	LibCompat.UnitFullName = UnitFullName
 	LibCompat.GetUnitIdFromGUID = GetUnitIdFromGUID
 	LibCompat.GetClassFromGUID = GetClassFromGUID
@@ -561,7 +589,7 @@ do
 
 	LibCompat.CancelAllTimers = function()
 		for i = 1, #waitTable do
-			if waitTable[i] and not waitTable[i]._cancelled then
+			if waitTable[i] and waitTable[i].Cancel and not waitTable[i]._cancelled then
 				waitTable[i]:Cancel()
 			end
 		end
@@ -755,6 +783,7 @@ local mixins = {
 	"IsGroupDead",
 	"IsGroupInCombat",
 	"GroupIterator",
+	"UnitIterator",
 	"UnitFullName",
 	-- unit util
 	"GetUnitIdFromGUID",

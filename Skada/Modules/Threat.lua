@@ -22,7 +22,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 			local guid = UnitGUID(unit)
 			local player = threatTable[guid]
 
-			if not player and UnitExists(unit) then
+			if not player then
 				local name = UnitName(unit)
 
 				-- is is a pet?
@@ -50,7 +50,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				threatTable[guid] = player
 			end
 
-			if player and UnitExists(player.unit) then
+			if player and player.unit then
 				local isTanking, _, threatpct, rawthreatpct, threatvalue = UnitDetailedThreatSituation(player.unit, target)
 
 				if threatvalue then
@@ -138,12 +138,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				-- Reset out max threat value.
 				maxthreat = 0
 
-				GroupIterator(function(unit)
-					add_to_threattable(unit, target, win)
-					if UnitExists(unit .. "pet") then
-						add_to_threattable(unit .. "pet", target, win)
-					end
-				end)
+				GroupIterator(function(unit) add_to_threattable(unit, target, win) end)
 
 				-- If we are going by raw threat we got the max threat from above; otherwise it's always 100.
 				if not self.db.rawvalue then

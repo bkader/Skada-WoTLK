@@ -27,6 +27,8 @@ local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAf
 local UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected
 local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
+local GetGroupTypeAndCount, GetNumGroupMembers = Skada.GetGroupTypeAndCount, Skada.GetNumGroupMembers
+local UnitIterator, IsGroupInCombat, IsGroupDead = Skada.UnitIterator, Skada.IsGroupInCombat, Skada.IsGroupDead
 
 local dataobj = LDB:NewDataObject("Skada", {
 	label = "Skada",
@@ -1587,16 +1589,10 @@ do
 	end
 
 	local function GetPetOwnerUnit(guid)
-		local prefix, min_member, max_member = Skada.GetGroupTypeAndCount()
-		if prefix then
-			for i = min_member, max_member do
-				local unit = (i == 0) and "player" or format("%s%d", prefix, i)
-				if UnitExists(unit .. "pet") and UnitGUID(unit .. "pet") == guid then
-					return unit
-				end
+		for unit, owner in UnitIterator() do
+			if owner ~= nil and UnitGUID(unit) == guid then
+				return owner
 			end
-		elseif UnitGUID("playerpet") == guid then
-			return "player"
 		end
 	end
 
@@ -2083,16 +2079,14 @@ end
 -------------------------------------------------------------------------------
 
 function Skada:CheckGroup()
-	self.GroupIterator(function(unit)
-		local unitGUID = UnitGUID(unit)
-		if unitGUID then
-			players[unitGUID] = unit
-			local petGUID = UnitGUID(unit .. "pet")
-			if petGUID and not pets[petGUID] then
-				self:AssignPet(unitGUID, UnitName(unit), petGUID)
-			end
+	for unit, owner in UnitIterator() do
+		local guid = UnitGUID(unit)
+		if guid and owner == nil then
+			players[guid] = unit
+		elseif guid and owner then
+			self:AssignPet(UnitGUID(owner), UnitName(owner), guid)
 		end
-	end)
+	end
 end
 
 function Skada:ZoneCheck()
@@ -2189,7 +2183,7 @@ do
 		self:CheckGroup()
 
 		-- version check
-		local t, _, count = self.GetGroupTypeAndCount()
+		local t, _, count = GetGroupTypeAndCount()
 		if t == "party" then
 			count = count + 1
 		end
@@ -3151,8 +3145,8 @@ function Skada:OnEnable()
 		self.modulelist = nil
 	end
 
-	self.After(2, Skada.ApplySettings)
-	self.After(3, Skada.MemoryCheck)
+	self.After(2, self.ApplySettings)
+	self.After(3, self.MemoryCheck)
 
 	if _G.BigWigs then
 		self:RegisterMessage("BigWigs_Message", "BigWigs")
@@ -3244,7 +3238,7 @@ do
 		if target == self.myName then return end
 
 		if not channel then
-			local t = self.GetGroupTypeAndCount()
+			local t = GetGroupTypeAndCount()
 			if t == nil then
 				return -- with whom you want to sync man!
 			elseif t == "raid" then
@@ -3368,7 +3362,7 @@ function Skada:EndSegment()
 		win:Wipe()
 		self.changed = true
 
-		if win.db.wipemode ~= "" and self.IsGroupDead() then
+		if win.db.wipemode ~= "" and IsGroupDead() then
 			win:RestoreView("current", win.db.wipemode)
 		elseif win.db.returnaftercombat and win.restore_mode and win.restore_set then
 			if win.restore_set ~= win.selectedset or win.restore_mode ~= win.selectedmode then
@@ -3427,7 +3421,7 @@ do
 
 	function Skada:Tick()
 		self.callbacks:Fire("COMBAT_PLAYER_TICK", self.current, self.total)
-		if not disabled and self.current and not InCombatLockdown() and not self.IsGroupInCombat() then
+		if not disabled and self.current and not InCombatLockdown() and not IsGroupInCombat() then
 			self:Debug("EndSegment: Tick")
 			self:EndSegment()
 		end
@@ -3435,7 +3429,7 @@ do
 
 	function Skada:StartCombat()
 		deathcounter = 0
-		startingmembers = select(3, self.GetGroupTypeAndCount())
+		startingmembers = GetNumGroupMembers()
 
 		if tentativehandle and not tentativehandle._cancelled then
 			tentativehandle:Cancel()
@@ -3567,7 +3561,7 @@ do
 				-- If we reached the treshold for stopping the segment, do so.
 				if deathcounter > 0 and deathcounter / startingmembers >= 0.5 and not self.current.stopped then
 					self.callbacks:Fire("COMBAT_PLAYER_WIPE", self.current)
-					self:Print("Stopping for wipe.")
+					self:Print(L["Stopping for wipe."])
 					self:StopSegment()
 				end
 			elseif eventtype == "SPELL_RESURRECT" and ((band(srcFlags, BITMASK_GROUP) ~= 0 and band(srcFlags, BITMASK_PETS) == 0) or players[srcGUID]) then

@@ -13,6 +13,7 @@ L["Enable"] = true
 L["ENABLED"] = true
 L["Disable"] = true
 L["DISABLED"] = true
+L["Stopping for wipe."] = true
 -- common lines
 L["More Details"] = true
 L["Active Time"] = true
@@ -634,11 +635,6 @@ L["Name display"] = true
 L["Choose how names are shown on your bars."] = true
 L["Clear Cache"] = true
 L["Are you sure you want clear cached nicknames?"] = true
--- player score module lines --
-L["Player Score"] = true
-L["Raid Score"] = true
-L["Score"] = true
-L["%s's Score"] = true
 -- damage mitigated lines --
 L["Damage Mitigated"] = true
 L["%s's mitigated damage"] = true

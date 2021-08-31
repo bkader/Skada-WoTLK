@@ -68,8 +68,8 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 		if event == "COMBAT_PLAYER_ENTER" then
 			prepotion = newTable()
 
-			GroupIterator(function(unit)
-				if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
+			GroupIterator(function(unit, owner)
+				if owner == nil and not UnitIsDeadOrGhost(unit) then
 					local playerid, playername = UnitGUID(unit), UnitName(unit)
 					local class = select(2, UnitClass(unit))
 

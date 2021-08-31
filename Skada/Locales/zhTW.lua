@@ -13,6 +13,7 @@ L["Enable"] = "啟用"
 L["ENABLED"] = "啟用"
 L["Disable"] = "停用"
 L["DISABLED"] = "停用"
+L["Stopping for wipe."] = "因擦拭而停止。"
 -- common lines
 L["More Details"] = "更多細節"
 L["Active Time"] = "活躍時間"
@@ -632,11 +633,6 @@ L["When enabled, nicknames set by Skada users are ignored."] = "如果启用，�
 -- L["Choose how names are shown on your bars."] = ""
 L["Clear Cache"] = "Clear Cache"
 L["Are you sure you want clear cached nicknames?"] = "您确定要清除缓存的昵称吗？"
--- player score module lines --
--- L["Player Score"] = ""
--- L["Raid Score"] = ""
--- L["Score"] = ""
--- L["%s's Score"] = ""
 -- damage mitigated lines --
 -- L["Damage Mitigated"] = ""
 -- L["%s's mitigated damage"] = ""

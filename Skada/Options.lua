@@ -143,7 +143,6 @@ Skada.defaults = {
 			["Improvement"] = true,
 			["Overhealing"] = true,
 			["Overkill"] = true,
-			["Player Score"] = true,
 			["Spamage"] = true,
 			["Themes"] = true,
 			["Useful Damage"] = true

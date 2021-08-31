@@ -100,7 +100,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
 
 	local instanceDiff, customUnitsTable, customUnitsInfo
-	local GroupIterator, GetCreatureId = Skada.GroupIterator, Skada.GetCreatureId
+	local UnitIterator, GetCreatureId = Skada.UnitIterator, Skada.GetCreatureId
 	local UnitHealthInfo, UnitPowerInfo = Skada.UnitHealthInfo, Skada.UnitPowerInfo
 	local UnitExists, UnitGUID = UnitExists, UnitGUID
 	local UnitHealthMax, UnitPowerMax = UnitHealthMax, UnitPowerMax
@@ -173,29 +173,26 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 		return instanceDiff
 	end
 
-	local function CustomUnitsMaxValue(id, guid, tbl)
+	local function CustomUnitsMaxValue(id, guid, unit)
 		if id and customUnitsInfo and customUnitsInfo[id] then
 			return customUnitsInfo[id]
 		end
 
 		local maxval
-		GroupIterator(function(unit)
-			if maxval then
-				return -- a single player is enough
-			elseif UnitExists(unit .. "target") and UnitGUID(unit .. "target") == guid then
-				maxval = tbl.power and UnitPowerMax(unit .. "target", tbl.power) or UnitHealthMax(unit .. "target")
-			elseif UnitExists(unit .. "pettarget") and UnitGUID(unit .. "pettarget") == guid then
-				maxval = tbl.power and UnitPowerMax(unit .. "pettarget", tbl.power) or UnitHealthMax(unit .. "pettarget")
+		for uid in UnitIterator() do
+			if UnitExists(uid .. "target") and UnitGUID(uid .. "target") == guid then
+				maxval = (unit.power ~= nil) and UnitPowerMax(uid .. "target", unit.power) or UnitHealthMax(uid .. "target")
+				break
 			end
-		end)
+		end
 
-		if not maxval and tbl.values then
-			maxval = tbl.values[GetRaidDiff()]
+		if not maxval and unit.values then
+			maxval = unit.values[GetRaidDiff()]
 		end
 
 		if not maxval then
-			if tbl.power ~= nil then
-				maxval = select(3, UnitPowerInfo(nil, guid, tbl.power))
+			if unit.power ~= nil then
+				maxval = select(3, UnitPowerInfo(nil, guid, unit.power))
 			else
 				maxval = select(3, UnitHealthInfo(nil, guid))
 			end
@@ -224,19 +221,28 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 				return false
 			end
 
+			-- get the unit max value.
 			local maxval = CustomUnitsMaxValue(id, guid, unit)
 			if not maxval then
 				customUnitsTable[guid] = -1
 				return false
-			else
-				curval = maxval - amount - overkill
+			end
+
+			-- calculate the current value and the point where to stop.
+			local curval = maxval - amount - overkill
+			local minval = floor(maxval * (unit.stop or 0))
+
+			-- ignore units below minimum required.
+			if curval <= minval then
+				customUnitsTable[guid] = -1
+				return false
 			end
 
 			customUnitsTable[guid] = {
 				name = unit.name or format(unit.text or L["%s below %s%%"], name or UNKNOWN, (unit.start or 1) * 100),
 				guid = guid,
 				curval = curval,
-				minval = floor(maxval * (unit.stop or 0)),
+				minval = minval,
 				maxval = floor(maxval * (unit.start or 1)),
 				full = maxval,
 				useful = unit.useful

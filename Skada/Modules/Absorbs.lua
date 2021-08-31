@@ -460,7 +460,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 			if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped then
 				local curtime = GetTime()
 				GroupIterator(function(unit)
-					if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
+					if not UnitIsDeadOrGhost(unit) then
 						local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
 						for i = 1, 40 do
 							local expires, unitCaster, _, _, spellid = select(7, UnitBuff(unit, i))

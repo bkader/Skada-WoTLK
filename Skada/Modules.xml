@@ -29,7 +29,6 @@
 <Script file="Modules\Failbot.lua" />
 <Script file="Modules\Interrupts.lua" />
 <Script file="Modules\Parry.lua" />
-<Script file="Modules\PlayerScore.lua" />
 <Script file="Modules\Potions.lua" />
 <Script file="Modules\Resurrects.lua" />
 <Script file="Modules\Threat.lua" />
