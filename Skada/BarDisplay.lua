@@ -202,6 +202,7 @@ function mod:Create(window)
 		classicontcoords.PET = {0.25, 0.5, 0.75, 1}
 		classicontcoords.PLAYER = {0.75, 1, 0.75, 1}
 		classicontcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
+		classicontcoords.AGGRO = {0.75, 1, 0.75, 1}
 
 		-- role icon file and texture coordinates
 		roleiconfile = [[Interface\LFGFrame\UI-LFG-ICON-PORTRAITROLES]]

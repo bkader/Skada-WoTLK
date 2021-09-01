@@ -2330,7 +2330,7 @@ function Skada:UpdateDisplay(force)
 						d.icon = dataobj.icon
 						d.ignore = true
 						d.value = total
-						d.valuetext = win.selectedmode:GetSetSummary(set)
+						d.valuetext = valuetext
 						if not existing then tinsert(win.dataset, 1, d) end
 						self.callbacks:Fire("SKADA_MODE_BAR", d, win.selectedmode)
 					end
@@ -3111,6 +3111,7 @@ function Skada:OnInitialize()
 	self.classnames.PLAYER = PLAYER
 	self.classnames.PET = PET
 	self.classnames.UNKNOWN = UNKNOWN
+	self.classnames.AGGRO = L["> Pull Aggro <"]
 
 	-- class colors
 	self.classcolors = self.GetClassColorsTable()
@@ -3121,6 +3122,7 @@ function Skada:OnInitialize()
 	self.classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
 	self.classcolors.PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"}
 	self.classcolors.UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
+	self.classcolors.AGGRO = {r = 0.95, g = 0, b = 0.02, colorStr = "fff00005"}
 end
 
 function Skada:OnEnable()
@@ -3181,7 +3183,7 @@ end
 
 function Skada:DBM(_, mod, wipe)
 	if not wipe and mod and mod.combatInfo and self.current and self.current.gotboss then
-		if mod.combatInfo.name == self.current.mobname then
+		if mod.combatInfo.name and mod.combatInfo.name:find(self.current.mobname) ~= nil then
 			self:Debug("COMBAT_BOSS_DEFEATED: DBM")
 			self.current.success = true
 			self.callbacks:Fire("COMBAT_BOSS_DEFEATED", self.current)
