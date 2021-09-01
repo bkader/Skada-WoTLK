@@ -3150,10 +3150,10 @@ function Skada:OnEnable()
 
 	if _G.BigWigs then
 		self:RegisterMessage("BigWigs_Message", "BigWigs")
-		self.bossmod = true
+		self.bossmod = "BigWigs"
 	elseif _G.DBM and _G.DBM.EndCombat then
 		self:SecureHook(DBM, "EndCombat", "DBM")
-		self.bossmod = true
+		self.bossmod = "DBM"
 	elseif self.bossmod then
 		self.bossmod = nil
 	end
@@ -3169,19 +3169,23 @@ function Skada:OnEnable()
 	version_timer = self.NewTimer(10, checkVersion)
 end
 
-function Skada:BigWigs(_, _, event)
-	if event == "bosskill" and self.current and self.current.gotboss then
-		self:Debug("COMBAT_BOSS_DEFEATED: BigWigs")
-		self.current.success = true
-		self.callbacks:Fire("COMBAT_BOSS_DEFEATED", self.current)
+function Skada:BigWigs(_, _, event, message)
+	if event == "bosskill" and message and self.current and self.current.gotboss then
+		if message:find(self.current.mobname) ~= nil then
+			self:Debug("COMBAT_BOSS_DEFEATED: BigWigs")
+			self.current.success = true
+			self.callbacks:Fire("COMBAT_BOSS_DEFEATED", self.current)
+		end
 	end
 end
 
 function Skada:DBM(_, mod, wipe)
-	if self.current and self.current.gotboss and not wipe and (mod and mod.combatInfo) then
-		self:Debug("COMBAT_BOSS_DEFEATED: DBM")
-		self.current.success = true
-		self.callbacks:Fire("COMBAT_BOSS_DEFEATED", self.current)
+	if not wipe and mod and mod.combatInfo and self.current and self.current.gotboss then
+		if mod.combatInfo.name == self.current.mobname then
+			self:Debug("COMBAT_BOSS_DEFEATED: DBM")
+			self.current.success = true
+			self.callbacks:Fire("COMBAT_BOSS_DEFEATED", self.current)
+		end
 	end
 end
 
@@ -3632,10 +3636,10 @@ do
 
 		if self.current and src_is_interesting and not self.current.gotboss then
 			if band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
-				local isboss, _, bossname = self:IsBoss(dstGUID)
+				local isboss, bossid, bossname = self:IsBoss(dstGUID)
 				if not self.current.gotboss and isboss then
 					self.current.mobname = bossname or dstName
-					self.current.gotboss = true
+					self.current.gotboss = bossid or true
 					if self.db.profile.alwayskeepbosses then
 						self.current.keep = true
 					end
