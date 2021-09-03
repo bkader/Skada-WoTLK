@@ -227,7 +227,6 @@ function mod:Wipe(win)
 		win.bargroup:SetBarOffset(0)
 
 		for _, bar in win.bargroup:IterateBars() do
-			bar:Hide()
 			win.bargroup:RemoveBar(bar)
 		end
 
@@ -571,7 +570,6 @@ do
 				local bar = win.bargroup:GetBar(data.id)
 
 				if bar and bar.missingclass and data.class and not data.ignore then
-					bar:Hide()
 					win.bargroup:RemoveBar(bar)
 					bar.missingclass = nil
 					bar = nil

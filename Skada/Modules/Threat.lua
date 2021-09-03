@@ -190,6 +190,8 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 								format("%.1f%%", 100 * data.value / max(0.000001, maxthreat)),
 								self.metadata.columns.Percent
 							)
+
+							win.metadata.maxvalue = self.db.rawvalue and data.threat or data.value
 						else
 							data.id = nil
 						end
