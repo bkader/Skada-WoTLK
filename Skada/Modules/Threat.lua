@@ -167,7 +167,9 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				-- reset stuff & check group
 				maxthreat, nr = 0, 1
 				GroupIterator(function(unit) add_to_threattable(unit, target, win) end)
-				add_to_threattable("AGGRO", target, win)
+				if maxthreat > 0 then
+					add_to_threattable("AGGRO", target, win)
+				end
 
 				-- If we are going by raw threat we got the max threat from above; otherwise it's always 100.
 				if not self.db.rawvalue then
