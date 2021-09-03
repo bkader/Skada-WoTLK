@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0", 11
+local MAJOR, MINOR = "LibCompat-1.0", 12
 
 local LibCompat, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not LibCompat then return end
@@ -343,12 +343,6 @@ do
 		end
 	end
 
-	local function UnitFullName(unit)
-		local name, realm = UnitName(unit)
-		local namerealm = realm and realm ~= "" and name .. "-" .. realm or name
-		return namerealm
-	end
-
 	local function GetUnitIdFromGUID(guid)
 		for i = 1, 4 do
 			if UnitExists("boss" .. i) and UnitGUID("boss" .. i) == guid then
@@ -423,6 +417,12 @@ do
 		return percent, power, maxpower
 	end
 
+	local function UnitFullName(unit)
+		local name, realm = UnitName(unit)
+		local namerealm = realm and realm ~= "" and name .. "-" .. realm or name
+		return namerealm
+	end
+
 	LibCompat.IsInRaid = IsInRaid
 	LibCompat.IsInParty = IsInParty
 	LibCompat.IsInGroup = IsInGroup
@@ -434,14 +434,14 @@ do
 	LibCompat.IsGroupInCombat = IsGroupInCombat
 	LibCompat.GroupIterator = GroupIterator
 	LibCompat.UnitIterator = UnitIterator
-	LibCompat.UnitFullName = UnitFullName
 	LibCompat.GetUnitIdFromGUID = GetUnitIdFromGUID
 	LibCompat.GetClassFromGUID = GetClassFromGUID
 	LibCompat.GetCreatureId = GetCreatureId
 	LibCompat.GetUnitCreatureId = GetUnitCreatureId
 	LibCompat.UnitHealthInfo = UnitHealthInfo
-	LibCompat.UnitHealthPercent = UnitHealthInfo -- backwards compatibility
+	LibCompat.UnitHealthPercent = UnitHealthInfo -- backward compatibility
 	LibCompat.UnitPowerInfo = UnitPowerInfo
+	LibCompat.UnitFullName = UnitFullName
 end
 
 -------------------------------------------------------------------------------
@@ -689,13 +689,13 @@ do
 	}
 
 	-- checks if the feral druid is a cat or tank spec
-	local function GetDruidSubSpec(unit)
+	local function GetDruidSpec(unit)
 		-- 57881 : Natural Reaction -- used by druid tanks
 		local points = LGT:UnitHasTalent(unit, LibCompat.GetSpellInfo(57881), LGT:GetActiveTalentGroup(unit))
 		return (points and points > 0) and 3 or 2
 	end
 
-	local function GetSpecialization(unit, class)
+	local function GetUnitSpec(unit, class)
 		unit = unit or "player"
 		class = class or select(2, UnitClass(unit))
 
@@ -714,7 +714,7 @@ do
 							if i == 3 then
 								index = 4
 							elseif i == 2 then
-								index = GetDruidSubSpec(unit)
+								index = GetDruidSpec(unit)
 							end
 						else
 							index = i
@@ -748,7 +748,8 @@ do
 		return GetTrueRole(LGT:GetGUIDRole(guid)) or "NONE"
 	end
 
-	LibCompat.GetSpecialization = GetSpecialization
+	LibCompat.GetUnitSpec = GetUnitSpec
+	LibCompat.GetSpecialization = GetUnitSpec -- backward compatibility
 	LibCompat.GetUnitRole = GetUnitRole
 	LibCompat.GetGUIDRole = GetGUIDRole
 end
@@ -791,11 +792,12 @@ local mixins = {
 	"GetCreatureId",
 	"GetUnitCreatureId",
 	"UnitHealthInfo",
-	"UnitHealthPercent",
+	"UnitHealthPercent", -- backward compatibility
 	"UnitPowerInfo",
 	"UnitIsGroupLeader",
 	"UnitIsGroupAssistant",
-	"GetSpecialization",
+	"GetUnitSpec",
+	"GetSpecialization", -- backward compatibility
 	"GetUnitRole",
 	"GetGUIDRole",
 	-- timer unit

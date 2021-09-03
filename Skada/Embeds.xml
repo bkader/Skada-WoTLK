@@ -23,9 +23,8 @@
 <Include file="Libs\LibBabble-Boss-3.0\lib.xml"/>
 <Script file="Libs\LibBossIDs-1.0\LibBossIDs-1.0.lua"/>
 <Script file="Libs\LibFail-1.0\LibFail-1.0.lua"/>
-<Include file="Libs\LibGroupTalents-1.0\lib.xml"/>
 <Script file="Libs\LibFlyPaper-1.1\LibFlyPaper-1.1.lua"/>
 <Include file="Libs\LibUIDropDownMenu\LibUIDropDownMenu.xml"/>
 <Script file="Libs\LibSink-2.0\LibSink-2.0.lua"/>
-<Script file="Libs\LibCompat-1.0\LibCompat-1.0.lua"/>
+<Include file="Libs\LibCompat-1.0\lib.xml"/>
 </Ui>

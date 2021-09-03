@@ -27,6 +27,7 @@ local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAf
 local UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected
 local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
+local GetGUIDRole, GetUnitSpec = Skada.GetGUIDRole, Skada.GetUnitSpec
 local GetGroupTypeAndCount, GetNumGroupMembers = Skada.GetGroupTypeAndCount, Skada.GetNumGroupMembers
 local UnitIterator, IsGroupInCombat, IsGroupDead = Skada.UnitIterator, Skada.IsGroupInCombat, Skada.IsGroupDead
 
@@ -1355,10 +1356,10 @@ do
 			-- we make sure to assign his/her role and spec
 			if Skada.validclass[player.class] and not (player.role or player.spec) then
 				if not player.role then
-					player.role = Skada.GetGUIDRole(player.id)
+					player.role = GetGUIDRole(player.id)
 				end
 				if not player.spec then
-					player.spec = Skada.GetSpecialization(player.name, player.class)
+					player.spec = GetUnitSpec(player.name, player.class)
 				end
 			end
 		end

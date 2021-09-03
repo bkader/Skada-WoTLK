@@ -10,7 +10,7 @@ if not lib then
 	return
 end -- No Upgrade needed.
 
-local CallbackHandler = LibStub:GetLibrary("CallbackHandler-1.0")
+local CallbackHandler = LibStub("CallbackHandler-1.0")
 
 local GetTime = _G.GetTime
 local sin, cos, rad = _G.math.sin, _G.math.cos, _G.math.rad
