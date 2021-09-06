@@ -7,6 +7,22 @@ local pairs, ipairs, select = pairs, ipairs, select
 -- list of miss types
 local misstypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}
 
+-- common functions
+local function getDPS(set, player, useful)
+	local amount = player.damage or 0
+	if useful and (player.overkill or 0) > 0 then
+		amount = max(0, amount - player.overkill)
+	end
+	return amount / max(1, Skada:PlayerActiveTime(set, player)), amount
+end
+
+local function getRaidDPS(set, useful)
+	local amount = set.damage or 0
+	if useful and (set.overkill or 0) > 0 then
+		amount = max(0, amount - set.overkill)
+	end
+	return amount / max(1, Skada:GetSetTime(set)), amount
+end
 -- ================== --
 -- Damage Done Module --
 -- ================== --
@@ -155,7 +171,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		set.overkill = (set.overkill or 0) + overkill
 
 		-- saving this to total set may become a memory hog deluxe.
-		if set == Skada.current and dmg.dstName and dmg.amount > 0 then
+		if set == Skada.current and dmg.dstName then
 			spell.targets = spell.targets or {}
 			if not spell.targets[dmg.dstName] then
 				spell.targets[dmg.dstName] = {amount = dmg.amount, overkill = overkill}
@@ -169,7 +185,6 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 				player.damage_targets[dmg.dstName] = {amount = dmg.amount, overkill = overkill}
 			else
 				player.damage_targets[dmg.dstName].amount = player.damage_targets[dmg.dstName].amount + dmg.amount
-				player.damage_targets[dmg.dstName].overkill = player.damage_targets[dmg.dstName].overkill + overkill
 			end
 		end
 	end
@@ -253,17 +268,6 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	local function SwingMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, MELEE, 1, ...)
 	end
-
-	local function getDPS(set, player)
-		local amount = player.damage or 0
-		return amount / max(1, Skada:PlayerActiveTime(set, player)), amount
-	end
-	mod.getDPS = getDPS
-
-	local function getRaidDPS(set)
-		return (set.damage or 0) / max(1, Skada:GetSetTime(set)), (set.damage or 0)
-	end
-	mod.getRaidDPS = getRaidDPS
 
 	local function damage_tooltip(win, id, label, tooltip)
 		local set = win:get_selected_set()
@@ -579,7 +583,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
 	function mod:Update(win, set)
 		win.title = L["Damage"]
-		local total = set.damage or 0
+		local total = select(2, getRaidDPS(set))
 
 		if total > 0 then
 			local maxvalue, nr = 0, 1
@@ -708,11 +712,7 @@ end)
 Skada:AddLoadableModule("DPS", function(Skada, L)
 	if Skada:IsDisabled("Damage", "DPS") then return end
 
-	local parentmod = Skada:GetModule(L["Damage"], true)
-
 	local mod = Skada:NewModule(L["DPS"])
-	local getDPS = parentmod.getDPS
-	local getRaidDPS = parentmod.getRaidDPS
 
 	local function dps_tooltip(win, id, label, tooltip)
 		local set = win:get_selected_set()
@@ -773,12 +773,16 @@ Skada:AddLoadableModule("DPS", function(Skada, L)
 		self.metadata = {
 			showspots = true,
 			tooltip = dps_tooltip,
-			click1 = parentmod.metadata.click1,
-			click2 = parentmod.metadata.click2,
-			nototalclick = {parentmod.metadata.click2},
 			columns = {DPS = true, Percent = true},
 			icon = "Interface\\Icons\\inv_misc_pocketwatch_01"
 		}
+
+		local parentmod = Skada:GetModule(L["Damage"], true)
+		if parentmod then
+			self.metadata.click1 = parentmod.metadata.click1
+			self.metadata.click2 = parentmod.metadata.click2
+			self.metadata.nototalclick = parentmod.metadata.nototalclick
+		end
 
 		Skada:AddMode(self, L["Damage Done"])
 	end
@@ -953,16 +957,6 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 	local detailmod = targetmod:NewModule(L["More Details"])
 	local UnitClass = Skada.UnitClass
 
-	local function getDPS(set, player)
-		local amount = max(0, (player.damage or 0) - (player.overkill or 0))
-		return amount / max(1, Skada:PlayerActiveTime(set, player)), amount
-	end
-
-	local function getRaidDPS(set)
-		local amount = max(0, (set.damage or 0) - (set.overkill or 0))
-		return amount / max(1, Skada:GetSetTime(set)), amount
-	end
-
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
 		win.title = format(L["%s's damage"], label)
@@ -973,7 +967,7 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 
 		if player then
 			win.title = format(L["%s's damage"], player.name)
-			local total = select(2, getDPS(set, player))
+			local total = select(2, getDPS(set, player, true))
 
 			if total > 0 and player.damage_spells then
 				local maxvalue, nr = 0, 1
@@ -1016,7 +1010,7 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 		local player = Skada:find_player(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's targets"], player.name)
-			local total = select(2, getDPS(set, player))
+			local total = select(2, getDPS(set, player, true))
 
 			if total > 0 then
 				local maxvalue, nr = 0, 1
@@ -1154,13 +1148,13 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 
 	function mod:Update(win, set)
 		win.title = L["Useful Damage"]
-		local total = select(2, getRaidDPS(set))
+		local total = select(2, getRaidDPS(set, true))
 
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
 			for _, player in Skada:IteratePlayers(set) do
-				local dps, amount = getDPS(set, player)
+				local dps, amount = getDPS(set, player, true)
 
 				if amount > 0 then
 					local d = win.dataset[nr] or {}
@@ -1213,7 +1207,7 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		local dps, value = getRaidDPS(set)
+		local dps, value = getRaidDPS(set, true)
 		return Skada:FormatValueText(
 			Skada:FormatNumber(value),
 			self.metadata.columns.Damage,
