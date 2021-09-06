@@ -1395,7 +1395,7 @@ do
 		end
 
 		-- not all modules provide playerflags
-		if playerflags and not (player.flags or player.flags == playerflags) then
+		if player.flags == nil and playerflags then
 			player.flags = playerflags
 		end
 
@@ -1554,12 +1554,37 @@ do
 		local pettooltip = CreateFrame("GameTooltip", "SkadaPetTooltip", nil, "GameTooltipTemplate")
 		local GetNumDeclensionSets, DeclineName = GetNumDeclensionSets, DeclineName
 
+		local ValidatePetOwner
+		do
+			local ownerPatterns = {}
+			do
+				local i = 1
+				local title = _G["UNITNAME_SUMMON_TITLE" .. i]
+				while (title and title ~= "%s" and title:find("%s")) do
+					local pattern = title:gsub("%%s", "(.-)")
+					tinsert(ownerPatterns, pattern)
+					i = i + 1
+					title = _G["UNITNAME_SUMMON_TITLE" .. i]
+				end
+			end
+
+			function ValidatePetOwner(text, name)
+				for _, pattern in ipairs(ownerPatterns) do
+					local owner = text:match(pattern)
+					if owner and owner == name then
+						return true
+					end
+				end
+				return false
+			end
+		end
+
 		-- attempts to find the player guid on Russian clients.
 		local function FindNameDeclension(text, playername)
 			for gender = 2, 3 do
 				for decset = 1, GetNumDeclensionSets(playername, gender) do
 					local ownerName = DeclineName(playername, gender, decset)
-					if text:find(ownerName) then
+					if ValidatePetOwner(text, ownerName) or text:find(ownerName) then
 						return true
 					end
 				end
@@ -1579,7 +1604,7 @@ do
 					if text and text ~= "" then
 						for _, p in Skada:IteratePlayers(Skada.total) do
 							local playername = p.name:gsub("%-.*", "")
-							if (Skada.locale == "ruRU" and FindNameDeclension(text, playername)) or text:find(playername) then
+							if (Skada.locale == "ruRU" and FindNameDeclension(text, playername)) or ValidatePetOwner(text, playername) then
 								return p.id, p.name
 							end
 						end
@@ -2238,7 +2263,7 @@ function Skada:Reset(force)
 	end
 
 	self:Wipe()
-	players, pets = {}, {}
+	players, pets = wipe(players or{}), wipe(pets or{})
 	self:CheckGroup()
 
 	if self.current ~= nil then
