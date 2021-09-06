@@ -402,31 +402,31 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 					type = "toggle",
 					name = L["First hit"],
 					desc = L["Prints a message of the first hit before combat.\nOnly works for boss encounters."],
-					order = 1
+					order = 10
 				},
 				moduleicons = {
 					type = "toggle",
 					name = L["Module Icons"],
 					desc = L["Enable this if you want to show module icons on windows and menus."],
-					order = 2
+					order = 20
 				},
 				spamage = {
 					type = "toggle",
 					name = L["Filter DPS meters Spam"],
 					desc = L["Suppresses chat messages from damage meters and provides single chat-link damage statistics in a popup."],
-					order = 3
+					order = 30
 				},
 				combatlogfix = {
 					type = "toggle",
 					name = L["Fix Combat Log"],
 					desc = L["Keeps the combat log from breaking without munging it completely."],
-					order = 4
+					order = 40
 				},
 				fofrostmourne = {
 					type = "toggle",
 					name = fofrostmourne,
 					desc = format(L["Enable this if you want to ignore |cffffbb00%s|r."], fofrostmourne),
-					order = 5
+					order = 50
 				},
 				smartsep = {
 					type = "description",

@@ -8,6 +8,16 @@ local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 -- list of miss types
 local misstypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}
 
+-- common functions
+local function getDTPS(set, player)
+	local amount = player.damagetaken or 0
+	return amount / max(1, Skada:PlayerActiveTime(set, player)), amount
+end
+
+local function getRaidDTPS(set)
+	return (set.damagetaken or 0) / max(1, Skada:GetSetTime(set)), (set.damagetaken or 0)
+end
+
 -- =================== --
 -- Damage Taken Module --
 -- =================== --
@@ -197,17 +207,6 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 	local function SwingMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		SpellMissed(nil, nil, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, MELEE, 1, ...)
 	end
-
-	local function getDTPS(set, player)
-		local amount = player.damagetaken or 0
-		return amount / max(1, Skada:PlayerActiveTime(set, player)), amount
-	end
-	mod.getDTPS = getDTPS
-
-	local function getRaidDTPS(set)
-		return (set.damagetaken or 0) / max(1, Skada:GetSetTime(set)), (set.damagetaken or 0)
-	end
-	mod.getRaidDTPS = getRaidDTPS
 
 	local function playermod_tooltip(win, id, label, tooltip)
 		local player = Skada:find_player(win:get_selected_set(), win.playerid)
@@ -625,10 +624,6 @@ end)
 Skada:AddLoadableModule("DTPS", function(Skada, L)
 	if Skada:IsDisabled("Damage Taken", "DTPS") then return end
 
-	local parentmod = Skada:GetModule(L["Damage Taken"], true)
-	local getDTPS = parentmod.getDTPS
-	local getRaidDTPS = parentmod.getRaidDTPS
-
 	local mod = Skada:NewModule(L["DTPS"])
 
 	function mod:Update(win, set)
@@ -674,12 +669,16 @@ Skada:AddLoadableModule("DTPS", function(Skada, L)
 	function mod:OnEnable()
 		self.metadata = {
 			showspots = true,
-			click1 = parentmod.metadata.click1,
-			click2 = parentmod.metadata.click2,
-			nototalclick = {parentmod.metadata.click2},
 			columns = {DTPS = true, Percent = true},
 			icon = "Interface\\Icons\\inv_misc_pocketwatch_02"
 		}
+
+		local parentmod = Skada:GetModule(L["Damage Taken"], true)
+		if parentmod then
+			self.metadata.click1 = parentmod.metadata.click1
+			self.metadata.click2 = parentmod.metadata.click2
+			self.metadata.nototalclick = parentmod.metadata.nototalclick
+		end
 
 		Skada:AddMode(self, L["Damage Taken"])
 	end

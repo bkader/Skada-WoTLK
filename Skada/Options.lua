@@ -558,7 +558,7 @@ Skada.options = {
 				separator1 = {
 					type = "description",
 					name = " ",
-					order = 24,
+					order = 95,
 					width = "full"
 				},
 				reportlinks = {
