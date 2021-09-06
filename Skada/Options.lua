@@ -3,7 +3,9 @@ assert(Skada, "Skada not found!")
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 local fmt = string.format
 
-Skada.resetoptions = {[1] = NO, [2] = YES, [3] = L["Ask"]}
+local windefaultscopy = {}
+local resetoptions = {[1] = NO, [2] = YES, [3] = L["Ask"]}
+local newdisplay, deletewindow = "bar"
 
 Skada.windowdefaults = {
 	name = "Skada",
@@ -89,8 +91,6 @@ Skada.windowdefaults = {
 	textcolor = {r = 0.9, g = 0.9, b = 0.9},
 	useframe = true
 }
-
-local windefaultscopy = {}
 Skada.tCopy(windefaultscopy, Skada.windowdefaults)
 
 Skada.defaults = {
@@ -200,9 +200,6 @@ function Skada:AddLoadableModuleCheckbox(mod, name, description)
 	}
 end
 
-local deletewindow = nil
-local newdisplay = "bar"
-
 Skada.options = {
 	type = "group",
 	name = fmt("Skada |cffffffff%s|r", Skada.version),
@@ -280,7 +277,7 @@ Skada.options = {
 					desc = L["Controls if data is reset when you enter an instance."],
 					order = 1,
 					width = "double",
-					values = Skada.resetoptions
+					values = resetoptions
 				},
 				join = {
 					type = "select",
@@ -288,7 +285,7 @@ Skada.options = {
 					desc = L["Controls if data is reset when you join a group."],
 					order = 2,
 					width = "double",
-					values = Skada.resetoptions
+					values = resetoptions
 				},
 				leave = {
 					type = "select",
@@ -296,7 +293,7 @@ Skada.options = {
 					desc = L["Controls if data is reset when you leave a group."],
 					order = 3,
 					width = "double",
-					values = Skada.resetoptions
+					values = resetoptions
 				},
 				sep = {
 					type = "description",
