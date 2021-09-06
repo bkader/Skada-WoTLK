@@ -1879,13 +1879,13 @@ do
 				end
 
 				if win.metadata.click1 and not ignoredTotalClick(win, win.metadata.click1) then
-					t:AddLine(L["Click for"] .. " |cff00ff00" .. win.metadata.click1:GetName() .. "|r.", 1, 0.82, 0)
+					t:AddLine(L["Click for"] .. " |cff00ff00" .. (win.metadata.click1.label or win.metadata.click1:GetName()) .. "|r.", 1, 0.82, 0)
 				end
 				if win.metadata.click2 and not ignoredTotalClick(win, win.metadata.click2) then
-					t:AddLine(L["Shift-Click for"] .. " |cff00ff00" .. win.metadata.click2:GetName() .. "|r.", 1, 0.82, 0)
+					t:AddLine(L["Shift-Click for"] .. " |cff00ff00" .. (win.metadata.click2.label or win.metadata.click2:GetName()) .. "|r.", 1, 0.82, 0)
 				end
 				if win.metadata.click3 and not ignoredTotalClick(win, win.metadata.click3) then
-					t:AddLine(L["Control-Click for"] .. " |cff00ff00" .. win.metadata.click3:GetName() .. "|r.", 1, 0.82, 0)
+					t:AddLine(L["Control-Click for"] .. " |cff00ff00" .. (win.metadata.click3.label or win.metadata.click3:GetName()) .. "|r.", 1, 0.82, 0)
 				end
 
 				t:Show()

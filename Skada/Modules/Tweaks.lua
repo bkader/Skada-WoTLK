@@ -263,21 +263,23 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 			local linktype, id = split(":", link)
 			if linktype == "SKSP" then
 				local meterid = tonumber(id)
-				ShowUIPanel(ItemRefTooltip)
-				if not ItemRefTooltip:IsShown() then
-					ItemRefTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE")
+				if meterid then
+					ShowUIPanel(ItemRefTooltip)
+					if not ItemRefTooltip:IsShown() then
+						ItemRefTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE")
+					end
+					ItemRefTooltip:ClearLines()
+					ItemRefTooltip:AddLine(meters[meterid].title)
+					ItemRefTooltip:AddLine(format(L["Reported by: %s"], meters[meterid].src))
+					ItemRefTooltip:AddLine(" ")
+					for _, line in ipairs(meters[meterid].data) do
+						ItemRefTooltip:AddLine(line, 1, 1, 1)
+					end
+					ItemRefTooltip:Show()
+					return
 				end
-				ItemRefTooltip:ClearLines()
-				ItemRefTooltip:AddLine(meters[meterid].title)
-				ItemRefTooltip:AddLine(format(L["Reported by: %s"], meters[meterid].src))
-				ItemRefTooltip:AddLine(" ")
-				for _, line in ipairs(meters[meterid].data) do
-					ItemRefTooltip:AddLine(line, 1, 1, 1)
-				end
-				ItemRefTooltip:Show()
-			else
-				return mod.hooks.SetItemRef(link, text, button, chatframe)
 			end
+			return mod.hooks.SetItemRef(link, text, button, chatframe)
 		end
 	end
 
