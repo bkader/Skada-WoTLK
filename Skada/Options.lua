@@ -114,6 +114,7 @@ Skada.defaults = {
 		alwayskeepbosses = false,
 		tentativetimer = 3,
 		tentativecombatstart = false,
+		timemesure = 2,
 		hidesolo = false,
 		hidepvp = false,
 		hidedisables = true,
@@ -125,13 +126,13 @@ Skada.defaults = {
 		feed = "",
 		showtotals = false,
 		autostop = false,
-		smartstop = false,
 		sortmodesbyusage = false,
 		updatefrequency = 0.5,
 		modules = {},
 		columns = {},
 		report = {mode = "Damage", set = "current", channel = "Say", chantype = "preset", number = 10},
 		modulesBlocked = {
+			["Absorbed Damage"] = true,
 			["Avoidance & Mitigation"] = true,
 			["Damage Done By Spell"] = true,
 			["Damage Mitigated"] = true,
@@ -143,9 +144,7 @@ Skada.defaults = {
 			["Improvement"] = true,
 			["Overhealing"] = true,
 			["Overkill"] = true,
-			["Spamage"] = true,
-			["Themes"] = true,
-			["Useful Damage"] = true
+			["Themes"] = true
 		},
 		windows = {windefaultscopy}
 	}

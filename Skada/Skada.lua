@@ -1782,7 +1782,7 @@ do
 	local white, ttwin = {r = 1, g = 1, b = 1}
 
 	function Skada:AddSubviewToTooltip(tooltip, win, mode, id, label)
-		if not mode then
+		if not (mode and mode.Update) then
 			return
 		end
 

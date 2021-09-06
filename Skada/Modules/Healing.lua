@@ -302,32 +302,30 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 
 			for _, player in Skada:IteratePlayers(set) do
 				local hps, amount = getHPS(set, player)
-				if amount > 0 then
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+				local d = win.dataset[nr] or {}
+				win.dataset[nr] = d
 
-					d.id = player.id
-					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
-					d.class = player.class
-					d.role = player.role
-					d.spec = player.spec
+				d.id = player.id
+				d.label = player.name
+				d.text = Skada:FormatName(player.name, player.id)
+				d.class = player.class
+				d.role = player.role
+				d.spec = player.spec
 
-					d.value = amount
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(d.value),
-						self.metadata.columns.Healing,
-						Skada:FormatNumber(hps),
-						self.metadata.columns.HPS,
-						format("%.1f%%", 100 * d.value / total),
-						self.metadata.columns.Percent
-					)
+				d.value = amount
+				d.valuetext = Skada:FormatValueText(
+					Skada:FormatNumber(d.value),
+					self.metadata.columns.Healing,
+					Skada:FormatNumber(hps),
+					self.metadata.columns.HPS,
+					format("%.1f%%", 100 * d.value / total),
+					self.metadata.columns.Percent
+				)
 
-					if d.value > maxvalue then
-						maxvalue = d.value
-					end
-					nr = nr + 1
+				if d.value > maxvalue then
+					maxvalue = d.value
 				end
+				nr = nr + 1
 			end
 
 			win.metadata.maxvalue = maxvalue

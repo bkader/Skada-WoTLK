@@ -560,6 +560,16 @@ function Skada:OpenMenu(window)
 				info.checked = (Skada.db.profile.tentativecombatstart == true)
 				info.isNotRadio = 1
 				UIDropDownMenu_AddButton(info, level)
+
+				info = UIDropDownMenu_CreateInfo()
+				info.text = L["Include Absorbed Damage"]
+				info.func = function()
+					Skada.db.profile.absdamage = not Skada.db.profile.absdamage
+					Skada:ApplySettings()
+				end
+				info.checked = (Skada.db.profile.absdamage == true)
+				info.isNotRadio = 1
+				UIDropDownMenu_AddButton(info, level)
 			end
 		elseif level == 3 then
 			if L_UIDROPDOWNMENU_MENU_VALUE == "modes" then

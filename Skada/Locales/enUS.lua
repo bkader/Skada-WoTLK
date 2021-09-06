@@ -493,6 +493,9 @@ L["DPS"] = true
 L["Damage: Personal DPS"] = true
 L["RDPS"] = true
 L["Damage: Raid DPS"] = true
+L["Absorbed Damage"] = true
+L["Include Absorbed Damage"] = true
+L["Enable this if you want the damage absorbed to be included in the damage done."] = true
 -- damage taken module
 L["Damage Taken"] = true
 L["Damage taken by %s"] = true
