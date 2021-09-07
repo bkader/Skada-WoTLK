@@ -27,7 +27,7 @@ local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAf
 local UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected
 local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
-local GetGUIDRole, GetUnitSpec = Skada.GetGUIDRole, Skada.GetUnitSpec
+local UnitGroupRolesAssigned, GetInspectSpecialization = Skada.UnitGroupRolesAssigned, Skada.GetInspectSpecialization
 local GetGroupTypeAndCount, GetNumGroupMembers = Skada.GetGroupTypeAndCount, Skada.GetNumGroupMembers
 local UnitIterator, IsGroupInCombat, IsGroupDead = Skada.UnitIterator, Skada.IsGroupInCombat, Skada.IsGroupDead
 
@@ -1334,8 +1334,10 @@ function Skada:find_player(set, playerid, playername, strict)
 end
 
 do
-	local function fix_player(player)
+	local function fix_player(player, unit)
 		if player.id and player.name then
+			unit = unit or Skada.GetUnitIdFromGUID(player.id)
+
 			if not player.class then
 				if Skada:IsPet(player.id, player.flags) then
 					player.class = "PET"
@@ -1344,7 +1346,7 @@ do
 				elseif Skada:IsCreature(player.id, player.flags) then
 					player.class = "MONSTER"
 				elseif Skada:IsPlayer(player.id, player.flags, player.name) then
-					local class = select(2, UnitClass(player.name))
+					local class = select(2, UnitClass(unit or player.name))
 					class = class or select(2, Skada.UnitClass(player.id, player.flags))
 					player.class = class
 				else
@@ -1356,10 +1358,10 @@ do
 			-- we make sure to assign his/her role and spec
 			if Skada.validclass[player.class] and not (player.role or player.spec) then
 				if not player.role then
-					player.role = GetGUIDRole(player.id)
+					player.role = UnitGroupRolesAssigned(unit or player.name)
 				end
 				if not player.spec then
-					player.spec = GetUnitSpec(player.name, player.class)
+					player.spec = GetInspectSpecialization(unit or player.name, player.class)
 				end
 			end
 		end
@@ -1383,7 +1385,7 @@ do
 				player.class = select(2, UnitClass(players[playerid]))
 			end
 
-			fix_player(player)
+			fix_player(player, players[playerid])
 
 			for _, mode in self:IterateModes() do
 				if mode.AddPlayerAttributes ~= nil then
@@ -1402,7 +1404,9 @@ do
 		-- fix players created before their info was received
 		if (player.name == UNKNOWN and playername ~= UNKNOWN) or (player.name == player.id and playername ~= player.id) then
 			player.name = (player.id == self.myGUID or playerid == self.myGUID) and self.myName or playername
-			player.fixtimer = player.fixtimer or self.NewTimer(3, function() fix_player(player) end)
+			if not player.fixtimer then
+				player.fixtimer = self.NewTimer(3, function() fix_player(player, players[player.id]) end)
+			end
 		elseif player.hotfix then
 			player.fixtimer:Cancel()
 			player.fixtimer = nil

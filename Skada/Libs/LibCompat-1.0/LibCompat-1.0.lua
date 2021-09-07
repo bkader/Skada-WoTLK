@@ -4,9 +4,7 @@
 -- @author: Kader B (https://github.com/bkader)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0", 12
-
-local LibCompat, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
+local LibCompat, oldminor = LibStub:NewLibrary("LibCompat-1.0", 13)
 if not LibCompat then return end
 
 LibCompat.embeds = LibCompat.embeds or {}
@@ -133,14 +131,20 @@ do
 	end
 
 	-- Shamelessly copied from Omen - thanks!
-	local tablePool = {}
-	setmetatable(tablePool, {__mode = "kv"})
+	local tablePool = setmetatable({}, {__mode = "kv"})
 
 	-- get a new table
-	local function newTable()
-		local t = next(tablePool) or {}
-		tablePool[t] = nil
-		return t
+	local function newTable(...)
+		local t = next(tablePool)
+		if t then
+			tablePool[t] = nil
+			for i = 1, select("#", ...) do
+				t[i] = select(i, ...)
+			end
+			return t
+		else
+			return {...}
+		end
 	end
 
 	-- delete table and return to pool
@@ -204,8 +208,7 @@ end
 
 do
 	local GetNumRaidMembers, GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
-	local UnitAffectingCombat, UnitIsDeadOrGhost = UnitAffectingCombat, UnitIsDeadOrGhost
-	local UnitExists, IsInInstance = UnitExists, IsInInstance
+	local UnitExists, UnitAffectingCombat, UnitIsDeadOrGhost = UnitExists, UnitAffectingCombat, UnitIsDeadOrGhost
 	local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
 	local UnitPower, UnitPowerMax = UnitPower, UnitPowerMax
 
@@ -213,21 +216,8 @@ do
 		return (GetNumRaidMembers() > 0)
 	end
 
-	local function IsInParty()
-		return (GetNumPartyMembers() > 0)
-	end
-
 	local function IsInGroup()
 		return (GetNumRaidMembers() > 0 or GetNumPartyMembers() > 0)
-	end
-
-	local IsInPvP
-	do
-		local instanceType
-		function IsInPvP()
-			instanceType = select(2, IsInInstance())
-			return (instanceType == "pvp" or instanceType == "arena")
-		end
 	end
 
 	local function GetNumGroupMembers()
@@ -424,9 +414,7 @@ do
 	end
 
 	LibCompat.IsInRaid = IsInRaid
-	LibCompat.IsInParty = IsInParty
 	LibCompat.IsInGroup = IsInGroup
-	LibCompat.IsInPvP = IsInPvP
 	LibCompat.GetNumGroupMembers = GetNumGroupMembers
 	LibCompat.GetNumSubgroupMembers = GetNumSubgroupMembers
 	LibCompat.GetGroupTypeAndCount = GetGroupTypeAndCount
@@ -673,6 +661,7 @@ end
 do
 	local LGT = LibStub("LibGroupTalents-1.0")
 	local UnitClass, MAX_TALENT_TABS = UnitClass, MAX_TALENT_TABS or 3
+	local LGTRoleTable = {melee = "DAMAGER", caster = "DAMAGER", healer = "HEALER", tank = "TANK"}
 
 	-- list of class to specs
 	local specIDs = {
@@ -695,7 +684,7 @@ do
 		return (points and points > 0) and 3 or 2
 	end
 
-	local function GetUnitSpec(unit, class)
+	local function GetInspectSpecialization(unit, class)
 		unit = unit or "player"
 		class = class or select(2, UnitClass(unit))
 
@@ -729,29 +718,53 @@ do
 		return spec
 	end
 
-	local function GetTrueRole(role)
-		if role == "melee" or role == "caster" then
-			role = "DAMAGER"
-		elseif role == "tank" then
-			role = "TANK"
-		elseif role == "healer" then
-			role = "HEALER"
-		end
-		return role
+	local function GetSpecializationRole(specIndex)
+		return LGTRoleTable[LGT:GetUnitRole("player")] or "NONE"
+	end
+
+	local function UnitGroupRolesAssigned(unit)
+		return LGTRoleTable[LGT:GetUnitRole(unit)] or "NONE"
 	end
 
 	local function GetUnitRole(unit)
-		return GetTrueRole(LGT:GetUnitRole(unit)) or "NONE"
+		return LGTRoleTable[LGT:GetUnitRole(unit)] or "NONE"
 	end
 
 	local function GetGUIDRole(guid)
-		return GetTrueRole(LGT:GetGUIDRole(guid)) or "NONE"
+		return LGTRoleTable[LGT:GetGUIDRole(guid)] or "NONE"
 	end
 
-	LibCompat.GetUnitSpec = GetUnitSpec
-	LibCompat.GetSpecialization = GetUnitSpec -- backward compatibility
-	LibCompat.GetUnitRole = GetUnitRole
+	LibCompat.GetInspectSpecialization = GetInspectSpecialization
+	LibCompat.GetSpecializationRole = GetSpecializationRole
+	LibCompat.UnitGroupRolesAssigned = UnitGroupRolesAssigned
+	LibCompat.GetUnitRole = UnitGroupRolesAssigned
 	LibCompat.GetGUIDRole = GetGUIDRole
+	LibCompat.GetUnitSpec = GetInspectSpecialization
+end
+
+-------------------------------------------------------------------------------
+
+do
+	local C_PvP = {}
+	local IsInInstance, instanceType = IsInInstance, nil
+
+	function C_PvP.IsPvPMap()
+		instanceType = select(2, IsInInstance())
+		return (instanceType == "pvp" or instanceType == "arena")
+	end
+
+	function C_PvP.IsBattleground()
+		instanceType = select(2, IsInInstance())
+		return (instanceType == "pvp")
+	end
+
+	function C_PvP.IsArena()
+		instanceType = select(2, IsInInstance())
+		return (instanceType == "arena")
+	end
+
+	LibCompat.IsInPvP = C_PvP.IsPvPMap
+	LibCompat.C_PvP = C_PvP
 end
 
 -------------------------------------------------------------------------------
@@ -775,7 +788,6 @@ local mixins = {
 	"WithinRangeExclusive",
 	-- roster util
 	"IsInRaid",
-	"IsInParty",
 	"IsInGroup",
 	"IsInPvP",
 	"GetNumGroupMembers",
@@ -786,6 +798,7 @@ local mixins = {
 	"GroupIterator",
 	"UnitIterator",
 	"UnitFullName",
+	"C_PvP",
 	-- unit util
 	"GetUnitIdFromGUID",
 	"GetClassFromGUID",
@@ -796,11 +809,13 @@ local mixins = {
 	"UnitPowerInfo",
 	"UnitIsGroupLeader",
 	"UnitIsGroupAssistant",
-	"GetUnitSpec",
-	"GetSpecialization", -- backward compatibility
+	"GetUnitSpec", -- backward compatibility
+	"GetInspectSpecialization",
+	"UnitGroupRolesAssigned",
+	"GetSpecializationRole",
 	"GetUnitRole",
 	"GetGUIDRole",
-	-- timer unit
+	-- timer util
 	"After",
 	"NewTimer",
 	"NewTicker",
