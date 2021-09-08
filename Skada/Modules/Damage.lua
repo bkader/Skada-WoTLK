@@ -980,6 +980,10 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
 	end
+
+	function mod:GetSetSummary(set)
+		return Skada:FormatNumber(set.damage or 0), set.damage or 0
+	end
 end)
 
 -- ==================== --
@@ -1471,6 +1475,10 @@ Skada:AddLoadableModule("Overkill", function(Skada, L)
 	function mod:OnDisable()
 		Skada:RemoveMode(self, L["Damage Done"])
 	end
+
+	function mod:GetSetSummary(set)
+		return Skada:FormatNumber(set.overkill or 0), set.overkill or 0
+	end
 end)
 
 -- ====================== --
@@ -1623,5 +1631,9 @@ Skada:AddLoadableModule("Absorbed Damage", function(Skada, L)
 
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
+	end
+
+	function mod:GetSetSummary(set)
+		return Skada:FormatNumber(set.absdamage or 0), set.absdamage or 0
 	end
 end)

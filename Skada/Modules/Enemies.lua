@@ -352,7 +352,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 						if unit.curval <= unit.maxval then
 							log_custom_unit(set, unit.name, dmg.srcGUID, dmg.srcName, dmg.spellid, unit.maxval - unit.curval, dmg.absorbed)
 							amount = amount - (unit.maxval - unit.curval)
-							if customGroups[unit.oname] then
+							if customGroups[unit.oname] and unit.useful then
 								log_custom_group(set, unit.guid, unit.oname, dmg.srcGUID, dmg.srcName, dmg.spellid, amount, dmg.overkill, dmg.absorbed)
 								customGroupsTable = customGroupsTable or newTable()
 								customGroupsTable[unit.guid] = true

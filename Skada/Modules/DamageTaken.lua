@@ -878,6 +878,10 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(Skada, L)
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
 	end
+
+	function mod:GetSetSummary(set)
+		return Skada:FormatNumber(set.damagetaken or 0), set.damagetaken or 0
+	end
 end)
 
 -- ============================= --

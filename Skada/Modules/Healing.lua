@@ -1345,4 +1345,9 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
 	end
+
+	function mod:GetSetSummary(set)
+		local amount = (set.heal or 0) + (set.absorb or 0)
+		return Skada:FormatNumber(amount), amount
+	end
 end)
