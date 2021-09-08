@@ -60,8 +60,8 @@ local update_timer, tick_timer, version_timer
 local checkVersion, convertVersion
 local check_for_join_and_leave
 
--- list of players and pets
-local players, pets = {}, {}
+-- list of players, pets and vehicles
+local players, pets, vehicles = {}, {}, {}
 
 -- list of feeds & selected feed
 local feeds, selectedfeed = {}
@@ -1347,8 +1347,7 @@ do
 					player.class = "MONSTER"
 				elseif Skada:IsPlayer(player.id, player.flags, player.name) then
 					local class = select(2, UnitClass(unit or player.name))
-					class = class or select(2, Skada.UnitClass(player.id, player.flags))
-					player.class = class
+					player.class = class or Skada.GetClassFromGUID(player.id)
 				else
 					player.class = "UNKNOWN"
 				end
@@ -1704,6 +1703,13 @@ end
 function Skada:AssignPet(ownerGUID, ownerName, petGUID)
 	if ownerGUID and ownerName and petGUID and not pets[petGUID] then
 		pets[petGUID] = {id = ownerGUID, name = ownerName}
+	end
+end
+
+function Skada:DismissPet(petGUID, delay)
+	if petGUID and pets[petGUID] then
+		-- delayed for a reason (2 x MAINMENU_SLIDETIME).
+		self.After(delay or 0.6, function() pets[petGUID] = nil end)
 	end
 end
 
@@ -2108,18 +2114,18 @@ end
 
 -------------------------------------------------------------------------------
 
-function Skada:CheckGroup()
+function Skada:CheckGroup(petsOnly)
 	for unit, owner in UnitIterator() do
 		local guid = UnitGUID(unit)
-		if guid and owner == nil then
+		if guid and owner == nil and not petsOnly then
 			players[guid] = unit
 		elseif guid and owner then
-			self:AssignPet(UnitGUID(owner), UnitName(owner), guid)
+			Skada:AssignPet(UnitGUID(owner), UnitName(owner), guid)
 		end
 	end
 end
 
-function Skada:ZoneCheck()
+function Skada:CheckZone()
 	local inInstance, instanceType = IsInInstance()
 
 	local isininstance = inInstance and (instanceType == "party" or instanceType == "raid")
@@ -2227,15 +2233,31 @@ do
 	Skada.RAID_ROSTER_UPDATE = Skada.PARTY_MEMBERS_CHANGED
 end
 
-function Skada:UNIT_PET(_, unit)
-	if unit and unit ~= "target" and unit ~= "focus" and unit ~= "npc" and unit ~= "mouseover" then
-		local guid = UnitGUID(unit)
-		if guid and players[guid] then
-			self.After(0.1, function()
-				if UnitExists(unit .. "pet") then
-					self:AssignPet(guid, UnitName(unit), UnitGUID(unit .. "pet"))
+do
+	local UnitHasVehicleUI = UnitHasVehicleUI
+	local ignoredUnits = {"target", "focus", "npc", "NPC", "mouseover"}
+
+	function Skada:UNIT_PET(_, unit)
+		if unit and not tContains(ignoredUnits, unit) then
+			self:CheckGroup(true)
+		end
+	end
+
+	function Skada:CheckVehicle(_, unit)
+		if unit and not tContains(ignoredUnits, unit) then
+			local guid = UnitGUID(unit)
+			if guid and players[guid] then
+				if UnitHasVehicleUI(unit) then
+					local prefix, id, suffix = unit:match("([^%d]+)([%d]*)(.*)")
+					local vUnitId = prefix .. "pet" .. id .. suffix
+					if UnitExists(vUnitId) then
+						self:AssignPet(guid, UnitName(unit), UnitGUID(vUnitId))
+						vehicles[guid] = UnitGUID(vUnitId)
+					end
+				elseif vehicles[guid] then
+					self:DismissPet(vehicles[guid])
 				end
-			end)
+			end
 		end
 	end
 end
@@ -2267,7 +2289,11 @@ function Skada:Reset(force)
 	end
 
 	self:Wipe()
-	players, pets = wipe(players or{}), wipe(pets or{})
+
+	pets = wipe(pets or {})
+	players = wipe(players or {})
+	vehicles = wipe(vehicles or {})
+
 	self:CheckGroup()
 
 	if self.current ~= nil then
@@ -3175,8 +3201,10 @@ function Skada:OnEnable()
 	self:RegisterEvent("RAID_ROSTER_UPDATE")
 	self:RegisterEvent("UNIT_PET")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
-	self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "ZoneCheck")
+	self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "CheckZone")
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "CombatLogEvent")
+	self:RegisterEvent("UNIT_ENTERED_VEHICLE", "CheckVehicle")
+	self:RegisterEvent("UNIT_EXITED_VEHICLE", "CheckVehicle")
 
 	if self.modulelist then
 		for i = 1, #self.modulelist do
@@ -3186,7 +3214,7 @@ function Skada:OnEnable()
 	end
 
 	self.After(2, self.ApplySettings)
-	self.After(3, self.MemoryCheck)
+	self.After(3, self.CheckMemory)
 
 	if _G.BigWigs then
 		self:RegisterMessage("BigWigs_Message", "BigWigs")
@@ -3199,7 +3227,7 @@ function Skada:OnEnable()
 	end
 
 	self.After(1, function()
-		self:ZoneCheck()
+		self:CheckZone()
 		self:CheckGroup()
 	end)
 	if not wasinparty then
@@ -3229,7 +3257,7 @@ function Skada:DBM(_, mod, wipe)
 	end
 end
 
-function Skada:MemoryCheck()
+function Skada:CheckMemory()
 	if Skada.db.profile.memorycheck then
 		UpdateAddOnMemoryUsage()
 
@@ -3440,7 +3468,7 @@ function Skada:EndSegment()
 		tick_timer = nil
 	end
 
-	self.After(3, Skada.MemoryCheck)
+	self.After(3, Skada.CheckMemory)
 end
 
 function Skada:StopSegment()
