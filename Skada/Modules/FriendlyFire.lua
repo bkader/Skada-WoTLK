@@ -81,14 +81,14 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
 					d.value = amount
 					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(amount),
+						Skada:FormatNumber(d.value),
 						mod.metadata.columns.Damage,
-						format("%.1f%%", 100 * amount / total),
+						Skada:FormatPercent(d.value, total),
 						mod.metadata.columns.Percent
 					)
 
-					if amount > maxvalue then
-						maxvalue = amount
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end
@@ -122,14 +122,14 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
 					d.value = amount
 					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(amount),
+						Skada:FormatNumber(d.value),
 						mod.metadata.columns.Damage,
-						format("%.1f%%", 100 * amount / total),
+						Skada:FormatPercent(d.value, total),
 						mod.metadata.columns.Percent
 					)
 
-					if amount > maxvalue then
-						maxvalue = amount
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end
@@ -160,14 +160,14 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
 					d.value = player.friendfire
 					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(player.friendfire),
+						Skada:FormatNumber(d.value),
 						self.metadata.columns.Damage,
-						format("%.1f%%", 100 * player.friendfire / total),
+						Skada:FormatPercent(d.value, total),
 						self.metadata.columns.Percent
 					)
 
-					if player.friendfire > maxvalue then
-						maxvalue = player.friendfire
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end

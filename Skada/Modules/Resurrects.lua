@@ -62,18 +62,18 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.spellicon = GetSpellInfo(spellid)
+					d.label, _, d.icon = GetSpellInfo(spellid)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
-						count,
+						d.value,
 						mod.metadata.columns.Count,
-						format("%.1f%%", 100 * count / total),
+						Skada:FormatPercent(d.value, total),
 						mod.metadata.columns.Percent
 					)
 
-					if count > maxvalue then
-						maxvalue = count
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end
@@ -106,14 +106,14 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
-						count,
+						d.value,
 						mod.metadata.columns.Count,
-						format("%.1f%%", 100 * count / total),
+						Skada:FormatPercent(d.value, total),
 						mod.metadata.columns.Percent
 					)
 
-					if count > maxvalue then
-						maxvalue = count
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end
@@ -144,14 +144,14 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 
 					d.value = player.ress
 					d.valuetext = Skada:FormatValueText(
-						player.ress,
+						d.value,
 						self.metadata.columns.Count,
-						format("%.1f%%", 100 * player.ress / total),
+						Skada:FormatPercent(d.value, total),
 						self.metadata.columns.Percent
 					)
 
-					if player.ress > maxvalue then
-						maxvalue = player.ress
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 
 					nr = nr + 1

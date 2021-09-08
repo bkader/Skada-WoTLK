@@ -120,14 +120,14 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
-						count,
+						d.value,
 						mod.metadata.columns.Total,
-						format("%.1f%%", 100 * count / total),
+						Skada:FormatPercent(d.value, total),
 						mod.metadata.columns.Percent
 					)
 
-					if count > maxvalue then
-						maxvalue = count
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end
@@ -160,14 +160,14 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
-						count,
+						d.value,
 						mod.metadata.columns.Total,
-						format("%.1f%%", 100 * count / total),
+						Skada:FormatPercent(d.value, total),
 						mod.metadata.columns.Percent
 					)
 
-					if count > maxvalue then
-						maxvalue = count
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end
@@ -201,14 +201,14 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
-						count,
+						d.value,
 						mod.metadata.columns.Total,
-						format("%.1f%%", 100 * count / total),
+						Skada:FormatPercent(d.value, total),
 						mod.metadata.columns.Percent
 					)
 
-					if count > maxvalue then
-						maxvalue = count
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end
@@ -238,14 +238,14 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 					d.value = player.interrupt
 					d.valuetext = Skada:FormatValueText(
-						player.interrupt,
+						d.value,
 						self.metadata.columns.Total,
-						format("%.1f%%", 100 * player.interrupt / total),
+						Skada:FormatPercent(d.value, total),
 						self.metadata.columns.Percent
 					)
 
-					if player.interrupt > maxvalue then
-						maxvalue = player.interrupt
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end

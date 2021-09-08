@@ -9,6 +9,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 	local tinsert, max = table.insert, math.max
 	local GroupIterator, UnitExists, UnitIsFriend = Skada.GroupIterator, UnitExists, UnitIsFriend
 	local UnitName, UnitClass, UnitGUID = UnitName, UnitClass, UnitGUID
+	local GetInspectSpecialization = Skada.GetInspectSpecialization
 	local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 	local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
 	local PlaySoundFile = PlaySoundFile
@@ -73,7 +74,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 							name = name,
 							class = class,
 							role = Skada.GetUnitRole(unit),
-							spec = Skada.GetSpecialization(unit, class),
+							spec = GetInspectSpecialization(unit, class),
 							unit = unit
 						}
 					end
@@ -189,7 +190,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 								self.metadata.columns.Threat,
 								getTPS(data.threat),
 								self.metadata.columns.TPS,
-								format("%.1f%%", 100 * data.value / max(0.000001, maxthreat)),
+								Skada:FormatPercent(data.value, max(0.000001, maxthreat)),
 								self.metadata.columns.Percent
 							)
 
@@ -213,7 +214,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 								self.metadata.columns.Threat,
 								getTPS(data.threat),
 								self.metadata.columns.TPS,
-								format("%.1f%%", percent),
+								Skada:FormatPercent(percent),
 								self.metadata.columns.Percent
 							)
 						else
@@ -484,9 +485,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 		local function add_threat_feed()
 			if Skada.current and UnitExists("target") then
 				local threatpct = select(3, UnitDetailedThreatSituation("player", "target"))
-				if threatpct then
-					return format("%.1f%%", threatpct)
-				end
+				return threatpct and Skada:FormatPercent(threatpct)
 			end
 		end
 

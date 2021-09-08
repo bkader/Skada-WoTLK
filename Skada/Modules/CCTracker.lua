@@ -226,8 +226,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 		local spellid = ...
 
 		if CCSpells[spellid] or ExtraCCSpells[spellid] then
-			data.playerid = srcGUID
-			data.playername = srcName
+			data.playerid, data.playername = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 			data.playerflags = srcFlags
 
 			data.dstGUID = dstGUID
@@ -266,14 +265,14 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
-						count,
+						d.value,
 						mod.metadata.columns.Count,
-						format("%.1f%%", 100 * count / total),
+						Skada:FormatPercent(d.value, total),
 						mod.metadata.columns.Percent
 					)
 
-					if count > maxvalue then
-						maxvalue = count
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end
@@ -307,14 +306,14 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
-						count,
+						d.value,
 						mod.metadata.columns.Count,
-						format("%.1f%%", 100 * count / total),
+						Skada:FormatPercent(d.value, total),
 						mod.metadata.columns.Percent
 					)
 
-					if count > maxvalue then
-						maxvalue = count
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end
@@ -345,14 +344,14 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 					d.value = player.ccdone
 					d.valuetext = Skada:FormatValueText(
-						player.ccdone,
+						d.value,
 						self.metadata.columns.Count,
-						format("%.1f%%", 100 * player.ccdone / total),
+						Skada:FormatPercent(d.value, total),
 						self.metadata.columns.Percent
 					)
 
-					if player.ccdone > maxvalue then
-						maxvalue = player.ccdone
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end
@@ -469,14 +468,14 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
-						count,
+						d.value,
 						mod.metadata.columns.Count,
-						format("%.1f%%", 100 * count / total),
+						Skada:FormatPercent(d.value, total),
 						mod.metadata.columns.Percent
 					)
 
-					if count > maxvalue then
-						maxvalue = count
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end
@@ -510,14 +509,14 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
-						count,
+						d.value,
 						mod.metadata.columns.Count,
-						format("%.1f%%", 100 * count / total),
+						Skada:FormatPercent(d.value, total),
 						mod.metadata.columns.Percent
 					)
 
-					if count > maxvalue then
-						maxvalue = count
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end
@@ -548,14 +547,14 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 					d.value = player.cctaken
 					d.valuetext = Skada:FormatValueText(
-						player.cctaken,
+						d.value,
 						self.metadata.columns.Count,
-						format("%.1f%%", 100 * player.cctaken / total),
+						Skada:FormatPercent(d.value, total),
 						self.metadata.columns.Percent
 					)
 
-					if player.cctaken > maxvalue then
-						maxvalue = player.cctaken
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end
@@ -712,14 +711,14 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
-						count,
+						d.value,
 						mod.metadata.columns.Count,
-						format("%.1f%%", 100 * count / total),
+						Skada:FormatPercent(d.value, total),
 						mod.metadata.columns.Percent
 					)
 
-					if count > maxvalue then
-						maxvalue = count
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end
@@ -753,14 +752,14 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
-						count,
+						d.value,
 						mod.metadata.columns.Count,
-						format("%.1f%%", 100 * count / total),
+						Skada:FormatPercent(d.value, total),
 						mod.metadata.columns.Percent
 					)
 
-					if count > maxvalue then
-						maxvalue = count
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end
@@ -791,14 +790,14 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 					d.value = player.ccbreak
 					d.valuetext = Skada:FormatValueText(
-						player.ccbreak,
+						d.value,
 						self.metadata.columns.Count,
-						format("%.1f%%", 100 * player.ccbreak / total),
+						Skada:FormatPercent(d.value, total),
 						self.metadata.columns.Percent
 					)
 
-					if player.ccbreak > maxvalue then
-						maxvalue = player.ccbreak
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end

@@ -134,14 +134,14 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 
 				d.value = player.count
 				d.valuetext = Skada:FormatValueText(
-					player.count,
+					d.value,
 					mod.metadata.columns.Count,
-					format("%.1f%%", 100 * player.count / total),
+					Skada:FormatPercent(d.value, total),
 					mod.metadata.columns.Percent
 				)
 
-				if player.count > maxvalue then
-					maxvalue = player.count
+				if d.value > maxvalue then
+					maxvalue = d.value
 				end
 				nr = nr + 1
 			end
@@ -190,14 +190,14 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 
 						d.value = count
 						d.valuetext = Skada:FormatValueText(
-							count,
+							d.value,
 							mod.metadata.columns.Count,
-							format("%.1f%%", 100 * count / total),
+							Skada:FormatPercent(d.value, total),
 							mod.metadata.columns.Percent
 						)
 
-						if count > maxvalue then
-							maxvalue = count
+						if d.value > maxvalue then
+							maxvalue = d.value
 						end
 
 						nr = nr + 1
@@ -230,14 +230,14 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 
 					d.value = player.potion
 					d.valuetext = Skada:FormatValueText(
-						player.potion,
+						d.value,
 						self.metadata.columns.Count,
-						format("%.1f%%", 100 * player.potion / total),
+						Skada:FormatPercent(d.value, total),
 						self.metadata.columns.Percent
 					)
 
-					if player.potion > maxvalue then
-						maxvalue = player.potion
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end

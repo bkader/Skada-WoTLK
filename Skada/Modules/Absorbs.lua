@@ -719,7 +719,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(d.value),
 							mod.metadata.columns.Absorbs,
-							format("%.1f%%", 100 * d.value / total),
+							Skada:FormatPercent(d.value, total),
 							mod.metadata.columns.Percent
 						)
 
@@ -762,7 +762,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(d.value),
 						mod.metadata.columns.Absorbs,
-						format("%.1f%%", 100 * d.value / total),
+						Skada:FormatPercent(d.value, total),
 						mod.metadata.columns.Percent
 					)
 
@@ -803,7 +803,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(d.value),
 						mod.metadata.columns.Absorbs,
-						format("%.1f%%", 100 * d.value / total),
+						Skada:FormatPercent(d.value, total),
 						mod.metadata.columns.Percent
 					)
 
@@ -841,7 +841,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(d.value),
 						self.metadata.columns.Absorbs,
-						format("%.1f%%", 100 * d.value / total),
+						Skada:FormatPercent(d.value, total),
 						self.metadata.columns.Percent
 					)
 
@@ -989,10 +989,10 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 				end
 				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
 				if (spell.critical or 0) > 0 then
-					tooltip:AddDoubleLine(L["Critical"], format("%.1f%%", 100 * spell.critical / spell.count), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Critical"], Skada:FormatPercent(spell.critical, spell.count), 1, 1, 1)
 				end
 				if (spell.overheal or 0) > 0 then
-					tooltip:AddDoubleLine(L["Overhealing"], format("%.1f%%", 100 * spell.overheal / (spell.overheal + spell.amount)), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Overhealing"], Skada:FormatPercent(spell.overheal, spell.overheal + spell.amount), 1, 1, 1)
 				end
 			end
 		end
@@ -1037,7 +1037,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 							d.valuetext = Skada:FormatValueText(
 								Skada:FormatNumber(d.value),
 								mod.metadata.columns.Healing,
-								format("%.1f%%", 100 * d.value / total),
+								Skada:FormatPercent(d.value, total),
 								mod.metadata.columns.Percent
 							)
 
@@ -1064,7 +1064,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 							d.valuetext = Skada:FormatValueText(
 								Skada:FormatNumber(d.value),
 								mod.metadata.columns.Healing,
-								format("%.1f%%", 100 * d.value / total),
+								Skada:FormatPercent(d.value, total),
 								mod.metadata.columns.Percent
 							)
 
@@ -1114,7 +1114,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(d.value),
 							mod.metadata.columns.Healing,
-							format("%.1f%%", 100 * d.value / max(1, total)),
+							Skada:FormatPercent(d.value, total),
 							mod.metadata.columns.Percent
 						)
 
@@ -1139,7 +1139,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(d.value),
 							mod.metadata.columns.Healing,
-							format("%.1f%%", 100 * d.value / max(1, total)),
+							Skada:FormatPercent(d.value, total),
 							mod.metadata.columns.Percent
 						)
 
@@ -1206,7 +1206,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(d.value),
 							mod.metadata.columns.Healing,
-							format("%.1f%%", 100 * d.value / total),
+							Skada:FormatPercent(d.value, total),
 							mod.metadata.columns.Percent
 						)
 
@@ -1249,7 +1249,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 						self.metadata.columns.Healing,
 						Skada:FormatNumber(hps),
 						self.metadata.columns.HPS,
-						format("%.1f%%", 100 * d.value / total),
+						Skada:FormatPercent(d.value, total),
 						self.metadata.columns.Percent
 					)
 
@@ -1311,7 +1311,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 		end
 		if (set.overheal or 0) > 0 then
 			total = total + set.overheal
-			tooltip:AddDoubleLine(L["Overhealing"], format("%.1f%%", 100 * set.overheal / max(1, total)), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Overhealing"], Skada:FormatPercent(set.overheal, total), 1, 1, 1)
 		end
 	end
 
@@ -1376,7 +1376,7 @@ Skada:AddLoadableModule("HPS", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(d.value),
 						self.metadata.columns.HPS,
-						format("%.1f%%", 100 * d.value / total),
+						Skada:FormatPercent(d.value, total),
 						self.metadata.columns.Percent
 					)
 
@@ -1555,7 +1555,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(d.value),
 						mod.metadata.columns.Healing,
-						format("%.1f%%", 100 * d.value / max(1, spell.amount)),
+						Skada:FormatPercent(d.value, spell.amount),
 						mod.metadata.columns.Percent
 					)
 
@@ -1594,7 +1594,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 				d.valuetext = Skada:FormatValueText(
 					Skada:FormatNumber(d.value),
 					self.metadata.columns.Healing,
-					format("%.1f%%", 100 * d.value / total),
+					Skada:FormatPercent(d.value, total),
 					self.metadata.columns.Percent
 				)
 

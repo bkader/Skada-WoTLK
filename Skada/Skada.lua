@@ -2455,6 +2455,14 @@ function Skada:FormatNumber(number, fmt)
 	end
 end
 
+function Skada:FormatPercent(value, total, dec)
+	dec = dec or self.db.profile.decimals or 1
+	if total == nil then
+		return format("%." .. dec .. "f%%", value)
+	end
+	return format("%." .. dec .. "f%%", 100 * value / max(1, total))
+end
+
 function Skada:FormatTime(sec)
 	if sec then
 		if sec >= 3600 then

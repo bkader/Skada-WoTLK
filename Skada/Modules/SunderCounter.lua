@@ -67,14 +67,14 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 					d.label = targetname
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
-						count,
+						d.value,
 						mod.metadata.columns.Count,
-						format("%.1f%%", 100 * count / total),
+						Skada:FormatPercent(d.value, total),
 						mod.metadata.columns.Percent
 					)
 
-					if count > maxvalue then
-						maxvalue = count
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end
@@ -110,14 +110,14 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 					d.value = player.sunder
 					d.valuetext = Skada:FormatValueText(
-						player.sunder,
+						d.value,
 						self.metadata.columns.Count,
-						format("%.1f%%", 100 * player.sunder / total),
+						Skada:FormatPercent(d.value, total),
 						self.metadata.columns.Percent
 					)
 
-					if player.sunder > maxvalue then
-						maxvalue = player.sunder
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end

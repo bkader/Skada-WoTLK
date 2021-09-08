@@ -548,6 +548,7 @@ do
 		for _, data in win:IterateDataset() do
 			if (data.icon and not data.ignore) or (data.spec and win.db.specicons) or (data.class and win.db.classicons) or (data.role and win.db.roleicons) then
 				hasicon = true
+				break
 			end
 		end
 

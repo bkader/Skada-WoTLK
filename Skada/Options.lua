@@ -99,6 +99,7 @@ Skada.defaults = {
 		skippopup = false,
 		icon = {hide = false, radius = 80, minimapPos = 195},
 		numberformat = 1,
+		decimals = 1,
 		setformat = 3,
 		setnumber = true,
 		showranks = true,
@@ -513,15 +514,23 @@ Skada.options = {
 					type = "select",
 					name = L["Number format"],
 					desc = L["Controls the way large numbers are displayed."],
-					order = 19,
-					width = "double",
-					values = {[1] = L["Condensed"], [2] = L["Comma"], [3] = L["Detailed"]}
+					values = {[1] = L["Condensed"], [2] = L["Comma"], [3] = L["Detailed"]},
+					order = 19
+				},
+				decimals = {
+					type = "range",
+					name = L["Number of decimals"],
+					desc = L["Controls the way percentages are displayed."],
+					min = 0,
+					max = 3,
+					step = 1,
+					order = 20
 				},
 				setformat = {
 					type = "select",
 					name = L["Set format"],
 					desc = L["Controls the way set names are displayed."],
-					order = 20,
+					order = 21,
 					width = "double",
 					values = Skada:SetLabelFormats()
 				},
@@ -529,19 +538,19 @@ Skada.options = {
 					type = "toggle",
 					name = L["Number set duplicates"],
 					desc = L["Append a count to set names with duplicate mob names."],
-					order = 21
+					order = 22
 				},
 				translit = {
 					type = "toggle",
 					name = L["Translit"],
 					desc = L["Make those russian letters that no one understands to be presented as western letters."],
-					order = 22
+					order = 23
 				},
 				feed = {
 					type = "select",
 					name = L["Data feed"],
 					desc = L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."],
-					order = 23,
+					order = 24,
 					width = "double",
 					values = function()
 						local feeds = {[""] = NONE}
@@ -578,22 +587,22 @@ Skada.options = {
 					type = "range",
 					name = L["Data segments to keep"],
 					desc = L["The number of fight segments to keep. Persistent segments are not included in this."],
-					order = 98,
 					width = "double",
 					min = 0,
 					max = 30,
-					step = 1
+					step = 1,
+					order = 98
 				},
 				updatefrequency = {
 					type = "range",
 					name = L["Update frequency"],
 					desc = L["How often windows are updated. Shorter for faster updates. Increases CPU usage."],
-					order = 99,
 					width = "double",
 					min = 0.10,
 					max = 1,
 					step = 0.05,
-					bigStep = 0.1
+					bigStep = 0.1,
+					order = 99
 				}
 			}
 		},

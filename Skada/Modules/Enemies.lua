@@ -464,7 +464,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 			local useful = e.damagetaken_sources[p.name].useful or 0
 			if useful > 0 then
-				tooltip:AddDoubleLine(L["Useful Damage"], format("%s (%.1f%%)", Skada:FormatNumber(useful), 100 * useful / total), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Useful Damage"], format("%s (%s)", Skada:FormatNumber(useful), Skada:FormatPercent(useful, total)), 1, 1, 1)
 			end
 		end
 	end
@@ -498,7 +498,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 				d.valuetext = Skada:FormatValueText(
 					Skada:FormatNumber(d.value),
 					mod.metadata.columns.Damage,
-					format("%.1f%%", 100 * d.value / total),
+					Skada:FormatPercent(d.value, total),
 					mod.metadata.columns.Percent
 				)
 
@@ -540,7 +540,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 				d.valuetext = Skada:FormatValueText(
 					Skada:FormatNumber(d.value),
 					mod.metadata.columns.Damage,
-					format("%.1f%%", 100 * d.value / total),
+					Skada:FormatPercent(d.value, total),
 					mod.metadata.columns.Percent
 				)
 
@@ -576,7 +576,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 						self.metadata.columns.Damage,
 						Skada:FormatNumber(dtps),
 						self.metadata.columns.DTPS,
-						format("%.1f%%", 100 * d.value / total),
+						Skada:FormatPercent(d.value, total),
 						self.metadata.columns.Percent
 					)
 
@@ -793,7 +793,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 				d.valuetext = Skada:FormatValueText(
 					Skada:FormatNumber(d.value),
 					mod.metadata.columns.Damage,
-					format("%.1f%%", 100 * d.value / total),
+					Skada:FormatPercent(d.value, total),
 					mod.metadata.columns.Percent
 				)
 
@@ -835,7 +835,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 				d.valuetext = Skada:FormatValueText(
 					Skada:FormatNumber(d.value),
 					mod.metadata.columns.Damage,
-					format("%.1f%%", 100 * d.value / total),
+					Skada:FormatPercent(d.value, total),
 					mod.metadata.columns.Percent
 				)
 
@@ -872,7 +872,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 							self.metadata.columns.Damage,
 							Skada:FormatNumber(dtps),
 							self.metadata.columns.DPS,
-							format("%.1f%%", 100 * d.value / total),
+							Skada:FormatPercent(d.value, total),
 							self.metadata.columns.Percent
 						)
 
@@ -1017,7 +1017,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 				d.valuetext = Skada:FormatValueText(
 					Skada:FormatNumber(d.value),
 					mod.metadata.columns.Healing,
-					format("%.1f%%", 100 * d.value / total),
+					Skada:FormatPercent(d.value, total),
 					mod.metadata.columns.Percent
 				)
 
@@ -1056,7 +1056,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 				d.valuetext = Skada:FormatValueText(
 					Skada:FormatNumber(d.value),
 					mod.metadata.columns.Healing,
-					format("%.1f%%", 100 * d.value / total),
+					Skada:FormatPercent(d.value, total),
 					mod.metadata.columns.Percent
 				)
 
@@ -1093,7 +1093,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 						self.metadata.columns.Healing,
 						Skada:FormatNumber(hps),
 						self.metadata.columns.HPS,
-						format("%.1f%%", 100 * d.value / total),
+						Skada:FormatPercent(d.value, total),
 						self.metadata.columns.Percent
 					)
 

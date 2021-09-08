@@ -16,8 +16,8 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetspellLink = Skada.GetSpellLink or GetSpellLink
 	local newTable, delTable = Skada.newTable, Skada.delTable
-	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
-	local date, zoneType, _ = date
+	local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
+	local date, log, _ = date
 
 	local function log_deathlog(set, data, ts)
 		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
@@ -139,40 +139,19 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 			if set == Skada.current then
 				player.deathlog = player.deathlog or {}
 				if player.deathlog[1] then
-					player.deathlog[1].time = ts
-				end
-			end
-		end
-	end
+					player.deathlog[1].time = ((ts or 0) <= 0) and time() or ts
 
-	local function UnitDied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		if not UnitIsFeignDeath(dstName) then
-			if Skada.db.profile.modules.deathannounce and IsInGroup() then
-				if zoneType == "pvp" or zoneType == "arena" then
-					log_death(Skada.current, dstGUID, dstName, dstFlags, ts)
-					log_death(Skada.total, dstGUID, dstName, dstFlags, ts)
-					return
-				end
-
-				local player = Skada:find_player(Skada.current, dstGUID, dstName)
-				if player and player.deathlog and player.deathlog[1] then
-					local log
-					for _, lo in ipairs(player.deathlog[1].log) do
-						if lo.amount and lo.amount < 0 then
-							log = lo
-							break
+					-- announce death
+					if Skada.db.profile.modules.deathannounce and IsInGroup() and not IsInPvP() then
+						for _, l in ipairs(player.deathlog[1].log) do
+							if l.amount and l.amount < 0 then
+								log = l
+								break
+							end
 						end
-					end
+						if not log then return end
 
-					if log then
-						local output = format(
-							"Skada: %s > %s (%s) %s",
-							log.source or UNKNOWN,
-							dstName or UNKNOWN,
-							GetSpellInfo(log.spellid) or UNKNOWN,
-							Skada:FormatNumber(0 - log.amount, 1)
-						)
-
+						local output = format("Skada: %s > %s (%s) %s", log.source or UNKNOWN, player.name or UNKNOWN, GetSpellInfo(log.spellid) or UNKNOWN, Skada:FormatNumber(0 - log.amount, 1))
 						if log.overkill or log.resisted or log.blocked or log.absorbed then
 							output = output .. " ["
 							local extra = newTable()
@@ -202,7 +181,11 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 					end
 				end
 			end
+		end
+	end
 
+	local function UnitDied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		if not UnitIsFeignDeath(dstName) then
 			log_death(Skada.current, dstGUID, dstName, dstFlags, ts)
 			log_death(Skada.total, dstGUID, dstName, dstFlags, ts)
 		end
@@ -286,7 +269,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 				for i, log in ipairs(deathlog.log) do
 					local diff = tonumber(log.time) - tonumber(deathlog.time)
-					if diff > -30 then
+					if diff > -60 then
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
@@ -339,7 +322,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 							self.metadata.columns.Change,
 							Skada:FormatNumber(log.hp or 0),
 							self.metadata.columns.Health,
-							format("%.1f%%", 100 * (log.hp or 1) / (player.maxhp or 1)),
+							Skada:FormatPercent(log.hp or 1, player.maxhp or 1),
 							self.metadata.columns.Percent
 						)
 
@@ -377,14 +360,19 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 					d.time = death.time
 					d.icon = "Interface\\Icons\\Ability_Rogue_FeignDeath"
 
-					if death.log[1] and death.log[1].spellid then
-						d.label, _, d.icon = GetSpellInfo(death.log[1].spellid)
-						d.spellid = death.log[1].spellid
-					elseif death.log[1] and death.log[1].source then
-						d.label = death.log[1].source
-					else
-						d.label = set.name or UNKNOWN
+					for k, v in ipairs(death.log) do
+						if v.amount and v.amount < 0 and (v.spellid or v.source) then
+							if v.spellid then
+								d.label, _, d.icon = GetSpellInfo(v.spellid)
+								d.spellid = v.spellid
+							elseif v.source then
+								d.label = v.source
+							end
+							break
+						end
 					end
+
+					d.label = d.label or set.name or UNKNOWN
 
 					d.value = death.time
 					d.valuetext = formatdate(d.value)
@@ -398,6 +386,14 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 				win.metadata.maxvalue = maxvalue
 			end
 		end
+	end
+
+	local function fixdeathtime(timestamp, player)
+		if timestamp <= 0 and player.deathlog[1].log[1] then
+			player.deathlog[1].time = player.deathlog[1].log[1].time + 25
+			timestamp = player.deathlog[1].time
+		end
+		return timestamp
 	end
 
 	function mod:Update(win, set)
@@ -420,9 +416,9 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 					d.spec = player.spec
 
 					if player.deathlog then
-						d.value = player.deathlog[1].time
+						d.value = fixdeathtime(player.deathlog[1].time, player)
 						d.valuetext = Skada:FormatValueText(
-							Skada:FormatTime(player.deathlog[1].time - set.starttime),
+							Skada:FormatTime(d.value - set.starttime),
 							self.metadata.columns.Survivability,
 							player.death,
 							self.metadata.columns.Count
@@ -435,7 +431,6 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 					if d.value > maxvalue then
 						maxvalue = d.value
 					end
-
 					nr = nr + 1
 				end
 			end
@@ -534,6 +529,13 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 				end
 				if #player.deathlog == 0 then
 					player.deathlog = nil
+				else
+					-- fix stupid 0 death timestamp
+					for i, v in ipairs(player.deathlog) do
+						if v.time <= 0 and v.log[1] then
+							player.deathlog[i].time = v.log[1].time or time()
+						end
+					end
 				end
 			end
 		end
@@ -546,13 +548,8 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return tostring(set.death or 0), set.death or 0
+		return tostring(set.death or 0)
 	end
-
-	function mod:AddSetAttributes(set)
-		zoneType = select(2, IsInInstance())
-	end
-	mod.SetComplete = mod.AddSetAttributes
 
 	do
 		local options

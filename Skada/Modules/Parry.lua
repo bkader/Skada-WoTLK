@@ -80,14 +80,14 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
-						count,
+						d.value,
 						mod.metadata.columns.Count,
-						format("%.1f%%", 100 * count / total),
+						Skada:FormatPercent(d.value, total),
 						mod.metadata.columns.Percent
 					)
 
-					if count > maxvalue then
-						maxvalue = count
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end
@@ -120,7 +120,7 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 					d.valuetext = Skada:FormatValueText(
 						d.value,
 						self.metadata.columns.Count,
-						format("%.1f%%", 100 * d.value / total),
+						Skada:FormatPercent(d.value, total),
 						self.metadata.columns.Percent
 					)
 

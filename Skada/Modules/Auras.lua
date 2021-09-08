@@ -188,7 +188,7 @@ do
 					d.valuetext = Skada:FormatValueText(
 						auracount,
 						mod.metadata.columns.Count,
-						format("%.1f%%", 100 * d.value),
+						Skada:FormatPercent(100 * d.value),
 						mod.metadata.columns.Percent
 					)
 
@@ -229,14 +229,14 @@ local function spellupdatefunc(auratype, win, set, playerid, playername, fmt, mo
 
 					d.value = uptime
 					d.valuetext = Skada:FormatValueText(
-						Skada:FormatTime(uptime),
+						Skada:FormatTime(d.value),
 						mod.metadata.columns.Uptime,
-						format("%.1f%%", 100 * uptime / maxtime),
+						Skada:FormatPercent(d.value, maxtime),
 						mod.metadata.columns.Percent
 					)
 
-					if uptime > maxvalue then
-						maxvalue = uptime
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 					nr = nr + 1
 				end
@@ -514,14 +514,14 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
-						count,
+						d.value,
 						mod.metadata.columns.Count,
-						format("%.1f%%", 100 * count / total),
+						Skada:FormatPercent(d.value, total),
 						mod.metadata.columns.Percent
 					)
 
-					if count > maxvalue then
-						maxvalue = count
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
 
 					nr = nr + 1
