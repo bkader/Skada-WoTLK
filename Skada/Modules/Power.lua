@@ -8,33 +8,26 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 	local setmetatable, GetSpellInfo = setmetatable, Skada.GetSpellInfo or GetSpellInfo
 	local _
 
-	local locales = {[0] = MANA, [1] = RAGE, [3] = ENERGY, [6] = RUNIC_POWER}
+	local namesTable = {[0] = MANA, [1] = RAGE, [3] = ENERGY, [6] = RUNIC_POWER}
+	local keysTable = {[0] = "mana", [1] = "rage", [2] = "energy", [3] = "energy", [4] = "energy", [6] = "runic"}
 
 	-- spells in the following table will be ignored.
 	local ignoredSpells = {}
 
 	local function log_gain(set, gain)
-		if (gain.spellid and tContains(ignoredSpells, gain.spellid)) or gain.type == nil then
-			return
-		elseif gain.type == 2 or gain.type == 4 then
-			gain.type = 3 -- Focus & Happiness treated as Energy
-		end
+		if not (gain and gain.type and keysTable[gain.type]) then return end
+		if (gain.spellid and tContains(ignoredSpells, gain.spellid)) then return end
 
-		if locales[gain.type] then
-			local player = Skada:get_player(set, gain.playerid, gain.playername, gain.playerflags)
-			if player then
-				player.power = player.power or {}
-				player.power[gain.type] = player.power[gain.type] or {amount = 0}
-				player.power[gain.type].amount = (player.power[gain.type].amount or 0) + gain.amount
+		local player = Skada:get_player(set, gain.playerid, gain.playername, gain.playerflags)
+		if player then
+			player[keysTable[gain.type]] = player[keysTable[gain.type]] or {amt = 0}
+			player[keysTable[gain.type]].amt = (player[keysTable[gain.type]].amt or 0) + gain.amount
 
-				set.power = set.power or {}
-				set.power[gain.type] = set.power[gain.type] or 0
-				set.power[gain.type] = set.power[gain.type] + gain.amount
+			set[keysTable[gain.type]] = (set[keysTable[gain.type]] or 0) + gain.amount
 
-				if set == Skada.current then
-					player.power[gain.type].spells = player.power[gain.type].spells or {}
-					player.power[gain.type].spells[gain.spellid] = (player.power[gain.type].spells[gain.spellid] or 0) + gain.amount
-				end
+			if set == Skada.current then
+				player[keysTable[gain.type]].spells = player[keysTable[gain.type]].spells or {}
+				player[keysTable[gain.type]].spells[gain.spellid] = (player[keysTable[gain.type]].spells[gain.spellid] or 0) + gain.amount
 			end
 		end
 	end
@@ -83,14 +76,16 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 
 	-- allows us to create a module for each power type.
 	function basemod:Create(power, modname, playermodname)
+		if not keysTable[power] then return end
 		local instance = Skada:NewModule(modname)
 		setmetatable(instance, basemod_mt)
 
 		local pmode = instance:NewModule(playermodname)
 		setmetatable(pmode, playermod_mt)
 
-		pmode.power = power
-		instance.power = power
+		pmode.powertype = power
+		pmode.power = keysTable[power]
+		instance.power = keysTable[power]
 		instance.metadata = {showspots = true, click1 = pmode, nototalclick = {pmode}}
 
 		return instance
@@ -100,13 +95,13 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 	-- of players depending on the selected power gain type.
 	function basemod:Update(win, set)
 		win.title = self.moduleName or UNKNOWN
-		local total = (set and set.power and self.power ~= nil) and set.power[self.power] or 0
+		local total = set and self.power and set[self.power] or 0
 
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
 			for _, player in Skada:IteratePlayers(set) do
-				if player.power and player.power[self.power] then
+				if player[self.power] then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -117,7 +112,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 					d.role = player.role
 					d.spec = player.spec
 
-					d.value = player.power[self.power].amount
+					d.value = player[self.power].amt
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(d.value),
 						mod.metadata.columns.Amount,
@@ -138,9 +133,9 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 
 	-- base function used to return sets summaries
 	function basemod:GetSetSummary(set)
-		if set and set.power and self.power ~= nil then
-			local value = set.power[self.power] or 0
-			local valuetext = (self.power == 0) and Skada:FormatNumber(value) or value
+		if set and self.power then
+			local value = set[self.power] or 0
+			local valuetext = (self.power == "mana") and Skada:FormatNumber(value) or value
 			return valuetext, value
 		end
 	end
@@ -148,23 +143,20 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 	-- player mods common Enter function.
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's gained %s"], label, locales[self.power])
+		win.title = format(L["%s's gained %s"], label, namesTable[self.powertype] or UNKNOWN)
 	end
 
 	-- player mods main update function
 	function playermod:Update(win, set)
-		win.title = format(L["%s's gained %s"], win.playername or UNKNOWN, self.power and locales[self.power] or UNKNOWN)
+		win.title = format(L["%s's gained %s"], win.playername or UNKNOWN, self.powertype and namesTable[self.powertype] or UNKNOWN)
 		local player = Skada:find_player(set, win.playerid)
-		if player then
-			local total = 0
-			if self.power ~= nil and player.power and player.power[self.power] then
-				total = player.power[self.power].amount or 0
-			end
+		if player and self.power then
+			local total = player[self.power] and player[self.power].amt or 0
 
-			if total > 0 and player.power[self.power].spells then
+			if total > 0 and player[self.power].spells then
 				local maxvalue, nr = 0, 1
 
-				for spellid, amount in pairs(player.power[self.power].spells or {}) do
+				for spellid, amount in pairs(player[self.power].spells) do
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
