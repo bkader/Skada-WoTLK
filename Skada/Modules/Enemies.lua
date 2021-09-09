@@ -241,7 +241,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 			customUnitsTable[guid] = {
 				oname = name or UNKNOWN,
-				name = unit.name or format(unit.text or L["%s below %s%%"], name or UNKNOWN, (unit.start or 1) * 100),
+				name = unit.name,
 				guid = guid,
 				curval = curval,
 				minval = minval,
@@ -250,6 +250,14 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 				power = (unit.power ~= nil),
 				useful = unit.useful
 			}
+			if unit.name == nil then
+				customUnitsTable[guid].name = format(
+					unit.text or (unit.stop and L["%s - %s%% to %s%%"] or L["%s below %s%%"]),
+					name or UNKNOWN,
+					(unit.start or 1) * 100,
+					(unit.stop or 0) * 100
+				)
+			end
 			return true
 		end
 

@@ -518,6 +518,7 @@ L["Damage taken per player"] = true
 L["Damage on %s"] = true
 L["%s's damage sources"] = true
 L["%s below %s%%"] = true
+L["%s - %s%% to %s%%"] = true
 L["%s - Phase %s"] = true
 L["%s - Phase 1"] = true
 L["%s - Phase 2"] = true
