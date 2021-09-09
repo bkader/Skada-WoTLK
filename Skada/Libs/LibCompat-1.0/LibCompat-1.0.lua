@@ -661,10 +661,11 @@ end
 do
 	local LGT = LibStub("LibGroupTalents-1.0")
 	local UnitClass, MAX_TALENT_TABS = UnitClass, MAX_TALENT_TABS or 3
+	local GetActiveTalentGroup, GetTalentTabInfo = GetActiveTalentGroup, GetTalentTabInfo
 	local LGTRoleTable = {melee = "DAMAGER", caster = "DAMAGER", healer = "HEALER", tank = "TANK"}
 
 	-- list of class to specs
-	local specIDs = {
+	local specsTable = {
 		["MAGE"] = {62, 63, 64},
 		["PRIEST"] = {256, 257, 258},
 		["ROGUE"] = {259, 260, 261},
@@ -684,13 +685,28 @@ do
 		return (points and points > 0) and 3 or 2
 	end
 
+	local function GetSpecialization(isInspect, isPet)
+		local currentSpecGroup = GetActiveTalentGroup(isInspect, isPet) or (specGroup or 1)
+		local points, specname, specid = 0, nil, nil
+
+		for i = 1, MAX_TALENT_TABS do
+			local name, _, pointsSpent = GetTalentTabInfo(i, isInspect, isPet, currentSpecGroup)
+			if points <= pointsSpent then
+				points = pointsSpent
+				specname = name
+				specid = i
+			end
+		end
+		return specid, specname, points
+	end
+
 	local function GetInspectSpecialization(unit, class)
 		unit = unit or "player"
 		class = class or select(2, UnitClass(unit))
 
 		local spec  -- start with nil
 
-		if unit and specIDs[class] then
+		if unit and specsTable[class] then
 			local talentGroup = LGT:GetActiveTalentGroup(unit)
 			local maxPoints, index = 0, 0
 
@@ -712,7 +728,7 @@ do
 				end
 			end
 
-			spec = specIDs[class][index]
+			spec = specsTable[class][index]
 		end
 
 		return spec
@@ -734,6 +750,7 @@ do
 		return LGTRoleTable[LGT:GetGUIDRole(guid)] or "NONE"
 	end
 
+	LibCompat.GetSpecialization = GetSpecialization
 	LibCompat.GetInspectSpecialization = GetInspectSpecialization
 	LibCompat.GetSpecializationRole = GetSpecializationRole
 	LibCompat.UnitGroupRolesAssigned = UnitGroupRolesAssigned
@@ -810,6 +827,7 @@ local mixins = {
 	"UnitIsGroupLeader",
 	"UnitIsGroupAssistant",
 	"GetUnitSpec", -- backward compatibility
+	"GetSpecialization",
 	"GetInspectSpecialization",
 	"UnitGroupRolesAssigned",
 	"GetSpecializationRole",
