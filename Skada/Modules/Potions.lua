@@ -78,7 +78,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 						local _, _, icon, _, _, _, _, _, _, _, spellid = UnitBuff(unit, GetSpellInfo(potionid))
 						if spellid and potionIDs[spellid] then
 							-- instant recording doesn't work, so we delay it
-							Skada.After(1, PotionUsed, nil, nil, playerid, playername, nil, nil, nil, nil, spellid)
+							Skada.After(1, PotionUsed, nil, playerid, playername, nil, nil, nil, nil, spellid)
 							tinsert(potions, format(potionStr, icon))
 						end
 					end
