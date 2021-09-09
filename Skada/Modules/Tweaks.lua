@@ -196,7 +196,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 			"CHAT_MSG_YELL"
 		}
 
-		local meters = Skada.WeakTable()
+		local meters = {}
 
 		function mod:FilterLine(event, source, msg, ...)
 			for i, line in ipairs(firstlines) do
@@ -263,23 +263,21 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 			local linktype, id = split(":", link)
 			if linktype == "SKSP" then
 				local meterid = tonumber(id)
-				if meterid then
-					ShowUIPanel(ItemRefTooltip)
-					if not ItemRefTooltip:IsShown() then
-						ItemRefTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE")
-					end
-					ItemRefTooltip:ClearLines()
-					ItemRefTooltip:AddLine(meters[meterid].title)
-					ItemRefTooltip:AddLine(format(L["Reported by: %s"], meters[meterid].src))
-					ItemRefTooltip:AddLine(" ")
-					for _, line in ipairs(meters[meterid].data) do
-						ItemRefTooltip:AddLine(line, 1, 1, 1)
-					end
-					ItemRefTooltip:Show()
-					return
+				ShowUIPanel(ItemRefTooltip)
+				if not ItemRefTooltip:IsShown() then
+					ItemRefTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE")
 				end
+				ItemRefTooltip:ClearLines()
+				ItemRefTooltip:AddLine(meters[meterid].title)
+				ItemRefTooltip:AddLine(format(L["Reported by: %s"], meters[meterid].src))
+				ItemRefTooltip:AddLine(" ")
+				for _, line in ipairs(meters[meterid].data) do
+					ItemRefTooltip:AddLine(line, 1, 1, 1)
+				end
+				ItemRefTooltip:Show()
+			else
+				return mod.hooks.SetItemRef(link, text, button, chatframe)
 			end
-			return mod.hooks.SetItemRef(link, text, button, chatframe)
 		end
 	end
 
