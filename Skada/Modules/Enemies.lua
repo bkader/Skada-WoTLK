@@ -247,6 +247,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 				minval = minval,
 				maxval = floor(maxval * (unit.start or 1)),
 				full = maxval,
+				power = (unit.power ~= nil),
 				useful = unit.useful
 			}
 			return true
@@ -371,6 +372,8 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 							customUnitsTable[unit.guid] = -1 -- remove it
 						end
 						log_custom_unit(set, unit.name, dmg.srcGUID, dmg.srcName, dmg.spellid, amount, dmg.absorbed)
+					elseif unit.power then
+						log_custom_unit(set, unit.name, dmg.srcGUID, dmg.srcName, dmg.spellid, dmg.amount - (unit.useful and dmg.overkill or 0), dmg.absorbed)
 					end
 				end
 
