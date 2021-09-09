@@ -159,15 +159,7 @@ end
 
 -- returns the selected set time.
 function Skada:GetSetTime(set)
-	local settime = 0
-	if set then
-		if (set.time or 0) > 0 then
-			settime = set.time
-		else
-			settime = max(time() - set.starttime, 0.1)
-		end
-	end
-	return settime
+	return max(0.1, set and set.time or 0)
 end
 
 -- returns a formmatted set time
@@ -177,13 +169,10 @@ end
 
 -- returns the player active/effective time
 function Skada:PlayerActiveTime(set, player, active)
-	local settime = self:GetSetTime(set)
-
-	if (self.db.profile.timemesure ~= 2 or active) and player and (player.time or 0) > 0 then
-		settime = player.time
+	if (self.db.profile.timemesure ~= 2 or active) and player and player.time then
+		return max(0.1, player.time)
 	end
-
-	return settime
+	return self:GetSetTime(set)
 end
 
 -- updates the player's active time
@@ -3375,7 +3364,6 @@ function Skada:EndSegment()
 	if not self.db.profile.onlykeepbosses or self.current.gotboss then
 		if self.current.mobname ~= nil and now - self.current.starttime > 5 then
 			self.current.endtime = self.current.endtime or now
-			self.current.time = max(self.current.endtime - self.current.starttime, 0.1)
 			self.current.started, self.current.stopped = nil, nil
 
 			local setname = self.current.mobname
@@ -3413,8 +3401,6 @@ function Skada:EndSegment()
 	end
 
 	self.last = self.current
-	self.total.time = self.total.time + self.current.time
-
 	self.current = nil
 	for _, player in self:IteratePlayers(self.total) do
 		player.last = nil
@@ -3475,7 +3461,6 @@ function Skada:StopSegment()
 	if self.current then
 		self.current.stopped = true
 		self.current.endtime = time()
-		self.current.time = max(self.current.endtime - self.current.starttime, 0.1)
 	end
 end
 
@@ -3483,7 +3468,6 @@ function Skada:ResumeSegment()
 	if self.current and self.current.stopped then
 		self.current.stopped = nil
 		self.current.endtime = nil
-		self.current.time = 0
 	end
 end
 
@@ -3492,10 +3476,15 @@ do
 	local deathcounter, startingmembers = 0, 0
 
 	function Skada:Tick()
-		self.callbacks:Fire("COMBAT_PLAYER_TICK", self.current, self.total)
-		if not disabled and self.current and not InCombatLockdown() and not IsGroupInCombat() then
-			self:Debug("EndSegment: Tick")
-			self:EndSegment()
+		if not disabled and self.current then
+			self.callbacks:Fire("COMBAT_PLAYER_TICK", self.current, self.total)
+			if not (InCombatLockdown() and IsGroupInCombat()) then
+				self:Debug("EndSegment: Tick")
+				self:EndSegment()
+			elseif not self.current.stopped then
+				self.current.time = self.current.time + 1
+				self.total.time = self.total.time + 1
+			end
 		end
 	end
 
