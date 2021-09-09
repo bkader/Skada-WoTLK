@@ -38,7 +38,6 @@ Though it's not required, if you want to show some love and support, PayPal dona
   * [Improvement](#improvement)
   * [Nickname](#nickname)
   * [Parry-haste](#parry-haste)
-  * [Player Score](#player-score)
   * [Potions](#potions)
   * [Power gains](#power-gains)
   * [Scroll](#scroll)
@@ -142,11 +141,6 @@ This module allows you to set a nickname for your character (_for example: the n
 ### Parry-haste
 
 Tracks all parry-hastes caused by players in your raid with access to the targets that parried them. Note that this module only records data for bosses that actionly parry-haste.
-
-### Player Score
-
-A simple module that evaluates and scores the player performance in the raid, using a simple formula:
-`(damagedone x fact1 + healingdone x fact2 + mitigation x fact3) / damagetaken)`. fact1-3 are mutipliers that depend on the player's role (_damager, healer or tank_).
 
 ### Potions
 

@@ -75,10 +75,10 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 
 					local potions = newTable() -- holds used potions
 					for potionid, _ in pairs(potionIDs) do
-						local _, _, icon, _, _, _, _, _, _, _, spellid = UnitBuff(unit, GetSpellInfo(potionid))
+						local icon, _, _, _, _, _, _, _, spellid = select(3, UnitBuff(unit, GetSpellInfo(potionid)))
 						if spellid and potionIDs[spellid] then
 							-- instant recording doesn't work, so we delay it
-							Skada.After(1, PotionUsed, nil, nil, playerid, playername, nil, nil, nil, nil, spellid)
+							Skada.After(1, PotionUsed, nil, playerid, playername, nil, nil, nil, nil, spellid)
 							tinsert(potions, format(potionStr, icon))
 						end
 					end
@@ -290,7 +290,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		return tostring(set.potion or 0), set.potion or 0
+		return set.potion or 0
 	end
 
 	function mod:SetComplete(set)
