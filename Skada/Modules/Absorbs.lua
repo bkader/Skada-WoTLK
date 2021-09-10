@@ -458,8 +458,9 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 		function mod:CheckPreShields(event, set, timestamp)
 			if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped then
+				self:ZoneModifier()
 				local curtime = GetTime()
-				GroupIterator(function(unit)
+				GroupIterator(function(unit, owner)
 					if not UnitIsDeadOrGhost(unit) then
 						local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
 						for i = 1, 40 do
@@ -472,6 +473,8 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 								break -- nothing found
 							end
 						end
+
+						if owner ~= nil then return end -- ignore pets
 
 						-- passive shields.
 						local class = select(2, _G.UnitClass(unit))
