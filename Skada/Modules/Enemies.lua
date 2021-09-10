@@ -649,16 +649,6 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 		customUnitsTable = delTable(customUnitsTable)
 		customUnitsInfo = delTable(customUnitsInfo)
 	end
-
-	function mod:GetSetSummary(set)
-		local dtps, amount = getEnemiesDTPS(set)
-		return Skada:FormatValueText(
-			Skada:FormatNumber(amount),
-			self.metadata.columns.Damage,
-			Skada:FormatNumber(dtps),
-			self.metadata.columns.DTPS
-		), amount
-	end
 end)
 
 ---------------------------------------------------------------------------
@@ -931,16 +921,6 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
 	end
-
-	function mod:GetSetSummary(set)
-		local dps, amount = getEnemiesDPS(set)
-		return Skada:FormatValueText(
-			Skada:FormatNumber(amount),
-			self.metadata.columns.Damage,
-			Skada:FormatNumber(dps),
-			self.metadata.columns.DTPS
-		), amount
-	end
 end)
 
 ---------------------------------------------------------------------------
@@ -1137,15 +1117,5 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
-	end
-
-	function mod:GetSetSummary(set)
-		local hps, amount = getEnemiesHPS(set)
-		return Skada:FormatValueText(
-			Skada:FormatNumber(amount),
-			self.metadata.columns.Damage,
-			Skada:FormatNumber(hps),
-			self.metadata.columns.DTPS
-		), amount
 	end
 end)
