@@ -685,7 +685,7 @@ do
 		return (points and points > 0) and 3 or 2
 	end
 
-	local function GetSpecialization(isInspect, isPet)
+	local function GetSpecialization(isInspect, isPet, specGroup)
 		local currentSpecGroup = GetActiveTalentGroup(isInspect, isPet) or (specGroup or 1)
 		local points, specname, specid = 0, nil, nil
 
@@ -727,23 +727,22 @@ do
 					end
 				end
 			end
-
 			spec = specsTable[class][index]
 		end
 
 		return spec
 	end
 
-	local function GetSpecializationRole(specIndex)
-		return LGTRoleTable[LGT:GetUnitRole("player")] or "NONE"
+	local function GetSpecializationRole(unit)
+		return LGTRoleTable[LGT:GetUnitRole(unit or "player")] or "NONE"
 	end
 
 	local function UnitGroupRolesAssigned(unit)
-		return LGTRoleTable[LGT:GetUnitRole(unit)] or "NONE"
+		return LGTRoleTable[LGT:GetUnitRole(unit or "player")] or "NONE"
 	end
 
 	local function GetUnitRole(unit)
-		return LGTRoleTable[LGT:GetUnitRole(unit)] or "NONE"
+		return LGTRoleTable[LGT:GetUnitRole(unit or "player")] or "NONE"
 	end
 
 	local function GetGUIDRole(guid)
