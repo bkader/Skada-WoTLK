@@ -2114,32 +2114,35 @@ function Skada:CheckGroup(petsOnly)
 	end
 end
 
-function Skada:CheckZone()
-	local inInstance, instanceType = IsInInstance()
+do
+	local inInstance, isininstance, isinpvp
 
-	local isininstance = inInstance and (instanceType == "party" or instanceType == "raid")
-	local isinpvp = self.IsInPvP()
+	function Skada:CheckZone()
+		inInstance, self.instanceType = IsInInstance()
+		isininstance = inInstance and (self.instanceType == "party" or self.instanceType == "raid")
+		isinpvp = self.IsInPvP()
 
-	if isininstance and wasininstance ~= nil and not wasininstance and self.db.profile.reset.instance ~= 1 and self:CanReset() then
-		if self.db.profile.reset.instance == 3 then
-			self:ShowPopup(nil, true)
-		else
-			self:Reset()
+		if isininstance and wasininstance ~= nil and not wasininstance and self.db.profile.reset.instance ~= 1 and self:CanReset() then
+			if self.db.profile.reset.instance == 3 then
+				self:ShowPopup(nil, true)
+			else
+				self:Reset()
+			end
 		end
-	end
 
-	if self.db.profile.hidepvp then
-		if isinpvp then
-			self:SetActive(false)
-		elseif wasinpvp then
-			self:SetActive(true)
+		if self.db.profile.hidepvp then
+			if isinpvp then
+				self:SetActive(false)
+			elseif wasinpvp then
+				self:SetActive(true)
+			end
 		end
-	end
 
-	wasininstance = (isininstance == true)
-	wasinpvp = (isinpvp == true)
-	wasinparty = self.IsInGroup()
-	self.callbacks:Fire("SKADA_ZONE_CHECK")
+		wasininstance = (isininstance == true)
+		wasinpvp = (isinpvp == true)
+		wasinparty = self.IsInGroup()
+		self.callbacks:Fire("SKADA_ZONE_CHECK")
+	end
 end
 
 do
@@ -3478,7 +3481,7 @@ do
 	function Skada:Tick()
 		if not disabled and self.current then
 			self.callbacks:Fire("COMBAT_PLAYER_TICK", self.current, self.total)
-			if not (InCombatLockdown() and IsGroupInCombat()) then
+			if not InCombatLockdown() and not IsGroupInCombat() then
 				self:Debug("EndSegment: Tick")
 				self:EndSegment()
 			elseif not self.current.stopped then
@@ -3614,6 +3617,8 @@ do
 		if self.current and not self.current.started then
 			self.callbacks:Fire("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 			self.current.started = true
+			if self.instanceType == nil then self:CheckZone() end
+			self.current.type = self.instanceType or "unknown"
 		end
 
 		if self.current and self.db.profile.autostop then
