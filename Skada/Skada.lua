@@ -3367,6 +3367,7 @@ function Skada:EndSegment()
 	if not self.db.profile.onlykeepbosses or self.current.gotboss then
 		if self.current.mobname ~= nil and now - self.current.starttime > 5 then
 			self.current.endtime = self.current.endtime or now
+			self.current.time = max(0.1, self.current.endtime - self.current.starttime)
 			self.current.started, self.current.stopped = nil, nil
 
 			local setname = self.current.mobname
