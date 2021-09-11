@@ -4,7 +4,7 @@ _G.Skada = Skada
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
 Skada.version = GetAddOnMetadata("Skada", "Version")
 Skada.website = GetAddOnMetadata("Skada", "X-Website") or "https://github.com/bkader/Skada-WoTLK"
-Skada.discord = GetAddOnMetadata("Skada", "X-Discord") or "https://bitly.com/skada-rev"
+Skada.discord = GetAddOnMetadata("Skada", "X-Discord") or "https://bit.ly/skada-rev"
 Skada.locale = Skada.locale or GetLocale()
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
@@ -1922,6 +1922,8 @@ local function SlashCommandHandler(cmd)
 		Skada:OpenOptions()
 	elseif cmd == "clear" or cmd == "clean" then
 		Skada:CleanGarbage()
+	elseif cmd == "about" or cmd == "info" then
+		Skada:OpenOptions(nil, "about")
 	elseif cmd == "website" or cmd == "github" then
 		Skada:Printf("|cffffbb00%s|r", Skada.website)
 	elseif cmd == "discord" then
@@ -1970,6 +1972,7 @@ local function SlashCommandHandler(cmd)
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33measure|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33config|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33clean|r")
+		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33about|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33website|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33discord|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33debug|r")
@@ -2696,11 +2699,14 @@ function dataobj:OnClick(button)
 	end
 end
 
-function Skada:OpenOptions(win)
+function Skada:OpenOptions(win, tab)
 	ACD:SetDefaultSize("Skada", 610, 500)
 	if win then
 		ACD:Open("Skada")
 		ACD:SelectGroup("Skada", "windows", win.db.name)
+	elseif tab then
+		ACD:Open("Skada")
+		ACD:SelectGroup("Skada", tab)
 	elseif not ACD:Close("Skada") then
 		ACD:Open("Skada")
 	end
@@ -3102,7 +3108,7 @@ function Skada:OnInitialize()
 	local AceDBOptions = LibStub("AceDBOptions-3.0", true)
 	if AceDBOptions then
 		self.options.args.profiles = AceDBOptions:GetOptionsTable(self.db)
-		self.options.args.profiles.order = 999
+		self.options.args.profiles.order = 998
 	end
 
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("Skada", self.options)

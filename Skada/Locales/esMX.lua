@@ -1,4 +1,6 @@
-local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "esMX", false)
+--[[ Translators: Ícar#8167 / Septimun#8954 ]] --
+local AceLocale = LibStub("AceLocale-3.0")
+local L = AceLocale:NewLocale("Skada", "esES") or AceLocale:NewLocale("Skada", "esMX")
 if not L then return end
 
 L["A damage meter."] = "Un medidor de daño."
@@ -671,3 +673,15 @@ L["Enable this if you want to show module icons on windows and menus."] = "Activ
 L["Fix Combat Log"] = "Arreglar registro de combate"
 L["Keeps the combat log from breaking without munging it completely."] = "Evita que el registro de combate se rompa sin estropearlo por completo."
 L["Enable this if you want to ignore |cffffbb00%s|r."] = "Active esta opción si quiere ignorar |cffffbb00%s|r."
+-- about
+L["About"] = "Sobre"
+L["Author"] = "Autor"
+L["Category"] = "Categoría"
+L["Credits"] = "Créditos"
+L["Discord"] = "Discord"
+L["Donate"] = "Donar"
+L["Email"] = "Email"
+L["License"] = "Licencia"
+L["Localizations"] = "Idiomas"
+L["Version"] = "Versión"
+L["Website"] = "Sitio web"

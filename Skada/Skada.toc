@@ -14,13 +14,16 @@
 ## SavedVariables: SkadaDB
 ## SavedVariablesPerCharacter: SkadaCharDB
 ## DefaultState: enabled
-## Author: Zarnivoop, Kader
+## Author: Kader (|cff808080bkader#6361|r)
 ## Version: 1.8.69
-## X-License: MIT/X
+## X-Credits: Zarnivoop, WoTLK Community
 ## X-Category: Combat
+## X-License: MIT/X
+## X-Email: |cff20ff20bkader@mail.com|r
 ## X-Website: https://github.com/bkader/Skada-WoTLK
-## X-Discord: https://bitly.com/skada-rev
-## X-Email: bkader@email.com
+## X-Discord: |cff20ff20https://bit.ly/skada-rev|r
+## X-Localizations: meatgaga (CN), Ícar & Septimun (ES), Kader (FR), NGL (RU)
+## X-Donate: |cff0079c1PayPal|r or |cff246a96Paysera|r at |cff20ff20bkader@mail.com|r
 
 Embeds.xml
 Locales.xml

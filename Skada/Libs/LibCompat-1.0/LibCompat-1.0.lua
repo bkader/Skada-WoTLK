@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader)
 --
 
-local LibCompat, oldminor = LibStub:NewLibrary("LibCompat-1.0", 13)
+local LibCompat, oldminor = LibStub:NewLibrary("LibCompat-1.0", 14)
 if not LibCompat then return end
 
 LibCompat.embeds = LibCompat.embeds or {}
@@ -476,7 +476,7 @@ do
 	local classColorsTable
 	local colors = CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS
 
-	function LibCompat.GetClassColorsTable()
+	local function GetClassColorsTable()
 		if not classColorsTable then
 			-- add missing class color strings
 			colors.DEATHKNIGHT.colorStr = "ffc41f3b"
@@ -499,6 +499,23 @@ do
 
 		return classColorsTable
 	end
+
+	local function GetClassColorObj(class)
+		classColorsTable = classColorsTable or GetClassColorsTable()
+		return class and classColorsTable[class]
+	end
+
+	local function GetClassColor(class)
+		local obj = GetClassColorObj(class)
+		if obj then
+			return obj.r, obj.g, obj.b, obj.colorStr
+		end
+		return 1, 1, 1, "ffffffff"
+	end
+
+	LibCompat.GetClassColorsTable = GetClassColorsTable
+	LibCompat.GetClassColorObj = GetClassColorObj
+	LibCompat.GetClassColor = GetClassColor
 end
 
 -------------------------------------------------------------------------------
@@ -843,6 +860,8 @@ local mixins = {
 	-- misc util
 	"EscapeStr",
 	"GetClassColorsTable",
+	"GetClassColorObj",
+	"GetClassColor",
 	"Print",
 	"Printf"
 }

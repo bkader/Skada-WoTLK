@@ -217,15 +217,10 @@ Skada.options = {
 	end,
 	plugins = {},
 	args = {
-		discord = {
-			type = "header",
-			name = fmt("Discord Server: |c007289d9%s|r", Skada.discord),
-			order = 1
-		},
 		windows = {
 			type = "group",
 			name = L["Windows"],
-			order = 2,
+			order = 1,
 			args = {
 				create = {
 					type = "input",
@@ -264,7 +259,7 @@ Skada.options = {
 		resetoptions = {
 			type = "group",
 			name = L["Data Resets"],
-			order = 3,
+			order = 2,
 			get = function(i)
 				return Skada.db.profile.reset[i[#i]]
 			end,
@@ -317,7 +312,7 @@ Skada.options = {
 		tooltips = {
 			type = "group",
 			name = L["Tooltips"],
-			order = 4,
+			order = 3,
 			args = {
 				tooltips = {
 					type = "toggle",
@@ -363,7 +358,7 @@ Skada.options = {
 		generaloptions = {
 			type = "group",
 			name = L["General Options"],
-			order = 5,
+			order = 4,
 			args = {
 				mmbutton = {
 					type = "toggle",
@@ -609,13 +604,13 @@ Skada.options = {
 		columns = {
 			type = "group",
 			name = L["Columns"],
-			order = 6,
+			order = 5,
 			args = {}
 		},
 		disabled = {
 			type = "group",
 			name = L["Disabled Modules"],
-			order = 7,
+			order = 6,
 			width = "double",
 			get = function(i)
 				return Skada.db.profile.modulesBlocked[i[#i]]
@@ -647,12 +642,32 @@ Skada.options = {
 		modules = {
 			type = "group",
 			name = L["Modules"],
-			order = 8,
+			order = 7,
 			width = "double",
 			disabled = function()
 				return next(Skada.options.args.modules.args) == nil
 			end,
 			args = {}
+		},
+		about = {
+			type = "group",
+			name = L["About"],
+			order = 999,
+			args = {}
 		}
 	}
 }
+
+-- about about args
+for i, field in ipairs({"Version", "Author", "Category", "License", "Email", "Website", "Discord", "Credits", "Localizations", "Donate"}) do
+	local meta = GetAddOnMetadata("Skada", field) or GetAddOnMetadata("Skada", "X-" .. field)
+	if meta then
+		Skada.options.args.about.args[field] = {
+			type = "description",
+			name = format("|cffffd200%s|r:  %s\n", L[field], meta),
+			fontSize = "medium",
+			width = "double",
+			order = i
+		}
+	end
+end

@@ -674,3 +674,15 @@ L["Enable this if you want to show module icons on windows and menus."] = true
 L["Fix Combat Log"] = true
 L["Keeps the combat log from breaking without munging it completely."] = true
 L["Enable this if you want to ignore |cffffbb00%s|r."] = true
+-- about
+L["About"] = true
+L["Author"] = true
+L["Category"] = true
+L["Credits"] = true
+L["Discord"] = true
+L["Donate"] = true
+L["Email"] = true
+L["License"] = true
+L["Localizations"] = true
+L["Version"] = true
+L["Website"] = true
