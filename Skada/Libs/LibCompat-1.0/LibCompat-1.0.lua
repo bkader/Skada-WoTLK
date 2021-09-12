@@ -524,9 +524,8 @@ end
 do
 	local Timer = {}
 
-	local TickerPrototype = {}
+	local TickerPrototype, waitTable, tickerCache = {}, {}, nil
 	local TickerMetatable = {__index = TickerPrototype, __metatable = true}
-	local waitTable = {}
 
 	local waitFrame = LibCompat_TimerFrame or CreateFrame("Frame", "LibCompat_TimerFrame", UIParent)
 	waitFrame:SetScript("OnUpdate", function(self, elapsed)
@@ -541,16 +540,17 @@ do
 					ticker._delay = ticker._delay - elapsed
 					i = i + 1
 				else
-					ticker._callback(ticker, LibCompat.SafeUnpack(ticker._args or {}))
+					ticker._callback(ticker, LibCompat.SafeUnpack(ticker._args))
 
-					if ticker._remainingIterations == -1 then
+					if ticker._iterations == -1 then
 						ticker._delay = ticker._duration
 						i = i + 1
-					elseif ticker._remainingIterations > 1 then
-						ticker._remainingIterations = ticker._remainingIterations - 1
+						tickerCache = ticker
+					elseif ticker._iterations > 1 then
+						ticker._iterations = ticker._iterations - 1
 						ticker._delay = ticker._duration
 						i = i + 1
-					elseif ticker._remainingIterations == 1 then
+					elseif ticker._iterations == 1 then
 						tremove(waitTable, i)
 						total = total - 1
 					end
@@ -573,8 +573,10 @@ do
 	end
 
 	local function CreateTicker(duration, callback, iterations, ...)
-		local ticker = setmetatable({}, TickerMetatable)
-		ticker._remainingIterations = iterations or -1
+		local ticker = tickerCache or setmetatable({}, TickerMetatable)
+		tickerCache = nil
+
+		ticker._iterations = iterations or -1
 		ticker._duration = duration
 		ticker._delay = duration
 		ticker._callback = callback
@@ -602,7 +604,7 @@ do
 
 	LibCompat.After = function(duration, callback, ...)
 		AddDelayedCall({
-			_remainingIterations = 1,
+			_iterations = 1,
 			_delay = duration,
 			_callback = callback,
 			_args = LibCompat.SafePack(...)

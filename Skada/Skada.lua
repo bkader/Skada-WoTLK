@@ -20,8 +20,8 @@ local Translit = LibStub("LibTranslit-1.0", true)
 local tsort, tinsert, tremove, tmaxn = table.sort, table.insert, table.remove, table.maxn
 local next, pairs, ipairs, type = next, pairs, ipairs, type
 local tonumber, tostring, format, strsplit = tonumber, tostring, string.format, strsplit
-local floor, max, min = math.floor, math.max, math.min
-local band, bor, time, setmetatable = bit.band, bit.bor, time, setmetatable
+local floor, max, min, band, bor, time = math.floor, math.max, math.min, bit.band, bit.bor, time
+local setmetatable, newTable, delTable = setmetatable, Skada.newTable, Skada.delTable
 local GetNumPartyMembers, GetNumRaidMembers = GetNumPartyMembers, GetNumRaidMembers
 local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAffectingCombat, InCombatLockdown
 local UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected
@@ -29,7 +29,7 @@ local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
 local UnitGroupRolesAssigned, GetInspectSpecialization = Skada.UnitGroupRolesAssigned, Skada.GetInspectSpecialization
 local GetGroupTypeAndCount, GetNumGroupMembers = Skada.GetGroupTypeAndCount, Skada.GetNumGroupMembers
-local UnitIterator, IsGroupInCombat, IsGroupDead = Skada.UnitIterator, Skada.IsGroupInCombat, Skada.IsGroupDead
+local GetUnitIdFromGUID, UnitIterator, IsGroupInCombat, IsGroupDead = Skada.GetUnitIdFromGUID, Skada.UnitIterator, Skada.IsGroupInCombat, Skada.IsGroupDead
 
 local dataobj = LDB:NewDataObject("Skada", {
 	label = "Skada",
@@ -62,6 +62,7 @@ local check_for_join_and_leave
 
 -- list of players, pets and vehicles
 local players, pets, vehicles = {}, {}, {}
+local queuedFixes, queuedData
 
 -- list of feeds & selected feed
 local feeds, selectedfeed = {}
@@ -1306,7 +1307,7 @@ function Skada:find_player(set, playerid, playername, strict)
 		end
 
 		-- needed for certain bosses
-		local isboss, npcid, npcname = self:IsBoss(playerid, playername)
+		local isboss, _, npcname = self:IsBoss(playerid, playername)
 		if isboss then
 			player = {id = playerid, name = npcname or playername, class = "BOSS"}
 			set._playeridx[playerid] = player
@@ -1323,9 +1324,9 @@ function Skada:find_player(set, playerid, playername, strict)
 end
 
 do
-	local function fix_player(player, unit)
+	local function fix_player(ticker, player, unit)
 		if player.id and player.name then
-			unit = unit or Skada.GetUnitIdFromGUID(player.id)
+			unit = unit or GetUnitIdFromGUID(player.id)
 
 			if not player.class then
 				if Skada:IsPet(player.id, player.flags) then
@@ -1344,13 +1345,11 @@ do
 
 			-- if the player has been assigned a valid class,
 			-- we make sure to assign his/her role and spec
-			if Skada.validclass[player.class] and not (player.role or player.spec) then
-				if not player.role then
-					player.role = UnitGroupRolesAssigned(unit or player.name)
-				end
-				if not player.spec then
-					player.spec = GetInspectSpecialization(unit or player.name, player.class)
-				end
+			if Skada.validclass[player.class] then
+				-- the unit might not be available after reloading/relogging.
+				players[player.id] = players[player.id] or unit
+				player.role = (player.role == nil or player.role == "NONE") and UnitGroupRolesAssigned(unit) or player.role
+				player.spec = player.spec or GetInspectSpecialization(unit, player.class)
 			end
 		end
 	end
@@ -1373,7 +1372,7 @@ do
 				player.class = select(2, UnitClass(players[playerid]))
 			end
 
-			fix_player(player, players[playerid])
+			fix_player(nil, player, players[playerid])
 
 			for _, mode in self:IterateModes() do
 				if mode.AddPlayerAttributes ~= nil then
@@ -1392,12 +1391,21 @@ do
 		-- fix players created before their info was received
 		if (player.name == UNKNOWN and playername ~= UNKNOWN) or (player.name == player.id and playername ~= player.id) then
 			player.name = (player.id == self.myGUID or playerid == self.myGUID) and self.myName or playername
-			if not player.fixtimer then
-				player.fixtimer = self.NewTimer(3, function() fix_player(player, players[player.id]) end)
+		end
+
+		if player.spec == nil and Skada.validclass[player.class] then
+			if queuedData and queuedData[player.id] then
+				player.spec, player.role = unpack(queuedData[player.id])
+				queuedData[player.id] = nil -- no longer needed
+			elseif set.name == L["Current"] and not (queuedFixes and queuedFixes[player.id]) then
+				queuedFixes = queuedFixes or newTable()
+				queuedFixes[player.id] = self.NewTicker(3, fix_player, -1, player, players[player.id])
 			end
-		elseif player.hotfix then
-			player.fixtimer:Cancel()
-			player.fixtimer = nil
+		elseif queuedFixes and queuedFixes[player.id] then
+			queuedData = queuedData or newTable()
+			queuedData[player.id] = {player.spec, player.role}
+			queuedFixes[player.id]:Cancel()
+			queuedFixes[player.id] = nil -- no longer needed
 		end
 
 		-- total set has "last" always removed.
@@ -1506,7 +1514,11 @@ do
 		[32882] = LBB["Thorim"], -- Jormungar Behemoth
 		[33288] = LBB["Yogg-Saron"], -- Yogg-Saron
 		[33890] = LBB["Yogg-Saron"], -- Brain of Yogg-Saron
-		[33136] = LBB["Yogg-Saron"] -- Guardian of Yogg-Saron
+		[33136] = LBB["Yogg-Saron"], -- Guardian of Yogg-Saron
+		[33350] = LBB["Mimiron"], -- Mimiron
+		[33432] = LBB["Mimiron"], -- Leviathan Mk II
+		[33651] = LBB["Mimiron"], -- VX-001
+		[33670] = LBB["Mimiron"] -- Aerial Command Unit
 	}
 
 	-- checks if the provided guid is a boss
@@ -2803,7 +2815,7 @@ end
 -------------------------------------------------------------------------------
 
 function Skada:ApplyBorder(frame, texture, color, thickness, padtop, padbottom, padleft, padright)
-	local borderbackdrop = {}
+	local borderbackdrop = newTable()
 
 	if not frame.borderFrame then
 		frame.borderFrame = CreateFrame("Frame", nil, frame)
@@ -2821,6 +2833,7 @@ function Skada:ApplyBorder(frame, texture, color, thickness, padtop, padbottom, 
 
 	borderbackdrop.edgeSize = thickness
 	frame.borderFrame:SetBackdrop(borderbackdrop)
+	delTable(borderbackdrop)
 	if color then
 		frame.borderFrame:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
 	end
@@ -3108,7 +3121,7 @@ function Skada:OnInitialize()
 	local AceDBOptions = LibStub("AceDBOptions-3.0", true)
 	if AceDBOptions then
 		self.options.args.profiles = AceDBOptions:GetOptionsTable(self.db)
-		self.options.args.profiles.order = 998
+		self.options.args.profiles.order = 999
 	end
 
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("Skada", self.options)
@@ -3368,6 +3381,8 @@ end
 
 function Skada:EndSegment()
 	if not self.current then return end
+	delTable(queuedFixes)
+	delTable(queuedData)
 
 	local now = time()
 	if not self.db.profile.onlykeepbosses or self.current.gotboss then
@@ -3471,6 +3486,8 @@ function Skada:StopSegment()
 	if self.current then
 		self.current.stopped = true
 		self.current.endtime = time()
+		delTable(queuedFixes)
+		delTable(queuedData)
 	end
 end
 

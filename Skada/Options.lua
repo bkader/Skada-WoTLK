@@ -652,7 +652,7 @@ Skada.options = {
 		about = {
 			type = "group",
 			name = L["About"],
-			order = 999,
+			order = 998,
 			args = {}
 		}
 	}
