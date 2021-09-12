@@ -4,7 +4,8 @@
 -- @author: Kader B (https://github.com/bkader)
 --
 
-local LibCompat, oldminor = LibStub:NewLibrary("LibCompat-1.0", 14)
+local MAJOR, MINOR = "LibCompat-1.0", 14
+local LibCompat, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not LibCompat then return end
 
 LibCompat.embeds = LibCompat.embeds or {}
@@ -194,7 +195,7 @@ do
 	end
 
 	local function WithinRangeExclusive(val, minval, maxval)
-		return val > minval and value < maxval
+		return val > minval and val < maxval
 	end
 
 	LibCompat.Round = Round
@@ -238,7 +239,7 @@ do
 		end
 	end
 
-	local UnitIterator, roster, raid
+	local UnitIterator, roster, _
 	do
 		local rmem, pmem, step, count
 
@@ -307,7 +308,7 @@ do
 	end
 
 	local function IsGroupDead()
-		roster, raid = UnitIterator()
+		roster, _ = UnitIterator()
 		for unit in roster do
 			if not UnitIsDeadOrGhost(unit) then
 				return false
@@ -317,7 +318,7 @@ do
 	end
 
 	local function IsGroupInCombat()
-		roster, raid = UnitIterator()
+		roster, _ = UnitIterator()
 		for unit in roster do
 			if UnitAffectingCombat(unit) then
 				return true
@@ -327,7 +328,7 @@ do
 	end
 
 	local function GroupIterator(func, ...)
-		roster, raid = UnitIterator()
+		roster, _ = UnitIterator()
 		for unit, owner in roster do
 			LibCompat.QuickDispatch(func, unit, owner, ...)
 		end
@@ -352,7 +353,7 @@ do
 			return "mouseover"
 		end
 
-		roster, raid = UnitIterator()
+		roster, _ = UnitIterator()
 		for unit in roster do
 			if UnitGUID(unit) == guid then
 				return unit
@@ -389,7 +390,7 @@ do
 		if unit and UnitExists(unit) then
 			health, maxhealth = UnitHealth(unit), UnitHealthMax(unit)
 			if health and maxhealth then
-				percent = 100 * health / max(1, maxhealth), health, maxhealth
+				percent = 100 * health / max(1, maxhealth)
 			end
 		end
 		return percent, health, maxhealth
@@ -401,7 +402,7 @@ do
 		if unit and UnitExists(unit) then
 			power, maxpower = UnitPower(unit, powerType), UnitPowerMax(unit, powerType)
 			if power and maxpower then
-				percent = 100 * power / max(1, maxpower), power, maxpower
+				percent = 100 * power / max(1, maxpower)
 			end
 		end
 		return percent, power, maxpower
@@ -522,8 +523,6 @@ end
 -- C_Timer mimic
 
 do
-	local Timer = {}
-
 	local TickerPrototype, waitTable, tickerCache = {}, {}, nil
 	local TickerMetatable = {__index = TickerPrototype, __metatable = true}
 
@@ -594,15 +593,7 @@ do
 		self._cancelled = true
 	end
 
-	LibCompat.CancelAllTimers = function()
-		for i = 1, #waitTable do
-			if waitTable[i] and waitTable[i].Cancel and not waitTable[i]._cancelled then
-				waitTable[i]:Cancel()
-			end
-		end
-	end
-
-	LibCompat.After = function(duration, callback, ...)
+	local function After(duration, callback, ...)
 		AddDelayedCall({
 			_iterations = 1,
 			_delay = duration,
@@ -611,13 +602,26 @@ do
 		})
 	end
 
-	LibCompat.NewTimer = function(duration, callback, ...)
+	local function NewTimer(duration, callback, ...)
 		return CreateTicker(duration, callback, 1, ...)
 	end
 
-	LibCompat.NewTicker = function(duration, callback, iterations, ...)
+	local function NewTicker(duration, callback, iterations, ...)
 		return CreateTicker(duration, callback, iterations, ...)
 	end
+
+	local function CancelAllTimers()
+		for i = 1, #waitTable do
+			if waitTable[i] and waitTable[i].Cancel and not waitTable[i]._cancelled then
+				waitTable[i]:Cancel()
+			end
+		end
+	end
+
+	LibCompat.After = After
+	LibCompat.NewTimer = NewTimer
+	LibCompat.NewTicker = NewTicker
+	LibCompat.CancelAllTimers = CancelAllTimers
 end
 
 -------------------------------------------------------------------------------
