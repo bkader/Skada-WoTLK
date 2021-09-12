@@ -1328,6 +1328,11 @@ do
 		if player.id and player.name then
 			unit = unit or GetUnitIdFromGUID(player.id)
 
+			-- fix "Unknown" player or player name shown as guid
+			if player.name == UNKNOWN or player.name == player.id then
+				player.name = UnitName(unit)
+			end
+
 			if not player.class then
 				if Skada:IsPet(player.id, player.flags) then
 					player.class = "PET"
@@ -1338,6 +1343,7 @@ do
 				elseif Skada:IsPlayer(player.id, player.flags, player.name) then
 					local class = select(2, UnitClass(unit or player.name))
 					player.class = class or Skada.GetClassFromGUID(player.id)
+					player.name = player.name or select(6, GetPlayerInfoByGUID(player.id))
 				else
 					player.class = "UNKNOWN"
 				end
@@ -1346,7 +1352,6 @@ do
 			-- if the player has been assigned a valid class,
 			-- we make sure to assign his/her role and spec
 			if Skada.validclass[player.class] then
-				-- the unit might not be available after reloading/relogging.
 				players[player.id] = players[player.id] or unit
 				player.role = (player.role == nil or player.role == "NONE") and UnitGroupRolesAssigned(unit) or player.role
 				player.spec = player.spec or GetInspectSpecialization(unit, player.class)
@@ -1361,9 +1366,7 @@ do
 		local player = self:find_player(set, playerid, playername, true)
 
 		if not player then
-			if not playername then
-				return
-			end
+			if not playername then return end
 
 			player = {id = playerid, name = playername, flags = playerflags, time = 0}
 
@@ -1389,13 +1392,9 @@ do
 		end
 
 		-- fix players created before their info was received
-		if (player.name == UNKNOWN and playername ~= UNKNOWN) or (player.name == player.id and playername ~= player.id) then
-			player.name = (player.id == self.myGUID or playerid == self.myGUID) and self.myName or playername
-		end
-
-		if player.spec == nil and Skada.validclass[player.class] then
+		if (player.name == UNKNOWN or player.name == player.id) or (player.spec == nil and Skada.validclass[player.class]) then
 			if queuedData and queuedData[player.id] then
-				player.spec, player.role = unpack(queuedData[player.id])
+				player.name, player.class, player.spec, player.role = unpack(queuedData[player.id])
 				queuedData[player.id] = nil -- no longer needed
 			elseif set.name == L["Current"] and not (queuedFixes and queuedFixes[player.id]) then
 				queuedFixes = queuedFixes or newTable()
@@ -1403,7 +1402,7 @@ do
 			end
 		elseif queuedFixes and queuedFixes[player.id] then
 			queuedData = queuedData or newTable()
-			queuedData[player.id] = {player.spec, player.role}
+			queuedData[player.id] = {player.name, player.class, player.spec, player.role}
 			queuedFixes[player.id]:Cancel()
 			queuedFixes[player.id] = nil -- no longer needed
 		end
