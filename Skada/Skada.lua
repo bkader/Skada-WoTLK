@@ -160,7 +160,7 @@ end
 
 -- returns the selected set time.
 function Skada:GetSetTime(set)
-	return max(0.1, set and set.time or 0)
+	return set and max(set.time > 0 and set.time or (time() - set.starttime), 0.1) or 0
 end
 
 -- returns a formmatted set time
@@ -3425,7 +3425,9 @@ function Skada:EndSegment()
 	end
 
 	self.last = self.current
+	self.total.time = self.total.time + self.current.time
 	self.current = nil
+
 	for _, player in self:IteratePlayers(self.total) do
 		player.last = nil
 	end
@@ -3485,6 +3487,7 @@ function Skada:StopSegment()
 	if self.current then
 		self.current.stopped = true
 		self.current.endtime = time()
+		self.current.time = max(self.current.endtime - self.current.starttime, 0.1)
 		delTable(queuedFixes)
 		delTable(queuedData)
 	end
@@ -3494,6 +3497,7 @@ function Skada:ResumeSegment()
 	if self.current and self.current.stopped then
 		self.current.stopped = nil
 		self.current.endtime = nil
+		self.current.time = 0
 	end
 end
 
@@ -3502,15 +3506,10 @@ do
 	local deathcounter, startingmembers = 0, 0
 
 	function Skada:Tick()
-		if not disabled and self.current then
-			self.callbacks:Fire("COMBAT_PLAYER_TICK", self.current, self.total)
-			if not InCombatLockdown() and not IsGroupInCombat() then
-				self:Debug("EndSegment: Tick")
-				self:EndSegment()
-			elseif not self.current.stopped then
-				self.current.time = self.current.time + 1
-				self.total.time = self.total.time + 1
-			end
+		self.callbacks:Fire("COMBAT_PLAYER_TICK", self.current, self.total)
+		if not disabled and self.current and not InCombatLockdown() and not IsGroupInCombat() then
+			self:Debug("EndSegment: Tick")
+			self:EndSegment()
 		end
 	end
 
