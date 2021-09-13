@@ -8,6 +8,7 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 	local type, time = type, time
 	local strlen, strfind, strgsub = string.len, string.find, string.gsub
 	local UnitGUID, UnitName = UnitGUID, UnitName
+	local NewTimer = Skada.NewTimer
 	local CheckNickname
 
 	do
@@ -67,7 +68,7 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 	function mod:OnEvent(event)
 		if self.sendCooldown > time() then
 			if not self.sendTimer or self.sendTimer._cancelled then
-				self.sendTimer = Skada.NewTimer(30, function() self:SendNickname() end)
+				self.sendTimer = NewTimer(30, function() self:SendNickname() end)
 			end
 		else
 			self:SendNickname()

@@ -30,6 +30,7 @@ local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
 local UnitGroupRolesAssigned, GetInspectSpecialization = Skada.UnitGroupRolesAssigned, Skada.GetInspectSpecialization
 local GetGroupTypeAndCount, GetNumGroupMembers = Skada.GetGroupTypeAndCount, Skada.GetNumGroupMembers
 local GetUnitIdFromGUID, UnitIterator, IsGroupInCombat, IsGroupDead = Skada.GetUnitIdFromGUID, Skada.UnitIterator, Skada.IsGroupInCombat, Skada.IsGroupDead
+local After, NewTimer, NewTicker, CancelTimer = Skada.After, Skada.NewTimer, Skada.NewTicker, Skada.CancelTimer
 
 local dataobj = LDB:NewDataObject("Skada", {
 	label = "Skada",
@@ -160,7 +161,7 @@ end
 
 -- returns the selected set time.
 function Skada:GetSetTime(set)
-	return set and max(set.time > 0 and set.time or (time() - set.starttime), 0.1) or 0
+	return max(0.1, set and set.time or 0)
 end
 
 -- returns a formmatted set time
@@ -1398,13 +1399,12 @@ do
 				queuedData[player.id] = nil -- no longer needed
 			elseif set.name == L["Current"] and not (queuedFixes and queuedFixes[player.id]) then
 				queuedFixes = queuedFixes or newTable()
-				queuedFixes[player.id] = self.NewTicker(3, fix_player, -1, player, players[player.id])
+				queuedFixes[player.id] = NewTicker(3, fix_player, -1, player, players[player.id])
 			end
 		elseif queuedFixes and queuedFixes[player.id] then
 			queuedData = queuedData or newTable()
 			queuedData[player.id] = {player.name, player.class, player.spec, player.role}
-			queuedFixes[player.id]:Cancel()
-			queuedFixes[player.id] = nil -- no longer needed
+			queuedFixes[player.id] = CancelTimer(queuedFixes[player.id]) -- no longer needed
 		end
 
 		-- total set has "last" always removed.
@@ -1709,7 +1709,7 @@ end
 function Skada:DismissPet(petGUID, delay)
 	if petGUID and pets[petGUID] then
 		-- delayed for a reason (2 x MAINMENU_SLIDETIME).
-		self.After(delay or 0.6, function() pets[petGUID] = nil end)
+		After(delay or 0.6, function() pets[petGUID] = nil end)
 	end
 end
 
@@ -2164,10 +2164,7 @@ do
 
 	function checkVersion()
 		Skada:SendComm(nil, nil, "VersionCheck", Skada.version)
-		if version_timer then
-			version_timer:Cancel()
-			version_timer = nil
-		end
+		version_timer = CancelTimer(version_timer)
 	end
 
 	function convertVersion(ver)
@@ -2231,7 +2228,7 @@ do
 		end
 		if count ~= version_count then
 			if count > 1 and count > version_count then
-				version_timer = version_timer or self.NewTimer(10, checkVersion)
+				version_timer = version_timer or NewTimer(10, checkVersion)
 			end
 			version_count = count
 		end
@@ -2290,7 +2287,7 @@ function Skada:Reset(force)
 		self.char.sets = wipe(self.char.sets or {})
 		self.char.total = nil
 		self:Reset()
-		self.After(3, Skada.ReloadSettings)
+		After(3, self.ReloadSettings)
 		return
 	end
 
@@ -3223,8 +3220,8 @@ function Skada:OnEnable()
 		self.modulelist = nil
 	end
 
-	self.After(2, self.ApplySettings)
-	self.After(3, self.CheckMemory)
+	After(2, self.ApplySettings)
+	After(3, self.CheckMemory)
 
 	if _G.BigWigs then
 		self:RegisterMessage("BigWigs_Message", "BigWigs")
@@ -3236,15 +3233,15 @@ function Skada:OnEnable()
 		self.bossmod = nil
 	end
 
-	self.After(1, function()
+	After(1, function()
 		self:CheckZone()
 		self:CheckGroup()
 	end)
 	if not wasinparty then
-		self.After(2, check_for_join_and_leave)
+		After(2, check_for_join_and_leave)
 	end
 
-	version_timer = self.NewTimer(10, checkVersion)
+	version_timer = NewTimer(10, checkVersion)
 end
 
 function Skada:BigWigs(_, _, event, message)
@@ -3425,9 +3422,7 @@ function Skada:EndSegment()
 	end
 
 	self.last = self.current
-	self.total.time = self.total.time + self.current.time
 	self.current = nil
-
 	for _, player in self:IteratePlayers(self.total) do
 		player.last = nil
 	end
@@ -3466,28 +3461,15 @@ function Skada:EndSegment()
 
 	self:UpdateDisplay(true)
 
-	if update_timer then
-		if not update_timer._cancelled then
-			update_timer:Cancel()
-		end
-		update_timer = nil
-	end
-
-	if tick_timer then
-		if not tick_timer._cancelled then
-			tick_timer:Cancel()
-		end
-		tick_timer = nil
-	end
-
-	self.After(3, Skada.CheckMemory)
+	update_timer = CancelTimer(update_timer)
+	tick_timer = CancelTimer(tick_timer)
+	After(3, Skada.CheckMemory)
 end
 
 function Skada:StopSegment()
 	if self.current then
 		self.current.stopped = true
 		self.current.endtime = time()
-		self.current.time = max(self.current.endtime - self.current.starttime, 0.1)
 		delTable(queuedFixes)
 		delTable(queuedData)
 	end
@@ -3497,7 +3479,6 @@ function Skada:ResumeSegment()
 	if self.current and self.current.stopped then
 		self.current.stopped = nil
 		self.current.endtime = nil
-		self.current.time = 0
 	end
 end
 
@@ -3506,21 +3487,22 @@ do
 	local deathcounter, startingmembers = 0, 0
 
 	function Skada:Tick()
-		self.callbacks:Fire("COMBAT_PLAYER_TICK", self.current, self.total)
-		if not disabled and self.current and not InCombatLockdown() and not IsGroupInCombat() then
-			self:Debug("EndSegment: Tick")
-			self:EndSegment()
+		if not disabled and self.current then
+			self.callbacks:Fire("COMBAT_PLAYER_TICK", self.current, self.total)
+			if not InCombatLockdown() and not IsGroupInCombat() then
+				self:Debug("EndSegment: Tick")
+				self:EndSegment()
+			elseif not self.current.stopped then
+				self.current.time = self.current.time + 1
+				self.total.time = self.total.time + 1
+			end
 		end
 	end
 
 	function Skada:StartCombat()
 		deathcounter = 0
 		startingmembers = GetNumGroupMembers()
-
-		if tentativehandle and not tentativehandle._cancelled then
-			tentativehandle:Cancel()
-			tentativehandle = nil
-		end
+		tentativehandle = CancelTimer(tentativehandle)
 
 		if update_timer then
 			self:Debug("EndSegment: StartCombat")
@@ -3570,8 +3552,8 @@ do
 
 		self:UpdateDisplay(true)
 
-		update_timer = self.NewTicker(self.db.profile.updatefrequency or 0.25, function() self:UpdateDisplay() end)
-		tick_timer = self.NewTicker(1, function() self:Tick() end)
+		update_timer = NewTicker(self.db.profile.updatefrequency or 0.25, function() self:UpdateDisplay() end)
+		tick_timer = NewTicker(1, function() self:Tick() end)
 	end
 
 	-- list of combat events that we don't care about
@@ -3627,7 +3609,7 @@ do
 					self.total = self:CreateSet(L["Total"], now)
 				end
 
-				tentativehandle = self.NewTimer(self.db.profile.tentativetimer or 3, function()
+				tentativehandle = NewTimer(self.db.profile.tentativetimer or 3, function()
 					tentative = nil
 					tentativehandle = nil
 					self.current = nil
@@ -3708,8 +3690,7 @@ do
 					if tentative ~= nil then
 						tentative = tentative + 1
 						if tentative == 5 then
-							tentativehandle:Cancel()
-							tentativehandle = nil
+							tentativehandle = CancelTimer(tentativehandle)
 							self:Debug("StartCombat: tentative combat")
 							self:StartCombat()
 						end
@@ -3754,7 +3735,7 @@ do
 		if self.current and self.current.gotboss and (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") then
 			if dstName and self.current.mobname == dstName then
 				local set = self.current -- catch it before it goes away
-				self.After(self.db.profile.updatefrequency or 0.25, function()
+				After(self.db.profile.updatefrequency or 0.25, function()
 					if set and set.success == nil then
 						set.success = true
 						self.callbacks:Fire("COMBAT_BOSS_DEFEATED", set)

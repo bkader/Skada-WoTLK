@@ -523,7 +523,7 @@ end
 -- C_Timer mimic
 
 do
-	local TickerPrototype, waitTable, tickerCache = {}, {}, nil
+	local TickerPrototype, waitTable = {}, {}
 	local TickerMetatable = {__index = TickerPrototype, __metatable = true}
 
 	local waitFrame = LibCompat_TimerFrame or CreateFrame("Frame", "LibCompat_TimerFrame", UIParent)
@@ -544,7 +544,6 @@ do
 					if ticker._iterations == -1 then
 						ticker._delay = ticker._duration
 						i = i + 1
-						tickerCache = ticker
 					elseif ticker._iterations > 1 then
 						ticker._iterations = ticker._iterations - 1
 						ticker._delay = ticker._duration
@@ -572,8 +571,7 @@ do
 	end
 
 	local function CreateTicker(duration, callback, iterations, ...)
-		local ticker = tickerCache or setmetatable({}, TickerMetatable)
-		tickerCache = nil
+		local ticker = setmetatable({}, TickerMetatable)
 
 		ticker._iterations = iterations or -1
 		ticker._duration = duration
@@ -610,18 +608,17 @@ do
 		return CreateTicker(duration, callback, iterations, ...)
 	end
 
-	local function CancelAllTimers()
-		for i = 1, #waitTable do
-			if waitTable[i] and waitTable[i].Cancel and not waitTable[i]._cancelled then
-				waitTable[i]:Cancel()
-			end
+	local function CancelTimer(ticker)
+		if ticker and type(ticker.Cancel) == "function" then
+			ticker:Cancel()
 		end
+		return nil -- return nil to assign input reference
 	end
 
 	LibCompat.After = After
 	LibCompat.NewTimer = NewTimer
 	LibCompat.NewTicker = NewTicker
-	LibCompat.CancelAllTimers = CancelAllTimers
+	LibCompat.CancelTimer = CancelTimer
 end
 
 -------------------------------------------------------------------------------
@@ -859,7 +856,7 @@ local mixins = {
 	"After",
 	"NewTimer",
 	"NewTicker",
-	"CancelAllTimers",
+	"CancelTimer",
 	-- spell util
 	"GetSpellInfo",
 	"GetSpellLink",

@@ -7,6 +7,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 	local select, band, format = select, bit.band, string.format
 	local UnitExists, UnitName, UnitClass = UnitExists, UnitName, UnitClass
 	local GetSpellLink, GetSpellInfo = Skada.GetSpellLink, Skada.GetSpellInfo
+	local After, NewTimer = Skada.After, Skada.NewTimer
 
 	local BITMASK_GROUP = Skada.BITMASK_GROUP or bit.bor(COMBATLOG_OBJECT_AFFILIATION_MINE, COMBATLOG_OBJECT_AFFILIATION_PARTY, COMBATLOG_OBJECT_AFFILIATION_RAID)
 	local pull_timer, channelEvents, fofrostmourne
@@ -69,7 +70,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 				-- the segment should be flagged as success.
 				if Skada.current and not Skada.current.success then
 					local set = Skada.current -- catch it before it goes away
-					Skada.After(Skada.db.profile.updatefrequency or 0.25, function()
+					After(Skada.db.profile.updatefrequency or 0.25, function()
 						set.success = true
 						Skada.callbacks:Fire("COMBAT_BOSS_DEFEATED", set)
 					end)
@@ -117,7 +118,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 
 					if puller then
 						local link = (eventtype == "SWING_DAMAGE") and GetSpellLink(6603) or GetSpellLink(select(1, ...)) or GetSpellInfo(select(1, ...))
-						pull_timer = Skada.NewTimer(0.5, function() WhoPulled(pull_timer) end)
+						pull_timer = NewTimer(0.5, WhoPulled)
 						pull_timer.HitBy = format(L["|cffffff00First Hit|r: %s from %s"], link or "", puller)
 					end
 				end
@@ -309,7 +310,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 			end
 
 			Skada:Debug("CombatLogClearEntries: Tweaks")
-			Skada.After(0.1, CombatLogClearEntries)
+			After(0.1, CombatLogClearEntries)
 		end
 
 		local function OnEvent(self, event, ...)
@@ -324,7 +325,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 			elseif event == "ZONE_CHANGED_NEW_AREA" then
 				local zt = select(2, IsInInstance())
 				if zonetype and zt ~= zonetype then
-					Skada.After(0.5, CombatLogClearEntries)
+					After(0.5, CombatLogClearEntries)
 				end
 				zonetype = zt
 			end
@@ -332,7 +333,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 
 		function mod:COMBAT_PLAYER_ENTER()
 			if Skada.db.profile.combatlogfix then
-				Skada.After(0.5, CombatLogClearEntries)
+				After(0.5, CombatLogClearEntries)
 			end
 		end
 
@@ -470,7 +471,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 
 	function mod:BossDefeated(event, set)
 		if event == "COMBAT_BOSS_DEFEATED" and set and not set.stopped then
-			Skada.After(Skada.db.profile.smartwait or 5, function()
+			After(Skada.db.profile.smartwait or 5, function()
 				if not set.endtime then
 					Skada:Print(L["Smart Stop"])
 					Skada:StopSegment()

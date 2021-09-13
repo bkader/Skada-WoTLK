@@ -9,7 +9,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	-- cache frequently used globals
 	local pairs, select, tconcat = pairs, select, table.concat
 	local format, strsub, tostring = string.format, string.sub, tostring
-	local GetItemInfo, GetSpellInfo = GetItemInfo, Skada.GetSpellInfo
+	local GetItemInfo, GetSpellInfo, After = GetItemInfo, Skada.GetSpellInfo, Skada.After
 	local GroupIterator = Skada.GroupIterator
 	local UnitExists, UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
 	local UnitGUID, UnitName = UnitGUID, UnitName
@@ -78,7 +78,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 						local icon, _, _, _, _, _, _, _, spellid = select(3, UnitBuff(unit, GetSpellInfo(potionid)))
 						if spellid and potionIDs[spellid] then
 							-- instant recording doesn't work, so we delay it
-							Skada.After(1, PotionUsed, nil, playerid, playername, nil, nil, nil, nil, spellid)
+							After(1, PotionUsed, nil, playerid, playername, nil, nil, nil, nil, spellid)
 							tinsert(potions, format(potionStr, icon))
 						end
 					end
