@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0", 14
+local MAJOR, MINOR = "LibCompat-1.0", 15
 local LibCompat, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not LibCompat then return end
 
@@ -757,6 +757,17 @@ do
 		return LGTRoleTable[LGT:GetUnitRole(unit or "player")] or "NONE"
 	end
 
+	local function GetSpecializationInfo(specIndex, isInspect, isPet, specGroup)
+		local name, icon, _, background = GetTalentTabInfo(specIndex, isInspect, isPet, specGroup)
+		local id, role
+		if isInspect and UnitExists("target") then
+			id, role = GetInspectSpecialization("target"), GetSpecializationRole("target")
+		else
+			id, role = GetInspectSpecialization("player"), GetSpecializationRole("player")
+		end
+		return id, name, nil, icon, background, role
+	end
+
 	local function UnitGroupRolesAssigned(unit)
 		return LGTRoleTable[LGT:GetUnitRole(unit or "player")] or "NONE"
 	end
@@ -772,10 +783,19 @@ do
 	LibCompat.GetSpecialization = GetSpecialization
 	LibCompat.GetInspectSpecialization = GetInspectSpecialization
 	LibCompat.GetSpecializationRole = GetSpecializationRole
+	LibCompat.GetSpecializationInfo = GetSpecializationInfo
+
 	LibCompat.UnitGroupRolesAssigned = UnitGroupRolesAssigned
 	LibCompat.GetUnitRole = UnitGroupRolesAssigned
 	LibCompat.GetGUIDRole = GetGUIDRole
 	LibCompat.GetUnitSpec = GetInspectSpecialization
+
+	-- functions that simply replaced other api functions
+	LibCompat.GetNumSpecializations = GetNumTalentTabs
+	LibCompat.GetNumSpecGroups = GetNumTalentGroups
+	LibCompat.GetNumUnspentTalents = GetUnspentTalentPoints
+	LibCompat.GetActiveSpecGroup = GetActiveTalentGroup
+	LibCompat.SetActiveSpecGroup = SetActiveTalentGroup
 end
 
 -------------------------------------------------------------------------------
@@ -848,8 +868,14 @@ local mixins = {
 	"GetUnitSpec", -- backward compatibility
 	"GetSpecialization",
 	"GetInspectSpecialization",
-	"UnitGroupRolesAssigned",
 	"GetSpecializationRole",
+	"GetNumSpecializations",
+	"GetSpecializationInfo",
+	"UnitGroupRolesAssigned",
+	"GetNumSpecGroups",
+	"GetNumUnspentTalents",
+	"GetActiveSpecGroup",
+	"SetActiveSpecGroup",
 	"GetUnitRole",
 	"GetGUIDRole",
 	-- timer util
@@ -870,7 +896,7 @@ local mixins = {
 }
 
 function LibCompat:Embed(target)
-	for k, v in pairs(mixins) do
+	for _, v in pairs(mixins) do
 		target[v] = self[v]
 	end
 	target.locale = target.locale or GetLocale()
