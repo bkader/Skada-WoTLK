@@ -624,7 +624,7 @@ do
 
 					if data.spec and win.db.specicons and specicons[data.spec] then
 						bar:ShowIcon()
-						bar:SetIconWithCoord(specicons[data.spec], {0.065, 0.935, 0.065, 0.935})
+						bar:SetIcon(specicons[data.spec])
 					elseif data.role and data.role ~= "NONE" and win.db.roleicons then
 						bar:ShowIcon()
 						bar:SetIconWithCoord(roleiconfile, roleicontcoords[data.role])

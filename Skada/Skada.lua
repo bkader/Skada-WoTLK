@@ -2555,11 +2555,11 @@ do
 			elseif fmt == 3 then
 				timelabel = date("%H:%M", starttime) .. " " .. duration
 			elseif fmt == 4 then
-				timelabel = date("%I:%M", starttime) .. " " .. duration
+				timelabel = date("%I:%M %p", starttime) .. " " .. duration
 			elseif fmt == 5 then
 				timelabel = date("%H:%M", starttime) .. " - " .. date("%H:%M", endtime)
 			elseif fmt == 6 then
-				timelabel = date("%I:%M", starttime) .. " - " .. date("%I:%M", endtime)
+				timelabel = date("%I:%M %p", starttime) .. " - " .. date("%I:%M %p", endtime)
 			elseif fmt == 7 then
 				timelabel = date("%H:%M:%S", starttime) .. " - " .. date("%H:%M:%S", endtime)
 			elseif fmt == 8 then
@@ -2570,19 +2570,17 @@ do
 		local comb
 		if #namelabel == 0 or #timelabel == 0 then
 			comb = namelabel .. timelabel
-		elseif timelabel:match("^%p") then
-			comb = namelabel .. " " .. timelabel
 		else
-			comb = namelabel .. ": " .. timelabel
+			comb = namelabel .. (timelabel:match("^%p") and " " or ": ") .. timelabel
 		end
 
 		return comb, namelabel, timelabel
 	end
 
 	function Skada:SetLabelFormats()
-		local ret, start = {}, 1000007900
+		local ret, start = {}, 1631547006
 		for i = 1, numsetfmts do
-			ret[i] = SetLabelFormat("Hogger", start, start + 380, i)
+			ret[i] = SetLabelFormat(LBB["Hogger"], start, start + 380, i)
 		end
 		return ret
 	end

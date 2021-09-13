@@ -6,7 +6,7 @@
 
 I am simply a huge fan of **Skada**, I prefer it to other damage meters for several reasons. No need to judge me, it's after all a personal preference.
 
-## How to install
+## IMPORTANT: How to install
 
 1. If you used the default on **Skada** before, please make sure to delete all its files from `Interface\AddOns` folder as well as all its _SavedVariables_ from `WTF` folder (_just delete all `Skada.lua` and `Skada.lua.bak` for this folder. Use the search box for quick delete_). If you are new, skip this step.
 2. [Download the package](https://github.com/bkader/Skada-WoTLK/archive/refs/heads/main.zip).

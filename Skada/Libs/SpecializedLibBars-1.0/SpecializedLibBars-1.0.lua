@@ -1228,7 +1228,7 @@ do
 		if icon then
 			self:ShowIcon()
 		end
-		self.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+		self.icon:SetTexCoord(0.065, 0.935, 0.065, 0.935)
 
 		-- Lame frame solely used for handling mouse input on icon.
 		self.iconFrame = self.iconFrame or CreateFrame("Frame", nil, self)
