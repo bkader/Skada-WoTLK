@@ -941,7 +941,7 @@ do
 		g:SetBackdropColor(bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a or 1)
 
 		if FlyPaper then
-			if p.sticky and not p.hidden then
+			if p.sticky then
 				FlyPaper.AddFrame("Skada", p.name, g)
 			else
 				FlyPaper.RemoveFrame("Skada", p.name)
