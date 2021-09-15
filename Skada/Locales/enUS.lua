@@ -595,6 +595,9 @@ L["Fails"] = true
 L["%s's fails"] = true
 L["Player's failed events"] = true
 L["Event's failed players"] = true
+L["Report Fails"] = true
+L["Reports the group fails at the end of combat if there are any."] = true
+L["Ignored Events"] = true
 -- interrupts module lines --
 L["Interrupts"] = true
 L["Interrupt spells"] = true

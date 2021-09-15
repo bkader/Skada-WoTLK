@@ -13,7 +13,8 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	local pairs, ipairs = pairs, ipairs
 	local tostring, format, tContains = tostring, string.format, tContains
 	local GetSpellInfo, UnitGUID = Skada.GetSpellInfo or GetSpellInfo, UnitGUID
-	local failevents, tankevents = LibFail:GetSupportedEvents()
+	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
+	local failevents, tankevents = LibFail:GetSupportedEvents(), LibFail:GetFailsWhereTanksDoNotFail()
 	local _
 
 	-- spells in the following table will be ignored.
@@ -23,7 +24,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 		if (spellid and tContains(ignoredSpells, spellid)) or not set then return end
 
 		local player = Skada:find_player(set, playerid, playername)
-		if player and (player.role ~= "TANK" or not tankevents[event]) then
+		if player and (player.role ~= "TANK" or not tContains(tankevents, event)) then
 			player.fail = (player.fail or 0) + 1
 			set.fail = (set.fail or 0) + 1
 
@@ -35,7 +36,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	end
 
 	local function onFail(event, who, failtype)
-		if event and who then
+		if who and event and not Skada.db.profile.modules.ignoredfails[event] then
 			local spellid = LibFail:GetEventSpellId(event)
 			if spellid then
 				local unitGUID = UnitGUID(who)
@@ -180,21 +181,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 		end
 	end
 
-	function mod:OnInitialize()
-		tankevents = {}
-		for _, event in ipairs(LibFail:GetFailsWhereTanksDoNotFail()) do
-			tankevents[event] = true
-		end
-		for _, event in ipairs(failevents) do
-			LibFail:RegisterCallback(event, onFail)
-		end
-	end
-
 	function mod:OnEnable()
-		if not tankevents then
-			self:OnInitialize()
-		end
-
 		playermod.metadata = {click1 = spellmod}
 		self.metadata = {
 			click1 = playermod,
@@ -203,6 +190,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 			icon = "Interface\\Icons\\ability_creature_cursed_01"
 		}
 
+		tankevents = tankevents or LibFail:GetFailsWhereTanksDoNotFail()
 		Skada:AddMode(self)
 	end
 
@@ -218,5 +206,94 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 		if set and (set.fail or 0) > 0 then
 			tooltip:AddDoubleLine(L["Fails"], set.fail, 1, 1, 1)
 		end
+	end
+
+	--------------------------------------------------------------------------
+
+	do
+		local options  -- holds the options table
+		local function GetOptions()
+			if not options then
+				options = {
+					type = "group",
+					name = L["Fails"],
+					get = function(i) return Skada.db.profile.modules[i[#i]] end,
+					set = function(i, val) Skada.db.profile.modules[i[#i]] = val or nil end,
+					args = {
+						failsannounce = {
+							type = "toggle",
+							name = L["Report Fails"],
+							desc = L["Reports the group fails at the end of combat if there are any."],
+							order = 10
+						},
+						failschannel = {
+							type = "select",
+							name = L["Channel"],
+							order = 20,
+							values = {AUTO = INSTANCE, GUILD = GUILD, OFFICER = CHAT_MSG_OFFICER, SELF = L["Self"]}
+						},
+						ignoredfails = {
+							type = "group",
+							name = L["Ignored Events"],
+							inline = true,
+							get = function(i) return Skada.db.profile.modules.ignoredfails[i[#i]] end,
+							set = function(i, val) Skada.db.profile.modules.ignoredfails[i[#i]] = val or nil end,
+							order = 30,
+							args = {}
+						}
+					}
+				}
+			end
+			return options
+		end
+
+		function mod:OnInitialize()
+			if Skada.db.profile.modules.failschannel == nil then
+				Skada.db.profile.modules.failschannel = "AUTO"
+			end
+			if Skada.db.profile.modules.ignoredfails == nil then
+				Skada.db.profile.modules.ignoredfails = {}
+			end
+
+			options = options or GetOptions()
+			tankevents = tankevents or LibFail:GetFailsWhereTanksDoNotFail()
+			for _, event in ipairs(failevents) do
+				LibFail:RegisterCallback(event, onFail)
+
+				-- add to options
+				local spellid = LibFail:GetEventSpellId(event)
+				local spellname, _, spellicon = GetSpellInfo(spellid)
+				if spellname then
+					options.args.ignoredfails.args[event] = {
+						type = "toggle",
+						name = spellname,
+						desc = format("%s: |cffffbb00%s|r\n%s", L["Spell"], spellid, event),
+						image = spellicon,
+						imageCoords = {0.05, 0.95, 0.05, 0.95}
+					}
+				end
+			end
+
+			Skada.options.args.modules.args.failbot = options
+		end
+	end
+
+	function mod:SetComplete(set)
+		if not (Skada.db.profile.modules.failsannounce and IsInGroup()) then return end
+		if set ~= Skada.current or (set.fail or 0) == 0 then return end
+
+		local channel = Skada.db.profile.modules.failschannel or "AUTO"
+		local chantype = (channel == "SELF") and "self" or "preset"
+		if channel == "AUTO" then
+			local zoneType = select(2, IsInInstance())
+			if zoneType == "pvp" or zoneType == "arena" then
+				channel = "BATTLEGROUND"
+			elseif zoneType == "party" or zoneType == "raid" then
+				channel = zoneType:upper()
+			else
+				channel = IsInRaid() and "RAID" or "PARTY"
+			end
+		end
+		Skada:Report(channel, chantype, L["Fails"], nil, 10)
 	end
 end)
