@@ -198,6 +198,56 @@ end
 -------------------------------------------------------------------------------
 -- popup dialogs
 
+-- creates generic dialog
+function Skada:ConfirmDialog(text, accept, cancel, override)
+	local t
+	if StaticPopupDialogs["SkadaCommonConfirmDialog"] then
+		t = wipe(StaticPopupDialogs["SkadaCommonConfirmDialog"])
+	else
+		t = newTable()
+		StaticPopupDialogs["SkadaCommonConfirmDialog"] = t
+	end
+
+	local dialog, strata
+	t.OnAccept = function(self)
+		if type(accept) == "function" then
+			(accept)(self)
+		end
+		if dialog and strata then
+			dialog:SetFrameStrata(strata)
+		end
+	end
+	t.OnCancel = function(self)
+		if type(cancel) == "function" then
+			(cancel)(self)
+		end
+		if dialog and strata then
+			dialog:SetFrameStrata(strata)
+		end
+	end
+	t.OnHide = function()
+		delTable(t)
+	end
+
+	t.preferredIndex = STATICPOPUP_NUMDIALOGS
+	t.text = text
+	t.button1 = ACCEPT
+	t.button2 = CANCEL
+	t.timeout = 0
+	t.whileDead = 1
+	t.hideOnEscape = 1
+
+	if type(override) == "table" then
+		self.tCopy(t, override)
+	end
+
+	dialog = StaticPopup_Show("SkadaCommonConfirmDialog")
+	if dialog then
+		strata = dialog:GetFrameStrata()
+		dialog:SetFrameStrata("TOOLTIP")
+	end
+end
+
 -- skada reset dialog
 function Skada:ShowPopup(win, popup)
 	if Skada.db.profile.skippopup and not popup then
@@ -205,18 +255,12 @@ function Skada:ShowPopup(win, popup)
 		return
 	end
 
-	if not StaticPopupDialogs["SkadaResetDialog"] then
-		StaticPopupDialogs["SkadaResetDialog"] = {
-			text = L["Do you want to reset Skada?\nHold SHIFT to reset all data."],
-			button1 = ACCEPT,
-			button2 = CANCEL,
-			timeout = 30,
-			whileDead = 0,
-			hideOnEscape = 1,
-			OnAccept = function() Skada:Reset(IsShiftKeyDown()) end
-		}
-	end
-	StaticPopup_Show("SkadaResetDialog")
+	Skada:ConfirmDialog(
+		L["Do you want to reset Skada?\nHold SHIFT to reset all data."],
+		function() Skada:Reset(IsShiftKeyDown()) end,
+		nil,
+		{timeout = 30, whileDead = 0}
+	)
 end
 
 -- new window creation dialog
@@ -2706,7 +2750,7 @@ function dataobj:OnClick(button)
 end
 
 function Skada:OpenOptions(win, tab)
-	ACD:SetDefaultSize("Skada", 610, 500)
+	ACD:SetDefaultSize("Skada", 615, 500)
 	if win then
 		ACD:Open("Skada")
 		ACD:SelectGroup("Skada", "windows", win.db.name)
@@ -3115,7 +3159,11 @@ function Skada:OnInitialize()
 	local AceDBOptions = LibStub("AceDBOptions-3.0", true)
 	if AceDBOptions then
 		self.options.args.profiles = AceDBOptions:GetOptionsTable(self.db)
-		self.options.args.profiles.order = 999
+		self.options.args.profiles.order = 980
+		-- import/export profile if found.
+		if self.AdvancedProfile then
+			self:AdvancedProfile(self.options.args.profiles.args)
+		end
 	end
 
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("Skada", self.options)

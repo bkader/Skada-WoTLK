@@ -365,9 +365,7 @@ Skada.options = {
 					name = L["Show minimap button"],
 					desc = L["Toggles showing the minimap button."],
 					order = 1,
-					get = function()
-						return not Skada.db.profile.icon.hide
-					end,
+					get = function() return not Skada.db.profile.icon.hide end,
 					set = function()
 						Skada.db.profile.icon.hide = not Skada.db.profile.icon.hide
 						Skada:RefreshMMButton()
@@ -487,12 +485,8 @@ Skada.options = {
 					step = 0.1,
 					bigStep = 1,
 					width = "double",
-					disabled = function()
-						return not Skada.db.profile.tentativecombatstart
-					end,
-					hidden = function()
-						return not Skada.db.profile.tentativecombatstart
-					end
+					disabled = function() return not Skada.db.profile.tentativecombatstart end,
+					hidden = function() return not Skada.db.profile.tentativecombatstart end
 				},
 				timemesure = {
 					type = "select",
@@ -501,9 +495,7 @@ Skada.options = {
 					order = 18,
 					width = "double",
 					values = {[1] = L["Activity time"], [2] = L["Effective time"]},
-					get = function()
-						return Skada.db.profile.timemesure or 1
-					end
+					get = function() return Skada.db.profile.timemesure or 1 end
 				},
 				numberformat = {
 					type = "select",
@@ -624,6 +616,7 @@ Skada.options = {
 					type = "description",
 					name = L["Tick the modules you want to disable."],
 					width = "double",
+					fontSize = "medium",
 					order = 0
 				},
 				apply = {
@@ -652,22 +645,231 @@ Skada.options = {
 		about = {
 			type = "group",
 			name = L["About"],
-			order = 998,
-			args = {}
+			order = 990,
+			args = {
+				title = {
+					type = "description",
+					name = fmt("|cffffd200Skada|r %s", Skada.version),
+					fontSize = "large",
+					image = "Interface\\Icons\\Spell_Lightning_LightningBolt01",
+					imageWidth = 16,
+					imageHeight = 16,
+					imageCoords = {0.05, 0.95, 0.05, 0.95},
+					width = "full",
+					order = 0
+				}
+			}
 		}
 	}
 }
 
 -- about about args
-for i, field in ipairs({"Version", "Author", "Category", "License", "Email", "Website", "Discord", "Credits", "Localizations", "Donate"}) do
+for i, field in ipairs({"Version", "Date", "Author", "Category", "License", "Email", "Website", "Discord", "Credits", "Localizations", "Donate"}) do
 	local meta = GetAddOnMetadata("Skada", field) or GetAddOnMetadata("Skada", "X-" .. field)
 	if meta then
 		Skada.options.args.about.args[field] = {
 			type = "description",
-			name = format("|cffffd200%s|r:  %s\n", L[field], meta),
+			name = fmt("\n|cffffd200%s|r:  %s", L[field], meta),
 			fontSize = "medium",
 			width = "double",
 			order = i
+		}
+	end
+end
+
+-------------------------------------------------------------------------------
+-- profile import, export and sharing
+do
+	local pairs, ipairs = pairs, ipairs
+	local band, rshift, lshift = bit.band, bit.rshift, bit.lshift
+	local tconcat, byte, char = table.concat, string.byte, string.char
+	local collectgarbage = collectgarbage
+	local Compress, Serializer, AceGUI
+
+	local function hexEncode(s, title)
+		local hex = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"}
+		local t = {fmt("[=== %s profile ===]", title or "")}
+		local j = 0
+		for i = 1, #s do
+			if j <= 0 then
+				t[#t + 1], j = "\n", 32
+			end
+			j = j - 1
+
+			local b = byte(s, i)
+			t[#t + 1] = hex[band(b, 15) + 1]
+			t[#t + 1] = hex[band(rshift(b, 4), 15) + 1]
+		end
+		t[#t + 1] = "\n"
+		t[#t + 1] = t[1]
+		return tconcat(t)
+	end
+
+	local function hexDecode(s)
+		s = s:gsub("%[.-%]", ""):gsub("[^0123456789ABCDEF]", "")
+		if (#s == 0) or (#s % 2 ~= 0) then
+			return false, "Invalid Hex string"
+		end
+
+		local t, bl, bh = {}
+		local i = 1
+		repeat
+			bl = byte(s, i)
+			bl = bl >= 65 and bl - 55 or bl - 48
+			i = i + 1
+			bh = byte(s, i)
+			bh = bh >= 65 and bh - 55 or bh - 48
+			i = i + 1
+			t[#t + 1] = char(lshift(bh, 4) + bl)
+		until i >= #s
+		return tconcat(t)
+	end
+
+	local function getProfileName(str)
+		local header = strsub(str, 1, 64)
+		local name = (header:match("%[(.-)%]") or header):gsub("=", ""):gsub("profile", ""):trim()
+		return (name ~= "") and name
+	end
+
+	local function SerializeProfile()
+		local data = {Skada = Skada.db.profile}
+		for k, v in Skada:IterateModules() do
+			if v.db and v.db.profile then
+				data[k] = v.db.profile
+			end
+		end
+
+		Compress = Compress or LibStub("LibCompress")
+		Serializer = Serializer or LibStub("AceSerializer-3.0")
+
+		local output = Compress:CompressHuffman(Serializer:Serialize(data))
+		output = hexEncode(output, Skada.db:GetCurrentProfile())
+		return output
+	end
+
+	local function UnserializeProfile(data)
+		Compress = Compress or LibStub("LibCompress")
+		local err
+		data, err = hexDecode(data), "Error decoding profile."
+		if data then
+			data, err = Compress:DecompressHuffman(data)
+			if data then
+				Serializer = Serializer or LibStub("AceSerializer-3.0")
+				return Serializer:Deserialize(data)
+			end
+		end
+		return false, err
+	end
+
+	local function ImportProfile(data)
+		if type(data) ~= "string" then
+			Skada:Print("Import profile failed, data supplied must be a string.")
+		end
+
+		local profileName = getProfileName(data)
+		local success
+		success, data = UnserializeProfile(data)
+
+		if not success then
+			Skada:Print("Import profile failed:", data)
+			return false
+		end
+
+		local Old_ReloadSettings = Skada.ReloadSettings
+		Skada.ReloadSettings = function(self)
+			self.ReloadSettings = Old_ReloadSettings
+			for k, v in pairs(data) do
+				local db = (k == "Skada") and Skada.db or (self:GetModule(k, true) and self.db:GetNamespace(k, true))
+				if db then
+					Skada.tCopy(db.profile, v)
+				end
+			end
+			self:ReloadSettings()
+			LibStub("AceConfigRegistry-3.0"):NotifyChange("Skada")
+		end
+		Skada.db:SetProfile(profileName)
+		Skada:ReloadSettings()
+		return true
+	end
+
+	local function OpenImportExportWindow(title, subtitle, data)
+		AceGUI = AceGUI or LibStub("AceGUI-3.0")
+		local frame = AceGUI:Create("Frame")
+		frame:SetTitle(L["Profile Import/Export"])
+		frame:SetStatusText(subtitle)
+		frame:SetLayout("Flow")
+		frame:SetCallback("OnClose", function(widget)
+			AceGUI:Release(widget)
+			collectgarbage()
+		end)
+		frame:SetWidth(535)
+		frame:SetHeight(350)
+
+		local editbox = AceGUI:Create("MultiLineEditBox")
+		editbox.editBox:SetFontObject(GameFontHighlightSmall)
+		editbox:SetLabel(title)
+		editbox:SetFullWidth(true)
+		editbox:SetFullHeight(true)
+		frame:AddChild(editbox)
+
+		if data then
+			editbox:DisableButton(true)
+			editbox:SetText(data)
+			editbox.editBox:SetFocus()
+			editbox.editBox:HighlightText()
+			editbox:SetCallback("OnLeave", function(widget)
+				widget.editBox:HighlightText()
+				widget.editBox:SetFocus()
+			end)
+			editbox:SetCallback("OnEnter", function(widget)
+				widget.editBox:HighlightText()
+				widget.editBox:SetFocus()
+			end)
+		else
+			editbox:DisableButton(false)
+			editbox.button:SetScript("OnClick", function(widget)
+				ImportProfile(editbox:GetText())
+				AceGUI:Release(frame)
+				collectgarbage()
+			end)
+		end
+	end
+
+	function Skada:AdvancedProfile(args)
+		if not args then return end
+		args.mainheader = {
+			type = "header",
+			name = L["Profile Import/Export"],
+			order = 2
+		}
+		args.importbtn = {
+			type = "execute",
+			name = L["Import Profile"],
+			order = 3,
+			func = function()
+				OpenImportExportWindow(
+					L["Paste here a profile in text format."],
+					L["Press CTRL-V to paste a Skada configuration text."]
+				)
+			end
+		}
+		args.exportbtn = {
+			type = "execute",
+			name = L["Export Profile"],
+			order = 4,
+			func = function()
+				OpenImportExportWindow(
+					L["This is your current profile in text format."],
+					L["Press CTRL-C to copy the configuration to your clipboard."],
+					SerializeProfile()
+				)
+			end
+		}
+		args.separator = {
+			type = "description",
+			name = " ",
+			width = "full",
+			order = 5
 		}
 	end
 end

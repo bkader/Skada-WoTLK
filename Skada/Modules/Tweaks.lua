@@ -397,7 +397,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 				Skada.db.profile[i[#i]] = val
 				mod:ApplySettings()
 			end,
-			order = 997,
+			order = 900,
 			args = {
 				firsthit = {
 					type = "toggle",
