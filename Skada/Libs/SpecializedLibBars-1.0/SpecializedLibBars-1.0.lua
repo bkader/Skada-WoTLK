@@ -1216,6 +1216,7 @@ do
 			self.spark:SetWidth(10)
 			self.spark:SetHeight(10)
 			self.spark:SetBlendMode("ADD")
+			self.spark:Hide()
 		end
 
 		self.bgtexture = self.bgtexture or self:CreateTexture(nil, "BACKGROUND")
@@ -1362,6 +1363,17 @@ function barPrototype:SetIcon(icon)
 		self.icon:Hide()
 	end
 	self.iconTexture = icon or nil
+end
+
+function barPrototype:SetUseSpark(use)
+	self.usespark = use
+	if not self.spark then
+		return
+	elseif self.usespark then
+		self.spark:Show()
+	else
+		self.spark:Hide()
+	end
 end
 
 function barPrototype:ShowIcon()
@@ -1677,7 +1689,7 @@ function barPrototype:SetValue(val)
 
 	if amt == 1 or amt == 0 then
 		self.spark:Hide()
-	else
+	elseif self.usespark then
 		self.spark:Show()
 	end
 

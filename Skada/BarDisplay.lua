@@ -666,12 +666,6 @@ do
 					if win.bargroup.showself and data.id == Skada.myGUID then
 						bar.fixed = true
 					end
-
-					if win.db.spark then
-						bar.spark:Show()
-					else
-						bar.spark:Hide()
-					end
 				end
 
 				if win.metadata.ordersort then
@@ -911,13 +905,7 @@ do
 			g:HideAnchor()
 		end
 
-		for _, bar in pairs(g:GetBars()) do
-			if p.spark then
-				bar.spark:Show()
-			else
-				bar.spark:Hide()
-			end
-		end
+		g:SetUseSpark(p.spark)
 
 		-- Window border
 		Skada:ApplyBorder(g, p.background.bordertexture, p.background.bordercolor, p.background.borderthickness)
