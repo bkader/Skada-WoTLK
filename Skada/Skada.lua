@@ -1373,11 +1373,6 @@ do
 		if player.id and player.name then
 			unit = unit or GetUnitIdFromGUID(player.id)
 
-			-- fix "Unknown" player or player name shown as guid
-			if player.name == UNKNOWN or player.name == player.id then
-				player.name = UnitName(unit)
-			end
-
 			if not player.class then
 				if Skada:IsPet(player.id, player.flags) then
 					player.class = "PET"
@@ -1398,6 +1393,13 @@ do
 			-- we make sure to assign his/her role and spec
 			if Skada.validclass[player.class] then
 				players[player.id] = players[player.id] or unit
+
+				-- fix "Unknown" player or player name shown as guid
+				if player.name == UNKNOWN or player.name == player.id then
+					player.name = players[player.id] and UnitName(players[player.id])
+					player.name = player.name or select(6, GetPlayerInfoByGUID(player.id))
+				end
+
 				player.role = (player.role == nil or player.role == "NONE") and UnitGroupRolesAssigned(unit) or player.role
 				player.spec = player.spec or GetInspectSpecialization(unit, player.class)
 			end
@@ -1649,7 +1651,7 @@ do
 				for i = 2, pettooltip:NumLines() do
 					local text = _G["SkadaPetTooltipTextLeft" .. i]:GetText()
 					if text and text ~= "" then
-						for _, p in Skada:IteratePlayers(Skada.total) do
+						for _, p in Skada:IteratePlayers(Skada.current) do
 							local playername = p.name:gsub("%-.*", "")
 							if (Skada.locale == "ruRU" and FindNameDeclension(text, playername)) or ValidatePetOwner(text, playername) then
 								return p.id, p.name
