@@ -642,6 +642,13 @@ Skada.options = {
 			end,
 			args = {}
 		},
+		profiles = {
+			type = "group",
+			name = L["Profiles"],
+			childGroups = "tab",
+			order = 980,
+			args = {}
+		},
 		about = {
 			type = "group",
 			name = L["About"],
@@ -798,31 +805,33 @@ do
 	end
 
 	function Skada:AdvancedProfile(args)
-		if not args then
-			return
-		end
-		args.mainheader = {
-			type = "header",
-			name = L["Profile Import/Export"],
-			order = 2
-		}
-		args.importbtn = {
-			type = "execute",
-			name = L["Import Profile"],
-			order = 3,
-			func = Skada.OpenImport
-		}
-		args.exportbtn = {
-			type = "execute",
-			name = L["Export Profile"],
-			order = 4,
-			func = Skada.ExportProfile
-		}
-		args.separator = {
-			type = "description",
-			name = " ",
-			width = "full",
-			order = 5
+		if not args then return end
+		args.advanced = {
+			type = "group",
+			name = L["Advanced"],
+			order = 10,
+			args = {
+				importexport = {
+					type = "group",
+					name = L["Profile Import/Export"],
+					inline = true,
+					order = 10,
+					args = {
+						importbtn = {
+							type = "execute",
+							name = L["Import Profile"],
+							order = 10,
+							func = Skada.OpenImport
+						},
+						exportbtn = {
+							type = "execute",
+							name = L["Export Profile"],
+							order = 20,
+							func = Skada.ExportProfile
+						}
+					}
+				}
+			}
 		}
 	end
 end

@@ -3164,8 +3164,10 @@ function Skada:OnInitialize()
 	-- Profiles
 	local AceDBOptions = LibStub("AceDBOptions-3.0", true)
 	if AceDBOptions then
-		self.options.args.profiles = AceDBOptions:GetOptionsTable(self.db)
-		self.options.args.profiles.order = 980
+		self.options.args.profiles.args.general = AceDBOptions:GetOptionsTable(self.db)
+		self.options.args.profiles.args.general.name = L["General"]
+		self.options.args.profiles.args.general.order = 0
+
 		-- import/export profile if found.
 		if self.AdvancedProfile then
 			self:AdvancedProfile(self.options.args.profiles.args)

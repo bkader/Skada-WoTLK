@@ -15,6 +15,8 @@ L["DISABLED"] = true
 L["Stopping for wipe."] = true
 -- profiles
 L["Profiles"] = true
+L["General"] = true
+L["Advanced"] = true
 L["Profile Import/Export"] = true
 L["Import Profile"] = true
 L["Export Profile"] = true
@@ -167,7 +169,6 @@ L["The color of the background."] = true
 L["Border"] = true
 L["Border thickness"] = true
 L["The thickness of the borders."] = true
-L["General"] = true
 L["Scale"] = true
 L["Sets the scale of the window."] = true
 L["Strata"] = true
