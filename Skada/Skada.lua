@@ -1977,6 +1977,10 @@ local function SlashCommandHandler(cmd)
 		Skada:OpenOptions()
 	elseif cmd == "clear" or cmd == "clean" then
 		Skada:CleanGarbage()
+	elseif cmd == "import" and Skada.OpenImport then
+		Skada:OpenImport()
+	elseif cmd == "export" and Skada.ExportProfile then
+		Skada:ExportProfile()
 	elseif cmd == "about" or cmd == "info" then
 		Skada:OpenOptions(nil, "about")
 	elseif cmd == "website" or cmd == "github" then
@@ -2027,6 +2031,8 @@ local function SlashCommandHandler(cmd)
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33measure|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33config|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33clean|r")
+		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33import|r")
+		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33export|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33about|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33website|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33discord|r")
@@ -3338,18 +3344,26 @@ do
 	local LibCompress = LibStub("LibCompress")
 	local encodeTable
 
-	function Skada:Serialize(...)
-		encodeTable = encodeTable or LibCompress:GetAddonEncodeTable()
-
+	function Skada:Serialize(hex, title, ...)
 		local result = LibCompress:CompressHuffman(AceSerializer:Serialize(...))
-		return encodeTable:Encode(result)
+		if hex then
+			return self.HexEncode(result, title)
+		else
+			encodeTable = encodeTable or LibCompress:GetAddonEncodeTable()
+			return encodeTable:Encode(result)
+		end
+
 	end
 
-	function Skada:Deserialize(data)
-		encodeTable = encodeTable or LibCompress:GetAddonEncodeTable()
-
+	function Skada:Deserialize(data, hex)
 		local err
-		data, err = encodeTable:Decode(data), "Error decoding"
+		if hex then
+			data, err = self.HexDecode(data)
+		else
+			encodeTable = encodeTable or LibCompress:GetAddonEncodeTable()
+			data, err = encodeTable:Decode(data), "Error decoding"
+		end
+
 		if data then
 			data, err = LibCompress:DecompressHuffman(data)
 			if data then
@@ -3381,7 +3395,7 @@ do
 		if channel == "WHISPER" and not (target and UnitIsConnected(target)) then
 			return
 		elseif channel then
-			self:SendCommMessage("Skada", self:Serialize(...), channel, target)
+			self:SendCommMessage("Skada", self:Serialize(false, nil, ...), channel, target)
 		end
 	end
 

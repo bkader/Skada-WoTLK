@@ -681,49 +681,8 @@ end
 -- profile import, export and sharing
 do
 	local pairs, ipairs = pairs, ipairs
-	local band, rshift, lshift = bit.band, bit.rshift, bit.lshift
-	local tconcat, byte, char = table.concat, string.byte, string.char
 	local collectgarbage = collectgarbage
-	local Compress, Serializer, AceGUI
-
-	local function hexEncode(s, title)
-		local hex = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"}
-		local t = {fmt("[=== %s profile ===]", title or "")}
-		local j = 0
-		for i = 1, #s do
-			if j <= 0 then
-				t[#t + 1], j = "\n", 32
-			end
-			j = j - 1
-
-			local b = byte(s, i)
-			t[#t + 1] = hex[band(b, 15) + 1]
-			t[#t + 1] = hex[band(rshift(b, 4), 15) + 1]
-		end
-		t[#t + 1] = "\n"
-		t[#t + 1] = t[1]
-		return tconcat(t)
-	end
-
-	local function hexDecode(s)
-		s = s:gsub("%[.-%]", ""):gsub("[^0123456789ABCDEF]", "")
-		if (#s == 0) or (#s % 2 ~= 0) then
-			return false, "Invalid Hex string"
-		end
-
-		local t, bl, bh = {}
-		local i = 1
-		repeat
-			bl = byte(s, i)
-			bl = bl >= 65 and bl - 55 or bl - 48
-			i = i + 1
-			bh = byte(s, i)
-			bh = bh >= 65 and bh - 55 or bh - 48
-			i = i + 1
-			t[#t + 1] = char(lshift(bh, 4) + bl)
-		until i >= #s
-		return tconcat(t)
-	end
+	local AceGUI
 
 	local function getProfileName(str)
 		local header = strsub(str, 1, 64)
@@ -738,58 +697,11 @@ do
 				data[k] = v.db.profile
 			end
 		end
-
-		Compress = Compress or LibStub("LibCompress")
-		Serializer = Serializer or LibStub("AceSerializer-3.0")
-
-		local output = Compress:CompressHuffman(Serializer:Serialize(data))
-		output = hexEncode(output, Skada.db:GetCurrentProfile())
-		return output
+		return Skada:Serialize(true, fmt("%s profile", Skada.db:GetCurrentProfile()), data)
 	end
 
 	local function UnserializeProfile(data)
-		Compress = Compress or LibStub("LibCompress")
-		local err
-		data, err = hexDecode(data), "Error decoding profile."
-		if data then
-			data, err = Compress:DecompressHuffman(data)
-			if data then
-				Serializer = Serializer or LibStub("AceSerializer-3.0")
-				return Serializer:Deserialize(data)
-			end
-		end
-		return false, err
-	end
-
-	local function ImportProfile(data)
-		if type(data) ~= "string" then
-			Skada:Print("Import profile failed, data supplied must be a string.")
-		end
-
-		local profileName = getProfileName(data)
-		local success
-		success, data = UnserializeProfile(data)
-
-		if not success then
-			Skada:Print("Import profile failed:", data)
-			return false
-		end
-
-		local Old_ReloadSettings = Skada.ReloadSettings
-		Skada.ReloadSettings = function(self)
-			self.ReloadSettings = Old_ReloadSettings
-			for k, v in pairs(data) do
-				local db = (k == "Skada") and Skada.db or (self:GetModule(k, true) and self.db:GetNamespace(k, true))
-				if db then
-					Skada.tCopy(db.profile, v)
-				end
-			end
-			self:ReloadSettings()
-			LibStub("AceConfigRegistry-3.0"):NotifyChange("Skada")
-		end
-		Skada.db:SetProfile(profileName)
-		Skada:ReloadSettings()
-		return true
+		return Skada:Deserialize(data, true)
 	end
 
 	local function OpenImportExportWindow(title, subtitle, data)
@@ -828,15 +740,67 @@ do
 		else
 			editbox:DisableButton(false)
 			editbox.button:SetScript("OnClick", function(widget)
-				ImportProfile(editbox:GetText())
+				Skada:ImportProfile(editbox:GetText())
 				AceGUI:Release(frame)
 				collectgarbage()
 			end)
 		end
+		-- close on escape
+		_G["SkadaImportExportFrame"] = frame.frame
+		tinsert(UISpecialFrames, "SkadaImportExportFrame")
+	end
+
+	function Skada:OpenImport()
+		OpenImportExportWindow(
+			L["Paste here a profile in text format."],
+			L["Press CTRL-V to paste a Skada configuration text."]
+		)
+	end
+
+	function Skada:ExportProfile()
+		OpenImportExportWindow(
+			L["This is your current profile in text format."],
+			L["Press CTRL-C to copy the configuration to your clipboard."],
+			SerializeProfile()
+		)
+	end
+
+	function Skada:ImportProfile(data)
+		if type(data) ~= "string" then
+			Skada:Print("Import profile failed, data supplied must be a string.")
+			return false
+		end
+
+		local profileName = getProfileName(data)
+		local success
+		success, data = UnserializeProfile(data)
+
+		if not success then
+			Skada:Print("Import profile failed:", data)
+			return false
+		end
+
+		local Old_ReloadSettings = Skada.ReloadSettings
+		Skada.ReloadSettings = function(self)
+			self.ReloadSettings = Old_ReloadSettings
+			for k, v in pairs(data) do
+				local db = (k == "Skada") and Skada.db or (self:GetModule(k, true) and self.db:GetNamespace(k, true))
+				if db then
+					Skada.tCopy(db.profile, v)
+				end
+			end
+			self:ReloadSettings()
+			LibStub("AceConfigRegistry-3.0"):NotifyChange("Skada")
+		end
+		Skada.db:SetProfile(profileName)
+		Skada:ReloadSettings()
+		return true
 	end
 
 	function Skada:AdvancedProfile(args)
-		if not args then return end
+		if not args then
+			return
+		end
 		args.mainheader = {
 			type = "header",
 			name = L["Profile Import/Export"],
@@ -846,24 +810,13 @@ do
 			type = "execute",
 			name = L["Import Profile"],
 			order = 3,
-			func = function()
-				OpenImportExportWindow(
-					L["Paste here a profile in text format."],
-					L["Press CTRL-V to paste a Skada configuration text."]
-				)
-			end
+			func = Skada.OpenImport
 		}
 		args.exportbtn = {
 			type = "execute",
 			name = L["Export Profile"],
 			order = 4,
-			func = function()
-				OpenImportExportWindow(
-					L["This is your current profile in text format."],
-					L["Press CTRL-C to copy the configuration to your clipboard."],
-					SerializeProfile()
-				)
-			end
+			func = Skada.ExportProfile
 		}
 		args.separator = {
 			type = "description",

@@ -187,16 +187,16 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 			end
 		end
 
-		if not maxval and unit.values then
-			maxval = unit.values[GetRaidDiff()]
-		end
-
 		if not maxval then
 			if unit.power ~= nil then
 				maxval = select(3, UnitPowerInfo(nil, guid, unit.power))
 			else
 				maxval = select(3, UnitHealthInfo(nil, guid))
 			end
+		end
+
+		if not maxval and unit.values then
+			maxval = unit.values[GetRaidDiff()]
 		end
 
 		if maxval then
