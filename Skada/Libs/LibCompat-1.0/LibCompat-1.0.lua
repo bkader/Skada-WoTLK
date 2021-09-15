@@ -333,31 +333,37 @@ do
 		end
 	end
 
-	local function GetUnitIdFromGUID(guid)
-		for i = 1, 4 do
-			if UnitExists("boss" .. i) and UnitGUID("boss" .. i) == guid then
-				return "boss" .. i
+	local function GetUnitIdFromGUID(guid, specific)
+		if specific == nil or specific == "boss" then
+			for i = 1, 4 do
+				if UnitExists("boss" .. i) and UnitGUID("boss" .. i) == guid then
+					return "boss" .. i
+				end
 			end
 		end
 
-		if UnitExists("target") and UnitGUID("target") == guid then
-			return "target"
-		elseif UnitExists("focus") and UnitGUID("focus") == guid then
-			return "focus"
-		elseif UnitExists("targettarget") and UnitGUID("targettarget") == guid then
-			return "targettarget"
-		elseif UnitExists("focustarget") and UnitGUID("focustarget") == guid then
-			return "focustarget"
-		elseif UnitExists("mouseover") and UnitGUID("mouseover") == guid then
-			return "mouseover"
+		if specific == nil or specific == "player" then
+			if UnitExists("target") and UnitGUID("target") == guid then
+				return "target"
+			elseif UnitExists("focus") and UnitGUID("focus") == guid then
+				return "focus"
+			elseif UnitExists("targettarget") and UnitGUID("targettarget") == guid then
+				return "targettarget"
+			elseif UnitExists("focustarget") and UnitGUID("focustarget") == guid then
+				return "focustarget"
+			elseif UnitExists("mouseover") and UnitGUID("mouseover") == guid then
+				return "mouseover"
+			end
 		end
 
-		roster, _ = UnitIterator()
-		for unit in roster do
-			if UnitGUID(unit) == guid then
-				return unit
-			elseif UnitExists(unit .. "target") and UnitGUID(unit .. "target") == guid then
-				return unit .. "target"
+		if specific == nil or specific == "group" then
+			roster, _ = UnitIterator()
+			for unit in roster do
+				if UnitGUID(unit) == guid then
+					return unit
+				elseif UnitExists(unit .. "target") and UnitGUID(unit .. "target") == guid then
+					return unit .. "target"
+				end
 			end
 		end
 	end
@@ -746,13 +752,6 @@ do
 		["SHAMAN"] = {262, 263, 264}
 	}
 
-	-- checks if the feral druid is a cat or tank spec
-	local function GetDruidSpec(unit)
-		-- 57881 : Natural Reaction -- used by druid tanks
-		local points = LGT:UnitHasTalent(unit, LibCompat.GetSpellInfo(57881), LGT:GetActiveTalentGroup(unit))
-		return (points and points > 0) and 3 or 2
-	end
-
 	local function GetSpecialization(isInspect, isPet, specGroup)
 		local currentSpecGroup = GetActiveTalentGroup(isInspect, isPet) or (specGroup or 1)
 		local points, specname, specid = 0, nil, nil
@@ -768,34 +767,41 @@ do
 		return specid, specname, points
 	end
 
-	local function GetInspectSpecialization(unit, class)
-		unit = unit or "player"
-		class = class or select(2, UnitClass(unit))
+	-- checks if the feral druid is a cat or tank spec
+	local function GetDruidSpec(unit)
+		-- 57881 : Natural Reaction -- used by druid tanks
+		local points = LGT:UnitHasTalent(unit, LibCompat.GetSpellInfo(57881), LGT:GetActiveTalentGroup(unit))
+		return (points and points > 0) and 3 or 2
+	end
 
+	local function GetInspectSpecialization(unit, class)
 		local spec  -- start with nil
 
-		if unit and specsTable[class] then
-			local talentGroup = LGT:GetActiveTalentGroup(unit)
-			local maxPoints, index = 0, 0
+		if unit and UnitExists(unit) then
+			class = class or select(2, UnitClass(unit))
+			if class and specsTable[class] then
+				local talentGroup = LGT:GetActiveTalentGroup(unit)
+				local maxPoints, index = 0, 0
 
-			for i = 1, MAX_TALENT_TABS do
-				local _, _, pointsSpent = LGT:GetTalentTabInfo(unit, i, talentGroup)
-				if pointsSpent ~= nil then
-					if maxPoints < pointsSpent then
-						maxPoints = pointsSpent
-						if class == "DRUID" and i >= 2 then
-							if i == 3 then
-								index = 4
-							elseif i == 2 then
-								index = GetDruidSpec(unit)
+				for i = 1, MAX_TALENT_TABS do
+					local _, _, pointsSpent = LGT:GetTalentTabInfo(unit, i, talentGroup)
+					if pointsSpent ~= nil then
+						if maxPoints < pointsSpent then
+							maxPoints = pointsSpent
+							if class == "DRUID" and i >= 2 then
+								if i == 3 then
+									index = 4
+								elseif i == 2 then
+									index = GetDruidSpec(unit)
+								end
+							else
+								index = i
 							end
-						else
-							index = i
 						end
 					end
 				end
+				spec = specsTable[class][index]
 			end
-			spec = specsTable[class][index]
 		end
 
 		return spec
