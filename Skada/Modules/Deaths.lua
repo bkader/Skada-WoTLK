@@ -224,7 +224,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	end
 
 	function deathlogmod:Enter(win, id, label)
-		self.index = id
+		win.datakey = id
 		win.title = format(L["%s's death log"], win.playername or UNKNOWN)
 	end
 
@@ -238,12 +238,12 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 		function deathlogmod:Update(win, set)
 			local player = Skada:find_player(set, win.playerid, win.playername)
-			if player and self.index then
+			if player and win.datakey then
 				win.title = format(L["%s's death log"], win.playername or UNKNOWN)
 
 				local deathlog
-				if player.deathlog and player.deathlog[self.index] then
-					deathlog = player.deathlog[self.index]
+				if player.deathlog and player.deathlog[win.datakey] then
+					deathlog = player.deathlog[win.datakey]
 				end
 				if not deathlog then
 					return

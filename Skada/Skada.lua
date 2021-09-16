@@ -2692,6 +2692,7 @@ function Window:RestoreView(theset, themode)
 		self.history, self.title = wipe(self.history or {}), nil
 
 		-- all all stuff that were registered by modules
+		self.datakey = nil
 		self.playerid, self.playername = nil, nil
 		self.spellid, self.spellname = nil, nil
 		self.targetid, self.targetname = nil, nil
@@ -3528,12 +3529,20 @@ function Skada:EndSegment()
 	After(3, Skada.CheckMemory)
 end
 
-function Skada:StopSegment()
+function Skada:StopSegment(completed)
 	if self.current then
 		self.current.stopped = true
 		self.current.endtime = time()
 		delTable(queuedFixes)
 		delTable(queuedData)
+		-- used to trigger modes "SetComplete"
+		if completed == true then
+			for _, mode in self:IterateModes() do
+				if mode.SetComplete then
+					mode:SetComplete(self.current)
+				end
+			end
+		end
 	end
 end
 

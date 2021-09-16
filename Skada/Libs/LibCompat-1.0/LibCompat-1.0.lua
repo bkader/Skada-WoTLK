@@ -16,6 +16,9 @@ local floor, ceil, max = math.floor, math.ceil, math.max
 local setmetatable, format = setmetatable, string.format
 local CreateFrame = CreateFrame
 
+local GAME_LOCALE = GetLocale()
+GAME_LOCALE = (GAME_LOCALE == "enGB") and "enUS" or GAME_LOCALE
+
 -------------------------------------------------------------------------------
 
 do
@@ -955,7 +958,7 @@ function LibCompat:Embed(target)
 	for _, v in pairs(mixins) do
 		target[v] = self[v]
 	end
-	target.locale = target.locale or GetLocale()
+	target.locale = target.locale or GAME_LOCALE
 	self.embeds[target] = true
 	return target
 end

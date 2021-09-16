@@ -474,7 +474,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 			After(Skada.db.profile.smartwait or 5, function()
 				if not set.endtime then
 					Skada:Print(L["Smart Stop"])
-					Skada:StopSegment()
+					Skada:StopSegment(true)
 					Skada:RegisterEvent("PLAYER_REGEN_ENABLED")
 				end
 			end)
