@@ -683,6 +683,10 @@ L["Enable this if you want to show module icons on windows and menus."] = "Aktiv
 L["Fix Combat Log"] = "Fix Kampf Log"
 L["Keeps the combat log from breaking without munging it completely."] = "Verhindert, dass das Kampfprotokoll zerbricht, ohne es vollständig zu zerstören."
 L["Enable this if you want to ignore |cffffbb00%s|r."] = "Aktivieren Sie dies, wenn Sie |cffffbb00%s|r ignorieren möchten."
+L["Announce %s"] = "Announce: %s"
+L["Announces how long it took to apply %d stacks of %s and announces when it drops."] = "Gibt an, wie lange es gedauert hat, %d Stapel von %s anzuwenden, und kündigt an, wann es abläuft."
+L["%s dropped from %s!"] = "%s ist am %s abgelaufen!"
+L["%s stacks of %s applied on %s in %s sec!"] = "%s Stapel von %s auf %s in %s sec angewandt!"
 -- about
 L["About"] = "Über"
 L["Author"] = "Autor"

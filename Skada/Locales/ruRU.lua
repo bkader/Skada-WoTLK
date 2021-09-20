@@ -685,6 +685,10 @@ L["Enable this if you want to show module icons on windows and menus."] = "Пр�
 L["Fix Combat Log"] = "Исправить журнал боя"
 L["Keeps the combat log from breaking without munging it completely."] = "Защищает журнал боя от поломки, не разрушая его полностью."
 L["Enable this if you want to ignore |cffffbb00%s|r."] = "Включите эту опцию, если хотите игнорировать |cffffbb00%s|r."
+L["Announce %s"] = "Объявить: %s"
+L["Announces how long it took to apply %d stacks of %s and announces when it drops."] = "Сообщает, сколько времени потребовалось для применения %d стеков %s, и объявляет, когда он истекает."
+L["%s dropped from %s!"] = "%s истек %s!"
+L["%s stacks of %s applied on %s in %s sec!"] = "На %3$s нанесено %1$s стаканов %2$s за %4$s секунд! " -- "%s стеков %s применено к %s за %s сек!"
 -- about
 L["About"] = "Об аддоне"
 L["Author"] = "Автор"

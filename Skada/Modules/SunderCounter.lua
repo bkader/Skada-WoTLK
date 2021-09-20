@@ -8,9 +8,12 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 	local pairs, select = pairs, select
 	local tostring, format = tostring, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+	local newTable, delTable = Skada.newTable, Skada.delTable
+	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
+	local sunder, devastate
 	local _
 
-	local sunder, devastate
+	local function fmt(num) return format("%.1f", num) end
 
 	local function log_sunder(set, data)
 		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
@@ -37,6 +40,36 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 			log_sunder(Skada.current, data)
 			log_sunder(Skada.total, data)
+
+			if Skada.db.profile.modules.sunderannounce then
+				mod.targets = mod.targets or newTable()
+				if not mod.targets[dstGUID] then
+					mod.targets[dstGUID] = {count = 1, time = timestamp}
+				elseif mod.targets[dstGUID] ~= -1 then
+					mod.targets[dstGUID].count = (mod.targets[dstGUID].count or 0) + 1
+					if mod.targets[dstGUID].count == 5 then
+						mod:Announce(format(L["%s stacks of %s applied on %s in %s sec!"], mod.targets[dstGUID].count, sunder, dstName, fmt(timestamp - mod.targets[dstGUID].time)))
+						mod.targets[dstGUID] = -1
+					end
+				end
+			end
+		end
+	end
+
+	local function SunderRemoved(timestamp, eventtype, _, _, _, dstGUID, dstName, _, _, spellname)
+		if Skada.db.profile.modules.sunderannounce and spellname and spellname == sunder then
+			Skada.After(0.15, function()
+				if mod.targets and mod.targets[dstGUID] then
+					mod:Announce(format(L["%s dropped from %s!"], sunder, dstName or UNKNOWN))
+					mod.targets[dstGUID] = nil
+				end
+			end)
+		end
+	end
+
+	local function TargetDied(timestamp, eventtype, _, _, _, dstGUID)
+		if Skada.db.profile.modules.sunderannounce and dstGUID and mod.targets and mod.targets[dstGUID] then
+			mod.targets[dstGUID] = nil
 		end
 	end
 
@@ -47,8 +80,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 	function targetmod:Update(win, set)
 		if not sunder then
-			sunder = GetSpellInfo(47467)
-			devastate = GetSpellInfo(47498)
+			sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
 		end
 
 		local player = Skada:find_player(set, win.playerid, win.playername)
@@ -86,8 +118,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 	function mod:Update(win, set)
 		if not sunder then
-			sunder = GetSpellInfo(47467)
-			devastate = GetSpellInfo(47498)
+			sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
 		end
 
 		win.title = L["Sunder Counter"]
@@ -127,11 +158,6 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 		end
 	end
 
-	function mod:OnInitialize()
-		sunder = GetSpellInfo(47467)
-		devastate = GetSpellInfo(47498)
-	end
-
 	function mod:OnEnable()
 		self.metadata = {
 			showspots = true,
@@ -140,7 +166,11 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 			columns = {Count = true, Percent = true},
 			icon = "Interface\\Icons\\ability_warrior_sunder"
 		}
+
 		Skada:RegisterForCL(SunderApplied, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})
+		Skada:RegisterForCL(SunderRemoved, "SPELL_AURA_REMOVED", {src_is_interesting_nopets = true})
+		Skada:RegisterForCL(TargetDied, "UNIT_DIED", {dst_is_not_interesting = true})
+
 		Skada:AddMode(self, L["Buffs and Debuffs"])
 	end
 
@@ -156,5 +186,75 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 	function mod:GetSetSummary(set)
 		return tostring(set.sunder or 0), set.sunder or 0
+	end
+
+	function mod:AddSetAttributes(set)
+		self.targets = newTable()
+	end
+
+	function mod:SetComplete(set)
+		self.targets = delTable(self.targets)
+	end
+
+	function mod:Announce(msg)
+		-- if IsInGroup() and msg then
+		if msg then
+			local channel = Skada.db.profile.modules.sunderchannel or "SAY"
+			if channel == "SELF" then
+				Skada:Print(msg)
+				return
+			end
+
+			if channel == "AUTO" then
+				local zoneType = select(2, IsInInstance())
+				if zoneType == "pvp" or zoneType == "arena" then
+					channel = "BATTLEGROUND"
+				elseif zoneType == "party" or zoneType == "raid" then
+					channel = zoneType:upper()
+				else
+					channel = IsInRaid() and "RAID" or "PARTY"
+				end
+			end
+
+			Skada:SendChat(msg, channel, "preset")
+		end
+	end
+
+	function mod:OnInitialize()
+		if not sunder then
+			sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
+		end
+
+		if Skada.db.profile.modules.sunderchannel == nil then
+			Skada.db.profile.modules.sunderchannel = "SAY"
+		end
+
+		Skada.options.args.modules.args.sundercounter = {
+			type = "group",
+			name = L["Sunder Counter"],
+			get = function(i)
+				return Skada.db.profile.modules[i[#i]]
+			end,
+			set = function(i, val)
+				Skada.db.profile.modules[i[#i]] = val
+			end,
+			args = {
+				sunderannounce = {
+					type = "toggle",
+					name = format(L["Announce %s"], sunder),
+					desc = format(L["Announces how long it took to apply %d stacks of %s and announces when it drops."], 5, sunder or UNKNOWN),
+					descStyle = "inline",
+					order = 10,
+					width = "double"
+				},
+				sunderchannel = {
+					type = "select",
+					name = L["Channel"],
+					values = {AUTO = INSTANCE, SAY = CHAT_MSG_SAY, YELL = CHAT_MSG_YELL, SELF = L["Self"]},
+					order = 20,
+					width = "double"
+				}
+			}
+		}
 	end
 end)

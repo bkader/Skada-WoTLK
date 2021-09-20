@@ -685,6 +685,10 @@ L["Enable this if you want to show module icons on windows and menus."] = "启�
 L["Fix Combat Log"] = "修理战斗记录"
 L["Keeps the combat log from breaking without munging it completely."] = "从断裂而没有完全破坏它可以防止战斗记录。"
 L["Enable this if you want to ignore |cffffbb00%s|r."] = "如果您想忽略|cffffbb00%s|r，请启用此功能。"
+L["Announce %s"] = "宣布：%s"
+L["Announces how long it took to apply %d stacks of %s and announces when it drops."] = "宣布应用 %d 堆 %s 所用的时间，并宣布它何时到期。"
+L["%s dropped from %s!"] = "%s 已于 %s 过期！"
+L["%s stacks of %s applied on %s in %s sec!"] = "%4$s 秒内将 %1$s 叠 %2$s 涂抹在 %3$s 上！"
 -- about
 L["About"] = "关于"
 L["Author"] = "作者"

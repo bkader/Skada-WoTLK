@@ -686,6 +686,10 @@ L["Enable this if you want to show module icons on windows and menus."] = true
 L["Fix Combat Log"] = true
 L["Keeps the combat log from breaking without munging it completely."] = true
 L["Enable this if you want to ignore |cffffbb00%s|r."] = true
+L["Announce %s"] = true
+L["Announces how long it took to apply %d stacks of %s and announces when it drops."] = true
+L["%s dropped from %s!"] = true
+L["%s stacks of %s applied on %s in %s sec!"] = true
 -- about
 L["About"] = true
 L["Author"] = true
