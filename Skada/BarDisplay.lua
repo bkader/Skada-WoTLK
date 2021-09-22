@@ -988,8 +988,8 @@ function mod:AddDisplayOptions(win, options)
 			},
 			barfontflags = {
 				type = "select",
-				name = L["Font flags"],
-				desc = L["Sets the font flags."],
+				name = L["Font Outline"],
+				desc = L["Sets the font outline."],
 				order = 2,
 				values = {
 					[""] = NONE,
@@ -1019,8 +1019,8 @@ function mod:AddDisplayOptions(win, options)
 			},
 			numfontflags = {
 				type = "select",
-				name = L["Font flags"],
-				desc = L["Sets the font flags."],
+				name = L["Font Outline"],
+				desc = L["Sets the font outline."],
 				order = 5,
 				values = {
 					[""] = NONE,
@@ -1269,8 +1269,8 @@ function mod:AddDisplayOptions(win, options)
 			},
 			fontflags = {
 				type = "select",
-				name = L["Font flags"],
-				desc = L["Sets the font flags."],
+				name = L["Font Outline"],
+				desc = L["Sets the font outline."],
 				order = 5,
 				values = {
 					[""] = NONE,
