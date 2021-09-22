@@ -2,7 +2,7 @@ assert(Skada, "Skada not found!")
 
 -- cache frequently used globals
 local pairs, format, select, tostring = pairs, string.format, select, tostring
-local min, max, floor = math.min, math.max, math.floor
+local tContains, min, max, floor = tContains, math.min, math.max, math.floor
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local _
 
@@ -302,13 +302,13 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 	local UnitGUID, UnitName, UnitBuff = UnitGUID, UnitName, UnitBuff
 
 	-- list of the auras that are ignored!
-	local blacklist = {
-		[57819] = true, -- Tabard of the Argent Crusade
-		[57820] = true, -- Tabard of the Ebon Blade
-		[57821] = true, -- Tabard of the Kirin Tor
-		[57822] = true, -- Tabard of the Wyrmrest Accord
-		[72968] = true, -- Precious's Ribbon
-		[57940] = true -- Essence of Wintergrasp
+	local ignoredSpells = {
+		57819, -- Tabard of the Argent Crusade
+		57820, -- Tabard of the Ebon Blade
+		57821, -- Tabard of the Kirin Tor
+		57822, -- Tabard of the Wyrmrest Accord
+		72968, -- Precious's Ribbon
+		57940 -- Essence of Wintergrasp
 	}
 
 	-- list of spells that don't trigger SPELL_AURA_x events
@@ -352,7 +352,7 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 	local aura = {}
 
 	local function handleBuff(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
-		if auratype == "BUFF" and not blacklist[spellid] and Skada:IsPlayer(dstGUID, dstFlags, dstName) then
+		if auratype == "BUFF" and not tContains(ignoredSpells, spellid) and Skada:IsPlayer(dstGUID, dstFlags, dstName) then
 			if spellid == 27827 then -- Spirit of Redemption (Holy Priest)
 				Skada:SendMessage("UNIT_DIED", ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, nil, spellschool, auratype)
 				return
@@ -390,24 +390,27 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 		end
 	end
 
-	function mod:CheckBuffs(event, set, timestamp)
-		if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped then
-			-- let's now check for buffs put before the combat started.
-			GroupIterator(function(unit, owner)
-				if owner == nil and not UnitIsDeadOrGhost(unit) then
-					local dstGUID, dstName = UnitGUID(unit), UnitName(unit)
-					for i = 1, 40 do
-						local rank, _, _, _, _, _, unitCaster, _, _, spellid = select(2, UnitBuff(unit, i))
-						if spellid then
-							if unitCaster and rank ~= SPELL_PASSIVE then
-								handleBuff(nil, "SPELL_AURA_APPLIED", UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, nil, nil, "BUFF")
-							end
-						else
-							break -- no buff at all
+	do
+		local function CheckUnitBuffs(unit, owner)
+			if owner == nil and not UnitIsDeadOrGhost(unit) then
+				local dstGUID, dstName = UnitGUID(unit), UnitName(unit)
+				for i = 1, 40 do
+					local rank, _, _, _, _, _, unitCaster, _, _, spellid = select(2, UnitBuff(unit, i))
+					if spellid then
+						if unitCaster and rank ~= SPELL_PASSIVE then
+							handleBuff(nil, "SPELL_AURA_APPLIED", UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, nil, nil, "BUFF")
 						end
+					else
+						break -- no buff at all
 					end
 				end
-			end)
+			end
+		end
+
+		function mod:CheckBuffs(event, set, timestamp)
+			if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped then
+				GroupIterator(CheckUnitBuffs)
+			end
 		end
 	end
 
@@ -446,15 +449,15 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 	local targetmod = spellmod:NewModule(L["Debuff target list"])
 
 	-- list of the auras that are ignored!
-	local blacklist = {
-		[57723] = true, -- Exhaustion (Heroism)
-		[57724] = true -- Sated (Bloodlust)
+	local ignoredSpells = {
+		57723, -- Exhaustion (Heroism)
+		57724 -- Sated (Bloodlust)
 	}
 
 	local aura = {}
 
 	local function handleDebuff(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, spellschool, auratype)
-		if auratype == "DEBUFF" and not blacklist[spellid] then
+		if auratype == "DEBUFF" and not tContains(ignoredSpells, spellid) then
 			if srcName == nil and #srcGUID == 0 and dstName and #dstGUID > 0 then
 				srcGUID = dstGUID
 				srcName = dstName

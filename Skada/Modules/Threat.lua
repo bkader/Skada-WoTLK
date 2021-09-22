@@ -9,7 +9,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 	local tinsert, max = table.insert, math.max
 	local GroupIterator, UnitExists, UnitIsFriend = Skada.GroupIterator, UnitExists, UnitIsFriend
 	local UnitName, UnitClass, UnitGUID = UnitName, UnitClass, UnitGUID
-	local GetInspectSpecialization = Skada.GetInspectSpecialization
+	local GetUnitRole, GetUnitSpec = Skada.GetUnitRole, Skada.GetInspectSpecialization
 	local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 	local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
 	local PlaySoundFile = PlaySoundFile
@@ -22,7 +22,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 		local threatUnits, threatTable = {"focus", "focustarget", "target", "targettarget"}
 		local tankThreat, tankValue, rubyAcorn, queried
 
-		local function add_to_threattable(unit, target, win)
+		local function add_to_threattable(unit, owner, target, win)
 			if unit == "AGGRO" then
 				if mod.db.showAggroBar and (tankThreat or 0) > 0 then
 					rubyAcorn = rubyAcorn or GetItemInfo(37727)
@@ -56,27 +56,14 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				local player = threatTable[guid]
 
 				if not player then
-					local name = UnitName(unit)
-
-					-- is is a pet?
-					local owner = Skada:GetPetOwner(guid)
-					if owner then
-						player = {
-							id = guid,
-							name = name .. " (" .. owner.name .. ")",
-							class = "PET",
-							unit = unit
-						}
+					player = {id = guid, unit = unit, name = UnitName(unit)}
+					if owner ~= nil then
+						player.name = player.name .. " (" .. UnitName(owner) .. ")"
+						player.class = "PET"
 					else
-						local class = select(2, UnitClass(unit))
-						player = {
-							id = guid,
-							name = name,
-							class = class,
-							role = Skada.GetUnitRole(unit),
-							spec = GetInspectSpecialization(unit, class),
-							unit = unit
-						}
+						player.class = select(2, UnitClass(unit))
+						player.role = GetUnitRole(unit)
+						player.spec = GetUnitSpec(unit, player.class)
 					end
 
 					-- cache the player.
@@ -167,9 +154,9 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 
 				-- reset stuff & check group
 				maxthreat, nr = 0, 1
-				GroupIterator(function(unit) add_to_threattable(unit, target, win) end)
+				GroupIterator(add_to_threattable, target, win)
 				if maxthreat > 0 then
-					add_to_threattable("AGGRO", target, win)
+					add_to_threattable("AGGRO", nil, target, win)
 				end
 
 				-- If we are going by raw threat we got the max threat from above; otherwise it's always 100.

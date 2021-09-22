@@ -63,34 +63,37 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 		end
 	end
 
-	-- we use this function to record pre-pots as well.
-	function mod:CheckPrePot(event)
-		if event == "COMBAT_PLAYER_ENTER" then
-			prepotion = newTable()
+	do
+		local function CheckUnitPotions(unit, owner, prepot)
+			if owner == nil and not UnitIsDeadOrGhost(unit) then
+				local playerid, playername = UnitGUID(unit), UnitName(unit)
+				local class = select(2, UnitClass(unit))
 
-			GroupIterator(function(unit, owner)
-				if owner == nil and not UnitIsDeadOrGhost(unit) then
-					local playerid, playername = UnitGUID(unit), UnitName(unit)
-					local class = select(2, UnitClass(unit))
-
-					local potions = newTable() -- holds used potions
-					for potionid, _ in pairs(potionIDs) do
-						local icon, _, _, _, _, _, _, _, spellid = select(3, UnitBuff(unit, GetSpellInfo(potionid)))
-						if spellid and potionIDs[spellid] then
-							-- instant recording doesn't work, so we delay it
-							After(1, PotionUsed, nil, playerid, playername, nil, nil, nil, nil, spellid)
-							tinsert(potions, format(potionStr, icon))
-						end
+				local potions = newTable() -- holds used potions
+				for potionid, _ in pairs(potionIDs) do
+					local icon, _, _, _, _, _, _, _, spellid = select(3, UnitBuff(unit, GetSpellInfo(potionid)))
+					if spellid and potionIDs[spellid] then
+						-- instant recording doesn't work, so we delay it
+						After(1, PotionUsed, nil, playerid, playername, nil, nil, nil, nil, spellid)
+						tinsert(potions, format(potionStr, icon))
 					end
-
-					-- add to print out:
-					if next(potions) ~= nil and class and Skada.validclass[class] then
-						local colorStr = Skada.classcolors[class].colorStr or "ffffffff"
-						tinsert(prepotion, format(prepotionStr, colorStr, playername, tconcat(potions, " ")))
-					end
-					delTable(potions)
 				end
-			end)
+
+				-- add to print out:
+				if next(potions) ~= nil and class and Skada.validclass[class] then
+					local colorStr = Skada.classcolors[class].colorStr or "ffffffff"
+					tinsert(prepotion, format(prepotionStr, colorStr, playername, tconcat(potions, " ")))
+				end
+				delTable(potions)
+			end
+		end
+
+		-- we use this function to record pre-pots as well.
+		function mod:CheckPrePot(event)
+			if event == "COMBAT_PLAYER_ENTER" then
+				prepotion = newTable()
+				GroupIterator(CheckUnitPotions, prepotion)
+			end
 		end
 	end
 

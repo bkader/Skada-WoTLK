@@ -456,38 +456,39 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 			ROGUE = {{31230, 1}}
 		}
 
-		function mod:CheckPreShields(event, set, timestamp)
-			if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped then
-				self:ZoneModifier()
-				local curtime = GetTime()
-				GroupIterator(function(unit, owner)
-					if not UnitIsDeadOrGhost(unit) then
-						local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
-						for i = 1, 40 do
-							local expires, unitCaster, _, _, spellid = select(7, UnitBuff(unit, i))
-							if spellid then
-								if absorbspells[spellid] and unitCaster then
-									AuraApplied(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
-								end
-							else
-								break -- nothing found
-							end
+		local function CheckUnitShields(unit, owner, timestamp, curtime)
+			if not UnitIsDeadOrGhost(unit) then
+				local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
+				for i = 1, 40 do
+					local expires, unitCaster, _, _, spellid = select(7, UnitBuff(unit, i))
+					if spellid then
+						if absorbspells[spellid] and unitCaster then
+							AuraApplied(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
 						end
+					else
+						break -- nothing found
+					end
+				end
 
-						if owner ~= nil then return end -- ignore pets
-
-						-- passive shields.
-						local class = select(2, _G.UnitClass(unit))
-						if passivespells[class] then
-							for _, spell in ipairs(passivespells[class]) do
-								local points = LGT:GUIDHasTalent(dstGUID, GetSpellInfo(spell[1]), LGT:GetActiveTalentGroup(unit))
-								if points then
-									AuraApplied(timestamp - 60, nil, dstGUID, dstGUID, nil, dstGUID, dstName, nil, spell[1], nil, spell[2], nil, points)
-								end
+				-- passive shields (not for pets)
+				if owner == nil then
+					local class = select(2, _G.UnitClass(unit))
+					if passivespells[class] then
+						for _, spell in ipairs(passivespells[class]) do
+							local points = LGT:GUIDHasTalent(dstGUID, GetSpellInfo(spell[1]), LGT:GetActiveTalentGroup(unit))
+							if points then
+								AuraApplied(timestamp - 60, nil, dstGUID, dstGUID, nil, dstGUID, dstName, nil, spell[1], nil, spell[2], nil, points)
 							end
 						end
 					end
-				end)
+				end
+			end
+		end
+
+		function mod:CheckPreShields(event, set, timestamp)
+			if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped then
+				self:ZoneModifier()
+				GroupIterator(CheckUnitShields, timestamp, GetTime())
 			end
 		end
 	end
