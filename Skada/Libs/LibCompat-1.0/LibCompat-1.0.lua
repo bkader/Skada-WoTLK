@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0", 16
+local MAJOR, MINOR = "LibCompat-1.0", 17
 local LibCompat, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not LibCompat then return end
 
@@ -371,8 +371,8 @@ do
 		end
 	end
 
-	local function GetClassFromGUID(guid)
-		local unit = GetUnitIdFromGUID(guid)
+	local function GetClassFromGUID(guid, specific)
+		local unit = GetUnitIdFromGUID(guid, specific)
 		local class
 		if unit and unit:find("pet") then
 			class = "PET"
@@ -392,8 +392,10 @@ do
 		return GetCreatureId(UnitGUID(unit))
 	end
 
-	local function UnitHealthInfo(unit, guid)
-		unit = unit or guid and GetUnitIdFromGUID(guid)
+	local unknownUnits = {[UKNOWNBEING] = true, [UNKNOWNOBJECT] = true}
+
+	local function UnitHealthInfo(unit, guid, specific)
+		unit = (unit and not unknownUnits[unit]) and unit or (guid and GetUnitIdFromGUID(guid, specific))
 		local percent, health, maxhealth
 		if unit and UnitExists(unit) then
 			health, maxhealth = UnitHealth(unit), UnitHealthMax(unit)
@@ -404,8 +406,8 @@ do
 		return percent, health, maxhealth
 	end
 
-	local function UnitPowerInfo(unit, guid, powerType)
-		unit = unit or guid and GetUnitIdFromGUID(guid)
+	local function UnitPowerInfo(unit, guid, powerType, specific)
+		unit = (unit and not unknownUnits[unit]) and unit or (guid and GetUnitIdFromGUID(guid, specific))
 		local percent, power, maxpower
 		if unit and UnitExists(unit) then
 			power, maxpower = UnitPower(unit, powerType), UnitPowerMax(unit, powerType)
@@ -882,6 +884,179 @@ end
 
 -------------------------------------------------------------------------------
 
+do
+	local function PassClickToParent(obj, ...)
+		obj:GetParent():Click(...)
+	end
+
+	local function Mixin(obj, ...)
+		for i = 1, select("#", ...) do
+			local mixin = select(i, ...)
+			for k, v in pairs(mixin) do
+				obj[k] = v
+			end
+		end
+		return obj
+	end
+
+	local function CreateFromMixins(...)
+		return Mixin({}, ...)
+	end
+
+	local function CreateAndInitFromMixin(mixin, ...)
+		local obj = CreateFromMixins(mixin)
+		obj:Init(...)
+		return obj
+	end
+
+	local ObjectPoolMixin = {}
+
+	function ObjectPoolMixin:OnLoad(creationFunc, resetterFunc)
+		self.creationFunc, self.resetterFunc = creationFunc, resetterFunc
+		self.activeObjects, self.inactiveObjects = {}, {}
+		self.numActiveObjects = 0
+	end
+
+	function ObjectPoolMixin:Acquire()
+		local numInactiveObjects = #self.inactiveObjects
+		if numInactiveObjects > 0 then
+			local obj = self.inactiveObjects[numInactiveObjects]
+			self.activeObjects[obj] = true
+			self.numActiveObjects = self.numActiveObjects + 1
+			self.inactiveObjects[numInactiveObjects] = nil
+			return obj, false
+		end
+
+		local newObj = self.creationFunc(self)
+		if self.resetterFunc and not self.disallowResetIfNew then
+			self.resetterFunc(self, newObj)
+		end
+		self.activeObjects[newObj] = true
+		self.numActiveObjects = self.numActiveObjects + 1
+		return newObj, true
+	end
+
+	function ObjectPoolMixin:Release(obj)
+		if self:IsActive(obj) then
+			self.inactiveObjects[#self.inactiveObjects + 1] = obj
+			self.activeObjects[obj] = nil
+			self.numActiveObjects = self.numActiveObjects - 1
+			if self.resetterFunc then
+				self.resetterFunc(self, obj)
+			end
+			return true
+		end
+		return false
+	end
+
+	function ObjectPoolMixin:ReleaseAll()
+		for obj in pairs(self.activeObjects) do
+			self:Release(obj)
+		end
+	end
+
+	function ObjectPoolMixin:SetResetDisallowedIfNew(disallowed)
+		self.disallowResetIfNew = disallowed
+	end
+
+	function ObjectPoolMixin:EnumerateActive()
+		return pairs(self.activeObjects)
+	end
+
+	function ObjectPoolMixin:GetNextActive(current)
+		return (next(self.activeObjects, current))
+	end
+
+	function ObjectPoolMixin:GetNextInactive(current)
+		return (next(self.inactiveObjects, current))
+	end
+
+	function ObjectPoolMixin:IsActive(object)
+		return (self.activeObjects[object] ~= nil)
+	end
+
+	function ObjectPoolMixin:GetNumActive()
+		return self.numActiveObjects
+	end
+
+	function ObjectPoolMixin:EnumerateInactive()
+		return ipairs(self.inactiveObjects)
+	end
+
+	local function CreateObjectPool(creationFunc, resetterFunc)
+		local objectPool = CreateFromMixins(ObjectPoolMixin)
+		objectPool:OnLoad(creationFunc, resetterFunc)
+		return objectPool
+	end
+
+	local ColorMixin = {}
+
+	function ColorMixin:OnLoad(r, g, b, a)
+		self:SetRGBA(r, g, b, a)
+	end
+
+	function ColorMixin:IsEqualTo(obj)
+		return (self.r == obj.r and self.g == obj.g and self.b == obj.b and self.a == obj.a)
+	end
+
+	function ColorMixin:GetRGB()
+		return self.r, self.g, self.b
+	end
+
+	function ColorMixin:GetRGBAsBytes()
+		return self.r * 255, self.g * 255, self.b * 255
+	end
+
+	function ColorMixin:GetRGBA()
+		return self.r, self.g, self.b, self.a
+	end
+
+	function ColorMixin:GetRGBAAsBytes()
+		return self.r * 255, self.g * 255, self.b * 255, (self.a or 1) * 255
+	end
+
+	function ColorMixin:SetRGBA(r, g, b, a)
+		self.r, self.g, self.b, self.a = r, g, b, a
+	end
+
+	function ColorMixin:SetRGB(r, g, b)
+		self:SetRGBA(r, g, b, nil)
+	end
+
+	function ColorMixin:GenerateHexColor()
+		return ("ff%.2x%.2x%.2x"):format(self:GetRGBAsBytes())
+	end
+
+	function ColorMixin:GenerateHexColorMarkup()
+		return "|c" .. self:GenerateHexColor()
+	end
+
+	function ColorMixin:WrapTextInColorCode(text)
+		return WrapTextInColorCode(text, self:GenerateHexColor())
+	end
+
+	local function CreateColor(r, g, b, a)
+		local color = CreateFromMixins(ColorMixin)
+		color:OnLoad(r, g, b, a)
+		return color
+	end
+
+	local function WrapTextInColorCode(text, colorHexString)
+		return ("|c%s%s|r"):format(colorHexString, text)
+	end
+
+	LibCompat.Mixin = Mixin
+	LibCompat.CreateFromMixins = CreateFromMixins
+	LibCompat.CreateAndInitFromMixin = CreateAndInitFromMixin
+	LibCompat.ObjectPoolMixin = ObjectPoolMixin
+	LibCompat.CreateObjectPool = CreateObjectPool
+	LibCompat.ColorMixin = ColorMixin
+	LibCompat.CreateColor = CreateColor
+	LibCompat.WrapTextInColorCode = WrapTextInColorCode
+end
+
+-------------------------------------------------------------------------------
+
 local mixins = {
 	"QuickDispatch",
 	-- table util
@@ -951,7 +1126,16 @@ local mixins = {
 	"GetClassColorObj",
 	"GetClassColor",
 	"Print",
-	"Printf"
+	"Printf",
+	"PassClickToParent",
+	"Mixin",
+	"CreateFromMixins",
+	"CreateAndInitFromMixin",
+	"ObjectPoolMixin",
+	"CreateObjectPool",
+	"ColorMixin",
+	"CreateColor",
+	"WrapTextInColorCode"
 }
 
 function LibCompat:Embed(target)
