@@ -1431,8 +1431,12 @@ do
 			player.flags = playerflags
 		end
 
-		-- attempt to fix player name "Unknown"
-		if (player.name == UNKNOWN and playername ~= UNKNOWN) or (player.name == player.id and playername ~= player.id) then
+		-- attempt to fix player name:
+		if
+			(player.name == UNKNOWNOBJECT and playername ~= UNKNOWNOBJECT) or -- unknown unit
+			(player.name == UKNOWNBEING and playername ~= UKNOWNBEING) or -- unknown unit
+			(player.name == player.id and playername ~= player.id) -- GUID is the same as the name
+		then
 			player.name = (player.id == self.myGUID or playerid == self.myGUID) and self.myName or playername
 		end
 
@@ -2643,7 +2647,12 @@ do
 	end
 
 	function Window:set_mode_title()
-		if not self.selectedmode or not self.selectedmode.GetName or not self.selectedset then
+		if
+			not self.db.enabletitle or -- title bar disabled
+			not self.selectedmode or -- window has no selected mode
+			not self.selectedmode.GetName or -- selected mode isn't a valid mode
+			not self.selectedset  -- window has no selected set
+		then
 			return
 		end
 
@@ -2658,29 +2667,27 @@ do
 		self.db.mode = savemode
 
 		name = self.title or name
-		if self.db.titleset and not self.selectedmode.notitleset and self.db.display ~= "inline" then
-			local setname
-			if self.selectedset == "current" then
-				setname = L["Current"]
-			elseif self.selectedset == "total" then
-				setname = L["Total"]
-			else
-				local set = self:get_selected_set()
-				if set then
-					setname = Skada:GetSetLabel(set)
+
+		if self.db.display == "bar" and not self.selectedmode.notitleset then
+			-- title set enabled?
+			if self.db.titleset then
+				if self.selectedset == "current" then
+					name = name .. ": " .. L["Current"]
+				elseif self.selectedset == "total" then
+					name = name .. ": " .. L["Total"]
+				else
+					local set = self:get_selected_set()
+					if set then
+						name = name .. ": " .. Skada:GetSetLabel(set)
+					end
 				end
 			end
-			if setname then
-				name = name .. ": " .. setname
+			-- combat timer enabled?
+			if self.db.combattimer and (self.selectedset == "current" or self.selectedset == "last") and (Skada.current or Skada.last) then
+				name = format("[%s] %s", Skada:GetFormatedSetTime(Skada.current or Skada.last), name)
 			end
 		end
-		if disabled and (self.selectedset == "current" or self.selectedset == "total") then
-			-- indicate when data collection is disabled
-			name = name .. "  |cFFFF0000" .. L["DISABLED"] .. "|r"
-		elseif not self.selectedmode.notitleset and self.db.enabletitle and self.db.combattimer and (self.selectedset == "current" or self.selectedset == "last") and (Skada.current or Skada.last) then
-			-- thanks Details! for the idea.
-			name = format("[%s] %s", Skada:GetFormatedSetTime(Skada.current or Skada.last), name)
-		end
+
 		self.metadata.title = name
 		self.display:SetTitle(self, name)
 	end
@@ -2757,7 +2764,6 @@ function dataobj:OnClick(button)
 end
 
 function Skada:OpenOptions(win, tab)
-	ACD:SetDefaultSize("Skada", 615, 500)
 	if win then
 		ACD:Open("Skada")
 		ACD:SelectGroup("Skada", "windows", win.db.name)
@@ -3137,6 +3143,7 @@ function Skada:OnInitialize()
 	LSM:Register("statusbar", "Serenity", [[Interface\AddOns\Skada\Media\Statusbar\Serenity]])
 	LSM:Register("statusbar", "Smooth v2", [[Interface\Addons\Skada\Media\Statusbar\Smoothv2]])
 	LSM:Register("statusbar", "Smooth", [[Interface\Addons\Skada\Media\Statusbar\Smooth]])
+	LSM:Register("statusbar", "Solid", [[Interface\Buttons\WHITE8X8]])
 	LSM:Register("statusbar", "TukTex", [[Interface\Addons\Skada\Media\Statusbar\TukTex]])
 	LSM:Register("statusbar", "WorldState Score", [[Interface\WorldStateFrame\WORLDSTATEFINALSCORE-HIGHLIGHT]])
 
@@ -3177,6 +3184,7 @@ function Skada:OnInitialize()
 
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("Skada", self.options)
 	self.optionsFrame = ACD:AddToBlizOptions("Skada", "Skada")
+	ACD:SetDefaultSize("Skada", 615, 500)
 
 	-- Slash Command Handler
 	SLASH_SKADA1 = "/skada"
