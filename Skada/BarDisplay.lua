@@ -674,12 +674,12 @@ do
 
 				if win.metadata.showspots and Skada.db.profile.showranks and not data.ignore then
 					if win.db.barorientation == 1 then
-						bar:SetLabel(("%d. %s"):format(nr, data.text or data.label))
+						bar:SetLabel(("%d. %s"):format(nr, data.text or data.label or UNKNOWN))
 					else
-						bar:SetLabel(("%s .%d"):format(data.text or data.label, nr))
+						bar:SetLabel(("%s .%d"):format(data.text or data.label or UNKNOWN, nr))
 					end
 				else
-					bar:SetLabel(data.text or data.label)
+					bar:SetLabel(data.text or data.label or UNKNOWN)
 				end
 				bar:SetTimerLabel(data.valuetext)
 
