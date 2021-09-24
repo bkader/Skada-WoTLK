@@ -36,7 +36,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	end
 
 	local function onFail(event, who, failtype)
-		if who and event and not Skada.db.profile.modules.ignoredfails[event] then
+		if who and event then
 			local spellid = LibFail:GetEventSpellId(event)
 			if spellid then
 				local unitGUID = UnitGUID(who)
@@ -225,22 +225,16 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 							type = "toggle",
 							name = L["Report Fails"],
 							desc = L["Reports the group fails at the end of combat if there are any."],
-							order = 10
+							descStyle = "inline",
+							order = 10,
+							width = "double"
 						},
 						failschannel = {
 							type = "select",
 							name = L["Channel"],
+							values = {AUTO = INSTANCE, GUILD = GUILD, OFFICER = CHAT_MSG_OFFICER, SELF = L["Self"]},
 							order = 20,
-							values = {AUTO = INSTANCE, GUILD = GUILD, OFFICER = CHAT_MSG_OFFICER, SELF = L["Self"]}
-						},
-						ignoredfails = {
-							type = "group",
-							name = L["Ignored Events"],
-							inline = true,
-							get = function(i) return Skada.db.profile.modules.ignoredfails[i[#i]] end,
-							set = function(i, val) Skada.db.profile.modules.ignoredfails[i[#i]] = val or nil end,
-							order = 30,
-							args = {}
+							width = "double"
 						}
 					}
 				}
@@ -249,33 +243,17 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 		end
 
 		function mod:OnInitialize()
+			failevents = failevents or LibFail:GetSupportedEvents()
+			tankevents = tankevents or LibFail:GetFailsWhereTanksDoNotFail()
+
 			if Skada.db.profile.modules.failschannel == nil then
 				Skada.db.profile.modules.failschannel = "AUTO"
 			end
-			if Skada.db.profile.modules.ignoredfails == nil then
-				Skada.db.profile.modules.ignoredfails = {}
+			if Skada.db.profile.modules.ignoredfails then
+				Skada.db.profile.modules.ignoredfails = nil
 			end
 
-			options = options or GetOptions()
-			tankevents = tankevents or LibFail:GetFailsWhereTanksDoNotFail()
-			for _, event in ipairs(failevents) do
-				LibFail:RegisterCallback(event, onFail)
-
-				-- add to options
-				local spellid = LibFail:GetEventSpellId(event)
-				local spellname, _, spellicon = GetSpellInfo(spellid)
-				if spellname then
-					options.args.ignoredfails.args[event] = {
-						type = "toggle",
-						name = spellname,
-						desc = format("%s: |cffffbb00%s|r\n%s", L["Spell"], spellid, event),
-						image = spellicon,
-						imageCoords = {0.05, 0.95, 0.05, 0.95}
-					}
-				end
-			end
-
-			Skada.options.args.modules.args.failbot = options
+			Skada.options.args.modules.args.failbot = GetOptions()
 		end
 	end
 
