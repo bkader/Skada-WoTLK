@@ -165,6 +165,7 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 		Skada.options.args.modules.args.Parry = {
 			type = "group",
 			name = self.moduleName,
+			desc = format(L["Options for %s."], self.moduleName),
 			get = function(i)
 				return Skada.db.profile.modules[i[#i]]
 			end,

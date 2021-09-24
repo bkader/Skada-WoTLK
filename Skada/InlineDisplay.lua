@@ -537,6 +537,7 @@ function mod:AddDisplayOptions(win, options)
 	options.baroptions = {
 		type = "group",
 		name = L["Text"],
+		desc = format(L["Options for %s."], L["Text"]),
 		order = 3,
 		args = {
 			barfont = {
@@ -544,37 +545,53 @@ function mod:AddDisplayOptions(win, options)
 				dialogControl = "LSM30_Font",
 				name = L["Bar font"],
 				desc = L["The font used by all bars."],
-				order = 0.0,
 				values = AceGUIWidgetLSMlists.font,
-				get = function()
-					return db.barfont
-				end,
+				get = function() return db.barfont end,
 				set = function(win, key)
 					db.barfont = key
 					Skada:ApplySettings(db.name)
-				end
+				end,
+				order = 10,
+				width = "double"
+			},
+			barfontflags = {
+				type = "select",
+				name = L["Font Outline"],
+				desc = L["Sets the font outline."],
+				values = {
+					[""] = NONE,
+					["OUTLINE"] = L["Outline"],
+					["THICKOUTLINE"] = L["Thick outline"],
+					["MONOCHROME"] = L["Monochrome"],
+					["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
+				},
+				get = function() return db.barfontflags end,
+				set = function(win, key)
+					db.barfontflags = key
+					Skada:ApplySettings(db.name)
+				end,
+				order = 20,
+				width = "double"
 			},
 			barfontsize = {
 				type = "range",
 				name = L["Bar font size"],
 				desc = L["The font size of all bars."],
-				order = 0.1,
 				min = 7,
 				max = 40,
 				step = 1,
-				get = function()
-					return db.barfontsize
-				end,
+				get = function() return db.barfontsize end,
 				set = function(win, size)
 					db.barfontsize = size
 					Skada:ApplySettings(db.name)
-				end
+				end,
+				order = 30,
+				width = "double"
 			},
 			color = {
 				type = "color",
 				name = L["Font Color"],
 				desc = L['Font Color. \nClick "Use class colors" to begin.'],
-				order = 0.2,
 				hasAlpha = true,
 				get = function()
 					local c = db.title.textcolor
@@ -583,95 +600,74 @@ function mod:AddDisplayOptions(win, options)
 				set = function(win, r, g, b, a)
 					db.title.textcolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a or 1.0}
 					Skada:ApplySettings(db.name)
-				end
-			},
-			barfontflags = {
-				type = "select",
-				name = L["Font Outline"],
-				desc = L["Sets the font outline."],
-				order = 0.3,
-				values = {
-					[""] = NONE,
-					["OUTLINE"] = L["Outline"],
-					["THICKOUTLINE"] = L["Thick outline"],
-					["MONOCHROME"] = L["Monochrome"],
-					["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
-				},
-				get = function()
-					return db.barfontflags
 				end,
-				set = function(win, key)
-					db.barfontflags = key
-					Skada:ApplySettings(db.name)
-				end
+				order = 40,
+				width = "double"
 			},
 			barwidth = {
 				type = "range",
 				name = L["Width"],
 				desc = L['Width of bars. This only applies if the "Fixed bar width" option is used.'],
-				order = 1.0,
 				min = 100,
 				max = 300,
 				step = 1.0,
-				get = function()
-					return db.barwidth
-				end,
+				get = function() return db.barwidth end,
 				set = function(win, key)
 					db.barwidth = key
 					Skada:ApplySettings(db.name)
-				end
+				end,
+				order = 50,
+				width = "double"
+			},
+			separator = {
+				type = "description",
+				name = "\n",
+				order = 60,
+				width = "full"
 			},
 			fixedbarwidth = {
 				type = "toggle",
 				name = L["Fixed bar width"],
 				desc = L["If checked, bar width is fixed. Otherwise, bar width depends on the text width."],
-				order = 1.1,
-				get = function()
-					return db.fixedbarwidth
-				end,
+				get = function() return db.fixedbarwidth end,
 				set = function()
 					db.fixedbarwidth = not db.fixedbarwidth
 					Skada:ApplySettings(db.name)
-				end
+				end,
+				order = 70,
 			},
 			isusingclasscolors = {
 				type = "toggle",
 				name = L["Use class colors"],
 				desc = L["Class colors:\n|cFFF58CBAKader|r - 5.71M (21.7K)\n\nWithout:\nKader - 5.71M (21.7K)"],
-				order = 2,
-				get = function()
-					return db.isusingclasscolors
-				end,
+				get = function() return db.isusingclasscolors end,
 				set = function(win, key)
 					db.isusingclasscolors = key
 					Skada:ApplySettings(db.name)
-				end
+				end,
+				order = 80,
 			},
 			isonnewline = {
 				type = "toggle",
 				name = L["Put values on new line."],
 				desc = L["New line:\nKader\n5.71M (21.7K)\n\nDivider:\nKader - 5.71M (21.7K)"],
-				order = 3,
-				get = function()
-					return db.isonnewline
-				end,
+				get = function() return db.isonnewline end,
 				set = function(win, key)
 					db.isonnewline = key
 					Skada:ApplySettings(db.name)
-				end
+				end,
+				order = 90
 			},
 			clickthrough = {
 				type = "toggle",
 				name = L["Clickthrough"],
 				desc = L["Disables mouse clicks on bars."],
-				order = 4,
-				get = function()
-					return db.clickthrough
-				end,
+				get = function() return db.clickthrough end,
 				set = function()
 					db.clickthrough = not db.clickthrough
 					Skada:ApplySettings(db.name)
-				end
+				end,
+				order = 100
 			}
 		}
 	}
@@ -679,33 +675,36 @@ function mod:AddDisplayOptions(win, options)
 	options.elvuioptions = {
 		type = "group",
 		name = "ElvUI",
+		desc = format(L["Options for %s."], "ElvUI"),
 		order = 4,
 		args = {
 			isusingelvuiskin = {
 				type = "toggle",
 				name = L["Use ElvUI skin if avaliable."],
 				desc = L["Check this to use ElvUI skin instead. \nDefault: checked"],
-				order = 0.1,
-				get = function()
-					return db.isusingelvuiskin
-				end,
+				descStyle = "inline",
+				get = function() return db.isusingelvuiskin end,
 				set = function(win, key)
 					db.isusingelvuiskin = key
 					Skada:ApplySettings(db.name)
-				end
+				end,
+				order = 10,
+				width = "full"
 			},
 			issolidbackdrop = {
 				type = "toggle",
 				name = L["Use solid background."],
 				desc = L["Un-check this for an opaque background."],
-				order = 1.0,
+				descStyle = "inline",
 				get = function()
 					return db.issolidbackdrop
 				end,
 				set = function(win, key)
 					db.issolidbackdrop = key
 					Skada:ApplySettings(db.name)
-				end
+				end,
+				order = 20,
+				width = "full"
 			}
 		}
 	}

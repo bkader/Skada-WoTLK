@@ -557,7 +557,8 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 			if not options then
 				options = {
 					type = "group",
-					name = L["Death log"],
+					name = mod.moduleName,
+					desc = format(L["Options for %s."], L["Death log"]),
 					get = function(i)
 						return Skada.db.profile.modules[i[#i]]
 					end,
@@ -565,54 +566,56 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 						Skada.db.profile.modules[i[#i]] = val
 					end,
 					args = {
-						deathlogevents = {
-							type = "range",
-							name = L["Events Amount"],
-							desc = L["Set the amount of events the death log should record."],
-							order = 1,
-							min = 4,
-							max = 24,
-							step = 1
-						},
-						deathlogthreshold = {
-							type = "range",
-							name = L["Minimum Healing"],
-							desc = L["Ignore heal events that are below this threshold."],
-							order = 2,
-							min = 0,
-							max = 10000,
-							step = 1,
-							bigStep = 10
-						},
-						sep = {
-							type = "description",
-							name = " ",
-							order = 3,
-							width = "full"
+						deathlog = {
+							type = "group",
+							name = L["Death log"],
+							inline = true,
+							order = 10,
+							args = {
+								deathlogevents = {
+									type = "range",
+									name = L["Events Amount"],
+									desc = L["Set the amount of events the death log should record."],
+									min = 4,
+									max = 24,
+									step = 1,
+									order = 10
+								},
+								deathlogthreshold = {
+									type = "range",
+									name = L["Minimum Healing"],
+									desc = L["Ignore heal events that are below this threshold."],
+									min = 0,
+									max = 10000,
+									step = 1,
+									bigStep = 10,
+									order = 20
+								}
+							}
 						},
 						announce = {
 							type = "group",
 							name = L["Announce Deaths"],
 							inline = true,
-							order = 4,
+							order = 20,
 							args = {
 								anndesc = {
 									type = "description",
 									name = L["Announces information about the last hit the player took before they died."],
 									fontSize = "medium",
 									width = "full",
-									order = 4
+									order = 10
 								},
 								deathannounce = {
 									type = "toggle",
 									name = L["Enable"],
-									order = 5
+									order = 20
 								},
 								deathchannel = {
 									type = "select",
 									name = L["Channel"],
 									values = {AUTO = INSTANCE, SELF = L["Self"], GUILD = GUILD},
-									order = 6,
+									order = 30,
 									disabled = function()
 										return not Skada.db.profile.modules.deathannounce
 									end

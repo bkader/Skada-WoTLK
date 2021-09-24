@@ -454,6 +454,9 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 		57724 -- Sated (Bloodlust)
 	}
 
+	-- list of spells used to queue units.
+	local queuedSpells = {[49005] = 50424}
+
 	local aura = {}
 
 	local function handleDebuff(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, spellschool, auratype)
@@ -479,12 +482,14 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 			if event == "SPELL_AURA_APPLIED" then
 				log_auraapply(Skada.current, aura)
 				log_auraapply(Skada.total, aura)
+				Skada:QueueUnit(spellid and queuedSpells[spellid], srcGUID, srcName, srcFlags, dstGUID)
 			elseif event == "SPELL_AURA_REFRESH" or event == "SPELL_AURA_APPLIED_DOSE" then
 				log_aurarefresh(Skada.current, aura)
 				log_aurarefresh(Skada.total, aura)
 			elseif event == "SPELL_AURA_REMOVED" then
 				log_auraremove(Skada.current, aura)
 				log_auraremove(Skada.total, aura)
+				Skada:UnqueueUnit(spellid and queuedSpells[spellid], dstGUID)
 			end
 		end
 	end

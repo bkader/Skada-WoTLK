@@ -58,6 +58,8 @@ L["MISS"] = "Miss"
 L["PARRY"] = "Parry"
 L["REFLECT"] = "Reflect"
 L["RESIST"] = "Resisted"
+L["Only for bosses."] = true
+L["Enable this only against bosses."] = true
 -- windows section:
 L["Window"] = true
 L["Windows"] = true
@@ -207,6 +209,8 @@ L["Use solid background."] = true
 L["Un-check this for an opaque background."] = true
 L["Data text"] = true
 L["Data text acts as an LDB data feed. It can be integrated in any LDB display such as Titan Panel or ChocolateBar. It also has an optional internal frame."] = true
+L["Use frame"] = true
+L["Shows a standalone frame. Not needed if you are using an LDB display provider such as Titan Panel or ChocolateBar."] = true
 L["Text color"] = true
 L["Choose the default color."] = true
 L["Hint: Left-Click to set active mode."] = true

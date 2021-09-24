@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0", 17
+local MAJOR, MINOR = "LibCompat-1.0", 18
 local LibCompat, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not LibCompat then return end
 
@@ -487,6 +487,23 @@ do
 	local classColorsTable
 	local colors = CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS
 
+	local classInfoTable = {
+		WARRIOR = {classFile = "WARRIOR", classID = 1},
+		PALADIN = {classFile = "PALADIN", classID = 2},
+		HUNTER = {classFile = "HUNTER", classID = 3},
+		ROGUE = {classFile = "ROGUE", classID = 4},
+		PRIEST = {classFile = "PRIEST", classID = 5},
+		DEATHKNIGHT = {classFile = "DEATHKNIGHT", classID = 6},
+		SHAMAN = {classFile = "SHAMAN", classID = 7},
+		MAGE = {classFile = "MAGE", classID = 8},
+		WARLOCK = {classFile = "WARLOCK", classID = 9},
+		DRUID = {classFile = "DRUID", classID = 11}
+	}
+
+	for k, v in pairs(LOCALIZED_CLASS_NAMES_MALE) do
+		classInfoTable[k].className = v
+	end
+
 	local function GetClassColorsTable()
 		if not classColorsTable then
 			-- add missing class color strings
@@ -524,9 +541,30 @@ do
 		return 1, 1, 1, "ffffffff"
 	end
 
+	local function GetNumClasses()
+		return LibCompat.tLength(colors)
+	end
+
+	local function GetClassInfo(classIndex)
+		local className, classFile, classID
+		if classIndex then
+			for _, class in pairs(classInfoTable) do
+				if class.classID == classIndex then
+					className = class.className
+					classFile = class.classFile
+					classID = class.classID
+					break
+				end
+			end
+		end
+		return className, classFile, classID
+	end
+
 	LibCompat.GetClassColorsTable = GetClassColorsTable
 	LibCompat.GetClassColorObj = GetClassColorObj
 	LibCompat.GetClassColor = GetClassColor
+	LibCompat.GetNumClasses = GetNumClasses
+	LibCompat.GetClassInfo = GetClassInfo
 end
 
 -------------------------------------------------------------------------------
@@ -668,8 +706,14 @@ do
 		end
 	end
 
+	local function IsPlayerSpell(spellid)
+		local spellname = GetSpellInfo(spellid)
+		return (spellname and GetSpellInfo(spellname) ~= nil)
+	end
+
 	LibCompat.GetSpellInfo = _GetSpellInfo
 	LibCompat.GetSpellLink = _GetSpellLink
+	LibCompat.IsPlayerSpell = IsPlayerSpell
 end
 
 -------------------------------------------------------------------------------
@@ -989,6 +1033,71 @@ do
 		return objectPool
 	end
 
+	local FramePoolMixin = CreateFromMixins(ObjectPoolMixin)
+
+	local function FramePoolFactory(framePool)
+		return CreateFrame(framePool.frameType, nil, framePool.parent, framePool.frameTemplate)
+	end
+
+	local function ForbiddenFramePoolFactory(framePool)
+		return CreateForbiddenFrame(framePool.frameType, nil, framePool.parent, framePool.frameTemplate)
+	end
+
+	function FramePoolMixin:OnLoad(frameType, parent, frameTemplate, resetterFunc, forbidden)
+		if forbidden then
+			ObjectPoolMixin.OnLoad(self, ForbiddenFramePoolFactory, resetterFunc)
+		else
+			ObjectPoolMixin.OnLoad(self, FramePoolFactory, resetterFunc)
+		end
+		self.frameType = frameType
+		self.parent = parent
+		self.frameTemplate = frameTemplate
+	end
+
+	function FramePoolMixin:GetTemplate()
+		return self.frameTemplate
+	end
+
+	local function FramePool_Hide(framePool, frame)
+		frame:Hide()
+	end
+
+	local function FramePool_HideAndClearAnchors(framePool, frame)
+		frame:Hide()
+		frame:ClearAllPoints()
+	end
+
+	local function CreateFramePool(frameType, parent, frameTemplate, resetterFunc, forbidden)
+		local framePool = CreateFromMixins(FramePoolMixin)
+		framePool:OnLoad(frameType, parent, frameTemplate, resetterFunc or FramePool_HideAndClearAnchors, forbidden)
+		return framePool
+	end
+
+	local TexturePoolMixin = CreateFromMixins(ObjectPoolMixin)
+
+	local function TexturePoolFactory(texturePool)
+		return texturePool.parent:CreateTexture(
+			nil,
+			texturePool.layer,
+			texturePool.textureTemplate,
+			texturePool.subLayer
+		)
+	end
+
+	function TexturePoolMixin:OnLoad(parent, layer, subLayer, textureTemplate, resetterFunc)
+		ObjectPoolMixin.OnLoad(self, TexturePoolFactory, resetterFunc)
+		self.parent = parent
+		self.layer = layer
+		self.subLayer = subLayer
+		self.textureTemplate = textureTemplate
+	end
+
+	local function CreateTexturePool(parent, layer, subLayer, textureTemplate, resetterFunc)
+		local texturePool = CreateFromMixins(TexturePoolMixin)
+		texturePool:OnLoad(parent, layer, subLayer, textureTemplate, resetterFunc or TexturePool_HideAndClearAnchors)
+		return texturePool
+	end
+
 	local ColorMixin = {}
 
 	function ColorMixin:OnLoad(r, g, b, a)
@@ -1050,6 +1159,14 @@ do
 	LibCompat.CreateAndInitFromMixin = CreateAndInitFromMixin
 	LibCompat.ObjectPoolMixin = ObjectPoolMixin
 	LibCompat.CreateObjectPool = CreateObjectPool
+	LibCompat.FramePoolMixin = FramePoolMixin
+	LibCompat.FramePool_Hide = FramePool_Hide
+	LibCompat.FramePool_HideAndClearAnchors = FramePool_HideAndClearAnchors
+	LibCompat.CreateFramePool = CreateFramePool
+	LibCompat.TexturePoolMixin = TexturePoolMixin
+	LibCompat.TexturePool_Hide = FramePool_Hide
+	LibCompat.TexturePool_HideAndClearAnchors = FramePool_HideAndClearAnchors
+	LibCompat.CreateTexturePool = CreateTexturePool
 	LibCompat.ColorMixin = ColorMixin
 	LibCompat.CreateColor = CreateColor
 	LibCompat.WrapTextInColorCode = WrapTextInColorCode
@@ -1118,6 +1235,7 @@ local mixins = {
 	-- spell util
 	"GetSpellInfo",
 	"GetSpellLink",
+	"IsPlayerSpell",
 	-- misc util
 	"HexEncode",
 	"HexDecode",
@@ -1125,6 +1243,8 @@ local mixins = {
 	"GetClassColorsTable",
 	"GetClassColorObj",
 	"GetClassColor",
+	"GetNumClasses",
+	"GetClassInfo",
 	"Print",
 	"Printf",
 	"PassClickToParent",
@@ -1133,6 +1253,14 @@ local mixins = {
 	"CreateAndInitFromMixin",
 	"ObjectPoolMixin",
 	"CreateObjectPool",
+	"FramePoolMixin",
+	"FramePool_Hide",
+	"FramePool_HideAndClearAnchors",
+	"CreateFramePool",
+	"TexturePoolMixin",
+	"TexturePool_Hide",
+	"TexturePool_HideAndClearAnchors",
+	"CreateTexturePool",
 	"ColorMixin",
 	"CreateColor",
 	"WrapTextInColorCode"

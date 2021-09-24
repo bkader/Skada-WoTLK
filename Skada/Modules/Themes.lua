@@ -280,9 +280,11 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 			end
 		end
 
-		Skada.options.args.modules.args.themes = {
+		Skada.options.args.themesoptions = {
 			type = "group",
-			name = L["Themes"],
+			name = self.moduleName,
+			desc = format(L["Options for %s."], self.moduleName),
+			order = 970,
 			args = {
 				apply = {
 					type = "group",

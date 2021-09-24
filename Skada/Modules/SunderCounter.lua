@@ -13,7 +13,9 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 	local sunder, devastate
 	local _
 
-	local function fmt(num) return format("%.1f", num) end
+	local function fmt(num)
+		return format("%.1f", num)
+	end
 
 	local function log_sunder(set, data)
 		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
@@ -48,7 +50,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 				elseif mod.targets[dstGUID] ~= -1 then
 					mod.targets[dstGUID].count = (mod.targets[dstGUID].count or 0) + 1
 					if mod.targets[dstGUID].count == 5 then
-						mod:Announce(format(L["%s stacks of %s applied on %s in %s sec!"], mod.targets[dstGUID].count, sunder, dstName, fmt(timestamp - mod.targets[dstGUID].time)))
+						mod:Announce(format(L["%s stacks of %s applied on %s in %s sec!"], mod.targets[dstGUID].count, sunder, dstName, fmt(timestamp - mod.targets[dstGUID].time)), dstGUID)
 						mod.targets[dstGUID] = -1
 					end
 				end
@@ -58,9 +60,9 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 	local function SunderRemoved(timestamp, eventtype, _, _, _, dstGUID, dstName, _, _, spellname)
 		if Skada.db.profile.modules.sunderannounce and spellname and spellname == sunder then
-			Skada.After(0.15, function()
+			Skada.After(0.1, function()
 				if mod.targets and mod.targets[dstGUID] then
-					mod:Announce(format(L["%s dropped from %s!"], sunder, dstName or UNKNOWN))
+					mod:Announce(format(L["%s dropped from %s!"], sunder, dstName or UNKNOWN), dstGUID)
 					mod.targets[dstGUID] = nil
 				end
 			end)
@@ -196,28 +198,35 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 		self.targets = delTable(self.targets)
 	end
 
-	function mod:Announce(msg)
-		-- if IsInGroup() and msg then
-		if msg then
-			local channel = Skada.db.profile.modules.sunderchannel or "SAY"
-			if channel == "SELF" then
-				Skada:Print(msg)
-				return
-			end
-
-			if channel == "AUTO" then
-				local zoneType = select(2, IsInInstance())
-				if zoneType == "pvp" or zoneType == "arena" then
-					channel = "BATTLEGROUND"
-				elseif zoneType == "party" or zoneType == "raid" then
-					channel = zoneType:upper()
-				else
-					channel = IsInRaid() and "RAID" or "PARTY"
-				end
-			end
-
-			Skada:SendChat(msg, channel, "preset")
+	function mod:Announce(msg, guid)
+		-- only in a group
+		if not IsInGroup() or not msg then
+			return
 		end
+
+		-- only on bosses!
+		if Skada.db.profile.modules.sunderbossonly and guid and not Skada:IsBoss(guid) then
+			return
+		end
+
+		local channel = Skada.db.profile.modules.sunderchannel or "SAY"
+		if channel == "SELF" then
+			Skada:Print(msg)
+			return
+		end
+
+		if channel == "AUTO" then
+			local zoneType = select(2, IsInInstance())
+			if zoneType == "pvp" or zoneType == "arena" then
+				channel = "BATTLEGROUND"
+			elseif zoneType == "party" or zoneType == "raid" then
+				channel = zoneType:upper()
+			else
+				channel = IsInRaid() and "RAID" or "PARTY"
+			end
+		end
+
+		Skada:SendChat(msg, channel, "preset")
 	end
 
 	function mod:OnInitialize()
@@ -232,6 +241,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 		Skada.options.args.modules.args.sundercounter = {
 			type = "group",
 			name = L["Sunder Counter"],
+			desc = format(L["Options for %s."], L["Sunder Counter"]),
 			get = function(i)
 				return Skada.db.profile.modules[i[#i]]
 			end,
@@ -252,6 +262,13 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 					name = L["Channel"],
 					values = {AUTO = INSTANCE, SAY = CHAT_MSG_SAY, YELL = CHAT_MSG_YELL, SELF = L["Self"]},
 					order = 20,
+					width = "double"
+				},
+				sunderbossonly = {
+					type = "toggle",
+					name = L["Only for bosses."],
+					desc = L["Enable this only against bosses."],
+					order = 30,
 					width = "double"
 				}
 			}

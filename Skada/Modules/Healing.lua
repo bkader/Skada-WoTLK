@@ -96,6 +96,8 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 	local function SpellHeal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, spellname, spellschool, amount, overheal, _, critical = ...
 
+		srcGUID, srcName, srcFlags = Skada:FixUnit(spellid, srcGUID, srcName, srcFlags)
+
 		heal.playerid = srcGUID
 		heal.playername = srcName
 		heal.playerflags = srcFlags

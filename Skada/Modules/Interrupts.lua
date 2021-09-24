@@ -292,6 +292,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 		Skada.options.args.modules.args.interrupts = {
 			type = "group",
 			name = L["Interrupts"],
+			desc = format(L["Options for %s."], L["Interrupts"]),
 			get = function(i)
 				return Skada.db.profile.modules[i[#i]]
 			end,

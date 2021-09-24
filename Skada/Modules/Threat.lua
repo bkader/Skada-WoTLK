@@ -336,6 +336,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 		local opts = {
 			type = "group",
 			name = L["Threat"],
+			desc = format(L["Options for %s."], L["Threat"]),
 			get = function(i)
 				return mod.db[i[#i]]
 			end,

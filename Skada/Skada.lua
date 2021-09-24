@@ -63,7 +63,7 @@ local check_for_join_and_leave
 
 -- list of players, pets and vehicles
 local players, pets, vehicles = {}, {}, {}
-local queuedFixes, queuedData
+local queuedFixes, queuedData, queuedUnits
 
 -- list of feeds & selected feed
 local feeds, selectedfeed = {}
@@ -191,7 +191,7 @@ function Skada:AddActiveTime(player, cond, diff)
 
 		delta = floor(100 * delta + 0.5) / 100
 		player.last = now
-		player.time = player.time + delta
+		player.time = (player.time or 0) + delta
 	end
 end
 
@@ -338,6 +338,7 @@ do
 		local options = {
 			type = "group",
 			name = function() return db.name end,
+			desc = function() return format(L["Options for %s."], db.name) end,
 			get = function(i) return db[i[#i]] end,
 			set = function(i, val)
 				db[i[#i]] = val
@@ -520,7 +521,8 @@ do
 		options.args.switchoptions = {
 			type = "group",
 			name = L["Mode Switching"],
-			order = 4,
+			desc = format(L["Options for %s."], L["Mode Switching"]),
+			order = 99,
 			args = {
 				modeincombat = {
 					type = "select",
@@ -1778,6 +1780,61 @@ function Skada:PetDebug()
 end
 
 -------------------------------------------------------------------------------
+-- units fix function.
+--
+-- on certain servers, certain spells are not assigned properly and
+-- in order to work around this, these functions were added.
+--
+-- for example, Death Knight' "Mark of Blood" healing is not considered
+-- by Skada because the healing is attributed to the boss and not to the
+-- player who used the spell, so in some modules you will find a table
+-- called "queuedSpells" in which you can store a table of [spellid] = spellid
+-- used by other modules.
+-- In the case of "Mark of Blood" (49005), the healing from the spell 50424
+-- is attributed to the target instead of the DK, so whenever Skada detects
+-- a healing from 50424 it will check queued units, if found the player data
+-- will be used.
+
+function Skada:QueueUnit(spellid, srcGUID, srcName, srcFlags, dstGUID)
+	if spellid and srcName and srcGUID and dstGUID and srcGUID ~= dstGUID then
+		queuedUnits = queuedUnits or newTable()
+		queuedUnits[spellid] = queuedUnits[spellid] or {}
+		queuedUnits[spellid][dstGUID] = {id = srcGUID, name = srcName, flags = srcFlags}
+	end
+end
+
+function Skada:UnqueueUnit(spellid, dstGUID)
+	if spellid and dstGUID and queuedUnits and queuedUnits[spellid] then
+		if queuedUnits[spellid][dstGUID] then
+			queuedUnits[spellid][dstGUID] = nil
+		end
+		if Skada.tLength(queuedUnits[spellid]) == 0 then
+			queuedUnits[spellid] = nil
+		end
+	end
+end
+
+function Skada:FixUnit(spellid, guid, name, flags)
+	if spellid and guid and queuedUnits and queuedUnits[spellid] and queuedUnits[spellid][guid] then
+		return queuedUnits[spellid][guid].id or guid, queuedUnits[spellid][guid].name or name, queuedUnits[spellid][guid].flags or flags
+	end
+	return guid, name, flags
+end
+
+function Skada:IsQueuedUnit(guid)
+	if queuedUnits and tonumber(guid) then
+		for _, units in pairs(queuedUnits) do
+			for id, _ in pairs(units) do
+				if id == guid then
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+
+-------------------------------------------------------------------------------
 -- tooltip functions
 
 -- sets the tooltip position
@@ -2894,6 +2951,7 @@ function Skada:FrameSettings(db, include_dimensions)
 	local obj = {
 		type = "group",
 		name = L["Window"],
+		desc = format(L["Options for %s."], L["Window"]),
 		get = function(i)
 			return db[i[#i]]
 		end,
@@ -3450,6 +3508,7 @@ function Skada:EndSegment()
 	if not self.current then return end
 	delTable(queuedFixes)
 	delTable(queuedData)
+	delTable(queuedUnits)
 
 	local now = time()
 	if not self.db.profile.onlykeepbosses or self.current.gotboss then
@@ -3543,6 +3602,8 @@ function Skada:StopSegment(completed)
 		self.current.endtime = time()
 		delTable(queuedFixes)
 		delTable(queuedData)
+		delTable(queuedUnits)
+
 		-- used to trigger modes "SetComplete"
 		if completed == true then
 			for _, mode in self:IterateModes() do
@@ -3745,7 +3806,7 @@ do
 
 				if not fail and mod.flags.src_is_interesting or mod.flags.src_is_not_interesting then
 					if not src_is_interesting then
-						src_is_interesting = band(srcFlags, BITMASK_GROUP) ~= 0 or (band(srcFlags, BITMASK_PETS) ~= 0 and pets[srcGUID]) or players[srcGUID]
+						src_is_interesting = band(srcFlags, BITMASK_GROUP) ~= 0 or (band(srcFlags, BITMASK_PETS) ~= 0 and pets[srcGUID]) or players[srcGUID] or self:IsQueuedUnit(srcGUID)
 					end
 
 					if (mod.flags.src_is_interesting and not src_is_interesting) or (mod.flags.src_is_not_interesting and src_is_interesting) then
@@ -3755,7 +3816,7 @@ do
 
 				if not fail and mod.flags.dst_is_interesting or mod.flags.dst_is_not_interesting then
 					if not dst_is_interesting then
-						dst_is_interesting = band(dstFlags, BITMASK_GROUP) ~= 0 or (band(dstFlags, BITMASK_PETS) ~= 0 and pets[dstGUID]) or players[dstGUID]
+						dst_is_interesting = band(dstFlags, BITMASK_GROUP) ~= 0 or (band(dstFlags, BITMASK_PETS) ~= 0 and pets[dstGUID]) or players[dstGUID] or self:IsQueuedUnit(dstGUID)
 					end
 
 					if (mod.flags.dst_is_interesting and not dst_is_interesting) or (mod.flags.dst_is_not_interesting and dst_is_interesting) then

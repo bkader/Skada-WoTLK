@@ -216,7 +216,8 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 			if not options then
 				options = {
 					type = "group",
-					name = L["Fails"],
+					name = mod.moduleName,
+					desc = format(L["Options for %s."], mod.moduleName),
 					get = function(i) return Skada.db.profile.modules[i[#i]] end,
 					set = function(i, val) Skada.db.profile.modules[i[#i]] = val or nil end,
 					args = {

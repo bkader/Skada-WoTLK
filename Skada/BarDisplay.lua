@@ -969,6 +969,7 @@ function mod:AddDisplayOptions(win, options)
 	options.baroptions = {
 		type = "group",
 		name = L["Bars"],
+		desc = (L["Options for %s."]):format(L["Bars"]),
 		order = 1,
 		get = function(i)
 			return db[i[#i]]
@@ -1210,6 +1211,7 @@ function mod:AddDisplayOptions(win, options)
 	options.titleoptions = {
 		type = "group",
 		name = L["Title Bar"],
+		desc = (L["Options for %s."]):format(L["Title Bar"]),
 		order = 2,
 		get = function(i)
 			return db.title[i[#i]]

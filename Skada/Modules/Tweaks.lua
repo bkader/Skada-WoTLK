@@ -390,6 +390,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 		Skada.options.args.Tweaks = {
 			type = "group",
 			name = L["Tweaks"],
+			desc = format(L["Options for %s."], L["Tweaks"]),
 			get = function(i)
 				return Skada.db.profile[i[#i]]
 			end,

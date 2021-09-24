@@ -265,34 +265,69 @@ function mod:AddDisplayOptions(win, options)
 	local db = win.db
 	options.main = {
 		type = "group",
-		name = "Datatext",
+		name = L["Data text"],
+		desc = format(L["Options for %s."], L["Data text"]),
 		order = 3,
 		args = {
 			useframe = {
 				type = "toggle",
-				name = "Use frame",
-				desc = "Shows a standalone frame. Not needed if you are using an LDB display provider such as Titan Panel or ChocolateBar.",
-				get = function()
-					return db.useframe
-				end,
+				name = L["Use frame"],
+				desc = L["Shows a standalone frame. Not needed if you are using an LDB display provider such as Titan Panel or ChocolateBar."],
+				get = function() return db.useframe end,
 				set = function(win, key)
 					db.useframe = key
 					Skada:ApplySettings(db.name)
 				end,
-				order = 0.0
+				order = 10,
+				width = "double"
 			},
-			classcolortext = {
-				type = "toggle",
-				name = L["Class color text"],
-				desc = L["When possible, bar text will be colored according to player class."],
-				order = 0.1,
-				get = function()
-					return db.isusingclasscolors
-				end,
-				set = function()
-					db.isusingclasscolors = not db.isusingclasscolors
+			barfont = {
+				type = "select",
+				dialogControl = "LSM30_Font",
+				name = L["Bar font"],
+				desc = L["The font used by all bars."],
+				values = AceGUIWidgetLSMlists.font,
+				get = function() return db.barfont end,
+				set = function(win, key)
+					db.barfont = key
 					Skada:ApplySettings(db.name)
-				end
+				end,
+				order = 20,
+				width = "double"
+			},
+			barfontsize = {
+				type = "range",
+				name = L["Bar font size"],
+				desc = L["The font size of all bars."],
+				min = 7,
+				max = 40,
+				step = 1,
+				get = function() return db.barfontsize end,
+				set = function(win, size)
+					db.barfontsize = size
+					Skada:ApplySettings(db.name)
+				end,
+				order = 30,
+				width = "double"
+			},
+			barfontflags = {
+				type = "select",
+				name = L["Font Outline"],
+				desc = L["Sets the font outline."],
+				values = {
+					[""] = NONE,
+					["OUTLINE"] = L["Outline"],
+					["THICKOUTLINE"] = L["Thick outline"],
+					["MONOCHROME"] = L["Monochrome"],
+					["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
+				},
+				get = function() return db.barfontflags end,
+				set = function(win, key)
+					db.barfontflags = key
+					Skada:ApplySettings(db.name)
+				end,
+				order = 40,
+				width = "double"
 			},
 			color = {
 				type = "color",
@@ -307,59 +342,22 @@ function mod:AddDisplayOptions(win, options)
 					db.textcolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
 					Skada:ApplySettings(db.name)
 				end,
-				order = 4
+				disabled = function() return db.isusingclasscolors end,
+				order = 50,
+				width = "double",
 			},
-			barfont = {
-				type = "select",
-				dialogControl = "LSM30_Font",
-				name = L["Bar font"],
-				desc = L["The font used by all bars."],
-				values = AceGUIWidgetLSMlists.font,
-				get = function()
-					return db.barfont
-				end,
-				set = function(win, key)
-					db.barfont = key
+			classcolortext = {
+				type = "toggle",
+				name = L["Class color text"],
+				desc = L["When possible, bar text will be colored according to player class."],
+				get = function() return db.isusingclasscolors end,
+				set = function()
+					db.isusingclasscolors = not db.isusingclasscolors
 					Skada:ApplySettings(db.name)
 				end,
-				order = 1
+				order = 60,
+				width = "double"
 			},
-			barfontsize = {
-				type = "range",
-				name = L["Bar font size"],
-				desc = L["The font size of all bars."],
-				min = 7,
-				max = 40,
-				step = 1,
-				get = function()
-					return db.barfontsize
-				end,
-				set = function(win, size)
-					db.barfontsize = size
-					Skada:ApplySettings(db.name)
-				end,
-				order = 2
-			},
-			barfontflags = {
-				type = "select",
-				name = L["Font Outline"],
-				desc = L["Sets the font outline."],
-				values = {
-					[""] = NONE,
-					["OUTLINE"] = L["Outline"],
-					["THICKOUTLINE"] = L["Thick outline"],
-					["MONOCHROME"] = L["Monochrome"],
-					["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
-				},
-				get = function()
-					return db.barfontflags
-				end,
-				set = function(win, key)
-					db.barfontflags = key
-					Skada:ApplySettings(db.name)
-				end,
-				order = 3
-			}
 		}
 	}
 

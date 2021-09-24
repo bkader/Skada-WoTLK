@@ -841,7 +841,8 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 	function mod:OnInitialize()
 		Skada.options.args.modules.args.ccoptions = {
 			type = "group",
-			name = L["CC Breakers"],
+			name = self.moduleName,
+			desc = format(L["Options for %s."], self.moduleName),
 			get = function(i)
 				return Skada.db.profile.modules[i[#i]]
 			end,
