@@ -1410,7 +1410,7 @@ do
 		if not player then
 			if not playername then return end
 
-			player = {id = playerid, name = playername, flags = playerflags, time = 0}
+			player = {id = playerid, name = playername or UNKNOWNOBJECT, flags = playerflags, time = 0}
 
 			-- set class right away
 			if players[playerid] then

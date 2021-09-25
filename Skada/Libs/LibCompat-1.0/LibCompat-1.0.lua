@@ -153,15 +153,25 @@ do
 	-- delete table and return to pool
 	local function delTable(t, recursive)
 		if type(t) == "table" then
+			wipe(t)
+			t[""] = true
+			t[""] = nil
+			tablePool[t] = true
+		end
+		return nil
+	end
+
+	-- delete table recursively
+	local function deepDelTable(t)
+		if type(t) == "table" then
 			for k, v in pairs(t) do
-				if recursive and type(v) == "table" then
-					delTable(v, recursive)
+				if type(v) == "table" then
+					deepDelTable(v)
 				end
 				t[k] = nil
 			end
-			t[true] = true
-			t[true] = nil
-			setmetatable(t, nil)
+			t[""] = true
+			t[""] = nil
 			tablePool[t] = true
 		end
 		return nil
@@ -175,6 +185,7 @@ do
 	LibCompat.WeakTable = WeakTable
 	LibCompat.newTable = newTable
 	LibCompat.delTable = delTable
+	LibCompat.deepDelTable = deepDelTable
 end
 
 -------------------------------------------------------------------------------
@@ -1185,6 +1196,7 @@ local mixins = {
 	"WeakTable",
 	"newTable",
 	"delTable",
+	"deepDelTable",
 	-- math util
 	"Round",
 	"Square",
