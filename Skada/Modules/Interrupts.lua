@@ -73,7 +73,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 		log_interrupt(Skada.current, data)
 		log_interrupt(Skada.total, data)
 
-		if Skada.db.profile.modules.interruptannounce and IsInGroup() and srcGUID == Skada.myGUID then
+		if Skada.db.profile.modules.interruptannounce and IsInGroup() and srcGUID == Skada.userGUID then
 			local spelllink = GetSpellLink(extraspellid or extraspellname) or extraspellname
 
 			local channel = Skada.db.profile.modules.interruptchannel or "SAY"

@@ -189,7 +189,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 						if data.threat and data.threat > 0 then
 							-- Warn if this is ourselves and we are over the treshold.
 							local percent = 100 * data.value / max(0.000001, maxthreat)
-							if data.id == Skada.myGUID then
+							if data.id == Skada.userGUID then
 								mypercent = percent
 								if self.db.threshold and self.db.threshold < percent and (not data.isTanking or not self.db.notankwarnings) then
 									we_should_warn = (data.color == nil)

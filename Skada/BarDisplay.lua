@@ -663,7 +663,7 @@ do
 						bar.timerLabel:SetTextColor(1, 1, 1, 1)
 					end
 
-					if win.bargroup.showself and data.id == Skada.myGUID then
+					if win.bargroup.showself and data.id == Skada.userGUID then
 						bar.fixed = true
 					end
 				end

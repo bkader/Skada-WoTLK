@@ -1094,7 +1094,7 @@ do
 
 	local function CreateTexturePool(parent, layer, subLayer, textureTemplate, resetterFunc)
 		local texturePool = CreateFromMixins(TexturePoolMixin)
-		texturePool:OnLoad(parent, layer, subLayer, textureTemplate, resetterFunc or TexturePool_HideAndClearAnchors)
+		texturePool:OnLoad(parent, layer, subLayer, textureTemplate, resetterFunc or FramePool_HideAndClearAnchors)
 		return texturePool
 	end
 

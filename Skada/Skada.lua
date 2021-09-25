@@ -1439,7 +1439,7 @@ do
 			(player.name == UKNOWNBEING and playername ~= UKNOWNBEING) or -- unknown unit
 			(player.name == player.id and playername ~= player.id) -- GUID is the same as the name
 		then
-			player.name = (player.id == self.myGUID or playerid == self.myGUID) and self.myName or playername
+			player.name = (player.id == self.userGUID or playerid == self.userGUID) and self.userName or playername
 		end
 
 		-- fix players created before their info was received
@@ -1682,7 +1682,7 @@ do
 
 		-- flags is provided and it is mine.
 		if guid and flags and band(flags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
-			pets[guid] = {id = Skada.myGUID, name = Skada.myName}
+			pets[guid] = {id = Skada.userGUID, name = Skada.userName}
 			return pets[guid]
 		end
 
@@ -2165,7 +2165,7 @@ do
 		end
 
 		local title = (window and window.title) or report_mode.title or report_mode:GetName()
-		local label = (report_mode_name == L["Improvement"]) and self.myName or Skada:GetSetLabel(report_set)
+		local label = (report_mode_name == L["Improvement"]) and self.userName or Skada:GetSetLabel(report_set)
 		self:SendChat(format(L["Skada: %s for %s:"], title, label), channel, chantype)
 
 		maxlines = maxlines or 10
@@ -2283,7 +2283,7 @@ do
 	end
 
 	function Skada:OnCommVersionCheck(sender, version)
-		if sender and sender ~= self.myName and version then
+		if sender and sender ~= self.userName and version then
 			version = convertVersion(version)
 			local ver = convertVersion(self.version)
 			if not (version and ver) or self.versionChecked then
@@ -3319,7 +3319,7 @@ end
 
 function Skada:OnEnable()
 	-- well, me!
-	self.myGUID, self.myName = UnitGUID("player"), UnitName("player")
+	self.userGUID, self.userName = UnitGUID("player"), UnitName("player")
 
 	self:ReloadSettings()
 
@@ -3443,7 +3443,7 @@ do
 	end
 
 	function Skada:SendComm(channel, target, ...)
-		if target == self.myName then return end
+		if target == self.userName then return end
 
 		if not channel then
 			local t = GetGroupTypeAndCount()
@@ -3482,7 +3482,7 @@ do
 	end
 
 	function Skada:OnCommReceived(prefix, message, channel, sender)
-		if prefix == "Skada" and channel and sender and sender ~= self.myName then
+		if prefix == "Skada" and channel and sender and sender ~= self.userName then
 			DispatchComm(sender, self:Deserialize(message))
 		end
 	end

@@ -1270,7 +1270,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 
 	local function feed_personal_hps()
 		if Skada.current then
-			local player = Skada:find_player(Skada.current, Skada.myGUID)
+			local player = Skada:find_player(Skada.current, Skada.userGUID)
 			if player then
 				return Skada:FormatNumber(getHPS(Skada.current, player)) .. " " .. L["HPS"]
 			end
