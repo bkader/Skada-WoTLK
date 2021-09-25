@@ -706,7 +706,8 @@ do
 	end
 
 	local function SerializeProfile()
-		local data = {Skada = Skada.db.profile}
+		local data = {Skada = {}}
+		Skada.tCopy(data.Skada, Skada.db.profile, {"nickname"})
 		for k, v in Skada:IterateModules() do
 			if v.db and v.db.profile then
 				data[k] = v.db.profile
