@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0", 18
+local MAJOR, MINOR = "LibCompat-1.0", 19
 local LibCompat, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not LibCompat then return end
 
@@ -12,7 +12,7 @@ LibCompat.embeds = LibCompat.embeds or {}
 
 local pairs, ipairs, select, type = pairs, ipairs, select, type
 local tinsert, tremove, tconcat, wipe = table.insert, table.remove, table.concat, wipe
-local floor, ceil, max = math.floor, math.ceil, math.max
+local floor, ceil, max, min = math.floor, math.ceil, math.max, math.min
 local setmetatable, format = setmetatable, string.format
 local CreateFrame = CreateFrame
 
@@ -134,44 +134,24 @@ do
 	end
 
 	-- Shamelessly copied from Omen - thanks!
-	local tablePool = setmetatable({}, {__mode = "kv"})
+	local tablePool = {}
+	setmetatable(tablePool, {__mode = "kv"})
 
 	-- get a new table
-	local function newTable(...)
-		local t = next(tablePool)
-		if t then
-			tablePool[t] = nil
-			for i = 1, select("#", ...) do
-				t[i] = select(i, ...)
-			end
-			return t
-		else
-			return {...}
-		end
+	local function newTable()
+		local t = next(tablePool) or {}
+		tablePool[t] = nil
+		return t
 	end
 
 	-- delete table and return to pool
-	local function delTable(t, recursive)
+	local function delTable(t)
 		if type(t) == "table" then
-			wipe(t)
-			t[""] = true
-			t[""] = nil
-			tablePool[t] = true
-		end
-		return nil
-	end
-
-	-- delete table recursively
-	local function deepDelTable(t)
-		if type(t) == "table" then
-			for k, v in pairs(t) do
-				if type(v) == "table" then
-					deepDelTable(v)
-				end
+			for k, _ in pairs(t) do
 				t[k] = nil
 			end
-			t[""] = true
-			t[""] = nil
+			t[true] = true
+			t[true] = nil
 			tablePool[t] = true
 		end
 		return nil
@@ -185,7 +165,6 @@ do
 	LibCompat.WeakTable = WeakTable
 	LibCompat.newTable = newTable
 	LibCompat.delTable = delTable
-	LibCompat.deepDelTable = deepDelTable
 end
 
 -------------------------------------------------------------------------------
@@ -598,7 +577,7 @@ do
 					ticker._delay = ticker._delay - elapsed
 					i = i + 1
 				else
-					ticker._callback(ticker, LibCompat.SafeUnpack(ticker._args))
+					ticker._callback(ticker)
 
 					if ticker._iterations == -1 then
 						ticker._delay = ticker._duration
@@ -629,14 +608,13 @@ do
 		waitFrame:Show()
 	end
 
-	local function CreateTicker(duration, callback, iterations, ...)
+	local function CreateTicker(duration, callback, iterations)
 		local ticker = setmetatable({}, TickerMetatable)
 
 		ticker._iterations = iterations or -1
 		ticker._duration = duration
 		ticker._delay = duration
 		ticker._callback = callback
-		ticker._args = LibCompat.SafePack(...)
 
 		AddDelayedCall(ticker)
 		return ticker
@@ -650,21 +628,16 @@ do
 		self._cancelled = true
 	end
 
-	local function After(duration, callback, ...)
-		AddDelayedCall({
-			_iterations = 1,
-			_delay = duration,
-			_callback = callback,
-			_args = LibCompat.SafePack(...)
-		})
+	local function After(duration, callback)
+		AddDelayedCall({_iterations = 1, _delay = duration, _callback = callback})
 	end
 
-	local function NewTimer(duration, callback, ...)
-		return CreateTicker(duration, callback, 1, ...)
+	local function NewTimer(duration, callback)
+		return CreateTicker(duration, callback, 1)
 	end
 
-	local function NewTicker(duration, callback, iterations, ...)
-		return CreateTicker(duration, callback, iterations, ...)
+	local function NewTicker(duration, callback, iterations)
+		return CreateTicker(duration, callback, iterations)
 	end
 
 	local function CancelTimer(ticker)
@@ -1184,6 +1157,224 @@ do
 end
 
 -------------------------------------------------------------------------------
+-- status bar emulation
+
+do
+	local StatusBarPrototype = {
+		min = 0,
+		max = 1,
+		value = 0.5,
+		rotate = true,
+		orientation = "HORIZONTAL",
+		-- [[ API ]]--
+		Update = function(self, changed)
+			self.value = min(self.max, max(self.min, self.value))
+
+			local progress = (self.value - self.min) / (self.max - self.min)
+			local align1, align2, xProgress, yProgress
+			local TLx, TLy, BLx, BLy, TRx, TRy, BRx, BRy
+			local TLx_, TLy_, BLx_, BLy_, TRx_, TRy_, BRx_, BRy_
+
+			local orientation = self.orientation
+			if not self.rotate then
+				if orientation == "HORIZONTAL_INVERSE" then
+					orientation = "HORIZONTAL"
+				elseif orientation == "VERTICAL_INVERSE" then
+					orientation = "VERTICAL"
+				end
+			end
+
+			if orientation == "HORIZONTAL" then
+				TLx, TLy = 0.0, 0.0
+				TRx, TRy = 1.0, 0.0
+				BLx, BLy = 0.0, 1.0
+				BRx, BRy = 1.0, 1.0
+
+				TLx_, TLy_ = TLx, TLy
+				TRx_, TRy_ = TRx * progress, TRy
+				BLx_, BLy_ = BLx, BLy
+				BRx_, BRy_ = BRx * progress, BRy
+			elseif orientation == "HORIZONTAL_INVERSE" then
+				TLx, TLy = 1.0, 0.0
+				TRx, TRy = 0.0, 0.0
+				BLx, BLy = 1.0, 1.0
+				BRx, BRy = 0.0, 1.0
+
+				TLx_, TLy_ = TLx * progress, TLy
+				TRx_, TRy_ = TRx, TRy
+				BLx_, BLy_ = BLx * progress, BLy
+				BRx_, BRy_ = BRx, BRy
+			elseif orientation == "VERTICAL_INVERSE" then
+				TLx, TLy = 0.0, 1.0
+				TRx, TRy = 0.0, 0.0
+				BLx, BLy = 1.0, 1.0
+				BRx, BRy = 1.0, 0.0
+
+				TLx_, TLy_ = TLx, TLy
+				TRx_, TRy_ = TRx, TRy
+				BLx_, BLy_ = BLx * progress, BLy
+				BRx_, BRy_ = BRx * progress, BRy
+			elseif orientation == "VERTICAL" then
+				TLx, TLy = 1.0, 0.0
+				TRx, TRy = 1.0, 1.0
+				BLx, BLy = 0.0, 0.0
+				BRx, BRy = 0.0, 1.0
+
+				TLx_, TLy_ = TLx * progress, TLy
+				TRx_, TRy_ = TRx * progress, TRy
+				BLx_, BLy_ = BLx, BLy
+				BRx_, BRy_ = BRx, BRy
+			end
+
+			local width, height = self:GetSize()
+			if self.orientation == "HORIZONTAL" then
+				align1, align2 = "TOPLEFT", "BOTTOMLEFT"
+				xProgress = width * progress
+			elseif self.orientation == "HORIZONTAL_INVERSE" then
+				align1, align2 = "TOPRIGHT", "BOTTOMRIGHT"
+				xProgress = width * progress
+			elseif self.orientation == "VERTICAL_INVERSE" then
+				align1, align2 = "TOPLEFT", "TOPRIGHT"
+				yProgress = height * progress
+			elseif self.orientation == "VERTICAL" then
+				align1, align2 = "BOTTOMLEFT", "BOTTOMRIGHT"
+				yProgress = height * progress
+			end
+
+			if not changed then
+				self.bg:ClearAllPoints()
+				self.bg:SetAllPoints()
+				self.bg:SetTexCoord(TLx, TLy, BLx, BLy, TRx, TRy, BRx, BRy)
+
+				self.fg:ClearAllPoints()
+				self.fg:SetPoint(align1)
+				self.fg:SetPoint(align2)
+				self.fg:SetTexCoord(TLx_, TLy_, BLx_, BLy_, TRx_, TRy_, BRx_, BRy_)
+			end
+
+			if xProgress then
+				self.fg:SetWidth(xProgress > 0 and xProgress or 0.1)
+			end
+			if yProgress then
+				self.fg:SetHeight(yProgress > 0 and yProgress or 0.1)
+			end
+		end,
+		OnSizeChanged = function(self, width, height)
+			self:Update(true)
+		end,
+		SetMinMaxValues = function(self, minVal, maxVal)
+			local update = false
+			if minVal and type(minVal) == "number" then
+				self.min = minVal
+				update = true
+			end
+			if maxVal and type(maxVal) == "number" then
+				self.max = maxVal
+				update = true
+			end
+
+			if update then
+				self:Update()
+			end
+		end,
+		GetMinMaxValues = function(self)
+			return self.min, self.max
+		end,
+		SetValue = function(self, value)
+			if value and type(value) == "number" then
+				self.value = value
+				self:Update()
+			end
+		end,
+		GetValue = function(self)
+			return self.value
+		end,
+		SetOrientation = function(self, orientation)
+			if orientation == "HORIZONTAL" or orientation == "VERTICAL" then
+				self.orientation = orientation
+				self:Update()
+			end
+		end,
+		GetOrientation = function(self)
+			return self.orientation
+		end,
+		SetRotatesTexture = function(self, rotate)
+			if rotate and type(rotate) == "boolean" then
+				self.rotate = rotate
+				self:Update()
+			end
+		end,
+		GetRotatesTexture = function(self)
+			return self.rotate
+		end,
+		SetReverseFill = function(self, reverse)
+			if reverse and not self.orientation:find("_INVERSE") then
+				self.orientation = self.orientation .. "_INVERSE"
+				self:Update()
+			elseif not reverse and self.orientation:find("_INVERSE") then
+				self.orientation = self.orientation:gsub("_INVERSE", "")
+				self:Update()
+			end
+		end,
+		SetStatusBarTexture = function(self, texture)
+			self.fg:SetTexture(texture)
+			self.bg:SetTexture(texture)
+		end,
+		GetStatusBarTexture = function(self)
+			return self.fg
+		end,
+		SetForegroundColor = function(self, r, g, b, a)
+			self.fg:SetVertexColor(r, g, b, a)
+		end,
+		GetForegroundColor = function(self)
+			return self.fg
+		end,
+		SetBackgroundColor = function(self, r, g, b, a)
+			self.bg:SetVertexColor(r, g, b, a)
+		end,
+		GetBackgroundColor = function(self)
+			return self.bg:GetVertexColor()
+		end,
+		SetTexture = function(self, texture)
+			self:SetStatusBarTexture(texture)
+		end,
+		GetTexture = function(self)
+			return self.fg:GetTexture()
+		end,
+		SetStatusBarColor = function(self, r, g, b, a)
+			self:SetForegroundColor(r, g, b, a)
+		end,
+		SetVertexColor = function(self, r, g, b, a)
+			self:SetForegroundColor(r, g, b, a)
+		end,
+		GetVertexColor = function(self)
+			return self.fg:GetVertexColor()
+		end,
+		GetObjectType = function(self)
+			return "StatusBar"
+		end
+	}
+
+	-- used to Create
+	function StatusBarPrototype:New(name, parent)
+		local bar = CreateFrame("Frame", name, parent)
+		bar.fg = bar:CreateTexture(nil, "ARTWORK")
+		bar.bg = bar:CreateTexture(nil, "BACKGROUND")
+		bar.bg:Hide()
+		for k, v in pairs(self) do
+			if k ~= "New" then
+				bar[k] = v
+			end
+		end
+		bar:SetRotatesTexture(false)
+		bar:HookScript("OnSizeChanged", bar.OnSizeChanged)
+		return bar
+	end
+
+	LibCompat.StatusBarPrototype = StatusBarPrototype
+end
+
+-------------------------------------------------------------------------------
 
 local mixins = {
 	"QuickDispatch",
@@ -1196,7 +1387,6 @@ local mixins = {
 	"WeakTable",
 	"newTable",
 	"delTable",
-	"deepDelTable",
 	-- math util
 	"Round",
 	"Square",
@@ -1275,7 +1465,8 @@ local mixins = {
 	"CreateTexturePool",
 	"ColorMixin",
 	"CreateColor",
-	"WrapTextInColorCode"
+	"WrapTextInColorCode",
+	"StatusBarPrototype"
 }
 
 function LibCompat:Embed(target)

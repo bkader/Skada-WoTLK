@@ -161,7 +161,7 @@ end
 
 -- returns the selected set time.
 function Skada:GetSetTime(set)
-	return max(0.1, set and set.time or 0)
+	return set and max((set.time or 0) > 0 and set.time or (time() - set.starttime), 0.1) or 0
 end
 
 -- returns a formmatted set time
@@ -1371,7 +1371,7 @@ function Skada:find_player(set, playerid, playername, strict)
 end
 
 do
-	local function fix_player(ticker, player, unit)
+	local function fix_player(player, unit)
 		if player.id and player.name then
 			unit = unit or GetUnitIdFromGUID(player.id, "group")
 
@@ -1417,7 +1417,7 @@ do
 				player.class = select(2, UnitClass(players[playerid]))
 			end
 
-			fix_player(nil, player, players[playerid])
+			fix_player(player, players[playerid])
 
 			for _, mode in self:IterateModes() do
 				if mode.AddPlayerAttributes ~= nil then
@@ -1449,7 +1449,7 @@ do
 				queuedData[player.id] = nil
 			elseif set.name == L["Current"] and not (queuedFixes and queuedFixes[player.id]) then
 				queuedFixes = queuedFixes or newTable()
-				queuedFixes[player.id] = NewTicker(5, fix_player, nil, player, players[player.id])
+				queuedFixes[player.id] = NewTicker(5, function() fix_player(player, players[player.id]) end)
 			end
 		elseif queuedFixes and queuedFixes[player.id] then
 			queuedData = queuedData or newTable()
@@ -3506,9 +3506,9 @@ end
 
 function Skada:EndSegment()
 	if not self.current then return end
-	delTable(queuedFixes)
-	delTable(queuedData)
-	delTable(queuedUnits)
+	queuedFixes = delTable(queuedFixes)
+	queuedData = delTable(queuedData)
+	queuedUnits = delTable(queuedUnits)
 
 	local now = time()
 	if not self.db.profile.onlykeepbosses or self.current.gotboss then
@@ -3552,7 +3552,9 @@ function Skada:EndSegment()
 	end
 
 	self.last = self.current
+	self.total.time = self.total.time + self.current.time
 	self.current = nil
+
 	for _, player in self:IteratePlayers(self.total) do
 		player.last = nil
 	end
@@ -3600,18 +3602,7 @@ function Skada:StopSegment(completed)
 	if self.current then
 		self.current.stopped = true
 		self.current.endtime = time()
-		delTable(queuedFixes)
-		delTable(queuedData)
-		delTable(queuedUnits)
-
-		-- used to trigger modes "SetComplete"
-		if completed == true then
-			for _, mode in self:IterateModes() do
-				if mode.SetComplete then
-					mode:SetComplete(self.current)
-				end
-			end
-		end
+		self.current.time = max(0.1, self.current.endtime - self.current.starttime)
 	end
 end
 
@@ -3619,6 +3610,7 @@ function Skada:ResumeSegment()
 	if self.current and self.current.stopped then
 		self.current.stopped = nil
 		self.current.endtime = nil
+		self.current.time = 0
 	end
 end
 
@@ -3627,15 +3619,10 @@ do
 	local deathcounter, startingmembers = 0, 0
 
 	function Skada:Tick()
-		if not disabled and self.current then
-			self.callbacks:Fire("COMBAT_PLAYER_TICK", self.current, self.total)
-			if not InCombatLockdown() and not IsGroupInCombat() then
-				self:Debug("EndSegment: Tick")
-				self:EndSegment()
-			elseif not self.current.stopped then
-				self.current.time = self.current.time + 1
-				self.total.time = self.total.time + 1
-			end
+		self.callbacks:Fire("COMBAT_PLAYER_TICK", self.current, self.total)
+		if not disabled and self.current and not InCombatLockdown() and not IsGroupInCombat() then
+			self:Debug("EndSegment: Tick")
+			self:EndSegment()
 		end
 	end
 
@@ -3816,7 +3803,7 @@ do
 
 				if not fail and mod.flags.dst_is_interesting or mod.flags.dst_is_not_interesting then
 					if not dst_is_interesting then
-						dst_is_interesting = band(dstFlags, BITMASK_GROUP) ~= 0 or (band(dstFlags, BITMASK_PETS) ~= 0 and pets[dstGUID]) or players[dstGUID] or self:IsQueuedUnit(dstGUID)
+						dst_is_interesting = band(dstFlags, BITMASK_GROUP) ~= 0 or (band(dstFlags, BITMASK_PETS) ~= 0 and pets[dstGUID]) or players[dstGUID]
 					end
 
 					if (mod.flags.dst_is_interesting and not dst_is_interesting) or (mod.flags.dst_is_not_interesting and dst_is_interesting) then

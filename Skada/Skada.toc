@@ -15,8 +15,8 @@
 ## SavedVariablesPerCharacter: SkadaCharDB
 ## DefaultState: enabled
 ## Author: Kader (|cff808080bkader#6361|r)
-## Version: 1.8.69
-## X-Date: 2021-09-16 @ 11:31 AM |cff808080UTC|r
+## Version: 1.8.70
+## X-Date: 2021-09-27 @ 11:30 PM |cff808080UTC|r
 ## X-Credits: Zarnivoop, WoTLK Community
 ## X-Category: Combat
 ## X-License: MIT/X
