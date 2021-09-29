@@ -200,13 +200,8 @@ end
 
 -- creates generic dialog
 function Skada:ConfirmDialog(text, accept, cancel, override)
-	local t
-	if StaticPopupDialogs["SkadaCommonConfirmDialog"] then
-		t = wipe(StaticPopupDialogs["SkadaCommonConfirmDialog"])
-	else
-		t = newTable()
-		StaticPopupDialogs["SkadaCommonConfirmDialog"] = t
-	end
+	local t = wipe(StaticPopupDialogs["SkadaCommonConfirmDialog"] or newTable())
+	StaticPopupDialogs["SkadaCommonConfirmDialog"] = t
 
 	local dialog, strata
 	t.OnAccept = function(self)
@@ -224,9 +219,6 @@ function Skada:ConfirmDialog(text, accept, cancel, override)
 		if dialog and strata then
 			dialog:SetFrameStrata(strata)
 		end
-	end
-	t.OnHide = function()
-		delTable(t)
 	end
 
 	t.preferredIndex = STATICPOPUP_NUMDIALOGS
@@ -246,6 +238,8 @@ function Skada:ConfirmDialog(text, accept, cancel, override)
 		strata = dialog:GetFrameStrata()
 		dialog:SetFrameStrata("TOOLTIP")
 	end
+
+	delTable(t)
 end
 
 -- skada reset dialog
