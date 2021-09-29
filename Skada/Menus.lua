@@ -793,7 +793,7 @@ do
 				local linebox = AceGUI:Create("Dropdown")
 				linebox:SetLabel(L["Line"])
 				linebox:SetList({[""] = NONE})
-				for _, bar in window:IterateDataset() do
+				for _, bar in ipairs(window.dataset) do
 					if bar.id and not bar.ignore then
 						linebox:AddItem(bar.id, format("%s   %s", bar.text or bar.label, bar.valuetext))
 					end

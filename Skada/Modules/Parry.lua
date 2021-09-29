@@ -5,7 +5,7 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 	local mod = Skada:NewModule(L["Parry-Haste"])
 	local targetmod = mod:NewModule(L["Parry target list"])
 
-	local pairs, select = pairs, select
+	local pairs, ipairs, select = pairs, ipairs, select
 	local tostring, format = tostring, string.format
 
 	local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
@@ -104,7 +104,7 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				if (player.parry or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d

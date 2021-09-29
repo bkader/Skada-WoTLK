@@ -829,7 +829,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				if (player.absorb or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
@@ -1233,7 +1233,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				local hps, amount = getHPS(set, player)
 
 				if amount > 0 then
@@ -1430,7 +1430,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 
 	local function CacheSpells(set)
 		spells = {}
-		for _, player in Skada:IteratePlayers(set) do
+		for _, player in ipairs(set.players) do
 			if player.heal_spells then
 				for spellid, spell in pairs(player.heal_spells) do
 					if (spell.amount or 0) > 0 then

@@ -3,7 +3,7 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
 	if Skada:IsDisabled("Activity") then return end
 
 	local mod = Skada:NewModule(L["Activity"])
-	local date, format, max = date, string.format, math.max
+	local ipairs, date, format, max = ipairs, date, string.format, math.max
 
 	local function activity_tooltip(win, id, label, tooltip)
 		local set = win:get_selected_set()
@@ -27,7 +27,7 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
 		if settime > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				local activetime = Skada:PlayerActiveTime(set, player, true)
 
 				if activetime > 0 then

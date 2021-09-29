@@ -7,7 +7,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	local potionmod = mod:NewModule(L["Players list"])
 
 	-- cache frequently used globals
-	local pairs, select, tconcat = pairs, select, table.concat
+	local pairs, ipairs, select, tconcat = pairs, ipairs, select, table.concat
 	local format, strsub, tostring = string.format, string.sub, tostring
 	local GetItemInfo, GetSpellInfo, After = GetItemInfo, Skada.GetSpellInfo, Skada.After
 	local GroupIterator = Skada.GroupIterator
@@ -107,7 +107,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 
 		local total, players = 0, newTable()
 		if win.potionid then
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				if player.potion_spells and player.potion_spells[win.potionid] then
 					total = total + player.potion_spells[win.potionid]
 					players[player.id] = {
@@ -219,7 +219,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				if (player.potion or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d

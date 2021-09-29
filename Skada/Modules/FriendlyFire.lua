@@ -6,7 +6,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 	local spellmod = mod:NewModule(L["Damage spell list"])
 	local targetmod = mod:NewModule(L["Damage target list"])
 
-	local pairs, select, format = pairs, select, string.format
+	local pairs, ipairs, select, format = pairs, ipairs, select, string.format
 	local GetSpellInfo, tContains = Skada.GetSpellInfo or GetSpellInfo, tContains
 	local _
 
@@ -146,7 +146,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				if (player.friendfire or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d

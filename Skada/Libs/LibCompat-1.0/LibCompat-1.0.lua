@@ -231,7 +231,7 @@ do
 		end
 	end
 
-	local UnitIterator, roster, _
+	local UnitIterator
 	do
 		local rmem, pmem, step, count
 
@@ -300,8 +300,7 @@ do
 	end
 
 	local function IsGroupDead()
-		roster, _ = UnitIterator()
-		for unit in roster do
+		for unit in UnitIterator() do
 			if not UnitIsDeadOrGhost(unit) then
 				return false
 			end
@@ -310,8 +309,7 @@ do
 	end
 
 	local function IsGroupInCombat()
-		roster, _ = UnitIterator()
-		for unit in roster do
+		for unit in UnitIterator() do
 			if UnitAffectingCombat(unit) then
 				return true
 			end
@@ -320,8 +318,7 @@ do
 	end
 
 	local function GroupIterator(func, ...)
-		roster, _ = UnitIterator()
-		for unit, owner in roster do
+		for unit, owner in UnitIterator() do
 			LibCompat.QuickDispatch(func, unit, owner, ...)
 		end
 	end
@@ -350,8 +347,7 @@ do
 		end
 
 		if specific == nil or specific == "group" then
-			roster, _ = UnitIterator()
-			for unit in roster do
+			for unit in UnitIterator() do
 				if UnitGUID(unit) == guid then
 					return unit
 				elseif UnitExists(unit .. "target") and UnitGUID(unit .. "target") == guid then

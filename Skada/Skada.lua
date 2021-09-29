@@ -113,7 +113,7 @@ function Skada.UnitClass(guid, flags, set, nocache)
 
 	if set then
 		-- an existing player
-		for _, p in Skada:IteratePlayers(set) do
+		for _, p in ipairs(set.players) do
 			if p.id == guid then
 				return Skada.classnames[p.class], p.class, p.role, p.spec
 			end
@@ -200,7 +200,7 @@ end
 
 -- creates generic dialog
 function Skada:ConfirmDialog(text, accept, cancel, override)
-	local t = wipe(StaticPopupDialogs["SkadaCommonConfirmDialog"] or newTable())
+	local t = wipe(StaticPopupDialogs["SkadaCommonConfirmDialog"] or {})
 	StaticPopupDialogs["SkadaCommonConfirmDialog"] = t
 
 	local dialog, strata
@@ -238,8 +238,6 @@ function Skada:ConfirmDialog(text, accept, cancel, override)
 		strata = dialog:GetFrameStrata()
 		dialog:SetFrameStrata("TOOLTIP")
 	end
-
-	delTable(t)
 end
 
 -- skada reset dialog
@@ -605,7 +603,7 @@ end
 function Window:UpdateDisplay()
 	if not self.metadata.maxvalue then
 		self.metadata.maxvalue = 0
-		for _, data in self:IterateDataset() do
+		for _, data in ipairs(self.dataset) do
 			if data.id and data.value > self.metadata.maxvalue then
 				self.metadata.maxvalue = data.value
 			end
@@ -618,7 +616,7 @@ end
 
 -- called before dataset is updated.
 function Window:UpdateInProgress()
-	for _, data in self:IterateDataset() do
+	for _, data in ipairs(self.dataset) do
 		if data.ignore then
 			data.icon = nil
 		end
@@ -640,12 +638,10 @@ function Window:IsShown()
 end
 
 function Window:Reset()
-	if self.display and self.display.Reset then
-		return self.display:Reset(self)
-	end
-
-	for _, data in self:IterateDataset() do
-		wipe(data)
+	if self.dataset then
+		for i, data in ipairs(self.dataset) do
+			self.dataset[i] = wipe(data)
+		end
 	end
 end
 
@@ -1166,14 +1162,6 @@ function Skada:IterateWindows()
 	return ipairs(windows)
 end
 
-function Skada:IteratePlayers(set)
-	return ipairs(set and set.players or {})
-end
-
-function Window:IterateDataset()
-	return ipairs(self.dataset or {})
-end
-
 -------------------------------------------------------------------------------
 -- modules functions
 
@@ -1238,7 +1226,7 @@ function Skada:VerifySet(mode, set)
 	end
 
 	if mode.AddPlayerAttributes then
-		for _, player in self:IteratePlayers(set) do
+		for _, player in ipairs(set.players) do
 			mode:AddPlayerAttributes(player, set)
 		end
 	end
@@ -1340,7 +1328,7 @@ function Skada:find_player(set, playerid, playername, strict)
 		end
 
 		-- search the set
-		for _, p in self:IteratePlayers(set) do
+		for _, p in ipairs(set.players) do
 			if p.id == playerid then
 				set._playeridx[playerid] = p
 				return p
@@ -1641,7 +1629,7 @@ do
 
 		-- attempt to get the pet's owner from tooltip
 		function GetPetOwnerFromTooltip(guid)
-			if Skada.current then
+			if Skada.current and Skada.current.players then
 				pettooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
 				pettooltip:ClearLines()
 				pettooltip:SetHyperlink("unit:" .. (guid or ""))
@@ -1649,7 +1637,7 @@ do
 				for i = 2, pettooltip:NumLines() do
 					local text = _G["SkadaPetTooltipTextLeft" .. i]:GetText()
 					if text and text ~= "" then
-						for _, p in Skada:IteratePlayers(Skada.current) do
+						for _, p in ipairs(Skada.current.players) do
 							local playername = p.name:gsub("%-.*", "")
 							if (Skada.locale == "ruRU" and FindNameDeclension(text, playername)) or ValidatePetOwner(text, playername) then
 								return p.id, p.name
@@ -1913,7 +1901,7 @@ do
 			tooltip:AddLine(ttwin.title or mode.title or mode:GetName())
 			local nr = 0
 
-			for _, data in ttwin:IterateDataset() do
+			for _, data in ipairs(ttwin.dataset) do
 				if data.id and nr < Skada.db.profile.tooltiprows then
 					nr = nr + 1
 					local color = white
@@ -2164,7 +2152,7 @@ do
 
 		maxlines = maxlines or 10
 		local nr = 1
-		for _, data in report_table:IterateDataset() do
+		for _, data in ipairs(report_table.dataset) do
 			if ((barid and barid == data.id) or (data.id and not barid)) and not data.ignore then
 				local label
 				if data.reportlabel then
@@ -2477,7 +2465,7 @@ function Skada:UpdateDisplay(force)
 
 						if not total then
 							total = 0
-							for _, data in win:IterateDataset() do
+							for _, data in ipairs(win.dataset) do
 								if data.id then
 									total = total + data.value
 								end
@@ -3549,7 +3537,7 @@ function Skada:EndSegment()
 	self.total.time = self.total.time + self.current.time
 	self.current = nil
 
-	for _, player in self:IteratePlayers(self.total) do
+	for _, player in ipairs(self.total.players) do
 		player.last = nil
 	end
 

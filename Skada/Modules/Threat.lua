@@ -169,7 +169,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 
 				-- We now have a a complete threat table.
 				-- Now we need to add valuetext.
-				for _, data in win:IterateDataset() do
+				for _, data in ipairs(win.dataset) do
 					if data.id == "AGGRO" then
 						if self.db.showAggroBar and (tankThreat or 0) > 0 then
 							data.valuetext = Skada:FormatValueText(

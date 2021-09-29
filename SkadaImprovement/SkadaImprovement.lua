@@ -248,7 +248,7 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 			local encounter = find_encounter_data(boss, set.starttime)
 			if not encounter then return end
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				if player.id == playerid then
 					for _, mode in ipairs(modes) do
 						if updaters[mode] then
@@ -269,6 +269,7 @@ Skada:AddLoadableModule("Improvement", function(Skada, L)
 	end
 
 	function mod:OnEnable()
+		playerid = playerid or UnitGUID("player")
 		self:OnInitialize()
 
 		mod_comparison.metadata = {}

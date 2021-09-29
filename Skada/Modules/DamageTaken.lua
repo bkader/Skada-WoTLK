@@ -553,7 +553,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				local dtps, amount = getDTPS(set, player)
 
 				if amount > 0 then
@@ -642,7 +642,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 	end
 
 	function mod:SetComplete(set)
-		for _, player in Skada:IteratePlayers(set) do
+		for _, player in ipairs(set.players) do
 			if (player.damagetaken or 0) == 0 then
 				player.damagetaken_spells = nil
 				player.damagetaken_sources = nil
@@ -667,7 +667,7 @@ Skada:AddLoadableModule("DTPS", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				local amount = getDTPS(set, player)
 
 				if amount > 0 then
@@ -747,7 +747,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(Skada, L)
 		if win.spellname then
 			cacheTable = newTable()
 			local total = 0
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				if player.damagetaken_spells and player.damagetaken_spells[win.spellname] then
 					if (player.damagetaken_spells[win.spellname].amount or 0) > 0 then
 						cacheTable[player.id] = {
@@ -810,7 +810,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(Skada, L)
 
 		cacheTable = newTable()
 
-		for _, player in Skada:IteratePlayers(set) do
+		for _, player in ipairs(set.players) do
 			if player.damagetaken_spells then
 				for spellname, spell in pairs(player.damagetaken_spells) do
 					if spell.amount > 0 then
@@ -942,7 +942,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 
 			local maxvalue, nr = 0, 1
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				if (player.damagetaken or 0) > 0 and player.damagetaken_spells then
 					local tmp = {name = player.name, data = {}}
 
@@ -1149,7 +1149,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 		if (set.damagetaken or 0) > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				local amount, total = getMIT(player)
 
 				if amount > 0 then

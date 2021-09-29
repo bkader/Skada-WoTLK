@@ -119,7 +119,6 @@ do
 		"GetBar",
 		"GetBars",
 		"HasBar",
-		"IterateBars",
 		"NewBarGroup",
 		"ReleaseBar",
 		"GetBarGroup",
@@ -245,10 +244,6 @@ end
 
 function lib:HasAnyBar()
 	return not (not (bars[self] and next(bars[self])))
-end
-
-function lib:IterateBars()
-	return pairs(bars[self] or {})
 end
 
 -- Convenient method to create a new, empty bar prototype
@@ -813,7 +808,6 @@ end
 barListPrototype.GetBar = lib.GetBar
 barListPrototype.GetBars = lib.GetBars
 barListPrototype.HasAnyBar = lib.HasAnyBar
-barListPrototype.IterateBars = lib.IterateBars
 
 function barListPrototype:RemoveBar(bar)
 	lib.ReleaseBar(self, bar)

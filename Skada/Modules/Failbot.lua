@@ -51,7 +51,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	local function countFail(set, spellid)
 		local count = 0
 		if set and spellid then
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				if player.fail_spells and player.fail_spells[spellid] then
 					count = count + player.fail_spells[spellid]
 				end
@@ -72,7 +72,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				if player.fail_spells and player.fail_spells[win.spellid] then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
@@ -151,7 +151,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				if (player.fail or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d

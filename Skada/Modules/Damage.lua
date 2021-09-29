@@ -609,7 +609,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				local dps, amount = getDPS(set, player)
 				if amount > 0 then
 					local d = win.dataset[nr] or {}
@@ -717,7 +717,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	end
 
 	function mod:SetComplete(set)
-		for _, player in Skada:IteratePlayers(set) do
+		for _, player in ipairs(set.players) do
 			if (player.damage or 0) == 0 then
 				player.damage_spells = nil
 				player.damage_targets = nil
@@ -776,7 +776,7 @@ Skada:AddLoadableModule("DPS", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				local amount = getDPS(set, player)
 
 				if amount > 0 then
@@ -858,7 +858,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 			cacheTable = newTable()
 			local total = 0
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				if player.damage_spells and player.damage_spells[win.spellname] then
 					if (player.damage_spells[win.spellname].amount or 0) > 0 then
 						cacheTable[player.id] = {
@@ -918,7 +918,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 
 		cacheTable = newTable()
 
-		for _, player in Skada:IteratePlayers(set) do
+		for _, player in ipairs(set.players) do
 			if player.damage_spells then
 				for spellname, spell in pairs(player.damage_spells) do
 					if spell.amount > 0 then
@@ -1065,8 +1065,8 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 			if total > 0 then
 				local maxvalue, nr = 0, 1
 
-				if Skada.IterateEnemies then
-					for _, e in Skada.IterateEnemies(set) do
+				if set.enemies then
+					for _, e in ipairs(set.enemies) do
 						if e.damagetaken_sources and e.damagetaken_sources[player.name] then
 							if (e.damagetaken_sources[player.name].useful or 0) > 0 then
 								local d = win.dataset[nr] or {}
@@ -1149,7 +1149,7 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 		end
 		if not found then
 			total = 0 -- reset total
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				if player.damage_targets and player.damage_targets[win.targetname] then
 					local amount = max(0, player.damage_targets[win.targetname].amount - player.damage_targets[win.targetname].overkill)
 					if Skada.db.profile.absdamage then
@@ -1209,7 +1209,7 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				local dps, amount = getDPS(set, player, true)
 
 				if amount > 0 then
@@ -1428,7 +1428,7 @@ Skada:AddLoadableModule("Overkill", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				if (player.overkill or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
@@ -1586,7 +1586,7 @@ Skada:AddLoadableModule("Absorbed Damage", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				if (player.absdamage or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d

@@ -226,23 +226,14 @@ function mod:Wipe(win)
 		win.bargroup:SetSortFunction(nil)
 		win.bargroup:SetBarOffset(0)
 
-		for _, bar in win.bargroup:IterateBars() do
-			win.bargroup:RemoveBar(bar)
+		local bars = win.bargroup:GetBars()
+		if bars then
+			for _, bar in pairs(bars) do
+				win.bargroup:RemoveBar(bar)
+			end
 		end
 
 		win.bargroup:SortBars()
-	end
-end
-
-function mod:Reset(win)
-	if win and win.bargroup then
-		local maxbars = win.bargroup:GetMaxBars()
-		for i, data in win:IterateDataset() do
-			wipe(data)
-			if i > maxbars then
-				win.dataset[i] = nil
-			end
-		end
 	end
 end
 
@@ -545,7 +536,7 @@ do
 		end
 
 		local hasicon
-		for _, data in win:IterateDataset() do
+		for _, data in ipairs(win.dataset) do
 			if (data.icon and not data.ignore) or (data.spec and win.db.specicons) or (data.class and win.db.classicons) or (data.role and win.db.roleicons) then
 				hasicon = true
 				break
@@ -560,8 +551,11 @@ do
 		end
 
 		if win.metadata.wipestale then
-			for _, bar in win.bargroup:IterateBars() do
-				bar.checked = false
+			local bars = win.bargroup:GetBars()
+			if bars then
+				for _, bar in pairs(bars) do
+					bar.checked = false
+				end
 			end
 		end
 
@@ -722,7 +716,8 @@ do
 		end
 
 		if win.metadata.wipestale then
-			for _, bar in win.bargroup:IterateBars() do
+			local bars = win.bargroup:GetBars()
+			for _, bar in pairs(bars) do
 				if not bar.checked then
 					win.bargroup:RemoveBar(bar)
 				end

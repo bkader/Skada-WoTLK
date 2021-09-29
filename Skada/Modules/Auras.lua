@@ -1,7 +1,7 @@
 assert(Skada, "Skada not found!")
 
 -- cache frequently used globals
-local pairs, format, select, tostring = pairs, string.format, select, tostring
+local pairs, ipairs, format, select, tostring = pairs, ipairs, string.format, select, tostring
 local tContains, min, max, floor = tContains, math.min, math.max, math.floor
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local _
@@ -29,7 +29,7 @@ do
 	-- simply adds 1sec to the active spells
 	local function auras_tick(set)
 		if set then
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				if player.auras then
 					for _, spell in pairs(player.auras) do
 						if (spell.active or 0) > 0 then
@@ -55,7 +55,7 @@ do
 	local function setcomplete(set)
 		if set then
 			local maxtime = Skada:GetSetTime(set)
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				if player.auras then
 					for spellid, spell in pairs(player.auras) do
 						spell.active = nil
@@ -167,7 +167,7 @@ do
 		if settime > 0 and auratype then
 			local maxvalue, nr = 0, 1
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				local auracount, aurauptime = countauras(player.auras, auratype)
 
 				if auracount > 0 and aurauptime > 0 then

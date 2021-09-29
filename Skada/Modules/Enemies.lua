@@ -52,10 +52,6 @@ function Skada:get_enemy(set, guid, name, flags)
 	end
 end
 
-function Skada:IterateEnemies(set)
-	return ipairs(set and set.enemies or {})
-end
-
 local function EnemyClass(name, set)
 	local class = "UNKNOWN"
 	local e = Skada:find_enemy(set, name)

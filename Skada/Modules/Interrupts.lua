@@ -9,7 +9,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	local _
 
 	-- cache frequently used globals
-	local pairs, select, max = pairs, select, math.max
+	local pairs, ipairs, select, max = pairs, ipairs, select, math.max
 	local tostring, format, tContains = tostring, string.format, tContains
 	local UnitGUID, IsInInstance = UnitGUID, IsInInstance
 	local GetSpellInfo, GetSpellLink = Skada.GetSpellInfo or GetSpellInfo, Skada.GetSpellLink or GetSpellLink
@@ -224,7 +224,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				if (player.interrupt or 0) > 0 then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d

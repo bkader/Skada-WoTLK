@@ -4,7 +4,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 
 	local mod = Skada:NewModule(L["Resources"])
 
-	local pairs, format, tContains = pairs, string.format, tContains
+	local pairs, ipairs, format, tContains = pairs, ipairs, string.format, tContains
 	local setmetatable, GetSpellInfo = setmetatable, Skada.GetSpellInfo or GetSpellInfo
 	local _
 
@@ -100,7 +100,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in Skada:IteratePlayers(set) do
+			for _, player in ipairs(set.players) do
 				if player[self.power] then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
