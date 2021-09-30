@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0", 19
+local MAJOR, MINOR = "LibCompat-1.0", 21
 local LibCompat, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not LibCompat then return end
 
@@ -14,6 +14,7 @@ local pairs, ipairs, select, type = pairs, ipairs, select, type
 local tinsert, tremove, tconcat, wipe = table.insert, table.remove, table.concat, wipe
 local floor, ceil, max, min = math.floor, math.ceil, math.max, math.min
 local setmetatable, format = setmetatable, string.format
+local tostring, tonumber = tostring, tonumber
 local CreateFrame = CreateFrame
 
 local GAME_LOCALE = GetLocale()
@@ -22,8 +23,6 @@ GAME_LOCALE = (GAME_LOCALE == "enGB") and "enUS" or GAME_LOCALE
 -------------------------------------------------------------------------------
 
 do
-	local tostring = tostring
-
 	local tmp = {}
 	local function Print(self, frame, ...)
 		local n = 0
@@ -1157,87 +1156,64 @@ end
 
 do
 	local StatusBarPrototype = {
-		min = 0,
-		max = 1,
+		minValue = 0,
+		maxValue = 1,
 		value = 0.5,
-		rotate = true,
-		orientation = "HORIZONTAL",
+		_rotatesTexture = true,
+		_reverseFill = false,
+		_orientation = "HORIZONTAL",
 		-- [[ API ]]--
-		Update = function(self, changed)
-			self.value = min(self.max, max(self.min, self.value))
+		Update = function(self, OnSizeChanged)
+			self.value = min(self.maxValue, max(self.minValue, self.value))
 
-			local progress = (self.value - self.min) / (self.max - self.min)
 			local align1, align2, xProgress, yProgress
 			local TLx, TLy, BLx, BLy, TRx, TRy, BRx, BRy
 			local TLx_, TLy_, BLx_, BLy_, TRx_, TRy_, BRx_, BRy_
 
-			local orientation = self.orientation
-			if not self.rotate then
-				if orientation == "HORIZONTAL_INVERSE" then
-					orientation = "HORIZONTAL"
-				elseif orientation == "VERTICAL_INVERSE" then
-					orientation = "VERTICAL"
+			local progress = (self.value - self.minValue) / max(0.000001, self.maxValue - self.minValue)
+			local width, height = self:GetSize()
+
+			if self._orientation == "HORIZONTAL" then
+				xProgress = width * progress -- progress horizontally
+				if self._fillStyle == "CENTER" then
+					align1, align2 = "TOP", "BOTTOM"
+				elseif self._reverseFill or self._fillStyle == "REVERSE" then
+					align1, align2 = "TOPRIGHT", "BOTTOMRIGHT"
+				else
+					align1, align2 = "TOPLEFT", "BOTTOMLEFT"
+				end
+			elseif self._orientation == "VERTICAL" then
+				yProgress = height * progress -- progress vertically
+				if self._fillStyle == "CENTER" then
+					align1, align2 = "LEFT", "RIGHT"
+				elseif self._reverseFill or self._fillStyle == "REVERSE" then
+					align1, align2 = "TOPLEFT", "TOPRIGHT"
+				else
+					align1, align2 = "BOTTOMLEFT", "BOTTOMRIGHT"
 				end
 			end
 
-			if orientation == "HORIZONTAL" then
-				TLx, TLy = 0.0, 0.0
-				TRx, TRy = 1.0, 0.0
-				BLx, BLy = 0.0, 1.0
-				BRx, BRy = 1.0, 1.0
-
-				TLx_, TLy_ = TLx, TLy
-				TRx_, TRy_ = TRx * progress, TRy
-				BLx_, BLy_ = BLx, BLy
-				BRx_, BRy_ = BRx * progress, BRy
-			elseif orientation == "HORIZONTAL_INVERSE" then
-				TLx, TLy = 1.0, 0.0
-				TRx, TRy = 0.0, 0.0
-				BLx, BLy = 1.0, 1.0
-				BRx, BRy = 0.0, 1.0
-
-				TLx_, TLy_ = TLx * progress, TLy
-				TRx_, TRy_ = TRx, TRy
-				BLx_, BLy_ = BLx * progress, BLy
-				BRx_, BRy_ = BRx, BRy
-			elseif orientation == "VERTICAL_INVERSE" then
+			if self._rotatesTexture then
 				TLx, TLy = 0.0, 1.0
 				TRx, TRy = 0.0, 0.0
 				BLx, BLy = 1.0, 1.0
 				BRx, BRy = 1.0, 0.0
-
 				TLx_, TLy_ = TLx, TLy
 				TRx_, TRy_ = TRx, TRy
 				BLx_, BLy_ = BLx * progress, BLy
 				BRx_, BRy_ = BRx * progress, BRy
-			elseif orientation == "VERTICAL" then
-				TLx, TLy = 1.0, 0.0
-				TRx, TRy = 1.0, 1.0
-				BLx, BLy = 0.0, 0.0
-				BRx, BRy = 0.0, 1.0
-
-				TLx_, TLy_ = TLx * progress, TLy
+			else
+				TLx, TLy = 0.0, 0.0
+				TRx, TRy = 1.0, 0.0
+				BLx, BLy = 0.0, 1.0
+				BRx, BRy = 1.0, 1.0
+				TLx_, TLy_ = TLx, TLy
 				TRx_, TRy_ = TRx * progress, TRy
 				BLx_, BLy_ = BLx, BLy
-				BRx_, BRy_ = BRx, BRy
+				BRx_, BRy_ = BRx * progress, BRy
 			end
 
-			local width, height = self:GetSize()
-			if self.orientation == "HORIZONTAL" then
-				align1, align2 = "TOPLEFT", "BOTTOMLEFT"
-				xProgress = width * progress
-			elseif self.orientation == "HORIZONTAL_INVERSE" then
-				align1, align2 = "TOPRIGHT", "BOTTOMRIGHT"
-				xProgress = width * progress
-			elseif self.orientation == "VERTICAL_INVERSE" then
-				align1, align2 = "TOPLEFT", "TOPRIGHT"
-				yProgress = height * progress
-			elseif self.orientation == "VERTICAL" then
-				align1, align2 = "BOTTOMLEFT", "BOTTOMRIGHT"
-				yProgress = height * progress
-			end
-
-			if not changed then
+			if not OnSizeChanged then
 				self.bg:ClearAllPoints()
 				self.bg:SetAllPoints()
 				self.bg:SetTexCoord(TLx, TLy, BLx, BLy, TRx, TRy, BRx, BRy)
@@ -1258,14 +1234,14 @@ do
 		OnSizeChanged = function(self, width, height)
 			self:Update(true)
 		end,
-		SetMinMaxValues = function(self, minVal, maxVal)
+		SetMinMaxValues = function(self, minValue, maxValue)
 			local update = false
-			if minVal and type(minVal) == "number" then
-				self.min = minVal
+			if type(minValue) == "number" then
+				self.minValue = minValue
 				update = true
 			end
-			if maxVal and type(maxVal) == "number" then
-				self.max = maxVal
+			if type(maxValue) == "number" then
+				self.maxValue = maxValue
 				update = true
 			end
 
@@ -1274,7 +1250,7 @@ do
 			end
 		end,
 		GetMinMaxValues = function(self)
-			return self.min, self.max
+			return self.minValue, self.maxValue
 		end,
 		SetValue = function(self, value)
 			if value and type(value) == "number" then
@@ -1287,30 +1263,39 @@ do
 		end,
 		SetOrientation = function(self, orientation)
 			if orientation == "HORIZONTAL" or orientation == "VERTICAL" then
-				self.orientation = orientation
+				self._orientation = orientation
 				self:Update()
 			end
 		end,
 		GetOrientation = function(self)
-			return self.orientation
+			return self._orientation
 		end,
 		SetRotatesTexture = function(self, rotate)
-			if rotate and type(rotate) == "boolean" then
-				self.rotate = rotate
+			if type(rotate) == "boolean" then
+				self._rotatesTexture = rotate
 				self:Update()
 			end
 		end,
 		GetRotatesTexture = function(self)
-			return self.rotate
+			return self._rotatesTexture
 		end,
 		SetReverseFill = function(self, reverse)
-			if reverse and not self.orientation:find("_INVERSE") then
-				self.orientation = self.orientation .. "_INVERSE"
-				self:Update()
-			elseif not reverse and self.orientation:find("_INVERSE") then
-				self.orientation = self.orientation:gsub("_INVERSE", "")
-				self:Update()
+			self._reverseFill = (reverse == true)
+			self:Update()
+		end,
+		GetReverseFill = function(self)
+			return self._reverseFill
+		end,
+		SetFillStyle = function(self, style)
+			if type(style) == "string" and style:upper() == "CENTER" or style:upper() == "REVERSE" then
+				self._fillStyle = style:upper()
+			else
+				self._fillStyle = "STANDARD"
 			end
+			self:Update()
+		end,
+		GetFillStyle = function(self)
+			return self._fillStyle
 		end,
 		SetStatusBarTexture = function(self, texture)
 			self.fg:SetTexture(texture)
@@ -1351,23 +1336,34 @@ do
 		end
 	}
 
-	-- used to Create
-	function StatusBarPrototype:New(name, parent)
+	setmetatable(StatusBarPrototype, {__call = function(self, name, parent)
 		local bar = CreateFrame("Frame", name, parent)
-		bar.fg = bar:CreateTexture(nil, "ARTWORK")
-		bar.bg = bar:CreateTexture(nil, "BACKGROUND")
+		bar.fg = bar.fg or bar:CreateTexture(name and "$parentTexture", "ARTWORK")
+		bar.bg = bar.bg or bar:CreateTexture(name and "$parentBackground", "BACKGROUND")
 		bar.bg:Hide()
-		for k, v in pairs(self) do
-			if k ~= "New" then
-				bar[k] = v
-			end
+		for k, v in pairs(StatusBarPrototype) do
+			bar[k] = v
 		end
 		bar:SetRotatesTexture(false)
 		bar:HookScript("OnSizeChanged", bar.OnSizeChanged)
 		return bar
-	end
+	end})
 
 	LibCompat.StatusBarPrototype = StatusBarPrototype
+end
+
+-------------------------------------------------------------------------------
+
+do
+	local strmatch = strmatch
+	local GetScreenResolutions = GetScreenResolutions
+	local GetCurrentResolution = GetCurrentResolution
+
+	local function GetPhysicalScreenSize()
+		local width, height = strmatch(({GetScreenResolutions()})[GetCurrentResolution()], "(%d+)x(%d+)")
+		return tonumber(width), tonumber(height)
+	end
+	LibCompat.GetPhysicalScreenSize = GetPhysicalScreenSize
 end
 
 -------------------------------------------------------------------------------
@@ -1462,7 +1458,8 @@ local mixins = {
 	"ColorMixin",
 	"CreateColor",
 	"WrapTextInColorCode",
-	"StatusBarPrototype"
+	"StatusBarPrototype",
+	"GetPhysicalScreenSize"
 }
 
 function LibCompat:Embed(target)
