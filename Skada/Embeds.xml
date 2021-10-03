@@ -2,6 +2,7 @@
 ..\FrameXML\UI.xsd">
 <Script file="Libs\LibStub\LibStub.lua"/>
 <Script file="Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua"/>
+<Include file="Libs\LibCompat-1.0\lib.xml"/>
 <Script file="Libs\AceAddon-3.0\AceAddon-3.0.lua"/>
 <Script file="Libs\AceEvent-3.0\AceEvent-3.0.lua"/>
 <Script file="Libs\AceHook-3.0\AceHook-3.0.lua"/>
@@ -26,5 +27,4 @@
 <Script file="Libs\LibFlyPaper-1.1\LibFlyPaper-1.1.lua"/>
 <Include file="Libs\LibUIDropDownMenu\LibUIDropDownMenu.xml"/>
 <Script file="Libs\LibSink-2.0\LibSink-2.0.lua"/>
-<Include file="Libs\LibCompat-1.0\lib.xml"/>
 </Ui>

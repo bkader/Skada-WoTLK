@@ -178,7 +178,7 @@ do
 	end
 
 	local function Clamp(val, minval, maxval)
-		return (val > maxval) and maxval or (val < minval) and minval or val
+		return min(maxval, max(minval, val))
 	end
 
 	local function WithinRange(val, minval, maxval)
@@ -439,8 +439,12 @@ do
 			if unit == "player" then
 				return IsRaidLeader()
 			end
-
-			local rank = select(2, GetRaidRosterInfo(unit:match("%d+")))
+			local index = unit:match("%d+")
+			if not index then
+				unit = LibCompat.GetUnitIdFromGUID(UnitGUID(unit), "group")
+				index = unit and unit:match("%d+")
+			end
+			local rank = index and select(2, GetRaidRosterInfo(index))
 			return (rank and rank == 2)
 		end
 
@@ -1156,61 +1160,60 @@ end
 
 do
 	local StatusBarPrototype = {
-		minValue = 0,
-		maxValue = 1,
+		minValue = 0.0,
+		maxValue = 1.0,
 		value = 0.5,
-		_rotatesTexture = true,
-		_reverseFill = false,
-		_orientation = "HORIZONTAL",
+		rotate = true,
+		reverse = false,
+		orientation = "HORIZONTAL",
 		-- [[ API ]]--
 		Update = function(self, OnSizeChanged)
-			self.value = min(self.maxValue, max(self.minValue, self.value))
+			self.value = LibCompat.Clamp(self.value, self.minValue, self.maxValue)
+			self.progress = LibCompat.Clamp((self.value - self.minValue) / (self.maxValue - self.minValue), self.minValue, self.maxValue)
 
-			local align1, align2, xProgress, yProgress
+			local align1, align2
 			local TLx, TLy, BLx, BLy, TRx, TRy, BRx, BRy
 			local TLx_, TLy_, BLx_, BLy_, TRx_, TRy_, BRx_, BRy_
-
-			local progress = (self.value - self.minValue) / max(0.000001, self.maxValue - self.minValue)
 			local width, height = self:GetSize()
 
-			if self._orientation == "HORIZONTAL" then
-				xProgress = width * progress -- progress horizontally
-				if self._fillStyle == "CENTER" then
+			if self.orientation == "HORIZONTAL" then
+				self.xProgress = width * self.progress -- progress horizontally
+				if self.fillStyle == "CENTER" then
 					align1, align2 = "TOP", "BOTTOM"
-				elseif self._reverseFill or self._fillStyle == "REVERSE" then
+				elseif self.reverse or self.fillStyle == "REVERSE" then
 					align1, align2 = "TOPRIGHT", "BOTTOMRIGHT"
 				else
 					align1, align2 = "TOPLEFT", "BOTTOMLEFT"
 				end
-			elseif self._orientation == "VERTICAL" then
-				yProgress = height * progress -- progress vertically
-				if self._fillStyle == "CENTER" then
+			elseif self.orientation == "VERTICAL" then
+				self.yProgress = height * self.progress -- progress vertically
+				if self.fillStyle == "CENTER" then
 					align1, align2 = "LEFT", "RIGHT"
-				elseif self._reverseFill or self._fillStyle == "REVERSE" then
+				elseif self.reverse or self.fillStyle == "REVERSE" then
 					align1, align2 = "TOPLEFT", "TOPRIGHT"
 				else
 					align1, align2 = "BOTTOMLEFT", "BOTTOMRIGHT"
 				end
 			end
 
-			if self._rotatesTexture then
+			if self.rotate then
 				TLx, TLy = 0.0, 1.0
 				TRx, TRy = 0.0, 0.0
 				BLx, BLy = 1.0, 1.0
 				BRx, BRy = 1.0, 0.0
 				TLx_, TLy_ = TLx, TLy
 				TRx_, TRy_ = TRx, TRy
-				BLx_, BLy_ = BLx * progress, BLy
-				BRx_, BRy_ = BRx * progress, BRy
+				BLx_, BLy_ = BLx * self.progress, BLy
+				BRx_, BRy_ = BRx * self.progress, BRy
 			else
 				TLx, TLy = 0.0, 0.0
 				TRx, TRy = 1.0, 0.0
 				BLx, BLy = 0.0, 1.0
 				BRx, BRy = 1.0, 1.0
 				TLx_, TLy_ = TLx, TLy
-				TRx_, TRy_ = TRx * progress, TRy
+				TRx_, TRy_ = TRx * self.progress, TRy
 				BLx_, BLy_ = BLx, BLy
-				BRx_, BRy_ = BRx * progress, BRy
+				BRx_, BRy_ = BRx * self.progress, BRy
 			end
 
 			if not OnSizeChanged then
@@ -1224,11 +1227,11 @@ do
 				self.fg:SetTexCoord(TLx_, TLy_, BLx_, BLy_, TRx_, TRy_, BRx_, BRy_)
 			end
 
-			if xProgress then
-				self.fg:SetWidth(xProgress > 0 and xProgress or 0.1)
+			if self.xProgress then
+				self.fg:SetWidth(self.xProgress > 0 and self.xProgress or 0.1)
 			end
-			if yProgress then
-				self.fg:SetHeight(yProgress > 0 and yProgress or 0.1)
+			if self.yProgress then
+				self.fg:SetHeight(self.yProgress > 0 and self.yProgress or 0.1)
 			end
 		end,
 		OnSizeChanged = function(self, width, height)
@@ -1246,7 +1249,7 @@ do
 			end
 
 			if update then
-				self:Update()
+				-- self:Update()
 			end
 		end,
 		GetMinMaxValues = function(self)
@@ -1263,39 +1266,39 @@ do
 		end,
 		SetOrientation = function(self, orientation)
 			if orientation == "HORIZONTAL" or orientation == "VERTICAL" then
-				self._orientation = orientation
+				self.orientation = orientation
 				self:Update()
 			end
 		end,
 		GetOrientation = function(self)
-			return self._orientation
+			return self.orientation
 		end,
 		SetRotatesTexture = function(self, rotate)
 			if type(rotate) == "boolean" then
-				self._rotatesTexture = rotate
+				self.rotate = rotate
 				self:Update()
 			end
 		end,
 		GetRotatesTexture = function(self)
-			return self._rotatesTexture
+			return self.rotate
 		end,
 		SetReverseFill = function(self, reverse)
-			self._reverseFill = (reverse == true)
+			self.reverse = (reverse == true)
 			self:Update()
 		end,
 		GetReverseFill = function(self)
-			return self._reverseFill
+			return self.reverse
 		end,
 		SetFillStyle = function(self, style)
 			if type(style) == "string" and style:upper() == "CENTER" or style:upper() == "REVERSE" then
-				self._fillStyle = style:upper()
+				self.fillStyle = style:upper()
 			else
-				self._fillStyle = "STANDARD"
+				self.fillStyle = "STANDARD"
 			end
-			self:Update()
+			-- self:Update()
 		end,
 		GetFillStyle = function(self)
-			return self._fillStyle
+			return self.fillStyle
 		end,
 		SetStatusBarTexture = function(self, texture)
 			self.fg:SetTexture(texture)
@@ -1338,14 +1341,12 @@ do
 
 	setmetatable(StatusBarPrototype, {__call = function(self, name, parent)
 		local bar = CreateFrame("Frame", name, parent)
-		bar.fg = bar.fg or bar:CreateTexture(name and "$parentTexture", "ARTWORK")
-		bar.bg = bar.bg or bar:CreateTexture(name and "$parentBackground", "BACKGROUND")
-		bar.bg:Hide()
-		for k, v in pairs(StatusBarPrototype) do
-			bar[k] = v
-		end
+		bar.fg = bar.fg or bar:CreateTexture(name and "$parent.Texture", "ARTWORK")
+		bar.bg = bar.bg or bar:CreateTexture(name and "$parent.Background", "BACKGROUND")
+		for k, v in pairs(StatusBarPrototype) do bar[k] = v end
 		bar:SetRotatesTexture(false)
 		bar:HookScript("OnSizeChanged", bar.OnSizeChanged)
+		bar.bg:Hide()
 		return bar
 	end})
 
