@@ -264,13 +264,15 @@ do
 	local ttactive = false
 
 	function mod:BarEnter(_, bar, motion)
-		local win, id, label = bar.win, bar.id, bar.text
-		ttactive = true
-		Skada:SetTooltipPosition(GameTooltip, win.bargroup, win.db.display, win)
-		Skada:ShowTooltip(win, id, label)
-		if not win.db.disablehighlight then
-			bar:SetOpacity(1)
-			bar:SetBackdropColor(0, 0, 0, 0.25)
+		if bar and bar.win then
+			local win, id, label = bar.win, bar.id, bar.text
+			ttactive = true
+			Skada:SetTooltipPosition(GameTooltip, win.bargroup, win.db.display, win)
+			Skada:ShowTooltip(win, id, label)
+			if not win.db.disablehighlight then
+				bar:SetOpacity(1)
+				bar:SetBackdropColor(0, 0, 0, 0.25)
+			end
 		end
 	end
 
