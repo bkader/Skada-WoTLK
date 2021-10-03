@@ -1215,7 +1215,7 @@ function Skada:CreateSet(setname, starttime)
 	for _, mode in self:IterateModes() do
 		self:VerifySet(mode, set)
 	end
-	self.callbacks:Fire("SKADA_DATA_SETCREATED", set)
+	self.callbacks:Fire("SKADA_DATA_SETCREATED", set, starttime)
 	return set
 end
 

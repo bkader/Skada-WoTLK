@@ -1062,61 +1062,31 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 			win.title = format(L["%s's targets"], player.name)
 			local total = select(2, getDPS(set, player, true))
 
-			if total > 0 then
+			if total > 0 and player.damage_targets then
 				local maxvalue, nr = 0, 1
 
-				if set.enemies then
-					for _, e in ipairs(set.enemies) do
-						if e.damagetaken_sources and e.damagetaken_sources[player.name] then
-							if (e.damagetaken_sources[player.name].useful or 0) > 0 then
-								local d = win.dataset[nr] or {}
-								win.dataset[nr] = d
+				for targetname, target in pairs(player.damage_targets) do
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
-								d.id = e.name
-								d.label = e.name
+					d.id = targetname
+					d.label = targetname
 
-								d.value = e.damagetaken_sources[player.name].useful
-								d.valuetext = Skada:FormatValueText(
-									Skada:FormatNumber(d.value),
-									mod.metadata.columns.Damage,
-									Skada:FormatPercent(d.value, total),
-									mod.metadata.columns.Percent
-								)
-
-								if d.value > maxvalue then
-									maxvalue = d.value
-								end
-								nr = nr + 1
-							end
-						end
+					d.value = max(0, (target.amount or 0) - (target.overkill or 0))
+					if Skada.db.profile.absdamage then
+						d.value = d.value + (target.absorbed or 0)
 					end
-				end
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatNumber(d.value),
+						mod.metadata.columns.Damage,
+						Skada:FormatPercent(d.value, total),
+						mod.metadata.columns.Percent
+					)
 
-				-- if nr is still set to one, it means nothing was created.
-				if nr == 1 and player.damage_targets then
-					for targetname, target in pairs(player.damage_targets) do
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
-
-						d.id = targetname
-						d.label = targetname
-
-						d.value = max(0, (target.amount or 0) - (target.overkill or 0))
-						if Skada.db.profile.absdamage then
-							d.value = d.value + (target.absorbed or 0)
-						end
-						d.valuetext = Skada:FormatValueText(
-							Skada:FormatNumber(d.value),
-							mod.metadata.columns.Damage,
-							Skada:FormatPercent(d.value, total),
-							mod.metadata.columns.Percent
-						)
-
-						if d.value > maxvalue then
-							maxvalue = d.value
-						end
-						nr = nr + 1
+					if d.value > maxvalue then
+						maxvalue = d.value
 					end
+					nr = nr + 1
 				end
 
 				win.metadata.maxvalue = maxvalue
