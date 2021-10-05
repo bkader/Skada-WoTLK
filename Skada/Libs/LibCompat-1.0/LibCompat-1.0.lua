@@ -689,14 +689,8 @@ do
 		end
 	end
 
-	local function IsPlayerSpell(spellid)
-		local spellname = GetSpellInfo(spellid)
-		return (spellname and GetSpellInfo(spellname) ~= nil)
-	end
-
 	LibCompat.GetSpellInfo = _GetSpellInfo
 	LibCompat.GetSpellLink = _GetSpellLink
-	LibCompat.IsPlayerSpell = IsPlayerSpell
 end
 
 -------------------------------------------------------------------------------
@@ -1430,7 +1424,6 @@ local mixins = {
 	-- spell util
 	"GetSpellInfo",
 	"GetSpellLink",
-	"IsPlayerSpell",
 	-- misc util
 	"HexEncode",
 	"HexDecode",
