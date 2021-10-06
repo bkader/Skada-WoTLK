@@ -1,6 +1,9 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
-<Script file="Libs\LibTalentQuery-1.0.lua"/>
-<Script file="Libs\LibGroupTalents-1.0.lua"/>
+<!--@no-lib-strip@-->
+<Script file="Libs\LibStub\LibStub.lua"/>
+<Script file="Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua"/>
+<!--@end-no-lib-strip@-->
+<Include file="Libs\LibGroupTalents-1.0\lib.xml"/>
 <Script file="LibCompat-1.0.lua"/>
 </Ui>

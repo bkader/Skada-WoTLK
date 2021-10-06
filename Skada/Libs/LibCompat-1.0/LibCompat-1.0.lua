@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0", 21
+local MAJOR, MINOR = "LibCompat-1.0", 22
 local LibCompat, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not LibCompat then return end
 
@@ -1160,6 +1160,7 @@ do
 		rotate = true,
 		reverse = false,
 		orientation = "HORIZONTAL",
+		fill = "STANDARD",
 		-- [[ API ]]--
 		Update = function(self, OnSizeChanged)
 			self.value = LibCompat.Clamp(self.value, self.minValue, self.maxValue)
@@ -1172,18 +1173,18 @@ do
 
 			if self.orientation == "HORIZONTAL" then
 				self.xProgress = width * self.progress -- progress horizontally
-				if self.fillStyle == "CENTER" then
+				if self.fill == "CENTER" then
 					align1, align2 = "TOP", "BOTTOM"
-				elseif self.reverse or self.fillStyle == "REVERSE" then
+				elseif self.reverse or self.fill == "REVERSE" then
 					align1, align2 = "TOPRIGHT", "BOTTOMRIGHT"
 				else
 					align1, align2 = "TOPLEFT", "BOTTOMLEFT"
 				end
 			elseif self.orientation == "VERTICAL" then
 				self.yProgress = height * self.progress -- progress vertically
-				if self.fillStyle == "CENTER" then
+				if self.fill == "CENTER" then
 					align1, align2 = "LEFT", "RIGHT"
-				elseif self.reverse or self.fillStyle == "REVERSE" then
+				elseif self.reverse or self.fill == "REVERSE" then
 					align1, align2 = "TOPLEFT", "TOPRIGHT"
 				else
 					align1, align2 = "BOTTOMLEFT", "BOTTOMRIGHT"
@@ -1232,18 +1233,11 @@ do
 			self:Update(true)
 		end,
 		SetMinMaxValues = function(self, minValue, maxValue)
-			local update = false
 			if type(minValue) == "number" then
 				self.minValue = minValue
-				update = true
 			end
 			if type(maxValue) == "number" then
 				self.maxValue = maxValue
-				update = true
-			end
-
-			if update then
-				-- self:Update()
 			end
 		end,
 		GetMinMaxValues = function(self)
@@ -1285,14 +1279,13 @@ do
 		end,
 		SetFillStyle = function(self, style)
 			if type(style) == "string" and style:upper() == "CENTER" or style:upper() == "REVERSE" then
-				self.fillStyle = style:upper()
+				self.fill = style:upper()
 			else
-				self.fillStyle = "STANDARD"
+				self.fill = "STANDARD"
 			end
-			-- self:Update()
 		end,
 		GetFillStyle = function(self)
-			return self.fillStyle
+			return self.fill
 		end,
 		SetStatusBarTexture = function(self, texture)
 			self.fg:SetTexture(texture)
