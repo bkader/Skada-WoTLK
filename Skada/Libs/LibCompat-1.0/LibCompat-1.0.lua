@@ -431,38 +431,35 @@ end
 -------------------------------------------------------------------------------
 
 do
-	local IsRaidLeader, GetPartyLeaderIndex = IsRaidLeader, GetPartyLeaderIndex
-	local GetRealNumRaidMembers, GetRaidRosterInfo = GetRealNumRaidMembers, GetRaidRosterInfo
+	local IsRaidLeader, IsPartyLeader = IsRaidLeader, IsPartyLeader
+	local GetPartyLeaderIndex, GetRaidRosterInfo = GetPartyLeaderIndex, GetRaidRosterInfo
 
 	local function UnitIsGroupLeader(unit)
-		if LibCompat.IsInRaid() then
-			if unit == "player" then
-				return IsRaidLeader()
-			end
+		if not LibCompat.IsInGroup() then
+			return false
+		elseif unit == "player" then
+			return (LibCompat.IsInRaid() and IsRaidLeader() or IsPartyLeader())
+		else
 			local index = unit:match("%d+")
-			if not index then
+			if not index then -- to allow other units to be checked
 				unit = LibCompat.GetUnitIdFromGUID(UnitGUID(unit), "group")
 				index = unit and unit:match("%d+")
 			end
-			local rank = index and select(2, GetRaidRosterInfo(index))
-			return (rank and rank == 2)
+			return (index and GetPartyLeaderIndex() == tonumber(index))
 		end
-
-		if unit == "player" then
-			return (GetPartyLeaderIndex() == 0)
-		end
-		local index = unit:match("%d+")
-		return (index and index == GetPartyLeaderIndex())
 	end
 
 	local function UnitIsGroupAssistant(unit)
-		for i = 1, GetRealNumRaidMembers() do
-			local name, rank = GetRaidRosterInfo(i)
-			if name == UnitName(unit) then
-				return (rank == 1)
+		if not LibCompat.IsInRaid() then
+			return false
+		else
+			local index = unit:match("%d+")
+			if not index then -- to allow other units to be checked
+				unit = LibCompat.GetUnitIdFromGUID(UnitGUID(unit), "group")
+				index = unit and unit:match("%d+")
 			end
+			return (index and select(2, GetRaidRosterInfo(index)) == 1)
 		end
-		return false
 	end
 
 	LibCompat.UnitIsGroupLeader = UnitIsGroupLeader
@@ -848,11 +845,26 @@ do
 		return id, name, nil, icon, background, role
 	end
 
-	local function UnitGroupRolesAssigned(unit)
-		return LGTRoleTable[LGT:GetUnitRole(unit or "player")] or "NONE"
-	end
+	local UnitGroupRolesAssigned = UnitGroupRolesAssigned
+	local function _UnitGroupRolesAssigned(unit)
+		unit = unit or "player" -- always fallback to player
 
-	local function GetUnitRole(unit)
+		-- For LFG using "UnitGroupRolesAssigned" is enough.
+		local isTank, isHealer, isDamager = UnitGroupRolesAssigned(unit)
+		if isTank then
+			return "TANK"
+		elseif isHealer then
+			return "HEALER"
+		elseif isDamager then
+			return "DAMAGER"
+		end
+
+		-- speedup things using classes.
+		local class = select(2, UnitClass(unit))
+		if class == "HUNTER" or class == "MAGE" or class == "ROGUE" or class == "WARLOCK" then
+			return "DAMAGER"
+		end
+
 		return LGTRoleTable[LGT:GetUnitRole(unit or "player")] or "NONE"
 	end
 
@@ -865,8 +877,8 @@ do
 	LibCompat.GetSpecializationRole = GetSpecializationRole
 	LibCompat.GetSpecializationInfo = GetSpecializationInfo
 
-	LibCompat.UnitGroupRolesAssigned = UnitGroupRolesAssigned
-	LibCompat.GetUnitRole = UnitGroupRolesAssigned
+	LibCompat.UnitGroupRolesAssigned = _UnitGroupRolesAssigned
+	LibCompat.GetUnitRole = _UnitGroupRolesAssigned
 	LibCompat.GetGUIDRole = GetGUIDRole
 	LibCompat.GetUnitSpec = GetInspectSpecialization
 
