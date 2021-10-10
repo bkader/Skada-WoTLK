@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0", 22
+local MAJOR, MINOR = "LibCompat-1.0", 23
 local LibCompat, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not LibCompat then return end
 
@@ -1168,15 +1168,14 @@ do
 	local StatusBarPrototype = {
 		minValue = 0.0,
 		maxValue = 1.0,
-		value = 0.5,
+		value = 1,
 		rotate = true,
 		reverse = false,
 		orientation = "HORIZONTAL",
 		fill = "STANDARD",
 		-- [[ API ]]--
 		Update = function(self, OnSizeChanged)
-			self.value = LibCompat.Clamp(self.value, self.minValue, self.maxValue)
-			self.progress = LibCompat.Clamp((self.value - self.minValue) / (self.maxValue - self.minValue), self.minValue, self.maxValue)
+			self.progress = (self.value - self.minValue) / (self.maxValue - self.minValue)
 
 			local align1, align2
 			local TLx, TLy, BLx, BLy, TRx, TRy, BRx, BRy
@@ -1245,18 +1244,30 @@ do
 			self:Update(true)
 		end,
 		SetMinMaxValues = function(self, minValue, maxValue)
-			if type(minValue) == "number" then
+			assert((type(minValue) == "number" and type(maxValue) == "number"), "Usage: StatusBar:SetMinMaxValues(number, number)")
+
+			if maxValue > minValue then
 				self.minValue = minValue
-			end
-			if type(maxValue) == "number" then
 				self.maxValue = maxValue
+			else
+				self.minValue = 0
+				self.maxValue = 1
 			end
+
+			if not self.value or self.value > self.maxValue then
+				self.value = self.maxValue
+			elseif not self.value or self.value < self.minValue then
+				self.value = self.minValue
+			end
+
+			self:Update()
 		end,
 		GetMinMaxValues = function(self)
 			return self.minValue, self.maxValue
 		end,
 		SetValue = function(self, value)
-			if value and type(value) == "number" then
+			assert(type(value) == "number", "Usage: StatusBar:SetValue(number)")
+			if value >= self.minValue and value <= self.maxValue then
 				self.value = value
 				self:Update()
 			end
@@ -1292,8 +1303,10 @@ do
 		SetFillStyle = function(self, style)
 			if type(style) == "string" and style:upper() == "CENTER" or style:upper() == "REVERSE" then
 				self.fill = style:upper()
+				self:Update()
 			else
 				self.fill = "STANDARD"
+				self:Update()
 			end
 		end,
 		GetFillStyle = function(self)
@@ -1333,8 +1346,20 @@ do
 		GetVertexColor = function(self)
 			return self.fg:GetVertexColor()
 		end,
+		SetStatusBarGradient = function(self, r1, g1, b1, a1, r2, g2, b2, a2)
+			self.fg:SetGradientAlpha(self.orientation, r1, g1, b1, a1, r2, g2, b2, a2)
+		end,
+		SetStatusBarGradientAuto = function(self, r, g, b, a)
+			self.fg:SetGradientAlpha(self.orientation, 0.5 + (r * 1.1), g * 0.7, b * 0.7, a, r * 0.7, g * 0.7, 0.5 + (b * 1.1), a)
+		end,
+		SetStatusBarSmartGradient = function(self, r1, g1, b1, r2, g2, b2)
+			self.fg:SetGradientAlpha(self.orientation, r1, g1, b1, 1, r2 or r1, g2 or g1, b2 or b1, 1)
+		end,
 		GetObjectType = function(self)
 			return "StatusBar"
+		end,
+		IsObjectType = function(self, otype)
+			return (otype == self:GetObjectType()) and 1 or nil
 		end
 	}
 
@@ -1345,6 +1370,7 @@ do
 		for k, v in pairs(StatusBarPrototype) do bar[k] = v end
 		bar:SetRotatesTexture(false)
 		bar:HookScript("OnSizeChanged", bar.OnSizeChanged)
+		bar:Update()
 		bar.bg:Hide()
 		return bar
 	end})
