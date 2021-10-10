@@ -565,6 +565,7 @@ L["Reanimated Adherent"] = "被复活的追随者"
 L["Reanimated Fanatic"] = "被复活的狂热者"
 L["Volatile Ooze"] = "不稳定的软泥怪"
 L["Wicked Spirit"] = "卑劣的灵魂"
+L["Hogger"] = "霍格"
 -- Deaths Module --
 L["Deaths"] = "死亡"
 L["%s's death"] = "%s的死亡"

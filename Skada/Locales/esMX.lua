@@ -565,6 +565,7 @@ L["Reanimated Adherent"] = "Partidario reanimado"
 L["Reanimated Fanatic"] = "Fanático reanimado"
 L["Volatile Ooze"] = "Moco volátil"
 L["Wicked Spirit"] = "Espíritu perverso"
+L["Hogger"] = "Hogger"
 -- Deaths Module --
 L["Deaths"] = "Muertes"
 L["%s's death"] = "Muerte de %s"

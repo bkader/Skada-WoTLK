@@ -2626,12 +2626,12 @@ function Skada:FormatValueText(...)
 end
 
 do
-	local numsetfmts, fakeFrame = 8
+	local fakeFrame
 
 	local function SetLabelFormat(name, starttime, endtime, fmt)
 		fmt = fmt or Skada.db.profile.setformat
 		local namelabel = name
-		if fmt < 1 or fmt > numsetfmts then
+		if fmt < 1 or fmt > 8 then
 			fmt = 3
 		end
 
@@ -2672,8 +2672,8 @@ do
 
 	function Skada:SetLabelFormats()
 		local ret, start = {}, 1631547006
-		for i = 1, numsetfmts do
-			ret[i] = SetLabelFormat(LBB["Hogger"], start, start + 380, i)
+		for i = 1, 8 do
+			ret[i] = SetLabelFormat(L["Hogger"], start, start + 380, i)
 		end
 		return ret
 	end

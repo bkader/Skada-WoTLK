@@ -564,6 +564,7 @@ L["Reanimated Adherent"] = true
 L["Reanimated Fanatic"] = true
 L["Volatile Ooze"] = true
 L["Wicked Spirit"] = true
+L["Hogger"] = true
 -- Deaths Module --
 L["Deaths"] = true
 L["%s's death"] = true

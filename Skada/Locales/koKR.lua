@@ -565,6 +565,7 @@ L["Reanimated Adherent"] = "되살아난 신봉자"
 L["Reanimated Fanatic"] = "되살아난 광신자"
 L["Volatile Ooze"] = "일촉즉발 수액괴물"
 L["Wicked Spirit"] = "추악한 영혼"
+L["Hogger"] = "들창코"
 -- Deaths Module --
 L["Deaths"] = "죽음"
 -- L["%s's death"] = ""

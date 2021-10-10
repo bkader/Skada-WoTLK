@@ -564,6 +564,7 @@ L["Reanimated Adherent"] = "Воскрешенный последователь"
 L["Reanimated Fanatic"] = "Воскрешенный фанатик"
 L["Volatile Ooze"] = "Неустойчивый слизнюк"
 L["Wicked Spirit"] = "Зловещий дух"
+L["Hogger"] = "Дробитель"
 -- Deaths Module --
 L["Deaths"] = "Смерти"
 L["%s's death"] = "%s - Смерть"
