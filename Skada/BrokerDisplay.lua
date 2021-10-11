@@ -41,13 +41,11 @@ local function sortDataset(win)
 end
 
 local function formatLabel(win, data)
-	local label = ""
 	if win.db.isusingclasscolors and data.class then
-		label = format(classcolors[data.class], data.text or data.label or UNKNOWN)
+		return format(classcolors[data.class], data.text or data.label or UNKNOWN)
 	else
-		label = data.text or data.label or UNKNOWN
+		return data.text or data.label or UNKNOWN
 	end
-	return label
 end
 
 local function formatValue(win, data)

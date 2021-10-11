@@ -121,6 +121,27 @@ do
 		end
 	end
 
+	local function tInvert(tbl)
+		local inverted = {}
+		for k, v in pairs(tbl) do
+			inverted[v] = k
+		end
+		return inverted
+	end
+
+	local function tIndexOf(tbl, item)
+		for i, v in ipairs(tbl) do
+			if item == v then
+				return i
+			end
+		end
+	end
+
+	-- replace the global function
+	_G.tContains = function(tbl, item)
+		return (tIndexOf(tbl, item) ~= nil)
+	end
+
 	local function tAppendAll(tbl, elems)
 		for _, elem in ipairs(elems) do
 			tinsert(tbl, elem)
@@ -160,6 +181,8 @@ do
 	LibCompat.SafeUnpack = SafeUnpack
 	LibCompat.tLength = tLength
 	LibCompat.tCopy = tCopy
+	LibCompat.tInvert = tInvert
+	LibCompat.tIndexOf = tIndexOf
 	LibCompat.tAppendAll = tAppendAll
 	LibCompat.WeakTable = WeakTable
 	LibCompat.newTable = newTable
@@ -1401,6 +1424,8 @@ local mixins = {
 	"SafeUnpack",
 	"tLength",
 	"tCopy",
+	"tInvert",
+	"tIndexOf",
 	"tAppendAll",
 	"WeakTable",
 	"newTable",

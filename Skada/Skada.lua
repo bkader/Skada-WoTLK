@@ -691,9 +691,9 @@ function Window:set_selected_set(set, step)
 end
 
 function Window:DisplayMode(mode)
-	if type(mode) ~= "table" then
-		return
-	end
+	mode = (type(mode) == "string") and Skada:GetModule(mode, true) or mode
+	if type(mode) ~= "table" then return end
+
 	self:Wipe()
 
 	self.selectedmode = mode

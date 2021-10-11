@@ -117,7 +117,15 @@ function mod:Create(window)
 			L["Jump to a specific mode."],
 			"Interface\\GROUPFRAME\\UI-GROUP-MAINASSISTICON",
 			"Interface\\GROUPFRAME\\UI-GROUP-MAINASSISTICON",
-			function() Skada:ModeMenu(bargroup.win) end
+			function(_, button)
+				if button == "RightButton" then
+					bargroup.win:DisplayMode(L["Absorbs and Healing"])
+				elseif button == "MiddleButton" then
+					bargroup.win:DisplayMode(L["Damage"])
+				else
+					Skada:ModeMenu(bargroup.win)
+				end
+			end
 		)
 
 		bargroup:AddButton(
