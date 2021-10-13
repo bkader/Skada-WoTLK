@@ -366,7 +366,7 @@ function mod:Update(win)
 	local wd = win.dataset
 	for i = #wd, 1, -1 do
 		if wd[i].label == nil then
-			tremove(wd, i)
+			wd[i] = nil
 		end
 	end
 

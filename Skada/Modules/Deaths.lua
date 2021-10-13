@@ -8,8 +8,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 	local UnitHealth, UnitHealthInfo = UnitHealth, Skada.UnitHealthInfo
 	local UnitIsFeignDeath = UnitIsFeignDeath
-	local tinsert, tremove = table.insert, table.remove
-	local tsort, tmaxn, tconcat = table.sort, table.maxn, table.concat
+	local tinsert, tsort, tmaxn, tconcat = table.insert, table.sort, table.maxn, table.concat
 	local ipairs = ipairs
 	local tostring, format, strsub = tostring, string.format, string.sub
 	local abs, max, modf = math.abs, math.max, math.modf
@@ -51,7 +50,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 			-- trim things and limit to 14 (custom value now)
 			while tmaxn(deathlog.log) > (Skada.db.profile.modules.deathlogevents or 14) do
-				tremove(deathlog.log)
+				deathlog.log[#deathlog.log] = nil
 			end
 		end
 	end
@@ -156,16 +155,16 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 							output = output .. " ["
 							local extra = newTable()
 							if log.overkill then
-								tinsert(extra, "O:" .. Skada:FormatNumber(log.overkill, 1))
+								extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.overkill, 1)
 							end
 							if log.resisted then
-								tinsert(extra, "R:" .. Skada:FormatNumber(log.resisted, 1))
+								extra[#extra + 1] = "R:" .. Skada:FormatNumber(log.resisted, 1)
 							end
 							if log.blocked then
-								tinsert(extra, "B:" .. Skada:FormatNumber(log.blocked, 1))
+								extra[#extra + 1] = "B:" .. Skada:FormatNumber(log.blocked, 1)
 							end
 							if log.absorbed then
-								tinsert(extra, "A:" .. Skada:FormatNumber(log.absorbed, 1))
+								extra[#extra + 1] = "A:" .. Skada:FormatNumber(log.absorbed, 1)
 							end
 							output = output .. tconcat(extra, " - ") .. "]"
 							delTable(extra)
@@ -295,19 +294,19 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 						if (log.overkill or 0) > 0 then
 							d.overkill = log.overkill
-							tinsert(extra, "O:" .. Skada:FormatNumber(abs(log.overkill)))
+							extra[#extra + 1] = "O:" .. Skada:FormatNumber(abs(log.overkill))
 						end
 						if (log.resisted or 0) > 0 then
 							d.resisted = log.resisted
-							tinsert(extra, "R:" .. Skada:FormatNumber(abs(log.resisted)))
+							extra[#extra + 1] = "R:" .. Skada:FormatNumber(abs(log.resisted))
 						end
 						if (log.blocked or 0) > 0 then
 							d.blocked = log.blocked
-							tinsert(extra, "B:" .. Skada:FormatNumber(abs(log.blocked)))
+							extra[#extra + 1] = "B:" .. Skada:FormatNumber(abs(log.blocked))
 						end
 						if (log.absorbed or 0) > 0 then
 							d.absorbed = log.absorbed
-							tinsert(extra, "A:" .. Skada:FormatNumber(abs(log.absorbed)))
+							extra[#extra + 1] = "A:" .. Skada:FormatNumber(abs(log.absorbed))
 						end
 
 						if next(extra) then
@@ -525,7 +524,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 				player.deathlog, player.maxhp = nil, nil
 			elseif player.deathlog then
 				while tmaxn(player.deathlog) > (player.death or 0) do
-					tremove(player.deathlog, 1)
+					player.deathlog[1] = nil
 				end
 				if #player.deathlog == 0 then
 					player.deathlog = nil

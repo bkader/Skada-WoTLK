@@ -6,9 +6,7 @@ local MAJOR = "SpecializedLibBars-1.0"
 local MINOR = 90000 + tonumber(("$Revision: 1 $"):match("%d+"))
 
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
-if not lib then
-	return
-end -- No Upgrade needed.
+if not lib then return end -- No Upgrade needed.
 
 local CallbackHandler = LibStub("CallbackHandler-1.0")
 
@@ -16,7 +14,7 @@ local GetTime = _G.GetTime
 local sin, cos, rad = _G.math.sin, _G.math.cos, _G.math.rad
 local abs, min, max, floor = _G.math.abs, _G.math.min, _G.math.max, _G.math.floor
 local tsort, tinsert, tremove, tconcat = _G.table.sort, tinsert, tremove, _G.table.concat
-local next, pairs, assert, error, type, xpcall = next, pairs, assert, error, type, xpcall
+local next, pairs, ipairs, assert, error, type, xpcall = next, pairs, ipairs, assert, error, type, xpcall
 
 --[[ xpcall safecall implementation ]]--
 local function errorhandler(err)
@@ -119,6 +117,7 @@ do
 		"GetBar",
 		"GetBars",
 		"HasBar",
+		"IterateBars",
 		"NewBarGroup",
 		"ReleaseBar",
 		"GetBarGroup",
@@ -220,7 +219,7 @@ do
 			del(tremove(colors))
 		end
 		for i = 1, #self.colors, 5 do
-			tinsert(colors, new(self.colors[i], self.colors[i + 1], self.colors[i + 2], self.colors[i + 3], self.colors[i + 4]))
+			colors[#colors + 1] = new(self.colors[i], self.colors[i + 1], self.colors[i + 2], self.colors[i + 3], self.colors[i + 4])
 		end
 		tsort(colors, sort_colors)
 
@@ -243,7 +242,18 @@ function lib:GetBars(name)
 end
 
 function lib:HasAnyBar()
-	return not (not (bars[self] and next(bars[self])))
+	return not not (bars[self] and next(bars[self]))
+end
+
+do
+	local function NOOP() end
+	function lib:IterateBars()
+		if bars[self] then
+			return pairs(bars[self])
+		else
+			return NOOP
+		end
+	end
 end
 
 -- Convenient method to create a new, empty bar prototype
@@ -256,7 +266,6 @@ function lib:NewBarPrototype(super)
 	prototype.metatable = {__index = prototype}
 	return prototype
 end
---
 
 ---[[ Individual bars ]]---
 function lib:NewBarFromPrototype(prototype, name, ...)
@@ -293,9 +302,7 @@ function lib:NewTimerBar(name, text, time, maxTime, icon, orientation, length, t
 end
 
 function lib:ReleaseBar(name)
-	if not bars[self] then
-		return
-	end
+	if not bars[self] then return end
 
 	local bar
 	if type(name) == "string" then
@@ -307,11 +314,9 @@ function lib:ReleaseBar(name)
 	end
 
 	if bar then
-		bar:SetScript("OnEnter", nil)
-		bar:SetScript("OnLeave", nil)
 		bar:OnBarReleased()
 		bars[self][bar.name] = nil
-		tinsert(recycledBars, bar)
+		recycledBars[#recycledBars + 1] = bar
 	end
 end
 
@@ -325,7 +330,7 @@ function barListPrototype:AddButton(title, description, normaltex, highlighttex,
 	btn:SetHeight(12)
 	btn:SetWidth(12)
 	btn:SetNormalTexture(normaltex)
-	btn:SetHighlightTexture(highlighttex, 1.0)
+	btn:SetHighlightTexture(highlighttex or normaltex, 1.0)
 	btn:SetAlpha(0.25)
 	btn:RegisterForClicks("AnyUp")
 	btn:SetScript("OnClick", clickfunc)
@@ -338,7 +343,7 @@ function barListPrototype:AddButton(title, description, normaltex, highlighttex,
 	btn:SetScript("OnLeave", function() GameTooltip:Hide() end)
 	btn:Show()
 
-	tinsert(self.buttons, btn)
+	self.buttons[#self.buttons + 1] = btn
 	self:AdjustButtons()
 end
 
@@ -388,9 +393,9 @@ function barListPrototype:AdjustButtons()
 			elseif nr == 0 then
 				btn:SetPoint("TOPRIGHT", self.button, "TOPRIGHT", -5, 0 - (max(self.button:GetHeight() - btn:GetHeight(), 0) / 2))
 			elseif self.orientation == 3 then
-				btn:SetPoint("TOPLEFT", lastbtn, "TOPRIGHT", 2, 0)
+				btn:SetPoint("TOPLEFT", lastbtn, "TOPRIGHT", 3, 0)
 			else
-				btn:SetPoint("TOPRIGHT", lastbtn, "TOPLEFT", -2, 0)
+				btn:SetPoint("TOPRIGHT", lastbtn, "TOPLEFT", -3, 0)
 			end
 			lastbtn = btn
 			nr = nr + 1
@@ -474,10 +479,14 @@ do
 		barLists[self][name] = list
 		list.name = name
 
-		local myfont = CreateFont("MyTitleFont")
-		myfont:CopyFontObject(ChatFontSmall)
+		local myfont = lib.defaultFont
+		if not myfont then
+			myfont = CreateFont("MyTitleFont")
+			myfont:CopyFontObject(ChatFontSmall)
+			lib.defaultFont = myfont
+		end
 
-		list.button = CreateFrame("Button", nil, list)
+		list.button = list.button or CreateFrame("Button", nil, list)
 		list.button:SetText(name)
 		list.button:SetBackdrop(frame_defaults)
 		list.button:SetNormalFontObject(myfont)
@@ -516,7 +525,7 @@ do
 		list.offset = 0
 
 		-- resize to the right
-		list.resizeright = CreateFrame("Button", "BarGroupResizeButton", list)
+		list.resizeright = list.resizeright or CreateFrame("Button", "BarGroupResizeButton", list)
 		list.resizeright:Show()
 		list.resizeright:SetFrameLevel(11)
 		list.resizeright:SetWidth(12)
@@ -553,7 +562,7 @@ do
 		list.resizeright:SetScript("OnLeave", function(self) self:SetAlpha(0) end)
 
 		-- resize to the left
-		list.resizeleft = CreateFrame("Button", "BarGroupResizeButton", list)
+		list.resizeleft = list.resizeleft or CreateFrame("Button", "BarGroupResizeButton", list)
 		list.resizeleft:Show()
 		list.resizeleft:SetFrameLevel(11)
 		list.resizeleft:SetWidth(12)
@@ -614,7 +623,6 @@ end
 function lib:GetBarGroup(name)
 	return barLists[self] and barLists[self][name]
 end
---
 
 ---[[ BarList prototype ]]---
 function barListPrototype:NewBarFromPrototype(prototype, ...)
@@ -808,6 +816,7 @@ end
 barListPrototype.GetBar = lib.GetBar
 barListPrototype.GetBars = lib.GetBars
 barListPrototype.HasAnyBar = lib.HasAnyBar
+barListPrototype.IterateBars = lib.IterateBars
 
 function barListPrototype:RemoveBar(bar)
 	lib.ReleaseBar(self, bar)
@@ -826,12 +835,7 @@ function barListPrototype:UpdateColors()
 end
 
 function barListPrototype:SetColorAt(at, r, g, b, a)
-	self.colors = self.colors or {}
-	tinsert(self.colors, at)
-	tinsert(self.colors, r)
-	tinsert(self.colors, g)
-	tinsert(self.colors, b)
-	tinsert(self.colors, a)
+	self.colors = {at, r, g, b, a}
 	ComputeGradient(self)
 	self:UpdateColors()
 end
@@ -1290,6 +1294,8 @@ function barPrototype:OnBarReleased()
 	end
 
 	self.texture:SetVertexColor(1, 1, 1, 0)
+	self:SetScript("OnEnter", nil)
+	self:SetScript("OnLeave", nil)
 	self:SetScript("OnUpdate", nil)
 	self:SetParent(UIParent)
 	self:ClearAllPoints()
@@ -1311,7 +1317,7 @@ function barPrototype:OnBarReleased()
 			callbacks[k] = nil
 		end
 		if self.callbacks.OnUnused then
-			self.callbacks.OnUnused(self.callbacks, target, eventname)
+			self.callbacks.OnUnused(self.callbacks, self, eventname)
 		end
 	end
 end
@@ -1446,12 +1452,7 @@ function barPrototype:SetBackgroundColor(r, g, b, a)
 end
 
 function barPrototype:SetColorAt(at, r, g, b, a)
-	self.colors = self.colors or {}
-	tinsert(self.colors, at)
-	tinsert(self.colors, r)
-	tinsert(self.colors, g)
-	tinsert(self.colors, b)
-	tinsert(self.colors, a)
+	self.colors = {at, r, g, b, a}
 	ComputeGradient(self)
 	self:UpdateColor()
 end
@@ -1461,9 +1462,7 @@ function barPrototype:SetOpacity(a)
 end
 
 function barPrototype:UnsetColorAt(at)
-	if not self.colors then
-		return
-	end
+	if not self.colors then return end
 	for i = 1, #self.colors, 5 do
 		if self.colors[i] == at then
 			for j = 1, 5 do
@@ -1477,9 +1476,7 @@ function barPrototype:UnsetColorAt(at)
 end
 
 function barPrototype:UnsetAllColors()
-	if not self.colors then
-		return
-	end
+	if not self.colors then return end
 	for i = 1, #self.colors do
 		tremove(self.colors)
 	end

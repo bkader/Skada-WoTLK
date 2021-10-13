@@ -3,7 +3,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 	if Skada:IsDisabled("Themes") then return end
 
 	local mod = Skada:NewModule(L["Themes"])
-	local ipairs, tinsert, tremove = ipairs, table.insert, table.remove
+	local ipairs = ipairs
 	local newTable, delTable, list = Skada.newTable, Skada.delTable
 
 	local themes = {
@@ -25,6 +25,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 			classcolortext = false,
 			classicons = true,
 			roleicons = false,
+			specicons = false,
 			showself = false,
 			buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false},
 			title = {
@@ -76,6 +77,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 			classcolortext = false,
 			classicons = true,
 			roleicons = false,
+			specicons = false,
 			showself = false,
 			buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false},
 			title = {
@@ -127,6 +129,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 			classcolortext = false,
 			classicons = true,
 			roleicons = false,
+			specicons = false,
 			showself = false,
 			buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false},
 			title = {
@@ -177,6 +180,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 			classcolortext = false,
 			classicons = false,
 			roleicons = false,
+			specicons = false,
 			showself = false,
 			buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false},
 			title = {
@@ -298,12 +302,13 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 							order = 1,
 							values = function()
 								list = newTable()
-								for i, theme in ipairs(themes) do
-									list[theme.name] = theme.name
+								for i = 1, #themes do
+									list[themes[i].name] = themes[i].name
 								end
 								if Skada.db.global.themes then
-									for i, theme in ipairs(Skada.db.global.themes) do
-										if theme.name then
+									for i = 1, #Skada.db.global.themes do
+										local theme = Skada.db.global.themes[i]
+										if theme and theme.name then
 											list[theme.name] = theme.name
 										end
 									end
@@ -324,8 +329,9 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 							order = 2,
 							values = function()
 								list = newTable()
-								for i, win in ipairs(Skada:GetWindows()) do
-									list[win.db.name] = win.db.name
+								for i = 1, #Skada.windows do
+									local win = Skada.windows[i]
+									if win then list[win.db.name] = win.db.name end
 								end
 								return list
 							end,
@@ -344,15 +350,16 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 							func = function()
 								if selectedwindow and selectedtheme then
 									local thetheme = nil
-									for i, theme in ipairs(themes) do
-										if theme.name == selectedtheme then
-											thetheme = theme
+									for i = 1, #themes do
+										if themes[i].name == selectedtheme then
+											thetheme = themes[i]
 											break
 										end
 									end
 									if Skada.db.global.themes then
-										for i, theme in ipairs(Skada.db.global.themes) do
-											if theme.name == selectedtheme then
+										for i = 1, #Skada.db.global.themes do
+											local theme = Skada.db.global.themes[i]
+											if theme and theme.name == selectedtheme then
 												thetheme = theme
 												break
 											end
@@ -360,8 +367,9 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 									end
 
 									if thetheme then
-										for _, win in ipairs(Skada:GetWindows()) do
-											if win.db.name == selectedwindow then
+										for i = 1, #Skada.windows do
+											local win = Skada.windows[i]
+											if win and win.db.name == selectedwindow then
 												Skada.tCopy(win.db, thetheme, {"name", "modeincombat", "display", "set", "wipemode", "returnaftercombat", "x", "y", "sticked"})
 												Skada:ApplySettings()
 												Skada:Print(L["Theme applied!"])
@@ -386,8 +394,9 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 							order = 1,
 							values = function()
 								list = newTable()
-								for i, win in ipairs(Skada:GetWindows()) do
-									list[win.db.name] = win.db.name
+								for i = 1, #Skada.windows do
+									local win = Skada.windows[i]
+									if win then list[win.db.name] = win.db.name end
 								end
 								return list
 							end,
@@ -417,13 +426,14 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 							order = 3,
 							width = "double",
 							func = function()
-								for i, win in ipairs(Skada:GetWindows()) do
-									if win.db.name == savewindow then
+								for i = 1, #Skada.windows do
+									local win = Skada.windows[i]
+									if win and win.db.name == savewindow then
 										Skada.db.global.themes = Skada.db.global.themes or {}
 										local theme = {}
 										Skada.tCopy(theme, win.db, {"name", "sticked", "x", "y", "point"})
 										theme.name = savename or win.db.name
-										tinsert(Skada.db.global.themes, theme)
+										Skada.db.global.themes[#Skada.db.global.themes + 1] = theme
 									end
 								end
 								savewindow = nil
@@ -446,8 +456,9 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 							values = function()
 								list = newTable()
 								if Skada.db.global.themes then
-									for i, theme in ipairs(Skada.db.global.themes) do
-										if theme.name then
+									for i = 1, #Skada.db.global.themes do
+										local theme = Skada.db.global.themes[i]
+										if theme and theme.name then
 											list[theme.name] = theme.name
 										end
 									end
@@ -469,9 +480,10 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 							width = "double",
 							func = function()
 								if Skada.db.global.themes then
-									for i, theme in ipairs(Skada.db.global.themes) do
-										if theme.name == deletetheme then
-											tremove(Skada.db.global.themes, i)
+									for i = 1, #Skada.db.global.themes do
+										local theme = Skada.db.global.themes[i]
+										if theme and theme.name == deletetheme then
+											Skada.db.global.themes[i] = nil
 											break
 										end
 									end

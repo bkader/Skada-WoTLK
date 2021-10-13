@@ -159,7 +159,8 @@ L["The texture used for the border of the title."] = "使用於標題的邊框�
 L["Border color"] = "外框顏色"
 L["The color used for the border."] = "使用在外框的顏色。"
 L["Buttons"] = "按鈕"
--- L["Show on MouseOver"] = ""
+L["Show on MouseOver"] = "鼠標移到"
+L["Show window buttons only if the cursor is over the title bar."] = "仅当光标在标题栏上方时才显示窗口按钮。"
 -- general window
 L["Background"] = "背景"
 L["Background texture"] = "背景的材質"

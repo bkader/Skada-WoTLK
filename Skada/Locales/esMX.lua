@@ -162,6 +162,7 @@ L["Border color"] = "Color del borde"
 L["The color used for the border."] = "El color utilizado para el borde."
 L["Buttons"] = "Botones"
 L["Show on MouseOver"] = "Mostrar botones al pasar el cursor"
+L["Show window buttons only if the cursor is over the title bar."] = "Mostrar botones de ventana solo si el cursor está sobre la barra de título."
 -- general window
 L["Background"] = "Fondo"
 L["Background texture"] = "Textura del fondo"

@@ -159,7 +159,8 @@ L["The texture used for the border of the title."] = "Die Rahmentextur der Titel
 L["Border color"] = "Rahmenfarbe"
 L["The color used for the border."] = "Die für den Rahmen verwendete Farbe."
 L["Buttons"] = "Buttons"
-L["Show on MouseOver"] = "Beim Mouseover anzeigen"
+L["Show on MouseOver"] = "Mauszeiger über"
+L["Show window buttons only if the cursor is over the title bar."] = "Fensterschaltflächen nur anzeigen, wenn der Cursor über der Titelleiste steht."
 -- general window
 L["Background"] = "Hintergrund"
 L["Background texture"] = "Hintergrundtextur"

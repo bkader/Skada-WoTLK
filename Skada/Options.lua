@@ -2,6 +2,8 @@ assert(Skada, "Skada not found!")
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
 local fmt = string.format
+local pairs, ipairs = pairs, ipairs
+local GetAddOnMetadata = GetAddOnMetadata
 
 local windefaultscopy = {}
 local resetoptions = {[1] = NO, [2] = YES, [3] = L["Ask"]}
@@ -150,56 +152,6 @@ Skada.defaults = {
 		windows = {windefaultscopy}
 	}
 }
-
--- Adds column configuration options for a mode.
-function Skada:AddColumnOptions(mod)
-	local db = self.db.profile.columns
-
-	if mod.metadata and mod.metadata.columns then
-		local cols = {
-			type = "group",
-			name = mod:GetName(),
-			order = 0,
-			width = "double",
-			inline = true,
-			args = {}
-		}
-
-		for colname, _ in pairs(mod.metadata.columns) do
-			local c = mod:GetName() .. "_" .. colname
-
-			-- Set initial value from db if available, otherwise use mod default value.
-			if db[c] ~= nil then
-				mod.metadata.columns[colname] = db[c]
-			end
-
-			-- Add column option.
-			local col = {
-				type = "toggle",
-				name = _G[colname] or L[colname],
-				get = function()
-					return mod.metadata.columns[colname]
-				end,
-				set = function()
-					mod.metadata.columns[colname] = not mod.metadata.columns[colname]
-					db[c] = mod.metadata.columns[colname]
-					Skada:UpdateDisplay(true)
-				end
-			}
-			cols.args[c] = col
-		end
-
-		Skada.options.args.columns.args[mod:GetName()] = cols
-	end
-end
-
-function Skada:AddLoadableModuleCheckbox(mod, name, description)
-	self.options.args.disabled.args[mod] = {
-		type = "toggle",
-		name = _G[name] or L[name],
-		desc = description and L[description]
-	}
-end
 
 Skada.options = {
 	type = "group",
@@ -545,7 +497,7 @@ Skada.options = {
 					width = "double",
 					values = function()
 						local feeds = {[""] = NONE}
-						for name, _ in pairs(Skada:GetFeeds()) do
+						for name, _ in pairs(Skada.feeds) do
 							feeds[name] = name
 						end
 						return feeds
@@ -692,10 +644,59 @@ for i, field in ipairs({"Version", "Date", "Author", "Category", "License", "Ema
 	end
 end
 
+-- Adds column configuration options for a mode.
+function Skada:AddColumnOptions(mod)
+	local db = self.db.profile.columns
+
+	if mod.metadata and mod.metadata.columns then
+		local cols = {
+			type = "group",
+			name = mod.moduleName,
+			order = 0,
+			width = "double",
+			inline = true,
+			args = {}
+		}
+
+		for colname, _ in pairs(mod.metadata.columns) do
+			local c = mod.moduleName .. "_" .. colname
+
+			-- Set initial value from db if available, otherwise use mod default value.
+			if db[c] ~= nil then
+				mod.metadata.columns[colname] = db[c]
+			end
+
+			-- Add column option.
+			local col = {
+				type = "toggle",
+				name = _G[colname] or L[colname],
+				get = function()
+					return mod.metadata.columns[colname]
+				end,
+				set = function()
+					mod.metadata.columns[colname] = not mod.metadata.columns[colname]
+					db[c] = mod.metadata.columns[colname]
+					Skada:UpdateDisplay(true)
+				end
+			}
+			cols.args[c] = col
+		end
+
+		Skada.options.args.columns.args[mod.moduleName] = cols
+	end
+end
+
+function Skada:AddLoadableModuleCheckbox(mod, name, description)
+	self.options.args.disabled.args[mod] = {
+		type = "toggle",
+		name = _G[name] or L[name],
+		desc = description and L[description]
+	}
+end
+
 -------------------------------------------------------------------------------
 -- profile import, export and sharing
 do
-	local pairs, ipairs = pairs, ipairs
 	local collectgarbage = collectgarbage
 	local AceGUI
 

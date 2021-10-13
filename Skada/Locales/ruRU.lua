@@ -159,7 +159,8 @@ L["The texture used for the border of the title."] = "Текстура, испо
 L["Border color"] = "Цвет рамки"
 L["The color used for the border."] = "Цвет, используемый для рамок."
 L["Buttons"] = "Кнопки"
-L["Show on MouseOver"] = "Показывать при наведении"
+L["Show on MouseOver"] = "Мышь наведена"
+L["Show window buttons only if the cursor is over the title bar."] = "Отображать кнопки окна, только если курсор находится над строкой заголовка."
 -- general window
 L["Background"] = "Фон"
 L["Background texture"] = "Текстура фона"

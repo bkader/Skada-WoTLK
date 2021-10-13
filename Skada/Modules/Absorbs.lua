@@ -26,7 +26,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	local UnitName, UnitExists, UnitBuff = UnitName, UnitExists, UnitBuff
 	local UnitIsDeadOrGhost, UnitHealthInfo = UnitIsDeadOrGhost, Skada.UnitHealthInfo
 	local GetTime, band = GetTime, bit.band
-	local tinsert, tsort, tContains = table.insert, table.sort, tContains
+	local tsort, tContains = table.sort, tContains
 
 	-- INCOMPLETE
 	-- the following list is incomplete due to the lack of testing for different
@@ -183,15 +183,17 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		[65684] = {dur = 86400, cap = 1000000} -- Twin Val'kyr: Dark Essence86400
 	}
 
-	local priest_divine_aegis = {47509, 47511, 47515, 47753, 54704} -- Divine Aegis
-	local mage_fire_ward = {543, 8457, 8458, 10223, 10225, 27128, 43010} -- Fire Ward
-	local mage_frost_ward = {6143, 8461, 8462, 10177, 28609, 32796, 43012} -- Frost Ward
-	local mage_ice_barrier = {11426, 13031, 13032, 13033, 27134, 33405, 43038, 43039} -- Ice Barrier
-	local warlock_shadow_ward = {6229, 11739, 11740, 28610, 47890, 47891} -- Shadow Ward
-	local warlock_sacrifice = {7812, 19438, 19440, 19441, 19442, 19443, 27273, 47985, 47986} -- Sacrifice
+	local priest_divine_aegis = {[47509] = true, [47511] = true, [47515] = true, [47753] = true, [54704] = true} -- Divine Aegis
+	local mage_frost_ward = {[6143] = true, [8461] = true, [8462] = true, [10177] = true, [28609] = true, [32796] = true, [43012] = true} -- Frost Ward
+	local mage_fire_ward = {[543] = true, [8457] = true, [8458] = true, [10223] = true, [10225] = true, [27128] = true, [43010] = true} -- Fire Ward
+	local mage_ice_barrier = {[11426] = true, [13031] = true, [13032] = true, [13033] = true, [27134] = true, [33405] = true, [43038] = true, [43039] = true} -- Ice Barrier
+	local warlock_shadow_ward = {[6229] = true, [11739] = true, [11740] = true, [28610] = true, [47890] = true, [47891] = true} -- Shadow Ward
+	local warlock_sacrifice = {[7812] = true, [19438] = true, [19440] = true, [19441] = true, [19442] = true, [19443] = true, [27273] = true, [47985] = true, [47986] = true} -- Sacrifice
 
-	local zoneModifier = 1
-	local heals, shields, shieldamounts
+	local zoneModifier = 1 -- coefficient used to calculate amounts
+	local heals = nil -- holds heal amounts used to "guess" shield amounts
+	local shields = nil -- holds the list of players shields and other stuff
+	local shieldamounts = nil -- holds the amount shields absorbed so far
 
 	-- spells in the following table will be ignored.
 	local ignoredSpells = {}
@@ -281,26 +283,26 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		end
 
 		-- Frost Ward
-		if tContains(mage_frost_ward, a_spellid) then
+		if mage_frost_ward[a_spellid] then
 			return false
 		end
-		if tContains(mage_frost_ward, b_spellid) then
+		if mage_frost_ward[b_spellid] then
 			return true
 		end
 
 		-- Fire Ward
-		if tContains(mage_fire_ward, a_spellid) then
+		if mage_fire_ward[a_spellid] then
 			return false
 		end
-		if tContains(mage_fire_ward, b_spellid) then
+		if mage_fire_ward[b_spellid] then
 			return true
 		end
 
 		-- Shadow Ward
-		if tContains(warlock_shadow_ward, a_spellid) then
+		if warlock_shadow_ward[a_spellid] then
 			return false
 		end
-		if tContains(warlock_shadow_ward, b_spellid) then
+		if warlock_shadow_ward[b_spellid] then
 			return true
 		end
 
@@ -321,26 +323,26 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		end
 
 		-- Divine Aegis
-		if tContains(priest_divine_aegis, a_spellid) then
+		if priest_divine_aegis[a_spellid] then
 			return false
 		end
-		if tContains(priest_divine_aegis, b_spellid) then
+		if priest_divine_aegis[b_spellid] then
 			return true
 		end
 
 		-- Ice Barrier
-		if tContains(mage_ice_barrier, a_spellid) then
+		if mage_ice_barrier[a_spellid] then
 			return false
 		end
-		if tContains(mage_ice_barrier, b_spellid) then
+		if mage_ice_barrier[b_spellid] then
 			return true
 		end
 
 		-- Sacrifice
-		if tContains(warlock_sacrifice, a_spellid) then
+		if warlock_sacrifice[a_spellid] then
 			return false
 		end
-		if tContains(warlock_sacrifice, b_spellid) then
+		if warlock_sacrifice[b_spellid] then
 			return true
 		end
 
@@ -389,13 +391,13 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 			local amount = 0
 
 			-- Stackable Shields
-			if (tContains(priest_divine_aegis, spellid) or spellid == 64413) then
+			if (priest_divine_aegis[spellid] or spellid == 64413) then
 				if shields[dstName][spellid][srcName] and timestamp < shields[dstName][spellid][srcName].ts then
 					amount = shields[dstName][spellid][srcName].amount
 				end
 			end
 
-			if tContains(priest_divine_aegis, spellid) then -- Divine Aegis
+			if priest_divine_aegis[spellid] then -- Divine Aegis
 				if heals[dstName] and heals[dstName][srcName] and heals[dstName][srcName].ts > timestamp - 0.2 then
 					amount = min((UnitLevel(srcName) or 80) * 125, amount + (heals[dstName][srcName].amount * 0.3 * zoneModifier))
 				end
@@ -508,19 +510,19 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					elseif spellid == 65684 and band(spellschool, 0x20) == spellschool then
 						return -- don't record
 					-- Frost Ward vs Frost Damage
-					elseif tContains(mage_frost_ward, spellid) and band(spellschool, 0x10) ~= spellschool then
+					elseif mage_frost_ward[spellid] and band(spellschool, 0x10) ~= spellschool then
 						-- nothing
 					-- Fire Ward vs Fire Damage
-					elseif tContains(mage_fire_ward, spellid) and band(spellschool, 0x4) ~= spellschool then
+					elseif mage_fire_ward[spellid] and band(spellschool, 0x4) ~= spellschool then
 						-- nothing
 					-- Shadow Ward vs Shadow Damage
-					elseif tContains(warlock_shadow_ward, spellid) and band(spellschool, 0x20) ~= spellschool then
+					elseif warlock_shadow_ward[spellid] and band(spellschool, 0x20) ~= spellschool then
 						-- nothing
 					-- Anti-Magic, Spell Deflection, Savage Defense
 					elseif (spellid == 48707 or spellid == 49497 or spellid == 62606) and band(spellschool, 0x1) == spellschool then
 						-- nothing
 					else
-						tinsert(shieldsPopped, {
+						shieldsPopped[#shieldsPopped + 1] = {
 							srcGUID = shield.srcGUID,
 							srcName = srcName,
 							spellid = shield.spellid,
@@ -529,7 +531,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 							ts = shield.ts - absorbspells[shield.spellid].dur,
 							amount = shield.amount,
 							full = shield.full
-						})
+						}
 						count = count + 1
 					end
 				end

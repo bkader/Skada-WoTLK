@@ -82,8 +82,9 @@ local function tooltipHandler(win, tooltip)
 	if #win.dataset > 0 then
 		tooltip:AddLine(" ")
 		local n = 0 -- used to fix spots starting from 2
-		for i, data in ipairs(win.dataset) do
-			if data.id and not data.ignore and i < 30 then
+		for i = 1, #win.dataset do
+			local data = win.dataset[i]
+			if data and data.id and not data.ignore and i < 30 then
 				n = n + 1
 				local label = formatLabel(win, data)
 				local value = formatValue(win, data)

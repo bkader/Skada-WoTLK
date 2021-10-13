@@ -37,7 +37,8 @@ function Skada:OpenMenu(window)
 
 		if level == 1 then
 			-- window menus
-			for _, win in Skada:IterateWindows() do
+			for i = 1, #Skada.windows do
+				local win = Skada.windows[i]
 				info = UIDropDownMenu_CreateInfo()
 				info.text = win.db.name
 				info.hasArrow = 1
@@ -168,15 +169,15 @@ function Skada:OpenMenu(window)
 
 				if not Skada.db.profile.shortmenu then
 					-- dsplay modes only if we have modules enabled.
-					local modes = Skada:GetModes()
-					if #modes > 0 then
+					if #Skada.modes > 0 then
 						info = UIDropDownMenu_CreateInfo()
 						info.isTitle = 1
 						info.text = L["Mode"]
 						info.notCheckable = 1
 						UIDropDownMenu_AddButton(info, level)
 
-						for _, mode in Skada:IterateModes() do
+						for i = 1, #Skada.modes do
+							local mode = Skada.modes[i]
 							info = UIDropDownMenu_CreateInfo()
 							info.text = mode:GetName()
 							info.func = function()
@@ -219,7 +220,8 @@ function Skada:OpenMenu(window)
 					info.checked = (window.selectedset == "current")
 					UIDropDownMenu_AddButton(info, level)
 
-					for i, set in Skada:IterateSets() do
+					for i = 1, #Skada.char.sets do
+						local set = Skada.char.sets[i]
 						info = UIDropDownMenu_CreateInfo()
 						info.text = Skada:GetSetLabel(set)
 						info.func = function()
@@ -277,7 +279,8 @@ function Skada:OpenMenu(window)
 					info.func = function()
 						window.db.sticky = not window.db.sticky
 						if not window.db.sticky then
-							for _, win in Skada:IterateWindows() do
+							for i = 1, #Skada.windows do
+								local win = Skada.windows[i]
 								if win.db.sticked[window.db.name] then
 									win.db.sticked[window.db.name] = nil
 								end
@@ -373,11 +376,11 @@ function Skada:OpenMenu(window)
 				info.checked = (window.selectedset == "current")
 				UIDropDownMenu_AddButton(info, level)
 
-				local sets = Skada:GetSets()
-				if #sets > 0 then
+				if #Skada.char.sets > 0 then
 					UIDropDownMenu_AddSeparator(info, level)
 
-					for i, set in ipairs(sets) do
+					for i = 1, #Skada.char.sets do
+						local set = Skada.char.sets[i]
 						info = UIDropDownMenu_CreateInfo()
 						info.text = Skada:GetSetLabel(set)
 						info.func = function()
@@ -391,7 +394,8 @@ function Skada:OpenMenu(window)
 					end
 				end
 			elseif L_UIDROPDOWNMENU_MENU_VALUE == "delete" then
-				for i, set in Skada:IterateSets() do
+				for i = 1, #Skada.char.sets do
+					local set = Skada.char.sets[i]
 					info = UIDropDownMenu_CreateInfo()
 					info.text = Skada:GetSetLabel(set)
 					info.func = function()
@@ -404,7 +408,9 @@ function Skada:OpenMenu(window)
 			elseif L_UIDROPDOWNMENU_MENU_VALUE == "keep" then
 				local num, kept = 0, 0
 
-				for _, set in Skada:IterateSets() do
+				for i = 1, #Skada.char.sets do
+					local set = Skada.char.sets[i]
+
 					num = num + 1
 					if set.keep then
 						kept = kept + 1
@@ -429,8 +435,8 @@ function Skada:OpenMenu(window)
 					info = UIDropDownMenu_CreateInfo()
 					info.text = L["Select All"]
 					info.func = function()
-						for _, s in Skada:IterateSets() do
-							s.keep = true
+						for i = 1, #Skada.char.sets do
+							Skada.char.sets[i].keep = true
 						end
 					end
 					info.notCheckable = 1
@@ -441,8 +447,8 @@ function Skada:OpenMenu(window)
 					info = UIDropDownMenu_CreateInfo()
 					info.text = L["Deselect All"]
 					info.func = function()
-						for _, s in Skada:IterateSets() do
-							s.keep = nil
+						for i = 1, #Skada.char.sets do
+							Skada.char.sets[i].keep = nil
 						end
 					end
 					info.notCheckable = 1
@@ -573,7 +579,8 @@ function Skada:OpenMenu(window)
 			end
 		elseif level == 3 then
 			if L_UIDROPDOWNMENU_MENU_VALUE == "modes" then
-				for _, mode in Skada:IterateModes() do
+				for i = 1, #Skada.modes do
+					local mode = Skada.modes[i]
 					info = UIDropDownMenu_CreateInfo()
 					info.text = mode:GetName()
 					info.checked = (Skada.db.profile.report.mode == mode:GetName())
@@ -599,7 +606,8 @@ function Skada:OpenMenu(window)
 				info.checked = (Skada.db.profile.report.set == "current")
 				UIDropDownMenu_AddButton(info, level)
 
-				for i, set in Skada:IterateSets() do
+				for i = 1, #Skada.char.sets do
+					local set = Skada.char.sets[i]
 					info = UIDropDownMenu_CreateInfo()
 					info.text = Skada:GetSetLabel(set)
 					info.func = function()
@@ -645,11 +653,11 @@ function Skada:SegmentMenu(window)
 		info.checked = (window.selectedset == "current")
 		UIDropDownMenu_AddButton(info, level)
 
-		local sets = Skada:GetSets()
-		if #sets > 0 then
+		if #Skada.char.sets > 0 then
 			UIDropDownMenu_AddSeparator(info, level)
 
-			for i, set in ipairs(sets) do
+			for i = 1, #Skada.char.sets do
+				local set = Skada.char.sets[i]
 				info = UIDropDownMenu_CreateInfo()
 				info.text = Skada:GetSetLabel(set)
 				info.func = function()
@@ -688,7 +696,8 @@ do
 		-- so we call it only once.
 		if categorized == nil then
 			categories, categorized = {}, {}
-			for _, mode in Skada:IterateModes() do
+			for i = 1, #Skada.modes do
+				local mode = Skada.modes[i]
 				categorized[mode.category] = categorized[mode.category] or {}
 				tinsert(categorized[mode.category], mode)
 				if not tContains(categories, mode.category) then
@@ -704,7 +713,8 @@ do
 			local info
 
 			if level == 1 then
-				for _, category in ipairs(categories) do
+				for i = 1, #categories do
+					local category = categories[i]
 					info = UIDropDownMenu_CreateInfo()
 					info.text = category
 					info.value = category
@@ -717,7 +727,8 @@ do
 					UIDropDownMenu_AddButton(info, level)
 				end
 			elseif level == 2 and categorized[L_UIDROPDOWNMENU_MENU_VALUE] then
-				for _, mode in ipairs(categorized[L_UIDROPDOWNMENU_MENU_VALUE]) do
+				for i = 1, #categorized[L_UIDROPDOWNMENU_MENU_VALUE] do
+					local mode = categorized[L_UIDROPDOWNMENU_MENU_VALUE][i]
 					info = UIDropDownMenu_CreateInfo()
 					info.text = mode:GetName()
 					info.func = function()
@@ -807,19 +818,19 @@ do
 			local modebox = AceGUI:Create("Dropdown")
 			modebox:SetLabel(L["Mode"])
 			modebox:SetList({})
-			for _, mode in Skada:IterateModes() do
-				modebox:AddItem(mode:GetName(), mode:GetName())
+			for i = 1, #Skada.modes do
+				modebox:AddItem(Skada.modes[i]:GetName(), Skada.modes[i]:GetName())
 			end
 			modebox:SetCallback("OnValueChanged", function(f, e, value) Skada.db.profile.report.mode = value end)
-			modebox:SetValue(Skada.db.profile.report.mode or Skada:GetModes()[1])
+			modebox:SetValue(Skada.db.profile.report.mode or Skada.modes[1])
 			frame:AddChild(modebox)
 
 			-- Segment, default last chosen or last set.
 			local setbox = AceGUI:Create("Dropdown")
 			setbox:SetLabel(L["Segment"])
 			setbox:SetList({total = L["Total"], current = L["Current"]})
-			for i, set in Skada:IterateSets() do
-				setbox:AddItem(i, set.name)
+			for i = 1, #Skada.char.sets do
+				setbox:AddItem(i, Skada.char.sets[i].name)
 			end
 			setbox:SetCallback("OnValueChanged", function(f, e, value) Skada.db.profile.report.set = value end)
 			setbox:SetValue(Skada.db.profile.report.set or Skada.char.sets[1])

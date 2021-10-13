@@ -160,6 +160,7 @@ L["Border color"] = true
 L["The color used for the border."] = true
 L["Buttons"] = true
 L["Show on MouseOver"] = true
+L["Show window buttons only if the cursor is over the title bar."] = true
 -- general window
 L["Background"] = true
 L["Background texture"] = true

@@ -2,7 +2,7 @@ assert(Skada, "Skada not found!")
 
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local format, max = string.format, math.max
-local pairs, ipairs, select = pairs, ipairs, select
+local pairs, select = pairs, select
 
 -- list of miss types
 local misstypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}
@@ -49,14 +49,37 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	-- spells on the list below are ignored when it comes
 	-- to updating player's active time.
 	local blacklist = {
-		-- Retribution Aura (rank 1 to 7)
-		7294, 10298, 10299, 10300, 10301, 27150, 54043,
-		-- Molten Armor (rank 1 to 3)
-		30482, 43045, 43046,
-		-- Lightning Shield (rank 1 to 11)
-		324, 325, 905, 945, 8134, 10431, 10432, 25469, 25472, 49280, 49281,
-		-- Fire Shield (rank 1 to 7)
-		2947, 8316, 8317, 11770, 11771, 27269, 47983
+		[7294] = true, -- Retribution Aura (Rank 1)
+		[10298] = true, -- Retribution Aura (Rank 2)
+		[10299] = true, -- Retribution Aura (Rank 3)
+		[10300] = true, -- Retribution Aura (Rank 4)
+		[10301] = true, -- Retribution Aura (Rank 5)
+		[27150] = true, -- Retribution Aura (Rank 6)
+		[54043] = true, -- Retribution Aura (Rank 7)
+
+		[30482] = true, -- Molten Armor (Rank 1)
+		[43045] = true, -- Molten Armor (Rank 2)
+		[43046] = true, -- Molten Armor (Rank 3)
+
+		[324] = true, -- Lightning Shield (Rank 1)
+		[325] = true, -- Lightning Shield (Rank 2)
+		[905] = true, -- Lightning Shield (Rank 3)
+		[945] = true, -- Lightning Shield (Rank 4)
+		[8134] = true, -- Lightning Shield (Rank 5)
+		[10431] = true, -- Lightning Shield (Rank 6)
+		[10432] = true, -- Lightning Shield (Rank 7)
+		[25469] = true, -- Lightning Shield (Rank 8)
+		[25472] = true, -- Lightning Shield (Rank 9)
+		[49280] = true, -- Lightning Shield (Rank 10)
+		[49281] = true, -- Lightning Shield (Rank 11)
+
+		[2947] = true, -- Fire Shield (Rank 1)
+		[8316] = true, -- Fire Shield (Rank 2)
+		[8317] = true, -- Fire Shield (Rank 3)
+		[11770] = true, -- Fire Shield (Rank 4)
+		[11771] = true, -- Fire Shield (Rank 5)
+		[27269] = true, -- Fire Shield (Rank 6)
+		[47983] = true -- Fire Shield (Rank 7)
 	}
 
 	-- spells on the list below are used to update player's active time
@@ -104,7 +127,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		if whitelist[dmg.spellid] ~= nil then
 			Skada:AddActiveTime(player, (dmg.amount > 0), tonumber(whitelist[dmg.spellid]))
 		elseif player.role ~= "HEALER" and not dmg.petname then
-			Skada:AddActiveTime(player, (dmg.amount > 0 and not tContains(blacklist, dmg.spellid)))
+			Skada:AddActiveTime(player, (dmg.amount > 0 and not blacklist[dmg.spellid]))
 		end
 
 		player.damage = (player.damage or 0) + dmg.amount

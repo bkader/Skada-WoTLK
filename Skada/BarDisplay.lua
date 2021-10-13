@@ -6,7 +6,7 @@ local libwindow = LibStub("LibWindow-1.1")
 local FlyPaper = LibStub:GetLibrary("LibFlyPaper-1.1", true)
 local LSM = LibStub("LibSharedMedia-3.0")
 
-local tinsert, tsort = table.insert, table.sort
+local tsort = table.sort
 local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
 
@@ -81,31 +81,31 @@ function mod:Create(window)
 
 		-- Add window buttons.
 		bargroup:AddButton(
-			L["Configure"],
-			L["Opens the configuration window."],
-			"Interface\\Addons\\Skada\\Media\\Textures\\icon-config",
-			"Interface\\Addons\\Skada\\Media\\Textures\\icon-config",
-			function() Skada:OpenMenu(bargroup.win) end
+			L["Configure"], L["Opens the configuration window."],
+			"Interface\\Addons\\Skada\\Media\\Textures\\icon-config", nil,
+			function(_, button)
+				if button == "RightButton" then
+					Skada:OpenOptions(bargroup.win)
+				else
+					Skada:OpenMenu(bargroup.win)
+				end
+			end
 		)
 
 		bargroup:AddButton(
-			RESET,
-			L["Resets all fight data except those marked as kept."],
-			"Interface\\Addons\\Skada\\Media\\Textures\\icon-reset",
-			"Interface\\Addons\\Skada\\Media\\Textures\\icon-reset",
+			RESET, L["Resets all fight data except those marked as kept."],
+			"Interface\\Addons\\Skada\\Media\\Textures\\icon-reset", nil,
 			function() Skada:ShowPopup(bargroup.win) end
 		)
 
 		bargroup:AddButton(
-			L["Segment"],
-			L["Jump to a specific segment."],
-			"Interface\\Buttons\\UI-GuildButton-PublicNote-Up",
-			"Interface\\Buttons\\UI-GuildButton-PublicNote-Up",
+			L["Segment"], L["Jump to a specific segment."],
+			"Interface\\Buttons\\UI-GuildButton-PublicNote-Up", nil,
 			function(_, button)
-				if button == "RightButton" then
-					bargroup.win:set_selected_set(nil, IsModifierKeyDown() and 1 or -1)
-				elseif button == "MiddleButton" then
+				if button == "MiddleButton" then
 					bargroup.win:set_selected_set("current")
+				elseif IsModifierKeyDown() then
+					bargroup.win:set_selected_set(nil, button == "RightButton" and 1 or -1)
 				else
 					Skada:SegmentMenu(bargroup.win)
 				end
@@ -113,10 +113,8 @@ function mod:Create(window)
 		)
 
 		bargroup:AddButton(
-			L["Mode"],
-			L["Jump to a specific mode."],
-			"Interface\\GROUPFRAME\\UI-GROUP-MAINASSISTICON",
-			"Interface\\GROUPFRAME\\UI-GROUP-MAINASSISTICON",
+			L["Mode"], L["Jump to a specific mode."],
+			"Interface\\GROUPFRAME\\UI-GROUP-MAINASSISTICON", nil,
 			function(_, button)
 				if button == "RightButton" then
 					bargroup.win:DisplayMode(L["Absorbs and Healing"])
@@ -129,18 +127,14 @@ function mod:Create(window)
 		)
 
 		bargroup:AddButton(
-			L["Report"],
-			L["Opens a dialog that lets you report your data to others in various ways."],
-			"Interface\\Buttons\\UI-GuildButton-MOTD-Up",
-			"Interface\\Buttons\\UI-GuildButton-MOTD-Up",
+			L["Report"], L["Opens a dialog that lets you report your data to others in various ways."],
+			"Interface\\Buttons\\UI-GuildButton-MOTD-Up", nil,
 			function() Skada:OpenReportWindow(bargroup.win) end
 		)
 
 		bargroup:AddButton(
-			L["Stop"],
-			L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."],
-			"Interface\\CHATFRAME\\ChatFrameExpandArrow",
-			"Interface\\CHATFRAME\\ChatFrameExpandArrow",
+			L["Stop"], L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."],
+			"Interface\\CHATFRAME\\ChatFrameExpandArrow", nil,
 			function()
 				if Skada.current and Skada.current.stopped then
 					Skada:ResumeSegment()
@@ -352,8 +346,9 @@ do
 					group:SortBars()
 				end
 			else
-				for _, win in Skada:IterateWindows() do
-					if win.db.display == "bar" and win.db.sticked and win.db.sticked[group.win.db.name] then
+				for i = 1, #Skada.windows do
+					local win = Skada.windows[i]
+					if win and win.db.display == "bar" and win.db.sticked and win.db.sticked[group.win.db.name] then
 						win.db.sticked[group.win.db.name] = nil
 					end
 				end
@@ -389,8 +384,9 @@ function mod:WindowResized(_, group)
 	-- resize sticked windows as well.
 	if FlyPaper then
 		local offset = db.background.borderthickness
-		for _, win in Skada:IterateWindows() do
-			if win.db.display == "bar" and win.bargroup:IsShown() and db.sticked[win.db.name] then
+		for i = 1, #Skada.windows do
+			local win = Skada.windows[i]
+			if win and win.db.display == "bar" and win.bargroup:IsShown() and db.sticked[win.db.name] then
 				win.bargroup.callbacks:Fire("AnchorMoved", win.bargroup)
 			end
 		end
@@ -419,7 +415,7 @@ end
 
 do
 	local function inserthistory(win)
-		tinsert(win.history, win.selectedmode)
+		win.history[#win.history + 1] = win.selectedmode
 		if win.child and win.db.childmode ~= 1 then
 			inserthistory(win.child)
 		end
@@ -768,8 +764,9 @@ do
 				-- move sticked windows.
 				if FlyPaper and group.win.db.sticky and not group.win.db.hidden then
 					local offset = group.win.db.background.borderthickness
-					for _, win in Skada:IterateWindows() do
-						if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
+					for i = 1, #Skada.windows do
+						win = Skada.windows[i]
+						if win and win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
 							FlyPaper.Stick(win.bargroup, group, nil, offset, offset)
 							win.bargroup.button.startX = win.bargroup:GetLeft()
 							win.bargroup.button.startY = win.bargroup:GetTop()
@@ -799,8 +796,9 @@ do
 				if self.startX ~= endX or self.startY ~= endY then
 					group.callbacks:Fire("AnchorMoved", group, endX, endY)
 					if FlyPaper and group.win.db.sticky and not group.win.db.hidden then
-						for _, win in Skada:IterateWindows() do
-							if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
+						for i = 1, #Skada.windows do
+							local win = Skada.windows[i]
+							if win and win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
 								local xOfs, yOfs = win.bargroup:GetLeft(), win.bargroup:GetTop()
 								if win.bargroup.startX ~= xOfs or win.bargroup.startY ~= yOfs then
 									win.bargroup.callbacks:Fire("AnchorMoved", win.bargroup, xOfs, yOfs)
@@ -886,23 +884,15 @@ do
 			g:AdjustButtons()
 
 			if p.title.hovermode then
-				for _, btn in ipairs(g.buttons) do
-					btn:SetAlpha(0)
-				end
+				g:SetButtonsOpacity(0)
 				g.button:SetScript("OnEnter", function(self)
-					for _, btn in ipairs(g.buttons) do
-						btn:SetAlpha(0.25)
-					end
+					g:SetButtonsOpacity(0.25)
 				end)
 				g.button:SetScript("OnLeave", function(self)
-					for _, btn in ipairs(g.buttons) do
-						btn:SetAlpha(MouseIsOver(self) and 0.25 or 0)
-					end
+					g:SetButtonsOpacity(MouseIsOver(self) and 0.25 or 0)
 				end)
 			else
-				for _, btn in ipairs(g.buttons) do
-					btn:SetAlpha(0.25)
-				end
+				g:SetButtonsOpacity(0.25)
 				g.button:SetScript("OnEnter", nil)
 				g.button:SetScript("OnLeave", nil)
 			end
@@ -959,8 +949,9 @@ do
 	function mod:WindowResizing(_, group)
 		if FlyPaper then
 			local offset = group.win.db.background.borderthickness
-			for _, win in Skada:IterateWindows() do
-				if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
+			for i = 1, #Skada.windows do
+				local win = Skada.windows[i]
+				if win and win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
 					FlyPaper.Stick(win.bargroup, group, nil, offset, offset)
 				end
 			end
@@ -1382,6 +1373,7 @@ function mod:AddDisplayOptions(win, options)
 			buttons = {
 				type = "group",
 				name = L["Buttons"],
+				desc = format(L["Options for %s."], L["Buttons"]),
 				order = 14,
 				width = "double",
 				inline = true,
@@ -1420,6 +1412,7 @@ function mod:AddDisplayOptions(win, options)
 					menu = {
 						type = "toggle",
 						name = L["Configure"],
+						desc = L["Opens the configuration window."],
 						order = 5
 					},
 					stop = {
@@ -1431,6 +1424,7 @@ function mod:AddDisplayOptions(win, options)
 					hovermode = {
 						type = "toggle",
 						name = L["Show on MouseOver"],
+						desc = L["Show window buttons only if the cursor is over the title bar."],
 						order = 7,
 						width = "double",
 						get = function()

@@ -162,6 +162,7 @@ L["Border color"] = "边框颜色"
 L["The color used for the border."] = "边框所使用的颜色。"
 L["Buttons"] = "按钮"
 L["Show on MouseOver"] = "鼠标指向时显示"
+L["Show window buttons only if the cursor is over the title bar."] = "仅当光标在标题栏上方时才显示窗口按钮。"
 -- general window
 L["Background"] = "背景"
 L["Background texture"] = "背景材质"

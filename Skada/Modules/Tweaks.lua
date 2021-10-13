@@ -4,7 +4,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 
 	local mod = Skada:NewModule(L["Tweaks"], "AceHook-3.0")
 
-	local select, band, format = select, bit.band, string.format
+	local ipairs, select, band, format = ipairs, select, bit.band, string.format
 	local UnitExists, UnitName, UnitClass = UnitExists, UnitName, UnitClass
 	local GetSpellLink, GetSpellInfo = Skada.GetSpellLink, Skada.GetSpellInfo
 	local After, NewTimer = Skada.After, Skada.NewTimer
@@ -215,7 +215,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 							return true, true, format("|HSKSP:%1$d|h|cffffff00[%2$s]|r|h", newID or 0, msg or "nil")
 						end
 					end
-					tinsert(meters, {src = source, evt = event, time = curtime, data = {}, title = msg})
+					meters[#meters + 1] = {src = source, evt = event, time = curtime, data = {}, title = msg}
 					for id, meter in ipairs(meters) do
 						if meter.src == source and meter.evt == event and meter.time == curtime then
 							newID = id
@@ -551,13 +551,13 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 			if not self:IsHooked("SetItemRef") then
 				self:RawHook("SetItemRef", "ParseLink", true)
 			end
-			for _, e in ipairs(channelEvents) do
-				ChatFrame_AddMessageEventFilter(e, self.ParseChatEvent)
+			for i = 1, #channelEvents do
+				ChatFrame_AddMessageEventFilter(channelEvents[i], self.ParseChatEvent)
 			end
 		elseif self:IsHooked("SetItemRef") then
 			self:Unhook("SetItemRef")
-			for _, e in ipairs(channelEvents) do
-				ChatFrame_RemoveMessageEventFilter(e, self.ParseChatEvent)
+			for i = 1, #channelEvents do
+				ChatFrame_RemoveMessageEventFilter(channelEvents[i], self.ParseChatEvent)
 			end
 		end
 	end

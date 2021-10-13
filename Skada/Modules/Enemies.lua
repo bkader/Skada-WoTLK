@@ -19,7 +19,7 @@ function Skada:find_enemy(set, name)
 			return enemy
 		end
 
-		for _, e in pairs(set.enemies) do
+		for _, e in ipairs(set.enemies) do
 			if e.name == name then
 				set._enemyidx[name] = e
 				return e
@@ -44,7 +44,7 @@ function Skada:get_enemy(set, guid, name, flags)
 				enemy.class = "ENEMY"
 			end
 
-			tinsert(set.enemies, enemy)
+			set.enemies[#set.enemies + 1] = enemy
 		end
 
 		self.changed = true

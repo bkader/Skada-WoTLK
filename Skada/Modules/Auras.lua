@@ -28,7 +28,7 @@ do
 
 	-- simply adds 1sec to the active spells
 	local function auras_tick(set)
-		if set then
+		if set and set.players then
 			for _, player in ipairs(set.players) do
 				if player.auras then
 					for _, spell in pairs(player.auras) do
