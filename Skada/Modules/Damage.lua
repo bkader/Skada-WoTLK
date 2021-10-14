@@ -3,6 +3,7 @@ assert(Skada, "Skada not found!")
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local format, max = string.format, math.max
 local pairs, select = pairs, select
+local _
 
 -- list of miss types
 local misstypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}
@@ -230,27 +231,18 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
-			local spellid, spellname, spellschool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing = ...
+			if eventtype == "SWING_DAMAGE" then
+				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, MELEE, 1
+				dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing, dmg.crushing = ...
+			else
+				dmg.spellid, dmg.spellname, dmg.spellschool, dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing, dmg.crushing = ...
+			end
 
 			dmg.playerid = srcGUID
 			dmg.playername = srcName
 			dmg.playerflags = srcFlags
 			dmg.dstName = dstName
-
-			dmg.spellid = spellid
-			dmg.spellname = spellname
-			dmg.spellschool = spellschool
-			dmg.amount = amount
-
-			dmg.overkill = overkill
-			dmg.resisted = resisted
-			dmg.blocked = blocked
-			dmg.absorbed = absorbed
-			dmg.critical = critical
-			dmg.glancing = glancing
-			dmg.crushing = crushing
 			dmg.missed = nil
-
 			dmg.petname = nil
 			Skada:FixPets(dmg)
 
@@ -259,51 +251,47 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		end
 	end
 
-	local function SwingDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, MELEE, 1, ...)
-	end
-
 	local function SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
-			local spellid, spellname, spellschool, misstype, amount = ...
+			local amount
 
-			dmg.playerid = srcGUID
-			dmg.playername = srcName
-			dmg.playerflags = srcFlags
-			dmg.dstName = dstName
-
-			dmg.spellid = spellid
-			dmg.spellname = spellname
-			dmg.spellschool = spellschool
-
-			dmg.amount = 0
-			dmg.overkill = 0
-			dmg.resisted = nil
-			dmg.blocked = nil
-			dmg.absorbed = nil
-			dmg.critical = nil
-			dmg.glancing = nil
-			dmg.crushing = nil
-			dmg.missed = misstype
-
-			if misstype == "ABSORB" then
-				dmg.absorbed = amount
-			elseif misstype == "BLOCK" then
-				dmg.blocked = amount
-			elseif misstype == "RESIST" then
-				dmg.resisted = amount
+			if eventtype == "SWING_MISSED" then
+				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, MELEE, 1
+				dmg.misstype, amount = ...
+			else
+				dmg.spellid, dmg.spellname, dmg.spellschool, dmg.misstype, amount = ...
 			end
 
-			dmg.petname = nil
-			Skada:FixPets(dmg)
+			if amount then
+				dmg.playerid = srcGUID
+				dmg.playername = srcName
+				dmg.playerflags = srcFlags
+				dmg.dstName = dstName
 
-			log_damage(Skada.current, dmg, eventtype == "SPELL_PERIODIC_MISSED")
-			log_damage(Skada.total, dmg, eventtype == "SPELL_PERIODIC_MISSED")
+				dmg.amount = 0
+				dmg.overkill = 0
+				dmg.resisted = nil
+				dmg.blocked = nil
+				dmg.absorbed = nil
+				dmg.critical = nil
+				dmg.glancing = nil
+				dmg.crushing = nil
+
+				if dmg.misstype == "ABSORB" then
+					dmg.absorbed = amount
+				elseif dmg.misstype == "BLOCK" then
+					dmg.blocked = amount
+				elseif dmg.misstype == "RESIST" then
+					dmg.resisted = amount
+				end
+
+				dmg.petname = nil
+				Skada:FixPets(dmg)
+
+				log_damage(Skada.current, dmg, eventtype == "SPELL_PERIODIC_MISSED")
+				log_damage(Skada.total, dmg, eventtype == "SPELL_PERIODIC_MISSED")
+			end
 		end
-	end
-
-	local function SwingMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, MELEE, 1, ...)
 	end
 
 	local function damage_tooltip(win, id, label, tooltip)
@@ -702,14 +690,14 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellDamage, "SPELL_EXTRA_ATTACKS", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SwingDamage, "SWING_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(SpellDamage, "SWING_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
 
 		Skada:RegisterForCL(SpellMissed, "DAMAGE_SHIELD_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellMissed, "RANGE_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellMissed, "SPELL_BUILDING_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellMissed, "SPELL_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellMissed, "SPELL_PERIODIC_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SwingMissed, "SWING_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(SpellMissed, "SWING_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
 
 		Skada:AddFeed(L["Damage: Personal DPS"], feed_personal_dps)
 		Skada:AddFeed(L["Damage: Raid DPS"], feed_raid_dps)

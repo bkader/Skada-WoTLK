@@ -94,23 +94,15 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 	local heal = {}
 
 	local function SpellHeal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, spellname, spellschool, amount, overheal, _, critical = ...
-
+		local spellid = ...
 		srcGUID, srcName, srcFlags = Skada:FixUnit(spellid, srcGUID, srcName, srcFlags)
 
 		heal.playerid = srcGUID
 		heal.playername = srcName
 		heal.playerflags = srcFlags
-
 		heal.dstGUID = dstGUID
 		heal.dstName = dstName
-
-		heal.spellid = spellid
-		heal.spellschool = spellschool
-
-		heal.amount = amount
-		heal.overheal = overheal
-		heal.critical = critical
+		heal.spellid, _, heal.spellschool, heal.amount, heal.overheal, _, heal.critical = ...
 
 		heal.petname = nil
 		Skada:FixPets(heal)

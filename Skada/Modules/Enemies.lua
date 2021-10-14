@@ -304,7 +304,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 	local function log_damage(set, dmg)
 		if dmg.spellid and tContains(ignoredSpells, dmg.spellid) then return end
-		if (dmg.amount + dmg.absorbed) <= 0 then return end
+		if (dmg.amount + (dmg.absorbed or 0)) == 0 then return end
 
 		local e = Skada:get_enemy(set, dmg.enemyid, dmg.enemyname, dmg.enemyflags)
 		if e then
@@ -315,7 +315,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 			if dmg.spellid then
 				e.damagetaken_spells = e.damagetaken_spells or {}
 				if not e.damagetaken_spells[dmg.spellid] then
-					e.damagetaken_spells[dmg.spellid] = {amount = dmg.amount}
+					e.damagetaken_spells[dmg.spellid] = {school = dmg.spellschool, amount = dmg.amount}
 				else
 					e.damagetaken_spells[dmg.spellid].amount = e.damagetaken_spells[dmg.spellid].amount + dmg.amount
 				end
@@ -391,8 +391,14 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcName and dstName then
-			local spellid, _, spellschool, amount, overkill, _, _, _, absorbed = ...
 			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+
+			if eventtype == "SWING_DAMAGE" then
+				dmg.spellid, dmg.spellschool = 6603, 1
+				dmg.amount, dmg.overkill, _, _, _, dmg.absorbed = ...
+			else
+				dmg.spellid, _, dmg.spellschool, dmg.amount, dmg.overkill, _, _, _, dmg.absorbed = ...
+			end
 
 			dmg.enemyid = dstGUID
 			dmg.enemyname = dstName
@@ -400,44 +406,40 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 			dmg.srcGUID = srcGUID
 			dmg.srcName = srcName
-			dmg.srcFlags = srcFlags
-
-			dmg.spellid = spellid
-			dmg.amount = amount
-			dmg.overkill = overkill or 0
-			dmg.absorbed = absorbed or 0
 
 			log_damage(Skada.current, dmg)
 		end
 	end
 
-	local function SwingDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, nil, nil, ...)
-	end
-
 	local function SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcName and dstName then
-			local spellid, _, _, misstype, amount = ...
+			local spellid, spellschool, misstype, amount
+
+			if eventtype == "SWING_MISSED" then
+				spellid, spellschool = 6603, 1
+				misstype, amount = ...
+			else
+				spellid, _, spellschool, misstype, amount = ...
+			end
+
 			if misstype == "ABSORB" then
 				srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 
 				dmg.enemyid = dstGUID
 				dmg.enemyname = dstName
 				dmg.enemyflags = dstFlags
+
 				dmg.srcGUID = srcGUID
 				dmg.srcName = srcName
 
 				dmg.spellid = spellid
+				dmg.spellschool = spellschool
 				dmg.amount = 0
 				dmg.absorbed = amount
 
 				log_damage(Skada.current, dmg)
 			end
 		end
-	end
-
-	local function SwingMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, MELEE, 1, ...)
 	end
 
 	local function getDTPS(set, enemy)
@@ -538,6 +540,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 				d.id = spellid
 				d.spellid = spellid
+				d.spellschool = spell.school
 				d.label, _, d.icon = GetSpellInfo(spellid)
 
 				d.value = spell.amount
@@ -624,14 +627,14 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 		Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellDamage, "SPELL_EXTRA_ATTACKS", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SwingDamage, "SWING_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(SpellDamage, "SWING_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
 
 		Skada:RegisterForCL(SpellMissed, "DAMAGE_SHIELD_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellMissed, "RANGE_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellMissed, "SPELL_BUILDING_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellMissed, "SPELL_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellMissed, "SPELL_PERIODIC_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SwingMissed, "SWING_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(SpellMissed, "SWING_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
 
 		Skada:AddMode(self, L["Enemies"])
 	end
@@ -663,6 +666,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 
 	local function log_damage(set, dmg)
 		if dmg.spellid and tContains(ignoredSpells, dmg.spellid) then return end
+		if (dmg.amount + (dmg.absorbed or 0)) == 0 then return end
 
 		local e = Skada:get_enemy(set, dmg.enemyid, dmg.enemyname, dmg.enemyflags)
 		if e then
@@ -672,7 +676,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 			-- spell
 			e.damage_spells = e.damage_spells or {}
 			if not e.damage_spells[dmg.spellid] then
-				e.damage_spells[dmg.spellid] = {amount = dmg.amount}
+				e.damage_spells[dmg.spellid] = {school = dmg.spellschool, amount = dmg.amount}
 			else
 				e.damage_spells[dmg.spellid].amount = e.damage_spells[dmg.spellid].amount + dmg.amount
 			end
@@ -698,7 +702,12 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcName and dstName then
-			local spellid, _, _, amount, _, _, _, _, absorbed = ...
+			if eventtype == "SWING_DAMAGE" then
+				dmg.spellid, dmg.spellschool = 6603, 1
+				dmg.amount, _, _, _, _, dmg.absorbed = ...
+			else
+				dmg.spellid, _, dmg.spellschool, dmg.amount, _, _, _, _, dmg.absorbed = ...
+			end
 
 			dmg.enemyid = srcGUID
 			dmg.enemyname = srcName
@@ -706,43 +715,40 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 
 			dmg.dstGUID = dstGUID
 			dmg.dstName = dstName
-			dmg.dstFlags = dstFlags
-
-			dmg.spellid = spellid
-			dmg.amount = amount
-			dmg.absorbed = absorbed or 0
 
 			log_damage(Skada.current, dmg)
 		end
 	end
 
-	local function SwingDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellDamage(nil, nil, srcGUID, srcName, nil, dstGUID, dstName, dstFlags, 6603, nil, nil, ...)
-	end
-
 	local function SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcName and dstName then
-			local spellid, _, _, misstype, amount = ...
+			local spellid, spellschool, misstype, amount
+
+			if eventtype == "SWING_MISSED" then
+				spellid, spellschool = 6603, 1
+				misstype, amount = ...
+			else
+				spellid, _, spellschool, misstype, amount = ...
+			end
+
 			if misstype == "ABSORB" then
+				srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+
 				dmg.enemyid = srcGUID
 				dmg.enemyname = srcName
 				dmg.enemyflags = srcFlags
 
 				dmg.dstGUID = dstGUID
 				dmg.dstName = dstName
-				dmg.dstFlags = dstFlags
 
 				dmg.spellid = spellid
+				dmg.spellschool = spellschool
 				dmg.amount = 0
 				dmg.absorbed = amount
 
 				log_damage(Skada.current, dmg)
 			end
 		end
-	end
-
-	local function SwingMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, MELEE, 1, ...)
 	end
 
 	local function getDPS(set, enemy)
@@ -823,6 +829,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 
 				d.id = spellid
 				d.spellid = spellid
+				d.spellschool = spell.school
 				d.label, _, d.icon = GetSpellInfo(spellid)
 
 				d.value = spell.amount
@@ -902,14 +909,14 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 		Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
 		Skada:RegisterForCL(SpellDamage, "SPELL_EXTRA_ATTACKS", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
 		Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
-		Skada:RegisterForCL(SwingDamage, "SWING_DAMAGE", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
+		Skada:RegisterForCL(SpellDamage, "SWING_DAMAGE", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
 
 		Skada:RegisterForCL(SpellMissed, "DAMAGE_SHIELD_MISSED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
 		Skada:RegisterForCL(SpellMissed, "RANGE_MISSED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
 		Skada:RegisterForCL(SpellMissed, "SPELL_BUILDING_MISSED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
 		Skada:RegisterForCL(SpellMissed, "SPELL_MISSED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
 		Skada:RegisterForCL(SpellMissed, "SPELL_PERIODIC_MISSED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
-		Skada:RegisterForCL(SwingMissed, "SWING_MISSED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
+		Skada:RegisterForCL(SpellMissed, "SWING_MISSED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
 
 		Skada:AddMode(self, L["Enemies"])
 	end
@@ -1037,6 +1044,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 
 				d.id = spellid
 				d.spellid = spellid
+				d.spellschool = spell.school
 				d.label, _, d.icon = GetSpellInfo(spellid)
 
 				d.value = amount

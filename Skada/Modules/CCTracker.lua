@@ -222,7 +222,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 	local data = {}
 
-	local function SpellAuraApplied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function AuraApplied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid = ...
 
 		if CCSpells[spellid] or ExtraCCSpells[spellid] then
@@ -372,8 +372,8 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 			icon = "Interface\\Icons\\spell_frost_chainsofice"
 		}
 
-		Skada:RegisterForCL(SpellAuraApplied, "SPELL_AURA_APPLIED", {src_is_interesting = true})
-		Skada:RegisterForCL(SpellAuraApplied, "SPELL_AURA_REFRESH", {src_is_interesting = true})
+		Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {src_is_interesting = true})
+		Skada:RegisterForCL(AuraApplied, "SPELL_AURA_REFRESH", {src_is_interesting = true})
 
 		Skada:AddMode(self, L["CC Tracker"])
 	end
@@ -424,7 +424,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 	local data = {}
 
-	local function SpellAuraApplied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function AuraApplied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid = ...
 
 		if CCSpells[spellid] or ExtraCCSpells[spellid] then
@@ -575,8 +575,8 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 			icon = "Interface\\Icons\\spell_magic_polymorphrabbit"
 		}
 
-		Skada:RegisterForCL(SpellAuraApplied, "SPELL_AURA_APPLIED", {dst_is_interesting = true})
-		Skada:RegisterForCL(SpellAuraApplied, "SPELL_AURA_REFRESH", {dst_is_interesting = true})
+		Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {dst_is_interesting = true})
+		Skada:RegisterForCL(AuraApplied, "SPELL_AURA_REFRESH", {dst_is_interesting = true})
 
 		Skada:AddMode(self, L["CC Tracker"])
 	end
@@ -631,7 +631,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 	local data = {}
 
-	local function SpellAuraBroken(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function AuraBroken(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, spellname, _, extraspellid, extraspellname, _, auratype = ...
 		if not CCSpells[spellid] then return end
 
@@ -818,8 +818,8 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 			icon = "Interface\\Icons\\spell_holy_sealofvalor"
 		}
 
-		Skada:RegisterForCL(SpellAuraBroken, "SPELL_AURA_BROKEN", {src_is_interesting = true})
-		Skada:RegisterForCL(SpellAuraBroken, "SPELL_AURA_BROKEN_SPELL", {src_is_interesting = true})
+		Skada:RegisterForCL(AuraBroken, "SPELL_AURA_BROKEN", {src_is_interesting = true})
+		Skada:RegisterForCL(AuraBroken, "SPELL_AURA_BROKEN_SPELL", {src_is_interesting = true})
 
 		Skada:AddMode(self, L["CC Tracker"])
 	end

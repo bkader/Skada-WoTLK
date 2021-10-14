@@ -35,15 +35,10 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 	local gain = {}
 
 	local function SpellEnergize(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, _, _, amount, powertype = ...
-
 		gain.playerid = dstGUID
 		gain.playername = dstName
 		gain.playerflags = dstFlags
-
-		gain.spellid = spellid
-		gain.amount = amount
-		gain.type = powertype
+		gain.spellid, _, _, gain.amount, gain.type = ...
 
 		Skada:FixPets(gain)
 		log_gain(Skada.current, gain)
@@ -51,15 +46,10 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 	end
 
 	local function SpellLeech(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, _, _, amount, powertype, extraamount = ...
-
 		gain.playerid = dstGUID
 		gain.playername = dstName
 		gain.playerflags = dstFlags
-
-		gain.spellid = spellid
-		gain.amount = amount
-		gain.type = powertype
+		gain.spellid, _, _, gain.amount, gain.type = ...
 
 		Skada:FixPets(gain)
 		log_gain(Skada.current, gain)

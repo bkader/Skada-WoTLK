@@ -39,23 +39,24 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
-			local spellid, _, _, amount, overkill, _, _, _, absorbed = ...
+			local amount, absorbed
+
+			if eventtype == "SWING_DAMAGE" then
+				dmg.spellid = 6603
+				amount, _, _, _, _, absorbed = ...
+			else
+				dmg.spellid, _, _, amount, _, _, _, _, absorbed = ...
+			end
 
 			dmg.playerid = srcGUID
 			dmg.playername = srcName
 			dmg.playerflags = srcFlags
-
 			dmg.dstName = dstName
-			dmg.spellid = spellid
-			dmg.amount = (amount or 0) + (overkill or 0) + (absorbed or 0)
+			dmg.amount = (amount or 0) + (absorbed or 0)
 
 			log_damage(Skada.current, dmg)
 			log_damage(Skada.total, dmg)
 		end
-	end
-
-	local function SwingDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, nil, nil, ...)
 	end
 
 	function targetmod:Enter(win, id, label)
@@ -193,7 +194,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 		Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, "SPELL_EXTRA_ATTACKS", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
-		Skada:RegisterForCL(SwingDamage, "SWING_DAMAGE", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellDamage, "SWING_DAMAGE", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
 
 		Skada:AddMode(self, L["Damage Done"])
 	end

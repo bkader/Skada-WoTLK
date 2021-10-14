@@ -58,32 +58,28 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	local data = {}
 
 	local function SpellDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, _, _, amount, overkill, _, resisted, blocked, absorbed = ...
+		if event == "SWING_DAMAGE" then
+			data.spellid = 6603
+			data.amount, data.overkill, _, data.resisted, data.blocked, data.absorbed = ...
+		else
+			data.spellid, _, _, data.amount, data.overkill, _, data.resisted, data.blocked, data.absorbed = ...
+		end
 
-		data.srcGUID = srcGUID
-		data.srcName = srcName
+		if data.amount then
+			data.srcName = srcName
+			data.playerid = dstGUID
+			data.playername = dstName
+			data.playerflags = dstFlags
 
-		data.playerid = dstGUID
-		data.playername = dstName
-		data.playerflags = dstFlags
+			data.amount = 0 - data.amount
+			data.overheal = nil
 
-		data.spellid = spellid
-		data.amount = 0 - amount
-		data.overkill = overkill
-		data.overheal = nil
-		data.resisted = resisted
-		data.blocked = blocked
-		data.absorbed = absorbed
-
-		log_deathlog(Skada.current, data, ts)
-	end
-
-	local function SwingDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, MELEE, nil, ...)
+			log_deathlog(Skada.current, data, ts)
+		end
 	end
 
 	local function EnvironmentDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local envtype = ...
+		local envtype, amount = ...
 		local spellid
 
 		if envtype == "Falling" or envtype == "FALLING" then
@@ -101,17 +97,52 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		end
 
 		if spellid then
-			SpellDamage(ts, event, nil, ENVIRONMENTAL_DAMAGE, nil, dstGUID, dstName, dstFlags, spellid, nil, nil, select(2, ...))
+			SpellDamage(ts, event, nil, ENVIRONMENTAL_DAMAGE, nil, dstGUID, dstName, dstFlags, spellid, nil, nil, amount or 0)
+		end
+	end
+
+	local function SpellMissed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		local misstype
+
+		if event == "SWING_MISSED" then
+			data.spellid = 6603
+			misstype, data.amount = ...
+		else
+			data.spellid, _, _, misstype, data.amount = ...
+		end
+
+		if data.spellid and data.amount then
+			data.srcName = srcName
+			data.playerid = dstGUID
+			data.playername = dstName
+			data.playerflags = dstFlags
+
+			data.amount = 0 - data.amount
+			data.overkill = nil
+			data.resisted = nil
+			data.blocked = nil
+			data.absorbed = nil
+
+			if misstype == "ABSORB" then
+				data.absorbed = data.amount
+			elseif misstype == "BLOCK" then
+				data.blocked = data.amount
+			elseif misstype == "RESIST" then
+				data.resisted = data.amount
+			end
+
+			log_deathlog(Skada.current, data, ts)
 		end
 	end
 
 	local function SpellHeal(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, _, _, amount, overheal = ...
+		local spellid, amount, overkill
+		spellid, _, _, amount, overheal = ...
+
 		if amount > (Skada.db.profile.modules.deathlogthreshold or 0) then
 			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 			dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName, dstFlags)
 
-			data.srcGUID = srcGUID
 			data.srcName = srcName
 
 			data.playerid = dstGUID
@@ -506,8 +537,15 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, "SPELL_EXTRA_ATTACKS", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SwingDamage, "SWING_DAMAGE", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellDamage, "SWING_DAMAGE", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(EnvironmentDamage, "ENVIRONMENTAL_DAMAGE", {dst_is_interesting_nopets = true})
+
+		Skada:RegisterForCL(SpellMissed, "DAMAGE_SHIELD_MISSED", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellMissed, "RANGE_MISSED", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellMissed, "SPELL_BUILDING_MISSED", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellMissed, "SPELL_MISSED", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellMissed, "SPELL_PERIODIC_MISSED", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellMissed, "SWING_MISSED", {dst_is_interesting_nopets = true})
 
 		Skada:RegisterForCL(SpellHeal, "SPELL_HEAL", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellHeal, "SPELL_PERIODIC_HEAL", {dst_is_interesting_nopets = true})
