@@ -8,7 +8,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 	local UnitHealth, UnitHealthInfo = UnitHealth, Skada.UnitHealthInfo
 	local UnitIsFeignDeath = UnitIsFeignDeath
-	local tinsert, tsort, tmaxn, tconcat = table.insert, table.sort, table.maxn, table.concat
+	local tinsert, tsort, tconcat = table.insert, table.sort, table.concat
 	local ipairs = ipairs
 	local tostring, format, strsub = tostring, string.format, string.sub
 	local abs, max, modf = math.abs, math.max, math.modf
@@ -49,7 +49,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 			})
 
 			-- trim things and limit to 14 (custom value now)
-			while tmaxn(deathlog.log) > (Skada.db.profile.modules.deathlogevents or 14) do
+			while #deathlog.log > (Skada.db.profile.modules.deathlogevents or 14) do
 				deathlog.log[#deathlog.log] = nil
 			end
 		end
@@ -140,6 +140,13 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 				if player.deathlog[1] then
 					player.deathlog[1].time = ((ts or 0) <= 0) and time() or ts
 
+					-- sometimes multiple close events arrive with the same timestamp
+					-- so we add a small correction to ensure sort stability.
+					for i, e in ipairs(player.deathlog[1].log) do
+						local t = e.time
+						e.time = e.time + i * 0.00001
+					end
+
 					-- announce death
 					if Skada.db.profile.modules.deathannounce and IsInGroup() and not IsInPvP() then
 						for _, l in ipairs(player.deathlog[1].log) do
@@ -183,18 +190,17 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		end
 	end
 
-	local function UnitDied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function UnitDied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags)
 		if not UnitIsFeignDeath(dstName) then
 			log_death(Skada.current, dstGUID, dstName, dstFlags, ts)
 			log_death(Skada.total, dstGUID, dstName, dstFlags, ts)
 		end
 	end
 
-	--
-	-- this function can be called using Skada:SendMessage function.
-	--
-	function mod:UNIT_DIED(event, ...)
-		UnitDied(...)
+	local function AuraApplied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
+		if spellid == 27827 then -- Spirit of Redemption (Holy Priest)
+			Skada.After(0.01, function() UnitDied(ts + 0.01, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags) end)
+		end
 	end
 
 	local function log_resurrect(set, playerid, playername, playerflags)
@@ -244,25 +250,25 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 				if player.deathlog and player.deathlog[win.datakey] then
 					deathlog = player.deathlog[win.datakey]
 				end
-				if not deathlog then
-					return
-				end
+				if not deathlog then return end
 
 				win.metadata.maxvalue = player.maxhp
+				local nr = 1
 
 				-- add a fake entry for the actual death
-				local nr = 1
-				local pre = win.dataset[nr] or {}
-				win.dataset[nr] = pre
+				if (deathlog.time or 0) > 0 then
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
-				pre.id = nr
-				pre.time = deathlog.time
-				pre.label = formatdate(deathlog.time) .. ": " .. format(L["%s dies"], player.name)
-				pre.icon = "Interface\\Icons\\Ability_Rogue_FeignDeath"
-				pre.value = 0
-				pre.valuetext = ""
+					d.id = nr
+					d.time = deathlog.time
+					d.label = formatdate(deathlog.time) .. ": " .. format(L["%s dies"], player.name)
+					d.icon = "Interface\\Icons\\Ability_Rogue_FeignDeath"
+					d.value = 0
+					d.valuetext = ""
 
-				nr = nr + 1
+					nr = nr + 1
+				end
 
 				tsort(deathlog.log, sort_logs)
 
@@ -491,6 +497,8 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 			icon = "Interface\\Icons\\ability_rogue_feigndeath"
 		}
 
+		Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {dst_is_interesting_nopets = true})
+
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SPLIT", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, "RANGE_DAMAGE", {dst_is_interesting_nopets = true})
@@ -507,14 +515,11 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		Skada:RegisterForCL(UnitDied, "UNIT_DIED", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(UnitDied, "UNIT_DESTROYED", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellResurrect, "SPELL_RESURRECT", {dst_is_interesting_nopets = true})
-		Skada.RegisterMessage(self, "UNIT_DIED")
-		Skada.RegisterMessage(self, "UNIT_DESTROYED", "UNIT_DIED")
 
 		Skada:AddMode(self)
 	end
 
 	function mod:OnDisable()
-		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
 	end
 
@@ -523,18 +528,11 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 			if (player.death or 0) == 0 then
 				player.deathlog, player.maxhp = nil, nil
 			elseif player.deathlog then
-				while tmaxn(player.deathlog) > (player.death or 0) do
+				while #player.deathlog > (player.death or 0) do
 					player.deathlog[1] = nil
 				end
 				if #player.deathlog == 0 then
 					player.deathlog = nil
-				else
-					-- fix stupid 0 death timestamp
-					for i, v in ipairs(player.deathlog) do
-						if v.time <= 0 and v.log[1] then
-							player.deathlog[i].time = v.log[1].time or time()
-						end
-					end
 				end
 			end
 		end
@@ -632,7 +630,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 				Skada.db.profile.modules.deathlogevents = 14
 			end
 			if Skada.db.profile.modules.deathlogthreshold == nil then
-				Skada.db.profile.modules.deathlogthreshold = 0
+				Skada.db.profile.modules.deathlogthreshold = 2000 -- default
 			end
 			if Skada.db.profile.modules.deathchannel == nil then
 				Skada.db.profile.modules.deathchannel = "AUTO"

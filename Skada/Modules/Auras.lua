@@ -353,11 +353,6 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 
 	local function handleBuff(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
 		if auratype == "BUFF" and not tContains(ignoredSpells, spellid) and Skada:IsPlayer(dstGUID, dstFlags, dstName) then
-			if spellid == 27827 then -- Spirit of Redemption (Holy Priest)
-				Skada:SendMessage("UNIT_DIED", ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, nil, spellschool, auratype)
-				return
-			end
-
 			aura.playerid = dstGUID
 			aura.playername = dstName
 			aura.playerflags = dstFlags
