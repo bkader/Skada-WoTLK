@@ -1,7 +1,7 @@
 assert(Skada, "Skada not found!")
 
 local Enemies = Skada:NewModule("Enemies")
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
+local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 
 -- frequently used globals --
 local pairs, ipairs, select = pairs, ipairs, select

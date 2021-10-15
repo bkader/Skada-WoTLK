@@ -1,7 +1,7 @@
 assert(Skada, "Skada not found!")
 
 local mod = Skada:NewModule("BarDisplay", "SpecializedLibBars-1.0")
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
+local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 local libwindow = LibStub("LibWindow-1.1")
 local FlyPaper = LibStub:GetLibrary("LibFlyPaper-1.1", true)
 local LSM = LibStub("LibSharedMedia-3.0")

@@ -1,5 +1,5 @@
 assert(Skada, "Skada not found!")
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
+local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 
 local name = L["Data text"]
 local mod = Skada:NewModule(name)

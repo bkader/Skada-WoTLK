@@ -1,6 +1,6 @@
 assert(Skada, "Skada not found!")
 
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
+local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 local fmt = string.format
 local pairs, ipairs = pairs, ipairs
 local GetAddOnMetadata = GetAddOnMetadata

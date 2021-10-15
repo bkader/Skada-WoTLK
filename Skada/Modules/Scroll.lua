@@ -3,7 +3,7 @@ assert(Skada, "Skada not found!")
 local bars = Skada:GetModule("BarDisplay", true)
 if not bars then return end
 
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
+local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 local mod = Skada:NewModule(L["Scroll"])
 
 local db

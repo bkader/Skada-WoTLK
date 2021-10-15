@@ -4,6 +4,7 @@ assert(Skada, "Skada not found!")
 local pairs, ipairs, format, select, tostring = pairs, ipairs, string.format, select, tostring
 local tContains, min, max, floor = tContains, math.min, math.max, math.floor
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+local newTable, delTable = Skada.newTable, Skada.delTable
 local _
 
 -- we use this custom function in order to round up player
@@ -12,7 +13,7 @@ local function PlayerActiveTime(set, player)
 	return floor(Skada:PlayerActiveTime(set, player))
 end
 
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
+local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 local main = Skada:NewModule(L["Buffs and Debuffs"])
 do
 	function main:OnEnable()
@@ -297,9 +298,11 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 
 	local mod = Skada:NewModule(L["Buffs"])
 	local spellmod = mod:NewModule(L["Buff spell list"])
+	local playermod = spellmod:NewModule(L["Players list"])
 
 	local GroupIterator, UnitExists, UnitIsDeadOrGhost = Skada.GroupIterator, UnitExists, UnitIsDeadOrGhost
 	local UnitGUID, UnitName, UnitBuff = UnitGUID, UnitName, UnitBuff
+	local cacheTable
 
 	-- list of the auras that are ignored!
 	local ignoredSpells = {
@@ -315,6 +318,64 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 	local speciallist = {
 		[57669] = true -- Replenishment
 	}
+
+	function playermod:Enter(win, id, label)
+		win.spellid, win.spellname = id, label
+		win.title = format(L["%s's targets"], label or UNKNOWN)
+	end
+
+	function playermod:Update(win, set)
+		win.title = format(L["%s's targets"], win.spellname or UNKNOWN)
+		if win.spellid then
+			cacheTable = newTable()
+
+			for _, player in ipairs(set.players) do
+				local maxtime = PlayerActiveTime(set, player)
+
+				if player.auras and player.auras[win.spellid] then
+					local uptime = min(maxtime, player.auras[win.spellid].uptime)
+					cacheTable[#cacheTable + 1] = {
+						id = player.id,
+						name = player.name,
+						class = player.class,
+						role = player.role,
+						spec = player.spec,
+						uptime = uptime,
+						maxtime = maxtime
+					}
+				end
+			end
+
+			local maxvalue, nr = 0, 1
+
+			for _, player in ipairs(cacheTable) do
+				local d = win.dataset[nr] or {}
+				win.dataset[nr] = d
+
+				d.id = player.id
+				d.label = player.name
+				d.class = player.class
+				d.role = player.role
+				d.spec = player.spec
+
+				d.value = player.uptime
+				d.valuetext = Skada:FormatValueText(
+					Skada:FormatTime(d.value),
+					mod.metadata.columns.Uptime,
+					Skada:FormatPercent(d.value, player.maxtime),
+					mod.metadata.columns.Percent
+				)
+
+				if d.value > maxvalue then
+					maxvalue = d.value
+				end
+				nr = nr + 1
+			end
+
+			win.metadata.maxvalue = maxvalue
+			delTable(cacheTable)
+		end
+	end
 
 	function spellmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
@@ -410,7 +471,7 @@ Skada:AddLoadableModule("Buffs", function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		spellmod.metadata = {tooltip = buff_tooltip}
+		spellmod.metadata = {tooltip = buff_tooltip, click1 = playermod}
 		self.metadata = {
 			click1 = spellmod,
 			columns = {Count = true, Uptime = true, Percent = true},
@@ -553,7 +614,11 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		spellmod.metadata = {post_tooltip = debuff_tooltip, click1 = targetmod, nototalclick = {targetmod}}
+		spellmod.metadata = {
+			click1 = targetmod,
+			post_tooltip = debuff_tooltip,
+			nototalclick = {targetmod}
+		}
 		self.metadata = {
 			click1 = spellmod,
 			columns = {Count = true, Uptime = true, Percent = true},

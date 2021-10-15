@@ -1,7 +1,7 @@
 assert(Skada, "Skada not found!")
 
 local mod = Skada:NewModule("InlineDisplay")
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
+local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 
 mod.name = L["Inline bar display"]
 mod.description = L["Inline display is a horizontal window style."]

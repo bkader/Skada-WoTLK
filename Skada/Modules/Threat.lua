@@ -454,7 +454,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				}
 			end
 			self.db = Skada.db.profile.modules.threat
-			self:SetSinkStorage(mod.db.sinkOptions)
+			self:SetSinkStorage(self.db.sinkOptions)
 			Skada.options.args.modules.args.threat = opts
 
 			Skada.options.args.modules.args.threat.args.output.order = 2
