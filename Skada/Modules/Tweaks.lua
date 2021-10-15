@@ -7,7 +7,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 	local ipairs, select, band, format = ipairs, select, bit.band, string.format
 	local UnitExists, UnitName, UnitClass = UnitExists, UnitName, UnitClass
 	local GetSpellLink, GetSpellInfo = Skada.GetSpellLink, Skada.GetSpellInfo
-	local After, NewTimer = Skada.After, Skada.NewTimer
+	local After, NewTimer, CancelTimer = Skada.After, Skada.NewTimer, Skada.CancelTimer
 
 	local BITMASK_GROUP = Skada.BITMASK_GROUP or bit.bor(COMBATLOG_OBJECT_AFFILIATION_MINE, COMBATLOG_OBJECT_AFFILIATION_PARTY, COMBATLOG_OBJECT_AFFILIATION_RAID)
 	local pull_timer, channelEvents, fofrostmourne
@@ -129,10 +129,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 	end
 
 	function mod:EndSegment()
-		if pull_timer then
-			pull_timer:Cancel()
-			pull_timer = nil
-		end
+		CancelTimer(pull_timer)
 	end
 
 	---------------------------------------------------------------------------
