@@ -180,7 +180,7 @@ local ExtraCCSpells = {
 local pairs, ipairs, select = pairs, ipairs, select
 local tostring, format = tostring, string.format
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-local GetSpellLink, UnitClass = Skada.GetSpellLink or GetSpellLink, Skada.UnitClass
+local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 local _
 
 local function GetSpellSchool(spellid)
