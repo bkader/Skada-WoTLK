@@ -644,7 +644,7 @@ function Skada:SegmentMenu(window)
 		if #Skada.char.sets > 0 then
 			UIDropDownMenu_AddSeparator(info, level)
 
-			for i, set in ipairs(Skada.chat.sets) do
+			for i, set in ipairs(Skada.char.sets) do
 				info = UIDropDownMenu_CreateInfo()
 				info.text = Skada:GetSetLabel(set)
 				info.func = function()
