@@ -1190,10 +1190,6 @@ do
 		self:GetParent().callbacks:Fire("BarLeave", self, motion)
 	end
 
-	local function mouseWheel(self, direction)
-		self:GetParent().callbacks:Fire("OnMouseWheel", self:GetParent(), direction)
-	end
-
 	local DEFAULT_ICON = [[Interface\Icons\INV_Misc_QuestionMark]]
 	function barPrototype:Create(text, value, maxVal, icon, orientation, length, thickness)
 		self.callbacks = self.callbacks or CallbackHandler:New(self)
@@ -1201,9 +1197,6 @@ do
 		self:SetScript("OnMouseDown", barClick)
 		self:SetScript("OnEnter", barEnter)
 		self:SetScript("OnLeave", barLeave)
-
-		self:EnableMouseWheel(true)
-		self:SetScript("OnMouseWheel", mouseWheel)
 
 		self:SetScript("OnSizeChanged", self.OnSizeChanged)
 		self.texture = self.texture or self:CreateTexture(nil, "ARTWORK")

@@ -149,7 +149,6 @@ function mod:Create(window)
 	bargroup.RegisterCallback(mod, "BarClick")
 	bargroup.RegisterCallback(mod, "BarEnter")
 	bargroup.RegisterCallback(mod, "BarLeave")
-	bargroup.RegisterCallback(mod, "OnMouseWheel")
 	bargroup.RegisterCallback(mod, "AnchorMoved")
 	bargroup.RegisterCallback(mod, "WindowResizing")
 	bargroup.RegisterCallback(mod, "WindowResized")
@@ -290,20 +289,6 @@ do
 	end
 end
 
-function mod:OnMouseWheel(_, frame, direction)
-	local win = frame.win
-
-	local maxbars = win.bargroup:GetMaxBars()
-	local numbars = #win.dataset
-	local offset = win.bargroup:GetBarOffset()
-
-	if direction == 1 and offset > 0 then
-		win.bargroup:SetBarOffset(offset - 1)
-	elseif direction == -1 and ((numbars - maxbars - offset) > 0) then
-		win.bargroup:SetBarOffset(offset + 1)
-	end
-end
-
 do
 	-- these anchors are used to correctly position the windows due
 	-- to the title bar overlapping.
@@ -397,10 +382,32 @@ function mod:WindowResized(_, group)
 end
 
 do
+	local function OnMouseWheel(frame, direction)
+		local win = frame.win
+		local maxbars = win.db.background.height / (win.db.barheight + win.db.barspacing)
+		if direction == 1 and win.bargroup:GetBarOffset() > 0 then
+			win.bargroup:SetBarOffset(win.bargroup:GetBarOffset() - 1)
+		elseif direction == -1 and ((win.bargroup:GetNumBars() - maxbars - win.bargroup:GetBarOffset()) > 0) then
+			win.bargroup:SetBarOffset(win.bargroup:GetBarOffset() + 1)
+		end
+	end
+
+	-- for external usage
+	function mod:OnMouseWheel(win, frame, direction)
+		if not frame then
+			mod.framedummy = mod.framedummy or {}
+			mod.framedummy.win = win
+			frame = mod.framedummy
+		end
+		OnMouseWheel(frame, direction)
+	end
+
 	local barbackdrop = {bgFile = "Interface\\Buttons\\WHITE8X8"}
 	function mod:CreateBar(win, name, label, value, maxvalue, icon, o)
 		local bar, isnew = win.bargroup:NewCounterBar(name, label, value, maxvalue, icon, o)
 		bar.win = win
+		bar:EnableMouseWheel(true)
+		bar:SetScript("OnMouseWheel", OnMouseWheel)
 		bar.iconFrame:SetScript("OnEnter", nil)
 		bar.iconFrame:SetScript("OnLeave", nil)
 		bar.iconFrame:SetScript("OnMouseDown", nil)
