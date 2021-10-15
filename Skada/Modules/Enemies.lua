@@ -1044,7 +1044,6 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 
 				d.id = spellid
 				d.spellid = spellid
-				d.spellschool = spell.school
 				d.label, _, d.icon = GetSpellInfo(spellid)
 
 				d.value = amount
