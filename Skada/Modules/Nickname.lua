@@ -8,7 +8,7 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 	local type, time = type, time
 	local strlen, strfind, strgsub, format = string.len, string.find, string.gsub, string.format
 	local UnitGUID, UnitName = UnitGUID, UnitName
-	local NewTimer = Skada.NewTimer
+	local NewTimer, CancelTimer = Skada.NewTimer, Skada.CancelTimer
 	local CheckNickname
 
 	-- modify this if you want to change the way nicknames are displayed
@@ -82,10 +82,8 @@ Skada:AddLoadableModule("Nickname", function(Skada, L)
 		self:SetCacheTable()
 
 		if not keepTimer then
-			if self.sendTimer and not self.sendTimer._cancelled then
-				self.sendTimer:Cancel()
-			end
-			self.sendTimer, self.sendCooldown = nil, time() + 29
+			self.sendTimer = CancelTimer(self.sendTimer)
+			self.sendCooldown = time() + 29
 		end
 
 		Skada:SendComm(nil, nil, "Nickname", Skada.userGUID, Skada.db.profile.nickname)
