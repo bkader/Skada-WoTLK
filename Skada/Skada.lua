@@ -590,7 +590,6 @@ function Window:destroy()
 
 	local name = self.db.name or Skada.windowdefaults.name
 	Skada.options.args.windows.args[name] = nil
-	name = nil
 end
 
 -- change window display
@@ -741,7 +740,6 @@ do
 					Skada:SortModes()
 				end
 				win:DisplayMode(mode)
-				mode = nil
 			end
 		elseif button == "RightButton" then
 			win:RightClick()
@@ -933,7 +931,7 @@ do
 			local win = windows[i]
 			if win and win.db.name == name then
 				win:destroy()
-				delTable(tremove(windows, i))
+				wipe(tremove(windows, i))
 			elseif win and win.db.child == name then
 				win.db.child, win.child = nil, nil
 			end
@@ -942,7 +940,7 @@ do
 		for i = 1, #Skada.db.profile.windows do
 			local win = Skada.db.profile.windows[i]
 			if win and win.name == name then
-				Skada.db.profile.windows[i] = nil
+				tremove(Skada.db.profile.windows, i)
 			elseif win and win.sticked and win.sticked[name] then
 				win.sticked[name] = nil
 			end
@@ -1163,7 +1161,7 @@ end
 function Skada:RemoveMode(mode)
 	for i = 1, #modes do
 		if modes[i] == mode then
-			modes[i] = nil
+			tremove(modes, i)
 			break
 		end
 	end
@@ -1926,7 +1924,6 @@ do
 						title = "|cffffffff" .. nr .. ".|r " .. title
 					end
 					tooltip:AddDoubleLine(title, data.valuetext, color.r, color.g, color.b)
-					color, title = nil, nil
 				end
 			end
 
@@ -2121,7 +2118,6 @@ do
 					break
 				end
 			end
-			list = nil
 		end
 
 		local report_table, report_set, report_mode
@@ -2190,7 +2186,6 @@ do
 				break
 			end
 		end
-		title, label, nr = nil, nil, nil
 	end
 end
 
@@ -2207,10 +2202,9 @@ function Skada:AddFeed(name, func)
 end
 
 function Skada:RemoveFeed(name)
-	for i = 1, #feeds do
-		local feed = feeds[i]
-		if feed and feed.name == name then
-			feeds[i] = nil
+	for i, feed in ipairs(feeds) do
+		if feed.name == name then
+			tremove(feeds, i)
 		end
 	end
 end
@@ -2413,8 +2407,8 @@ function Skada:Reset(force)
 
 	-- delete all sets that aren't marked as persistent
 	for i = #self.char.sets, 1, -1 do
-		if not self.char.sets[i].keep then
-			self.char.sets[i] = nil
+		if self.char.sets[i] and not self.char.sets[i].keep then
+			wipe(tremove(self.char.sets, i))
 		end
 	end
 
@@ -2544,16 +2538,20 @@ function Skada:UpdateDisplay(force)
 
 				for i = 1, #self.char.sets do
 					local set = self.char.sets[i]
-					nr = nr + 1
-					d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					if set then
+						nr = nr + 1
+						d = win.dataset[nr] or {}
+						win.dataset[nr] = d
 
-					d.id = tostring(set.starttime)
-					d.label = set.name
-					d.valuetext = date("%H:%M", set.starttime) .. " - " .. date("%H:%M", set.endtime)
-					d.value = 1
-					if set.keep then
-						d.emphathize = true
+						d.id = tostring(set.starttime)
+						d.label = set.name
+						d.valuetext = date("%H:%M", set.starttime) .. " - " .. date("%H:%M", set.endtime)
+						d.value = 1
+						if set.keep then
+							d.emphathize = true
+						end
+					else
+						tremove(self.char.sets, i)
 					end
 				end
 
@@ -2709,9 +2707,10 @@ do
 		end
 
 		local name = (self.parentmode and self.parentmode:GetName()) or self.selectedmode.title or self.selectedmode:GetName()
-		if self.title ~= nil and self.title ~= self.selectedmode:GetName() then
-			self.title = self.selectedmode:GetName()
-		end
+		-- FIXME
+		-- if self.title ~= nil and self.title ~= self.selectedmode:GetName() then
+		-- 	self.title = self.selectedmode:GetName()
+		-- end
 
 		-- save window settings for RestoreView after reload
 		self.db.set = self.selectedset
@@ -3567,7 +3566,7 @@ function Skada:EndSegment()
 	if numsets > 0 then
 		for i = maxsets, 1, -1 do
 			if numsets > self.db.profile.setstokeep and not self.char.sets[i].keep then
-				self.char.sets[i] = nil
+				tremove(self.char.sets, i)
 				numsets = numsets - 1
 			end
 		end
