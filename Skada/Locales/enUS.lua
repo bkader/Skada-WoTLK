@@ -462,6 +462,7 @@ L["Debuffs"] = true
 L["Debuff spell list"] = true
 L["Debuff target list"] = true
 L["%s's debuffs"] = true
+L["%s's debuffs on %s"] = true
 L["%s's <%s> targets"] = true
 L["Sunder Counter"] = true
 L["Sunder target list"] = true
