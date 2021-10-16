@@ -3,9 +3,9 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 	if Skada:IsDisabled("Threat") then return end
 
 	local mod = Skada:NewModule(L["Threat"], "LibSink-2.0")
-	local LSM = LibStub("LibSharedMedia-3.0")
 
-	local ipairs, select, format, max = ipairs, select, string.format, math.max
+	local ipairs, select, format = ipairs, select, string.format
+	local tinsert, max = table.insert, math.max
 	local GroupIterator, UnitExists, UnitIsFriend = Skada.GroupIterator, UnitExists, UnitIsFriend
 	local UnitName, UnitClass, UnitGUID = UnitName, UnitClass, UnitGUID
 	local GetUnitRole, GetUnitSpec = Skada.GetUnitRole, Skada.GetInspectSpecialization
@@ -282,7 +282,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				if not self.originalPoints then
 					self.originalPoints = {}
 					for i = 1, WorldFrame:GetNumPoints() do
-						self.originalPoints[#self.originalPoints + 1] = {WorldFrame:GetPoint(i)}
+						tinsert(self.originalPoints, {WorldFrame:GetPoint(i)})
 					end
 				end
 				self.elapsed = 0
@@ -318,7 +318,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 	-- Shamelessly copied from Omen - thanks!
 	function mod:Warn(sound, flash, shake, message)
 		if sound then
-			PlaySoundFile(LSM:Fetch("sound", self.db.soundfile))
+			PlaySoundFile(Skada:MediaFetch("sound", self.db.soundfile))
 		end
 		if flash then
 			self:Flash()
@@ -454,7 +454,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				}
 			end
 			self.db = Skada.db.profile.modules.threat
-			self:SetSinkStorage(self.db.sinkOptions)
+			self:SetSinkStorage(mod.db.sinkOptions)
 			Skada.options.args.modules.args.threat = opts
 
 			Skada.options.args.modules.args.threat.args.output.order = 2

@@ -363,6 +363,8 @@ L["Report"] = "Bericht"
 L["Opens a dialog that lets you report your data to others in various ways."] = "Öffnet ein Dialogfeld, damit Sie Ihre Daten an andere auf verschiedene Weise mitteilen können."
 L["Stop"] = "Stopp"
 L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."] = "Stoppt oder setzt das aktuelle Segment fort. Nützlich zur Diskontierung von Daten nach einem Wipe. Kann auch so eingestellt werden, dass in den Einstellungen automatisch gestoppt wird."
+L["Segment Stopped."] = "Segment angehalten."
+L["Segment Resumed."] = "Segment fortgesetzt."
 L["Quick Access"] = "Schneller Zugang"
 -- default segments
 L["Total"] = "Gesamt"

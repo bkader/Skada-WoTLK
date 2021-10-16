@@ -497,7 +497,7 @@ Skada.options = {
 					width = "double",
 					values = function()
 						local feeds = {[""] = NONE}
-						for name, _ in pairs(Skada.feeds) do
+						for name, _ in Skada:IterateFeeds() do
 							feeds[name] = name
 						end
 						return feeds
@@ -696,6 +696,7 @@ end
 
 -------------------------------------------------------------------------------
 -- profile import, export and sharing
+
 do
 	local collectgarbage = collectgarbage
 	local AceGUI
@@ -844,4 +845,209 @@ do
 			}
 		}
 	end
+end
+
+-------------------------------------------------------------------------------
+-- LibSharedMedia Helpers
+
+do
+	local LSM = LibStub("LibSharedMedia-3.0")
+
+	function Skada:MediaFetch(mediatype, key, default)
+		return (key and LSM:Fetch(mediatype, key)) or (default and LSM:Fetch(mediatype, default)) or default
+	end
+
+	function Skada:MediaList(mediatype)
+		return LSM:HashTable(mediatype)
+	end
+
+	function Skada:RegisterMedia(mediatype, key, path)
+		LSM:Register(mediatype, key, path)
+	end
+
+	function Skada._RegisterMedias()
+		-- fonts
+		LSM:Register("font", "ABF", [[Interface\Addons\Skada\Media\Fonts\ABF.ttf]])
+		LSM:Register("font", "Accidental Presidency", [[Interface\Addons\Skada\Media\Fonts\Accidental Presidency.ttf]])
+		LSM:Register("font", "Adventure", [[Interface\Addons\Skada\Media\Fonts\Adventure.ttf]])
+		LSM:Register("font", "Continuum Medium", [[Interface\Addons\Skada\Media\Fonts\ContinuumMedium.ttf]])
+		LSM:Register("font", "Diablo", [[Interface\Addons\Skada\Media\Fonts\Diablo.ttf]])
+		LSM:Register("font", "Forced Square", [[Interface\Addons\Skada\Media\Fonts\FORCED SQUARE.ttf]])
+		LSM:Register("font", "FrancoisOne", [[Interface\Addons\Skada\Media\Fonts\FrancoisOne.ttf]])
+		LSM:Register("font", "Hooge", [[Interface\Addons\Skada\Media\Fonts\Hooge.ttf]])
+
+		-- statusbars
+		LSM:Register("statusbar", "Aluminium", [[Interface\Addons\Skada\Media\Statusbar\Aluminium]])
+		LSM:Register("statusbar", "Armory", [[Interface\Addons\Skada\Media\Statusbar\Armory]])
+		LSM:Register("statusbar", "BantoBar", [[Interface\Addons\Skada\Media\Statusbar\BantoBar]])
+		LSM:Register("statusbar", "Flat", [[Interface\Addons\Skada\Media\Statusbar\Flat]])
+		LSM:Register("statusbar", "Glass", [[Interface\AddOns\Skada\Media\Statusbar\Glass]])
+		LSM:Register("statusbar", "Gloss", [[Interface\Addons\Skada\Media\Statusbar\Gloss]])
+		LSM:Register("statusbar", "Graphite", [[Interface\Addons\Skada\Media\Statusbar\Graphite]])
+		LSM:Register("statusbar", "Grid", [[Interface\Addons\Skada\Media\Statusbar\Grid]])
+		LSM:Register("statusbar", "Healbot", [[Interface\Addons\Skada\Media\Statusbar\Healbot]])
+		LSM:Register("statusbar", "LiteStep", [[Interface\Addons\Skada\Media\Statusbar\LiteStep]])
+		LSM:Register("statusbar", "Minimalist", [[Interface\Addons\Skada\Media\Statusbar\Minimalist]])
+		LSM:Register("statusbar", "Otravi", [[Interface\Addons\Skada\Media\Statusbar\Otravi]])
+		LSM:Register("statusbar", "Outline", [[Interface\Addons\Skada\Media\Statusbar\Outline]])
+		LSM:Register("statusbar", "Round", [[Interface\Addons\Skada\Media\Statusbar\Round]])
+		LSM:Register("statusbar", "Serenity", [[Interface\AddOns\Skada\Media\Statusbar\Serenity]])
+		LSM:Register("statusbar", "Smooth v2", [[Interface\Addons\Skada\Media\Statusbar\Smoothv2]])
+		LSM:Register("statusbar", "Smooth", [[Interface\Addons\Skada\Media\Statusbar\Smooth]])
+		LSM:Register("statusbar", "Solid", [[Interface\Buttons\WHITE8X8]])
+		LSM:Register("statusbar", "TukTex", [[Interface\Addons\Skada\Media\Statusbar\TukTex]])
+		LSM:Register("statusbar", "WorldState Score", [[Interface\WorldStateFrame\WORLDSTATEFINALSCORE-HIGHLIGHT]])
+
+		-- borders
+		LSM:Register("border", "Glow", [[Interface\Addons\Skada\Media\Border\Glow]])
+		LSM:Register("border", "Roth", [[Interface\Addons\Skada\Media\Border\Roth]])
+		LSM:Register("background", "Copper", [[Interface\Addons\Skada\Media\Background\copper]])
+
+		-- sounds
+		LSM:Register("sound", "Cartoon FX", [[Sound\Doodad\Goblin_Lottery_Open03.wav]])
+		LSM:Register("sound", "Cheer", [[Sound\Event Sounds\OgreEventCheerUnique.wav]])
+		LSM:Register("sound", "Explosion", [[Sound\Doodad\Hellfire_Raid_FX_Explosion05.wav]])
+		LSM:Register("sound", "Fel Nova", [[Sound\Spells\SeepingGaseous_Fel_Nova.wav]])
+		LSM:Register("sound", "Fel Portal", [[Sound\Spells\Sunwell_Fel_PortalStand.wav]])
+		LSM:Register("sound", "Humm", [[Sound\Spells\SimonGame_Visual_GameStart.wav]])
+		LSM:Register("sound", "Rubber Ducky", [[Sound\Doodad\Goblin_Lottery_Open01.wav]])
+		LSM:Register("sound", "Shing!", [[Sound\Doodad\PortcullisActive_Closed.wav]])
+		LSM:Register("sound", "Short Circuit", [[Sound\Spells\SimonGame_Visual_BadPress.wav]])
+		LSM:Register("sound", "Simon Chime", [[Sound\Doodad\SimonGame_LargeBlueTree.wav]])
+		LSM:Register("sound", "War Drums", [[Sound\Event Sounds\Event_wardrum_ogre.wav]])
+		LSM:Register("sound", "Wham!", [[Sound\Doodad\PVP_Lordaeron_Door_Open.wav]])
+		LSM:Register("sound", "You Will Die!", [[Sound\Creature\CThun\CThunYouWillDIe.wav]])
+
+		Skada._RegisterMedias = nil -- remove it
+	end
+end
+
+-------------------------------------------------------------------------------
+-- Classes, Specs and Schools
+
+function Skada._RegisterClasses()
+	-- class icons file.
+	Skada.classicons = [[Interface\AddOns\Skada\Media\Textures\icon-classes]]
+
+	-- class texture coordinates & custom
+	Skada.classcoords, Skada.validclass = {}, {}
+	for class, coords in pairs(CLASS_ICON_TCOORDS) do
+		Skada.classcoords[class] = coords
+		Skada.validclass[class] = true
+	end
+	Skada.classcoords.ENEMY = {0.5, 0.75, 0.5, 0.75}
+	Skada.classcoords.BOSS = {0.75, 1, 0.5, 0.75}
+	Skada.classcoords.MONSTER = {0, 0.25, 0.75, 1}
+	Skada.classcoords.PET = {0.25, 0.5, 0.75, 1}
+	Skada.classcoords.PLAYER = {0.75, 1, 0.75, 1}
+	Skada.classcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
+	Skada.classcoords.AGGRO = {0.75, 1, 0.75, 1}
+
+	-- role icon file and texture coordinates
+	Skada.roleicons = [[Interface\LFGFrame\UI-LFG-ICON-PORTRAITROLES]]
+	Skada.rolecoords = {
+		DAMAGER = {0.3125, 0.63, 0.3125, 0.63},
+		HEALER = {0.3125, 0.63, 0.015625, 0.3125},
+		TANK = {0, 0.296875, 0.3125, 0.63},
+		LEADER = {0, 0.296875, 0.015625, 0.3125},
+		NONE = ""
+	}
+
+	-- specialization icons
+	Skada.specicons = {
+		-- Death Knight
+		[250] = "Interface\\Icons\\spell_deathknight_bloodpresence", --> Blood
+		[251] = "Interface\\Icons\\spell_deathknight_frostpresence", --> Frost
+		[252] = "Interface\\Icons\\spell_deathknight_unholypresence", --> Unholy
+		-- Druid
+		[102] = "Interface\\Icons\\spell_nature_starfall", --> Balance
+		[103] = "Interface\\Icons\\ability_druid_catform", --> Feral
+		[104] = "Interface\\Icons\\ability_racial_bearform", --> Tank
+		[105] = "Interface\\Icons\\spell_nature_healingtouch", --> Restoration
+		-- Hunter
+		[253] = "Interface\\Icons\\ability_hunter_beasttaming", --> Beastmastery
+		[254] = "Interface\\Icons\\ability_hunter_focusedaim", --> Marksmalship
+		[255] = "Interface\\Icons\\ability_hunter_swiftstrike", --> Survival
+		-- Mage
+		[62] = "Interface\\Icons\\spell_holy_magicalsentry", --> Arcane (or: spell_arcane_blast)
+		[63] = "Interface\\Icons\\spell_fire_flamebolt", --> Fire
+		[64] = "Interface\\Icons\\spell_frost_frostbolt02", --> Frost
+		-- Paldin
+		[65] = "Interface\\Icons\\spell_holy_holybolt", --> Holy
+		[66] = "Interface\\Icons\\ability_paladin_shieldofthetemplar", --> Protection (or: spell_holy_devotionaura)
+		[70] = "Interface\\Icons\\spell_holy_auraoflight", --> Ret
+		-- Priest
+		[256] = "Interface\\Icons\\spell_holy_powerwordshield", --> Discipline
+		[257] = "Interface\\Icons\\spell_holy_guardianspirit", --> Holy
+		[258] = "Interface\\Icons\\spell_shadow_shadowwordpain", --> Shadow
+		-- Rogue
+		[259] = "Interface\\Icons\\ability_rogue_eviscerate", --> Assassination (or: ability_rogue_shadowstrikes)
+		[260] = "Interface\\Icons\\ability_backstab", --> Combat
+		[261] = "Interface\\Icons\\ability_stealth", --> Subtlty
+		-- Shaman
+		[262] = "Interface\\Icons\\spell_nature_lightning", --> Elemental
+		[263] = "Interface\\Icons\\spell_shaman_improvedstormstrike", --> Enhancement (or: spell_nature_lightningshield)
+		[264] = "Interface\\Icons\\spell_nature_healingwavegreater", --> Restoration
+		-- Warlock
+		[265] = "Interface\\Icons\\spell_shadow_deathcoil", --> Affliction
+		[266] = "Interface\\Icons\\spell_shadow_metamorphosis", --> Demonology
+		[267] = "Interface\\Icons\\spell_shadow_rainoffire", --> Destruction
+		-- Warrior
+		[71] = "Interface\\Icons\\ability_warrior_savageblow", --> Arms
+		[72] = "Interface\\Icons\\ability_warrior_innerrage", --> Fury (or: ability_warrior_titansgrip)
+		[73] = "Interface\\Icons\\ability_warrior_defensivestance" --> Protection (or: ability_warrior_safeguard)
+	}
+
+	-- class names & custom
+	Skada.classnames = {}
+	for k, v in pairs(LOCALIZED_CLASS_NAMES_MALE) do
+		Skada.classnames[k] = v
+	end
+	Skada.classnames.ENEMY = ENEMY
+	Skada.classnames.MONSTER = EXAMPLE_TARGET_MONSTER
+	Skada.classnames.BOSS = BOSS
+	Skada.classnames.PLAYER = PLAYER
+	Skada.classnames.PET = PET
+	Skada.classnames.UNKNOWN = UNKNOWN
+	Skada.classnames.AGGRO = L["> Pull Aggro <"]
+
+	-- class colors & custom
+	Skada.classcolors = Skada.GetClassColorsTable()
+	Skada.classcolors.ENEMY = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
+	Skada.classcolors.MONSTER = {r = 0.549, g = 0.388, b = 0.404, colorStr = "ff8c6367"}
+	Skada.classcolors.BOSS = {r = 0.203, g = 0.345, b = 0.525, colorStr = "345886"}
+	Skada.classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
+	Skada.classcolors.PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"}
+	Skada.classcolors.UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
+	Skada.classcolors.AGGRO = {r = 0.95, g = 0, b = 0.02, colorStr = "fff00005"}
+
+	Skada._RegisterClasses = nil -- remove it
+end
+
+function Skada._RegisterSchools()
+	-- spell school colors
+	Skada.schoolcolors = {
+		[1] = {a = 1.00, r = 1.00, g = 1.00, b = 0.00}, -- Physical
+		[2] = {a = 1.00, r = 1.00, g = 0.90, b = 0.50}, -- Holy
+		[4] = {a = 1.00, r = 1.00, g = 0.50, b = 0.00}, -- Fire
+		[8] = {a = 1.00, r = 0.30, g = 1.00, b = 0.30}, -- Nature
+		[16] = {a = 1.00, r = 0.50, g = 1.00, b = 1.00}, -- Frost
+		[20] = {a = 1.00, r = 0.50, g = 1.00, b = 1.00}, -- Frostfire
+		[32] = {a = 1.00, r = 0.50, g = 0.50, b = 1.00}, -- Shadow
+		[64] = {a = 1.00, r = 1.00, g = 0.50, b = 1.00} -- Arcane
+	}
+
+	-- spell school names
+	Skada.schoolnames = {
+		[1] = STRING_SCHOOL_PHYSICAL:gsub("%(", ""):gsub("%)", ""),
+		[2] = STRING_SCHOOL_HOLY:gsub("%(", ""):gsub("%)", ""),
+		[4] = STRING_SCHOOL_FIRE:gsub("%(", ""):gsub("%)", ""),
+		[8] = STRING_SCHOOL_NATURE:gsub("%(", ""):gsub("%)", ""),
+		[16] = STRING_SCHOOL_FROST:gsub("%(", ""):gsub("%)", ""),
+		[20] = STRING_SCHOOL_FROSTFIRE:gsub("%(", ""):gsub("%)", ""),
+		[32] = STRING_SCHOOL_SHADOW:gsub("%(", ""):gsub("%)", ""),
+		[64] = STRING_SCHOOL_ARCANE:gsub("%(", ""):gsub("%)", "")
+	}
+
+	Skada._RegisterSchools = nil -- remove it
 end

@@ -4,9 +4,8 @@ local mod = Skada:NewModule("BarDisplay", "SpecializedLibBars-1.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 local libwindow = LibStub("LibWindow-1.1")
 local FlyPaper = LibStub:GetLibrary("LibFlyPaper-1.1", true)
-local LSM = LibStub("LibSharedMedia-3.0")
 
-local tsort = table.sort
+local tinsert, tsort = table.insert, table.sort
 local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
 
@@ -15,51 +14,8 @@ mod.description = L["Bar display is the normal bar window used by most damage me
 Skada:AddDisplaySystem("bar", mod)
 
 -- class, role & specs
-local classiconfile, classicontcoords
-local roleiconfile, roleicontcoords
-local specicons = {
-	-- Death Knight
-	[250] = "Interface\\Icons\\spell_deathknight_bloodpresence", --> Blood
-	[251] = "Interface\\Icons\\spell_deathknight_frostpresence", --> Frost
-	[252] = "Interface\\Icons\\spell_deathknight_unholypresence", --> Unholy
-	-- Druid
-	[102] = "Interface\\Icons\\spell_nature_starfall", --> Balance
-	[103] = "Interface\\Icons\\ability_druid_catform", --> Feral
-	[104] = "Interface\\Icons\\ability_racial_bearform", --> Tank
-	[105] = "Interface\\Icons\\spell_nature_healingtouch", --> Restoration
-	-- Hunter
-	[253] = "Interface\\Icons\\ability_hunter_beasttaming", --> Beastmastery
-	[254] = "Interface\\Icons\\ability_hunter_focusedaim", --> Marksmalship
-	[255] = "Interface\\Icons\\ability_hunter_swiftstrike", --> Survival
-	-- Mage
-	[62] = "Interface\\Icons\\spell_holy_magicalsentry", --> Arcane (or: spell_arcane_blast)
-	[63] = "Interface\\Icons\\spell_fire_flamebolt", --> Fire
-	[64] = "Interface\\Icons\\spell_frost_frostbolt02", --> Frost
-	-- Paldin
-	[65] = "Interface\\Icons\\spell_holy_holybolt", --> Holy
-	[66] = "Interface\\Icons\\ability_paladin_shieldofthetemplar", --> Protection (or: spell_holy_devotionaura)
-	[70] = "Interface\\Icons\\spell_holy_auraoflight", --> Ret
-	-- Priest
-	[256] = "Interface\\Icons\\spell_holy_powerwordshield", --> Discipline
-	[257] = "Interface\\Icons\\spell_holy_guardianspirit", --> Holy
-	[258] = "Interface\\Icons\\spell_shadow_shadowwordpain", --> Shadow
-	-- Rogue
-	[259] = "Interface\\Icons\\ability_rogue_eviscerate", --> Assassination (or: ability_rogue_shadowstrikes)
-	[260] = "Interface\\Icons\\ability_backstab", --> Combat
-	[261] = "Interface\\Icons\\ability_stealth", --> Subtlty
-	-- Shaman
-	[262] = "Interface\\Icons\\spell_nature_lightning", --> Elemental
-	[263] = "Interface\\Icons\\spell_shaman_improvedstormstrike", --> Enhancement (or: spell_nature_lightningshield)
-	[264] = "Interface\\Icons\\spell_nature_healingwavegreater", --> Restoration
-	-- Warlock
-	[265] = "Interface\\Icons\\spell_shadow_deathcoil", --> Affliction
-	[266] = "Interface\\Icons\\spell_shadow_metamorphosis", --> Demonology
-	[267] = "Interface\\Icons\\spell_shadow_rainoffire", --> Destruction
-	-- Warrior
-	[71] = "Interface\\Icons\\ability_warrior_savageblow", --> Arms
-	[72] = "Interface\\Icons\\ability_warrior_innerrage", --> Fury (or: ability_warrior_titansgrip)
-	[73] = "Interface\\Icons\\ability_warrior_defensivestance" --> Protection (or: ability_warrior_safeguard)
-}
+local classicons, roleicons, specicons
+local classcoords, rolecoords
 
 function mod:Create(window)
 	-- Re-use bargroup if it exists.
@@ -115,15 +71,7 @@ function mod:Create(window)
 		bargroup:AddButton(
 			L["Mode"], L["Jump to a specific mode."],
 			"Interface\\GROUPFRAME\\UI-GROUP-MAINASSISTICON", nil,
-			function(_, button)
-				if button == "RightButton" then
-					bargroup.win:DisplayMode(L["Absorbs and Healing"])
-				elseif button == "MiddleButton" then
-					bargroup.win:DisplayMode(L["Damage"])
-				else
-					Skada:ModeMenu(bargroup.win)
-				end
-			end
+			function() Skada:ModeMenu(bargroup.win) end
 		)
 
 		bargroup:AddButton(
@@ -190,30 +138,14 @@ function mod:Create(window)
 	bargroup:SetMaxBars()
 	window.bargroup = bargroup
 
-	if not classicontcoords then
-		-- class icon file and texture coordinates
-		classiconfile = [[Interface\AddOns\Skada\Media\Textures\icon-classes]]
-		classicontcoords = {}
-		for class, coords in pairs(CLASS_ICON_TCOORDS) do
-			classicontcoords[class] = coords
-		end
-		classicontcoords.ENEMY = {0.5, 0.75, 0.5, 0.75}
-		classicontcoords.BOSS = {0.75, 1, 0.5, 0.75}
-		classicontcoords.MONSTER = {0, 0.25, 0.75, 1}
-		classicontcoords.PET = {0.25, 0.5, 0.75, 1}
-		classicontcoords.PLAYER = {0.75, 1, 0.75, 1}
-		classicontcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
-		classicontcoords.AGGRO = {0.75, 1, 0.75, 1}
+	if not classicons then
+		classicons = Skada.classicons
+		classcoords = Skada.classcoords
 
-		-- role icon file and texture coordinates
-		roleiconfile = [[Interface\LFGFrame\UI-LFG-ICON-PORTRAITROLES]]
-		roleicontcoords = {
-			DAMAGER = {0.3125, 0.63, 0.3125, 0.63},
-			HEALER = {0.3125, 0.63, 0.015625, 0.3125},
-			TANK = {0, 0.296875, 0.3125, 0.63},
-			LEADER = {0, 0.296875, 0.015625, 0.3125},
-			NONE = ""
-		}
+		roleicons = Skada.roleicons
+		rolecoords = Skada.rolecoords
+
+		specicons = Skada.specicons
 	end
 end
 
@@ -331,9 +263,8 @@ do
 					group:SortBars()
 				end
 			else
-				for i = 1, #Skada.windows do
-					local win = Skada.windows[i]
-					if win and win.db.display == "bar" and win.db.sticked and win.db.sticked[group.win.db.name] then
+				for _, win in Skada:IterateWindows() do
+					if win.db.display == "bar" and win.db.sticked and win.db.sticked[group.win.db.name] then
 						win.db.sticked[group.win.db.name] = nil
 					end
 				end
@@ -369,9 +300,8 @@ function mod:WindowResized(_, group)
 	-- resize sticked windows as well.
 	if FlyPaper then
 		local offset = db.background.borderthickness
-		for i = 1, #Skada.windows do
-			local win = Skada.windows[i]
-			if win and win.db.display == "bar" and win.bargroup:IsShown() and db.sticked[win.db.name] then
+		for _, win in Skada:IterateWindows() do
+			if win.db.display == "bar" and win.bargroup:IsShown() and db.sticked[win.db.name] then
 				win.bargroup.callbacks:Fire("AnchorMoved", win.bargroup)
 			end
 		end
@@ -422,7 +352,7 @@ end
 
 do
 	local function inserthistory(win)
-		win.history[#win.history + 1] = win.selectedmode
+		tinsert(win.history, win.selectedmode)
 		if win.child and win.db.childmode ~= 1 then
 			inserthistory(win.child)
 		end
@@ -634,14 +564,14 @@ do
 						bar:SetIcon(specicons[data.spec])
 					elseif data.role and data.role ~= "NONE" and win.db.roleicons then
 						bar:ShowIcon()
-						bar:SetIconWithCoord(roleiconfile, roleicontcoords[data.role])
-					elseif data.class and win.db.classicons and classicontcoords[data.class] then
+						bar:SetIconWithCoord(roleicons, rolecoords[data.role])
+					elseif data.class and win.db.classicons and classcoords[data.class] then
 						bar:ShowIcon()
-						bar:SetIconWithCoord(classiconfile, classicontcoords[data.class])
+						bar:SetIconWithCoord(classicons, classcoords[data.class])
 					elseif not data.ignore and not data.spellid then
 						if data.icon and not bar:IsIconShown() then
 							bar:ShowIcon()
-							bar:SetIconWithCoord(classiconfile, classicontcoords["PLAYER"])
+							bar:SetIconWithCoord(classicons, classcoords["PLAYER"])
 						end
 					end
 
@@ -771,9 +701,8 @@ do
 				-- move sticked windows.
 				if FlyPaper and group.win.db.sticky and not group.win.db.hidden then
 					local offset = group.win.db.background.borderthickness
-					for i = 1, #Skada.windows do
-						win = Skada.windows[i]
-						if win and win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
+					for _, win in Skada:IterateWindows() do
+						if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
 							FlyPaper.Stick(win.bargroup, group, nil, offset, offset)
 							win.bargroup.button.startX = win.bargroup:GetLeft()
 							win.bargroup.button.startY = win.bargroup:GetTop()
@@ -803,9 +732,8 @@ do
 				if self.startX ~= endX or self.startY ~= endY then
 					group.callbacks:Fire("AnchorMoved", group, endX, endY)
 					if FlyPaper and group.win.db.sticky and not group.win.db.hidden then
-						for i = 1, #Skada.windows do
-							local win = Skada.windows[i]
-							if win and win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
+						for _, win in Skada:IterateWindows() do
+							if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
 								local xOfs, yOfs = win.bargroup:GetLeft(), win.bargroup:GetTop()
 								if win.bargroup.startX ~= xOfs or win.bargroup.startY ~= yOfs then
 									win.bargroup.callbacks:Fire("AnchorMoved", win.bargroup, xOfs, yOfs)
@@ -833,14 +761,14 @@ do
 		g:SetHeight(p.background.height)
 		g:SetWidth(p.barwidth)
 		g:SetLength(p.barwidth)
-		g:SetTexture(p.bartexturepath or LSM:Fetch("statusbar", p.bartexture))
+		g:SetTexture(p.bartexturepath or Skada:MediaFetch("statusbar", p.bartexture))
 		g:SetBarBackgroundColor(p.barbgcolor.r, p.barbgcolor.g, p.barbgcolor.b, p.barbgcolor.a or 0.6)
 
 		g:SetFont(
-			p.barfontpath or LSM:Fetch("font", p.barfont),
+			p.barfontpath or Skada:MediaFetch("font", p.barfont),
 			p.barfontsize,
 			p.barfontflags,
-			p.numfontpath or LSM:Fetch("font", p.numfont),
+			p.numfontpath or Skada:MediaFetch("font", p.numfont),
 			p.numfontsize,
 			p.numfontflags
 		)
@@ -861,13 +789,13 @@ do
 
 		-- Header
 		local fo = CreateFont("TitleFont" .. win.db.name)
-		fo:SetFont(p.title.fontpath or LSM:Fetch("font", p.title.font), p.title.fontsize, p.title.fontflags)
+		fo:SetFont(p.title.fontpath or Skada:MediaFetch("font", p.title.font), p.title.fontsize, p.title.fontflags)
 		if p.title.textcolor then
 			fo:SetTextColor(p.title.textcolor.r, p.title.textcolor.g, p.title.textcolor.b, p.title.textcolor.a)
 		end
 		g.button:SetNormalFontObject(fo)
 
-		titlebackdrop.bgFile = LSM:Fetch("statusbar", p.title.texture)
+		titlebackdrop.bgFile = Skada:MediaFetch("statusbar", p.title.texture)
 		titlebackdrop.tile = false
 		titlebackdrop.tileSize = 0
 		titlebackdrop.edgeSize = p.title.borderthickness
@@ -892,12 +820,8 @@ do
 
 			if p.title.hovermode then
 				g:SetButtonsOpacity(0)
-				g.button:SetScript("OnEnter", function(self)
-					g:SetButtonsOpacity(0.25)
-				end)
-				g.button:SetScript("OnLeave", function(self)
-					g:SetButtonsOpacity(MouseIsOver(self) and 0.25 or 0)
-				end)
+				g.button:SetScript("OnEnter", function(self) g:SetButtonsOpacity(0.25) end)
+				g.button:SetScript("OnLeave", function(self) g:SetButtonsOpacity(MouseIsOver(self) and 0.25 or 0) end)
 			else
 				g:SetButtonsOpacity(0.25)
 				g.button:SetScript("OnEnter", nil)
@@ -912,7 +836,7 @@ do
 		-- Window border
 		Skada:ApplyBorder(g, p.background.bordertexture, p.background.bordercolor, p.background.borderthickness)
 
-		windowbackdrop.bgFile = p.background.texturepath or LSM:Fetch("background", p.background.texture)
+		windowbackdrop.bgFile = p.background.texturepath or Skada:MediaFetch("background", p.background.texture)
 		windowbackdrop.tile = p.background.tile
 		windowbackdrop.tileSize = p.background.tilesize
 		windowbackdrop.insets = {left = 0, right = 0, top = 0, bottom = 0}
@@ -956,9 +880,8 @@ do
 	function mod:WindowResizing(_, group)
 		if FlyPaper then
 			local offset = group.win.db.background.borderthickness
-			for i = 1, #Skada.windows do
-				local win = Skada.windows[i]
-				if win and win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
+			for _, win in Skada:IterateWindows() do
+				if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
 					FlyPaper.Stick(win.bargroup, group, nil, offset, offset)
 				end
 			end

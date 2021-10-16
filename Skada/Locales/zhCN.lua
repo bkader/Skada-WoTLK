@@ -365,6 +365,8 @@ L["Report"] = "报告"
 L["Opens a dialog that lets you report your data to others in various ways."] = "打开一个可以通过各种方式向他人报告数据的对话框。"
 L["Stop"] = "停止"
 L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."] = "停止或继续当前分段。在团灭后很有用。可在设置中设为自动停止。"
+L["Segment Stopped."] = "段已停止。"
+L["Segment Resumed."] = "段已恢复。"
 L["Quick Access"] = "快速访问"
 -- default segments
 L["Total"] = "总计"

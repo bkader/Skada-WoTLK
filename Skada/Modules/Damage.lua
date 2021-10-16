@@ -729,7 +729,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
 	function mod:SetComplete(set)
 		for _, player in ipairs(set.players) do
-			if (player.damage or 0) == 0 then
+			if ((player.damage or 0) + (player.absdamage or 0)) == 0 then
 				player.damage_spells = nil
 				player.damage_targets = nil
 			end

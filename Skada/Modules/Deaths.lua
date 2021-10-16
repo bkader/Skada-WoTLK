@@ -101,40 +101,6 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		end
 	end
 
-	local function SpellMissed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local misstype
-
-		if event == "SWING_MISSED" then
-			data.spellid = 6603
-			misstype, data.amount = ...
-		else
-			data.spellid, _, _, misstype, data.amount = ...
-		end
-
-		if data.spellid and data.amount then
-			data.srcName = srcName
-			data.playerid = dstGUID
-			data.playername = dstName
-			data.playerflags = dstFlags
-
-			data.amount = 0 - data.amount
-			data.overkill = nil
-			data.resisted = nil
-			data.blocked = nil
-			data.absorbed = nil
-
-			if misstype == "ABSORB" then
-				data.absorbed = data.amount
-			elseif misstype == "BLOCK" then
-				data.blocked = data.amount
-			elseif misstype == "RESIST" then
-				data.resisted = data.amount
-			end
-
-			log_deathlog(Skada.current, data, ts)
-		end
-	end
-
 	local function SpellHeal(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, amount, overkill
 		spellid, _, _, amount, overheal = ...
@@ -539,13 +505,6 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, "SWING_DAMAGE", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(EnvironmentDamage, "ENVIRONMENTAL_DAMAGE", {dst_is_interesting_nopets = true})
-
-		Skada:RegisterForCL(SpellMissed, "DAMAGE_SHIELD_MISSED", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellMissed, "RANGE_MISSED", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellMissed, "SPELL_BUILDING_MISSED", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellMissed, "SPELL_MISSED", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellMissed, "SPELL_PERIODIC_MISSED", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellMissed, "SWING_MISSED", {dst_is_interesting_nopets = true})
 
 		Skada:RegisterForCL(SpellHeal, "SPELL_HEAL", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellHeal, "SPELL_PERIODIC_HEAL", {dst_is_interesting_nopets = true})

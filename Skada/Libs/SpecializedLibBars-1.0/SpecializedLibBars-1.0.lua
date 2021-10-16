@@ -14,7 +14,7 @@ local GetTime = _G.GetTime
 local sin, cos, rad = _G.math.sin, _G.math.cos, _G.math.rad
 local abs, min, max, floor = _G.math.abs, _G.math.min, _G.math.max, _G.math.floor
 local tsort, tinsert, tremove, tconcat = _G.table.sort, tinsert, tremove, _G.table.concat
-local next, pairs, ipairs, assert, error, type, xpcall = next, pairs, ipairs, assert, error, type, xpcall
+local next, pairs, assert, error, type, xpcall = next, pairs, assert, error, type, xpcall
 
 --[[ xpcall safecall implementation ]]--
 local function errorhandler(err)
@@ -241,7 +241,7 @@ function lib:GetBars(name)
 end
 
 function lib:HasAnyBar()
-	return not not (bars[self] and next(bars[self]))
+	return not (not (bars[self] and next(bars[self])))
 end
 
 -- Convenient method to create a new, empty bar prototype
@@ -822,7 +822,12 @@ function barListPrototype:UpdateColors()
 end
 
 function barListPrototype:SetColorAt(at, r, g, b, a)
-	self.colors = {at, r, g, b, a}
+	self.colors = self.colors or {}
+	tinsert(self.colors, at)
+	tinsert(self.colors, r)
+	tinsert(self.colors, g)
+	tinsert(self.colors, b)
+	tinsert(self.colors, a)
 	ComputeGradient(self)
 	self:UpdateColors()
 end
@@ -1294,7 +1299,7 @@ function barPrototype:OnBarReleased()
 			callbacks[k] = nil
 		end
 		if self.callbacks.OnUnused then
-			self.callbacks.OnUnused(self.callbacks, self, eventname)
+			self.callbacks.OnUnused(self.callbacks, target, eventname)
 		end
 	end
 end
@@ -1429,7 +1434,12 @@ function barPrototype:SetBackgroundColor(r, g, b, a)
 end
 
 function barPrototype:SetColorAt(at, r, g, b, a)
-	self.colors = {at, r, g, b, a}
+	self.colors = self.colors or {}
+	tinsert(self.colors, at)
+	tinsert(self.colors, r)
+	tinsert(self.colors, g)
+	tinsert(self.colors, b)
+	tinsert(self.colors, a)
 	ComputeGradient(self)
 	self:UpdateColor()
 end

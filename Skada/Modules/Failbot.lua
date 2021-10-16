@@ -245,8 +245,8 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 		function mod:OnInitialize()
 			failevents = failevents or LibFail:GetSupportedEvents()
 			tankevents = tankevents or LibFail:GetFailsWhereTanksDoNotFail()
-			for i = 1, #failevents do
-				LibFail:RegisterCallback(failevents[i], onFail)
+			for _, event in ipairs(failevents) do
+				LibFail:RegisterCallback(event, onFail)
 			end
 
 			if Skada.db.profile.modules.failschannel == nil then

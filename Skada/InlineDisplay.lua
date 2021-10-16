@@ -19,18 +19,7 @@ local pairs, tostring, type = pairs, tostring, type
 local strrep, format, _match = string.rep, string.format, string.match
 local tinsert, tremove, tsort = table.insert, table.remove, table.sort
 
-local classcolors = {
-	DEATHKNIGHT = "|cffc41f3b%s|r",
-	DRUID = "|cffff7d0a%s|r",
-	HUNTER = "|cffa9d271%s|r",
-	MAGE = "|cff40c7eb%s|r",
-	PALADIN = "|cfff58cba%s|r",
-	PRIEST = "|cffffffff%s|r",
-	ROGUE = "|cfffff569%s|r",
-	SHAMAN = "|cff0070de%s|r",
-	WARLOCK = "|cff8787ed%s|r",
-	WARRIOR = "|cffc79c6e%s|r"
-}
+local WrapTextInColorCode = Skada.WrapTextInColorCode
 
 local function serial(val, name, skipnewlines, depth)
 	skipnewlines = skipnewlines or false
@@ -324,10 +313,8 @@ end
 
 function mod:UpdateBar(bar, bardata, db)
 	local label = bardata.text or bardata.label or UNKNOWN
-	if db.isusingclasscolors then
-		if bardata.class then
-			label = format(classcolors[bardata.class] or "|cffffffff%s|r", bardata.text or bardata.label or UNKNOWN)
-		end
+	if db.isusingclasscolors and bardata.class then
+		label = WrapTextInColorCode(bardata.text or bardata.label or UNKNOWN, Skada.classcolors[bardata.class].colorStr)
 	else
 		label = bardata.text or bardata.label or UNKNOWN
 	end
@@ -365,8 +352,8 @@ function mod:Update(win)
 
 	local wd = win.dataset
 	for i = #wd, 1, -1 do
-		if wd[i].label == nil then
-			wd[i] = nil
+		if wd[i] and wd[i].label == nil then
+			tremove(wd, i)
 		end
 	end
 
@@ -440,6 +427,7 @@ end
 function mod:CreateBar(win, name, label, maxValue, icon, o)
 	local bar = {}
 	bar.win = win
+
 	return bar
 end
 

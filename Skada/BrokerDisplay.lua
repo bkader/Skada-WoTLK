@@ -15,18 +15,7 @@ local media = LibStub("LibSharedMedia-3.0")
 local tsort, format = table.sort, string.format
 local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
 
-local classcolors = {
-	DEATHKNIGHT = "|cffc41f3b%s|r",
-	DRUID = "|cffff7d0a%s|r",
-	HUNTER = "|cffa9d271%s|r",
-	MAGE = "|cff40c7eb%s|r",
-	PALADIN = "|cfff58cba%s|r",
-	PRIEST = "|cffffffff%s|r",
-	ROGUE = "|cfffff569%s|r",
-	SHAMAN = "|cff0070de%s|r",
-	WARLOCK = "|cff8787ed%s|r",
-	WARRIOR = "|cffc79c6e%s|r"
-}
+local WrapTextInColorCode = Skada.WrapTextInColorCode
 
 local function sortDataset(win)
 	tsort(win.dataset, function(a, b)
@@ -42,7 +31,7 @@ end
 
 local function formatLabel(win, data)
 	if win.db.isusingclasscolors and data.class then
-		return format(classcolors[data.class], data.text or data.label or UNKNOWN)
+		return WrapTextInColorCode(data.text or data.label or UNKNOWN, Skada.classcolors[data.class].colorStr)
 	else
 		return data.text or data.label or UNKNOWN
 	end
@@ -82,9 +71,8 @@ local function tooltipHandler(win, tooltip)
 	if #win.dataset > 0 then
 		tooltip:AddLine(" ")
 		local n = 0 -- used to fix spots starting from 2
-		for i = 1, #win.dataset do
-			local data = win.dataset[i]
-			if data and data.id and not data.ignore and i < 30 then
+		for i, data in ipairs(win.dataset) do
+			if data.id and not data.ignore and i < 30 then
 				n = n + 1
 				local label = formatLabel(win, data)
 				local value = formatValue(win, data)
@@ -180,10 +168,16 @@ function mod:Hide(win)
 end
 
 function mod:Destroy(win)
-	win.obj.text = " "
-	win.obj = nil
-	win.frame:Hide()
-	win.frame = nil
+	if win and win.frame then
+		if win.obj then
+			if win.obj.text then
+				win.obj.text = " "
+			end
+			win.obj = nil
+		end
+		win.frame:Hide()
+		win.frame = nil
+	end
 end
 
 function mod:Wipe(win)

@@ -363,6 +363,8 @@ L["Report"] = true
 L["Opens a dialog that lets you report your data to others in various ways."] = true
 L["Stop"] = "Stop/Resume"
 L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."] = true
+L["Segment Stopped."] = true
+L["Segment Resumed."] = true
 L["Quick Access"] = true
 -- default segments
 L["Total"] = true

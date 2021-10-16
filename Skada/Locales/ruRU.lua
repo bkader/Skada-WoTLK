@@ -364,6 +364,8 @@ L["Report"] = "Отчет"
 L["Opens a dialog that lets you report your data to others in various ways."] = "Открывает диалоговое окно, в котором можно различными способами сообщать свои данные другим пользователям."
 L["Stop"] = "Остановить"
 L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."] = "Останавливает или возобновляет запись текущего сегмента. Полезна для сокращения объема данных при вайпе. Возможна настройка автоматической остановки в настройках."
+L["Segment Stopped."] = "Сегмент остановлен."
+L["Segment Resumed."] = "Сегмент возобновлен."
 L["Quick Access"] = "Быстрый доступ"
 -- default segments
 L["Total"] = "Всего"

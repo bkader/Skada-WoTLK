@@ -129,7 +129,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 	end
 
 	function mod:EndSegment()
-		CancelTimer(pull_timer)
+		pull_timer = CancelTimer(pull_timer)
 	end
 
 	---------------------------------------------------------------------------
@@ -212,7 +212,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 							return true, true, format("|HSKSP:%1$d|h|cffffff00[%2$s]|r|h", newID or 0, msg or "nil")
 						end
 					end
-					meters[#meters + 1] = {src = source, evt = event, time = curtime, data = {}, title = msg}
+					tinsert(meters, {src = source, evt = event, time = curtime, data = {}, title = msg})
 					for id, meter in ipairs(meters) do
 						if meter.src == source and meter.evt == event and meter.time == curtime then
 							newID = id
@@ -471,8 +471,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 		if event == "COMBAT_BOSS_DEFEATED" and set and not set.stopped then
 			After(Skada.db.profile.smartwait or 5, function()
 				if not set.endtime then
-					Skada:Print(L["Smart Stop"])
-					Skada:StopSegment()
+					Skada:StopSegment(L["Smart Stop"])
 					Skada:RegisterEvent("PLAYER_REGEN_ENABLED")
 				end
 			end)
@@ -548,13 +547,13 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 			if not self:IsHooked("SetItemRef") then
 				self:RawHook("SetItemRef", "ParseLink", true)
 			end
-			for i = 1, #channelEvents do
-				ChatFrame_AddMessageEventFilter(channelEvents[i], self.ParseChatEvent)
+			for _, e in ipairs(channelEvents) do
+				ChatFrame_AddMessageEventFilter(e, self.ParseChatEvent)
 			end
 		elseif self:IsHooked("SetItemRef") then
 			self:Unhook("SetItemRef")
-			for i = 1, #channelEvents do
-				ChatFrame_RemoveMessageEventFilter(channelEvents[i], self.ParseChatEvent)
+			for _, e in ipairs(channelEvents) do
+				ChatFrame_RemoveMessageEventFilter(e, self.ParseChatEvent)
 			end
 		end
 	end

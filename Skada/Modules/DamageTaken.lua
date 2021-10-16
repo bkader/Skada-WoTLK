@@ -117,7 +117,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 		end
 
 		-- saving this to total set may become a memory hog deluxe.
-		if set == Skada.current and dmg.srcName and dmg.amount > 0 then
+		if set == Skada.current and dmg.srcName then
 			spell.sources = spell.sources or {}
 			if not spell.sources[dmg.srcName] then
 				spell.sources[dmg.srcName] = {amount = dmg.amount}
@@ -637,7 +637,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 
 	function mod:SetComplete(set)
 		for _, player in ipairs(set.players) do
-			if (player.damagetaken or 0) == 0 then
+			if ((player.damagetaken or 0) + (player.absdamagetaken or 0)) == 0 then
 				player.damagetaken_spells = nil
 				player.damagetaken_sources = nil
 			end

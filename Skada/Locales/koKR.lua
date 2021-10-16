@@ -366,6 +366,8 @@ L["Report"] = "보고서"
 L["Opens a dialog that lets you report your data to others in various ways."] = "다양한 방법으로 다른 사람에게 당신의 자료를 보고할 수 있는 대화창을 엽니다."
 L["Stop"] = "중지"
 L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."] = "현재 세분화를 중지하거나 재개합니다. 전멸 후 자료를 제외하는 데 유용합니다. 설정에서 자동으로 중지하도록 설정할 수 있습니다."
+L["Segment Stopped."] = "세그먼트 중지됨."
+L["Segment Resumed."] = "재개된 세그먼트."
 L["Quick Access"] = "빠른 접근"
 -- default segments
 L["Total"] = "전체"
