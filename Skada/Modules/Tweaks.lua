@@ -349,6 +349,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 				frame:UnregisterAllEvents()
 				frame:SetScript("OnUpdate", nil)
 				frame:SetScript("OnEvent", nil)
+				frame:Hide()
 				frame = nil
 
 				Skada.UnregisterCallback(self, "COMBAT_PLAYER_ENTER")
