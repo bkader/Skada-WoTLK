@@ -314,7 +314,9 @@ end
 do
 	local function OnMouseWheel(frame, direction)
 		local win = frame.win
-		local maxbars = win.db.background.height / (win.db.barheight + win.db.barspacing)
+		-- NOTE: this line is kept just in case mousewheel misbehaves.
+		-- local maxbars = win.db.background.height / (win.db.barheight + win.db.barspacing)
+		local maxbars = win.bargroup:GetMaxBars()
 		if direction == 1 and win.bargroup:GetBarOffset() > 0 then
 			win.bargroup:SetBarOffset(win.bargroup:GetBarOffset() - 1)
 		elseif direction == -1 and ((win.bargroup:GetNumBars() - maxbars - win.bargroup:GetBarOffset()) > 0) then

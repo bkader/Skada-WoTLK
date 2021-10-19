@@ -3,7 +3,8 @@ assert(Skada, "Skada not found!")
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local format, max = string.format, math.max
 local pairs, select = pairs, select
-local _
+local newTable, delTable = Skada.newTable, Skada.delTable
+local cacheTable, _
 
 -- list of miss types
 local misstypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}
@@ -856,7 +857,6 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 
 	local mod = Skada:NewModule(L["Damage Done By Spell"])
 	local sourcemod = mod:NewModule(L["Damage spell sources"])
-	local newTable, delTable, cacheTable = Skada.newTable, Skada.delTable
 
 	function sourcemod:Enter(win, id, label)
 		win.spellname = label

@@ -4,7 +4,8 @@ assert(Skada, "Skada not found!")
 local pairs, ipairs, select = pairs, ipairs, select
 local format, max = string.format, math.max
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-local _
+local newTable, delTable = Skada.newTable, Skada.delTable
+local cacheTable, _
 
 -- list of miss types
 local misstypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}
@@ -729,7 +730,6 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(Skada, L)
 
 	local mod = Skada:NewModule(L["Damage Taken By Spell"])
 	local targetmod = mod:NewModule(L["Damage spell targets"])
-	local newTable, delTable, cacheTable = Skada.newTable, Skada.delTable
 
 	function targetmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
@@ -887,7 +887,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 
 	local mod = Skada:NewModule(L["Avoidance & Mitigation"])
 	local playermod = mod:NewModule(L["Damage Breakdown"])
-	local cacheTable
+	local cache
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
@@ -895,8 +895,8 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 	end
 
 	function playermod:Update(win, set)
-		if cacheTable[win.playerid] then
-			local player = cacheTable[win.playerid]
+		if cache[win.playerid] then
+			local player = cache[win.playerid]
 			win.title = format(L["%s's damage breakdown"], player.name)
 
 			local maxvalue, nr = 0, 1
@@ -932,7 +932,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 		win.title = L["Avoidance & Mitigation"]
 
 		if (set.damagetaken or 0) > 0 then
-			cacheTable = Skada.WeakTable(cacheTable)
+			cache = Skada.WeakTable(cache)
 
 			local maxvalue, nr = 0, 1
 
@@ -955,7 +955,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 					if avoid > 0 then
 						tmp.total = total
 						tmp.avoid = avoid
-						cacheTable[player.id] = tmp
+						cache[player.id] = tmp
 
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
@@ -981,8 +981,8 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 							maxvalue = d.value
 						end
 						nr = nr + 1
-					elseif cacheTable[player.id] then
-						cacheTable[player.id] = nil
+					elseif cache[player.id] then
+						cache[player.id] = nil
 					end
 				end
 			end
