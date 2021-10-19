@@ -8,7 +8,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 	local UnitHealth, UnitHealthInfo = UnitHealth, Skada.UnitHealthInfo
 	local UnitIsFeignDeath = UnitIsFeignDeath
-	local tinsert, tsort, tconcat = table.insert, table.sort, table.concat
+	local tinsert, tremove, tsort, tconcat = table.insert, table.remove, table.sort, table.concat
 	local ipairs = ipairs
 	local tostring, format, strsub = tostring, string.format, string.sub
 	local abs, max, modf = math.abs, math.max, math.modf
@@ -50,7 +50,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 			-- trim things and limit to 14 (custom value now)
 			while #deathlog.log > (Skada.db.profile.modules.deathlogevents or 14) do
-				deathlog.log[#deathlog.log] = nil
+				tremove(deathlog.log)
 			end
 		end
 	end
@@ -526,7 +526,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 				player.deathlog, player.maxhp = nil, nil
 			elseif player.deathlog then
 				while #player.deathlog > (player.death or 0) do
-					player.deathlog[1] = nil
+					tremove(player.deathlog, 1)
 				end
 				if #player.deathlog == 0 then
 					player.deathlog = nil
