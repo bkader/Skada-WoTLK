@@ -928,9 +928,9 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 	end
 
 	function mod:SetComplete(set)
-		delTable(heals)
-		delTable(shields)
-		delTable(shieldamounts)
+		heals = delTable(heals)
+		shields = delTable(shields)
+		shieldamounts = delTable(shieldamounts)
 	end
 end)
 
