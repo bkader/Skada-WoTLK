@@ -842,6 +842,8 @@ function Skada:CreateWindow(name, db, display)
 	name = name and name:trim() or "Skada"
 	if not name or name == "" then
 		name = "Skada" -- default
+	else
+		name = name:gsub("^%l", strupper, 1)
 	end
 
 	local isnew = false
