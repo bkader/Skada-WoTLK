@@ -71,7 +71,6 @@ end
 -------------------------------------------------------------------------------
 -- Lua Memoize
 
-local memoize
 do
 	local unpack = unpack
 	local getmetatable = getmetatable
