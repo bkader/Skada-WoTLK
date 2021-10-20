@@ -169,7 +169,7 @@ do
 		[8] = {ACTION_ENVIRONMENTAL_DAMAGE_SLIME, [[Interface\Icons\inv_misc_slime_01]]}
 	}
 
-	function Skada.getSpellInfo(spellid)
+	local function getSpellInfo(spellid)
 		local res1, res2, res3, res4, res5, res6, res7, res8, res9
 		if spellid then
 			if custom[spellid] then
@@ -186,11 +186,14 @@ do
 		return res1, res2, res3, res4, res5, res6, res7, res8, res9
 	end
 
-	function Skada.getSpellLink(spellid)
+	local function getSpellLink(spellid)
 		if not custom[spellid] then
 			return GetSpellLink(spellid)
 		end
 	end
+
+	Skada.getSpellInfo = Skada.memoize(getSpellInfo)
+	Skada.getSpellLink = Skada.memoize(getSpellLink)
 end
 
 -------------------------------------------------------------------------------
@@ -2624,23 +2627,21 @@ function Skada:FormatName(name, guid)
 	return name
 end
 
-function Skada:FormatValueText(...)
-	local value1, bool1, value2, bool2, value3, bool3 = ...
-
-	if bool1 and bool2 and bool3 then
-		return value1 .. " (" .. value2 .. ", " .. value3 .. ")"
-	elseif bool1 and bool2 then
-		return value1 .. " (" .. value2 .. ")"
-	elseif bool1 and bool3 then
-		return value1 .. " (" .. value3 .. ")"
-	elseif bool2 and bool3 then
-		return value2 .. " (" .. value3 .. ")"
-	elseif bool2 then
-		return value2
-	elseif bool1 then
-		return value1
-	elseif bool3 then
-		return value3
+function Skada:FormatValueText(v1, b1, v2, b2, v3, b3)
+	if b1 and b2 and b3 then
+		return format("%s (%s, %s)", v1, v2, v3)
+	elseif b1 and b2 then
+		return format("%s (%s)", v1, v2)
+	elseif b1 and b3 then
+		return format("%s (%s)", v1, v3)
+	elseif b2 and b3 then
+		return format("%s (%s)", v2, v3)
+	elseif b2 then
+		return v2
+	elseif b1 then
+		return v1
+	elseif b3 then
+		return v3
 	end
 end
 
