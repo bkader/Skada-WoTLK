@@ -1,10 +1,14 @@
-# Skada for WoTLK (_Revisited - v1.8.70_)
+# Skada for WoTLK (_Revisited - v1.8.71_)
 
 ![Discord](https://img.shields.io/discord/795698054371868743?label=discord)
 ![GitHub last commit](https://img.shields.io/github/last-commit/bkader/Skada-WoTLK)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/bkader/Skada-WoTLK?label=version)
 
-I am simply a huge fan of **Skada**, I prefer it to other damage meters for several reasons. No need to judge me, it's after all a personal preference.
+## >> NOTE FOR 1.8.71 <<
+
+The only table structure that was changed is **Debuffs** module. So, even it works fine for data from older version (_segments/sets_), mouse overing bars while on debuffs module **WILL** trigger an error. So make sure to just not check that modules for older data or simply reset.
+
+Skada is a modular damage meter with various viewing modes, segmented fights and customizable windows. It aims to be highly efficient with memory and CPU.
 
 ## IMPORTANT: How to install
 
@@ -45,17 +49,18 @@ Though it's not required, if you want to show some love and support, PayPal dona
   * [Sunder Counter (_Sunder Armor_)](#sunder-counter)
   * [Themes](#themes)
   * [Threat](#threat)
+  * [TWEAKS](#tweaks)
 
 ## What's the difference?
 
 Almost everything was changed, starting from the default version that was available for **v3.3.5** of the game up to what you can see on the addon.
 
 - It is now an **all-in-one** addon as opposed to what it was, modules can de enabled or disabled easily on the config panel.
-- Data collection was simplified and reduced teremendously and modules reply on each other to function (_more explained later_).
 - Several accessibility found here and there on the net and judged useful were added to the addon as modules (_window buttons, mouse & keyboard scroll, themes...etc_).
 - Unlike before, windows are resizable using the resize handles found at both bottom corners.
 - Bars are more fancy, colored by not only class but also spell school colors.
 - Bars display icons for both players and spells (_spell tooltips as well for the latter_).
+- Under consistent development thanks to WoTLK community and their feedbacks.
 
 ## Modules
 
@@ -87,6 +92,7 @@ This module shows detailed data about damage done, giving you access to _Damage 
 2. **Damage done by spell**: this module shows a list of all spells used in your raid with their damage and the percentage of damage to the total. Clicking on a spell gives you access to the _Damage source list_, aka list of players that used that spell.
 3. **Useful damage**: a useful damage is the damage required for the target to die, anything above it is called _Overkill_, this module shows the damage done in your raid without the overkill, it means all the damage that was required for all your raid targets to reach 0 health.
 4. **Overkill**: this module does the reverse of what _Useful damage_ does, it only lists players overkill with the list of their overkill spells.
+5. **Absorbed Damage**: simply shows the damage that was absorbed because some players consider it part of the damage anyways.
 
 ### Damage taken
 
@@ -107,10 +113,10 @@ These module do what they are named after, and unlike before, they provide more 
 
 ### Enemies
 
-The following modules require _Damage_ or _Damage taken_ modules to be enabled in order to work, because as said before, **Skada** no longer records duplicates and unnecessary data that can be found on other modules.
+1. **Enemy Damage Done**: shows the list of targets that damage players during the combat with the damage they've done. Clicking on an enemy bar gives you access to the list of players that were damaged by the enemy, and clicking on a players shows you the spells used on the selected player by the selected enemy. One level deeper and you will see details about the select spell that was used on the selected player by the selected enemy.
+2. **Enemy Damage Taken**: shows the list of enemies your party/raid members damaged during the combat with the total damage they took. Clicking on an enemy gives you access to the list of players that damage the selected enemy and clicking on a player shows you the spells that the selected player used on the selected enemy.
+3. **Enemy Healing Done**: a simple module that keeps track of enemies healing done, showing their spells and targets.
 
-1. **Enemy damage done**: shows the list of targets that damage players during the combat with the damage they've done. Clicking on an enemy bar gives you access to the list of players that were damaged by the enemy, and clicking on a players shows you the spells used on the selected player by the selected enemy. One level deeper and you will see details about the select spell that was used on the selected player by the selected enemy.
-2. **Enemy damage taken**: shows the list of enemies your party/raid members damaged during the combat with the total damage they took. Clicking on an enemy gives you access to the list of players that damage the selected enemy and clicking on a player shows you the spells that the selected player used on the selected enemy.
 
 ### Failbot
 
@@ -157,10 +163,6 @@ It provides additional options for scrolling the bar displays. its main features
 * Allows the middle-button to act as a scroll wheel for people missing wheel hardware (many laptops).
 * Provides keybinds for scrolling the bar displays.
 
-### Spamage
-
-Suppresses chat messages from damage meters and provides single chat-link damage statistics in a popup. Useful if you don't spam on your chat window.
-
 ### Sunder Counter
 
 Counts and shows the _Sunder Armor_ usage by warriors.
@@ -172,3 +174,15 @@ It allows you to create themes that you can use if you want to change windows lo
 ### Threat
 
 I think you already know what this module is used for, so no need to talk more about it. Oh and yes! You can use it instead of Omen or use both, it's up to you and it's a matter of personal preferences.
+
+### TWEAKS
+
+This module was created in order to add some tweaks to Skada, hence its name. It comes with few options that you may or may not find handy.
+
+- **First Hit**: this is not a **WHO PULLED** feature, it simply prints out what was the first hit and who was the first boss' target. When it comes to determining who pulled, this is only reliable in certain situations and requires a bit of understanding. The first hit can be from player to boss or boss to player. _Only works on boss fights_.
+- **Module Icons**: simply shows module icons when you are on the modes list.
+- **Filter DPS messages**: previously known as _Spaamage_, catches DPS meters report and shows the in a single line link with tooltip of details.
+- **Fix Combat Log**: unlike the macro people use, this feature ONLY fixes the combat log is detected broken. If it still doesn't fix your combatlog, you can always use `/skada clear`.
+- **Ignore Fury of Frostmourne**: if you don't want this spell to be included in anything, enable this option.
+- **Include absorbed damage**: some people (_Details! users >cough<_) consider that absorbed damage should be included in the overall damage, and because Skada doesn't include it but rather shows it as an extra info, this option was added to satisfy them and so we won't hear/read `Oh! They are not showing the same numbers...`.
+- **Smart Stop**: this feature relies on DBM/BigWigs to stop collecting data after the amount of seconds you choose. It is useful in case of being in combat bug (_not combatlog bug, but stuck in combat_).
