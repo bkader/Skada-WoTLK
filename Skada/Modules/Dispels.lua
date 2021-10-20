@@ -10,7 +10,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 	-- cache frequently used globals
 	local pairs, ipairs, select = pairs, ipairs, select
 	local tostring, format = tostring, string.format
-	local GetSpellInfo, tContains = Skada.GetSpellInfo or GetSpellInfo, tContains
+	local getSpellInfo, tContains = Skada.getSpellInfo or GetSpellInfo, tContains
 	local _
 
 	-- spells in the following table will be ignored.
@@ -85,7 +85,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = GetSpellInfo(spellid)
+					d.label, _, d.icon = getSpellInfo(spellid)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
@@ -167,7 +167,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = GetSpellInfo(spellid)
+					d.label, _, d.icon = getSpellInfo(spellid)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(

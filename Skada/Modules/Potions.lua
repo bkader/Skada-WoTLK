@@ -9,7 +9,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	-- cache frequently used globals
 	local pairs, ipairs, select, tconcat = pairs, ipairs, select, table.concat
 	local format, strsub, tostring = string.format, string.sub, tostring
-	local GetItemInfo, GetSpellInfo, After = GetItemInfo, Skada.GetSpellInfo, Skada.After
+	local GetItemInfo, getSpellInfo, After = GetItemInfo, Skada.getSpellInfo or GetSpellInfo, Skada.After
 	local GroupIterator = Skada.GroupIterator
 	local UnitExists, UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
 	local UnitGUID, UnitName = UnitGUID, UnitName
@@ -71,7 +71,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 
 				local potions = newTable() -- holds used potions
 				for potionid, _ in pairs(potionIDs) do
-					local icon, _, _, _, _, _, _, _, spellid = select(3, UnitBuff(unit, GetSpellInfo(potionid)))
+					local icon, _, _, _, _, _, _, _, spellid = select(3, UnitBuff(unit, getSpellInfo(potionid)))
 					if spellid and potionIDs[spellid] then
 						-- instant recording doesn't work, so we delay it
 						After(1, function() PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid) end)

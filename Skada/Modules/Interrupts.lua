@@ -12,7 +12,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	local pairs, ipairs, select, max = pairs, ipairs, select, math.max
 	local tostring, format, tContains = tostring, string.format, tContains
 	local UnitGUID, IsInInstance = UnitGUID, IsInInstance
-	local GetSpellInfo, GetSpellLink = Skada.GetSpellInfo or GetSpellInfo, Skada.GetSpellLink or GetSpellLink
+	local getSpellInfo, getSpellLink = Skada.getSpellInfo or GetSpellInfo, Skada.getSpellLink or GetSpellLink
 	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
 
 	-- spells in the following table will be ignored.
@@ -74,7 +74,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 		log_interrupt(Skada.total, data)
 
 		if Skada.db.profile.modules.interruptannounce and IsInGroup() and srcGUID == Skada.userGUID then
-			local spelllink = GetSpellLink(extraspellid or extraspellname) or extraspellname
+			local spelllink = getSpellLink(extraspellid or extraspellname) or extraspellname
 
 			local channel = Skada.db.profile.modules.interruptchannel or "SAY"
 			if channel == "SELF" then
@@ -116,7 +116,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = GetSpellInfo(spellid)
+					d.label, _, d.icon = getSpellInfo(spellid)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
@@ -197,7 +197,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = GetSpellInfo(spellid)
+					d.label, _, d.icon = getSpellInfo(spellid)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(

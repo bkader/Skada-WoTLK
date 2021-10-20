@@ -7,8 +7,8 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 	local pairs, ipairs, select = pairs, ipairs, select
 	local tostring, format = tostring, string.format
-	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
+	local getSpellInfo = Skada.getSpellInfo or GetSpellInfo
+	local getSpellLink = Skada.getSpellLink or GetSpellLink
 	local newTable, delTable = Skada.newTable, Skada.delTable
 	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
 	local sunder, sunderLink, devastate
@@ -83,8 +83,8 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 	function targetmod:Update(win, set)
 		if not sunder then
-			sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
-			sunderLink = GetSpellLink(47467)
+			sunder, devastate = getSpellInfo(47467), getSpellInfo(47498)
+			sunderLink = getSpellLink(47467)
 		end
 
 		local player = Skada:find_player(set, win.playerid, win.playername)
@@ -122,8 +122,8 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 	function mod:Update(win, set)
 		if not sunder then
-			sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
-			sunderLink = GetSpellLink(47467)
+			sunder, devastate = getSpellInfo(47467), getSpellInfo(47498)
+			sunderLink = getSpellLink(47467)
 		end
 
 		win.title = L["Sunder Counter"]
@@ -234,8 +234,8 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 	function mod:OnInitialize()
 		if not sunder then
-			sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
-			sunderLink = GetSpellLink(47467)
+			sunder, devastate = getSpellInfo(47467), getSpellInfo(47498)
+			sunderLink = getSpellLink(47467)
 		end
 
 		if Skada.db.profile.modules.sunderchannel == nil then

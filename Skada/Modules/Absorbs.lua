@@ -3,8 +3,8 @@ assert(Skada, "Skada not found!")
 -- cache frequently used globals
 local pairs, ipairs, select, format = pairs, ipairs, select, string.format
 local max, min, floor = math.max, math.min, math.floor
-local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-local UnitGUID, UnitClass = UnitGUID, Skada.UnitClass
+local getSpellInfo = Skada.getSpellInfo or GetSpellInfo
+local UnitGUID, UnitClass, unitClass = UnitGUID, UnitClass, Skada.unitClass
 local newTable, delTable = Skada.newTable, Skada.delTable
 local _
 
@@ -474,10 +474,10 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 				-- passive shields (not for pets)
 				if owner == nil then
-					local class = select(2, _G.UnitClass(unit))
+					local class = select(2, UnitClass(unit))
 					if passivespells[class] then
 						for _, spell in ipairs(passivespells[class]) do
-							local points = LGT:GUIDHasTalent(dstGUID, GetSpellInfo(spell[1]), LGT:GetActiveTalentGroup(unit))
+							local points = LGT:GUIDHasTalent(dstGUID, getSpellInfo(spell[1]), LGT:GetActiveTalentGroup(unit))
 							if points then
 								AuraApplied(timestamp - 60, nil, dstGUID, dstGUID, nil, dstGUID, dstName, nil, spell[1], nil, spell[2], nil, points)
 							end
@@ -719,7 +719,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 						d.id = spellid
 						d.spellid = spellid
 						d.spellschool = spell.school
-						d.label, _, d.icon = GetSpellInfo(spellid)
+						d.label, _, d.icon = getSpellInfo(spellid)
 
 						d.value = spell.targets[win.targetname].amount or 0
 						d.valuetext = Skada:FormatValueText(
@@ -762,7 +762,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					d.id = spellid
 					d.spellid = spellid
 					d.spellschool = spell.school
-					d.label, _, d.icon = GetSpellInfo(spellid)
+					d.label, _, d.icon = getSpellInfo(spellid)
 
 					d.value = spell.amount
 					d.valuetext = Skada:FormatValueText(
@@ -803,7 +803,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
+					d.class, d.role, d.spec = select(2, unitClass(d.id, nil, set))
 
 					d.value = target.amount
 					d.valuetext = Skada:FormatValueText(
@@ -914,7 +914,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 		elseif IsActiveBattlefieldArena() then
 			zoneModifier = 0.9
 		elseif GetCurrentMapAreaID() == 605 then
-			zoneModifier = (UnitBuff("player", GetSpellInfo(73822)) or UnitBuff("player", GetSpellInfo(73828))) and 1.3 or 1
+			zoneModifier = (UnitBuff("player", getSpellInfo(73822)) or UnitBuff("player", getSpellInfo(73828))) and 1.3 or 1
 		else
 			zoneModifier = 1
 		end
@@ -1034,7 +1034,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 							d.id = spellid
 							d.spellid = spellid
 							d.spellschool = spell.school
-							d.label, _, d.icon = GetSpellInfo(spellid)
+							d.label, _, d.icon = getSpellInfo(spellid)
 							if spell.ishot then
 								d.text = d.label .. L["HoT"]
 							end
@@ -1064,7 +1064,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 							d.id = spellid
 							d.spellid = spellid
 							d.spellschool = spell.school
-							d.label, _, d.icon = GetSpellInfo(spellid)
+							d.label, _, d.icon = getSpellInfo(spellid)
 
 							d.value = spell.targets[win.targetname].amount or 0
 							d.valuetext = Skada:FormatValueText(
@@ -1110,7 +1110,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 						d.id = spellid
 						d.spellid = spellid
 						d.spellschool = spell.school
-						d.label, _, d.icon = GetSpellInfo(spellid)
+						d.label, _, d.icon = getSpellInfo(spellid)
 
 						if spell.ishot then
 							d.text = d.label .. L["HoT"]
@@ -1139,7 +1139,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 						d.id = spellid
 						d.spellid = spellid
 						d.spellschool = spell.school
-						d.label, _, d.icon = GetSpellInfo(spellid)
+						d.label, _, d.icon = getSpellInfo(spellid)
 
 						d.value = spell.amount
 						d.valuetext = Skada:FormatValueText(
@@ -1206,7 +1206,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(Skada, L)
 
 						d.id = target.id or targetname
 						d.label = targetname
-						d.class, d.role, d.spec = select(2, UnitClass(d.id, target.flags, set))
+						d.class, d.role, d.spec = select(2, unitClass(d.id, target.flags, set))
 
 						d.value = target.amount
 						d.valuetext = Skada:FormatValueText(
@@ -1515,7 +1515,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 			if total > 0 then
 				local overheal = (set.overheal or 0)
 
-				tooltip:AddLine(GetSpellInfo(id))
+				tooltip:AddLine(getSpellInfo(id))
 				if spell.school then
 					local c = Skada.schoolcolors[spell.school]
 					local n = Skada.schoolnames[spell.school]
@@ -1588,7 +1588,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(Skada, L)
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
-				local spellname, _, spellicon = GetSpellInfo(spellid)
+				local spellname, _, spellicon = getSpellInfo(spellid)
 				d.id = spellid
 				d.spellid = spellid
 				d.label = spellname

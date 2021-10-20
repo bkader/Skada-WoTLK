@@ -6,7 +6,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 -- frequently used globals --
 local pairs, ipairs, select = pairs, ipairs, select
 local format, min, max = string.format, math.min, math.max
-local UnitClass, GetSpellInfo = Skada.UnitClass, Skada.GetSpellInfo
+local unitClass, getSpellInfo = Skada.unitClass, Skada.getSpellInfo or GetSpellInfo
 local tContains = tContains
 local _
 
@@ -39,7 +39,7 @@ function Skada:get_enemy(set, guid, name, flags)
 			enemy = {id = guid or name, name = name}
 
 			if guid or flags then
-				enemy.class = select(2, UnitClass(guid, flags, set))
+				enemy.class = select(2, unitClass(guid, flags, set))
 			else
 				enemy.class = "ENEMY"
 			end
@@ -498,7 +498,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 				d.id = player.id or playername
 				d.label = playername
 				d.text = Skada:FormatName(playername, d.id)
-				d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
+				d.class, d.role, d.spec = select(2, unitClass(d.id, nil, set))
 
 				d.value = player.amount
 				if Skada.db.profile.absdamage then
@@ -541,7 +541,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 				d.id = spellid
 				d.spellid = spellid
 				d.spellschool = spell.school
-				d.label, _, d.icon = GetSpellInfo(spellid)
+				d.label, _, d.icon = getSpellInfo(spellid)
 
 				d.value = spell.amount
 				if Skada.db.profile.absdamage then
@@ -787,7 +787,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 				d.id = target.id or targetname
 				d.label = targetname
 				d.text = Skada:FormatName(targetname, d.id)
-				d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
+				d.class, d.role, d.spec = select(2, unitClass(d.id, nil, set))
 
 				d.value = target.amount
 				if Skada.db.profile.absdamage then
@@ -830,7 +830,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 				d.id = spellid
 				d.spellid = spellid
 				d.spellschool = spell.school
-				d.label, _, d.icon = GetSpellInfo(spellid)
+				d.label, _, d.icon = getSpellInfo(spellid)
 
 				d.value = spell.amount
 				if Skada.db.profile.absdamage then
@@ -1044,7 +1044,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 
 				d.id = spellid
 				d.spellid = spellid
-				d.label, _, d.icon = GetSpellInfo(spellid)
+				d.label, _, d.icon = getSpellInfo(spellid)
 
 				d.value = amount
 				d.valuetext = Skada:FormatValueText(

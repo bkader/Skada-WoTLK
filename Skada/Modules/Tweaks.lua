@@ -6,7 +6,8 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 
 	local ipairs, select, band, format = ipairs, select, bit.band, string.format
 	local UnitExists, UnitName, UnitClass = UnitExists, UnitName, UnitClass
-	local GetSpellLink, GetSpellInfo = Skada.GetSpellLink, Skada.GetSpellInfo
+	local getSpellInfo = Skada.getSpellInfo or GetSpellInfo
+	local getSpellLink = Skada.getSpellLink or GetSpellLink
 	local After, NewTimer, CancelTimer = Skada.After, Skada.NewTimer, Skada.CancelTimer
 
 	local BITMASK_GROUP = Skada.BITMASK_GROUP or bit.bor(COMBATLOG_OBJECT_AFFILIATION_MINE, COMBATLOG_OBJECT_AFFILIATION_PARTY, COMBATLOG_OBJECT_AFFILIATION_RAID)
@@ -66,7 +67,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 
 		function mod:CombatLogEvent(_, _, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 			-- The Lich King fight & Fury of Frostmourne
-			if select(1, ...) == 72350 or select(2, ...) == fofrostmourne then
+			if (select(1, ...)) == 72350 or (select(2, ...)) == fofrostmourne then
 				-- the segment should be flagged as success.
 				if Skada.current and not Skada.current.success then
 					local set = Skada.current -- catch it before it goes away
@@ -80,7 +81,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 			end
 
 			-- first hit
-			if Skada.db.profile.firsthit and (triggerevents[eventtype] or eventtype == "SPELL_CAST_SUCCESS") and not pull_timer and not ignoredspells[select(1, ...)] then
+			if Skada.db.profile.firsthit and (triggerevents[eventtype] or eventtype == "SPELL_CAST_SUCCESS") and not pull_timer and not ignoredspells[(select(1, ...))] then
 				if srcName and dstName and ((band(srcFlags, BITMASK_GROUP) ~= 0 and Skada:IsBoss(dstGUID)) or (band(dstFlags, BITMASK_GROUP) ~= 0 and Skada:IsBoss(srcGUID))) then
 					local puller
 
@@ -117,7 +118,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 					end
 
 					if puller then
-						local link = (eventtype == "SWING_DAMAGE") and GetSpellLink(6603) or GetSpellLink(select(1, ...)) or GetSpellInfo(select(1, ...))
+						local link = (eventtype == "SWING_DAMAGE") and getSpellLink(6603) or getSpellLink((select(1, ...))) or getSpellInfo((select(1, ...)))
 						pull_timer = NewTimer(0.5, WhoPulled)
 						pull_timer.HitBy = format(L["|cffffff00First Hit|r: %s from %s"], link or "", puller)
 					end
@@ -288,7 +289,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 
 		local frame, zonetype, throttle
 		local playerspells = setmetatable({}, {__index = function(t, name)
-			local cost = select(4, GetSpellInfo(name))
+			local cost = select(4, getSpellInfo(name))
 			rawset(t, name, not (not (cost and cost > 0)))
 			return rawget(t, name)
 		end})
@@ -382,7 +383,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 		end
 
 		-- Fury of Frostmourne
-		fofrostmourne = fofrostmourne or GetSpellInfo(72351)
+		fofrostmourne = fofrostmourne or getSpellInfo(72351)
 
 		-- options.
 		Skada.options.args.Tweaks = {
@@ -504,7 +505,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 	end
 
 	function mod:ApplySettings()
-		fofrostmourne = fofrostmourne or GetSpellInfo(72351)
+		fofrostmourne = fofrostmourne or getSpellInfo(72351)
 
 		-- first hit or fury of frostmourne
 		if (Skada.db.profile.firsthit or Skada.db.profile.fofrostmourne) then

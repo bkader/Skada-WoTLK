@@ -6,7 +6,7 @@ local libwindow = LibStub("LibWindow-1.1")
 local FlyPaper = LibStub:GetLibrary("LibFlyPaper-1.1", true)
 
 local tinsert, tsort = table.insert, table.sort
-local GetSpellLink = Skada.GetSpellLink or GetSpellLink
+local getSpellLink = Skada.getSpellLink or GetSpellLink
 local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
 
 mod.name = L["Bar display"]
@@ -531,7 +531,7 @@ do
 
 							bar.link = nil
 							if data.spellid then
-								bar.link = GetSpellLink(data.spellid)
+								bar.link = getSpellLink(data.spellid)
 							elseif data.hyperlink then
 								bar.link = data.hyperlink
 							end

@@ -3,7 +3,7 @@ assert(Skada, "Skada not found!")
 -- cache frequently used globals
 local pairs, ipairs, select = pairs, ipairs, select
 local format, max = string.format, math.max
-local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+local getSpellInfo = Skada.getSpellInfo or GetSpellInfo
 local newTable, delTable = Skada.newTable, Skada.delTable
 local cacheTable, _
 
@@ -64,7 +64,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 			if dmg.spellschool and dmg.spellschool ~= spell.school then
 				spellname = spellname .. " (" .. (Skada.schoolnames[dmg.spellschool] or OTHER) .. ")"
 			else
-				spellname = GetSpellInfo(dmg.spellid)
+				spellname = getSpellInfo(dmg.spellid)
 			end
 			if not player.damagetaken_spells[spellname] then
 				player.damagetaken_spells[spellname] = {id = dmg.spellid, school = dmg.spellschool, amount = 0}
@@ -313,7 +313,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 					d.id = spellname
 					d.spellid = spell.id
 					d.label = spellname
-					d.icon = select(3, GetSpellInfo(spell.id))
+					d.icon = select(3, getSpellInfo(spell.id))
 					d.spellschool = spell.school
 
 					d.value = spell.amount
@@ -474,7 +474,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 						d.id = spellname
 						d.spellid = spell.id
 						d.label = spellname
-						d.icon = select(3, GetSpellInfo(spell.id))
+						d.icon = select(3, getSpellInfo(spell.id))
 						d.spellschool = spell.school
 
 						d.value = spell.sources[win.targetname].amount or 0
@@ -837,7 +837,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(Skada, L)
 			d.id = spellname
 			d.spellid = spell.id
 			d.label = spellname
-			d.icon = select(3, GetSpellInfo(spell.id))
+			d.icon = select(3, getSpellInfo(spell.id))
 			d.spellschool = spell.school
 
 			d.value = spell.amount
@@ -1112,7 +1112,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(Skada, L)
 						d.id = spellname
 						d.spellid = spell.id
 						d.label = spellname
-						d.icon = select(3, GetSpellInfo(spell.id))
+						d.icon = select(3, getSpellInfo(spell.id))
 						d.spellschool = spell.school
 
 						d.value = amount

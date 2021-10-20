@@ -179,8 +179,8 @@ local ExtraCCSpells = {
 
 local pairs, ipairs, select = pairs, ipairs, select
 local tostring, format = tostring, string.format
-local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-local GetSpellLink = Skada.GetSpellLink or GetSpellLink
+local getSpellInfo = Skada.getSpellInfo or GetSpellInfo
+local getSpellLink = Skada.getSpellLink or GetSpellLink
 local _
 
 local function GetSpellSchool(spellid)
@@ -260,7 +260,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = GetSpellInfo(spellid)
+					d.label, _, d.icon = getSpellInfo(spellid)
 					d.spellschool = GetSpellSchool(spellid)
 
 					d.value = count
@@ -463,7 +463,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = GetSpellInfo(spellid)
+					d.label, _, d.icon = getSpellInfo(spellid)
 					d.spellschool = GetSpellSchool(spellid)
 
 					d.value = count
@@ -678,7 +678,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 			-- Go ahead and announce it.
 			if extraspellname then
-				Skada:SendChat(format(L["%s on %s removed by %s's %s"], spellname, dstName, srcName, GetSpellLink(extraspellid)), "RAID", "preset")
+				Skada:SendChat(format(L["%s on %s removed by %s's %s"], spellname, dstName, srcName, getSpellLink(extraspellid)), "RAID", "preset")
 			else
 				Skada:SendChat(format(L["%s on %s removed by %s"], spellname, dstName, srcName), "RAID", "preset")
 			end
@@ -706,7 +706,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = GetSpellInfo(spellid)
+					d.label, _, d.icon = getSpellInfo(spellid)
 					d.spellschool = GetSpellSchool(spellid)
 
 					d.value = count

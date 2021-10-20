@@ -3,7 +3,7 @@ assert(Skada, "Skada not found!")
 -- cache frequently used globals
 local pairs, ipairs, format, select, tostring = pairs, ipairs, string.format, select, tostring
 local tContains, min, max, floor = tContains, math.min, math.max, math.floor
-local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+local getSpellInfo = Skada.getSpellInfo or GetSpellInfo
 local newTable, delTable = Skada.newTable, Skada.delTable
 local cacheTable, _
 
@@ -276,7 +276,7 @@ local function spellupdatefunc(auratype, win, set, playerid, playername, fmt, mo
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = GetSpellInfo(spellid)
+					d.label, _, d.icon = getSpellInfo(spellid)
 					d.spellschool = spell.school
 
 					d.value = uptime
@@ -559,7 +559,7 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 	local spelltargetmod = spellmod:NewModule(L["Debuff target list"])
 	local targetmod = mod:NewModule(L["Debuff target list"])
 	local targetspellmod = targetmod:NewModule(L["Debuff spell list"])
-	local UnitClass = Skada.UnitClass
+	local unitClass = Skada.unitClass
 
 	-- list of the auras that are ignored!
 	local ignoredSpells = {
@@ -630,7 +630,7 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
+					d.class, d.role, d.spec = select(2, unitClass(d.id, nil, set))
 
 					d.value = target.uptime
 					d.valuetext = Skada:FormatValueText(
@@ -694,7 +694,7 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 
 				d.id = spellid
 				d.spellid = spellid
-				d.label, _, d.icon = GetSpellInfo(spellid)
+				d.label, _, d.icon = getSpellInfo(spellid)
 				d.spellschool = aura.school
 
 				d.value = aura.uptime
@@ -759,7 +759,7 @@ Skada:AddLoadableModule("Debuffs", function(Skada, L)
 
 				d.id = target.id or targetname
 				d.label = targetname
-				d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
+				d.class, d.role, d.spec = select(2, unitClass(d.id, nil, set))
 
 				d.value = min(target.uptime, total)
 				d.valuetext = Skada:FormatValueText(

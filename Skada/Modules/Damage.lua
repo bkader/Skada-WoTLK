@@ -1,6 +1,6 @@
 assert(Skada, "Skada not found!")
 
-local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+local getSpellInfo = Skada.getSpellInfo or GetSpellInfo
 local format, max = string.format, math.max
 local pairs, select = pairs, select
 local newTable, delTable = Skada.newTable, Skada.delTable
@@ -145,7 +145,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			if dmg.spellschool and dmg.spellschool ~= spell.school then
 				spellname = spellname .. " (" .. (Skada.schoolnames[dmg.spellschool] or OTHER) .. ")"
 			else
-				spellname = GetSpellInfo(dmg.spellid)
+				spellname = getSpellInfo(dmg.spellid)
 			end
 			if not player.damage_spells[spellname] then
 				player.damage_spells[spellname] = {id = dmg.spellid, school = dmg.spellschool, amount = 0}
@@ -396,7 +396,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 					d.id = spellname
 					d.spellid = spell.id
 					d.label = spellname
-					d.icon = select(3, GetSpellInfo(spell.id))
+					d.icon = select(3, getSpellInfo(spell.id))
 					d.spellschool = spell.school
 
 					d.value = spell.amount + (Skada.db.profile.absdamage and (spell.absorbed or 0) or 0)
@@ -588,7 +588,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 						d.id = spellname
 						d.spellid = spell.id
 						d.label = spellname
-						d.icon = select(3, GetSpellInfo(spell.id))
+						d.icon = select(3, getSpellInfo(spell.id))
 						d.spellschool = spell.school
 
 						d.value = spell.targets[win.targetname].amount or 0
@@ -956,7 +956,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 			d.id = spellname
 			d.spellid = spell.id
 			d.label = spellname
-			d.icon = select(3, GetSpellInfo(spell.id))
+			d.icon = select(3, getSpellInfo(spell.id))
 			d.spellschool = spell.school
 
 			d.value = spell.amount
@@ -1013,7 +1013,7 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 	local playermod = mod:NewModule(L["Damage spell list"])
 	local targetmod = mod:NewModule(L["Damage target list"])
 	local detailmod = targetmod:NewModule(L["More Details"])
-	local UnitClass = Skada.UnitClass
+	local unitClass = Skada.unitClass
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
@@ -1037,7 +1037,7 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 					d.id = spellname
 					d.spellid = spell.id
 					d.label = spellname
-					d.icon = select(3, GetSpellInfo(spell.id))
+					d.icon = select(3, getSpellInfo(spell.id))
 					d.spellschool = spell.school
 
 					d.value = max(0, (spell.amount or 0) - (spell.overkill or 0))
@@ -1158,7 +1158,7 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 				d.id = player.id or playername
 				d.label = Skada:FormatName(playername, d.id)
 				if not player.class then
-					d.class, d.role, d.spec = select(2, UnitClass(player.id, nil, set, true))
+					d.class, d.role, d.spec = select(2, unitClass(player.id, nil, set, true))
 				else
 					d.class = player.class
 					d.role = player.role
@@ -1288,7 +1288,7 @@ Skada:AddLoadableModule("Overkill", function(Skada, L)
 						d.id = spellname
 						d.spellid = spell.id
 						d.label = spellname
-						d.icon = select(3, GetSpellInfo(spell.id))
+						d.icon = select(3, getSpellInfo(spell.id))
 						d.spellschool = spell.school
 
 						d.value = spell.overkill
@@ -1379,7 +1379,7 @@ Skada:AddLoadableModule("Overkill", function(Skada, L)
 						d.id = spellname
 						d.spellid = spell.id
 						d.label = spellname
-						d.icon = select(3, GetSpellInfo(spell.id))
+						d.icon = select(3, getSpellInfo(spell.id))
 						d.spellschool = spell.school
 
 						d.value = spell.targets[win.targetname].overkill
@@ -1495,7 +1495,7 @@ Skada:AddLoadableModule("Absorbed Damage", function(Skada, L)
 						d.id = spellname
 						d.spellid = spell.id
 						d.label = spellname
-						d.icon = select(3, GetSpellInfo(spell.id))
+						d.icon = select(3, getSpellInfo(spell.id))
 						d.spellschool = spell.school
 
 						d.value = spell.absorbed

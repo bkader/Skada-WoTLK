@@ -8,7 +8,7 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 
 	local select, pairs, ipairs = select, pairs, ipairs
 	local tostring, format = tostring, string.format
-	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+	local getSpellInfo = Skada.getSpellInfo or GetSpellInfo
 	local _
 
 	local function log_resurrect(set, data)
@@ -62,7 +62,7 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = GetSpellInfo(spellid)
+					d.label, _, d.icon = getSpellInfo(spellid)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(

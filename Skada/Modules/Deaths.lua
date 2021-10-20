@@ -12,8 +12,8 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	local ipairs = ipairs
 	local tostring, format, strsub = tostring, string.format, string.sub
 	local abs, max, modf = math.abs, math.max, math.modf
-	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-	local GetspellLink = Skada.GetSpellLink or GetSpellLink
+	local getSpellInfo = Skada.getSpellInfo or GetSpellInfo
+	local getSpellLink = Skada.getSpellLink or GetSpellLink
 	local newTable, delTable = Skada.newTable, Skada.delTable
 	local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
 	local date, log, _ = date
@@ -154,7 +154,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 						end
 						if not log then return end
 
-						local output = format("Skada: %s > %s (%s) %s", log.source or UNKNOWN, player.name or UNKNOWN, GetSpellInfo(log.spellid) or UNKNOWN, Skada:FormatNumber(0 - log.amount, 1))
+						local output = format("Skada: %s > %s (%s) %s", log.source or UNKNOWN, player.name or UNKNOWN, getSpellInfo(log.spellid) or UNKNOWN, Skada:FormatNumber(0 - log.amount, 1))
 						if log.overkill or log.resisted or log.blocked or log.absorbed then
 							output = output .. " ["
 							local extra = newTable()
@@ -275,7 +275,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
-						local spellname, _, spellicon = GetSpellInfo(log.spellid)
+						local spellname, _, spellicon = getSpellInfo(log.spellid)
 
 						d.id = nr
 						d.spellid = log.spellid
@@ -291,7 +291,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 						d.value = log.hp or 0
 						local change = (log.amount >= 0 and "+" or "-") .. Skada:FormatNumber(abs(log.amount))
-						d.reportlabel = format("%02.2f: %s   %s [%s]", diff or 0, GetspellLink(log.spellid) or spellname or UNKNOWN, change, Skada:FormatNumber(log.hp or 0))
+						d.reportlabel = format("%02.2f: %s   %s [%s]", diff or 0, getSpellLink(log.spellid) or spellname or UNKNOWN, change, Skada:FormatNumber(log.hp or 0))
 
 						local extra = newTable()
 
@@ -365,7 +365,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 					for k, v in ipairs(death.log) do
 						if v.amount and v.amount < 0 and (v.spellid or v.source) then
 							if v.spellid then
-								d.label, _, d.icon = GetSpellInfo(v.spellid)
+								d.label, _, d.icon = getSpellInfo(v.spellid)
 								d.spellid = v.spellid
 							elseif v.source then
 								d.label = v.source

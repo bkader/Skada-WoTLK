@@ -12,7 +12,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 
 	local pairs, ipairs = pairs, ipairs
 	local tostring, format, tContains = tostring, string.format, tContains
-	local GetSpellInfo, UnitGUID = Skada.GetSpellInfo or GetSpellInfo, UnitGUID
+	local getSpellInfo, UnitGUID = Skada.getSpellInfo or GetSpellInfo, UnitGUID
 	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
 	local failevents, tankevents = LibFail:GetSupportedEvents(), LibFail:GetFailsWhereTanksDoNotFail()
 	local _
@@ -123,7 +123,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = GetSpellInfo(spellid)
+					d.label, _, d.icon = getSpellInfo(spellid)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(

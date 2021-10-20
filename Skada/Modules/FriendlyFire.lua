@@ -7,7 +7,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 	local targetmod = mod:NewModule(L["Damage target list"])
 
 	local pairs, ipairs, select, format = pairs, ipairs, select, string.format
-	local GetSpellInfo, tContains = Skada.GetSpellInfo or GetSpellInfo, tContains
+	local getSpellInfo, tContains = Skada.getSpellInfo or GetSpellInfo, tContains
 	local _
 
 	-- spells in the following table will be ignored.
@@ -119,7 +119,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = GetSpellInfo(spellid)
+					d.label, _, d.icon = getSpellInfo(spellid)
 
 					d.value = amount
 					d.valuetext = Skada:FormatValueText(

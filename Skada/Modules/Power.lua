@@ -5,7 +5,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 	local mod = Skada:NewModule(L["Resources"])
 
 	local pairs, ipairs, format, tContains = pairs, ipairs, string.format, tContains
-	local setmetatable, GetSpellInfo = setmetatable, Skada.GetSpellInfo or GetSpellInfo
+	local setmetatable, getSpellInfo = setmetatable, Skada.getSpellInfo or GetSpellInfo
 	local _
 
 	local namesTable = {[0] = MANA, [1] = RAGE, [3] = ENERGY, [6] = RUNIC_POWER}
@@ -152,7 +152,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = GetSpellInfo(spellid)
+					d.label, _, d.icon = getSpellInfo(spellid)
 
 					d.value = amount
 					d.valuetext = Skada:FormatValueText(

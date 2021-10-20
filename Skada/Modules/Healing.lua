@@ -2,7 +2,7 @@ assert(Skada, "Skada not found!")
 
 -- cache frequently used globals
 local pairs, ipairs, select, format, max = pairs, ipairs, select, string.format, math.max
-local GetSpellInfo, UnitClass = Skada.GetSpellInfo or GetSpellInfo, Skada.UnitClass
+local getSpellInfo, unitClass = Skada.getSpellInfo or GetSpellInfo, Skada.unitClass
 local _
 
 -- ============== --
@@ -176,7 +176,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 						d.id = spellid
 						d.spellid = spellid
 						d.spellschool = spell.school
-						d.label, _, d.icon = GetSpellInfo(spellid)
+						d.label, _, d.icon = getSpellInfo(spellid)
 						if spell.ishot then
 							d.text = d.label .. L["HoT"]
 						end
@@ -222,7 +222,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 					d.id = spellid
 					d.spellid = spellid
 					d.spellschool = spell.school
-					d.label, _, d.icon = GetSpellInfo(spellid)
+					d.label, _, d.icon = getSpellInfo(spellid)
 					if spell.ishot then
 						d.text = d.label .. L["HoT"]
 					end
@@ -266,7 +266,7 @@ Skada:AddLoadableModule("Healing", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
+					d.class, d.role, d.spec = select(2, unitClass(d.id, nil, set))
 
 					d.value = target.amount
 					d.valuetext = Skada:FormatValueText(
@@ -399,7 +399,7 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 						d.id = spellid
 						d.spellid = spellid
 						d.spellschool = spell.school
-						d.label, _, d.icon = GetSpellInfo(spellid)
+						d.label, _, d.icon = getSpellInfo(spellid)
 						if spell.ishot then
 							d.text = d.label .. L["HoT"]
 						end
@@ -445,7 +445,7 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 						d.id = spellid
 						d.spellid = spellid
 						d.spellschool = spell.school
-						d.label, _, d.icon = GetSpellInfo(spellid)
+						d.label, _, d.icon = getSpellInfo(spellid)
 
 						if spell.ishot then
 							d.text = d.label .. L["HoT"]
@@ -491,7 +491,7 @@ Skada:AddLoadableModule("Overhealing", function(Skada, L)
 
 						d.id = target.id or targetname
 						d.label = targetname
-						d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
+						d.class, d.role, d.spec = select(2, unitClass(d.id, nil, set))
 
 						d.value = target.overheal / (target.amount + target.overheal)
 						d.valuetext = Skada:FormatValueText(
@@ -653,7 +653,7 @@ Skada:AddLoadableModule("Total Healing", function(Skada, L)
 						d.id = spellid
 						d.spellid = spellid
 						d.spellschool = spell.school
-						d.label, _, d.icon = GetSpellInfo(spellid)
+						d.label, _, d.icon = getSpellInfo(spellid)
 						if spell.ishot then
 							d.text = d.label .. L["HoT"]
 						end
@@ -701,7 +701,7 @@ Skada:AddLoadableModule("Total Healing", function(Skada, L)
 						d.id = spellid
 						d.spellid = spellid
 						d.spellschool = spell.school
-						d.label, _, d.icon = GetSpellInfo(spellid)
+						d.label, _, d.icon = getSpellInfo(spellid)
 
 						if spell.ishot then
 							d.text = d.label .. L["HoT"]
@@ -749,7 +749,7 @@ Skada:AddLoadableModule("Total Healing", function(Skada, L)
 
 						d.id = target.id or targetname
 						d.label = targetname
-						d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
+						d.class, d.role, d.spec = select(2, unitClass(d.id, nil, set))
 
 						d.value = amount
 						d.valuetext = Skada:FormatValueText(
@@ -879,7 +879,7 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
 						d.id = spellid
 						d.spellid = spellid
 						d.spellschool = spell.school
-						d.label, _, d.icon = GetSpellInfo(spellid)
+						d.label, _, d.icon = getSpellInfo(spellid)
 						if spell.ishot then
 							d.text = d.label .. L["HoT"]
 						end
@@ -929,7 +929,7 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
 						d.id = spellid
 						d.spellid = spellid
 						d.spellschool = spell.school
-						d.label, _, d.icon = GetSpellInfo(spellid)
+						d.label, _, d.icon = getSpellInfo(spellid)
 
 						if spell.ishot then
 							d.text = d.label .. L["HoT"]
@@ -977,7 +977,7 @@ Skada:AddLoadableModule("Healing and Overhealing", function(Skada, L)
 
 					d.id = target.id or targetname
 					d.label = targetname
-					d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
+					d.class, d.role, d.spec = select(2, unitClass(d.id, nil, set))
 
 					d.value = target.amount + target.overheal
 					d.valuetext = Skada:FormatValueText(
@@ -1116,7 +1116,7 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 							d.id = spellid
 							d.spellid = spellid
 							d.spellschool = spell.school
-							d.label, _, d.icon = GetSpellInfo(spellid)
+							d.label, _, d.icon = getSpellInfo(spellid)
 							if spell.ishot then
 								d.text = d.label .. L["HoT"]
 							end
@@ -1146,7 +1146,7 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 							d.id = spellid
 							d.spellid = spellid
 							d.spellschool = spell.school
-							d.label, _, d.icon = GetSpellInfo(spellid)
+							d.label, _, d.icon = getSpellInfo(spellid)
 
 							d.value = spell.targets[win.playername].amount or 0
 							d.valuetext = Skada:FormatValueText(
@@ -1304,7 +1304,7 @@ Skada:AddLoadableModule("Healing Taken", function(Skada, L)
 				d.id = player.id
 				d.label = playername
 				d.text = Skada:FormatName(playername, player.id)
-				d.class, d.role, d.spec = select(2, UnitClass(d.id, nil, set))
+				d.class, d.role, d.spec = select(2, unitClass(d.id, nil, set))
 
 				d.value = player.amount
 				d.valuetext = Skada:FormatValueText(

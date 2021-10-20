@@ -111,7 +111,7 @@ Skada.BITMASK_ENEMY = BITMASK_ENEMY
 -- custom functions --
 -- ================ --
 
-function Skada.UnitClass(guid, flags, set, nocache)
+function Skada.unitClass(guid, flags, set, nocache)
 	set = set or Skada.current
 
 	if set then
@@ -155,6 +155,42 @@ function Skada.UnitClass(guid, flags, set, nocache)
 	end
 
 	return locClass, engClass
+end
+
+do
+	local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
+
+	local custom = {
+		[3] = {ACTION_ENVIRONMENTAL_DAMAGE_FALLING, [[Interface\Icons\ability_rogue_quickrecovery]]},
+		[4] = {ACTION_ENVIRONMENTAL_DAMAGE_DROWNING, [[Interface\Icons\spell_shadow_demonbreath]]},
+		[5] = {ACTION_ENVIRONMENTAL_DAMAGE_FATIGUE, [[Interface\Icons\ability_creature_cursed_05]]},
+		[6] = {ACTION_ENVIRONMENTAL_DAMAGE_FIRE, [[Interface\Icons\spell_fire_fire]]},
+		[7] = {ACTION_ENVIRONMENTAL_DAMAGE_LAVA, [[Interface\Icons\spell_shaman_lavaflow]]},
+		[8] = {ACTION_ENVIRONMENTAL_DAMAGE_SLIME, [[Interface\Icons\inv_misc_slime_01]]}
+	}
+
+	function Skada.getSpellInfo(spellid)
+		local res1, res2, res3, res4, res5, res6, res7, res8, res9
+		if spellid then
+			if custom[spellid] then
+				res1, res3 = custom[spellid][1], custom[spellid][2]
+			else
+				res1, res2, res3, res4, res5, res6, res7, res8, res9 = GetSpellInfo(spellid)
+				if spellid == 75 then
+					res3 = "Interface\\Icons\\INV_Weapon_Bow_07"
+				elseif spellid == 6603 then
+					res1, res3 = MELEE, "Interface\\Icons\\INV_Sword_04"
+				end
+			end
+		end
+		return res1, res2, res3, res4, res5, res6, res7, res8, res9
+	end
+
+	function Skada.getSpellLink(spellid)
+		if not custom[spellid] then
+			return GetSpellLink(spellid)
+		end
+	end
 end
 
 -------------------------------------------------------------------------------
@@ -2144,7 +2180,7 @@ do
 				if data.reportlabel then
 					label = data.reportlabel
 				elseif self.db.profile.reportlinks and (data.spellid or data.hyperlink) then
-					label = format("%s   %s", data.hyperlink or self.GetSpellLink(data.spellid) or data.label, data.valuetext)
+					label = format("%s   %s", data.hyperlink or self.getSpellLink(data.spellid) or data.label, data.valuetext)
 				else
 					label = format("%s   %s", data.label, data.valuetext)
 				end
