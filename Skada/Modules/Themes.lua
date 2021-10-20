@@ -3,7 +3,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 	if Skada:IsDisabled("Themes") then return end
 
 	local mod = Skada:NewModule(L["Themes"])
-	local ipairs, tinsert, tremove = ipairs, table.insert, table.remove
+	local ipairs, tremove = ipairs, table.remove
 	local newTable, delTable, list = Skada.newTable, Skada.delTable
 
 	local themes = {
@@ -427,7 +427,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 										local theme = {}
 										Skada.tCopy(theme, win.db, {"name", "sticked", "x", "y", "point"})
 										theme.name = savename or win.db.name
-										tinsert(Skada.db.global.themes, theme)
+										Skada.db.global.themes[#Skada.db.global.themes + 1] = theme
 									end
 								end
 								savewindow = nil

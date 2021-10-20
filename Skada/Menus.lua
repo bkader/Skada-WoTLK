@@ -3,8 +3,7 @@ assert(Skada, "Skada not found!")
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 local AceGUI = LibStub("AceGUI-3.0")
 
-local tinsert, tsort = table.insert, table.sort
-local pairs, ipairs, type = pairs, ipairs, type
+local pairs, ipairs, type, tsort = pairs, ipairs, type, table.sort
 local format, sbyte = string.format, string.byte
 local GetCursorPosition = GetCursorPosition
 local GetScreenWidth, GetScreenHeight = GetScreenWidth, GetScreenHeight
@@ -686,9 +685,9 @@ do
 			categories, categorized = {}, {}
 			for _, mode in Skada:IterateModes() do
 				categorized[mode.category] = categorized[mode.category] or {}
-				tinsert(categorized[mode.category], mode)
+				categorized[mode.category][#categorized[mode.category] + 1] = mode
 				if not tContains(categories, mode.category) then
-					tinsert(categories, mode.category)
+					categories[#categories + 1] = mode.category
 				end
 			end
 			tsort(categories, sort_categories)
@@ -783,7 +782,7 @@ do
 
 		-- make the frame closable with Escape button
 		_G.SkadaReportWindow = frame.frame
-		tinsert(UISpecialFrames, "SkadaReportWindow")
+		UISpecialFrames[#UISpecialFrames + 1] = "SkadaReportWindow"
 
 		-- slight AceGUI hack to auto-set height of Window widget:
 		frame.orig_LayoutFinished = frame.LayoutFinished

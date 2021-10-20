@@ -522,7 +522,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 					elseif (spellid == 48707 or spellid == 49497 or spellid == 62606) and band(spellschool, 0x1) == spellschool then
 						-- nothing
 					else
-						tinsert(shieldsPopped, {
+						shieldsPopped[#shieldsPopped + 1] = {
 							srcGUID = shield.srcGUID,
 							srcName = srcName,
 							spellid = shield.spellid,
@@ -531,7 +531,7 @@ Skada:AddLoadableModule("Absorbs", function(Skada, L)
 							ts = shield.ts - absorbspells[shield.spellid].dur,
 							amount = shield.amount,
 							full = shield.full
-						})
+						}
 						count = count + 1
 					end
 				end

@@ -75,14 +75,14 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 					if spellid and potionIDs[spellid] then
 						-- instant recording doesn't work, so we delay it
 						After(1, function() PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid) end)
-						tinsert(potions, format(potionStr, icon))
+						potions[#potions + 1] = format(potionStr, icon)
 					end
 				end
 
 				-- add to print out:
 				if next(potions) ~= nil and class and Skada.validclass[class] then
 					local colorStr = Skada.classcolors[class].colorStr or "ffffffff"
-					tinsert(prepotion, format(prepotionStr, colorStr, playername, tconcat(potions, " ")))
+					prepotion[#prepotion + 1] = format(prepotionStr, colorStr, playername, tconcat(potions, " "))
 				end
 				delTable(potions)
 			end

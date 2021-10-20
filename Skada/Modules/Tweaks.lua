@@ -213,7 +213,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 							return true, true, format("|HSKSP:%1$d|h|cffffff00[%2$s]|r|h", newID or 0, msg or "nil")
 						end
 					end
-					tinsert(meters, {src = source, evt = event, time = curtime, data = {}, title = msg})
+					meters[#meters + 1] = {src = source, evt = event, time = curtime, data = {}, title = msg}
 					for id, meter in ipairs(meters) do
 						if meter.src == source and meter.evt == event and meter.time == curtime then
 							newID = id
@@ -236,7 +236,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 								end
 							end
 							if toInsert then
-								tinsert(meter.data, msg)
+								meter.data[#meter.data + 1] = msg
 							end
 							return true, false, nil
 						end

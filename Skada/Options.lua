@@ -765,7 +765,7 @@ do
 		end
 		-- close on escape
 		_G["SkadaImportExportFrame"] = frame.frame
-		tinsert(UISpecialFrames, "SkadaImportExportFrame")
+		UISpecialFrames[#UISpecialFrames + 1] = "SkadaImportExportFrame"
 	end
 
 	function Skada:OpenImport()

@@ -4,8 +4,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 
 	local mod = Skada:NewModule(L["Threat"], "LibSink-2.0")
 
-	local ipairs, select, format = ipairs, select, string.format
-	local tinsert, max = table.insert, math.max
+	local ipairs, select, format, max = ipairs, select, string.format, math.max
 	local GroupIterator, UnitExists, UnitIsFriend = Skada.GroupIterator, UnitExists, UnitIsFriend
 	local UnitName, UnitClass, UnitGUID = UnitName, UnitClass, UnitGUID
 	local GetUnitRole, GetUnitSpec = Skada.GetUnitRole, Skada.GetInspectSpecialization
@@ -282,7 +281,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 				if not self.originalPoints then
 					self.originalPoints = {}
 					for i = 1, WorldFrame:GetNumPoints() do
-						tinsert(self.originalPoints, {WorldFrame:GetPoint(i)})
+						self.originalPoints[#self.originalPoints + 1] = {WorldFrame:GetPoint(i)}
 					end
 				end
 				self.elapsed = 0

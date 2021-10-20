@@ -5,7 +5,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 local libwindow = LibStub("LibWindow-1.1")
 local FlyPaper = LibStub:GetLibrary("LibFlyPaper-1.1", true)
 
-local tinsert, tsort = table.insert, table.sort
+local pairs, ipairs, tsort = pairs, ipairs, table.sort
 local getSpellLink = Skada.getSpellLink or GetSpellLink
 local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
 
@@ -354,7 +354,7 @@ end
 
 do
 	local function inserthistory(win)
-		tinsert(win.history, win.selectedmode)
+		win.history[#win.history + 1] = win.selectedmode
 		if win.child and win.db.childmode ~= 1 then
 			inserthistory(win.child)
 		end

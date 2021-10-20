@@ -886,7 +886,7 @@ function Skada:CreateWindow(name, db, display)
 	if not db then
 		db, isnew = {}, true
 		self.tCopy(db, Skada.windowdefaults)
-		tinsert(self.db.profile.windows, db)
+		self.db.profile.windows[#self.db.profile.windows + 1] = db
 	end
 
 	if display then
@@ -933,7 +933,7 @@ function Skada:CreateWindow(name, db, display)
 	if displays[window.db.display] then
 		window:SetDisplay(window.db.display or "bar")
 		window.display:Create(window)
-		tinsert(windows, window)
+		windows[#windows + 1] = window
 		window:DisplaySets()
 
 		if isnew and self:find_mode(L["Damage"]) then
@@ -1144,7 +1144,7 @@ do
 		end
 
 		mode.category = category or OTHER
-		tinsert(modes, mode)
+		modes[#modes + 1] = mode
 
 		for _, win in ipairs(windows) do
 			if mode.moduleName == win.db.mode then
@@ -1438,7 +1438,7 @@ do
 				end
 			end
 
-			tinsert(set.players, player)
+			set.players[#set.players + 1] = player
 		end
 
 		-- not all modules provide playerflags
@@ -1623,7 +1623,7 @@ do
 				local title = _G["UNITNAME_SUMMON_TITLE" .. i]
 				while (title and title ~= "%s" and title:find("%s")) do
 					local pattern = title:gsub("%%s", "(.-)")
-					tinsert(ownerPatterns, pattern)
+					ownerPatterns[#ownerPatterns + 1] = pattern
 					i = i + 1
 					title = _G["UNITNAME_SUMMON_TITLE" .. i]
 				end
@@ -3643,9 +3643,9 @@ do
 
 	local combatlogevents = {}
 
-	function Skada:RegisterForCL(func, event, flags)
+	function Skada:RegisterForCL(callback, event, flags)
 		combatlogevents[event] = combatlogevents[event] or {}
-		tinsert(combatlogevents[event], {["func"] = func, ["flags"] = flags})
+		combatlogevents[event][#combatlogevents[event] + 1] = {func = callback, flags = flags}
 	end
 
 	function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)

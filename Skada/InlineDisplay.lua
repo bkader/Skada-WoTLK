@@ -60,9 +60,9 @@ end
 
 local function showmode(win, id, label, mode)
 	if win.selectedmode then
-		tinsert(win.history, win.selectedmode)
+		win.history[#win.history + 1] = win.selectedmode
 		if win.child then
-			tinsert(win.child.history, win.selectedmode)
+			win.child.history[#win.child.history + 1] = win.selectedmode
 		end
 	end
 	if mode.Enter then
@@ -290,7 +290,7 @@ function barlibrary:Withdraw(win)
 			print("|c0033ff99SkadaInline|r: THIS SHOULD NEVER HAPPEN")
 		end
 		replacement = self:CreateBar(uuid, win)
-		tinsert(barlibrary.bars, replacement)
+		barlibrary.bars[#barlibrary.bars + 1] = replacement
 	end
 
 	barlibrary.bars[1].inuse = false

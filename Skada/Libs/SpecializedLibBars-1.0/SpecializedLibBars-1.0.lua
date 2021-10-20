@@ -823,11 +823,11 @@ end
 
 function barListPrototype:SetColorAt(at, r, g, b, a)
 	self.colors = self.colors or {}
-	tinsert(self.colors, at)
-	tinsert(self.colors, r)
-	tinsert(self.colors, g)
-	tinsert(self.colors, b)
-	tinsert(self.colors, a)
+	self.colors[#self.colors + 1] = at
+	self.colors[#self.colors + 1] = r
+	self.colors[#self.colors + 1] = g
+	self.colors[#self.colors + 1] = b
+	self.colors[#self.colors + 1] = a
 	ComputeGradient(self)
 	self:UpdateColors()
 end
@@ -1435,11 +1435,11 @@ end
 
 function barPrototype:SetColorAt(at, r, g, b, a)
 	self.colors = self.colors or {}
-	tinsert(self.colors, at)
-	tinsert(self.colors, r)
-	tinsert(self.colors, g)
-	tinsert(self.colors, b)
-	tinsert(self.colors, a)
+	self.colors[#self.colors + 1] = at
+	self.colors[#self.colors + 1] = r
+	self.colors[#self.colors + 1] = g
+	self.colors[#self.colors + 1] = b
+	self.colors[#self.colors + 1] = a
 	ComputeGradient(self)
 	self:UpdateColor()
 end
