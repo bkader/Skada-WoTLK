@@ -20,7 +20,7 @@ Skada is a modular damage meter with various viewing modes, segmented fights and
 
 ## Show Love & Support
 
-Though it's not required, if you want to show some love and support, PayPal donations are most welcome at **bkader[at]mail.com** or @[Buy Me a Coffee](https://www.buymeacoffee.com/bkader).
+Though it's not required, if you want to show some love and support, **PayPal**/**Paysera** donations are most welcome at **bkader[at]mail.com**.
 
 ## Table of content
 
