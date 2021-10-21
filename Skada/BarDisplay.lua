@@ -765,6 +765,7 @@ do
 		g:SetLength(p.barwidth)
 		g:SetTexture(p.bartexturepath or Skada:MediaFetch("statusbar", p.bartexture))
 		g:SetBarBackgroundColor(p.barbgcolor.r, p.barbgcolor.g, p.barbgcolor.b, p.barbgcolor.a or 0.6)
+		g:SetButtonMouseOver(p.title.hovermode)
 
 		g:SetFont(
 			p.barfontpath or Skada:MediaFetch("font", p.barfont),
@@ -818,17 +819,6 @@ do
 			g:ShowButton(L["Mode"], p.buttons.mode)
 			g:ShowButton(L["Report"], p.buttons.report)
 			g:ShowButton(L["Stop"], p.buttons.stop)
-			g:AdjustButtons()
-
-			if p.title.hovermode then
-				g:SetButtonsOpacity(0)
-				g.button:SetScript("OnEnter", function(self) g:SetButtonsOpacity(0.25) end)
-				g.button:SetScript("OnLeave", function(self) g:SetButtonsOpacity(MouseIsOver(self) and 0.25 or 0) end)
-			else
-				g:SetButtonsOpacity(0.25)
-				g.button:SetScript("OnEnter", nil)
-				g.button:SetScript("OnLeave", nil)
-			end
 		else
 			g:HideAnchor()
 		end
@@ -934,8 +924,8 @@ function mod:AddDisplayOptions(win, options)
 				desc = L["The font size of all bars."],
 				order = 3,
 				width = "double",
-				min = 6,
-				max = 40,
+				min = 5,
+				max = 32,
 				step = 1
 			},
 			numfont = {
@@ -965,8 +955,8 @@ function mod:AddDisplayOptions(win, options)
 				desc = L["The font size of bar values."],
 				order = 6,
 				width = "double",
-				min = 6,
-				max = 40,
+				min = 5,
+				max = 32,
 				step = 1
 			},
 			bartexture = {
@@ -1231,8 +1221,8 @@ function mod:AddDisplayOptions(win, options)
 				name = L["Title font size"],
 				desc = L["The font size of the title bar."],
 				order = 7,
-				min = 7,
-				max = 40,
+				min = 5,
+				max = 32,
 				step = 1
 			},
 			height = {
@@ -1317,40 +1307,46 @@ function mod:AddDisplayOptions(win, options)
 					Skada:ApplySettings(db.name)
 				end,
 				args = {
-					report = {
+					menu = {
 						type = "toggle",
-						name = L["Report"],
-						desc = L["Opens a dialog that lets you report your data to others in various ways."],
+						name = L["Configure"],
+						desc = L["Opens the configuration window."],
+						image = [[Interface\Addons\Skada\Media\Textures\icon-config]],
 						order = 1
 					},
-					mode = {
+					reset = {
 						type = "toggle",
-						name = L["Mode"],
-						desc = L["Jump to a specific mode."],
+						name = RESET,
+						desc = L["Resets all fight data except those marked as kept."],
+						image = [[Interface\Addons\Skada\Media\Textures\icon-reset]],
 						order = 2
 					},
 					segment = {
 						type = "toggle",
 						name = L["Segment"],
 						desc = L["Jump to a specific segment."],
+						image = [[Interface\Buttons\UI-GuildButton-PublicNote-Up]],
 						order = 3
 					},
-					reset = {
+					mode = {
 						type = "toggle",
-						name = RESET,
-						desc = L["Resets all fight data except those marked as kept."],
+						name = L["Mode"],
+						desc = L["Jump to a specific mode."],
+						image = [[Interface\GROUPFRAME\UI-GROUP-MAINASSISTICON]],
 						order = 4
 					},
-					menu = {
+					report = {
 						type = "toggle",
-						name = L["Configure"],
-						desc = L["Opens the configuration window."],
+						name = L["Report"],
+						desc = L["Opens a dialog that lets you report your data to others in various ways."],
+						image = [[Interface\Buttons\UI-GuildButton-MOTD-Up]],
 						order = 5
 					},
 					stop = {
 						type = "toggle",
 						name = L["Stop"],
 						desc = L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."],
+						image = [[Interface\CHATFRAME\ChatFrameExpandArrow]],
 						order = 6
 					},
 					hovermode = {

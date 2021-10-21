@@ -327,8 +327,16 @@ function barListPrototype:AddButton(title, description, normaltex, highlighttex,
 		GameTooltip:SetText(title)
 		GameTooltip:AddLine(description, 1, 1, 1, true)
 		GameTooltip:Show()
+		if self.mouseover then
+			self:SetButtonsOpacity(0.25)
+		end
 	end)
-	btn:SetScript("OnLeave", function() GameTooltip:Hide() end)
+	btn:SetScript("OnLeave", function()
+		GameTooltip:Hide()
+		if self.mouseover then
+			self:SetButtonsOpacity(0)
+		end
+	end)
 	btn:Show()
 
 	self.buttons[#self.buttons + 1] = btn
@@ -369,17 +377,37 @@ function barListPrototype:SetButtonsOpacity(alpha)
 	end
 end
 
+function barListPrototype:SetButtonMouseOver(mouseover)
+	self.mouseover = mouseover
+
+	if self.mouseover then
+		self:SetButtonsOpacity(0)
+		self.button:SetScript("OnEnter", function()
+			self:SetButtonsOpacity(0.25)
+		end)
+		self.button:SetScript("OnLeave", function()
+			self:SetButtonsOpacity(MouseIsOver(self.button) and 0.25 or 0)
+		end)
+	else
+		self:SetButtonsOpacity(0.25)
+		self.button:SetScript("OnEnter", nil)
+		self.button:SetScript("OnLeave", nil)
+	end
+
+	self:AdjustButtons()
+end
+
 function barListPrototype:AdjustButtons()
-	local nr = 0
-	local lastbtn = nil
+	local height = self.button:GetHeight()
+	local nr, lastbtn = 0, nil
 	for _, btn in ipairs(self.buttons) do
 		btn:ClearAllPoints()
 
 		if btn:IsShown() then
 			if nr == 0 and self.orientation == 3 then
-				btn:SetPoint("TOPLEFT", self.button, "TOPLEFT", 5, 0 - (max(self.button:GetHeight() - btn:GetHeight(), 0) / 2))
+				btn:SetPoint("TOPLEFT", self.button, "TOPLEFT", 5, -(max(height - btn:GetHeight(), 0) / 2))
 			elseif nr == 0 then
-				btn:SetPoint("TOPRIGHT", self.button, "TOPRIGHT", -5, 0 - (max(self.button:GetHeight() - btn:GetHeight(), 0) / 2))
+				btn:SetPoint("TOPRIGHT", self.button, "TOPRIGHT", -5, -(max(height - btn:GetHeight(), 0) / 2))
 			elseif self.orientation == 3 then
 				btn:SetPoint("TOPLEFT", lastbtn, "TOPRIGHT", 3, 0)
 			else
