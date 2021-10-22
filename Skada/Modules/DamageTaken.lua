@@ -196,32 +196,30 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 				dmg.spellid, dmg.spellname, dmg.spellschool, dmg.misstype, amount = ...
 			end
 
-			if amount then
-				dmg.srcName = srcName
-				dmg.playerid = dstGUID
-				dmg.playername = dstName
-				dmg.playerflags = dstFlags
+			dmg.srcName = srcName
+			dmg.playerid = dstGUID
+			dmg.playername = dstName
+			dmg.playerflags = dstFlags
 
-				dmg.amount = 0
-				dmg.overkill = 0
-				dmg.resisted = nil
-				dmg.blocked = nil
-				dmg.absorbed = nil
-				dmg.critical = nil
-				dmg.glancing = nil
-				dmg.crushing = nil
+			dmg.amount = 0
+			dmg.overkill = 0
+			dmg.resisted = nil
+			dmg.blocked = nil
+			dmg.absorbed = nil
+			dmg.critical = nil
+			dmg.glancing = nil
+			dmg.crushing = nil
 
-				if dmg.misstype == "ABSORB" then
-					dmg.absorbed = amount
-				elseif dmg.misstype == "BLOCK" then
-					dmg.blocked = amount
-				elseif dmg.misstype == "RESIST" then
-					dmg.resisted = amount
-				end
-
-				log_damage(Skada.current, dmg, eventtype == "SPELL_PERIODIC_MISSED")
-				log_damage(Skada.total, dmg, eventtype == "SPELL_PERIODIC_MISSED")
+			if dmg.misstype == "ABSORB" then
+				dmg.absorbed = amount or 0
+			elseif dmg.misstype == "BLOCK" then
+				dmg.blocked = amount or 0
+			elseif dmg.misstype == "RESIST" then
+				dmg.resisted = amount or 0
 			end
+
+			log_damage(Skada.current, dmg, eventtype == "SPELL_PERIODIC_MISSED")
+			log_damage(Skada.total, dmg, eventtype == "SPELL_PERIODIC_MISSED")
 		end
 	end
 

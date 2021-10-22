@@ -166,8 +166,8 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			if not spell.criticalmin or dmg.amount < spell.criticalmin then
 				spell.criticalmin = dmg.amount
 			end
-		elseif dmg.missed ~= nil then
-			spell[dmg.missed] = (spell[dmg.missed] or 0) + 1
+		elseif dmg.misstype ~= nil then
+			spell[dmg.misstype] = (spell[dmg.misstype] or 0) + 1
 		elseif dmg.glancing then
 			spell.glancing = (spell.glancing or 0) + 1
 		elseif dmg.crushing then
@@ -243,7 +243,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			dmg.playername = srcName
 			dmg.playerflags = srcFlags
 			dmg.dstName = dstName
-			dmg.missed = nil
+			dmg.misstype = nil
 			dmg.petname = nil
 			Skada:FixPets(dmg)
 
@@ -263,35 +263,33 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 				dmg.spellid, dmg.spellname, dmg.spellschool, dmg.misstype, amount = ...
 			end
 
-			if amount then
-				dmg.playerid = srcGUID
-				dmg.playername = srcName
-				dmg.playerflags = srcFlags
-				dmg.dstName = dstName
+			dmg.playerid = srcGUID
+			dmg.playername = srcName
+			dmg.playerflags = srcFlags
+			dmg.dstName = dstName
 
-				dmg.amount = 0
-				dmg.overkill = 0
-				dmg.resisted = nil
-				dmg.blocked = nil
-				dmg.absorbed = nil
-				dmg.critical = nil
-				dmg.glancing = nil
-				dmg.crushing = nil
+			dmg.amount = 0
+			dmg.overkill = 0
+			dmg.resisted = nil
+			dmg.blocked = nil
+			dmg.absorbed = nil
+			dmg.critical = nil
+			dmg.glancing = nil
+			dmg.crushing = nil
 
-				if dmg.misstype == "ABSORB" then
-					dmg.absorbed = amount
-				elseif dmg.misstype == "BLOCK" then
-					dmg.blocked = amount
-				elseif dmg.misstype == "RESIST" then
-					dmg.resisted = amount
-				end
-
-				dmg.petname = nil
-				Skada:FixPets(dmg)
-
-				log_damage(Skada.current, dmg, eventtype == "SPELL_PERIODIC_MISSED")
-				log_damage(Skada.total, dmg, eventtype == "SPELL_PERIODIC_MISSED")
+			if dmg.misstype == "ABSORB" then
+				dmg.absorbed = amount or 0
+			elseif dmg.misstype == "BLOCK" then
+				dmg.blocked = amount or 0
+			elseif dmg.misstype == "RESIST" then
+				dmg.resisted = amount or 0
 			end
+
+			dmg.petname = nil
+			Skada:FixPets(dmg)
+
+			log_damage(Skada.current, dmg, eventtype == "SPELL_PERIODIC_MISSED")
+			log_damage(Skada.total, dmg, eventtype == "SPELL_PERIODIC_MISSED")
 		end
 	end
 
