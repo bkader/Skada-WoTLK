@@ -141,12 +141,33 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 	end
 
 	local dmg = {}
+	local extraATT
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
+
+			-- handle extra attacks
+			if eventtype == "SPELL_EXTRA_ATTACKS" then
+				local _, spellname, _, amount = ...
+				extraATT = extraATT or newTable()
+				if not extraATT[srcName] then
+					extraATT[srcName] = {spellname = spellname, amount = amount}
+				end
+				return
+			end
+
 			if eventtype == "SWING_DAMAGE" then
 				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, MELEE, 1
 				dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing, dmg.crushing = ...
+
+				-- an extra attack?
+				if extraATT and extraATT[srcName] then
+					dmg.spellname = dmg.spellname .. " (" .. extraATT[srcName].spellname .. ")"
+					extraATT[srcName].amount = max(0, extraATT[srcName].amount - 1)
+					if extraATT[srcName].amount == 0 then
+						extraATT[srcName] = nil
+					end
+				end
 			else
 				dmg.spellid, dmg.spellname, dmg.spellschool, dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing, dmg.crushing = ...
 			end
@@ -635,6 +656,7 @@ Skada:AddLoadableModule("Damage Taken", function(Skada, L)
 	end
 
 	function mod:SetComplete(set)
+		extraATT = delTable(extraATT)
 		for _, player in ipairs(set.players) do
 			if ((player.damagetaken or 0) + (player.absdamagetaken or 0)) == 0 then
 				player.damagetaken_spells = nil

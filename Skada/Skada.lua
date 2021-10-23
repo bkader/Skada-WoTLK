@@ -1,10 +1,10 @@
-local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceEvent-3.0", "AceHook-3.0", "AceComm-3.0", "LibCompat-1.0")
+local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceEvent-3.0", "AceHook-3.0", "AceComm-3.0", "LibCompat-1.0-Skada")
 _G.Skada = Skada
 
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
 Skada.version = GetAddOnMetadata("Skada", "Version")
-Skada.website = GetAddOnMetadata("Skada", "X-Website") or "https://github.com/bkader/Skada-WoTLK"
-Skada.discord = GetAddOnMetadata("Skada", "X-Discord") or "https://bit.ly/skada-rev"
+Skada.website = GetAddOnMetadata("Skada", "X-Website")
+Skada.discord = GetAddOnMetadata("Skada", "X-Discord")
 Skada.locale = Skada.locale or GetLocale()
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada", false)
@@ -13,7 +13,6 @@ local DBI = LibStub("LibDBIcon-1.0", true)
 local LBB = LibStub("LibBabble-Boss-3.0"):GetUnstrictLookupTable()
 local LBI = LibStub("LibBossIDs-1.0")
 local LDB = LibStub("LibDataBroker-1.1")
-local LGT = LibStub("LibGroupTalents-1.0")
 local Translit = LibStub("LibTranslit-1.0", true)
 
 -- cache frequently used globlas
@@ -27,10 +26,11 @@ local IsInInstance, UnitAffectingCombat, InCombatLockdown = IsInInstance, UnitAf
 local UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected
 local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
-local UnitGroupRolesAssigned, GetInspectSpecialization = Skada.UnitGroupRolesAssigned, Skada.GetInspectSpecialization
+local GetUnitRole, GetUnitSpec = Skada.GetUnitRole, Skada.GetUnitSpec
 local GetGroupTypeAndCount, GetNumGroupMembers = Skada.GetGroupTypeAndCount, Skada.GetNumGroupMembers
 local GetUnitIdFromGUID, UnitIterator, IsGroupInCombat, IsGroupDead = Skada.GetUnitIdFromGUID, Skada.UnitIterator, Skada.IsGroupInCombat, Skada.IsGroupDead
 local After, NewTicker, NewTimer, CancelTimer = Skada.After, Skada.NewTicker, Skada.NewTimer, Skada.CancelTimer
+local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
 
 local dataobj = LDB:NewDataObject("Skada", {
 	label = "Skada",
@@ -61,9 +61,6 @@ local disabled = false
 local update_timer, tick_timer, version_timer
 local checkVersion, convertVersion
 local check_for_join_and_leave
-
--- spec and role tables
-Skada.LGTSpecs, Skada.LGTRoles = {}, {}
 
 -- list of players, pets and vehicles
 local players, pets, vehicles, queuedUnits = {}, {}, {}, nil
@@ -169,7 +166,7 @@ do
 		[8] = {ACTION_ENVIRONMENTAL_DAMAGE_SLIME, [[Interface\Icons\inv_misc_slime_01]]}
 	}
 
-	local function getSpellInfo(spellid)
+	function Skada.getSpellInfo(spellid)
 		local res1, res2, res3, res4, res5, res6, res7, res8, res9
 		if spellid then
 			if custom[spellid] then
@@ -177,23 +174,20 @@ do
 			else
 				res1, res2, res3, res4, res5, res6, res7, res8, res9 = GetSpellInfo(spellid)
 				if spellid == 75 then
-					res3 = "Interface\\Icons\\INV_Weapon_Bow_07"
+					res3 = [[Interface\Icons\INV_Weapon_Bow_07]]
 				elseif spellid == 6603 then
-					res1, res3 = MELEE, "Interface\\Icons\\INV_Sword_04"
+					res1, res3 = MELEE, [[Interface\Icons\INV_Sword_04]]
 				end
 			end
 		end
 		return res1, res2, res3, res4, res5, res6, res7, res8, res9
 	end
 
-	local function getSpellLink(spellid)
+	function Skada.getSpellLink(spellid)
 		if not custom[spellid] then
 			return GetSpellLink(spellid)
 		end
 	end
-
-	Skada.getSpellInfo = Skada.memoize(getSpellInfo)
-	Skada.getSpellLink = Skada.memoize(getSpellLink)
 end
 
 -------------------------------------------------------------------------------
@@ -1332,33 +1326,6 @@ end
 -------------------------------------------------------------------------------
 -- player functions
 
-function Skada:LibGroupTalents_Update(event, guid, unit)
-	if guid and unit then
-		local class = select(2, UnitClass(unit))
-
-		-- cache spec
-		local spec = GetInspectSpecialization(unit, class)
-		if spec then
-			self.LGTSpecs[guid] = spec
-		end
-
-		-- cache role
-		local role = UnitGroupRolesAssigned(unit, class)
-		if role and role ~= "NONE" then
-			self.LGTRoles[guid] = role
-		end
-	end
-end
-LGT.RegisterCallback(Skada, "LibGroupTalents_Update")
-
-function Skada:LibGroupTalents_Remove(_, guid, name)
-	if self.LGTSpecs[guid] then
-		self.LGTSpecs[guid] = nil
-		self.LGTRoles[guid] = nil
-	end
-end
-LGT.RegisterCallback(Skada, "LibGroupTalents_Remove")
-
 -- finds a player that was already recorded
 function Skada:find_player(set, playerid, playername, strict)
 	if set and playerid and playerid ~= "total" then
@@ -1460,11 +1427,11 @@ do
 
 		-- fix players created before their info was received
 		if player.class and Skada.validclass[player.class] then
-			if player.spec == nil and self.LGTSpecs[player.id] then
-				player.spec = self.LGTSpecs[player.id]
+			if player.spec == nil then
+				player.spec = GetUnitSpec(players[player.id])
 			end
-			if player.role == nil and self.LGTRoles[player.id] then
-				player.role = self.LGTRoles[player.id]
+			if player.role == nil or player.role == "NONE" then
+				player.role = GetUnitRole(players[player.id])
 			end
 		end
 
@@ -1472,7 +1439,6 @@ do
 		player.last = player.last or GetTime()
 
 		self.changed = true
-		self.callbacks:Fire("SKADA_PLAYER_GET", player)
 		return player
 	end
 end
@@ -2253,7 +2219,7 @@ do
 	function Skada:CheckZone()
 		inInstance, self.instanceType = IsInInstance()
 		isininstance = inInstance and (self.instanceType == "party" or self.instanceType == "raid")
-		isinpvp = self.IsInPvP()
+		isinpvp = IsInPvP()
 
 		if isininstance and wasininstance ~= nil and not wasininstance and self.db.profile.reset.instance ~= 1 and self:CanReset() then
 			if self.db.profile.reset.instance == 3 then
@@ -2273,7 +2239,7 @@ do
 
 		wasininstance = (isininstance == true)
 		wasinpvp = (isinpvp == true)
-		wasinparty = self.IsInGroup()
+		wasinparty = IsInGroup()
 		self.callbacks:Fire("SKADA_ZONE_CHECK")
 	end
 end
@@ -2309,7 +2275,7 @@ do
 	end
 
 	function check_for_join_and_leave()
-		if not Skada.IsInGroup() and wasinparty then
+		if not IsInGroup() and wasinparty then
 			if Skada.db.profile.reset.leave == 3 and Skada:CanReset() then
 				Skada:ShowPopup(nil, true)
 			elseif Skada.db.profile.reset.leave == 2 and Skada:CanReset() then
@@ -2321,19 +2287,19 @@ do
 			end
 		end
 
-		if Skada.IsInGroup() and not wasinparty then
+		if IsInGroup() and not wasinparty then
 			if Skada.db.profile.reset.join == 3 and Skada:CanReset() then
 				Skada:ShowPopup(nil, true)
 			elseif Skada.db.profile.reset.join == 2 and Skada:CanReset() then
 				Skada:Reset()
 			end
 
-			if Skada.db.profile.hidesolo and not (Skada.db.profile.hidepvp and Skada.IsInPvP()) then
+			if Skada.db.profile.hidesolo and not (Skada.db.profile.hidepvp and IsInPvP()) then
 				Skada:SetActive(true)
 			end
 		end
 
-		wasinparty = not (not Skada.IsInGroup())
+		wasinparty = not (not IsInGroup())
 	end
 
 	function Skada:PARTY_MEMBERS_CHANGED()
@@ -2445,8 +2411,6 @@ function Skada:Reset(force)
 	self:CleanGarbage()
 	self:Print(L["All data has been reset."])
 	CloseDropDownMenus()
-
-	self.callbacks:Fire("SKADA_DATA_RESET")
 end
 
 function Skada:UpdateDisplay(force)
@@ -2853,7 +2817,7 @@ function Skada:ApplySettings(name)
 		end
 	end
 
-	if (Skada.db.profile.hidesolo and not Skada.IsInGroup()) or (Skada.db.profile.hidepvp and Skada.IsInPvP()) then
+	if (Skada.db.profile.hidesolo and not IsInGroup()) or (Skada.db.profile.hidepvp and IsInPvP()) then
 		Skada:SetActive(false)
 	else
 		Skada:SetActive(true)
@@ -3513,7 +3477,7 @@ function Skada:EndSegment()
 			end
 		end
 
-		if not win.db.hidden and (not self.db.profile.hidesolo or self.IsInGroup()) then
+		if not win.db.hidden and (not self.db.profile.hidesolo or IsInGroup()) then
 			if self.db.profile.showcombat and win:IsShown() then
 				win:Hide()
 			elseif self.db.profile.hidecombat and not win:IsShown() then

@@ -44,9 +44,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	local sdetailmod = spellmod:NewModule(L["Damage Breakdown"])
 	local targetmod = mod:NewModule(L["Damage target list"])
 	local tdetailmod = targetmod:NewModule(L["Damage spell list"])
-
-	local UnitGUID = UnitGUID
-	local tContains = tContains
+	local UnitGUID, tContains = UnitGUID, tContains
 
 	-- spells on the list below are ignored when it comes
 	-- to updating player's active time.
@@ -229,12 +227,33 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	end
 
 	local dmg = {}
+	local extraATT
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
+
+			-- handle extra attacks
+			if eventtype == "SPELL_EXTRA_ATTACKS" then
+				local _, spellname, _, amount = ...
+				extraATT = extraATT or newTable()
+				if not extraATT[srcName] then
+					extraATT[srcName] = {spellname = spellname, amount = amount}
+				end
+				return
+			end
+
 			if eventtype == "SWING_DAMAGE" then
 				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, MELEE, 1
 				dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing, dmg.crushing = ...
+
+				-- an extra attack?
+				if extraATT and extraATT[srcName] then
+					dmg.spellname = dmg.spellname .. " (" .. extraATT[srcName].spellname .. ")"
+					extraATT[srcName].amount = max(0, extraATT[srcName].amount - 1)
+					if extraATT[srcName].amount == 0 then
+						extraATT[srcName] = nil
+					end
+				end
 			else
 				dmg.spellid, dmg.spellname, dmg.spellschool, dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing, dmg.crushing = ...
 			end
@@ -298,7 +317,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 		local player = Skada:find_player(set, id)
 		if player then
 			local totaltime = Skada:GetSetTime(set)
-			local activetime = Skada:PlayerActiveTime(set, player)
+			local activetime = Skada:PlayerActiveTime(set, player, true)
 			tooltip:AddDoubleLine(L["Activity"], Skada:FormatPercent(activetime, totaltime), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(Skada:PlayerActiveTime(set, player, true)), 1, 1, 1)
@@ -727,6 +746,8 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	end
 
 	function mod:SetComplete(set)
+		extraATT = delTable(extraATT)
+
 		for _, player in ipairs(set.players) do
 			if ((player.damage or 0) + (player.absdamage or 0)) == 0 then
 				player.damage_spells = nil
