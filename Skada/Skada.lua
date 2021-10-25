@@ -1375,7 +1375,7 @@ do
 					player.class = "MONSTER"
 				elseif Skada:IsPlayer(player.id, player.flags, player.name) then
 					local class = select(2, UnitClass(unit or player.name))
-					player.class = class or Skada.GetClassFromGUID(player.id)
+					player.class = class or Skada.GetClassFromGUID(player.id, "group")
 					player.name = player.name or select(6, GetPlayerInfoByGUID(player.id))
 				else
 					player.class = "UNKNOWN"

@@ -123,7 +123,7 @@ do
 	end
 
 	-- Shamelessly copied from Omen - thanks!
-	local tablePool = lib.tablePool or setmetatable({}, {__mode = "kv"})
+	local tablePool = lib.tablePool or setmetatable({}, {__mode = "k"})
 	lib.tablePool = tablePool
 
 	-- get a new table
@@ -136,12 +136,7 @@ do
 	-- delete table and return to pool
 	local function delTable(t)
 		if type(t) == "table" then
-			for k, v in pairs(t) do
-				if type(v) == "table" then
-					delTable(v)
-				end
-				t[k] = nil
-			end
+			wipe(t)
 			t[true] = true
 			t[true] = nil
 			tablePool[t] = true
@@ -725,7 +720,7 @@ do
 			return "DAMAGER"
 		end
 
-		return LGTRoleTable[LGT:GetUnitRole(unit or "player")] or "NONE"
+		return LGTRoleTable[LGT:GetUnitRole(unit)] or "NONE"
 	end
 
 	local function GetGUIDRole(guid)

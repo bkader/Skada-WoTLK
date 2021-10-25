@@ -7,7 +7,7 @@ Skada:AddLoadableModule("Threat", function(Skada, L)
 	local ipairs, select, format, max = ipairs, select, string.format, math.max
 	local GroupIterator, UnitExists, UnitIsFriend = Skada.GroupIterator, UnitExists, UnitIsFriend
 	local UnitName, UnitClass, UnitGUID = UnitName, UnitClass, UnitGUID
-	local GetUnitRole, GetUnitSpec = Skada.GetUnitRole, Skada.GetUnitRole
+	local GetUnitRole, GetUnitSpec = Skada.GetUnitRole, Skada.GetUnitSpec
 	local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 	local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
 	local PlaySoundFile = PlaySoundFile
