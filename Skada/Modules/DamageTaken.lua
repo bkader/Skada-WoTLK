@@ -1009,7 +1009,6 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(Skada, L)
 			end
 
 			win.metadata.maxvalue = maxvalue
-			delTable(cacheTable)
 		end
 	end
 
