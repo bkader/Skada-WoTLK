@@ -1428,10 +1428,10 @@ do
 		-- fix players created before their info was received
 		if player.class and Skada.validclass[player.class] then
 			if player.spec == nil then
-				player.spec = GetUnitSpec(players[player.id])
+				player.spec = GetUnitSpec(players[player.id], player.class)
 			end
 			if player.role == nil or player.role == "NONE" then
-				player.role = GetUnitRole(players[player.id])
+				player.role = GetUnitRole(players[player.id], player.class)
 			end
 		end
 
