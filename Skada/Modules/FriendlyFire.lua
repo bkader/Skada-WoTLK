@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local Skada = Skada
 Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 	if Skada:IsDisabled("Friendly Fire") then return end
 
@@ -7,7 +7,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 	local targetmod = mod:NewModule(L["Damage target list"])
 
 	local pairs, ipairs, select, format = pairs, ipairs, select, string.format
-	local getSpellInfo, tContains = Skada.getSpellInfo or GetSpellInfo, tContains
+	local GetSpellInfo, tContains = Skada.GetSpellInfo or GetSpellInfo, tContains
 	local _
 
 	-- spells in the following table will be ignored.
@@ -16,7 +16,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 	local function log_damage(set, dmg)
 		if dmg.spellid and tContains(ignoredSpells, dmg.spellid) then return end
 
-		local player = Skada:get_player(set, dmg.playerid, dmg.playername, dmg.playerflags)
+		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
 		if player then
 			Skada:AddActiveTime(player, dmg.amount > 0)
 
@@ -65,7 +65,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 	end
 
 	function targetmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's targets"], player.name)
 			local total = player.friendfire or 0
@@ -105,7 +105,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 	end
 
 	function spellmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's damage"], player.name)
 			local total = player.friendfire or 0
@@ -119,7 +119,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = getSpellInfo(spellid)
+					d.label, _, d.icon = GetSpellInfo(spellid)
 
 					d.value = amount
 					d.valuetext = Skada:FormatValueText(
@@ -152,9 +152,9 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = player.id
+					d.id = player.id or player.name
 					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
+					d.text = player.id and Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -184,7 +184,7 @@ Skada:AddLoadableModule("Friendly Fire", function(Skada, L)
 			click2 = targetmod,
 			nototalclick = {targetmod},
 			columns = {Damage = true, Percent = true},
-			icon = "Interface\\Icons\\inv_gizmo_supersappercharge"
+			icon = [[Interface\Icons\inv_gizmo_supersappercharge]]
 		}
 
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})

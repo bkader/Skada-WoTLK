@@ -1,7 +1,7 @@
-assert(Skada, "Skada not found!")
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
+local Skada = Skada
 
-local name = L["Data text"]
+local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
+local name = L["Data Text"]
 local mod = Skada:NewModule(name)
 
 mod.name = name
@@ -9,7 +9,7 @@ mod.description = L["Data text acts as an LDB data feed. It can be integrated in
 Skada:AddDisplaySystem("broker", mod)
 
 local ldb = LibStub:GetLibrary("LibDataBroker-1.1")
-local libwindow = LibStub("LibWindow-1.1")
+local LibWindow = LibStub("LibWindow-1.1")
 local media = LibStub("LibSharedMedia-3.0")
 
 local tsort, format = table.sort, string.format
@@ -31,9 +31,9 @@ end
 
 local function formatLabel(win, data)
 	if win.db.isusingclasscolors and data.class then
-		return WrapTextInColorCode(data.text or data.label or UNKNOWN, Skada.classcolors[data.class].colorStr)
+		return WrapTextInColorCode(data.text or data.label or L.Unknown, Skada.classcolors[data.class].colorStr)
 	else
-		return data.text or data.label or UNKNOWN
+		return data.text or data.label or L.Unknown
 	end
 end
 
@@ -105,13 +105,13 @@ function mod:Create(win, isnew)
 		win.frame:SetPoint("CENTER", 0, 0)
 
 		-- Register with LibWindow-1.1.
-		libwindow.RegisterConfig(win.frame, win.db)
+		LibWindow.RegisterConfig(win.frame, win.db)
 
 		-- Restore window position.
 		if isnew then
-			libwindow.SavePosition(win.frame)
+			LibWindow.SavePosition(win.frame)
 		else
-			libwindow.RestorePosition(win.frame)
+			LibWindow.RestorePosition(win.frame)
 		end
 
 		local title = win.frame:CreateFontString("frameTitle", 6)
@@ -134,7 +134,7 @@ function mod:Create(win, isnew)
 		win.frame:SetScript("OnDragStop", function(frame)
 			frame:StopMovingOrSizing()
 			frame.isDragging = false
-			libwindow.SavePosition(frame)
+			LibWindow.SavePosition(frame)
 		end)
 	end
 
@@ -258,73 +258,52 @@ function mod:AddDisplayOptions(win, options)
 	local db = win.db
 	options.main = {
 		type = "group",
-		name = L["Data text"],
-		desc = format(L["Options for %s."], L["Data text"]),
-		order = 3,
+		name = L["Data Text"],
+		desc = format(L["Options for %s."], L["Data Text"]),
+		order = 10,
+		get = function(i)
+			return db[i[#i]]
+		end,
+		set = function(i, val)
+			db[i[#i]] = val
+			Skada:ApplySettings(db.name)
+		end,
 		args = {
 			useframe = {
 				type = "toggle",
 				name = L["Use frame"],
 				desc = L["Shows a standalone frame. Not needed if you are using an LDB display provider such as Titan Panel or ChocolateBar."],
-				get = function() return db.useframe end,
-				set = function(win, key)
-					db.useframe = key
-					Skada:ApplySettings(db.name)
-				end,
 				order = 10,
 				width = "double"
 			},
 			barfont = {
 				type = "select",
 				dialogControl = "LSM30_Font",
-				name = L["Bar font"],
-				desc = L["The font used by all bars."],
+				name = L["Font"],
+				desc = format(L["The font used by %s."], L["Bars"]),
 				values = AceGUIWidgetLSMlists.font,
-				get = function() return db.barfont end,
-				set = function(win, key)
-					db.barfont = key
-					Skada:ApplySettings(db.name)
-				end,
-				order = 20,
-				width = "double"
-			},
-			barfontsize = {
-				type = "range",
-				name = L["Bar font size"],
-				desc = L["The font size of all bars."],
-				min = 7,
-				max = 40,
-				step = 1,
-				get = function() return db.barfontsize end,
-				set = function(win, size)
-					db.barfontsize = size
-					Skada:ApplySettings(db.name)
-				end,
-				order = 30,
-				width = "double"
+				order = 20
 			},
 			barfontflags = {
 				type = "select",
 				name = L["Font Outline"],
 				desc = L["Sets the font outline."],
-				values = {
-					[""] = NONE,
-					["OUTLINE"] = L["Outline"],
-					["THICKOUTLINE"] = L["Thick outline"],
-					["MONOCHROME"] = L["Monochrome"],
-					["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
-				},
-				get = function() return db.barfontflags end,
-				set = function(win, key)
-					db.barfontflags = key
-					Skada:ApplySettings(db.name)
-				end,
+				values = Skada.fontFlags,
+				order = 30
+			},
+			barfontsize = {
+				type = "range",
+				name = L["Font Size"],
+				desc = format(L["The font size of %s."], L["Bars"]),
+				min = 5,
+				max = 32,
+				step = 1,
 				order = 40,
 				width = "double"
 			},
 			color = {
 				type = "color",
-				name = L["Text color"],
+				name = L["Text Color"],
 				desc = L["Choose the default color."],
 				hasAlpha = true,
 				get = function(i)
@@ -337,19 +316,12 @@ function mod:AddDisplayOptions(win, options)
 				end,
 				disabled = function() return db.isusingclasscolors end,
 				order = 50,
-				width = "double",
 			},
-			classcolortext = {
+			isusingclasscolors = {
 				type = "toggle",
-				name = L["Class color text"],
+				name = L["Class Colors"],
 				desc = L["When possible, bar text will be colored according to player class."],
-				get = function() return db.isusingclasscolors end,
-				set = function()
-					db.isusingclasscolors = not db.isusingclasscolors
-					Skada:ApplySettings(db.name)
-				end,
-				order = 60,
-				width = "double"
+				order = 60
 			},
 		}
 	}

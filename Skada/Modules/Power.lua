@@ -1,11 +1,12 @@
-assert(Skada, "Skada not found!")
+local Skada = Skada
 Skada:AddLoadableModule("Resources", function(Skada, L)
 	if Skada:IsDisabled("Resources") then return end
 
 	local mod = Skada:NewModule(L["Resources"])
+	mod.icon = [[Interface\Icons\spell_holy_rapture]]
 
 	local pairs, ipairs, format, tContains = pairs, ipairs, string.format, tContains
-	local setmetatable, getSpellInfo = setmetatable, Skada.getSpellInfo or GetSpellInfo
+	local setmetatable, GetSpellInfo = setmetatable, Skada.GetSpellInfo or GetSpellInfo
 	local _
 
 	local namesTable = {[0] = MANA, [1] = RAGE, [3] = ENERGY, [6] = RUNIC_POWER}
@@ -18,7 +19,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 		if not (gain and gain.type and keysTable[gain.type]) then return end
 		if (gain.spellid and tContains(ignoredSpells, gain.spellid)) then return end
 
-		local player = Skada:get_player(set, gain.playerid, gain.playername, gain.playerflags)
+		local player = Skada:GetPlayer(set, gain.playerid, gain.playername, gain.playerflags)
 		if player then
 			player[keysTable[gain.type]] = player[keysTable[gain.type]] or {amt = 0}
 			player[keysTable[gain.type]].amt = (player[keysTable[gain.type]].amt or 0) + gain.amount
@@ -84,7 +85,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 	-- this is the main module update function that shows the list
 	-- of players depending on the selected power gain type.
 	function basemod:Update(win, set)
-		win.title = self.moduleName or UNKNOWN
+		win.title = self.moduleName or L["Unknown"]
 		local total = set and self.power and set[self.power] or 0
 
 		if total > 0 then
@@ -95,9 +96,9 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = player.id
+					d.id = player.id or player.name
 					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
+					d.text = player.id and Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -133,13 +134,13 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 	-- player mods common Enter function.
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's gained %s"], label, namesTable[self.powertype] or UNKNOWN)
+		win.title = format(L["%s's gained %s"], label, namesTable[self.powertype] or L["Unknown"])
 	end
 
 	-- player mods main update function
 	function playermod:Update(win, set)
-		win.title = format(L["%s's gained %s"], win.playername or UNKNOWN, self.powertype and namesTable[self.powertype] or UNKNOWN)
-		local player = Skada:find_player(set, win.playerid)
+		win.title = format(L["%s's gained %s"], win.playername or L["Unknown"], self.powertype and namesTable[self.powertype] or L["Unknown"])
+		local player = Skada:FindPlayer(set, win.playerid)
 		if player and self.power then
 			local total = player[self.power] and player[self.power].amt or 0
 
@@ -152,7 +153,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = getSpellInfo(spellid)
+					d.label, _, d.icon = GetSpellInfo(spellid)
 
 					d.value = amount
 					d.valuetext = Skada:FormatValueText(
@@ -188,10 +189,10 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 		Skada:RegisterForCL(SpellLeech, "SPELL_LEECH", {src_is_interesting = true})
 		Skada:RegisterForCL(SpellLeech, "SPELL_PERIODIC_LEECH", {src_is_interesting = true})
 
-		manamod.metadata.icon = "Interface\\Icons\\inv_elemental_primal_mana"
-		ragemod.metadata.icon = "Interface\\Icons\\ability_racial_bloodrage"
-		energymod.metadata.icon = "Interface\\Icons\\spell_holy_circleofrenewal"
-		runicmod.metadata.icon = "Interface\\Icons\\inv_misc_rune_09"
+		manamod.metadata.icon = [[Interface\Icons\inv_elemental_primal_mana]]
+		ragemod.metadata.icon = [[Interface\Icons\ability_racial_bloodrage]]
+		energymod.metadata.icon = [[Interface\Icons\spell_holy_circleofrenewal]]
+		runicmod.metadata.icon = [[Interface\Icons\inv_misc_rune_09]]
 		Skada:AddMode(manamod, L["Resources"])
 		Skada:AddMode(ragemod, L["Resources"])
 		Skada:AddMode(energymod, L["Resources"])

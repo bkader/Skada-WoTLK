@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local Skada = Skada
 Skada:AddLoadableModule("Potions", function(Skada, L)
 	if Skada:IsDisabled("Potions") then return end
 
@@ -9,7 +9,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	-- cache frequently used globals
 	local pairs, ipairs, select, tconcat = pairs, ipairs, select, table.concat
 	local format, strsub, tostring = string.format, string.sub, tostring
-	local GetItemInfo, getSpellInfo, After = GetItemInfo, Skada.getSpellInfo or GetSpellInfo, Skada.After
+	local GetItemInfo, GetSpellInfo, After = GetItemInfo, Skada.GetSpellInfo or GetSpellInfo, Skada.After
 	local GroupIterator = Skada.GroupIterator
 	local UnitExists, UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
 	local UnitGUID, UnitName = UnitGUID, UnitName
@@ -40,7 +40,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	local prepotion
 
 	local function log_potion(set, playerid, playername, playerflags, spellid)
-		local player = Skada:get_player(set, playerid, playername, playerflags)
+		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
 		if player then
 			-- record potion usage for player and set
 			player.potion = (player.potion or 0) + 1
@@ -71,7 +71,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 
 				local potions = newTable() -- holds used potions
 				for potionid, _ in pairs(potionIDs) do
-					local icon, _, _, _, _, _, _, _, spellid = select(3, UnitBuff(unit, getSpellInfo(potionid)))
+					local icon, _, _, _, _, _, _, _, spellid = select(3, UnitBuff(unit, GetSpellInfo(potionid)))
 					if spellid and potionIDs[spellid] then
 						-- instant recording doesn't work, so we delay it
 						After(1, function() PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid) end)
@@ -103,7 +103,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	end
 
 	function potionmod:Update(win, set)
-		win.title = win.potionname or UNKNOWN
+		win.title = win.potionname or L["Unknown"]
 
 		local total, players = 0, newTable()
 		if win.potionid then
@@ -168,7 +168,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	end
 
 	function playermod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid)
+		local player = Skada:FindPlayer(set, win.playerid)
 		if player then
 			win.title = format(L["%s's used potions"], player.name)
 			local total = player.potion or 0
@@ -224,9 +224,9 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = player.id
+					d.id = player.id or player.name
 					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
+					d.text = player.id and Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -255,21 +255,12 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 			Skada.db.profile.prepotion = true
 		end
 
-		if Skada.options.args.Tweaks then
-			Skada.options.args.Tweaks.args.prepotion = {
-				type = "toggle",
-				name = L["Pre-potion"],
-				desc = L["Prints pre-potion after the end of the combat."],
-				order = 0
-			}
-		else
-			Skada.options.args.generaloptions.args.prepotion = {
-				type = "toggle",
-				name = L["Pre-potion"],
-				desc = L["Prints pre-potion after the end of the combat."],
-				order = 94
-			}
-		end
+		Skada.options.args.tweaks.args.general.args.prepotion = {
+			type = "toggle",
+			name = L["Pre-potion"],
+			desc = L["Prints pre-potion after the end of the combat."],
+			order = 0
+		}
 	end
 
 	function mod:OnEnable()
@@ -279,7 +270,7 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 			showspots = true,
 			click1 = playermod,
 			columns = {Count = true, Percent = true},
-			icon = "Interface\\Icons\\inv_potion_110"
+			icon = [[Interface\Icons\inv_potion_110]]
 		}
 
 		Skada:RegisterForCL(PotionUsed, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})

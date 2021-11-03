@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader/LibCompat-1.0)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0-Skada", 25
+local MAJOR, MINOR = "LibCompat-1.0-Skada", 26
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
@@ -13,10 +13,12 @@ lib.callbacks = lib.callbacks or LibStub("CallbackHandler-1.0"):New(lib)
 
 local pairs, ipairs, select, type = pairs, ipairs, select, type
 local tinsert, tremove, tconcat, wipe = table.insert, table.remove, table.concat, wipe
-local floor, ceil, max, min = math.floor, math.ceil, math.max, math.min
+local max, min = math.max, math.min
 local format = format or string.format
 local strlen = strlen or string.len
 local strmatch = strmatch or string.match
+local strbyte = strbyte or string.byte
+local strchar = strchar or string.char
 local tostring, tonumber = tostring, tonumber
 local setmetatable = setmetatable
 local CreateFrame = CreateFrame
@@ -29,63 +31,21 @@ local QuickDispatch
 local IsInGroup, IsInRaid
 local GetUnitIdFromGUID
 local tLength
-local WithinRange
-
--------------------------------------------------------------------------------
-
-do
-	local tmp = {}
-	local function _print(self, frame, ...)
-		local n = 0
-		if self ~= lib then
-			n = n + 1
-			tmp[n] = "|cff33ff99" .. tostring(self) .. "|r:"
-		end
-		for i = 1, select("#", ...) do
-			n = n + 1
-			tmp[n] = tostring(select(i, ...))
-		end
-		frame:AddMessage(tconcat(tmp, " ", 1, n))
-	end
-
-	function lib:Print(...)
-		local frame = ...
-		if type(frame) == "table" and frame.AddMessage then
-			return _print(self, frame, select(2, ...))
-		end
-		return _print(self, DEFAULT_CHAT_FRAME, ...)
-	end
-
-	function lib:Printf(...)
-		local frame = ...
-		if type(frame) == "table" and frame.AddMessage then
-			return _print(self, frame, format(select(2, ...)))
-		else
-			return _print(self, DEFAULT_CHAT_FRAME, format(...))
-		end
-	end
-end
 
 -------------------------------------------------------------------------------
 
 do
 	local pcall = pcall
 
-	local function dispatchError(err)
-		print("|cffff9900Error|r:" .. (err or "<no error given>"))
-	end
-
 	function QuickDispatch(func, ...)
 		if type(func) ~= "function" then return end
 		local ok, err = pcall(func, ...)
 		if not ok then
-			dispatchError(err)
+			print("|cffff9900Error|r:" .. (err or "<no error given>"))
 			return
 		end
 		return true
 	end
-
-	lib.QuickDispatch = QuickDispatch
 end
 
 -------------------------------------------------------------------------------
@@ -104,10 +64,19 @@ do
 		for k, v in pairs(from) do
 			local skip = false
 			if ... then
-				for _, j in ipairs(...) do
-					if j == k then
-						skip = true
-						break
+				if type(...) == "table" then
+					for _, j in ipairs(...) do
+						if j == k then
+							skip = true
+							break
+						end
+					end
+				else
+					for i = 1, select("#", ...) do
+						if select(i, ...) == k then
+							skip = true
+							break
+						end
 					end
 				end
 			end
@@ -122,8 +91,21 @@ do
 		end
 	end
 
+	local function tIndexOf(tbl, item)
+		for i, v in ipairs(tbl) do
+			if item == v then
+				return i
+			end
+		end
+	end
+
+	-- replace the global function
+	_G.tContains = function(tbl, item)
+		return (tIndexOf(tbl, item) ~= nil)
+	end
+
 	-- Shamelessly copied from Omen - thanks!
-	local tablePool = lib.tablePool or setmetatable({}, {__mode = "k"})
+	local tablePool = lib.tablePool or setmetatable({}, {__mode = "kv"})
 	lib.tablePool = tablePool
 
 	-- get a new table
@@ -139,25 +121,24 @@ do
 			wipe(t)
 			t[true] = true
 			t[true] = nil
+			setmetatable(t, nil)
 			tablePool[t] = true
 		end
 		return nil
 	end
 
-	lib.tLength = tLength
-	lib.tCopy = tCopy
-	lib.newTable = newTable
-	lib.delTable = delTable
-end
-
--------------------------------------------------------------------------------
-
-do
-	function WithinRange(val, minval, maxval)
-		return val >= minval and val <= maxval
+	local weaktable = {__mode = "v"}
+	local function WeakTable(t)
+		t = t or newTable() -- just so that we reuse tables.
+		return setmetatable(t, weaktable)
 	end
 
-	lib.WithinRange = WithinRange
+	lib.tLength = tLength
+	lib.tCopy = tCopy
+	lib.tIndexOf = tIndexOf
+	lib.newTable = newTable
+	lib.delTable = delTable
+	lib.WeakTable = WeakTable
 end
 
 -------------------------------------------------------------------------------
@@ -194,13 +175,16 @@ do
 	do
 		local rmem, pmem, step, count
 
-		local function SelfIterator()
+		local function SelfIterator(excPets)
 			while step do
 				local unit, owner
 				if step == 1 then
 					unit, owner, step = "player", nil, 2
 				elseif step == 2 then
-					unit, owner, step = "playerpet", "player", nil
+					if not excPets then
+						unit, owner = "playerpet", "player"
+					end
+					step = nil
 				end
 				if unit and UnitExists(unit) then
 					return unit, owner
@@ -208,16 +192,18 @@ do
 			end
 		end
 
-		local function PartyIterator()
+		local function PartyIterator(excPets)
 			while step do
 				local unit, owner
 				if step <= 2 then
-					unit, owner = SelfIterator()
+					unit, owner = SelfIterator(excPets)
 					step = step or 3
 				elseif step == 3 then
 					unit, owner, step = format("party%d", count), nil, 4
 				elseif step == 4 then
-					unit, owner = format("partypet%d", count), format("party%d", count)
+					if not excPets then
+						unit, owner = format("partypet%d", count), format("party%d", count)
+					end
 					count = count + 1
 					step = count <= pmem and 3 or nil
 				end
@@ -227,13 +213,15 @@ do
 			end
 		end
 
-		local function RaidIterator()
+		local function RaidIterator(excPets)
 			while step do
 				local unit, owner
 				if step == 1 then
 					unit, owner, step = format("raid%d", count), nil, 2
 				elseif step == 2 then
-					unit, owner = format("raidpet%d", count), format("raid%d", count)
+					if not excPets then
+						unit, owner = format("raidpet%d", count), format("raid%d", count)
+					end
 					count = count + 1
 					step = count <= rmem and 1 or nil
 				end
@@ -243,23 +231,23 @@ do
 			end
 		end
 
-		function UnitIterator()
+		function UnitIterator(excPets)
 			rmem, step = GetNumRaidMembers(), 1
 			if rmem == 0 then
 				pmem = GetNumPartyMembers()
 				if pmem == 0 then
-					return SelfIterator, false
+					return SelfIterator, excPets
 				end
 				count = 1
-				return PartyIterator, false
+				return PartyIterator, excPets
 			end
 			count = 1
-			return RaidIterator, true
+			return RaidIterator, excPets
 		end
 	end
 
-	local function IsGroupDead()
-		for unit in UnitIterator() do
+	local function IsGroupDead(incPets)
+		for unit in UnitIterator(not incPets) do
 			if not UnitIsDeadOrGhost(unit) then
 				return false
 			end
@@ -267,8 +255,8 @@ do
 		return true
 	end
 
-	local function IsGroupInCombat()
-		for unit in UnitIterator() do
+	local function IsGroupInCombat(incPets)
+		for unit in UnitIterator(not incPets) do
 			if UnitAffectingCombat(unit) then
 				return true
 			end
@@ -379,6 +367,7 @@ do
 	lib.GetClassFromGUID = GetClassFromGUID
 	lib.GetCreatureId = GetCreatureId
 	lib.UnitHealthInfo = UnitHealthInfo
+	lib.UnitHealthPercent = UnitHealthInfo -- backward compatibility
 	lib.UnitPowerInfo = UnitPowerInfo
 end
 
@@ -401,8 +390,9 @@ end
 -- Classes & Colors
 
 do
-	local classColorsTable
+	local classColorsTable, classInfoTable
 	local colors = CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS
+	local CLASS_SORT_ORDER = CLASS_SORT_ORDER
 
 	-- the functions below are for internal usage only
 	local function __fillClassColorsTable()
@@ -411,6 +401,30 @@ do
 		for class, tbl in pairs(colors) do
 			classColorsTable[class] = tbl
 			classColorsTable[class].colorStr = "ff" .. RGBPercToHex(tbl.r, tbl.g, tbl.b)
+		end
+	end
+
+	local function __fillClassInfoTable()
+		if classInfoTable ~= nil then return end
+
+		classInfoTable = {
+			WARRIOR = {classFile = "WARRIOR", classID = 1},
+			PALADIN = {classFile = "PALADIN", classID = 2},
+			HUNTER = {classFile = "HUNTER", classID = 3},
+			ROGUE = {classFile = "ROGUE", classID = 4},
+			PRIEST = {classFile = "PRIEST", classID = 5},
+			DEATHKNIGHT = {classFile = "DEATHKNIGHT", classID = 6},
+			SHAMAN = {classFile = "SHAMAN", classID = 7},
+			MAGE = {classFile = "MAGE", classID = 8},
+			WARLOCK = {classFile = "WARLOCK", classID = 9},
+			DRUID = {classFile = "DRUID", classID = 11}
+		}
+
+		-- fill names
+		for k, v in pairs(LOCALIZED_CLASS_NAMES_MALE) do
+			if classInfoTable[k] then
+				classInfoTable[k].className = v
+			end
 		end
 	end
 
@@ -429,6 +443,9 @@ end
 -- C_Timer mimic
 
 do
+	local Timer = lib.Timer or {}
+	lib.Timer = Timer
+
 	local TickerPrototype = {}
 	local TickerMetatable = {
 		__index = TickerPrototype,
@@ -439,10 +456,10 @@ do
 
 	local new, del
 	do
-		lib.__timers = lib.__timers or {}
-		lib.__afters = lib.__afters or {}
-		local listT = lib.__timers
-		local listA = lib.__afters
+		Timer.recycledTimers = Timer.recycledTimers or {}
+		Timer.recycledDelays = Timer.recycledDelays or {}
+		local listT = Timer.recycledTimers
+		local listA = Timer.recycledDelays
 
 		function new(temp)
 			if temp then
@@ -456,9 +473,9 @@ do
 			return t
 		end
 
-		function del(t)
+		function del(t, temp)
 			if t then
-				local temp = t._temp
+				wipe(t)
 				t[true] = true
 				t[true] = nil
 				if temp then
@@ -478,7 +495,7 @@ do
 			local ticker = WaitTable[i]
 
 			if ticker._cancelled then
-				del(tremove(WaitTable, i))
+				del(tremove(WaitTable, i), ticker._temp)
 				total = total - 1
 			elseif ticker._delay > elapsed then
 				ticker._delay = ticker._delay - elapsed
@@ -486,15 +503,15 @@ do
 			else
 				ticker._callback(ticker)
 
-				if ticker._remainingIterations == -1 then
+				if ticker._iterations == -1 then
 					ticker._delay = ticker._duration
 					i = i + 1
-				elseif ticker._remainingIterations > 1 then
-					ticker._remainingIterations = ticker._remainingIterations - 1
+				elseif ticker._iterations > 1 then
+					ticker._iterations = ticker._iterations - 1
 					ticker._delay = ticker._duration
 					i = i + 1
-				elseif ticker._remainingIterations == 1 then
-					del(tremove(WaitTable, i))
+				elseif ticker._iterations == 1 then
+					del(tremove(WaitTable, i), ticker._temp)
 					total = total - 1
 				end
 			end
@@ -528,46 +545,48 @@ do
 		end
 	end
 
-	local function After(duration, callback, ...)
+	function Timer.After(duration, callback)
 		ValidateArguments(duration, callback, "After")
-
 		local ticker = new(true)
 
-		ticker._remainingIterations = 1
+		ticker._iterations = 1
 		ticker._delay = max(0.01, duration)
 		ticker._callback = callback
-		ticker._cancelled = nil
 		ticker._temp = true
+		ticker._cancelled = nil -- just in case
 
 		AddDelayedCall(ticker)
 	end
 
-	local function CreateTicker(duration, callback, iterations, ...)
+	local function CreateTicker(duration, callback, iterations)
 		local ticker = new()
 
-		ticker._remainingIterations = iterations or -1
+		ticker._iterations = iterations or -1
 		ticker._delay = max(0.01, duration)
 		ticker._duration = ticker._delay
 		ticker._callback = callback
-		ticker._cancelled = nil
+		ticker._cancelled = nil -- just in case
+		ticker._temp = nil -- just in case
 
 		AddDelayedCall(ticker)
 		return ticker
 	end
 
-	local function NewTicker(duration, callback, iterations, ...)
+	function Timer.NewTicker(duration, callback, iterations)
 		ValidateArguments(duration, callback, "NewTicker")
-		return CreateTicker(duration, callback, iterations, ...)
+		return CreateTicker(duration, callback, iterations)
 	end
 
-	local function NewTimer(duration, callback, ...)
+	function Timer.NewTimer(duration, callback)
 		ValidateArguments(duration, callback, "NewTimer")
-		return CreateTicker(duration, callback, 1, ...)
+		return CreateTicker(duration, callback, 1)
 	end
 
-	local function CancelTimer(ticker)
+	function Timer.CancelTimer(ticker, silent)
 		if ticker and ticker.Cancel then
 			ticker:Cancel()
+		elseif not silent then
+			error(MAJOR .. ": CancelTimer(timer[, silent]): '"..tostring(ticker).."' - no such timer registered")
 		end
 		return nil
 	end
@@ -579,17 +598,18 @@ do
 		return self._cancelled
 	end
 
-	lib.After = After
-	lib.NewTicker = NewTicker
-	lib.NewTimer = NewTimer
-	lib.CancelTimer = CancelTimer
+	lib.C_Timer = Timer
+	-- backwards compatibility
+	lib.After = Timer.After
+	lib.NewTicker = Timer.NewTicker
+	lib.NewTimer = Timer.NewTimer
+	lib.CancelTimer = Timer.CancelTimer
 end
 
 -------------------------------------------------------------------------------
 
 do
 	local band, rshift, lshift = bit.band, bit.rshift, bit.lshift
-	local byte, char = string.byte, string.char
 
 	local function HexEncode(str, title)
 		local hex = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"}
@@ -601,7 +621,7 @@ do
 			end
 			j = j - 1
 
-			local b = byte(str, i)
+			local b = strbyte(str, i)
 			t[#t + 1] = hex[band(b, 15) + 1]
 			t[#t + 1] = hex[band(rshift(b, 4), 15) + 1]
 		end
@@ -620,19 +640,32 @@ do
 		local t, bl, bh = {}
 		local i = 1
 		repeat
-			bl = byte(str, i)
+			bl = strbyte(str, i)
 			bl = bl >= 65 and bl - 55 or bl - 48
 			i = i + 1
-			bh = byte(str, i)
+			bh = strbyte(str, i)
 			bh = bh >= 65 and bh - 55 or bh - 48
 			i = i + 1
-			t[#t + 1] = char(lshift(bh, 4) + bl)
+			t[#t + 1] = strchar(lshift(bh, 4) + bl)
 		until i >= #str
 		return tconcat(t)
 	end
 
+	-- we a fake frame/fontstring to escape the string
+	local escapeFrame = CreateFrame("Frame")
+	escapeFrame.fs = escapeFrame:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
+	escapeFrame:Hide()
+
+	local function EscapeStr(str)
+		escapeFrame.fs:SetText(str)
+		str = escapeFrame.fs:GetText()
+		escapeFrame.fs:SetText("")
+		return str
+	end
+
 	lib.HexEncode = HexEncode
 	lib.HexDecode = HexDecode
+	lib.EscapeStr = EscapeStr
 end
 
 -------------------------------------------------------------------------------
@@ -660,13 +693,6 @@ do
 		["SHAMAN"] = {262, 263, 264}
 	}
 
-	-- checks if the feral druid is a cat or tank spec
-	local function GetDruidSpec(unit)
-		-- 57881 : Natural Reaction -- used by druid tanks
-		local points = LGT:UnitHasTalent(unit, GetSpellInfo(57881), LGT:GetActiveTalentGroup(unit))
-		return (points and points > 0) and 3 or 2
-	end
-
 	local function GetUnitSpec(unit, class)
 		local spec  -- start with nil
 
@@ -685,7 +711,8 @@ do
 								if i == 3 then
 									index = 4
 								elseif i == 2 then
-									index = GetDruidSpec(unit)
+									local points = LGT:UnitHasTalent(unit, GetSpellInfo(57881))
+									index = (points and points > 0) and 3 or 2
 								end
 							else
 								index = i
@@ -723,13 +750,8 @@ do
 		return LGTRoleTable[LGT:GetUnitRole(unit)] or "NONE"
 	end
 
-	local function GetGUIDRole(guid)
-		return LGTRoleTable[LGT:GetGUIDRole(guid)] or "NONE"
-	end
-
-	lib.GetUnitRole = GetUnitRole
-	lib.GetGUIDRole = GetGUIDRole
 	lib.GetUnitSpec = GetUnitSpec
+	lib.GetUnitRole = GetUnitRole
 end
 
 -------------------------------------------------------------------------------
@@ -749,7 +771,7 @@ end
 
 do
 	local function WrapTextInColorCode(text, colorHexString)
-		return ("|c%s%s|r"):format(colorHexString, text)
+		return format("|c%s%s|r", colorHexString, text)
 	end
 
 	lib.WrapTextInColorCode = WrapTextInColorCode
@@ -758,11 +780,14 @@ end
 -------------------------------------------------------------------------------
 
 local mixins = {
+	-- table util
 	"tLength",
 	"tCopy",
+	"tIndexOf",
 	"newTable",
 	"delTable",
-	"WithinRange",
+	"WeakTable",
+	-- roster util
 	"IsInRaid",
 	"IsInGroup",
 	"IsInPvP",
@@ -772,24 +797,28 @@ local mixins = {
 	"IsGroupInCombat",
 	"GroupIterator",
 	"UnitIterator",
+	-- unit util
 	"GetUnitIdFromGUID",
 	"GetClassFromGUID",
 	"GetCreatureId",
 	"UnitHealthInfo",
+	"UnitHealthPercent", -- backward compatibility
 	"UnitPowerInfo",
 	"GetUnitSpec",
 	"GetUnitRole",
-	"GetGUIDRole",
+	-- timer util
+	"C_Timer",
 	"After",
 	"NewTicker",
 	"NewTimer",
 	"CancelTimer",
+	-- color conversion
 	"RGBPercToHex",
+	-- misc util
 	"HexEncode",
 	"HexDecode",
+	"EscapeStr",
 	"GetClassColorsTable",
-	"Print",
-	"Printf",
 	"WrapTextInColorCode"
 }
 

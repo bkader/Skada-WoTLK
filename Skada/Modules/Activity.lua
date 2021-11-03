@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local Skada = Skada
 Skada:AddLoadableModule("Activity", function(Skada, L)
 	if Skada:IsDisabled("Activity") then return end
 
@@ -6,8 +6,8 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
 	local ipairs, date, format, max = ipairs, date, string.format, math.max
 
 	local function activity_tooltip(win, id, label, tooltip)
-		local set = win:get_selected_set()
-		local player = Skada:find_player(set, id, label)
+		local set = win:GetSelectedSet()
+		local player = Skada:FindPlayer(set, id, label)
 		if player then
 			local settime = Skada:GetSetTime(set)
 			if settime > 0 then
@@ -34,9 +34,9 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = player.id
+					d.id = player.id or player.name
 					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
+					d.text = player.id and Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -66,7 +66,7 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
 			ordersort = true,
 			tooltip = activity_tooltip,
 			columns = {["Active Time"] = true, Percent = true},
-			icon = "Interface\\Icons\\spell_nature_timestop"
+			icon = [[Interface\Icons\spell_nature_timestop]]
 		}
 		Skada:AddMode(self)
 	end

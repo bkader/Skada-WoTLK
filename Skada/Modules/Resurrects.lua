@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local Skada = Skada
 Skada:AddLoadableModule("Resurrects", function(Skada, L)
 	if Skada:IsDisabled("Resurrects") then return end
 
@@ -8,11 +8,11 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 
 	local select, pairs, ipairs = select, pairs, ipairs
 	local tostring, format = tostring, string.format
-	local getSpellInfo = Skada.getSpellInfo or GetSpellInfo
+	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local _
 
 	local function log_resurrect(set, data)
-		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
+		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if player then
 			player.ress = (player.ress or 0) + 1
 			set.ress = (set.ress or 0) + 1
@@ -48,7 +48,7 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 	end
 
 	function playermod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's resurrect spells"], player.name)
 			local total = player.ress or 0
@@ -62,7 +62,7 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = getSpellInfo(spellid)
+					d.label, _, d.icon = GetSpellInfo(spellid)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
@@ -89,7 +89,7 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 	end
 
 	function targetmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's resurrect targets"], player.name)
 			local total = player.ress or 0
@@ -135,9 +135,9 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = player.id
+					d.id = player.id or player.name
 					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
+					d.text = player.id and Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -169,7 +169,7 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 			click2 = targetmod,
 			nototalclick = {targetmod},
 			columns = {Count = true, Percent = false},
-			icon = "Interface\\Icons\\spell_nature_reincarnation"
+			icon = [[Interface\Icons\spell_nature_reincarnation]]
 		}
 
 		Skada:RegisterForCL(SpellResurrect, "SPELL_RESURRECT", {src_is_interesting = true, dst_is_interesting = true})

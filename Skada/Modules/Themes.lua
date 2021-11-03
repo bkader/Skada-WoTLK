@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local Skada = Skada
 Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custom themes can also be used.", function(Skada, L)
 	if Skada:IsDisabled("Themes") then return end
 
@@ -288,7 +288,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 			type = "group",
 			name = self.moduleName,
 			desc = format(L["Options for %s."], self.moduleName),
-			order = 970,
+			order = 960,
 			args = {
 				apply = {
 					type = "group",
@@ -366,7 +366,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 									if thetheme then
 										for _, win in Skada:IterateWindows() do
 											if win.db.name == selectedwindow then
-												Skada.tCopy(win.db, thetheme, {"name", "modeincombat", "display", "set", "wipemode", "returnaftercombat", "x", "y", "sticked"})
+												Skada.tCopy(win.db, thetheme, "name", "modeincombat", "display", "set", "wipemode", "returnaftercombat", "x", "y", "sticked")
 												Skada:ApplySettings()
 												Skada:Print(L["Theme applied!"])
 											end
@@ -380,7 +380,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 				},
 				save = {
 					type = "group",
-					name = L["Save theme"],
+					name = L["Save Theme"],
 					inline = true,
 					order = 2,
 					args = {
@@ -425,7 +425,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 									if win.db.name == savewindow then
 										Skada.db.global.themes = Skada.db.global.themes or {}
 										local theme = {}
-										Skada.tCopy(theme, win.db, {"name", "sticked", "x", "y", "point"})
+										Skada.tCopy(theme, win.db, "name", "sticked", "x", "y", "point")
 										theme.name = savename or win.db.name
 										Skada.db.global.themes[#Skada.db.global.themes + 1] = theme
 									end
@@ -438,7 +438,7 @@ Skada:AddLoadableModule("Themes", "Adds a set of standard themes to Skada. Custo
 				},
 				delete = {
 					type = "group",
-					name = L["Delete theme"],
+					name = L["Delete Theme"],
 					inline = true,
 					order = 3,
 					args = {

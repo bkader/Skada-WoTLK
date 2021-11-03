@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local Skada = Skada
 
 local LibFail = LibStub("LibFail-1.0", true)
 if not LibFail then return end
@@ -12,7 +12,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 
 	local pairs, ipairs = pairs, ipairs
 	local tostring, format, tContains = tostring, string.format, tContains
-	local getSpellInfo, UnitGUID = Skada.getSpellInfo or GetSpellInfo, UnitGUID
+	local GetSpellInfo, UnitGUID = Skada.GetSpellInfo or GetSpellInfo, UnitGUID
 	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
 	local failevents, tankevents = LibFail:GetSupportedEvents(), LibFail:GetFailsWhereTanksDoNotFail()
 	local _
@@ -23,7 +23,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	local function log_fail(set, playerid, playername, spellid, event)
 		if (spellid and tContains(ignoredSpells, spellid)) or not set then return end
 
-		local player = Skada:find_player(set, playerid, playername)
+		local player = Skada:FindPlayer(set, playerid, playername)
 		if player and (player.role ~= "TANK" or not tContains(tankevents, event)) then
 			player.fail = (player.fail or 0) + 1
 			set.fail = (set.fail or 0) + 1
@@ -66,7 +66,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's fails"], win.spellname or UNKNOWN)
+		win.title = format(L["%s's fails"], win.spellname or L["Unknown"])
 
 		local total = countFail(set, win.spellid or 0)
 		if total > 0 then
@@ -77,9 +77,9 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = player.id
+					d.id = player.id or player.name
 					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
+					d.text = player.id and Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -109,7 +109,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	end
 
 	function playermod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's fails"], player.name)
 			local total = player.fail or 0
@@ -123,7 +123,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = getSpellInfo(spellid)
+					d.label, _, d.icon = GetSpellInfo(spellid)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
@@ -156,9 +156,9 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = player.id
+					d.id = player.id or player.name
 					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
+					d.text = player.id and Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -187,7 +187,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 			click1 = playermod,
 			nototalclick = {playermod},
 			columns = {Count = true, Percent = false},
-			icon = "Interface\\Icons\\ability_creature_cursed_01"
+			icon = [[Interface\Icons\ability_creature_cursed_01]]
 		}
 
 		tankevents = tankevents or LibFail:GetFailsWhereTanksDoNotFail()
@@ -218,9 +218,24 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 					type = "group",
 					name = mod.moduleName,
 					desc = format(L["Options for %s."], mod.moduleName),
-					get = function(i) return Skada.db.profile.modules[i[#i]] end,
-					set = function(i, val) Skada.db.profile.modules[i[#i]] = val or nil end,
 					args = {
+						header = {
+							type = "description",
+							name = mod.moduleName,
+							fontSize = "large",
+							image = [[Interface\Icons\ability_creature_cursed_01]],
+							imageWidth = 18,
+							imageHeight = 18,
+							imageCoords = {0.05, 0.95, 0.05, 0.95},
+							width = "full",
+							order = 0
+						},
+						sep = {
+							type = "description",
+							name = " ",
+							width = "full",
+							order = 1,
+						},
 						failsannounce = {
 							type = "toggle",
 							name = L["Report Fails"],

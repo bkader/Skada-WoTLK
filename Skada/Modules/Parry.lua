@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local Skada = Skada
 Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 	if Skada:IsDisabled("Parry-Haste") then return end
 
@@ -8,19 +8,18 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 	local pairs, ipairs, select = pairs, ipairs, select
 	local tostring, format = tostring, string.format
 
-	local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
 	local parrybosses = {
-		[LBB["Acidmaw"]] = true,
-		[LBB["Dreadscale"]] = true,
-		[LBB["Icehowl"]] = true,
-		[LBB["Onyxia"]] = true,
-		[LBB["Lady Deathwhisper"]] = true,
-		[LBB["Sindragosa"]] = true,
-		[LBB["Halion"]] = true
+		[L["Acidmaw"]] = true,
+		[L["Dreadscale"]] = true,
+		[L["Icehowl"]] = true,
+		[L["Onyxia"]] = true,
+		[L["Lady Deathwhisper"]] = true,
+		[L["Sindragosa"]] = true,
+		[L["Halion"]] = true
 	}
 
 	local function log_parry(set, data)
-		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
+		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if player then
 			player.parry = (player.parry or 0) + 1
 			set.parry = (set.parry or 0) + 1
@@ -62,7 +61,7 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 	end
 
 	function targetmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's parry targets"], player.name)
 			local total = player.parry or 0
@@ -109,9 +108,9 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = player.id
+					d.id = player.id or player.name
 					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
+					d.text = player.id and Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -141,7 +140,7 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 			click1 = targetmod,
 			nototalclick = {targetmod},
 			columns = {Count = true, Percent = false},
-			icon = "Interface\\Icons\\ability_parry"
+			icon = [[Interface\Icons\ability_parry]]
 		}
 
 		Skada:RegisterForCL(SpellMissed, "SPELL_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
@@ -166,24 +165,35 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 			type = "group",
 			name = self.moduleName,
 			desc = format(L["Options for %s."], self.moduleName),
-			get = function(i)
-				return Skada.db.profile.modules[i[#i]]
-			end,
-			set = function(i, val)
-				Skada.db.profile.modules[i[#i]] = val
-			end,
 			args = {
+				header = {
+					type = "description",
+					name = self.moduleName,
+					fontSize = "large",
+					image = [[Interface\Icons\ability_parry]],
+					imageWidth = 18,
+					imageHeight = 18,
+					imageCoords = {0.05, 0.95, 0.05, 0.95},
+					width = "full",
+					order = 0
+				},
+				sep = {
+					type = "description",
+					name = " ",
+					width = "full",
+					order = 1,
+				},
 				parryannounce = {
 					type = "toggle",
 					name = L["Announce Parries"],
-					order = 1,
+					order = 10,
 					width = "double"
 				},
 				parrychannel = {
 					type = "select",
 					name = L["Channel"],
 					values = {AUTO = INSTANCE, SELF = L["Self"]},
-					order = 2,
+					order = 20,
 					width = "double"
 				}
 			}

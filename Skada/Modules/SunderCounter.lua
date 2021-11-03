@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local Skada = Skada
 Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 	if Skada:IsDisabled("Sunder Counter") then return end
 
@@ -7,8 +7,8 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 	local pairs, ipairs, select = pairs, ipairs, select
 	local tostring, format = tostring, string.format
-	local getSpellInfo = Skada.getSpellInfo or GetSpellInfo
-	local getSpellLink = Skada.getSpellLink or GetSpellLink
+	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 	local newTable, delTable = Skada.newTable, Skada.delTable
 	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
 	local sunder, sunderLink, devastate
@@ -19,7 +19,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 	end
 
 	local function log_sunder(set, data)
-		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
+		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if player then
 			set.sunder = (set.sunder or 0) + 1
 			player.sunder = (player.sunder or 0) + 1
@@ -63,7 +63,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 		if Skada.db.profile.modules.sunderannounce and spellname and spellname == sunder then
 			Skada.After(0.1, function()
 				if mod.targets and mod.targets[dstGUID] then
-					mod:Announce(format(L["%s dropped from %s!"], sunderLink or sunder, dstName or UNKNOWN), dstGUID)
+					mod:Announce(format(L["%s dropped from %s!"], sunderLink or sunder, dstName or L["Unknown"]), dstGUID)
 					mod.targets[dstGUID] = nil
 				end
 			end)
@@ -83,11 +83,11 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 	function targetmod:Update(win, set)
 		if not sunder then
-			sunder, devastate = getSpellInfo(47467), getSpellInfo(47498)
-			sunderLink = getSpellLink(47467)
+			sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
+			sunderLink = GetSpellLink(47467)
 		end
 
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's <%s> targets"], player.name, sunder)
 			local total = player.sunder or 0
@@ -122,8 +122,8 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 	function mod:Update(win, set)
 		if not sunder then
-			sunder, devastate = getSpellInfo(47467), getSpellInfo(47498)
-			sunderLink = getSpellLink(47467)
+			sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
+			sunderLink = GetSpellLink(47467)
 		end
 
 		win.title = L["Sunder Counter"]
@@ -137,9 +137,9 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = player.id
+					d.id = player.id or player.name
 					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
+					d.text = player.id and Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.spec = player.spec
 					d.role = player.role
@@ -169,7 +169,7 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 			click1 = targetmod,
 			nototalclick = {targetmod},
 			columns = {Count = true, Percent = true},
-			icon = "Interface\\Icons\\ability_warrior_sunder"
+			icon = [[Interface\Icons\ability_warrior_sunder]]
 		}
 
 		Skada:RegisterForCL(SunderApplied, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})
@@ -234,8 +234,8 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 	function mod:OnInitialize()
 		if not sunder then
-			sunder, devastate = getSpellInfo(47467), getSpellInfo(47498)
-			sunderLink = getSpellLink(47467)
+			sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
+			sunderLink = GetSpellLink(47467)
 		end
 
 		if Skada.db.profile.modules.sunderchannel == nil then
@@ -244,19 +244,30 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 		Skada.options.args.modules.args.sundercounter = {
 			type = "group",
-			name = L["Sunder Counter"],
-			desc = format(L["Options for %s."], L["Sunder Counter"]),
-			get = function(i)
-				return Skada.db.profile.modules[i[#i]]
-			end,
-			set = function(i, val)
-				Skada.db.profile.modules[i[#i]] = val
-			end,
+			name = self.moduleName,
+			desc = format(L["Options for %s."], self.moduleName),
 			args = {
+				header = {
+					type = "description",
+					name = self.moduleName,
+					fontSize = "large",
+					image = [[Interface\Icons\ability_warrior_sunder]],
+					imageWidth = 18,
+					imageHeight = 18,
+					imageCoords = {0.05, 0.95, 0.05, 0.95},
+					width = "full",
+					order = 0
+				},
+				sep = {
+					type = "description",
+					name = " ",
+					width = "full",
+					order = 1,
+				},
 				sunderannounce = {
 					type = "toggle",
 					name = format(L["Announce %s"], sunder),
-					desc = format(L["Announces how long it took to apply %d stacks of %s and announces when it drops."], 5, sunder or UNKNOWN),
+					desc = format(L["Announces how long it took to apply %d stacks of %s and announces when it drops."], 5, sunder or L["Unknown"]),
 					descStyle = "inline",
 					order = 10,
 					width = "double"

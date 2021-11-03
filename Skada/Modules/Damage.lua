@@ -1,10 +1,11 @@
-assert(Skada, "Skada not found!")
+local Skada = Skada
 
-local getSpellInfo = Skada.getSpellInfo or GetSpellInfo
 local format, max = string.format, math.max
 local pairs, select = pairs, select
 local newTable, delTable = Skada.newTable, Skada.delTable
-local cacheTable, _
+local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+local unitClass = Skada.unitClass
+local _
 
 -- list of miss types
 local misstypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}
@@ -120,7 +121,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	local function log_damage(set, dmg, tick)
 		if dmg.spellid and tContains(ignoredSpells, dmg.spellid) then return end
 
-		local player = Skada:get_player(set, dmg.playerid, dmg.playername, dmg.playerflags)
+		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
 		if not player then return end
 
 		-- update activity
@@ -143,7 +144,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			if dmg.spellschool and dmg.spellschool ~= spell.school then
 				spellname = spellname .. " (" .. (Skada.schoolnames[dmg.spellschool] or OTHER) .. ")"
 			else
-				spellname = getSpellInfo(dmg.spellid)
+				spellname = GetSpellInfo(dmg.spellid)
 			end
 			if not player.damage_spells[spellname] then
 				player.damage_spells[spellname] = {id = dmg.spellid, school = dmg.spellschool, amount = 0}
@@ -243,7 +244,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			end
 
 			if eventtype == "SWING_DAMAGE" then
-				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, MELEE, 1
+				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, L["Melee"], 1
 				dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing, dmg.crushing = ...
 
 				-- an extra attack?
@@ -276,7 +277,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			local amount
 
 			if eventtype == "SWING_MISSED" then
-				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, MELEE, 1
+				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, L["Melee"], 1
 				dmg.misstype, amount = ...
 			else
 				dmg.spellid, dmg.spellname, dmg.spellschool, dmg.misstype, amount = ...
@@ -313,8 +314,8 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	end
 
 	local function damage_tooltip(win, id, label, tooltip)
-		local set = win:get_selected_set()
-		local player = Skada:find_player(set, id)
+		local set = win:GetSelectedSet()
+		local player = Skada:FindPlayer(set, id)
 		if player then
 			local totaltime = Skada:GetSetTime(set)
 			local activetime = Skada:PlayerActiveTime(set, player, true)
@@ -325,7 +326,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	end
 
 	local function playermod_tooltip(win, id, label, tooltip)
-		local player = Skada:find_player(win:get_selected_set(), win.playerid)
+		local player = Skada:FindPlayer(win:GetSelectedSet(), win.playerid)
 		if player then
 			local spell = player.damage_spells and player.damage_spells[label]
 			if spell then
@@ -339,31 +340,31 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 					end
 				end
 
-				if (spell.hitmin or 0) > 0 then
+				local amount = spell.amount + (Skada.db.profile.absdamage and (spell.absorbed or 0) or 0)
+				tooltip:AddDoubleLine(L["Average Hit"], Skada:FormatNumber(amount / spell.count), 1, 1, 1)
+
+				if spell.hitmin and spell.hitmax then
 					local spellmin = spell.hitmin
 					if spell.criticalmin and spell.criticalmin < spellmin then
 						spellmin = spell.criticalmin
 					end
-					tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
-				end
-
-				if (spell.hitmax or 0) > 0 then
 					local spellmax = spell.hitmax
 					if spell.criticalmax and spell.criticalmax > spellmax then
 						spellmax = spell.criticalmax
 					end
-					tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
-				end
 
-				local amount = spell.amount + (Skada.db.profile.absdamage and (spell.absorbed or 0) or 0)
-				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(amount / spell.count), 1, 1, 1)
+					tooltip:AddLine(" ")
+					tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber((spellmin + spellmax) / 2), 1, 1, 1)
+				end
 			end
 		end
 	end
 
 	local function spellmod_tooltip(win, id, label, tooltip)
 		if label == L["Critical Hits"] or label == L["Normal Hits"] then
-			local player = Skada:find_player(win:get_selected_set(), win.playerid)
+			local player = Skada:FindPlayer(win:GetSelectedSet(), win.playerid)
 			if player then
 				local spell = player.damage_spells and player.damage_spells[win.spellname]
 				if spell then
@@ -378,13 +379,21 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 					end
 
 					if label == L["Critical Hits"] and spell.criticalamount then
-						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.criticalmin), 1, 1, 1)
-						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.criticalmax), 1, 1, 1)
-						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.criticalamount / spell.critical), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Average Hit"], Skada:FormatNumber(spell.criticalamount / spell.critical), 1, 1, 1)
+						if spell.criticalmin and spell.criticalmax then
+							tooltip:AddLine(" ")
+							tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.criticalmin), 1, 1, 1)
+							tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.criticalmax), 1, 1, 1)
+							tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber((spell.criticalmin + spell.criticalmax) / 2), 1, 1, 1)
+						end
 					elseif label == L["Normal Hits"] and spell.hitamount then
-						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
-						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
-						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Average Hit"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
+						if spell.hitmin and spell.hitmax then
+							tooltip:AddLine(" ")
+							tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
+							tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
+							tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber((spell.hitmin + spell.hitmax) / 2), 1, 1, 1)
+						end
 					end
 				end
 			end
@@ -397,7 +406,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	end
 
 	function playermod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 
 		if player then
 			win.title = format(L["%s's damage"], player.name)
@@ -413,7 +422,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 					d.id = spellname
 					d.spellid = spell.id
 					d.label = spellname
-					d.icon = select(3, getSpellInfo(spell.id))
+					d.icon = select(3, GetSpellInfo(spell.id))
 					d.spellschool = spell.school
 
 					d.value = spell.amount + (Skada.db.profile.absdamage and (spell.absorbed or 0) or 0)
@@ -441,7 +450,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	end
 
 	function targetmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's targets"], player.name)
 			local total = select(2, getDPS(set, player))
@@ -494,11 +503,11 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
 	function spellmod:Enter(win, id, label)
 		win.spellname = label
-		win.title = format(L["%s's <%s> damage"], win.playername or UNKNOWN, label)
+		win.title = format(L["%s's <%s> damage"], win.playername or L["Unknown"], label)
 	end
 
 	function spellmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's <%s> damage"], player.name, win.spellname)
 
@@ -542,9 +551,9 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	end
 
 	function sdetailmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 		if player then
-			win.title = format(L["%s's damage breakdown"], win.spellname or UNKNOWN)
+			win.title = format(L["%s's damage breakdown"], win.spellname or L["Unknown"])
 
 			local spell = win.spellname and player.damage_spells and player.damage_spells[win.spellname]
 
@@ -578,13 +587,13 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
 	function tdetailmod:Enter(win, id, label)
 		win.targetname = label
-		win.title = format(L["%s's damage on %s"], win.playername or UNKNOWN, label)
+		win.title = format(L["%s's damage on %s"], win.playername or L["Unknown"], label)
 	end
 
 	function tdetailmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 		if player then
-			win.title = format(L["%s's damage on %s"], player.name, win.targetname or UNKNOWN)
+			win.title = format(L["%s's damage on %s"], player.name, win.targetname or L["Unknown"])
 
 			local total = 0
 			if player.damage_targets and win.targetname and player.damage_targets[win.targetname] then
@@ -605,7 +614,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 						d.id = spellname
 						d.spellid = spell.id
 						d.label = spellname
-						d.icon = select(3, getSpellInfo(spell.id))
+						d.icon = select(3, GetSpellInfo(spell.id))
 						d.spellschool = spell.school
 
 						d.value = spell.targets[win.targetname].amount or 0
@@ -644,9 +653,9 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = player.id
+					d.id = player.id or player.name
 					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
+					d.text = player.id and Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -674,7 +683,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 
 	local function feed_personal_dps()
 		if Skada.current then
-			local player = Skada:find_player(Skada.current, Skada.userGUID)
+			local player = Skada:FindPlayer(Skada.current, Skada.userGUID)
 			if player then
 				return Skada:FormatNumber(getDPS(Skada.current, player)) .. " " .. L["DPS"]
 			end
@@ -698,7 +707,7 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 			click2 = targetmod,
 			nototalclick = {targetmod},
 			columns = {Damage = true, DPS = true, Percent = true},
-			icon = "Interface\\Icons\\spell_fire_firebolt"
+			icon = [[Interface\Icons\spell_fire_firebolt]]
 		}
 
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {src_is_interesting = true, dst_is_not_interesting = true})
@@ -757,22 +766,12 @@ Skada:AddLoadableModule("Damage", function(Skada, L)
 	end
 
 	function mod:OnInitialize()
-		if Skada.options.args.Tweaks then
-			Skada.options.args.Tweaks.args.absdamage = {
-				type = "toggle",
-				name = L["Include Absorbed Damage"],
-				desc = L["Enable this if you want the damage absorbed to be included in the damage done."],
-				order = 94,
-				width = "double"
-			}
-		else
-			Skada.options.args.generaloptions.args.absdamage = {
-				type = "toggle",
-				name = L["Include Absorbed Damage"],
-				desc = L["Enable this if you want the damage absorbed to be included in the damage done."],
-				order = 93
-			}
-		end
+		Skada.options.args.tweaks.args.general.args.absdamage = {
+			type = "toggle",
+			name = L["Absorbed Damage"],
+			desc = L["Enable this if you want the damage absorbed to be included in the damage done."],
+			order = 100
+		}
 	end
 end)
 
@@ -786,8 +785,8 @@ Skada:AddLoadableModule("DPS", function(Skada, L)
 	local mod = Skada:NewModule(L["DPS"])
 
 	local function dps_tooltip(win, id, label, tooltip)
-		local set = win:get_selected_set()
-		local player = Skada:find_player(set, id)
+		local set = win:GetSelectedSet()
+		local player = Skada:FindPlayer(set, id)
 		if player then
 			local totaltime = Skada:GetSetTime(set)
 			local activetime = Skada:PlayerActiveTime(set, player)
@@ -814,9 +813,9 @@ Skada:AddLoadableModule("DPS", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = player.id
+					d.id = player.id or player.name
 					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
+					d.text = player.id and Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -845,7 +844,7 @@ Skada:AddLoadableModule("DPS", function(Skada, L)
 			showspots = true,
 			tooltip = dps_tooltip,
 			columns = {DPS = true, Percent = true},
-			icon = "Interface\\Icons\\inv_misc_pocketwatch_01"
+			icon = [[Interface\Icons\inv_misc_pocketwatch_01]]
 		}
 
 		local parentmod = Skada:GetModule(L["Damage"], true)
@@ -876,6 +875,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 
 	local mod = Skada:NewModule(L["Damage Done By Spell"])
 	local sourcemod = mod:NewModule(L["Damage spell sources"])
+	local cacheTable = nil
 
 	function sourcemod:Enter(win, id, label)
 		win.spellname = label
@@ -883,7 +883,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 	end
 
 	function sourcemod:Update(win, set)
-		win.title = format(L["%s's sources"], win.spellname or UNKNOWN)
+		win.title = format(L["%s's sources"], win.spellname or L["Unknown"])
 		if win.spellname then
 			cacheTable = newTable()
 			local total = 0
@@ -912,7 +912,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
-				d.id = playerid
+				d.id = playerid or player.name
 				d.label = player.name
 				d.text = Skada:FormatName(player.name, playerid)
 				d.class = player.class
@@ -975,7 +975,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 			d.id = spellname
 			d.spellid = spell.id
 			d.label = spellname
-			d.icon = select(3, getSpellInfo(spell.id))
+			d.icon = select(3, GetSpellInfo(spell.id))
 			d.spellschool = spell.school
 
 			d.value = spell.amount
@@ -1002,7 +1002,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(Skada, L)
 			showspots = true,
 			click1 = sourcemod,
 			columns = {Damage = true, Percent = true},
-			icon = "Interface\\Icons\\spell_nature_lightning"
+			icon = [[Interface\Icons\spell_nature_lightning]]
 		}
 		Skada:AddMode(self, L["Damage Done"])
 	end
@@ -1032,7 +1032,6 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 	local playermod = mod:NewModule(L["Damage spell list"])
 	local targetmod = mod:NewModule(L["Damage target list"])
 	local detailmod = targetmod:NewModule(L["More Details"])
-	local unitClass = Skada.unitClass
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
@@ -1040,7 +1039,7 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 	end
 
 	function playermod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 
 		if player then
 			win.title = format(L["%s's damage"], player.name)
@@ -1056,7 +1055,7 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 					d.id = spellname
 					d.spellid = spell.id
 					d.label = spellname
-					d.icon = select(3, getSpellInfo(spell.id))
+					d.icon = select(3, GetSpellInfo(spell.id))
 					d.spellschool = spell.school
 
 					d.value = max(0, (spell.amount or 0) - (spell.overkill or 0))
@@ -1087,7 +1086,7 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 	end
 
 	function targetmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's targets"], player.name)
 			local total = select(2, getDPS(set, player, true))
@@ -1130,12 +1129,12 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 	end
 
 	function detailmod:Update(win, set)
-		win.title = format(L["Useful damage on %s"], win.targetname or UNKNOWN)
+		win.title = format(L["Useful damage on %s"], win.targetname or L["Unknown"])
 
 		local total, players, found = 0, {}
 
 		if Skada.find_enemy then
-			local enemy = Skada:find_enemy(set, win.targetname)
+			local enemy = Skada:FindEnemy(set, win.targetname)
 			if enemy and (enemy.damagetaken_useful or 0) > 0 then
 				total = enemy.damagetaken_useful
 
@@ -1158,6 +1157,7 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 					total = total + amount
 					players[player.name] = {
 						id = player.id,
+						flag = player.flag,
 						class = player.class,
 						role = player.role,
 						spec = player.spec,
@@ -1175,9 +1175,10 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 				win.dataset[nr] = d
 
 				d.id = player.id or playername
-				d.label = Skada:FormatName(playername, d.id)
+				d.label = playername
+				d.text = player.id and Skada:FormatName(playername, player.id)
 				if not player.class then
-					d.class, d.role, d.spec = select(2, unitClass(player.id, nil, set, true))
+					d.class, d.role, d.spec = unitClass(player.id, player.flag, set)
 				else
 					d.class = player.class
 					d.role = player.role
@@ -1216,9 +1217,9 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = player.id
+					d.id = player.id or player.name
 					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
+					d.text = player.id and Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -1253,7 +1254,7 @@ Skada:AddLoadableModule("Useful Damage", function(Skada, L)
 			click2 = targetmod,
 			nototalclick = {targetmod},
 			columns = {Damage = true, DPS = true, Percent = true},
-			icon = "Interface\\Icons\\spell_fire_fireball02"
+			icon = [[Interface\Icons\spell_fire_fireball02]]
 		}
 		Skada:AddMode(self, L["Damage Done"])
 	end
@@ -1291,7 +1292,7 @@ Skada:AddLoadableModule("Overkill", function(Skada, L)
 	end
 
 	function playermod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's overkill spells"], player.name)
 			local total = player.damage and player.overkill or 0
@@ -1307,7 +1308,7 @@ Skada:AddLoadableModule("Overkill", function(Skada, L)
 						d.id = spellname
 						d.spellid = spell.id
 						d.label = spellname
-						d.icon = select(3, getSpellInfo(spell.id))
+						d.icon = select(3, GetSpellInfo(spell.id))
 						d.spellschool = spell.school
 
 						d.value = spell.overkill
@@ -1336,7 +1337,7 @@ Skada:AddLoadableModule("Overkill", function(Skada, L)
 	end
 
 	function targetmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's overkill targets"], player.name)
 			local total = player.overkill or 0
@@ -1374,11 +1375,11 @@ Skada:AddLoadableModule("Overkill", function(Skada, L)
 
 	function detailmod:Enter(win, id, label)
 		win.targetname = label
-		win.title = format(L["%s's overkill spells"], win.playername or UNKNOWN)
+		win.title = format(L["%s's overkill spells"], win.playername or L["Unknown"])
 	end
 
 	function detailmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's overkill spells"], player.name)
 
@@ -1398,7 +1399,7 @@ Skada:AddLoadableModule("Overkill", function(Skada, L)
 						d.id = spellname
 						d.spellid = spell.id
 						d.label = spellname
-						d.icon = select(3, getSpellInfo(spell.id))
+						d.icon = select(3, GetSpellInfo(spell.id))
 						d.spellschool = spell.school
 
 						d.value = spell.targets[win.targetname].overkill
@@ -1433,9 +1434,9 @@ Skada:AddLoadableModule("Overkill", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = player.id
+					d.id = player.id or player.name
 					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
+					d.text = player.id and Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -1467,7 +1468,7 @@ Skada:AddLoadableModule("Overkill", function(Skada, L)
 			click2 = targetmod,
 			nototalclick = {targetmod},
 			columns = {Damage = true, Percent = true},
-			icon = "Interface\\Icons\\spell_fire_incinerate"
+			icon = [[Interface\Icons\spell_fire_incinerate]]
 		}
 		Skada:AddMode(self, L["Damage Done"])
 	end
@@ -1498,7 +1499,7 @@ Skada:AddLoadableModule("Absorbed Damage", function(Skada, L)
 	end
 
 	function playermod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's damage"], player.name)
 			local total = player.absdamage or 0
@@ -1514,7 +1515,7 @@ Skada:AddLoadableModule("Absorbed Damage", function(Skada, L)
 						d.id = spellname
 						d.spellid = spell.id
 						d.label = spellname
-						d.icon = select(3, getSpellInfo(spell.id))
+						d.icon = select(3, GetSpellInfo(spell.id))
 						d.spellschool = spell.school
 
 						d.value = spell.absorbed
@@ -1543,7 +1544,7 @@ Skada:AddLoadableModule("Absorbed Damage", function(Skada, L)
 	end
 
 	function targetmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's targets"], player.name)
 			local total = player.absdamage or 0
@@ -1591,9 +1592,9 @@ Skada:AddLoadableModule("Absorbed Damage", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = player.id
+					d.id = player.id or player.name
 					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
+					d.text = player.id and Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -1624,7 +1625,7 @@ Skada:AddLoadableModule("Absorbed Damage", function(Skada, L)
 			click2 = targetmod,
 			nototalclick = {targetmod},
 			columns = {Damage = true, Percent = true},
-			icon = "Interface\\Icons\\spell_fire_playingwithfire"
+			icon = [[Interface\Icons\spell_fire_playingwithfire]]
 		}
 		Skada:AddMode(self, L["Damage Done"])
 	end

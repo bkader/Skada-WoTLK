@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local Skada = Skada
 Skada:AddLoadableModule("Deaths", function(Skada, L)
 	if Skada:IsDisabled("Deaths") then return end
 
@@ -12,14 +12,14 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	local ipairs = ipairs
 	local tostring, format, strsub = tostring, string.format, string.sub
 	local abs, max, modf = math.abs, math.max, math.modf
-	local getSpellInfo = Skada.getSpellInfo or GetSpellInfo
-	local getSpellLink = Skada.getSpellLink or GetSpellLink
+	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 	local newTable, delTable = Skada.newTable, Skada.delTable
 	local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
 	local date, log, _ = date
 
 	local function log_deathlog(set, data, ts)
-		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
+		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 
 		if player then
 			-- et player maxhp if not already set
@@ -128,7 +128,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	end
 
 	local function log_death(set, playerid, playername, playerflags, ts)
-		local player = Skada:get_player(set, playerid, playername, playerflags)
+		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
 		if player then
 			set.death = (set.death or 0) + 1
 			player.death = (player.death or 0) + 1
@@ -154,7 +154,14 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 						end
 						if not log then return end
 
-						local output = format("Skada: %s > %s (%s) %s", log.source or UNKNOWN, player.name or UNKNOWN, getSpellInfo(log.spellid) or UNKNOWN, Skada:FormatNumber(0 - log.amount, 1))
+						local output = format(
+							"Skada: %s > %s (%s) %s",
+							log.source or L["Unknown"], -- source name
+							player.name or L["Unknown"], -- player name
+							GetSpellInfo(log.spellid) or L["Unknown"], -- spell name
+							Skada:FormatNumber(0 - log.amount, 1) -- spell amount
+						)
+
 						if log.overkill or log.resisted or log.blocked or log.absorbed then
 							output = output .. " ["
 							local extra = newTable()
@@ -201,7 +208,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	end
 
 	local function log_resurrect(set, playerid, playername, playerflags)
-		local player = Skada:get_player(set, playerid, playername, playerflags)
+		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
 		if player then
 			player.deathlog = player.deathlog or {}
 			tinsert(player.deathlog, 1, {time = 0, log = {}})
@@ -227,7 +234,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 	function deathlogmod:Enter(win, id, label)
 		win.datakey = id
-		win.title = format(L["%s's death log"], win.playername or UNKNOWN)
+		win.title = format(L["%s's death log"], win.playername or L["Unknown"])
 	end
 
 	do
@@ -239,9 +246,9 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		end
 
 		function deathlogmod:Update(win, set)
-			local player = Skada:find_player(set, win.playerid, win.playername)
+			local player = Skada:FindPlayer(set, win.playerid, win.playername)
 			if player and win.datakey then
-				win.title = format(L["%s's death log"], win.playername or UNKNOWN)
+				win.title = format(L["%s's death log"], win.playername or L["Unknown"])
 
 				local deathlog
 				if player.deathlog and player.deathlog[win.datakey] then
@@ -260,7 +267,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 					d.id = nr
 					d.time = deathlog.time
 					d.label = formatdate(deathlog.time) .. ": " .. format(L["%s dies"], player.name)
-					d.icon = "Interface\\Icons\\Ability_Rogue_FeignDeath"
+					d.icon = [[Interface\Icons\Ability_Rogue_FeignDeath]]
 					d.value = 0
 					d.valuetext = ""
 
@@ -275,11 +282,11 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
-						local spellname, _, spellicon = getSpellInfo(log.spellid)
+						local spellname, _, spellicon = GetSpellInfo(log.spellid)
 
 						d.id = nr
 						d.spellid = log.spellid
-						d.label = format("%02.2f: %s", diff or 0, spellname or UNKNOWN)
+						d.label = format("%02.2f: %s", diff or 0, spellname or L["Unknown"])
 						d.icon = spellicon
 						d.time = log.time
 
@@ -291,7 +298,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 						d.value = log.hp or 0
 						local change = (log.amount >= 0 and "+" or "-") .. Skada:FormatNumber(abs(log.amount))
-						d.reportlabel = format("%02.2f: %s   %s [%s]", diff or 0, getSpellLink(log.spellid) or spellname or UNKNOWN, change, Skada:FormatNumber(log.hp or 0))
+						d.reportlabel = format("%02.2f: %s   %s [%s]", diff or 0, GetSpellLink(log.spellid) or spellname or L["Unknown"], change, Skada:FormatNumber(log.hp or 0))
 
 						local extra = newTable()
 
@@ -346,7 +353,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 	end
 
 	function playermod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid)
+		local player = Skada:FindPlayer(set, win.playerid)
 
 		if player then
 			win.title = format(L["%s's deaths"], player.name)
@@ -360,12 +367,12 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 					d.id = i
 					d.time = death.time
-					d.icon = "Interface\\Icons\\Ability_Rogue_FeignDeath"
+					d.icon = [[Interface\Icons\Ability_Rogue_FeignDeath]]
 
 					for k, v in ipairs(death.log) do
 						if v.amount and v.amount < 0 and (v.spellid or v.source) then
 							if v.spellid then
-								d.label, _, d.icon = getSpellInfo(v.spellid)
+								d.label, _, d.icon = GetSpellInfo(v.spellid)
 								d.spellid = v.spellid
 							elseif v.source then
 								d.label = v.source
@@ -374,7 +381,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 						end
 					end
 
-					d.label = d.label or set.name or UNKNOWN
+					d.label = d.label or set.name or L["Unknown"]
 
 					d.value = death.time
 					d.valuetext = formatdate(d.value)
@@ -410,9 +417,9 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = player.id
+					d.id = player.id or player.name
 					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
+					d.text = player.id and Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -484,14 +491,15 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		deathlogmod.metadata = {
 			ordersort = true,
 			tooltip = entry_tooltip,
-			columns = {Change = true, Health = true, Percent = true}
+			columns = {Change = true, Health = true, Percent = true},
+			icon = [[Interface\Icons\spell_shadow_soulleech_1]]
 		}
 		playermod.metadata = {click1 = deathlogmod}
 		self.metadata = {
 			click1 = playermod,
 			nototalclick = {playermod},
 			columns = {Survivability = false, Count = true},
-			icon = "Interface\\Icons\\ability_rogue_feigndeath"
+			icon = [[Interface\Icons\ability_rogue_feigndeath]]
 		}
 
 		Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {dst_is_interesting_nopets = true})
@@ -553,13 +561,24 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 					type = "group",
 					name = mod.moduleName,
 					desc = format(L["Options for %s."], L["Death log"]),
-					get = function(i)
-						return Skada.db.profile.modules[i[#i]]
-					end,
-					set = function(i, val)
-						Skada.db.profile.modules[i[#i]] = val
-					end,
 					args = {
+						header = {
+							type = "description",
+							name = mod.moduleName,
+							fontSize = "large",
+							image = [[Interface\Icons\ability_rogue_feigndeath]],
+							imageWidth = 18,
+							imageHeight = 18,
+							imageCoords = {0.05, 0.95, 0.05, 0.95},
+							width = "full",
+							order = 0
+						},
+						sep = {
+							type = "description",
+							name = " ",
+							width = "full",
+							order = 1,
+						},
 						deathlog = {
 							type = "group",
 							name = L["Death log"],

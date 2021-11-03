@@ -1,85 +1,19 @@
-assert(Skada, "Skada not found!")
-
-local Enemies = Skada:NewModule("Enemies")
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
+local Skada = Skada
 
 -- frequently used globals --
 local pairs, ipairs, select = pairs, ipairs, select
 local format, min, max = string.format, math.min, math.max
-local unitClass, getSpellInfo = Skada.unitClass, Skada.getSpellInfo or GetSpellInfo
+local unitClass, GetSpellInfo = Skada.unitClass, Skada.GetSpellInfo or GetSpellInfo
 local tContains = tContains
 local _
 
-function Skada:find_enemy(set, name)
-	if set and name then
-		set._enemyidx = set._enemyidx or {}
-
-		local enemy = set._enemyidx[name]
-		if enemy then
-			return enemy
-		end
-
-		for _, e in ipairs(set.enemies) do
-			if e.name == name then
-				set._enemyidx[name] = e
-				return e
-			end
-		end
-	end
-end
-
-function Skada:get_enemy(set, guid, name, flags)
-	if set then
-		local enemy = self:find_enemy(set, name)
-		local now = time()
-
-		if not enemy then
-			if not name then return end
-
-			enemy = {id = guid or name, name = name}
-
-			if guid or flags then
-				enemy.class = select(2, unitClass(guid, flags, set))
-			else
-				enemy.class = "ENEMY"
-			end
-
-			set.enemies[#set.enemies + 1] = enemy
-		end
-
-		self.changed = true
-		return enemy
-	end
-end
-
 local function EnemyClass(name, set)
 	local class = "UNKNOWN"
-	local e = Skada:find_enemy(set, name)
+	local e = Skada:FindEnemy(set, name)
 	if e and e.class then
 		class = e.class
 	end
 	return class
-end
-
-function Enemies:CreateSet(_, set)
-	if set and set.name == L["Current"] then
-		set.enemies = set.enemies or {}
-	end
-end
-
-function Enemies:ClearIndexes(_, set)
-	if set then
-		set._enemyidx = nil
-	end
-end
-
-function Enemies:OnEnable()
-	Skada.RegisterCallback(self, "SKADA_DATA_SETCREATED", "CreateSet")
-	Skada.RegisterCallback(self, "SKADA_DATA_CLEARSETINDEX", "ClearIndexes")
-end
-
-function Enemies:OnDisable()
-	Skada.UnregisterAllCallbacks(self)
 end
 
 ---------------------------------------------------------------------------
@@ -94,7 +28,6 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	local damagemod, usefulmod
 
 	local type, newTable, delTable = type, Skada.newTable, Skada.delTable
-	local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
 
 	local instanceDiff, customGroupsTable, customUnitsTable, customUnitsInfo
 	local UnitIterator, GetCreatureId = Skada.UnitIterator, Skada.GetCreatureId
@@ -106,18 +39,18 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	-- collected into a new fake unit.
 	local customGroups = {
 		-- The Lich King: Useful targets
-		[LBB["The Lich King"]] = L["Important targets"],
-		[LBB["Raging Spirit"]] = L["Important targets"],
-		[LBB["Ice Sphere"]] = L["Important targets"],
-		[LBB["Val'kyr Shadowguard"]] = L["Important targets"],
+		[L["The Lich King"]] = L["Important targets"],
+		[L["Raging Spirit"]] = L["Important targets"],
+		[L["Ice Sphere"]] = L["Important targets"],
+		[L["Val'kyr Shadowguard"]] = L["Important targets"],
 		[L["Wicked Spirit"]] = L["Important targets"],
 		-- Professor Putricide: Oozes
 		[L["Gas Cloud"]] = L["Oozes"],
 		[L["Volatile Ooze"]] = L["Oozes"],
 		-- Blood Prince Council: Princes overkilling
-		[LBB["Prince Valanar"]] = L["Princes overkilling"],
-		[LBB["Prince Taldaram"]] = L["Princes overkilling"],
-		[LBB["Prince Keleseth"]] = L["Princes overkilling"],
+		[L["Prince Valanar"]] = L["Princes overkilling"],
+		[L["Prince Taldaram"]] = L["Princes overkilling"],
+		[L["Prince Keleseth"]] = L["Princes overkilling"],
 		-- Lady Deathwhisper: Adds
 		[L["Cult Adherent"]] = L["Adds"],
 		[L["Empowered Adherent"]] = L["Adds"],
@@ -127,7 +60,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 		[L["Reanimated Fanatic"]] = L["Adds"],
 		[L["Darnavan"]] = L["Adds"],
 		-- Halion: Halion and Inferno
-		[LBB["Halion"]] = L["Halion and Inferno"],
+		[L["Halion"]] = L["Halion and Inferno"],
 		[L["Living Inferno"]] = L["Halion and Inferno"]
 	}
 
@@ -236,7 +169,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 			end
 
 			customUnitsTable[guid] = {
-				oname = name or UNKNOWN,
+				oname = name or L["Unknown"],
 				name = unit.name,
 				guid = guid,
 				curval = curval,
@@ -249,7 +182,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 			if unit.name == nil then
 				customUnitsTable[guid].name = format(
 					unit.text or (unit.stop and L["%s - %s%% to %s%%"] or L["%s below %s%%"]),
-					name or UNKNOWN,
+					name or L["Unknown"],
 					(unit.start or 1) * 100,
 					(unit.stop or 0) * 100
 				)
@@ -261,7 +194,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	end
 
 	local function log_custom_unit(set, name, playerid, playername, spellid, amount, absorbed)
-		local e = Skada:get_enemy(set, nil, name, nil)
+		local e = Skada:GetEnemy(set, name)
 		if e then
 			e.fake = true
 			e.damagetaken = (e.damagetaken or 0) + amount
@@ -306,7 +239,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 		if dmg.spellid and tContains(ignoredSpells, dmg.spellid) then return end
 		if (dmg.amount + (dmg.absorbed or 0)) == 0 then return end
 
-		local e = Skada:get_enemy(set, dmg.enemyid, dmg.enemyname, dmg.enemyflags)
+		local e = Skada:GetEnemy(set, dmg.enemyname, dmg.enemyid, dmg.enemyflags)
 		if e then
 			e.damagetaken = (e.damagetaken or 0) + dmg.amount
 			set.edamagetaken = (set.edamagetaken or 0) + dmg.amount
@@ -459,9 +392,9 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	end
 
 	local function enemymod_tooltip(win, id, label, tooltip)
-		local set = win:get_selected_set()
-		local p = Skada:find_player(set, id, label)
-		local e = Skada:find_enemy(set, win.targetname)
+		local set = win:GetSelectedSet()
+		local p = Skada:FindPlayer(set, id, label)
+		local e = Skada:FindEnemy(set, win.targetname)
 		if p and e and e.damagetaken_sources and e.damagetaken_sources[p.name] then
 			tooltip:AddLine(format(L["%s's damage breakdown"], p.name))
 
@@ -484,8 +417,8 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	end
 
 	function enemymod:Update(win, set)
-		win.title = format(L["Damage on %s"], win.targetname or UNKNOWN)
-		local enemy = Skada:find_enemy(set, win.targetname)
+		win.title = format(L["Damage on %s"], win.targetname or L["Unknown"])
+		local enemy = Skada:FindEnemy(set, win.targetname)
 		local total = enemy and select(2, getDTPS(set, enemy)) or 0
 
 		if total > 0 and enemy.damagetaken_sources then
@@ -497,8 +430,8 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 
 				d.id = player.id or playername
 				d.label = playername
-				d.text = Skada:FormatName(playername, d.id)
-				d.class, d.role, d.spec = select(2, unitClass(d.id, nil, set))
+				d.text = player.id and Skada:FormatName(playername, player.id)
+				d.class, d.role, d.spec = unitClass(d.id, player.flag, set, player)
 
 				d.value = player.amount
 				if Skada.db.profile.absdamage then
@@ -527,8 +460,8 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["Damage on %s"], win.targetname or UNKNOWN)
-		local enemy = Skada:find_enemy(set, win.targetname)
+		win.title = format(L["Damage on %s"], win.targetname or L["Unknown"])
+		local enemy = Skada:FindEnemy(set, win.targetname)
 		local total = enemy and select(2, getDTPS(set, enemy)) or 0
 
 		if total > 0 and enemy.damagetaken_spells then
@@ -541,7 +474,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 				d.id = spellid
 				d.spellid = spellid
 				d.spellschool = spell.school
-				d.label, _, d.icon = getSpellInfo(spellid)
+				d.label, _, d.icon = GetSpellInfo(spellid)
 
 				d.value = spell.amount
 				if Skada.db.profile.absdamage then
@@ -612,7 +545,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(Skada, L)
 			click1 = enemymod,
 			click2 = spellmod,
 			columns = {Damage = true, DTPS = false, Percent = true},
-			icon = "Interface\\Icons\\spell_fire_felflamebolt"
+			icon = [[Interface\Icons\spell_fire_felflamebolt]]
 		}
 
 		if Skada:GetModule(L["Useful Damage"], true) then
@@ -667,7 +600,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 		if dmg.spellid and tContains(ignoredSpells, dmg.spellid) then return end
 		if (dmg.amount + (dmg.absorbed or 0)) == 0 then return end
 
-		local e = Skada:get_enemy(set, dmg.enemyid, dmg.enemyname, dmg.enemyflags)
+		local e = Skada:GetEnemy(set, dmg.enemyname, dmg.enemyid, dmg.enemyflags)
 		if e then
 			e.damage = (e.damage or 0) + dmg.amount
 			set.edamage = (set.edamage or 0) + dmg.amount
@@ -772,8 +705,8 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 	end
 
 	function enemymod:Update(win, set)
-		win.title = format(L["Damage from %s"], win.targetname or UNKNOWN)
-		local enemy = Skada:find_enemy(set, win.targetname)
+		win.title = format(L["Damage from %s"], win.targetname or L["Unknown"])
+		local enemy = Skada:FindEnemy(set, win.targetname)
 		local total = enemy and select(2, getDPS(set, enemy)) or 0
 
 		if total > 0 and enemy.damage_targets then
@@ -785,8 +718,12 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 
 				d.id = target.id or targetname
 				d.label = targetname
-				d.text = Skada:FormatName(targetname, d.id)
-				d.class, d.role, d.spec = select(2, unitClass(d.id, nil, set))
+				d.class, d.role, d.spec = unitClass(d.id, target.flag, set, target)
+
+				-- transliterate only players names.
+				if d.class and Skada.validclass[d.class] then
+					d.text = Skada:FormatName(targetname, d.id)
+				end
 
 				d.value = target.amount
 				if Skada.db.profile.absdamage then
@@ -815,8 +752,8 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's damage"], win.targetname or UNKNOWN)
-		local enemy = Skada:find_enemy(set, win.targetname)
+		win.title = format(L["%s's damage"], win.targetname or L["Unknown"])
+		local enemy = Skada:FindEnemy(set, win.targetname)
 		local total = enemy and select(2, getDPS(set, enemy)) or 0
 
 		if total > 0 and enemy.damage_spells then
@@ -829,7 +766,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 				d.id = spellid
 				d.spellid = spellid
 				d.spellschool = spell.school
-				d.label, _, d.icon = getSpellInfo(spellid)
+				d.label, _, d.icon = GetSpellInfo(spellid)
 
 				d.value = spell.amount
 				if Skada.db.profile.absdamage then
@@ -899,7 +836,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(Skada, L)
 			click1 = enemymod,
 			click2 = spellmod,
 			columns = {Damage = true, DPS = false, Percent = true},
-			icon = "Interface\\Icons\\spell_shadow_shadowbolt"
+			icon = [[Interface\Icons\spell_shadow_shadowbolt]]
 		}
 
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
@@ -940,7 +877,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 	local function log_heal(set, data)
 		if data.spellid and tContains(ignoredSpells, data.spellid) then return end
 
-		local e = Skada:get_enemy(set, data.enemyid, data.enemyname, data.enemyflags)
+		local e = Skada:GetEnemy(set, data.enemyname, data.enemyid, data.enemyflags)
 		if e then
 			e.heal = (e.heal or 0) + data.amount
 			set.eheal = (set.eheal or 0) + data.amount
@@ -990,8 +927,8 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's healed targets"], win.targetname or UNKNOWN)
-		local enemy = Skada:find_enemy(set, win.targetname)
+		win.title = format(L["%s's healed targets"], win.targetname or L["Unknown"])
+		local enemy = Skada:FindEnemy(set, win.targetname)
 		local total = enemy and select(2, getHPS(set, enemy)) or 0
 
 		if total > 0 and enemy.heal_targets then
@@ -1029,8 +966,8 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's healing spells"], win.targetname or UNKNOWN)
-		local enemy = Skada:find_enemy(set, win.targetname)
+		win.title = format(L["%s's healing spells"], win.targetname or L["Unknown"])
+		local enemy = Skada:FindEnemy(set, win.targetname)
 		local total = enemy and select(2, getHPS(set, enemy)) or 0
 
 		if total > 0 and enemy.heal_spells then
@@ -1042,7 +979,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 
 				d.id = spellid
 				d.spellid = spellid
-				d.label, _, d.icon = getSpellInfo(spellid)
+				d.label, _, d.icon = GetSpellInfo(spellid)
 
 				d.value = amount
 				d.valuetext = Skada:FormatValueText(
@@ -1107,7 +1044,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(Skada, L)
 			click2 = targetmod,
 			nototalclick = {spellmod, targetmod},
 			columns = {Healing = true, HPS = false, Percent = true},
-			icon = "Interface\\Icons\\spell_nature_healingtouch"
+			icon = [[Interface\Icons\spell_nature_healingtouch]]
 		}
 
 		Skada:RegisterForCL(SpellHeal, "SPELL_HEAL", {src_is_not_interesting = true, dst_is_not_interesting = true})

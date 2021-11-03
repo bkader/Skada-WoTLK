@@ -1,5 +1,4 @@
-assert(Skada, "Skada not found!")
-
+local Skada = Skada
 local bars = Skada:GetModule("BarDisplay", true)
 if not bars then return end
 
@@ -34,7 +33,7 @@ function mod.ShowCursor(win)
 		f:SetSize(32, 32)
 		f:SetPoint("CENTER")
 		local t = f:CreateTexture(nil, "OVERLAY")
-		t:SetTexture("Interface\\AddOns\\Skada\\Media\\Textures\\icon-scroll")
+		t:SetTexture([[Interface\AddOns\Skada\Media\Textures\icon-scroll]])
 		t:SetAllPoints(f)
 		t:Show()
 		mod.ScrollIcon[win] = f
@@ -171,7 +170,7 @@ function mod.AddDisplayOptions(self, win, options)
 		type = "group",
 		name = L["Scroll"],
 		desc = (L["Options for %s."]):format(L["Scroll"]),
-		order = 99,
+		order = 970,
 		set = function(info, val)
 			db[info[#info]] = val
 			debug(info[#info] .. " set to: " .. tostring(val))
@@ -180,88 +179,92 @@ function mod.AddDisplayOptions(self, win, options)
 			return db[info[#info]]
 		end,
 		args = {
-			mheader = {
+			mouse = {
+				type = "group",
 				name = L["Mouse"],
-				type = "header",
-				cmdHidden = true,
-				order = 1
-			},
-			speed = {
-				type = "range",
-				name = L["Scrolling speed"],
+				inline = true,
 				order = 10,
-				min = 0.1,
-				max = 10,
-				bigStep = 1,
-				width = "full"
-			},
-			icon = {
-				type = "toggle",
-				name = L["Scroll icon"],
-				order = 20
-			},
-			button = {
-				type = "select",
-				name = L["Scroll mouse button"],
-				order = 20,
-				values = {
-					["MiddleButton"] = KEY_BUTTON3,
-					["Button4"] = KEY_BUTTON4,
-					["Button5"] = KEY_BUTTON5
+				args = {
+					speed = {
+						type = "range",
+						name = L["Scrolling Speed"],
+						min = 0.1,
+						max = 10,
+						bigStep = 1,
+						width = "double",
+						order = 10
+					},
+					icon = {
+						type = "toggle",
+						name = L["Scroll Icon"],
+						order = 20
+					},
+					button = {
+						type = "select",
+						name = L["Scroll mouse button"],
+						order = 20,
+						values = {
+							["MiddleButton"] = KEY_BUTTON3,
+							["Button4"] = KEY_BUTTON4,
+							["Button5"] = KEY_BUTTON5
+						}
+					}
 				}
 			},
-			kheader = {
+			binding = {
+				type = "group",
 				name = L["Keybinding"],
-				type = "header",
-				cmdHidden = true,
-				order = 100
-			},
-			kspeed = {
-				type = "range",
-				name = L["Key scrolling speed"],
-				order = 105,
-				min = 1,
-				max = 10,
-				step = 1,
-				width = "full"
-			},
-			upkey = {
-				type = "keybinding",
-				order = 110,
-				name = COMBAT_TEXT_SCROLL_UP,
-				set = function(info, val)
-					local b1, b2 = GetBindingKey("SKADA_SCROLLUP")
-					if b1 then
-						SetBinding(b1)
-					end
-					if b2 then
-						SetBinding(b2)
-					end
-					SetBinding(val, "SKADA_SCROLLUP")
-					SaveBindings(GetCurrentBindingSet())
-				end,
-				get = function(info)
-					return GetBindingKey("SKADA_SCROLLUP")
-				end
-			},
-			downkey = {
-				type = "keybinding",
-				order = 120,
-				name = COMBAT_TEXT_SCROLL_DOWN,
-				set = function(info, val)
-					local b1, b2 = GetBindingKey("SKADA_SCROLLDOWN")
-					if b1 then
-						SetBinding(b1)
-					end
-					if b2 then
-						SetBinding(b2)
-					end
-					SetBinding(val, "SKADA_SCROLLDOWN")
-					SaveBindings(GetCurrentBindingSet())
-				end,
-				get = function(info)
-					return GetBindingKey("SKADA_SCROLLDOWN")
-				end
+				inline = true,
+				order = 20,
+				args = {
+					upkey = {
+						type = "keybinding",
+						name = COMBAT_TEXT_SCROLL_UP,
+						set = function(info, val)
+							local b1, b2 = GetBindingKey("SKADA_SCROLLUP")
+							if b1 then
+								SetBinding(b1)
+							end
+							if b2 then
+								SetBinding(b2)
+							end
+							SetBinding(val, "SKADA_SCROLLUP")
+							SaveBindings(GetCurrentBindingSet())
+						end,
+						get = function(info)
+							return GetBindingKey("SKADA_SCROLLUP")
+						end,
+						order = 10
+					},
+					downkey = {
+						type = "keybinding",
+						name = COMBAT_TEXT_SCROLL_DOWN,
+						set = function(info, val)
+							local b1, b2 = GetBindingKey("SKADA_SCROLLDOWN")
+							if b1 then
+								SetBinding(b1)
+							end
+							if b2 then
+								SetBinding(b2)
+							end
+							SetBinding(val, "SKADA_SCROLLDOWN")
+							SaveBindings(GetCurrentBindingSet())
+						end,
+						get = function(info)
+							return GetBindingKey("SKADA_SCROLLDOWN")
+						end,
+						order = 20
+					},
+					kspeed = {
+						type = "range",
+						name = L["Key scrolling speed"],
+						min = 1,
+						max = 10,
+						step = 1,
+						width = "double",
+						order = 30
+					},
+				}
 			}
 		}
 	}

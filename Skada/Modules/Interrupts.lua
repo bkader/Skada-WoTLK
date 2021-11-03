@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local Skada = Skada
 Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	if Skada:IsDisabled("Interrupts") then return end
 
@@ -12,7 +12,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	local pairs, ipairs, select, max = pairs, ipairs, select, math.max
 	local tostring, format, tContains = tostring, string.format, tContains
 	local UnitGUID, IsInInstance = UnitGUID, IsInInstance
-	local getSpellInfo, getSpellLink = Skada.getSpellInfo or GetSpellInfo, Skada.getSpellLink or GetSpellLink
+	local GetSpellInfo, GetSpellLink = Skada.GetSpellInfo or GetSpellInfo, Skada.GetSpellLink or GetSpellLink
 	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
 
 	-- spells in the following table will be ignored.
@@ -21,7 +21,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	local function log_interrupt(set, data)
 		if (data.spellid and tContains(ignoredSpells, data.spellid)) or (data.extraspellid and tContains(ignoredSpells, data.extraspellid)) then return end
 
-		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
+		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if player then
 			-- increment player's and set's interrupts count
 			player.interrupt = (player.interrupt or 0) + 1
@@ -74,7 +74,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 		log_interrupt(Skada.total, data)
 
 		if Skada.db.profile.modules.interruptannounce and IsInGroup() and srcGUID == Skada.userGUID then
-			local spelllink = getSpellLink(extraspellid or extraspellname) or extraspellname
+			local spelllink = GetSpellLink(extraspellid or extraspellname) or extraspellname
 
 			local channel = Skada.db.profile.modules.interruptchannel or "SAY"
 			if channel == "SELF" then
@@ -102,7 +102,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	end
 
 	function spellmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid)
+		local player = Skada:FindPlayer(set, win.playerid)
 		if player then
 			win.title = format(L["%s's interrupted spells"], player.name)
 			local total = player.interrupt or 0
@@ -116,7 +116,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = getSpellInfo(spellid)
+					d.label, _, d.icon = GetSpellInfo(spellid)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
@@ -143,7 +143,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	end
 
 	function targetmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid)
+		local player = Skada:FindPlayer(set, win.playerid)
 		if player then
 			win.title = format(L["%s's interrupted targets"], player.name)
 			local total = player.interrupt or 0
@@ -183,7 +183,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 	end
 
 	function playermod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid)
+		local player = Skada:FindPlayer(set, win.playerid)
 		if player then
 			win.title = format(L["%s's interrupt spells"], player.name)
 			local total = player.interrupt or 0
@@ -197,7 +197,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = getSpellInfo(spellid)
+					d.label, _, d.icon = GetSpellInfo(spellid)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
@@ -229,9 +229,9 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = player.id
+					d.id = player.id or player.name
 					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
+					d.text = player.id and Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -263,7 +263,7 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 			click3 = playermod,
 			nototalclick = {spellmod, targetmod, playermod},
 			columns = {Total = true, Percent = true},
-			icon = "Interface\\Icons\\ability_kick"
+			icon = [[Interface\Icons\ability_kick]]
 		}
 
 		Skada:RegisterForCL(SpellInterrupt, "SPELL_INTERRUPT", {src_is_interesting = true})
@@ -291,26 +291,37 @@ Skada:AddLoadableModule("Interrupts", function(Skada, L)
 
 		Skada.options.args.modules.args.interrupts = {
 			type = "group",
-			name = L["Interrupts"],
-			desc = format(L["Options for %s."], L["Interrupts"]),
-			get = function(i)
-				return Skada.db.profile.modules[i[#i]]
-			end,
-			set = function(i, val)
-				Skada.db.profile.modules[i[#i]] = val
-			end,
+			name = self.moduleName,
+			desc = format(L["Options for %s."], self.moduleName),
 			args = {
+				header = {
+					type = "description",
+					name = self.moduleName,
+					fontSize = "large",
+					image = [[Interface\Icons\ability_kick]],
+					imageWidth = 18,
+					imageHeight = 18,
+					imageCoords = {0.05, 0.95, 0.05, 0.95},
+					width = "full",
+					order = 0
+				},
+				sep = {
+					type = "description",
+					name = " ",
+					width = "full",
+					order = 1,
+				},
 				interruptannounce = {
 					type = "toggle",
 					name = L["Announce Interrupts"],
-					order = 1,
+					order = 10,
 					width = "double"
 				},
 				interruptchannel = {
 					type = "select",
 					name = L["Channel"],
 					values = {AUTO = INSTANCE, SAY = CHAT_MSG_SAY, YELL = CHAT_MSG_YELL, SELF = L["Self"]},
-					order = 2,
+					order = 20,
 					width = "double"
 				}
 			}

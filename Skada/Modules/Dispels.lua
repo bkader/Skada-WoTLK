@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local Skada = Skada
 Skada:AddLoadableModule("Dispels", function(Skada, L)
 	if Skada:IsDisabled("Dispels") then return end
 
@@ -10,7 +10,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 	-- cache frequently used globals
 	local pairs, ipairs, select = pairs, ipairs, select
 	local tostring, format = tostring, string.format
-	local getSpellInfo, tContains = Skada.getSpellInfo or GetSpellInfo, tContains
+	local GetSpellInfo, tContains = Skada.GetSpellInfo or GetSpellInfo, tContains
 	local _
 
 	-- spells in the following table will be ignored.
@@ -19,7 +19,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 	local function log_dispel(set, data)
 		if (data.spellid and tContains(ignoredSpells, data.spellid)) or (data.extraspellid and tContains(ignoredSpells, data.extraspellid)) then return end
 
-		local player = Skada:get_player(set, data.playerid, data.playername, data.playerflags)
+		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if player then
 			-- increment player's and set's dispels count
 			player.dispel = (player.dispel or 0) + 1
@@ -71,7 +71,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 	end
 
 	function spellmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's dispelled spells"], player.name)
 			local total = player.dispel or 0
@@ -85,7 +85,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = getSpellInfo(spellid)
+					d.label, _, d.icon = GetSpellInfo(spellid)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
@@ -112,7 +112,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 	end
 
 	function targetmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's dispelled targets"], player.name)
 			local total = player.dispel or 0
@@ -153,7 +153,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 	end
 
 	function playermod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 		if player then
 			win.title = format(L["%s's dispel spells"], player.name)
 			local total = player.dispel or 0
@@ -167,7 +167,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = getSpellInfo(spellid)
+					d.label, _, d.icon = GetSpellInfo(spellid)
 
 					d.value = count
 					d.valuetext = Skada:FormatValueText(
@@ -200,9 +200,9 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = player.id
+					d.id = player.id or player.name
 					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
+					d.text = player.id and Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.spec = player.spec
 					d.role = player.role
@@ -234,7 +234,7 @@ Skada:AddLoadableModule("Dispels", function(Skada, L)
 			click3 = playermod,
 			nototalclick = {spellmod, targetmod, playermod},
 			columns = {Total = true, Percent = true},
-			icon = "Interface\\Icons\\spell_arcane_massdispel"
+			icon = [[Interface\Icons\spell_arcane_massdispel]]
 		}
 
 		Skada:RegisterForCL(SpellDispel, "SPELL_DISPEL", {src_is_interesting = true})

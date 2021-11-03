@@ -97,6 +97,8 @@ globals = {
 	"bit",
 	"Recount",
 	"Skada",
+	"SkadaDB",
+	"SkadaCharDB",
 	-- misc custom
 	"CUSTOM_CLASS_COLORS",
 	"LibStub",
@@ -1290,6 +1292,7 @@ globals = {
 	"CombatText_OnUpdate",
 	"CombatText_RemoveMessage",
 	"CombatText_UpdateDisplayedMessages",
+	"CombatText_StandardScroll",
 	"ComboFrame_OnEvent",
 	"ComboFrame_Update",
 	"ComboPointShineFadeIn",

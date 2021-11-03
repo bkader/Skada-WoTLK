@@ -102,8 +102,8 @@ local barLists = lib.barLists
 local recycledBars = lib.recycledBars
 
 local frame_defaults = {
-	bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-	edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+	bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],
+	edgeFile = [[Interface\Tooltips\UI-Tooltip-Border]],
 	inset = 4,
 	edgeSize = 8,
 	tile = true,
@@ -313,10 +313,9 @@ function barListPrototype:AddButton(title, description, normaltex, highlighttex,
 	-- Create button frame.
 	local btn = CreateFrame("Button", nil, self.button)
 	btn.title = title
-	btn:SetFrameLevel(5)
+	btn:SetFrameLevel(self.button:GetFrameLevel() + 1)
 	btn:ClearAllPoints()
-	btn:SetHeight(12)
-	btn:SetWidth(12)
+	btn:SetSize(12, 12)
 	btn:SetNormalTexture(normaltex)
 	btn:SetHighlightTexture(highlighttex or normaltex, 1.0)
 	btn:SetAlpha(0.25)
@@ -328,13 +327,15 @@ function barListPrototype:AddButton(title, description, normaltex, highlighttex,
 		GameTooltip:AddLine(description, 1, 1, 1, true)
 		GameTooltip:Show()
 		if self.mouseover then
-			self:SetButtonsOpacity(0.25)
+			self:SetButtonsOpacity(0.5)
+			self:AdjustTitle(true)
 		end
 	end)
 	btn:SetScript("OnLeave", function()
 		GameTooltip:Hide()
 		if self.mouseover then
 			self:SetButtonsOpacity(0)
+			self:AdjustTitle()
 		end
 	end)
 	btn:Show()
@@ -383,10 +384,17 @@ function barListPrototype:SetButtonMouseOver(mouseover)
 	if self.mouseover then
 		self:SetButtonsOpacity(0)
 		self.button:SetScript("OnEnter", function()
-			self:SetButtonsOpacity(0.25)
+			self:SetButtonsOpacity(0.5)
+			self:AdjustTitle(true)
 		end)
 		self.button:SetScript("OnLeave", function()
-			self:SetButtonsOpacity(MouseIsOver(self.button) and 0.25 or 0)
+			if MouseIsOver(self.button) then
+				self:SetButtonsOpacity(0.5)
+				self:AdjustTitle(true)
+			else
+				self:SetButtonsOpacity(0)
+				self:AdjustTitle()
+			end
 		end)
 	else
 		self:SetButtonsOpacity(0.25)
@@ -398,8 +406,10 @@ function barListPrototype:SetButtonMouseOver(mouseover)
 end
 
 function barListPrototype:AdjustButtons()
+	self.lastbtn = nil
 	local height = self.button:GetHeight()
-	local nr, lastbtn = 0, nil
+	local nr = 0
+
 	for _, btn in ipairs(self.buttons) do
 		btn:ClearAllPoints()
 
@@ -409,22 +419,34 @@ function barListPrototype:AdjustButtons()
 			elseif nr == 0 then
 				btn:SetPoint("TOPRIGHT", self.button, "TOPRIGHT", -5, -(max(height - btn:GetHeight(), 0) / 2))
 			elseif self.orientation == 3 then
-				btn:SetPoint("TOPLEFT", lastbtn, "TOPRIGHT", 3, 0)
+				btn:SetPoint("TOPLEFT", self.lastbtn, "TOPRIGHT", 3, 0)
 			else
-				btn:SetPoint("TOPRIGHT", lastbtn, "TOPLEFT", -3, 0)
+				btn:SetPoint("TOPRIGHT", self.lastbtn, "TOPLEFT", -3, 0)
 			end
-			lastbtn = btn
+			self.lastbtn = btn
 			nr = nr + 1
 		end
 	end
 
+	self:AdjustTitle()
+end
+
+function barListPrototype:AdjustTitle(ignoreMouseover)
 	self.button.text:SetJustifyH(self.orientation == 3 and "RIGHT" or "LEFT")
-	if lastbtn and self.orientation == 3 then
-		self.button.text:SetPoint("LEFT", lastbtn, "RIGHT")
+	if self.lastbtn and self.orientation == 3 then
+		if self.mouseover and not ignoreMouseover then
+			self.button.text:SetPoint("LEFT", self.button, "LEFT", 5, 0)
+		else
+			self.button.text:SetPoint("LEFT", self.lastbtn, "RIGHT")
+		end
 		self.button.text:SetPoint("RIGHT", self.button, "RIGHT", -5, 0)
-	elseif lastbtn then
+	elseif self.lastbtn then
 		self.button.text:SetPoint("LEFT", self.button, "LEFT", 5, 0)
-		self.button.text:SetPoint("RIGHT", lastbtn, "LEFT")
+		if self.mouseover and not ignoreMouseover then
+			self.button.text:SetPoint("RIGHT", self.button, "RIGHT", -5, 0)
+		else
+			self.button.text:SetPoint("RIGHT", self.lastbtn, "LEFT")
+		end
 	else
 		self.button.text:SetPoint("LEFT", self.button, "LEFT", 5, 0)
 		self.button.text:SetPoint("RIGHT", self.button, "RIGHT", -5, 0)
@@ -460,6 +482,7 @@ do
 			win:StartMoving()
 		end
 	end
+
 	local function stopMove(self)
 		local win = self:GetParent()
 		if not win.locked then
@@ -470,6 +493,59 @@ do
 				win.callbacks:Fire("AnchorMoved", win, endX, endY)
 			end
 		end
+	end
+
+	local function sizeChanged(self, width)
+		self:SetLength(width)
+		self.callbacks:Fire("WindowResizing", self)
+	end
+
+	local function listOnEnter(self)
+		if not self.locked then
+			self.resizeright:SetAlpha(1)
+			self.resizeleft:SetAlpha(1)
+		end
+	end
+
+	local function listOnLeave(self)
+		if not self.locked then
+			self.resizeright:SetAlpha(0)
+			self.resizeleft:SetAlpha(0)
+		end
+	end
+
+	local strfind = strfind or string.find
+	local function sizerOnMouseDown(self, button)
+		if button == "LeftButton" then
+			local p = self:GetParent()
+			if not self.direction then
+				self.direction = strfind(self:GetName(), "Left") and "LEFT" or "RIGHT"
+			end
+			p.isResizing = true
+			p:StartSizing((p.growup and "TOP" or "BOTTOM") .. self.direction)
+		end
+	end
+
+	local function sizerOnMouseUp(self, button)
+		if button == "LeftButton" then
+			local p = self:GetParent()
+			if p.isResizing then
+				p.isResizing = nil
+				local top, left = p:GetTop(), p:GetLeft()
+				p:StopMovingOrSizing()
+				p:SetLength(p:GetLength())
+				p.callbacks:Fire("WindowResized", p)
+				p:SortBars()
+			end
+		end
+	end
+
+	local function sizerOnEnter(self)
+		self:SetAlpha(1)
+	end
+
+	local function sizerOnLeave(self)
+		self:SetAlpha(0)
 	end
 
 	local DEFAULT_TEXTURE = [[Interface\TARGETINGFRAME\UI-StatusBar]]
@@ -502,7 +578,7 @@ do
 			lib.defaultFont = myfont
 		end
 
-		list.button = list.button or CreateFrame("Button", nil, list)
+		list.button = list.button or CreateFrame("Button", "$parentTitleButton", list)
 		list.button:SetText(name)
 		list.button:SetBackdrop(frame_defaults)
 		list.button:SetNormalFontObject(myfont)
@@ -523,8 +599,7 @@ do
 
 		list.barbackgroundcolor = {0.3, 0.3, 0.3, 0.6}
 		list:SetPoint("TOPLEFT", UIParent, "CENTER", 0, 0)
-		list:SetHeight(height)
-		list:SetWidth(length)
+		list:SetSize(length, height)
 		list:SetResizable(true)
 		list:SetMinResize(80, 60)
 		list:SetMaxResize(500, 500)
@@ -541,90 +616,32 @@ do
 		list.offset = 0
 
 		-- resize to the right
-		list.resizeright = list.resizeright or CreateFrame("Button", "BarGroupResizeButton", list)
+		list.resizeright = list.resizeright or CreateFrame("Button", "$parentSizerRight", list)
 		list.resizeright:Show()
-		list.resizeright:SetFrameLevel(11)
-		list.resizeright:SetWidth(12)
-		list.resizeright:SetHeight(12)
+		list.resizeright:SetFrameLevel(list:GetFrameLevel() + 1)
+		list.resizeright:SetSize(12, 12)
 		list.resizeright:SetAlpha(0)
 		list.resizeright:EnableMouse(true)
-		list.resizeright:SetScript("OnMouseDown", function(self, button)
-			local p = self:GetParent()
-			if (button == "LeftButton") then
-				p.isResizing = true
-				p:StartSizing(p.growup and "TOPRIGHT" or "BOTTOMRIGHT")
-				p:SetScript("OnUpdate", function()
-					if p.isResizing then
-						p:SetLength(p:GetWidth())
-						p.callbacks:Fire("WindowResizing", p)
-					else
-						p:SetScript("OnUpdate", nil)
-					end
-				end)
-			end
-		end)
-		list.resizeright:SetScript("OnMouseUp", function(self, button)
-			local p = self:GetParent()
-			local top, left = p:GetTop(), p:GetLeft()
-			if p.isResizing == true then
-				p:StopMovingOrSizing()
-				p:SetLength(p:GetWidth())
-				p.callbacks:Fire("WindowResized", p)
-				p.isResizing = false
-				p:SortBars()
-			end
-		end)
-		list.resizeright:SetScript("OnEnter", function(self) self:SetAlpha(1) end)
-		list.resizeright:SetScript("OnLeave", function(self) self:SetAlpha(0) end)
+		list.resizeright:SetScript("OnMouseDown", sizerOnMouseDown)
+		list.resizeright:SetScript("OnMouseUp", sizerOnMouseUp)
+		list.resizeright:SetScript("OnEnter", sizerOnEnter)
+		list.resizeright:SetScript("OnLeave", sizerOnLeave)
 
 		-- resize to the left
-		list.resizeleft = list.resizeleft or CreateFrame("Button", "BarGroupResizeButton", list)
+		list.resizeleft = list.resizeleft or CreateFrame("Button", "$parentSizerLeft", list)
 		list.resizeleft:Show()
-		list.resizeleft:SetFrameLevel(11)
-		list.resizeleft:SetWidth(12)
-		list.resizeleft:SetHeight(12)
+		list.resizeleft:SetFrameLevel(list:GetFrameLevel() + 1)
+		list.resizeleft:SetSize(12, 12)
 		list.resizeleft:SetAlpha(0)
 		list.resizeleft:EnableMouse(true)
-		list.resizeleft:SetScript("OnMouseDown", function(self, button)
-			local p = self:GetParent()
-			if (button == "LeftButton") then
-				p.isResizing = true
-				p:StartSizing(p.growup and "TOPLEFT" or "BOTTOMLEFT")
-				p:SetScript("OnUpdate", function()
-					if p.isResizing then
-						p:SetLength(p:GetWidth())
-						p.callbacks:Fire("WindowResizing", p)
-					else
-						p:SetScript("OnUpdate", nil)
-					end
-				end)
-			end
-		end)
-		list.resizeleft:SetScript("OnMouseUp", function(self, button)
-			local p = self:GetParent()
-			local top, left = p:GetTop(), p:GetLeft()
-			if p.isResizing == true then
-				p:StopMovingOrSizing()
-				p:SetLength(p:GetWidth())
-				p.callbacks:Fire("WindowResized", p)
-				p.isResizing = false
-				p:SortBars()
-			end
-		end)
-		list.resizeleft:SetScript("OnEnter", function(self) self:SetAlpha(1) end)
-		list.resizeleft:SetScript("OnLeave", function(self) self:SetAlpha(0) end)
-		list:SetScript("OnEnter", function(self)
-			if not self.locked then
-				self.resizeright:SetAlpha(1)
-				self.resizeleft:SetAlpha(1)
-			end
-		end)
-		list:SetScript("OnLeave", function(self)
-			if not self.locked then
-				self.resizeright:SetAlpha(0)
-				self.resizeleft:SetAlpha(0)
-			end
-		end)
+		list.resizeleft:SetScript("OnMouseDown", sizerOnMouseDown)
+		list.resizeleft:SetScript("OnMouseUp", sizerOnMouseUp)
+		list.resizeleft:SetScript("OnEnter", sizerOnEnter)
+		list.resizeleft:SetScript("OnLeave", sizerOnLeave)
+
+		list:SetScript("OnEnter", listOnEnter)
+		list:SetScript("OnLeave", listOnLeave)
+		list:SetScript("OnSizeChanged", sizeChanged)
 
 		list:ReverseGrowth(false)
 
@@ -718,8 +735,8 @@ function barListPrototype:GuessMaxBars(round)
 	return round and floor(maxBars + 0.5) or floor(maxBars)
 end
 
-function barListPrototype:SetMaxBars(num)
-	self.maxBars = ((num or 0) > 0) and floor(num) or self:GuessMaxBars()
+function barListPrototype:SetMaxBars(num, round)
+	self.maxBars = ((num or 0) > 0) and floor(num) or self:GuessMaxBars(round)
 	self:SortBars()
 end
 
@@ -841,6 +858,20 @@ function barListPrototype:SetDisplayMax(val)
 	self.displayMax = val
 end
 
+function barListPrototype:SetTextColor(r, g, b, a)
+	self.textcolor = {r or 1, g or 1, b or 1, a or 1}
+	self:UpdateTextColor()
+end
+
+function barListPrototype:UpdateTextColor()
+	if bars[self] then
+		for k, v in pairs(bars[self]) do
+			v.label:SetTextColor(unpack(self.textcolor))
+			v.timerLabel:SetTextColor(unpack(self.textcolor))
+		end
+	end
+end
+
 function barListPrototype:UpdateColors()
 	if bars[self] then
 		for k, v in pairs(bars[self]) do
@@ -931,8 +962,8 @@ function barListPrototype:ReverseGrowth(reverse)
 	end
 
 	if self.resizeright then
-		self.resizeright:SetNormalTexture("Interface\\CHATFRAME\\UI-ChatIM-SizeGrabber-Up")
-		self.resizeright:SetHighlightTexture("Interface\\CHATFRAME\\UI-ChatIM-SizeGrabber-Down")
+		self.resizeright:SetNormalTexture([[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Up]])
+		self.resizeright:SetHighlightTexture([[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Down]])
 		self.resizeright:ClearAllPoints()
 
 		local normaltex = self.resizeright:GetNormalTexture()
@@ -949,8 +980,8 @@ function barListPrototype:ReverseGrowth(reverse)
 	end
 
 	if self.resizeleft then
-		self.resizeleft:SetNormalTexture("Interface\\CHATFRAME\\UI-ChatIM-SizeGrabber-Up")
-		self.resizeleft:SetHighlightTexture("Interface\\CHATFRAME\\UI-ChatIM-SizeGrabber-Up", "ALPHA")
+		self.resizeleft:SetNormalTexture([[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Up]])
+		self.resizeleft:SetHighlightTexture([[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Up]], "ALPHA")
 		self.resizeleft:ClearAllPoints()
 
 		local normaltex = self.resizeleft:GetNormalTexture()
@@ -1111,7 +1142,7 @@ do
 		local thickness, showIcon = self.thickness, self.showIcon
 		local offset = self.offset
 		local x1, y1, x2, y2 = 0, startpoint, 0, startpoint
-		local maxbars = min(#values, self:GetMaxBars())
+		local maxbars = min(#values, self.isStretching and self:GuessMaxBars() or self:GetMaxBars())
 
 		local start, stop, step, fixnum
 		if growup then
@@ -1221,8 +1252,7 @@ do
 		if not self.spark then
 			self.spark = self:CreateTexture(nil, "OVERLAY")
 			self.spark:SetTexture([[Interface\CastingBar\UI-CastingBar-Spark]])
-			self.spark:SetWidth(10)
-			self.spark:SetHeight(10)
+			self.spark:SetSize(10, 10)
 			self.spark:SetBlendMode("ADD")
 			self.spark:Hide()
 		end
@@ -1285,6 +1315,7 @@ end
 
 barPrototype.SetWidth = barListPrototype.SetWidth
 barPrototype.SetHeight = barListPrototype.SetHeight
+barPrototype.SetSize = barListPrototype.SetSize
 
 function barPrototype:OnBarReleased()
 	self.callbacks:Fire("BarReleased", self, self.name)
@@ -1638,10 +1669,8 @@ do
 		local iconSize = self.showIcon and thickness or 0
 		local width = max(0.0001, length - iconSize)
 		local height = thickness
-		barPrototype.super.SetWidth(self, width)
-		barPrototype.super.SetHeight(self, height)
-		self.icon:SetWidth(thickness)
-		self.icon:SetHeight(thickness)
+		barPrototype.super.SetSize(self, width, height)
+		self.icon:SetSize(thickness, thickness)
 	end
 
 	function barPrototype:SetLength(length)

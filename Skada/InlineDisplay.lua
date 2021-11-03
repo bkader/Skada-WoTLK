@@ -1,9 +1,9 @@
-assert(Skada, "Skada not found!")
+local Skada = Skada
 
 local mod = Skada:NewModule("InlineDisplay")
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 
-mod.name = L["Inline bar display"]
+mod.name = L["Inline Bar Display"]
 mod.description = L["Inline display is a horizontal window style."]
 Skada:AddDisplaySystem("inline", mod)
 
@@ -12,7 +12,7 @@ local barlibrary = {bars = {}, nextuuid = 1}
 local leftmargin = 40
 local ttactive = false
 
-local libwindow = LibStub("LibWindow-1.1")
+local LibWindow = LibStub("LibWindow-1.1")
 local media = LibStub("LibSharedMedia-3.0")
 
 local pairs, tostring, type = pairs, tostring, type
@@ -126,12 +126,12 @@ function mod:Create(window, isnew)
 		end
 	end)
 
-	libwindow.RegisterConfig(window.frame, window.db)
+	LibWindow.RegisterConfig(window.frame, window.db)
 
 	if isnew then
-		libwindow.SavePosition(window.frame)
+		LibWindow.SavePosition(window.frame)
 	else
-		libwindow.RestorePosition(window.frame)
+		LibWindow.RestorePosition(window.frame)
 	end
 
 	window.frame:EnableMouse(true)
@@ -147,7 +147,7 @@ function mod:Create(window, isnew)
 	window.frame:SetScript("OnDragStop", function(frame)
 		frame:StopMovingOrSizing()
 		frame.isDragging = false
-		libwindow.SavePosition(frame)
+		LibWindow.SavePosition(frame)
 	end)
 
 	local titlebg = CreateFrame("Frame", "InlineTitleBackground", window.frame)
@@ -174,8 +174,8 @@ function mod:Create(window, isnew)
 	end)
 
 	local skadamenubuttonbackdrop = {
-		bgFile = "Interface\\Buttons\\UI-OptionsButton",
-		edgeFile = "Interface\\Buttons\\UI-OptionsButton",
+		bgFile = [[Interface\Buttons\UI-OptionsButton]],
+		edgeFile = [[Interface\Buttons\UI-OptionsButton]],
 		tile = true,
 		tileSize = 12,
 		edgeSize = 0,
@@ -186,8 +186,8 @@ function mod:Create(window, isnew)
 	menu:ClearAllPoints()
 	menu:SetWidth(12)
 	menu:SetHeight(12)
-	menu:SetNormalTexture("Interface\\Addons\\Skada\\Media\\Textures\\icon-config")
-	menu:SetHighlightTexture("Interface\\Addons\\Skada\\Media\\Textures\\icon-config", 1.0)
+	menu:SetNormalTexture([[Interface\Addons\Skada\Media\Textures\icon-config]])
+	menu:SetHighlightTexture([[Interface\Addons\Skada\Media\Textures\icon-config]], 1.0)
 	menu:SetAlpha(1)
 	menu:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 	menu:SetBackdropColor(
@@ -312,11 +312,11 @@ function mod:GetBar(win)
 end
 
 function mod:UpdateBar(bar, bardata, db)
-	local label = bardata.text or bardata.label or UNKNOWN
+	local label = bardata.text or bardata.label or L.Unknown
 	if db.isusingclasscolors and bardata.class then
-		label = WrapTextInColorCode(bardata.text or bardata.label or UNKNOWN, Skada.classcolors[bardata.class].colorStr)
+		label = WrapTextInColorCode(bardata.text or bardata.label or L.Unknown, Skada.classcolors[bardata.class].colorStr)
 	else
-		label = bardata.text or bardata.label or UNKNOWN
+		label = bardata.text or bardata.label or L.Unknown
 	end
 
 	if bardata.valuetext then
@@ -341,7 +341,7 @@ function mod:UpdateBar(bar, bardata, db)
 	end
 
 	bar.valueid = bardata.id
-	bar.valuetext = bardata.text or bardata.label or UNKNOWN
+	bar.valuetext = bardata.text or bardata.label or L.Unknown
 	return bar
 end
 
@@ -526,60 +526,44 @@ function mod:AddDisplayOptions(win, options)
 		type = "group",
 		name = L["Text"],
 		desc = format(L["Options for %s."], L["Text"]),
-		order = 3,
+		order = 1,
+		get = function(i)
+			return db[i[#i]]
+		end,
+		set = function(i, val)
+			db[i[#i]] = val
+			Skada:ApplySettings(db.name)
+		end,
 		args = {
 			barfont = {
 				type = "select",
 				dialogControl = "LSM30_Font",
-				name = L["Bar font"],
-				desc = L["The font used by all bars."],
+				name = L["Font"],
+				desc = format(L["The font used by %s."], L["Bars"]),
 				values = AceGUIWidgetLSMlists.font,
-				get = function() return db.barfont end,
-				set = function(win, key)
-					db.barfont = key
-					Skada:ApplySettings(db.name)
-				end,
-				order = 10,
-				width = "double"
+				order = 10
 			},
 			barfontflags = {
 				type = "select",
 				name = L["Font Outline"],
 				desc = L["Sets the font outline."],
-				values = {
-					[""] = NONE,
-					["OUTLINE"] = L["Outline"],
-					["THICKOUTLINE"] = L["Thick outline"],
-					["MONOCHROME"] = L["Monochrome"],
-					["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
-				},
-				get = function() return db.barfontflags end,
-				set = function(win, key)
-					db.barfontflags = key
-					Skada:ApplySettings(db.name)
-				end,
-				order = 20,
-				width = "double"
+				values = Skada.fontFlags,
+				order = 20
 			},
 			barfontsize = {
 				type = "range",
-				name = L["Bar font size"],
-				desc = L["The font size of all bars."],
-				min = 7,
-				max = 40,
+				name = L["Font Size"],
+				desc = format(L["The font size of %s."], L["Bars"]),
+				min = 5,
+				max = 32,
 				step = 1,
-				get = function() return db.barfontsize end,
-				set = function(win, size)
-					db.barfontsize = size
-					Skada:ApplySettings(db.name)
-				end,
 				order = 30,
 				width = "double"
 			},
 			color = {
 				type = "color",
 				name = L["Font Color"],
-				desc = L['Font Color. \nClick "Use class colors" to begin.'],
+				desc = L['Font Color. \nClick "Class Colors" to begin.'],
 				hasAlpha = true,
 				get = function()
 					local c = db.title.textcolor
@@ -599,11 +583,6 @@ function mod:AddDisplayOptions(win, options)
 				min = 100,
 				max = 300,
 				step = 1.0,
-				get = function() return db.barwidth end,
-				set = function(win, key)
-					db.barwidth = key
-					Skada:ApplySettings(db.name)
-				end,
 				order = 50,
 				width = "double"
 			},
@@ -617,44 +596,24 @@ function mod:AddDisplayOptions(win, options)
 				type = "toggle",
 				name = L["Fixed bar width"],
 				desc = L["If checked, bar width is fixed. Otherwise, bar width depends on the text width."],
-				get = function() return db.fixedbarwidth end,
-				set = function()
-					db.fixedbarwidth = not db.fixedbarwidth
-					Skada:ApplySettings(db.name)
-				end,
-				order = 70,
+				order = 70
 			},
 			isusingclasscolors = {
 				type = "toggle",
-				name = L["Use class colors"],
+				name = L["Class Colors"],
 				desc = L["Class colors:\n|cFFF58CBAKader|r - 5.71M (21.7K)\n\nWithout:\nKader - 5.71M (21.7K)"],
-				get = function() return db.isusingclasscolors end,
-				set = function(win, key)
-					db.isusingclasscolors = key
-					Skada:ApplySettings(db.name)
-				end,
 				order = 80,
 			},
 			isonnewline = {
 				type = "toggle",
 				name = L["Put values on new line."],
 				desc = L["New line:\nKader\n5.71M (21.7K)\n\nDivider:\nKader - 5.71M (21.7K)"],
-				get = function() return db.isonnewline end,
-				set = function(win, key)
-					db.isonnewline = key
-					Skada:ApplySettings(db.name)
-				end,
 				order = 90
 			},
 			clickthrough = {
 				type = "toggle",
-				name = L["Clickthrough"],
+				name = L["Click Through"],
 				desc = L["Disables mouse clicks on bars."],
-				get = function() return db.clickthrough end,
-				set = function()
-					db.clickthrough = not db.clickthrough
-					Skada:ApplySettings(db.name)
-				end,
 				order = 100
 			}
 		}
@@ -664,18 +623,20 @@ function mod:AddDisplayOptions(win, options)
 		type = "group",
 		name = "ElvUI",
 		desc = format(L["Options for %s."], "ElvUI"),
-		order = 4,
+		order = 2,
+		get = function(i)
+			return db[i[#i]]
+		end,
+		set = function(i, val)
+			db[i[#i]] = val
+			Skada:ApplySettings(db.name)
+		end,
 		args = {
 			isusingelvuiskin = {
 				type = "toggle",
 				name = L["Use ElvUI skin if avaliable."],
 				desc = L["Check this to use ElvUI skin instead. \nDefault: checked"],
 				descStyle = "inline",
-				get = function() return db.isusingelvuiskin end,
-				set = function(win, key)
-					db.isusingelvuiskin = key
-					Skada:ApplySettings(db.name)
-				end,
 				order = 10,
 				width = "full"
 			},
@@ -684,13 +645,6 @@ function mod:AddDisplayOptions(win, options)
 				name = L["Use solid background."],
 				desc = L["Un-check this for an opaque background."],
 				descStyle = "inline",
-				get = function()
-					return db.issolidbackdrop
-				end,
-				set = function(win, key)
-					db.issolidbackdrop = key
-					Skada:ApplySettings(db.name)
-				end,
 				order = 20,
 				width = "full"
 			}

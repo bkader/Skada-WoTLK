@@ -1,4 +1,4 @@
-assert(Skada, "Skada not found!")
+local Skada = Skada
 
 local CCSpells = {
 	[118] = true, -- Polymorph (rank 1)
@@ -179,8 +179,8 @@ local ExtraCCSpells = {
 
 local pairs, ipairs, select = pairs, ipairs, select
 local tostring, format = tostring, string.format
-local getSpellInfo = Skada.getSpellInfo or GetSpellInfo
-local getSpellLink = Skada.getSpellLink or GetSpellLink
+local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 local _
 
 local function GetSpellSchool(spellid)
@@ -202,7 +202,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 	local playermod = mod:NewModule(L["CC Done spells"])
 	local targetmod = mod:NewModule(L["CC Done targets"])
 	local function log_ccdone(set, cc)
-		local player = Skada:get_player(set, cc.playerid, cc.playername, cc.playerflags)
+		local player = Skada:GetPlayer(set, cc.playerid, cc.playername, cc.playerflags)
 		if player then
 			-- increment the count.
 			player.ccdone = (player.ccdone or 0) + 1
@@ -245,7 +245,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 	end
 
 	function playermod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 
 		if player then
 			win.title = format(L["%s's CC Done spells"], player.name)
@@ -260,7 +260,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = getSpellInfo(spellid)
+					d.label, _, d.icon = GetSpellInfo(spellid)
 					d.spellschool = GetSpellSchool(spellid)
 
 					d.value = count
@@ -288,7 +288,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 	end
 
 	function targetmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 
 		if player then
 			win.title = format(L["%s's CC Done targets"], player.name)
@@ -335,9 +335,9 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = player.id
+					d.id = player.id or player.name
 					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
+					d.text = player.id and Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -369,7 +369,7 @@ Skada:AddLoadableModule("CC Done", function(Skada, L)
 			click2 = targetmod,
 			nototalclick = {targetmod},
 			columns = {Count = true, Percent = false},
-			icon = "Interface\\Icons\\spell_frost_chainsofice"
+			icon = [[Interface\Icons\spell_frost_chainsofice]]
 		}
 
 		Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {src_is_interesting = true})
@@ -404,7 +404,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 	local sourcemod = mod:NewModule(L["CC Taken sources"])
 
 	local function log_cctaken(set, cc)
-		local player = Skada:get_player(set, cc.playerid, cc.playername, cc.playerflags)
+		local player = Skada:GetPlayer(set, cc.playerid, cc.playername, cc.playerflags)
 		if player then
 			-- increment the count.
 			player.cctaken = (player.cctaken or 0) + 1
@@ -448,7 +448,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 	end
 
 	function playermod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 
 		if player then
 			win.title = format(L["%s's CC Taken spells"], player.name)
@@ -463,7 +463,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = getSpellInfo(spellid)
+					d.label, _, d.icon = GetSpellInfo(spellid)
 					d.spellschool = GetSpellSchool(spellid)
 
 					d.value = count
@@ -491,7 +491,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 	end
 
 	function sourcemod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 
 		if player then
 			win.title = format(L["%s's CC Taken sources"], player.name)
@@ -538,9 +538,9 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = player.id
+					d.id = player.id or player.name
 					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
+					d.text = player.id and Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -572,7 +572,7 @@ Skada:AddLoadableModule("CC Taken", function(Skada, L)
 			click2 = sourcemod,
 			nototalclick = {sourcemod},
 			columns = {Count = true, Percent = false},
-			icon = "Interface\\Icons\\spell_magic_polymorphrabbit"
+			icon = [[Interface\Icons\spell_magic_polymorphrabbit]]
 		}
 
 		Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {dst_is_interesting = true})
@@ -611,7 +611,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 	local IsInInstance, UnitInRaid = IsInInstance, UnitInRaid
 
 	local function log_ccbreak(set, cc)
-		local player = Skada:get_player(set, cc.playerid, cc.playername)
+		local player = Skada:GetPlayer(set, cc.playerid, cc.playername)
 		if player then
 			-- increment the count.
 			player.ccbreak = (player.ccbreak or 0) + 1
@@ -678,7 +678,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 			-- Go ahead and announce it.
 			if extraspellname then
-				Skada:SendChat(format(L["%s on %s removed by %s's %s"], spellname, dstName, srcName, getSpellLink(extraspellid)), "RAID", "preset")
+				Skada:SendChat(format(L["%s on %s removed by %s's %s"], spellname, dstName, srcName, GetSpellLink(extraspellid)), "RAID", "preset")
 			else
 				Skada:SendChat(format(L["%s on %s removed by %s"], spellname, dstName, srcName), "RAID", "preset")
 			end
@@ -691,7 +691,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 	end
 
 	function playermod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 
 		if player then
 			win.title = format(L["%s's CC Break spells"], player.name)
@@ -706,7 +706,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 
 					d.id = spellid
 					d.spellid = spellid
-					d.label, _, d.icon = getSpellInfo(spellid)
+					d.label, _, d.icon = GetSpellInfo(spellid)
 					d.spellschool = GetSpellSchool(spellid)
 
 					d.value = count
@@ -734,7 +734,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 	end
 
 	function targetmod:Update(win, set)
-		local player = Skada:find_player(set, win.playerid, win.playername)
+		local player = Skada:FindPlayer(set, win.playerid, win.playername)
 
 		if player then
 			win.title = format(L["%s's CC Break targets"], player.name)
@@ -781,9 +781,9 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
-					d.id = player.id
+					d.id = player.id or player.name
 					d.label = player.name
-					d.text = Skada:FormatName(player.name, player.id)
+					d.text = player.id and Skada:FormatName(player.name, player.id)
 					d.class = player.class
 					d.role = player.role
 					d.spec = player.spec
@@ -815,7 +815,7 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 			click2 = targetmod,
 			nototalclick = {targetmod},
 			columns = {Count = true, Percent = false},
-			icon = "Interface\\Icons\\spell_holy_sealofvalor"
+			icon = [[Interface\Icons\spell_holy_sealofvalor]]
 		}
 
 		Skada:RegisterForCL(AuraBroken, "SPELL_AURA_BROKEN", {src_is_interesting = true})
@@ -843,23 +843,34 @@ Skada:AddLoadableModule("CC Breakers", function(Skada, L)
 			type = "group",
 			name = self.moduleName,
 			desc = format(L["Options for %s."], self.moduleName),
-			get = function(i)
-				return Skada.db.profile.modules[i[#i]]
-			end,
-			set = function(i, val)
-				Skada.db.profile.modules[i[#i]] = val
-			end,
 			args = {
+				header = {
+					type = "description",
+					name = self.moduleName,
+					fontSize = "large",
+					image = [[Interface\Icons\spell_holy_sealofvalor]],
+					imageWidth = 18,
+					imageHeight = 18,
+					imageCoords = {0.05, 0.95, 0.05, 0.95},
+					width = "full",
+					order = 0
+				},
+				sep = {
+					type = "description",
+					name = " ",
+					width = "full",
+					order = 1,
+				},
 				ccannounce = {
 					type = "toggle",
 					name = L["Announce CC breaking to party"],
-					order = 1,
+					order = 10,
 					width = "double"
 				},
 				ccignoremaintanks = {
 					type = "toggle",
 					name = L["Ignore Main Tanks"],
-					order = 2,
+					order = 20,
 					width = "double"
 				}
 			}
