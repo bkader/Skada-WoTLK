@@ -540,8 +540,6 @@ L["Damage done per player"] = "Получено урона игроками"
 L["Damage from %s"] = "Урон от %s"
 -- enemy damage taken module
 L["Enemy Damage Taken"] = "Получено урона врагом"
-L["Damage taken per player"] = "Получено урона от игроков"
-L["Damage on %s"] = "Урон по %s"
 L["%s's damage sources"] = "%s - Источники урона"
 L["%s below %s%%"] = "%s ниже %s%%"
 L["%s - %s%% to %s%%"] = "%s - от %s%% до %s%%"

@@ -540,8 +540,6 @@ L["Damage done per player"] = "플레이어 별 피해량"
 L["Damage from %s"] = "피해 from %S"
 -- enemy damage taken module
 L["Enemy Damage Taken"] = "적이 받은 피해"
-L["Damage taken per player"] = "플레이어별 받은 피해"
-L["Damage on %s"] = "피해 -> %s"
 -- L["%s's damage sources"] = ""
 L["%s below %s%%"] = "%s %s%% 미만"
 L["%s - %s%% to %s%%"] = "%s - %s%% 에서 %s%%"

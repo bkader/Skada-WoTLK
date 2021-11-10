@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Resources", function(Skada, L)
+Skada:AddLoadableModule("Resources", function(L)
 	if Skada:IsDisabled("Resources") then return end
 
 	local mod = Skada:NewModule(L["Resources"])
@@ -16,19 +16,21 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 	local ignoredSpells = {}
 
 	local function log_gain(set, gain)
-		if not (gain and gain.type and keysTable[gain.type]) then return end
-		if (gain.spellid and tContains(ignoredSpells, gain.spellid)) then return end
+		if not (gain and gain.type and keysTable[gain.type]) or (gain.spellid and tContains(ignoredSpells, gain.spellid)) then
+			return
+		end
 
 		local player = Skada:GetPlayer(set, gain.playerid, gain.playername, gain.playerflags)
 		if player then
-			player[keysTable[gain.type]] = player[keysTable[gain.type]] or {amt = 0}
-			player[keysTable[gain.type]].amt = (player[keysTable[gain.type]].amt or 0) + gain.amount
+			local power = keysTable[gain.type]
+			player[power] = player[power] or {amount = 0}
+			player[power].amount = (player[power].amount or 0) + gain.amount
 
-			set[keysTable[gain.type]] = (set[keysTable[gain.type]] or 0) + gain.amount
+			set[power] = (set[power] or 0) + gain.amount
 
 			if set == Skada.current then
-				player[keysTable[gain.type]].spells = player[keysTable[gain.type]].spells or {}
-				player[keysTable[gain.type]].spells[gain.spellid] = (player[keysTable[gain.type]].spells[gain.spellid] or 0) + gain.amount
+				player[power].spells = player[power].spells or {}
+				player[power].spells[gain.spellid] = (player[power].spells[gain.spellid] or 0) + gain.amount
 			end
 		end
 	end
@@ -85,7 +87,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 	-- this is the main module update function that shows the list
 	-- of players depending on the selected power gain type.
 	function basemod:Update(win, set)
-		win.title = self.moduleName or L["Unknown"]
+		win.title = self.moduleName or L.Unknown
 		local total = set and self.power and set[self.power] or 0
 
 		if total > 0 then
@@ -103,7 +105,7 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 					d.role = player.role
 					d.spec = player.spec
 
-					d.value = player[self.power].amt
+					d.value = player[self.power].amount
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(d.value),
 						mod.metadata.columns.Amount,
@@ -134,43 +136,49 @@ Skada:AddLoadableModule("Resources", function(Skada, L)
 	-- player mods common Enter function.
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's gained %s"], label, namesTable[self.powertype] or L["Unknown"])
+		win.title = format(L["%s's gained %s"], label, namesTable[self.powertype] or L.Unknown)
 	end
 
 	-- player mods main update function
 	function playermod:Update(win, set)
-		win.title = format(L["%s's gained %s"], win.playername or L["Unknown"], self.powertype and namesTable[self.powertype] or L["Unknown"])
-		local player = Skada:FindPlayer(set, win.playerid)
-		if player and self.power then
-			local total = player[self.power] and player[self.power].amt or 0
+		win.title = format(
+			L["%s's gained %s"],
+			win.playername or L.Unknown,
+			self.powertype and namesTable[self.powertype] or L.Unknown
+		)
 
-			if total > 0 and player[self.power].spells then
-				local maxvalue, nr = 0, 1
+		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local total = 0
+		if player and self.power and player[self.power] and player[self.power].amount then
+			total = player[self.power].amount or 0
+		end
 
-				for spellid, amount in pairs(player[self.power].spells) do
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+		if total > 0 and player[self.power].spells then
+			local maxvalue, nr = 0, 1
 
-					d.id = spellid
-					d.spellid = spellid
-					d.label, _, d.icon = GetSpellInfo(spellid)
+			for spellid, amount in pairs(player[self.power].spells) do
+				local d = win.dataset[nr] or {}
+				win.dataset[nr] = d
 
-					d.value = amount
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(d.value),
-						mod.metadata.columns.Amount,
-						Skada:FormatPercent(d.value, total),
-						mod.metadata.columns.Percent
-					)
+				d.id = spellid
+				d.spellid = spellid
+				d.label, _, d.icon = GetSpellInfo(spellid)
 
-					if d.value > maxvalue then
-						maxvalue = d.value
-					end
-					nr = nr + 1
+				d.value = amount
+				d.valuetext = Skada:FormatValueText(
+					Skada:FormatNumber(d.value),
+					mod.metadata.columns.Amount,
+					Skada:FormatPercent(d.value, total),
+					mod.metadata.columns.Percent
+				)
+
+				if d.value > maxvalue then
+					maxvalue = d.value
 				end
-
-				win.metadata.maxvalue = maxvalue
+				nr = nr + 1
 			end
+
+			win.metadata.maxvalue = maxvalue
 		end
 	end
 

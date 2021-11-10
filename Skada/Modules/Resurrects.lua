@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Resurrects", function(Skada, L)
+Skada:AddLoadableModule("Resurrects", function(L)
 	if Skada:IsDisabled("Resurrects") then return end
 
 	local mod = Skada:NewModule(L["Resurrects"])
@@ -11,20 +11,46 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local _
 
+	local spellSchools = {
+		-- Rebirth
+		[20484] = 8,
+		[20739] = 8,
+		[20742] = 8,
+		[20747] = 8,
+		[20748] = 8,
+		[26994] = 8,
+		[48477] = 8,
+		-- Reincarnation
+		[16184] = 8,
+		[16209] = 8,
+		[20608] = 8
+	}
+
 	local function log_resurrect(set, data)
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if player then
 			player.ress = (player.ress or 0) + 1
 			set.ress = (set.ress or 0) + 1
 
-			-- spell
-			player.ress_spells = player.ress_spells or {}
-			player.ress_spells[data.spellid] = (player.ress_spells[data.spellid] or 0) + 1
+			-- saving this to total set may become a memory hog deluxe.
+			if set ~= Skada.current then return end
 
-			-- target
-			if set == Skada.current then
-				player.ress_targets = player.ress_targets or {}
-				player.ress_targets[data.dstName] = (player.ress_targets[data.dstName] or 0) + 1
+			-- spell
+			local spell = player.resspells and player.resspells[data.spellid]
+			if not spell then
+				player.resspells = player.resspells or {}
+				player.resspells[data.spellid] = {count = 0}
+				spell = player.resspells[data.spellid]
+			end
+			spell.count = spell.count + 1
+
+			-- spell targets
+			if data.dstName then
+				local actor = Skada:FindActor(set, data.dstGUID, data.dstName, data.dstFlags)
+				if actor then
+					spell.targets = spell.targets or {}
+					spell.targets[data.dstName] = (spell.targets[data.dstName] or 0) + 1
+				end
 			end
 		end
 	end
@@ -32,11 +58,18 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 	local data = {}
 
 	local function SpellResurrect(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		local spellid = ...
+		if not spellid then return end
+
+		data.spellid = spellid
+
 		data.playerid = srcGUID
 		data.playername = srcName
 		data.playerflags = srcFlags
+
+		data.dstGUID = dstGUID
 		data.dstName = dstName
-		data.spellid = ...
+		data.dstFlags = dstFlags
 
 		log_resurrect(Skada.current, data)
 		log_resurrect(Skada.total, data)
@@ -48,38 +81,38 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 	end
 
 	function playermod:Update(win, set)
-		local player = Skada:FindPlayer(set, win.playerid, win.playername)
-		if player then
-			win.title = format(L["%s's resurrect spells"], player.name)
-			local total = player.ress or 0
+		win.title = format(L["%s's resurrect spells"], win.playername or L.Unknown)
 
-			if total > 0 and player.ress_spells then
-				local maxvalue, nr = 0, 1
+		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local total = player and player.ress or 0
 
-				for spellid, count in pairs(player.ress_spells) do
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+		if total > 0 and player.resspells then
+			local maxvalue, nr = 0, 1
 
-					d.id = spellid
-					d.spellid = spellid
-					d.label, _, d.icon = GetSpellInfo(spellid)
+			for spellid, spell in pairs(player.resspells) do
+				local d = win.dataset[nr] or {}
+				win.dataset[nr] = d
 
-					d.value = count
-					d.valuetext = Skada:FormatValueText(
-						d.value,
-						mod.metadata.columns.Count,
-						Skada:FormatPercent(d.value, total),
-						mod.metadata.columns.Percent
-					)
+				d.id = spellid
+				d.spellid = spellid
+				d.label, _, d.icon = GetSpellInfo(spellid)
+				d.spellschool = spellSchools[spellid]
 
-					if d.value > maxvalue then
-						maxvalue = d.value
-					end
-					nr = nr + 1
+				d.value = spell.count
+				d.valuetext = Skada:FormatValueText(
+					d.value,
+					mod.metadata.columns.Count,
+					Skada:FormatPercent(d.value, total),
+					mod.metadata.columns.Percent
+				)
+
+				if d.value > maxvalue then
+					maxvalue = d.value
 				end
-
-				win.metadata.maxvalue = maxvalue
+				nr = nr + 1
 			end
+
+			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -89,37 +122,41 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 	end
 
 	function targetmod:Update(win, set)
-		local player = Skada:FindPlayer(set, win.playerid, win.playername)
-		if player then
-			win.title = format(L["%s's resurrect targets"], player.name)
-			local total = player.ress or 0
+		win.title = format(L["%s's resurrect targets"], win.playername or L.Unknown)
 
-			if total > 0 and player.ress_targets then
-				local maxvalue, nr = 0, 1
+		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local total = player and player.ress or 0
+		local targets = (total > 0) and player:GetRessTargets()
 
-				for targetname, count in pairs(player.ress_targets) do
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+		if targets then
+			local maxvalue, nr = 0, 1
 
-					d.id = targetname
-					d.label = targetname
+			for targetname, target in pairs(targets) do
+				local d = win.dataset[nr] or {}
+				win.dataset[nr] = d
 
-					d.value = count
-					d.valuetext = Skada:FormatValueText(
-						d.value,
-						mod.metadata.columns.Count,
-						Skada:FormatPercent(d.value, total),
-						mod.metadata.columns.Percent
-					)
+				d.id = target.id or targetname
+				d.label = targetname
+				d.text = target.id and Skada:FormatName(targetname, target.id)
+				d.class = target.class
+				d.role = target.role
+				d.spec = target.spec
 
-					if d.value > maxvalue then
-						maxvalue = d.value
-					end
-					nr = nr + 1
+				d.value = target.count
+				d.valuetext = Skada:FormatValueText(
+					d.value,
+					mod.metadata.columns.Count,
+					Skada:FormatPercent(d.value, total),
+					mod.metadata.columns.Percent
+				)
+
+				if d.value > maxvalue then
+					maxvalue = d.value
 				end
-
-				win.metadata.maxvalue = maxvalue
+				nr = nr + 1
 			end
+
+			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -167,7 +204,7 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 			showspots = true,
 			click1 = playermod,
 			click2 = targetmod,
-			nototalclick = {targetmod},
+			nototalclick = {playermod, targetmod},
 			columns = {Count = true, Percent = false},
 			icon = [[Interface\Icons\spell_nature_reincarnation]]
 		}
@@ -189,5 +226,37 @@ Skada:AddLoadableModule("Resurrects", function(Skada, L)
 
 	function mod:GetSetSummary(set)
 		return tostring(set.ress or 0), set.ress or 0
+	end
+
+	do
+		local playerPrototype = Skada.playerPrototype
+		local cacheTable = Skada.cacheTable
+
+		function playerPrototype:GetRessTargets()
+			if self.resspells then
+				wipe(cacheTable)
+				for _, spell in pairs(self.resspells) do
+					if spell.targets then
+						for name, count in pairs(spell.targets) do
+							if not cacheTable[name] then
+								cacheTable[name] = {count = count}
+							else
+								cacheTable[name].count = cacheTable[name].count + count
+							end
+							if not cacheTable[name].class then
+								local actor = self.super:GetActor(name)
+								if actor then
+									cacheTable[name].id = actor.id
+									cacheTable[name].class = actor.class
+									cacheTable[name].role = actor.role
+									cacheTable[name].spec = actor.spec
+								end
+							end
+						end
+					end
+				end
+				return cacheTable
+			end
+		end
 	end
 end)

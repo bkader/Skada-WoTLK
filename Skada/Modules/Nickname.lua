@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Nickname", function(Skada, L)
+Skada:AddLoadableModule("Nickname", function(L)
 	if Skada:IsDisabled("Nickname") then return end
 
 	local mod = Skada:NewModule(L["Nickname"])

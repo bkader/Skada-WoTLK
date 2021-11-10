@@ -1,9 +1,8 @@
-local Skada = Skada
-
 local LibFail = LibStub("LibFail-1.0", true)
 if not LibFail then return end
 
-Skada:AddLoadableModule("Fails", function(Skada, L)
+local Skada = Skada
+Skada:AddLoadableModule("Fails", function(L)
 	if Skada:IsDisabled("Fails") then return end
 
 	local mod = Skada:NewModule(L["Fails"])
@@ -28,9 +27,10 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 			player.fail = (player.fail or 0) + 1
 			set.fail = (set.fail or 0) + 1
 
+			-- saving this to total set may become a memory hog deluxe.
 			if set == Skada.current and spellid then
-				player.fail_spells = player.fail_spells or {}
-				player.fail_spells[spellid] = (player.fail_spells[spellid] or 0) + 1
+				player.failspells = player.failspells or {}
+				player.failspells[spellid] = (player.failspells[spellid] or 0) + 1
 			end
 		end
 	end
@@ -48,32 +48,21 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 		end
 	end
 
-	local function countFail(set, spellid)
-		local count = 0
-		if set and spellid then
-			for _, player in ipairs(set.players) do
-				if player.fail_spells and player.fail_spells[spellid] then
-					count = count + player.fail_spells[spellid]
-				end
-			end
-		end
-		return count
-	end
-
 	function spellmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
 		win.title = format(L["%s's fails"], label)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's fails"], win.spellname or L["Unknown"])
+		win.title = format(L["%s's fails"], win.spellname or L.Unknown)
+		if not win.spellid then return end
 
-		local total = countFail(set, win.spellid or 0)
+		local total = set and set:GetFailCount(win.spellid) or 0
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
 			for _, player in ipairs(set.players) do
-				if player.fail_spells and player.fail_spells[win.spellid] then
+				if player.failspells and player.failspells[win.spellid] then
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -84,7 +73,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 					d.role = player.role
 					d.spec = player.spec
 
-					d.value = player.fail_spells[win.spellid]
+					d.value = player.failspells[win.spellid]
 					d.valuetext = Skada:FormatValueText(
 						d.value,
 						mod.metadata.columns.Count,
@@ -109,38 +98,37 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	end
 
 	function playermod:Update(win, set)
-		local player = Skada:FindPlayer(set, win.playerid, win.playername)
-		if player then
-			win.title = format(L["%s's fails"], player.name)
-			local total = player.fail or 0
+		win.title = format(L["%s's fails"], win.playername or L.Unknown)
 
-			if total > 0 and player.fail_spells then
-				local maxvalue, nr = 0, 1
+		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local total = player and player.fail or 0
 
-				for spellid, count in pairs(player.fail_spells) do
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+		if total > 0 and player.failspells then
+			local maxvalue, nr = 0, 1
 
-					d.id = spellid
-					d.spellid = spellid
-					d.label, _, d.icon = GetSpellInfo(spellid)
+			for spellid, count in pairs(player.failspells) do
+				local d = win.dataset[nr] or {}
+				win.dataset[nr] = d
 
-					d.value = count
-					d.valuetext = Skada:FormatValueText(
-						d.value,
-						mod.metadata.columns.Count,
-						Skada:FormatPercent(d.value, total),
-						mod.metadata.columns.Percent
-					)
+				d.id = spellid
+				d.spellid = spellid
+				d.label, _, d.icon = GetSpellInfo(spellid)
 
-					if d.value > maxvalue then
-						maxvalue = d.value
-					end
-					nr = nr + 1
+				d.value = count
+				d.valuetext = Skada:FormatValueText(
+					d.value,
+					mod.metadata.columns.Count,
+					Skada:FormatPercent(d.value, total),
+					mod.metadata.columns.Percent
+				)
+
+				if d.value > maxvalue then
+					maxvalue = d.value
 				end
-
-				win.metadata.maxvalue = maxvalue
+				nr = nr + 1
 			end
+
+			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -234,7 +222,7 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 							type = "description",
 							name = " ",
 							width = "full",
-							order = 1,
+							order = 1
 						},
 						failsannounce = {
 							type = "toggle",
@@ -276,8 +264,12 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 	end
 
 	function mod:SetComplete(set)
-		if not (Skada.db.profile.modules.failsannounce and IsInGroup()) then return end
-		if set ~= Skada.current or (set.fail or 0) == 0 then return end
+		if not (Skada.db.profile.modules.failsannounce and IsInGroup()) then
+			return
+		end
+		if set ~= Skada.current or (set.fail or 0) == 0 then
+			return
+		end
 
 		local channel = Skada.db.profile.modules.failschannel or "AUTO"
 		local chantype = (channel == "SELF") and "self" or "preset"
@@ -292,5 +284,20 @@ Skada:AddLoadableModule("Fails", function(Skada, L)
 			end
 		end
 		Skada:Report(channel, chantype, L["Fails"], nil, 10)
+	end
+
+	do
+		local setPrototype = Skada.setPrototype
+		function setPrototype:GetFailCount(spellid)
+			if spellid and self.fail then
+				local count = 0
+				for _, p in ipairs(self.players) do
+					if p.failspells and p.failspells[spellid] then
+						count = count + p.failspells[spellid]
+					end
+				end
+				return count
+			end
+		end
 	end
 end)

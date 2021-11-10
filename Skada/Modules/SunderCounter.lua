@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
+Skada:AddLoadableModule("Sunder Counter", function(L)
 	if Skada:IsDisabled("Sunder Counter") then return end
 
 	local mod = Skada:NewModule(L["Sunder Counter"])
@@ -9,14 +9,10 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 	local tostring, format = tostring, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
-	local newTable, delTable = Skada.newTable, Skada.delTable
+	local newTable, delTable, After = Skada.newTable, Skada.delTable, Skada.After
 	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
 	local sunder, sunderLink, devastate
 	local _
-
-	local function fmt(num)
-		return format("%.1f", num)
-	end
 
 	local function log_sunder(set, data)
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
@@ -25,8 +21,11 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 			player.sunder = (player.sunder or 0) + 1
 
 			if set == Skada.current and data.dstName then
-				player.sunder_targets = player.sunder_targets or {}
-				player.sunder_targets[data.dstName] = (player.sunder_targets[data.dstName] or 0) + 1
+				local actor = Skada:GetActor(set, data.dstGUID, data.dstName, data.dstFlags)
+				if actor then
+					player.sundertargets = player.sundertargets or {}
+					player.sundertargets[data.dstName] = (player.sundertargets[data.dstName] or 0) + 1
+				end
 			end
 		end
 	end
@@ -39,7 +38,10 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 			data.playerid = srcGUID
 			data.playername = srcName
 			data.playerflags = srcFlags
+
+			data.dstGUID = dstGUID
 			data.dstName = dstName
+			data.dstFlags = dstFlags
 
 			log_sunder(Skada.current, data)
 			log_sunder(Skada.total, data)
@@ -51,7 +53,13 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 				elseif mod.targets[dstGUID] ~= -1 then
 					mod.targets[dstGUID].count = (mod.targets[dstGUID].count or 0) + 1
 					if mod.targets[dstGUID].count == 5 then
-						mod:Announce(format(L["%s stacks of %s applied on %s in %s sec!"], mod.targets[dstGUID].count, sunderLink or sunder, dstName, fmt(timestamp - mod.targets[dstGUID].time)), dstGUID)
+						mod:Announce(format(
+							L["%s stacks of %s applied on %s in %s sec!"],
+							mod.targets[dstGUID].count,
+							sunderLink or sunder,
+							dstName,
+							format("%.1f", timestamp - mod.targets[dstGUID].time)
+						), dstGUID)
 						mod.targets[dstGUID] = -1
 					end
 				end
@@ -61,9 +69,9 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 	local function SunderRemoved(timestamp, eventtype, _, _, _, dstGUID, dstName, _, _, spellname)
 		if Skada.db.profile.modules.sunderannounce and spellname and spellname == sunder then
-			Skada.After(0.1, function()
+			After(0.1, function()
 				if mod.targets and mod.targets[dstGUID] then
-					mod:Announce(format(L["%s dropped from %s!"], sunderLink or sunder, dstName or L["Unknown"]), dstGUID)
+					mod:Announce(format(L["%s dropped from %s!"], sunderLink or sunder, dstName or L.Unknown), dstGUID)
 					mod.targets[dstGUID] = nil
 				end
 			end)
@@ -76,55 +84,59 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 		end
 	end
 
+	local function DoubleCheckSunder()
+		if not sunder then
+			sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
+			sunderLink = GetSpellLink(47467)
+		end
+	end
+
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
 		win.title = format(L["%s's <%s> targets"], label, sunder)
 	end
 
 	function targetmod:Update(win, set)
-		if not sunder then
-			sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
-			sunderLink = GetSpellLink(47467)
-		end
+		DoubleCheckSunder()
+		win.title = format(L["%s's <%s> targets"], win.playername or L.Unknown, sunder)
 
-		local player = Skada:FindPlayer(set, win.playerid, win.playername)
-		if player then
-			win.title = format(L["%s's <%s> targets"], player.name, sunder)
-			local total = player.sunder or 0
+		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local total = player and player.sunder or 0
+		local targets = (total > 0) and player:GetSunderTargets()
 
-			if total > 0 and player.sunder_targets then
-				local maxvalue, nr = 0, 1
+		if targets then
+			local maxvalue, nr = 0, 1
 
-				for targetname, count in pairs(player.sunder_targets) do
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+			for targetname, target in pairs(targets) do
+				local d = win.dataset[nr] or {}
+				win.dataset[nr] = d
 
-					d.id = targetname
-					d.label = targetname
-					d.value = count
-					d.valuetext = Skada:FormatValueText(
-						d.value,
-						mod.metadata.columns.Count,
-						Skada:FormatPercent(d.value, total),
-						mod.metadata.columns.Percent
-					)
+				d.id = target.id or targetname
+				d.label = targetname
+				d.class = target.class
+				d.role = target.role
+				d.spec = target.spec
 
-					if d.value > maxvalue then
-						maxvalue = d.value
-					end
-					nr = nr + 1
+				d.value = target.count
+				d.valuetext = Skada:FormatValueText(
+					d.value,
+					mod.metadata.columns.Count,
+					Skada:FormatPercent(d.value, total),
+					mod.metadata.columns.Percent
+				)
+
+				if d.value > maxvalue then
+					maxvalue = d.value
 				end
-
-				win.metadata.maxvalue = maxvalue
+				nr = nr + 1
 			end
+
+			win.metadata.maxvalue = maxvalue
 		end
 	end
 
 	function mod:Update(win, set)
-		if not sunder then
-			sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
-			sunderLink = GetSpellLink(47467)
-		end
+		DoubleCheckSunder()
 
 		win.title = L["Sunder Counter"]
 		local total = set.sunder or 0
@@ -203,14 +215,10 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 
 	function mod:Announce(msg, guid)
 		-- only in a group
-		if not IsInGroup() or not msg then
-			return
-		end
+		if not IsInGroup() or not msg then return end
 
 		-- only on bosses!
-		if Skada.db.profile.modules.sunderbossonly and guid and not Skada:IsBoss(guid) then
-			return
-		end
+		if Skada.db.profile.modules.sunderbossonly and guid and not Skada:IsBoss(guid) then return end
 
 		local channel = Skada.db.profile.modules.sunderchannel or "SAY"
 		if channel == "SELF" then
@@ -229,14 +237,11 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 			end
 		end
 
-		Skada:SendChat(msg, channel, "preset")
+		Skada:SendChat(msg, channel, "preset", true)
 	end
 
 	function mod:OnInitialize()
-		if not sunder then
-			sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
-			sunderLink = GetSpellLink(47467)
-		end
+		DoubleCheckSunder()
 
 		if Skada.db.profile.modules.sunderchannel == nil then
 			Skada.db.profile.modules.sunderchannel = "SAY"
@@ -262,12 +267,12 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 					type = "description",
 					name = " ",
 					width = "full",
-					order = 1,
+					order = 1
 				},
 				sunderannounce = {
 					type = "toggle",
 					name = format(L["Announce %s"], sunder),
-					desc = format(L["Announces how long it took to apply %d stacks of %s and announces when it drops."], 5, sunder or L["Unknown"]),
+					desc = format(L["Announces how long it took to apply %d stacks of %s and announces when it drops."], 5, sunder or L.Unknown),
 					descStyle = "inline",
 					order = 10,
 					width = "double"
@@ -288,5 +293,28 @@ Skada:AddLoadableModule("Sunder Counter", function(Skada, L)
 				}
 			}
 		}
+	end
+
+	do
+		local playerPrototype = Skada.playerPrototype
+		local cacheTable = Skada.cacheTable
+		local wipe = wipe
+
+		function playerPrototype:GetSunderTargets()
+			if self.sundertargets then
+				wipe(cacheTable)
+				for name, count in pairs(self.sundertargets) do
+					cacheTable[name] = {count = count}
+					local actor = self.super:GetActor(name)
+					if actor then
+						cacheTable[name].id = actor.id
+						cacheTable[name].class = actor.class
+						cacheTable[name].role = actor.role
+						cacheTable[name].spec = actor.spec
+					end
+				end
+				return cacheTable
+			end
+		end
 	end
 end)

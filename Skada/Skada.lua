@@ -1,4 +1,4 @@
-local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceEvent-3.0", "AceComm-3.0", "LibCompat-1.0-Skada")
+local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceEvent-3.0", "AceHook-3.0", "AceComm-3.0", "LibCompat-1.0-Skada")
 _G.Skada = Skada
 
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
@@ -16,7 +16,7 @@ local DBI = LibStub("LibDBIcon-1.0", true)
 local Translit = LibStub("LibTranslit-1.0", true)
 
 -- cache frequently used globlas
-local tsort, tinsert, tremove, tmaxn, setmetatable = table.sort, table.insert, table.remove, table.maxn, setmetatable
+local tsort, tinsert, tremove, tmaxn, wipe, setmetatable = table.sort, table.insert, table.remove, table.maxn, wipe, setmetatable
 local next, pairs, ipairs, type = next, pairs, ipairs, type
 local tonumber, tostring, format, strsplit = tonumber, tostring, string.format, strsplit
 local floor, max, min, band, time = math.floor, math.max, math.min, bit.band, time
@@ -67,9 +67,6 @@ local CheckForJoinAndLeave
 -- list of players, pets and vehicles
 local players, pets, vehicles, queued_units = {}, {}, {}, nil
 
--- tables used for more efficient lookups
-local lookup_players, lookup_enemies = {}, {}
-
 -- list of feeds & selected feed
 local feeds, selected_feed = {}, nil
 
@@ -110,17 +107,6 @@ Skada.BITMASK_ENEMY = BITMASK_ENEMY
 
 -------------------------------------------------------------------------------
 -- local functions.
-
--- returns the selected set table.
-local function FindSet(s)
-	if s == "current" then
-		return Skada.current or Skada.last or Skada.char.sets[1]
-	elseif s == "total" then
-		return Skada.total
-	else
-		return s and Skada.char.sets[s]
-	end
-end
 
 -- verifies a set
 local function VerifySet(mode, set)
@@ -520,8 +506,8 @@ end
 
 function Window:Reset()
 	if self.dataset then
-		for i, data in ipairs(self.dataset) do
-			self.dataset[i] = wipe(data)
+		for i = 1, #self.dataset do
+			wipe(self.dataset[i])
 		end
 	end
 end
@@ -538,7 +524,7 @@ function Window:Wipe()
 end
 
 function Window:GetSelectedSet()
-	return FindSet(self.selectedset)
+	return Skada:GetSet(self.selectedset)
 end
 
 function Window:set_selected_set(set, step)
@@ -577,7 +563,7 @@ function Window:DisplayMode(mode)
 
 	self.selectedset = self.selectedset or "current"
 	self.selectedmode = mode
-	self.metadata = wipe(self.metadata or {})
+	wipe(self.metadata)
 
 	if mode and self.parentmode ~= mode and Skada:GetModule(mode.moduleName, true) then
 		self.parentmode = mode
@@ -628,12 +614,11 @@ do
 	end
 
 	function Window:DisplayModes(settime)
-		self.history = wipe(self.history or {})
+		wipe(self.metadata)
+		wipe(self.history)
 		self:Wipe()
 
 		self.selectedmode = nil
-
-		self.metadata = wipe(self.metadata or {})
 		self.metadata.title = L["Skada: Modes"]
 
 		self.db.set = settime
@@ -679,13 +664,13 @@ do
 	end
 
 	function Window:DisplaySets()
-		self.history = wipe(self.history or {})
+		wipe(self.history)
+		wipe(self.metadata)
 		self:Wipe()
 
 		self.selectedmode = nil
 		self.selectedset = nil
 
-		self.metadata = wipe(self.metadata or {})
 		self.metadata.title = L["Skada: Fights"]
 		self.display:SetTitle(self, self.metadata.title)
 
@@ -780,7 +765,7 @@ function Skada:CreateWindow(name, db, display)
 			self:RestoreView(window, window.db.set, window.db.mode)
 		end
 	else
-		self:Printf("Window '%s' was not loaded because its display module, '%s' was not found.", name, window.db.display or L["Unknown"])
+		self:Printf("Window '%s' was not loaded because its display module, '%s' was not found.", name, window.db.display or L.Unknown)
 	end
 
 	ACR:NotifyChange("Skada")
@@ -1071,65 +1056,12 @@ function Skada:DeleteSet(set, index)
 	end
 end
 
--- clears cached player indexes
-do
-	local function ClearIndexes(set)
-		if set then
-			lookup_players[set] = delTable(lookup_players[set])
-			lookup_enemies[set] = delTable(lookup_enemies[set])
-		end
-	end
-
-	function Skada:ClearAllIndexes()
-		ClearIndexes(self.current)
-		ClearIndexes(self.char.total)
-		for _, set in ipairs(self.char.sets) do
-			ClearIndexes(set)
-		end
-	end
-end
-
 -------------------------------------------------------------------------------
 -- player & enemies functions
 
--- finds a player that was already recorded
-function Skada:FindPlayer(set, guid, name, strict)
-	if set and guid and guid ~= "total" then
-		lookup_players[set] = lookup_players[set] or newTable()
-
-		local player = lookup_players[set][guid]
-		if player then
-			return player
-		end
-
-		-- search the set
-		for _, p in ipairs(set.players) do
-			if p.id == guid then
-				lookup_players[set][guid] = p
-				return p
-			end
-		end
-
-		-- needed for certain bosses
-		local isboss, _, npcname = self:IsBoss(guid, name)
-		if isboss then
-			player = {id = guid, name = npcname or name, class = "BOSS"}
-			lookup_players[set][guid] = player
-			return player
-		end
-
-		if strict then
-			return player
-		end
-
-		-- last hope
-		return {id = guid, name = name or L["Unknown"], class = "PET"}
-	end
-end
-
 -- finds a player table or creates it if not found
 function Skada:GetPlayer(set, guid, name, flag)
-	if not (set and guid) then return end
+	if not (set and set.players and guid) then return end
 
 	local player = self:FindPlayer(set, guid, name, true)
 
@@ -1186,29 +1118,10 @@ function Skada:GetPlayer(set, guid, name, flag)
 	return player
 end
 
--- finds an enemy unit
-function Skada:FindEnemy(set, name, guid)
-	if set and set.enemies and name then
-		lookup_enemies[set] = lookup_enemies[set] or newTable()
-
-		local enemy = lookup_enemies[set][name]
-		if enemy then
-			return enemy
-		end
-
-		for _, e in ipairs(set.enemies) do
-			if (guid and guid == e.id) or (e.name == name) then
-				lookup_enemies[set][name] = e
-				return e
-			end
-		end
-	end
-end
-
 -- finds or create an enemy entry
 -- function Skada:FindEnemy(set, name, guid)
 function Skada:GetEnemy(set, name, guid, flag)
-	if not (set and name) then return end
+	if not (set and set.enemies and name) then return end
 	local enemy = self:FindEnemy(set, name, guid)
 	if not enemy then
 		enemy = {id = guid or name, name = name, flag = flag}
@@ -1227,7 +1140,7 @@ end
 -- checks if the unit is a player
 function Skada:IsPlayer(guid, flag, name)
 	if guid and players[guid] then
-		return true
+		return 1 -- 1 for group member
 	end
 	if name and UnitIsPlayer(name) then
 		return true
@@ -1626,7 +1539,7 @@ do
 					local numLines = t:NumLines()
 					win.metadata.post_tooltip(win, id, label, t)
 
-					if t:NumLines() ~= numLines and hasClick then
+					if numLines > 0 and t:NumLines() ~= numLines and hasClick then
 						t:AddLine(" ")
 					end
 				end
@@ -1785,7 +1698,7 @@ do
 
 		if not window then
 			report_mode = FindMode(report_mode_name or L["Damage"])
-			report_set = FindSet(report_set_name or "current")
+			report_set = self:GetSet(report_set_name or "current")
 			if report_set == nil then
 				return
 			end
@@ -1877,10 +1790,10 @@ function Skada:PLAYER_ENTERING_WORLD()
 end
 
 function Skada:CheckGroup(petsOnly)
-	pets = wipe(pets)
-	vehicles = wipe(vehicles)
+	wipe(pets)
+	wipe(vehicles)
 	if not petsOnly then
-		players = wipe(players)
+		wipe(players)
 	end
 
 	for unit, owner in UnitIterator() do
@@ -2052,7 +1965,7 @@ function Skada:Reset(force)
 	if self.testMode then return end
 
 	if force then
-		self.char.sets = wipe(self.char.sets or {})
+		wipe(self.char.sets)
 		self.char.total = nil
 		self:Reset()
 		After(3, self.ReloadSettings)
@@ -2227,7 +2140,17 @@ end
 -- format functions
 
 do
-	local ShortenValue
+	local function ShortenValue(num)
+		if num >= 1e9 or num <= -1e9 then
+			return format("%02.3fB", num / 1e9)
+		elseif num >= 1e6 or num <= -1e6 then
+			return format("%02.2fM", num / 1e6)
+		elseif num >= 1e3 or num <= -1e3 then
+			return format("%02.1fK", num / 1e3)
+		end
+		return floor(num)
+	end
+
 	if Skada.locale == "zhCN" then
 		ShortenValue = function(num)
 			if num >= 1e8 or num <= -1e8 then
@@ -2237,14 +2160,21 @@ do
 			end
 			return floor(num)
 		end
-	else
+	elseif Skada.locale == "zhTW" then
 		ShortenValue = function(num)
-			if num >= 1e9 or num <= -1e9 then
-				return format("%02.3fB", num / 1e9)
-			elseif num >= 1e6 or num <= -1e6 then
-				return format("%02.2fM", num / 1e6)
-			elseif num >= 1e3 or num <= -1e3 then
-				return format("%02.1fK", num / 1e3)
+			if num >= 1e8 or num <= -1e8 then
+				return format("%02.2f億", num / 1e8)
+			elseif num >= 1e4 or num <= -1e4 then
+				return format("%02.1f萬", num / 1e4)
+			end
+			return floor(num)
+		end
+	elseif Skada.locale == "koKR" then
+		ShortenValue = function(num)
+			if num >= 1e8 or num <= -1e8 then
+				return format("%02.2f억", num / 1e8)
+			elseif num >= 1e4 or num <= -1e4 then
+				return format("%02.1f만", num / 1e4)
 			end
 			return floor(num)
 		end
@@ -2362,7 +2292,7 @@ do
 		if not set then
 			return ""
 		end
-		return SetLabelFormat(set.name or L["Unknown"], set.starttime, set.endtime or time())
+		return SetLabelFormat(set.name or L.Unknown, set.starttime, set.endtime or time())
 	end
 
 	function Window:set_mode_title()
@@ -2415,7 +2345,8 @@ end
 function Window:RestoreView(theset, themode)
 	if self.history[1] then
 		-- clear history and title
-		self.history, self.title = wipe(self.history or {}), nil
+		wipe(self.history)
+		self.title = nil
 
 		-- all all stuff that were registered by modules
 		self.datakey = nil
@@ -2437,12 +2368,7 @@ function dataobj:OnEnter()
 	self.tooltip:SetPoint("TOPRIGHT", self, "BOTTOMRIGHT")
 	self.tooltip:ClearLines()
 
-	local set
-	if Skada.current then
-		set = Skada.current
-	else
-		set = Skada.char.sets[1]
-	end
+	local set = Skada.current or Skada.char.sets[1]
 	if set then
 		self.tooltip:AddDoubleLine(L["Skada Summary"], Skada.version)
 		self.tooltip:AddLine(" ")
@@ -2532,7 +2458,7 @@ function Skada:ReloadSettings()
 
 	Skada.total = Skada.char.total
 
-	Skada:ClearAllIndexes()
+	Skada:ClearIndexes()
 
 	if DBI and not DBI:IsRegistered("Skada") then
 		DBI:Register("Skada", dataobj, Skada.db.profile.icon)
@@ -3030,7 +2956,7 @@ function Skada:OnEnable()
 
 	if self.modulelist then
 		for i = 1, #self.modulelist do
-			self.modulelist[i](self, L)
+			self.modulelist[i](L)
 		end
 		self.modulelist = nil
 	end
@@ -3085,7 +3011,6 @@ end
 -- note that "collect" isn't used because it blocks all execution for too long.
 function Skada:CleanGarbage()
 	CombatLogClearEntries()
-	Skada:ClearAllIndexes()
 	if not InCombatLockdown() then
 		collectgarbage("collect")
 	end
@@ -3185,14 +3110,6 @@ function Skada:IterateWindows()
 	return ipairs(windows)
 end
 
-function Skada:GetSets()
-	return self.char.sets
-end
-
-function Skada:IterateSets()
-	return ipairs(self.char.sets)
-end
-
 function Skada:GetModes()
 	return modes
 end
@@ -3260,6 +3177,9 @@ function Skada:EndSegment()
 					mode:SetComplete(self.current)
 				end
 			end
+
+			-- do you want to do something?
+			self.callbacks:Fire("Skada_SetComplete", self.current)
 
 			tinsert(self.char.sets, 1, self.current)
 		end
@@ -3433,7 +3353,7 @@ do
 	end
 
 	function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		if disabled or ignored_events[eventtype] then return end
+		if disabled or self.testMode or ignored_events[eventtype] then return end
 
 		local src_is_interesting = nil
 		local dst_is_interesting = nil

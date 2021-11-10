@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Potions", function(Skada, L)
+Skada:AddLoadableModule("Potions", function(L)
 	if Skada:IsDisabled("Potions") then return end
 
 	local mod = Skada:NewModule(L["Potions"])
@@ -46,11 +46,11 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 			player.potion = (player.potion or 0) + 1
 			set.potion = (set.potion or 0) + 1
 
-			-- record the potion
-			if spellid then
+			-- saving this to total set may become a memory hog deluxe.
+			if set == Skada.current and spellid then
 				local potionid = potionIDs[spellid]
-				player.potion_spells = player.potion_spells or {}
-				player.potion_spells[potionid] = (player.potion_spells[potionid] or 0) + 1
+				player.potionspells = player.potionspells or {}
+				player.potionspells[potionid] = (player.potionspells[potionid] or 0) + 1
 			end
 		end
 	end
@@ -103,34 +103,20 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	end
 
 	function potionmod:Update(win, set)
-		win.title = win.potionname or L["Unknown"]
+		win.title = win.potionname or L.Unknown
+		if not (set and win.potionname) then return end
 
-		local total, players = 0, newTable()
-		if win.potionid then
-			for _, player in ipairs(set.players) do
-				if player.potion_spells and player.potion_spells[win.potionid] then
-					total = total + player.potion_spells[win.potionid]
-					players[player.id] = {
-						name = player.name,
-						class = player.class,
-						role = player.role,
-						spec = player.spec,
-						count = player.potion_spells[win.potionid]
-					}
-				end
-			end
-		end
-
-		if total > 0 then
+		local players, total = set:GetPotion(win.potionid)
+		if players and total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for playerid, player in pairs(players) do
+			for playername, player in pairs(players) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
-				d.id = playerid
-				d.label = player.name
-				d.text = Skada:FormatName(player.name, player.id)
+				d.id = player.id or playername
+				d.label = playername
+				d.text = player.id and Skada:FormatName(playername, player.id)
 				d.class = player.class
 				d.role = player.role
 				d.spec = player.spec
@@ -151,8 +137,6 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 
 			win.metadata.maxvalue = maxvalue
 		end
-
-		delTable(players)
 	end
 
 	function playermod:Enter(win, id, label)
@@ -173,10 +157,10 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 			win.title = format(L["%s's used potions"], player.name)
 			local total = player.potion or 0
 
-			if total > 0 and player.potion_spells then
+			if total > 0 and player.potionspells then
 				local maxvalue, nr = 0, 1
 
-				for potionid, count in pairs(player.potion_spells) do
+				for potionid, count in pairs(player.potionspells) do
 					local potionname, potionlink, _, _, _, _, _, _, _, potionicon = GetItemInfo(potionid)
 					if not potionname then
 						RequestPotion(potionid)
@@ -264,11 +248,11 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 	end
 
 	function mod:OnEnable()
-		potionmod.metadata = {click1 = playermod}
 		playermod.metadata = {click1 = potionmod}
 		self.metadata = {
 			showspots = true,
 			click1 = playermod,
+			nototalclick = {playermod},
 			columns = {Count = true, Percent = true},
 			icon = [[Interface\Icons\inv_potion_110]]
 		}
@@ -291,7 +275,33 @@ Skada:AddLoadableModule("Potions", function(Skada, L)
 		if Skada.db.profile.prepotion and next(prepotion or {}) ~= nil then
 			Skada:Printf(L["pre-potion: %s"], tconcat(prepotion, ", "))
 		end
-
 		delTable(prepotion)
+	end
+
+	do
+		local setPrototype = Skada.setPrototype
+		local cacheTable, wipe = Skada.WeakTable(), wipe
+
+		function setPrototype:GetPotion(potionid)
+			if potionid and self.potion then
+				wipe(cacheTable)
+				local total = 0
+
+				for _, p in ipairs(self.players) do
+					if p.potionspells and p.potionspells[potionid] then
+						total = total + p.potionspells[potionid]
+						cacheTable[p.name] = {
+							id = p.id,
+							class = p.class,
+							role = p.role,
+							spec = p.spec,
+							count = p.potionspells[potionid]
+						}
+					end
+				end
+
+				return cacheTable, total
+			end
+		end
 	end
 end)

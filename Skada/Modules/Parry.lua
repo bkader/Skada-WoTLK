@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
+Skada:AddLoadableModule("Parry-Haste", function(L)
 	if Skada:IsDisabled("Parry-Haste") then return end
 
 	local mod = Skada:NewModule(L["Parry-Haste"])
@@ -24,12 +24,13 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 			player.parry = (player.parry or 0) + 1
 			set.parry = (set.parry or 0) + 1
 
+			-- saving this to total set may become a memory hog deluxe.
 			if set == Skada.current then
-				player.parry_targets = player.parry_targets or {}
-				player.parry_targets[data.dstName] = (player.parry_targets[data.dstName] or 0) + 1
+				player.parrytargets = player.parrytargets or {}
+				player.parrytargets[data.dstName] = (player.parrytargets[data.dstName] or 0) + 1
 
 				if Skada.db.profile.modules.parryannounce then
-					Skada:SendChat(format(L["%s parried %s (%s)"], data.dstName, data.playername, player.parry_targets[data.dstName] or 1), Skada.db.profile.modules.parrychannel, "preset")
+					Skada:SendChat(format(L["%s parried %s (%s)"], data.dstName, data.playername, player.parrytargets[data.dstName] or 1), Skada.db.profile.modules.parrychannel, "preset", true)
 				end
 			end
 		end
@@ -61,38 +62,37 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 	end
 
 	function targetmod:Update(win, set)
-		local player = Skada:FindPlayer(set, win.playerid, win.playername)
-		if player then
-			win.title = format(L["%s's parry targets"], player.name)
-			local total = player.parry or 0
+		win.title = format(L["%s's parry targets"], win.playername or L.Unknown)
 
-			if total > 0 and player.parry_targets then
-				local maxvalue, nr = 0, 1
+		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local total = player and player.parry or 0
 
-				for targetname, count in pairs(player.parry_targets) do
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+		if total > 0 and player.parrytargets then
+			local maxvalue, nr = 0, 1
 
-					d.id = targetname
-					d.label = targetname
-					d.class = "BOSS"
+			for targetname, count in pairs(player.parrytargets) do
+				local d = win.dataset[nr] or {}
+				win.dataset[nr] = d
 
-					d.value = count
-					d.valuetext = Skada:FormatValueText(
-						d.value,
-						mod.metadata.columns.Count,
-						Skada:FormatPercent(d.value, total),
-						mod.metadata.columns.Percent
-					)
+				d.id = targetname
+				d.label = targetname
+				d.class = "BOSS" -- what else can it be?
 
-					if d.value > maxvalue then
-						maxvalue = d.value
-					end
-					nr = nr + 1
+				d.value = count
+				d.valuetext = Skada:FormatValueText(
+					d.value,
+					mod.metadata.columns.Count,
+					Skada:FormatPercent(d.value, total),
+					mod.metadata.columns.Percent
+				)
+
+				if d.value > maxvalue then
+					maxvalue = d.value
 				end
-
-				win.metadata.maxvalue = maxvalue
+				nr = nr + 1
 			end
+
+			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -181,7 +181,7 @@ Skada:AddLoadableModule("Parry-Haste", function(Skada, L)
 					type = "description",
 					name = " ",
 					width = "full",
-					order = 1,
+					order = 1
 				},
 				parryannounce = {
 					type = "toggle",

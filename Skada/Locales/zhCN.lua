@@ -539,8 +539,6 @@ L["Damage done per player"] = "每人造成伤害"
 L["Damage from %s"] = "来自于%s的伤害"
 -- enemy damage taken module
 L["Enemy Damage Taken"] = "敌方承受伤害"
-L["Damage taken per player"] = "每人承受伤害"
-L["Damage on %s"] = "对于%s的伤害"
 L["%s's damage sources"] = "%s的伤害来源"
 L["%s below %s%%"] = "%s - %s%%"
 L["%s - %s%% to %s%%"] = "%s - %s%% 到 %s%%"

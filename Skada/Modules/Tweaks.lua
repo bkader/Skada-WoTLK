@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Tweaks", function(Skada, L)
+Skada:AddLoadableModule("Tweaks", function(L)
 	if Skada:IsDisabled("Tweaks") then return end
 
 	local mod = Skada:NewModule(L["Tweaks"], "AceHook-3.0")
@@ -66,7 +66,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 					if class and Skada.classcolors[class] then
 						target = "|c" .. Skada.classcolors[class].colorStr .. target .. "|r"
 					end
-					targetline = format(L["|cffffbb00Boss First Target|r: %s (%s)"], target, UnitName(boss) or L["Unknown"])
+					targetline = format(L["|cffffbb00Boss First Target|r: %s (%s)"], target, UnitName(boss) or L.Unknown)
 					break -- no need
 				end
 			end
@@ -106,7 +106,7 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 					-- close distance?
 					if self:IsBoss(srcGUID) then
 						if self:IsPet(dstGUID, dstFlags) then
-							output = format(pull_formats[1], srcName, dstName or L["Unknown"])
+							output = format(pull_formats[1], srcName, dstName or L.Unknown)
 						elseif dstName then
 							local class = select(2, UnitClass(dstName))
 							if class and self.classcolors[class] then
@@ -561,14 +561,22 @@ Skada:AddLoadableModule("Tweaks", function(Skada, L)
 	---------------------------------------------------------------------------
 	-- Smart stop
 
-	function mod:BossDefeated(event, set)
-		if event == "COMBAT_BOSS_DEFEATED" and set and not set.stopped then
-			After(Skada.db.profile.smartwait or 3, function()
-				if not set.endtime then
-					Skada:StopSegment(L["Smart Stop"])
-					Skada:RegisterEvent("PLAYER_REGEN_ENABLED")
-				end
-			end)
+	do
+		-- list of creature IDs to be ignored
+		local ignoredBosses = {
+			[37217] = true, -- Precious
+			[37025] = true, -- Stinky
+		}
+
+		function mod:BossDefeated(_, set)
+			if set and not set.stopped and set.gotboss and not ignoredBosses[set.gotboss] then
+				After(Skada.db.profile.smartwait or 3, function()
+					if not set.endtime then
+						Skada:StopSegment(L["Smart Stop"])
+						Skada:RegisterEvent("PLAYER_REGEN_ENABLED")
+					end
+				end)
+			end
 		end
 	end
 

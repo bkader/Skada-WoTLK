@@ -145,17 +145,20 @@ Skada.defaults = {
 		modulesBlocked = {
 			["Absorbed Damage"] = true,
 			["Avoidance & Mitigation"] = true,
+			["CC Breakers"] = true,
 			["Damage Done By Spell"] = true,
 			["Damage Mitigated"] = true,
 			["DTPS"] = true,
 			["Enemy Healing Done"] = true,
 			["Healing and Overhealing"] = true,
 			["Healing Done By Spell"] = true,
+			["Healing Taken"] = true,
 			["HPS"] = true,
 			["Improvement"] = true,
 			["Overhealing"] = true,
 			["Overkill"] = true,
-			["Themes"] = true
+			["Themes"] = true,
+			["Useful Damage"] = true
 		},
 		windows = {windefaultscopy}
 	}
@@ -673,6 +676,9 @@ Skada.fontFlags = {
 	["MONOCHROME"] = L["Monochrome"],
 	["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
 }
+
+-- missed damage types
+Skada.missTypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}
 
 -- initial options for blizzard interface options
 do

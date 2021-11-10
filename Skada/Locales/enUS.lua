@@ -547,8 +547,6 @@ L["Damage done per player"] = true
 L["Damage from %s"] = true
 -- enemy damage taken module
 L["Enemy Damage Taken"] = true
-L["Damage taken per player"] = true
-L["Damage on %s"] = true
 L["%s's damage sources"] = true
 L["%s below %s%%"] = true
 L["%s - %s%% to %s%%"] = true

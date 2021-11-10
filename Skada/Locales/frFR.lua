@@ -544,8 +544,6 @@ L["Damage done per player"] = "Dégâts infligés par joueur"
 L["Damage from %s"] = "Dégâts infligés par %s"
 -- enemy damage taken module
 L["Enemy Damage Taken"] = "Dégâts subis (Ennemi)"
-L["Damage taken per player"] = "Dégâts subis par joueur"
-L["Damage on %s"] = "Dégâts infligés à %s"
 L["%s's damage sources"] = "Sources des dégâts subis par %s"
 L["%s below %s%%"] = "%s à partir \1242 %s%%"
 L["%s - %s%% to %s%%"] = "%s - %s%% à %s%%"

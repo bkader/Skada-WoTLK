@@ -358,7 +358,7 @@ do
 	}
 
 	local function GenerateFakeData()
-		fakeSet = wipe(fakeSet)
+		wipe(fakeSet)
 		fakeSet.name = "Fake Fight"
 		fakeSet.starttime = time() - 120
 		fakeSet.endtime = time()
@@ -442,7 +442,7 @@ do
 
 	function Skada:TestMode()
 		if InCombatLockdown() or IsGroupInCombat() then
-			fakeSet = wipe(fakeSet)
+			wipe(fakeSet)
 			updateTimer = CancelTimer(updateTimer, true)
 			self.testMode = nil
 			self:CleanGarbage()
@@ -450,7 +450,7 @@ do
 		end
 		self.testMode = not self.testMode
 		if not self.testMode then
-			fakeSet = wipe(fakeSet)
+			wipe(fakeSet)
 			updateTimer = CancelTimer(updateTimer, true)
 			self.current = nil
 			return

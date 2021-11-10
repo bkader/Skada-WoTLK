@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Activity", function(Skada, L)
+Skada:AddLoadableModule("Activity", function(L)
 	if Skada:IsDisabled("Activity") then return end
 
 	local mod = Skada:NewModule(L["Activity"])
@@ -7,11 +7,11 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
 
 	local function activity_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local player = Skada:FindPlayer(set, id, label)
+		local player = set and set:GetPlayer(id, label)
 		if player then
-			local settime = Skada:GetSetTime(set)
+			local settime = set:GetTime()
 			if settime > 0 then
-				local activetime = Skada:PlayerActiveTime(set, player, true)
+				local activetime = player:GetTime(true)
 				tooltip:AddLine(player.name .. ": " .. L["Activity"])
 				tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
 				tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
@@ -22,13 +22,13 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
 
 	function mod:Update(win, set)
 		win.title = L["Activity"]
-		local settime = Skada:GetSetTime(set)
 
+		local settime = set and set:GetTime()
 		if settime > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in ipairs(set.players) do
-				local activetime = Skada:PlayerActiveTime(set, player, true)
+			for _, player in set:IteratePlayers() do
+				local activetime = player:GetTime(true)
 
 				if activetime > 0 then
 					local d = win.dataset[nr] or {}
@@ -76,12 +76,14 @@ Skada:AddLoadableModule("Activity", function(Skada, L)
 	end
 
 	function mod:GetSetSummary(set)
-		local value = Skada:GetSetTime(set)
-		return Skada:FormatValueText(
-			Skada:FormatTime(value),
-			self.metadata.columns["Active Time"],
-			format("%s - %s", date("%H:%M", set.starttime), date("%H:%M", set.endtime)),
-			self.metadata.columns.Percent
-		), value
+		local settime = set and set:GetTime() or 0
+		if settime > 0 then
+			return Skada:FormatValueText(
+				Skada:FormatTime(settime),
+				self.metadata.columns["Active Time"],
+				format("%s - %s", date("%H:%M", set.starttime), date("%H:%M", set.endtime)),
+				self.metadata.columns.Percent
+			), settime
+		end
 	end
 end)

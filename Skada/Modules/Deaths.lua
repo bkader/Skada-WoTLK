@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Deaths", function(Skada, L)
+Skada:AddLoadableModule("Deaths", function(L)
 	if Skada:IsDisabled("Deaths") then return end
 
 	local mod = Skada:NewModule(L["Deaths"])
@@ -156,9 +156,9 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 						local output = format(
 							"Skada: %s > %s (%s) %s",
-							log.source or L["Unknown"], -- source name
-							player.name or L["Unknown"], -- player name
-							GetSpellInfo(log.spellid) or L["Unknown"], -- spell name
+							log.source or L.Unknown, -- source name
+							player.name or L.Unknown, -- player name
+							GetSpellInfo(log.spellid) or L.Unknown, -- spell name
 							Skada:FormatNumber(0 - log.amount, 1) -- spell amount
 						)
 
@@ -182,11 +182,11 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 						end
 
 						if Skada.db.profile.modules.deathchannel == "SELF" then
-							Skada:SendChat(output, nil, "self")
+							Skada:Print(output)
 						elseif Skada.db.profile.modules.deathchannel == "GUILD" then
-							Skada:SendChat(output, "GUILD", "preset")
+							Skada:SendChat(output, "GUILD", "preset", true)
 						else
-							Skada:SendChat(output, IsInRaid() and "RAID" or "PARTY", "preset")
+							Skada:SendChat(output, IsInRaid() and "RAID" or "PARTY", "preset", true)
 						end
 					end
 				end
@@ -234,7 +234,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 	function deathlogmod:Enter(win, id, label)
 		win.datakey = id
-		win.title = format(L["%s's death log"], win.playername or L["Unknown"])
+		win.title = format(L["%s's death log"], win.playername or L.Unknown)
 	end
 
 	do
@@ -248,7 +248,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 		function deathlogmod:Update(win, set)
 			local player = Skada:FindPlayer(set, win.playerid, win.playername)
 			if player and win.datakey then
-				win.title = format(L["%s's death log"], win.playername or L["Unknown"])
+				win.title = format(L["%s's death log"], win.playername or L.Unknown)
 
 				local deathlog
 				if player.deathlog and player.deathlog[win.datakey] then
@@ -286,7 +286,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 						d.id = nr
 						d.spellid = log.spellid
-						d.label = format("%02.2f: %s", diff or 0, spellname or L["Unknown"])
+						d.label = format("%02.2f: %s", diff or 0, spellname or L.Unknown)
 						d.icon = spellicon
 						d.time = log.time
 
@@ -298,7 +298,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 
 						d.value = log.hp or 0
 						local change = (log.amount >= 0 and "+" or "-") .. Skada:FormatNumber(abs(log.amount))
-						d.reportlabel = format("%02.2f: %s   %s [%s]", diff or 0, GetSpellLink(log.spellid) or spellname or L["Unknown"], change, Skada:FormatNumber(log.hp or 0))
+						d.reportlabel = format("%02.2f: %s   %s [%s]", diff or 0, GetSpellLink(log.spellid) or spellname or L.Unknown, change, Skada:FormatNumber(log.hp or 0))
 
 						local extra = newTable()
 
@@ -381,7 +381,7 @@ Skada:AddLoadableModule("Deaths", function(Skada, L)
 						end
 					end
 
-					d.label = d.label or set.name or L["Unknown"]
+					d.label = d.label or set.name or L.Unknown
 
 					d.value = death.time
 					d.valuetext = formatdate(d.value)
