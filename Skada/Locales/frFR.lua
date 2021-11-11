@@ -267,7 +267,9 @@ L["The mode list will be sorted to reflect usage instead of alphabetically."] = 
 L["Show rank numbers"] = "Afficher n° des rangs"
 L["Shows numbers for relative ranks for modes where it is applicable."] = "Affiche les numéros des rangs relatifs pour les modes où cela est applicable."
 L["Aggressive combat detection"] = "Détection agressive des combats"
-L["Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons, meaningless on boss encounters."] = "Skada utilise un mode conservateur (simple) de détection de combat qui fonctionne mieux en raids. Avec cette option, Skada, tente de simuler les autres \"damage meters\". Pratique en solo ou bien en donjons, inutile contre les bosses."
+L["tentativecombatstart_desc"] = [[Skada utilise un mode conservateur (simple) de détection de combat qui fonctionne mieux en raids.
+Avec cette option, Skada, tente de simuler les autres "damage meters".
+Pratique en solo ou bien en donjons, inutile contre les bosses.]]
 L["Autostop"] = "Arrêt automatique"
 L["Automatically stops the current segment after half of all raid members have died."] = "Arrête automatiquement le segment après que la moitié du groupe soient morts."
 L["Always show self"] = "Toujours afficher ma barre"
@@ -296,8 +298,10 @@ L["Links in reports"] = "Liens dans les rapports"
 L["When possible, use links in the report messages."] = "Utiliser des liens dans les messages de rapport quand cela est possible."
 L["Memory Check"] = "Vérification de la mémoire"
 L["Checks memory usage and warns you if it is greater than or equal to %dmb."] = "Vérifie l'utilisation de la mémoire et vous avertit si elle est supérieure ou égale à %d Mo."
-L["Data segments to keep"] = "Segments à garder"
+L["Segments to keep"] = "Segments à garder"
 L["The number of fight segments to keep. Persistent segments are not included in this."] = "Le nombre de segments de combat à garder. Les segments persistants ne sont pas comptés avec."
+L["Segments limit"] = "Limite de segments"
+L["The limit of saved fight segments, including persistent segments."] = "La limite de segments de combat enregistrés, y compris les segments persistants."
 L["Update frequency"] = "Fréquence de mise à jour"
 L["How often windows are updated. Shorter for faster updates. Increases CPU usage."] = "La fréquence de rafraichissement des fenêtres. Plus court pour des mises à jour plus fréquentes. Augmente l'utilisation du CPU."
 -- columns

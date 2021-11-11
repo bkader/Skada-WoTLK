@@ -185,30 +185,31 @@ function mod.AddDisplayOptions(self, win, options)
 				inline = true,
 				order = 10,
 				args = {
+					button = {
+						type = "select",
+						name = L["Scroll mouse button"],
+						values = {
+							["MiddleButton"] = KEY_BUTTON3,
+							["Button4"] = KEY_BUTTON4,
+							["Button5"] = KEY_BUTTON5
+						},
+						width = "double",
+						order = 10
+					},
 					speed = {
 						type = "range",
 						name = L["Scrolling Speed"],
 						min = 0.1,
 						max = 10,
+						step = 0.1,
 						bigStep = 1,
-						width = "double",
-						order = 10
+						order = 20
 					},
 					icon = {
 						type = "toggle",
 						name = L["Scroll Icon"],
-						order = 20
+						order = 30
 					},
-					button = {
-						type = "select",
-						name = L["Scroll mouse button"],
-						order = 20,
-						values = {
-							["MiddleButton"] = KEY_BUTTON3,
-							["Button4"] = KEY_BUTTON4,
-							["Button5"] = KEY_BUTTON5
-						}
-					}
 				}
 			},
 			binding = {

@@ -155,7 +155,7 @@ local function CleanSets(force)
 	-- because some players may enable the "always keep boss fights" option,
 	-- the amount of segments kept can grow bit, so we make sure to keep
 	-- the player reasonable, otherwise they'll encounter memory issues.
-	local limit = Skada.db.profile.setslimit or 40
+	local limit = (Skada.db.profile.setslimit or 10) + Skada.db.profile.setstokeep
 	if numsets > limit then
 		Skada:Debug("CleanSets: over", limit)
 		for i = numsets, limit, -1 do
@@ -1633,7 +1633,7 @@ local function SlashCommandHandler(cmd)
 		end
 	elseif cmd:sub(1, 5) == "raise" then
 		local _, num = strsplit(" ", cmd, 2)
-		if tonumber(num) then Skada.db.profile.setslimit = max(30, min(60, num)) end
+		if tonumber(num) then Skada.db.profile.setslimit = max(0, min(50, num)) end
 		Skada:Print("Segments Limit:", Skada.db.profile.setslimit)
 	else
 		Skada:Print("Usage:")
@@ -2466,23 +2466,19 @@ function Skada:ReloadSettings()
 	Skada:RefreshMMButton()
 	Skada:ApplySettings()
 
-	-- fix setstokeep
-	if (Skada.db.profile.setstokeep or 0) > 30 then
-		Skada.db.profile.setstokeep = 30
+	-- fix setstokeep, setslimit and timemesure.
+	if (Skada.db.profile.setstokeep or 0) > 25 then
+		Skada.db.profile.setstokeep = 25
+	end
+	if not Skada.db.profile.setslimit then
+		Skada.db.profile.setslimit = 15
+	end
+	if not Skada.db.profile.timemesure then
+		Skada.db.profile.timemesure = 2
 	end
 
-	-- fix time measure
-	if Skada.db.profile.timemesure == nil then
-		Skada.db.profile.timemesure = 1
-	end
-
-	-- remove old improvement data
+	-- remove old improvement data.
 	if Skada.char.improvement then
-		if Skada.char.improvement.bosses then
-			SkadaImprovementDB = CopyTable(Skada.char.improvement.bosses or {})
-		else
-			SkadaImprovementDB = CopyTable(Skada.char.improvement)
-		end
 		Skada.char.improvement = nil
 	end
 

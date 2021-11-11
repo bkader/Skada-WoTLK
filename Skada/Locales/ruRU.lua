@@ -263,7 +263,9 @@ L["The mode list will be sorted to reflect usage instead of alphabetically."] = 
 L["Show rank numbers"] = "Показать номера полос"
 L["Shows numbers for relative ranks for modes where it is applicable."] = "Показывает номера полос в режимах, где это применимо."
 L["Aggressive combat detection"] = "Агрессивное определение режима боя"
-L["Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons, meaningless on boss encounters."] = "Обычно Skada использует простую схему определения начала боя, которая работает лучше всего в рейдах. С этой опцией Skada будет действовать как другие аддоны для подсчета урона. Полезно для подземелий, бессмысленно на рейдовых боссах."
+L["tentativecombatstart_desc"] = [[Обычно Skada использует простую схему определения начала боя, которая работает лучше всего в рейдах.
+С этой опцией Skada будет действовать как другие аддоны для подсчета урона.
+Полезно для подземелий, бессмысленно на рейдовых боссах.]]
 L["Autostop"] = "Останавливать в начале вайпа"
 L["Automatically stops the current segment after half of all raid members have died."] = "Автоматически останавливает текущий сегмент после смерти половины участников рейда."
 L["Always show self"] = "Всегда показывать себя"
@@ -292,8 +294,10 @@ L["When possible, use links in the report messages."] = "По возможнос
 L["Memory Check"] = "Проверка памяти"
 L["Checks memory usage and warns you if it is greater than or equal to %dmb."] = "Проверяет использование памяти и предупреждает, если оно больше или равно %d МБ."
 L["Controls the way set names are displayed."] = "Настройка форматирования заголовков для боя."
-L["Data segments to keep"] = "Сегменты для хранения"
+L["Segments to keep"] = "Сегменты для хранения"
 L["The number of fight segments to keep. Persistent segments are not included in this."] = "Число сохраняемых сегментов боев. В это число не входят постоянные сегменты."
+L["Segments limit"] = "Ограничение сегмента"
+L["The limit of saved fight segments, including persistent segments."] = "Лимит сохраняемых боевых сегментов, включая постоянные."
 L["Update frequency"] = "Частота обновления"
 L["How often windows are updated. Shorter for faster updates. Increases CPU usage."] = "Частота обновления окон. Меньшее значение способствует более быстрому обновлению. Увеличивает нагрузку процессора."
 -- columns

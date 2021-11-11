@@ -270,7 +270,9 @@ L["The mode list will be sorted to reflect usage instead of alphabetically."] = 
 L["Show rank numbers"] = true
 L["Shows numbers for relative ranks for modes where it is applicable."] = true
 L["Aggressive combat detection"] = true
-L["Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons, meaningless on boss encounters."] = true
+L["tentativecombatstart_desc"] = [[Skada usually uses a very conservative (simple) combat detection scheme that works best in raids.
+With this option Skada attempts to emulate other damage meters.
+Useful for running dungeons, meaningless on boss encounters.]]
 L["Autostop"] = true
 L["Automatically stops the current segment after half of all raid members have died."] = true
 L["Always show self"] = true
@@ -298,8 +300,10 @@ L["Links in reports"] = true
 L["When possible, use links in the report messages."] = true
 L["Memory Check"] = true
 L["Checks memory usage and warns you if it is greater than or equal to %dmb."] = true
-L["Data segments to keep"] = true
+L["Segments to keep"] = true
 L["The number of fight segments to keep. Persistent segments are not included in this."] = true
+L["Segments limit"] = true
+L["The limit of saved fight segments, including persistent segments."] = true
 L["Update frequency"] = true
 L["How often windows are updated. Shorter for faster updates. Increases CPU usage."] = true
 -- columns

@@ -115,7 +115,7 @@ Skada.defaults = {
 		showranks = true,
 		showself = false,
 		setstokeep = 15,
-		setslimit = 40,
+		setslimit = 15,
 		reportlinks = false,
 		memorycheck = true,
 		tooltips = true,
@@ -223,221 +223,255 @@ Skada.options = {
 			type = "group",
 			name = L["General Options"],
 			desc = fmt(L["Options for %s."], L["General Options"]),
+			childGroups = "tab",
 			order = 20,
 			args = {
-				mmbutton = {
-					type = "toggle",
-					name = L["Show minimap button"],
-					desc = L["Toggles showing the minimap button."],
+				general = {
+					type = "group",
+					name = L["General"],
+					desc = fmt(L["Options for %s."], L["General"]),
 					order = 10,
-					get = function() return not Skada.db.profile.icon.hide end,
-					set = function()
-						Skada.db.profile.icon.hide = not Skada.db.profile.icon.hide
-						Skada:RefreshMMButton()
-					end
+					args = {
+						mmbutton = {
+							type = "toggle",
+							name = L["Show minimap button"],
+							desc = L["Toggles showing the minimap button."],
+							order = 10,
+							get = function()
+								return not Skada.db.profile.icon.hide
+							end,
+							set = function()
+								Skada.db.profile.icon.hide = not Skada.db.profile.icon.hide
+								Skada:RefreshMMButton()
+							end
+						},
+						shortmenu = {
+							type = "toggle",
+							name = L["Shorten menus"],
+							desc = L["Removes mode and segment menus from Skada menu to reduce its height. Menus are still accessible using window buttons."],
+							order = 20
+						},
+						mergepets = {
+							type = "toggle",
+							name = L["Merge pets"],
+							desc = L["Merges pets with their owners. Changing this only affects new data."],
+							order = 30
+						},
+						showtotals = {
+							type = "toggle",
+							name = L["Show totals"],
+							desc = L["Shows a extra row with a summary in certain modes."],
+							order = 40
+						},
+						onlykeepbosses = {
+							type = "toggle",
+							name = L["Only keep boss fighs"],
+							desc = L["Boss fights will be kept with this on, and non-boss fights are discarded."],
+							order = 50
+						},
+						alwayskeepbosses = {
+							type = "toggle",
+							name = L["Always keep boss fights"],
+							desc = L["Boss fights will be kept with this on and will not be affected by Skada reset."],
+							order = 60
+						},
+						hidesolo = {
+							type = "toggle",
+							name = L["Hide when solo"],
+							desc = L["Hides Skada's window when not in a party or raid."],
+							order = 70
+						},
+						hidepvp = {
+							type = "toggle",
+							name = L["Hide in PvP"],
+							desc = L["Hides Skada's window when in Battlegrounds/Arenas."],
+							order = 80
+						},
+						hidecombat = {
+							type = "toggle",
+							name = L["Hide in combat"],
+							desc = L["Hides Skada's window when in combat."],
+							order = 90,
+							set = function()
+								Skada.db.profile.hidecombat = not Skada.db.profile.hidecombat
+								if Skada.db.profile.hidecombat then
+									Skada.db.profile.showcombat = false
+								end
+								Skada:ApplySettings()
+							end
+						},
+						showcombat = {
+							type = "toggle",
+							name = L["Show in combat"],
+							desc = L["Shows Skada's window when in combat."],
+							order = 100,
+							set = function()
+								Skada.db.profile.showcombat = not Skada.db.profile.showcombat
+								if Skada.db.profile.showcombat then
+									Skada.db.profile.hidecombat = false
+								end
+								Skada:ApplySettings()
+							end
+						},
+						hidedisables = {
+							type = "toggle",
+							name = L["Disable while hidden"],
+							desc = L["Skada will not collect any data when automatically hidden."],
+							order = 110
+						},
+						sortmodesbyusage = {
+							type = "toggle",
+							name = L["Sort modes by usage"],
+							desc = L["The mode list will be sorted to reflect usage instead of alphabetically."],
+							order = 120
+						},
+						showranks = {
+							type = "toggle",
+							name = L["Show rank numbers"],
+							desc = L["Shows numbers for relative ranks for modes where it is applicable."],
+							order = 130
+						},
+						showself = {
+							type = "toggle",
+							name = L["Always show self"],
+							desc = L["Keeps the player shown last even if there is not enough space."],
+							order = 140
+						},
+						autostop = {
+							type = "toggle",
+							name = L["Autostop"],
+							desc = L["Automatically stops the current segment after half of all raid members have died."],
+							order = 150
+						},
+						tentativecombatstart = {
+							type = "toggle",
+							name = L["Aggressive combat detection"],
+							desc = L.tentativecombatstart_desc,
+							order = 160
+						},
+						reportlinks = {
+							type = "toggle",
+							name = L["Links in reports"],
+							desc = L["When possible, use links in the report messages."],
+							order = 170
+						},
+						translit = {
+							type = "toggle",
+							name = L["Transliterate"],
+							desc = L["Converts Cyrillic letters into Latin letters."],
+							order = 180
+						}
+					}
 				},
-				shortmenu = {
-					type = "toggle",
-					name = L["Shorten menus"],
-					desc = L["Removes mode and segment menus from Skada menu to reduce its height. Menus are still accessible using window buttons."],
-					order = 20
-				},
-				mergepets = {
-					type = "toggle",
-					name = L["Merge pets"],
-					desc = L["Merges pets with their owners. Changing this only affects new data."],
-					order = 30
-				},
-				showtotals = {
-					type = "toggle",
-					name = L["Show totals"],
-					desc = L["Shows a extra row with a summary in certain modes."],
-					order = 40
-				},
-				onlykeepbosses = {
-					type = "toggle",
-					name = L["Only keep boss fighs"],
-					desc = L["Boss fights will be kept with this on, and non-boss fights are discarded."],
-					order = 50
-				},
-				alwayskeepbosses = {
-					type = "toggle",
-					name = L["Always keep boss fights"],
-					desc = L["Boss fights will be kept with this on and will not be affected by Skada reset."],
-					order = 60
-				},
-				hidesolo = {
-					type = "toggle",
-					name = L["Hide when solo"],
-					desc = L["Hides Skada's window when not in a party or raid."],
-					order = 70
-				},
-				hidepvp = {
-					type = "toggle",
-					name = L["Hide in PvP"],
-					desc = L["Hides Skada's window when in Battlegrounds/Arenas."],
-					order = 80
-				},
-				hidecombat = {
-					type = "toggle",
-					name = L["Hide in combat"],
-					desc = L["Hides Skada's window when in combat."],
-					order = 90,
-					set = function()
-						Skada.db.profile.hidecombat = not Skada.db.profile.hidecombat
-						if Skada.db.profile.hidecombat then
-							Skada.db.profile.showcombat = false
-						end
-						Skada:ApplySettings()
-					end
-				},
-				showcombat = {
-					type = "toggle",
-					name = L["Show in combat"],
-					desc = L["Shows Skada's window when in combat."],
-					order = 100,
-					set = function()
-						Skada.db.profile.showcombat = not Skada.db.profile.showcombat
-						if Skada.db.profile.showcombat then
-							Skada.db.profile.hidecombat = false
-						end
-						Skada:ApplySettings()
-					end
-				},
-				hidedisables = {
-					type = "toggle",
-					name = L["Disable while hidden"],
-					desc = L["Skada will not collect any data when automatically hidden."],
-					order = 110
-				},
-				sortmodesbyusage = {
-					type = "toggle",
-					name = L["Sort modes by usage"],
-					desc = L["The mode list will be sorted to reflect usage instead of alphabetically."],
-					order = 120
-				},
-				showranks = {
-					type = "toggle",
-					name = L["Show rank numbers"],
-					desc = L["Shows numbers for relative ranks for modes where it is applicable."],
-					order = 130
-				},
-				showself = {
-					type = "toggle",
-					name = L["Always show self"],
-					desc = L["Keeps the player shown last even if there is not enough space."],
-					order = 140
-				},
-				autostop = {
-					type = "toggle",
-					name = L["Autostop"],
-					desc = L["Automatically stops the current segment after half of all raid members have died."],
-					order = 150
-				},
-				tentativecombatstart = {
-					type = "toggle",
-					name = L["Aggressive combat detection"],
-					desc = L["Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons, meaningless on boss encounters."],
-					order = 160
-				},
-				timemesure = {
-					type = "select",
-					name = L["Time Measure"],
-					desc = L.timemesure_desc,
-					order = 180,
-					width = "double",
-					values = {[1] = L["Activity Time"], [2] = L["Effective Time"]},
-					get = function() return Skada.db.profile.timemesure or 1 end
-				},
-				numberformat = {
-					type = "select",
-					name = L["Number format"],
-					desc = L["Controls the way large numbers are displayed."],
-					values = {[1] = L["Condensed"], [2] = L["Comma"], [3] = L["Detailed"]},
-					order = 190
-				},
-				decimals = {
-					type = "range",
-					name = L["Number of decimals"],
-					desc = L["Controls the way percentages are displayed."],
-					min = 0,
-					max = 3,
-					step = 1,
-					order = 200
-				},
-				setformat = {
-					type = "select",
-					name = L["Set Format"],
-					desc = L["Controls the way set names are displayed."],
-					order = 210,
-					width = "double",
-					values = Skada:SetLabelFormats()
-				},
-				setnumber = {
-					type = "toggle",
-					name = L["Number set duplicates"],
-					desc = L["Append a count to set names with duplicate mob names."],
-					order = 220
-				},
-				translit = {
-					type = "toggle",
-					name = L["Transliterate"],
-					desc = L["Converts Cyrillic letters into Latin letters."],
-					order = 230
-				},
-				feed = {
-					type = "select",
-					name = L["Data Feed"],
-					desc = L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."],
-					order = 240,
-					width = "double",
-					values = function()
-						local feeds = {[""] = NONE}
-						for name, _ in Skada:IterateFeeds() do
-							feeds[name] = name
-						end
-						return feeds
-					end
-				},
-				separator1 = {
-					type = "description",
-					name = " ",
-					order = 950,
-					width = "full"
-				},
-				reportlinks = {
-					type = "toggle",
-					name = L["Links in reports"],
-					desc = L["When possible, use links in the report messages."],
-					order = 960
-				},
-				memorycheck = {
-					type = "toggle",
-					name = L["Memory Check"],
-					desc = function()
-						return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], 30 + (Skada.db.profile.setstokeep * 1.25))
-					end,
-					order = 970
-				},
-				setstokeep = {
-					type = "range",
-					name = L["Data segments to keep"],
-					desc = L["The number of fight segments to keep. Persistent segments are not included in this."],
-					width = "double",
-					min = 0,
-					max = 30,
-					step = 1,
-					order = 980
-				},
-				updatefrequency = {
-					type = "range",
-					name = L["Update frequency"],
-					desc = L["How often windows are updated. Shorter for faster updates. Increases CPU usage."],
-					width = "double",
-					min = 0.10,
-					max = 1,
-					step = 0.01,
-					order = 990
+				advanced = {
+					type = "group",
+					name = L["Advanced"],
+					desc = fmt(L["Options for %s."], L["Advanced"]),
+					order = 20,
+					args = {
+						timemesure = {
+							type = "select",
+							name = L["Time Measure"],
+							desc = L.timemesure_desc,
+							values = {[1] = L["Activity Time"], [2] = L["Effective Time"]},
+							get = function()
+								return Skada.db.profile.timemesure or 1
+							end,
+							width = "double",
+							order = 10
+						},
+						numberformat = {
+							type = "select",
+							name = L["Number format"],
+							desc = L["Controls the way large numbers are displayed."],
+							values = {[1] = L["Condensed"], [2] = L["Comma"], [3] = L["Detailed"]},
+							order = 20
+						},
+						decimals = {
+							type = "range",
+							name = L["Number of decimals"],
+							desc = L["Controls the way percentages are displayed."],
+							min = 0,
+							max = 3,
+							step = 1,
+							order = 30
+						},
+						setformat = {
+							type = "select",
+							name = L["Set Format"],
+							desc = L["Controls the way set names are displayed."],
+							width = "double",
+							values = Skada:SetLabelFormats(),
+							order = 40
+						},
+						setnumber = {
+							type = "toggle",
+							name = L["Number set duplicates"],
+							desc = L["Append a count to set names with duplicate mob names."],
+							order = 50
+						},
+						feed = {
+							type = "select",
+							name = L["Data Feed"],
+							desc = L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."],
+							width = "double",
+							values = function()
+								local feeds = {[""] = NONE}
+								for name, _ in Skada:IterateFeeds() do
+									feeds[name] = name
+								end
+								return feeds
+							end,
+							order = 60
+						},
+						separator1 = {
+							type = "description",
+							name = " ",
+							width = "full",
+							order = 900
+						},
+						setstokeep = {
+							type = "range",
+							name = L["Segments to keep"],
+							desc = L["The number of fight segments to keep. Persistent segments are not included in this."],
+							min = 0,
+							max = 25,
+							step = 1,
+							order = 910
+						},
+						setslimit = {
+							type = "range",
+							name = function()
+								return fmt(
+									"%s: |cffffffff%s|r",
+									L["Segments limit"],
+									Skada.db.profile.setstokeep + Skada.db.profile.setslimit
+								)
+							end,
+							desc = L["The limit of saved fight segments, including persistent segments."],
+							min = 0,
+							max = 25,
+							step = 1,
+							order = 920
+						},
+						memorycheck = {
+							type = "toggle",
+							name = L["Memory Check"],
+							desc = function() return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], 30 + (Skada.db.profile.setstokeep * 1.25)) end,
+							width = "double",
+							order = 930
+						},
+						updatefrequency = {
+							type = "range",
+							name = L["Update frequency"],
+							desc = L["How often windows are updated. Shorter for faster updates. Increases CPU usage."],
+							width = "double",
+							min = 0.10,
+							max = 1,
+							step = 0.01,
+							order = 990
+						}
+					}
 				}
 			}
 		},
@@ -458,7 +492,9 @@ Skada.options = {
 					name = L["Informative Tooltips"],
 					desc = L["Shows subview summaries in the tooltips."],
 					order = 2,
-					disabled = function() return not Skada.db.profile.tooltips end
+					disabled = function()
+						return not Skada.db.profile.tooltips
+					end
 				},
 				tooltiprows = {
 					type = "range",
@@ -468,7 +504,9 @@ Skada.options = {
 					min = 1,
 					max = 10,
 					step = 1,
-					disabled = function() return not Skada.db.profile.tooltips end
+					disabled = function()
+						return not Skada.db.profile.tooltips
+					end
 				},
 				tooltippos = {
 					type = "select",
@@ -484,7 +522,9 @@ Skada.options = {
 						["bottomleft"] = L["Bottom Left"],
 						["cursor"] = L["Follow Cursor"]
 					},
-					disabled = function() return not Skada.db.profile.tooltips end
+					disabled = function()
+						return not Skada.db.profile.tooltips
+					end
 				}
 			}
 		},
@@ -545,8 +585,12 @@ Skada.options = {
 					descStyle = "inline",
 					order = 5,
 					width = "double",
-					get = function() return Skada.db.profile.skippopup end,
-					set = function() Skada.db.profile.skippopup = not Skada.db.profile.skippopup end
+					get = function()
+						return Skada.db.profile.skippopup
+					end,
+					set = function()
+						Skada.db.profile.skippopup = not Skada.db.profile.skippopup
+					end
 				}
 			}
 		},
@@ -576,9 +620,7 @@ Skada.options = {
 					name = APPLY,
 					width = "double",
 					func = ReloadUI,
-					confirm = function()
-						return L["This change requires a UI reload. Are you sure?"]
-					end,
+					confirm = function() return L["This change requires a UI reload. Are you sure?"] end,
 					disabled = true,
 					order = 99
 				}
@@ -694,7 +736,9 @@ do
 						name = L["Open Config"],
 						width = "full",
 						order = 0,
-						func = function() Skada:OpenOptions() end
+						func = function()
+							Skada:OpenOptions()
+						end
 					}
 				}
 			}
@@ -702,9 +746,11 @@ do
 				initOptions.args,
 				Skada.options.args.about.args,
 				-- except
-				"title", "Version", "X-Category", "X-License"
+				"title",
+				"Version",
+				"X-Category",
+				"X-License"
 			)
-
 		end
 		return initOptions
 	end
@@ -719,7 +765,7 @@ end
 function Skada:OpenOptions(win, tab)
 	if not ACR:GetOptionsTable("Skada") then
 		LibStub("AceConfig-3.0"):RegisterOptionsTable("Skada", self.options)
-		ACD:SetDefaultSize("Skada", 635, 500)
+		ACD:SetDefaultSize("Skada", 625, 500)
 	end
 
 	HideUIPanel(InterfaceOptionsFrame)
@@ -738,17 +784,15 @@ end
 -- Adds column configuration options for a mode.
 local nameIcon = "|T%s:18:18:-5:0:32:32:2:30:2:30|t %s"
 function Skada:AddColumnOptions(mod)
-	if not (mod and mod.metadata and mod.metadata.columns) then return end
+	if not (mod and mod.metadata and mod.metadata.columns) then
+		return
+	end
 
 	local db = self.db.profile.columns
 	local category = mod.category or OTHER
 
 	if not Skada.options.args.columns.args[category] then
-		Skada.options.args.columns.args[category] = {
-			type = "group",
-			name = category,
-			args = {}
-		}
+		Skada.options.args.columns.args[category] = {type = "group", name = category, args = {}}
 	end
 
 	local moduleName = mod.moduleName
@@ -756,12 +800,7 @@ function Skada:AddColumnOptions(mod)
 		moduleName = format(nameIcon, mod.metadata.icon or mod.icon, moduleName)
 	end
 
-	local cols = {
-		type = "group",
-		name = moduleName,
-		inline = true,
-		args = {}
-	}
+	local cols = {type = "group", name = moduleName, inline = true, args = {}}
 
 	for colname, _ in pairs(mod.metadata.columns) do
 		local c = mod.moduleName .. "_" .. colname
@@ -920,7 +959,9 @@ do
 	end
 
 	function Skada:AdvancedProfile(args)
-		if not args then return end
+		if not args then
+			return
+		end
 		args.advanced = {
 			type = "group",
 			name = L["Advanced"],

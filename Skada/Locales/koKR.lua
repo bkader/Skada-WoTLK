@@ -263,7 +263,9 @@ L["The mode list will be sorted to reflect usage instead of alphabetically."] = 
 L["Show rank numbers"] = "순위 표시"
 L["Shows numbers for relative ranks for modes where it is applicable."] = "사용 가능한 모드에서 순위를 표시합니다."
 L["Aggressive combat detection"] = "적극적인 전투 감지"
-L["Skada usually uses a very conservative (simple) combat detection scheme that works best in raids. With this option Skada attempts to emulate other damage meters. Useful for running dungeons, meaningless on boss encounters."] = "Skada는 공격대 중 가장 잘 작동하는 매우 전통적인 전투 감지 방법을 사용합니다. 이 옵션을 사용하면 Skada는 다른 데미지 미터기를 모방합니다. 던전을 진행할 때 유용합니다, 우두머리 전투에선 의미가 없습니다."
+L["tentativecombatstart_desc"] = [[Skada는 공격대 중 가장 잘 작동하는 매우 전통적인 전투 감지 방법을 사용합니다.
+이 옵션을 사용하면 Skada는 다른 데미지 미터기를 모방합니다.
+던전을 진행할 때 유용합니다, 우두머리 전투에선 의미가 없습니다.]]
 L["Autostop"] = "전멸 시 일찍 멈추기"
 L["Automatically stops the current segment after half of all raid members have died."] = "전체 공격대원의 절반 이상이 죽으면 현재 세분화를 자동으로 멈춥니다."
 L["Always show self"] = "항상 자신 표시"
@@ -292,8 +294,10 @@ L["Controls the way set names are displayed."] = "세트 이름 표시 방식을
 -- L["When possible, use links in the report messages."] = ""
 L["Memory Check"] = "메모리 확인"
 L["Checks memory usage and warns you if it is greater than or equal to %dmb."] = "메모리 사용량을 확인하고 %dMB보다 크거나 같은 경우 경고합니다."
-L["Data segments to keep"] = "유지할 자료 세분화"
+L["Segments to keep"] = "보관할 세그먼트"
 L["The number of fight segments to keep. Persistent segments are not included in this."] = "유지할 전투 세분화의 수입니다. 지속 세분화는 여기 포함되지 않습니다."
+L["Segments limit"] = "세그먼트 제한"
+L["The limit of saved fight segments, including persistent segments."] = "영구 세그먼트를 포함하여 저장된 전투 세그먼트의 제한."
 L["Update frequency"] = "갱신 주기"
 L["How often windows are updated. Shorter for faster updates. Increases CPU usage."] = "윈도우 업데이트됩니다 얼마나 자주. 빠른 업데이트에 대한 짧은. CPU 사용량이 증가합니다."
 -- columns
