@@ -323,7 +323,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 				},
 				interruptannounce = {
 					type = "toggle",
-					name = L["Announce Interrupts"],
+					name = format(L["Announce %s"], self.moduleName),
 					order = 10,
 					width = "double"
 				},

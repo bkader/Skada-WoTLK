@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader/LibCompat-1.0)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0-Skada", 26
+local MAJOR, MINOR = "LibCompat-1.0-Skada", 27
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
@@ -31,7 +31,6 @@ local QuickDispatch
 local IsInGroup, IsInRaid
 local GetUnitIdFromGUID
 local tLength
-
 -------------------------------------------------------------------------------
 
 do
@@ -105,8 +104,8 @@ do
 	end
 
 	-- Shamelessly copied from Omen - thanks!
-	local tablePool = lib.tablePool or setmetatable({}, {__mode = "kv"})
-	lib.tablePool = tablePool
+	lib.tablePool = lib.tablePool or setmetatable({}, {__mode = "kv"})
+	local tablePool = lib.tablePool
 
 	-- get a new table
 	local function newTable()
@@ -129,8 +128,8 @@ do
 
 	local weaktable = {__mode = "v"}
 	local function WeakTable(t)
-		t = t or newTable() -- just so that we reuse tables.
-		return setmetatable(t, weaktable)
+		-- just so that we reuse tables.
+		return setmetatable(t or newTable(), weaktable)
 	end
 
 	lib.tLength = tLength
@@ -443,9 +442,6 @@ end
 -- C_Timer mimic
 
 do
-	local Timer = lib.Timer or {}
-	lib.Timer = Timer
-
 	local TickerPrototype = {}
 	local TickerMetatable = {
 		__index = TickerPrototype,
@@ -456,20 +452,19 @@ do
 
 	local new, del
 	do
-		Timer.recycledTimers = Timer.recycledTimers or {}
-		Timer.recycledDelays = Timer.recycledDelays or {}
-		local listT = Timer.recycledTimers
-		local listA = Timer.recycledDelays
+		lib.afterPool = lib.afterPool or setmetatable({}, {__mode = "kv"})
+		lib.timerPool = lib.timerPool or setmetatable({}, {__mode = "kv"})
+		local afterPool = lib.afterPool
+		local timerPool = lib.timerPool
 
 		function new(temp)
 			if temp then
-				local t = next(listA) or {}
-				listA[t] = nil
+				local t = next(afterPool) or {}
+				afterPool[t] = nil
 				return t
 			end
-
-			local t = next(listT) or setmetatable({}, TickerMetatable)
-			listT[t] = nil
+			local t = next(timerPool) or setmetatable({}, TickerMetatable)
+			timerPool[t] = nil
 			return t
 		end
 
@@ -479,9 +474,9 @@ do
 				t[true] = true
 				t[true] = nil
 				if temp then
-					listA[t] = true
+					afterPool[t] = true
 				else
-					listT[t] = true
+					timerPool[t] = true
 				end
 			end
 		end
@@ -545,7 +540,7 @@ do
 		end
 	end
 
-	function Timer.After(duration, callback)
+	local function After(duration, callback)
 		ValidateArguments(duration, callback, "After")
 		local ticker = new(true)
 
@@ -572,17 +567,17 @@ do
 		return ticker
 	end
 
-	function Timer.NewTicker(duration, callback, iterations)
+	local function NewTicker(duration, callback, iterations)
 		ValidateArguments(duration, callback, "NewTicker")
 		return CreateTicker(duration, callback, iterations)
 	end
 
-	function Timer.NewTimer(duration, callback)
+	local function NewTimer(duration, callback)
 		ValidateArguments(duration, callback, "NewTimer")
 		return CreateTicker(duration, callback, 1)
 	end
 
-	function Timer.CancelTimer(ticker, silent)
+	local function CancelTimer(ticker, silent)
 		if ticker and ticker.Cancel then
 			ticker:Cancel()
 		elseif not silent then
@@ -598,12 +593,10 @@ do
 		return self._cancelled
 	end
 
-	lib.C_Timer = Timer
-	-- backwards compatibility
-	lib.After = Timer.After
-	lib.NewTicker = Timer.NewTicker
-	lib.NewTimer = Timer.NewTimer
-	lib.CancelTimer = Timer.CancelTimer
+	lib.After = After
+	lib.NewTicker = NewTicker
+	lib.NewTimer = NewTimer
+	lib.CancelTimer = CancelTimer
 end
 
 -------------------------------------------------------------------------------

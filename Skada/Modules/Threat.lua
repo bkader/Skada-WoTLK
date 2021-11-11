@@ -59,7 +59,7 @@ Skada:AddLoadableModule("Threat", function(L)
 				end
 			elseif not mod.db.ignorePets or (mod.db.ignorePets and owner == nil) then
 				local guid = UnitGUID(unit)
-				local player = threatTable[guid]
+				local player = threatTable and threatTable[guid]
 
 				if not player then
 					player = {id = guid, unit = unit, name = UnitName(unit)}
@@ -73,6 +73,7 @@ Skada:AddLoadableModule("Threat", function(L)
 					end
 
 					-- cache the player.
+					threatTable = threatTable or newTable()
 					threatTable[guid] = player
 				end
 
@@ -229,10 +230,6 @@ Skada:AddLoadableModule("Threat", function(L)
 					last_warn = time()
 				end
 			end
-		end
-
-		function mod:AddSetAttributes(set)
-			threatTable = newTable()
 		end
 
 		function mod:SetComplete(set)

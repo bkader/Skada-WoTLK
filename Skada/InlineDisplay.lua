@@ -635,7 +635,7 @@ function mod:AddDisplayOptions(win, options)
 			isusingelvuiskin = {
 				type = "toggle",
 				name = L["Use ElvUI skin if avaliable."],
-				desc = L["Check this to use ElvUI skin instead. \nDefault: checked"],
+				desc = L["Check this to use ElvUI skin instead.\nDefault: checked"],
 				descStyle = "inline",
 				order = 10,
 				width = "full"

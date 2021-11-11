@@ -145,7 +145,7 @@ Skada.defaults = {
 		modulesBlocked = {
 			["Absorbed Damage"] = true,
 			["Avoidance & Mitigation"] = true,
-			["CC Breakers"] = true,
+			["CC Breaks"] = true,
 			["Damage Done By Spell"] = true,
 			["Damage Mitigated"] = true,
 			["DTPS"] = true,
@@ -435,22 +435,16 @@ Skada.options = {
 							name = L["Segments to keep"],
 							desc = L["The number of fight segments to keep. Persistent segments are not included in this."],
 							min = 0,
-							max = 25,
+							max = 30,
 							step = 1,
 							order = 910
 						},
 						setslimit = {
 							type = "range",
-							name = function()
-								return fmt(
-									"%s: |cffffffff%s|r",
-									L["Segments limit"],
-									Skada.db.profile.setstokeep + Skada.db.profile.setslimit
-								)
-							end,
-							desc = L["The limit of saved fight segments, including persistent segments."],
+							name = L["Persisten segments"],
+							desc = L["The number of persistent fight segments to keep."],
 							min = 0,
-							max = 25,
+							max = 30,
 							step = 1,
 							order = 920
 						},

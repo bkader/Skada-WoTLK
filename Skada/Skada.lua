@@ -18,7 +18,7 @@ local Translit = LibStub("LibTranslit-1.0", true)
 -- cache frequently used globlas
 local tsort, tinsert, tremove, tmaxn, wipe, setmetatable = table.sort, table.insert, table.remove, table.maxn, wipe, setmetatable
 local next, pairs, ipairs, type = next, pairs, ipairs, type
-local tonumber, tostring, format, strsplit = tonumber, tostring, string.format, strsplit
+local tonumber, tostring, strsplit, strmatch, format, gsub = tonumber, tostring, strsplit, strmatch, string.format, string.gsub
 local floor, max, min, band, time = math.floor, math.max, math.min, bit.band, time
 local IsInInstance, InCombatLockdown, IsGroupInCombat = IsInInstance, InCombatLockdown, Skada.IsGroupInCombat
 local UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected
@@ -130,7 +130,6 @@ local function CreateSet(setname, starttime)
 	if setname == L["Current"] then
 		set.enemies = set.enemies or {}
 	end
-
 	for _, mode in ipairs(modes) do
 		VerifySet(mode, set)
 	end
@@ -140,31 +139,31 @@ local function CreateSet(setname, starttime)
 end
 
 local function CleanSets(force)
-	local numsets = #Skada.char.sets
+	local maxsets, numsets = 0, 0
+	for _, set in ipairs(Skada.char.sets) do
+		maxsets = maxsets + 1
+		if not set.keep then
+			numsets = numsets + 1
+		end
+	end
 
-	-- delete all segments over "setstokeep" and that aren't set to "keep".
-	if force or numsets > Skada.db.profile.setstokeep then
-		for i = numsets, 1, -1 do
-			if not Skada.char.sets[i].keep then
-				delTable(tremove(Skada.char.sets, i))
-				numsets = numsets - 1
-			end
+	-- we trim segments without touching persistent ones.
+	for i = #Skada.char.sets, 1, -1 do
+		if (force or numsets > Skada.db.profile.setstokeep) and not Skada.char.sets[i].keep then
+			delTable(tremove(Skada.char.sets, i)) -- to be reused
+			numsets = numsets - 1
+			maxsets = maxsets - 1
 		end
 	end
 
 	-- because some players may enable the "always keep boss fights" option,
 	-- the amount of segments kept can grow bit, so we make sure to keep
 	-- the player reasonable, otherwise they'll encounter memory issues.
-	local limit = (Skada.db.profile.setslimit or 10) + Skada.db.profile.setstokeep
-	if numsets > limit then
-		Skada:Debug("CleanSets: over", limit)
-		for i = numsets, limit, -1 do
-			delTable(tremove(Skada.char.sets))
-		end
+	local limit = Skada.db.profile.setstokeep + (Skada.db.profile.setslimit or 10)
+	while maxsets > limit and Skada.char.sets[maxsets] do
+		delTable(tremove(Skada.char.sets, maxsets)) -- to be reused
+		maxsets = maxsets - 1
 	end
-
-	-- clean garbage
-	Skada:CleanGarbage()
 end
 
 -- finds a mode
@@ -707,7 +706,7 @@ function Skada:CreateWindow(name, db, display)
 	if not name or name == "" then
 		name = "Skada" -- default
 	else
-		name = name:gsub("^%l", strupper, 1)
+		name = gsub(name, "^%l", strupper, 1)
 	end
 
 	local isnew = false
@@ -740,7 +739,7 @@ function Skada:CreateWindow(name, db, display)
 			if win.db.name == name and num == 0 then
 				num = 1
 			else
-				local n, c = win.db.name:match("^(.-)%s*%((%d+)%)$")
+				local n, c = strmatch(win.db.name, "^(.-)%s*%((%d+)%)$")
 				if n == name then
 					num = max(num, tonumber(c) or 0)
 				end
@@ -885,13 +884,13 @@ function Skada:SetActive(enable)
 
 	if not enable and self.db.profile.hidedisables then
 		if not disabled then
-			self:Debug(L["Data Collection"] .. " " .. "|cFFFF0000" .. L["DISABLED"] .. "|r")
+			self:Debug(format("%s |cffff0000%s|r", L["Data Collection"], L["DISABLED"]))
 		end
 		disabled = true
 		self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	else
 		if disabled then
-			self:Debug(L["Data Collection"] .. " " .. "|cFF00FF00" .. L["ENABLED"] .. "|r")
+			self:Debug(format("%s |cff00ff00%s|r", L["Data Collection"], L["ENABLED"]))
 		end
 		disabled = false
 		self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "CombatLogEvent")
@@ -1006,7 +1005,7 @@ do
 	function Skada:AddDisplaySystem(key, mod)
 		displays[key] = mod
 		if mod.description then
-			Skada.options.args.windows.args[key .. "desc"] = {
+			Skada.options.args.windows.args[format("%sdesc", key)] = {
 				type = "description",
 				name = format("\n|cffffd700%s|r:\n%s", mod.name, mod.description),
 				fontSize = "medium",
@@ -1033,7 +1032,9 @@ function Skada:DeleteSet(set, index)
 	end
 
 	if set and index then
-		self.callbacks:Fire("Skada_SetDeleted", index, tremove(self.char.sets, index))
+		local deletedset = tremove(self.char.sets, index)
+		self.callbacks:Fire("Skada_SetDeleted", index, deletedset)
+		delTable(deletedset)
 
 		if set == self.last then
 			self.last = nil
@@ -1167,7 +1168,7 @@ do
 				local i = 1
 				local title = _G["UNITNAME_SUMMON_TITLE" .. i]
 				while (title and title ~= "%s" and title:find("%s")) do
-					local pattern = title:gsub("%%s", "(.-)")
+					local pattern = gsub(title, "%%s", "(.-)")
 					ownerPatterns[#ownerPatterns + 1] = pattern
 					i = i + 1
 					title = _G["UNITNAME_SUMMON_TITLE" .. i]
@@ -1176,7 +1177,7 @@ do
 
 			function ValidatePetOwner(text, name)
 				for _, pattern in ipairs(ownerPatterns) do
-					local owner = text:match(pattern)
+					local owner = strmatch(text, pattern)
 					if owner and owner == name then
 						return true
 					end
@@ -1203,13 +1204,13 @@ do
 			if Skada.current and Skada.current.players then
 				pettooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
 				pettooltip:ClearLines()
-				pettooltip:SetHyperlink("unit:" .. (guid or ""))
+				pettooltip:SetHyperlink(format("unit:%s", guid or ""))
 
 				for i = 2, pettooltip:NumLines() do
 					local text = _G["SkadaPetTooltipTextLeft" .. i]:GetText()
 					if text and text ~= "" then
 						for _, p in ipairs(Skada.current.players) do
-							local playername = p.name:gsub("%-.*", "")
+							local playername = gsub(p.name, "%-.*", "")
 							if (Skada.locale == "ruRU" and FindNameDeclension(text, playername)) or ValidatePetOwner(text, playername) then
 								return p.id, p.name
 							end
@@ -1259,6 +1260,7 @@ do
 		return nil
 	end
 
+	local GetCreatureId = Skada.GetCreatureId
 	function Skada:FixPets(action)
 		if action and self:IsPet(action.playerid, action.playerflags) then
 			local owner = pets[action.playerid] or CommonFixPets(action.playerid, action.playerflags)
@@ -1268,14 +1270,14 @@ do
 
 				if self.db.profile.mergepets then
 					if action.spellname then
-						action.spellname = action.spellname .. " (" .. action.playername .. ")"
+						action.spellname = format("%s (%s)", action.spellname, action.playername)
 					end
 					action.playerid = owner.id
 					action.playername = owner.name
 				else
 					-- just append the creature id to the player
-					action.playerid = owner.id .. tonumber(action.playerid:sub(9, 12), 16)
-					action.playername = action.playername .. " (" .. owner.name .. ")"
+					action.playerid = format("%s%s", owner.id, GetCreatureId(action.playerid))
+					action.playername = format("%s (%s)", action.playername, owner.name)
 				end
 			else
 				-- if for any reason we fail to find the pets, we simply
@@ -1394,7 +1396,7 @@ end
 function Skada:SetTooltipPosition(tooltip, frame, display, win)
 	if win and win.db.tooltippos ~= "NONE" then
 		local anchor = win.db.tooltippos:find("TOP") and "TOP" or "BOTTOM"
-		anchor = anchor .. (win.db.tooltippos:find("LEFT") and "RIGHT" or "LEFT")
+		anchor = format("%s%s", anchor, win.db.tooltippos:find("LEFT") and "RIGHT" or "LEFT")
 		tooltip:SetOwner(UIParent, "ANCHOR_NONE")
 		tooltip:SetPoint(anchor, frame, win.db.tooltippos)
 	elseif self.db.profile.tooltippos == "default" then
@@ -1420,7 +1422,7 @@ function Skada:SetTooltipPosition(tooltip, frame, display, win)
 		end
 	else
 		local anchor = self.db.profile.tooltippos:find("top") and "TOP" or "BOTTOM"
-		anchor = anchor .. (self.db.profile.tooltippos:find("left") and "RIGHT" or "LEFT")
+		anchor = format("%s%s", anchor, self.db.profile.tooltippos:find("left") and "RIGHT" or "LEFT")
 		tooltip:SetOwner(frame, "ANCHOR_NONE")
 		tooltip:SetPoint(anchor, frame, self.db.profile.tooltippos)
 	end
@@ -1484,7 +1486,7 @@ do
 
 					local title = data.text or data.label
 					if mode.metadata and mode.metadata.showspots then
-						title = "|cffffffff" .. nr .. ".|r " .. title
+						title = format("|cffffffff%d.|r %s", nr, title)
 					end
 					tooltip:AddDoubleLine(title, data.valuetext, color.r, color.g, color.b)
 				end
@@ -1545,13 +1547,13 @@ do
 				end
 
 				if win.metadata.click1 and not ignoredTotalClick(win, win.metadata.click1) then
-					t:AddLine(L["Click for"] .. " |cff00ff00" .. (win.metadata.click1.label or win.metadata.click1.moduleName) .. "|r.", 1, 0.82, 0)
+					t:AddLine(format(L["Click for |cff00ff00%s|r"], win.metadata.click1.label or win.metadata.click1.moduleName))
 				end
 				if win.metadata.click2 and not ignoredTotalClick(win, win.metadata.click2) then
-					t:AddLine(L["Shift-Click for"] .. " |cff00ff00" .. (win.metadata.click2.label or win.metadata.click2.moduleName) .. "|r.", 1, 0.82, 0)
+					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], win.metadata.click2.label or win.metadata.click2.moduleName))
 				end
 				if win.metadata.click3 and not ignoredTotalClick(win, win.metadata.click3) then
-					t:AddLine(L["Control-Click for"] .. " |cff00ff00" .. (win.metadata.click3.label or win.metadata.click3.moduleName) .. "|r.", 1, 0.82, 0)
+					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], win.metadata.click3.label or win.metadata.click3.moduleName))
 				end
 
 				t:Show()
@@ -1584,7 +1586,7 @@ local function SlashCommandHandler(cmd)
 		end
 	elseif cmd == "debug" then
 		Skada.db.profile.debug = not Skada.db.profile.debug
-		Skada:Print("Debug mode " .. (Skada.db.profile.debug and ("|cFF00FF00" .. L["ENABLED"] .. "|r") or ("|cFFFF0000" .. L["DISABLED"] .. "|r")))
+		Skada:Print("Debug mode " .. (Skada.db.profile.debug and ("|cff00ff00" .. L["ENABLED"] .. "|r") or ("|cffff0000" .. L["DISABLED"] .. "|r")))
 	elseif cmd == "config" then
 		Skada:OpenOptions()
 	elseif cmd == "clear" or cmd == "clean" then
@@ -1845,7 +1847,7 @@ do
 	end
 
 	function ConvertVersion(ver)
-		return tonumber(type(ver) == "string" and ver:gsub("%.", "") or ver)
+		return tonumber(type(ver) == "string" and gsub(ver, "%.", "") or ver)
 	end
 
 	function Skada:OnCommVersionCheck(sender, version)
@@ -1930,8 +1932,8 @@ do
 			local guid = UnitGUID(unit)
 			if guid and players[guid] then
 				if UnitHasVehicleUI(unit) then
-					local prefix, id, suffix = unit:match("([^%d]+)([%d]*)(.*)")
-					local vUnitId = prefix .. "pet" .. id .. suffix
+					local prefix, id, suffix = strmatch(unit, "([^%d]+)([%d]*)(.*)")
+					local vUnitId = format("%spet%s%s", prefix, id, suffix)
 					if UnitExists(vUnitId) then
 						self:AssignPet(guid, UnitName(unit), UnitGUID(vUnitId))
 						vehicles[guid] = UnitGUID(vUnitId)
@@ -2180,14 +2182,15 @@ do
 		end
 	end
 
+	local reverse = string.reverse
 	function Skada:FormatNumber(num, fmt)
 		if num then
 			fmt = fmt or self.db.profile.numberformat or 1
 			if fmt == 1 then
 				return ShortenValue(num)
 			elseif fmt == 2 then
-				local left, mid, right = tostring(floor(num)):match("^([^%d]*%d)(%d*)(.-)$")
-				return left .. (mid:reverse():gsub("(%d%d%d)", "%1,"):reverse()) .. right
+				local left, mid, right = strmatch(tostring(floor(num)), "^([^%d]*%d)(%d*)(.-)$")
+				return format("%s%s%s", left, reverse(gsub(reverse(mid), "(%d%d%d)", "%1,")), right)
 			else
 				return floor(num)
 			end
@@ -2274,7 +2277,7 @@ do
 		if #namelabel == 0 or #timelabel == 0 then
 			comb = namelabel .. timelabel
 		else
-			comb = namelabel .. (timelabel:match("^%p") and " " or ": ") .. timelabel
+			comb = namelabel .. (strmatch(timelabel, "^%p") and " " or ": ") .. timelabel
 		end
 
 		return comb, namelabel, timelabel
@@ -2502,22 +2505,15 @@ end
 -------------------------------------------------------------------------------
 
 function Skada:ApplyBorder(frame, texture, color, thickness, padtop, padbottom, padleft, padright)
-	local borderbackdrop = newTable()
+	if frame.borderFrame then return end
 
-	if not frame.borderFrame then
-		frame.borderFrame = CreateFrame("Frame", nil, frame)
-		frame.borderFrame:SetFrameLevel(0)
-	end
-
+	frame.borderFrame = CreateFrame("Frame", nil, frame)
+	frame.borderFrame:SetFrameLevel(0)
 	frame.borderFrame:SetPoint("TOPLEFT", frame, -thickness - (padleft or 0), thickness + (padtop or 0))
 	frame.borderFrame:SetPoint("BOTTOMRIGHT", frame, thickness + (padright or 0), -thickness - (padbottom or 0))
 
-	if texture and thickness > 0 then
-		borderbackdrop.edgeFile = self:MediaFetch("border", texture)
-	else
-		borderbackdrop.edgeFile = nil
-	end
-
+	local borderbackdrop = newTable()
+	borderbackdrop.edgeFile = (texture and thickness > 0) and self:MediaFetch("border", texture) or nil
 	borderbackdrop.edgeSize = thickness
 	frame.borderFrame:SetBackdrop(borderbackdrop)
 	delTable(borderbackdrop)
@@ -3156,7 +3152,7 @@ function Skada:EndSegment()
 					if set.name == setname and num == 0 then
 						num = 1
 					else
-						local n, c = set.name:match("^(.-)%s*%((%d+)%)$")
+						local n, c = strmatch(set.name, "^(.-)%s*%((%d+)%)$")
 						if n == setname then
 							num = max(num, tonumber(c) or 0)
 						end
@@ -3178,6 +3174,7 @@ function Skada:EndSegment()
 			self.callbacks:Fire("Skada_SetComplete", self.current)
 
 			tinsert(self.char.sets, 1, self.current)
+			self:Debug("Segment Saved:", self.current.name)
 		end
 	end
 

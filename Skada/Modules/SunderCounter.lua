@@ -205,10 +205,6 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 		return tostring(set.sunder or 0), set.sunder or 0
 	end
 
-	function mod:AddSetAttributes(set)
-		self.targets = newTable()
-	end
-
 	function mod:SetComplete(set)
 		self.targets = delTable(self.targets)
 	end

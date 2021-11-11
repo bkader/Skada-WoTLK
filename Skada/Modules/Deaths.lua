@@ -14,9 +14,10 @@ Skada:AddLoadableModule("Deaths", function(L)
 	local abs, max, modf = math.abs, math.max, math.modf
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
-	local newTable, delTable = Skada.newTable, Skada.delTable
+	local newTable, wipe = Skada.newTable, wipe
 	local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
-	local date, log, _ = date
+	local date, time = date, time
+	local log, extra, _
 
 	local function log_deathlog(set, data, ts)
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
@@ -163,22 +164,22 @@ Skada:AddLoadableModule("Deaths", function(L)
 						)
 
 						if log.overkill or log.resisted or log.blocked or log.absorbed then
-							output = output .. " ["
-							local extra = newTable()
+							extra = wipe(extra or newTable())
 							if log.overkill then
-								extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.overkill, 1)
+								extra[#extra + 1] = format("O:%s", Skada:FormatNumber(log.overkill, 1))
 							end
 							if log.resisted then
-								extra[#extra + 1] = "R:" .. Skada:FormatNumber(log.resisted, 1)
+								extra[#extra + 1] = format("R:%s", Skada:FormatNumber(log.resisted, 1))
 							end
 							if log.blocked then
-								extra[#extra + 1] = "B:" .. Skada:FormatNumber(log.blocked, 1)
+								extra[#extra + 1] = format("B:%s", Skada:FormatNumber(log.blocked, 1))
 							end
 							if log.absorbed then
-								extra[#extra + 1] = "A:" .. Skada:FormatNumber(log.absorbed, 1)
+								extra[#extra + 1] = format("A:%s", Skada:FormatNumber(log.absorbed, 1))
 							end
-							output = output .. tconcat(extra, " - ") .. "]"
-							delTable(extra)
+							if next(extra) then
+								output = format("%s [%s]", output, tconcat(extra, " - "))
+							end
 						end
 
 						if Skada.db.profile.modules.deathchannel == "SELF" then
@@ -300,7 +301,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 						local change = (log.amount >= 0 and "+" or "-") .. Skada:FormatNumber(abs(log.amount))
 						d.reportlabel = format("%02.2f: %s   %s [%s]", diff or 0, GetSpellLink(log.spellid) or spellname or L.Unknown, change, Skada:FormatNumber(log.hp or 0))
 
-						local extra = newTable()
+						extra = wipe(extra or newTable())
 
 						if (log.overkill or 0) > 0 then
 							d.overkill = log.overkill
@@ -323,8 +324,6 @@ Skada:AddLoadableModule("Deaths", function(L)
 							change = "(|cffff0000*|r) " .. change
 							d.reportlabel = d.reportlabel .. " (" .. tconcat(extra, " - ") .. ")"
 						end
-
-						delTable(extra)
 
 						d.valuetext = Skada:FormatValueText(
 							change,

@@ -109,20 +109,14 @@ function setPrototype:IterateEnemies()
 	return ipairs(self:GetEnemies())
 end
 
-function setPrototype:GetPlayer(id, name)
-	for _, p in self:IteratePlayers() do
-		if (id and p.id == id) or (name and p.name == name) then
-			return p
-		end
-	end
+function setPrototype:GetPlayer(id, name, strict)
+	local p = Skada:FindPlayer(self, id, name, strict)
+	return p and playerPrototype:Bind(p, self)
 end
 
 function setPrototype:GetEnemy(name, id)
-	for _, e in self:IterateEnemies() do
-		if (id and e.id == id) or (name and e.name == name) then
-			return e
-		end
-	end
+	local e = Skada:FindEnemy(self, name, id)
+	return e and enemyPrototype:Bind(e, self)
 end
 
 function setPrototype:GetActor(name, id)
@@ -184,7 +178,7 @@ function Skada:FindPlayer(set, id, name, strict)
 
 		-- search the set
 		for _, p in ipairs(set.players) do
-			if p.id == id then
+			if (id and p.id == id) or (name and p.name == name) then
 				set._playeridx[id] = p
 				return p
 			end
@@ -218,7 +212,7 @@ function Skada:FindEnemy(set, name, id)
 		end
 
 		for _, e in ipairs(set.enemies) do
-			if (id and id == e.id) or (e.name == name) then
+			if (id and id == e.id) or (name and e.name == name) then
 				set._enemyidx[name] = e
 				return e
 			end

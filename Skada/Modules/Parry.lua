@@ -185,7 +185,7 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 				},
 				parryannounce = {
 					type = "toggle",
-					name = L["Announce Parries"],
+					name = format(L["Announce %s"], self.moduleName),
 					order = 10,
 					width = "double"
 				},

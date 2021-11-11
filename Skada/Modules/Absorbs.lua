@@ -239,6 +239,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local heals = nil -- holds heal amounts used to "guess" shield amounts
 	local shields = nil -- holds the list of players shields and other stuff
 	local shieldamounts = nil -- holds the amount shields absorbed so far
+	local shieldspopped = nil -- holds the list of shields that popped on a player
 
 	-- spells in the following table will be ignored.
 	local ignoredSpells = {}
@@ -416,6 +417,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, _, spellschool, _, points = ...
 		if absorbspells[spellid] and dstName then
+			shields = shields or newTable()
 			shields[dstName] = shields[dstName] or {}
 			shields[dstName][spellid] = shields[dstName][spellid] or {}
 
@@ -430,11 +432,11 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			end
 
 			if priest_divine_aegis[spellid] then -- Divine Aegis
-				if heals[dstName] and heals[dstName][srcName] and heals[dstName][srcName].ts > timestamp - 0.2 then
+				if heals and heals[dstName] and heals[dstName][srcName] and heals[dstName][srcName].ts > timestamp - 0.2 then
 					amount = min((UnitLevel(srcName) or 80) * 125, amount + (heals[dstName][srcName].amount * 0.3 * zoneModifier))
 				end
 			elseif spellid == 64413 then -- Protection of Ancient Kings (Vala'nyr)
-				if heals[dstName] and heals[dstName][srcName] and heals[dstName][srcName].ts > timestamp - 0.2 then
+				if heals and heals[dstName] and heals[dstName][srcName] and heals[dstName][srcName].ts > timestamp - 0.2 then
 					amount = min(20000, amount + (heals[dstName][srcName].amount * 0.15))
 				end
 			elseif (spellid == 48707 or spellid == 51052) and UnitHealthMax(dstName) then -- Anti-Magic Shell/Zone
@@ -442,7 +444,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			elseif spellid == 70845 and UnitHealthMax(dstName) then -- Stoicism
 				amount = UnitHealthMax(dstName) * 0.2
 			elseif absorbspells[spellid].cap then
-				if shieldamounts[srcName] and shieldamounts[srcName][spellid] then
+				if shieldamounts and shieldamounts[srcName] and shieldamounts[srcName][spellid] then
 					shields[dstName][spellid][srcName] = {
 						srcGUID = srcGUID,
 						srcFlags = srcFlags,
@@ -533,7 +535,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	local function process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool, damage, broke)
 		shields[dstName] = shields[dstName] or {}
-		local shieldsPopped = newTable()
+		shieldspopped = wipe(shieldspopped or newTable())
 		local count, total = 0, damage + absorbed
 
 		for spellid, spells in pairs(shields[dstName]) do
@@ -558,7 +560,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 					elseif (spellid == 48707 or spellid == 49497 or spellid == 62606) and band(spellschool, 0x1) == spellschool then
 						-- nothing
 					else
-						shieldsPopped[#shieldsPopped + 1] = {
+						shieldspopped[#shieldspopped + 1] = {
 							srcGUID = shield.srcGUID,
 							srcName = srcName,
 							srcFlags = shield.srcFlags,
@@ -579,8 +581,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		if count <= 0 then return end
 
 		-- if the player has a single shield and it broke, we update its max absorb
-		if count == 1 and broke and shieldsPopped[1].full and absorbspells[shieldsPopped[1].spellid].cap then
-			local s = shieldsPopped[1]
+		if count == 1 and broke and shieldspopped[1].full and absorbspells[shieldspopped[1].spellid].cap then
+			local s = shieldspopped[1]
+			shieldamounts = shieldamounts or newTable()
 			shieldamounts[s.srcName] = shieldamounts[s.srcName] or {}
 			if (not shieldamounts[s.srcName][s.spellid] or shieldamounts[s.srcName][s.spellid] < absorbed) and absorbed < (absorbspells[s.spellid].cap * zoneModifier) then
 				shieldamounts[s.srcName][s.spellid] = absorbed
@@ -589,8 +592,8 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 		-- we loop through available shields and make sure to update
 		-- their maximum absorb values.
-		for _, s in ipairs(shieldsPopped) do
-			if s.full and shieldamounts[s.srcName] and shieldamounts[s.srcName][s.spellid] then
+		for _, s in ipairs(shieldspopped) do
+			if s.full and shieldamounts and shieldamounts[s.srcName] and shieldamounts[s.srcName][s.spellid] then
 				s.amount = shieldamounts[s.srcName][s.spellid]
 			elseif s.spellid == 50150 and s.points then -- Will of the Necropolis
 				local hppercent = UnitHealthInfo(dstName, dstGUID)
@@ -605,11 +608,11 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			end
 		end
 
-		tsort(shieldsPopped, SortShields)
+		tsort(shieldspopped, SortShields)
 
 		local amount = absorbed
 		local pshield = nil
-		for i = #shieldsPopped, 0, -1 do
+		for i = #shieldspopped, 0, -1 do
 			-- no shield left to check?
 			if i == 0 then
 				-- if we still have an absorbed amount running and there is
@@ -634,7 +637,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				break
 			end
 
-			local s = shieldsPopped[i]
+			local s = shieldspopped[i]
 			-- whoops! No shield?
 			if not s then break end
 
@@ -690,8 +693,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				amount = amount - s.amount
 			end
 		end
-
-		delTable(shieldsPopped)
 	end
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
@@ -740,6 +741,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	end
 
 	local function SpellHeal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		heals = heals or newTable()
 		heals[dstName] = heals[dstName] or {}
 		heals[dstName][srcName] = {ts = timestamp, amount = select(4, ...)}
 	end
@@ -1010,15 +1012,13 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	function mod:AddSetAttributes(set)
 		self:ZoneModifier()
-		heals = newTable()
-		shields = newTable()
-		shieldamounts = newTable()
 	end
 
 	function mod:SetComplete(set)
 		heals = delTable(heals)
 		shields = delTable(shields)
 		shieldamounts = delTable(shieldamounts)
+		shieldspopped = delTable(shieldspopped)
 	end
 
 	function setPrototype:GetAPS()

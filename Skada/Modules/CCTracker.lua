@@ -201,8 +201,8 @@ Skada:AddLoadableModule("CC Done", function(L)
 	if Skada:IsDisabled("CC Done") then return end
 
 	local mod = Skada:NewModule(L["CC Done"])
-	local playermod = mod:NewModule(L["CC Done spells"])
-	local targetmod = mod:NewModule(L["CC Done targets"])
+	local playermod = mod:NewModule(L["Crowd Control Spells"])
+	local targetmod = mod:NewModule(L["Crowd Control Targets"])
 
 	local function log_ccdone(set, cc)
 		local player = Skada:GetPlayer(set, cc.playerid, cc.playername, cc.playerflags)
@@ -256,11 +256,11 @@ Skada:AddLoadableModule("CC Done", function(L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's CC Done spells"], label)
+		win.title = format(L["%s's control spells"], label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's CC Done spells"], win.playername or L.Unknown)
+		win.title = format(L["%s's control spells"], win.playername or L.Unknown)
 
 		local player = set and set:GetPlayer(win.playerid, win.playername)
 		local total = player and player.ccdone or 0
@@ -297,11 +297,11 @@ Skada:AddLoadableModule("CC Done", function(L)
 
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's CC Done targets"], label)
+		win.title = format(L["%s's control targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's CC Done targets"], win.playername or L.Unknown)
+		win.title = format(L["%s's control targets"], win.playername or L.Unknown)
 
 		local player = set and set:GetPlayer(win.playerid, win.playername)
 		local total = player and player.ccdone or 0
@@ -390,7 +390,7 @@ Skada:AddLoadableModule("CC Done", function(L)
 		Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {src_is_interesting = true})
 		Skada:RegisterForCL(AuraApplied, "SPELL_AURA_REFRESH", {src_is_interesting = true})
 
-		Skada:AddMode(self, L["CC Tracker"])
+		Skada:AddMode(self, L["Crowd Control"])
 	end
 
 	function mod:OnDisable()
@@ -441,8 +441,8 @@ Skada:AddLoadableModule("CC Taken", function(L)
 	if Skada:IsDisabled("CC Taken") then return end
 
 	local mod = Skada:NewModule(L["CC Taken"])
-	local playermod = mod:NewModule(L["CC Taken spells"])
-	local sourcemod = mod:NewModule(L["CC Taken sources"])
+	local playermod = mod:NewModule(L["Crowd Control Spells"])
+	local sourcemod = mod:NewModule(L["Crowd Control Sources"])
 
 	local function log_cctaken(set, cc)
 		local player = Skada:GetPlayer(set, cc.playerid, cc.playername, cc.playerflags)
@@ -497,11 +497,11 @@ Skada:AddLoadableModule("CC Taken", function(L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's CC Taken spells"], label)
+		win.title = format(L["%s's control spells"], label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's CC Taken spells"], win.playername or L.Unknown)
+		win.title = format(L["%s's control spells"], win.playername or L.Unknown)
 
 		local player = set and set:GetPlayer(win.playerid, win.playername)
 		local total = player and player.cctaken or 0
@@ -538,11 +538,11 @@ Skada:AddLoadableModule("CC Taken", function(L)
 
 	function sourcemod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's CC Taken sources"], label)
+		win.title = format(L["%s's control sources"], label)
 	end
 
 	function sourcemod:Update(win, set)
-		win.title = format(L["%s's CC Taken sources"], win.playername or L.Unknown)
+		win.title = format(L["%s's control sources"], win.playername or L.Unknown)
 
 		local player = set and set:GetPlayer(win.playerid, win.playername)
 		local total = player and player.cctaken or 0
@@ -631,7 +631,7 @@ Skada:AddLoadableModule("CC Taken", function(L)
 		Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {dst_is_interesting = true})
 		Skada:RegisterForCL(AuraApplied, "SPELL_AURA_REFRESH", {dst_is_interesting = true})
 
-		Skada:AddMode(self, L["CC Tracker"])
+		Skada:AddMode(self, L["Crowd Control"])
 	end
 
 	function mod:OnDisable()
@@ -678,12 +678,12 @@ end)
 -- =========== --
 -- CC Breakers --
 -- =========== --
-Skada:AddLoadableModule("CC Breakers", function(L)
-	if Skada:IsDisabled("CC Breakers") then return end
+Skada:AddLoadableModule("CC Breaks", function(L)
+	if Skada:IsDisabled("CC Breaks") then return end
 
-	local mod = Skada:NewModule(L["CC Breakers"])
-	local playermod = mod:NewModule(L["CC Break spells"])
-	local targetmod = mod:NewModule(L["CC Break targets"])
+	local mod = Skada:NewModule(L["CC Breaks"])
+	local playermod = mod:NewModule(L["Crowd Control Spells"])
+	local targetmod = mod:NewModule(L["Crowd Control Targets"])
 
 	local UnitExists, UnitName, IsInRaid = UnitExists, UnitName, Skada.IsInRaid
 	local GetNumRaidMembers, GetPartyAssignment = GetNumRaidMembers, GetPartyAssignment
@@ -774,11 +774,11 @@ Skada:AddLoadableModule("CC Breakers", function(L)
 
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's CC Break spells"], label)
+		win.title = format(L["%s's control spells"], label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's CC Break spells"], win.playername or L.Unknown)
+		win.title = format(L["%s's control spells"], win.playername or L.Unknown)
 
 		local player = set and set:GetPlayer(win.playerid, win.playername)
 		local total = player and player.ccbreak or 0
@@ -815,11 +815,11 @@ Skada:AddLoadableModule("CC Breakers", function(L)
 
 	function targetmod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's CC Break targets"], label)
+		win.title = format(L["%s's control targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's CC Break targets"], win.playername or L.Unknown)
+		win.title = format(L["%s's control targets"], win.playername or L.Unknown)
 
 		local player = set and set:GetPlayer(win.playerid, win.playername)
 		local total = player and player.ccbreak or 0
@@ -857,7 +857,7 @@ Skada:AddLoadableModule("CC Breakers", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["CC Breakers"]
+		win.title = L["CC Breaks"]
 		local total = set.ccbreak or 0
 
 		if total > 0 then
@@ -908,7 +908,7 @@ Skada:AddLoadableModule("CC Breakers", function(L)
 		Skada:RegisterForCL(AuraBroken, "SPELL_AURA_BROKEN", {src_is_interesting = true})
 		Skada:RegisterForCL(AuraBroken, "SPELL_AURA_BROKEN_SPELL", {src_is_interesting = true})
 
-		Skada:AddMode(self, L["CC Tracker"])
+		Skada:AddMode(self, L["Crowd Control"])
 	end
 
 	function mod:OnDisable()
@@ -976,7 +976,7 @@ Skada:AddLoadableModule("CC Breakers", function(L)
 				},
 				ccannounce = {
 					type = "toggle",
-					name = L["Announce CC breaking to party"],
+					name = format(L["Announce %s"], self.moduleName),
 					order = 10,
 					width = "double"
 				},
