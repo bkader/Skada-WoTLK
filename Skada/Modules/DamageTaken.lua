@@ -561,7 +561,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in set:IteratePlayers() do
+			for _, player in ipairs(set.players) do
 				local dtps, amount = player:GetDTPS()
 				if amount > 0 then
 					local d = win.dataset[nr] or {}
@@ -651,7 +651,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 	end
 
 	function mod:SetComplete(set)
-		extraATT = delTable(extraATT)
+		delTable(extraATT)
 
 		-- clean set from garbage before it is saved.
 		for _, p in ipairs(set.players) do
@@ -768,7 +768,7 @@ Skada:AddLoadableModule("DTPS", function(L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in set:IteratePlayers() do
+			for _, player in ipairs(set.players) do
 				local dtps = player:GetDTPS()
 				if dtps > 0 then
 					local d = win.dataset[nr] or {}

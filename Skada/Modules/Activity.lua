@@ -27,7 +27,7 @@ Skada:AddLoadableModule("Activity", function(L)
 		if settime > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in set:IteratePlayers() do
+			for _, player in ipairs(set.players) do
 				local activetime = player:GetTime(true)
 
 				if activetime > 0 then

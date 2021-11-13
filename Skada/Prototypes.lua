@@ -1,6 +1,7 @@
 local Skada = Skada
 
 local pairs, ipairs = pairs, ipairs
+local getmetatable = getmetatable
 local setmetatable = setmetatable
 
 local newTable, delTable = Skada.newTable, Skada.delTable
@@ -9,9 +10,6 @@ local newTable, delTable = Skada.newTable, Skada.delTable
 local dummyTable = {}
 Skada.dummyTable = dummyTable
 
--- cache tables used and reused instead of
--- constantly creating tables.
-local upperCacheTable = Skada.WeakTable()
 -- this one should be used at modules level
 Skada.cacheTable = Skada.WeakTable()
 
@@ -63,6 +61,23 @@ function setPrototype:Bind(obj)
 	if obj then
 		local o = setmetatable(obj, self)
 		self.__index = self
+
+		if o.players then
+			for i, p in ipairs(o.players) do
+				if getmetatable(p) ~= playerPrototype then
+					playerPrototype:Bind(p, o)
+				end
+			end
+		end
+
+		if o.enemies then
+			for i, e in ipairs(o.enemies) do
+				if getmetatable(e) ~= enemyPrototype then
+					enemyPrototype:Bind(e, o)
+				end
+			end
+		end
+
 		return o
 	end
 end
@@ -79,87 +94,71 @@ function setPrototype:GetFormatedTime()
 	return Skada:FormatTime(Skada:GetSetTime(self))
 end
 
-function setPrototype:GetPlayers()
-	if self.players then
-		wipe(upperCacheTable)
-		for i, p in ipairs(self.players) do
-			upperCacheTable[i] = playerPrototype:Bind(p, self)
-		end
-		return upperCacheTable
-	end
-	return dummyTable
-end
-
-function setPrototype:GetEnemies()
-	if self.enemies then
-		wipe(upperCacheTable)
-		for i, e in ipairs(self.enemies) do
-			upperCacheTable[i] = enemyPrototype:Bind(e, self)
-		end
-		return upperCacheTable
-	end
-	return dummyTable
-end
-
-function setPrototype:IteratePlayers()
-	return ipairs(self:GetPlayers())
-end
-
-function setPrototype:IterateEnemies()
-	return ipairs(self:GetEnemies())
-end
-
 function setPrototype:GetPlayer(id, name, strict)
-	local p = Skada:FindPlayer(self, id, name, strict)
-	return p and playerPrototype:Bind(p, self)
+	if self.players and ((id and id ~= "total") or name) then
+		for _, actor in ipairs(self.players) do
+			if (id and actor.id == id) or (name and actor.name == name) then
+				return actor
+			end
+		end
+	end
+
+	-- couldn't be found, rely on skada.
+	local actor = Skada:FindPlayer(self, id, name, strict)
+	if actor and getmetatable(actor) ~= playerPrototype then
+		playerPrototype(actor, self)
+	end
+	return actor
 end
 
 function setPrototype:GetEnemy(name, id)
-	local e = Skada:FindEnemy(self, name, id)
-	return e and enemyPrototype:Bind(e, self)
+	if self.enemies and name then
+		for _, actor in ipairs(self.enemies) do
+			if (name and actor.name == name) or (id and actor.id == id) then
+				return actor
+			end
+		end
+	end
+
+	-- couldn't be found, rely on skada.
+	local actor = Skada:FindEnemy(self, name, id)
+	if actor and getmetatable(actor) ~= enemyPrototype then
+		enemyPrototype:Bind(actor, self)
+	end
+	return actor
 end
 
-function setPrototype:GetActor(name, id)
-	local actor = self:GetPlayer(id, name)
-	if actor then
-		return actor
-	end
-
-	actor = self:GetEnemy(name, id)
-	if actor then
-		return actor
-	end
-
-	actor = Skada:FindPlayer(self, id, name, true)
-	if actor then
-		return playerPrototype:Bind(actor, self)
-	end
-
-	actor = Skada:FindEnemy(self, name, id)
-	if actor then
-		return enemyPrototype:Bind(actor, self)
-	end
+function setPrototype:GetActor(name, id, strict)
+	return self:GetPlayer(id, name, strict) or self:GetEnemy(name, id)
 end
 
 -------------------------------------------------------------------------------
 -- Skada functions
 
 function Skada:GetSet(s)
+	local set = nil
 	if s == "current" then
-		return setPrototype:Bind(self.current or self.last or self.char.sets[1])
+		set = self.current or self.last or self.char.sets[1]
 	elseif s == "total" then
-		return setPrototype:Bind(self.total)
+		set = self.total
 	else
-		return setPrototype:Bind(self.char.sets[s])
+		set = self.char.sets[s]
+	end
+
+	if set and getmetatable(set) == setPrototype then
+		return set
+	elseif set then
+		return setPrototype:Bind(set)
 	end
 end
 
 function Skada:GetSets()
-	wipe(upperCacheTable)
-	for i, set in ipairs(self.char.sets) do
-		upperCacheTable[i] = setPrototype:Bind(set)
+	for _, set in ipairs(self.char.sets) do
+		if getmetatable(set) ~= setPrototype then
+			setPrototype:Bind(set)
+		end
 	end
-	return upperCacheTable
+	return self.char.sets
 end
 
 function Skada:IterateSets()
@@ -246,20 +245,22 @@ do
 		if set then
 			set._playeridx = delTable(set._playeridx)
 			set._enemyidx = delTable(set._enemyidx)
-			if not mt then return end
 
-			-- clear created metatable ref.
-			if set.players then
-				for _, p in ipairs(set.players) do
-					if p.super then
-						p.super = nil
+			-- delete our metatables.
+			if mt then
+				if set.players then
+					for _, p in ipairs(set.players) do
+						if p.super then
+							p.super = nil
+						end
 					end
 				end
-			end
-			if set.enemies then
-				for _, e in ipairs(set.enemies) do
-					if e.super then
-						e.super = nil
+
+				if set.enemies then
+					for _, e in ipairs(set.enemies) do
+						if e.super then
+							e.super = nil
+						end
 					end
 				end
 			end

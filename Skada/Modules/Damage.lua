@@ -617,7 +617,8 @@ Skada:AddLoadableModule("Damage", function(L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in set:IteratePlayers() do
+
+			for _, player in ipairs(set.players) do
 				local dps, amount = player:GetDPS()
 				if amount > 0 then
 					local d = win.dataset[nr] or {}
@@ -723,7 +724,7 @@ Skada:AddLoadableModule("Damage", function(L)
 	end
 
 	function mod:SetComplete(set)
-		extraATT = delTable(extraATT)
+		delTable(extraATT)
 
 		-- clean set from garbage before it is saved.
 		for _, p in ipairs(set.players) do
@@ -858,7 +859,7 @@ Skada:AddLoadableModule("DPS", function(L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in set:IteratePlayers() do
+			for _, player in ipairs(set.players) do
 				local dps = player:GetDPS()
 
 				if dps > 0 then
@@ -1185,7 +1186,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 
 		local players, total = newTable(), 0
 
-		for _, p in set:IteratePlayers() do
+		for _, p in ipairs(set.players) do
 			local targets = p:GetDamageTargets()
 			if targets and targets[win.targetname] then
 				local amount = max(0, targets[win.targetname].amount - targets[win.targetname].overkill)
@@ -1238,7 +1239,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in set:IteratePlayers() do
+			for _, player in ipairs(set.players) do
 				local dps, amount = player:GetDPS(true)
 
 				if amount > 0 then

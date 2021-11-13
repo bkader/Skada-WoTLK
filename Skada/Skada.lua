@@ -157,7 +157,7 @@ local function CleanSets(force)
 	end
 
 	-- because some players may enable the "always keep boss fights" option,
-	-- the amount of segments kept can grow bit, so we make sure to keep
+	-- the amount of segments kept can grow big, so we make sure to keep
 	-- the player reasonable, otherwise they'll encounter memory issues.
 	local limit = Skada.db.profile.setstokeep + (Skada.db.profile.setslimit or 10)
 	while maxsets > limit and Skada.char.sets[maxsets] do
@@ -292,13 +292,13 @@ do
 	local copywindow = nil
 
 	-- create a new window
-	function Window:New()
-		return setmetatable({
-			dataset = {},
-			metadata = {},
-			history = {},
-			changed = false
-		}, mt)
+	function Window:New(tooltip)
+		local win = {dataset = {}, metadata = {}}
+		if not tooltip then
+			win.history = {}
+			return setmetatable(win, mt)
+		end
+		return win
 	end
 
 	-- add window options
@@ -383,7 +383,7 @@ do
 						if copywindow then
 							for _, win in ipairs(windows) do
 								if win.db.name == copywindow and win.db.display == db.display then
-									Skada.tCopy(newdb, win.db, "name", "sticked", "x", "y", "point", "snapped")
+									Skada.tCopy(newdb, win.db, "name", "sticked", "x", "y", "point", "snapped", "mode")
 									break
 								end
 							end
@@ -1450,13 +1450,12 @@ do
 		end
 	end
 
-	local white, ttwin = {r = 1, g = 1, b = 1}
+	local white = {r = 1, g = 1, b = 1}
+	local ttwin = Window:New(true)
 
 	function Skada:AddSubviewToTooltip(tooltip, win, mode, id, label)
 		if not (mode and mode.Update) then return end
 
-		ttwin = win.ttwin or Window:New()
-		win.ttwin = ttwin
 		wipe(ttwin.dataset)
 
 		if mode.Enter then

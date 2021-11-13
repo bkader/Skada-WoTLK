@@ -105,7 +105,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 		for uid in UnitIterator() do
 			if UnitExists(uid .. "target") and UnitGUID(uid .. "target") == guid then
 				maxval = (unit.power ~= nil) and UnitPowerMax(uid .. "target", unit.power) or UnitHealthMax(uid .. "target")
-				break
+				if (maxval or 0) > 0 then break end -- break only if found!
 			end
 		end
 
@@ -121,7 +121,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 			maxval = unit.values[GetRaidDiff()]
 		end
 
-		if maxval then
+		if (maxval or 0) > 0 then
 			customUnitsInfo = customUnitsInfo or newTable()
 			customUnitsInfo[id] = maxval
 		end
@@ -146,7 +146,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 
 			-- get the unit max value.
 			local maxval = CustomUnitsMaxValue(id, guid, unit)
-			if not maxval then
+			if (maxval or 0) == 0 then
 				customUnitsTable[guid] = -1
 				return false
 			end
@@ -549,7 +549,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, enemy in set:IterateEnemies() do
+			for _, enemy in ipairs(set.enemies) do
 				local dtps, amount = enemy:GetDTPS()
 				if amount > 0 then
 					local d = win.dataset[nr] or {}
@@ -917,7 +917,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, enemy in set:IterateEnemies() do
+			for _, enemy in ipairs(set.enemies) do
 				if not enemy.fake then
 					local dtps, amount = enemy:GetDPS()
 					if amount > 0 then
@@ -1209,7 +1209,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, enemy in set:IterateEnemies() do
+			for _, enemy in ipairs(set.enemies) do
 				if not enemy.fake then
 					local hps, amount = enemy:GetHPS()
 					if amount > 0 then

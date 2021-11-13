@@ -417,7 +417,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, _, spellschool, _, points = ...
 		if absorbspells[spellid] and dstName then
-			shields = shields or newTable()
 			shields[dstName] = shields[dstName] or {}
 			shields[dstName][spellid] = shields[dstName][spellid] or {}
 
@@ -444,7 +443,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			elseif spellid == 70845 and UnitHealthMax(dstName) then -- Stoicism
 				amount = UnitHealthMax(dstName) * 0.2
 			elseif absorbspells[spellid].cap then
-				if shieldamounts and shieldamounts[srcName] and shieldamounts[srcName][spellid] then
+				if shieldamounts[srcName] and shieldamounts[srcName][spellid] then
 					shields[dstName][spellid][srcName] = {
 						srcGUID = srcGUID,
 						srcFlags = srcFlags,
@@ -535,7 +534,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	local function process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool, damage, broke)
 		shields[dstName] = shields[dstName] or {}
-		shieldspopped = wipe(shieldspopped or newTable())
+		shieldspopped = wipe(shieldspopped)
 		local count, total = 0, damage + absorbed
 
 		for spellid, spells in pairs(shields[dstName]) do
@@ -583,7 +582,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		-- if the player has a single shield and it broke, we update its max absorb
 		if count == 1 and broke and shieldspopped[1].full and absorbspells[shieldspopped[1].spellid].cap then
 			local s = shieldspopped[1]
-			shieldamounts = shieldamounts or newTable()
 			shieldamounts[s.srcName] = shieldamounts[s.srcName] or {}
 			if (not shieldamounts[s.srcName][s.spellid] or shieldamounts[s.srcName][s.spellid] < absorbed) and absorbed < (absorbspells[s.spellid].cap * zoneModifier) then
 				shieldamounts[s.srcName][s.spellid] = absorbed
@@ -673,7 +671,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				-- if the "points" key exists, we don't remove the shield because
 				-- for us it means it's a passive shield that should always be kept.
 				if s.points == nil then
-					shields[dstName][s.spellid][s.srcName] = nil
+					shields[dstName][s.spellid][s.srcName] = delTable(shields[dstName][s.spellid][s.srcName])
 				end
 
 				absorb.playerid = s.srcGUID
@@ -741,7 +739,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	end
 
 	local function SpellHeal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		heals = heals or newTable()
 		heals[dstName] = heals[dstName] or {}
 		heals[dstName][srcName] = {ts = timestamp, amount = select(4, ...)}
 	end
@@ -911,7 +908,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in set:IteratePlayers() do
+			for _, player in ipairs(set.players) do
 				local aps, amount = player:GetAPS()
 				if amount > 0 then
 					local d = win.dataset[nr] or {}
@@ -1012,13 +1009,17 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	function mod:AddSetAttributes(set)
 		self:ZoneModifier()
+		heals = heals or newTable()
+		shields = shields or newTable()
+		shieldamounts = shieldamounts or newTable()
+		shieldspopped = shieldspopped or newTable()
 	end
 
 	function mod:SetComplete(set)
-		heals = delTable(heals)
-		shields = delTable(shields)
-		shieldamounts = delTable(shieldamounts)
-		shieldspopped = delTable(shieldspopped)
+		delTable(heals)
+		delTable(shields)
+		delTable(shieldamounts)
+		delTable(shieldspopped)
 	end
 
 	function setPrototype:GetAPS()
@@ -1337,7 +1338,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in set:IteratePlayers() do
+			for _, player in ipairs(set.players) do
 				local hps, amount = player:GetAHPS()
 
 				if amount > 0 then
@@ -1599,7 +1600,7 @@ Skada:AddLoadableModule("HPS", function(L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in set:IteratePlayers() do
+			for _, player in ipairs(set.players) do
 				local amount = player:GetAHPS()
 				if amount > 0 then
 					local d = win.dataset[nr] or {}

@@ -301,7 +301,7 @@ Skada:AddLoadableModule("Healing", function(L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in set:IteratePlayers() do
+			for _, player in ipairs(set.players) do
 				local hps, amount = player:GetHPS()
 				if amount > 0 then
 					local d = win.dataset[nr] or {}
@@ -892,7 +892,7 @@ Skada:AddLoadableModule("Total Healing", function(L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-			for _, player in set:IteratePlayers() do
+			for _, player in ipairs(set.players) do
 				local hps, amount = player:GetTHPS()
 				if amount > 0 then
 					local d = win.dataset[nr] or {}

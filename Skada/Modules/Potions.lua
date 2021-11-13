@@ -91,7 +91,7 @@ Skada:AddLoadableModule("Potions", function(L)
 		-- we use this function to record pre-pots as well.
 		function mod:CheckPrePot(event)
 			if event == "COMBAT_PLAYER_ENTER" then
-				prepotion = newTable()
+				prepotion = prepotion or newTable()
 				GroupIterator(CheckUnitPotions, prepotion)
 			end
 		end

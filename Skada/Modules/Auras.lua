@@ -5,7 +5,6 @@ local tContains, min, max, floor = tContains, math.min, math.max, math.floor
 local UnitExists, UnitName, UnitGUID, UnitBuff = UnitExists, UnitName, UnitGUID, UnitBuff
 local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-local newTable, delTable = Skada.newTable, Skada.delTable
 local dummyTable = Skada.dummyTable
 local setPrototype = Skada.setPrototype
 local playerPrototype = Skada.playerPrototype
@@ -194,7 +193,7 @@ do
 			if settime > 0 then
 				local maxvalue, nr = 0, 1
 
-				for _, player in set:IteratePlayers() do
+				for _, player in ipairs(set.players) do
 					local auracount, aurauptime = CountAuras(player.auras, atype)
 					if auracount > 0 and aurauptime > 0 then
 						local d = win.dataset[nr] or {}

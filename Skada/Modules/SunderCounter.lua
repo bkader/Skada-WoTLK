@@ -206,7 +206,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 	end
 
 	function mod:SetComplete(set)
-		self.targets = delTable(self.targets)
+		delTable(self.targets)
 	end
 
 	function mod:Announce(msg, guid)
