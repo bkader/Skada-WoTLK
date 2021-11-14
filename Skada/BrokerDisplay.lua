@@ -248,6 +248,12 @@ function mod:ApplySettings(win)
 
 		win.frame:SetScale(db.scale)
 		win.frame:SetFrameStrata(db.strata)
+
+		if db.hidden and win.frame:IsShown() then
+			win.frame:Hide()
+		elseif not db.hidden and not win.frame:IsShown() then
+			win.frame:Show()
+		end
 	else
 		win.frame:Hide()
 	end

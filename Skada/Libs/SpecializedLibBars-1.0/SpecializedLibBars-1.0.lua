@@ -708,6 +708,14 @@ function barListPrototype:NewCounterBar(name, text, value, maxVal, icon)
 	return bar, isNew
 end
 
+function barListPrototype:SetShown(show)
+	if show and not self:IsShown() then
+		self:Show()
+	elseif not show and self:IsShown() then
+		self:Hide()
+	end
+end
+
 function barListPrototype:Lock()
 	self.resizeright:Hide()
 	self.resizeleft:Hide()

@@ -460,7 +460,7 @@ function mod:ApplySettings(win)
 	local p = win.db
 
 	f:SetHeight(p.height)
-	f:SetWidth(win.db.width or GetScreenWidth())
+	f:SetWidth(p.width or GetScreenWidth())
 	f.fstitle:SetTextColor(self:GetFontColor(p))
 	f.fstitle:SetFont(self:GetFont(p))
 
@@ -469,7 +469,7 @@ function mod:ApplySettings(win)
 		bar.label:SetTextColor(self:GetFontColor(p))
 		bar.bg:EnableMouse(not p.clickthrough)
 	end
-	f.menu:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 6, win.db.height / 2 - 8)
+	f.menu:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 6, p.height / 2 - 8)
 
 	f:EnableMouse(not p.clickthrough)
 	f:SetScale(p.scale)
@@ -517,6 +517,12 @@ function mod:ApplySettings(win)
 		f:SetFrameStrata(p.strata)
 		Skada:ApplyBorder(f, p.background.bordertexture, p.background.bordercolor, p.background.borderthickness)
 	end
+
+	if p.hidden and win.frame:IsShown() then
+		win.frame:Hide()
+	elseif not p.hidden and not win.frame:IsShown() then
+		win.frame:Show()
+	end
 end
 
 function mod:AddDisplayOptions(win, options)
@@ -563,7 +569,7 @@ function mod:AddDisplayOptions(win, options)
 			color = {
 				type = "color",
 				name = L["Font Color"],
-				desc = L['Font Color. \nClick "Class Colors" to begin.'],
+				desc = L["Font Color.\nClick \"Class Colors\" to begin."],
 				hasAlpha = true,
 				get = function()
 					local c = db.title.textcolor

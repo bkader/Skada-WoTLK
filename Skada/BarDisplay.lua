@@ -899,6 +899,7 @@ do
 		g:SetSmoothing(p.smoothing)
 		LibWindow.SetScale(g, p.scale)
 		g:SortBars()
+		g:SetShown(not p.hidden)
 	end
 
 	function mod:WindowResizing(_, group)
