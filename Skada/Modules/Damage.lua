@@ -617,7 +617,6 @@ Skada:AddLoadableModule("Damage", function(L)
 		if total > 0 then
 			local maxvalue, nr = 0, 1
 
-
 			for _, player in ipairs(set.players) do
 				local dps, amount = player:GetDPS()
 				if amount > 0 then
@@ -817,6 +816,8 @@ Skada:AddLoadableModule("Damage", function(L)
 									cacheTable[name].class = actor.class
 									cacheTable[name].role = actor.role
 									cacheTable[name].spec = actor.spec
+								else
+									cacheTable[name].class = "UNKNOWN"
 								end
 							end
 						end

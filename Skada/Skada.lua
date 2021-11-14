@@ -67,6 +67,15 @@ local CheckForJoinAndLeave
 -- list of players, pets and vehicles
 local players, pets, vehicles, queued_units = {}, {}, {}, nil
 
+-- prototypes:
+Skada.setPrototype = Skada.setPrototype or {}
+Skada.playerPrototype = Skada.playerPrototype or {}
+Skada.enemyPrototype = Skada.enemyPrototype or {}
+
+local setPrototype = Skada.setPrototype
+local playerPrototype = Skada.playerPrototype
+local enemyPrototype = Skada.enemyPrototype
+
 -- list of feeds & selected feed
 local feeds, selected_feed = {}, nil
 
@@ -135,7 +144,7 @@ local function CreateSet(setname, starttime)
 	end
 
 	Skada.callbacks:Fire("Skada_SetCreated", set)
-	return set
+	return setPrototype:Bind(set)
 end
 
 local function CleanSets(force)
@@ -1116,7 +1125,7 @@ function Skada:GetPlayer(set, guid, name, flag)
 	player.last = player.last or GetTime()
 
 	self.changed = true
-	return player
+	return playerPrototype:Bind(player, set)
 end
 
 -- finds or create an enemy entry
@@ -1135,7 +1144,7 @@ function Skada:GetEnemy(set, name, guid, flag)
 		set.enemies[#set.enemies + 1] = enemy
 	end
 	self.changed = true
-	return enemy
+	return enemyPrototype:Bind(enemy, set)
 end
 
 -- checks if the unit is a player
@@ -1322,8 +1331,14 @@ function Skada:GetPetOwner(petGUID)
 	return pets[petGUID]
 end
 
-function Skada:IsPet(petGUID, petFlags)
-	return (petGUID and pets[petGUID]) or (tonumber(petFlags) and band(petFlags, BITMASK_PETS) ~= 0)
+function Skada:IsPet(guid, flag)
+	if guid and pets[guid] then
+		return 1 -- group pet
+	end
+	if tonumber(flag) then
+		return (band(flag, BITMASK_PETS) ~= 0)
+	end
+	return false
 end
 
 function Skada:PetDebug()

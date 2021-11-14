@@ -419,6 +419,8 @@ Skada:AddLoadableModule("Healing", function(L)
 								cacheTable[name].class = actor.class
 								cacheTable[name].role = actor.role
 								cacheTable[name].spec = actor.spec
+							else
+								cacheTable[name].class = "UNKNOWN"
 							end
 						end
 					end
@@ -670,6 +672,8 @@ Skada:AddLoadableModule("Overhealing", function(L)
 									cacheTable[name].class = actor.class
 									cacheTable[name].role = actor.role
 									cacheTable[name].spec = actor.spec
+								else
+									cacheTable[name].class = "UNKNOWN"
 								end
 							end
 						end
@@ -989,6 +993,8 @@ Skada:AddLoadableModule("Total Healing", function(L)
 								cacheTable[name].class = actor.class
 								cacheTable[name].role = actor.role
 								cacheTable[name].spec = actor.spec
+							else
+								cacheTable[name].class = "UNKNOWN"
 							end
 						end
 					end
@@ -1454,6 +1460,8 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 										cacheTable[name].class = actor.class
 										cacheTable[name].role = actor.role
 										cacheTable[name].spec = actor.spec
+									else
+										cacheTable[name].class = "UNKNOWN"
 									end
 								end
 							end
@@ -1480,6 +1488,8 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 										cacheTable[name].class = actor.class
 										cacheTable[name].role = actor.role
 										cacheTable[name].spec = actor.spec
+									else
+										cacheTable[name].class = "UNKNOWN"
 									end
 								end
 							end

@@ -679,6 +679,8 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 								cacheTable[name].class = actor.class
 								cacheTable[name].role = actor.role
 								cacheTable[name].spec = actor.spec
+							else
+								cacheTable[name].class = "UNKNOWN"
 							end
 						end
 					end
@@ -1039,6 +1041,8 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 								cacheTable[name].class = actor.class
 								cacheTable[name].role = actor.role
 								cacheTable[name].spec = actor.spec
+							else
+								cacheTable[name].class = "UNKNOWN"
 							end
 						end
 					end
@@ -1302,6 +1306,8 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 								cacheTable[name].class = actor.class
 								cacheTable[name].role = actor.role
 								cacheTable[name].spec = actor.spec
+							else
+								cacheTable[name].class = "UNKNOWN"
 							end
 						end
 					end

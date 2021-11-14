@@ -424,6 +424,8 @@ Skada:AddLoadableModule("CC Done", function(L)
 								cacheTable[name].class = actor.class
 								cacheTable[name].role = actor.role
 								cacheTable[name].spec = actor.spec
+							else
+								cacheTable[name].class = "UNKNOWN"
 							end
 						end
 					end
@@ -665,6 +667,8 @@ Skada:AddLoadableModule("CC Taken", function(L)
 								cacheTable[name].class = actor.class
 								cacheTable[name].role = actor.role
 								cacheTable[name].spec = actor.spec
+							else
+								cacheTable[name].class = "UNKNOWN"
 							end
 						end
 					end
@@ -942,6 +946,8 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 								cacheTable[name].class = actor.class
 								cacheTable[name].role = actor.role
 								cacheTable[name].spec = actor.spec
+							else
+								cacheTable[name].class = "UNKNOWN"
 							end
 						end
 					end

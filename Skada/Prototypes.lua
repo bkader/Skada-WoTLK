@@ -16,15 +16,17 @@ Skada.cacheTable = Skada.WeakTable()
 -------------------------------------------------------------------------------
 -- player prototype & functions
 
-local playerPrototype = {}
-Skada.playerPrototype = playerPrototype
+Skada.playerPrototype = Skada.playerPrototype or {}
+local playerPrototype = Skada.playerPrototype
 
 function playerPrototype:Bind(obj, set)
 	if obj then
-		local o = setmetatable(obj, self)
-		self.__index = self
-		o.super = set
-		return o
+		if getmetatable(obj) ~= self then
+			setmetatable(obj, self)
+			self.__index = self
+			obj.super = set
+		end
+		return obj
 	end
 end
 
@@ -35,15 +37,17 @@ end
 -------------------------------------------------------------------------------
 -- enemy prototype & functions
 
-local enemyPrototype = {}
-Skada.enemyPrototype = enemyPrototype
+Skada.enemyPrototype = Skada.enemyPrototype or {}
+local enemyPrototype = Skada.enemyPrototype
 
 function enemyPrototype:Bind(obj, set)
 	if obj then
-		local o = setmetatable(obj, self)
-		self.__index = self
-		o.super = set
-		return o
+		if getmetatable(obj) ~= self then
+			setmetatable(obj, self)
+			self.__index = self
+			obj.super = set
+		end
+		return obj
 	end
 end
 
@@ -54,31 +58,29 @@ end
 -------------------------------------------------------------------------------
 -- segment/set prototype & functions
 
-local setPrototype = {}
-Skada.setPrototype = setPrototype
+Skada.setPrototype = Skada.setPrototype or {}
+local setPrototype = Skada.setPrototype
 
 function setPrototype:Bind(obj)
 	if obj then
-		local o = setmetatable(obj, self)
-		self.__index = self
+		if getmetatable(obj) ~= self then
+			setmetatable(obj, self)
+			self.__index = self
 
-		if o.players then
-			for i, p in ipairs(o.players) do
-				if getmetatable(p) ~= playerPrototype then
-					playerPrototype:Bind(p, o)
+			if obj.players then
+				for i, p in ipairs(obj.players) do
+					playerPrototype:Bind(p, obj)
+				end
+			end
+
+			if obj.enemies then
+				for i, e in ipairs(obj.enemies) do
+					enemyPrototype:Bind(e, obj)
 				end
 			end
 		end
 
-		if o.enemies then
-			for i, e in ipairs(o.enemies) do
-				if getmetatable(e) ~= enemyPrototype then
-					enemyPrototype:Bind(e, o)
-				end
-			end
-		end
-
-		return o
+		return obj
 	end
 end
 
@@ -94,7 +96,7 @@ function setPrototype:GetFormatedTime()
 	return Skada:FormatTime(Skada:GetSetTime(self))
 end
 
-function setPrototype:GetPlayer(id, name, strict)
+function setPrototype:GetPlayer(id, name)
 	if self.players and ((id and id ~= "total") or name) then
 		for _, actor in ipairs(self.players) do
 			if (id and actor.id == id) or (name and actor.name == name) then
@@ -104,11 +106,8 @@ function setPrototype:GetPlayer(id, name, strict)
 	end
 
 	-- couldn't be found, rely on skada.
-	local actor = Skada:FindPlayer(self, id, name, strict)
-	if actor and getmetatable(actor) ~= playerPrototype then
-		playerPrototype(actor, self)
-	end
-	return actor
+	local actor = Skada:FindPlayer(self, id, name, true)
+	return actor and playerPrototype:Bind(actor, self)
 end
 
 function setPrototype:GetEnemy(name, id)
@@ -122,14 +121,15 @@ function setPrototype:GetEnemy(name, id)
 
 	-- couldn't be found, rely on skada.
 	local actor = Skada:FindEnemy(self, name, id)
-	if actor and getmetatable(actor) ~= enemyPrototype then
-		enemyPrototype:Bind(actor, self)
-	end
-	return actor
+	return actor and enemyPrototype:Bind(actor, self)
 end
 
 function setPrototype:GetActor(name, id, strict)
-	return self:GetPlayer(id, name, strict) or self:GetEnemy(name, id)
+	return self:GetPlayer(id, name) or self:GetEnemy(name, id)
+end
+
+function setPrototype:IteratPlayers()
+	return ipairs(self.players)
 end
 
 -------------------------------------------------------------------------------
@@ -145,18 +145,12 @@ function Skada:GetSet(s)
 		set = self.char.sets[s]
 	end
 
-	if set and getmetatable(set) == setPrototype then
-		return set
-	elseif set then
-		return setPrototype:Bind(set)
-	end
+	return set and setPrototype:Bind(set)
 end
 
 function Skada:GetSets()
 	for _, set in ipairs(self.char.sets) do
-		if getmetatable(set) ~= setPrototype then
-			setPrototype:Bind(set)
-		end
+		set =  setPrototype:Bind(set)
 	end
 	return self.char.sets
 end
@@ -172,13 +166,13 @@ function Skada:FindPlayer(set, id, name, strict)
 
 		local player = set._playeridx[id]
 		if player then
-			return player
+			return  playerPrototype:Bind(player, set)
 		end
 
 		-- search the set
 		for _, p in ipairs(set.players) do
 			if (id and p.id == id) or (name and p.name == name) then
-				set._playeridx[id] = p
+				set._playeridx[id] = playerPrototype:Bind(p, set)
 				return p
 			end
 		end
@@ -187,16 +181,16 @@ function Skada:FindPlayer(set, id, name, strict)
 		local isboss, _, npcname = self:IsBoss(id, name)
 		if isboss then
 			player = {id = id, name = npcname or name, class = "BOSS"}
-			set._playeridx[id] = player
+			set._playeridx[id] = playerPrototype:Bind(player, set)
 			return player
 		end
 
-		if strict then
-			return player
+		-- our last hope!
+		if not strict then
+			player = playerPrototype:Bind({id = id, name = name or UNKNOWN, class = "PET"}, set)
 		end
 
-		-- last hope
-		return {id = id, name = name or UNKNOWN, class = "PET"}
+		return player
 	end
 end
 
@@ -207,12 +201,12 @@ function Skada:FindEnemy(set, name, id)
 
 		local enemy = set._enemyidx[name]
 		if enemy then
-			return enemy
+			return enemyPrototype:Bind(enemy, set)
 		end
 
 		for _, e in ipairs(set.enemies) do
 			if (id and id == e.id) or (name and e.name == name) then
-				set._enemyidx[name] = e
+				set._enemyidx[name] = enemyPrototype:Bind(e, set)
 				return e
 			end
 		end
@@ -228,10 +222,10 @@ function Skada:FindActor(set, id, name)
 end
 
 function Skada:GetActor(set, id, name, flag)
-	local actor = self:FindActor(set, id, name, flag)
+	local actor = self:FindActor(set, id, name)
 	-- creates it if not found
 	if not actor then
-		if self:IsPlayer(id, flag, name) == 1 then -- group member
+		if self:IsPlayer(id, flag, name) == 1 or self:IsPet(id, flag) == 1 then -- group members or group pets
 			actor = self:GetPlayer(set, id, name, flag)
 		else -- an outsider maybe?
 			actor = self:GetEnemy(set, name, id, flag)
