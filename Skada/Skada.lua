@@ -1466,28 +1466,27 @@ do
 	end
 
 	local white = {r = 1, g = 1, b = 1}
-	local ttwin = Window:New(true)
-
 	function Skada:AddSubviewToTooltip(tooltip, win, mode, id, label)
 		if not (mode and mode.Update) then return end
 
-		wipe(ttwin.dataset)
+		win.ttwin = win.ttwin or Window:New(true)
+		wipe(win.ttwin.dataset)
 
 		if mode.Enter then
-			mode:Enter(ttwin, id, label)
+			mode:Enter(win.ttwin, id, label)
 		end
 
-		mode:Update(ttwin, win:GetSelectedSet())
+		mode:Update(win.ttwin, win:GetSelectedSet())
 
 		if not mode.metadata or not mode.metadata.ordersort then
-			tsort(ttwin.dataset, ValueSort)
+			tsort(win.ttwin.dataset, ValueSort)
 		end
 
-		if #ttwin.dataset > 0 then
-			tooltip:AddLine(ttwin.title or mode.title or mode.moduleName)
+		if #win.ttwin.dataset > 0 then
+			tooltip:AddLine(win.ttwin.title or mode.title or mode.moduleName)
 			local nr = 0
 
-			for _, data in ipairs(ttwin.dataset) do
+			for _, data in ipairs(win.ttwin.dataset) do
 				if data.id and nr < Skada.db.profile.tooltiprows then
 					nr = nr + 1
 					local color = white
