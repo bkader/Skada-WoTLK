@@ -301,13 +301,12 @@ do
 	local copywindow = nil
 
 	-- create a new window
-	function Window:New(tooltip)
-		local win = {dataset = {}, metadata = {}}
-		if not tooltip then
-			win.history = {}
-			return setmetatable(win, mt)
+	function Window:New(ttwin)
+		if ttwin then -- only used for tooltips
+			return {dataset = {}}
 		end
-		return win
+		-- regular window.
+		return setmetatable({metadata = {}, dataset = {}, history = {}}, mt)
 	end
 
 	-- add window options
@@ -1469,7 +1468,12 @@ do
 	function Skada:AddSubviewToTooltip(tooltip, win, mode, id, label)
 		if not (mode and mode.Update) then return end
 
-		win.ttwin = win.ttwin or Window:New(true)
+		-- windows should have separate tooltip tables in order
+		-- to display different numbers for same spells for example.
+		if not win.ttwin then
+			win.ttwin = Window:New(true)
+		end
+
 		wipe(win.ttwin.dataset)
 
 		if mode.Enter then
@@ -2440,6 +2444,7 @@ function Skada:ApplySettings(name)
 		if name and win.db.name == name then
 			win:SetChild(win.db.child)
 			win.display:ApplySettings(win)
+			Skada:UpdateDisplay(true)
 			return
 		else
 			win:SetChild(win.db.child)
@@ -2483,8 +2488,8 @@ function Skada:ReloadSettings()
 	Skada:ApplySettings()
 
 	-- fix setstokeep, setslimit and timemesure.
-	if (Skada.db.profile.setstokeep or 0) > 25 then
-		Skada.db.profile.setstokeep = 25
+	if (Skada.db.profile.setstokeep or 0) > 30 then
+		Skada.db.profile.setstokeep = 30
 	end
 	if not Skada.db.profile.setslimit then
 		Skada.db.profile.setslimit = 15

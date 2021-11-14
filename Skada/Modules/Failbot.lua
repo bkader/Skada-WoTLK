@@ -59,8 +59,11 @@ Skada:AddLoadableModule("Fails", function(L)
 
 		local total = set and set:GetFailCount(win.spellid) or 0
 		if total > 0 then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for _, player in ipairs(set.players) do
 				if player.failspells and player.failspells[win.spellid] then
 					local d = win.dataset[nr] or {}
@@ -81,14 +84,12 @@ Skada:AddLoadableModule("Fails", function(L)
 						mod.metadata.columns.Percent
 					)
 
-					if d.value > maxvalue then
-						maxvalue = d.value
+					if win.metadata and d.value > win.metadata.maxvalue then
+						win.metadata.maxvalue = d.value
 					end
 					nr = nr + 1
 				end
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -104,8 +105,11 @@ Skada:AddLoadableModule("Fails", function(L)
 		local total = player and player.fail or 0
 
 		if total > 0 and player.failspells then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for spellid, count in pairs(player.failspells) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
@@ -122,13 +126,11 @@ Skada:AddLoadableModule("Fails", function(L)
 					mod.metadata.columns.Percent
 				)
 
-				if d.value > maxvalue then
-					maxvalue = d.value
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 				nr = nr + 1
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -137,8 +139,11 @@ Skada:AddLoadableModule("Fails", function(L)
 		local total = set.fail or 0
 
 		if total > 0 then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for _, player in ipairs(set.players) do
 				if (player.fail or 0) > 0 then
 					local d = win.dataset[nr] or {}
@@ -159,19 +164,20 @@ Skada:AddLoadableModule("Fails", function(L)
 						self.metadata.columns.Percent
 					)
 
-					if d.value > d.value then
-						d.value = d.value
+					if win.metadata and d.value > win.metadata.maxvalue then
+						win.metadata.maxvalue = d.value
 					end
 					nr = nr + 1
 				end
 			end
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
 	function mod:OnEnable()
 		playermod.metadata = {click1 = spellmod}
 		self.metadata = {
+			showspots = true,
+			ordersort = true,
 			click1 = playermod,
 			nototalclick = {playermod},
 			columns = {Count = true, Percent = false},

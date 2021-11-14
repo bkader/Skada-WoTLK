@@ -191,8 +191,11 @@ do
 			if not atype then return end
 			local settime = set and set:GetTime()
 			if settime > 0 then
-				local maxvalue, nr = 0, 1
+				if win.metadata then
+					win.metadata.maxvalue = 0
+				end
 
+				local nr = 1
 				for _, player in ipairs(set.players) do
 					local auracount, aurauptime = CountAuras(player.auras, atype)
 					if auracount > 0 and aurauptime > 0 then
@@ -217,14 +220,12 @@ do
 							mode.metadata.columns.Percent
 						)
 
-						if d.value > maxvalue then
-							maxvalue = d.value
+						if win.metadata and d.value > win.metadata.maxvalue then
+							win.metadata.maxvalue = d.value
 						end
 						nr = nr + 1
 					end
 				end
-
-				win.metadata.maxvalue = maxvalue
 			end
 		end
 	end
@@ -237,8 +238,11 @@ do
 		local maxtime = player and player:GetTime() or 0
 
 		if maxtime > 0 and player.auras then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for spellid, spell in pairs(player.auras) do
 				if spell.type == atype then
 					local d = win.dataset[nr] or {}
@@ -259,14 +263,12 @@ do
 						mode.metadata.columns.Percent
 					)
 
-					if d.value > maxvalue then
-						maxvalue = d.value
+					if win.metadata and d.value > win.metadata.maxvalue then
+						win.metadata.maxvalue = d.value
 					end
 					nr = nr + 1
 				end
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -381,8 +383,11 @@ Skada:AddLoadableModule("Buffs", function(L)
 
 		local players, count = set:GetAuraPlayers(win.spellid)
 		if count > 0 then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for playername, player in pairs(players) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
@@ -402,13 +407,11 @@ Skada:AddLoadableModule("Buffs", function(L)
 					mod.metadata.columns.Percent
 				)
 
-				if d.value > maxvalue then
-					maxvalue = d.value
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 				nr = nr + 1
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -451,6 +454,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 	end
 
 	function mod:OnEnable()
+		playermod.metadata = {showspots = true, ordersort = true}
 		spellmod.metadata = {tooltip = aura_tooltip, click1 = playermod}
 		self.metadata = {
 			click1 = spellmod,
@@ -546,8 +550,11 @@ Skada:AddLoadableModule("Debuffs", function(L)
 
 		local auras, maxtime = player:GetDebuffsOnTarget(win.targetname)
 		if auras and maxtime > 0 then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for spellid, aura in pairs(auras) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
@@ -567,13 +574,11 @@ Skada:AddLoadableModule("Debuffs", function(L)
 					mod.metadata.columns.Percent
 				)
 
-				if d.value > maxvalue then
-					maxvalue = d.value
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 				nr = nr + 1
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -595,53 +600,11 @@ Skada:AddLoadableModule("Debuffs", function(L)
 
 		local targets, maxtime = player:GetDebuffTargets(win.spellid)
 		if targets and maxtime > 0 then
-			local maxvalue, nr = 0, 1
-
-			for targetname, target in pairs(targets) do
-				local d = win.metadata[nr] or {}
-				win.dataset[nr] = d
-
-				d.id = target.id or targetname
-				d.label = targetname
-				d.class = target.class
-				d.role = target.role
-				d.spec = target.spec
-
-				d.value = target.uptime
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatTime(d.value),
-					mod.metadata.columns.Uptime,
-					target.count,
-					mod.metadata.columns.Count,
-					Skada:FormatPercent(d.value, maxtime),
-					mod.metadata.columns.Percent
-				)
-
-				if d.value > maxvalue then
-					maxvalue = d.value
-				end
-				nr = nr + 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
 			end
 
-			win.metadata.maxvalue = maxvalue
-		end
-	end
-
-	function targetmod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
-		win.title = format(L["%s's targets"], label)
-	end
-
-	function targetmod:Update(win, set)
-		win.title = format(L["%s's targets"], win.playername or L.Unknown)
-
-		local player = set and set:GetPlayer(win.playerid, win.playername)
-		if not player then return end
-
-		local targets, maxtime = player:GetDebuffsTargets()
-		if targets and maxtime > 0 then
-			local maxvalue, nr = 0, 1
-
+			local nr = 1
 			for targetname, target in pairs(targets) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
@@ -662,13 +625,57 @@ Skada:AddLoadableModule("Debuffs", function(L)
 					mod.metadata.columns.Percent
 				)
 
-				if d.value > maxvalue then
-					maxvalue = d.value
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 				nr = nr + 1
 			end
+		end
+	end
 
-			win.metadata.maxvalue = maxvalue
+	function targetmod:Enter(win, id, label)
+		win.playerid, win.playername = id, label
+		win.title = format(L["%s's targets"], label)
+	end
+
+	function targetmod:Update(win, set)
+		win.title = format(L["%s's targets"], win.playername or L.Unknown)
+
+		local player = set and set:GetPlayer(win.playerid, win.playername)
+		if not player then return end
+
+		local targets, maxtime = player:GetDebuffsTargets()
+		if targets and maxtime > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
+			local nr = 1
+			for targetname, target in pairs(targets) do
+				local d = win.dataset[nr] or {}
+				win.dataset[nr] = d
+
+				d.id = target.id or targetname
+				d.label = targetname
+				d.class = target.class
+				d.role = target.role
+				d.spec = target.spec
+
+				d.value = target.uptime
+				d.valuetext = Skada:FormatValueText(
+					Skada:FormatTime(d.value),
+					mod.metadata.columns.Uptime,
+					target.count,
+					mod.metadata.columns.Count,
+					Skada:FormatPercent(d.value, maxtime),
+					mod.metadata.columns.Percent
+				)
+
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
+				end
+				nr = nr + 1
+			end
 		end
 	end
 

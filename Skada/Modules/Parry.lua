@@ -68,8 +68,11 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 		local total = player and player.parry or 0
 
 		if total > 0 and player.parrytargets then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for targetname, count in pairs(player.parrytargets) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
@@ -86,13 +89,11 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 					mod.metadata.columns.Percent
 				)
 
-				if d.value > maxvalue then
-					maxvalue = d.value
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 				nr = nr + 1
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -101,8 +102,11 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 		local total = set.parry or 0
 
 		if total > 0 then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for _, player in ipairs(set.players) do
 				if (player.parry or 0) > 0 then
 					local d = win.dataset[nr] or {}
@@ -123,20 +127,19 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 						self.metadata.columns.Percent
 					)
 
-					if d.value > maxvalue then
-						maxvalue = d.value
+					if win.metadata and d.value > win.metadata.maxvalue then
+						win.metadata.maxvalue = d.value
 					end
 					nr = nr + 1
 				end
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
 	function mod:OnEnable()
 		self.metadata = {
 			showspots = true,
+			ordersort = true,
 			click1 = targetmod,
 			nototalclick = {targetmod},
 			columns = {Count = true, Percent = false},

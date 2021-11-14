@@ -242,7 +242,7 @@ do
 			local offset = group.win.db.background.borderthickness
 			local anchor, name, frame = FlyPaper.StickToClosestFrameInGroup(group, "Skada", nil, offset, offset)
 
-			if anchor and frame then
+			if anchor and frame and frame.win then
 				frame.win.db.sticked[group.win.db.name] = true
 				group.win.db.sticked[name] = nil
 
@@ -422,13 +422,13 @@ do
 			Skada:SegmentMenu(win)
 		elseif win.metadata.click and not ignoredClick(win, win.metadata.click) then
 			win.metadata.click(win, id, label, button)
-		elseif button == "RightButton" then
+		elseif button == "RightButton" and not IsModifierKeyDown() then
 			win:RightClick()
 		elseif win.metadata.click2 and not ignoredClick(win, win.metadata.click2) and IsShiftKeyDown() then
 			showmode(win, id, label, win.metadata.click2)
 		elseif win.metadata.click3 and not ignoredClick(win, win.metadata.click3) and IsControlKeyDown() then
 			showmode(win, id, label, win.metadata.click3)
-		elseif win.metadata.click1 and not ignoredClick(win, win.metadata.click1) then
+		elseif win.metadata.click1 and not ignoredClick(win, win.metadata.click1) and not IsModifierKeyDown() then
 			showmode(win, id, label, win.metadata.click1)
 		end
 	end

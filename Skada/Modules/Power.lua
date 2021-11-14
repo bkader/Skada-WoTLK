@@ -121,8 +121,11 @@ Skada:AddLoadableModule("Resources", function(L)
 		local total = set and self.power and set[self.power] or 0
 
 		if total > 0 then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for _, player in ipairs(set.players) do
 				if player[self.power] then
 					local d = win.dataset[nr] or {}
@@ -143,14 +146,12 @@ Skada:AddLoadableModule("Resources", function(L)
 						mod.metadata.columns.Percent
 					)
 
-					if d.value > maxvalue then
-						maxvalue = d.value
+					if win.metadata and d.value > win.metadata.maxvalue then
+						win.metadata.maxvalue = d.value
 					end
 					nr = nr + 1
 				end
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -177,8 +178,11 @@ Skada:AddLoadableModule("Resources", function(L)
 		local total = player and self.power and player[self.power] or 0
 
 		if total > 0 and player[self.spells] then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for spellid, amount in pairs(player[self.spells]) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
@@ -195,13 +199,11 @@ Skada:AddLoadableModule("Resources", function(L)
 					mod.metadata.columns.Percent
 				)
 
-				if d.value > maxvalue then
-					maxvalue = d.value
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 				nr = nr + 1
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 

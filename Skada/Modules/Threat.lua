@@ -178,9 +178,11 @@ Skada:AddLoadableModule("Threat", function(L)
 					maxthreat = 100
 				end
 
-				win.metadata.maxvalue = maxthreat
-				local we_should_warn = false
+				if win.metadata then
+					win.metadata.maxvalue = maxthreat
+				end
 
+				local we_should_warn = false
 				-- We now have a a complete threat table.
 				-- Now we need to add valuetext.
 				for _, data in ipairs(win.dataset) do
@@ -195,7 +197,9 @@ Skada:AddLoadableModule("Threat", function(L)
 								self.metadata.columns.Percent
 							)
 
-							win.metadata.maxvalue = self.db.rawvalue and data.threat or data.value
+							if win.metadata then
+								win.metadata.maxvalue = self.db.rawvalue and data.threat or data.value
+							end
 						else
 							data.id = nil
 						end

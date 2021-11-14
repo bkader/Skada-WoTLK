@@ -266,8 +266,11 @@ Skada:AddLoadableModule("CC Done", function(L)
 		local total = player and player.ccdone or 0
 
 		if total > 0 and player.ccdonespells then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for spellid, spell in pairs(player.ccdonespells) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
@@ -285,13 +288,11 @@ Skada:AddLoadableModule("CC Done", function(L)
 					mod.metadata.columns.Percent
 				)
 
-				if d.value > maxvalue then
-					maxvalue = d.value
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 				nr = nr + 1
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -308,8 +309,11 @@ Skada:AddLoadableModule("CC Done", function(L)
 		local targets = (total > 0) and player:GetCCDoneTargets()
 
 		if targets then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for targetname, target in pairs(targets) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
@@ -328,13 +332,11 @@ Skada:AddLoadableModule("CC Done", function(L)
 					mod.metadata.columns.Percent
 				)
 
-				if d.value > maxvalue then
-					maxvalue = d.value
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 				nr = nr + 1
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -343,8 +345,11 @@ Skada:AddLoadableModule("CC Done", function(L)
 		local total = set.ccdone or 0
 
 		if total > 0 then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for _, player in ipairs(set.players) do
 				if (player.ccdone or 0) > 0 then
 					local d = win.dataset[nr] or {}
@@ -365,14 +370,12 @@ Skada:AddLoadableModule("CC Done", function(L)
 						self.metadata.columns.Percent
 					)
 
-					if d.value > maxvalue then
-						maxvalue = d.value
+					if win.metadata and d.value > win.metadata.maxvalue then
+						win.metadata.maxvalue = d.value
 					end
 					nr = nr + 1
 				end
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -509,8 +512,11 @@ Skada:AddLoadableModule("CC Taken", function(L)
 		local total = player and player.cctaken or 0
 
 		if total > 0 and player.cctakenspells then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for spellid, spell in pairs(player.cctakenspells) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
@@ -528,13 +534,11 @@ Skada:AddLoadableModule("CC Taken", function(L)
 					mod.metadata.columns.Percent
 				)
 
-				if d.value > maxvalue then
-					maxvalue = d.value
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 				nr = nr + 1
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -551,8 +555,11 @@ Skada:AddLoadableModule("CC Taken", function(L)
 		local sources = (total > 0) and player:GetCCTakenSources()
 
 		if sources then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for sourcename, source in pairs(sources) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
@@ -571,13 +578,11 @@ Skada:AddLoadableModule("CC Taken", function(L)
 					mod.metadata.columns.Percent
 				)
 
-				if d.value > maxvalue then
-					maxvalue = d.value
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 				nr = nr + 1
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -586,8 +591,11 @@ Skada:AddLoadableModule("CC Taken", function(L)
 		local total = set.cctaken or 0
 
 		if total > 0 then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for _, player in ipairs(set.players) do
 				if (player.cctaken or 0) > 0 then
 					local d = win.dataset[nr] or {}
@@ -608,14 +616,12 @@ Skada:AddLoadableModule("CC Taken", function(L)
 						self.metadata.columns.Percent
 					)
 
-					if d.value > maxvalue then
-						maxvalue = d.value
+					if win.metadata and d.value > win.metadata.maxvalue then
+						win.metadata.maxvalue = d.value
 					end
 					nr = nr + 1
 				end
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -788,8 +794,11 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 		local total = player and player.ccbreak or 0
 
 		if total > 0 and player.ccbreakspells then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for spellid, spell in pairs(player.ccbreakspells) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
@@ -807,13 +816,11 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 					mod.metadata.columns.Percent
 				)
 
-				if d.value > maxvalue then
-					maxvalue = d.value
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 				nr = nr + 1
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -830,8 +837,11 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 		local targets = (total > 0) and player:GetCCBreakTargets()
 
 		if targets then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for targetname, target in pairs(targets) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
@@ -850,13 +860,11 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 					mod.metadata.columns.Percent
 				)
 
-				if d.value > maxvalue then
-					maxvalue = d.value
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 				nr = nr + 1
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -865,8 +873,11 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 		local total = set.ccbreak or 0
 
 		if total > 0 then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for _, player in ipairs(set.players) do
 				if (player.ccbreak or 0) > 0 then
 					local d = win.dataset[nr] or {}
@@ -887,14 +898,12 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 						self.metadata.columns.Percent
 					)
 
-					if d.value > maxvalue then
-						maxvalue = d.value
+					if win.metadata and d.value > win.metadata.maxvalue then
+						win.metadata.maxvalue = d.value
 					end
 					nr = nr + 1
 				end
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 

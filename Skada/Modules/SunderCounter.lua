@@ -105,8 +105,11 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 		local targets = (total > 0) and player:GetSunderTargets()
 
 		if targets then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for targetname, target in pairs(targets) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
@@ -125,13 +128,11 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 					mod.metadata.columns.Percent
 				)
 
-				if d.value > maxvalue then
-					maxvalue = d.value
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 				nr = nr + 1
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -142,8 +143,11 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 		local total = set.sunder or 0
 
 		if total > 0 then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for _, player in ipairs(set.players) do
 				if (player.sunder or 0) > 0 then
 					local d = win.dataset[nr] or {}
@@ -164,14 +168,12 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 						self.metadata.columns.Percent
 					)
 
-					if d.value > maxvalue then
-						maxvalue = d.value
+					if win.metadata and d.value > win.metadata.maxvalue then
+						win.metadata.maxvalue = d.value
 					end
 					nr = nr + 1
 				end
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 

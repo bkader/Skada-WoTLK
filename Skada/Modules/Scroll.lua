@@ -10,16 +10,10 @@ local defaults = {
 	speed = 2.0,
 	kspeed = 3,
 	icon = true,
-	debug = false,
 	button = "MiddleButton"
 }
 
 mod.elap = 0
-local function debug(msg)
-	if db and db.debug then
-		print("Skada Scroll:", msg)
-	end
-end
 
 function mod.ShowCursor(win)
 	if not db.icon then
@@ -50,14 +44,12 @@ function mod.HideCursor(win)
 end
 
 function mod.BeginScroll(win)
-	debug("BeginScroll")
 	mod.ypos = select(2, GetCursorPosition())
 	mod.scrolling = win
 	mod.ShowCursor(win)
 end
 
 function mod.EndScroll(win)
-	debug("EndScroll")
 	mod.scrolling = nil
 	mod.HideCursor(win)
 end
@@ -92,7 +84,6 @@ end
 
 local windows = {}
 function Skada:Scroll(up)
-	debug("Scroll " .. (up and "up" or "down"))
 	for win, _ in pairs(windows) do
 		for i = 1, db.kspeed do
 			bars:OnMouseWheel(nil, win.bargroup, up and 1 or -1)
@@ -105,7 +96,6 @@ mod.frame:SetScript("OnUpdate", mod.OnUpdate)
 
 local hooked = {}
 function mod.Create(self, win)
-	debug("Create")
 	if win.bargroup and not hooked[win.bargroup] then
 		win.bargroup:HookScript("OnMouseDown", function(frame, button)
 			if button == db.button then
@@ -139,7 +129,6 @@ end
 
 function mod.HookMore(win)
 	if not hooked[win] then
-		debug("HookMore")
 		local bars = win.bargroup:GetBars()
 		if bars then
 			for name, bar in pairs(bars) do
@@ -156,7 +145,6 @@ function mod.HookMore(win)
 end
 
 function mod.CreateBar(self, win, name, label, value, maxvalue, icon, o)
-	debug("CreateBar: " .. name)
 	hooked[win] = false
 end
 hooksecurefunc(bars, "CreateBar", mod.CreateBar)
@@ -173,7 +161,6 @@ function mod.AddDisplayOptions(self, win, options)
 		order = 970,
 		set = function(info, val)
 			db[info[#info]] = val
-			debug(info[#info] .. " set to: " .. tostring(val))
 		end,
 		get = function(info)
 			return db[info[#info]]
