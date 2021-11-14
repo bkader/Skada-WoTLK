@@ -611,17 +611,10 @@ L["%s's interrupted spells"] = true
 L["%s's interrupted targets"] = true
 L["%s interrupted!"] = true
 -- Power gained module --
-L["Power"] = true
 L["Resources"] = true
+L["Power gained: %s"] = true
+L["%s gained spells"] = true
 L["%s's gained %s"] = true
-L["Power gained: Mana"] = true
-L["Mana gained spell list"] = true
-L["Power gained: Rage"] = true
-L["Rage gained spell list"] = true
-L["Power gained: Energy"] = true
-L["Energy gained spell list"] = true
-L["Power gained: Runic Power"] = true
-L["Runic Power gained spell list"] = true
 -- Parry module lines --
 L["Parry-Haste"] = true
 L["Parry target list"] = true

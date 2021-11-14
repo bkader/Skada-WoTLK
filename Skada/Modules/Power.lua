@@ -7,30 +7,57 @@ Skada:AddLoadableModule("Resources", function(L)
 
 	local pairs, ipairs, format, tContains = pairs, ipairs, string.format, tContains
 	local setmetatable, GetSpellInfo = setmetatable, Skada.GetSpellInfo or GetSpellInfo
-	local _
+	local key, _
 
-	local namesTable = {[0] = MANA, [1] = RAGE, [3] = ENERGY, [6] = RUNIC_POWER}
-	local keysTable = {[0] = "mana", [1] = "rage", [2] = "energy", [3] = "energy", [4] = "energy", [6] = "runic"}
+	-- used to localize modules names.
+	local namesTable = {
+		[0] = MANA,
+		[1] = RAGE,
+		[3] = ENERGY,
+		[6] = RUNIC_POWER
+	}
+
+	-- used to store total amounts for sets and players
+	local gainTable = {
+		[0] = "mana",
+		[1] = "rage",
+		[2] = "energy",
+		[3] = "energy",
+		[4] = "energy",
+		[6] = "runic"
+	}
+
+	-- users as keys to store spells and their amounts.
+	local spellTable = {
+		[0] = "manaspells",
+		[1] = "ragespells",
+		[2] = "energyspells",
+		[3] = "energyspells",
+		[4] = "energyspells",
+		[6] = "runicspells"
+	}
 
 	-- spells in the following table will be ignored.
 	local ignoredSpells = {}
 
 	local function log_gain(set, gain)
-		if not (gain and gain.type and keysTable[gain.type]) or (gain.spellid and tContains(ignoredSpells, gain.spellid)) then
+		if not (gain and gain.type and gainTable[gain.type]) then
+			return
+		end
+		if (gain.spellid and tContains(ignoredSpells, gain.spellid)) then
 			return
 		end
 
 		local player = Skada:GetPlayer(set, gain.playerid, gain.playername, gain.playerflags)
 		if player then
-			local power = keysTable[gain.type]
-			player[power] = player[power] or {amount = 0}
-			player[power].amount = (player[power].amount or 0) + gain.amount
-
-			set[power] = (set[power] or 0) + gain.amount
+			key = gainTable[gain.type]
+			player[key] = (player[key] or 0) + gain.amount
+			set[key] = (set[key] or 0) + gain.amount
 
 			if set == Skada.current then
-				player[power].spells = player[power].spells or {}
-				player[power].spells[gain.spellid] = (player[power].spells[gain.spellid] or 0) + gain.amount
+				key = spellTable[gain.type]
+				player[key] = player[key] or {}
+				player[key][gain.spellid] = (player[key][gain.spellid] or 0) + gain.amount
 			end
 		end
 	end
@@ -68,20 +95,23 @@ Skada:AddLoadableModule("Resources", function(L)
 	local playermod_mt = {__index = playermod}
 
 	-- allows us to create a module for each power type.
-	function basemod:Create(power, modname, playermodname)
-		if not keysTable[power] then return end
-		local instance = Skada:NewModule(modname)
-		setmetatable(instance, basemod_mt)
+	function basemod:Create(power)
+		if gainTable[power] then
+			local powername = namesTable[power]
+			local instance = Skada:NewModule(format(L["Power gained: %s"], powername))
+			setmetatable(instance, basemod_mt)
 
-		local pmode = instance:NewModule(playermodname)
-		setmetatable(pmode, playermod_mt)
+			local pmode = instance:NewModule(format(L["%s gained spells"], powername))
+			setmetatable(pmode, playermod_mt)
 
-		pmode.powertype = power
-		pmode.power = keysTable[power]
-		instance.power = keysTable[power]
-		instance.metadata = {showspots = true, click1 = pmode, nototalclick = {pmode}}
-
-		return instance
+			pmode.powerid = power
+			pmode.power = gainTable[power]
+			pmode.powername = powername
+			pmode.spells = spellTable[power]
+			instance.power = gainTable[power]
+			instance.metadata = {showspots = true, click1 = pmode, nototalclick = {pmode}}
+			return instance
+		end
 	end
 
 	-- this is the main module update function that shows the list
@@ -105,7 +135,7 @@ Skada:AddLoadableModule("Resources", function(L)
 					d.role = player.role
 					d.spec = player.spec
 
-					d.value = player[self.power].amount
+					d.value = player[self.power]
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(d.value),
 						mod.metadata.columns.Amount,
@@ -136,27 +166,20 @@ Skada:AddLoadableModule("Resources", function(L)
 	-- player mods common Enter function.
 	function playermod:Enter(win, id, label)
 		win.playerid, win.playername = id, label
-		win.title = format(L["%s's gained %s"], label, namesTable[self.powertype] or L.Unknown)
+		win.title = format(L["%s's gained %s"], label, namesTable[self.powerid] or L.Unknown)
 	end
 
 	-- player mods main update function
 	function playermod:Update(win, set)
-		win.title = format(
-			L["%s's gained %s"],
-			win.playername or L.Unknown,
-			self.powertype and namesTable[self.powertype] or L.Unknown
-		)
+		win.title = format(L["%s's gained %s"], win.playername or L.Unknown, self.powername or L.Unknown)
 
 		local player = set and set:GetPlayer(win.playerid, win.playername)
-		local total = 0
-		if player and self.power and player[self.power] and player[self.power].amount then
-			total = player[self.power].amount or 0
-		end
+		local total = player and self.power and player[self.power] or 0
 
-		if total > 0 and player[self.power].spells then
+		if total > 0 and player[self.spells] then
 			local maxvalue, nr = 0, 1
 
-			for spellid, amount in pairs(player[self.power].spells) do
+			for spellid, amount in pairs(player[self.spells]) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -183,10 +206,11 @@ Skada:AddLoadableModule("Resources", function(L)
 	end
 
 	-- we create the modules now
-	local manamod = basemod:Create(0, L["Power gained: Mana"], L["Mana gained spell list"])
-	local ragemod = basemod:Create(1, L["Power gained: Rage"], L["Rage gained spell list"])
-	local energymod = basemod:Create(3, L["Power gained: Energy"], L["Energy gained spell list"])
-	local runicmod = basemod:Create(6, L["Power gained: Runic Power"], L["Runic Power gained spell list"])
+	-- power gained: mana
+	local manamod = basemod:Create(0)
+	local ragemod = basemod:Create(1)
+	local energymod = basemod:Create(3)
+	local runicmod = basemod:Create(6)
 
 	function mod:OnEnable()
 		self.metadata = {columns = {Amount = true, Percent = true}}
@@ -201,6 +225,7 @@ Skada:AddLoadableModule("Resources", function(L)
 		ragemod.metadata.icon = [[Interface\Icons\ability_racial_bloodrage]]
 		energymod.metadata.icon = [[Interface\Icons\spell_holy_circleofrenewal]]
 		runicmod.metadata.icon = [[Interface\Icons\inv_misc_rune_09]]
+
 		Skada:AddMode(manamod, L["Resources"])
 		Skada:AddMode(ragemod, L["Resources"])
 		Skada:AddMode(energymod, L["Resources"])

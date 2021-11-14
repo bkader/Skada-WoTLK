@@ -248,7 +248,7 @@ function Skada:OpenMenu(window)
 				info.text = L["Lock Window"]
 				info.func = function()
 					window.db.barslocked = not window.db.barslocked
-					Skada:ApplySettings()
+					Skada:ApplySettings(window)
 				end
 				info.checked = window.db.barslocked
 				info.isNotRadio = 1
@@ -265,7 +265,7 @@ function Skada:OpenMenu(window)
 						window.db.hidden = false
 						window:Show()
 					end
-					Skada:ApplySettings()
+					Skada:ApplySettings(window)
 				end
 				info.checked = not window:IsShown()
 				info.isNotRadio = 1
@@ -284,7 +284,7 @@ function Skada:OpenMenu(window)
 								end
 							end
 						end
-						Skada:ApplySettings()
+						Skada:ApplySettings(window)
 					end
 					info.checked = window.db.sticky
 					info.isNotRadio = 1
@@ -296,7 +296,7 @@ function Skada:OpenMenu(window)
 				info.text = L["Clamped To Screen"]
 				info.func = function()
 					window.db.clamped = not window.db.clamped
-					Skada:ApplySettings()
+					Skada:ApplySettings(window)
 				end
 				info.checked = window.db.clamped
 				info.isNotRadio = 1
@@ -316,7 +316,7 @@ function Skada:OpenMenu(window)
 					info.text = L["Always show self"]
 					info.func = function()
 						window.db.showself = not window.db.showself
-						Skada:ApplySettings()
+						Skada:ApplySettings(window)
 					end
 					info.checked = (window.db.showself == true)
 					info.isNotRadio = 1
@@ -326,7 +326,7 @@ function Skada:OpenMenu(window)
 					info.text = L["Include set"]
 					info.func = function()
 						window.db.titleset = not window.db.titleset
-						Skada:ApplySettings()
+						Skada:ApplySettings(window)
 					end
 					info.checked = (window.db.titleset == true)
 					info.isNotRadio = 1
@@ -336,7 +336,7 @@ function Skada:OpenMenu(window)
 					info.text = L["Encounter Timer"]
 					info.func = function()
 						window.db.combattimer = not window.db.combattimer
-						Skada:ApplySettings()
+						Skada:ApplySettings(window)
 					end
 					info.checked = (window.db.combattimer == true)
 					info.isNotRadio = 1
