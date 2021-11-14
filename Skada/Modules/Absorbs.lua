@@ -5,10 +5,10 @@ local pairs, ipairs, select, format, wipe = pairs, ipairs, select, string.format
 local max, min, floor = math.max, math.min, math.floor
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local UnitGUID, UnitClass, unitClass = UnitGUID, UnitClass, Skada.unitClass
-local newTable, delTable = Skada.newTable, Skada.delTable
 local setPrototype = Skada.setPrototype
 local playerPrototype = Skada.playerPrototype
 local cacheTable = Skada.cacheTable
+local T = Skada.TablePool
 local _
 
 -- ============== --
@@ -671,7 +671,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				-- if the "points" key exists, we don't remove the shield because
 				-- for us it means it's a passive shield that should always be kept.
 				if s.points == nil then
-					shields[dstName][s.spellid][s.srcName] = delTable(shields[dstName][s.spellid][s.srcName])
+					shields[dstName][s.spellid][s.srcName] = nil
 				end
 
 				absorb.playerid = s.srcGUID
@@ -1013,17 +1013,17 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	function mod:AddSetAttributes(set)
 		self:ZoneModifier()
-		heals = heals or newTable()
-		shields = shields or newTable()
-		shieldamounts = shieldamounts or newTable()
-		shieldspopped = shieldspopped or newTable()
+		heals = heals or T.fetch("Absorbs_Heals")
+		shields = shields or T.fetch("Absorbs_Shields")
+		shieldamounts = shieldamounts or T.fetch("Absorbs_ShieldAmounts")
+		shieldspopped = shieldspopped or T.fetch("Absorbs_ShieldsPopped")
 	end
 
 	function mod:SetComplete(set)
-		delTable(heals)
-		delTable(shields)
-		delTable(shieldamounts)
-		delTable(shieldspopped)
+		T.release("Absorbs_Heals", heals)
+		T.release("Absorbs_Shields", shields)
+		T.release("Absorbs_ShieldAmounts", shieldamounts)
+		T.release("Absorbs_ShieldsPopped", shieldspopped)
 	end
 
 	function setPrototype:GetAPS()

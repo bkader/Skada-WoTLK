@@ -11,7 +11,7 @@ Skada:AddLoadableModule("Threat", function(L)
 	local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 	local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
 	local PlaySoundFile = PlaySoundFile
-	local newTable, delTable = Skada.newTable, Skada.delTable
+	local T = Skada.TablePool
 
 	local aggroColor = {r = 0.95, g = 0, b = 0.02}
 	local aggroIcon = [[Interface\Icons\ability_physical_taunt]]
@@ -73,7 +73,7 @@ Skada:AddLoadableModule("Threat", function(L)
 					end
 
 					-- cache the player.
-					threatTable = threatTable or newTable()
+					threatTable = threatTable or T.fetch("Threat_Table")
 					threatTable[guid] = player
 				end
 
@@ -238,7 +238,7 @@ Skada:AddLoadableModule("Threat", function(L)
 
 		function mod:SetComplete(set)
 			tankThreat, tankValue = nil, nil
-			delTable(threatTable)
+			T.release("Threat_Table", threatTable)
 		end
 	end
 

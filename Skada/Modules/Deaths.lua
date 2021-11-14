@@ -14,10 +14,9 @@ Skada:AddLoadableModule("Deaths", function(L)
 	local abs, max, modf = math.abs, math.max, math.modf
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
-	local newTable, wipe = Skada.newTable, wipe
+	local T, wipe = Skada.TablePool, wipe
 	local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
-	local date, time = date, time
-	local log, extra, _
+	local date, time, log, _ = date, time, nil, nil
 
 	local function log_deathlog(set, data, ts)
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
@@ -157,14 +156,15 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 						local output = format(
 							"Skada: %s > %s (%s) %s",
-							log.source or L.Unknown, -- source name
-							player.name or L.Unknown, -- player name
-							GetSpellInfo(log.spellid) or L.Unknown, -- spell name
+							log.source or UNKNOWN, -- source name
+							player.name or UNKNOWN, -- player name
+							GetSpellInfo(log.spellid) or UNKNOWN, -- spell name
 							Skada:FormatNumber(0 - log.amount, 1) -- spell amount
 						)
 
 						if log.overkill or log.resisted or log.blocked or log.absorbed then
-							extra = wipe(extra or newTable())
+							local extra = T.fetch("Death_ExtraInfo")
+
 							if log.overkill then
 								extra[#extra + 1] = format("O:%s", Skada:FormatNumber(log.overkill, 1))
 							end
@@ -180,6 +180,8 @@ Skada:AddLoadableModule("Deaths", function(L)
 							if next(extra) then
 								output = format("%s [%s]", output, tconcat(extra, " - "))
 							end
+
+							T.release("Death_ExtraInfo", extra)
 						end
 
 						if Skada.db.profile.modules.deathchannel == "SELF" then
@@ -235,7 +237,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 	function deathlogmod:Enter(win, id, label)
 		win.datakey = id
-		win.title = format(L["%s's death log"], win.playername or L.Unknown)
+		win.title = format(L["%s's death log"], win.playername or UNKNOWN)
 	end
 
 	do
@@ -249,7 +251,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 		function deathlogmod:Update(win, set)
 			local player = Skada:FindPlayer(set, win.playerid, win.playername)
 			if player and win.datakey then
-				win.title = format(L["%s's death log"], win.playername or L.Unknown)
+				win.title = format(L["%s's death log"], win.playername or UNKNOWN)
 
 				local deathlog
 				if player.deathlog and player.deathlog[win.datakey] then
@@ -289,7 +291,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 						d.id = nr
 						d.spellid = log.spellid
-						d.label = format("%02.2f: %s", diff or 0, spellname or L.Unknown)
+						d.label = format("%02.2f: %s", diff or 0, spellname or UNKNOWN)
 						d.icon = spellicon
 						d.time = log.time
 
@@ -301,9 +303,9 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 						d.value = log.hp or 0
 						local change = (log.amount >= 0 and "+" or "-") .. Skada:FormatNumber(abs(log.amount))
-						d.reportlabel = format("%02.2f: %s   %s [%s]", diff or 0, GetSpellLink(log.spellid) or spellname or L.Unknown, change, Skada:FormatNumber(log.hp or 0))
+						d.reportlabel = format("%02.2f: %s   %s [%s]", diff or 0, GetSpellLink(log.spellid) or spellname or UNKNOWN, change, Skada:FormatNumber(log.hp or 0))
 
-						extra = wipe(extra or newTable())
+						local extra = T.fetch("Deathlog_ExtraInfo")
 
 						if (log.overkill or 0) > 0 then
 							d.overkill = log.overkill
@@ -326,6 +328,8 @@ Skada:AddLoadableModule("Deaths", function(L)
 							change = "(|cffff0000*|r) " .. change
 							d.reportlabel = d.reportlabel .. " (" .. tconcat(extra, " - ") .. ")"
 						end
+
+						T.release("Deathlog_ExtraInfo", extra)
 
 						d.valuetext = Skada:FormatValueText(
 							change,
@@ -385,7 +389,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 						end
 					end
 
-					d.label = d.label or set.name or L.Unknown
+					d.label = d.label or set.name or UNKNOWN
 
 					d.value = death.time
 					d.valuetext = formatdate(d.value)

@@ -28,10 +28,10 @@ local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
 local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
 local GetNumGroupMembers, GetGroupTypeAndCount = Skada.GetNumGroupMembers, Skada.GetGroupTypeAndCount
 local After, NewTimer, NewTicker, CancelTimer = Skada.After, Skada.NewTimer, Skada.NewTicker, Skada.CancelTimer
-local newTable, delTable = Skada.newTable, Skada.delTable
 local GetUnitIdFromGUID, GetUnitSpec, GetUnitRole = Skada.GetUnitIdFromGUID, Skada.GetUnitSpec, Skada.GetUnitRole
 local UnitIterator, IsGroupDead = Skada.UnitIterator, Skada.IsGroupDead
 local Transliterate = Skada.Transliterate
+local T = Skada.TablePool
 
 local LDB = LibStub("LibDataBroker-1.1")
 local dataobj = LDB:NewDataObject("Skada", {
@@ -159,7 +159,7 @@ local function CleanSets(force)
 	-- we trim segments without touching persistent ones.
 	for i = #Skada.char.sets, 1, -1 do
 		if (force or numsets > Skada.db.profile.setstokeep) and not Skada.char.sets[i].keep then
-			delTable(tremove(Skada.char.sets, i)) -- to be reused
+			wipe(tremove(Skada.char.sets, i))
 			numsets = numsets - 1
 			maxsets = maxsets - 1
 		end
@@ -170,7 +170,7 @@ local function CleanSets(force)
 	-- the player reasonable, otherwise they'll encounter memory issues.
 	local limit = Skada.db.profile.setstokeep + (Skada.db.profile.setslimit or 10)
 	while maxsets > limit and Skada.char.sets[maxsets] do
-		delTable(tremove(Skada.char.sets, maxsets)) -- to be reused
+		wipe(tremove(Skada.char.sets, maxsets))
 		maxsets = maxsets - 1
 	end
 end
@@ -1040,9 +1040,7 @@ function Skada:DeleteSet(set, index)
 	end
 
 	if set and index then
-		local deletedset = tremove(self.char.sets, index)
-		self.callbacks:Fire("Skada_SetDeleted", index, deletedset)
-		delTable(deletedset)
+		self.callbacks:Fire("Skada_SetDeleted", index, tremove(self.char.sets, index))
 
 		if set == self.last then
 			self.last = nil
@@ -1366,7 +1364,7 @@ end
 
 function Skada:QueueUnit(spellid, srcGUID, srcName, srcFlags, dstGUID)
 	if spellid and srcName and srcGUID and dstGUID and srcGUID ~= dstGUID then
-		queued_units = queued_units or newTable()
+		queued_units = queued_units or T.fetch("Skada_QueuedUnits")
 		queued_units[spellid] = queued_units[spellid] or {}
 		queued_units[spellid][dstGUID] = {id = srcGUID, name = srcName, flag = srcFlags}
 	end
@@ -2530,11 +2528,11 @@ function Skada:ApplyBorder(frame, texture, color, thickness, padtop, padbottom, 
 	frame.borderFrame:SetPoint("TOPLEFT", frame, -thickness - (padleft or 0), thickness + (padtop or 0))
 	frame.borderFrame:SetPoint("BOTTOMRIGHT", frame, thickness + (padright or 0), -thickness - (padbottom or 0))
 
-	local borderbackdrop = newTable()
+	local borderbackdrop = T.fetch("Skada_BorderBackdrop")
 	borderbackdrop.edgeFile = (texture and thickness > 0) and self:MediaFetch("border", texture) or nil
 	borderbackdrop.edgeSize = thickness
 	frame.borderFrame:SetBackdrop(borderbackdrop)
-	delTable(borderbackdrop)
+	T.release("Skada_BorderBackdrop", borderbackdrop)
 	if color then
 		frame.borderFrame:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
 	end
@@ -3154,7 +3152,7 @@ end
 
 function Skada:EndSegment()
 	if not self.current then return end
-	queued_units = delTable(queued_units)
+	T.release("Skada_QueuedUnits", queued_units)
 
 	local now = time()
 	if not self.db.profile.onlykeepbosses or self.current.gotboss then

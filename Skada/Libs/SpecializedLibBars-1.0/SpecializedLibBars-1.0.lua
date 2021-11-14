@@ -96,6 +96,7 @@ barListPrototype.super = dummyFrame
 lib.bars = lib.bars or {}
 lib.barLists = lib.barLists or {}
 lib.recycledBars = lib.recycledBars or {}
+
 lib.embeds = lib.embeds or {}
 local bars = lib.bars
 local barLists = lib.barLists

@@ -3,8 +3,8 @@ local Skada = Skada
 -- cache frequently used globals
 local pairs, ipairs, select = pairs, ipairs, select
 local format, max = string.format, math.max
-local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-local newTable, delTable = Skada.newTable, Skada.delTable
+local GetSpellInfo = Skada.GetSpellInfo
+local cacheTable, T = Skada.cacheTable, Skada.TablePool
 local misstypes = Skada.missTypes
 local _
 
@@ -143,7 +143,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			-- handle extra attacks
 			if eventtype == "SPELL_EXTRA_ATTACKS" then
 				local _, spellname, _, amount = ...
-				extraATT = extraATT or newTable()
+				extraATT = extraATT or T.fetch("DamageTaken_ExtraAttacks")
 				if not extraATT[srcName] then
 					extraATT[srcName] = {spellname = spellname, amount = amount}
 				end
@@ -151,7 +151,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			end
 
 			if eventtype == "SWING_DAMAGE" then
-				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, L["Melee"], 1
+				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, L.Melee, 1
 				dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing, dmg.crushing = ...
 
 				-- an extra attack?
@@ -209,7 +209,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			local amount
 
 			if eventtype == "SWING_MISSED" then
-				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, L["Melee"], 1
+				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, L.Melee, 1
 				dmg.misstype, amount = ...
 			else
 				dmg.spellid, dmg.spellname, dmg.spellschool, dmg.misstype, amount = ...
@@ -662,7 +662,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 	end
 
 	function mod:SetComplete(set)
-		delTable(extraATT)
+		T.release("DamageTaken_ExtraAttacks", extraATT)
 
 		-- clean set from garbage before it is saved.
 		for _, p in ipairs(set.players) do
@@ -686,7 +686,6 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 		local setPrototype = Skada.setPrototype
 		local playerPrototype = Skada.playerPrototype
 		local cacheTable = Skada.cacheTable
-		local wipe = wipe
 
 		function setPrototype:GetDamageTaken()
 			return Skada.db.profile.absdamage and self.totaldamagetaken or self.damagetaken or 0

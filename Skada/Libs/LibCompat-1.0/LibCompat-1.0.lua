@@ -1,5 +1,5 @@
 --
--- **LibCompat-1.0** provided few handy functions that can be embed to addons.
+-- **LibCompat-1.0** provides few handy functions that can be embed to addons.
 -- This library was originally created for Skada as of 1.8.50.
 -- @author: Kader B (https://github.com/bkader/LibCompat-1.0)
 --
@@ -103,40 +103,15 @@ do
 		return (tIndexOf(tbl, item) ~= nil)
 	end
 
-	-- Shamelessly copied from Omen - thanks!
-	lib.tablePool = lib.tablePool or setmetatable({}, {__mode = "kv"})
-	local tablePool = lib.tablePool
-
-	-- get a new table
-	local function newTable()
-		local t = next(tablePool) or {}
-		tablePool[t] = nil
-		return t
-	end
-
-	-- delete table and return to pool
-	local function delTable(t)
-		if type(t) == "table" then
-			wipe(t)
-			t[true] = true
-			t[true] = nil
-			setmetatable(t, nil)
-			tablePool[t] = true
-		end
-		return nil
-	end
-
 	local weaktable = {__mode = "v"}
 	local function WeakTable(t)
 		-- just so that we reuse tables.
-		return setmetatable(t or newTable(), weaktable)
+		return setmetatable(t or {}, weaktable)
 	end
 
 	lib.tLength = tLength
 	lib.tCopy = tCopy
 	lib.tIndexOf = tIndexOf
-	lib.newTable = newTable
-	lib.delTable = delTable
 	lib.WeakTable = WeakTable
 end
 
@@ -452,8 +427,8 @@ do
 
 	local new, del
 	do
-		lib.afterPool = lib.afterPool or setmetatable({}, {__mode = "kv"})
-		lib.timerPool = lib.timerPool or setmetatable({}, {__mode = "kv"})
+		lib.afterPool = lib.afterPool or setmetatable({}, {__mode = "k"})
+		lib.timerPool = lib.timerPool or setmetatable({}, {__mode = "k"})
 		local afterPool = lib.afterPool
 		local timerPool = lib.timerPool
 
@@ -772,13 +747,84 @@ end
 
 -------------------------------------------------------------------------------
 
+do
+	local TablePool = {}
+	local max_pool_size = 200
+	local pools = {}
+
+	-- attempts to fetch a table from the table pool of the
+	-- specified tag name. if the pool doesn't exist or is empty
+	-- it creates a lua table.
+	function TablePool.fetch(tag)
+		local pool = pools[tag]
+		if not pool then
+			pool = {}
+			pools[tag] = pool
+			pool.c = 0
+			pool[0] = 0
+		else
+			local len = pool[0]
+			if len > 0 then
+				local obj = pool[len]
+				pool[len] = nil
+				pool[0] = len - 1
+				return obj
+			end
+		end
+		return {}
+	end
+
+	-- releases the already used lua table into the table pool
+	-- named "tag" or creates it right away.
+	function TablePool.release(tag, obj, noclear)
+		if not obj then return end
+
+		local pool = pools[tag]
+		if not pool then
+			pool = {}
+			pools[tag] = pool
+			pool.c = 0
+			pool[0] = 0
+		end
+
+		if not noclear then
+			setmetatable(obj, nil)
+			for k, _ in pairs(obj) do
+				obj[k] = nil
+			end
+		end
+
+		do
+			local cnt = pool.c + 1
+			if cnt >= 20000 then
+				pool = {}
+				pools[tag] = pool
+				pool.c = 0
+				pool[0] = 0
+				return
+			end
+			pool.c = cnt
+		end
+
+		local len = pool[0] + 1
+		if len > max_pool_size then
+			return
+		end
+
+		pool[len] = obj
+		pool[0] = len
+	end
+
+	lib.TablePool = TablePool
+end
+
+-------------------------------------------------------------------------------
+
 local mixins = {
 	-- table util
 	"tLength",
 	"tCopy",
 	"tIndexOf",
-	"newTable",
-	"delTable",
 	"WeakTable",
 	-- roster util
 	"IsInRaid",
@@ -812,7 +858,8 @@ local mixins = {
 	"HexDecode",
 	"EscapeStr",
 	"GetClassColorsTable",
-	"WrapTextInColorCode"
+	"WrapTextInColorCode",
+	"TablePool"
 }
 
 function lib:Embed(target)

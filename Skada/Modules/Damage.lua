@@ -2,9 +2,8 @@ local Skada = Skada
 
 local format, max = string.format, math.max
 local pairs, select = pairs, select
-local newTable, delTable = Skada.newTable, Skada.delTable
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-local cacheTable = Skada.cacheTable
+local cacheTable, T = Skada.cacheTable, Skada.TablePool
 local misstypes = Skada.missTypes
 local _
 
@@ -207,7 +206,7 @@ Skada:AddLoadableModule("Damage", function(L)
 			-- handle extra attacks
 			if eventtype == "SPELL_EXTRA_ATTACKS" then
 				local _, spellname, _, amount = ...
-				extraATT = extraATT or newTable()
+				extraATT = extraATT or T.fetch("Damage_ExtraAttacks")
 				if not extraATT[srcName] then
 					extraATT[srcName] = {spellname = spellname, amount = amount}
 				end
@@ -215,7 +214,7 @@ Skada:AddLoadableModule("Damage", function(L)
 			end
 
 			if eventtype == "SWING_DAMAGE" then
-				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, L["Melee"], 1
+				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, L.Melee, 1
 				dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing = ...
 
 				-- an extra attack?
@@ -252,7 +251,7 @@ Skada:AddLoadableModule("Damage", function(L)
 			local amount
 
 			if eventtype == "SWING_MISSED" then
-				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, L["Melee"], 1
+				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, L.Melee, 1
 				dmg.misstype, amount = ...
 			else
 				dmg.spellid, dmg.spellname, dmg.spellschool, dmg.misstype, amount = ...
@@ -721,7 +720,7 @@ Skada:AddLoadableModule("Damage", function(L)
 	end
 
 	function mod:SetComplete(set)
-		delTable(extraATT)
+		T.release("Damage_ExtraAttacks", extraATT)
 
 		-- clean set from garbage before it is saved.
 		for _, p in ipairs(set.players) do
@@ -1188,7 +1187,8 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 		win.title = format(L["Useful damage on %s"], win.targetname or L.Unknown)
 		if not win.targetname then return end
 
-		local players, total = newTable(), 0
+		local players = T.fetch("Damage_UsefulTargets")
+		local total = 0
 
 		for _, p in ipairs(set.players) do
 			local targets = p:GetDamageTargets()
@@ -1234,7 +1234,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 			end
 		end
 
-		delTable(players)
+		T.release("Damage_UsefulTargets", players)
 	end
 
 	function mod:Update(win, set)

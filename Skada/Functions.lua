@@ -311,7 +311,7 @@ do
 				if spellid == 75 then
 					res3 = [[Interface\Icons\INV_Weapon_Bow_07]]
 				elseif spellid == 6603 then
-					res1, res3 = L["Melee"], [[Interface\Icons\INV_Sword_04]]
+					res1, res3 = L.Melee, [[Interface\Icons\INV_Sword_04]]
 				end
 			end
 		end
@@ -555,12 +555,12 @@ function Skada:RegisterClasses()
 	end
 
 	if not CLASS_ICON_TCOORDS.ENEMY then
-		self.classcoords.ENEMY = {0.5, 0.75, 0.5, 0.75}
 		self.classcoords.BOSS = {0.75, 1, 0.5, 0.75}
+		self.classcoords.ENEMY = {0.5, 0.75, 0.5, 0.75}
 		self.classcoords.MONSTER = {0, 0.25, 0.75, 1}
 		self.classcoords.PET = {0.25, 0.5, 0.75, 1}
-		self.classcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
 		self.classcoords.PLAYER = {0.75, 1, 0.75, 1}
+		self.classcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
 	end
 
 	-- role icon file and texture coordinates
@@ -620,11 +620,11 @@ function Skada:RegisterClasses()
 
 	-- class colors & custom
 	self.classcolors = self.GetClassColorsTable()
+	self.classcolors.BOSS = {r = 0.203, g = 0.345, b = 0.525, colorStr = "345886"}
 	self.classcolors.ENEMY = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
 	self.classcolors.MONSTER = {r = 0.549, g = 0.388, b = 0.404, colorStr = "ff8c6367"}
-	self.classcolors.BOSS = {r = 0.203, g = 0.345, b = 0.525, colorStr = "345886"}
-	self.classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
 	self.classcolors.PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"}
+	self.classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
 	self.classcolors.UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
 
 	self.RegisterClasses = nil -- remove it

@@ -9,7 +9,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 	local tostring, format = tostring, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
-	local newTable, delTable, After = Skada.newTable, Skada.delTable, Skada.After
+	local T, After = Skada.TablePool, Skada.After
 	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
 	local sunder, sunderLink, devastate
 	local _
@@ -47,7 +47,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 			log_sunder(Skada.total, data)
 
 			if Skada.db.profile.modules.sunderannounce then
-				mod.targets = mod.targets or newTable()
+				mod.targets = mod.targets or T.fetch("Sunder_Targets")
 				if not mod.targets[dstGUID] then
 					mod.targets[dstGUID] = {count = 1, time = timestamp}
 				elseif mod.targets[dstGUID] ~= -1 then
@@ -208,7 +208,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 	end
 
 	function mod:SetComplete(set)
-		delTable(self.targets)
+		T.release("Sunder_Targets", self.targets)
 	end
 
 	function mod:Announce(msg, guid)

@@ -4,8 +4,6 @@ local pairs, ipairs = pairs, ipairs
 local getmetatable = getmetatable
 local setmetatable = setmetatable
 
-local newTable, delTable = Skada.newTable, Skada.delTable
-
 -- a dummy table used as fallback
 local dummyTable = {}
 Skada.dummyTable = dummyTable
@@ -162,11 +160,11 @@ end
 -- finds a player that was already recorded
 function Skada:FindPlayer(set, id, name, strict)
 	if set and set.players and id and id ~= "total" then
-		set._playeridx = set._playeridx or newTable()
+		set._playeridx = set._playeridx or {}
 
 		local player = set._playeridx[id]
 		if player then
-			return  playerPrototype:Bind(player, set)
+			return playerPrototype:Bind(player, set)
 		end
 
 		-- search the set
@@ -197,7 +195,7 @@ end
 -- finds an enemy unit
 function Skada:FindEnemy(set, name, id)
 	if set and set.enemies and name then
-		set._enemyidx = set._enemyidx or newTable()
+		set._enemyidx = set._enemyidx or {}
 
 		local enemy = set._enemyidx[name]
 		if enemy then
@@ -237,8 +235,8 @@ end
 do
 	local function ClearIndexes(set, mt)
 		if set then
-			set._playeridx = delTable(set._playeridx)
-			set._enemyidx = delTable(set._enemyidx)
+			set._playeridx = nil
+			set._enemyidx = nil
 
 			-- delete our metatables.
 			if mt then

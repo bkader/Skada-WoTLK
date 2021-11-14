@@ -3,10 +3,9 @@ local Skada = Skada
 -- cache frequently used globals
 local pairs, ipairs, select, format, max = pairs, ipairs, select, string.format, math.max
 local GetSpellInfo, unitClass = Skada.GetSpellInfo or GetSpellInfo, Skada.unitClass
-local newTable, delTable, wipe = Skada.newTable, Skada.delTable, wipe
 local setPrototype = Skada.setPrototype
 local playerPrototype = Skada.playerPrototype
-local cacheTable = Skada.cacheTable
+local cacheTable, wipe = Skada.cacheTable, wipe
 local _
 
 -- ============== --
