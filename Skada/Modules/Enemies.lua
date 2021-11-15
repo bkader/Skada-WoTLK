@@ -61,14 +61,33 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 	-- at certain health percentage. Useful in case you want
 	-- to collect damage done to the units at certain phases.
 	local customUnits = {
-		-- Icecrown Citadel:
-		[36855] = {start = 0, text = L["%s - Phase 2"], power = 0}, -- Lady Deathwhisper
-		[36678] = {start = 0.35, text = L["%s - Phase 3"]}, -- Professor Putricide
-		[36853] = {start = 0.35, text = L["%s - Phase 2"]}, -- Sindragosa
-		[36597] = {start = 0.4, stop = 0.1, text = L["%s - Phase 3"]}, -- The Lich King
-		[36609] = {name = L["Valkyrs overkilling"], diff = {"10h", "25h"}, start = 0.5, useful = true, values = {["10h"] = 1417500, ["25h"] = 2992000}}, -- Valkyrs overkilling
-		-- Trial of the Crusader
-		[34564] = {start = 0.3, text = L["%s - Phase 2"]} -- Anub'arak
+		-- [[ Icecrown Citadel ]] --
+		[36855] = {-- Lady Deathwhisper
+			start = 0, power = 0, text = L["%s - Phase 2"],
+			values = {["10n"] = 3264800, ["10h"] = 3264800, ["25n"] = 11193600, ["25h"] = 13992000}
+		},
+		[36678] = { -- Professor Putricide
+			start = 0.35, text = L["%s - Phase 3"],
+			values = {["10n"] = 9761500, ["10h"] = 13666100, ["25n"] = 41835000, ["25h"] = 50202000}
+		},
+		[36853] = { -- Sindragosa
+			start = 0.35, text = L["%s - Phase 2"],
+			values = {["10n"] = 11156000, ["10h"] = 13945000, ["25n"] = 38348750, ["25h"] = 46018500}
+		},
+		[36597] = { -- The Lich King
+			start = 0.4, stop = 0.1, text = L["%s - Phase 3"],
+			values = {["10n"] = 17431250, ["10h"] = 29458813, ["25n"] = 61009375, ["25h"] = 103151165}
+		},
+		[36609] = { -- Valkyrs overkilling
+			name = L["Valkyrs overkilling"],
+			diff = {"10h", "25h"}, start = 0.5, useful = true,
+			values = {["10h"] = 1417500, ["25h"] = 2992000}
+		},
+		-- [[ Trial of the Crusader ]] --
+		[34564] = { -- Anub'arak
+			start = 0.3, text = L["%s - Phase 2"],
+			values = {["10n"] = 4183500, ["10h"] = 5438550, ["25n"] = 20917500, ["25h"] = 27192750}
+		}
 	}
 
 	local function GetRaidDiff()
