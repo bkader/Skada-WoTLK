@@ -9,7 +9,8 @@ local dummyTable = {}
 Skada.dummyTable = dummyTable
 
 -- this one should be used at modules level
-Skada.cacheTable = Skada.WeakTable()
+local T = Skada.Table
+Skada.cacheTable = T.get("Skada_CacheTable")
 
 -------------------------------------------------------------------------------
 -- player prototype & functions

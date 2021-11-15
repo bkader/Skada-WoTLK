@@ -7,7 +7,7 @@ Skada:AddLoadableModule("Resources", function(L)
 
 	local pairs, ipairs, format, tContains = pairs, ipairs, string.format, tContains
 	local setmetatable, GetSpellInfo = setmetatable, Skada.GetSpellInfo or GetSpellInfo
-	local key, _
+	local _
 
 	-- used to localize modules names.
 	local namesTable = {
@@ -50,14 +50,12 @@ Skada:AddLoadableModule("Resources", function(L)
 
 		local player = Skada:GetPlayer(set, gain.playerid, gain.playername, gain.playerflags)
 		if player then
-			key = gainTable[gain.type]
-			player[key] = (player[key] or 0) + gain.amount
-			set[key] = (set[key] or 0) + gain.amount
+			player[gainTable[gain.type]] = (player[gainTable[gain.type]] or 0) + gain.amount
+			set[gainTable[gain.type]] = (set[gainTable[gain.type]] or 0) + gain.amount
 
 			if set == Skada.current then
-				key = spellTable[gain.type]
-				player[key] = player[key] or {}
-				player[key][gain.spellid] = (player[key][gain.spellid] or 0) + gain.amount
+				player[spellTable[gain.type]] = player[spellTable[gain.type]] or {}
+				player[spellTable[gain.type]][gain.spellid] = (player[spellTable[gain.type]][gain.spellid] or 0) + gain.amount
 			end
 		end
 	end

@@ -9,14 +9,11 @@ local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
 lib.embeds = lib.embeds or {}
-lib.callbacks = lib.callbacks or LibStub("CallbackHandler-1.0"):New(lib)
 
 local pairs, ipairs, select, type = pairs, ipairs, select, type
 local tinsert, tremove, tconcat, wipe = table.insert, table.remove, table.concat, wipe
 local max, min = math.max, math.min
 local format = format or string.format
-local strlen = strlen or string.len
-local strmatch = strmatch or string.match
 local strbyte = strbyte or string.byte
 local strchar = strchar or string.char
 local tostring, tonumber = tostring, tonumber
@@ -103,16 +100,9 @@ do
 		return (tIndexOf(tbl, item) ~= nil)
 	end
 
-	local weaktable = {__mode = "v"}
-	local function WeakTable(t)
-		-- just so that we reuse tables.
-		return setmetatable(t or {}, weaktable)
-	end
-
 	lib.tLength = tLength
 	lib.tCopy = tCopy
 	lib.tIndexOf = tIndexOf
-	lib.WeakTable = WeakTable
 end
 
 -------------------------------------------------------------------------------
@@ -271,15 +261,11 @@ do
 		end
 
 		if filter == nil or filter == "group" then
-			for unit, owner in UnitIterator() do
+			for unit in UnitIterator() do
 				if UnitGUID(unit) == guid then
 					return unit
 				elseif UnitExists(unit .. "target") and UnitGUID(unit .. "target") == guid then
 					return unit .. "target"
-				elseif owner and UnitGUID(owner) == guid then
-					return owner
-				elseif owner and UnitGUID(owner .. "target") == guid then
-					return owner .. "target"
 				end
 			end
 			if filter == "group" then return end
@@ -341,7 +327,6 @@ do
 	lib.GetClassFromGUID = GetClassFromGUID
 	lib.GetCreatureId = GetCreatureId
 	lib.UnitHealthInfo = UnitHealthInfo
-	lib.UnitHealthPercent = UnitHealthInfo -- backward compatibility
 	lib.UnitPowerInfo = UnitPowerInfo
 end
 
@@ -748,14 +733,14 @@ end
 -------------------------------------------------------------------------------
 
 do
-	local TablePool = {}
+	local Table = {}
 	local max_pool_size = 200
 	local pools = {}
 
-	-- attempts to fetch a table from the table pool of the
+	-- attempts to get a table from the table pool of the
 	-- specified tag name. if the pool doesn't exist or is empty
 	-- it creates a lua table.
-	function TablePool.fetch(tag)
+	function Table.get(tag)
 		local pool = pools[tag]
 		if not pool then
 			pool = {}
@@ -776,7 +761,7 @@ do
 
 	-- releases the already used lua table into the table pool
 	-- named "tag" or creates it right away.
-	function TablePool.release(tag, obj, noclear)
+	function Table.free(tag, obj, noclear)
 		if not obj then return end
 
 		local pool = pools[tag]
@@ -815,7 +800,44 @@ do
 		pool[0] = len
 	end
 
-	lib.TablePool = TablePool
+	lib.Table = Table
+end
+
+-------------------------------------------------------------------------------
+
+do
+	-- Table Pool for recycling tables
+	-- creates a new table system that can be used to reuse tables
+	-- it returns both "new" and "del" functions.
+	function lib.TablePool()
+		max_pool_size = max_pool_size or 10
+		local pool = {}
+		setmetatable(pool, {__mode = "kv"})
+
+		-- attempts to retrieve a table from the cache
+		-- creates if if it doesn't exist.
+		local function new()
+			local t = next(pool) or {}
+			pool[t] = nil
+			return t
+		end
+
+		-- it will wipe the provided table then cache it
+		-- to be reusable later.
+		local function del(t)
+			if type(t) == "table" then
+				for k, _ in pairs(t) do
+					t[k] = nil
+				end
+				t[true] = true
+				t[true] = nil
+				pool[t] = true
+			end
+			return nil
+		end
+
+		return new, del
+	end
 end
 
 -------------------------------------------------------------------------------
@@ -825,7 +847,6 @@ local mixins = {
 	"tLength",
 	"tCopy",
 	"tIndexOf",
-	"WeakTable",
 	-- roster util
 	"IsInRaid",
 	"IsInGroup",
@@ -841,12 +862,10 @@ local mixins = {
 	"GetClassFromGUID",
 	"GetCreatureId",
 	"UnitHealthInfo",
-	"UnitHealthPercent", -- backward compatibility
 	"UnitPowerInfo",
 	"GetUnitSpec",
 	"GetUnitRole",
 	-- timer util
-	"C_Timer",
 	"After",
 	"NewTicker",
 	"NewTimer",
@@ -859,7 +878,8 @@ local mixins = {
 	"EscapeStr",
 	"GetClassColorsTable",
 	"WrapTextInColorCode",
-	"TablePool"
+	"Table",
+	"TablePool",
 }
 
 function lib:Embed(target)

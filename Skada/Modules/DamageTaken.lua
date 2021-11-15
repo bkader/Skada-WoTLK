@@ -4,7 +4,7 @@ local Skada = Skada
 local pairs, ipairs, select = pairs, ipairs, select
 local format, max = string.format, math.max
 local GetSpellInfo = Skada.GetSpellInfo
-local cacheTable, T = Skada.cacheTable, Skada.TablePool
+local cacheTable = Skada.cacheTable
 local misstypes = Skada.missTypes
 local _
 
@@ -21,7 +21,8 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 	local sdetailmod = spellmod:NewModule(L["Damage Breakdown"])
 	local sourcemod = mod:NewModule(L["Damage source list"])
 	local tdetailmod = sourcemod:NewModule(L["Damage spell list"])
-	local tContains = tContains
+	local tContains, T = tContains, Skada.Table
+	local new, del = Skada.TablePool()
 
 	-- spells in the following table will be ignored.
 	local ignoredSpells = {}
@@ -143,9 +144,11 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			-- handle extra attacks
 			if eventtype == "SPELL_EXTRA_ATTACKS" then
 				local _, spellname, _, amount = ...
-				extraATT = extraATT or T.fetch("DamageTaken_ExtraAttacks")
+				extraATT = extraATT or T.get("DamageTaken_ExtraAttacks")
 				if not extraATT[srcName] then
-					extraATT[srcName] = {spellname = spellname, amount = amount}
+					extraATT[srcName] = new()
+					extraATT[srcName].spellname = spellname
+					extraATT[srcName].amount = amount
 				end
 				return
 			end
@@ -159,7 +162,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 					dmg.spellname = dmg.spellname .. " (" .. extraATT[srcName].spellname .. ")"
 					extraATT[srcName].amount = max(0, extraATT[srcName].amount - 1)
 					if extraATT[srcName].amount == 0 then
-						extraATT[srcName] = nil
+						extraATT[srcName] = del(extraATT[srcName])
 					end
 				end
 			else
@@ -662,7 +665,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 	end
 
 	function mod:SetComplete(set)
-		T.release("DamageTaken_ExtraAttacks", extraATT)
+		T.free("DamageTaken_ExtraAttacks", extraATT)
 
 		-- clean set from garbage before it is saved.
 		for _, p in ipairs(set.players) do

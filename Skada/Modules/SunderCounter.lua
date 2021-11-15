@@ -9,10 +9,10 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 	local tostring, format = tostring, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
-	local T, After = Skada.TablePool, Skada.After
 	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
-	local sunder, sunderLink, devastate
-	local _
+	local T, After = Skada.Table, Skada.After
+	local new, del = Skada.TablePool()
+	local sunder, sunderLink, devastate, _
 
 	local function log_sunder(set, data)
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
@@ -47,10 +47,12 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 			log_sunder(Skada.total, data)
 
 			if Skada.db.profile.modules.sunderannounce then
-				mod.targets = mod.targets or T.fetch("Sunder_Targets")
+				mod.targets = mod.targets or T.get("Sunder_Targets")
 				if not mod.targets[dstGUID] then
-					mod.targets[dstGUID] = {count = 1, time = timestamp}
-				elseif mod.targets[dstGUID] ~= -1 then
+					mod.targets[dstGUID] = new()
+					mod.targets[dstGUID].count = 1
+					mod.targets[dstGUID].time = timestamp
+				elseif not mod.targets[dstGUID].full then
 					mod.targets[dstGUID].count = (mod.targets[dstGUID].count or 0) + 1
 					if mod.targets[dstGUID].count == 5 then
 						mod:Announce(format(
@@ -60,7 +62,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 							dstName,
 							format("%.1f", timestamp - mod.targets[dstGUID].time)
 						), dstGUID)
-						mod.targets[dstGUID] = -1
+						mod.targets[dstGUID].full = true
 					end
 				end
 			end
@@ -72,7 +74,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 			After(0.1, function()
 				if mod.targets and mod.targets[dstGUID] then
 					mod:Announce(format(L["%s dropped from %s!"], sunderLink or sunder, dstName or L.Unknown), dstGUID)
-					mod.targets[dstGUID] = nil
+					mod.targets[dstGUID] = del(mod.targets[dstGUID])
 				end
 			end)
 		end
@@ -208,14 +210,20 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 	end
 
 	function mod:SetComplete(set)
-		T.release("Sunder_Targets", self.targets)
+		-- delete to reuse
+		if self.targets then
+			for k, _ in pairs(self.targets) do
+				self.targets[k] = del(self.targets[k])
+			end
+			T.free("Sunder_Targets", self.targets)
+		end
 	end
 
 	function mod:Announce(msg, guid)
 		-- only in a group
 		if not IsInGroup() or not msg then return end
 
-		-- only on bosses!
+		-- -- only on bosses!
 		if Skada.db.profile.modules.sunderbossonly and guid and not Skada:IsBoss(guid) then return end
 
 		local channel = Skada.db.profile.modules.sunderchannel or "SAY"

@@ -3,7 +3,7 @@ local Skada = Skada
 local format, max = string.format, math.max
 local pairs, select = pairs, select
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-local cacheTable, T = Skada.cacheTable, Skada.TablePool
+local cacheTable, T = Skada.cacheTable, Skada.Table
 local misstypes = Skada.missTypes
 local _
 
@@ -23,6 +23,7 @@ Skada:AddLoadableModule("Damage", function(L)
 	local targetmod = mod:NewModule(L["Damage target list"])
 	local tdetailmod = targetmod:NewModule(L["Damage spell list"])
 	local UnitGUID, tContains = UnitGUID, tContains
+	local new, del = Skada.TablePool()
 
 	-- spells on the list below are ignored when it comes
 	-- to updating player's active time.
@@ -206,9 +207,11 @@ Skada:AddLoadableModule("Damage", function(L)
 			-- handle extra attacks
 			if eventtype == "SPELL_EXTRA_ATTACKS" then
 				local _, spellname, _, amount = ...
-				extraATT = extraATT or T.fetch("Damage_ExtraAttacks")
+				extraATT = extraATT or T.get("Damage_ExtraAttacks")
 				if not extraATT[srcName] then
-					extraATT[srcName] = {spellname = spellname, amount = amount}
+					extraATT[srcName] = new()
+					extraATT[srcName].spellname = spellname
+					extraATT[srcName].amount = amount
 				end
 				return
 			end
@@ -222,7 +225,7 @@ Skada:AddLoadableModule("Damage", function(L)
 					dmg.spellname = dmg.spellname .. " (" .. extraATT[srcName].spellname .. ")"
 					extraATT[srcName].amount = max(0, extraATT[srcName].amount - 1)
 					if extraATT[srcName].amount == 0 then
-						extraATT[srcName] = nil
+						extraATT[srcName] = del(extraATT[srcName])
 					end
 				end
 			else
@@ -720,7 +723,7 @@ Skada:AddLoadableModule("Damage", function(L)
 	end
 
 	function mod:SetComplete(set)
-		T.release("Damage_ExtraAttacks", extraATT)
+		T.free("Damage_ExtraAttacks", extraATT)
 
 		-- clean set from garbage before it is saved.
 		for _, p in ipairs(set.players) do
@@ -1187,7 +1190,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 		win.title = format(L["Useful damage on %s"], win.targetname or L.Unknown)
 		if not win.targetname then return end
 
-		local players = T.fetch("Damage_UsefulTargets")
+		local players = T.get("Damage_UsefulTargets")
 		local total = 0
 
 		for _, p in ipairs(set.players) do
@@ -1234,7 +1237,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 			end
 		end
 
-		T.release("Damage_UsefulTargets", players)
+		T.free("Damage_UsefulTargets", players)
 	end
 
 	function mod:Update(win, set)

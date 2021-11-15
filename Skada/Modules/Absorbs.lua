@@ -8,7 +8,6 @@ local UnitGUID, UnitClass, unitClass = UnitGUID, UnitClass, Skada.unitClass
 local setPrototype = Skada.setPrototype
 local playerPrototype = Skada.playerPrototype
 local cacheTable = Skada.cacheTable
-local T = Skada.TablePool
 local _
 
 -- ============== --
@@ -30,6 +29,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local UnitIsDeadOrGhost, UnitHealthInfo = UnitIsDeadOrGhost, Skada.UnitHealthInfo
 	local GetTime, band = GetTime, bit.band
 	local tsort, tContains = table.sort, tContains
+	local T = Skada.Table
 
 	-- INCOMPLETE
 	-- the following list is incomplete due to the lack of testing for different
@@ -1013,17 +1013,17 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	function mod:AddSetAttributes(set)
 		self:ZoneModifier()
-		heals = heals or T.fetch("Absorbs_Heals")
-		shields = shields or T.fetch("Absorbs_Shields")
-		shieldamounts = shieldamounts or T.fetch("Absorbs_ShieldAmounts")
-		shieldspopped = shieldspopped or T.fetch("Absorbs_ShieldsPopped")
+		heals = heals or T.get("Absorbs_Heals")
+		shields = shields or T.get("Absorbs_Shields")
+		shieldamounts = shieldamounts or T.get("Absorbs_ShieldAmounts")
+		shieldspopped = shieldspopped or T.get("Absorbs_ShieldsPopped")
 	end
 
 	function mod:SetComplete(set)
-		T.release("Absorbs_Heals", heals)
-		T.release("Absorbs_Shields", shields)
-		T.release("Absorbs_ShieldAmounts", shieldamounts)
-		T.release("Absorbs_ShieldsPopped", shieldspopped)
+		T.free("Absorbs_Heals", heals)
+		T.free("Absorbs_Shields", shields)
+		T.free("Absorbs_ShieldAmounts", shieldamounts)
+		T.free("Absorbs_ShieldsPopped", shieldspopped)
 	end
 
 	function setPrototype:GetAPS()

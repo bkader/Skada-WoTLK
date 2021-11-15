@@ -14,7 +14,8 @@ Skada:AddLoadableModule("Deaths", function(L)
 	local abs, max, modf = math.abs, math.max, math.modf
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
-	local T, wipe = Skada.TablePool, wipe
+	local T, wipe = Skada.Table, wipe
+	local new, del = Skada.TablePool()
 	local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
 	local date, time, log, _ = date, time, nil, nil
 
@@ -163,7 +164,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 						)
 
 						if log.overkill or log.resisted or log.blocked or log.absorbed then
-							local extra = T.fetch("Death_ExtraInfo")
+							local extra = new()
 
 							if log.overkill then
 								extra[#extra + 1] = format("O:%s", Skada:FormatNumber(log.overkill, 1))
@@ -181,7 +182,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 								output = format("%s [%s]", output, tconcat(extra, " - "))
 							end
 
-							T.release("Death_ExtraInfo", extra)
+							extra = del(extra)
 						end
 
 						if Skada.db.profile.modules.deathchannel == "SELF" then
@@ -305,7 +306,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 						local change = (log.amount >= 0 and "+" or "-") .. Skada:FormatNumber(abs(log.amount))
 						d.reportlabel = format("%02.2f: %s   %s [%s]", diff or 0, GetSpellLink(log.spellid) or spellname or UNKNOWN, change, Skada:FormatNumber(log.hp or 0))
 
-						local extra = T.fetch("Deathlog_ExtraInfo")
+						local extra = new()
 
 						if (log.overkill or 0) > 0 then
 							d.overkill = log.overkill
@@ -329,7 +330,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 							d.reportlabel = d.reportlabel .. " (" .. tconcat(extra, " - ") .. ")"
 						end
 
-						T.release("Deathlog_ExtraInfo", extra)
+						extra = del(extra)
 
 						d.valuetext = Skada:FormatValueText(
 							change,

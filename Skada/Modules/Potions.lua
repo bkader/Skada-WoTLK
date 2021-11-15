@@ -14,7 +14,9 @@ Skada:AddLoadableModule("Potions", function(L)
 	local UnitExists, UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
 	local UnitGUID, UnitName = UnitGUID, UnitName
 	local UnitClass, UnitBuff = UnitClass, UnitBuff
-	local T, _ = Skada.TablePool, nil
+	local new, del = Skada.TablePool()
+	local T = Skada.Table
+	local _
 
 	local potionIDs = {
 		[28494] = 22828, -- Insane Strength Potion
@@ -68,7 +70,7 @@ Skada:AddLoadableModule("Potions", function(L)
 				local playerid, playername = UnitGUID(unit), UnitName(unit)
 				local class = select(2, UnitClass(unit))
 
-				local potions = T.fetch("Potions_UnitPotions")
+				local potions = new()
 				for potionid, _ in pairs(potionIDs) do
 					local icon, _, _, _, _, _, _, _, spellid = select(3, UnitBuff(unit, GetSpellInfo(potionid)))
 					if spellid and potionIDs[spellid] then
@@ -83,14 +85,14 @@ Skada:AddLoadableModule("Potions", function(L)
 					local colorStr = Skada.classcolors[class].colorStr or "ffffffff"
 					prepotion[#prepotion + 1] = format(prepotionStr, colorStr, playername, tconcat(potions, " "))
 				end
-				T.release("Potions_UnitPotions", potions)
+				del(potions)
 			end
 		end
 
 		-- we use this function to record pre-pots as well.
 		function mod:CheckPrePot(event)
 			if event == "COMBAT_PLAYER_ENTER" then
-				prepotion = prepotion or T.fetch("Potions_PrePotions")
+				prepotion = prepotion or T.get("Potions_PrePotions")
 				GroupIterator(CheckUnitPotions, prepotion)
 			end
 		end
@@ -277,12 +279,12 @@ Skada:AddLoadableModule("Potions", function(L)
 		if Skada.db.profile.prepotion and next(prepotion or {}) ~= nil then
 			Skada:Printf(L["pre-potion: %s"], tconcat(prepotion, ", "))
 		end
-		T.release("Potions_PrePotions", prepotion)
+		T.free("Potions_PrePotions", prepotion)
 	end
 
 	do
 		local setPrototype = Skada.setPrototype
-		local cacheTable, wipe = Skada.WeakTable(), wipe
+		local cacheTable, wipe = Skada.cacheTable, wipe
 
 		function setPrototype:GetPotion(potionid)
 			if potionid and self.potion then

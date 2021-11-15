@@ -4,7 +4,7 @@ local Skada = Skada
 local pairs, ipairs, type, select = pairs, ipairs, type, select
 local format, min, max = string.format, math.min, math.max
 local unitClass, GetSpellInfo = Skada.unitClass, Skada.GetSpellInfo or GetSpellInfo
-local T, wipe = Skada.TablePool, wipe
+local T, wipe = Skada.Table, wipe
 local cacheTable = Skada.cacheTable
 local setPrototype = Skada.setPrototype
 local enemyPrototype = Skada.enemyPrototype
@@ -141,7 +141,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 		end
 
 		if (maxval or 0) > 0 then
-			customUnitsInfo = customUnitsInfo or T.fetch("Enemies_UnitsInfo")
+			customUnitsInfo = customUnitsInfo or T.get("Enemies_UnitsInfo")
 			customUnitsInfo[id] = maxval
 		end
 
@@ -156,7 +156,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 		local id = GetCreatureId(guid)
 		local unit = id and customUnits[id]
 		if unit then
-			customUnitsTable = customUnitsTable or T.fetch("Enemies_UnitsTable")
+			customUnitsTable = customUnitsTable or T.get("Enemies_UnitsTable")
 
 			if unit.diff ~= nil and ((type(unit.diff) == "table" and not tContains(unit.diff, GetRaidDiff())) or (type(unit.diff) == "string" and GetRaidDiff() ~= unit.diff)) then
 				customUnitsTable[guid] = -1
@@ -323,7 +323,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 							amount = amount - (unit.maxval - unit.curval)
 							if customGroups[unit.oname] and unit.useful then
 								log_custom_group(set, unit.guid, unit.oname, dmg.srcName, dmg.spellid, dmg.spellschool, amount, dmg.overkill, absorbed)
-								customGroupsTable = customGroupsTable or T.fetch("Enemies_GroupsTable")
+								customGroupsTable = customGroupsTable or T.get("Enemies_GroupsTable")
 								customGroupsTable[unit.guid] = true
 							end
 						end
@@ -643,9 +643,9 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 
 	function mod:SetComplete(set)
 		instanceDiff = nil
-		T.release("Enemies_UnitsInfo", customUnitsInfo)
-		T.release("Enemies_UnitsTable", customUnitsTable)
-		T.release("Enemies_GroupsTable", customGroupsTable)
+		T.free("Enemies_UnitsInfo", customUnitsInfo)
+		T.free("Enemies_UnitsTable", customUnitsTable)
+		T.free("Enemies_GroupsTable", customGroupsTable)
 	end
 
 	function setPrototype:GetEnemyDamageTaken()

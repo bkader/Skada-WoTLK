@@ -31,7 +31,7 @@ local After, NewTimer, NewTicker, CancelTimer = Skada.After, Skada.NewTimer, Ska
 local GetUnitIdFromGUID, GetUnitSpec, GetUnitRole = Skada.GetUnitIdFromGUID, Skada.GetUnitSpec, Skada.GetUnitRole
 local UnitIterator, IsGroupDead = Skada.UnitIterator, Skada.IsGroupDead
 local Transliterate = Skada.Transliterate
-local T = Skada.TablePool
+local T = Skada.Table
 
 local LDB = LibStub("LibDataBroker-1.1")
 local dataobj = LDB:NewDataObject("Skada", {
@@ -1364,7 +1364,7 @@ end
 
 function Skada:QueueUnit(spellid, srcGUID, srcName, srcFlags, dstGUID)
 	if spellid and srcName and srcGUID and dstGUID and srcGUID ~= dstGUID then
-		queued_units = queued_units or T.fetch("Skada_QueuedUnits")
+		queued_units = queued_units or T.get("Skada_QueuedUnits")
 		queued_units[spellid] = queued_units[spellid] or {}
 		queued_units[spellid][dstGUID] = {id = srcGUID, name = srcName, flag = srcFlags}
 	end
@@ -2528,11 +2528,11 @@ function Skada:ApplyBorder(frame, texture, color, thickness, padtop, padbottom, 
 	frame.borderFrame:SetPoint("TOPLEFT", frame, -thickness - (padleft or 0), thickness + (padtop or 0))
 	frame.borderFrame:SetPoint("BOTTOMRIGHT", frame, thickness + (padright or 0), -thickness - (padbottom or 0))
 
-	local borderbackdrop = T.fetch("Skada_BorderBackdrop")
+	local borderbackdrop = T.get("Skada_BorderBackdrop")
 	borderbackdrop.edgeFile = (texture and thickness > 0) and self:MediaFetch("border", texture) or nil
 	borderbackdrop.edgeSize = thickness
 	frame.borderFrame:SetBackdrop(borderbackdrop)
-	T.release("Skada_BorderBackdrop", borderbackdrop)
+	T.free("Skada_BorderBackdrop", borderbackdrop)
 	if color then
 		frame.borderFrame:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
 	end
@@ -3152,7 +3152,7 @@ end
 
 function Skada:EndSegment()
 	if not self.current then return end
-	T.release("Skada_QueuedUnits", queued_units)
+	T.free("Skada_QueuedUnits", queued_units)
 
 	local now = time()
 	if not self.db.profile.onlykeepbosses or self.current.gotboss then
