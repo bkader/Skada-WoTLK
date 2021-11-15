@@ -689,6 +689,7 @@ L["Donate"] = "기부"
 L["Email"] = "전자 우편"
 L["License"] = "라이센스"
 L["Localizations"] = "현지화"
+L["Thanks"] = "감사"
 L["Version"] = "버전"
 L["Website"] = "웹 사이트"
 -- missing bosses entries

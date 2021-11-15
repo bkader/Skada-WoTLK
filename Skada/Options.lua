@@ -691,7 +691,7 @@ Skada.options = {
 }
 
 -- about about args
-for i, field in ipairs({"Version", "Date", "Author", "Category", "License", "Email", "Website", "Discord", "Credits", "Localizations", "Donate"}) do
+for i, field in ipairs({"Version", "Date", "Author", "Category", "License", "Email", "Website", "Discord", "Credits", "Localizations", "Thanks", "Donate"}) do
 	local meta = GetAddOnMetadata("Skada", field) or GetAddOnMetadata("Skada", "X-" .. field)
 	if meta then
 		Skada.options.args.about.args[field] = {

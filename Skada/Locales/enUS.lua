@@ -697,6 +697,7 @@ L["Donate"] = true
 L["Email"] = true
 L["License"] = true
 L["Localizations"] = true
+L["Thanks"] = true
 L["Version"] = true
 L["Website"] = true
 -- missing bosses entries

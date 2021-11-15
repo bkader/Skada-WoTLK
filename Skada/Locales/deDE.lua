@@ -688,6 +688,7 @@ L["Donate"] = "Spenden"
 L["Email"] = "E-Mail"
 L["License"] = "Lizenz"
 L["Localizations"] = "Lokalisierungen"
+L["Thanks"] = "Dank"
 L["Version"] = "Version"
 L["Website"] = "Webseite"
 -- missing bosses entries

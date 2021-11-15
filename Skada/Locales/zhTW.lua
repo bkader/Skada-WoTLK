@@ -686,6 +686,7 @@ L["Donate"] = "捐款"
 L["Email"] = "電子郵件"
 L["License"] = "授權"
 L["Localizations"] = "本地化"
+L["Thanks"] = "謝謝"
 L["Version"] = "版本"
 L["Website"] = "網站"
 -- missing bosses entries
