@@ -66,7 +66,7 @@ Events:
 
 local TalentQuery = LibStub("LibTalentQuery-1.0")
 
-local MAJOR, MINOR = "LibGroupTalents-1.0", tonumber(("$Rev: 55 $"):match("(%d+)"))
+local MAJOR, MINOR = "LibGroupTalents-1.0", tonumber(("$Rev: 65 $"):match("(%d+)"))
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
@@ -406,10 +406,10 @@ function lib:OnRaidRosterUpdate()
 
 				local classStorageStrings = self.pendingStorageStrings[r.class]
 				if (classStorageStrings) then
-				    classStorageStrings[guid] = del(classStorageStrings[guid])
-				    if (not next(classStorageStrings)) then
-				    	self.pendingStorageStrings[r.class] = del(self.pendingStorageStrings[r.class])
-				    end
+					classStorageStrings[guid] = del(classStorageStrings[guid])
+					if (not next(classStorageStrings)) then
+						self.pendingStorageStrings[r.class] = del(self.pendingStorageStrings[r.class])
+					end
 				end
 			end
 		end
@@ -716,7 +716,7 @@ function GetClassTalentData(unit)
 							if (guid ~= unitGUID) then
 								lib:SetStorageString(str)
 							end
- 						end
+						end
 						lib.pendingStorageStrings[class] = del(lib.pendingStorageStrings[class])
 					end
 				else
@@ -1301,9 +1301,9 @@ function lib:GetGUIDTalents(guid, refetch)
 			TalentQuery:Query(unit)
 
 			local namerealm = UnitFullName(unit)
+			local skipGlyphs = nil
 			if (not r.talents and not r.requested) then
 				-- Don't need to query on a 'refetch' because they'll send changes anyway via comms
-				local skipGlyphs
 				if (not UnitIsVisible(unit) or not CanInspect(unit)) then
 					if (r.version) then
 						if (CanCommQuery(guid)) then

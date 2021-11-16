@@ -337,28 +337,28 @@ Skada.options = {
 							desc = L["Keeps the player shown last even if there is not enough space."],
 							order = 140
 						},
-						autostop = {
-							type = "toggle",
-							name = L["Autostop"],
-							desc = L["Automatically stops the current segment after half of all raid members have died."],
-							order = 150
-						},
-						tentativecombatstart = {
-							type = "toggle",
-							name = L["Aggressive combat detection"],
-							desc = L.tentativecombatstart_desc,
-							order = 160
-						},
 						reportlinks = {
 							type = "toggle",
 							name = L["Links in reports"],
 							desc = L["When possible, use links in the report messages."],
-							order = 170
+							order = 150
 						},
 						translit = {
 							type = "toggle",
 							name = L["Transliterate"],
 							desc = L["Converts Cyrillic letters into Latin letters."],
+							order = 160
+						},
+						autostop = {
+							type = "toggle",
+							name = L["Autostop"],
+							desc = L["Automatically stops the current segment after half of all raid members have died."],
+							order = 170
+						},
+						tentativecombatstart = {
+							type = "toggle",
+							name = L["Aggressive combat detection"],
+							desc = L.tentativecombatstart_desc,
 							order = 180
 						}
 					}

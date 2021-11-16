@@ -108,6 +108,116 @@ end
 -------------------------------------------------------------------------------
 
 do
+	local Table = {}
+	local max_pool_size = 200
+	local pools = {}
+
+	-- attempts to get a table from the table pool of the
+	-- specified tag name. if the pool doesn't exist or is empty
+	-- it creates a lua table.
+	function Table.get(tag)
+		local pool = pools[tag]
+		if not pool then
+			pool = {}
+			pools[tag] = pool
+			pool.c = 0
+			pool[0] = 0
+		else
+			local len = pool[0]
+			if len > 0 then
+				local obj = pool[len]
+				pool[len] = nil
+				pool[0] = len - 1
+				return obj
+			end
+		end
+		return {}
+	end
+
+	-- releases the already used lua table into the table pool
+	-- named "tag" or creates it right away.
+	function Table.free(tag, obj, noclear)
+		if not obj then return end
+
+		local pool = pools[tag]
+		if not pool then
+			pool = {}
+			pools[tag] = pool
+			pool.c = 0
+			pool[0] = 0
+		end
+
+		if not noclear then
+			setmetatable(obj, nil)
+			for k, _ in pairs(obj) do
+				obj[k] = nil
+			end
+		end
+
+		do
+			local cnt = pool.c + 1
+			if cnt >= 20000 then
+				pool = {}
+				pools[tag] = pool
+				pool.c = 0
+				pool[0] = 0
+				return
+			end
+			pool.c = cnt
+		end
+
+		local len = pool[0] + 1
+		if len > max_pool_size then
+			return
+		end
+
+		pool[len] = obj
+		pool[0] = len
+	end
+
+	lib.Table = Table
+end
+
+-------------------------------------------------------------------------------
+
+do
+	-- Table Pool for recycling tables
+	-- creates a new table system that can be used to reuse tables
+	-- it returns both "new" and "del" functions.
+	function lib.TablePool()
+		max_pool_size = max_pool_size or 10
+		local pool = {}
+		setmetatable(pool, {__mode = "kv"})
+
+		-- attempts to retrieve a table from the cache
+		-- creates if if it doesn't exist.
+		local function new()
+			local t = next(pool) or {}
+			pool[t] = nil
+			return t
+		end
+
+		-- it will wipe the provided table then cache it
+		-- to be reusable later.
+		local function del(t)
+			if type(t) == "table" then
+				for k, _ in pairs(t) do
+					t[k] = nil
+				end
+				t[true] = true
+				t[true] = nil
+				pool[t] = true
+			end
+			return nil
+		end
+
+		return new, del
+	end
+end
+
+-------------------------------------------------------------------------------
+
+do
 	local GetNumRaidMembers, GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
 	local UnitExists, UnitAffectingCombat, UnitIsDeadOrGhost = UnitExists, UnitAffectingCombat, UnitIsDeadOrGhost
 	local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
@@ -732,121 +842,13 @@ end
 
 -------------------------------------------------------------------------------
 
-do
-	local Table = {}
-	local max_pool_size = 200
-	local pools = {}
-
-	-- attempts to get a table from the table pool of the
-	-- specified tag name. if the pool doesn't exist or is empty
-	-- it creates a lua table.
-	function Table.get(tag)
-		local pool = pools[tag]
-		if not pool then
-			pool = {}
-			pools[tag] = pool
-			pool.c = 0
-			pool[0] = 0
-		else
-			local len = pool[0]
-			if len > 0 then
-				local obj = pool[len]
-				pool[len] = nil
-				pool[0] = len - 1
-				return obj
-			end
-		end
-		return {}
-	end
-
-	-- releases the already used lua table into the table pool
-	-- named "tag" or creates it right away.
-	function Table.free(tag, obj, noclear)
-		if not obj then return end
-
-		local pool = pools[tag]
-		if not pool then
-			pool = {}
-			pools[tag] = pool
-			pool.c = 0
-			pool[0] = 0
-		end
-
-		if not noclear then
-			setmetatable(obj, nil)
-			for k, _ in pairs(obj) do
-				obj[k] = nil
-			end
-		end
-
-		do
-			local cnt = pool.c + 1
-			if cnt >= 20000 then
-				pool = {}
-				pools[tag] = pool
-				pool.c = 0
-				pool[0] = 0
-				return
-			end
-			pool.c = cnt
-		end
-
-		local len = pool[0] + 1
-		if len > max_pool_size then
-			return
-		end
-
-		pool[len] = obj
-		pool[0] = len
-	end
-
-	lib.Table = Table
-end
-
--------------------------------------------------------------------------------
-
-do
-	-- Table Pool for recycling tables
-	-- creates a new table system that can be used to reuse tables
-	-- it returns both "new" and "del" functions.
-	function lib.TablePool()
-		max_pool_size = max_pool_size or 10
-		local pool = {}
-		setmetatable(pool, {__mode = "kv"})
-
-		-- attempts to retrieve a table from the cache
-		-- creates if if it doesn't exist.
-		local function new()
-			local t = next(pool) or {}
-			pool[t] = nil
-			return t
-		end
-
-		-- it will wipe the provided table then cache it
-		-- to be reusable later.
-		local function del(t)
-			if type(t) == "table" then
-				for k, _ in pairs(t) do
-					t[k] = nil
-				end
-				t[true] = true
-				t[true] = nil
-				pool[t] = true
-			end
-			return nil
-		end
-
-		return new, del
-	end
-end
-
--------------------------------------------------------------------------------
-
 local mixins = {
 	-- table util
 	"tLength",
 	"tCopy",
 	"tIndexOf",
+	"Table",
+	"TablePool",
 	-- roster util
 	"IsInRaid",
 	"IsInGroup",
@@ -877,9 +879,7 @@ local mixins = {
 	"HexDecode",
 	"EscapeStr",
 	"GetClassColorsTable",
-	"WrapTextInColorCode",
-	"Table",
-	"TablePool",
+	"WrapTextInColorCode"
 }
 
 function lib:Embed(target)

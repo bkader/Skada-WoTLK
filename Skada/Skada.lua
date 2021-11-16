@@ -3136,6 +3136,20 @@ end
 
 -------------------------------------------------------------------------------
 
+-- never initially registered.
+function Skada:PLAYER_REGEN_ENABLED()
+	self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+	if not self.current then return end
+
+	-- we make sure to end the segment only if:
+	-- 	1. the segment was previously stopped.
+	-- 	2. the player and the group aren't in combat
+	if self.current.stopped or (not InCombatLockdown() and not IsGroupInCombat()) then
+		self:Debug("EndSegment: PLAYER_REGEN_ENABLED")
+		self:EndSegment()
+	end
+end
+
 function Skada:PLAYER_REGEN_DISABLED()
 	if not disabled and not self.current then
 		self:Debug("StartCombat: PLAYER_REGEN_DISABLED")
@@ -3244,6 +3258,7 @@ function Skada:StopSegment(msg)
 		self.current.endtime = time()
 		self.current.time = max(0.1, self.current.endtime - self.current.starttime)
 		self:Print(msg or L["Segment Stopped."])
+		self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	end
 end
 
@@ -3366,7 +3381,6 @@ do
 
 		local src_is_interesting = nil
 		local dst_is_interesting = nil
-		local now = time()
 
 		if not self.current and trigger_events[eventtype] and srcName and dstName and srcGUID ~= dstGUID then
 			src_is_interesting = band(srcFlags, BITMASK_GROUP) ~= 0 or (band(srcFlags, BITMASK_PETS) ~= 0 and pets[srcGUID]) or players[srcGUID]
@@ -3376,6 +3390,7 @@ do
 			end
 
 			if src_is_interesting or dst_is_interesting then
+				local now = time()
 				self.current = CreateSet(L["Current"], now)
 				if not self.total then
 					self.total = CreateSet(L["Total"], now)
@@ -3403,8 +3418,7 @@ do
 				-- If we reached the treshold for stopping the segment, do so.
 				if death_counter > 0 and death_counter / starting_members >= 0.5 and not self.current.stopped then
 					self.callbacks:Fire("COMBAT_PLAYER_WIPE", self.current)
-					self:Print(L["Stopping for wipe."])
-					self:StopSegment()
+					self:StopSegment(L["Stopping for wipe."])
 				end
 			elseif eventtype == "SPELL_RESURRECT" and ((band(srcFlags, BITMASK_GROUP) ~= 0 and band(srcFlags, BITMASK_PETS) == 0) or players[srcGUID]) then
 				death_counter = death_counter - 1
