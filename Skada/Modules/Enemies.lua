@@ -649,7 +649,11 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 	end
 
 	function setPrototype:GetEnemyDamageTaken()
-		if not self.GetDamage and self.enemies then
+		if not self.enemies then
+			return 0
+		elseif self.GetDamage then
+			return self:GetDamage()
+		else
 			local total = 0
 			for _, e in ipairs(self.enemies) do
 				if not e.fake and Skada.db.profile.absdamage then
@@ -660,7 +664,6 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 			end
 			return total
 		end
-		return self.GetDamage and self:GetDamage() or 0
 	end
 
 	function enemyPrototype:GetDamageTaken()
@@ -1011,7 +1014,11 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 	end
 
 	function setPrototype:GetEnemyDamageDone()
-		if not self.GetDamageTaken and self.enemies then
+		if not self.enemies then
+			return 0
+		elseif self.GetDamageTaken then
+			return self:GetDamageTaken()
+		else
 			local total = 0
 			for _, e in ipairs(self.enemies) do
 				if not e.fake and Skada.db.profile.absdamage then
@@ -1022,7 +1029,6 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 			end
 			return total
 		end
-		return self.GetDamageTaken and self:GetDamageTaken() or 0
 	end
 
 	function enemyPrototype:GetDamageDone()
