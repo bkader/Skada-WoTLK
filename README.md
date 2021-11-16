@@ -314,8 +314,8 @@ function playerPrototype:MyOwnPlayerFunction()
 end
 
 -- To extend enemies functions:
-local playerPrototype = Skada.playerPrototype
-function playerPrototype:MyOwnEnemyFunction()
+local enemyPrototype = Skada.enemyPrototype
+function enemyPrototype:MyOwnEnemyFunction()
   -- do your thing
 end
 ```
