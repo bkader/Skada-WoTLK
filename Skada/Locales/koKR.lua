@@ -268,6 +268,8 @@ L["Aggressive combat detection"] = "적극적인 전투 감지"
 L["tentativecombatstart_desc"] = [[Skada는 공격대 중 가장 잘 작동하는 매우 전통적인 전투 감지 방법을 사용합니다.
 이 옵션을 사용하면 Skada는 다른 데미지 미터기를 모방합니다.
 던전을 진행할 때 유용합니다, 우두머리 전투에선 의미가 없습니다.]]
+L["Tentative Timer"] = "대기 시간"
+L["tentativetimer_desc"] = "Skada가 전투 시작 후 새 세그먼트를 생성하기에 충분한 이벤트를 갖기 위해 기다려야 하는 시간(초)입니다.\n\n|cffffbb00적극적인 전투 감지|r가 비활성화된 경우에만 작동합니다."
 L["Autostop"] = "전멸 시 일찍 멈추기"
 L["Automatically stops the current segment after half of all raid members have died."] = "전체 공격대원의 절반 이상이 죽으면 현재 세분화를 자동으로 멈춥니다."
 L["Always show self"] = "항상 자신 표시"

@@ -275,6 +275,8 @@ L["Aggressive combat detection"] = true
 L["tentativecombatstart_desc"] = [[Skada usually uses a very conservative (simple) combat detection scheme that works best in raids.
 With this option Skada attempts to emulate other damage meters.
 Useful for running dungeons, meaningless on boss encounters.]]
+L["Tentative Timer"] = true
+L["tentativetimer_desc"] = "The number of seconds Skada should wait after combat start to have enough events to create a new segment.\n\nOnly works if |cffffbb00Aggressive combat detection|r is disabled."
 L["Autostop"] = true
 L["Automatically stops the current segment after half of all raid members have died."] = true
 L["Always show self"] = true

@@ -272,6 +272,8 @@ L["Aggressive combat detection"] = "Détection agressive des combats"
 L["tentativecombatstart_desc"] = [[Skada utilise un mode conservateur (simple) de détection de combat qui fonctionne mieux en raids.
 Avec cette option, Skada, tente de simuler les autres "damage meters".
 Pratique en solo ou bien en donjons, inutile contre les bosses.]]
+L["Tentative Timer"] = "Temps d'attente"
+L["tentativetimer_desc"] = "Le nombre de secondes que Skada doint attendre après le début du combat afin d'avoir assez d'événments pour créer un nouveau segment.\n\nFonctionne uniquement si |cffffbb00Détection agressive des combats|r est désactivé."
 L["Autostop"] = "Arrêt automatique"
 L["Automatically stops the current segment after half of all raid members have died."] = "Arrête automatiquement le segment après que la moitié du groupe soient morts."
 L["Always show self"] = "Toujours afficher ma barre"

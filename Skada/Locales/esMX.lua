@@ -270,6 +270,8 @@ L["Aggressive combat detection"] = "Detección de combate agresiva"
 L["tentativecombatstart_desc"] = [[Skada usualmente usa un muy conservador (simple) esquema de detección del combate que funciona mejor en bandas.
 Con esta opción Skada intenta emular otros medidores de daño.
 Útil cuando se hacen mazmorras, insignificante en encuentros de jefes.]]
+L["Tentative Timer"] = "Tiempo de espera"
+L["tentativetimer_desc"] = "La cantidad de segundos que Skada debe esperar después de que comience el combate para tener suficientes eventos para crear un nuevo segmento.\n\nSolo funciona si la |cffffbb00Detección de combate agresiva|r está desactivada."
 L["Autostop"] = "Autoestop"
 L["Automatically stops the current segment after half of all raid members have died."] = "Detiene automáticamente el segmento actual después de que la mitad de los miembros hayan muerto."
 L["Always show self"] = "Muéstrate siempre"

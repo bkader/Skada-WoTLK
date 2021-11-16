@@ -2484,38 +2484,6 @@ function Skada:ReloadSettings()
 	end
 	Skada:RefreshMMButton()
 	Skada:ApplySettings()
-
-	-- fix setstokeep, setslimit and timemesure.
-	if (Skada.db.profile.setstokeep or 0) > 30 then
-		Skada.db.profile.setstokeep = 30
-	end
-	if not Skada.db.profile.setslimit then
-		Skada.db.profile.setslimit = 15
-	end
-	if not Skada.db.profile.timemesure then
-		Skada.db.profile.timemesure = 2
-	end
-
-	-- remove old improvement data.
-	if Skada.char.improvement then
-		Skada.char.improvement = nil
-	end
-
-	-- in case of future code change or database structure changes, this
-	-- code here will be used to perform any database modifications.
-	local curversion = ConvertVersion(Skada.version)
-	if type(Skada.db.global.version) ~= "number" or curversion > Skada.db.global.version then
-		Skada.callbacks:Fire("Skada_UpdateCore", Skada.db.global.version, curversion)
-		Skada.db.global.version = curversion
-	end
-	if type(Skada.char.version) ~= "number" or curversion > Skada.char.version then
-		-- force reset for if 5 revision behind
-		if (curversion - (Skada.char.version or 0)) >= 5 then
-			Skada:Reset(true)
-		end
-		Skada.callbacks:Fire("Skada_UpdateData", Skada.char.version, curversion)
-		Skada.char.version = curversion
-	end
 end
 
 -------------------------------------------------------------------------------
@@ -2943,6 +2911,41 @@ function Skada:OnInitialize()
 	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes")
 
 	self:RegisterInitOptions()
+
+	-- fix setstokeep, setslimit and timemesure.
+	if (self.db.profile.setstokeep or 0) > 30 then
+		self.db.profile.setstokeep = 30
+	end
+	if not self.db.profile.setslimit then
+		self.db.profile.setslimit = 15
+	end
+	if not self.db.profile.timemesure then
+		self.db.profile.timemesure = 2
+	end
+	if not self.db.profile.tentativetimer then
+		self.db.profile.tentativetimer = 3
+	end
+
+	-- remove old improvement data.
+	if self.char.improvement then
+		self.char.improvement = nil
+	end
+
+	-- in case of future code change or database structure changes, this
+	-- code here will be used to perform any database modifications.
+	local curversion = ConvertVersion(self.version)
+	if type(self.db.global.version) ~= "number" or curversion > self.db.global.version then
+		self.callbacks:Fire("self_UpdateCore", self.db.global.version, curversion)
+		self.db.global.version = curversion
+	end
+	if type(self.char.version) ~= "number" or curversion > self.char.version then
+		-- force reset for if 5 revision behind
+		if (curversion - (self.char.version or 0)) >= 5 then
+			self:Reset(true)
+		end
+		self.callbacks:Fire("self_UpdateData", self.char.version, curversion)
+		self.char.version = curversion
+	end
 end
 
 function Skada:OnEnable()
@@ -3396,7 +3399,7 @@ do
 					self.total = CreateSet(L["Total"], now)
 				end
 
-				tentative_handle = NewTimer(3, function()
+				tentative_handle = NewTimer(self.db.profile.tentativetimer or 3, function()
 					tentative = nil
 					tentative_handle = nil
 					self.current = nil

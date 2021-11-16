@@ -200,6 +200,7 @@ do
 		-- to be reusable later.
 		local function del(t)
 			if type(t) == "table" then
+				setmetatable(t, nil)
 				for k, _ in pairs(t) do
 					t[k] = nil
 				end
@@ -512,40 +513,31 @@ end
 
 do
 	local TickerPrototype = {}
-	local TickerMetatable = {
-		__index = TickerPrototype,
-		__metatable = true
-	}
-
+	local TickerMetatable = {__index = TickerPrototype}
 	local WaitTable = {}
 
 	local new, del
 	do
-		lib.afterPool = lib.afterPool or setmetatable({}, {__mode = "k"})
-		lib.timerPool = lib.timerPool or setmetatable({}, {__mode = "k"})
-		local afterPool = lib.afterPool
-		local timerPool = lib.timerPool
+		local list = {cache = {}, trash = {}}
+		-- make trash table weak so that GC claims its content.
+		setmetatable(list.trash, {__mode = "v"})
 
-		function new(temp)
-			if temp then
-				local t = next(afterPool) or {}
-				afterPool[t] = nil
-				return t
-			end
-			local t = next(timerPool) or setmetatable({}, TickerMetatable)
-			timerPool[t] = nil
-			return t
+		function new()
+			return tremove(list.cache) or tremove(list.trash) or {}
 		end
 
-		function del(t, temp)
+		function del(t)
 			if t then
-				wipe(t)
+				setmetatable(t, nil)
+				for k, _ in pairs(t) do
+					t[k] = nil
+				end
 				t[true] = true
 				t[true] = nil
-				if temp then
-					afterPool[t] = true
-				else
-					timerPool[t] = true
+
+				tinsert(list.cache, 1, t)
+				while #list.cache > 10 do
+					tinsert(list.trash, 1, tremove(list.cache))
 				end
 			end
 		end
@@ -559,7 +551,7 @@ do
 			local ticker = WaitTable[i]
 
 			if ticker._cancelled then
-				del(tremove(WaitTable, i), ticker._temp)
+				del(tremove(WaitTable, i))
 				total = total - 1
 			elseif ticker._delay > elapsed then
 				ticker._delay = ticker._delay - elapsed
@@ -575,7 +567,7 @@ do
 					ticker._delay = ticker._duration
 					i = i + 1
 				elseif ticker._iterations == 1 then
-					del(tremove(WaitTable, i), ticker._temp)
+					del(tremove(WaitTable, i))
 					total = total - 1
 				end
 			end
@@ -611,12 +603,11 @@ do
 
 	local function After(duration, callback)
 		ValidateArguments(duration, callback, "After")
-		local ticker = new(true)
+		local ticker = new()
 
 		ticker._iterations = 1
 		ticker._delay = max(0.01, duration)
 		ticker._callback = callback
-		ticker._temp = true
 		ticker._cancelled = nil -- just in case
 
 		AddDelayedCall(ticker)
@@ -624,13 +615,13 @@ do
 
 	local function CreateTicker(duration, callback, iterations)
 		local ticker = new()
+		setmetatable(ticker, TickerMetatable)
 
 		ticker._iterations = iterations or -1
 		ticker._delay = max(0.01, duration)
 		ticker._duration = ticker._delay
 		ticker._callback = callback
 		ticker._cancelled = nil -- just in case
-		ticker._temp = nil -- just in case
 
 		AddDelayedCall(ticker)
 		return ticker

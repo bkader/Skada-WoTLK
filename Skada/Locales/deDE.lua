@@ -268,6 +268,8 @@ L["Aggressive combat detection"] = "Aggressive Kampferkennung"
 L["tentativecombatstart_desc"] = [[Skada verwendet normalerweise ein sehr konservatives (simples) Kampferkennungsschema, welches am besten in Schlachtzügen funktioniert.
 Mithilfe dieser Option versucht Skada andere Damage-Meter zu emulieren.
 Sinnvoll für Dungeon-Runs, für Bosskämpfe bedeutungslos.]]
+L["Tentative Timer"] = "Vorläufiger Timer"
+L["tentativetimer_desc"] = "Die Anzahl der Sekunden, die Skada nach Kampfbeginn warten sollte, um genügend Ereignisse zu haben, um ein neues Segment zu erstellen.\n\nFunktioniert nur, wenn |cffffbb00Aggressive Kampferkennung|r deaktiviert ist."
 L["Autostop"] = "Früh Stoppen bei Wipe"
 L["Automatically stops the current segment after half of all raid members have died."] = "Stoppt automatisch das aktuelle Segment, nachdem die Hälfte aller Schlachtzugsmitglieder gestorben sind."
 L["Always show self"] = "Mich immer anzeigen"

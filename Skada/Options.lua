@@ -125,6 +125,7 @@ Skada.defaults = {
 		onlykeepbosses = false,
 		alwayskeepbosses = false,
 		tentativecombatstart = false,
+		tentativetimer = 3,
 		timemesure = 2,
 		hidesolo = false,
 		hidepvp = false,
@@ -463,6 +464,16 @@ Skada.options = {
 							min = 0.10,
 							max = 1,
 							step = 0.01,
+							order = 980
+						},
+						tentativetimer = {
+							type = "range",
+							name = L["Tentative Timer"],
+							desc = L.tentativetimer_desc,
+							min = 1,
+							max = 5,
+							step = 1,
+							width = "double",
 							order = 990
 						}
 					}
