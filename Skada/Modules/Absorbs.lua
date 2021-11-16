@@ -760,14 +760,14 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 			if (spell.count or 0) > 0 then
 				tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
-				tooltip:AddDoubleLine(L["Average Hit"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
 			end
 
 			if spell.min and spell.max then
 				tooltip:AddLine(" ")
-				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.min), 1, 1, 1)
-				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.max), 1, 1, 1)
-				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber((spell.min + spell.max) / 2), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Minimum Hit"], Skada:FormatNumber(spell.min), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Maximum Hit"], Skada:FormatNumber(spell.max), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Average Hit"], Skada:FormatNumber((spell.min + spell.max) / 2), 1, 1, 1)
 			end
 		end
 	end
@@ -1115,7 +1115,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 
 			if (spell.count or 0) > 0 then
 				tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
-				tooltip:AddDoubleLine(L["Average Hit"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
 
 				if (spell.critical or 0) > 0 then
 					tooltip:AddDoubleLine(L["Critical"], Skada:FormatPercent(spell.critical, spell.count), 1, 1, 1)
@@ -1136,9 +1136,9 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 					spellmax = spell.criticalmax
 				end
 				tooltip:AddLine(" ")
-				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
-				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
-				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber((spellmin + spellmax) / 2), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Minimum Hit"], Skada:FormatNumber(spellmin), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Maximum Hit"], Skada:FormatNumber(spellmax), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Average Hit"], Skada:FormatNumber((spellmin + spellmax) / 2), 1, 1, 1)
 			end
 		end
 	end
