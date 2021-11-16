@@ -185,9 +185,8 @@ do
 	-- creates a new table system that can be used to reuse tables
 	-- it returns both "new" and "del" functions.
 	function lib.TablePool()
-		max_pool_size = max_pool_size or 10
 		local pool = {}
-		setmetatable(pool, {__mode = "kv"})
+		setmetatable(pool, {__mode = "k"})
 
 		-- attempts to retrieve a table from the cache
 		-- creates if if it doesn't exist.
