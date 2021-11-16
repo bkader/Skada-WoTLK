@@ -1,12 +1,13 @@
-# Skada for WoTLK (_Revisited - v1.8.71_)
+# Skada for WoTLK (_Revisited - v1.8.72_)
 
 ![Discord](https://img.shields.io/discord/795698054371868743?label=discord)
 ![GitHub last commit](https://img.shields.io/github/last-commit/bkader/Skada-WoTLK)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/bkader/Skada-WoTLK?label=version)
 
-## >> NOTE FOR 1.8.71 <<
+## >> NOTE FOR 1.8.72 <<
 
-The only table structure that was changed is **Debuffs** module. So, even it works fine for data from older version (_segments/sets_), mouse overing bars while on debuffs module **WILL** trigger an error. So make sure to just not check that modules for older data or simply reset.
+- The data tables structures of most of the modules were changed, so it is important to reset Skada (_segments and not settings._).
+- A newly added and extensible **API** system that allows you to access data provided by Skada to be used externally (_WeakAuras for example_). [Read more](#api) about this at the bottom.
 
 Skada is a modular damage meter with various viewing modes, segmented fights and customizable windows. It aims to be highly efficient with memory and CPU.
 
@@ -61,6 +62,7 @@ Almost everything was changed, starting from the default version that was availa
 - Bars are more fancy, colored by not only class but also spell school colors.
 - Bars display icons for both players and spells (_spell tooltips as well for the latter_).
 - Under consistent development thanks to WoTLK community and their feedbacks.
+- An annoying number of options available for more advanced players.
 
 ## Modules
 
@@ -186,3 +188,134 @@ This module was created in order to add some tweaks to Skada, hence its name. It
 - **Ignore Fury of Frostmourne**: if you don't want this spell to be included in anything, enable this option.
 - **Include absorbed damage**: some people (_Details! users >cough<_) consider that absorbed damage should be included in the overall damage, and because Skada doesn't include it but rather shows it as an extra info, this option was added to satisfy them and so we won't hear/read `Oh! They are not showing the same numbers...`.
 - **Smart Stop**: this feature relies on DBM/BigWigs to stop collecting data after the amount of seconds you choose. It is useful in case of being in combat bug (_not combatlog bug, but stuck in combat_).
+
+### API
+
+This concept was added as of version **1.8.72** and allows the player to access and use data provided by Skada externally. It can be used for example by **WeakAuras** to display things you want.
+
+#### Segments/Sets functions
+
+```lua
+local set = Skada:GetSet("current") -- gets the current segment table.
+-- then you have access to the following functions:
+set:GetLabel() -- returns the formatted set name?
+set:GetTime() -- returns the segment time or combat time?
+set:GetFormatedTime() -- returns the formatted segment time in HH:MM:SS?
+
+set:GetPlayer(guid, name) -- retrieves a player's table?
+set:GetEnemy(name, guid) -- retrieves an enemy table?
+set:GetActor(name, guid) -- retrieves a player or an enemy?
+
+set:GetAPS() -- returns the amount of Absorbs per second APS?
+set:GetAbsorbHeal() -- returns the amount of absorbs?
+set:GetAHPS() -- returns the amounts of absorbs and heals combined.
+set:GetHPS() -- returns the amount of heal per second
+set:GetDPS(useful) -- returns the group DPS amount. useful: exclude the overkill
+set:GetOHPS() -- returns the amount of overheal
+set:GetTHPS() -- returns the total healing, including the overheal
+set:GetDTPS() -- returns the amount of damage taken per second by the whole group.
+
+set:GetAbsorbHealSpells() -- returns the table of both absorb heals spells.
+set:GetAuraPlayers(spellid) -- returns the list of players by the given buff id.
+set:GetDamage(useful) -- returns the damage amount. if "useful" is true, it excludes the overkill.
+set:GetDamageTaken() -- returns the amount of damage taken by the whole group.
+set:GetEnemyDamageTaken() -- returns the amount of damage enemies took.
+set:GetEnemyDamageDone() -- returns the amount of damage enemies dealt to your group.
+set:GetEnemyHeal() -- returns the amount of heal enemies did.
+set:GetFailCount(spellid) -- returns the number of fails per give spell id
+set:GetAbsorbHealTaken() -- returns the table of players their healing taken amounts.
+set:GetPotion(potionid) -- returns the list of players and total usage of the give potion id
+```
+
+#### Players functions
+
+First, you would want to get the segment, then the player. After, you will have access to a set of predefined functions that only work if their modules are enabled:
+
+```lua
+local set = Skada:GetSet("current")
+local player = set:GetPlayer(UnitGUID("player"), UnitName("player")) -- get my own table
+
+-- now to functions:
+player:GetTime(active) -- returns the player time if active is set to true, otherwise the combat time.
+player:GetAPS(active) -- returns the amount of absorbs the player did per second
+player:GetAbsorbTargets() -- returns the list of players the player shieled and absorbed.
+player:GetAbsorbHeal() -- returns the amount of absorbs and heals the player did.
+player:GetAHPS() -- returns the amount of absorb+heal per second.
+player:GetAbsorbHealTargets() -- returns the list of absorb and heal targets.
+player:GetAbsorbHealOnTarget(name) -- returns the amount of absorb and heal the player did on the given target.
+player:GetDebuffsTargets() -- returns the list of the player's debuffs targets.
+player:GetDebuffTargets(spellid) -- returns the list of the given debuff targets.
+player:GetDebuffsOnTarget(name) -- returns the list of debuffs applied on the given target.
+player:GetCCDoneTargets() -- returns the list of targets the player CC'd.
+player:GetCCTakenSources() -- returns the list of sources the player got CC'd from.
+player:GetCCBreakTargets() -- returns the list of CC break targets.
+player:GetDamage(useful) -- returns the amount of damage the player did. usef: excludes the overkill.
+player:GetDPS(useful, active) -- returns the dps and amount of damage the player did.
+player:GetDamageTargets() -- returns the list of the player's damage targets and their amounts table.
+player:GetDamageTaken() -- returns the amount of the damage taken by the player
+player:GetDTPS(active) -- returns the damage taken per second as well as the total amount
+player:GetDamageSources() -- returns the list of sources the player took damage from with their amounts table.
+player:GetDispelledSpells() -- returns the list of spells the player dispelled.
+player:GetDispelledTargets() -- returns the list of targets the player dispelled.
+player:GetFriendlyFireTargets() -- returns the list of players the player caused friendly fire to.
+player:GetHPS(active) -- returns the amount of healing per second.
+player:GetOHPS(active) -- returns the amount of overhaling per second.
+player:GetHealTargets() -- returns the list of targets the player healed.
+player:GetHealOnTarget(name) -- returns the amount of healing the player did on the given target.
+player:GetOverhealTargets() -- returns the list of targets the player overhealed.
+player:GetOverhealOnTarget(name) -- returns the amount of overhealing the player did on the given target.
+player:GetTHPS(active) -- returns the amount of healing+overhealing per second.
+player:GetTotalHealTargets() -- returns the list of targets the player healed and overhealed.
+player:GetTotalHealOnTarget(name) -- returns the amount of healing and overhealing combined on the given target.
+player:GetAbsorbHealSources() -- returns the list of players the player was healed by.
+player:GetInterruptedSpells() -- returns the list of spells the player interrupted.
+player:GetInterruptTargets() -- returns the list of targets the player interrupted.
+player:GetRessTargets() -- returns the list of targets the player resurrected.
+player:GetSunderTargets() -- returns the list of targets the player applied Sunder Armor to.
+```
+
+#### Enemies functions
+
+The same deal, you want first to get the segment then the enemy, after that you have access to a set of functions:
+
+```lua
+local set = Skada:GetSet("current")
+local enemy = set:GetEnemy("The Lich King") -- example
+
+-- functions:
+enemy:GetTime() -- simply returns the combat time
+enemy:GetDamageTaken() -- returns the amount of damage the enemy took
+enemy:GetDTPS() -- returns the amount of damage the enemy took per second.
+enemy:GetDamageSources() -- returns the list of players who damaged the enemy and their amounts table.
+enemy:GetDamageFromSource(name) -- returns the amount, total and useful damage the given name did on the enemy.
+enemy:GetDamageDone() -- returns the amount of damage the enemy did.
+enemy:GetDPS() -- returns the enemy DPS.
+enemy:GetDamageTargets() -- returns the list of players the enemy did damage to.
+enemy:GetDamageOnTarget(name) -- returns the amount of damage the enemy did to the given player.
+enemy:GetHPS() -- returns the amount healing per second the enemy did.
+enemy:GetHealTargets() -- returns the list of targets the enemy healed.
+```
+
+#### Extending the API
+
+You can easily extend the API if you know the table structure of course, which will be added and explain another time:
+
+```lua
+-- To extend segments functions:
+local setPrototype = Skada.setPrototype -- use the prototype
+function setPrototype:MyOwnSetFunction()
+  -- do your thing
+end
+
+-- To extend players functions
+local playerPrototype = Skada.playerPrototype
+function playerPrototype:MyOwnPlayerFunction()
+  -- do your thing
+end
+
+-- To extend enemies functions:
+local playerPrototype = Skada.playerPrototype
+function playerPrototype:MyOwnEnemyFunction()
+  -- do your thing
+end
+```

@@ -123,12 +123,8 @@ function setPrototype:GetEnemy(name, id)
 	return actor and enemyPrototype:Bind(actor, self)
 end
 
-function setPrototype:GetActor(name, id, strict)
+function setPrototype:GetActor(name, id)
 	return self:GetPlayer(id, name) or self:GetEnemy(name, id)
-end
-
-function setPrototype:IteratPlayers()
-	return ipairs(self.players)
 end
 
 -------------------------------------------------------------------------------
