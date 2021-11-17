@@ -718,7 +718,7 @@ do
 						UIDropDownMenu_AddButton(info, level)
 					end
 
-					UIDropDownMenu_AddSeparator(info, level)
+					UIDropDownMenu_AddSeparator(info or UIDropDownMenu_CreateInfo(), level)
 				end
 
 				-- Close menu item

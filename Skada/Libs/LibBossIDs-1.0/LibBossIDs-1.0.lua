@@ -1,6 +1,6 @@
 --[[
 Name: LibBossIDs-1.0
-Revision: $Revision: 47 $
+Revision: $Revision: 44 $
 Author: Elsia
 Website: http://www.wowace.com/addons/libbossids-1-0/
 Documentation:
@@ -10,7 +10,7 @@ Dependencies: LibStub
 License: Public Domain, Absolutely no Warranty.
 ]]
 
-local MAJOR, MINOR = "LibBossIDs-1.0", "$Revision: 47 $"
+local MAJOR, MINOR = "LibBossIDs-1.0", "$Revision: 44 $"
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not lib then return end
@@ -957,42 +957,6 @@ local BossIDs = {
 	[39863] = true, -- Halion
 	[39899] = true, -- Baltharus (Copy has an own id apparently)
 	[40142] = true, -- Halion (twilight realm)
-
-	-- Blackrock Caverns
-	[39665] = true, -- Rom'ogg Bonecrusher
-	[39679] = true, -- Corla, Herald of Twilight
-	[39698] = true, -- Karsh Steelbender
-	[39700] = true, -- Beauty
-	[39705] = true, -- Ascendant Lord Obsidius
-
-	-- Throne of the Tides
-	[40586] = true, -- Lady Naz'jar
-	[40765] = true, -- Commander Ulthok
-	[40825] = true, -- Erunak Stonespeaker
-	[40788] = true, -- Mindbender Ghur'sha
-	[42172] = true, -- Ozumat
-
-	-- The Stonecore
-	[43438] = true, -- Corborus
-	[43214] = true,	-- Slabhide
-	[42188] = true,	-- Ozruk
-	[42333] = true, -- High Priestess Azil
-
-	-- The Vortex Pinnacle
-	[43878] = true, -- Grand Vizier Ertan
-	[43873] = true, -- Altairus
-	[43875] = true, -- Asaad
-
-	-- Grim Batol
-	[39625] = true, -- General Umbriss
-	[40177] = true, -- Forgemaster Throngus
-	[40319] = true, -- Drahga Shadowburner
-	[40484] = true, -- Erudax
-
-	-- Halls of Origination
-	[39425] = true, -- Temple Guardian Anhuur
-
-	-- Lost City of the Tol'vir
 
 	-- World Dragons
 	[14889] = true, -- Emeriss

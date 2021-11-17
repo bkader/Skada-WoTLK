@@ -99,7 +99,7 @@ function setPrototype:GetPlayer(id, name)
 	if self.players and ((id and id ~= "total") or name) then
 		for _, actor in ipairs(self.players) do
 			if (id and actor.id == id) or (name and actor.name == name) then
-				return actor
+				return playerPrototype:Bind(actor, self)
 			end
 		end
 	end
@@ -113,7 +113,7 @@ function setPrototype:GetEnemy(name, id)
 	if self.enemies and name then
 		for _, actor in ipairs(self.enemies) do
 			if (name and actor.name == name) or (id and actor.id == id) then
-				return actor
+				return enemyPrototype:Bind(actor, self)
 			end
 		end
 	end
