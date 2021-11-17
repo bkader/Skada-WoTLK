@@ -336,6 +336,7 @@ do
 	local CancelTimer = Skada.CancelTimer
 	local IsGroupInCombat = Skada.IsGroupInCombat
 	local InCombatLockdown = InCombatLockdown
+	local setPrototype = Skada.setPrototype
 
 	local fakeSet, updateTimer = {}, nil
 
@@ -405,7 +406,7 @@ do
 			fakeSet.absorb = fakeSet.absorb + absorb
 		end
 
-		return fakeSet
+		return setPrototype:Bind(fakeSet)
 	end
 
 	local function RandomizeFakeData(set, coef)
