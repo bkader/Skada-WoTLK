@@ -619,7 +619,7 @@ do
 							bar.timerLabel:SetTextColor(c.r, c.g, c.b, c.a or 1)
 						end
 					else
-						local c = win.db.textcolor
+						local c = win.db.textcolor or white
 						bar.label:SetTextColor(c.r, c.g, c.b, c.a or 1)
 						bar.timerLabel:SetTextColor(c.r, c.g, c.b, c.a or 1)
 					end
