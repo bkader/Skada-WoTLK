@@ -329,6 +329,10 @@ L["Bottom Right"] = true
 L["Bottom Left"] = true
 L["Smart"] = true
 L["Follow Cursor"] = true
+L["Top"] = true
+L["Bottom"] = true
+L["Right"] = true
+L["Left"] = true
 -- disabled modules
 L["Modules"] = true
 L["Disabled Modules"] = true
@@ -690,6 +694,11 @@ L["Announce %s"] = true
 L["Announces how long it took to apply %d stacks of %s and announces when it drops."] = true
 L["%s dropped from %s!"] = true
 L["%s stacks of %s applied on %s in %s sec!"] = true
+-- notifications
+L["Opacity"] = true
+L["Notifications"] = true
+L["Uses visual notifications instead of chat window messages whenever applicable."] = true
+L["Test Notifications"] = true
 -- about
 L["About"] = true
 L["Author"] = true

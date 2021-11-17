@@ -1874,7 +1874,7 @@ do
 			end
 
 			if (version > ver) then
-				self:Printf(L["Skada is out of date. You can download the newest version from |cffffbb00%s|r"], self.website)
+				self:Notify(format(L["Skada is out of date. You can download the newest version from |cffffbb00%s|r"], self.website))
 			elseif (version < ver) then
 				self:SendComm("WHISPER", sender, "VersionCheck", self.version)
 			end
@@ -2017,7 +2017,7 @@ function Skada:Reset(force)
 	dataobj.text = "n/a"
 	self:UpdateDisplay(true)
 	self:CleanGarbage()
-	self:Print(L["All data has been reset."])
+	self:Notify(L["All data has been reset."])
 	CloseDropDownMenus()
 end
 
@@ -2876,10 +2876,6 @@ end
 -------------------------------------------------------------------------------
 
 function Skada:OnInitialize()
-	self:RegisterMedias()
-	self:RegisterClasses()
-	self:RegisterSchools()
-
 	self.db = LibStub("AceDB-3.0"):New("SkadaDB", self.defaults, "Default")
 
 	if type(SkadaCharDB) ~= "table" then
@@ -2911,6 +2907,11 @@ function Skada:OnInitialize()
 	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes")
 
 	self:RegisterInitOptions()
+
+	self:RegisterMedias()
+	self:RegisterClasses()
+	self:RegisterSchools()
+	self:RegisterToast()
 
 	-- fix setstokeep, setslimit and timemesure.
 	if (self.db.profile.setstokeep or 0) > 30 then
@@ -3011,9 +3012,9 @@ function Skada:CheckMemory()
 	if Skada.db.profile.memorycheck then
 		UpdateAddOnMemoryUsage()
 
-		local compare = 30 + (Skada.db.profile.setstokeep * 1.25)
+		local compare = 10 + (Skada.db.profile.setstokeep + Skada.db.profile.setslimit) * 2
 		if GetAddOnMemoryUsage("Skada") > (compare * 1024) then
-			Skada:Print(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."])
+			Skada:Notify(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."], L["Memory Check"], nil, "emergency")
 		end
 	end
 end

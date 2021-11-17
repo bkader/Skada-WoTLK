@@ -20,11 +20,15 @@ local COMBATLOG_OBJECT_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
 -- print and debug
 
 function Skada:Print(...)
-	print("|cff33ff99Skada|r:", ...)
+	if ... then
+		print("|cff33ff99Skada|r:", ...)
+	end
 end
 
 function Skada:Printf(...)
-	print("|cff33ff99Skada|r:", format(...))
+	if ... then
+		print("|cff33ff99Skada|r:", format(...))
+	end
 end
 
 function Skada:Debug(...)
@@ -657,4 +661,121 @@ function Skada:RegisterSchools()
 	}
 
 	self.RegisterSchools = nil -- remove it
+end
+
+-------------------------------------------------------------------------------
+-- Notifications stuff!
+
+do
+	local LibToast = LibStub("SpecializedLibToast-1.0", true)
+	local toast_opt = nil
+
+	-- initialize LibToast
+	function Skada:RegisterToast()
+		if LibToast then
+			-- install default options
+			if not self.db.profile.toast then
+				self.db.profile.toast = self.defaults.toast
+			end
+
+			LibToast:Register("SkadaToastFrame", function(toast, text, title, icon, urgency)
+				toast:SetTitle(title or "Skada")
+				toast:SetText(text or L["A damage meter."])
+				toast:SetIconTexture(icon or [[Interface\Icons\Spell_Lightning_LightningBolt01]])
+				toast:SetUrgencyLevel(urgency or "normal")
+			end)
+			if self.db.profile.toast then
+				LibToast.config.hide_toasts = self.db.profile.toast.hide_toasts
+				LibToast.config.spawn_point = self.db.profile.toast.spawn_point or "TOP"
+				LibToast.config.duration = self.db.profile.toast.duration or 7
+				LibToast.config.opacity = self.db.profile.toast.opacity or 0.75
+			end
+		end
+		self.RegisterToast = nil
+	end
+
+	-- returns toast options
+	function Skada:GetToastOptions()
+		if LibToast and not toast_opt then
+			toast_opt = {
+				type = "group",
+				name = L["Notifications"],
+				get = function(i)
+					return self.db.profile.toast[i[#i]] or LibToast.config[i[#i]]
+				end,
+				set = function(i, val)
+					self.db.profile.toast[i[#i]] = val
+					LibToast.config[i[#i]] = val
+				end,
+				order = 10000,
+				args = {
+					toastdesc = {
+						type = "description",
+						name = L["Uses visual notifications instead of chat window messages whenever applicable."],
+						width = "full",
+						order = 0
+					},
+					hide_toasts = {
+						type = "toggle",
+						name = L["Disable"],
+						order = 10
+					},
+					spawn_point = {
+						type = "select",
+						name = L["Position"],
+						order = 20,
+						values = {
+							TOPLEFT = L["Top Left"],
+							TOPRIGHT = L["Top Right"],
+							BOTTOMLEFT = L["Bottom Left"],
+							BOTTOMRIGHT = L["Bottom Right"],
+							TOP = L["Top"],
+							BOTTOM = L["Bottom"],
+							LEFT = L["Left"],
+							RIGHT = L["Right"]
+						}
+					},
+					duration = {
+						type = "range",
+						name = L["Duration"],
+						min = 5,
+						max = 15,
+						step = 1,
+						order = 30
+					},
+					opacity = {
+						type = "range",
+						name = L["Opacity"],
+						min = 0,
+						max = 1,
+						step = 0.01,
+						isPercent = true,
+						order = 40
+					},
+					empty_1 = {
+						type = "description",
+						name = " ",
+						width = "full",
+						order = 50
+					},
+					test = {
+						type = "execute",
+						name = L["Test Notifications"],
+						func = function() Skada:Notify() end,
+						disabled = function() return Skada.db.profile.toast.hide_toasts end,
+						width = "double",
+						order = 60
+					}
+				}
+			}
+		end
+		return toast_opt
+	end
+
+	-- shows notifications or simply uses Print method.
+	function Skada:Notify(text, title, icon, urgency)
+		if not (LibToast and LibToast:Spawn("SkadaToastFrame", text, title, icon, urgency)) then
+			self:Print(text)
+		end
+	end
 end

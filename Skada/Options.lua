@@ -142,6 +142,7 @@ Skada.defaults = {
 		updatefrequency = 0.5,
 		modules = {},
 		columns = {},
+		toast = {hide_toasts = false, spawn_point = "BOTTOM", duration = 5, opacity = 0.75},
 		report = {mode = "Damage", set = "current", channel = "Say", chantype = "preset", number = 10},
 		modulesBlocked = {
 			["Absorbed Damage"] = true,
@@ -452,19 +453,9 @@ Skada.options = {
 						memorycheck = {
 							type = "toggle",
 							name = L["Memory Check"],
-							desc = function() return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], 30 + (Skada.db.profile.setstokeep * 1.25)) end,
+							desc = function() return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], 10 + (Skada.db.profile.setstokeep + Skada.db.profile.setslimit) * 2) end,
 							width = "double",
 							order = 930
-						},
-						updatefrequency = {
-							type = "range",
-							name = L["Update frequency"],
-							desc = L["How often windows are updated. Shorter for faster updates. Increases CPU usage."],
-							width = "double",
-							min = 0.10,
-							max = 1,
-							step = 0.01,
-							order = 980
 						},
 						tentativetimer = {
 							type = "range",
@@ -473,9 +464,17 @@ Skada.options = {
 							min = 1,
 							max = 5,
 							step = 1,
-							width = "double",
+							order = 980
+						},
+						updatefrequency = {
+							type = "range",
+							name = L["Update frequency"],
+							desc = L["How often windows are updated. Shorter for faster updates. Increases CPU usage."],
+							min = 0.10,
+							max = 1,
+							step = 0.01,
 							order = 990
-						}
+						},
 					}
 				}
 			}
@@ -668,7 +667,9 @@ Skada.options = {
 					name = L["Advanced"],
 					desc = format(L["Advanced options for %s."], L["Tweaks"]),
 					order = 900,
-					args = {}
+					args = {
+						notify = Skada:GetToastOptions()
+					}
 				}
 			}
 		},
