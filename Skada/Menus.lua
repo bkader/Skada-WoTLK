@@ -704,20 +704,22 @@ do
 			local info
 
 			if level == 1 then
-				for _, category in ipairs(categories) do
-					info = UIDropDownMenu_CreateInfo()
-					info.text = category
-					info.value = category
-					info.hasArrow = 1
-					info.notCheckable = 1
-					info.padding = 16
-					if win and win.selectedmode and (win.selectedmode.category == category or (win.parentmode and win.parentmode.category == category)) then
-						info.colorCode = "|cffffd100"
+				if #categories > 0 then
+					for _, category in ipairs(categories) do
+						info = UIDropDownMenu_CreateInfo()
+						info.text = category
+						info.value = category
+						info.hasArrow = 1
+						info.notCheckable = 1
+						info.padding = 16
+						if win and win.selectedmode and (win.selectedmode.category == category or (win.parentmode and win.parentmode.category == category)) then
+							info.colorCode = "|cffffd100"
+						end
+						UIDropDownMenu_AddButton(info, level)
 					end
-					UIDropDownMenu_AddButton(info, level)
-				end
 
-				UIDropDownMenu_AddSeparator(info, level)
+					UIDropDownMenu_AddSeparator(info, level)
+				end
 
 				-- Close menu item
 				info = UIDropDownMenu_CreateInfo()
