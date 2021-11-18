@@ -18,7 +18,7 @@ Skada:AddDisplaySystem("bar", mod)
 
 -- class, role & specs
 local classicons, roleicons, specicons
-local classcoords, rolecoords
+local classcoords, rolecoords, speccoords
 
 local function WindowOnMouseDown(self, button)
 	if IsShiftKeyDown() then
@@ -155,6 +155,7 @@ function mod:Create(window)
 		rolecoords = Skada.rolecoords
 
 		specicons = Skada.specicons
+		speccoords = Skada.speccoords
 	end
 end
 
@@ -576,9 +577,9 @@ do
 						bar.missingclass = nil
 					end
 
-					if win.db.specicons and data.spec and specicons[data.spec] then
+					if win.db.specicons and data.spec and speccoords[data.spec] then
 						bar:ShowIcon()
-						bar:SetIcon(specicons[data.spec])
+						bar:SetIconWithCoord(specicons, speccoords[data.spec])
 					elseif win.db.roleicons and data.role and data.role ~= "NONE" and rolecoords[data.role] then
 						bar:ShowIcon()
 						bar:SetIconWithCoord(roleicons, rolecoords[data.role])

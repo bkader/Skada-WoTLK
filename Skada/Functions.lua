@@ -4,7 +4,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 
 local select, pairs, ipairs = select, pairs, ipairs
 local tostring, tonumber, format = tostring, tonumber, string.format
-local setmetatable, band = setmetatable, bit.band
+local setmetatable, getmetatable, band = setmetatable, getmetatable, bit.band
 local print = print
 
 local GetNumRaidMembers, GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
@@ -341,6 +341,7 @@ do
 	local IsGroupInCombat = Skada.IsGroupInCombat
 	local InCombatLockdown = InCombatLockdown
 	local setPrototype = Skada.setPrototype
+	local playerPrototype = Skada.playerPrototype
 
 	local fakeSet, updateTimer = {}, nil
 
@@ -395,7 +396,7 @@ do
 			end
 
 			tinsert(fakeSet.players, {
-				id = i,
+				id = name,
 				name = name,
 				class = class,
 				role = role,
@@ -415,6 +416,10 @@ do
 
 	local function RandomizeFakeData(set, coef)
 		for _, player in ipairs(set.players) do
+			if getmetatable(player) ~= playerPrototype then
+				playerPrototype:Bind(player, set)
+			end
+
 			local damage, heal, absorb = 0, 0, 0
 
 			if player.role == "HEALER" then
@@ -579,48 +584,39 @@ function Skada:RegisterClasses()
 	}
 
 	-- specialization icons
-	self.specicons = {
-		-- DEATHKNIGHT
-		[250] = [[Interface\ICONS\spell_deathknight_bloodpresence]], --> Blood
-		[251] = [[Interface\ICONS\spell_deathknight_frostpresence]], --> Frost
-		[252] = [[Interface\ICONS\spell_deathknight_unholypresence]], --> Unholy
-		-- DRUID
-		[102] = [[Interface\ICONS\spell_nature_starfall]], --> Balance
-		[103] = [[Interface\ICONS\ability_druid_catform]], --> Feral
-		[104] = [[Interface\ICONS\ability_racial_bearform]], --> Tank
-		[105] = [[Interface\ICONS\spell_nature_healingtouch]], --> Restoration
-		-- HUNTER
-		[253] = [[Interface\ICONS\ability_hunter_beasttaming]], --> Beastmastery
-		[254] = [[Interface\ICONS\ability_hunter_focusedaim]], --> Marksmalship
-		[255] = [[Interface\ICONS\ability_hunter_swiftstrike]], --> Survival
-		-- MAGE
-		[62] = [[Interface\ICONS\spell_holy_magicalsentry]], --> Arcane (or: spell_arcane_blast)
-		[63] = [[Interface\ICONS\spell_fire_flamebolt]], --> Fire
-		[64] = [[Interface\ICONS\spell_frost_frostbolt02]], --> Frost
-		-- PALADIN
-		[65] = [[Interface\ICONS\spell_holy_holybolt]], --> Holy
-		[66] = [[Interface\ICONS\ability_paladin_shieldofthetemplar]], --> Protection (or: spell_holy_devotionaura)
-		[70] = [[Interface\ICONS\spell_holy_auraoflight]], --> Ret
-		-- PRIEST
-		[256] = [[Interface\ICONS\spell_holy_powerwordshield]], --> Discipline
-		[257] = [[Interface\ICONS\spell_holy_guardianspirit]], --> Holy
-		[258] = [[Interface\ICONS\spell_shadow_shadowwordpain]], --> Shadow
-		-- ROGUE
-		[259] = [[Interface\ICONS\ability_rogue_eviscerate]], --> Assassination (or: ability_rogue_shadowstrikes)
-		[260] = [[Interface\ICONS\ability_backstab]], --> Combat
-		[261] = [[Interface\ICONS\ability_stealth]], --> Subtlty
-		-- SHAMAN
-		[262] = [[Interface\ICONS\spell_nature_lightning]], --> Elemental
-		[263] = [[Interface\ICONS\spell_shaman_improvedstormstrike]], --> Enhancement (or: spell_nature_lightningshield)
-		[264] = [[Interface\ICONS\spell_nature_healingwavegreater]], --> Restoration
-		-- WARLOCK
-		[265] = [[Interface\ICONS\spell_shadow_deathcoil]], --> Affliction
-		[266] = [[Interface\ICONS\spell_shadow_metamorphosis]], --> Demonology
-		[267] = [[Interface\ICONS\spell_shadow_rainoffire]], --> Destruction
-		-- WARRIOR
-		[71] = [[Interface\ICONS\ability_warrior_savageblow]], --> Arms
-		[72] = [[Interface\ICONS\ability_warrior_innerrage]], --> Fury (or: ability_warrior_titansgrip)
-		[73] = [[Interface\ICONS\ability_warrior_defensivestance]] --> Protection (or: ability_warrior_safeguard)
+	self.specicons = [[Interface\AddOns\Skada\Media\Textures\icon-specs]]
+	self.speccoords = {
+		[62] = {0.25, 0.375, 0.25, 0.5}, --> Mage: Arcane
+		[63] = {0.375, 0.5, 0.25, 0.5}, --> Mage: Fire
+		[64] = {0.5, 0.625, 0.25, 0.5}, --> Mage: Frost
+		[65] = {0.625, 0.75, 0.25, 0.5}, --> Paladin: Holy
+		[66] = {0.75, 0.875, 0.25, 0.5}, --> Paladin: Protection
+		[70] = {0.875, 1, 0.25, 0.5}, --> Paladin: Retribution
+		[71] = {0.5, 0.625, 0.75, 1}, --> Warrior: Arms
+		[72] = {0.625, 0.75, 0.75, 1}, --> Warrior: Fury
+		[73] = {0.75, 0.875, 0.75, 1}, --> Warrior: Protection
+		[102] = {0.375, 0.5, 0, 0.25}, --> Druid: Balance
+		[103] = {0.5, 0.625, 0, 0.25}, --> Druid: Feral
+		[104] = {0.625, 0.75, 0, 0.25}, --> Druid: Tank
+		[105] = {0.75, 0.875, 0, 0.25}, --> Druid: Restoration
+		[250] = {0, 0.125, 0, 0.25}, --> Death Knight: Blood
+		[251] = {0.125, 0.25, 0, 0.25}, --> Death Knight: Frost
+		[252] = {0.25, 0.375, 0, 0.25}, --> Death Knight: Unholy
+		[253] = {0.875, 1, 0, 0.25}, --> Hunter: Beastmastery
+		[254] = {0, 0.125, 0.25, 0.5}, --> Hunter: Marksmalship
+		[255] = {0.125, 0.25, 0.25, 0.5}, --> Hunter: Survival
+		[256] = {0, 0.125, 0.5, 0.75}, --> Priest: Discipline
+		[257] = {0.125, 0.25, 0.5, 0.75}, --> Priest: Holy
+		[258] = {0.25, 0.375, 0.5, 0.75}, --> Priest: Shadow
+		[259] = {0.375, 0.5, 0.5, 0.75}, --> Rogue: Assassination
+		[260] = {0.5, 0.625, 0.5, 0.75}, --> Rogue: Combat
+		[261] = {0.625, 0.75, 0.5, 0.75}, --> Rogue: Subtlty
+		[262] = {0.75, 0.875, 0.5, 0.75}, --> Shaman: Elemental
+		[263] = {0.875, 1, 0.5, 0.75}, --> Shaman: Enhancement
+		[264] = {0, 0.125, 0.75, 1}, --> Shaman: Restoration
+		[265] = {0.125, 0.25, 0.75, 1}, --> Warlock: Affliction
+		[266] = {0.25, 0.375, 0.75, 1}, --> Warlock: Demonology
+		[267] = {0.375, 0.5, 0.75, 1} --> Warlock: Destruction
 	}
 
 	-- class colors & custom

@@ -16,7 +16,7 @@
 ## DefaultState: enabled
 ## Author: Kader (|cff808080bkader#6361|r)
 ## Version: 1.8.72
-## X-Date: 2021-11-18 @ 11:21 AM |cff808080UTC|r
+## X-Date: 2021-11-18 @ 08:27 PM |cff808080UTC|r
 ## X-Credits: Zarnivoop, WoTLK Community
 ## X-Category: Combat
 ## X-License: MIT/X
