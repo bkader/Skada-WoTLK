@@ -1,20 +1,63 @@
 -- LibBars-1.0 by Antiarc, all glory to him.
--- Specialized ( = uglified) for Skada
+-- Specialized ( = enhanced) for Skada
 -- Note to self: don't forget to notify original author of changes
 -- in the unlikely event they end up being usable outside of Skada.
-local MAJOR = "SpecializedLibBars-1.0"
-local MINOR = 90000 + tonumber(("$Revision: 1 $"):match("%d+"))
-
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90001
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 
 local CallbackHandler = LibStub("CallbackHandler-1.0")
 
-local GetTime = _G.GetTime
-local sin, cos, rad = _G.math.sin, _G.math.cos, _G.math.rad
-local abs, min, max, floor = _G.math.abs, _G.math.min, _G.math.max, _G.math.floor
-local tsort, tinsert, tremove, tconcat = _G.table.sort, tinsert, tremove, _G.table.concat
+local GetTime = GetTime
+local sin, cos, rad = math.sin, math.cos, math.rad
+local abs, min, max, floor = math.abs, math.min, math.max, math.floor
+local tsort, tinsert, tremove, tconcat = table.sort, tinsert, tremove, table.concat
 local next, pairs, assert, error, type, xpcall = next, pairs, assert, error, type, xpcall
+
+local GAME_LOCALE = GetLocale()
+
+local L = {
+	resize_header = "Resize",
+	resize_click = "|cff00ff00Click|r to freely resize window.",
+	resize_shift_click = "|cff00ff00Shift-Click|r to change the width.",
+	resize_alt_click = "|cff00ff00Alt-Click|r to change the height."
+}
+if GAME_LOCALE == "deDE" then
+	L.resize_header = "Größe ändern"
+	L.resize_click = "|cff00ff00Klicken|r, um die Fenstergröße frei zu ändern."
+	L.resize_shift_click = "|cff00ff00Umschalt-Klick|r, um die Breite zu ändern."
+	L.resize_alt_click = "|cff00ff00Alt-Klick|r, um die Höhe zu ändern."
+elseif GAME_LOCALE == "esES" or GAME_LOCALE == "esMX" then
+	L.resize_header = "Redimensionar"
+	L.resize_click = "|cff00ff00Haga clic|r para cambiar el tamaño de la ventana."
+	L.resize_shift_click = "|cff00ff00Shift-Click|r para cambiar el ancho de la ventana."
+	L.resize_alt_click = "|cff00ff00Alt-Click|r para cambiar la altura de la ventana."
+elseif GAME_LOCALE == "frFR" then
+	L.resize_header = "Redimensionner"
+	L.resize_click = "|cff00ff00Clic|r pour redimensionner."
+	L.resize_shift_click = "|cff00ff00Shift clic|r pour changer la largeur."
+	L.resize_alt_click = "|cff00ff00Alt clic|r pour changer la hauteur."
+elseif GAME_LOCALE == "koKR" then
+	L.resize_header = "크기 조정"
+	L.resize_click = "|cff00ff00클릭|r하여 창 크기를 자유롭게 조정합니다."
+	L.resize_shift_click = "너비를 변경하려면 |cff00ff00Shift-클릭|r하십시오."
+	L.resize_alt_click = "높이를 변경하려면 |cff00ff00Alt-클릭|r하십시오"
+elseif GAME_LOCALE == "ruRU" then
+	L.resize_header = "Изменение размера"
+	L.resize_click = "|cff00ff00Щелкните|r, чтобы изменить размер окна."
+	L.resize_shift_click = "|cff00ff00Shift-Click|r, чтобы изменить ширину."
+	L.resize_alt_click = "|cff00ff00ALT-Click|r, чтобы изменить высоту."
+elseif GAME_LOCALE == "zhCN" then
+	L.resize_header = "调整大小"
+	L.resize_click = "|cff00ff00单击|r以调整窗口大小。"
+	L.resize_shift_click = "|cff00ff00Shift-Click|r改变窗口的宽度。"
+	L.resize_alt_click = "|cff00ff00Alt-Click|r更改窗口高度。"
+elseif GAME_LOCALE == "zhTW" then
+	L.resize_header = "調整大小"
+	L.resize_click = "|cff00ff00單擊|r以調整窗口大小。"
+	L.resize_shift_click = "|cff00ff00Shift-Click|r改變窗口的寬度。"
+	L.resize_alt_click = "|cff00ff00Alt-Click|r更改窗口高度。"
+end
 
 --[[ xpcall safecall implementation ]]--
 local function errorhandler(err)
@@ -63,7 +106,7 @@ local function safecall(func, ...)
 	end
 end
 
-local dummyFrame, barFrameMT, barPrototype, barPrototype_mt, barListPrototype
+local dummyFrame, barPrototype, barPrototype_mt, barListPrototype
 local barListPrototype_mt
 
 lib.LEFT_TO_RIGHT = 1
@@ -79,7 +122,6 @@ lib.barListPrototype = lib.barListPrototype or setmetatable({}, lib.barFrameMT)
 lib.barListPrototype_mt = lib.barListPrototype_mt or {__index = lib.barListPrototype}
 
 dummyFrame = lib.dummyFrame
-barFrameMT = lib.barFrameMT
 barPrototype = lib.barPrototype
 barPrototype_mt = lib.barPrototype_mt
 barListPrototype = lib.barListPrototype
@@ -97,7 +139,6 @@ lib.bars = lib.bars or {}
 lib.barLists = lib.barLists or {}
 lib.recycledBars = lib.recycledBars or {}
 
-lib.embeds = lib.embeds or {}
 local bars = lib.bars
 local barLists = lib.barLists
 local recycledBars = lib.recycledBars
@@ -111,6 +152,7 @@ local frame_defaults = {
 	insets = {left = 2, right = 2, top = 2, bottom = 2}
 }
 
+lib.embeds = lib.embeds or {}
 do
 	local mixins = {
 		"NewCounterBar",
@@ -455,7 +497,10 @@ function barListPrototype:AdjustTitle(ignoreMouseover)
 end
 
 function barListPrototype:SetBarBackgroundColor(r, g, b, a)
-	self.barbackgroundcolor = {r, g, b, a}
+	self.barbackgroundcolor[1] = r
+	self.barbackgroundcolor[2] = g
+	self.barbackgroundcolor[3] = b
+	self.barbackgroundcolor[4] = a
 	for _, bar in pairs(self:GetBars()) do
 		bar.bgtexture:SetVertexColor(unpack(self.barbackgroundcolor))
 	end
@@ -523,7 +568,13 @@ do
 				self.direction = strfind(self:GetName(), "Left") and "LEFT" or "RIGHT"
 			end
 			p.isResizing = true
-			p:StartSizing((p.growup and "TOP" or "BOTTOM") .. self.direction)
+			if IsShiftKeyDown() then
+				p:StartSizing(self.direction)
+			elseif IsAltKeyDown() then
+				p:StartSizing(p.growup and "TOP" or "BOTTOM")
+			else
+				p:StartSizing((p.growup and "TOP" or "BOTTOM") .. self.direction)
+			end
 		end
 	end
 
@@ -543,10 +594,20 @@ do
 
 	local function sizerOnEnter(self)
 		self:SetAlpha(1)
+		local t = GameTooltip
+		t:SetOwner(self, "ANCHOR_NONE")
+		t:SetPoint("BOTTOM", self, "TOP", 0, 0)
+		t:ClearLines()
+		t:AddLine(L.resize_header)
+		t:AddLine(L.resize_click, 1, 1, 1)
+		t:AddLine(L.resize_shift_click, 1, 1, 1)
+		t:AddLine(L.resize_alt_click, 1, 1, 1)
+		t:Show()
 	end
 
 	local function sizerOnLeave(self)
 		self:SetAlpha(0)
+		GameTooltip:Hide()
 	end
 
 	local DEFAULT_TEXTURE = [[Interface\TARGETINGFRAME\UI-StatusBar]]
@@ -617,28 +678,32 @@ do
 		list.offset = 0
 
 		-- resize to the right
-		list.resizeright = list.resizeright or CreateFrame("Button", "$parentSizerRight", list)
-		list.resizeright:Show()
-		list.resizeright:SetFrameLevel(list:GetFrameLevel() + 1)
-		list.resizeright:SetSize(12, 12)
-		list.resizeright:SetAlpha(0)
-		list.resizeright:EnableMouse(true)
-		list.resizeright:SetScript("OnMouseDown", sizerOnMouseDown)
-		list.resizeright:SetScript("OnMouseUp", sizerOnMouseUp)
-		list.resizeright:SetScript("OnEnter", sizerOnEnter)
-		list.resizeright:SetScript("OnLeave", sizerOnLeave)
+		if not list.resizeright then
+			list.resizeright = CreateFrame("Button", "$parentSizerRight", list)
+			list.resizeright:Show()
+			list.resizeright:SetFrameLevel(list:GetFrameLevel() + 1)
+			list.resizeright:SetSize(12, 12)
+			list.resizeright:SetAlpha(0)
+			list.resizeright:EnableMouse(true)
+			list.resizeright:SetScript("OnMouseDown", sizerOnMouseDown)
+			list.resizeright:SetScript("OnMouseUp", sizerOnMouseUp)
+			list.resizeright:SetScript("OnEnter", sizerOnEnter)
+			list.resizeright:SetScript("OnLeave", sizerOnLeave)
+		end
 
 		-- resize to the left
-		list.resizeleft = list.resizeleft or CreateFrame("Button", "$parentSizerLeft", list)
-		list.resizeleft:Show()
-		list.resizeleft:SetFrameLevel(list:GetFrameLevel() + 1)
-		list.resizeleft:SetSize(12, 12)
-		list.resizeleft:SetAlpha(0)
-		list.resizeleft:EnableMouse(true)
-		list.resizeleft:SetScript("OnMouseDown", sizerOnMouseDown)
-		list.resizeleft:SetScript("OnMouseUp", sizerOnMouseUp)
-		list.resizeleft:SetScript("OnEnter", sizerOnEnter)
-		list.resizeleft:SetScript("OnLeave", sizerOnLeave)
+		if not list.resizeleft then
+			list.resizeleft = CreateFrame("Button", "$parentSizerLeft", list)
+			list.resizeleft:Show()
+			list.resizeleft:SetFrameLevel(list:GetFrameLevel() + 1)
+			list.resizeleft:SetSize(12, 12)
+			list.resizeleft:SetAlpha(0)
+			list.resizeleft:EnableMouse(true)
+			list.resizeleft:SetScript("OnMouseDown", sizerOnMouseDown)
+			list.resizeleft:SetScript("OnMouseUp", sizerOnMouseUp)
+			list.resizeleft:SetScript("OnEnter", sizerOnEnter)
+			list.resizeleft:SetScript("OnLeave", sizerOnLeave)
+		end
 
 		list:SetScript("OnEnter", listOnEnter)
 		list:SetScript("OnLeave", listOnLeave)
@@ -868,7 +933,11 @@ function barListPrototype:SetDisplayMax(val)
 end
 
 function barListPrototype:SetTextColor(r, g, b, a)
-	self.textcolor = {r or 1, g or 1, b or 1, a or 1}
+	self.textcolor = self.textcolor or {}
+	self.textcolor[1] = r or 1
+	self.textcolor[2] = g or 1
+	self.textcolor[3] = b or 1
+	self.textcolor[4] = a or 1
 	self:UpdateTextColor()
 end
 
@@ -972,7 +1041,7 @@ function barListPrototype:ReverseGrowth(reverse)
 
 	if self.resizeright then
 		self.resizeright:SetNormalTexture([[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Up]])
-		self.resizeright:SetHighlightTexture([[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Down]])
+		self.resizeright:SetHighlightTexture([[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Down]], "ALPHA")
 		self.resizeright:ClearAllPoints()
 
 		local normaltex = self.resizeright:GetNormalTexture()
@@ -990,7 +1059,7 @@ function barListPrototype:ReverseGrowth(reverse)
 
 	if self.resizeleft then
 		self.resizeleft:SetNormalTexture([[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Up]])
-		self.resizeleft:SetHighlightTexture([[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Up]], "ALPHA")
+		self.resizeleft:SetHighlightTexture([[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Down]], "ALPHA")
 		self.resizeleft:ClearAllPoints()
 
 		local normaltex = self.resizeleft:GetNormalTexture()
@@ -1181,7 +1250,6 @@ do
 		end
 
 		local shown = 0
-		local last_icon = false
 		for i = start, stop, step do
 			local origTo = to
 			local v = values[i]
@@ -1219,9 +1287,6 @@ do
 
 				v:Show()
 				shown = shown + 1
-				if v.showIcon then
-					last_icon = true
-				end
 				lastBar = v
 			end
 
@@ -1263,7 +1328,6 @@ do
 			self.spark:SetTexture([[Interface\CastingBar\UI-CastingBar-Spark]])
 			self.spark:SetSize(10, 10)
 			self.spark:SetBlendMode("ADD")
-			self.spark:Hide()
 		end
 
 		self.bgtexture = self.bgtexture or self:CreateTexture(nil, "BACKGROUND")
@@ -1289,21 +1353,17 @@ do
 		self.label:SetPoint("LEFT", self, "LEFT", 3, 0)
 		self:ShowLabel()
 
-		do
-			local f, s, m = self.label:GetFont()
-			self.label:SetFont(f, s or 10, m)
+		self.timerLabel = self.timerLabel or self:CreateFontString(nil, "OVERLAY", "ChatFontNormal")
+		self.timerLabel:ClearAllPoints()
+		self.timerLabel:SetPoint("RIGHT", self, "RIGHT", -3, 0)
+		self:SetTimerLabel("")
+		self:HideTimerLabel()
 
-			self.timerLabel = self.timerLabel or self:CreateFontString(nil, "OVERLAY", "ChatFontNormal")
-			self:SetTimerLabel("")
-			self.timerLabel:ClearAllPoints()
-			self.timerLabel:SetPoint("RIGHT", self, "RIGHT", -3, 0)
-			self:HideTimerLabel()
-		end
+		local f, s, m = self.label:GetFont()
+		self.label:SetFont(f, s or 10, m)
 
-		do
-			local f, s, m = self.timerLabel:GetFont()
-			self.timerLabel:SetFont(f, s or 10, m)
-		end
+		f, s, m = self.timerLabel:GetFont()
+		self.timerLabel:SetFont(f, s or 10, m)
 
 		self:SetScale(1)
 		self:SetAlpha(1)
@@ -1312,13 +1372,10 @@ do
 		self.thickness = thickness or 15
 		self:SetOrientation(orientation or 1)
 
-		value = value or 1
-		maxVal = maxVal or value
-		self.value = value
-		self.maxValue = maxVal
-
-		self:SetMaxValue(maxVal)
-		self:SetValue(value)
+		self.value = value or 1
+		self.maxValue = maxVal or self.value
+		self:SetMaxValue(self.maxValue)
+		self:SetValue(self.value)
 	end
 end
 
@@ -1367,7 +1424,7 @@ function barPrototype:OnBarReleased()
 			callbacks[k] = nil
 		end
 		if self.callbacks.OnUnused then
-			self.callbacks.OnUnused(self.callbacks, target, eventname)
+			self.callbacks:OnUnused(self, eventname)
 		end
 	end
 end
@@ -1539,9 +1596,8 @@ end
 
 do
 	function barPrototype:UpdateOrientationLayout()
-		local o = self.orientation
-		local t
-		if o == lib.LEFT_TO_RIGHT then
+		local t = nil
+		if self.orientation == lib.LEFT_TO_RIGHT then
 			self.icon:ClearAllPoints()
 			self.icon:SetPoint("RIGHT", self, "LEFT", 0, 0)
 
@@ -1571,7 +1627,7 @@ do
 			t:SetJustifyV("MIDDLE")
 
 			self.bgtexture:SetTexCoord(0, 1, 0, 1)
-		elseif o == lib.BOTTOM_TO_TOP then
+		elseif self.orientation == lib.BOTTOM_TO_TOP then
 			self.icon:ClearAllPoints()
 			self.icon:SetPoint("TOP", self, "BOTTOM", 0, 0)
 
@@ -1602,7 +1658,7 @@ do
 			t:SetJustifyV("BOTTOM")
 
 			self.bgtexture:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
-		elseif o == lib.RIGHT_TO_LEFT then
+		elseif self.orientation == lib.RIGHT_TO_LEFT then
 			self.icon:ClearAllPoints()
 			self.icon:SetPoint("LEFT", self, "RIGHT", 0, 0)
 
@@ -1632,7 +1688,7 @@ do
 			t:SetJustifyV("MIDDLE")
 
 			self.bgtexture:SetTexCoord(0, 1, 0, 1)
-		elseif o == lib.TOP_TO_BOTTOM then
+		elseif self.orientation == lib.TOP_TO_BOTTOM then
 			self.icon:ClearAllPoints()
 			self.icon:SetPoint("BOTTOM", self, "TOP", 0, 0)
 
@@ -1731,7 +1787,7 @@ function barPrototype:SetValue(val)
 		self:SetTextureValue(amt, dist)
 	end
 
-	if amt == 1 or amt == 0 then
+	if (self.usespark and (amt == 1 or amt == 0)) or not self.usespark then
 		self.spark:Hide()
 	elseif self.usespark then
 		self.spark:Show()

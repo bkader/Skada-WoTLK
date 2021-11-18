@@ -1,5 +1,5 @@
 -- LibToast-1.0 modified by Kader
--- Specialized ( = enhanced) ofr Skada
+-- Specialized ( = enhanced) for Skada
 
 local MAJOR, MINOR = "SpecializedLibToast-1.0", 1
 
