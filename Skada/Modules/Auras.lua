@@ -137,7 +137,7 @@ do
 
 			-- only records targets for debuffs
 			if aura.type == "DEBUFF" and aura.dstName then
-				local actor = Skada:GetActor(set, aura.dstGUID, aura.dstName, aura.dstGUID)
+				local actor = Skada:GetActor(set, aura.dstGUID, aura.dstName, aura.dstFlags)
 				if actor then
 					spell.targets = spell.targets or {}
 					if not spell.targets[aura.dstName] then
