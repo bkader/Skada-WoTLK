@@ -207,7 +207,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 	local function AuraApplied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
 		if spellid == 27827 then -- Spirit of Redemption (Holy Priest)
-			Skada.After(0.01, function() UnitDied(ts + 0.01, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags) end)
+			Skada:ScheduleTimer(function() UnitDied(ts + 0.01, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags) end, 0.01)
 		end
 	end
 

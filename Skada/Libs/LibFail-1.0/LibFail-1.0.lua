@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "LibFail-1.0", tonumber("255") or 999
+local MAJOR, MINOR = "LibFail-1.0", tonumber("256") or 999
 
 assert(LibStub, MAJOR.." requires LibStub")
 
@@ -678,6 +678,7 @@ function lib:IsSnared(target)
 end
 
 function lib:SaurfangCheck()
+    if not lib.SaurfangTarget then return end
     local bossId = lib:findTargetByGUID(37813)
     if not bossId then return end
     local target = UnitName(bossId .. "target")

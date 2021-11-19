@@ -221,10 +221,10 @@ Skada:AddLoadableModule("Resources", function(L)
 		Skada:RegisterForCL(SpellLeech, "SPELL_LEECH", {src_is_interesting = true})
 		Skada:RegisterForCL(SpellLeech, "SPELL_PERIODIC_LEECH", {src_is_interesting = true})
 
-		manamod.metadata.icon = [[Interface\Icons\inv_elemental_primal_mana]]
-		ragemod.metadata.icon = [[Interface\Icons\ability_racial_bloodrage]]
+		manamod.metadata.icon = [[Interface\Icons\spell_frost_summonwaterelemental]]
+		ragemod.metadata.icon = [[Interface\Icons\spell_nature_shamanrage]]
 		energymod.metadata.icon = [[Interface\Icons\spell_holy_circleofrenewal]]
-		runicmod.metadata.icon = [[Interface\Icons\inv_misc_rune_09]]
+		runicmod.metadata.icon = [[Interface\Icons\inv_sword_62]]
 
 		Skada:AddMode(manamod, L["Resources"])
 		Skada:AddMode(ragemod, L["Resources"])

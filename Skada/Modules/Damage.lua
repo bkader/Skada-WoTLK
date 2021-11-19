@@ -902,7 +902,7 @@ Skada:AddLoadableModule("DPS", function(L)
 			showspots = true,
 			tooltip = dps_tooltip,
 			columns = {DPS = true, Percent = true},
-			icon = [[Interface\Icons\inv_misc_pocketwatch_01]]
+			icon = [[Interface\Icons\achievement_bg_topdps]]
 		}
 
 		local parentmod = Skada:GetModule(L["Damage"], true)
@@ -1295,7 +1295,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 			click2 = targetmod,
 			nototalclick = {playermod, targetmod},
 			columns = {Damage = true, DPS = true, Percent = true},
-			icon = [[Interface\Icons\spell_fire_fireball02]]
+			icon = [[Interface\Icons\spell_shaman_stormearthfire]]
 		}
 		Skada:AddMode(self, L["Damage Done"])
 	end

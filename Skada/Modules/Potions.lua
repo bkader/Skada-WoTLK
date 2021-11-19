@@ -9,7 +9,7 @@ Skada:AddLoadableModule("Potions", function(L)
 	-- cache frequently used globals
 	local pairs, ipairs, select, tconcat = pairs, ipairs, select, table.concat
 	local format, strsub, tostring = string.format, string.sub, tostring
-	local GetItemInfo, GetSpellInfo, After = GetItemInfo, Skada.GetSpellInfo or GetSpellInfo, Skada.After
+	local GetItemInfo, GetSpellInfo = GetItemInfo, Skada.GetSpellInfo or GetSpellInfo
 	local GroupIterator = Skada.GroupIterator
 	local UnitExists, UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
 	local UnitGUID, UnitName = UnitGUID, UnitName
@@ -37,7 +37,7 @@ Skada:AddLoadableModule("Potions", function(L)
 		[67490] = 42545 -- Runic Mana Injector
 	}
 
-	local prepotionStr, potionStr = "|c%s%s|r %s", "|T%s:14:14:1:-2:64:64:2:62:2:62|t"
+	local prepotionStr, potionStr = "|c%s%s|r %s", "|T%s:14:14:1:-2:32:32:2:30:2:30|t"
 	local prepotion
 
 	local function log_potion(set, playerid, playername, playerflags, spellid)
@@ -75,7 +75,7 @@ Skada:AddLoadableModule("Potions", function(L)
 					local icon, _, _, _, _, _, _, _, spellid = select(3, UnitBuff(unit, GetSpellInfo(potionid)))
 					if spellid and potionIDs[spellid] then
 						-- instant recording doesn't work, so we delay it
-						After(1, function() PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid) end)
+						Skada:ScheduleTimer(function() PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid) end, 1)
 						potions[#potions + 1] = format(potionStr, icon)
 					end
 				end
@@ -258,7 +258,7 @@ Skada:AddLoadableModule("Potions", function(L)
 			click1 = playermod,
 			nototalclick = {playermod},
 			columns = {Count = true, Percent = true},
-			icon = [[Interface\Icons\inv_potion_110]]
+			icon = [[Interface\Icons\inv_potion_31]]
 		}
 
 		Skada:RegisterForCL(PotionUsed, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})

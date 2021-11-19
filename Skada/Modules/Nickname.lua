@@ -2,12 +2,11 @@ local Skada = Skada
 Skada:AddLoadableModule("Nickname", function(L)
 	if Skada:IsDisabled("Nickname") then return end
 
-	local mod = Skada:NewModule(L["Nickname"])
+	local mod = Skada:NewModule(L["Nickname"], "AceTimer-3.0")
 
 	local type, time = type, time
 	local strlen, strfind, strgsub, format = string.len, string.find, string.gsub, string.format
 	local UnitGUID, UnitName = UnitGUID, UnitName
-	local NewTimer, CancelTimer = Skada.NewTimer, Skada.CancelTimer
 	local CheckNickname
 
 	do
@@ -66,19 +65,16 @@ Skada:AddLoadableModule("Nickname", function(L)
 
 	function mod:OnEvent(event)
 		if self.sendCooldown > time() then
-			if not self.sendTimer or self.sendTimer._cancelled then
-				self.sendTimer = NewTimer(30, function() self:SendNickname() end)
-			end
+			self:ScheduleTimer("SendNickname", 30)
 		else
 			self:SendNickname()
 		end
 	end
 
-	function mod:SendNickname(keepTimer)
+	function mod:SendNickname(nocooldown)
 		self:SetCacheTable()
 
-		if not keepTimer then
-			self.sendTimer = CancelTimer(self.sendTimer, true)
+		if not nocooldown then
 			self.sendCooldown = time() + 29
 		end
 

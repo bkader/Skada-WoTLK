@@ -328,10 +328,6 @@ function lib:NewCounterBar(name, text, value, maxVal, icon, orientation, length,
 	return self:NewBarFromPrototype(barPrototype, name, text, value, maxVal, icon, orientation, length, thickness)
 end
 
-function lib:NewTimerBar(name, text, time, maxTime, icon, orientation, length, thickness)
-	return self:NewBarFromPrototype(barPrototype, name, text, time, maxTime, icon, orientation, length, thickness, true)
-end
-
 function lib:ReleaseBar(name)
 	if not bars[self] then return end
 
@@ -476,22 +472,30 @@ end
 
 function barListPrototype:AdjustTitle(ignoreMouseover)
 	self.button.text:SetJustifyH(self.orientation == 3 and "RIGHT" or "LEFT")
+	self.button.text:SetJustifyV("MIDDLE")
+
+	self.button.icon:ClearAllPoints()
+	self.button.text:ClearAllPoints()
+
 	if self.lastbtn and self.orientation == 3 then
 		if self.mouseover and not ignoreMouseover then
 			self.button.text:SetPoint("LEFT", self.button, "LEFT", 5, 0)
 		else
 			self.button.text:SetPoint("LEFT", self.lastbtn, "RIGHT")
 		end
-		self.button.text:SetPoint("RIGHT", self.button, "RIGHT", -5, 0)
+		self.button.icon:SetPoint("RIGHT", self.button, "RIGHT", -5, -1)
+		self.button.text:SetPoint("RIGHT", self.button, "RIGHT", self.showButtonIcon and -23 or -5, 0)
 	elseif self.lastbtn then
-		self.button.text:SetPoint("LEFT", self.button, "LEFT", 5, 0)
+		self.button.icon:SetPoint("LEFT", self.button, "LEFT", 5, -1)
+		self.button.text:SetPoint("LEFT", self.button, "LEFT", self.showButtonIcon and 23 or 5, 0)
 		if self.mouseover and not ignoreMouseover then
 			self.button.text:SetPoint("RIGHT", self.button, "RIGHT", -5, 0)
 		else
 			self.button.text:SetPoint("RIGHT", self.lastbtn, "LEFT")
 		end
 	else
-		self.button.text:SetPoint("LEFT", self.button, "LEFT", 5, 0)
+		self.button.icon:SetPoint("LEFT", self.button, "LEFT", 5, -1)
+		self.button.text:SetPoint("LEFT", self.button, "LEFT", self.showButtonIcon and 23 or 5, 0)
 		self.button.text:SetPoint("RIGHT", self.button, "RIGHT", -5, 0)
 	end
 end
@@ -645,6 +649,11 @@ do
 		list.button:SetBackdrop(frame_defaults)
 		list.button:SetNormalFontObject(myfont)
 		list.button.text = list.button:GetFontString()
+
+		list.button.icon = list.button.icon or list.button:CreateTexture(nil, "ARTWORK")
+		list.button.icon:SetTexCoord(0.094, 0.906, 0.094, 0.906)
+		list.button.icon:SetPoint("LEFT", list.button, "LEFT", 5, 0)
+		list.button.icon:SetSize(14, 14)
 
 		list.length = length or 200
 		list.thickness = thickness or 15
@@ -849,6 +858,26 @@ end
 
 function barListPrototype:IsFilling()
 	return self.fill
+end
+
+function barListPrototype:ShowButtonIcon()
+	if not self.showButtonIcon then
+		self.showButtonIcon = true
+		self.button.icon:Show()
+		self:AdjustTitle()
+	end
+end
+
+function barListPrototype:HideButtonIcon()
+	if self.showButtonIcon then
+		self.showButtonIcon = false
+		self.button.icon:Hide()
+		self:AdjustTitle()
+	end
+end
+
+function barListPrototype:SetButtonIcon(icon)
+	self.button.icon:SetTexture(icon)
 end
 
 function barListPrototype:ShowIcon()
@@ -1340,7 +1369,7 @@ do
 		if icon then
 			self:ShowIcon()
 		end
-		self.icon:SetTexCoord(0.065, 0.935, 0.065, 0.935)
+		self.icon:SetTexCoord(0.094, 0.906, 0.094, 0.906)
 
 		-- Lame frame solely used for handling mouse input on icon.
 		self.iconFrame = self.iconFrame or CreateFrame("Frame", nil, self)
@@ -1376,6 +1405,12 @@ do
 		self.maxValue = maxVal or self.value
 		self:SetMaxValue(self.maxValue)
 		self:SetValue(self.value)
+
+		if self.updateFuncs then
+			for i = 1, #self.updateFuncs do
+				tremove(self.updateFuncs, i)
+			end
+		end
 	end
 end
 
@@ -1840,6 +1875,37 @@ function barPrototype:UpdateColor()
 	end
 	if map then
 		self.texture:SetVertexColor(map[amt], map[amt + 1], map[amt + 2], map[amt + 3])
+	end
+end
+
+function barPrototype:AddOnUpdate(f)
+	self.updateFuncs = self.updateFuncs or {}
+	tinsert(self.updateFuncs, f)
+	self:SetScript("OnUpdate", self.OnUpdate)
+end
+
+function barPrototype:RemoveOnUpdate(f)
+	if self.updateFuncs then
+		for i = 1, #self.updateFuncs do
+			if f == self.updateFuncs[i] then
+				tremove(self.updateFuncs, i)
+				if #self.updateFuncs == 0 then
+					self:SetScript("OnUpdate", nil)
+				end
+				return
+			end
+		end
+	end
+end
+
+function barPrototype.OnUpdate(f, t)
+	if f and f.updateFuncs then
+		for i = 1, #f.updateFuncs do
+			local func = f.updateFuncs[i]
+			if func then
+				func(f, t)
+			end
+		end
 	end
 end
 

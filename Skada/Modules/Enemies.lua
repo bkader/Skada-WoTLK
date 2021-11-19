@@ -453,6 +453,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 
 				d.id = source.id or sourcename
 				d.label = sourcename
+				d.text = source.id and Skada:FormatName(sourcename, source.id)
 				d.class = source.class
 				d.role = source.role
 				d.spec = source.spec
@@ -548,6 +549,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 
 					d.id = source.id or sourcename
 					d.label = sourcename
+					d.text = source.id and Skada:FormatName(sourcename, source.id)
 					d.class = source.class
 					d.role = source.role
 					d.spec = source.spec
@@ -1284,7 +1286,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 			click2 = targetmod,
 			nototalclick = {spellmod, targetmod},
 			columns = {Healing = true, HPS = true, Percent = true},
-			icon = [[Interface\Icons\spell_nature_healingtouch]]
+			icon = [[Interface\Icons\spell_holy_blessedlife]]
 		}
 
 		Skada:RegisterForCL(SpellHeal, "SPELL_HEAL", {src_is_not_interesting = true, dst_is_not_interesting = true})

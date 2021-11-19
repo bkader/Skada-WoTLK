@@ -77,6 +77,7 @@ Skada.windowdefaults = {
 	enabletitle = true,
 	titleset = true,
 	combattimer = false,
+	moduleicons = false,
 	set = "current",
 	mode = nil,
 	display = "bar",
@@ -735,7 +736,7 @@ do
 		if not initOptions then
 			initOptions = {
 				type = "group",
-				name = fmt("|T%s:19:19:0:-1:32:32:2:32:2:32|t Skada |cffffffff%s|r", [[Interface\ICONS\Spell_Lightning_LightningBolt01]], Skada.version),
+				name = fmt("|T%s:19:19:0:-1:32:32:2:30:2:30|t Skada |cffffffff%s|r", [[Interface\ICONS\Spell_Lightning_LightningBolt01]], Skada.version),
 				args = {
 					open = {
 						type = "execute",

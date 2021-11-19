@@ -1,4 +1,4 @@
-local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceEvent-3.0", "AceHook-3.0", "AceComm-3.0", "LibCompat-1.0-Skada")
+local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceEvent-3.0", "AceHook-3.0", "AceTimer-3.0", "AceComm-3.0", "LibCompat-1.0-Skada")
 _G.Skada = Skada
 
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
@@ -27,7 +27,6 @@ local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
 local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
 local GetNumGroupMembers, GetGroupTypeAndCount = Skada.GetNumGroupMembers, Skada.GetGroupTypeAndCount
-local After, NewTimer, NewTicker, CancelTimer = Skada.After, Skada.NewTimer, Skada.NewTicker, Skada.CancelTimer
 local GetUnitIdFromGUID, GetUnitSpec, GetUnitRole = Skada.GetUnitIdFromGUID, Skada.GetUnitSpec, Skada.GetUnitRole
 local UnitIterator, IsGroupDead = Skada.UnitIterator, Skada.IsGroupDead
 local Transliterate = Skada.Transliterate
@@ -650,8 +649,8 @@ do
 		self.metadata.maxvalue = 1
 		self.metadata.sortfunc = function(a, b) return a.name < b.name end
 
-		self.display:SetTitle(self, self.metadata.title)
 		self.changed = true
+		self.display:SetTitle(self, self.metadata.title)
 
 		if self.child and self.db.childmode == 0 then
 			self.child:DisplayModes(settime)
@@ -1320,7 +1319,7 @@ end
 function Skada:DismissPet(petGUID, delay)
 	if petGUID and pets[petGUID] then
 		-- delayed for a reason (2 x MAINMENU_SLIDETIME).
-		After(delay or 0.6, function() pets[petGUID] = nil end)
+		Skada:ScheduleTimer(function() pets[petGUID] = nil end, delay or 0.6)
 	end
 end
 
@@ -1802,7 +1801,7 @@ end
 function Skada:PLAYER_ENTERING_WORLD()
 	Skada:CheckZone()
 	if was_in_party == nil then
-		After(1, Skada.GROUP_ROSTER_UPDATE)
+		Skada:ScheduleTimer("GROUP_ROSTER_UPDATE", 1)
 	end
 end
 
@@ -1858,7 +1857,8 @@ do
 
 	function CheckVersion()
 		Skada:SendComm(nil, nil, "VersionCheck", Skada.version)
-		version_timer = CancelTimer(version_timer, true)
+		Skada:CancelTimer(version_timer, true)
+		version_timer = nil
 	end
 
 	function ConvertVersion(ver)
@@ -1923,7 +1923,7 @@ do
 
 		if count ~= version_count then
 			if count > 1 and count > version_count then
-				version_timer = version_timer or NewTimer(10, CheckVersion)
+				version_timer = version_timer or Skada:ScheduleTimer(CheckVersion, 10)
 			end
 			version_count = count
 		end
@@ -1985,7 +1985,7 @@ function Skada:Reset(force)
 		wipe(self.char.sets)
 		self.char.total = nil
 		self:Reset()
-		After(3, self.ReloadSettings)
+		self:ScheduleTimer("ReloadSettings", 3)
 		return
 	end
 
@@ -2333,11 +2333,15 @@ do
 		end
 		self.db.mode = savemode
 
-		name = self.title or name
+		if self.changed and self.title then
+			self.title = nil
+		elseif self.title and self.title ~= name then
+			name = self.title
+		end
 
-		if self.db.display == "bar" and not self.selectedmode.notitleset then
+		if self.db.display == "bar" then
 			-- title set enabled?
-			if self.db.titleset then
+			if self.db.titleset and not self.selectedmode.notitleset then
 				if self.selectedset == "current" then
 					name = name .. ": " .. L["Current"]
 				elseif self.selectedset == "total" then
@@ -2984,8 +2988,8 @@ function Skada:OnEnable()
 	end
 
 	-- SharedMedia is sometimes late, we wait few seconds then re-apply settings.
-	After(2, self.ApplySettings)
-	After(3, self.CheckMemory)
+	self:ScheduleTimer("ApplySettings", 2)
+	self:ScheduleTimer("CheckMemory", 3)
 end
 
 function Skada:BigWigs(_, _, event, message)
@@ -3251,9 +3255,17 @@ function Skada:EndSegment()
 
 	self:UpdateDisplay(true)
 
-	update_timer = CancelTimer(update_timer, true)
-	tick_timer = CancelTimer(tick_timer, true)
-	After(3, Skada.CheckMemory)
+	if update_timer then
+		self:CancelTimer(update_timer, true)
+		update_timer = nil
+	end
+
+	if tick_timer then
+		self:CancelTimer(tick_timer, true)
+		tick_timer = nil
+	end
+
+	self:ScheduleTimer("CheckMemory", 3)
 end
 
 function Skada:StopSegment(msg)
@@ -3326,7 +3338,11 @@ do
 	function Skada:StartCombat()
 		death_counter = 0
 		starting_members = GetNumGroupMembers()
-		tentative_handle = CancelTimer(tentative_handle, true)
+
+		if tentative_handle then
+			self:CancelTimer(tentative_handle, true)
+			tentative_handle = nil
+		end
 
 		if update_timer then
 			self:Debug("EndSegment: StartCombat")
@@ -3376,8 +3392,8 @@ do
 
 		self:UpdateDisplay(true)
 
-		update_timer = NewTicker(self.db.profile.updatefrequency or 0.5, function() self:UpdateDisplay() end)
-		tick_timer = NewTicker(1, function() self:Tick() end)
+		update_timer = self:ScheduleRepeatingTimer("UpdateDisplay", self.db.profile.updatefrequency or 0.5)
+		tick_timer = self:ScheduleRepeatingTimer("Tick", 1)
 	end
 
 	function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
@@ -3400,11 +3416,11 @@ do
 					self.total = CreateSet(L["Total"], now)
 				end
 
-				tentative_handle = NewTimer(self.db.profile.tentativetimer or 3, function()
+				tentative_handle = self:ScheduleTimer(function()
 					tentative = nil
 					tentative_handle = nil
 					self.current = nil
-				end)
+				end, self.db.profile.tentativetimer or 3)
 				tentative = self.db.profile.tentativecombatstart and 4 or 0
 			end
 		end
@@ -3478,7 +3494,8 @@ do
 					if tentative ~= nil then
 						tentative = tentative + 1
 						if tentative == 5 then
-							tentative_handle = CancelTimer(tentative_handle, true)
+							self:CancelTimer(tentative_handle, true)
+							tentative_handle = nil
 							tentative = nil
 							self:Debug("StartCombat: tentative combat")
 							self:StartCombat()
@@ -3525,14 +3542,15 @@ do
 
 		if self.current and self.current.gotboss and (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") then
 			if dstName and self.current.mobname == dstName then
-				local set = self.current -- catch it before it goes away
-				After(self.db.profile.updatefrequency or 0.5, function()
-					if set and set.success == nil then
-						set.success = true
-						self.callbacks:Fire("COMBAT_BOSS_DEFEATED", set)
-					end
-				end)
+				self:ScheduleTimer("BossDefeated", self.db.profile.updatefrequency or 0.5, self.current)
 			end
 		end
+	end
+end
+
+function Skada:BossDefeated(set)
+	if set and not set.success then
+		set.success = true
+		self.callbacks:Fire("COMBAT_BOSS_DEFEATED", set)
 	end
 end

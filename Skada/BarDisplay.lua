@@ -200,6 +200,17 @@ end
 function mod:SetTitle(win, title)
 	if win and win.bargroup then
 		win.bargroup.button:SetText(title)
+
+		-- module icon
+		if not win.db.moduleicons then
+			win.bargroup:HideButtonIcon()
+		elseif win.selectedmode and win.selectedmode.metadata and win.selectedmode.metadata.icon then
+			win.bargroup:SetButtonIcon(win.selectedmode.metadata.icon)
+			win.bargroup:ShowButtonIcon()
+		elseif win.parentmode and win.parentmode.metadata and win.parentmode.metadata.icon then
+			win.bargroup:SetButtonIcon(win.parentmode.metadata.icon)
+			win.bargroup:ShowButtonIcon()
+		end
 	end
 end
 
@@ -1308,12 +1319,25 @@ function mod:AddDisplayOptions(win, options)
 							Skada:ApplySettings(db.name)
 						end
 					},
+					moduleicons = {
+						type = "toggle",
+						name = L["Mode Icon"],
+						desc = L["Shows mode's icon in the title bar."],
+						order = 40,
+						get = function()
+							return db.moduleicons
+						end,
+						set = function()
+							db.moduleicons = not db.moduleicons
+							Skada:ApplySettings(db.name)
+						end
+					},
 					height = {
 						type = "range",
 						name = L["Height"],
 						desc = format(L["The height of %s."], L["Title Bar"]),
 						width = "double",
-						order = 40,
+						order = 50,
 						min = 10,
 						max = 50,
 						step = 1
@@ -1322,7 +1346,7 @@ function mod:AddDisplayOptions(win, options)
 						type = "group",
 						name = L["Background"],
 						inline = true,
-						order = 50,
+						order = 60,
 						args = {
 							texture = {
 								type = "select",
@@ -1353,7 +1377,7 @@ function mod:AddDisplayOptions(win, options)
 						type = "group",
 						name = L["Border"],
 						inline = true,
-						order = 60,
+						order = 70,
 						args = {
 							bordertexture = {
 								type = "select",

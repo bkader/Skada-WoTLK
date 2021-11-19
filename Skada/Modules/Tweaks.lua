@@ -8,7 +8,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 	local UnitExists, UnitName, UnitClass = UnitExists, UnitName, UnitClass
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
-	local GetTime, After, NewTimer, CancelTimer = GetTime, Skada.After, Skada.NewTimer, Skada.CancelTimer
+	local GetTime = GetTime
 
 	local BITMASK_GROUP = Skada.BITMASK_GROUP
 	if not BITMASK_GROUP then
@@ -19,7 +19,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 		Skada.BITMASK_GROUP = BITMASK_GROUP
 	end
 
-	local pull_timer, channel_events, fofrostmourne
+	local channel_events, fofrostmourne
 
 	local ignoredspells = {
 		[1130] = true, -- Hunter's Mark (rank 1)
@@ -48,9 +48,9 @@ Skada:AddLoadableModule("Tweaks", function(L)
 		local pull_formats = {"%s (%s)", "%s (|c%s%s|r)", "|c%s%s|r", "|c%s%s|r (%s)"}
 
 		-- thank you Details!
-		local function WhoPulled(self)
+		local function WhoPulled(hitline)
 			-- first hit
-			local hitline = self.HitBy or L["|cffffbb00First Hit|r: *?*"]
+			hitline = hitline or L["|cffffbb00First Hit|r: *?*"]
 			Skada:Print(hitline)
 
 			-- firt boss target
@@ -91,10 +91,10 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			-- first hit
 			if
 				self.db.profile.firsthit and
+				not self.current and
 				(trigger_events[eventtype] or eventtype == "SPELL_CAST_SUCCESS") and
 				srcName and
 				dstName and
-				not pull_timer and
 				not ignoredspells[(select(1, ...))]
 			then
 				if
@@ -144,24 +144,13 @@ Skada:AddLoadableModule("Tweaks", function(L)
 							link = GetSpellLink((select(1, ...))) or GetSpellInfo((select(1, ...)))
 						end
 
-						pull_timer = NewTimer(self.db.profile.updatefrequency or 0.5, WhoPulled)
-						pull_timer.HitBy = format(L["|cffffff00First Hit|r: %s from %s"], link or "", output)
+						Skada:ScheduleTimer(WhoPulled, self.db.profile.updatefrequency or 0.5, format(L["|cffffff00First Hit|r: %s from %s"], link or "", output))
 					end
 				end
 			end
 
 			-- use the original function
 			Skada_CombatLogEvent(Skada, nil, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		end
-	end
-
-	do
-		local Skada_EndSegment = Skada.EndSegment
-		function Skada:EndSegment()
-			if self.db.profile.firsthit and pull_timer then
-				pull_timer = CancelTimer(pull_timer, true)
-			end
-			Skada_EndSegment(Skada)
 		end
 	end
 
@@ -348,7 +337,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 				self.throttle = nil
 			end
 
-			After(0.1, CombatLogClearEntries)
+			Skada:ScheduleTimer(CombatLogClearEntries, 0.1)
 		end
 
 		local function OnEvent(self, event, unit, spellname)
@@ -362,7 +351,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			elseif event == "ZONE_CHANGED_NEW_AREA" then
 				local zt = select(2, IsInInstance())
 				if self.zonetype and zt ~= self.zonetype then
-					After(0.01, CombatLogClearEntries)
+					Skada:ScheduleTimer(CombatLogClearEntries, 0.01)
 				end
 				self.zonetype = zt
 			end
@@ -370,7 +359,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 
 		function mod:COMBAT_PLAYER_ENTER()
 			if Skada.db.profile.combatlogfix then
-				After(0.01, CombatLogClearEntries)
+				Skada:ScheduleTimer(CombatLogClearEntries, 0.01)
 			end
 		end
 
@@ -461,8 +450,8 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			}
 			Skada.options.args.tweaks.args.general.args.moduleicons = {
 				type = "toggle",
-				name = L["Module Icons"],
-				desc = L["Enable this if you want to show module icons on windows and menus."],
+				name = L["Modes Icons"],
+				desc = L["Show modes icons on bars and menus."],
 				set = SetValue,
 				order = 20
 			}
@@ -570,11 +559,11 @@ Skada:AddLoadableModule("Tweaks", function(L)
 
 		function mod:BossDefeated(_, set)
 			if set and not set.stopped and set.gotboss and not ignoredBosses[set.gotboss] then
-				After(Skada.db.profile.smartwait or 3, function()
+				Skada:ScheduleTimer(function()
 					if not set.endtime then
 						Skada:StopSegment(L["Smart Stop"])
 					end
-				end)
+				end, Skada.db.profile.smartwait or 3)
 			end
 		end
 	end

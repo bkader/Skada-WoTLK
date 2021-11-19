@@ -209,7 +209,7 @@ Skada:AddLoadableModule("Resurrects", function(L)
 			click2 = targetmod,
 			nototalclick = {playermod, targetmod},
 			columns = {Count = true, Percent = false},
-			icon = [[Interface\Icons\spell_nature_reincarnation]]
+			icon = [[Interface\Icons\spell_holy_resurrection]]
 		}
 
 		Skada:RegisterForCL(SpellResurrect, "SPELL_RESURRECT", {src_is_interesting = true, dst_is_interesting = true})

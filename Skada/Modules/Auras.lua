@@ -460,7 +460,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 			click1 = spellmod,
 			nototalclick = {spellmod},
 			columns = {Uptime = true, Count = true, Percent = true},
-			icon = [[Interface\Icons\spell_magic_greaterblessingofkings]]
+			icon = [[Interface\Icons\spell_holy_divinespirit]]
 		}
 
 		Skada:RegisterForCL(HandleBuff, "SPELL_AURA_APPLIED", {dst_is_interesting = true})

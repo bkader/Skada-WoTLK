@@ -67,7 +67,7 @@ Skada:AddLoadableModule("Activity", function(L)
 			ordersort = true,
 			tooltip = activity_tooltip,
 			columns = {["Active Time"] = true, Percent = true},
-			icon = [[Interface\Icons\spell_nature_timestop]]
+			icon = [[Interface\Icons\spell_holy_borrowedtime]]
 		}
 		Skada:AddMode(self)
 	end

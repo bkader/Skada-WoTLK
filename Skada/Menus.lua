@@ -15,7 +15,7 @@ local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
 local ToggleDropDownMenu = L_ToggleDropDownMenu or ToggleDropDownMenu
 local UIDropDownMenu_AddSeparator = L_UIDropDownMenu_AddSeparator or UIDropDownMenu_AddSeparator
 
-local iconName = "|T%s:19:19:0:-1:32:32:2:32:2:32|t %s"
+local iconName = "|T%s:19:19:0:-1:32:32:2:30:2:30|t %s"
 
 -- guesses the dropdown location
 local function getDropdownPoint()

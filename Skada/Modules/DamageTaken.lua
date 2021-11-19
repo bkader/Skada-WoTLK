@@ -821,7 +821,7 @@ Skada:AddLoadableModule("DTPS", function(L)
 			showspots = true,
 			tooltip = dtps_tooltip,
 			columns = {DTPS = true, Percent = true},
-			icon = [[Interface\Icons\inv_misc_pocketwatch_02]]
+			icon = [[Interface\Icons\inv_weapon_shortblade_06]]
 		}
 
 		local parentmod = Skada:GetModule(L["Damage Taken"], true)
@@ -1109,7 +1109,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 			showspots = true,
 			click1 = playermod,
 			columns = {Percent = true, Count = true, Total = true},
-			icon = [[Interface\Icons\ability_warrior_shieldwall]]
+			icon = [[Interface\Icons\ability_warlock_avoidance]]
 		}
 
 		Skada:AddMode(self, L["Damage Taken"])

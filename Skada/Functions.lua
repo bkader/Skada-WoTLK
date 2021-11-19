@@ -336,8 +336,6 @@ do
 	local wipe = wipe
 	local unpack = unpack
 	local random = math.random
-	local NewTicker = Skada.NewTicker
-	local CancelTimer = Skada.CancelTimer
 	local IsGroupInCombat = Skada.IsGroupInCombat
 	local InCombatLockdown = InCombatLockdown
 	local setPrototype = Skada.setPrototype
@@ -453,25 +451,31 @@ do
 	function Skada:TestMode()
 		if InCombatLockdown() or IsGroupInCombat() then
 			wipe(fakeSet)
-			updateTimer = CancelTimer(updateTimer, true)
 			self.testMode = nil
+			if updateTimer then
+				self:CancelTimer(updateTimer)
+				updateTimer = nil
+			end
 			self:CleanGarbage()
 			return
 		end
 		self.testMode = not self.testMode
 		if not self.testMode then
 			wipe(fakeSet)
-			updateTimer = CancelTimer(updateTimer, true)
+			if updateTimer then
+				self:CancelTimer(updateTimer)
+				updateTimer = nil
+			end
 			self.current = nil
 			return
 		end
 
 		self:Wipe()
 		self.current = GenerateFakeData()
-		updateTimer = NewTicker(self.db.profile.updatefrequency or 0.25, function()
+		updateTimer = self:ScheduleRepeatingTimer(function()
 			RandomizeFakeData(self.current, self.db.profile.updatefrequency or 0.25)
 			self:UpdateDisplay(true)
-		end)
+		end, self.db.profile.updatefrequency or 0.25)
 	end
 end
 

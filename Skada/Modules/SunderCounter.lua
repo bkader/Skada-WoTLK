@@ -10,7 +10,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
-	local T, After = Skada.Table, Skada.After
+	local T = Skada.Table
 	local new, del = Skada.TablePool()
 	local sunder, sunderLink, devastate, _
 
@@ -71,12 +71,12 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 
 	local function SunderRemoved(timestamp, eventtype, _, _, _, dstGUID, dstName, _, _, spellname)
 		if Skada.db.profile.modules.sunderannounce and spellname and spellname == sunder then
-			After(0.1, function()
+			Skada:ScheduleTimer(function()
 				if mod.targets and mod.targets[dstGUID] then
 					mod:Announce(format(L["%s dropped from %s!"], sunderLink or sunder, dstName or L.Unknown), dstGUID)
 					mod.targets[dstGUID] = del(mod.targets[dstGUID])
 				end
-			end)
+			end, 0.1)
 		end
 	end
 
