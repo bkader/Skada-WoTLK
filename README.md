@@ -4,8 +4,12 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/bkader/Skada-WoTLK)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/bkader/Skada-WoTLK?label=version)
 
-## >> NOTE FOR 1.8.72 <<
+## >> NOTES <<
 
+**1.8.73**:
+- Added [Project Ascension CoA](https://ascension.gg/news/conquest-of-azeroth-alpha/332) classes only available when player on CoA realms.
+
+**1.8.72**:
 - The data tables structures of most of the modules were changed, so it is important to reset Skada (_segments and not settings._).
 - A newly added and extensible **API** system that allows you to access data provided by Skada to be used externally (_WeakAuras for example_). [Read more](#api) about this at the bottom.
 
