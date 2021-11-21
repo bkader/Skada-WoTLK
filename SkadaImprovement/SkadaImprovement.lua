@@ -196,8 +196,11 @@ Skada:AddLoadableModule("Improvement", function(L)
 		win.title = L["Improvement"]
 
 		if self.db then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 1
 			for name, data in pairs(self.db) do
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
@@ -208,13 +211,11 @@ Skada:AddLoadableModule("Improvement", function(L)
 				d.value = data.count
 				d.valuetext = tostring(data.count)
 
-				if data.count > maxvalue then
-					maxvalue = data.count
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 				nr = nr + 1
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
