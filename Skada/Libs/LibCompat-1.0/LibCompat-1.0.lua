@@ -459,40 +459,68 @@ end
 -- Classes & Colors
 
 do
-	local classColorsTable, classInfoTable
-	local colors = CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS
-	local CLASS_SORT_ORDER = CLASS_SORT_ORDER
+	local classColorsTable, classCoordsTable
+	local classColors = CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS
+	lib.AscensionCoA = (classColors.BARBARIAN ~= nil) -- flag for Project Ascension CoA
 
 	-- the functions below are for internal usage only
 	local function __fillClassColorsTable()
-		if classColorsTable ~= nil then return end
 		classColorsTable = {}
-		for class, tbl in pairs(colors) do
+		for class, tbl in pairs(classColors) do
 			classColorsTable[class] = tbl
 			classColorsTable[class].colorStr = "ff" .. RGBPercToHex(tbl.r, tbl.g, tbl.b)
 		end
 	end
 
-	local function __fillClassInfoTable()
-		if classInfoTable ~= nil then return end
-
-		classInfoTable = {
-			WARRIOR = {classFile = "WARRIOR", classID = 1},
-			PALADIN = {classFile = "PALADIN", classID = 2},
-			HUNTER = {classFile = "HUNTER", classID = 3},
-			ROGUE = {classFile = "ROGUE", classID = 4},
-			PRIEST = {classFile = "PRIEST", classID = 5},
-			DEATHKNIGHT = {classFile = "DEATHKNIGHT", classID = 6},
-			SHAMAN = {classFile = "SHAMAN", classID = 7},
-			MAGE = {classFile = "MAGE", classID = 8},
-			WARLOCK = {classFile = "WARLOCK", classID = 9},
-			DRUID = {classFile = "DRUID", classID = 11}
-		}
-
-		-- fill names
-		for k, v in pairs(LOCALIZED_CLASS_NAMES_MALE) do
-			if classInfoTable[k] then
-				classInfoTable[k].className = v
+	-- fills class coordinates table
+	local function __fillClassCoordsTable()
+		-- for Project Ascension!
+		if lib.AscensionCoA then
+			classCoordsTable = {
+				-- original wow classes
+				WARRIOR = {0, 0.125, 0, 0.125},
+				MAGE = {0.125, 0.25, 0, 0.125},
+				ROGUE = {0.25, 0.375, 0, 0.125},
+				DRUID = {0.375, 0.5, 0, 0.125},
+				HUNTER = {0.5, 0.625, 0, 0.125},
+				SHAMAN = {0.625, 0.75, 0, 0.125},
+				PRIEST = {0.75, 0.875, 0, 0.125},
+				WARLOCK = {0.875, 1, 0, 0.125},
+				PALADIN = {0, 0.125, 0.125, 0.25},
+				DEATHKNIGHT = {0.125, 0.25, 0.125, 0.25},
+				-- project ascension custom classes
+				ABOMINATION = {0.75, 0.875, 0.375, 0.5}, -- Knight of Xoroth
+				BARBARIAN = {0.875, 1, 0.375, 0.5},
+				BARD = {0.75, 0.875, 0.625, 0.75},
+				CHRONOMANCER = {0.125, 0.25, 0.625, 0.75},
+				CULTIST = {0, 0.125, 0.5, 0.625},
+				DEMONHUNTER = {0.5, 0.625, 0.5, 0.625},
+				FLESHWARDEN = {0.75, 0.875, 0.375, 0.5}, -- Knight of Xoroth
+				FREE = {0.875, 1, 0.875, 1},
+				GUARDIAN = {0.625, 0.75, 0.5, 0.625},
+				MONK = {0, 0.125, 0.625, 0.75},
+				NECROMANCER = {0, 0.125, 0.375, 0.5},
+				PROPHET = {0.25, 0.375, 0.625, 0.75}, -- Disciple of Shadra, Venomancer
+				PYROMANCER = {0.125, 0.25, 0.5, 0.625},
+				RANGER = {0.25, 0.375, 0.5, 0.625},
+				REAPER = {0.375, 0.5, 0.375, 0.5},
+				RIFTBLADE = {0.875, 1, 0.625, 0.75},
+				SONOFARUGAL = {0.875, 1, 0.5, 0.625},
+				SPIRITMAGE = {0.375, 0.5, 0.5, 0.625}, -- Runemaster
+				STARCALLER = {0.25, 0.375, 0.375, 0.5},
+				STORMBRINGER = {0.625, 0.75, 0.375, 0.5},
+				SUNCLERIC = {0.125, 0.25, 0.375, 0.5},
+				THIEF = {0.625, 0.75, 0.625, 0.75},
+				TIDECALLER = {0.000, 0.125, 0.75, 0.875},
+				TINKER = {0.5, 0.625, 0.375, 0.5},
+				WILDWALKER = {0.375, 0.5, 0.625, 0.75}, -- Primalist
+				WITCHDOCTOR = {0.5, 0.625, 0.625, 0.75},
+				WITCHHUNTER = {0.75, 0.875, 0.5, 0.625},
+			}
+		else
+			classCoordsTable = {}
+			for class, coords in pairs(CLASS_ICON_TCOORDS) do
+				classCoordsTable[class] = coords
 			end
 		end
 	end
@@ -501,8 +529,10 @@ do
 		if classColorsTable == nil then
 			__fillClassColorsTable()
 		end
-
-		return classColorsTable
+		if classCoordsTable == nil then
+			__fillClassCoordsTable()
+		end
+		return classColorsTable, classCoordsTable
 	end
 
 	lib.GetClassColorsTable = GetClassColorsTable
@@ -700,6 +730,7 @@ local mixins = {
 	"UnitIterator",
 	-- unit util
 	"GetUnitIdFromGUID",
+	"AscensionCoA",
 	"GetClassFromGUID",
 	"GetCreatureId",
 	"UnitHealthInfo",

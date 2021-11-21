@@ -444,7 +444,7 @@ Skada.options = {
 						},
 						setslimit = {
 							type = "range",
-							name = L["Persisten segments"],
+							name = L["Persistent segments"],
 							desc = L["The number of persistent fight segments to keep."],
 							min = 0,
 							max = 30,
@@ -652,24 +652,24 @@ Skada.options = {
 		tweaks = {
 			type = "group",
 			name = L["Tweaks"],
-			desc = format(L["Options for %s."], L["Tweaks"]),
+			desc = fmt(L["Options for %s."], L["Tweaks"]),
 			childGroups = "tab",
 			order = 950,
 			args = {
 				general = {
 					type = "group",
 					name = L["General"],
-					desc = format(L["General options for %s."], L["Tweaks"]),
+					desc = fmt(L["General options for %s."], L["Tweaks"]),
 					order = 10,
 					args = {}
 				},
 				advanced = {
 					type = "group",
 					name = L["Advanced"],
-					desc = format(L["Advanced options for %s."], L["Tweaks"]),
+					desc = fmt(L["Advanced options for %s."], L["Tweaks"]),
 					order = 900,
 					args = {
-						notify = Skada:GetToastOptions()
+						toast_opt = Skada:GetToastOptions()
 					}
 				}
 			}
@@ -804,7 +804,7 @@ function Skada:AddColumnOptions(mod)
 
 	local moduleName = mod.moduleName
 	if mod.metadata.icon or mod.icon then
-		moduleName = format(nameIcon, mod.metadata.icon or mod.icon, moduleName)
+		moduleName = fmt(nameIcon, mod.metadata.icon or mod.icon, moduleName)
 	end
 
 	local cols = {type = "group", name = moduleName, inline = true, args = {}}

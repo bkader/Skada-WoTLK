@@ -505,7 +505,12 @@ do
 
 		local hasicon
 		for _, data in ipairs(win.dataset) do
-			if (data.icon and not data.ignore) or (data.spec and win.db.specicons) or (data.class and win.db.classicons) or (data.role and win.db.roleicons) then
+			if
+				(data.icon and not data.ignore) or
+				(win.db.classicons and data.class) or
+				(win.db.roleicons and rolecoords and data.role) or
+				(win.db.specicons and speccoords and data.spec)
+			then
 				hasicon = true
 				break
 			end
@@ -588,10 +593,10 @@ do
 						bar.missingclass = nil
 					end
 
-					if win.db.specicons and data.spec and speccoords[data.spec] then
+					if win.db.specicons and speccoords and data.spec and speccoords[data.spec] then
 						bar:ShowIcon()
 						bar:SetIconWithCoord(specicons, speccoords[data.spec])
-					elseif win.db.roleicons and data.role and data.role ~= "NONE" and rolecoords[data.role] then
+					elseif win.db.roleicons and rolecoords and data.role and data.role ~= "NONE" and rolecoords[data.role] then
 						bar:ShowIcon()
 						bar:SetIconWithCoord(roleicons, rolecoords[data.role])
 					elseif win.db.classicons and data.class and classcoords[data.class] then

@@ -1108,12 +1108,13 @@ function Skada:GetPlayer(set, guid, name, flag)
 	end
 
 	-- fix players created before their info was received
-	if player.class and Skada.validclass[player.class] then
-		if player.spec == nil then
-			player.spec = GetUnitSpec(players[player.id], player.class)
-		end
+	-- roles and specs are temporary disabled for Project Ascension CoA
+	if not self.AscensionCoA and player.class and Skada.validclass[player.class] then
 		if player.role == nil or player.role == "NONE" then
 			player.role = GetUnitRole(players[player.id], player.class)
+		end
+		if player.spec == nil then
+			player.spec = GetUnitSpec(players[player.id], player.class)
 		end
 	end
 
@@ -1331,8 +1332,9 @@ function Skada:IsPet(guid, flag)
 	if guid and pets[guid] then
 		return 1 -- group pet
 	end
-	if tonumber(flag) then
-		return (band(flag, BITMASK_PETS) ~= 0)
+	if tonumber(flag) and (band(flag, BITMASK_PETS) ~= 0) then
+		-- we return 1 for a friendly pet (probably group's) or true.
+		return (band(flag, COMBATLOG_OBJECT_REACTION_FRIENDLY) ~= 0) and 1 or true
 	end
 	return false
 end

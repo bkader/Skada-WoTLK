@@ -68,8 +68,10 @@ Skada:AddLoadableModule("Threat", function(L)
 						player.class = "PET"
 					else
 						player.class = select(2, UnitClass(unit))
-						player.role = GetUnitRole(unit, player.class)
-						player.spec = GetUnitSpec(unit, player.class)
+						if not Skada.AscensionCoA then
+							player.role = GetUnitRole(unit, player.class)
+							player.spec = GetUnitSpec(unit, player.class)
+						end
 					end
 
 					-- cache the player.

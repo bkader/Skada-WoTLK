@@ -360,6 +360,29 @@ do
 		{"Summonbot", "WARLOCK", "DAMAGER", 266}, -- Demonology Warlock
 		{"Chuggernaut", "WARRIOR", "DAMAGER", 72} -- Fury Warrior
 	}
+	local fakePlayersAscension = {
+		{"Necromancer", "NECROMANCER"},
+		{"Sun Cleric", "SUNCLERIC"},
+		{"Starcaller", "STARCALLER"},
+		{"Reaper", "REAPER"},
+		{"Tinker", "TINKER"},
+		{"Stormbringer", "STORMBRINGER"},
+		{"Knight of Xoroth", "FLESHWARDEN"},
+		{"Barbarian", "BARBARIAN"},
+		{"Cultist", "CULTIST"},
+		{"Pyromancer", "PYROMANCER"},
+		{"Ranger", "RANGER"},
+		{"Runemaster", "SPIRITMAGE"},
+		{"Demon Hunter", "DEMONHUNTER"},
+		{"Guardian", "GUARDIAN"},
+		{"Witch Hunter", "WITCHHUNTER"},
+		{"Son of Arugal", "SONOFARUGAL"},
+		{"Monk", "MONK"},
+		{"Chronomancer", "CHRONOMANCER"},
+		{"Venomancer", "PROPHET"},
+		{"Primalist", "WILDWALKER"},
+		{"Witch Doctor", "WITCHDOCTOR"}
+	}
 
 	local function GenerateFakeData()
 		wipe(fakeSet)
@@ -371,8 +394,9 @@ do
 		fakeSet.absorb = 0
 		fakeSet.players = wipe(fakeSet.players or {})
 
-		for i = 1, 10 do
-			local name, class, role, spec = unpack(fakePlayers[i])
+		local players = Skada.AscensionCoA and fakePlayersAscension or fakePlayers
+		for i = 1, #players do
+			local name, class, role, spec = unpack(players[i])
 			local damage, heal, absorb = 0, 0, 0
 
 			if role == "TANK" then
@@ -498,6 +522,8 @@ do
 	end
 
 	function Skada:RegisterMedias()
+		self.RegisterMedias = nil -- remove it
+
 		-- fonts
 		LSM:Register("font", "ABF", [[Interface\Addons\Skada\Media\Fonts\ABF.ttf]])
 		LSM:Register("font", "Accidental Presidency", [[Interface\Addons\Skada\Media\Fonts\Accidental Presidency.ttf]])
@@ -549,8 +575,6 @@ do
 		LSM:Register("sound", "War Drums", [[Sound\Event Sounds\Event_wardrum_ogre.wav]])
 		LSM:Register("sound", "Wham!", [[Sound\Doodad\PVP_Lordaeron_Door_Open.wav]])
 		LSM:Register("sound", "You Will Die!", [[Sound\Creature\CThun\CThunYouWillDIe.wav]])
-
-		self.RegisterMedias = nil -- remove it
 	end
 end
 
@@ -558,73 +582,18 @@ end
 -- Classes, Specs and Schools
 
 function Skada:RegisterClasses()
-	-- class icons file.
-	self.classicons = [[Interface\AddOns\Skada\Media\Textures\icon-classes]]
+	self.RegisterClasses = nil -- remove it
 
-	-- class texture coordinates & custom
-	self.classcoords, self.validclass = {}, {}
-	for class, coords in pairs(CLASS_ICON_TCOORDS) do
-		self.classcoords[class] = coords
+	-- class colors & coordinates
+	self.classcolors, self.classcoords = self.GetClassColorsTable()
+
+	-- valid classes!
+	self.validclass = {}
+	for class in pairs(self.classcolors) do
 		self.validclass[class] = true
 	end
 
-	if not CLASS_ICON_TCOORDS.ENEMY then
-		self.classcoords.BOSS = {0.75, 1, 0.5, 0.75}
-		self.classcoords.ENEMY = {0.5, 0.75, 0.5, 0.75}
-		self.classcoords.MONSTER = {0, 0.25, 0.75, 1}
-		self.classcoords.PET = {0.25, 0.5, 0.75, 1}
-		self.classcoords.PLAYER = {0.75, 1, 0.75, 1}
-		self.classcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
-	end
-
-	-- role icon file and texture coordinates
-	self.roleicons = [[Interface\AddOns\Skada\Media\Textures\icon-roles]]
-	self.rolecoords = {
-		LEADER = {0, 0.25, 0, 1},
-		DAMAGER = {0.25, 0.5, 0, 1},
-		TANK = {0.5, 0.75, 0, 1},
-		HEALER = {0.75, 1, 0, 1},
-		NONE = ""
-	}
-
-	-- specialization icons
-	self.specicons = [[Interface\AddOns\Skada\Media\Textures\icon-specs]]
-	self.speccoords = {
-		[62] = {0.25, 0.375, 0.25, 0.5}, --> Mage: Arcane
-		[63] = {0.375, 0.5, 0.25, 0.5}, --> Mage: Fire
-		[64] = {0.5, 0.625, 0.25, 0.5}, --> Mage: Frost
-		[65] = {0.625, 0.75, 0.25, 0.5}, --> Paladin: Holy
-		[66] = {0.75, 0.875, 0.25, 0.5}, --> Paladin: Protection
-		[70] = {0.875, 1, 0.25, 0.5}, --> Paladin: Retribution
-		[71] = {0.5, 0.625, 0.75, 1}, --> Warrior: Arms
-		[72] = {0.625, 0.75, 0.75, 1}, --> Warrior: Fury
-		[73] = {0.75, 0.875, 0.75, 1}, --> Warrior: Protection
-		[102] = {0.375, 0.5, 0, 0.25}, --> Druid: Balance
-		[103] = {0.5, 0.625, 0, 0.25}, --> Druid: Feral
-		[104] = {0.625, 0.75, 0, 0.25}, --> Druid: Tank
-		[105] = {0.75, 0.875, 0, 0.25}, --> Druid: Restoration
-		[250] = {0, 0.125, 0, 0.25}, --> Death Knight: Blood
-		[251] = {0.125, 0.25, 0, 0.25}, --> Death Knight: Frost
-		[252] = {0.25, 0.375, 0, 0.25}, --> Death Knight: Unholy
-		[253] = {0.875, 1, 0, 0.25}, --> Hunter: Beastmastery
-		[254] = {0, 0.125, 0.25, 0.5}, --> Hunter: Marksmalship
-		[255] = {0.125, 0.25, 0.25, 0.5}, --> Hunter: Survival
-		[256] = {0, 0.125, 0.5, 0.75}, --> Priest: Discipline
-		[257] = {0.125, 0.25, 0.5, 0.75}, --> Priest: Holy
-		[258] = {0.25, 0.375, 0.5, 0.75}, --> Priest: Shadow
-		[259] = {0.375, 0.5, 0.5, 0.75}, --> Rogue: Assassination
-		[260] = {0.5, 0.625, 0.5, 0.75}, --> Rogue: Combat
-		[261] = {0.625, 0.75, 0.5, 0.75}, --> Rogue: Subtlty
-		[262] = {0.75, 0.875, 0.5, 0.75}, --> Shaman: Elemental
-		[263] = {0.875, 1, 0.5, 0.75}, --> Shaman: Enhancement
-		[264] = {0, 0.125, 0.75, 1}, --> Shaman: Restoration
-		[265] = {0.125, 0.25, 0.75, 1}, --> Warlock: Affliction
-		[266] = {0.25, 0.375, 0.75, 1}, --> Warlock: Demonology
-		[267] = {0.375, 0.5, 0.75, 1} --> Warlock: Destruction
-	}
-
-	-- class colors & custom
-	self.classcolors = self.GetClassColorsTable()
+	-- Skada custom class colors!
 	self.classcolors.BOSS = {r = 0.203, g = 0.345, b = 0.525, colorStr = "345886"}
 	self.classcolors.ENEMY = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
 	self.classcolors.MONSTER = {r = 0.549, g = 0.388, b = 0.404, colorStr = "ff8c6367"}
@@ -632,10 +601,87 @@ function Skada:RegisterClasses()
 	self.classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
 	self.classcolors.UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
 
-	self.RegisterClasses = nil -- remove it
+	-- set classes icon file & Skada custom classes.
+	if self.AscensionCoA then
+		self.classicons = [[Interface\AddOns\Skada\Media\Textures\icon-classes-coa]]
+
+		-- custom class coordinates
+		if not self.classcoords.BOSS then
+			self.classcoords.BOSS = {0, 0.125, 0.875, 1}
+			self.classcoords.MONSTER = {0.125, 0.25, 0.875, 1}
+			self.classcoords.ENEMY = {0.25, 0.375, 0.875, 1}
+			self.classcoords.PET = {0.375, 0.5, 0.875, 1}
+			self.classcoords.UNKNOWN = {0.5, 0.625, 0.875, 1}
+			self.classcoords.PLAYER = {0.625, 0.75, 0.875, 1}
+		end
+	else
+		self.classicons = [[Interface\AddOns\Skada\Media\Textures\icon-classes]]
+
+		-- custom class coordinates
+		if not self.classcoords.BOSS then
+			self.classcoords.BOSS = {0.75, 1, 0.5, 0.75}
+			self.classcoords.ENEMY = {0.5, 0.75, 0.5, 0.75}
+			self.classcoords.MONSTER = {0, 0.25, 0.75, 1}
+			self.classcoords.PET = {0.25, 0.5, 0.75, 1}
+			self.classcoords.PLAYER = {0.75, 1, 0.75, 1}
+			self.classcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
+		end
+	end
+
+	-- we temporary ignore roles & specs until a better way
+	-- of detection is implemented.
+	if not self.AscensionCoA then
+		-- role icon file and texture coordinates
+		self.roleicons = [[Interface\AddOns\Skada\Media\Textures\icon-roles]]
+		self.rolecoords = {
+			LEADER = {0, 0.25, 0, 1},
+			DAMAGER = {0.25, 0.5, 0, 1},
+			TANK = {0.5, 0.75, 0, 1},
+			HEALER = {0.75, 1, 0, 1},
+			NONE = ""
+		}
+
+		-- specialization icons
+		self.specicons = [[Interface\AddOns\Skada\Media\Textures\icon-specs]]
+		self.speccoords = {
+			[62] = {0.25, 0.375, 0.25, 0.5}, --> Mage: Arcane
+			[63] = {0.375, 0.5, 0.25, 0.5}, --> Mage: Fire
+			[64] = {0.5, 0.625, 0.25, 0.5}, --> Mage: Frost
+			[65] = {0.625, 0.75, 0.25, 0.5}, --> Paladin: Holy
+			[66] = {0.75, 0.875, 0.25, 0.5}, --> Paladin: Protection
+			[70] = {0.875, 1, 0.25, 0.5}, --> Paladin: Retribution
+			[71] = {0.5, 0.625, 0.75, 1}, --> Warrior: Arms
+			[72] = {0.625, 0.75, 0.75, 1}, --> Warrior: Fury
+			[73] = {0.75, 0.875, 0.75, 1}, --> Warrior: Protection
+			[102] = {0.375, 0.5, 0, 0.25}, --> Druid: Balance
+			[103] = {0.5, 0.625, 0, 0.25}, --> Druid: Feral
+			[104] = {0.625, 0.75, 0, 0.25}, --> Druid: Tank
+			[105] = {0.75, 0.875, 0, 0.25}, --> Druid: Restoration
+			[250] = {0, 0.125, 0, 0.25}, --> Death Knight: Blood
+			[251] = {0.125, 0.25, 0, 0.25}, --> Death Knight: Frost
+			[252] = {0.25, 0.375, 0, 0.25}, --> Death Knight: Unholy
+			[253] = {0.875, 1, 0, 0.25}, --> Hunter: Beastmastery
+			[254] = {0, 0.125, 0.25, 0.5}, --> Hunter: Marksmalship
+			[255] = {0.125, 0.25, 0.25, 0.5}, --> Hunter: Survival
+			[256] = {0, 0.125, 0.5, 0.75}, --> Priest: Discipline
+			[257] = {0.125, 0.25, 0.5, 0.75}, --> Priest: Holy
+			[258] = {0.25, 0.375, 0.5, 0.75}, --> Priest: Shadow
+			[259] = {0.375, 0.5, 0.5, 0.75}, --> Rogue: Assassination
+			[260] = {0.5, 0.625, 0.5, 0.75}, --> Rogue: Combat
+			[261] = {0.625, 0.75, 0.5, 0.75}, --> Rogue: Subtlty
+			[262] = {0.75, 0.875, 0.5, 0.75}, --> Shaman: Elemental
+			[263] = {0.875, 1, 0.5, 0.75}, --> Shaman: Enhancement
+			[264] = {0, 0.125, 0.75, 1}, --> Shaman: Restoration
+			[265] = {0.125, 0.25, 0.75, 1}, --> Warlock: Affliction
+			[266] = {0.25, 0.375, 0.75, 1}, --> Warlock: Demonology
+			[267] = {0.375, 0.5, 0.75, 1} --> Warlock: Destruction
+		}
+	end
 end
 
 function Skada:RegisterSchools()
+	self.RegisterSchools = nil -- remove it
+
 	-- spell school colors
 	self.schoolcolors = {
 		[1] = {a = 1.00, r = 1.00, g = 1.00, b = 0.00}, -- Physical
@@ -659,8 +705,6 @@ function Skada:RegisterSchools()
 		[32] = STRING_SCHOOL_SHADOW:gsub("%(", ""):gsub("%)", ""),
 		[64] = STRING_SCHOOL_ARCANE:gsub("%(", ""):gsub("%)", "")
 	}
-
-	self.RegisterSchools = nil -- remove it
 end
 
 -------------------------------------------------------------------------------
@@ -696,6 +740,8 @@ do
 
 	-- returns toast options
 	function Skada:GetToastOptions()
+		self.GetToastOptions = nil -- remove it
+
 		if LibToast and not toast_opt then
 			toast_opt = {
 				type = "group",
@@ -712,8 +758,15 @@ do
 					toastdesc = {
 						type = "description",
 						name = L["Uses visual notifications instead of chat window messages whenever applicable."],
+						fontSize = "medium",
 						width = "full",
 						order = 0
+					},
+					empty_1 = {
+						type = "description",
+						name = " ",
+						width = "full",
+						order = 1
 					},
 					hide_toasts = {
 						type = "toggle",
@@ -761,14 +814,15 @@ do
 					test = {
 						type = "execute",
 						name = L["Test Notifications"],
-						func = function() Skada:Notify() end,
-						disabled = function() return Skada.db.profile.toast.hide_toasts end,
+						func = function() self:Notify() end,
+						disabled = function() return self.db.profile.toast.hide_toasts end,
 						width = "double",
 						order = 60
 					}
 				}
 			}
 		end
+
 		return toast_opt
 	end
 
