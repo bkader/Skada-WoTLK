@@ -690,7 +690,7 @@ do
 		if not list.resizeright then
 			list.resizeright = CreateFrame("Button", "$parentSizerRight", list)
 			list.resizeright:Show()
-			list.resizeright:SetFrameLevel(list:GetFrameLevel() + 1)
+			list.resizeright:SetFrameLevel(list:GetFrameLevel() + 3)
 			list.resizeright:SetSize(12, 12)
 			list.resizeright:SetAlpha(0)
 			list.resizeright:EnableMouse(true)
@@ -704,7 +704,7 @@ do
 		if not list.resizeleft then
 			list.resizeleft = CreateFrame("Button", "$parentSizerLeft", list)
 			list.resizeleft:Show()
-			list.resizeleft:SetFrameLevel(list:GetFrameLevel() + 1)
+			list.resizeleft:SetFrameLevel(list:GetFrameLevel() + 3)
 			list.resizeleft:SetSize(12, 12)
 			list.resizeleft:SetAlpha(0)
 			list.resizeleft:EnableMouse(true)
@@ -1330,15 +1330,24 @@ end
 ---[[ Bar methods ]] ---
 do
 	local function barClick(self, button)
-		self:GetParent().callbacks:Fire("BarClick", self, button)
+		local parent = self:GetParent()
+		if parent and parent.callbacks then
+			parent.callbacks:Fire("BarClick", self, button)
+		end
 	end
 
 	local function barEnter(self, motion)
-		self:GetParent().callbacks:Fire("BarEnter", self, motion)
+		local parent = self:GetParent()
+		if parent and parent.callbacks then
+			parent.callbacks:Fire("BarEnter", self, motion)
+		end
 	end
 
 	local function barLeave(self, motion)
-		self:GetParent().callbacks:Fire("BarLeave", self, motion)
+		local parent = self:GetParent()
+		if parent and parent.callbacks then
+			parent.callbacks:Fire("BarLeave", self, motion)
+		end
 	end
 
 	local DEFAULT_ICON = [[Interface\Icons\INV_Misc_QuestionMark]]
@@ -1374,6 +1383,7 @@ do
 		-- Lame frame solely used for handling mouse input on icon.
 		self.iconFrame = self.iconFrame or CreateFrame("Frame", nil, self)
 		self.iconFrame:SetAllPoints(self.icon)
+		self.iconFrame:SetFrameLevel(self:GetFrameLevel() + 1)
 
 		self.label = self.label or self:CreateFontString(nil, "OVERLAY", "ChatFontNormal")
 		self.label:SetWordWrap(false)
