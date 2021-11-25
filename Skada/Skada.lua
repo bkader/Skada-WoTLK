@@ -51,6 +51,10 @@ BINDING_NAME_SKADA_STOP = L["Stop"]
 -- Skada-Revisited flag
 Skada.revisited = true
 
+-- things we need
+Skada.userName = UnitName("player")
+Skada.userClass = select(2, UnitClass("player"))
+
 -- available display types
 Skada.displays = {}
 local displays = Skada.displays
@@ -1108,8 +1112,8 @@ function Skada:GetPlayer(set, guid, name, flag)
 	end
 
 	-- fix players created before their info was received
-	-- roles and specs are temporary disabled for Project Ascension CoA
-	if not self.AscensionCoA and player.class and Skada.validclass[player.class] then
+	-- roles and specs are temporary disabled for Project Ascension
+	if not self.Ascension and player.class and Skada.validclass[player.class] then
 		if player.role == nil or player.role == "NONE" then
 			player.role = GetUnitRole(players[player.id], player.class)
 		end
@@ -2942,7 +2946,7 @@ function Skada:OnInitialize()
 	-- code here will be used to perform any database modifications.
 	local curversion = ConvertVersion(self.version)
 	if type(self.db.global.version) ~= "number" or curversion > self.db.global.version then
-		self.callbacks:Fire("self_UpdateCore", self.db.global.version, curversion)
+		self.callbacks:Fire("Skada_UpdateCore", self.db.global.version, curversion)
 		self.db.global.version = curversion
 	end
 	if type(self.char.version) ~= "number" or curversion > self.char.version then
@@ -2950,14 +2954,14 @@ function Skada:OnInitialize()
 		if (curversion - (self.char.version or 0)) >= 5 then
 			self:Reset(true)
 		end
-		self.callbacks:Fire("self_UpdateData", self.char.version, curversion)
+		self.callbacks:Fire("Skada_UpdateData", self.char.version, curversion)
 		self.char.version = curversion
 	end
 end
 
 function Skada:OnEnable()
-	-- well, me!
-	self.userGUID, self.userName = UnitGUID("player"), UnitName("player")
+	-- well, my ID!
+	self.userGUID = UnitGUID("player")
 
 	self:ReloadSettings()
 	self:RegisterComm("Skada")

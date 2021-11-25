@@ -16,6 +16,7 @@ local tsort, format = table.sort, string.format
 local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
 
 local WrapTextInColorCode = Skada.WrapTextInColorCode
+local RGBPercToHex = Skada.RGBPercToHex
 
 local function sortDataset(win)
 	tsort(win.dataset, function(a, b)
@@ -32,6 +33,10 @@ end
 local function formatLabel(win, data)
 	if win.db.isusingclasscolors and data.class then
 		return WrapTextInColorCode(data.text or data.label or L.Unknown, Skada.classcolors[data.class].colorStr)
+	elseif data.color and data.color.colorStr then
+		return WrapTextInColorCode(data.text or data.label or L.Unknown, data.color.colorStr)
+	elseif data.color then
+		return WrapTextInColorCode(data.text or data.label or L.Unknown, RGBPercToHex(data.color.r or 1, data.color.g or 1, data.color.b or 1, data.color.a or 1, true))
 	else
 		return data.text or data.label or L.Unknown
 	end

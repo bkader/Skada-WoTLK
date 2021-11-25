@@ -445,11 +445,11 @@ end
 
 local RGBPercToHex
 do
-	function RGBPercToHex(r, g, b)
+	function RGBPercToHex(r, g, b, prefix)
 		r = r <= 1 and r >= 0 and r or 0
 		g = g <= 1 and g >= 0 and g or 0
 		b = b <= 1 and b >= 0 and b or 0
-		return format("%02x%02x%02x", r * 255, g * 255, b * 255)
+		return format(prefix and "ff%02x%02x%02x" or "%02x%02x%02x", r * 255, g * 255, b * 255)
 	end
 
 	lib.RGBPercToHex = RGBPercToHex
@@ -461,14 +461,21 @@ end
 do
 	local classColorsTable, classCoordsTable
 	local classColors = CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS
-	lib.AscensionCoA = (classColors.BARBARIAN ~= nil) -- flag for Project Ascension CoA
+
+	-- flags for Projects Ascension
+	lib.AscensionCoA = (classColors.BARBARIAN ~= nil) -- CoA Realms
+	do
+		-- in non-CoA realms, all players are heroes/druids.
+		local locClass, engClass = UnitClass("player")
+		lib.Ascension = (locClass == "Hero" and engClass == "DRUID")
+	end
 
 	-- the functions below are for internal usage only
 	local function __fillClassColorsTable()
 		classColorsTable = {}
 		for class, tbl in pairs(classColors) do
 			classColorsTable[class] = tbl
-			classColorsTable[class].colorStr = "ff" .. RGBPercToHex(tbl.r, tbl.g, tbl.b)
+			classColorsTable[class].colorStr = RGBPercToHex(tbl.r, tbl.g, tbl.b, true)
 		end
 	end
 
@@ -730,6 +737,7 @@ local mixins = {
 	"UnitIterator",
 	-- unit util
 	"GetUnitIdFromGUID",
+	"Ascension",
 	"AscensionCoA",
 	"GetClassFromGUID",
 	"GetCreatureId",

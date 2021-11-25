@@ -20,6 +20,7 @@ local strrep, format, _match = string.rep, string.format, string.match
 local tinsert, tremove, tsort = table.insert, table.remove, table.sort
 
 local WrapTextInColorCode = Skada.WrapTextInColorCode
+local RGBPercToHex = Skada.RGBPercToHex
 
 local function serial(val, name, skipnewlines, depth)
 	skipnewlines = skipnewlines or false
@@ -315,6 +316,10 @@ function mod:UpdateBar(bar, bardata, db)
 	local label = bardata.text or bardata.label or L.Unknown
 	if db.isusingclasscolors and bardata.class then
 		label = WrapTextInColorCode(bardata.text or bardata.label or L.Unknown, Skada.classcolors[bardata.class].colorStr)
+	elseif bardata.color and bardata.color.colorStr then
+		label = WrapTextInColorCode(bardata.text or bardata.label or L.Unknown, bardata.color.colorStr)
+	elseif bardata.color then
+		label = WrapTextInColorCode(bardata.text or bardata.label or L.Unknown, RGBPercToHex(bardata.color.r or 1, bardata.color.g or 1, bardata.color.b or 1, bardata.color.a or 1, true))
 	else
 		label = bardata.text or bardata.label or L.Unknown
 	end

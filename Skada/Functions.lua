@@ -628,9 +628,9 @@ function Skada:RegisterClasses()
 		end
 	end
 
-	-- we temporary ignore roles & specs until a better way
-	-- of detection is implemented.
-	if not self.AscensionCoA then
+	-- we ignore roles & specs on Project Ascension since players
+	-- have a custom module to set their own colors & icons.
+	if not self.Ascension then
 		-- role icon file and texture coordinates
 		self.roleicons = [[Interface\AddOns\Skada\Media\Textures\icon-roles]]
 		self.rolecoords = {

@@ -4,7 +4,7 @@ Skada:AddLoadableModule("Nickname", function(L)
 
 	local mod = Skada:NewModule(L["Nickname"], "AceTimer-3.0")
 
-	local type, time = type, time
+	local type, time, wipe = type, time, wipe
 	local strlen, strfind, strgsub, format = string.len, string.find, string.gsub, string.format
 	local UnitGUID, UnitName = UnitGUID, UnitName
 	local CheckNickname
@@ -241,22 +241,24 @@ Skada:AddLoadableModule("Nickname", function(L)
 	-----------------------------------------------------------
 	-- cache table functions
 
-	function mod:SetCacheTable()
-		if not self.db then
-			self.db = Skada.db.global.nicknames or {cache = {}}
-			Skada.db.global.nicknames = self.db
+	local function CheckForReset()
+		if not mod.db.reset then
+			mod.db.reset = time() + (60 * 60 * 24 * 15)
+			mod.db.cache = {}
+		elseif time() > mod.db.reset then
+			mod.db.reset = time() + (60 * 60 * 24 * 15)
+			wipe(mod.db.cache)
 		end
-		self:CheckForReset()
 	end
 
-	function mod:CheckForReset()
-		if not self.db.reset then
-			self.db.reset = time() + (60 * 60 * 24 * 15)
-			self.db.cache = {}
-		elseif time() > self.db.reset then
-			self.db.reset = time() + (60 * 60 * 24 * 15)
-			self.db.cache = {}
+	function mod:SetCacheTable()
+		if not self.db then
+			if not Skada.db.global.nicknames then
+				Skada.db.global.nicknames = {cache = {}}
+			end
+			self.db = Skada.db.global.nicknames
 		end
+		CheckForReset()
 	end
 
 	function mod:Reset(event)
@@ -264,8 +266,15 @@ Skada:AddLoadableModule("Nickname", function(L)
 			if Skada.db.profile.namedisplay == nil then
 				Skada.db.profile.namedisplay = 2
 			end
-			Skada.db.global.nicknames = nil
-			self:SetCacheTable()
+
+			if not Skada.db.global.nicknames then
+				Skada.db.global.nicknames = {cache = {}}
+			else
+				Skada.db.global.nicknames.reset = time() + (60 * 60 * 24 * 15)
+				wipe(Skada.db.global.nicknames.cache)
+			end
+
+			self.db = Skada.db.global.nicknames
 		end
 	end
 end)

@@ -46,6 +46,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 		}
 
 		local pull_formats = {"%s (%s)", "%s (|c%s%s|r)", "|c%s%s|r", "|c%s%s|r (%s)"}
+		local pull_timer = nil
 
 		-- thank you Details!
 		local function WhoPulled(hitline)
@@ -78,7 +79,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 
 		function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 			-- The Lich King fight & Fury of Frostmourne
-			if (select(1, ...)) == 72350 or (select(2, ...)) == fofrostmourne then
+			if not self.Ascension and (select(1, ...)) == 72350 or (select(2, ...)) == fofrostmourne then
 				-- the segment should be flagged as success.
 				if self.current and not self.current.success then
 					self.current.success = true
@@ -92,6 +93,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			if
 				self.db.profile.firsthit and
 				not self.current and
+				not pull_timer and
 				(trigger_events[eventtype] or eventtype == "SPELL_CAST_SUCCESS") and
 				srcName and
 				dstName and
@@ -144,13 +146,20 @@ Skada:AddLoadableModule("Tweaks", function(L)
 							link = GetSpellLink((select(1, ...))) or GetSpellInfo((select(1, ...)))
 						end
 
-						Skada:ScheduleTimer(WhoPulled, self.db.profile.updatefrequency or 0.5, format(L["|cffffff00First Hit|r: %s from %s"], link or "", output))
+						pull_timer = Skada:ScheduleTimer(WhoPulled, self.db.profile.updatefrequency or 0.5, format(L["|cffffff00First Hit|r: %s from %s"], link or "", output))
 					end
 				end
 			end
 
 			-- use the original function
 			Skada_CombatLogEvent(Skada, nil, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		end
+
+		function mod:COMBAT_PLAYER_LEAVE()
+			if pull_timer then
+				Skada:CancelTimer(pull_timer, true)
+				pull_timer = nil
+			end
 		end
 	end
 
@@ -466,6 +475,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 				type = "toggle",
 				name = fofrostmourne,
 				desc = format(L["Enable this if you want to ignore |cffffbb00%s|r."], fofrostmourne),
+				hidden = Skada.Ascension,
 				set = SetValue,
 				order = 40
 			}
@@ -554,7 +564,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 		-- list of creature IDs to be ignored
 		local ignoredBosses = {
 			[37217] = true, -- Precious
-			[37025] = true, -- Stinky
+			[37025] = true -- Stinky
 		}
 
 		function mod:BossDefeated(_, set)
@@ -599,6 +609,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 
 	function mod:OnEnable()
 		self:ApplySettings()
+		Skada.RegisterCallback(self, "COMBAT_PLAYER_LEAVE")
 	end
 
 	function mod:OnDisable()

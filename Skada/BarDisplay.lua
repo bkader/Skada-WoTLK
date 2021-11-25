@@ -599,13 +599,13 @@ do
 					elseif win.db.roleicons and rolecoords and data.role and data.role ~= "NONE" and rolecoords[data.role] then
 						bar:ShowIcon()
 						bar:SetIconWithCoord(roleicons, rolecoords[data.role])
-					elseif win.db.classicons and data.class and classcoords[data.class] then
+					elseif win.db.classicons and data.class and classcoords[data.class] and data.icon == nil then
 						bar:ShowIcon()
 						bar:SetIconWithCoord(classicons, classcoords[data.class])
-					elseif not data.ignore and not data.spellid then
+					elseif not data.ignore and not data.spellid and not data.hyperlink then
 						if data.icon and not bar:IsIconShown() then
 							bar:ShowIcon()
-							bar:SetIconWithCoord(classicons, classcoords["PLAYER"])
+							bar:SetIcon(data.icon)
 						end
 					end
 
@@ -1084,7 +1084,8 @@ function mod:AddDisplayOptions(win, options)
 								db.classicons = true
 							end
 							Skada:ReloadSettings()
-						end
+						end,
+						hidden = Skada.Ascension
 					},
 					specicons = {
 						type = "toggle",
@@ -1097,7 +1098,8 @@ function mod:AddDisplayOptions(win, options)
 								db.classicons = true
 							end
 							Skada:ReloadSettings()
-						end
+						end,
+						hidden = Skada.Ascension
 					},
 					spark = {
 						type = "toggle",
