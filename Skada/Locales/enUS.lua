@@ -1,11 +1,4 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "enUS", true)
-
--- shared locales
-L["Combat Log"] = COMBAT_LOG
-L["Melee"] = MELEE
-L["Name"] = NAME
-L["Unknown"] = UNKNOWN
-
 if not L then return end
 
 L["A damage meter."] = true
@@ -84,6 +77,8 @@ L["REFLECT"] = "Reflect"
 L["RESIST"] = "Resisted"
 L["Only for bosses."] = true
 L["Enable this only against bosses."] = true
+L["Melee"] = MELEE
+L["Unknown"] = UNKNOWN
 -- windows section:
 L["Window"] = true
 L["Windows"] = true
@@ -647,11 +642,13 @@ L["%s's resurrect spells"] = true
 L["%s's resurrect targets"] = true
 -- nickname module lines --
 L["Nickname"] = true
+L["Name"] = NAME
 L["Nicknames are sent to group members and Skada can use them instead of your character name."] = true
 L["Set a nickname for you."] = true
 L["Nickname isn't a valid string."] = true
 L["Your nickname is too long, max of 12 characters is allowed."] = true
 L["Only letters and two spaces are allowed."] = true
+L["Your nickname contains a forbidden word."] = true
 L["You can't use the same letter three times consecutively, two spaces consecutively or more then two spaces."] = true
 L["Ignore Nicknames"] = true
 L["When enabled, nicknames set by Skada users are ignored."] = true
@@ -686,6 +683,7 @@ L["Duration"] = true
 L["For how long Skada should wait before stopping the segment."] = true
 L["Modes Icons"] = true
 L["Show modes icons on bars and menus."] = true
+L["Combat Log"] = COMBAT_LOG
 L["Keeps the combat log from breaking without munging it completely."] = true
 L["Conservative Mode"] = true
 L["Aggressive Mode"] = true
