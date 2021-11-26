@@ -688,6 +688,15 @@ L["Announce %s"] = "Announce: %s"
 L["Announces how long it took to apply %d stacks of %s and announces when it drops."] = "Gibt an, wie lange es gedauert hat, %d Stapel von %s anzuwenden, und kündigt an, wann es abläuft."
 L["%s dropped from %s!"] = "%s ist am %s abgelaufen!"
 L["%s stacks of %s applied on %s in %s sec!"] = "%s Stapel von %s auf %s in %s sec angewandt!"
+-- project ascension
+L["Project Ascension"] = "Project Ascension"
+L["project_ascension_desc"] = [=[Bei |cffffbb00Project Ascension|r sind deine Charaktere Helden, die alle Fähigkeiten oder Talente in Reichweite haben.
+
+Symbole und Farben werden an Gruppenmitglieder gesendet, um sie anstelle der Standardsymbole und -farben zu verwenden.]=]
+L["Icon"] = "Symbol"
+L["Color"] = "Farbe"
+L["Choose the %s that fits your character's build."] = "Wähle das %s, das zum Build deines Charakters passt."
+L["Are you sure you want clear cached icons and colors?"] = "Möchten Sie die zwischengespeicherten Symbole und Farben wirklich löschen?"
 -- notifications
 L["Opacity"] = "Opazität"
 L["Notifications"] = "Benachrichtigungen"

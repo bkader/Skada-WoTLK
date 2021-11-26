@@ -694,6 +694,15 @@ L["Announce %s"] = true
 L["Announces how long it took to apply %d stacks of %s and announces when it drops."] = true
 L["%s dropped from %s!"] = true
 L["%s stacks of %s applied on %s in %s sec!"] = true
+-- project ascension
+L["Project Ascension"] = true
+L["project_ascension_desc"] = [=[On |cffffbb00Project Ascension|r, your characters are classless Heroes that have any ability or talent within their reach.
+
+Icons and colors are sent to group members and Skada can use them instead of your character's default class icon and color.]=]
+L["Icon"] = true
+L["Color"] = true
+L["Choose the %s that fits your character's build."] = true
+L["Are you sure you want clear cached icons and colors?"] = true
 -- notifications
 L["Opacity"] = true
 L["Notifications"] = true

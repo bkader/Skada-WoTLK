@@ -338,7 +338,7 @@ L["Modules"] = "Modules"
 L["Disabled Modules"] = "Gestion des modules"
 L["Modules Options"] = "Options des modules"
 L["Tick the modules you want to disable."] = "Cocher les modules que vous souhaitez désactiver."
-L["This change requires a UI reload. Are you sure?"] = "Ce changement nécessite un rechargement de l'IU. Êtes-vous sûr ?"
+L["This change requires a UI reload. Are you sure?"] = "Ce changement nécessite un rechargement de l'IU. Êtes-vous sûr?"
 L["Adds a set of standard themes to Skada. Custom themes can also be used."] = "Ajoute un ensemble de thèmes standards à Skada. Les thèmes personnalisés peuvent également être utilisés."
 -- themes module
 L["Theme"] = "Thème"
@@ -655,7 +655,7 @@ L["When enabled, nicknames set by Skada users are ignored."] = "Si activé, les 
 L["Name display"] = "Format des noms"
 L["Choose how names are shown on your bars."] = "Choisissez comment les noms seront affichés sur les barres."
 L["Clear Cache"] = "Vider le cache"
-L["Are you sure you want clear cached nicknames?"] = "Êtes-vous sûr vouloir vider le cache des surnoms?"
+L["Are you sure you want clear cached nicknames?"] = "Êtes-vous sûr vouloir vider le cache des surnoms?"
 -- damage mitigated lines --
 L["Damage Mitigated"] = "Dégâts mitigés"
 L["%s's mitigated damage"] = "Dégâts mitigés \1242 %s"
@@ -693,6 +693,15 @@ L["Announce %s"] = "Annoncer %s"
 L["Announces how long it took to apply %d stacks of %s and announces when it drops."] = "Annonce combien de temps il a fallu pour appliquer %d piles \1242 %s et annonce quand il expire."
 L["%s dropped from %s!"] = "%s sur %s a expiré!"
 L["%s stacks of %s applied on %s in %s sec!"] = "%s piles \1242 %s appliquées sur %s en %s sec!"
+-- project ascension
+L["Project Ascension"] = "Project Ascension"
+L["project_ascension_desc"] = [=[Sur |cffffbb00Project Ascension|r, vos héros sans classe ayant à leur portée n'importe quelle capacité ou talent.
+
+Les icônes et les couleurs sont envoyées aux membres du groupe afain d'être utilisées au lieu des icônes et couleurs par défaut.]=]
+L["Icon"] = "Icône"
+L["Color"] = "Couleur"
+L["Choose the %s that fits your character's build."] = "Choix \1242 %s qui correspond au build de votre personnage."
+L["Are you sure you want clear cached icons and colors?"] = "Êtes-vous sûr de vouloir vider le cache des icônes et des couleurs?"
 -- notifications
 L["Opacity"] = "Opacité"
 L["Notifications"] = "Notifications"

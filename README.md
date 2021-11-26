@@ -1,4 +1,4 @@
-# Skada for WoTLK (_Revisited - v1.8.73_)
+# Skada for WoTLK (_Revisited - v1.8.73.330_)
 
 ![Discord](https://img.shields.io/discord/795698054371868743?label=discord)
 ![GitHub last commit](https://img.shields.io/github/last-commit/bkader/Skada-WoTLK)
@@ -54,7 +54,8 @@ Though it's not required, if you want to show some love and support, **PayPal**/
   * [Sunder Counter (_Sunder Armor_)](#sunder-counter)
   * [Themes](#themes)
   * [Threat](#threat)
-  * [TWEAKS](#tweaks)
+  * [Tweaks](#tweaks)
+  * [Project Ascension](#project-ascension)
 
 ## What's the difference?
 
@@ -181,7 +182,7 @@ It allows you to create themes that you can use if you want to change windows lo
 
 I think you already know what this module is used for, so no need to talk more about it. Oh and yes! You can use it instead of Omen or use both, it's up to you and it's a matter of personal preferences.
 
-### TWEAKS
+### Tweaks
 
 This module was created in order to add some tweaks to Skada, hence its name. It comes with few options that you may or may not find handy.
 
@@ -192,6 +193,14 @@ This module was created in order to add some tweaks to Skada, hence its name. It
 - **Ignore Fury of Frostmourne**: if you don't want this spell to be included in anything, enable this option.
 - **Include absorbed damage**: some people (_Details! users >cough<_) consider that absorbed damage should be included in the overall damage, and because Skada doesn't include it but rather shows it as an extra info, this option was added to satisfy them and so we won't hear/read `Oh! They are not showing the same numbers...`.
 - **Smart Stop**: this feature relies on DBM/BigWigs to stop collecting data after the amount of seconds you choose. It is useful in case of being in combat bug (_not combatlog bug, but stuck in combat_).
+
+### Project Ascension
+
+After requests from players to make the addon work properly on [Project Ascension](https://ascension.gg/) and after their staff's help, I could access their [Conquest of Azeroth](https://ascension.gg/news/conquest-of-azeroth-alpha/332) and work on the addon. Thus, as of `v1.8.73`, CoA classes are available on Skada.
+
+Project Ascension is also a **Classless** game that allows you to imagine and build the character of your dreams. Your custom character has any ability or talent within their reach. For this reason and as of `v1.8.73.330`, a special tweaks module was added to Skada to give freedom to players to choose their icons and colors. This module is only available if you play there and you can find in `Tweaks` panel, `Advanced` tab.
+
+Icons and colors are saved per character and cached ones (_from other players_) are saved per account. Your hero is unique, your build is unique, so why not make your character on Skada unique!
 
 ### API
 

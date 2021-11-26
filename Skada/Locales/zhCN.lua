@@ -686,6 +686,13 @@ L["Announce %s"] = "宣布：%s"
 L["Announces how long it took to apply %d stacks of %s and announces when it drops."] = "宣布应用 %d 堆 %s 所用的时间，并宣布它何时到期。"
 L["%s dropped from %s!"] = "%s 已于 %s 过期！"
 L["%s stacks of %s applied on %s in %s sec!"] = "%4$s 秒内将 %1$s 叠 %2$s 涂抹在 %3$s 上！"
+-- project ascension
+L["Project Ascension"] = "Project Ascension"
+L["project_ascension_desc"] = "在 |cffffbb00Project Ascension|r 中，您的角色是拥有任何能力或天赋的英雄。\n\n图标和颜色被发送给组成员使用，而不是默认的图标和颜色。"
+L["Icon"] = "图标"
+L["Color"] = "颜色"
+L["Choose the %s that fits your character's build."] = "选择适合您角色体型的%s。"
+L["Are you sure you want clear cached icons and colors?"] = "您确定要删除缓存的图标和颜色吗？"
 -- notifications
 L["Opacity"] = "不透明度"
 L["Notifications"] = "通知"

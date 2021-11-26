@@ -690,6 +690,15 @@ L["Announce %s"] = "Anunciar: %s"
 L["Announces how long it took to apply %d stacks of %s and announces when it drops."] = "Anuncia el tiempo que tomó en aplicar %d cargas de %s y anuncia cuando expiren."
 L["%s dropped from %s!"] = "%s expiró en %s!"
 L["%s stacks of %s applied on %s in %s sec!"] = "¡%s pilas de %s aplicadas a %s en %s seg!"
+-- project ascension
+L["Project Ascension"] = "Project Ascension"
+L["project_ascension_desc"] = [=[En |cffffbb00Project Ascension|r, tus personajes son héroes sin clase que tienen cualquier habilidad o talento a su alcance.
+
+Los iconos y colores se envían a los miembros del grupo para que los utilicen en lugar de los iconos y colores predeterminados.]=]
+L["Icon"] = "Icono"
+L["Color"] = "Color"
+L["Choose the %s that fits your character's build."] = "Elige el %s que se adapte a la estructura de tu personaje."
+L["Are you sure you want clear cached icons and colors?"] = "¿Está seguro de que desea borrar los iconos y colores almacenados en caché?"
 -- notifications
 L["Opacity"] = "Opacidad"
 L["Notifications"] = "Notificaciones"
