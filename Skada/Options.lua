@@ -160,6 +160,7 @@ Skada.defaults = {
 			["Improvement"] = true,
 			["Overhealing"] = true,
 			["Overkill"] = true,
+			["Project Ascension"] = true,
 			["Themes"] = true,
 			["Useful Damage"] = true
 		},
