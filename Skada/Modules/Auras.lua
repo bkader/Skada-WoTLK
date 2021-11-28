@@ -24,12 +24,13 @@ do
 	function mod:OnEnable()
 		if not Skada:IsDisabled("Buffs", "Debuffs") then
 			Skada.RegisterCallback(self, "Skada_CombatTick", "Tick")
-			Skada.RegisterCallback(self, "COMBAT_PLAYER_LEAVE", "Clean")
+			Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "Clean")
 		end
 	end
 
 	function mod:OnDisable()
 		Skada.UnregisterAllCallbacks(self)
+		Skada.UnregisterAllMessages(self)
 	end
 
 	function mod:Tick(event, set)
@@ -469,12 +470,12 @@ Skada:AddLoadableModule("Buffs", function(L)
 		Skada:RegisterForCL(HandleBuff, "SPELL_AURA_REMOVED", {dst_is_interesting = true})
 		Skada:RegisterForCL(HandleBuff, "SPELL_PERIODIC_ENERGIZE", {dst_is_interesting = true})
 
-		Skada.RegisterCallback(self, "COMBAT_PLAYER_ENTER", "CheckBuffs")
+		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CheckBuffs")
 		Skada:AddMode(self, L["Buffs and Debuffs"])
 	end
 
 	function mod:OnDisable()
-		Skada.UnregisterAllCallbacks(self)
+		Skada.UnregisterAllMessages(self)
 		Skada:AddMode(self)
 	end
 end)

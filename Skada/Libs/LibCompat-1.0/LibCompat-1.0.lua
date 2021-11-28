@@ -320,8 +320,8 @@ do
 		end
 	end
 
-	local function IsGroupDead(incPets)
-		for unit in UnitIterator(not incPets) do
+	local function IsGroupDead()
+		for unit in UnitIterator(true) do
 			if not UnitIsDeadOrGhost(unit) then
 				return false
 			end
@@ -329,8 +329,8 @@ do
 		return true
 	end
 
-	local function IsGroupInCombat(incPets)
-		for unit in UnitIterator(not incPets) do
+	local function IsGroupInCombat()
+		for unit in UnitIterator() do
 			if UnitAffectingCombat(unit) then
 				return true
 			end

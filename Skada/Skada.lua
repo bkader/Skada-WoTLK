@@ -3003,17 +3003,17 @@ function Skada:BigWigs(_, _, event, message)
 		if message:find(self.current.mobname) ~= nil then
 			self:Debug("COMBAT_BOSS_DEFEATED: BigWigs")
 			self.current.success = true
-			self.callbacks:Fire("COMBAT_BOSS_DEFEATED", self.current)
+			self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
 		end
 	end
 end
 
 function Skada:DBM(_, mod, wipe)
-	if not wipe and mod and mod.combatInfo and self.current and self.current.gotboss then
-		if mod.combatInfo.name and mod.combatInfo.name:find(self.current.mobname) ~= nil then
+	if not wipe and mod and mod.combatInfo and self.current and self.current.gotboss and not self.current.success then
+		if mod.combatInfo.name and self.current.mobname:find(mod.combatInfo.name) ~= nil then
 			self:Debug("COMBAT_BOSS_DEFEATED: DBM")
 			self.current.success = true
-			self.callbacks:Fire("COMBAT_BOSS_DEFEATED", self.current)
+			self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
 		end
 	end
 end
@@ -3222,9 +3222,9 @@ function Skada:EndSegment()
 		end
 	end
 
-	self.callbacks:Fire("COMBAT_PLAYER_LEAVE", self.current, self.total)
+	self:SendMessage("COMBAT_PLAYER_LEAVE", self.current, self.total)
 	if self.current.gotboss then
-		self.callbacks:Fire("COMBAT_ENCOUNTER_END", self.current, self.total)
+		self:SendMessage("COMBAT_ENCOUNTER_END", self.current, self.total)
 	end
 
 	for _, player in ipairs(self.total.players) do
@@ -3315,8 +3315,6 @@ do
 
 	-- events used to trigger combat for aggressive combat detection
 	local trigger_events = {
-		DAMAGE_SHIELD = true,
-		DAMAGE_SPLIT = true,
 		RANGE_DAMAGE = true,
 		SPELL_BUILDING_DAMAGE = true,
 		SPELL_DAMAGE = true,
@@ -3432,7 +3430,7 @@ do
 		end
 
 		if self.current and not self.current.started then
-			self.callbacks:Fire("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+			self:SendMessage("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 			self.current.started = true
 			if self.instanceType == nil then self:CheckZone() end
 			self.current.type = self.instanceType or "unknown"
@@ -3443,7 +3441,7 @@ do
 				death_counter = death_counter + 1
 				-- If we reached the treshold for stopping the segment, do so.
 				if death_counter > 0 and death_counter / starting_members >= 0.5 and not self.current.stopped then
-					self.callbacks:Fire("COMBAT_PLAYER_WIPE", self.current)
+					self:SendMessage("COMBAT_PLAYER_WIPE", self.current)
 					self:StopSegment(L["Stopping for wipe."])
 				end
 			elseif eventtype == "SPELL_RESURRECT" and ((band(srcFlags, BITMASK_GROUP) ~= 0 and band(srcFlags, BITMASK_PETS) == 0) or players[srcGUID]) then
@@ -3522,7 +3520,7 @@ do
 					if self.db.profile.alwayskeepbosses then
 						self.current.keep = true
 					end
-					self.callbacks:Fire("COMBAT_ENCOUNTER_START", self.current)
+					self:SendMessage("COMBAT_ENCOUNTER_START", self.current)
 				elseif not self.current.mobname then
 					self.current.mobname = dstName
 				end
@@ -3547,8 +3545,10 @@ do
 		end
 
 		if self.current and self.current.gotboss and (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") then
-			if dstName and self.current.mobname == dstName then
-				self:ScheduleTimer("BossDefeated", self.db.profile.updatefrequency or 0.5, self.current)
+			if band(dstFlags, BITMASK_GROUP) == 0 and band(dstFlags, BITMASK_PETS) == 0 then
+				if dstName and self.current.mobname == dstName then
+					self:ScheduleTimer("BossDefeated", self.db.profile.updatefrequency or 0.5, self.current)
+				end
 			end
 		end
 	end
@@ -3557,6 +3557,6 @@ end
 function Skada:BossDefeated(set)
 	if set and not set.success then
 		set.success = true
-		self.callbacks:Fire("COMBAT_BOSS_DEFEATED", set)
+		self:SendMessage("COMBAT_BOSS_DEFEATED", set)
 	end
 end

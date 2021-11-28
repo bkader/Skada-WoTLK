@@ -979,12 +979,13 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		Skada:RegisterForCL(SpellHeal, "SPELL_PERIODIC_HEAL", {src_is_interesting = true})
 
 		Skada.RegisterCallback(self, "Skada_ZoneCheck", "ZoneModifier")
-		Skada.RegisterCallback(self, "COMBAT_PLAYER_ENTER", "CheckPreShields")
+		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CheckPreShields")
 		Skada:AddMode(self, L["Absorbs and Healing"])
 	end
 
 	function mod:OnDisable()
 		Skada.UnregisterAllCallbacks(self)
+		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
 	end
 

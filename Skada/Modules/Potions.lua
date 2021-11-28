@@ -262,12 +262,12 @@ Skada:AddLoadableModule("Potions", function(L)
 		}
 
 		Skada:RegisterForCL(PotionUsed, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})
-		Skada.RegisterCallback(self, "COMBAT_PLAYER_ENTER", "CheckPrePot")
+		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CheckPrePot")
 		Skada:AddMode(self)
 	end
 
 	function mod:OnDisable()
-		Skada.UnregisterAllCallbacks(self)
+		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
 	end
 
