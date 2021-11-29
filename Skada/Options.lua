@@ -168,6 +168,7 @@ Skada.defaults = {
 	}
 }
 
+local titleVersion = fmt("|T%s:18:18:0:0:32:32:2:30:2:30|t |cffffd200Skada|r |cffffffff%s|r", Skada.logo, Skada.version)
 Skada.options = {
 	type = "group",
 	name = fmt("Skada |cffffffff%s|r", Skada.version),
@@ -690,12 +691,8 @@ Skada.options = {
 			args = {
 				title = {
 					type = "description",
-					name = fmt("|cffffd200Skada|r %s", Skada.version),
+					name = titleVersion,
 					fontSize = "large",
-					image = [[Interface\ICONS\Spell_Lightning_LightningBolt01]],
-					imageWidth = 16,
-					imageHeight = 16,
-					imageCoords = {0.05, 0.95, 0.05, 0.95},
 					width = "full",
 					order = 0
 				}
@@ -737,7 +734,7 @@ do
 		if not initOptions then
 			initOptions = {
 				type = "group",
-				name = fmt("|T%s:19:19:0:-1:32:32:2:30:2:30|t Skada |cffffffff%s|r", [[Interface\ICONS\Spell_Lightning_LightningBolt01]], Skada.version),
+				name = titleVersion,
 				args = {
 					open = {
 						type = "execute",

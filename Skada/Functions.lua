@@ -725,7 +725,7 @@ do
 			LibToast:Register("SkadaToastFrame", function(toast, text, title, icon, urgency)
 				toast:SetTitle(title or "Skada")
 				toast:SetText(text or L["A damage meter."])
-				toast:SetIconTexture(icon or [[Interface\Icons\Spell_Lightning_LightningBolt01]])
+				toast:SetIconTexture(icon or self.logo)
 				toast:SetUrgencyLevel(urgency or "normal")
 			end)
 			if self.db.profile.toast then

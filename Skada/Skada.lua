@@ -8,6 +8,7 @@ local GetAddOnMetadata = GetAddOnMetadata
 Skada.version = GetAddOnMetadata("Skada", "Version")
 Skada.website = GetAddOnMetadata("Skada", "X-Website")
 Skada.discord = GetAddOnMetadata("Skada", "X-Discord")
+Skada.logo = [[Interface\Icons\Spell_Lightning_LightningBolt01]]
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 local ACD = LibStub("AceConfigDialog-3.0")
@@ -36,7 +37,7 @@ local LDB = LibStub("LibDataBroker-1.1")
 local dataobj = LDB:NewDataObject("Skada", {
 	label = "Skada",
 	type = "data source",
-	icon = [[Interface\Icons\Spell_Lightning_LightningBolt01]],
+	icon = Skada.logo,
 	text = "n/a"
 })
 
@@ -2396,7 +2397,7 @@ function dataobj:OnEnter()
 	self.tooltip:SetPoint("TOPRIGHT", self, "BOTTOMRIGHT")
 	self.tooltip:ClearLines()
 
-	local set = Skada.current or Skada.char.sets[1]
+	local set = Skada:GetSet("current")
 	if set then
 		self.tooltip:AddDoubleLine(L["Skada Summary"], Skada.version)
 		self.tooltip:AddLine(" ")
