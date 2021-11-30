@@ -170,6 +170,7 @@ L["The color used for the border."] = "使用在外框的顏色。"
 L["Buttons"] = "按鈕"
 L["Auto Hide Buttons"] = "自動隱藏按鈕"
 L["Show window buttons only if the cursor is over the title bar."] = "仅当光标在标题栏上方时才显示窗口按钮。"
+L["Buttons Style"] = "按鈕樣式"
 -- general window
 L["Background"] = "背景"
 L["Background Texture"] = "背景的材質"

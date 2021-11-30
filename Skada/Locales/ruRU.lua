@@ -170,6 +170,7 @@ L["The color used for the border."] = "Цвет, используемый для
 L["Buttons"] = "Кнопки"
 L["Auto Hide Buttons"] = "Авто-скрытие кнопок"
 L["Show window buttons only if the cursor is over the title bar."] = "Отображать кнопки окна, только если курсор находится над строкой заголовка."
+L["Buttons Style"] = "Пуговицы Стиль"
 -- general window
 L["Background"] = "Фон"
 L["Background Texture"] = "Текстура фона"

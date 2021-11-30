@@ -171,6 +171,7 @@ L["The color used for the border."] = "테두리 색상으로 사용합니다."
 L["Buttons"] = "버튼"
 L["Auto Hide Buttons"] = "버튼 자동 숨기기"
 L["Show window buttons only if the cursor is over the title bar."] = "커서가 제목 표시줄 위에 있을 때만 창 버튼을 표시합니다."
+L["Buttons Style"] = "버튼 스타일"
 -- general window
 L["Background"] = "배경"
 L["Background Texture"] = "배경 텍스쳐"

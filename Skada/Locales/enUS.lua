@@ -172,6 +172,7 @@ L["The color used for the border."] = true
 L["Buttons"] = true
 L["Auto Hide Buttons"] = true
 L["Show window buttons only if the cursor is over the title bar."] = true
+L["Buttons Style"] = true
 -- general window
 L["Background"] = true
 L["Background Texture"] = true

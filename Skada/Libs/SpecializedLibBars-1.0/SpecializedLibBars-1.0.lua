@@ -348,16 +348,20 @@ function lib:ReleaseBar(name)
 end
 
 ---[[ Bar Groups ]]---
-function barListPrototype:AddButton(title, description, normaltex, highlighttex, clickfunc)
+function barListPrototype:AddButton(title, description, texture, texcoords, clickfunc)
 	-- Create button frame.
 	local btn = CreateFrame("Button", nil, self.button)
 	btn.title = title
 	btn:SetFrameLevel(self.button:GetFrameLevel() + 1)
 	btn:ClearAllPoints()
 	btn:SetSize(12, 12)
-	btn:SetNormalTexture(normaltex)
-	btn:SetHighlightTexture(highlighttex or normaltex, 1.0)
-	btn:SetAlpha(0.25)
+	btn:SetNormalTexture(texture)
+	btn:SetHighlightTexture(texture, 1.0)
+	if type(texcoords) == "table" then
+		btn:GetNormalTexture():SetTexCoord(unpack(texcoords))
+		btn:GetHighlightTexture():SetTexCoord(unpack(texcoords))
+	end
+	btn:SetAlpha(self.buttonsOpacity or 1)
 	btn:RegisterForClicks("AnyUp")
 	btn:SetScript("OnClick", clickfunc)
 	btn:SetScript("OnEnter", function(this)
@@ -366,18 +370,19 @@ function barListPrototype:AddButton(title, description, normaltex, highlighttex,
 		GameTooltip:AddLine(description, 1, 1, 1, true)
 		GameTooltip:Show()
 		if self.mouseover then
-			self:SetButtonsOpacity(0.5)
+			self:ShowButtons()
 			self:AdjustTitle(true)
 		end
 	end)
 	btn:SetScript("OnLeave", function()
 		GameTooltip:Hide()
 		if self.mouseover then
-			self:SetButtonsOpacity(0)
+			btn:Hide()
+			self:HideButtons()
 			self:AdjustTitle()
 		end
 	end)
-	btn:Show()
+	btn:Hide()
 
 	self.buttons[#self.buttons + 1] = btn
 	self:AdjustButtons()
@@ -412,6 +417,7 @@ do
 end
 
 function barListPrototype:SetButtonsOpacity(alpha)
+	self.buttonsOpacity = alpha
 	for _, btn in ipairs(self.buttons) do
 		btn:SetAlpha(alpha)
 	end
@@ -421,22 +427,22 @@ function barListPrototype:SetButtonMouseOver(mouseover)
 	self.mouseover = mouseover
 
 	if self.mouseover then
-		self:SetButtonsOpacity(0)
+		self:HideButtons()
 		self.button:SetScript("OnEnter", function()
-			self:SetButtonsOpacity(0.5)
+			self:ShowButtons()
 			self:AdjustTitle(true)
 		end)
 		self.button:SetScript("OnLeave", function()
 			if MouseIsOver(self.button) then
-				self:SetButtonsOpacity(0.5)
+				self:ShowButtons()
 				self:AdjustTitle(true)
 			else
-				self:SetButtonsOpacity(0)
+				self:HideButtons()
 				self:AdjustTitle()
 			end
 		end)
 	else
-		self:SetButtonsOpacity(0.25)
+		self:ShowButtons()
 		self.button:SetScript("OnEnter", nil)
 		self.button:SetScript("OnLeave", nil)
 	end
@@ -452,7 +458,7 @@ function barListPrototype:AdjustButtons()
 	for _, btn in ipairs(self.buttons) do
 		btn:ClearAllPoints()
 
-		if btn:IsShown() then
+		if btn.visible then
 			if nr == 0 and self.orientation == 3 then
 				btn:SetPoint("TOPLEFT", self.button, "TOPLEFT", 5, -(max(height - btn:GetHeight(), 0) / 2))
 			elseif nr == 0 then
@@ -464,6 +470,14 @@ function barListPrototype:AdjustButtons()
 			end
 			self.lastbtn = btn
 			nr = nr + 1
+
+			if self.mouseover then
+				btn:Hide()
+			else
+				btn:Show()
+			end
+		else
+			btn:Hide()
 		end
 	end
 
@@ -513,14 +527,26 @@ end
 function barListPrototype:ShowButton(title, visible)
 	for _, b in ipairs(self.buttons) do
 		if b.title == title then
-			if visible then
-				b:Show()
-			else
-				b:Hide()
-			end
+			b.visible = (visible == true)
 		end
 	end
 	self:AdjustButtons()
+end
+
+function barListPrototype:ShowButtons()
+	for _, b in ipairs(self.buttons) do
+		if not b:IsShown() and b.visible then
+			b:Show()
+		end
+	end
+end
+
+function barListPrototype:HideButtons()
+	for _, b in ipairs(self.buttons) do
+		if b:IsShown() then
+			b:Hide()
+		end
+	end
 end
 
 do

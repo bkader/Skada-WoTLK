@@ -54,7 +54,8 @@ Skada.windowdefaults = {
 		bordertexture = "None",
 		borderthickness = 2,
 		bordercolor = {r = 0, g = 0, b = 0, a = 1},
-		hovermode = false
+		hovermode = false,
+		toolbar = 1
 	},
 	background = {
 		tile = false,

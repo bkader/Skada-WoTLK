@@ -44,6 +44,25 @@ local function TitleButtonOnClick(self, button)
 	end
 end
 
+local buttonsTexPath = [[Interface\AddOns\Skada\Media\Textures\toolbar]]
+local buttonsTexCoords = {
+	{0.008, 0.117, 0.062, 0.938}, -- config
+	{0.133, 0.242, 0.062, 0.938}, -- reset
+	{0.258, 0.367, 0.062, 0.938}, -- segments
+	{0.383, 0.492, 0.062, 0.938}, -- modes
+	{0.508, 0.617, 0.062, 0.938}, -- report
+	{0.633, 0.742, 0.062, 0.938} -- stop/resume
+}
+
+local function AddWindowButton(win, style, index, title, description, func)
+	if win and win.AddButton then
+		style, index = style or 1, index or 1
+		local tex = buttonsTexPath .. style
+		local texcoords = buttonsTexCoords[index]
+		win:AddButton(title, description, tex, texcoords, func)
+	end
+end
+
 function mod:Create(window)
 	-- Re-use bargroup if it exists.
 	local bargroup = mod:GetBarGroup(window.db.name)
@@ -62,10 +81,12 @@ function mod:Create(window)
 			"SkadaBarWindow" .. window.db.name
 		)
 
+		bargroup:SetButtonsOpacity(window.db.title.toolbaropacity or 0.25)
+		bargroup:SetButtonMouseOver(window.db.title.hovermode)
+
 		-- Add window buttons.
-		bargroup:AddButton(
+		AddWindowButton(bargroup, window.db.title.toolbar, 1,
 			L["Configure"], L["Opens the configuration window."],
-			[[Interface\Addons\Skada\Media\Textures\icon-config]], nil,
 			function(_, button)
 				if button == "RightButton" then
 					Skada:OpenOptions(bargroup.win)
@@ -75,15 +96,13 @@ function mod:Create(window)
 			end
 		)
 
-		bargroup:AddButton(
+		AddWindowButton(bargroup, window.db.title.toolbar, 2,
 			RESET, L["Resets all fight data except those marked as kept."],
-			[[Interface\Addons\Skada\Media\Textures\icon-reset]], nil,
 			function() Skada:ShowPopup(bargroup.win) end
 		)
 
-		bargroup:AddButton(
+		AddWindowButton(bargroup, window.db.title.toolbar, 3,
 			L["Segment"], L["Jump to a specific segment."],
-			[[Interface\Buttons\UI-GuildButton-PublicNote-Up]], nil,
 			function(_, button)
 				if button == "MiddleButton" then
 					bargroup.win:set_selected_set("current")
@@ -95,21 +114,18 @@ function mod:Create(window)
 			end
 		)
 
-		bargroup:AddButton(
+		AddWindowButton(bargroup, window.db.title.toolbar, 4,
 			L["Mode"], L["Jump to a specific mode."],
-			[[Interface\GROUPFRAME\UI-GROUP-MAINASSISTICON]], nil,
 			function() Skada:ModeMenu(bargroup.win) end
 		)
 
-		bargroup:AddButton(
+		AddWindowButton(bargroup, window.db.title.toolbar, 5,
 			L["Report"], L["Opens a dialog that lets you report your data to others in various ways."],
-			[[Interface\Buttons\UI-GuildButton-MOTD-Up]], nil,
 			function() Skada:OpenReportWindow(bargroup.win) end
 		)
 
-		bargroup:AddButton(
+		AddWindowButton(bargroup, window.db.title.toolbar, 6,
 			L["Stop"], L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."],
-			[[Interface\CHATFRAME\ChatFrameExpandArrow]], nil,
 			function()
 				if Skada.current and Skada.current.stopped then
 					Skada:ResumeSegment()
@@ -137,6 +153,7 @@ function mod:Create(window)
 	titletext:SetPoint("LEFT", bargroup.button, "LEFT", 5, 1)
 	titletext:SetJustifyH("LEFT")
 	bargroup.button:SetHeight(window.db.title.height or 15)
+	bargroup:SetButtonMouseOver(window.db.title.hovermode)
 
 	-- Register with LibWindow-1.0.
 	LibWindow.RegisterConfig(bargroup, window.db)
@@ -812,6 +829,7 @@ do
 		g:SetTexture(p.bartexturepath or Skada:MediaFetch("statusbar", p.bartexture))
 		g:SetBarBackgroundColor(p.barbgcolor.r, p.barbgcolor.g, p.barbgcolor.b, p.barbgcolor.a or 0.6)
 		g:SetButtonMouseOver(p.title.hovermode)
+		g:SetButtonsOpacity(p.title.toolbaropacity or 0.25)
 
 		g:SetFont(
 			p.barfontpath or Skada:MediaFetch("font", p.barfont),
@@ -855,6 +873,15 @@ do
 		g.button:SetHeight(p.title.height or 15)
 
 		Skada:ApplyBorder(g.button, p.title.bordertexture, p.title.bordercolor, p.title.borderthickness)
+
+		g.button.toolbar = g.button.toolbar or p.title.toolbar or 1
+		if g.button.toolbar ~= p.title.toolbar then
+			g.button.toolbar = p.title.toolbar
+			for i, b in ipairs(g.buttons) do
+				b:GetNormalTexture():SetTexture(buttonsTexPath .. g.button.toolbar)
+				b:GetHighlightTexture():SetTexture(buttonsTexPath .. g.button.toolbar, 1.0)
+			end
+		end
 
 		if p.enabletitle then
 			g:ShowAnchor()
@@ -1494,42 +1521,36 @@ function mod:AddDisplayOptions(win, options)
 						type = "toggle",
 						name = L["Configure"],
 						desc = L["Opens the configuration window."],
-						image = [[Interface\Addons\Skada\Media\Textures\icon-config]],
 						order = 10
 					},
 					reset = {
 						type = "toggle",
 						name = RESET,
 						desc = L["Resets all fight data except those marked as kept."],
-						image = [[Interface\Addons\Skada\Media\Textures\icon-reset]],
 						order = 20
 					},
 					segment = {
 						type = "toggle",
 						name = L["Segment"],
 						desc = L["Jump to a specific segment."],
-						image = [[Interface\Buttons\UI-GuildButton-PublicNote-Up]],
 						order = 30
 					},
 					mode = {
 						type = "toggle",
 						name = L["Mode"],
 						desc = L["Jump to a specific mode."],
-						image = [[Interface\GROUPFRAME\UI-GROUP-MAINASSISTICON]],
 						order = 40
 					},
 					report = {
 						type = "toggle",
 						name = L["Report"],
 						desc = L["Opens a dialog that lets you report your data to others in various ways."],
-						image = [[Interface\Buttons\UI-GuildButton-MOTD-Up]],
 						order = 50
 					},
 					stop = {
 						type = "toggle",
 						name = L["Stop"],
 						desc = L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."],
-						image = [[Interface\CHATFRAME\ChatFrameExpandArrow]],
 						order = 60
 					},
 					hovermode = {
@@ -1545,6 +1566,50 @@ function mod:AddDisplayOptions(win, options)
 							db.title.hovermode = not db.title.hovermode
 							Skada:ApplySettings(db.name)
 						end
+					},
+					appearance = {
+						type = "group",
+						name = L["Appearance"],
+						desc = format(L["Appearance options for %s."], L["Buttons"]),
+						inline = true,
+						order = 80,
+						args = {
+							style = {
+								type = "multiselect",
+								name = L["Buttons Style"],
+								width = "full",
+								order = 10,
+								get = function(_, key)
+									return (db.title.toolbar == key)
+								end,
+								set = function(_, val)
+									db.title.toolbar = val
+									Skada:ApplySettings(db.name)
+								end,
+								values = {
+									format("|T%s%d:24:192|t", buttonsTexPath, 1),
+									format("|T%s%d:24:192|t", buttonsTexPath, 2),
+									format("|T%s%d:24:192|t", buttonsTexPath, 3)
+								}
+							},
+							opacity = {
+								type = "range",
+								name = L["Opacity"],
+								get = function()
+									return db.title.toolbaropacity or 0.25
+								end,
+								set = function(_, val)
+									db.title.toolbaropacity = val
+									Skada:ApplySettings(db.name)
+								end,
+								min = 0,
+								max = 1,
+								step = 0.01,
+								isPercent = true,
+								width = "double",
+								order = 20,
+							}
+						}
 					}
 				}
 			}

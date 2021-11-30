@@ -171,6 +171,7 @@ L["The color used for the border."] = "La couleur à utiliser pour la bordure."
 L["Buttons"] = "Boutons"
 L["Auto Hide Buttons"] = "Afficher au survol de la souris"
 L["Show window buttons only if the cursor is over the title bar."] = "Afficher les boutons de la fenêtre uniquement si le curseur se trouve au-dessus de la barre de titre."
+L["Buttons Style"] = "Style des boutons"
 -- general window
 L["Background"] = "Arrière-plan"
 L["Background Texture"] = "Texture de l'arrière-plan"
