@@ -14,6 +14,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 local ACD = LibStub("AceConfigDialog-3.0")
 local ACR = LibStub("AceConfigRegistry-3.0")
 local DBI = LibStub("LibDBIcon-1.0", true)
+local LDS = LibStub("LibDualSpec-1.0", true)
 local Translit = LibStub("LibTranslit-1.0", true)
 
 -- cache frequently used globlas
@@ -2898,9 +2899,13 @@ function Skada:OnInitialize()
 	-- Profiles
 	local AceDBOptions = LibStub("AceDBOptions-3.0", true)
 	if AceDBOptions then
+		if LDS then LDS:EnhanceDatabase(self.db, "Skada") end
+
 		self.options.args.profiles.args.general = AceDBOptions:GetOptionsTable(self.db)
 		self.options.args.profiles.args.general.name = L["General"]
 		self.options.args.profiles.args.general.order = 0
+
+		if LDS then LDS:EnhanceOptions(self.options.args.profiles.args.general, self.db) end
 
 		-- import/export profile if found.
 		if self.AdvancedProfile then
