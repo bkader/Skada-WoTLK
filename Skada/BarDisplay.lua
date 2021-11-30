@@ -876,7 +876,7 @@ do
 
 		g.button.toolbar = g.button.toolbar or p.title.toolbar or 1
 		if g.button.toolbar ~= p.title.toolbar then
-			g.button.toolbar = p.title.toolbar
+			g.button.toolbar = p.title.toolbar or 1
 			for i, b in ipairs(g.buttons) do
 				b:GetNormalTexture():SetTexture(buttonsTexPath .. g.button.toolbar)
 				b:GetHighlightTexture():SetTexture(buttonsTexPath .. g.button.toolbar, 1.0)
