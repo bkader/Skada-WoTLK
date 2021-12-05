@@ -1,4 +1,4 @@
-# Skada for WoTLK (_Revisited - v1.8.73.334_)
+# Skada for WoTLK (_Revisited - v1.8.73.338_)
 
 ![Discord](https://img.shields.io/discord/795698054371868743?label=discord)
 ![GitHub last commit](https://img.shields.io/github/last-commit/bkader/Skada-WoTLK)
@@ -298,6 +298,7 @@ local enemy = set:GetEnemy("The Lich King") -- example
 -- functions:
 enemy:GetTime() -- simply returns the combat time
 enemy:GetDamageTaken() -- returns the amount of damage the enemy took
+enemy:GetDamageTakenBreakdown() -- returns the amount, total and useful damage taken by the enemy.
 enemy:GetDTPS() -- returns the amount of damage the enemy took per second.
 enemy:GetDamageSources() -- returns the list of players who damaged the enemy and their amounts table.
 enemy:GetDamageFromSource(name) -- returns the amount, total and useful damage the given name did on the enemy.

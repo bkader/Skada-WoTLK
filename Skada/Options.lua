@@ -157,6 +157,7 @@ Skada.defaults = {
 			["Healing and Overhealing"] = true,
 			["Healing Done By Spell"] = true,
 			["Healing Taken"] = true,
+			["Healthstones"] = true,
 			["HPS"] = true,
 			["Improvement"] = true,
 			["Overhealing"] = true,
@@ -706,6 +707,10 @@ Skada.options = {
 for i, field in ipairs({"Version", "Date", "Author", "Category", "License", "Email", "Website", "Discord", "Credits", "Localizations", "Thanks", "Donate"}) do
 	local meta = GetAddOnMetadata("Skada", field) or GetAddOnMetadata("Skada", "X-" .. field)
 	if meta then
+		-- append field to revision number
+		if field == "Version" then
+			meta = format("%s-rev|cffffd200%s|r", meta, Skada.revision)
+		end
 		Skada.options.args.about.args[field] = {
 			type = "description",
 			name = fmt("\n|cffffd200%s|r:  %s", L[field], meta),

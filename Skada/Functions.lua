@@ -126,10 +126,27 @@ do
 		[15929] = L["Thaddius"], -- Stalagg
 		[15928] = L["Thaddius"], -- Thaddius
 		-- [[ Trial of the Crusader ]] --
-		[34796] = L["The Beasts of Northrend"], -- Gormok
-		[35144] = L["The Beasts of Northrend"], -- Acidmaw
-		[34799] = L["The Beasts of Northrend"], -- Dreadscale
-		[34797] = L["The Beasts of Northrend"], -- Icehowl
+		[34796] = L["The Northrend Beasts"], -- Gormok
+		[35144] = L["The Northrend Beasts"], -- Acidmaw
+		[34799] = L["The Northrend Beasts"], -- Dreadscale
+		[34797] = L["The Northrend Beasts"], -- Icehowl
+		-- Champions of the Alliance
+		[34461] = L["Faction Champions"], -- Tyrius Duskblade <Death Knight>
+		[34460] = L["Faction Champions"], -- Kavina Grovesong <Druid>
+		[34469] = L["Faction Champions"], -- Melador Valestrider <Druid>
+		[34467] = L["Faction Champions"], -- Alyssia Moonstalker <Hunter>
+		[34468] = L["Faction Champions"], -- Noozle Whizzlestick <Mage>
+		[34465] = L["Faction Champions"], -- Velanaa <Paladin>
+		[34471] = L["Faction Champions"], -- Baelnor Lightbearer <Paladin>
+		[34466] = L["Faction Champions"], -- Anthar Forgemender <Priest>
+		[34473] = L["Faction Champions"], -- Brienna Nightfell <Priest>
+		[34472] = L["Faction Champions"], -- Irieth Shadowstep <Rogue>
+		[34463] = L["Faction Champions"], -- Shaabad <Shaman>
+		[34470] = L["Faction Champions"], -- Saamul <Shaman>
+		[34474] = L["Faction Champions"], -- Serissa Grimdabbler <Warlock>
+		[34475] = L["Faction Champions"], -- Shocuul <Warrior>
+		[35465] = L["Faction Champions"], -- Zhaagrym <Harkzog's Minion / Serissa Grimdabbler's Minion>
+		-- Champions of the Horde
 		[34441] = L["Faction Champions"], -- Vivienne Blackwhisper <Priest>
 		[34444] = L["Faction Champions"], -- Thrakgar <Shaman>
 		[34445] = L["Faction Champions"], -- Liandra Suncaller <Paladin>
@@ -144,24 +161,9 @@ do
 		[34456] = L["Faction Champions"], -- Malithas Brightblade <Paladin>
 		[34458] = L["Faction Champions"], -- Gorgrim Shadowcleave <Death Knight>
 		[34459] = L["Faction Champions"], -- Erin Misthoof <Druid>
-		[34460] = L["Faction Champions"], -- Kavina Grovesong <Druid>
-		[34461] = L["Faction Champions"], -- Tyrius Duskblade <Death Knight>
-		[34463] = L["Faction Champions"], -- Shaabad <Shaman>
-		[34465] = L["Faction Champions"], -- Velanaa <Paladin>
-		[34466] = L["Faction Champions"], -- Anthar Forgemender <Priest>
-		[34467] = L["Faction Champions"], -- Alyssia Moonstalker <Hunter>
-		[34468] = L["Faction Champions"], -- Noozle Whizzlestick <Mage>
-		[34469] = L["Faction Champions"], -- Melador Valestrider <Druid>
-		[34470] = L["Faction Champions"], -- Saamul <Shaman>
-		[34471] = L["Faction Champions"], -- Baelnor Lightbearer <Paladin>
-		[34472] = L["Faction Champions"], -- Irieth Shadowstep <Rogue>
-		[34473] = L["Faction Champions"], -- Brienna Nightfell <Priest>
-		[34474] = L["Faction Champions"], -- Serissa Grimdabbler <Warlock>
-		[34475] = L["Faction Champions"], -- Shocuul <Warrior>
-		[35465] = L["Faction Champions"], -- Zhaagrym <Harkzog's Minion / Serissa Grimdabbler's Minion>
 		[35610] = L["Faction Champions"], -- Cat <Ruj'kah's Pet / Alyssia Moonstalker's Pet>
-		[34496] = L["The Twin Val'kyr"], -- Eydis Darkbane
-		[34497] = L["The Twin Val'kyr"], -- Fjola Lightbane
+		[34496] = L["Twin Val'kyr"], -- Eydis Darkbane
+		[34497] = L["Twin Val'kyr"], -- Fjola Lightbane
 		-- [[ Ulduar ]] --
 		[32857] = L["The Iron Council"], -- Stormcaller Brundir
 		[32867] = L["The Iron Council"], -- Steelbreaker

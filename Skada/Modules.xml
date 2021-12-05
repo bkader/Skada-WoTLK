@@ -27,6 +27,7 @@
 <Script file="Modules\Deaths.lua" />
 <Script file="Modules\Dispels.lua" />
 <Script file="Modules\Failbot.lua" />
+<Script file="Modules\Healthstone.lua" />
 <Script file="Modules\Interrupts.lua" />
 <Script file="Modules\Parry.lua" />
 <Script file="Modules\Potions.lua" />

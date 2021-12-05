@@ -246,7 +246,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 	local function log_custom_group(set, id, name, playername, spellid, spellschool, amount, overkill, absorbed)
 		if not (name and customGroups[name]) then return end -- not a custom group.
 		if customGroups[name] == L["Halion and Inferno"] and GetRaidDiff() ~= "25h" then return end -- rs25hm only
-		if customGroupsTable and customGroupsTable[id] then return end -- a custim unit with useful damage.
+		if customGroupsTable and customGroupsTable[id] then return end -- a custom unit with useful damage.
 
 		amount = (customGroups[name] == L["Princes overkilling"]) and overkill or amount
 		log_custom_unit(set, customGroups[name], playername, spellid, spellschool, amount, absorbed)
@@ -326,6 +326,9 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 								customGroupsTable = customGroupsTable or T.get("Enemies_GroupsTable")
 								customGroupsTable[unit.guid] = true
 							end
+							if customGroups[unit.name] then
+								log_custom_group(set, unit.guid, unit.name, dmg.srcName, dmg.spellid, dmg.spellschool, unit.maxval - unit.curval, dmg.overkill, absorbed)
+							end
 						end
 						if unit.useful then
 							e.usefuldamagetaken = (e.usefuldamagetaken or 0) + amount
@@ -336,6 +339,9 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 						local amount = dmg.amount - dmg.overkill
 						unit.curval = unit.curval - amount
 
+						if customGroups[unit.name] then
+							log_custom_group(set, unit.guid, unit.name, dmg.srcName, dmg.spellid, dmg.spellschool, amount, dmg.overkill, absorbed)
+						end
 						if unit.curval <= unit.minval then
 							amount = amount - (unit.minval - unit.curval)
 							customUnitsTable[unit.guid] = -1 -- remove it
@@ -426,6 +432,19 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 				local overkill = max(0, damage - useful)
 				tooltip:AddDoubleLine(L["Overkill"], format("%s (%s)", Skada:FormatNumber(overkill), Skada:FormatPercent(overkill, damage)), 1, 1, 1)
 			end
+		end
+	end
+
+	local function usefulmod_tooltip(win, id, label, tooltip)
+		local set = win:GetSelectedSet()
+		local e = set and set:GetEnemy(label, id)
+		local amount, total, useful = e:GetDamageTakenBreakdown()
+		if useful and useful > 0 then
+			tooltip:AddLine(format(L["%s's damage breakdown"], label))
+			tooltip:AddDoubleLine(L["Damage Done"], Skada:FormatNumber(total), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Useful Damage"], format("%s (%s)", Skada:FormatNumber(useful), Skada:FormatPercent(useful, total)), 1, 1, 1)
+			local overkill = max(0, total - useful)
+			tooltip:AddDoubleLine(L["Overkill"], format("%s (%s)", Skada:FormatNumber(overkill), Skada:FormatPercent(overkill, total)), 1, 1, 1)
 		end
 	end
 
@@ -618,6 +637,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 			click1 = sourcemod,
 			click2 = spellmod,
 			click3 = usefulmod,
+			post_tooltip = usefulmod_tooltip,
 			columns = {Damage = true, DTPS = false, Percent = true},
 			icon = [[Interface\Icons\spell_fire_felflamebolt]]
 		}
@@ -727,6 +747,23 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 				total = sources[name].total or 0
 				if sources[name].useful then
 					useful = sources[name].useful or 0
+				end
+			end
+			return amount, total, useful
+		end
+	end
+
+	function enemyPrototype:GetDamageTakenBreakdown()
+		if self.damagetakenspells then
+			local amount, total, useful = 0, 0, 0
+			local sources = self:GetDamageSources()
+			if sources then
+				for _, source in pairs(sources) do
+					amount = amount + (source.amount or 0)
+					total = total + (source.total or 0)
+					if source.useful then
+						useful = useful + source.useful
+					end
 				end
 			end
 			return amount, total, useful

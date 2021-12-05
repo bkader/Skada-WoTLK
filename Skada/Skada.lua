@@ -6,6 +6,7 @@ Skada.locale = Skada.locale or GetLocale()
 
 local GetAddOnMetadata = GetAddOnMetadata
 Skada.version = GetAddOnMetadata("Skada", "Version")
+Skada.revision = GetAddOnMetadata("Skada", "X-Revision") or "0"
 Skada.website = GetAddOnMetadata("Skada", "X-Website")
 Skada.discord = GetAddOnMetadata("Skada", "X-Discord")
 Skada.logo = [[Interface\Icons\Spell_Lightning_LightningBolt01]]
@@ -140,8 +141,9 @@ end
 -- creates a new set
 local function CreateSet(setname, starttime)
 	starttime = starttime or time()
-	local set = {players = {}, name = setname, starttime = starttime, last_action = starttime, time = 0}
+	local set = {players = {}, name = setname, starttime = starttime, time = 0}
 	if setname == L["Current"] then
+		set.last_action = set.last_action or starttime
 		set.enemies = set.enemies or {}
 	end
 	for _, mode in ipairs(modes) do
@@ -1864,27 +1866,30 @@ do
 	local version_count = 0
 
 	function CheckVersion()
-		Skada:SendComm(nil, nil, "VersionCheck", Skada.version)
+		Skada:SendComm(nil, nil, "VersionCheck", Skada.version, Skada.revision)
 		Skada:CancelTimer(version_timer, true)
 		version_timer = nil
 	end
 
 	function ConvertVersion(ver)
-		return tonumber(type(ver) == "string" and gsub(ver, "%.", "") or ver)
+		return tonumber(type(ver) == "string" and gsub(ver, "%.", "") or ver) or 0
 	end
 
-	function Skada:OnCommVersionCheck(sender, version)
+	function Skada:OnCommVersionCheck(sender, version, revision)
 		if sender and sender ~= self.userName and version then
 			version = ConvertVersion(version)
+
 			local ver = ConvertVersion(self.version)
 			if not (version and ver) or self.versionChecked then
 				return
 			end
 
-			if (version > ver) then
-				self:Notify(format(L["Skada is out of date. You can download the newest version from |cffffbb00%s|r"], self.website))
-			elseif (version < ver) then
-				self:SendComm("WHISPER", sender, "VersionCheck", self.version)
+			revision = ConvertVersion(revision)
+			local rev = ConvertVersion(self.revision)
+			if (version > ver) or (version == ver and revision > rev) then
+				self:Print(format(L["Skada is out of date. You can download the newest version from |cffffbb00%s|r"], self.website))
+			elseif (version < ver) or (version == ver and revision < rev) then
+				self:SendComm("WHISPER", sender, "VersionCheck", self.version, self.revision)
 			end
 
 			self.versionChecked = true
@@ -2950,18 +2955,28 @@ function Skada:OnInitialize()
 
 	-- in case of future code change or database structure changes, this
 	-- code here will be used to perform any database modifications.
-	local curversion = ConvertVersion(self.version)
-	if type(self.db.global.version) ~= "number" or curversion > self.db.global.version then
-		self.callbacks:Fire("Skada_UpdateCore", self.db.global.version, curversion)
-		self.db.global.version = curversion
+	local version = ConvertVersion(self.version)
+	local revision = ConvertVersion(self.revision)
+
+	self.db.global.version = self.db.global.version or 0
+	self.db.global.revision = self.db.global.revision or revision
+
+	self.char.version = self.char.version or 0
+	self.char.revision = self.char.revision or revision
+
+	if version > self.db.global.version then
+		self.db.global.version = version
+		self.db.global.revision = revision
+		self.callbacks:Fire("Skada_UpdateCore", self.db.global.version, version, self.db.global.revision, revision)
 	end
-	if type(self.char.version) ~= "number" or curversion > self.char.version then
-		-- force reset for if 5 revision behind
-		if (curversion - (self.char.version or 0)) >= 5 then
+
+	if version > self.char.version or (version == self.char.version and revision > self.char.revision) then
+		if (version - (self.char.version or 0)) >= 1 then
 			self:Reset(true)
 		end
-		self.callbacks:Fire("Skada_UpdateData", self.char.version, curversion)
-		self.char.version = curversion
+		self.char.version = version
+		self.char.revision = revision
+		self.callbacks:Fire("Skada_UpdateData", self.char.version, version, self.char.revision, revision)
 	end
 end
 
@@ -3006,7 +3021,7 @@ end
 
 function Skada:BigWigs(_, _, event, message)
 	if event == "bosskill" and message and self.current and self.current.gotboss then
-		if message:find(self.current.mobname) ~= nil then
+		if message:lower():find(self.current.mobname:lower()) ~= nil and not self.current.success then
 			self:Debug("COMBAT_BOSS_DEFEATED: BigWigs")
 			self.current.success = true
 			self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
@@ -3015,11 +3030,12 @@ function Skada:BigWigs(_, _, event, message)
 end
 
 function Skada:DBM(_, mod, wipe)
-	if not wipe and mod and mod.combatInfo and self.current and self.current.gotboss and not self.current.success then
-		if mod.combatInfo.name and self.current.mobname:find(mod.combatInfo.name) ~= nil then
+	if not wipe and mod and mod.combatInfo then
+		local set = self.current or self.last -- just in case DBM was late.
+		if set and not set.success and mod.combatInfo.name and set.mobname:lower():find(mod.combatInfo.name:lower()) ~= nil then
 			self:Debug("COMBAT_BOSS_DEFEATED: DBM")
-			self.current.success = true
-			self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
+			set.success = true
+			self:SendMessage("COMBAT_BOSS_DEFEATED", set)
 		end
 	end
 end
@@ -3188,8 +3204,8 @@ function Skada:EndSegment()
 	if not self.current then return end
 	T.free("Skada_QueuedUnits", queued_units)
 
-	local now = time()
 	if not self.db.profile.onlykeepbosses or self.current.gotboss then
+		local now = time()
 		if self.current.mobname ~= nil and now - self.current.starttime > 5 then
 			self.current.endtime = self.current.endtime or now
 			self.current.time = max(0.1, self.current.endtime - self.current.starttime)
@@ -3361,14 +3377,12 @@ do
 
 		self:Wipe()
 
-		local starttime = time()
-
 		if not self.current then
-			self.current = CreateSet(L["Current"], starttime)
+			self.current = CreateSet(L["Current"])
 		end
 
 		if self.total == nil then
-			self.total = CreateSet(L["Total"], starttime)
+			self.total = CreateSet(L["Total"])
 			self.char.total = self.total
 		end
 
@@ -3412,6 +3426,7 @@ do
 		local src_is_interesting = nil
 		local dst_is_interesting = nil
 
+		local now = time()
 		if not self.current and trigger_events[eventtype] and srcName and dstName and srcGUID ~= dstGUID then
 			src_is_interesting = band(srcFlags, BITMASK_GROUP) ~= 0 or (band(srcFlags, BITMASK_PETS) ~= 0 and pets[srcGUID]) or players[srcGUID]
 
@@ -3420,7 +3435,6 @@ do
 			end
 
 			if src_is_interesting or dst_is_interesting then
-				local now = time()
 				self.current = CreateSet(L["Current"], now)
 				if not self.total then
 					self.total = CreateSet(L["Total"], now)
@@ -3512,6 +3526,7 @@ do
 						end
 					end
 
+					self.current.last_action = now
 					mod.func(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 				end
 			end

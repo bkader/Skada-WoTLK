@@ -612,13 +612,13 @@ do
 
 					if win.db.specicons and speccoords and data.spec and speccoords[data.spec] then
 						bar:ShowIcon()
-						bar:SetIconWithCoord(specicons, speccoords[data.spec])
+						bar:SetIcon(specicons, speccoords[data.spec])
 					elseif win.db.roleicons and rolecoords and data.role and data.role ~= "NONE" and rolecoords[data.role] then
 						bar:ShowIcon()
-						bar:SetIconWithCoord(roleicons, rolecoords[data.role])
+						bar:SetIcon(roleicons, rolecoords[data.role])
 					elseif win.db.classicons and data.class and classcoords[data.class] and data.icon == nil then
 						bar:ShowIcon()
-						bar:SetIconWithCoord(classicons, classcoords[data.class])
+						bar:SetIcon(classicons, classcoords[data.class])
 					elseif not data.ignore and not data.spellid and not data.hyperlink then
 						if data.icon and not bar:IsIconShown() then
 							bar:ShowIcon()

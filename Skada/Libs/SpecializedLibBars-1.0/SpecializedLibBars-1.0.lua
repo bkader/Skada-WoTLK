@@ -1518,24 +1518,14 @@ function barPrototype:SetFont(f1, s1, m1, f2, s2, m2)
 	timer:SetFont(f2 or numfont, s2 or numsize, m2 or numflags)
 end
 
-function barPrototype:SetIconWithCoord(icon, coord)
+function barPrototype:SetIcon(icon, coord)
 	if icon then
 		self.icon:SetTexture(icon)
-		self.icon:SetTexCoord(unpack(coord))
 		if self.showIcon then
 			self.icon:Show()
 		end
-	else
-		self.icon:Hide()
-	end
-	self.iconTexture = icon or nil
-end
-
-function barPrototype:SetIcon(icon)
-	if icon then
-		self.icon:SetTexture(icon)
-		if self.showIcon then
-			self.icon:Show()
+		if coord then
+			self.icon:SetTexCoord(unpack(coord))
 		end
 	else
 		self.icon:Hide()
