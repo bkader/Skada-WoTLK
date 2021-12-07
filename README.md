@@ -232,12 +232,15 @@ set:GetAbsorbHealSpells() -- returns the table of both absorb heals spells.
 set:GetAuraPlayers(spellid) -- returns the list of players by the given buff id.
 set:GetDamage(useful) -- returns the damage amount. if "useful" is true, it excludes the overkill.
 set:GetDamageTaken() -- returns the amount of damage taken by the whole group.
-set:GetEnemyDamageTaken() -- returns the amount of damage enemies took.
-set:GetEnemyDamageDone() -- returns the amount of damage enemies dealt to your group.
-set:GetEnemyHeal() -- returns the amount of heal enemies did.
 set:GetFailCount(spellid) -- returns the number of fails per give spell id
 set:GetAbsorbHealTaken() -- returns the table of players their healing taken amounts.
 set:GetPotion(potionid) -- returns the list of players and total usage of the give potion id
+
+set:GetEnemyDamageTaken() -- returns the amount of damage enemies took.
+set:GetEnemyDamageDone() -- returns the amount of damage enemies dealt to your group.
+set:GetEnemyDPS() -- returns total dps and damage amount of all enemies.
+set:GetEnemyHeal() -- returns the amount of heal enemies did.
+set:GetEnemyHPS() -- returns the total hps and heal amount of all enemies.
 ```
 
 #### Players functions
@@ -302,7 +305,7 @@ enemy:GetDamageTakenBreakdown() -- returns the amount, total and useful damage t
 enemy:GetDTPS() -- returns the amount of damage the enemy took per second.
 enemy:GetDamageSources() -- returns the list of players who damaged the enemy and their amounts table.
 enemy:GetDamageFromSource(name) -- returns the amount, total and useful damage the given name did on the enemy.
-enemy:GetDamageDone() -- returns the amount of damage the enemy did.
+enemy:GetDamage() -- returns the amount of damage the enemy did.
 enemy:GetDPS() -- returns the enemy DPS.
 enemy:GetDamageTargets() -- returns the list of players the enemy did damage to.
 enemy:GetDamageOnTarget(name) -- returns the amount of damage the enemy did to the given player.

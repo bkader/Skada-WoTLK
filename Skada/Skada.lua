@@ -2971,7 +2971,7 @@ function Skada:OnInitialize()
 	end
 
 	if version > self.char.version or (version == self.char.version and revision > self.char.revision) then
-		if (version - (self.char.version or 0)) >= 1 then
+		if (version - self.char.version >= 1) or (version == self.char.version and revision - self.char.revision >= 5) then
 			self:Reset(true)
 		end
 		self.char.version = version

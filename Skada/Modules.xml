@@ -39,4 +39,5 @@
 <Script file="Modules\Themes.lua" />
 <Script file="Modules\Nickname.lua" />
 <Script file="Modules\Ascension.lua" />
+<Script file="Modules\Arena.lua" />
 </Ui>

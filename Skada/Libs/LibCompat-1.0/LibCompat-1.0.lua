@@ -356,6 +356,17 @@ do
 			if filter == "boss" then return end
 		end
 
+		if filter == nil or filter == "group" then
+			for unit in UnitIterator() do
+				if UnitGUID(unit) == guid then
+					return unit
+				elseif UnitExists(unit .. "target") and UnitGUID(unit .. "target") == guid then
+					return unit .. "target"
+				end
+			end
+			if filter == "group" then return end
+		end
+
 		if filter == nil or filter == "player" then
 			if UnitExists("target") and UnitGUID("target") == guid then
 				return "target"
@@ -370,15 +381,12 @@ do
 			elseif filter == "player" then return end
 		end
 
-		if filter == nil or filter == "group" then
-			for unit in UnitIterator() do
-				if UnitGUID(unit) == guid then
-					return unit
-				elseif UnitExists(unit .. "target") and UnitGUID(unit .. "target") == guid then
-					return unit .. "target"
+		if filter == "arena" then
+			for i = 1, 5 do
+				if UnitExists("arena" .. i) and UnitGUID("arena" .. i) == guid then
+					return "arena" .. i
 				end
 			end
-			if filter == "group" then return end
 		end
 	end
 

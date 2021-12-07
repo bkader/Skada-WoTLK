@@ -894,7 +894,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 		win.title = format(L["%s's targets"], win.targetname or L.Unknown)
 
 		local enemy = set and set:GetEnemy(win.targetname, win.targetid)
-		local total = enemy and enemy:GetDamageDone() or 0
+		local total = enemy and enemy:GetDamage() or 0
 		local targets = (total > 0) and enemy:GetDamageTargets()
 
 		if targets then
@@ -942,7 +942,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 		win.title = format(L["%s's damage"], win.targetname or L.Unknown)
 
 		local enemy = set and set:GetEnemy(win.targetname, win.targetid)
-		local total = enemy and enemy:GetDamageDone() or 0
+		local total = enemy and enemy:GetDamage() or 0
 
 		if total > 0 and enemy.damagespells then
 			if win.metadata then
@@ -1070,7 +1070,15 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 		end
 	end
 
-	function enemyPrototype:GetDamageDone()
+	function setPrototype:GetEnemyDPS()
+		local damage, dps = self:GetEnemyDamageDone(), 0
+		if damage > 0 then
+			dps = damage / max(1, self:GetTime())
+		end
+		return dps, damage
+	end
+
+	function enemyPrototype:GetDamage()
 		if Skada.db.profile.absdamage then
 			return self.totaldamage or 0
 		end
@@ -1078,7 +1086,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 	end
 
 	function enemyPrototype:GetDPS()
-		local dtps, damage = 0, self:GetDamageDone()
+		local dtps, damage = 0, self:GetDamage()
 		if damage > 0 then
 			dtps = damage / max(1, self:GetTime())
 		end
@@ -1346,6 +1354,14 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 			end
 		end
 		return total
+	end
+
+	function setPrototype:GetEnemyHPS()
+		local hps, amount = 0, self:GetEnemyHeal()
+		if amount > 0 then
+			hps = amount / max(1, self:GetTime())
+		end
+		return hps, amount
 	end
 
 	function enemyPrototype:GetHPS()
