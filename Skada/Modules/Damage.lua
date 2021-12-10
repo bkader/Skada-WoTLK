@@ -144,8 +144,8 @@ Skada:AddLoadableModule("Damage", function(L)
 			spell = player.damagespells[spellname]
 		end
 		spell.count = (spell.count or 0) + 1
-		spell.amount = (spell.amount or 0) + dmg.amount
-		spell.total = (spell.total or 0) + dmg.amount + absorbed
+		spell.amount = spell.amount + dmg.amount
+		spell.total = spell.total + dmg.amount
 		spell.overkill = (spell.overkill or 0) + overkill
 
 		if dmg.critical then

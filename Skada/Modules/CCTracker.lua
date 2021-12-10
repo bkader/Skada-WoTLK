@@ -449,6 +449,19 @@ Skada:AddLoadableModule("CC Taken", function(L)
 	local playermod = mod:NewModule(L["Crowd Control Spells"])
 	local sourcemod = mod:NewModule(L["Crowd Control Sources"])
 
+	local RaidCCSpells = {
+		[16869] = 16, -- Maleki the Pallid/Ossirian the Unscarred: Ice Tomb (Stratholme/??)
+		[29670] = 16, -- Frostwarden Sorceress: Ice Tomb (Karazhan)
+		[29670] = 16, -- Skeletal Usher: Ice Tomb (Karazhan)
+		[69065] = 1, -- Bone Spike: Impale (Icecrown Citadel: Lord Marrowgar)
+		[70157] = 16, -- Sindragosa: Ice Tomb (Icecrown Citadel)
+		[70447] = 64, -- Green Ooze: Volatile Ooze Adhesive (Icecrown Citadel: Professor Putricide)
+		[71289] = 32, -- Lady Deathwhisper: Dominate Mind (Icecrown Citadel)
+		[72836] = 64, -- Green Ooze: Volatile Ooze Adhesive (Icecrown Citadel: Professor Putricide)
+		[72837] = 64, -- Green Ooze: Volatile Ooze Adhesive (Icecrown Citadel: Professor Putricide)
+		[72838] = 64 -- Green Ooze: Volatile Ooze Adhesive (Icecrown Citadel: Professor Putricide)
+	}
+
 	local function log_cctaken(set, cc)
 		local player = Skada:GetPlayer(set, cc.playerid, cc.playername, cc.playerflags)
 		if player then
@@ -484,7 +497,7 @@ Skada:AddLoadableModule("CC Taken", function(L)
 	local function AuraApplied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid = ...
 
-		if CCSpells[spellid] or ExtraCCSpells[spellid] then
+		if CCSpells[spellid] or ExtraCCSpells[spellid] or RaidCCSpells[spellid] then
 			data.srcGUID = srcGUID
 			data.srcName = srcName
 			data.srcFlags = srcFlags
@@ -524,7 +537,7 @@ Skada:AddLoadableModule("CC Taken", function(L)
 				d.id = spellid
 				d.spellid = spellid
 				d.label, _, d.icon = GetSpellInfo(spellid)
-				d.spellschool = GetSpellSchool(spellid)
+				d.spellschool = GetSpellSchool(spellid) or RaidCCSpells[spellid]
 
 				d.value = spell.count
 				d.valuetext = Skada:FormatValueText(

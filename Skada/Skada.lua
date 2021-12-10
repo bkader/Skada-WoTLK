@@ -398,7 +398,7 @@ do
 						if copywindow then
 							for _, win in ipairs(windows) do
 								if win.db.name == copywindow and win.db.display == db.display then
-									Skada.tCopy(newdb, win.db, "name", "sticked", "x", "y", "point", "snapped", "mode")
+									Skada.tCopy(newdb, win.db, "name", "sticked", "x", "y", "point", "snapped")
 									break
 								end
 							end
