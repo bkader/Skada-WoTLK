@@ -710,7 +710,7 @@ for i, field in ipairs({"Version", "Date", "Author", "Category", "License", "Ema
 	if meta then
 		-- append field to revision number
 		if field == "Version" then
-			meta = format("%s-rev|cffffd200%s|r", meta, Skada.revision)
+			meta = format("%s rev|cffffd200%s|r", meta, Skada.revision)
 		end
 		Skada.options.args.about.args[field] = {
 			type = "description",

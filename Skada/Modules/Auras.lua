@@ -42,7 +42,7 @@ do
 							spell.uptime = spell.uptime + 1
 							if spell.targets then
 								for name, target in pairs(spell.targets) do
-									if target.active > 0 then
+									if (target.active or 0) > 0 then
 										target.uptime = target.uptime + 1
 									end
 								end
@@ -128,8 +128,8 @@ do
 				spell = player.auras[aura.spellid]
 			end
 
-			spell.active = spell.active + 1
-			spell.count = spell.count + 1
+			spell.active = (spell.active or 0) + 1
+			spell.count = (spell.count or 0) + 1
 
 			-- fix missing school
 			if not spell.school and aura.spellschool then
@@ -145,7 +145,7 @@ do
 						spell.targets[aura.dstName] = {count = 1, active = 1, uptime = 0}
 					else
 						spell.targets[aura.dstName].count = spell.targets[aura.dstName].count + 1
-						spell.targets[aura.dstName].active = spell.targets[aura.dstName].active + 1
+						spell.targets[aura.dstName].active = (spell.targets[aura.dstName].active or 0) + 1
 					end
 				end
 			end
@@ -155,7 +155,7 @@ do
 	function log_aurarefresh(set, aura)
 		if not (set and aura and aura.spellid) then return end
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
-		if player and player.auras and player.auras[aura.spellid] and player.auras[aura.spellid].active > 0 then
+		if player and player.auras and player.auras[aura.spellid] and (player.auras[aura.spellid].active or 0) > 0 then
 			player.auras[aura.spellid].refresh = (player.auras[aura.spellid].refresh or 0) + 1
 			if aura.dstName and player.auras[aura.spellid].targets and player.auras[aura.spellid].targets[aura.dstName] then
 				player.auras[aura.spellid].targets[aura.dstName].refresh = (player.auras[aura.spellid].targets[aura.dstName].refresh or 0) + 1
@@ -166,7 +166,7 @@ do
 	function log_auraremove(set, aura)
 		if not (set and aura and aura.spellid) then return end
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
-		if player and player.auras and player.auras[aura.spellid] and player.auras[aura.spellid].active > 0 then
+		if player and player.auras and player.auras[aura.spellid] and (player.auras[aura.spellid].active or 0) > 0 then
 			player.auras[aura.spellid].active = max(0, player.auras[aura.spellid].active - 1)
 			if aura.dstName and player.auras[aura.spellid].targets and player.auras[aura.spellid].targets[aura.dstName] then
 				player.auras[aura.spellid].targets[aura.dstName].active = max(0, player.auras[aura.spellid].targets[aura.dstName].active - 1)
