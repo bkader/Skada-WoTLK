@@ -270,8 +270,10 @@ Skada:AddLoadableModule("CC Done", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for spellid, spell in pairs(player.ccdonespells) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -291,7 +293,6 @@ Skada:AddLoadableModule("CC Done", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -313,8 +314,10 @@ Skada:AddLoadableModule("CC Done", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for targetname, target in pairs(targets) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -335,7 +338,6 @@ Skada:AddLoadableModule("CC Done", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -349,9 +351,11 @@ Skada:AddLoadableModule("CC Done", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for _, player in ipairs(set.players) do
 				if (player.ccdone or 0) > 0 then
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -373,7 +377,6 @@ Skada:AddLoadableModule("CC Done", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end
@@ -529,8 +532,10 @@ Skada:AddLoadableModule("CC Taken", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for spellid, spell in pairs(player.cctakenspells) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -550,7 +555,6 @@ Skada:AddLoadableModule("CC Taken", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -572,8 +576,10 @@ Skada:AddLoadableModule("CC Taken", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for sourcename, source in pairs(sources) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -594,7 +600,6 @@ Skada:AddLoadableModule("CC Taken", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -608,9 +613,11 @@ Skada:AddLoadableModule("CC Taken", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for _, player in ipairs(set.players) do
 				if (player.cctaken or 0) > 0 then
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -632,7 +639,6 @@ Skada:AddLoadableModule("CC Taken", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end
@@ -811,8 +817,10 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for spellid, spell in pairs(player.ccbreakspells) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -832,7 +840,6 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -854,8 +861,10 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for targetname, target in pairs(targets) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -876,7 +885,6 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -890,9 +898,11 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for _, player in ipairs(set.players) do
 				if (player.ccbreak or 0) > 0 then
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -914,7 +924,6 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end

@@ -103,7 +103,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 	end
 
 	local function SpellHeal(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, amount, overkill
+		local spellid, amount, overheal
 		spellid, _, _, amount, overheal = ...
 
 		if amount > (Skada.db.profile.modules.deathlogthreshold or 0) then
@@ -263,10 +263,12 @@ Skada:AddLoadableModule("Deaths", function(L)
 				if win.metadata then
 					win.metadata.maxvalue = player.maxhp
 				end
-				local nr = 1
+				local nr = 0
 
 				-- add a fake entry for the actual death
 				if (deathlog.time or 0) > 0 then
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -276,8 +278,6 @@ Skada:AddLoadableModule("Deaths", function(L)
 					d.icon = [[Interface\Icons\Ability_Rogue_FeignDeath]]
 					d.value = 0
 					d.valuetext = ""
-
-					nr = nr + 1
 				end
 
 				tsort(deathlog.log, sort_logs)
@@ -285,6 +285,8 @@ Skada:AddLoadableModule("Deaths", function(L)
 				for i, log in ipairs(deathlog.log) do
 					local diff = tonumber(log.time) - tonumber(deathlog.time)
 					if diff > -60 then
+						nr = nr + 1
+
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
@@ -346,7 +348,6 @@ Skada:AddLoadableModule("Deaths", function(L)
 						else
 							d.color = red
 						end
-						nr = nr + 1
 					end
 				end
 			end
@@ -369,8 +370,10 @@ Skada:AddLoadableModule("Deaths", function(L)
 					win.metadata.maxvalue = 0
 				end
 
-				local nr = 1
+				local nr = 0
 				for i, death in ipairs(player.deathlog) do
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -398,7 +401,6 @@ Skada:AddLoadableModule("Deaths", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end
@@ -421,9 +423,11 @@ Skada:AddLoadableModule("Deaths", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for _, player in ipairs(set.players) do
 				if (player.death or 0) > 0 then
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -450,7 +454,6 @@ Skada:AddLoadableModule("Deaths", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end

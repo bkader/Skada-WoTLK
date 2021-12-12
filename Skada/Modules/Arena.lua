@@ -4,13 +4,26 @@ Skada:AddLoadableModule("ARENA", function(L)
 
 	local mod = Skada:NewModule(ARENA)
 
-	local strfind, tonumber, wipe = string.find, tonumber, wipe
+	local format, wipe = string.format, wipe
+	local GetCVar, UnitIsPlayer = GetCVar, UnitIsPlayer
 	local UnitGUID, UnitBuff = UnitGUID, UnitBuff
 	local GetSpellInfo, UnitCastingInfo = GetSpellInfo, UnitCastingInfo
 
-	local teamGreen = {r = 0.4, g = 1, b = 0.4, colorStr = "ff66ff66"}
-	local teamYellow = {r = 1, g = 1, b = 0.25, colorStr = "ffffff3f"}
+	local teamGreen = {r = 0.1, g = 1, b = 0.1, colorStr = "ff19ff19"}
+	local teamYellow = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
 	local specsCache, spellsTable, aurasTable, _ = {}, nil, nil, nil
+
+	-- table used to determine enemies roles.
+	-- Except for healers and some tanks, all enemies are damagers.
+	local specsRoles = {
+		[105] = "HEALER", -- Druid: Restoration
+		[256] = "HEALER", -- Priest: Discipline
+		[257] = "HEALER", -- Priest: Holy
+		[264] = "HEALER", -- Shaman: Restoration
+		[65] = "HEALER", -- Paladin: Holy
+		[66] = "TANK", -- Paladin: Protection
+		[73] = "TANK", -- Warrior: Protection
+	}
 
 	local function BuildSpellsList()
 		if not aurasTable then
@@ -147,9 +160,9 @@ Skada:AddLoadableModule("ARENA", function(L)
 	end
 
 	function Skada:UNIT_AURA(event, unit)
-		if not self.instanceType == "arena" then
+		if self.instanceType ~= "pvp" and self.instanceType ~= "arena" then
 			self:UnregisterEvent("UNIT_AURA")
-		elseif unit and strfind(unit, "arena") and not strfind(unit, "pet") then
+		elseif unit and UnitIsPlayer(unit) then
 			if not specsCache[UnitGUID(unit)] then
 				local i = 1
 				local name = UnitBuff(unit, i)
@@ -166,9 +179,9 @@ Skada:AddLoadableModule("ARENA", function(L)
 	end
 
 	function Skada:UNIT_SPELLCAST_START(event, unit)
-		if self.instanceType ~= "arena" then
+		if self.instanceType ~= "pvp" and self.instanceType ~= "arena" then
 			self:UnregisterEvent("UNIT_SPELLCAST_START")
-		elseif unit and strfind(unit, "arena") and not strfind(unit, "pet") then
+		elseif unit and UnitIsPlayer(unit) then
 			if not specsCache[UnitGUID(unit)] then
 				local spell = UnitCastingInfo(unit)
 				if spell and spellsTable[spell] then
@@ -181,15 +194,26 @@ Skada:AddLoadableModule("ARENA", function(L)
 	local Skada_CheckZone = Skada.CheckZone
 	function Skada:CheckZone()
 		Skada_CheckZone(self)
-		self:ToggleSpecDetection(self.instanceType == "arena")
+		self:ToggleSpecDetection(self.instanceType == "pvp" or self.instanceType == "arena")
 	end
 
 	local Skada_GetEnemy = Skada.GetEnemy
 	function Skada:GetEnemy(set, name, guid, flag)
 		local enemy = Skada_GetEnemy(self, set, name, guid, flag)
 
-		if enemy and tonumber(enemy.id) and self.instanceType == "arena" and enemy.spec == nil then
-			enemy.spec = specsCache[enemy.id]
+		if
+			enemy and
+			enemy.class and
+			Skada.validclass[enemy.class] and
+			(self.instanceType == "pvp" or self.instanceType == "arena")
+		then
+			if enemy.spec == nil then
+				enemy.spec = specsCache[enemy.id]
+			end
+
+			if enemy.spec and (enemy.role == nil or enemy.role == "NONE") then
+				enemy.role = specsRoles[enemy.spec] or "DAMAGER"
+			end
 		end
 
 		return enemy
@@ -205,7 +229,7 @@ Skada:AddLoadableModule("ARENA", function(L)
 		if set then
 			total = set:GetDamage()
 			-- in arena, we make sure to add enemies damage too.
-			if set.GetEnemyDamageDone then
+			if set.type == "arena" and set.GetEnemyDamageDone then
 				total = total + set:GetEnemyDamageDone()
 			end
 		end
@@ -215,12 +239,14 @@ Skada:AddLoadableModule("ARENA", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 
 			-- group damage.
 			for _, player in ipairs(set.players) do
 				local dps, amount = player:GetDPS()
 				if amount > 0 then
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -232,7 +258,7 @@ Skada:AddLoadableModule("ARENA", function(L)
 					d.spec = player.spec
 
 					if set.type == "arena" then
-						d.color = teamGreen
+						d.color = set.team and teamYellow or teamGreen
 					end
 
 					d.value = amount
@@ -248,7 +274,6 @@ Skada:AddLoadableModule("ARENA", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 
@@ -257,14 +282,18 @@ Skada:AddLoadableModule("ARENA", function(L)
 				for _, enemy in ipairs(set.enemies) do
 					local dps, amount = enemy:GetDPS()
 					if amount > 0 then
+						nr = nr + 1
+
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
 						d.id = enemy.id or enemy.name
 						d.label = enemy.name
+						d.text = nil
 						d.class = enemy.class
+						d.role = enemy.role
 						d.spec = enemy.spec
-						d.color = teamYellow
+						d.color = set.team and teamGreen or teamYellow
 
 						d.value = amount
 						d.valuetext = Skada:FormatValueText(
@@ -279,7 +308,6 @@ Skada:AddLoadableModule("ARENA", function(L)
 						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
-						nr = nr + 1
 					end
 				end
 			end
@@ -317,8 +345,10 @@ Skada:AddLoadableModule("ARENA", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for spellname, spell in pairs(player.damagespells) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -339,11 +369,10 @@ Skada:AddLoadableModule("ARENA", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 
-		if not found then
+		if not found and set.type == "arena" then
 			player = set and set:GetEnemy(win.playername, win.playerid)
 			total = player and player:GetDamage() or 0
 
@@ -354,8 +383,10 @@ Skada:AddLoadableModule("ARENA", function(L)
 					win.metadata.maxvalue = 0
 				end
 
-				local nr = 1
+				local nr = 0
 				for spellid, spell in pairs(player.damagespells) do
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -375,7 +406,6 @@ Skada:AddLoadableModule("ARENA", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end
@@ -396,8 +426,10 @@ Skada:AddLoadableModule("ARENA", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for targetname, target in pairs(targets) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -418,11 +450,10 @@ Skada:AddLoadableModule("ARENA", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 
-		if not found then
+		if not found and set and set.type == "arena" then
 			player = set and set:GetEnemy(win.playername, win.playername)
 			total = player and player:GetDamage() or 0
 			targets = (total > 0) and player:GetDamageTargets()
@@ -434,8 +465,10 @@ Skada:AddLoadableModule("ARENA", function(L)
 					win.metadata.maxvalue = 0
 				end
 
-				local nr = 1
+				local nr = 0
 				for targetname, target in pairs(targets) do
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -456,7 +489,6 @@ Skada:AddLoadableModule("ARENA", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end
@@ -478,12 +510,14 @@ Skada:AddLoadableModule("ARENA", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 
 			for _, player in ipairs(set.players) do
 				local hps, amount = player:GetAHPS()
 
 				if amount > 0 then
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -495,7 +529,7 @@ Skada:AddLoadableModule("ARENA", function(L)
 					d.spec = player.spec
 
 					if set.type == "arena" then
-						d.color = teamGreen
+						d.color = set.team and teamYellow or teamGreen
 					end
 
 					d.value = amount
@@ -511,7 +545,6 @@ Skada:AddLoadableModule("ARENA", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 
@@ -520,14 +553,18 @@ Skada:AddLoadableModule("ARENA", function(L)
 					local hps, amount = enemy:GetHPS()
 
 					if amount > 0 then
+						nr = nr + 1
+
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
 						d.id = enemy.id or enemy.name
 						d.label = enemy.name
+						d.text = nil
 						d.class = enemy.class
+						d.role = enemy.role
 						d.spec = enemy.spec
-						d.color = teamYellow
+						d.color = set.team and teamGreen or teamYellow
 
 						d.value = amount
 						d.valuetext = Skada:FormatValueText(
@@ -542,7 +579,6 @@ Skada:AddLoadableModule("ARENA", function(L)
 						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
-						nr = nr + 1
 					end
 				end
 			end
@@ -592,6 +628,14 @@ Skada:AddLoadableModule("ARENA", function(L)
 		if heal then
 			heal.Update = mod.Group_HealingUpdate
 			heal.GetSetSummary = mod.Group_HealingSummary
+		end
+
+		-- purple color for color blind mode.
+		if GetCVar("colorblindMode") == "1" then
+			teamGreen.r = 0.686
+			teamGreen.g = 0.384
+			teamGreen.b = 1
+			teamGreen.colorStr = "ffae61ff"
 		end
 	end
 

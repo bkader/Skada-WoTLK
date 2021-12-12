@@ -334,8 +334,10 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for spellname, spell in pairs(player.damagetakenspells) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -359,7 +361,6 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -381,8 +382,10 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for sourcename, source in pairs(sources) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -403,12 +406,13 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
 
 	local function add_detail_bar(win, nr, title, value, total, percent, fmt)
+		nr = nr + 1
+
 		local d = win.dataset[nr] or {}
 		win.dataset[nr] = d
 
@@ -425,7 +429,6 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 		if win.metadata and d.value > win.metadata.maxvalue then
 			win.metadata.maxvalue = d.value
 		end
-		nr = nr + 1
 		return nr
 	end
 
@@ -445,7 +448,8 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				win.metadata.maxvalue = spell.count
 			end
 
-			local nr = add_detail_bar(win, 1, L["Hits"], spell.count)
+			local nr = add_detail_bar(win, 0, L["Hits"], spell.count)
+			win.dataset[nr].value = win.dataset[nr].value + 1 -- to be always first
 
 			if (spell.hit or 0) > 0 then
 				nr = add_detail_bar(win, nr, L["Normal Hits"], spell.hit, spell.count, true)
@@ -492,7 +496,8 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				win.metadata.maxvalue = total
 			end
 
-			local nr = add_detail_bar(win, 1, L["Damage"], total, nil, nil, true)
+			local nr = add_detail_bar(win, 0, L["Damage"], total, nil, nil, true)
+			win.dataset[nr].value = win.dataset[nr].value + 1 -- to be always first
 
 			if (spell.overkill or 0) > 0 then
 				nr = add_detail_bar(win, nr, L["Overkill"], spell.overkill, total, true, true)
@@ -534,9 +539,11 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 					win.metadata.maxvalue = 0
 				end
 
-				local nr = 1
+				local nr = 0
 				for spellname, spell in pairs(player.damagetakenspells) do
 					if spell.sources and spell.sources[win.targetname] then
+						nr = nr + 1
+
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
@@ -561,7 +568,6 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
-						nr = nr + 1
 					end
 				end
 			end
@@ -576,10 +582,12 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for _, player in ipairs(set.players) do
 				local dtps, amount = player:GetDTPS()
 				if amount > 0 then
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -603,7 +611,6 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end
@@ -785,10 +792,12 @@ Skada:AddLoadableModule("DTPS", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for _, player in ipairs(set.players) do
 				local dtps = player:GetDTPS()
 				if dtps > 0 then
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -810,7 +819,6 @@ Skada:AddLoadableModule("DTPS", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end
@@ -900,8 +908,10 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 					win.metadata.maxvalue = 0
 				end
 
-				local nr = 1
+				local nr = 0
 				for sourcename, source in pairs(cacheTable) do
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -922,7 +932,6 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end
@@ -965,8 +974,10 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 					win.metadata.maxvalue = 0
 				end
 
-				local nr = 1
+				local nr = 0
 				for playername, player in pairs(cacheTable) do
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -988,7 +999,6 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end
@@ -1021,8 +1031,10 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 			win.metadata.maxvalue = 0
 		end
 
-		local nr = 1
+		local nr = 0
 		for spellname, spell in pairs(cacheTable) do
+			nr = nr + 1
+
 			local d = win.dataset[nr] or {}
 			win.dataset[nr] = d
 
@@ -1043,7 +1055,6 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 			if win.metadata and d.value > win.metadata.maxvalue then
 				win.metadata.maxvalue = d.value
 			end
-			nr = nr + 1
 		end
 	end
 
@@ -1089,8 +1100,10 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for event, count in pairs(player.data) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -1110,7 +1123,6 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -1124,7 +1136,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for _, player in ipairs(set.players) do
 				if player.damagetakenspells then
 					local tmp = {name = player.name, data = {}}
@@ -1145,6 +1157,8 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 						tmp.total = total
 						tmp.avoid = avoid
 						cacheTable[player.id] = tmp
+
+						nr = nr + 1
 
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
@@ -1169,7 +1183,6 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
-						nr = nr + 1
 					elseif cacheTable[player.id] then
 						cacheTable[player.id] = nil
 					end
@@ -1218,6 +1231,8 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 	end
 
 	local function add_detail_bar(win, nr, title, value, total)
+		nr = nr + 1
+
 		local d = win.dataset[nr] or {}
 		win.dataset[nr] = d
 
@@ -1234,7 +1249,6 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 		if win.metadata and value > win.metadata.maxvalue then
 			win.metadata.maxvalue = value
 		end
-		nr = nr + 1
 		return nr
 	end
 
@@ -1255,7 +1269,9 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 				win.metadata.maxvalue = spell.total
 			end
 
-			local nr = add_detail_bar(win, 1, L["Total"], spell.total)
+			local nr = add_detail_bar(win, 0, L["Total"], spell.total)
+			win.dataset[nr].value = win.dataset[nr].value + 1 -- to be always first
+
 			nr = add_detail_bar(win, nr, L["Damage Taken"], spell.amount, spell.total)
 
 			local absorbed = max(0, spell.total - spell.amount)
@@ -1295,9 +1311,11 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for spellname, spell in pairs(player.damagetakenspells) do
 				if spell.total > 0 then
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -1320,7 +1338,6 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end
@@ -1333,11 +1350,13 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for _, player in ipairs(set.players) do
 				local amount, total = getMIT(player)
 
 				if amount > 0 then
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -1361,7 +1380,6 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end

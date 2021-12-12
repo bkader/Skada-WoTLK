@@ -113,8 +113,10 @@ Skada:AddLoadableModule("Potions", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for playername, player in pairs(players) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -136,7 +138,6 @@ Skada:AddLoadableModule("Potions", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -164,7 +165,7 @@ Skada:AddLoadableModule("Potions", function(L)
 					win.metadata.maxvalue = 0
 				end
 
-				local nr = 1
+				local nr = 0
 				for potionid, count in pairs(player.potionspells) do
 					local potionname, potionlink, _, _, _, _, _, _, _, potionicon = GetItemInfo(potionid)
 					if not potionname then
@@ -172,6 +173,8 @@ Skada:AddLoadableModule("Potions", function(L)
 					end
 
 					if potionname then
+						nr = nr + 1
+
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
@@ -191,7 +194,6 @@ Skada:AddLoadableModule("Potions", function(L)
 						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
-						nr = nr + 1
 					end
 				end
 			end
@@ -207,9 +209,11 @@ Skada:AddLoadableModule("Potions", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for _, player in ipairs(set.players) do
 				if (player.potion or 0) > 0 then
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -231,7 +235,6 @@ Skada:AddLoadableModule("Potions", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end
@@ -257,7 +260,7 @@ Skada:AddLoadableModule("Potions", function(L)
 			ordersort = true,
 			click1 = playermod,
 			nototalclick = {playermod},
-			columns = {Count = true, Percent = true},
+			columns = {Count = true, Percent = false},
 			icon = [[Interface\Icons\inv_potion_31]]
 		}
 

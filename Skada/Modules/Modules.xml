@@ -1,0 +1,43 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+
+<!-- Tweaks must be loaded first -->
+<Script file="Tweaks.lua" />
+
+<!-- Damage category -->
+<Script file="Damage.lua" />
+<Script file="DamageTaken.lua" />
+<Script file="FriendlyFire.lua" />
+<Script file="Enemies.lua" />
+
+<!-- Absorb and healing category -->
+<Script file="Healing.lua" />
+<Script file="Absorbs.lua" />
+
+<!-- CC Tracker and Power gained categories -->
+<Script file="Power.lua" />
+<Script file="CCTracker.lua" />
+
+<!-- Buffs and Debuffs category -->
+<Script file="Auras.lua" />
+<Script file="SunderCounter.lua" />
+
+<!-- Other category -->
+<Script file="Activity.lua" />
+<Script file="Deaths.lua" />
+<Script file="Dispels.lua" />
+<Script file="Failbot.lua" />
+<Script file="Healthstone.lua" />
+<Script file="Interrupts.lua" />
+<Script file="Parry.lua" />
+<Script file="Potions.lua" />
+<Script file="Resurrects.lua" />
+<Script file="Threat.lua" />
+
+<!-- Modules without modes -->
+<Script file="Scroll.lua" />
+<Script file="Themes.lua" />
+<Script file="Nickname.lua" />
+<Script file="Ascension.lua" />
+<Script file="Arena.lua" />
+</Ui>

@@ -29,8 +29,9 @@ function playerPrototype:Bind(obj, set)
 	end
 end
 
+-- for better dps calculation, we use active time for Arena/BGs.
 function playerPrototype:GetTime(active)
-	return Skada:PlayerActiveTime(self.super, self, active)
+	return Skada:PlayerActiveTime(self.super, self, active or self.super.type == "pvp" or self.super.type == "arena")
 end
 
 -------------------------------------------------------------------------------

@@ -173,40 +173,40 @@ Skada:AddLoadableModule("Tweaks", function(L)
 		local ItemRefTooltip = ItemRefTooltip
 
 		local firstlines = {
-			"^Details!: (.*)$", -- Details!
-			"^Skada report on (.*) for (.*), (.*) to (.*):$", -- Skada enUS
-			"^(.*) - (.*)의 Skada 보고, (.*) ~ (.*):$", -- Skada koKR
-			"^Skada报告(.*)的(.*), (.*)到(.*):$", -- Skada zhCN
-			"^(.*)的報告來自(.*)，從(.*)到(.*)：$", -- Skada zhTW
-			"^Skada: (.*) for (.*), (.*) - (.*):$", -- Better Skada support player details
-			"^Recount - (.*)$", -- Recount
-			"^Skada: (.*) for (.*):$", -- Skada enUS
-			"^Skada: (.*) für (.*):$", -- Skada deDE
-			"^Skada: (.*) pour (.*):$", -- Skada frFR
-			"^Skada: (.*) для (.*):$", -- Skada ruRU
-			"^Отчёт Skada: (.*), с (.*):$", -- Skada ruRU
-			"^Skada: (.*) por (.*):$", -- Skada esES/ptBR
-			"^(.*) 의 Skada 보고 (.*):$", -- Skada koKR
-			"^Skada报告(.*)的(.*):$", -- Skada zhCN
-			"^Skada:(.*)來自(.*):$", -- Skada zhTW
-			"^(.*) Done for (.*)$", -- TinyDPS enUS
-			"^(.*) für (.*)$", -- TinyDPS deDE
-			"데미지량 -(.*)$", -- TinyDPS koKR
-			"힐량 -(.*)$", -- TinyDPS koKR
-			"Урон:(.*)$", -- TinyDPS ruRU
-			"Исцеление:(.*)$", -- TinyDPS ruRU
-			"^# (.*) - (.*)$", -- Numeration
-			"alDamageMeter : (.*)$", -- alDamageMeter
-			"^Details! Report for (.*)$" -- Details!
+			"^Details!: (.-)$", -- Details!
+			"^Skada report on (.-) for (.-), (.-) to (.-):$", -- Skada enUS
+			"^(.-) - (.-)의 Skada 보고, (.-) ~ (.-):$", -- Skada koKR
+			"^Skada报告(.-)的(.-), (.-)到(.-):$", -- Skada zhCN
+			"^(.-)的報告來自(.-)，從(.-)到(.-)：$", -- Skada zhTW
+			"^Skada: (.-) for (.-), (.-) - (.-):$", -- Better Skada support player details
+			"^Recount - (.-)$", -- Recount
+			"^Skada: (.-) for (.-):$", -- Skada enUS
+			"^Skada: (.-) für (.-):$", -- Skada deDE
+			"^Skada: (.-) pour (.-):$", -- Skada frFR
+			"^Skada: (.-) для (.-):$", -- Skada ruRU
+			"^Отчёт Skada: (.-), с (.-):$", -- Skada ruRU
+			"^Skada: (.-) por (.-):$", -- Skada esES/ptBR
+			"^(.-) 의 Skada 보고 (.-):$", -- Skada koKR
+			"^Skada报告(.-)的(.-):$", -- Skada zhCN
+			"^Skada:(.-)來自(.-):$", -- Skada zhTW
+			"^(.-) Done for (.-)$", -- TinyDPS enUS
+			"^(.-) für (.-)$", -- TinyDPS deDE
+			"데미지량 -(.-)$", -- TinyDPS koKR
+			"힐량 -(.-)$", -- TinyDPS koKR
+			"Урон:(.-)$", -- TinyDPS ruRU
+			"Исцеление:(.-)$", -- TinyDPS ruRU
+			"^# (.-) - (.-)$", -- Numeration
+			"alDamageMeter : (.-)$", -- alDamageMeter
+			"^Details! Report for (.-)$" -- Details!
 		}
 
 		local nextlines = {
-			"^(%d+)%. (.*)$", -- Recount, Details! and Skada
-			"^ (%d+). (.*)$", -- Skada (default)
-			"^(.*)%s%s%s(.*)$", -- Additional Skada details
+			"^(%d+)%. (.-)$", -- Recount, Details! and Skada
+			"^ (%d+). (.-)$", -- Skada (default)
+			"^(.-)%s%s%s(.-)$", -- Additional Skada details
 			"^.*%%%)$", --Skada player details
 			"^[+-]%d+.%d", -- Numeration deathlog details
-			"^(%d+). (.*):(.*)(%d+)(.*)(%d+)%%(.*)%((%d+)%)$" -- TinyDPS
+			"^(%d+). (.-):(.-)(%d+)(.-)(%d+)%%(.-)%((%d+)%)$" -- TinyDPS
 		}
 
 		channel_events = {

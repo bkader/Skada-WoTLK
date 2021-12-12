@@ -789,9 +789,11 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for spellid, spell in pairs(player.absorbspells) do
 				if spell.targets and spell.targets[win.targetname] then
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -811,7 +813,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end
@@ -833,8 +834,10 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for spellid, spell in pairs(player.absorbspells) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -854,7 +857,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -876,8 +878,10 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for targetname, target in pairs(targets) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -899,7 +903,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -913,10 +916,12 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for _, player in ipairs(set.players) do
 				local aps, amount = player:GetAPS()
 				if amount > 0 then
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -940,7 +945,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end
@@ -1163,10 +1167,12 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			if player.healspells then
 				for spellid, spell in pairs(player.healspells) do
 					if spell.targets and spell.targets[win.targetname] then
+						nr = nr + 1
+
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
@@ -1190,7 +1196,6 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
-						nr = nr + 1
 					end
 				end
 			end
@@ -1198,6 +1203,8 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 			if player.absorbspells then
 				for spellid, spell in pairs(player.absorbspells) do
 					if spell.targets and spell.targets[win.targetname] then
+						nr = nr + 1
+
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
@@ -1217,7 +1224,6 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
-						nr = nr + 1
 					end
 				end
 			end
@@ -1240,9 +1246,11 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			if player.healspells then
 				for spellid, spell in pairs(player.healspells) do
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -1266,12 +1274,13 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 
 			if player.absorbspells then
 				for spellid, spell in pairs(player.absorbspells) do
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -1291,7 +1300,6 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end
@@ -1314,9 +1322,11 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for targetname, target in pairs(targets) do
 				if target.amount > 0 then
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -1337,7 +1347,6 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end
@@ -1352,11 +1361,13 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for _, player in ipairs(set.players) do
 				local hps, amount = player:GetAHPS()
 
 				if amount > 0 then
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -1380,7 +1391,6 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end
@@ -1619,10 +1629,12 @@ Skada:AddLoadableModule("HPS", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for _, player in ipairs(set.players) do
 				local amount = player:GetAHPS()
 				if amount > 0 then
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -1644,7 +1656,6 @@ Skada:AddLoadableModule("HPS", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end
@@ -1760,8 +1771,10 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for playername, player in pairs(cacheTable) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -1783,7 +1796,6 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -1798,8 +1810,10 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for spellid, spell in pairs(spells) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -1823,7 +1837,6 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end

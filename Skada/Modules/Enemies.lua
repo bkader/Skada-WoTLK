@@ -465,8 +465,10 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for sourcename, source in pairs(sources) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -492,7 +494,6 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -513,8 +514,10 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for spellid, spell in pairs(enemy.damagetakenspells) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -538,7 +541,6 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -560,9 +562,11 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for sourcename, source in pairs(sources) do
 				if (source.useful or 0) > 0 then
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -584,7 +588,6 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end
@@ -598,10 +601,12 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for _, enemy in ipairs(set.enemies) do
 				local dtps, amount = enemy:GetDTPS()
 				if amount > 0 then
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -624,7 +629,6 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end
@@ -908,8 +912,10 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for targetname, target in pairs(targets) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -934,7 +940,6 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -955,8 +960,10 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for spellid, spell in pairs(enemy.damagespells) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -980,7 +987,6 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -993,11 +999,13 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for _, enemy in ipairs(set.enemies) do
 				if not enemy.fake then
 					local dtps, amount = enemy:GetDPS()
 					if amount > 0 then
+						nr = nr + 1
+
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
@@ -1021,7 +1029,6 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
-						nr = nr + 1
 					end
 				end
 			end
@@ -1225,8 +1232,10 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for targetname, target in pairs(targets) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -1247,7 +1256,6 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -1268,8 +1276,10 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for spellid, spell in pairs(enemy.healspells) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -1289,7 +1299,6 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -1302,11 +1311,13 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for _, enemy in ipairs(set.enemies) do
 				if not enemy.fake then
 					local hps, amount = enemy:GetHPS()
 					if amount > 0 then
+						nr = nr + 1
+
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
@@ -1329,7 +1340,6 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
-						nr = nr + 1
 					end
 				end
 			end

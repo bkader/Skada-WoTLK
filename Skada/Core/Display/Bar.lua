@@ -376,7 +376,7 @@ do
 
 	local barbackdrop = {bgFile = [[Interface\Buttons\WHITE8X8]]}
 	function mod:CreateBar(win, name, label, value, maxvalue, icon, o)
-		local bar, isnew = win.bargroup:NewCounterBar(name, label, value, maxvalue, icon, o)
+		local bar, isnew = win.bargroup:NewBar(name, label, value, maxvalue, icon, o)
 		bar.win = win
 		bar:EnableMouseWheel(true)
 		bar:SetScript("OnMouseWheel", OnMouseWheel)
@@ -516,7 +516,7 @@ do
 		if not win or not win.bargroup then return end
 		win.bargroup.button:SetText(win.metadata.title)
 
-		if win.metadata.showspots then
+		if win.metadata.showspots or win.metadata.valueorder then
 			tsort(win.dataset, value_sort)
 		end
 

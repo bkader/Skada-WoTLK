@@ -23,7 +23,8 @@ local tsort, tinsert, tremove, tmaxn, wipe, setmetatable = table.sort, table.ins
 local next, pairs, ipairs, type = next, pairs, ipairs, type
 local tonumber, tostring, strsplit, strmatch, format, gsub = tonumber, tostring, strsplit, strmatch, string.format, string.gsub
 local floor, max, min, band, time = math.floor, math.max, math.min, bit.band, time
-local IsInInstance, InCombatLockdown, IsGroupInCombat = IsInInstance, InCombatLockdown, Skada.IsGroupInCombat
+local IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction = IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction
+local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
 local UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected
 local GetScreenWidth = GetScreenWidth
 local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
@@ -1215,19 +1216,18 @@ do
 
 		-- attempt to get the pet's owner from tooltip
 		function GetPetOwnerFromTooltip(guid)
-			if Skada.current and Skada.current.players then
+			if Skada.current and Skada.current.players and guid then
 				pettooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
 				pettooltip:ClearLines()
-				pettooltip:SetHyperlink(format("unit:%s", guid or ""))
+				pettooltip:SetHyperlink(format("unit:%s", guid))
 
-				for i = 2, pettooltip:NumLines() do
-					local text = _G["SkadaPetTooltipTextLeft" .. i]:GetText()
-					if text and text ~= "" then
-						for _, p in ipairs(Skada.current.players) do
-							local playername = gsub(p.name, "%-.*", "")
-							if (Skada.locale == "ruRU" and FindNameDeclension(text, playername)) or ValidatePetOwner(text, playername) then
-								return p.id, p.name
-							end
+				-- we only need to scan the 2nd line.
+				local text = _G["SkadaPetTooltipTextLeft2"] and _G["SkadaPetTooltipTextLeft2"]:GetText()
+				if text and text ~= "" then
+					for _, p in ipairs(Skada.current.players) do
+						local playername = gsub(p.name, "%-.*", "")
+						if (Skada.locale == "ruRU" and FindNameDeclension(text, playername)) or ValidatePetOwner(text, playername) then
+							return p.id, p.name
 						end
 					end
 				end
@@ -1498,7 +1498,7 @@ do
 			local nr = 0
 
 			for _, data in ipairs(win.ttwin.dataset) do
-				if data.id and nr < Skada.db.profile.tooltiprows then
+				if data.id and not data.ignore and nr < Skada.db.profile.tooltiprows then
 					nr = nr + 1
 					local color = white
 
@@ -1756,9 +1756,11 @@ do
 		self:SendChat(format(L["Skada: %s for %s:"], title, label), channel, chantype, true) -- always escape
 
 		maxlines = maxlines or 10
-		local nr = 1
+		local nr = 0
 		for _, data in ipairs(report_table.dataset) do
 			if ((barid and barid == data.id) or (data.id and not barid)) and not data.ignore then
+				nr = nr + 1
+
 				local label
 				if data.reportlabel then
 					label = data.reportlabel
@@ -1777,8 +1779,6 @@ do
 				if barid then
 					break
 				end
-
-				nr = nr + 1
 			end
 
 			if nr > maxlines then
@@ -3542,6 +3542,11 @@ do
 						self.current.keep = true
 					end
 					self:SendMessage("COMBAT_ENCOUNTER_START", self.current)
+				elseif self.current.type == "pvp" then
+					self.current.mobname = GetInstanceInfo()
+				elseif self.current.type == "arena" then
+					self.current.mobname = GetInstanceInfo()
+					self.current.team = GetBattlefieldArenaFaction()
 				elseif not self.current.mobname then
 					self.current.mobname = dstName
 				end

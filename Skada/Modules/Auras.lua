@@ -196,10 +196,12 @@ do
 					win.metadata.maxvalue = 0
 				end
 
-				local nr = 1
+				local nr = 0
 				for _, player in ipairs(set.players) do
 					local auracount, aurauptime = CountAuras(player.auras, atype)
 					if auracount > 0 and aurauptime > 0 then
+						nr = nr + 1
+
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
@@ -224,7 +226,6 @@ do
 						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
-						nr = nr + 1
 					end
 				end
 			end
@@ -243,9 +244,11 @@ do
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for spellid, spell in pairs(player.auras) do
 				if spell.type == atype then
+					nr = nr + 1
+
 					local d = win.dataset[nr] or {}
 					win.dataset[nr] = d
 
@@ -267,7 +270,6 @@ do
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
-					nr = nr + 1
 				end
 			end
 		end
@@ -319,7 +321,19 @@ Skada:AddLoadableModule("Buffs", function(L)
 		57821, -- Tabard of the Kirin Tor
 		57822, -- Tabard of the Wyrmrest Accord
 		72968, -- Precious's Ribbon
-		57940 -- Essence of Wintergrasp
+		57940, -- Essence of Wintergrasp
+		-- 73816, -- Hellscream's Warsong (ICC-Horde 5%)
+		-- 73818, -- Hellscream's Warsong (ICC-Horde 10%)
+		-- 73819, -- Hellscream's Warsong (ICC-Horde 15%)
+		-- 73820, -- Hellscream's Warsong (ICC-Horde 20%)
+		-- 73821, -- Hellscream's Warsong (ICC-Horde 25%)
+		-- 73822, -- Hellscream's Warsong (ICC-Horde 30%)
+		-- 73762, -- Hellscream's Warsong (ICC-Alliance 5%)
+		-- 73824, -- Hellscream's Warsong (ICC-Alliance 10%)
+		-- 73825, -- Hellscream's Warsong (ICC-Alliance 15%)
+		-- 73826, -- Hellscream's Warsong (ICC-Alliance 20%)
+		-- 73827, -- Hellscream's Warsong (ICC-Alliance 25%)
+		-- 73828, -- Hellscream's Warsong (ICC-Alliance 30%)
 	}
 
 	-- list of spells that don't trigger SPELL_AURA_x events
@@ -388,8 +402,10 @@ Skada:AddLoadableModule("Buffs", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for playername, player in pairs(players) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -411,7 +427,6 @@ Skada:AddLoadableModule("Buffs", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -456,7 +471,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 
 	function mod:OnEnable()
 		playermod.metadata = {showspots = true, ordersort = true}
-		spellmod.metadata = {tooltip = aura_tooltip, click1 = playermod}
+		spellmod.metadata = {valueorder = true, tooltip = aura_tooltip, click1 = playermod}
 		self.metadata = {
 			click1 = spellmod,
 			nototalclick = {spellmod},
@@ -555,8 +570,10 @@ Skada:AddLoadableModule("Debuffs", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for spellid, aura in pairs(auras) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -578,7 +595,6 @@ Skada:AddLoadableModule("Debuffs", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -605,8 +621,10 @@ Skada:AddLoadableModule("Debuffs", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for targetname, target in pairs(targets) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -629,7 +647,6 @@ Skada:AddLoadableModule("Debuffs", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -651,8 +668,10 @@ Skada:AddLoadableModule("Debuffs", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for targetname, target in pairs(targets) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -675,7 +694,6 @@ Skada:AddLoadableModule("Debuffs", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end

@@ -29,33 +29,36 @@ Skada:AddLoadableModule("Activity", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for _, player in ipairs(set.players) do
-				local activetime = player:GetTime(true)
+				if player.class and Skada.validclass[player.class] then
+					local activetime = player:GetTime(true)
 
-				if activetime > 0 then
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					if activetime > 0 then
+						nr = nr + 1
 
-					d.id = player.id or player.name
-					d.label = player.name
-					d.text = player.id and Skada:FormatName(player.name, player.id)
-					d.class = player.class
-					d.role = player.role
-					d.spec = player.spec
+						local d = win.dataset[nr] or {}
+						win.dataset[nr] = d
 
-					d.value = activetime
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatTime(d.value),
-						self.metadata.columns["Active Time"],
-						Skada:FormatPercent(d.value, settime),
-						self.metadata.columns.Percent
-					)
+						d.id = player.id or player.name
+						d.label = player.name
+						d.text = player.id and Skada:FormatName(player.name, player.id)
+						d.class = player.class
+						d.role = player.role
+						d.spec = player.spec
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
+						d.value = activetime
+						d.valuetext = Skada:FormatValueText(
+							Skada:FormatTime(d.value),
+							self.metadata.columns["Active Time"],
+							Skada:FormatPercent(d.value, settime),
+							self.metadata.columns.Percent
+						)
+
+						if win.metadata and d.value > win.metadata.maxvalue then
+							win.metadata.maxvalue = d.value
+						end
 					end
-					nr = nr + 1
 				end
 			end
 		end

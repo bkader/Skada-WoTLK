@@ -154,17 +154,7 @@ local frame_defaults = {
 
 lib.embeds = lib.embeds or {}
 do
-	local mixins = {
-		"NewCounterBar",
-		"NewBarFromPrototype",
-		"GetBar",
-		"GetBars",
-		"HasBar",
-		"NewBarGroup",
-		"ReleaseBar",
-		"GetBarGroup",
-		"GetBarGroups"
-	}
+	local mixins = {"NewBar", "GetBar", "ReleaseBar", "GetBars", "NewBarGroup", "GetBarGroup"}
 	function lib:Embed(target)
 		for k, v in pairs(mixins) do
 			target[v] = self[v]
@@ -324,7 +314,7 @@ function lib:NewBarFromPrototype(prototype, name, ...)
 	return bar, isNew
 end
 
-function lib:NewCounterBar(name, text, value, maxVal, icon, orientation, length, thickness)
+function lib:NewBar(name, text, value, maxVal, icon, orientation, length, thickness)
 	return self:NewBarFromPrototype(barPrototype, name, text, value, maxVal, icon, orientation, length, thickness)
 end
 
@@ -750,10 +740,6 @@ do
 	end
 end
 
-function lib:GetBarGroups()
-	return barLists[self]
-end
-
 function lib:GetBarGroup(name)
 	return barLists[self] and barLists[self][name]
 end
@@ -803,7 +789,7 @@ function barListPrototype:SetBarHeight(height)
 	self:SetThickness(height)
 end
 
-function barListPrototype:NewCounterBar(name, text, value, maxVal, icon)
+function barListPrototype:NewBar(name, text, value, maxVal, icon)
 	local bar, isNew = self:NewBarFromPrototype(barPrototype, name, text, value, maxVal, icon, self.orientation, self.length, self.thickness)
 	bar.bgtexture:SetVertexColor(unpack(self.barbackgroundcolor))
 	return bar, isNew
