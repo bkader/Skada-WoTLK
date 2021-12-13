@@ -148,7 +148,7 @@ Skada.defaults = {
 		report = {mode = "Damage", set = "current", channel = "Say", chantype = "preset", number = 10},
 		modulesBlocked = {
 			["Absorbed Damage"] = true,
-			["ARENA"] = true,
+			["PVP"] = true,
 			["Avoidance & Mitigation"] = true,
 			["CC Breaks"] = true,
 			["Damage Done By Spell"] = true,

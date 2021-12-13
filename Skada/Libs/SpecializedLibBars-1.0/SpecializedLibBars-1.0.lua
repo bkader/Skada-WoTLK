@@ -14,45 +14,43 @@ local abs, min, max, floor = math.abs, math.min, math.max, math.floor
 local tsort, tinsert, tremove, tconcat = table.sort, tinsert, tremove, table.concat
 local next, pairs, assert, error, type, xpcall = next, pairs, assert, error, type, xpcall
 
-local GAME_LOCALE = GetLocale()
-
 local L = {
 	resize_header = "Resize",
 	resize_click = "|cff00ff00Click|r to freely resize window.",
 	resize_shift_click = "|cff00ff00Shift-Click|r to change the width.",
 	resize_alt_click = "|cff00ff00Alt-Click|r to change the height."
 }
-if GAME_LOCALE == "deDE" then
+if LOCALE_deDE then
 	L.resize_header = "Größe ändern"
 	L.resize_click = "|cff00ff00Klicken|r, um die Fenstergröße frei zu ändern."
 	L.resize_shift_click = "|cff00ff00Umschalt-Klick|r, um die Breite zu ändern."
 	L.resize_alt_click = "|cff00ff00Alt-Klick|r, um die Höhe zu ändern."
-elseif GAME_LOCALE == "esES" or GAME_LOCALE == "esMX" then
+elseif LOCALE_esES or LOCALE_esMX then
 	L.resize_header = "Redimensionar"
 	L.resize_click = "|cff00ff00Haga clic|r para cambiar el tamaño de la ventana."
 	L.resize_shift_click = "|cff00ff00Shift-Click|r para cambiar el ancho de la ventana."
 	L.resize_alt_click = "|cff00ff00Alt-Click|r para cambiar la altura de la ventana."
-elseif GAME_LOCALE == "frFR" then
+elseif LOCALE_frFR then
 	L.resize_header = "Redimensionner"
 	L.resize_click = "|cff00ff00Clic|r pour redimensionner."
 	L.resize_shift_click = "|cff00ff00Shift clic|r pour changer la largeur."
 	L.resize_alt_click = "|cff00ff00Alt clic|r pour changer la hauteur."
-elseif GAME_LOCALE == "koKR" then
+elseif LOCALE_koKR then
 	L.resize_header = "크기 조정"
 	L.resize_click = "|cff00ff00클릭|r하여 창 크기를 자유롭게 조정합니다."
 	L.resize_shift_click = "너비를 변경하려면 |cff00ff00Shift-클릭|r하십시오."
 	L.resize_alt_click = "높이를 변경하려면 |cff00ff00Alt-클릭|r하십시오"
-elseif GAME_LOCALE == "ruRU" then
+elseif LOCALE_ruRU then
 	L.resize_header = "Изменение размера"
 	L.resize_click = "|cff00ff00Щелкните|r, чтобы изменить размер окна."
 	L.resize_shift_click = "|cff00ff00Shift-Click|r, чтобы изменить ширину."
 	L.resize_alt_click = "|cff00ff00ALT-Click|r, чтобы изменить высоту."
-elseif GAME_LOCALE == "zhCN" then
+elseif LOCALE_zhCN then
 	L.resize_header = "调整大小"
 	L.resize_click = "|cff00ff00单击|r以调整窗口大小。"
 	L.resize_shift_click = "|cff00ff00Shift-Click|r改变窗口的宽度。"
 	L.resize_alt_click = "|cff00ff00Alt-Click|r更改窗口高度。"
-elseif GAME_LOCALE == "zhTW" then
+elseif LOCALE_zhTW then
 	L.resize_header = "調整大小"
 	L.resize_click = "|cff00ff00單擊|r以調整窗口大小。"
 	L.resize_shift_click = "|cff00ff00Shift-Click|r改變窗口的寬度。"

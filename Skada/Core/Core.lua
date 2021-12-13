@@ -2,7 +2,6 @@ local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceEvent-3.0", "AceHook
 _G.Skada = Skada
 
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
-Skada.locale = Skada.locale or GetLocale()
 
 local GetAddOnMetadata = GetAddOnMetadata
 Skada.version = GetAddOnMetadata("Skada", "Version")
@@ -1226,7 +1225,7 @@ do
 				if text and text ~= "" then
 					for _, p in ipairs(Skada.current.players) do
 						local playername = gsub(p.name, "%-.*", "")
-						if (Skada.locale == "ruRU" and FindNameDeclension(text, playername)) or ValidatePetOwner(text, playername) then
+						if (LOCALE_ruRU and FindNameDeclension(text, playername)) or ValidatePetOwner(text, playername) then
 							return p.id, p.name
 						end
 					end
@@ -2181,7 +2180,7 @@ do
 		return floor(num)
 	end
 
-	if Skada.locale == "zhCN" then
+	if LOCALE_zhCN then
 		ShortenValue = function(num)
 			if num >= 1e8 or num <= -1e8 then
 				return format("%02.2f亿", num / 1e8)
@@ -2190,7 +2189,7 @@ do
 			end
 			return floor(num)
 		end
-	elseif Skada.locale == "zhTW" then
+	elseif LOCALE_zhTW then
 		ShortenValue = function(num)
 			if num >= 1e8 or num <= -1e8 then
 				return format("%02.2f億", num / 1e8)
@@ -2199,7 +2198,7 @@ do
 			end
 			return floor(num)
 		end
-	elseif Skada.locale == "koKR" then
+	elseif LOCALE_koKR then
 		ShortenValue = function(num)
 			if num >= 1e8 or num <= -1e8 then
 				return format("%02.2f억", num / 1e8)

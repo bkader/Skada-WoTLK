@@ -1,8 +1,8 @@
 local Skada = Skada
-Skada:AddLoadableModule("ARENA", function(L)
-	if Skada:IsDisabled("ARENA") then return end
+Skada:AddLoadableModule("PVP", function(L)
+	if Skada:IsDisabled("PVP") then return end
 
-	local mod = Skada:NewModule(ARENA)
+	local mod = Skada:NewModule(PVP)
 
 	local format, wipe = string.format, wipe
 	local GetCVar, UnitIsPlayer = GetCVar, UnitIsPlayer

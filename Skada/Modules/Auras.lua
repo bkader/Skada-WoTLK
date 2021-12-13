@@ -168,7 +168,12 @@ do
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
 		if player and player.auras and player.auras[aura.spellid] and (player.auras[aura.spellid].active or 0) > 0 then
 			player.auras[aura.spellid].active = max(0, player.auras[aura.spellid].active - 1)
-			if aura.dstName and player.auras[aura.spellid].targets and player.auras[aura.spellid].targets[aura.dstName] then
+			if
+				aura.dstName and
+				player.auras[aura.spellid].targets and
+				player.auras[aura.spellid].targets[aura.dstName] and
+				(player.auras[aura.spellid].targets[aura.dstName].active or 0) > 0
+			then
 				player.auras[aura.spellid].targets[aura.dstName].active = max(0, player.auras[aura.spellid].targets[aura.dstName].active - 1)
 			end
 		end

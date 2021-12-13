@@ -21,9 +21,6 @@ local setmetatable = setmetatable
 local CreateFrame = CreateFrame
 local error = error
 
-local GAME_LOCALE = GetLocale()
-GAME_LOCALE = (GAME_LOCALE == "enGB") and "enUS" or GAME_LOCALE
-
 local QuickDispatch
 local IsInGroup, IsInRaid
 local GetUnitIdFromGUID
@@ -489,52 +486,24 @@ do
 
 	-- fills class coordinates table
 	local function __fillClassCoordsTable()
+		classCoordsTable = {}
 		-- for Project Ascension!
 		if lib.AscensionCoA then
-			classCoordsTable = {
-				-- original wow classes
-				WARRIOR = {0, 0.125, 0, 0.125},
-				MAGE = {0.125, 0.25, 0, 0.125},
-				ROGUE = {0.25, 0.375, 0, 0.125},
-				DRUID = {0.375, 0.5, 0, 0.125},
-				HUNTER = {0.5, 0.625, 0, 0.125},
-				SHAMAN = {0.625, 0.75, 0, 0.125},
-				PRIEST = {0.75, 0.875, 0, 0.125},
-				WARLOCK = {0.875, 1, 0, 0.125},
-				PALADIN = {0, 0.125, 0.125, 0.25},
-				DEATHKNIGHT = {0.125, 0.25, 0.125, 0.25},
-				-- project ascension custom classes
-				ABOMINATION = {0.75, 0.875, 0.375, 0.5}, -- Knight of Xoroth
-				BARBARIAN = {0.875, 1, 0.375, 0.5},
-				BARD = {0.75, 0.875, 0.625, 0.75},
-				CHRONOMANCER = {0.125, 0.25, 0.625, 0.75},
-				CULTIST = {0, 0.125, 0.5, 0.625},
-				DEMONHUNTER = {0.5, 0.625, 0.5, 0.625},
-				FLESHWARDEN = {0.75, 0.875, 0.375, 0.5}, -- Knight of Xoroth
-				FREE = {0.875, 1, 0.875, 1},
-				GUARDIAN = {0.625, 0.75, 0.5, 0.625},
-				MONK = {0, 0.125, 0.625, 0.75},
-				NECROMANCER = {0, 0.125, 0.375, 0.5},
-				PROPHET = {0.25, 0.375, 0.625, 0.75}, -- Disciple of Shadra, Venomancer
-				PYROMANCER = {0.125, 0.25, 0.5, 0.625},
-				RANGER = {0.25, 0.375, 0.5, 0.625},
-				REAPER = {0.375, 0.5, 0.375, 0.5},
-				RIFTBLADE = {0.875, 1, 0.625, 0.75},
-				SONOFARUGAL = {0.875, 1, 0.5, 0.625},
-				SPIRITMAGE = {0.375, 0.5, 0.5, 0.625}, -- Runemaster
-				STARCALLER = {0.25, 0.375, 0.375, 0.5},
-				STORMBRINGER = {0.625, 0.75, 0.375, 0.5},
-				SUNCLERIC = {0.125, 0.25, 0.375, 0.5},
-				THIEF = {0.625, 0.75, 0.625, 0.75},
-				TIDECALLER = {0.000, 0.125, 0.75, 0.875},
-				TINKER = {0.5, 0.625, 0.375, 0.5},
-				WILDWALKER = {0.375, 0.5, 0.625, 0.75}, -- Primalist
-				WITCHDOCTOR = {0.5, 0.625, 0.625, 0.75},
-				WITCHHUNTER = {0.75, 0.875, 0.5, 0.625},
-			}
-		else
-			classCoordsTable = {}
-			for class, coords in pairs(CLASS_ICON_TCOORDS) do
+			-- original wow classes
+			classCoordsTable.WARRIOR = {0.25, 0.375, 0.5, 0.625}
+			classCoordsTable.MAGE = {0.375, 0.5, 0.5, 0.625}
+			classCoordsTable.ROGUE = {0, 0.125, 0.625, 0.75}
+			classCoordsTable.DRUID = {0.125, 0.25, 0.625, 0.75}
+			classCoordsTable.HUNTER = {0.25, 0.375, 0.625, 0.75}
+			classCoordsTable.SHAMAN = {0.375, 0.5, 0.625, 0.75}
+			classCoordsTable.PRIEST = {0, 0.125, 0.75, 0.875}
+			classCoordsTable.WARLOCK = {0.125, 0.25, 0.75, 0.875}
+			classCoordsTable.PALADIN = {0.25, 0.375, 0.75, 0.875}
+			classCoordsTable.DEATHKNIGHT = {0.375, 0.5, 0.75, 0.875}
+		end
+		for class, coords in pairs(CLASS_ICON_TCOORDS) do
+			-- skip original classes for Ascension CoA
+			if not classCoordsTable[class] then
 				classCoordsTable[class] = coords
 			end
 		end
@@ -767,7 +736,6 @@ function lib:Embed(target)
 	for _, v in pairs(mixins) do
 		target[v] = self[v]
 	end
-	target.locale = target.locale or GAME_LOCALE
 	self.embeds[target] = true
 	return target
 end

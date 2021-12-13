@@ -596,7 +596,7 @@ function Skada:RegisterClasses()
 	end
 
 	-- Skada custom class colors!
-	self.classcolors.BOSS = {r = 0.203, g = 0.345, b = 0.525, colorStr = "345886"}
+	self.classcolors.BOSS = {r = 0.203, g = 0.345, b = 0.525, colorStr = "ff345886"}
 	self.classcolors.ENEMY = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
 	self.classcolors.MONSTER = {r = 0.549, g = 0.388, b = 0.404, colorStr = "ff8c6367"}
 	self.classcolors.PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"}
@@ -621,9 +621,9 @@ function Skada:RegisterClasses()
 
 		-- custom class coordinates
 		if not self.classcoords.BOSS then
-			self.classcoords.BOSS = {0.75, 1, 0.5, 0.75}
-			self.classcoords.ENEMY = {0.5, 0.75, 0.5, 0.75}
-			self.classcoords.MONSTER = {0, 0.25, 0.75, 1}
+			self.classcoords.BOSS = {0.5, 0.75, 0.5, 0.75}
+			self.classcoords.MONSTER = {0.75, 1, 0.5, 0.75}
+			self.classcoords.ENEMY = {0, 0.25, 0.75, 1}
 			self.classcoords.PET = {0.25, 0.5, 0.75, 1}
 			self.classcoords.PLAYER = {0.75, 1, 0.75, 1}
 			self.classcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
@@ -632,7 +632,7 @@ function Skada:RegisterClasses()
 
 	-- we ignore roles & specs on Project Ascension since players
 	-- have a custom module to set their own colors & icons.
-	if not self.Ascension then
+	if not self.Ascension and not self.AscensionCoA then
 		-- role icon file and texture coordinates
 		self.roleicons = [[Interface\AddOns\Skada\Media\Textures\icon-roles]]
 		self.rolecoords = {

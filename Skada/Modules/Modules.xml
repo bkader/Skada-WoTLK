@@ -39,5 +39,5 @@
 <Script file="Themes.lua" />
 <Script file="Nickname.lua" />
 <Script file="Ascension.lua" />
-<Script file="Arena.lua" />
+<Script file="PvP.lua" />
 </Ui>
