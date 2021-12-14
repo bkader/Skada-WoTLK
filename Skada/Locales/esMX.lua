@@ -384,6 +384,7 @@ L["Opens a dialog that lets you report your data to others in various ways."] = 
 L["Stop"] = "Parar"
 L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."] = "Para o resume el segmento actual. Útil para descontar los datos después de una muerte del grupo. Puede ser establecido para que se pare automáticamente en las opciones."
 L["Segment Stopped."] = "Segmento detenido."
+L["Segment Paused."] = "Segmento en pausa."
 L["Segment Resumed."] = "Segmento reanudado."
 L["Quick Access"] = "Acceso rapido"
 -- default segments

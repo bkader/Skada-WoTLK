@@ -1,6 +1,22 @@
 ## Interface: 30300
-## Title: Skada - Improvement
-## Notes: Saves your character boss encouters data to track your improvement.
+## Title: Skada: |cff7fff7fImprovement|r
+## Title-deDE: Skada: |cff7fff7fVerbesserung|r
+## Title-esES: Skada: |cff7fff7fMejora|r
+## Title-esMX: Skada: |cff7fff7fMejora|r
+## Title-frFR: Skada: |cff7fff7fAmélioration|r
+## Title-koKR: Skada: |cff7fff7f개선|r
+## Title-ruRU: Skada: |cff7fff7fУлучшение|r
+## Title-zhCN: Skada: |cff7fff7f提升|r
+## Title-zhTW: Skada: |cff7fff7f改進|r
+## Notes: Saves your character boss fights data to track your improvement.
+## Notes-deDE: Speichert die Kampfdaten Ihres Charakterboss, um Ihren Fortschritt zu verfolgen.
+## Notes-esES: Guarda los datos de las peleas del jefe de tu personaje para seguir tu progreso.
+## Notes-esMX: Guarda los datos de las peleas del jefe de tu personaje para seguir tu progreso.
+## Notes-frFR: Sauvgarde les données des combats de boss de votre personnage pour suivre vos progrès.
+## Notes-koKR: 캐릭터 보스 전투 데이터를 저장하여 개선 사항을 추적합니다.
+## Notes-ruRU: Сохраняет данные о боях с боссом вашего персонажа, чтобы отслеживать ваш прогресс.
+## Notes-zhCN: 保存您的角色首领战斗数据以跟踪您的进度。
+## Notes-zhTW: 保存您的角色首領戰斗數據以跟踪您的進度。
 ## Dependencies: Skada
 ## SavedVariablesPerCharacter: SkadaImprovementDB
 ## DefaultState: enabled

@@ -32,8 +32,7 @@ local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
 local GetNumGroupMembers, GetGroupTypeAndCount = Skada.GetNumGroupMembers, Skada.GetGroupTypeAndCount
 local GetUnitIdFromGUID, GetUnitSpec, GetUnitRole = Skada.GetUnitIdFromGUID, Skada.GetUnitSpec, Skada.GetUnitRole
 local UnitIterator, IsGroupDead = Skada.UnitIterator, Skada.IsGroupDead
-local Transliterate = Skada.Transliterate
-local T = Skada.Table
+local EscapeStr, GetCreatureId, T = Skada.EscapeStr, Skada.GetCreatureId, Skada.Table
 
 local LDB = LibStub("LibDataBroker-1.1")
 local dataobj = LDB:NewDataObject("Skada", {
@@ -564,10 +563,12 @@ function Window:set_selected_set(set, step)
 		end
 	end
 
-	self.selectedset = set
-	self:RestoreView()
-	if self.child and self.db.childmode <= 1 then
-		self.child:set_selected_set(set)
+	if set and self.selectedset ~= set then
+		self.selectedset = set
+		self:RestoreView()
+		if self.child and self.db.childmode <= 1 then
+			self.child:set_selected_set(set)
+		end
 	end
 end
 
@@ -1182,8 +1183,7 @@ do
 				local i = 1
 				local title = _G["UNITNAME_SUMMON_TITLE" .. i]
 				while (title and title ~= "%s" and title:find("%s")) do
-					local pattern = gsub(title, "%%s", "(.-)")
-					ownerPatterns[#ownerPatterns + 1] = pattern
+					ownerPatterns[#ownerPatterns + 1] = title
 					i = i + 1
 					title = _G["UNITNAME_SUMMON_TITLE" .. i]
 				end
@@ -1191,8 +1191,7 @@ do
 
 			function ValidatePetOwner(text, name)
 				for _, pattern in ipairs(ownerPatterns) do
-					local owner = strmatch(text, pattern)
-					if owner and owner == name then
+					if EscapeStr(format(pattern, name)) == text then
 						return true
 					end
 				end
@@ -1273,7 +1272,6 @@ do
 		return nil
 	end
 
-	local GetCreatureId = Skada.GetCreatureId
 	function Skada:FixPets(action)
 		if action and self:IsPet(action.playerid, action.playerflags) then
 			local owner = pets[action.playerid] or CommonFixPets(action.playerid, action.playerflags)
@@ -1694,7 +1692,7 @@ do
 		end
 
 		if escape then
-			msg = Skada.EscapeStr(msg)
+			msg = EscapeStr(msg)
 		end
 
 		if chantype == "channel" then
@@ -1853,6 +1851,12 @@ do
 			elseif was_in_pvp then
 				self:SetActive(true)
 			end
+		end
+
+		-- left an arena or a battleground match?
+		if self.last and self.last.resume then
+			self:Debug("EndSegment: Removed paused segment.")
+			self.last.resume = nil
 		end
 
 		was_in_instance = (isininstance == true)
@@ -3097,7 +3101,7 @@ do
 	end
 
 	function Skada:SendComm(channel, target, ...)
-		if target == self.userName then return end
+		if target == self.userName or not IsInGroup() then return end
 
 		if not channel then
 			local t = GetGroupTypeAndCount()
@@ -3236,7 +3240,7 @@ function Skada:EndSegment()
 			end
 
 			-- do you want to do something?
-			self.callbacks:Fire("Skada_SetComplete", self.current)
+			self.callbacks:Fire("Skada_SetCompleted", self.current)
 
 			tinsert(self.char.sets, 1, self.current)
 			self:Debug("Segment Saved:", self.current.name)
@@ -3255,6 +3259,15 @@ function Skada:EndSegment()
 	self.last = self.current
 	self.total.time = self.total.time + self.current.time
 	self.current = nil
+
+	-- make sure to have a single segment for arenas & battlegrounds.
+	if self.last.paused or self.last.type == "arena" or self.last.type == "pvp" then
+		self:Debug("EndSegment: Segment Paused.")
+		self.last.resume, self.last.paused = true, nil
+	elseif self.last.resume then
+		self:Debug("EndSegment: Removed paused segment.")
+		self.last.resume = nil
+	end
 
 	CleanSets()
 
@@ -3376,7 +3389,15 @@ do
 
 		self:Wipe()
 
-		if not self.current then
+		if self.last and self.last.resume then
+			self:Debug("StartCombat: Segment Resumed!")
+			self.current = (self.char.sets[1] and self.char.sets[1] == self.last) and tremove(self.char.sets, 1) or self.last
+			self.current.endtime = nil
+			self.current.time = 0
+			self.current.resume = nil
+			self.last = nil
+		elseif not self.current then
+			self:Debug("StartCombat: Segment Created!")
 			self.current = CreateSet(L["Current"])
 		end
 
@@ -3545,7 +3566,7 @@ do
 					self.current.mobname = GetInstanceInfo()
 				elseif self.current.type == "arena" then
 					self.current.mobname = GetInstanceInfo()
-					self.current.team = GetBattlefieldArenaFaction()
+					self.current.gold = GetBattlefieldArenaFaction()
 				elseif not self.current.mobname then
 					self.current.mobname = dstName
 				end
@@ -3557,13 +3578,13 @@ do
 			self:AssignPet(srcGUID, srcName, dstGUID)
 
 			-- we fix the table by searching through the complete list
-			local fixed = true
-			while fixed do
-				fixed = false
+			self.fixsummon = true
+			while self.fixsummon do
+				self.fixsummon = nil
 				for pet, owner in pairs(pets) do
 					if pets[owner.id] then
 						pets[pet] = {id = pets[owner.id].id, name = pets[owner.id].name}
-						fixed = true
+						self.fixsummon = true
 					end
 				end
 			end

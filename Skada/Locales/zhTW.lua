@@ -380,6 +380,7 @@ L["Opens a dialog that lets you report your data to others in various ways."] = 
 L["Stop"] = "停止"
 L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."] = "停止或恢復當前區段。用於滅團後停止收集數據。也可在設置中設為自動停止。"
 L["Segment Stopped."] = "段已停止。"
+L["Segment Paused."] = "段已暫停。"
 L["Segment Resumed."] = "段已恢復。"
 L["Quick Access"] = "快速訪問"
 -- default segments
@@ -663,7 +664,7 @@ L["Overkill target list"] = "過度損壞的目標"
 L["%s's overkill spells"] = "%s過度傷害法術"
 L["%s's overkill targets"] = "%s過度損壞的目標"
 -- tweaks module lines --
--- L["Improvement"] = ""
+L["Improvement"] = "改進"
 L["Tweaks"] = "調整"
 -- L["First hit"] = ""
 -- L["|cffffff00First Hit|r: %s from %s"] = ""

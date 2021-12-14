@@ -380,6 +380,7 @@ L["Opens a dialog that lets you report your data to others in various ways."] = 
 L["Stop"] = "停止"
 L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."] = "停止或继续当前分段。在团灭后很有用。可在设置中设为自动停止。"
 L["Segment Stopped."] = "段已停止。"
+L["Segment Paused."] = "段已暂停。"
 L["Segment Resumed."] = "段已恢复。"
 L["Quick Access"] = "快速访问"
 -- default segments

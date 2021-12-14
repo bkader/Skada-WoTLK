@@ -10,7 +10,7 @@ Skada:AddLoadableModule("PVP", function(L)
 	local GetSpellInfo, UnitCastingInfo = GetSpellInfo, UnitCastingInfo
 
 	local teamGreen = {r = 0.1, g = 1, b = 0.1, colorStr = "ff19ff19"}
-	local teamYellow = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
+	local teamGold = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
 	local specsCache, spellsTable, aurasTable, _ = {}, nil, nil, nil
 
 	-- table used to determine enemies roles.
@@ -258,7 +258,7 @@ Skada:AddLoadableModule("PVP", function(L)
 					d.spec = player.spec
 
 					if set.type == "arena" then
-						d.color = set.team and teamYellow or teamGreen
+						d.color = set.gold and teamGold or teamGreen
 					end
 
 					d.value = amount
@@ -293,7 +293,7 @@ Skada:AddLoadableModule("PVP", function(L)
 						d.class = enemy.class
 						d.role = enemy.role
 						d.spec = enemy.spec
-						d.color = set.team and teamGreen or teamYellow
+						d.color = set.gold and teamGreen or teamGold
 
 						d.value = amount
 						d.valuetext = Skada:FormatValueText(
@@ -529,7 +529,7 @@ Skada:AddLoadableModule("PVP", function(L)
 					d.spec = player.spec
 
 					if set.type == "arena" then
-						d.color = set.team and teamYellow or teamGreen
+						d.color = set.gold and teamGold or teamGreen
 					end
 
 					d.value = amount
@@ -564,7 +564,7 @@ Skada:AddLoadableModule("PVP", function(L)
 						d.class = enemy.class
 						d.role = enemy.role
 						d.spec = enemy.spec
-						d.color = set.team and teamGreen or teamYellow
+						d.color = set.gold and teamGreen or teamGold
 
 						d.value = amount
 						d.valuetext = Skada:FormatValueText(
