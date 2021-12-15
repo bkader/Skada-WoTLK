@@ -271,8 +271,6 @@ L["Aggressive combat detection"] = "적극적인 전투 감지"
 L["tentativecombatstart_desc"] = [[Skada는 공격대 중 가장 잘 작동하는 매우 전통적인 전투 감지 방법을 사용합니다.
 이 옵션을 사용하면 Skada는 다른 데미지 미터기를 모방합니다.
 던전을 진행할 때 유용합니다, 우두머리 전투에선 의미가 없습니다.]]
-L["Tentative Timer"] = "대기 시간"
-L["tentativetimer_desc"] = "Skada가 전투 시작 후 새 세그먼트를 생성하기에 충분한 이벤트를 갖기 위해 기다려야 하는 시간(초)입니다.\n\n|cffffbb00적극적인 전투 감지|r가 비활성화된 경우에만 작동합니다."
 L["Autostop"] = "전멸 시 일찍 멈추기"
 L["Automatically stops the current segment after half of all raid members have died."] = "전체 공격대원의 절반 이상이 죽으면 현재 세분화를 자동으로 멈춥니다."
 L["Always show self"] = "항상 자신 표시"
@@ -698,8 +696,14 @@ L["Project Ascension"] = "Project Ascension"
 L["project_ascension_desc"] = "|cffffbb00Project Ascension|r에서 캐릭터는 능력이나 재능이 있는 클래스가 없는 영웅입니다.\n\n아이콘 및 색상은 기본 아이콘 및 색상 대신 사용할 그룹 구성원에게 전송됩니다."
 L["Icon"] = "아이콘"
 L["Color"] = "색상"
+L["Color for %s."] = "%s의 색상입니다."
 L["Choose the %s that fits your character's build."] = "캐릭터의 빌드에 맞는 %s을 선택하십시오."
 L["Are you sure you want clear cached icons and colors?"] = "캐시된 아이콘과 색상을 삭제하시겠습니까?"
+-- arena
+L["Custom Arena Colors"] = "커스텀 아레나 색상"
+L["Enable this if you want to use custom arena teams colors."] = "사용자 정의 팀 색상을 사용하려면 이것을 활성화하십시오."
+L["Gold Team"] = "금색팀"
+L["Green Team"] = "녹색팀"
 -- notifications
 L["Opacity"] = "불투명"
 L["Notifications"] = "알림"

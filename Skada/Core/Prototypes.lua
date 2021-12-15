@@ -31,7 +31,7 @@ end
 
 -- for better dps calculation, we use active time for Arena/BGs.
 function playerPrototype:GetTime(active)
-	return Skada:PlayerActiveTime(self.super, self, active or self.super.type == "pvp" or self.super.type == "arena")
+	return Skada:GetActiveTime(self.super, self, active or self.super.type == "pvp" or self.super.type == "arena")
 end
 
 -------------------------------------------------------------------------------
@@ -51,8 +51,8 @@ function enemyPrototype:Bind(obj, set)
 	end
 end
 
-function enemyPrototype:GetTime()
-	return Skada:GetSetTime(self.super)
+function enemyPrototype:GetTime(active)
+	return Skada:GetActiveTime(self.super, self, active or self.super.type == "pvp" or self.super.type == "arena")
 end
 
 -------------------------------------------------------------------------------

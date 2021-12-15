@@ -273,8 +273,6 @@ L["Aggressive combat detection"] = true
 L["tentativecombatstart_desc"] = [[Skada usually uses a very conservative (simple) combat detection scheme that works best in raids.
 With this option Skada attempts to emulate other damage meters.
 Useful for running dungeons, meaningless on boss encounters.]]
-L["Tentative Timer"] = true
-L["tentativetimer_desc"] = "The number of seconds Skada should wait after combat start to have enough events to create a new segment.\n\nOnly works if |cffffbb00Aggressive combat detection|r is disabled."
 L["Autostop"] = true
 L["Automatically stops the current segment after half of all raid members have died."] = true
 L["Always show self"] = true
@@ -705,8 +703,14 @@ L["project_ascension_desc"] = [=[On |cffffbb00Project Ascension|r, your characte
 Icons and colors are sent to group members and Skada can use them instead of your character's default class icon and color.]=]
 L["Icon"] = true
 L["Color"] = true
+L["Color for %s."] = true
 L["Choose the %s that fits your character's build."] = true
 L["Are you sure you want clear cached icons and colors?"] = true
+-- arena
+L["Custom Arena Colors"] = true
+L["Enable this if you want to use custom arena teams colors."] = true
+L["Gold Team"] = true
+L["Green Team"] = true
 -- notifications
 L["Opacity"] = true
 L["Notifications"] = true

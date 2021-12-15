@@ -137,20 +137,50 @@ local function VerifySet(mode, set)
 	end
 end
 
--- creates a new set
-local function CreateSet(setname, starttime)
-	starttime = starttime or time()
-	local set = {players = {}, name = setname, starttime = starttime, time = 0}
-	if setname == L["Current"] then
-		set.last_action = set.last_action or starttime
-		set.enemies = set.enemies or {}
-	end
-	for _, mode in ipairs(modes) do
-		VerifySet(mode, set)
-	end
+-- set creation and recycling
+local CreateSet, RecycleSet
+do
+	local new
+	new, RecycleSet = Skada.TablePool()
 
-	Skada.callbacks:Fire("Skada_SetCreated", set)
-	return setPrototype:Bind(set)
+	-- creates a new set
+	-- @param 	setname 	the segment name
+	-- @param 	set 		the set to override/reuse
+	function CreateSet(setname, set)
+		if set then
+			Skada:Debug("CreateSet: Reuse", set.name, setname)
+			for k, _ in pairs(set) do
+				if k == "players" or k == "enemies" then
+					wipe(set[k])
+				else
+					set[k] = nil
+				end
+			end
+		else
+			Skada:Debug("CreateSet: New", setname)
+			set = new()
+		end
+
+		-- add stuff.
+		set.name = setname
+		set.starttime = time()
+		set.time = 0
+		set.players = set.players or {}
+
+		-- only for current segment
+		if setname == L["Current"] then
+			set.last_action = set.last_action or set.starttime
+			set.enemies = set.enemies or {}
+		end
+
+		-- last alterations before returning.
+		for _, mode in ipairs(modes) do
+			VerifySet(mode, set)
+		end
+
+		Skada.callbacks:Fire("Skada_SetCreated", set)
+		return setPrototype:Bind(set)
+	end
 end
 
 local function CleanSets(force)
@@ -165,7 +195,7 @@ local function CleanSets(force)
 	-- we trim segments without touching persistent ones.
 	for i = #Skada.char.sets, 1, -1 do
 		if (force or numsets > Skada.db.profile.setstokeep) and not Skada.char.sets[i].keep then
-			wipe(tremove(Skada.char.sets, i))
+			RecycleSet(tremove(Skada.char.sets, i))
 			numsets = numsets - 1
 			maxsets = maxsets - 1
 		end
@@ -176,7 +206,7 @@ local function CleanSets(force)
 	-- the player reasonable, otherwise they'll encounter memory issues.
 	local limit = Skada.db.profile.setstokeep + (Skada.db.profile.setslimit or 10)
 	while maxsets > limit and Skada.char.sets[maxsets] do
-		wipe(tremove(Skada.char.sets, maxsets))
+		RecycleSet(tremove(Skada.char.sets, maxsets))
 		maxsets = maxsets - 1
 	end
 end
@@ -204,7 +234,7 @@ function Skada:GetFormatedSetTime(set)
 end
 
 -- returns the player active/effective time
-function Skada:PlayerActiveTime(set, player, active)
+function Skada:GetActiveTime(set, player, active)
 	if (self.db.profile.timemesure ~= 2 or active) and player and (player.time or 0) > 0 then
 		return max(0.1, player.time)
 	end
@@ -679,8 +709,8 @@ do
 	end
 
 	function Window:DisplaySets()
-		wipe(self.history)
 		wipe(self.metadata)
+		wipe(self.history)
 		self:Wipe()
 
 		self.selectedmode = nil
@@ -1048,10 +1078,12 @@ function Skada:DeleteSet(set, index)
 	end
 
 	if set and index then
-		self.callbacks:Fire("Skada_SetDeleted", index, tremove(self.char.sets, index))
+		local delset = tremove(self.char.sets, index)
+		self.callbacks:Fire("Skada_SetDeleted", index, delset)
+		RecycleSet(delset)
 
 		if set == self.last then
-			self.last = nil
+			self.last = RecycleSet(self.last)
 		end
 
 		-- Don't leave windows pointing to a deleted sets
@@ -1131,6 +1163,7 @@ function Skada:GetPlayer(set, guid, name, flag)
 	player.last = player.last or GetTime()
 
 	self.changed = true
+	self.callbacks:Fire("Skada_GetPlayer", player)
 	return playerPrototype:Bind(player, set)
 end
 
@@ -1149,7 +1182,9 @@ function Skada:GetEnemy(set, name, guid, flag)
 
 		set.enemies[#set.enemies + 1] = enemy
 	end
+
 	self.changed = true
+	self.callbacks:Fire("Skada_GetEnemy", enemy)
 	return enemyPrototype:Bind(enemy, set)
 end
 
@@ -2009,16 +2044,15 @@ function Skada:Reset(force)
 	self:CheckGroup()
 
 	if self.current ~= nil then
-		wipe(self.current)
-		self.current = CreateSet(L["Current"])
+		self.current = CreateSet(L["Current"], self.current)
 	end
 
 	if self.total ~= nil then
-		wipe(self.total)
-		self.total = CreateSet(L["Total"])
+		self.total = CreateSet(L["Total"], self.total)
 		self.char.total = self.total
 	end
-	self.last = nil
+
+	self.last = RecycleSet(self.last)
 
 	CleanSets(true)
 
@@ -2050,7 +2084,7 @@ function Skada:UpdateDisplay(force)
 	end
 
 	for _, win in ipairs(windows) do
-		if (self.changed or win.changed) or self.current then
+		if self.changed or win.changed or (self.current and (win.selectedset == "current" or win.selectedset == "total")) then
 			win.changed = false
 
 			if win.selectedmode then
@@ -2947,9 +2981,6 @@ function Skada:OnInitialize()
 	if not self.db.profile.timemesure then
 		self.db.profile.timemesure = 2
 	end
-	if not self.db.profile.tentativetimer then
-		self.db.profile.tentativetimer = 3
-	end
 
 	-- remove old improvement data.
 	if self.char.improvement then
@@ -3392,9 +3423,8 @@ do
 		if self.last and self.last.resume then
 			self:Debug("StartCombat: Segment Resumed!")
 			self.current = (self.char.sets[1] and self.char.sets[1] == self.last) and tremove(self.char.sets, 1) or self.last
-			self.current.endtime = nil
-			self.current.time = 0
-			self.current.resume = nil
+			self.current.endtime, self.current.time = nil, 0
+			self.current.resume, self.current.paused = nil, nil
 			self.last = nil
 		elseif not self.current then
 			self:Debug("StartCombat: Segment Created!")
@@ -3446,8 +3476,7 @@ do
 		local src_is_interesting = nil
 		local dst_is_interesting = nil
 
-		local now = time()
-		if not self.current and trigger_events[eventtype] and srcName and dstName and srcGUID ~= dstGUID then
+		if not self.current and self.db.profile.tentativecombatstart and trigger_events[eventtype] and srcName and dstName and srcGUID ~= dstGUID then
 			src_is_interesting = band(srcFlags, BITMASK_GROUP) ~= 0 or (band(srcFlags, BITMASK_PETS) ~= 0 and pets[srcGUID]) or players[srcGUID]
 
 			if eventtype ~= "SPELL_PERIODIC_DAMAGE" then
@@ -3455,17 +3484,17 @@ do
 			end
 
 			if src_is_interesting or dst_is_interesting then
-				self.current = CreateSet(L["Current"], now)
+				self.current = CreateSet(L["Current"])
 				if not self.total then
-					self.total = CreateSet(L["Total"], now)
+					self.total = CreateSet(L["Total"])
 				end
 
 				tentative_handle = self:ScheduleTimer(function()
 					tentative = nil
 					tentative_handle = nil
 					self.current = nil
-				end, self.db.profile.tentativetimer or 3)
-				tentative = self.db.profile.tentativecombatstart and 4 or 0
+				end, 1)
+				tentative = 0
 			end
 		end
 
@@ -3537,6 +3566,7 @@ do
 				if not fail then
 					if tentative ~= nil then
 						tentative = tentative + 1
+						self:Debug(format("Tentative: %s (%d)", eventtype, tentative))
 						if tentative == 5 then
 							self:CancelTimer(tentative_handle, true)
 							tentative_handle = nil
@@ -3546,7 +3576,7 @@ do
 						end
 					end
 
-					self.current.last_action = now
+					self.current.last_action = time()
 					mod.func(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 				end
 			end

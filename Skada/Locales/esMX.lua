@@ -273,8 +273,6 @@ L["Aggressive combat detection"] = "Detección de combate agresiva"
 L["tentativecombatstart_desc"] = [[Skada usualmente usa un muy conservador (simple) esquema de detección del combate que funciona mejor en bandas.
 Con esta opción Skada intenta emular otros medidores de daño.
 Útil cuando se hacen mazmorras, insignificante en encuentros de jefes.]]
-L["Tentative Timer"] = "Tiempo de espera"
-L["tentativetimer_desc"] = "La cantidad de segundos que Skada debe esperar después de que comience el combate para tener suficientes eventos para crear un nuevo segmento.\n\nSolo funciona si la |cffffbb00Detección de combate agresiva|r está desactivada."
 L["Autostop"] = "Autoestop"
 L["Automatically stops the current segment after half of all raid members have died."] = "Detiene automáticamente el segmento actual después de que la mitad de los miembros hayan muerto."
 L["Always show self"] = "Muéstrate siempre"
@@ -701,8 +699,14 @@ L["project_ascension_desc"] = [=[En |cffffbb00Project Ascension|r, tus personaje
 Los iconos y colores se envían a los miembros del grupo para que los utilicen en lugar de los iconos y colores predeterminados.]=]
 L["Icon"] = "Icono"
 L["Color"] = "Color"
+L["Color for %s."] = "Color para %s."
 L["Choose the %s that fits your character's build."] = "Elige el %s que se adapte a la estructura de tu personaje."
 L["Are you sure you want clear cached icons and colors?"] = "¿Está seguro de que desea borrar los iconos y colores almacenados en caché?"
+-- arena
+L["Custom Arena Colors"] = "Colores personalizados de la arena"
+L["Enable this if you want to use custom arena teams colors."] = "Habilite esta opción si desea utilizar colores de equipos personalizados."
+L["Gold Team"] = "Equipo dorado"
+L["Green Team"] = "Equipo verde"
 -- notifications
 L["Opacity"] = "Opacidad"
 L["Notifications"] = "Notificaciones"

@@ -4,7 +4,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 
 local select, pairs, ipairs = select, pairs, ipairs
 local tostring, tonumber, format = tostring, tonumber, string.format
-local setmetatable, getmetatable, band = setmetatable, getmetatable, bit.band
+local setmetatable, getmetatable, wipe, band = setmetatable, getmetatable, wipe, bit.band
 local print = print
 
 local GetNumRaidMembers, GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
@@ -335,7 +335,6 @@ end
 -- test mode
 
 do
-	local wipe = wipe
 	local unpack = unpack
 	local random = math.random
 	local IsGroupInCombat = Skada.IsGroupInCombat
@@ -602,6 +601,16 @@ function Skada:RegisterClasses()
 	self.classcolors.PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"}
 	self.classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
 	self.classcolors.UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
+	-- arena class colors
+	self.classcolors.ARENA_YELLOW = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
+	self.classcolors.ARENA_GREEN = {r = 0.1, g = 1, b = 0.1, colorStr = "ff19ff19"}
+	-- purple color instead of green for color blind mode.
+	if GetCVar("colorblindMode") == "1" then
+		self.classcolors.ARENA_GREEN.r = 0.686
+		self.classcolors.ARENA_GREEN.g = 0.384
+		self.classcolors.ARENA_GREEN.b = 1
+		self.classcolors.ARENA_GREEN.colorStr = "ffae61ff"
+	end
 
 	-- set classes icon file & Skada custom classes.
 	if self.AscensionCoA then

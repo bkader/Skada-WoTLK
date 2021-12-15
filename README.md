@@ -1,17 +1,8 @@
-# Skada for WoTLK (_Revisited - v1.8.73.347_)
+# Skada for WoTLK (_Revisited - v1.8.73.348_)
 
 ![Discord](https://img.shields.io/discord/795698054371868743?label=discord)
 ![GitHub last commit](https://img.shields.io/github/last-commit/bkader/Skada-WoTLK)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/bkader/Skada-WoTLK?label=version)
-
-## >> NOTES <<
-
-**1.8.73**:
-- Added [Project Ascension CoA](https://ascension.gg/news/conquest-of-azeroth-alpha/332) classes only available when player on CoA realms.
-
-**1.8.72**:
-- The data tables structures of most of the modules were changed, so it is important to reset Skada (_segments and not settings._).
-- A newly added and extensible **API** system that allows you to access data provided by Skada to be used externally (_WeakAuras for example_). [Read more](#api) about this at the bottom.
 
 Skada is a modular damage meter with various viewing modes, segmented fights and customizable windows. It aims to be highly efficient with memory and CPU.
 
@@ -55,6 +46,7 @@ Though it's not required, if you want to show some love and support, **PayPal**/
   * [Themes](#themes)
   * [Threat](#threat)
   * [Tweaks](#tweaks)
+  * [PvP](#pvp)
   * [Project Ascension](#project-ascension)
 
 ## What's the difference?
@@ -194,6 +186,17 @@ This module was created in order to add some tweaks to Skada, hence its name. It
 - **Include absorbed damage**: some people (_Details! users >cough<_) consider that absorbed damage should be included in the overall damage, and because Skada doesn't include it but rather shows it as an extra info, this option was added to satisfy them and so we won't hear/read `Oh! They are not showing the same numbers...`.
 - **Smart Stop**: this feature relies on DBM/BigWigs to stop collecting data after the amount of seconds you choose. It is useful in case of being in combat bug (_not combatlog bug, but stuck in combat_).
 
+### PvP
+
+This module was added as of `r340` and brings extra small features for PvPers:
+
+**Enemies spec detection**
+Enemies specs and roles are guessed from their buffs or certain spells they can. Only few auras/spells are added to the detection table but if you know of any more ones that can be used, please let me know on [Discord](https://discord.gg/a8z5CyS3eW) or open an [issue](https://github.com/bkader/Skada-WoTLK/issues) with the `enhancement` label.
+
+**Arena Features**
+- It shows both group members and enemies on the same damage and healing windows.
+- Players are colored by their team (_flag_) color: Gold for Yellow/Gold Team and Green for the Green Team. If the in-game color blind mode is enabled, the Green team appears Purple.
+
 ### Project Ascension
 
 After requests from players to make the addon work properly on [Project Ascension](https://ascension.gg/) and after their staff's help, I could access their [Conquest of Azeroth](https://ascension.gg/news/conquest-of-azeroth-alpha/332) and work on the addon. Thus, as of `v1.8.73`, CoA classes are available on Skada.
@@ -211,15 +214,16 @@ This concept was added as of version **1.8.72** and allows the player to access 
 ```lua
 local set = Skada:GetSet("current") -- gets the current segment table.
 -- then you have access to the following functions:
-set:GetLabel() -- returns the formatted set name?
-set:GetTime() -- returns the segment time or combat time?
-set:GetFormatedTime() -- returns the formatted segment time in HH:MM:SS?
+set:GetLabel() -- returns the formatted set name
+set:GetTime() -- returns the segment time or combat time
+set:GetFormatedTime() -- returns the formatted segment time in HH:MM:SS
 
-set:GetPlayer(guid, name) -- retrieves a player's table?
-set:GetEnemy(name, guid) -- retrieves an enemy table?
-set:GetActor(name, guid) -- retrieves a player or an enemy?
+set:GetPlayer(guid, name) -- retrieves a player's table
+set:GetEnemy(name, guid) -- retrieves an enemy table
+set:GetActor(name, guid) -- retrieves a player or an enemy
 
-set:GetAPS() -- returns the amount of Absorbs per second APS?
+set:GetAPS() -- returns the amount of Absorbs per second APS
+set:GetHeal() -- returns the amount of heal
 set:GetAbsorbHeal() -- returns the amount of absorbs?
 set:GetAHPS() -- returns the amounts of absorbs and heals combined.
 set:GetHPS() -- returns the amount of heal per second
@@ -237,7 +241,7 @@ set:GetAbsorbHealTaken() -- returns the table of players their healing taken amo
 set:GetPotion(potionid) -- returns the list of players and total usage of the give potion id
 
 set:GetEnemyDamageTaken() -- returns the amount of damage enemies took.
-set:GetEnemyDamageDone() -- returns the amount of damage enemies dealt to your group.
+set:GetEnemyDamage() -- returns the amount of damage enemies dealt to your group.
 set:GetEnemyDPS() -- returns total dps and damage amount of all enemies.
 set:GetEnemyHeal() -- returns the amount of heal enemies did.
 set:GetEnemyHPS() -- returns the total hps and heal amount of all enemies.
@@ -311,6 +315,7 @@ enemy:GetDamageTargets() -- returns the list of players the enemy did damage to.
 enemy:GetDamageOnTarget(name) -- returns the amount of damage the enemy did to the given player.
 enemy:GetHPS() -- returns the amount healing per second the enemy did.
 enemy:GetHealTargets() -- returns the list of targets the enemy healed.
+enemy:GetHealOnTarget() -- returns the amount of heal on the give target.
 ```
 
 #### Extending the API

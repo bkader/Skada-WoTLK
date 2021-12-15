@@ -1091,11 +1091,16 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 
 	local function hps_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local player = set and set:GetPlayer(id, label)
+		local player = set and set:GetActor(label, id)
 		if player then
 			local totaltime = set:GetTime()
 			local activetime = player:GetTime()
-			local hps, amount = player:GetAHPS()
+			local hps, amount = 0, 0
+			if player.GetAHPS then
+				hps, amount = player:GetAHPS()
+			elseif player.GetHPS then
+				hps, amount = player:GetHPS()
+			end
 			tooltip:AddLine(player.name .. " - " .. L["HPS"])
 			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(set:GetTime()), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(player:GetTime(true)), 1, 1, 1)
@@ -1159,9 +1164,12 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 		win.title = format(L["%s's absorbs and healing on %s"], win.playername or L.Unknown, win.targetname or L.Unknown)
 		if not win.targetname then return end
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
-		local total = player and player:GetAbsorbHealOnTarget(win.targetname)
+		local player, enemy = set and set:GetPlayer(win.playerid, win.playername), false
+		if not player and Skada.forPVP and set.type == "arena" then
+			player, enemy = set:GetEnemy(win.playername, win.playerid), true
+		end
 
+		local total = player and (enemy and player:GetHealOnTarget(win.targetname) or player:GetAbsorbHealOnTarget(win.targetname)) or 0
 		if total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
@@ -1185,7 +1193,12 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 							d.text = d.label .. L["HoT"]
 						end
 
-						d.value = spell.targets[win.targetname].amount or 0
+						if enemy then
+							d.value = spell.targets[win.targetname]
+						else
+							d.value = spell.targets[win.targetname].amount or 0
+						end
+
 						d.valuetext = Skada:FormatValueText(
 							Skada:FormatNumber(d.value),
 							mod.metadata.columns.Healing,
@@ -1240,6 +1253,11 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 
 		local player = set and set:GetPlayer(win.playerid, win.playername)
 		local total = player and player:GetAbsorbHeal() or 0
+
+		if not player and Skada.forPVP and set.type == "arena" then
+			player = set:GetEnemy(win.playername, win.playerid)
+			total = player and player.heal or 0
+		end
 
 		if total > 0 then
 			if win.metadata then
@@ -1314,9 +1332,18 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 		win.title = format(L["%s's absorbed and healed targets"], win.playername or L.Unknown)
 
 		local player = set and set:GetPlayer(win.playerid, win.playername)
-		if not player then return end
+		if not player and Skada.forPVP and set.type == "arena" then
+			player = set:GetEnemy(win.playername, win.playerid)
+		end
 
-		local targets, total = player:GetAbsorbHealTargets()
+		local total, targets = 0, nil
+		if player and player.GetAbsorbHealTargets then
+			targets, total = player:GetAbsorbHealTargets()
+		elseif player and player.GetHealTargets then
+			targets = player:GetHealTargets()
+			total = player.heal or 0
+		end
+
 		if targets and total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
@@ -1362,6 +1389,8 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 			end
 
 			local nr = 0
+
+			-- players
 			for _, player in ipairs(set.players) do
 				local hps, amount = player:GetAHPS()
 
@@ -1378,6 +1407,10 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 					d.role = player.role
 					d.spec = player.spec
 
+					if Skada.forPVP and set.type == "arena" then
+						d.color = set.gold and Skada.classcolors.ARENA_YELLOW or Skada.classcolors.ARENA_GREEN
+					end
+
 					d.value = amount
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(d.value),
@@ -1390,6 +1423,42 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
+					end
+				end
+			end
+
+			-- arena enemies
+			if Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyHeal then
+				for _, enemy in ipairs(set.enemies) do
+					local hps, amount = enemy:GetHPS()
+
+					if amount > 0 then
+						nr = nr + 1
+
+						local d = win.dataset[nr] or {}
+						win.dataset[nr] = d
+
+						d.id = enemy.id or enemy.name
+						d.label = enemy.name
+						d.text = nil
+						d.class = enemy.class
+						d.role = enemy.role
+						d.spec = enemy.spec
+						d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_YELLOW
+
+						d.value = amount
+						d.valuetext = Skada:FormatValueText(
+							Skada:FormatNumber(d.value),
+							self.metadata.columns.Healing,
+							Skada:FormatNumber(hps),
+							self.metadata.columns.HPS,
+							Skada:FormatPercent(d.value, total),
+							self.metadata.columns.Percent
+						)
+
+						if win.metadata and d.value > win.metadata.maxvalue then
+							win.metadata.maxvalue = d.value
+						end
 					end
 				end
 			end
@@ -1491,11 +1560,11 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 	end
 
 	function setPrototype:GetAbsorbHeal()
-		return (self.absorb or 0) + (self.heal or 0)
+		return (self.absorb or 0) + self:GetHeal()
 	end
 
 	function setPrototype:GetAHPS()
-		local amount = (self.heal or 0) + (self.absorb or 0)
+		local amount = self:GetAbsorbHeal()
 		return amount / max(1, self:GetTime()), amount
 	end
 
@@ -1607,11 +1676,16 @@ Skada:AddLoadableModule("HPS", function(L)
 
 	local function hps_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local player = set and set:GetPlayer(id, label)
+		local player = set and set:GetActor(label, id)
 		if player then
 			local totaltime = set:GetTime()
 			local activetime = player:GetTime()
-			local hps, amount = player:GetAHPS()
+			local hps, amount = 0
+			if player.GetAHPS then
+				hps, amount = player:GetAHPS()
+			elseif player.GetHPS then
+				hps, amount = player:GetHPS()
+			end
 			tooltip:AddLine(player.name .. " - " .. L["HPS"])
 			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(set:GetTime()), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(player:GetTime(true)), 1, 1, 1)
@@ -1630,6 +1704,8 @@ Skada:AddLoadableModule("HPS", function(L)
 			end
 
 			local nr = 0
+
+			-- players
 			for _, player in ipairs(set.players) do
 				local amount = player:GetAHPS()
 				if amount > 0 then
@@ -1645,6 +1721,10 @@ Skada:AddLoadableModule("HPS", function(L)
 					d.role = player.role
 					d.spec = player.spec
 
+					if Skada.forPVP and set.type == "arena" then
+						d.color = set.gold and Skada.classcolors.ARENA_YELLOW or Skada.classcolors.ARENA_GREEN
+					end
+
 					d.value = amount
 					d.valuetext = Skada:FormatValueText(
 						Skada:FormatNumber(d.value),
@@ -1655,6 +1735,39 @@ Skada:AddLoadableModule("HPS", function(L)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
+					end
+				end
+			end
+
+			-- arena enemies
+			if Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyHeal then
+				for _, enemy in ipairs(set.enemies) do
+					local amount = enemy:GetHPS()
+					if amount > 0 then
+						nr = nr + 1
+
+						local d = win.dataset[nr] or {}
+						win.dataset[nr] = d
+
+						d.id = enemy.id or enemy.name
+						d.label = enemy.name
+						d.text = nil
+						d.class = enemy.class
+						d.role = enemy.role
+						d.spec = enemy.spec
+						d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_YELLOW
+
+						d.value = amount
+						d.valuetext = Skada:FormatValueText(
+							Skada:FormatNumber(d.value),
+							self.metadata.columns.HPS,
+							Skada:FormatPercent(d.value, total),
+							self.metadata.columns.Percent
+						)
+
+						if win.metadata and d.value > win.metadata.maxvalue then
+							win.metadata.maxvalue = d.value
+						end
 					end
 				end
 			end
