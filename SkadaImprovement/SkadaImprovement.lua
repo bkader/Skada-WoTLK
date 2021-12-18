@@ -50,7 +50,7 @@ Skada:AddLoadableModule("Improvement", function(L)
 	local updaters = {}
 
 	updaters.ActiveTime = function(set, player)
-		return Skada:PlayerActiveTime(set, player, true)
+		return Skada:GetActiveTime(set, player, true)
 	end
 
 	updaters.Damage = function(set, player)
@@ -121,9 +121,14 @@ Skada:AddLoadableModule("Improvement", function(L)
 		local boss = find_boss_data(win.targetname)
 
 		if boss and boss.encounters then
-			local maxvalue, nr = 0, 1
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
+			local nr = 0
 			for i, encounter in ipairs(boss.encounters) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -137,18 +142,17 @@ Skada:AddLoadableModule("Improvement", function(L)
 					d.valuetext = tostring(d.value)
 				else
 					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(d.value), true,
-						Skada:FormatNumber((d.value) / max(1, encounter.data.ActiveTime or 0)), true
+						Skada:FormatNumber(d.value),
+						true,
+						Skada:FormatNumber((d.value) / max(1, encounter.data.ActiveTime or 0)),
+						true
 					)
 				end
 
-				if d.value > maxvalue then
-					maxvalue = d.value
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
-
-			win.metadata.maxvalue = maxvalue
 		end
 	end
 
@@ -162,9 +166,14 @@ Skada:AddLoadableModule("Improvement", function(L)
 		local boss = find_boss_data(win.targetname)
 
 		if boss then
-			win.metadata.maxvalue = 1
-			local nr = 1
+			if win.metadata then
+				win.metadata.maxvalue = 1
+			end
+
+			local nr = 0
 			for i, mode in ipairs(modes) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -187,7 +196,6 @@ Skada:AddLoadableModule("Improvement", function(L)
 				else
 					d.valuetext = Skada:FormatNumber(d.value)
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -200,8 +208,10 @@ Skada:AddLoadableModule("Improvement", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 1
+			local nr = 0
 			for name, data in pairs(self.db) do
+				nr = nr + 1
+
 				local d = win.dataset[nr] or {}
 				win.dataset[nr] = d
 
@@ -214,7 +224,6 @@ Skada:AddLoadableModule("Improvement", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
-				nr = nr + 1
 			end
 		end
 	end
@@ -238,11 +247,7 @@ Skada:AddLoadableModule("Improvement", function(L)
 	end
 
 	function mod:BossDefeated(event, set)
-		if event == "COMBAT_BOSS_DEFEATED" and set and set.success then
-			-- we only record raid bosses, nothing else.
-			local inInstance, instanceType = IsInInstance()
-			if not inInstance or instanceType ~= "raid" then return end
-
+		if event == "COMBAT_BOSS_DEFEATED" and set and set.type == "raid" and set.success then
 			local boss = find_boss_data(set.mobname)
 			if not boss then return end
 
@@ -282,12 +287,12 @@ Skada:AddLoadableModule("Improvement", function(L)
 		mod_modes.notitleset = true
 		mod_comparison.notitleset = true
 
-		Skada.RegisterCallback(self, "COMBAT_BOSS_DEFEATED", "BossDefeated")
+		Skada.RegisterMessage(self, "COMBAT_BOSS_DEFEATED", "BossDefeated")
 		Skada:AddMode(self)
 	end
 
 	function mod:OnDisable()
-		Skada.UnregisterAllCallbacks(self)
+		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
 	end
 

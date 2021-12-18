@@ -1621,6 +1621,63 @@ end
 -------------------------------------------------------------------------------
 -- slash commands
 
+local function GenerateTotal()
+	if not Skada.char.total then
+		Skada.total = CreateSet(L["Total"], Skada.total)
+		Skada.char.total = Skada.total
+	else
+		for k, v in pairs(Skada.char.total) do
+			if k == "players" then
+				wipe(v)
+			else
+				Skada.char.total[k] = nil
+			end
+		end
+	end
+
+	wipe(Skada.total.players)
+	Skada.total.starttime = 0
+	Skada.total.time = 0
+
+	for _, set in ipairs(Skada.char.sets) do
+		if not Skada.total.starttime or set.starttime < Skada.total.starttime then
+			Skada.total.starttime = set.starttime
+		end
+
+		for k, v in pairs(set) do
+			if type(v) == "number" and k ~= "starttime" and k ~= "endtime" then
+				Skada.total[k] = (Skada.total[k] or 0) + v
+			end
+		end
+
+		for _, p in ipairs(set.players) do
+			local index = nil
+			for i, a in ipairs(Skada.total.players) do
+				if p.id == a.id then
+					index = i
+					break
+				end
+			end
+
+			local player = index and Skada.total.players[index] or {}
+
+			for k, v in pairs(p) do
+				if (type(v) == "string" or k == "spec" or k == "flag") then
+					player[k] = player[k] or v
+				elseif type(v) == "number" then
+					player[k] = (player[k] or 0) + v
+				end
+			end
+
+			if not index then
+				tinsert(Skada.total.players, player)
+			end
+		end
+	end
+
+	ReloadUI()
+end
+
 local function SlashCommandHandler(cmd)
 	if cmd == "pets" then
 		Skada:PetDebug()
@@ -1687,15 +1744,17 @@ local function SlashCommandHandler(cmd)
 			Skada:Report(chan, "preset", report_mode_name, "current", num)
 		else
 			Skada:Print("Usage:")
-			Skada:Printf("%-20s", "/skada report [raid|guild|party|officer|say] [mode] [max lines]")
+			Skada:Printf("%-20s", "/skada report [channel] [mode] [lines]")
 		end
 	elseif cmd:sub(1, 5) == "raise" then
 		local _, num = strsplit(" ", cmd, 2)
 		if tonumber(num) then Skada.db.profile.setslimit = max(0, min(50, num)) end
-		Skada:Print("Segments Limit:", Skada.db.profile.setslimit)
+		Skada:Print(L["Persistent segments"], Skada.db.profile.setslimit)
+	elseif cmd:sub(1, 5) == "total" or cmd:sub(1, 5) == "generate" then
+		GenerateTotal()
 	else
 		Skada:Print("Usage:")
-		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33report|r [raid|guild|party|officer|say] [mode] [max lines]")
+		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33report|r [channel] [mode] [lines]")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33reset|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33toggle|r")
 		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33show|r")
@@ -2066,8 +2125,8 @@ function Skada:Reset(force)
 
 	dataobj.text = "n/a"
 	self:UpdateDisplay(true)
-	self:CleanGarbage()
 	self:Notify(L["All data has been reset."])
+	self:CleanGarbage()
 	CloseDropDownMenus()
 end
 
@@ -3083,6 +3142,7 @@ function Skada:CheckMemory()
 			Skada:Notify(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."], L["Memory Check"], nil, "emergency")
 		end
 	end
+	Skada:CleanGarbage() -- optional
 end
 
 -- this can be used to clear combat log and garbage.
@@ -3091,6 +3151,7 @@ function Skada:CleanGarbage()
 	CombatLogClearEntries()
 	if not InCombatLockdown() then
 		collectgarbage("collect")
+		Skada:Debug("CleanGarbage")
 	end
 end
 

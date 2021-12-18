@@ -243,26 +243,26 @@ Skada:AddLoadableModule("PVP", function(L)
 	---------------------------------------------------------------------------
 
 	local GetCVar, RGBPercToHex = GetCVar, Skada.RGBPercToHex
-	local teamYellow = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
+	local teamGold = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
 	local teamGreen = {r = 0.1, g = 1, b = 0.1, colorStr = "ff19ff19"}
 	local teamPurple = {r = 0.686, g = 0.384, b = 1, colorStr = "ffae61ff"}
 
 	function mod:ApplySettings()
 		if not Skada.db.profile.modules.arena then
-			Skada.db.profile.modules.arena = {custom = false, ARENA_YELLOW = teamYellow, ARENA_GREEN = teamGreen}
+			Skada.db.profile.modules.arena = {custom = false, ARENA_GOLD = teamGold, ARENA_GREEN = teamGreen}
 		end
 
 		-- yellow team!
-		if Skada.db.profile.modules.arena.custom == true and Skada.db.profile.modules.arena.ARENA_YELLOW then
-			Skada.classcolors.ARENA_YELLOW.r = Skada.db.profile.modules.arena.ARENA_YELLOW.r
-			Skada.classcolors.ARENA_YELLOW.g = Skada.db.profile.modules.arena.ARENA_YELLOW.g
-			Skada.classcolors.ARENA_YELLOW.b = Skada.db.profile.modules.arena.ARENA_YELLOW.b
-			Skada.classcolors.ARENA_YELLOW.colorStr = Skada.db.profile.modules.arena.ARENA_YELLOW.colorStr
+		if Skada.db.profile.modules.arena.custom == true and Skada.db.profile.modules.arena.ARENA_GOLD then
+			Skada.classcolors.ARENA_GOLD.r = Skada.db.profile.modules.arena.ARENA_GOLD.r
+			Skada.classcolors.ARENA_GOLD.g = Skada.db.profile.modules.arena.ARENA_GOLD.g
+			Skada.classcolors.ARENA_GOLD.b = Skada.db.profile.modules.arena.ARENA_GOLD.b
+			Skada.classcolors.ARENA_GOLD.colorStr = Skada.db.profile.modules.arena.ARENA_GOLD.colorStr
 		else
-			Skada.classcolors.ARENA_YELLOW.r = teamYellow.r
-			Skada.classcolors.ARENA_YELLOW.g = teamYellow.g
-			Skada.classcolors.ARENA_YELLOW.b = teamYellow.b
-			Skada.classcolors.ARENA_YELLOW.colorStr = teamYellow.colorStr
+			Skada.classcolors.ARENA_GOLD.r = teamGold.r
+			Skada.classcolors.ARENA_GOLD.g = teamGold.g
+			Skada.classcolors.ARENA_GOLD.b = teamGold.b
+			Skada.classcolors.ARENA_GOLD.colorStr = teamGold.colorStr
 		end
 
 		if Skada.db.profile.modules.arena.custom == true and Skada.db.profile.modules.arena.ARENA_GREEN then
@@ -288,7 +288,7 @@ Skada:AddLoadableModule("PVP", function(L)
 	function mod:OnInitialize()
 		-- install defaults.
 		if not Skada.db.profile.modules.arena then
-			Skada.db.profile.modules.arena = {custom = false, ARENA_YELLOW = teamYellow, ARENA_GREEN = teamGreen}
+			Skada.db.profile.modules.arena = {custom = false, ARENA_GOLD = teamGold, ARENA_GREEN = teamGreen}
 		end
 
 		-- options panel
@@ -312,19 +312,19 @@ Skada:AddLoadableModule("PVP", function(L)
 					end,
 					order = 10
 				},
-				ARENA_YELLOW = {
+				ARENA_GOLD = {
 					type = "color",
 					name = L["Gold Team"],
 					desc = format(L["Color for %s."], L["Gold Team"]),
 					get = function()
-						local color = Skada.db.profile.modules.arena.ARENA_YELLOW or Skada.classcolors.ARENA_YELLOW
+						local color = Skada.db.profile.modules.arena.ARENA_GOLD or Skada.classcolors.ARENA_GOLD
 						return color.r, color.g, color.b
 					end,
 					set = function(_, r, g, b)
-						Skada.db.profile.modules.arena.ARENA_YELLOW.r = r
-						Skada.db.profile.modules.arena.ARENA_YELLOW.g = g
-						Skada.db.profile.modules.arena.ARENA_YELLOW.b = b
-						Skada.db.profile.modules.arena.ARENA_YELLOW.colorStr = RGBPercToHex(r, g, b)
+						Skada.db.profile.modules.arena.ARENA_GOLD.r = r
+						Skada.db.profile.modules.arena.ARENA_GOLD.g = g
+						Skada.db.profile.modules.arena.ARENA_GOLD.b = b
+						Skada.db.profile.modules.arena.ARENA_GOLD.colorStr = RGBPercToHex(r, g, b)
 						self:ApplySettings()
 					end,
 					disabled = function()
@@ -363,10 +363,10 @@ Skada:AddLoadableModule("PVP", function(L)
 					name = RESET,
 					func = function()
 						-- reset yellow team
-						Skada.db.profile.modules.arena.ARENA_YELLOW.r = teamYellow.r
-						Skada.db.profile.modules.arena.ARENA_YELLOW.g = teamYellow.g
-						Skada.db.profile.modules.arena.ARENA_YELLOW.b = teamYellow.b
-						Skada.db.profile.modules.arena.ARENA_YELLOW.colorStr = teamYellow.colorStr
+						Skada.db.profile.modules.arena.ARENA_GOLD.r = teamGold.r
+						Skada.db.profile.modules.arena.ARENA_GOLD.g = teamGold.g
+						Skada.db.profile.modules.arena.ARENA_GOLD.b = teamGold.b
+						Skada.db.profile.modules.arena.ARENA_GOLD.colorStr = teamGold.colorStr
 						-- reset green team
 						Skada.db.profile.modules.arena.ARENA_GREEN.r = teamGreen.r
 						Skada.db.profile.modules.arena.ARENA_GREEN.g = teamGreen.g

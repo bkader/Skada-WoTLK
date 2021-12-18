@@ -602,7 +602,7 @@ function Skada:RegisterClasses()
 	self.classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
 	self.classcolors.UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
 	-- arena class colors
-	self.classcolors.ARENA_YELLOW = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
+	self.classcolors.ARENA_GOLD = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
 	self.classcolors.ARENA_GREEN = {r = 0.1, g = 1, b = 0.1, colorStr = "ff19ff19"}
 	-- purple color instead of green for color blind mode.
 	if GetCVar("colorblindMode") == "1" then

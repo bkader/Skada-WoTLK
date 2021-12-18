@@ -669,7 +669,7 @@ Skada:AddLoadableModule("Damage", function(L)
 					d.spec = player.spec
 
 					if Skada.forPVP and set.type == "arena" then
-						d.color = set.gold and Skada.classcolors.ARENA_YELLOW or Skada.classcolors.ARENA_GREEN
+						d.color = set.gold and Skada.classcolors.ARENA_GOLD or Skada.classcolors.ARENA_GREEN
 					end
 
 					d.value = amount
@@ -704,7 +704,7 @@ Skada:AddLoadableModule("Damage", function(L)
 						d.class = enemy.class
 						d.role = enemy.role
 						d.spec = enemy.spec
-						d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_YELLOW
+						d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_GOLD
 
 						d.value = amount
 						d.valuetext = Skada:FormatValueText(
@@ -955,7 +955,7 @@ Skada:AddLoadableModule("DPS", function(L)
 					d.spec = player.spec
 
 					if Skada.forPVP and set.type == "arena" then
-						d.color = set.gold and Skada.classcolors.ARENA_YELLOW or Skada.classcolors.ARENA_GREEN
+						d.color = set.gold and Skada.classcolors.ARENA_GOLD or Skada.classcolors.ARENA_GREEN
 					end
 
 					d.value = dps
@@ -989,7 +989,7 @@ Skada:AddLoadableModule("DPS", function(L)
 						d.class = enemy.class
 						d.role = enemy.role
 						d.spec = enemy.spec
-						d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_YELLOW
+						d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_GOLD
 
 						d.value = dps
 						d.valuetext = Skada:FormatValueText(
@@ -1632,7 +1632,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 					d.spec = player.spec
 
 					if Skada.forPVP and set.type == "arena" then
-						d.color = set.gold and Skada.classcolors.ARENA_YELLOW or Skada.classcolors.ARENA_GREEN
+						d.color = set.gold and Skada.classcolors.ARENA_GOLD or Skada.classcolors.ARENA_GREEN
 					end
 
 					d.value = player.overkill

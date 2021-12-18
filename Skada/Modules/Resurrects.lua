@@ -206,7 +206,7 @@ Skada:AddLoadableModule("Resurrects", function(L)
 
 	function mod:OnEnable()
 		self.metadata = {
-			ordersort = true,
+			valuesort = true,
 			click1 = playermod,
 			click2 = targetmod,
 			nototalclick = {playermod, targetmod},
