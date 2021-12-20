@@ -240,6 +240,7 @@ L["Do you want to reset Skada?\nHold SHIFT to reset all data."] = true
 L["All data has been reset."] = true
 L["Skip reset dialog"] = true
 L["Enable this if you want Skada to reset without the confirmation dialog."] = true
+L["Are you sure you want to reinstall Skada?"] = true
 -- general options
 L["Show minimap button"] = true
 L["Toggles showing the minimap button."] = true

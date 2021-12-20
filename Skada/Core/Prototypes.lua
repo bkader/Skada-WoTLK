@@ -257,19 +257,13 @@ do
 		end
 	end
 
-	function Skada:ClearIndexes()
-		ClearIndexes(Skada.current)
-		ClearIndexes(Skada.char.total)
-		for _, set in ipairs(Skada.char.sets) do
-			ClearIndexes(set)
-		end
-	end
-
-	function Skada:ClearAllIndexes()
-		ClearIndexes(Skada.current, true)
-		ClearIndexes(Skada.char.total, true)
-		for _, set in ipairs(Skada.char.sets) do
-			ClearIndexes(set, true)
+	function Skada:ClearAllIndexes(mt)
+		ClearIndexes(Skada.current, mt)
+		ClearIndexes(Skada.char.total, mt)
+		if Skada.char.sets then
+			for _, set in ipairs(Skada.char.sets) do
+				ClearIndexes(set, mt)
+			end
 		end
 	end
 end

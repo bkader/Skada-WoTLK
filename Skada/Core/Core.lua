@@ -1,4 +1,4 @@
-local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceEvent-3.0", "AceHook-3.0", "AceTimer-3.0", "AceComm-3.0", "LibCompat-1.0-Skada")
+local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceEvent-3.0", "AceHook-3.0", "AceTimer-3.0", "AceConsole-3.0", "AceComm-3.0", "LibCompat-1.0-Skada")
 _G.Skada = Skada
 
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
@@ -20,12 +20,12 @@ local Translit = LibStub("LibTranslit-1.0", true)
 -- cache frequently used globlas
 local tsort, tinsert, tremove, tmaxn, wipe, setmetatable = table.sort, table.insert, table.remove, table.maxn, wipe, setmetatable
 local next, pairs, ipairs, type = next, pairs, ipairs, type
-local tonumber, tostring, strsplit, strmatch, format, gsub = tonumber, tostring, strsplit, strmatch, string.format, string.gsub
+local tonumber, tostring, strmatch, format, gsub = tonumber, tostring, strmatch, string.format, string.gsub
 local floor, max, min, band, time = math.floor, math.max, math.min, bit.band, time
 local IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction = IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction
 local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
 local UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected
-local GetScreenWidth = GetScreenWidth
+local ReloadUI, GetScreenWidth = ReloadUI, GetScreenWidth
 local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
 local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
@@ -235,7 +235,7 @@ end
 
 -- returns the player active/effective time
 function Skada:GetActiveTime(set, player, active)
-	if (self.db.profile.timemesure ~= 2 or active) and player and (player.time or 0) > 0 then
+	if (self.db.profile.timemesure ~= 2 or active) and player and (player.time or 0) >= 1 then
 		return max(0.1, player.time)
 	end
 	return self:GetSetTime(set)
@@ -271,11 +271,9 @@ function Skada:ShowPopup(win, popup)
 		return
 	end
 
-	Skada:ConfirmDialog(
-		L["Do you want to reset Skada?\nHold SHIFT to reset all data."],
-		function() Skada:Reset(IsShiftKeyDown()) end,
-		nil, {timeout = 30, whileDead = 0}
-	)
+	Skada:ConfirmDialog(L["Do you want to reset Skada?\nHold SHIFT to reset all data."], function()
+		Skada:Reset(IsShiftKeyDown())
+	end, {timeout = 30, whileDead = 0})
 end
 
 -- new window creation dialog
@@ -326,6 +324,14 @@ function Skada:NewWindow()
 		}
 	end
 	StaticPopup_Show("SkadaCreateWindowDialog")
+end
+
+-- reinstall the addon
+function Skada:Reinstall()
+	Skada:ConfirmDialog(L["Are you sure you want to reinstall Skada?"], function()
+		wipe(SkadaDB)
+		ReloadUI()
+	end, {timeout = 15, whileDead = 0})
 end
 
 -------------------------------------------------------------------------------
@@ -1678,98 +1684,93 @@ local function GenerateTotal()
 	ReloadUI()
 end
 
-local function SlashCommandHandler(cmd)
+function Skada:Command(param)
+	local cmd, arg1, arg2, arg3 = self:GetArgs(param, 4)
 	if cmd == "pets" then
-		Skada:PetDebug()
+		self:PetDebug()
 	elseif cmd == "reset" then
-		Skada:Reset(IsShiftKeyDown())
-	elseif cmd == "newsegment" then
-		Skada:NewSegment()
+		self:Reset(IsShiftKeyDown())
+	elseif cmd == "reinstall" then
+		self:Reinstall()
+	elseif cmd == "newsegment" or cmd == "new" then
+		self:NewSegment()
 	elseif cmd == "toggle" then
-		Skada:ToggleWindow()
+		self:ToggleWindow()
 	elseif cmd == "show" then
-		if Skada.db.profile.hidden then
-			Skada.db.profile.hidden = false
-			Skada:ApplySettings()
+		if self.db.profile.hidden then
+			self.db.profile.hidden = false
+			self:ApplySettings()
 		end
 	elseif cmd == "hide" then
-		if not Skada.db.profile.hidden then
-			Skada.db.profile.hidden = true
-			Skada:ApplySettings()
+		if not self.db.profile.hidden then
+			self.db.profile.hidden = true
+			self:ApplySettings()
 		end
 	elseif cmd == "debug" then
-		Skada.db.profile.debug = not Skada.db.profile.debug
-		Skada:Print("Debug mode " .. (Skada.db.profile.debug and ("|cff00ff00" .. L["ENABLED"] .. "|r") or ("|cffff0000" .. L["DISABLED"] .. "|r")))
-	elseif cmd == "config" then
-		Skada:OpenOptions()
+		self.db.profile.debug = not self.db.profile.debug
+		self:Print("Debug mode " .. (self.db.profile.debug and ("|cff00ff00" .. L["ENABLED"] .. "|r") or ("|cffff0000" .. L["DISABLED"] .. "|r")))
+	elseif cmd == "config" or cmd == "options" then
+		self:OpenOptions()
 	elseif cmd == "clear" or cmd == "clean" then
-		Skada:CleanGarbage()
-	elseif cmd == "import" and Skada.OpenImport then
-		Skada:OpenImport()
-	elseif cmd == "export" and Skada.ExportProfile then
-		Skada:ExportProfile()
+		self:CleanGarbage()
+	elseif cmd == "import" and self.OpenImport then
+		self:OpenImport()
+	elseif cmd == "export" and self.ExportProfile then
+		self:ExportProfile()
 	elseif cmd == "about" or cmd == "info" then
-		Skada:OpenOptions(nil, "about")
+		self:OpenOptions("about")
+	elseif cmd == "version" or cmd == "checkversion" then
+		self:Printf("|cffffbb00%s|r: %s |cffffbb00%s|r: %s", L["Version"], self.version, L["Revision"], self.revision)
+		CheckVersion()
 	elseif cmd == "website" or cmd == "github" then
-		Skada:Printf("|cffffbb00%s|r", Skada.website)
+		self:Printf("|cffffbb00%s|r", self.website)
 	elseif cmd == "discord" then
-		Skada:Printf("|cffffbb00%s|r", Skada.discord)
+		self:Printf("|cffffbb00%s|r", self.discord)
 	elseif cmd == "timemesure" or cmd == "measure" then
-		if Skada.db.profile.timemesure == 2 then
-			Skada.db.profile.timemesure = 1
-			Skada:Print(L["Time Measure"] .. ": " .. L["Activity Time"])
-			Skada:ApplySettings()
-		elseif Skada.db.profile.timemesure == 1 then
-			Skada.db.profile.timemesure = 2
-			Skada:Print(L["Time Measure"] .. ": " .. L["Effective Time"])
-			Skada:ApplySettings()
+		if self.db.profile.timemesure == 2 then
+			self.db.profile.timemesure = 1
+			self:Print(L["Time Measure"] .. ": " .. L["Activity Time"])
+			self:ApplySettings()
+		elseif self.db.profile.timemesure == 1 then
+			self.db.profile.timemesure = 2
+			self:Print(L["Time Measure"] .. ": " .. L["Effective Time"])
+			self:ApplySettings()
 		end
 	elseif cmd == "numformat" then
-		Skada.db.profile.numberformat = Skada.db.profile.numberformat + 1
-		if Skada.db.profile.numberformat > 3 then
-			Skada.db.profile.numberformat = 1
+		self.db.profile.numberformat = self.db.profile.numberformat + 1
+		if self.db.profile.numberformat > 3 then
+			self.db.profile.numberformat = 1
 		end
-		Skada:ApplySettings()
-	elseif cmd:sub(1, 6) == "report" then
-		cmd = cmd:sub(7):trim()
-
-		local w1, w2, w3 = strsplit(" ", cmd, 3)
-
-		local chan = w1 and w1:trim() or "say"
-		local report_mode_name = w2 or L["Damage"]
-		local num = tonumber(w3 or 10)
+		self:ApplySettings()
+	elseif cmd == "raise" and arg1 then
+		if tonumber(arg1) then self.db.profile.setslimit = max(0, min(50, arg1)) end
+		self:Print(L["Persistent segments"], self.db.profile.setslimit)
+	elseif cmd == "total" or cmd == "generate" then
+		GenerateTotal()
+	elseif cmd == "report" then
+		local chan = arg1 and arg1:trim()
+		local report_mode_name = arg2 or L["Damage"]
+		local num = tonumber(arg3) or 10
 
 		-- Sanity checks.
 		if chan and (chan == "say" or chan == "guild" or chan == "raid" or chan == "party" or chan == "officer") and (report_mode_name and FindMode(report_mode_name)) then
-			Skada:Report(chan, "preset", report_mode_name, "current", num)
+			self:Report(chan, "preset", report_mode_name, "current", num)
 		else
-			Skada:Print("Usage:")
-			Skada:Printf("%-20s", "/skada report [channel] [mode] [lines]")
+			self:Print("Usage:")
+			self:Printf("%-20s", "/skada report [channel] [mode] [lines]")
 		end
-	elseif cmd:sub(1, 5) == "raise" then
-		local _, num = strsplit(" ", cmd, 2)
-		if tonumber(num) then Skada.db.profile.setslimit = max(0, min(50, num)) end
-		Skada:Print(L["Persistent segments"], Skada.db.profile.setslimit)
-	elseif cmd:sub(1, 5) == "total" or cmd:sub(1, 5) == "generate" then
-		GenerateTotal()
 	else
-		Skada:Print("Usage:")
-		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33report|r [channel] [mode] [lines]")
-		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33reset|r")
-		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33toggle|r")
-		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33show|r")
-		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33hide|r")
-		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33newsegment|r")
-		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33numformat|r")
-		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33measure|r")
-		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33config|r")
-		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33clean|r")
-		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33import|r")
-		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33export|r")
-		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33about|r")
-		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33website|r")
-		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33discord|r")
-		Skada:Printf("%-20s", "|cffffaeae/skada|r |cffffff33debug|r")
+		self:Print("Usage:")
+		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33report|r [channel] [mode] [lines]")
+		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33toggle|r / |cffffff33show|r / |cffffff33hide|r")
+		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33newsegment|r")
+		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33numformat|r / |cffffff33measure|r")
+		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33import|r / |cffffff33export|r")
+		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33about|r / |cffffff33version|r / |cffffff33website|r / |cffffff33discord|r")
+		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33reset|r")
+		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33clean|r")
+		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33config|r")
+		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33debug|r")
 	end
 end
 
@@ -2590,7 +2591,7 @@ function Skada:ReloadSettings()
 
 	Skada.total = Skada.char.total
 
-	Skada:ClearIndexes()
+	Skada:ClearAllIndexes()
 
 	if DBI and not DBI:IsRegistered("Skada") then
 		DBI:Register("Skada", dataobj, Skada.db.profile.icon)
@@ -3014,14 +3015,11 @@ function Skada:OnInitialize()
 		end
 	end
 
-	-- Slash Command Handler
-	SLASH_SKADA1 = "/skada"
-	SlashCmdList.SKADA = SlashCommandHandler
-
+	self:RegisterChatCommand("skada", "Command")
 	self.db.RegisterCallback(self, "OnProfileChanged", "ReloadSettings")
 	self.db.RegisterCallback(self, "OnProfileCopied", "ReloadSettings")
 	self.db.RegisterCallback(self, "OnProfileReset", "ReloadSettings")
-	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes")
+	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes", true)
 
 	self:RegisterInitOptions()
 
@@ -3299,12 +3297,11 @@ function Skada:EndSegment()
 	if not self.current then return end
 	T.free("Skada_QueuedUnits", queued_units)
 
+	local now = time()
 	if not self.db.profile.onlykeepbosses or self.current.gotboss then
-		local now = time()
 		if self.current.mobname ~= nil and now - self.current.starttime > 5 then
 			self.current.endtime = self.current.endtime or now
 			self.current.time = max(0.1, self.current.endtime - self.current.starttime)
-			self.current.started, self.current.stopped = nil, nil
 
 			local setname = self.current.mobname
 			if self.db.profile.setnumber then
@@ -3347,6 +3344,14 @@ function Skada:EndSegment()
 	for _, player in ipairs(self.total.players) do
 		player.last = nil
 	end
+
+	-- the segment didn't have the chance to get saved
+	if self.current.endtime == nil then
+		self.current.endtime = now
+		self.current.time = max(0.1, self.current.endtime - self.current.starttime)
+	end
+	-- remove any additional keys.
+	self.current.started, self.current.stopped = nil, nil
 
 	self.last = self.current
 	self.total.time = self.total.time + self.current.time

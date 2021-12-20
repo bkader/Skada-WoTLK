@@ -235,8 +235,9 @@ L["Controls if data is reset when you leave a group."] = "當你離開團體時�
 L["Ask"] = "詢問"
 L["Do you want to reset Skada?\nHold SHIFT to reset all data."] = "你要重置Skada嗎？\n按住 SHIFT 重置所有。"
 L["All data has been reset."] = "所有資料已重置。"
--- L["Skip reset dialog"] = ""
--- L["Enable this if you want Skada to reset without the confirmation dialog."] = ""
+L["Skip reset dialog"] = "跳過重置確認"
+L["Enable this if you want Skada to reset without the confirmation dialog."] = "如果您希望 Skada 在沒有確認對話框的情況下重置，請啟用此選項。"
+L["Are you sure you want to reinstall Skada?"] = "您確定要重新安裝 Skada 嗎？"
 -- general options
 L["Show minimap button"] = "顯示小地圖按鈕"
 L["Toggles showing the minimap button."] = "切換顯示小地圖按鈕。"

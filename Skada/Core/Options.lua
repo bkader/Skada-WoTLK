@@ -701,7 +701,9 @@ for i, field in ipairs({"Version", "Date", "Author", "Category", "License", "Ema
 	if meta then
 		-- append field to revision number
 		if field == "Version" then
-			meta = format("%s rev|cffffd200%s|r", meta, Skada.revision)
+			meta = format("%s - |cffffbb00%s|r: %s", meta, L["Revision"], Skada.revision)
+		elseif meta:match("^http[s]://[a-zA-Z0-9_/]-%.[a-zA-Z]") or meta:match("^[%w.]+@%w+%.%w+$") then
+			meta = format("|cff20ff20%s|r", meta)
 		end
 		Skada.options.args.about.args[field] = {
 			type = "description",
@@ -739,21 +741,11 @@ do
 						name = L["Open Config"],
 						width = "full",
 						order = 0,
-						func = function()
-							Skada:OpenOptions()
-						end
+						func = Skada.OpenOptions
 					}
 				}
 			}
-			Skada.tCopy(
-				initOptions.args,
-				Skada.options.args.about.args,
-				-- except
-				"title",
-				"Version",
-				"X-Category",
-				"X-License"
-			)
+			Skada.tCopy(initOptions.args, Skada.options.args.about.args, "title", "Category", "License", "Localizations", "Thanks")
 		end
 		return initOptions
 	end
@@ -765,22 +757,22 @@ do
 	end
 end
 
-function Skada:OpenOptions(win, tab)
+function Skada:OpenOptions(win)
 	if not ACR:GetOptionsTable("Skada") then
-		LibStub("AceConfig-3.0"):RegisterOptionsTable("Skada", self.options)
+		LibStub("AceConfig-3.0"):RegisterOptionsTable("Skada", Skada.options)
 		ACD:SetDefaultSize("Skada", 625, 500)
 	end
 
-	HideUIPanel(InterfaceOptionsFrame)
-	HideUIPanel(GameMenuFrame)
-	if win then
-		ACD:Open("Skada")
-		ACD:SelectGroup("Skada", "windows", win.db.name)
-	elseif tab then
-		ACD:Open("Skada")
-		ACD:SelectGroup("Skada", tab)
-	elseif not ACD:Close("Skada") then
-		ACD:Open("Skada")
+	if not ACD:Close("Skada") then
+		HideUIPanel(InterfaceOptionsFrame)
+		HideUIPanel(GameMenuFrame)
+		if type(win) == "table" then
+			ACD:Open("Skada")
+			ACD:SelectGroup("Skada", "windows", win.db.name)
+		else
+			ACD:Open("Skada")
+			ACD:SelectGroup("Skada", win or "generaloptions")
+		end
 	end
 end
 

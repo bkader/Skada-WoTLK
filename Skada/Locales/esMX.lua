@@ -240,6 +240,7 @@ L["Do you want to reset Skada?\nHold SHIFT to reset all data."] = "¿Quiere rest
 L["All data has been reset."] = "Todos los datos han sido reestablecidos."
 L["Skip reset dialog"] = "Omitir diálogo de reinicio"
 L["Enable this if you want Skada to reset without the confirmation dialog."] = "Habilite esto si desea que Skada se reinicie sin mostrar el diálogo de confirmación."
+L["Are you sure you want to reinstall Skada?"] = "¿Estás seguro de que quieres reinstalar Skada?"
 -- general options
 L["Show minimap button"] = "Mostrar botón minimapa"
 L["Toggles showing the minimap button."] = "Mostrar/No mostrar el botón del minimapa"

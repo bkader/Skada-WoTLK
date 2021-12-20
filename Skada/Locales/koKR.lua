@@ -238,6 +238,7 @@ L["Do you want to reset Skada?\nHold SHIFT to reset all data."] = "Skada를 초�
 L["All data has been reset."] = "모든 자료가 초기화되었습니다."
 L["Skip reset dialog"] = "재설정 대화 상자 건너 뛰기"
 L["Enable this if you want Skada to reset without the confirmation dialog."] = "확인 대화 상자없이 Skada를 재설정하려면이 옵션을 활성화하십시오."
+L["Are you sure you want to reinstall Skada?"] = "Skada를 다시 설치하시겠습니까?"
 -- general options
 L["Show minimap button"] = "미니맵 버튼 표시"
 L["Toggles showing the minimap button."] = "미니맵 버튼 표시를 전환합니다."

@@ -17,19 +17,7 @@ local GetClassFromGUID = Skada.GetClassFromGUID
 local COMBATLOG_OBJECT_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
 
 -------------------------------------------------------------------------------
--- print and debug
-
-function Skada:Print(...)
-	if ... then
-		print("|cff33ff99Skada|r:", ...)
-	end
-end
-
-function Skada:Printf(...)
-	if ... then
-		print("|cff33ff99Skada|r:", format(...))
-	end
-end
+-- debug function
 
 function Skada:Debug(...)
 	if self.db.profile.debug then
@@ -49,6 +37,11 @@ end
 -- creates generic dialog
 
 function Skada:ConfirmDialog(text, accept, cancel, override)
+	if type(cancel) == "table" and override == nil then
+		override = cancel
+		cancel = nil
+	end
+
 	local t = wipe(StaticPopupDialogs["SkadaCommonConfirmDialog"] or {})
 	StaticPopupDialogs["SkadaCommonConfirmDialog"] = t
 
