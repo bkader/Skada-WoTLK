@@ -2267,57 +2267,53 @@ end
 -- format functions
 
 do
-	local function ShortenValue(num)
-		if num >= 1e9 or num <= -1e9 then
-			return format("%02.3fB", num / 1e9)
-		elseif num >= 1e6 or num <= -1e6 then
-			return format("%02.2fM", num / 1e6)
-		elseif num >= 1e3 or num <= -1e3 then
-			return format("%02.1fK", num / 1e3)
-		end
-		return floor(num)
-	end
-
-	if LOCALE_zhCN then
-		ShortenValue = function(num)
-			if num >= 1e8 or num <= -1e8 then
-				return format("%02.2f亿", num / 1e8)
-			elseif num >= 1e4 or num <= -1e4 then
-				return format("%02.1f万", num / 1e4)
-			end
-			return floor(num)
-		end
-	elseif LOCALE_zhTW then
-		ShortenValue = function(num)
-			if num >= 1e8 or num <= -1e8 then
-				return format("%02.2f億", num / 1e8)
-			elseif num >= 1e4 or num <= -1e4 then
-				return format("%02.1f萬", num / 1e4)
-			end
-			return floor(num)
-		end
-	elseif LOCALE_koKR then
-		ShortenValue = function(num)
-			if num >= 1e8 or num <= -1e8 then
-				return format("%02.2f억", num / 1e8)
-			elseif num >= 1e4 or num <= -1e4 then
-				return format("%02.1f만", num / 1e4)
-			end
-			return floor(num)
-		end
-	end
-
 	local reverse = string.reverse
-	function Skada:FormatNumber(num, fmt)
-		if num then
-			fmt = fmt or self.db.profile.numberformat or 1
-			if fmt == 1 then
-				return ShortenValue(num)
-			elseif fmt == 2 then
-				local left, mid, right = strmatch(tostring(floor(num)), "^([^%d]*%d)(%d*)(.-)$")
-				return format("%s%s%s", left, reverse(gsub(reverse(mid), "(%d%d%d)", "%1,")), right)
-			else
-				return floor(num)
+	function Skada:SetNumeralFormat(system)
+		system = system or 1
+
+		local ShortenValue = function(num)
+			if num >= 1e9 or num <= -1e9 then
+				return format("%.2fB", num / 1e9)
+			elseif num >= 1e6 or num <= -1e6 then
+				return format("%.2fM", num / 1e6)
+			elseif num >= 1e3 or num <= -1e3 then
+				return format("%.1fK", num / 1e3)
+			end
+			return format("%.0f", num)
+		end
+
+		if system == 3 or (system == 1 and (LOCALE_koKR or LOCALE_zhCN or LOCALE_zhTW)) then
+			-- default to chinese, even for western clients.
+			local symbol_1k, symbol_10k, symbol_1b = "천", "万", "亿"
+			if LOCALE_koKR then
+				symbol_1k, symbol_10k, symbol_1b = "천", "만", "억"
+			elseif LOCALE_zhTW then
+				symbol_1k, symbol_10k, symbol_1b = "천", "萬", "億"
+			end
+
+			ShortenValue = function(num)
+				if num >= 1e8 or num <= -1e8 then
+					return format("%.2f%s", num / 1e8, symbol_1b)
+				elseif num >= 1e4 or num <= -1e4 then
+					return format("%.2f%s", num / 1e4, symbol_10k)
+				elseif num >= 1e3 or num <= -1e3 then
+					return format("%.1f%s", num / 1e4, symbol_1k)
+				end
+				return format("%.0f", num)
+			end
+		end
+
+		self.FormatNumber = function(self, num, fmt)
+			if num then
+				fmt = fmt or self.db.profile.numberformat or 1
+				if fmt == 1 and (num >= 1e3 or num <= -1e3) then
+					return ShortenValue(num)
+				elseif fmt == 2 and (num >= 1e3 or num <= -1e3) then
+					local left, mid, right = strmatch(tostring(floor(num)), "^([^%d]*%d)(%d*)(.-)$")
+					return format("%s%s%s", left, reverse(gsub(reverse(mid), "(%d%d%d)", "%1,")), right)
+				else
+					return format("%.0f", num)
+				end
 			end
 		end
 	end
@@ -2576,6 +2572,7 @@ function Skada:ApplySettings(name)
 		end
 	end
 
+	Skada:SetNumeralFormat(Skada.db.profile.numbersystem or 1)
 	Skada:UpdateDisplay(true)
 end
 

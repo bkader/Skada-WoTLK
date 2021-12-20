@@ -114,6 +114,7 @@ Skada.defaults = {
 		decimals = 1,
 		setformat = 3,
 		setnumber = true,
+		numbersystem = 1,
 		showranks = true,
 		showself = false,
 		setstokeep = 15,
@@ -394,6 +395,13 @@ Skada.options = {
 							values = {[1] = L["Condensed"], [2] = L["Comma"], [3] = L["Detailed"]},
 							order = 20
 						},
+						numbersystem = {
+							type = "select",
+							name = L["Numeral system"],
+							desc = L["Select which numeral system to use."],
+							values = {[1] = L["Auto"], [2] = L["Western"], [3] = L["East Asia"]},
+							order = 30
+						},
 						decimals = {
 							type = "range",
 							name = L["Number of decimals"],
@@ -401,7 +409,8 @@ Skada.options = {
 							min = 0,
 							max = 3,
 							step = 1,
-							order = 30
+							width = "double",
+							order = 40
 						},
 						setformat = {
 							type = "select",
@@ -409,13 +418,13 @@ Skada.options = {
 							desc = L["Controls the way set names are displayed."],
 							width = "double",
 							values = Skada:SetLabelFormats(),
-							order = 40
+							order = 50
 						},
 						setnumber = {
 							type = "toggle",
 							name = L["Number set duplicates"],
 							desc = L["Append a count to set names with duplicate mob names."],
-							order = 50
+							order = 60
 						},
 						feed = {
 							type = "select",
@@ -429,7 +438,7 @@ Skada.options = {
 								end
 								return feeds
 							end,
-							order = 60
+							order = 70
 						},
 						separator1 = {
 							type = "description",
