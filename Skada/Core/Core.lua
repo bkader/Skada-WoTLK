@@ -243,7 +243,7 @@ end
 
 -- updates the player's active time
 function Skada:AddActiveTime(player, cond, diff)
-	if player and cond then
+	if player and player.last and cond then
 		local now = GetTime()
 		local delta = now - player.last
 
@@ -1948,12 +1948,6 @@ do
 			end
 		end
 
-		-- left an arena or a battleground match?
-		if self.last and self.last.resume then
-			self:Debug("EndSegment: Removed paused segment.")
-			self.last.resume = nil
-		end
-
 		was_in_instance = (isininstance == true)
 		was_in_pvp = (isinpvp == true)
 		self.callbacks:Fire("Skada_ZoneCheck")
@@ -3353,16 +3347,6 @@ function Skada:EndSegment()
 	self.last = self.current
 	self.total.time = self.total.time + self.current.time
 	self.current = nil
-
-	-- make sure to have a single segment for arenas & battlegrounds.
-	if self.last.paused or self.last.type == "arena" or self.last.type == "pvp" then
-		self:Debug("EndSegment: Segment Paused.")
-		self.last.resume, self.last.paused = true, nil
-	elseif self.last.resume then
-		self:Debug("EndSegment: Removed paused segment.")
-		self.last.resume = nil
-	end
-
 	CleanSets()
 
 	for _, win in ipairs(windows) do
@@ -3461,7 +3445,7 @@ do
 
 	function Skada:Tick()
 		self.callbacks:Fire("Skada_CombatTick", self.current, self.total)
-		if not disabled and self.current and not InCombatLockdown() and not IsGroupInCombat() then
+		if not disabled and self.current and not InCombatLockdown() and not IsGroupInCombat() and Skada.instanceType ~= "pvp" and Skada.instanceType ~= "arena" then
 			self:Debug("EndSegment: Tick")
 			self:EndSegment()
 		end
@@ -3483,13 +3467,7 @@ do
 
 		self:Wipe()
 
-		if self.last and self.last.resume then
-			self:Debug("StartCombat: Segment Resumed!")
-			self.current = (self.char.sets[1] and self.char.sets[1] == self.last) and tremove(self.char.sets, 1) or self.last
-			self.current.endtime, self.current.time = nil, 0
-			self.current.resume, self.current.paused = nil, nil
-			self.last = nil
-		elseif not self.current then
+		if self.current == nil then
 			self:Debug("StartCombat: Segment Created!")
 			self.current = CreateSet(L["Current"])
 		end

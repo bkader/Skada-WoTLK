@@ -275,17 +275,6 @@ function lib:HasAnyBar()
 	return not (not (bars[self] and next(bars[self])))
 end
 
--- Convenient method to create a new, empty bar prototype
-function lib:NewBarPrototype(super)
-	assert(super == nil or (type(super) == "table" and type(super.metatable) == "table"), "!NewBarPrototype: super must either be nil or a valid prototype")
-	super = super or barPrototype
-	local prototype = setmetatable({}, super.metatable)
-	prototype.prototype = prototype
-	prototype.super = super
-	prototype.metatable = {__index = prototype}
-	return prototype
-end
-
 ---[[ Individual bars ]]---
 function lib:NewBarFromPrototype(prototype, name, ...)
 	assert(self ~= lib, "You may only call :NewBar as an embedded function")
@@ -295,12 +284,8 @@ function lib:NewBarFromPrototype(prototype, name, ...)
 	local isNew = false
 	if not bar then
 		isNew = true
-		bar = tremove(recycledBars)
-		if not bar then
-			bar = CreateFrame("Frame")
-		else
-			bar:Show()
-		end
+		bar = tremove(recycledBars) or CreateFrame("Frame")
+		bar:Show()
 	end
 	bar = setmetatable(bar, prototype.metatable)
 	bar.name = name

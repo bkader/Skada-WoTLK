@@ -4,7 +4,7 @@ local mod = Skada:NewModule("BarDisplay", "SpecializedLibBars-1.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 local ACR = LibStub("AceConfigRegistry-3.0")
 local LibWindow = LibStub("LibWindow-1.1")
-local FlyPaper = LibStub:GetLibrary("LibFlyPaper-1.1", true)
+local FlyPaper = LibStub("LibFlyPaper-1.1", true)
 
 local pairs, ipairs, tsort, format = pairs, ipairs, table.sort, string.format
 local GetSpellLink = Skada.GetSpellLink or GetSpellLink
@@ -70,7 +70,7 @@ function mod:Create(window)
 	-- Save a reference to window in bar group. Needed for some nasty callbacks.
 	if bargroup then
 		-- Clear callbacks.
-		bargroup.callbacks = LibStub:GetLibrary("CallbackHandler-1.0"):New(bargroup)
+		bargroup.callbacks = LibStub("CallbackHandler-1.0"):New(bargroup)
 	else
 		bargroup = mod:NewBarGroup(
 			window.db.name,

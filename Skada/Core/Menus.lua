@@ -228,7 +228,11 @@ function Skada:OpenMenu(window)
 							Skada:Wipe()
 							Skada:UpdateDisplay(true)
 						end
-						info.colorCode = set.gotboss and (set.success and "|cff00ff00" or "|cffff0000") or "|cffffffff"
+						if set.gotboss then
+							info.colorCode = set.success and "|cff19ff19" or "|cffff1919"
+						elseif set.type == "pvp" or set.type == "arena" then
+							info.colorCode = "|cffffd100"
+						end
 						info.checked = (window.selectedset == set.starttime)
 						UIDropDownMenu_AddButton(info, level)
 					end
@@ -387,8 +391,12 @@ function Skada:OpenMenu(window)
 							Skada:Wipe()
 							Skada:UpdateDisplay(true)
 						end
+						if set.gotboss then
+							info.colorCode = set.success and "|cff19ff19" or "|cffff1919"
+						elseif set.type == "pvp" or set.type == "arena" then
+							info.colorCode = "|cffffd100"
+						end
 						info.checked = (window.selectedset == i)
-						info.colorCode = set.gotboss and (set.success and "|cff00ff00" or "|cffff0000") or "|cffffffff"
 						UIDropDownMenu_AddButton(info, level)
 					end
 				end
@@ -400,7 +408,11 @@ function Skada:OpenMenu(window)
 						Skada:DeleteSet(set, i)
 					end
 					info.notCheckable = 1
-					info.colorCode = set.gotboss and (set.success and "|cff00ff00" or "|cffff0000") or "|cffffffff"
+					if set.gotboss then
+						info.colorCode = set.success and "|cff19ff19" or "|cffff1919"
+					elseif set.type == "pvp" or set.type == "arena" then
+						info.colorCode = "|cffffd100"
+					end
 					UIDropDownMenu_AddButton(info, level)
 				end
 			elseif L_UIDROPDOWNMENU_MENU_VALUE == "keep" then
@@ -419,7 +431,11 @@ function Skada:OpenMenu(window)
 					info.checked = set.keep
 					info.isNotRadio = 1
 					info.keepShownOnClick = true
-					info.colorCode = set.gotboss and (set.success and "|cff00ff00" or "|cffff0000") or "|cffffffff"
+					if set.gotboss then
+						info.colorCode = set.success and "|cff19ff19" or "|cffff1919"
+					elseif set.type == "pvp" or set.type == "arena" then
+						info.colorCode = "|cffffd100"
+					end
 					UIDropDownMenu_AddButton(info, level)
 				end
 
@@ -659,7 +675,9 @@ function Skada:SegmentMenu(window)
 				end
 				info.checked = (window.selectedset == i)
 				if set.gotboss then
-					info.colorCode = set.success and "|cff00ff00" or "|cffff0000"
+					info.colorCode = set.success and "|cff19ff19" or "|cffff1919"
+				elseif set.type == "pvp" or set.type == "arena" then
+					info.colorCode = "|cffffd100"
 				end
 				UIDropDownMenu_AddButton(info, level)
 			end
