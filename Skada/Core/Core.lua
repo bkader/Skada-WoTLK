@@ -20,7 +20,7 @@ local Translit = LibStub("LibTranslit-1.0", true)
 -- cache frequently used globlas
 local tsort, tinsert, tremove, tmaxn, wipe, setmetatable = table.sort, table.insert, table.remove, table.maxn, wipe, setmetatable
 local next, pairs, ipairs, type = next, pairs, ipairs, type
-local tonumber, tostring, strmatch, format, gsub = tonumber, tostring, strmatch, string.format, string.gsub
+local tonumber, tostring, strmatch, format, gsub, lower, find = tonumber, tostring, strmatch, string.format, string.gsub, string.lower, string.find
 local floor, max, min, band, time = math.floor, math.max, math.min, bit.band, time
 local IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction = IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction
 local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
@@ -235,7 +235,7 @@ end
 
 -- returns the player active/effective time
 function Skada:GetActiveTime(set, player, active)
-	if (self.db.profile.timemesure ~= 2 or active) and player and (player.time or 0) >= 1 then
+	if (self.db.profile.timemesure ~= 2 or active) and player and (player.time or 0) > 0 then
 		return max(0.1, player.time)
 	end
 	return self:GetSetTime(set)
@@ -1223,7 +1223,7 @@ do
 			do
 				local i = 1
 				local title = _G["UNITNAME_SUMMON_TITLE" .. i]
-				while (title and title ~= "%s" and title:find("%s")) do
+				while (title and title ~= "%s" and find(title, "%s")) do
 					ownerPatterns[#ownerPatterns + 1] = title
 					i = i + 1
 					title = _G["UNITNAME_SUMMON_TITLE" .. i]
@@ -1245,7 +1245,7 @@ do
 			for gender = 2, 3 do
 				for decset = 1, GetNumDeclensionSets(playername, gender) do
 					local ownerName = DeclineName(playername, gender, decset)
-					if ValidatePetOwner(text, ownerName) or text:find(ownerName) then
+					if ValidatePetOwner(text, ownerName) or find(text, ownerName) then
 						return true
 					end
 				end
@@ -1454,8 +1454,8 @@ end
 -- sets the tooltip position
 function Skada:SetTooltipPosition(tooltip, frame, display, win)
 	if win and win.db.tooltippos ~= "NONE" then
-		local anchor = win.db.tooltippos:find("TOP") and "TOP" or "BOTTOM"
-		anchor = format("%s%s", anchor, win.db.tooltippos:find("LEFT") and "RIGHT" or "LEFT")
+		local anchor = find(win.db.tooltippos, "TOP") and "TOP" or "BOTTOM"
+		anchor = format("%s%s", anchor, find(win.db.tooltippos, "LEFT") and "RIGHT" or "LEFT")
 		tooltip:SetOwner(UIParent, "ANCHOR_NONE")
 		tooltip:SetPoint(anchor, frame, win.db.tooltippos)
 	elseif self.db.profile.tooltippos == "default" then
@@ -1480,8 +1480,8 @@ function Skada:SetTooltipPosition(tooltip, frame, display, win)
 			tooltip:SetPoint("TOPRIGHT", frame, "TOPLEFT", -10, 0)
 		end
 	else
-		local anchor = self.db.profile.tooltippos:find("top") and "TOP" or "BOTTOM"
-		anchor = format("%s%s", anchor, self.db.profile.tooltippos:find("left") and "RIGHT" or "LEFT")
+		local anchor = find(self.db.profile.tooltippos, "top") and "TOP" or "BOTTOM"
+		anchor = format("%s%s", anchor, find(self.db.profile.tooltippos, "left") and "RIGHT" or "LEFT")
 		tooltip:SetOwner(frame, "ANCHOR_NONE")
 		tooltip:SetPoint(anchor, frame, self.db.profile.tooltippos)
 	end
@@ -1810,19 +1810,31 @@ do
 					break
 				end
 			end
+		elseif chantype == nil then
+			chantype = "preset"
 		end
 
 		local report_table, report_set, report_mode
 
-		if not window then
+		if window == nil then
 			report_mode = FindMode(report_mode_name or L["Damage"])
 			report_set = self:GetSet(report_set_name or "current")
 			if report_set == nil then
+				self:Print(L["No mode or segment selected for report."])
 				return
 			end
 
-			report_table = Window:New()
+			report_table = Window:New(true)
 			report_mode:Update(report_table, report_set)
+		elseif type(window) == "string" then
+			for _, win in ipairs(windows) do
+				if lower(win.db.name) == lower(window) then
+					report_table = win
+					report_set = win:GetSelectedSet()
+					report_mode = win.selectedmode
+					break
+				end
+			end
 		else
 			report_table = window
 			report_set = window:GetSelectedSet()
@@ -1877,6 +1889,10 @@ do
 				break
 			end
 		end
+
+		-- clean garbage afterwards
+		report_table, report_set, report_mode = nil, nil, nil
+		self:CleanGarbage()
 	end
 end
 
@@ -3103,7 +3119,7 @@ end
 
 function Skada:BigWigs(_, _, event, message)
 	if event == "bosskill" and message and self.current and self.current.gotboss then
-		if message:lower():find(self.current.mobname:lower()) ~= nil and not self.current.success then
+		if find(lower(message), lower(self.current.mobname)) ~= nil and not self.current.success then
 			self:Debug("COMBAT_BOSS_DEFEATED: BigWigs")
 			self.current.success = true
 			self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
@@ -3114,7 +3130,7 @@ end
 function Skada:DBM(_, mod, wipe)
 	if not wipe and mod and mod.combatInfo then
 		local set = self.current or self.last -- just in case DBM was late.
-		if set and not set.success and mod.combatInfo.name and set.mobname:lower():find(mod.combatInfo.name:lower()) ~= nil then
+		if set and not set.success and mod.combatInfo.name and find(lower(set.mobname), lower(mod.combatInfo.name)) ~= nil then
 			self:Debug("COMBAT_BOSS_DEFEATED: DBM")
 			set.success = true
 			self:SendMessage("COMBAT_BOSS_DEFEATED", set)
