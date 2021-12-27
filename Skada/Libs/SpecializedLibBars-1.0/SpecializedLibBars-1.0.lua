@@ -166,21 +166,14 @@ local ComputeGradient
 do
 	local new, del
 	do
-		local list = lib.garbageList or setmetatable({}, {__mode = "k"})
-		lib.garbageList = list
+		local list = setmetatable({}, {__mode = "k"})
 		-- new is always called with the exact same arguments, no need to
 		-- iterate over a vararg
-		function new(a1, a2, a3, a4, a5)
-			local t = next(list)
-			if t then
-				list[t] = nil
-				t[1] = a1
-				t[2] = a2
-				t[3] = a3
-				t[4] = a4
-				t[5] = a5
-			else
-				t = {a1, a2, a3, a4, a5}
+		function new(...)
+			local t = next(list) or {}
+			list[t] = nil
+			for i = 1, select("#", ...) do
+				t[i] = select(i, ...)
 			end
 			return t
 		end
@@ -188,14 +181,14 @@ do
 		-- del is called over the same tables produced from new, no need for
 		-- fancy stuff
 		function del(t)
-			t[1] = nil
-			t[2] = nil
-			t[3] = nil
-			t[4] = nil
-			t[5] = nil
-			t[""] = true
-			t[""] = nil
-			list[t] = true
+			if t then
+				for k, _ in pairs(t) do
+					t[k] = nil
+				end
+				t[""] = true
+				t[""] = nil
+				list[t] = true
+			end
 			return nil
 		end
 	end
@@ -222,10 +215,7 @@ do
 		end
 		--local pct = (point - lowerBoundIndex) / (upperBoundIndex - lowerBoundIndex)
 		local diff = (upperBoundIndex - lowerBoundIndex)
-		local pct = 1
-		if diff ~= 0 then
-			pct = (point - lowerBoundIndex) / diff
-		end
+		local pct = (diff ~= 0) and ((point - lowerBoundIndex) / diff) or 1
 		local r = lowerBound[2] + ((upperBound[2] - lowerBound[2]) * pct)
 		local g = lowerBound[3] + ((upperBound[3] - lowerBound[3]) * pct)
 		local b = lowerBound[4] + ((upperBound[4] - lowerBound[4]) * pct)

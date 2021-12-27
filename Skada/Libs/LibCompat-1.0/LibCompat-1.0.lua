@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader/LibCompat-1.0)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0-Skada", 28
+local MAJOR, MINOR = "LibCompat-1.0-Skada", 29
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
@@ -195,14 +195,17 @@ do
 
 		-- it will wipe the provided table then cache it
 		-- to be reusable later.
-		local function del(t)
+		local function del(t, recursive)
 			if type(t) == "table" then
 				setmetatable(t, nil)
-				for k, _ in pairs(t) do
+				for k, v in pairs(t) do
+					if recursive and type(v) == "table" then
+						del(v, recursive)
+					end
 					t[k] = nil
 				end
-				t[true] = true
-				t[true] = nil
+				t[""] = true
+				t[""] = nil
 				pool[t] = true
 			end
 			return nil

@@ -119,6 +119,9 @@ Skada.BITMASK_PETS = BITMASK_PETS
 Skada.BITMASK_OWNERS = BITMASK_OWNERS
 Skada.BITMASK_ENEMY = BITMASK_ENEMY
 
+-- table recycling for all kind of tables.
+local new, del = Skada.TablePool()
+
 -------------------------------------------------------------------------------
 -- local functions.
 
@@ -140,8 +143,8 @@ end
 -- set creation and recycling
 local CreateSet, RecycleSet
 do
-	local new
-	new, RecycleSet = Skada.TablePool()
+	local NewSet
+	NewSet, RecycleSet = Skada.TablePool()
 
 	-- creates a new set
 	-- @param 	setname 	the segment name
@@ -158,7 +161,7 @@ do
 			end
 		else
 			Skada:Debug("CreateSet: New", setname)
-			set = new()
+			set = NewSet()
 		end
 
 		-- add stuff.
@@ -344,11 +347,16 @@ do
 
 	-- create a new window
 	function Window:New(ttwin)
+		local win = new()
 		if ttwin then -- only used for tooltips
-			return {dataset = {}}
+			win.dataset = new()
+			return win
 		end
 		-- regular window.
-		return setmetatable({metadata = {}, dataset = {}, history = {}}, mt)
+		win.metadata = new()
+		win.dataset = new()
+		win.history = new()
+		return setmetatable(win, mt)
 	end
 
 	-- add window options
@@ -830,7 +838,7 @@ do
 		for i, win in ipairs(windows) do
 			if win.db.name == name then
 				win:Destroy()
-				wipe(tremove(windows, i))
+				tremove(windows, i)
 			elseif win.db.child == name then
 				win.db.child, win.child = nil, nil
 			end
@@ -838,11 +846,14 @@ do
 
 		for i, win in ipairs(Skada.db.profile.windows) do
 			if win.name == name then
-				tremove(Skada.db.profile.windows, i)
+				del(tremove(Skada.db.profile.windows, i), true)
 			elseif win.sticked and win.sticked[name] then
 				win.sticked[name] = nil
 			end
 		end
+
+		-- clean garbage afterwards
+		Skada:CleanGarbage()
 	end
 
 	function Skada:DeleteWindow(name, internal)
@@ -1020,7 +1031,7 @@ end
 function Skada:RemoveMode(mode)
 	for k, v in ipairs(modes) do
 		if v == mode then
-			tremove(modes, k)
+			del(tremove(modes, k))
 		end
 	end
 end
@@ -1106,6 +1117,9 @@ function Skada:DeleteSet(set, index)
 
 		self:Wipe()
 		self:UpdateDisplay(true)
+
+		-- clean garbage afterwards
+		self:CleanGarbage()
 	end
 end
 
