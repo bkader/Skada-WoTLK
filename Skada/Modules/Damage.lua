@@ -521,7 +521,7 @@ Skada:AddLoadableModule("Damage", function(L)
 			end
 
 			if (spell.glancing or 0) > 0 then
-				add_detail_bar(win, nr, L["Glancing"], spell.glancing, spell.count, true)
+				nr = add_detail_bar(win, nr, L["Glancing"], spell.glancing, spell.count, true)
 			end
 
 			for _, misstype in ipairs(misstypes) do
