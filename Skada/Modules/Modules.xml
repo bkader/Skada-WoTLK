@@ -33,6 +33,7 @@
 <Script file="Potions.lua" />
 <Script file="Resurrects.lua" />
 <Script file="Threat.lua" />
+<Script file="MySpells.lua" />
 
 <!-- Modules without modes -->
 <Script file="Scroll.lua" />

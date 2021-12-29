@@ -148,7 +148,6 @@ Skada.defaults = {
 		report = {mode = "Damage", set = "current", channel = "Say", chantype = "preset", number = 10},
 		modulesBlocked = {
 			["Absorbed Damage"] = true,
-			["PVP"] = true,
 			["Avoidance & Mitigation"] = true,
 			["CC Breaks"] = true,
 			["Damage Done By Spell"] = true,
@@ -161,9 +160,11 @@ Skada.defaults = {
 			["Healthstones"] = true,
 			["HPS"] = true,
 			["Improvement"] = true,
+			["My Spells"] = true,
 			["Overhealing"] = true,
 			["Overkill"] = true,
 			["Project Ascension"] = true,
+			["PVP"] = true,
 			["Themes"] = true,
 			["Useful Damage"] = true
 		},

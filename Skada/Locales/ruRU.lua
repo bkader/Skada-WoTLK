@@ -698,6 +698,7 @@ L["Announce %s"] = "Объявить: %s"
 L["Announces how long it took to apply %d stacks of %s and announces when it drops."] = "Сообщает, сколько времени потребовалось для применения %d стеков %s, и объявляет, когда он истекает."
 L["%s dropped from %s!"] = "%s истек %s!"
 L["%s stacks of %s applied on %s in %s sec!"] = "На %3$s нанесено %1$s стаканов %2$s за %4$s секунд!"
+L["My Spells"] = "Мои заклинания"
 -- project ascension
 L["Project Ascension"] = "Project Ascension"
 L["project_ascension_desc"] = [=[В |cffffbb00Project Ascension|r ваши персонажи - бесклассовые Герои, у которых есть любые способности или таланты, доступные им.

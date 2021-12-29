@@ -1,4 +1,6 @@
-# Skada for WoTLK (_Revisited - v1.8.73.355_)
+
+
+# Skada for WoTLK (_Revisited - v1.8.73.356_)
 
 ![Discord](https://img.shields.io/discord/795698054371868743?label=discord)
 ![GitHub last commit](https://img.shields.io/github/last-commit/bkader/Skada-WoTLK)
@@ -26,7 +28,7 @@ Though it's not required, if you want to show some love and support, **PayPal**/
   * [Absorbs](#absorbs)
   * [Activity](#activity)
   * [Buffs and Debuffs](#buffs-and-debuffs)
-  * [CC Tracker (_Done, Taken and Breakers_)](#cc-tracker)
+  * [Crowd Control (_Done, Taken and Breakers_)](#crowd-control)
   * [Damage](#damage)
   * [Damage taken](#damage-taken)
   * [Deaths](#deaths)
@@ -40,25 +42,27 @@ Though it's not required, if you want to show some love and support, **PayPal**/
   * [Parry-haste](#parry-haste)
   * [Potions](#potions)
   * [Power gains](#power-gains)
+  * [Threat](#threat)
+  * [My Spells](#my-spells)
   * [Scroll](#scroll)
-  * [Spamage](#spamage)
   * [Sunder Counter (_Sunder Armor_)](#sunder-counter)
   * [Themes](#themes)
-  * [Threat](#threat)
   * [Tweaks](#tweaks)
   * [PvP](#pvp)
   * [Project Ascension](#project-ascension)
 
 ## What's the difference?
 
-Almost everything was changed, starting from the default version that was available for **v3.3.5** of the game up to what you can see on the addon.
+This version of Skada is a mix between the old default version available for **WotLK** and the **latest retail** version. Everything was fully rewritten to provide more detailed spell breakdowns and more. Here is why it is better than the old default version:
 
-- It is now an **all-in-one** addon as opposed to what it was, modules can de enabled or disabled easily on the config panel.
-- Several accessibility found here and there on the net and judged useful were added to the addon as modules (_window buttons, mouse & keyboard scroll, themes...etc_).
-- Unlike before, windows are resizable using the resize handles found at both bottom corners.
+- An **All-In-One** addon instead of having modules seperated into addons. Most of the modules can be enable or disabled on the options panel.
+- Lots of new modules were added, some found on the internet and others were requested by the community.
+- Windows are resizable using the resize grips/handles found at both bottom corners. Holding **SHIFT** when resizing changes widths while holding **ALT** changes heights.
 - Bars are more fancy, colored by not only class but also spell school colors.
-- Bars display icons for both players and spells (_spell tooltips as well for the latter_).
-- Under consistent development thanks to WoTLK community and their feedbacks.
+- Bars can display players/enemies classes, roles or specializations unlike the default old version. Spells also had their icons changed to display info tooltips (_spells tooltips_).
+- The **most (*if not the only*) accurate** combat log parser for WotLK, whether it is for damage, healing or absorbs. Since absorbs aren't really available in this expansion, this Skada is best at estimating amounts with lots of calculations and logics implemented after months and gigabytes of combat log parsing.
+- Profiles importation/exportation as well as dual-spec profiles.
+- Under consistent, free and solo development thanks to WotLK community and their feedbacks (_helps and pull requests are most welcome_).
 - An annoying number of options available for more advanced players.
 
 ## Modules
@@ -78,7 +82,7 @@ Shows players activity in the raid, or what's called _Active Time_.
 
 This module shows players buffs and their uptime, debuffs and their uptime and targets.
 
-### CC Tracker
+### Crowd Control
 
 1. **CC Done** & **CC Taken**: unlike default ones, they now provided details info about spells used to CC and targets/sources.
 2. **CC Breakers** : this was rewritten a bit, it is almost like the old one but optimized and provided like other CC modules, spell and target details.
@@ -143,6 +147,8 @@ Use to track your character improvement. It records your boss data in raids only
 
 This module allows you to set a nickname for your character (_for example: the name of the main character if you are playing on an alt_), this name will be displayed on main bars instead of your character's name. All other Skada users and have nicknames enabled will see that name as well.
 
+You can access this module's settings on Tweaks panel > Advanced.
+
 ### Parry-haste
 
 Tracks all parry-hastes caused by players in your raid with access to the targets that parried them. Note that this module only records data for bosses that actionly parry-haste.
@@ -155,36 +161,53 @@ Tracks potions usage during an encounter. It even tracks and prints out to you *
 
 It records mana, range, energy and runic power gained by players (_happiness of hunter's pet is treated as energy_). Clicking a bar shows you the spells responsible for the gain.
 
-### Scroll
+### Threat
 
+I think you already know what this module is used for, so no need to talk more about it. Oh and yes! You can use it instead of Omen or use both, it's up to you and it's a matter of personal preferences.
+
+### My Spells
+
+This mode shows the list of your damage spells, healing spells and absorbs spells, all in a single window with their amounts. The tooltip shows some info if available: hits, normal and critical hits, average, mininum hit, maximum hit and average hit
+
+### Scroll
 It provides additional options for scrolling the bar displays. its main features are:
 
 * Allows the middle-button to act as a scroll wheel for people missing wheel hardware (many laptops).
 * Provides keybinds for scrolling the bar displays.
 
 ### Sunder Counter
-
 Counts and shows the _Sunder Armor_ usage by warriors.
 
 ### Themes
-
 It allows you to create themes that you can use if you want to change windows look. Themes can be created, applied and deleted (_probably Shared as well in the future if I don't forget to add it_).
 
-### Threat
-
-I think you already know what this module is used for, so no need to talk more about it. Oh and yes! You can use it instead of Omen or use both, it's up to you and it's a matter of personal preferences.
-
 ### Tweaks
-
 This module was created in order to add some tweaks to Skada, hence its name. It comes with few options that you may or may not find handy.
 
-- **First Hit**: this is not a **WHO PULLED** feature, it simply prints out what was the first hit and who was the first boss' target. When it comes to determining who pulled, this is only reliable in certain situations and requires a bit of understanding. The first hit can be from player to boss or boss to player. _Only works on boss fights_.
-- **Module Icons**: simply shows module icons when you are on the modes list.
-- **Filter DPS messages**: previously known as _Spaamage_, catches DPS meters report and shows the in a single line link with tooltip of details.
-- **Fix Combat Log**: unlike the macro people use, this feature ONLY fixes the combat log is detected broken. If it still doesn't fix your combatlog, you can always use `/skada clear`.
-- **Ignore Fury of Frostmourne**: if you don't want this spell to be included in anything, enable this option.
-- **Include absorbed damage**: some people (_Details! users >cough<_) consider that absorbed damage should be included in the overall damage, and because Skada doesn't include it but rather shows it as an extra info, this option was added to satisfy them and so we won't hear/read `Oh! They are not showing the same numbers...`.
-- **Smart Stop**: this feature relies on DBM/BigWigs to stop collecting data after the amount of seconds you choose. It is useful in case of being in combat bug (_not combatlog bug, but stuck in combat_).
+***General*** > **First Hit**
+This is not a **who pulled** feature, it simply prints out what was the first hit and who was the first boss' target. When it comes to determining who pulled, this is only reliable in certain situations and requires a bit of understanding. The first hit can be from player to boss or boss to player. _Only works on boss fights_.
+
+***General*** > **Module Icons**
+Simply shows module icons when you are on the modes list.
+
+***General*** > **Filter DPS messages**
+Previously known as _Spamage_, catches damage meters report and shows them in a single line link with tooltip of details.
+
+***General*** > **Ignore Fury of Frostmourne**
+If you don't want this spell to be included in anything, enable this option.
+
+***General*** > **Absorbed Damage**
+Some people (_Details! users >cough<_) consider that absorbed damage should be included in the overall damage, and because Skada doesn't include it but rather shows it as an extra info, this option was added to satisfy them and so we won't hear/read `Oh! They are not showing the same numbers...`.
+
+***Advanced*** > **Smart Stop**
+This feature relies on DBM/BigWigs to stop collecting data after the amount of seconds you choose. It is useful in case of being in combat bug (_not combatlog bug, but stuck in combat_) or if you want to stop collecting data right after the boss has died.
+
+***Advanced*** > **Combat Log**
+Unlike the macro people use, this feature ONLY fixes the combat log is detected broken. If it still doesn't fix your combatlog, you can always use `/skada clear`.
+If you want to mimic **CL_Fix**, enabled aggressive mode and your combatlog will be cleared every **2 seconds**.
+
+***Advanced*** > **Notifications**
+Skada provides visual/toaster notifications for few actions only. These settings allow you to disable this behavior so only use printed messages to the chat window; change the location of notifications as well as changing their on-screen duration and opacity.
 
 ### PvP
 

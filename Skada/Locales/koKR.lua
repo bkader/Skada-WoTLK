@@ -697,6 +697,7 @@ L["Announce %s"] = "발표: %s"
 L["Announces how long it took to apply %d stacks of %s and announces when it drops."] = "%d 스택(%s)을 적용하는 데 걸린 시간을 알리고 언제 드롭되는지 알립니다."
 L["%s dropped from %s!"] = "%s 는 %s 에 만료!"
 L["%s stacks of %s applied on %s in %s sec!"] = "%4$s초 만에 %3$s에 %2$s %1$s중첩 적용!"
+L["My Spells"] = "내 주문"
 -- project ascension
 L["Project Ascension"] = "Project Ascension"
 L["project_ascension_desc"] = "|cffffbb00Project Ascension|r에서 캐릭터는 능력이나 재능이 있는 클래스가 없는 영웅입니다.\n\n아이콘 및 색상은 기본 아이콘 및 색상 대신 사용할 그룹 구성원에게 전송됩니다."

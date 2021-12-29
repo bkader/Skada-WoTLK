@@ -698,6 +698,7 @@ L["Announce %s"] = "Anunciar: %s"
 L["Announces how long it took to apply %d stacks of %s and announces when it drops."] = "Anuncia el tiempo que tomó en aplicar %d cargas de %s y anuncia cuando expiren."
 L["%s dropped from %s!"] = "%s expiró en %s!"
 L["%s stacks of %s applied on %s in %s sec!"] = "¡%s pilas de %s aplicadas a %s en %s seg!"
+L["My Spells"] = "Mis habilidades"
 -- project ascension
 L["Project Ascension"] = "Project Ascension"
 L["project_ascension_desc"] = [=[En |cffffbb00Project Ascension|r, tus personajes son héroes sin clase que tienen cualquier habilidad o talento a su alcance.

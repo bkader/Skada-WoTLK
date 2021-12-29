@@ -701,6 +701,7 @@ L["Announce %s"] = "Annoncer %s"
 L["Announces how long it took to apply %d stacks of %s and announces when it drops."] = "Annonce combien de temps il a fallu pour appliquer %d piles \1242 %s et annonce quand il expire."
 L["%s dropped from %s!"] = "%s sur %s a expiré!"
 L["%s stacks of %s applied on %s in %s sec!"] = "%s piles \1242 %s appliquées sur %s en %s sec!"
+L["My Spells"] = "Mes sorts"
 -- project ascension
 L["Project Ascension"] = "Project Ascension"
 L["project_ascension_desc"] = [=[Sur |cffffbb00Project Ascension|r, vos héros sans classe ayant à leur portée n'importe quelle capacité ou talent.
