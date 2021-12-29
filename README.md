@@ -1,5 +1,3 @@
-
-
 # Skada for WoTLK (_Revisited - v1.8.73.356_)
 
 ![Discord](https://img.shields.io/discord/795698054371868743?label=discord)
@@ -18,7 +16,7 @@ Skada is a modular damage meter with various viewing modes, segmented fights and
 
 ## Show Love & Support
 
-Though it's not required, if you want to show some love and support, **PayPal**/**Paysera** donations are most welcome at **bkader[at]mail.com**.
+Though it's not required, **PayPal** donations are most welcome at **bkader[at]mail.com**, or via Discord [Donate Bot](https://donatebot.io/checkout/795698054371868743).
 
 ## Table of content
 
