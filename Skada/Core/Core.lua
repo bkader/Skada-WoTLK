@@ -2308,11 +2308,11 @@ do
 
 		if system == 3 or (system == 1 and (LOCALE_koKR or LOCALE_zhCN or LOCALE_zhTW)) then
 			-- default to chinese, even for western clients.
-			local symbol_1k, symbol_10k, symbol_1b = "천", "万", "亿"
+			local symbol_1k, symbol_10k, symbol_1b = "千", "万", "亿"
 			if LOCALE_koKR then
 				symbol_1k, symbol_10k, symbol_1b = "천", "만", "억"
 			elseif LOCALE_zhTW then
-				symbol_1k, symbol_10k, symbol_1b = "천", "萬", "億"
+				symbol_1k, symbol_10k, symbol_1b = "千", "萬", "億"
 			end
 
 			ShortenValue = function(num)
