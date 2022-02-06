@@ -1795,7 +1795,7 @@ do
 	local SendChatMessage = SendChatMessage
 
 	function Skada:SendChat(msg, chan, chantype, escape)
-		if chantype == "self" then
+		if lower(chan) == "self" or lower(chantype) == "self" then
 			Skada:Print(msg)
 			return
 		end
