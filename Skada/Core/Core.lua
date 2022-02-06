@@ -1734,7 +1734,7 @@ function Skada:Command(param)
 	elseif cmd == "about" or cmd == "info" then
 		self:OpenOptions("about")
 	elseif cmd == "version" or cmd == "checkversion" then
-		self:Printf("|cffffbb00%s|r: %s |cffffbb00%s|r: %s", L["Version"], self.version, L["Revision"], self.revision)
+		self:Printf("\n|cffffbb00%s|r: %s\n|cffffbb00%s|r: %s\n|cffffbb00%s|r: %s", L["Version"], self.version, L["Revision"], self.revision, L["Date"], GetAddOnMetadata("Skada", "X-Date"))
 		CheckVersion()
 	elseif cmd == "website" or cmd == "github" then
 		self:Printf("|cffffbb00%s|r", self.website)
@@ -1781,10 +1781,8 @@ function Skada:Command(param)
 		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33numformat|r / |cffffff33measure|r")
 		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33import|r / |cffffff33export|r")
 		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33about|r / |cffffff33version|r / |cffffff33website|r / |cffffff33discord|r")
-		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33reset|r")
-		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33clean|r")
-		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33config|r")
-		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33debug|r")
+		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33reset|r / |cffffff33clean|r / |cffffff33reinstall|r")
+		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33config|r / |cffffff33debug|r")
 	end
 end
 
@@ -2063,7 +2061,7 @@ do
 			version_count = count
 		end
 
-		Skada:SendMessage("GROUP_ROSTER_UPDATE")
+		Skada:SendMessage("GROUP_ROSTER_UPDATE", players, pets)
 	end
 end
 

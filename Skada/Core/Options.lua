@@ -605,26 +605,31 @@ Skada.options = {
 				}
 			}
 		},
-		disabled = {
+		modules = {
 			type = "group",
-			name = L["Disabled Modules"],
-			desc = fmt(L["Options for %s."], L["Disabled Modules"]),
+			name = L["Modules Options"],
+			desc = fmt(L["Options for %s."], L["Modules"]),
 			order = 60,
 			width = "double",
 			get = function(i)
-				return Skada.db.profile.modulesBlocked[i[#i]]
+				return Skada.db.profile.modules[i[#i]]
 			end,
-			set = function(i, value)
-				Skada.db.profile.modulesBlocked[i[#i]] = value
-				Skada.options.args.disabled.args.apply.disabled = false
+			set = function(i, val)
+				Skada.db.profile.modules[i[#i]] = val
+				Skada:ApplySettings()
 			end,
 			args = {
+				header = {
+					type = "header",
+					name = L["Disabled Modules"],
+					order = 0
+				},
 				desc = {
 					type = "description",
 					name = L["Tick the modules you want to disable."],
 					width = "double",
 					fontSize = "medium",
-					order = 0
+					order = 0.1
 				},
 				apply = {
 					type = "execute",
@@ -636,24 +641,6 @@ Skada.options = {
 					order = 99
 				}
 			}
-		},
-		modules = {
-			type = "group",
-			name = L["Modules Options"],
-			desc = fmt(L["Options for %s."], L["Modules"]),
-			order = 70,
-			width = "double",
-			disabled = function()
-				return next(Skada.options.args.modules.args) == nil
-			end,
-			get = function(i)
-				return Skada.db.profile.modules[i[#i]]
-			end,
-			set = function(i, val)
-				Skada.db.profile.modules[i[#i]] = val
-				Skada:ApplySettings()
-			end,
-			args = {}
 		},
 		tweaks = {
 			type = "group",
@@ -834,12 +821,25 @@ function Skada:AddColumnOptions(mod)
 	Skada.options.args.columns.args[category].args[mod.moduleName] = cols
 end
 
-function Skada:AddLoadableModuleCheckbox(mod, name, description)
-	self.options.args.disabled.args[mod] = {
-		type = "toggle",
-		name = _G[name] or L[name],
-		desc = description and L[description]
-	}
+do
+	local function GetValue(i)
+		return Skada.db.profile.modulesBlocked[i[#i]]
+	end
+
+	local function SetValue(i, val)
+		Skada.db.profile.modulesBlocked[i[#i]] = val
+		Skada.options.args.modules.args.apply.disabled = false
+	end
+
+	function Skada:AddLoadableModuleCheckbox(mod, name, description)
+		self.options.args.modules.args[mod] = {
+			type = "toggle",
+			name = _G[name] or L[name],
+			desc = description and L[description],
+			get = GetValue,
+			set = SetValue
+		}
+	end
 end
 
 -------------------------------------------------------------------------------
