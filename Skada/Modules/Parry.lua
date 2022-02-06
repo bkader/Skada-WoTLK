@@ -15,7 +15,13 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 		[L["Onyxia"]] = true,
 		[L["Lady Deathwhisper"]] = true,
 		[L["Sindragosa"]] = true,
-		[L["Halion"]] = true
+		[L["Halion"]] = true,
+		-- UNCONFIRMED BOSSES
+		-- Suggested by shoggoth#9796
+		[L["General Vezax"]] = true,
+		[L["Gluth"]] = true,
+		[L["Kel'Thuzad"]] = true,
+		[L["Sapphiron"]] = true,
 	}
 
 	local function log_parry(set, data)
