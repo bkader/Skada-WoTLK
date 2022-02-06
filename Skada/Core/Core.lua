@@ -1860,7 +1860,7 @@ do
 			return
 		end
 
-		if not report_table.metadata.ordersort then
+		if report_table.metadata and not report_table.metadata.ordersort then
 			tsort(report_table.dataset, ValueIdSort)
 		end
 

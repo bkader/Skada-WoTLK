@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this addon, please cite it as below."
+authors:
+  - given-names: "Kader"
+    family-names: "Bouyakoub"
+    orcid: "https://orcid.org/0000-0002-1184-8061"
+title: "Skada WotLK (Revisited)"
+version: 1.8.73
+date-released: 2020-10-22
+url: "https://github.com/bkader/Skada-WoTLK"
