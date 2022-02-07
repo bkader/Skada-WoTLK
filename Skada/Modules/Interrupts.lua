@@ -22,7 +22,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 		-- ignored spells
 		if data.spellid and tContains(ignoredSpells, data.spellid) then return end
 		-- other ignored spells
-		if (data.extraspellid and tContains(ignoredSpells, data.extraspellid)) then return end
+		if data.extraspellid and tContains(ignoredSpells, data.extraspellid) then return end
 
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if player then

@@ -25,7 +25,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 			set.friendfire = (set.friendfire or 0) + dmg.amount
 
 			-- to save up memory, we only record the rest to the current set.
-			if set ~= Skada.current then return end
+			if set ~= Skada.current or not dmg.spellid then return end
 
 			-- spell
 			local spell = player.friendfirespells and player.friendfirespells[dmg.spellid]

@@ -44,7 +44,7 @@ Skada:AddLoadableModule("Resources", function(L)
 		if not (gain and gain.type and gainTable[gain.type]) then
 			return
 		end
-		if (gain.spellid and tContains(ignoredSpells, gain.spellid)) then
+		if gain.spellid and tContains(ignoredSpells, gain.spellid) then
 			return
 		end
 
@@ -53,7 +53,7 @@ Skada:AddLoadableModule("Resources", function(L)
 			player[gainTable[gain.type]] = (player[gainTable[gain.type]] or 0) + gain.amount
 			set[gainTable[gain.type]] = (set[gainTable[gain.type]] or 0) + gain.amount
 
-			if set == Skada.current then
+			if set == Skada.current and gain.spellid then
 				player[spellTable[gain.type]] = player[spellTable[gain.type]] or {}
 				player[spellTable[gain.type]][gain.spellid] = (player[spellTable[gain.type]][gain.spellid] or 0) + gain.amount
 			end

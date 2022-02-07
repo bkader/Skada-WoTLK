@@ -19,13 +19,28 @@ Skada:AddLoadableModule("Healing", function(L)
 	local playermod = mod:NewModule(L["Healing spell list"])
 	local targetmod = mod:NewModule(L["Healed target list"])
 	local spellmod = targetmod:NewModule(L["Healing spell list"])
-	local tContains = tContains
+	local tContains, T = tContains, Skada.Table
 
 	-- spells in the following table will be ignored.
 	local ignoredSpells = {}
 
+	local function log_spellcast(set, heal)
+		local player = Skada:GetPlayer(set, heal.playerid, heal.playername, heal.playerflags)
+		if player and player.healspells and player.healspells[heal.spellid] then
+			-- because some HoTs don't have an initial amount
+			-- we start from 1 and not from 0 if casts wasn't
+			-- previously set. Otherwise we just increment.
+			player.healspells[heal.spellid].casts = (player.healspells[heal.spellid].casts or 1) + 1
+
+			-- fix possible missing spell school.
+			if not player.healspells[heal.spellid].school and heal.spellschool then
+				player.healspells[heal.spellid].school = heal.spellschool
+			end
+		end
+	end
+
 	local function log_heal(set, data, tick)
-		if data.spellid and tContains(ignoredSpells, data.spellid) then return end
+		if not data.spellid or tContains(ignoredSpells, data.spellid) then return end
 
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if player then
@@ -50,6 +65,8 @@ Skada:AddLoadableModule("Healing", function(L)
 				player.healspells = player.healspells or {}
 				player.healspells[data.spellid] = {school = data.spellschool, amount = 0, overheal = 0}
 				spell = player.healspells[data.spellid]
+			elseif not spell.school and data.spellschool then
+				spell.school = data.spellschool
 			end
 
 			spell.ishot = tick or nil
@@ -95,6 +112,29 @@ Skada:AddLoadableModule("Healing", function(L)
 
 	local heal = {}
 
+	local function SpellCast(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		if srcGUID and dstGUID then
+			heal.spellid, _, heal.spellschool = ...
+
+			heal.playerid = srcGUID
+			heal.playername = srcName
+			heal.playerflags = srcFlags
+
+			heal.dstGUID = dstGUID
+			heal.dstName = dstName
+			heal.dstFlags = dstFlags
+
+			heal.amount = nil
+			heal.overheal = nil
+			heal.critical = nil
+			heal.petname = nil
+
+			Skada:FixPets(heal)
+
+			log_spellcast(Skada.current, heal)
+		end
+	end
+
 	local function SpellHeal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid = ...
 		srcGUID, srcName, srcFlags = Skada:FixUnit(spellid, srcGUID, srcName, srcFlags)
@@ -131,7 +171,11 @@ Skada:AddLoadableModule("Healing", function(L)
 				end
 			end
 
-			tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
+			if (spell.casts or 0) > 0 then
+				tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
+			end
+
+			tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
 			tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
 
 			if (spell.critical or 0) > 0 then
@@ -395,6 +439,8 @@ Skada:AddLoadableModule("Healing", function(L)
 			icon = [[Interface\Icons\spell_nature_healingtouch]]
 		}
 
+		Skada:RegisterForCL(SpellCast, "SPELL_CAST_START", {src_is_interesting = true})
+		Skada:RegisterForCL(SpellCast, "SPELL_CAST_SUCCESS", {src_is_interesting = true})
 		Skada:RegisterForCL(SpellHeal, "SPELL_HEAL", {src_is_interesting = true})
 		Skada:RegisterForCL(SpellHeal, "SPELL_PERIODIC_HEAL", {src_is_interesting = true})
 
@@ -414,6 +460,10 @@ Skada:AddLoadableModule("Healing", function(L)
 			Skada:FormatNumber(hps),
 			self.metadata.columns.HPS
 		), amount
+	end
+
+	function mod:SetComplete(set)
+		T.clear(heal)
 	end
 
 	function setPrototype:GetHeal()
@@ -785,6 +835,10 @@ Skada:AddLoadableModule("Total Healing", function(L)
 				if c and n then
 					tooltip:AddLine(n, c.r, c.g, c.b)
 				end
+			end
+
+			if (spell.casts or 0) > 0 then
+				tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
 			end
 
 			if spell.count then

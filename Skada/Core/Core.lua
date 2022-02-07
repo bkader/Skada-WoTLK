@@ -3552,7 +3552,11 @@ do
 	end
 
 	function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		if disabled or self.testMode or ignored_events[eventtype] then return end
+		-- disabled module or test mode?
+		if disabled or self.testMode then return end
+
+		-- ignored combat event?
+		if ignored_events[eventtype] and (eventtype ~= "SPELL_CAST_START" or not self.current) then return end
 
 		local src_is_interesting = nil
 		local dst_is_interesting = nil

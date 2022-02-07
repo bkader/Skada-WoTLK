@@ -235,17 +235,38 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		[47986] = true
 	}
 
+	-- spells iof which we don't record casts.
+	local passivespells = {
+		[31230] = true, -- Cheat Death
+		[49497] = true, -- Spell Deflection
+		[50150] = true, -- Will of the Necropolis
+		[66233] = true, -- Ardent Defender
+	}
+
 	local zoneModifier = 1 -- coefficient used to calculate amounts
 	local heals = nil -- holds heal amounts used to "guess" shield amounts
 	local shields = nil -- holds the list of players shields and other stuff
 	local shieldamounts = nil -- holds the amount shields absorbed so far
 	local shieldspopped = nil -- holds the list of shields that popped on a player
+	local absorb = {}
 
 	-- spells in the following table will be ignored.
 	local ignoredSpells = {}
 
+	local function log_spellcast(set, playerid, playername, playerflags, spellid, spellschool)
+		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
+		if player and player.absorbspells and player.absorbspells[spellid] then
+			player.absorbspells[spellid].casts = (player.absorbspells[spellid].casts or 1) + 1
+
+			-- fix possible missing spell school.
+			if not player.absorbspells[spellid].school and spellschool then
+				player.absorbspells[spellid].school = spellschool
+			end
+		end
+	end
+
 	local function log_absorb(set, absorb, nocount)
-		if (absorb.spellid and tContains(ignoredSpells, absorb.spellid)) or (absorb.amount or 0) <= 0 then return end
+		if not absorb.spellid or tContains(ignoredSpells, absorb.spellid) or (absorb.amount or 0) == 0 then return end
 
 		local player = Skada:GetPlayer(set, absorb.playerid, absorb.playername)
 		if player then
@@ -272,6 +293,11 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				if not nocount then
 					spell.count = (spell.count or 0) + 1
 				end
+			end
+
+			-- start cast counter.
+			if not spell.casts and not passivespells[absorb.spellid] then
+				spell.casts = 1
 			end
 
 			if not spell.min or absorb.amount < spell.min then
@@ -420,6 +446,11 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			shields[dstName] = shields[dstName] or {}
 			shields[dstName][spellid] = shields[dstName][spellid] or {}
 
+			-- log spell casts.
+			if not passivespells[spellid] then
+				log_spellcast(Skada.current, srcGUID, srcName, srcFlags, spellid, spellschool)
+			end
+
 			-- we calculate how much the shield's maximum absorb amount
 			local amount = 0
 
@@ -487,7 +518,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		-- in order to track them, we simply add them as fake shields before all.
 		-- I don't know the whole list of effects but, if you want to add yours
 		-- please do : CLASS = {[index] = {spellid, spellschool}}
-		local passivespells = {
+		local passiveshields = {
 			DEATHKNIGHT = {{50150, 1}, {49497, 1}},
 			PALADIN = {{66233, 1}},
 			ROGUE = {{31230, 1}}
@@ -510,8 +541,8 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				-- passive shields (not for pets)
 				if owner == nil then
 					local class = select(2, UnitClass(unit))
-					if passivespells[class] then
-						for _, spell in ipairs(passivespells[class]) do
+					if passiveshields[class] then
+						for _, spell in ipairs(passiveshields[class]) do
 							local points = LGT:GUIDHasTalent(dstGUID, GetSpellInfo(spell[1]), LGT:GetActiveTalentGroup(unit))
 							if points then
 								AuraApplied(timestamp - 60, nil, dstGUID, dstGUID, nil, dstGUID, dstName, nil, spell[1], nil, spell[2], nil, points)
@@ -529,8 +560,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			end
 		end
 	end
-
-	local absorb = {}
 
 	local function process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool, damage, broke)
 		shields[dstName] = shields[dstName] or {}
@@ -758,8 +787,12 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				end
 			end
 
+			if (spell.casts or 0) > 0 then
+				tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
+			end
+
 			if (spell.count or 0) > 0 then
-				tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
+				tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
 				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
 			end
 
@@ -1025,6 +1058,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	end
 
 	function mod:SetComplete(set)
+		T.clear(absorb)
 		T.free("Absorbs_Heals", heals)
 		T.free("Absorbs_Shields", shields)
 		T.free("Absorbs_ShieldAmounts", shieldamounts)
@@ -1123,8 +1157,12 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 				end
 			end
 
+			if (spell.casts or 0) > 0 then
+				tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
+			end
+
 			if (spell.count or 0) > 0 then
-				tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
+				tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
 				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
 
 				if (spell.critical or 0) > 0 then
@@ -1840,8 +1878,12 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 				end
 			end
 
+			if (spell.casts or 0) > 0 then
+				tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
+			end
+
 			if (spell.count or 0) > 0 then
-				tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
+				tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
 			end
 			tooltip:AddDoubleLine(spell.isabsorb and L["Absorbs"] or L["Healing"], format("%s (%s)", Skada:FormatNumber(spell.amount), Skada:FormatPercent(spell.amount, total)), 1, 1, 1)
 			if (spell.overheal or 0) > 0 then

@@ -256,7 +256,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 	local ignoredSpells = {}
 
 	local function log_damage(set, dmg)
-		if dmg.spellid and tContains(ignoredSpells, dmg.spellid) then return end
+		if not dmg.spellid or tContains(ignoredSpells, dmg.spellid) then return end
 		local absorbed = dmg.absorbed or 0
 		if (dmg.amount + absorbed) == 0 then return end
 
@@ -797,7 +797,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 	local ignoredSpells = {}
 
 	local function log_damage(set, dmg)
-		if dmg.spellid and tContains(ignoredSpells, dmg.spellid) then return end
+		if not dmg.spellid or not tContains(ignoredSpells, dmg.spellid) then return end
 		local absorbed = dmg.absorbed or 0
 		if (dmg.amount + absorbed) == 0 then return end
 
@@ -1198,7 +1198,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 	local ignoredSpells = {}
 
 	local function log_heal(set, data)
-		if (data.spellid and tContains(ignoredSpells, data.spellid)) or data.amount == 0 then return end
+		if not data.spellid or tContains(ignoredSpells, data.spellid) or (data.amount or 0) == 0 then return end
 
 		local e = Skada:GetEnemy(set, data.enemyname, data.enemyid, data.enemyflags)
 		if e then

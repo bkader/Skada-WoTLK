@@ -53,6 +53,7 @@ L["Average"] = true
 L["Minimum Hit"] = true
 L["Maximum Hit"] = true
 L["Average Hit"] = true
+L["Casts"] = true
 L["Count"] = true
 L["Refresh"] = true
 L["Percent"] = true

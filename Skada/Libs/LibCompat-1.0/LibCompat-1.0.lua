@@ -131,6 +131,14 @@ do
 		return {}
 	end
 
+	-- clears all items in a table.
+	function Table.clear(obj)
+		for k in pairs(obj) do
+			obj[k] = nil
+		end
+		return obj
+	end
+
 	-- releases the already used lua table into the table pool
 	-- named "tag" or creates it right away.
 	function Table.free(tag, obj, noclear)
@@ -146,9 +154,7 @@ do
 
 		if not noclear then
 			setmetatable(obj, nil)
-			for k, _ in pairs(obj) do
-				obj[k] = nil
-			end
+			obj = Table.clear(obj)
 		end
 
 		do

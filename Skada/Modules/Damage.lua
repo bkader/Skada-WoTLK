@@ -96,8 +96,26 @@ Skada:AddLoadableModule("Damage", function(L)
 	-- spells in the following table will be ignored.
 	local ignoredSpells = {}
 
+	local function log_spellcast(set, dmg)
+		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
+		if player and player.damagespells then
+			local spell = player.damagespells[dmg.spellname] or player.damagespells[dmg.spellname..L["DoT"]]
+			if spell then
+				-- because some DoTs don't have an initial damage
+				-- we start from 1 and not from 0 if casts wasn't
+				-- previously set. Otherwise we just increment.
+				spell.casts = (spell.casts or 1) + 1
+
+				-- fix possible missing spell school.
+				if not spell.school and dmg.spellschool then
+					spell.school = dmg.spellschool
+				end
+			end
+		end
+	end
+
 	local function log_damage(set, dmg, tick)
-		if dmg.spellid and tContains(ignoredSpells, dmg.spellid) then return end
+		if not dmg.spellid or tContains(ignoredSpells, dmg.spellid) then return end
 
 		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
 		if not player then return end
@@ -145,7 +163,15 @@ Skada:AddLoadableModule("Damage", function(L)
 				player.damagespells[spellname] = {id = dmg.spellid, school = dmg.spellschool, amount = 0, total = 0}
 			end
 			spell = player.damagespells[spellname]
+		elseif not spell.school and dmg.spellschool then
+			spell.school = dmg.spellschool
 		end
+
+		-- start casts count for non DoTs.
+		if dmg.spellid ~= 6603 and not tick then
+			spell.casts = spell.casts or 1
+		end
+
 		spell.count = (spell.count or 0) + 1
 		spell.amount = spell.amount + dmg.amount
 		spell.total = spell.total + dmg.amount
@@ -204,6 +230,34 @@ Skada:AddLoadableModule("Damage", function(L)
 
 	local dmg = {}
 	local extraATT
+
+	local function SpellCast(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		if srcGUID and dstGUID then
+			dmg.spellid, dmg.spellname, dmg.spellschool = ...
+
+			dmg.playerid = srcGUID
+			dmg.playerflags = srcFlags
+			dmg.playername = srcName
+
+			dmg.dstGUID = dstGUID
+			dmg.dstName = dstName
+			dmg.dstFlags = dstFlags
+
+			dmg.amount = nil
+			dmg.overkill = nil
+			dmg.resisted = nil
+			dmg.blocked = nil
+			dmg.absorbed = nil
+			dmg.critical = nil
+			dmg.glancing = nil
+			dmg.misstype = nil
+			dmg.petname = nil
+
+			Skada:FixPets(dmg)
+
+			log_spellcast(Skada.current, dmg)
+		end
+	end
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
@@ -319,6 +373,10 @@ Skada:AddLoadableModule("Damage", function(L)
 				if c and n then
 					tooltip:AddLine(n, c.r, c.g, c.b)
 				end
+			end
+
+			if (spell.casts or 0) > 0 then
+				tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
 			end
 
 			local amount = Skada.db.profile.absdamage and spell.total or spell.amount
@@ -522,6 +580,11 @@ Skada:AddLoadableModule("Damage", function(L)
 			local nr = add_detail_bar(win, 0, L["Hits"], spell.count)
 			win.dataset[nr].value = win.dataset[nr].value + 1 -- to be always first
 
+			if (spell.casts or 0) > 0 then
+				nr = add_detail_bar(win, nr, L["Casts"], spell.casts)
+				win.dataset[nr].value = win.dataset[nr].value * 1e3 -- to be always first
+			end
+
 			if (spell.hit or 0) > 0 then
 				nr = add_detail_bar(win, nr, L["Normal Hits"], spell.hit, spell.count, true)
 			end
@@ -562,8 +625,12 @@ Skada:AddLoadableModule("Damage", function(L)
 				win.metadata.maxvalue = total
 			end
 
-			local nr = add_detail_bar(win, 0, L["Damage"], total, nil, nil, true)
+			local nr = add_detail_bar(win, 0, L["Total"], total, nil, nil, true)
 			win.dataset[nr].value = win.dataset[nr].value + 1 -- to be always first
+
+			if total ~= spell.amount then
+				nr = add_detail_bar(win, nr, L["Damage"], spell.amount, total, true, true)
+			end
 
 			if (spell.overkill or 0) > 0 then
 				nr = add_detail_bar(win, nr, L["Overkill"], spell.overkill, total, true, true)
@@ -760,6 +827,9 @@ Skada:AddLoadableModule("Damage", function(L)
 			icon = [[Interface\Icons\spell_fire_firebolt]]
 		}
 
+		Skada:RegisterForCL(SpellCast, "SPELL_CAST_START", {src_is_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(SpellCast, "SPELL_CAST_SUCCESS", {src_is_interesting = true, dst_is_not_interesting = true})
+
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellDamage, "DAMAGE_SPLIT", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SpellDamage, "RANGE_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
@@ -807,6 +877,7 @@ Skada:AddLoadableModule("Damage", function(L)
 	end
 
 	function mod:SetComplete(set)
+		T.clear(dmg)
 		T.free("Damage_ExtraAttacks", extraATT)
 
 		-- clean set from garbage before it is saved.
@@ -815,7 +886,7 @@ Skada:AddLoadableModule("Damage", function(L)
 				p.damagespells = nil
 			elseif p.damagespells then
 				for spellname, spell in pairs(p.damagespells) do
-					if spell.total and spell.total == 0 then
+					if (spell.total or 0) == 0 or (spell.count or 0) == 0 then
 						p.damagespells[spellname] = nil
 					end
 				end
