@@ -22,7 +22,7 @@ do
 	local mod = Skada:NewModule(L["Buffs and Debuffs"])
 
 	function mod:OnEnable()
-		if not Skada:IsDisabled("Buffs", "Debuffs") then
+		if not Skada:IsDisabled("Buffs") or not Skada:IsDisabled("Debuffs") then
 			Skada.RegisterCallback(self, "Skada_CombatTick", "Tick")
 			Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "Clean")
 		end
