@@ -6,6 +6,8 @@
 
 Skada is a modular damage meter with various viewing modes, segmented fights and customizable windows. It aims to be highly efficient with memory and CPU.
 
+<p align="center"><img src="https://repository-images.githubusercontent.com/306277951/dcdd501d-57be-43cb-81d5-c791c0b255a3" alt="Skada WotLK"></p>
+
 ## IMPORTANT: How to install
 
 1. If you used the default on **Skada** before, please make sure to delete all its files from `Interface\AddOns` folder as well as all its _SavedVariables_ from `WTF` folder (_just delete all `Skada.lua` and `Skada.lua.bak` for this folder. Use the search box for quick delete_). If you are new, skip this step.
@@ -284,7 +286,6 @@ player:GetAbsorbHeal() -- returns the amount of absorbs and heals the player did
 player:GetAHPS() -- returns the amount of absorb+heal per second.
 player:GetAbsorbHealTargets() -- returns the list of absorb and heal targets.
 player:GetAbsorbHealOnTarget(name) -- returns the amount of absorb and heal the player did on the given target.
-player:GetAuraUptime(spellid) -- returns the uptime of the given aura if found, else null.
 player:GetDebuffsTargets() -- returns the list of the player's debuffs targets.
 player:GetDebuffTargets(spellid) -- returns the list of the given debuff targets.
 player:GetDebuffsOnTarget(name) -- returns the list of debuffs applied on the given target.

@@ -13,6 +13,7 @@ local UnitAffectingCombat, UnitIsDeadOrGhost = UnitAffectingCombat, UnitIsDeadOr
 local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 local GetPlayerInfoByGUID = GetPlayerInfoByGUID
 local GetClassFromGUID = Skada.GetClassFromGUID
+local T = Skada.Table
 
 local COMBATLOG_OBJECT_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
 
@@ -31,6 +32,145 @@ function Skada:Debug(...)
 		end
 		print("|cff33ff99Skada Debug|r: " .. msg)
 	end
+end
+
+-------------------------------------------------------------------------------
+-- Classes, Specs and Schools
+
+function Skada:RegisterClasses()
+	self.RegisterClasses = nil -- remove it
+
+	-- class colors & coordinates
+	self.classcolors, self.classcoords = self.GetClassColorsTable()
+
+	-- valid classes!
+	self.validclass = {}
+	for class in pairs(self.classcolors) do
+		self.validclass[class] = true
+	end
+
+	-- Skada custom class colors!
+	self.classcolors.BOSS = {r = 0.203, g = 0.345, b = 0.525, colorStr = "ff345886"}
+	self.classcolors.ENEMY = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
+	self.classcolors.MONSTER = {r = 0.549, g = 0.388, b = 0.404, colorStr = "ff8c6367"}
+	self.classcolors.PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"}
+	self.classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
+	self.classcolors.UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
+	-- arena class colors
+	self.classcolors.ARENA_GOLD = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
+	self.classcolors.ARENA_GREEN = {r = 0.1, g = 1, b = 0.1, colorStr = "ff19ff19"}
+	-- purple color instead of green for color blind mode.
+	if GetCVar("colorblindMode") == "1" then
+		self.classcolors.ARENA_GREEN.r = 0.686
+		self.classcolors.ARENA_GREEN.g = 0.384
+		self.classcolors.ARENA_GREEN.b = 1
+		self.classcolors.ARENA_GREEN.colorStr = "ffae61ff"
+	end
+
+	-- set classes icon file & Skada custom classes.
+	if self.AscensionCoA then
+		self.classicons = [[Interface\AddOns\Skada\Media\Textures\icon-classes-coa]]
+
+		-- custom class coordinates
+		if not self.classcoords.BOSS then
+			self.classcoords.BOSS = {0, 0.125, 0.875, 1}
+			self.classcoords.MONSTER = {0.125, 0.25, 0.875, 1}
+			self.classcoords.ENEMY = {0.25, 0.375, 0.875, 1}
+			self.classcoords.PET = {0.375, 0.5, 0.875, 1}
+			self.classcoords.UNKNOWN = {0.5, 0.625, 0.875, 1}
+			self.classcoords.PLAYER = {0.625, 0.75, 0.875, 1}
+		end
+	else
+		self.classicons = [[Interface\AddOns\Skada\Media\Textures\icon-classes]]
+
+		-- custom class coordinates
+		if not self.classcoords.BOSS then
+			self.classcoords.BOSS = {0.5, 0.75, 0.5, 0.75}
+			self.classcoords.MONSTER = {0.75, 1, 0.5, 0.75}
+			self.classcoords.ENEMY = {0, 0.25, 0.75, 1}
+			self.classcoords.PET = {0.25, 0.5, 0.75, 1}
+			self.classcoords.PLAYER = {0.75, 1, 0.75, 1}
+			self.classcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
+		end
+	end
+
+	-- we ignore roles & specs on Project Ascension since players
+	-- have a custom module to set their own colors & icons.
+	if not self.Ascension and not self.AscensionCoA then
+		-- role icon file and texture coordinates
+		self.roleicons = [[Interface\AddOns\Skada\Media\Textures\icon-roles]]
+		self.rolecoords = {
+			LEADER = {0, 0.25, 0, 1},
+			DAMAGER = {0.25, 0.5, 0, 1},
+			TANK = {0.5, 0.75, 0, 1},
+			HEALER = {0.75, 1, 0, 1},
+			NONE = ""
+		}
+
+		-- specialization icons
+		self.specicons = [[Interface\AddOns\Skada\Media\Textures\icon-specs]]
+		self.speccoords = {
+			[62] = {0.25, 0.375, 0.25, 0.5}, --> Mage: Arcane
+			[63] = {0.375, 0.5, 0.25, 0.5}, --> Mage: Fire
+			[64] = {0.5, 0.625, 0.25, 0.5}, --> Mage: Frost
+			[65] = {0.625, 0.75, 0.25, 0.5}, --> Paladin: Holy
+			[66] = {0.75, 0.875, 0.25, 0.5}, --> Paladin: Protection
+			[70] = {0.875, 1, 0.25, 0.5}, --> Paladin: Retribution
+			[71] = {0.5, 0.625, 0.75, 1}, --> Warrior: Arms
+			[72] = {0.625, 0.75, 0.75, 1}, --> Warrior: Fury
+			[73] = {0.75, 0.875, 0.75, 1}, --> Warrior: Protection
+			[102] = {0.375, 0.5, 0, 0.25}, --> Druid: Balance
+			[103] = {0.5, 0.625, 0, 0.25}, --> Druid: Feral
+			[104] = {0.625, 0.75, 0, 0.25}, --> Druid: Tank
+			[105] = {0.75, 0.875, 0, 0.25}, --> Druid: Restoration
+			[250] = {0, 0.125, 0, 0.25}, --> Death Knight: Blood
+			[251] = {0.125, 0.25, 0, 0.25}, --> Death Knight: Frost
+			[252] = {0.25, 0.375, 0, 0.25}, --> Death Knight: Unholy
+			[253] = {0.875, 1, 0, 0.25}, --> Hunter: Beastmastery
+			[254] = {0, 0.125, 0.25, 0.5}, --> Hunter: Marksmalship
+			[255] = {0.125, 0.25, 0.25, 0.5}, --> Hunter: Survival
+			[256] = {0, 0.125, 0.5, 0.75}, --> Priest: Discipline
+			[257] = {0.125, 0.25, 0.5, 0.75}, --> Priest: Holy
+			[258] = {0.25, 0.375, 0.5, 0.75}, --> Priest: Shadow
+			[259] = {0.375, 0.5, 0.5, 0.75}, --> Rogue: Assassination
+			[260] = {0.5, 0.625, 0.5, 0.75}, --> Rogue: Combat
+			[261] = {0.625, 0.75, 0.5, 0.75}, --> Rogue: Subtlty
+			[262] = {0.75, 0.875, 0.5, 0.75}, --> Shaman: Elemental
+			[263] = {0.875, 1, 0.5, 0.75}, --> Shaman: Enhancement
+			[264] = {0, 0.125, 0.75, 1}, --> Shaman: Restoration
+			[265] = {0.125, 0.25, 0.75, 1}, --> Warlock: Affliction
+			[266] = {0.25, 0.375, 0.75, 1}, --> Warlock: Demonology
+			[267] = {0.375, 0.5, 0.75, 1} --> Warlock: Destruction
+		}
+	end
+end
+
+function Skada:RegisterSchools()
+	self.RegisterSchools = nil -- remove it
+
+	-- spell school colors
+	self.schoolcolors = {
+		[1] = {a = 1.00, r = 1.00, g = 1.00, b = 0.00}, -- Physical
+		[2] = {a = 1.00, r = 1.00, g = 0.90, b = 0.50}, -- Holy
+		[4] = {a = 1.00, r = 1.00, g = 0.50, b = 0.00}, -- Fire
+		[8] = {a = 1.00, r = 0.30, g = 1.00, b = 0.30}, -- Nature
+		[16] = {a = 1.00, r = 0.50, g = 1.00, b = 1.00}, -- Frost
+		[20] = {a = 1.00, r = 0.50, g = 1.00, b = 1.00}, -- Frostfire
+		[32] = {a = 1.00, r = 0.50, g = 0.50, b = 1.00}, -- Shadow
+		[64] = {a = 1.00, r = 1.00, g = 0.50, b = 1.00} -- Arcane
+	}
+
+	-- spell school names
+	self.schoolnames = {
+		[1] = STRING_SCHOOL_PHYSICAL:gsub("%(", ""):gsub("%)", ""),
+		[2] = STRING_SCHOOL_HOLY:gsub("%(", ""):gsub("%)", ""),
+		[4] = STRING_SCHOOL_FIRE:gsub("%(", ""):gsub("%)", ""),
+		[8] = STRING_SCHOOL_NATURE:gsub("%(", ""):gsub("%)", ""),
+		[16] = STRING_SCHOOL_FROST:gsub("%(", ""):gsub("%)", ""),
+		[20] = STRING_SCHOOL_FROSTFIRE:gsub("%(", ""):gsub("%)", ""),
+		[32] = STRING_SCHOOL_SHADOW:gsub("%(", ""):gsub("%)", ""),
+		[64] = STRING_SCHOOL_ARCANE:gsub("%(", ""):gsub("%)", "")
+	}
 end
 
 -------------------------------------------------------------------------------
@@ -573,145 +713,6 @@ do
 end
 
 -------------------------------------------------------------------------------
--- Classes, Specs and Schools
-
-function Skada:RegisterClasses()
-	self.RegisterClasses = nil -- remove it
-
-	-- class colors & coordinates
-	self.classcolors, self.classcoords = self.GetClassColorsTable()
-
-	-- valid classes!
-	self.validclass = {}
-	for class in pairs(self.classcolors) do
-		self.validclass[class] = true
-	end
-
-	-- Skada custom class colors!
-	self.classcolors.BOSS = {r = 0.203, g = 0.345, b = 0.525, colorStr = "ff345886"}
-	self.classcolors.ENEMY = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
-	self.classcolors.MONSTER = {r = 0.549, g = 0.388, b = 0.404, colorStr = "ff8c6367"}
-	self.classcolors.PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"}
-	self.classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
-	self.classcolors.UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
-	-- arena class colors
-	self.classcolors.ARENA_GOLD = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
-	self.classcolors.ARENA_GREEN = {r = 0.1, g = 1, b = 0.1, colorStr = "ff19ff19"}
-	-- purple color instead of green for color blind mode.
-	if GetCVar("colorblindMode") == "1" then
-		self.classcolors.ARENA_GREEN.r = 0.686
-		self.classcolors.ARENA_GREEN.g = 0.384
-		self.classcolors.ARENA_GREEN.b = 1
-		self.classcolors.ARENA_GREEN.colorStr = "ffae61ff"
-	end
-
-	-- set classes icon file & Skada custom classes.
-	if self.AscensionCoA then
-		self.classicons = [[Interface\AddOns\Skada\Media\Textures\icon-classes-coa]]
-
-		-- custom class coordinates
-		if not self.classcoords.BOSS then
-			self.classcoords.BOSS = {0, 0.125, 0.875, 1}
-			self.classcoords.MONSTER = {0.125, 0.25, 0.875, 1}
-			self.classcoords.ENEMY = {0.25, 0.375, 0.875, 1}
-			self.classcoords.PET = {0.375, 0.5, 0.875, 1}
-			self.classcoords.UNKNOWN = {0.5, 0.625, 0.875, 1}
-			self.classcoords.PLAYER = {0.625, 0.75, 0.875, 1}
-		end
-	else
-		self.classicons = [[Interface\AddOns\Skada\Media\Textures\icon-classes]]
-
-		-- custom class coordinates
-		if not self.classcoords.BOSS then
-			self.classcoords.BOSS = {0.5, 0.75, 0.5, 0.75}
-			self.classcoords.MONSTER = {0.75, 1, 0.5, 0.75}
-			self.classcoords.ENEMY = {0, 0.25, 0.75, 1}
-			self.classcoords.PET = {0.25, 0.5, 0.75, 1}
-			self.classcoords.PLAYER = {0.75, 1, 0.75, 1}
-			self.classcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
-		end
-	end
-
-	-- we ignore roles & specs on Project Ascension since players
-	-- have a custom module to set their own colors & icons.
-	if not self.Ascension and not self.AscensionCoA then
-		-- role icon file and texture coordinates
-		self.roleicons = [[Interface\AddOns\Skada\Media\Textures\icon-roles]]
-		self.rolecoords = {
-			LEADER = {0, 0.25, 0, 1},
-			DAMAGER = {0.25, 0.5, 0, 1},
-			TANK = {0.5, 0.75, 0, 1},
-			HEALER = {0.75, 1, 0, 1},
-			NONE = ""
-		}
-
-		-- specialization icons
-		self.specicons = [[Interface\AddOns\Skada\Media\Textures\icon-specs]]
-		self.speccoords = {
-			[62] = {0.25, 0.375, 0.25, 0.5}, --> Mage: Arcane
-			[63] = {0.375, 0.5, 0.25, 0.5}, --> Mage: Fire
-			[64] = {0.5, 0.625, 0.25, 0.5}, --> Mage: Frost
-			[65] = {0.625, 0.75, 0.25, 0.5}, --> Paladin: Holy
-			[66] = {0.75, 0.875, 0.25, 0.5}, --> Paladin: Protection
-			[70] = {0.875, 1, 0.25, 0.5}, --> Paladin: Retribution
-			[71] = {0.5, 0.625, 0.75, 1}, --> Warrior: Arms
-			[72] = {0.625, 0.75, 0.75, 1}, --> Warrior: Fury
-			[73] = {0.75, 0.875, 0.75, 1}, --> Warrior: Protection
-			[102] = {0.375, 0.5, 0, 0.25}, --> Druid: Balance
-			[103] = {0.5, 0.625, 0, 0.25}, --> Druid: Feral
-			[104] = {0.625, 0.75, 0, 0.25}, --> Druid: Tank
-			[105] = {0.75, 0.875, 0, 0.25}, --> Druid: Restoration
-			[250] = {0, 0.125, 0, 0.25}, --> Death Knight: Blood
-			[251] = {0.125, 0.25, 0, 0.25}, --> Death Knight: Frost
-			[252] = {0.25, 0.375, 0, 0.25}, --> Death Knight: Unholy
-			[253] = {0.875, 1, 0, 0.25}, --> Hunter: Beastmastery
-			[254] = {0, 0.125, 0.25, 0.5}, --> Hunter: Marksmalship
-			[255] = {0.125, 0.25, 0.25, 0.5}, --> Hunter: Survival
-			[256] = {0, 0.125, 0.5, 0.75}, --> Priest: Discipline
-			[257] = {0.125, 0.25, 0.5, 0.75}, --> Priest: Holy
-			[258] = {0.25, 0.375, 0.5, 0.75}, --> Priest: Shadow
-			[259] = {0.375, 0.5, 0.5, 0.75}, --> Rogue: Assassination
-			[260] = {0.5, 0.625, 0.5, 0.75}, --> Rogue: Combat
-			[261] = {0.625, 0.75, 0.5, 0.75}, --> Rogue: Subtlty
-			[262] = {0.75, 0.875, 0.5, 0.75}, --> Shaman: Elemental
-			[263] = {0.875, 1, 0.5, 0.75}, --> Shaman: Enhancement
-			[264] = {0, 0.125, 0.75, 1}, --> Shaman: Restoration
-			[265] = {0.125, 0.25, 0.75, 1}, --> Warlock: Affliction
-			[266] = {0.25, 0.375, 0.75, 1}, --> Warlock: Demonology
-			[267] = {0.375, 0.5, 0.75, 1} --> Warlock: Destruction
-		}
-	end
-end
-
-function Skada:RegisterSchools()
-	self.RegisterSchools = nil -- remove it
-
-	-- spell school colors
-	self.schoolcolors = {
-		[1] = {a = 1.00, r = 1.00, g = 1.00, b = 0.00}, -- Physical
-		[2] = {a = 1.00, r = 1.00, g = 0.90, b = 0.50}, -- Holy
-		[4] = {a = 1.00, r = 1.00, g = 0.50, b = 0.00}, -- Fire
-		[8] = {a = 1.00, r = 0.30, g = 1.00, b = 0.30}, -- Nature
-		[16] = {a = 1.00, r = 0.50, g = 1.00, b = 1.00}, -- Frost
-		[20] = {a = 1.00, r = 0.50, g = 1.00, b = 1.00}, -- Frostfire
-		[32] = {a = 1.00, r = 0.50, g = 0.50, b = 1.00}, -- Shadow
-		[64] = {a = 1.00, r = 1.00, g = 0.50, b = 1.00} -- Arcane
-	}
-
-	-- spell school names
-	self.schoolnames = {
-		[1] = STRING_SCHOOL_PHYSICAL:gsub("%(", ""):gsub("%)", ""),
-		[2] = STRING_SCHOOL_HOLY:gsub("%(", ""):gsub("%)", ""),
-		[4] = STRING_SCHOOL_FIRE:gsub("%(", ""):gsub("%)", ""),
-		[8] = STRING_SCHOOL_NATURE:gsub("%(", ""):gsub("%)", ""),
-		[16] = STRING_SCHOOL_FROST:gsub("%(", ""):gsub("%)", ""),
-		[20] = STRING_SCHOOL_FROSTFIRE:gsub("%(", ""):gsub("%)", ""),
-		[32] = STRING_SCHOOL_SHADOW:gsub("%(", ""):gsub("%)", ""),
-		[64] = STRING_SCHOOL_ARCANE:gsub("%(", ""):gsub("%)", "")
-	}
-end
-
--------------------------------------------------------------------------------
 -- Notifications stuff!
 
 do
@@ -835,5 +836,68 @@ do
 		if not (LibToast and LibToast:Spawn("SkadaToastFrame", text, title, icon, urgency)) then
 			self:Print(text)
 		end
+	end
+end
+
+-------------------------------------------------------------------------------
+-- units fix function.
+--
+-- on certain servers, certain spells are not assigned properly and
+-- in order to work around this, these functions were added.
+--
+-- for example, Death Knight' "Mark of Blood" healing is not considered
+-- by Skada because the healing is attributed to the boss and not to the
+-- player who used the spell, so in some modules you will find a table
+-- called "queuedSpells" in which you can store a table of [spellid] = spellid
+-- used by other modules.
+-- In the case of "Mark of Blood" (49005), the healing from the spell 50424
+-- is attributed to the target instead of the DK, so whenever Skada detects
+-- a healing from 50424 it will check queued units, if found the player data
+-- will be used.
+
+do
+	local queued_units = nil
+
+	function Skada:QueueUnit(spellid, srcGUID, srcName, srcFlags, dstGUID)
+		if spellid and srcName and srcGUID and dstGUID and srcGUID ~= dstGUID then
+			queued_units = queued_units or T.get("Skada_QueuedUnits")
+			queued_units[spellid] = queued_units[spellid] or {}
+			queued_units[spellid][dstGUID] = {id = srcGUID, name = srcName, flag = srcFlags}
+		end
+	end
+
+	function Skada:UnqueueUnit(spellid, dstGUID)
+		if spellid and dstGUID and queued_units and queued_units[spellid] then
+			if queued_units[spellid][dstGUID] then
+				queued_units[spellid][dstGUID] = nil
+			end
+			if Skada.tLength(queued_units[spellid]) == 0 then
+				queued_units[spellid] = nil
+			end
+		end
+	end
+
+	function Skada:FixUnit(spellid, guid, name, flag)
+		if spellid and guid and queued_units and queued_units[spellid] and queued_units[spellid][guid] then
+			return queued_units[spellid][guid].id or guid, queued_units[spellid][guid].name or name, queued_units[spellid][guid].flag or flag
+		end
+		return guid, name, flag
+	end
+
+	function Skada:IsQueuedUnit(guid)
+		if queued_units and tonumber(guid) then
+			for _, units in pairs(queued_units) do
+				for id, _ in pairs(units) do
+					if id == guid then
+						return true
+					end
+				end
+			end
+		end
+		return false
+	end
+
+	function Skada:ClearQueueUnits()
+		T.free("Skada_QueuedUnits", queued_units)
 	end
 end
