@@ -2569,7 +2569,19 @@ function Skada:RefreshMMButton()
 	end
 end
 
-function Skada:ApplySettings(name)
+function Skada:ApplySettings(name, hidemenu)
+	if type(name) == "table" and name.db and name.db.name then
+		name = name.db.name
+	elseif type(name) == "boolean" then
+		hidemenu = name
+		name = nil
+	end
+
+	-- close dropdown menus?
+	if hidemenu == true then
+		CloseDropDownMenus()
+	end
+
 	for _, win in ipairs(windows) do
 		if name and win.db.name == name then
 			win:SetChild(win.db.child)

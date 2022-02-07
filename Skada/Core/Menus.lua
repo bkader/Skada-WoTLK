@@ -252,7 +252,7 @@ function Skada:OpenMenu(window)
 				info.text = L["Lock Window"]
 				info.func = function()
 					window.db.barslocked = not window.db.barslocked
-					Skada:ApplySettings(window)
+					Skada:ApplySettings(window.db.name)
 				end
 				info.checked = window.db.barslocked
 				info.isNotRadio = 1
@@ -269,7 +269,7 @@ function Skada:OpenMenu(window)
 						window.db.hidden = false
 						window:Show()
 					end
-					Skada:ApplySettings(window)
+					Skada:ApplySettings(window.db.name, true)
 				end
 				info.checked = not window:IsShown()
 				info.isNotRadio = 1
@@ -288,7 +288,7 @@ function Skada:OpenMenu(window)
 								end
 							end
 						end
-						Skada:ApplySettings(window)
+						Skada:ApplySettings(window.db.name)
 					end
 					info.checked = window.db.sticky
 					info.isNotRadio = 1
@@ -300,7 +300,7 @@ function Skada:OpenMenu(window)
 				info.text = L["Clamped To Screen"]
 				info.func = function()
 					window.db.clamped = not window.db.clamped
-					Skada:ApplySettings(window)
+					Skada:ApplySettings(window.db.name)
 				end
 				info.checked = window.db.clamped
 				info.isNotRadio = 1
@@ -320,7 +320,7 @@ function Skada:OpenMenu(window)
 					info.text = L["Always show self"]
 					info.func = function()
 						window.db.showself = not window.db.showself
-						Skada:ApplySettings(window)
+						Skada:ApplySettings(window.db.name)
 					end
 					info.checked = (window.db.showself == true)
 					info.isNotRadio = 1
@@ -330,7 +330,7 @@ function Skada:OpenMenu(window)
 					info.text = L["Include set"]
 					info.func = function()
 						window.db.titleset = not window.db.titleset
-						Skada:ApplySettings(window)
+						Skada:ApplySettings(window.db.name)
 					end
 					info.checked = (window.db.titleset == true)
 					info.isNotRadio = 1
@@ -340,7 +340,7 @@ function Skada:OpenMenu(window)
 					info.text = L["Encounter Timer"]
 					info.func = function()
 						window.db.combattimer = not window.db.combattimer
-						Skada:ApplySettings(window)
+						Skada:ApplySettings(window.db.name)
 					end
 					info.checked = (window.db.combattimer == true)
 					info.isNotRadio = 1
@@ -478,7 +478,7 @@ function Skada:OpenMenu(window)
 				info.text = L["Activity Time"]
 				info.func = function()
 					Skada.db.profile.timemesure = 1
-					Skada:ApplySettings()
+					Skada:ApplySettings(true)
 				end
 				info.checked = (Skada.db.profile.timemesure == 1)
 				UIDropDownMenu_AddButton(info, level)
@@ -487,7 +487,7 @@ function Skada:OpenMenu(window)
 				info.text = L["Effective Time"]
 				info.func = function()
 					Skada.db.profile.timemesure = 2
-					Skada:ApplySettings()
+					Skada:ApplySettings(true)
 				end
 				info.checked = (Skada.db.profile.timemesure == 2)
 				UIDropDownMenu_AddButton(info, level)
@@ -505,7 +505,7 @@ function Skada:OpenMenu(window)
 				info.text = L["Condensed"]
 				info.func = function()
 					Skada.db.profile.numberformat = 1
-					Skada:ApplySettings()
+					Skada:ApplySettings(true)
 				end
 				info.checked = (Skada.db.profile.numberformat == 1)
 				UIDropDownMenu_AddButton(info, level)
@@ -514,7 +514,7 @@ function Skada:OpenMenu(window)
 				info.text = L["Comma"]
 				info.func = function()
 					Skada.db.profile.numberformat = 2
-					Skada:ApplySettings()
+					Skada:ApplySettings(true)
 				end
 				info.checked = (Skada.db.profile.numberformat == 2)
 				UIDropDownMenu_AddButton(info, level)
@@ -523,7 +523,7 @@ function Skada:OpenMenu(window)
 				info.text = L["Detailed"]
 				info.func = function()
 					Skada.db.profile.numberformat = 3
-					Skada:ApplySettings()
+					Skada:ApplySettings(true)
 				end
 				info.checked = (Skada.db.profile.numberformat == 3)
 				UIDropDownMenu_AddButton(info, level)
@@ -545,6 +545,7 @@ function Skada:OpenMenu(window)
 				end
 				info.checked = (Skada.db.profile.showtotals == true)
 				info.isNotRadio = 1
+				info.keepShownOnClick = 1
 				UIDropDownMenu_AddButton(info, level)
 
 				info = UIDropDownMenu_CreateInfo()
@@ -555,6 +556,7 @@ function Skada:OpenMenu(window)
 				end
 				info.checked = (Skada.db.profile.showranks == true)
 				info.isNotRadio = 1
+				info.keepShownOnClick = 1
 				UIDropDownMenu_AddButton(info, level)
 
 				info = UIDropDownMenu_CreateInfo()
@@ -565,6 +567,7 @@ function Skada:OpenMenu(window)
 				end
 				info.checked = (Skada.db.profile.showself == true)
 				info.isNotRadio = 1
+				info.keepShownOnClick = 1
 				UIDropDownMenu_AddButton(info, level)
 
 				info = UIDropDownMenu_CreateInfo()
@@ -575,6 +578,7 @@ function Skada:OpenMenu(window)
 				end
 				info.checked = (Skada.db.profile.tentativecombatstart == true)
 				info.isNotRadio = 1
+				info.keepShownOnClick = 1
 				UIDropDownMenu_AddButton(info, level)
 
 				info = UIDropDownMenu_CreateInfo()
@@ -585,6 +589,7 @@ function Skada:OpenMenu(window)
 				end
 				info.checked = (Skada.db.profile.absdamage == true)
 				info.isNotRadio = 1
+				info.keepShownOnClick = 1
 				UIDropDownMenu_AddButton(info, level)
 			end
 		elseif level == 3 then
