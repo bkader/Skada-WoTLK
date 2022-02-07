@@ -595,7 +595,6 @@ L["Announce Deaths"] = true
 L["Announces information about the last hit the player took before they died."] = true
 -- activity module
 L["Activity"] = true
-L["Activity per target"] = true
 -- dispels module lines --
 L["Dispels"] = true
 L["Dispel spell list"] = true

@@ -284,6 +284,7 @@ player:GetAbsorbHeal() -- returns the amount of absorbs and heals the player did
 player:GetAHPS() -- returns the amount of absorb+heal per second.
 player:GetAbsorbHealTargets() -- returns the list of absorb and heal targets.
 player:GetAbsorbHealOnTarget(name) -- returns the amount of absorb and heal the player did on the given target.
+player:GetAuraUptime(spellid) -- returns the uptime of the given aura if found, else null.
 player:GetDebuffsTargets() -- returns the list of the player's debuffs targets.
 player:GetDebuffTargets(spellid) -- returns the list of the given debuff targets.
 player:GetDebuffsOnTarget(name) -- returns the list of debuffs applied on the given target.

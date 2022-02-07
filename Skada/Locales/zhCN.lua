@@ -590,7 +590,6 @@ L["Announce Deaths"] = "宣布死亡"
 L["Announces information about the last hit the player took before they died."] = "宣布玩家死前最后一次命中。"
 -- activity module
 L["Activity"] = "活跃"
-L["Activity per target"] = "每个目标活跃"
 -- dispels module lines --
 L["Dispels"] = "驱散"
 L["Dispel spell list"] = "驱散法术列表"

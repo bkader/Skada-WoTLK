@@ -5,6 +5,7 @@ local tContains, min, max, floor = tContains, math.min, math.max, math.floor
 local UnitExists, UnitName, UnitGUID, UnitBuff = UnitExists, UnitName, UnitGUID, UnitBuff
 local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+local PercentToRGB = Skada.PercentToRGB
 local dummyTable = Skada.dummyTable
 local setPrototype = Skada.setPrototype
 local playerPrototype = Skada.playerPrototype
@@ -25,6 +26,13 @@ do
 		if not Skada:IsDisabled("Buffs") or not Skada:IsDisabled("Debuffs") then
 			Skada.RegisterCallback(self, "Skada_CombatTick", "Tick")
 			Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "Clean")
+
+			-- add player's aura uptime getter.
+			playerPrototype.GetAuraUptime = function(self, spellid)
+				if self.auras and spellid and self.auras[spellid] and (self.auras[spellid].uptime or 0) > 0 then
+					return self.auras[spellid].uptime, self:GetTime()
+				end
+			end
 		end
 	end
 
@@ -307,7 +315,11 @@ do
 			-- add segment and active times
 			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(player:GetTime(true)), 1, 1, 1)
-			tooltip:AddDoubleLine(L["Uptime"], Skada:FormatTime(aura.uptime), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Duration"], Skada:FormatTime(aura.uptime), 1, 1, 1)
+
+			-- display aura uptime in colored percent
+			local uptime = 100 * (aura.uptime / player:GetTime())
+			tooltip:AddDoubleLine(L["Uptime"], Skada:FormatPercent(uptime), nil, nil, nil, PercentToRGB(uptime))
 		end
 	end
 end

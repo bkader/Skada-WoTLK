@@ -593,7 +593,6 @@ L["Announce Deaths"] = "Объявить Смерти"
 L["Announces information about the last hit the player took before they died."] = "Объявляет последний удар игрок принял перед смертью."
 -- activity module
 L["Activity"] = "Активность"
-L["Activity per target"] = "Активность на цель"
 -- dispels module lines --
 L["Dispels"] = "Рассеивания"
 L["Dispel spell list"] = "Заклинания рассеивания"

@@ -460,7 +460,39 @@ do
 		return format(prefix and "ff%02x%02x%02x" or "%02x%02x%02x", r * 255, g * 255, b * 255)
 	end
 
+	local function PercentToRGB(perc, reverse, hex)
+		-- clamp first
+		perc = min(100, max(0, perc or 0))
+
+		-- start with full red
+		local r, g, b = 1, 0, 0
+
+		-- reversed?
+		if reverse then
+			r, g = 0, 1
+
+			if perc <= 50 then -- increment red channel
+				r = r + (perc / 50)
+			else -- set red to 1 and decrement green channel
+				r, g = 1, g - ((perc - 50) / 50)
+			end
+		elseif perc <= 50 then -- increment green channel
+			g = g + (perc / 50)
+		else -- set green to 1 and decrement red channel
+			r, g = r - ((perc - 50) / 50), 1
+		end
+
+		-- return hex? channels will be as of 2nd param.
+		if hex then
+			return RGBPercToHex(r, g, b, true), r, g, b
+		end
+
+		-- return only channels.
+		return r, g, b
+	end
+
 	lib.RGBPercToHex = RGBPercToHex
+	lib.PercentToRGB = PercentToRGB
 end
 
 -------------------------------------------------------------------------------
@@ -727,6 +759,7 @@ local mixins = {
 	"GetUnitRole",
 	-- color conversion
 	"RGBPercToHex",
+	"PercentToRGB",
 	-- misc util
 	"HexEncode",
 	"HexDecode",

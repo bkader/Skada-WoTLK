@@ -485,7 +485,7 @@ L["%s's received healing"] = "Sanación recibida por %s"
 L["Healing Done By Spell"] = "Sanación hecha por hechizo"
 L["Healing spell sources"] = "Fuentes del hechizo de sanación"
 -- Auras Module --
-L["Uptime"] = "Duración"
+L["Uptime"] = "Disponibilidad"
 L["Buffs and Debuffs"] = "Beneficios y Perjuicios"
 L["Buffs"] = "Beneficios"
 L["Buff spell list"] = "Hechizos de beneficios"
@@ -594,7 +594,6 @@ L["Announce Deaths"] = "Anunciar muertes"
 L["Announces information about the last hit the player took before they died."] = "Anuncia el último golpe que recibió el jugador antes de morir."
 -- activity module
 L["Activity"] = "Actividad"
-L["Activity per target"] = "Actividad por objetivo"
 -- dispels module lines --
 L["Dispels"] = "Disipaciones"
 L["Dispel spell list"] = "Hechizos de disipar"

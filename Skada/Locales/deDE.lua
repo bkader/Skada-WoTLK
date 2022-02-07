@@ -592,7 +592,6 @@ L["Announce Deaths"] = "Todesfälle bekannt geben"
 L["Announces information about the last hit the player took before they died."] = "Gibt den letzten Treffer der Person an, bevor sie starb."
 -- activity module
 L["Activity"] = "Aktivität"
-L["Activity per target"] = "Aktivität pro Ziel"
 -- dispels module lines --
 L["Dispels"] = "Bannungen"
 L["Dispel spell list"] = "Zauberliste zerstreuen"

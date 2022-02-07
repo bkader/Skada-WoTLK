@@ -4,6 +4,7 @@ local format, max = string.format, math.max
 local pairs, select = pairs, select
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local cacheTable, T = Skada.cacheTable, Skada.Table
+local PercentToRGB = Skada.PercentToRGB
 local setPrototype = Skada.setPrototype
 local playerPrototype = Skada.playerPrototype
 local misstypes = Skada.missTypes
@@ -322,6 +323,15 @@ Skada:AddLoadableModule("Damage", function(L)
 
 			local amount = Skada.db.profile.absdamage and spell.total or spell.amount
 			tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(amount / spell.count), 1, 1, 1)
+
+			-- show the aura uptime in case of a debuff.
+			if player.GetAuraUptime then
+				local uptime, activetime = player:GetAuraUptime(spell.id)
+				if (uptime or 0) > 0 then
+					uptime = 100 * (uptime / activetime)
+					tooltip:AddDoubleLine(L["Uptime"], Skada:FormatPercent(uptime), nil, nil, nil, PercentToRGB(uptime))
+				end
+			end
 
 			if spell.hitmin and spell.hitmax then
 				local spellmin = spell.hitmin
