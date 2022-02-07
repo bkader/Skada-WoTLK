@@ -266,7 +266,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	end
 
 	local function log_absorb(set, absorb, nocount)
-		if not absorb.spellid or tContains(ignoredSpells, absorb.spellid) or (absorb.amount or 0) == 0 then return end
+		if not absorb.spellid or (absorb.amount or 0) == 0 then return end
 
 		local player = Skada:GetPlayer(set, absorb.playerid, absorb.playername)
 		if player then
@@ -442,7 +442,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, _, spellschool, _, points = ...
-		if absorbspells[spellid] and dstName then
+		if spellid and absorbspells[spellid] and not tContains(ignoredSpells, spellid) and dstName then
 			shields[dstName] = shields[dstName] or {}
 			shields[dstName][spellid] = shields[dstName][spellid] or {}
 

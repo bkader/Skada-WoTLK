@@ -20,15 +20,13 @@ Skada:AddLoadableModule("Fails", function(L)
 	local ignoredSpells = {}
 
 	local function log_fail(set, playerid, playername, spellid, event)
-		if (spellid and tContains(ignoredSpells, spellid)) or not set then return end
-
 		local player = Skada:FindPlayer(set, playerid, playername)
 		if player and (player.role ~= "TANK" or not tContains(tankevents, event)) then
 			player.fail = (player.fail or 0) + 1
 			set.fail = (set.fail or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
-			if set == Skada.current and spellid then
+			if set == Skada.current then
 				player.failspells = player.failspells or {}
 				player.failspells[spellid] = (player.failspells[spellid] or 0) + 1
 			end
@@ -38,7 +36,7 @@ Skada:AddLoadableModule("Fails", function(L)
 	local function onFail(event, who, failtype)
 		if who and event then
 			local spellid = LibFail:GetEventSpellId(event)
-			if spellid then
+			if spellid and not tContains(ignoredSpells, spellid) then
 				local unitGUID = UnitGUID(who)
 				if unitGUID then
 					log_fail(Skada.current, unitGUID, who, spellid, event)

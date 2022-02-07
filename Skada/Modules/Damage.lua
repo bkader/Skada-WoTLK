@@ -115,8 +115,6 @@ Skada:AddLoadableModule("Damage", function(L)
 	end
 
 	local function log_damage(set, dmg, tick)
-		if not dmg.spellid or tContains(ignoredSpells, dmg.spellid) then return end
-
 		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
 		if not player then return end
 
@@ -234,28 +232,29 @@ Skada:AddLoadableModule("Damage", function(L)
 	local function SpellCast(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID and dstGUID then
 			dmg.spellid, dmg.spellname, dmg.spellschool = ...
+			if dmg.spellid and dmg.spellname and not tContains(ignoredSpells, dmg.spellid) then
+				dmg.playerid = srcGUID
+				dmg.playerflags = srcFlags
+				dmg.playername = srcName
 
-			dmg.playerid = srcGUID
-			dmg.playerflags = srcFlags
-			dmg.playername = srcName
+				dmg.dstGUID = dstGUID
+				dmg.dstName = dstName
+				dmg.dstFlags = dstFlags
 
-			dmg.dstGUID = dstGUID
-			dmg.dstName = dstName
-			dmg.dstFlags = dstFlags
+				dmg.amount = nil
+				dmg.overkill = nil
+				dmg.resisted = nil
+				dmg.blocked = nil
+				dmg.absorbed = nil
+				dmg.critical = nil
+				dmg.glancing = nil
+				dmg.misstype = nil
+				dmg.petname = nil
 
-			dmg.amount = nil
-			dmg.overkill = nil
-			dmg.resisted = nil
-			dmg.blocked = nil
-			dmg.absorbed = nil
-			dmg.critical = nil
-			dmg.glancing = nil
-			dmg.misstype = nil
-			dmg.petname = nil
+				Skada:FixPets(dmg)
 
-			Skada:FixPets(dmg)
-
-			log_spellcast(Skada.current, dmg)
+				log_spellcast(Skada.current, dmg)
+			end
 		end
 	end
 
@@ -263,13 +262,17 @@ Skada:AddLoadableModule("Damage", function(L)
 		if srcGUID ~= dstGUID then
 			-- handle extra attacks
 			if eventtype == "SPELL_EXTRA_ATTACKS" then
-				local _, spellname, _, amount = ...
-				extraATT = extraATT or T.get("Damage_ExtraAttacks")
-				if not extraATT[srcName] then
-					extraATT[srcName] = new()
-					extraATT[srcName].spellname = spellname
-					extraATT[srcName].amount = amount
+				local spellid, spellname, _, amount = ...
+
+				if spellid and spellname and not tContains(ignoredSpells, spellid) then
+					extraATT = extraATT or T.get("Damage_ExtraAttacks")
+					if not extraATT[srcName] then
+						extraATT[srcName] = new()
+						extraATT[srcName].spellname = spellname
+						extraATT[srcName].amount = amount
+					end
 				end
+
 				return
 			end
 
@@ -289,20 +292,22 @@ Skada:AddLoadableModule("Damage", function(L)
 				dmg.spellid, dmg.spellname, dmg.spellschool, dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing = ...
 			end
 
-			dmg.playerid = srcGUID
-			dmg.playername = srcName
-			dmg.playerflags = srcFlags
+			if dmg.spellid and dmg.spellname and not tContains(ignoredSpells, dmg.spellid) then
+				dmg.playerid = srcGUID
+				dmg.playername = srcName
+				dmg.playerflags = srcFlags
 
-			dmg.dstGUID = dstGUID
-			dmg.dstName = dstName
-			dmg.dstFlags = dstFlags
+				dmg.dstGUID = dstGUID
+				dmg.dstName = dstName
+				dmg.dstFlags = dstFlags
 
-			dmg.misstype = nil
-			dmg.petname = nil
-			Skada:FixPets(dmg)
+				dmg.misstype = nil
+				dmg.petname = nil
+				Skada:FixPets(dmg)
 
-			log_damage(Skada.current, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
-			log_damage(Skada.total, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
+				log_damage(Skada.current, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
+				log_damage(Skada.total, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
+			end
 		end
 	end
 
@@ -317,35 +322,37 @@ Skada:AddLoadableModule("Damage", function(L)
 				dmg.spellid, dmg.spellname, dmg.spellschool, dmg.misstype, amount = ...
 			end
 
-			dmg.playerid = srcGUID
-			dmg.playername = srcName
-			dmg.playerflags = srcFlags
+			if dmg.spellid and dmg.spellname and not tContains(ignoredSpells, dmg.spellid) then
+				dmg.playerid = srcGUID
+				dmg.playername = srcName
+				dmg.playerflags = srcFlags
 
-			dmg.dstGUID = dstGUID
-			dmg.dstName = dstName
-			dmg.dstFlags = dstFlags
+				dmg.dstGUID = dstGUID
+				dmg.dstName = dstName
+				dmg.dstFlags = dstFlags
 
-			dmg.amount = 0
-			dmg.overkill = 0
-			dmg.resisted = nil
-			dmg.blocked = nil
-			dmg.absorbed = nil
-			dmg.critical = nil
-			dmg.glancing = nil
+				dmg.amount = 0
+				dmg.overkill = 0
+				dmg.resisted = nil
+				dmg.blocked = nil
+				dmg.absorbed = nil
+				dmg.critical = nil
+				dmg.glancing = nil
 
-			if dmg.misstype == "ABSORB" then
-				dmg.absorbed = amount or 0
-			elseif dmg.misstype == "BLOCK" then
-				dmg.blocked = amount or 0
-			elseif dmg.misstype == "RESIST" then
-				dmg.resisted = amount or 0
+				if dmg.misstype == "ABSORB" then
+					dmg.absorbed = amount or 0
+				elseif dmg.misstype == "BLOCK" then
+					dmg.blocked = amount or 0
+				elseif dmg.misstype == "RESIST" then
+					dmg.resisted = amount or 0
+				end
+
+				dmg.petname = nil
+				Skada:FixPets(dmg)
+
+				log_damage(Skada.current, dmg, eventtype == "SPELL_PERIODIC_MISSED")
+				log_damage(Skada.total, dmg, eventtype == "SPELL_PERIODIC_MISSED")
 			end
-
-			dmg.petname = nil
-			Skada:FixPets(dmg)
-
-			log_damage(Skada.current, dmg, eventtype == "SPELL_PERIODIC_MISSED")
-			log_damage(Skada.total, dmg, eventtype == "SPELL_PERIODIC_MISSED")
 		end
 	end
 

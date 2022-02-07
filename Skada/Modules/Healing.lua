@@ -40,8 +40,6 @@ Skada:AddLoadableModule("Healing", function(L)
 	end
 
 	local function log_heal(set, data, tick)
-		if not data.spellid or tContains(ignoredSpells, data.spellid) then return end
-
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if player then
 			-- get rid of overheal
@@ -115,6 +113,31 @@ Skada:AddLoadableModule("Healing", function(L)
 	local function SpellCast(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID and dstGUID then
 			heal.spellid, _, heal.spellschool = ...
+			if heal.spellid and not tContains(ignoredSpells, heal.spellid) then
+				heal.playerid = srcGUID
+				heal.playername = srcName
+				heal.playerflags = srcFlags
+
+				heal.dstGUID = dstGUID
+				heal.dstName = dstName
+				heal.dstFlags = dstFlags
+
+				heal.amount = nil
+				heal.overheal = nil
+				heal.critical = nil
+				heal.petname = nil
+
+				Skada:FixPets(heal)
+
+				log_spellcast(Skada.current, heal)
+			end
+		end
+	end
+
+	local function SpellHeal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		local spellid = ...
+		if spellid and not tContains(ignoredSpells, spellid) then
+			srcGUID, srcName, srcFlags = Skada:FixUnit(spellid, srcGUID, srcName, srcFlags)
 
 			heal.playerid = srcGUID
 			heal.playername = srcName
@@ -124,36 +147,14 @@ Skada:AddLoadableModule("Healing", function(L)
 			heal.dstName = dstName
 			heal.dstFlags = dstFlags
 
-			heal.amount = nil
-			heal.overheal = nil
-			heal.critical = nil
-			heal.petname = nil
+			heal.spellid, _, heal.spellschool, heal.amount, heal.overheal, _, heal.critical = ...
 
+			heal.petname = nil
 			Skada:FixPets(heal)
 
-			log_spellcast(Skada.current, heal)
+			log_heal(Skada.current, heal, eventtype == "SPELL_PERIODIC_HEAL")
+			log_heal(Skada.total, heal, eventtype == "SPELL_PERIODIC_HEAL")
 		end
-	end
-
-	local function SpellHeal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid = ...
-		srcGUID, srcName, srcFlags = Skada:FixUnit(spellid, srcGUID, srcName, srcFlags)
-
-		heal.playerid = srcGUID
-		heal.playername = srcName
-		heal.playerflags = srcFlags
-
-		heal.dstGUID = dstGUID
-		heal.dstName = dstName
-		heal.dstFlags = dstFlags
-
-		heal.spellid, _, heal.spellschool, heal.amount, heal.overheal, _, heal.critical = ...
-
-		heal.petname = nil
-		Skada:FixPets(heal)
-
-		log_heal(Skada.current, heal, eventtype == "SPELL_PERIODIC_HEAL")
-		log_heal(Skada.total, heal, eventtype == "SPELL_PERIODIC_HEAL")
 	end
 
 	local function playermod_tooltip(win, id, label, tooltip)

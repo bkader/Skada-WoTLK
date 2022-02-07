@@ -15,8 +15,6 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 	local ignoredSpells = {}
 
 	local function log_damage(set, dmg)
-		if dmg.spellid and tContains(ignoredSpells, dmg.spellid) then return end
-
 		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
 		if player then
 			Skada:AddActiveTime(player, dmg.amount > 0)
@@ -60,18 +58,20 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 				dmg.spellid, _, _, amount, _, _, _, _, absorbed = ...
 			end
 
-			dmg.playerid = srcGUID
-			dmg.playername = srcName
-			dmg.playerflags = srcFlags
+			if dmg.spellid and not tContains(ignoredSpells, dmg.spellid) then
+				dmg.playerid = srcGUID
+				dmg.playername = srcName
+				dmg.playerflags = srcFlags
 
-			dmg.dstGUID = dstGUID
-			dmg.dstName = dstName
-			dmg.dstFlags = dstFlags
+				dmg.dstGUID = dstGUID
+				dmg.dstName = dstName
+				dmg.dstFlags = dstFlags
 
-			dmg.amount = (amount or 0) + (absorbed or 0)
+				dmg.amount = (amount or 0) + (absorbed or 0)
 
-			log_damage(Skada.current, dmg)
-			log_damage(Skada.total, dmg)
+				log_damage(Skada.current, dmg)
+				log_damage(Skada.total, dmg)
+			end
 		end
 	end
 

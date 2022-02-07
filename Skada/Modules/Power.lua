@@ -41,19 +41,14 @@ Skada:AddLoadableModule("Resources", function(L)
 	local ignoredSpells = {}
 
 	local function log_gain(set, gain)
-		if not (gain and gain.type and gainTable[gain.type]) then
-			return
-		end
-		if gain.spellid and tContains(ignoredSpells, gain.spellid) then
-			return
-		end
+		if not (gain and gain.type and gainTable[gain.type]) then return end
 
 		local player = Skada:GetPlayer(set, gain.playerid, gain.playername, gain.playerflags)
 		if player then
 			player[gainTable[gain.type]] = (player[gainTable[gain.type]] or 0) + gain.amount
 			set[gainTable[gain.type]] = (set[gainTable[gain.type]] or 0) + gain.amount
 
-			if set == Skada.current and gain.spellid then
+			if set == Skada.current then
 				player[spellTable[gain.type]] = player[spellTable[gain.type]] or {}
 				player[spellTable[gain.type]][gain.spellid] = (player[spellTable[gain.type]][gain.spellid] or 0) + gain.amount
 			end
@@ -63,25 +58,31 @@ Skada:AddLoadableModule("Resources", function(L)
 	local gain = {}
 
 	local function SpellEnergize(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		gain.playerid = dstGUID
-		gain.playername = dstName
-		gain.playerflags = dstFlags
 		gain.spellid, _, _, gain.amount, gain.type = ...
+		if gain.spellid and not tContains(ignoredSpells, gain.spellid) then
+			gain.playerid = dstGUID
+			gain.playername = dstName
+			gain.playerflags = dstFlags
 
-		Skada:FixPets(gain)
-		log_gain(Skada.current, gain)
-		log_gain(Skada.total, gain)
+			Skada:FixPets(gain)
+
+			log_gain(Skada.current, gain)
+			log_gain(Skada.total, gain)
+		end
 	end
 
 	local function SpellLeech(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		gain.playerid = dstGUID
-		gain.playername = dstName
-		gain.playerflags = dstFlags
 		gain.spellid, _, _, gain.amount, gain.type = ...
+		if gain.spellid and not tContains(ignoredSpells, gain.spellid) then
+			gain.playerid = dstGUID
+			gain.playername = dstName
+			gain.playerflags = dstFlags
 
-		Skada:FixPets(gain)
-		log_gain(Skada.current, gain)
-		log_gain(Skada.total, gain)
+			Skada:FixPets(gain)
+
+			log_gain(Skada.current, gain)
+			log_gain(Skada.total, gain)
+		end
 	end
 
 	-- a base module used to create our power modules.

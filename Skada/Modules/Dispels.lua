@@ -17,9 +17,6 @@ Skada:AddLoadableModule("Dispels", function(L)
 	local ignoredSpells = {}
 
 	local function log_dispel(set, data)
-		if data.spellid and tContains(ignoredSpells, data.spellid) then return end
-		if data.extraspellid and tContains(ignoredSpells, data.extraspellid) then return end
-
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if player then
 			-- increment player's and set's dispels count
@@ -58,6 +55,14 @@ Skada:AddLoadableModule("Dispels", function(L)
 
 	local function SpellDispel(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if eventtype ~= "SPELL_DISPEL_FAILED" then -- ignore already but, just in case!
+			data.spellid, _, _, data.extraspellid = ...
+			data.extraspellid = data.extraspellid or 6603
+
+			-- invalid/ignored spell?
+			if (data.spellid and tContains(ignoredSpells, data.spellid)) or tContains(ignoredSpells, data.extraspellid) then
+				return
+			end
+
 			data.playerid = srcGUID
 			data.playername = srcName
 			data.playerflags = srcFlags
@@ -65,9 +70,6 @@ Skada:AddLoadableModule("Dispels", function(L)
 			data.dstGUID = dstGUID
 			data.dstName = dstName
 			data.dstFlags = dstFlags
-
-			data.spellid, _, _, data.extraspellid = ...
-			data.extraspellid = data.extraspellid or 6603
 
 			log_dispel(Skada.current, data)
 			log_dispel(Skada.total, data)

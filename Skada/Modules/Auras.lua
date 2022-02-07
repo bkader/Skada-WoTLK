@@ -376,8 +376,8 @@ Skada:AddLoadableModule("Buffs", function(L)
 	local function HandleBuff(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
 		if
 			spellid and -- just in case, you never know!
-			(auratype == "BUFF" or speciallist[spellid]) and
 			not tContains(ignoredSpells, spellid) and
+			(auratype == "BUFF" or speciallist[spellid]) and
 			Skada:IsPlayer(dstGUID, dstFlags, dstName)
 		then
 			aura.playerid = dstGUID
@@ -532,7 +532,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 
 	local aura = {}
 	local function HandleDebuff(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
-		if auratype == "DEBUFF" and not tContains(ignoredSpells, spellid) then
+		if spellid and not tContains(ignoredSpells, spellid) and auratype == "DEBUFF" then
 			if srcName == nil and #srcGUID == 0 and dstName and #dstGUID > 0 then
 				srcGUID = dstGUID
 				srcName = dstName

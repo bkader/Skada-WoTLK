@@ -46,8 +46,6 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 	end
 
 	local function log_damage(set, dmg, tick)
-		if not dmg.spellid or tContains(ignoredSpells, dmg.spellid) then return end
-
 		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
 		if not player then return end
 
@@ -167,26 +165,27 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 	local function SpellCast(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID and dstGUID then
 			dmg.spellid, dmg.spellname, dmg.spellschool = ...
+			if dmg.spellid and dmg.spellname and not tContains(ignoredSpells, dmg.spellid) then
+				dmg.srcGUID = srcGUID
+				dmg.srcName = srcName
+				dmg.srcFlags = srcFlags
 
-			dmg.srcGUID = srcGUID
-			dmg.srcName = srcName
-			dmg.srcFlags = srcFlags
+				dmg.playerid = dstGUID
+				dmg.playername = dstName
+				dmg.playerflags = dstFlags
 
-			dmg.playerid = dstGUID
-			dmg.playername = dstName
-			dmg.playerflags = dstFlags
+				dmg.amount = nil
+				dmg.overkill = nil
+				dmg.resisted = nil
+				dmg.blocked = nil
+				dmg.absorbed = nil
+				dmg.critical = nil
+				dmg.glancing = nil
+				dmg.crushing = nil
+				dmg.misstype = nil
 
-			dmg.amount = nil
-			dmg.overkill = nil
-			dmg.resisted = nil
-			dmg.blocked = nil
-			dmg.absorbed = nil
-			dmg.critical = nil
-			dmg.glancing = nil
-			dmg.crushing = nil
-			dmg.misstype = nil
-
-			log_spellcast(Skada.current, dmg)
+				log_spellcast(Skada.current, dmg)
+			end
 		end
 	end
 
@@ -194,13 +193,17 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 		if srcGUID ~= dstGUID then
 			-- handle extra attacks
 			if eventtype == "SPELL_EXTRA_ATTACKS" then
-				local _, spellname, _, amount = ...
-				extraATT = extraATT or T.get("DamageTaken_ExtraAttacks")
-				if not extraATT[srcName] then
-					extraATT[srcName] = new()
-					extraATT[srcName].spellname = spellname
-					extraATT[srcName].amount = amount
+				local spellid, spellname, _, amount = ...
+
+				if spellid and spellname and not tContains(ignoredSpells, spellid) then
+					extraATT = extraATT or T.get("DamageTaken_ExtraAttacks")
+					if not extraATT[srcName] then
+						extraATT[srcName] = new()
+						extraATT[srcName].spellname = spellname
+						extraATT[srcName].amount = amount
+					end
 				end
+
 				return
 			end
 
@@ -220,18 +223,20 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				dmg.spellid, dmg.spellname, dmg.spellschool, dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing, dmg.crushing = ...
 			end
 
-			dmg.srcGUID = srcGUID
-			dmg.srcName = srcName
-			dmg.srcFlags = srcFlags
+			if dmg.spellid and dmg.spellname and not tContains(ignoredSpells, dmg.spellid) then
+				dmg.srcGUID = srcGUID
+				dmg.srcName = srcName
+				dmg.srcFlags = srcFlags
 
-			dmg.playerid = dstGUID
-			dmg.playername = dstName
-			dmg.playerflags = dstFlags
+				dmg.playerid = dstGUID
+				dmg.playername = dstName
+				dmg.playerflags = dstFlags
 
-			dmg.misstype = nil
+				dmg.misstype = nil
 
-			log_damage(Skada.current, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
-			log_damage(Skada.total, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
+				log_damage(Skada.current, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
+				log_damage(Skada.total, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
+			end
 		end
 	end
 
@@ -269,33 +274,35 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				dmg.spellid, dmg.spellname, dmg.spellschool, dmg.misstype, amount = ...
 			end
 
-			dmg.srcGUID = srcGUID
-			dmg.srcName = srcName
-			dmg.srcFlags = srcFlags
+			if dmg.spellid and dmg.spellname and not tContains(ignoredSpells, dmg.spellid) then
+				dmg.srcGUID = srcGUID
+				dmg.srcName = srcName
+				dmg.srcFlags = srcFlags
 
-			dmg.playerid = dstGUID
-			dmg.playername = dstName
-			dmg.playerflags = dstFlags
+				dmg.playerid = dstGUID
+				dmg.playername = dstName
+				dmg.playerflags = dstFlags
 
-			dmg.amount = 0
-			dmg.overkill = 0
-			dmg.resisted = nil
-			dmg.blocked = nil
-			dmg.absorbed = nil
-			dmg.critical = nil
-			dmg.glancing = nil
-			dmg.crushing = nil
+				dmg.amount = 0
+				dmg.overkill = 0
+				dmg.resisted = nil
+				dmg.blocked = nil
+				dmg.absorbed = nil
+				dmg.critical = nil
+				dmg.glancing = nil
+				dmg.crushing = nil
 
-			if dmg.misstype == "ABSORB" then
-				dmg.absorbed = amount or 0
-			elseif dmg.misstype == "BLOCK" then
-				dmg.blocked = amount or 0
-			elseif dmg.misstype == "RESIST" then
-				dmg.resisted = amount or 0
+				if dmg.misstype == "ABSORB" then
+					dmg.absorbed = amount or 0
+				elseif dmg.misstype == "BLOCK" then
+					dmg.blocked = amount or 0
+				elseif dmg.misstype == "RESIST" then
+					dmg.resisted = amount or 0
+				end
+
+				log_damage(Skada.current, dmg, eventtype == "SPELL_PERIODIC_MISSED")
+				log_damage(Skada.total, dmg, eventtype == "SPELL_PERIODIC_MISSED")
 			end
-
-			log_damage(Skada.current, dmg, eventtype == "SPELL_PERIODIC_MISSED")
-			log_damage(Skada.total, dmg, eventtype == "SPELL_PERIODIC_MISSED")
 		end
 	end
 

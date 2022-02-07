@@ -48,7 +48,7 @@ Skada:AddLoadableModule("Potions", function(L)
 			set.potion = (set.potion or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
-			if set == Skada.current and spellid then
+			if set == Skada.current then
 				local potionid = potionIDs[spellid]
 				player.potionspells = player.potionspells or {}
 				player.potionspells[potionid] = (player.potionspells[potionid] or 0) + 1

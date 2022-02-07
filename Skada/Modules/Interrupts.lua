@@ -19,11 +19,6 @@ Skada:AddLoadableModule("Interrupts", function(L)
 	local ignoredSpells = {}
 
 	local function log_interrupt(set, data)
-		-- ignored spells
-		if data.spellid and tContains(ignoredSpells, data.spellid) then return end
-		-- other ignored spells
-		if data.extraspellid and tContains(ignoredSpells, data.extraspellid) then return end
-
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if player then
 			-- increment player's and set's interrupts count
@@ -31,7 +26,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 			set.interrupt = (set.interrupt or 0) + 1
 
 			-- to save up memory, we only record the rest to the current set.
-			if set == Skada.current and data.spellid then
+			if set == Skada.current then
 				local spell = player.interruptspells and player.interruptspells[data.spellid]
 				if not spell then
 					player.interruptspells = player.interruptspells or {}
@@ -63,6 +58,14 @@ Skada:AddLoadableModule("Interrupts", function(L)
 	local function SpellInterrupt(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, spellname, _, extraspellid, extraspellname, _ = ...
 
+		spellid = spellid or 6603
+		spellname = spellname or L.Melee
+
+		-- invalid/ignored spell?
+		if tContains(ignoredSpells, spellid) or (extraspellid and tContains(ignoredSpells, extraspellid)) then
+			return
+		end
+
 		data.playerid = srcGUID
 		data.playername = srcName
 		data.playerflags = srcFlags
@@ -71,7 +74,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 		data.dstName = dstName
 		data.dstFlags = dstFlags
 
-		data.spellid = spellid or 6603
+		data.spellid = spellid
 		data.extraspellid = extraspellid
 
 		Skada:FixPets(data)

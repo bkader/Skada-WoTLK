@@ -256,7 +256,6 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 	local ignoredSpells = {}
 
 	local function log_damage(set, dmg)
-		if not dmg.spellid or tContains(ignoredSpells, dmg.spellid) then return end
 		local absorbed = dmg.absorbed or 0
 		if (dmg.amount + absorbed) == 0 then return end
 
@@ -371,15 +370,17 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 				dmg.spellid, _, dmg.spellschool, dmg.amount, dmg.overkill, _, _, _, dmg.absorbed = ...
 			end
 
-			dmg.enemyid = dstGUID
-			dmg.enemyname = dstName
-			dmg.enemyflags = dstFlags
+			if dmg.spellid and not tContains(ignoredSpells, dmg.spellid) then
+				dmg.enemyid = dstGUID
+				dmg.enemyname = dstName
+				dmg.enemyflags = dstFlags
 
-			dmg.srcGUID = srcGUID
-			dmg.srcName = srcName
-			dmg.srcFlags = srcFlags
+				dmg.srcGUID = srcGUID
+				dmg.srcName = srcName
+				dmg.srcFlags = srcFlags
 
-			log_damage(Skada.current, dmg)
+				log_damage(Skada.current, dmg)
+			end
 		end
 	end
 
@@ -394,7 +395,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 				spellid, _, spellschool, misstype, amount = ...
 			end
 
-			if misstype == "ABSORB" then
+			if misstype == "ABSORB" and spellid and not tContains(ignoredSpells, spellid) then
 				srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 
 				dmg.enemyid = dstGUID
@@ -797,7 +798,6 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 	local ignoredSpells = {}
 
 	local function log_damage(set, dmg)
-		if not dmg.spellid or not tContains(ignoredSpells, dmg.spellid) then return end
 		local absorbed = dmg.absorbed or 0
 		if (dmg.amount + absorbed) == 0 then return end
 
@@ -864,15 +864,17 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 				dmg.spellid, _, dmg.spellschool, dmg.amount, dmg.overkill, _, _, _, dmg.absorbed = ...
 			end
 
-			dmg.enemyid = srcGUID
-			dmg.enemyname = srcName
-			dmg.enemyflags = srcFlags
+			if dmg.spellid and not tContains(ignoredSpells, dmg.spellid) then
+				dmg.enemyid = srcGUID
+				dmg.enemyname = srcName
+				dmg.enemyflags = srcFlags
 
-			dmg.dstGUID = dstGUID
-			dmg.dstName = dstName
-			dmg.dstFlags = dstFlags
+				dmg.dstGUID = dstGUID
+				dmg.dstName = dstName
+				dmg.dstFlags = dstFlags
 
-			log_damage(Skada.current, dmg)
+				log_damage(Skada.current, dmg)
+			end
 		end
 	end
 
@@ -887,7 +889,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 				spellid, _, spellschool, misstype, amount = ...
 			end
 
-			if misstype == "ABSORB" then
+			if misstype == "ABSORB" and spellid and not tContains(ignoredSpells, spellid) then
 				srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 
 				dmg.enemyid = srcGUID
@@ -1198,7 +1200,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 	local ignoredSpells = {}
 
 	local function log_heal(set, data)
-		if not data.spellid or tContains(ignoredSpells, data.spellid) or (data.amount or 0) == 0 then return end
+		if (data.amount or 0) == 0 then return end
 
 		local e = Skada:GetEnemy(set, data.enemyname, data.enemyid, data.enemyflags)
 		if e then
@@ -1229,20 +1231,22 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 	local heal = {}
 
 	local function SpellHeal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		heal.enemyid = srcGUID
-		heal.enemyname = srcName
-		heal.enemyflags = srcFlags
-
-		heal.dstGUID = dstGUID
-		heal.dstName = dstName
-		heal.dstFlags = dstFlags
-
 		local spellid, _, spellschool, amount, overheal = ...
-		heal.spellid = spellid
-		heal.spellschool = spellschool
-		heal.amount = max(0, amount - overheal)
+		if spellid and not tContains(ignoredSpells, spellid) then
+			heal.enemyid = srcGUID
+			heal.enemyname = srcName
+			heal.enemyflags = srcFlags
 
-		log_heal(Skada.current, heal)
+			heal.dstGUID = dstGUID
+			heal.dstName = dstName
+			heal.dstFlags = dstFlags
+
+			heal.spellid = spellid
+			heal.spellschool = spellschool
+			heal.amount = max(0, amount - overheal)
+
+			log_heal(Skada.current, heal)
+		end
 	end
 
 	function targetmod:Enter(win, id, label)
