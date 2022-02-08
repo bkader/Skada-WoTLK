@@ -267,14 +267,18 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 			icon = [[Interface\Icons\inv_gizmo_supersappercharge]]
 		}
 
-		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "DAMAGE_SPLIT", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "RANGE_DAMAGE", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_BUILDING_DAMAGE", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_EXTRA_ATTACKS", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "SWING_DAMAGE", {dst_is_interesting_nopets = true, src_is_interesting_nopets = true})
+		Skada:RegisterForCL(
+			SpellDamage,
+			"DAMAGE_SHIELD",
+			"DAMAGE_SPLIT",
+			"RANGE_DAMAGE",
+			"SPELL_BUILDING_DAMAGE",
+			"SPELL_DAMAGE",
+			"SPELL_EXTRA_ATTACKS",
+			"SPELL_PERIODIC_DAMAGE",
+			"SWING_DAMAGE",
+			{dst_is_interesting_nopets = true, src_is_interesting_nopets = true}
+		)
 
 		Skada:AddMode(self, L["Damage Done"])
 	end

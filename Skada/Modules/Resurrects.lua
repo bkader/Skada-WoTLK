@@ -214,7 +214,11 @@ Skada:AddLoadableModule("Resurrects", function(L)
 			icon = [[Interface\Icons\spell_holy_resurrection]]
 		}
 
-		Skada:RegisterForCL(SpellResurrect, "SPELL_RESURRECT", {src_is_interesting = true, dst_is_interesting = true})
+		Skada:RegisterForCL(
+			SpellResurrect,
+			"SPELL_RESURRECT",
+			{src_is_interesting = true, dst_is_interesting = true}
+		)
 
 		Skada:AddMode(self)
 	end

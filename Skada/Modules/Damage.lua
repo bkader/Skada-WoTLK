@@ -22,7 +22,7 @@ Skada:AddLoadableModule("Damage", function(L)
 	local mod = Skada:NewModule(L["Damage"])
 	local playermod = mod:NewModule(L["Damage spell list"])
 	local spellmod = playermod:NewModule(L["Damage spell details"])
-	local sdetailmod = spellmod:NewModule(L["Damage Breakdown"])
+	local sdetailmod = playermod:NewModule(L["Damage Breakdown"])
 	local targetmod = mod:NewModule(L["Damage target list"])
 	local tdetailmod = targetmod:NewModule(L["Damage spell list"])
 	local UnitGUID, tContains = UnitGUID, tContains
@@ -834,24 +834,38 @@ Skada:AddLoadableModule("Damage", function(L)
 			icon = [[Interface\Icons\spell_fire_firebolt]]
 		}
 
-		Skada:RegisterForCL(SpellCast, "SPELL_CAST_START", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellCast, "SPELL_CAST_SUCCESS", {src_is_interesting = true, dst_is_not_interesting = true})
+		local flags_src_dst = {src_is_interesting = true, dst_is_not_interesting = true}
 
-		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellDamage, "DAMAGE_SPLIT", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellDamage, "RANGE_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_BUILDING_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_EXTRA_ATTACKS", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellDamage, "SWING_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(
+			SpellCast,
+			"SPELL_CAST_START",
+			"SPELL_CAST_SUCCESS",
+			flags_src_dst
+		)
 
-		Skada:RegisterForCL(SpellMissed, "DAMAGE_SHIELD_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellMissed, "RANGE_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellMissed, "SPELL_BUILDING_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellMissed, "SPELL_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellMissed, "SPELL_PERIODIC_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellMissed, "SWING_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(
+			SpellDamage,
+			"DAMAGE_SHIELD",
+			"DAMAGE_SPLIT",
+			"RANGE_DAMAGE",
+			"SPELL_BUILDING_DAMAGE",
+			"SPELL_DAMAGE",
+			"SPELL_EXTRA_ATTACKS",
+			"SPELL_PERIODIC_DAMAGE",
+			"SWING_DAMAGE",
+			flags_src_dst
+		)
+
+		Skada:RegisterForCL(
+			SpellMissed,
+			"DAMAGE_SHIELD_MISSED",
+			"RANGE_MISSED",
+			"SPELL_BUILDING_MISSED",
+			"SPELL_MISSED",
+			"SPELL_PERIODIC_MISSED",
+			"SWING_MISSED",
+			flags_src_dst
+		)
 
 		Skada:AddFeed(L["Damage: Personal DPS"], feed_personal_dps)
 		Skada:AddFeed(L["Damage: Raid DPS"], feed_raid_dps)

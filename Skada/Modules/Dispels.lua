@@ -259,8 +259,12 @@ Skada:AddLoadableModule("Dispels", function(L)
 			icon = [[Interface\Icons\spell_holy_dispelmagic]]
 		}
 
-		Skada:RegisterForCL(SpellDispel, "SPELL_DISPEL", {src_is_interesting = true})
-		Skada:RegisterForCL(SpellDispel, "SPELL_STOLEN", {src_is_interesting = true})
+		Skada:RegisterForCL(
+			SpellDispel,
+			"SPELL_DISPEL",
+			"SPELL_STOLEN",
+			{src_is_interesting = true}
+		)
 
 		Skada:AddMode(self)
 	end

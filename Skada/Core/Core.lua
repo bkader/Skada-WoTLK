@@ -3433,9 +3433,27 @@ do
 	-- list of registered combat log event functions.
 	local combatlog_events = {}
 
-	function Skada:RegisterForCL(callback, event, flags)
-		combatlog_events[event] = combatlog_events[event] or {}
-		combatlog_events[event][#combatlog_events[event] + 1] = {func = callback, flags = flags}
+	function Skada:RegisterForCL(...)
+		local args = {...}
+		if #args >= 3 then
+			-- first arg must always be the callback.
+			local callback = tremove(args, 1)
+			if type(callback) ~= "function" then
+				return
+			end
+
+			-- last arg must always be the flags table.
+			local flags = tremove(args)
+			if type(flags) ~= "table" then
+				return
+			end
+
+			-- register events.
+			for _, event in ipairs(args) do
+				combatlog_events[event] = combatlog_events[event] or {}
+				combatlog_events[event][#combatlog_events[event] + 1] = {func = callback, flags = flags}
+			end
+		end
 	end
 
 	function Skada:Tick()

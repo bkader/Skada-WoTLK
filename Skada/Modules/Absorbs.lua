@@ -446,7 +446,17 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		return (a.ts > b.ts)
 	end
 
-	local function AuraApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function HandleShield(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		-- shield removed?
+		if eventtype == "SPELL_AURA_REMOVED" then
+			local spellid = ...
+			if absorbspells[spellid] and shields[dstName] and shields[dstName][spellid] and shields[dstName][spellid][srcName] then
+				shields[dstName][spellid][srcName].ts = timestamp + 0.1
+			end
+			return
+		end
+
+		-- shield applied
 		local spellid, _, spellschool, _, points = ...
 		if spellid and absorbspells[spellid] and not tContains(ignoredSpells, spellid) and dstName then
 			shields[dstName] = shields[dstName] or {}
@@ -512,13 +522,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		end
 	end
 
-	local function AuraRemoved(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid = ...
-		if absorbspells[spellid] and shields[dstName] and shields[dstName][spellid] and shields[dstName][spellid][srcName] then
-			shields[dstName][spellid][srcName].ts = timestamp + 0.1
-		end
-	end
-
 	do
 		-- some effects aren't shields but rather special effects, such us talents.
 		-- in order to track them, we simply add them as fake shields before all.
@@ -537,7 +540,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 					local expires, unitCaster, _, _, spellid = select(7, UnitBuff(unit, i))
 					if spellid then
 						if absorbspells[spellid] and unitCaster then
-							AuraApplied(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
+							HandleShield(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
 						end
 					else
 						break -- nothing found
@@ -551,7 +554,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 						for _, spell in ipairs(passiveshields[class]) do
 							local points = LGT:GUIDHasTalent(dstGUID, GetSpellInfo(spell[1]), LGT:GetActiveTalentGroup(unit))
 							if points then
-								AuraApplied(timestamp - 60, nil, dstGUID, dstGUID, nil, dstGUID, dstName, nil, spell[1], nil, spell[2], nil, points)
+								HandleShield(timestamp - 60, nil, dstGUID, dstGUID, nil, dstGUID, dstName, nil, spell[1], nil, spell[2], nil, points)
 							end
 						end
 					end
@@ -1007,25 +1010,51 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			icon = [[Interface\Icons\spell_holy_powerwordshield]]
 		}
 
-		Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {src_is_interesting_nopets = true})
-		Skada:RegisterForCL(AuraApplied, "SPELL_AURA_REFRESH", {src_is_interesting_nopets = true})
-		Skada:RegisterForCL(AuraRemoved, "SPELL_AURA_REMOVED", {src_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_BUILDING_DAMAGE", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "RANGE_DAMAGE", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "SWING_DAMAGE", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(EnvironmentDamage, "ENVIRONMENTAL_DAMAGE", {dst_is_interesting_nopets = true})
+		local flags_src = {src_is_interesting_nopets = true}
 
-		Skada:RegisterForCL(SpellMissed, "SPELL_MISSED", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellMissed, "SPELL_PERIODIC_MISSED", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellMissed, "SPELL_BUILDING_MISSED", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellMissed, "RANGE_MISSED", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellMissed, "SWING_MISSED", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(
+			HandleShield,
+			"SPELL_AURA_APPLIED",
+			"SPELL_AURA_REFRESH",
+			"SPELL_AURA_REMOVED",
+			flags_src
+		)
 
-		Skada:RegisterForCL(SpellHeal, "SPELL_HEAL", {src_is_interesting = true})
-		Skada:RegisterForCL(SpellHeal, "SPELL_PERIODIC_HEAL", {src_is_interesting = true})
+		Skada:RegisterForCL(
+			SpellHeal,
+			"SPELL_HEAL",
+			"SPELL_PERIODIC_HEAL",
+			flags_src
+		)
+
+		local flags_dst = {dst_is_interesting_nopets = true}
+
+		Skada:RegisterForCL(
+			SpellDamage,
+			"DAMAGE_SHIELD",
+			"SPELL_DAMAGE",
+			"SPELL_PERIODIC_DAMAGE",
+			"SPELL_BUILDING_DAMAGE",
+			"RANGE_DAMAGE",
+			"SWING_DAMAGE",
+			flags_dst
+		)
+
+		Skada:RegisterForCL(
+			EnvironmentDamage,
+			"ENVIRONMENTAL_DAMAGE",
+			flags_dst
+		)
+
+		Skada:RegisterForCL(
+			SpellMissed,
+			"SPELL_MISSED",
+			"SPELL_PERIODIC_MISSED",
+			"SPELL_BUILDING_MISSED",
+			"RANGE_MISSED",
+			"SWING_MISSED",
+			flags_dst
+		)
 
 		Skada.RegisterCallback(self, "Skada_ZoneCheck", "ZoneModifier")
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CheckPreShields")

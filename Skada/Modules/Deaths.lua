@@ -513,24 +513,52 @@ Skada:AddLoadableModule("Deaths", function(L)
 			icon = [[Interface\Icons\ability_rogue_feigndeath]]
 		}
 
-		Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {dst_is_interesting_nopets = true})
+		local flags_dst_nopets = {dst_is_interesting_nopets = true}
 
-		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "DAMAGE_SPLIT", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "RANGE_DAMAGE", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_BUILDING_DAMAGE", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_EXTRA_ATTACKS", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellDamage, "SWING_DAMAGE", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(EnvironmentDamage, "ENVIRONMENTAL_DAMAGE", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(
+			AuraApplied,
+			"SPELL_AURA_APPLIED",
+			flags_dst_nopets
+		)
 
-		Skada:RegisterForCL(SpellHeal, "SPELL_HEAL", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellHeal, "SPELL_PERIODIC_HEAL", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(
+			SpellDamage,
+			"DAMAGE_SHIELD",
+			"DAMAGE_SPLIT",
+			"RANGE_DAMAGE",
+			"SPELL_BUILDING_DAMAGE",
+			"SPELL_DAMAGE",
+			"SPELL_EXTRA_ATTACKS",
+			"SPELL_PERIODIC_DAMAGE",
+			"SWING_DAMAGE",
+			flags_dst_nopets
+		)
 
-		Skada:RegisterForCL(UnitDied, "UNIT_DIED", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(UnitDied, "UNIT_DESTROYED", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SpellResurrect, "SPELL_RESURRECT", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(
+			EnvironmentDamage,
+			"ENVIRONMENTAL_DAMAGE",
+			flags_dst_nopets
+		)
+
+		Skada:RegisterForCL(
+			SpellHeal,
+			"SPELL_HEAL",
+			"SPELL_PERIODIC_HEAL",
+			flags_dst_nopets
+		)
+
+		Skada:RegisterForCL(
+			UnitDied,
+			"UNIT_DIED",
+			"UNIT_DESTROYED",
+			flags_dst_nopets
+		)
+
+		Skada:RegisterForCL(
+			SpellResurrect,
+			"SPELL_RESURRECT",
+			flags_dst_nopets
+		)
 
 		Skada:AddMode(self)
 	end

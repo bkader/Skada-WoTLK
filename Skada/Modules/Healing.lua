@@ -440,10 +440,21 @@ Skada:AddLoadableModule("Healing", function(L)
 			icon = [[Interface\Icons\spell_nature_healingtouch]]
 		}
 
-		Skada:RegisterForCL(SpellCast, "SPELL_CAST_START", {src_is_interesting = true})
-		Skada:RegisterForCL(SpellCast, "SPELL_CAST_SUCCESS", {src_is_interesting = true})
-		Skada:RegisterForCL(SpellHeal, "SPELL_HEAL", {src_is_interesting = true})
-		Skada:RegisterForCL(SpellHeal, "SPELL_PERIODIC_HEAL", {src_is_interesting = true})
+		local flags_src = {src_is_interesting = true}
+
+		Skada:RegisterForCL(
+			SpellCast,
+			"SPELL_CAST_START",
+			"SPELL_CAST_SUCCESS",
+			flags_src
+		)
+
+		Skada:RegisterForCL(
+			SpellHeal,
+			"SPELL_HEAL",
+			"SPELL_PERIODIC_HEAL",
+			flags_src
+		)
 
 		Skada:AddMode(self, L["Absorbs and Healing"])
 	end

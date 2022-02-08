@@ -653,19 +653,29 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 			sourcemod.metadata.click2 = damagedone:GetModule(L["Damage spell list"], true)
 		end
 
-		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellDamage, "DAMAGE_SPLIT", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellDamage, "RANGE_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellDamage, "SWING_DAMAGE", {src_is_interesting = true, dst_is_not_interesting = true})
+		local flags_src_dst = {src_is_interesting = true, dst_is_not_interesting = true}
 
-		Skada:RegisterForCL(SpellMissed, "DAMAGE_SHIELD_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellMissed, "RANGE_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellMissed, "SPELL_BUILDING_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellMissed, "SPELL_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellMissed, "SPELL_PERIODIC_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellMissed, "SWING_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(
+			SpellDamage,
+			"DAMAGE_SHIELD",
+			"DAMAGE_SPLIT",
+			"RANGE_DAMAGE",
+			"SPELL_DAMAGE",
+			"SPELL_PERIODIC_DAMAGE",
+			"SWING_DAMAGE",
+			flags_src_dst
+		)
+
+		Skada:RegisterForCL(
+			SpellMissed,
+			"DAMAGE_SHIELD_MISSED",
+			"RANGE_MISSED",
+			"SPELL_BUILDING_MISSED",
+			"SPELL_MISSED",
+			"SPELL_PERIODIC_MISSED",
+			"SWING_MISSED",
+			flags_src_dst
+		)
 
 		Skada:AddMode(self, L["Enemies"])
 	end
@@ -1065,19 +1075,29 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 			targetmod.metadata.click2 = damagetaken:GetModule(L["Damage source list"], true)
 		end
 
-		Skada:RegisterForCL(SpellDamage, "DAMAGE_SHIELD", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
-		Skada:RegisterForCL(SpellDamage, "DAMAGE_SPLIT", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
-		Skada:RegisterForCL(SpellDamage, "RANGE_DAMAGE", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_DAMAGE", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
-		Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
-		Skada:RegisterForCL(SpellDamage, "SWING_DAMAGE", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
+		local flags_dst_src = {dst_is_interesting_nopets = true, src_is_not_interesting = true}
 
-		Skada:RegisterForCL(SpellMissed, "DAMAGE_SHIELD_MISSED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
-		Skada:RegisterForCL(SpellMissed, "RANGE_MISSED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
-		Skada:RegisterForCL(SpellMissed, "SPELL_BUILDING_MISSED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
-		Skada:RegisterForCL(SpellMissed, "SPELL_MISSED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
-		Skada:RegisterForCL(SpellMissed, "SPELL_PERIODIC_MISSED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
-		Skada:RegisterForCL(SpellMissed, "SWING_MISSED", {dst_is_interesting_nopets = true, src_is_not_interesting = true})
+		Skada:RegisterForCL(
+			SpellDamage,
+			"DAMAGE_SHIELD",
+			"DAMAGE_SPLIT",
+			"RANGE_DAMAGE",
+			"SPELL_DAMAGE",
+			"SPELL_PERIODIC_DAMAGE",
+			"SWING_DAMAGE",
+			flags_dst_src
+		)
+
+		Skada:RegisterForCL(
+			SpellMissed,
+			"DAMAGE_SHIELD_MISSED",
+			"RANGE_MISSED",
+			"SPELL_BUILDING_MISSED",
+			"SPELL_MISSED",
+			"SPELL_PERIODIC_MISSED",
+			"SWING_MISSED",
+			flags_dst_src
+		)
 
 		Skada:AddMode(self, L["Enemies"])
 	end
@@ -1390,8 +1410,12 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 			icon = [[Interface\Icons\spell_holy_blessedlife]]
 		}
 
-		Skada:RegisterForCL(SpellHeal, "SPELL_HEAL", {src_is_not_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SpellHeal, "SPELL_PERIODIC_HEAL", {src_is_not_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(
+			SpellHeal,
+			"SPELL_HEAL",
+			"SPELL_PERIODIC_HEAL",
+			{src_is_not_interesting = true, dst_is_not_interesting = true}
+		)
 
 		Skada:AddMode(self, L["Enemies"])
 	end

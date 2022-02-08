@@ -496,11 +496,15 @@ Skada:AddLoadableModule("Buffs", function(L)
 			icon = [[Interface\Icons\spell_holy_divinespirit]]
 		}
 
-		Skada:RegisterForCL(HandleBuff, "SPELL_AURA_APPLIED", {dst_is_interesting = true})
-		Skada:RegisterForCL(HandleBuff, "SPELL_AURA_REFRESH", {dst_is_interesting = true})
-		Skada:RegisterForCL(HandleBuff, "SPELL_AURA_APPLIED_DOSE", {dst_is_interesting = true})
-		Skada:RegisterForCL(HandleBuff, "SPELL_AURA_REMOVED", {dst_is_interesting = true})
-		Skada:RegisterForCL(HandleBuff, "SPELL_PERIODIC_ENERGIZE", {dst_is_interesting = true})
+		Skada:RegisterForCL(
+			HandleBuff,
+			"SPELL_AURA_APPLIED",
+			"SPELL_AURA_REFRESH",
+			"SPELL_AURA_APPLIED_DOSE",
+			"SPELL_AURA_REMOVED",
+			"SPELL_PERIODIC_ENERGIZE",
+			{dst_is_interesting = true}
+		)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CheckBuffs")
 		Skada:AddMode(self, L["Buffs and Debuffs"])
@@ -740,10 +744,14 @@ Skada:AddLoadableModule("Debuffs", function(L)
 			icon = [[Interface\Icons\spell_shadow_shadowwordpain]]
 		}
 
-		Skada:RegisterForCL(HandleDebuff, "SPELL_AURA_APPLIED", {src_is_interesting = true})
-		Skada:RegisterForCL(HandleDebuff, "SPELL_AURA_REFRESH", {src_is_interesting = true})
-		Skada:RegisterForCL(HandleDebuff, "SPELL_AURA_APPLIED_DOSE", {src_is_interesting = true})
-		Skada:RegisterForCL(HandleDebuff, "SPELL_AURA_REMOVED", {src_is_interesting = true})
+		Skada:RegisterForCL(
+			HandleDebuff,
+			"SPELL_AURA_APPLIED",
+			"SPELL_AURA_REFRESH",
+			"SPELL_AURA_APPLIED_DOSE",
+			"SPELL_AURA_REMOVED",
+			{src_is_interesting = true}
+		)
 
 		Skada:AddMode(self, L["Buffs and Debuffs"])
 	end

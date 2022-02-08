@@ -393,8 +393,12 @@ Skada:AddLoadableModule("CC Done", function(L)
 			icon = [[Interface\Icons\spell_frost_chainsofice]]
 		}
 
-		Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {src_is_interesting = true})
-		Skada:RegisterForCL(AuraApplied, "SPELL_AURA_REFRESH", {src_is_interesting = true})
+		Skada:RegisterForCL(
+			AuraApplied,
+			"SPELL_AURA_APPLIED",
+			"SPELL_AURA_REFRESH",
+			{src_is_interesting = true}
+		)
 
 		Skada:AddMode(self, L["Crowd Control"])
 	end
@@ -655,8 +659,12 @@ Skada:AddLoadableModule("CC Taken", function(L)
 			icon = [[Interface\Icons\spell_magic_polymorphrabbit]]
 		}
 
-		Skada:RegisterForCL(AuraApplied, "SPELL_AURA_APPLIED", {dst_is_interesting = true})
-		Skada:RegisterForCL(AuraApplied, "SPELL_AURA_REFRESH", {dst_is_interesting = true})
+		Skada:RegisterForCL(
+			AuraApplied,
+			"SPELL_AURA_APPLIED",
+			"SPELL_AURA_REFRESH",
+			{dst_is_interesting = true}
+		)
 
 		Skada:AddMode(self, L["Crowd Control"])
 	end
@@ -940,8 +948,12 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 			icon = [[Interface\Icons\spell_holy_sealofvalor]]
 		}
 
-		Skada:RegisterForCL(AuraBroken, "SPELL_AURA_BROKEN", {src_is_interesting = true})
-		Skada:RegisterForCL(AuraBroken, "SPELL_AURA_BROKEN_SPELL", {src_is_interesting = true})
+		Skada:RegisterForCL(
+			AuraBroken,
+			"SPELL_AURA_BROKEN",
+			"SPELL_AURA_BROKEN_SPELL",
+			{src_is_interesting = true}
+		)
 
 		Skada:AddMode(self, L["Crowd Control"])
 	end

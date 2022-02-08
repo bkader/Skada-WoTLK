@@ -219,10 +219,21 @@ Skada:AddLoadableModule("Resources", function(L)
 		self.metadata = {columns = {Amount = true, Percent = true}}
 		Skada:AddColumnOptions(self)
 
-		Skada:RegisterForCL(SpellEnergize, "SPELL_ENERGIZE", {src_is_interesting = true})
-		Skada:RegisterForCL(SpellEnergize, "SPELL_PERIODIC_ENERGIZE", {src_is_interesting = true})
-		Skada:RegisterForCL(SpellLeech, "SPELL_LEECH", {src_is_interesting = true})
-		Skada:RegisterForCL(SpellLeech, "SPELL_PERIODIC_LEECH", {src_is_interesting = true})
+		local flags_src = {src_is_interesting = true}
+
+		Skada:RegisterForCL(
+			SpellEnergize,
+			"SPELL_ENERGIZE",
+			"SPELL_PERIODIC_ENERGIZE",
+			flags_src
+		)
+
+		Skada:RegisterForCL(
+			SpellLeech,
+			"SPELL_LEECH",
+			"SPELL_PERIODIC_LEECH",
+			flags_src
+		)
 
 		manamod.metadata.icon = [[Interface\Icons\spell_frost_summonwaterelemental]]
 		ragemod.metadata.icon = [[Interface\Icons\spell_nature_shamanrage]]
