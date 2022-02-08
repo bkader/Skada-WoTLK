@@ -32,8 +32,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 
 	local data = {}
 
-	local function SunderApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellname = select(2, ...)
+	local function SunderApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, _, spellname)
 		if spellname == sunder or spellname == devastate then
 			data.playerid = srcGUID
 			data.playername = srcName
@@ -70,11 +69,13 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 	end
 
 	local function SunderRemoved(timestamp, eventtype, _, _, _, dstGUID, dstName, _, _, spellname)
-		if Skada.db.profile.modules.sunderannounce and spellname and spellname == sunder then
+		if spellname == sunder then
 			Skada:ScheduleTimer(function()
 				if mod.targets and mod.targets[dstGUID] then
-					mod:Announce(format(L["%s dropped from %s!"], sunderLink or sunder, dstName or L.Unknown), dstGUID)
 					mod.targets[dstGUID] = del(mod.targets[dstGUID])
+					if Skada.db.profile.modules.sunderannounce then
+						mod:Announce(format(L["%s dropped from %s!"], sunderLink or sunder, dstName or L.Unknown), dstGUID)
+					end
 				end
 			end, 0.1)
 		end
