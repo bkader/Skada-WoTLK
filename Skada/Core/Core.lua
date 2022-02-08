@@ -1328,7 +1328,7 @@ do
 	end
 
 	function Skada:FixPets(action)
-		if action and self:IsPet(action.playerid, action.playerflags) then
+		if action and self:IsPlayer(action.playerid, action.playerflags, action.playername) == false then
 			local owner = pets[action.playerid] or CommonFixPets(action.playerid, action.playerflags)
 
 			if owner then
@@ -1372,8 +1372,25 @@ do
 end
 
 function Skada:AssignPet(ownerGUID, ownerName, petGUID)
-	if ownerGUID and ownerName and petGUID and not pets[petGUID] then
-		pets[petGUID] = {id = ownerGUID, name = ownerName}
+	pets[petGUID] = {id = ownerGUID, name = ownerName}
+end
+
+function Skada:SummonPet(petGUID, petFlags, ownerGUID, ownerName, ownerFlags)
+	if band(ownerFlags, BITMASK_GROUP) ~= 0 or band(ownerFlags, BITMASK_PETS) ~= 0 or (band(petFlags, BITMASK_PETS) ~= 0 and pets[petGUID]) then
+		-- we assign the pet the normal way
+		self:AssignPet(ownerGUID, ownerName, petGUID)
+
+		-- we fix the table by searching through the complete list
+		self.fixsummon = true
+		while self.fixsummon do
+			self.fixsummon = nil
+			for pet, owner in pairs(pets) do
+				if pets[owner.id] then
+					pets[pet] = {id = pets[owner.id].id, name = pets[owner.id].name}
+					self.fixsummon = true
+				end
+			end
+		end
 	end
 end
 
@@ -1880,19 +1897,12 @@ function Skada:PLAYER_ENTERING_WORLD()
 	end
 end
 
-function Skada:CheckGroup(petsOnly)
-	wipe(pets)
-	wipe(vehicles)
-	if not petsOnly then
-		wipe(players)
-	end
-
+function Skada:CheckGroup()
 	for unit, owner in UnitIterator() do
-		local guid = UnitGUID(unit)
-		if guid and owner == nil and not petsOnly then
-			players[guid] = unit
-		elseif guid and owner then
-			Skada:AssignPet(UnitGUID(owner), UnitName(owner), guid)
+		if owner == nil then
+			players[UnitGUID(unit)] = unit
+		else
+			Skada:AssignPet(UnitGUID(owner), UnitName(owner), UnitGUID(unit))
 		end
 	end
 end
@@ -2016,7 +2026,7 @@ do
 
 	function Skada:UNIT_PET(_, unit)
 		if unit and not tContains(ignoredUnits, unit) then
-			self:CheckGroup(true)
+			self:CheckGroup()
 		end
 	end
 
@@ -3633,21 +3643,8 @@ do
 			end
 		end
 
-		if eventtype == "SPELL_SUMMON" and (band(srcFlags, BITMASK_GROUP) ~= 0 or band(srcFlags, BITMASK_PETS) ~= 0 or (band(dstFlags, BITMASK_PETS) ~= 0 and pets[dstGUID])) then
-			-- we assign the pet the normal way
-			self:AssignPet(srcGUID, srcName, dstGUID)
-
-			-- we fix the table by searching through the complete list
-			self.fixsummon = true
-			while self.fixsummon do
-				self.fixsummon = nil
-				for pet, owner in pairs(pets) do
-					if pets[owner.id] then
-						pets[pet] = {id = pets[owner.id].id, name = pets[owner.id].name}
-						self.fixsummon = true
-					end
-				end
-			end
+		if eventtype == "SPELL_SUMMON" then
+			self:SummonPet(dstGUID, dstFlags, srcGUID, srcName, srcFlags)
 		end
 
 		if self.current and self.current.gotboss and (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") then
