@@ -186,7 +186,13 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		[65684] = {dur = 86400, cap = 1000000} -- Twin Val'kyr: Dark Essence86400
 	}
 
-	local priest_divine_aegis = {[47509] = true, [47511] = true, [47515] = true, [47753] = true, [54704] = true} -- Divine Aegis
+	local priest_divine_aegis = { -- Divine Aegis
+		[47509] = true,
+		[47511] = true,
+		[47515] = true,
+		[47753] = true,
+		[54704] = true
+	}
 	local mage_frost_ward = { -- Frost Ward
 		[6143] = true,
 		[8461] = true,
@@ -723,25 +729,31 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	end
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellschool, amount, _, _, _, _, absorbed = select(3, ...)
-		if (absorbed or 0) > 0 and dstName and shields[dstName] then
-			process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool, amount, amount > absorbed)
-		end
-	end
+		local spellschool, amount, absorbed
 
-	local function SwingDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, nil, 1, ...)
+		if eventtype == "SWING_DAMAGE" then
+			amount, _, _, _, _, absorbed = ...
+		else
+			spellschool, amount, _, _, _, _, absorbed = select(3, ...)
+		end
+
+		if (absorbed or 0) > 0 and dstName and shields[dstName] then
+			process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool or 1, amount, amount > absorbed)
+		end
 	end
 
 	local function SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellschool, misstype, absorbed = select(3, ...)
-		if misstype == "ABSORB" and (absorbed or 0) > 0 and dstName and shields[dstName] then
-			process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool, 0, false)
-		end
-	end
+		local spellschool, misstype, absorbed
 
-	local function SwingMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, 6603, nil, 1, ...)
+		if eventtype == "SWING_MISSED" then
+			misstype, absorbed = ...
+		else
+			spellschool, misstype, absorbed = select(3, ...)
+		end
+
+		if misstype == "ABSORB" and (absorbed or 0) > 0 and dstName and shields[dstName] then
+			process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool or 1, 0, false)
+		end
 	end
 
 	local function EnvironmentDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
@@ -1003,14 +1015,14 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		Skada:RegisterForCL(SpellDamage, "SPELL_PERIODIC_DAMAGE", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, "SPELL_BUILDING_DAMAGE", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellDamage, "RANGE_DAMAGE", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SwingDamage, "SWING_DAMAGE", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellDamage, "SWING_DAMAGE", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(EnvironmentDamage, "ENVIRONMENTAL_DAMAGE", {dst_is_interesting_nopets = true})
 
 		Skada:RegisterForCL(SpellMissed, "SPELL_MISSED", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellMissed, "SPELL_PERIODIC_MISSED", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellMissed, "SPELL_BUILDING_MISSED", {dst_is_interesting_nopets = true})
 		Skada:RegisterForCL(SpellMissed, "RANGE_MISSED", {dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(SwingMissed, "SWING_MISSED", {dst_is_interesting_nopets = true})
+		Skada:RegisterForCL(SpellMissed, "SWING_MISSED", {dst_is_interesting_nopets = true})
 
 		Skada:RegisterForCL(SpellHeal, "SPELL_HEAL", {src_is_interesting = true})
 		Skada:RegisterForCL(SpellHeal, "SPELL_PERIODIC_HEAL", {src_is_interesting = true})

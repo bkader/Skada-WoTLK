@@ -22,15 +22,7 @@ local COMBATLOG_OBJECT_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
 
 function Skada:Debug(...)
 	if self.db.profile.debug then
-		local msg = ""
-		for i = 1, select("#", ...) do
-			local v = tostring(select(i, ...))
-			if #msg > 0 then
-				msg = msg .. ", "
-			end
-			msg = msg .. v
-		end
-		print("|cff33ff99Skada Debug|r: " .. msg)
+		print("|cff33ff99Skada Debug|r:", ...)
 	end
 end
 
