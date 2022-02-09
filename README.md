@@ -1,4 +1,4 @@
-# Skada for WoTLK (_Revisited - v1.8.73.356_)
+# Skada for WoTLK (_Revisited - v1.8.73.357_)
 
 ![Discord](https://img.shields.io/discord/795698054371868743?label=discord)
 ![GitHub last commit](https://img.shields.io/github/last-commit/bkader/Skada-WoTLK)
@@ -255,8 +255,12 @@ set:GetOHPS() -- returns the amount of overheal
 set:GetTHPS() -- returns the total healing, including the overheal
 set:GetDTPS() -- returns the amount of damage taken per second by the whole group.
 
+set:GetActorTime(id, name, active) -- return the actor's time.
 set:GetAbsorbHealSpells() -- returns the table of both absorb heals spells.
 set:GetAuraPlayers(spellid) -- returns the list of players by the given buff id.
+set:GetActorDamage(id, name) -- returns the actor's damage.
+set:GetActorDamageSpells(id, name) -- returns the actor's spell table if found.
+set:GetActorDamageTargets(id, name, tbl) -- returns the actor's damage targets table with options cache table.
 set:GetDamage(useful) -- returns the damage amount. if "useful" is true, it excludes the overkill.
 set:GetDamageTaken() -- returns the amount of damage taken by the whole group.
 set:GetFailCount(spellid) -- returns the number of fails per give spell id

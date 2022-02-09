@@ -24,16 +24,17 @@
 
 <!-- Other category -->
 <Script file="Activity.lua" />
+<Script file="Comparison.lua" />
 <Script file="Deaths.lua" />
 <Script file="Dispels.lua" />
 <Script file="Failbot.lua" />
 <Script file="Healthstone.lua" />
 <Script file="Interrupts.lua" />
+<Script file="MySpells.lua" />
 <Script file="Parry.lua" />
 <Script file="Potions.lua" />
 <Script file="Resurrects.lua" />
 <Script file="Threat.lua" />
-<Script file="MySpells.lua" />
 
 <!-- Modules without modes -->
 <Script file="Scroll.lua" />

@@ -92,6 +92,11 @@ function setPrototype:GetTime()
 	return Skada:GetSetTime(self)
 end
 
+function setPrototype:GetActorTime(id, name, active)
+	local actor = self:GetActor(name, id)
+	return (actor and actor.GetTime) and actor:GetTime(active) or 0
+end
+
 function setPrototype:GetFormatedTime()
 	return Skada:FormatTime(Skada:GetSetTime(self))
 end

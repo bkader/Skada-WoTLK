@@ -713,6 +713,13 @@ L["Opacity"] = "不透明度"
 L["Notifications"] = "通知"
 L["Uses visual notifications instead of chat window messages whenever applicable."] = "在适用时使用视觉通知而不是聊天窗口消息。"
 L["Test Notifications"] = "测试通知"
+-- comparison module
+L["Comparison"] = "比较"
+L["Damage Comparison"] = "伤害比较"
+L["%s vs %s: %s"] = "%s 与 %s: %s"
+L["%s vs %s: Spells"] = "%s 与 %s: 法术"
+L["%s vs %s: Targets"] = "%s 与 %s: 目标"
+L["%s vs %s: Damage on %s"] = "%s 与 %s: %s上的伤害"
 -- about
 L["About"] = "关于"
 L["Author"] = "作者"

@@ -723,6 +723,13 @@ L["Opacity"] = true
 L["Notifications"] = true
 L["Uses visual notifications instead of chat window messages whenever applicable."] = true
 L["Test Notifications"] = true
+-- comparison module
+L["Comparison"] = true
+L["Damage Comparison"] = true
+L["%s vs %s: %s"] = true
+L["%s vs %s: Spells"] = true
+L["%s vs %s: Targets"] = true
+L["%s vs %s: Damage on %s"] = true
 -- about
 L["About"] = true
 L["Author"] = true

@@ -719,6 +719,13 @@ L["Opacity"] = "Прозрачность"
 L["Notifications"] = "Уведомления"
 L["Uses visual notifications instead of chat window messages whenever applicable."] = "По возможности использует визуальные уведомления вместо сообщений в окне чата."
 L["Test Notifications"] = "Тестовые уведомления"
+-- comparison module
+L["Comparison"] = "Сравнение"
+L["Damage Comparison"] = "Сравнение ущерба"
+L["%s vs %s: %s"] = "%s vs %s: %s"
+L["%s vs %s: Spells"] = "%s vs %s: Заклинания"
+L["%s vs %s: Targets"] = "%s vs %s: Цели"
+L["%s vs %s: Damage on %s"] = "%s vs %s: Урон по %s"
 -- about
 L["About"] = "Об аддоне"
 L["Author"] = "Автор"

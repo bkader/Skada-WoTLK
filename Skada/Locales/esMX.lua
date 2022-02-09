@@ -719,6 +719,13 @@ L["Opacity"] = "Opacidad"
 L["Notifications"] = "Notificaciones"
 L["Uses visual notifications instead of chat window messages whenever applicable."] = "Utiliza notificaciones visuales en lugar de mensajes de la ventana de chat cuando corresponde."
 L["Test Notifications"] = "Notificaciones de prueba"
+-- comparison module
+L["Comparison"] = "Comparación"
+L["Damage Comparison"] = "Comparación de daños"
+L["%s vs %s: %s"] = "%s vs %s: %s"
+L["%s vs %s: Spells"] = "%s vs %s: Hechizos"
+L["%s vs %s: Targets"] = "%s vs %s: Objetivos"
+L["%s vs %s: Damage on %s"] = "%s vs %s: Daño en %s"
 -- about
 L["About"] = "Acerca"
 L["Author"] = "Autor"

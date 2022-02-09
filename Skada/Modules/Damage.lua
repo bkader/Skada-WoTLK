@@ -364,7 +364,7 @@ Skada:AddLoadableModule("Damage", function(L)
 			local activetime = player:GetTime(true)
 			tooltip:AddDoubleLine(L["Activity"], Skada:FormatPercent(activetime, totaltime), nil, nil, nil, 1, 1, 1)
 			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
-			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(player:GetTime(true)), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
 		end
 	end
 
@@ -834,6 +834,13 @@ Skada:AddLoadableModule("Damage", function(L)
 			icon = [[Interface\Icons\spell_fire_firebolt]]
 		}
 
+		local compare = Skada:GetModule(L["Comparison"], true)
+		if compare then
+			self.metadata.click3 = compare.SetActor
+			self.metadata.click3label = L["Damage Comparison"]
+			tinsert(self.metadata.nototalclick, compare)
+		end
+
 		local flags_src_dst = {src_is_interesting = true, dst_is_not_interesting = true}
 
 		Skada:RegisterForCL(
@@ -950,6 +957,30 @@ Skada:AddLoadableModule("Damage", function(L)
 		return dps, damage
 	end
 
+	function setPrototype:GetActorDamage(id, name)
+		local actor = self:GetActor(name, id)
+		if actor and actor.GetDamage then
+			return actor:GetDamage(), actor
+		elseif actor and (actor.totaldamage or actor.damage) then
+			return Skada.db.profile.absdamage and actor.totaldamage or actor.damage
+		end
+		return 0
+	end
+
+	function setPrototype:GetActorDamageSpells(id, name)
+		local actor = self:GetActor(name, id)
+		if actor and actor.damagespells then
+			return actor.damagespells, actor
+		end
+	end
+
+	function setPrototype:GetActorDamageTargets(id, name, tbl)
+		local actor = self:GetActor(name, id)
+		if actor and actor.GetDamageTargets then
+			return actor:GetDamageTargets(tbl), actor
+		end
+	end
+
 	function playerPrototype:GetDamage(useful)
 		local damage = Skada.db.profile.absdamage and self.totaldamage or self.damage or 0
 		if useful and self.overkill then
@@ -966,40 +997,40 @@ Skada:AddLoadableModule("Damage", function(L)
 		return dps, damage
 	end
 
-	function playerPrototype:GetDamageTargets()
+	function playerPrototype:GetDamageTargets(tbl)
 		if self.damagespells then
-			wipe(cacheTable)
+			tbl = wipe(tbl or Skada.cacheTable)
 			for _, spell in pairs(self.damagespells) do
 				if spell.targets then
 					for name, tar in pairs(spell.targets) do
-						if not cacheTable[name] then
-							cacheTable[name] = {
+						if not tbl[name] then
+							tbl[name] = {
 								amount = tar.amount,
 								total = tar.total,
 								overkill = tar.overkill
 							}
 						else
-							cacheTable[name].amount = cacheTable[name].amount + tar.amount
-							cacheTable[name].total = (cacheTable[name].total or 0) + (tar.total or 0)
-							cacheTable[name].overkill = cacheTable[name].overkill + tar.overkill
+							tbl[name].amount = tbl[name].amount + tar.amount
+							tbl[name].total = (tbl[name].total or 0) + (tar.total or 0)
+							tbl[name].overkill = tbl[name].overkill + tar.overkill
 						end
 
 						-- attempt to get the class
-						if not cacheTable[name].class then
+						if not tbl[name].class then
 							local actor = self.super:GetActor(name)
 							if actor then
-								cacheTable[name].id = actor.id
-								cacheTable[name].class = actor.class
-								cacheTable[name].role = actor.role
-								cacheTable[name].spec = actor.spec
+								tbl[name].id = actor.id
+								tbl[name].class = actor.class
+								tbl[name].role = actor.role
+								tbl[name].spec = actor.spec
 							else
-								cacheTable[name].class = "UNKNOWN"
+								tbl[name].class = "UNKNOWN"
 							end
 						end
 					end
 				end
 			end
-			return cacheTable
+			return tbl
 		end
 	end
 end)

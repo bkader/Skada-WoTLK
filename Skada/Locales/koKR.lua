@@ -717,6 +717,13 @@ L["Opacity"] = "불투명"
 L["Notifications"] = "알림"
 L["Uses visual notifications instead of chat window messages whenever applicable."] = "해당되는 경우 채팅 창 메시지 대신 시각적 알림을 사용합니다."
 L["Test Notifications"] = "테스트 알림"
+-- comparison module
+L["Comparison"] = "비교"
+L["Damage Comparison"] = "손상 비교"
+L["%s vs %s: %s"] = "%s 대 %s: %s"
+L["%s vs %s: Spells"] = "%s 대 %s: Spells"
+L["%s vs %s: Targets"] = "%s 대 %s: 대상"
+L["%s vs %s: Damage on %s"] = "%s 대 %s: %s의 손상"
 -- about
 L["About"] = "대하여"
 L["Author"] = "저작자"
