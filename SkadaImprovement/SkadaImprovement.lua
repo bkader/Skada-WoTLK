@@ -278,14 +278,13 @@ Skada:AddLoadableModule("Improvement", function(L)
 		playerid = playerid or UnitGUID("player")
 		self:OnInitialize()
 
-		mod_comparison.metadata = {}
-		mod_modes.metadata = {click1 = mod_comparison}
-		self.metadata = {click1 = mod_modes, icon = "Interface\\Icons\\ability_warrior_intensifyrage"}
-
-		-- ignore title set
-		self.notitleset = true
-		mod_modes.notitleset = true
-		mod_comparison.notitleset = true
+		mod_comparison.metadata = {notitleset = true}
+		mod_modes.metadata = {click1 = mod_comparison, notitleset = true}
+		self.metadata = {
+			click1 = mod_modes,
+			notitleset = true, -- ignore title set
+			icon = "Interface\\Icons\\ability_warrior_intensifyrage"
+		}
 
 		Skada.RegisterMessage(self, "COMBAT_BOSS_DEFEATED", "BossDefeated")
 		Skada:AddMode(self)

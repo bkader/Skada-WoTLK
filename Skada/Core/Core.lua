@@ -81,6 +81,9 @@ local setPrototype = Skada.setPrototype
 local playerPrototype = Skada.playerPrototype
 local enemyPrototype = Skada.enemyPrototype
 
+-- format funtions.
+local SetNumeralFormat, SetValueFormat
+
 -- list of feeds & selected feed
 local feeds, selected_feed = {}, nil
 
@@ -1187,10 +1190,18 @@ function Skada:GetPlayer(set, guid, name, flag)
 	-- roles and specs are temporary disabled for Project Ascension
 	if not self.Ascension and player.class and Skada.validclass[player.class] then
 		if player.role == nil or player.role == "NONE" then
-			player.role = GetUnitRole(players[player.id], player.class)
+			if player.id == self.userGUID and self.userRole then
+				player.role = self.userRole
+			else
+				player.role = GetUnitRole(players[player.id], player.class)
+			end
 		end
 		if player.spec == nil then
-			player.spec = GetUnitSpec(players[player.id], player.class)
+			if player.id == self.userGUID and self.userSpec then
+				player.spec = self.userSpec
+			else
+				player.spec = GetUnitSpec(players[player.id], player.class)
+			end
 		end
 	end
 
@@ -1948,6 +1959,10 @@ function Skada:CheckGroup()
 			Skada:AssignPet(UnitGUID(owner), UnitName(owner), UnitGUID(unit))
 		end
 	end
+
+	-- update my spec and role.
+	Skada.userSpec = GetUnitSpec("player", Skada.userClass)
+	Skada.userRole = GetUnitRole("player", Skada.userClass)
 end
 
 do
@@ -2288,7 +2303,7 @@ end
 
 do
 	local reverse = string.reverse
-	function Skada:SetNumeralFormat(system)
+	function SetNumeralFormat(system)
 		system = system or 1
 
 		local ShortenValue = function(num)
@@ -2323,7 +2338,7 @@ do
 			end
 		end
 
-		self.FormatNumber = function(self, num, fmt)
+		Skada.FormatNumber = function(self, num, fmt)
 			if num then
 				fmt = fmt or self.db.profile.numberformat or 1
 				if fmt == 1 and (num >= 1e3 or num <= -1e3) then
@@ -2379,21 +2394,37 @@ function Skada:FormatName(name)
 	return name
 end
 
-function Skada:FormatValueText(v1, b1, v2, b2, v3, b3)
-	if b1 and b2 and b3 then
-		return format("%s (%s, %s)", v1, v2, v3)
-	elseif b1 and b2 then
-		return format("%s (%s)", v1, v2)
-	elseif b1 and b3 then
-		return format("%s (%s)", v1, v3)
-	elseif b2 and b3 then
-		return format("%s (%s)", v2, v3)
-	elseif b2 then
-		return v2
-	elseif b1 then
-		return v1
-	elseif b3 then
-		return v3
+do
+	-- brackets and separators
+	local brackets = {"(%s)", "{%s}", "[%s]", "<%s>", "%s"}
+	local separators = {"%s, %s", "%s. %s", "%s; %s", "%s - %s", "%s || %s", "%s / %s", "%s \\ %s", "%s ~ %s", "%s %s"}
+
+	-- formats default values
+	local format_2 = "%s (%s)"
+	local format_3 = "%s (%s, %s)"
+
+	function SetValueFormat(bracket, separator)
+		format_2 = brackets[bracket or 1]
+		format_3 = "%s " .. format(format_2, separators[separator or 1])
+		format_2 = "%s " .. format_2
+	end
+
+	function Skada:FormatValueText(v1, b1, v2, b2, v3, b3)
+		if b1 and b2 and b3 then
+			return format(format_3, v1, v2, v3)
+		elseif b1 and b2 then
+			return format(format_2, v1, v2)
+		elseif b1 and b3 then
+			return format(format_2, v1, v3)
+		elseif b2 and b3 then
+			return format(format_2, v2, v3)
+		elseif b2 then
+			return v2
+		elseif b1 then
+			return v1
+		elseif b3 then
+			return v3
+		end
 	end
 end
 
@@ -2476,7 +2507,7 @@ do
 
 		if self.db.display == "bar" then
 			-- title set enabled?
-			if self.db.titleset and not self.selectedmode.notitleset then
+			if self.db.titleset and not self.selectedmode.metadata.notitleset then
 				if self.selectedset == "current" then
 					name = format("%s%s %s", name, find(name, ":") and " -" or ":", L["Current"])
 				elseif self.selectedset == "total" then
@@ -2613,7 +2644,9 @@ function Skada:ApplySettings(name, hidemenu)
 		end
 	end
 
-	Skada:SetNumeralFormat(Skada.db.profile.numbersystem or 1)
+	SetNumeralFormat(Skada.db.profile.numbersystem)
+	SetValueFormat(Skada.db.profile.brackets, Skada.db.profile.separator)
+
 	Skada:UpdateDisplay(true)
 end
 
@@ -2893,7 +2926,7 @@ function Skada:FrameSettings(db, include_dimensions)
 							modeincombat = {
 								type = "select",
 								name = L["Combat Mode"],
-								desc = L["Automatically switch to set 'Current' and this mode when entering combat."],
+								desc = L["Automatically switch to set |cffffbb00Current|r and this mode when entering combat."],
 								order = 10,
 								values = function()
 									local m = {[""] = NONE}
@@ -2906,7 +2939,7 @@ function Skada:FrameSettings(db, include_dimensions)
 							wipemode = {
 								type = "select",
 								name = L["Wipe Mode"],
-								desc = L["Automatically switch to set 'Current' and this mode after a wipe."],
+								desc = L["Automatically switch to set |cffffbb00Current|r and this mode after a wipe."],
 								order = 20,
 								values = function()
 									local m = {[""] = NONE}
@@ -2921,8 +2954,13 @@ function Skada:FrameSettings(db, include_dimensions)
 								name = L["Return after combat"],
 								desc = L["Return to the previous set and mode after combat ends."],
 								order = 30,
-								width = "double",
 								disabled = function() return (db.modeincombat == "" and db.wipemode == "") end
+							},
+							autocurrent = {
+								type = "toggle",
+								name = L["Auto switch to current"],
+								desc = L["Whenever a combat starts, this window automatically switches to |cffffbb00Current|r segment."],
+								order = 40
 							}
 						}
 					}
@@ -3566,6 +3604,9 @@ do
 					win:Show()
 				elseif self.db.profile.hidecombat and win:IsShown() then
 					win:Hide()
+				end
+				if win.db.autocurrent and win.selectedset ~= "current" then
+					win:set_selected_set("current")
 				end
 			end
 		end

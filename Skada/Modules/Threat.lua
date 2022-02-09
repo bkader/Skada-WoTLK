@@ -581,9 +581,10 @@ Skada:AddLoadableModule("Threat", function(L)
 			self.metadata = {
 				wipestale = true,
 				columns = {Threat = true, TPS = false, Percent = true},
+				notitleset = true, -- ignore title set
 				icon = aggroIcon
 			}
-			self.notitleset = true
+
 			Skada:AddFeed(L["Threat: Personal Threat"], add_threat_feed)
 			Skada:AddMode(self)
 		end

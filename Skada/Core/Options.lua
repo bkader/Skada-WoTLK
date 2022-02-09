@@ -73,6 +73,7 @@ Skada.windowdefaults = {
 	disablehighlight = false,
 	modeincombat = "",
 	returnaftercombat = false,
+	autocurrent = false,
 	wipemode = "",
 	hidden = false,
 	enabletitle = true,
@@ -115,6 +116,8 @@ Skada.defaults = {
 		setformat = 3,
 		setnumber = true,
 		numbersystem = 1,
+		brackets = 1,
+		separator = 1,
 		showranks = true,
 		showself = false,
 		setstokeep = 15,
@@ -403,6 +406,20 @@ Skada.options = {
 							values = {[1] = L["Auto"], [2] = L["Western"], [3] = L["East Asia"]},
 							order = 30
 						},
+						brackets = {
+							type = "select",
+							name = L["Brackets"],
+							desc = L["Choose which type of brackets to use."],
+							values = {"(", "{", "[", "<", NONE},
+							order = 40
+						},
+						separator = {
+							type = "select",
+							name = L["Separator"],
+							desc = L["Choose which character is used to separator values between brackets."],
+							values = {",", ".", ";", "-", "|", "/", "\\", "~", NONE},
+							order = 50
+						},
 						decimals = {
 							type = "range",
 							name = L["Number of decimals"],
@@ -411,7 +428,7 @@ Skada.options = {
 							max = 3,
 							step = 1,
 							width = "double",
-							order = 40
+							order = 60
 						},
 						setformat = {
 							type = "select",
@@ -419,13 +436,13 @@ Skada.options = {
 							desc = L["Controls the way set names are displayed."],
 							width = "double",
 							values = Skada:SetLabelFormats(),
-							order = 50
+							order = 70
 						},
 						setnumber = {
 							type = "toggle",
 							name = L["Number set duplicates"],
 							desc = L["Append a count to set names with duplicate mob names."],
-							order = 60
+							order = 80
 						},
 						feed = {
 							type = "select",
@@ -439,7 +456,7 @@ Skada.options = {
 								end
 								return feeds
 							end,
-							order = 70
+							order = 90
 						},
 						separator1 = {
 							type = "description",
