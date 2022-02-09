@@ -217,9 +217,9 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Friendly Fire"]
-		local total = set.friendfire or 0
+		win.title = win.class and format("%s (%s)", L["Friendly Fire"], L[win.class]) or L["Friendly Fire"]
 
+		local total = set.friendfire or 0
 		if total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
@@ -262,6 +262,8 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 			showspots = true,
 			click1 = spellmod,
 			click2 = targetmod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			nototalclick = {spellmod, targetmod},
 			columns = {Damage = true, Percent = true},
 			icon = [[Interface\Icons\inv_gizmo_supersappercharge]]

@@ -1,5 +1,4 @@
 local Skada = Skada
-
 Skada:AddLoadableModule("Comparison", function(L)
 	if Skada:IsDisabled("Damage", "Comparison") then return end
 
@@ -511,7 +510,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 			click1 = spellmod,
 			click2 = targetmod,
 			click3 = self.SetActor,
-			click3label = L["Damage Comparison"],
+			click3_label = L["Damage Comparison"],
 			nototalclick = {spellmod, targetmod},
 			columns = {Damage = true, Comparison = true, Percent = true},
 			icon = [[Interface\Icons\Ability_Warrior_OffensiveStance]]

@@ -211,33 +211,35 @@ do
 
 				local nr = 0
 				for _, player in ipairs(set.players) do
-					local auracount, aurauptime = CountAuras(player.auras, atype)
-					if auracount > 0 and aurauptime > 0 then
-						nr = nr + 1
+					if not win.class or win.class == player.class then
+						local auracount, aurauptime = CountAuras(player.auras, atype)
+						if auracount > 0 and aurauptime > 0 then
+							nr = nr + 1
 
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+							local d = win.dataset[nr] or {}
+							win.dataset[nr] = d
 
-						d.id = player.id or player.name
-						d.label = player.name
-						d.text = player.id and Skada:FormatName(player.name, player.id)
-						d.class = player.class
-						d.role = player.role
-						d.spec = player.spec
+							d.id = player.id or player.name
+							d.label = player.name
+							d.text = player.id and Skada:FormatName(player.name, player.id)
+							d.class = player.class
+							d.role = player.role
+							d.spec = player.spec
 
-						local maxtime = floor(player:GetTime())
-						d.value = min(floor(aurauptime / auracount), maxtime)
-						d.valuetext = Skada:FormatValueText(
-							Skada:FormatTime(d.value),
-							mode.metadata.columns.Uptime,
-							auracount,
-							mode.metadata.columns.Count,
-							Skada:FormatPercent(d.value, maxtime),
-							mode.metadata.columns.Percent
-						)
+							local maxtime = floor(player:GetTime())
+							d.value = min(floor(aurauptime / auracount), maxtime)
+							d.valuetext = Skada:FormatValueText(
+								Skada:FormatTime(d.value),
+								mode.metadata.columns.Uptime,
+								auracount,
+								mode.metadata.columns.Count,
+								Skada:FormatPercent(d.value, maxtime),
+								mode.metadata.columns.Percent
+							)
 
-						if win.metadata and d.value > win.metadata.maxvalue then
-							win.metadata.maxvalue = d.value
+							if win.metadata and d.value > win.metadata.maxvalue then
+								win.metadata.maxvalue = d.value
+							end
 						end
 					end
 				end
@@ -458,7 +460,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Buffs"]
+		win.title = win.class and format("%s (%s)", L["Buffs"], L[win.class]) or L["Buffs"]
 		UpdateFunction("BUFF", win, set, self)
 	end
 
@@ -491,6 +493,8 @@ Skada:AddLoadableModule("Buffs", function(L)
 		spellmod.metadata = {valueorder = true, tooltip = aura_tooltip, click1 = playermod}
 		self.metadata = {
 			click1 = spellmod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			nototalclick = {spellmod},
 			columns = {Uptime = true, Count = true, Percent = true},
 			icon = [[Interface\Icons\spell_holy_divinespirit]]
@@ -729,7 +733,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Debuffs"]
+		win.title = win.class and format("%s (%s)", L["Debuffs"], L[win.class]) or L["Debuffs"]
 		UpdateFunction("DEBUFF", win, set, self)
 	end
 
@@ -739,6 +743,8 @@ Skada:AddLoadableModule("Debuffs", function(L)
 		self.metadata = {
 			click1 = spellmod,
 			click2 = targetmod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			nototalclick = {spellmod, targetmod},
 			columns = {Uptime = true, Count = true, Percent = true},
 			icon = [[Interface\Icons\spell_shadow_shadowwordpain]]

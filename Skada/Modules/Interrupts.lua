@@ -237,9 +237,9 @@ Skada:AddLoadableModule("Interrupts", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Interrupts"]
-		local total = set.interrupt or 0
+		win.title = win.class and format("%s (%s)", L["Interrupts"], L[win.class]) or L["Interrupts"]
 
+		local total = set.interrupt or 0
 		if total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
@@ -247,7 +247,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 
 			local nr = 0
 			for _, player in ipairs(set.players) do
-				if (player.interrupt or 0) > 0 then
+				if (not win.class or win.class == player.class) and (player.interrupt or 0) > 0 then
 					nr = nr + 1
 
 					local d = win.dataset[nr] or {}
@@ -283,6 +283,8 @@ Skada:AddLoadableModule("Interrupts", function(L)
 			click1 = spellmod,
 			click2 = targetmod,
 			click3 = playermod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			nototalclick = {spellmod, targetmod, playermod},
 			columns = {Total = true, Percent = true},
 			icon = [[Interface\Icons\ability_kick]]

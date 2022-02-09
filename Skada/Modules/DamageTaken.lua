@@ -655,7 +655,8 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Damage Taken"]
+		win.title = win.class and format("%s (%s)", L["Damage Taken"], L[win.class]) or L["Damage Taken"]
+
 		local total = set and set:GetDamageTaken() or 0
 		if total > 0 then
 			if win.metadata then
@@ -666,57 +667,24 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 
 			-- players.
 			for _, player in ipairs(set.players) do
-				local dtps, amount = player:GetDTPS()
-				if amount > 0 then
-					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
-
-					d.id = player.id or player.name
-					d.label = player.name
-					d.text = player.id and Skada:FormatName(player.name, player.id)
-					d.class = player.class
-					d.role = player.role
-					d.spec = player.spec
-
-					if Skada.forPVP and set.type == "arena" then
-						d.color = set.gold and Skada.classcolors.ARENA_GOLD or Skada.classcolors.ARENA_GREEN
-					end
-
-					d.value = amount
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(d.value),
-						self.metadata.columns.Damage,
-						Skada:FormatNumber(dtps),
-						self.metadata.columns.DTPS,
-						Skada:FormatPercent(d.value, total),
-						self.metadata.columns.Percent
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
-				end
-			end
-
-			-- arena enemies
-			if Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyDamageTaken then
-				for _, enemy in ipairs(set.enemies) do
-					local dtps, amount = enemy:GetDTPS()
+				if not win.class or win.class == player.class then
+					local dtps, amount = player:GetDTPS()
 					if amount > 0 then
 						nr = nr + 1
 
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
-						d.id = enemy.id or enemy.name
-						d.label = enemy.name
-						d.text = nil
-						d.class = enemy.class
-						d.role = enemy.role
-						d.spec = enemy.spec
-						d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_GOLD
+						d.id = player.id or player.name
+						d.label = player.name
+						d.text = player.id and Skada:FormatName(player.name, player.id)
+						d.class = player.class
+						d.role = player.role
+						d.spec = player.spec
+
+						if Skada.forPVP and set.type == "arena" then
+							d.color = set.gold and Skada.classcolors.ARENA_GOLD or Skada.classcolors.ARENA_GREEN
+						end
 
 						d.value = amount
 						d.valuetext = Skada:FormatValueText(
@@ -734,6 +702,43 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 					end
 				end
 			end
+
+			-- arena enemies
+			if Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyDamageTaken then
+				for _, enemy in ipairs(set.enemies) do
+					if not win.class or win.class == enemy.class then
+						local dtps, amount = enemy:GetDTPS()
+						if amount > 0 then
+							nr = nr + 1
+
+							local d = win.dataset[nr] or {}
+							win.dataset[nr] = d
+
+							d.id = enemy.id or enemy.name
+							d.label = enemy.name
+							d.text = nil
+							d.class = enemy.class
+							d.role = enemy.role
+							d.spec = enemy.spec
+							d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_GOLD
+
+							d.value = amount
+							d.valuetext = Skada:FormatValueText(
+								Skada:FormatNumber(d.value),
+								self.metadata.columns.Damage,
+								Skada:FormatNumber(dtps),
+								self.metadata.columns.DTPS,
+								Skada:FormatPercent(d.value, total),
+								self.metadata.columns.Percent
+							)
+
+							if win.metadata and d.value > win.metadata.maxvalue then
+								win.metadata.maxvalue = d.value
+							end
+						end
+					end
+				end
+			end
 		end
 	end
 
@@ -745,6 +750,8 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			showspots = true,
 			click1 = playermod,
 			click2 = sourcemod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod, sourcemod},
 			columns = {Damage = true, DTPS = true, Percent = true},
 			icon = [[Interface\Icons\ability_mage_frostfirebolt]]
@@ -933,7 +940,8 @@ Skada:AddLoadableModule("DTPS", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["DTPS"]
+		win.title = win.class and format("%s (%s)", L["DTPS"], L[win.class]) or L["DTPS"]
+
 		local total = set and set:GetDTPS()
 		if total > 0 then
 			if win.metadata then
@@ -944,55 +952,24 @@ Skada:AddLoadableModule("DTPS", function(L)
 
 			-- players
 			for _, player in ipairs(set.players) do
-				local dtps = player:GetDTPS()
-				if dtps > 0 then
-					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
-
-					d.id = player.id or player.name
-					d.label = player.name
-					d.text = player.id and Skada:FormatName(player.name, player.id)
-					d.class = player.class
-					d.role = player.role
-					d.spec = player.spec
-
-					if Skada.forPVP and set.type == "arena" then
-						d.color = set.gold and Skada.classcolors.ARENA_GOLD or Skada.classcolors.ARENA_GREEN
-					end
-
-					d.value = dtps
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(d.value),
-						self.metadata.columns.DTPS,
-						Skada:FormatPercent(d.value, total),
-						self.metadata.columns.Percent
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
-				end
-			end
-
-			-- arena enemies
-			if Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyDamageTaken then
-				for _, enemy in ipairs(set.enemies) do
-					local dtps = enemy:GetDTPS()
+				if not win.class or win.class == player.class then
+					local dtps = player:GetDTPS()
 					if dtps > 0 then
 						nr = nr + 1
 
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
-						d.id = enemy.id or enemy.name
-						d.label = enemy.name
-						d.text = nil
-						d.class = enemy.class
-						d.role = enemy.role
-						d.spec = enemy.spec
-						d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_GOLD
+						d.id = player.id or player.name
+						d.label = player.name
+						d.text = player.id and Skada:FormatName(player.name, player.id)
+						d.class = player.class
+						d.role = player.role
+						d.spec = player.spec
+
+						if Skada.forPVP and set.type == "arena" then
+							d.color = set.gold and Skada.classcolors.ARENA_GOLD or Skada.classcolors.ARENA_GREEN
+						end
 
 						d.value = dtps
 						d.valuetext = Skada:FormatValueText(
@@ -1008,6 +985,41 @@ Skada:AddLoadableModule("DTPS", function(L)
 					end
 				end
 			end
+
+			-- arena enemies
+			if Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyDamageTaken then
+				for _, enemy in ipairs(set.enemies) do
+					if not win.class or win.class == enemy.class then
+						local dtps = enemy:GetDTPS()
+						if dtps > 0 then
+							nr = nr + 1
+
+							local d = win.dataset[nr] or {}
+							win.dataset[nr] = d
+
+							d.id = enemy.id or enemy.name
+							d.label = enemy.name
+							d.text = nil
+							d.class = enemy.class
+							d.role = enemy.role
+							d.spec = enemy.spec
+							d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_GOLD
+
+							d.value = dtps
+							d.valuetext = Skada:FormatValueText(
+								Skada:FormatNumber(d.value),
+								self.metadata.columns.DTPS,
+								Skada:FormatPercent(d.value, total),
+								self.metadata.columns.Percent
+							)
+
+							if win.metadata and d.value > win.metadata.maxvalue then
+								win.metadata.maxvalue = d.value
+							end
+						end
+					end
+				end
+			end
 		end
 	end
 
@@ -1015,6 +1027,8 @@ Skada:AddLoadableModule("DTPS", function(L)
 		self.metadata = {
 			showspots = true,
 			tooltip = dtps_tooltip,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			columns = {DTPS = true, Percent = true},
 			icon = [[Interface\Icons\inv_weapon_shortblade_06]]
 		}
@@ -1315,7 +1329,8 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Avoidance & Mitigation"]
+		win.title = win.class and format("%s (%s)", L["Avoidance & Mitigation"], L[win.class]) or L["Avoidance & Mitigation"]
+
 		if (set.totaldamagetaken or 0) > 0 then
 			wipe(cacheTable) -- used later
 
@@ -1325,53 +1340,55 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 
 			local nr = 0
 			for _, player in ipairs(set.players) do
-				if player.damagetakenspells then
-					local tmp = {name = player.name, data = {}}
+				if not win.class or win.class == player.class then
+					if player.damagetakenspells then
+						local tmp = {name = player.name, data = {}}
 
-					local total, avoid = 0, 0
-					for _, spell in pairs(player.damagetakenspells) do
-						total = total + spell.count
+						local total, avoid = 0, 0
+						for _, spell in pairs(player.damagetakenspells) do
+							total = total + spell.count
 
-						for _, t in ipairs(misstypes) do
-							if (spell[t] or 0) > 0 then
-								avoid = avoid + spell[t]
-								tmp.data[t] = (tmp.data[t] or 0) + spell[t]
+							for _, t in ipairs(misstypes) do
+								if (spell[t] or 0) > 0 then
+									avoid = avoid + spell[t]
+									tmp.data[t] = (tmp.data[t] or 0) + spell[t]
+								end
 							end
 						end
-					end
 
-					if avoid > 0 then
-						tmp.total = total
-						tmp.avoid = avoid
-						cacheTable[player.id] = tmp
+						if avoid > 0 then
+							tmp.total = total
+							tmp.avoid = avoid
+							cacheTable[player.id] = tmp
 
-						nr = nr + 1
+							nr = nr + 1
 
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+							local d = win.dataset[nr] or {}
+							win.dataset[nr] = d
 
-						d.id = player.id or player.name
-						d.label = player.name
-						d.text = player.id and Skada:FormatName(player.name, player.id)
-						d.class = player.class
-						d.role = player.role
-						d.spec = player.spec
+							d.id = player.id or player.name
+							d.label = player.name
+							d.text = player.id and Skada:FormatName(player.name, player.id)
+							d.class = player.class
+							d.role = player.role
+							d.spec = player.spec
 
-						d.value = 100 * avoid / total
-						d.valuetext = Skada:FormatValueText(
-							Skada:FormatPercent(d.value),
-							self.metadata.columns.Percent,
-							avoid,
-							self.metadata.columns.Count,
-							total,
-							self.metadata.columns.Total
-						)
+							d.value = 100 * avoid / total
+							d.valuetext = Skada:FormatValueText(
+								Skada:FormatPercent(d.value),
+								self.metadata.columns.Percent,
+								avoid,
+								self.metadata.columns.Count,
+								total,
+								self.metadata.columns.Total
+							)
 
-						if win.metadata and d.value > win.metadata.maxvalue then
-							win.metadata.maxvalue = d.value
+							if win.metadata and d.value > win.metadata.maxvalue then
+								win.metadata.maxvalue = d.value
+							end
+						elseif cacheTable[player.id] then
+							cacheTable[player.id] = nil
 						end
-					elseif cacheTable[player.id] then
-						cacheTable[player.id] = nil
 					end
 				end
 			end
@@ -1383,6 +1400,8 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 		self.metadata = {
 			showspots = true,
 			click1 = playermod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			columns = {Percent = true, Count = true, Total = true},
 			icon = [[Interface\Icons\ability_warlock_avoidance]]
 		}
@@ -1531,7 +1550,8 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Damage Mitigated"]
+		win.title = win.class and format("%s (%s)", L["Damage Mitigated"], L[win.class]) or L["Damage Mitigated"]
+
 		if (set.totaldamagetaken or 0) > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
@@ -1539,33 +1559,34 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 
 			local nr = 0
 			for _, player in ipairs(set.players) do
-				local amount, total = getMIT(player)
+				if not win.class or win.class == player.class then
+					local amount, total = getMIT(player)
+					if amount > 0 then
+						nr = nr + 1
 
-				if amount > 0 then
-					nr = nr + 1
+						local d = win.dataset[nr] or {}
+						win.dataset[nr] = d
 
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+						d.id = player.id or player.name
+						d.label = player.name
+						d.text = player.id and Skada:FormatName(player.name, player.id)
+						d.class = player.class
+						d.role = player.role
+						d.spec = player.spec
 
-					d.id = player.id or player.name
-					d.label = player.name
-					d.text = player.id and Skada:FormatName(player.name, player.id)
-					d.class = player.class
-					d.role = player.role
-					d.spec = player.spec
+						d.value = amount
+						d.valuetext = Skada:FormatValueText(
+							Skada:FormatNumber(d.value),
+							self.metadata.columns.Damage,
+							Skada:FormatNumber(total),
+							self.metadata.columns.Total,
+							Skada:FormatPercent(d.value, total),
+							self.metadata.columns.Percent
+						)
 
-					d.value = amount
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(d.value),
-						self.metadata.columns.Damage,
-						Skada:FormatNumber(total),
-						self.metadata.columns.Total,
-						Skada:FormatPercent(d.value, total),
-						self.metadata.columns.Percent
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
+						if win.metadata and d.value > win.metadata.maxvalue then
+							win.metadata.maxvalue = d.value
+						end
 					end
 				end
 			end
@@ -1577,6 +1598,8 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 		self.metadata = {
 			showspots = true,
 			click1 = playermod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			columns = {Damage = true, Total = true, Percent = true},
 			icon = [[Interface\Icons\spell_shadow_shadowward]]
 		}

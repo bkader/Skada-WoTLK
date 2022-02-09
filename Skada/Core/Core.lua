@@ -616,8 +616,16 @@ function Window:set_selected_set(set, step)
 	end
 end
 
-function Window:DisplayMode(mode)
+function Window:DisplayMode(mode, class)
 	if type(mode) ~= "table" then return end
+
+	-- remove filter for the same mode
+	if class and not self.class then
+		self.class = class
+	elseif not class and self.class and self.selectedmode == mode then
+		self.class = nil
+	end
+
 	self:Wipe()
 
 	self.selectedset = self.selectedset or "current"
@@ -641,7 +649,7 @@ function Window:DisplayMode(mode)
 		self.child:DisplayMode(mode)
 	end
 
-	Skada:UpdateDisplay(false)
+	Skada:UpdateDisplay()
 end
 
 do
@@ -709,7 +717,7 @@ do
 			self.child:DisplayModes(settime)
 		end
 
-		Skada:UpdateDisplay(false)
+		Skada:UpdateDisplay()
 	end
 end
 
@@ -741,18 +749,22 @@ do
 			self.child:DisplaySets()
 		end
 
-		Skada:UpdateDisplay(false)
+		Skada:UpdateDisplay()
 	end
 end
 
-function Window:RightClick(_, button)
+function Window:RightClick(bar, button)
 	if self.selectedmode then
 		if #self.history > 0 then
 			self:DisplayMode(tremove(self.history))
+		elseif self.class then
+			Skada:ToggleFilter(self)
 		else
+			self.class = nil
 			self:DisplayModes(self.selectedset)
 		end
 	elseif self.selectedset then
+		self.class = nil
 		self:DisplaySets()
 	end
 	CloseDropDownMenus() -- always close
@@ -986,6 +998,9 @@ do
 				end
 				if mode.metadata.click3 then
 					ScanForColumns(mode.metadata.click3)
+				end
+				if mode.metadata.click4 then
+					ScanForColumns(mode.metadata.click4)
 				end
 			end
 		end
@@ -1550,9 +1565,9 @@ do
 				t:ClearLines()
 				self:AddSubviewToTooltip(t, win, FindMode(id), id, label)
 				t:Show()
-			elseif win.metadata.click1 or win.metadata.click2 or win.metadata.click3 or win.metadata.tooltip then
+			elseif win.metadata.click1 or win.metadata.click2 or win.metadata.click3 or win.metadata.click4 or win.metadata.tooltip then
 				t:ClearLines()
-				local hasClick = win.metadata.click1 or win.metadata.click2 or win.metadata.click3
+				local hasClick = win.metadata.click1 or win.metadata.click2 or win.metadata.click3 or win.metadata.click4
 
 				if win.metadata.tooltip then
 					local numLines = t:NumLines()
@@ -1573,6 +1588,9 @@ do
 					if win.metadata.click3 and not ignoredTotalClick(win, win.metadata.click3) then
 						self:AddSubviewToTooltip(t, win, win.metadata.click3, id, label)
 					end
+					if win.metadata.click4 and not ignoredTotalClick(win, win.metadata.click4) then
+						self:AddSubviewToTooltip(t, win, win.metadata.click4, id, label)
+					end
 				end
 
 				if win.metadata.post_tooltip then
@@ -1586,25 +1604,41 @@ do
 
 				if type(win.metadata.click1) == "table" and not ignoredTotalClick(win, win.metadata.click1) then
 					t:AddLine(format(L["Click for |cff00ff00%s|r"], win.metadata.click1.label or win.metadata.click1.moduleName))
-				elseif type(win.metadata.click1) == "function" and win.metadata.click1label then
-					t:AddLine(format(L["Click for |cff00ff00%s|r"], win.metadata.click1label))
+				elseif type(win.metadata.click1) == "function" and win.metadata.click1_label then
+					t:AddLine(format(L["Click for |cff00ff00%s|r"], win.metadata.click1_label))
 				end
 
 				if type(win.metadata.click2) == "table" and not ignoredTotalClick(win, win.metadata.click2) then
 					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], win.metadata.click2.label or win.metadata.click2.moduleName))
-				elseif type(win.metadata.click2) == "function" and win.metadata.click2label then
-					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], win.metadata.click2label))
+				elseif type(win.metadata.click2) == "function" and win.metadata.click2_label then
+					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], win.metadata.click2_label))
 				end
 
 				if type(win.metadata.click3) == "table" and not ignoredTotalClick(win, win.metadata.click3) then
 					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], win.metadata.click3.label or win.metadata.click3.moduleName))
-				elseif type(win.metadata.click3) == "function" and win.metadata.click3label then
-					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], win.metadata.click3label))
+				elseif type(win.metadata.click3) == "function" and win.metadata.click3_label then
+					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], win.metadata.click3_label))
+				end
+
+				if type(win.metadata.click4) == "table" and not ignoredTotalClick(win, win.metadata.click4) then
+					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], win.metadata.click4.label or win.metadata.click4.moduleName))
+				elseif type(win.metadata.click4) == "function" and win.metadata.click4_label then
+					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], win.metadata.click4_label))
 				end
 
 				t:Show()
 			end
 		end
+	end
+end
+
+function Skada:ToggleFilter(win, id, label)
+	if win.class then
+		win:DisplayMode(win.selectedmode, nil)
+	elseif win.GetSelectedSet and id then
+		local set = win:GetSelectedSet()
+		local actor = set and set:GetPlayer(id, label)
+		win:DisplayMode(win.selectedmode, actor and actor.class)
 	end
 end
 
@@ -1628,6 +1662,7 @@ local function GenerateTotal()
 	wipe(Skada.total.players)
 	Skada.total.starttime = 0
 	Skada.total.time = 0
+	Skada.total.name = Skada.total.name or L["Total"]
 
 	for _, set in ipairs(Skada.char.sets) do
 		if not Skada.total.starttime or set.starttime < Skada.total.starttime then

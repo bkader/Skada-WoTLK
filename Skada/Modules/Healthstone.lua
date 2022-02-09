@@ -32,7 +32,7 @@ Skada:AddLoadableModule("Healthstones", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = self.moduleName
+		win.title = win.class and format("%s (%s)", L["Healthstones"], L[win.class]) or L["Healthstones"]
 
 		local total = set.healthstone or 0
 		if total > 0 then
@@ -42,7 +42,7 @@ Skada:AddLoadableModule("Healthstones", function(L)
 
 			local nr = 0
 			for _, player in ipairs(set.players) do
-				if player.healthstone then
+				if (not win.class or win.class == player.class) and player.healthstone then
 					nr = nr + 1
 
 					local d = win.dataset[nr] or {}
@@ -75,6 +75,8 @@ Skada:AddLoadableModule("Healthstones", function(L)
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = true},
 			icon = [[Interface\Icons\inv_stone_04]]
 		}

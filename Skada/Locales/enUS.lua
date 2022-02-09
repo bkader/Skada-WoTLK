@@ -47,6 +47,8 @@ L["Segment Time"] = true
 L["Click for |cff00ff00%s|r"] = true
 L["Shift-Click for |cff00ff00%s|r"] = true
 L["Control-Click for |cff00ff00%s|r"] = true
+L["Alt-Click for |cff00ff00%s|r"] = true
+L["Toggle Class Filter"] = true
 L["Minimum"] = true
 L["Maximum"] = true
 L["Average"] = true
@@ -745,6 +747,17 @@ L["Revision"] = true
 L["Thanks"] = true
 L["Version"] = true
 L["Website"] = true
+-- class names
+L["DEATHKNIGHT"] = "Death Knight"
+L["DRUID"] = "Druid"
+L["HUNTER"] = "Hunter"
+L["MAGE"] = "Mage"
+L["PALADIN"] = "Paladin"
+L["PRIEST"] = "Priest"
+L["ROGUE"] = "Rogue"
+L["SHAMAN"] = "Shaman"
+L["WARLOCK"] = "Warlock"
+L["WARRIOR"] = "Warrior"
 -- some bosses entries
 L["Acidmaw"] = true
 L["Auriaya"] = true

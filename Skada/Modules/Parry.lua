@@ -105,9 +105,9 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Parry-Haste"]
-		local total = set.parry or 0
+		win.title = win.class and format("%s (%s)", L["Parry-Haste"], L[win.class]) or L["Parry-Haste"]
 
+		local total = set.parry or 0
 		if total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
@@ -115,7 +115,7 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 
 			local nr = 0
 			for _, player in ipairs(set.players) do
-				if (player.parry or 0) > 0 then
+				if (not win.class or win.class == player.class) and (player.parry or 0) > 0 then
 					nr = nr + 1
 
 					local d = win.dataset[nr] or {}
@@ -149,6 +149,8 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 			showspots = true,
 			ordersort = true,
 			click1 = targetmod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			nototalclick = {targetmod},
 			columns = {Count = true, Percent = false},
 			icon = [[Interface\Icons\ability_parry]]

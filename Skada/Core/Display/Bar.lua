@@ -28,7 +28,7 @@ local function WindowOnMouseDown(self, button)
 	elseif button == "RightButton" and IsAltKeyDown() then
 		Skada:ModeMenu(self.win)
 	elseif button == "RightButton" then
-		self.win:RightClick()
+		self.win:RightClick(nil, button)
 	end
 end
 
@@ -40,7 +40,7 @@ local function TitleButtonOnClick(self, button)
 	elseif button == "RightButton" and IsControlKeyDown() then
 		Skada:SegmentMenu(bargroup.win)
 	elseif button == "RightButton" and not IsAltKeyDown() then
-		bargroup.win:RightClick()
+		bargroup.win:RightClick(nil, button)
 	end
 end
 
@@ -434,7 +434,7 @@ do
 		elseif IsAltKeyDown() and button == "RightButton" then
 			Skada:ModeMenu(bar.win)
 		elseif button == "RightButton" then
-			bar.win:RightClick()
+			bar.win:RightClick(bar, button)
 		end
 	end
 
@@ -456,12 +456,14 @@ do
 		elseif win.metadata.click and not ignoredClick(win, win.metadata.click) then
 			win.metadata.click(win, id, label, button)
 		elseif button == "RightButton" and not IsModifierKeyDown() then
-			win:RightClick()
-		elseif win.metadata.click2 and not ignoredClick(win, win.metadata.click2) and IsShiftKeyDown() then
+			win:RightClick(bar, button)
+		elseif win.metadata.click2 and IsShiftKeyDown() and not ignoredClick(win, win.metadata.click2) then
 			showmode(win, id, label, win.metadata.click2)
-		elseif win.metadata.click3 and not ignoredClick(win, win.metadata.click3) and IsControlKeyDown() then
+		elseif win.metadata.click4 and IsAltKeyDown() and not ignoredClick(win, win.metadata.click4) then
+			showmode(win, id, label, win.metadata.click4)
+		elseif win.metadata.click3 and IsControlKeyDown() and not ignoredClick(win, win.metadata.click3) then
 			showmode(win, id, label, win.metadata.click3)
-		elseif win.metadata.click1 and not ignoredClick(win, win.metadata.click1) and not IsModifierKeyDown() then
+		elseif win.metadata.click1 and not IsModifierKeyDown() and not ignoredClick(win, win.metadata.click1) then
 			showmode(win, id, label, win.metadata.click1)
 		end
 	end

@@ -1,4 +1,4 @@
-# Skada for WoTLK (_Revisited - v1.8.73.357_)
+# Skada for WoTLK (_Revisited - v1.8.73.358_)
 
 ![Discord](https://img.shields.io/discord/795698054371868743?label=discord)
 ![GitHub last commit](https://img.shields.io/github/last-commit/bkader/Skada-WoTLK)
@@ -265,7 +265,7 @@ set:GetDamage(useful) -- returns the damage amount. if "useful" is true, it excl
 set:GetDamageTaken() -- returns the amount of damage taken by the whole group.
 set:GetFailCount(spellid) -- returns the number of fails per give spell id
 set:GetAbsorbHealTaken() -- returns the table of players their healing taken amounts.
-set:GetPotion(potionid) -- returns the list of players and total usage of the give potion id
+set:GetPotion(potionid, class) -- returns the list of players and total usage of the give potion id
 
 set:GetEnemyDamageTaken() -- returns the amount of damage enemies took.
 set:GetEnemyDamage() -- returns the amount of damage enemies dealt to your group.

@@ -207,7 +207,7 @@ Skada:AddLoadableModule("Dispels", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Dispels"]
+		win.title = win.class and format("%s (%s)", L["Dispels"], L[win.class]) or L["Dispels"]
 
 		local total = set.dispel or 0
 		if total > 0 then
@@ -217,7 +217,7 @@ Skada:AddLoadableModule("Dispels", function(L)
 
 			local nr = 0
 			for _, player in ipairs(set.players) do
-				if (player.dispel or 0) > 0 then
+				if (not win.class or win.class == player.class) and (player.dispel or 0) > 0 then
 					nr = nr + 1
 
 					local d = win.dataset[nr] or {}
@@ -254,6 +254,8 @@ Skada:AddLoadableModule("Dispels", function(L)
 			click1 = spellmod,
 			click2 = targetmod,
 			click3 = playermod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			nototalclick = {spellmod, targetmod, playermod},
 			columns = {Total = true, Percent = true},
 			icon = [[Interface\Icons\spell_holy_dispelmagic]]

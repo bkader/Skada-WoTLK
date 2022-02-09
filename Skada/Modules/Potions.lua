@@ -105,9 +105,13 @@ Skada:AddLoadableModule("Potions", function(L)
 
 	function potionmod:Update(win, set)
 		win.title = win.potionname or L.Unknown
+		if win.class then
+			win.title = format("%s (%s)", win.title, L[win.class])
+		end
+
 		if not (set and win.potionname) then return end
 
-		local players, total = set:GetPotion(win.potionid)
+		local players, total = set:GetPotion(win.potionid, win.class)
 		if players and total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
@@ -201,9 +205,9 @@ Skada:AddLoadableModule("Potions", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Potions"]
-		local total = set.potion or 0
+		win.title = win.class and format("%s (%s)", L["Potions"], L[win.class]) or L["Potions"]
 
+		local total = set.potion or 0
 		if total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
@@ -211,7 +215,7 @@ Skada:AddLoadableModule("Potions", function(L)
 
 			local nr = 0
 			for _, player in ipairs(set.players) do
-				if (player.potion or 0) > 0 then
+				if (not win.class or win.class == player.class) and (player.potion or 0) > 0 then
 					nr = nr + 1
 
 					local d = win.dataset[nr] or {}
@@ -254,11 +258,17 @@ Skada:AddLoadableModule("Potions", function(L)
 	end
 
 	function mod:OnEnable()
+		potionmod.metadata = {
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"]
+		}
 		playermod.metadata = {click1 = potionmod}
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
 			click1 = playermod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod},
 			columns = {Count = true, Percent = false},
 			icon = [[Interface\Icons\inv_potion_31]]
@@ -289,13 +299,13 @@ Skada:AddLoadableModule("Potions", function(L)
 		local setPrototype = Skada.setPrototype
 		local cacheTable, wipe = Skada.cacheTable, wipe
 
-		function setPrototype:GetPotion(potionid)
+		function setPrototype:GetPotion(potionid, class)
 			if potionid and self.potion then
 				wipe(cacheTable)
 				local total = 0
 
 				for _, p in ipairs(self.players) do
-					if p.potionspells and p.potionspells[potionid] then
+					if (not class or class == p.class) and p.potionspells and p.potionspells[potionid] then
 						total = total + p.potionspells[potionid]
 						cacheTable[p.name] = {
 							id = p.id,

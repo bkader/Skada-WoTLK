@@ -456,6 +456,9 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 
 	function sourcemod:Update(win, set)
 		win.title = format(L["%s's damage sources"], win.targetname or L.Unknown)
+		if win.class then
+			win.title = format("%s (%s)", win.title, L[win.class])
+		end
 
 		local enemy = set and set:GetEnemy(win.targetname, win.targetid)
 		local total = enemy and enemy:GetDamageTaken() or 0
@@ -468,32 +471,34 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 
 			local nr = 0
 			for sourcename, source in pairs(sources) do
-				nr = nr + 1
+				if not win.class or win.class == source.class then
+					nr = nr + 1
 
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
-				d.id = source.id or sourcename
-				d.label = sourcename
-				d.text = source.id and Skada:FormatName(sourcename, source.id)
-				d.class = source.class
-				d.role = source.role
-				d.spec = source.spec
+					d.id = source.id or sourcename
+					d.label = sourcename
+					d.text = source.id and Skada:FormatName(sourcename, source.id)
+					d.class = source.class
+					d.role = source.role
+					d.spec = source.spec
 
-				d.value = source.amount
-				if Skada.db.profile.absdamage then
-					d.value = source.total or d.value
-				end
+					d.value = source.amount
+					if Skada.db.profile.absdamage then
+						d.value = source.total or d.value
+					end
 
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatNumber(d.value),
-					mod.metadata.columns.Damage,
-					Skada:FormatPercent(d.value, total),
-					mod.metadata.columns.Percent
-				)
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatNumber(d.value),
+						mod.metadata.columns.Damage,
+						Skada:FormatPercent(d.value, total),
+						mod.metadata.columns.Percent
+					)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
+					if win.metadata and d.value > win.metadata.maxvalue then
+						win.metadata.maxvalue = d.value
+					end
 				end
 			end
 		end
@@ -553,6 +558,9 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 
 	function usefulmod:Update(win, set)
 		win.title = format(L["Useful damage on %s"], win.targetname or L.Unknown)
+		if win.class then
+			win.title = format("%s (%s)", win.title, L[win.class])
+		end
 
 		local enemy = set and set:GetEnemy(win.targetname, win.targetid)
 		local total = enemy and enemy.usefuldamagetaken or 0
@@ -565,7 +573,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 
 			local nr = 0
 			for sourcename, source in pairs(sources) do
-				if (source.useful or 0) > 0 then
+				if (not win.class or win.class == source.class) and (source.useful or 0) > 0 then
 					nr = nr + 1
 
 					local d = win.dataset[nr] or {}
@@ -636,8 +644,17 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 	end
 
 	function mod:OnEnable()
-		usefulmod.metadata = {showspots = true}
-		sourcemod.metadata = {showspots = true, tooltip = sourcemod_tooltip}
+		usefulmod.metadata = {
+			showspots = true,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"]
+		}
+		sourcemod.metadata = {
+			showspots = true,
+			tooltip = sourcemod_tooltip,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"]
+		}
 		self.metadata = {
 			click1 = sourcemod,
 			click2 = spellmod,
@@ -927,6 +944,9 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 
 	function targetmod:Update(win, set)
 		win.title = format(L["%s's targets"], win.targetname or L.Unknown)
+		if win.class then
+			win.title = format("%s (%s)", win.title, L[win.class])
+		end
 
 		local enemy = set and set:GetEnemy(win.targetname, win.targetid)
 		local total = enemy and enemy:GetDamage() or 0
@@ -939,31 +959,33 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 
 			local nr = 0
 			for targetname, target in pairs(targets) do
-				nr = nr + 1
+				if not win.class or win.class == target.class then
+					nr = nr + 1
 
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
-				d.id = target.id or targetname
-				d.label = targetname
-				d.class = target.class
-				d.role = target.role
-				d.spec = target.spec
+					d.id = target.id or targetname
+					d.label = targetname
+					d.class = target.class
+					d.role = target.role
+					d.spec = target.spec
 
-				d.value = target.amount
-				if Skada.db.profile.absdamage then
-					d.value = target.total or d.value
+					d.value = target.amount
+					if Skada.db.profile.absdamage then
+						d.value = target.total or d.value
+					end
+
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatNumber(d.value),
+						mod.metadata.columns.Damage,
+						Skada:FormatPercent(d.value, total),
+						mod.metadata.columns.Percent
+					)
+
+					if win.metadata and d.value > win.metadata.maxvalue then
+						win.metadata.maxvalue = d.value
 				end
-
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatNumber(d.value),
-					mod.metadata.columns.Damage,
-					Skada:FormatPercent(d.value, total),
-					mod.metadata.columns.Percent
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
 				end
 			end
 		end
@@ -1061,7 +1083,11 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 	end
 
 	function mod:OnEnable()
-		targetmod.metadata = {showspots = true}
+		targetmod.metadata = {
+			showspots = true,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"]
+		}
 		self.metadata = {
 			click1 = targetmod,
 			click2 = spellmod,
@@ -1359,6 +1385,10 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 
 	function mod:Update(win, set)
 		win.title = L["Enemy Healing Done"]
+		if win.class then
+			win.title = format("%s (%s)", win.title, L[win.class])
+		end
+
 		local total = set and set:GetEnemyHeal() or 0
 		if total > 0 then
 			if win.metadata then
@@ -1367,7 +1397,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 
 			local nr = 0
 			for _, enemy in ipairs(set.enemies) do
-				if not enemy.fake then
+				if (not win.class or win.class == enemy.class) and not enemy.fake then
 					local hps, amount = enemy:GetHPS()
 					if amount > 0 then
 						nr = nr + 1
@@ -1405,6 +1435,8 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 			showspots = true,
 			click1 = spellmod,
 			click2 = targetmod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			nototalclick = {spellmod, targetmod},
 			columns = {Healing = true, HPS = true, Percent = true},
 			icon = [[Interface\Icons\spell_holy_blessedlife]]

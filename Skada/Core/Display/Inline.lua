@@ -101,9 +101,11 @@ local function BarClick(win, bar, button)
 	elseif win.metadata.click and not ignoredClick(win, win.metadata.click) then
 		win.metadata.click(win, id, label, button)
 	elseif button == "RightButton" then
-		win:RightClick()
+		win:RightClick(bar, button)
 	elseif win.metadata.click2 and IsShiftKeyDown() and not ignoredClick(win, win.metadata.click2) then
 		showmode(win, id, label, win.metadata.click2)
+	elseif win.metadata.click4 and IsAltKeyDown() and not ignoredClick(win, win.metadata.click4) then
+		showmode(win, id, label, win.metadata.click4)
 	elseif win.metadata.click3 and IsControlKeyDown() and not ignoredClick(win, win.metadata.click3) then
 		showmode(win, id, label, win.metadata.click3)
 	elseif win.metadata.click1 and not ignoredClick(win, win.metadata.click1) then
@@ -134,7 +136,7 @@ function mod:Create(window, isnew)
 	window.frame:EnableMouse()
 	window.frame:SetScript("OnMouseDown", function(frame, button)
 		if button == "RightButton" then
-			window:RightClick()
+			window:RightClick(nil, button)
 		end
 	end)
 

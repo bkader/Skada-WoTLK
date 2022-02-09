@@ -108,7 +108,13 @@ Skada:AddLoadableModule("Resources", function(L)
 			pmode.powername = powername
 			pmode.spells = spellTable[power]
 			instance.power = gainTable[power]
-			instance.metadata = {showspots = true, click1 = pmode, nototalclick = {pmode}}
+			instance.metadata = {
+				showspots = true,
+				click1 = pmode,
+				click4 = Skada.ToggleFilter,
+				click4_label = L["Toggle Class Filter"],
+				nototalclick = {pmode}
+			}
 			return instance
 		end
 	end
@@ -117,6 +123,10 @@ Skada:AddLoadableModule("Resources", function(L)
 	-- of players depending on the selected power gain type.
 	function basemod:Update(win, set)
 		win.title = self.moduleName or L.Unknown
+		if win.class then
+			win.title = format("%s (%s)", win.title, L[win.class])
+		end
+
 		local total = set and self.power and set[self.power] or 0
 
 		if total > 0 then
@@ -126,7 +136,7 @@ Skada:AddLoadableModule("Resources", function(L)
 
 			local nr = 0
 			for _, player in ipairs(set.players) do
-				if player[self.power] then
+				if (not win.class or win.class == player.class) and player[self.power] then
 					nr = nr + 1
 
 					local d = win.dataset[nr] or {}

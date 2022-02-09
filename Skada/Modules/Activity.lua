@@ -21,7 +21,7 @@ Skada:AddLoadableModule("Activity", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Activity"]
+		win.title = win.class and format("%s (%s)", L["Activity"], L[win.class]) or L["Activity"]
 
 		local settime = set and set:GetTime()
 		if settime > 0 then
@@ -31,9 +31,8 @@ Skada:AddLoadableModule("Activity", function(L)
 
 			local nr = 0
 			for _, player in ipairs(set.players) do
-				if player.class and Skada.validclass[player.class] then
+				if (not win.class or win.class == player.class) and player.class and Skada.validclass[player.class] then
 					local activetime = player:GetTime(true)
-
 					if activetime > 0 then
 						nr = nr + 1
 
@@ -65,10 +64,12 @@ Skada:AddLoadableModule("Activity", function(L)
 	end
 
 	function mod:OnEnable()
-		mod.metadata = {
+		self.metadata = {
 			showspots = true,
 			ordersort = true,
 			tooltip = activity_tooltip,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			columns = {["Active Time"] = true, Percent = true},
 			icon = [[Interface\Icons\spell_holy_borrowedtime]]
 		}

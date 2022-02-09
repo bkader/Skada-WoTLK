@@ -345,9 +345,9 @@ Skada:AddLoadableModule("Healing", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Healing"]
-		local total = set and set:GetHeal() or 0
+		win.title = win.class and format("%s (%s)", L["Healing"], L[win.class]) or L["Healing"]
 
+		local total = set and set:GetHeal() or 0
 		if total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
@@ -357,57 +357,24 @@ Skada:AddLoadableModule("Healing", function(L)
 
 			-- players
 			for _, player in ipairs(set.players) do
-				local hps, amount = player:GetHPS()
-				if amount > 0 then
-					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
-
-					d.id = player.id or player.name
-					d.label = player.name
-					d.text = player.id and Skada:FormatName(player.name, player.id)
-					d.class = player.class
-					d.role = player.role
-					d.spec = player.spec
-
-					if Skada.forPVP and set.type == "arena" then
-						d.color = set.gold and Skada.classcolors.ARENA_GOLD or Skada.classcolors.ARENA_GREEN
-					end
-
-					d.value = amount
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(d.value),
-						self.metadata.columns.Healing,
-						Skada:FormatNumber(hps),
-						self.metadata.columns.HPS,
-						Skada:FormatPercent(d.value, total),
-						self.metadata.columns.Percent
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
-				end
-			end
-
-			-- arena enemies
-			if Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyHeal then
-				for _, enemy in ipairs(set.enemies) do
-					local hps, amount = enemy:GetHPS()
+				if not win.class or win.class == player.class then
+					local hps, amount = player:GetHPS()
 					if amount > 0 then
 						nr = nr + 1
 
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
-						d.id = enemy.id or enemy.name
-						d.label = enemy.name
-						d.text = nil
-						d.class = enemy.class
-						d.role = enemy.role
-						d.spec = enemy.spec
-						d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_GOLD
+						d.id = player.id or player.name
+						d.label = player.name
+						d.text = player.id and Skada:FormatName(player.name, player.id)
+						d.class = player.class
+						d.role = player.role
+						d.spec = player.spec
+
+						if Skada.forPVP and set.type == "arena" then
+							d.color = set.gold and Skada.classcolors.ARENA_GOLD or Skada.classcolors.ARENA_GREEN
+						end
 
 						d.value = amount
 						d.valuetext = Skada:FormatValueText(
@@ -425,6 +392,43 @@ Skada:AddLoadableModule("Healing", function(L)
 					end
 				end
 			end
+
+			-- arena enemies
+			if Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyHeal then
+				for _, enemy in ipairs(set.enemies) do
+					if not win.class or win.class == enemy.class then
+						local hps, amount = enemy:GetHPS()
+						if amount > 0 then
+							nr = nr + 1
+
+							local d = win.dataset[nr] or {}
+							win.dataset[nr] = d
+
+							d.id = enemy.id or enemy.name
+							d.label = enemy.name
+							d.text = nil
+							d.class = enemy.class
+							d.role = enemy.role
+							d.spec = enemy.spec
+							d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_GOLD
+
+							d.value = amount
+							d.valuetext = Skada:FormatValueText(
+								Skada:FormatNumber(d.value),
+								self.metadata.columns.Healing,
+								Skada:FormatNumber(hps),
+								self.metadata.columns.HPS,
+								Skada:FormatPercent(d.value, total),
+								self.metadata.columns.Percent
+							)
+
+							if win.metadata and d.value > win.metadata.maxvalue then
+								win.metadata.maxvalue = d.value
+							end
+						end
+					end
+				end
+			end
 		end
 	end
 
@@ -435,6 +439,8 @@ Skada:AddLoadableModule("Healing", function(L)
 			showspots = true,
 			click1 = playermod,
 			click2 = targetmod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod, targetmod},
 			columns = {Healing = true, HPS = true, Percent = true},
 			icon = [[Interface\Icons\spell_nature_healingtouch]]
@@ -717,9 +723,9 @@ Skada:AddLoadableModule("Overhealing", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Overhealing"]
-		local total = set.overheal or 0
+		win.title = win.class and format("%s (%s)", L["Overhealing"], L[win.class]) or L["Overhealing"]
 
+		local total = set.overheal or 0
 		if total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
@@ -727,7 +733,7 @@ Skada:AddLoadableModule("Overhealing", function(L)
 
 			local nr = 0
 			for _, player in ipairs(set.players) do
-				if (player.overheal or 0) > 0 then
+				if (not win.class or win.class == player.class) and (player.overheal or 0) > 0 then
 					nr = nr + 1
 
 					local d = win.dataset[nr] or {}
@@ -763,6 +769,8 @@ Skada:AddLoadableModule("Overhealing", function(L)
 			showspots = true,
 			click1 = playermod,
 			click2 = targetmod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod, targetmod},
 			columns = {Overhealing = true, Percent = true},
 			icon = [[Interface\Icons\spell_holy_holybolt]]
@@ -1036,9 +1044,9 @@ Skada:AddLoadableModule("Total Healing", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Total Healing"]
-		local total = set and (set:GetHeal() + (set.overheal or 0)) or 0
+		win.title = win.class and format("%s (%s)", L["Total Healing"], L[win.class]) or L["Total Healing"]
 
+		local total = set and (set:GetHeal() + (set.overheal or 0)) or 0
 		if total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
@@ -1048,57 +1056,24 @@ Skada:AddLoadableModule("Total Healing", function(L)
 
 			-- players
 			for _, player in ipairs(set.players) do
-				local hps, amount = player:GetTHPS()
-				if amount > 0 then
-					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
-
-					d.id = player.id or player.name
-					d.label = player.name
-					d.text = player.id and Skada:FormatName(player.name, player.id)
-					d.class = player.class
-					d.role = player.role
-					d.spec = player.spec
-
-					if Skada.forPVP and set.type == "arena" then
-						d.color = set.gold and Skada.classcolors.ARENA_GOLD or Skada.classcolors.ARENA_GREEN
-					end
-
-					d.value = amount
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(d.value),
-						self.metadata.columns.Healing,
-						Skada:FormatNumber(hps),
-						self.metadata.columns.HPS,
-						Skada:FormatPercent(d.value, total),
-						self.metadata.columns.Percent
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
-				end
-			end
-
-			-- arena enemies
-			if Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyHeal then
-				for _, enemy in ipairs(set.enemies) do
-					local hps, amount = enemy:GetHPS()
+				if not win.class or win.class == player.class then
+					local hps, amount = player:GetTHPS()
 					if amount > 0 then
 						nr = nr + 1
 
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
-						d.id = enemy.id or enemy.name
-						d.label = enemy.name
-						d.text = nil
-						d.class = enemy.class
-						d.role = enemy.role
-						d.spec = enemy.spec
-						d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_GOLD
+						d.id = player.id or player.name
+						d.label = player.name
+						d.text = player.id and Skada:FormatName(player.name, player.id)
+						d.class = player.class
+						d.role = player.role
+						d.spec = player.spec
+
+						if Skada.forPVP and set.type == "arena" then
+							d.color = set.gold and Skada.classcolors.ARENA_GOLD or Skada.classcolors.ARENA_GREEN
+						end
 
 						d.value = amount
 						d.valuetext = Skada:FormatValueText(
@@ -1116,6 +1091,43 @@ Skada:AddLoadableModule("Total Healing", function(L)
 					end
 				end
 			end
+
+			-- arena enemies
+			if Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyHeal then
+				for _, enemy in ipairs(set.enemies) do
+					if not win.class or win.class == enemy.class then
+						local hps, amount = enemy:GetHPS()
+						if amount > 0 then
+							nr = nr + 1
+
+							local d = win.dataset[nr] or {}
+							win.dataset[nr] = d
+
+							d.id = enemy.id or enemy.name
+							d.label = enemy.name
+							d.text = nil
+							d.class = enemy.class
+							d.role = enemy.role
+							d.spec = enemy.spec
+							d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_GOLD
+
+							d.value = amount
+							d.valuetext = Skada:FormatValueText(
+								Skada:FormatNumber(d.value),
+								self.metadata.columns.Healing,
+								Skada:FormatNumber(hps),
+								self.metadata.columns.HPS,
+								Skada:FormatPercent(d.value, total),
+								self.metadata.columns.Percent
+							)
+
+							if win.metadata and d.value > win.metadata.maxvalue then
+								win.metadata.maxvalue = d.value
+							end
+						end
+					end
+				end
+			end
 		end
 	end
 
@@ -1126,6 +1138,8 @@ Skada:AddLoadableModule("Total Healing", function(L)
 			showspots = true,
 			click1 = playermod,
 			click2 = targetmod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod, targetmod},
 			columns = {Healing = true, HPS = true, Percent = true},
 			icon = [[Interface\Icons\spell_holy_flashheal]]
@@ -1373,9 +1387,9 @@ Skada:AddLoadableModule("Healing and Overhealing", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Healing and Overhealing"]
-		local total = set and ((set.heal or 0) + (set.overheal or 0)) or 0
+		win.title = win.class and format("%s (%s)", L["Healing and Overhealing"], L[win.class]) or L["Healing and Overhealing"]
 
+		local total = set and ((set.heal or 0) + (set.overheal or 0)) or 0
 		if total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
@@ -1383,32 +1397,34 @@ Skada:AddLoadableModule("Healing and Overhealing", function(L)
 
 			local nr = 0
 			for _, player in ipairs(set.players) do
-				local amount = (player.heal or 0) + (player.overheal or 0)
-				if amount > 0 then
-					nr = nr + 1
+				if not win.class or win.class == player.class then
+					local amount = (player.heal or 0) + (player.overheal or 0)
+					if amount > 0 then
+						nr = nr + 1
 
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+						local d = win.dataset[nr] or {}
+						win.dataset[nr] = d
 
-					d.id = player.id or player.name
-					d.label = player.name
-					d.text = player.id and Skada:FormatName(player.name, player.id)
-					d.class = player.class
-					d.role = player.role
-					d.spec = player.spec
+						d.id = player.id or player.name
+						d.label = player.name
+						d.text = player.id and Skada:FormatName(player.name, player.id)
+						d.class = player.class
+						d.role = player.role
+						d.spec = player.spec
 
-					d.value = amount
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(amount),
-						self.metadata.columns.Healing,
-						Skada:FormatNumber(player.overheal),
-						self.metadata.columns.Overhealing,
-						Skada:FormatPercent(player.overheal, total),
-						self.metadata.columns.Percent
-					)
+						d.value = amount
+						d.valuetext = Skada:FormatValueText(
+							Skada:FormatNumber(amount),
+							self.metadata.columns.Healing,
+							Skada:FormatNumber(player.overheal),
+							self.metadata.columns.Overhealing,
+							Skada:FormatPercent(player.overheal, total),
+							self.metadata.columns.Percent
+						)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
+						if win.metadata and d.value > win.metadata.maxvalue then
+							win.metadata.maxvalue = d.value
+						end
 					end
 				end
 			end
@@ -1421,6 +1437,8 @@ Skada:AddLoadableModule("Healing and Overhealing", function(L)
 			showspots = true,
 			click1 = playermod,
 			click2 = targetmod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod, targetmod},
 			columns = {Healing = true, Overhealing = true, Percent = true},
 			icon = [[Interface\Icons\spell_holy_prayerofhealing02]]
@@ -1587,7 +1605,8 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Healing Taken"]
+		win.title = win.class and format("%s (%s)", L["Healing Taken"], L[win.class]) or L["Healing Taken"]
+
 		local total = set and set:GetAbsorbHeal() or 0
 		local players = (total > 0) and set:GetAbsorbHealTaken()
 
@@ -1598,30 +1617,32 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 
 			local nr = 0
 			for playername, player in pairs(players) do
-				nr = nr + 1
+				if not win.class or win.class == player.class then
+					nr = nr + 1
 
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
-				d.id = player.id or playername
-				d.label = playername
-				d.text = player.id and Skada:FormatName(playername, player.id)
-				d.class = player.class
-				d.role = player.role
-				d.spec = player.spec
+					d.id = player.id or playername
+					d.label = playername
+					d.text = player.id and Skada:FormatName(playername, player.id)
+					d.class = player.class
+					d.role = player.role
+					d.spec = player.spec
 
-				d.value = player.amount
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatNumber(d.value),
-					mod.metadata.columns.Healing,
-					Skada:FormatNumber(player.overheal),
-					mod.metadata.columns.Overhealing,
-					Skada:FormatPercent(d.value, total),
-					mod.metadata.columns.Percent
-				)
+					d.value = player.amount
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatNumber(d.value),
+						mod.metadata.columns.Healing,
+						Skada:FormatNumber(player.overheal),
+						mod.metadata.columns.Overhealing,
+						Skada:FormatPercent(d.value, total),
+						mod.metadata.columns.Percent
+					)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
+					if win.metadata and d.value > win.metadata.maxvalue then
+						win.metadata.maxvalue = d.value
+					end
 				end
 			end
 		end
@@ -1632,6 +1653,8 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 		self.metadata = {
 			showspots = true,
 			click1 = sourcemod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			columns = {Healing = true, Overhealing = true, Percent = true},
 			icon = [[Interface\Icons\spell_nature_resistnature]]
 		}

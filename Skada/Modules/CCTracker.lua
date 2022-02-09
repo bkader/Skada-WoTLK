@@ -343,9 +343,9 @@ Skada:AddLoadableModule("CC Done", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["CC Done"]
-		local total = set.ccdone or 0
+		win.title = win.class and format("%s (%s)", L["CC Done"], L[win.class]) or L["CC Done"]
 
+		local total = set.ccdone or 0
 		if total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
@@ -353,7 +353,7 @@ Skada:AddLoadableModule("CC Done", function(L)
 
 			local nr = 0
 			for _, player in ipairs(set.players) do
-				if (player.ccdone or 0) > 0 then
+				if (not win.class or win.class == player.class) and (player.ccdone or 0) > 0 then
 					nr = nr + 1
 
 					local d = win.dataset[nr] or {}
@@ -388,6 +388,8 @@ Skada:AddLoadableModule("CC Done", function(L)
 			ordersort = true,
 			click1 = playermod,
 			click2 = targetmod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod, targetmod},
 			columns = {Count = true, Percent = false},
 			icon = [[Interface\Icons\spell_frost_chainsofice]]
@@ -609,9 +611,9 @@ Skada:AddLoadableModule("CC Taken", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["CC Taken"]
-		local total = set.cctaken or 0
+		win.title = win.class and format("%s (%s)", L["CC Taken"], L[win.class]) or L["CC Taken"]
 
+		local total = set.cctaken or 0
 		if total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
@@ -619,7 +621,7 @@ Skada:AddLoadableModule("CC Taken", function(L)
 
 			local nr = 0
 			for _, player in ipairs(set.players) do
-				if (player.cctaken or 0) > 0 then
+				if (not win.class or win.class == player.class) and (player.cctaken or 0) > 0 then
 					nr = nr + 1
 
 					local d = win.dataset[nr] or {}
@@ -654,6 +656,8 @@ Skada:AddLoadableModule("CC Taken", function(L)
 			ordersort = true,
 			click1 = playermod,
 			click2 = sourcemod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod, sourcemod},
 			columns = {Count = true, Percent = false},
 			icon = [[Interface\Icons\spell_magic_polymorphrabbit]]
@@ -898,9 +902,9 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["CC Breaks"]
-		local total = set.ccbreak or 0
+		win.title = win.class and format("%s (%s)", L["CC Breaks"], L[win.class]) or L["CC Breaks"]
 
+		local total = set.ccbreak or 0
 		if total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
@@ -908,7 +912,7 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 
 			local nr = 0
 			for _, player in ipairs(set.players) do
-				if (player.ccbreak or 0) > 0 then
+				if (not win.class or win.class == player.class) and (player.ccbreak or 0) > 0 then
 					nr = nr + 1
 
 					local d = win.dataset[nr] or {}
@@ -943,6 +947,8 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 			ordersort = true,
 			click1 = playermod,
 			click2 = targetmod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod, targetmod},
 			columns = {Count = true, Percent = false},
 			icon = [[Interface\Icons\spell_holy_sealofvalor]]

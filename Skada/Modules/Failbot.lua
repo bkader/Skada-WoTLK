@@ -135,9 +135,9 @@ Skada:AddLoadableModule("Fails", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Fails"]
-		local total = set.fail or 0
+		win.title = win.class and format("%s (%s)", L["Fails"], L[win.class]) or L["Fails"]
 
+		local total = set.fail or 0
 		if total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
@@ -145,7 +145,7 @@ Skada:AddLoadableModule("Fails", function(L)
 
 			local nr = 0
 			for _, player in ipairs(set.players) do
-				if (player.fail or 0) > 0 then
+				if (not win.class or win.class == player.class) and (player.fail or 0) > 0 then
 					nr = nr + 1
 
 					local d = win.dataset[nr] or {}
@@ -180,6 +180,8 @@ Skada:AddLoadableModule("Fails", function(L)
 			showspots = true,
 			ordersort = true,
 			click1 = playermod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod},
 			columns = {Count = true, Percent = false},
 			icon = [[Interface\Icons\ability_creature_cursed_01]]

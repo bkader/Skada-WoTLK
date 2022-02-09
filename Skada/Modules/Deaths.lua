@@ -415,9 +415,9 @@ Skada:AddLoadableModule("Deaths", function(L)
 	end
 
 	function mod:Update(win, set)
-		win.title = L["Deaths"]
-		local total = set.death or 0
+		win.title = win.class and format("%s (%s)", L["Deaths"], L[win.class]) or L["Deaths"]
 
+		local total = set.death or 0
 		if total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
@@ -425,7 +425,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 			local nr = 0
 			for _, player in ipairs(set.players) do
-				if (player.death or 0) > 0 then
+				if (not win.class or win.class == player.class) and (player.death or 0) > 0 then
 					nr = nr + 1
 
 					local d = win.dataset[nr] or {}
@@ -508,6 +508,8 @@ Skada:AddLoadableModule("Deaths", function(L)
 		playermod.metadata = {click1 = deathlogmod}
 		self.metadata = {
 			click1 = playermod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod},
 			columns = {Survivability = false, Count = true},
 			icon = [[Interface\Icons\ability_rogue_feigndeath]]
