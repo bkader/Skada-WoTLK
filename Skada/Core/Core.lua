@@ -968,7 +968,7 @@ end
 do
 	-- scane modes to add column options
 	local function ScanForColumns(mode)
-		if not mode.scanned then
+		if type(mode) == "table" and not mode.scanned then
 			mode.scanned = true
 
 			if mode.metadata then
@@ -1487,7 +1487,7 @@ do
 
 	local white = {r = 1, g = 1, b = 1}
 	function Skada:AddSubviewToTooltip(tooltip, win, mode, id, label)
-		if not (mode and mode.Update) then return end
+		if not (type(mode) == "table" and mode.Update) then return end
 
 		-- windows should have separate tooltip tables in order
 		-- to display different numbers for same spells for example.
@@ -1584,14 +1584,22 @@ do
 					end
 				end
 
-				if win.metadata.click1 and not ignoredTotalClick(win, win.metadata.click1) then
+				if type(win.metadata.click1) == "table" and not ignoredTotalClick(win, win.metadata.click1) then
 					t:AddLine(format(L["Click for |cff00ff00%s|r"], win.metadata.click1.label or win.metadata.click1.moduleName))
+				elseif type(win.metadata.click1) == "function" and win.metadata.click1label then
+					t:AddLine(format(L["Click for |cff00ff00%s|r"], win.metadata.click1label))
 				end
-				if win.metadata.click2 and not ignoredTotalClick(win, win.metadata.click2) then
+
+				if type(win.metadata.click2) == "table" and not ignoredTotalClick(win, win.metadata.click2) then
 					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], win.metadata.click2.label or win.metadata.click2.moduleName))
+				elseif type(win.metadata.click2) == "function" and win.metadata.click2label then
+					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], win.metadata.click2label))
 				end
-				if win.metadata.click3 and not ignoredTotalClick(win, win.metadata.click3) then
+
+				if type(win.metadata.click3) == "table" and not ignoredTotalClick(win, win.metadata.click3) then
 					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], win.metadata.click3.label or win.metadata.click3.moduleName))
+				elseif type(win.metadata.click3) == "function" and win.metadata.click3label then
+					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], win.metadata.click3label))
 				end
 
 				t:Show()
@@ -1705,11 +1713,11 @@ function Skada:Command(param)
 	elseif cmd == "timemesure" or cmd == "measure" then
 		if self.db.profile.timemesure == 2 then
 			self.db.profile.timemesure = 1
-			self:Print(L["Time Measure"] .. ": " .. L["Activity Time"])
+			self:Printf("%s: %s", L["Time Measure"], L["Activity Time"])
 			self:ApplySettings()
 		elseif self.db.profile.timemesure == 1 then
 			self.db.profile.timemesure = 2
-			self:Print(L["Time Measure"] .. ": " .. L["Effective Time"])
+			self:Printf("%s: %s", L["Time Measure"], L["Effective Time"])
 			self:ApplySettings()
 		end
 	elseif cmd == "numformat" then
@@ -2298,10 +2306,22 @@ end
 
 function Skada:FormatPercent(value, total, dec)
 	dec = dec or self.db.profile.decimals or 1
-	if total == nil then
-		return format("%." .. dec .. "f%%", value)
+
+	-- no value? 0%
+	if not value then
+		return format("%." .. dec .. "f%%", 0)
 	end
-	return format("%." .. dec .. "f%%", 100 * value / max(1, total))
+
+	-- correct values.
+	value, total = total and (100 * value) or value, max(1, total or 0)
+
+	-- below 0? clamp to -999
+	if value <= 0 then
+		return format("%." .. dec .. "f%%", max(-999, value / total))
+	-- otherwise, clamp to 999
+	else
+		return format("%." .. dec .. "f%%", min(999, value / total))
+	end
 end
 
 function Skada:FormatTime(sec)
@@ -2371,14 +2391,11 @@ do
 			end
 		end
 
-		local comb
 		if #namelabel == 0 or #timelabel == 0 then
-			comb = namelabel .. timelabel
-		else
-			comb = namelabel .. (strmatch(timelabel, "^%p") and " " or ": ") .. timelabel
+			return format("%s%s", namelabel, timelabel), namelabel, timelabel
 		end
 
-		return comb, namelabel, timelabel
+		return format("%s%s%s", namelabel, strmatch(timelabel, "^%p") and " " or ": ", timelabel), namelabel, timelabel
 	end
 
 	function Skada:SetLabelFormats()
@@ -2426,13 +2443,13 @@ do
 			-- title set enabled?
 			if self.db.titleset and not self.selectedmode.notitleset then
 				if self.selectedset == "current" then
-					name = name .. ": " .. L["Current"]
+					name = format("%s%s %s", name, find(name, ":") and " -" or ":", L["Current"])
 				elseif self.selectedset == "total" then
-					name = name .. ": " .. L["Total"]
+					name = format("%s%s %s", name, find(name, ":") and " -" or ":", L["Total"])
 				else
 					local set = self:GetSelectedSet()
 					if set then
-						name = name .. ": " .. Skada:GetSetLabel(set)
+						name = format("%s%s %s", name, find(name, ":") and " -" or ":", Skada:GetSetLabel(set))
 					end
 				end
 			end

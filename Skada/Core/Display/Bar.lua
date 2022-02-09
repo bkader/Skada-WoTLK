@@ -394,9 +394,11 @@ end
 
 do
 	local function inserthistory(win)
-		win.history[#win.history + 1] = win.selectedmode
-		if win.child and win.db.childmode ~= 1 then
-			inserthistory(win.child)
+		if win.selectedmode and win.history[#win.history] ~= win.selectedmode then
+			win.history[#win.history + 1] = win.selectedmode
+			if win.child and win.db.childmode ~= 1 then
+				inserthistory(win.child)
+			end
 		end
 	end
 
@@ -408,15 +410,17 @@ do
 	end
 
 	local function showmode(win, id, label, mode)
-		if win.selectedmode then
-			inserthistory(win)
+		inserthistory(win)
+
+		if type(mode) == "function" then
+			mode(mode, win, id, label)
+		else
+			if mode.Enter then
+				onEnter(win, id, label, mode)
+			end
+			win:DisplayMode(mode)
 		end
 
-		if mode.Enter then
-			onEnter(win, id, label, mode)
-		end
-
-		win:DisplayMode(mode)
 		CloseDropDownMenus()
 	end
 

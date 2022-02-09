@@ -18,6 +18,7 @@ local media = LibStub("LibSharedMedia-3.0")
 local pairs, tostring, type = pairs, tostring, type
 local strrep, format, _match = string.rep, string.format, string.match
 local tinsert, tremove, tsort = table.insert, table.remove, table.sort
+local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
 
 local WrapTextInColorCode = Skada.WrapTextInColorCode
 local RGBPercToHex = Skada.RGBPercToHex
@@ -59,21 +60,31 @@ local function BarLeave(bar)
 	end
 end
 
-local function showmode(win, id, label, mode)
-	if win.selectedmode then
+local function inserthistory(win)
+	if win.selectedmode and win.history[#win.history] ~= win.selectedmode then
 		win.history[#win.history + 1] = win.selectedmode
-		if win.child then
-			win.child.history[#win.child.history + 1] = win.selectedmode
+		if win.child and win.db.childmode ~= 1 then
+			inserthistory(win.child)
 		end
 	end
-	if mode.Enter then
-		mode:Enter(win, id, label)
-		if win.child then
-			mode:Enter(win.child, id, label)
+end
+
+local function showmode(win, id, label, mode)
+	inserthistory(win)
+
+	if type(mode) == "function" then
+		mode(mode, win, id, label)
+	else
+		if mode.Enter then
+			mode:Enter(win, id, label)
+			if win.child then
+				mode:Enter(win.child, id, label)
+			end
 		end
+		win:DisplayMode(mode)
 	end
-	win:DisplayMode(mode)
-	L_CloseDropDownMenus() -- always close
+
+	CloseDropDownMenus() -- always close
 end
 
 local function ignoredClick(win, click)
@@ -187,9 +198,11 @@ function mod:Create(window, isnew)
 	menu:ClearAllPoints()
 	menu:SetWidth(12)
 	menu:SetHeight(12)
-	menu:SetNormalTexture([[Interface\Addons\Skada\Media\Textures\icon-config]])
-	menu:SetHighlightTexture([[Interface\Addons\Skada\Media\Textures\icon-config]], 1.0)
-	menu:SetAlpha(1)
+	menu:SetNormalTexture([[Interface\AddOns\Skada\Media\Textures\toolbar1]])
+	menu:SetHighlightTexture([[Interface\AddOns\Skada\Media\Textures\toolbar1]], 1.0)
+	menu:GetNormalTexture():SetTexCoord(0.008, 0.117, 0.062, 0.938)
+	menu:GetHighlightTexture():SetTexCoord(0.008, 0.117, 0.062, 0.938)
+	menu:SetAlpha(0.5)
 	menu:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 	menu:SetBackdropColor(
 		window.db.title.textcolor.r,
