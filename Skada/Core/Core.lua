@@ -2507,7 +2507,7 @@ do
 
 		if self.db.display == "bar" then
 			-- title set enabled?
-			if self.db.titleset and not self.selectedmode.metadata.notitleset then
+			if self.db.titleset and self.selectedmode.metadata and not self.selectedmode.metadata.notitleset then
 				if self.selectedset == "current" then
 					name = format("%s%s %s", name, find(name, ":") and " -" or ":", L["Current"])
 				elseif self.selectedset == "total" then
