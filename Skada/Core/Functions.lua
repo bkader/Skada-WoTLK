@@ -195,7 +195,6 @@ function Skada:ConfirmDialog(text, accept, cancel, override)
 		end
 	end
 
-	t.enterClicksFirstButton = 1
 	t.preferredIndex = STATICPOPUP_NUMDIALOGS
 	t.text = text
 	t.button1 = ACCEPT
