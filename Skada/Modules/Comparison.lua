@@ -45,6 +45,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 	end
 
 	local function FormatValueNumber(val, myval, fmt, disabled)
+		val, myval = val or 0, myval or 0 -- sanity check
 		return Skada:FormatValueText(
 			fmt and Skada:FormatNumber(val) or val,
 			mod.metadata.columns.Damage,
@@ -157,8 +158,8 @@ Skada:AddLoadableModule("Comparison", function(L)
 		win.title = format( L["%s vs %s: %s"], mod.userName, win.playername or L.Unknown, format(L["%s's damage"], win.spellname or L.Unknown))
 		if not win.spellname then return end
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
-		local spell = player and player.damagespells and player.damagespells[win.spellname]
+		local actor = set and set:GetPlayer(win.playerid, win.playername)
+		local spell = actor and actor.damagespells and actor.damagespells[win.spellname]
 
 		local myspells = set:GetActorDamageSpells(mod.userGUID, mod.userName)
 		local myspell = myspells and myspells[win.spellname]
@@ -168,29 +169,29 @@ Skada:AddLoadableModule("Comparison", function(L)
 				win.metadata.maxvalue = spell.count
 			end
 
-			local nr = add_detail_bar(win, 0, L["Hits"], spell.count, myspell.count)
+			local nr = add_detail_bar(win, 0, L["Hits"], spell.count, myspell.count, nil, actor.id == mod.userGUID)
 			win.dataset[nr].value = win.dataset[nr].value + 1 -- to be always first
 
 			if (spell.casts or 0) > 0 or (myspell.casts or 0) > 0 then
-				nr = add_detail_bar(win, nr, L["Casts"], spell.casts, myspell.casts)
+				nr = add_detail_bar(win, nr, L["Casts"], spell.casts, myspell.casts, nil, actor.id == mod.userGUID)
 				win.dataset[nr].value = win.dataset[nr].value * 1e3 -- to be always first
 			end
 
 			if (spell.hit or 0) > 0 or (myspell.hit or 0) > 0 then
-				nr = add_detail_bar(win, nr, L["Normal Hits"], spell.hit, myspell.hit)
+				nr = add_detail_bar(win, nr, L["Normal Hits"], spell.hit, myspell.hit, nil, actor.id == mod.userGUID)
 			end
 
 			if (spell.critical or 0) > 0 or (myspell.critical or 0) > 0 then
-				nr = add_detail_bar(win, nr, L["Critical Hits"], spell.critical, myspell.critical)
+				nr = add_detail_bar(win, nr, L["Critical Hits"], spell.critical, myspell.critical, nil, actor.id == mod.userGUID)
 			end
 
 			if (spell.glancing or 0) > 0 or (myspell.glancing or 0) > 0 then
-				nr = add_detail_bar(win, nr, L["Glancing"], spell.glancing, myspell.glancing)
+				nr = add_detail_bar(win, nr, L["Glancing"], spell.glancing, myspell.glancing, nil, actor.id == mod.userGUID)
 			end
 
 			for _, misstype in ipairs(misstypes) do
 				if (spell[misstype] or 0) > 0 or (myspell[misstype] or 0) > 0 then
-					nr = add_detail_bar(win, nr, L[misstype], spell[misstype], myspell[misstype])
+					nr = add_detail_bar(win, nr, L[misstype], spell[misstype], myspell[misstype], nil, actor.id == mod.userGUID)
 				end
 			end
 		end
@@ -227,27 +228,27 @@ Skada:AddLoadableModule("Comparison", function(L)
 			local myresisted = myspell.resisted or 0
 			local mytotal = myspell.amount + myabsorbed + myblocked + myresisted
 
-			local nr = add_detail_bar(win, 0, L["Total"], total, mytotal, true)
+			local nr = add_detail_bar(win, 0, L["Total"], total, mytotal, true, player.id == mod.userGUID)
 			win.dataset[nr].value = win.dataset[nr].value + 1 -- to be always first
 
 			if total ~= spell.amount or mytotal ~= myspell.amount then
-				nr = add_detail_bar(win, nr, L["Damage"], spell.amount, myspell.amount, true)
+				nr = add_detail_bar(win, nr, L["Damage"], spell.amount, myspell.amount, true, player.id == mod.userGUID)
 			end
 
 			if (spell.overkill or 0) > 0 or (myspell.overkill or 0) > 0 then
-				nr = add_detail_bar(win, nr, L["Overkill"], spell.overkill, myspell.overkill, true)
+				nr = add_detail_bar(win, nr, L["Overkill"], spell.overkill, myspell.overkill, true, player.id == mod.userGUID)
 			end
 
 			if absorbed > 0 or myabsorbed > 0 then
-				nr = add_detail_bar(win, nr, L["ABSORB"], absorbed, myabsorbed, true)
+				nr = add_detail_bar(win, nr, L["ABSORB"], absorbed, myabsorbed, true, player.id == mod.userGUID)
 			end
 
 			if blocked > 0 or myblocked > 0 then
-				nr = add_detail_bar(win, nr, L["BLOCK"], blocked, myblocked, true)
+				nr = add_detail_bar(win, nr, L["BLOCK"], blocked, myblocked, true, player.id == mod.userGUID)
 			end
 
 			if resisted > 0 or myresisted > 0 then
-				nr = add_detail_bar(win, nr, L["RESIST"], resisted, myresisted, true)
+				nr = add_detail_bar(win, nr, L["RESIST"], resisted, myresisted, true, player.id == mod.userGUID)
 			end
 		end
 	end
@@ -459,7 +460,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 			end
 
 			local myamount = set:GetActorDamage(mod.userGUID, mod.userName)
-			local nr = 1
+			local nr = 0
 
 			for _, player in ipairs(set.players) do
 				if CanCompare(player) then
