@@ -25,7 +25,7 @@ local floor, max, min, band, time = math.floor, math.max, math.min, bit.band, ti
 local IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction = IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction
 local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
 local UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected
-local ReloadUI, GetScreenWidth = ReloadUI, GetScreenWidth
+local ReloadUI, GetScreenWidth, GetScreenHeight = ReloadUI, GetScreenWidth, GetScreenHeight
 local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
 local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
@@ -1474,12 +1474,24 @@ function Skada:SetTooltipPosition(tooltip, frame, display, win)
 		-- use effective scale so the tooltip doesn't become dumb
 		-- if the window is scaled up.
 		local s = frame:GetEffectiveScale() + 0.5
+		local top = frame:GetTop() * s -- frame top
+		local hsh = GetScreenHeight() / 2 -- half screen height
+
+		tooltip:SetOwner(frame, "ANCHOR_PRESERVE")
+		tooltip:ClearAllPoints()
+
 		if (frame:GetLeft() * s) < (GetScreenWidth() / 2) then
-			tooltip:SetOwner(frame, "ANCHOR_NONE")
-			tooltip:SetPoint("TOPLEFT", frame, "TOPRIGHT", 10, 0)
+			if top > hsh then
+				tooltip:SetPoint("TOPLEFT", frame, "TOPRIGHT", 10, 0)
+			else
+				tooltip:SetPoint("BOTTOMLEFT", frame, "BOTTOMRIGHT", 10, 0)
+			end
 		else
-			tooltip:SetOwner(frame, "ANCHOR_NONE")
-			tooltip:SetPoint("TOPRIGHT", frame, "TOPLEFT", -10, 0)
+			if top > hsh then
+				tooltip:SetPoint("TOPRIGHT", frame, "TOPLEFT", -10, 0)
+			else
+				tooltip:SetPoint("BOTTOMRIGHT", frame, "BOTTOMLEFT", -10, 0)
+			end
 		end
 	else
 		local anchor = find(self.db.profile.tooltippos, "top") and "TOP" or "BOTTOM"
