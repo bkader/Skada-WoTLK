@@ -1471,7 +1471,7 @@ end)
 -- ================ --
 
 Skada:AddLoadableModule("Healing Taken", function(L)
-	if Skada:IsDisabled("Healing", "Healing Taken") then return end
+	if Skada:IsDisabled("Healing", "Absorbs", "Absorbs and Healing", "Healing Taken") then return end
 
 	local mod = Skada:NewModule(L["Healing Taken"])
 	local sourcemod = mod:NewModule(L["Healing source list"])

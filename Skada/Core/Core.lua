@@ -1790,15 +1790,15 @@ function Skada:Command(param)
 			self:Printf("%-20s", "/skada report [channel] [mode] [lines]")
 		end
 	else
-		self:Print("Usage:")
-		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33report|r [channel] [mode] [lines]")
-		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33toggle|r / |cffffff33show|r / |cffffff33hide|r")
-		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33newsegment|r")
-		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33numformat|r / |cffffff33measure|r")
-		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33import|r / |cffffff33export|r")
-		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33about|r / |cffffff33version|r / |cffffff33website|r / |cffffff33discord|r")
-		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33reset|r / |cffffff33clean|r / |cffffff33reinstall|r")
-		self:Printf("%-20s", "|cffffaeae/skada|r |cffffff33config|r / |cffffff33debug|r")
+		self:Print(L["Usage:"])
+		print("|cffffaeae/skada|r |cffffff33report|r [channel] [mode] [lines]")
+		print("|cffffaeae/skada|r |cffffff33toggle|r / |cffffff33show|r / |cffffff33hide|r")
+		print("|cffffaeae/skada|r |cffffff33newsegment|r")
+		print("|cffffaeae/skada|r |cffffff33numformat|r / |cffffff33measure|r")
+		print("|cffffaeae/skada|r |cffffff33import|r / |cffffff33export|r")
+		print("|cffffaeae/skada|r |cffffff33about|r / |cffffff33version|r / |cffffff33website|r / |cffffff33discord|r")
+		print("|cffffaeae/skada|r |cffffff33reset|r / |cffffff33clean|r / |cffffff33reinstall|r")
+		print("|cffffaeae/skada|r |cffffff33config|r / |cffffff33debug|r")
 	end
 end
 

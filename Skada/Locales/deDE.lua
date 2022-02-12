@@ -13,6 +13,7 @@ L["ENABLED"] = "AKTIVIERT"
 L["Disable"] = "Deaktivieren"
 L["DISABLED"] = "DEAKTIVIERT"
 L["Stopping for wipe."] = "Stoppen wegen Wischen."
+L["Usage:"] = "Benutzen:"
 -- profiles
 L["Profiles"] = "Profile"
 L["Profile Import/Export"] = "Profile Importieren/Exportieren"

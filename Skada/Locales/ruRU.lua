@@ -14,6 +14,7 @@ L["ENABLED"] = "ВКЛЮЧЕН"
 L["Disable"] = "Отключить"
 L["DISABLED"] = "ВЫКЛЮЧЕН"
 L["Stopping for wipe."] = "Остановка из-за протирать."
+L["Usage:"] = "Использовать:"
 -- profiles
 L["Profiles"] = "Профили"
 L["Profile Import/Export"] = "Профиль Импорта/Экспорта"

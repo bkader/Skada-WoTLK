@@ -15,6 +15,7 @@ L["ENABLED"] = "HABILITADO"
 L["Disable"] = "Deshabilitar"
 L["DISABLED"] = "DESHABILITDO"
 L["Stopping for wipe."] = "Detenido por muerte de la banda."
+L["Usage:"] = "Utilizar:"
 -- profiles
 L["Profiles"] = "Perfiles"
 L["Profile Import/Export"] = "Importación/Exportación de perfiles"

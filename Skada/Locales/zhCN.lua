@@ -14,6 +14,7 @@ L["ENABLED"] = "已启用"
 L["Disable"] = "禁用"
 L["DISABLED"] = "已禁用"
 L["Stopping for wipe."] = "因擦拭而停止。"
+L["Usage:"] = "利用："
 -- profiles
 L["Profiles"] = "配置文件"
 L["Profile Import/Export"] = "配置文件导入/导出"

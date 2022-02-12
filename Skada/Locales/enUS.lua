@@ -13,6 +13,7 @@ L["ENABLED"] = true
 L["Disable"] = true
 L["DISABLED"] = true
 L["Stopping for wipe."] = true
+L["Usage:"] = true
 -- profiles
 L["Profiles"] = true
 L["Profile Import/Export"] = true

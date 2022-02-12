@@ -13,6 +13,7 @@ L["ENABLED"] = "활성화됨"
 L["Disable"] = "비활성화"
 L["DISABLED"] = "비활성화됨"
 L["Stopping for wipe."] = "때문에 닦아의 중지."
+L["Usage:"] = "사용:"
 -- profiles
 L["Profiles"] = "프로필"
 L["Profile Import/Export"] = "프로필 가져오기/내보내기"
