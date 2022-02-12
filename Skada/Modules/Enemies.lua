@@ -664,7 +664,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 			icon = [[Interface\Icons\spell_fire_felflamebolt]]
 		}
 
-		local damagedone = Skada:GetModule(L["Damage Done"], true)
+		local damagedone = Skada:GetModule(L["Damage"], true)
 		if damagedone then
 			sourcemod.metadata.click1 = damagedone:GetModule(L["Damage target list"], true)
 			sourcemod.metadata.click2 = damagedone:GetModule(L["Damage spell list"], true)
@@ -818,8 +818,12 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 	if Skada:IsDisabled("Enemy Damage Done") then return end
 
 	local mod = Skada:NewModule(L["Enemy Damage Done"])
+
 	local targetmod = mod:NewModule(L["Damage target list"])
+	local targetspellmod = targetmod:NewModule(L["Damage spell targets"])
+
 	local spellmod = mod:NewModule(L["Damage spell list"])
+	local spelltargetmod = spellmod:NewModule(L["Damage spell targets"])
 
 	-- spells in the following table will be ignored.
 	local ignoredSpells = {}
@@ -937,6 +941,105 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 		end
 	end
 
+	function targetspellmod:Enter(win, id, label)
+		win.playerid, win.playername = id, label
+		win.title = format(L["%s's damage on %s"], win.targetname or L.Unknown, label)
+	end
+
+	function targetspellmod:Update(win, set)
+		win.title = format(L["%s's damage on %s"], win.targetname or L.Unknown, win.playername or L.Unknown)
+		if not (win.targetname and win.playername) then return end
+
+		local enemy = set and set:GetEnemy(win.targetname, win.targetid)
+		if not (enemy and enemy.GetDamageTargetSpells) then return end
+		local spells, total = enemy:GetDamageTargetSpells(win.playername)
+
+		if spells and total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
+			local nr = 0
+			for spellid, spell in pairs(spells) do
+				nr = nr + 1
+
+				local d = win.dataset[nr] or {}
+				win.dataset[nr] = d
+
+				d.id = spellid
+				d.spellid = spellid
+				d.label, _, d.icon = GetSpellInfo(spellid)
+				d.spellschool = spell.school
+
+				d.value = spell.amount
+				d.valuetext = Skada:FormatValueText(
+					Skada:FormatNumber(d.value),
+					mod.metadata.columns.Damage,
+					Skada:FormatPercent(d.value, total),
+					mod.metadata.columns.Percent
+				)
+
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
+				end
+			end
+		end
+	end
+
+	function spelltargetmod:Enter(win, id, label)
+		win.spellid, win.spellname = id, label
+		win.title = format(L["%s's <%s> targets"], win.targetname or L.Unknown, label)
+	end
+
+	function spelltargetmod:Update(win, set)
+		win.title = format(L["%s's <%s> targets"], win.targetname or L.Unknown, win.spellname or L.Unknown)
+		if win.class then
+			win.title = format("%s (%s)", win.title, L[win.class])
+		end
+
+		if not win.spellid then return end
+
+		local enemy = set and set:GetEnemy(win.targetname, win.targetid)
+		if not (enemy and enemy.GetDamageSpellTargets) then return end
+
+		local targets, total = enemy:GetDamageSpellTargets(win.spellid)
+
+		if targets and total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
+			local nr = 0
+			for targetname, target in pairs(targets) do
+				if not win.class or win.class == target.class then
+					nr = nr + 1
+
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
+
+					d.id = target.id or targetname
+					d.label = targetname
+					d.text = target.id and Skada:FormatName(targetname, target.id)
+					d.class = target.class
+					d.role = target.role
+					d.spec = target.spec
+
+					d.value = target.amount
+					d.valuetext = Skada:FormatValueText(
+						Skada:FormatNumber(d.value),
+						mod.metadata.columns.Damage,
+						Skada:FormatPercent(d.value, total),
+						mod.metadata.columns.Percent
+					)
+
+					if win.metadata and d.value > win.metadata.maxvalue then
+						win.metadata.maxvalue = d.value
+					end
+				end
+			end
+		end
+	end
+
 	function targetmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
 		win.title = format(L["%s's targets"], label)
@@ -985,7 +1088,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
-				end
+					end
 				end
 			end
 		end
@@ -1083,23 +1186,24 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 	end
 
 	function mod:OnEnable()
-		targetmod.metadata = {
+		spelltargetmod.metadata = {
 			showspots = true,
 			click4 = Skada.ToggleFilter,
 			click4_label = L["Toggle Class Filter"]
 		}
+		targetmod.metadata = {
+			showspots = true,
+			click1 = targetspellmod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"]
+		}
+		spellmod.metadata = {click1 = spelltargetmod}
 		self.metadata = {
 			click1 = targetmod,
 			click2 = spellmod,
 			columns = {Damage = true, DPS = false, Percent = true},
 			icon = [[Interface\Icons\spell_shadow_shadowbolt]]
 		}
-
-		local damagetaken = Skada:GetModule(L["Damage Taken"], true)
-		if damagetaken then
-			targetmod.metadata.click1 = damagetaken:GetModule(L["Damage spell list"], true)
-			targetmod.metadata.click2 = damagetaken:GetModule(L["Damage source list"], true)
-		end
 
 		local flags_dst_src = {dst_is_interesting_nopets = true, src_is_not_interesting = true}
 
@@ -1224,6 +1328,66 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 				end
 			end
 			return amount, total
+		end
+	end
+
+	function enemyPrototype:GetDamageTargetSpells(name)
+		if self.damagespells and name then
+			wipe(cacheTable)
+			local total = 0
+
+			for spellid, spell in pairs(self.damagespells) do
+				if spell.targets and spell.targets[name] then
+					cacheTable[spellid] = cacheTable[spellid] or {school = spell.school, amount = 0}
+
+					if Skada.db.profile.absdamage and spell.targets[name].total then
+						cacheTable[spellid].amount = cacheTable[spellid].amount + spell.targets[name].total
+					else
+						cacheTable[spellid].amount = cacheTable[spellid].amount + spell.targets[name].amount
+					end
+					total = total + cacheTable[spellid].amount
+				end
+			end
+
+			return cacheTable, total
+		end
+	end
+
+	function enemyPrototype:GetDamageSpellTargets(spellid)
+		if self.damagespells and self.damagespells[spellid] and self.damagespells[spellid].targets then
+			wipe(cacheTable)
+
+			local total = 0
+			if Skada.db.profile.absdamage and self.damagespells[spellid].total then
+				total = self.damagespells[spellid].total
+			else
+				total = self.damagespells[spellid].amount
+			end
+
+			for name, target in pairs(self.damagespells[spellid].targets) do
+				if not cacheTable[name] then
+					cacheTable[name] = {amount = Skada.db.profile.absdamage and target.total or target.amount}
+				elseif Skada.db.profile.absdamage and target.total then
+					cacheTable[name].amount = cacheTable[name].amount + target.total
+				else
+					cacheTable[name].amount = cacheTable[name].amount + target.amount
+				end
+
+				-- attempt to get the class
+				if not cacheTable[name].class then
+					local actor = self.super:GetActor(name)
+					if actor then
+						cacheTable[name].id = actor.id
+						cacheTable[name].class = actor.class
+						cacheTable[name].role = actor.role
+						cacheTable[name].spec = actor.spec
+					else
+						cacheTable[name].class = "UNKNOWN"
+					end
+				end
+			end
+
+			return cacheTable, total
 		end
 	end
 

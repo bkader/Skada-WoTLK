@@ -340,6 +340,8 @@ enemy:GetDamage() -- returns the amount of damage the enemy did.
 enemy:GetDPS() -- returns the enemy DPS.
 enemy:GetDamageTargets() -- returns the list of players the enemy did damage to.
 enemy:GetDamageOnTarget(name) -- returns the amount of damage the enemy did to the given player.
+enemy:GetDamageTargetSpells() -- returns the list of damage spells on the given player.
+enemy:GetDamageSpellTargets(spellid) -- returns the list of damaged player for the given spell id.
 enemy:GetHPS() -- returns the amount healing per second the enemy did.
 enemy:GetHealTargets() -- returns the list of targets the enemy healed.
 enemy:GetHealOnTarget() -- returns the amount of heal on the give target.
