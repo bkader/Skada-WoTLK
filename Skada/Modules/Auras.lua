@@ -398,7 +398,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 				log_specialaura(Skada.current, aura)
 			elseif event == "SPELL_AURA_APPLIED" or event == true then
 				log_auraapply(Skada.current, aura)
-			elseif event == "SPELL_AURA_REFRESH" or event == "SPELL_AURA_APPLIED_DOSE" then
+			elseif event == "SPELL_AURA_REFRESH" then
 				log_aurarefresh(Skada.current, aura)
 			elseif event == "SPELL_AURA_REMOVED" then
 				log_auraremove(Skada.current, aura)
@@ -504,7 +504,6 @@ Skada:AddLoadableModule("Buffs", function(L)
 			HandleBuff,
 			"SPELL_AURA_APPLIED",
 			"SPELL_AURA_REFRESH",
-			"SPELL_AURA_APPLIED_DOSE",
 			"SPELL_AURA_REMOVED",
 			"SPELL_PERIODIC_ENERGIZE",
 			{dst_is_interesting = true}
@@ -565,7 +564,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 					if queuedSpells[spellid] then
 						Skada:QueueUnit(queuedSpells[spellid], srcGUID, srcName, srcFlags, dstGUID)
 					end
-				elseif event == "SPELL_AURA_REFRESH" or event == "SPELL_AURA_APPLIED_DOSE" then
+				elseif event == "SPELL_AURA_REFRESH" then
 					log_aurarefresh(Skada.current, aura)
 				elseif event == "SPELL_AURA_REMOVED" then
 					log_auraremove(Skada.current, aura)
@@ -754,7 +753,6 @@ Skada:AddLoadableModule("Debuffs", function(L)
 			HandleDebuff,
 			"SPELL_AURA_APPLIED",
 			"SPELL_AURA_REFRESH",
-			"SPELL_AURA_APPLIED_DOSE",
 			"SPELL_AURA_REMOVED",
 			{src_is_interesting = true}
 		)

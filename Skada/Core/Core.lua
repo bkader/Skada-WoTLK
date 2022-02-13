@@ -259,9 +259,8 @@ function Skada:AddActiveTime(player, cond, diff)
 			delta = 3.5
 		end
 
-		delta = floor(100 * delta + 0.5) / 100
 		player.last = now
-		player.time = (player.time or 0) + delta
+		player.time = (player.time or 0) + floor(100 * delta + 0.5) / 100
 	end
 end
 
@@ -364,16 +363,14 @@ do
 
 	-- add window options
 	function Window:AddOptions()
-		local db = self.db
-
 		local options = {
 			type = "group",
-			name = function() return db.name end,
-			desc = function() return format(L["Options for %s."], db.name) end,
-			get = function(i) return db[i[#i]] end,
+			name = function() return self.db.name end,
+			desc = function() return format(L["Options for %s."], self.db.name) end,
+			get = function(i) return self.db[i[#i]] end,
 			set = function(i, val)
-				db[i[#i]] = val
-				Skada:ApplySettings(db.name)
+				self.db[i[#i]] = val
+				Skada:ApplySettings(self.db.name)
 			end,
 			args = {
 				name = {
@@ -383,9 +380,27 @@ do
 					order = 1,
 					width = "double",
 					set = function(_, val)
-						if val ~= db.name and val ~= "" then
-							local oldname = db.name
-							db.name = val
+						val = val:trim()
+						if val ~= self.db.name and val ~= "" then
+							local oldname = self.db.name
+
+							-- avoid duplicate names
+							local num = 0
+							for _, win in ipairs(windows) do
+								if win.db.name == val and num == 0 then
+									num = 1
+								else
+									local n, c = strmatch(win.db.name, "^(.-)%s*%((%d+)%)$")
+									if n == val then
+										num = max(num, tonumber(c) or 0)
+									end
+								end
+							end
+							if num > 0 then
+								val = format("%s (%s)", val, num + 1)
+							end
+
+							self.db.name = val
 							Skada.options.args.windows.args[val] = Skada.options.args.windows.args[oldname]
 							Skada.options.args.windows.args[oldname] = nil
 						end
@@ -405,7 +420,7 @@ do
 						return list
 					end,
 					set = function(_, display)
-						db.display = display
+						self.db.display = display
 						Skada:ReloadSettings()
 					end
 				},
@@ -420,10 +435,11 @@ do
 					name = L["Copy Settings"],
 					desc = L["Choose the window from which you want to copy the settings."],
 					order = 10,
+					hidden = true,
 					values = function()
 						local list = {[""] = NONE}
 						for _, win in ipairs(windows) do
-							if win.db.name ~= db.name and win.db.display == db.display then
+							if win.db.name ~= self.db.name and win.db.display == self.db.display then
 								list[win.db.name] = win.db.name
 							end
 						end
@@ -436,6 +452,7 @@ do
 					type = "execute",
 					name = L["Copy Settings"],
 					order = 11,
+					hidden = true,
 					disabled = function()
 						return (copywindow == nil)
 					end,
@@ -443,16 +460,16 @@ do
 						local newdb = {}
 						if copywindow then
 							for _, win in ipairs(windows) do
-								if win.db.name == copywindow and win.db.display == db.display then
+								if win.db.name == copywindow and win.db.display == self.db.display then
 									Skada.tCopy(newdb, win.db, "name", "sticked", "x", "y", "point", "snapped")
 									break
 								end
 							end
 						end
 						for k, v in pairs(newdb) do
-							db[k] = v
+							self.db[k] = v
 						end
-						Skada:ApplySettings(db.name)
+						Skada:ApplySettings(self.db.name)
 						copywindow = nil
 					end
 				},
@@ -460,6 +477,7 @@ do
 					type = "description",
 					name = " ",
 					order = 98,
+					hidden = true,
 					width = "full"
 				},
 				delete = {
@@ -467,21 +485,37 @@ do
 					name = L["Delete Window"],
 					desc = L["Choose the window to be deleted."],
 					order = 998,
+					width = "double",
 					confirm = function() return L["Are you sure you want to delete this window?"] end,
-					func = function() Skada:DeleteWindow(db.name, true) end
+					func = function() Skada:DeleteWindow(self.db.name, true) end
 				},
-				testmod = {
+				testmode = {
 					type = "execute",
 					name = L["Test Mode"],
 					desc = L["Creates fake data to help you configure your windows."],
 					order = 999,
+					hidden = true,
 					disabled = function() return (InCombatLockdown() or IsGroupInCombat()) end,
 					func = function() Skada:TestMode() end
 				}
 			}
 		}
 
-		self.display:AddDisplayOptions(self, options.args)
+		if self.display and self.display.AddDisplayOptions then
+			options.args.copywin.hidden = nil
+			options.args.copyexec.hidden = nil
+			options.args.separator2.hidden = nil
+			options.args.delete.width = nil
+			options.args.testmode.hidden = nil
+
+			self.display:AddDisplayOptions(self, options.args)
+		else
+			options.name = function()
+				return format("|cffff0000%s|r - %s", self.db.name, ERROR_CAPS)
+			end
+			options.args.display.name = format("%s - |cffff0000%s|r", L["Display System"], ERROR_CAPS)
+		end
+
 		Skada.options.args.windows.args[self.db.name] = options
 	end
 end
@@ -827,8 +861,8 @@ function Skada:CreateWindow(name, db, display)
 
 	window.db.name = name
 
-	if displays[window.db.display] then
-		window:SetDisplay(window.db.display or "bar")
+	window:SetDisplay(window.db.display or "bar")
+	if window.db.display and displays[window.db.display] then
 		window.display:Create(window)
 		windows[#windows + 1] = window
 		window:DisplaySets()
@@ -1398,7 +1432,12 @@ do
 end
 
 function Skada:AssignPet(ownerGUID, ownerName, petGUID)
-	pets[petGUID] = {id = ownerGUID, name = ownerName}
+	if pets[petGUID] then
+		pets[petGUID].id = ownerGUID
+		pets[petGUID].name = ownerName
+	else
+		pets[petGUID] = {id = ownerGUID, name = ownerName}
+	end
 end
 
 function Skada:SummonPet(petGUID, petFlags, ownerGUID, ownerName, ownerFlags)
@@ -3219,6 +3258,13 @@ function Skada:DBM(_, mod, wipe)
 	end
 end
 
+function Skada:BossDefeated(set)
+	if set and not set.success then
+		set.success = true
+		self:SendMessage("COMBAT_BOSS_DEFEATED", set)
+	end
+end
+
 function Skada:CheckMemory()
 	if Skada.db.profile.memorycheck then
 		UpdateAddOnMemoryUsage()
@@ -3508,8 +3554,10 @@ do
 
 	-- list of combat events that we don't care about
 	local ignored_events = {
+		SPELL_AURA_APPLIED_DOSE = true,
 		SPELL_AURA_REMOVED_DOSE = true,
 		SPELL_CAST_START = true,
+		SPELL_CAST_SUCCESS = true,
 		SPELL_CAST_FAILED = true,
 		SPELL_DRAIN = true,
 		PARTY_KILL = true,
@@ -3530,6 +3578,12 @@ do
 		SPELL_EXTRA_ATTACKS = true,
 		SPELL_PERIODIC_DAMAGE = true,
 		SWING_DAMAGE = true
+	}
+
+	-- events used to count spell casts.
+	local spellcast_events = {
+		SPELL_CAST_START = true,
+		SPELL_CAST_SUCCESS = true
 	}
 
 	-- list of registered combat log event functions.
@@ -3634,7 +3688,7 @@ do
 		if disabled or self.testMode then return end
 
 		-- ignored combat event?
-		if ignored_events[eventtype] and (eventtype ~= "SPELL_CAST_START" or not self.current) then return end
+		if ignored_events[eventtype] and not (spellcast_events[eventtype] and self.current) then return end
 
 		local src_is_interesting = nil
 		local dst_is_interesting = nil
@@ -3777,12 +3831,5 @@ do
 				end
 			end
 		end
-	end
-end
-
-function Skada:BossDefeated(set)
-	if set and not set.success then
-		set.success = true
-		self:SendMessage("COMBAT_BOSS_DEFEATED", set)
 	end
 end

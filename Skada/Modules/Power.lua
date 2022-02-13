@@ -9,32 +9,39 @@ Skada:AddLoadableModule("Resources", function(L)
 	local setmetatable, GetSpellInfo = setmetatable, Skada.GetSpellInfo or GetSpellInfo
 	local _
 
+	local SPELL_POWER_MANA = SPELL_POWER_MANA or 0
+	local SPELL_POWER_RAGE = SPELL_POWER_RAGE or 1
+	local SPELL_POWER_FOCUS = SPELL_POWER_FOCUS or 2
+	local SPELL_POWER_ENERGY = SPELL_POWER_ENERGY or 3
+	local SPELL_POWER_HAPPINESS = SPELL_POWER_HAPPINESS or 4
+	local SPELL_POWER_RUNIC_POWER = SPELL_POWER_RUNIC_POWER or 6
+
 	-- used to localize modules names.
 	local namesTable = {
-		[0] = MANA,
-		[1] = RAGE,
-		[3] = ENERGY,
-		[6] = RUNIC_POWER
+		[SPELL_POWER_MANA] = MANA,
+		[SPELL_POWER_RAGE] = RAGE,
+		[SPELL_POWER_ENERGY] = ENERGY,
+		[SPELL_POWER_RUNIC_POWER] = RUNIC_POWER
 	}
 
 	-- used to store total amounts for sets and players
 	local gainTable = {
-		[0] = "mana",
-		[1] = "rage",
-		[2] = "energy",
-		[3] = "energy",
-		[4] = "energy",
-		[6] = "runic"
+		[SPELL_POWER_MANA] = "mana",
+		[SPELL_POWER_RAGE] = "rage",
+		[SPELL_POWER_FOCUS] = "energy",
+		[SPELL_POWER_ENERGY] = "energy",
+		[SPELL_POWER_HAPPINESS] = "energy",
+		[SPELL_POWER_RUNIC_POWER] = "runic"
 	}
 
 	-- users as keys to store spells and their amounts.
 	local spellTable = {
-		[0] = "manaspells",
-		[1] = "ragespells",
-		[2] = "energyspells",
-		[3] = "energyspells",
-		[4] = "energyspells",
-		[6] = "runicspells"
+		[SPELL_POWER_MANA] = "manaspells",
+		[SPELL_POWER_RAGE] = "ragespells",
+		[SPELL_POWER_FOCUS] = "energyspells",
+		[SPELL_POWER_ENERGY] = "energyspells",
+		[SPELL_POWER_HAPPINESS] = "energyspells",
+		[SPELL_POWER_RUNIC_POWER] = "runicspells"
 	}
 
 	-- spells in the following table will be ignored.
@@ -58,20 +65,6 @@ Skada:AddLoadableModule("Resources", function(L)
 	local gain = {}
 
 	local function SpellEnergize(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		gain.spellid, _, _, gain.amount, gain.type = ...
-		if gain.spellid and not tContains(ignoredSpells, gain.spellid) then
-			gain.playerid = dstGUID
-			gain.playername = dstName
-			gain.playerflags = dstFlags
-
-			Skada:FixPets(gain)
-
-			log_gain(Skada.current, gain)
-			log_gain(Skada.total, gain)
-		end
-	end
-
-	local function SpellLeech(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		gain.spellid, _, _, gain.amount, gain.type = ...
 		if gain.spellid and not tContains(ignoredSpells, gain.spellid) then
 			gain.playerid = dstGUID
@@ -220,10 +213,10 @@ Skada:AddLoadableModule("Resources", function(L)
 
 	-- we create the modules now
 	-- power gained: mana
-	local manamod = basemod:Create(0)
-	local ragemod = basemod:Create(1)
-	local energymod = basemod:Create(3)
-	local runicmod = basemod:Create(6)
+	local manamod = basemod:Create(SPELL_POWER_MANA)
+	local ragemod = basemod:Create(SPELL_POWER_RAGE)
+	local energymod = basemod:Create(SPELL_POWER_ENERGY)
+	local runicmod = basemod:Create(SPELL_POWER_RUNIC_POWER)
 
 	function mod:OnEnable()
 		self.metadata = {columns = {Amount = true, Percent = true}}
@@ -235,11 +228,6 @@ Skada:AddLoadableModule("Resources", function(L)
 			SpellEnergize,
 			"SPELL_ENERGIZE",
 			"SPELL_PERIODIC_ENERGIZE",
-			flags_src
-		)
-
-		Skada:RegisterForCL(
-			SpellLeech,
 			"SPELL_LEECH",
 			"SPELL_PERIODIC_LEECH",
 			flags_src

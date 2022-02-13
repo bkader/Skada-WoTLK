@@ -193,7 +193,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 
 		Skada:RegisterForCL(SunderApplied, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})
 		Skada:RegisterForCL(SunderRemoved, "SPELL_AURA_REMOVED", {src_is_interesting_nopets = true})
-		Skada:RegisterForCL(TargetDied, "UNIT_DIED", {dst_is_not_interesting = true})
+		Skada:RegisterForCL(TargetDied, "UNIT_DIED", "UNIT_DESTROYED", "UNIT_DISSIPATES", {dst_is_not_interesting = true})
 
 		Skada:AddMode(self, L["Buffs and Debuffs"])
 	end

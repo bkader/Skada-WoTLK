@@ -54,26 +54,24 @@ Skada:AddLoadableModule("Dispels", function(L)
 	local data = {}
 
 	local function SpellDispel(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		if eventtype ~= "SPELL_DISPEL_FAILED" then -- ignore already but, just in case!
-			data.spellid, _, _, data.extraspellid = ...
-			data.extraspellid = data.extraspellid or 6603
+		data.spellid, _, _, data.extraspellid = ...
+		data.extraspellid = data.extraspellid or 6603
 
-			-- invalid/ignored spell?
-			if (data.spellid and tContains(ignoredSpells, data.spellid)) or tContains(ignoredSpells, data.extraspellid) then
-				return
-			end
-
-			data.playerid = srcGUID
-			data.playername = srcName
-			data.playerflags = srcFlags
-
-			data.dstGUID = dstGUID
-			data.dstName = dstName
-			data.dstFlags = dstFlags
-
-			log_dispel(Skada.current, data)
-			log_dispel(Skada.total, data)
+		-- invalid/ignored spell?
+		if (data.spellid and tContains(ignoredSpells, data.spellid)) or tContains(ignoredSpells, data.extraspellid) then
+			return
 		end
+
+		data.playerid = srcGUID
+		data.playername = srcName
+		data.playerflags = srcFlags
+
+		data.dstGUID = dstGUID
+		data.dstName = dstName
+		data.dstFlags = dstFlags
+
+		log_dispel(Skada.current, data)
+		log_dispel(Skada.total, data)
 	end
 
 	function spellmod:Enter(win, id, label)

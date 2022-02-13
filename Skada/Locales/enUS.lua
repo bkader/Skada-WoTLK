@@ -765,6 +765,13 @@ L["ROGUE"] = "Rogue"
 L["SHAMAN"] = "Shaman"
 L["WARLOCK"] = "Warlock"
 L["WARRIOR"] = "Warrior"
+-- custom names using globals
+L["BOSS"] = BOSS
+L["ENEMY"] = ENEMY
+L["MONSTER"] = EXAMPLE_TARGET_MONSTER
+L["PET"] = PET
+L["PLAYER"] = PLAYER
+L["UNKNOWN"] = UNKNOWN
 -- some bosses entries
 L["Acidmaw"] = true
 L["Auriaya"] = true

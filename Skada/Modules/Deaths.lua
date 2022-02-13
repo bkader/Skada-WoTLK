@@ -553,6 +553,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 			UnitDied,
 			"UNIT_DIED",
 			"UNIT_DESTROYED",
+			"UNIT_DISSIPATES",
 			flags_dst_nopets
 		)
 

@@ -464,7 +464,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 			for _, player in ipairs(set.players) do
 				if CanCompare(player) then
-					local amount = player:GetDamage()
+					local dps, amount = player:GetDPS()
 					if amount > 0 then
 						nr = nr + 1
 
@@ -479,7 +479,14 @@ Skada:AddLoadableModule("Comparison", function(L)
 						d.spec = player.spec
 
 						d.value = amount
-						d.valuetext = FormatValueNumber(d.value, myamount, true, player.id == mod.userGUID)
+						d.valuetext = Skada:FormatValueText(
+							Skada:FormatNumber(d.value),
+							mod.metadata.columns.Damage,
+							Skada:FormatNumber(dps),
+							mod.metadata.columns.DPS,
+							FormatPercent(myamount, d.value),
+							(mod.metadata.columns.Percent and player.id ~= mod.userGUID)
+						)
 
 						-- a valid window, not a tooltip
 						if win.metadata then
@@ -513,7 +520,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 			click3 = self.SetActor,
 			click3_label = L["Damage Comparison"],
 			nototalclick = {spellmod, targetmod},
-			columns = {Damage = true, Comparison = true, Percent = true},
+			columns = {Damage = true, DPS = true, Comparison = true, Percent = true},
 			icon = [[Interface\Icons\Ability_Warrior_OffensiveStance]]
 		}
 
