@@ -4,10 +4,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 local name = L["Data Text"]
 local mod = Skada:NewModule(name)
 
-mod.name = name
-mod.description = L["Data text acts as an LDB data feed. It can be integrated in any LDB display such as Titan Panel or ChocolateBar. It also has an optional internal frame."]
-Skada:AddDisplaySystem("broker", mod)
-
 local ldb = LibStub:GetLibrary("LibDataBroker-1.1")
 local LibWindow = LibStub("LibWindow-1.1")
 local media = LibStub("LibSharedMedia-3.0")
@@ -336,4 +332,10 @@ function mod:AddDisplayOptions(win, options)
 	}
 
 	options.window = Skada:FrameSettings(db, true)
+end
+
+function mod:OnInitialize()
+	self.name = name
+	self.description = L["Data text acts as an LDB data feed. It can be integrated in any LDB display such as Titan Panel or ChocolateBar. It also has an optional internal frame."]
+	Skada:AddDisplaySystem("broker", self)
 end

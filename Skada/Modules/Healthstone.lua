@@ -55,11 +55,9 @@ Skada:AddLoadableModule("Healthstones", function(L)
 					d.spec = player.spec
 
 					d.value = player.healthstone
-					d.valuetext = Skada:FormatValueText(
-						d.value,
-						self.metadata.columns.Count,
-						Skada:FormatPercent(d.value, total),
-						self.metadata.columns.Percent
+					d.valuetext = Skada:FormatValueCols(
+						self.metadata.columns.Count and d.value,
+						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then

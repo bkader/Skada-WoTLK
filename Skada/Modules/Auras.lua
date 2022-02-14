@@ -228,13 +228,10 @@ do
 
 							local maxtime = floor(player:GetTime())
 							d.value = min(floor(aurauptime / auracount), maxtime)
-							d.valuetext = Skada:FormatValueText(
-								Skada:FormatTime(d.value),
-								mode.metadata.columns.Uptime,
-								auracount,
-								mode.metadata.columns.Count,
-								Skada:FormatPercent(d.value, maxtime),
-								mode.metadata.columns.Percent
+							d.valuetext = Skada:FormatValueCols(
+								mode.metadata.columns.Uptime and Skada:FormatTime(d.value),
+								mode.metadata.columns.Count and auracount,
+								mode.metadata.columns.Percent and Skada:FormatPercent(d.value, maxtime)
 							)
 
 							if win.metadata and d.value > win.metadata.maxvalue then
@@ -273,13 +270,10 @@ do
 					d.spellschool = spell.school
 
 					d.value = min(maxtime, spell.uptime)
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatTime(d.value),
-						mode.metadata.columns.Uptime,
-						spell.count,
-						spell.count and mode.metadata.columns.Count,
-						Skada:FormatPercent(d.value, maxtime),
-						mode.metadata.columns.Percent
+					d.valuetext = Skada:FormatValueCols(
+						mode.metadata.columns.Uptime and Skada:FormatTime(d.value),
+						mode.metadata.columns.Count and spell.count,
+						mode.metadata.columns.Percent and Skada:FormatPercent(d.value, maxtime)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -436,11 +430,9 @@ Skada:AddLoadableModule("Buffs", function(L)
 				d.spec = player.spec
 
 				d.value = player.uptime
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatTime(d.value),
-					mod.metadata.columns.Uptime,
-					Skada:FormatPercent(d.value, player.maxtime),
-					mod.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Uptime and Skada:FormatTime(d.value),
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, player.maxtime)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -607,13 +599,10 @@ Skada:AddLoadableModule("Debuffs", function(L)
 				d.spellschool = aura.school
 
 				d.value = aura.uptime
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatTime(d.value),
-					mod.metadata.columns.Uptime,
-					aura.count,
-					mod.metadata.columns.Count,
-					Skada:FormatPercent(d.value, maxtime),
-					mod.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Uptime and Skada:FormatTime(d.value),
+					mod.metadata.columns.Count and aura.count,
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, maxtime)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -659,13 +648,10 @@ Skada:AddLoadableModule("Debuffs", function(L)
 				d.spec = target.spec
 
 				d.value = target.uptime
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatTime(d.value),
-					mod.metadata.columns.Uptime,
-					target.count,
-					mod.metadata.columns.Count,
-					Skada:FormatPercent(d.value, maxtime),
-					mod.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Uptime and Skada:FormatTime(d.value),
+					mod.metadata.columns.Count and target.count,
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, maxtime)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -706,13 +692,10 @@ Skada:AddLoadableModule("Debuffs", function(L)
 				d.spec = target.spec
 
 				d.value = target.uptime
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatTime(d.value),
-					mod.metadata.columns.Uptime,
-					target.count,
-					mod.metadata.columns.Count,
-					Skada:FormatPercent(d.value, maxtime),
-					mod.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Uptime and Skada:FormatTime(d.value),
+					mod.metadata.columns.Count and target.count,
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, maxtime)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then

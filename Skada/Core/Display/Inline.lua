@@ -3,10 +3,6 @@ local Skada = Skada
 local mod = Skada:NewModule("InlineDisplay")
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 
-mod.name = L["Inline Bar Display"]
-mod.description = L["Inline display is a horizontal window style."]
-Skada:AddDisplaySystem("inline", mod)
-
 local mybars = {}
 local barlibrary = {bars = {}, nextuuid = 1}
 local leftmargin = 40
@@ -678,4 +674,10 @@ function mod:AddDisplayOptions(win, options)
 	}
 
 	options.frameoptions = Skada:FrameSettings(db, true)
+end
+
+function mod:OnInitialize()
+	self.name = L["Inline Bar Display"]
+	self.description = L["Inline display is a horizontal window style."]
+	Skada:AddDisplaySystem("inline", self)
 end

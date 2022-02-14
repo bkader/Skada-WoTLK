@@ -422,11 +422,9 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				if Skada.db.profile.absdamage then
 					d.value = min(total, spell.total)
 				end
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatNumber(d.value),
-					mod.metadata.columns.Damage,
-					Skada:FormatPercent(d.value, total),
-					mod.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -467,11 +465,9 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				d.spec = source.spec
 
 				d.value = Skada.db.profile.absdamage and source.total or source.amount
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatNumber(d.value),
-					mod.metadata.columns.Damage,
-					Skada:FormatPercent(d.value, total),
-					mod.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -490,11 +486,9 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 		d.id = title
 		d.label = title
 		d.value = value
-		d.valuetext = Skada:FormatValueText(
-			fmt and Skada:FormatNumber(value) or value,
-			mod.metadata.columns.Damage,
-			Skada:FormatPercent(d.value, total),
-			percent and mod.metadata.columns.Percent
+		d.valuetext = Skada:FormatValueCols(
+			mod.metadata.columns.Damage and (fmt and Skada:FormatNumber(value) or value),
+			(mod.metadata.columns.Percent and percent) and Skada:FormatPercent(d.value, total)
 		)
 
 		if win.metadata and d.value > win.metadata.maxvalue then
@@ -638,11 +632,9 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 							d.value = spell.sources[win.targetname].total or d.value
 						end
 
-						d.valuetext = Skada:FormatValueText(
-							Skada:FormatNumber(d.value),
-							mod.metadata.columns.Damage,
-							Skada:FormatPercent(d.value, total),
-							mod.metadata.columns.Percent
+						d.valuetext = Skada:FormatValueCols(
+							mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+							mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
 						if win.metadata and d.value > win.metadata.maxvalue then
@@ -687,13 +679,10 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 						end
 
 						d.value = amount
-						d.valuetext = Skada:FormatValueText(
-							Skada:FormatNumber(d.value),
-							self.metadata.columns.Damage,
-							Skada:FormatNumber(dtps),
-							self.metadata.columns.DTPS,
-							Skada:FormatPercent(d.value, total),
-							self.metadata.columns.Percent
+						d.valuetext = Skada:FormatValueCols(
+							self.metadata.columns.Damage and Skada:FormatNumber(d.value),
+							self.metadata.columns.DTPS and Skada:FormatNumber(dtps),
+							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
 						if win.metadata and d.value > win.metadata.maxvalue then
@@ -723,13 +712,10 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 							d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_GOLD
 
 							d.value = amount
-							d.valuetext = Skada:FormatValueText(
-								Skada:FormatNumber(d.value),
-								self.metadata.columns.Damage,
-								Skada:FormatNumber(dtps),
-								self.metadata.columns.DTPS,
-								Skada:FormatPercent(d.value, total),
-								self.metadata.columns.Percent
+							d.valuetext = Skada:FormatValueCols(
+								self.metadata.columns.Damage and Skada:FormatNumber(d.value),
+								self.metadata.columns.DTPS and Skada:FormatNumber(dtps),
+								self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 							)
 
 							if win.metadata and d.value > win.metadata.maxvalue then
@@ -813,11 +799,9 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 	function mod:GetSetSummary(set)
 		if not set then return end
 		local dtps, amount = set:GetDTPS()
-		return Skada:FormatValueText(
-			Skada:FormatNumber(amount),
-			self.metadata.columns.Damage,
-			Skada:FormatNumber(dtps),
-			self.metadata.columns.DTPS
+		return Skada:FormatValueCols(
+			self.metadata.columns.Damage and Skada:FormatNumber(amount),
+			self.metadata.columns.DTPS and Skada:FormatNumber(dtps)
 		), amount
 	end
 
@@ -972,11 +956,9 @@ Skada:AddLoadableModule("DTPS", function(L)
 						end
 
 						d.value = dtps
-						d.valuetext = Skada:FormatValueText(
-							Skada:FormatNumber(d.value),
-							self.metadata.columns.DTPS,
-							Skada:FormatPercent(d.value, total),
-							self.metadata.columns.Percent
+						d.valuetext = Skada:FormatValueCols(
+							self.metadata.columns.DTPS and Skada:FormatNumber(d.value),
+							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
 						if win.metadata and d.value > win.metadata.maxvalue then
@@ -1006,11 +988,9 @@ Skada:AddLoadableModule("DTPS", function(L)
 							d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_GOLD
 
 							d.value = dtps
-							d.valuetext = Skada:FormatValueText(
-								Skada:FormatNumber(d.value),
-								self.metadata.columns.DTPS,
-								Skada:FormatPercent(d.value, total),
-								self.metadata.columns.Percent
+							d.valuetext = Skada:FormatValueCols(
+								self.metadata.columns.DTPS and Skada:FormatNumber(d.value),
+								self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 							)
 
 							if win.metadata and d.value > win.metadata.maxvalue then
@@ -1123,11 +1103,9 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 					d.spec = source.spec
 
 					d.value = source.amount
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(d.value),
-						mod.metadata.columns.Damage,
-						Skada:FormatPercent(d.value, total),
-						mod.metadata.columns.Percent
+					d.valuetext = Skada:FormatValueCols(
+						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -1190,11 +1168,9 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 					d.spec = player.spec
 
 					d.value = player.amount
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(d.value),
-						mod.metadata.columns.Damage,
-						Skada:FormatPercent(d.value, total),
-						mod.metadata.columns.Percent
+					d.valuetext = Skada:FormatValueCols(
+						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -1246,11 +1222,9 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 			d.spellschool = spell.school
 
 			d.value = spell.amount
-			d.valuetext = Skada:FormatValueText(
-				Skada:FormatNumber(d.value),
-				self.metadata.columns.Damage,
-				Skada:FormatPercent(d.value, total),
-				self.metadata.columns.Percent
+			d.valuetext = Skada:FormatValueCols(
+				self.metadata.columns.Damage and Skada:FormatNumber(d.value),
+				self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 			)
 
 			if win.metadata and d.value > win.metadata.maxvalue then
@@ -1312,13 +1286,10 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 				d.label = L[event]
 
 				d.value = 100 * count / player.total
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatPercent(d.value),
-					mod.metadata.columns.Percent,
-					count,
-					mod.metadata.columns.Count,
-					player.total,
-					mod.metadata.columns.Total
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value),
+					mod.metadata.columns.Count and count,
+					mod.metadata.columns.Total and player.total
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -1374,13 +1345,10 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 							d.spec = player.spec
 
 							d.value = 100 * avoid / total
-							d.valuetext = Skada:FormatValueText(
-								Skada:FormatPercent(d.value),
-								self.metadata.columns.Percent,
-								avoid,
-								self.metadata.columns.Count,
-								total,
-								self.metadata.columns.Total
+							d.valuetext = Skada:FormatValueCols(
+								self.metadata.columns.Percent and Skada:FormatPercent(d.value),
+								self.metadata.columns.Count and avoid,
+								self.metadata.columns.Total and total
 							)
 
 							if win.metadata and d.value > win.metadata.maxvalue then
@@ -1445,11 +1413,9 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 		d.id = title
 		d.label = title
 		d.value = value
-		d.valuetext = Skada:FormatValueText(
-			Skada:FormatNumber(value),
-			mod.metadata.columns.Damage,
-			Skada:FormatPercent(value, total),
-			mod.metadata.columns.Percent
+		d.valuetext = Skada:FormatValueCols(
+			mod.metadata.columns.Damage and Skada:FormatNumber(value),
+			mod.metadata.columns.Percent and Skada:FormatPercent(value, total)
 		)
 
 		if win.metadata and value > win.metadata.maxvalue then
@@ -1532,13 +1498,10 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 					d.spellschool = spell.school
 
 					d.value = spell.amount
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(d.value),
-						mod.metadata.columns.Damage,
-						Skada:FormatNumber(spell.total),
-						mod.metadata.columns.Total,
-						Skada:FormatPercent(d.value, spell.total),
-						mod.metadata.columns.Percent
+					d.valuetext = Skada:FormatValueCols(
+						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+						mod.metadata.columns.Total and Skada:FormatNumber(spell.total),
+						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, spell.total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -1575,13 +1538,10 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 						d.spec = player.spec
 
 						d.value = amount
-						d.valuetext = Skada:FormatValueText(
-							Skada:FormatNumber(d.value),
-							self.metadata.columns.Damage,
-							Skada:FormatNumber(total),
-							self.metadata.columns.Total,
-							Skada:FormatPercent(d.value, total),
-							self.metadata.columns.Percent
+						d.valuetext = Skada:FormatValueCols(
+							self.metadata.columns.Damage and Skada:FormatNumber(d.value),
+							self.metadata.columns.Total and Skada:FormatNumber(total),
+							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
 						if win.metadata and d.value > win.metadata.maxvalue then

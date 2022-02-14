@@ -851,11 +851,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 					d.label, _, d.icon = GetSpellInfo(spellid)
 
 					d.value = spell.targets[win.targetname]
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(d.value),
-						mod.metadata.columns.Absorbs,
-						Skada:FormatPercent(d.value, total),
-						mod.metadata.columns.Percent
+					d.valuetext = Skada:FormatValueCols(
+						mod.metadata.columns.Absorbs and Skada:FormatNumber(d.value),
+						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -895,11 +893,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				d.label, _, d.icon = GetSpellInfo(spellid)
 
 				d.value = spell.amount
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatNumber(d.value),
-					mod.metadata.columns.Absorbs,
-					Skada:FormatPercent(d.value, total),
-					mod.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Absorbs and Skada:FormatNumber(d.value),
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -941,11 +937,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				d.spec = target.spec
 
 				d.value = target.amount
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatNumber(d.value),
-					mod.metadata.columns.Absorbs,
-					Skada:FormatPercent(d.value, total),
-					mod.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Absorbs and Skada:FormatNumber(d.value),
+					mod.metadata.columns.Percen and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -982,13 +976,10 @@ Skada:AddLoadableModule("Absorbs", function(L)
 						d.spec = player.spec
 
 						d.value = amount
-						d.valuetext = Skada:FormatValueText(
-							Skada:FormatNumber(d.value),
-							self.metadata.columns.Absorbs,
-							Skada:FormatNumber(aps),
-							self.metadata.columns.HPS,
-							Skada:FormatPercent(d.value, total),
-							self.metadata.columns.Percent
+						d.valuetext = Skada:FormatValueCols(
+							self.metadata.columns.Absorbs and Skada:FormatNumber(d.value),
+							self.metadata.columns.HPS and  Skada:FormatNumber(aps),
+							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
 						if win.metadata and d.value > win.metadata.maxvalue then
@@ -1074,11 +1065,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	function mod:GetSetSummary(set)
 		if not set then return end
 		local aps, amount = set:GetAPS()
-		return Skada:FormatValueText(
-			Skada:FormatNumber(amount),
-			self.metadata.columns.Absorbs,
-			Skada:FormatNumber(aps),
-			self.metadata.columns.HPS
+		return Skada:FormatValueCols(
+			self.metadata.columns.Absorbs and Skada:FormatNumber(amount),
+			self.metadata.columns.HPS and Skada:FormatNumber(aps)
 		), amount
 	end
 
@@ -1282,11 +1271,9 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 							d.value = spell.targets[win.targetname].amount or 0
 						end
 
-						d.valuetext = Skada:FormatValueText(
-							Skada:FormatNumber(d.value),
-							mod.metadata.columns.Healing,
-							Skada:FormatPercent(d.value, total),
-							mod.metadata.columns.Percent
+						d.valuetext = Skada:FormatValueCols(
+							mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
+							mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
 						if win.metadata and d.value > win.metadata.maxvalue then
@@ -1310,11 +1297,9 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 						d.label, _, d.icon = GetSpellInfo(spellid)
 
 						d.value = spell.targets[win.targetname] or 0
-						d.valuetext = Skada:FormatValueText(
-							Skada:FormatNumber(d.value),
-							mod.metadata.columns.Healing,
-							Skada:FormatPercent(d.value, total),
-							mod.metadata.columns.Percent
+						d.valuetext = Skada:FormatValueCols(
+							mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
+							mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
 						if win.metadata and d.value > win.metadata.maxvalue then
@@ -1365,11 +1350,9 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 					end
 
 					d.value = spell.amount
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(d.value),
-						mod.metadata.columns.Healing,
-						Skada:FormatPercent(d.value, total),
-						mod.metadata.columns.Percent
+					d.valuetext = Skada:FormatValueCols(
+						mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
+						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -1391,11 +1374,9 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 					d.label, _, d.icon = GetSpellInfo(spellid)
 
 					d.value = spell.amount
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(d.value),
-						mod.metadata.columns.Healing,
-						Skada:FormatPercent(d.value, total),
-						mod.metadata.columns.Percent
+					d.valuetext = Skada:FormatValueCols(
+						mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
+						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -1447,11 +1428,9 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 					d.spec = target.spec
 
 					d.value = target.amount
-					d.valuetext = Skada:FormatValueText(
-						Skada:FormatNumber(d.value),
-						mod.metadata.columns.Healing,
-						Skada:FormatPercent(d.value, total),
-						mod.metadata.columns.Percent
+					d.valuetext = Skada:FormatValueCols(
+						mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
+						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -1496,13 +1475,10 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 						end
 
 						d.value = amount
-						d.valuetext = Skada:FormatValueText(
-							Skada:FormatNumber(d.value),
-							self.metadata.columns.Healing,
-							Skada:FormatNumber(hps),
-							self.metadata.columns.HPS,
-							Skada:FormatPercent(d.value, total),
-							self.metadata.columns.Percent
+						d.valuetext = Skada:FormatValueCols(
+							self.metadata.columns.Healing and Skada:FormatNumber(d.value),
+							self.metadata.columns.HPS and Skada:FormatNumber(hps),
+							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
 						if win.metadata and d.value > win.metadata.maxvalue then
@@ -1533,13 +1509,10 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 							d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_GOLD
 
 							d.value = amount
-							d.valuetext = Skada:FormatValueText(
-								Skada:FormatNumber(d.value),
-								self.metadata.columns.Healing,
-								Skada:FormatNumber(hps),
-								self.metadata.columns.HPS,
-								Skada:FormatPercent(d.value, total),
-								self.metadata.columns.Percent
+							d.valuetext = Skada:FormatValueCols(
+								self.metadata.columns.Healing and Skada:FormatNumber(d.value),
+								self.metadata.columns.HPS and Skada:FormatNumber(hps),
+								self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 							)
 
 							if win.metadata and d.value > win.metadata.maxvalue then
@@ -1608,11 +1581,9 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 	function mod:GetSetSummary(set)
 		if not set then return end
 		local hps, amount = set:GetAHPS()
-		return Skada:FormatValueText(
-			Skada:FormatNumber(amount),
-			self.metadata.columns.Healing,
-			Skada:FormatNumber(hps),
-			self.metadata.columns.HPS
+		return Skada:FormatValueCols(
+			self.metadata.columns.Healing and Skada:FormatNumber(amount),
+			self.metadata.columns.HPS and Skada:FormatNumber(hps)
 		), amount
 	end
 
@@ -1816,11 +1787,9 @@ Skada:AddLoadableModule("HPS", function(L)
 						end
 
 						d.value = amount
-						d.valuetext = Skada:FormatValueText(
-							Skada:FormatNumber(d.value),
-							self.metadata.columns.HPS,
-							Skada:FormatPercent(d.value, total),
-							self.metadata.columns.Percent
+						d.valuetext = Skada:FormatValueCols(
+							self.metadata.columns.HPS and Skada:FormatNumber(d.value),
+							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
 						if win.metadata and d.value > win.metadata.maxvalue then
@@ -1850,11 +1819,9 @@ Skada:AddLoadableModule("HPS", function(L)
 							d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_GOLD
 
 							d.value = amount
-							d.valuetext = Skada:FormatValueText(
-								Skada:FormatNumber(d.value),
-								self.metadata.columns.HPS,
-								Skada:FormatPercent(d.value, total),
-								self.metadata.columns.Percent
+							d.valuetext = Skada:FormatValueCols(
+								self.metadata.columns.HPS and Skada:FormatNumber(d.value),
+								self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 							)
 
 							if win.metadata and d.value > win.metadata.maxvalue then
@@ -1998,11 +1965,9 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 				d.spec = player.spec
 
 				d.value = player.amount
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatNumber(d.value),
-					mod.metadata.columns.Healing,
-					Skada:FormatPercent(d.value, total),
-					mod.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -2039,11 +2004,9 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 				end
 
 				d.value = spell.amount
-				d.valuetext = Skada:FormatValueText(
-					Skada:FormatNumber(d.value),
-					self.metadata.columns.Healing,
-					Skada:FormatPercent(d.value, total),
-					self.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					self.metadata.columns.Healing and Skada:FormatNumber(d.value),
+					self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then

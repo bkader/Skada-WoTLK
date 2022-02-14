@@ -103,11 +103,9 @@ Skada:AddLoadableModule("Dispels", function(L)
 				d.label, _, d.icon = GetSpellInfo(spellid)
 
 				d.value = count
-				d.valuetext = Skada:FormatValueText(
-					d.value,
-					mod.metadata.columns.Total,
-					Skada:FormatPercent(d.value, total),
-					mod.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Total and d.value,
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -148,11 +146,9 @@ Skada:AddLoadableModule("Dispels", function(L)
 				d.spec = target.spec
 
 				d.value = target.count
-				d.valuetext = Skada:FormatValueText(
-					d.value,
-					mod.metadata.columns.Total,
-					Skada:FormatPercent(d.value, total),
-					mod.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Total and d.value,
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -190,11 +186,9 @@ Skada:AddLoadableModule("Dispels", function(L)
 				d.label, _, d.icon = GetSpellInfo(spellid)
 
 				d.value = spell.count
-				d.valuetext = Skada:FormatValueText(
-					d.value,
-					mod.metadata.columns.Total,
-					Skada:FormatPercent(d.value, total),
-					mod.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Total and d.value,
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -229,12 +223,9 @@ Skada:AddLoadableModule("Dispels", function(L)
 					d.role = player.role
 
 					d.value = player.dispel
-					d.valuetext =
-						Skada:FormatValueText(
-						d.value,
-						self.metadata.columns.Total,
-						Skada:FormatPercent(d.value, total),
-						self.metadata.columns.Percent
+					d.valuetext = Skada:FormatValueCols(
+						self.metadata.columns.Total and d.value,
+						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then

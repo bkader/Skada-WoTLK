@@ -12,10 +12,6 @@ local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
 local GetScreenWidth, GetScreenHeight = GetScreenWidth, GetScreenHeight
 local white = {r = 0.9, g = 0.9, b = 0.9, a = 1}
 
-mod.name = L["Bar display"]
-mod.description = L["Bar display is the normal bar window used by most damage meters. It can be extensively styled."]
-Skada:AddDisplaySystem("bar", mod)
-
 -- class, role & specs
 local classicons, roleicons, specicons
 local classcoords, rolecoords, speccoords
@@ -1683,4 +1679,10 @@ function mod:AddDisplayOptions(win, options)
 			end
 		end
 	}
+end
+
+function mod:OnInitialize()
+	self.name = L["Bar display"]
+	self.description = L["Bar display is the normal bar window used by most damage meters. It can be extensively styled."]
+	Skada:AddDisplaySystem("bar", self)
 end

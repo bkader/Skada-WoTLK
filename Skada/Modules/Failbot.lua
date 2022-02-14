@@ -77,11 +77,9 @@ Skada:AddLoadableModule("Fails", function(L)
 					d.spec = player.spec
 
 					d.value = player.failspells[win.spellid]
-					d.valuetext = Skada:FormatValueText(
-						d.value,
-						mod.metadata.columns.Count,
-						Skada:FormatPercent(d.value, total),
-						mod.metadata.columns.Percent
+					d.valuetext = Skada:FormatValueCols(
+						mod.metadata.columns.Count and d.value,
+						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -120,11 +118,9 @@ Skada:AddLoadableModule("Fails", function(L)
 				d.label, _, d.icon = GetSpellInfo(spellid)
 
 				d.value = count
-				d.valuetext = Skada:FormatValueText(
-					d.value,
-					mod.metadata.columns.Count,
-					Skada:FormatPercent(d.value, total),
-					mod.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Count and d.value,
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -159,11 +155,9 @@ Skada:AddLoadableModule("Fails", function(L)
 					d.spec = player.spec
 
 					d.value = player.fail
-					d.valuetext = Skada:FormatValueText(
-						d.value,
-						self.metadata.columns.Count,
-						Skada:FormatPercent(d.value, total),
-						self.metadata.columns.Percent
+					d.valuetext = Skada:FormatValueCols(
+						self.metadata.columns.Count and d.value,
+						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then

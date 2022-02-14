@@ -126,11 +126,9 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 				d.spec = target.spec
 
 				d.value = target.count
-				d.valuetext = Skada:FormatValueText(
-					d.value,
-					mod.metadata.columns.Count,
-					Skada:FormatPercent(d.value, total),
-					mod.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Count and d.value,
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -167,11 +165,9 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 					d.role = player.role
 
 					d.value = player.sunder
-					d.valuetext = Skada:FormatValueText(
-						d.value,
-						self.metadata.columns.Count,
-						Skada:FormatPercent(d.value, total),
-						self.metadata.columns.Percent
+					d.valuetext = Skada:FormatValueCols(
+						self.metadata.columns.Count and d.value,
+						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -187,7 +183,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 			showspots = true,
 			click1 = targetmod,
 			nototalclick = {targetmod},
-			columns = {Count = true, Percent = true},
+			columns = {Count = true, Percent = false},
 			icon = [[Interface\Icons\ability_warrior_sunder]]
 		}
 

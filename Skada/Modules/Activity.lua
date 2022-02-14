@@ -47,11 +47,9 @@ Skada:AddLoadableModule("Activity", function(L)
 						d.spec = player.spec
 
 						d.value = activetime
-						d.valuetext = Skada:FormatValueText(
-							Skada:FormatTime(d.value),
-							self.metadata.columns["Active Time"],
-							Skada:FormatPercent(d.value, settime),
-							self.metadata.columns.Percent
+						d.valuetext = Skada:FormatValueCols(
+							self.metadata.columns["Active Time"] and Skada:FormatTime(d.value),
+							self.metadata.columns.Percent and Skada:FormatPercent(d.value, settime)
 						)
 
 						if win.metadata and d.value > win.metadata.maxvalue then
@@ -83,11 +81,9 @@ Skada:AddLoadableModule("Activity", function(L)
 	function mod:GetSetSummary(set)
 		local settime = set and set:GetTime() or 0
 		if settime > 0 then
-			return Skada:FormatValueText(
-				Skada:FormatTime(settime),
-				self.metadata.columns["Active Time"],
-				format("%s - %s", date("%H:%M", set.starttime), date("%H:%M", set.endtime)),
-				self.metadata.columns.Percent
+			return Skada:FormatValueCols(
+				self.metadata.columns["Active Time"] and Skada:FormatTime(settime),
+				self.metadata.columns.Percent and format("%s - %s", date("%H:%M", set.starttime), date("%H:%M", set.endtime))
 			), settime
 		end
 	end

@@ -141,11 +141,9 @@ Skada:AddLoadableModule("Improvement", function(L)
 				elseif win.modename == "Deaths" or win.modename == "Interrupts" or win.modename == "Fails" then
 					d.valuetext = tostring(d.value)
 				else
-					d.valuetext = Skada:FormatValueText(
+					d.valuetext = Skada:FormatColumns(
 						Skada:FormatNumber(d.value),
-						true,
-						Skada:FormatNumber((d.value) / max(1, encounter.data.ActiveTime or 0)),
-						true
+						Skada:FormatNumber((d.value) / max(1, encounter.data.ActiveTime or 0))
 					)
 				end
 

@@ -137,31 +137,40 @@ function Skada:RegisterClasses()
 	end
 end
 
+local SPELLSCHOOL_PHYSICAL = SCHOOL_MASK_PHYSICAL or 1
+local SPELLSCHOOL_HOLY = SCHOOL_MASK_HOLY or 2
+local SPELLSCHOOL_FIRE = SCHOOL_MASK_FIRE or 4
+local SPELLSCHOOL_NATURE = SCHOOL_MASK_NATURE or 8
+local SPELLSCHOOL_FROST = SCHOOL_MASK_FROST or 16
+local SPELLSCHOOL_FROSTFIRE = SPELLSCHOOL_FIRE + SPELLSCHOOL_FROST
+local SPELLSCHOOL_SHADOW = SCHOOL_MASK_SHADOW or 32
+local SPELLSCHOOL_ARCANE = SCHOOL_MASK_ARCANE or 64
+
 function Skada:RegisterSchools()
 	self.RegisterSchools = nil -- remove it
 
 	-- spell school colors
 	self.schoolcolors = {
-		[1] = {a = 1.00, r = 1.00, g = 1.00, b = 0.00}, -- Physical
-		[2] = {a = 1.00, r = 1.00, g = 0.90, b = 0.50}, -- Holy
-		[4] = {a = 1.00, r = 1.00, g = 0.50, b = 0.00}, -- Fire
-		[8] = {a = 1.00, r = 0.30, g = 1.00, b = 0.30}, -- Nature
-		[16] = {a = 1.00, r = 0.50, g = 1.00, b = 1.00}, -- Frost
-		[20] = {a = 1.00, r = 0.50, g = 1.00, b = 1.00}, -- Frostfire
-		[32] = {a = 1.00, r = 0.50, g = 0.50, b = 1.00}, -- Shadow
-		[64] = {a = 1.00, r = 1.00, g = 0.50, b = 1.00} -- Arcane
+		[SPELLSCHOOL_PHYSICAL] = {a = 1.00, r = 1.00, g = 1.00, b = 0.00}, -- Physical
+		[SPELLSCHOOL_HOLY] = {a = 1.00, r = 1.00, g = 0.90, b = 0.50}, -- Holy
+		[SPELLSCHOOL_FIRE] = {a = 1.00, r = 1.00, g = 0.50, b = 0.00}, -- Fire
+		[SPELLSCHOOL_NATURE] = {a = 1.00, r = 0.30, g = 1.00, b = 0.30}, -- Nature
+		[SPELLSCHOOL_FROST] = {a = 1.00, r = 0.50, g = 1.00, b = 1.00}, -- Frost
+		[SPELLSCHOOL_FROSTFIRE] = {a = 1.00, r = 0.50, g = 1.00, b = 1.00}, -- Frostfire
+		[SPELLSCHOOL_SHADOW] = {a = 1.00, r = 0.50, g = 0.50, b = 1.00}, -- Shadow
+		[SPELLSCHOOL_ARCANE] = {a = 1.00, r = 1.00, g = 0.50, b = 1.00} -- Arcane
 	}
 
 	-- spell school names
 	self.schoolnames = {
-		[1] = STRING_SCHOOL_PHYSICAL:gsub("%(", ""):gsub("%)", ""),
-		[2] = STRING_SCHOOL_HOLY:gsub("%(", ""):gsub("%)", ""),
-		[4] = STRING_SCHOOL_FIRE:gsub("%(", ""):gsub("%)", ""),
-		[8] = STRING_SCHOOL_NATURE:gsub("%(", ""):gsub("%)", ""),
-		[16] = STRING_SCHOOL_FROST:gsub("%(", ""):gsub("%)", ""),
-		[20] = STRING_SCHOOL_FROSTFIRE:gsub("%(", ""):gsub("%)", ""),
-		[32] = STRING_SCHOOL_SHADOW:gsub("%(", ""):gsub("%)", ""),
-		[64] = STRING_SCHOOL_ARCANE:gsub("%(", ""):gsub("%)", "")
+		[SPELLSCHOOL_PHYSICAL] = STRING_SCHOOL_PHYSICAL:gsub("%(", ""):gsub("%)", ""),
+		[SPELLSCHOOL_HOLY] = STRING_SCHOOL_HOLY:gsub("%(", ""):gsub("%)", ""),
+		[SPELLSCHOOL_FIRE] = STRING_SCHOOL_FIRE:gsub("%(", ""):gsub("%)", ""),
+		[SPELLSCHOOL_NATURE] = STRING_SCHOOL_NATURE:gsub("%(", ""):gsub("%)", ""),
+		[SPELLSCHOOL_FROST] = STRING_SCHOOL_FROST:gsub("%(", ""):gsub("%)", ""),
+		[SPELLSCHOOL_FROSTFIRE] = STRING_SCHOOL_FROSTFIRE:gsub("%(", ""):gsub("%)", ""),
+		[SPELLSCHOOL_SHADOW] = STRING_SCHOOL_SHADOW:gsub("%(", ""):gsub("%)", ""),
+		[SPELLSCHOOL_ARCANE] = STRING_SCHOOL_ARCANE:gsub("%(", ""):gsub("%)", "")
 	}
 end
 

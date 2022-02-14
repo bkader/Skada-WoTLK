@@ -328,19 +328,16 @@ Skada:AddLoadableModule("Deaths", function(L)
 						end
 
 						if next(extra) then
-							change = "(|cffff0000*|r) " .. change
+							-- change = "(|cffff0000*|r) " .. change -- uncomment for * back.
 							d.reportlabel = d.reportlabel .. " (" .. tconcat(extra, " - ") .. ")"
 						end
 
 						extra = del(extra)
 
-						d.valuetext = Skada:FormatValueText(
-							change,
-							self.metadata.columns.Change,
-							Skada:FormatNumber(log.hp or 0),
-							self.metadata.columns.Health,
-							Skada:FormatPercent(log.hp or 1, player.maxhp or 1),
-							self.metadata.columns.Percent
+						d.valuetext = Skada:FormatValueCols(
+							self.metadata.columns.Change and change,
+							self.metadata.columns.Health and Skada:FormatNumber(log.hp or 0),
+							self.metadata.columns.Percent and Skada:FormatPercent(log.hp or 1, player.maxhp or 1)
 						)
 
 						if log.amount >= 0 then
@@ -440,11 +437,9 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 					if player.deathlog then
 						d.value = fixdeathtime(player.deathlog[1].time, player)
-						d.valuetext = Skada:FormatValueText(
-							Skada:FormatTime(d.value - set.starttime),
-							self.metadata.columns.Survivability,
-							player.death,
-							self.metadata.columns.Count
+						d.valuetext = Skada:FormatValueCols(
+							self.metadata.columns.Survivability and Skada:FormatTime(d.value - set.starttime),
+							self.metadata.columns.Count and player.death
 						)
 					else
 						d.value = player.death

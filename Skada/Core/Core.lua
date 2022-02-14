@@ -21,7 +21,7 @@ local Translit = LibStub("LibTranslit-1.0", true)
 local tsort, tinsert, tremove, tmaxn, wipe, setmetatable = table.sort, table.insert, table.remove, table.maxn, wipe, setmetatable
 local next, pairs, ipairs, type = next, pairs, ipairs, type
 local tonumber, tostring, strmatch, format, gsub, lower, find = tonumber, tostring, strmatch, string.format, string.gsub, string.lower, string.find
-local floor, max, min, band, time = math.floor, math.max, math.min, bit.band, time
+local floor, max, min, band, time, GetTime = math.floor, math.max, math.min, bit.band, time, GetTime
 local IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction = IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction
 local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
 local UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected
@@ -873,7 +873,7 @@ function Skada:CreateWindow(name, db, display)
 			self:RestoreView(window, window.db.set, window.db.mode)
 		end
 	else
-		self:Printf("Window '%s' was not loaded because its display module, '%s' was not found.", name, window.db.display or L.Unknown)
+		self:Printf("Window \"|cffffbb00%s|r\" was not loaded because its display module, \"|cff00ff00%s|r\" was not found.", name, window.db.display or L.Unknown)
 	end
 
 	ACR:NotifyChange("Skada")
@@ -1620,6 +1620,8 @@ do
 	end
 
 	function Skada:ShowTooltip(win, id, label)
+		if not (win and win.metadata) then return end
+
 		local t = GameTooltip
 
 		if self.db.profile.tooltips then
@@ -2002,7 +2004,15 @@ function Skada:PLAYER_ENTERING_WORLD()
 	end
 end
 
+local lastCheckGroup
 function Skada:CheckGroup()
+	-- throttle group check.
+	local checkTime = GetTime()
+	if lastCheckGroup and (checkTime - lastCheckGroup) <= 0.25 then
+		return
+	end
+	lastCheckGroup = checkTime
+
 	for unit, owner in UnitIterator() do
 		if owner == nil then
 			players[UnitGUID(unit)] = unit
@@ -2250,37 +2260,39 @@ function Skada:UpdateDisplay(force)
 					end
 
 					if self.db.profile.showtotals and win.selectedmode.GetSetSummary then
-						local valuetext, total = win.selectedmode:GetSetSummary(set)
-						local existing = nil  -- an existing bar?
+						local valuetext, total = win.selectedmode:GetSetSummary(set, win)
+						if valuetext or total then
+							local existing = nil  -- an existing bar?
 
-						if not total then
-							total = 0
-							for _, data in ipairs(win.dataset) do
-								if data.id then
-									total = total + data.value
-								end
-								if not existing and not data.id then
-									existing = data
+							if not total then
+								total = 0
+								for _, data in ipairs(win.dataset) do
+									if data.id then
+										total = total + data.value
+									end
+									if not existing and not data.id then
+										existing = data
+									end
 								end
 							end
+							total = total + 1
+
+							local d = existing or {}
+							d.id = "total"
+							d.label = L["Total"]
+							d.text = nil
+							d.ignore = true
+							d.value = total
+							d.valuetext = valuetext or total
+
+							if self.db.profile.moduleicons and win.selectedmode.metadata and win.selectedmode.metadata.icon then
+								d.icon = win.selectedmode.metadata.icon
+							else
+								d.icon = dataobj.icon
+							end
+
+							if not existing then tinsert(win.dataset, 1, d) end
 						end
-						total = total + 1
-
-						local d = existing or {}
-						d.id = "total"
-						d.label = L["Total"]
-						d.text = nil
-						d.ignore = true
-						d.value = total
-						d.valuetext = valuetext
-
-						if self.db.profile.moduleicons and win.selectedmode.metadata and win.selectedmode.metadata.icon then
-							d.icon = win.selectedmode.metadata.icon
-						else
-							d.icon = dataobj.icon
-						end
-
-						if not existing then tinsert(win.dataset, 1, d) end
 					end
 				end
 
@@ -2301,7 +2313,7 @@ function Skada:UpdateDisplay(force)
 					end
 
 					if set and mode.GetSetSummary ~= nil then
-						d.valuetext = mode:GetSetSummary(set)
+						d.valuetext = mode:GetSetSummary(set, win)
 					end
 				end
 
@@ -2475,6 +2487,24 @@ do
 			return v1
 		elseif b3 then
 			return v3
+		end
+	end
+
+	function Skada:FormatValueCols(col1, col2, col3)
+		if col1 and col2 and col3 then
+			return format(format_3, col1, col2, col3)
+		elseif col1 and col2 then
+			return format(format_2, col1, col2)
+		elseif col1 and col3 then
+			return format(format_2, col1, col3)
+		elseif col2 and col3 then
+			return format(format_2, col2, col3)
+		elseif col2 then
+			return col2
+		elseif col1 then
+			return col1
+		elseif col3 then
+			return col3
 		end
 	end
 end

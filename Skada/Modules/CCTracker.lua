@@ -283,11 +283,9 @@ Skada:AddLoadableModule("CC Done", function(L)
 				d.spellschool = GetSpellSchool(spellid)
 
 				d.value = spell.count
-				d.valuetext = Skada:FormatValueText(
-					d.value,
-					mod.metadata.columns.Count,
-					Skada:FormatPercent(d.value, total),
-					mod.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Count and d.value,
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -328,11 +326,9 @@ Skada:AddLoadableModule("CC Done", function(L)
 				d.spec = target.spec
 
 				d.value = target.count
-				d.valuetext = Skada:FormatValueText(
-					d.value,
-					mod.metadata.columns.Count,
-					Skada:FormatPercent(d.value, total),
-					mod.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Count and d.value,
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -367,11 +363,9 @@ Skada:AddLoadableModule("CC Done", function(L)
 					d.spec = player.spec
 
 					d.value = player.ccdone
-					d.valuetext = Skada:FormatValueText(
-						d.value,
-						self.metadata.columns.Count,
-						Skada:FormatPercent(d.value, total),
-						self.metadata.columns.Percent
+					d.valuetext = Skada:FormatValueCols(
+						self.metadata.columns.Count and d.value,
+						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -551,11 +545,9 @@ Skada:AddLoadableModule("CC Taken", function(L)
 				d.spellschool = GetSpellSchool(spellid) or RaidCCSpells[spellid]
 
 				d.value = spell.count
-				d.valuetext = Skada:FormatValueText(
-					d.value,
-					mod.metadata.columns.Count,
-					Skada:FormatPercent(d.value, total),
-					mod.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Count and d.value,
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -596,11 +588,9 @@ Skada:AddLoadableModule("CC Taken", function(L)
 				d.spec = source.spec
 
 				d.value = source.count
-				d.valuetext = Skada:FormatValueText(
-					d.value,
-					mod.metadata.columns.Count,
-					Skada:FormatPercent(d.value, total),
-					mod.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Count and d.value,
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -635,11 +625,9 @@ Skada:AddLoadableModule("CC Taken", function(L)
 					d.spec = player.spec
 
 					d.value = player.cctaken
-					d.valuetext = Skada:FormatValueText(
-						d.value,
-						self.metadata.columns.Count,
-						Skada:FormatPercent(d.value, total),
-						self.metadata.columns.Percent
+					d.valuetext = Skada:FormatValueCols(
+						self.metadata.columns.Count and d.value,
+						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -842,11 +830,9 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 				d.spellschool = GetSpellSchool(spellid)
 
 				d.value = spell.count
-				d.valuetext = Skada:FormatValueText(
-					d.value,
-					mod.metadata.columns.Count,
-					Skada:FormatPercent(d.value, total),
-					mod.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Count and d.value,
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -887,11 +873,9 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 				d.spec = target.spec
 
 				d.value = target.count
-				d.valuetext = Skada:FormatValueText(
-					d.value,
-					mod.metadata.columns.Count,
-					Skada:FormatPercent(d.value, total),
-					mod.metadata.columns.Percent
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Count and d.value,
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -926,11 +910,9 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 					d.spec = player.spec
 
 					d.value = player.ccbreak
-					d.valuetext = Skada:FormatValueText(
-						d.value,
-						self.metadata.columns.Count,
-						Skada:FormatPercent(d.value, total),
-						self.metadata.columns.Percent
+					d.valuetext = Skada:FormatValueCols(
+						self.metadata.columns.Count and d.value,
+						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then

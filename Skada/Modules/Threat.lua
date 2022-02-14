@@ -190,13 +190,10 @@ Skada:AddLoadableModule("Threat", function(L)
 				for _, data in ipairs(win.dataset) do
 					if data.id == "AGGRO" then
 						if self.db.showAggroBar and (tankThreat or 0) > 0 then
-							data.valuetext = Skada:FormatValueText(
-								format_threatvalue(data.threat),
-								self.metadata.columns.Threat,
-								getTPS(data.threat),
-								self.metadata.columns.TPS,
-								Skada:FormatPercent(data.value, max(0.000001, maxthreat)),
-								self.metadata.columns.Percent
+							data.valuetext = Skada:FormatValueCols(
+								self.metadata.columns.Threat and format_threatvalue(data.threat),
+								self.metadata.columns.TPS and getTPS(data.threat),
+								self.metadata.columns.Percent and Skada:FormatPercent(data.value, max(0.000001, maxthreat))
 							)
 
 							if win.metadata then
@@ -216,13 +213,10 @@ Skada:AddLoadableModule("Threat", function(L)
 								end
 							end
 
-							data.valuetext = Skada:FormatValueText(
-								format_threatvalue(data.threat),
-								self.metadata.columns.Threat,
-								getTPS(data.threat),
-								self.metadata.columns.TPS,
-								Skada:FormatPercent(percent),
-								self.metadata.columns.Percent
+							data.valuetext = Skada:FormatValueCols(
+								self.metadata.columns.Threat and format_threatvalue(data.threat),
+								self.metadata.columns.TPS and getTPS(data.threat),
+								self.metadata.columns.Percent and Skada:FormatPercent(percent)
 							)
 						else
 							data.id = nil

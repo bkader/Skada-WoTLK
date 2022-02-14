@@ -22,7 +22,9 @@ Skada:AddLoadableModule("Comparison", function(L)
 	local green = "|cffaaffaa+%s|r"
 	local grey = "|cff808080%s|r"
 
-	local function FormatPercent(value1, value2)
+	local function FormatPercent(value1, value2, cond)
+		if cond == false then return end
+
 		value1, value2 = value1 or 0, value2 or 0
 		if value1 == value2 then
 			return format(grey, Skada:FormatPercent(0))
@@ -34,25 +36,19 @@ Skada:AddLoadableModule("Comparison", function(L)
 	end
 
 	local function FormatValuePercent(val, myval, disabled)
-		return Skada:FormatValueText(
-			Skada:FormatPercent(val),
-			mod.metadata.columns.Damage,
-			Skada:FormatPercent(myval),
-			mod.metadata.columns.Comparison and not disabled,
-			FormatPercent(myval, val),
-			mod.metadata.columns.Percent and not disabled
+		return Skada:FormatValueCols(
+			mod.metadata.columns.Damage and Skada:FormatPercent(val),
+			(mod.metadata.columns.Comparison and not disabled) and Skada:FormatPercent(myval),
+			(mod.metadata.columns.Percent and not disabled) and  FormatPercent(myval, val)
 		)
 	end
 
 	local function FormatValueNumber(val, myval, fmt, disabled)
 		val, myval = val or 0, myval or 0 -- sanity check
-		return Skada:FormatValueText(
-			fmt and Skada:FormatNumber(val) or val,
-			mod.metadata.columns.Damage,
-			fmt and Skada:FormatNumber(myval) or myval,
-			mod.metadata.columns.Comparison and not disabled,
-			FormatPercent(myval, val),
-			mod.metadata.columns.Percent and not disabled
+		return Skada:FormatValueCols(
+			mod.metadata.columns.Damage and (fmt and Skada:FormatNumber(val) or val),
+			(mod.metadata.columns.Comparison and not disabled) and (fmt and Skada:FormatNumber(myval) or myval),
+			FormatPercent(myval, val, mod.metadata.columns.Percent and not disabled)
 		)
 	end
 
@@ -479,13 +475,10 @@ Skada:AddLoadableModule("Comparison", function(L)
 						d.spec = player.spec
 
 						d.value = amount
-						d.valuetext = Skada:FormatValueText(
-							Skada:FormatNumber(d.value),
-							mod.metadata.columns.Damage,
-							Skada:FormatNumber(dps),
-							mod.metadata.columns.DPS,
-							FormatPercent(myamount, d.value),
-							(mod.metadata.columns.Percent and player.id ~= mod.userGUID)
+						d.valuetext = Skada:FormatValueCols(
+							mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+							mod.metadata.columns.DPS and Skada:FormatNumber(dps),
+							FormatPercent(myamount, d.value, mod.metadata.columns.Percent and player.id ~= mod.userGUID)
 						)
 
 						-- a valid window, not a tooltip
