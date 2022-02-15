@@ -389,13 +389,13 @@ Skada:AddLoadableModule("Buffs", function(L)
 			aura.type = auratype or "BUFF"
 
 			if event == "SPELL_PERIODIC_ENERGIZE" then
-				log_specialaura(Skada.current, aura)
+				Skada:DispatchSets(log_specialaura, aura)
 			elseif event == "SPELL_AURA_APPLIED" or event == true then
-				log_auraapply(Skada.current, aura)
+				Skada:DispatchSets(log_auraapply, aura)
 			elseif event == "SPELL_AURA_REFRESH" then
-				log_aurarefresh(Skada.current, aura)
+				Skada:DispatchSets(log_aurarefresh, aura)
 			elseif event == "SPELL_AURA_REMOVED" then
-				log_auraremove(Skada.current, aura)
+				Skada:DispatchSets(log_auraremove, aura)
 			end
 		end
 	end
@@ -552,14 +552,14 @@ Skada:AddLoadableModule("Debuffs", function(L)
 				aura.type = "DEBUFF"
 
 				if event == "SPELL_AURA_APPLIED" then
-					log_auraapply(Skada.current, aura)
+					Skada:DispatchSets(log_auraapply, aura)
 					if queuedSpells[spellid] then
 						Skada:QueueUnit(queuedSpells[spellid], srcGUID, srcName, srcFlags, dstGUID)
 					end
 				elseif event == "SPELL_AURA_REFRESH" then
-					log_aurarefresh(Skada.current, aura)
+					Skada:DispatchSets(log_aurarefresh, aura)
 				elseif event == "SPELL_AURA_REMOVED" then
-					log_auraremove(Skada.current, aura)
+					Skada:DispatchSets(log_auraremove, aura)
 					if queuedSpells[spellid] then
 						Skada:UnqueueUnit(queuedSpells[spellid], dstGUID)
 					end

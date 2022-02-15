@@ -71,7 +71,7 @@ Skada:AddLoadableModule("Resurrects", function(L)
 		data.dstName = dstName
 		data.dstFlags = dstFlags
 
-		log_resurrect(Skada.current, data)
+		Skada:DispatchSets(log_resurrect, data)
 		log_resurrect(Skada.total, data)
 	end
 

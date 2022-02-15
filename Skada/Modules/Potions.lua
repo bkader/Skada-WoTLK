@@ -59,7 +59,7 @@ Skada:AddLoadableModule("Potions", function(L)
 	local function PotionUsed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid = ...
 		if spellid and potionIDs[spellid] then
-			log_potion(Skada.current, srcGUID, srcName, srcFlags, spellid)
+			Skada:DispatchSets(log_potion, srcGUID, srcName, srcFlags, spellid)
 			log_potion(Skada.total, srcGUID, srcName, srcFlags, spellid)
 		end
 	end

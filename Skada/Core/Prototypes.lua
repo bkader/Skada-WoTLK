@@ -263,7 +263,7 @@ do
 	end
 
 	function Skada:ClearAllIndexes(mt)
-		ClearIndexes(Skada.current, mt)
+		Skada:DispatchSets(ClearIndexes, mt)
 		ClearIndexes(Skada.char.total, mt)
 		if Skada.char.sets then
 			for _, set in ipairs(Skada.char.sets) do

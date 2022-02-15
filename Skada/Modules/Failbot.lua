@@ -39,7 +39,7 @@ Skada:AddLoadableModule("Fails", function(L)
 			if spellid and not tContains(ignoredSpells, spellid) then
 				local unitGUID = UnitGUID(who)
 				if unitGUID then
-					log_fail(Skada.current, unitGUID, who, spellid, event)
+					Skada:DispatchSets(log_fail, unitGUID, who, spellid, event)
 					log_fail(Skada.total, unitGUID, who, spellid, event)
 				end
 			end

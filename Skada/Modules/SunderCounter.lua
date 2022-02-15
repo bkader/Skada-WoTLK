@@ -42,7 +42,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 			data.dstName = dstName
 			data.dstFlags = dstFlags
 
-			log_sunder(Skada.current, data)
+			Skada:DispatchSets(log_sunder, data)
 			log_sunder(Skada.total, data)
 
 			if Skada.db.profile.modules.sunderannounce then

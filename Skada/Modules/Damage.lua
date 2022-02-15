@@ -253,7 +253,7 @@ Skada:AddLoadableModule("Damage", function(L)
 
 				Skada:FixPets(dmg)
 
-				log_spellcast(Skada.current, dmg)
+				Skada:DispatchSets(log_spellcast, dmg)
 			end
 		end
 	end
@@ -305,7 +305,7 @@ Skada:AddLoadableModule("Damage", function(L)
 				dmg.petname = nil
 				Skada:FixPets(dmg)
 
-				log_damage(Skada.current, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
+				Skada:DispatchSets(log_damage, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
 				log_damage(Skada.total, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
 			end
 		end
@@ -350,7 +350,7 @@ Skada:AddLoadableModule("Damage", function(L)
 				dmg.petname = nil
 				Skada:FixPets(dmg)
 
-				log_damage(Skada.current, dmg, eventtype == "SPELL_PERIODIC_MISSED")
+				Skada:DispatchSets(log_damage, dmg, eventtype == "SPELL_PERIODIC_MISSED")
 				log_damage(Skada.total, dmg, eventtype == "SPELL_PERIODIC_MISSED")
 			end
 		end

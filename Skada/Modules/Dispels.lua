@@ -70,7 +70,7 @@ Skada:AddLoadableModule("Dispels", function(L)
 		data.dstName = dstName
 		data.dstFlags = dstFlags
 
-		log_dispel(Skada.current, data)
+		Skada:DispatchSets(log_dispel, data)
 		log_dispel(Skada.total, data)
 	end
 

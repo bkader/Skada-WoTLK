@@ -193,12 +193,6 @@ end
 local function CheckSetName(set)
 	local setname = set.mobname or L.Unknown
 
-	-- possibly name with "phase".
-	if set.phase then
-		setname = format(L["%s - Phase %s"], setname, set.phase)
-		set.phase = nil
-	end
-
 	if Skada.db.profile.setnumber then
 		local num = 0
 		for _, set in ipairs(Skada.char.sets) do
@@ -244,6 +238,12 @@ local function ProcessSet(set, curtime)
 			tinsert(Skada.char.sets, 1, set)
 			Skada:Debug("Segment Saved:", set.name)
 		end
+	end
+
+	-- the segment didn't have the chance to get saved
+	if set.endtime == nil then
+		set.endtime = curtime
+		set.time = max(0.1, set.endtime - set.starttime)
 	end
 end
 
@@ -3138,7 +3138,7 @@ function Skada:FrameSettings(db, include_dimensions)
 			type = "group",
 			name = L["Child Window"],
 			inline = true,
-			order = 20,
+			order = 100,
 			args = {
 				desc = {
 					type = "description",
@@ -3529,13 +3529,7 @@ function Skada:EndSegment()
 	end
 
 	local curtime = time()
-	ProcessSet(self.current, curtime)
-
-	-- the segment didn't have the chance to get saved
-	if self.current.endtime == nil then
-		self.current.endtime = curtime
-		self.current.time = max(0.1, self.current.endtime - self.current.starttime)
-	end
+	self:DispatchSets(ProcessSet, curtime)
 
 	-- remove players ".last" key from total segment.
 	for _, player in ipairs(self.total.players) do
@@ -3602,6 +3596,14 @@ function Skada:ResumeSegment(msg)
 		self:Print(msg or L["Segment Resumed."])
 	end
 end
+
+function Skada:DispatchSets(callback, ...)
+	if self.current and type(callback) == "function" then
+		callback(self.current, ...)
+	end
+end
+
+-------------------------------------------------------------------------------
 
 do
 	local tentative, tentative_handle

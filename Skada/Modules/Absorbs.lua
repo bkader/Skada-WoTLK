@@ -464,7 +464,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 			-- log spell casts.
 			if not passivespells[spellid] then
-				log_spellcast(Skada.current, srcGUID, srcName, srcFlags, spellid, spellschool)
+				Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, spellid, spellschool)
 			end
 
 			-- we calculate how much the shield's maximum absorb amount
@@ -667,7 +667,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 					absorb.school = pshield.school
 					absorb.amount = amount
 
-					log_absorb(Skada.current, absorb, true)
+					Skada:DispatchSets(log_absorb, absorb, true)
 					log_absorb(Skada.total, absorb, true)
 				end
 				break
@@ -699,7 +699,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				absorb.school = s.school
 				absorb.amount = amount
 
-				log_absorb(Skada.current, absorb)
+				Skada:DispatchSets(log_absorb, absorb)
 				log_absorb(Skada.total, absorb)
 				break
 			-- arriving at this point means that the shield broke,
@@ -724,7 +724,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				absorb.school = s.school
 				absorb.amount = s.amount
 
-				log_absorb(Skada.current, absorb)
+				Skada:DispatchSets(log_absorb, absorb)
 				log_absorb(Skada.total, absorb)
 				amount = amount - s.amount
 			end

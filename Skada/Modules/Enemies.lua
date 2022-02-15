@@ -379,7 +379,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 				dmg.srcName = srcName
 				dmg.srcFlags = srcFlags
 
-				log_damage(Skada.current, dmg)
+				Skada:DispatchSets(log_damage, dmg)
 			end
 		end
 	end
@@ -411,7 +411,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 				dmg.amount = 0
 				dmg.absorbed = amount
 
-				log_damage(Skada.current, dmg)
+				Skada:DispatchSets(log_damage, dmg)
 			end
 		end
 	end
@@ -895,7 +895,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 				dmg.dstName = dstName
 				dmg.dstFlags = dstFlags
 
-				log_damage(Skada.current, dmg)
+				Skada:DispatchSets(log_damage, dmg)
 			end
 		end
 	end
@@ -927,7 +927,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 				dmg.amount = 0
 				dmg.absorbed = amount
 
-				log_damage(Skada.current, dmg)
+				Skada:DispatchSets(log_damage, dmg)
 			end
 		end
 	end
@@ -1435,7 +1435,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 			heal.spellschool = spellschool
 			heal.amount = max(0, amount - overheal)
 
-			log_heal(Skada.current, heal)
+			Skada:DispatchSets(log_heal, heal)
 		end
 	end
 

@@ -79,7 +79,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 
 		Skada:FixPets(data)
 
-		log_interrupt(Skada.current, data)
+		Skada:DispatchSets(log_interrupt, data)
 		log_interrupt(Skada.total, data)
 
 		if Skada.db.profile.modules.interruptannounce and IsInGroup() and srcGUID == Skada.userGUID then
