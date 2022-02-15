@@ -142,7 +142,7 @@ Skada:AddLoadableModule("Damage", function(L)
 		end
 
 		-- saving this to total set may become a memory hog deluxe.
-		if set ~= Skada.current then return end
+		if set == Skada.total then return end
 
 		-- spell
 		local spellname = dmg.spellname .. (tick and L["DoT"] or "")
@@ -899,6 +899,7 @@ Skada:AddLoadableModule("Damage", function(L)
 		T.free("Damage_ExtraAttacks", extraATT)
 
 		-- clean set from garbage before it is saved.
+		if (set.totaldamage or 0) == 0 then return end
 		for _, p in ipairs(set.players) do
 			if p.totaldamage and p.totaldamage == 0 then
 				p.damagespells = nil

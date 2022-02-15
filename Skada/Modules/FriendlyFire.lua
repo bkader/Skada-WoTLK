@@ -9,7 +9,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 
 	local pairs, ipairs, select, format = pairs, ipairs, select, string.format
 	local GetSpellInfo, tContains = Skada.GetSpellInfo or GetSpellInfo, tContains
-	local _
+	local T, _ = Skada.Table, nil
 
 	-- spells in the following table will be ignored.
 	local ignoredSpells = {}
@@ -23,7 +23,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 			set.friendfire = (set.friendfire or 0) + dmg.amount
 
 			-- to save up memory, we only record the rest to the current set.
-			if set ~= Skada.current or not dmg.spellid then return end
+			if set == Skada.total or not dmg.spellid then return end
 
 			-- spell
 			local spell = player.friendfirespells and player.friendfirespells[dmg.spellid]
@@ -287,6 +287,9 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 	end
 
 	function mod:SetComplete(set)
+		T.clear(dmg)
+
+		if (set.friendfire or 0) == 0 then return end
 		for _, p in ipairs(set.players) do
 			if p.friendfire and p.friendfire == 0 then
 				p.friendfirespells = nil

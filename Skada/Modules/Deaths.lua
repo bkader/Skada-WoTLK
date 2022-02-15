@@ -133,7 +133,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 		if player then
 			set.death = (set.death or 0) + 1
 			player.death = (player.death or 0) + 1
-			if set == Skada.current then
+			if set ~= Skada.total then
 				player.deathlog = player.deathlog or {}
 				if player.deathlog[1] then
 					player.deathlog[1].time = ((ts or 0) <= 0) and time() or ts
@@ -566,6 +566,10 @@ Skada:AddLoadableModule("Deaths", function(L)
 	end
 
 	function mod:SetComplete(set)
+		T.clear(data)
+
+		-- clean deathlogs.
+		if (set.death or 0) == 0 then return end
 		for _, player in ipairs(set.players) do
 			if (player.death or 0) == 0 then
 				player.deathlog, player.maxhp = nil, nil

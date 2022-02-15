@@ -283,7 +283,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			set.absorb = (set.absorb or 0) + absorb.amount
 
 			-- saving this to total set may become a memory hog deluxe.
-			if set ~= Skada.current then return end
+			if set == Skada.total then return end
 
 			-- record the spell
 			local spell = player.absorbspells and player.absorbspells[absorb.spellid]
@@ -1097,6 +1097,22 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		T.free("Absorbs_Shields", shields)
 		T.free("Absorbs_ShieldAmounts", shieldamounts)
 		T.free("Absorbs_ShieldsPopped", shieldspopped)
+		-- clean absorbspells table:
+		if (set.absorb or 0) == 0 then return end
+		for _, p in ipairs(set.players) do
+			if p.absorb and p.absorb == 0 then
+				p.absorbspells = nil
+			elseif p.absorbspells then
+				for spellid, spell in pairs(p.absorbspells) do
+					if spell.amount == 0 then
+						p.absorbspells[spellid] = nil
+					end
+				end
+				if next(p.absorbspells) == nil then
+					p.absorbspells = nil
+				end
+			end
+		end
 	end
 
 	function setPrototype:GetAPS()
@@ -1585,38 +1601,6 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 			self.metadata.columns.Healing and Skada:FormatNumber(amount),
 			self.metadata.columns.HPS and Skada:FormatNumber(hps)
 		), amount
-	end
-
-	function mod:SetComplete(set)
-		for _, p in ipairs(set.players) do
-			-- clean absorbspells table:
-			if p.absorb and p.absorb == 0 then
-				p.absorbspells = nil
-			elseif p.absorbspells then
-				for spellid, spell in pairs(p.absorbspells) do
-					if spell.amount == 0 then
-						p.absorbspells[spellid] = nil
-					end
-				end
-				if next(p.absorbspells) == nil then
-					p.absorbspells = nil
-				end
-			end
-
-			-- clean healspells table!
-			if p.heal and (p.heal + p.overheal) == 0 then
-				p.healspells = nil
-			elseif p.healspells then
-				for spellid, spell in pairs(p.healspells) do
-					if (spell.amount + spell.overheal) == 0 then
-						p.healspells[spellid] = nil
-					end
-				end
-				if next(p.healspells) == nil then
-					p.healspells = nil
-				end
-			end
-		end
 	end
 
 	function setPrototype:GetAbsorbHeal()

@@ -212,7 +212,7 @@ Skada:AddLoadableModule("CC Done", function(L)
 			set.ccdone = (set.ccdone or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
-			if set ~= Skada.current then return end
+			if set == Skada.total then return end
 
 			-- record the spell.
 			local spell = player.ccdonespells and player.ccdonespells[cc.spellid]
@@ -473,7 +473,7 @@ Skada:AddLoadableModule("CC Taken", function(L)
 			set.cctaken = (set.cctaken or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
-			if set ~= Skada.current then return end
+			if set == Skada.total then return end
 
 			-- record the spell.
 			local spell = player.cctakenspells and player.cctakenspells[cc.spellid]
@@ -727,7 +727,7 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 			set.ccbreak = (set.ccbreak or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
-			if set ~= Skada.current then return end
+			if set == Skada.total then return end
 
 			-- record the spell.
 			local spell = player.ccbreakspells and player.ccbreakspells[cc.spellid]

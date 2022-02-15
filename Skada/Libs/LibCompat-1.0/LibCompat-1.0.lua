@@ -39,6 +39,8 @@ do
 		end
 		return true
 	end
+
+	lib.QuickDispatch = QuickDispatch
 end
 
 -------------------------------------------------------------------------------
@@ -737,6 +739,7 @@ end
 -------------------------------------------------------------------------------
 
 local mixins = {
+	"QuickDispatch",
 	-- table util
 	"tLength",
 	"tCopy",

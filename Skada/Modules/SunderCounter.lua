@@ -20,7 +20,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 			set.sunder = (set.sunder or 0) + 1
 			player.sunder = (player.sunder or 0) + 1
 
-			if set == Skada.current and data.dstName then
+			if set ~= Skada.total and data.dstName then
 				local actor = Skada:GetActor(set, data.dstGUID, data.dstName, data.dstFlags)
 				if actor then
 					player.sundertargets = player.sundertargets or {}
@@ -209,6 +209,8 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 	end
 
 	function mod:SetComplete(set)
+		T.clear(data)
+
 		-- delete to reuse
 		if self.targets then
 			for k, _ in pairs(self.targets) do

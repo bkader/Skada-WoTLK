@@ -26,7 +26,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 			set.interrupt = (set.interrupt or 0) + 1
 
 			-- to save up memory, we only record the rest to the current set.
-			if set == Skada.current then
+			if set ~= Skada.total then
 				local spell = player.interruptspells and player.interruptspells[data.spellid]
 				if not spell then
 					player.interruptspells = player.interruptspells or {}

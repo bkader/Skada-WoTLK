@@ -31,7 +31,7 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 			set.parry = (set.parry or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
-			if set == Skada.current then
+			if set ~= Skada.total then
 				player.parrytargets = player.parrytargets or {}
 				player.parrytargets[data.dstName] = (player.parrytargets[data.dstName] or 0) + 1
 

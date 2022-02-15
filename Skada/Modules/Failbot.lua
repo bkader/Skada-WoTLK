@@ -26,7 +26,7 @@ Skada:AddLoadableModule("Fails", function(L)
 			set.fail = (set.fail or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
-			if set == Skada.current then
+			if set ~= Skada.total then
 				player.failspells = player.failspells or {}
 				player.failspells[spellid] = (player.failspells[spellid] or 0) + 1
 			end
@@ -267,10 +267,7 @@ Skada:AddLoadableModule("Fails", function(L)
 	end
 
 	function mod:SetComplete(set)
-		if not (Skada.db.profile.modules.failsannounce and IsInGroup()) then
-			return
-		end
-		if set ~= Skada.current or (set.fail or 0) == 0 then
+		if (set.fail or 0) == 0 or not (Skada.db.profile.modules.failsannounce and IsInGroup()) then
 			return
 		end
 

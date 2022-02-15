@@ -33,7 +33,7 @@ Skada:AddLoadableModule("Resurrects", function(L)
 			set.ress = (set.ress or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
-			if set ~= Skada.current then return end
+			if set == Skada.total then return end
 
 			-- spell
 			local spell = player.resspells and player.resspells[data.spellid]

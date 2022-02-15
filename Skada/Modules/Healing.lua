@@ -55,7 +55,7 @@ Skada:AddLoadableModule("Healing", function(L)
 			set.overheal = (set.overheal or 0) + data.overheal
 
 			-- saving this to total set may become a memory hog deluxe.
-			if set ~= Skada.current then return end
+			if set == Skada.total then return end
 
 			-- record the spell
 			local spell = player.healspells and player.healspells[data.spellid]
@@ -468,6 +468,24 @@ Skada:AddLoadableModule("Healing", function(L)
 
 	function mod:SetComplete(set)
 		T.clear(heal)
+
+		-- clean healspells table!
+		if (set.heal or 0) > 0 or (set.overheal or 0) > 0 then
+			for _, p in ipairs(set.players) do
+				if p.heal and (p.heal + p.overheal) == 0 then
+					p.healspells = nil
+				elseif p.healspells then
+					for spellid, spell in pairs(p.healspells) do
+						if (spell.amount + spell.overheal) == 0 then
+							p.healspells[spellid] = nil
+						end
+					end
+					if next(p.healspells) == nil then
+						p.healspells = nil
+					end
+				end
+			end
+		end
 	end
 
 	function setPrototype:GetHeal()
