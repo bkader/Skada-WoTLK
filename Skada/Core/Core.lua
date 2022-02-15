@@ -189,6 +189,64 @@ do
 	end
 end
 
+-- prepares the given set name.
+local function CheckSetName(set)
+	local setname = set.mobname or L.Unknown
+
+	-- possibly name with "phase".
+	if set.phase then
+		setname = format(L["%s - Phase %s"], setname, set.phase)
+		set.phase = nil
+	end
+
+	if Skada.db.profile.setnumber then
+		local num = 0
+		for _, set in ipairs(Skada.char.sets) do
+			if set.name == setname and num == 0 then
+				num = 1
+			else
+				local n, c = strmatch(set.name, "^(.-)%s*%((%d+)%)$")
+				if n == setname then
+					num = max(num, tonumber(c) or 0)
+				end
+			end
+		end
+		if num > 0 then
+			setname = format("%s (%s)", setname, num + 1)
+		end
+	end
+
+	set.name = setname
+	return setname -- return reference.
+end
+
+-- process the given set and stores into sv.
+local function ProcessSet(set, curtime)
+	if not set then return end
+
+	curtime = curtime or time()
+
+	if not Skada.db.profile.onlykeepbosses or set.gotboss then
+		if set.mobname ~= nil and curtime - set.starttime > 5 then
+			set.endtime = set.endtime or curtime
+			set.time = max(0.1, set.endtime - set.starttime)
+			set.name = CheckSetName(set)
+
+			for _, mode in ipairs(modes) do
+				if mode.SetComplete then
+					mode:SetComplete(set)
+				end
+			end
+
+			-- do you want to do something?
+			Skada.callbacks:Fire("Skada_SetCompleted", set)
+
+			tinsert(Skada.char.sets, 1, set)
+			Skada:Debug("Segment Saved:", set.name)
+		end
+	end
+end
+
 local function CleanSets(force)
 	local maxsets, numsets = 0, 0
 	for _, set in ipairs(Skada.char.sets) do
@@ -250,8 +308,8 @@ end
 -- updates the player's active time
 function Skada:AddActiveTime(player, cond, diff)
 	if player and player.last and cond then
-		local now = GetTime()
-		local delta = now - player.last
+		local curtime = GetTime()
+		local delta = curtime - player.last
 
 		if (diff or 0) > 0 and delta > diff then
 			delta = diff
@@ -259,7 +317,7 @@ function Skada:AddActiveTime(player, cond, diff)
 			delta = 3.5
 		end
 
-		player.last = now
+		player.last = curtime
 		player.time = (player.time or 0) + floor(100 * delta + 0.5) / 100
 	end
 end
@@ -3461,61 +3519,28 @@ function Skada:EndSegment()
 	if not self.current then return end
 	self:ClearQueueUnits()
 
-	local now = time()
-	if not self.db.profile.onlykeepbosses or self.current.gotboss then
-		if self.current.mobname ~= nil and now - self.current.starttime > 5 then
-			self.current.endtime = self.current.endtime or now
-			self.current.time = max(0.1, self.current.endtime - self.current.starttime)
+	-- remove any additional keys.
+	self.current.started, self.current.stopped = nil, nil
 
-			local setname = self.current.mobname
-			if self.db.profile.setnumber then
-				local num = 0
-				for _, set in ipairs(self.char.sets) do
-					if set.name == setname and num == 0 then
-						num = 1
-					else
-						local n, c = strmatch(set.name, "^(.-)%s*%((%d+)%)$")
-						if n == setname then
-							num = max(num, tonumber(c) or 0)
-						end
-					end
-				end
-				if num > 0 then
-					setname = format("%s (%s)", setname, num + 1)
-				end
-			end
-			self.current.name = setname
-
-			for _, mode in ipairs(modes) do
-				if mode.SetComplete then
-					mode:SetComplete(self.current)
-				end
-			end
-
-			-- do you want to do something?
-			self.callbacks:Fire("Skada_SetCompleted", self.current)
-
-			tinsert(self.char.sets, 1, self.current)
-			self:Debug("Segment Saved:", self.current.name)
-		end
-	end
-
+	-- trigger events.
 	self:SendMessage("COMBAT_PLAYER_LEAVE", self.current, self.total)
 	if self.current.gotboss then
 		self:SendMessage("COMBAT_ENCOUNTER_END", self.current, self.total)
 	end
 
-	for _, player in ipairs(self.total.players) do
-		player.last = nil
-	end
+	local curtime = time()
+	ProcessSet(self.current, curtime)
 
 	-- the segment didn't have the chance to get saved
 	if self.current.endtime == nil then
-		self.current.endtime = now
+		self.current.endtime = curtime
 		self.current.time = max(0.1, self.current.endtime - self.current.starttime)
 	end
-	-- remove any additional keys.
-	self.current.started, self.current.stopped = nil, nil
+
+	-- remove players ".last" key from total segment.
+	for _, player in ipairs(self.total.players) do
+		player.last = nil
+	end
 
 	self.last = self.current
 	self.total.time = self.total.time + self.current.time
