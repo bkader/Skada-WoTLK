@@ -193,6 +193,11 @@ end
 local function CheckSetName(set)
 	local setname = set.mobname or L.Unknown
 
+	if set.phase then
+		setname = format(L["%s - Phase %s"], setname, set.phase)
+		set.phase = nil
+	end
+
 	if Skada.db.profile.setnumber then
 		local num = 0
 		for _, set in ipairs(Skada.char.sets) do
@@ -290,6 +295,14 @@ local function FindMode(name)
 		if mode.moduleName == name then
 			return mode
 		end
+	end
+end
+
+-- called on boss defeat
+local function BossDefeated(set)
+	if set and not set.success then
+		set.success = true
+		Skada:SendMessage("COMBAT_BOSS_DEFEATED", set)
 	end
 end
 
@@ -3355,13 +3368,6 @@ function Skada:DBM(_, mod, wipe)
 	end
 end
 
-function Skada:BossDefeated(set)
-	if set and not set.success then
-		set.success = true
-		self:SendMessage("COMBAT_BOSS_DEFEATED", set)
-	end
-end
-
 function Skada:CheckMemory()
 	if Skada.db.profile.memorycheck then
 		UpdateAddOnMemoryUsage()
@@ -3884,7 +3890,7 @@ do
 		if self.current and self.current.gotboss and (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") then
 			if band(dstFlags, BITMASK_GROUP) == 0 and band(dstFlags, BITMASK_PETS) == 0 then
 				if dstName and self.current.mobname == dstName then
-					self:ScheduleTimer("BossDefeated", self.db.profile.updatefrequency or 0.5, self.current)
+					self:ScheduleTimer("DispatchSets", self.db.profile.updatefrequency or 0.5, BossDefeated)
 				end
 			end
 		end

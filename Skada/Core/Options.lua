@@ -242,7 +242,7 @@ Skada.options = {
 				general = {
 					type = "group",
 					name = L["General"],
-					desc = fmt(L["Options for %s."], L["General"]),
+					desc = fmt(L["General options for %s."], "Skada"),
 					order = 10,
 					args = {
 						mmbutton = {
@@ -376,11 +376,71 @@ Skada.options = {
 						}
 					}
 				},
+				format = {
+					type = "group",
+					name = L["Format"],
+					desc = fmt(L["Format options for %s."], "Skada"),
+					order = 20,
+					args = {
+						numberformat = {
+							type = "select",
+							name = L["Number format"],
+							desc = L["Controls the way large numbers are displayed."],
+							values = {[1] = L["Condensed"], [2] = L["Comma"], [3] = L["Detailed"]},
+							order = 10
+						},
+						numbersystem = {
+							type = "select",
+							name = L["Numeral system"],
+							desc = L["Select which numeral system to use."],
+							values = {[1] = L["Auto"], [2] = L["Western"], [3] = L["East Asia"]},
+							order = 20
+						},
+						brackets = {
+							type = "select",
+							name = L["Brackets"],
+							desc = L["Choose which type of brackets to use."],
+							values = {"(", "{", "[", "<", NONE},
+							order = 30
+						},
+						separator = {
+							type = "select",
+							name = L["Separator"],
+							desc = L["Choose which character is used to separator values between brackets."],
+							values = {",", ".", ";", "-", "|", "/", "\\", "~", NONE},
+							order = 40
+						},
+						decimals = {
+							type = "range",
+							name = L["Number of decimals"],
+							desc = L["Controls the way percentages are displayed."],
+							min = 0,
+							max = 3,
+							step = 1,
+							width = "double",
+							order = 50
+						},
+						setformat = {
+							type = "select",
+							name = L["Set Format"],
+							desc = L["Controls the way set names are displayed."],
+							width = "double",
+							values = Skada:SetLabelFormats(),
+							order = 60
+						},
+						setnumber = {
+							type = "toggle",
+							name = L["Number set duplicates"],
+							desc = L["Append a count to set names with duplicate mob names."],
+							order = 70
+						},
+					}
+				},
 				advanced = {
 					type = "group",
 					name = L["Advanced"],
-					desc = fmt(L["Options for %s."], L["Advanced"]),
-					order = 20,
+					desc = fmt(L["Advanced options for %s."], "Skada"),
+					order = 30,
 					args = {
 						timemesure = {
 							type = "select",
@@ -392,58 +452,6 @@ Skada.options = {
 							end,
 							width = "double",
 							order = 10
-						},
-						numberformat = {
-							type = "select",
-							name = L["Number format"],
-							desc = L["Controls the way large numbers are displayed."],
-							values = {[1] = L["Condensed"], [2] = L["Comma"], [3] = L["Detailed"]},
-							order = 20
-						},
-						numbersystem = {
-							type = "select",
-							name = L["Numeral system"],
-							desc = L["Select which numeral system to use."],
-							values = {[1] = L["Auto"], [2] = L["Western"], [3] = L["East Asia"]},
-							order = 30
-						},
-						brackets = {
-							type = "select",
-							name = L["Brackets"],
-							desc = L["Choose which type of brackets to use."],
-							values = {"(", "{", "[", "<", NONE},
-							order = 40
-						},
-						separator = {
-							type = "select",
-							name = L["Separator"],
-							desc = L["Choose which character is used to separator values between brackets."],
-							values = {",", ".", ";", "-", "|", "/", "\\", "~", NONE},
-							order = 50
-						},
-						decimals = {
-							type = "range",
-							name = L["Number of decimals"],
-							desc = L["Controls the way percentages are displayed."],
-							min = 0,
-							max = 3,
-							step = 1,
-							width = "double",
-							order = 60
-						},
-						setformat = {
-							type = "select",
-							name = L["Set Format"],
-							desc = L["Controls the way set names are displayed."],
-							width = "double",
-							values = Skada:SetLabelFormats(),
-							order = 70
-						},
-						setnumber = {
-							type = "toggle",
-							name = L["Number set duplicates"],
-							desc = L["Append a count to set names with duplicate mob names."],
-							order = 80
 						},
 						feed = {
 							type = "select",
@@ -457,7 +465,7 @@ Skada.options = {
 								end
 								return feeds
 							end,
-							order = 90
+							order = 20
 						},
 						separator1 = {
 							type = "description",
