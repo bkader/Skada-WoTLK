@@ -91,7 +91,7 @@ local feeds, selected_feed = {}, nil
 local modes, windows = {}, {}
 
 -- flags for party, instance and ovo
-local was_in_party, was_in_instance, was_in_pvp = nil, nil, nil
+local was_in_party = nil
 
 local COMBATLOG_OBJECT_AFFILIATION_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE or 0x00000001
 local COMBATLOG_OBJECT_AFFILIATION_PARTY = COMBATLOG_OBJECT_AFFILIATION_PARTY or 0x00000002
@@ -674,6 +674,30 @@ function Window:Hide()
 	self.display:Hide(self)
 end
 
+-- toggles window visibility
+function Window:Toggle()
+	if
+		Skada.db.profile.hidden or
+		self.db.hidden or
+		(Skada.db.profile.hidesolo and not IsInGroup()) or
+		(Skada.db.profile.hidepvp and IsInPvP()) or
+		(Skada.db.profile.showcombat and not InCombatLockdown() and not IsGroupInCombat()) or
+		(Skada.db.profile.hidecombat and (InCombatLockdown() or IsGroupInCombat())) or
+		(self.db.hideauto == 4 and not IsInGroup()) or
+		(self.db.hideauto == 2 and (InCombatLockdown() or IsGroupInCombat())) or
+		(self.db.hideauto == 3 and not InCombatLockdown() and not IsGroupInCombat()) or
+		(self.db.hideauto == 7 and Skada.instanceType == "pvp") or
+		(self.db.hideauto == 5 and (Skada.instanceType == "raid" or Skada.instanceType == "party")) or
+		(self.db.hideauto == 6 and Skada.instanceType ~= "raid" and Skada.instanceType ~= "party")
+	then
+		if self.display:IsShown(self) then
+			self.display:Hide(self)
+		end
+	elseif not self.display:IsShown(self) then
+		self.display:Show(self)
+	end
+end
+
 function Window:IsShown()
 	return self.display:IsShown(self)
 end
@@ -1006,6 +1030,13 @@ do
 			}
 		end
 		StaticPopup_Show("SkadaDeleteWindowDialog", nil, nil, name)
+	end
+end
+
+-- toggles windows visiblity
+function Skada:Toggle()
+	for _, win in ipairs(windows) do
+		win:Toggle()
 	end
 end
 
@@ -1575,10 +1606,17 @@ end
 -- sets the tooltip position
 function Skada:SetTooltipPosition(tooltip, frame, display, win)
 	if win and win.db.tooltippos ~= "NONE" then
-		local anchor = find(win.db.tooltippos, "TOP") and "TOP" or "BOTTOM"
-		anchor = format("%s%s", anchor, find(win.db.tooltippos, "LEFT") and "RIGHT" or "LEFT")
 		tooltip:SetOwner(UIParent, "ANCHOR_NONE")
-		tooltip:SetPoint(anchor, frame, win.db.tooltippos)
+
+		local anchor = find(win.db.tooltippos, "TOP") and "TOP" or "BOTTOM"
+		if find(win.db.tooltippos, "LEFT") or find(win.db.tooltippos, "RIGHT") then
+			anchor = format("%s%s", anchor, find(win.db.tooltippos, "LEFT") and "RIGHT" or "LEFT")
+			tooltip:SetPoint(anchor, frame, win.db.tooltippos)
+		elseif anchor == "TOP" then
+			tooltip:SetPoint("BOTTOM", frame, anchor)
+		else
+			tooltip:SetPoint("TOP", frame, anchor)
+		end
 	elseif self.db.profile.tooltippos == "default" then
 		tooltip:SetOwner(UIParent, "ANCHOR_NONE")
 		tooltip:SetPoint("BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -40, 40)
@@ -1601,15 +1639,15 @@ function Skada:SetTooltipPosition(tooltip, frame, display, win)
 
 		if (frame:GetLeft() * s) < (GetScreenWidth() / 2) then
 			if top > hsh then
-				tooltip:SetPoint("TOPLEFT", frame, "TOPRIGHT", 10, 0)
+				tooltip:SetPoint("TOPLEFT", frame, "TOPRIGHT")
 			else
-				tooltip:SetPoint("BOTTOMLEFT", frame, "BOTTOMRIGHT", 10, 0)
+				tooltip:SetPoint("BOTTOMLEFT", frame, "BOTTOMRIGHT")
 			end
 		else
 			if top > hsh then
-				tooltip:SetPoint("TOPRIGHT", frame, "TOPLEFT", -10, 0)
+				tooltip:SetPoint("TOPRIGHT", frame, "TOPLEFT")
 			else
-				tooltip:SetPoint("BOTTOMRIGHT", frame, "BOTTOMLEFT", -10, 0)
+				tooltip:SetPoint("BOTTOMRIGHT", frame, "BOTTOMLEFT")
 			end
 		end
 	else
@@ -2108,6 +2146,7 @@ end
 
 do
 	local inInstance, isininstance, isinpvp
+	local was_in_instance, was_in_pvp
 
 	function Skada:CheckZone()
 		inInstance, self.instanceType = IsInInstance()
@@ -2133,6 +2172,7 @@ do
 		was_in_instance = (isininstance == true)
 		was_in_pvp = (isinpvp == true)
 		self.callbacks:Fire("Skada_ZoneCheck")
+		self:Toggle()
 	end
 end
 
@@ -2446,8 +2486,11 @@ end
 
 do
 	local reverse = string.reverse
+	local numbersystem = nil
 	function SetNumeralFormat(system)
-		system = system or 1
+		system = system or numbersystem
+		if numbersystem == system then return end
+		numbersystem = system
 
 		local ShortenValue = function(num)
 			if num >= 1e9 or num <= -1e9 then
@@ -2785,6 +2828,7 @@ function Skada:ApplySettings(name, hidemenu)
 		if name and win.db.name == name then
 			win:SetChild(win.db.child)
 			win.display:ApplySettings(win)
+			win:Toggle()
 			Skada:UpdateDisplay(true)
 			return
 		else
@@ -2799,9 +2843,7 @@ function Skada:ApplySettings(name, hidemenu)
 		Skada:SetActive(true)
 
 		for _, win in ipairs(windows) do
-			if (win.db.hidden or (not win.db.hidden and Skada.db.profile.showcombat)) and win:IsShown() then
-				win:Hide()
-			end
+			win:Toggle()
 		end
 	end
 
@@ -2850,378 +2892,6 @@ function Skada:ApplyBorder(frame, texture, color, thickness, padtop, padbottom, 
 	if color then
 		frame.borderFrame:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
 	end
-end
-
-function Skada:FrameSettings(db, include_dimensions)
-	local obj = {
-		type = "group",
-		name = L["Window"],
-		desc = format(L["Options for %s."], L["Window"]),
-		childGroups = "tab",
-		order = 30,
-		get = function(i)
-			return db[i[#i]]
-		end,
-		set = function(i, val)
-			db[i[#i]] = val
-			Skada:ApplySettings(db.name)
-		end,
-		args = {
-			appearance = {
-				type = "group",
-				name = L["Appearance"],
-				desc = format(L["Appearance options for %s."], db.name),
-				order = 10,
-				args = {
-					scale = {
-						type = "range",
-						name = L["Scale"],
-						desc = L["Sets the scale of the window."],
-						order = 10,
-						width = "double",
-						min = 0.1,
-						max = 3,
-						step = 0.01,
-						isPercent = true
-					},
-					background = {
-						type = "group",
-						name = L["Background"],
-						inline = true,
-						order = 20,
-						get = function(i)
-							return db.background[i[#i]]
-						end,
-						set = function(i, val)
-							db.background[i[#i]] = val
-							Skada:ApplySettings(db.name)
-						end,
-						args = {
-							texture = {
-								type = "select",
-								dialogControl = "LSM30_Background",
-								name = L["Background Texture"],
-								desc = L["The texture used as the background."],
-								order = 10,
-								width = "double",
-								values = AceGUIWidgetLSMlists.background,
-								get = function()
-									return db.background.texture
-								end,
-								set = function(_, key)
-									db.background.texture = key
-									Skada:ApplySettings(db.name)
-								end
-							},
-							tile = {
-								type = "toggle",
-								name = L["Tile"],
-								desc = L["Tile the background texture."],
-								order = 20
-							},
-							tilesize = {
-								type = "range",
-								name = L["Tile Size"],
-								desc = L["The size of the texture pattern."],
-								order = 30,
-								min = 0,
-								max = floor(GetScreenWidth()),
-								step = 0.1,
-								bigStep = 1
-							},
-							color = {
-								type = "color",
-								name = L["Background Color"],
-								desc = L["The color of the background."],
-								order = 40,
-								width = "double",
-								hasAlpha = true,
-								get = function()
-									local c = db.background.color
-									return c.r, c.g, c.b, c.a
-								end,
-								set = function(_, r, g, b, a)
-									db.background.color = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
-									Skada:ApplySettings(db.name)
-								end
-							}
-						}
-					},
-					border = {
-						type = "group",
-						name = L["Border"],
-						inline = true,
-						order = 30,
-						args = {
-							bordertexture = {
-								type = "select",
-								dialogControl = "LSM30_Border",
-								name = L["Border texture"],
-								desc = L["The texture used for the borders."],
-								order = 10,
-								width = "double",
-								values = AceGUIWidgetLSMlists.border,
-								get = function()
-									return db.background.bordertexture
-								end,
-								set = function(_, key)
-									db.background.bordertexture = key
-									if key == "None" then
-										db.background.borderthickness = 1
-									end
-									Skada:ApplySettings(db.name)
-								end
-							},
-							bordercolor = {
-								type = "color",
-								name = L["Border Color"],
-								desc = L["The color used for the border."],
-								order = 20,
-								hasAlpha = true,
-								get = function()
-									local c = db.background.bordercolor or {r = 0, g = 0, b = 0, a = 1}
-									return c.r, c.g, c.b, c.a
-								end,
-								set = function(_, r, g, b, a)
-									db.background.bordercolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
-									Skada:ApplySettings(db.name)
-								end
-							},
-							thickness = {
-								type = "range",
-								name = L["Border Thickness"],
-								desc = L["The thickness of the borders."],
-								order = 30,
-								min = 0,
-								max = 50,
-								step = 0.01,
-								bigStep = 0.5,
-								get = function()
-									return db.background.borderthickness
-								end,
-								set = function(_, val)
-									db.background.borderthickness = val
-									Skada:ApplySettings(db.name)
-								end
-							}
-						}
-					}
-				}
-			},
-			position = {
-				type = "group",
-				name = L["Position"],
-				desc = format(L["Position settings for %s."], db.name),
-				order = 20,
-				args = {
-					barslocked = {
-						type = "toggle",
-						name = L["Lock Window"],
-						desc = L["Locks the bar window in place."],
-						order = 10
-					},
-					hidden = {
-						type = "toggle",
-						name = L["Hide Window"],
-						desc = L["Hides the window."],
-						order = 20
-					},
-					clamped = {
-						type = "toggle",
-						name = L["Clamped To Screen"],
-						desc = L["Toggle whether to permit movement out of screen."],
-						order = 50
-					},
-					sep = {
-						type = "description",
-						name = " ",
-						width = "full",
-						order = 60
-					},
-					strata = {
-						type = "select",
-						name = L["Strata"],
-						desc = L["This determines what other frames will be in front of the frame."],
-						order = 110,
-						values = {
-							["BACKGROUND"] = "BACKGROUND",
-							["LOW"] = "LOW",
-							["MEDIUM"] = "MEDIUM",
-							["HIGH"] = "HIGH",
-							["DIALOG"] = "DIALOG",
-							["FULLSCREEN"] = "FULLSCREEN",
-							["FULLSCREEN_DIALOG"] = "FULLSCREEN_DIALOG"
-						}
-					},
-					tooltippos = {
-						type = "select",
-						name = L["Tooltip Position"],
-						desc = L["Position of the tooltips."],
-						order = 120,
-						values = {
-							["NONE"] = NONE,
-							["TOPRIGHT"] = L["Top Right"],
-							["TOPLEFT"] = L["Top Left"],
-							["BOTTOMRIGHT"] = L["Bottom Right"],
-							["BOTTOMLEFT"] = L["Bottom Left"]
-						},
-						get = function()
-							return db.tooltippos or "NONE"
-						end
-					}
-				}
-			},
-			advanced = {
-				type = "group",
-				name = L["Advanced"],
-				desc = format(L["Advanced options for %s."], db.name),
-				order = 30,
-				args = {
-					switch = {
-						type = "group",
-						name = L["Mode Switching"],
-						desc = format(L["Options for %s."], L["Mode Switching"]),
-						inline = true,
-						order = 10,
-						args = {
-							modeincombat = {
-								type = "select",
-								name = L["Combat Mode"],
-								desc = L["Automatically switch to set |cffffbb00Current|r and this mode when entering combat."],
-								order = 10,
-								values = function()
-									local m = {[""] = NONE}
-									for _, mode in ipairs(modes) do
-										m[mode.moduleName] = mode.moduleName
-									end
-									return m
-								end
-							},
-							wipemode = {
-								type = "select",
-								name = L["Wipe Mode"],
-								desc = L["Automatically switch to set |cffffbb00Current|r and this mode after a wipe."],
-								order = 20,
-								values = function()
-									local m = {[""] = NONE}
-									for _, mode in ipairs(modes) do
-										m[mode.moduleName] = mode.moduleName
-									end
-									return m
-								end
-							},
-							returnaftercombat = {
-								type = "toggle",
-								name = L["Return after combat"],
-								desc = L["Return to the previous set and mode after combat ends."],
-								order = 30,
-								disabled = function() return (db.modeincombat == "" and db.wipemode == "") end
-							},
-							autocurrent = {
-								type = "toggle",
-								name = L["Auto switch to current"],
-								desc = L["Whenever a combat starts, this window automatically switches to |cffffbb00Current|r segment."],
-								order = 40
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if db.display == "bar" then
-		obj.args.position.args.sticky = {
-			type = "toggle",
-			name = L["Sticky Window"],
-			desc = L["Allows the window to stick to other Skada windows."],
-			order = 30,
-			set = function()
-				db.sticky = not db.sticky
-				if not db.sticky then
-					for _, win in ipairs(windows) do
-						if win.db.sticked[db.name] then
-							win.db.sticked[db.name] = nil
-						end
-					end
-				end
-				Skada:ApplySettings(db.name)
-			end
-		}
-
-		obj.args.position.args.snapto = {
-			type = "toggle",
-			name = L["Snap to best fit"],
-			desc = L["Snaps the window size to best fit when resizing."],
-			order = 40
-		}
-
-		obj.args.advanced.args.childoptions = {
-			type = "group",
-			name = L["Child Window"],
-			inline = true,
-			order = 100,
-			args = {
-				desc = {
-					type = "description",
-					name = L["A child window will replicate the parent window actions."],
-					width = "full",
-					order = 0
-				},
-				child = {
-					type = "select",
-					name = L["Window"],
-					order = 10,
-					values = function()
-						local list = {[""] = NONE}
-						for _, win in ipairs(windows) do
-							if win.db.name ~= db.name and win.db.child ~= db.name and win.db.display == db.display then
-								list[win.db.name] = win.db.name
-							end
-						end
-						return list
-					end,
-					get = function() return db.child or "" end,
-					set = function(_, child)
-						db.child = child == "" and nil or child
-						Skada:ReloadSettings()
-					end
-				},
-				childmode = {
-					type = "select",
-					name = L["Child Window Mode"],
-					order = 20,
-					values = {[0] = ALL, [1] = L["Segment"], [2] = L["Mode"]},
-					get = function() return db.childmode or 0 end,
-					disabled = function() return not (db.child and db.child ~= "") end
-				}
-			}
-		}
-	end
-
-	if include_dimensions then
-		obj.args.position.args.width = {
-			type = "range",
-			name = L["Width"],
-			order = 70,
-			min = 100,
-			max = floor(GetScreenWidth()),
-			step = 0.01,
-			bigStep = 1
-		}
-
-		obj.args.position.args.height = {
-			type = "range",
-			name = L["Height"],
-			order = 80,
-			min = 16,
-			max = 400,
-			step = 0.01,
-			bigStep = 1
-		}
-	end
-
-	return obj
 end
 
 -------------------------------------------------------------------------------
@@ -3560,13 +3230,7 @@ function Skada:EndSegment()
 			end
 		end
 
-		if not win.db.hidden and (not self.db.profile.hidesolo or IsInGroup()) then
-			if self.db.profile.showcombat and win:IsShown() then
-				win:Hide()
-			elseif self.db.profile.hidecombat and not win:IsShown() then
-				win:Show()
-			end
-		end
+		win:Toggle()
 	end
 
 	self:UpdateDisplay(true)
@@ -3728,15 +3392,10 @@ do
 				end
 			end
 
-			if not win.db.hidden then
-				if self.db.profile.showcombat and not win:IsShown() then
-					win:Show()
-				elseif self.db.profile.hidecombat and win:IsShown() then
-					win:Hide()
-				end
-				if win.db.autocurrent and win.selectedset ~= "current" then
-					win:set_selected_set("current")
-				end
+			win:Toggle()
+
+			if win.db.autocurrent and win.selectedset ~= "current" then
+				win:set_selected_set("current")
 			end
 		end
 
