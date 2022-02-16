@@ -174,7 +174,7 @@ do
 		set.players = set.players or {}
 
 		-- only for current segment
-		if setname == L["Current"] then
+		if setname ~= L["Total"] then
 			set.last_action = set.last_action or set.starttime
 			set.enemies = set.enemies or {}
 		end
@@ -220,8 +220,17 @@ local function ProcessSet(set, curtime)
 
 	curtime = curtime or time()
 
+	-- remove any additional keys.
+	set.started, set.stopped = nil, nil
+
+	-- trigger events.
+	Skada:SendMessage("COMBAT_PLAYER_LEAVE", set, curtime)
+	if set.gotboss then
+		Skada:SendMessage("COMBAT_ENCOUNTER_END", set, curtime)
+	end
+
 	if not Skada.db.profile.onlykeepbosses or set.gotboss then
-		if set.mobname ~= nil and curtime - set.starttime > 5 then
+		if set.mobname ~= nil and curtime - set.starttime > (Skada.db.profile.minsetlength or 5) then
 			set.endtime = set.endtime or curtime
 			set.time = max(0.1, set.endtime - set.starttime)
 			set.name = CheckSetName(set)
@@ -3519,15 +3528,6 @@ function Skada:EndSegment()
 	if not self.current then return end
 	self:ClearQueueUnits()
 
-	-- remove any additional keys.
-	self.current.started, self.current.stopped = nil, nil
-
-	-- trigger events.
-	self:SendMessage("COMBAT_PLAYER_LEAVE", self.current, self.total)
-	if self.current.gotboss then
-		self:SendMessage("COMBAT_ENCOUNTER_END", self.current, self.total)
-	end
-
 	local curtime = time()
 	self:DispatchSets(ProcessSet, curtime)
 
@@ -3597,9 +3597,9 @@ function Skada:ResumeSegment(msg)
 	end
 end
 
-function Skada:DispatchSets(callback, ...)
-	if self.current and type(callback) == "function" then
-		callback(self.current, ...)
+function Skada:DispatchSets(func, ...)
+	if self.current and type(func) == "function" then
+		func(self.current, ...)
 	end
 end
 

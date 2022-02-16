@@ -145,6 +145,7 @@ Skada.defaults = {
 		autostop = false,
 		sortmodesbyusage = false,
 		updatefrequency = 0.5,
+		minsetlength = 5,
 		modules = {},
 		columns = {},
 		toast = {hide_toasts = false, spawn_point = "BOTTOM", duration = 5, opacity = 0.75},
@@ -499,6 +500,16 @@ Skada.options = {
 							width = "double",
 							order = 980
 						},
+						minsetlength = {
+							type = "range",
+							name = L["Minimum segment length"],
+							desc = L["The minimum length required in seconds for a segment to be saved."],
+							width = "double",
+							min = 3,
+							max = 30,
+							step = 1,
+							order = 990
+						}
 					}
 				}
 			}
