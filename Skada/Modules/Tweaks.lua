@@ -81,6 +81,13 @@ Skada:AddLoadableModule("Tweaks", function(L)
 				if self.current and not self.current.success then
 					self.current.success = true
 					self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
+
+					if self.tempsets then -- phases
+						for _, set in ipairs(self.tempsets) do
+							set.success = true
+							self:SendMessage("COMBAT_BOSS_DEFEATED", set)
+						end
+					end
 				end
 				-- ignore the spell
 				if self.db.profile.fofrostmourne then return end

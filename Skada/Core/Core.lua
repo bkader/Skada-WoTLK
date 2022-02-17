@@ -48,6 +48,7 @@ BINDING_NAME_SKADA_TOGGLE = L["Toggle Windows"]
 BINDING_NAME_SKADA_SHOWHIDE = L["Show/Hide Windows"]
 BINDING_NAME_SKADA_RESET = RESET
 BINDING_NAME_SKADA_NEWSEGMENT = L["Start New Segment"]
+BINDING_NAME_SKADA_NEWPHASE = L["Start New Phase"]
 BINDING_NAME_SKADA_STOP = L["Stop"]
 
 -- Skada-Revisited flag
@@ -1895,6 +1896,8 @@ function Skada:Command(param)
 		self:Reinstall()
 	elseif cmd == "newsegment" or cmd == "new" then
 		self:NewSegment()
+	elseif cmd == "newphase" or cmd == "phase" then
+		self:NewPhase()
 	elseif cmd == "toggle" then
 		self:ToggleWindow()
 	elseif cmd == "show" then
@@ -1964,7 +1967,7 @@ function Skada:Command(param)
 		self:Print(L["Usage:"])
 		print("|cffffaeae/skada|r |cffffff33report|r [channel] [mode] [lines]")
 		print("|cffffaeae/skada|r |cffffff33toggle|r / |cffffff33show|r / |cffffff33hide|r")
-		print("|cffffaeae/skada|r |cffffff33newsegment|r")
+		print("|cffffaeae/skada|r |cffffff33newsegment|r / |cffffff33newphase|r")
 		print("|cffffaeae/skada|r |cffffff33numformat|r / |cffffff33measure|r")
 		print("|cffffaeae/skada|r |cffffff33import|r / |cffffff33export|r")
 		print("|cffffaeae/skada|r |cffffff33about|r / |cffffff33version|r / |cffffff33website|r / |cffffff33discord|r")
@@ -3023,6 +3026,13 @@ function Skada:BigWigs(_, _, event, message)
 			self:Debug("COMBAT_BOSS_DEFEATED: BigWigs")
 			self.current.success = true
 			self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
+
+			if self.tempsets then -- phases
+				for _, set in ipairs(self.tempsets) do
+					set.success = true
+					self:SendMessage("COMBAT_BOSS_DEFEATED", set)
+				end
+			end
 		end
 	end
 end
@@ -3034,6 +3044,13 @@ function Skada:DBM(_, mod, wipe)
 			self:Debug("COMBAT_BOSS_DEFEATED: DBM")
 			set.success = true
 			self:SendMessage("COMBAT_BOSS_DEFEATED", set)
+
+			if self.tempsets then -- phases
+				for _, set in ipairs(self.tempsets) do
+					set.success = true
+					self:SendMessage("COMBAT_BOSS_DEFEATED", set)
+				end
+			end
 		end
 	end
 end
@@ -3200,12 +3217,29 @@ function Skada:NewSegment()
 	end
 end
 
+function Skada:NewPhase()
+	if self.current and (time() - self.current.starttime) > (self.db.profile.minsetlength or 5) then
+		self.tempsets = self.tempsets or T.get("Skada_TempSegments")
+
+		local set = CreateSet(L["Current"])
+		set.mobname = self.current.mobname
+		set.gotboss = self.current.gotboss
+		set.started = self.current.started
+		set.phase = 2 + #self.tempsets
+
+		tinsert(self.tempsets, set)
+
+		self:Print(format("|cffffbb00%s|r - |cff00ff00Phase %s|r started.", set.mobname, set.phase))
+	end
+end
+
 function Skada:EndSegment()
 	if not self.current then return end
 	self:ClearQueueUnits()
 
 	local curtime = time()
 	self:DispatchSets(ProcessSet, curtime)
+	T.free("Skada_TempSegments", self.tempsets)
 
 	-- remove players ".last" key from total segment.
 	for _, player in ipairs(self.total.players) do
@@ -3250,9 +3284,22 @@ end
 
 function Skada:StopSegment(msg)
 	if self.current then
+		local curtime = time()
+
+		-- stop current segment.
 		self.current.stopped = true
-		self.current.endtime = time()
+		self.current.endtime = curtime
 		self.current.time = max(0.1, self.current.endtime - self.current.starttime)
+
+		-- stop phase segments.
+		if self.tempsets then
+			for _, set in ipairs(self.tempsets) do
+				set.stopped = true
+				set.endtime = curtime
+				set.time = max(0.1, set.endtime - set.starttime)
+			end
+		end
+
 		self:Print(msg or L["Segment Stopped."])
 		self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	end
@@ -3260,9 +3307,20 @@ end
 
 function Skada:ResumeSegment(msg)
 	if self.current and self.current.stopped then
+		-- resume current segment.
 		self.current.stopped = nil
 		self.current.endtime = nil
 		self.current.time = 0
+
+		-- resume phase segments.
+		if self.tempsets then
+			for _, set in ipairs(self.tempsets) do
+				set.stopped = nil
+				set.endtime = nil
+				set.time = 0
+			end
+		end
+
 		self:Print(msg or L["Segment Resumed."])
 	end
 end
@@ -3270,6 +3328,12 @@ end
 function Skada:DispatchSets(func, ...)
 	if self.current and type(func) == "function" then
 		func(self.current, ...)
+
+		if self.tempsets then -- phases
+			for _, set in ipairs(self.tempsets) do
+				func(set, ...)
+			end
+		end
 	end
 end
 
@@ -3340,7 +3404,14 @@ do
 	end
 
 	function Skada:Tick()
-		self.callbacks:Fire("Skada_CombatTick", self.current, self.total)
+		self.callbacks:Fire("Skada_CombatTick", self.current)
+
+		if self.tempsets then -- phases
+			for _, set in ipairs(self.tempsets) do
+				self.callbacks:Fire("Skada_CombatTick", set)
+			end
+		end
+
 		if not disabled and self.current and not InCombatLockdown() and not IsGroupInCombat() and Skada.instanceType ~= "pvp" and Skada.instanceType ~= "arena" then
 			self:Debug("EndSegment: Tick")
 			self:EndSegment()

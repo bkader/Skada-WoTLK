@@ -122,11 +122,23 @@ function Skada:OpenMenu(window)
 				UIDropDownMenu_AddButton(info, level)
 			end
 
+			UIDropDownMenu_AddSeparator(info, level)
+
 			-- start new segment
 			info = UIDropDownMenu_CreateInfo()
 			info.text = L["Start New Segment"]
 			info.func = function()
 				Skada:NewSegment()
+			end
+			info.notCheckable = 1
+			info.padding = 16
+			UIDropDownMenu_AddButton(info, level)
+
+			-- start new phase
+			info = UIDropDownMenu_CreateInfo()
+			info.text = L["Start New Phase"]
+			info.func = function()
+				Skada:NewPhase()
 			end
 			info.notCheckable = 1
 			info.padding = 16

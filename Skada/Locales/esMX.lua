@@ -393,6 +393,7 @@ L["Keep Segment"] = "Guardar segmento"
 L["Toggle Windows"] = "Alternar ventanas"
 L["Show/Hide Windows"] = "Mostrar/Ocultar ventanas"
 L["Start New Segment"] = "Comenzar nuevo segmento"
+L["Start New Phase"] = "Comenzar nueva fase"
 L["Select All"] = "Seleccionar todo"
 L["Deselect All"] = "Deselecciona todo"
 -- window buttons

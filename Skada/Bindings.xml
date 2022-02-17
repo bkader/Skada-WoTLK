@@ -3,6 +3,7 @@
 	<Binding name="SKADA_SHOWHIDE" category="ADDONS">Skada:ShowHide()</Binding>
 	<Binding name="SKADA_RESET" category="ADDONS">Skada:ShowPopup()</Binding>
 	<Binding name="SKADA_NEWSEGMENT" category="ADDONS">Skada:NewSegment()</Binding>
+	<Binding name="SKADA_NEWPHASE" category="ADDONS">Skada:NewPhase()</Binding>
   	<Binding name="SKADA_STOP" category="ADDONS">
 		if Skada.current and Skada.current.stopped then
 			Skada:ResumeSegment()

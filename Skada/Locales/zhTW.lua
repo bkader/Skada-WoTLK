@@ -389,6 +389,7 @@ L["Keep Segment"] = "保留分段資料"
 L["Toggle Windows"] = "切換窗口"
 L["Show/Hide Windows"] = "顯示/隱藏窗口"
 L["Start New Segment"] = "開始新的分段"
+L["Start New Phase"] = "開始新階段"
 L["Select All"] = "全選"
 L["Deselect All"] = "取消全選"
 -- window buttons
