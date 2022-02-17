@@ -253,6 +253,7 @@ L["Controls if data is reset when you leave a group."] = true
 L["Ask"] = true
 L["Do you want to reset Skada?\nHold SHIFT to reset all data."] = true
 L["All data has been reset."] = true
+L["There is no data to reset."] = true
 L["Skip reset dialog"] = true
 L["Enable this if you want Skada to reset without the confirmation dialog."] = true
 L["Are you sure you want to reinstall Skada?"] = true

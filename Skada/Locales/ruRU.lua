@@ -251,6 +251,7 @@ L["Controls if data is reset when you leave a group."] = "Управление �
 L["Ask"] = "Уточнить"
 L["Do you want to reset Skada?\nHold SHIFT to reset all data."] = "Вы хотите сбросить Skada?\nУдерживайте SHIFT, чтобы сбросить все."
 L["All data has been reset."] = "Все данные были сброшены."
+L["There is no data to reset."] = "Нет данных для сброса."
 L["Skip reset dialog"] = "Пропустить диалог сброса"
 L["Enable this if you want Skada to reset without the confirmation dialog."] = "Включите это, если хотите, чтобы Skada сбрасывалась без диалогового окна подтверждения."
 L["Are you sure you want to reinstall Skada?"] = "Вы уверены, что хотите переустановить Skada?"

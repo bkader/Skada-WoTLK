@@ -251,6 +251,7 @@ L["Controls if data is reset when you leave a group."] = "파티/공격대를 �
 L["Ask"] = "묻기"
 L["Do you want to reset Skada?\nHold SHIFT to reset all data."] = "Skada를 초기화하시겠습니까?\n리셋 모든 것에 보류 SHIFT."
 L["All data has been reset."] = "모든 자료가 초기화되었습니다."
+L["There is no data to reset."] = "재설정할 데이터가 없습니다."
 L["Skip reset dialog"] = "재설정 대화 상자 건너 뛰기"
 L["Enable this if you want Skada to reset without the confirmation dialog."] = "확인 대화 상자없이 Skada를 재설정하려면이 옵션을 활성화하십시오."
 L["Are you sure you want to reinstall Skada?"] = "Skada를 다시 설치하시겠습니까?"

@@ -349,6 +349,8 @@ function barListPrototype:AddButton(title, description, texture, texcoords, clic
 
 	self.buttons[#self.buttons + 1] = btn
 	self:AdjustButtons()
+
+	return btn
 end
 
 do
@@ -491,6 +493,7 @@ function barListPrototype:ShowButton(title, visible)
 	for _, b in ipairs(self.buttons) do
 		if b.title == title then
 			b.visible = (visible == true)
+			break
 		end
 	end
 	self:AdjustButtons()

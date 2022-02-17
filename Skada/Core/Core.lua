@@ -28,7 +28,7 @@ local UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitExists, U
 local ReloadUI, GetScreenWidth, GetScreenHeight = ReloadUI, GetScreenWidth, GetScreenHeight
 local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
-local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
+local IsInGroup, IsInRaid, IsInPvP = Skada.IsInGroup, Skada.IsInRaid, Skada.IsInPvP
 local GetNumGroupMembers, GetGroupTypeAndCount = Skada.GetNumGroupMembers, Skada.GetGroupTypeAndCount
 local GetUnitIdFromGUID, GetUnitSpec, GetUnitRole = Skada.GetUnitIdFromGUID, Skada.GetUnitSpec, Skada.GetUnitRole
 local UnitIterator, IsGroupDead = Skada.UnitIterator, Skada.IsGroupDead
@@ -351,6 +351,10 @@ end
 -- skada reset dialog
 function Skada:ShowPopup(win, popup)
 	if Skada.testMode then return end
+	if not Skada:CanReset() then
+		self:Print(L["There is no data to reset."])
+		return
+	end
 
 	if Skada.db.profile.skippopup and not popup then
 		Skada:Reset(IsShiftKeyDown())
@@ -1958,9 +1962,19 @@ function Skada:Command(param)
 	elseif cmd == "total" or cmd == "generate" then
 		GenerateTotal()
 	elseif cmd == "report" then
+		if not self:CanReset() then
+			self:Print(L["There is nothing to report."])
+			return
+		end
+
 		local chan = arg1 and arg1:trim()
 		local report_mode_name = arg2 or L["Damage"]
 		local num = tonumber(arg3) or 10
+
+		-- automatic
+		if chan == "auto" and IsInGroup() then
+			chan = IsInRaid() and "raid" or "party"
+		end
 
 		-- Sanity checks.
 		if chan and (chan == "say" or chan == "guild" or chan == "raid" or chan == "party" or chan == "officer") and (report_mode_name and FindMode(report_mode_name)) then
@@ -2323,7 +2337,13 @@ function Skada:Reset(force)
 		wipe(self.char.sets)
 		self.char.total = nil
 		self:Reset()
+		StaticPopup_Hide("SkadaCommonConfirmDialog")
 		self:ScheduleTimer("ReloadSettings", 3)
+		return
+	end
+
+	if not self:CanReset() then
+		self:Print(L["There is no data to reset."])
 		return
 	end
 
@@ -2355,6 +2375,7 @@ function Skada:Reset(force)
 	self:UpdateDisplay(true)
 	self:Notify(L["All data has been reset."])
 	self:CleanGarbage()
+	StaticPopup_Hide("SkadaCommonConfirmDialog")
 	CloseDropDownMenus()
 end
 

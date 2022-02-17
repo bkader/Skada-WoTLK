@@ -254,6 +254,7 @@ L["Controls if data is reset when you leave a group."] = "Détermine si les donn
 L["Ask"] = "Demander"
 L["Do you want to reset Skada?\nHold SHIFT to reset all data."] = "Voulez-vous réinitialiser Skada?\nMaintenez SHIFT pour tout réinitialiser."
 L["All data has been reset."] = "Toutes les données ont été réinitialisées."
+L["There is no data to reset."] = "Pas de données à réinitialiser."
 L["Skip reset dialog"] = "Réinitialiser sans confirmation"
 L["Enable this if you want Skada to reset without the confirmation dialog."] = "Si activé, Skada sera réinitialisé sans afficher la boîte de confirmation."
 -- general options

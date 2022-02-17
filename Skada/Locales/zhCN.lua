@@ -251,6 +251,7 @@ L["Controls if data is reset when you leave a group."] = "控制是否在离开�
 L["Ask"] = "询问"
 L["Do you want to reset Skada?\nHold SHIFT to reset all data."] = "是否要重置数据？\n按住 SHIFT 重置所有。"
 L["All data has been reset."] = "全部数据已重置。"
+L["There is no data to reset."] = "没有要重置的数据。"
 L["Skip reset dialog"] = "跳过重置对话框"
 L["Enable this if you want Skada to reset without the confirmation dialog."] = "如果您希望Skada在没有确认对话框的情况下进行重置，请启用此选项。"
 L["Are you sure you want to reinstall Skada?"] = "您确定要重新安装 Skada 吗？"

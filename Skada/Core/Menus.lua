@@ -107,6 +107,7 @@ function Skada:OpenMenu(window)
 			info.text = L["Delete Segment"]
 			info.value = "delete"
 			info.hasArrow = 1
+			info.disabled = (not Skada.char.sets or #Skada.char.sets == 0)
 			info.notCheckable = 1
 			info.padding = 16
 			UIDropDownMenu_AddButton(info, level)
@@ -117,6 +118,7 @@ function Skada:OpenMenu(window)
 				info.text = L["Keep Segment"]
 				info.value = "keep"
 				info.hasArrow = 1
+				info.disabled = (not Skada.char.sets or #Skada.char.sets == 0)
 				info.notCheckable = 1
 				info.padding = 16
 				UIDropDownMenu_AddButton(info, level)
@@ -152,6 +154,7 @@ function Skada:OpenMenu(window)
 			info.func = function()
 				Skada:ShowPopup()
 			end
+			info.disabled = not Skada:CanReset()
 			info.notCheckable = 1
 			info.padding = 16
 			UIDropDownMenu_AddButton(info, level)
@@ -1004,6 +1007,9 @@ do
 
 	function Skada:OpenReportWindow(window)
 		if self.testMode then
+			return
+		elseif not self:CanReset() then
+			self:Print(L["There is nothing to report."])
 			return
 		elseif self.reportwindow == nil then
 			createReportWindow(window)
