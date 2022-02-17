@@ -53,7 +53,10 @@ Skada:AddLoadableModule("Comparison", function(L)
 	end
 
 	local function CanCompare(actor)
-		return (actor and actor.class == mod.userClass and actor.role == "DAMAGER")
+		if actor and actor.class == mod.userClass then
+			return (Skada.Ascension or Skada.AscensionCoA) and true or (actor.role == "DAMAGER")
+		end
+		return false
 	end
 
 	local function spellmod_tooltip(win, id, label, tooltip)

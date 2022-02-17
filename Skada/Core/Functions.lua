@@ -37,8 +37,10 @@ function Skada:RegisterClasses()
 
 	-- valid classes!
 	self.validclass = {}
-	for class in pairs(self.classcolors) do
+	for class, classTable in pairs(self.classcolors) do
 		self.validclass[class] = true
+		-- localized class names.
+		L[class] = classTable.className
 	end
 
 	-- Skada custom class colors!

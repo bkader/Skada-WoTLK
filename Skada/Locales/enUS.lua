@@ -767,18 +767,7 @@ L["Revision"] = true
 L["Thanks"] = true
 L["Version"] = true
 L["Website"] = true
--- class names
-L["DEATHKNIGHT"] = "Death Knight"
-L["DRUID"] = "Druid"
-L["HUNTER"] = "Hunter"
-L["MAGE"] = "Mage"
-L["PALADIN"] = "Paladin"
-L["PRIEST"] = "Priest"
-L["ROGUE"] = "Rogue"
-L["SHAMAN"] = "Shaman"
-L["WARLOCK"] = "Warlock"
-L["WARRIOR"] = "Warrior"
--- custom names using globals
+-- custom class names using globals
 L["BOSS"] = BOSS
 L["ENEMY"] = ENEMY
 L["MONSTER"] = EXAMPLE_TARGET_MONSTER

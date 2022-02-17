@@ -1148,7 +1148,7 @@ do
 				if mode.metadata.click3 then
 					ScanForColumns(mode.metadata.click3)
 				end
-				if mode.metadata.click4 then
+				if not Skada.Ascension and mode.metadata.click4 then
 					ScanForColumns(mode.metadata.click4)
 				end
 			end
@@ -1334,7 +1334,7 @@ function Skada:GetPlayer(set, guid, name, flag)
 
 	-- fix players created before their info was received
 	-- roles and specs are temporary disabled for Project Ascension
-	if not self.Ascension and player.class and Skada.validclass[player.class] then
+	if not self.Ascension and not self.AscensionCoA and player.class and Skada.validclass[player.class] then
 		if player.role == nil or player.role == "NONE" then
 			if player.id == self.userGUID and self.userRole then
 				player.role = self.userRole
@@ -1748,7 +1748,13 @@ do
 				t:ClearLines()
 				self:AddSubviewToTooltip(t, win, FindMode(id), id, label)
 				t:Show()
-			elseif win.metadata.click1 or win.metadata.click2 or win.metadata.click3 or win.metadata.click4 or win.metadata.tooltip then
+			elseif
+				win.metadata.click1 or
+				win.metadata.click2 or
+				win.metadata.click3 or
+				(not self.Ascension and win.metadata.click4) or
+				win.metadata.tooltip
+			then
 				t:ClearLines()
 				local hasClick = win.metadata.click1 or win.metadata.click2 or win.metadata.click3 or win.metadata.click4
 
@@ -1771,7 +1777,7 @@ do
 					if win.metadata.click3 and not ignoredTotalClick(win, win.metadata.click3) then
 						self:AddSubviewToTooltip(t, win, win.metadata.click3, id, label)
 					end
-					if win.metadata.click4 and not ignoredTotalClick(win, win.metadata.click4) then
+					if not self.Ascension and win.metadata.click4 and not ignoredTotalClick(win, win.metadata.click4) then
 						self:AddSubviewToTooltip(t, win, win.metadata.click4, id, label)
 					end
 				end
@@ -1803,9 +1809,9 @@ do
 					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], win.metadata.click3_label))
 				end
 
-				if type(win.metadata.click4) == "table" and not ignoredTotalClick(win, win.metadata.click4) then
+				if not self.Ascension and type(win.metadata.click4) == "table" and not ignoredTotalClick(win, win.metadata.click4) then
 					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], win.metadata.click4.label or win.metadata.click4.moduleName))
-				elseif type(win.metadata.click4) == "function" and win.metadata.click4_label then
+				elseif not self.Ascension and type(win.metadata.click4) == "function" and win.metadata.click4_label then
 					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], win.metadata.click4_label))
 				end
 
@@ -2143,8 +2149,10 @@ function Skada:CheckGroup()
 	end
 
 	-- update my spec and role.
-	Skada.userSpec = GetUnitSpec("player", Skada.userClass)
-	Skada.userRole = GetUnitRole("player", Skada.userClass)
+	if not Skada.Ascension and not Skada.AscensionCoA then
+		Skada.userSpec = GetUnitSpec("player", Skada.userClass)
+		Skada.userRole = GetUnitRole("player", Skada.userClass)
+	end
 end
 
 do

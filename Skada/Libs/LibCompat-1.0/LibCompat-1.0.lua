@@ -524,6 +524,7 @@ do
 		for class, tbl in pairs(classColors) do
 			classColorsTable[class] = tbl
 			classColorsTable[class].colorStr = RGBPercToHex(tbl.r, tbl.g, tbl.b, true)
+			classColorsTable[class].className = LOCALIZED_CLASS_NAMES_MALE[class] or UNKNOWN
 		end
 	end
 
