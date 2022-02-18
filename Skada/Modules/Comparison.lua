@@ -89,7 +89,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 					tooltip:AddDoubleLine(L["Average"], FormatValueNumber(num, mynum, true), 1, 1, 1)
 
-					if (spell.criticalmin and spell.criticalmax) or (myspell.criticalmin and myspell.criticalmax) then
+					if (spell and spell.criticalmin and spell.criticalmax) or (myspell and myspell.criticalmin and myspell.criticalmax) then
 						tooltip:AddLine(" ")
 						tooltip:AddDoubleLine(L["Minimum Hit"], FormatValueNumber(spell and spell.criticalmin, myspell and myspell.criticalmin, true), 1, 1, 1)
 						tooltip:AddDoubleLine(L["Maximum Hit"], FormatValueNumber(spell and spell.criticalmax, myspell and myspell.criticalmax, true), 1, 1, 1)
