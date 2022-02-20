@@ -135,8 +135,10 @@ do
 
 	-- clears all items in a table.
 	function Table.clear(obj)
-		for k in pairs(obj) do
-			obj[k] = nil
+		if obj then
+			for k in pairs(obj) do
+				obj[k] = nil
+			end
 		end
 		return obj
 	end
@@ -567,6 +569,7 @@ do
 end
 
 -------------------------------------------------------------------------------
+-- Hex Encode, Decode and String Escape
 
 do
 	local band, rshift, lshift = bit.band, bit.rshift, bit.lshift
@@ -629,6 +632,7 @@ do
 end
 
 -------------------------------------------------------------------------------
+-- Specs and Roles
 
 do
 	local LGT = LibStub("LibGroupTalents-1.0")
@@ -715,6 +719,7 @@ do
 end
 
 -------------------------------------------------------------------------------
+-- Pvp
 
 do
 	local IsInInstance, instanceType = IsInInstance, nil
@@ -728,6 +733,7 @@ do
 end
 
 -------------------------------------------------------------------------------
+-- Colors
 
 do
 	local function WrapTextInColorCode(text, colorHexString)

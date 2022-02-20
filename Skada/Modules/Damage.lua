@@ -153,7 +153,7 @@ Skada:AddLoadableModule("Damage", function(L)
 			player.damagespells[spellname] = spell
 		elseif dmg.spellid and dmg.spellid ~= spell.id then
 			if dmg.spellschool and dmg.spellschool ~= spell.school then
-				spellname = spellname .. " (" .. (Skada.schoolnames[dmg.spellschool] or OTHER) .. ")"
+				spellname = spellname .. " (" .. (Skada.spellschools[dmg.spellschool] and Skada.spellschools[dmg.spellschool].name or OTHER) .. ")"
 			else
 				spellname = GetSpellInfo(dmg.spellid)
 			end
@@ -277,7 +277,7 @@ Skada:AddLoadableModule("Damage", function(L)
 			end
 
 			if eventtype == "SWING_DAMAGE" then
-				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, L.Melee, 1
+				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, L.Melee, 0x01
 				dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing = ...
 
 				-- an extra attack?
@@ -316,7 +316,7 @@ Skada:AddLoadableModule("Damage", function(L)
 			local amount
 
 			if eventtype == "SWING_MISSED" then
-				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, L.Melee, 1
+				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, L.Melee, 0x01
 				dmg.misstype, amount = ...
 			else
 				dmg.spellid, dmg.spellname, dmg.spellschool, dmg.misstype, amount = ...
@@ -374,12 +374,13 @@ Skada:AddLoadableModule("Damage", function(L)
 		local spell = player and player.damagespells and player.damagespells[label]
 		if spell then
 			tooltip:AddLine(player.name .. " - " .. label)
-			if spell.school then
-				local c = Skada.schoolcolors[spell.school]
-				local n = Skada.schoolnames[spell.school]
-				if c and n then
-					tooltip:AddLine(n, c.r, c.g, c.b)
-				end
+			if spell.school and Skada.spellschools[spell.school] then
+				tooltip:AddLine(
+					Skada.spellschools[spell.school].name,
+					Skada.spellschools[spell.school].r,
+					Skada.spellschools[spell.school].g,
+					Skada.spellschools[spell.school].b
+				)
 			end
 
 			if (spell.casts or 0) > 0 then
@@ -422,12 +423,13 @@ Skada:AddLoadableModule("Damage", function(L)
 			local spell = player.damagespells and player.damagespells[win.spellname]
 			if spell then
 				tooltip:AddLine(player.name .. " - " .. win.spellname)
-				if spell.school then
-					local c = Skada.schoolcolors[spell.school]
-					local n = Skada.schoolnames[spell.school]
-					if c and n then
-						tooltip:AddLine(n, c.r, c.g, c.b)
-					end
+				if spell.school and Skada.spellschools[spell.school] then
+					tooltip:AddLine(
+						Skada.spellschools[spell.school].name,
+						Skada.spellschools[spell.school].r,
+						Skada.spellschools[spell.school].g,
+						Skada.spellschools[spell.school].b
+					)
 				end
 
 				if label == L["Critical Hits"] and spell.criticalamount then

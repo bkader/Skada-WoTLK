@@ -70,12 +70,13 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 			if spell or myspell then
 				tooltip:AddLine(format(L["%s vs %s: %s"], actor and actor.name or L.Unknown, mod.userName, win.spellname))
-				if (spell and spell.school) or (myspell and myspell.school) then
-					local c = Skada.schoolcolors[spell and spell.school or myspell.school]
-					local n = Skada.schoolnames[spell and spell.school or myspell.school]
-					if c and n then
-						tooltip:AddLine(n, c.r, c.g, c.b)
-					end
+				if (spell.school and Skada.spellschools[spell.school]) or (myspell.school and Skada.spellschools[myspell.school]) then
+					tooltip:AddLine(
+						Skada.spellschools[spell and spell.school or myspell.school].name,
+						Skada.spellschools[spell and spell.school or myspell.school].r,
+						Skada.spellschools[spell and spell.school or myspell.school].g,
+						Skada.spellschools[spell and spell.school or myspell.school].b
+					)
 				end
 
 				if label == L["Critical Hits"] and (spell and spell.criticalamount or myspell.criticalamount) then

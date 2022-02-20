@@ -794,12 +794,13 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 		if spell then
 			tooltip:AddLine(player.name .. " - " .. label)
-			if spell.school then
-				local c = Skada.schoolcolors[spell.school]
-				local n = Skada.schoolnames[spell.school]
-				if c and n then
-					tooltip:AddLine(n, c.r, c.g, c.b)
-				end
+			if spell.school and Skada.spellschools[spell.school] then
+				tooltip:AddLine(
+					Skada.spellschools[spell.school].name,
+					Skada.spellschools[spell.school].r,
+					Skada.spellschools[spell.school].g,
+					Skada.spellschools[spell.school].b
+				)
 			end
 
 			if (spell.casts or 0) > 0 then
@@ -1199,12 +1200,13 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 		local spell = player and ((player.absorbspells and player.absorbspells[id]) or (player.healspells and player.healspells[id]))
 		if spell then
 			tooltip:AddLine(player.name .. " - " .. label)
-			if spell.school then
-				local c = Skada.schoolcolors[spell.school]
-				local n = Skada.schoolnames[spell.school]
-				if c and n then
-					tooltip:AddLine(n, c.r, c.g, c.b)
-				end
+			if spell.school and Skada.spellschools[spell.school] then
+				tooltip:AddLine(
+					Skada.spellschools[spell.school].name,
+					Skada.spellschools[spell.school].r,
+					Skada.spellschools[spell.school].g,
+					Skada.spellschools[spell.school].b
+				)
 			end
 
 			if (spell.casts or 0) > 0 then
@@ -1878,12 +1880,13 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 		local spell = cacheTable[id]
 		if spell then
 			tooltip:AddLine(GetSpellInfo(id))
-			if spell.school then
-				local c = Skada.schoolcolors[spell.school]
-				local n = Skada.schoolnames[spell.school]
-				if c and n then
-					tooltip:AddLine(n, c.r, c.g, c.b)
-				end
+			if spell.school and Skada.spellschools[spell.school] then
+				tooltip:AddLine(
+					Skada.spellschools[spell.school].name,
+					Skada.spellschools[spell.school].r,
+					Skada.spellschools[spell.school].g,
+					Skada.spellschools[spell.school].b
+				)
 			end
 
 			if (spell.casts or 0) > 0 then

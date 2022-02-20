@@ -24,12 +24,13 @@ Skada:AddLoadableModule("My Spells", function(L)
 
 		if spell then
 			tooltip:AddLine(player.name .. " - " .. label)
-			if spell.school then
-				local c = Skada.schoolcolors[spell.school]
-				local n = Skada.schoolnames[spell.school]
-				if c and n then
-					tooltip:AddLine(n, c.r, c.g, c.b)
-				end
+			if spell.school and Skada.spellschools[spell.school] then
+				tooltip:AddLine(
+					Skada.spellschools[spell.school].name,
+					Skada.spellschools[spell.school].r,
+					Skada.spellschools[spell.school].g,
+					Skada.spellschools[spell.school].b
+				)
 			end
 
 			-- count stats

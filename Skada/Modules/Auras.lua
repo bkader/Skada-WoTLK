@@ -291,12 +291,13 @@ do
 		local aura = player and player.auras and player.auras[id]
 		if aura then
 			tooltip:AddLine(player.name .. ": " .. label)
-			if aura.school then
-				local c = Skada.schoolcolors[aura.school]
-				local n = Skada.schoolnames[aura.school]
-				if c and n then
-					tooltip:AddLine(n, c.r, c.g, c.b)
-				end
+			if aura.school and Skada.spellschools[aura.school] then
+				tooltip:AddLine(
+					Skada.spellschools[aura.school].name,
+					Skada.spellschools[aura.school].r,
+					Skada.spellschools[aura.school].g,
+					Skada.spellschools[aura.school].b
+				)
 			end
 			if aura.count or aura.refresh then
 				if aura.count then

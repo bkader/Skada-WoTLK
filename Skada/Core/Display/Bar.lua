@@ -634,7 +634,7 @@ do
 					if data.color then
 						color = data.color
 					elseif data.spellschool and win.db.spellschoolcolors then
-						color = Skada.schoolcolors[data.spellschool] or color
+						color = Skada.spellschools[data.spellschool] or color
 					elseif data.class and win.db.classcolorbars then
 						color = Skada.classcolors[data.class] or color
 					end

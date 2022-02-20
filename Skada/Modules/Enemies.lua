@@ -364,7 +364,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 
 			if eventtype == "SWING_DAMAGE" then
-				dmg.spellid, dmg.spellschool = 6603, 1
+				dmg.spellid, dmg.spellschool = 6603, 0x01
 				dmg.amount, dmg.overkill, _, _, _, dmg.absorbed = ...
 			else
 				dmg.spellid, _, dmg.spellschool, dmg.amount, dmg.overkill, _, _, _, dmg.absorbed = ...
@@ -389,7 +389,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 			local spellid, spellschool, misstype, amount
 
 			if eventtype == "SWING_MISSED" then
-				spellid, spellschool = 6603, 1
+				spellid, spellschool = 6603, 0x01
 				misstype, amount = ...
 			else
 				spellid, _, spellschool, misstype, amount = ...
@@ -880,7 +880,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcName and dstName then
 			if eventtype == "SWING_DAMAGE" then
-				dmg.spellid, dmg.spellschool = 6603, 1
+				dmg.spellid, dmg.spellschool = 6603, 0x01
 				dmg.amount, dmg.overkill, _, _, _, dmg.absorbed = ...
 			else
 				dmg.spellid, _, dmg.spellschool, dmg.amount, dmg.overkill, _, _, _, dmg.absorbed = ...
@@ -905,7 +905,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 			local spellid, spellschool, misstype, amount
 
 			if eventtype == "SWING_MISSED" then
-				spellid, spellschool = 6603, 1
+				spellid, spellschool = 6603, 0x01
 				misstype, amount = ...
 			else
 				spellid, _, spellschool, misstype, amount = ...
