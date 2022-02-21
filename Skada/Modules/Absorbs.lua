@@ -940,7 +940,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				d.value = target.amount
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Absorbs and Skada:FormatNumber(d.value),
-					mod.metadata.columns.Percen and Skada:FormatPercent(d.value, total)
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then

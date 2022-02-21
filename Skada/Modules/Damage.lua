@@ -931,29 +931,41 @@ Skada:AddLoadableModule("Damage", function(L)
 	---------------------------------------------------------------------------
 
 	function setPrototype:GetDamage(useful)
-		local damage = Skada.db.profile.absdamage and self.totaldamage or self.damage or 0
-		if Skada.forPVP and self.type == "arena" and self.GetEnemyDamage then
-			damage = damage + self:GetEnemyDamage()
+		local damage = 0
+
+		if Skada.db.profile.absdamage and self.totaldamage then
+			damage = self.totaldamage
+		elseif self.damage then
+			damage = self.damage
 		end
 
 		if useful and self.overkill then
 			damage = max(0, damage - self.overkill)
 		end
+
+		if Skada.forPVP and self.type == "arena" and self.GetEnemyDamage then
+			damage = damage + self:GetEnemyDamage()
+
+			if useful and self.eoverkill then
+				damage = max(0, damage - self.eoverkill)
+			end
+		end
+
 		return damage
 	end
 
 	function setPrototype:GetDPS(useful)
-		local damage, dps = self:GetDamage(useful), 0
+		local dps, damage = 0, self:GetDamage(useful)
 		if damage > 0 then
 			dps = damage / max(1, self:GetTime())
 		end
 		return dps, damage
 	end
 
-	function setPrototype:GetActorDamage(id, name)
+	function setPrototype:GetActorDamage(id, name, useful)
 		local actor = self:GetActor(name, id)
 		if actor and actor.GetDamage then
-			return actor:GetDamage(), actor
+			return actor:GetDamage(useful), actor
 		elseif actor and (actor.totaldamage or actor.damage) then
 			return Skada.db.profile.absdamage and actor.totaldamage or actor.damage
 		end
@@ -975,10 +987,18 @@ Skada:AddLoadableModule("Damage", function(L)
 	end
 
 	function playerPrototype:GetDamage(useful)
-		local damage = Skada.db.profile.absdamage and self.totaldamage or self.damage or 0
+		local damage = 0
+
+		if Skada.db.profile.absdamage and self.totaldamage then
+			damage = self.totaldamage
+		elseif self.damage then
+			damage = self.damage
+		end
+
 		if useful and self.overkill then
 			damage = max(0, damage - self.overkill)
 		end
+
 		return damage
 	end
 

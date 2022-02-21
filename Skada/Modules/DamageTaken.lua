@@ -836,15 +836,23 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 		local cacheTable = Skada.cacheTable
 
 		function setPrototype:GetDamageTaken()
-			local damage = Skada.db.profile.absdamage and self.totaldamagetaken or self.damagetaken or 0
+			local damage = 0
+
+			if Skada.db.profile.absdamage and self.totaldamagetaken then
+				damage = self.totaldamagetaken
+			elseif self.damagetaken then
+				damage = self.damagetaken
+			end
+
 			if Skada.forPVP and self.type == "arena" and self.GetEnemyDamageTaken then
 				damage = damage + self:GetEnemyDamageTaken()
 			end
+
 			return damage
 		end
 
 		function setPrototype:GetDTPS()
-			local damage, dtps = self:GetDamageTaken(), 0
+			local dtps, damage = 0, self:GetDamageTaken()
 			if damage > 0 then
 				dtps = damage / max(1, self:GetTime())
 			end
@@ -852,11 +860,14 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 		end
 
 		function playerPrototype:GetDamageTaken()
-			return Skada.db.profile.absdamage and self.totaldamagetaken or self.damagetaken or 0
+			if Skada.db.profile.absdamage and self.totaldamagetaken then
+				return self.totaldamagetaken
+			end
+			return self.damagetaken or 0
 		end
 
 		function playerPrototype:GetDTPS(active)
-			local damage, dtps = self:GetDamageTaken(), 0
+			local dtps, damage = 0, self:GetDamageTaken()
 			if damage > 0 then
 				dtps = damage / max(1, self:GetTime(active))
 			end

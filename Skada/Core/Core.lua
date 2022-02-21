@@ -73,15 +73,6 @@ local CheckForJoinAndLeave
 -- list of players, pets and vehicles
 local players, pets, vehicles = {}, {}, {}
 
--- prototypes:
-Skada.setPrototype = Skada.setPrototype or {}
-Skada.playerPrototype = Skada.playerPrototype or {}
-Skada.enemyPrototype = Skada.enemyPrototype or {}
-
-local setPrototype = Skada.setPrototype
-local playerPrototype = Skada.playerPrototype
-local enemyPrototype = Skada.enemyPrototype
-
 -- format funtions.
 local SetNumeralFormat, SetValueFormat
 
@@ -186,7 +177,7 @@ do
 		end
 
 		Skada.callbacks:Fire("Skada_SetCreated", set)
-		return setPrototype:Bind(set)
+		return Skada.setPrototype:Bind(set)
 	end
 end
 
@@ -1294,6 +1285,41 @@ end
 -------------------------------------------------------------------------------
 -- player & enemies functions
 
+-- finds a player that was already recorded
+function Skada:FindPlayer(set, id, name, strict)
+	if set and set.players and id and id ~= "total" then
+		set._playeridx = set._playeridx or {}
+
+		local player = set._playeridx[id]
+		if player then
+			return self.playerPrototype:Bind(player, set)
+		end
+
+		-- search the set
+		for _, p in ipairs(set.players) do
+			if (id and p.id == id) or (name and p.name == name) then
+				set._playeridx[id] = self.playerPrototype:Bind(p, set)
+				return p
+			end
+		end
+
+		-- needed for certain bosses
+		local isboss, _, npcname = self:IsBoss(id, name)
+		if isboss then
+			player = {id = id, name = npcname or name, class = "BOSS"}
+			set._playeridx[id] = self.playerPrototype:Bind(player, set)
+			return player
+		end
+
+		-- our last hope!
+		if not strict then
+			player = self.playerPrototype:Bind({id = id, name = name or UNKNOWN, class = "PET"}, set)
+		end
+
+		return player
+	end
+end
+
 -- finds a player table or creates it if not found
 function Skada:GetPlayer(set, guid, name, flag)
 	if not (set and set.players and guid) then return end
@@ -1360,7 +1386,26 @@ function Skada:GetPlayer(set, guid, name, flag)
 
 	self.changed = true
 	self.callbacks:Fire("Skada_GetPlayer", player)
-	return playerPrototype:Bind(player, set)
+	return self.playerPrototype:Bind(player, set)
+end
+
+-- finds an enemy unit
+function Skada:FindEnemy(set, name, id)
+	if set and set.enemies and name then
+		set._enemyidx = set._enemyidx or {}
+
+		local enemy = set._enemyidx[name]
+		if enemy then
+			return self.enemyPrototype:Bind(enemy, set)
+		end
+
+		for _, e in ipairs(set.enemies) do
+			if (id and id == e.id) or (name and e.name == name) then
+				set._enemyidx[name] = self.enemyPrototype:Bind(e, set)
+				return e
+			end
+		end
+	end
 end
 
 -- finds or create an enemy entry
@@ -1381,7 +1426,30 @@ function Skada:GetEnemy(set, name, guid, flag)
 
 	self.changed = true
 	self.callbacks:Fire("Skada_GetEnemy", enemy)
-	return enemyPrototype:Bind(enemy, set)
+	return self.enemyPrototype:Bind(enemy, set)
+end
+
+-- generic find a player or an enemey
+function Skada:FindActor(set, id, name)
+	local actor = self:FindPlayer(set, id, name, true)
+	if not actor then
+		actor = self:FindEnemy(set, name, id)
+	end
+	return actor
+end
+
+-- generic: finds a player/enemy or creates it.
+function Skada:GetActor(set, id, name, flag)
+	local actor = self:FindActor(set, id, name)
+	-- creates it if not found
+	if not actor then
+		if self:IsPlayer(id, flag, name) == 1 or self:IsPet(id, flag) == 1 then -- group members or group pets
+			actor = self:GetPlayer(set, id, name, flag)
+		else -- an outsider maybe?
+			actor = self:GetEnemy(set, name, id, flag)
+		end
+	end
+	return actor
 end
 
 -- checks if the unit is a player
@@ -3181,6 +3249,46 @@ do
 end
 
 -------------------------------------------------------------------------------
+
+do
+	local function ClearIndexes(set, mt)
+		if set then
+			set._playeridx = nil
+			set._enemyidx = nil
+
+			-- delete our metatables.
+			if mt then
+				if set.players then
+					for _, p in ipairs(set.players) do
+						if p.super then
+							p.super = nil
+						end
+					end
+				end
+
+				if set.enemies then
+					for _, e in ipairs(set.enemies) do
+						if e.super then
+							e.super = nil
+						end
+					end
+				end
+			end
+		end
+	end
+
+	function Skada:ClearAllIndexes(mt)
+		Skada:DispatchSets(ClearIndexes, mt)
+		ClearIndexes(Skada.char.total, mt)
+		if Skada.char.sets then
+			for _, set in ipairs(Skada.char.sets) do
+				ClearIndexes(set, mt)
+			end
+		end
+	end
+end
+
+-------------------------------------------------------------------------------
 -- Getters & Iterators
 
 function Skada:GetWindows()
@@ -3205,6 +3313,30 @@ end
 
 function Skada:IterateFeeds()
 	return pairs(feeds)
+end
+
+function Skada:GetSet(s)
+	local set = nil
+	if s == "current" then
+		set = self.current or self.last or self.char.sets[1]
+	elseif s == "total" then
+		set = self.total
+	else
+		set = self.char.sets[s]
+	end
+
+	return set and self.setPrototype:Bind(set)
+end
+
+function Skada:GetSets()
+	for _, set in ipairs(self.char.sets) do
+		set =  self.setPrototype:Bind(set)
+	end
+	return self.char.sets
+end
+
+function Skada:IterateSets()
+	return ipairs(self:GetSets())
 end
 
 -------------------------------------------------------------------------------

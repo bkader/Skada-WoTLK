@@ -261,9 +261,13 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 
 		local e = Skada:GetEnemy(set, dmg.enemyname, dmg.enemyid, dmg.enemyflags)
 		if e then
+			set.edamagetaken = (set.edamagetaken or 0) + dmg.amount
+			set.etotaldamagetaken = (set.etotaldamagetaken or 0) + dmg.amount
+
 			e.damagetaken = (e.damagetaken or 0) + dmg.amount
 			e.totaldamagetaken = (e.totaldamagetaken or 0) + dmg.amount
 			if absorbed > 0 then
+				set.etotaldamagetaken = set.etotaldamagetaken + absorbed
 				e.totaldamagetaken = e.totaldamagetaken + absorbed
 			end
 
@@ -702,34 +706,34 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 	function setPrototype:GetEnemyDamageTaken()
 		if not self.enemies then
 			return 0
-		elseif Skada.db.profile.absdamage and self.totaldamage then
-			return self.totaldamage
-		elseif self.damage then
-			return self.damage
-		else
-			local total = 0
-			for _, e in ipairs(self.enemies) do
-				if not e.fake and Skada.db.profile.absdamage and e.totaldamagetaken then
-					total = total + e.totaldamagetaken
-				elseif not e.fake and e.damagetaken then
-					total = total + e.damagetaken
-				end
-			end
-			return total
+		elseif Skada.db.profile.absdamage and self.etotaldamagetaken then
+			return self.etotaldamagetaken
+		elseif self.edamagetaken then
+			return self.edamagetaken
 		end
+
+		local total = 0
+		for _, e in ipairs(self.enemies) do
+			if not e.fake and Skada.db.profile.absdamage and e.totaldamagetaken then
+				total = total + e.totaldamagetaken
+			elseif not e.fake and e.damagetaken then
+				total = total + e.damagetaken
+			end
+		end
+		return total
 	end
 
 	function enemyPrototype:GetDamageTaken()
-		if Skada.db.profile.absdamage then
-			return self.totaldamagetaken or 0
+		if Skada.db.profile.absdamage and self.totaldamagetaken then
+			return self.totaldamagetaken
 		end
 		return self.damagetaken or 0
 	end
 
-	function enemyPrototype:GetDTPS()
+	function enemyPrototype:GetDTPS(active)
 		local dtps, damage = 0, self:GetDamageTaken()
 		if damage > 0 then
-			dtps = damage / max(1, self:GetTime())
+			dtps = damage / max(1, self:GetTime(active))
 		end
 		return dtps, damage
 	end
@@ -744,7 +748,9 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 							cacheTable[name] = {amount = source.amount, total = source.total, useful = source.useful}
 						else
 							cacheTable[name].amount = cacheTable[name].amount + source.amount
-							cacheTable[name].total = cacheTable[name].total + source.total
+							if source.total then
+								cacheTable[name].total = (cacheTable[name].total or 0) + source.total
+							end
 							if source.useful then
 								cacheTable[name].useful = (cacheTable[name].useful or 0) + source.useful
 							end
@@ -776,9 +782,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 			if sources and sources[name] then
 				amount = sources[name].amount or 0
 				total = sources[name].total or 0
-				if sources[name].useful then
-					useful = sources[name].useful or 0
-				end
+				useful = sources[name].useful or 0
 			end
 			return amount, total, useful
 		end
@@ -829,6 +833,9 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 				Skada:AddActiveTime(e, e.role ~= "HEALER" and dmg.amount > 0)
 			end
 
+			set.edamage = (set.edamage or 0) + dmg.amount
+			set.etotaldamage = (set.etotaldamage or 0) + dmg.amount
+
 			e.damage = (e.damage or 0) + dmg.amount
 			e.totaldamage = (e.totaldamage or 0) + dmg.amount
 
@@ -843,6 +850,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 			spell.total = spell.total + dmg.amount
 
 			if absorbed > 0 then
+				set.etotaldamage = set.etotaldamage + absorbed
 				e.totaldamage = e.totaldamage + absorbed
 				spell.total = spell.total + absorbed
 			end
@@ -866,8 +874,8 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 				end
 
 				if (dmg.overkill or 0) > 0 then
-					e.overkill = (e.overkill or 0) + dmg.overkill
 					set.eoverkill = (set.eoverkill or 0) + dmg.overkill
+					e.overkill = (e.overkill or 0) + dmg.overkill
 					spell.overkill = (spell.overkill or 0) + dmg.overkill
 					target.overkill = (target.overkill or 0) + dmg.overkill
 				end
@@ -1126,6 +1134,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 
 	function mod:Update(win, set)
 		win.title = L["Enemy Damage Done"]
+
 		local total = set and set:GetEnemyDamage() or 0
 		if total > 0 then
 			if win.metadata then
@@ -1219,25 +1228,25 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 	function setPrototype:GetEnemyDamage()
 		if not self.enemies then
 			return 0
-		elseif Skada.db.profile.absdamage and self.totaldamagetaken then
-			return self.totaldamagetaken
-		elseif self.damagetaken then
-			return self.damagetaken
-		else
-			local total = 0
-			for _, e in ipairs(self.enemies) do
-				if not e.fake and Skada.db.profile.absdamage and e.totaldamage then
-					total = total + e.totaldamage
-				elseif not e.fake and e.damage then
-					total = total + e.damage
-				end
-			end
-			return total
+		elseif Skada.db.profile.absdamage and self.etotaldamage then
+			return self.etotaldamage
+		elseif self.edamage then
+			return self.edamage
 		end
+
+		local total = 0
+		for _, e in ipairs(self.enemies) do
+			if not e.fake and Skada.db.profile.absdamage and e.totaldamage then
+				total = total + e.totaldamage
+			elseif not e.fake and e.damage then
+				total = total + e.damage
+			end
+		end
+		return total
 	end
 
 	function setPrototype:GetEnemyDPS()
-		local damage, dps = self:GetEnemyDamage(), 0
+		local dps, damage = 0, self:GetEnemyDamage()
 		if damage > 0 then
 			dps = damage / max(1, self:GetTime())
 		end
@@ -1249,8 +1258,8 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 	end
 
 	function enemyPrototype:GetDamage()
-		if Skada.db.profile.absdamage then
-			return self.totaldamage or 0
+		if Skada.db.profile.absdamage and self.totaldamage then
+			return self.totaldamage
 		end
 		return self.damage or 0
 	end
@@ -1398,6 +1407,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 				Skada:AddActiveTime(e, e.role == "HEALER" and data.amount > 0)
 			end
 
+			set.eheal = (set.eheal or 0) + data.amount
 			e.heal = (e.heal or 0) + data.amount
 
 			local spell = e.healspells and e.healspells[data.spellid]
@@ -1594,12 +1604,16 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 	end
 
 	function setPrototype:GetEnemyHeal()
+		if not self.enemies then
+			return 0
+		elseif self.eheal then
+			return self.eheal
+		end
+
 		local total = 0
-		if self.enemies then
-			for _, e in ipairs(self.enemies) do
-				if e.heal then
-					total = total + e.heal
-				end
+		for _, e in ipairs(self.enemies) do
+			if e.heal then
+				total = total + e.heal
 			end
 		end
 		return total
