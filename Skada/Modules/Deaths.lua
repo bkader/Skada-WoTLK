@@ -133,65 +133,83 @@ Skada:AddLoadableModule("Deaths", function(L)
 		if player then
 			set.death = (set.death or 0) + 1
 			player.death = (player.death or 0) + 1
-			if set ~= Skada.total then
-				player.deathlog = player.deathlog or {}
-				if player.deathlog[1] then
-					player.deathlog[1].time = ((ts or 0) <= 0) and time() or ts
 
-					-- sometimes multiple close events arrive with the same timestamp
-					-- so we add a small correction to ensure sort stability.
-					for i, e in ipairs(player.deathlog[1].log) do
-						local t = e.time
+			-- saving this to total set may become a memory hog deluxe.
+			if set == Skada.total then return end
+
+			player.deathlog = player.deathlog or {}
+			if player.deathlog[1] then
+				player.deathlog[1].time = ((ts or 0) <= 0) and time() or ts
+
+				for i = #player.deathlog[1].log, 1, -1 do
+					local e = player.deathlog[1].log[i]
+					if (player.deathlog[1].time - e.time) >= 60 then
+						-- in certain situations, such us The Ruby Sanctum,
+						-- deathlog contain old data which are irrelevant to keep.
+						tremove(player.deathlog[1].log, i)
+					else
+						-- sometimes multiple close events arrive with the same timestamp
+						-- so we add a small correction to ensure sort stability.
 						e.time = e.time + i * 0.00001
 					end
+				end
 
-					-- announce death
-					if Skada.db.profile.modules.deathannounce and IsInGroup() and not IsInPvP() then
-						for _, l in ipairs(player.deathlog[1].log) do
-							if l.amount and l.amount < 0 then
-								log = l
-								break
-							end
+				-- no entry left? insert an unknown entry
+				if #player.deathlog[1].log == 0 then
+					tinsert(player.deathlog[1].log, {
+						source = L.Unknown,
+						amount = -player.maxhp,
+						time = player.deathlog[1].time-0.00001,
+						hp = player.maxhp
+					})
+				end
+
+				-- announce death
+				if Skada.db.profile.modules.deathannounce and IsInGroup() and not IsInPvP() then
+					for _, l in ipairs(player.deathlog[1].log) do
+						if l.amount and l.amount < 0 then
+							log = l
+							break
 						end
-						if not log then return end
+					end
+					if not log then return end
 
-						local output = format(
-							"Skada: %s > %s (%s) %s",
-							log.source or UNKNOWN, -- source name
-							player.name or UNKNOWN, -- player name
-							GetSpellInfo(log.spellid) or UNKNOWN, -- spell name
-							Skada:FormatNumber(0 - log.amount, 1) -- spell amount
-						)
+					local output = format(
+						"Skada: %s > %s (%s) %s",
+						log.source or L.Unknown, -- source name
+						player.name or L.Unknown, -- player name
+						log.spellid and GetSpellInfo(log.spellid) or L.Unknown, -- spell name
+						Skada:FormatNumber(0 - log.amount, 1) -- spell amount
+					)
 
-						if log.overkill or log.resisted or log.blocked or log.absorbed then
-							local extra = new()
+					if log.overkill or log.resisted or log.blocked or log.absorbed then
+						local extra = new()
 
-							if log.overkill then
-								extra[#extra + 1] = format("O:%s", Skada:FormatNumber(log.overkill, 1))
-							end
-							if log.resisted then
-								extra[#extra + 1] = format("R:%s", Skada:FormatNumber(log.resisted, 1))
-							end
-							if log.blocked then
-								extra[#extra + 1] = format("B:%s", Skada:FormatNumber(log.blocked, 1))
-							end
-							if log.absorbed then
-								extra[#extra + 1] = format("A:%s", Skada:FormatNumber(log.absorbed, 1))
-							end
-							if next(extra) then
-								output = format("%s [%s]", output, tconcat(extra, " - "))
-							end
-
-							extra = del(extra)
+						if log.overkill then
+							extra[#extra + 1] = format("O:%s", Skada:FormatNumber(log.overkill, 1))
+						end
+						if log.resisted then
+							extra[#extra + 1] = format("R:%s", Skada:FormatNumber(log.resisted, 1))
+						end
+						if log.blocked then
+							extra[#extra + 1] = format("B:%s", Skada:FormatNumber(log.blocked, 1))
+						end
+						if log.absorbed then
+							extra[#extra + 1] = format("A:%s", Skada:FormatNumber(log.absorbed, 1))
+						end
+						if next(extra) then
+							output = format("%s [%s]", output, tconcat(extra, " - "))
 						end
 
-						if Skada.db.profile.modules.deathchannel == "SELF" then
-							Skada:Print(output)
-						elseif Skada.db.profile.modules.deathchannel == "GUILD" then
-							Skada:SendChat(output, "GUILD", "preset", true)
-						else
-							Skada:SendChat(output, IsInRaid() and "RAID" or "PARTY", "preset", true)
-						end
+						extra = del(extra)
+					end
+
+					if Skada.db.profile.modules.deathchannel == "SELF" then
+						Skada:Print(output)
+					elseif Skada.db.profile.modules.deathchannel == "GUILD" then
+						Skada:SendChat(output, "GUILD", "preset", true)
+					else
+						Skada:SendChat(output, IsInRaid() and "RAID" or "PARTY", "preset", true)
 					end
 				end
 			end
@@ -238,7 +256,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 	function deathlogmod:Enter(win, id, label)
 		win.datakey = id
-		win.title = format(L["%s's death log"], win.playername or UNKNOWN)
+		win.title = format(L["%s's death log"], win.playername or L.Unknown)
 	end
 
 	do
@@ -252,7 +270,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 		function deathlogmod:Update(win, set)
 			local player = Skada:FindPlayer(set, win.playerid, win.playername)
 			if player and win.datakey then
-				win.title = format(L["%s's death log"], win.playername or UNKNOWN)
+				win.title = format(L["%s's death log"], win.playername or L.Unknown)
 
 				local deathlog
 				if player.deathlog and player.deathlog[win.datakey] then
@@ -263,10 +281,11 @@ Skada:AddLoadableModule("Deaths", function(L)
 				if win.metadata then
 					win.metadata.maxvalue = player.maxhp
 				end
+
 				local nr = 0
 
 				-- add a fake entry for the actual death
-				if (deathlog.time or 0) > 0 then
+				if win.metadata and (deathlog.time or 0) > 0 then
 					nr = nr + 1
 
 					local d = win.dataset[nr] or {}
@@ -280,7 +299,17 @@ Skada:AddLoadableModule("Deaths", function(L)
 					d.valuetext = ""
 				end
 
-				tsort(deathlog.log, sort_logs)
+				-- postfix
+				if #deathlog.log == 0 then
+					deathlog.log[1] = {
+						source = L.Unknown,
+						amount = -player.maxhp,
+						time = deathlog.time-0.00001,
+						hp = player.maxhp
+					}
+				else
+					tsort(deathlog.log, sort_logs)
+				end
 
 				for i, log in ipairs(deathlog.log) do
 					local diff = tonumber(log.time) - tonumber(deathlog.time)
@@ -290,23 +319,36 @@ Skada:AddLoadableModule("Deaths", function(L)
 						local d = win.dataset[nr] or {}
 						win.dataset[nr] = d
 
-						local spellname, _, spellicon = GetSpellInfo(log.spellid)
+						local spellname, spellicon
+						if log.spellid then
+							spellname, _, spellicon = GetSpellInfo(log.spellid)
+						else
+							spellname = L.Unknown
+							spellicon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
+						end
 
 						d.id = nr
 						d.spellid = log.spellid
-						d.label = format("%02.2f: %s", diff or 0, spellname or UNKNOWN)
+						d.label = format("%02.2fs: %s", diff or 0, spellname)
 						d.icon = spellicon
 						d.time = log.time
 
 						-- used for tooltip
 						d.hp = log.hp
 						d.amount = log.amount
-						d.source = log.source
+						d.source = log.source or L.Unknown
 						d.spellname = spellname
 
 						d.value = log.hp or 0
 						local change = (log.amount >= 0 and "+" or "-") .. Skada:FormatNumber(abs(log.amount))
-						d.reportlabel = format("%02.2f: %s   %s [%s]", diff or 0, GetSpellLink(log.spellid) or spellname or UNKNOWN, change, Skada:FormatNumber(log.hp or 0))
+						d.reportlabel = format(
+							"%02.2fs: %s (%s)   %s [%s]",
+							diff or 0,
+							(Skada.db.profile.reportlinks and log.spellid) and GetSpellLink(log.spellid) or spellname,
+							d.source,
+							change,
+							Skada:FormatNumber(log.hp or 0)
+						)
 
 						local extra = new()
 
@@ -345,6 +387,8 @@ Skada:AddLoadableModule("Deaths", function(L)
 						else
 							d.color = red
 						end
+					else
+						tremove(deathlog.log, i)
 					end
 				end
 			end
@@ -363,10 +407,6 @@ Skada:AddLoadableModule("Deaths", function(L)
 			win.title = format(L["%s's deaths"], player.name)
 
 			if (player.death or 0) > 0 and player.deathlog then
-				if win.metadata then
-					win.metadata.maxvalue = 0
-				end
-
 				local nr = 0
 				for i, death in ipairs(player.deathlog) do
 					nr = nr + 1
@@ -376,7 +416,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 					d.id = i
 					d.time = death.time
-					d.icon = [[Interface\Icons\Ability_Rogue_FeignDeath]]
+					d.icon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
 
 					for k, v in ipairs(death.log) do
 						if v.amount and v.amount < 0 and (v.spellid or v.source) then
@@ -390,12 +430,12 @@ Skada:AddLoadableModule("Deaths", function(L)
 						end
 					end
 
-					d.label = d.label or set.name or UNKNOWN
+					d.label = d.label or set.name or L.Unknown
 
 					d.value = death.time
 					d.valuetext = formatdate(d.value)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
+					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -416,10 +456,6 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 		local total = set.death or 0
 		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and (player.death or 0) > 0 then
@@ -446,7 +482,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 						d.valuetext = tostring(player.death)
 					end
 
-					if win.metadata and d.value > win.metadata.maxvalue then
+					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -498,7 +534,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 			ordersort = true,
 			tooltip = entry_tooltip,
 			columns = {Change = true, Health = true, Percent = true},
-			icon = [[Interface\Icons\spell_shadow_soulleech_1]]
+			icon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
 		}
 		playermod.metadata = {click1 = deathlogmod}
 		self.metadata = {

@@ -123,10 +123,6 @@ Skada:AddLoadableModule("Resources", function(L)
 		local total = set and self.power and set[self.power] or 0
 
 		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and player[self.power] then
@@ -148,7 +144,7 @@ Skada:AddLoadableModule("Resources", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
+					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -174,17 +170,15 @@ Skada:AddLoadableModule("Resources", function(L)
 	-- player mods main update function
 	function playermod:Update(win, set)
 		win.title = format(L["%s's gained %s"], win.playername or L.Unknown, self.powername or L.Unknown)
+		if not set or not win.playername then return end
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
-		local total = player and self.power and player[self.power] or 0
+		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		if enemy then return end -- unavailable for enemies yet
 
-		if total > 0 and player[self.spells] then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
+		local total = actor and self.power and actor[self.power] or 0
+		if total > 0 and actor[self.spells] then
 			local nr = 0
-			for spellid, amount in pairs(player[self.spells]) do
+			for spellid, amount in pairs(actor[self.spells]) do
 				nr = nr + 1
 
 				local d = win.dataset[nr] or {}
@@ -200,7 +194,7 @@ Skada:AddLoadableModule("Resources", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
+				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 					win.metadata.maxvalue = d.value
 				end
 			end

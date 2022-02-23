@@ -70,10 +70,6 @@ Skada:AddLoadableModule("My Spells", function(L)
 
 		local player = set and set:GetPlayer(Skada.userGUID, Skada.userName)
 		if player then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 
 			-- damage spells
@@ -93,7 +89,7 @@ Skada:AddLoadableModule("My Spells", function(L)
 					d.value = Skada.db.profile.absdamage and spell.total or spell.amount
 					d.valuetext = Skada:FormatNumber(d.value)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
+					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -118,7 +114,7 @@ Skada:AddLoadableModule("My Spells", function(L)
 					d.value = spell.amount
 					d.valuetext = Skada:FormatNumber(d.value)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
+					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -140,7 +136,7 @@ Skada:AddLoadableModule("My Spells", function(L)
 					d.value = spell.amount
 					d.valuetext = Skada:FormatNumber(d.value)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
+					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 						win.metadata.maxvalue = d.value
 					end
 				end

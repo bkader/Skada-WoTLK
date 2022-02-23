@@ -88,10 +88,6 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 		local targets = (total > 0) and player:GetFriendlyFireTargets()
 
 		if targets then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
@@ -111,7 +107,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
+				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -130,10 +126,6 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 		local total = player and player.friendfire or 0
 
 		if total > 0 and player.friendfirespells then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for spellid, spell in pairs(player.friendfirespells) do
 				nr = nr + 1
@@ -151,7 +143,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
+				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -171,14 +163,11 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 		local total = player and player.friendfire or 0
 		local targets = nil
 		if total > 0 and player.friendfirespells and player.friendfirespells[win.spellid] then
+			total = player.friendfirespells[win.spellid].amount
 			targets = player.friendfirespells[win.spellid].targets
 		end
 
 		if targets then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for targetname, amount in pairs(targets) do
 				nr = nr + 1
@@ -203,7 +192,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
+				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -215,10 +204,6 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 
 		local total = set.friendfire or 0
 		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and (player.friendfire or 0) > 0 then
@@ -240,7 +225,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
+					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -312,9 +297,9 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 		local cacheTable = Skada.cacheTable
 		local wipe = wipe
 
-		function playerPrototype:GetFriendlyFireTargets()
+		function playerPrototype:GetFriendlyFireTargets(tbl)
 			if self.friendfirespells then
-				wipe(cacheTable)
+				tbl = wipe(tbl or cacheTable)
 				for _, spell in pairs(self.friendfirespells) do
 					if spell.targets then
 						for name, amount in pairs(spell.targets) do
@@ -337,8 +322,9 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 						end
 					end
 				end
-				return cacheTable
 			end
+
+			return tbl
 		end
 	end
 end)

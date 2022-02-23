@@ -25,11 +25,9 @@ Skada:AddLoadableModule("Activity", function(L)
 
 		local settime = set and set:GetTime()
 		if settime > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
+
+			-- players.
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and player.class and Skada.validclass[player.class] then
 					local activetime = player:GetTime(true)
@@ -46,14 +44,51 @@ Skada:AddLoadableModule("Activity", function(L)
 						d.role = player.role
 						d.spec = player.spec
 
+						if Skada.forPVP and set.type == "arena" then
+							d.color = set.gold and Skada.classcolors.ARENA_GOLD or Skada.classcolors.ARENA_GREEN
+						end
+
 						d.value = activetime
 						d.valuetext = Skada:FormatValueCols(
 							self.metadata.columns["Active Time"] and Skada:FormatTime(d.value),
 							self.metadata.columns.Percent and Skada:FormatPercent(d.value, settime)
 						)
 
-						if win.metadata and d.value > win.metadata.maxvalue then
+						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 							win.metadata.maxvalue = d.value
+						end
+					end
+				end
+			end
+
+			-- arena enemies
+			if Skada.forPVP and set.type == "arena" and set.enemies then
+				for _, enemy in ipairs(set.enemies) do
+					if (not win.class or win.class == enemy.class) and enemy.class and Skada.validclass[enemy.class] then
+						local activetime = enemy:GetTime(true)
+						if activetime > 0 then
+							nr = nr + 1
+
+							local d = win.dataset[nr] or {}
+							win.dataset[nr] = d
+
+							d.id = enemy.id or enemy.name
+							d.label = enemy.name
+							d.text = nil
+							d.class = enemy.class
+							d.role = enemy.role
+							d.spec = enemy.spec
+							d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_GOLD
+
+							d.value = activetime
+							d.valuetext = Skada:FormatValueCols(
+								self.metadata.columns["Active Time"] and Skada:FormatTime(d.value),
+								self.metadata.columns.Percent and Skada:FormatPercent(d.value, settime)
+							)
+
+							if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+								win.metadata.maxvalue = d.value
+							end
 						end
 					end
 				end

@@ -57,10 +57,6 @@ Skada:AddLoadableModule("Fails", function(L)
 
 		local total = set and set:GetFailCount(win.spellid) or 0
 		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for _, player in ipairs(set.players) do
 				if player.failspells and player.failspells[win.spellid] then
@@ -82,7 +78,7 @@ Skada:AddLoadableModule("Fails", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
+					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -102,10 +98,6 @@ Skada:AddLoadableModule("Fails", function(L)
 		local total = player and player.fail or 0
 
 		if total > 0 and player.failspells then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for spellid, count in pairs(player.failspells) do
 				nr = nr + 1
@@ -123,7 +115,7 @@ Skada:AddLoadableModule("Fails", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
+				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -135,10 +127,6 @@ Skada:AddLoadableModule("Fails", function(L)
 
 		local total = set.fail or 0
 		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and (player.fail or 0) > 0 then
@@ -160,7 +148,7 @@ Skada:AddLoadableModule("Fails", function(L)
 						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
+					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 						win.metadata.maxvalue = d.value
 					end
 				end

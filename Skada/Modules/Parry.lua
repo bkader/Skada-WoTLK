@@ -69,17 +69,15 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 
 	function targetmod:Update(win, set)
 		win.title = format(L["%s's parry targets"], win.playername or L.Unknown)
+		if not set or not win.playername then return end
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
-		local total = player and player.parry or 0
+		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		if enemy then return end -- unavailable for enemies yet
 
-		if total > 0 and player.parrytargets then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
+		local total = actor and actor.parry or 0
+		if total > 0 and actor.parrytargets then
 			local nr = 0
-			for targetname, count in pairs(player.parrytargets) do
+			for targetname, count in pairs(actor.parrytargets) do
 				nr = nr + 1
 
 				local d = win.dataset[nr] or {}
@@ -95,7 +93,7 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
+				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -107,10 +105,6 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 
 		local total = set.parry or 0
 		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and (player.parry or 0) > 0 then
@@ -132,7 +126,7 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
+					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 						win.metadata.maxvalue = d.value
 					end
 				end

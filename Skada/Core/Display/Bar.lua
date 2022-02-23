@@ -573,7 +573,7 @@ do
 					bar = mod:CreateBar(win, data.id, data.label, data.value, win.metadata.maxvalue or 1, data.icon, false)
 					bar.id = data.id
 					bar.text = data.label
-					bar.fixed = false
+					bar.fixed = nil
 
 					if not data.ignore then
 						numbars = numbars + 1

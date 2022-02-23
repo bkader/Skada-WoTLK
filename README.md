@@ -235,90 +235,169 @@ This concept was added as of version **1.8.72** and allows the player to access 
 #### Segments/Sets functions
 
 ```lua
-local set = Skada:GetSet("current") -- gets the current segment table.
--- then you have access to the following functions:
-set:GetLabel() -- returns the formatted set name
-set:GetTime() -- returns the segment time or combat time
-set:GetFormatedTime() -- returns the formatted segment time in HH:MM:SS
+-- to retrieve a segment (current for example):
+local set = Skada:GetSet("current")
 
-set:GetPlayer(guid, name) -- retrieves a player's table
-set:GetEnemy(name, guid) -- retrieves an enemy table
-set:GetActor(name, guid) -- retrieves a player or an enemy
+-- After the segment is found, you have access to the following functions
+-- called like so: set:Func(...)
+set:GetTime() -- returns the segment time
 
-set:GetAPS() -- returns the amount of Absorbs per second APS
-set:GetHeal() -- returns the amount of heal
-set:GetAbsorbHeal() -- returns the amount of absorbs?
-set:GetAHPS() -- returns the amounts of absorbs and heals combined.
-set:GetHPS() -- returns the amount of heal per second
-set:GetDPS(useful) -- returns the group DPS amount. useful: exclude the overkill
-set:GetOHPS() -- returns the amount of overheal
-set:GetTHPS() -- returns the total healing, including the overheal
-set:GetDTPS() -- returns the amount of damage taken per second by the whole group.
+set:GetActor(name, guid) -- attempts to retrieve a player or an enemy.
+set:GetPlayer(guid, name) -- attempts to retrieve a player.
+set:GetEnemy(name, guid) -- attempts to retrieve an enemy.
+set:GetActorTime(guid, name, active) -- returns the actor's time if found or 0.
 
-set:GetActorTime(id, name, active) -- return the actor's time.
-set:GetAbsorbHealSpells() -- returns the table of both absorb heals spells.
-set:GetAuraPlayers(spellid) -- returns the list of players by the given buff id.
-set:GetActorDamage(id, name) -- returns the actor's damage.
-set:GetActorDamageSpells(id, name) -- returns the actor's spell table if found.
-set:GetActorDamageTargets(id, name, tbl) -- returns the actor's damage targets table with options cache table.
-set:GetDamage(useful) -- returns the damage amount. if "useful" is true, it excludes the overkill.
-set:GetDamageTaken() -- returns the amount of damage taken by the whole group.
-set:GetFailCount(spellid) -- returns the number of fails per give spell id
-set:GetAbsorbHealTaken() -- returns the table of players their healing taken amounts.
-set:GetPotion(potionid, class) -- returns the list of players and total usage of the give potion id
+set:GetDamage(useful) -- returns the segment damage amount, exlucing overkill if "useful" is true
+set:GetDPS(useful) -- returns the dps and damage amount, excluding overkill if "useful" is true
 
-set:GetEnemyDamageTaken() -- returns the amount of damage enemies took.
-set:GetEnemyDamage() -- returns the amount of damage enemies dealt to your group.
-set:GetEnemyDPS() -- returns total dps and damage amount of all enemies.
-set:GetEnemyHeal() -- returns the amount of heal enemies did.
-set:GetEnemyHPS() -- returns the total hps and heal amount of all enemies.
+set:GetDamageTaken() -- returns the damage taken by players.
+set:GetDTPS() -- returns the damage taken by players per second and damage amount.
+
+set:GetActorDamage(guid, name, useful) -- returns the damage done by the given actor.
+set:GetActorDPS(guid, name, useful, active) -- returns the dps and damage for the given actor.
+set:GetActorDamageTargets(guid, name, tbl) -- returns the table of damage targets.
+set:GetActorDamageSpells(guid, name) -- returns the table of damage spells.
+set:GetActorDamageOnTarget(guid, name, targetname) -- returns the damage, overkill [and useful for enemies]
+
+set:GetActorDamageTaken(guid, name) -- returns the damage taken by the actor.
+set:GetActorDTPS(guid, name, active) -- returns the damage taken by the actor per second and damage amount.
+set:GetActorDamageSources(guid, name, tbl) -- returns the table of damage taken sources.
+set:GetActorDamageTakenSpells(guid, name) -- returns the table of damage taken spells.
+set:GetActorDamageFromSource(guid, name, targetname) -- returns the damage, overkill [and useful for enemies].
+
+set:GetOverkill() -- returns the amount of overkill
+
+set:GetHeal() -- returns the amount of heal.
+set:GetHPS() -- returns the amount of heal per second and the heal amount.
+
+set:GetOverheal() -- returns the amount of overheal.
+set:GetOHPS() -- returns the amount of overheal per second and the overheal amount.
+
+set:GetTotalHeal() -- returns the amount of heal, including the overheal
+set:GetTHPS() -- returns the amount of heal+overheal per second
+
+set:GetAbsorb() -- returns the amount of absorbs.
+set:GetAPS() -- returns the amount of absorbs per second and the absorb amount.
+
+set:GetAbsorbHeal() -- returns the amount of heals and absorbs combined.
+set:GetAHPS() -- returns the amount of heals and absorbs combined per second.
+set:GetAbsorbHealSpells(tbl) -- returns the table of heal spells and absorbs spells combined.
+
+--
+-- below are functions available only if certain modules are enabled.
+--
+
+-- requires Healing Taken module
+set:GetAbsorbHealTaken(tbl) -- returns the amount of heal taken.
+
+-- requires either Buffs or Debuffs modules.
+set:GetAuraPlayers(spellid) -- returns the list of players that had the aura.
+
+-- requires Enemies modules
+set:GetEnemyDamage() -- returns the damage done by enemeies.
+set:GetEnemyDPS() -- returns enemies DPS and damage amount.
+set:GetEnemyDamageTaken() -- returns the damage taken by enemeies.
+set:GetEnemyDTPS() -- returns enemies DTPS and damage taken amount.
+set:GetEnemyOverkill() -- returns enemies overkill amount.
+set:GetEnemyHeal(absorb) -- returns enemies heal amount [including absorbs]
+set:GetEnemyHPS(absorb, active) -- returns enemies HPS and heal amount.
+
+-- requires Absorbed Damage module
+set:GetAbsorbedDamage() -- returns the amount of absorbed damage.
+
+-- requires Fails module
+set:GetFailCount(spellid) -- returns the number of fails for the given spell.
+
+-- requires Potions module
+set:GetPotion(potionid, class) -- returns the list of players for the given potion id (optional class filter)
+```
+
+#### Actors functions (_Common to both players and enemies_)
+
+First, you would want to get the segment, then the actor. After, you will have access to a set of predefined functions:
+
+```lua
+-- After retrieving and actor like so:
+local set = Skada:GetSet("current")
+local actor = set:GetActor(name, guid)
+
+-- here is the list of common functions.
+actor:GetTime(active) -- returns actor's active/effective time.
+
+actor:GetDamage(useful) -- returns actor's damage, excluding overkill if "useful" is true
+actor:GetDPS(useful, active) -- returns the actor's active/effective DPS and damage amount
+actor:GetDamageTargets(tbl) -- returns the actor's damage targets table.
+actor:GetDamageOnTarget(name) -- returns the damage, overkill [and userful] on the given target
+
+actor:GetOverkill() -- returns the amount of overkill
+
+actor:GetDamageTaken() -- returns the amount of damage taken
+actor:GetDTPS(active) -- returns the DTPS and the amount of damage taken
+actor:GetDamageSources(tbl) -- returns the table of damage taken sources.
+actor:GetDamageFromSource(name) -- returns the damage, overkill [and useful for enemies]
+
+actor:GetHeal() -- returns the actor's heal amount.
+actor:GetHPS(active) -- returns the actor's HPS and heal amount.
+actor:GetHealTargets(tbl) -- returns the actor's heal targets table.
+actor:GetHealOnTarget(name) -- returns the actor's heal and overheal amount on the target.
+
+actor:GetOverheal() -- returns the actor's overheal amount.
+actor:GetOHPS(active) -- returns the actor's overheal per second and overheal amount.
+actor:GetOverhealTargets(tbl) -- returns the table of actor's overheal targets.
+actor:GetOverhealOnTarget(name) -- returns the amount of overheal on the given target.
+
+actor:GetTotalHeal() -- returns the actor's heal amount including overheal.
+actor:GetTHPS(active) -- returns the actor's total heal per second and total heal amount.
+actor:GetTotalHealTargets(tbl) -- returns the table of actor's total heal targets.
+actor:GetTotalHealOnTarget(name) -- returns the total heal amount on the given target.
+
+actor:GetAbsorb() -- returns the amount of absorbs.
+actor:GetAPS(active) -- returns the absorbs per second and absorbs amount.
+actor:GetAbsorbTargets(tbl) -- returns the table of actor's absorbed targets.
+
+actor:GetAbsorbHeal() -- returns the amounts of heal and absorb combined.
+actor:GetAHPS(active) -- returns the heal and absorb combined, per second and their combined amount.
+actor:GetAbsorbHealTargets(tbl) -- returns the table of actor's healed and absorbed targets.
+actor:GetAbsorbHealOnTarget(name) -- returns the actor's heal (including absorbs) and overheal on the target.
 ```
 
 #### Players functions
 
-First, you would want to get the segment, then the player. After, you will have access to a set of predefined functions that only work if their modules are enabled:
+First, you would want to get the segment, then the player. After, you will have access to a set of predefined functions that only work if **their modules are enabled**:
 
 ```lua
 local set = Skada:GetSet("current")
 local player = set:GetPlayer(UnitGUID("player"), UnitName("player")) -- get my own table
 
--- now to functions:
-player:GetTime(active) -- returns the player time if active is set to true, otherwise the combat time.
-player:GetAPS(active) -- returns the amount of absorbs the player did per second
-player:GetAbsorbTargets() -- returns the list of players the player shieled and absorbed.
-player:GetAbsorbHeal() -- returns the amount of absorbs and heals the player did.
-player:GetAHPS() -- returns the amount of absorb+heal per second.
-player:GetAbsorbHealTargets() -- returns the list of absorb and heal targets.
-player:GetAbsorbHealOnTarget(name) -- returns the amount of absorb and heal the player did on the given target.
-player:GetDebuffsTargets() -- returns the list of the player's debuffs targets.
-player:GetDebuffTargets(spellid) -- returns the list of the given debuff targets.
-player:GetDebuffsOnTarget(name) -- returns the list of debuffs applied on the given target.
-player:GetCCDoneTargets() -- returns the list of targets the player CC'd.
-player:GetCCTakenSources() -- returns the list of sources the player got CC'd from.
-player:GetCCBreakTargets() -- returns the list of CC break targets.
-player:GetDamage(useful) -- returns the amount of damage the player did. usef: excludes the overkill.
-player:GetDPS(useful, active) -- returns the dps and amount of damage the player did.
-player:GetDamageTargets() -- returns the list of the player's damage targets and their amounts table.
-player:GetDamageTaken() -- returns the amount of the damage taken by the player
-player:GetDTPS(active) -- returns the damage taken per second as well as the total amount
-player:GetDamageSources() -- returns the list of sources the player took damage from with their amounts table.
-player:GetDispelledSpells() -- returns the list of spells the player dispelled.
-player:GetDispelledTargets() -- returns the list of targets the player dispelled.
-player:GetFriendlyFireTargets() -- returns the list of players the player caused friendly fire to.
-player:GetHPS(active) -- returns the amount of healing per second.
-player:GetOHPS(active) -- returns the amount of overhaling per second.
-player:GetHealTargets() -- returns the list of targets the player healed.
-player:GetHealOnTarget(name) -- returns the amount of healing the player did on the given target.
-player:GetOverhealTargets() -- returns the list of targets the player overhealed.
-player:GetOverhealOnTarget(name) -- returns the amount of overhealing the player did on the given target.
-player:GetTHPS(active) -- returns the amount of healing+overhealing per second.
-player:GetTotalHealTargets() -- returns the list of targets the player healed and overhealed.
-player:GetTotalHealOnTarget(name) -- returns the amount of healing and overhealing combined on the given target.
-player:GetAbsorbHealSources() -- returns the list of players the player was healed by.
-player:GetInterruptedSpells() -- returns the list of spells the player interrupted.
-player:GetInterruptTargets() -- returns the list of targets the player interrupted.
-player:GetRessTargets() -- returns the list of targets the player resurrected.
-player:GetSunderTargets() -- returns the list of targets the player applied Sunder Armor to.
+-- require Debuffs module
+player:GetDebuffsTargets() -- returns the table of actor's debuffs targets.
+player:GetDebuffTargets(spellid) -- returns the table of actor's given debuff targets.
+player:GetDebuffsOnTarget(name) -- returns the list of actor's debuffs on the given target.
+
+-- require CC Done, CC Taken or CC Break modules.
+player:GetCCDoneTargets() -- returns the table of CC Done targets.
+player:GetCCTakenSources() -- returns the table of CC Taken sources.
+player:GetCCBreakTargets() -- returns the table of CC Break targets.
+
+-- require Dispel module
+player:GetDispelledSpells() -- returns the table of actor's dispelled spells.
+player:GetDispelledTargets() -- returns the table of actor's dispelled targets.
+
+-- requires Friendly Fire module
+player:GetFriendlyFireTargets(tbl) -- returns the table of actor's friendly fire targets.
+
+-- requires Healing Taken module
+player:GetAbsorbHealSources(tbl) -- returns the table of actor's heal and absorb sources.
+
+-- require Interrupts module
+player:GetInterruptedSpells() -- returns the table of actor's interrupted spells.
+player:GetInterruptTargets() -- returns the table of actor's interrupted targets.
+
+-- requires Resurrects module
+player:GetRessTargets() -- returns the table of actor's resurrected targets.
+
+-- required Sunder Counter
+player:GetSunderTargets() -- returns the table of actor's Sunder Armor targets.
 ```
 
 #### Enemies functions
@@ -329,32 +408,28 @@ The same deal, you want first to get the segment then the enemy, after that you 
 local set = Skada:GetSet("current")
 local enemy = set:GetEnemy("The Lich King") -- example
 
--- functions:
-enemy:GetTime() -- simply returns the combat time
-enemy:GetDamageTaken() -- returns the amount of damage the enemy took
-enemy:GetDamageTakenBreakdown() -- returns the amount, total and useful damage taken by the enemy.
-enemy:GetDTPS() -- returns the amount of damage the enemy took per second.
-enemy:GetDamageSources() -- returns the list of players who damaged the enemy and their amounts table.
-enemy:GetDamageFromSource(name) -- returns the amount, total and useful damage the given name did on the enemy.
-enemy:GetDamage() -- returns the amount of damage the enemy did.
-enemy:GetDPS() -- returns the enemy DPS.
-enemy:GetDamageTargets() -- returns the list of players the enemy did damage to.
-enemy:GetDamageOnTarget(name) -- returns the amount of damage the enemy did to the given player.
-enemy:GetDamageTargetSpells() -- returns the list of damage spells on the given player.
-enemy:GetDamageSpellTargets(spellid) -- returns the list of damaged player for the given spell id.
-enemy:GetHPS() -- returns the amount healing per second the enemy did.
-enemy:GetHealTargets() -- returns the list of targets the enemy healed.
-enemy:GetHealOnTarget() -- returns the amount of heal on the give target.
+-- requires: Enemy Damage Taken module
+enemy:GetDamageTakenBreakdown() -- returns damage, total and useful
+
+-- require Enemy Damage Done module
+enemy:GetDamageTargetSpells(name) -- returns the table of enemy's damage spells on the target.
+enemy:GetDamageSpellTargets(spellid) -- returns the targets of the enemy's given damage spell.
 ```
 
 #### Extending the API
 
-You can easily extend the API if you know the table structure of course, which will be added and explain another time:
+You can easily extend the API if you know the table structure of course, which will be added and explained another time:
 
 ```lua
 -- To extend segments functions:
 local setPrototype = Skada.setPrototype -- use the prototype
 function setPrototype:MyOwnSetFunction()
+  -- do your thing
+end
+
+-- to extend common functions to both players and enemies
+local actorPrototype = Skada.actorPrototype
+function actorPrototype:MyOwnActorFunction()
   -- do your thing
 end
 

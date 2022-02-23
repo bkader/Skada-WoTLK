@@ -5,7 +5,6 @@ local pairs, ipairs, type, select = pairs, ipairs, type, select
 local format, min, max = string.format, math.min, math.max
 local unitClass, GetSpellInfo = Skada.unitClass, Skada.GetSpellInfo or GetSpellInfo
 local T, wipe = Skada.Table, wipe
-local cacheTable = Skada.cacheTable
 local setPrototype = Skada.setPrototype
 local enemyPrototype = Skada.enemyPrototype
 local tContains = tContains
@@ -304,6 +303,11 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 					source.total = source.total + absorbed
 				end
 
+				if (dmg.overkill or 0) > 0 then
+					spell.overkill = (spell.overkill or 0) + dmg.overkill
+					source.overkill = (source.overkill or 0) + dmg.overkill
+				end
+
 				-- the rest of the code is only for raids.
 				if GetRaidDiff() == nil or GetRaidDiff() == "unknown" then return end
 				if IsCustomUnit(dmg.enemyid, dmg.enemyname, dmg.amount, dmg.overkill) then
@@ -422,19 +426,18 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 
 	local function sourcemod_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local e = set and set:GetEnemy(win.targetname, win.targetid)
-		if not e then return end
-
-		local amount, total, useful = e:GetDamageFromSource(label)
-		if total > 0 then
+		if not set then return end
+		local damage, overkill, useful = set:GetActorDamageFromSource(win.targetid, win.targetname, label)
+		if damage > 0 then
 			tooltip:AddLine(format(L["%s's damage breakdown"], label))
-			local damage = Skada.db.profile.absdamage and total or amount
 			tooltip:AddDoubleLine(L["Damage Done"], Skada:FormatNumber(damage), 1, 1, 1)
-			if (useful or 0) > 0 then
+			if useful > 0 then
 				tooltip:AddDoubleLine(L["Useful Damage"], format("%s (%s)", Skada:FormatNumber(useful), Skada:FormatPercent(useful, damage)), 1, 1, 1)
 
 				-- the overkil
 				local overkill = max(0, damage - useful)
+				tooltip:AddDoubleLine(L["Overkill"], format("%s (%s)", Skada:FormatNumber(overkill), Skada:FormatPercent(overkill, damage)), 1, 1, 1)
+			elseif overkill > 0 then
 				tooltip:AddDoubleLine(L["Overkill"], format("%s (%s)", Skada:FormatNumber(overkill), Skada:FormatPercent(overkill, damage)), 1, 1, 1)
 			end
 		end
@@ -469,10 +472,6 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 		local sources = (total > 0) and enemy:GetDamageSources()
 
 		if sources then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for sourcename, source in pairs(sources) do
 				if not win.class or win.class == source.class then
@@ -498,7 +497,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
+					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -518,10 +517,6 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 		local total = enemy and enemy:GetDamageTaken() or 0
 
 		if total > 0 and enemy.damagetakenspells then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for spellid, spell in pairs(enemy.damagetakenspells) do
 				nr = nr + 1
@@ -534,9 +529,9 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 				d.spellschool = spell.school
 				d.label, _, d.icon = GetSpellInfo(spellid)
 
-				d.value = spell.amount
-				if Skada.db.profile.absdamage then
-					d.value = d.value + (spell.absorbed or 0)
+				d.value = spell.amount or 0
+				if Skada.db.profile.absdamage and spell.total then
+					d.value = spell.total
 				end
 
 				d.valuetext = Skada:FormatValueCols(
@@ -544,7 +539,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
+				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -567,10 +562,6 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 		local sources = (total > 0) and enemy:GetDamageSources()
 
 		if sources then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for sourcename, source in pairs(sources) do
 				if (not win.class or win.class == source.class) and (source.useful or 0) > 0 then
@@ -592,7 +583,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
+					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -604,10 +595,6 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 		win.title = L["Enemy Damage Taken"]
 		local total = set and set:GetEnemyDamageTaken() or 0
 		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for _, enemy in ipairs(set.enemies) do
 				local dtps, amount = enemy:GetDTPS()
@@ -630,7 +617,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
+					if win.metadata and not enemy.fake and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -650,6 +637,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 			click4 = Skada.ToggleFilter,
 			click4_label = L["Toggle Class Filter"]
 		}
+		spellmod.metadata = {valueorder = true}
 		self.metadata = {
 			click1 = sourcemod,
 			click2 = spellmod,
@@ -723,69 +711,12 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 		return total
 	end
 
-	function enemyPrototype:GetDamageTaken()
-		if Skada.db.profile.absdamage and self.totaldamagetaken then
-			return self.totaldamagetaken
-		end
-		return self.damagetaken or 0
-	end
-
-	function enemyPrototype:GetDTPS(active)
-		local dtps, damage = 0, self:GetDamageTaken()
+	function setPrototype:GetEnemyDTPS()
+		local damage = self:GetEnemyDamageTaken()
 		if damage > 0 then
-			dtps = damage / max(1, self:GetTime(active))
+			return damage / max(1, self:GetTime()), damage
 		end
-		return dtps, damage
-	end
-
-	function enemyPrototype:GetDamageSources()
-		if self.damagetakenspells then
-			wipe(cacheTable)
-			for _, spell in pairs(self.damagetakenspells) do
-				if spell.sources then
-					for name, source in pairs(spell.sources) do
-						if not cacheTable[name] then
-							cacheTable[name] = {amount = source.amount, total = source.total, useful = source.useful}
-						else
-							cacheTable[name].amount = cacheTable[name].amount + source.amount
-							if source.total then
-								cacheTable[name].total = (cacheTable[name].total or 0) + source.total
-							end
-							if source.useful then
-								cacheTable[name].useful = (cacheTable[name].useful or 0) + source.useful
-							end
-						end
-
-						-- attempt to get the class
-						if not cacheTable[name].class then
-							local actor = self.super:GetActor(name)
-							if actor then
-								cacheTable[name].id = actor.id
-								cacheTable[name].class = actor.class
-								cacheTable[name].role = actor.role
-								cacheTable[name].spec = actor.spec
-							else
-								cacheTable[name].class = "UNKNOWN"
-							end
-						end
-					end
-				end
-			end
-			return cacheTable
-		end
-	end
-
-	function enemyPrototype:GetDamageFromSource(name)
-		if self.damagetakenspells and name then
-			local amount, total, useful = 0, 0, 0
-			local sources = self:GetDamageSources()
-			if sources and sources[name] then
-				amount = sources[name].amount or 0
-				total = sources[name].total or 0
-				useful = sources[name].useful or 0
-			end
-			return amount, total, useful
-		end
+		return 0, damage
 	end
 
 	function enemyPrototype:GetDamageTakenBreakdown()
@@ -954,10 +885,6 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 		local spells, total = enemy:GetDamageTargetSpells(win.playername)
 
 		if spells and total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for spellid, spell in pairs(spells) do
 				nr = nr + 1
@@ -976,7 +903,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
+				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -1002,10 +929,6 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 		local targets, total = enemy:GetDamageSpellTargets(win.spellid)
 
 		if targets and total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				if not win.class or win.class == target.class then
@@ -1027,7 +950,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
+					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -1051,10 +974,6 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 		local targets = (total > 0) and enemy:GetDamageTargets()
 
 		if targets then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				if not win.class or win.class == target.class then
@@ -1079,7 +998,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
+					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -1099,10 +1018,6 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 		local total = enemy and enemy:GetDamage() or 0
 
 		if total > 0 and enemy.damagespells then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for spellid, spell in pairs(enemy.damagespells) do
 				nr = nr + 1
@@ -1125,7 +1040,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
+				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -1137,10 +1052,6 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 
 		local total = set and set:GetEnemyDamage() or 0
 		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for _, enemy in ipairs(set.enemies) do
 				if not enemy.fake then
@@ -1165,7 +1076,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
-						if win.metadata and d.value > win.metadata.maxvalue then
+						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -1186,7 +1097,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 			click4 = Skada.ToggleFilter,
 			click4_label = L["Toggle Class Filter"]
 		}
-		spellmod.metadata = {click1 = spelltargetmod}
+		spellmod.metadata = {click1 = spelltargetmod, valueorder = true}
 		self.metadata = {
 			click1 = targetmod,
 			click2 = spellmod,
@@ -1257,94 +1168,31 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 		return self.eoverkill or 0
 	end
 
-	function enemyPrototype:GetDamage()
-		if Skada.db.profile.absdamage and self.totaldamage then
-			return self.totaldamage
-		end
-		return self.damage or 0
-	end
-
-	function enemyPrototype:GetDPS()
-		local dtps, damage = 0, self:GetDamage()
-		if damage > 0 then
-			dtps = damage / max(1, self:GetTime())
-		end
-		return dtps, damage
-	end
-
-	function enemyPrototype:GetDamageTargets()
-		if self.damagespells then
-			wipe(cacheTable)
-			for _, spell in pairs(self.damagespells) do
-				if spell.targets then
-					for name, target in pairs(spell.targets) do
-						if not cacheTable[name] then
-							cacheTable[name] = {amount = target.amount, total = target.total, overkill = target.overkill}
-						else
-							cacheTable[name].amount = cacheTable[name].amount + target.amount
-							cacheTable[name].total = cacheTable[name].total + target.total
-							if target.overkill then
-								cacheTable[name].overkill = (cacheTable[name].overkill or 0) + target.overkill
-							end
-						end
-
-						-- attempt to get the class
-						if not cacheTable[name].class then
-							local actor = self.super:GetActor(name)
-							if actor then
-								cacheTable[name].id = actor.id
-								cacheTable[name].class = actor.class
-								cacheTable[name].role = actor.role
-								cacheTable[name].spec = actor.spec
-							else
-								cacheTable[name].class = "UNKNOWN"
-							end
-						end
-					end
-				end
-			end
-			return cacheTable
-		end
-	end
-
-	function enemyPrototype:GetDamageOnTarget(name)
+	function enemyPrototype:GetDamageTargetSpells(name, tbl)
 		if self.damagespells and name then
-			local amount, total = 0, 0
-			for _, spell in pairs(self.damagespells) do
-				if spell.targets and spell.targets[name] then
-					amount = amount + spell.amount
-					total = total + spell.total
-				end
-			end
-			return amount, total
-		end
-	end
-
-	function enemyPrototype:GetDamageTargetSpells(name)
-		if self.damagespells and name then
-			wipe(cacheTable)
+			tbl = wipe(tbl or Skada.cacheTable)
 			local total = 0
 
 			for spellid, spell in pairs(self.damagespells) do
 				if spell.targets and spell.targets[name] then
-					cacheTable[spellid] = cacheTable[spellid] or {school = spell.school, amount = 0}
+					tbl[spellid] = tbl[spellid] or {school = spell.school, amount = 0}
 
 					if Skada.db.profile.absdamage and spell.targets[name].total then
-						cacheTable[spellid].amount = cacheTable[spellid].amount + spell.targets[name].total
+						tbl[spellid].amount = tbl[spellid].amount + spell.targets[name].total
 					else
-						cacheTable[spellid].amount = cacheTable[spellid].amount + spell.targets[name].amount
+						tbl[spellid].amount = tbl[spellid].amount + spell.targets[name].amount
 					end
-					total = total + cacheTable[spellid].amount
+					total = total + tbl[spellid].amount
 				end
 			end
 
-			return cacheTable, total
+			return tbl, total
 		end
 	end
 
-	function enemyPrototype:GetDamageSpellTargets(spellid)
+	function enemyPrototype:GetDamageSpellTargets(spellid, tbl)
 		if self.damagespells and self.damagespells[spellid] and self.damagespells[spellid].targets then
-			wipe(cacheTable)
+			tbl = wipe(tbl or Skada.cacheTable)
 
 			local total = 0
 			if Skada.db.profile.absdamage and self.damagespells[spellid].total then
@@ -1354,34 +1202,30 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 			end
 
 			for name, target in pairs(self.damagespells[spellid].targets) do
-				if not cacheTable[name] then
-					cacheTable[name] = {amount = Skada.db.profile.absdamage and target.total or target.amount}
+				if not tbl[name] then
+					tbl[name] = {amount = Skada.db.profile.absdamage and target.total or target.amount}
 				elseif Skada.db.profile.absdamage and target.total then
-					cacheTable[name].amount = cacheTable[name].amount + target.total
+					tbl[name].amount = tbl[name].amount + target.total
 				else
-					cacheTable[name].amount = cacheTable[name].amount + target.amount
+					tbl[name].amount = tbl[name].amount + target.amount
 				end
 
 				-- attempt to get the class
-				if not cacheTable[name].class then
+				if not tbl[name].class then
 					local actor = self.super:GetActor(name)
 					if actor then
-						cacheTable[name].id = actor.id
-						cacheTable[name].class = actor.class
-						cacheTable[name].role = actor.role
-						cacheTable[name].spec = actor.spec
+						tbl[name].id = actor.id
+						tbl[name].class = actor.class
+						tbl[name].role = actor.role
+						tbl[name].spec = actor.spec
 					else
-						cacheTable[name].class = "UNKNOWN"
+						tbl[name].class = "UNKNOWN"
 					end
 				end
 			end
 
-			return cacheTable, total
+			return tbl, total
 		end
-	end
-
-	function enemyPrototype:GetOverkill()
-		return self.overkill or 0
 	end
 end)
 
@@ -1462,10 +1306,6 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 		local targets = (total > 0) and enemy:GetHealTargets()
 
 		if total > 0 and targets then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
@@ -1485,7 +1325,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
+				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -1504,10 +1344,6 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 		local total = enemy and enemy.heal or 0
 
 		if total > 0 and enemy.healspells then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for spellid, spell in pairs(enemy.healspells) do
 				nr = nr + 1
@@ -1526,7 +1362,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
+				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -1541,10 +1377,6 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 
 		local total = set and set:GetEnemyHeal() or 0
 		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for _, enemy in ipairs(set.enemies) do
 				if (not win.class or win.class == enemy.class) and not enemy.fake then
@@ -1568,7 +1400,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
-						if win.metadata and d.value > win.metadata.maxvalue then
+						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -1578,6 +1410,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 	end
 
 	function mod:OnEnable()
+		spellmod.metadata = {valueorder = true}
 		self.metadata = {
 			showspots = true,
 			click1 = spellmod,
@@ -1603,76 +1436,40 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 		Skada:RemoveMode(self)
 	end
 
-	function setPrototype:GetEnemyHeal()
+	function setPrototype:GetEnemyHeal(absorb)
+		local heal = 0
 		if not self.enemies then
-			return 0
-		elseif self.eheal then
-			return self.eheal
+			return heal
 		end
 
-		local total = 0
-		for _, e in ipairs(self.enemies) do
-			if e.heal then
-				total = total + e.heal
+		if self.eheal then
+			heal = self.eheal
+
+			if absorb and self.eabsorb then
+				heal = heal + self.eabsorb
 			end
-		end
-		return total
-	end
+		else
+			for _, e in ipairs(self.enemies) do
+				if e.heal then
+					heal = heal + e.heal
 
-	function setPrototype:GetEnemyHPS()
-		local hps, amount = 0, self:GetEnemyHeal()
-		if amount > 0 then
-			hps = amount / max(1, self:GetTime())
-		end
-		return hps, amount
-	end
-
-	function enemyPrototype:GetHPS()
-		local hps, amount = 0, self.heal or 0
-		if amount > 0 then
-			hps = amount / max(1, self:GetTime())
-		end
-		return hps, amount
-	end
-
-	function enemyPrototype:GetHealTargets()
-		if self.healspells then
-			wipe(cacheTable)
-			for _, spell in pairs(self.healspells) do
-				if spell.targets then
-					for name, amount in pairs(spell.targets) do
-						if not cacheTable[name] then
-							cacheTable[name] = {amount = amount}
-						else
-							cacheTable[name].amount = cacheTable[name].amount + amount
-						end
-						if not cacheTable[name].class then
-							local actor = self.super:GetActor(name)
-							if actor then
-								cacheTable[name].id = actor.id
-								cacheTable[name].class = actor.class
-								cacheTable[name].role = actor.role
-								cacheTable[name].spec = actor.spec
-							else
-								cacheTable[name].class = "UNKNOWN"
-							end
-						end
+					if absorb and e.absorb then
+						heal = heal + e.absorb
 					end
 				end
 			end
-			return cacheTable
 		end
+
+		return heal
 	end
 
-	function enemyPrototype:GetHealOnTarget(name)
-		local total = 0
-		if name and self.healspells then
-			for _, spell in pairs(self.healspells) do
-				if spell.targets and spell.targets[name] then
-					total = total + spell.targets[name]
-				end
-			end
+	function setPrototype:GetEnemyHPS(absorb, active)
+		local hps, amount = 0, self:GetEnemyHeal(absorb)
+
+		if amount > 0 then
+			hps = amount / max(1, self:GetTime(active))
 		end
-		return total
+
+		return hps, amount
 	end
 end)

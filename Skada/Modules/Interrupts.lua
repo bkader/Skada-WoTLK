@@ -113,16 +113,14 @@ Skada:AddLoadableModule("Interrupts", function(L)
 
 	function spellmod:Update(win, set)
 		win.title = format(L["%s's interrupted spells"], win.playername or L.Unknown)
+		if not set or not win.playername then return end
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
-		local total = player and player.interrupt or 0
-		local spells = (total > 0) and player:GetInterruptedSpells()
+		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		if enemy then return end -- unavailable for enemeies yet
 
+		local total = actor and actor.interrupt or 0
+		local spells = (total > 0) and actor:GetInterruptedSpells()
 		if spells and total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for spellid, count in pairs(spells) do
 				nr = nr + 1
@@ -140,7 +138,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
+				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -154,16 +152,15 @@ Skada:AddLoadableModule("Interrupts", function(L)
 
 	function targetmod:Update(win, set)
 		win.title = format(L["%s's interrupted targets"], win.playername or L.Unknown)
+		if not set or not win.playername then return end
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
-		local total = player and player.interrupt or 0
-		local targets = (total > 0) and player:GetInterruptTargets()
+		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		if enemy then return end -- unavailable for enemies yet
+
+		local total = actor and actor.interrupt or 0
+		local targets = (total > 0) and actor:GetInterruptTargets()
 
 		if targets then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
@@ -183,7 +180,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
+				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -197,17 +194,15 @@ Skada:AddLoadableModule("Interrupts", function(L)
 
 	function playermod:Update(win, set)
 		win.title = format(L["%s's interrupt spells"], win.playername or L.Unknown)
+		if not set or not win.playername then return end
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
-		local total = player and player.interrupt or 0
+		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		if enemy then return end -- unavailable for enemies yet
 
-		if total > 0 and player.interruptspells then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
+		local total = actor and actor.interrupt or 0
+		if total > 0 and actor.interruptspells then
 			local nr = 0
-			for spellid, spell in pairs(player.interruptspells) do
+			for spellid, spell in pairs(actor.interruptspells) do
 				nr = nr + 1
 
 				local d = win.dataset[nr] or {}
@@ -223,7 +218,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
+				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -235,10 +230,6 @@ Skada:AddLoadableModule("Interrupts", function(L)
 
 		local total = set.interrupt or 0
 		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and (player.interrupt or 0) > 0 then
@@ -260,7 +251,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
+					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -346,49 +337,48 @@ Skada:AddLoadableModule("Interrupts", function(L)
 
 	do
 		local playerPrototype = Skada.playerPrototype
-		local cacheTable = Skada.cacheTable
 		local wipe = wipe
 
-		function playerPrototype:GetInterruptedSpells()
+		function playerPrototype:GetInterruptedSpells(tbl)
 			if self.interruptspells then
-				wipe(cacheTable)
+				tbl = wipe(tbl or Skada.cacheTable)
 				for _, spell in pairs(self.interruptspells) do
 					if spell.spells then
 						for spellid, count in pairs(spell.spells) do
-							cacheTable[spellid] = (cacheTable[spellid] or 0) + count
+							tbl[spellid] = (tbl[spellid] or 0) + count
 						end
 					end
 				end
-				return cacheTable
+				return tbl
 			end
 		end
 
-		function playerPrototype:GetInterruptTargets()
+		function playerPrototype:GetInterruptTargets(tbl)
 			if self.interruptspells then
-				wipe(cacheTable)
+				tbl = wipe(tbl or Skada.cacheTable)
 				for _, spell in pairs(self.interruptspells) do
 					if spell.targets then
 						for name, count in pairs(spell.targets) do
-							if not cacheTable[name] then
-								cacheTable[name] = {count = count}
+							if not tbl[name] then
+								tbl[name] = {count = count}
 							else
-								cacheTable[name].count = cacheTable[name].count + count
+								tbl[name].count = tbl[name].count + count
 							end
-							if not cacheTable[name].class then
+							if not tbl[name].class then
 								local actor = self.super:GetActor(name)
 								if actor then
-									cacheTable[name].id = actor.id
-									cacheTable[name].class = actor.class
-									cacheTable[name].role = actor.role
-									cacheTable[name].spec = actor.spec
+									tbl[name].id = actor.id
+									tbl[name].class = actor.class
+									tbl[name].role = actor.role
+									tbl[name].spec = actor.spec
 								else
-									cacheTable[name].class = "UNKNOWN"
+									tbl[name].class = "UNKNOWN"
 								end
 							end
 						end
 					end
 				end
-				return cacheTable
+				return tbl
 			end
 		end
 	end

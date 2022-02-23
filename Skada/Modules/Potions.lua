@@ -113,10 +113,6 @@ Skada:AddLoadableModule("Potions", function(L)
 
 		local players, total = set:GetPotion(win.potionid, win.class)
 		if players and total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for playername, player in pairs(players) do
 				nr = nr + 1
@@ -137,7 +133,7 @@ Skada:AddLoadableModule("Potions", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
+				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -163,10 +159,6 @@ Skada:AddLoadableModule("Potions", function(L)
 			local total = player.potion or 0
 
 			if total > 0 and player.potionspells then
-				if win.metadata then
-					win.metadata.maxvalue = 0
-				end
-
 				local nr = 0
 				for potionid, count in pairs(player.potionspells) do
 					local potionname, potionlink, _, _, _, _, _, _, _, potionicon = GetItemInfo(potionid)
@@ -191,7 +183,7 @@ Skada:AddLoadableModule("Potions", function(L)
 							mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
-						if win.metadata and d.value > win.metadata.maxvalue then
+						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -205,10 +197,6 @@ Skada:AddLoadableModule("Potions", function(L)
 
 		local total = set.potion or 0
 		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and (player.potion or 0) > 0 then
@@ -230,7 +218,7 @@ Skada:AddLoadableModule("Potions", function(L)
 						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
+					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -291,17 +279,17 @@ Skada:AddLoadableModule("Potions", function(L)
 
 	do
 		local setPrototype = Skada.setPrototype
-		local cacheTable, wipe = Skada.cacheTable, wipe
+		local wipe = wipe
 
-		function setPrototype:GetPotion(potionid, class)
+		function setPrototype:GetPotion(potionid, class, tbl)
 			if potionid and self.potion then
-				wipe(cacheTable)
+				tbl = wipe(tbl or Skada.cacheTable)
 				local total = 0
 
 				for _, p in ipairs(self.players) do
 					if (not class or class == p.class) and p.potionspells and p.potionspells[potionid] then
 						total = total + p.potionspells[potionid]
-						cacheTable[p.name] = {
+						tbl[p.name] = {
 							id = p.id,
 							class = p.class,
 							role = p.role,
@@ -311,7 +299,7 @@ Skada:AddLoadableModule("Potions", function(L)
 					end
 				end
 
-				return cacheTable, total
+				return tbl, total
 			end
 		end
 	end

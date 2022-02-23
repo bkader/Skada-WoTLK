@@ -99,16 +99,16 @@ do
 
 	-- add functions to segment prototype
 
-	function setPrototype:GetAuraPlayers(spellid)
+	function setPrototype:GetAuraPlayers(spellid, tbl)
 		local count = 0
 		if spellid and self.players then
-			wipe(cacheTable)
+			tbl = wipe(tbl or cacheTable)
 			for _, p in ipairs(self.players) do
 				if p.auras and p.auras[spellid] then
 					local maxtime = floor(p:GetTime())
 					local uptime = min(maxtime, p.auras[spellid].uptime)
 					count = count + 1
-					cacheTable[p.name] = {
+					tbl[p.name] = {
 						id = p.id,
 						class = p.class,
 						role = p.role,
@@ -118,7 +118,7 @@ do
 					}
 				end
 			end
-			return cacheTable, count
+			return tbl, count
 		end
 		return nil, count
 	end
@@ -205,10 +205,6 @@ do
 			if not atype then return end
 			local settime = set and set:GetTime()
 			if settime > 0 then
-				if win.metadata then
-					win.metadata.maxvalue = 0
-				end
-
 				local nr = 0
 				for _, player in ipairs(set.players) do
 					if not win.class or win.class == player.class then
@@ -234,7 +230,7 @@ do
 								mode.metadata.columns.Percent and Skada:FormatPercent(d.value, maxtime)
 							)
 
-							if win.metadata and d.value > win.metadata.maxvalue then
+							if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 								win.metadata.maxvalue = d.value
 							end
 						end
@@ -252,10 +248,6 @@ do
 		local maxtime = player and player:GetTime() or 0
 
 		if maxtime > 0 and player.auras then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for spellid, spell in pairs(player.auras) do
 				if spell.type == atype then
@@ -276,7 +268,7 @@ do
 						mode.metadata.columns.Percent and Skada:FormatPercent(d.value, maxtime)
 					)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
+					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -412,10 +404,6 @@ Skada:AddLoadableModule("Buffs", function(L)
 
 		local players, count = set:GetAuraPlayers(win.spellid)
 		if count > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for playername, player in pairs(players) do
 				nr = nr + 1
@@ -436,7 +424,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, player.maxtime)
 				)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
+				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -583,10 +571,6 @@ Skada:AddLoadableModule("Debuffs", function(L)
 
 		local auras, maxtime = player:GetDebuffsOnTarget(win.targetname)
 		if auras and maxtime > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for spellid, aura in pairs(auras) do
 				nr = nr + 1
@@ -606,7 +590,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, maxtime)
 				)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
+				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -631,10 +615,6 @@ Skada:AddLoadableModule("Debuffs", function(L)
 
 		local targets, maxtime = player:GetDebuffTargets(win.spellid)
 		if targets and maxtime > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
@@ -655,7 +635,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, maxtime)
 				)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
+				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -675,10 +655,6 @@ Skada:AddLoadableModule("Debuffs", function(L)
 
 		local targets, maxtime = player:GetDebuffsTargets()
 		if targets and maxtime > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
@@ -699,7 +675,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, maxtime)
 				)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
+				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -750,70 +726,70 @@ Skada:AddLoadableModule("Debuffs", function(L)
 
 	-- add functions to player's prototype.
 
-	function playerPrototype:GetDebuffsTargets()
+	function playerPrototype:GetDebuffsTargets(tbl)
 		if self.auras then
-			wipe(cacheTable)
+			tbl = wipe(tbl or cacheTable)
 			local maxtime = 0
 			for _, aura in pairs(self.auras) do
 				if aura.targets then
 					maxtime = maxtime + aura.uptime
 					for name, target in pairs(aura.targets) do
-						if not cacheTable[name] then
-							cacheTable[name] = {count = target.count, refresh = target.refresh, uptime = target.uptime}
+						if not tbl[name] then
+							tbl[name] = {count = target.count, refresh = target.refresh, uptime = target.uptime}
 						else
-							cacheTable[name].count = cacheTable[name].count + target.count
-							cacheTable[name].uptime = cacheTable[name].uptime + target.uptime
+							tbl[name].count = tbl[name].count + target.count
+							tbl[name].uptime = tbl[name].uptime + target.uptime
 							if target.refresh then
-								cacheTable[name].refresh = (cacheTable[name].refresh or 0) + target.refresh
+								tbl[name].refresh = (tbl[name].refresh or 0) + target.refresh
 							end
 						end
 
-						if not cacheTable[name].class then
+						if not tbl[name].class then
 							local actor = self.super:GetActor(name)
 							if actor then
-								cacheTable[name].id = actor.id
-								cacheTable[name].class = actor.class
-								cacheTable[name].role = actor.role
-								cacheTable[name].spec = actor.spec
+								tbl[name].id = actor.id
+								tbl[name].class = actor.class
+								tbl[name].role = actor.role
+								tbl[name].spec = actor.spec
 							else
-								cacheTable[name].class = "UNKNOWN"
+								tbl[name].class = "UNKNOWN"
 							end
 						end
 					end
 				end
 			end
-			return cacheTable, maxtime
+			return tbl, maxtime
 		end
 	end
 
-	function playerPrototype:GetDebuffTargets(spellid)
+	function playerPrototype:GetDebuffTargets(spellid, tbl)
 		if self.auras and spellid and self.auras[spellid] and self.auras[spellid].targets then
-			wipe(cacheTable)
+			tbl = wipe(tbl or cacheTable)
 			local maxtime = self.auras[spellid].uptime
 			for name, target in pairs(self.auras[spellid].targets) do
-				cacheTable[name] = {count = target.count, refresh = target.refresh, uptime = target.uptime}
+				tbl[name] = {count = target.count, refresh = target.refresh, uptime = target.uptime}
 				local actor = self.super:GetActor(name)
 				if actor then
-					cacheTable[name].id = actor.id
-					cacheTable[name].class = actor.class
-					cacheTable[name].role = actor.role
-					cacheTable[name].spec = actor.spec
+					tbl[name].id = actor.id
+					tbl[name].class = actor.class
+					tbl[name].role = actor.role
+					tbl[name].spec = actor.spec
 				else
-					cacheTable[name].class = "UNKNOWN"
+					tbl[name].class = "UNKNOWN"
 				end
 			end
-			return cacheTable, maxtime
+			return tbl, maxtime
 		end
 	end
 
-	function playerPrototype:GetDebuffsOnTarget(name)
+	function playerPrototype:GetDebuffsOnTarget(name, tbl)
 		if self.auras and name then
-			wipe(cacheTable)
+			tbl = wipe(tbl or cacheTable)
 			local maxtime = 0
 			for spellid, aura in pairs(self.auras) do
 				if aura.targets and aura.targets[name] then
 					maxtime = maxtime + aura.uptime
-					cacheTable[spellid] = {
+					tbl[spellid] = {
 						school = aura.school,
 						count = aura.targets[name].count,
 						refresh = aura.targets[name].refresh,
@@ -821,7 +797,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 					}
 				end
 			end
-			return cacheTable, maxtime
+			return tbl, maxtime
 		end
 	end
 end)

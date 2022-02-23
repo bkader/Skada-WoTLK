@@ -102,16 +102,15 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 	function targetmod:Update(win, set)
 		DoubleCheckSunder()
 		win.title = format(L["%s's <%s> targets"], win.playername or L.Unknown, sunder)
+		if not set or not win.playername then return end
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
-		local total = player and player.sunder or 0
-		local targets = (total > 0) and player:GetSunderTargets()
+		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		if enemy then return end -- unavailable for enemies yet
+
+		local total = actor and actor.sunder or 0
+		local targets = (total > 0) and actor:GetSunderTargets()
 
 		if targets then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
@@ -131,7 +130,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
+				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -145,10 +144,6 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 		local total = set.sunder or 0
 
 		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
-
 			local nr = 0
 			for _, player in ipairs(set.players) do
 				if (player.sunder or 0) > 0 then
@@ -170,7 +165,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
+					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -304,25 +299,24 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 
 	do
 		local playerPrototype = Skada.playerPrototype
-		local cacheTable = Skada.cacheTable
 		local wipe = wipe
 
-		function playerPrototype:GetSunderTargets()
+		function playerPrototype:GetSunderTargets(tbl)
 			if self.sundertargets then
-				wipe(cacheTable)
+				tbl = wipe(tbl or Skada.cacheTable)
 				for name, count in pairs(self.sundertargets) do
-					cacheTable[name] = {count = count}
+					tbl[name] = {count = count}
 					local actor = self.super:GetActor(name)
 					if actor then
-						cacheTable[name].id = actor.id
-						cacheTable[name].class = actor.class
-						cacheTable[name].role = actor.role
-						cacheTable[name].spec = actor.spec
+						tbl[name].id = actor.id
+						tbl[name].class = actor.class
+						tbl[name].role = actor.role
+						tbl[name].spec = actor.spec
 					else
-						cacheTable[name].class = "UNKNOWN"
+						tbl[name].class = "UNKNOWN"
 					end
 				end
-				return cacheTable
+				return tbl
 			end
 		end
 	end
