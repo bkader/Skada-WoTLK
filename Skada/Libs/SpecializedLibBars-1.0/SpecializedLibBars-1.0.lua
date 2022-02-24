@@ -1296,7 +1296,7 @@ do
 				end
 			end
 
-			if shown <= maxbars then
+			if shown <= maxbars and v then
 				v:ClearAllPoints()
 
 				v:SetPoint(from .. "LEFT", lastBar, to .. "LEFT", x1, y1)

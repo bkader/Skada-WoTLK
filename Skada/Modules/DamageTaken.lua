@@ -307,6 +307,24 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 		end
 	end
 
+	local function damage_tooltip(win, id, label, tooltip)
+		local set = win:GetSelectedSet()
+		local actor = set and set:GetActor(label, id)
+		if actor then
+			local totaltime = set:GetTime()
+			local activetime = actor:GetTime(true)
+			local dtps, damage = actor:GetDTPS()
+
+			tooltip:AddDoubleLine(L["Activity"], Skada:FormatPercent(activetime, totaltime), nil, nil, nil, 1, 1, 1)
+			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Damage Taken"], Skada:FormatNumber(damage), 1, 1, 1)
+
+			local suffix = Skada:FormatTime(Skada.db.profile.timemesure == 1 and activetime or totaltime)
+			tooltip:AddDoubleLine(Skada:FormatNumber(damage) .. "/" .. suffix, Skada:FormatNumber(dtps), 1, 1, 1)
+		end
+	end
+
 	local function playermod_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
 		if not set then return end
@@ -404,6 +422,10 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 		local total = actor and actor:GetDamageTaken() or 0
 
 		if total > 0 and actor.damagetakenspells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellname, spell in pairs(actor.damagetakenspells) do
 				nr = nr + 1
@@ -433,7 +455,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -455,6 +477,10 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 		local sources = (total > 0) and actor:GetDamageSources()
 
 		if sources then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for sourcename, source in pairs(sources) do
 				nr = nr + 1
@@ -474,7 +500,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -495,7 +521,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			(mod.metadata.columns.Percent and percent) and Skada:FormatPercent(d.value, total)
 		)
 
-		if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+		if win.metadata and d.value > win.metadata.maxvalue then
 			win.metadata.maxvalue = d.value
 		end
 
@@ -628,6 +654,10 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			end
 
 			if total > 0 and actor.damagetakenspells then
+				if win.metadata then
+					win.metadata.maxvalue = 0
+				end
+
 				local nr = 0
 				for spellname, spell in pairs(actor.damagetakenspells) do
 					if spell.sources and spell.sources[win.targetname] then
@@ -659,7 +689,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 							mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -673,6 +703,10 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 
 		local total = set and set:GetDamageTaken() or 0
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 
 			-- players.
@@ -703,7 +737,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -736,7 +770,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 								self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 							)
 
-							if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+							if win.metadata and d.value > win.metadata.maxvalue then
 								win.metadata.maxvalue = d.value
 							end
 						end
@@ -752,6 +786,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 		sourcemod.metadata = {click1 = tdetailmod}
 		self.metadata = {
 			showspots = true,
+			post_tooltip = damage_tooltip,
 			click1 = playermod,
 			click2 = sourcemod,
 			click4 = Skada.ToggleFilter,
@@ -863,11 +898,14 @@ Skada:AddLoadableModule("DTPS", function(L)
 			local totaltime = set:GetTime()
 			local activetime = actor:GetTime(true)
 			local dtps, damage = actor:GetDTPS()
+
 			tooltip:AddLine(actor.name .. " - " .. L["DTPS"])
 			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Damage Taken"], Skada:FormatNumber(damage), 1, 1, 1)
-			tooltip:AddDoubleLine(Skada:FormatNumber(damage) .. "/" .. Skada:FormatTime(activetime), Skada:FormatNumber(dtps), 1, 1, 1)
+
+			local suffix = Skada:FormatTime(Skada.db.profile.timemesure == 1 and activetime or totaltime)
+			tooltip:AddDoubleLine(Skada:FormatNumber(damage) .. "/" .. suffix, Skada:FormatNumber(dtps), 1, 1, 1)
 		end
 	end
 
@@ -876,6 +914,10 @@ Skada:AddLoadableModule("DTPS", function(L)
 
 		local total = set and set:GetDTPS() or 0
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 
 			-- players
@@ -905,7 +947,7 @@ Skada:AddLoadableModule("DTPS", function(L)
 							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -937,7 +979,7 @@ Skada:AddLoadableModule("DTPS", function(L)
 								self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 							)
 
-							if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+							if win.metadata and d.value > win.metadata.maxvalue then
 								win.metadata.maxvalue = d.value
 							end
 						end
@@ -1029,6 +1071,10 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 			end
 
 			if total > 0 then
+				if win.metadata then
+					win.metadata.maxvalue = 0
+				end
+
 				local nr = 0
 				for sourcename, source in pairs(cacheTable) do
 					nr = nr + 1
@@ -1048,7 +1094,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -1089,6 +1135,10 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 			end
 
 			if total > 0 then
+				if win.metadata then
+					win.metadata.maxvalue = 0
+				end
+
 				local nr = 0
 				for playername, player in pairs(cacheTable) do
 					nr = nr + 1
@@ -1109,7 +1159,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -1140,6 +1190,10 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 			end
 		end
 
+		if win.metadata then
+			win.metadata.maxvalue = 0
+		end
+
 		local nr = 0
 		for spellname, spell in pairs(cacheTable) do
 			nr = nr + 1
@@ -1159,7 +1213,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 				self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 			)
 
-			if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+			if win.metadata and d.value > win.metadata.maxvalue then
 				win.metadata.maxvalue = d.value
 			end
 		end
@@ -1203,6 +1257,10 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 			local actor = cacheTable[win.actorid]
 			win.title = format(L["%s's damage breakdown"], actor.name)
 
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for event, count in pairs(actor.data) do
 				nr = nr + 1
@@ -1220,7 +1278,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 					mod.metadata.columns.Total and actor.total
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -1232,6 +1290,10 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 
 		if (set.totaldamagetaken or 0) > 0 then
 			wipe(cacheTable) -- used later
+
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
 			local nr = 0
 			for _, player in ipairs(set.players) do
@@ -1275,7 +1337,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 								self.metadata.columns.Total and total
 							)
 
-							if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+							if win.metadata and d.value > win.metadata.maxvalue then
 								win.metadata.maxvalue = d.value
 							end
 						elseif cacheTable[player.id] then
@@ -1399,6 +1461,10 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 		local overall = actor and select(2, getMIT(actor)) or 0
 
 		if overall > 0 and actor.damagetakenspells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellname, spell in pairs(actor.damagetakenspells) do
 				if spell.total > 0 then
@@ -1427,7 +1493,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, spell.total)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -1441,6 +1507,10 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 		local total = set and set:GetDamageTaken() or 0
 
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 
 			-- players
@@ -1471,7 +1541,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -1505,7 +1575,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 								self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 							)
 
-							if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+							if win.metadata and d.value > win.metadata.maxvalue then
 								win.metadata.maxvalue = d.value
 							end
 						end

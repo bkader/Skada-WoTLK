@@ -15,7 +15,7 @@ Skada:AddLoadableModule("Activity", function(L)
 				tooltip:AddLine(player.name .. ": " .. L["Activity"])
 				tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
 				tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
-				tooltip:AddDoubleLine(L["Activity"], Skada:FormatPercent(activetime, settime), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Activity"], Skada:FormatPercent(activetime, settime), nil, nil, nil, 1, 1, 1)
 			end
 		end
 	end
@@ -25,6 +25,10 @@ Skada:AddLoadableModule("Activity", function(L)
 
 		local settime = set and set:GetTime()
 		if settime > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 
 			-- players.
@@ -54,7 +58,7 @@ Skada:AddLoadableModule("Activity", function(L)
 							self.metadata.columns.Percent and Skada:FormatPercent(d.value, settime)
 						)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -86,7 +90,7 @@ Skada:AddLoadableModule("Activity", function(L)
 								self.metadata.columns.Percent and Skada:FormatPercent(d.value, settime)
 							)
 
-							if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+							if win.metadata and d.value > win.metadata.maxvalue then
 								win.metadata.maxvalue = d.value
 							end
 						end

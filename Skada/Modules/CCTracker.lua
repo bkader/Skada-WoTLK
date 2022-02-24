@@ -265,6 +265,10 @@ Skada:AddLoadableModule("CC Done", function(L)
 		local total = player and player.ccdone or 0
 
 		if total > 0 and player.ccdonespells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellid, spell in pairs(player.ccdonespells) do
 				nr = nr + 1
@@ -283,7 +287,7 @@ Skada:AddLoadableModule("CC Done", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -303,6 +307,10 @@ Skada:AddLoadableModule("CC Done", function(L)
 		local targets = (total > 0) and player:GetCCDoneTargets()
 
 		if targets then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
@@ -322,7 +330,7 @@ Skada:AddLoadableModule("CC Done", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -334,6 +342,10 @@ Skada:AddLoadableModule("CC Done", function(L)
 
 		local total = set.ccdone or 0
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and (player.ccdone or 0) > 0 then
@@ -355,7 +367,7 @@ Skada:AddLoadableModule("CC Done", function(L)
 						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -515,6 +527,10 @@ Skada:AddLoadableModule("CC Taken", function(L)
 		local total = player and player.cctaken or 0
 
 		if total > 0 and player.cctakenspells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellid, spell in pairs(player.cctakenspells) do
 				nr = nr + 1
@@ -533,7 +549,7 @@ Skada:AddLoadableModule("CC Taken", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -553,6 +569,10 @@ Skada:AddLoadableModule("CC Taken", function(L)
 		local sources = (total > 0) and player:GetCCTakenSources()
 
 		if sources then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for sourcename, source in pairs(sources) do
 				nr = nr + 1
@@ -572,7 +592,7 @@ Skada:AddLoadableModule("CC Taken", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -584,6 +604,10 @@ Skada:AddLoadableModule("CC Taken", function(L)
 
 		local total = set.cctaken or 0
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and (player.cctaken or 0) > 0 then
@@ -605,7 +629,7 @@ Skada:AddLoadableModule("CC Taken", function(L)
 						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -788,6 +812,10 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 		local total = player and player.ccbreak or 0
 
 		if total > 0 and player.ccbreakspells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellid, spell in pairs(player.ccbreakspells) do
 				nr = nr + 1
@@ -806,7 +834,7 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -826,6 +854,10 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 		local targets = (total > 0) and player:GetCCBreakTargets()
 
 		if targets then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
@@ -845,7 +877,7 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -857,6 +889,10 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 
 		local total = set.ccbreak or 0
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and (player.ccbreak or 0) > 0 then
@@ -878,7 +914,7 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end

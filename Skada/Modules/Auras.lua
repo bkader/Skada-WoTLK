@@ -205,6 +205,10 @@ do
 			if not atype then return end
 			local settime = set and set:GetTime()
 			if settime > 0 then
+				if win.metadata then
+					win.metadata.maxvalue = 0
+				end
+
 				local nr = 0
 				for _, player in ipairs(set.players) do
 					if not win.class or win.class == player.class then
@@ -230,7 +234,7 @@ do
 								mode.metadata.columns.Percent and Skada:FormatPercent(d.value, maxtime)
 							)
 
-							if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+							if win.metadata and d.value > win.metadata.maxvalue then
 								win.metadata.maxvalue = d.value
 							end
 						end
@@ -248,6 +252,10 @@ do
 		local maxtime = player and player:GetTime() or 0
 
 		if maxtime > 0 and player.auras then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellid, spell in pairs(player.auras) do
 				if spell.type == atype then
@@ -268,7 +276,7 @@ do
 						mode.metadata.columns.Percent and Skada:FormatPercent(d.value, maxtime)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -404,6 +412,10 @@ Skada:AddLoadableModule("Buffs", function(L)
 
 		local players, count = set:GetAuraPlayers(win.spellid)
 		if count > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for playername, player in pairs(players) do
 				nr = nr + 1
@@ -424,7 +436,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, player.maxtime)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -571,6 +583,10 @@ Skada:AddLoadableModule("Debuffs", function(L)
 
 		local auras, maxtime = player:GetDebuffsOnTarget(win.targetname)
 		if auras and maxtime > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellid, aura in pairs(auras) do
 				nr = nr + 1
@@ -590,7 +606,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, maxtime)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -615,6 +631,10 @@ Skada:AddLoadableModule("Debuffs", function(L)
 
 		local targets, maxtime = player:GetDebuffTargets(win.spellid)
 		if targets and maxtime > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
@@ -635,7 +655,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, maxtime)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -655,6 +675,10 @@ Skada:AddLoadableModule("Debuffs", function(L)
 
 		local targets, maxtime = player:GetDebuffsTargets()
 		if targets and maxtime > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
@@ -675,7 +699,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, maxtime)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end

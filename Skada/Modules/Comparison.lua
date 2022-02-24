@@ -155,7 +155,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 		d.valuetext = FormatValueNumber(value, myvalue, fmt, disabled)
 
-		if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+		if win.metadata and d.value > win.metadata.maxvalue then
 			win.metadata.maxvalue = d.value
 		end
 
@@ -366,6 +366,10 @@ Skada:AddLoadableModule("Comparison", function(L)
 			end
 
 			if total > 0 and actor.damagespells then
+				if win.metadata then
+					win.metadata.maxvalue = 0
+				end
+
 				local nr = 0
 				for spellname, spell in pairs(actor.damagespells) do
 					if spell.targets and spell.targets[win.targetname] then
@@ -387,7 +391,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 						d.valuetext = Skada:FormatValueCols(mod.metadata.columns.Damage and Skada:FormatNumber(d.value))
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -407,6 +411,10 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 		-- existing targets.
 		if total > 0 and actor.damagespells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellname, spell in pairs(actor.damagespells) do
 				if spell.targets and spell.targets[win.targetname] then
@@ -448,7 +456,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 					d.valuetext = FormatValueNumber(d.value, myamount, true)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -464,6 +472,10 @@ Skada:AddLoadableModule("Comparison", function(L)
 				mytotal = mytargets[win.targetname].total
 			end
 			if mytotal > 0 then
+				if win.metadata then
+					win.metadata.maxvalue = 0
+				end
+
 				local nr = 0
 				for spellname, spell in pairs(myself.damagespells) do
 					if spell.targets and spell.targets[win.targetname] then
@@ -486,7 +498,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 						d.value = myamount
 						d.valuetext = FormatValueNumber(0, myamount, true)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -506,6 +518,10 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 		local spells, actor = set:GetActorDamageSpells(win.actorid, win.actorname)
 		if actor and spells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 
 			-- same actor?
@@ -531,7 +547,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 					d.valuetext = Skada:FormatValueCols(mod.metadata.columns.Damage and Skada:FormatNumber(d.value))
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -570,7 +586,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 				d.valuetext = FormatValueNumber(d.value, myamount, true)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -600,7 +616,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 						d.value = myamount
 						d.valuetext = FormatValueNumber(0, myamount, true)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -620,6 +636,10 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 		local targets, actor = set:GetActorDamageTargets(win.actorid, win.actorname)
 		if targets then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 
 			-- same actor?
@@ -646,7 +666,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 					d.valuetext = Skada:FormatValueCols(mod.metadata.columns.Damage and Skada:FormatNumber(d.value))
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -684,7 +704,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 				d.valuetext = FormatValueNumber(d.value, myamount, true, actor.id == mod.userGUID)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -714,7 +734,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 						d.value = myamount
 						d.valuetext = FormatValueNumber(0, myamount, true, actor.id == mod.userGUID)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -726,7 +746,11 @@ Skada:AddLoadableModule("Comparison", function(L)
 	function mod:Update(win, set)
 		win.title = format("%s: %s", L["Comparison"], self.userName)
 
-		if (set:GetDamage() or 0) then
+		if set and set:GetDamage() > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local myamount = set:GetActorDamage(mod.userGUID, mod.userName)
 			local nr = 0
 

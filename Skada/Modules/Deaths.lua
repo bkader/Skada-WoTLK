@@ -407,6 +407,10 @@ Skada:AddLoadableModule("Deaths", function(L)
 			win.title = format(L["%s's deaths"], player.name)
 
 			if (player.death or 0) > 0 and player.deathlog then
+				if win.metadata then
+					win.metadata.maxvalue = 0
+				end
+
 				local nr = 0
 				for i, death in ipairs(player.deathlog) do
 					nr = nr + 1
@@ -435,7 +439,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 					d.value = death.time
 					d.valuetext = formatdate(d.value)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -456,6 +460,10 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 		local total = set.death or 0
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and (player.death or 0) > 0 then
@@ -482,7 +490,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 						d.valuetext = tostring(player.death)
 					end
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end

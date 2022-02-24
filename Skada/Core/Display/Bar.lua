@@ -353,10 +353,13 @@ do
 		-- NOTE: this line is kept just in case mousewheel misbehaves.
 		-- local maxbars = win.db.background.height / (win.db.barheight + win.db.barspacing)
 		local maxbars = win.bargroup:GetMaxBars()
-		if direction == 1 and win.bargroup:GetBarOffset() > 0 then
-			win.bargroup:SetBarOffset(win.bargroup:GetBarOffset() - 1)
-		elseif direction == -1 and ((win.bargroup:GetNumBars() - maxbars - win.bargroup:GetBarOffset()) > 0) then
-			win.bargroup:SetBarOffset(win.bargroup:GetBarOffset() + 1)
+		local numbars = win.bargroup:GetNumBars()
+		local offset = win.bargroup:GetBarOffset()
+
+		if direction == 1 and offset > 0 then
+			win.bargroup:SetBarOffset(IsShiftKeyDown() and 0 or (offset - 1))
+		elseif direction == -1 and ((numbars - maxbars - offset) > 0) then
+			win.bargroup:SetBarOffset(IsShiftKeyDown() and (numbars - maxbars) or offset + 1)
 		end
 	end
 

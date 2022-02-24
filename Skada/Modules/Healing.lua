@@ -161,9 +161,15 @@ Skada:AddLoadableModule("Healing", function(L)
 		if actor then
 			local totaltime = set:GetTime()
 			local activetime = actor:GetTime(true)
+			local hps, amount = actor:GetHPS()
+
 			tooltip:AddDoubleLine(L["Activity"], Skada:FormatPercent(activetime, totaltime), nil, nil, nil, 1, 1, 1)
 			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Healing"], Skada:FormatNumber(amount), 1, 1, 1)
+
+			local suffix = Skada:FormatTime(Skada.db.profile.timemesure == 1 and activetime or totaltime)
+			tooltip:AddDoubleLine(Skada:FormatNumber(amount) .. "/" .. suffix, Skada:FormatNumber(hps), 1, 1, 1)
 		end
 	end
 
@@ -234,6 +240,10 @@ Skada:AddLoadableModule("Healing", function(L)
 		local total = actor and actor:GetHealOnTarget(win.targetname) or 0
 
 		if total > 0 and actor.healspells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellid, spell in pairs(actor.healspells) do
 				if spell.targets and spell.targets[win.targetname] then
@@ -261,7 +271,7 @@ Skada:AddLoadableModule("Healing", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -282,6 +292,10 @@ Skada:AddLoadableModule("Healing", function(L)
 		local total = actor and actor.heal or 0
 
 		if total > 0 and actor.healspells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellid, spell in pairs(actor.healspells) do
 				nr = nr + 1
@@ -303,7 +317,7 @@ Skada:AddLoadableModule("Healing", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -325,6 +339,10 @@ Skada:AddLoadableModule("Healing", function(L)
 		local targets = (total > 0) and actor:GetHealTargets()
 
 		if targets then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
@@ -344,7 +362,7 @@ Skada:AddLoadableModule("Healing", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -356,6 +374,10 @@ Skada:AddLoadableModule("Healing", function(L)
 
 		local total = set and set:GetHeal() or 0
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 
 			-- players
@@ -386,7 +408,7 @@ Skada:AddLoadableModule("Healing", function(L)
 							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -419,7 +441,7 @@ Skada:AddLoadableModule("Healing", function(L)
 								self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 							)
 
-							if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+							if win.metadata and d.value > win.metadata.maxvalue then
 								win.metadata.maxvalue = d.value
 							end
 						end
@@ -524,6 +546,10 @@ Skada:AddLoadableModule("Overhealing", function(L)
 		local total = actor and actor:GetOverhealOnTarget(win.targetname) or 0
 
 		if total > 0 and actor.healspells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellid, spell in pairs(actor.healspells) do
 				if spell.targets and spell.targets[win.targetname] and (spell.targets[win.targetname].overheal or 0) > 0 then
@@ -546,7 +572,7 @@ Skada:AddLoadableModule("Overhealing", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(100 * d.value)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -567,6 +593,10 @@ Skada:AddLoadableModule("Overhealing", function(L)
 		local total = actor and actor:GetOverheal() or 0
 
 		if total > 0 and actor.healspells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellid, spell in pairs(actor.healspells) do
 				if (spell.overheal or 0) > 0 then
@@ -590,7 +620,7 @@ Skada:AddLoadableModule("Overhealing", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(100 * d.value)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -612,6 +642,10 @@ Skada:AddLoadableModule("Overhealing", function(L)
 		local targets = (total > 0) and actor:GetOverhealTargets()
 
 		if targets then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
@@ -631,7 +665,7 @@ Skada:AddLoadableModule("Overhealing", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(100 * d.value)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -643,6 +677,10 @@ Skada:AddLoadableModule("Overhealing", function(L)
 
 		local total = set.overheal or 0
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for _, player in ipairs(set.players) do
 				if not win.class or win.class == player.class then
@@ -668,7 +706,7 @@ Skada:AddLoadableModule("Overhealing", function(L)
 							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -779,6 +817,10 @@ Skada:AddLoadableModule("Total Healing", function(L)
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetTotalHealOnTarget(win.targetname) or 0
 		if total > 0 and actor.healspells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellid, spell in pairs(actor.healspells) do
 				if spell.targets and spell.targets[win.targetname] then
@@ -809,7 +851,7 @@ Skada:AddLoadableModule("Total Healing", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -830,6 +872,10 @@ Skada:AddLoadableModule("Total Healing", function(L)
 		local total = actor and actor:GetTotalHeal() or 0
 
 		if total > 0 and actor.healspells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellid, spell in pairs(actor.healspells) do
 				local amount = spell.amount + (spell.overheal or 0)
@@ -854,7 +900,7 @@ Skada:AddLoadableModule("Total Healing", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -875,6 +921,10 @@ Skada:AddLoadableModule("Total Healing", function(L)
 		local targets = (total > 0) and actor:GetTotalHealTargets()
 
 		if targets then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
@@ -894,7 +944,7 @@ Skada:AddLoadableModule("Total Healing", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -906,6 +956,10 @@ Skada:AddLoadableModule("Total Healing", function(L)
 
 		local total = set and set:GetTotalHeal() or 0
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 
 			-- players
@@ -936,7 +990,7 @@ Skada:AddLoadableModule("Total Healing", function(L)
 							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -969,7 +1023,7 @@ Skada:AddLoadableModule("Total Healing", function(L)
 								self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 							)
 
-							if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+							if win.metadata and d.value > win.metadata.maxvalue then
 								win.metadata.maxvalue = d.value
 							end
 						end
@@ -1035,6 +1089,10 @@ Skada:AddLoadableModule("Healing and Overhealing", function(L)
 
 		local total = actor and actor:GetTotalHealOnTarget(win.targetname) or 0
 		if total > 0 and actor.healspells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellid, spell in pairs(actor.healspells) do
 				if spell.targets and spell.targets[win.targetname] then
@@ -1059,7 +1117,7 @@ Skada:AddLoadableModule("Healing and Overhealing", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(100 * d.value)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -1081,6 +1139,10 @@ Skada:AddLoadableModule("Healing and Overhealing", function(L)
 
 		local total = actor and actor:GetTotalHeal() or 0
 		if total > 0 and actor.healspells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellid, spell in pairs(actor.healspells) do
 				local amount = spell.amount + spell.overheal
@@ -1106,7 +1168,7 @@ Skada:AddLoadableModule("Healing and Overhealing", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(100 * d.value)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -1130,6 +1192,10 @@ Skada:AddLoadableModule("Healing and Overhealing", function(L)
 		local targets = (total > 0) and actor:GetHealTargets()
 
 		if targets then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
@@ -1154,7 +1220,7 @@ Skada:AddLoadableModule("Healing and Overhealing", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(target.overheal, d.value)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -1166,6 +1232,10 @@ Skada:AddLoadableModule("Healing and Overhealing", function(L)
 
 		local total = set and set:GetTotalHeal() or 0
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for _, player in ipairs(set.players) do
 				if not win.class or win.class == player.class then
@@ -1190,7 +1260,7 @@ Skada:AddLoadableModule("Healing and Overhealing", function(L)
 							self.metadata.columns.Percent and Skada:FormatPercent(player.overheal, total)
 						)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -1259,6 +1329,10 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 		local total = actor and actor:GetAbsorbHealOnTarget(win.actorname)
 
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			if actor.absorbspells then
 				for spellid, spell in pairs(actor.absorbspells) do
@@ -1279,7 +1353,7 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 							mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -1313,7 +1387,7 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 							mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -1336,6 +1410,10 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 
 		local sources, total = actor:GetAbsorbHealSources()
 		if sources and total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for sourcename, source in pairs(cacheTable) do
 				nr = nr + 1
@@ -1357,7 +1435,7 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -1371,6 +1449,10 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 		local players = (total > 0) and set:GetAbsorbHealTaken()
 
 		if players then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for playername, player in pairs(players) do
 				if not win.class or win.class == player.class then
@@ -1393,7 +1475,7 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end

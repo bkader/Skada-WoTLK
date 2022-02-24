@@ -472,6 +472,10 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 		local sources = (total > 0) and enemy:GetDamageSources()
 
 		if sources then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for sourcename, source in pairs(sources) do
 				if not win.class or win.class == source.class then
@@ -497,7 +501,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -517,6 +521,10 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 		local total = enemy and enemy:GetDamageTaken() or 0
 
 		if total > 0 and enemy.damagetakenspells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellid, spell in pairs(enemy.damagetakenspells) do
 				nr = nr + 1
@@ -539,7 +547,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -562,6 +570,10 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 		local sources = (total > 0) and enemy:GetDamageSources()
 
 		if sources then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for sourcename, source in pairs(sources) do
 				if (not win.class or win.class == source.class) and (source.useful or 0) > 0 then
@@ -583,7 +595,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -595,6 +607,10 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 		win.title = L["Enemy Damage Taken"]
 		local total = set and set:GetEnemyDamageTaken() or 0
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for _, enemy in ipairs(set.enemies) do
 				local dtps, amount = enemy:GetDTPS()
@@ -617,7 +633,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and not enemy.fake and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and not enemy.fake and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -885,6 +901,10 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 		local spells, total = enemy:GetDamageTargetSpells(win.actorname)
 
 		if spells and total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellid, spell in pairs(spells) do
 				nr = nr + 1
@@ -903,7 +923,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -929,6 +949,10 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 		local targets, total = enemy:GetDamageSpellTargets(win.spellid)
 
 		if targets and total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				if not win.class or win.class == target.class then
@@ -950,7 +974,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -974,6 +998,10 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 		local targets = (total > 0) and enemy:GetDamageTargets()
 
 		if targets then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				if not win.class or win.class == target.class then
@@ -998,7 +1026,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -1018,6 +1046,10 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 		local total = enemy and enemy:GetDamage() or 0
 
 		if total > 0 and enemy.damagespells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellid, spell in pairs(enemy.damagespells) do
 				nr = nr + 1
@@ -1040,7 +1072,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -1052,6 +1084,10 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 
 		local total = set and set:GetEnemyDamage() or 0
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for _, enemy in ipairs(set.enemies) do
 				if not enemy.fake then
@@ -1076,7 +1112,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -1306,6 +1342,10 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 		local targets = (total > 0) and enemy:GetHealTargets()
 
 		if total > 0 and targets then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
@@ -1325,7 +1365,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -1344,6 +1384,10 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 		local total = enemy and enemy.heal or 0
 
 		if total > 0 and enemy.healspells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellid, spell in pairs(enemy.healspells) do
 				nr = nr + 1
@@ -1362,7 +1406,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -1377,6 +1421,10 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 
 		local total = set and set:GetEnemyHeal() or 0
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for _, enemy in ipairs(set.enemies) do
 				if (not win.class or win.class == enemy.class) and not enemy.fake then
@@ -1400,7 +1448,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end

@@ -786,11 +786,14 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	local function playermod_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local player = set and set:GetPlayer(win.actorid, win.actorname)
-		local spell = player and player.absorbspells and player.absorbspells[id]
+		if not set then return end
 
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
+		if enemy then return end -- unavailable for enemies yet
+
+		local spell = actor and actor.absorbspells and actor.absorbspells[id]
 		if spell then
-			tooltip:AddLine(player.name .. " - " .. label)
+			tooltip:AddLine(actor.name .. " - " .. label)
 			if spell.school and Skada.spellschools[spell.school] then
 				tooltip:AddLine(
 					Skada.spellschools[spell.school].name,
@@ -825,14 +828,19 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	function spellmod:Update(win, set)
 		win.title = format(L["%s's absorbs on %s"], win.actorname or L.Unknown, win.targetname or L.Unknown)
-		if not win.targetname then return end
+		if not set or not win.targetname then return end
 
-		local player = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = player and player.absorb or 0
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
+		if enemy then return end -- unavailable for enemies yet
 
-		if total > 0 and player.absorbspells then
+		local total = actor and actor.absorb or 0
+		if total > 0 and actor.absorbspells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
-			for spellid, spell in pairs(player.absorbspells) do
+			for spellid, spell in pairs(actor.absorbspells) do
 				if spell.targets and spell.targets[win.targetname] then
 					nr = nr + 1
 
@@ -850,7 +858,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -865,13 +873,19 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	function playermod:Update(win, set)
 		win.title = format(L["%s's absorb spells"], win.actorname or L.Unknown)
+		if not set or not win.actorname then return end
 
-		local player = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = player and player.absorb or 0
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
+		if enemy then return end -- unavailable for enemies yet
 
-		if total > 0 and player.absorbspells then
+		local total = actor and actor.absorb or 0
+		if total > 0 and actor.absorbspells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
-			for spellid, spell in pairs(player.absorbspells) do
+			for spellid, spell in pairs(actor.absorbspells) do
 				nr = nr + 1
 
 				local d = win.dataset[nr] or {}
@@ -888,7 +902,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -902,12 +916,19 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	function targetmod:Update(win, set)
 		win.title = format(L["%s's absorbed targets"], win.actorname or L.Unknown)
+		if not set or not win.actorname then return end
 
-		local player = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = player and player.absorb or 0
-		local targets = (total > 0) and player:GetAbsorbTargets()
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
+		if enemy then return end -- unavailable for enemies yet
+
+		local total = actor and actor.absorb or 0
+		local targets = (total > 0) and actor:GetAbsorbTargets()
 
 		if targets then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
@@ -928,7 +949,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -940,7 +961,13 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 		local total = set and set:GetAbsorb() or 0
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
+
+			-- players
 			for _, player in ipairs(set.players) do
 				if not win.class or win.class == player.class then
 					local aps, amount = player:GetAPS()
@@ -957,6 +984,10 @@ Skada:AddLoadableModule("Absorbs", function(L)
 						d.role = player.role
 						d.spec = player.spec
 
+						if Skada.forPVP and set.type == "arena" then
+							d.color = set.gold and Skada.classcolors.ARENA_GOLD or Skada.classcolors.ARENA_GREEN
+						end
+
 						d.value = amount
 						d.valuetext = Skada:FormatValueCols(
 							self.metadata.columns.Absorbs and Skada:FormatNumber(d.value),
@@ -964,8 +995,42 @@ Skada:AddLoadableModule("Absorbs", function(L)
 							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
+						end
+					end
+				end
+			end
+
+			-- arena enemies
+			if Skada.forPVP and set.type == "arena" and set.enemies then
+				for _, enemy in ipairs(set.enemies) do
+					if not win.class or win.class == enemy.class then
+						local aps, amount = enemy:GetAPS()
+						if amount > 0 then
+							nr = nr + 1
+
+							local d = win.dataset[nr] or {}
+							win.dataset[nr] = d
+
+							d.id = enemy.id or enemy.name
+							d.label = enemy.name
+							d.text = nil
+							d.class = enemy.class
+							d.role = enemy.role
+							d.spec = enemy.spec
+							d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_GOLD
+
+							d.value = amount
+							d.valuetext = Skada:FormatValueCols(
+								self.metadata.columns.Absorbs and Skada:FormatNumber(d.value),
+								self.metadata.columns.HPS and  Skada:FormatNumber(aps),
+								self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+							)
+
+							if win.metadata and d.value > win.metadata.maxvalue then
+								win.metadata.maxvalue = d.value
+							end
 						end
 					end
 				end
@@ -1112,30 +1177,36 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 
 	local function hps_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local player = set and set:GetActor(label, id)
-		if player then
+		if not set then return end
+
+		local actor, enemy = set:GetActor(label, id)
+		if actor then
 			local totaltime = set:GetTime()
-			local activetime = player:GetTime()
-			local hps, amount = 0, 0
-			if player.GetAHPS then
-				hps, amount = player:GetAHPS()
-			elseif player.GetHPS then
-				hps, amount = player:GetHPS()
-			end
-			tooltip:AddLine(player.name .. " - " .. L["HPS"])
+			local activetime = actor:GetTime(true)
+			local hps, amount = actor:GetAHPS()
+
+			tooltip:AddDoubleLine(L["Activity"], Skada:FormatPercent(activetime, totaltime), nil, nil, nil, 1, 1, 1)
 			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(set:GetTime()), 1, 1, 1)
-			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(player:GetTime(true)), 1, 1, 1)
-			tooltip:AddDoubleLine(L["Absorbs and Healing"], format("%s (%s)", Skada:FormatNumber(hps), Skada:FormatPercent(hps, amount)), 1, 1, 1)
-			tooltip:AddDoubleLine(Skada:FormatNumber(amount) .. "/" .. Skada:FormatTime(activetime), Skada:FormatNumber(hps), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Absorbs and Healing"], Skada:FormatNumber(amount), 1, 1, 1)
+
+			local suffix = Skada:FormatTime(Skada.db.profile.timemesure == 1 and activetime or totaltime)
+			tooltip:AddDoubleLine(Skada:FormatNumber(amount) .. "/" .. suffix, Skada:FormatNumber(hps), 1, 1, 1)
 		end
 	end
 
 	local function playermod_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local player = set and set:GetPlayer(win.actorid, win.actorname)
-		local spell = player and ((player.absorbspells and player.absorbspells[id]) or (player.healspells and player.healspells[id]))
+		if not set or not win.actorname then return end
+
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
+		if not actor then return end
+
+		local spell = actor.absorbspells and actor.absorbspells[id] -- absorb?
+		spell = spell or actor.healspells and actor.healspells[id] -- heal?
+
 		if spell then
-			tooltip:AddLine(player.name .. " - " .. label)
+			tooltip:AddLine(actor.name .. " - " .. label)
 			if spell.school and Skada.spellschools[spell.school] then
 				tooltip:AddLine(
 					Skada.spellschools[spell.school].name,
@@ -1143,6 +1214,11 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 					Skada.spellschools[spell.school].g,
 					Skada.spellschools[spell.school].b
 				)
+			end
+
+			if enemy then
+				tooltip:AddDoubleLine(L["Amount"], spell.amount, 1, 1, 1)
+				return
 			end
 
 			if (spell.casts or 0) > 0 then
@@ -1188,16 +1264,18 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 
 	function spellmod:Update(win, set)
 		win.title = format(L["%s's absorbs and healing on %s"], win.actorname or L.Unknown, win.targetname or L.Unknown)
-		if not win.targetname then return end
+		if not set or not win.targetname then return end
 
-		local actor, enemy = set and set:GetPlayer(win.actorid, win.actorname)
-		if not actor and set and Skada.forPVP and set.type == "arena" then
-			actor, enemy = set:GetEnemy(win.actorname, win.actorid)
-		end
-
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetAbsorbHealOnTarget(win.targetname) or 0
+
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
+
 			if actor.healspells then
 				for spellid, spell in pairs(actor.healspells) do
 					if spell.targets and spell.targets[win.targetname] then
@@ -1226,7 +1304,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 							mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -1252,7 +1330,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 							mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -1274,7 +1352,12 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 		local total = actor and actor:GetAbsorbHeal() or 0
 
 		if total > 0 and (actor.healspells or actor.absorbspells) then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
+
 			if actor.healspells then
 				for spellid, spell in pairs(actor.healspells) do
 					nr = nr + 1
@@ -1297,7 +1380,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -1321,7 +1404,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -1342,6 +1425,10 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 		local targets = (total > 0) and actor:GetAbsorbHealTargets()
 
 		if targets then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				if target.amount > 0 then
@@ -1362,7 +1449,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end
@@ -1375,6 +1462,10 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 
 		local total = set and set:GetAbsorbHeal() or 0
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 
 			-- players
@@ -1406,7 +1497,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -1417,7 +1508,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 			if Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyHeal then
 				for _, enemy in ipairs(set.enemies) do
 					if not win.class or win.class == enemy.class then
-						local hps, amount = enemy:GetHPS()
+						local hps, amount = enemy:GetAHPS()
 
 						if amount > 0 then
 							nr = nr + 1
@@ -1440,7 +1531,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 								self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 							)
 
-							if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+							if win.metadata and d.value > win.metadata.maxvalue then
 								win.metadata.maxvalue = d.value
 							end
 						end
@@ -1524,21 +1615,21 @@ Skada:AddLoadableModule("HPS", function(L)
 
 	local function hps_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local player = set and set:GetActor(label, id)
-		if player then
+		if not set then return end
+
+		local actor, enemy = set:GetActor(label, id)
+		if actor then
 			local totaltime = set:GetTime()
-			local activetime = player:GetTime()
-			local hps, amount = 0
-			if player.GetAHPS then
-				hps, amount = player:GetAHPS()
-			elseif player.GetHPS then
-				hps, amount = player:GetHPS()
-			end
-			tooltip:AddLine(player.name .. " - " .. L["HPS"])
+			local activetime = actor:GetTime(true)
+			local hps, amount = actor:GetAHPS()
+
+			tooltip:AddLine(actor.name .. " - " .. L["HPS"])
 			tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(set:GetTime()), 1, 1, 1)
-			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(player:GetTime(true)), 1, 1, 1)
-			tooltip:AddDoubleLine(L["Absorbs and Healing"], format("%s (%s)", Skada:FormatNumber(hps), Skada:FormatPercent(hps, amount)), 1, 1, 1)
-			tooltip:AddDoubleLine(Skada:FormatNumber(amount) .. "/" .. Skada:FormatTime(activetime), Skada:FormatNumber(hps), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Absorbs and Healing"], Skada:FormatNumber(amount), 1, 1, 1)
+
+			local suffix = Skada:FormatTime(Skada.db.profile.timemesure == 1 and activetime or totaltime)
+			tooltip:AddDoubleLine(Skada:FormatNumber(amount) .. "/" .. suffix, Skada:FormatNumber(hps), 1, 1, 1)
 		end
 	end
 
@@ -1547,6 +1638,10 @@ Skada:AddLoadableModule("HPS", function(L)
 
 		local total = set and set:GetAHPS() or 0
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 
 			-- players
@@ -1576,7 +1671,7 @@ Skada:AddLoadableModule("HPS", function(L)
 							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
-						if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
 						end
 					end
@@ -1608,7 +1703,7 @@ Skada:AddLoadableModule("HPS", function(L)
 								self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 							)
 
-							if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+							if win.metadata and d.value > win.metadata.maxvalue then
 								win.metadata.maxvalue = d.value
 							end
 						end
@@ -1732,6 +1827,10 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 		end
 
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for playername, player in pairs(cacheTable) do
 				nr = nr + 1
@@ -1752,7 +1851,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -1765,6 +1864,10 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 		local spells = (total > 0) and set:GetAbsorbHealSpells()
 
 		if spells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellid, spell in pairs(spells) do
 				nr = nr + 1
@@ -1787,7 +1890,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 					self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end

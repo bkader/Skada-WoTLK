@@ -88,6 +88,10 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 		local targets = (total > 0) and player:GetFriendlyFireTargets()
 
 		if targets then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
@@ -107,7 +111,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -126,6 +130,10 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 		local total = player and player.friendfire or 0
 
 		if total > 0 and player.friendfirespells then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for spellid, spell in pairs(player.friendfirespells) do
 				nr = nr + 1
@@ -143,7 +151,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -168,6 +176,10 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 		end
 
 		if targets then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for targetname, amount in pairs(targets) do
 				nr = nr + 1
@@ -192,7 +204,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -204,6 +216,10 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 
 		local total = set.friendfire or 0
 		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and (player.friendfire or 0) > 0 then
@@ -225,7 +241,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
-					if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
 					end
 				end

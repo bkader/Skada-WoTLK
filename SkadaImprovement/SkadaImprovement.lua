@@ -121,6 +121,10 @@ Skada:AddLoadableModule("Improvement", function(L)
 		local boss = find_boss_data(win.targetname)
 
 		if boss and boss.encounters then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for i, encounter in ipairs(boss.encounters) do
 				nr = nr + 1
@@ -143,7 +147,7 @@ Skada:AddLoadableModule("Improvement", function(L)
 					)
 				end
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
@@ -198,6 +202,10 @@ Skada:AddLoadableModule("Improvement", function(L)
 		win.title = L["Improvement"]
 
 		if self.db then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
 			local nr = 0
 			for name, data in pairs(self.db) do
 				nr = nr + 1
@@ -211,7 +219,7 @@ Skada:AddLoadableModule("Improvement", function(L)
 				d.value = data.count
 				d.valuetext = tostring(data.count)
 
-				if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
+				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
