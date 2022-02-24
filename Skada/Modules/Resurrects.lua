@@ -76,15 +76,15 @@ Skada:AddLoadableModule("Resurrects", function(L)
 	end
 
 	function playermod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's resurrect spells"], label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's resurrect spells"], win.playername or L.Unknown)
-		if not set or not win.playername then return end
+		win.title = format(L["%s's resurrect spells"], win.actorname or L.Unknown)
+		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		if enemy then return end -- unuavailable for enemies yet
 
 		local total = actor and actor.ress or 0
@@ -115,15 +115,15 @@ Skada:AddLoadableModule("Resurrects", function(L)
 	end
 
 	function targetmod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's resurrect targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's resurrect targets"], win.playername or L.Unknown)
-		if not set or not win.playername then return end
+		win.title = format(L["%s's resurrect targets"], win.actorname or L.Unknown)
+		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		if enemy then return end -- unavailable for enemies yet
 
 		local total = actor and actor.ress or 0

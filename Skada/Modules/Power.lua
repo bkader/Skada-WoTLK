@@ -163,16 +163,16 @@ Skada:AddLoadableModule("Resources", function(L)
 
 	-- player mods common Enter function.
 	function playermod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's gained %s"], label, namesTable[self.powerid] or L.Unknown)
 	end
 
 	-- player mods main update function
 	function playermod:Update(win, set)
-		win.title = format(L["%s's gained %s"], win.playername or L.Unknown, self.powername or L.Unknown)
-		if not set or not win.playername then return end
+		win.title = format(L["%s's gained %s"], win.actorname or L.Unknown, self.powername or L.Unknown)
+		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		if enemy then return end -- unavailable for enemies yet
 
 		local total = actor and self.power and actor[self.power] or 0

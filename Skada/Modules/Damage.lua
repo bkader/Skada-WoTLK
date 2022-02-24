@@ -374,7 +374,7 @@ Skada:AddLoadableModule("Damage", function(L)
 		local set = win:GetSelectedSet()
 		if not set then return end
 
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local spell = actor and actor.damagespells and actor.damagespells[enemy and id or label]
 		if spell then
 			tooltip:AddLine(actor.name .. " - " .. label)
@@ -427,7 +427,7 @@ Skada:AddLoadableModule("Damage", function(L)
 	local function spellmod_tooltip(win, id, label, tooltip)
 		if label == L["Critical Hits"] or label == L["Normal Hits"] then
 			local set = win:GetSelectedSet()
-			local actor = set and set:GetPlayer(win.playerid, win.playername)
+			local actor = set and set:GetPlayer(win.actorid, win.actorname)
 			local spell = actor.damagespells and actor.damagespells[win.spellname]
 			if spell then
 				tooltip:AddLine(actor.name .. " - " .. win.spellname)
@@ -462,15 +462,15 @@ Skada:AddLoadableModule("Damage", function(L)
 	end
 
 	function playermod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's damage"], label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's damage"], win.playername or L.Unknown)
-		if not set or not win.playername then return end
+		win.title = format(L["%s's damage"], win.actorname or L.Unknown)
+		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetDamage() or 0
 
 
@@ -508,14 +508,14 @@ Skada:AddLoadableModule("Damage", function(L)
 	end
 
 	function targetmod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's targets"], win.playername or L.Unknown)
+		win.title = format(L["%s's targets"], win.actorname or L.Unknown)
 
-		local actor = set and set:GetActor(win.playername, win.playerid)
+		local actor = set and set:GetActor(win.actorname, win.actorid)
 		if not actor then return end
 
 		local total = actor:GetDamage()
@@ -566,15 +566,15 @@ Skada:AddLoadableModule("Damage", function(L)
 
 	function spellmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format("%s: %s", win.playername or L.Unknown, format(L["%s's damage breakdown"], label))
+		win.title = format("%s: %s", win.actorname or L.Unknown, format(L["%s's damage breakdown"], label))
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format("%s: %s", win.playername or L.Unknown, format(L["%s's damage breakdown"], win.spellname or L.Unknown))
+		win.title = format("%s: %s", win.actorname or L.Unknown, format(L["%s's damage breakdown"], win.spellname or L.Unknown))
 		if not set or not win.spellname then return end
 
 		-- details only available for players
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local spell = actor and actor.damagespells and actor.damagespells[enemy and win.spellid or win.spellname]
 		if spell then
 			if win.metadata then
@@ -624,15 +624,15 @@ Skada:AddLoadableModule("Damage", function(L)
 
 	function sdetailmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format(L["%s's <%s> damage"], win.playername or L.Unknown, label)
+		win.title = format(L["%s's <%s> damage"], win.actorname or L.Unknown, label)
 	end
 
 	function sdetailmod:Update(win, set)
-		win.title = format(L["%s's <%s> damage"], win.playername or L.Unknown, win.spellname or L.Unknown)
+		win.title = format(L["%s's <%s> damage"], win.actorname or L.Unknown, win.spellname or L.Unknown)
 		if not win.spellname then return end
 
 		-- only available for players
-		local actor = set and set:GetPlayer(win.playerid, win.playername)
+		local actor = set and set:GetPlayer(win.actorid, win.actorname)
 		local spell = actor and actor.damagespells and actor.damagespells[win.spellname]
 		if spell then
 			local absorbed = max(0, spell.total - spell.amount)
@@ -670,14 +670,14 @@ Skada:AddLoadableModule("Damage", function(L)
 
 	function tdetailmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = format(L["%s's damage on %s"], win.playername or L.Unknown, label)
+		win.title = format(L["%s's damage on %s"], win.actorname or L.Unknown, label)
 	end
 
 	function tdetailmod:Update(win, set)
-		win.title = format(L["%s's damage on %s"], win.playername or L.Unknown, win.targetname or L.Unknown)
+		win.title = format(L["%s's damage on %s"], win.actorname or L.Unknown, win.targetname or L.Unknown)
 		if not set or not win.targetname then return end
 
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local targets = actor and actor:GetDamageTargets()
 		if targets then
 			local total = targets[win.targetname] and targets[win.targetname].amount or 0
@@ -1220,15 +1220,15 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 	local detailmod = targetmod:NewModule(L["More Details"])
 
 	function playermod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's damage"], label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's damage"], win.playername or L.Unknown)
-		if not set or not win.playername then return end
+		win.title = format(L["%s's damage"], win.actorname or L.Unknown)
+		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetDamage(true) or 0
 
 		if total > 0 and actor.damagespells then
@@ -1270,15 +1270,15 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 	end
 
 	function targetmod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's targets"], win.playername or L.Unknown)
-		if not set or not win.playername then return end
+		win.title = format(L["%s's targets"], win.actorname or L.Unknown)
+		if not set or not win.actorname then return end
 
-		local actor = set:GetActor(win.playername, win.playerid)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetDamage(true) or 0
 		local targets = (total > 0) and actor:GetDamageTargets()
 
@@ -1487,15 +1487,15 @@ Skada:AddLoadableModule("Overkill", function(L)
 	local detailmod = targetmod:NewModule(L["Overkill spell list"])
 
 	function playermod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's overkill spells"], label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's overkill spells"], win.playername or L.Unknown)
-		if not set or not win.playername then return end
+		win.title = format(L["%s's overkill spells"], win.actorname or L.Unknown)
+		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor.overkill or 0
 		if total > 0 and actor.damagespells then
 			local nr = 0
@@ -1534,15 +1534,15 @@ Skada:AddLoadableModule("Overkill", function(L)
 	end
 
 	function targetmod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's overkill targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's overkill targets"], win.playername or L.Unknown)
-		if not set or not win.playername then return end
+		win.title = format(L["%s's overkill targets"], win.actorname or L.Unknown)
+		if not set or not win.actorname then return end
 
-		local actor = set:GetActor(win.playername, win.playerid)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor.overkill or 0
 		local targets = (total > 0) and actor:GetDamageTargets()
 
@@ -1577,14 +1577,14 @@ Skada:AddLoadableModule("Overkill", function(L)
 
 	function detailmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = format(L["%s's overkill spells"], win.playername or L.Unknown)
+		win.title = format(L["%s's overkill spells"], win.actorname or L.Unknown)
 	end
 
 	function detailmod:Update(win, set)
-		win.title = format(L["%s's overkill spells"], win.playername or L.Unknown)
+		win.title = format(L["%s's overkill spells"], win.actorname or L.Unknown)
 		if not set or not win.targetname then return end
 
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		if not actor or (actor.overkill or 0) == 0 then return end
 
 		local targets = actor:GetDamageTargets()
@@ -1733,15 +1733,15 @@ Skada:AddLoadableModule("Absorbed Damage", function(L)
 	local targetmod = mod:NewModule(L["Damage target list"])
 
 	function playermod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's damage"], label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's damage"], win.playername or L.Unknown)
-		if not set or not win.playername then return end
+		win.title = format(L["%s's damage"], win.actorname or L.Unknown)
+		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		if not actor then return end
 
 		local total = (actor.totaldamage and actor.damage) and max(0, actor.totaldamage - actor.damage) or 0
@@ -1785,14 +1785,14 @@ Skada:AddLoadableModule("Absorbed Damage", function(L)
 	end
 
 	function targetmod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's targets"], win.playername or L.Unknown)
+		win.title = format(L["%s's targets"], win.actorname or L.Unknown)
 
-		local actor = set and set:GetActor(win.playername, win.playerid)
+		local actor = set and set:GetActor(win.actorname, win.actorid)
 		if not actor then return end
 
 		local total = (actor.totaldamage and actor.damage) and max(0, actor.totaldamage - actor.damage) or 0

@@ -107,15 +107,15 @@ Skada:AddLoadableModule("Interrupts", function(L)
 	end
 
 	function spellmod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's interrupted spells"], label)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's interrupted spells"], win.playername or L.Unknown)
-		if not set or not win.playername then return end
+		win.title = format(L["%s's interrupted spells"], win.actorname or L.Unknown)
+		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		if enemy then return end -- unavailable for enemeies yet
 
 		local total = actor and actor.interrupt or 0
@@ -146,15 +146,15 @@ Skada:AddLoadableModule("Interrupts", function(L)
 	end
 
 	function targetmod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's interrupted targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's interrupted targets"], win.playername or L.Unknown)
-		if not set or not win.playername then return end
+		win.title = format(L["%s's interrupted targets"], win.actorname or L.Unknown)
+		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		if enemy then return end -- unavailable for enemies yet
 
 		local total = actor and actor.interrupt or 0
@@ -188,15 +188,15 @@ Skada:AddLoadableModule("Interrupts", function(L)
 	end
 
 	function playermod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's interrupt spells"], label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's interrupt spells"], win.playername or L.Unknown)
-		if not set or not win.playername then return end
+		win.title = format(L["%s's interrupt spells"], win.actorname or L.Unknown)
+		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		if enemy then return end -- unavailable for enemies yet
 
 		local total = actor and actor.interrupt or 0

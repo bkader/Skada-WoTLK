@@ -87,14 +87,14 @@ Skada:AddLoadableModule("Fails", function(L)
 	end
 
 	function playermod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's fails"], label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's fails"], win.playername or L.Unknown)
+		win.title = format(L["%s's fails"], win.actorname or L.Unknown)
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.fail or 0
 
 		if total > 0 and player.failspells then

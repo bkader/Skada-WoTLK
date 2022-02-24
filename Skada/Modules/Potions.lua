@@ -141,7 +141,7 @@ Skada:AddLoadableModule("Potions", function(L)
 	end
 
 	function playermod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's used potions"], label)
 	end
 
@@ -153,7 +153,7 @@ Skada:AddLoadableModule("Potions", function(L)
 	end
 
 	function playermod:Update(win, set)
-		local player = Skada:FindPlayer(set, win.playerid)
+		local player = Skada:FindPlayer(set, win.actorid)
 		if player then
 			win.title = format(L["%s's used potions"], player.name)
 			local total = player.potion or 0

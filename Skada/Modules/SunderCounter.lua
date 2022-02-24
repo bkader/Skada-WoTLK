@@ -95,16 +95,16 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 	end
 
 	function targetmod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's <%s> targets"], label, sunder)
 	end
 
 	function targetmod:Update(win, set)
 		DoubleCheckSunder()
-		win.title = format(L["%s's <%s> targets"], win.playername or L.Unknown, sunder)
-		if not set or not win.playername then return end
+		win.title = format(L["%s's <%s> targets"], win.actorname or L.Unknown, sunder)
+		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		if enemy then return end -- unavailable for enemies yet
 
 		local total = actor and actor.sunder or 0

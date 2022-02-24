@@ -311,7 +311,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 		local set = win:GetSelectedSet()
 		if not set then return end
 
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		if enemy then return end -- sorry, only for players.
 
 		local spell = actor and actor.damagetakenspells and actor.damagetakenspells[label]
@@ -357,7 +357,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 	local function spellmod_tooltip(win, id, label, tooltip)
 		if label == L["Critical Hits"] or label == L["Normal Hits"] then
 			local set = win:GetSelectedSet()
-			local actor = set and set:GetPlayer(win.playerid, win.playername)
+			local actor = set and set:GetPlayer(win.actorid, win.actorname)
 			local spell = actor and actor.damagetakenspells and actor.damagetakenspells[win.spellname]
 			if spell then
 				tooltip:AddLine(actor.name .. " - " .. win.spellname)
@@ -392,15 +392,15 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 	end
 
 	function playermod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["Damage taken by %s"], label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["Damage taken by %s"], win.playername or L.Unknown)
-		if not set or not win.playername then return end
+		win.title = format(L["Damage taken by %s"], win.actorname or L.Unknown)
+		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetDamageTaken() or 0
 
 		if total > 0 and actor.damagetakenspells then
@@ -441,14 +441,14 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 	end
 
 	function sourcemod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's damage sources"], label)
 	end
 
 	function sourcemod:Update(win, set)
-		win.title = format(L["%s's damage sources"], win.playername or L.Unknown)
+		win.title = format(L["%s's damage sources"], win.actorname or L.Unknown)
 
-		local actor = set and set:GetActor(win.playername, win.playerid)
+		local actor = set and set:GetActor(win.actorname, win.actorid)
 		if not actor then return end
 
 		local total = actor:GetDamageTaken()
@@ -504,15 +504,15 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 
 	function spellmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format("%s: %s", win.playername or L.Unknown, format(L["%s's damage breakdown"], label))
+		win.title = format("%s: %s", win.actorname or L.Unknown, format(L["%s's damage breakdown"], label))
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format("%s: %s", win.playername or L.Unknown, format(L["%s's damage breakdown"], win.spellname or L.Unknown))
+		win.title = format("%s: %s", win.actorname or L.Unknown, format(L["%s's damage breakdown"], win.spellname or L.Unknown))
 		if not set or not win.spellname then return end
 
 		-- details only available for players
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local spell = actor and actor.damagetakenspells and actor.damagetakenspells[enemy and win.spellid or win.spellname]
 		if spell then
 			if win.metadata then
@@ -566,15 +566,15 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 
 	function sdetailmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format("%s: %s", win.playername or L.Unknown, format(L["Damage from %s"], label))
+		win.title = format("%s: %s", win.actorname or L.Unknown, format(L["Damage from %s"], label))
 	end
 
 	function sdetailmod:Update(win, set)
-		win.title = format("%s: %s", win.playername or L.Unknown, format(L["Damage from %s"], win.spellname or L.Unknown))
+		win.title = format("%s: %s", win.actorname or L.Unknown, format(L["Damage from %s"], win.spellname or L.Unknown))
 		if not set or not win.spellname then return end
 
 		-- only available for players
-		local actor = set:GetPlayer(win.playerid, win.playername)
+		local actor = set:GetPlayer(win.actorid, win.actorname)
 		local spell = actor and actor.damagetakenspells and actor.damagetakenspells[win.spellname]
 		if spell then
 			local absorbed = max(0, spell.total - spell.amount)
@@ -612,14 +612,14 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 
 	function tdetailmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = format(L["%s's damage on %s"], label, win.playername or L.Unknown)
+		win.title = format(L["%s's damage on %s"], label, win.actorname or L.Unknown)
 	end
 
 	function tdetailmod:Update(win, set)
-		win.title = format(L["%s's damage on %s"], win.targetname or L.Unknown, win.playername or L.Unknown)
+		win.title = format(L["%s's damage on %s"], win.targetname or L.Unknown, win.actorname or L.Unknown)
 		if not set or not win.targetname then return end
 
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local sources = actor and actor:GetDamageSources()
 		if sources then
 			local total = sources[win.targetname] and sources[win.targetname].amount or 0
@@ -1194,13 +1194,13 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 	local cacheTable = T.get("Skada_CacheTable2")
 
 	function playermod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's damage breakdown"], label)
 	end
 
 	function playermod:Update(win, set)
-		if cacheTable[win.playerid] then
-			local actor = cacheTable[win.playerid]
+		if cacheTable[win.actorid] then
+			local actor = cacheTable[win.actorid]
 			win.title = format(L["%s's damage breakdown"], actor.name)
 
 			local nr = 0
@@ -1350,14 +1350,14 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 
 	function spellmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format(L["%s's <%s> mitigated damage"], win.playername or L.Unknown, label)
+		win.title = format(L["%s's <%s> mitigated damage"], win.actorname or L.Unknown, label)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's <%s> mitigated damage"], win.playername or L.Unknown, win.spellname or L.Unknown)
+		win.title = format(L["%s's <%s> mitigated damage"], win.actorname or L.Unknown, win.spellname or L.Unknown)
 		if not set or not win.spellname then return end
 
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local spell = actor and actor.damagetakenspells and actor.damagetakenspells[enemy and win.spellid or win.spellname]
 
 		if spell then
@@ -1387,15 +1387,15 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 	end
 
 	function playermod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's mitigated damage"], label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's mitigated damage"], win.playername or L.Unknown)
-		if not set or not win.playername then return end
+		win.title = format(L["%s's mitigated damage"], win.actorname or L.Unknown)
+		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.playername, win.playerid)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local overall = actor and select(2, getMIT(actor)) or 0
 
 		if overall > 0 and actor.damagetakenspells then

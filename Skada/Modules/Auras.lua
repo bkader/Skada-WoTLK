@@ -242,9 +242,9 @@ do
 
 	function SpellUpdateFunction(atype, win, set, title, mode)
 		if not atype then return end
-		win.title = title and format(title, win.playername or L.Unknown) or mode.moduleName or L.Unknown
+		win.title = title and format(title, win.actorname or L.Unknown) or mode.moduleName or L.Unknown
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local maxtime = player and player:GetTime() or 0
 
 		if maxtime > 0 and player.auras then
@@ -279,7 +279,7 @@ do
 	function aura_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
 		local settime = set and set:GetTime() or 0
-		local player = (settime > 0) and set:GetPlayer(win.playerid, win.playername)
+		local player = (settime > 0) and set:GetPlayer(win.actorid, win.actorname)
 		local aura = player and player.auras and player.auras[id]
 		if aura then
 			tooltip:AddLine(player.name .. ": " .. label)
@@ -432,7 +432,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 	end
 
 	function spellmod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's buffs"], label)
 	end
 
@@ -559,14 +559,14 @@ Skada:AddLoadableModule("Debuffs", function(L)
 
 	function targetspellmod:Enter(win, id, label)
 		win.targetname = label or L.Unknown
-		win.title = format(L["%s's debuffs on %s"], win.playername or L.Unknown, label)
+		win.title = format(L["%s's debuffs on %s"], win.actorname or L.Unknown, label)
 	end
 
 	function targetspellmod:Update(win, set)
-		win.title = format(L["%s's debuffs on %s"], win.playername or L.Unknown, win.targetname or L.Unknown)
+		win.title = format(L["%s's debuffs on %s"], win.actorname or L.Unknown, win.targetname or L.Unknown)
 		if not win.targetname then return end
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		if not player then return end
 
 		local auras, maxtime = player:GetDebuffsOnTarget(win.targetname)
@@ -599,16 +599,16 @@ Skada:AddLoadableModule("Debuffs", function(L)
 
 	function spelltargetmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format(L["%s's <%s> targets"], win.playername or L.Unknown, label)
+		win.title = format(L["%s's <%s> targets"], win.actorname or L.Unknown, label)
 	end
 
 	function spelltargetmod:Update(win, set)
-		win.title = format(L["%s's <%s> targets"], win.playername or L.Unknown, win.spellname or L.Unknown)
+		win.title = format(L["%s's <%s> targets"], win.actorname or L.Unknown, win.spellname or L.Unknown)
 		if not win.spellid then
 			return
 		end
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		if not player then
 			return
 		end
@@ -643,14 +643,14 @@ Skada:AddLoadableModule("Debuffs", function(L)
 	end
 
 	function targetmod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's targets"], win.playername or L.Unknown)
+		win.title = format(L["%s's targets"], win.actorname or L.Unknown)
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		if not player then return end
 
 		local targets, maxtime = player:GetDebuffsTargets()
@@ -683,7 +683,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 	end
 
 	function spellmod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's debuffs"], label)
 	end
 

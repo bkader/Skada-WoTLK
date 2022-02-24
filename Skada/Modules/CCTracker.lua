@@ -254,14 +254,14 @@ Skada:AddLoadableModule("CC Done", function(L)
 	end
 
 	function playermod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's control spells"], label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's control spells"], win.playername or L.Unknown)
+		win.title = format(L["%s's control spells"], win.actorname or L.Unknown)
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.ccdone or 0
 
 		if total > 0 and player.ccdonespells then
@@ -291,14 +291,14 @@ Skada:AddLoadableModule("CC Done", function(L)
 	end
 
 	function targetmod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's control targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's control targets"], win.playername or L.Unknown)
+		win.title = format(L["%s's control targets"], win.actorname or L.Unknown)
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.ccdone or 0
 		local targets = (total > 0) and player:GetCCDoneTargets()
 
@@ -504,14 +504,14 @@ Skada:AddLoadableModule("CC Taken", function(L)
 	end
 
 	function playermod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's control spells"], label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's control spells"], win.playername or L.Unknown)
+		win.title = format(L["%s's control spells"], win.actorname or L.Unknown)
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.cctaken or 0
 
 		if total > 0 and player.cctakenspells then
@@ -541,14 +541,14 @@ Skada:AddLoadableModule("CC Taken", function(L)
 	end
 
 	function sourcemod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's control sources"], label)
 	end
 
 	function sourcemod:Update(win, set)
-		win.title = format(L["%s's control sources"], win.playername or L.Unknown)
+		win.title = format(L["%s's control sources"], win.actorname or L.Unknown)
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.cctaken or 0
 		local sources = (total > 0) and player:GetCCTakenSources()
 
@@ -777,14 +777,14 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 	end
 
 	function playermod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's control spells"], label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's control spells"], win.playername or L.Unknown)
+		win.title = format(L["%s's control spells"], win.actorname or L.Unknown)
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.ccbreak or 0
 
 		if total > 0 and player.ccbreakspells then
@@ -814,14 +814,14 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 	end
 
 	function targetmod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's control targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's control targets"], win.playername or L.Unknown)
+		win.title = format(L["%s's control targets"], win.actorname or L.Unknown)
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.ccbreak or 0
 		local targets = (total > 0) and player:GetCCBreakTargets()
 

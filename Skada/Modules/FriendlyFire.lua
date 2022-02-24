@@ -76,14 +76,14 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 	end
 
 	function targetmod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's targets"], win.playername or L.Unknown)
+		win.title = format(L["%s's targets"], win.actorname or L.Unknown)
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.friendfire or 0
 		local targets = (total > 0) and player:GetFriendlyFireTargets()
 
@@ -115,14 +115,14 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 	end
 
 	function spellmod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's damage"], label)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's damage"], win.playername or L.Unknown)
+		win.title = format(L["%s's damage"], win.actorname or L.Unknown)
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.friendfire or 0
 
 		if total > 0 and player.friendfirespells then
@@ -152,14 +152,14 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 
 	function spelltargetmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format(L["%s's <%s> damage"], win.playername or L.Unknown, label)
+		win.title = format(L["%s's <%s> damage"], win.actorname or L.Unknown, label)
 	end
 
 	function spelltargetmod:Update(win, set)
-		win.title = format(L["%s's <%s> damage"], win.playername or L.Unknown, win.spellname or L.Unknown)
+		win.title = format(L["%s's <%s> damage"], win.actorname or L.Unknown, win.spellname or L.Unknown)
 		if not win.spellid then return end
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.friendfire or 0
 		local targets = nil
 		if total > 0 and player.friendfirespells and player.friendfirespells[win.spellid] then

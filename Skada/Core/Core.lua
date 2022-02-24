@@ -2833,7 +2833,7 @@ function Window:RestoreView(theset, themode)
 
 		-- all all stuff that were registered by modules
 		self.datakey = nil
-		self.playerid, self.playername = nil, nil
+		self.actorid, self.actorname = nil, nil
 		self.spellid, self.spellname = nil, nil
 		self.targetid, self.targetname = nil, nil
 	end

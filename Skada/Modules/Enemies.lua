@@ -872,17 +872,17 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 	end
 
 	function targetspellmod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's damage on %s"], win.targetname or L.Unknown, label)
 	end
 
 	function targetspellmod:Update(win, set)
-		win.title = format(L["%s's damage on %s"], win.targetname or L.Unknown, win.playername or L.Unknown)
-		if not (win.targetname and win.playername) then return end
+		win.title = format(L["%s's damage on %s"], win.targetname or L.Unknown, win.actorname or L.Unknown)
+		if not (win.targetname and win.actorname) then return end
 
 		local enemy = set and set:GetEnemy(win.targetname, win.targetid)
 		if not (enemy and enemy.GetDamageTargetSpells) then return end
-		local spells, total = enemy:GetDamageTargetSpells(win.playername)
+		local spells, total = enemy:GetDamageTargetSpells(win.actorname)
 
 		if spells and total > 0 then
 			local nr = 0

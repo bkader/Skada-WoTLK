@@ -75,14 +75,14 @@ Skada:AddLoadableModule("Dispels", function(L)
 	end
 
 	function spellmod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's dispelled spells"], label)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's dispelled spells"], win.playername or L.Unknown)
+		win.title = format(L["%s's dispelled spells"], win.actorname or L.Unknown)
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.dispel or 0
 		local spells = (total > 0) and player:GetDispelledSpells()
 
@@ -112,14 +112,14 @@ Skada:AddLoadableModule("Dispels", function(L)
 	end
 
 	function targetmod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's dispelled targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's dispelled targets"], win.playername or L.Unknown)
+		win.title = format(L["%s's dispelled targets"], win.actorname or L.Unknown)
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.dispel or 0
 		local targets = (total > 0) and player:GetDispelledTargets()
 
@@ -151,14 +151,14 @@ Skada:AddLoadableModule("Dispels", function(L)
 	end
 
 	function playermod:Enter(win, id, label)
-		win.playerid, win.playername = id, label
+		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's dispel spells"], label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's dispel spells"], win.playername or L.Unknown)
+		win.title = format(L["%s's dispel spells"], win.actorname or L.Unknown)
 
-		local player = set and set:GetPlayer(win.playerid, win.playername)
+		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.dispel or 0
 
 		if total > 0 and player.dispelspells then
