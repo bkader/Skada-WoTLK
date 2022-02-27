@@ -66,6 +66,10 @@ local function inserthistory(win)
 end
 
 local function showmode(win, id, label, mode)
+	if win.selectedset == "total" and win.metadata.nototalclick and tContains(win.metadata.nototalclick, mode) then
+		return
+	end
+
 	inserthistory(win)
 
 	if type(mode) == "function" then
@@ -83,28 +87,24 @@ local function showmode(win, id, label, mode)
 	CloseDropDownMenus() -- always close
 end
 
-local function ignoredClick(win, click)
-	if win and win.selectedset == "total" and win.metadata and win.metadata.nototalclick and click then
-		return tContains(win.metadata.nototalclick, click)
-	end
-end
-
 local function BarClick(win, bar, button)
+	if bar.ignore then return end
+
 	local id, label = bar.valueid, bar.valuetext
 
 	if button == "RightButton" and IsShiftKeyDown() then
 		Skada:OpenMenu(win)
-	elseif win.metadata.click and not ignoredClick(win, win.metadata.click) then
+	elseif win.metadata.click then
 		win.metadata.click(win, id, label, button)
 	elseif button == "RightButton" then
 		win:RightClick(bar, button)
-	elseif win.metadata.click2 and IsShiftKeyDown() and not ignoredClick(win, win.metadata.click2) then
+	elseif button == "LeftButton" and win.metadata.click2 and IsShiftKeyDown() then
 		showmode(win, id, label, win.metadata.click2)
-	elseif not Skada.Ascension and win.metadata.click4 and IsAltKeyDown() and not ignoredClick(win, win.metadata.click4) then
+	elseif button == "LeftButton" and not Skada.Ascension and win.metadata.click4 and IsAltKeyDown() then
 		showmode(win, id, label, win.metadata.click4)
-	elseif win.metadata.click3 and IsControlKeyDown() and not ignoredClick(win, win.metadata.click3) then
+	elseif button == "LeftButton" and win.metadata.click3 and IsControlKeyDown() then
 		showmode(win, id, label, win.metadata.click3)
-	elseif win.metadata.click1 and not ignoredClick(win, win.metadata.click1) then
+	elseif button == "LeftButton" and win.metadata.click1 then
 		showmode(win, id, label, win.metadata.click1)
 	end
 end
@@ -266,7 +266,7 @@ function barlibrary:CreateBar(uuid, win)
 	bar.bg:SetScript("OnEnter", function(frame, button)
 		ttactive = true
 		Skada:SetTooltipPosition(GameTooltip, win.frame, win.db.display, win)
-		Skada:ShowTooltip(win, bar.valueid, bar.valuetext)
+		Skada:ShowTooltip(win, bar.valueid, bar.valuetext, bar)
 	end)
 	bar.bg:SetScript("OnLeave", BarLeave)
 

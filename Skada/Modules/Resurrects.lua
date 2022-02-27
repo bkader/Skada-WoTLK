@@ -11,19 +11,19 @@ Skada:AddLoadableModule("Resurrects", function(L)
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local _
 
-	local spellSchools = {
+	local spellschools = {
 		-- Rebirth
-		[20484] = 8,
-		[20739] = 8,
-		[20742] = 8,
-		[20747] = 8,
-		[20748] = 8,
-		[26994] = 8,
-		[48477] = 8,
+		[20484] = 0x08,
+		[20739] = 0x08,
+		[20742] = 0x08,
+		[20747] = 0x08,
+		[20748] = 0x08,
+		[26994] = 0x08,
+		[48477] = 0x08,
 		-- Reincarnation
-		[16184] = 8,
-		[16209] = 8,
-		[20608] = 8
+		[16184] = 0x08,
+		[16209] = 0x08,
+		[20608] = 0x08
 	}
 
 	local function log_resurrect(set, data)
@@ -57,8 +57,7 @@ Skada:AddLoadableModule("Resurrects", function(L)
 
 	local data = {}
 
-	local function SpellResurrect(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid = ...
+	local function SpellResurrect(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
 		if not spellid then return end
 
 		data.spellid = spellid
@@ -103,7 +102,7 @@ Skada:AddLoadableModule("Resurrects", function(L)
 				d.id = spellid
 				d.spellid = spellid
 				d.label, _, d.icon = GetSpellInfo(spellid)
-				d.spellschool = spellSchools[spellid]
+				d.spellschool = spellschools[spellid]
 
 				d.value = spell.count
 				d.valuetext = Skada:FormatValueCols(

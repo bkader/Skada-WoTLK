@@ -800,6 +800,47 @@ do
 end
 
 do
+	local strtrim = strtrim or string.trim
+	local UnitExists, UnitName = UnitExists, UnitName
+
+	-- handles reporting
+	local function DoReport(window, barid)
+		local mode = Skada.db.profile.report.mode
+		local set = Skada.db.profile.report.set
+		local channel = Skada.db.profile.report.channel
+		local chantype = Skada.db.profile.report.chantype
+		local number = Skada.db.profile.report.number
+
+		if channel == "whisper" then
+			channel = Skada.db.profile.report.target
+			if channel and #strtrim(channel) == 0 then
+				channel = nil
+			end
+		elseif channel == "target" then
+			if UnitExists("target") then
+				local toon, realm = UnitName("target")
+				if realm and #realm > 0 then
+					channel = toon .. "-" .. realm
+				else
+					channel = toon
+				end
+			else
+				channel = nil
+			end
+		end
+
+		if channel and chantype and mode and set and number then
+			Skada:Report(channel, chantype, mode, set, number, window, barid)
+
+			-- hide report window if shown.
+			if Skada.reportwindow and Skada.reportwindow:IsShown() then
+				Skada.reportwindow:Hide()
+			end
+		else
+			Skada:Print("Error: Whisper target not found")
+		end
+	end
+
 	local function destroywindow()
 		if Skada.reportwindow then
 			-- remove AceGUI hacks before recycling the widget
@@ -968,37 +1009,7 @@ do
 		frame.button = report
 		report:SetText(L["Report"])
 		report:SetCallback("OnClick", function()
-			local mode, set, channel, chantype, number =
-				Skada.db.profile.report.mode,
-				Skada.db.profile.report.set,
-				Skada.db.profile.report.channel,
-				Skada.db.profile.report.chantype,
-				Skada.db.profile.report.number
-
-			if channel == "whisper" then
-				channel = Skada.db.profile.report.target
-				if channel and #strtrim(channel) == 0 then
-					channel = nil
-				end
-			elseif channel == "target" then
-				if UnitExists("target") then
-					local toon, realm = UnitName("target")
-					if realm and #realm > 0 then
-						channel = toon .. "-" .. realm
-					else
-						channel = toon
-					end
-				else
-					channel = nil
-				end
-			end
-
-			if channel and chantype and mode and set and number then
-				Skada:Report(channel, chantype, mode, set, number, window, barid)
-				frame:Hide()
-			else
-				Skada:Print("Error: Whisper target not found")
-			end
+			DoReport(window, barid)
 		end)
 
 		report:SetFullWidth(true)
@@ -1007,10 +1018,11 @@ do
 
 	function Skada:OpenReportWindow(window)
 		if self.testMode then
-			return
+			return -- nothing to do.
 		elseif not self:CanReset() then
 			self:Print(L["There is nothing to report."])
-			return
+		elseif IsShiftKeyDown() then
+			DoReport(window) -- quick report?
 		elseif self.reportwindow == nil then
 			createReportWindow(window)
 		elseif self.reportwindow:IsShown() then

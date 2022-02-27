@@ -65,6 +65,39 @@ Skada:AddLoadableModule("Comparison", function(L)
 			local actor = set and set:GetActor(win.actorname, win.actorid)
 			local spell = actor.damagespells and actor.damagespells[win.spellname]
 
+			if actor.id == mod.userGUID then
+				if spell then
+					tooltip:AddLine(actor.name .. " - " .. win.spellname)
+					if spell.school and Skada.spellschools[spell.school] then
+						tooltip:AddLine(
+							Skada.spellschools[spell.school].name,
+							Skada.spellschools[spell.school].r,
+							Skada.spellschools[spell.school].g,
+							Skada.spellschools[spell.school].b
+						)
+					end
+
+					if label == L["Critical Hits"] and spell.criticalamount then
+						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.criticalamount / spell.critical), 1, 1, 1)
+						if spell.criticalmin and spell.criticalmax then
+							tooltip:AddLine(" ")
+							tooltip:AddDoubleLine(L["Minimum Hit"], Skada:FormatNumber(spell.criticalmin), 1, 1, 1)
+							tooltip:AddDoubleLine(L["Maximum Hit"], Skada:FormatNumber(spell.criticalmax), 1, 1, 1)
+							tooltip:AddDoubleLine(L["Average Hit"], Skada:FormatNumber((spell.criticalmin + spell.criticalmax) / 2), 1, 1, 1)
+						end
+					elseif label == L["Normal Hits"] and spell.hitamount then
+						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
+						if spell.hitmin and spell.hitmax then
+							tooltip:AddLine(" ")
+							tooltip:AddDoubleLine(L["Minimum Hit"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
+							tooltip:AddDoubleLine(L["Maximum Hit"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
+							tooltip:AddDoubleLine(L["Average Hit"], Skada:FormatNumber((spell.hitmin + spell.hitmax) / 2), 1, 1, 1)
+						end
+					end
+				end
+				return
+			end
+
 			local myspells = set:GetActorDamageSpells(mod.userGUID, mod.userName)
 			local myspell = myspells and myspells[win.spellname]
 
@@ -155,7 +188,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 		d.valuetext = FormatValueNumber(value, myvalue, fmt, disabled)
 
-		if win.metadata and d.value > win.metadata.maxvalue then
+		if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 			win.metadata.maxvalue = d.value
 		end
 

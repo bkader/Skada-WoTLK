@@ -243,7 +243,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 
 	local function EnvironmentDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local envtype = ...
-		local spellid, spellname
+		local spellid, spellname, spellschool = nil, nil, 0x01
 
 		if envtype == "Falling" or envtype == "FALLING" then
 			spellid, spellname = 3, ACTION_ENVIRONMENTAL_DAMAGE_FALLING
@@ -252,15 +252,15 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 		elseif envtype == "Fatigue" or envtype == "FATIGUE" then
 			spellid, spellname = 5, ACTION_ENVIRONMENTAL_DAMAGE_FATIGUE
 		elseif envtype == "Fire" or envtype == "FIRE" then
-			spellid, spellname = 6, ACTION_ENVIRONMENTAL_DAMAGE_FIRE
+			spellid, spellname, spellschool = 6, ACTION_ENVIRONMENTAL_DAMAGE_FIRE, 0x04
 		elseif envtype == "Lava" or envtype == "LAVA" then
-			spellid, spellname = 7, ACTION_ENVIRONMENTAL_DAMAGE_LAVA
+			spellid, spellname, spellschool = 7, ACTION_ENVIRONMENTAL_DAMAGE_LAVA, 0x04
 		elseif envtype == "Slime" or envtype == "SLIME" then
-			spellid, spellname = 8, ACTION_ENVIRONMENTAL_DAMAGE_SLIME
+			spellid, spellname, spellschool = 8, ACTION_ENVIRONMENTAL_DAMAGE_SLIME, 0x08
 		end
 
 		if spellid and spellname then
-			SpellDamage(nil, nil, nil, ENVIRONMENTAL_DAMAGE, nil, dstGUID, dstName, dstFlags, spellid, spellname, nil, select(2, ...))
+			SpellDamage(nil, nil, nil, ENVIRONMENTAL_DAMAGE, nil, dstGUID, dstName, dstFlags, spellid, spellname, spellschool, select(2, ...))
 		end
 	end
 

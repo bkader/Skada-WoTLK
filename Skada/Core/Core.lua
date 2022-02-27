@@ -148,7 +148,7 @@ do
 		if set then
 			Skada:Debug("CreateSet: Reuse", set.name, setname)
 			for k, _ in pairs(set) do
-				if k == "players" or k == "enemies" then
+				if k == "players" or (k == "enemies" and setname ~= L["Total"]) then
 					wipe(set[k])
 				else
 					set[k] = nil
@@ -1795,35 +1795,25 @@ do
 		end
 	end
 
-	local function ignoredTotalClick(win, click)
-		if win and win.selectedset == "total" and win.metadata and win.metadata.nototalclick and click then
-			return tContains(win.metadata.nototalclick, click)
-		end
+	local function IgnoredTotalClick(win, click)
+		return (win.selectedset == "total" and win.metadata.nototalclick and tContains(win.metadata.nototalclick, click))
 	end
 
-	function Skada:ShowTooltip(win, id, label)
-		if not (win and win.metadata) then return end
+	function Skada:ShowTooltip(win, id, label, bar)
+		if self.db.profile.tooltips and win and win.metadata and not (bar and bar.ignore) then
+			local t, md = GameTooltip, win.metadata
 
-		local t = GameTooltip
-
-		if self.db.profile.tooltips then
-			if win.metadata.is_modelist and self.db.profile.informativetooltips then
+			if md.is_modelist and self.db.profile.informativetooltips then
 				t:ClearLines()
 				self:AddSubviewToTooltip(t, win, FindMode(id), id, label)
 				t:Show()
-			elseif
-				win.metadata.click1 or
-				win.metadata.click2 or
-				win.metadata.click3 or
-				(not self.Ascension and win.metadata.click4) or
-				win.metadata.tooltip
-			then
+			elseif md.click1 or md.click2 or md.click3 or (not self.Ascension and md.click4) or md.tooltip then
 				t:ClearLines()
-				local hasClick = win.metadata.click1 or win.metadata.click2 or win.metadata.click3 or win.metadata.click4
+				local hasClick = md.click1 or md.click2 or md.click3 or md.click4
 
-				if win.metadata.tooltip then
+				if md.tooltip then
 					local numLines = t:NumLines()
-					win.metadata.tooltip(win, id, label, t)
+					md.tooltip(win, id, label, t)
 
 					if t:NumLines() ~= numLines and hasClick then
 						t:AddLine(" ")
@@ -1831,51 +1821,51 @@ do
 				end
 
 				if self.db.profile.informativetooltips then
-					if win.metadata.click1 and not ignoredTotalClick(win, win.metadata.click1) then
-						self:AddSubviewToTooltip(t, win, win.metadata.click1, id, label)
+					if md.click1 and not IgnoredTotalClick(win, md.click1) then
+						self:AddSubviewToTooltip(t, win, md.click1, id, label)
 					end
-					if win.metadata.click2 and not ignoredTotalClick(win, win.metadata.click2) then
-						self:AddSubviewToTooltip(t, win, win.metadata.click2, id, label)
+					if md.click2 and not IgnoredTotalClick(win, md.click2) then
+						self:AddSubviewToTooltip(t, win, md.click2, id, label)
 					end
-					if win.metadata.click3 and not ignoredTotalClick(win, win.metadata.click3) then
-						self:AddSubviewToTooltip(t, win, win.metadata.click3, id, label)
+					if md.click3 and not IgnoredTotalClick(win, md.click3) then
+						self:AddSubviewToTooltip(t, win, md.click3, id, label)
 					end
-					if not self.Ascension and win.metadata.click4 and not ignoredTotalClick(win, win.metadata.click4) then
-						self:AddSubviewToTooltip(t, win, win.metadata.click4, id, label)
+					if not self.Ascension and md.click4 and not IgnoredTotalClick(win, md.click4) then
+						self:AddSubviewToTooltip(t, win, md.click4, id, label)
 					end
 				end
 
-				if win.metadata.post_tooltip then
+				if md.post_tooltip then
 					local numLines = t:NumLines()
-					win.metadata.post_tooltip(win, id, label, t)
+					md.post_tooltip(win, id, label, t)
 
 					if numLines > 0 and t:NumLines() ~= numLines and hasClick then
 						t:AddLine(" ")
 					end
 				end
 
-				if type(win.metadata.click1) == "table" and not ignoredTotalClick(win, win.metadata.click1) then
-					t:AddLine(format(L["Click for |cff00ff00%s|r"], win.metadata.click1.label or win.metadata.click1.moduleName))
-				elseif type(win.metadata.click1) == "function" and win.metadata.click1_label then
-					t:AddLine(format(L["Click for |cff00ff00%s|r"], win.metadata.click1_label))
+				if type(md.click1) == "table" and not IgnoredTotalClick(win, md.click1) then
+					t:AddLine(format(L["Click for |cff00ff00%s|r"], md.click1.label or md.click1.moduleName))
+				elseif type(md.click1) == "function" and md.click1_label then
+					t:AddLine(format(L["Click for |cff00ff00%s|r"], md.click1_label))
 				end
 
-				if type(win.metadata.click2) == "table" and not ignoredTotalClick(win, win.metadata.click2) then
-					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], win.metadata.click2.label or win.metadata.click2.moduleName))
-				elseif type(win.metadata.click2) == "function" and win.metadata.click2_label then
-					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], win.metadata.click2_label))
+				if type(md.click2) == "table" and not IgnoredTotalClick(win, md.click2) then
+					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], md.click2.label or md.click2.moduleName))
+				elseif type(md.click2) == "function" and md.click2_label then
+					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], md.click2_label))
 				end
 
-				if type(win.metadata.click3) == "table" and not ignoredTotalClick(win, win.metadata.click3) then
-					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], win.metadata.click3.label or win.metadata.click3.moduleName))
-				elseif type(win.metadata.click3) == "function" and win.metadata.click3_label then
-					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], win.metadata.click3_label))
+				if type(md.click3) == "table" and not IgnoredTotalClick(win, md.click3) then
+					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], md.click3.label or md.click3.moduleName))
+				elseif type(md.click3) == "function" and md.click3_label then
+					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], md.click3_label))
 				end
 
-				if not self.Ascension and type(win.metadata.click4) == "table" and not ignoredTotalClick(win, win.metadata.click4) then
-					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], win.metadata.click4.label or win.metadata.click4.moduleName))
-				elseif not self.Ascension and type(win.metadata.click4) == "function" and win.metadata.click4_label then
-					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], win.metadata.click4_label))
+				if not self.Ascension and type(md.click4) == "table" and not IgnoredTotalClick(win, md.click4) then
+					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], md.click4.label or md.click4.moduleName))
+				elseif not self.Ascension and type(md.click4) == "function" and md.click4_label then
+					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], md.click4_label))
 				end
 
 				t:Show()
@@ -2166,7 +2156,7 @@ do
 				end
 			end
 
-			if nr > maxlines then
+			if nr >= maxlines then
 				break
 			end
 		end
@@ -2470,7 +2460,7 @@ function Skada:UpdateDisplay(force)
 						self:Print("Mode %s does not have an Update function!", win.selectedmode.moduleName)
 					end
 
-					if self.db.profile.showtotals and win.selectedmode.GetSetSummary then
+					if self.db.profile.showtotals and win.selectedmode.GetSetSummary and set.type ~= "none" then
 						local valuetext, total = win.selectedmode:GetSetSummary(set, win)
 						if valuetext or total then
 							local existing = nil  -- an existing bar?
@@ -3053,14 +3043,16 @@ function Skada:OnInitialize()
 	self.char.version = self.char.version or 0
 	self.char.revision = self.char.revision or revision
 
-	if version > self.db.global.version then
+	-- global version/revision
+	if version ~= self.db.global.version or revision ~= self.db.global.revision then
 		self.db.global.version = version
 		self.db.global.revision = revision
 		self.callbacks:Fire("Skada_UpdateCore", self.db.global.version, version, self.db.global.revision, revision)
 	end
 
-	if version > self.char.version or (version == self.char.version and revision > self.char.revision) then
-		if (version - self.char.version >= 1) or (version == self.char.version and revision - self.char.revision >= 5) then
+	-- character version/revision
+	if version ~= self.char.version or revision ~= self.char.revision then
+		if (version - self.char.version) ~= 0 or (revision - self.char.revision) >= 5 or (revision - self.char.revision) <= -5 then
 			self:Reset(true)
 		end
 		self.char.version = version
@@ -3564,7 +3556,7 @@ do
 			end
 		end
 
-		if not disabled and self.current and not InCombatLockdown() and not IsGroupInCombat() and Skada.instanceType ~= "pvp" and Skada.instanceType ~= "arena" then
+		if not disabled and self.current and not InCombatLockdown() and not IsGroupInCombat() and self.instanceType ~= "pvp" and self.instanceType ~= "arena" then
 			self:Debug("EndSegment: Tick")
 			self:EndSegment()
 		end
@@ -3664,7 +3656,7 @@ do
 			self:SendMessage("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 			self.current.started = true
 			if self.instanceType == nil then self:CheckZone() end
-			self.current.type = self.instanceType or "unknown"
+			self.current.type = (self.instanceType == "none" and IsInGroup()) and "group" or self.instanceType
 		end
 
 		if self.current and self.db.profile.autostop then

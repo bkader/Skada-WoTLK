@@ -6,10 +6,16 @@ local ACR = LibStub("AceConfigRegistry-3.0")
 local LibWindow = LibStub("LibWindow-1.1")
 local FlyPaper = LibStub("LibFlyPaper-1.1", true)
 
-local pairs, ipairs, tsort, format = pairs, ipairs, table.sort, string.format
+local pairs, ipairs = pairs, ipairs
+local tsort, tContains = table.sort, tContains
+local format, max = string.format, math.max
 local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
 local GetScreenWidth, GetScreenHeight = GetScreenWidth, GetScreenHeight
+local IsShiftKeyDown = IsShiftKeyDown
+local IsAltKeyDown = IsAltKeyDown
+local IsControlKeyDown = IsControlKeyDown
+local IsModifierKeyDown = IsModifierKeyDown
 local white = {r = 0.9, g = 0.9, b = 0.9, a = 1}
 
 -- class, role & specs
@@ -61,76 +67,66 @@ end
 
 function mod:Create(window)
 	-- Re-use bargroup if it exists.
-	local bargroup = mod:GetBarGroup(window.db.name)
+	local p = window.db
+	local bargroup = mod:GetBarGroup(p.name)
 
 	-- Save a reference to window in bar group. Needed for some nasty callbacks.
 	if bargroup then
 		-- Clear callbacks.
 		bargroup.callbacks = LibStub("CallbackHandler-1.0"):New(bargroup)
 	else
-		bargroup = mod:NewBarGroup(
-			window.db.name,
-			window.db.barorientation,
-			window.db.background.height,
-			window.db.barwidth,
-			window.db.barheight,
-			"SkadaBarWindow" .. window.db.name
-		)
+		bargroup = mod:NewBarGroup(p.name, p.barorientation, p.background.height, p.barwidth, p.barheight, "SkadaBarWindow" .. p.name)
 
-		bargroup:SetButtonsOpacity(window.db.title.toolbaropacity or 0.25)
-		bargroup:SetButtonMouseOver(window.db.title.hovermode)
+		bargroup:SetButtonsOpacity(p.title.toolbaropacity or 0.25)
+		bargroup:SetButtonMouseOver(p.title.hovermode)
 
+		--
 		-- Add window buttons.
-		AddWindowButton(bargroup, window.db.title.toolbar, 1,
-			L["Configure"], L["Opens the configuration window."],
-			function(_, button)
-				if button == "RightButton" then
-					Skada:OpenOptions(bargroup.win)
-				else
-					Skada:OpenMenu(bargroup.win)
-				end
+		--
+
+		-- config button
+		AddWindowButton(bargroup, p.title.toolbar, 1, L.Configure, L.Config_Button_Desc, function(_, button)
+			if button == "RightButton" then
+				Skada:OpenOptions(bargroup.win)
+			else
+				Skada:OpenMenu(bargroup.win)
 			end
-		)
+		end)
 
-		AddWindowButton(bargroup, window.db.title.toolbar, 2,
-			RESET, L["Resets all fight data except those marked as kept."],
-			function() Skada:ShowPopup(bargroup.win) end
-		)
+		-- reset button
+		AddWindowButton(bargroup, p.title.toolbar, 2, RESET, L.Reset_Button_Desc, function()
+			Skada:ShowPopup(bargroup.win)
+		end)
 
-		AddWindowButton(bargroup, window.db.title.toolbar, 3,
-			L["Segment"], L["Jump to a specific segment."],
-			function(_, button)
-				if button == "MiddleButton" then
-					bargroup.win:set_selected_set("current")
-				elseif IsModifierKeyDown() then
-					bargroup.win:set_selected_set(nil, button == "RightButton" and 1 or -1)
-				else
-					Skada:SegmentMenu(bargroup.win)
-				end
+		-- segment button
+		AddWindowButton(bargroup, p.title.toolbar, 3, L.Segment, L.Segment_Button_Desc, function(_, button)
+			if button == "MiddleButton" then
+				bargroup.win:set_selected_set("current")
+			elseif IsModifierKeyDown() then
+				bargroup.win:set_selected_set(nil, button == "RightButton" and 1 or -1)
+			else
+				Skada:SegmentMenu(bargroup.win)
 			end
-		)
+		end)
 
-		AddWindowButton(bargroup, window.db.title.toolbar, 4,
-			L["Mode"], L["Jump to a specific mode."],
-			function() Skada:ModeMenu(bargroup.win) end
-		)
+		-- mode button
+		AddWindowButton(bargroup, p.title.toolbar, 4, L.Mode, L["Jump to a specific mode."], function()
+			Skada:ModeMenu(bargroup.win)
+		end)
 
-		AddWindowButton(bargroup, window.db.title.toolbar, 5,
-			L["Report"], L["Opens a dialog that lets you report your data to others in various ways."],
-			function() Skada:OpenReportWindow(bargroup.win) end
-		)
+		AddWindowButton(bargroup, p.title.toolbar, 5, L.Report, L.Report_Button_Desc, function()
+			Skada:OpenReportWindow(bargroup.win)
+		end)
 
-		AddWindowButton(bargroup, window.db.title.toolbar, 6,
-			L["Stop"], L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."],
-			function()
-				if Skada.current and Skada.current.stopped then
-					Skada:ResumeSegment()
-				elseif Skada.current then
-					Skada:StopSegment()
-				end
+		AddWindowButton(bargroup, p.title.toolbar, 6, L.Stop, L.Stop_Button_Desc, function()
+			if Skada.current and Skada.current.stopped then
+				Skada:ResumeSegment()
+			elseif Skada.current then
+				Skada:StopSegment()
 			end
-		)
+		end)
 	end
+
 	bargroup.win = window
 
 	bargroup.RegisterCallback(mod, "BarClick")
@@ -148,16 +144,16 @@ function mod:Create(window)
 	titletext:SetWordWrap(false)
 	titletext:SetPoint("LEFT", bargroup.button, "LEFT", 5, 1)
 	titletext:SetJustifyH("LEFT")
-	bargroup.button:SetHeight(window.db.title.height or 15)
-	bargroup:SetButtonMouseOver(window.db.title.hovermode)
+	bargroup.button:SetHeight(p.title.height or 15)
+	bargroup:SetButtonMouseOver(p.title.hovermode)
 
 	-- Register with LibWindow-1.0.
-	LibWindow.RegisterConfig(bargroup, window.db)
+	LibWindow.RegisterConfig(bargroup, p)
 
 	-- Restore window position.
 	LibWindow.RestorePosition(bargroup)
 
-	bargroup:SetMaxBars(nil, window.db.snapto)
+	bargroup:SetMaxBars(nil, p.snapto)
 	window.bargroup = bargroup
 
 	if not classicons then
@@ -235,7 +231,7 @@ do
 			local win, id, label = bar.win, bar.id, bar.text
 			ttactive = true
 			Skada:SetTooltipPosition(GameTooltip, win.bargroup, win.db.display, win)
-			Skada:ShowTooltip(win, id, label)
+			Skada:ShowTooltip(win, id, label, bar)
 			if not win.db.disablehighlight then
 				bar:SetOpacity(1)
 				bar:SetBackdropColor(0, 0, 0, 0.25)
@@ -357,9 +353,13 @@ do
 		local offset = win.bargroup:GetBarOffset()
 
 		if direction == 1 and offset > 0 then
-			win.bargroup:SetBarOffset(IsShiftKeyDown() and 0 or (offset - 1))
+			win.bargroup:SetBarOffset(IsShiftKeyDown() and 0 or max(0, offset - (IsControlKeyDown() and maxbars or 1)))
 		elseif direction == -1 and ((numbars - maxbars - offset) > 0) then
-			win.bargroup:SetBarOffset(IsShiftKeyDown() and (numbars - maxbars) or offset + 1)
+			if IsShiftKeyDown() then
+				win.bargroup:SetBarOffset(numbars - maxbars)
+			else
+				win.bargroup:SetBarOffset(min(max(0, numbars - maxbars), offset + (IsControlKeyDown() and maxbars or 1)))
+			end
 		end
 	end
 
@@ -409,6 +409,10 @@ do
 	end
 
 	local function showmode(win, id, label, mode)
+		if win.selectedset == "total" and win.metadata.nototalclick and tContains(win.metadata.nototalclick, mode) then
+			return
+		end
+
 		inserthistory(win)
 
 		if type(mode) == "function" then
@@ -437,12 +441,6 @@ do
 		end
 	end
 
-	local function ignoredClick(win, click)
-		if win and win.selectedset == "total" and win.metadata and win.metadata.nototalclick and click then
-			return tContains(win.metadata.nototalclick, click)
-		end
-	end
-
 	function mod:BarClick(_, bar, button)
 		local win, id, label = bar.win, bar.id, bar.text
 
@@ -452,17 +450,17 @@ do
 			Skada:ModeMenu(win)
 		elseif button == "RightButton" and IsControlKeyDown() then
 			Skada:SegmentMenu(win)
-		elseif win.metadata.click and not ignoredClick(win, win.metadata.click) then
+		elseif win.metadata.click then
 			win.metadata.click(win, id, label, button)
 		elseif button == "RightButton" and not IsModifierKeyDown() then
 			win:RightClick(bar, button)
-		elseif win.metadata.click2 and IsShiftKeyDown() and not ignoredClick(win, win.metadata.click2) then
+		elseif button == "LeftButton" and win.metadata.click2 and IsShiftKeyDown() then
 			showmode(win, id, label, win.metadata.click2)
-		elseif not Skada.Ascension and win.metadata.click4 and IsAltKeyDown() and not ignoredClick(win, win.metadata.click4) then
+		elseif button == "LeftButton" and not Skada.Ascension and win.metadata.click4 and IsAltKeyDown() then
 			showmode(win, id, label, win.metadata.click4)
-		elseif win.metadata.click3 and IsControlKeyDown() and not ignoredClick(win, win.metadata.click3) then
+		elseif button == "LeftButton" and win.metadata.click3 and IsControlKeyDown() then
 			showmode(win, id, label, win.metadata.click3)
-		elseif win.metadata.click1 and not IsModifierKeyDown() and not ignoredClick(win, win.metadata.click1) then
+		elseif button == "LeftButton" and win.metadata.click1 and not IsModifierKeyDown() then
 			showmode(win, id, label, win.metadata.click1)
 		end
 	end
@@ -1525,13 +1523,13 @@ function mod:AddDisplayOptions(win, options)
 					menu = {
 						type = "toggle",
 						name = L["Configure"],
-						desc = L["Opens the configuration window."],
+						desc = L.Config_Button_Desc,
 						order = 10
 					},
 					reset = {
 						type = "toggle",
 						name = RESET,
-						desc = L["Resets all fight data except those marked as kept."],
+						desc = L.Reset_Button_Desc,
 						order = 20
 					},
 					segment = {
@@ -1549,13 +1547,13 @@ function mod:AddDisplayOptions(win, options)
 					report = {
 						type = "toggle",
 						name = L["Report"],
-						desc = L["Opens a dialog that lets you report your data to others in various ways."],
+						desc = L.Report_Button_Desc,
 						order = 50
 					},
 					stop = {
 						type = "toggle",
 						name = L["Stop"],
-						desc = L["Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."],
+						desc = L.Stop_Button_Desc,
 						order = 60
 					},
 					hovermode = {

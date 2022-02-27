@@ -150,7 +150,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			end
 
 			-- use the original function
-			Skada_CombatLogEvent(Skada, nil, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+			Skada_CombatLogEvent(self, nil, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		end
 
 		function mod:PrintFirstHit()

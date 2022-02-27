@@ -53,15 +53,15 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		[28609] = {dur = 30}, -- Frost Ward (rank 5)
 		[32796] = {dur = 30}, -- Frost Ward (rank 6)
 		[43012] = {dur = 30, avg = 5200, cap = 7000}, -- Frost Ward (rank 7)
-		[1463] = {dur = 60}, --  Mana shield (rank 1)
-		[8494] = {dur = 60}, --  Mana shield (rank 2)
-		[8495] = {dur = 60}, --  Mana shield (rank 3)
-		[10191] = {dur = 60}, --  Mana shield (rank 4)
-		[10192] = {dur = 60}, --  Mana shield (rank 5)
-		[10193] = {dur = 60}, --  Mana shield (rank 6)
-		[27131] = {dur = 60}, --  Mana shield (rank 7)
-		[43019] = {dur = 60}, --  Mana shield (rank 8)
-		[43020] = {dur = 60, avg = 4500, cap = 6300}, --  Mana shield (rank 9)
+		[1463] = {dur = 60}, -- Mana shield (rank 1)
+		[8494] = {dur = 60}, -- Mana shield (rank 2)
+		[8495] = {dur = 60}, -- Mana shield (rank 3)
+		[10191] = {dur = 60}, -- Mana shield (rank 4)
+		[10192] = {dur = 60}, -- Mana shield (rank 5)
+		[10193] = {dur = 60}, -- Mana shield (rank 6)
+		[27131] = {dur = 60}, -- Mana shield (rank 7)
+		[43019] = {dur = 60}, -- Mana shield (rank 8)
+		[43020] = {dur = 60, avg = 4500, cap = 6300}, -- Mana shield (rank 9)
 		[543] = {dur = 30}, -- Fire Ward (rank 1)
 		[8457] = {dur = 30}, -- Fire Ward (rank 2)
 		[8458] = {dur = 30}, -- Fire Ward (rank 3)
@@ -112,7 +112,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		[29701] = {dur = 86400, cap = 4000}, -- Greater Shielding
 		[28538] = {dur = 120, avg = 3400, cap = 4000}, -- Major Holy Protection Potion
 		[28537] = {dur = 120, avg = 3400, cap = 4000}, -- Major Shadow Protection Potion
-		[28536] = {dur = 120, avg = 3400, cap = 4000}, --  Major Arcane Protection Potion
+		[28536] = {dur = 120, avg = 3400, cap = 4000}, -- Major Arcane Protection Potion
 		[28513] = {dur = 120, avg = 3400, cap = 4000}, -- Major Nature Protection Potion
 		[28512] = {dur = 120, avg = 3400, cap = 4000}, -- Major Frost Protection Potion
 		[28511] = {dur = 120, avg = 3400, cap = 4000}, -- Major Fire Protection Potion
@@ -126,7 +126,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		[53913] = {dur = 120, avg = 5100, cap = 6000}, -- Mighty Frost Protection Potion
 		[53911] = {dur = 120, avg = 5100, cap = 6000}, -- Mighty Fire Protection Potion
 		[53910] = {dur = 120, avg = 5100, cap = 6000}, -- Mighty Arcane Protection Potion
-		[17548] = {dur = 120, avg = 2600, cap = 3250}, --  Greater Shadow Protection Potion
+		[17548] = {dur = 120, avg = 2600, cap = 3250}, -- Greater Shadow Protection Potion
 		[17546] = {dur = 120, avg = 2600, cap = 3250}, -- Greater Nature Protection Potion
 		[17545] = {dur = 120, avg = 2600, cap = 3250}, -- Greater Holy Protection Potion
 		[17544] = {dur = 120, avg = 2600, cap = 3250}, -- Greater Frost Protection Potion
@@ -591,7 +591,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 					elseif warlock_shadow_ward[spellid] and band(spellschool, 0x20) ~= spellschool then
 						-- nothing
 					-- Anti-Magic, Spell Deflection, Savage Defense
-					elseif (spellid == 48707 or spellid == 49497 or spellid == 62606) and band(spellschool, 0x1) == spellschool then
+					elseif (spellid == 48707 or spellid == 49497 or spellid == 62606) and band(spellschool, 0x01) == spellschool then
 						-- nothing
 					else
 						shieldspopped[#shieldspopped + 1] = {
@@ -759,20 +759,14 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local function EnvironmentDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local envtype, amount, _, _, _, _, absorbed = ...
 		if (absorbed or 0) > 0 and dstName and shields[dstName] then
-			local spellschool = 1
+			local spellschool = 0x01
 
-			if envtype == "Falling" or envtype == "FALLING" then
-				spellschool = 1
-			elseif envtype == "Drowning" or envtype == "DROWNING" then
-				spellschool = 1
-			elseif envtype == "Fatigue" or envtype == "FATIGUE" then
-				spellschool = 1
-			elseif envtype == "Fire" or envtype == "FIRE" then
-				spellschool = 4
+			if envtype == "Fire" or envtype == "FIRE" then
+				spellschool = 0x04
 			elseif envtype == "Lava" or envtype == "LAVA" then
-				spellschool = 4
+				spellschool = 0x04
 			elseif envtype == "Slime" or envtype == "SLIME" then
-				spellschool = 8
+				spellschool = 0x08
 			end
 
 			process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool, amount, amount > absorbed)
