@@ -1579,7 +1579,7 @@ do
 				action.petname = action.playername
 
 				if self.db.profile.mergepets then
-					if action.spellname then
+					if action.spellname and action.playername then
 						action.spellname = format("%s (%s)", action.spellname, action.playername)
 					end
 					action.playerid = owner.id
@@ -3548,14 +3548,6 @@ do
 	end
 
 	function Skada:Tick()
-		self.callbacks:Fire("Skada_CombatTick", self.current)
-
-		if self.tempsets then -- phases
-			for _, set in ipairs(self.tempsets) do
-				self.callbacks:Fire("Skada_CombatTick", set)
-			end
-		end
-
 		if not disabled and self.current and not InCombatLockdown() and not IsGroupInCombat() and self.instanceType ~= "pvp" and self.instanceType ~= "arena" then
 			self:Debug("EndSegment: Tick")
 			self:EndSegment()

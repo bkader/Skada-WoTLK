@@ -24,7 +24,6 @@ do
 
 	function mod:OnEnable()
 		if not Skada:IsDisabled("Buffs") or not Skada:IsDisabled("Debuffs") then
-			Skada.RegisterCallback(self, "Skada_CombatTick", "Tick")
 			Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "Clean")
 
 			-- add player's aura uptime getter.
@@ -37,52 +36,45 @@ do
 	end
 
 	function mod:OnDisable()
-		Skada.UnregisterAllCallbacks(self)
 		Skada.UnregisterAllMessages(self)
 	end
 
-	function mod:Tick(event, set)
-		if event == "Skada_CombatTick" and set and not set.stopped then
-			for _, player in ipairs(set.players) do
-				if player.auras then
-					for _, spell in pairs(player.auras) do
-						if (spell.active or 0) > 0 then
-							spell.uptime = spell.uptime + 1
-							if spell.targets then
-								for name, target in pairs(spell.targets) do
-									if (target.active or 0) > 0 then
-										target.uptime = target.uptime + 1
-									end
-								end
-							end
-						end
-					end
-				end
-			end
-		end
-	end
-
-	function mod:Clean(event, set)
+	function mod:Clean(event, set, curtime)
 		if event == "COMBAT_PLAYER_LEAVE" and set then
 			local maxtime = Skada:GetSetTime(set)
+			curtime = curtime or time()
+
 			for _, player in ipairs(set.players) do
 				if player.auras then
 					for spellid, spell in pairs(player.auras) do
-						spell.active = nil -- remove it
-						if spell.uptime == 0 then
-							player.auras[spellid] = nil -- remove 0 uptime
-						else
-							-- never exceed settime
-							spell.uptime = min(spell.uptime, maxtime)
-							-- debuff targets
-							if spell.targets then
+						if spell.active ~= nil and spell.start then
+							spell.uptime = min(maxtime, spell.uptime + floor((curtime - spell.start) + 0.5))
+							spell.active = nil
+							spell.start = nil
+
+							if spell.uptime == 0 then
+								-- remove spell with 0 uptime.
+								player.auras[spellid] = nil
+							elseif spell.targets then
+								-- debuff targets
 								for name, target in pairs(spell.targets) do
-									target.active = nil -- remove it
-									if target.uptime == 0 then
-										player.auras[spellid].targets[name] = nil -- remove 0 uptime
-									else
-										target.uptime = min(target.uptime, spell.uptime)
+									if target.active ~= nil and target.start then
+										target.uptime = min(spell.uptime, target.uptime + floor((curtime - target.start) + 0.5))
 									end
+
+									spell.targets[name].active = nil
+									spell.targets[name].start = nil
+
+									-- remove targets with 0 uptime.
+									if target.uptime == 0 then
+										player.auras[spellid].targets[name] = nil
+									end
+
+								end
+
+								-- an empty targets table? Remove it
+								if next(spell.targets) == nil then
+									player.auras[spellid] = nil
 								end
 							end
 						end
@@ -131,17 +123,18 @@ do
 		if player then
 			local spell = player.auras and player.auras[aura.spellid]
 			if not spell then
+				spell = {school = aura.spellschool, type = aura.type, active = 1, count = 1, uptime = 0, start = time()}
 				player.auras = player.auras or {}
-				player.auras[aura.spellid] = {school = aura.spellschool, type = aura.type, active = 0, count = 0, uptime = 0}
-				spell = player.auras[aura.spellid]
-			end
+				player.auras[aura.spellid] = spell
+			else
+				spell.active = spell.active + 1
+				spell.count = spell.count + 1
+				spell.start = spell.start or time()
 
-			spell.active = (spell.active or 0) + 1
-			spell.count = (spell.count or 0) + 1
-
-			-- fix missing school
-			if not spell.school and aura.spellschool then
-				spell.school = aura.spellschool
+				-- fix missing school
+				if not spell.school and aura.spellschool then
+					spell.school = aura.spellschool
+				end
 			end
 
 			-- only records targets for debuffs
@@ -150,10 +143,11 @@ do
 				if actor then
 					spell.targets = spell.targets or {}
 					if not spell.targets[aura.dstName] then
-						spell.targets[aura.dstName] = {count = 1, active = 1, uptime = 0}
+						spell.targets[aura.dstName] = {count = 1, active = 1, uptime = 0, start = time()}
 					else
 						spell.targets[aura.dstName].count = spell.targets[aura.dstName].count + 1
 						spell.targets[aura.dstName].active = (spell.targets[aura.dstName].active or 0) + 1
+						spell.targets[aura.dstName].start = spell.targets[aura.dstName].start or time()
 					end
 				end
 			end
@@ -163,10 +157,12 @@ do
 	function log_aurarefresh(set, aura)
 		if not (set and aura and aura.spellid) then return end
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
-		if player and player.auras and player.auras[aura.spellid] and (player.auras[aura.spellid].active or 0) > 0 then
-			player.auras[aura.spellid].refresh = (player.auras[aura.spellid].refresh or 0) + 1
-			if aura.dstName and player.auras[aura.spellid].targets and player.auras[aura.spellid].targets[aura.dstName] then
-				player.auras[aura.spellid].targets[aura.dstName].refresh = (player.auras[aura.spellid].targets[aura.dstName].refresh or 0) + 1
+		local spell = player and player.auras and player.auras[aura.spellid]
+
+		if spell and (spell.active or 0) > 0 then
+			spell.refresh = (spell.refresh or 0) + 1
+			if spell.targets and aura.dstName and spell.targets[aura.dstName] then
+				spell.targets[aura.dstName].refresh = (spell.targets[aura.dstName].refresh or 0) + 1
 			end
 		end
 	end
@@ -174,15 +170,22 @@ do
 	function log_auraremove(set, aura)
 		if not (set and aura and aura.spellid) then return end
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
-		if player and player.auras and player.auras[aura.spellid] and (player.auras[aura.spellid].active or 0) > 0 then
-			player.auras[aura.spellid].active = max(0, player.auras[aura.spellid].active - 1)
-			if
-				aura.dstName and
-				player.auras[aura.spellid].targets and
-				player.auras[aura.spellid].targets[aura.dstName] and
-				(player.auras[aura.spellid].targets[aura.dstName].active or 0) > 0
-			then
-				player.auras[aura.spellid].targets[aura.dstName].active = max(0, player.auras[aura.spellid].targets[aura.dstName].active - 1)
+		local spell = player and player.auras and player.auras[aura.spellid]
+
+		if spell and (spell.active or 0) > 0 then
+			spell.active = spell.active - 1
+			if spell.active == 0 and spell.start then
+				spell.uptime = spell.uptime + floor((time() - spell.start) + 0.5)
+				spell.start = nil
+			end
+
+			-- targets
+			if spell.targets and aura.dstName and spell.targets[aura.dstName] and (spell.targets[aura.dstName].active or 0) > 0 then
+				spell.targets[aura.dstName].active = spell.targets[aura.dstName].active - 1
+				if spell.targets[aura.dstName].active == 0 and spell.targets[aura.dstName].start then
+					spell.targets[aura.dstName].uptime = spell.targets[aura.dstName].uptime + floor((time() - spell.targets[aura.dstName].start) + 0.5)
+					spell.targets[aura.dstName].start = nil
+				end
 			end
 		end
 	end
@@ -191,11 +194,9 @@ do
 		local function CountAuras(auras, atype)
 			local count, uptime = 0, 0
 			for _, spell in pairs(auras or dummyTable) do
-				if spell.type == atype then
+				if spell.type == atype and spell.uptime > 0 then
 					count = count + 1
-					if spell.uptime then
-						uptime = uptime + spell.uptime
-					end
+					uptime = uptime + spell.uptime
 				end
 			end
 			return count, uptime
@@ -258,7 +259,7 @@ do
 
 			local nr = 0
 			for spellid, spell in pairs(player.auras) do
-				if spell.type == atype then
+				if spell.type == atype and spell.uptime > 0 then
 					nr = nr + 1
 
 					local d = win.dataset[nr] or {}
@@ -300,12 +301,8 @@ do
 				)
 			end
 			if aura.count or aura.refresh then
-				if aura.count then
-					tooltip:AddDoubleLine(L["Count"], aura.count, 1, 1, 1)
-				end
-				if aura.refresh then
-					tooltip:AddDoubleLine(L["Refresh"], aura.refresh or 0, 1, 1, 1)
-				end
+				tooltip:AddDoubleLine(L["Count"], aura.count or 0, 1, 1, 1)
+				tooltip:AddDoubleLine(L["Refresh"], aura.refresh or 0 or 0, 1, 1, 1)
 				tooltip:AddLine(" ")
 			end
 
@@ -489,7 +486,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 			click4 = Skada.ToggleFilter,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {spellmod},
-			columns = {Uptime = true, Count = true, Percent = true},
+			columns = {Uptime = true, Count = false, Percent = true},
 			icon = [[Interface\Icons\spell_holy_divinespirit]]
 		}
 
@@ -729,7 +726,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 			click4 = Skada.ToggleFilter,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {spellmod, targetmod},
-			columns = {Uptime = true, Count = true, Percent = true},
+			columns = {Uptime = true, Count = false, Percent = true},
 			icon = [[Interface\Icons\spell_shadow_shadowwordpain]]
 		}
 
