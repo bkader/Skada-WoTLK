@@ -64,7 +64,6 @@ globals = {
 	"LibCompat_TimerFrame",
 
 	"AceGUIWidgetLSMlists",
-	"UIDropDownMenu_AddSeparator",
 
 	"nop",
 	"ActorPoolMixin",

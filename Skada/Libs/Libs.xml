@@ -1,5 +1,6 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
+<Include file="TaintLess.xml"/>
 <!--@no-lib-strip@-->
 <Script file="LibStub\LibStub.lua"/>
 <Script file="CallbackHandler-1.0\CallbackHandler-1.0.lua"/>
@@ -30,5 +31,4 @@
 <Script file="LibBossIDs-1.0\LibBossIDs-1.0.lua"/>
 <Script file="LibFail-1.0\LibFail-1.0.lua"/>
 <Script file="LibFlyPaper-1.1\LibFlyPaper-1.1.lua"/>
-<Include file="LibUIDropDownMenu\LibUIDropDownMenu.xml"/>
 </Ui>
