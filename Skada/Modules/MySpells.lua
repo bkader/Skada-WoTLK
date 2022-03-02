@@ -80,9 +80,7 @@ Skada:AddLoadableModule("My Spells", function(L)
 			if player.damagespells then
 				for spellname, spell in pairs(player.damagespells) do
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = spellname
 					d.spellid = spell.id
@@ -103,9 +101,7 @@ Skada:AddLoadableModule("My Spells", function(L)
 			if player.healspells then
 				for spellid, spell in pairs(player.healspells) do
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = spellid
 					d.spellid = spellid
@@ -128,9 +124,7 @@ Skada:AddLoadableModule("My Spells", function(L)
 			if player.absorbspells then
 				for spellid, spell in pairs(player.absorbspells) do
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = spellid
 					d.spellid = spellid

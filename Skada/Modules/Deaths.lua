@@ -312,8 +312,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 					local diff = tonumber(log.time) - tonumber(deathlog.time)
 					if diff > -60 then
 						local nr = i + 1
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						local spellname, spellicon
 						if log.spellid then
@@ -411,9 +410,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 				local nr = 0
 				for i, death in ipairs(player.deathlog) do
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = i
 					d.time = death.time
@@ -466,9 +463,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and (player.death or 0) > 0 then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = player.id or player.name
 					d.label = player.name

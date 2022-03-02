@@ -120,9 +120,7 @@ Skada:AddLoadableModule("Potions", function(L)
 			local nr = 0
 			for playername, player in pairs(players) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = player.id or playername
 				d.label = playername
@@ -176,9 +174,7 @@ Skada:AddLoadableModule("Potions", function(L)
 
 					if potionname then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = potionid
 						d.hyperlink = potionlink
@@ -213,9 +209,7 @@ Skada:AddLoadableModule("Potions", function(L)
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and (player.potion or 0) > 0 then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = player.id or player.name
 					d.label = player.name

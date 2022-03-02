@@ -480,9 +480,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 			for sourcename, source in pairs(sources) do
 				if not win.class or win.class == source.class then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = source.id or sourcename
 					d.label = sourcename
@@ -528,9 +526,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 			local nr = 0
 			for spellid, spell in pairs(enemy.damagetakenspells) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = spellid
 				d.spellid = spellid
@@ -578,9 +574,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 			for sourcename, source in pairs(sources) do
 				if (not win.class or win.class == source.class) and (source.useful or 0) > 0 then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = source.id or sourcename
 					d.label = sourcename
@@ -616,9 +610,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 				local dtps, amount = enemy:GetDTPS()
 				if amount > 0 then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = enemy.id or enemy.name
 					d.label = enemy.name
@@ -908,9 +900,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 			local nr = 0
 			for spellid, spell in pairs(spells) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = spellid
 				d.spellid = spellid
@@ -957,9 +947,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 			for targetname, target in pairs(targets) do
 				if not win.class or win.class == target.class then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = target.id or targetname
 					d.label = targetname
@@ -1006,9 +994,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 			for targetname, target in pairs(targets) do
 				if not win.class or win.class == target.class then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = target.id or targetname
 					d.label = targetname
@@ -1053,9 +1039,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 			local nr = 0
 			for spellid, spell in pairs(enemy.damagespells) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = spellid
 				d.spellid = spellid
@@ -1094,9 +1078,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 					local dtps, amount = enemy:GetDPS()
 					if amount > 0 then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = enemy.id or enemy.name
 						d.id = enemy.name
@@ -1349,9 +1331,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = target.id or targetname
 				d.label = targetname
@@ -1391,9 +1371,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 			local nr = 0
 			for spellid, spell in pairs(enemy.healspells) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = spellid
 				d.spellid = spellid
@@ -1431,9 +1409,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 					local hps, amount = enemy:GetHPS()
 					if amount > 0 then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = enemy.id or enemy.name
 						d.label = enemy.name

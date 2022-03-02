@@ -28,8 +28,7 @@ Skada:AddLoadableModule("Threat", function(L)
 				if mod.db.showAggroBar and (tankThreat or 0) > 0 then
 					rubyAcorn = rubyAcorn or GetItemInfo(37727)
 
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = "AGGRO"
 					d.label = L["> Pull Aggro <"]
@@ -83,8 +82,7 @@ Skada:AddLoadableModule("Threat", function(L)
 					local isTanking, _, threatpct, _, threatvalue = UnitDetailedThreatSituation(player.unit, target)
 
 					if threatvalue then
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = player.id or player.name
 						d.label = player.name

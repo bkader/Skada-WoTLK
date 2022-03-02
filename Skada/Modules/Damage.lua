@@ -488,9 +488,7 @@ Skada:AddLoadableModule("Damage", function(L)
 			local nr = 0
 			for spellname, spell in pairs(actor.damagespells) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = spellname
 				d.spellschool = spell.school
@@ -539,9 +537,7 @@ Skada:AddLoadableModule("Damage", function(L)
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = target.id or targetname
 				d.label = targetname
@@ -564,9 +560,7 @@ Skada:AddLoadableModule("Damage", function(L)
 
 	local function add_detail_bar(win, nr, title, value, total, percent, fmt)
 		nr = nr + 1
-
-		local d = win.dataset[nr] or {}
-		win.dataset[nr] = d
+		local d = win:nr(nr)
 
 		d.id = title
 		d.label = title
@@ -708,9 +702,7 @@ Skada:AddLoadableModule("Damage", function(L)
 				for spellname, spell in pairs(actor.damagespells) do
 					if spell.targets and spell.targets[win.targetname] then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						if enemy then
 							d.spellid = spellname
@@ -762,9 +754,7 @@ Skada:AddLoadableModule("Damage", function(L)
 					local dps, amount = player:GetDPS()
 					if amount > 0 then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = player.id or player.name
 						d.label = player.name
@@ -798,9 +788,7 @@ Skada:AddLoadableModule("Damage", function(L)
 						local dps, amount = enemy:GetDPS()
 						if amount > 0 then
 							nr = nr + 1
-
-							local d = win.dataset[nr] or {}
-							win.dataset[nr] = d
+							local d = win:nr(nr)
 
 							d.id = enemy.id or enemy.name
 							d.label = enemy.name
@@ -1000,9 +988,7 @@ Skada:AddLoadableModule("DPS", function(L)
 
 					if dps > 0 then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = player.id or player.name
 						d.label = player.name
@@ -1036,9 +1022,7 @@ Skada:AddLoadableModule("DPS", function(L)
 
 						if dps > 0 then
 							nr = nr + 1
-
-							local d = win.dataset[nr] or {}
-							win.dataset[nr] = d
+							local d = win:nr(nr)
 
 							d.id = enemy.id or enemy.name
 							d.label = enemy.name
@@ -1143,9 +1127,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(L)
 				local nr = 0
 				for playername, player in pairs(cacheTable) do
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = player.id or playername
 					d.label = playername
@@ -1200,9 +1182,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(L)
 		local nr = 0
 		for spellname, spell in pairs(cacheTable) do
 			nr = nr + 1
-
-			local d = win.dataset[nr] or {}
-			win.dataset[nr] = d
+			local d = win:nr(nr)
 
 			d.id = spellname
 			d.spellid = spell.id
@@ -1275,9 +1255,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 			local nr = 0
 			for spellname, spell in pairs(actor.damagespells) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				if enemy then
 					d.spellid = spellname
@@ -1330,9 +1308,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = target.id or targetname
 				d.label = targetname
@@ -1387,9 +1363,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 
 				if amount > 0 then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = source.id or sourcename
 					d.label = sourcename
@@ -1430,9 +1404,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 
 					if amount > 0 then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = player.id or player.name
 						d.label = player.name
@@ -1467,9 +1439,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 
 						if amount > 0 then
 							nr = nr + 1
-
-							local d = win.dataset[nr] or {}
-							win.dataset[nr] = d
+							local d = win:nr(nr)
 
 							d.id = enemy.id or enemy.name
 							d.label = enemy.name
@@ -1558,9 +1528,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 			for spellname, spell in pairs(actor.damagespells) do
 				if (spell.overkill or 0) > 0 then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					if enemy then
 						d.spellid = spellname
@@ -1611,9 +1579,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 			for targetname, target in pairs(targets) do
 				if (target.overkill or 0) > 0 then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = target.id or targetname
 					d.label = targetname
@@ -1659,9 +1625,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 			for spellname, spell in pairs(actor.damagespells) do
 				if spell.targets and spell.targets[win.targetname] and (spell.targets[win.targetname].overkill or 0) > 0 then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					if enemy then
 						d.spellid = spellname
@@ -1705,9 +1669,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and (player.overkill or 0) > 0 then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = player.id or player.name
 					d.label = player.name
@@ -1737,9 +1699,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 				for _, enemy in ipairs(set.enemies) do
 					if (not win.class or win.class == enemy.class) and (enemy.overkill or 0) > 0 then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = enemy.id or enemy.name
 						d.label = enemy.name
@@ -1824,9 +1784,7 @@ Skada:AddLoadableModule("Absorbed Damage", function(L)
 					local amount = max(0, spell.total - spell.amount)
 					if amount > 0 then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						if enemy then
 							d.spellid = spellname
@@ -1880,9 +1838,7 @@ Skada:AddLoadableModule("Absorbed Damage", function(L)
 					local amount = max(0, target.total - target.amount)
 					if amount > 0 then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = target.id or targetname
 						d.label = targetname
@@ -1922,9 +1878,7 @@ Skada:AddLoadableModule("Absorbed Damage", function(L)
 					local amount = max(0, player.totaldamage - player.damage)
 					if amount > 0 then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = player.id or player.name
 						d.label = player.name
@@ -1957,9 +1911,7 @@ Skada:AddLoadableModule("Absorbed Damage", function(L)
 						local amount = max(0, enemy.totaldamage - enemy.damage)
 						if amount > 0 then
 							nr = nr + 1
-
-							local d = win.dataset[nr] or {}
-							win.dataset[nr] = d
+							local d = win:nr(nr)
 
 							d.id = enemy.id or enemy.name
 							d.label = enemy.name

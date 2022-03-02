@@ -95,9 +95,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = target.id or targetname
 				d.label = targetname
@@ -137,9 +135,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 			local nr = 0
 			for spellid, spell in pairs(player.friendfirespells) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = spellid
 				d.spellid = spellid
@@ -183,9 +179,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 			local nr = 0
 			for targetname, amount in pairs(targets) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = targetname
 				d.label = targetname
@@ -224,9 +218,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and (player.friendfire or 0) > 0 then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = player.id or player.name
 					d.label = player.name

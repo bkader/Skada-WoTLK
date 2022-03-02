@@ -429,9 +429,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			local nr = 0
 			for spellname, spell in pairs(actor.damagetakenspells) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = spellname
 				d.spellschool = spell.school
@@ -484,9 +482,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			local nr = 0
 			for sourcename, source in pairs(sources) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = source.id or sourcename
 				d.label = sourcename
@@ -509,9 +505,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 
 	local function add_detail_bar(win, nr, title, value, total, percent, fmt)
 		nr = nr + 1
-
-		local d = win.dataset[nr] or {}
-		win.dataset[nr] = d
+		local d = win:nr(nr)
 
 		d.id = title
 		d.label = title
@@ -662,9 +656,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				for spellname, spell in pairs(actor.damagetakenspells) do
 					if spell.sources and spell.sources[win.targetname] then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						if enemy then
 							d.spellid = spellname
@@ -715,9 +707,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 					local dtps, amount = player:GetDTPS()
 					if amount > 0 then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = player.id or player.name
 						d.label = player.name
@@ -751,9 +741,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 						local dtps, amount = enemy:GetDTPS()
 						if amount > 0 then
 							nr = nr + 1
-
-							local d = win.dataset[nr] or {}
-							win.dataset[nr] = d
+							local d = win:nr(nr)
 
 							d.id = enemy.id or enemy.name
 							d.label = enemy.name
@@ -926,9 +914,7 @@ Skada:AddLoadableModule("DTPS", function(L)
 					local dtps = player:GetDTPS()
 					if dtps > 0 then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = player.id or player.name
 						d.label = player.name
@@ -961,9 +947,7 @@ Skada:AddLoadableModule("DTPS", function(L)
 						local dtps = enemy:GetDTPS()
 						if dtps > 0 then
 							nr = nr + 1
-
-							local d = win.dataset[nr] or {}
-							win.dataset[nr] = d
+							local d = win:nr(nr)
 
 							d.id = enemy.id or enemy.name
 							d.label = enemy.name
@@ -1078,9 +1062,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 				local nr = 0
 				for sourcename, source in pairs(cacheTable) do
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = source.id or sourcename
 					d.label = sourcename
@@ -1142,9 +1124,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 				local nr = 0
 				for playername, player in pairs(cacheTable) do
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = player.id or playername
 					d.label = playername
@@ -1197,9 +1177,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 		local nr = 0
 		for spellname, spell in pairs(cacheTable) do
 			nr = nr + 1
-
-			local d = win.dataset[nr] or {}
-			win.dataset[nr] = d
+			local d = win:nr(nr)
 
 			d.id = spellname
 			d.spellid = spell.id
@@ -1264,9 +1242,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 			local nr = 0
 			for event, count in pairs(actor.data) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = event
 				d.label = L[event]
@@ -1319,9 +1295,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 							cacheTable[player.id] = tmp
 
 							nr = nr + 1
-
-							local d = win.dataset[nr] or {}
-							win.dataset[nr] = d
+							local d = win:nr(nr)
 
 							d.id = player.id or player.name
 							d.label = player.name
@@ -1392,9 +1366,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 
 	local function add_detail_bar(win, nr, title, value, total)
 		nr = nr + 1
-
-		local d = win.dataset[nr] or {}
-		win.dataset[nr] = d
+		local d = win:nr(nr)
 
 		d.id = title
 		d.label = title
@@ -1469,9 +1441,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 			for spellname, spell in pairs(actor.damagetakenspells) do
 				if spell.total > 0 then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					if enemy then
 						d.id = spellname
@@ -1519,9 +1489,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 					local amount, total = getMIT(player)
 					if amount > 0 then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = player.id or player.name
 						d.label = player.name
@@ -1555,9 +1523,7 @@ Skada:AddLoadableModule("Damage Mitigated", function(L)
 						local amount, total = getMIT(enemy)
 						if amount > 0 then
 							nr = nr + 1
-
-							local d = win.dataset[nr] or {}
-							win.dataset[nr] = d
+							local d = win:nr(nr)
 
 							d.id = enemy.id or enemy.name
 							d.label = enemy.name

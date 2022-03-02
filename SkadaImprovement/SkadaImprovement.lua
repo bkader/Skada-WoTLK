@@ -128,9 +128,7 @@ Skada:AddLoadableModule("Improvement", function(L)
 			local nr = 0
 			for i, encounter in ipairs(boss.encounters) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = i
 				d.label = date("%x %X", encounter.starttime)
@@ -171,9 +169,7 @@ Skada:AddLoadableModule("Improvement", function(L)
 			local nr = 0
 			for i, mode in ipairs(modes) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = i
 				d.label = localized[mode] or mode
@@ -209,9 +205,7 @@ Skada:AddLoadableModule("Improvement", function(L)
 			local nr = 0
 			for name, data in pairs(self.db) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = name
 				d.label = name

@@ -83,9 +83,7 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 			local nr = 0
 			for targetname, count in pairs(actor.parrytargets) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = targetname
 				d.label = targetname
@@ -117,9 +115,7 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and (player.parry or 0) > 0 then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = player.id or player.name
 					d.label = player.name

@@ -131,9 +131,7 @@ Skada:AddLoadableModule("Resources", function(L)
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and player[self.power] then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = player.id or player.name
 					d.label = player.name
@@ -188,9 +186,7 @@ Skada:AddLoadableModule("Resources", function(L)
 			local nr = 0
 			for spellid, amount in pairs(actor[self.spells]) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = spellid
 				d.spellid = spellid

@@ -216,9 +216,7 @@ do
 						local auracount, aurauptime = CountAuras(player.auras, atype)
 						if auracount > 0 and aurauptime > 0 then
 							nr = nr + 1
-
-							local d = win.dataset[nr] or {}
-							win.dataset[nr] = d
+							local d = win:nr(nr)
 
 							d.id = player.id or player.name
 							d.label = player.name
@@ -261,9 +259,7 @@ do
 			for spellid, spell in pairs(player.auras) do
 				if spell.type == atype and spell.uptime > 0 then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = spellid
 					d.spellid = spellid
@@ -416,9 +412,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 			local nr = 0
 			for playername, player in pairs(players) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = player.id or playername
 				d.label = playername
@@ -587,9 +581,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 			local nr = 0
 			for spellid, aura in pairs(auras) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = spellid
 				d.spellid = spellid
@@ -635,9 +627,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = target.id or targetname
 				d.label = targetname
@@ -679,9 +669,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = target.id or targetname
 				d.label = targetname

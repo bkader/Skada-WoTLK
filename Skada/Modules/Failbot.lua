@@ -13,7 +13,6 @@ Skada:AddLoadableModule("Fails", function(L)
 	local tostring, format, tContains = tostring, string.format, tContains
 	local GetSpellInfo, UnitGUID = Skada.GetSpellInfo or GetSpellInfo, UnitGUID
 	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
-	local failevents, tankevents = LibFail:GetSupportedEvents(), LibFail:GetFailsWhereTanksDoNotFail()
 	local _
 
 	-- spells in the following table will be ignored.
@@ -21,7 +20,7 @@ Skada:AddLoadableModule("Fails", function(L)
 
 	local function log_fail(set, playerid, playername, spellid, event)
 		local player = Skada:FindPlayer(set, playerid, playername)
-		if player and (player.role ~= "TANK" or not tContains(tankevents, event)) then
+		if player and (player.role ~= "TANK" or not tContains(LibFail:GetFailsWhereTanksDoNotFail(), event)) then
 			player.fail = (player.fail or 0) + 1
 			set.fail = (set.fail or 0) + 1
 
@@ -65,9 +64,7 @@ Skada:AddLoadableModule("Fails", function(L)
 			for _, player in ipairs(set.players) do
 				if player.failspells and player.failspells[win.spellid] then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = player.id or player.name
 					d.label = player.name
@@ -109,9 +106,7 @@ Skada:AddLoadableModule("Fails", function(L)
 			local nr = 0
 			for spellid, count in pairs(player.failspells) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = spellid
 				d.spellid = spellid
@@ -143,9 +138,7 @@ Skada:AddLoadableModule("Fails", function(L)
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and (player.fail or 0) > 0 then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = player.id or player.name
 					d.label = player.name
@@ -181,7 +174,6 @@ Skada:AddLoadableModule("Fails", function(L)
 			icon = [[Interface\Icons\ability_creature_cursed_01]]
 		}
 
-		tankevents = tankevents or LibFail:GetFailsWhereTanksDoNotFail()
 		Skada:AddMode(self)
 	end
 
@@ -249,9 +241,7 @@ Skada:AddLoadableModule("Fails", function(L)
 		end
 
 		function mod:OnInitialize()
-			failevents = failevents or LibFail:GetSupportedEvents()
-			tankevents = tankevents or LibFail:GetFailsWhereTanksDoNotFail()
-			for _, event in ipairs(failevents) do
+			for _, event in ipairs(LibFail:GetSupportedEvents()) do
 				LibFail:RegisterCallback(event, onFail)
 			end
 

@@ -95,8 +95,7 @@ Skada:AddLoadableModule("Dispels", function(L)
 			for spellid, count in pairs(spells) do
 				nr = nr + 1
 
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = spellid
 				d.spellid = spellid
@@ -136,8 +135,7 @@ Skada:AddLoadableModule("Dispels", function(L)
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
 
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = target.id or targetname
 				d.label = targetname
@@ -178,8 +176,7 @@ Skada:AddLoadableModule("Dispels", function(L)
 			for spellid, spell in pairs(player.dispelspells) do
 				nr = nr + 1
 
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = spellid
 				d.spellid = spellid
@@ -212,8 +209,7 @@ Skada:AddLoadableModule("Dispels", function(L)
 				if (not win.class or win.class == player.class) and (player.dispel or 0) > 0 then
 					nr = nr + 1
 
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = player.id or player.name
 					d.label = player.name

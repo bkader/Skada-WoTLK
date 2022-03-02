@@ -191,9 +191,9 @@ do
 	-- Table Pool for recycling tables
 	-- creates a new table system that can be used to reuse tables
 	-- it returns both "new" and "del" functions.
-	function lib.TablePool()
+	function lib.TablePool(mode)
 		local pool = {}
-		setmetatable(pool, {__mode = "k"})
+		setmetatable(pool, {__mode = mode or "k"})
 
 		-- attempts to retrieve a table from the cache
 		-- creates if if it doesn't exist.

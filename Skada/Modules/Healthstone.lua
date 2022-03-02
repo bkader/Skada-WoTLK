@@ -44,9 +44,7 @@ Skada:AddLoadableModule("Healthstones", function(L)
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and player.healthstone then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = player.id or player.name
 					d.label = player.name

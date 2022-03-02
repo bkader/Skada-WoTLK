@@ -37,9 +37,7 @@ Skada:AddLoadableModule("Activity", function(L)
 					local activetime = player:GetTime(true)
 					if activetime > 0 then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = player.id or player.name
 						d.label = player.name
@@ -72,9 +70,7 @@ Skada:AddLoadableModule("Activity", function(L)
 						local activetime = enemy:GetTime(true)
 						if activetime > 0 then
 							nr = nr + 1
-
-							local d = win.dataset[nr] or {}
-							win.dataset[nr] = d
+							local d = win:nr(nr)
 
 							d.id = enemy.id or enemy.name
 							d.label = enemy.name

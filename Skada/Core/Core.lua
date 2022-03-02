@@ -420,21 +420,27 @@ end
 
 local Window = {}
 do
-	local mt = {__index = Window}
+	local window_mt = {__index = Window}
 	local copywindow = nil
 
 	-- create a new window
 	function Window:New(ttwin)
 		local win = new()
-		if ttwin then -- only used for tooltips
-			win.dataset = new()
-			return win
-		end
-		-- regular window.
-		win.metadata = new()
+
 		win.dataset = new()
-		win.history = new()
-		return setmetatable(win, mt)
+		if not ttwin then -- regular window?
+			win.metadata = new()
+			win.history = new()
+		end
+
+		return setmetatable(win, window_mt)
+	end
+
+	-- creates or reuses a dataset table
+	function Window:nr(i)
+		local d = self.dataset[i] or {}
+		self.dataset[i] = d
+		return d
 	end
 
 	-- add window options
@@ -1754,7 +1760,7 @@ do
 			win.ttwin = Window:New(true)
 		end
 
-		wipe(win.ttwin.dataset)
+		win.ttwin:Reset()
 
 		if mode.Enter then
 			mode:Enter(win.ttwin, id, label)
@@ -2502,8 +2508,7 @@ function Skada:UpdateDisplay(force)
 				local set = win:GetSelectedSet()
 
 				for m, mode in ipairs(modes) do
-					local d = win.dataset[m] or {}
-					win.dataset[m] = d
+					local d = win:nr(m)
 
 					d.id = mode.moduleName
 					d.label = mode.moduleName
@@ -2527,16 +2532,14 @@ function Skada:UpdateDisplay(force)
 				win:UpdateDisplay()
 			else
 				local nr = 1
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = "total"
 				d.label = L["Total"]
 				d.value = 1
 
 				nr = nr + 1
-				d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				d = win:nr(nr)
 
 				d.id = "current"
 				d.label = L["Current"]
@@ -2544,8 +2547,7 @@ function Skada:UpdateDisplay(force)
 
 				for _, set in ipairs(self.char.sets) do
 					nr = nr + 1
-					d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					d = win:nr(nr)
 
 					d.id = tostring(set.starttime)
 					d.label, d.valuetext = select(2, self:GetSetLabel(set))
