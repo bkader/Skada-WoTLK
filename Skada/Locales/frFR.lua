@@ -682,10 +682,6 @@ L["Name display"] = "Format des noms"
 L["Choose how names are shown on your bars."] = "Choisissez comment les noms seront affichés sur les barres."
 L["Clear Cache"] = "Vider le cache"
 L["Are you sure you want clear cached nicknames?"] = "Êtes-vous sûr vouloir vider le cache des surnoms?"
--- damage mitigated lines --
-L["Damage Mitigated"] = "Dégâts mitigés"
-L["%s's mitigated damage"] = "Dégâts mitigés \1242 %s"
-L["%s's <%s> mitigated damage"] = "Dégâts mitigés \1242 %s <%s>"
 -- overkill module lines --
 L["Overkill"] = "Dégâts excessifs"
 L["Overkill spell list"] = "Sorts des dégâts excessifs"

@@ -679,10 +679,6 @@ L["Name display"] = "Формат отображения имени"
 L["Choose how names are shown on your bars."] = "Выберите вариант отображения имени на полосах."
 L["Clear Cache"] = "Очистить кэш"
 L["Are you sure you want clear cached nicknames?"] = "Вы уверены, что хотите очистить кешированные никнеймы?"
--- damage mitigated lines --
-L["Damage Mitigated"] = "Уменьшение урона"
-L["%s's mitigated damage"] = "Урон уменьшен - %s"
-L["%s's <%s> mitigated damage"] = "Урон уменьшен - %s <%s>"
 -- overkill module lines --
 L["Overkill"] = "Урон - Избыточный"
 L["Overkill spell list"] = "Заклинания избыточного урона"

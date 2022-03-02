@@ -675,10 +675,6 @@ L["Name display"] = "名字显示"
 L["Choose how names are shown on your bars."] = "选择统计条上名字的显示方式。"
 L["Clear Cache"] = "清除缓存"
 L["Are you sure you want clear cached nicknames?"] = "您确定要清除缓存的昵称吗？"
--- damage mitigated lines --
-L["Damage Mitigated"] = "伤害减免"
-L["%s's mitigated damage"] = "%s的减免伤害"
-L["%s's <%s> mitigated damage"] = "%s的<%s>减免伤害"
 -- overkill module lines --
 L["Overkill"] = "过度杀伤"
 L["Overkill spell list"] = "过度杀伤法术列表"

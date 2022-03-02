@@ -677,10 +677,6 @@ L["Name display"] = "Namensanzeige"
 L["Choose how names are shown on your bars."] = "Wählen Sie aus, wie Namen in Ihren Balken angezeigt werden."
 L["Clear Cache"] = "Cache leeren"
 L["Are you sure you want clear cached nicknames?"] = "Möchten Sie zwischengespeicherte Spitznamen wirklich löschen?"
--- damage mitigated lines --
-L["Damage Mitigated"] = "Reduzierter Schaden"
-L["%s's mitigated damage"] = "%s reduzierter Schaden"
-L["%s's <%s> mitigated damage"] = "%s <%s> reduzierter Schaden"
 -- overkill module lines --
 L["Overkill"] = "Overkill"
 L["Overkill spell list"] = "Overkill-Zauberliste"

@@ -156,7 +156,6 @@ Skada.defaults = {
 			["Avoidance & Mitigation"] = true,
 			["CC Breaks"] = true,
 			["Damage Done By Spell"] = true,
-			["Damage Mitigated"] = true,
 			["DTPS"] = true,
 			["Enemy Healing Done"] = true,
 			["Healing Done By Spell"] = true,

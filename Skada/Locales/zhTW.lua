@@ -675,10 +675,6 @@ L["When enabled, nicknames set by Skada users are ignored."] = "如果启用，�
 -- L["Choose how names are shown on your bars."] = ""
 L["Clear Cache"] = "Clear Cache"
 L["Are you sure you want clear cached nicknames?"] = "您确定要清除缓存的昵称吗？"
--- damage mitigated lines --
--- L["Damage Mitigated"] = ""
--- L["%s's mitigated damage"] = ""
--- L["%s's <%s> mitigated damage"] = ""
 -- overkill module lines --
 L["Overkill"] = "過度損壞"
 L["Overkill spell list"] = "過度傷害法術"

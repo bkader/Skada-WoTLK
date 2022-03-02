@@ -682,10 +682,6 @@ L["Name display"] = true
 L["Choose how names are shown on your bars."] = true
 L["Clear Cache"] = true
 L["Are you sure you want clear cached nicknames?"] = true
--- damage mitigated lines --
-L["Damage Mitigated"] = true
-L["%s's mitigated damage"] = true
-L["%s's <%s> mitigated damage"] = true
 -- overkill module lines --
 L["Overkill"] = true
 L["Overkill spell list"] = true
