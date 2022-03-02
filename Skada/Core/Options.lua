@@ -159,7 +159,6 @@ Skada.defaults = {
 			["Damage Mitigated"] = true,
 			["DTPS"] = true,
 			["Enemy Healing Done"] = true,
-			["Healing and Overhealing"] = true,
 			["Healing Done By Spell"] = true,
 			["Healing Taken"] = true,
 			["Healthstones"] = true,
