@@ -152,7 +152,6 @@ Skada.defaults = {
 		toast = {hide_toasts = false, spawn_point = "BOTTOM", duration = 5, opacity = 0.75},
 		report = {mode = "Damage", set = "current", channel = "Say", chantype = "preset", number = 10},
 		modulesBlocked = {
-			["Absorbed Damage"] = true,
 			["Avoidance & Mitigation"] = true,
 			["CC Breaks"] = true,
 			["Damage Done By Spell"] = true,
