@@ -2960,9 +2960,7 @@ end
 -------------------------------------------------------------------------------
 
 function Skada:ApplyBorder(frame, texture, color, thickness, padtop, padbottom, padleft, padright)
-	if frame.borderFrame then return end
-
-	frame.borderFrame = CreateFrame("Frame", nil, frame)
+	frame.borderFrame = frame.borderFrame or CreateFrame("Frame", nil, frame)
 	frame.borderFrame:SetFrameLevel(0)
 	frame.borderFrame:SetPoint("TOPLEFT", frame, -thickness - (padleft or 0), thickness + (padtop or 0))
 	frame.borderFrame:SetPoint("BOTTOMRIGHT", frame, thickness + (padright or 0), -thickness - (padbottom or 0))
