@@ -477,7 +477,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 		spellmod.metadata = {valueorder = true, tooltip = aura_tooltip, click1 = playermod}
 		self.metadata = {
 			click1 = spellmod,
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {spellmod},
 			columns = {Uptime = true, Count = false, Percent = true},
@@ -711,7 +711,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 		self.metadata = {
 			click1 = spellmod,
 			click2 = targetmod,
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {spellmod, targetmod},
 			columns = {Uptime = true, Count = false, Percent = true},

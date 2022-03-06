@@ -540,7 +540,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 		playermod.metadata = {click1 = deathlogmod}
 		self.metadata = {
 			click1 = playermod,
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod},
 			columns = {Survivability = false, Count = true},

@@ -143,7 +143,7 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 			showspots = true,
 			ordersort = true,
 			click1 = targetmod,
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {targetmod},
 			columns = {Count = true, Percent = false},

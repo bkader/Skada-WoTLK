@@ -101,7 +101,7 @@ Skada:AddLoadableModule("Activity", function(L)
 			showspots = true,
 			ordersort = true,
 			tooltip = activity_tooltip,
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {["Active Time"] = true, Percent = true},
 			icon = [[Interface\Icons\spell_holy_borrowedtime]]

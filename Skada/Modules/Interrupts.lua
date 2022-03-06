@@ -274,7 +274,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 			click1 = spellmod,
 			click2 = targetmod,
 			click3 = playermod,
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {spellmod, targetmod, playermod},
 			columns = {Total = true, Percent = true},

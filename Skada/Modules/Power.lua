@@ -104,7 +104,7 @@ Skada:AddLoadableModule("Resources", function(L)
 			instance.metadata = {
 				showspots = true,
 				click1 = pmode,
-				click4 = Skada.ToggleFilter,
+				click4 = Skada.FilterClass,
 				click4_label = L["Toggle Class Filter"],
 				nototalclick = {pmode}
 			}

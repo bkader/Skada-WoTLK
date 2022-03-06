@@ -1029,7 +1029,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			showspots = true,
 			click1 = playermod,
 			click2 = targetmod,
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod, targetmod},
 			columns = {Absorbs = true, HPS = true, Percent = true},
@@ -1531,7 +1531,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 			showspots = true,
 			click1 = playermod,
 			click2 = targetmod,
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			post_tooltip = hps_tooltip,
 			nototalclick = {playermod, targetmod},
@@ -1683,7 +1683,7 @@ Skada:AddLoadableModule("HPS", function(L)
 		self.metadata = {
 			showspots = true,
 			tooltip = hps_tooltip,
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {HPS = true, Percent = true},
 			icon = [[Interface\Icons\spell_nature_rejuvenation]]

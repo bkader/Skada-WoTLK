@@ -247,7 +247,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 			showspots = true,
 			click1 = spellmod,
 			click2 = targetmod,
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {spellmod, targetmod},
 			columns = {Damage = true, Percent = true},

@@ -72,7 +72,7 @@ Skada:AddLoadableModule("Healthstones", function(L)
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = true},
 			icon = [[Interface\Icons\inv_stone_04]]

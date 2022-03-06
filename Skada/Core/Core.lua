@@ -901,7 +901,7 @@ function Window:RightClick(bar, button)
 		if #self.history > 0 then
 			self:DisplayMode(tremove(self.history))
 		elseif self.class then
-			Skada:ToggleFilter(self)
+			Skada:FilterClass(self)
 		else
 			self.class = nil
 			self:DisplayModes(self.selectedset)
@@ -1324,6 +1324,21 @@ function Skada:FindPlayer(set, id, name, strict)
 
 		return player
 	end
+end
+
+-- returns the unit id from guid (priority players and pets)
+function Skada:GetUnitId(guid, filter, strict)
+	-- pets?
+	if guid and pets[guid] and players[pets[guid].id] then
+		return players[pets[guid].id] .. "pet"
+	end
+
+	-- player?
+	if guid and players[guid] then
+		return players[guid]
+	end
+
+	return strict and nil or GetUnitIdFromGUID(guid, filter)
 end
 
 -- finds a player table or creates it if not found
@@ -1880,7 +1895,7 @@ do
 	end
 end
 
-function Skada:ToggleFilter(win, id, label)
+function Skada:FilterClass(win, id, label)
 	if win.class then
 		win:DisplayMode(win.selectedmode, nil)
 	elseif win.GetSelectedSet and id then

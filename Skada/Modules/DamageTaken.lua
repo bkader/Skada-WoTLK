@@ -777,7 +777,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			post_tooltip = damage_tooltip,
 			click1 = playermod,
 			click2 = sourcemod,
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod, sourcemod},
 			columns = {Damage = true, DTPS = true, Percent = true},
@@ -977,7 +977,7 @@ Skada:AddLoadableModule("DTPS", function(L)
 		self.metadata = {
 			showspots = true,
 			tooltip = dtps_tooltip,
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {DTPS = true, Percent = true},
 			icon = [[Interface\Icons\inv_weapon_shortblade_06]]
@@ -1328,7 +1328,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 		self.metadata = {
 			showspots = true,
 			click1 = playermod,
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Percent = true, Count = true, Total = true},
 			icon = [[Interface\Icons\ability_warlock_avoidance]]

@@ -247,7 +247,7 @@ Skada:AddLoadableModule("Potions", function(L)
 
 	function mod:OnEnable()
 		potionmod.metadata = {
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"]
 		}
 		playermod.metadata = {click1 = potionmod}
@@ -255,7 +255,7 @@ Skada:AddLoadableModule("Potions", function(L)
 			showspots = true,
 			ordersort = true,
 			click1 = playermod,
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod},
 			columns = {Count = true, Percent = false},

@@ -636,13 +636,13 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 	function mod:OnEnable()
 		usefulmod.metadata = {
 			showspots = true,
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"]
 		}
 		sourcemod.metadata = {
 			showspots = true,
 			tooltip = sourcemod_tooltip,
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"]
 		}
 		spellmod.metadata = {valueorder = true}
@@ -1106,13 +1106,13 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 	function mod:OnEnable()
 		spelltargetmod.metadata = {
 			showspots = true,
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"]
 		}
 		targetmod.metadata = {
 			showspots = true,
 			click1 = targetspellmod,
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"]
 		}
 		spellmod.metadata = {click1 = spelltargetmod, valueorder = true}
@@ -1439,7 +1439,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 			showspots = true,
 			click1 = spellmod,
 			click2 = targetmod,
-			click4 = Skada.ToggleFilter,
+			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {spellmod, targetmod},
 			columns = {Healing = true, HPS = true, Percent = true},
