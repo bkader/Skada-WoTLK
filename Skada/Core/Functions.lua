@@ -141,36 +141,37 @@ end
 
 function Skada:RegisterSchools()
 	self.RegisterSchools = nil -- remove it
+	self.spellschools = self.spellschools or {}
 
-	local SCHOOL_PHYSICAL = SCHOOL_MASK_PHYSICAL or 0x01
-	local SCHOOL_HOLY = SCHOOL_MASK_HOLY or 0x02
-	local SCHOOL_FIRE = SCHOOL_MASK_FIRE or 0x04
-	local SCHOOL_NATURE = SCHOOL_MASK_NATURE or 0x08
-	local SCHOOL_FROST = SCHOOL_MASK_FROST or 0x10
-	local SCHOOL_FROSTFIRE = SCHOOL_FIRE + SCHOOL_FROST
-	local SCHOOL_SHADOW = SCHOOL_MASK_SHADOW or 0x20
-	local SCHOOL_ARCANE = SCHOOL_MASK_ARCANE or 0x40
+	-- handles adding spell schools
+	local function add_school(key, name, r, g, b)
+		if key and name and not self.spellschools[key] then
+			local newname = name:match("%((.+)%)")
+			self.spellschools[key] = {r = r or 1, g = g or 1, b = b or 1, name = newname or name}
+		end
+	end
 
-	-- spell school colors
-	self.spellschools = {}
-	self.spellschools[SCHOOL_PHYSICAL] = {a = 1, r = 1, g = 1, b = 0} -- Physical
-	self.spellschools[SCHOOL_HOLY] = {a = 1, r = 1, g = 0.9, b = 0.5} -- Holy
-	self.spellschools[SCHOOL_FIRE] = {a = 1, r = 1, g = 0.5, b = 0} -- Fire
-	self.spellschools[SCHOOL_NATURE] = {a = 1, r = 0.30, g = 1, b = 0.30} -- Nature
-	self.spellschools[SCHOOL_FROST] = {a = 1, r = 0.5, g = 1, b = 1} -- Frost
-	self.spellschools[SCHOOL_FROSTFIRE] = {a = 1, r = 0.5, g = 1, b = 1} -- Frostfire
-	self.spellschools[SCHOOL_SHADOW] = {a = 1, r = 0.5, g = 0.5, b = 1} -- Shadow
-	self.spellschools[SCHOOL_ARCANE] = {a = 1, r = 1, g = 0.5, b = 1} -- Arcane
+	-- main school
+	local SCHOOL_PHYSICAL = SCHOOL_MASK_PHYSICAL or 0x01 -- Physical
+	local SCHOOL_HOLY = SCHOOL_MASK_HOLY or 0x02 -- Holy
+	local SCHOOL_FIRE = SCHOOL_MASK_FIRE or 0x04 -- Fire
+	local SCHOOL_NATURE = SCHOOL_MASK_NATURE or 0x08 -- Nature
+	local SCHOOL_FROST = SCHOOL_MASK_FROST or 0x10 -- Frost
+	local SCHOOL_SHADOW = SCHOOL_MASK_SHADOW or 0x20 -- Shadow
+	local SCHOOL_ARCANE = SCHOOL_MASK_ARCANE or 0x40 -- Arcane
 
-	-- spell school names
-	self.spellschools[SCHOOL_PHYSICAL].name = STRING_SCHOOL_PHYSICAL:gsub("%(", ""):gsub("%)", "") -- Physical
-	self.spellschools[SCHOOL_HOLY].name = STRING_SCHOOL_HOLY:gsub("%(", ""):gsub("%)", "") -- Holy
-	self.spellschools[SCHOOL_FIRE].name = STRING_SCHOOL_FIRE:gsub("%(", ""):gsub("%)", "") -- Fire
-	self.spellschools[SCHOOL_NATURE].name = STRING_SCHOOL_NATURE:gsub("%(", ""):gsub("%)", "") -- Nature
-	self.spellschools[SCHOOL_FROST].name = STRING_SCHOOL_FROST:gsub("%(", ""):gsub("%)", "") -- Frost
-	self.spellschools[SCHOOL_FROSTFIRE].name = STRING_SCHOOL_FROSTFIRE:gsub("%(", ""):gsub("%)", "") -- Frostfire
-	self.spellschools[SCHOOL_SHADOW].name = STRING_SCHOOL_SHADOW:gsub("%(", ""):gsub("%)", "") -- Shadow
-	self.spellschools[SCHOOL_ARCANE].name = STRING_SCHOOL_ARCANE:gsub("%(", ""):gsub("%)", "") -- Arcane
+	-- Single Schools
+	add_school(SCHOOL_PHYSICAL, STRING_SCHOOL_PHYSICAL, 1, 1, 0) -- Physical
+	add_school(SCHOOL_HOLY, STRING_SCHOOL_HOLY, 1, 0.9, 0.5) -- Holy
+	add_school(SCHOOL_FIRE, STRING_SCHOOL_FIRE, 1, 0.5, 0) -- Fire
+	add_school(SCHOOL_NATURE, STRING_SCHOOL_NATURE, 0.3, 1, 0.3) -- Nature
+	add_school(SCHOOL_FROST, STRING_SCHOOL_FROST, 0.5, 1, 1) -- Frost
+	add_school(SCHOOL_SHADOW, STRING_SCHOOL_SHADOW, 0.5, 0.5, 1) -- Shadow
+	add_school(SCHOOL_ARCANE, STRING_SCHOOL_ARCANE, 1, 0.5, 1) -- Arcane
+
+	-- Multiple Schools (can be extended if needed)
+	add_school(SCHOOL_FIRE + SCHOOL_FROST, STRING_SCHOOL_FROSTFIRE, 0.5, 1, 1) -- Frostfire
+	add_school(SCHOOL_PHYSICAL + SCHOOL_SHADOW, STRING_SCHOOL_SHADOWSTRIKE, 0.5, 0.5, 1) -- Shadowstrike
 end
 
 -------------------------------------------------------------------------------
