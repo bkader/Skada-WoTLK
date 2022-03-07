@@ -227,7 +227,7 @@ local function ProcessSet(set, curtime)
 	end
 
 	if not Skada.db.profile.onlykeepbosses or set.gotboss then
-		if set.mobname ~= nil and curtime - set.starttime > (Skada.db.profile.minsetlength or 5) then
+		if set.mobname ~= nil and curtime - set.starttime >= (Skada.db.profile.minsetlength or 5) then
 			set.endtime = set.endtime or curtime
 			set.time = max(0.1, set.endtime - set.starttime)
 			set.name = CheckSetName(set)
@@ -2481,7 +2481,7 @@ function Skada:UpdateDisplay(force)
 						self:Print("Mode %s does not have an Update function!", win.selectedmode.moduleName)
 					end
 
-					if self.db.profile.showtotals and win.selectedmode.GetSetSummary and set.type ~= "none" then
+					if self.db.profile.showtotals and win.selectedmode.GetSetSummary and set.type and set.type ~= "none" then
 						local valuetext, total = win.selectedmode:GetSetSummary(set, win)
 						if valuetext or total then
 							local existing = nil  -- an existing bar?
@@ -3377,7 +3377,7 @@ function Skada:NewSegment()
 end
 
 function Skada:NewPhase()
-	if self.current and (time() - self.current.starttime) > (self.db.profile.minsetlength or 5) then
+	if self.current and (time() - self.current.starttime) >= (self.db.profile.minsetlength or 5) then
 		self.tempsets = self.tempsets or T.get("Skada_TempSegments")
 
 		local set = CreateSet(L["Current"])
@@ -3743,24 +3743,30 @@ do
 			end
 		end
 
+		-- marking set as boss fights relies only on src_is_interesting
 		if self.current and src_is_interesting and not self.current.gotboss then
 			if band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
 				local isboss, bossid, bossname = self:IsBoss(dstGUID)
-				if not self.current.gotboss and isboss then
+				if isboss then
 					self.current.mobname = bossname or dstName
 					self.current.gotboss = bossid or true
-					if self.db.profile.alwayskeepbosses then
-						self.current.keep = true
-					end
+					self.current.keep = self.db.profile.alwayskeepbosses or nil
 					self:SendMessage("COMBAT_ENCOUNTER_START", self.current)
-				elseif self.current.type == "pvp" then
-					self.current.mobname = GetInstanceInfo()
-				elseif self.current.type == "arena" then
-					self.current.mobname = GetInstanceInfo()
-					self.current.gold = GetBattlefieldArenaFaction()
-				elseif not self.current.mobname then
-					self.current.mobname = dstName
 				end
+			end
+		end
+
+		-- set mobname
+		if self.current and not self.current.mobname then
+			if self.current.type == "pvp" then
+				self.current.mobname = GetInstanceInfo()
+			elseif self.current.type == "arena" then
+				self.current.mobname = GetInstanceInfo()
+				self.current.gold = GetBattlefieldArenaFaction()
+			elseif src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+				self.current.mobname = dstName
+			elseif dst_is_interesting and band(srcFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+				self.current.mobname = srcName
 			end
 		end
 
