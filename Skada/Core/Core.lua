@@ -3660,10 +3660,10 @@ do
 		end
 
 		if self.current and not self.current.started then
-			self:SendMessage("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 			self.current.started = true
 			if self.instanceType == nil then self:CheckZone() end
 			self.current.type = (self.instanceType == "none" and IsInGroup()) and "group" or self.instanceType
+			self:SendMessage("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		end
 
 		if self.current and self.db.profile.autostop then
