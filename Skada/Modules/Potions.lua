@@ -91,8 +91,8 @@ Skada:AddLoadableModule("Potions", function(L)
 
 		-- we use this function to record pre-pots as well.
 		function mod:CheckPrePot(event)
-			if event == "COMBAT_PLAYER_ENTER" and not self.checked then
-				prepotion = prepotion or T.get("Potions_PrePotions")
+			if event == "COMBAT_PLAYER_ENTER" and Skada.db.profile.prepotion and not self.checked then
+				prepotion = prepotion or T.get("Skada_PrePotions")
 				GroupIterator(CheckUnitPotions, prepotion)
 				self.checked = true
 			end
@@ -278,10 +278,10 @@ Skada:AddLoadableModule("Potions", function(L)
 	end
 
 	function mod:SetComplete(set)
-		if Skada.db.profile.prepotion and next(prepotion or {}) ~= nil then
+		if Skada.db.profile.prepotion and prepotion and next(prepotion) ~= nil then
 			Skada:Printf(L["pre-potion: %s"], tconcat(prepotion, ", "))
 		end
-		T.free("Potions_PrePotions", prepotion)
+		T.free("Skada_PrePotions", prepotion)
 		self.checked = nil
 	end
 
