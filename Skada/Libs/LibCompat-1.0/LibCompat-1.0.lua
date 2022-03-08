@@ -513,12 +513,8 @@ do
 	local classColors = CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS
 
 	-- flags for Projects Ascension
-	lib.AscensionCoA = (classColors.BARBARIAN ~= nil) -- CoA Realms
-	do
-		-- in non-CoA realms, all players are heroes/druids.
-		local locClass, engClass = UnitClass("player")
-		lib.Ascension = (locClass == "Hero" and engClass == "DRUID")
-	end
+	lib.Ascension = (type(IsCoA) == "function")
+	lib.AscensionCoA = lib.Ascension and IsCoA()
 
 	-- the functions below are for internal usage only
 	local function __fillClassColorsTable()

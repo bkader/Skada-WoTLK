@@ -122,6 +122,9 @@ globals = {
 	"LOCALE_zhCN",
 	"LOCALE_zhTW",
 
+	-- Ascension
+	"IsCoA",
+
 	-- Sirus
 	"AnimationsToggle_STARTNUMBERS",
 	"TimerTracker",
