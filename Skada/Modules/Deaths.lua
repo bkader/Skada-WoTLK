@@ -269,10 +269,11 @@ Skada:AddLoadableModule("Deaths", function(L)
 		end
 
 		function deathlogmod:Update(win, set)
+			win.title = format(L["%s's death log"], win.actorname or L.Unknown)
+			if set == Skada.current then return end -- don't show while in combat
+
 			local player = Skada:FindPlayer(set, win.actorid, win.actorname)
 			if player and win.datakey then
-				win.title = format(L["%s's death log"], win.actorname or L.Unknown)
-
 				local deathlog
 				if player.deathlog and player.deathlog[win.datakey] then
 					deathlog = player.deathlog[win.datakey]
@@ -285,9 +286,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 				-- add a fake entry for the actual death
 				if win.metadata and (deathlog.time or 0) > 0 then
-					local d = win.dataset[1] or {}
-					win.dataset[1] = d
-
+					local d = win:nr(1)
 					d.id = 1
 					d.time = deathlog.time
 					d.label = formatdate(deathlog.time) .. ": " .. format(L["%s dies"], player.name)
@@ -617,10 +616,9 @@ Skada:AddLoadableModule("Deaths", function(L)
 		T.clear(data)
 
 		-- clean deathlogs.
-		if (set.death or 0) == 0 then return end
 		for _, player in ipairs(set.players) do
-			if (player.death or 0) == 0 then
-				player.deathlog = nil
+			if (set.death or 0) == 0 or (player.death or 0) == 0 then
+				player.death, player.deathlog = nil, nil
 			elseif player.deathlog then
 				while #player.deathlog > (player.death or 0) do
 					tremove(player.deathlog, 1)
