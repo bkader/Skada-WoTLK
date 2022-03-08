@@ -6,6 +6,8 @@
 
 Skada is a modular damage meter with various viewing modes, segmented fights and customizable windows. It aims to be highly efficient with memory and CPU.
 
+_**Also available for [Cataclysm](https://github.com/bkader/Skada-Cata/)**_
+
 <p align="center"><img src="https://repository-images.githubusercontent.com/306277951/dcdd501d-57be-43cb-81d5-c791c0b255a3" alt="Skada WotLK"></p>
 
 ## IMPORTANT: How to install

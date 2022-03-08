@@ -29,65 +29,12 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 
 	-- this table holds the units to which the damage done is
 	-- collected into a new fake unit.
-	local customGroups = {
-		-- The Lich King: Useful targets
-		[L["The Lich King"]] = L["Important targets"],
-		[L["Raging Spirit"]] = L["Important targets"],
-		[L["Ice Sphere"]] = L["Important targets"],
-		[L["Val'kyr Shadowguard"]] = L["Important targets"],
-		[L["Wicked Spirit"]] = L["Important targets"],
-		-- Professor Putricide: Oozes
-		[L["Gas Cloud"]] = L["Oozes"],
-		[L["Volatile Ooze"]] = L["Oozes"],
-		-- Blood Prince Council: Princes overkilling
-		[L["Prince Valanar"]] = L["Princes overkilling"],
-		[L["Prince Taldaram"]] = L["Princes overkilling"],
-		[L["Prince Keleseth"]] = L["Princes overkilling"],
-		-- Lady Deathwhisper: Adds
-		[L["Cult Adherent"]] = L["Adds"],
-		[L["Empowered Adherent"]] = L["Adds"],
-		[L["Reanimated Adherent"]] = L["Adds"],
-		[L["Cult Fanatic"]] = L["Adds"],
-		[L["Deformed Fanatic"]] = L["Adds"],
-		[L["Reanimated Fanatic"]] = L["Adds"],
-		[L["Darnavan"]] = L["Adds"],
-		-- Halion: Halion and Inferno
-		[L["Halion"]] = L["Halion and Inferno"],
-		[L["Living Inferno"]] = L["Halion and Inferno"]
-	}
+	local customGroups = {}
 
 	-- this table holds units that should create a fake unit
 	-- at certain health percentage. Useful in case you want
 	-- to collect damage done to the units at certain phases.
-	local customUnits = {
-		-- [[ Icecrown Citadel ]] --
-		[36855] = {-- Lady Deathwhisper
-			start = 0, power = 0, text = L["%s - Phase 2"],
-			values = {["10n"] = 3264800, ["10h"] = 3264800, ["25n"] = 11193600, ["25h"] = 13992000}
-		},
-		[36678] = { -- Professor Putricide
-			start = 0.35, text = L["%s - Phase 3"],
-			values = {["10n"] = 9761500, ["10h"] = 13666100, ["25n"] = 41835000, ["25h"] = 50202000}
-		},
-		[36853] = { -- Sindragosa
-			start = 0.35, text = L["%s - Phase 2"],
-			values = {["10n"] = 11156000, ["10h"] = 13945000, ["25n"] = 38348750, ["25h"] = 46018500}
-		},
-		[36597] = { -- The Lich King
-			start = 0.4, stop = 0.1, text = L["%s - Phase 3"],
-			values = {["10n"] = 17431250, ["10h"] = 29458813, ["25n"] = 61009375, ["25h"] = 103151165}
-		},
-		[36609] = { -- Valkyrs overkilling
-			name = L["Valkyrs overkilling"],
-			diff = {"10h", "25h"}, start = 0.5, useful = true,
-			values = {["10h"] = 1417500, ["25h"] = 2992000}
-		},
-		-- [[ Trial of the Crusader ]] --
-		[34564] = { -- Anub'arak
-			start = 0.3, text = L["%s - Phase 2"],
-			values = {["10n"] = 4183500, ["10h"] = 5438550, ["25n"] = 20917500, ["25h"] = 27192750}
-		}
-	}
+	local customUnits = {}
 
 	local function GetRaidDiff()
 		if not instanceDiff then
@@ -698,6 +645,87 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 		T.free("Enemies_UnitsTable", customUnitsTable)
 		T.free("Enemies_GroupsTable", customGroupsTable)
 	end
+
+	function mod:OnInitialize()
+		-- don't add anything for Project Ascension
+		if Skada.Ascension or Skada.AscensionCoA then return end
+
+		-- ----------------------------
+		-- Custom Groups
+		-- ----------------------------
+
+		-- The Lich King: Useful targets
+		customGroups[L["The Lich King"]] = L["Important targets"]
+		customGroups[L["Raging Spirit"]] = L["Important targets"]
+		customGroups[L["Ice Sphere"]] = L["Important targets"]
+		customGroups[L["Val'kyr Shadowguard"]] = L["Important targets"]
+		customGroups[L["Wicked Spirit"]] = L["Important targets"]
+
+		-- Professor Putricide: Oozes
+		customGroups[L["Gas Cloud"]] = L["Oozes"]
+		customGroups[L["Volatile Ooze"]] = L["Oozes"]
+
+		-- Blood Prince Council: Princes overkilling
+		customGroups[L["Prince Valanar"]] = L["Princes overkilling"]
+		customGroups[L["Prince Taldaram"]] = L["Princes overkilling"]
+		customGroups[L["Prince Keleseth"]] = L["Princes overkilling"]
+
+		-- Lady Deathwhisper: Adds
+		customGroups[L["Cult Adherent"]] = L["Adds"]
+		customGroups[L["Empowered Adherent"]] = L["Adds"]
+		customGroups[L["Reanimated Adherent"]] = L["Adds"]
+		customGroups[L["Cult Fanatic"]] = L["Adds"]
+		customGroups[L["Deformed Fanatic"]] = L["Adds"]
+		customGroups[L["Reanimated Fanatic"]] = L["Adds"]
+		customGroups[L["Darnavan"]] = L["Adds"]
+
+		-- Halion: Halion and Inferno
+		customGroups[L["Halion"]] = L["Halion and Inferno"]
+		customGroups[L["Living Inferno"]] = L["Halion and Inferno"]
+
+		-- ----------------------------
+		-- Custom Units
+		-- ----------------------------
+
+		-- ICC: Lady Deathwhisper
+		customUnits[36855] = {
+			start = 0, power = 0, text = L["%s - Phase 2"],
+			values = {["10n"] = 3264800, ["10h"] = 3264800, ["25n"] = 11193600, ["25h"] = 13992000}
+		}
+
+		-- ICC: Professor Putricide
+		customUnits[36678] = {
+			start = 0.35, text = L["%s - Phase 3"],
+			values = {["10n"] = 9761500, ["10h"] = 13666100, ["25n"] = 41835000, ["25h"] = 50202000}
+		}
+
+		-- ICC: Sindragosa
+		customUnits[36853] = {
+			start = 0.35, text = L["%s - Phase 2"],
+			values = {["10n"] = 11156000, ["10h"] = 13945000, ["25n"] = 38348750, ["25h"] = 46018500}
+		}
+
+		-- ICC: The Lich King
+		customUnits[36597] = {
+			start = 0.4, stop = 0.1, text = L["%s - Phase 3"],
+			values = {["10n"] = 17431250, ["10h"] = 29458813, ["25n"] = 61009375, ["25h"] = 103151165}
+		}
+
+		-- ICC: Valkyrs overkilling
+		customUnits[36609] = {
+			name = L["Valkyrs overkilling"],
+			diff = {"10h", "25h"}, start = 0.5, useful = true,
+			values = {["10h"] = 1417500, ["25h"] = 2992000}
+		}
+
+		-- ToC: Anub'arak
+		customUnits[34564] = {
+			start = 0.3, text = L["%s - Phase 2"],
+			values = {["10n"] = 4183500, ["10h"] = 5438550, ["25n"] = 20917500, ["25h"] = 27192750}
+		}
+	end
+
+	---------------------------------------------------------------------------
 
 	function setPrototype:GetEnemyDamageTaken()
 		if not self.enemies then

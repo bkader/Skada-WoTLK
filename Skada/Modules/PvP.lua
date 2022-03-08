@@ -8,21 +8,22 @@ Skada:AddLoadableModule("PVP", function(L)
 	local UnitGUID, UnitClass, UnitBuff, UnitIsPlayer = UnitGUID, UnitClass, UnitBuff, UnitIsPlayer
 	local GetSpellInfo, UnitCastingInfo = GetSpellInfo, UnitCastingInfo
 
-	local specsCache, spellsTable, aurasTable, _ = {}, nil, nil, nil
-
-	-- table used to determine enemies roles.
-	-- Except for healers and some tanks, all enemies are damagers.
-	local specsRoles = {
-		[105] = "HEALER", -- Druid: Restoration
-		[256] = "HEALER", -- Priest: Discipline
-		[257] = "HEALER", -- Priest: Holy
-		[264] = "HEALER", -- Shaman: Restoration
-		[65] = "HEALER", -- Paladin: Holy
-		[66] = "TANK", -- Paladin: Protection
-		[73] = "TANK" -- Warrior: Protection
-	}
+	local specsCache, specsRoles = nil, nil
+	local spellsTable, aurasTable = nil, nil
 
 	local function BuildSpellsList()
+		if not specsRoles then
+			specsRoles = {
+				[105] = "HEALER", -- Druid: Restoration
+				[256] = "HEALER", -- Priest: Discipline
+				[257] = "HEALER", -- Priest: Holy
+				[264] = "HEALER", -- Shaman: Restoration
+				[65] = "HEALER", -- Paladin: Holy
+				[66] = "TANK", -- Paladin: Protection
+				[73] = "TANK" -- Warrior: Protection
+			}
+		end
+
 		if not aurasTable then
 			aurasTable = {
 				WARRIOR = {
@@ -195,7 +196,7 @@ Skada:AddLoadableModule("PVP", function(L)
 	end
 
 	function mod:CheckZone()
-		wipe(specsCache)
+		specsCache = wipe(specsCache or {})
 
 		if Skada.instanceType == "arena" or Skada.instanceType == "pvp" then
 			BuildSpellsList()
@@ -232,6 +233,10 @@ Skada:AddLoadableModule("PVP", function(L)
 	function mod:OnEnable()
 		Skada.forPVP = true
 		self:ApplySettings()
+		-- things are disabled on Project Ascension sadly
+		if Skada.Ascension then return end
+
+		specsCache = specsCache or {}
 		Skada.RegisterCallback(self, "Skada_ZoneCheck", "CheckZone")
 	end
 
