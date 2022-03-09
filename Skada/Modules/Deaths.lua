@@ -34,23 +34,35 @@ Skada:AddLoadableModule("Deaths", function(L)
 				deathlog.maxhp = select(3, UnitHealthInfo(player.name, player.id, "group")) or 0
 			end
 
-			tinsert(deathlog.log, 1, {
-				spellid = data.spellid,
-				school = data.spellschool,
-				source = data.srcName,
-				amount = data.amount,
-				overkill = data.overkill,
-				overheal = data.overheal,
-				resisted = data.resisted,
-				blocked = data.blocked,
-				absorbed = data.absorbed,
-				time = ts,
-				hp = select(2, UnitHealthInfo(player.name, player.id, "group"))
-			})
+			local log = new()
+			log.spellid = data.spellid
+			log.school = data.spellschool
+			log.source = data.srcName
+			log.amount = data.amount
+			log.time = ts
+			log.hp = select(2, UnitHealthInfo(player.name, player.id, "group"))
+
+			if data.overheal and data.overheal > 0 then
+				log.overheal = data.overheal
+			end
+			if data.overkill and data.overkill > 0 then
+				log.overkill = data.overkill
+			end
+			if data.resisted and data.resisted > 0 then
+				log.resisted = data.resisted
+			end
+			if data.blocke and data.blocked > 0 then
+				log.blocked = data.blocked
+			end
+			if data.absorbed and data.absorbed > 0 then
+				log.absorbed = data.absorbed
+			end
+
+			tinsert(deathlog.log, 1, log)
 
 			-- trim things and limit to deathlogevents (defaul: 14)
 			while #deathlog.log > (Skada.db.profile.modules.deathlogevents or 14) - 1 do
-				tremove(deathlog.log)
+				del(tremove(deathlog.log))
 			end
 		end
 	end
@@ -88,19 +100,29 @@ Skada:AddLoadableModule("Deaths", function(L)
 			data.spellid, _, data.spellschool, misstype, amount = ...
 		end
 
-		if misstype == "ABSORB" and (amount or 0) > 0 then
+		if (amount or 0) > 0 and (misstype == "RESIST" or misstype == "BLOCK" or misstype == "ABSORB") then
 			data.srcName = srcName
 			data.playerid = dstGUID
 			data.playername = dstName
 			data.playerflags = dstFlags
 
-			data.amount = 0
-			data.absorbed = amount
-
+			data.amount = nil
 			data.overkill = nil
-			data.resisted = nil
-			data.blocked = nil
 			data.overheal = nil
+
+			if misstype == "RESIST" then
+				data.resisted = amount
+				data.blocked = nil
+				data.absorbed = nil
+			elseif misstype == "BLOCK" then
+				data.resisted = nil
+				data.blocked = amount
+				data.absorbed = nil
+			elseif misstype == "ABSORB" then
+				data.resisted = nil
+				data.blocked = nil
+				data.absorbed = amount
+			end
 
 			Skada:DispatchSets(log_deathlog, data, ts)
 		end
@@ -183,11 +205,11 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 				-- no entry left? insert an unknown entry
 				if #deathlog.log == 0 then
-					tinsert(deathlog.log, {
-						amount = -deathlog.maxhp,
-						time = deathlog.time-0.00001,
-						hp = deathlog.maxhp
-					})
+					local log = new()
+					log.amount = -deathlog.maxhp
+					log.time = deathlog.time-0.00001
+					log.hp = deathlog.maxhp
+					tinsert(deathlog.log, log)
 				end
 
 				-- announce death
@@ -329,12 +351,12 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 						-- used for tooltip
 						d.hp = log.hp or 0
-						d.amount = log.amount
+						d.amount = log.amount or 0
 						d.source = log.source or L.Unknown
 						d.spellname = spellname
 						d.value = d.hp
 
-						local change = log.amount and log.amount ~= 0 and log.amount or log.absorbed or 0
+						local change = d.amount ~= 0 and log.amount or log.absorbed or 0
 						if change > 0 then
 							change = "+" .. Skada:FormatNumber(change)
 							d.color = green
@@ -665,7 +687,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 			log.source or L.Unknown, -- source name
 			playername or L.Unknown, -- player name
 			log.spellid and GetSpellInfo(log.spellid) or L.Unknown, -- spell name
-			Skada:FormatNumber(0 - log.amount, 1) -- spell amount
+			log.amount and Skada:FormatNumber(0 - log.amount, 1) or 0 -- spell amount
 		)
 
 		-- prepare any extra info.
