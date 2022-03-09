@@ -50,33 +50,32 @@ do
 					for spellid, spell in pairs(player.auras) do
 						if spell.active ~= nil and spell.start then
 							spell.uptime = min(maxtime, spell.uptime + floor((curtime - spell.start) + 0.5))
-							spell.active = nil
-							spell.start = nil
+						end
+						-- remove temporary keys
+						spell.active, spell.start = nil, nil
 
-							if spell.uptime == 0 then
-								-- remove spell with 0 uptime.
+						if spell.uptime == 0 then
+							-- remove spell with 0 uptime.
+							player.auras[spellid] = nil
+						elseif spell.targets then
+							-- debuff targets
+							for name, target in pairs(spell.targets) do
+								if target.active ~= nil and target.start then
+									target.uptime = min(spell.uptime, target.uptime + floor((curtime - target.start) + 0.5))
+								end
+
+								-- remove targets with 0 uptime.
+								if target.uptime == 0 then
+									spell.targets[name] = nil
+								else
+									-- remove temporary keys
+									target.active, target.start = nil, nil
+								end
+							end
+
+							-- an empty targets table? Remove it
+							if next(spell.targets) == nil then
 								player.auras[spellid] = nil
-							elseif spell.targets then
-								-- debuff targets
-								for name, target in pairs(spell.targets) do
-									if target.active ~= nil and target.start then
-										target.uptime = min(spell.uptime, target.uptime + floor((curtime - target.start) + 0.5))
-									end
-
-									spell.targets[name].active = nil
-									spell.targets[name].start = nil
-
-									-- remove targets with 0 uptime.
-									if target.uptime == 0 then
-										player.auras[spellid].targets[name] = nil
-									end
-
-								end
-
-								-- an empty targets table? Remove it
-								if next(spell.targets) == nil then
-									player.auras[spellid] = nil
-								end
 							end
 						end
 					end
