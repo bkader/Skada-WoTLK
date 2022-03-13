@@ -319,11 +319,11 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 				-- postfix
 				if #deathlog.log == 0 then
-					deathlog.log[1] = {
-						amount = deathlog.maxhp and -deathlog.maxhp or 0,
-						time = deathlog.time-0.00001,
-						hp = deathlog.maxhp or 0
-					}
+					local log = new()
+					log.amount = deathlog.maxhp and -deathlog.maxhp or 0
+					log.time = deathlog.time-0.00001
+					log.hp = deathlog.maxhp or 0
+					deathlog.log[1] = log
 				end
 
 				tsort(deathlog.log, sort_logs)
@@ -375,6 +375,10 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 						local extra = new()
 
+						if (log.overheal or 0) > 0 then
+							d.overheal = log.overheal
+							extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.overheal)
+						end
 						if (log.overkill or 0) > 0 then
 							d.overkill = log.overkill
 							extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.overkill)

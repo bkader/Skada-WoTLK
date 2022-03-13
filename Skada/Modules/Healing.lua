@@ -204,7 +204,7 @@ Skada:AddLoadableModule("Healing", function(L)
 				end
 
 				if spell.overheal > 0 then
-					tooltip:AddDoubleLine(L["Overhealing"], Skada:FormatPercent(spell.overheal, spell.overheal + spell.amount), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Overheal"], Skada:FormatPercent(spell.overheal, spell.overheal + spell.amount), 1, 1, 1)
 				end
 			else
 				tooltip:AddDoubleLine(L["Total"], Skada:FormatNumber(spell.amount), 1, 1, 1)
@@ -767,7 +767,7 @@ Skada:AddLoadableModule("Total Healing", function(L)
 				tooltip:AddDoubleLine(L["Healing"], format("%s (%s)", Skada:FormatNumber(spell.amount), Skada:FormatPercent(spell.amount, total)), 1, 1, 1)
 			end
 			if (spell.overheal or 0) > 0 then
-				tooltip:AddDoubleLine(L["Overhealing"], format("%s (%s)", Skada:FormatNumber(spell.overheal), Skada:FormatPercent(spell.overheal, total)), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Overheal"], format("%s (%s)", Skada:FormatNumber(spell.overheal), Skada:FormatPercent(spell.overheal, total)), 1, 1, 1)
 			end
 
 			if spell.min and spell.max then

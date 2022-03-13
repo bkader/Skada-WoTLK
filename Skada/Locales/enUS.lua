@@ -480,6 +480,7 @@ L["Healing: Personal HPS"] = true
 L["RHPS"] = true
 L["Healing: Raid HPS"] = true
 L["Total Healing"] = true
+L["Overheal"] = true
 L["Overhealing"] = true
 L["Overhealed target list"] = true
 L["Overheal spell list"] = true
