@@ -114,9 +114,6 @@ Skada.BITMASK_PETS = BITMASK_PETS
 Skada.BITMASK_OWNERS = BITMASK_OWNERS
 Skada.BITMASK_ENEMY = BITMASK_ENEMY
 
--- table recycling for all kind of tables.
-local new, del = Skada.TablePool()
-
 -------------------------------------------------------------------------------
 -- local functions.
 
@@ -425,12 +422,12 @@ do
 
 	-- create a new window
 	function Window:New(ttwin)
-		local win = new()
+		local win = {}
 
-		win.dataset = new()
+		win.dataset = {}
 		if not ttwin then -- regular window?
-			win.metadata = new()
-			win.history = new()
+			win.metadata = {}
+			win.history = {}
 		end
 
 		return setmetatable(win, window_mt)
@@ -1001,7 +998,7 @@ do
 
 		for i, win in ipairs(Skada.db.profile.windows) do
 			if win.name == name then
-				del(tremove(Skada.db.profile.windows, i), true)
+				tremove(Skada.db.profile.windows, i)
 			elseif win.sticked and win.sticked[name] then
 				win.sticked[name] = nil
 			end
@@ -1196,7 +1193,7 @@ end
 function Skada:RemoveMode(mode)
 	for k, v in ipairs(modes) do
 		if v == mode then
-			del(tremove(modes, k))
+			tremove(modes, k)
 		end
 	end
 end
@@ -1390,14 +1387,14 @@ function Skada:GetPlayer(set, guid, name, flag)
 			if player.id == self.userGUID and self.userRole then
 				player.role = self.userRole
 			else
-				player.role = GetUnitRole(players[player.id], player.class)
+				player.role = GetUnitRole(players[player.id] or player.name, player.class)
 			end
 		end
 		if player.spec == nil then
 			if player.id == self.userGUID and self.userSpec then
 				player.spec = self.userSpec
 			else
-				player.spec = GetUnitSpec(players[player.id], player.class)
+				player.spec = GetUnitSpec(players[player.id] or player.name, player.class)
 			end
 		end
 	end
