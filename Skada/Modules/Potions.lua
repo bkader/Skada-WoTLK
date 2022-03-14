@@ -16,26 +16,7 @@ Skada:AddLoadableModule("Potions", function(L)
 	local UnitClass, UnitBuff = UnitClass, UnitBuff
 	local new, del = Skada.TablePool()
 	local T = Skada.Table
-	local _
-
-	local potionIDs = {
-		[28494] = 22828, -- Insane Strength Potion
-		[38929] = 31677, -- Fel mana potion
-		[53909] = 40212, -- Potion of Wild Magic
-		[53908] = 40211, -- Potion of Speed
-		[53750] = 40077, -- Crazy Alchemist's Potion
-		[53761] = 40087, -- Powerful Rejuvenation Potion
-		[43185] = 33447, -- Healing Potion
-		[43186] = 33448, -- Restore Mana
-		[53753] = 40081, -- Nightmare Slumber
-		[53910] = 40213, -- Arcane Protection
-		[53911] = 40214, -- Fire Protection
-		[53913] = 40215, -- Frost Protection
-		[53914] = 40216, -- Nature Protection
-		[53915] = 40217, -- Shadow Protection
-		[53762] = 40093, -- Indestructible
-		[67490] = 42545 -- Runic Mana Injector
-	}
+	local potionIDs, _ = {}, nil
 
 	local prepotionStr, potionStr = "|c%s%s|r %s", "|T%s:14:14:1:-2:32:32:2:30:2:30|t"
 	local prepotion
@@ -234,6 +215,127 @@ Skada:AddLoadableModule("Potions", function(L)
 	end
 
 	function mod:OnInitialize()
+		-- list of potion: [spellid] = potionid
+
+		--[[ level NaN ]]--
+		potionIDs[439] = 118 -- Minor Healing Potion
+		potionIDs[6724] = 5816 -- Light of Elune
+		potionIDs[29236] = 3087 -- Mug of Shimmer Stout
+		potionIDs[47430] = 36770 -- Zort's Protective Elixir
+		potionIDs[50809] = 38351 -- Murliver Oil
+
+		--[[ level 03-17 ]]--
+		potionIDs[437] = 2455 -- Minor Mana Potion
+		potionIDs[438] = 3385 -- Lesser Mana Potion
+		potionIDs[440] = 4596 -- Discolored Healing Potion
+		potionIDs[441] = 929 -- Healing Potion
+		potionIDs[2370] = 2456 -- Minor Rejuvenation Potion
+		potionIDs[2379] = 2459 -- Swiftness Potion
+		potionIDs[2380] = 3384 -- Minor Magic Resistance Potion
+		potionIDs[6612] = 5631 -- Rage Potion
+		potionIDs[6612] = 858 -- Lesser Healing Potion
+		potionIDs[6614] = 5632 -- Cowardly Flight Potion
+		potionIDs[7242] = 6048 -- Shadow Protection Potion
+		potionIDs[7245] = 6051 -- Holy Protection Potion
+		potionIDs[7840] = 6372 -- Swim Speed Potion
+		potionIDs[26677] = 3386 -- Potion of Curing
+
+		--[[ level 20-28 ]]--
+		potionIDs[2023] = 3827 -- Mana Potion
+		potionIDs[2024] = 1710 -- Greater Healing Potion
+		potionIDs[3592] = 2633 -- Jungle Remedy
+		potionIDs[3680] = 3823 -- Lesser Invisibility Potion
+		potionIDs[6613] = 5633 -- Great Rage Potion
+		potionIDs[6615] = 5634 -- Free Action Potion
+		potionIDs[7233] = 6049 -- Fire Protection Potion
+		potionIDs[7239] = 6050 -- Frost Protection Potion
+		potionIDs[7254] = 6052 -- Nature Protection Potion
+
+		--[[ level 31-37 ]]--
+		potionIDs[4042] = 3928 -- Superior Healing Potion
+		potionIDs[4941] = 4623 -- Lesser Stoneshield Potion
+		potionIDs[11359] = 9030 -- Restorative Potion
+		potionIDs[11364] = 9036 -- Magic Resistance Potion
+		potionIDs[11387] = 9144 -- Wildvine Potion
+		potionIDs[11392] = 9172 -- Invisibility Potion
+		potionIDs[11903] = 6149 -- Greater Mana Potion
+		potionIDs[15822] = 12190 -- Dreamless Sleep Potion
+		potionIDs[21394] = 17349 -- Superior Healing Draught
+		potionIDs[21396] = 17352 -- Superior Mana Draught
+
+		--[[ level 41-49 ]]--
+		potionIDs[3169] = 3387 -- Limited Invulnerability Potion
+		potionIDs[17528] = 13442 -- Mighty Rage Potion
+		potionIDs[17530] = 13443 -- Superior Mana Potion
+		potionIDs[17540] = 13455 -- Greater Stoneshield Potion
+		potionIDs[17543] = 13457 -- Greater Fire Protection Potion
+		potionIDs[17544] = 13456 -- Greater Frost Protection Potion
+		potionIDs[17545] = 13460 -- Greater Holy Protection Potion
+		potionIDs[17546] = 13458 -- Greater Nature Protection Potion
+		potionIDs[17548] = 13459 -- Greater Shadow Protection Potion
+		potionIDs[17549] = 13461 -- Greater Arcane Protection Potion
+		potionIDs[17550] = 13462 -- Purification Potion
+		potionIDs[21393] = 17348 -- Major Healing Draught
+		potionIDs[21395] = 17351 -- Major Mana Draught
+		potionIDs[24364] = 20008 -- Living Action Potion
+
+		--[[ level 50-55 ]]--
+		potionIDs[17624] = 13506 -- Flask of Petrification
+		potionIDs[22729] = 18253 -- Major Rejuvenation Potion
+		potionIDs[24360] = 20002 -- Greater Dreamless Sleep Potion
+		potionIDs[28492] = 22826 -- Sneaking Potion
+		potionIDs[28548] = 22871 -- Shrouding Potion
+		potionIDs[41617] = 32903 -- Cenarion Mana Salve
+		potionIDs[41618] = 32902 -- Bottled Nethergon Energy
+		potionIDs[41619] = 32904 -- Cenarion Healing Salve
+		potionIDs[41620] = 32905 -- Bottled Nethergon Vapor
+		potionIDs[52697] = 39327 -- Noth's Special Brew
+		potionIDs[67486] = 33092 -- Healing Potion Injector
+		potionIDs[67487] = 33093 -- Mana Potion Injector
+
+		--[[ level 60-65 ]]--
+		potionIDs[17531] = 31840 -- Major Combat Mana Potion
+		potionIDs[17534] = 31838 -- Major Combat Healing Potion
+		potionIDs[28504] = 22836 -- Major Dreamless Sleep Potion
+		potionIDs[28506] = 22837 -- Heroic Potion
+		potionIDs[28507] = 22838 -- Haste Potion
+		potionIDs[28508] = 22839 -- Destruction Potion
+		potionIDs[28511] = 22841 -- Major Fire Protection Potion
+		potionIDs[28512] = 22842 -- Major Frost Protection Potion
+		potionIDs[28513] = 22844 -- Major Nature Protection Potion
+		potionIDs[28515] = 22849 -- Ironshield Potion
+		potionIDs[28517] = 22850 -- Super Rejuvenation Potion
+		potionIDs[28536] = 22845 -- Major Arcane Protection Potion
+		potionIDs[28537] = 22846 -- Major Shadow Protection Potion
+		potionIDs[28538] = 22847 -- Major Holy Protection Potion
+		potionIDs[38908] = 31676 -- Fel Regeneration Potion
+		potionIDs[45051] = 34440 -- Mad Alchemist's Potion
+
+		--[[ level 70 ]]--
+		potionIDs[28494] = 22828 -- Insane Strength Potion
+		potionIDs[28495] = 43569 -- Endless Healing Potion
+		potionIDs[28499] = 43570 -- Endless Mana Potion
+		potionIDs[38929] = 31677 -- Fel mana potion
+		potionIDs[41304] = 32783 -- Blue Ogre Brew
+		potionIDs[41306] = 32784 -- Red Ogre Brew
+		potionIDs[43185] = 33447 -- Healing Potion
+		potionIDs[43186] = 33448 -- Restore Mana
+		potionIDs[53750] = 40077 -- Crazy Alchemist's Potion
+		potionIDs[53753] = 40081 -- Nightmare Slumber
+		potionIDs[53761] = 40087 -- Powerful Rejuvenation Potion
+		potionIDs[53762] = 40093 -- Indestructible
+		potionIDs[53908] = 40211 -- Potion of Speed
+		potionIDs[53909] = 40212 -- Potion of Wild Magic
+		potionIDs[53910] = 40213 -- Arcane Protection
+		potionIDs[53911] = 40214 -- Fire Protection
+		potionIDs[53913] = 40215 -- Frost Protection
+		potionIDs[53914] = 40216 -- Nature Protection
+		potionIDs[53915] = 40217 -- Shadow Protection
+		potionIDs[61371] = 44728 -- Endless Rejuvenation Potion
+		potionIDs[67489] = 41166 -- Runic Healing Injector
+		potionIDs[67490] = 42545 -- Runic Mana Injector
+
+		-- don't edit below unless you know what you're doing.
 		if Skada.db.profile.prepotion == nil then
 			Skada.db.profile.prepotion = true
 		end
