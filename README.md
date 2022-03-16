@@ -4,6 +4,8 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/bkader/Skada-WoTLK)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/bkader/Skada-WoTLK?label=version)
 
+_This version is a total **Rewrite** of Skada `r301` for `3.3.5` and not a **Backport** like some believe._
+
 Skada is a modular damage meter with various viewing modes, segmented fights and customizable windows. It aims to be highly efficient with memory and CPU.
 
 _**Also available for [Cataclysm](https://github.com/bkader/Skada-Cata/)**_

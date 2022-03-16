@@ -1,4 +1,4 @@
--- LibBars-1.0 by Antiarc, all glory to him.
+-- LibBars-1.0 by Kader, all glory to him.
 -- Specialized ( = enhanced) for Skada
 -- Note to self: don't forget to notify original author of changes
 -- in the unlikely event they end up being usable outside of Skada.
@@ -107,11 +107,6 @@ end
 local dummyFrame, barPrototype, barPrototype_mt, barListPrototype
 local barListPrototype_mt
 
-lib.LEFT_TO_RIGHT = 1
-lib.BOTTOM_TO_TOP = 2
-lib.RIGHT_TO_LEFT = 3
-lib.TOP_TO_BOTTOM = 4
-
 lib.dummyFrame = lib.dummyFrame or CreateFrame("Frame")
 lib.barFrameMT = lib.barFrameMT or {__index = lib.dummyFrame}
 lib.barPrototype = lib.barPrototype or setmetatable({}, lib.barFrameMT)
@@ -167,13 +162,20 @@ do
 	local new, del
 	do
 		local list = setmetatable({}, {__mode = "k"})
+
 		-- new is always called with the exact same arguments, no need to
 		-- iterate over a vararg
-		function new(...)
-			local t = next(list) or {}
-			list[t] = nil
-			for i = 1, select("#", ...) do
-				t[i] = select(i, ...)
+		function new(a1, a2, a3, a4, a5)
+			local t = next(list)
+			if t then
+				list[t] = nil
+				t[1] = a1
+				t[2] = a2
+				t[3] = a3
+				t[4] = a4
+				t[5] = a5
+			else
+				t = {a1, a2, a3, a4, a5}
 			end
 			return t
 		end
@@ -181,14 +183,14 @@ do
 		-- del is called over the same tables produced from new, no need for
 		-- fancy stuff
 		function del(t)
-			if t then
-				for k, _ in pairs(t) do
-					t[k] = nil
-				end
-				t[""] = true
-				t[""] = nil
-				list[t] = true
-			end
+			t[1] = nil
+			t[2] = nil
+			t[3] = nil
+			t[4] = nil
+			t[5] = nil
+			t[""] = true
+			t[""] = nil
+			list[t] = true
 			return nil
 		end
 	end
@@ -273,9 +275,13 @@ function lib:NewBarFromPrototype(prototype, name, ...)
 	local bar = bars[self][name]
 	local isNew = false
 	if not bar then
+		bar = tremove(recycledBars)
+		if not bar then
+			bar = CreateFrame("Frame")
+		else
+			bar:Show()
+		end
 		isNew = true
-		bar = tremove(recycledBars) or CreateFrame("Frame")
-		bar:Show()
 	end
 	bar = setmetatable(bar, prototype.metatable)
 	bar.name = name
@@ -608,18 +614,14 @@ do
 
 	local DEFAULT_TEXTURE = [[Interface\TARGETINGFRAME\UI-StatusBar]]
 	function lib:NewBarGroup(name, orientation, height, length, thickness, frameName)
-		if self == lib then
-			error("You may only call :NewBarGroup as an embedded function")
-		end
+		assert(self ~= lib, "You may only call :NewBarGroup as an embedded function")
 
 		barLists[self] = barLists[self] or {}
-		if barLists[self][name] then
-			error("A bar list named " .. name .. " already exists.")
-		end
+		assert(barLists[self][name] == nil, "A bar list named " .. name .. " already exists.")
 
-		orientation = orientation or lib.LEFT_TO_RIGHT
-		orientation = orientation == "LEFT" and lib.LEFT_TO_RIGHT or orientation
-		orientation = orientation == "RIGHT" and lib.RIGHT_TO_LEFT or orientation
+		orientation = orientation or 1
+		orientation = (orientation == "LEFT") and 1 or orientation
+		orientation = (orientation == "RIGHT") and 3 or orientation
 
 		local list = setmetatable(CreateFrame("Frame", frameName, UIParent), barListPrototype_mt)
 		list:SetMovable(true)
@@ -1620,7 +1622,7 @@ end
 do
 	function barPrototype:UpdateOrientationLayout()
 		local t = nil
-		if self.orientation == lib.LEFT_TO_RIGHT then
+		if self.orientation == 1 then
 			self.icon:ClearAllPoints()
 			self.icon:SetPoint("RIGHT", self, "LEFT", 0, 0)
 
@@ -1650,7 +1652,7 @@ do
 			t:SetJustifyV("MIDDLE")
 
 			self.bgtexture:SetTexCoord(0, 1, 0, 1)
-		elseif self.orientation == lib.BOTTOM_TO_TOP then
+		elseif self.orientation == 2 then
 			self.icon:ClearAllPoints()
 			self.icon:SetPoint("TOP", self, "BOTTOM", 0, 0)
 
@@ -1681,7 +1683,7 @@ do
 			t:SetJustifyV("BOTTOM")
 
 			self.bgtexture:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
-		elseif self.orientation == lib.RIGHT_TO_LEFT then
+		elseif self.orientation == 3 then
 			self.icon:ClearAllPoints()
 			self.icon:SetPoint("LEFT", self, "RIGHT", 0, 0)
 
@@ -1711,7 +1713,7 @@ do
 			t:SetJustifyV("MIDDLE")
 
 			self.bgtexture:SetTexCoord(0, 1, 0, 1)
-		elseif self.orientation == lib.TOP_TO_BOTTOM then
+		elseif self.orientation == 4 then
 			self.icon:ClearAllPoints()
 			self.icon:SetPoint("BOTTOM", self, "TOP", 0, 0)
 
@@ -1776,8 +1778,9 @@ function barPrototype:GetThickness()
 	return self.thickness
 end
 
-function barPrototype:SetOrientation(orientation)
-	self.orientation = orientation
+function barPrototype:SetOrientation(o)
+	assert(o >= 1 and o <= 4, "orientation must be 1-4")
+	self.orientation = o
 	self:UpdateOrientationLayout()
 	self:SetThickness(self.thickness)
 end
@@ -1787,7 +1790,7 @@ function barPrototype:GetOrientation()
 end
 
 function barPrototype:SetValue(val)
-	assert(val ~= nil, "Value cannot be nil!")
+	assert(val ~= nil, "value cannot be nil!")
 	self.value = val
 	if not self.maxValue or val > self.maxValue then
 		self.maxValue = val
