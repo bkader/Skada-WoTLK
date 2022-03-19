@@ -105,7 +105,7 @@ Skada:AddLoadableModule("Resurrects", function(L)
 				d.value = spell.count
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -150,7 +150,7 @@ Skada:AddLoadableModule("Resurrects", function(L)
 				d.value = target.count
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -202,7 +202,7 @@ Skada:AddLoadableModule("Resurrects", function(L)
 			click1 = playermod,
 			click2 = targetmod,
 			nototalclick = {playermod, targetmod},
-			columns = {Count = true, Percent = false},
+			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_holy_resurrection]]
 		}
 

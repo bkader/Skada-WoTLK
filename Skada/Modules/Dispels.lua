@@ -103,8 +103,8 @@ Skada:AddLoadableModule("Dispels", function(L)
 
 				d.value = count
 				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Total and d.value,
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					mod.metadata.columns.Count and d.value,
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -145,8 +145,8 @@ Skada:AddLoadableModule("Dispels", function(L)
 
 				d.value = target.count
 				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Total and d.value,
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					mod.metadata.columns.Count and d.value,
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -184,8 +184,8 @@ Skada:AddLoadableModule("Dispels", function(L)
 
 				d.value = spell.count
 				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Total and d.value,
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					mod.metadata.columns.Count and d.value,
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -220,7 +220,7 @@ Skada:AddLoadableModule("Dispels", function(L)
 
 					d.value = player.dispel
 					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Total and d.value,
+						self.metadata.columns.Count and d.value,
 						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
@@ -242,7 +242,7 @@ Skada:AddLoadableModule("Dispels", function(L)
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {spellmod, targetmod, playermod},
-			columns = {Total = true, Percent = true},
+			columns = {Count = true, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\spell_holy_dispelmagic]]
 		}
 

@@ -61,7 +61,7 @@ end
 -- returns the actor's time if found (player or enemy)
 function setPrototype:GetActorTime(id, name, active)
 	local actor = self:GetActor(name, id)
-	return actor and actor:GetTime(active) or 0
+	return actor and actor:GetTime(active) or self:GetTime()
 end
 
 -- attempts to retrieve a player

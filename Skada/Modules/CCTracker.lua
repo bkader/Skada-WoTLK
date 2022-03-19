@@ -70,6 +70,7 @@ local ExtraCCSpells = {
 	[49802] = 0x01, -- Maim (rank 2)
 	[49803] = 0x01, -- Pounce
 	-- Hunter
+	[5116] = true, -- Concussive Shot
 	[19503] = 0x01, -- Scatter Shot
 	[19386] = 0x08, -- Wyvern Sting (rank 1)
 	[24132] = 0x08, -- Wyvern Sting (rank 2)
@@ -282,7 +283,7 @@ Skada:AddLoadableModule("CC Done", function(L)
 				d.value = spell.count
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -323,7 +324,7 @@ Skada:AddLoadableModule("CC Done", function(L)
 				d.value = target.count
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -378,7 +379,7 @@ Skada:AddLoadableModule("CC Done", function(L)
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod, targetmod},
-			columns = {Count = true, Percent = false},
+			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_frost_chainsofice]]
 		}
 
@@ -537,7 +538,7 @@ Skada:AddLoadableModule("CC Taken", function(L)
 				d.value = spell.count
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -578,7 +579,7 @@ Skada:AddLoadableModule("CC Taken", function(L)
 				d.value = source.count
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -633,7 +634,7 @@ Skada:AddLoadableModule("CC Taken", function(L)
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod, sourcemod},
-			columns = {Count = true, Percent = false},
+			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_magic_polymorphrabbit]]
 		}
 
@@ -816,7 +817,7 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 				d.value = spell.count
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -857,7 +858,7 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 				d.value = target.count
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -912,7 +913,7 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod, targetmod},
-			columns = {Count = true, Percent = false},
+			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_holy_sealofvalor]]
 		}
 

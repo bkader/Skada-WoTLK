@@ -414,16 +414,16 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 			win.title = format("%s (%s)", win.title, L[win.class])
 		end
 
-		local enemy = set and set:GetEnemy(win.targetname, win.targetid)
-		local total = enemy and enemy:GetDamageTaken() or 0
-		local sources = (total > 0) and enemy:GetDamageSources()
+		local actor = set and set:GetEnemy(win.targetname, win.targetid)
+		local total = actor and actor:GetDamageTaken() or 0
+		local sources = (total > 0) and actor:GetDamageSources()
 
 		if sources then
 			if win.metadata then
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.sDTPS and actor:GetTime(), 0
 			for sourcename, source in pairs(sources) do
 				if not win.class or win.class == source.class then
 					nr = nr + 1
@@ -443,7 +443,8 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 
 					d.valuetext = Skada:FormatValueCols(
 						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+						actortime and Skada:FormatNumber(d.value / actortime),
+						mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -462,16 +463,16 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 	function spellmod:Update(win, set)
 		win.title = format(L["Damage taken by %s"], win.targetname or L.Unknown)
 
-		local enemy = set and set:GetEnemy(win.targetname, win.targetid)
-		local total = enemy and enemy:GetDamageTaken() or 0
+		local actor = set and set:GetEnemy(win.targetname, win.targetid)
+		local total = actor and actor:GetDamageTaken() or 0
 
-		if total > 0 and enemy.damagetakenspells then
+		if total > 0 and actor.damagetakenspells then
 			if win.metadata then
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
-			for spellid, spell in pairs(enemy.damagetakenspells) do
+			local actortime, nr = mod.metadata.columns.sDTPS and actor:GetTime(), 0
+			for spellid, spell in pairs(actor.damagetakenspells) do
 				nr = nr + 1
 				local d = win:nr(nr)
 
@@ -487,7 +488,8 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					actortime and Skada:FormatNumber(d.value / actortime),
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -508,16 +510,16 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 			win.title = format("%s (%s)", win.title, L[win.class])
 		end
 
-		local enemy = set and set:GetEnemy(win.targetname, win.targetid)
-		local total = enemy and enemy.usefuldamagetaken or 0
-		local sources = (total > 0) and enemy:GetDamageSources()
+		local actor = set and set:GetEnemy(win.targetname, win.targetid)
+		local total = actor and actor.usefuldamagetaken or 0
+		local sources = (total > 0) and actor:GetDamageSources()
 
 		if sources then
 			if win.metadata then
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.sDTPS and actor:GetTime(), 0
 			for sourcename, source in pairs(sources) do
 				if (not win.class or win.class == source.class) and (source.useful or 0) > 0 then
 					nr = nr + 1
@@ -533,7 +535,8 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 					d.value = source.useful
 					d.valuetext = Skada:FormatValueCols(
 						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+						actortime and Skada:FormatNumber(d.value / actortime),
+						mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -598,7 +601,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 			click2 = spellmod,
 			click3 = usefulmod,
 			post_tooltip = usefulmod_tooltip,
-			columns = {Damage = true, DTPS = false, Percent = true},
+			columns = {Damage = true, DTPS = false, Percent = true, sDTPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_fire_felflamebolt]]
 		}
 
@@ -916,16 +919,16 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 		win.title = format(L["%s's damage on %s"], win.targetname or L.Unknown, win.actorname or L.Unknown)
 		if not (win.targetname and win.actorname) then return end
 
-		local enemy = set and set:GetEnemy(win.targetname, win.targetid)
-		if not (enemy and enemy.GetDamageTargetSpells) then return end
-		local spells, total = enemy:GetDamageTargetSpells(win.actorname)
+		local actor = set and set:GetEnemy(win.targetname, win.targetid)
+		if not (actor and actor.GetDamageTargetSpells) then return end
+		local spells, total = actor:GetDamageTargetSpells(win.actorname)
 
 		if spells and total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
 			for spellid, spell in pairs(spells) do
 				nr = nr + 1
 				local d = win:nr(nr)
@@ -938,7 +941,8 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 				d.value = spell.amount
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					actortime and Skada:FormatNumber(d.value / actortime),
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -961,17 +965,17 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 
 		if not win.spellid then return end
 
-		local enemy = set and set:GetEnemy(win.targetname, win.targetid)
-		if not (enemy and enemy.GetDamageSpellTargets) then return end
+		local actor = set and set:GetEnemy(win.targetname, win.targetid)
+		if not (actor and actor.GetDamageSpellTargets) then return end
 
-		local targets, total = enemy:GetDamageSpellTargets(win.spellid)
+		local targets, total = actor:GetDamageSpellTargets(win.spellid)
 
 		if targets and total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
 			for targetname, target in pairs(targets) do
 				if not win.class or win.class == target.class then
 					nr = nr + 1
@@ -987,7 +991,8 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 					d.value = target.amount
 					d.valuetext = Skada:FormatValueCols(
 						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+						actortime and Skada:FormatNumber(d.value / actortime),
+						mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -1009,16 +1014,16 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 			win.title = format("%s (%s)", win.title, L[win.class])
 		end
 
-		local enemy = set and set:GetEnemy(win.targetname, win.targetid)
-		local total = enemy and enemy:GetDamage() or 0
-		local targets = (total > 0) and enemy:GetDamageTargets()
+		local actor = set and set:GetEnemy(win.targetname, win.targetid)
+		local total = actor and actor:GetDamage() or 0
+		local targets = (total > 0) and actor:GetDamageTargets()
 
 		if targets then
 			if win.metadata then
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
 			for targetname, target in pairs(targets) do
 				if not win.class or win.class == target.class then
 					nr = nr + 1
@@ -1037,7 +1042,8 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 
 					d.valuetext = Skada:FormatValueCols(
 						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+						actortime and Skada:FormatNumber(d.value / actortime),
+						mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -1056,16 +1062,16 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 	function spellmod:Update(win, set)
 		win.title = format(L["%s's damage"], win.targetname or L.Unknown)
 
-		local enemy = set and set:GetEnemy(win.targetname, win.targetid)
-		local total = enemy and enemy:GetDamage() or 0
+		local actor = set and set:GetEnemy(win.targetname, win.targetid)
+		local total = actor and actor:GetDamage() or 0
 
-		if total > 0 and enemy.damagespells then
+		if total > 0 and actor.damagespells then
 			if win.metadata then
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
-			for spellid, spell in pairs(enemy.damagespells) do
+			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
+			for spellid, spell in pairs(actor.damagespells) do
 				nr = nr + 1
 				local d = win:nr(nr)
 
@@ -1081,7 +1087,8 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					actortime and Skada:FormatNumber(d.value / actortime),
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -1147,7 +1154,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 		self.metadata = {
 			click1 = targetmod,
 			click2 = spellmod,
-			columns = {Damage = true, DPS = false, Percent = true},
+			columns = {Damage = true, DPS = false, Percent = true, sDPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_shadow_shadowbolt]]
 		}
 
@@ -1347,16 +1354,16 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 	function targetmod:Update(win, set)
 		win.title = format(L["%s's healed targets"], win.targetname or L.Unknown)
 
-		local enemy = set and set:GetEnemy(win.targetname, win.targetid)
-		local total = enemy and enemy.heal or 0
-		local targets = (total > 0) and enemy:GetHealTargets()
+		local actor = set and set:GetEnemy(win.targetname, win.targetid)
+		local total = actor and actor.heal or 0
+		local targets = (total > 0) and actor:GetHealTargets()
 
 		if total > 0 and targets then
 			if win.metadata then
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
 				local d = win:nr(nr)
@@ -1370,7 +1377,8 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 				d.value = target.amount
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					actortime and Skada:FormatNumber(d.value / actortime),
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -1388,16 +1396,16 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 	function spellmod:Update(win, set)
 		win.title = format(L["%s's healing spells"], win.targetname or L.Unknown)
 
-		local enemy = set and set:GetEnemy(win.targetname, win.targetid)
-		local total = enemy and enemy.heal or 0
+		local actor = set and set:GetEnemy(win.targetname, win.targetid)
+		local total = actor and actor.heal or 0
 
-		if total > 0 and enemy.healspells then
+		if total > 0 and actor.healspells then
 			if win.metadata then
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
-			for spellid, spell in pairs(enemy.healspells) do
+			local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
+			for spellid, spell in pairs(actor.healspells) do
 				nr = nr + 1
 				local d = win:nr(nr)
 
@@ -1409,7 +1417,8 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 				d.value = spell.amount
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					actortime and Skada:FormatNumber(d.value / actortime),
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -1470,7 +1479,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {spellmod, targetmod},
-			columns = {Healing = true, HPS = true, Percent = true},
+			columns = {Healing = true, HPS = true, Percent = true, sHPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_holy_blessedlife]]
 		}
 

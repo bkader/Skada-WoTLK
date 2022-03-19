@@ -92,7 +92,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local actortime, nr = mod.metadata.columns.DPS and actor:GetTime(), 0
+			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
 				local d = win:nr(nr)
@@ -107,7 +107,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
 					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -133,7 +133,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local actortime, nr = mod.metadata.columns.DPS and actor:GetTime(), 0
+			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
 			for spellid, spell in pairs(actor.friendfirespells) do
 				nr = nr + 1
 				local d = win:nr(nr)
@@ -146,7 +146,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
 					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -178,7 +178,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local actortime, nr = mod.metadata.columns.DPS and actor:GetTime(), 0
+			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
 			for targetname, amount in pairs(targets) do
 				nr = nr + 1
 				local d = win:nr(nr)
@@ -198,7 +198,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
 					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -254,7 +254,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {spellmod, targetmod},
-			columns = {Damage = true, DPS = false, Percent = true},
+			columns = {Damage = true, DPS = false, Percent = true, sDPS = false, sPercent = true},
 			icon = [[Interface\Icons\inv_gizmo_supersappercharge]]
 		}
 

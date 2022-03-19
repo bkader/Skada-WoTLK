@@ -270,7 +270,7 @@ do
 					d.valuetext = Skada:FormatValueCols(
 						mode.metadata.columns.Uptime and Skada:FormatTime(d.value),
 						mode.metadata.columns.Count and spell.count,
-						mode.metadata.columns.Percent and Skada:FormatPercent(d.value, maxtime)
+						mode.metadata.columns.sPercent and Skada:FormatPercent(d.value, maxtime)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -424,7 +424,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 				d.value = player.uptime
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Uptime and Skada:FormatTime(d.value),
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, player.maxtime)
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, player.maxtime)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -481,7 +481,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {spellmod},
-			columns = {Uptime = true, Count = false, Percent = true},
+			columns = {Uptime = true, Count = false, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\spell_holy_divinespirit]]
 		}
 
@@ -593,7 +593,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Uptime and Skada:FormatTime(d.value),
 					mod.metadata.columns.Count and aura.count,
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, maxtime)
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, maxtime)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -640,7 +640,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Uptime and Skada:FormatTime(d.value),
 					mod.metadata.columns.Count and target.count,
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, maxtime)
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, maxtime)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -682,7 +682,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Uptime and Skada:FormatTime(d.value),
 					mod.metadata.columns.Count and target.count,
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, maxtime)
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, maxtime)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -715,7 +715,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {spellmod, targetmod},
-			columns = {Uptime = true, Count = false, Percent = true},
+			columns = {Uptime = true, Count = false, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\spell_shadow_shadowwordpain]]
 		}
 

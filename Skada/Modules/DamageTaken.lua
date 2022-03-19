@@ -426,7 +426,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local actortime, nr = mod.metadata.columns.DTPS and actor:GetTime(), 0
+			local actortime, nr = mod.metadata.columns.sDTPS and actor:GetTime(), 0
 			for spellname, spell in pairs(actor.damagetakenspells) do
 				nr = nr + 1
 				local d = win:nr(nr)
@@ -451,7 +451,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
 					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -480,7 +480,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local actortime, nr = mod.metadata.columns.DTPS and actor:GetTime(), 0
+			local actortime, nr = mod.metadata.columns.sDTPS and actor:GetTime(), 0
 			for sourcename, source in pairs(sources) do
 				nr = nr + 1
 				local d = win:nr(nr)
@@ -495,7 +495,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
 					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -514,7 +514,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 		d.value = value
 		d.valuetext = Skada:FormatValueCols(
 			mod.metadata.columns.Damage and (fmt and Skada:FormatNumber(value) or value),
-			(mod.metadata.columns.Percent and percent) and Skada:FormatPercent(d.value, total)
+			(mod.metadata.columns.sPercent and percent) and Skada:FormatPercent(d.value, total)
 		)
 
 		if win.metadata and d.value > win.metadata.maxvalue then
@@ -654,7 +654,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 					win.metadata.maxvalue = 0
 				end
 
-				local actortime, nr = mod.metadata.columns.DTPS and actor:GetTime(), 0
+				local actortime, nr = mod.metadata.columns.sDTPS and actor:GetTime(), 0
 				for spellname, spell in pairs(actor.damagetakenspells) do
 					if spell.sources and spell.sources[win.targetname] then
 						nr = nr + 1
@@ -681,7 +681,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 						d.valuetext = Skada:FormatValueCols(
 							mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
 							actortime and Skada:FormatNumber(d.value / actortime),
-							mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+							mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 						)
 
 						if win.metadata and d.value > win.metadata.maxvalue then
@@ -783,7 +783,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod, sourcemod},
-			columns = {Damage = true, DTPS = false, Percent = true},
+			columns = {Damage = true, DTPS = false, Percent = true, sDTPS = false, sPercent = true},
 			icon = [[Interface\Icons\ability_mage_frostfirebolt]]
 		}
 
@@ -1044,13 +1044,16 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 						end
 						total = total + cacheTable[sourcename].amount
 
-						if not cacheTable[sourcename].class then
+						if not cacheTable[sourcename].class or (mod.metadata.columns.sDTPS and not cacheTable[sourcename].time) then
 							local actor = set:GetActor(sourcename)
-							if actor then
+							if actor and not cacheTable[sourcename].class then
 								cacheTable[sourcename].id = actor.id or actor.name
 								cacheTable[sourcename].class = actor.class
 								cacheTable[sourcename].role = actor.role
 								cacheTable[sourcename].spec = actor.spec
+							end
+							if actor and mod.metadata.columns.sDTPS and not cacheTable[sourcename].time then
+								cacheTable[sourcename].time = set:GetActorTime(actor.id, actor.name)
 							end
 						end
 					end
@@ -1062,7 +1065,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 					win.metadata.maxvalue = 0
 				end
 
-				local settime, nr = mod.metadata.columns.DTPS and set:GetTime(), 0
+				local nr = 0
 				for sourcename, source in pairs(cacheTable) do
 					nr = nr + 1
 					local d = win:nr(nr)
@@ -1076,8 +1079,8 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 					d.value = source.amount
 					d.valuetext = Skada:FormatValueCols(
 						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-						settime and Skada:FormatNumber(d.value / settime),
-						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+						source.time and Skada:FormatNumber(d.value / source.time),
+						mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -1111,7 +1114,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 						role = player.role,
 						spec = player.spec,
 						amount = player.damagetakenspells[win.spellname].amount,
-						time = mod.metadata.columns.DTPS and player:GetTime()
+						time = mod.metadata.columns.sDTPS and player:GetTime()
 					}
 					if Skada.db.profile.absdamage then
 						cacheTable[player.name].amount = player.damagetakenspells[win.spellname].total
@@ -1142,7 +1145,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 					d.valuetext = Skada:FormatValueCols(
 						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
 						player.time and Skada:FormatNumber(d.value / player.time),
-						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+						mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -1210,7 +1213,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 			showspots = true,
 			click1 = targetmod,
 			click2 = sourcemod,
-			columns = {Damage = true, DTPS = false, Percent = true},
+			columns = {Damage = true, DTPS = false, Percent = true, sDTPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_arcane_starfire]]
 		}
 		Skada:AddMode(self, L["Damage Taken"])

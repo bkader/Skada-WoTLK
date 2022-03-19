@@ -195,7 +195,7 @@ Skada:AddLoadableModule("Resources", function(L)
 				d.value = amount
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Amount and Skada:FormatNumber(d.value),
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 				)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
@@ -213,7 +213,7 @@ Skada:AddLoadableModule("Resources", function(L)
 	local runicmod = basemod:Create(SPELL_POWER_RUNIC_POWER)
 
 	function mod:OnEnable()
-		self.metadata = {columns = {Amount = true, Percent = true}}
+		self.metadata = {columns = {Amount = true, Percent = true, sPercent = true}}
 		Skada:AddColumnOptions(self)
 
 		local flags_src = {src_is_interesting = true}

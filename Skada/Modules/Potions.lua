@@ -166,7 +166,7 @@ Skada:AddLoadableModule("Potions", function(L)
 						d.value = count
 						d.valuetext = Skada:FormatValueCols(
 							mod.metadata.columns.Count and d.value,
-							mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+							mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
 						)
 
 						if win.metadata and d.value > win.metadata.maxvalue then
@@ -361,7 +361,7 @@ Skada:AddLoadableModule("Potions", function(L)
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod},
-			columns = {Count = true, Percent = false},
+			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\inv_potion_31]]
 		}
 
