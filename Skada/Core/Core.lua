@@ -1472,14 +1472,14 @@ end
 
 -- checks if the unit is a player
 function Skada:IsPlayer(guid, flag, name)
-	if guid and players[guid] then
-		return 1 -- 1 for group member
-	end
-	if name and UnitIsPlayer(name) then
-		return true
+	if guid and (players[guid] or pets[guid]) then
+		return players[guid] and 1 or false -- 1 for player, else false
 	end
 	if tonumber(flag) then
 		return (band(flag, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0)
+	end
+	if name and UnitIsPlayer(name) then
+		return true
 	end
 	return false
 end
