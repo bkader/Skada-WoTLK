@@ -493,6 +493,7 @@ L["Absorb spell list"] = true
 L["%s's absorbed targets"] = true
 L["%s's absorb spells"] = true
 L["%s's absorbs on %s"] = true
+L["APS"] = true
 L["Absorbs and Healing"] = true
 L["Absorbs and healing spells"] = true
 L["Absorbed and healed targets"] = true

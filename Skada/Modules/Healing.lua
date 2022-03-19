@@ -244,7 +244,7 @@ Skada:AddLoadableModule("Healing", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.HPS and actor:GetTime(), 0
 			for spellid, spell in pairs(actor.healspells) do
 				if spell.targets and spell.targets[win.targetname] then
 					nr = nr + 1
@@ -266,6 +266,7 @@ Skada:AddLoadableModule("Healing", function(L)
 
 					d.valuetext = Skada:FormatValueCols(
 						mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
+						actortime and Skada:FormatNumber(d.value / actortime),
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
@@ -294,7 +295,7 @@ Skada:AddLoadableModule("Healing", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.HPS and actor:GetTime(), 0
 			for spellid, spell in pairs(actor.healspells) do
 				nr = nr + 1
 				local d = win:nr(nr)
@@ -310,6 +311,7 @@ Skada:AddLoadableModule("Healing", function(L)
 				d.value = spell.amount
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
+					actortime and Skada:FormatNumber(d.value / actortime),
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
@@ -339,7 +341,7 @@ Skada:AddLoadableModule("Healing", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.HPS and actor:GetTime(), 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
 				local d = win:nr(nr)
@@ -353,6 +355,7 @@ Skada:AddLoadableModule("Healing", function(L)
 				d.value = target.amount
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
+					mod.metadata.columns.HPS and Skada:FormatNumber(d.value / actortime),
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
@@ -540,7 +543,7 @@ Skada:AddLoadableModule("Overhealing", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.HPS and actor:GetTime(), 0
 			for spellid, spell in pairs(actor.healspells) do
 				if spell.targets and spell.targets[win.targetname] and (spell.targets[win.targetname].overheal or 0) > 0 then
 					nr = nr + 1
@@ -557,6 +560,7 @@ Skada:AddLoadableModule("Overhealing", function(L)
 					d.value = spell.targets[win.targetname].overheal / (spell.targets[win.targetname].amount + spell.targets[win.targetname].overheal)
 					d.valuetext = Skada:FormatValueCols(
 						mod.metadata.columns.Overhealing and Skada:FormatNumber(spell.targets[win.targetname].overheal),
+						actortime and Skada:FormatNumber(spell.targets[win.targetname].overheal / actortime),
 						mod.metadata.columns.Percent and Skada:FormatPercent(100 * d.value)
 					)
 
@@ -585,7 +589,7 @@ Skada:AddLoadableModule("Overhealing", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.HPS and actor:GetTime(), 0
 			for spellid, spell in pairs(actor.healspells) do
 				if (spell.overheal or 0) > 0 then
 					nr = nr + 1
@@ -603,6 +607,7 @@ Skada:AddLoadableModule("Overhealing", function(L)
 					d.value = spell.overheal / (spell.amount + spell.overheal)
 					d.valuetext = Skada:FormatValueCols(
 						mod.metadata.columns.Overhealing and Skada:FormatNumber(spell.overheal),
+						actortime and Skada:FormatNumber(spell.overheal / actortime),
 						mod.metadata.columns.Percent and Skada:FormatPercent(100 * d.value)
 					)
 
@@ -632,7 +637,7 @@ Skada:AddLoadableModule("Overhealing", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.HPS and actor:GetTime(), 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
 				local d = win:nr(nr)
@@ -646,6 +651,7 @@ Skada:AddLoadableModule("Overhealing", function(L)
 				d.value = target.amount / target.total
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Overhealing and Skada:FormatNumber(target.amount),
+					actortime and Skada:FormatNumber(target.amount / actortime),
 					mod.metadata.columns.Percent and Skada:FormatPercent(100 * d.value)
 				)
 
@@ -803,7 +809,7 @@ Skada:AddLoadableModule("Total Healing", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.HPS and actor:GetTime(), 0
 			for spellid, spell in pairs(actor.healspells) do
 				if spell.targets and spell.targets[win.targetname] then
 					nr = nr + 1
@@ -828,6 +834,7 @@ Skada:AddLoadableModule("Total Healing", function(L)
 
 					d.valuetext = Skada:FormatValueCols(
 						mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
+						actortime and Skada:FormatNumber(d.value / actortime),
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
@@ -856,7 +863,7 @@ Skada:AddLoadableModule("Total Healing", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.HPS and actor:GetTime(), 0
 			for spellid, spell in pairs(actor.healspells) do
 				local amount = spell.amount + (spell.overheal or 0)
 				if amount > 0 then
@@ -875,6 +882,7 @@ Skada:AddLoadableModule("Total Healing", function(L)
 					d.value = amount
 					d.valuetext = Skada:FormatValueCols(
 						mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
+						actortime and Skada:FormatNumber(d.value / actortime),
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
@@ -903,7 +911,7 @@ Skada:AddLoadableModule("Total Healing", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.HPS and actor:GetTime(), 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
 				local d = win:nr(nr)
@@ -917,6 +925,7 @@ Skada:AddLoadableModule("Total Healing", function(L)
 				d.value = target.amount
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
+					actortime and Skada:FormatNumber(d.value / actortime),
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
@@ -1044,16 +1053,16 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 
 	local mod = Skada:NewModule(L["Healing Taken"])
 	local sourcemod = mod:NewModule(L["Healing source list"])
-	local spellmod = sourcemod:NewModule(L["Healing spell list"])
+	local sourcespellmod = sourcemod:NewModule(L["Healing spell list"])
 	local cacheTable, wipe = T.get("Skada_CacheTable2"), wipe
 
-	function spellmod:Enter(win, id, label)
+	function sourcespellmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = format(L["%s's healing on %s"], win.actorname or L.Unknown, label)
+		win.title = format(L["%s's healing on %s"], label, win.actorname or L.Unknown)
 	end
 
-	function spellmod:Update(win, set)
-		win.title = format(L["%s's healing on %s"], win.actorname or L.Unknown, win.targetname or L.Unknown)
+	function sourcespellmod:Update(win, set)
+		win.title = format(L["%s's healing on %s"], win.targetname or L.Unknown, win.actorname or L.Unknown)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.targetname, win.targetid)
@@ -1066,7 +1075,7 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.HPS and actor:GetTime(), 0
 			if actor.absorbspells then
 				for spellid, spell in pairs(actor.absorbspells) do
 					if spell.targets and spell.targets[win.actorname] then
@@ -1081,6 +1090,7 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 						d.value = spell.targets[win.actorname]
 						d.valuetext = Skada:FormatValueCols(
 							mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
+							actortime and Skada:FormatNumber(d.value / actortime),
 							mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
@@ -1113,6 +1123,7 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 
 						d.valuetext = Skada:FormatValueCols(
 							mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
+							actortime and Skada:FormatNumber(d.value / actortime),
 							mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
@@ -1143,7 +1154,7 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.HPS and actor:GetTime(), 0
 			for sourcename, source in pairs(cacheTable) do
 				nr = nr + 1
 				local d = win:nr(nr)
@@ -1158,7 +1169,7 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 				d.value = source.amount
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
-					mod.metadata.columns.Overhealing and Skada:FormatNumber(source.overheal or 0),
+					actortime and Skada:FormatNumber(d.value / actortime),
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
@@ -1195,9 +1206,9 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 
 					d.value = player.amount
 					d.valuetext = Skada:FormatValueCols(
-						mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
-						mod.metadata.columns.Overhealing and Skada:FormatNumber(player.overheal),
-						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+						self.metadata.columns.Healing and Skada:FormatNumber(d.value),
+						player.time and Skada:FormatNumber(d.value / player.time),
+						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -1209,13 +1220,13 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 	end
 
 	function mod:OnEnable()
-		sourcemod.metadata = {showspots = true, click1 = spellmod}
+		sourcemod.metadata = {showspots = true, click1 = sourcespellmod}
 		self.metadata = {
 			showspots = true,
 			click1 = sourcemod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			columns = {Healing = true, Overhealing = true, Percent = true},
+			columns = {Healing = true, HPS = true, Percent = true},
 			icon = [[Interface\Icons\spell_nature_resistnature]]
 		}
 		Skada:AddMode(self, L["Absorbs and Healing"])
@@ -1259,6 +1270,9 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 										tbl[name].class = "UNKNOWN"
 									end
 								end
+								if not tbl[name].time and mod.metadata.columns.HPS then
+									tbl[name].time = self:GetActorTime(tbl[name].id, tbl[name].name)
+								end
 							end
 						end
 					end
@@ -1272,8 +1286,7 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 								else
 									tbl[name].amount = tbl[name].amount + target.amount
 									if target.overheal then
-										tbl[name].overheal =
-											(tbl[name].overheal or 0) + target.overheal
+										tbl[name].overheal = (tbl[name].overheal or 0) + target.overheal
 									end
 								end
 								if not tbl[name].class then
@@ -1286,6 +1299,9 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 									else
 										tbl[name].class = "UNKNOWN"
 									end
+								end
+								if not tbl[name].time and mod.metadata.columns.HPS then
+									tbl[name].time = self:GetActorTime(tbl[name].id, tbl[name].name)
 								end
 							end
 						end
@@ -1335,8 +1351,7 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 									amount = spell.targets[self.name].amount
 								}
 							else
-								tbl[p.name].amount =
-									tbl[p.name].amount + spell.targets[self.name].amount
+								tbl[p.name].amount = tbl[p.name].amount + spell.targets[self.name].amount
 							end
 						end
 					end

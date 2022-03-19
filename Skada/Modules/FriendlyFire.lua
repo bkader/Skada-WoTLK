@@ -83,16 +83,16 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 	function targetmod:Update(win, set)
 		win.title = format(L["%s's targets"], win.actorname or L.Unknown)
 
-		local player = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = player and player.friendfire or 0
-		local targets = (total > 0) and player:GetFriendlyFireTargets()
+		local actor = set and set:GetPlayer(win.actorid, win.actorname)
+		local total = actor and actor.friendfire or 0
+		local targets = (total > 0) and actor:GetFriendlyFireTargets()
 
 		if targets then
 			if win.metadata then
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.DPS and actor:GetTime(), 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
 				local d = win:nr(nr)
@@ -106,6 +106,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 				d.value = target.amount
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+					actortime and Skada:FormatNumber(d.value / actortime),
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
@@ -124,16 +125,16 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 	function spellmod:Update(win, set)
 		win.title = format(L["%s's damage"], win.actorname or L.Unknown)
 
-		local player = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = player and player.friendfire or 0
+		local actor = set and set:GetPlayer(win.actorid, win.actorname)
+		local total = actor and actor.friendfire or 0
 
-		if total > 0 and player.friendfirespells then
+		if total > 0 and actor.friendfirespells then
 			if win.metadata then
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
-			for spellid, spell in pairs(player.friendfirespells) do
+			local actortime, nr = mod.metadata.columns.DPS and actor:GetTime(), 0
+			for spellid, spell in pairs(actor.friendfirespells) do
 				nr = nr + 1
 				local d = win:nr(nr)
 
@@ -144,6 +145,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 				d.value = spell.amount
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+					actortime and Skada:FormatNumber(d.value / actortime),
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
@@ -163,12 +165,12 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 		win.title = format(L["%s's <%s> damage"], win.actorname or L.Unknown, win.spellname or L.Unknown)
 		if not win.spellid then return end
 
-		local player = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = player and player.friendfire or 0
+		local actor = set and set:GetPlayer(win.actorid, win.actorname)
+		local total = actor and actor.friendfire or 0
 		local targets = nil
-		if total > 0 and player.friendfirespells and player.friendfirespells[win.spellid] then
-			total = player.friendfirespells[win.spellid].amount
-			targets = player.friendfirespells[win.spellid].targets
+		if total > 0 and actor.friendfirespells and actor.friendfirespells[win.spellid] then
+			total = actor.friendfirespells[win.spellid].amount
+			targets = actor.friendfirespells[win.spellid].targets
 		end
 
 		if targets then
@@ -176,7 +178,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.DPS and actor:GetTime(), 0
 			for targetname, amount in pairs(targets) do
 				nr = nr + 1
 				local d = win:nr(nr)
@@ -195,6 +197,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 				d.value = amount
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+					actortime and Skada:FormatNumber(d.value / actortime),
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
@@ -230,6 +233,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 					d.value = player.friendfire
 					d.valuetext = Skada:FormatValueCols(
 						self.metadata.columns.Damage and Skada:FormatNumber(d.value),
+						self.metadata.columns.DPS and Skada:FormatNumber(d.value / max(1, player:GetTime())),
 						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
@@ -250,7 +254,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {spellmod, targetmod},
-			columns = {Damage = true, Percent = true},
+			columns = {Damage = true, DPS = false, Percent = true},
 			icon = [[Interface\Icons\inv_gizmo_supersappercharge]]
 		}
 
