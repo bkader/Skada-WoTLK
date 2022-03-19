@@ -2073,6 +2073,14 @@ do
 		if lower(chan) == "self" or lower(chantype) == "self" then
 			Skada:Print(msg)
 			return
+		elseif lower(chan) == "auto" then
+			if not IsInGroup() then
+				return
+			elseif Skada.instanceType == "pvp" or Skada.instanceType == "arena" then
+				chan = "battleground"
+			else
+				chan = IsInRaid() and "raid" or "party"
+			end
 		end
 
 		if escape then
