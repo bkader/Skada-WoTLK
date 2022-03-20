@@ -16,7 +16,9 @@ local IsShiftKeyDown = IsShiftKeyDown
 local IsAltKeyDown = IsAltKeyDown
 local IsControlKeyDown = IsControlKeyDown
 local IsModifierKeyDown = IsModifierKeyDown
-local white = {r = 0.9, g = 0.9, b = 0.9, a = 1}
+
+local COLOR_WHITE = {r = 0.99, g = 0.99, b = 0.99, a = 1}
+local COLOR_DEFAULT = {r = 0.99, g = 0.99, b = 0}
 
 -- class, role & specs
 local classicons, roleicons, specicons
@@ -629,20 +631,6 @@ do
 						end
 					end
 
-					-- set bar color
-					local color = win.db.barcolor or {r = 1, g = 1, b = 0}
-
-					if data.color then
-						color = data.color
-					elseif data.spellschool and win.db.spellschoolcolors then
-						color = Skada.spellschools[data.spellschool] or color
-					elseif data.class and win.db.classcolorbars then
-						color = Skada.classcolors[data.class] or color
-					end
-
-					color.a = win.db.disablehighlight and (color.a or 1) or 0.85
-					bar:SetColorAt(0, color.r, color.g, color.b, color.a or 1)
-
 					if
 						data.class and
 						Skada.classcolors[data.class] and
@@ -656,7 +644,7 @@ do
 							bar.timerLabel:SetTextColor(c.r, c.g, c.b, c.a or 1)
 						end
 					else
-						local c = win.db.textcolor or white
+						local c = win.db.textcolor or COLOR_WHITE
 						bar.label:SetTextColor(c.r, c.g, c.b, c.a or 1)
 						bar.timerLabel:SetTextColor(c.r, c.g, c.b, c.a or 1)
 					end
@@ -665,6 +653,20 @@ do
 						bar.fixed = true
 					end
 				end
+
+				-- set bar color
+				local color = win.db.barcolor or COLOR_DEFAULT
+
+				if data.color then
+					color = data.color
+				elseif win.db.spellschoolcolors and data.spellschool and Skada.spellschools[data.spellschool] then
+					color = Skada.spellschools[data.spellschool]
+				elseif win.db.classcolorbars and data.class and Skada.classcolors[data.class] then
+					color = Skada.classcolors[data.class]
+				end
+
+				color.a = win.db.disablehighlight and (color.a or 1) or 0.85
+				bar:SetColorAt(0, color.r, color.g, color.b, color.a or 1)
 
 				if win.metadata.ordersort then
 					bar.order = i
@@ -922,7 +924,7 @@ do
 		color = p.background.color
 		g:SetBackdropColor(color.r, color.g, color.b, color.a or 1)
 
-		color = p.textcolor or white
+		color = p.textcolor or COLOR_WHITE
 		g:SetTextColor(color.r, color.g, color.b, color.a or 1)
 
 		if FlyPaper then
@@ -1158,7 +1160,7 @@ function mod:AddDisplayOptions(win, options)
 						hasAlpha = true,
 						disabled = function() return db.classcolortext end,
 						get = function()
-							local c = db.textcolor or white
+							local c = db.textcolor or COLOR_WHITE
 							return c.r, c.g, c.b, c.a
 						end,
 						set = function(_, r, g, b, a)
@@ -1496,7 +1498,7 @@ function mod:AddDisplayOptions(win, options)
 						order = 40,
 						hasAlpha = true,
 						get = function()
-							local c = db.title.textcolor or white
+							local c = db.title.textcolor or COLOR_WHITE
 							return c.r, c.g, c.b, c.a
 						end,
 						set = function(_, r, g, b, a)

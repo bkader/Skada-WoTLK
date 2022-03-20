@@ -105,7 +105,6 @@ Skada:AddLoadableModule("Threat", function(L)
 							else
 								d.value = threatvalue
 								d.threat = threatvalue
-								d.color = nil
 							end
 						elseif threatpct then
 							d.value = threatpct
