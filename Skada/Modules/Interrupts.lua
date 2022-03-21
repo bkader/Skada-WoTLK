@@ -82,27 +82,12 @@ Skada:AddLoadableModule("Interrupts", function(L)
 		Skada:DispatchSets(log_interrupt, data)
 		log_interrupt(Skada.total, data)
 
-		if Skada.db.profile.modules.interruptannounce and IsInGroup() and srcGUID == Skada.userGUID then
-			local spelllink = GetSpellLink(extraspellid or extraspellname) or extraspellname
-
-			local channel = Skada.db.profile.modules.interruptchannel or "SAY"
-			if channel == "SELF" then
-				Skada:Print(format(L["%s interrupted!"], spelllink or dstName))
-				return
+		if Skada.db.profile.modules.interruptannounce and srcGUID == Skada.userGUID then
+			local spelllink = extraspellname or dstName
+			if Skada.db.profile.reportlinks then
+				spelllink = GetSpellLink(extraspellid or extraspellname) or spelllink
 			end
-
-			if channel == "AUTO" then
-				local zoneType = select(2, IsInInstance())
-				if zoneType == "pvp" or zoneType == "arena" then
-					channel = "BATTLEGROUND"
-				elseif zoneType == "party" or zoneType == "raid" then
-					channel = zoneType:upper()
-				else
-					channel = IsInRaid() and "RAID" or "PARTY"
-				end
-			end
-
-			Skada:SendChat(format(L["%s interrupted!"], spelllink or dstName), channel, "preset", true)
+			Skada:SendChat(format(L["%s interrupted!"], spelllink), Skada.db.profile.modules.interruptchannel or "SAY", "preset", true)
 		end
 	end
 

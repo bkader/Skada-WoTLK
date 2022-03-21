@@ -780,8 +780,8 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 			end
 
 			-- Go ahead and announce it.
-			if extraspellname then
-				Skada:SendChat(format(L["%s on %s removed by %s's %s"], spellname, dstName, srcName, GetSpellLink(extraspellid)), "RAID", "preset", true)
+			if extraspellid or extraspellname then
+				Skada:SendChat(format(L["%s on %s removed by %s's %s"], spellname, dstName, srcName, GetSpellLink(extraspellid or extraspellname)), "RAID", "preset", true)
 			else
 				Skada:SendChat(format(L["%s on %s removed by %s"], spellname, dstName, srcName), "RAID", "preset", true)
 			end

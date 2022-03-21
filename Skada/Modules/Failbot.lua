@@ -11,8 +11,7 @@ Skada:AddLoadableModule("Fails", function(L)
 
 	local pairs, ipairs = pairs, ipairs
 	local tostring, format, tContains = tostring, string.format, tContains
-	local GetSpellInfo, UnitGUID = Skada.GetSpellInfo or GetSpellInfo, UnitGUID
-	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
+	local GetSpellInfo, UnitGUID, IsInGroup = Skada.GetSpellInfo or GetSpellInfo, UnitGUID, Skada.IsInGroup
 	local _
 
 	-- spells in the following table will be ignored.
@@ -257,23 +256,12 @@ Skada:AddLoadableModule("Fails", function(L)
 	end
 
 	function mod:SetComplete(set)
-		if (set.fail or 0) == 0 or not (Skada.db.profile.modules.failsannounce and IsInGroup()) then
-			return
-		end
-
-		local channel = Skada.db.profile.modules.failschannel or "AUTO"
-		local chantype = (channel == "SELF") and "self" or "preset"
-		if channel == "AUTO" then
-			local zoneType = select(2, IsInInstance())
-			if zoneType == "pvp" or zoneType == "arena" then
-				channel = "BATTLEGROUND"
-			elseif zoneType == "party" or zoneType == "raid" then
-				channel = zoneType:upper()
-			else
-				channel = IsInRaid() and "RAID" or "PARTY"
+		if (set.fail or 0) > 0 and Skada.db.profile.modules.failsannounce then
+			local channel = Skada.db.profile.modules.failschannel or "AUTO"
+			if channel == "SELF" or channel == "GUILD" or IsInGroup() then
+				Skada:Report(channel, "preset", L["Fails"], nil, 10)
 			end
 		end
-		Skada:Report(channel, chantype, L["Fails"], nil, 10)
 	end
 
 	do

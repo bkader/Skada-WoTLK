@@ -15,9 +15,8 @@
 ## SavedVariablesPerCharacter: SkadaCharDB
 ## DefaultState: enabled
 ## Author: Kader (|cff808080bkader#6361|r)
-## Version: 1.8.73
-## X-Revision: 362
-## X-Date: 2022-03-20 @ 09:27 PM |cff808080UTC|r
+## Version: 1.8.74
+## X-Date: 2022-03-21 @ 03:19 AM |cff808080UTC|r
 ## X-Credits: Zarnivoop
 ## X-Category: Combat
 ## X-License: MIT/X
@@ -25,7 +24,7 @@
 ## X-Website: https://github.com/bkader/Skada-WoTLK
 ## X-Discord: https://discord.gg/a8z5CyS3eW
 ## X-Localizations: meatgaga (CN), Ícar & Septimun (ES), Kader (FR), NGL (RU)
-## X-Thanks: Babe, Iqui, Jeb, Nomadra, Shoggoth, Havi & Ganrod, WotLK Community, Project Ascension
+## X-Thanks: Abel, Iqui, Jeb, Nomadra, Shoggoth, Havi & Ganrod, WotLK Community, Project Ascension
 ## X-Donate: |cff0079c1PayPal|r or |cff246a96Paysera|r at |cff20ff20bkader@mail.com|r
 
 Libs\Libs.xml

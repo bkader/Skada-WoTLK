@@ -13,15 +13,18 @@ Skada:AddLoadableModule("Threat", function(L)
 	local PlaySoundFile = PlaySoundFile
 	local T = Skada.Table
 
-	local aggroColor = {r = 0.95, g = 0, b = 0.02}
 	local aggroIcon = [[Interface\Icons\ability_physical_taunt]]
 
 	do
 		local CheckInteractDistance, ItemRefTooltip = CheckInteractDistance, ItemRefTooltip
 		local GetItemInfo, IsItemInRange = GetItemInfo, IsItemInRange
 		local nr, maxthreat, last_warn, mypercent = 1, 0, time(), nil
-		local threatUnits, threatTable = {"focus", "focustarget", "target", "targettarget"}
+		local threatUnits, threatTable = {"focus", "focustarget", "target", "targettarget"}, nil
 		local tankThreat, tankValue, rubyAcorn, queried
+
+		-- bar colors
+		local aggroColor = RED_FONT_COLOR
+		local negativeColor = GRAY_FONT_COLOR
 
 		local function add_to_threattable(unit, owner, target, win)
 			if unit == "AGGRO" then
@@ -101,7 +104,7 @@ Skada:AddLoadableModule("Threat", function(L)
 							if threatvalue < 0 then
 								d.value = threatvalue + 410065408
 								d.threat = threatvalue + 410065408
-								d.color = {r = 0.5, g = 0.5, b = 0.5}
+								d.color = negativeColor
 							else
 								d.value = threatvalue
 								d.threat = threatvalue

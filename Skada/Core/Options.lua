@@ -8,10 +8,6 @@ local fmt = string.format
 local pairs, ipairs = pairs, ipairs
 local GetAddOnMetadata = GetAddOnMetadata
 
-local windefaultscopy = {}
-local resetoptions = {[1] = NO, [2] = YES, [3] = L["Ask"]}
-local newdisplay, deletewindow = "bar"
-
 Skada.windowdefaults = {
 	name = "Skada",
 	barspacing = 0,
@@ -105,6 +101,8 @@ Skada.windowdefaults = {
 	textcolor = {r = 0.9, g = 0.9, b = 0.9},
 	useframe = true
 }
+
+local windefaultscopy = {}
 Skada.tCopy(windefaultscopy, Skada.windowdefaults)
 
 Skada.defaults = {
@@ -174,7 +172,12 @@ Skada.defaults = {
 	}
 }
 
+-------------------------------------------------------------------------------
+
 local titleVersion = fmt("|T%s:18:18:0:0:32:32:2:30:2:30|t |cffffd200Skada|r |cffffffff%s|r", Skada.logo, Skada.version)
+local resetoptions = {NO, YES, L["Ask"]}
+local newdisplay = "bar"
+
 Skada.options = {
 	type = "group",
 	name = fmt("Skada |cffffffff%s|r", Skada.version),
@@ -708,43 +711,9 @@ Skada.options = {
 			childGroups = "tab",
 			order = 10000,
 			args = {}
-		},
-		about = {
-			type = "group",
-			name = L["About"],
-			order = 11000,
-			args = {
-				title = {
-					type = "description",
-					name = titleVersion,
-					fontSize = "large",
-					width = "full",
-					order = 0
-				}
-			}
 		}
 	}
 }
-
--- about about args
-for i, field in ipairs({"Version", "Date", "Author", "Category", "License", "Email", "Website", "Discord", "Credits", "Localizations", "Thanks", "Donate"}) do
-	local meta = GetAddOnMetadata("Skada", field) or GetAddOnMetadata("Skada", "X-" .. field)
-	if meta then
-		-- append field to revision number
-		if field == "Version" then
-			meta = format("%s - |cffffbb00%s|r: %s", meta, L["Revision"], Skada.revision)
-		elseif meta:match("^http[s]://[a-zA-Z0-9_/]-%.[a-zA-Z]") or meta:match("^[%w.]+@%w+%.%w+$") then
-			meta = format("|cff20ff20%s|r", meta)
-		end
-		Skada.options.args.about.args[field] = {
-			type = "description",
-			name = fmt("\n|cffffd200%s|r:  %s", L[field], meta),
-			fontSize = "medium",
-			width = "double",
-			order = i
-		}
-	end
-end
 
 -- font flags
 Skada.fontFlags = {
@@ -776,7 +745,23 @@ do
 					}
 				}
 			}
-			Skada.tCopy(initOptions.args, Skada.options.args.about.args, "title", "Category", "License", "Localizations", "Thanks")
+
+			-- about args
+			for i, field in ipairs({"Version", "Date", "Author", "Credits", "Donate", "License", "Website", "Discord", "Localizations", "Thanks"}) do
+				local meta = GetAddOnMetadata("Skada", field) or GetAddOnMetadata("Skada", "X-" .. field)
+				if meta then
+					if meta:match("^http[s]://[a-zA-Z0-9_/]-%.[a-zA-Z]") or meta:match("^[%w.]+@%w+%.%w+$") then
+						meta = format("|cff20ff20%s|r", meta)
+					end
+					initOptions.args[field] = {
+						type = "description",
+						name = fmt("\n|cffffd200%s|r:  %s", L[field], meta),
+						fontSize = "medium",
+						width = "double",
+						order = i
+					}
+				end
+			end
 		end
 		return initOptions
 	end
@@ -810,9 +795,7 @@ end
 -- Adds column configuration options for a mode.
 local nameIcon = "|T%s:18:18:-5:0:32:32:2:30:2:30|t %s"
 function Skada:AddColumnOptions(mod)
-	if not (mod and mod.metadata and mod.metadata.columns) then
-		return
-	end
+	if not (mod and mod.metadata and mod.metadata.columns) then return end
 
 	local db = self.db.profile.columns
 	local category = mod.category or OTHER
@@ -828,6 +811,7 @@ function Skada:AddColumnOptions(mod)
 
 	local cols = {type = "group", name = moduleName, inline = true, args = {}}
 
+	local order = 0
 	for colname, _ in pairs(mod.metadata.columns) do
 		local c = mod.moduleName .. "_" .. colname
 
@@ -849,6 +833,21 @@ function Skada:AddColumnOptions(mod)
 				Skada:UpdateDisplay(true)
 			end
 		}
+
+		-- proper and reasonable columns order.
+		if col.name == L.APS or col.name == L.DPS or col.name == L.DTPS or col.name == L.HPS or col.name == L.TPS then
+			col.order = 6
+		elseif col.name == L.sAPS or col.name == L.sDPS or col.name == L.sDTPS or col.name == L.sHPS then
+			col.order = 8
+		elseif col.name == L.Percent then
+			col.order = 7
+		elseif col.name == L.sPercent then
+			col.order = 9
+		else
+			order = order + 1
+			col.order = order
+		end
+
 		cols.args[c] = col
 	end
 
@@ -971,11 +970,15 @@ function Skada:FrameSettings(db, include_dimensions)
 								width = "double",
 								hasAlpha = true,
 								get = function()
-									local c = db.background.color
+									local c = db.background.color or Skada.windowdefaults.background.color
 									return c.r, c.g, c.b, c.a
 								end,
 								set = function(_, r, g, b, a)
-									db.background.color = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
+									db.background.color = db.background.color or {}
+									db.background.color.r = r
+									db.background.color.g = g
+									db.background.color.b = b
+									db.background.color.a = a
 									Skada:ApplySettings(db.name)
 								end
 							}
@@ -1013,11 +1016,15 @@ function Skada:FrameSettings(db, include_dimensions)
 								order = 20,
 								hasAlpha = true,
 								get = function()
-									local c = db.background.bordercolor or {r = 0, g = 0, b = 0, a = 1}
+									local c = db.background.bordercolor or Skada.windowdefaults.background.bordercolor
 									return c.r, c.g, c.b, c.a
 								end,
 								set = function(_, r, g, b, a)
-									db.background.bordercolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
+									db.background.bordercolor = db.background.bordercolor or {}
+									db.background.bordercolor.r = r
+									db.background.bordercolor.g = g
+									db.background.bordercolor.b = b
+									db.background.bordercolor.a = a
 									Skada:ApplySettings(db.name)
 								end
 							},

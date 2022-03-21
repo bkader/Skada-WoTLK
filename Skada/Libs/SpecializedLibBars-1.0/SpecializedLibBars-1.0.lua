@@ -11,7 +11,7 @@ local CallbackHandler = LibStub("CallbackHandler-1.0")
 local GetTime = GetTime
 local sin, cos, rad = math.sin, math.cos, math.rad
 local abs, min, max, floor = math.abs, math.min, math.max, math.floor
-local tsort, tinsert, tremove, tconcat = table.sort, tinsert, tremove, table.concat
+local tsort, tinsert, tremove, tconcat, wipe = table.sort, tinsert, tremove, table.concat, wipe
 local next, pairs, assert, error, type, xpcall = next, pairs, assert, error, type, xpcall
 
 local L = {
@@ -226,13 +226,9 @@ do
 	end
 
 	function ComputeGradient(self)
-		self.gradMap = self.gradMap or {}
-		if not self.colors then
-			return
-		end
-		if #self.colors == 0 then
-			for k in pairs(self.gradMap) do
-				self.gradMap[k] = nil
+		if not self.colors or #self.colors == 0 then
+			if self.gradMap then
+				wipe(self.gradMap)
 			end
 			return
 		end
@@ -245,6 +241,7 @@ do
 		end
 		tsort(colors, sort_colors)
 
+		self.gradMap = self.gradMap or {}
 		for i = 0, 200 do
 			local r, g, b, a = getColor(i / 200)
 			self.gradMap[(i * 4)] = r
@@ -355,7 +352,6 @@ function barListPrototype:AddButton(title, description, texture, texcoords, clic
 
 	self.buttons[#self.buttons + 1] = btn
 	self:AdjustButtons()
-
 	return btn
 end
 
@@ -1424,15 +1420,11 @@ function barPrototype:OnBarReleased()
 	self.ownerGroup = nil
 	self.fill = false
 	if self.colors then
-		for k, v in pairs(self.colors) do
-			self.colors[k] = nil
-		end
+		wipe(self.colors)
 	end
 
 	if self.gradMap then
-		for k, v in pairs(self.gradMap) do
-			self.gradMap[k] = nil
-		end
+		wipe(self.gradMap)
 	end
 
 	self.texture:SetVertexColor(1, 1, 1, 0)
@@ -1449,15 +1441,11 @@ function barPrototype:OnBarReleased()
 
 	if self.callbacks.insertQueue then
 		for eventname, callbacks in pairs(self.callbacks.insertQueue) do
-			for k, v in pairs(callbacks) do
-				callbacks[k] = nil
-			end
+			wipe(callbacks)
 		end
 	end
 	for eventname, callbacks in pairs(self.callbacks.events) do
-		for k, v in pairs(callbacks) do
-			callbacks[k] = nil
-		end
+		wipe(callbacks)
 		if self.callbacks.OnUnused then
 			self.callbacks:OnUnused(self, eventname)
 		end

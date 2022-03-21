@@ -588,11 +588,12 @@ function mod:AddDisplayOptions(win, options)
 				desc = L["Font Color.\nClick \"Class Colors\" to begin."],
 				hasAlpha = true,
 				get = function()
-					local c = db.title.textcolor
-					return c.r, c.g, c.b, c.a
+					local c = db.title.textcolor or Skada.windowdefaults.title.textcolor
+					return c.r, c.g, c.b, c.a or 1
 				end,
 				set = function(win, r, g, b, a)
-					db.title.textcolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a or 1.0}
+					db.title.textcolor = db.title.textcolor or {}
+					db.title.textcolor.r, db.title.textcolor.g, db.title.textcolor.b, db.title.textcolor.a = r, g, b, a
 					Skada:ApplySettings(db.name)
 				end,
 				order = 40,

@@ -668,12 +668,13 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 	function mod:Announce(logs, playername)
 		-- announce only if:
-		-- 	1. player is in a group or channel set to self.
+		-- 	1. we have a valid deathlog.
 		-- 	2. player is not in a pvp (spam caution).
-		-- 	3. we have a valid deathlog.
-		if (Skada.db.profile.modules.deathchannel ~= "SELF" and not IsInGroup()) or IsInPvP() or not logs then
-			return
-		end
+		-- 	3. player is in a group or channel set to self or guild.
+		if not logs or IsInPvP() then return end
+
+		local channel = Skada.db.profile.modules.deathchannel
+		if channel ~= "SELF" and channel ~= "GUILD" and not IsInGroup() then return end
 
 		local log = nil
 		for _, l in ipairs(logs) do
@@ -687,7 +688,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 		-- prepare the output.
 		local output = format(
-			"Skada: %s > %s (%s) %s",
+			(channel == "SELF") and "%s > %s (%s) %s" or "Skada: %s > %s (%s) %s",
 			log.source or L.Unknown, -- source name
 			playername or L.Unknown, -- player name
 			log.spellid and GetSpellInfo(log.spellid) or L.Unknown, -- spell name
@@ -717,13 +718,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 			extra = del(extra)
 		end
 
-		if Skada.db.profile.modules.deathchannel == "SELF" then
-			Skada:Print(output)
-		elseif Skada.db.profile.modules.deathchannel == "GUILD" then
-			Skada:SendChat(output, "GUILD", "preset", true)
-		else
-			Skada:SendChat(output, IsInRaid() and "RAID" or "PARTY", "preset", true)
-		end
+		Skada:SendChat(output, channel, "preset", true)
 	end
 
 	do

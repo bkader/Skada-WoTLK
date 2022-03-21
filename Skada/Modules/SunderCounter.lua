@@ -46,22 +46,24 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 			log_sunder(Skada.total, data)
 
 			if Skada.db.profile.modules.sunderannounce then
-				mod.targets = mod.targets or T.get("Sunder_Targets")
-				if not mod.targets[dstGUID] then
-					mod.targets[dstGUID] = new()
-					mod.targets[dstGUID].count = 1
-					mod.targets[dstGUID].time = timestamp
-				elseif not mod.targets[dstGUID].full then
-					mod.targets[dstGUID].count = (mod.targets[dstGUID].count or 0) + 1
-					if mod.targets[dstGUID].count == 5 then
-						mod:Announce(format(
-							L["%s stacks of %s applied on %s in %s sec!"],
-							mod.targets[dstGUID].count,
-							sunderLink or sunder,
-							dstName,
-							format("%.1f", timestamp - mod.targets[dstGUID].time)
-						), dstGUID)
-						mod.targets[dstGUID].full = true
+				if not Skada.db.profile.modules.sunderbossonly or (Skada.db.profile.modules.sunderbossonly and Skada:IsBoss(dstGUID)) then
+					mod.targets = mod.targets or T.get("Sunder_Targets")
+					if not mod.targets[dstGUID] then
+						mod.targets[dstGUID] = new()
+						mod.targets[dstGUID].count = 1
+						mod.targets[dstGUID].time = timestamp
+					elseif not mod.targets[dstGUID].full then
+						mod.targets[dstGUID].count = (mod.targets[dstGUID].count or 0) + 1
+						if mod.targets[dstGUID].count == 5 then
+							mod:Announce(format(
+								L["%s stacks of %s applied on %s in %s sec!"],
+								mod.targets[dstGUID].count,
+								sunderLink or sunder,
+								dstName,
+								format("%.1f", timestamp - mod.targets[dstGUID].time)
+							))
+							mod.targets[dstGUID].full = true
+						end
 					end
 				end
 			end
@@ -74,7 +76,9 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 				if mod.targets and mod.targets[dstGUID] then
 					mod.targets[dstGUID] = del(mod.targets[dstGUID])
 					if Skada.db.profile.modules.sunderannounce then
-						mod:Announce(format(L["%s dropped from %s!"], sunderLink or sunder, dstName or L.Unknown), dstGUID)
+						if not Skada.db.profile.modules.sunderbossonly or (Skada.db.profile.modules.sunderbossonly and Skada:IsBoss(dstGUID)) then
+							mod:Announce(format(L["%s dropped from %s!"], sunderLink or sunder, dstName or L.Unknown))
+						end
 					end
 				end
 			end, 0.1)
@@ -90,7 +94,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 	local function DoubleCheckSunder()
 		if not sunder then
 			sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
-			sunderLink = GetSpellLink(47467)
+			sunderLink = Skada.db.profile.reportlinks and GetSpellLink(47467)
 		end
 	end
 
@@ -219,31 +223,8 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 		end
 	end
 
-	function mod:Announce(msg, guid)
-		-- only in a group or to SELF
-		if (Skada.db.profile.modules.sunderchannel ~= "SELF" and not IsInGroup()) or not msg then return end
-
-		-- -- only on bosses!
-		if Skada.db.profile.modules.sunderbossonly and guid and not Skada:IsBoss(guid) then return end
-
-		local channel = Skada.db.profile.modules.sunderchannel or "SAY"
-		if channel == "SELF" then
-			Skada:Print(msg)
-			return
-		end
-
-		if channel == "AUTO" then
-			local zoneType = select(2, IsInInstance())
-			if zoneType == "pvp" or zoneType == "arena" then
-				channel = "BATTLEGROUND"
-			elseif zoneType == "party" or zoneType == "raid" then
-				channel = zoneType:upper()
-			else
-				channel = IsInRaid() and "RAID" or "PARTY"
-			end
-		end
-
-		Skada:SendChat(msg, channel, "preset", true)
+	function mod:Announce(msg)
+		Skada:SendChat(msg, Skada.db.profile.modules.sunderchannel or "SAY", "preset", true)
 	end
 
 	function mod:OnInitialize()

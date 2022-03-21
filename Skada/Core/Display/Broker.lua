@@ -311,12 +311,13 @@ function mod:AddDisplayOptions(win, options)
 				name = L["Text Color"],
 				desc = L["Choose the default color."],
 				hasAlpha = true,
-				get = function(i)
-					local c = db.textcolor or {r = 1, g = 1, b = 1, a = 1}
-					return c.r, c.g, c.b, c.a
+				get = function()
+					local c = db.textcolor or Skada.windowdefaults.textcolor
+					return c.r, c.g, c.b, c.a or 1
 				end,
 				set = function(i, r, g, b, a)
-					db.textcolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
+					db.textcolor = db.textcolor or {}
+					db.textcolor.r, db.textcolor.g, db.textcolor.b, db.textcolor.a = r, g, b, a
 					Skada:ApplySettings(db.name)
 				end,
 				disabled = function() return db.isusingclasscolors end,

@@ -17,8 +17,8 @@ local IsAltKeyDown = IsAltKeyDown
 local IsControlKeyDown = IsControlKeyDown
 local IsModifierKeyDown = IsModifierKeyDown
 
-local COLOR_WHITE = {r = 0.99, g = 0.99, b = 0.99, a = 1}
-local COLOR_DEFAULT = {r = 0.99, g = 0.99, b = 0}
+local COLOR_WHITE = HIGHLIGHT_FONT_COLOR
+local COLOR_YELLOW = YELLOW_FONT_COLOR
 
 -- class, role & specs
 local classicons, roleicons, specicons
@@ -655,7 +655,7 @@ do
 				end
 
 				-- set bar color
-				local color = win.db.barcolor or COLOR_DEFAULT
+				local color = win.db.barcolor or COLOR_YELLOW
 
 				if data.color then
 					color = data.color
@@ -1063,10 +1063,12 @@ function mod:AddDisplayOptions(win, options)
 						order = 80,
 						hasAlpha = true,
 						get = function()
-							return db.barcolor.r, db.barcolor.g, db.barcolor.b, db.barcolor.a
+							local c = db.barcolor or Skada.windowdefaults.barcolor
+							return c.r, c.g, c.b, c.a or 1
 						end,
 						set = function(_, r, g, b, a)
-							db.barcolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
+							db.barcolor = db.barcolor or {}
+							db.barcolor.r, db.barcolor.g, db.barcolor.b, db.barcolor.a = r, g, b, a
 							Skada:ApplySettings(db.name)
 						end
 					},
@@ -1076,11 +1078,13 @@ function mod:AddDisplayOptions(win, options)
 						desc = L["Choose the background color of the bars."],
 						order = 90,
 						hasAlpha = true,
-						get = function(_)
-							return db.barbgcolor.r, db.barbgcolor.g, db.barbgcolor.b, db.barbgcolor.a
+						get = function()
+							local c = db.barbgcolor or Skada.windowdefaults.barbgcolor
+							return c.r, c.g, c.b, c.a or 1
 						end,
 						set = function(_, r, g, b, a)
-							db.barbgcolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
+							db.barbgcolor = db.barbgcolor or {}
+							db.barbgcolor.r, db.barbgcolor.g, db.barbgcolor.b, db.barbgcolor.a = r, g, b, a
 							Skada:ApplySettings(db.name)
 						end
 					},
@@ -1161,10 +1165,11 @@ function mod:AddDisplayOptions(win, options)
 						disabled = function() return db.classcolortext end,
 						get = function()
 							local c = db.textcolor or COLOR_WHITE
-							return c.r, c.g, c.b, c.a
+							return c.r, c.g, c.b, c.a or 1
 						end,
 						set = function(_, r, g, b, a)
-							db.textcolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
+							db.textcolor = db.textcolor or {}
+							db.textcolor.r, db.textcolor.g, db.textcolor.b, db.textcolor.a = r, g, b, a
 							Skada:ApplySettings(db.name)
 						end
 					},
@@ -1402,11 +1407,13 @@ function mod:AddDisplayOptions(win, options)
 								desc = L["The background color of the title."],
 								order = 20,
 								hasAlpha = true,
-								get = function(_)
-									return db.title.color.r, db.title.color.g, db.title.color.b, db.title.color.a
+								get = function()
+									local c = db.title.color or Skada.windowdefaults.title.color
+									return c.r, c.g, c.b, c.a or 1
 								end,
 								set = function(_, r, g, b, a)
-									db.title.color = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
+									db.title.color = db.title.color or {}
+									db.title.color.r, db.title.color.g, db.title.color.b, db.title.color.a = r, g, b, a
 									Skada:ApplySettings(db.name)
 								end
 							}
@@ -1434,10 +1441,12 @@ function mod:AddDisplayOptions(win, options)
 								hasAlpha = true,
 								order = 20,
 								get = function()
-									return db.title.bordercolor.r, db.title.bordercolor.g, db.title.bordercolor.b, db.title.bordercolor.a
+									local c = db.title.bordercolor or Skada.windowdefaults.title.bordercolor
+									return c.r, c.g, c.b, c.a or 1
 								end,
 								set = function(_, r, g, b, a)
-									db.title.bordercolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
+									db.title.bordercolor = db.title.bordercolor or {}
+									db.title.bordercolor.r, db.title.bordercolor.g, db.title.bordercolor.b, db.title.bordercolor.a = r, g, b, a
 									Skada:ApplySettings(db.name)
 								end
 							},
@@ -1498,11 +1507,12 @@ function mod:AddDisplayOptions(win, options)
 						order = 40,
 						hasAlpha = true,
 						get = function()
-							local c = db.title.textcolor or COLOR_WHITE
-							return c.r, c.g, c.b, c.a
+							local c = db.title.textcolor or Skada.windowdefaults.title.textcolor
+							return c.r, c.g, c.b, c.a or 1
 						end,
 						set = function(_, r, g, b, a)
-							db.title.textcolor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
+							db.title.textcolor = db.title.textcolor or {}
+							db.title.textcolor.r, db.title.textcolor.g, db.title.textcolor.b, db.title.textcolor.a = r, g, b, a
 							Skada:ApplySettings(db.name)
 						end
 					}

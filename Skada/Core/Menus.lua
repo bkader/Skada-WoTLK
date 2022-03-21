@@ -156,7 +156,6 @@ function Skada:OpenMenu(window)
 			info.func = function()
 				Skada:ShowPopup()
 			end
-			info.disabled = not Skada:CanReset()
 			info.notCheckable = 1
 			UIDropDownMenu_AddButton(info, level)
 
@@ -1031,8 +1030,6 @@ do
 	function Skada:OpenReportWindow(window)
 		if self.testMode then
 			return -- nothing to do.
-		elseif not self:CanReset() then
-			self:Print(L["There is nothing to report."])
 		elseif IsShiftKeyDown() then
 			DoReport(window) -- quick report?
 		elseif self.reportwindow == nil then

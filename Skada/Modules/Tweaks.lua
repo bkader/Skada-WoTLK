@@ -27,8 +27,8 @@ Skada:AddLoadableModule("Tweaks", function(L)
 		[14324] = true, -- Hunter's Mark (rank 3)
 		[14325] = true, -- Hunter's Mark (rank 4)
 		[53338] = true, -- Hunter's Mark (rank 5)
-		[60122] = true, -- Baby Spice
-		[56191] = true -- Shadow Jade Focusing Lens
+		[56191] = true, -- Shadow Jade Focusing Lens
+		[60122] = true -- Baby Spice
 	}
 
 	---------------------------------------------------------------------------
@@ -110,7 +110,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 					local output
 
 					-- close distance?
-					if self:IsBoss(srcGUID) then
+					if self:IsBoss(srcGUID, dstName) then
 						if self:IsPet(dstGUID, dstFlags) then
 							output = format(hitformats[1], srcName, dstName or L.Unknown)
 						elseif dstName then
