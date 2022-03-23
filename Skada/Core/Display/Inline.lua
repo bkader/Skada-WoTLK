@@ -14,7 +14,7 @@ local media = LibStub("LibSharedMedia-3.0")
 local pairs, tostring, type = pairs, tostring, type
 local strrep, format, _match = string.rep, string.format, string.match
 local tinsert, tremove, tsort = table.insert, table.remove, table.sort
-local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
+local CloseDropDownMenus = CloseDropDownMenus
 
 local WrapTextInColorCode = Skada.WrapTextInColorCode
 local RGBPercToHex = Skada.RGBPercToHex
@@ -602,7 +602,7 @@ function mod:AddDisplayOptions(win, options)
 			barwidth = {
 				type = "range",
 				name = L["Width"],
-				desc = L['Width of bars. This only applies if the "Fixed bar width" option is used.'],
+				desc = L.opt_barwidth_desc,
 				min = 100,
 				max = 300,
 				step = 1.0,
@@ -618,19 +618,19 @@ function mod:AddDisplayOptions(win, options)
 			fixedbarwidth = {
 				type = "toggle",
 				name = L["Fixed bar width"],
-				desc = L["If checked, bar width is fixed. Otherwise, bar width depends on the text width."],
+				desc = L.opt_fixedbarwidth_desc,
 				order = 70
 			},
 			isusingclasscolors = {
 				type = "toggle",
 				name = L["Class Colors"],
-				desc = L["Class colors:\n|cFFF58CBAKader|r - 5.71M (21.7K)\n\nWithout:\nKader - 5.71M (21.7K)"],
+				desc = L.opt_isusingclasscolors_desc,
 				order = 80,
 			},
 			isonnewline = {
 				type = "toggle",
 				name = L["Put values on new line."],
-				desc = L["New line:\nKader\n5.71M (21.7K)\n\nDivider:\nKader - 5.71M (21.7K)"],
+				desc = L.opt_isonnewline_desc,
 				order = 90
 			},
 			clickthrough = {
@@ -658,7 +658,7 @@ function mod:AddDisplayOptions(win, options)
 			isusingelvuiskin = {
 				type = "toggle",
 				name = L["Use ElvUI skin if avaliable."],
-				desc = L["Check this to use ElvUI skin instead.\nDefault: checked"],
+				desc = L.opt_isusingelvuiskin_desc,
 				descStyle = "inline",
 				order = 10,
 				width = "full"

@@ -5,11 +5,9 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 	local mod = Skada:NewModule(L["Sunder Counter"])
 	local targetmod = mod:NewModule(L["Sunder target list"])
 
-	local pairs, ipairs, select = pairs, ipairs, select
-	local tostring, format = tostring, string.format
+	local pairs, ipairs, tostring, format = pairs, ipairs, tostring, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
-	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
 	local T = Skada.Table
 	local new, del = Skada.TablePool()
 	local sunder, sunderLink, devastate, _

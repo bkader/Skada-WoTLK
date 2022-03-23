@@ -1,13 +1,9 @@
 local Skada = Skada
 
 -- frequently used globals --
-local pairs, ipairs, type, select = pairs, ipairs, type, select
-local format, min, max = string.format, math.min, math.max
-local unitClass, GetSpellInfo = Skada.unitClass, Skada.GetSpellInfo or GetSpellInfo
-local T, wipe = Skada.Table, wipe
-local setPrototype = Skada.setPrototype
-local enemyPrototype = Skada.enemyPrototype
-local tContains = tContains
+local pairs, ipairs, type, format, max, wipe = pairs, ipairs, type, string.format, math.max, wipe
+local GetSpellInfo, T, tContains = Skada.GetSpellInfo or GetSpellInfo, Skada.Table, tContains
+local setPrototype, enemyPrototype = Skada.setPrototype, Skada.enemyPrototype
 local _
 
 ---------------------------------------------------------------------------
@@ -76,9 +72,9 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 
 		if not maxval then
 			if unit.power ~= nil then
-				maxval = select(3, UnitPowerInfo(nil, guid, unit.power))
+				_, _, maxval = UnitPowerInfo(nil, guid, unit.power)
 			else
-				maxval = select(3, UnitHealthInfo(nil, guid))
+				_, _, maxval = UnitHealthInfo(nil, guid)
 			end
 		end
 
@@ -912,11 +908,11 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 
 	function targetspellmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's damage on %s"], win.targetname or L.Unknown, label)
+		win.title = L["actor damage"](win.targetname or L.Unknown, label)
 	end
 
 	function targetspellmod:Update(win, set)
-		win.title = format(L["%s's damage on %s"], win.targetname or L.Unknown, win.actorname or L.Unknown)
+		win.title = L["actor damage"](win.targetname or L.Unknown, win.actorname or L.Unknown)
 		if not (win.targetname and win.actorname) then return end
 
 		local actor = set and set:GetEnemy(win.targetname, win.targetid)
@@ -1056,11 +1052,11 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 
 	function spellmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = format(L["%s's damage"], label)
+		win.title = L["actor damage"](label)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's damage"], win.targetname or L.Unknown)
+		win.title = L["actor damage"](win.targetname or L.Unknown)
 
 		local actor = set and set:GetEnemy(win.targetname, win.targetid)
 		local total = actor and actor:GetDamage() or 0
@@ -1390,11 +1386,11 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 
 	function spellmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = format(L["%s's healing spells"], label)
+		win.title = L["actor heal spells"](label)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's healing spells"], win.targetname or L.Unknown)
+		win.title = L["actor heal spells"](win.targetname or L.Unknown)
 
 		local actor = set and set:GetEnemy(win.targetname, win.targetid)
 		local total = actor and actor.heal or 0

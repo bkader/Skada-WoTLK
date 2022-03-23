@@ -2,7 +2,7 @@ local Skada = Skada
 
 local pairs, ipairs, format, tostring = pairs, ipairs, string.format, tostring
 local tContains, min, max, floor = tContains, math.min, math.max, math.floor
-local UnitExists, UnitName, UnitGUID, UnitBuff = UnitExists, UnitName, UnitGUID, UnitBuff
+local UnitName, UnitGUID, UnitBuff = UnitName, UnitGUID, UnitBuff
 local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local PercentToRGB = Skada.PercentToRGB
@@ -243,9 +243,8 @@ do
 		end
 	end
 
-	function SpellUpdateFunction(atype, win, set, title, mode)
+	function SpellUpdateFunction(atype, win, set, mode)
 		if not atype then return end
-		win.title = title and format(title, win.actorname or L.Unknown) or mode.moduleName or L.Unknown
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local maxtime = player and player:GetTime() or 0
@@ -440,7 +439,8 @@ Skada:AddLoadableModule("Buffs", function(L)
 	end
 
 	function spellmod:Update(win, set)
-		SpellUpdateFunction("BUFF", win, set, L["%s's buffs"], mod)
+		win.title = format(L["%s's buffs"], win.actorname or L.Unknown)
+		SpellUpdateFunction("BUFF", win, set, mod)
 	end
 
 	function mod:Update(win, set)
@@ -563,11 +563,11 @@ Skada:AddLoadableModule("Debuffs", function(L)
 
 	function targetspellmod:Enter(win, id, label)
 		win.targetname = label or L.Unknown
-		win.title = format(L["%s's debuffs on %s"], win.actorname or L.Unknown, label)
+		win.title = L["actor debuffs"](win.actorname or L.Unknown, label)
 	end
 
 	function targetspellmod:Update(win, set)
-		win.title = format(L["%s's debuffs on %s"], win.actorname or L.Unknown, win.targetname or L.Unknown)
+		win.title = L["actor debuffs"](win.actorname or L.Unknown, win.targetname or L.Unknown)
 		if not win.targetname then return end
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
@@ -694,11 +694,12 @@ Skada:AddLoadableModule("Debuffs", function(L)
 
 	function spellmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's debuffs"], label)
+		win.title = L["actor debuffs"](label)
 	end
 
 	function spellmod:Update(win, set)
-		SpellUpdateFunction("DEBUFF", win, set, L["%s's debuffs"], mod)
+		win.title = L["actor debuffs"](win.actorname or L.Unknown)
+		SpellUpdateFunction("DEBUFF", win, set, mod)
 	end
 
 	function mod:Update(win, set)

@@ -9,11 +9,8 @@ Skada:AddLoadableModule("Interrupts", function(L)
 	local _
 
 	-- cache frequently used globals
-	local pairs, ipairs, select, max = pairs, ipairs, select, math.max
-	local tostring, format, tContains = tostring, string.format, tContains
-	local UnitGUID, IsInInstance = UnitGUID, IsInInstance
+	local pairs, ipairs, tostring, format, tContains = pairs, ipairs, tostring, string.format, tContains
 	local GetSpellInfo, GetSpellLink = Skada.GetSpellInfo or GetSpellInfo, Skada.GetSpellLink or GetSpellLink
-	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
 
 	-- spells in the following table will be ignored.
 	local ignoredSpells = {}

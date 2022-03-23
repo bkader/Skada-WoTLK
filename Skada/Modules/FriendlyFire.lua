@@ -7,7 +7,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 	local spellmod = mod:NewModule(L["Damage spell list"])
 	local spelltargetmod = spellmod:NewModule(L["Damage spell targets"])
 
-	local pairs, ipairs, select, format = pairs, ipairs, select, string.format
+	local pairs, ipairs, format = pairs, ipairs, string.format
 	local GetSpellInfo, tContains = Skada.GetSpellInfo or GetSpellInfo, tContains
 	local T, _ = Skada.Table, nil
 
@@ -119,11 +119,11 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 
 	function spellmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's damage"], label)
+		win.title = L["actor damage"](label)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's damage"], win.actorname or L.Unknown)
+		win.title = L["actor damage"](win.actorname or L.Unknown)
 
 		local actor = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = actor and actor.friendfire or 0

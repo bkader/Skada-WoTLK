@@ -763,7 +763,7 @@ do
 				args = {
 					toastdesc = {
 						type = "description",
-						name = L["Uses visual notifications instead of chat window messages whenever applicable."],
+						name = L.opt_toast_desc,
 						fontSize = "medium",
 						width = "full",
 						order = 0

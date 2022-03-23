@@ -4,11 +4,11 @@ Skada:AddLoadableModule("Tweaks", function(L)
 
 	local mod = Skada:NewModule(L["Tweaks"], "AceHook-3.0")
 
-	local ipairs, select, band, format = ipairs, select, bit.band, string.format
+	local ipairs, band, format = ipairs, bit.band, string.format
 	local UnitExists, UnitName, UnitClass = UnitExists, UnitName, UnitClass
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
-	local GetTime = GetTime
+	local GetTime, _ = GetTime, nil
 
 	local BITMASK_GROUP = Skada.BITMASK_GROUP
 	if not BITMASK_GROUP then
@@ -45,6 +45,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 		local trigger_events = {
 			RANGE_DAMAGE = true,
 			SPELL_BUILDING_DAMAGE = true,
+			SPELL_CAST_SUCCESS = true,
 			SPELL_DAMAGE = true,
 			SWING_DAMAGE = true
 		}
@@ -61,7 +62,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 
 				local target = UnitName(boss .. "target")
 				if target then
-					local class = select(2, UnitClass(boss .. "target"))
+					local _, class = UnitClass(boss .. "target")
 
 					if class and Skada.classcolors[class] then
 						target = "|c" .. Skada.classcolors[class].colorStr .. target .. "|r"
@@ -74,9 +75,9 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			return hitline, targetline
 		end
 
-		function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
 			-- The Lich King fight & Fury of Frostmourne
-			if considerFoF and (... == 72350 or select(2, ...) == fofrostmourne) then
+			if considerFoF and (spellid == 72350 or spellname == fofrostmourne) then
 				-- the segment should be flagged as success.
 				if self.current and not self.current.success then
 					self.current.success = true
@@ -96,61 +97,54 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			-- first hit
 			if
 				self.db.profile.firsthit and
-				not self.current and
 				firsthit.hitline == nil and
-				(trigger_events[eventtype] or eventtype == "SPELL_CAST_SUCCESS") and
+				trigger_events[eventtype] and
 				srcName and
 				dstName and
-				not ignoredspells[(select(1, ...))]
+				not ignoredspells[spellid]
 			then
-				if
-					(band(srcFlags, BITMASK_GROUP) ~= 0 and self:IsBoss(dstGUID, dstName)) or
-					(band(dstFlags, BITMASK_GROUP) ~= 0 and self:IsBoss(srcGUID, dstName))
-				then
-					local output
+				local output -- initial output
 
-					-- close distance?
-					if self:IsBoss(srcGUID, dstName) then
-						if self:IsPet(dstGUID, dstFlags) then
-							output = format(hitformats[1], srcName, dstName or L.Unknown)
-						elseif dstName then
-							local class = select(2, UnitClass(dstName))
-							if class and self.classcolors[class] then
-								output = format(hitformats[2], srcName, self.classcolors[class].colorStr, dstName)
-							else
-								output = format(hitformats[1], srcName, dstName)
-							end
+				if band(dstFlags, BITMASK_GROUP) ~= 0 and self:IsBoss(srcGUID, dstName) then -- boss started?
+					if self:IsPet(dstGUID, dstFlags) then
+						output = format(hitformats[1], srcName, dstName or L.Unknown)
+					elseif dstName then
+						local _, class = UnitClass(dstName)
+						if class and self.classcolors[class] then
+							output = format(hitformats[2], srcName, self.classcolors[class].colorStr, dstName)
+						else
+							output = format(hitformats[1], srcName, dstName)
+						end
+					else
+						output = srcName
+					end
+				elseif band(srcFlags, BITMASK_GROUP) ~= 0 and self:IsBoss(dstGUID, dstName) then -- a player started?
+					local owner = self:GetPetOwner(srcGUID)
+					if owner then
+						local _, class = UnitClass(owner.name)
+						if class and self.classcolors[class] then
+							output = format(hitformats[4], self.classcolors[class].colorStr, owner.name, PET)
+						else
+							output = format(hitformats[1], owner.name, PET)
+						end
+					elseif srcName then
+						local _, class = UnitClass(srcName)
+						if class and self.classcolors[class] then
+							output = format(hitformats[3], self.classcolors[class].colorStr, srcName)
 						else
 							output = srcName
 						end
-					else
-						local owner = self:GetPetOwner(srcGUID)
-						if owner then
-							local class = select(2, UnitClass(owner.name))
-							if class and self.classcolors[class] then
-								output = format(hitformats[4], self.classcolors[class].colorStr, owner.name, PET)
-							else
-								output = format(hitformats[1], owner.name, PET)
-							end
-						elseif srcName then
-							local class = select(2, UnitClass(srcName))
-							if class and self.classcolors[class] then
-								output = format(hitformats[3], self.classcolors[class].colorStr, srcName)
-							else
-								output = srcName
-							end
-						end
 					end
+				end
 
-					if output then
-						local link = (eventtype == "SWING_DAMAGE") and GetSpellLink(6603) or (GetSpellLink((select(1, ...))) or GetSpellInfo((select(1, ...))))
-						firsthit.hitline, firsthit.targetline = WhoPulled(format(L["|cffffff00First Hit|r: %s from %s"], link or "", output))
-					end
+				if output then
+					local spell = (eventtype == "SWING_DAMAGE") and GetSpellLink(6603) or GetSpellLink(spellid) or GetSpellInfo(spellid)
+					firsthit.hitline, firsthit.targetline = WhoPulled(format(L["|cffffff00First Hit|r: %s from %s"], spell or "", output))
 				end
 			end
 
 			-- use the original function
-			Skada_CombatLogEvent(self, nil, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+			Skada_CombatLogEvent(self, nil, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
 		end
 
 		function mod:PrintFirstHit()
@@ -366,7 +360,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 					self:Show()
 				end
 			elseif event == "ZONE_CHANGED_NEW_AREA" then
-				local zt = select(2, IsInInstance())
+				local _, zt = IsInInstance()
 				if self.zonetype and zt ~= self.zonetype then
 					Skada:ScheduleTimer(CombatLogClearEntries, 0.01)
 				end
@@ -393,7 +387,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 					-- construct player's spells
 					if playerspells == nil then
 						playerspells = setmetatable({}, {__index = function(t, name)
-							local cost = select(4, GetSpellInfo(name))
+							local _, _, _, cost = GetSpellInfo(name)
 							rawset(t, name, not (not (cost and cost > 0)))
 							return rawget(t, name)
 						end})
@@ -461,7 +455,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			Skada.options.args.tweaks.args.general.args.firsthit = {
 				type = "toggle",
 				name = L["First hit"],
-				desc = L["Prints a message of the first hit before combat.\nOnly works for boss encounters."],
+				desc = L.opt_tweaks_firsthit_desc,
 				set = SetValue,
 				order = 10
 			}
@@ -475,7 +469,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			Skada.options.args.tweaks.args.general.args.spamage = {
 				type = "toggle",
 				name = L["Filter DPS meters Spam"],
-				desc = L["Suppresses chat messages from damage meters and provides single chat-link damage statistics in a popup."],
+				desc = L.opt_tweaks_spamage_desc,
 				set = SetValue,
 				order = 30
 			}
@@ -497,7 +491,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 				args = {
 					smartdesc = {
 						type = "description",
-						name = L["Automatically stops the current segment after the boss has died.\nUseful to avoid collecting data in case of a combat bug."],
+						name = L.opt_tweaks_smarthalt_desc,
 						fontSize = "medium",
 						order = 10,
 						width = "full"
@@ -510,7 +504,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 					smartwait = {
 						type = "range",
 						name = L["Duration"],
-						desc = L["For how long Skada should wait before stopping the segment."],
+						desc = L.opt_tweaks_smartwait_desc,
 						disabled = function()
 							return not Skada.db.profile.smartstop
 						end,
@@ -532,7 +526,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 				args = {
 					desc = {
 						type = "description",
-						name = L["Keeps the combat log from breaking without munging it completely."],
+						name = L.opt_tweaks_combatlogfix_desc,
 						fontSize = "medium",
 						order = 10,
 						width = "full"
@@ -545,7 +539,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 					combatlogfixalt = {
 						type = "toggle",
 						name = L["Aggressive Mode"],
-						desc = L["Constantly clear the combat log instead of only when it breaks."],
+						desc = L.opt_tweaks_combatlogfixalt_desc,
 						disabled = function()
 							return not Skada.db.profile.combatlogfix
 						end,

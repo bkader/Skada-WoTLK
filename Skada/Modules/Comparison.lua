@@ -11,8 +11,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 	local targetmod = mod:NewModule(L["Damage target list"])
 	local dtargetmod = targetmod:NewModule(L["Damage spell list"])
 
-	local format, max = string.format, math.max
-	local pairs, ipairs, select = pairs, ipairs, select
+	local pairs, ipairs, format, max = pairs, ipairs, string.format, math.max
 	local GetSpellInfo, T = Skada.GetSpellInfo or GetSpellInfo, Skada.Table
 	local misstypes = Skada.missTypes
 	local cacheTable = T.get("Skada_CacheTable2")
@@ -282,11 +281,11 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 	function bspellmod:Enter(win, id, label)
 		win.spellname = label
-		win.title = format(L["%s vs %s: %s"], win.actorname or L.Unknown, mod.userName or L.Unknown, format(L["%s's damage"], label))
+		win.title = format(L["%s vs %s: %s"], win.actorname or L.Unknown, mod.userName or L.Unknown, L["actor damage"](label))
 	end
 
 	function bspellmod:Update(win, set)
-		win.title = format(L["%s vs %s: %s"], win.actorname or L.Unknown, mod.userName or L.Unknown, format(L["%s's damage"], win.spellname or L.Unknown))
+		win.title = format(L["%s vs %s: %s"], win.actorname or L.Unknown, mod.userName or L.Unknown, L["actor damage"](win.spellname or L.Unknown))
 		if not set or not win.spellname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)
@@ -389,7 +388,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 		if not targets then return end
 
 		if actor.id == mod.userGUID then
-			win.title = format(L["%s's damage on %s"], actor.name, win.targetname)
+			win.title = L["actor damage"](actor.name, win.targetname)
 
 			local total = targets[win.targetname] and targets[win.targetname].amount or 0
 			if Skada.db.profile.absdamage and targets[win.targetname] and targets[win.targetname].total then
@@ -410,7 +409,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 						d.id = spellname
 						d.spellid = spell.id
 						d.label = spellname
-						d.icon = select(3, GetSpellInfo(spell.id))
+						_, _, d.icon = GetSpellInfo(spell.id)
 						d.spellschool = spell.school
 
 						d.value = spell.targets[win.targetname].amount or 0
@@ -453,7 +452,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 					d.id = spellname
 					d.spellid = spell.id
 					d.label = spellname
-					d.icon = select(3, GetSpellInfo(spell.id))
+					_, _, d.icon = GetSpellInfo(spell.id)
 					d.spellschool = spell.school
 
 					local myamount = 0
@@ -512,7 +511,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 						d.id = spellname
 						d.spellid = spell.id
 						d.label = spellname
-						d.icon = select(3, GetSpellInfo(spell.id))
+						_, _, d.icon = GetSpellInfo(spell.id)
 						d.spellschool = spell.school
 
 						local myamount = spell.targets[win.targetname].amount or 0
@@ -551,7 +550,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 			-- same actor?
 			if actor.id == mod.userGUID then
-				win.title = format(L["%s's damage"], actor.name)
+				win.title = L["actor damage"](actor.name)
 
 				for spellname, spell in pairs(spells) do
 					nr = nr + 1
@@ -560,7 +559,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 					d.id = spellname
 					d.spellid = spell.id
 					d.label = spellname
-					d.icon = select(3, GetSpellInfo(spell.id))
+					_, _, d.icon = GetSpellInfo(spell.id)
 					d.spellschool = spell.school
 
 					d.value = spell.amount or 0
@@ -589,7 +588,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 				d.id = spellname
 				d.spellid = spell.id
 				d.label = spellname
-				d.icon = select(3, GetSpellInfo(spell.id))
+				_, _, d.icon = GetSpellInfo(spell.id)
 				d.spellschool = spell.school
 
 				local myamount = 0
@@ -622,7 +621,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 						d.id = spellname
 						d.spellid = spell.id
 						d.label = spellname
-						d.icon = select(3, GetSpellInfo(spell.id))
+						_, _, d.icon = GetSpellInfo(spell.id)
 						d.spellschool = spell.school
 
 						local myamount = 0

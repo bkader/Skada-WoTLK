@@ -8,8 +8,7 @@ Skada:AddLoadableModule("Dispels", function(L)
 	local playermod = mod:NewModule(L["Dispel spell list"])
 
 	-- cache frequently used globals
-	local pairs, ipairs, select = pairs, ipairs, select
-	local tostring, format = tostring, string.format
+	local pairs, ipairs, tostring, format = pairs, ipairs, tostring, string.format
 	local GetSpellInfo, tContains = Skada.GetSpellInfo or GetSpellInfo, tContains
 	local _
 

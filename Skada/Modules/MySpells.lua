@@ -4,7 +4,7 @@ Skada:AddLoadableModule("My Spells", function(L)
 
 	local mod = Skada:NewModule(L["My Spells"])
 
-	local pairs, select, format = pairs, select, string.format
+	local pairs, format = pairs, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local _
 
@@ -85,7 +85,7 @@ Skada:AddLoadableModule("My Spells", function(L)
 					d.id = spellname
 					d.spellid = spell.id
 					d.label = spellname
-					d.icon = select(3, GetSpellInfo(spell.id))
+					_, _, d.icon = GetSpellInfo(spell.id)
 					d.spellschool = spell.school
 
 					d.value = Skada.db.profile.absdamage and spell.total or spell.amount

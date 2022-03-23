@@ -6,7 +6,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 	local playermod = mod:NewModule(L["Player's deaths"])
 	local deathlogmod = mod:NewModule(L["Death log"])
 
-	local UnitHealth, UnitHealthInfo = UnitHealth, Skada.UnitHealthInfo
+	local UnitHealthInfo = Skada.UnitHealthInfo
 	local UnitIsFeignDeath = UnitIsFeignDeath
 	local tinsert, tremove, tsort, tconcat = table.insert, table.remove, table.sort, table.concat
 	local ipairs, select = ipairs, select
@@ -40,7 +40,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 			log.source = data.srcName
 			log.amount = data.amount
 			log.time = ts
-			log.hp = select(2, UnitHealthInfo(player.name, player.id, "group"))
+			_, log.hp = UnitHealthInfo(player.name, player.id, "group")
 
 			if data.overheal and data.overheal > 0 then
 				log.overheal = data.overheal

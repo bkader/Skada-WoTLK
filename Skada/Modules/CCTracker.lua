@@ -1,7 +1,6 @@
 local Skada = Skada
 
-local pairs, ipairs, select = pairs, ipairs, select
-local tostring, format = tostring, string.format
+local pairs, ipairs, tostring, format = pairs, ipairs, tostring, string.format
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 local playerPrototype = Skada.playerPrototype
@@ -701,10 +700,8 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 	local playermod = mod:NewModule(L["Crowd Control Spells"])
 	local targetmod = mod:NewModule(L["Crowd Control Targets"])
 
-	local UnitExists, UnitName, IsInRaid = UnitExists, UnitName, Skada.IsInRaid
-	local GetNumRaidMembers, GetPartyAssignment = GetNumRaidMembers, GetPartyAssignment
-	local IsInInstance, UnitInRaid = IsInInstance, UnitInRaid
-	local UnitIterator = Skada.UnitIterator
+	local UnitName, UnitInRaid, IsInRaid = UnitName, UnitInRaid, Skada.IsInRaid
+	local GetPartyAssignment, UnitIterator = GetPartyAssignment, Skada.UnitIterator
 
 	local function log_ccbreak(set, cc)
 		local player = Skada:GetPlayer(set, cc.playerid, cc.playername)
@@ -762,7 +759,7 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 		-- Optional announce
 		srcName = srcName_modified or srcName
 		if Skada.db.profile.modules.ccannounce and IsInRaid() and UnitInRaid(srcName) then
-			if select(2, IsInInstance()) == "pvp" then return end
+			if Skada.instanceType == "pvp" then return end
 
 			-- Ignore main tanks and main assist?
 			if Skada.db.profile.modules.ccignoremaintanks then

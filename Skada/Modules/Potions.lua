@@ -7,16 +7,12 @@ Skada:AddLoadableModule("Potions", function(L)
 	local potionmod = mod:NewModule(L["Players list"])
 
 	-- cache frequently used globals
-	local pairs, ipairs, select, tconcat = pairs, ipairs, select, table.concat
-	local format, strsub, tostring = string.format, string.sub, tostring
+	local pairs, ipairs, tconcat, format, strsub = pairs, ipairs, table.concat, string.format, string.sub
 	local GetItemInfo, GetSpellInfo = GetItemInfo, Skada.GetSpellInfo or GetSpellInfo
-	local GroupIterator = Skada.GroupIterator
-	local UnitExists, UnitIsDeadOrGhost = UnitExists, UnitIsDeadOrGhost
-	local UnitGUID, UnitName = UnitGUID, UnitName
-	local UnitClass, UnitBuff = UnitClass, UnitBuff
+	local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
+	local UnitGUID, UnitName, UnitClass, UnitBuff = UnitGUID, UnitName, UnitClass, UnitBuff
 	local new, del = Skada.TablePool()
-	local T = Skada.Table
-	local potionIDs, _ = {}, nil
+	local T, potionIDs, _= Skada.Table, {}, nil
 
 	local prepotionStr, potionStr = "|c%s%s|r %s", "|T%s:14:14:1:-2:32:32:2:30:2:30|t"
 	local prepotion
@@ -49,11 +45,11 @@ Skada:AddLoadableModule("Potions", function(L)
 		local function CheckUnitPotions(unit, owner, prepot)
 			if owner == nil and not UnitIsDeadOrGhost(unit) then
 				local playerid, playername = UnitGUID(unit), UnitName(unit)
-				local class = select(2, UnitClass(unit))
+				local _, class = UnitClass(unit)
 
 				local potions = new()
 				for potionid, _ in pairs(potionIDs) do
-					local icon, _, _, _, _, _, _, _, spellid = select(3, UnitBuff(unit, GetSpellInfo(potionid)))
+					local _, _, icon, _, _, _, _, _, _, _, spellid = UnitBuff(unit, GetSpellInfo(potionid))
 					if spellid and potionIDs[spellid] then
 						-- instant recording doesn't work, so we delay it
 						Skada:ScheduleTimer(function() PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid) end, 1)

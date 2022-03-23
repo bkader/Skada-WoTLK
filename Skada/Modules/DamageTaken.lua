@@ -1,13 +1,9 @@
 local Skada = Skada
 
 -- cache frequently used globals
-local pairs, ipairs, select = pairs, ipairs, select
-local format, max = string.format, math.max
-local GetSpellInfo = Skada.GetSpellInfo
-local cacheTable = Skada.cacheTable
-local misstypes = Skada.missTypes
-local T = Skada.Table
-local _
+local pairs, ipairs, select, format, max = pairs, ipairs, select, string.format, math.max
+local GetSpellInfo, cacheTable, misstypes = Skada.GetSpellInfo, Skada.cacheTable, Skada.missTypes
+local T, _ = Skada.Table, nil
 
 -- =================== --
 -- Damage Taken Module --
@@ -440,7 +436,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				else
 					d.spellid = spell.id
 					d.label = spellname
-					d.icon = select(3, GetSpellInfo(spell.id))
+					_, _, d.icon = GetSpellInfo(spell.id)
 				end
 
 				d.value = spell.amount
@@ -634,11 +630,11 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 
 	function tdetailmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = format(L["%s's damage on %s"], label, win.actorname or L.Unknown)
+		win.title = L["actor damage"](label, win.actorname or L.Unknown)
 	end
 
 	function tdetailmod:Update(win, set)
-		win.title = format(L["%s's damage on %s"], win.targetname or L.Unknown, win.actorname or L.Unknown)
+		win.title = L["actor damage"](win.targetname or L.Unknown, win.actorname or L.Unknown)
 		if not set or not win.targetname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -668,7 +664,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 							d.id = spellname
 							d.spellid = spell.id
 							d.label = spellname
-							d.icon = select(3, GetSpellInfo(spell.id))
+							_, _, d.icon = GetSpellInfo(spell.id)
 						end
 
 						d.spellschool = spell.school
@@ -1191,7 +1187,7 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 			d.id = spellname
 			d.spellid = spell.id
 			d.label = spellname
-			d.icon = select(3, GetSpellInfo(spell.id))
+			_, _, d.icon = GetSpellInfo(spell.id)
 			d.spellschool = spell.school
 
 			d.value = spell.amount

@@ -5,8 +5,7 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 	local mod = Skada:NewModule(L["Parry-Haste"])
 	local targetmod = mod:NewModule(L["Parry target list"])
 
-	local pairs, ipairs, select = pairs, ipairs, select
-	local tostring, format = tostring, string.format
+	local pairs, ipairs, tostring, format = pairs, ipairs, tostring, string.format
 
 	local parrybosses = {
 		[L["Acidmaw"]] = true,
@@ -44,8 +43,8 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 
 	local data = {}
 
-	local function SpellMissed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		if parrybosses[dstName] and srcGUID ~= dstGUID and select(4, ...) == "PARRY" then
+	local function SpellMissed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, _, _, _, misstype)
+		if parrybosses[dstName] and srcGUID ~= dstGUID and misstype == "PARRY" then
 			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 
 			data.playerid = srcGUID

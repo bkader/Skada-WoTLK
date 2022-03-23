@@ -4,14 +4,15 @@ Skada:AddLoadableModule("Threat", function(L)
 
 	local mod = Skada:NewModule(L["Threat"])
 
-	local ipairs, select, format, max = ipairs, select, string.format, math.max
-	local GroupIterator, UnitExists, UnitIsFriend = Skada.GroupIterator, UnitExists, UnitIsFriend
+	local ipairs, format, max = ipairs, string.format, math.max
+	local GroupIterator, UnitExists = Skada.GroupIterator, UnitExists
 	local UnitName, UnitClass, UnitGUID = UnitName, UnitClass, UnitGUID
 	local GetUnitRole, GetUnitSpec = Skada.GetUnitRole, Skada.GetUnitSpec
 	local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 	local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
 	local PlaySoundFile = PlaySoundFile
 	local T = Skada.Table
+	local _
 
 	local aggroIcon = [[Interface\Icons\ability_physical_taunt]]
 
@@ -69,7 +70,7 @@ Skada:AddLoadableModule("Threat", function(L)
 						player.name = player.name .. " (" .. UnitName(owner) .. ")"
 						player.class = "PET"
 					else
-						player.class = select(2, UnitClass(unit))
+						_, player.class = UnitClass(unit)
 						if not Skada.AscensionCoA and not Skada.Ascension then
 							player.role = GetUnitRole(unit, player.class)
 							player.spec = GetUnitSpec(unit, player.class)
@@ -453,7 +454,7 @@ Skada:AddLoadableModule("Threat", function(L)
 						soundfile = {
 							type = "select",
 							name = L["Threat sound"],
-							desc = L["The sound that will be played when your threat percentage reaches a certain point."],
+							desc = L.opt_threat_soundfile_desc,
 							order = 60,
 							width = "double",
 							dialogControl = "LSM30_Sound",
@@ -476,7 +477,7 @@ Skada:AddLoadableModule("Threat", function(L)
 						threshold = {
 							type = "range",
 							name = L["Threat Threshold"],
-							desc = L["When your threat reaches this level, relative to tank, warnings are shown."],
+							desc = L.opt_threat_threshold_desc,
 							order = 80,
 							min = 60,
 							max = 130,
@@ -487,31 +488,31 @@ Skada:AddLoadableModule("Threat", function(L)
 				rawvalue = {
 					type = "toggle",
 					name = L["Show raw threat"],
-					desc = L["Shows raw threat percentage relative to tank instead of modified for range."],
+					desc = L.opt_threat_rawvalue_desc,
 					order = 20
 				},
 				focustarget = {
 					type = "toggle",
 					name = L["Use focus target"],
-					desc = L["Tells Skada to additionally check your 'focus' and 'focustarget' before your 'target' and 'targettarget' in that order for threat display."],
+					desc = L.opt_threat_focustarget_desc,
 					order = 30
 				},
 				notankwarnings = {
 					type = "toggle",
 					name = L["Disable while tanking"],
-					desc = L["Do not give out any warnings if Defensive Stance, Bear Form, Righteous Fury or Frost Presence is active."],
+					desc = L.opt_threat_notankwarnings_desc,
 					order = 40
 				},
 				ignorePets = {
 					type = "toggle",
 					name = L["Ignore Pets"],
-					desc = L["Disable tracking pets threat and only watch players."],
+					desc = L.opt_threat_ignorepets_desc,
 					order = 50,
 				},
 				showAggroBar = {
 					type = "toggle",
 					name = L["Show Pull Aggro Bar"],
-					desc = L["Show a bar for the amount of threat you will need to reach in order to pull aggro."],
+					desc = L.opt_threat_showaggrobar_desc,
 					order = 60
 				},
 				sep = {
@@ -565,7 +566,7 @@ Skada:AddLoadableModule("Threat", function(L)
 	do
 		local function add_threat_feed()
 			if Skada.current and UnitExists("target") then
-				local threatpct = select(3, UnitDetailedThreatSituation("player", "target"))
+				local _, _, threatpct = UnitDetailedThreatSituation("player", "target")
 				return threatpct and Skada:FormatPercent(threatpct)
 			end
 		end

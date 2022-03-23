@@ -9,8 +9,7 @@ Skada:AddLoadableModule("Fails", function(L)
 	local playermod = mod:NewModule(L["Player's failed events"])
 	local spellmod = mod:NewModule(L["Event's failed players"])
 
-	local pairs, ipairs = pairs, ipairs
-	local tostring, format, tContains = tostring, string.format, tContains
+	local pairs, ipairs, tostring, format, tContains = pairs, ipairs, tostring, string.format, tContains
 	local GetSpellInfo, UnitGUID, IsInGroup = Skada.GetSpellInfo or GetSpellInfo, UnitGUID, Skada.IsInGroup
 	local _
 

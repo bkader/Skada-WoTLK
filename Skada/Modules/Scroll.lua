@@ -5,7 +5,7 @@ if not bars then return end
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 local mod = Skada:NewModule(L["Scroll"])
 
-local db
+local db, _
 local defaults = {
 	speed = 2.0,
 	kspeed = 3,
@@ -44,7 +44,7 @@ function mod.HideCursor(win)
 end
 
 function mod.BeginScroll(win)
-	mod.ypos = select(2, GetCursorPosition())
+	_, mod.ypos = GetCursorPosition()
 	mod.scrolling = win
 	mod.ShowCursor(win)
 end
@@ -69,7 +69,7 @@ function mod.OnUpdate(f, elap)
 		return
 	end
 	mod.elap = 0
-	local newpos = select(2, GetCursorPosition())
+	local _, newpos = GetCursorPosition()
 	local step = (win.db.barheight + win.db.barspacing) / (win.bargroup:GetEffectiveScale() * db.speed)
 	while math.abs(newpos - mod.ypos) > step do
 		if newpos > mod.ypos then

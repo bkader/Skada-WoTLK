@@ -10,7 +10,7 @@ local pairs, ipairs = pairs, ipairs
 local tsort, tContains = table.sort, tContains
 local format, max = string.format, math.max
 local GetSpellLink = Skada.GetSpellLink or GetSpellLink
-local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
+local CloseDropDownMenus = CloseDropDownMenus
 local GetScreenWidth, GetScreenHeight = GetScreenWidth, GetScreenHeight
 local IsShiftKeyDown = IsShiftKeyDown
 local IsAltKeyDown = IsAltKeyDown
@@ -87,7 +87,7 @@ function mod:Create(window)
 		--
 
 		-- config button
-		AddWindowButton(bargroup, p.title.toolbar, 1, L.Configure, L.Config_Button_Desc, function(_, button)
+		AddWindowButton(bargroup, p.title.toolbar, 1, L.Configure, L.btn_config_desc, function(_, button)
 			if button == "RightButton" then
 				Skada:OpenOptions(bargroup.win)
 			else
@@ -96,12 +96,12 @@ function mod:Create(window)
 		end)
 
 		-- reset button
-		AddWindowButton(bargroup, p.title.toolbar, 2, RESET, L.Reset_Button_Desc, function()
+		AddWindowButton(bargroup, p.title.toolbar, 2, RESET, L.btn_reset_desc, function()
 			Skada:ShowPopup(bargroup.win)
 		end)
 
 		-- segment button
-		AddWindowButton(bargroup, p.title.toolbar, 3, L.Segment, L.Segment_Button_Desc, function(_, button)
+		AddWindowButton(bargroup, p.title.toolbar, 3, L.Segment, L.btn_segment_desc, function(_, button)
 			if button == "MiddleButton" then
 				bargroup.win:set_selected_set("current")
 			elseif IsModifierKeyDown() then
@@ -116,11 +116,11 @@ function mod:Create(window)
 			Skada:ModeMenu(bargroup.win)
 		end)
 
-		AddWindowButton(bargroup, p.title.toolbar, 5, L.Report, L.Report_Button_Desc, function()
+		AddWindowButton(bargroup, p.title.toolbar, 5, L.Report, L.btn_report_desc, function()
 			Skada:OpenReportWindow(bargroup.win)
 		end)
 
-		AddWindowButton(bargroup, p.title.toolbar, 6, L.Stop, L.Stop_Button_Desc, function()
+		AddWindowButton(bargroup, p.title.toolbar, 6, L.Stop, L.btn_stop_desc, function()
 			if Skada.current and Skada.current.stopped then
 				Skada:ResumeSegment()
 			elseif Skada.current then
@@ -1270,7 +1270,7 @@ function mod:AddDisplayOptions(win, options)
 					showself = {
 						type = "toggle",
 						name = L["Always show self"],
-						desc = L["Keeps the player shown last even if there is not enough space."],
+						desc = L.opt_showself_desc,
 						descStyle = "inline",
 						width = "double",
 						order = 10
@@ -1535,13 +1535,13 @@ function mod:AddDisplayOptions(win, options)
 					menu = {
 						type = "toggle",
 						name = L["Configure"],
-						desc = L.Config_Button_Desc,
+						desc = L.btn_config_desc,
 						order = 10
 					},
 					reset = {
 						type = "toggle",
 						name = RESET,
-						desc = L.Reset_Button_Desc,
+						desc = L.btn_reset_desc,
 						order = 20
 					},
 					segment = {
@@ -1559,13 +1559,13 @@ function mod:AddDisplayOptions(win, options)
 					report = {
 						type = "toggle",
 						name = L["Report"],
-						desc = L.Report_Button_Desc,
+						desc = L.btn_report_desc,
 						order = 50
 					},
 					stop = {
 						type = "toggle",
 						name = L["Stop"],
-						desc = L.Stop_Button_Desc,
+						desc = L.btn_stop_desc,
 						order = 60
 					},
 					hovermode = {
@@ -1696,6 +1696,6 @@ end
 
 function mod:OnInitialize()
 	self.name = L["Bar display"]
-	self.description = L["Bar display is the normal bar window used by most damage meters. It can be extensively styled."]
+	self.description = L.mod_bar_desc
 	Skada:AddDisplaySystem("bar", self)
 end

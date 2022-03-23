@@ -9,7 +9,7 @@ local LibWindow = LibStub("LibWindow-1.1")
 local media = LibStub("LibSharedMedia-3.0")
 
 local tsort, format = table.sort, string.format
-local CloseDropDownMenus = L_CloseDropDownMenus or CloseDropDownMenus
+local CloseDropDownMenus = CloseDropDownMenus
 
 local WrapTextInColorCode = Skada.WrapTextInColorCode
 local RGBPercToHex = Skada.RGBPercToHex
@@ -277,7 +277,7 @@ function mod:AddDisplayOptions(win, options)
 			useframe = {
 				type = "toggle",
 				name = L["Use frame"],
-				desc = L["Shows a standalone frame. Not needed if you are using an LDB display provider such as Titan Panel or ChocolateBar."],
+				desc = L.opt_useframe_desc,
 				order = 10,
 				width = "double"
 			},
@@ -337,6 +337,6 @@ end
 
 function mod:OnInitialize()
 	self.name = name
-	self.description = L["Data text acts as an LDB data feed. It can be integrated in any LDB display such as Titan Panel or ChocolateBar. It also has an optional internal frame."]
+	self.description = L.mod_broker_desc
 	Skada:AddDisplaySystem("broker", self)
 end

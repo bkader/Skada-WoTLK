@@ -7,6 +7,7 @@ Skada:AddLoadableModule("PVP", function(L)
 	local format, wipe, GetTime = string.format, wipe, GetTime
 	local UnitGUID, UnitClass, UnitBuff, UnitIsPlayer = UnitGUID, UnitClass, UnitBuff, UnitIsPlayer
 	local GetSpellInfo, UnitCastingInfo = GetSpellInfo, UnitCastingInfo
+	local _
 
 	local specsCache, specsRoles = nil, nil
 	local spellsTable, aurasTable = nil, nil
@@ -168,7 +169,7 @@ Skada:AddLoadableModule("PVP", function(L)
 		if Skada.instanceType ~= "pvp" and Skada.instanceType ~= "arena" then
 			self:UnregisterEvent("UNIT_AURA")
 		elseif unit and UnitIsPlayer(unit) and not specsCache[UnitGUID(unit)] then
-			local class = select(2, UnitClass(unit))
+			local _, class = UnitClass(unit)
 			if class and Skada.validclass[class] then
 				local i = 1
 				local name = UnitBuff(unit, i)
@@ -188,7 +189,8 @@ Skada:AddLoadableModule("PVP", function(L)
 		if Skada.instanceType ~= "pvp" and Skada.instanceType ~= "arena" then
 			self:UnregisterEvent("UNIT_SPELLCAST_START")
 		elseif unit and UnitIsPlayer(unit) and not specsCache[UnitGUID(unit)] then
-			local class, spell = select(2, UnitClass(unit)), UnitCastingInfo(unit)
+			local _, class = UnitClass(unit)
+			local spell = UnitCastingInfo(unit)
 			if class and Skada.validclass[class] and spellsTable[class] and spellsTable[class][spell] then
 				specsCache[UnitGUID(unit)] = spellsTable[class][spell]
 			end

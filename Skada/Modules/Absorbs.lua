@@ -2,9 +2,9 @@ local Skada = Skada
 
 -- cache frequently used globals
 local pairs, ipairs, select, format, wipe = pairs, ipairs, select, string.format, wipe
-local max, min, floor = math.max, math.min, math.floor
+local min, floor = math.min, math.floor
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-local UnitGUID, UnitClass, unitClass = UnitGUID, UnitClass, Skada.unitClass
+local UnitGUID, UnitClass = UnitGUID, UnitClass
 local _
 
 -- ============== --
@@ -560,7 +560,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			if not UnitIsDeadOrGhost(unit) then
 				local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
 				for i = 1, 40 do
-					local expires, unitCaster, _, _, spellid = select(7, UnitBuff(unit, i))
+					local _, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitBuff(unit, i)
 					if spellid then
 						if absorbspells[spellid] and unitCaster then
 							HandleShield(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
@@ -572,7 +572,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 				-- passive shields (not for pets)
 				if owner == nil then
-					local class = select(2, UnitClass(unit))
+					local _, class = UnitClass(unit)
 					if passiveshields[class] then
 						for _, spell in ipairs(passiveshields[class]) do
 							local points = LGT:GUIDHasTalent(dstGUID, GetSpellInfo(spell[1]), LGT:GetActiveTalentGroup(unit))
@@ -759,7 +759,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		if eventtype == "SWING_DAMAGE" then
 			amount, _, _, _, _, absorbed = ...
 		else
-			spellschool, amount, _, _, _, _, absorbed = select(3, ...)
+			_, _, spellschool, amount, _, _, _, _, absorbed = ...
 		end
 
 		if (absorbed or 0) > 0 and dstName and shields[dstName] then
@@ -773,7 +773,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		if eventtype == "SWING_MISSED" then
 			misstype, absorbed = ...
 		else
-			spellschool, misstype, absorbed = select(3, ...)
+			_, _, spellschool, misstype, absorbed = ...
 		end
 
 		if misstype == "ABSORB" and (absorbed or 0) > 0 and dstName and shields[dstName] then
@@ -842,11 +842,11 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	function spellmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = format(L["%s's absorbs on %s"], win.actorname or L.Unknown, label)
+		win.title = L["actor absorb spells"](win.actorname or L.Unknown, label)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's absorbs on %s"], win.actorname or L.Unknown, win.targetname or L.Unknown)
+		win.title = L["actor absorb spells"](win.actorname or L.Unknown, win.targetname or L.Unknown)
 		if not set or not win.targetname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -886,11 +886,11 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	function playermod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's absorb spells"], label)
+		win.title = L["actor absorb spells"](label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's absorb spells"], win.actorname or L.Unknown)
+		win.title = L["actor absorb spells"](win.actorname or L.Unknown)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -1272,11 +1272,11 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 
 	function spellmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = format(L["%s's absorbs and healing on %s"], win.actorname or L.Unknown, label)
+		win.title = L["actor absorb and heal spells"](win.actorname or L.Unknown, label)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's absorbs and healing on %s"], win.actorname or L.Unknown, win.targetname or L.Unknown)
+		win.title = L["actor absorb and heal spells"](win.actorname or L.Unknown, win.targetname or L.Unknown)
 		if not set or not win.targetname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -1352,11 +1352,11 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 
 	function playermod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's absorb and healing spells"], label)
+		win.title = L["actor absorb and heal spells"](label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's absorb and healing spells"], win.actorname or L.Unknown)
+		win.title = L["actor absorb and heal spells"](win.actorname or L.Unknown)
 		if not win.actorname then return end
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)

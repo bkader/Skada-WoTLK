@@ -6,8 +6,7 @@ Skada:AddLoadableModule("Resurrects", function(L)
 	local playermod = mod:NewModule(L["Resurrect spell list"])
 	local targetmod = mod:NewModule(L["Resurrect target list"])
 
-	local select, pairs, ipairs = select, pairs, ipairs
-	local tostring, format = tostring, string.format
+	local pairs, ipairs, tostring, format = pairs, ipairs, tostring, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local _
 

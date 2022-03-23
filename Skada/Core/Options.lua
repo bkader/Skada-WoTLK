@@ -262,7 +262,7 @@ Skada.options = {
 						shortmenu = {
 							type = "toggle",
 							name = L["Shorten menus"],
-							desc = L["Removes mode and segment menus from Skada menu to reduce its height. Menus are still accessible using window buttons."],
+							desc = L.opt_shortmenu_desc,
 							order = 20
 						},
 						mergepets = {
@@ -348,7 +348,7 @@ Skada.options = {
 						showself = {
 							type = "toggle",
 							name = L["Always show self"],
-							desc = L["Keeps the player shown last even if there is not enough space."],
+							desc = L.opt_showself_desc,
 							order = 140
 						},
 						reportlinks = {
@@ -366,13 +366,13 @@ Skada.options = {
 						autostop = {
 							type = "toggle",
 							name = L["Autostop"],
-							desc = L["Automatically stops the current segment after half of all raid members have died."],
+							desc = L.opt_autostop_desc,
 							order = 170
 						},
 						tentativecombatstart = {
 							type = "toggle",
 							name = L["Aggressive combat detection"],
-							desc = L.tentativecombatstart_desc,
+							desc = L.opt_tentativecombatstart_desc,
 							order = 180
 						}
 					}
@@ -446,7 +446,7 @@ Skada.options = {
 						timemesure = {
 							type = "select",
 							name = L["Time Measure"],
-							desc = L.timemesure_desc,
+							desc = L.opt_timemesure_desc,
 							values = {[1] = L["Activity Time"], [2] = L["Effective Time"]},
 							get = function()
 								return Skada.db.profile.timemesure or 1
@@ -457,7 +457,7 @@ Skada.options = {
 						feed = {
 							type = "select",
 							name = L["Data Feed"],
-							desc = L["Choose which data feed to show in the DataBroker view. This requires an LDB display addon, such as Titan Panel."],
+							desc = L.opt_feed_desc,
 							width = "double",
 							values = function()
 								local feeds = {[""] = NONE}
@@ -629,7 +629,7 @@ Skada.options = {
 				skippopup = {
 					type = "toggle",
 					name = L["Skip reset dialog"],
-					desc = L["Enable this if you want Skada to reset without the confirmation dialog."],
+					desc = L.opt_skippopup_desc,
 					descStyle = "inline",
 					order = 5,
 					width = "double",
@@ -1137,7 +1137,7 @@ function Skada:FrameSettings(db, include_dimensions)
 							modeincombat = {
 								type = "select",
 								name = L["Combat Mode"],
-								desc = L["Automatically switch to set |cffffbb00Current|r and this mode when entering combat."],
+								desc = L.opt_combatmode_desc,
 								order = 10,
 								values = function()
 									local m = {[""] = NONE}
@@ -1150,7 +1150,7 @@ function Skada:FrameSettings(db, include_dimensions)
 							wipemode = {
 								type = "select",
 								name = L["Wipe Mode"],
-								desc = L["Automatically switch to set |cffffbb00Current|r and this mode after a wipe."],
+								desc = L.opt_wipemode_desc,
 								order = 20,
 								values = function()
 									local m = {[""] = NONE}
@@ -1170,7 +1170,7 @@ function Skada:FrameSettings(db, include_dimensions)
 							autocurrent = {
 								type = "toggle",
 								name = L["Auto switch to current"],
-								desc = L["Whenever a combat starts, this window automatically switches to |cffffbb00Current|r segment."],
+								desc = L.opt_autocurrent_desc,
 								order = 40
 							}
 						}
