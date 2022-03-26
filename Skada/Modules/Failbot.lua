@@ -8,13 +8,11 @@ Skada:AddLoadableModule("Fails", function(L)
 	local mod = Skada:NewModule(L["Fails"])
 	local playermod = mod:NewModule(L["Player's failed events"])
 	local spellmod = mod:NewModule(L["Event's failed players"])
+	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local pairs, ipairs, tostring, format, tContains = pairs, ipairs, tostring, string.format, tContains
 	local GetSpellInfo, UnitGUID, IsInGroup = Skada.GetSpellInfo or GetSpellInfo, UnitGUID, Skada.IsInGroup
 	local _
-
-	-- spells in the following table will be ignored.
-	local ignoredSpells = {}
 
 	local function log_fail(set, playerid, playername, spellid, event)
 		local player = Skada:FindPlayer(set, playerid, playername)
@@ -33,7 +31,7 @@ Skada:AddLoadableModule("Fails", function(L)
 	local function onFail(event, who, failtype)
 		if who and event then
 			local spellid = LibFail:GetEventSpellId(event)
-			if spellid and not tContains(ignoredSpells, spellid) then
+			if spellid and not ignoredSpells[spellid] then
 				local unitGUID = UnitGUID(who)
 				if unitGUID then
 					Skada:DispatchSets(log_fail, unitGUID, who, spellid, event)
@@ -173,6 +171,11 @@ Skada:AddLoadableModule("Fails", function(L)
 		}
 
 		Skada:AddMode(self)
+
+		-- table of ignored spells:
+		if Skada.ignoredSpells and Skada.ignoredSpells.fails then
+			ignoredSpells = Skada.ignoredSpells.fails
+		end
 	end
 
 	function mod:OnDisable()

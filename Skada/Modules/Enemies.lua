@@ -2,7 +2,7 @@ local Skada = Skada
 
 -- frequently used globals --
 local pairs, ipairs, type, format, max, wipe = pairs, ipairs, type, string.format, math.max, wipe
-local GetSpellInfo, T, tContains = Skada.GetSpellInfo or GetSpellInfo, Skada.Table, tContains
+local GetSpellInfo, T = Skada.GetSpellInfo or GetSpellInfo, Skada.Table
 local setPrototype, enemyPrototype = Skada.setPrototype, Skada.enemyPrototype
 local _
 
@@ -16,12 +16,14 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 	local spellmod = mod:NewModule(L["Damage spell list"])
 	local sourcemod = mod:NewModule(L["Damage source list"])
 	local usefulmod = mod:NewModule(L["Useful Damage"])
+	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local instanceDiff, customGroupsTable, customUnitsTable, customUnitsInfo
 	local UnitIterator, GetCreatureId = Skada.UnitIterator, Skada.GetCreatureId
 	local UnitHealthInfo, UnitPowerInfo = Skada.UnitHealthInfo, Skada.UnitPowerInfo
 	local UnitExists, UnitGUID = UnitExists, UnitGUID
 	local UnitHealthMax, UnitPowerMax = UnitHealthMax, UnitPowerMax
+	local tContains = tContains
 
 	-- this table holds the units to which the damage done is
 	-- collected into a new fake unit.
@@ -194,9 +196,6 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 		log_custom_unit(set, customGroups[name], playername, spellid, spellschool, amount, absorbed)
 	end
 
-	-- spells in the following table will be ignored.
-	local ignoredSpells = {}
-
 	local function log_damage(set, dmg)
 		local absorbed = dmg.absorbed or 0
 		if (dmg.amount + absorbed) == 0 then return end
@@ -321,7 +320,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 				dmg.spellid, _, dmg.spellschool, dmg.amount, dmg.overkill, _, _, _, dmg.absorbed = ...
 			end
 
-			if dmg.spellid and not tContains(ignoredSpells, dmg.spellid) then
+			if dmg.spellid and not ignoredSpells[dmg.spellid] then
 				dmg.enemyid = dstGUID
 				dmg.enemyname = dstName
 				dmg.enemyflags = dstFlags
@@ -346,7 +345,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 				spellid, _, spellschool, misstype, amount = ...
 			end
 
-			if misstype == "ABSORB" and spellid and not tContains(ignoredSpells, spellid) then
+			if misstype == "ABSORB" and spellid and not ignoredSpells[spellid] then
 				srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 
 				dmg.enemyid = dstGUID
@@ -632,6 +631,11 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 		)
 
 		Skada:AddMode(self, L["Enemies"])
+
+		-- table of ignored spells:
+		if Skada.ignoredSpells and Skada.ignoredSpells.damage then
+			ignoredSpells = Skada.ignoredSpells.damage
+		end
 	end
 
 	function mod:OnDisable()
@@ -779,15 +783,11 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 	if Skada:IsDisabled("Enemy Damage Done") then return end
 
 	local mod = Skada:NewModule(L["Enemy Damage Done"])
-
 	local targetmod = mod:NewModule(L["Damage target list"])
 	local targetspellmod = targetmod:NewModule(L["Damage spell targets"])
-
 	local spellmod = mod:NewModule(L["Damage spell list"])
 	local spelltargetmod = spellmod:NewModule(L["Damage spell targets"])
-
-	-- spells in the following table will be ignored.
-	local ignoredSpells = {}
+	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local function log_damage(set, dmg)
 		local absorbed = dmg.absorbed or 0
@@ -860,7 +860,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 				dmg.spellid, _, dmg.spellschool, dmg.amount, dmg.overkill, _, _, _, dmg.absorbed = ...
 			end
 
-			if dmg.spellid and not tContains(ignoredSpells, dmg.spellid) then
+			if dmg.spellid and not ignoredSpells[dmg.spellid] then
 				dmg.enemyid = srcGUID
 				dmg.enemyname = srcName
 				dmg.enemyflags = srcFlags
@@ -885,7 +885,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 				spellid, _, spellschool, misstype, amount = ...
 			end
 
-			if misstype == "ABSORB" and spellid and not tContains(ignoredSpells, spellid) then
+			if misstype == "ABSORB" and spellid and not ignoredSpells[spellid] then
 				srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 
 				dmg.enemyid = srcGUID
@@ -1179,6 +1179,11 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 		)
 
 		Skada:AddMode(self, L["Enemies"])
+
+		-- table of ignored spells:
+		if Skada.ignoredSpells and Skada.ignoredSpells.damagetaken then
+			ignoredSpells = Skada.ignoredSpells.damagetaken
+		end
 	end
 
 	function mod:OnDisable()
@@ -1287,9 +1292,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 	local mod = Skada:NewModule(L["Enemy Healing Done"])
 	local targetmod = mod:NewModule(L["Healed target list"])
 	local spellmod = mod:NewModule(L["Healing spell list"])
-
-	-- spells in the following table will be ignored.
-	local ignoredSpells = {}
+	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local function log_heal(set, data)
 		if (data.amount or 0) == 0 then return end
@@ -1325,7 +1328,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 
 	local function SpellHeal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, _, spellschool, amount, overheal = ...
-		if spellid and not tContains(ignoredSpells, spellid) then
+		if spellid and not ignoredSpells[spellid] then
 			heal.enemyid = srcGUID
 			heal.enemyname = srcName
 			heal.enemyflags = srcFlags
@@ -1487,6 +1490,11 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 		)
 
 		Skada:AddMode(self, L["Enemies"])
+
+		-- table of ignored spells:
+		if Skada.ignoredSpells and Skada.ignoredSpells.heals then
+			ignoredSpells = Skada.ignoredSpells.heals
+		end
 	end
 
 	function mod:OnDisable()

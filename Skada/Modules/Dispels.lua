@@ -6,14 +6,12 @@ Skada:AddLoadableModule("Dispels", function(L)
 	local spellmod = mod:NewModule(L["Dispelled spell list"])
 	local targetmod = mod:NewModule(L["Dispelled target list"])
 	local playermod = mod:NewModule(L["Dispel spell list"])
+	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	-- cache frequently used globals
 	local pairs, ipairs, tostring, format = pairs, ipairs, tostring, string.format
-	local GetSpellInfo, tContains = Skada.GetSpellInfo or GetSpellInfo, tContains
+	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local _
-
-	-- spells in the following table will be ignored.
-	local ignoredSpells = {}
 
 	local function log_dispel(set, data)
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
@@ -57,9 +55,7 @@ Skada:AddLoadableModule("Dispels", function(L)
 		data.extraspellid = data.extraspellid or 6603
 
 		-- invalid/ignored spell?
-		if (data.spellid and tContains(ignoredSpells, data.spellid)) or tContains(ignoredSpells, data.extraspellid) then
-			return
-		end
+		if (data.spellid and ignoredSpells[data.spellid]) or ignoredSpells[data.extraspellid] then return end
 
 		data.playerid = srcGUID
 		data.playername = srcName
@@ -253,6 +249,11 @@ Skada:AddLoadableModule("Dispels", function(L)
 		)
 
 		Skada:AddMode(self)
+
+		-- table of ignored spells:
+		if Skada.ignoredSpells and Skada.ignoredSpells.dispels then
+			ignoredSpells = Skada.ignoredSpells.dispels
+		end
 	end
 
 	function mod:OnDisable()

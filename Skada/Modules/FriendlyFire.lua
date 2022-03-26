@@ -6,13 +6,11 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 	local targetmod = mod:NewModule(L["Damage target list"])
 	local spellmod = mod:NewModule(L["Damage spell list"])
 	local spelltargetmod = spellmod:NewModule(L["Damage spell targets"])
+	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local pairs, ipairs, format = pairs, ipairs, string.format
-	local GetSpellInfo, tContains = Skada.GetSpellInfo or GetSpellInfo, tContains
-	local T, _ = Skada.Table, nil
-
-	-- spells in the following table will be ignored.
-	local ignoredSpells = {}
+	local GetSpellInfo, T = Skada.GetSpellInfo or GetSpellInfo, Skada.Table
+	local _
 
 	local function log_damage(set, dmg)
 		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
@@ -58,7 +56,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 				dmg.spellid, _, _, amount, _, _, _, _, absorbed = ...
 			end
 
-			if dmg.spellid and not tContains(ignoredSpells, dmg.spellid) then
+			if dmg.spellid and not ignoredSpells[dmg.spellid] then
 				dmg.playerid = srcGUID
 				dmg.playername = srcName
 				dmg.playerflags = srcFlags
@@ -272,6 +270,11 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 		)
 
 		Skada:AddMode(self, L["Damage Done"])
+
+		-- table of ignored spells:
+		if Skada.ignoredSpells and Skada.ignoredSpells.friendfire then
+			ignoredSpells = Skada.ignoredSpells.friendfire
+		end
 	end
 
 	function mod:OnDisable()

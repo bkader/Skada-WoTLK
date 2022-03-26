@@ -6,14 +6,12 @@ Skada:AddLoadableModule("Interrupts", function(L)
 	local spellmod = mod:NewModule(L["Interrupted spells"])
 	local targetmod = mod:NewModule(L["Interrupted targets"])
 	local playermod = mod:NewModule(L["Interrupt spells"])
+	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local _
 
 	-- cache frequently used globals
-	local pairs, ipairs, tostring, format, tContains = pairs, ipairs, tostring, string.format, tContains
+	local pairs, ipairs, tostring, format = pairs, ipairs, tostring, string.format
 	local GetSpellInfo, GetSpellLink = Skada.GetSpellInfo or GetSpellInfo, Skada.GetSpellLink or GetSpellLink
-
-	-- spells in the following table will be ignored.
-	local ignoredSpells = {}
 
 	local function log_interrupt(set, data)
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
@@ -59,9 +57,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 		spellname = spellname or L.Melee
 
 		-- invalid/ignored spell?
-		if tContains(ignoredSpells, spellid) or (extraspellid and tContains(ignoredSpells, extraspellid)) then
-			return
-		end
+		if ignoredSpells[spellid] or (extraspellid and ignoredSpells[extraspellid]) then return end
 
 		data.playerid = srcGUID
 		data.playername = srcName
@@ -265,6 +261,11 @@ Skada:AddLoadableModule("Interrupts", function(L)
 
 		Skada:RegisterForCL(SpellInterrupt, "SPELL_INTERRUPT", {src_is_interesting = true})
 		Skada:AddMode(self)
+
+		-- table of ignored spells:
+		if Skada.ignoredSpells and Skada.ignoredSpells.interrupts then
+			ignoredSpells = Skada.ignoredSpells.interrupts
+		end
 	end
 
 	function mod:OnDisable()

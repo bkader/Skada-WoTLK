@@ -18,14 +18,14 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local playermod = mod:NewModule(L["Absorb spell list"])
 	local targetmod = mod:NewModule(L["Absorbed target list"])
 	local spellmod = targetmod:NewModule(L["Absorb spell list"])
+	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local LGT = LibStub("LibGroupTalents-1.0")
 
 	local GroupIterator = Skada.GroupIterator
 	local UnitName, UnitExists, UnitBuff = UnitName, UnitExists, UnitBuff
 	local UnitIsDeadOrGhost, UnitHealthInfo = UnitIsDeadOrGhost, Skada.UnitHealthInfo
-	local GetTime, band = GetTime, bit.band
-	local tsort, tContains = table.sort, tContains
+	local GetTime, band, tsort = GetTime, bit.band, table.sort
 	local T = Skada.Table
 	local new, del = Skada.TablePool("kv")
 
@@ -254,9 +254,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local shieldspopped = nil -- holds the list of shields that popped on a player
 	local absorb = {}
 
-	-- spells in the following table will be ignored.
-	local ignoredSpells = {}
-
 	local function log_spellcast(set, playerid, playername, playerflags, spellid, spellschool)
 		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
 		if player and player.absorbspells and player.absorbspells[spellid] then
@@ -456,7 +453,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 		-- shield applied
 		local spellid, _, spellschool, _, points = ...
-		if spellid and absorbspells[spellid] and not tContains(ignoredSpells, spellid) and dstName then
+		if spellid and absorbspells[spellid] and not ignoredSpells[spellid] and dstName then
 			shields[dstName] = shields[dstName] or {}
 			shields[dstName][spellid] = shields[dstName][spellid] or {}
 
@@ -1113,6 +1110,11 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		Skada.RegisterCallback(self, "Skada_ZoneCheck", "ZoneModifier")
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CheckPreShields")
 		Skada:AddMode(self, L["Absorbs and Healing"])
+
+		-- table of ignored spells:
+		if Skada.ignoredSpells and Skada.ignoredSpells.absorbs then
+			ignoredSpells = Skada.ignoredSpells.absorbs
+		end
 	end
 
 	function mod:OnDisable()

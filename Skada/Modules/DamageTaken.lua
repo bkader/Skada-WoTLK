@@ -18,11 +18,8 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 	local sdetailmod = spellmod:NewModule(L["Damage Breakdown"])
 	local sourcemod = mod:NewModule(L["Damage source list"])
 	local tdetailmod = sourcemod:NewModule(L["Damage spell list"])
-	local tContains = tContains
 	local new, del = Skada.TablePool()
-
-	-- spells in the following table will be ignored.
-	local ignoredSpells = {}
+	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local function log_spellcast(set, dmg)
 		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
@@ -162,7 +159,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 	local function SpellCast(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID and dstGUID then
 			dmg.spellid, dmg.spellname, dmg.spellschool = ...
-			if dmg.spellid and dmg.spellname and not tContains(ignoredSpells, dmg.spellid) then
+			if dmg.spellid and dmg.spellname and not ignoredSpells[dmg.spellid] then
 				dmg.srcGUID = srcGUID
 				dmg.srcName = srcName
 				dmg.srcFlags = srcFlags
@@ -192,7 +189,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			if eventtype == "SPELL_EXTRA_ATTACKS" then
 				local spellid, spellname, _, amount = ...
 
-				if spellid and spellname and not tContains(ignoredSpells, spellid) then
+				if spellid and spellname and not ignoredSpells[spellid] then
 					extraATT = extraATT or T.get("DamageTaken_ExtraAttacks")
 					if not extraATT[srcName] then
 						extraATT[srcName] = new()
@@ -220,7 +217,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				dmg.spellid, dmg.spellname, dmg.spellschool, dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing, dmg.crushing = ...
 			end
 
-			if dmg.spellid and dmg.spellname and not tContains(ignoredSpells, dmg.spellid) then
+			if dmg.spellid and dmg.spellname and not ignoredSpells[dmg.spellid] then
 				dmg.srcGUID = srcGUID
 				dmg.srcName = srcName
 				dmg.srcFlags = srcFlags
@@ -271,7 +268,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				dmg.spellid, dmg.spellname, dmg.spellschool, dmg.misstype, amount = ...
 			end
 
-			if dmg.spellid and dmg.spellname and not tContains(ignoredSpells, dmg.spellid) then
+			if dmg.spellid and dmg.spellname and not ignoredSpells[dmg.spellid] then
 				dmg.srcGUID = srcGUID
 				dmg.srcName = srcName
 				dmg.srcFlags = srcFlags
@@ -823,6 +820,11 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 		)
 
 		Skada:AddMode(self, L["Damage Taken"])
+
+		-- table of ignored spells:
+		if Skada.ignoredSpells and Skada.ignoredSpells.damagetaken then
+			ignoredSpells = Skada.ignoredSpells.damagetaken
+		end
 	end
 
 	function mod:OnDisable()

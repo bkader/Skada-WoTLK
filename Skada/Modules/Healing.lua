@@ -16,10 +16,7 @@ Skada:AddLoadableModule("Healing", function(L)
 	local playermod = mod:NewModule(L["Healing spell list"])
 	local targetmod = mod:NewModule(L["Healed target list"])
 	local spellmod = targetmod:NewModule(L["Healing spell list"])
-	local tContains = tContains
-
-	-- spells in the following table will be ignored.
-	local ignoredSpells = {}
+	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local function log_spellcast(set, heal)
 		local player = Skada:GetPlayer(set, heal.playerid, heal.playername, heal.playerflags)
@@ -110,7 +107,7 @@ Skada:AddLoadableModule("Healing", function(L)
 	local function SpellCast(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID and dstGUID then
 			heal.spellid, _, heal.spellschool = ...
-			if heal.spellid and not tContains(ignoredSpells, heal.spellid) then
+			if heal.spellid and not ignoredSpells[heal.spellid] then
 				heal.playerid = srcGUID
 				heal.playername = srcName
 				heal.playerflags = srcFlags
@@ -133,7 +130,7 @@ Skada:AddLoadableModule("Healing", function(L)
 
 	local function SpellHeal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid = ...
-		if spellid and not tContains(ignoredSpells, spellid) then
+		if spellid and not ignoredSpells[spellid] then
 			srcGUID, srcName, srcFlags = Skada:FixUnit(spellid, srcGUID, srcName, srcFlags)
 
 			heal.playerid = srcGUID
@@ -475,6 +472,11 @@ Skada:AddLoadableModule("Healing", function(L)
 		)
 
 		Skada:AddMode(self, L["Absorbs and Healing"])
+
+		-- table of ignored spells:
+		if Skada.ignoredSpells and Skada.ignoredSpells.heals then
+			ignoredSpells = Skada.ignoredSpells.heals
+		end
 	end
 
 	function mod:OnDisable()

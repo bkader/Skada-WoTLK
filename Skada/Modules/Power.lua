@@ -5,7 +5,7 @@ Skada:AddLoadableModule("Resources", function(L)
 	local mod = Skada:NewModule(L["Resources"])
 	mod.icon = [[Interface\Icons\spell_holy_rapture]]
 
-	local pairs, ipairs, format, tContains = pairs, ipairs, string.format, tContains
+	local pairs, ipairs, format = pairs, ipairs, string.format
 	local setmetatable, GetSpellInfo = setmetatable, Skada.GetSpellInfo or GetSpellInfo
 	local _
 
@@ -44,8 +44,7 @@ Skada:AddLoadableModule("Resources", function(L)
 		[SPELL_POWER_RUNIC_POWER] = "runicspells"
 	}
 
-	-- spells in the following table will be ignored.
-	local ignoredSpells = {}
+	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local function log_gain(set, gain)
 		if not (gain and gain.type and gainTable[gain.type]) then return end
@@ -66,7 +65,7 @@ Skada:AddLoadableModule("Resources", function(L)
 
 	local function SpellEnergize(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		gain.spellid, _, _, gain.amount, gain.type = ...
-		if gain.spellid and not tContains(ignoredSpells, gain.spellid) then
+		if gain.spellid and not ignoredSpells[gain.spellid] then
 			gain.playerid = dstGUID
 			gain.playername = dstName
 			gain.playerflags = dstFlags
@@ -236,6 +235,11 @@ Skada:AddLoadableModule("Resources", function(L)
 		Skada:AddMode(ragemod, L["Resources"])
 		Skada:AddMode(energymod, L["Resources"])
 		Skada:AddMode(runicmod, L["Resources"])
+
+		-- table of ignored spells:
+		if Skada.ignoredSpells and Skada.ignoredSpells.power then
+			ignoredSpells = Skada.ignoredSpells.power
+		end
 	end
 
 	function mod:OnDisable()

@@ -1,7 +1,7 @@
 local Skada = Skada
 
 local pairs, ipairs, format, tostring = pairs, ipairs, string.format, tostring
-local tContains, min, max, floor = tContains, math.min, math.max, math.floor
+local min, max, floor = math.min, math.max, math.floor
 local UnitName, UnitGUID, UnitBuff = UnitName, UnitGUID, UnitBuff
 local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
@@ -319,28 +319,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 	local mod = Skada:NewModule(L["Buffs"])
 	local spellmod = mod:NewModule(L["Buff spell list"])
 	local playermod = spellmod:NewModule(L["Players list"])
-
-	-- list of the auras that are ignored!
-	local ignoredSpells = {
-		57819, -- Tabard of the Argent Crusade
-		57820, -- Tabard of the Ebon Blade
-		57821, -- Tabard of the Kirin Tor
-		57822, -- Tabard of the Wyrmrest Accord
-		72968, -- Precious's Ribbon
-		57940, -- Essence of Wintergrasp
-		-- 73816, -- Hellscream's Warsong (ICC-Horde 5%)
-		-- 73818, -- Hellscream's Warsong (ICC-Horde 10%)
-		-- 73819, -- Hellscream's Warsong (ICC-Horde 15%)
-		-- 73820, -- Hellscream's Warsong (ICC-Horde 20%)
-		-- 73821, -- Hellscream's Warsong (ICC-Horde 25%)
-		-- 73822, -- Hellscream's Warsong (ICC-Horde 30%)
-		-- 73762, -- Hellscream's Warsong (ICC-Alliance 5%)
-		-- 73824, -- Hellscream's Warsong (ICC-Alliance 10%)
-		-- 73825, -- Hellscream's Warsong (ICC-Alliance 15%)
-		-- 73826, -- Hellscream's Warsong (ICC-Alliance 20%)
-		-- 73827, -- Hellscream's Warsong (ICC-Alliance 25%)
-		-- 73828, -- Hellscream's Warsong (ICC-Alliance 30%)
-	}
+	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	-- list of spells that don't trigger SPELL_AURA_x events
 	local speciallist = {
@@ -365,7 +344,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 	local function HandleBuff(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
 		if
 			spellid and -- just in case, you never know!
-			not tContains(ignoredSpells, spellid) and
+			not ignoredSpells[spellid] and
 			(auratype == "BUFF" or speciallist[spellid]) and
 			Skada:IsPlayer(dstGUID, dstFlags, dstName)
 		then
@@ -496,6 +475,11 @@ Skada:AddLoadableModule("Buffs", function(L)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CheckBuffs")
 		Skada:AddMode(self, L["Buffs and Debuffs"])
+
+		-- table of ignored spells:
+		if Skada.ignoredSpells and Skada.ignoredSpells.buffs then
+			ignoredSpells = Skada.ignoredSpells.buffs
+		end
 	end
 
 	function mod:OnDisable()
@@ -512,19 +496,14 @@ Skada:AddLoadableModule("Debuffs", function(L)
 	local spelltargetmod = spellmod:NewModule(L["Debuff target list"])
 	local targetmod = mod:NewModule(L["Debuff target list"])
 	local targetspellmod = targetmod:NewModule(L["Debuff spell list"])
-
-	-- list of the auras that are ignored!
-	local ignoredSpells = {
-		57723, -- Exhaustion (Heroism)
-		57724 -- Sated (Bloodlust)
-	}
+	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	-- list of spells used to queue units.
 	local queuedSpells = {[49005] = 50424}
 
 	local aura = {}
 	local function HandleDebuff(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
-		if spellid and not tContains(ignoredSpells, spellid) and auratype == "DEBUFF" then
+		if spellid and not ignoredSpells[spellid] and auratype == "DEBUFF" then
 			if srcName == nil and #srcGUID == 0 and dstName and #dstGUID > 0 then
 				srcGUID = dstGUID
 				srcName = dstName
@@ -729,6 +708,11 @@ Skada:AddLoadableModule("Debuffs", function(L)
 		)
 
 		Skada:AddMode(self, L["Buffs and Debuffs"])
+
+		-- table of ignored spells:
+		if Skada.ignoredSpells and Skada.ignoredSpells.debuffs then
+			ignoredSpells = Skada.ignoredSpells.debuffs
+		end
 	end
 
 	function mod:OnDisable()

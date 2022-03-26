@@ -3609,12 +3609,17 @@ do
 		tick_timer = self:ScheduleRepeatingTimer("Tick", 1)
 	end
 
-	function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	function Skada:CombatLogEvent(token, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
 		-- disabled module or test mode?
 		if disabled or self.testMode then return end
 
 		-- ignored combat event?
 		if ignored_events[eventtype] and not (spellcast_events[eventtype] and self.current) then return end
+
+		-- globally ignored spell (TWEAKS token == already checked.)
+		if token ~= "TWEAKS" and ((spellid and self.ignoredSpells[spellid]) or (spellname and self.ignoredSpells[spellname])) then
+			return
+		end
 
 		local src_is_interesting = nil
 		local dst_is_interesting = nil
@@ -3645,7 +3650,7 @@ do
 			self.current.started = true
 			if self.instanceType == nil then self:CheckZone() end
 			self.current.type = (self.instanceType == "none" and IsInGroup()) and "group" or self.instanceType
-			self:SendMessage("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+			self:SendMessage("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
 		end
 
 		if self.current and self.db.profile.autostop then
@@ -3720,7 +3725,7 @@ do
 					end
 
 					self.current.last_action = time()
-					mod.func(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+					mod.func(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
 				end
 			end
 		end

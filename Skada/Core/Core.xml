@@ -2,6 +2,7 @@
 ..\FrameXML\UI.xsd">
 <!-- core files -->
 <Script file="Core.lua"/>
+<Script file="Tables.lua"/>
 <Script file="Prototypes.lua"/>
 <Script file="Functions.lua"/>
 <Script file="Options.lua"/>
