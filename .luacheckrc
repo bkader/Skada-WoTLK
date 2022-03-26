@@ -112,6 +112,7 @@ globals = {
 	"DBT_AllPersistentOptions",
 	"DBT_PersistentOptions",
 	"DBT",
+	"LOCALE_deDE",
 	"LOCALE_enGB",
 	"LOCALE_enUS",
 	"LOCALE_esES",

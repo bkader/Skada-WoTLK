@@ -16,7 +16,7 @@
 ## DefaultState: enabled
 ## Author: Kader (|cff808080bkader#6361|r)
 ## Version: 1.8.74
-## X-Date: 2022-03-26 @ 05:39 PM |cff808080UTC|r
+## X-Date: 2022-03-26 @ 08:16 PM |cff808080UTC|r
 ## X-Credits: Zarnivoop
 ## X-Category: Combat
 ## X-License: MIT/X

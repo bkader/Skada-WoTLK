@@ -48,22 +48,12 @@ local function TitleButtonOnClick(self, button)
 	end
 end
 
-local buttonsTexPath = [[Interface\AddOns\Skada\Media\Textures\toolbar]]
-local buttonsTexCoords = {
-	{0.008, 0.117, 0.062, 0.938}, -- config
-	{0.133, 0.242, 0.062, 0.938}, -- reset
-	{0.258, 0.367, 0.062, 0.938}, -- segments
-	{0.383, 0.492, 0.062, 0.938}, -- modes
-	{0.508, 0.617, 0.062, 0.938}, -- report
-	{0.633, 0.742, 0.062, 0.938} -- stop/resume
-}
-
+local buttonsTexPath = [[Interface\AddOns\Skada\Media\Textures\toolbar%s\%s.blp]]
 local function AddWindowButton(win, style, index, title, description, func)
-	if win and win.AddButton then
-		style, index = style or 1, index or 1
-		local tex = buttonsTexPath .. style
-		local texcoords = buttonsTexCoords[index]
-		win:AddButton(title, description, tex, texcoords, func)
+	if win and win.AddButton and index then
+		style = style or 1
+		local tex = format(buttonsTexPath, style or 1, index)
+		win:AddButton(index, title, description, tex, nil, func)
 	end
 end
 
@@ -87,7 +77,7 @@ function mod:Create(window)
 		--
 
 		-- config button
-		AddWindowButton(bargroup, p.title.toolbar, 1, L.Configure, L.btn_config_desc, function(_, button)
+		AddWindowButton(bargroup, p.title.toolbar, "config", L.Configure, L.btn_config_desc, function(_, button)
 			if button == "RightButton" then
 				Skada:OpenOptions(bargroup.win)
 			else
@@ -96,12 +86,12 @@ function mod:Create(window)
 		end)
 
 		-- reset button
-		AddWindowButton(bargroup, p.title.toolbar, 2, RESET, L.btn_reset_desc, function()
+		AddWindowButton(bargroup, p.title.toolbar, "reset", RESET, L.btn_reset_desc, function()
 			Skada:ShowPopup(bargroup.win)
 		end)
 
 		-- segment button
-		AddWindowButton(bargroup, p.title.toolbar, 3, L.Segment, L.btn_segment_desc, function(_, button)
+		AddWindowButton(bargroup, p.title.toolbar, "segment", L.Segment, L.btn_segment_desc, function(_, button)
 			if button == "MiddleButton" then
 				bargroup.win:set_selected_set("current")
 			elseif IsModifierKeyDown() then
@@ -112,15 +102,15 @@ function mod:Create(window)
 		end)
 
 		-- mode button
-		AddWindowButton(bargroup, p.title.toolbar, 4, L.Mode, L["Jump to a specific mode."], function()
+		AddWindowButton(bargroup, p.title.toolbar, "mode", L.Mode, L["Jump to a specific mode."], function()
 			Skada:ModeMenu(bargroup.win)
 		end)
 
-		AddWindowButton(bargroup, p.title.toolbar, 5, L.Report, L.btn_report_desc, function()
+		AddWindowButton(bargroup, p.title.toolbar, "report", L.Report, L.btn_report_desc, function()
 			Skada:OpenReportWindow(bargroup.win)
 		end)
 
-		AddWindowButton(bargroup, p.title.toolbar, 6, L.Stop, L.btn_stop_desc, function()
+		AddWindowButton(bargroup, p.title.toolbar, "stop", L.Stop, L.btn_stop_desc, function()
 			if Skada.current and Skada.current.stopped then
 				Skada:ResumeSegment()
 			elseif Skada.current then
@@ -665,8 +655,10 @@ do
 					color = Skada.classcolors[data.class]
 				end
 
-				color.a = win.db.disablehighlight and (color.a or 1) or 0.85
-				bar:SetColorAt(0, color.r, color.g, color.b, color.a or 1)
+				if color then
+					color.a = win.db.disablehighlight and (color.a or 1) or 0.85
+					bar:SetColorAt(0, color.r, color.g, color.b, color.a)
+				end
 
 				if win.metadata.ordersort then
 					bar.order = i
@@ -883,8 +875,8 @@ do
 		if g.button.toolbar ~= p.title.toolbar then
 			g.button.toolbar = p.title.toolbar or 1
 			for i, b in ipairs(g.buttons) do
-				b:GetNormalTexture():SetTexture(buttonsTexPath .. g.button.toolbar)
-				b:GetHighlightTexture():SetTexture(buttonsTexPath .. g.button.toolbar, 1.0)
+				b:GetNormalTexture():SetTexture(format(buttonsTexPath, g.button.toolbar, b.index))
+				b:GetHighlightTexture():SetTexture(format(buttonsTexPath, g.button.toolbar, b.index), 1.0)
 			end
 		end
 
@@ -1602,9 +1594,9 @@ function mod:AddDisplayOptions(win, options)
 									Skada:ApplySettings(db.name)
 								end,
 								values = {
-									format("|T%s%d:24:192|t", buttonsTexPath, 1),
-									format("|T%s%d:24:192|t", buttonsTexPath, 2),
-									format("|T%s%d:24:192|t", buttonsTexPath, 3)
+									format("|T%s:24:192|t", format(buttonsTexPath, 1, "_full")),
+									format("|T%s:24:192|t", format(buttonsTexPath, 2, "_full")),
+									format("|T%s:24:192|t", format(buttonsTexPath, 3, "_full"))
 								}
 							},
 							opacity = {

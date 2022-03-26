@@ -159,45 +159,46 @@ end
 
 local ComputeGradient
 do
-	local new, del
-	do
-		local list = setmetatable({}, {__mode = "k"})
+	-- TODO: Put me back!
+	-- local new, del
+	-- do
+	-- 	local list = setmetatable({}, {__mode = "k"})
 
-		-- new is always called with the exact same arguments, no need to
-		-- iterate over a vararg
-		function new(a1, a2, a3, a4, a5)
-			local t = next(list)
-			if t then
-				list[t] = nil
-				t[1] = a1
-				t[2] = a2
-				t[3] = a3
-				t[4] = a4
-				t[5] = a5
-			else
-				t = {a1, a2, a3, a4, a5}
-			end
-			return t
-		end
+	-- 	-- new is always called with the exact same arguments, no need to
+	-- 	-- iterate over a vararg
+	-- 	function new(a1, a2, a3, a4, a5)
+	-- 		local t = next(list)
+	-- 		if t then
+	-- 			list[t] = nil
+	-- 			t[1] = a1
+	-- 			t[2] = a2
+	-- 			t[3] = a3
+	-- 			t[4] = a4
+	-- 			t[5] = a5
+	-- 		else
+	-- 			t = {a1, a2, a3, a4, a5}
+	-- 		end
+	-- 		return t
+	-- 	end
 
-		-- del is called over the same tables produced from new, no need for
-		-- fancy stuff
-		function del(t)
-			t[1] = nil
-			t[2] = nil
-			t[3] = nil
-			t[4] = nil
-			t[5] = nil
-			t[""] = true
-			t[""] = nil
-			list[t] = true
-			return nil
-		end
-	end
+	-- 	-- del is called over the same tables produced from new, no need for
+	-- 	-- fancy stuff
+	-- 	function del(t)
+	-- 		t[1] = nil
+	-- 		t[2] = nil
+	-- 		t[3] = nil
+	-- 		t[4] = nil
+	-- 		t[5] = nil
+	-- 		t[""] = true
+	-- 		t[""] = nil
+	-- 		list[t] = true
+	-- 		return nil
+	-- 	end
+	-- end
 
-	local function sort_colors(a, b)
-		return a[1] < b[1]
-	end
+	-- local function sort_colors(a, b)
+	-- 	return a[1] < b[1]
+	-- end
 
 	local colors = {}
 	local function getColor(point)
@@ -233,13 +234,20 @@ do
 			return
 		end
 
-		for i = 1, #colors do
-			del(tremove(colors))
+		-- TODO: Enhance me!
+		-- for i = 1, #colors do
+		-- 	del(tremove(colors))
+		-- end
+		-- for i = 1, #self.colors, 5 do
+		-- 	colors[#colors + 1] = new(self.colors[i], self.colors[i + 1], self.colors[i + 2], self.colors[i + 3], self.colors[i + 4])
+		-- end
+		-- tsort(colors, sort_colors)
+
+		-- TODO: Remove me!
+		colors[1] = colors[1] or {}
+		for i, c in ipairs(self.colors) do
+			colors[1][i] = c
 		end
-		for i = 1, #self.colors, 5 do
-			colors[#colors + 1] = new(self.colors[i], self.colors[i + 1], self.colors[i + 2], self.colors[i + 3], self.colors[i + 4])
-		end
-		tsort(colors, sort_colors)
 
 		self.gradMap = self.gradMap or {}
 		for i = 0, 200 do
@@ -314,19 +322,22 @@ function lib:ReleaseBar(name)
 end
 
 ---[[ Bar Groups ]]---
-function barListPrototype:AddButton(title, description, texture, texcoords, clickfunc)
+function barListPrototype:AddButton(index, title, description, normaltex, highlighttex, clickfunc)
 	-- Create button frame.
 	local btn = CreateFrame("Button", nil, self.button)
+	if index and not title then
+		title = index
+	elseif title and not index then
+		index = title
+	end
+	btn.index = index
 	btn.title = title
 	btn:SetFrameLevel(self.button:GetFrameLevel() + 1)
 	btn:ClearAllPoints()
-	btn:SetSize(12, 12)
-	btn:SetNormalTexture(texture)
-	btn:SetHighlightTexture(texture, 1.0)
-	if type(texcoords) == "table" then
-		btn:GetNormalTexture():SetTexCoord(unpack(texcoords))
-		btn:GetHighlightTexture():SetTexCoord(unpack(texcoords))
-	end
+	btn:SetSize(14, 14)
+	btn:SetNormalTexture(normaltex)
+	highlighttex = highlighttex or normaltex
+	btn:SetHighlightTexture(normaltex, 1.0)
 	btn:SetAlpha(self.buttonsOpacity or 1)
 	btn:RegisterForClicks("AnyUp")
 	btn:SetScript("OnClick", clickfunc)
@@ -431,9 +442,9 @@ function barListPrototype:AdjustButtons()
 			elseif nr == 0 then
 				btn:SetPoint("TOPRIGHT", self.button, "TOPRIGHT", -5, -(max(height - btn:GetHeight(), 0) / 2))
 			elseif self.orientation == 3 then
-				btn:SetPoint("TOPLEFT", self.lastbtn, "TOPRIGHT", 3, 0)
+				btn:SetPoint("TOPLEFT", self.lastbtn, "TOPRIGHT", 1, 0)
 			else
-				btn:SetPoint("TOPRIGHT", self.lastbtn, "TOPLEFT", -3, 0)
+				btn:SetPoint("TOPRIGHT", self.lastbtn, "TOPLEFT", -1, 0)
 			end
 			self.lastbtn = btn
 			nr = nr + 1
@@ -975,39 +986,27 @@ end
 
 function barListPrototype:SetColorAt(at, r, g, b, a)
 	self.colors = self.colors or {}
-	self.colors[#self.colors + 1] = at
-	self.colors[#self.colors + 1] = r
-	self.colors[#self.colors + 1] = g
-	self.colors[#self.colors + 1] = b
-	self.colors[#self.colors + 1] = a
-	ComputeGradient(self)
-	self:UpdateColors()
-end
-
-function barListPrototype:UnsetColorAt(at)
-	if not self.colors then
-		return
-	end
-	for i = 1, #self.colors, 5 do
-		if self.colors[i] == at then
-			for j = 1, 5 do
-				tremove(self.colors, i)
-			end
-			ComputeGradient(self)
-			self:UpdateColors()
-			return
-		end
+	if
+		self.colors[1] ~= at or
+		self.colors[2] ~= r or
+		self.colors[3] ~= g or
+		self.colors[4] ~= b or
+		self.colors[5] ~= a
+	then
+		self.colors[1] = at
+		self.colors[2] = r
+		self.colors[3] = g
+		self.colors[4] = b
+		self.colors[5] = a
+		ComputeGradient(self)
+		self:UpdateColors()
 	end
 end
 
 function barListPrototype:UnsetAllColors()
-	if not self.colors then
-		return
+	if self.colors then
+		wipe(self.colors)
 	end
-	for i = 1, #self.colors do
-		tremove(self.colors)
-	end
-	return
 end
 
 function barListPrototype:ShowAnchor()
@@ -1573,37 +1572,30 @@ end
 
 function barPrototype:SetColorAt(at, r, g, b, a)
 	self.colors = self.colors or {}
-	self.colors[#self.colors + 1] = at
-	self.colors[#self.colors + 1] = r
-	self.colors[#self.colors + 1] = g
-	self.colors[#self.colors + 1] = b
-	self.colors[#self.colors + 1] = a
-	ComputeGradient(self)
-	self:UpdateColor()
+	if
+		self.colors[1] ~= at or
+		self.colors[2] ~= r or
+		self.colors[3] ~= g or
+		self.colors[4] ~= b or
+		self.colors[5] ~= a
+	then
+		self.colors[1] = at
+		self.colors[2] = r
+		self.colors[3] = g
+		self.colors[4] = b
+		self.colors[5] = a
+		ComputeGradient(self)
+		self:UpdateColor()
+	end
 end
 
 function barPrototype:SetOpacity(a)
 	self:SetColorAt(self.colors[1], self.colors[2], self.colors[3], self.colors[4], a or self.colors[5])
 end
 
-function barPrototype:UnsetColorAt(at)
-	if not self.colors then return end
-	for i = 1, #self.colors, 5 do
-		if self.colors[i] == at then
-			for j = 1, 5 do
-				tremove(self.colors, i)
-			end
-			ComputeGradient(self)
-			self:UpdateColor()
-			return
-		end
-	end
-end
-
 function barPrototype:UnsetAllColors()
-	if not self.colors then return end
-	for i = 1, #self.colors do
-		tremove(self.colors)
+	if self.colors then
+		wipe(self.colors)
 	end
 end
 
