@@ -69,20 +69,21 @@ Skada:AddLoadableModule("Tweaks", function(L)
 
 		function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
 			-- The Lich King fight & Fury of Frostmourne
-			if considerFoF and spellname == fofrostmourne and self.current and not self.current.success then
-				self.current.success = true
-				self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
+			if considerFoF and (spellid == 72350 or spellname == fofrostmourne) then
+				if self.current and not self.current.success then
+					self.current.success = true
+					self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
 
-				if self.tempsets then -- phases
-					for _, set in ipairs(self.tempsets) do
-						set.success = true
-						self:SendMessage("COMBAT_BOSS_DEFEATED", set)
+					if self.tempsets then -- phases
+						for _, set in ipairs(self.tempsets) do
+							set.success = true
+							self:SendMessage("COMBAT_BOSS_DEFEATED", set)
+						end
 					end
 				end
+				-- ignore the spell
+				if self.db.profile.fofrostmourne then return end
 			end
-
-			-- globally ignored spell
-			if (spellid and self.ignoredSpells[spellid]) or (spellname and self.ignoredSpells[spellname]) then return end
 
 			-- first hit
 			if
@@ -133,7 +134,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			end
 
 			-- use the original function
-			Skada_CombatLogEvent(self, "TWEAKS", timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
+			Skada_CombatLogEvent(self, nil, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
 		end
 
 		function mod:PrintFirstHit()
@@ -590,16 +591,6 @@ Skada:AddLoadableModule("Tweaks", function(L)
 		-- fury of frostmourne
 		fofrostmourne = fofrostmourne or GetSpellInfo(72350)
 		considerFoF = not (Skada.Ascension or Skada.AscensionCoA)
-		-- add/remove spell to ignored spell list
-		if considerFoF and Skada.db.profile.fofrostmourne then
-			Skada.ignoredSpells[72350] = true
-			Skada.ignoredSpells[72351] = true
-			Skada.ignoredSpells[fofrostmourne] = true
-		elseif Skada.ignoredSpells[72350] then
-			Skada.ignoredSpells[72350] = nil
-			Skada.ignoredSpells[72351] = nil
-			Skada.ignoredSpells[fofrostmourne] = nil
-		end
 
 		-- smart stop
 		if Skada.db.profile.smartstop then
