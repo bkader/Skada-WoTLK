@@ -507,6 +507,23 @@ do
 		return a and b and a.order and b.order and a.order < b.order
 	end
 
+	local function bar_setcolor(bar, db, data, color)
+		if not color then
+			color = db.barcolor or COLOR_YELLOW
+
+			if data.color then
+				color = data.color
+			elseif db.spellschoolcolors and data.spellschool and Skada.spellschools[data.spellschool] then
+				color = Skada.spellschools[data.spellschool]
+			elseif db.classcolorbars and data.class and Skada.classcolors[data.class] then
+				color = Skada.classcolors[data.class]
+			end
+		end
+
+		color.a = db.disablehighlight and (color.a or 1) or 0.85
+		bar:SetColorAt(0, color.r, color.g, color.b, color.a)
+	end
+
 	function mod:Update(win)
 		if not win or not win.bargroup then return end
 		win.bargroup.button:SetText(win.metadata.title)
@@ -621,6 +638,9 @@ do
 						end
 					end
 
+					-- set bar color
+					bar_setcolor(bar, win.db, data)
+
 					if
 						data.class and
 						Skada.classcolors[data.class] and
@@ -642,22 +662,6 @@ do
 					if win.bargroup.showself and data.id == Skada.userGUID then
 						bar.fixed = true
 					end
-				end
-
-				-- set bar color
-				local color = win.db.barcolor or COLOR_YELLOW
-
-				if data.color then
-					color = data.color
-				elseif win.db.spellschoolcolors and data.spellschool and Skada.spellschools[data.spellschool] then
-					color = Skada.spellschools[data.spellschool]
-				elseif win.db.classcolorbars and data.class and Skada.classcolors[data.class] then
-					color = Skada.classcolors[data.class]
-				end
-
-				if color then
-					color.a = win.db.disablehighlight and (color.a or 1) or 0.85
-					bar:SetColorAt(0, color.r, color.g, color.b, color.a)
 				end
 
 				if win.metadata.ordersort then
@@ -709,6 +713,14 @@ do
 
 				if not data.ignore then
 					nr = nr + 1
+
+					if data.color and not data.changed then
+						bar_setcolor(bar, win.db, data, data.color)
+						data.changed = true
+					elseif not data.color and data.changed then
+						bar_setcolor(bar, win.db, data)
+						data.changed = nil
+					end
 				end
 			end
 		end
