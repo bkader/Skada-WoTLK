@@ -44,12 +44,15 @@ ignore = {
 	"211/CL", -- Unused local variable "CL"
 	"212", -- Unused argument
 	"213", -- Unused loop variable
+	"214", -- Used variable
 	"231/_.*", -- unused variables starting with _
 	"311", -- Value assigned to a local variable is unused
 	"312/self", -- Value assigned is overwritten
 --	"431", -- shadowing upvalue
 	"43.", -- Shadowing an upvalue, an upvalue argument, an upvalue loop variable.
 	"542", -- An empty if branch
+	"581", -- Negation of a relational operator- operator can be flipped
+	"582", -- Error prone negation: negation has a higher priority than equality
 }
 
 globals = {
