@@ -13,10 +13,17 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 	local pairs, ipairs, format, max = pairs, ipairs, string.format, math.max
 	local GetSpellInfo, T = Skada.GetSpellInfo or GetSpellInfo, Skada.Table
-	local misstypes = Skada.missTypes
 	local cacheTable = T.get("Skada_CacheTable2")
 	local _
 
+	-- damage miss types
+	local missTypes = Skada.missTypes
+	if not missTypes then
+		missTypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}
+		Skada.missTypes = missTypes
+	end
+
+	-- percentage colors
 	local red = "|cffffaaaa-%s|r"
 	local green = "|cffaaffaa+%s|r"
 	local grey = "|cff808080%s|r"
@@ -233,7 +240,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 					nr = add_detail_bar(win, nr, L["Glancing"], spell.glancing, nil, nil, true)
 				end
 
-				for _, misstype in ipairs(misstypes) do
+				for _, misstype in ipairs(missTypes) do
 					if (spell[misstype] or 0) > 0 then
 						nr = add_detail_bar(win, nr, L[misstype], spell[misstype], nil, nil, true)
 					end
@@ -271,7 +278,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 				nr = add_detail_bar(win, nr, L["Glancing"], spell and spell.glancing, myspell and myspell.glancing)
 			end
 
-			for _, misstype in ipairs(misstypes) do
+			for _, misstype in ipairs(missTypes) do
 				if (spell and (spell[misstype] or 0) > 0) or (myspell and (myspell[misstype] or 0) > 0) then
 					nr = add_detail_bar(win, nr, L[misstype], spell and spell[misstype], myspell and myspell[misstype])
 				end

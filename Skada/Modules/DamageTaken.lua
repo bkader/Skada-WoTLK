@@ -2,8 +2,8 @@ local Skada = Skada
 
 -- cache frequently used globals
 local pairs, ipairs, select, format, max = pairs, ipairs, select, string.format, math.max
-local GetSpellInfo, cacheTable, misstypes = Skada.GetSpellInfo, Skada.cacheTable, Skada.missTypes
-local T, _ = Skada.Table, nil
+local GetSpellInfo, cacheTable, T = Skada.GetSpellInfo, Skada.cacheTable, Skada.Table
+local _
 
 -- =================== --
 -- Damage Taken Module --
@@ -20,6 +20,13 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 	local tdetailmod = sourcemod:NewModule(L["Damage spell list"])
 	local new, del = Skada.TablePool()
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+
+	-- damage miss types
+	local missTypes = Skada.missTypes
+	if not missTypes then
+		missTypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}
+		Skada.missTypes = missTypes
+	end
 
 	local function log_spellcast(set, dmg)
 		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
@@ -570,7 +577,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 					nr = add_detail_bar(win, nr, L["Crushing"], spell.crushing, spell.count, true)
 				end
 
-				for _, misstype in ipairs(misstypes) do
+				for _, misstype in ipairs(missTypes) do
 					if (spell[misstype] or 0) > 0 then
 						nr = add_detail_bar(win, nr, L[misstype], spell[misstype], spell.count, true)
 					end
@@ -1233,6 +1240,13 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 	local playermod = mod:NewModule(L["Damage Breakdown"])
 	local cacheTable = T.get("Skada_CacheTable2")
 
+	-- damage miss types
+	local missTypes = Skada.missTypes
+	if not missTypes then
+		missTypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}
+		Skada.missTypes = missTypes
+	end
+
 	function playermod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's damage breakdown"], label)
@@ -1289,7 +1303,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 						for _, spell in pairs(player.damagetakenspells) do
 							total = total + spell.count
 
-							for _, t in ipairs(misstypes) do
+							for _, t in ipairs(missTypes) do
 								if (spell[t] or 0) > 0 then
 									avoid = avoid + spell[t]
 									tmp.data[t] = (tmp.data[t] or 0) + spell[t]

@@ -1,13 +1,9 @@
 local Skada = Skada
 
 local pairs, ipairs, format, max = pairs, ipairs, string.format, math.max
-local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-local cacheTable, T = Skada.cacheTable, Skada.Table
+local GetSpellInfo, cacheTable, T = Skada.GetSpellInfo, Skada.cacheTable, Skada.Table
 local PercentToRGB = Skada.PercentToRGB
-local misstypes = Skada.missTypes
 local _
-
--- list of miss types
 
 -- ================== --
 -- Damage Done Module --
@@ -25,6 +21,13 @@ Skada:AddLoadableModule("Damage", function(L)
 	local UnitGUID = UnitGUID
 	local new, del = Skada.TablePool()
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+
+	-- damage miss types
+	local missTypes = Skada.missTypes
+	if not missTypes then
+		missTypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}
+		Skada.missTypes = missTypes
+	end
 
 	-- spells on the list below are ignored when it comes
 	-- to updating player's active time.
@@ -620,7 +623,7 @@ Skada:AddLoadableModule("Damage", function(L)
 					nr = add_detail_bar(win, nr, L["Glancing"], spell.glancing, spell.count, true)
 				end
 
-				for _, misstype in ipairs(misstypes) do
+				for _, misstype in ipairs(missTypes) do
 					if (spell[misstype] or 0) > 0 then
 						nr = add_detail_bar(win, nr, L[misstype], spell[misstype], spell.count, true)
 					end
