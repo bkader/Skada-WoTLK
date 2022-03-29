@@ -86,22 +86,18 @@ do
 		end
 	end
 
-	local function tIndexOf(tbl, item)
-		for i, v in ipairs(tbl) do
-			if item == v then
-				return i
-			end
-		end
-	end
-
 	-- replace the global function
 	_G.tContains = function(tbl, item)
-		return (tIndexOf(tbl, item) ~= nil)
+		for _, v in pairs(tbl) do
+			if item == v then
+				return true
+			end
+		end
+		return false
 	end
 
 	lib.tLength = tLength
 	lib.tCopy = tCopy
-	lib.tIndexOf = tIndexOf
 end
 
 -------------------------------------------------------------------------------
@@ -746,7 +742,6 @@ local mixins = {
 	-- table util
 	"tLength",
 	"tCopy",
-	"tIndexOf",
 	"Table",
 	"TablePool",
 	-- roster util
