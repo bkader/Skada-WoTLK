@@ -7,9 +7,9 @@ L["Skada is out of date. You can download the newest version from |cffffbb00%s|r
 L["Skada: Modes"] = true
 L["Skada: Fights"] = true
 L["Data Collection"] = true
-L["Enable"] = true
+L["Enable"] = ENABLE
 L["ENABLED"] = true
-L["Disable"] = true
+L["Disable"] = DISABLE
 L["DISABLED"] = true
 L["Stopping for wipe."] = true
 L["Usage:"] = true
@@ -51,8 +51,6 @@ L["Shift-Click for |cff00ff00%s|r"] = true
 L["Control-Click for |cff00ff00%s|r"] = true
 L["Alt-Click for |cff00ff00%s|r"] = true
 L["Toggle Class Filter"] = true
-L["Minimum"] = true
-L["Maximum"] = true
 L["Average"] = true
 L["Minimum Hit"] = true
 L["Maximum Hit"] = true
@@ -180,7 +178,7 @@ L["Auto Hide Buttons"] = true
 L["Show window buttons only if the cursor is over the title bar."] = true
 L["Buttons Style"] = true
 -- general window
-L["Background"] = true
+L["Background"] = BACKGROUND
 L["Background Texture"] = true
 L["The texture used as the background."] = true
 L["Tile"] = true
@@ -346,7 +344,7 @@ L["Subview Rows"] = true
 L["The number of rows from each subview to show when using informative tooltips."] = true
 L["Tooltip Position"] = true
 L["Position of the tooltips."] = true
-L["Default"] = true
+L["Default"] = DEFAULT
 L["Top Right"] = true
 L["Top Left"] = true
 L["Bottom Right"] = true
@@ -420,9 +418,9 @@ L["Total"] = true
 L["Current"] = "Current fight"
 -- report module and window
 L["Skada: %s for %s:"] = true
-L["Channel"] = true
+L["Channel"] = CHANNEL
 L["Self"] = true
-L["Whisper"] = true
+L["Whisper"] = WHISPER
 L["Whisper Target"] = true
 L["Line"] = true
 L["Lines"] = true
@@ -591,7 +589,7 @@ L["Adds"] = true
 L["Halion and Inferno"] = true
 L["Valkyrs overkilling"] = true
 -- Deaths Module --
-L["Deaths"] = true
+L["Deaths"] = DEATHS
 L["%s's death"] = true
 L["%s's deaths"] = true
 L["Death log"] = true
@@ -602,7 +600,7 @@ L["Spell details"] = true
 L["Spell"] = true
 L["Amount"] = true
 L["Source"] = true
-L["Health"] = true
+L["Health"] = HEALTH
 L["Change"] = true
 L["Survivability"] = true
 L["Events Amount"] = true
@@ -614,7 +612,7 @@ L["Announces information about the last hit the player took before they died."] 
 -- activity module
 L["Activity"] = true
 -- dispels module lines --
-L["Dispels"] = true
+L["Dispels"] = DISPELS
 L["Dispel spell list"] = true
 L["Dispelled spell list"] = true
 L["Dispelled target list"] = true
@@ -630,7 +628,7 @@ L["Report Fails"] = true
 L["Reports the group fails at the end of combat if there are any."] = true
 L["Ignored Events"] = true
 -- interrupts module lines --
-L["Interrupts"] = true
+L["Interrupts"] = INTERRUPTS
 L["Interrupt spells"] = true
 L["Interrupted spells"] = true
 L["Interrupted targets"] = true
@@ -722,7 +720,7 @@ L["project_ascension_desc"] = [=[On |cffffbb00Project Ascension|r, your characte
 
 Icons and colors are sent to group members and Skada can use them instead of your character's default class icon and color.]=]
 L["Icon"] = true
-L["Color"] = true
+L["Color"] = COLOR
 L["Color for %s."] = true
 L["Choose the %s that fits your character's build."] = true
 L["Are you sure you want clear cached icons and colors?"] = true
@@ -732,7 +730,7 @@ L["Enable this if you want to use custom arena teams colors."] = true
 L["Gold Team"] = true
 L["Green Team"] = true
 -- notifications
-L["Opacity"] = true
+L["Opacity"] = OPACITY
 L["Notifications"] = true
 L.opt_toast_desc = "Uses visual notifications instead of chat window messages whenever applicable."
 L["Test Notifications"] = true
