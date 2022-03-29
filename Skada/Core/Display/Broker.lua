@@ -1,18 +1,29 @@
 local Skada = Skada
-
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
+
 local name = L["Data Text"]
 local mod = Skada:NewModule(name)
 
-local ldb = LibStub:GetLibrary("LibDataBroker-1.1")
+local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 local LibWindow = LibStub("LibWindow-1.1")
-local media = LibStub("LibSharedMedia-3.0")
 
 local tsort, format = table.sort, string.format
 local CloseDropDownMenus = CloseDropDownMenus
 
 local WrapTextInColorCode = Skada.WrapTextInColorCode
 local RGBPercToHex = Skada.RGBPercToHex
+
+local FONT_FLAGS = Skada.fontFlags
+if not FONT_FLAGS then
+	FONT_FLAGS = {
+		[""] = NONE,
+		["OUTLINE"] = L["Outline"],
+		["THICKOUTLINE"] = L["Thick outline"],
+		["MONOCHROME"] = L["Monochrome"],
+		["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
+	}
+	Skada.fontFlags = FONT_FLAGS
+end
 
 local function sortDataset(win)
 	tsort(win.dataset, function(a, b)
@@ -139,7 +150,7 @@ function mod:Create(win, isnew)
 
 	-- LDB object
 	if not win.obj then
-		win.obj = ldb:NewDataObject("Skada: " .. win.db.name, {
+		win.obj = LDB:NewDataObject("Skada: " .. win.db.name, {
 			type = "data source",
 			text = "",
 			OnTooltipShow = function(tooltip) tooltipHandler(win, tooltip) end,
@@ -218,7 +229,7 @@ function mod:ApplySettings(win)
 		win.frame:SetHeight(win.db.height or 30)
 		win.frame:SetWidth(win.db.width or 200)
 		local fbackdrop = {}
-		fbackdrop.bgFile = media:Fetch("background", db.background.texture)
+		fbackdrop.bgFile = Skada:MediaFetch("background", db.background.texture)
 		fbackdrop.tile = db.background.tile
 		fbackdrop.tileSize = db.background.tilesize
 		win.frame:SetBackdrop(fbackdrop)
@@ -238,7 +249,7 @@ function mod:ApplySettings(win)
 
 		local color = db.textcolor or {r = 1, g = 1, b = 1, a = 1}
 		title:SetTextColor(color.r, color.g, color.b, color.a)
-		title:SetFont(media:Fetch("font", db.barfont), db.barfontsize, db.barfontflags)
+		title:SetFont(Skada:MediaFetch("font", db.barfont), db.barfontsize, db.barfontflags)
 		title:SetText(win.metadata.title or "Skada")
 		title:SetWordWrap(false)
 		title:SetJustifyH("CENTER")
@@ -293,7 +304,7 @@ function mod:AddDisplayOptions(win, options)
 				type = "select",
 				name = L["Font Outline"],
 				desc = L["Sets the font outline."],
-				values = Skada.fontFlags,
+				values = FONT_FLAGS,
 				order = 30
 			},
 			barfontsize = {

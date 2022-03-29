@@ -18,7 +18,17 @@ local IsControlKeyDown = IsControlKeyDown
 local IsModifierKeyDown = IsModifierKeyDown
 
 local COLOR_WHITE = HIGHLIGHT_FONT_COLOR
-local COLOR_YELLOW = YELLOW_FONT_COLOR
+local FONT_FLAGS = Skada.fontFlags
+if not FONT_FLAGS then
+	FONT_FLAGS = {
+		[""] = NONE,
+		["OUTLINE"] = L["Outline"],
+		["THICKOUTLINE"] = L["Thick outline"],
+		["MONOCHROME"] = L["Monochrome"],
+		["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
+	}
+	Skada.fontFlags = FONT_FLAGS
+end
 
 -- class, role & specs
 local classicons, roleicons, specicons
@@ -509,7 +519,7 @@ do
 
 	local function bar_setcolor(bar, db, data, color)
 		if not color then
-			color = db.barcolor or COLOR_YELLOW
+			color = db.barcolor or Skada.windowdefaults.barcolor
 
 			if data.color then
 				color = data.color
@@ -1203,7 +1213,7 @@ function mod:AddDisplayOptions(win, options)
 								name = L["Font Outline"],
 								desc = L["Sets the font outline."],
 								order = 20,
-								values = Skada.fontFlags
+								values = FONT_FLAGS
 							},
 							barfontsize = {
 								type = "range",
@@ -1243,7 +1253,7 @@ function mod:AddDisplayOptions(win, options)
 								name = L["Font Outline"],
 								desc = L["Sets the font outline."],
 								order = 20,
-								values = Skada.fontFlags
+								values = FONT_FLAGS
 							},
 							numfontsize = {
 								type = "range",

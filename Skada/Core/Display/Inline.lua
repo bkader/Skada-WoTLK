@@ -1,23 +1,44 @@
 local Skada = Skada
 
 local mod = Skada:NewModule("InlineDisplay")
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
-
-local mybars = {}
-local barlibrary = {bars = {}, nextuuid = 1}
-local leftmargin = 40
-local ttactive = false
-
 local LibWindow = LibStub("LibWindow-1.1")
-local media = LibStub("LibSharedMedia-3.0")
+local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 
 local pairs, tostring, type = pairs, tostring, type
 local strrep, format, _match = string.rep, string.format, string.match
 local tinsert, tremove, tsort = table.insert, table.remove, table.sort
 local CloseDropDownMenus = CloseDropDownMenus
 
+local mybars = {}
+local barlibrary = {bars = {}, nextuuid = 1}
+local leftmargin = 40
+local ttactive = false
+
 local WrapTextInColorCode = Skada.WrapTextInColorCode
 local RGBPercToHex = Skada.RGBPercToHex
+
+local FONT_FLAGS = Skada.fontFlags
+if not FONT_FLAGS then
+	FONT_FLAGS = {
+		[""] = NONE,
+		["OUTLINE"] = L["Outline"],
+		["THICKOUTLINE"] = L["Thick outline"],
+		["MONOCHROME"] = L["Monochrome"],
+		["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
+	}
+	Skada.fontFlags = FONT_FLAGS
+end
+
+local buttonBackdrop = {
+	bgFile = [[Interface\Buttons\UI-OptionsButton]],
+	edgeFile = [[Interface\Buttons\UI-OptionsButton]],
+	tile = true,
+	tileSize = 12,
+	edgeSize = 0,
+	insets = {left = 0, right = 0, top = 0, bottom = 0}
+}
+
+local buttonTexture = [[Interface\AddOns\Skada\Media\Textures\toolbar%s\config.blp]]
 
 local function serial(val, name, skipnewlines, depth)
 	skipnewlines = skipnewlines or false
@@ -183,23 +204,11 @@ function mod:Create(window, isnew)
 		end
 	end)
 
-	local skadamenubuttonbackdrop = {
-		bgFile = [[Interface\Buttons\UI-OptionsButton]],
-		edgeFile = [[Interface\Buttons\UI-OptionsButton]],
-		tile = true,
-		tileSize = 12,
-		edgeSize = 0,
-		insets = {left = 0, right = 0, top = 0, bottom = 0}
-	}
-
-	local menu = CreateFrame("Button", "InlineFrameMenuButton", window.frame)
+	local menu = CreateFrame("Button", "$parentMenuButton", window.frame)
 	menu:ClearAllPoints()
-	menu:SetWidth(12)
-	menu:SetHeight(12)
-	menu:SetNormalTexture([[Interface\AddOns\Skada\Media\Textures\toolbar1]])
-	menu:SetHighlightTexture([[Interface\AddOns\Skada\Media\Textures\toolbar1]], 1.0)
-	menu:GetNormalTexture():SetTexCoord(0.008, 0.117, 0.062, 0.938)
-	menu:GetHighlightTexture():SetTexCoord(0.008, 0.117, 0.062, 0.938)
+	menu:SetSize(12, 12)
+	menu:SetNormalTexture(format(buttonTexture, window.db.title.toolbar or 1))
+	menu:SetHighlightTexture(format(buttonTexture, window.db.title.toolbar or 1), 1.0)
 	menu:SetAlpha(0.5)
 	menu:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 	menu:SetBackdropColor(
@@ -208,10 +217,9 @@ function mod:Create(window, isnew)
 		window.db.title.textcolor.b,
 		window.db.title.textcolor.a
 	)
-	menu:SetPoint("BOTTOMLEFT", window.frame, "BOTTOMLEFT", 6, window.db.height / 2 - 8)
-	menu:SetFrameLevel(9)
-	menu:SetPoint("CENTER")
-	menu:SetBackdrop(skadamenubuttonbackdrop)
+	menu:SetPoint("LEFT", window.frame, "LEFT", 6, 0)
+	menu:SetFrameLevel(window.frame:GetFrameLevel() + 5)
+	menu:SetBackdrop(buttonBackdrop)
 	menu:SetScript("OnClick", function() Skada:OpenMenu(window) end)
 
 	window.frame.menu = menu
@@ -455,7 +463,7 @@ function mod:GetFont(db)
 			return nil
 		end
 	else
-		return media:Fetch("font", db.barfont), db.barfontsize, db.barfontflags
+		return Skada:MediaFetch("font", db.barfont), db.barfontsize, db.barfontflags
 	end
 end
 
@@ -525,7 +533,7 @@ function mod:ApplySettings(win)
 	else
 		--background
 		local fbackdrop = {}
-		fbackdrop.bgFile = media:Fetch("background", p.background.texture)
+		fbackdrop.bgFile = Skada:MediaFetch("background", p.background.texture)
 		fbackdrop.tile = p.background.tile
 		fbackdrop.tileSize = p.background.tilesize
 		f:SetBackdrop(fbackdrop)
@@ -569,7 +577,7 @@ function mod:AddDisplayOptions(win, options)
 				type = "select",
 				name = L["Font Outline"],
 				desc = L["Sets the font outline."],
-				values = Skada.fontFlags,
+				values = FONT_FLAGS,
 				order = 20
 			},
 			barfontsize = {
