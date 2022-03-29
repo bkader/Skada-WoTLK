@@ -1346,12 +1346,10 @@ do
 		self:SetScript("OnSizeChanged", self.OnSizeChanged)
 		self.texture = self.texture or self:CreateTexture(nil, "ARTWORK")
 
-		if not self.spark then
-			self.spark = self:CreateTexture(nil, "OVERLAY")
-			self.spark:SetTexture([[Interface\CastingBar\UI-CastingBar-Spark]])
-			self.spark:SetSize(10, 10)
-			self.spark:SetBlendMode("ADD")
-		end
+		self.spark = self.spark or self:CreateTexture(nil, "OVERLAY")
+		self.spark:SetTexture([[Interface\CastingBar\UI-CastingBar-Spark]])
+		self.spark:SetSize(10, 10)
+		self.spark:SetBlendMode("ADD")
 
 		self.bgtexture = self.bgtexture or self:CreateTexture(nil, "BACKGROUND")
 		self.bgtexture:SetAllPoints()
@@ -1793,7 +1791,7 @@ function barPrototype:SetValue(val)
 		self:SetTextureValue(amt, dist)
 	end
 
-	if (self.usespark and (amt == 1 or amt == 0)) or not self.usespark then
+	if self.usespark and (amt == 1 or amt == 0) then
 		self.spark:Hide()
 	elseif self.usespark then
 		self.spark:Show()

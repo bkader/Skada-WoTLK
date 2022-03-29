@@ -23,6 +23,10 @@ L["Press CTRL-V to paste a Skada configuration text."] = true
 L["This is your current profile in text format."] = true
 L["Press CTRL-C to copy the configuration to your clipboard."] = true
 -- common lines
+L["Yes"] = YES
+L["No"] = NO
+L["None"] = NONE
+L["All"] = ALL
 L["Options"] = true
 L["Options for %s."] = true
 L["General"] = true

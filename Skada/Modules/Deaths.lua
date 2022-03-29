@@ -15,7 +15,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 	local T, wipe = Skada.Table, wipe
-	local new, del = Skada.TablePool()
+	local new, del = Skada.newTable, Skada.delTable
 	local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
 	local date, time, _ = date, time, nil
 

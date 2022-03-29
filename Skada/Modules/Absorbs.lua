@@ -27,7 +27,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local UnitIsDeadOrGhost, UnitHealthInfo = UnitIsDeadOrGhost, Skada.UnitHealthInfo
 	local GetTime, band, tsort = GetTime, bit.band, table.sort
 	local T = Skada.Table
-	local new, del = Skada.TablePool("kv")
+	local new, del = Skada.newTable, Skada.delTable
 
 	-- INCOMPLETE
 	-- the following list is incomplete due to the lack of testing for different
@@ -442,103 +442,108 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	end
 
 	local function HandleShield(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		local spellid = ...
+		if not spellid or not absorbspells[spellid] or not dstName or ignoredSpells[spellid] then return end
+
+		shields = shields or T.get("Skada_Shields") -- create table if missing
+
 		-- shield removed?
 		if eventtype == "SPELL_AURA_REMOVED" then
-			local spellid = ...
-			if absorbspells[spellid] and shields[dstName] and shields[dstName][spellid] and shields[dstName][spellid][srcName] then
+			if shields[dstName] and shields[dstName][spellid] and shields[dstName][spellid][srcName] then
 				shields[dstName][spellid][srcName].ts = timestamp + 0.1
 			end
 			return
 		end
 
+		-- complete data
+		local spellschool, points
+		spellid, _, spellschool, _, points = ...
+
 		-- shield applied
-		local spellid, _, spellschool, _, points = ...
-		if spellid and absorbspells[spellid] and not ignoredSpells[spellid] and dstName then
-			shields[dstName] = shields[dstName] or {}
-			shields[dstName][spellid] = shields[dstName][spellid] or {}
+		shields[dstName] = shields[dstName] or {}
+		shields[dstName][spellid] = shields[dstName][spellid] or {}
 
-			-- log spell casts.
-			if not passivespells[spellid] then
-				Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, spellid, spellschool)
+		-- log spell casts.
+		if not passivespells[spellid] then
+			Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, spellid, spellschool)
+		end
+
+		-- we calculate how much the shield's maximum absorb amount
+		local amount = 0
+
+		-- Stackable Shields
+		if (priest_divine_aegis[spellid] or spellid == 64413) then
+			if shields[dstName][spellid][srcName] and timestamp < shields[dstName][spellid][srcName].ts then
+				amount = shields[dstName][spellid][srcName].amount
 			end
+		end
 
-			-- we calculate how much the shield's maximum absorb amount
-			local amount = 0
-
-			-- Stackable Shields
-			if (priest_divine_aegis[spellid] or spellid == 64413) then
-				if shields[dstName][spellid][srcName] and timestamp < shields[dstName][spellid][srcName].ts then
-					amount = shields[dstName][spellid][srcName].amount
-				end
+		if priest_divine_aegis[spellid] then -- Divine Aegis
+			if heals and heals[dstName] and heals[dstName][srcName] and heals[dstName][srcName].ts > timestamp - 0.2 then
+				amount = min((UnitLevel(srcName) or 80) * 125, amount + (heals[dstName][srcName].amount * 0.3 * zoneModifier))
 			end
-
-			if priest_divine_aegis[spellid] then -- Divine Aegis
-				if heals and heals[dstName] and heals[dstName][srcName] and heals[dstName][srcName].ts > timestamp - 0.2 then
-					amount = min((UnitLevel(srcName) or 80) * 125, amount + (heals[dstName][srcName].amount * 0.3 * zoneModifier))
+		elseif spellid == 64413 then -- Protection of Ancient Kings (Vala'nyr)
+			if heals and heals[dstName] and heals[dstName][srcName] and heals[dstName][srcName].ts > timestamp - 0.2 then
+				amount = min(20000, amount + (heals[dstName][srcName].amount * 0.15))
+			end
+		elseif (spellid == 48707 or spellid == 51052) and UnitHealthMax(dstName) then -- Anti-Magic Shell/Zone
+			amount = UnitHealthMax(dstName) * 0.5
+		elseif spellid == 70845 and UnitHealthMax(dstName) then -- Stoicism
+			amount = UnitHealthMax(dstName) * 0.2
+		elseif absorbspells[spellid].cap then
+			if shieldamounts and shieldamounts[srcName] and shieldamounts[srcName][spellid] then
+				local shield = shields[dstName][spellid][srcName]
+				if not shield then
+					shields[dstName][spellid][srcName] = {
+						srcGUID = srcGUID,
+						srcFlags = srcFlags,
+						school = spellschool,
+						points = points,
+					}
+					shield = shields[dstName][spellid][srcName]
 				end
-			elseif spellid == 64413 then -- Protection of Ancient Kings (Vala'nyr)
-				if heals and heals[dstName] and heals[dstName][srcName] and heals[dstName][srcName].ts > timestamp - 0.2 then
-					amount = min(20000, amount + (heals[dstName][srcName].amount * 0.15))
+
+				shield.amount = shieldamounts[srcName][spellid]
+				shield.ts = timestamp + absorbspells[spellid].dur + 0.1
+				shield.full = true
+
+				-- fix things
+				if not shield.school and spellschool then
+					shield.school = spellschool
 				end
-			elseif (spellid == 48707 or spellid == 51052) and UnitHealthMax(dstName) then -- Anti-Magic Shell/Zone
-				amount = UnitHealthMax(dstName) * 0.5
-			elseif spellid == 70845 and UnitHealthMax(dstName) then -- Stoicism
-				amount = UnitHealthMax(dstName) * 0.2
-			elseif absorbspells[spellid].cap then
-				if shieldamounts[srcName] and shieldamounts[srcName][spellid] then
-					local shield = shields[dstName][spellid][srcName]
-					if not shield then
-						shields[dstName][spellid][srcName] = {
-							srcGUID = srcGUID,
-							srcFlags = srcFlags,
-							school = spellschool,
-							points = points,
-						}
-						shield = shields[dstName][spellid][srcName]
-					end
-
-					shield.amount = shieldamounts[srcName][spellid]
-					shield.ts = timestamp + absorbspells[spellid].dur + 0.1
-					shield.full = true
-
-					-- fix things
-					if not shield.school and spellschool then
-						shield.school = spellschool
-					end
-					if not shield.points and points then
-						shield.points = points
-					end
-
-					return
-				else
-					amount = (absorbspells[spellid].avg or absorbspells[spellid].cap or 1000) * zoneModifier
+				if not shield.points and points then
+					shield.points = points
 				end
+
+				return
 			else
-				amount = 1000 * zoneModifier -- default
+				amount = (absorbspells[spellid].avg or absorbspells[spellid].cap or 1000) * zoneModifier
 			end
+		else
+			amount = 1000 * zoneModifier -- default
+		end
 
-			local shield = shields[dstName][spellid][srcName]
-			if not shield then
-				shields[dstName][spellid][srcName] = {
-					srcGUID = srcGUID,
-					srcFlags = srcFlags,
-					school = spellschool,
-					points = points,
-				}
-				shield = shields[dstName][spellid][srcName]
-			end
+		local shield = shields[dstName][spellid][srcName]
+		if not shield then
+			shields[dstName][spellid][srcName] = {
+				srcGUID = srcGUID,
+				srcFlags = srcFlags,
+				school = spellschool,
+				points = points,
+			}
+			shield = shields[dstName][spellid][srcName]
+		end
 
-			shield.amount = floor(amount)
-			shield.ts = timestamp + absorbspells[spellid].dur + 0.1
-			shield.full = true
+		shield.amount = floor(amount)
+		shield.ts = timestamp + absorbspells[spellid].dur + 0.1
+		shield.full = true
 
-			-- fix things
-			if not shield.school and spellschool then
-				shield.school = spellschool
-			end
-			if not shield.points and points then
-				shield.points = points
-			end
+		-- fix things
+		if not shield.school and spellschool then
+			shield.school = spellschool
+		end
+		if not shield.points and points then
+			shield.points = points
 		end
 	end
 
@@ -593,7 +598,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	local function process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool, damage, broke)
 		shields[dstName] = shields[dstName] or {}
-		del(shieldspopped)
+		shieldspopped = T.clear(shieldspopped or T.get("Skada_ShieldsPopped"), del)
 
 		for spellid, sources in pairs(shields[dstName]) do
 			for srcName, spell in pairs(sources) do
@@ -639,6 +644,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		-- if the player has a single shield and it broke, we update its max absorb
 		if #shieldspopped == 1 and broke and shieldspopped[1].full and absorbspells[shieldspopped[1].spellid].cap then
 			local s = shieldspopped[1]
+			shieldamounts = shieldamounts or T.get("Skada_ShieldAmounts") -- create table if missing
 			shieldamounts[s.srcName] = shieldamounts[s.srcName] or {}
 			if (not shieldamounts[s.srcName][s.spellid] or shieldamounts[s.srcName][s.spellid] < absorbed) and absorbed < (absorbspells[s.spellid].cap * zoneModifier) then
 				shieldamounts[s.srcName][s.spellid] = absorbed
@@ -796,6 +802,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	end
 
 	local function SpellHeal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		heals = heals or T.get("Skada_Heals") -- create table if missing
 		heals[dstName] = heals[dstName] or {}
 		heals[dstName][srcName] = {ts = timestamp, amount = select(4, ...)}
 	end
@@ -1146,19 +1153,16 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	function mod:AddSetAttributes(set)
 		self:ZoneModifier()
-		heals = heals or T.get("Absorbs_Heals")
-		shields = shields or T.get("Absorbs_Shields")
-		shieldamounts = shieldamounts or T.get("Absorbs_ShieldAmounts")
-		shieldspopped = shieldspopped or T.get("Absorbs_ShieldsPopped")
 	end
 
 	function mod:SetComplete(set)
 		T.clear(absorb)
-		T.free("Absorbs_Heals", heals)
-		T.free("Absorbs_Shields", shields)
-		T.free("Absorbs_ShieldAmounts", shieldamounts)
-		T.free("Absorbs_ShieldsPopped", shieldspopped)
+		T.free("Skada_Heals", heals)
+		T.free("Skada_Shields", shields)
+		T.free("Skada_ShieldAmounts", shieldamounts)
+		T.free("Skada_ShieldsPopped", shieldspopped, nil, del)
 		self.checked = nil
+
 		-- clean absorbspells table:
 		if (set.absorb or 0) == 0 then return end
 		for _, p in ipairs(set.players) do

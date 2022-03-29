@@ -84,7 +84,7 @@ function Skada:OpenMenu(window)
 			-- Can't report if we are not in a mode.
 			if not window or (window and window.selectedmode) then
 				wipe(info)
-				info.text = L["Report"]
+				info.text = L.Report
 				info.value = "report"
 				info.func = function()
 					Skada:OpenReportWindow(window)
@@ -161,7 +161,7 @@ function Skada:OpenMenu(window)
 
 			-- Configure
 			wipe(info)
-			info.text = L["Configure"]
+			info.text = L.Configure
 			info.func = function()
 				Skada:OpenOptions(window)
 			end
@@ -186,7 +186,7 @@ function Skada:OpenMenu(window)
 					if #modes > 0 then
 						wipe(info)
 						info.isTitle = 1
-						info.text = L["Mode"]
+						info.text = L.Mode
 						info.notCheckable = 1
 						UIDropDownMenu_AddButton(info, level)
 
@@ -210,12 +210,12 @@ function Skada:OpenMenu(window)
 
 					wipe(info)
 					info.isTitle = 1
-					info.text = L["Segment"]
+					info.text = L.Segment
 					info.notCheckable = 1
 					UIDropDownMenu_AddButton(info, level)
 
 					wipe(info)
-					info.text = L["Total"]
+					info.text = L.Total
 					info.func = function()
 						window:set_selected_set("total")
 						Skada:Wipe()
@@ -225,7 +225,7 @@ function Skada:OpenMenu(window)
 					UIDropDownMenu_AddButton(info, level)
 
 					wipe(info)
-					info.text = L["Current"]
+					info.text = L.Current
 					info.func = function()
 						window:set_selected_set("current")
 						Skada:Wipe()
@@ -259,7 +259,7 @@ function Skada:OpenMenu(window)
 
 				-- window
 				wipe(info)
-				info.text = L["Window"]
+				info.text = L.Window
 				info.isTitle = 1
 				info.notCheckable = 1
 				UIDropDownMenu_AddButton(info, level)
@@ -327,7 +327,7 @@ function Skada:OpenMenu(window)
 				-- window
 				if window.db.display == "bar" then
 					wipe(info)
-					info.text = L["Options"]
+					info.text = L.Options
 					info.isTitle = 1
 					info.notCheckable = 1
 					UIDropDownMenu_AddButton(info, level)
@@ -377,7 +377,7 @@ function Skada:OpenMenu(window)
 				UIDropDownMenu_AddButton(info, level)
 			elseif UIDROPDOWNMENU_MENU_VALUE == "segment" then
 				wipe(info)
-				info.text = L["Total"]
+				info.text = L.Total
 				info.func = function()
 					window:set_selected_set("total")
 					Skada:Wipe()
@@ -387,7 +387,7 @@ function Skada:OpenMenu(window)
 				UIDropDownMenu_AddButton(info, level)
 
 				wipe(info)
-				info.text = L["Current"]
+				info.text = L.Current
 				info.func = function()
 					window:set_selected_set("current")
 					Skada:Wipe()
@@ -526,7 +526,7 @@ function Skada:OpenMenu(window)
 				UIDropDownMenu_AddButton(info, level)
 
 				wipe(info)
-				info.text = L["Condensed"]
+				info.text = L.Condensed
 				info.func = function()
 					Skada.db.profile.numberformat = 1
 					Skada:ApplySettings(true)
@@ -535,7 +535,7 @@ function Skada:OpenMenu(window)
 				UIDropDownMenu_AddButton(info, level)
 
 				wipe(info)
-				info.text = L["Comma"]
+				info.text = L.Comma
 				info.func = function()
 					Skada.db.profile.numberformat = 2
 					Skada:ApplySettings(true)
@@ -544,7 +544,7 @@ function Skada:OpenMenu(window)
 				UIDropDownMenu_AddButton(info, level)
 
 				wipe(info)
-				info.text = L["Detailed"]
+				info.text = L.Detailed
 				info.func = function()
 					Skada.db.profile.numberformat = 3
 					Skada:ApplySettings(true)
@@ -627,7 +627,7 @@ function Skada:OpenMenu(window)
 				end
 			elseif UIDROPDOWNMENU_MENU_VALUE == "segment" then
 				wipe(info)
-				info.text = L["Total"]
+				info.text = L.Total
 				info.func = function()
 					Skada.db.profile.report.set = "total"
 				end
@@ -635,7 +635,7 @@ function Skada:OpenMenu(window)
 				UIDropDownMenu_AddButton(info, level)
 
 				wipe(info)
-				info.text = L["Current"]
+				info.text = L.Current
 				info.func = function()
 					Skada.db.profile.report.set = "current"
 				end
@@ -670,7 +670,7 @@ function Skada:SegmentMenu(window)
 		local info = UIDropDownMenu_CreateInfo()
 
 		wipe(info)
-		info.text = L["Total"]
+		info.text = L.Total
 		info.func = function()
 			window:set_selected_set("total")
 			Skada:Wipe()
@@ -680,7 +680,7 @@ function Skada:SegmentMenu(window)
 		UIDropDownMenu_AddButton(info, level)
 
 		wipe(info)
-		info.text = L["Current"]
+		info.text = L.Current
 		info.func = function()
 			window:set_selected_set("current")
 			Skada:Wipe()
@@ -875,9 +875,9 @@ do
 		frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
 
 		if window then
-			frame:SetTitle(L["Report"] .. format(" - %s", window.db.name))
+			frame:SetTitle(L.Report .. format(" - %s", window.db.name))
 		else
-			frame:SetTitle(L["Report"])
+			frame:SetTitle(L.Report)
 		end
 
 		frame:SetCallback("OnClose", function(widget, callback) destroywindow() end)
@@ -900,8 +900,8 @@ do
 			-- report a specific line
 			if window.selectedset and window.selectedmode then
 				local linebox = AceGUI:Create("Dropdown")
-				linebox:SetLabel(L["Line"])
-				linebox:SetList({[""] = NONE})
+				linebox:SetLabel(L.Line)
+				linebox:SetList({[""] = L.None})
 				for _, bar in ipairs(window.dataset) do
 					if bar.id and not bar.ignore then
 						linebox:AddItem(bar.id, format("%s   %s", bar.text or bar.label, bar.valuetext))
@@ -914,7 +914,7 @@ do
 		else
 			-- Mode, default last chosen or first available.
 			local modebox = AceGUI:Create("Dropdown")
-			modebox:SetLabel(L["Mode"])
+			modebox:SetLabel(L.Mode)
 			modebox:SetList({})
 			for _, mode in Skada:IterateModes() do
 				modebox:AddItem(mode.moduleName, mode.moduleName)
@@ -925,8 +925,8 @@ do
 
 			-- Segment, default last chosen or last set.
 			local setbox = AceGUI:Create("Dropdown")
-			setbox:SetLabel(L["Segment"])
-			setbox:SetList({total = L["Total"], current = L["Current"]})
+			setbox:SetLabel(L.Segment)
+			setbox:SetList({total = L.Total, current = L.Current})
 			for i, set in Skada:IterateSets() do
 				setbox:AddItem(i, set.name)
 			end
@@ -936,27 +936,27 @@ do
 		end
 
 		local channellist = {
-			whisper = {L["Whisper"], "whisper", true},
+			whisper = {L.Whisper, "whisper", true},
 			target = {L["Whisper Target"], "whisper"},
 			say = {CHAT_MSG_SAY, "preset"},
 			raid = {CHAT_MSG_RAID, "preset"},
 			party = {CHAT_MSG_PARTY, "preset"},
 			guild = {CHAT_MSG_GUILD, "preset"},
 			officer = {CHAT_MSG_OFFICER, "preset"},
-			self = {L["Self"], "self"}
+			self = {L.Self, "self"}
 		}
 
 		local list = {GetChannelList()}
 		for i = 1, #list, 2 do
 			local chan = list[i + 1]
 			if chan ~= "Trade" and chan ~= "General" and chan ~= "LocalDefense" and chan ~= "LookingForGroup" then -- These should be localized.
-				channellist[chan] = {format("%s: %d/%s", L["Channel"], list[i], chan), "channel"}
+				channellist[chan] = {format("%s: %d/%s", L.Channel, list[i], chan), "channel"}
 			end
 		end
 
 		-- Channel, default last chosen or Say.
 		local channelbox = AceGUI:Create("Dropdown")
-		channelbox:SetLabel(L["Channel"])
+		channelbox:SetLabel(L.Channel)
 		channelbox:SetList({})
 		for chan, kind in pairs(channellist) do
 			channelbox:AddItem(chan, kind[1])
@@ -982,7 +982,7 @@ do
 		frame:AddChild(channelbox)
 
 		local lines = AceGUI:Create("Slider")
-		lines:SetLabel(L["Lines"])
+		lines:SetLabel(L.Lines)
 		lines:SetValue(Skada.db.profile.report.number ~= nil and Skada.db.profile.report.number or 10)
 		lines:SetSliderValues(1, 25, 1)
 		lines:SetCallback("OnValueChanged", function(self, event, value)
@@ -1018,7 +1018,7 @@ do
 
 		local report = AceGUI:Create("Button")
 		frame.button = report
-		report:SetText(L["Report"])
+		report:SetText(L.Report)
 		report:SetCallback("OnClick", function()
 			DoReport(window, barid)
 		end)

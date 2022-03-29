@@ -21,7 +21,7 @@ local COLOR_WHITE = HIGHLIGHT_FONT_COLOR
 local FONT_FLAGS = Skada.fontFlags
 if not FONT_FLAGS then
 	FONT_FLAGS = {
-		[""] = NONE,
+		[""] = L.None,
 		["OUTLINE"] = L["Outline"],
 		["THICKOUTLINE"] = L["Thick outline"],
 		["MONOCHROME"] = L["Monochrome"],
@@ -192,20 +192,22 @@ function mod:Wipe(win)
 end
 
 function mod:Show(win)
-	if win and win.bargroup then
+	if self:IsShown(win) == false then
 		win.bargroup:Show()
 		win.bargroup:SortBars()
 	end
 end
 
 function mod:Hide(win)
-	if win and win.bargroup then
+	if self:IsShown(win) == true then
 		win.bargroup:Hide()
 	end
 end
 
 function mod:IsShown(win)
-	return (win and win.bargroup and win.bargroup:IsShown())
+	if win and win.bargroup then
+		return win.bargroup:IsShown() and true or false
+	end
 end
 
 function mod:SetTitle(win, title)
@@ -978,6 +980,18 @@ do
 	end
 end
 
+local optionsValues = {
+	ORIENTATION = {
+		[1] = L["Left to right"],
+		[3] = L["Right to left"],
+	},
+	TITLEBTNS = {
+		format("|T%s:24:192|t", format(buttonsTexPath, 1, "_full")),
+		format("|T%s:24:192|t", format(buttonsTexPath, 2, "_full")),
+		format("|T%s:24:192|t", format(buttonsTexPath, 3, "_full"))
+	}
+}
+
 function mod:AddDisplayOptions(win, options)
 	local db = win.db
 
@@ -1061,7 +1075,7 @@ function mod:AddDisplayOptions(win, options)
 						desc = L["The direction the bars are drawn in."],
 						order = 60,
 						width = "double",
-						values = {[1] = L["Left to right"], [3] = L["Right to left"]}
+						values = optionsValues.ORIENTATION
 					},
 					reversegrowth = {
 						type = "toggle",
@@ -1497,13 +1511,7 @@ function mod:AddDisplayOptions(win, options)
 						name = L["Font Outline"],
 						desc = L["Sets the font outline."],
 						order = 20,
-						values = {
-							[""] = NONE,
-							["OUTLINE"] = L["Outline"],
-							["THICKOUTLINE"] = L["Thick outline"],
-							["MONOCHROME"] = L["Monochrome"],
-							["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
-						}
+						values = FONT_FLAGS
 					},
 					fontsize = {
 						type = "range",
@@ -1615,11 +1623,7 @@ function mod:AddDisplayOptions(win, options)
 									db.title.toolbar = val
 									Skada:ApplySettings(db.name)
 								end,
-								values = {
-									format("|T%s:24:192|t", format(buttonsTexPath, 1, "_full")),
-									format("|T%s:24:192|t", format(buttonsTexPath, 2, "_full")),
-									format("|T%s:24:192|t", format(buttonsTexPath, 3, "_full"))
-								}
+								values = optionsValues.TITLEBTNS
 							},
 							opacity = {
 								type = "range",

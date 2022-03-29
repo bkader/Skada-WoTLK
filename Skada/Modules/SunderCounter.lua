@@ -9,7 +9,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 	local T = Skada.Table
-	local new, del = Skada.TablePool()
+	local new, del = Skada.newTable, Skada.delTable
 	local sunder, sunderLink, devastate, _
 
 	local function log_sunder(set, data)

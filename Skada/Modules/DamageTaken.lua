@@ -18,7 +18,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 	local sdetailmod = spellmod:NewModule(L["Damage Breakdown"])
 	local sourcemod = mod:NewModule(L["Damage source list"])
 	local tdetailmod = sourcemod:NewModule(L["Damage spell list"])
-	local new, del = Skada.TablePool()
+	local new, del = Skada.newTable, Skada.delTable
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	-- damage miss types
@@ -197,7 +197,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				local spellid, spellname, _, amount = ...
 
 				if spellid and spellname and not ignoredSpells[spellid] then
-					extraATT = extraATT or T.get("DamageTaken_ExtraAttacks")
+					extraATT = extraATT or T.get("Damage_ExtraAttacks")
 					if not extraATT[srcName] then
 						extraATT[srcName] = new()
 						extraATT[srcName].spellname = spellname
@@ -856,7 +856,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 
 	function mod:SetComplete(set)
 		T.clear(dmg)
-		T.free("DamageTaken_ExtraAttacks", extraATT)
+		T.free("Damage_ExtraAttacks", extraATT, nil, del)
 
 		-- clean set from garbage before it is saved.
 		if (set.totaldamagetaken or 0) == 0 then return end

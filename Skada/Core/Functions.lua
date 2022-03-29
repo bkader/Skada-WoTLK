@@ -735,22 +735,26 @@ end
 
 do
 	local queued_units = nil
+	local new, del = Skada.newTable, Skada.delTable
 
 	function Skada:QueueUnit(spellid, srcGUID, srcName, srcFlags, dstGUID)
 		if spellid and srcName and srcGUID and dstGUID and srcGUID ~= dstGUID then
 			queued_units = queued_units or T.get("Skada_QueuedUnits")
-			queued_units[spellid] = queued_units[spellid] or {}
-			queued_units[spellid][dstGUID] = {id = srcGUID, name = srcName, flag = srcFlags}
+			queued_units[spellid] = queued_units[spellid] or new()
+			queued_units[spellid][dstGUID] = new()
+			queued_units[spellid][dstGUID].id = srcGUID
+			queued_units[spellid][dstGUID].name = srcName
+			queued_units[spellid][dstGUID].flag = srcFlags
 		end
 	end
 
 	function Skada:UnqueueUnit(spellid, dstGUID)
 		if spellid and dstGUID and queued_units and queued_units[spellid] then
 			if queued_units[spellid][dstGUID] then
-				queued_units[spellid][dstGUID] = nil
+				queued_units[spellid][dstGUID] = del(queued_units[spellid][dstGUID])
 			end
 			if Skada.tLength(queued_units[spellid]) == 0 then
-				queued_units[spellid] = nil
+				queued_units[spellid] = del(queued_units[spellid])
 			end
 		end
 	end
@@ -776,6 +780,6 @@ do
 	end
 
 	function Skada:ClearQueueUnits()
-		T.free("Skada_QueuedUnits", queued_units)
+		T.free("Skada_QueuedUnits", queued_units, nil, del, true)
 	end
 end

@@ -81,6 +81,9 @@ local feeds, selected_feed = {}, nil
 -- lists of modules and windows
 local modes, windows = {}, {}
 
+-- table used for temporary stuff
+local tempTable = {}
+
 -- flags for party, instance and ovo
 local was_in_party = nil
 
@@ -115,6 +118,9 @@ Skada.BITMASK_ENEMY = BITMASK_ENEMY
 
 -------------------------------------------------------------------------------
 -- local functions.
+
+Skada.newTable, Skada.delTable = Skada.TablePool("kv")
+local new, del = Skada.newTable, Skada.delTable
 
 -- verifies a set
 local function VerifySet(mode, set)
@@ -480,7 +486,7 @@ do
 					order = 2,
 					width = "double",
 					values = function()
-						local list = {}
+						local list = wipe(tempTable)
 						for name, display in pairs(displays) do
 							list[name] = display.name
 						end
@@ -524,18 +530,19 @@ do
 						return (copywindow == nil)
 					end,
 					func = function()
-						local newdb = {}
+						wipe(tempTable)
 						if copywindow then
 							for _, win in ipairs(windows) do
 								if win.db.name == copywindow and win.db.display == self.db.display then
-									Skada.tCopy(newdb, win.db, "name", "sticked", "x", "y", "point", "snapped")
+									Skada.tCopy(tempTable, win.db, "name", "sticked", "x", "y", "point", "snapped")
 									break
 								end
 							end
 						end
-						for k, v in pairs(newdb) do
+						for k, v in pairs(tempTable) do
 							self.db[k] = v
 						end
+						wipe(tempTable)
 						Skada:ApplySettings(self.db.name)
 						copywindow = nil
 					end
@@ -666,21 +673,15 @@ function Window:Toggle()
 	if
 		Skada.db.profile.hidden or
 		self.db.hidden or
-		(Skada.db.profile.hidesolo and not IsInGroup()) or
-		(Skada.db.profile.hidepvp and IsInPvP()) or
-		(Skada.db.profile.showcombat and not InCombatLockdown() and not IsGroupInCombat()) or
-		(Skada.db.profile.hidecombat and (InCombatLockdown() or IsGroupInCombat())) or
-		(self.db.hideauto == 4 and not IsInGroup()) or
-		(self.db.hideauto == 2 and (InCombatLockdown() or IsGroupInCombat())) or
-		(self.db.hideauto == 3 and not InCombatLockdown() and not IsGroupInCombat()) or
-		(self.db.hideauto == 7 and Skada.instanceType == "pvp") or
+		((Skada.db.profile.hidesolo or self.db.hideauto == 4) and not IsInGroup()) or
+		((Skada.db.profile.hidepvp or self.db.hideauto == 7) and IsInPvP()) or
+		((Skada.db.profile.showcombat or self.db.hideauto == 3) and not IsGroupInCombat()) or
+		((Skada.db.profile.hidecombat or self.db.hideauto == 2) and IsGroupInCombat()) or
 		(self.db.hideauto == 5 and (Skada.instanceType == "raid" or Skada.instanceType == "party")) or
 		(self.db.hideauto == 6 and Skada.instanceType ~= "raid" and Skada.instanceType ~= "party")
 	then
-		if self.display:IsShown(self) then
-			self.display:Hide(self)
-		end
-	elseif not self.display:IsShown(self) then
+		self.display:Hide(self)
+	else
 		self.display:Show(self)
 	end
 end
@@ -1004,8 +1005,8 @@ do
 		if not StaticPopupDialogs["SkadaDeleteWindowDialog"] then
 			StaticPopupDialogs["SkadaDeleteWindowDialog"] = {
 				text = L["Are you sure you want to delete this window?"],
-				button1 = YES,
-				button2 = NO,
+				button1 = L.Yes,
+				button2 = L.No,
 				timeout = 30,
 				whileDead = 0,
 				hideOnEscape = 1,
@@ -2958,7 +2959,7 @@ function Skada:ReloadSettings()
 	for _, win in ipairs(windows) do
 		win:Destroy()
 	end
-	windows = {}
+	wipe(windows)
 
 	for _, win in ipairs(Skada.db.profile.windows) do
 		Skada:CreateWindow(win.name, win)
@@ -3609,15 +3610,12 @@ do
 		tick_timer = self:ScheduleRepeatingTimer("Tick", 1)
 	end
 
-	function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
+	function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		-- disabled module or test mode?
 		if disabled or self.testMode then return end
 
 		-- ignored combat event?
 		if ignored_events[eventtype] and not (spellcast_events[eventtype] and self.current) then return end
-
-		-- globally ignored spell
-		if (spellid and self.ignoredSpells[spellid]) or (spellname and self.ignoredSpells[spellname]) then return end
 
 		local src_is_interesting = nil
 		local dst_is_interesting = nil
@@ -3648,7 +3646,7 @@ do
 			self.current.started = true
 			if self.instanceType == nil then self:CheckZone() end
 			self.current.type = (self.instanceType == "none" and IsInGroup()) and "group" or self.instanceType
-			self:SendMessage("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
+			self:SendMessage("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		end
 
 		if self.current and self.db.profile.autostop then
@@ -3723,7 +3721,7 @@ do
 					end
 
 					self.current.last_action = time()
-					mod.func(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
+					mod.func(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 				end
 			end
 		end

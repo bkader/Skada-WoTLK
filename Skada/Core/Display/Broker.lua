@@ -16,7 +16,7 @@ local RGBPercToHex = Skada.RGBPercToHex
 local FONT_FLAGS = Skada.fontFlags
 if not FONT_FLAGS then
 	FONT_FLAGS = {
-		[""] = NONE,
+		[""] = L.None,
 		["OUTLINE"] = L["Outline"],
 		["THICKOUTLINE"] = L["Thick outline"],
 		["MONOCHROME"] = L["Monochrome"],
@@ -162,17 +162,19 @@ function mod:Create(win, isnew)
 end
 
 function mod:IsShown(win)
-	return win.frame:IsShown()
+	if win and win.frame and win.db.useframe then
+		return win.frame:IsShown() and true or false
+	end
 end
 
 function mod:Show(win)
-	if win.db.useframe then
+	if self:IsShown(win) == false then
 		win.frame:Show()
 	end
 end
 
 function mod:Hide(win)
-	if win.db.useframe then
+	if self:IsShown(win) == true then
 		win.frame:Hide()
 	end
 end

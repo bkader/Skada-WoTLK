@@ -15,9 +15,6 @@ Skada.ignoredSpells = ignoredSpells
 
 -->> start of editable code <<--
 
--- [[ globally ignored spells ]] --
--- ignoredSpells[72350] = true -- Fury of Frostmourne (example only)
-
 -- [[ absorbs modules ]] --
 -- ignoredSpells.absorbs = {}
 

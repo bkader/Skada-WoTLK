@@ -175,8 +175,46 @@ Skada.defaults = {
 -------------------------------------------------------------------------------
 
 local titleVersion = fmt("|T%s:18:18:0:0:32:32:2:30:2:30|t |cffffd200Skada|r |cffffffff%s|r", Skada.logo, Skada.version)
-local resetoptions = {NO, YES, L["Ask"]}
 local newdisplay = "bar"
+local optionsValues = {
+	RESETOPT = {
+		L["No"], -- [1]
+		L["Yes"], -- [2]
+		L["Ask"], -- [3]
+	},
+	STRATA = {
+		BACKGROUND = "BACKGROUND",
+		LOW = "LOW",
+		MEDIUM = "MEDIUM",
+		HIGH = "HIGH",
+		DIALOG = "DIALOG",
+		FULLSCREEN = "FULLSCREEN",
+		FULLSCREEN_DIALOG = "FULLSCREEN_DIALOG"
+	},
+	AUTOHIDE = {
+		NONE, -- [1]
+		L["While in combat"], -- [2]
+		L["While out of combat"], -- [3]
+		L["While not in a group"], -- [4]
+		L["While inside an instance"], -- [5]
+		L["While not inside an instance"], -- [6]
+		L["In Battlegrounds"], -- [7]
+	},
+	CHILDMODE = {
+		L["All"],  -- [1]
+		L["Segment"],  -- [2]
+		L["Mode"], -- [3]
+	},
+	TOOLTIPPOS = {
+		NONE = L.None,
+		BOTTOM = L["Bottom"],
+		BOTTOMLEFT = L["Bottom Left"],
+		BOTTOMRIGHT = L["Bottom Right"],
+		TOP = L["Top"],
+		TOPLEFT = L["Top Left"],
+		TOPRIGHT = L["Top Right"],
+	}
+}
 
 Skada.options = {
 	type = "group",
@@ -401,14 +439,14 @@ Skada.options = {
 							type = "select",
 							name = L["Brackets"],
 							desc = L["Choose which type of brackets to use."],
-							values = {"(", "{", "[", "<", NONE},
+							values = {"(", "{", "[", "<", L.None},
 							order = 30
 						},
 						separator = {
 							type = "select",
 							name = L["Separator"],
 							desc = L["Choose which character is used to separator values between brackets."],
-							values = {",", ".", ";", "-", "|", "/", "\\", "~", NONE},
+							values = {",", ".", ";", "-", "|", "/", "\\", "~", L.None},
 							order = 40
 						},
 						decimals = {
@@ -460,7 +498,7 @@ Skada.options = {
 							desc = L.opt_feed_desc,
 							width = "double",
 							values = function()
-								local feeds = {[""] = NONE}
+								local feeds = {[""] = L.None}
 								for name, _ in Skada:IterateFeeds() do
 									feeds[name] = name
 								end
@@ -602,7 +640,7 @@ Skada.options = {
 					desc = L["Controls if data is reset when you enter an instance."],
 					order = 1,
 					width = "double",
-					values = resetoptions
+					values = optionsValues.RESETOPT
 				},
 				join = {
 					type = "select",
@@ -610,7 +648,7 @@ Skada.options = {
 					desc = L["Controls if data is reset when you join a group."],
 					order = 2,
 					width = "double",
-					values = resetoptions
+					values = optionsValues.RESETOPT
 				},
 				leave = {
 					type = "select",
@@ -618,7 +656,7 @@ Skada.options = {
 					desc = L["Controls if data is reset when you leave a group."],
 					order = 3,
 					width = "double",
-					values = resetoptions
+					values = optionsValues.RESETOPT
 				},
 				sep = {
 					type = "description",
@@ -863,16 +901,6 @@ do
 	end
 end
 
-local wintooltippos = {
-	["NONE"] = NONE,
-	["BOTTOM"] = L["Bottom"],
-	["BOTTOMLEFT"] = L["Bottom Left"],
-	["BOTTOMRIGHT"] = L["Bottom Right"],
-	["TOP"] = L["Top"],
-	["TOPLEFT"] = L["Top Left"],
-	["TOPRIGHT"] = L["Top Right"]
-}
-
 function Skada:FrameSettings(db, include_dimensions)
 	local obj = {
 		type = "group",
@@ -1072,22 +1100,14 @@ function Skada:FrameSettings(db, include_dimensions)
 						name = L["Strata"],
 						desc = L["This determines what other frames will be in front of the frame."],
 						order = 110,
-						values = {
-							["BACKGROUND"] = "BACKGROUND",
-							["LOW"] = "LOW",
-							["MEDIUM"] = "MEDIUM",
-							["HIGH"] = "HIGH",
-							["DIALOG"] = "DIALOG",
-							["FULLSCREEN"] = "FULLSCREEN",
-							["FULLSCREEN_DIALOG"] = "FULLSCREEN_DIALOG"
-						}
+						values = optionsValues.STRATA
 					},
 					tooltippos = {
 						type = "select",
 						name = L["Tooltip Position"],
 						desc = L["Position of the tooltips."],
 						order = 120,
-						values = wintooltippos,
+						values = optionsValues.TOOLTIPPOS,
 						get = function()
 							return db.tooltippos or "NONE"
 						end
@@ -1095,15 +1115,7 @@ function Skada:FrameSettings(db, include_dimensions)
 					hideauto = {
 						type = "select",
 						name = L["Auto Hide"],
-						values = {
-							NONE,
-							L["While in combat"],
-							L["While out of combat"],
-							L["While not in a group"],
-							L["While inside an instance"],
-							L["While not inside an instance"],
-							L["In Battlegrounds"]
-						},
+						values = optionsValues.AUTOHIDE,
 						width = "double",
 						order = 999
 					}
@@ -1128,7 +1140,7 @@ function Skada:FrameSettings(db, include_dimensions)
 								desc = L.opt_combatmode_desc,
 								order = 10,
 								values = function()
-									local m = {[""] = NONE}
+									local m = {[""] = L.None}
 									for _, mode in Skada:IterateModes() do
 										m[mode.moduleName] = mode.moduleName
 									end
@@ -1141,7 +1153,7 @@ function Skada:FrameSettings(db, include_dimensions)
 								desc = L.opt_wipemode_desc,
 								order = 20,
 								values = function()
-									local m = {[""] = NONE}
+									local m = {[""] = L.None}
 									for _, mode in Skada:IterateModes() do
 										m[mode.moduleName] = mode.moduleName
 									end
@@ -1211,7 +1223,7 @@ function Skada:FrameSettings(db, include_dimensions)
 					name = L["Window"],
 					order = 10,
 					values = function()
-						local list = {[""] = NONE}
+						local list = {[""] = L.None}
 						for _, win in Skada:IterateWindows() do
 							if win.db.name ~= db.name and win.db.child ~= db.name and win.db.display == db.display then
 								list[win.db.name] = win.db.name
@@ -1229,7 +1241,7 @@ function Skada:FrameSettings(db, include_dimensions)
 					type = "select",
 					name = L["Child Window Mode"],
 					order = 20,
-					values = {[0] = ALL, [1] = L["Segment"], [2] = L["Mode"]},
+					values = optionsValues.CHILDMODE,
 					get = function() return db.childmode or 0 end,
 					disabled = function() return not (db.child and db.child ~= "") end
 				}
@@ -1277,7 +1289,7 @@ do
 
 	local function SerializeProfile()
 		local data = {Skada = {}}
-		Skada.tCopy(data.Skada, Skada.db.profile, {"nickname"})
+		Skada.tCopy(data.Skada, Skada.db.profile, {"nickname", "modeclicks"})
 		for k, v in Skada:IterateModules() do
 			if v.db and v.db.profile then
 				data[k] = v.db.profile
@@ -1380,6 +1392,8 @@ do
 		end
 		Skada.db:SetProfile(profileName)
 		Skada:ReloadSettings()
+		Skada:Wipe()
+		Skada:UpdateDisplay(true)
 		return true
 	end
 

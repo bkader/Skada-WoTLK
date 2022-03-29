@@ -11,7 +11,7 @@ Skada:AddLoadableModule("Potions", function(L)
 	local GetItemInfo, GetSpellInfo = GetItemInfo, Skada.GetSpellInfo or GetSpellInfo
 	local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
 	local UnitGUID, UnitName, UnitClass, UnitBuff = UnitGUID, UnitName, UnitClass, UnitBuff
-	local new, del = Skada.TablePool()
+	local new, del = Skada.newTable, Skada.delTable
 	local T, potionIDs, _= Skada.Table, {}, nil
 
 	local prepotionStr, potionStr = "|c%s%s|r %s", "|T%s:14:14:1:-2:32:32:2:30:2:30|t"
@@ -69,7 +69,7 @@ Skada:AddLoadableModule("Potions", function(L)
 		-- we use this function to record pre-pots as well.
 		function mod:CheckPrePot(event)
 			if event == "COMBAT_PLAYER_ENTER" and Skada.db.profile.prepotion and not self.checked then
-				prepotion = prepotion or T.get("Skada_PrePotions")
+				prepotion = prepotion or T.get("Potions_PrePotions")
 				GroupIterator(CheckUnitPotions, prepotion)
 				self.checked = true
 			end
@@ -379,7 +379,7 @@ Skada:AddLoadableModule("Potions", function(L)
 		if Skada.db.profile.prepotion and prepotion and next(prepotion) ~= nil then
 			Skada:Printf(L["pre-potion: %s"], tconcat(prepotion, ", "))
 		end
-		T.free("Skada_PrePotions", prepotion)
+		T.free("Potions_PrePotions", prepotion)
 		self.checked = nil
 	end
 
