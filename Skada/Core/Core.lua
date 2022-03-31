@@ -592,6 +592,15 @@ do
 
 		Skada.options.args.windows.args[self.db.name] = options
 	end
+
+	-- fires a callback event
+	function Window:Fire(event, ...)
+		if self.bargroup and self.bargroup.callbacks then
+			self.bargroup.callbacks:Fire(event, self, ...)
+		elseif self.frame and self.frame.callbacks then
+			self.frame.callbacks:Fire(event, self, ...)
+		end
+	end
 end
 
 -- sets the selected window as a child to the current window
