@@ -295,7 +295,7 @@ Skada:AddLoadableModule("PVP", function(L)
 	function mod:OnInitialize()
 		-- install defaults.
 		if not Skada.db.profile.modules.arena then
-			Skada.db.profile.modules.arena = {custom = false, ARENA_GOLD = teamGold, ARENA_GREEN = teamGreen}
+			Skada.db.profile.modules.arena = {ARENA_GOLD = teamGold, ARENA_GREEN = teamGreen}
 		end
 
 		-- options panel

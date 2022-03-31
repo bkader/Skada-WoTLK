@@ -19,7 +19,7 @@ Skada:AddLoadableModule("Threat", function(L)
 	do
 		local CheckInteractDistance, ItemRefTooltip = CheckInteractDistance, ItemRefTooltip
 		local GetItemInfo, IsItemInRange = GetItemInfo, IsItemInRange
-		local nr, maxthreat, last_warn, mypercent = 1, 0, time(), nil
+		local nr, maxthreat, last_warn, mypercent = 0, 0, time(), nil
 		local threatUnits, threatTable = {"focus", "focustarget", "target", "targettarget"}, nil
 		local tankThreat, tankValue, rubyAcorn, queried
 
@@ -30,8 +30,11 @@ Skada:AddLoadableModule("Threat", function(L)
 		local function add_to_threattable(unit, owner, target, win)
 			if unit == "AGGRO" then
 				if mod.db.showAggroBar and (tankThreat or 0) > 0 then
-					rubyAcorn = rubyAcorn or GetItemInfo(37727)
+					if not rubyAcorn then
+						rubyAcorn = GetItemInfo(37727)
+					end
 
+					nr = nr + 1
 					local d = win:nr(nr)
 
 					d.id = "AGGRO"
@@ -58,7 +61,6 @@ Skada:AddLoadableModule("Threat", function(L)
 							queried = true
 						end
 					end
-					nr = nr + 1
 				end
 			elseif not mod.db.ignorePets or (mod.db.ignorePets and owner == nil) then
 				local guid = UnitGUID(unit)
@@ -86,6 +88,7 @@ Skada:AddLoadableModule("Threat", function(L)
 					local isTanking, _, threatpct, _, threatvalue = UnitDetailedThreatSituation(player.unit, target)
 
 					if threatvalue then
+						nr = nr + 1
 						local d = win:nr(nr)
 
 						d.id = player.id or player.name
@@ -120,7 +123,6 @@ Skada:AddLoadableModule("Threat", function(L)
 							tankThreat = d.threat
 							tankValue = d.value
 						end
-						nr = nr + 1
 					end
 				end
 			end
@@ -170,10 +172,21 @@ Skada:AddLoadableModule("Threat", function(L)
 				win.title = UnitName(target) or L["Threat"]
 
 				-- reset stuff & check group
-				maxthreat, nr = 0, 1
+				maxthreat, nr = 0, 0
 				GroupIterator(add_to_threattable, target, win)
-				if maxthreat > 0 then
+				if maxthreat > 0 and self.db.showAggroBar then
 					add_to_threattable("AGGRO", nil, target, win)
+				end
+
+				-- nothing was added.
+				if nr == 0 then
+					-- hide if empty?
+					if self.db.hideEmpty then
+						win:Hide()
+					end
+					return
+				elseif self.db.hideEmpty then
+					win:Show()
 				end
 
 				-- If we are going by raw threat we got the max threat from above; otherwise it's always 100.
@@ -230,6 +243,8 @@ Skada:AddLoadableModule("Threat", function(L)
 					self:Warn(self.db.sound, self.db.flash, self.db.shake, mypercent and format(THREAT_TOOLTIP, mypercent) or COMBAT_THREAT_INCREASE_1)
 					last_warn = time()
 				end
+			elseif self.db.hideEmpty then
+				win:Hide()
 			end
 		end
 
@@ -515,17 +530,23 @@ Skada:AddLoadableModule("Threat", function(L)
 					desc = L.opt_threat_showaggrobar_desc,
 					order = 60
 				},
+				hideEmpty = {
+					type = "toggle",
+					name = L["Hide empty window"],
+					desc = L.opt_threat_hideempty_desc,
+					order = 70
+				},
 				sep = {
 					type = "description",
 					name = " ",
 					width = "full",
-					order = 70
+					order = 90
 				},
 				test = {
 					type = "execute",
 					name = L["Test Warnings"],
 					width = "double",
-					order = 80,
+					order = 100,
 					func = function()
 						mod:Warn(mod.db.sound, mod.db.flash, mod.db.shake, mod.db.message and L["Test Warnings"])
 					end
@@ -538,14 +559,10 @@ Skada:AddLoadableModule("Threat", function(L)
 				Skada.db.profile.modules.threat = {
 					sound = true,
 					flash = true,
-					shake = false,
-					message = false,
 					output = 1,
 					frequency = 2,
 					threshold = 90,
 					soundfile = "Fel Nova",
-					rawvalue = false,
-					focustarget = false,
 					notankwarnings = true,
 					ignorePets = true,
 					showAggroBar = true

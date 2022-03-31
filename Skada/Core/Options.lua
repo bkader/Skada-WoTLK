@@ -24,20 +24,13 @@ Skada.windowdefaults = {
 	barorientation = 1,
 	barcolor = {r = 0.3, g = 0.3, b = 0.8, a = 1},
 	barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6},
-	barslocked = false,
-	clickthrough = false,
 	spellschoolcolors = true,
 	classcolorbars = true,
-	classcolortext = false,
-	classcolorleft = false,
-	classcolorright = false,
 	classicons = true,
-	roleicons = false,
 	specicons = true,
 	spark = true,
-	showself = false,
 	-- buttons
-	buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false},
+	buttons = {menu = true, reset = true, report = true, mode = true, segment = true},
 	-- title options
 	title = {
 		height = 20,
@@ -50,11 +43,9 @@ Skada.windowdefaults = {
 		bordertexture = "None",
 		borderthickness = 2,
 		bordercolor = {r = 0, g = 0, b = 0, a = 1},
-		hovermode = false,
 		toolbar = 1
 	},
 	background = {
-		tile = false,
 		tilesize = 0,
 		color = {r = 0, g = 0, b = 0, a = 0.4},
 		texture = "Solid",
@@ -65,38 +56,25 @@ Skada.windowdefaults = {
 	},
 	strata = "LOW",
 	scale = 1,
-	reversegrowth = false,
-	disablehighlight = false,
 	modeincombat = "",
-	returnaftercombat = false,
-	autocurrent = false,
 	wipemode = "",
-	hidden = false,
 	enabletitle = true,
 	titleset = true,
-	combattimer = false,
-	moduleicons = false,
 	set = "current",
-	mode = nil,
 	display = "bar",
 	child = "",
 	childmode = 0,
-	snapto = false,
 	sticky = true,
 	sticked = {},
 	clamped = true,
-	smoothing = false,
 	tooltippos = "NONE",
 	hideauto = 1,
 	-- inline bar display
-	isonnewline = false,
 	isusingclasscolors = true,
 	height = 30,
 	width = 600,
 	color = {r = 0.3, g = 0.3, b = 0.3, a = 0.6},
 	isusingelvuiskin = true,
-	issolidbackdrop = false,
-	fixedbarwidth = false,
 	-- data broker display
 	textcolor = {r = 0.9, g = 0.9, b = 0.9},
 	useframe = true
@@ -108,8 +86,7 @@ Skada.tCopy(windefaultscopy, Skada.windowdefaults)
 Skada.defaults = {
 	profile = {
 		reset = {instance = 1, join = 3, leave = 1},
-		skippopup = false,
-		icon = {hide = false, radius = 80, minimapPos = 195},
+		icon = {radius = 80, minimapPos = 195},
 		numberformat = 1,
 		decimals = 1,
 		setformat = 3,
@@ -118,36 +95,23 @@ Skada.defaults = {
 		brackets = 1,
 		separator = 1,
 		showranks = true,
-		showself = false,
 		setstokeep = 15,
 		setslimit = 15,
-		reportlinks = false,
 		memorycheck = true,
 		tooltips = true,
 		tooltippos = "smart",
 		tooltiprows = 3,
 		informativetooltips = true,
-		onlykeepbosses = false,
-		alwayskeepbosses = false,
-		tentativecombatstart = false,
 		timemesure = 2,
-		hidesolo = false,
-		hidepvp = false,
 		hidedisables = true,
-		hidecombat = false,
-		showcombat = false,
-		translit = false,
 		mergepets = true,
 		shortmenu = true,
 		feed = "",
-		showtotals = false,
-		autostop = false,
-		sortmodesbyusage = false,
 		updatefrequency = 0.5,
 		minsetlength = 5,
 		modules = {},
 		columns = {},
-		toast = {hide_toasts = false, spawn_point = "BOTTOM", duration = 5, opacity = 0.75},
+		toast = {spawn_point = "BOTTOM", duration = 5, opacity = 0.75},
 		report = {mode = "Damage", set = "current", channel = "Say", chantype = "preset", number = 10},
 		modulesBlocked = {
 			["Avoidance & Mitigation"] = true,
@@ -223,7 +187,7 @@ Skada.options = {
 		return Skada.db.profile[i[#i]]
 	end,
 	set = function(i, val)
-		Skada.db.profile[i[#i]] = val
+		Skada.db.profile[i[#i]] = val or nil
 		if i[#i] == "showtotals" then
 			Skada:ReloadSettings()
 		else
@@ -347,7 +311,7 @@ Skada.options = {
 							set = function()
 								Skada.db.profile.hidecombat = not Skada.db.profile.hidecombat
 								if Skada.db.profile.hidecombat then
-									Skada.db.profile.showcombat = false
+									Skada.db.profile.showcombat = nil
 								end
 								Skada:ApplySettings()
 							end
@@ -360,7 +324,7 @@ Skada.options = {
 							set = function()
 								Skada.db.profile.showcombat = not Skada.db.profile.showcombat
 								if Skada.db.profile.showcombat then
-									Skada.db.profile.hidecombat = false
+									Skada.db.profile.hidecombat = nil
 								end
 								Skada:ApplySettings()
 							end
@@ -690,7 +654,7 @@ Skada.options = {
 				return Skada.db.profile.modules[i[#i]]
 			end,
 			set = function(i, val)
-				Skada.db.profile.modules[i[#i]] = val
+				Skada.db.profile.modules[i[#i]] = val or nil
 				Skada:ApplySettings()
 			end,
 			args = {
@@ -887,7 +851,7 @@ do
 
 	local function SetValue(i, val)
 		Skada.db.profile.modulesBlocked[i[#i]] = val
-		Skada.options.args.modules.args.apply.disabled = false
+		Skada.options.args.modules.args.apply.disabled = nil
 	end
 
 	function Skada:AddLoadableModuleCheckbox(mod, name, description)
@@ -912,7 +876,7 @@ function Skada:FrameSettings(db, include_dimensions)
 			return db[i[#i]]
 		end,
 		set = function(i, val)
-			db[i[#i]] = val
+			db[i[#i]] = val or nil
 			Skada:ApplySettings(db.name)
 		end,
 		args = {

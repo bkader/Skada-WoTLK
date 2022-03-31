@@ -428,7 +428,6 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			end
 			-- smart stop & duration
 			if Skada.db.profile.smartstop == nil then
-				Skada.db.profile.smartstop = false
 			end
 			if Skada.db.profile.smartwait == nil then
 				Skada.db.profile.smartwait = 3
@@ -436,13 +435,11 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			-- combatlog fix
 			if Skada.db.profile.combatlogfix == nil then
 				Skada.db.profile.combatlogfix = true
-				Skada.db.profile.combatlogfixverbose = false
-				Skada.db.profile.combatlogfixalt = false
 			end
 
 			-- old spamage module
-			if type(Skada.db.profile.spamage) == "table" or Skada.db.profile.spamage == nil then
-				Skada.db.profile.spamage = false
+			if type(Skada.db.profile.spamage) == "table" then
+				Skada.db.profile.spamage = nil
 			end
 
 			-- Fury of Frostmourne
