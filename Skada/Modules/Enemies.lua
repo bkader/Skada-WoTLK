@@ -1106,7 +1106,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 			local nr = 0
 			for _, enemy in ipairs(set.enemies) do
 				if not enemy.fake then
-					local dtps, amount = enemy:GetDPS()
+					local dps, amount = enemy:GetDPS()
 					if amount > 0 then
 						nr = nr + 1
 						local d = win:nr(nr)
@@ -1121,7 +1121,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 						d.value = amount
 						d.valuetext = Skada:FormatValueCols(
 							self.metadata.columns.Damage and Skada:FormatNumber(d.value),
-							self.metadata.columns.DPS and Skada:FormatNumber(dtps),
+							self.metadata.columns.DPS and Skada:FormatNumber(dps),
 							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 

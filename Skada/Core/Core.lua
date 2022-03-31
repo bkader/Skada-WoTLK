@@ -1436,25 +1436,25 @@ end
 
 -- generic find a player or an enemey
 function Skada:FindActor(set, id, name)
-	local actor = self:FindPlayer(set, id, name, true)
+	local actor, enemy = self:FindPlayer(set, id, name, true), nil
 	if not actor then
-		actor = self:FindEnemy(set, name, id)
+		actor, enemy = self:FindEnemy(set, name, id), true
 	end
-	return actor
+	return actor, enemy
 end
 
 -- generic: finds a player/enemy or creates it.
 function Skada:GetActor(set, id, name, flag)
-	local actor = self:FindActor(set, id, name)
+	local actor, enemy = self:FindActor(set, id, name)
 	-- creates it if not found
 	if not actor then
 		if self:IsPlayer(id, flag, name) == 1 or self:IsPet(id, flag) == 1 then -- group members or group pets
 			actor = self:GetPlayer(set, id, name, flag)
 		else -- an outsider maybe?
-			actor = self:GetEnemy(set, name, id, flag)
+			actor, enemy = self:GetEnemy(set, name, id, flag), true
 		end
 	end
-	return actor
+	return actor, enemy
 end
 
 -- checks if the unit is a player

@@ -96,14 +96,26 @@ end
 
 -- attempts to find an actor (player or enemy)
 function setPrototype:GetActor(name, id)
-	-- enemy first.
-	local actor = self:GetEnemy(name, id)
-	if actor then
-		return actor, true
+	-- player first.
+	if self.players and ((id and id ~= "total") or name) then
+		for _, actor in ipairs(self.players) do
+			if (id and actor.id == id) or (name and actor.name == name) then
+				return playerPrototype:Bind(actor, self)
+			end
+		end
 	end
 
-	-- player
-	return self:GetPlayer(id, name)
+	-- enemy second
+	if self.enemies and name then
+		for _, actor in ipairs(self.enemies) do
+			if (name and actor.name == name) or (id and actor.id == id) then
+				return enemyPrototype:Bind(actor, self), true
+			end
+		end
+	end
+
+	-- couldn't be found, rely on skada.
+	return Skada:FindActor(self, id, name)
 end
 
 -- returns the actor's time
