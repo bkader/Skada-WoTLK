@@ -510,7 +510,7 @@ do
 					order = 10,
 					hidden = true,
 					values = function()
-						local list = {[""] = NONE}
+						local list = {[""] = L.None}
 						for _, win in ipairs(windows) do
 							if win.db.name ~= self.db.name and win.db.display == self.db.display then
 								list[win.db.name] = win.db.name
@@ -2988,8 +2988,10 @@ end
 -------------------------------------------------------------------------------
 
 function Skada:ApplyBorder(frame, texture, color, thickness, padtop, padbottom, padleft, padright)
-	frame.borderFrame = frame.borderFrame or CreateFrame("Frame", nil, frame)
-	frame.borderFrame:SetFrameLevel(0)
+	if not frame.borderFrame then
+		frame.borderFrame = CreateFrame("Frame", "$parentBorder", frame)
+		frame.borderFrame:SetFrameLevel(frame:GetFrameLevel() - 1)
+	end
 	frame.borderFrame:SetPoint("TOPLEFT", frame, -thickness - (padleft or 0), thickness + (padtop or 0))
 	frame.borderFrame:SetPoint("BOTTOMRIGHT", frame, thickness + (padright or 0), -thickness - (padbottom or 0))
 

@@ -7,7 +7,7 @@ local LibWindow = LibStub("LibWindow-1.1")
 local FlyPaper = LibStub("LibFlyPaper-1.1", true)
 
 local pairs, ipairs = pairs, ipairs
-local tsort, tContains = table.sort, tContains
+local tsort, tContains, unpack = table.sort, tContains, unpack
 local format, max = string.format, math.max
 local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 local CloseDropDownMenus = CloseDropDownMenus
@@ -636,13 +636,13 @@ do
 
 					if win.db.specicons and speccoords and data.spec and speccoords[data.spec] then
 						bar:ShowIcon()
-						bar:SetIcon(specicons, speccoords[data.spec])
+						bar:SetIcon(specicons, unpack(speccoords[data.spec]))
 					elseif win.db.roleicons and rolecoords and data.role and data.role ~= "NONE" and rolecoords[data.role] then
 						bar:ShowIcon()
-						bar:SetIcon(roleicons, rolecoords[data.role])
+						bar:SetIcon(roleicons, unpack(rolecoords[data.role]))
 					elseif win.db.classicons and data.class and classcoords[data.class] and data.icon == nil then
 						bar:ShowIcon()
-						bar:SetIcon(classicons, classcoords[data.class])
+						bar:SetIcon(classicons, unpack(classcoords[data.class]))
 					elseif not data.ignore and not data.spellid and not data.hyperlink then
 						if data.icon and not bar:IsIconShown() then
 							bar:ShowIcon()
@@ -1478,15 +1478,15 @@ function mod:AddDisplayOptions(win, options)
 									Skada:ApplySettings(db.name)
 								end
 							},
-							thickness = {
+							borderthickness = {
 								type = "range",
 								name = L["Border Thickness"],
 								desc = L["The thickness of the borders."],
 								order = 30,
 								min = 0,
 								max = 50,
-								step = 0.1,
-								bigStep = 0.5
+								step = 0.01,
+								bigStep = 0.1
 							}
 						}
 					}

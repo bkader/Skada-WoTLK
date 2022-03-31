@@ -389,8 +389,8 @@ do
 	end
 
 	function barListPrototype:SetSmoothing(smoothing)
-		self.smoothing = smoothing
-		self:SetScript("OnUpdate", smoothing and Smoothing_OnUpdate or nil)
+		self.smoothing = smoothing or nil
+		self:SetScript("OnUpdate", self.smoothing and Smoothing_OnUpdate or nil)
 	end
 end
 
@@ -402,7 +402,7 @@ function barListPrototype:SetButtonsOpacity(alpha)
 end
 
 function barListPrototype:SetButtonMouseOver(mouseover)
-	self.mouseover = mouseover
+	self.mouseover = mouseover or nil
 
 	if self.mouseover then
 		self:HideButtons()
@@ -681,7 +681,6 @@ do
 		list.showTimerLabel = true
 
 		list.lastBar = list
-		list.locked = false
 
 		list.texture = DEFAULT_TEXTURE
 		list.spacing = 0
@@ -759,10 +758,10 @@ function barListPrototype:NewBarFromPrototype(prototype, ...)
 end
 
 function barListPrototype:SetEnableMouse(enablemouse)
-	self.enablemouse = enablemouse
-	self:EnableMouse(enablemouse)
+	self.enablemouse = enablemouse or nil
+	self:EnableMouse(self.enablemouse)
 	for _, bar in pairs(self:GetBars()) do
-		bar:EnableMouse(enablemouse)
+		bar:EnableMouse(self.enablemouse)
 	end
 end
 
@@ -797,7 +796,7 @@ end
 function barListPrototype:Unlock()
 	self.resizeright:Show()
 	self.resizeleft:Show()
-	self.locked = false
+	self.locked = nil
 end
 
 function barListPrototype:IsLocked()
@@ -845,10 +844,10 @@ function barListPrototype:SetFont(f1, s1, m1, f2, s2, m2)
 end
 
 function barListPrototype:SetFill(fill)
-	self.fill = fill
+	self.fill = fill or nil
 	if bars[self] then
 		for k, v in pairs(bars[self]) do
-			v:SetFill(fill)
+			v:SetFill(self.fill)
 		end
 	end
 end
@@ -867,7 +866,7 @@ end
 
 function barListPrototype:HideButtonIcon()
 	if self.showButtonIcon then
-		self.showButtonIcon = false
+		self.showButtonIcon = nil
 		self.button.icon:Hide()
 		self:AdjustTitle()
 	end
@@ -879,21 +878,19 @@ end
 
 function barListPrototype:ShowIcon()
 	self.showIcon = true
-	if not bars[self] then
-		return
-	end
-	for name, bar in pairs(bars[self]) do
-		bar:ShowIcon()
+	if bars[self] then
+		for _, bar in pairs(bars[self]) do
+			bar:ShowIcon()
+		end
 	end
 end
 
 function barListPrototype:HideIcon()
-	self.showIcon = false
-	if not bars[self] then
-		return
-	end
-	for name, bar in pairs(bars[self]) do
-		bar:HideIcon()
+	self.showIcon = nil
+	if bars[self] then
+		for _, bar in pairs(bars[self]) do
+			bar:HideIcon()
+		end
 	end
 end
 
@@ -903,15 +900,19 @@ end
 
 function barListPrototype:ShowLabel()
 	self.showLabel = true
-	for name, bar in pairs(bars[self]) do
-		bar:ShowLabel()
+	if bars[self] then
+		for _, bar in pairs(bars[self]) do
+			bar:ShowLabel()
+		end
 	end
 end
 
 function barListPrototype:HideLabel()
-	self.showLabel = false
-	for name, bar in pairs(bars[self]) do
-		bar:HideLabel()
+	self.showLabel = nil
+	if bars[self] then
+		for _, bar in pairs(bars[self]) do
+			bar:HideLabel()
+		end
 	end
 end
 
@@ -921,15 +922,19 @@ end
 
 function barListPrototype:ShowTimerLabel()
 	self.showTimerLabel = true
-	for name, bar in pairs(bars[self]) do
-		bar:ShowTimerLabel()
+	if bars[self] then
+		for _, bar in pairs(bars[self]) do
+			bar:ShowTimerLabel()
+		end
 	end
 end
 
 function barListPrototype:HideTimerLabel()
-	self.showTimerLabel = false
-	for name, bar in pairs(bars[self]) do
-		bar:HideTimerLabel()
+	self.showTimerLabel = nil
+	if bars[self] then
+		for _, bar in pairs(bars[self]) do
+			bar:HideTimerLabel()
+		end
 	end
 end
 
@@ -1168,18 +1173,20 @@ function barListPrototype:GetBarOffset()
 end
 
 function barListPrototype:SetUseSpark(use)
-	self.usespark = use
+	self.usespark = use or nil
 	if bars[self] then
 		for _, v in pairs(bars[self]) do
-			v:SetUseSpark(use)
+			v:SetUseSpark(self.usespark)
 		end
 	end
 end
 
 function barListPrototype:GetNumBars()
 	local n = 0
-	for _, _ in pairs(bars[self]) do
-		n = n + 1
+	if bars[self] then
+		for _, _ in pairs(bars[self]) do
+			n = n + 1
+		end
 	end
 	return n
 end
@@ -1203,7 +1210,7 @@ do
 	function barListPrototype:SortBars()
 		local lastBar = self
 		local ct = 0
-		local has_fixed = false
+		local has_fixed = nil
 
 		if not bars[self] then
 			return
@@ -1415,7 +1422,7 @@ function barPrototype:OnBarReleased()
 	self.callbacks:Fire("BarReleased", self, self.name)
 
 	self.ownerGroup = nil
-	self.fill = false
+	self.fill = nil
 	if self.colors then
 		wipe(self.colors)
 	end
@@ -1467,14 +1474,14 @@ function barPrototype:SetFont(f1, s1, m1, f2, s2, m2)
 	timer:SetFont(f2 or numfont, s2 or numsize, m2 or numflags)
 end
 
-function barPrototype:SetIcon(icon, coord)
+function barPrototype:SetIcon(icon, ...)
 	if icon then
 		self.icon:SetTexture(icon)
 		if self.showIcon then
 			self.icon:Show()
 		end
-		if coord then
-			self.icon:SetTexCoord(unpack(coord))
+		if ... then
+			self.icon:SetTexCoord(...)
 		end
 	else
 		self.icon:Hide()
@@ -1483,12 +1490,10 @@ function barPrototype:SetIcon(icon, coord)
 end
 
 function barPrototype:SetUseSpark(use)
-	self.usespark = use
-	if not self.spark then
-		return
-	elseif self.usespark then
+	self.usespark = use or nil
+	if self.usespark and self.spark and not self.spark:IsShown() then
 		self.spark:Show()
-	else
+	elseif not self.usespark and self.spark and self.spark:IsShown() then
 		self.spark:Hide()
 	end
 end
@@ -1501,7 +1506,7 @@ function barPrototype:ShowIcon()
 end
 
 function barPrototype:HideIcon()
-	self.showIcon = false
+	self.showIcon = nil
 	self.icon:Hide()
 end
 
@@ -1526,7 +1531,7 @@ function barPrototype:ShowLabel()
 end
 
 function barPrototype:HideLabel()
-	self.showLabel = false
+	self.showLabel = nil
 	self.label:Hide()
 end
 
@@ -1548,7 +1553,7 @@ function barPrototype:ShowTimerLabel()
 end
 
 function barPrototype:HideTimerLabel()
-	self.showTimerLabel = false
+	self.showTimerLabel = nil
 	self.timerLabel:Hide()
 end
 
@@ -1831,7 +1836,7 @@ function barPrototype:SetMaxValue(val)
 end
 
 function barPrototype:SetFill(fill)
-	self.fill = fill
+	self.fill = fill or nil
 end
 
 function barPrototype:UpdateColor()

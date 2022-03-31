@@ -192,7 +192,7 @@ local optionsValues = {
 		FULLSCREEN_DIALOG = "FULLSCREEN_DIALOG"
 	},
 	AUTOHIDE = {
-		NONE, -- [1]
+		L.None, -- [1]
 		L["While in combat"], -- [2]
 		L["While out of combat"], -- [3]
 		L["While not in a group"], -- [4]
@@ -1020,7 +1020,7 @@ function Skada:FrameSettings(db, include_dimensions)
 								set = function(_, key)
 									db.background.bordertexture = key
 									if key == "None" then
-										db.background.borderthickness = 1
+										db.background.borderthickness = 0
 									end
 									Skada:ApplySettings(db.name)
 								end
@@ -1044,7 +1044,7 @@ function Skada:FrameSettings(db, include_dimensions)
 									Skada:ApplySettings(db.name)
 								end
 							},
-							thickness = {
+							borderthickness = {
 								type = "range",
 								name = L["Border Thickness"],
 								desc = L["The thickness of the borders."],
