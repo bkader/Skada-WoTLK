@@ -689,7 +689,6 @@ do
 		-- resize to the right
 		if not list.resizeright then
 			list.resizeright = CreateFrame("Button", "$parentSizerRight", list)
-			list.resizeright:Show()
 			list.resizeright:SetFrameLevel(list:GetFrameLevel() + 3)
 			list.resizeright:SetSize(12, 12)
 			list.resizeright:SetAlpha(0)
@@ -703,7 +702,6 @@ do
 		-- resize to the left
 		if not list.resizeleft then
 			list.resizeleft = CreateFrame("Button", "$parentSizerLeft", list)
-			list.resizeleft:Show()
 			list.resizeleft:SetFrameLevel(list:GetFrameLevel() + 3)
 			list.resizeleft:SetSize(12, 12)
 			list.resizeleft:SetAlpha(0)
@@ -787,16 +785,24 @@ function barListPrototype:SetShown(show)
 	end
 end
 
-function barListPrototype:Lock()
+function barListPrototype:Lock(fireEvent)
+	self.locked = true
 	self.resizeright:Hide()
 	self.resizeleft:Hide()
-	self.locked = true
+
+	if fireEvent then
+		self.callbacks:Fire("WindowLocked", self, self.locked)
+	end
 end
 
-function barListPrototype:Unlock()
+function barListPrototype:Unlock(fireEvent)
+	self.locked = nil
 	self.resizeright:Show()
 	self.resizeleft:Show()
-	self.locked = nil
+
+	if fireEvent then
+		self.callbacks:Fire("WindowLocked", self, self.locked)
+	end
 end
 
 function barListPrototype:IsLocked()
@@ -1047,7 +1053,7 @@ function barListPrototype:GetBarAttachPoint()
 end
 
 function barListPrototype:ReverseGrowth(reverse)
-	self.growup = reverse
+	self.growup = reverse or nil
 	self.button:ClearAllPoints()
 
 	if reverse then
@@ -1100,6 +1106,10 @@ end
 
 function barListPrototype:HasReverseGrowth()
 	return self.growup
+end
+
+function barListPrototype:SetReverseGrowth(reverse)
+	self.growup = reverse or nil
 end
 
 function barListPrototype:UpdateOrientationLayout()

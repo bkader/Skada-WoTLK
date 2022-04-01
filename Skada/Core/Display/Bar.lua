@@ -137,6 +137,7 @@ function mod:Create(window)
 	bargroup.RegisterCallback(mod, "AnchorMoved")
 	bargroup.RegisterCallback(mod, "WindowResizing")
 	bargroup.RegisterCallback(mod, "WindowResized")
+	bargroup.RegisterCallback(mod, "WindowLocked")
 	bargroup:EnableMouse(true)
 	bargroup:SetScript("OnMouseDown", WindowOnMouseDown)
 	bargroup.button:SetScript("OnClick", TitleButtonOnClick)
@@ -345,6 +346,12 @@ function mod:WindowResized(_, group)
 	group:SetMaxBars(nil, db.snapto)
 	Skada:ApplySettings(db.name)
 	ACR:NotifyChange("Skada")
+end
+
+function mod:WindowLocked(_, group, locked)
+	if group and group.win and group.win.db then
+		group.win.db.barslocked = locked
+	end
 end
 
 do
@@ -841,7 +848,7 @@ do
 		g:SetFrameLevel(1)
 
 		local p = win.db
-		g:ReverseGrowth(p.reversegrowth)
+		g:SetReverseGrowth(p.reversegrowth)
 		g:SetOrientation(p.barorientation)
 		g:SetBarHeight(p.barheight)
 		g:SetHeight(p.background.height)
