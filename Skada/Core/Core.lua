@@ -65,7 +65,7 @@ local displays = Skada.displays
 local disabled = false
 
 -- update & tick timers
-local update_timer, tick_timer, version_timer
+local update_timer, tick_timer, toggle_timer, version_timer
 local CheckVersion, ConvertVersion
 local CheckForJoinAndLeave
 
@@ -3432,6 +3432,11 @@ function Skada:EndSegment()
 		tick_timer = nil
 	end
 
+	if toggle_timer then
+		self:CancelTimer(toggle_timer, true)
+		toggle_timer = nil
+	end
+
 	self:ScheduleTimer("CheckMemory", 3)
 end
 
@@ -3608,7 +3613,9 @@ do
 				end
 			end
 
-			win:Toggle()
+			if not self.db.profile.tentativecombatstart then
+				win:Toggle()
+			end
 
 			if win.db.autocurrent and win.selectedset ~= "current" then
 				win:set_selected_set("current")
@@ -3619,6 +3626,9 @@ do
 
 		update_timer = self:ScheduleRepeatingTimer("UpdateDisplay", self.db.profile.updatefrequency or 0.5)
 		tick_timer = self:ScheduleRepeatingTimer("Tick", 1)
+		if self.db.profile.tentativecombatstart then
+			toggle_timer = self:ScheduleTimer("Toggle", 0.1)
+		end
 	end
 
 	function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
