@@ -2,7 +2,7 @@
 -- Specialized ( = enhanced) for Skada
 -- Note to self: don't forget to notify original author of changes
 -- in the unlikely event they end up being usable outside of Skada.
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90001
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90002
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 
@@ -13,48 +13,65 @@ local sin, cos, rad = math.sin, math.cos, math.rad
 local abs, min, max, floor = math.abs, math.min, math.max, math.floor
 local tsort, tinsert, tremove, tconcat, wipe = table.sort, tinsert, tremove, table.concat, wipe
 local next, pairs, assert, error, type, xpcall = next, pairs, assert, error, type, xpcall
+local GameTooltip = GameTooltip
 
 local L = {
 	resize_header = "Resize",
 	resize_click = "|cff00ff00Click|r to freely resize window.",
 	resize_shift_click = "|cff00ff00Shift-Click|r to change the width.",
-	resize_alt_click = "|cff00ff00Alt-Click|r to change the height."
+	resize_alt_click = "|cff00ff00Alt-Click|r to change the height.",
+	lock = "lock",
+	unlock = "unclock"
 }
 if LOCALE_deDE then
 	L.resize_header = "Größe ändern"
 	L.resize_click = "|cff00ff00Klicken|r, um die Fenstergröße frei zu ändern."
 	L.resize_shift_click = "|cff00ff00Umschalt-Klick|r, um die Breite zu ändern."
 	L.resize_alt_click = "|cff00ff00Alt-Klick|r, um die Höhe zu ändern."
+	L.lock = "sperren"
+	L.unlock = "freischalten"
 elseif LOCALE_esES or LOCALE_esMX then
 	L.resize_header = "Redimensionar"
 	L.resize_click = "|cff00ff00Haga clic|r para cambiar el tamaño de la ventana."
 	L.resize_shift_click = "|cff00ff00Shift-Click|r para cambiar el ancho de la ventana."
 	L.resize_alt_click = "|cff00ff00Alt-Click|r para cambiar la altura de la ventana."
+	L.lock = "bloquear"
+	L.unlock = "desbloquear"
 elseif LOCALE_frFR then
 	L.resize_header = "Redimensionner"
 	L.resize_click = "|cff00ff00Clic|r pour redimensionner."
 	L.resize_shift_click = "|cff00ff00Shift clic|r pour changer la largeur."
 	L.resize_alt_click = "|cff00ff00Alt clic|r pour changer la hauteur."
+	L.lock = "verrouiller"
+	L.unlock = "déverrouiller"
 elseif LOCALE_koKR then
 	L.resize_header = "크기 조정"
 	L.resize_click = "|cff00ff00클릭|r하여 창 크기를 자유롭게 조정합니다."
 	L.resize_shift_click = "너비를 변경하려면 |cff00ff00Shift-클릭|r하십시오."
 	L.resize_alt_click = "높이를 변경하려면 |cff00ff00Alt-클릭|r하십시오"
+	L.lock = "잠금"
+	L.unlock = "잠금해제"
 elseif LOCALE_ruRU then
 	L.resize_header = "Изменение размера"
 	L.resize_click = "|cff00ff00Щелкните|r, чтобы изменить размер окна."
 	L.resize_shift_click = "|cff00ff00Shift-Click|r, чтобы изменить ширину."
 	L.resize_alt_click = "|cff00ff00ALT-Click|r, чтобы изменить высоту."
+	L.lock = "закрепить"
+	L.unlock = "открепить"
 elseif LOCALE_zhCN then
 	L.resize_header = "调整大小"
 	L.resize_click = "|cff00ff00单击|r以调整窗口大小。"
 	L.resize_shift_click = "|cff00ff00Shift-Click|r改变窗口的宽度。"
 	L.resize_alt_click = "|cff00ff00Alt-Click|r更改窗口高度。"
+	L.lock = "锁定"
+	L.unlock = "解锁"
 elseif LOCALE_zhTW then
 	L.resize_header = "調整大小"
 	L.resize_click = "|cff00ff00單擊|r以調整窗口大小。"
 	L.resize_shift_click = "|cff00ff00Shift-Click|r改變窗口的寬度。"
 	L.resize_alt_click = "|cff00ff00Alt-Click|r更改窗口高度。"
+	L.lock = "鎖定"
+	L.unlock = "解鎖"
 end
 
 --[[ xpcall safecall implementation ]]--
@@ -322,48 +339,57 @@ function lib:ReleaseBar(name)
 end
 
 ---[[ Bar Groups ]]---
-function barListPrototype:AddButton(index, title, description, normaltex, highlighttex, clickfunc)
-	-- Create button frame.
-	local btn = CreateFrame("Button", nil, self.button)
-	if index and not title then
-		title = index
-	elseif title and not index then
-		index = title
-	end
-	btn.index = index
-	btn.title = title
-	btn:SetFrameLevel(self.button:GetFrameLevel() + 1)
-	btn:ClearAllPoints()
-	btn:SetSize(14, 14)
-	btn:SetNormalTexture(normaltex)
-	highlighttex = highlighttex or normaltex
-	btn:SetHighlightTexture(normaltex, 1.0)
-	btn:SetAlpha(self.buttonsOpacity or 1)
-	btn:RegisterForClicks("AnyUp")
-	btn:SetScript("OnClick", clickfunc)
-	btn:SetScript("OnEnter", function(this)
-		GameTooltip_SetDefaultAnchor(GameTooltip, this)
-		GameTooltip:SetText(title)
-		GameTooltip:AddLine(description, 1, 1, 1, true)
+do
+	local function btnOnEnter(self)
+		GameTooltip_SetDefaultAnchor(GameTooltip, self)
+		GameTooltip:SetText(self.title)
+		GameTooltip:AddLine(self.description, 1, 1, 1, true)
 		GameTooltip:Show()
-		if self.mouseover then
-			self:ShowButtons()
-			self:AdjustTitle(true)
+		if self.list.mouseover then
+			self.list:ShowButtons()
+			self.list:AdjustTitle(true)
 		end
-	end)
-	btn:SetScript("OnLeave", function()
-		GameTooltip:Hide()
-		if self.mouseover then
-			btn:Hide()
-			self:HideButtons()
-			self:AdjustTitle()
-		end
-	end)
-	btn:Hide()
+	end
 
-	self.buttons[#self.buttons + 1] = btn
-	self:AdjustButtons()
-	return btn
+	local function btnOnLeave(self)
+		GameTooltip:Hide()
+		if self.list.mouseover then
+			self:Hide()
+			self.list:HideButtons()
+			self.list:AdjustTitle()
+		end
+	end
+
+	function barListPrototype:AddButton(index, title, description, normaltex, highlighttex, clickfunc)
+		if index and not title then
+			title = index
+		elseif title and not index then
+			index = title
+		end
+
+		-- Create button frame.
+		local btn = CreateFrame("Button", nil, self.button)
+		btn:SetFrameLevel(self.button:GetFrameLevel() + 1)
+		btn:SetSize(14, 14)
+		btn:SetNormalTexture(normaltex)
+		btn:SetHighlightTexture(highlighttex or normaltex, 1.0)
+		btn:RegisterForClicks("AnyUp")
+		btn:SetScript("OnClick", clickfunc)
+
+		btn.list = self
+		btn.index = index
+		btn.title = title
+		btn.description = description
+
+		btn:SetScript("OnEnter", btnOnEnter)
+		btn:SetScript("OnLeave", btnOnLeave)
+
+		btn:Hide()
+		self.buttons[#self.buttons + 1] = btn
+		self:AdjustButtons()
+
+		return btn
+	end
 end
 
 do
@@ -401,31 +427,41 @@ function barListPrototype:SetButtonsOpacity(alpha)
 	end
 end
 
-function barListPrototype:SetButtonMouseOver(mouseover)
-	self.mouseover = mouseover or nil
+do
+	local MouseIsOver = MouseIsOver
 
-	if self.mouseover then
-		self:HideButtons()
-		self.button:SetScript("OnEnter", function()
-			self:ShowButtons()
-			self:AdjustTitle(true)
-		end)
-		self.button:SetScript("OnLeave", function()
-			if MouseIsOver(self.button) then
-				self:ShowButtons()
-				self:AdjustTitle(true)
-			else
-				self:HideButtons()
-				self:AdjustTitle()
-			end
-		end)
-	else
-		self:ShowButtons()
-		self.button:SetScript("OnEnter", nil)
-		self.button:SetScript("OnLeave", nil)
+	local function btnOnEnter(self)
+		local p = self:GetParent()
+		p:ShowButtons()
+		p:AdjustTitle(true)
 	end
 
-	self:AdjustButtons()
+	local function btnOnLeave(self)
+		local p = self:GetParent()
+		if MouseIsOver(p) then
+			p:ShowButtons()
+			p:AdjustTitle(true)
+		else
+			p:HideButtons()
+			p:AdjustTitle()
+		end
+	end
+
+	function barListPrototype:SetButtonMouseOver(mouseover)
+		self.mouseover = mouseover or nil
+
+		if self.mouseover then
+			self:HideButtons()
+			self.button:SetScript("OnEnter", btnOnEnter)
+			self.button:SetScript("OnLeave", btnOnLeave)
+		else
+			self:ShowButtons()
+			self.button:SetScript("OnEnter", nil)
+			self.button:SetScript("OnLeave", nil)
+		end
+
+		self:AdjustButtons()
+	end
 end
 
 function barListPrototype:AdjustButtons()
@@ -556,6 +592,7 @@ do
 	end
 
 	local function listOnEnter(self)
+		self.lockbutton:SetAlpha(1)
 		if not self.locked then
 			self.resizeright:SetAlpha(1)
 			self.resizeleft:SetAlpha(1)
@@ -563,10 +600,9 @@ do
 	end
 
 	local function listOnLeave(self)
-		if not self.locked then
-			self.resizeright:SetAlpha(0)
-			self.resizeleft:SetAlpha(0)
-		end
+		self.lockbutton:SetAlpha(0)
+		self.resizeright:SetAlpha(0)
+		self.resizeleft:SetAlpha(0)
 	end
 
 	local strfind = strfind or string.find
@@ -602,21 +638,39 @@ do
 	end
 
 	local function sizerOnEnter(self)
-		self:SetAlpha(1)
-		local t = GameTooltip
-		t:SetOwner(self, "ANCHOR_NONE")
-		t:SetPoint("BOTTOM", self, "TOP", 0, 0)
-		t:ClearLines()
-		t:AddLine(L.resize_header)
-		t:AddLine(L.resize_click, 1, 1, 1)
-		t:AddLine(L.resize_shift_click, 1, 1, 1)
-		t:AddLine(L.resize_alt_click, 1, 1, 1)
-		t:Show()
+		GameTooltip:SetOwner(self, "ANCHOR_NONE")
+		GameTooltip:SetPoint("BOTTOM", self, "TOP", 0, 0)
+		GameTooltip:ClearLines()
+		GameTooltip:AddLine(L.resize_header)
+		GameTooltip:AddLine(L.resize_click, 1, 1, 1)
+		GameTooltip:AddLine(L.resize_shift_click, 1, 1, 1)
+		GameTooltip:AddLine(L.resize_alt_click, 1, 1, 1)
+		GameTooltip:Show()
+		listOnEnter(self:GetParent())
 	end
 
 	local function sizerOnLeave(self)
-		self:SetAlpha(0)
 		GameTooltip:Hide()
+		listOnLeave(self:GetParent())
+	end
+
+	local function lockOnClick(self)
+		local p = self:GetParent()
+		if p.locked then
+			p:Unlock(true)
+		else
+			p:Lock(true)
+		end
+	end
+
+	local function lockOnEnter(self)
+		listOnEnter(self:GetParent())
+		self.label:SetTextColor(1, 1, 1, 0.7)
+	end
+
+	local function lockOnLeave(self)
+		listOnLeave(self:GetParent())
+		self.label:SetTextColor(0.6, 0.6, 0.6, 0.7)
 	end
 
 	local DEFAULT_TEXTURE = [[Interface\TARGETINGFRAME\UI-StatusBar]]
@@ -658,9 +712,6 @@ do
 
 		list.length = length or 200
 		list.thickness = thickness or 15
-		list:SetOrientation(orientation)
-
-		list:UpdateOrientationLayout()
 
 		list.button:SetScript("OnMouseDown", move)
 		list.button:SetScript("OnMouseUp", stopMove)
@@ -697,6 +748,8 @@ do
 			list.resizeright:SetScript("OnMouseUp", sizerOnMouseUp)
 			list.resizeright:SetScript("OnEnter", sizerOnEnter)
 			list.resizeright:SetScript("OnLeave", sizerOnLeave)
+			list.resizeright:SetNormalTexture([[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Up]])
+			list.resizeright:SetHighlightTexture([[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Down]], "ALPHA")
 		end
 
 		-- resize to the left
@@ -710,12 +763,34 @@ do
 			list.resizeleft:SetScript("OnMouseUp", sizerOnMouseUp)
 			list.resizeleft:SetScript("OnEnter", sizerOnEnter)
 			list.resizeleft:SetScript("OnLeave", sizerOnLeave)
+			list.resizeleft:SetNormalTexture([[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Up]])
+			list.resizeleft:SetHighlightTexture([[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Down]], "ALPHA")
+		end
+
+		-- lock button
+		if not list.lockbutton then
+			list.lockbutton = CreateFrame("Button", "$parentLockButton", list)
+			list.lockbutton:SetPoint("RIGHT", list.resizeright, "LEFT", -2, 0)
+			list.lockbutton:SetFrameLevel(list:GetFrameLevel() + 5)
+			list.lockbutton:SetSize(50, 10)
+			list.lockbutton:SetAlpha(0)
+			list.lockbutton.label = list.lockbutton:CreateFontString("$parentText", "OVERLAY", "GameFontNormalSmall")
+			list.lockbutton.label:SetTextColor(0.6, 0.6, 0.6, 0.7)
+			list.lockbutton.label:SetShadowColor(0, 0, 0, 1)
+			list.lockbutton.label:SetShadowOffset(1, -1)
+			list.lockbutton.label:SetPoint("RIGHT")
+			list.lockbutton.label:SetJustifyH("RIGHT")
+			list.lockbutton.label:SetText(L.lock)
+			list.lockbutton:SetScript("OnClick", lockOnClick)
+			list.lockbutton:SetScript("OnEnter", lockOnEnter)
+			list.lockbutton:SetScript("OnLeave", lockOnLeave)
 		end
 
 		list:SetScript("OnEnter", listOnEnter)
 		list:SetScript("OnLeave", listOnLeave)
 		list:SetScript("OnSizeChanged", sizeChanged)
 
+		list:SetOrientation(orientation)
 		list:ReverseGrowth(false)
 
 		return list
@@ -787,8 +862,17 @@ end
 
 function barListPrototype:Lock(fireEvent)
 	self.locked = true
+
 	self.resizeright:Hide()
 	self.resizeleft:Hide()
+
+	self.lockbutton.label:SetText(L.unlock)
+	self.lockbutton:ClearAllPoints()
+	if self.growup then
+		self.lockbutton:SetPoint("TOPRIGHT", self, "TOPRIGHT", -2, -1)
+	else
+		self.lockbutton:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", -2, 1)
+	end
 
 	if fireEvent then
 		self.callbacks:Fire("WindowLocked", self, self.locked)
@@ -797,8 +881,13 @@ end
 
 function barListPrototype:Unlock(fireEvent)
 	self.locked = nil
+
 	self.resizeright:Show()
 	self.resizeleft:Show()
+
+	self.lockbutton.label:SetText(L.lock)
+	self.lockbutton:ClearAllPoints()
+	self.lockbutton:SetPoint("RIGHT", self.resizeright, "LEFT", -2, 0)
 
 	if fireEvent then
 		self.callbacks:Fire("WindowLocked", self, self.locked)
@@ -1054,50 +1143,45 @@ end
 
 function barListPrototype:ReverseGrowth(reverse)
 	self.growup = reverse or nil
-	self.button:ClearAllPoints()
 
-	if reverse then
+	self.button:ClearAllPoints()
+	self.resizeright:ClearAllPoints()
+	self.resizeleft:ClearAllPoints()
+	self.lockbutton:ClearAllPoints()
+
+	if self.growup then
 		self.button:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT")
 		self.button:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT")
+
+		self.resizeright:GetNormalTexture():SetTexCoord(0, 1, 1, 0)
+		self.resizeright:GetHighlightTexture():SetTexCoord(0, 1, 1, 0)
+		self.resizeright:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
+
+		self.resizeleft:GetNormalTexture():SetTexCoord(1, 0, 1, 0)
+		self.resizeleft:GetHighlightTexture():SetTexCoord(1, 0, 1, 0)
+		self.resizeleft:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
+
+		if self.locked then
+			self.lockbutton:SetPoint("TOPRIGHT", self, "TOPRIGHT", -2, -1)
+		else
+			self.lockbutton:SetPoint("RIGHT", self.resizeright, "LEFT", -2, 0)
+		end
 	else
 		self.button:SetPoint("TOPLEFT", self, "TOPLEFT")
 		self.button:SetPoint("TOPRIGHT", self, "TOPRIGHT")
-	end
 
-	if self.resizeright then
-		self.resizeright:SetNormalTexture([[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Up]])
-		self.resizeright:SetHighlightTexture([[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Down]], "ALPHA")
-		self.resizeright:ClearAllPoints()
+		self.resizeright:GetNormalTexture():SetTexCoord(0, 1, 0, 1)
+		self.resizeright:GetHighlightTexture():SetTexCoord(0, 1, 0, 1)
+		self.resizeright:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 0, 0)
 
-		local normaltex = self.resizeright:GetNormalTexture()
-		local highlighttex = self.resizeright:GetHighlightTexture()
-		if reverse then
-			normaltex:SetTexCoord(0, 1, 1, 0)
-			highlighttex:SetTexCoord(0, 1, 1, 0)
-			self.resizeright:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
+		self.resizeleft:GetNormalTexture():SetTexCoord(1, 0, 0, 1)
+		self.resizeleft:GetHighlightTexture():SetTexCoord(1, 0, 0, 1)
+		self.resizeleft:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 0, 0)
+
+		if self.locked then
+			self.lockbutton:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", -2, 1)
 		else
-			normaltex:SetTexCoord(0, 1, 0, 1)
-			highlighttex:SetTexCoord(0, 1, 0, 1)
-			self.resizeright:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 0, 0)
-		end
-	end
-
-	if self.resizeleft then
-		self.resizeleft:SetNormalTexture([[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Up]])
-		self.resizeleft:SetHighlightTexture([[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Down]], "ALPHA")
-		self.resizeleft:ClearAllPoints()
-
-		local normaltex = self.resizeleft:GetNormalTexture()
-		local highlighttex = self.resizeleft:GetHighlightTexture()
-
-		if reverse then
-			normaltex:SetTexCoord(1, 0, 1, 0)
-			highlighttex:SetTexCoord(1, 0, 1, 0)
-			self.resizeleft:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
-		else
-			normaltex:SetTexCoord(1, 0, 0, 1)
-			highlighttex:SetTexCoord(1, 0, 0, 1)
-			self.resizeleft:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 0, 0)
+			self.lockbutton:SetPoint("RIGHT", self.resizeright, "LEFT", -2, 0)
 		end
 	end
 

@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader/LibCompat-1.0)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0-Skada", 29
+local MAJOR, MINOR = "LibCompat-1.0-Skada", 30
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
@@ -20,6 +20,7 @@ local tostring, tonumber = tostring, tonumber
 local setmetatable = setmetatable
 local CreateFrame = CreateFrame
 local error = error
+local _
 
 local QuickDispatch
 local IsInGroup, IsInRaid
@@ -406,7 +407,7 @@ do
 		elseif unit and unit:find("boss") then
 			class = "BOSS"
 		elseif unit then
-			class = select(2, UnitClass(unit))
+			_, class = UnitClass(unit)
 		end
 		return class, unit
 	end
@@ -655,7 +656,10 @@ do
 		local spec  -- start with nil
 
 		if unit and UnitExists(unit) then
-			class = class or select(2, UnitClass(unit))
+			if not class then
+				_, class = UnitClass(unit)
+			end
+
 			if class and specsTable[class] then
 				local talentGroup = LGT:GetActiveTalentGroup(unit)
 				local maxPoints, index = 0, 0
@@ -699,8 +703,11 @@ do
 			return "DAMAGER"
 		end
 
+		if not class then
+			_, class = UnitClass(unit)
+		end
+
 		-- speedup things using classes.
-		class = class or select(2, UnitClass(unit))
 		if class == "HUNTER" or class == "MAGE" or class == "ROGUE" or class == "WARLOCK" then
 			return "DAMAGER"
 		end
@@ -719,7 +726,7 @@ do
 	local IsInInstance, instanceType = IsInInstance, nil
 
 	local function IsInPvP()
-		instanceType = select(2, IsInInstance())
+		_, instanceType = IsInInstance()
 		return (instanceType == "pvp" or instanceType == "arena")
 	end
 

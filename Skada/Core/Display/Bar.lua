@@ -59,115 +59,118 @@ local function TitleButtonOnClick(self, button)
 end
 
 local buttonsTexPath = [[Interface\AddOns\Skada\Media\Textures\toolbar%s\%s.blp]]
-local function AddWindowButton(win, style, index, title, description, func)
-	if win and win.AddButton and index then
-		style = style or 1
-		local tex = format(buttonsTexPath, style or 1, index)
-		win:AddButton(index, title, description, tex, nil, func)
+do
+	local function AddWindowButton(win, style, index, title, description, func)
+		if win and win.AddButton and index then
+			return win:AddButton(index, title, description, format(buttonsTexPath, style or 1, index), nil, func)
+		end
 	end
-end
 
-function mod:Create(window)
-	-- Re-use bargroup if it exists.
-	local p = window.db
-	local bargroup = mod:GetBarGroup(p.name)
+	local function configOnClick(self, button)
+		if button == "RightButton" then
+			Skada:OpenOptions(self.list.win)
+		else
+			Skada:OpenMenu(self.list.win)
+		end
+	end
 
-	-- Save a reference to window in bar group. Needed for some nasty callbacks.
-	if bargroup then
-		-- Clear callbacks.
-		bargroup.callbacks = LibStub("CallbackHandler-1.0"):New(bargroup)
-	else
-		bargroup = mod:NewBarGroup(p.name, p.barorientation, p.background.height, p.barwidth, p.barheight, "SkadaBarWindow" .. p.name)
+	local function resetOnClick(self, button)
+		Skada:ShowPopup(self.list.win)
+	end
 
-		bargroup:SetButtonsOpacity(p.title.toolbaropacity or 0.25)
+	local function segmentOnClick(self, button)
+		if button == "MiddleButton" then
+			self.list.win:set_selected_set("current")
+		elseif IsModifierKeyDown() then
+			self.list.win:set_selected_set(nil, button == "RightButton" and 1 or -1)
+		else
+			Skada:SegmentMenu(self.list.win)
+		end
+	end
+
+	local function modeOnClick(self, button)
+		Skada:ModeMenu(self.list.win)
+	end
+
+	local function reportOnClick(self, button)
+		Skada:OpenReportWindow(self.list.win)
+	end
+
+	local function stopOnClick(self, button)
+		if Skada.current and Skada.current.stopped then
+			Skada:ResumeSegment()
+		elseif Skada.current then
+			Skada:StopSegment()
+		end
+	end
+
+	function mod:Create(window)
+		-- Re-use bargroup if it exists.
+		local p = window.db
+		local bargroup = mod:GetBarGroup(p.name)
+
+		-- Save a reference to window in bar group. Needed for some nasty callbacks.
+		if bargroup then
+			-- Clear callbacks.
+			bargroup.callbacks = LibStub("CallbackHandler-1.0"):New(bargroup)
+		else
+			bargroup = mod:NewBarGroup(p.name, p.barorientation, p.background.height, p.barwidth, p.barheight, "SkadaBarWindow" .. p.name)
+
+			bargroup:SetButtonsOpacity(p.title.toolbaropacity or 0.25)
+			bargroup:SetButtonMouseOver(p.title.hovermode)
+
+			--
+			-- Add window buttons.
+			--
+			AddWindowButton(bargroup, p.title.toolbar, "config", L.Configure, L.btn_config_desc, configOnClick)
+			AddWindowButton(bargroup, p.title.toolbar, "reset", RESET, L.btn_reset_desc, resetOnClick)
+			AddWindowButton(bargroup, p.title.toolbar, "segment", L.Segment, L.btn_segment_desc, segmentOnClick)
+			AddWindowButton(bargroup, p.title.toolbar, "mode", L.Mode, L["Jump to a specific mode."], modeOnClick)
+			AddWindowButton(bargroup, p.title.toolbar, "report", L.Report, L.btn_report_desc, reportOnClick)
+			AddWindowButton(bargroup, p.title.toolbar, "stop", L.Stop, L.btn_stop_desc, stopOnClick)
+		end
+
+		bargroup.win = window
+
+		bargroup.RegisterCallback(mod, "BarClick")
+		bargroup.RegisterCallback(mod, "BarEnter")
+		bargroup.RegisterCallback(mod, "BarLeave")
+		bargroup.RegisterCallback(mod, "AnchorMoved")
+		bargroup.RegisterCallback(mod, "WindowResizing")
+		bargroup.RegisterCallback(mod, "WindowResized")
+		bargroup.RegisterCallback(mod, "WindowLocked")
+		bargroup:EnableMouse(true)
+		bargroup:SetScript("OnMouseDown", WindowOnMouseDown)
+		bargroup:SetScript("OnShow", function(self) self:SetMaxBars(nil, p.snapto) end)
+		bargroup.button:SetScript("OnClick", TitleButtonOnClick)
+		bargroup:HideIcon()
+
+		local titletext = bargroup.button:GetFontString()
+		titletext:SetWordWrap(false)
+		titletext:SetPoint("LEFT", bargroup.button, "LEFT", 5, 1)
+		titletext:SetJustifyH("LEFT")
+		bargroup.button:SetHeight(p.title.height or 15)
 		bargroup:SetButtonMouseOver(p.title.hovermode)
 
-		--
-		-- Add window buttons.
-		--
+		-- Register with LibWindow-1.0.
+		LibWindow.RegisterConfig(bargroup, p)
 
-		-- config button
-		AddWindowButton(bargroup, p.title.toolbar, "config", L.Configure, L.btn_config_desc, function(_, button)
-			if button == "RightButton" then
-				Skada:OpenOptions(bargroup.win)
-			else
-				Skada:OpenMenu(bargroup.win)
-			end
-		end)
+		-- Restore window position.
+		LibWindow.RestorePosition(bargroup)
 
-		-- reset button
-		AddWindowButton(bargroup, p.title.toolbar, "reset", RESET, L.btn_reset_desc, function()
-			Skada:ShowPopup(bargroup.win)
-		end)
+		bargroup:SetMaxBars(nil, p.snapto)
+		window.bargroup = bargroup
 
-		-- segment button
-		AddWindowButton(bargroup, p.title.toolbar, "segment", L.Segment, L.btn_segment_desc, function(_, button)
-			if button == "MiddleButton" then
-				bargroup.win:set_selected_set("current")
-			elseif IsModifierKeyDown() then
-				bargroup.win:set_selected_set(nil, button == "RightButton" and 1 or -1)
-			else
-				Skada:SegmentMenu(bargroup.win)
-			end
-		end)
+		if not classicons then
+			classicons = Skada.classicons
+			classcoords = Skada.classcoords
 
-		-- mode button
-		AddWindowButton(bargroup, p.title.toolbar, "mode", L.Mode, L["Jump to a specific mode."], function()
-			Skada:ModeMenu(bargroup.win)
-		end)
+			roleicons = Skada.roleicons
+			rolecoords = Skada.rolecoords
 
-		AddWindowButton(bargroup, p.title.toolbar, "report", L.Report, L.btn_report_desc, function()
-			Skada:OpenReportWindow(bargroup.win)
-		end)
-
-		AddWindowButton(bargroup, p.title.toolbar, "stop", L.Stop, L.btn_stop_desc, function()
-			if Skada.current and Skada.current.stopped then
-				Skada:ResumeSegment()
-			elseif Skada.current then
-				Skada:StopSegment()
-			end
-		end)
-	end
-
-	bargroup.win = window
-
-	bargroup.RegisterCallback(mod, "BarClick")
-	bargroup.RegisterCallback(mod, "BarEnter")
-	bargroup.RegisterCallback(mod, "BarLeave")
-	bargroup.RegisterCallback(mod, "AnchorMoved")
-	bargroup.RegisterCallback(mod, "WindowResizing")
-	bargroup.RegisterCallback(mod, "WindowResized")
-	bargroup.RegisterCallback(mod, "WindowLocked")
-	bargroup:EnableMouse(true)
-	bargroup:SetScript("OnMouseDown", WindowOnMouseDown)
-	bargroup.button:SetScript("OnClick", TitleButtonOnClick)
-	bargroup:HideIcon()
-
-	local titletext = bargroup.button:GetFontString()
-	titletext:SetWordWrap(false)
-	titletext:SetPoint("LEFT", bargroup.button, "LEFT", 5, 1)
-	titletext:SetJustifyH("LEFT")
-	bargroup.button:SetHeight(p.title.height or 15)
-	bargroup:SetButtonMouseOver(p.title.hovermode)
-
-	-- Register with LibWindow-1.0.
-	LibWindow.RegisterConfig(bargroup, p)
-
-	-- Restore window position.
-	LibWindow.RestorePosition(bargroup)
-
-	bargroup:SetMaxBars(nil, p.snapto)
-	window.bargroup = bargroup
-
-	if not classicons then
-		classicons = Skada.classicons
-		classcoords = Skada.classcoords
-
-		roleicons = Skada.roleicons
-		rolecoords = Skada.rolecoords
-
-		specicons = Skada.specicons
-		speccoords = Skada.speccoords
+			specicons = Skada.specicons
+			speccoords = Skada.speccoords
+		end
 	end
 end
 
@@ -765,11 +768,11 @@ do
 	local windowbackdrop = {}
 
 	local lastStretchTime = 0
-	local function OnStretch(self, elapsed)
+	local function stretch(self, elapsed)
 		lastStretchTime = lastStretchTime + elapsed
 		if lastStretchTime > 0.01 then
 			self:SortBars()
-			if self:GetHeight() >= 450 then
+			if self:GetHeight() >= 500 then
 				self:StopMovingOrSizing()
 			end
 			lastStretchTime = 0
@@ -779,13 +782,14 @@ do
 	local function move(self, button)
 		local group = self:GetParent()
 		if group then
-			if button == "MiddleButton" then
-				CloseDropDownMenus()
+			if button == "MiddleButton" or (button == "LeftButton" and group.locked) then
 				group.isStretching = true
+				group:StartSizing("TOP")
+				group:SetScript("OnUpdate", stretch)
+
+				CloseDropDownMenus()
 				group:SetBackdropColor(0, 0, 0, 0.9)
 				group:SetFrameStrata("TOOLTIP")
-				group:StartSizing("TOP")
-				group:SetScript("OnUpdate", OnStretch)
 			elseif button == "LeftButton" and not group.locked then
 				self.startX = group:GetLeft()
 				self.startY = group:GetTop()
@@ -812,12 +816,14 @@ do
 		if group then
 			if group.isStretching then
 				group.isStretching = nil
-				local color = group.win.db.background.color
-				group:SetBackdropColor(color.r, color.g, color.b, color.a or 1)
-				group:SetFrameStrata(group.win.db.strata)
 				group:StopMovingOrSizing()
 				group:SetScript("OnUpdate", nil)
-				mod:ApplySettings(group.win)
+
+				local p = group.win.db
+				group:SetBackdropColor(p.background.color.r, p.background.color.g, p.background.color.b, p.background.color.a or 1)
+				group:SetFrameStrata(p.strata)
+				group.win.bargroup:SetHeight(p.background.height)
+				LibWindow.RestorePosition(group.win.bargroup)
 			elseif button == "LeftButton" and not group.locked then
 				group:StopMovingOrSizing()
 				local endX = group:GetLeft()
@@ -920,8 +926,14 @@ do
 			g:ShowButton(L["Mode"], p.buttons.mode)
 			g:ShowButton(L["Report"], p.buttons.report)
 			g:ShowButton(L["Stop"], p.buttons.stop)
+
+			g.button:SetScript("OnMouseDown", move)
+			g.button:SetScript("OnMouseUp", stopMove)
 		else
 			g:HideAnchor()
+
+			g.button:SetScript("OnMouseDown", nil)
+			g.button:SetScript("OnMouseUp", nil)
 		end
 
 		g:SetUseSpark(p.spark)
@@ -964,7 +976,6 @@ do
 		g.showself = Skada.db.profile.showself or p.showself
 
 		g:SetMaxBars(nil, p.snapto)
-		g:SetScript("OnShow", function(self) self:SetMaxBars(nil, p.snapto) end)
 
 		g:SetEnableMouse(not p.clickthrough)
 		g:SetClampedToScreen(p.clamped)
@@ -1684,7 +1695,7 @@ function mod:AddDisplayOptions(win, options)
 		end
 	}
 
-	local x, y = floor(GetScreenWidth()), floor(GetScreenHeight())
+	local x, y = floor(GetScreenWidth() / 2), floor(GetScreenHeight() / 2)
 	options.windowoptions.args.position.args.x = {
 		type = "range",
 		name = L["X Offset"],
