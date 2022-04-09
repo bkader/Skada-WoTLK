@@ -784,7 +784,7 @@ do
 		if group then
 			if button == "MiddleButton" or (button == "LeftButton" and group.locked) then
 				group.isStretching = true
-				group:StartSizing("TOP")
+				group:StartSizing(IsModifierKeyDown() and "BOTTOM" or "TOP")
 				group:SetScript("OnUpdate", stretch)
 
 				CloseDropDownMenus()

@@ -234,17 +234,20 @@ do
 	-- checks if the provided guid is a boss
 	-- returns a boolean, boss id and boss name
 	function Skada:IsBoss(guid, name)
-		local isboss, npcid, npcname = false, 0, nil
 		local id = self.GetCreatureId(guid)
-		if id and (LBI.BossIDs[id] or creatureToFight[id] or creatureToBoss[id]) then
-			isboss, npcid = true, creatureToBoss[id] or id
-			if creatureToFight[id] then
-				npcname = (name and name ~= creatureToFight[id]) and name or creatureToFight[id]
+
+		if LBI.BossIDs[id] or creatureToFight[id] or creatureToBoss[id] then
+			id = creatureToBoss[id] or id -- should fix id?
+
+			-- should fix name?
+			if creatureToFight[id] and name ~= creatureToFight[id] then
+				name = creatureToFight[id]
 			end
-		elseif self:IsCreature(guid) then
-			npcid = id
+
+			return true, id, name
 		end
-		return isboss, npcid, npcname
+
+		return false, (self:IsCreature(guid) and id or 0), name
 	end
 end
 
