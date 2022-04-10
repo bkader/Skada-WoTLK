@@ -6,10 +6,9 @@ Skada:AddLoadableModule("Tweaks", function(L)
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local ipairs, band, format = ipairs, bit.band, string.format
-	local UnitExists, UnitName, UnitClass = UnitExists, UnitName, UnitClass
+	local UnitClass, GetTime = UnitClass, GetTime
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
-	local GetTime = GetTime
 	local _
 
 	local BITMASK_GROUP = Skada.BITMASK_GROUP
@@ -42,29 +41,45 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			SWING_DAMAGE = true
 		}
 
-		local function WhoPulled(hitline)
-			-- first hit
-			hitline = hitline or L["|cffffbb00First Hit|r: *?*"]
+		local WhoPulled
+		do
+			local tinsert, tconcat = table.insert, table.concat
+			local UnitExists, UnitName = UnitExists, UnitName
+			local new, del = Skada.newTable, Skada.delTable
 
-			-- firt boss target
-			local targetline
-			for i = 1, MAX_BOSS_FRAMES do
-				local boss = format("boss%d", i)
-				if not UnitExists(boss) then break end
+			function WhoPulled(hitline)
+				-- first hit
+				hitline = hitline or L["|cffffbb00First Hit|r: *?*"]
 
-				local target = UnitName(boss .. "target")
-				if target then
-					local _, class = UnitClass(boss .. "target")
+				-- firt boss target
+				local targetline = nil
+				local targettable = nil
 
-					if class and Skada.classcolors[class] then
-						target = "|c" .. Skada.classcolors[class].colorStr .. target .. "|r"
+				for i = 1, MAX_BOSS_FRAMES do
+					local boss = format("boss%d", i)
+					if not UnitExists(boss) then break end
+
+					local bosstarget = format("boss%dtarget", i)
+					local target = UnitName(bosstarget)
+					if target then
+						targettable = targettable or new()
+
+						local _, class = UnitClass(bosstarget)
+						if class and Skada.classcolors[class] then
+							target = format("|c%s%s|r", Skada.classcolors[class].colorStr, target)
+						end
+
+						tinsert(targettable, format("%s > %s", UnitName(boss) or L.Unknown, target))
 					end
-					targetline = format(L["|cffffbb00Boss First Target|r: %s (%s)"], target, UnitName(boss) or L.Unknown)
-					break -- no need
 				end
-			end
 
-			return hitline, targetline
+				if targettable then
+					targetline = format(L["|cffffbb00Boss First Target|r: %s"], tconcat(targettable, " \124\124 "))
+					targettable = del(targettable)
+				end
+
+				return hitline, targetline
+			end
 		end
 
 		function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
