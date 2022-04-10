@@ -602,7 +602,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 
 		-- fury of frostmourne
 		fofrostmourne = fofrostmourne or GetSpellInfo(72350)
-		considerFoF = not (Skada.Ascension or Skada.AscensionCoA)
+		considerFoF = not Skada.Ascension
 
 		-- smart stop
 		if Skada.db.profile.smartstop then

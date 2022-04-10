@@ -85,6 +85,18 @@ ignoredSpells.firsthit = {
 
 -->> end of editable code <<--
 
+-- ----------------------------- --
+-- >>>>> PROJECT ASCENSION <<<<< --
+-- ----------------------------- --
+
+if Skada.Ascension then
+	--
+	-- add your ascension-specific stuff
+	--
+
+	return -- skip the rest of the file.
+end
+
 -------------------------------------------------------------------------------
 -- creatureToFight
 -- a table of creatures IDs used to fix segments names.

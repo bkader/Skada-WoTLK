@@ -20,8 +20,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local spellmod = targetmod:NewModule(L["Absorb spell list"])
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
-	local LGT = LibStub("LibGroupTalents-1.0")
-
 	local GroupIterator = Skada.GroupIterator
 	local UnitName, UnitExists, UnitBuff = UnitName, UnitExists, UnitBuff
 	local UnitIsDeadOrGhost, UnitHealthInfo = UnitIsDeadOrGhost, Skada.UnitHealthInfo
@@ -547,55 +545,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		end
 	end
 
-	do
-		-- some effects aren't shields but rather special effects, such us talents.
-		-- in order to track them, we simply add them as fake shields before all.
-		-- I don't know the whole list of effects but, if you want to add yours
-		-- please do : CLASS = {[index] = {spellid, spellschool}}
-		local passiveshields = {
-			DEATHKNIGHT = {{50150, 1}, {49497, 1}},
-			PALADIN = {{66233, 1}},
-			ROGUE = {{31230, 1}}
-		}
-
-		local function CheckUnitShields(unit, owner, timestamp, curtime)
-			if not UnitIsDeadOrGhost(unit) then
-				local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
-				for i = 1, 40 do
-					local _, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitBuff(unit, i)
-					if spellid then
-						if absorbspells[spellid] and unitCaster then
-							HandleShield(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
-						end
-					else
-						break -- nothing found
-					end
-				end
-
-				-- passive shields (not for pets)
-				if owner == nil then
-					local _, class = UnitClass(unit)
-					if passiveshields[class] then
-						for _, spell in ipairs(passiveshields[class]) do
-							local points = LGT:GUIDHasTalent(dstGUID, GetSpellInfo(spell[1]), LGT:GetActiveTalentGroup(unit))
-							if points then
-								HandleShield(timestamp - 60, nil, dstGUID, dstGUID, nil, dstGUID, dstName, nil, spell[1], nil, spell[2], nil, points)
-							end
-						end
-					end
-				end
-			end
-		end
-
-		function mod:CheckPreShields(event, set, timestamp)
-			if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped and not self.checked then
-				self:ZoneModifier()
-				GroupIterator(CheckUnitShields, timestamp, GetTime())
-				self.checked = true
-			end
-		end
-	end
-
 	local function process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool, damage, broke)
 		shields[dstName] = shields[dstName] or {}
 		shieldspopped = T.clear(shieldspopped or T.get("Skada_ShieldsPopped"), del)
@@ -1046,6 +995,85 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 							if win.metadata and d.value > win.metadata.maxvalue then
 								win.metadata.maxvalue = d.value
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	do
+		local function CheckUnitShields(unit, owner, timestamp, curtime)
+			if not UnitIsDeadOrGhost(unit) then
+				local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
+				for i = 1, 40 do
+					local _, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitBuff(unit, i)
+					if spellid then
+						if absorbspells[spellid] and unitCaster then
+							HandleShield(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
+						end
+					else
+						break -- nothing found
+					end
+				end
+			end
+		end
+
+		function mod:CheckPreShields(event, set, timestamp)
+			if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped and not self.checked then
+				self:ZoneModifier()
+				GroupIterator(CheckUnitShields, timestamp, GetTime())
+				self.checked = true
+			end
+		end
+
+		function mod:OnInitialize()
+			-- nothing to do for Project Ascension
+			if Skada.Ascension then return end
+
+			-- some effects aren't shields but rather special effects, such us talents.
+			-- in order to track them, we simply add them as fake shields before all.
+			-- I don't know the whole list of effects but, if you want to add yours
+			-- please do : CLASS = {[index] = {spellid, spellschool}}
+			-- see: http://wotlk.cavernoftime.com/spell=<spellid>
+			local passiveshields = {
+				DEATHKNIGHT = {
+					{50150, 1}, -- Will of the Necropolis
+					{49497, 1}, -- Spell Deflection
+				},
+				PALADIN = {
+					{66233, 1}, -- Ardent Defender
+				},
+				ROGUE = {
+					{31230, 1}, -- Cheat Death
+				}
+			}
+
+			local LGT = LibStub("LibGroupTalents-1.0")
+			CheckUnitShields = function(unit, owner, timestamp, curtime)
+				if not UnitIsDeadOrGhost(unit) then
+					local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
+					for i = 1, 40 do
+						local _, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitBuff(unit, i)
+						if spellid then
+							if absorbspells[spellid] and unitCaster then
+								HandleShield(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
+							end
+						else
+							break -- nothing found
+						end
+					end
+
+					-- passive shields (not for pets)
+					if owner == nil then
+						local _, class = UnitClass(unit)
+						if passiveshields[class] then
+							for _, spell in ipairs(passiveshields[class]) do
+								local points = LGT:GUIDHasTalent(dstGUID, GetSpellInfo(spell[1]), LGT:GetActiveTalentGroup(unit))
+								if points then
+									HandleShield(timestamp - 60, nil, dstGUID, dstGUID, nil, dstGUID, dstName, nil, spell[1], nil, spell[2], nil, points)
+								end
 							end
 						end
 					end

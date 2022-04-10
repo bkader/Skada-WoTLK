@@ -651,7 +651,13 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 
 	function mod:OnInitialize()
 		-- don't add anything for Project Ascension
-		if Skada.Ascension or Skada.AscensionCoA then return end
+		if Skada.Ascension then
+			--
+			-- add your ascension-specific stuff
+			--
+
+			return -- skip the rest of the code.
+		end
 
 		-- ----------------------------
 		-- Custom Groups

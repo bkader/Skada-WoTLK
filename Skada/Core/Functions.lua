@@ -361,43 +361,54 @@ do
 	-- there was no discrimination with classes and specs
 	-- the only reason this group composition was made is
 	-- to have all 10 classes displayed on windows.
-	local fakePlayers = {
-		-- Tanks & Healers
-		{"Deafknight", "DEATHKNIGHT", "TANK", 250}, -- Blood Death Knight
-		{"Bubbleboy", "PRIEST", "HEALER", 256}, -- Discipline Priest
-		{"Channingtotem", "SHAMAN", "HEALER", 264}, -- Restoration Shaman
-		-- Damagers
-		{"Shiftycent", "DRUID", "DAMAGER", 102}, -- Balance Druid
-		{"Beargrills", "HUNTER", "DAMAGER", 254}, -- Marksmanship Hunter
-		{"Foodanddps", "MAGE", "DAMAGER", 63}, -- Fire Mage
-		{"Retryhard", "PALADIN", "DAMAGER", 70}, -- Retribution Paladin
-		{"Stabass", "ROGUE", "DAMAGER", 260}, -- Combat Rogue
-		{"Summonbot", "WARLOCK", "DAMAGER", 266}, -- Demonology Warlock
-		{"Chuggernaut", "WARRIOR", "DAMAGER", 72} -- Fury Warrior
-	}
-	local fakePlayersAscension = {
-		{"Necromancer", "NECROMANCER"},
-		{"Sun Cleric", "SUNCLERIC"},
-		{"Starcaller", "STARCALLER"},
-		{"Reaper", "REAPER"},
-		{"Tinker", "TINKER"},
-		{"Stormbringer", "STORMBRINGER"},
-		{"Knight of Xoroth", "FLESHWARDEN"},
-		{"Barbarian", "BARBARIAN"},
-		{"Cultist", "CULTIST"},
-		{"Pyromancer", "PYROMANCER"},
-		{"Ranger", "RANGER"},
-		{"Runemaster", "SPIRITMAGE"},
-		{"Demon Hunter", "DEMONHUNTER"},
-		{"Guardian", "GUARDIAN"},
-		{"Witch Hunter", "WITCHHUNTER"},
-		{"Son of Arugal", "SONOFARUGAL"},
-		{"Monk", "MONK"},
-		{"Chronomancer", "CHRONOMANCER"},
-		{"Venomancer", "PROPHET"},
-		{"Primalist", "WILDWALKER"},
-		{"Witch Doctor", "WITCHDOCTOR"}
-	}
+	local FakePlayers
+	do
+		local playersTable = nil
+		function FakePlayers()
+			if not playersTable and Skada.AscensionCoA then
+				playersTable = {
+					{"Necromancer", "NECROMANCER"},
+					{"Sun Cleric", "SUNCLERIC"},
+					{"Starcaller", "STARCALLER"},
+					{"Reaper", "REAPER"},
+					{"Tinker", "TINKER"},
+					{"Stormbringer", "STORMBRINGER"},
+					{"Knight of Xoroth", "FLESHWARDEN"},
+					{"Barbarian", "BARBARIAN"},
+					{"Cultist", "CULTIST"},
+					{"Pyromancer", "PYROMANCER"},
+					{"Ranger", "RANGER"},
+					{"Runemaster", "SPIRITMAGE"},
+					{"Demon Hunter", "DEMONHUNTER"},
+					{"Guardian", "GUARDIAN"},
+					{"Witch Hunter", "WITCHHUNTER"},
+					{"Son of Arugal", "SONOFARUGAL"},
+					{"Monk", "MONK"},
+					{"Chronomancer", "CHRONOMANCER"},
+					{"Venomancer", "PROPHET"},
+					{"Primalist", "WILDWALKER"},
+					{"Witch Doctor", "WITCHDOCTOR"}
+				}
+			elseif not playersTable then
+				playersTable = {
+					-- Tanks & Healers
+					{"Deafknight", "DEATHKNIGHT", "TANK", 250}, -- Blood Death Knight
+					{"Bubbleboy", "PRIEST", "HEALER", 256}, -- Discipline Priest
+					{"Channingtotem", "SHAMAN", "HEALER", 264}, -- Restoration Shaman
+					-- Damagers
+					{"Shiftycent", "DRUID", "DAMAGER", 102}, -- Balance Druid
+					{"Beargrills", "HUNTER", "DAMAGER", 254}, -- Marksmanship Hunter
+					{"Foodanddps", "MAGE", "DAMAGER", 63}, -- Fire Mage
+					{"Retryhard", "PALADIN", "DAMAGER", 70}, -- Retribution Paladin
+					{"Stabass", "ROGUE", "DAMAGER", 260}, -- Combat Rogue
+					{"Summonbot", "WARLOCK", "DAMAGER", 266}, -- Demonology Warlock
+					{"Chuggernaut", "WARRIOR", "DAMAGER", 72} -- Fury Warrior
+				}
+			end
+
+			return playersTable
+		end
+	end
 
 	local function GenerateFakeData()
 		wipe(fakeSet)
@@ -409,7 +420,7 @@ do
 		fakeSet.absorb = 0
 		fakeSet.players = wipe(fakeSet.players or {})
 
-		local players = Skada.AscensionCoA and fakePlayersAscension or fakePlayers
+		local players = FakePlayers()
 		for i = 1, #players do
 			local name, class, role, spec = unpack(players[i])
 			local damage, heal, absorb = 0, 0, 0

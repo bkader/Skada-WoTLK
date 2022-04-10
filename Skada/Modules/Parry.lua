@@ -1,4 +1,5 @@
 local Skada = Skada
+if Skada.Ascension then return end -- skipped on ascension
 Skada:AddLoadableModule("Parry-Haste", function(L)
 	if Skada:IsDisabled("Parry-Haste") then return end
 
