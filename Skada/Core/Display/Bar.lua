@@ -864,6 +864,7 @@ do
 		g:SetBarBackgroundColor(p.barbgcolor.r, p.barbgcolor.g, p.barbgcolor.b, p.barbgcolor.a or 0.6)
 		g:SetButtonMouseOver(p.title.hovermode)
 		g:SetButtonsOpacity(p.title.toolbaropacity or 0.25)
+		g:SetUseSpark(p.spark)
 
 		g:SetFont(
 			p.barfontpath or Skada:MediaFetch("font", p.barfont),
@@ -935,8 +936,6 @@ do
 			g.button:SetScript("OnMouseDown", nil)
 			g.button:SetScript("OnMouseUp", nil)
 		end
-
-		g:SetUseSpark(p.spark)
 
 		-- Window border
 		Skada:ApplyBorder(g, p.background.bordertexture, p.background.bordercolor, p.background.borderthickness)

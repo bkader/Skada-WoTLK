@@ -1250,11 +1250,6 @@ end
 
 function barListPrototype:SetUseSpark(use)
 	self.usespark = use or nil
-	if bars[self] then
-		for _, v in pairs(bars[self]) do
-			v:SetUseSpark(self.usespark)
-		end
-	end
 end
 
 function barListPrototype:GetNumBars()
@@ -1433,6 +1428,7 @@ do
 		self.spark:SetTexture([[Interface\CastingBar\UI-CastingBar-Spark]])
 		self.spark:SetSize(10, 10)
 		self.spark:SetBlendMode("ADD")
+		self.spark:Hide()
 
 		self.bgtexture = self.bgtexture or self:CreateTexture(nil, "BACKGROUND")
 		self.bgtexture:SetAllPoints()
@@ -1563,15 +1559,6 @@ function barPrototype:SetIcon(icon, ...)
 		self.icon:Hide()
 	end
 	self.iconTexture = icon or nil
-end
-
-function barPrototype:SetUseSpark(use)
-	self.usespark = use or nil
-	if self.usespark and self.spark and not self.spark:IsShown() then
-		self.spark:Show()
-	elseif not self.usespark and self.spark and self.spark:IsShown() then
-		self.spark:Hide()
-	end
 end
 
 function barPrototype:ShowIcon()
@@ -1865,17 +1852,22 @@ function barPrototype:SetValue(val)
 	local dist = (ownerGroup and ownerGroup:GetLength()) or self.length
 	amt = max(amt, 0.000001)
 
-	if ownerGroup and ownerGroup.smoothing and self.lastamount then
-		self:SetTextureTarget(amt, dist)
-	else
-		self.lastamount = amt
-		self:SetTextureValue(amt, dist)
-	end
-
-	if self.usespark and (amt == 1 or amt == 0) then
-		self.spark:Hide()
-	elseif self.usespark then
-		self.spark:Show()
+	if ownerGroup then
+		-- smoothing
+		if ownerGroup.smoothing and self.lastamount then
+			self:SetTextureTarget(amt, dist)
+		else
+			self.lastamount = amt
+			self:SetTextureValue(amt, dist)
+		end
+		-- spark
+		if ownerGroup.usespark and self.spark then
+			if amt == 1 or amt <= 0.000001 then
+				self.spark:Hide()
+			else
+				self.spark:Show()
+			end
+		end
 	end
 
 	self:UpdateColor()
