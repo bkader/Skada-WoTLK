@@ -15,6 +15,9 @@ local tsort, tinsert, tremove, tconcat, wipe = table.sort, tinsert, tremove, tab
 local next, pairs, assert, error, type, xpcall = next, pairs, assert, error, type, xpcall
 local GameTooltip = GameTooltip
 
+local ICON_LOCK = [[Interface\AddOns\Skada\Libs\SpecializedLibBars-1.0\lock.tga]]
+local ICON_UNLOCK = [[Interface\AddOns\Skada\Libs\SpecializedLibBars-1.0\unlock.tga]]
+
 local L = {
 	resize_header = "Resize",
 	resize_click = "|cff00ff00Click|r to freely resize window.",
@@ -368,7 +371,7 @@ do
 		end
 
 		-- Create button frame.
-		local btn = CreateFrame("Button", nil, self.button)
+		local btn = CreateFrame("Button", "$parent" .. title:gsub("%s+", "_"), self.button)
 		btn:SetFrameLevel(self.button:GetFrameLevel() + 1)
 		btn:SetSize(14, 14)
 		btn:SetNormalTexture(normaltex)
@@ -665,12 +668,12 @@ do
 
 	local function lockOnEnter(self)
 		listOnEnter(self:GetParent())
-		self.label:SetTextColor(1, 1, 1, 0.7)
+		self.icon:SetVertexColor(1, 1, 1, 0.7)
 	end
 
 	local function lockOnLeave(self)
 		listOnLeave(self:GetParent())
-		self.label:SetTextColor(0.6, 0.6, 0.6, 0.7)
+		self.icon:SetVertexColor(0.6, 0.6, 0.6, 0.7)
 	end
 
 	local DEFAULT_TEXTURE = [[Interface\TARGETINGFRAME\UI-StatusBar]]
@@ -699,7 +702,7 @@ do
 			lib.defaultFont = myfont
 		end
 
-		list.button = list.button or CreateFrame("Button", "$parentTitleButton", list)
+		list.button = list.button or CreateFrame("Button", "$parentAnchor", list)
 		list.button:SetText(name)
 		list.button:SetBackdrop(frame_defaults)
 		list.button:SetNormalFontObject(myfont)
@@ -739,7 +742,7 @@ do
 
 		-- resize to the right
 		if not list.resizeright then
-			list.resizeright = CreateFrame("Button", "$parentSizerRight", list)
+			list.resizeright = CreateFrame("Button", "$parentRightResizer", list)
 			list.resizeright:SetFrameLevel(list:GetFrameLevel() + 3)
 			list.resizeright:SetSize(12, 12)
 			list.resizeright:SetAlpha(0)
@@ -754,7 +757,7 @@ do
 
 		-- resize to the left
 		if not list.resizeleft then
-			list.resizeleft = CreateFrame("Button", "$parentSizerLeft", list)
+			list.resizeleft = CreateFrame("Button", "$parentLeftResizer", list)
 			list.resizeleft:SetFrameLevel(list:GetFrameLevel() + 3)
 			list.resizeleft:SetSize(12, 12)
 			list.resizeleft:SetAlpha(0)
@@ -770,17 +773,14 @@ do
 		-- lock button
 		if not list.lockbutton then
 			list.lockbutton = CreateFrame("Button", "$parentLockButton", list)
-			list.lockbutton:SetPoint("RIGHT", list.resizeright, "LEFT", -2, 0)
+			list.lockbutton:SetPoint("BOTTOM", list, "BOTTOM", 0, 2)
 			list.lockbutton:SetFrameLevel(list:GetFrameLevel() + 5)
-			list.lockbutton:SetSize(50, 10)
+			list.lockbutton:SetSize(12, 12)
 			list.lockbutton:SetAlpha(0)
-			list.lockbutton.label = list.lockbutton:CreateFontString("$parentText", "OVERLAY", "GameFontNormalSmall")
-			list.lockbutton.label:SetTextColor(0.6, 0.6, 0.6, 0.7)
-			list.lockbutton.label:SetShadowColor(0, 0, 0, 1)
-			list.lockbutton.label:SetShadowOffset(1, -1)
-			list.lockbutton.label:SetPoint("RIGHT")
-			list.lockbutton.label:SetJustifyH("RIGHT")
-			list.lockbutton.label:SetText(L.lock)
+			list.lockbutton.icon = list.lockbutton:CreateTexture("$parentIcon", "OVERLAY")
+			list.lockbutton.icon:SetAllPoints(list.lockbutton)
+			list.lockbutton.icon:SetTexture(ICON_LOCK)
+			list.lockbutton.icon:SetVertexColor(0.6, 0.6, 0.6, 0.7)
 			list.lockbutton:SetScript("OnClick", lockOnClick)
 			list.lockbutton:SetScript("OnEnter", lockOnEnter)
 			list.lockbutton:SetScript("OnLeave", lockOnLeave)
@@ -865,14 +865,7 @@ function barListPrototype:Lock(fireEvent)
 
 	self.resizeright:Hide()
 	self.resizeleft:Hide()
-
-	self.lockbutton.label:SetText(L.unlock)
-	self.lockbutton:ClearAllPoints()
-	if self.growup then
-		self.lockbutton:SetPoint("TOPRIGHT", self, "TOPRIGHT", -2, -1)
-	else
-		self.lockbutton:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", -2, 1)
-	end
+	self.lockbutton.icon:SetTexture(ICON_UNLOCK)
 
 	if fireEvent then
 		self.callbacks:Fire("WindowLocked", self, self.locked)
@@ -884,10 +877,7 @@ function barListPrototype:Unlock(fireEvent)
 
 	self.resizeright:Show()
 	self.resizeleft:Show()
-
-	self.lockbutton.label:SetText(L.lock)
-	self.lockbutton:ClearAllPoints()
-	self.lockbutton:SetPoint("RIGHT", self.resizeright, "LEFT", -2, 0)
+	self.lockbutton.icon:SetTexture(ICON_LOCK)
 
 	if fireEvent then
 		self.callbacks:Fire("WindowLocked", self, self.locked)
@@ -1161,11 +1151,7 @@ function barListPrototype:ReverseGrowth(reverse)
 		self.resizeleft:GetHighlightTexture():SetTexCoord(1, 0, 1, 0)
 		self.resizeleft:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
 
-		if self.locked then
-			self.lockbutton:SetPoint("TOPRIGHT", self, "TOPRIGHT", -2, -1)
-		else
-			self.lockbutton:SetPoint("RIGHT", self.resizeright, "LEFT", -2, 0)
-		end
+		self.lockbutton:SetPoint("TOP", self, "TOP", 0, -2)
 	else
 		self.button:SetPoint("TOPLEFT", self, "TOPLEFT")
 		self.button:SetPoint("TOPRIGHT", self, "TOPRIGHT")
@@ -1178,11 +1164,7 @@ function barListPrototype:ReverseGrowth(reverse)
 		self.resizeleft:GetHighlightTexture():SetTexCoord(1, 0, 0, 1)
 		self.resizeleft:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 0, 0)
 
-		if self.locked then
-			self.lockbutton:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", -2, 1)
-		else
-			self.lockbutton:SetPoint("RIGHT", self.resizeright, "LEFT", -2, 0)
-		end
+		self.lockbutton:SetPoint("BOTTOM", self, "BOTTOM", 0, 2)
 	end
 
 	self:SortBars()
