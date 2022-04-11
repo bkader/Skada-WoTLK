@@ -536,8 +536,11 @@ function barListPrototype:SetBarBackgroundColor(r, g, b, a)
 	self.barbackgroundcolor[2] = g
 	self.barbackgroundcolor[3] = b
 	self.barbackgroundcolor[4] = a
-	for _, bar in pairs(self:GetBars()) do
-		bar.bgtexture:SetVertexColor(unpack(self.barbackgroundcolor))
+
+	if bars[self] then
+		for _, bar in pairs(bars[self]) do
+			bar.bgtexture:SetVertexColor(unpack(self.barbackgroundcolor))
+		end
 	end
 end
 
@@ -832,9 +835,17 @@ end
 
 function barListPrototype:SetEnableMouse(enablemouse)
 	self.enablemouse = enablemouse or nil
+
 	self:EnableMouse(self.enablemouse)
-	for _, bar in pairs(self:GetBars()) do
-		bar:EnableMouse(self.enablemouse)
+	self.button:EnableMouse(self.enablemouse)
+	self.resizeright:EnableMouse(self.enablemouse)
+	self.resizeleft:EnableMouse(self.enablemouse)
+	self.lockbutton:EnableMouse(self.enablemouse)
+
+	if bars[self] then
+		for _, bar in pairs(bars[self]) do
+			bar:EnableMouse(self.enablemouse)
+		end
 	end
 end
 
@@ -1214,11 +1225,12 @@ function barListPrototype:GetThickness()
 	return self.thickness
 end
 
-function barListPrototype:SetOrientation(orientation)
-	self.orientation = orientation
+function barListPrototype:SetOrientation(o)
+	assert(o >= 1 and o <= 4, "orientation must be 1-4")
+	self.orientation = o
 	if bars[self] then
 		for k, v in pairs(bars[self]) do
-			v:SetOrientation(orientation)
+			v:SetOrientation(self.orientation)
 		end
 	end
 	self:UpdateOrientationLayout()
@@ -1537,13 +1549,11 @@ function barPrototype:OnSizeChanged()
 end
 
 function barPrototype:SetFont(f1, s1, m1, f2, s2, m2)
-	local label = self.label
-	local font, size, flags = label:GetFont()
-	label:SetFont(f1 or font, s1 or size, m1 or flags)
+	local font, size, flags = self.label:GetFont()
+	self.label:SetFont(f1 or font, s1 or size, m1 or flags)
 
-	local timer = self.timerLabel
-	local numfont, numsize, numflags = timer:GetFont()
-	timer:SetFont(f2 or numfont, s2 or numsize, m2 or numflags)
+	font, size, flags = self.timerLabel:GetFont()
+	self.timerLabel:SetFont(f2 or font, s2 or size, m2 or flags)
 end
 
 function barPrototype:SetIcon(icon, ...)
@@ -1558,19 +1568,20 @@ function barPrototype:SetIcon(icon, ...)
 	else
 		self.icon:Hide()
 	end
-	self.iconTexture = icon or nil
 end
 
 function barPrototype:ShowIcon()
 	self.showIcon = true
-	if self.iconTexture then
+	if self.icon then
 		self.icon:Show()
 	end
 end
 
 function barPrototype:HideIcon()
 	self.showIcon = nil
-	self.icon:Hide()
+	if self.icon then
+		self.icon:Hide()
+	end
 end
 
 function barPrototype:IsIconShown()
@@ -1666,9 +1677,9 @@ function barPrototype:UnsetAllColors()
 end
 
 do
-	function barPrototype:UpdateOrientationLayout()
+	function barPrototype:UpdateOrientationLayout(orientation)
 		local t = nil
-		if self.orientation == 1 then
+		if orientation == 1 then
 			self.icon:ClearAllPoints()
 			self.icon:SetPoint("RIGHT", self, "LEFT", 0, 0)
 
@@ -1698,7 +1709,7 @@ do
 			t:SetJustifyV("MIDDLE")
 
 			self.bgtexture:SetTexCoord(0, 1, 0, 1)
-		elseif self.orientation == 2 then
+		elseif orientation == 2 then
 			self.icon:ClearAllPoints()
 			self.icon:SetPoint("TOP", self, "BOTTOM", 0, 0)
 
@@ -1729,7 +1740,7 @@ do
 			t:SetJustifyV("BOTTOM")
 
 			self.bgtexture:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
-		elseif self.orientation == 3 then
+		elseif orientation == 3 then
 			self.icon:ClearAllPoints()
 			self.icon:SetPoint("LEFT", self, "RIGHT", 0, 0)
 
@@ -1759,7 +1770,7 @@ do
 			t:SetJustifyV("MIDDLE")
 
 			self.bgtexture:SetTexCoord(0, 1, 0, 1)
-		elseif self.orientation == 4 then
+		elseif orientation == 4 then
 			self.icon:ClearAllPoints()
 			self.icon:SetPoint("BOTTOM", self, "TOP", 0, 0)
 
@@ -1800,23 +1811,25 @@ function barPrototype:GetLength()
 end
 
 do
-	local function updateSize(self)
-		local thickness, length = self.thickness, self.length
-		local iconSize = self.showIcon and thickness or 0
-		local width = max(0.0001, length - iconSize)
-		local height = thickness
-		barPrototype.super.SetSize(self, width, height)
-		self.icon:SetSize(thickness, thickness)
+	local function updateSize(self, length, thickness)
+		if length then
+			local iconSize = self.showIcon and thickness or 0
+			local width = max(0.0001, length - iconSize)
+			barPrototype.super.SetWidth(self, width)
+		end
+
+		if thickness then
+			barPrototype.super.SetHeight(self, thickness)
+			self.icon:SetSize(thickness, thickness)
+		end
 	end
 
 	function barPrototype:SetLength(length)
-		self.length = length
-		updateSize(self)
+		updateSize(self, length)
 	end
 
 	function barPrototype:SetThickness(thickness)
-		self.thickness = thickness
-		updateSize(self)
+		updateSize(self, nil, thickness)
 	end
 end
 
@@ -1825,9 +1838,7 @@ function barPrototype:GetThickness()
 end
 
 function barPrototype:SetOrientation(o)
-	assert(o >= 1 and o <= 4, "orientation must be 1-4")
-	self.orientation = o
-	self:UpdateOrientationLayout()
+	self:UpdateOrientationLayout(o)
 	self:SetThickness(self.thickness)
 end
 

@@ -116,12 +116,7 @@ do
 		else
 			bargroup = mod:NewBarGroup(p.name, p.barorientation, p.background.height, p.barwidth, p.barheight, "SkadaBarWindow" .. p.name)
 
-			bargroup:SetButtonsOpacity(p.title.toolbaropacity or 0.25)
-			bargroup:SetButtonMouseOver(p.title.hovermode)
-
-			--
 			-- Add window buttons.
-			--
 			AddWindowButton(bargroup, p.title.toolbar, "config", L.Configure, L.btn_config_desc, configOnClick)
 			AddWindowButton(bargroup, p.title.toolbar, "reset", RESET, L.btn_reset_desc, resetOnClick)
 			AddWindowButton(bargroup, p.title.toolbar, "segment", L.Segment, L.btn_segment_desc, segmentOnClick)
@@ -628,7 +623,7 @@ do
 							end
 						end
 
-						bar:EnableMouse(true)
+						bar:EnableMouse(not win.db.clickthrough)
 					else
 						bar:SetScript("OnEnter", nil)
 						bar:SetScript("OnLeave", nil)
