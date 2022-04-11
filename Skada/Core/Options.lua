@@ -1170,6 +1170,13 @@ function Skada:FrameSettings(db, include_dimensions)
 			order = 40
 		}
 
+		obj.args.position.args.hidebuttons = {
+			type = "toggle",
+			name = L["Disable Resize Buttons"],
+			desc = L["Resize and lock/unlock buttons won't show up when you hover over the window."],
+			order = 45
+		}
+
 		obj.args.advanced.args.childoptions = {
 			type = "group",
 			name = L["Child Window"],

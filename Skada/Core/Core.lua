@@ -476,6 +476,7 @@ do
 							self.db.name = val
 							Skada.options.args.windows.args[val] = Skada.options.args.windows.args[oldname]
 							Skada.options.args.windows.args[oldname] = nil
+							Skada:ApplySettings(self.db.name)
 						end
 					end
 				},

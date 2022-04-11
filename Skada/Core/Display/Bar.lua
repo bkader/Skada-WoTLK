@@ -849,6 +849,7 @@ do
 		g:SetFrameLevel(1)
 
 		local p = win.db
+		g.name = p.name -- update name
 		g:SetReverseGrowth(p.reversegrowth)
 		g:SetOrientation(p.barorientation)
 		g:SetBarHeight(p.barheight)
@@ -860,6 +861,7 @@ do
 		g:SetButtonMouseOver(p.title.hovermode)
 		g:SetButtonsOpacity(p.title.toolbaropacity or 0.25)
 		g:SetUseSpark(p.spark)
+		g:SetMouseEnter(not p.hidebuttons)
 
 		g:SetFont(
 			p.barfontpath or Skada:MediaFetch("font", p.barfont),
