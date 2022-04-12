@@ -64,6 +64,7 @@ Skada.windowdefaults = {
 	display = "bar",
 	child = "",
 	childmode = 0,
+	wheelspeed = 1,
 	sticky = true,
 	sticked = {},
 	clamped = true,
@@ -1217,6 +1218,17 @@ function Skada:FrameSettings(db, include_dimensions)
 					disabled = function() return not (db.child and db.child ~= "") end
 				}
 			}
+		}
+
+		obj.args.advanced.args.wheelspeed = {
+			type = "range",
+			name = L["Scrolling Speed"],
+			desc = L.opt_wheelspeed_desc,
+			order = 120,
+			width = "double",
+			min = 1,
+			max = 5,
+			step = 1,
 		}
 	end
 

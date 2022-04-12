@@ -96,6 +96,7 @@ L["Creates fake data to help you configure your windows."] = "Crea datos falsos 
 L["Child Window"] = "Ventana secundaria"
 L["A child window will replicate the parent window actions."] = "Una ventana secundaria copiará las acciones de la ventana principal."
 L["Child Window Mode"] = "Modo de ventana secundaria"
+L.opt_wheelspeed_desc = "Cambia la velocidad de desplazamiento al pasar la rueda del ratón por la ventana."
 L["Lock Window"] = "Bloquear ventana"
 L["Locks the bar window in place."] = "Bloquear la barra de la ventana en su lugar"
 L["Hide Window"] = "Ocultar ventana"

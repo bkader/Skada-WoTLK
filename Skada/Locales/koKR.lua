@@ -94,6 +94,7 @@ L["Creates fake data to help you configure your windows."] = "창 구성에 도�
 -- L["Child Window"] = ""
 -- L["A child window will replicate the parent window actions."] = ""
 -- L["Child Window Mode"] = ""
+L.opt_wheelspeed_desc = "창에서 마우스 휠을 사용할 때 스크롤 속도를 변경합니다."
 L["Lock Window"] = "창 고정"
 L["Locks the bar window in place."] = "바 창을 고정합니다."
 L["Hide Window"] = "창 숨기기"

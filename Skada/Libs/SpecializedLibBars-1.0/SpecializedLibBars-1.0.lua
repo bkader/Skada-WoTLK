@@ -593,9 +593,27 @@ do
 		end
 	end
 
-	local function sizeChanged(self, width)
+	local function onSizeChanged(self, width)
 		self:SetLength(width)
 		self.callbacks:Fire("WindowResizing", self)
+	end
+
+	local function onMouseWheel(self, direction)
+		local maxbars = self:GetMaxBars()
+		local numbars = self:GetNumBars()
+		local offset = self:GetBarOffset()
+
+		if direction == 1 and offset > 0 then
+			self:SetBarOffset(IsShiftKeyDown() and 0 or max(0, offset - (IsControlKeyDown() and maxbars or self.wheelspeed)))
+			self.callbacks:Fire("WindowScroll", self, direction)
+		elseif direction == -1 and ((numbars - maxbars - offset) > 0) then
+			if IsShiftKeyDown() then
+				self:SetBarOffset(numbars - maxbars)
+			else
+				self:SetBarOffset(min(max(0, numbars - maxbars), offset + (IsControlKeyDown() and maxbars or self.wheelspeed)))
+			end
+			self.callbacks:Fire("WindowScroll", self, direction)
+		end
 	end
 
 	local DEFAULT_TEXTURE = [[Interface\TARGETINGFRAME\UI-StatusBar]]
@@ -700,7 +718,11 @@ do
 		end
 
 		list:SetMouseEnter(false)
-		list:SetScript("OnSizeChanged", sizeChanged)
+		list:SetScript("OnSizeChanged", onSizeChanged)
+
+		list:SetScrollSpeed(1)
+		list:EnableMouseWheel(true)
+		list:SetScript("OnMouseWheel", onMouseWheel)
 
 		list:SetOrientation(orientation)
 		list:ReverseGrowth(false)
@@ -904,8 +926,8 @@ function barListPrototype:SetEnableMouse(enablemouse)
 	end
 end
 
-function barListPrototype:SetBarWidth(width)
-	self:SetLength(width)
+function barListPrototype:SetScrollSpeed(speed)
+	self.wheelspeed = min(5, max(1, speed or 0))
 end
 
 function barListPrototype:SetBarHeight(height)

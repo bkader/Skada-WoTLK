@@ -94,6 +94,7 @@ L["Creates fake data to help you configure your windows."] = "Erstellt gefälsch
 L["Child Window"] = "Fenster sperren"
 L["A child window will replicate the parent window actions."] = "Ein untergeordnetes Fenster kopiert die übergeordneten Fensteraktionen. "
 L["Child Window Mode"] = "Kind Fenstermodus"
+L.opt_wheelspeed_desc = "Legt die Anzahl der Scrollschritte für das Mausrad fest."
 L["Lock Window"] = "Sekundärfenster"
 L["Locks the bar window in place."] = "Sperrt das Fenster gegen unbeabsichtigtes Verschieben."
 L["Hide Window"] = "Fenster ausblenden"

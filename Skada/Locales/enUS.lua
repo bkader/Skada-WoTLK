@@ -102,6 +102,7 @@ L["Creates fake data to help you configure your windows."] = true
 L["Child Window"] = true
 L["A child window will replicate the parent window actions."] = true
 L["Child Window Mode"] = true
+L.opt_wheelspeed_desc = "Changes how fast the scroll goes when rolling the mouse wheel over the window."
 L["Lock Window"] = true
 L["Locks the bar window in place."] = true
 L["Hide Window"] = true

@@ -1,5 +1,5 @@
 local Skada = Skada
-local bars = Skada:GetModule("BarDisplay", true)
+local bars = Skada and Skada:GetModule("BarDisplay", true)
 if not bars then return end
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
@@ -20,27 +20,29 @@ function mod.ShowCursor(win)
 		return
 	end
 	SetCursor("")
-	mod.ScrollIcon = mod.ScrollIcon or {}
-	if not mod.ScrollIcon[win] then
-		local f = CreateFrame("Frame", nil, win.bargroup)
-		f:SetFrameStrata("TOOLTIP")
-		f:SetSize(32, 32)
-		f:SetPoint("CENTER")
-		local t = f:CreateTexture(nil, "OVERLAY")
+	local scrollIcon = mod.ScrollIcon and mod.ScrollIcon[win]
+	if not scrollIcon then
+		scrollIcon = CreateFrame("Frame", nil, win.bargroup)
+		scrollIcon:SetFrameStrata("TOOLTIP")
+		scrollIcon:SetSize(32, 32)
+		scrollIcon:SetPoint("CENTER")
+
+		local t = scrollIcon:CreateTexture(nil, "OVERLAY")
 		t:SetTexture([[Interface\AddOns\Skada\Media\Textures\icon-scroll]])
-		t:SetAllPoints(f)
+		t:SetAllPoints(scrollIcon)
 		t:Show()
-		mod.ScrollIcon[win] = f
+
+		mod.ScrollIcon = mod.ScrollIcon or {}
+		mod.ScrollIcon[win] = scrollIcon
 	end
-	mod.ScrollIcon[win]:Show()
+	scrollIcon:Show()
 end
 
 function mod.HideCursor(win)
-	ResetCursor()
-	if not db.icon then
-		return
+	if db.icon then
+		ResetCursor()
+		mod.ScrollIcon[win]:Hide()
 	end
-	mod.ScrollIcon[win]:Hide()
 end
 
 function mod.BeginScroll(win)
@@ -73,10 +75,10 @@ function mod.OnUpdate(f, elap)
 	local step = (win.db.barheight + win.db.barspacing) / (win.bargroup:GetEffectiveScale() * db.speed)
 	while math.abs(newpos - mod.ypos) > step do
 		if newpos > mod.ypos then
-			bars:OnMouseWheel(nil, win.bargroup, 1)
+			mod.OnMouseWheel(win.bargroup, 1)
 			mod.ypos = mod.ypos + step
 		else
-			bars:OnMouseWheel(nil, win.bargroup, -1)
+			mod.OnMouseWheel(win.bargroup, -1)
 			mod.ypos = mod.ypos - step
 		end
 	end
@@ -86,7 +88,7 @@ local windows = {}
 function Skada:Scroll(up)
 	for win, _ in pairs(windows) do
 		for i = 1, db.kspeed do
-			bars:OnMouseWheel(nil, win.bargroup, up and 1 or -1)
+			mod.OnMouseWheel(win.bargroup, up and 1 or -1)
 		end
 	end
 end
@@ -97,6 +99,8 @@ mod.frame:SetScript("OnUpdate", mod.OnUpdate)
 local hooked = {}
 function mod.Create(self, win)
 	if win.bargroup and not hooked[win.bargroup] then
+		-- OnMouseWheel func
+		mod.OnMouseWheel = mod.OnMouseWheel or win.bargroup:GetScript("OnMouseWheel")
 		win.bargroup:HookScript("OnMouseDown", function(frame, button)
 			if button == db.button then
 				mod.BeginScroll(win)
@@ -196,7 +200,7 @@ function mod.AddDisplayOptions(self, win, options)
 						type = "toggle",
 						name = L["Scroll Icon"],
 						order = 30
-					},
+					}
 				}
 			},
 			binding = {
@@ -251,7 +255,7 @@ function mod.AddDisplayOptions(self, win, options)
 						step = 1,
 						width = "double",
 						order = 30
-					},
+					}
 				}
 			}
 		}

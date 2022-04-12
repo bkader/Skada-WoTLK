@@ -353,41 +353,10 @@ function mod:WindowLocked(_, group, locked)
 end
 
 do
-	local function OnMouseWheel(frame, direction)
-		local win = frame.win
-		-- NOTE: this line is kept just in case mousewheel misbehaves.
-		-- local maxbars = win.db.background.height / (win.db.barheight + win.db.barspacing)
-		local maxbars = win.bargroup:GetMaxBars()
-		local numbars = win.bargroup:GetNumBars()
-		local offset = win.bargroup:GetBarOffset()
-
-		if direction == 1 and offset > 0 then
-			win.bargroup:SetBarOffset(IsShiftKeyDown() and 0 or max(0, offset - (IsControlKeyDown() and maxbars or 1)))
-		elseif direction == -1 and ((numbars - maxbars - offset) > 0) then
-			if IsShiftKeyDown() then
-				win.bargroup:SetBarOffset(numbars - maxbars)
-			else
-				win.bargroup:SetBarOffset(min(max(0, numbars - maxbars), offset + (IsControlKeyDown() and maxbars or 1)))
-			end
-		end
-	end
-
-	-- for external usage
-	function mod:OnMouseWheel(win, frame, direction)
-		if not frame then
-			mod.framedummy = mod.framedummy or {}
-			mod.framedummy.win = win
-			frame = mod.framedummy
-		end
-		OnMouseWheel(frame, direction)
-	end
-
 	local barbackdrop = {bgFile = [[Interface\Buttons\WHITE8X8]]}
 	function mod:CreateBar(win, name, label, value, maxvalue, icon, o)
 		local bar, isnew = win.bargroup:NewBar(name, label, value, maxvalue, icon, o)
 		bar.win = win
-		bar:EnableMouseWheel(true)
-		bar:SetScript("OnMouseWheel", OnMouseWheel)
 		bar.iconFrame:SetScript("OnEnter", nil)
 		bar.iconFrame:SetScript("OnLeave", nil)
 		bar.iconFrame:SetScript("OnMouseDown", nil)
@@ -862,6 +831,7 @@ do
 		g:SetButtonsOpacity(p.title.toolbaropacity or 0.25)
 		g:SetUseSpark(p.spark)
 		g:SetMouseEnter(not p.hidebuttons)
+		g:SetScrollSpeed(p.wheelspeed or 1)
 
 		g:SetFont(
 			p.barfontpath or Skada:MediaFetch("font", p.barfont),
@@ -965,8 +935,6 @@ do
 				FlyPaper.RemoveFrame("Skada", p.name)
 			end
 		end
-		g.button:SetScript("OnMouseDown", move)
-		g.button:SetScript("OnMouseUp", stopMove)
 
 		-- make player's bar fixed.
 		g.showself = Skada.db.profile.showself or p.showself

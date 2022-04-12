@@ -95,6 +95,7 @@ L["Creates fake data to help you configure your windows."] = "创建虚假数据
 L["Child Window"] = "子窗口"
 L["A child window will replicate the parent window actions."] = "子窗口将复制父窗口的动作。"
 -- L["Child Window Mode"] = ""
+L.opt_wheelspeed_desc = "更改在窗口上滚动鼠标滚轮时滚动的速度。"
 L["Lock Window"] = "锁定窗口"
 L["Locks the bar window in place."] = "在当前位置锁定统计条窗口。"
 L["Hide Window"] = "隐藏窗口"

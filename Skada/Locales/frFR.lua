@@ -95,6 +95,7 @@ L["Creates fake data to help you configure your windows."] = "Crée de fausses d
 L["Child Window"] = "Fenêtre enfant"
 L["A child window will replicate the parent window actions."] = "Une fenêtre enfant copiera les actions de la fenêtre parente."
 L["Child Window Mode"] = "Mode Parent-Enfant"
+L.opt_wheelspeed_desc = "Change la vitesse de défilement lorsque vous utilisez la roulette de la souris sur la fenêtre."
 L["Lock Window"] = "Verrouiller la fenêtre"
 L["Locks the bar window in place."] = "Verrouille la fenêtre des barres à sa position actuelle."
 L["Hide Window"] = "Cacher la fenêtre"
