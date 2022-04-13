@@ -473,7 +473,7 @@ Skada:AddLoadableModule("Threat", function(L)
 							order = 60,
 							width = "double",
 							dialogControl = "LSM30_Sound",
-							values = AceGUIWidgetLSMlists.sound,
+							values = Skada:MediaList("sound"),
 							hidden = function()
 								return not mod.db.sound
 							end,

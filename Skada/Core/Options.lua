@@ -139,7 +139,6 @@ Skada.defaults = {
 -------------------------------------------------------------------------------
 
 local titleVersion = fmt("|T%s:18:18:0:0:32:32:2:30:2:30|t |cffffd200Skada|r |cffffffff%s|r", Skada.logo, Skada.version)
-local newdisplay = "bar"
 local optionsValues = {
 	RESETOPT = {
 		L["No"], -- [1]
@@ -180,6 +179,9 @@ local optionsValues = {
 	}
 }
 
+local newdisplay = "bar"
+local newwindow = nil
+
 Skada.options = {
 	type = "group",
 	name = fmt("Skada |cffffffff%s|r", Skada.version),
@@ -202,36 +204,57 @@ Skada.options = {
 			order = 10,
 			args = {
 				create = {
-					type = "input",
+					type = "group",
 					name = L["Create Window"],
-					desc = L["Enter the name for the new window."],
-					order = 1,
-					width = "double",
-					set = function(_, val)
-						if val and val ~= "" then
-							Skada:CreateWindow(val, nil, newdisplay)
-						end
-					end
-				},
-				display = {
-					type = "select",
-					name = L["Display System"],
-					desc = L["Choose the system to be used for displaying data in this window."],
-					order = 2,
-					width = "double",
-					values = function()
-						local list = {}
-						for name, display in pairs(Skada.displays) do
-							list[name] = display.name
-						end
-						return list
-					end,
-					get = function()
-						return newdisplay
-					end,
-					set = function(_, display)
-						newdisplay = display
-					end
+					inline = true,
+					order = 0,
+					args = {
+						name = {
+							type = "input",
+							name = L["Window Name"],
+							desc = L["Enter the name for the new window."],
+							order = 10,
+							get = function() return newwindow end,
+							set = function(_, val)
+								if val and val:trim() ~= "" then
+									newwindow = val
+								end
+							end
+						},
+						display = {
+							type = "select",
+							name = L["Display System"],
+							desc = L["Choose the system to be used for displaying data in this window."],
+							order = 20,
+							values = function()
+								local list = {}
+								for name, display in pairs(Skada.displays) do
+									list[name] = display.name
+								end
+								return list
+							end,
+							get = function()
+								return newdisplay
+							end,
+							set = function(_, display)
+								newdisplay = display
+							end
+						},
+						exec = {
+							type = "execute",
+							name = L["Create"],
+							width = "double",
+							order = 30,
+							disabled = function() return (newdisplay == nil or newwindow == nil) end,
+							func = function()
+								if newdisplay and newwindow then
+									Skada:CreateWindow(newwindow, nil, newdisplay)
+									newdisplay = "bar"
+									newwindow = nil
+								end
+							end
+						}
+					}
 				}
 			}
 		},
@@ -917,7 +940,7 @@ function Skada:FrameSettings(db, include_dimensions)
 								desc = L["The texture used as the background."],
 								order = 10,
 								width = "double",
-								values = AceGUIWidgetLSMlists.background,
+								values = Skada:MediaList("background"),
 								get = function()
 									return db.background.texture
 								end,
@@ -977,7 +1000,7 @@ function Skada:FrameSettings(db, include_dimensions)
 								desc = L["The texture used for the borders."],
 								order = 10,
 								width = "double",
-								values = AceGUIWidgetLSMlists.border,
+								values = Skada:MediaList("border"),
 								get = function()
 									return db.background.bordertexture
 								end,

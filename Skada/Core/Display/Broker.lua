@@ -299,7 +299,7 @@ function mod:AddDisplayOptions(win, options)
 				dialogControl = "LSM30_Font",
 				name = L["Font"],
 				desc = format(L["The font used by %s."], L["Bars"]),
-				values = AceGUIWidgetLSMlists.font,
+				values = Skada:MediaList("font"),
 				order = 20
 			},
 			barfontflags = {

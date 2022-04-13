@@ -1116,24 +1116,13 @@ function mod:AddDisplayOptions(win, options)
 						order = 10,
 						width = "double",
 						dialogControl = "LSM30_Statusbar",
-						values = AceGUIWidgetLSMlists.statusbar
-					},
-					barspacing = {
-						type = "range",
-						name = L["Spacing"],
-						desc = format(L["Distance between %s."], L["Bars"]),
-						order = 20,
-						width = "double",
-						min = 0,
-						max = 10,
-						step = 0.01,
-						bigStep = 1
+						values = Skada:MediaList("statusbar")
 					},
 					barheight = {
 						type = "range",
 						name = L["Height"],
 						desc = format(L["The height of %s."], L["Bars"]),
-						order = 30,
+						order = 20,
 						min = 10,
 						max = 40,
 						step = 0.01,
@@ -1143,9 +1132,19 @@ function mod:AddDisplayOptions(win, options)
 						type = "range",
 						name = L["Width"],
 						desc = format(L["The width of %s."], L["Bars"]),
-						order = 40,
+						order = 30,
 						min = 80,
 						max = 400,
+						step = 0.01,
+						bigStep = 1
+					},
+					barspacing = {
+						type = "range",
+						name = L["Spacing"],
+						desc = format(L["Distance between %s."], L["Bars"]),
+						order = 40,
+						min = 0,
+						max = 10,
 						step = 0.01,
 						bigStep = 1
 					},
@@ -1153,11 +1152,10 @@ function mod:AddDisplayOptions(win, options)
 						type = "range",
 						name = L["Max Bars"],
 						desc = L["The maximum number of bars shown."],
+						order = 50,
 						min = 0,
 						max = 100,
-						step = 1,
-						order = 50,
-						width = "double"
+						step = 1
 					},
 					barorientation = {
 						type = "select",
@@ -1309,7 +1307,7 @@ function mod:AddDisplayOptions(win, options)
 								name = L["Font"],
 								desc = format(L["The font used by %s."], L["Left Text"]),
 								order = 10,
-								values = AceGUIWidgetLSMlists.font,
+								values = Skada:MediaList("font"),
 								dialogControl = "LSM30_Font"
 							},
 							barfontflags = {
@@ -1349,7 +1347,7 @@ function mod:AddDisplayOptions(win, options)
 								name = L["Font"],
 								desc = format(L["The font used by %s."], L["Right Text"]),
 								order = 10,
-								values = AceGUIWidgetLSMlists.font,
+								values = Skada:MediaList("font"),
 								dialogControl = "LSM30_Font"
 							},
 							numfontflags = {
@@ -1516,8 +1514,7 @@ function mod:AddDisplayOptions(win, options)
 								name = L["Background Texture"],
 								desc = L["The texture used as the background of the title."],
 								order = 10,
-								width = "double",
-								values = AceGUIWidgetLSMlists.statusbar
+								values = Skada:MediaList("statusbar")
 							},
 							color = {
 								type = "color",
@@ -1550,7 +1547,7 @@ function mod:AddDisplayOptions(win, options)
 								desc = L["The texture used for the border of the title."],
 								order = 10,
 								width = "double",
-								values = AceGUIWidgetLSMlists.border
+								values = Skada:MediaList("border")
 							},
 							bordercolor = {
 								type = "color",
@@ -1596,7 +1593,7 @@ function mod:AddDisplayOptions(win, options)
 						name = L["Font"],
 						desc = format(L["The font used by %s."], L["Title Bar"]),
 						dialogControl = "LSM30_Font",
-						values = AceGUIWidgetLSMlists.font,
+						values = Skada:MediaList("font"),
 						order = 10
 					},
 					fontflags = {
@@ -1650,48 +1647,75 @@ function mod:AddDisplayOptions(win, options)
 					Skada:ApplySettings(db.name)
 				end,
 				args = {
-					menu = {
-						type = "toggle",
-						name = L["Configure"],
-						desc = L.btn_config_desc,
-						order = 10
+					buttons = {
+						type = "group",
+						name = L["Buttons"],
+						inline = true,
+						order = 10,
+						args = {
+							menu = {
+								type = "toggle",
+								name = L["Configure"],
+								desc = L.btn_config_desc,
+								order = 10
+							},
+							reset = {
+								type = "toggle",
+								name = RESET,
+								desc = L.btn_reset_desc,
+								order = 20
+							},
+							segment = {
+								type = "toggle",
+								name = L["Segment"],
+								desc = L["Jump to a specific segment."],
+								order = 30
+							},
+							mode = {
+								type = "toggle",
+								name = L["Mode"],
+								desc = L["Jump to a specific mode."],
+								order = 40
+							},
+							report = {
+								type = "toggle",
+								name = L["Report"],
+								desc = L.btn_report_desc,
+								order = 50
+							},
+							stop = {
+								type = "toggle",
+								name = L["Stop"],
+								desc = L.btn_stop_desc,
+								order = 60
+							}
+						}
 					},
-					reset = {
-						type = "toggle",
-						name = RESET,
-						desc = L.btn_reset_desc,
-						order = 20
+					style = {
+						type = "multiselect",
+						name = L["Buttons Style"],
+						width = "full",
+						order = 20,
+						get = function(_, key)
+							return (db.title.toolbar == key)
+						end,
+						set = function(_, val)
+							db.title.toolbar = val
+							Skada:ApplySettings(db.name)
+						end,
+						values = optionsValues.TITLEBTNS
 					},
-					segment = {
-						type = "toggle",
-						name = L["Segment"],
-						desc = L["Jump to a specific segment."],
+					sep1 = {
+						type = "description",
+						name = " ",
+						width = "full",
 						order = 30
-					},
-					mode = {
-						type = "toggle",
-						name = L["Mode"],
-						desc = L["Jump to a specific mode."],
-						order = 40
-					},
-					report = {
-						type = "toggle",
-						name = L["Report"],
-						desc = L.btn_report_desc,
-						order = 50
-					},
-					stop = {
-						type = "toggle",
-						name = L["Stop"],
-						desc = L.btn_stop_desc,
-						order = 60
 					},
 					hovermode = {
 						type = "toggle",
 						name = L["Auto Hide Buttons"],
 						desc = L["Show window buttons only if the cursor is over the title bar."],
-						order = 70,
-						width = "double",
+						order = 90,
 						get = function()
 							return db.title.hovermode
 						end,
@@ -1700,45 +1724,21 @@ function mod:AddDisplayOptions(win, options)
 							Skada:ApplySettings(db.name)
 						end
 					},
-					appearance = {
-						type = "group",
-						name = L["Appearance"],
-						desc = format(L["Appearance options for %s."], L["Buttons"]),
-						inline = true,
-						order = 80,
-						args = {
-							style = {
-								type = "multiselect",
-								name = L["Buttons Style"],
-								width = "full",
-								order = 10,
-								get = function(_, key)
-									return (db.title.toolbar == key)
-								end,
-								set = function(_, val)
-									db.title.toolbar = val
-									Skada:ApplySettings(db.name)
-								end,
-								values = optionsValues.TITLEBTNS
-							},
-							opacity = {
-								type = "range",
-								name = L["Opacity"],
-								get = function()
-									return db.title.toolbaropacity or 0.25
-								end,
-								set = function(_, val)
-									db.title.toolbaropacity = val
-									Skada:ApplySettings(db.name)
-								end,
-								min = 0,
-								max = 1,
-								step = 0.01,
-								isPercent = true,
-								width = "double",
-								order = 20
-							}
-						}
+					opacity = {
+						type = "range",
+						name = L["Opacity"],
+						get = function()
+							return db.title.toolbaropacity or 0.25
+						end,
+						set = function(_, val)
+							db.title.toolbaropacity = val
+							Skada:ApplySettings(db.name)
+						end,
+						min = 0,
+						max = 1,
+						step = 0.01,
+						isPercent = true,
+						order = 100
 					}
 				}
 			}
@@ -1817,10 +1817,9 @@ do
 	local SaveBindings = SaveBindings
 	local GetCurrentBindingSet = GetCurrentBindingSet
 
-	local options
-	local function GetOptions()
-		if not options then
-
+	local opt_themes
+	local function GetThemeOptions()
+		if not opt_themes then
 			local applytheme, applywindow = nil, nil
 			local savetheme, savewindow = nil, nil
 			local deletetheme = nil
@@ -1839,15 +1838,9 @@ do
 					barorientation = 1,
 					barcolor = {r = 0.3, g = 0.3, b = 0.8, a = 1},
 					barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6},
-					barslocked = false,
-					clickthrough = false,
 					classcolorbars = true,
-					classcolortext = false,
 					classicons = true,
-					roleicons = false,
-					specicons = false,
-					showself = false,
-					buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false},
+					buttons = {menu = true, reset = true, report = true, mode = true, segment = true},
 					title = {
 						textcolor = {r = 0.9, g = 0.9, b = 0.9, a = 1},
 						height = 20,
@@ -1867,12 +1860,10 @@ do
 						bordertexture = "Blizzard Party",
 						borderthickness = 2,
 						color = {r = 0, g = 0, b = 0, a = 0.4},
-						tile = false,
 						tilesize = 0
 					},
 					strata = "LOW",
 					scale = 1,
-					hidden = false,
 					enabletitle = true,
 					titleset = true,
 					display = "bar",
@@ -1891,15 +1882,9 @@ do
 					barorientation = 1,
 					barcolor = {r = 0.3, g = 0.3, b = 0.8, a = 1},
 					barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6},
-					barslocked = false,
-					clickthrough = false,
 					classcolorbars = true,
-					classcolortext = false,
 					classicons = true,
-					roleicons = false,
-					specicons = false,
-					showself = false,
-					buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false},
+					buttons = {menu = true, reset = true, report = true, mode = true, segment = true},
 					title = {
 						textcolor = {r = 0.9, g = 0.9, b = 0.9, a = 1},
 						height = 18,
@@ -1919,12 +1904,10 @@ do
 						bordertexture = "Blizzard Party",
 						borderthickness = 0,
 						color = {r = 0, g = 0, b = 0, a = 0.4},
-						tile = false,
 						tilesize = 0
 					},
 					strata = "LOW",
 					scale = 1,
-					hidden = false,
 					enabletitle = true,
 					titleset = true,
 					display = "bar",
@@ -1943,15 +1926,9 @@ do
 					barorientation = 1,
 					barcolor = {r = 0.3, g = 0.3, b = 0.8, a = 1},
 					barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6},
-					barslocked = false,
-					clickthrough = false,
 					classcolorbars = true,
-					classcolortext = false,
 					classicons = true,
-					roleicons = false,
-					specicons = false,
-					showself = false,
-					buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false},
+					buttons = {menu = true, reset = true, report = true, mode = true, segment = true},
 					title = {
 						textcolor = {r = 0.9, g = 0.9, b = 0.9, a = 1},
 						height = 20,
@@ -1971,12 +1948,10 @@ do
 						bordertexture = "Glow",
 						borderthickness = 5,
 						color = {r = 0, g = 0, b = 0, a = 0.4},
-						tile = false,
 						tilesize = 0
 					},
 					strata = "LOW",
 					scale = 1,
-					hidden = false,
 					enabletitle = true,
 					titleset = true,
 					display = "bar",
@@ -1994,15 +1969,8 @@ do
 					barorientation = 1,
 					barcolor = {r = 0.3, g = 0.3, b = 0.8, a = 1},
 					barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6},
-					barslocked = false,
-					clickthrough = false,
 					classcolorbars = true,
-					classcolortext = false,
-					classicons = false,
-					roleicons = false,
-					specicons = false,
-					showself = false,
-					buttons = {menu = true, reset = true, report = true, mode = true, segment = true, stop = false},
+					buttons = {menu = true, reset = true, report = true, mode = true, segment = true},
 					title = {
 						textcolor = {r = 1, g = 1, b = 1, a = 1},
 						height = 18,
@@ -2022,12 +1990,10 @@ do
 						bordertexture = "None",
 						borderthickness = 5,
 						color = {r = 0, g = 0, b = 0, a = 0.4},
-						tile = false,
 						tilesize = 0
 					},
 					strata = "LOW",
 					scale = 1,
-					hidden = false,
 					enabletitle = true,
 					titleset = true,
 					display = "bar",
@@ -2048,17 +2014,9 @@ do
 					barorientation = 1,
 					barcolor = {r = 0.8, g = 0.05, b = 0, a = 1},
 					barbgcolor = {r = 0.3, g = 0.01, b = 0, a = 0.6},
-					barslocked = false,
-					clickthrough = false,
 					classcolorbars = true,
-					classcolortext = false,
-					classicons = false,
-					roleicons = false,
-					specicons = false,
-					spark = false,
 					smoothing = true,
-					showself = false,
-					buttons = {menu = true, reset = true, report = false, mode = true, segment = false, stop = false},
+					buttons = {menu = true, reset = true, mode = true},
 					title = {
 						textcolor = {r = 1, g = 1, b = 1, a = 1},
 						height = 16,
@@ -2078,302 +2036,193 @@ do
 						bordertexture = "Blizzard Dialog",
 						borderthickness = 1,
 						color = {r = 1, g = 1, b = 1, a = 1},
-						tile = false,
 						tilesize = 0
 					},
 					strata = "LOW",
 					scale = 1,
-					hidden = false,
 					enabletitle = true,
-					titleset = false,
 					display = "bar",
-					snapto = false,
 					version = 1
 				}
 			}
 
-			options = {
+			opt_themes = {
 				type = "group",
-				name = mod.name,
-				desc = format(L["Options for %s."], mod.name),
-				childGroups = "tab",
-				order = 970,
+				name = L["Themes"],
+				desc = format(L["Options for %s."], L["Themes"]),
 				args = {
-					scroll = {
+					apply = {
 						type = "group",
-						name = L["Scroll"],
-						desc = format(L["Options for %s."], L["Scroll"]),
+						name = L["Apply Theme"],
+						inline = true,
 						order = 10,
-						set = function(info, val)
-							mod.db[info[#info]] = val
-						end,
-						get = function(info)
-							return mod.db[info[#info]]
-						end,
 						args = {
-							speed = {
-								type = "range",
-								name = L["Wheel Speed"],
-								desc = L.opt_wheelspeed_desc,
-								set = function(_, val)
-									mod.db.speed = val
-									mod:SetScrollSpeed(val)
-								end,
-								min = 1,
-								max = 10,
-								step = 1,
-								width = "double",
-								order = 10
+							theme = {
+								type = "select",
+								name = L["Theme"],
+								order = 10,
+								get = function() return applytheme end,
+								set = function(_, val) applytheme = val end,
+								values = function()
+									wipe(list)
+									for _, theme in ipairs(themes) do
+										list[theme.name] = theme.name
+									end
+									if Skada.db.global.themes then
+										for _, theme in ipairs(Skada.db.global.themes) do
+											if theme.name then
+												list[theme.name] = theme.name
+											end
+										end
+									end
+									return list
+								end
 							},
-							mouse = {
-								type = "group",
-								name = L["Mouse"],
-								inline = true,
+							window = {
+								type = "select",
+								name = L["Window"],
 								order = 20,
-								args = {
-									button = {
-										type = "select",
-										name = L["Scroll mouse button"],
-										values = {
-											MiddleButton = L["Middle Button"],
-											Button4 = L["Mouse Button 4"],
-											Button5 = L["Mouse Button 5"]
-										},
-										order = 10
-									},
-									icon = {
-										type = "toggle",
-										name = L["Scroll Icon"],
-										order = 20
-									}
-								}
+								get = function() return applywindow end,
+								set = function(_, val) applywindow = val end,
+								values = function()
+									wipe(list)
+									for _, win in Skada:IterateWindows() do
+										list[win.db.name] = win.db.name
+									end
+									return list
+								end
 							},
-							binding = {
-								type = "group",
-								name = L["Keybinding"],
-								inline = true,
+							exec = {
+								type = "execute",
+								name = L["Apply"],
+								width = "double",
 								order = 30,
-								args = {
-									upkey = {
-										type = "keybinding",
-										name = L["Scroll Up"],
-										set = function(info, val)
-											local b1, b2 = GetBindingKey("SKADA_SCROLLUP")
-											if b1 then
-												SetBinding(b1)
+								disabled = function()
+									return (applytheme == nil or applywindow == nil)
+								end,
+								func = function()
+									if applywindow and applytheme then
+										local thetheme = nil
+										for i, theme in ipairs(themes) do
+											if theme.name == applytheme then
+												thetheme = theme
+												break
 											end
-											if b2 then
-												SetBinding(b2)
+										end
+										if Skada.db.global.themes then
+											for i, theme in ipairs(Skada.db.global.themes) do
+												if theme.name == applytheme then
+													thetheme = theme
+													break
+												end
 											end
-											SetBinding(val, "SKADA_SCROLLUP")
-											SaveBindings(GetCurrentBindingSet())
-										end,
-										get = function(info)
-											return GetBindingKey("SKADA_SCROLLUP")
-										end,
-										order = 10
-									},
-									downkey = {
-										type = "keybinding",
-										name = L["Scroll Down"],
-										set = function(info, val)
-											local b1, b2 = GetBindingKey("SKADA_SCROLLDOWN")
-											if b1 then
-												SetBinding(b1)
+										end
+
+										if thetheme then
+											for _, win in Skada:IterateWindows() do
+												if win.db.name == applywindow then
+													Skada.tCopy(win.db, thetheme)
+													Skada:ApplySettings()
+													Skada:Print(L["Theme applied!"])
+												end
 											end
-											if b2 then
-												SetBinding(b2)
-											end
-											SetBinding(val, "SKADA_SCROLLDOWN")
-											SaveBindings(GetCurrentBindingSet())
-										end,
-										get = function(info)
-											return GetBindingKey("SKADA_SCROLLDOWN")
-										end,
-										order = 20
-									}
-								}
+										end
+									end
+									applytheme, applywindow = nil, nil
+								end
 							}
 						}
 					},
-					themes = {
+					save = {
 						type = "group",
-						name = L["Themes"],
-						desc = format(L["Options for %s."], L["Themes"]),
+						name = L["Save Theme"],
+						inline = true,
 						order = 20,
 						args = {
-							apply = {
-								type = "group",
-								name = L["Apply Theme"],
-								inline = true,
+							window = {
+								type = "select",
+								name = L["Window"],
 								order = 10,
-								args = {
-									theme = {
-										type = "select",
-										name = L["Theme"],
-										order = 10,
-										get = function() return applytheme end,
-										set = function(_, val) applytheme = val end,
-										values = function()
-											wipe(list)
-											for _, theme in ipairs(themes) do
+								get = function() return savewindow end,
+								set = function(_, val) savewindow = val end,
+								values = function()
+									wipe(list)
+									for _, win in Skada:IterateWindows() do
+										list[win.db.name] = win.db.name
+									end
+									return list
+								end
+							},
+							theme = {
+								type = "input",
+								name = L["Name"],
+								desc = L["Name of your new theme."],
+								order = 20,
+								get = function() return savetheme end,
+								set = function(_, val) savetheme = val end
+							},
+							exec = {
+								type = "execute",
+								name = L["Save"],
+								width = "double",
+								order = 30,
+								disabled = function() return (savetheme == nil or savewindow == nil) end,
+								func = function()
+									for _, win in Skada:IterateWindows() do
+										if win.db.name == savewindow then
+											Skada.db.global.themes = Skada.db.global.themes or {}
+											local theme = {}
+											Skada.tCopy(theme, win.db, "name", "sticked", "x", "y", "point", "modeincombat", "set", "wipemode", "returnaftercombat")
+											theme.name = savetheme or win.db.name
+											Skada.db.global.themes[#Skada.db.global.themes + 1] = theme
+										end
+									end
+									savetheme, savewindow = nil, nil
+								end
+							}
+						}
+					},
+					delete = {
+						type = "group",
+						name = L["Delete Theme"],
+						inline = true,
+						order = 30,
+						args = {
+							theme = {
+								type = "select",
+								name = L["Theme"],
+								order = 10,
+								get = function() return deletetheme end,
+								set = function(_, name) deletetheme = name end,
+								values = function()
+									wipe(list)
+									if Skada.db.global.themes then
+										for i, theme in ipairs(Skada.db.global.themes) do
+											if theme.name then
 												list[theme.name] = theme.name
 											end
-											if Skada.db.global.themes then
-												for _, theme in ipairs(Skada.db.global.themes) do
-													if theme.name then
-														list[theme.name] = theme.name
-													end
-												end
-											end
-											return list
-										end,
-									},
-									window = {
-										type = "select",
-										name = L["Window"],
-										order = 20,
-										get = function() return applywindow end,
-										set = function(_, val) applywindow = val end,
-										values = function()
-											wipe(list)
-											for _, win in Skada:IterateWindows() do
-												list[win.db.name] = win.db.name
-											end
-											return list
 										end
-									},
-									exec = {
-										type = "execute",
-										name = L["Apply"],
-										width = "double",
-										order = 30,
-										disabled = function() return (applytheme == nil or applywindow == nil) end,
-										func = function()
-											if applywindow and applytheme then
-												local thetheme = nil
-												for i, theme in ipairs(themes) do
-													if theme.name == applytheme then
-														thetheme = theme
-														break
-													end
-												end
-												if Skada.db.global.themes then
-													for i, theme in ipairs(Skada.db.global.themes) do
-														if theme.name == applytheme then
-															thetheme = theme
-															break
-														end
-													end
-												end
-
-												if thetheme then
-													for _, win in Skada:IterateWindows() do
-														if win.db.name == applywindow then
-															Skada.tCopy(win.db, thetheme, "name", "modeincombat", "display", "set", "wipemode", "returnaftercombat", "x", "y", "sticked")
-															Skada:ApplySettings()
-															Skada:Print(L["Theme applied!"])
-														end
-													end
-												end
-											end
-											applytheme, applywindow = nil, nil
-										end
-									}
-								},
+									end
+									return list
+								end
 							},
-							save = {
-								type = "group",
-								name = L["Save Theme"],
-								inline = true,
+							exec = {
+								type = "execute",
+								name = L["Delete"],
 								order = 20,
-								args = {
-									window = {
-										type = "select",
-										name = L["Window"],
-										order = 10,
-										get = function() return savewindow end,
-										set = function(_, val) savewindow = val end,
-										values = function()
-											wipe(list)
-											for _, win in Skada:IterateWindows() do
-												list[win.db.name] = win.db.name
+								disabled = function() return (deletetheme == nil) end,
+								confirm = function() return L["Are you sure you want to delete this theme?"] end,
+								func = function()
+									if Skada.db.global.themes then
+										for i, theme in ipairs(Skada.db.global.themes) do
+											if theme.name == deletetheme then
+												tremove(Skada.db.global.themes, i)
+												break
 											end
-											return list
 										end
-									},
-									theme = {
-										type = "input",
-										name = L["Name"],
-										desc = L["Name of your new theme."],
-										order = 20,
-										get = function() return savetheme end,
-										set = function(_, val) savetheme = val end
-									},
-									exec = {
-										type = "execute",
-										name = L["Save"],
-										width = "double",
-										order = 30,
-										disabled = function() return (savetheme == nil or savewindow == nil) end,
-										func = function()
-											for _, win in Skada:IterateWindows() do
-												if win.db.name == savewindow then
-													Skada.db.global.themes = Skada.db.global.themes or {}
-													local theme = {}
-													Skada.tCopy(theme, win.db, "name", "sticked", "x", "y", "point")
-													theme.name = savetheme or win.db.name
-													Skada.db.global.themes[#Skada.db.global.themes + 1] = theme
-												end
-											end
-											savetheme, savewindow = nil, nil
-										end
-									}
-								},
-							},
-							delete = {
-								type = "group",
-								name = L["Delete Theme"],
-								inline = true,
-								order = 30,
-								args = {
-									theme = {
-										type = "select",
-										name = L["Theme"],
-										order = 10,
-										get = function() return deletetheme end,
-										set = function(_, name) deletetheme = name end,
-										values = function()
-											wipe(list)
-											if Skada.db.global.themes then
-												for i, theme in ipairs(Skada.db.global.themes) do
-													if theme.name then
-														list[theme.name] = theme.name
-													end
-												end
-											end
-											return list
-										end
-									},
-									exec = {
-										type = "execute",
-										name = L["Delete"],
-										order = 20,
-										disabled = function() return (deletetheme == nil) end,
-										confirm = function() return L["Are you sure you want to delete this theme?"] end,
-										func = function()
-											if Skada.db.global.themes then
-												for i, theme in ipairs(Skada.db.global.themes) do
-													if theme.name == deletetheme then
-														tremove(Skada.db.global.themes, i)
-														break
-													end
-												end
-											end
-											deletetheme = nil
-										end
-									}
-								}
+									end
+									deletetheme = nil
+								end
 							}
 						}
 					}
@@ -2381,7 +2230,108 @@ do
 			}
 		end
 
-		return options
+		return opt_themes
+	end
+
+	local opt_scroll
+	local function GetScrollOptions()
+		if not opt_scroll then
+			opt_scroll = {
+				type = "group",
+				name = L["Scroll"],
+				desc = format(L["Options for %s."], L["Scroll"]),
+				order = 10,
+				get = function(info) return mod.db[info[#info]] end,
+				set = function(info, val) mod.db[info[#info]] = val end,
+				args = {
+					speed = {
+						type = "range",
+						name = L["Wheel Speed"],
+						desc = L.opt_wheelspeed_desc,
+						set = function(_, val)
+							mod.db.speed = val
+							mod:SetScrollSpeed(val)
+						end,
+						min = 1,
+						max = 10,
+						step = 1,
+						width = "double",
+						order = 10
+					},
+					mouse = {
+						type = "group",
+						name = L["Mouse"],
+						inline = true,
+						order = 20,
+						args = {
+							button = {
+								type = "select",
+								name = L["Scroll mouse button"],
+								values = {
+									MiddleButton = L["Middle Button"],
+									Button4 = L["Mouse Button 4"],
+									Button5 = L["Mouse Button 5"]
+								},
+								order = 10
+							},
+							icon = {
+								type = "toggle",
+								name = L["Scroll Icon"],
+								order = 20
+							}
+						}
+					},
+					binding = {
+						type = "group",
+						name = L["Keybinding"],
+						inline = true,
+						order = 30,
+						args = {
+							upkey = {
+								type = "keybinding",
+								name = L["Scroll Up"],
+								set = function(info, val)
+									local b1, b2 = GetBindingKey("SKADA_SCROLLUP")
+									if b1 then
+										SetBinding(b1)
+									end
+									if b2 then
+										SetBinding(b2)
+									end
+									SetBinding(val, "SKADA_SCROLLUP")
+									SaveBindings(GetCurrentBindingSet())
+								end,
+								get = function(info)
+									return GetBindingKey("SKADA_SCROLLUP")
+								end,
+								order = 10
+							},
+							downkey = {
+								type = "keybinding",
+								name = L["Scroll Down"],
+								set = function(info, val)
+									local b1, b2 = GetBindingKey("SKADA_SCROLLDOWN")
+									if b1 then
+										SetBinding(b1)
+									end
+									if b2 then
+										SetBinding(b2)
+									end
+									SetBinding(val, "SKADA_SCROLLDOWN")
+									SaveBindings(GetCurrentBindingSet())
+								end,
+								get = function(info)
+									return GetBindingKey("SKADA_SCROLLDOWN")
+								end,
+								order = 20
+							}
+						}
+					}
+				}
+			}
+		end
+
+		return opt_scroll
 	end
 
 	function mod:OnInitialize()
@@ -2395,7 +2345,12 @@ do
 			Skada.db.profile.scroll = self.db
 		end
 
-		Skada.options.args.bars = GetOptions()
+		Skada.options.args.themeoptions = GetThemeOptions()
+		Skada.options.args.themeoptions.order = 960
+
+		Skada.options.args.scrolloptions = GetScrollOptions()
+		Skada.options.args.scrolloptions.order = 970
+
 		self:SetScrollSpeed(self.db.speed)
 	end
 end

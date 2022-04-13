@@ -83,6 +83,7 @@ L["Enable this only against bosses."] = "보스에 대해서만 활성화하십�
 L["Window"] = "창"
 L["Windows"] = "창"
 L["Create Window"] = "창 생성"
+L["Window Name"] = "창 이름"
 L["Enter the name for the new window."] = "새 창의 이름을 입력합니다."
 L["Delete Window"] = "창 삭제"
 L["Choose the window to be deleted."] = "삭제할 창을 선택합니다."

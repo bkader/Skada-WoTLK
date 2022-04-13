@@ -83,6 +83,7 @@ L["Enable this only against bosses."] = "Aktivieren Sie diese Option nur gegen B
 L["Window"] = "Fenster"
 L["Windows"] = "Fenster"
 L["Create Window"] = "Fenster erstellen"
+L["Window Name"] = "Fenstername"
 L["Enter the name for the new window."] = "Gib den Namen für das neue Fenster ein."
 L["Delete Window"] = "Fenster löschen"
 L["Choose the window to be deleted."] = "Wähle das Fenster, welches gelöscht werden soll."

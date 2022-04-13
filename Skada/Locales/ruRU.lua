@@ -84,6 +84,7 @@ L["Enable this only against bosses."] = "Включите это только п
 L["Window"] = "Окно"
 L["Windows"] = "Окна"
 L["Create Window"] = "Создать окно"
+L["Window Name"] = "Имя окна"
 L["Enter the name for the new window."] = "Введите имя нового окна."
 L["Delete Window"] = "Удалить окно"
 L["Choose the window to be deleted."] = "Выберите окно для удаления."

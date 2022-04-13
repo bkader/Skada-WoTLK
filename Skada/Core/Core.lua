@@ -1230,7 +1230,7 @@ end
 
 -- add a display system
 do
-	local numorder = 3
+	local numorder = 80
 	function Skada:AddDisplaySystem(key, mod)
 		displays[key] = mod
 		if mod.description then
@@ -1240,7 +1240,7 @@ do
 				fontSize = "medium",
 				order = numorder
 			}
-			numorder = numorder + 1
+			numorder = numorder + 10
 		end
 	end
 end

@@ -517,6 +517,7 @@ do
 				updateTimer = nil
 			end
 			self.current = nil
+			self:CleanGarbage()
 			return
 		end
 

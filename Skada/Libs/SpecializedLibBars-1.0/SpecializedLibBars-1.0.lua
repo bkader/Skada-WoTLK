@@ -1327,10 +1327,10 @@ function barListPrototype:GetOrientation()
 end
 
 function barListPrototype:SetSortFunction(func)
-	if func then
-		assert(type(func) == "function")
+	if self.sortFunc ~= func then
+		assert(func == nil or type(func) == "function")
+		self.sortFunc = func
 	end
-	self.sortFunc = func
 end
 
 function barListPrototype:GetSortFunction(func)
