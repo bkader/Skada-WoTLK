@@ -81,9 +81,6 @@ local feeds, selected_feed = {}, nil
 -- lists of modules and windows
 local modes, windows = {}, {}
 
--- table used for temporary stuff
-local tempTable = {}
-
 -- flags for party, instance and ovo
 local was_in_party = nil
 
@@ -144,7 +141,13 @@ local function CreateSet(setname, set)
 	if set then
 		Skada:Debug("CreateSet: Reuse", set.name, setname)
 		setmetatable(set, nil)
-		wipe(set)
+		for k, v in pairs(set) do
+			if type(v) == "table" then
+				set[k] = wipe(v)
+			else
+				set[k] = nil
+			end
+		end
 	else
 		Skada:Debug("CreateSet: New", setname)
 		set = {}
@@ -436,6 +439,8 @@ do
 
 	-- add window options
 	function Window:AddOptions()
+		local templist = {}
+
 		local options = {
 			type = "group",
 			name = function() return self.db.name end,
@@ -487,7 +492,7 @@ do
 					order = 2,
 					width = "double",
 					values = function()
-						local list = wipe(tempTable)
+						local list = wipe(templist)
 						for name, display in pairs(displays) do
 							list[name] = display.name
 						end
@@ -531,19 +536,19 @@ do
 						return (copywindow == nil)
 					end,
 					func = function()
-						wipe(tempTable)
+						wipe(templist)
 						if copywindow then
 							for _, win in ipairs(windows) do
 								if win.db.name == copywindow and win.db.display == self.db.display then
-									Skada.tCopy(tempTable, win.db, "name", "sticked", "x", "y", "point", "snapped")
+									Skada.tCopy(templist, win.db, "name", "sticked", "x", "y", "point", "snapped")
 									break
 								end
 							end
 						end
-						for k, v in pairs(tempTable) do
+						for k, v in pairs(templist) do
 							self.db[k] = v
 						end
-						wipe(tempTable)
+						wipe(templist)
 						Skada:ApplySettings(self.db.name)
 						copywindow = nil
 					end

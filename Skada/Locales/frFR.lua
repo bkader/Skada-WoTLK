@@ -424,8 +424,8 @@ L["Lines"] = "Lignes"
 L["There is nothing to report."] = "Il n'y a rien à rapporter."
 L["No mode or segment selected for report."] = "Aucun mode ou segment n'a été sélectionné pour le rapport."
 -- Bar Display Module --
-L["Bar display"] = "Affichage par barres"
-L.mod_bar_desc = "L'affichage par barres est la fenêtre de barres habituellement utilisée par la plupart des damage meters. Il peut être personnalisé de façon approfondie."
+L["Bar display"] = "Affichage à barres"
+L.mod_bar_desc = "L'affichage à barres est la fenêtre de barres habituellement utilisée par la plupart des damage meters. Il peut être personnalisé de façon approfondie."
 -- Threat Module --
 L["Threat"] = "Menace"
 L["Threat Warning"] = "Avertissement de la menace"
