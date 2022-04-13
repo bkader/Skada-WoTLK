@@ -2,7 +2,7 @@
 -- Specialized ( = enhanced) for Skada
 -- Note to self: don't forget to notify original author of changes
 -- in the unlikely event they end up being usable outside of Skada.
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90002
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90003
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 
@@ -168,7 +168,16 @@ local frame_defaults = {
 
 lib.embeds = lib.embeds or {}
 do
-	local mixins = {"NewBar", "GetBar", "ReleaseBar", "GetBars", "NewBarGroup", "GetBarGroup"}
+	local mixins = {
+		"NewBar",
+		"GetBar",
+		"ReleaseBar",
+		"GetBars",
+		"NewBarGroup",
+		"GetBarGroup",
+		"GetBarGroups",
+		"SetScrollSpeed"
+	}
 	function lib:Embed(target)
 		for k, v in pairs(mixins) do
 			target[v] = self[v]
@@ -340,6 +349,11 @@ function lib:ReleaseBar(name)
 		bars[self][bar.name] = nil
 		recycledBars[#recycledBars + 1] = bar
 	end
+end
+
+lib.scrollspeed = lib.scrollspeed or 1
+function lib:SetScrollSpeed(speed)
+	lib.scrollspeed = min(10, max(1, speed or 0))
 end
 
 ---[[ Bar Groups ]]---
@@ -604,13 +618,13 @@ do
 		local offset = self:GetBarOffset()
 
 		if direction == 1 and offset > 0 then
-			self:SetBarOffset(IsShiftKeyDown() and 0 or max(0, offset - (IsControlKeyDown() and maxbars or self.wheelspeed)))
+			self:SetBarOffset(IsShiftKeyDown() and 0 or max(0, offset - (IsControlKeyDown() and maxbars or lib.scrollspeed)))
 			self.callbacks:Fire("WindowScroll", self, direction)
 		elseif direction == -1 and ((numbars - maxbars - offset) > 0) then
 			if IsShiftKeyDown() then
 				self:SetBarOffset(numbars - maxbars)
 			else
-				self:SetBarOffset(min(max(0, numbars - maxbars), offset + (IsControlKeyDown() and maxbars or self.wheelspeed)))
+				self:SetBarOffset(min(max(0, numbars - maxbars), offset + (IsControlKeyDown() and maxbars or lib.scrollspeed)))
 			end
 			self.callbacks:Fire("WindowScroll", self, direction)
 		end
@@ -720,7 +734,6 @@ do
 		list:SetMouseEnter(false)
 		list:SetScript("OnSizeChanged", onSizeChanged)
 
-		list:SetScrollSpeed(1)
 		list:EnableMouseWheel(true)
 		list:SetScript("OnMouseWheel", onMouseWheel)
 
@@ -877,6 +890,10 @@ do
 	end
 end
 
+function lib:GetBarGroups()
+	return barLists[self]
+end
+
 function lib:GetBarGroup(name)
 	return barLists[self] and barLists[self][name]
 end
@@ -924,10 +941,6 @@ function barListPrototype:SetEnableMouse(enablemouse)
 			bar:EnableMouse(self.enablemouse)
 		end
 	end
-end
-
-function barListPrototype:SetScrollSpeed(speed)
-	self.wheelspeed = min(5, max(1, speed or 0))
 end
 
 function barListPrototype:SetBarHeight(height)

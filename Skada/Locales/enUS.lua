@@ -102,7 +102,6 @@ L["Creates fake data to help you configure your windows."] = true
 L["Child Window"] = true
 L["A child window will replicate the parent window actions."] = true
 L["Child Window Mode"] = true
-L.opt_wheelspeed_desc = "Changes how fast the scroll goes when rolling the mouse wheel over the window."
 L["Lock Window"] = true
 L["Locks the bar window in place."] = true
 L["Hide Window"] = true
@@ -377,14 +376,19 @@ L["Theme applied!"] = true
 L["Name of your new theme."] = true
 L["Save Theme"] = true
 L["Delete Theme"] = true
--- scroll module
+-- scroll options
 L["Scroll"] = true
-L["Mouse"] = true
-L["Scrolling Speed"] = true
+L["Mouse"] = MOUSE_LABEL
+L["Wheel Speed"] = true
+L.opt_wheelspeed_desc = "Changes how fast the scroll goes when rolling the mouse wheel over the window."
 L["Scroll Icon"] = true
 L["Scroll mouse button"] = true
-L["Keybinding"] = true
-L["Key scrolling speed"] = true
+L["Scroll Up"] = COMBAT_TEXT_SCROLL_UP
+L["Scroll Down"] = COMBAT_TEXT_SCROLL_DOWN
+L["Keybinding"] = KEY_BINDINGS
+L["Middle Button"] = KEY_BUTTON3
+L["Mouse Button 4"] = KEY_BUTTON4
+L["Mouse Button 5"] = KEY_BUTTON5
 -- minimap button
 L["Skada Summary"] = true
 L["|cffeda55fLeft-Click|r to toggle windows."] = true

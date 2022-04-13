@@ -16,6 +16,7 @@ local IsShiftKeyDown = IsShiftKeyDown
 local IsAltKeyDown = IsAltKeyDown
 local IsControlKeyDown = IsControlKeyDown
 local IsModifierKeyDown = IsModifierKeyDown
+local _
 
 local COLOR_WHITE = HIGHLIGHT_FONT_COLOR
 local FONT_FLAGS = Skada.fontFlags
@@ -114,7 +115,14 @@ do
 			-- Clear callbacks.
 			bargroup.callbacks = LibStub("CallbackHandler-1.0"):New(bargroup)
 		else
-			bargroup = mod:NewBarGroup(p.name, p.barorientation, p.background.height, p.barwidth, p.barheight, "SkadaBarWindow" .. p.name)
+			bargroup = mod:NewBarGroup(
+				p.name, -- window name
+				p.barorientation, -- bars orientation
+				p.background.height, -- window height
+				p.barwidth, -- window width
+				p.barheight, -- bars height
+				format("SkadaBarWindow%s", p.name) -- frame name
+			)
 
 			-- Add window buttons.
 			AddWindowButton(bargroup, p.title.toolbar, "config", L.Configure, L.btn_config_desc, configOnClick)
@@ -422,7 +430,9 @@ do
 	function mod:BarClick(_, bar, button)
 		local win, id, label = bar.win, bar.id, bar.text
 
-		if button == "RightButton" and IsShiftKeyDown() then
+		if button == self.db.button then
+			self:ScrollStart(win)
+		elseif button == "RightButton" and IsShiftKeyDown() then
 			Skada:OpenMenu(win)
 		elseif button == "RightButton" and IsAltKeyDown() then
 			Skada:ModeMenu(win)
@@ -728,6 +738,105 @@ end
 -- ======================================================= --
 
 do
+	local CreateFrame = CreateFrame
+	local SetCursor = SetCursor
+	local ResetCursor = ResetCursor
+	local scrollIcons = nil
+
+	local function ShowCursor(win)
+		if mod.db.icon then
+			SetCursor("")
+			local icon = scrollIcons and scrollIcons[win]
+			if not icon then
+				icon = CreateFrame("Frame", nil, win.bargroup)
+				icon:SetSize(32, 32)
+				icon:SetPoint("CENTER")
+				icon:SetFrameLevel(win.bargroup:GetFrameLevel() + 6)
+
+				local t = icon:CreateTexture(nil, "OVERLAY")
+				t:SetTexture([[Interface\AddOns\Skada\Media\Textures\icon-scroll]])
+				t:SetAllPoints(icon)
+				t:Show()
+
+				scrollIcons = scrollIcons or {}
+				scrollIcons[win] = icon
+			end
+			icon:Show()
+		end
+	end
+
+	local function HideCursor(win)
+		if mod.db.icon and scrollIcons and scrollIcons[win] then
+			ResetCursor()
+			scrollIcons[win]:Hide()
+		end
+	end
+
+	local GetCursorPosition = GetCursorPosition
+	local scrollWin = nil
+
+	local cursorYPos = nil
+	function mod:ScrollStart(win)
+		_, cursorYPos = GetCursorPosition()
+		scrollWin = win
+		ShowCursor(win)
+	end
+
+	function mod:EndScroll(win)
+		scrollWin = nil
+		HideCursor(win)
+	end
+
+	local IsMouseButtonDown = IsMouseButtonDown
+	local lastUpdated = 0
+	local math_abs = math.abs
+
+	local function OnMouseWheel(win, direction)
+		win.OnMouseWheel = win.OnMouseWheel or win:GetScript("OnMouseWheel")
+		win.OnMouseWheel(win, direction)
+	end
+
+	local function OnUpdate(_, elapsed)
+		-- no scrolled window
+		if not scrollWin then return end
+
+		-- db button isn't used
+		if not IsMouseButtonDown(mod.db.button) then
+			mod:EndScroll(scrollWin)
+			return
+		end
+
+		ShowCursor(scrollWin)
+		lastUpdated = lastUpdated + elapsed
+		if lastUpdated <= 0.1 then return end
+		lastUpdated = 0
+
+		local _, newpos = GetCursorPosition()
+		local step = (scrollWin.db.barheight + scrollWin.db.barspacing) / (scrollWin.bargroup:GetEffectiveScale() * mod.db.speed)
+		while math_abs(newpos - cursorYPos) > step do
+			if newpos > cursorYPos then
+				OnMouseWheel(scrollWin.bargroup, 1)
+				cursorYPos = cursorYPos + step
+			else
+				OnMouseWheel(scrollWin.bargroup, -1)
+				cursorYPos = cursorYPos - step
+			end
+		end
+	end
+
+	local f = CreateFrame("Frame", nil, UIParent)
+	f:SetScript("OnUpdate", OnUpdate)
+
+	function Skada:Scroll(up)
+		for _, win in pairs(mod:GetBarGroups()) do
+			OnMouseWheel(win, up and 1 or -1)
+		end
+	end
+end
+
+-- ======================================================= --
+
+do
 	local titlebackdrop = {}
 	local windowbackdrop = {}
 
@@ -831,7 +940,6 @@ do
 		g:SetButtonsOpacity(p.title.toolbaropacity or 0.25)
 		g:SetUseSpark(p.spark)
 		g:SetMouseEnter(not p.hidebuttons)
-		g:SetScrollSpeed(p.wheelspeed or 1)
 
 		g:SetFont(
 			p.barfontpath or Skada:MediaFetch("font", p.barfont),
@@ -965,7 +1073,7 @@ end
 local optionsValues = {
 	ORIENTATION = {
 		[1] = L["Left to right"],
-		[3] = L["Right to left"],
+		[3] = L["Right to left"]
 	},
 	TITLEBTNS = {
 		format("|T%s:24:192|t", format(buttonsTexPath, 1, "_full")),
@@ -1049,7 +1157,7 @@ function mod:AddDisplayOptions(win, options)
 						max = 100,
 						step = 1,
 						order = 50,
-						width = "double",
+						width = "double"
 					},
 					barorientation = {
 						type = "select",
@@ -1268,7 +1376,7 @@ function mod:AddDisplayOptions(win, options)
 								order = 40
 							}
 						}
-					},
+					}
 				}
 			},
 			advanced = {
@@ -1456,7 +1564,10 @@ function mod:AddDisplayOptions(win, options)
 								end,
 								set = function(_, r, g, b, a)
 									db.title.bordercolor = db.title.bordercolor or {}
-									db.title.bordercolor.r, db.title.bordercolor.g, db.title.bordercolor.b, db.title.bordercolor.a = r, g, b, a
+									db.title.bordercolor.r = r
+									db.title.bordercolor.g = g
+									db.title.bordercolor.b = b
+									db.title.bordercolor.a = a
 									Skada:ApplySettings(db.name)
 								end
 							},
@@ -1516,7 +1627,10 @@ function mod:AddDisplayOptions(win, options)
 						end,
 						set = function(_, r, g, b, a)
 							db.title.textcolor = db.title.textcolor or {}
-							db.title.textcolor.r, db.title.textcolor.g, db.title.textcolor.b, db.title.textcolor.a = r, g, b, a
+							db.title.textcolor.r = r
+							db.title.textcolor.g = g
+							db.title.textcolor.b = b
+							db.title.textcolor.a = a
 							Skada:ApplySettings(db.name)
 						end
 					}
@@ -1622,7 +1736,7 @@ function mod:AddDisplayOptions(win, options)
 								step = 0.01,
 								isPercent = true,
 								width = "double",
-								order = 20,
+								order = 20
 							}
 						}
 					}
@@ -1694,8 +1808,150 @@ function mod:AddDisplayOptions(win, options)
 	}
 end
 
-function mod:OnInitialize()
-	self.name = L["Bar display"]
-	self.description = L.mod_bar_desc
-	Skada:AddDisplaySystem("bar", self)
+-- ======================================================= --
+
+do
+	local GetBindingKey = GetBindingKey
+	local SetBinding = SetBinding
+	local SaveBindings = SaveBindings
+	local GetCurrentBindingSet = GetCurrentBindingSet
+
+	local options
+	local function GetOptions()
+		if not options then
+			options = {
+				type = "group",
+				name = L["Scroll"],
+				desc = format(L["Options for %s."], L["Bar display"]),
+				order = 970,
+				set = function(info, val)
+					mod.db[info[#info]] = val
+				end,
+				get = function(info)
+					return mod.db[info[#info]]
+				end,
+				args = {
+					header = {
+						type = "description",
+						name = L["Scroll"],
+						fontSize = "large",
+						image = [[Interface\AddOns\Skada\Media\Textures\icon-scroll]],
+						imageWidth = 16,
+						imageHeight = 16,
+						width = "full",
+						order = 0
+					},
+					sep = {
+						type = "description",
+						name = " ",
+						width = "full",
+						order = 1
+					},
+					speed = {
+						type = "range",
+						name = L["Wheel Speed"],
+						desc = L.opt_wheelspeed_desc,
+						set = function(_, val)
+							mod.db.speed = val
+							mod:SetScrollSpeed(val)
+						end,
+						min = 1,
+						max = 10,
+						step = 1,
+						width = "double",
+						order = 10
+					},
+					mouse = {
+						type = "group",
+						name = L["Mouse"],
+						inline = true,
+						order = 20,
+						args = {
+							button = {
+								type = "select",
+								name = L["Scroll mouse button"],
+								values = {
+									MiddleButton = L["Middle Button"],
+									Button4 = L["Mouse Button 4"],
+									Button5 = L["Mouse Button 5"]
+								},
+								order = 10
+							},
+							icon = {
+								type = "toggle",
+								name = L["Scroll Icon"],
+								order = 20
+							}
+						}
+					},
+					binding = {
+						type = "group",
+						name = L["Keybinding"],
+						inline = true,
+						order = 30,
+						args = {
+							upkey = {
+								type = "keybinding",
+								name = L["Scroll Up"],
+								set = function(info, val)
+									local b1, b2 = GetBindingKey("SKADA_SCROLLUP")
+									if b1 then
+										SetBinding(b1)
+									end
+									if b2 then
+										SetBinding(b2)
+									end
+									SetBinding(val, "SKADA_SCROLLUP")
+									SaveBindings(GetCurrentBindingSet())
+								end,
+								get = function(info)
+									return GetBindingKey("SKADA_SCROLLUP")
+								end,
+								order = 10
+							},
+							downkey = {
+								type = "keybinding",
+								name = L["Scroll Down"],
+								set = function(info, val)
+									local b1, b2 = GetBindingKey("SKADA_SCROLLDOWN")
+									if b1 then
+										SetBinding(b1)
+									end
+									if b2 then
+										SetBinding(b2)
+									end
+									SetBinding(val, "SKADA_SCROLLDOWN")
+									SaveBindings(GetCurrentBindingSet())
+								end,
+								get = function(info)
+									return GetBindingKey("SKADA_SCROLLDOWN")
+								end,
+								order = 20
+							}
+						}
+					}
+				}
+			}
+		end
+
+		return options
+	end
+
+	function mod:OnInitialize()
+		self.name = L["Bar display"]
+		self.description = L.mod_bar_desc
+		Skada:AddDisplaySystem("bar", self)
+
+		self.db = Skada.db.profile.scroll or {speed = 2, icon = true, button = "MiddleButton"}
+		if not self.db then
+			self.db = {speed = 2, icon = true, button = "MiddleButton"}
+			Skada.db.profile.scroll = self.db
+		end
+
+		Skada.options.args.bars = GetOptions()
+		self:SetScrollSpeed(self.db.speed)
+	end
 end
+
+_G.BINDING_NAME_SKADA_SCROLLUP = L["Scroll Up"]
+_G.BINDING_NAME_SKADA_SCROLLDOWN = L["Scroll Down"]
