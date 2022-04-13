@@ -359,8 +359,7 @@ L["Disabled Modules"] = "비활성화된 모듈"
 L["Modules Options"] = "모듈 설정"
 L["Tick the modules you want to disable."] = "비활성화할 모듈을 찍으세요."
 L["This change requires a UI reload. Are you sure?"] = "변경하려면 UI 재시작이 필요합니다. 다시 불러올까요?"
-L["Adds a set of standard themes to Skada. Custom themes can also be used."] = "Skada에 표준 테마 세트를 추가합니다. 사용자 설정 테마도 사용할 수 있습니다."
--- themes module
+-- themes options
 L["Theme"] = "테마"
 L["Themes"] = "테마"
 L["Apply Theme"] = "테마 적용"
@@ -368,6 +367,7 @@ L["Theme applied!"] = "테마 적용!"
 L["Name of your new theme."] = "당신의 새로운 테마의 이름입니다."
 L["Save Theme"] = "테마 저장"
 L["Delete Theme"] = "테마 삭제"
+L["Are you sure you want to delete this theme?"] = "이 테마를 삭제하시겠습니까?"
 -- scroll options
 L["Scroll"] = "스크롤"
 L["Wheel Speed"] = "휠 속도"

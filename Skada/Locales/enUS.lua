@@ -367,15 +367,18 @@ L["Disabled Modules"] = true
 L["Modules Options"] = true
 L["Tick the modules you want to disable."] = true
 L["This change requires a UI reload. Are you sure?"] = true
-L["Adds a set of standard themes to Skada. Custom themes can also be used."] = true
--- themes module
+-- themes options
 L["Theme"] = true
 L["Themes"] = true
 L["Apply Theme"] = true
+L["Apply"] = APPLY
 L["Theme applied!"] = true
 L["Name of your new theme."] = true
 L["Save Theme"] = true
+L["Save"] = SAVE
 L["Delete Theme"] = true
+L["Delete"] = DELETE
+L["Are you sure you want to delete this theme?"] = true
 -- scroll options
 L["Scroll"] = true
 L["Mouse"] = MOUSE_LABEL

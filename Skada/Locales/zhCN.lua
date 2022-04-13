@@ -356,8 +356,7 @@ L["Disabled Modules"] = "禁用模块"
 L["Modules Options"] = "模块选项"
 L["Tick the modules you want to disable."] = "勾选要禁用的模块。"
 L["This change requires a UI reload. Are you sure?"] = "此更改需要重载界面。确定重载？"
-L["Adds a set of standard themes to Skada. Custom themes can also be used."] = "为Skada添加一套标准主题。自定义主题也能同时使用。"
--- themes module
+-- themes options
 L["Theme"] = "主题"
 L["Themes"] = "主题"
 L["Apply Theme"] = "应用主题"
@@ -365,6 +364,7 @@ L["Theme applied!"] = "主题已应用！"
 L["Name of your new theme."] = "新主题的名称。"
 L["Save Theme"] = "保存主题"
 L["Delete Theme"] = "删除主题"
+L["Are you sure you want to delete this theme?"] = "确定要删除此样式吗？"
 -- scroll options
 L["Scroll"] = "滚动"
 L["Wheel Speed"] = "轮速"

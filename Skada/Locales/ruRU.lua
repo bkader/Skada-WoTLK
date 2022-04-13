@@ -359,8 +359,7 @@ L["Disabled Modules"] = "Отключение модулей"
 L["Modules Options"] = "Настроить модули"
 L["Tick the modules you want to disable."] = "Выберите модули, которые хотите отключить."
 L["This change requires a UI reload. Are you sure?"] = "Это изменение требует перезагрузки пользовательского интерфейса. Вы уверены?"
-L["Adds a set of standard themes to Skada. Custom themes can also be used."] = "Добавляет набор стандартных тем для Skada. Также могут быть использованы пользовательские темы."
--- themes module
+-- themes options
 L["Theme"] = "Тема"
 L["Themes"] = "Темы"
 L["Apply Theme"] = "Применить тему"
@@ -368,6 +367,7 @@ L["Theme applied!"] = "Тема применена!"
 L["Name of your new theme."] = "Название вашей новой темы."
 L["Save Theme"] = "Сохранить тему"
 L["Delete Theme"] = "Удалить тему"
+L["Are you sure you want to delete this theme?"] = "Вы уверены, что хотите удалить этот тема?"
 -- scroll options
 L["Scroll"] = "Прокрутка"
 L["Wheel Speed"] = "Скорость прокрутки"
