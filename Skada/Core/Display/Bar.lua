@@ -938,6 +938,7 @@ do
 		g:SetBarBackgroundColor(p.barbgcolor.r, p.barbgcolor.g, p.barbgcolor.b, p.barbgcolor.a or 0.6)
 		g:SetButtonMouseOver(p.title.hovermode)
 		g:SetButtonsOpacity(p.title.toolbaropacity or 0.25)
+		g:SetButtonSpacing(p.title.spacing or 1)
 		g:SetUseSpark(p.spark)
 		g:SetMouseEnter(not p.hidebuttons)
 
@@ -1076,9 +1077,9 @@ local optionsValues = {
 		[3] = L["Right to left"]
 	},
 	TITLEBTNS = {
-		format("|T%s:24:192|t", format(buttonsTexPath, 1, "_full")),
-		format("|T%s:24:192|t", format(buttonsTexPath, 2, "_full")),
-		format("|T%s:24:192|t", format(buttonsTexPath, 3, "_full"))
+		[1] = format("|T%s:22:66|t", format(buttonsTexPath, 1, "_prev")),
+		[2] = format("|T%s:22:66|t", format(buttonsTexPath, 2, "_prev")),
+		[3] = format("|T%s:22:66|t", format(buttonsTexPath, 3, "_prev"))
 	}
 }
 
@@ -1639,19 +1640,19 @@ function mod:AddDisplayOptions(win, options)
 				desc = format(L["Options for %s."], L["Buttons"]),
 				order = 30,
 				width = "double",
-				get = function(i)
-					return db.buttons[i[#i]]
-				end,
-				set = function(i, val)
-					db.buttons[i[#i]] = val
-					Skada:ApplySettings(db.name)
-				end,
 				args = {
 					buttons = {
 						type = "group",
 						name = L["Buttons"],
 						inline = true,
 						order = 10,
+						get = function(i)
+							return db.buttons[i[#i]]
+						end,
+						set = function(i, val)
+							db.buttons[i[#i]] = val
+							Skada:ApplySettings(db.name)
+						end,
 						args = {
 							menu = {
 								type = "toggle",
@@ -1694,7 +1695,7 @@ function mod:AddDisplayOptions(win, options)
 					style = {
 						type = "multiselect",
 						name = L["Buttons Style"],
-						width = "full",
+						width = "half",
 						order = 20,
 						get = function(_, key)
 							return (db.title.toolbar == key)
@@ -1711,19 +1712,6 @@ function mod:AddDisplayOptions(win, options)
 						width = "full",
 						order = 30
 					},
-					hovermode = {
-						type = "toggle",
-						name = L["Auto Hide Buttons"],
-						desc = L["Show window buttons only if the cursor is over the title bar."],
-						order = 90,
-						get = function()
-							return db.title.hovermode
-						end,
-						set = function()
-							db.title.hovermode = not db.title.hovermode
-							Skada:ApplySettings(db.name)
-						end
-					},
 					opacity = {
 						type = "range",
 						name = L["Opacity"],
@@ -1738,7 +1726,38 @@ function mod:AddDisplayOptions(win, options)
 						max = 1,
 						step = 0.01,
 						isPercent = true,
-						order = 100
+						order = 40
+					},
+					spacing = {
+						type = "range",
+						name = L["Spacing"],
+						desc = format(L["Distance between %s."], L["Buttons"]),
+						get = function()
+							return db.title.spacing or 1
+						end,
+						set = function(_, val)
+							db.title.spacing = val
+							Skada:ApplySettings(db.name)
+						end,
+						min = 0,
+						max = 10,
+						step = 0.01,
+						bigStep = 1,
+						order = 50
+					},
+					hovermode = {
+						type = "toggle",
+						name = L["Auto Hide Buttons"],
+						desc = L["Show window buttons only if the cursor is over the title bar."],
+						width = "double",
+						order = 90,
+						get = function()
+							return db.title.hovermode
+						end,
+						set = function()
+							db.title.hovermode = not db.title.hovermode
+							Skada:ApplySettings(db.name)
+						end
 					}
 				}
 			}
@@ -2244,26 +2263,26 @@ do
 				get = function(info) return mod.db[info[#info]] end,
 				set = function(info, val) mod.db[info[#info]] = val end,
 				args = {
-					speed = {
-						type = "range",
-						name = L["Wheel Speed"],
-						desc = L.opt_wheelspeed_desc,
-						set = function(_, val)
-							mod.db.speed = val
-							mod:SetScrollSpeed(val)
-						end,
-						min = 1,
-						max = 10,
-						step = 1,
-						width = "double",
-						order = 10
-					},
 					mouse = {
 						type = "group",
 						name = L["Mouse"],
 						inline = true,
-						order = 20,
+						order = 10,
 						args = {
+							speed = {
+								type = "range",
+								name = L["Wheel Speed"],
+								desc = L.opt_wheelspeed_desc,
+								set = function(_, val)
+									mod.db.speed = val
+									mod:SetScrollSpeed(val)
+								end,
+								min = 1,
+								max = 10,
+								step = 1,
+								width = "double",
+								order = 10
+							},
 							button = {
 								type = "select",
 								name = L["Scroll mouse button"],
@@ -2272,12 +2291,12 @@ do
 									Button4 = L["Mouse Button 4"],
 									Button5 = L["Mouse Button 5"]
 								},
-								order = 10
+								order = 20
 							},
 							icon = {
 								type = "toggle",
 								name = L["Scroll Icon"],
-								order = 20
+								order = 30
 							}
 						}
 					},
@@ -2285,7 +2304,7 @@ do
 						type = "group",
 						name = L["Keybinding"],
 						inline = true,
-						order = 30,
+						order = 20,
 						args = {
 							upkey = {
 								type = "keybinding",

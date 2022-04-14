@@ -446,23 +446,16 @@ function barListPrototype:SetButtonsOpacity(alpha)
 end
 
 do
-	local MouseIsOver = MouseIsOver
-
-	local function btnOnEnter(self)
+	local function anchorOnEnter(self)
 		local p = self:GetParent()
 		p:ShowButtons()
 		p:AdjustTitle(true)
 	end
 
-	local function btnOnLeave(self)
+	local function anchorOnLeave(self)
 		local p = self:GetParent()
-		if MouseIsOver(p) then
-			p:ShowButtons()
-			p:AdjustTitle(true)
-		else
-			p:HideButtons()
-			p:AdjustTitle()
-		end
+		p:HideButtons()
+		p:AdjustTitle()
 	end
 
 	function barListPrototype:SetButtonMouseOver(mouseover)
@@ -470,8 +463,8 @@ do
 
 		if self.mouseover then
 			self:HideButtons()
-			self.button:SetScript("OnEnter", btnOnEnter)
-			self.button:SetScript("OnLeave", btnOnLeave)
+			self.button:SetScript("OnEnter", anchorOnEnter)
+			self.button:SetScript("OnLeave", anchorOnLeave)
 		else
 			self:ShowButtons()
 			self.button:SetScript("OnEnter", nil)
@@ -482,9 +475,15 @@ do
 	end
 end
 
+function barListPrototype:SetButtonSpacing(spacing)
+	self.spacing2 = spacing
+	self:AdjustButtons()
+end
+
 function barListPrototype:AdjustButtons()
 	self.lastbtn = nil
 	local height = self.button:GetHeight()
+	local spacing = self.spacing2 or 1
 	local nr = 0
 
 	for _, btn in ipairs(self.buttons) do
@@ -496,9 +495,9 @@ function barListPrototype:AdjustButtons()
 			elseif nr == 0 then
 				btn:SetPoint("TOPRIGHT", self.button, "TOPRIGHT", -5, -(max(height - btn:GetHeight(), 0) / 2))
 			elseif self.orientation == 3 then
-				btn:SetPoint("TOPLEFT", self.lastbtn, "TOPRIGHT", 1, 0)
+				btn:SetPoint("TOPLEFT", self.lastbtn, "TOPRIGHT", spacing, 0)
 			else
-				btn:SetPoint("TOPRIGHT", self.lastbtn, "TOPLEFT", -1, 0)
+				btn:SetPoint("TOPRIGHT", self.lastbtn, "TOPLEFT", -spacing, 0)
 			end
 			self.lastbtn = btn
 			nr = nr + 1
