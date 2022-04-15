@@ -344,8 +344,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 		if
 			spellid and -- just in case, you never know!
 			not ignoredSpells[spellid] and
-			(auratype == "BUFF" or speciallist[spellid]) and
-			Skada:IsPlayer(dstGUID, dstFlags, dstName)
+			(auratype == "BUFF" or speciallist[spellid])
 		then
 			aura.playerid = dstGUID
 			aura.playername = dstName
@@ -358,6 +357,8 @@ Skada:AddLoadableModule("Buffs", function(L)
 			aura.spellid = spellid
 			aura.spellschool = spellschool
 			aura.type = auratype or "BUFF"
+
+			Skada:FixPets(aura)
 
 			if event == "SPELL_PERIODIC_ENERGIZE" then
 				Skada:DispatchSets(log_specialaura, aura)
@@ -510,31 +511,31 @@ Skada:AddLoadableModule("Debuffs", function(L)
 				srcFlags = dstFlags
 			end
 
-			if Skada:IsPlayer(srcGUID, srcFlags, srcName) then
-				aura.playerid = srcGUID
-				aura.playername = srcName
-				aura.playerflags = srcFlags
+			aura.playerid = srcGUID
+			aura.playername = srcName
+			aura.playerflags = srcFlags
 
-				aura.dstGUID = dstGUID
-				aura.dstName = dstName
-				aura.dstFlags = dstFlags
+			aura.dstGUID = dstGUID
+			aura.dstName = dstName
+			aura.dstFlags = dstFlags
 
-				aura.spellid = spellid
-				aura.spellschool = spellschool
-				aura.type = "DEBUFF"
+			aura.spellid = spellid
+			aura.spellschool = spellschool
+			aura.type = "DEBUFF"
 
-				if event == "SPELL_AURA_APPLIED" then
-					Skada:DispatchSets(log_auraapply, aura)
-					if queuedSpells[spellid] then
-						Skada:QueueUnit(queuedSpells[spellid], srcGUID, srcName, srcFlags, dstGUID)
-					end
-				elseif event == "SPELL_AURA_REFRESH" then
-					Skada:DispatchSets(log_aurarefresh, aura)
-				elseif event == "SPELL_AURA_REMOVED" then
-					Skada:DispatchSets(log_auraremove, aura)
-					if queuedSpells[spellid] then
-						Skada:UnqueueUnit(queuedSpells[spellid], dstGUID)
-					end
+			Skada:FixPets(aura)
+
+			if event == "SPELL_AURA_APPLIED" then
+				Skada:DispatchSets(log_auraapply, aura)
+				if queuedSpells[spellid] then
+					Skada:QueueUnit(queuedSpells[spellid], srcGUID, srcName, srcFlags, dstGUID)
+				end
+			elseif event == "SPELL_AURA_REFRESH" then
+				Skada:DispatchSets(log_aurarefresh, aura)
+			elseif event == "SPELL_AURA_REMOVED" then
+				Skada:DispatchSets(log_auraremove, aura)
+				if queuedSpells[spellid] then
+					Skada:UnqueueUnit(queuedSpells[spellid], dstGUID)
 				end
 			end
 		end
