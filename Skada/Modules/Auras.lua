@@ -40,7 +40,6 @@ do
 	end
 
 	function mod:Clean(event, set, curtime)
-		self.checked = nil
 		if event == "COMBAT_PLAYER_LEAVE" and set then
 			local maxtime = Skada:GetSetTime(set)
 			curtime = curtime or time()
@@ -474,6 +473,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 		)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CheckBuffs")
+		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", function() mod.checked = nil end)
 		Skada:AddMode(self, L["Buffs and Debuffs"])
 
 		-- table of ignored spells:
