@@ -2358,7 +2358,7 @@ do
 		self.description = L.mod_bar_desc
 		Skada:AddDisplaySystem("bar", self)
 
-		self.db = Skada.db.profile.scroll or {speed = 2, icon = true, button = "MiddleButton"}
+		self.db = Skada.db.profile.scroll
 		if not self.db then
 			self.db = {speed = 2, icon = true, button = "MiddleButton"}
 			Skada.db.profile.scroll = self.db
