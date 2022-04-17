@@ -66,7 +66,6 @@ Skada.windowdefaults = {
 	child = "",
 	childmode = 0,
 	sticky = true,
-	sticked = {},
 	clamped = true,
 	tooltippos = "NONE",
 	hideauto = 1,
@@ -1178,7 +1177,7 @@ function Skada:FrameSettings(db, include_dimensions)
 				db.sticky = not db.sticky
 				if not db.sticky then
 					for _, win in Skada:IterateWindows() do
-						if win.db.sticked[db.name] then
+						if win.db.sticked and win.db.sticked[db.name] then
 							win.db.sticked[db.name] = nil
 						end
 					end
@@ -1282,15 +1281,11 @@ do
 		return (name ~= "") and name
 	end
 
+	local temp = {}
 	local function SerializeProfile()
-		local data = {Skada = {}}
-		Skada.tCopy(data.Skada, Skada.db.profile, {"nickname", "modeclicks"})
-		for k, v in Skada:IterateModules() do
-			if v.db and v.db.profile then
-				data[k] = v.db.profile
-			end
-		end
-		return Skada:Serialize(true, fmt("%s profile", Skada.db:GetCurrentProfile()), data)
+		wipe(temp)
+		Skada.tCopy(temp, Skada.db.profile, "modeclicks")
+		return Skada:Serialize(true, fmt("%s profile", Skada.db:GetCurrentProfile()), temp)
 	end
 
 	local function UnserializeProfile(data)
@@ -1332,6 +1327,7 @@ do
 			end)
 		else
 			editbox:DisableButton(false)
+			editbox.editBox:SetFocus()
 			editbox.button:SetScript("OnClick", function(widget)
 				Skada:ImportProfile(editbox:GetText())
 				AceGUI:Release(frame)
@@ -1376,12 +1372,7 @@ do
 		local Old_ReloadSettings = Skada.ReloadSettings
 		Skada.ReloadSettings = function(self)
 			self.ReloadSettings = Old_ReloadSettings
-			for k, v in pairs(data) do
-				local db = (k == "Skada") and Skada.db or (self:GetModule(k, true) and self.db:GetNamespace(k, true))
-				if db then
-					Skada.tCopy(db.profile, v)
-				end
-			end
+			self.tCopy(self.db.profile, data)
 			self:ReloadSettings()
 			ACR:NotifyChange("Skada")
 		end

@@ -275,8 +275,12 @@ do
 			local anchor, name, frame = FlyPaper.StickToClosestFrameInGroup(group, "Skada", nil, offset, offset)
 
 			if anchor and frame and frame.win then
+				frame.win.db.sticked = frame.win.db.sticked or {}
 				frame.win.db.sticked[group.win.db.name] = true
-				group.win.db.sticked[name] = nil
+
+				if group.win.db.sticked then
+					group.win.db.sticked[name] = nil
+				end
 
 				-- bar spacing first
 				group.win.db.barspacing = frame.win.db.barspacing
@@ -305,8 +309,13 @@ do
 				end
 			else
 				for _, win in Skada:IterateWindows() do
-					if win.db.display == "bar" and win.db.sticked and win.db.sticked[group.win.db.name] then
-						win.db.sticked[group.win.db.name] = nil
+					if win.db.display == "bar" and win.db.sticked then
+						if win.db.sticked[group.win.db.name] then
+							win.db.sticked[group.win.db.name] = nil
+						end
+						if next(win.db.sticked) == nil then
+							win.db.sticked = nil
+						end
 					end
 				end
 			end
@@ -343,7 +352,7 @@ function mod:WindowResized(_, group)
 	if FlyPaper then
 		local offset = db.background.borderthickness
 		for _, win in Skada:IterateWindows() do
-			if win.db.display == "bar" and win.bargroup:IsShown() and db.sticked[win.db.name] then
+			if win.db.display == "bar" and win.bargroup:IsShown() and db.sticked and db.sticked[win.db.name] then
 				win.bargroup.callbacks:Fire("AnchorMoved", win.bargroup)
 			end
 		end
@@ -872,7 +881,7 @@ do
 				if FlyPaper and group.win.db.sticky and not group.win.db.hidden then
 					local offset = group.win.db.background.borderthickness
 					for _, win in Skada:IterateWindows() do
-						if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
+						if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked and group.win.db.sticked[win.db.name] then
 							FlyPaper.Stick(win.bargroup, group, nil, offset, offset)
 							win.bargroup.button.startX = win.bargroup:GetLeft()
 							win.bargroup.button.startY = win.bargroup:GetTop()
@@ -905,7 +914,7 @@ do
 					group.callbacks:Fire("AnchorMoved", group, endX, endY)
 					if FlyPaper and group.win.db.sticky and not group.win.db.hidden then
 						for _, win in Skada:IterateWindows() do
-							if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
+							if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked and group.win.db.sticked[win.db.name] then
 								local xOfs, yOfs = win.bargroup:GetLeft(), win.bargroup:GetTop()
 								if win.bargroup.startX ~= xOfs or win.bargroup.startY ~= yOfs then
 									win.bargroup.callbacks:Fire("AnchorMoved", win.bargroup, xOfs, yOfs)
@@ -1062,7 +1071,7 @@ do
 		if FlyPaper then
 			local offset = group.win.db.background.borderthickness
 			for _, win in Skada:IterateWindows() do
-				if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked[win.db.name] then
+				if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked and group.win.db.sticked[win.db.name] then
 					FlyPaper.Stick(win.bargroup, group, nil, offset, offset)
 				end
 			end

@@ -2299,8 +2299,10 @@ do
 
 	function CheckVersion()
 		Skada:SendComm(nil, nil, "VersionCheck", Skada.version)
-		Skada:CancelTimer(version_timer, true)
-		version_timer = nil
+		if version_timer then
+			Skada:CancelTimer(version_timer, true)
+			version_timer = nil
+		end
 	end
 
 	function ConvertVersion(ver)

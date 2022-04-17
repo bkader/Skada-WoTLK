@@ -359,7 +359,7 @@ Skada:AddLoadableModule("Nickname", function(L)
 			self.sendCooldown = time() + 29
 		end
 
-		Skada:SendComm(nil, nil, "Nickname", Skada.userGUID, Skada.db.profile.nickname)
+		Skada:SendComm(nil, nil, "Nickname", Skada.userGUID, Skada.db.global.nickname)
 	end
 
 	function mod:OnCommNickname(event, sender, guid, nickname)
@@ -378,6 +378,14 @@ Skada:AddLoadableModule("Nickname", function(L)
 	function mod:OnInitialize()
 		if Skada.db.profile.namedisplay == nil then
 			Skada.db.profile.namedisplay = 2
+		end
+
+		-- move nickname to global
+		if Skada.db.profile.nickname then
+			if not Skada.db.global.nickname then
+				Skada.db.global.nickname = Skada.db.profile.nickname
+				Skada.db.profile.nickname = nil
+			end
 		end
 
 		Skada.options.args.tweaks.args.advanced.args.nickname = {
@@ -406,12 +414,12 @@ Skada:AddLoadableModule("Nickname", function(L)
 					desc = L["Set a nickname for you."],
 					order = 10,
 					get = function()
-						return Skada.db.profile.nickname
+						return Skada.db.global.nickname
 					end,
 					set = function(_, val)
 						local okey, nickname = CheckNickname(val)
 						if okey == true then
-							Skada.db.profile.nickname = nickname
+							Skada.db.global.nickname = nickname
 							mod:SendNickname(true)
 							Skada:ApplySettings()
 						else
@@ -488,7 +496,7 @@ Skada:AddLoadableModule("Nickname", function(L)
 
 				local nickname
 				if guid == self.userGUID then
-					nickname = self.db.profile.nickname
+					nickname = self.db.global.nickname
 				elseif mod.db and mod.db.cache[guid] then
 					nickname = mod.db.cache[guid]
 				end
