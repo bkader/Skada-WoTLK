@@ -366,7 +366,8 @@ Skada:AddLoadableModule("Nickname", function(L)
 		self:SetCacheTable()
 		if Skada.db.profile.ignorenicknames then return end
 		if sender and guid and guid ~= Skada.userGUID and nickname then
-			local okey, nickname = CheckNickname(nickname)
+			local okey = nil
+			okey, nickname = CheckNickname(nickname)
 			if not okey or nickname == "" then
 				self.db.cache[guid] = nil -- remove if invalid or empty
 			elseif not self.db.cache[guid] or self.db.cache[guid] ~= nickname then
@@ -491,13 +492,13 @@ Skada:AddLoadableModule("Nickname", function(L)
 		local nicknameFormats = {[1] = "%1$s", [2] = "%2$s", [3] = "%1$s (%2$s)", [4] = "%2$s (%1$s)"}
 
 		function Skada:FormatName(name, guid)
-			if not self.db.profile.ignorenicknames and (self.db.profile.namedisplay or 0) > 1 and name and guid then
+			if (self.db.profile.namedisplay or 0) > 1 and name and guid then
 				if not mod.db then mod:SetCacheTable() end
 
-				local nickname
-				if guid == self.userGUID then
+				local nickname = nil
+				if guid == self.userGUID then -- mine
 					nickname = self.db.global.nickname
-				elseif mod.db and mod.db.cache[guid] then
+				elseif not self.db.profile.ignorenicknames and mod.db and mod.db.cache[guid] then
 					nickname = mod.db.cache[guid]
 				end
 

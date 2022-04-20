@@ -32,7 +32,7 @@ ignore = {
 	"131/[A-Z][A-Z0-9_]+",	-- Unused implicitly defined global variable (GlobalStrings and Constants 2char+)
 	"131/Skada.*",	-- Unsed global variable (Skada.*)
 	"314", -- Value of a field in a table literal is unused
-	"42.", -- Shadowing a local variable, an argument, a loop variable.
+--	"42.", -- Shadowing a local variable, an argument, a loop variable.
 	"11./BINDING_.*", -- Setting an undefined (Keybinding header) global variable
 	"113/LE_.*", -- Accessing an undefined (Lua ENUM type) global variable
 	"113/NUM_LE_.*", -- Accessing an undefined (Lua ENUM type) global variable
