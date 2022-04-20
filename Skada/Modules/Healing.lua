@@ -687,12 +687,12 @@ Skada:AddLoadableModule("Overhealing", function(L)
 						d.role = player.role
 						d.spec = player.spec
 
-						local total = player.heal + player.overheal
+						local overall = player.heal + player.overheal
 						d.value = player.overheal
 						d.valuetext = Skada:FormatValueCols(
 							self.metadata.columns.Overhealing and Skada:FormatNumber(d.value),
 							self.metadata.columns.HPS and Skada:FormatNumber(ohps),
-							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+							self.metadata.columns.Percent and Skada:FormatPercent(d.value, overall)
 						)
 
 						if win.metadata and d.value > win.metadata.maxvalue then

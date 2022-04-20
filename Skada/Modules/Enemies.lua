@@ -376,8 +376,8 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 			if useful > 0 then
 				tooltip:AddDoubleLine(L["Useful Damage"], format("%s (%s)", Skada:FormatNumber(useful), Skada:FormatPercent(useful, damage)), 1, 1, 1)
 
-				-- the overkil
-				local overkill = max(0, damage - useful)
+				-- override overkill
+				overkill = max(0, damage - useful)
 				tooltip:AddDoubleLine(L["Overkill"], format("%s (%s)", Skada:FormatNumber(overkill), Skada:FormatPercent(overkill, damage)), 1, 1, 1)
 			elseif overkill > 0 then
 				tooltip:AddDoubleLine(L["Overkill"], format("%s (%s)", Skada:FormatNumber(overkill), Skada:FormatPercent(overkill, damage)), 1, 1, 1)

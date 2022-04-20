@@ -184,12 +184,12 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 				d.id = targetname
 				d.label = targetname
 
-				local actor = set:GetActor(targetname)
-				if actor then
-					d.id = actor.id or targetname
-					d.class = actor.class
-					d.role = actor.role
-					d.spec = actor.spec
+				local tactor = set:GetActor(targetname)
+				if tactor then
+					d.id = tactor.id or targetname
+					d.class = tactor.class
+					d.role = tactor.role
+					d.spec = tactor.spec
 				end
 
 				d.value = amount

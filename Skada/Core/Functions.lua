@@ -310,8 +310,6 @@ end
 -- spell functions
 
 do
-	local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
-
 	local customSpells = {
 		[3] = {ACTION_ENVIRONMENTAL_DAMAGE_FALLING, [[Interface\Icons\ability_rogue_quickrecovery]]},
 		[4] = {ACTION_ENVIRONMENTAL_DAMAGE_DROWNING, [[Interface\Icons\spell_shadow_demonbreath]]},

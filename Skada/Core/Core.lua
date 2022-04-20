@@ -185,11 +185,11 @@ local function CheckSetName(set)
 
 	if Skada.db.profile.setnumber then
 		local num = 0
-		for _, set in ipairs(Skada.char.sets) do
-			if set.name == setname and num == 0 then
+		for _, s in ipairs(Skada.char.sets) do
+			if s.name == setname and num == 0 then
 				num = 1
 			else
-				local n, c = strmatch(set.name, "^(.-)%s*%((%d+)%)$")
+				local n, c = strmatch(s.name, "^(.-)%s*%((%d+)%)$")
 				if n == setname then
 					num = max(num, tonumber(c) or 0)
 				end
@@ -2163,8 +2163,8 @@ do
 		for _, data in ipairs(report_table.dataset) do
 			if ((barid and barid == data.id) or (data.id and not barid)) and not data.ignore then
 				nr = nr + 1
+				label = nil
 
-				local label
 				if data.reportlabel then
 					label = data.reportlabel
 				elseif self.db.profile.reportlinks and (data.spellid or data.hyperlink) then
@@ -3143,9 +3143,9 @@ function Skada:DBM(_, mod, wipe)
 			self:SendMessage("COMBAT_BOSS_DEFEATED", set)
 
 			if self.tempsets then -- phases
-				for _, set in ipairs(self.tempsets) do
-					set.success = true
-					self:SendMessage("COMBAT_BOSS_DEFEATED", set)
+				for _, s in ipairs(self.tempsets) do
+					s.success = true
+					self:SendMessage("COMBAT_BOSS_DEFEATED", s)
 				end
 			end
 		end
