@@ -263,7 +263,6 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 			"RANGE_DAMAGE",
 			"SPELL_BUILDING_DAMAGE",
 			"SPELL_DAMAGE",
-			"SPELL_EXTRA_ATTACKS",
 			"SPELL_PERIODIC_DAMAGE",
 			"SWING_DAMAGE",
 			{dst_is_interesting_nopets = true, src_is_interesting_nopets = true}

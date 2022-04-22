@@ -45,10 +45,10 @@ local dataobj = LDB:NewDataObject("Skada", {
 BINDING_HEADER_SKADA = "Skada"
 BINDING_NAME_SKADA_TOGGLE = L["Toggle Windows"]
 BINDING_NAME_SKADA_SHOWHIDE = L["Show/Hide Windows"]
-BINDING_NAME_SKADA_RESET = RESET
+BINDING_NAME_SKADA_RESET = L.Reset
 BINDING_NAME_SKADA_NEWSEGMENT = L["Start New Segment"]
 BINDING_NAME_SKADA_NEWPHASE = L["Start New Phase"]
-BINDING_NAME_SKADA_STOP = L["Stop"]
+BINDING_NAME_SKADA_STOP = L.Stop
 
 -- Skada-Revisited flag
 Skada.revisited = true
@@ -3532,7 +3532,6 @@ do
 		RANGE_DAMAGE = true,
 		SPELL_BUILDING_DAMAGE = true,
 		SPELL_DAMAGE = true,
-		SPELL_EXTRA_ATTACKS = true,
 		SPELL_PERIODIC_DAMAGE = true,
 		SWING_DAMAGE = true
 	}

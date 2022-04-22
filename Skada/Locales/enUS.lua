@@ -250,6 +250,7 @@ L["Right-Click to set active set."] = true
 L["Shift+Left-Click to open menu."] = true
 -- data resets
 L["Data Resets"] = true
+L["Reset"] = RESET
 L["Reset on entering instance"] = true
 L["Controls if data is reset when you enter an instance."] = true
 L["Reset on joining a group"] = true

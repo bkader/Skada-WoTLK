@@ -126,7 +126,7 @@ do
 
 			-- Add window buttons.
 			AddWindowButton(bargroup, p.title.toolbar, "config", L.Configure, L.btn_config_desc, configOnClick)
-			AddWindowButton(bargroup, p.title.toolbar, "reset", RESET, L.btn_reset_desc, resetOnClick)
+			AddWindowButton(bargroup, p.title.toolbar, "reset", L.Reset, L.btn_reset_desc, resetOnClick)
 			AddWindowButton(bargroup, p.title.toolbar, "segment", L.Segment, L.btn_segment_desc, segmentOnClick)
 			AddWindowButton(bargroup, p.title.toolbar, "mode", L.Mode, L["Jump to a specific mode."], modeOnClick)
 			AddWindowButton(bargroup, p.title.toolbar, "report", L.Report, L.btn_report_desc, reportOnClick)
@@ -1007,7 +1007,7 @@ do
 			g:ShowAnchor()
 
 			g:ShowButton(L["Configure"], p.buttons.menu)
-			g:ShowButton(RESET, p.buttons.reset)
+			g:ShowButton(L.Reset, p.buttons.reset)
 			g:ShowButton(L["Segment"], p.buttons.segment)
 			g:ShowButton(L["Mode"], p.buttons.mode)
 			g:ShowButton(L["Report"], p.buttons.report)
@@ -1671,7 +1671,7 @@ function mod:AddDisplayOptions(win, options)
 							},
 							reset = {
 								type = "toggle",
-								name = RESET,
+								name = L.Reset,
 								desc = L.btn_reset_desc,
 								order = 20
 							},

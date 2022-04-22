@@ -587,7 +587,6 @@ Skada:AddLoadableModule("Deaths", function(L)
 			"RANGE_DAMAGE",
 			"SPELL_BUILDING_DAMAGE",
 			"SPELL_DAMAGE",
-			"SPELL_EXTRA_ATTACKS",
 			"SPELL_PERIODIC_DAMAGE",
 			"SWING_DAMAGE",
 			flags_dst_nopets

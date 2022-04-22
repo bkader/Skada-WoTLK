@@ -367,7 +367,7 @@ Skada:AddLoadableModule("PVP", function(L)
 				},
 				reset = {
 					type = "execute",
-					name = RESET,
+					name = L.Reset,
 					func = function()
 						-- reset yellow team
 						Skada.db.profile.modules.arena.ARENA_GOLD.r = teamGold.r

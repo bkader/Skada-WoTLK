@@ -18,7 +18,7 @@ Skada:AddLoadableModule("Damage", function(L)
 	local sdetailmod = playermod:NewModule(L["Damage Breakdown"])
 	local targetmod = mod:NewModule(L["Damage target list"])
 	local tdetailmod = targetmod:NewModule(L["Damage spell list"])
-	local UnitGUID = UnitGUID
+	local UnitGUID, GetTime = UnitGUID, GetTime
 	local new, del = Skada.newTable, Skada.delTable
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
@@ -270,8 +270,9 @@ Skada:AddLoadableModule("Damage", function(L)
 					extraATT = extraATT or T.get("Damage_ExtraAttacks")
 					if not extraATT[srcName] then
 						extraATT[srcName] = new()
-						extraATT[srcName].spellname = spellname
-						extraATT[srcName].amount = amount
+						extraATT[srcName].proc = spellname
+						extraATT[srcName].count = amount
+						extraATT[srcName].time = GetTime()
 					end
 				end
 
@@ -284,10 +285,16 @@ Skada:AddLoadableModule("Damage", function(L)
 
 				-- an extra attack?
 				if extraATT and extraATT[srcName] then
-					dmg.spellname = dmg.spellname .. " (" .. extraATT[srcName].spellname .. ")"
-					extraATT[srcName].amount = max(0, extraATT[srcName].amount - 1)
-					if extraATT[srcName].amount == 0 then
+					if not extraATT[srcName].spellname then -- queue spell
+						extraATT[srcName].spellname = dmg.spellname
+					elseif dmg.spellname == L.Melee and extraATT[srcName].time < (GetTime() - 5) then -- expired proc
 						extraATT[srcName] = del(extraATT[srcName])
+					elseif dmg.spellname == L.Melee then -- valid damage contribution
+						dmg.spellname = extraATT[srcName].spellname .. " (" .. extraATT[srcName].proc .. ")"
+						extraATT[srcName].count = max(0, extraATT[srcName].count - 1)
+						if extraATT[srcName].count == 0 then -- no procs left
+							extraATT[srcName] = del(extraATT[srcName])
+						end
 					end
 				end
 			else
