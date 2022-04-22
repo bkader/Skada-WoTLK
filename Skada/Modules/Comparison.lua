@@ -795,7 +795,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 						if win.metadata then
 							-- color the selected player's bar.
 							if player.id == mod.userGUID then
-								d.color = Skada.classcolors.ARENA_GOLD
+								d.color = Skada:ClassColor("ARENA_GOLD")
 							elseif d.color then
 								d.color = nil
 							end

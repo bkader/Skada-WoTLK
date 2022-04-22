@@ -39,11 +39,11 @@ end
 
 local function formatLabel(win, data)
 	if win.db.isusingclasscolors and data.class then
-		return WrapTextInColorCode(data.text or data.label or L.Unknown, Skada.classcolors[data.class].colorStr)
+		return Skada:ClassColor(data.class, data.text or data.label or L.Unknown)
 	elseif data.color and data.color.colorStr then
-		return WrapTextInColorCode(data.text or data.label or L.Unknown, data.color.colorStr)
+		return format("|c%s%s|r", data.color.colorStr, data.text or data.label or L.Unknown)
 	elseif data.color then
-		return WrapTextInColorCode(data.text or data.label or L.Unknown, RGBPercToHex(data.color.r or 1, data.color.g or 1, data.color.b or 1, data.color.a or 1, true))
+		return WrapTextInColorCode(data.text or data.label or L.Unknown, RGBPercToHex(data.color.r or 1, data.color.g or 1, data.color.b or 1, true))
 	else
 		return data.text or data.label or L.Unknown
 	end

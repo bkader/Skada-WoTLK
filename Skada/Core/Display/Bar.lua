@@ -521,7 +521,7 @@ do
 			elseif db.spellschoolcolors and data.spellschool and Skada.spellschools[data.spellschool] then
 				color = Skada.spellschools[data.spellschool]
 			elseif db.classcolorbars and data.class and Skada.classcolors[data.class] then
-				color = Skada.classcolors[data.class]
+				color = Skada:ClassColor(data.class)
 			end
 		end
 
@@ -651,7 +651,7 @@ do
 						Skada.classcolors[data.class] and
 						(win.db.classcolortext or win.db.classcolorleft or win.db.classcolorright)
 					then
-						local c = Skada.classcolors[data.class]
+						local c = Skada:ClassColor(data.class)
 						if win.db.classcolortext or win.db.classcolorleft then
 							bar.label:SetTextColor(c.r, c.g, c.b, c.a or 1)
 						end

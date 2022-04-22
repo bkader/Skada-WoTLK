@@ -1798,7 +1798,7 @@ do
 					if data.color then
 						color = data.color
 					elseif data.class and Skada.validclass[data.class] then
-						color = Skada.classcolors[data.class]
+						color = Skada:ClassColor(data.class)
 					end
 
 					local title = data.text or data.label

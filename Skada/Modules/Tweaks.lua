@@ -66,7 +66,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 
 						local _, class = UnitClass(bosstarget)
 						if class and Skada.classcolors[class] then
-							target = format("|c%s%s|r", Skada.classcolors[class].colorStr, target)
+							target = Skada:ClassColor(class, target)
 						end
 
 						tinsert(targettable, format("%s > %s", UnitName(boss) or L.Unknown, target))
@@ -116,7 +116,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 					elseif dstName then
 						local _, class = UnitClass(dstName)
 						if class and self.classcolors[class] then
-							output = format(hitformats[2], srcName, self.classcolors[class].colorStr, dstName)
+							output = format(hitformats[2], srcName, self:ClassColor(class, true), dstName)
 						else
 							output = format(hitformats[1], srcName, dstName)
 						end
@@ -128,14 +128,14 @@ Skada:AddLoadableModule("Tweaks", function(L)
 					if owner then
 						local _, class = UnitClass(owner.name)
 						if class and self.classcolors[class] then
-							output = format(hitformats[4], self.classcolors[class].colorStr, owner.name, PET)
+							output = format(hitformats[4], self:ClassColor(class, true), owner.name, PET)
 						else
 							output = format(hitformats[1], owner.name, PET)
 						end
 					elseif srcName then
 						local _, class = UnitClass(srcName)
 						if class and self.classcolors[class] then
-							output = format(hitformats[3], self.classcolors[class].colorStr, srcName)
+							output = format(hitformats[3], self:ClassColor(class, true), srcName)
 						else
 							output = srcName
 						end

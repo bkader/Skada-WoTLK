@@ -308,7 +308,7 @@ Skada:AddLoadableModule("Project Ascension", function(L)
 				if not Skada.db.global.ascension.player[Skada.userGUID] then
 					Skada.db.global.ascension.player[Skada.userGUID] = {}
 
-					local mycolor = Skada.classcolors[Skada.userClass]
+					local mycolor = Skada:ClassColor(Skada.userClass)
 					Skada.db.global.ascension.player[Skada.userGUID][2] = round(mycolor.r)
 					Skada.db.global.ascension.player[Skada.userGUID][3] = round(mycolor.g)
 					Skada.db.global.ascension.player[Skada.userGUID][4] = round(mycolor.b)
@@ -339,7 +339,7 @@ Skada:AddLoadableModule("Project Ascension", function(L)
 				if not Skada.db.global.ascension.player[Skada.userGUID] then
 					Skada.db.global.ascension.player[Skada.userGUID] = {}
 
-					local mycolor = Skada.classcolors[Skada.userClass]
+					local mycolor = Skada:ClassColor(Skada.userClass)
 					Skada.db.global.ascension.player[Skada.userGUID][2] = round(mycolor.r)
 					Skada.db.global.ascension.player[Skada.userGUID][3] = round(mycolor.g)
 					Skada.db.global.ascension.player[Skada.userGUID][4] = round(mycolor.b)

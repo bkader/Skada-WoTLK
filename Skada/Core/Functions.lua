@@ -60,6 +60,9 @@ function Skada:RegisterClasses()
 		self.classcolors.ARENA_GREEN.b = 1
 		self.classcolors.ARENA_GREEN.colorStr = "ffae61ff"
 	end
+	-- localize arena team colors (just in case)
+	L.ARENA_GREEN = L["Green Team"]
+	L.ARENA_GOLD = L["Gold Team"]
 
 	-- set classes icon file & Skada custom classes.
 	if self.AscensionCoA then
@@ -136,6 +139,114 @@ function Skada:RegisterClasses()
 			[266] = {0.25, 0.375, 0.75, 1}, --> Warlock: Demonology
 			[267] = {0.375, 0.5, 0.75, 1} --> Warlock: Destruction
 		}
+	end
+
+	-- customize class colors
+	if not self.Ascension or not self.AscensionCoA then
+		local disabled = function()
+			return not self.db.profile.customcolors
+		end
+
+		local colorsOpt = {
+			type = "group",
+			name = L["Colors"],
+			desc = format(L["Options for %s."], L["Colors"]),
+			order = 11000,
+			get = function(i)
+				local color = self.classcolors[i[#i]]
+				if self.db.profile.classcolors and self.db.profile.classcolors[i[#i]] then
+					color = self.db.profile.classcolors[i[#i]]
+				end
+				return color.r, color.g, color.b
+			end,
+			set = function(i, r, g, b)
+				local class = i[#i]
+				self.db.profile.classcolors = self.db.profile.classcolors or {}
+				self.db.profile.classcolors[class] = self.db.profile.classcolors[class] or {}
+				self.db.profile.classcolors[class].r = r
+				self.db.profile.classcolors[class].g = g
+				self.db.profile.classcolors[class].b = b
+				self.db.profile.classcolors[class].colorStr = self.RGBPercToHex(r, g, b, true)
+			end,
+			args = {
+				enable = {
+					type = "toggle",
+					name = L.Enable,
+					width = "double",
+					order = 10,
+					get = function()
+						return self.db.profile.customcolors
+					end,
+					set = function(_, val)
+						if val then
+							self.db.profile.customcolors = true
+						else
+							self.db.profile.customcolors = nil
+							self.db.profile.classcolors = nil -- free it
+						end
+					end
+				},
+				class = {
+					type = "group",
+					name = L["Class Colors"],
+					order = 20,
+					hidden = disabled,
+					disabled = disabled,
+					args = {}
+				},
+				custom = {
+					type = "group",
+					name = L["Custom Colors"],
+					order = 30,
+					hidden = disabled,
+					disabled = disabled,
+					args = {}
+				},
+				arena = {
+					type = "group",
+					name = L["Arena Teams"],
+					order = 40,
+					hidden = disabled,
+					disabled = disabled,
+					args = {}
+				},
+				reset = {
+					type = "execute",
+					name = L.Reset,
+					width = "double",
+					order = 90,
+					disabled = disabled,
+					confirm = function() return L["Are you sure you want to reset all colors?"] end,
+					func = function()
+						self.db.profile.classcolors = wipe(self.db.profile.classcolors or {})
+					end
+				}
+			}
+		}
+
+		for class, data in pairs(self.classcolors) do
+			if self.validclass[class] then
+				colorsOpt.args.class.args[class] = {
+					type = "color",
+					name = L[class],
+					desc = format(L["Color for %s."], L[class])
+				}
+			elseif class == "ARENA_GREEN" or class == "ARENA_GOLD" then
+				colorsOpt.args.arena.args[class] = {
+					type = "color",
+					name = L[class],
+					desc = format(L["Color for %s."], L[class])
+				}
+			else
+				colorsOpt.args.custom.args[class] = {
+					type = "color",
+					name = L[class],
+					desc = format(L["Color for %s."], L[class])
+				}
+			end
+		end
+
+		self.options.args.tweaks.args.advanced.args.colors = colorsOpt
 	end
 end
 
@@ -304,6 +415,33 @@ function Skada.unitClass(guid, flag, set, db, name)
 	end
 
 	return class
+end
+
+-- returns custom or default class colors table
+function Skada:ClassColor(class, arg)
+	local color = HIGHLIGHT_FONT_COLOR
+
+	if class and self.classcolors then
+		color = self.classcolors[class]
+
+		-- using a custom color?
+		if self.db.profile.customcolors and self.db.profile.classcolors and self.db.profile.classcolors[class] then
+			color = self.db.profile.classcolors[class]
+		end
+	end
+
+	-- missing colorStr?
+	if not color.colorStr then
+		color.colorStr = self.RGBPercToHex(color.r, color.g, color.b, true)
+	end
+
+	if arg ~= nil then
+		-- return class-colored text or color string.
+		return (type(arg) == "string") and format("|c%s%s|r", color.colorStr, arg) or color.colorStr
+	end
+
+	-- return full table
+	return color
 end
 
 -------------------------------------------------------------------------------

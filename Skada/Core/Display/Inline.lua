@@ -334,11 +334,11 @@ end
 function mod:UpdateBar(bar, bardata, db)
 	local label = bardata.text or bardata.label or L.Unknown
 	if db.isusingclasscolors and bardata.class then
-		label = WrapTextInColorCode(bardata.text or bardata.label or L.Unknown, Skada.classcolors[bardata.class].colorStr)
+		label = Skada:ClassColor(bardata.class, bardata.text or bardata.label or L.Unknown)
 	elseif bardata.color and bardata.color.colorStr then
-		label = WrapTextInColorCode(bardata.text or bardata.label or L.Unknown, bardata.color.colorStr)
+		label = format("|c%s%s|r", bardata.color.colorStr, bardata.text or bardata.label or L.Unknown)
 	elseif bardata.color then
-		label = WrapTextInColorCode(bardata.text or bardata.label or L.Unknown, RGBPercToHex(bardata.color.r or 1, bardata.color.g or 1, bardata.color.b or 1, bardata.color.a or 1, true))
+		label = WrapTextInColorCode(bardata.text or bardata.label or L.Unknown, RGBPercToHex(bardata.color.r or 1, bardata.color.g or 1, bardata.color.b or 1, true))
 	else
 		label = bardata.text or bardata.label or L.Unknown
 	end
