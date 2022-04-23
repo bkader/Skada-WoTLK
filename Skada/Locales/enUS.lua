@@ -473,7 +473,13 @@ L.opt_threat_focustarget_desc = 'Tells Skada to additionally check your "focus" 
 L["Disable while tanking"] = true
 L.opt_threat_notankwarnings_desc = "Do not give out any warnings if Defensive Stance, Bear Form, Righteous Fury or Frost Presence is active."
 L["Ignore Pets"] = true
-L.opt_threat_ignorepets_desc = "Disable tracking pets threat and only watch players."
+L.opt_threat_ignorepets_desc = [[Tells Skada to skip enemy player pets when determining which unit to display threat data on.
+
+Player pets maintain a threat table when in |cffffff78Aggressive|r or |cffffff78Defensive|r mode and behave just like normal mobs, attacking the target with the highest threat. If the pet is instructed to attack a specific target, the pet still maintains the threat table, but sticks on the assigned target which by definition has 100% threat. Player pets can be taunted to force them to attack you.
+
+However, player pets on |cffffff78Passive|r mode do not have a threat table, and taunt does not work on them. They only attack their assigned target when instructed and do so without any threat table.
+
+When a player pet is instructed to |cffffff78Follow|r, the pet's threat table is wiped immediately and stops attacking, although it may immediately reacquire a target based on its Aggressive/Defensive mode.]]
 L["> Pull Aggro <"] = true
 L["Show Pull Aggro Bar"] = true
 L.opt_threat_showaggrobar_desc = "Show a bar for the amount of threat you will need to reach in order to pull aggro."

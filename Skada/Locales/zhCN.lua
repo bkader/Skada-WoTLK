@@ -448,7 +448,13 @@ L.opt_threat_focustarget_desc = "让 Skada 额外检查您的“焦点”和“�
 L["Disable while tanking"] = "作为坦克时不警告"
 L.opt_threat_notankwarnings_desc = "如果在防御姿态、熊形态、正义之怒与冰霜系时、不显示警报。"
 L["Ignore Pets"] = "忽略宠物"
-L.opt_threat_ignorepets_desc = "禁用跟踪宠物威胁，只看玩家。"
+L.opt_threat_ignorepets_desc = [=[让 Skada 忽略敌对玩家宠物以确定显示哪些单位的威胁。
+
+玩家宠物|cffffff78攻击|r或者|cffffff78防御|r状态保持威胁与正常的怪物相同，正被攻击目标具有最高的威胁。如果宠物指定攻击一个具体目标，宠物仍然保持在威胁列表，但保持在指定的目标定义100%威胁之上。可以玩家宠物嘲讽以攻击你。
+
+然而，玩家宠物在|cffffff78被动|r模式并没有威胁列表，嘲讽依然不起作用。它们只攻击指定的目标和指令时没有仇恨列表。
+
+当玩家宠物处于|cffffff78跟随|r状态时，宠物的威胁列表被消除并立刻停止攻击，虽然它可能会立即重新指定目标位于攻击/防御模式。]=]
 L["> Pull Aggro <"] = ">获得仇恨<"
 L["Show Pull Aggro Bar"] = "显示获得仇恨计量条"
 L.opt_threat_showaggrobar_desc = "显示一个数值威胁计量条，以帮助获得仇恨。"

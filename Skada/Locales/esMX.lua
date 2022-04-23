@@ -451,7 +451,13 @@ L.opt_threat_focustarget_desc = "Indica a Skada que adicionalmente revise tu 'fo
 L["Disable while tanking"] = "Desactivar cu\195\161ndo eres el tanque"
 L.opt_threat_notankwarnings_desc = "No dar ninguna alerta si Actitud defensiva, Forma de oso, Furia recta o Presencia de Escarcha est\195\161 activado."
 L["Ignore Pets"] = "Ignorar las mascotas"
-L.opt_threat_ignorepets_desc = "Desactive el rastreo de amenazas de mascotas y solo observe a los jugadores."
+L.opt_threat_ignorepets_desc = [=[Indica a Skada que ignore las mascotas de los jugadores enemigos al determinar qué unidades debe mostrar en los datos de amenaza.
+
+Las mascotas de los jugadores mantienen una tabla de amenaza cuando se encuentran en modo |cffffff78Agresivo|r o |cffffff78Defensivo|r y se comportan de manera normal atacando al objetivo con la amenaza más alta. Si se le indica a la mascota que ataque a un objetivo específico, ésta mantiene su tabla de amenaza, pero permanece con el objetivo asignado el cual por definición tiene 100% de amenaza. Las mascotas de los jugadores pueden ser provocadas para forzarlas a que te ataquen.
+
+Las mascotas de los jugadores en modo |cffffff78Pasivo|r no tienen tabla de amenaza y la habilidad provocar no funciona en ellas, sólo atacarán a su objetivo asignado cuando se les indique hacerlo y lo harán sin ninguna tabla de amenaza.
+
+Cuando a una mascota se le indica |cffffff78Seguir|r al jugador, su tabla de amenaza es eliminada inmediatamente y deja de atacar su objetivo, aunque podría volver a adquirir un nuevo objetivo si se encuentra en modo agresivo/defensivo.]=]
 L["> Pull Aggro <"] = "> Amenaza para Aggro <"
 L["Show Pull Aggro Bar"] = "Mostrar Barra de Amenaza para Aggro"
 L.opt_threat_showaggrobar_desc = "Mostrar una barra que indica la amenaza que necesitas para conseguir el aggro y te ataquen (Amenaza para Aggro)."

@@ -449,7 +449,13 @@ L.opt_threat_focustarget_desc = "Lässt Skada zusätzlich den Fokus und das Foku
 L["Disable while tanking"] = "Beim Tanken deaktivieren"
 L.opt_threat_notankwarnings_desc = "Gibt keine Warnmeldungen aus wenn Verteidigungshaltung, Bärengestalt, Zorn der Gerechtigkeit oder Frost Präsenz aktiv sind."
 L["Ignore Pets"] = "Haustiere ignorieren"
-L.opt_threat_ignorepets_desc = "Deaktiviere die Verfolgung von Haustieren und beobachte nur Spieler."
+L.opt_threat_ignorepets_desc = [=[Veranlasst Skada gegnerische Spielerbegleiter ausser acht zu lassen wenn bestimmt wird auf welche Einheit Bedrohung angezeigt werden soll.
+
+Spielerbegleiter haben nur eine Bedrohungsliste wenn sie sich im |cffffff78Aggressiven|r oder |cffffff78Defensiven|r Modus befinden und sich somit wie normale Mobs verhalten, also das Ziel mit der größten Bedrohung angreiffen. Wird der Beleiter dazu veranlasst, eine bestimntes Ziel anzugreiffen, behält der Begleiter eine Bedrohungstabelle, aber bleibt bei dem festgelegten Ziel, welches per Definition 100% Bedrohung hat. Spielerbegleiter können abgespottet werden um sie zu zwingen Sie anzugreiffen.
+
+Spielerbegleiter im |cffffff78Passiven|r Modus haben auf jeden Fall keine Bedrohungstabelle und Spott funktioniert bei ihnen nicht. Sie greiffen das ausgewählte Ziel nur auf Befehl an und das ohne Bedrohungstabelle.
+
+Wenn ein Spielerbegleiter dazu aufgefordert wird, zu |cffffff78Folgen|r, wird die Bedrohungstabelle gelöscht und es hört auf anzugreiffen, dennoch kann es sofort wieder ein neues Ziel aufnehmen, wenn wieder in den Aggressiven/Defensiven Modus gewechselt wird.]=]
 L["> Pull Aggro <"] = "> Aggro ziehen <"
 L["Show Pull Aggro Bar"] = "\"Aggro ziehen\" Leiste anzeigen"
 L.opt_threat_showaggrobar_desc = "Zeigt eine Leiste mit dem Wert an Bedrohung der benötigt wird um Aggro zu ziehen."

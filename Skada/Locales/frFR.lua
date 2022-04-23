@@ -454,7 +454,13 @@ L.opt_threat_focustarget_desc = "Demande \195\160 Skada de v\195\169rifier \195\
 L["Disable while tanking"] = "D\195\169sactiver en tankant"
 L.opt_threat_notankwarnings_desc = "Ne donne aucun avertissement si vous \195\170tes en posture d\195\169fensive, en forme d'ours, sous fureur vertueuse ou en pr\195\169sence de givre."
 L["Ignore Pets"] = "Ignorer les familiers"
-L.opt_threat_ignorepets_desc = "D\195\169sactive la menace des familiers et ne surveille que celle des joueurs."
+L.opt_threat_ignorepets_desc = [=[Demande à Skada de ne pas s'occuper des familiers des autres joueurs lors de la détermination de l'unité à afficher.
+
+Ces familiers gardent une table des menaces lorsqu'ils sont en mode |cffffff78aggressif|r ou |cffffff78défensif|r et se comportent alors comme les monstres normaux, attaquant la cible avec laquelle ils ont la plus haute menace. Si on leur donne l'ordre d'attaquer une cible spécifique, ils gardent toujours la table des menaces, mais se focalisent sur la cible assignée qui a alors par définition 100% de menace. Ils peuvent être provoqués pour les forcer à vous attaquer.
+
+Les fam. des joueurs en mode |cffffff78passif|r n'ont pas de table des menaces, et la provocation ne fonctionne pas sur eux. Ils attaquent uniquement leur cible assignée et le font sans aucune table des menaces.
+
+Quand un fam. de joueur reçoit l'ordre de |cffffff78suivre|r, la table des menaces du familier est détruite immédiatement et il arrête d'attaquer. Cependant, il risque de reprendre immédiatement une cible s'il se trouve en mode aggressif/défensif.]=]
 L["> Pull Aggro <"] = "> Reprise d'aggro <"
 L["Show Pull Aggro Bar"] = "Barre reprise d'aggro"
 L.opt_threat_showaggrobar_desc = "Affiche une barre indiquant la quantit\195\169 de menace que vous avez besoin de faire pour reprendre l'aggro."
