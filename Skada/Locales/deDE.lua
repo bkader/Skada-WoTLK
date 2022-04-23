@@ -704,6 +704,15 @@ L["Announces how long it took to apply %d stacks of %s and announces when it dro
 L["%s dropped from %s!"] = "%s ist am %s abgelaufen!"
 L["%s stacks of %s applied on %s in %s sec!"] = "%s Stapel von %s auf %s in %s sec angewandt!"
 L["My Spells"] = "Meine Zauber"
+-- total data options
+L["Total Segment"] = "Gesamtes Segment" -- needs review
+L["All Segments"] = "Alle Segmente" -- needs review
+L["Raid Bosses"] = "Raid-Bosse" -- needs review
+L["Raid Trash"] = "Schlachtzug-Müll" -- needs review
+L["Dungeon Bosses"] = "Dungeon-Bosse" -- needs review
+L["Dungeon Trash"] = "Dungeon-Müll" -- needs review
+L.opt_tweaks_total_all_desc = "Alle Segmente werden zu den Daten des Gesamtsegments hinzugefügt." -- needs review
+L.opt_tweaks_total_fmt_desc = "Segmente mit %s werden zu den Daten des Gesamtsegments hinzugefügt." -- needs review
 -- project ascension
 L["Project Ascension"] = "Project Ascension"
 L["project_ascension_desc"] = [=[Bei |cffffbb00Project Ascension|r sind deine Charaktere Helden, die alle Fähigkeiten oder Talente in Reichweite haben.

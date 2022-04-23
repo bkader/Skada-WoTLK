@@ -361,13 +361,13 @@ Skada:AddLoadableModule("Buffs", function(L)
 			Skada:FixPets(aura)
 
 			if event == "SPELL_PERIODIC_ENERGIZE" then
-				Skada:DispatchSets(log_specialaura, aura)
+				Skada:DispatchSets(log_specialaura, nil, aura)
 			elseif event == "SPELL_AURA_APPLIED" or event == true then
-				Skada:DispatchSets(log_auraapply, aura)
+				Skada:DispatchSets(log_auraapply, nil, aura)
 			elseif event == "SPELL_AURA_REFRESH" then
-				Skada:DispatchSets(log_aurarefresh, aura)
+				Skada:DispatchSets(log_aurarefresh, nil, aura)
 			elseif event == "SPELL_AURA_REMOVED" then
-				Skada:DispatchSets(log_auraremove, aura)
+				Skada:DispatchSets(log_auraremove, nil, aura)
 			end
 		end
 	end
@@ -526,14 +526,14 @@ Skada:AddLoadableModule("Debuffs", function(L)
 			Skada:FixPets(aura)
 
 			if event == "SPELL_AURA_APPLIED" then
-				Skada:DispatchSets(log_auraapply, aura)
+				Skada:DispatchSets(log_auraapply, nil, aura)
 				if queuedSpells[spellid] then
 					Skada:QueueUnit(queuedSpells[spellid], srcGUID, srcName, srcFlags, dstGUID)
 				end
 			elseif event == "SPELL_AURA_REFRESH" then
-				Skada:DispatchSets(log_aurarefresh, aura)
+				Skada:DispatchSets(log_aurarefresh, nil, aura)
 			elseif event == "SPELL_AURA_REMOVED" then
-				Skada:DispatchSets(log_auraremove, aura)
+				Skada:DispatchSets(log_auraremove, nil, aura)
 				if queuedSpells[spellid] then
 					Skada:UnqueueUnit(queuedSpells[spellid], dstGUID)
 				end

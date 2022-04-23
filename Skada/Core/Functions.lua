@@ -869,6 +869,82 @@ do
 end
 
 -------------------------------------------------------------------------------
+-- Notifications stuff!
+
+do
+	local total_opt = nil
+
+	function Skada:GetTotalOptions()
+		self.GetTotalOptions = nil -- remove it
+
+		if not total_opt then
+			local values = {al = 0x10, rb = 0x01, rt = 0x02, db = 0x04, dt = 0x08}
+
+			local disabled = function()
+				return band(self.db.profile.totalflag, values.al) ~= 0
+			end
+
+			total_opt = {
+				type = "group",
+				name = L["Total Segment"],
+				desc = format(L["Options for %s."], L["Total Segment"]),
+				order = 10000,
+				get = function(i)
+					return (band(self.db.profile.totalflag, values[i[#i]]) ~= 0)
+				end,
+				set = function(i, val)
+					local v = values[i[#i]]
+					if val and band(self.db.profile.totalflag, v) == 0 then
+						self.db.profile.totalflag = self.db.profile.totalflag + v
+					elseif not val and band(self.db.profile.totalflag, v) ~= 0 then
+						self.db.profile.totalflag = self.db.profile.totalflag - v
+					end
+				end,
+				args = {
+					al = {
+						type = "toggle",
+						name = L["All Segments"],
+						desc = L.opt_tweaks_total_all_desc,
+						width = "full",
+						order = 10
+					},
+					rb = {
+						type = "toggle",
+						name = L["Raid Bosses"],
+						desc = format(L.opt_tweaks_total_fmt_desc, L["Raid Bosses"]),
+						order = 20,
+						disabled = disabled
+					},
+					rt = {
+						type = "toggle",
+						name = L["Raid Trash"],
+						desc = format(L.opt_tweaks_total_fmt_desc, L["Raid Trash"]),
+						order = 30,
+						disabled = disabled
+					},
+					db = {
+						type = "toggle",
+						name = L["Dungeon Bosses"],
+						desc = format(L.opt_tweaks_total_fmt_desc, L["Dungeon Bosses"]),
+						order = 40,
+						disabled = disabled
+					},
+					dt = {
+						type = "toggle",
+						name = L["Dungeon Trash"],
+						desc = format(L.opt_tweaks_total_fmt_desc, L["Dungeon Trash"]),
+						order = 50,
+						disabled = disabled
+					},
+				}
+			}
+		end
+
+		return total_opt
+	end
+end
+
+-------------------------------------------------------------------------------
 -- units fix function.
 --
 -- on certain servers, certain spells are not assigned properly and

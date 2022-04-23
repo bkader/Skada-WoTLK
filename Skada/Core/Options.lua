@@ -109,6 +109,7 @@ Skada.defaults = {
 		feed = "",
 		updatefrequency = 0.5,
 		minsetlength = 5,
+		totalflag = 0x10,
 		modules = {},
 		columns = {},
 		toast = {spawn_point = "BOTTOM", duration = 5, opacity = 0.75},
@@ -724,7 +725,8 @@ Skada.options = {
 					desc = fmt(L["Advanced options for %s."], L["Tweaks"]),
 					order = 900,
 					args = {
-						toast_opt = Skada:GetToastOptions()
+						toast_opt = Skada:GetToastOptions(),
+						total_opt = Skada:GetTotalOptions()
 					}
 				}
 			}

@@ -703,6 +703,15 @@ L["Announces how long it took to apply %d stacks of %s and announces when it dro
 L["%s dropped from %s!"] = "%s 已於 %s 過期！"
 L["%s stacks of %s applied on %s in %s sec!"] = "%4$s 秒內將 %1$s 疊 %2$s 塗抹在 %3$s 上！"
 L["My Spells"] = "我的法術"
+-- total data options
+L["Total Segment"] = "總段" -- needs review
+L["All Segments"] = "所有段" -- needs review
+L["Raid Bosses"] = "突襲首領" -- needs review
+L["Raid Trash"] = "突襲垃圾" -- needs review
+L["Dungeon Bosses"] = "地牢首領" -- needs review
+L["Dungeon Trash"] = "地牢垃圾" -- needs review
+L.opt_tweaks_total_all_desc = "将所有段添加到总段的数据中。" -- needs review
+L.opt_tweaks_total_fmt_desc = "将带有 %s 的段添加到总段的数据中。" -- needs review
 -- project ascension
 L["Project Ascension"] = "Project Ascension"
 L["project_ascension_desc"] = "在 |cffffbb00Project Ascension|r 中，您的角色是擁有任何能力或天賦的英雄。\n\n图标和颜色被发送给群组成员以代替默认图标和颜色使用。"

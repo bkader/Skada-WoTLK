@@ -40,8 +40,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 			data.dstName = dstName
 			data.dstFlags = dstFlags
 
-			Skada:DispatchSets(log_sunder, data)
-			log_sunder(Skada.total, data)
+			Skada:DispatchSets(log_sunder, true, data)
 
 			if Skada.db.profile.modules.sunderannounce then
 				if not Skada.db.profile.modules.sunderbossonly or (Skada.db.profile.modules.sunderbossonly and Skada:IsBoss(dstGUID)) then

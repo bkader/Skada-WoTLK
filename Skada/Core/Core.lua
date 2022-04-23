@@ -3287,8 +3287,7 @@ do
 	end
 
 	function Skada:ClearAllIndexes(mt)
-		Skada:DispatchSets(ClearIndexes, mt)
-		ClearIndexes(Skada.char.total, mt)
+		Skada:DispatchSets(ClearIndexes, true, mt)
 		if Skada.char.sets then
 			for _, set in ipairs(Skada.char.sets) do
 				ClearIndexes(set, mt)
@@ -3399,7 +3398,7 @@ function Skada:EndSegment()
 	self:ClearQueueUnits()
 
 	local curtime = time()
-	self:DispatchSets(ProcessSet, curtime)
+	self:DispatchSets(ProcessSet, nil, curtime)
 	T.free("Skada_TempSegments", self.tempsets)
 
 	-- remove players ".last" key from total segment.
@@ -3491,10 +3490,61 @@ function Skada:ResumeSegment(msg)
 	end
 end
 
-function Skada:DispatchSets(func, ...)
+local function CanRecordTotal(set)
+	if set then
+		-- raid bosses - 0x01
+		if band(Skada.db.profile.totalflag, 0x01) ~= 0 then
+			if set.type == "raid" and set.gotboss then
+				if set.time >= Skada.db.profile.minsetlength then
+					return true
+				end
+			end
+		end
+
+		-- raid trash - 0x02
+		if band(Skada.db.profile.totalflag, 0x02) ~= 0 then
+			if set.type == "raid" and not set.gotboss then
+				return true
+			end
+		end
+
+		-- dungeon boss - 0x04
+		if band(Skada.db.profile.totalflag, 0x04) ~= 0 then
+			if set.type == "party" and Skada.db.profile.gotboss then
+				return true
+			end
+		end
+
+		-- dungeon trash - 0x08
+		if band(Skada.db.profile.totalflag, 0x08) ~= 0 then
+			if set.type == "party" and not Skada.db.profile.gotboss then
+				return true
+			end
+		end
+
+		-- any combat - 0x10
+		if band(Skada.db.profile.totalflag, 0x10) ~= 0 then
+			return true
+		end
+
+		-- battlegrouns/arenas or nothing
+		return (set.type == "pvp" or set.type == "arena")
+	end
+
+	return false
+end
+
+function Skada:DispatchSets(func, total, ...)
 	if self.current and type(func) == "function" then
+		-- record to current
 		func(self.current, ...)
 
+		-- record to total
+		if total and self.total and CanRecordTotal(self.current) then
+			func(self.total, ...)
+		end
+
+		-- record to phases
 		if self.tempsets then -- phases
 			for _, set in ipairs(self.tempsets) do
 				func(set, ...)
@@ -3788,7 +3838,7 @@ do
 		if self.current and self.current.gotboss and (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") then
 			if band(dstFlags, BITMASK_GROUP) == 0 and band(dstFlags, BITMASK_PETS) == 0 then
 				if dstName and self.current.mobname == dstName then
-					self:ScheduleTimer("DispatchSets", self.db.profile.updatefrequency or 0.5, BossDefeated)
+					self:ScheduleTimer("DispatchSets", nil, self.db.profile.updatefrequency or 0.5, BossDefeated)
 				end
 			end
 		end

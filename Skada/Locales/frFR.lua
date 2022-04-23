@@ -709,6 +709,15 @@ L["Announces how long it took to apply %d stacks of %s and announces when it dro
 L["%s dropped from %s!"] = "%s sur %s a expir\195\169!"
 L["%s stacks of %s applied on %s in %s sec!"] = "%s piles \1242 %s appliqu\195\169es sur %s en %s sec!"
 L["My Spells"] = "Mes sorts"
+-- total data options
+L["Total Segment"] = "Segment total"
+L["All Segments"] = "Tous les segments"
+L["Raid Bosses"] = "Boss de raid"
+L["Raid Trash"] = "Trash de raid"
+L["Dungeon Bosses"] = "Boss de donjon"
+L["Dungeon Trash"] = "Trash de donjon"
+L.opt_tweaks_total_all_desc = "Tous les segments sont ajout\195\169s aux donn\195\169es du segment total."
+L.opt_tweaks_total_fmt_desc = "Les segments avec %s sont ajout\195\169s aux donn\195\169es du segment total."
 -- project ascension
 L["Project Ascension"] = "Project Ascension"
 L["project_ascension_desc"] = [=[Sur |cffffbb00Project Ascension|r, vos héros sans classe ayant à leur portée n'importe quelle capacité ou talent.

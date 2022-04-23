@@ -248,8 +248,7 @@ Skada:AddLoadableModule("CC Done", function(L)
 
 			data.spellid = spellid
 
-			Skada:DispatchSets(log_ccdone, data)
-			log_ccdone(Skada.total, data)
+			Skada:DispatchSets(log_ccdone, true, data)
 		end
 	end
 
@@ -503,8 +502,7 @@ Skada:AddLoadableModule("CC Taken", function(L)
 
 			data.spellid = spellid
 
-			Skada:DispatchSets(log_cctaken, data)
-			log_cctaken(Skada.total, data)
+			Skada:DispatchSets(log_cctaken, true, data)
 		end
 	end
 
@@ -753,8 +751,7 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 		data.spellid = spellid
 		data.extraspellid = extraspellid
 
-		Skada:DispatchSets(log_ccbreak, data)
-		log_ccbreak(Skada.total, data)
+		Skada:DispatchSets(log_ccbreak, true, data)
 
 		-- Optional announce
 		srcName = srcName_modified or srcName

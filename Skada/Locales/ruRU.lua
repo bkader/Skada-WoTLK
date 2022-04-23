@@ -707,6 +707,15 @@ L["Announces how long it took to apply %d stacks of %s and announces when it dro
 L["%s dropped from %s!"] = "%s истек %s!"
 L["%s stacks of %s applied on %s in %s sec!"] = "На %3$s нанесено %1$s стаканов %2$s за %4$s секунд!"
 L["My Spells"] = "Мои заклинания"
+-- total data options
+L["Total Segment"] = "Всего сегмент"
+L["All Segments"] = "Все сегменты"
+L["Raid Bosses"] = "Рейдовые боссы"
+L["Raid Trash"] = "Рейдовый мусор"
+L["Dungeon Bosses"] = "Боссы подземелья"
+L["Dungeon Trash"] = "Мусор подземелья"
+L.opt_tweaks_total_all_desc = "Все сегменты добавляются к всего данным."
+L.opt_tweaks_total_fmt_desc = "Сегменты с %s добавляются к всего данным."
 -- project ascension
 L["Project Ascension"] = "Project Ascension"
 L["project_ascension_desc"] = [=[В |cffffbb00Project Ascension|r ваши персонажи - бесклассовые Герои, у которых есть любые способности или таланты, доступные им.

@@ -737,6 +737,15 @@ L["Announces how long it took to apply %d stacks of %s and announces when it dro
 L["%s dropped from %s!"] = true
 L["%s stacks of %s applied on %s in %s sec!"] = true
 L["My Spells"] = true
+-- total data options
+L["Total Segment"] = true
+L["All Segments"] = true
+L["Raid Bosses"] = true
+L["Raid Trash"] = true
+L["Dungeon Bosses"] = true
+L["Dungeon Trash"] = true
+L.opt_tweaks_total_all_desc = "All segments are added to total segment data."
+L.opt_tweaks_total_fmt_desc = "Segments with %s are added to total segment data."
 -- project ascension
 L["Project Ascension"] = true
 L["project_ascension_desc"] = [=[On |cffffbb00Project Ascension|r, your characters are classless Heroes that have any ability or talent within their reach.

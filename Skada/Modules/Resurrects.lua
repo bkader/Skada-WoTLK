@@ -69,8 +69,7 @@ Skada:AddLoadableModule("Resurrects", function(L)
 		data.dstName = dstName
 		data.dstFlags = dstFlags
 
-		Skada:DispatchSets(log_resurrect, data)
-		log_resurrect(Skada.total, data)
+		Skada:DispatchSets(log_resurrect, true, data)
 	end
 
 	function playermod:Enter(win, id, label)

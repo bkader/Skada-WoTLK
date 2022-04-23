@@ -53,8 +53,7 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 			data.playerflags = srcFlags
 			data.dstName = dstName
 
-			Skada:DispatchSets(log_parry, data)
-			log_parry(Skada.total, data)
+			Skada:DispatchSets(log_parry, true, data)
 		end
 	end
 

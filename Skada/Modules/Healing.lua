@@ -123,7 +123,7 @@ Skada:AddLoadableModule("Healing", function(L)
 
 				Skada:FixPets(heal)
 
-				Skada:DispatchSets(log_spellcast, heal)
+				Skada:DispatchSets(log_spellcast, nil, heal)
 			end
 		end
 	end
@@ -146,8 +146,7 @@ Skada:AddLoadableModule("Healing", function(L)
 			heal.petname = nil
 			Skada:FixPets(heal)
 
-			Skada:DispatchSets(log_heal, heal, eventtype == "SPELL_PERIODIC_HEAL")
-			log_heal(Skada.total, heal, eventtype == "SPELL_PERIODIC_HEAL")
+			Skada:DispatchSets(log_heal, true, heal, eventtype == "SPELL_PERIODIC_HEAL")
 		end
 	end
 

@@ -707,6 +707,15 @@ L["Announces how long it took to apply %d stacks of %s and announces when it dro
 L["%s dropped from %s!"] = "%s expir\195\179 en %s!"
 L["%s stacks of %s applied on %s in %s sec!"] = "¡%s pilas de %s aplicadas a %s en %s seg!"
 L["My Spells"] = "Mis habilidades"
+-- total data options
+L["Total Segment"] = "Segmento total" -- needs review
+L["All Segments"] = "Todos los segmentos" -- needs review
+L["Raid Bosses"] = "Jefes de raid" -- needs review
+L["Raid Trash"] = "Trash de raid" -- needs review
+L["Dungeon Bosses"] = "Jefes de mazmorra" -- needs review
+L["Dungeon Trash"] = "Trash de mazmorra" -- needs review
+L.opt_tweaks_total_all_desc = "Todos los segmentos se a\195\177aden a los datos del segmento total." -- needs review
+L.opt_tweaks_total_fmt_desc = "Los segmentos con %s se a\195\177aden a los datos del segmento total." -- needs review
 -- project ascension
 L["Project Ascension"] = "Project Ascension"
 L["project_ascension_desc"] = [=[En |cffffbb00Project Ascension|r, tus personajes son héroes sin clase que tienen cualquier habilidad o talento a su alcance.

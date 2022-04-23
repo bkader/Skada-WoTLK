@@ -186,7 +186,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				dmg.crushing = nil
 				dmg.misstype = nil
 
-				Skada:DispatchSets(log_spellcast, dmg)
+				Skada:DispatchSets(log_spellcast, nil, dmg)
 			end
 		end
 	end
@@ -243,8 +243,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 
 				dmg.misstype = nil
 
-				Skada:DispatchSets(log_damage, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
-				log_damage(Skada.total, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
+				Skada:DispatchSets(log_damage, true, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
 			end
 		end
 	end
@@ -309,8 +308,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 					dmg.resisted = amount or 0
 				end
 
-				Skada:DispatchSets(log_damage, dmg, eventtype == "SPELL_PERIODIC_MISSED")
-				log_damage(Skada.total, dmg, eventtype == "SPELL_PERIODIC_MISSED")
+				Skada:DispatchSets(log_damage, true, dmg, eventtype == "SPELL_PERIODIC_MISSED")
 			end
 		end
 	end
