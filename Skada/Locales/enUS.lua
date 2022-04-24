@@ -754,7 +754,7 @@ L.opt_tweaks_total_all_desc = "All segments are added to total segment data."
 L.opt_tweaks_total_fmt_desc = "Segments with %s are added to total segment data."
 -- project ascension
 L["Project Ascension"] = true
-L["project_ascension_desc"] = [=[On |cffffbb00Project Ascension|r, your characters are classless Heroes that have any ability or talent within their reach.
+L.project_ascension_desc = [=[On |cffffbb00Project Ascension|r, your characters are classless Heroes that have any ability or talent within their reach.
 
 Icons and colors are sent to group members and Skada can use them instead of your character's default class icon and color.]=]
 L["Icon"] = true

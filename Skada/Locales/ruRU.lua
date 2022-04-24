@@ -724,7 +724,7 @@ L.opt_tweaks_total_all_desc = "Все сегменты добавляются к
 L.opt_tweaks_total_fmt_desc = "Сегменты с %s добавляются к всего данным."
 -- project ascension
 L["Project Ascension"] = "Project Ascension"
-L["project_ascension_desc"] = [=[В |cffffbb00Project Ascension|r ваши персонажи - бесклассовые Герои, у которых есть любые способности или таланты, доступные им.
+L.project_ascension_desc = [=[В |cffffbb00Project Ascension|r ваши персонажи - бесклассовые Герои, у которых есть любые способности или таланты, доступные им.
 
 Значки и цвета отправляются членам группы для использования вместо значков и цветов по умолчанию.]=]
 L["Icon"] = "Значок"

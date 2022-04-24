@@ -720,7 +720,7 @@ L.opt_tweaks_total_all_desc = "将所有段添加到总段的数据中。" -- ne
 L.opt_tweaks_total_fmt_desc = "将带有 %s 的段添加到总段的数据中。" -- needs review
 -- project ascension
 L["Project Ascension"] = "Project Ascension"
-L["project_ascension_desc"] = "在 |cffffbb00Project Ascension|r 中，您的角色是擁有任何能力或天賦的英雄。\n\n图标和颜色被发送给群组成员以代替默认图标和颜色使用。"
+L.project_ascension_desc = "在 |cffffbb00Project Ascension|r 中，您的角色是擁有任何能力或天賦的英雄。\n\n图标和颜色被发送给群组成员以代替默认图标和颜色使用。"
 L["Icon"] = "圖標"
 L["Color for %s."] = "%s 的顏色。"
 L["Choose the %s that fits your character's build."] = "選擇適合您角色體型的%s。"

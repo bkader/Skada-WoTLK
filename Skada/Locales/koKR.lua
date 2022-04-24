@@ -724,7 +724,7 @@ L.opt_tweaks_total_all_desc = "모든 세그먼트는 전체 세그먼트의 데
 L.opt_tweaks_total_fmt_desc = "전체 세그먼트의 데이터에 %s가 있는 세그먼트가 추가됩니다." -- needs review
 -- project ascension
 L["Project Ascension"] = "Project Ascension"
-L["project_ascension_desc"] = "|cffffbb00Project Ascension|r에서 캐릭터는 능력이나 재능이 있는 클래스가 없는 영웅입니다.\n\n아이콘 및 색상은 기본 아이콘 및 색상 대신 사용할 그룹 구성원에게 전송됩니다."
+L.project_ascension_desc = "|cffffbb00Project Ascension|r에서 캐릭터는 능력이나 재능이 있는 클래스가 없는 영웅입니다.\n\n아이콘 및 색상은 기본 아이콘 및 색상 대신 사용할 그룹 구성원에게 전송됩니다."
 L["Icon"] = "아이콘"
 L["Color for %s."] = "%s의 색상입니다."
 L["Choose the %s that fits your character's build."] = "캐릭터의 빌드에 맞는 %s을 선택하십시오."

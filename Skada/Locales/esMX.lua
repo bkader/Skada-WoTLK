@@ -405,7 +405,7 @@ L["Jump to a specific mode."] = "Salta a un modo espec\195\173fico."
 L["Report"] = "Informar"
 L.btn_report_desc = "Abre el di\195\161logo que te permite informar de tus datos a otros de varias maneras.\n|cff00ff00Shift-click|r para Informe r\195\161pido."
 L["Stop"] = "Parar"
-L.btn_stop_desc = "Para o resume el segmento actual. Útil para descontar los datos despu\195\169s de una muerte del grupo. Puede ser establecido para que se pare autom\195\161ticamente en las opciones."
+L.btn_stop_desc = "Para o resume el segmento actual. \195\154til para descontar los datos despu\195\169s de una muerte del grupo. Puede ser establecido para que se pare autom\195\161ticamente en las opciones."
 L["Segment Stopped."] = "Segmento detenido."
 L["Segment Paused."] = "Segmento en pausa."
 L["Segment Resumed."] = "Segmento reanudado."
@@ -694,7 +694,7 @@ L["Filter DPS meters Spam"] = "Filtrar el spamn de medidores de DPS"
 L.opt_tweaks_spamage_desc = "Suprime los mensajes en el chat de medidores de da\195\177o y brinda un \195\186nico link en el chat con estadisticas en una ventana emergente."
 L["Reported by: %s"] = "Reportado por: %s"
 L["Smart Stop"] = "Parada inteligente"
-L.opt_tweaks_smarthalt_desc = "Detiene autom\195\161ticamente el segmento actual despu\195\169s de que el jefe ha muerto.\nÚtil para evitar la recopilaci\195\179n de datos en caso de un error de combate."
+L.opt_tweaks_smarthalt_desc = "Detiene autom\195\161ticamente el segmento actual despu\195\169s de que el jefe ha muerto.\n\195\154til para evitar la recopilaci\195\179n de datos en caso de un error de combate."
 L["Duration"] = "Duraci\195\179n"
 L.opt_tweaks_smartwait_desc = "¿Por cu\195\161nto tiempo debe esperar antes de Skada detener el segmento?"
 L["Modes Icons"] = "Iconos de modos"
@@ -724,7 +724,7 @@ L.opt_tweaks_total_all_desc = "Todos los segmentos se a\195\177aden a los datos 
 L.opt_tweaks_total_fmt_desc = "Los segmentos con %s se a\195\177aden a los datos del segmento total." -- needs review
 -- project ascension
 L["Project Ascension"] = "Project Ascension"
-L["project_ascension_desc"] = [=[En |cffffbb00Project Ascension|r, tus personajes son héroes sin clase que tienen cualquier habilidad o talento a su alcance.
+L.project_ascension_desc = [=[En |cffffbb00Project Ascension|r, tus personajes son héroes sin clase que tienen cualquier habilidad o talento a su alcance.
 
 Los iconos y colores se envían a los miembros del grupo para que los utilicen en lugar de los iconos y colores predeterminados.]=]
 L["Icon"] = "Icono"
