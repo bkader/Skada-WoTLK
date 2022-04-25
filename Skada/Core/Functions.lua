@@ -348,7 +348,10 @@ do
 		local id = self.GetCreatureId(guid)
 
 		if LBI.BossIDs[id] or creatureToFight[id] or creatureToBoss[id] then
-			id = creatureToBoss[id] or id -- should fix id?
+			-- should fix id?
+			if creatureToBoss[id] and creatureToBoss[id] ~= true then
+				id = creatureToBoss[id]
+			end
 
 			-- should fix name?
 			if creatureToFight[id] and name ~= creatureToFight[id] then

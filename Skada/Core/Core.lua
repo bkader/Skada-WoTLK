@@ -333,17 +333,20 @@ end
 -- popup dialogs
 
 -- skada reset dialog
-function Skada:ShowPopup(win, popup)
-	if Skada.testMode then return end
+do
+	local t = {timeout = 30, whileDead = 0}
+	local f = function() Skada:Reset(IsShiftKeyDown()) end
 
-	if Skada.db.profile.skippopup and not popup then
-		Skada:Reset(IsShiftKeyDown())
-		return
+	function Skada:ShowPopup(win, popup)
+		if Skada.testMode then return end
+
+		if Skada.db.profile.skippopup and not popup then
+			Skada:Reset(IsShiftKeyDown())
+			return
+		end
+
+		Skada:ConfirmDialog(L["Do you want to reset Skada?\nHold SHIFT to reset all data."], f, t)
 	end
-
-	Skada:ConfirmDialog(L["Do you want to reset Skada?\nHold SHIFT to reset all data."], function()
-		Skada:Reset(IsShiftKeyDown())
-	end, {timeout = 30, whileDead = 0})
 end
 
 -- new window creation dialog
@@ -397,8 +400,9 @@ function Skada:NewWindow()
 end
 
 -- reinstall the addon
-function Skada:Reinstall()
-	Skada:ConfirmDialog(L["Are you sure you want to reinstall Skada?"], function()
+do
+	local t = {timeout = 15, whileDead = 0}
+	local f = function()
 		if SkadaDB.profiles then
 			wipe(SkadaDB.profiles)
 		end
@@ -406,7 +410,11 @@ function Skada:Reinstall()
 			wipe(SkadaDB.profileKeys)
 		end
 		ReloadUI()
-	end, {timeout = 15, whileDead = 0})
+	end
+
+	function Skada:Reinstall()
+		Skada:ConfirmDialog(L["Are you sure you want to reinstall Skada?"], f, t)
+	end
 end
 
 -------------------------------------------------------------------------------
@@ -813,15 +821,16 @@ do
 		end
 	end
 
+	local function sortFunc(a, b)
+		if Skada.db.profile.sortmodesbyusage and Skada.db.profile.modeclicks then
+			return (Skada.db.profile.modeclicks[a.moduleName] or 0) > (Skada.db.profile.modeclicks[b.moduleName] or 0)
+		else
+			return a.moduleName < b.moduleName
+		end
+	end
+
 	function Skada:SortModes()
-		tsort(modes, function(a, b)
-			if self.db.profile.sortmodesbyusage and self.db.profile.modeclicks then
-				return (self.db.profile.modeclicks[a.moduleName] or 0) >
-					(self.db.profile.modeclicks[b.moduleName] or 0)
-			else
-				return a.moduleName < b.moduleName
-			end
-		end)
+		tsort(modes, sortFunc)
 	end
 
 	function Window:DisplayModes(settime)
@@ -2218,7 +2227,7 @@ end
 function Skada:PLAYER_ENTERING_WORLD()
 	Skada:CheckZone()
 	if was_in_party == nil then
-		Skada:ScheduleTimer("GROUP_ROSTER_UPDATE", 1)
+		Skada:ScheduleTimer("UpdateRoster", 1)
 	end
 
 	-- account-wide addon version
@@ -2356,7 +2365,7 @@ do
 		was_in_party = IsInGroup()
 	end
 
-	function Skada:GROUP_ROSTER_UPDATE()
+	function Skada:UpdateRoster()
 		CheckForJoinAndLeave()
 		Skada:CheckGroup()
 
@@ -3086,8 +3095,8 @@ function Skada:OnEnable()
 	self:RegisterComm("Skada")
 
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
-	self:RegisterEvent("PARTY_MEMBERS_CHANGED", "GROUP_ROSTER_UPDATE")
-	self:RegisterEvent("RAID_ROSTER_UPDATE", "GROUP_ROSTER_UPDATE")
+	self:RegisterEvent("PARTY_MEMBERS_CHANGED", "UpdateRoster")
+	self:RegisterEvent("RAID_ROSTER_UPDATE", "UpdateRoster")
 	self:RegisterEvent("UNIT_PET")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 	self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "CheckZone")
@@ -3287,7 +3296,8 @@ do
 	end
 
 	function Skada:ClearAllIndexes(mt)
-		Skada:DispatchSets(ClearIndexes, true, mt)
+		Skada:DispatchSets(ClearIndexes, nil, mt)
+		ClearIndexes(Skada.total, mt)
 		if Skada.char.sets then
 			for _, set in ipairs(Skada.char.sets) do
 				ClearIndexes(set, mt)

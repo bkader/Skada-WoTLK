@@ -25,16 +25,18 @@ if not FONT_FLAGS then
 	Skada.fontFlags = FONT_FLAGS
 end
 
+local function sortFunc(a, b)
+	if not a or a.value == nil then
+		return false
+	elseif not b or b.value == nil then
+		return true
+	else
+		return a.value > b.value
+	end
+end
+
 local function sortDataset(win)
-	tsort(win.dataset, function(a, b)
-		if not a or a.value == nil then
-			return false
-		elseif not b or b.value == nil then
-			return true
-		else
-			return a.value > b.value
-		end
-	end)
+	tsort(win.dataset, sortFunc)
 end
 
 local function formatLabel(win, data)

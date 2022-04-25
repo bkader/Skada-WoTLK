@@ -130,6 +130,38 @@ local function BarClick(win, bar, button)
 	end
 end
 
+local function frameOnMouseDown(self, button)
+	if button == "RightButton" then
+		self.win:RightClick(nil, button)
+	end
+end
+
+local function frameOnDragStart(self)
+	if not self.win.db.barslocked then
+		GameTooltip:Hide()
+		self.isDragging = true
+		self:StartMoving()
+	end
+end
+
+local function frameOnDragStop(self)
+	self:StopMovingOrSizing()
+	self.isDragging = false
+	LibWindow.SavePosition(self)
+end
+
+local function titleOnMouseDown(self, button)
+	if button == "RightButton" then
+		Skada:SegmentMenu(self.win)
+	elseif button == "LeftButton" then
+		Skada:ModeMenu(self.win)
+	end
+end
+
+local function menuOnClick(self, button)
+	Skada:OpenMenu(self.win, button)
+end
+
 function mod:Create(window, isnew)
 	if not window.frame then
 		window.frame = CreateFrame("Frame", window.db.name .. "InlineFrame", UIParent)
@@ -151,12 +183,7 @@ function mod:Create(window, isnew)
 	end
 
 	window.frame:EnableMouse()
-	window.frame:SetScript("OnMouseDown", function(frame, button)
-		if button == "RightButton" then
-			window:RightClick(nil, button)
-		end
-	end)
-
+	window.frame:SetScript("OnMouseDown", frameOnMouseDown)
 	LibWindow.RegisterConfig(window.frame, window.db)
 
 	if isnew then
@@ -168,20 +195,12 @@ function mod:Create(window, isnew)
 	window.frame:EnableMouse(true)
 	window.frame:SetMovable(true)
 	window.frame:RegisterForDrag("LeftButton")
-	window.frame:SetScript("OnDragStart", function(frame)
-		if not window.db.barslocked then
-			GameTooltip:Hide()
-			frame.isDragging = true
-			frame:StartMoving()
-		end
-	end)
-	window.frame:SetScript("OnDragStop", function(frame)
-		frame:StopMovingOrSizing()
-		frame.isDragging = false
-		LibWindow.SavePosition(frame)
-	end)
+	window.frame:SetScript("OnDragStart", frameOnDragStart)
+	window.frame:SetScript("OnDragStop", frameOnDragStop)
 
 	local titlebg = CreateFrame("Frame", "InlineTitleBackground", window.frame)
+	titlebg.win = window
+
 	local title = window.frame:CreateFontString("frameTitle", 6)
 	title:SetTextColor(self:GetFontColor(window.db))
 	title:SetFont(self:GetFont(window.db))
@@ -196,13 +215,7 @@ function mod:Create(window, isnew)
 
 	titlebg:SetAllPoints(title)
 	titlebg:EnableMouse(true)
-	titlebg:SetScript("OnMouseDown", function(frame, button)
-		if button == "RightButton" then
-			Skada:SegmentMenu(window)
-		elseif button == "LeftButton" then
-			Skada:ModeMenu(window)
-		end
-	end)
+	titlebg:SetScript("OnMouseDown", titleOnMouseDown)
 
 	local menu = CreateFrame("Button", "$parentMenuButton", window.frame)
 	menu:ClearAllPoints()
@@ -220,7 +233,8 @@ function mod:Create(window, isnew)
 	menu:SetPoint("LEFT", window.frame, "LEFT", 6, 0)
 	menu:SetFrameLevel(window.frame:GetFrameLevel() + 5)
 	menu:SetBackdrop(buttonBackdrop)
-	menu:SetScript("OnClick", function() Skada:OpenMenu(window) end)
+	menu.win = window
+	menu:SetScript("OnClick", menuOnClick)
 
 	window.frame.menu = menu
 	window.frame.skadamenubutton = title
@@ -369,6 +383,16 @@ function mod:UpdateBar(bar, bardata, db)
 	return bar
 end
 
+local function sortFunc(a, b)
+	if not a or a.value == nil then
+		return false
+	elseif not b or b.value == nil then
+		return true
+	else
+		return a.value > b.value
+	end
+end
+
 function mod:Update(win)
 	if not win or not win.frame then
 		return
@@ -393,15 +417,7 @@ function mod:Update(win)
 		end
 	end
 
-	tsort(mybars, function(bar1, bar2)
-		if not bar1 or bar1.value == nil then
-			return false
-		elseif not bar2 or bar2.value == nil then
-			return true
-		else
-			return bar1.value > bar2.value
-		end
-	end)
+	tsort(mybars, sortFunc)
 
 	local yoffset = (win.db.height - win.db.barfontsize) / 2
 	local left = win.frame.barstartx + 40

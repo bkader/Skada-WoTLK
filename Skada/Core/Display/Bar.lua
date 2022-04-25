@@ -47,6 +47,12 @@ local function WindowOnMouseDown(self, button)
 	end
 end
 
+local function WindowOnShow(self)
+	if self.win and self.win.db then
+		self:SetMaxBars(nil, self.win.db.snapto)
+	end
+end
+
 local function TitleButtonOnClick(self, button)
 	local bargroup = self:GetParent()
 	if not bargroup then return end
@@ -144,7 +150,7 @@ do
 		bargroup.RegisterCallback(mod, "WindowLocked")
 		bargroup:EnableMouse(true)
 		bargroup:SetScript("OnMouseDown", WindowOnMouseDown)
-		bargroup:SetScript("OnShow", function(self) self:SetMaxBars(nil, p.snapto) end)
+		bargroup:SetScript("OnShow", WindowOnShow)
 		bargroup.button:SetScript("OnClick", TitleButtonOnClick)
 		bargroup:HideIcon()
 
