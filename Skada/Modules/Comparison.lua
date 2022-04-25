@@ -812,11 +812,11 @@ Skada:AddLoadableModule("Comparison", function(L)
 	end
 
 	function mod:SetActor(win, id, label)
-		-- same player, same mode or no DisplayMode func?
-		if (id == mod.userGUID and win.selectedmode == mod) or not win.DisplayMode then return end
+		-- no DisplayMode func?
+		if not win.DisplayMode then return end
 
-		-- is it met?
-		if id == Skada.userGUID then
+		-- same actor or me? reset to the player
+		if id == Skada.userGUID or (id == mod.userGUID and win.selectedmode == mod) then
 			mod.userGUID = Skada.userGUID
 			mod.userName = Skada.userName
 			mod.userClass = Skada.userClass
