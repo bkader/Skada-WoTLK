@@ -164,10 +164,12 @@ Skada:AddLoadableModule("Fails", function(L)
 			click1 = playermod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			nototalclick = {playermod},
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\ability_creature_cursed_01]]
 		}
+
+		-- no total click.
+		playermod.nototal = true
 
 		Skada:AddMode(self)
 

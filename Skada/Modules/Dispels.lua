@@ -235,10 +235,14 @@ Skada:AddLoadableModule("Dispels", function(L)
 			click3 = playermod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			nototalclick = {spellmod, targetmod, playermod},
 			columns = {Count = true, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\spell_holy_dispelmagic]]
 		}
+
+		-- no total click.
+		spellmod.nototal = true
+		targetmod.nototal = true
+		playermod.nototal = true
 
 		Skada:RegisterForCL(
 			SpellDispel,

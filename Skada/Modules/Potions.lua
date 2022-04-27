@@ -354,10 +354,12 @@ Skada:AddLoadableModule("Potions", function(L)
 			click1 = playermod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			nototalclick = {playermod},
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\inv_potion_31]]
 		}
+
+		-- no total click.
+		playermod.nototal = true
 
 		Skada:RegisterForCL(PotionUsed, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CheckPrePot")

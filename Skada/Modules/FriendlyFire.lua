@@ -250,10 +250,13 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 			click2 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			nototalclick = {spellmod, targetmod},
 			columns = {Damage = true, DPS = false, Percent = true, sDPS = false, sPercent = true},
 			icon = [[Interface\Icons\inv_gizmo_supersappercharge]]
 		}
+
+		-- no total click.
+		spellmod.nototal = true
+		targetmod.nototal = true
 
 		Skada:RegisterForCL(
 			SpellDamage,

@@ -449,10 +449,13 @@ Skada:AddLoadableModule("Healing", function(L)
 			click2 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			nototalclick = {playermod, targetmod},
 			columns = {Healing = true, HPS = true, Percent = true, sHPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_nature_healingtouch]]
 		}
+
+		-- no total click.
+		playermod.nototal = true
+		targetmod.nototal = true
 
 		local flags_src = {src_is_interesting = true}
 
@@ -711,10 +714,14 @@ Skada:AddLoadableModule("Overhealing", function(L)
 			click2 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			nototalclick = {playermod, targetmod},
 			columns = {Overhealing = true, HPS = true, Percent = true, sHPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_holy_holybolt]]
 		}
+
+		-- no total click.
+		playermod.nototal = true
+		targetmod.nototal = true
+
 		Skada:AddMode(self, L["Absorbs and Healing"])
 	end
 
@@ -1023,10 +1030,14 @@ Skada:AddLoadableModule("Total Healing", function(L)
 			click2 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			nototalclick = {playermod, targetmod},
 			columns = {Healing = true, HPS = true, Percent = true, sHPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_holy_flashheal]]
 		}
+
+		-- no total click.
+		playermod.nototal = true
+		targetmod.nototal = true
+
 		Skada:AddMode(self, L["Absorbs and Healing"])
 	end
 

@@ -566,10 +566,12 @@ Skada:AddLoadableModule("Deaths", function(L)
 			click1 = playermod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			nototalclick = {playermod},
 			columns = {Survivability = false, Count = true},
 			icon = [[Interface\Icons\ability_rogue_feigndeath]]
 		}
+
+		-- no total click.
+		playermod.nototal = true
 
 		local flags_dst_nopets = {dst_is_interesting_nopets = true}
 

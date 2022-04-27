@@ -104,8 +104,11 @@ Skada:AddLoadableModule("Resources", function(L)
 				click1 = pmode,
 				click4 = Skada.FilterClass,
 				click4_label = L["Toggle Class Filter"],
-				nototalclick = {pmode}
 			}
+
+			-- no total click.
+			pmode.nototal = true
+
 			return instance
 		end
 	end

@@ -144,10 +144,12 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 			click1 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			nototalclick = {targetmod},
 			columns = {Count = true, Percent = false},
 			icon = [[Interface\Icons\ability_parry]]
 		}
+
+		-- no total click.
+		targetmod.nototal = true
 
 		Skada:RegisterForCL(SpellMissed, "SPELL_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
 		Skada:RegisterForCL(SwingMissed, "SWING_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})

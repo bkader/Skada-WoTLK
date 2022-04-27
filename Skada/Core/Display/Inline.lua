@@ -94,7 +94,7 @@ local function onEnter(win, id, label, mode)
 end
 
 local function showmode(win, id, label, mode)
-	if win.selectedset == "total" and win.metadata.nototalclick and tContains(win.metadata.nototalclick, mode) then
+	if win.selectedset == "total" and type(mode) == "table" and mode.nototal then
 		return
 	end
 

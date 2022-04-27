@@ -253,10 +253,14 @@ Skada:AddLoadableModule("Interrupts", function(L)
 			click3 = playermod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			nototalclick = {spellmod, targetmod, playermod},
 			columns = {Count = true, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\ability_kick]]
 		}
+
+		-- no total click.
+		spellmod.nototal = true
+		targetmod.nototal = true
+		playermod.nototal = true
 
 		Skada:RegisterForCL(SpellInterrupt, "SPELL_INTERRUPT", {src_is_interesting = true})
 		Skada:AddMode(self)

@@ -788,10 +788,13 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			click2 = sourcemod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			nototalclick = {playermod, sourcemod},
 			columns = {Damage = true, DTPS = false, Percent = true, sDTPS = false, sPercent = true},
 			icon = [[Interface\Icons\ability_mage_frostfirebolt]]
 		}
+
+		-- no total click.
+		playermod.nototal = true
+		sourcemod.nototal = true
 
 		local flags_dst = {dst_is_interesting_nopets = true}
 
@@ -1001,7 +1004,6 @@ Skada:AddLoadableModule("DTPS", function(L)
 		if parentmod then
 			self.metadata.click1 = parentmod.metadata.click1
 			self.metadata.click2 = parentmod.metadata.click2
-			self.metadata.nototalclick = parentmod.metadata.nototalclick
 		end
 
 		Skada:AddMode(self, L["Damage Taken"])

@@ -459,10 +459,12 @@ Skada:AddLoadableModule("Buffs", function(L)
 			click1 = spellmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			nototalclick = {spellmod},
 			columns = {Uptime = true, Count = false, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\spell_holy_divinespirit]]
 		}
+
+		-- no total click.
+		spellmod.nototal = true
 
 		Skada:RegisterForCL(
 			HandleBuff,
@@ -695,10 +697,13 @@ Skada:AddLoadableModule("Debuffs", function(L)
 			click2 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			nototalclick = {spellmod, targetmod},
 			columns = {Uptime = true, Count = false, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\spell_shadow_shadowwordpain]]
 		}
+
+		-- no total click.
+		spellmod.nototal = true
+		targetmod.nototal = true
 
 		Skada:RegisterForCL(
 			HandleDebuff,

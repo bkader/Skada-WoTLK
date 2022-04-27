@@ -182,10 +182,12 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 		self.metadata = {
 			showspots = true,
 			click1 = targetmod,
-			nototalclick = {targetmod},
 			columns = {Count = true, Percent = false, sPercent = true},
 			icon = [[Interface\Icons\ability_warrior_sunder]]
 		}
+
+		-- no total click.
+		targetmod.nototal = true
 
 		Skada:RegisterForCL(SunderApplied, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})
 		Skada:RegisterForCL(SunderRemoved, "SPELL_AURA_REMOVED", {src_is_interesting_nopets = true})

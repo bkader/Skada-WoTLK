@@ -199,10 +199,13 @@ Skada:AddLoadableModule("Resurrects", function(L)
 			valuesort = true,
 			click1 = playermod,
 			click2 = targetmod,
-			nototalclick = {playermod, targetmod},
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_holy_resurrection]]
 		}
+
+		-- no total click.
+		playermod.nototal = true
+		targetmod.nototal = true
 
 		Skada:RegisterForCL(
 			SpellResurrect,

@@ -1823,8 +1823,8 @@ do
 		end
 	end
 
-	local function IgnoredTotalClick(win, click)
-		return (win.selectedset == "total" and win.metadata.nototalclick and tContains(win.metadata.nototalclick, click))
+	local function IgnoredTotalClick(set, mode)
+		return (set == "total" and type(mode) == "table" and mode.nototal == true)
 	end
 
 	function Skada:ShowTooltip(win, id, label, bar)
@@ -1849,16 +1849,16 @@ do
 				end
 
 				if self.db.profile.informativetooltips then
-					if md.click1 and not IgnoredTotalClick(win, md.click1) then
+					if md.click1 and not IgnoredTotalClick(win.selectedset, md.click1) then
 						self:AddSubviewToTooltip(t, win, md.click1, id, label)
 					end
-					if md.click2 and not IgnoredTotalClick(win, md.click2) then
+					if md.click2 and not IgnoredTotalClick(win.selectedset, md.click2) then
 						self:AddSubviewToTooltip(t, win, md.click2, id, label)
 					end
-					if md.click3 and not IgnoredTotalClick(win, md.click3) then
+					if md.click3 and not IgnoredTotalClick(win.selectedset, md.click3) then
 						self:AddSubviewToTooltip(t, win, md.click3, id, label)
 					end
-					if not self.Ascension and md.click4 and not IgnoredTotalClick(win, md.click4) then
+					if not self.Ascension and md.click4 and not IgnoredTotalClick(win.selectedset, md.click4) then
 						self:AddSubviewToTooltip(t, win, md.click4, id, label)
 					end
 				end
@@ -1872,28 +1872,28 @@ do
 					end
 				end
 
-				if type(md.click1) == "table" and not IgnoredTotalClick(win, md.click1) then
-					t:AddLine(format(L["Click for |cff00ff00%s|r"], md.click1.label or md.click1.moduleName))
-				elseif type(md.click1) == "function" and md.click1_label then
-					t:AddLine(format(L["Click for |cff00ff00%s|r"], md.click1_label))
+				if type(md.click1) == "function" then
+					t:AddLine(format(L["Click for |cff00ff00%s|r"], md.click1_label or L.Unknown))
+				elseif md.click1 and not IgnoredTotalClick(win.selectedset, md.click1) then
+					t:AddLine(format(L["Click for |cff00ff00%s|r"], md.click1_label or md.click1.moduleName))
 				end
 
-				if type(md.click2) == "table" and not IgnoredTotalClick(win, md.click2) then
-					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], md.click2.label or md.click2.moduleName))
-				elseif type(md.click2) == "function" and md.click2_label then
-					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], md.click2_label))
+				if type(md.click2) == "function" then
+					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], md.click2_label or L.Unknown))
+				elseif md.click2 and not IgnoredTotalClick(win.selectedset, md.click2) then
+					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], md.click2_label or md.click2.moduleName))
 				end
 
-				if type(md.click3) == "table" and not IgnoredTotalClick(win, md.click3) then
-					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], md.click3.label or md.click3.moduleName))
-				elseif type(md.click3) == "function" and md.click3_label then
-					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], md.click3_label))
+				if type(md.click3) == "function" then
+					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], md.click3_label or L.Unknown))
+				elseif md.click3 and not IgnoredTotalClick(win.selectedset, md.click3) then
+					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], md.click3_label or md.click3.moduleName))
 				end
 
-				if not self.Ascension and type(md.click4) == "table" and not IgnoredTotalClick(win, md.click4) then
-					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], md.click4.label or md.click4.moduleName))
-				elseif not self.Ascension and type(md.click4) == "function" and md.click4_label then
-					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], md.click4_label))
+				if not self.Ascension and type(md.click4) == "function" then
+					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], md.click4_label or L.Unknown))
+				elseif not self.Ascension and md.click4 and not IgnoredTotalClick(win.selectedset, md.click4) then
+					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], md.click4_label or md.click4.moduleName))
 				end
 
 				t:Show()

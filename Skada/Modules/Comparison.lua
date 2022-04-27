@@ -853,10 +853,13 @@ Skada:AddLoadableModule("Comparison", function(L)
 			click2 = targetmod,
 			click3 = self.SetActor,
 			click3_label = L["Damage Comparison"],
-			nototalclick = {spellmod, targetmod},
 			columns = {Damage = true, DPS = true, Comparison = true, Percent = true},
 			icon = [[Interface\Icons\Ability_Warrior_OffensiveStance]]
 		}
+
+		-- no total click.
+		spellmod.nototal = true
+		targetmod.nototal = true
 
 		self.userGUID = Skada.userGUID
 		self.userName = Skada.userName

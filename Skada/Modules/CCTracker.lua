@@ -376,10 +376,13 @@ Skada:AddLoadableModule("CC Done", function(L)
 			click2 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			nototalclick = {playermod, targetmod},
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_frost_chainsofice]]
 		}
+
+		-- no total click.
+		playermod.nototal = true
+		targetmod.nototal = true
 
 		Skada:RegisterForCL(
 			AuraApplied,
@@ -630,10 +633,13 @@ Skada:AddLoadableModule("CC Taken", function(L)
 			click2 = sourcemod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			nototalclick = {playermod, sourcemod},
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_magic_polymorphrabbit]]
 		}
+
+		-- no total click.
+		playermod.nototal = true
+		sourcemod.nototal = true
 
 		Skada:RegisterForCL(
 			AuraApplied,
@@ -906,10 +912,13 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 			click2 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			nototalclick = {playermod, targetmod},
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_holy_sealofvalor]]
 		}
+
+		-- no total click.
+		playermod.nototal = true
+		targetmod.nototal = true
 
 		Skada:RegisterForCL(
 			AuraBroken,
