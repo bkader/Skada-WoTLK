@@ -548,7 +548,7 @@ do
 						if copywindow then
 							for _, win in ipairs(windows) do
 								if win.db.name == copywindow and win.db.display == self.db.display then
-									Skada.tCopy(templist, win.db, "name", "sticked", "x", "y", "point", "snapped")
+									Skada.tCopy(templist, win.db, "name", "sticked", "x", "y", "point", "snapped", "child", "childmode")
 									break
 								end
 							end
@@ -727,7 +727,7 @@ function Window:Wipe()
 		self.display:Wipe(self)
 	end
 
-	if self.child and self.db.childmode == 0 then
+	if self.child and self.db.childmode == 1 then
 		self.child:Wipe()
 	end
 end
@@ -762,7 +762,7 @@ function Window:set_selected_set(set, step)
 	if set and self.selectedset ~= set then
 		self.selectedset = set
 		self:RestoreView()
-		if self.child and self.db.childmode <= 1 then
+		if self.child and (self.db.childmode == 1 or self.db.childmode == 2) then
 			self.child:set_selected_set(set)
 		end
 	end
@@ -797,7 +797,7 @@ function Window:DisplayMode(mode, class)
 	self.changed = true
 	self:set_mode_title()
 
-	if self.child and self.db.childmode ~= 1 then
+	if self.child and (self.db.childmode == 1 or self.db.childmode == 3) then
 		self.child:DisplayMode(mode)
 	end
 
@@ -866,7 +866,7 @@ do
 		self.changed = true
 		self.display:SetTitle(self, self.metadata.title)
 
-		if self.child and self.db.childmode == 0 then
+		if self.child and (self.db.childmode == 1 or self.db.childmode == 3) then
 			self.child:DisplayModes(settime)
 		end
 
@@ -898,7 +898,7 @@ do
 		self.metadata.maxvalue = 1
 		self.changed = true
 
-		if self.child and self.db.childmode == 0 then
+		if self.child and (self.db.childmode == 1 or self.db.childmode == 2) then
 			self.child:DisplaySets()
 		end
 
@@ -951,7 +951,6 @@ function Skada:CreateWindow(name, db, display)
 	db.scale = db.scale or self.windowdefaults.scale or 1
 
 	-- child window mode
-	db.childmode = db.childmode or self.windowdefaults.childmode or 0
 	db.tooltippos = db.tooltippos or self.windowdefaults.tooltippos or "NONE"
 
 	local window = Window:New()
@@ -1005,7 +1004,7 @@ do
 				win:Destroy()
 				tremove(windows, i)
 			elseif win.db.child == name then
-				win.db.child, win.child = nil, nil
+				win.db.child, win.db.childmode, win.child = nil, nil, nil
 			end
 		end
 

@@ -396,7 +396,7 @@ do
 	local function inserthistory(win)
 		if win.selectedmode and win.history[#win.history] ~= win.selectedmode then
 			win.history[#win.history + 1] = win.selectedmode
-			if win.child and win.db.childmode ~= 1 then
+			if win.child and (win.db.childmode == 1 or win.db.childmode == 3) then
 				inserthistory(win.child)
 			end
 		end
@@ -404,7 +404,7 @@ do
 
 	local function onEnter(win, id, label, mode)
 		mode:Enter(win, id, label)
-		if win.child and win.db.childmode ~= 1 then
+		if win.child and (win.db.childmode == 1 or win.db.childmode == 3) then
 			onEnter(win.child, id, label, mode)
 		end
 	end

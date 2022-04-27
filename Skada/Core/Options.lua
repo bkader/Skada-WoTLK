@@ -64,7 +64,6 @@ Skada.windowdefaults = {
 	set = "current",
 	display = "bar",
 	child = "",
-	childmode = 0,
 	sticky = true,
 	clamped = true,
 	tooltippos = "NONE",
@@ -1229,7 +1228,8 @@ function Skada:FrameSettings(db, include_dimensions)
 					end,
 					get = function() return db.child or "" end,
 					set = function(_, child)
-						db.child = child == "" and nil or child
+						db.child = (child == "") and nil or child
+						db.childmode = db.child and (db.childmode or 1) or nil
 						Skada:ReloadSettings()
 					end
 				},
@@ -1238,7 +1238,7 @@ function Skada:FrameSettings(db, include_dimensions)
 					name = L["Child Window Mode"],
 					order = 20,
 					values = optionsValues.CHILDMODE,
-					get = function() return db.childmode or 0 end,
+					get = function() return db.childmode or 1 end,
 					disabled = function() return not (db.child and db.child ~= "") end
 				}
 			}
