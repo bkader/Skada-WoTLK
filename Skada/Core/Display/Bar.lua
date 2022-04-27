@@ -55,13 +55,17 @@ end
 
 local function TitleButtonOnClick(self, button)
 	local bargroup = self:GetParent()
-	if not bargroup then return end
-	if IsShiftKeyDown() then
-		Skada:OpenMenu(bargroup.win)
-	elseif button == "RightButton" and IsControlKeyDown() then
-		Skada:SegmentMenu(bargroup.win)
-	elseif button == "RightButton" and not IsAltKeyDown() then
-		bargroup.win:RightClick(nil, button)
+	-- other buttons are reserved for other actions
+	if bargroup and button == "RightButton" then
+		if IsShiftKeyDown() then
+			Skada:OpenMenu(bargroup.win)
+		elseif IsControlKeyDown() then
+			Skada:SegmentMenu(bargroup.win)
+		elseif IsAltKeyDown() then
+			Skada:ModeMenu(bargroup.win)
+		else
+			bargroup.win:RightClick(nil, button)
+		end
 	end
 end
 
