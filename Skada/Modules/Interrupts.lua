@@ -79,7 +79,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 			if Skada.db.profile.reportlinks then
 				spelllink = GetSpellLink(extraspellid or extraspellname) or spelllink
 			end
-			Skada:SendChat(format(L["%s interrupted!"], spelllink), Skada.db.profile.modules.interruptchannel or "SAY", "preset", true)
+			Skada:SendChat(format(L["%s interrupted!"], spelllink), Skada.db.profile.modules.interruptchannel or "SAY", "preset")
 		end
 	end
 

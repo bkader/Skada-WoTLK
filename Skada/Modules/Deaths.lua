@@ -718,7 +718,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 			extra = del(extra)
 		end
 
-		Skada:SendChat(output, channel, "preset", true)
+		Skada:SendChat(output, channel, "preset")
 	end
 
 	do

@@ -36,7 +36,7 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 				player.parrytargets[data.dstName] = (player.parrytargets[data.dstName] or 0) + 1
 
 				if Skada.db.profile.modules.parryannounce then
-					Skada:SendChat(format(L["%s parried %s (%s)"], data.dstName, data.playername, player.parrytargets[data.dstName] or 1), Skada.db.profile.modules.parrychannel, "preset", true)
+					Skada:SendChat(format(L["%s parried %s (%s)"], data.dstName, data.playername, player.parrytargets[data.dstName] or 1), Skada.db.profile.modules.parrychannel, "preset")
 				end
 			end
 		end

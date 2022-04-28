@@ -2079,7 +2079,7 @@ end
 do
 	local SendChatMessage = SendChatMessage
 
-	function Skada:SendChat(msg, chan, chantype, escape)
+	function Skada:SendChat(msg, chan, chantype, noescape)
 		if lower(chan) == "self" or lower(chantype) == "self" then
 			Skada:Print(msg)
 			return
@@ -2093,7 +2093,7 @@ do
 			end
 		end
 
-		if escape then
+		if not noescape then
 			msg = EscapeStr(msg)
 		end
 
@@ -2164,7 +2164,7 @@ do
 
 		local title = (window and window.title) or report_mode.title or report_mode.moduleName
 		local label = (report_mode_name == L["Improvement"]) and self.userName or Skada:GetSetLabel(report_set)
-		self:SendChat(format(L["Skada: %s for %s:"], title, label), channel, chantype, true) -- always escape
+		self:SendChat(format(L["Skada: %s for %s:"], title, label), channel, chantype)
 
 		maxlines = maxlines or 10
 		local nr = 0

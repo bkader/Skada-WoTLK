@@ -223,7 +223,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 	end
 
 	function mod:Announce(msg)
-		Skada:SendChat(msg, Skada.db.profile.modules.sunderchannel or "SAY", "preset", true)
+		Skada:SendChat(msg, Skada.db.profile.modules.sunderchannel or "SAY", "preset")
 	end
 
 	function mod:OnInitialize()
