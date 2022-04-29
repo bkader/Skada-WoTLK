@@ -627,7 +627,6 @@ L["Amount"] = true
 L["Source"] = true
 L["Health"] = HEALTH
 L["Change"] = true
-L["Survivability"] = true
 L["Events Amount"] = true
 L["Set the amount of events the death log should record."] = true
 L["Minimum Healing"] = true
