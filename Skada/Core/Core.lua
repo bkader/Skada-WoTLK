@@ -2951,6 +2951,9 @@ function Skada:ApplySettings(name, hidemenu)
 		CloseDropDownMenus()
 	end
 
+	-- fire callback in case modules need it
+	Skada.callbacks:Fire("Skada_UpdateConfig")
+
 	for _, win in ipairs(windows) do
 		if name and win.db.name == name then
 			win:SetChild(win.db.child)

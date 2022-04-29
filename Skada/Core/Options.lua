@@ -331,8 +331,8 @@ Skada.options = {
 							name = L["Hide in combat"],
 							desc = L["Hides Skada's window when in combat."],
 							order = 90,
-							set = function()
-								Skada.db.profile.hidecombat = not Skada.db.profile.hidecombat
+							set = function(_, val)
+								Skada.db.profile.hidecombat = val or nil
 								if Skada.db.profile.hidecombat then
 									Skada.db.profile.showcombat = nil
 								end
@@ -344,8 +344,8 @@ Skada.options = {
 							name = L["Show in combat"],
 							desc = L["Shows Skada's window when in combat."],
 							order = 100,
-							set = function()
-								Skada.db.profile.showcombat = not Skada.db.profile.showcombat
+							set = function(_, val)
+								Skada.db.profile.showcombat = val or nil
 								if Skada.db.profile.showcombat then
 									Skada.db.profile.hidecombat = nil
 								end
@@ -661,8 +661,8 @@ Skada.options = {
 					get = function()
 						return Skada.db.profile.skippopup
 					end,
-					set = function()
-						Skada.db.profile.skippopup = not Skada.db.profile.skippopup
+					set = function(_, val)
+						Skada.db.profile.skippopup = val or nil
 					end
 				}
 			}
@@ -1174,8 +1174,8 @@ function Skada:FrameSettings(db, include_dimensions)
 			name = L["Sticky Window"],
 			desc = L["Allows the window to stick to other Skada windows."],
 			order = 30,
-			set = function()
-				db.sticky = not db.sticky
+			set = function(_, val)
+				db.sticky = val or nil
 				if not db.sticky then
 					for _, win in Skada:IterateWindows() do
 						if win.db.sticked and win.db.sticked[db.name] then
