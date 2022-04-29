@@ -120,6 +120,11 @@ do
 		local p = window.db
 		local bargroup = mod:GetBarGroup(p.name)
 
+		-- fix old oriantation
+		if p.barorientation == 3 then
+			p.barorientation = 2
+		end
+
 		-- Save a reference to window in bar group. Needed for some nasty callbacks.
 		if bargroup then
 			-- Clear callbacks.
@@ -1093,7 +1098,7 @@ end
 local optionsValues = {
 	ORIENTATION = {
 		[1] = L["Left to right"],
-		[3] = L["Right to left"]
+		[2] = L["Right to left"]
 	},
 	TITLEBTNS = {
 		[1] = format("|T%s:22:66|t", format(buttonsTexPath, 1, "_prev")),

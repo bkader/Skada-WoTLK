@@ -125,29 +125,30 @@ local function safecall(func, ...)
 	end
 end
 
-local dummyFrame, barPrototype, barPrototype_mt, barListPrototype
-local barListPrototype_mt
+local function createClass(ftype, parent)
+	local class = (type(ftype) == "table") and ftype or CreateFrame(ftype)
+	class.mt = {__index = class}
 
-lib.dummyFrame = lib.dummyFrame or CreateFrame("Frame")
-lib.barFrameMT = lib.barFrameMT or {__index = lib.dummyFrame}
-lib.barPrototype = lib.barPrototype or setmetatable({}, lib.barFrameMT)
-lib.barPrototype_mt = lib.barPrototype_mt or {__index = lib.barPrototype}
-lib.barListPrototype = lib.barListPrototype or setmetatable({}, lib.barFrameMT)
-lib.barListPrototype_mt = lib.barListPrototype_mt or {__index = lib.barListPrototype}
+	if parent then
+		class = setmetatable(class, {__index = parent})
+		class.super = parent
+	end
 
-dummyFrame = lib.dummyFrame
+	class.Bind = function(self, o)
+		return setmetatable(o, self.mt)
+	end
+
+	return class
+end
+
+local barPrototype, barListPrototype
+
+local dummyFrame = createClass("Frame")
+lib.barPrototype = lib.barPrototype or createClass({}, dummyFrame)
+lib.barListPrototype = lib.barListPrototype or createClass({}, dummyFrame)
+
 barPrototype = lib.barPrototype
-barPrototype_mt = lib.barPrototype_mt
 barListPrototype = lib.barListPrototype
-barListPrototype_mt = lib.barListPrototype_mt
-
-barPrototype.prototype = barPrototype
-barPrototype.metatable = barPrototype_mt
-barPrototype.super = dummyFrame
-
-barListPrototype.prototype = barListPrototype
-barListPrototype.metatable = barListPrototype_mt
-barListPrototype.super = dummyFrame
 
 lib.bars = lib.bars or {}
 lib.barLists = lib.barLists or {}
@@ -305,20 +306,19 @@ end
 ---[[ Individual bars ]]---
 function lib:NewBarFromPrototype(prototype, name, ...)
 	assert(self ~= lib, "You may only call :NewBar as an embedded function")
-	assert(type(prototype) == "table" and type(prototype.metatable) == "table", "Invalid bar prototype")
+	assert(type(prototype) == "table" and type(prototype.mt) == "table", "Invalid bar prototype")
 	bars[self] = bars[self] or {}
 	local bar = bars[self][name]
 	local isNew = false
 	if not bar then
 		bar = tremove(recycledBars)
 		if not bar then
-			bar = CreateFrame("Frame")
+			bar = prototype:Bind(CreateFrame("Frame"))
 		else
 			bar:Show()
 		end
 		isNew = true
 	end
-	bar = setmetatable(bar, prototype.metatable)
 	bar.name = name
 	bar:Create(...)
 	bar:SetFont(self.font, self.fontSize, self.fontFlags, self.numfont, self.numfontSize, self.numfontFlags)
@@ -326,10 +326,6 @@ function lib:NewBarFromPrototype(prototype, name, ...)
 	bars[self][name] = bar
 
 	return bar, isNew
-end
-
-function lib:NewBar(name, text, value, maxVal, icon, orientation, length, thickness)
-	return self:NewBarFromPrototype(barPrototype, name, text, value, maxVal, icon, orientation, length, thickness)
 end
 
 function lib:ReleaseBar(name)
@@ -490,11 +486,11 @@ function barListPrototype:AdjustButtons()
 		btn:ClearAllPoints()
 
 		if btn.visible then
-			if nr == 0 and self.orientation == 3 then
+			if nr == 0 and self.orientation == 2 then
 				btn:SetPoint("TOPLEFT", self.button, "TOPLEFT", 5, -(max(height - btn:GetHeight(), 0) / 2))
 			elseif nr == 0 then
 				btn:SetPoint("TOPRIGHT", self.button, "TOPRIGHT", -5, -(max(height - btn:GetHeight(), 0) / 2))
-			elseif self.orientation == 3 then
+			elseif self.orientation == 2 then
 				btn:SetPoint("TOPLEFT", self.lastbtn, "TOPRIGHT", spacing, 0)
 			else
 				btn:SetPoint("TOPRIGHT", self.lastbtn, "TOPLEFT", -spacing, 0)
@@ -516,13 +512,13 @@ function barListPrototype:AdjustButtons()
 end
 
 function barListPrototype:AdjustTitle(ignoreMouseover)
-	self.button.text:SetJustifyH(self.orientation == 3 and "RIGHT" or "LEFT")
+	self.button.text:SetJustifyH(self.orientation == 2 and "RIGHT" or "LEFT")
 	self.button.text:SetJustifyV("MIDDLE")
 
 	self.button.icon:ClearAllPoints()
 	self.button.text:ClearAllPoints()
 
-	if self.lastbtn and self.orientation == 3 then
+	if self.lastbtn and self.orientation == 2 then
 		if self.mouseover and not ignoreMouseover then
 			self.button.text:SetPoint("LEFT", self.button, "LEFT", 5, 0)
 		else
@@ -640,7 +636,7 @@ do
 		orientation = (orientation == "LEFT") and 1 or orientation
 		orientation = (orientation == "RIGHT") and 3 or orientation
 
-		local list = setmetatable(CreateFrame("Frame", frameName, UIParent), barListPrototype_mt)
+		local list = barListPrototype:Bind(CreateFrame("Frame", frameName, UIParent))
 		list:SetMovable(true)
 		list.enablemouse = true
 
@@ -1311,7 +1307,7 @@ function barListPrototype:GetThickness()
 end
 
 function barListPrototype:SetOrientation(o)
-	assert(o >= 1 and o <= 4, "orientation must be 1-4")
+	assert(o == 1 or o == 2, "orientation must be 1-4")
 	self.orientation = o
 	if bars[self] then
 		for k, v in pairs(bars[self]) do
@@ -1796,37 +1792,6 @@ do
 			self.bgtexture:SetTexCoord(0, 1, 0, 1)
 		elseif orientation == 2 then
 			self.icon:ClearAllPoints()
-			self.icon:SetPoint("TOP", self, "BOTTOM", 0, 0)
-
-			t = self.spark
-			t:ClearAllPoints()
-			t:SetPoint("LEFT", self.texture, "TOPLEFT", -7, 0)
-			t:SetPoint("RIGHT", self.texture, "TOPRIGHT", 7, 0)
-			t:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
-
-			t = self.texture
-			t.SetValue = t.SetHeight
-			t:ClearAllPoints()
-			t:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT")
-			t:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT")
-
-			t = self.timerLabel
-			t:ClearAllPoints()
-			t:SetPoint("TOPLEFT", self, "TOPLEFT", 3, -3)
-			t:SetPoint("TOPRIGHT", self, "TOPRIGHT", -3, -3)
-			t:SetJustifyH("CENTER")
-			t:SetJustifyV("TOP")
-
-			t = self.label
-			t:ClearAllPoints()
-			t:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", -3, 3)
-			t:SetPoint("TOPLEFT", self.Label, "BOTTOMLEFT", 0, 0)
-			t:SetJustifyH("CENTER")
-			t:SetJustifyV("BOTTOM")
-
-			self.bgtexture:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
-		elseif orientation == 3 then
-			self.icon:ClearAllPoints()
 			self.icon:SetPoint("LEFT", self, "RIGHT", 0, 0)
 
 			t = self.spark
@@ -1855,37 +1820,6 @@ do
 			t:SetJustifyV("MIDDLE")
 
 			self.bgtexture:SetTexCoord(0, 1, 0, 1)
-		elseif orientation == 4 then
-			self.icon:ClearAllPoints()
-			self.icon:SetPoint("BOTTOM", self, "TOP", 0, 0)
-
-			t = self.spark
-			t:ClearAllPoints()
-			t:SetPoint("LEFT", self.texture, "BOTTOMLEFT", -7, 0)
-			t:SetPoint("RIGHT", self.texture, "BOTTOMRIGHT", 7, 0)
-			t:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
-
-			t = self.texture
-			t.SetValue = t.SetHeight
-			t:ClearAllPoints()
-			t:SetPoint("TOPLEFT", self, "TOPLEFT")
-			t:SetPoint("TOPRIGHT", self, "TOPRIGHT")
-
-			t = self.timerLabel
-			t:ClearAllPoints()
-			t:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 3, 3)
-			t:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", -3, 3)
-			t:SetJustifyH("CENTER")
-			t:SetJustifyV("BOTTOM")
-
-			t = self.label
-			t:ClearAllPoints()
-			t:SetPoint("TOPLEFT", self, "TOPLEFT", 3, -3)
-			t:SetPoint("BOTTOMRIGHT", self.timerLabel, "TOPRIGHT", 0, 0)
-			t:SetJustifyH("CENTER")
-			t:SetJustifyV("TOP")
-
-			self.bgtexture:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
 		end
 		self:SetValue(self.value or 0)
 	end
@@ -1982,11 +1916,7 @@ function barPrototype:SetTextureValue(amt, dist)
 	if o == 1 then
 		t:SetTexCoord(0, amt, 0, 1)
 	elseif o == 2 then
-		t:SetTexCoord(1 - amt, 1, 1, 1, 1 - amt, 0, 1, 0)
-	elseif o == 3 then
 		t:SetTexCoord(1 - amt, 1, 0, 1)
-	elseif o == 4 then
-		t:SetTexCoord(0, 1, amt, 1, 0, 0, amt, 0)
 	end
 end
 
