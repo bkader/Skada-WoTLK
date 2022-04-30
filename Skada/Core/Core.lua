@@ -2899,13 +2899,13 @@ function dataobj:OnEnter()
 		end
 		self.tooltip:AddLine(" ")
 	else
-		self.tooltip:AddDoubleLine("Skada", Skada.version)
+		self.tooltip:AddDoubleLine("Skada", Skada.version, nil, nil, nil, 0, 1, 0)
 	end
 
-	self.tooltip:AddLine(L["|cffeda55fLeft-Click|r to toggle windows."], 0.2, 1, 0.2)
-	self.tooltip:AddLine(L["|cffeda55fCtrl+Left-Click|r to show/hide windows."], 0.2, 1, 0.2)
-	self.tooltip:AddLine(L["|cffeda55fShift+Left-Click|r to reset."], 0.2, 1, 0.2)
-	self.tooltip:AddLine(L["|cffeda55fRight-Click|r to open menu."], 0.2, 1, 0.2)
+	self.tooltip:AddLine(L["|cff00ff00Left-Click|r to toggle windows."], 1, 1, 1)
+	self.tooltip:AddLine(L["|cff00ff00Ctrl+Left-Click|r to show/hide windows."], 1, 1, 1)
+	self.tooltip:AddLine(L["|cff00ff00Shift+Left-Click|r to reset."], 1, 1, 1)
+	self.tooltip:AddLine(L["|cff00ff00Right-Click|r to open menu."], 1, 1, 1)
 
 	self.tooltip:Show()
 end

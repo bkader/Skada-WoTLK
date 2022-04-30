@@ -397,10 +397,10 @@ L["Mouse Button 4"] = KEY_BUTTON4
 L["Mouse Button 5"] = KEY_BUTTON5
 -- minimap button
 L["Skada Summary"] = true
-L["|cffeda55fLeft-Click|r to toggle windows."] = true
-L["|cffeda55fCtrl+Left-Click|r to show/hide windows."] = true
-L["|cffeda55fShift+Left-Click|r to reset."] = true
-L["|cffeda55fRight-Click|r to open menu."] = true
+L["|cff00ff00Left-Click|r to toggle windows."] = true
+L["|cff00ff00Ctrl+Left-Click|r to show/hide windows."] = true
+L["|cff00ff00Shift+Left-Click|r to reset."] = true
+L["|cff00ff00Right-Click|r to open menu."] = true
 -- skada menu
 L["Skada Menu"] = true
 L["Select Segment"] = true
@@ -418,8 +418,7 @@ L["Open Config"] = true
 L.btn_config_desc = "Opens the configuration window."
 L.btn_reset_desc = "Resets all fight data except those marked as kept."
 L["Segment"] = true
-L["Jump to a specific segment."] = true
-L.btn_segment_desc = "Jump to a specific segment.\n|cff00ff00Middle-Click|r for |cffffbb00current|r segment."
+L.btn_segment_desc = "Jump to a specific segment.\n|cff00ff00Shift-LMB|r for |cffffbb00next|r segment.\n|cff00ff00Shift-RMB|r for |cffffbb00previous|r segment.\n|cff00ff00Middle-Click|r for |cffffbb00current|r segment."
 L["Mode"] = true
 L["Jump to a specific mode."] = true
 L["Report"] = true

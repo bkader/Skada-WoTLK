@@ -1693,7 +1693,7 @@ function mod:AddDisplayOptions(win, options)
 							segment = {
 								type = "toggle",
 								name = L["Segment"],
-								desc = L["Jump to a specific segment."],
+								desc = L.btn_segment_desc,
 								order = 30
 							},
 							mode = {
