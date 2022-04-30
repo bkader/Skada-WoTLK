@@ -3732,125 +3732,128 @@ do
 			end
 		end
 
-		if self.current and not self.current.started then
-			self.current.started = true
-			if self.instanceType == nil then self:CheckZone() end
-			self.current.type = (self.instanceType == "none" and IsInGroup()) and "group" or self.instanceType
-			self:SendMessage("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		end
-
-		if self.current and self.db.profile.autostop then
-			if eventtype == "UNIT_DIED" and ((band(srcFlags, BITMASK_GROUP) ~= 0 and band(srcFlags, BITMASK_PETS) == 0) or players[srcGUID]) then
-				death_counter = death_counter + 1
-				-- If we reached the treshold for stopping the segment, do so.
-				if death_counter > 0 and death_counter / starting_members >= 0.5 and not self.current.stopped then
-					self:SendMessage("COMBAT_PLAYER_WIPE", self.current)
-					self:StopSegment(L["Stopping for wipe."])
-				end
-			elseif eventtype == "SPELL_RESURRECT" and ((band(srcFlags, BITMASK_GROUP) ~= 0 and band(srcFlags, BITMASK_PETS) == 0) or players[srcGUID]) then
-				death_counter = death_counter - 1
-			end
-		end
-
-		if self.current and combatlog_events[eventtype] then
-			if self.current.stopped then return end
-
-			for _, mod in ipairs(combatlog_events[eventtype]) do
-				local fail = false
-
-				if mod.flags.src_is_interesting_nopets then
-					local src_is_interesting_nopets = (band(srcFlags, BITMASK_GROUP) ~= 0 and band(srcFlags, BITMASK_PETS) == 0) or players[srcGUID]
-
-					if src_is_interesting_nopets then
-						src_is_interesting = true
-					else
-						fail = true
-					end
-				end
-
-				if not fail and mod.flags.dst_is_interesting_nopets then
-					local dst_is_interesting_nopets = (band(dstFlags, BITMASK_GROUP) ~= 0 and band(dstFlags, BITMASK_PETS) == 0) or players[dstGUID]
-					if dst_is_interesting_nopets then
-						dst_is_interesting = true
-					else
-						fail = true
-					end
-				end
-
-				if not fail and mod.flags.src_is_interesting or mod.flags.src_is_not_interesting then
-					if not src_is_interesting then
-						src_is_interesting = band(srcFlags, BITMASK_GROUP) ~= 0 or (band(srcFlags, BITMASK_PETS) ~= 0 and pets[srcGUID]) or players[srcGUID] or self:IsQueuedUnit(srcGUID)
-					end
-
-					if (mod.flags.src_is_interesting and not src_is_interesting) or (mod.flags.src_is_not_interesting and src_is_interesting) then
-						fail = true
-					end
-				end
-
-				if not fail and mod.flags.dst_is_interesting or mod.flags.dst_is_not_interesting then
-					if not dst_is_interesting then
-						dst_is_interesting = band(dstFlags, BITMASK_GROUP) ~= 0 or (band(dstFlags, BITMASK_PETS) ~= 0 and pets[dstGUID]) or players[dstGUID]
-					end
-
-					if (mod.flags.dst_is_interesting and not dst_is_interesting) or (mod.flags.dst_is_not_interesting and dst_is_interesting) then
-						fail = true
-					end
-				end
-
-				if not fail then
-					if tentative ~= nil then
-						tentative = tentative + 1
-						self:Debug(format("Tentative: %s (%d)", eventtype, tentative))
-						if tentative == 5 then
-							self:CancelTimer(tentative_handle, true)
-							tentative_handle = nil
-							tentative = nil
-							self:Debug("StartCombat: tentative combat")
-							self:StartCombat()
-						end
-					end
-
-					self.current.last_action = time()
-					mod.func(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-				end
-			end
-		end
-
-		-- marking set as boss fights relies only on src_is_interesting
-		if self.current and src_is_interesting and not self.current.gotboss then
-			if band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
-				local isboss, bossid, bossname = self:IsBoss(dstGUID)
-				if isboss then
-					self.current.mobname = bossname or dstName
-					self.current.gotboss = bossid or true
-					self.current.keep = self.db.profile.alwayskeepbosses or nil
-					self:SendMessage("COMBAT_ENCOUNTER_START", self.current)
-				end
-			end
-		end
-
-		-- set mobname
-		if self.current and not self.current.mobname then
-			if self.current.type == "pvp" then
-				self.current.mobname = GetInstanceInfo()
-			elseif self.current.type == "arena" then
-				self.current.mobname = GetInstanceInfo()
-				self.current.gold = GetBattlefieldArenaFaction()
-			elseif src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
-				self.current.mobname = dstName
-			elseif dst_is_interesting and band(srcFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
-				self.current.mobname = srcName
-			end
-		end
-
+		-- pet summons.
 		if eventtype == "SPELL_SUMMON" then
 			self:SummonPet(dstGUID, dstFlags, srcGUID, srcName, srcFlags)
 		end
 
-		if self.current and self.current.gotboss and (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") then
-			if band(dstFlags, BITMASK_GROUP) == 0 and band(dstFlags, BITMASK_PETS) == 0 then
-				if dstName and self.current.mobname == dstName then
-					self:ScheduleTimer("DispatchSets", nil, self.db.profile.updatefrequency or 0.5, BossDefeated)
+		-- current segment created?
+		if self.current then
+			-- segment not yet flagged as started?
+			if not self.current.started then
+				self.current.started = true
+				if self.instanceType == nil then self:CheckZone() end
+				self.current.type = (self.instanceType == "none" and IsInGroup()) and "group" or self.instanceType
+				self:SendMessage("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+			end
+
+			-- autostop on wipe enabled?
+			if self.db.profile.autostop then
+				if eventtype == "UNIT_DIED" and ((band(srcFlags, BITMASK_GROUP) ~= 0 and band(srcFlags, BITMASK_PETS) == 0) or players[srcGUID]) then
+					death_counter = death_counter + 1
+					-- If we reached the treshold for stopping the segment, do so.
+					if death_counter > 0 and death_counter / starting_members >= 0.5 and not self.current.stopped then
+						self:SendMessage("COMBAT_PLAYER_WIPE", self.current)
+						self:StopSegment(L["Stopping for wipe."])
+					end
+				elseif eventtype == "SPELL_RESURRECT" and ((band(srcFlags, BITMASK_GROUP) ~= 0 and band(srcFlags, BITMASK_PETS) == 0) or players[srcGUID]) then
+					death_counter = death_counter - 1
+				end
+			end
+
+			-- check for boss fights
+			if not self.current.gotboss then
+				-- marking set as boss fights relies only on src_is_interesting
+				if src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+					local isboss, bossid, bossname = self:IsBoss(dstGUID)
+					if isboss then
+						self.current.mobname = bossname or dstName
+						self.current.gotboss = bossid or true
+						self.current.keep = self.db.profile.alwayskeepbosses or nil
+						self:SendMessage("COMBAT_ENCOUNTER_START", self.current)
+					end
+				end
+			-- default boss defeated event? (no DBM/BigWigs)
+			elseif (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") and self.current.gotboss == GetCreatureId(dstGUID) then
+				self:ScheduleTimer("DispatchSets", self.db.profile.updatefrequency or 0.5, BossDefeated)
+			end
+
+			-- set mobname
+			if not self.current.mobname then
+				if self.current.type == "pvp" then
+					self.current.mobname = GetInstanceInfo()
+				elseif self.current.type == "arena" then
+					self.current.mobname = GetInstanceInfo()
+					self.current.gold = GetBattlefieldArenaFaction()
+				elseif src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+					self.current.mobname = dstName
+				elseif dst_is_interesting and band(srcFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+					self.current.mobname = srcName
+				end
+			end
+
+			-- valid combatlog event
+			if combatlog_events[eventtype] then
+				if self.current.stopped then return end
+
+				for _, mod in ipairs(combatlog_events[eventtype]) do
+					local fail = false
+
+					if mod.flags.src_is_interesting_nopets then
+						local src_is_interesting_nopets = (band(srcFlags, BITMASK_GROUP) ~= 0 and band(srcFlags, BITMASK_PETS) == 0) or players[srcGUID]
+
+						if src_is_interesting_nopets then
+							src_is_interesting = true
+						else
+							fail = true
+						end
+					end
+
+					if not fail and mod.flags.dst_is_interesting_nopets then
+						local dst_is_interesting_nopets = (band(dstFlags, BITMASK_GROUP) ~= 0 and band(dstFlags, BITMASK_PETS) == 0) or players[dstGUID]
+						if dst_is_interesting_nopets then
+							dst_is_interesting = true
+						else
+							fail = true
+						end
+					end
+
+					if not fail and mod.flags.src_is_interesting or mod.flags.src_is_not_interesting then
+						if not src_is_interesting then
+							src_is_interesting = band(srcFlags, BITMASK_GROUP) ~= 0 or (band(srcFlags, BITMASK_PETS) ~= 0 and pets[srcGUID]) or players[srcGUID] or self:IsQueuedUnit(srcGUID)
+						end
+
+						if (mod.flags.src_is_interesting and not src_is_interesting) or (mod.flags.src_is_not_interesting and src_is_interesting) then
+							fail = true
+						end
+					end
+
+					if not fail and mod.flags.dst_is_interesting or mod.flags.dst_is_not_interesting then
+						if not dst_is_interesting then
+							dst_is_interesting = band(dstFlags, BITMASK_GROUP) ~= 0 or (band(dstFlags, BITMASK_PETS) ~= 0 and pets[dstGUID]) or players[dstGUID]
+						end
+
+						if (mod.flags.dst_is_interesting and not dst_is_interesting) or (mod.flags.dst_is_not_interesting and dst_is_interesting) then
+							fail = true
+						end
+					end
+
+					if not fail then
+						if tentative ~= nil then
+							tentative = tentative + 1
+							self:Debug(format("Tentative: %s (%d)", eventtype, tentative))
+							if tentative == 5 then
+								self:CancelTimer(tentative_handle, true)
+								tentative_handle = nil
+								tentative = nil
+								self:Debug("StartCombat: tentative combat")
+								self:StartCombat()
+							end
+						end
+
+						self.current.last_action = time()
+						mod.func(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+					end
 				end
 			end
 		end
