@@ -1,7 +1,7 @@
 local Skada = Skada
 
 local pairs, ipairs, wipe, max = pairs, ipairs, wipe, math.max
-local getmetatable, setmetatable = getmetatable, setmetatable
+local getmetatable, setmetatable, time = getmetatable, setmetatable, time
 
 -- a dummy table used as fallback
 local dummyTable = {}
@@ -55,7 +55,7 @@ end
 
 -- returns the segment's time
 function setPrototype:GetTime()
-	return Skada:GetSetTime(self)
+	return max((self.time or 0) > 0 and self.time or (time() - self.starttime), 0.1)
 end
 
 -- returns the actor's time if found (player or enemy)

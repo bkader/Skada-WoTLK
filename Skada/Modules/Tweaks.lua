@@ -349,11 +349,11 @@ Skada:AddLoadableModule("Tweaks", function(L)
 
 			if Skada.db.profile.combatlogfixverbose then
 				if not self.throttle or self.throttle < GetTime() then
-					Skada:Print(format(
+					Skada:Printf(
 						L["%d filtered / %d events found. Cleared combat log, as it broke."],
 						CombatLogGetNumEntries(),
 						CombatLogGetNumEntries(true)
-					))
+					)
 					self.throttle = GetTime() + 60
 				end
 			elseif self.throttle then

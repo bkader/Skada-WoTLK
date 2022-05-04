@@ -991,7 +991,9 @@ do
 
 	function Skada:FixUnit(spellid, guid, name, flag)
 		if spellid and guid and queued_units and queued_units[spellid] and queued_units[spellid][guid] then
-			return queued_units[spellid][guid].id or guid, queued_units[spellid][guid].name or name, queued_units[spellid][guid].flag or flag
+			guid = queued_units[spellid][guid].id or guid
+			name = queued_units[spellid][guid].name or name
+			flag = queued_units[spellid][guid].flag or flag
 		end
 		return guid, name, flag
 	end

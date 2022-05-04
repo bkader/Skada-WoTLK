@@ -425,7 +425,7 @@ do
 	end
 
 	local function showmode(win, id, label, mode)
-		if win.selectedset == "total" and type(mode) == "table" and mode.nototal then
+		if Skada:NoTotal(win.selectedset, mode) then
 			return
 		end
 

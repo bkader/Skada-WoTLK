@@ -1823,7 +1823,7 @@ do
 		end
 	end
 
-	local function IgnoredTotalClick(set, mode)
+	function Skada:NoTotal(set, mode)
 		return (set == "total" and type(mode) == "table" and mode.nototal == true)
 	end
 
@@ -1849,16 +1849,16 @@ do
 				end
 
 				if self.db.profile.informativetooltips then
-					if md.click1 and not IgnoredTotalClick(win.selectedset, md.click1) then
+					if md.click1 and not self:NoTotal(win.selectedset, md.click1) then
 						self:AddSubviewToTooltip(t, win, md.click1, id, label)
 					end
-					if md.click2 and not IgnoredTotalClick(win.selectedset, md.click2) then
+					if md.click2 and not self:NoTotal(win.selectedset, md.click2) then
 						self:AddSubviewToTooltip(t, win, md.click2, id, label)
 					end
-					if md.click3 and not IgnoredTotalClick(win.selectedset, md.click3) then
+					if md.click3 and not self:NoTotal(win.selectedset, md.click3) then
 						self:AddSubviewToTooltip(t, win, md.click3, id, label)
 					end
-					if not self.Ascension and md.click4 and not IgnoredTotalClick(win.selectedset, md.click4) then
+					if not self.Ascension and md.click4 and not self:NoTotal(win.selectedset, md.click4) then
 						self:AddSubviewToTooltip(t, win, md.click4, id, label)
 					end
 				end
@@ -1874,25 +1874,25 @@ do
 
 				if type(md.click1) == "function" then
 					t:AddLine(format(L["Click for |cff00ff00%s|r"], md.click1_label or L.Unknown))
-				elseif md.click1 and not IgnoredTotalClick(win.selectedset, md.click1) then
+				elseif md.click1 and not self:NoTotal(win.selectedset, md.click1) then
 					t:AddLine(format(L["Click for |cff00ff00%s|r"], md.click1_label or md.click1.moduleName))
 				end
 
 				if type(md.click2) == "function" then
 					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], md.click2_label or L.Unknown))
-				elseif md.click2 and not IgnoredTotalClick(win.selectedset, md.click2) then
+				elseif md.click2 and not self:NoTotal(win.selectedset, md.click2) then
 					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], md.click2_label or md.click2.moduleName))
 				end
 
 				if type(md.click3) == "function" then
 					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], md.click3_label or L.Unknown))
-				elseif md.click3 and not IgnoredTotalClick(win.selectedset, md.click3) then
+				elseif md.click3 and not self:NoTotal(win.selectedset, md.click3) then
 					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], md.click3_label or md.click3.moduleName))
 				end
 
 				if not self.Ascension and type(md.click4) == "function" then
 					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], md.click4_label or L.Unknown))
-				elseif not self.Ascension and md.click4 and not IgnoredTotalClick(win.selectedset, md.click4) then
+				elseif not self.Ascension and md.click4 and not self:NoTotal(win.selectedset, md.click4) then
 					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], md.click4_label or md.click4.moduleName))
 				end
 
@@ -1916,31 +1916,18 @@ end
 -- slash commands
 
 local function GenerateTotal()
-	if not Skada.char.total then
-		Skada.total = CreateSet(L["Total"], Skada.total)
-		Skada.char.total = Skada.total
-	else
-		for k, v in pairs(Skada.char.total) do
-			if k == "players" then
-				wipe(v)
-			else
-				Skada.char.total[k] = nil
-			end
-		end
-	end
-
-	wipe(Skada.total.players)
-	Skada.total.starttime = 0
-	Skada.total.time = 0
-	Skada.total.name = Skada.total.name or L["Total"]
+	Skada.char.total = CreateSet(L["Total"], Skada.char.total)
+	Skada.total = Skada.char.total
+	Skada.total.starttime = nil
+	Skada.total.endtime = nil
 
 	for _, set in ipairs(Skada.char.sets) do
-		if not Skada.total.starttime or set.starttime < Skada.total.starttime then
-			Skada.total.starttime = set.starttime
-		end
-
 		for k, v in pairs(set) do
-			if type(v) == "number" and k ~= "starttime" and k ~= "endtime" then
+			if k == "starttime" and (not Skada.total.starttime or v < Skada.total.starttime) then
+				Skada.total.starttime = v
+			elseif k == "endtime" and (not Skada.total.endtime or v > Skada.total.endtime) then
+				Skada.total.endtime = v
+			elseif type(v) == "number" and k ~= "starttime" and k ~= "endtime" then
 				Skada.total[k] = (Skada.total[k] or 0) + v
 			end
 		end
@@ -2327,7 +2314,7 @@ do
 			end
 
 			if version > ver then
-				self:Print(format(L["Skada is out of date. You can download the newest version from |cffffbb00%s|r"], self.website))
+				self:Printf(L["Skada is out of date. You can download the newest version from |cffffbb00%s|r"], self.website)
 			elseif version < ver then
 				self:SendComm("WHISPER", sender, "VersionCheck", self.version)
 			end
@@ -3401,7 +3388,7 @@ function Skada:NewPhase()
 
 		tinsert(self.tempsets, set)
 
-		self:Print(format("|cffffbb00%s|r - |cff00ff00Phase %s|r started.", set.mobname, set.phase))
+		self:Printf("|cffffbb00%s|r - |cff00ff00Phase %s|r started.", set.mobname, set.phase)
 	end
 end
 
@@ -3787,7 +3774,7 @@ do
 					self.current.gold = GetBattlefieldArenaFaction()
 				elseif src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
 					self.current.mobname = dstName
-				elseif dst_is_interesting and band(srcFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+				elseif (dst_is_interesting or band(dstFlags, BITMASK_GROUP) ~= 0) and band(srcFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
 					self.current.mobname = srcName
 				end
 			end
