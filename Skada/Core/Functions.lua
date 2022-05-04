@@ -144,7 +144,7 @@ function Skada:RegisterClasses()
 	-- customize class colors
 	if not self.Ascension or not self.AscensionCoA then
 		local disabled = function()
-			return not self.db.profile.customcolors
+			return not self.db.profile.usecustomcolors
 		end
 
 		local colorsOpt = {
@@ -154,19 +154,19 @@ function Skada:RegisterClasses()
 			order = 11000,
 			get = function(i)
 				local color = self.classcolors[i[#i]]
-				if self.db.profile.classcolors and self.db.profile.classcolors[i[#i]] then
-					color = self.db.profile.classcolors[i[#i]]
+				if self.db.profile.customcolors and self.db.profile.customcolors[i[#i]] then
+					color = self.db.profile.customcolors[i[#i]]
 				end
 				return color.r, color.g, color.b
 			end,
 			set = function(i, r, g, b)
 				local class = i[#i]
-				self.db.profile.classcolors = self.db.profile.classcolors or {}
-				self.db.profile.classcolors[class] = self.db.profile.classcolors[class] or {}
-				self.db.profile.classcolors[class].r = r
-				self.db.profile.classcolors[class].g = g
-				self.db.profile.classcolors[class].b = b
-				self.db.profile.classcolors[class].colorStr = self.RGBPercToHex(r, g, b, true)
+				self.db.profile.customcolors = self.db.profile.customcolors or {}
+				self.db.profile.customcolors[class] = self.db.profile.customcolors[class] or {}
+				self.db.profile.customcolors[class].r = r
+				self.db.profile.customcolors[class].g = g
+				self.db.profile.customcolors[class].b = b
+				self.db.profile.customcolors[class].colorStr = self.RGBPercToHex(r, g, b, true)
 			end,
 			args = {
 				enable = {
@@ -175,14 +175,14 @@ function Skada:RegisterClasses()
 					width = "double",
 					order = 10,
 					get = function()
-						return self.db.profile.customcolors
+						return self.db.profile.usecustomcolors
 					end,
 					set = function(_, val)
 						if val then
-							self.db.profile.customcolors = true
+							self.db.profile.usecustomcolors = true
 						else
-							self.db.profile.customcolors = nil
-							self.db.profile.classcolors = nil -- free it
+							self.db.profile.usecustomcolors = nil
+							self.db.profile.customcolors = nil -- free it
 						end
 					end
 				},
@@ -218,7 +218,7 @@ function Skada:RegisterClasses()
 					disabled = disabled,
 					confirm = function() return L["Are you sure you want to reset all colors?"] end,
 					func = function()
-						self.db.profile.classcolors = wipe(self.db.profile.classcolors or {})
+						self.db.profile.customcolors = wipe(self.db.profile.customcolors or {})
 					end
 				}
 			}
@@ -428,8 +428,8 @@ function Skada:ClassColor(class, arg)
 		color = self.classcolors[class]
 
 		-- using a custom color?
-		if self.db.profile.customcolors and self.db.profile.classcolors and self.db.profile.classcolors[class] then
-			color = self.db.profile.classcolors[class]
+		if self.db.profile.usecustomcolors and self.db.profile.customcolors and self.db.profile.customcolors[class] then
+			color = self.db.profile.customcolors[class]
 		end
 	end
 

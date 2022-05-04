@@ -20,6 +20,26 @@ Skada:AddLoadableModule("Deaths", function(L)
 	local GetTime, date = GetTime, date
 	local _
 
+	local function GetColor(key)
+		if
+			Skada.db.profile.usecustomcolors and
+			Skada.db.profile.customcolors and
+			Skada.db.profile.customcolors["deathlog_" .. key]
+		then
+			return Skada.db.profile.customcolors["deathlog_" .. key]
+		end
+
+		if key == "orange" then
+			return ORANGE_FONT_COLOR
+		elseif key == "yellow" then
+			return YELLOW_FONT_COLOR
+		elseif key == "green" then
+			return GREEN_FONT_COLOR
+		else
+			return RED_FONT_COLOR
+		end
+	end
+
 	local function log_deathlog(set, data, deathlog, override)
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if player then
@@ -268,11 +288,6 @@ Skada:AddLoadableModule("Deaths", function(L)
 	end
 
 	do
-		local green = GREEN_FONT_COLOR
-		local red = RED_FONT_COLOR
-		local yellow = YELLOW_FONT_COLOR
-		local orange = ORANGE_FONT_COLOR
-
 		local function sort_logs(a, b)
 			return a and b and a.time > b.time
 		end
@@ -344,13 +359,13 @@ Skada:AddLoadableModule("Deaths", function(L)
 						local change = d.amount
 						if change > 0 then
 							change = "+" .. Skada:FormatNumber(change)
-							d.color = green
+							d.color = GetColor("green")
 						elseif change == 0 and (log.resisted or log.blocked or log.absorbed) then
 							change = "+" .. Skada:FormatNumber(log.resisted or log.blocked or log.absorbed)
-							d.color = orange
+							d.color = GetColor("orange")
 						else
 							change = Skada:FormatNumber(change)
-							d.color = log.overheal and yellow or red
+							d.color = log.overheal and GetColor("yellow") or GetColor("red")
 						end
 
 						d.reportlabel = "%02.2fs: %s (%s)   %s [%s]"
@@ -794,6 +809,53 @@ Skada:AddLoadableModule("Deaths", function(L)
 			end
 
 			Skada.options.args.modules.args.deathlog = GetOptions()
+
+			-- add colors to tweaks
+			Skada.options.args.tweaks.args.advanced.args.colors.args.deathlog = {
+				type = "group",
+				name = L["Death log"],
+				order = 50,
+				hidden = Skada.options.args.tweaks.args.advanced.args.colors.args.custom.disabled,
+				disabled = Skada.options.args.tweaks.args.advanced.args.colors.args.custom.disabled,
+				get = function(i)
+					local color = GetColor(i[#i])
+					return color.r, color.g, color.b
+				end,
+				set = function(i, r, g, b)
+					Skada.db.profile.customcolors = Skada.db.profile.customcolors or {}
+					local key = "deathlog_" .. i[#i]
+					Skada.db.profile.customcolors[key] = Skada.db.profile.customcolors[key] or {}
+					Skada.db.profile.customcolors[key].r = r
+					Skada.db.profile.customcolors[key].g = g
+					Skada.db.profile.customcolors[key].b = b
+				end,
+				args = {
+					green = {
+						type = "color",
+						name = L["Healing Taken"],
+						desc = format(L["Color for %s."], L["Healing Taken"]),
+						order = 10
+					},
+					red = {
+						type = "color",
+						name = L["Damage Taken"],
+						desc = format(L["Color for %s."], L["Damage Taken"]),
+						order = 20
+					},
+					yellow = {
+						type = "color",
+						name = L["Overheal"],
+						desc = format(L["Color for %s."], L["Overhealing"]),
+						order = 20
+					},
+					orange = {
+						type = "color",
+						name = L["Avoidance & Mitigation"],
+						desc = format(L["Color for %s."], L["Avoidance & Mitigation"]),
+						order = 20
+					}
+				}
+			}
 		end
 	end
 end)
