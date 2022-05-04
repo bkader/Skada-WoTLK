@@ -86,7 +86,9 @@ do
 	end
 
 	local function resetOnClick(self, button)
-		Skada:ShowPopup(self.list.win)
+		if button == "LeftButton" then
+			Skada:ShowPopup(self.list.win)
+		end
 	end
 
 	local function segmentOnClick(self, button)
@@ -94,23 +96,27 @@ do
 			self.list.win:set_selected_set("current")
 		elseif IsModifierKeyDown() then
 			self.list.win:set_selected_set(nil, button == "RightButton" and 1 or -1)
-		else
+		elseif button == "LeftButton" then
 			Skada:SegmentMenu(self.list.win)
 		end
 	end
 
 	local function modeOnClick(self, button)
-		Skada:ModeMenu(self.list.win)
+		if button == "LeftButton" then
+			Skada:ModeMenu(self.list.win)
+		end
 	end
 
 	local function reportOnClick(self, button)
-		Skada:OpenReportWindow(self.list.win)
+		if button == "LeftButton" then
+			Skada:OpenReportWindow(self.list.win)
+		end
 	end
 
 	local function stopOnClick(self, button)
-		if Skada.current and Skada.current.stopped then
+		if Skada.current and Skada.current.stopped and button == "LeftButton" then
 			Skada:ResumeSegment()
-		elseif Skada.current then
+		elseif Skada.current and button == "LeftButton" then
 			Skada:StopSegment()
 		end
 	end
@@ -1101,9 +1107,9 @@ local optionsValues = {
 		[2] = L["Right to left"]
 	},
 	TITLEBTNS = {
-		[1] = format("|T%s:22:66|t", format(buttonsTexPath, 1, "_prev")),
-		[2] = format("|T%s:22:66|t", format(buttonsTexPath, 2, "_prev")),
-		[3] = format("|T%s:22:66|t", format(buttonsTexPath, 3, "_prev"))
+		[1] = format("|T%s:22:88|t", format(buttonsTexPath, 1, "_prev")),
+		[2] = format("|T%s:22:88|t", format(buttonsTexPath, 2, "_prev")),
+		[3] = format("|T%s:22:88|t", format(buttonsTexPath, 3, "_prev"))
 	}
 }
 
@@ -1719,7 +1725,6 @@ function mod:AddDisplayOptions(win, options)
 					style = {
 						type = "multiselect",
 						name = L["Buttons Style"],
-						width = "half",
 						order = 20,
 						get = function(_, key)
 							return (db.title.toolbar == key)
