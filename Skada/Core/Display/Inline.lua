@@ -94,7 +94,7 @@ local function onEnter(win, id, label, mode)
 end
 
 local function showmode(win, id, label, mode)
-	if Skada:NoTotal(win.selectedset, mode) then
+	if Skada:NoTotalClick(win.selectedset, mode) then
 		return
 	end
 

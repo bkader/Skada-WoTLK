@@ -1,8 +1,8 @@
 local Skada = Skada
-Skada:AddLoadableModule("PVP", function(L)
-	if Skada:IsDisabled("PVP") then return end
+Skada:AddLoadableModule("Player vs. Player", "mod_pvp_desc", function(L)
+	if Skada:IsDisabled("Player vs. Player") then return end
 
-	local mod = Skada:NewModule(PVP, "AceEvent-3.0")
+	local mod = Skada:NewModule(L["Player vs. Player"], "AceEvent-3.0")
 
 	local format, wipe, GetTime = string.format, wipe, GetTime
 	local UnitGUID, UnitClass, UnitBuff, UnitIsPlayer = UnitGUID, UnitClass, UnitBuff, UnitIsPlayer
@@ -252,5 +252,47 @@ Skada:AddLoadableModule("PVP", function(L)
 		if Skada.db.profile.modules.arena then
 			Skada.db.profile.modules.arena = nil
 		end
+
+		-- arena custom colors
+		Skada.classcolors = Skada.classcolors or {}
+		if not Skada.classcolors.ARENA_GOLD then
+			Skada.classcolors.ARENA_GOLD = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
+		end
+		if not Skada.classcolors.ARENA_GREEN then
+			Skada.classcolors.ARENA_GREEN = {r = 0.1, g = 1, b = 0.1, colorStr = "ff19ff19"}
+		end
+
+		-- purple color instead of green for color blind mode.
+		if GetCVar("colorblindMode") == "1" then
+			Skada.classcolors.ARENA_GREEN.r = 0.686
+			Skada.classcolors.ARENA_GREEN.g = 0.384
+			Skada.classcolors.ARENA_GREEN.b = 1
+			Skada.classcolors.ARENA_GREEN.colorStr = "ffae61ff"
+		end
+
+		-- localize arena team colors (just in case)
+		L.ARENA_GREEN = L["Green Team"]
+		L.ARENA_GOLD = L["Gold Team"]
+
+		-- add custom colors to tweaks
+		Skada.options.args.tweaks.args.advanced.args.colors.args.arean = {
+			type = "group",
+			name = L["Arena Teams"],
+			order = 40,
+			hidden = Skada.options.args.tweaks.args.advanced.args.colors.args.custom.disabled,
+			disabled = Skada.options.args.tweaks.args.advanced.args.colors.args.custom.disabled,
+			args = {
+				ARENA_GOLD = {
+					type = "color",
+					name = L.ARENA_GOLD,
+					desc = format(L["Color for %s."], L.ARENA_GOLD)
+				},
+				ARENA_GREEN = {
+					type = "color",
+					name = L.ARENA_GREEN,
+					desc = format(L["Color for %s."], L.ARENA_GREEN)
+				}
+			}
+		}
 	end
 end)

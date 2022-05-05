@@ -50,19 +50,6 @@ function Skada:RegisterClasses()
 	self.classcolors.PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"}
 	self.classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
 	self.classcolors.UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
-	-- arena class colors
-	self.classcolors.ARENA_GOLD = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
-	self.classcolors.ARENA_GREEN = {r = 0.1, g = 1, b = 0.1, colorStr = "ff19ff19"}
-	-- purple color instead of green for color blind mode.
-	if GetCVar("colorblindMode") == "1" then
-		self.classcolors.ARENA_GREEN.r = 0.686
-		self.classcolors.ARENA_GREEN.g = 0.384
-		self.classcolors.ARENA_GREEN.b = 1
-		self.classcolors.ARENA_GREEN.colorStr = "ffae61ff"
-	end
-	-- localize arena team colors (just in case)
-	L.ARENA_GREEN = L["Green Team"]
-	L.ARENA_GOLD = L["Gold Team"]
 
 	-- set classes icon file & Skada custom classes.
 	if self.AscensionCoA then
@@ -202,14 +189,6 @@ function Skada:RegisterClasses()
 					disabled = disabled,
 					args = {}
 				},
-				arena = {
-					type = "group",
-					name = L["Arena Teams"],
-					order = 40,
-					hidden = disabled,
-					disabled = disabled,
-					args = {}
-				},
 				reset = {
 					type = "execute",
 					name = L.Reset,
@@ -227,12 +206,6 @@ function Skada:RegisterClasses()
 		for class, data in pairs(self.classcolors) do
 			if self.validclass[class] then
 				colorsOpt.args.class.args[class] = {
-					type = "color",
-					name = L[class],
-					desc = format(L["Color for %s."], L[class])
-				}
-			elseif class == "ARENA_GREEN" or class == "ARENA_GOLD" then
-				colorsOpt.args.arena.args[class] = {
 					type = "color",
 					name = L[class],
 					desc = format(L["Color for %s."], L[class])
@@ -872,7 +845,7 @@ do
 end
 
 -------------------------------------------------------------------------------
--- Notifications stuff!
+-- Total segment stuff!
 
 do
 	local total_opt = nil
@@ -944,6 +917,59 @@ do
 		end
 
 		return total_opt
+	end
+
+	function Skada:NoTotalClick(set, mode)
+		return (set == "total" and type(mode) == "table" and mode.nototal == true)
+	end
+
+	function Skada:CanRecordTotal(set)
+		if set then
+			-- just in case
+			if not self.db.profile.totalflag then
+				self.db.profile.totalflag = 0x10
+			end
+
+			-- raid bosses - 0x01
+			if band(self.db.profile.totalflag, 0x01) ~= 0 then
+				if set.type == "raid" and set.gotboss then
+					if set.time >= self.db.profile.minsetlength then
+						return true
+					end
+				end
+			end
+
+			-- raid trash - 0x02
+			if band(self.db.profile.totalflag, 0x02) ~= 0 then
+				if set.type == "raid" and not set.gotboss then
+					return true
+				end
+			end
+
+			-- dungeon boss - 0x04
+			if band(self.db.profile.totalflag, 0x04) ~= 0 then
+				if set.type == "party" and self.db.profile.gotboss then
+					return true
+				end
+			end
+
+			-- dungeon trash - 0x08
+			if band(self.db.profile.totalflag, 0x08) ~= 0 then
+				if set.type == "party" and not self.db.profile.gotboss then
+					return true
+				end
+			end
+
+			-- any combat - 0x10
+			if band(self.db.profile.totalflag, 0x10) ~= 0 then
+				return true
+			end
+
+			-- battlegrouns/arenas or nothing
+			return (set.type == "pvp" or set.type == "arena")
+		end
+
+		return false
 	end
 end
 

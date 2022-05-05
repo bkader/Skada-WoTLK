@@ -732,8 +732,7 @@ L["Color for %s."] = "Couleur \1242 %s."
 L["Choose the %s that fits your character's build."] = "Choix \1242 %s qui correspond au build de votre personnage."
 L["Are you sure you want clear cached icons and colors?"] = "\195\138tes-vous s\195\187r de vouloir vider le cache des ic\195\180nes et des couleurs?"
 -- arena
-L["Custom Arena Colors"] = "Couleurs d'ar\195\168ne personnalis\195\169es"
-L["Enable this if you want to use custom arena teams colors."] = "Activez cette option si vous souhaitez utiliser des couleurs d'\195\169quipes d'ar\195\168ne personnalis\195\169es."
+L.mod_pvp_desc = "Ajoute la d\195\169tection des sp\195\169cialisations pour les ar\195\168nes et les champs de bataille, et affiche les adversaires de l'ar\195\168ne dans la m\195\170me fen\195\170tre."
 L["Gold Team"] = "\195\137quipe dor\195\169e"
 L["Green Team"] = "\195\137quipe verte"
 -- notifications

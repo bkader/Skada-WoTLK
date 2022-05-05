@@ -728,8 +728,7 @@ L["Color for %s."] = "%s의 색상입니다."
 L["Choose the %s that fits your character's build."] = "캐릭터의 빌드에 맞는 %s을 선택하십시오."
 L["Are you sure you want clear cached icons and colors?"] = "캐시된 아이콘과 색상을 삭제하시겠습니까?"
 -- arena
-L["Custom Arena Colors"] = "커스텀 아레나 색상"
-L["Enable this if you want to use custom arena teams colors."] = "사용자 정의 팀 색상을 사용하려면 이것을 활성화하십시오."
+L.mod_pvp_desc = "투기장 및 전장에 대한 전문화 감지를 추가하고 같은 창에 투기장 상대를 표시합니다."
 L["Gold Team"] = "금색팀"
 L["Green Team"] = "녹색팀"
 -- notifications

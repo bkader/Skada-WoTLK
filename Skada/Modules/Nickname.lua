@@ -325,7 +325,7 @@ Skada:AddLoadableModule("Nickname", function(L)
 			end
 
 			for _, word in ipairs(blacklist) do
-				if strfind(name, word) then
+				if strfind(name:lower(), word) then
 					return false, L["Your nickname contains a forbidden word."]
 				end
 			end

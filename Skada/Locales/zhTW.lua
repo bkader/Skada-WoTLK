@@ -724,8 +724,7 @@ L["Color for %s."] = "%s 的顏色。"
 L["Choose the %s that fits your character's build."] = "選擇適合您角色體型的%s。"
 L["Are you sure you want clear cached icons and colors?"] = "您確定要刪除緩存的圖標和顏色嗎？"
 -- arena
-L["Custom Arena Colors"] = "自定義競技場顏色"
-L["Enable this if you want to use custom arena teams colors."] = "如果您想使用自定義團隊顏色，請啟用此選項。"
+L.mod_pvp_desc = "為競技場和戰場添加專業化檢測，並在同一窗口顯示競技場對手。"
 L["Gold Team"] = "金隊"
 L["Green Team"] = "綠隊"
 -- notifications

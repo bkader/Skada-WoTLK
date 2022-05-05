@@ -761,8 +761,8 @@ L["Color for %s."] = true
 L["Choose the %s that fits your character's build."] = true
 L["Are you sure you want clear cached icons and colors?"] = true
 -- arena
-L["Custom Arena Colors"] = true
-L["Enable this if you want to use custom arena teams colors."] = true
+L["Player vs. Player"] = PLAYER_V_PLAYER
+L.mod_pvp_desc = "Adds specialization detection for arenas and battlegrounds, and shows arena opponents on the same window."
 L["Gold Team"] = true
 L["Green Team"] = true
 -- notifications

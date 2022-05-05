@@ -79,6 +79,7 @@ ignoredSpells.firsthit = {
 	[14324] = true, -- Hunter's Mark (rank 3)
 	[14325] = true, -- Hunter's Mark (rank 4)
 	[53338] = true, -- Hunter's Mark (rank 5)
+	[56190] = true, -- Shadow Jade Focusing Lens
 	[56191] = true, -- Shadow Jade Focusing Lens
 	[60122] = true -- Baby Spice
 }

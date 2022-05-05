@@ -1823,10 +1823,6 @@ do
 		end
 	end
 
-	function Skada:NoTotal(set, mode)
-		return (set == "total" and type(mode) == "table" and mode.nototal == true)
-	end
-
 	function Skada:ShowTooltip(win, id, label, bar)
 		if self.db.profile.tooltips and win and win.metadata and not (bar and bar.ignore) then
 			local t, md = GameTooltip, win.metadata
@@ -1849,16 +1845,16 @@ do
 				end
 
 				if self.db.profile.informativetooltips then
-					if md.click1 and not self:NoTotal(win.selectedset, md.click1) then
+					if md.click1 and not self:NoTotalClick(win.selectedset, md.click1) then
 						self:AddSubviewToTooltip(t, win, md.click1, id, label)
 					end
-					if md.click2 and not self:NoTotal(win.selectedset, md.click2) then
+					if md.click2 and not self:NoTotalClick(win.selectedset, md.click2) then
 						self:AddSubviewToTooltip(t, win, md.click2, id, label)
 					end
-					if md.click3 and not self:NoTotal(win.selectedset, md.click3) then
+					if md.click3 and not self:NoTotalClick(win.selectedset, md.click3) then
 						self:AddSubviewToTooltip(t, win, md.click3, id, label)
 					end
-					if not self.Ascension and md.click4 and not self:NoTotal(win.selectedset, md.click4) then
+					if not self.Ascension and md.click4 and not self:NoTotalClick(win.selectedset, md.click4) then
 						self:AddSubviewToTooltip(t, win, md.click4, id, label)
 					end
 				end
@@ -1874,25 +1870,25 @@ do
 
 				if type(md.click1) == "function" then
 					t:AddLine(format(L["Click for |cff00ff00%s|r"], md.click1_label or L.Unknown))
-				elseif md.click1 and not self:NoTotal(win.selectedset, md.click1) then
+				elseif md.click1 and not self:NoTotalClick(win.selectedset, md.click1) then
 					t:AddLine(format(L["Click for |cff00ff00%s|r"], md.click1_label or md.click1.moduleName))
 				end
 
 				if type(md.click2) == "function" then
 					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], md.click2_label or L.Unknown))
-				elseif md.click2 and not self:NoTotal(win.selectedset, md.click2) then
+				elseif md.click2 and not self:NoTotalClick(win.selectedset, md.click2) then
 					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], md.click2_label or md.click2.moduleName))
 				end
 
 				if type(md.click3) == "function" then
 					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], md.click3_label or L.Unknown))
-				elseif md.click3 and not self:NoTotal(win.selectedset, md.click3) then
+				elseif md.click3 and not self:NoTotalClick(win.selectedset, md.click3) then
 					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], md.click3_label or md.click3.moduleName))
 				end
 
 				if not self.Ascension and type(md.click4) == "function" then
 					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], md.click4_label or L.Unknown))
-				elseif not self.Ascension and md.click4 and not self:NoTotal(win.selectedset, md.click4) then
+				elseif not self.Ascension and md.click4 and not self:NoTotalClick(win.selectedset, md.click4) then
 					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], md.click4_label or md.click4.moduleName))
 				end
 
@@ -3489,57 +3485,13 @@ function Skada:ResumeSegment(msg)
 	end
 end
 
-local function CanRecordTotal(set)
-	if set then
-		-- raid bosses - 0x01
-		if band(Skada.db.profile.totalflag, 0x01) ~= 0 then
-			if set.type == "raid" and set.gotboss then
-				if set.time >= Skada.db.profile.minsetlength then
-					return true
-				end
-			end
-		end
-
-		-- raid trash - 0x02
-		if band(Skada.db.profile.totalflag, 0x02) ~= 0 then
-			if set.type == "raid" and not set.gotboss then
-				return true
-			end
-		end
-
-		-- dungeon boss - 0x04
-		if band(Skada.db.profile.totalflag, 0x04) ~= 0 then
-			if set.type == "party" and Skada.db.profile.gotboss then
-				return true
-			end
-		end
-
-		-- dungeon trash - 0x08
-		if band(Skada.db.profile.totalflag, 0x08) ~= 0 then
-			if set.type == "party" and not Skada.db.profile.gotboss then
-				return true
-			end
-		end
-
-		-- any combat - 0x10
-		if band(Skada.db.profile.totalflag, 0x10) ~= 0 then
-			return true
-		end
-
-		-- battlegrouns/arenas or nothing
-		return (set.type == "pvp" or set.type == "arena")
-	end
-
-	return false
-end
-
 function Skada:DispatchSets(func, total, ...)
 	if self.current and type(func) == "function" then
 		-- record to current
 		func(self.current, ...)
 
 		-- record to total
-		if total and self.total and CanRecordTotal(self.current) then
+		if total and self.total and self:CanRecordTotal(self.current) then
 			func(self.total, ...)
 		end
 

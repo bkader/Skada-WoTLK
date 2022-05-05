@@ -730,8 +730,7 @@ L["Color for %s."] = "Цвет %s."
 L["Choose the %s that fits your character's build."] = "Выберите %s, соответствующий телосложению вашего персонажа."
 L["Are you sure you want clear cached icons and colors?"] = "Вы уверены, что хотите удалить кешированные значки и цвета?"
 -- arena
-L["Custom Arena Colors"] = "Пользовательские цвета арены"
-L["Enable this if you want to use custom arena teams colors."] = "Включите это, если вы хотите использовать собственные цвета команд арены."
+L.mod_pvp_desc = "Добавляет определение специализации для арен и мест сражений, а также отображение противников на арене в одном окне."
 L["Gold Team"] = "Золотая команда"
 L["Green Team"] = "Зеленая команда"
 -- notifications
