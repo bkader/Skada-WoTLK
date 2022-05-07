@@ -2,7 +2,7 @@ local Skada = Skada
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 
-local select, pairs, ipairs = select, pairs, ipairs
+local select, pairs = select, pairs
 local tostring, tonumber, format = tostring, tonumber, string.format
 local setmetatable, getmetatable, wipe, band = setmetatable, getmetatable, wipe, bit.band
 local print = print
@@ -355,16 +355,18 @@ function Skada.unitClass(guid, flag, set, db, name)
 	set = set or Skada.current
 	if set then
 		-- an existing player
-		for _, p in ipairs(set.players) do
-			if p.id == guid then
+		for i = 1, #set.players do
+			local p = set.players[i]
+			if p and p.id == guid then
 				return p.class, p.role, p.spec
-			elseif name and p.name == name and p.class and Skada.validclass[p.class] then
+			elseif p and name and p.name == name and p.class and Skada.validclass[p.class] then
 				return p.class, p.role, p.spec
 			end
 		end
 		if set.enemies then
-			for _, e in ipairs(set.enemies) do
-				if (e.id == guid or e.name == guid) and e.class then
+			for i = 1, #set.enemies do
+				local e = set.enemies[i]
+				if e and ((e.id == guid or e.name == guid)) and e.class then
 					return e.class
 				end
 			end
@@ -575,38 +577,37 @@ do
 	end
 
 	local function RandomizeFakeData(set, coef)
-		for _, player in ipairs(set.players) do
-			if getmetatable(player) ~= playerPrototype then
-				playerPrototype:Bind(player, set)
-			end
+		for i = 1, #set.players do
+			local player = playerPrototype:Bind(set.players[i], set)
+			if player then
+				local damage, heal, absorb = 0, 0, 0
 
-			local damage, heal, absorb = 0, 0, 0
-
-			if player.role == "HEALER" then
-				damage = coef * random(0, 1500)
-				if player.spec == 256 then
+				if player.role == "HEALER" then
+					damage = coef * random(0, 1500)
+					if player.spec == 256 then
+						heal = coef * random(500, 1500)
+						absorb = coef * random(2500, 20000)
+					else
+						heal = coef * random(2500, 15000)
+						absorb = coef * random(0, 150)
+					end
+				elseif player.role == "TANK" then
+					damage = coef * random(1000, 10000)
 					heal = coef * random(500, 1500)
-					absorb = coef * random(2500, 20000)
+					absorb = coef * random(1000, 1500)
 				else
-					heal = coef * random(2500, 15000)
-					absorb = coef * random(0, 150)
+					damage = coef * random(8000, 18000)
+					heal = coef * random(150, 1500)
 				end
-			elseif player.role == "TANK" then
-				damage = coef * random(1000, 10000)
-				heal = coef * random(500, 1500)
-				absorb = coef * random(1000, 1500)
-			else
-				damage = coef * random(8000, 18000)
-				heal = coef * random(150, 1500)
+
+				player.damage = (player.damage or 0) + damage
+				player.heal = (player.heal or 0) + heal
+				player.absorb = (player.absorb or 0) + absorb
+
+				set.damage = set.damage + damage
+				set.heal = set.heal + heal
+				set.absorb = set.absorb + absorb
 			end
-
-			player.damage = (player.damage or 0) + damage
-			player.heal = (player.heal or 0) + heal
-			player.absorb = (player.absorb or 0) + absorb
-
-			set.damage = set.damage + damage
-			set.heal = set.heal + heal
-			set.absorb = set.absorb + absorb
 		end
 	end
 

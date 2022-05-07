@@ -7,7 +7,7 @@ Skada:AddLoadableModule("Potions", function(L)
 	local potionmod = mod:NewModule(L["Players list"])
 
 	-- cache frequently used globals
-	local pairs, ipairs, tconcat, format, strsub = pairs, ipairs, table.concat, string.format, string.sub
+	local pairs, tconcat, format, strsub = pairs, table.concat, string.format, string.sub
 	local GetItemInfo, GetSpellInfo = GetItemInfo, Skada.GetSpellInfo or GetSpellInfo
 	local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
 	local UnitGUID, UnitName, UnitClass, UnitBuff = UnitGUID, UnitName, UnitClass, UnitBuff
@@ -182,8 +182,9 @@ Skada:AddLoadableModule("Potions", function(L)
 			end
 
 			local nr = 0
-			for _, player in ipairs(set.players) do
-				if (not win.class or win.class == player.class) and (player.potion or 0) > 0 then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and player.potion and (not win.class or win.class == player.class) then
 					nr = nr + 1
 					local d = win:nr(nr)
 
@@ -392,8 +393,9 @@ Skada:AddLoadableModule("Potions", function(L)
 				tbl = wipe(tbl or Skada.cacheTable)
 				local total = 0
 
-				for _, p in ipairs(self.players) do
-					if (not class or class == p.class) and p.potionspells and p.potionspells[potionid] then
+				for i = 1, #self.players do
+					local p = self.players[i]
+					if p and p.potionspells and p.potionspells[potionid] and (not class or class == p.class) then
 						total = total + p.potionspells[potionid]
 						tbl[p.name] = {
 							id = p.id,

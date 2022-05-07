@@ -5,7 +5,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 	local mod = Skada:NewModule(L["Tweaks"], "AceHook-3.0")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
-	local ipairs, band, format = ipairs, bit.band, string.format
+	local band, format = bit.band, string.format
 	local UnitClass, GetTime = UnitClass, GetTime
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
@@ -90,9 +90,12 @@ Skada:AddLoadableModule("Tweaks", function(L)
 					self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
 
 					if self.tempsets then -- phases
-						for _, set in ipairs(self.tempsets) do
-							set.success = true
-							self:SendMessage("COMBAT_BOSS_DEFEATED", set)
+						for i = 1, #self.tempsets do
+							local set = self.tempsets[i]
+							if set and not set.success then
+								set.success = true
+								self:SendMessage("COMBAT_BOSS_DEFEATED", set)
+							end
 						end
 					end
 				end
@@ -241,40 +244,46 @@ Skada:AddLoadableModule("Tweaks", function(L)
 		local meters = {}
 
 		function mod:FilterLine(event, source, msg, ...)
-			for i, line in ipairs(firstlines) do
-				local newID = 0
-				if msg:match(line) then
+			for i = 1, #firstlines do
+				local line = firstlines[i]
+				if line and msg:match(line) then
+					local newID = 0
 					local curtime = GetTime()
 					if find(msg, "|cff(.+)|r") then
 						msg = gsub(msg, "|cff%w%w%w%w%w%w", "")
 						msg = gsub(msg, "|r", "")
 					end
-					for id, meter in ipairs(meters) do
-						local elapsed = curtime - meter.time
-						if meter.src == source and meter.evt == event and elapsed < 1 then
-							newID = id
+					for j = 1, #meters do
+						local meter = meters[j]
+						local elapsed = meter and (curtime - meter.time) or 0
+						if meter and meter.src == source and meter.evt == event and elapsed < 1 then
+							newID = j
 							return true, true, format("|HSKSP:%1$d|h|cffffff00[%2$s]|r|h", newID or 0, msg or "nil")
 						end
 					end
 					meters[#meters + 1] = {src = source, evt = event, time = curtime, data = {}, title = msg}
-					for id, meter in ipairs(meters) do
-						if meter.src == source and meter.evt == event and meter.time == curtime then
-							newID = id
+					for j = 1, #meters do
+						local meter = meters[j]
+						if meter and meter.src == source and meter.evt == event and meter.time == curtime then
+							newID = j
 						end
 					end
 					return true, true, format("|HSKSP:%1$d|h|cffffff00[%2$s]|r|h", newID or 0, msg or "nil")
 				end
 			end
 
-			for _, line in ipairs(nextlines) do
-				if msg:match(line) then
+			for i = 1, #nextlines do
+				local line = nextlines[i]
+				if line and msg:match(line) then
 					local curtime = GetTime()
-					for _, meter in ipairs(meters) do
-						local elapsed = curtime - meter.time
-						if meter.src == source and meter.evt == event and elapsed < 1 then
+					for j = 1, #meters do
+						local meter = meters[j]
+						local elapsed = meter and (curtime - meter.time) or 0
+						if meter and meter.src == source and meter.evt == event and elapsed < 1 then
 							local toInsert = true
-							for _, b in ipairs(meter.data) do
-								if b == msg then
+							for k = 1, #meter.data do
+								local b = meter.data[k]
+								if b and b == msg then
 									toInsert = false
 								end
 							end
@@ -313,8 +322,11 @@ Skada:AddLoadableModule("Tweaks", function(L)
 				ItemRefTooltip:AddLine(meters[meterid].title)
 				ItemRefTooltip:AddLine(format(L["Reported by: %s"], meters[meterid].src))
 				ItemRefTooltip:AddLine(" ")
-				for _, line in ipairs(meters[meterid].data) do
-					ItemRefTooltip:AddLine(line, 1, 1, 1)
+				for i = 1, #meters[meterid].data do
+					local line = meters[meterid].data[i]
+					if line then
+						ItemRefTooltip:AddLine(line, 1, 1, 1)
+					end
 				end
 				ItemRefTooltip:Show()
 			else
@@ -616,13 +628,13 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			if not self:IsHooked("SetItemRef") then
 				self:RawHook("SetItemRef", "ParseLink", true)
 			end
-			for _, e in ipairs(channel_events) do
-				ChatFrame_AddMessageEventFilter(e, self.ParseChatEvent)
+			for i = 1, #channel_events do
+				ChatFrame_AddMessageEventFilter(channel_events[i], self.ParseChatEvent)
 			end
 		elseif self:IsHooked("SetItemRef") then
 			self:Unhook("SetItemRef")
-			for _, e in ipairs(channel_events) do
-				ChatFrame_RemoveMessageEventFilter(e, self.ParseChatEvent)
+			for i = 1, #channel_events do
+				ChatFrame_RemoveMessageEventFilter(channel_events[i], self.ParseChatEvent)
 			end
 		end
 

@@ -8,7 +8,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 	local spelltargetmod = spellmod:NewModule(L["Damage spell targets"])
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
-	local pairs, ipairs, format = pairs, ipairs, string.format
+	local pairs, format = pairs, string.format
 	local GetSpellInfo, T = Skada.GetSpellInfo or GetSpellInfo, Skada.Table
 	local _
 
@@ -215,8 +215,9 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 			end
 
 			local nr = 0
-			for _, player in ipairs(set.players) do
-				if (not win.class or win.class == player.class) and (player.friendfire or 0) > 0 then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and player.friendfire and (not win.class or win.class == player.class) then
 					nr = nr + 1
 					local d = win:nr(nr)
 
@@ -291,10 +292,11 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 		T.clear(dmg)
 
 		if (set.friendfire or 0) == 0 then return end
-		for _, p in ipairs(set.players) do
-			if p.friendfire and p.friendfire == 0 then
+		for i = 1, #set.players do
+			local p = set.players[i]
+			if p and p.friendfire and p.friendfire == 0 then
 				p.friendfirespells = nil
-			elseif p.friendfirespells then
+			elseif p and p.friendfirespells then
 				for spellid, spell in pairs(p.friendfirespells) do
 					if spell.amount == 0 then
 						p.friendfirespells[spellid] = nil

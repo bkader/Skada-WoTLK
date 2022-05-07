@@ -1,6 +1,6 @@
 local Skada = Skada
 
-local pairs, ipairs, format, tostring = pairs, ipairs, string.format, tostring
+local pairs, format, tostring = pairs, string.format, tostring
 local min, max, floor = math.min, math.max, math.floor
 local UnitName, UnitGUID, UnitBuff = UnitName, UnitGUID, UnitBuff
 local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
@@ -44,8 +44,9 @@ do
 			local maxtime = Skada:GetSetTime(set)
 			curtime = curtime or time()
 
-			for _, player in ipairs(set.players) do
-				if player.auras then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and player.auras then
 					for spellid, spell in pairs(player.auras) do
 						if spell.active ~= nil and spell.start then
 							spell.uptime = min(maxtime, spell.uptime + floor((curtime - spell.start) + 0.5))
@@ -94,8 +95,9 @@ do
 		local count = 0
 		if spellid and self.players then
 			tbl = wipe(tbl or cacheTable)
-			for _, p in ipairs(self.players) do
-				if p.auras and p.auras[spellid] then
+			for i = 1, #self.players do
+				local p = self.players[i]
+				if p and p.auras and p.auras[spellid] then
 					local maxtime = floor(p:GetTime())
 					local uptime = min(maxtime, p.auras[spellid].uptime)
 					count = count + 1
@@ -210,8 +212,9 @@ do
 				end
 
 				local nr = 0
-				for _, player in ipairs(set.players) do
-					if not win.class or win.class == player.class then
+				for i = 1, #set.players do
+					local player = set.players[i]
+					if player and (not win.class or win.class == player.class) then
 						local auracount, aurauptime = CountAuras(player.auras, atype)
 						if auracount > 0 and aurauptime > 0 then
 							nr = nr + 1

@@ -6,7 +6,7 @@ Skada:AddLoadableModule("Resurrects", function(L)
 	local playermod = mod:NewModule(L["Resurrect spell list"])
 	local targetmod = mod:NewModule(L["Resurrect target list"])
 
-	local pairs, ipairs, tostring, format = pairs, ipairs, tostring, string.format
+	local pairs, tostring, format = pairs, tostring, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local _
 
@@ -168,8 +168,9 @@ Skada:AddLoadableModule("Resurrects", function(L)
 			end
 
 			local nr = 0
-			for _, player in ipairs(set.players) do
-				if (player.ress or 0) > 0 then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and player.ress then
 					nr = nr + 1
 					local d = win:nr(nr)
 

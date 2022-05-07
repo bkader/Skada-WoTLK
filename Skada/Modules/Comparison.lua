@@ -11,9 +11,10 @@ Skada:AddLoadableModule("Comparison", function(L)
 	local targetmod = mod:NewModule(L["Damage target list"])
 	local dtargetmod = targetmod:NewModule(L["Damage spell list"])
 
-	local pairs, ipairs, format, max = pairs, ipairs, string.format, math.max
+	local pairs, format, max = pairs, string.format, math.max
 	local GetSpellInfo, T = Skada.GetSpellInfo or GetSpellInfo, Skada.Table
 	local cacheTable = T.get("Skada_CacheTable2")
+	local COLOR_GOLD = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
 	local _
 
 	-- damage miss types
@@ -237,8 +238,9 @@ Skada:AddLoadableModule("Comparison", function(L)
 					nr = add_detail_bar(win, nr, L["Glancing"], spell.glancing, nil, nil, true)
 				end
 
-				for _, misstype in ipairs(missTypes) do
-					if (spell[misstype] or 0) > 0 then
+				for i = 1, #missTypes do
+					local misstype = missTypes[i]
+					if misstype and spell[misstype] then
 						nr = add_detail_bar(win, nr, L[misstype], spell[misstype], nil, nil, true)
 					end
 				end
@@ -275,8 +277,9 @@ Skada:AddLoadableModule("Comparison", function(L)
 				nr = add_detail_bar(win, nr, L["Glancing"], spell and spell.glancing, myspell and myspell.glancing)
 			end
 
-			for _, misstype in ipairs(missTypes) do
-				if (spell and (spell[misstype] or 0) > 0) or (myspell and (myspell[misstype] or 0) > 0) then
+			for i = 1, #missTypes do
+				local misstype = missTypes[i]
+				if misstype and ((spell and spell[misstype]) or (myspell and myspell[misstype])) then
 					nr = add_detail_bar(win, nr, L[misstype], spell and spell[misstype], myspell and myspell[misstype])
 				end
 			end
@@ -770,7 +773,8 @@ Skada:AddLoadableModule("Comparison", function(L)
 			local myamount = set:GetActorDamage(mod.userGUID, mod.userName)
 			local nr = 0
 
-			for _, player in ipairs(set.players) do
+			for i = 1, #set.players do
+				local player = set.players[i]
 				if CanCompare(player) then
 					local dps, amount = player:GetDPS()
 					if amount > 0 then
@@ -795,7 +799,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 						if win.metadata then
 							-- color the selected player's bar.
 							if player.id == mod.userGUID then
-								d.color = Skada:ClassColor("ARENA_GOLD")
+								d.color = COLOR_GOLD
 							elseif d.color then
 								d.color = nil
 							end

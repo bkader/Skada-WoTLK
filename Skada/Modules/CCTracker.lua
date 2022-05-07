@@ -1,6 +1,6 @@
 local Skada = Skada
 
-local pairs, ipairs, tostring, format = pairs, ipairs, tostring, string.format
+local pairs, tostring, format = pairs, tostring, string.format
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 local playerPrototype = Skada.playerPrototype
@@ -342,8 +342,9 @@ Skada:AddLoadableModule("CC Done", function(L)
 			end
 
 			local nr = 0
-			for _, player in ipairs(set.players) do
-				if (not win.class or win.class == player.class) and (player.ccdone or 0) > 0 then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and player.ccdone and (not win.class or win.class == player.class) then
 					nr = nr + 1
 					local d = win:nr(nr)
 
@@ -599,8 +600,9 @@ Skada:AddLoadableModule("CC Taken", function(L)
 			end
 
 			local nr = 0
-			for _, player in ipairs(set.players) do
-				if (not win.class or win.class == player.class) and (player.cctaken or 0) > 0 then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and player.cctaken and (not win.class or win.class == player.class) then
 					nr = nr + 1
 					local d = win:nr(nr)
 
@@ -878,8 +880,9 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 			end
 
 			local nr = 0
-			for _, player in ipairs(set.players) do
-				if (not win.class or win.class == player.class) and (player.ccbreak or 0) > 0 then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and player.ccbreak and (not win.class or win.class == player.class) then
 					nr = nr + 1
 					local d = win:nr(nr)
 

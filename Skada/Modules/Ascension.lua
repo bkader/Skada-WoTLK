@@ -8,7 +8,7 @@ Skada:AddLoadableModule("Project Ascension", function(L)
 
 	local mod = Skada:NewModule(L["Project Ascension"], "AceTimer-3.0")
 
-	local type, next, ipairs = type, next, ipairs
+	local type, next = type, next
 	local time, wipe, format = time, wipe, string.format
 	local RGBPercToHex = Skada.RGBPercToHex
 
@@ -44,7 +44,7 @@ Skada:AddLoadableModule("Project Ascension", function(L)
 	function mod:OnCommAscension(event, sender, guid, data)
 		if sender and guid and guid ~= Skada.userGUID and data and CheckAscension(data) then
 			self.db.others[guid] = self.db.others[guid] or {}
-			for i, _ in ipairs(data) do
+			for i = 1, #data do
 				self.db.others[guid][i] = data[i]
 			end
 		end
@@ -59,8 +59,9 @@ Skada:AddLoadableModule("Project Ascension", function(L)
 				mod:SetCacheTable()
 			end
 
-			for _, data in ipairs(win.dataset) do
-				if data.id and not (data.ignore or data.spellid or data.hyperlink) then
+			for i = 1, #win.dataset do
+				local data = win.dataset[i]
+				if data and data.id and not (data.ignore or data.spellid or data.hyperlink) then
 					if mod.db.others[data.id] then
 						if mod.db.others[data.id][1] then
 							data.icon = format(patternIcon, mod.db.others[data.id][1])
@@ -95,8 +96,9 @@ Skada:AddLoadableModule("Project Ascension", function(L)
 				mod:SetCacheTable()
 			end
 
-			for _, data in ipairs(win.dataset) do
-				if not data.ignore and data.id then
+			for i = 1, #win.dataset do
+				local data = win.dataset[i]
+				if data and data.id and not data.ignore then
 					if mod.db.others[data.id] then
 						data.color = {
 							r = mod.db.others[data.id][2],

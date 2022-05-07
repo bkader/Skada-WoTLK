@@ -324,7 +324,8 @@ Skada:AddLoadableModule("Nickname", function(L)
 				return false, L["Only letters and two spaces are allowed."]
 			end
 
-			for _, word in ipairs(blacklist) do
+			for i = 1, #blacklist do
+				local word = blacklist[i]
 				if strfind(name:lower(), word) then
 					return false, L["Your nickname contains a forbidden word."]
 				end

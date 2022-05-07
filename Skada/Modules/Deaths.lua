@@ -6,12 +6,11 @@ Skada:AddLoadableModule("Deaths", function(L)
 	local playermod = mod:NewModule(L["Player's deaths"])
 	local deathlogmod = mod:NewModule(L["Death log"])
 
+	local tinsert, tremove, tsort, tconcat = table.insert, table.remove, table.sort, table.concat
+	local tostring, format, select = tostring, string.format, select
+	local max, floor = math.max, math.floor
 	local UnitHealthInfo = Skada.UnitHealthInfo
 	local UnitIsFeignDeath = UnitIsFeignDeath
-	local tinsert, tremove, tsort, tconcat = table.insert, table.remove, table.sort, table.concat
-	local ipairs, select = ipairs, select
-	local tostring, format = tostring, string.format
-	local max, floor = math.max, math.floor
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 	local T, wipe = Skada.Table, wipe
@@ -436,15 +435,17 @@ Skada:AddLoadableModule("Deaths", function(L)
 				end
 
 				local nr = 0
-				for i, death in ipairs(player.deathlog) do
+				for i = 1, #player.deathlog do
+					local death = player.deathlog[i]
 					nr = nr + 1
 					local d = win:nr(nr)
 
 					d.id = i
 					d.icon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
 
-					for k, v in ipairs(death.log) do
-						if v.amount and v.amount < 0 and (v.spellid or v.source) then
+					for k = 1, #death.log do
+						local v = death.log[k]
+						if v and v.amount and v.amount < 0 and (v.spellid or v.source) then
 							if v.spellid then
 								d.label, _, d.icon = GetSpellInfo(v.spellid)
 								d.spellid = v.spellid
@@ -478,8 +479,9 @@ Skada:AddLoadableModule("Deaths", function(L)
 			end
 
 			local nr = 0
-			for _, player in ipairs(set.players) do
-				if (not win.class or win.class == player.class) and (player.death or 0) > 0 then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and player.death and (not win.class or win.class == player.class) then
 					nr = nr + 1
 					local d = win:nr(nr)
 
@@ -630,10 +632,11 @@ Skada:AddLoadableModule("Deaths", function(L)
 		T.clear(data)
 
 		-- clean deathlogs.
-		for _, player in ipairs(set.players) do
-			if (set.death or 0) == 0 or (player.death or 0) == 0 then
+		for i = 1, #set.players do
+			local player = set.players[i]
+			if player and (not set.death or not player.death) then
 				player.death, player.deathlog = nil, nil
-			elseif player.deathlog then
+			elseif player and player.deathlog then
 				while #player.deathlog > (player.death or 0) do
 					tremove(player.deathlog, 1)
 				end
@@ -665,8 +668,9 @@ Skada:AddLoadableModule("Deaths", function(L)
 		if channel ~= "SELF" and channel ~= "GUILD" and not IsInGroup() then return end
 
 		local log = nil
-		for _, l in ipairs(logs) do
-			if l.amount and l.amount < 0 then
+		for i = 1, #logs do
+			local l = logs[i]
+			if l and l.amount and l.amount < 0 then
 				log = l
 				break
 			end

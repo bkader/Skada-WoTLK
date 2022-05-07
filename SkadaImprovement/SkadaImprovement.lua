@@ -7,7 +7,7 @@ Skada:AddLoadableModule("Improvement", function(L)
 	local mod_modes = mod:NewModule(L["Improvement modes"])
 	local mod_comparison = mod:NewModule(L["Improvement comparison"])
 
-	local pairs, ipairs, select = pairs, ipairs, select
+	local pairs, select = pairs, select
 	local date, tostring = date, tostring
 	local playerid = UnitGUID("player")
 
@@ -101,13 +101,14 @@ Skada:AddLoadableModule("Improvement", function(L)
 	end
 
 	local function find_encounter_data(boss, starttime)
-		for i, encounter in ipairs(boss.encounters) do
-			if encounter.starttime == starttime then
+		for i = 1, #boss.encounters do
+			local encounter = boss.encounters[i]
+			if encounter and encounter.starttime == starttime then
 				return encounter
 			end
 		end
 
-		tinsert(boss.encounters, {starttime = starttime, data = {}})
+		boss.encounters[#boss.encounters + 1] = {starttime = starttime, data = {}}
 		return find_encounter_data(boss, starttime)
 	end
 
@@ -126,7 +127,8 @@ Skada:AddLoadableModule("Improvement", function(L)
 			end
 
 			local nr = 0
-			for i, encounter in ipairs(boss.encounters) do
+			for i = 1, #boss.encounters do
+				local encounter = boss.encounters[i]
 				nr = nr + 1
 				local d = win:nr(nr)
 
@@ -139,7 +141,7 @@ Skada:AddLoadableModule("Improvement", function(L)
 				elseif win.modename == "Deaths" or win.modename == "Interrupts" or win.modename == "Fails" then
 					d.valuetext = tostring(d.value)
 				else
-					d.valuetext = Skada:FormatColumns(
+					d.valuetext = Skada:FormatValueCols(
 						Skada:FormatNumber(d.value),
 						Skada:FormatNumber((d.value) / max(1, encounter.data.ActiveTime or 0))
 					)
@@ -167,7 +169,8 @@ Skada:AddLoadableModule("Improvement", function(L)
 			end
 
 			local nr = 0
-			for i, mode in ipairs(modes) do
+			for i = 1, #modes do
+				local mode = modes[i]
 				nr = nr + 1
 				local d = win:nr(nr)
 
@@ -175,10 +178,9 @@ Skada:AddLoadableModule("Improvement", function(L)
 				d.label = localized[mode] or mode
 
 				local value, active = 0, 0
-
-				for _, encounter in ipairs(boss.encounters) do
-					value = value + (encounter.data[mode] or 0)
-					active = active + (encounter.data.ActiveTime or 0)
+				for j = 1, #boss.encounters do
+					value = value + (boss.encounters[j].data[mode] or 0)
+					active = active + (boss.encounters[j].data.ActiveTime or 0)
 				end
 
 				d.value = value
@@ -246,12 +248,14 @@ Skada:AddLoadableModule("Improvement", function(L)
 			local encounter = find_encounter_data(boss, set.starttime)
 			if not encounter then return end
 
-			for _, player in ipairs(set.players) do
-				if player.id == playerid then
-					for _, mode in ipairs(modes) do
-						if updaters[mode] then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and player.id == playerid then
+					for j = 1, #modes do
+						local mode = modes[j]
+						if mode and updaters[mode] then
 							encounter.data[mode] = updaters[mode](set, player)
-						else
+						elseif mode then
 							encounter.data[mode] = player[mode:lower()]
 						end
 					end
@@ -267,7 +271,7 @@ Skada:AddLoadableModule("Improvement", function(L)
 	end
 
 	function mod:OnEnable()
-		playerid = playerid or UnitGUID("player")
+		playerid = playerid or Skada.userGUID or UnitGUID("player")
 		self:OnInitialize()
 
 		mod_comparison.metadata = {notitleset = true}
@@ -307,15 +311,19 @@ Skada:AddLoadableModule("Improvement", function(L)
 		SkadaImprovementDB = wipe(SkadaImprovementDB or {})
 		self.db = nil
 		self:OnInitialize()
-		collectgarbage("collect")
-		for _, win in ipairs(Skada:GetWindows()) do
-			local mode = win.db.mode
+
+		local windows = Skada:GetWindows()
+		for i = 1, #windows do
+			local win = windows[i]
+			local mode = (win and win.db) and win.db.mode or nil
 			if mode == L["Improvement"] or mode == L["Improvement modes"] or mode == L["Improvement comparison"] then
 				win:DisplayMode(mod)
 			end
 		end
+
 		Skada:UpdateDisplay(true)
 		Skada:Print(L["All data has been reset."])
+		Skada:CleanGarbage()
 	end
 
 	local Default_ShowPopup = Skada.ShowPopup

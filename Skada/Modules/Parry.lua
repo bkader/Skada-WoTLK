@@ -6,7 +6,7 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 	local mod = Skada:NewModule(L["Parry-Haste"])
 	local targetmod = mod:NewModule(L["Parry target list"])
 
-	local pairs, ipairs, tostring, format = pairs, ipairs, tostring, string.format
+	local pairs, tostring, format = pairs, tostring, string.format
 
 	local parrybosses = {
 		[L["Acidmaw"]] = true,
@@ -111,8 +111,9 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 			end
 
 			local nr = 0
-			for _, player in ipairs(set.players) do
-				if (not win.class or win.class == player.class) and (player.parry or 0) > 0 then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and player.parry and (not win.class or win.class == player.class) then
 					nr = nr + 1
 					local d = win:nr(nr)
 

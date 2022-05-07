@@ -2,7 +2,7 @@
 -- Specialized ( = enhanced) for Skada
 -- Note to self: don't forget to notify original author of changes
 -- in the unlikely event they end up being usable outside of Skada.
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90003
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90004
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 
@@ -14,6 +14,7 @@ local abs, min, max, floor = math.abs, math.min, math.max, math.floor
 local tsort, tinsert, tremove, tconcat, wipe = table.sort, tinsert, tremove, table.concat, wipe
 local next, pairs, assert, error, type, xpcall = next, pairs, assert, error, type, xpcall
 local GameTooltip = GameTooltip
+local dummyTable = {}
 
 local ICON_LOCK = [[Interface\AddOns\Skada\Libs\SpecializedLibBars-1.0\lock.tga]]
 local ICON_UNLOCK = [[Interface\AddOns\Skada\Libs\SpecializedLibBars-1.0\unlock.tga]]
@@ -141,14 +142,12 @@ local function createClass(ftype, parent)
 	return class
 end
 
-local barPrototype, barListPrototype
-
 local dummyFrame = createClass("Frame")
 lib.barPrototype = lib.barPrototype or createClass({}, dummyFrame)
 lib.barListPrototype = lib.barListPrototype or createClass({}, dummyFrame)
 
-barPrototype = lib.barPrototype
-barListPrototype = lib.barListPrototype
+local barPrototype = lib.barPrototype
+local barListPrototype = lib.barListPrototype
 
 lib.bars = lib.bars or {}
 lib.barLists = lib.barLists or {}
@@ -276,8 +275,8 @@ do
 
 		-- TODO: Remove me!
 		colors[1] = colors[1] or {}
-		for i, c in ipairs(self.colors) do
-			colors[1][i] = c
+		for i = 1, #self.colors do
+			colors[1][i] = self.colors[i]
 		end
 
 		self.gradMap = self.gradMap or {}
@@ -296,7 +295,7 @@ function lib:GetBar(name)
 end
 
 function lib:GetBars(name)
-	return bars[self]
+	return bars[self] or dummyTable
 end
 
 function lib:HasAnyBar()
@@ -436,8 +435,11 @@ end
 
 function barListPrototype:SetButtonsOpacity(alpha)
 	self.buttonsOpacity = alpha
-	for _, btn in ipairs(self.buttons) do
-		btn:SetAlpha(alpha)
+	for i = 1, #self.buttons do
+		local btn = self.buttons[i]
+		if btn then
+			btn:SetAlpha(alpha)
+		end
 	end
 end
 
@@ -482,29 +484,32 @@ function barListPrototype:AdjustButtons()
 	local spacing = self.spacing2 or 1
 	local nr = 0
 
-	for _, btn in ipairs(self.buttons) do
-		btn:ClearAllPoints()
+	for i = 1, #self.buttons do
+		local btn = self.buttons[i]
+		if btn then
+			btn:ClearAllPoints()
 
-		if btn.visible then
-			if nr == 0 and self.orientation == 2 then
-				btn:SetPoint("TOPLEFT", self.button, "TOPLEFT", 5, -(max(height - btn:GetHeight(), 0) / 2))
-			elseif nr == 0 then
-				btn:SetPoint("TOPRIGHT", self.button, "TOPRIGHT", -5, -(max(height - btn:GetHeight(), 0) / 2))
-			elseif self.orientation == 2 then
-				btn:SetPoint("TOPLEFT", self.lastbtn, "TOPRIGHT", spacing, 0)
+			if btn.visible then
+				if nr == 0 and self.orientation == 2 then
+					btn:SetPoint("TOPLEFT", self.button, "TOPLEFT", 5, -(max(height - btn:GetHeight(), 0) / 2))
+				elseif nr == 0 then
+					btn:SetPoint("TOPRIGHT", self.button, "TOPRIGHT", -5, -(max(height - btn:GetHeight(), 0) / 2))
+				elseif self.orientation == 2 then
+					btn:SetPoint("TOPLEFT", self.lastbtn, "TOPRIGHT", spacing, 0)
+				else
+					btn:SetPoint("TOPRIGHT", self.lastbtn, "TOPLEFT", -spacing, 0)
+				end
+				self.lastbtn = btn
+				nr = nr + 1
+
+				if self.mouseover then
+					btn:Hide()
+				else
+					btn:Show()
+				end
 			else
-				btn:SetPoint("TOPRIGHT", self.lastbtn, "TOPLEFT", -spacing, 0)
-			end
-			self.lastbtn = btn
-			nr = nr + 1
-
-			if self.mouseover then
 				btn:Hide()
-			else
-				btn:Show()
 			end
-		else
-			btn:Hide()
 		end
 	end
 
@@ -555,8 +560,9 @@ function barListPrototype:SetBarBackgroundColor(r, g, b, a)
 end
 
 function barListPrototype:ShowButton(title, visible)
-	for _, b in ipairs(self.buttons) do
-		if b.title == title then
+	for i = 1, #self.buttons do
+		local b = self.buttons[i]
+		if b and b.title == title then
 			b.visible = (visible == true)
 			break
 		end
@@ -565,16 +571,18 @@ function barListPrototype:ShowButton(title, visible)
 end
 
 function barListPrototype:ShowButtons()
-	for _, b in ipairs(self.buttons) do
-		if not b:IsShown() and b.visible then
+	for i = 1, #self.buttons do
+		local b = self.buttons[i]
+		if b and not b:IsShown() and b.visible then
 			b:Show()
 		end
 	end
 end
 
 function barListPrototype:HideButtons()
-	for _, b in ipairs(self.buttons) do
-		if b:IsShown() then
+	for i = 1, #self.buttons do
+		local b = self.buttons[i]
+		if b and b:IsShown() then
 			b:Hide()
 		end
 	end

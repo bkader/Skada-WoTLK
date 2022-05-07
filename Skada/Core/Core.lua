@@ -84,6 +84,9 @@ local modes, windows = {}, {}
 -- flags for party, instance and ovo
 local was_in_party = nil
 
+-- secret flags
+local _bound_sets = nil
+
 local COMBATLOG_OBJECT_AFFILIATION_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE or 0x00000001
 local COMBATLOG_OBJECT_AFFILIATION_PARTY = COMBATLOG_OBJECT_AFFILIATION_PARTY or 0x00000002
 local COMBATLOG_OBJECT_AFFILIATION_RAID = COMBATLOG_OBJECT_AFFILIATION_RAID or 0x00000004
@@ -121,15 +124,21 @@ local new, del = Skada.newTable, Skada.delTable
 
 -- verifies a set
 local function VerifySet(mode, set)
-	if not mode then return end
+	if not mode or not set then return end
 
 	if mode.AddSetAttributes then
 		mode:AddSetAttributes(set)
 	end
 
-	if mode.AddPlayerAttributes then
-		for _, player in ipairs(set.players) do
-			mode:AddPlayerAttributes(player, set)
+	if mode.AddPlayerAttributes and set.players then
+		for i = 1, #set.players do
+			mode:AddPlayerAttributes(set.players[i], set)
+		end
+	end
+
+	if mode.AddEnemyAttributes and set.enemies then
+		for i = 1, #set.enemies do
+			mode:AddEnemyAttributes(set.enemies[i], set)
 		end
 	end
 end
@@ -166,8 +175,8 @@ local function CreateSet(setname, set)
 	end
 
 	-- last alterations before returning.
-	for _, mode in ipairs(modes) do
-		VerifySet(mode, set)
+	for i = 1, #modes do
+		VerifySet(modes[i], set)
 	end
 
 	Skada.callbacks:Fire("Skada_SetCreated", set)
@@ -185,10 +194,11 @@ local function CheckSetName(set)
 
 	if Skada.db.profile.setnumber then
 		local num = 0
-		for _, s in ipairs(Skada.char.sets) do
-			if s.name == setname and num == 0 then
+		for i = 1, #Skada.char.sets do
+			local s = Skada.char.sets[i]
+			if s and s.name == setname and num == 0 then
 				num = 1
-			else
+			elseif s then
 				local n, c = strmatch(s.name, "^(.-)%s*%((%d+)%)$")
 				if n == setname then
 					num = max(num, tonumber(c) or 0)
@@ -207,6 +217,7 @@ end
 -- process the given set and stores into sv.
 local function ProcessSet(set, curtime)
 	if not set then return end
+	_bound_sets = nil -- to refresh mt
 
 	curtime = curtime or time()
 
@@ -225,8 +236,9 @@ local function ProcessSet(set, curtime)
 			set.time = max(0.1, set.endtime - set.starttime)
 			set.name = CheckSetName(set)
 
-			for _, mode in ipairs(modes) do
-				if mode.SetComplete then
+			for i = 1, #modes do
+				local mode = modes[i]
+				if mode and mode.SetComplete then
 					mode:SetComplete(set)
 				end
 			end
@@ -248,10 +260,13 @@ end
 
 local function CleanSets(force)
 	local maxsets, numsets = 0, 0
-	for _, set in ipairs(Skada.char.sets) do
-		maxsets = maxsets + 1
-		if not set.keep then
-			numsets = numsets + 1
+	for i = 1, #Skada.char.sets do
+		local set = Skada.char.sets[i]
+		if set then
+			maxsets = maxsets + 1
+			if not set.keep then
+				numsets = numsets + 1
+			end
 		end
 	end
 
@@ -276,8 +291,9 @@ end
 
 -- finds a mode
 local function FindMode(name)
-	for _, mode in ipairs(modes) do
-		if mode.moduleName == name then
+	for i = 1, #modes do
+		local mode = modes[i]
+		if mode and mode.moduleName == name then
 			return mode
 		end
 	end
@@ -472,10 +488,11 @@ do
 
 							-- avoid duplicate names
 							local num = 0
-							for _, win in ipairs(windows) do
-								if win.db.name == val and num == 0 then
+							for i = 1, #windows do
+								local win = windows[i]
+								if win and win.db and win.db.name == val and num == 0 then
 									num = 1
-								else
+								elseif win and win.db then
 									local n, c = strmatch(win.db.name, "^(.-)%s*%((%d+)%)$")
 									if n == val then
 										num = max(num, tonumber(c) or 0)
@@ -508,7 +525,7 @@ do
 					end,
 					set = function(_, display)
 						self.db.display = display
-						Skada:ReloadSettings()
+						Skada:ReloadSettings(self)
 					end
 				},
 				separator1 = {
@@ -525,8 +542,9 @@ do
 					hidden = true,
 					values = function()
 						local list = {[""] = L.None}
-						for _, win in ipairs(windows) do
-							if win.db.name ~= self.db.name and win.db.display == self.db.display then
+						for i = 1, #windows do
+							local win = windows[i]
+							if win and win.db and win.db.name ~= self.db.name and win.db.display == self.db.display then
 								list[win.db.name] = win.db.name
 							end
 						end
@@ -546,8 +564,9 @@ do
 					func = function()
 						wipe(templist)
 						if copywindow then
-							for _, win in ipairs(windows) do
-								if win.db.name == copywindow and win.db.display == self.db.display then
+							for i = 1, #windows do
+								local win = windows[i]
+								if win and win.db and win.db.name == copywindow and win.db.display == self.db.display then
 									Skada.tCopy(templist, win.db, "name", "sticked", "x", "y", "point", "snapped", "child", "childmode")
 									break
 								end
@@ -624,8 +643,9 @@ function Window:SetChild(win)
 	elseif type(win) == "table" then
 		self.child = win
 	elseif type(win) == "string" and win:trim() ~= "" then
-		for _, w in ipairs(windows) do
-			if w.db.name == win then
+		for i = 1, #windows do
+			local w = windows[i]
+			if w and w.db and w.db.name == win then
 				self.child = w
 				return
 			end
@@ -661,9 +681,12 @@ end
 function Window:UpdateDisplay()
 	if not self.metadata.maxvalue then
 		self.metadata.maxvalue = 0
-		for _, data in ipairs(self.dataset) do
-			if data.id and data.value > self.metadata.maxvalue then
-				self.metadata.maxvalue = data.value
+		if self.dataset then
+			for i = 1, #self.dataset do
+				local data = self.dataset[i]
+				if data and data.id and data.value > self.metadata.maxvalue then
+					self.metadata.maxvalue = data.value
+				end
 			end
 		end
 	end
@@ -674,12 +697,15 @@ end
 
 -- called before dataset is updated.
 function Window:UpdateInProgress()
-	for _, data in ipairs(self.dataset) do
-		if data.ignore then
-			data.icon = nil
+	for i = 1, #self.dataset do
+		local data = self.dataset[i]
+		if data then
+			if data.ignore then
+				data.icon = nil
+			end
+			data.id = nil
+			data.ignore = nil
 		end
-		data.id = nil
-		data.ignore = nil
 	end
 end
 
@@ -846,8 +872,9 @@ do
 		if settime == "current" or settime == "total" then
 			self.selectedset = settime
 		else
-			for i, set in ipairs(Skada.char.sets) do
-				if tostring(set.starttime) == settime then
+			for i = 1, #Skada.char.sets do
+				local set = Skada.char.sets[i]
+				if set and tostring(set.starttime) == settime then
 					if set.name == L["Current"] then
 						self.selectedset = "current"
 					elseif set.name == L["Total"] then
@@ -959,10 +986,11 @@ function Skada:CreateWindow(name, db, display)
 	-- avoid duplicate names
 	do
 		local num = 0
-		for _, win in ipairs(windows) do
-			if win.db.name == name and num == 0 then
+		for i = 1, #windows do
+			local win = windows[i]
+			if win and win.db and win.db.name == name and num == 0 then
 				num = 1
-			else
+			elseif win and win.db then
 				local n, c = strmatch(win.db.name, "^(.-)%s*%((%d+)%)$")
 				if n == name then
 					num = max(num, tonumber(c) or 0)
@@ -999,19 +1027,21 @@ end
 -- window deletion
 do
 	local function DeleteWindow(name)
-		for i, win in ipairs(windows) do
-			if win.db.name == name then
+		for i = 1, #windows do
+			local win = windows[i]
+			if win and win.db and win.db.name == name then
 				win:Destroy()
 				tremove(windows, i)
-			elseif win.db.child == name then
+			elseif win and win.db and win.db.child == name then
 				win.db.child, win.db.childmode, win.child = nil, nil, nil
 			end
 		end
 
-		for i, win in ipairs(Skada.db.profile.windows) do
-			if win.name == name then
+		for i = 1, #Skada.db.profile.windows do
+			local win = Skada.db.profile.windows[i]
+			if win and win.name == name then
 				tremove(Skada.db.profile.windows, i)
-			elseif win.sticked and win.sticked[name] then
+			elseif win and win.sticked and win.sticked[name] then
 				win.sticked[name] = nil
 			end
 		end
@@ -1046,8 +1076,11 @@ end
 
 -- toggles windows visiblity
 function Skada:Toggle()
-	for _, win in ipairs(windows) do
-		win:Toggle()
+	for i = 1, #windows do
+		local win = windows[i]
+		if win then
+			win:Toggle()
+		end
 	end
 end
 
@@ -1057,11 +1090,12 @@ function Skada:ToggleWindow()
 		self.db.profile.hidden = false
 		self:ApplySettings()
 	else
-		for _, win in ipairs(windows) do
-			if win:IsShown() then
+		for i = 1, #windows do
+			local win = windows[i]
+			if win and win:IsShown() then
 				win.db.hidden = true
 				win:Hide()
-			else
+			elseif win then
 				win.db.hidden = false
 				win:Show()
 			end
@@ -1096,8 +1130,11 @@ end
 
 -- wipes all windows
 function Skada:Wipe()
-	for _, win in ipairs(windows) do
-		win:Wipe()
+	for i = 1, #windows do
+		local win = windows[i]
+		if win and win.Wipe then
+			win:Wipe()
+		end
 	end
 end
 
@@ -1106,12 +1143,11 @@ function Skada:SetActive(enable)
 		enable = false
 	end
 
-	if enable then
-		for _, win in ipairs(windows) do
+	for i = 1, #windows do
+		local win = windows[i]
+		if win and enable and not win:IsShown() then
 			win:Show()
-		end
-	else
-		for _, win in ipairs(windows) do
+		elseif win and not enable and win:IsShown() then
 			win:Hide()
 		end
 	end
@@ -1174,18 +1210,12 @@ do
 			VerifySet(mode, self.current)
 		end
 
-		for _, set in ipairs(self.char.sets) do
-			VerifySet(mode, set)
+		for i = 1, #self.char.sets do
+			VerifySet(mode, self.char.sets[i])
 		end
 
 		mode.category = category or OTHER
 		modes[#modes + 1] = mode
-
-		for _, win in ipairs(windows) do
-			if mode.moduleName == win.db.mode then
-				self:RestoreView(win, win.db.set, mode.moduleName)
-			end
-		end
 
 		if selected_feed == nil and self.db.profile.feed ~= "" then
 			self:SetFeed(self.db.profile.feed)
@@ -1194,8 +1224,16 @@ do
 		ScanForColumns(mode)
 		Skada:SortModes()
 
-		for _, win in ipairs(windows) do
-			win:Wipe()
+		for i = 1, #windows do
+			local win = windows[i]
+			if win then
+				if win.db and mode.moduleName == win.db.mode then
+					self:RestoreView(win, win.db.set, mode.moduleName)
+				end
+				if win.Wipe then
+					win:Wipe()
+				end
+			end
 		end
 
 		self.changed = true
@@ -1203,9 +1241,9 @@ do
 end
 
 function Skada:RemoveMode(mode)
-	for k, v in ipairs(modes) do
-		if v == mode then
-			tremove(modes, k)
+	for i = 1, #modes do
+		if modes[i] == mode then
+			tremove(modes, i)
 		end
 	end
 end
@@ -1259,8 +1297,9 @@ end
 -- deletes a set
 function Skada:DeleteSet(set, index)
 	if not (set and index) then
-		for i, s in ipairs(self.char.sets) do
-			if (i == index) or (set == s) then
+		for i = 1, #self.char.sets do
+			local s = self.char.sets[i]
+			if s and ((i == index) or (set == s)) then
 				set = set or s
 				index = index or i
 				break
@@ -1276,15 +1315,18 @@ function Skada:DeleteSet(set, index)
 		end
 
 		-- Don't leave windows pointing to a deleted sets
-		for _, win in ipairs(windows) do
-			if win.selectedset == index or win:GetSelectedSet() == set then
-				win.selectedset = "current"
-				win.changed = true
-			elseif (tonumber(win.selectedset) or 0) > index then
-				win.selectedset = win.selectedset - 1
-				win.changed = true
+		for i = 1, #windows do
+			local win = windows[i]
+			if win then
+				if win.selectedset == index or win:GetSelectedSet() == set then
+					win.selectedset = "current"
+					win.changed = true
+				elseif (tonumber(win.selectedset) or 0) > index then
+					win.selectedset = win.selectedset - 1
+					win.changed = true
+				end
+				win:RestoreView()
 			end
-			win:RestoreView()
 		end
 
 		self:Wipe()
@@ -1309,8 +1351,9 @@ function Skada:FindPlayer(set, id, name, strict)
 		end
 
 		-- search the set
-		for _, p in ipairs(set.players) do
-			if (id and p.id == id) or (name and p.name == name) then
+		for i = 1, #set.players do
+			local p = set.players[i]
+			if p and ((id and p.id == id) or (name and p.name == name)) then
 				set._playeridx[id] = self.playerPrototype:Bind(p, set)
 				return p
 			end
@@ -1367,8 +1410,9 @@ function Skada:GetPlayer(set, guid, name, flag)
 			player.class = self.unitClass(guid, flag, nil, nil, name)
 		end
 
-		for _, mode in ipairs(modes) do
-			if mode.AddPlayerAttributes ~= nil then
+		for i = 1, #modes do
+			local mode = modes[i]
+			if mode and mode.AddPlayerAttributes then
 				mode:AddPlayerAttributes(player, set)
 			end
 		end
@@ -1427,8 +1471,9 @@ function Skada:FindEnemy(set, name, id)
 			return self.enemyPrototype:Bind(enemy, set)
 		end
 
-		for _, e in ipairs(set.enemies) do
-			if (id and id == e.id) or (name and e.name == name) then
+		for i = 1, #set.enemies do
+			local e = set.enemies[i]
+			if e and ((id and id == e.id) or (name and e.name == name)) then
 				set._enemyidx[name] = self.enemyPrototype:Bind(e, set)
 				return e
 			end
@@ -1517,8 +1562,9 @@ do
 			end
 
 			function ValidatePetOwner(text, name)
-				for _, pattern in ipairs(ownerPatterns) do
-					if EscapeStr(format(pattern, name)) == text then
+				for i = 1, #ownerPatterns do
+					local pattern = ownerPatterns[i]
+					if pattern and EscapeStr(format(pattern, name)) == text then
 						return true
 					end
 				end
@@ -1549,9 +1595,10 @@ do
 				-- we only need to scan the 2nd line.
 				local text = _G["SkadaPetTooltipTextLeft2"] and _G["SkadaPetTooltipTextLeft2"]:GetText()
 				if text and text ~= "" then
-					for _, p in ipairs(Skada.current.players) do
-						local playername = gsub(p.name, "%-.*", "")
-						if (LOCALE_ruRU and FindNameDeclension(text, playername)) or ValidatePetOwner(text, playername) then
+					for i = 1, #Skada.current.players do
+						local p = Skada.current.players[i]
+						local playername = p and gsub(p.name, "%-.*", "")
+						if playername and ((LOCALE_ruRU and FindNameDeclension(text, playername)) or ValidatePetOwner(text, playername)) then
 							return p.id, p.name
 						end
 					end
@@ -1798,8 +1845,9 @@ do
 			tooltip:AddLine(win.ttwin.title or mode.title or mode.moduleName)
 			local nr = 0
 
-			for _, data in ipairs(win.ttwin.dataset) do
-				if data.id and not data.ignore and nr < Skada.db.profile.tooltiprows then
+			for i = 1, #win.ttwin.dataset do
+				local data = win.ttwin.dataset[i]
+				if data and data.id and not data.ignore and nr < Skada.db.profile.tooltiprows then
 					nr = nr + 1
 					local color = white
 
@@ -1814,6 +1862,8 @@ do
 						title = format("|cffffffff%d.|r %s", nr, title)
 					end
 					tooltip:AddDoubleLine(title, data.valuetext, color.r, color.g, color.b)
+				elseif nr >= Skada.db.profile.tooltiprows then
+					break -- no need to continue
 				end
 			end
 
@@ -1912,12 +1962,15 @@ end
 -- slash commands
 
 local function GenerateTotal()
+	if #Skada.char.sets == 0 then return end
+
 	Skada.char.total = CreateSet(L["Total"], Skada.char.total)
 	Skada.total = Skada.char.total
 	Skada.total.starttime = nil
 	Skada.total.endtime = nil
 
-	for _, set in ipairs(Skada.char.sets) do
+	for i = 1, #Skada.char.sets do
+		local set = Skada.char.sets[i]
 		for k, v in pairs(set) do
 			if k == "starttime" and (not Skada.total.starttime or v < Skada.total.starttime) then
 				Skada.total.starttime = v
@@ -1928,27 +1981,31 @@ local function GenerateTotal()
 			end
 		end
 
-		for _, p in ipairs(set.players) do
-			local index = nil
-			for i, a in ipairs(Skada.total.players) do
-				if p.id == a.id then
-					index = i
-					break
+		for j = 1, #set.players do
+			local p = set.players[j]
+			if p then
+				local index = nil
+				for k = 1, #Skada.total.players do
+					local a = Skada.total.players[k]
+					if a and a.id == p.id then
+						index = k
+						break
+					end
 				end
-			end
 
-			local player = index and Skada.total.players[index] or {}
+				local player = index and Skada.total.players[index] or {}
 
-			for k, v in pairs(p) do
-				if (type(v) == "string" or k == "spec" or k == "flag") then
-					player[k] = player[k] or v
-				elseif type(v) == "number" then
-					player[k] = (player[k] or 0) + v
+				for k, v in pairs(p) do
+					if (type(v) == "string" or k == "spec" or k == "flag") then
+						player[k] = player[k] or v
+					elseif type(v) == "number" then
+						player[k] = (player[k] or 0) + v
+					end
 				end
-			end
 
-			if not index then
-				tinsert(Skada.total.players, player)
+				if not index then
+					tinsert(Skada.total.players, player)
+				end
 			end
 		end
 	end
@@ -2117,8 +2174,9 @@ do
 			report_table = Window:New(true)
 			report_mode:Update(report_table, report_set)
 		elseif type(window) == "string" then
-			for _, win in ipairs(windows) do
-				if lower(win.db.name) == lower(window) then
+			for i = 1, #windows do
+				local win = windows[i]
+				if win and win.db and lower(win.db.name) == lower(window) then
 					report_table = win
 					report_set = win:GetSelectedSet()
 					report_mode = win.selectedmode
@@ -2151,8 +2209,9 @@ do
 
 		maxlines = maxlines or 10
 		local nr = 0
-		for _, data in ipairs(report_table.dataset) do
-			if ((barid and barid == data.id) or (data.id and not barid)) and not data.ignore then
+		for i = 1, #report_table.dataset do
+			local data = report_table.dataset[i]
+			if data and not data.ignore and ((barid and barid == data.id) or (data.id and not barid)) and nr < maxlines then
 				nr = nr + 1
 				label = nil
 
@@ -2173,9 +2232,7 @@ do
 				if barid then
 					break
 				end
-			end
-
-			if nr >= maxlines then
+			elseif nr >= maxlines then
 				break
 			end
 		end
@@ -2405,8 +2462,9 @@ function Skada:CanReset()
 		return true
 	end
 
-	for _, set in ipairs(self.char.sets) do
-		if not set.keep then
+	for i = 1, #self.char.sets do
+		local set = self.char.sets[i]
+		if set and not set.keep then
 			return true
 		end
 	end
@@ -2441,8 +2499,9 @@ function Skada:Reset(force)
 
 	CleanSets(true)
 
-	for _, win in ipairs(windows) do
-		if win.selectedset ~= "total" then
+	for i = 1, #windows do
+		local win = windows[i]
+		if win and win.selectedset ~= "total" then
 			win.selectedset = "current"
 			win.changed = true
 			win:RestoreView()
@@ -2469,8 +2528,9 @@ function Skada:UpdateDisplay(force)
 		end
 	end
 
-	for _, win in ipairs(windows) do
-		if self.changed or win.changed or (self.current and (win.selectedset == "current" or win.selectedset == "total")) then
+	for i = 1, #windows do
+		local win = windows[i]
+		if win and (self.changed or win.changed or (self.current and (win.selectedset == "current" or win.selectedset == "total"))) then
 			win.changed = false
 
 			if win.selectedmode then
@@ -2500,11 +2560,12 @@ function Skada:UpdateDisplay(force)
 
 							if not total then
 								total = 0
-								for _, data in ipairs(win.dataset) do
-									if data.id then
+								for j = 1, #win.dataset do
+									local data = win.dataset[j]
+									if data and data.id then
 										total = total + data.value
 									end
-									if not existing and not data.id then
+									if data and not existing and not data.id then
 										existing = data
 									end
 								end
@@ -2534,19 +2595,22 @@ function Skada:UpdateDisplay(force)
 			elseif win.selectedset then
 				local set = win:GetSelectedSet()
 
-				for m, mode in ipairs(modes) do
-					local d = win:nr(m)
+				for j = 1, #modes do
+					local mode = modes[j]
+					if mode then
+						local d = win:nr(j)
 
-					d.id = mode.moduleName
-					d.label = mode.moduleName
-					d.value = 1
+						d.id = mode.moduleName
+						d.label = mode.moduleName
+						d.value = 1
 
-					if self.db.profile.moduleicons and mode.metadata and mode.metadata.icon then
-						d.icon = mode.metadata.icon
-					end
+						if self.db.profile.moduleicons and mode.metadata and mode.metadata.icon then
+							d.icon = mode.metadata.icon
+						end
 
-					if set and mode.GetSetSummary ~= nil then
-						d.valuetext = mode:GetSetSummary(set, win)
+						if set and mode.GetSetSummary then
+							d.valuetext = mode:GetSetSummary(set, win)
+						end
 					end
 				end
 
@@ -2572,14 +2636,17 @@ function Skada:UpdateDisplay(force)
 				d.label = L["Current"]
 				d.value = 1
 
-				for _, set in ipairs(self.char.sets) do
-					nr = nr + 1
-					d = win:nr(nr)
+				for j = 1, #self.char.sets do
+					local set = self.char.sets[j]
+					if set then
+						nr = nr + 1
+						d = win:nr(nr)
 
-					d.id = tostring(set.starttime)
-					d.label, d.valuetext = select(2, self:GetSetLabel(set))
-					d.value = 1
-					d.emphathize = set.keep
+						d.id = tostring(set.starttime)
+						d.label, d.valuetext = select(2, self:GetSetLabel(set))
+						d.value = 1
+						d.emphathize = set.keep
+					end
 				end
 
 				win.metadata.ordersort = true
@@ -2875,8 +2942,9 @@ function dataobj:OnEnter()
 		self.tooltip:AddDoubleLine(L["Skada Summary"], Skada.version)
 		self.tooltip:AddLine(" ")
 		self.tooltip:AddDoubleLine(L["Segment Time"], Skada:GetFormatedSetTime(set), 1, 1, 1)
-		for _, mode in ipairs(modes) do
-			if mode.AddToTooltip ~= nil then
+		for i = 1, #modes do
+			local mode = modes[i]
+			if mode and mode.AddToTooltip then
 				mode:AddToTooltip(set, self.tooltip)
 			end
 		end
@@ -2937,14 +3005,15 @@ function Skada:ApplySettings(name, hidemenu)
 	-- fire callback in case modules need it
 	Skada.callbacks:Fire("Skada_UpdateConfig")
 
-	for _, win in ipairs(windows) do
-		if name and win.db.name == name then
+	for i = 1, #windows do
+		local win = windows[i]
+		if win and win.db and name and win.db.name == name then
 			win:SetChild(win.db.child)
 			win.display:ApplySettings(win)
 			win:Toggle()
 			Skada:UpdateDisplay(true)
 			return
-		else
+		elseif win and win.db then
 			win:SetChild(win.db.child)
 			win.display:ApplySettings(win)
 		end
@@ -2955,8 +3024,11 @@ function Skada:ApplySettings(name, hidemenu)
 	else
 		Skada:SetActive(true)
 
-		for _, win in ipairs(windows) do
-			win:Toggle()
+		for i = 1, #windows do
+			local win = windows[i]
+			if win then
+				win:Toggle()
+			end
 		end
 	end
 
@@ -2966,25 +3038,60 @@ function Skada:ApplySettings(name, hidemenu)
 	Skada:UpdateDisplay(true)
 end
 
-function Skada:ReloadSettings()
-	for _, win in ipairs(windows) do
-		win:Destroy()
-	end
-	wipe(windows)
+function Skada:ReloadSettings(win)
+	if win then
+		if type(win) == "string" then
+			for i = 1, #windows do
+				local w = windows[i]
+				if w.db.name == win then
+					win = w
+					break
+				end
+			end
+		end
 
-	for _, win in ipairs(Skada.db.profile.windows) do
-		Skada:CreateWindow(win.name, win)
+		win:Destroy()
+
+		for i = 1, #windows do
+			if win == windows[i] then
+				tremove(windows, i)
+				break
+			end
+		end
+
+		for i = 1, #Skada.db.profile.windows do
+			local w = Skada.db.profile.windows[i]
+			if w and w.name == win.db.name then
+				Skada:CreateWindow(w.name, w)
+				break
+			end
+		end
+	else
+		for i = 1, #windows do
+			local w = windows[i]
+			if w then
+				w:Destroy()
+			end
+		end
+		wipe(windows)
+
+		for i = 1, #Skada.db.profile.windows do
+			local w = Skada.db.profile.windows[i]
+			if w then
+				Skada:CreateWindow(w.name, w)
+			end
+		end
+
+		if DBI and not DBI:IsRegistered("Skada") then
+			DBI:Register("Skada", dataobj, Skada.db.profile.icon)
+		end
+
+		Skada:ClearAllIndexes()
+		Skada:RefreshMMButton()
 	end
 
 	Skada.total = Skada.char.total
-
-	Skada:ClearAllIndexes()
-
-	if DBI and not DBI:IsRegistered("Skada") then
-		DBI:Register("Skada", dataobj, Skada.db.profile.icon)
-	end
-	Skada:RefreshMMButton()
-	Skada:ApplySettings()
+	Skada:ApplySettings(win)
 end
 
 -------------------------------------------------------------------------------
@@ -3119,9 +3226,12 @@ function Skada:BigWigs(_, _, event, message)
 			self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
 
 			if self.tempsets then -- phases
-				for _, set in ipairs(self.tempsets) do
-					set.success = true
-					self:SendMessage("COMBAT_BOSS_DEFEATED", set)
+				for i = 1, #self.tempsets do
+					local set = self.tempsets[i]
+					if set and not set.success then
+						set.success = true
+						self:SendMessage("COMBAT_BOSS_DEFEATED", set)
+					end
 				end
 			end
 		end
@@ -3137,9 +3247,12 @@ function Skada:DBM(_, mod, wipe)
 			self:SendMessage("COMBAT_BOSS_DEFEATED", set)
 
 			if self.tempsets then -- phases
-				for _, s in ipairs(self.tempsets) do
-					s.success = true
-					self:SendMessage("COMBAT_BOSS_DEFEATED", s)
+				for i = 1, #self.tempsets do
+					local s = self.tempsets[i]
+					if s and not s.success then
+						s.success = true
+						self:SendMessage("COMBAT_BOSS_DEFEATED", s)
+					end
 				end
 			end
 		end
@@ -3262,16 +3375,18 @@ do
 			-- delete our metatables.
 			if mt then
 				if set.players then
-					for _, p in ipairs(set.players) do
-						if p.super then
+					for i = 1, #set.players do
+						local p = set.players[i]
+						if p and p.super then
 							p.super = nil
 						end
 					end
 				end
 
 				if set.enemies then
-					for _, e in ipairs(set.enemies) do
-						if e.super then
+					for i = 1, #set.enemies do
+						local e = set.enemies[i]
+						if e and e.super then
 							e.super = nil
 						end
 					end
@@ -3284,8 +3399,8 @@ do
 		Skada:DispatchSets(ClearIndexes, nil, mt)
 		ClearIndexes(Skada.total, mt)
 		if Skada.char.sets then
-			for _, set in ipairs(Skada.char.sets) do
-				ClearIndexes(set, mt)
+			for i = 1, #Skada.char.sets do
+				ClearIndexes(Skada.char.sets[i], mt)
 			end
 		end
 	end
@@ -3328,12 +3443,17 @@ function Skada:GetSet(s)
 		set = self.char.sets[s]
 	end
 
-	return set and self.setPrototype:Bind(set)
+	return self.setPrototype:Bind(set)
 end
 
 function Skada:GetSets()
-	for _, set in ipairs(self.char.sets) do
-		set =  self.setPrototype:Bind(set)
+	if _bound_sets then
+		return self.char.sets
+	end
+
+	_bound_sets = true
+	for i = 1, #self.char.sets do
+		self.char.sets[i] = self.setPrototype:Bind(self.char.sets[i])
 	end
 	return self.char.sets
 end
@@ -3397,8 +3517,10 @@ function Skada:EndSegment()
 	T.free("Skada_TempSegments", self.tempsets)
 
 	-- remove players ".last" key from total segment.
-	for _, player in ipairs(self.total.players) do
-		player.last = nil
+	for i = 1, #self.total.players do
+		if self.total.players[i] then
+			self.total.players[i].last = nil
+		end
 	end
 
 	self.last = self.current
@@ -3406,20 +3528,23 @@ function Skada:EndSegment()
 	self.current = nil
 	CleanSets()
 
-	for _, win in ipairs(windows) do
-		win:Wipe()
-		self.changed = true
+	for i = 1, #windows do
+		local win = windows[i]
+		if win then
+			win:Wipe()
+			self.changed = true
 
-		if win.db.wipemode ~= "" and IsGroupDead() then
-			win:RestoreView("current", win.db.wipemode)
-		elseif win.db.returnaftercombat and win.restore_mode and win.restore_set then
-			if win.restore_set ~= win.selectedset or win.restore_mode ~= win.selectedmode then
-				win:RestoreView(win.restore_set, win.restore_mode)
-				win.restore_mode, win.restore_set = nil, nil
+			if win.db.wipemode ~= "" and IsGroupDead() then
+				win:RestoreView("current", win.db.wipemode)
+			elseif win.db.returnaftercombat and win.restore_mode and win.restore_set then
+				if win.restore_set ~= win.selectedset or win.restore_mode ~= win.selectedmode then
+					win:RestoreView(win.restore_set, win.restore_mode)
+					win.restore_mode, win.restore_set = nil, nil
+				end
 			end
-		end
 
-		win:Toggle()
+			win:Toggle()
+		end
 	end
 
 	self:UpdateDisplay(true)
@@ -3453,10 +3578,13 @@ function Skada:StopSegment(msg)
 
 		-- stop phase segments.
 		if self.tempsets then
-			for _, set in ipairs(self.tempsets) do
-				set.stopped = true
-				set.endtime = curtime
-				set.time = max(0.1, set.endtime - set.starttime)
+			for i = 1, #self.tempsets do
+				local set = self.tempsets[i]
+				if set and not set.stopped then
+					set.stopped = true
+					set.endtime = curtime
+					set.time = max(0.1, set.endtime - set.starttime)
+				end
 			end
 		end
 
@@ -3474,10 +3602,13 @@ function Skada:ResumeSegment(msg)
 
 		-- resume phase segments.
 		if self.tempsets then
-			for _, set in ipairs(self.tempsets) do
-				set.stopped = nil
-				set.endtime = nil
-				set.time = 0
+			for i = 1, #self.tempsets do
+				local set = self.tempsets[i]
+				if set and set.stopped then
+					set.stopped = nil
+					set.endtime = nil
+					set.time = 0
+				end
 			end
 		end
 
@@ -3497,8 +3628,11 @@ function Skada:DispatchSets(func, total, ...)
 
 		-- record to phases
 		if self.tempsets then -- phases
-			for _, set in ipairs(self.tempsets) do
-				func(set, ...)
+			for i = 1, #self.tempsets do
+				local set = self.tempsets[i]
+				if set and not set.stopped then
+					func(set, ...)
+				end
 			end
 		end
 	end
@@ -3602,31 +3736,36 @@ do
 			self.char.total = self.total
 		end
 
-		for _, win in ipairs(windows) do
-			if win.db.modeincombat ~= "" then
-				local mymode = FindMode(win.db.modeincombat)
+		for i = 1, #windows do
+			local win = windows[i]
+			if win and win.db then
+				-- combat mode switch
+				if win.db.modeincombat ~= "" then
+					local mymode = FindMode(win.db.modeincombat)
 
-				if mymode ~= nil then
-					if win.db.returnaftercombat then
-						if win.selectedset then
-							win.restore_set = win.selectedset
+					if mymode ~= nil then
+						if win.db.returnaftercombat then
+							if win.selectedset then
+								win.restore_set = win.selectedset
+							end
+							if win.selectedmode then
+								win.restore_mode = win.selectedmode.moduleName
+							end
 						end
-						if win.selectedmode then
-							win.restore_mode = win.selectedmode.moduleName
-						end
+
+						win.selectedset = "current"
+						win:DisplayMode(mymode)
 					end
+				end
 
-					win.selectedset = "current"
-					win:DisplayMode(mymode)
+				-- combat switch to current
+				if win.db.autocurrent and win.selectedset ~= "current" then
+					win:set_selected_set("current")
 				end
 			end
 
-			if not self.db.profile.tentativecombatstart then
+			if win and not self.db.profile.tentativecombatstart then
 				win:Toggle()
-			end
-
-			if win.db.autocurrent and win.selectedset ~= "current" then
-				win:set_selected_set("current")
 			end
 		end
 
@@ -3735,7 +3874,8 @@ do
 			if combatlog_events[eventtype] then
 				if self.current.stopped then return end
 
-				for _, mod in ipairs(combatlog_events[eventtype]) do
+				for i = 1, #combatlog_events[eventtype] do
+					local mod = combatlog_events[eventtype][i]
 					local fail = false
 
 					if mod.flags.src_is_interesting_nopets then

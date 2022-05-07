@@ -18,6 +18,8 @@ local IsControlKeyDown = IsControlKeyDown
 local IsModifierKeyDown = IsModifierKeyDown
 local _
 
+local windows = nil -- reference to Skada windows
+
 local COLOR_WHITE = HIGHLIGHT_FONT_COLOR
 local FONT_FLAGS = Skada.fontFlags
 if not FONT_FLAGS then
@@ -208,11 +210,8 @@ function mod:Wipe(win)
 		win.bargroup:SetSortFunction(nil)
 		win.bargroup:SetBarOffset(0)
 
-		local bars = win.bargroup:GetBars()
-		if bars then
-			for _, bar in pairs(bars) do
-				win.bargroup:RemoveBar(bar)
-			end
+		for _, bar in pairs(win.bargroup:GetBars()) do
+			win.bargroup:RemoveBar(bar)
 		end
 
 		win.bargroup:SortBars()
@@ -329,8 +328,10 @@ do
 					group:SortBars()
 				end
 			else
-				for _, win in Skada:IterateWindows() do
-					if win.db.display == "bar" and win.db.sticked then
+				windows = Skada:GetWindows()
+				for i = 1, #windows do
+					local win = windows[i]
+					if win and win.db and win.db.display == "bar" and win.db.sticked then
 						if win.db.sticked[group.win.db.name] then
 							win.db.sticked[group.win.db.name] = nil
 						end
@@ -372,8 +373,10 @@ function mod:WindowResized(_, group)
 	-- resize sticked windows as well.
 	if FlyPaper then
 		local offset = db.background.borderthickness
-		for _, win in Skada:IterateWindows() do
-			if win.db.display == "bar" and win.bargroup:IsShown() and db.sticked and db.sticked[win.db.name] then
+		windows = Skada:GetWindows()
+		for i = 1, #windows do
+			local win = windows[i]
+			if win and win.db and win.db.display == "bar" and win.bargroup:IsShown() and db.sticked and db.sticked[win.db.name] then
 				win.bargroup.callbacks:Fire("AnchorMoved", win.bargroup)
 			end
 		end
@@ -579,11 +582,8 @@ do
 		end
 
 		if win.metadata.wipestale then
-			local bars = win.bargroup:GetBars()
-			if bars then
-				for _, bar in pairs(bars) do
-					bar.checked = false
-				end
+			for _, bar in pairs(win.bargroup:GetBars()) do
+				bar.checked = nil
 			end
 		end
 
@@ -752,8 +752,7 @@ do
 		end
 
 		if win.metadata.wipestale then
-			local bars = win.bargroup:GetBars()
-			for _, bar in pairs(bars) do
+			for _, bar in pairs(win.bargroup:GetBars()) do
 				if not bar.checked then
 					win.bargroup:RemoveBar(bar)
 				end
@@ -901,8 +900,10 @@ do
 				-- move sticked windows.
 				if FlyPaper and group.win.db.sticky and not group.win.db.hidden then
 					local offset = group.win.db.background.borderthickness
-					for _, win in Skada:IterateWindows() do
-						if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked and group.win.db.sticked[win.db.name] then
+					windows = Skada:GetWindows()
+					for i = 1, #windows do
+						local win = windows[i]
+						if win and win.db and win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked and group.win.db.sticked[win.db.name] then
 							FlyPaper.Stick(win.bargroup, group, nil, offset, offset)
 							win.bargroup.button.startX = win.bargroup:GetLeft()
 							win.bargroup.button.startY = win.bargroup:GetTop()
@@ -934,8 +935,10 @@ do
 				if self.startX ~= endX or self.startY ~= endY then
 					group.callbacks:Fire("AnchorMoved", group, endX, endY)
 					if FlyPaper and group.win.db.sticky and not group.win.db.hidden then
-						for _, win in Skada:IterateWindows() do
-							if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked and group.win.db.sticked[win.db.name] then
+						windows = Skada:GetWindows()
+						for i = 1, #windows do
+							local win = windows[i]
+							if win and win.db and win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked and group.win.db.sticked[win.db.name] then
 								local xOfs, yOfs = win.bargroup:GetLeft(), win.bargroup:GetTop()
 								if win.bargroup.startX ~= xOfs or win.bargroup.startY ~= yOfs then
 									win.bargroup.callbacks:Fire("AnchorMoved", win.bargroup, xOfs, yOfs)
@@ -1018,7 +1021,8 @@ do
 		g.button.toolbar = g.button.toolbar or p.title.toolbar or 1
 		if g.button.toolbar ~= p.title.toolbar then
 			g.button.toolbar = p.title.toolbar or 1
-			for i, b in ipairs(g.buttons) do
+			for i = 1, #g.buttons do
+				local b = g.buttons[i]
 				b:GetNormalTexture():SetTexture(format(buttonsTexPath, g.button.toolbar, b.index))
 				b:GetHighlightTexture():SetTexture(format(buttonsTexPath, g.button.toolbar, b.index), 1.0)
 			end
@@ -1091,8 +1095,10 @@ do
 	function mod:WindowResizing(_, group)
 		if FlyPaper then
 			local offset = group.win.db.background.borderthickness
-			for _, win in Skada:IterateWindows() do
-				if win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked and group.win.db.sticked[win.db.name] then
+			windows = Skada:GetWindows()
+			for i = 1, #windows do
+				local win = windows[i]
+				if win and win.db and win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked and group.win.db.sticked[win.db.name] then
 					FlyPaper.Stick(win.bargroup, group, nil, offset, offset)
 				end
 			end
@@ -1266,7 +1272,7 @@ function mod:AddDisplayOptions(win, options)
 							if db.roleicons and not db.classicons then
 								db.classicons = true
 							end
-							Skada:ReloadSettings()
+							Skada:ReloadSettings(db.name)
 						end,
 						hidden = Skada.Ascension
 					},
@@ -1280,7 +1286,7 @@ function mod:AddDisplayOptions(win, options)
 							if db.specicons and not db.classicons then
 								db.classicons = true
 							end
-							Skada:ReloadSettings()
+							Skada:ReloadSettings(db.name)
 						end,
 						hidden = Skada.Ascension
 					},
@@ -2114,12 +2120,16 @@ do
 								set = function(_, val) applytheme = val end,
 								values = function()
 									wipe(list)
-									for _, theme in ipairs(themes) do
-										list[theme.name] = theme.name
+									for i = 1, #themes do
+										local theme = themes[i]
+										if theme then
+											list[theme.name] = theme.name
+										end
 									end
 									if Skada.db.global.themes then
-										for _, theme in ipairs(Skada.db.global.themes) do
-											if theme.name then
+										for i = 1, #Skada.db.global.themes do
+											local theme = Skada.db.global.themes[i]
+											if theme and theme.name then
 												list[theme.name] = theme.name
 											end
 										end
@@ -2135,8 +2145,12 @@ do
 								set = function(_, val) applywindow = val end,
 								values = function()
 									wipe(list)
-									for _, win in Skada:IterateWindows() do
-										list[win.db.name] = win.db.name
+									windows = Skada:GetWindows()
+									for i = 1, #windows do
+										local win = windows[i]
+										if win and win.db and win.db.display == "bar" then
+											list[win.db.name] = win.db.name
+										end
 									end
 									return list
 								end
@@ -2152,15 +2166,16 @@ do
 								func = function()
 									if applywindow and applytheme then
 										local thetheme = nil
-										for i, theme in ipairs(themes) do
-											if theme.name == applytheme then
-												thetheme = theme
+										for i = 1, #themes do
+											if themes[i] and themes[i].name == applytheme then
+												thetheme = themes[i]
 												break
 											end
 										end
 										if Skada.db.global.themes then
-											for i, theme in ipairs(Skada.db.global.themes) do
-												if theme.name == applytheme then
+											for i = 1, #Skada.db.global.themes do
+												local theme = Skada.db.global.themes[i]
+												if theme and theme.name == applytheme then
 													thetheme = theme
 													break
 												end
@@ -2168,8 +2183,10 @@ do
 										end
 
 										if thetheme then
-											for _, win in Skada:IterateWindows() do
-												if win.db.name == applywindow then
+											windows = Skada:GetWindows()
+											for i = 1, #windows do
+												local win = windows[i]
+												if win and win.db and win.db.name == applywindow then
 													Skada.tCopy(win.db, thetheme, skipped)
 													Skada:ApplySettings()
 													Skada:Print(L["Theme applied!"])
@@ -2196,8 +2213,12 @@ do
 								set = function(_, val) savewindow = val end,
 								values = function()
 									wipe(list)
-									for _, win in Skada:IterateWindows() do
-										list[win.db.name] = win.db.name
+									windows = Skada:GetWindows()
+									for i = 1, #windows do
+										local win = windows[i]
+										if win and win.db and win.db.display == "bar" then
+											list[win.db.name] = win.db.name
+										end
 									end
 									return list
 								end
@@ -2217,8 +2238,10 @@ do
 								order = 30,
 								disabled = function() return (savetheme == nil or savewindow == nil) end,
 								func = function()
-									for _, win in Skada:IterateWindows() do
-										if win.db.name == savewindow then
+									windows = Skada:GetWindows()
+									for i = 1, #windows do
+										local win = windows[i]
+										if win and win.db and win.db.name == savewindow then
 											Skada.db.global.themes = Skada.db.global.themes or {}
 											local theme = {}
 											Skada.tCopy(theme, win.db, skipped)
@@ -2246,8 +2269,9 @@ do
 								values = function()
 									wipe(list)
 									if Skada.db.global.themes then
-										for i, theme in ipairs(Skada.db.global.themes) do
-											if theme.name then
+										for i = 1, #Skada.db.global.themes do
+											local theme = Skada.db.global.themes[i]
+											if theme and theme.name then
 												list[theme.name] = theme.name
 											end
 										end
@@ -2263,8 +2287,9 @@ do
 								confirm = function() return L["Are you sure you want to delete this theme?"] end,
 								func = function()
 									if Skada.db.global.themes then
-										for i, theme in ipairs(Skada.db.global.themes) do
-											if theme.name == deletetheme then
+										for i = 1, #Skada.db.global.themes do
+											local theme = Skada.db.global.themes[i]
+											if theme and theme.name == deletetheme then
 												tremove(Skada.db.global.themes, i)
 												break
 											end

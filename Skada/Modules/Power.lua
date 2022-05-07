@@ -5,7 +5,7 @@ Skada:AddLoadableModule("Resources", function(L)
 	local mod = Skada:NewModule(L["Resources"])
 	mod.icon = [[Interface\Icons\spell_holy_rapture]]
 
-	local pairs, ipairs, format = pairs, ipairs, string.format
+	local pairs, format = pairs, string.format
 	local setmetatable, GetSpellInfo = setmetatable, Skada.GetSpellInfo or GetSpellInfo
 	local _
 
@@ -103,7 +103,7 @@ Skada:AddLoadableModule("Resources", function(L)
 				showspots = true,
 				click1 = pmode,
 				click4 = Skada.FilterClass,
-				click4_label = L["Toggle Class Filter"],
+				click4_label = L["Toggle Class Filter"]
 			}
 
 			-- no total click.
@@ -129,8 +129,9 @@ Skada:AddLoadableModule("Resources", function(L)
 			end
 
 			local nr = 0
-			for _, player in ipairs(set.players) do
-				if (not win.class or win.class == player.class) and player[self.power] then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and player[self.power] and (not win.class or win.class == player.class) then
 					nr = nr + 1
 					local d = win:nr(nr)
 

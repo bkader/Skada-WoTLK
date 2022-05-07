@@ -5,7 +5,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 	local mod = Skada:NewModule(L["Sunder Counter"])
 	local targetmod = mod:NewModule(L["Sunder target list"])
 
-	local pairs, ipairs, tostring, format = pairs, ipairs, tostring, string.format
+	local pairs, tostring, format = pairs, tostring, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 	local T = Skada.Table
@@ -152,8 +152,9 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 			end
 
 			local nr = 0
-			for _, player in ipairs(set.players) do
-				if (player.sunder or 0) > 0 then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and player.sunder then
 					nr = nr + 1
 					local d = win:nr(nr)
 

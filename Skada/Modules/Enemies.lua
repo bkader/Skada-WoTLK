@@ -1,7 +1,7 @@
 local Skada = Skada
 
 -- frequently used globals --
-local pairs, ipairs, type, format, max, wipe = pairs, ipairs, type, string.format, math.max, wipe
+local pairs, type, format, max, wipe = pairs, type, string.format, math.max, wipe
 local GetSpellInfo, T = Skada.GetSpellInfo or GetSpellInfo, Skada.Table
 local setPrototype, enemyPrototype = Skada.setPrototype, Skada.enemyPrototype
 local _
@@ -551,27 +551,30 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 			end
 
 			local nr = 0
-			for _, enemy in ipairs(set.enemies) do
-				local dtps, amount = enemy:GetDTPS()
-				if amount > 0 then
-					nr = nr + 1
-					local d = win:nr(nr)
+			for i = 1, #set.enemies do
+				local enemy = set.enemies[i]
+				if enemy then
+					local dtps, amount = enemy:GetDTPS()
+					if amount > 0 then
+						nr = nr + 1
+						local d = win:nr(nr)
 
-					d.id = enemy.id or enemy.name
-					d.label = enemy.name
-					d.class = enemy.class
-					d.role = enemy.role
-					d.spec = enemy.spec
+						d.id = enemy.id or enemy.name
+						d.label = enemy.name
+						d.class = enemy.class
+						d.role = enemy.role
+						d.spec = enemy.spec
 
-					d.value = amount
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Damage and Skada:FormatNumber(d.value),
-						self.metadata.columns.DTPS and Skada:FormatNumber(dtps),
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
+						d.value = amount
+						d.valuetext = Skada:FormatValueCols(
+							self.metadata.columns.Damage and Skada:FormatNumber(d.value),
+							self.metadata.columns.DTPS and Skada:FormatNumber(dtps),
+							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+						)
 
-					if win.metadata and not enemy.fake and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
+						if win.metadata and not enemy.fake and d.value > win.metadata.maxvalue then
+							win.metadata.maxvalue = d.value
+						end
 					end
 				end
 			end
@@ -746,10 +749,11 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 		end
 
 		local total = 0
-		for _, e in ipairs(self.enemies) do
-			if not e.fake and Skada.db.profile.absdamage and e.totaldamagetaken then
+		for i = 1, #self.enemies do
+			local e = self.enemies[i]
+			if e and not e.fake and Skada.db.profile.absdamage and e.totaldamagetaken then
 				total = total + e.totaldamagetaken
-			elseif not e.fake and e.damagetaken then
+			elseif e and not e.fake and e.damagetaken then
 				total = total + e.damagetaken
 			end
 		end
@@ -1110,8 +1114,9 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 			end
 
 			local nr = 0
-			for _, enemy in ipairs(set.enemies) do
-				if not enemy.fake then
+			for i = 1, #set.enemies do
+				local enemy = set.enemies[i]
+				if enemy and not enemy.fake then
 					local dps, amount = enemy:GetDPS()
 					if amount > 0 then
 						nr = nr + 1
@@ -1206,10 +1211,11 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 		end
 
 		local total = 0
-		for _, e in ipairs(self.enemies) do
-			if not e.fake and Skada.db.profile.absdamage and e.totaldamage then
+		for i = 1, #self.enemies do
+			local e = self.enemies[i]
+			if e and not e.fake and Skada.db.profile.absdamage and e.totaldamage then
 				total = total + e.totaldamage
-			elseif not e.fake and e.damage then
+			elseif e and not e.fake and e.damage then
 				total = total + e.damage
 			end
 		end
@@ -1446,8 +1452,9 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 			end
 
 			local nr = 0
-			for _, enemy in ipairs(set.enemies) do
-				if (not win.class or win.class == enemy.class) and not enemy.fake then
+			for i = 1, #set.enemies do
+				local enemy = set.enemies[i]
+				if enemy and enemy.heal and (not win.class or win.class == enemy.class) then
 					local hps, amount = enemy:GetHPS()
 					if amount > 0 then
 						nr = nr + 1
@@ -1523,8 +1530,9 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 				heal = heal + self.eabsorb
 			end
 		else
-			for _, e in ipairs(self.enemies) do
-				if e.heal then
+			for i = 1, #self.enemies do
+				local e = self.enemies[i]
+				if e and e.heal then
 					heal = heal + e.heal
 
 					if absorb and e.absorb then

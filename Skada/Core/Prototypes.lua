@@ -1,6 +1,6 @@
 local Skada = Skada
 
-local pairs, ipairs, wipe, max = pairs, ipairs, wipe, math.max
+local pairs, wipe, max = pairs, wipe, math.max
 local getmetatable, setmetatable, time = getmetatable, setmetatable, time
 
 -- a dummy table used as fallback
@@ -31,26 +31,23 @@ Skada.enemyPrototype = enemyPrototype
 
 -- binds a set table to set prototype
 function setPrototype:Bind(obj)
-	if obj then
-		if getmetatable(obj) ~= self then
-			setmetatable(obj, self)
-			self.__index = self
+	if obj and getmetatable(obj) ~= self then
+		setmetatable(obj, self)
+		self.__index = self
 
-			if obj.players then
-				for i, p in ipairs(obj.players) do
-					playerPrototype:Bind(p, obj)
-				end
-			end
-
-			if obj.enemies then
-				for i, e in ipairs(obj.enemies) do
-					enemyPrototype:Bind(e, obj)
-				end
+		if obj.players then
+			for i = 1, #obj.players do
+				playerPrototype:Bind(obj.players[i], obj)
 			end
 		end
 
-		return obj
+		if obj.enemies then
+			for i = 1, #obj.enemies do
+				enemyPrototype:Bind(obj.enemies[i], obj)
+			end
+		end
 	end
+	return obj
 end
 
 -- returns the segment's time
@@ -67,8 +64,9 @@ end
 -- attempts to retrieve a player
 function setPrototype:GetPlayer(id, name)
 	if self.players and ((id and id ~= "total") or name) then
-		for _, actor in ipairs(self.players) do
-			if (id and actor.id == id) or (name and actor.name == name) then
+		for i = 1, #self.players do
+			local actor = self.players[i]
+			if actor and ((id and actor.id == id) or (name and actor.name == name)) then
 				return playerPrototype:Bind(actor, self)
 			end
 		end
@@ -82,8 +80,9 @@ end
 -- attempts to retrieve an enemy
 function setPrototype:GetEnemy(name, id)
 	if self.enemies and name then
-		for _, actor in ipairs(self.enemies) do
-			if (name and actor.name == name) or (id and actor.id == id) then
+		for i = 1, #self.enemies do
+			local actor = self.enemies[i]
+			if actor and ((name and actor.name == name) or (id and actor.id == id)) then
 				return enemyPrototype:Bind(actor, self)
 			end
 		end
@@ -98,8 +97,9 @@ end
 function setPrototype:GetActor(name, id)
 	-- player first.
 	if self.players and ((id and id ~= "total") or name) then
-		for _, actor in ipairs(self.players) do
-			if (id and actor.id == id) or (name and actor.name == name) then
+		for i = 1, #self.players do
+			local actor = self.players[i]
+			if actor and ((id and actor.id == id) or (name and actor.name == name)) then
 				return playerPrototype:Bind(actor, self)
 			end
 		end
@@ -107,8 +107,9 @@ function setPrototype:GetActor(name, id)
 
 	-- enemy second
 	if self.enemies and name then
-		for _, actor in ipairs(self.enemies) do
-			if (name and actor.name == name) or (id and actor.id == id) then
+		for i = 1, #self.enemies do
+			local actor = self.enemies[i]
+			if actor and ((name and actor.name == name) or (id and actor.id == id)) then
 				return enemyPrototype:Bind(actor, self), true
 			end
 		end
@@ -420,14 +421,12 @@ end
 
 -- binds a table to the prototype table
 function actorPrototype:Bind(obj, set)
-	if obj then
-		if getmetatable(obj) ~= self then
-			setmetatable(obj, self)
-			self.__index = self
-			obj.super = set
-		end
-		return obj
+	if obj and getmetatable(obj) ~= self then
+		setmetatable(obj, self)
+		self.__index = self
+		obj.super = set
 	end
+	return obj
 end
 
 -- for better dps calculation, we use active time for Arena/BGs.

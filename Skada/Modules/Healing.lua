@@ -1,7 +1,7 @@
 local Skada = Skada
 
 -- cache frequently used globals
-local pairs, ipairs, format, max = pairs, ipairs, string.format, math.max
+local pairs, format, max = pairs, string.format, math.max
 local GetSpellInfo, T = Skada.GetSpellInfo or GetSpellInfo, Skada.Table
 local _
 
@@ -373,8 +373,9 @@ Skada:AddLoadableModule("Healing", function(L)
 			local nr = 0
 
 			-- players
-			for _, player in ipairs(set.players) do
-				if not win.class or win.class == player.class then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and (not win.class or win.class == player.class) then
 					local hps, amount = player:GetHPS()
 					if amount > 0 then
 						nr = nr + 1
@@ -407,8 +408,9 @@ Skada:AddLoadableModule("Healing", function(L)
 
 			-- arena enemies
 			if Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyHeal then
-				for _, enemy in ipairs(set.enemies) do
-					if not win.class or win.class == enemy.class then
+				for i = 1, #set.enemies do
+					local enemy = set.enemies[i]
+					if enemy and not enemy.fake and (not win.class or win.class == enemy.class) then
 						local hps, amount = enemy:GetHPS()
 						if amount > 0 then
 							nr = nr + 1
@@ -499,10 +501,11 @@ Skada:AddLoadableModule("Healing", function(L)
 
 		-- clean healspells table!
 		if (set.heal or 0) > 0 or (set.overheal or 0) > 0 then
-			for _, p in ipairs(set.players) do
-				if p.heal and (p.heal + p.overheal) == 0 then
+			for i = 1, #set.players do
+				local p = set.players[i]
+				if p and p.heal and (p.heal + p.overheal) == 0 then
 					p.healspells = nil
-				elseif p.healspells then
+				elseif p and p.healspells then
 					for spellid, spell in pairs(p.healspells) do
 						if (spell.amount + spell.overheal) == 0 then
 							p.healspells[spellid] = nil
@@ -675,8 +678,9 @@ Skada:AddLoadableModule("Overhealing", function(L)
 			end
 
 			local nr = 0
-			for _, player in ipairs(set.players) do
-				if not win.class or win.class == player.class then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and (not win.class or win.class == player.class) then
 					local ohps, overheal = player:GetOHPS()
 					if overheal > 0 then
 						nr = nr + 1
@@ -955,8 +959,9 @@ Skada:AddLoadableModule("Total Healing", function(L)
 			local nr = 0
 
 			-- players
-			for _, player in ipairs(set.players) do
-				if not win.class or win.class == player.class then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and (not win.class or win.class == player.class) then
 					local hps, amount = player:GetTHPS()
 					if amount > 0 then
 						nr = nr + 1
@@ -989,8 +994,9 @@ Skada:AddLoadableModule("Total Healing", function(L)
 
 			-- arena enemies
 			if Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyHeal then
-				for _, enemy in ipairs(set.enemies) do
-					if not win.class or win.class == enemy.class then
+				for i = 1, #set.enemies do
+					local enemy = set.enemies[i]
+					if enemy and not enemy.fake and (not win.class or win.class == enemy.class) then
 						local hps, amount = enemy:GetHPS()
 						if amount > 0 then
 							nr = nr + 1
@@ -1261,8 +1267,9 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 	function setPrototype:GetAbsorbHealTaken(tbl)
 		if self.heal or self.absorb then
 			tbl = wipe(tbl or cacheTable)
-			for _, p in ipairs(self.players) do
-				if p.absorbspells then
+			for i = 1, #self.players do
+				local p = self.players[i]
+				if p and p.absorbspells then
 					for _, spell in pairs(p.absorbspells) do
 						if spell.targets then
 							for name, amount in pairs(spell.targets) do
@@ -1292,7 +1299,7 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 						end
 					end
 				end
-				if p.healspells then
+				if p and p.healspells then
 					for _, spell in pairs(p.healspells) do
 						if spell.targets then
 							for name, target in pairs(spell.targets) do

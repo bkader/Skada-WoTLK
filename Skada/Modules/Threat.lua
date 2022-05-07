@@ -4,7 +4,7 @@ Skada:AddLoadableModule("Threat", function(L)
 
 	local mod = Skada:NewModule(L["Threat"])
 
-	local ipairs, format, max = ipairs, string.format, math.max
+	local format, max = string.format, math.max
 	local GroupIterator, UnitExists = Skada.GroupIterator, UnitExists
 	local UnitName, UnitClass, UnitGUID = UnitName, UnitClass, UnitGUID
 	local GetUnitRole, GetUnitSpec = Skada.GetUnitRole, Skada.GetUnitSpec
@@ -73,7 +73,7 @@ Skada:AddLoadableModule("Threat", function(L)
 						player.class = "PET"
 					else
 						_, player.class = UnitClass(unit)
-						if not Skada.AscensionCoA and not Skada.Ascension then
+						if not Skada.Ascension then
 							player.role = GetUnitRole(unit, player.class)
 							player.spec = GetUnitSpec(unit, player.class)
 						end
@@ -149,12 +149,7 @@ Skada:AddLoadableModule("Threat", function(L)
 		end
 
 		local function getTPS(threatvalue)
-			local tps = "0"
-			if Skada.current then
-				local totaltime = time() - (Skada.current.starttime or 0)
-				tps = format_threatvalue(threatvalue / max(1, totaltime))
-			end
-			return tps
+			return Skada.current and format_threatvalue(threatvalue / Skada.current:GetTime()) or "0"
 		end
 
 		function mod:Update(win, set)
@@ -201,8 +196,9 @@ Skada:AddLoadableModule("Threat", function(L)
 				local we_should_warn = false
 				-- We now have a a complete threat table.
 				-- Now we need to add valuetext.
-				for _, data in ipairs(win.dataset) do
-					if data.id == "AGGRO" then
+				for i = 1, #win.dataset do
+					local data = win.dataset[i]
+					if data and data.id == "AGGRO" then
 						if self.db.showAggroBar and (tankThreat or 0) > 0 then
 							data.valuetext = Skada:FormatValueCols(
 								self.metadata.columns.Threat and format_threatvalue(data.threat),
@@ -216,7 +212,7 @@ Skada:AddLoadableModule("Threat", function(L)
 						else
 							data.id = nil
 						end
-					elseif data.id then
+					elseif data and data.id then
 						if data.threat and data.threat > 0 then
 							-- Warn if this is ourselves and we are over the treshold.
 							local percent = 100 * data.value / max(0.000001, maxthreat)

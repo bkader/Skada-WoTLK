@@ -10,7 +10,7 @@ Skada:AddLoadableModule("Fails", function(L)
 	local spellmod = mod:NewModule(L["Event's failed players"])
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
-	local pairs, ipairs, tostring, format, tContains = pairs, ipairs, tostring, string.format, tContains
+	local pairs, tostring, format, tContains = pairs, tostring, string.format, tContains
 	local GetSpellInfo, UnitGUID, IsInGroup = Skada.GetSpellInfo or GetSpellInfo, UnitGUID, Skada.IsInGroup
 	local _
 
@@ -56,8 +56,9 @@ Skada:AddLoadableModule("Fails", function(L)
 			end
 
 			local nr = 0
-			for _, player in ipairs(set.players) do
-				if player.failspells and player.failspells[win.spellid] then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and player.failspells and player.failspells[win.spellid] then
 					nr = nr + 1
 					local d = win:nr(nr)
 
@@ -130,8 +131,9 @@ Skada:AddLoadableModule("Fails", function(L)
 			end
 
 			local nr = 0
-			for _, player in ipairs(set.players) do
-				if (not win.class or win.class == player.class) and (player.fail or 0) > 0 then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and player.fail and (not win.class or win.class == player.class) then
 					nr = nr + 1
 					local d = win:nr(nr)
 
@@ -243,8 +245,9 @@ Skada:AddLoadableModule("Fails", function(L)
 		end
 
 		function mod:OnInitialize()
-			for _, event in ipairs(LibFail:GetSupportedEvents()) do
-				LibFail:RegisterCallback(event, onFail)
+			local events = LibFail:GetSupportedEvents()
+			for i = 1, #events do
+				LibFail:RegisterCallback(events[i], onFail)
 			end
 
 			if Skada.db.profile.modules.failschannel == nil then
@@ -272,8 +275,9 @@ Skada:AddLoadableModule("Fails", function(L)
 		function setPrototype:GetFailCount(spellid)
 			if spellid and self.fail then
 				local count = 0
-				for _, p in ipairs(self.players) do
-					if p.failspells and p.failspells[spellid] then
+				for i = 1, #self.players do
+					local p = self.players[i]
+					if p and p.failspells and p.failspells[spellid] then
 						count = count + p.failspells[spellid]
 					end
 				end

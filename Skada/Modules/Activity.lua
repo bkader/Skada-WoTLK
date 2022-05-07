@@ -3,7 +3,7 @@ Skada:AddLoadableModule("Activity", function(L)
 	if Skada:IsDisabled("Activity") then return end
 
 	local mod = Skada:NewModule(L["Activity"])
-	local ipairs, date, format, max = ipairs, date, string.format, math.max
+	local date, format, max = date, string.format, math.max
 
 	local function activity_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
@@ -32,8 +32,9 @@ Skada:AddLoadableModule("Activity", function(L)
 			local nr = 0
 
 			-- players.
-			for _, player in ipairs(set.players) do
-				if (not win.class or win.class == player.class) and player.class and Skada.validclass[player.class] then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and Skada.validclass[player.class or "NaN"] and (not win.class or win.class == player.class) then
 					local activetime = player:GetTime(true)
 					if activetime > 0 then
 						nr = nr + 1
@@ -65,8 +66,9 @@ Skada:AddLoadableModule("Activity", function(L)
 
 			-- arena enemies
 			if Skada.forPVP and set.type == "arena" and set.enemies then
-				for _, enemy in ipairs(set.enemies) do
-					if (not win.class or win.class == enemy.class) and enemy.class and Skada.validclass[enemy.class] then
+				for i = 1, #set.enemies do
+					local enemy = set.enemies[i]
+					if enemy and Skada.validclass[enemy.class or "NaN"] and (not win.class or win.class == enemy.class) then
 						local activetime = enemy:GetTime(true)
 						if activetime > 0 then
 							nr = nr + 1

@@ -1,7 +1,7 @@
 local Skada = Skada
 
 -- cache frequently used globals
-local pairs, ipairs, select, format, max = pairs, ipairs, select, string.format, math.max
+local pairs, select, format, max = pairs, select, string.format, math.max
 local GetSpellInfo, cacheTable, T = Skada.GetSpellInfo, Skada.cacheTable, Skada.Table
 local _
 
@@ -583,8 +583,9 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 					nr = add_detail_bar(win, nr, L["Crushing"], spell.crushing, spell.count, true)
 				end
 
-				for _, misstype in ipairs(missTypes) do
-					if (spell[misstype] or 0) > 0 then
+				for i = 1, #missTypes do
+					local misstype = missTypes[i]
+					if misstype and spell[misstype] then
 						nr = add_detail_bar(win, nr, L[misstype], spell[misstype], spell.count, true)
 					end
 				end
@@ -711,8 +712,9 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			local nr = 0
 
 			-- players.
-			for _, player in ipairs(set.players) do
-				if not win.class or win.class == player.class then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and (not win.class or win.class == player.class) then
 					local dtps, amount = player:GetDTPS()
 					if amount > 0 then
 						nr = nr + 1
@@ -745,8 +747,9 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 
 			-- arena enemies
 			if Skada.forPVP and set.type == "arena" and set.enemies then
-				for _, enemy in ipairs(set.enemies) do
-					if not win.class or win.class == enemy.class then
+				for i = 1, #set.enemies do
+					local enemy = set.enemies[i]
+					if enemy and not enemy.fake and (not win.class or win.class == enemy.class) then
 						local dtps, amount = enemy:GetDTPS()
 						if amount > 0 then
 							nr = nr + 1
@@ -869,10 +872,11 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 
 		-- clean set from garbage before it is saved.
 		if (set.totaldamagetaken or 0) == 0 then return end
-		for _, p in ipairs(set.players) do
-			if p.totaldamagetaken and p.totaldamagetaken == 0 then
+		for i = 1, #set.players do
+			local p = set.players[i]
+			if p and p.totaldamagetaken == 0 then
 				p.damagetakenspells = nil
-			elseif p.damagetakenspells then
+			elseif p and p.damagetakenspells then
 				for spellname, spell in pairs(p.damagetakenspells) do
 					if (spell.total or 0) == 0 or (spell.count or 0) == 0 then
 						p.damagetakenspells[spellname] = nil
@@ -926,8 +930,9 @@ Skada:AddLoadableModule("DTPS", function(L)
 			local nr = 0
 
 			-- players
-			for _, player in ipairs(set.players) do
-				if not win.class or win.class == player.class then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and (not win.class or win.class == player.class) then
 					local dtps = player:GetDTPS()
 					if dtps > 0 then
 						nr = nr + 1
@@ -959,8 +964,9 @@ Skada:AddLoadableModule("DTPS", function(L)
 
 			-- arena enemies
 			if Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyDamageTaken then
-				for _, enemy in ipairs(set.enemies) do
-					if not win.class or win.class == enemy.class then
+				for i = 1, #set.enemies do
+					local enemy = set.enemies[i]
+					if enemy and not enemy.fake and (not win.class or win.class == enemy.class) then
 						local dtps = enemy:GetDTPS()
 						if dtps > 0 then
 							nr = nr + 1
@@ -1041,8 +1047,10 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 			wipe(cacheTable)
 
 			local total = 0
-			for _, player in ipairs(set.players) do
+			for i = 1, #set.players do
+				local player = set.players[i]
 				if
+					player and
 					player.damagetakenspells and
 					player.damagetakenspells[win.spellname] and
 					player.damagetakenspells[win.spellname].sources
@@ -1115,8 +1123,10 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 			wipe(cacheTable)
 			local total = 0
 
-			for _, player in ipairs(set.players) do
+			for i = 1, #set.players do
+				local player = set.players[i]
 				if
+					player and
 					player.damagetakenspells and
 					player.damagetakenspells[win.spellname] and
 					(player.damagetakenspells[win.spellname].total or 0) > 0
@@ -1175,8 +1185,9 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 		if total == 0 then return end
 
 		wipe(cacheTable)
-		for _, player in ipairs(set.players) do
-			if player.damagetakenspells then
+		for i = 1, #set.players do
+			local player = set.players[i]
+			if player and player.damagetakenspells then
 				for spellname, spell in pairs(player.damagetakenspells) do
 					if spell.total > 0 then
 						if not cacheTable[spellname] then
@@ -1302,8 +1313,9 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 			end
 
 			local nr = 0
-			for _, player in ipairs(set.players) do
-				if not win.class or win.class == player.class then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and (not win.class or win.class == player.class) then
 					if player.damagetakenspells then
 						local tmp = {name = player.name, data = {}}
 
@@ -1311,8 +1323,9 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 						for _, spell in pairs(player.damagetakenspells) do
 							total = total + spell.count
 
-							for _, t in ipairs(missTypes) do
-								if (spell[t] or 0) > 0 then
+							for j = 1, #missTypes do
+								local t = missTypes[j]
+								if t and spell[t] then
 									avoid = avoid + spell[t]
 									tmp.data[t] = (tmp.data[t] or 0) + spell[t]
 								end

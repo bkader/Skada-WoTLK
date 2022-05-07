@@ -10,7 +10,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 	local _
 
 	-- cache frequently used globals
-	local pairs, ipairs, tostring, format = pairs, ipairs, tostring, string.format
+	local pairs, tostring, format = pairs, tostring, string.format
 	local GetSpellInfo, GetSpellLink = Skada.GetSpellInfo or GetSpellInfo, Skada.GetSpellLink or GetSpellLink
 
 	local function log_interrupt(set, data)
@@ -218,8 +218,9 @@ Skada:AddLoadableModule("Interrupts", function(L)
 			end
 
 			local nr = 0
-			for _, player in ipairs(set.players) do
-				if (not win.class or win.class == player.class) and (player.interrupt or 0) > 0 then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and player.interrupt and (not win.class or win.class == player.class) then
 					nr = nr + 1
 					local d = win:nr(nr)
 

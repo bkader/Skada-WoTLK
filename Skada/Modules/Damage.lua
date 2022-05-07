@@ -1,6 +1,6 @@
 local Skada = Skada
 
-local pairs, ipairs, format, max = pairs, ipairs, string.format, math.max
+local pairs, format, max = pairs, string.format, math.max
 local GetSpellInfo, cacheTable, T = Skada.GetSpellInfo, Skada.cacheTable, Skada.Table
 local PercentToRGB = Skada.PercentToRGB
 local _
@@ -628,8 +628,9 @@ Skada:AddLoadableModule("Damage", function(L)
 					nr = add_detail_bar(win, nr, L["Glancing"], spell.glancing, spell.count, true)
 				end
 
-				for _, misstype in ipairs(missTypes) do
-					if (spell[misstype] or 0) > 0 then
+				for i = 1, #missTypes do
+					local misstype = missTypes[i]
+					if misstype and spell[misstype] then
 						nr = add_detail_bar(win, nr, L[misstype], spell[misstype], spell.count, true)
 					end
 				end
@@ -757,8 +758,9 @@ Skada:AddLoadableModule("Damage", function(L)
 			local nr = 0
 
 			-- players
-			for _, player in ipairs(set.players) do
-				if not win.class or win.class == player.class then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and (not win.class or win.class == player.class) then
 					local dps, amount = player:GetDPS()
 					if amount > 0 then
 						nr = nr + 1
@@ -791,8 +793,9 @@ Skada:AddLoadableModule("Damage", function(L)
 
 			-- arena enemies
 			if Skada.forPVP and set.type == "arena" and set.enemies then
-				for _, enemy in ipairs(set.enemies) do
-					if not win.class or win.class == enemy.class then
+				for i = 1, #set.enemies do
+					local enemy = set.enemies[i]
+					if enemy and not enemy.fake and (not win.class or win.class == enemy.class) then
 						local dps, amount = enemy:GetDPS()
 						if amount > 0 then
 							nr = nr + 1
@@ -931,10 +934,11 @@ Skada:AddLoadableModule("Damage", function(L)
 
 		-- clean set from garbage before it is saved.
 		if (set.totaldamage or 0) == 0 then return end
-		for _, p in ipairs(set.players) do
-			if p.totaldamage and p.totaldamage == 0 then
+		for i = 1, #set.players do
+			local p = set.players[i]
+			if p and p.totaldamage == 0 then
 				p.damagespells = nil
-			elseif p.damagespells then
+			elseif p and p.damagespells then
 				for spellname, spell in pairs(p.damagespells) do
 					if (spell.total or 0) == 0 or (spell.count or 0) == 0 then
 						p.damagespells[spellname] = nil
@@ -997,8 +1001,9 @@ Skada:AddLoadableModule("DPS", function(L)
 			local nr = 0
 
 			-- players
-			for _, player in ipairs(set.players) do
-				if not win.class or win.class == player.class then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and (not win.class or win.class == player.class) then
 					local dps = player:GetDPS()
 
 					if dps > 0 then
@@ -1031,8 +1036,9 @@ Skada:AddLoadableModule("DPS", function(L)
 
 			-- arena enemies
 			if Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyDamage then
-				for _, enemy in ipairs(set.enemies) do
-					if not win.class or win.class == enemy.class then
+				for i = 1, #set.enemies do
+					local enemy = set.enemies[i]
+					if enemy and not enemy.fake and (not win.class or win.class == enemy.class) then
 						local dps = enemy:GetDPS()
 
 						if dps > 0 then
@@ -1112,8 +1118,10 @@ Skada:AddLoadableModule("Damage Done By Spell", function(L)
 			wipe(cacheTable)
 			local total = 0
 
-			for _, player in ipairs(set.players) do
+			for i = 1, #set.players do
+				local player = set.players[i]
 				if
+					player and
 					player.damagespells and
 					player.damagespells[win.spellname] and
 					(player.damagespells[win.spellname].total or 0) > 0
@@ -1174,8 +1182,9 @@ Skada:AddLoadableModule("Damage Done By Spell", function(L)
 
 		wipe(cacheTable)
 
-		for _, player in ipairs(set.players) do
-			if player.damagespells then
+		for i = 1, #set.players do
+			local player = set.players[i]
+			if player and player.damagespells then
 				for spellname, spell in pairs(player.damagespells) do
 					if spell.total > 0 then
 						if not cacheTable[spellname] then
@@ -1418,8 +1427,9 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 			local nr = 0
 
 			-- players
-			for _, player in ipairs(set.players) do
-				if not win.class or win.class == player.class then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and (not win.class or win.class == player.class) then
 					local dps, amount = player:GetDPS(true)
 
 					if amount > 0 then
@@ -1453,8 +1463,9 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 
 			-- arena enemies
 			if Skada.forPVP and set.type == "arena" and set.enemies then
-				for _, enemy in ipairs(set.enemies) do
-					if not win.class or win.class == enemy.class then
+				for i = 1, #set.enemies do
+					local enemy = set.enemies[i]
+					if enemy and not enemy.fake and (not win.class or win.class == enemy.class) then
 						local dps, amount = enemy:GetDPS(true)
 
 						if amount > 0 then
@@ -1693,8 +1704,9 @@ Skada:AddLoadableModule("Overkill", function(L)
 			local nr = 0
 
 			-- players
-			for _, player in ipairs(set.players) do
-				if (not win.class or win.class == player.class) and (player.overkill or 0) > 0 then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and player.overkill and (not win.class or win.class == player.class) then
 					nr = nr + 1
 					local d = win:nr(nr)
 
@@ -1724,8 +1736,9 @@ Skada:AddLoadableModule("Overkill", function(L)
 
 			-- arena enemies
 			if Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyOverkill then
-				for _, enemy in ipairs(set.enemies) do
-					if (not win.class or win.class == enemy.class) and (enemy.overkill or 0) > 0 then
+				for i = 1, #set.enemies do
+					local enemy = set.enemies[i]
+					if enemy and not enemy.fake and enemy.overkill and (not win.class or win.class == enemy.class) then
 						nr = nr + 1
 						local d = win:nr(nr)
 
