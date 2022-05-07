@@ -215,7 +215,7 @@ local function CheckSetName(set)
 end
 
 -- process the given set and stores into sv.
-local function ProcessSet(set, curtime)
+local function ProcessSet(set, curtime, mobname)
 	if not set then return end
 	_bound_sets = nil -- to refresh mt
 
@@ -231,6 +231,7 @@ local function ProcessSet(set, curtime)
 	end
 
 	if not Skada.db.profile.onlykeepbosses or set.gotboss then
+		set.mobname = mobname or set.mobname -- override name
 		if set.mobname ~= nil and curtime - set.starttime >= (Skada.db.profile.minsetlength or 5) then
 			set.endtime = set.endtime or curtime
 			set.time = max(0.1, set.endtime - set.starttime)
@@ -300,10 +301,20 @@ local function FindMode(name)
 end
 
 -- called on boss defeat
-local function BossDefeated(set)
-	if set and not set.success then
-		set.success = true
-		Skada:SendMessage("COMBAT_BOSS_DEFEATED", set)
+local function BossDefeated()
+	if Skada.current and not Skada.current.success then
+		Skada.current.success = true
+		Skada:SendMessage("COMBAT_BOSS_DEFEATED", Skada.current)
+
+		if Skada.tempsets then
+			for i = 1, #Skada.tempsets do
+				local set = Skada.tempsets[i]
+				if set and not set.success then
+					set.success = true
+					Skada:SendMessage("COMBAT_BOSS_DEFEATED", set)
+				end
+			end
+		end
 	end
 end
 
@@ -2025,6 +2036,10 @@ function Skada:Command(param)
 		self:NewSegment()
 	elseif cmd == "newphase" or cmd == "phase" then
 		self:NewPhase()
+	elseif cmd == "stopsegment" or cmd == "stop" then
+		self:StopSegment(nil, arg1)
+	elseif cmd == "resumesegment" or cmd == "resume" then
+		self:ResumeSegment(nil, arg1)
 	elseif cmd == "toggle" then
 		self:ToggleWindow()
 	elseif cmd == "show" then
@@ -3396,11 +3411,18 @@ do
 	end
 
 	function Skada:ClearAllIndexes(mt)
-		Skada:DispatchSets(ClearIndexes, nil, mt)
+		ClearIndexes(Skada.current, mt)
 		ClearIndexes(Skada.total, mt)
+
 		if Skada.char.sets then
 			for i = 1, #Skada.char.sets do
 				ClearIndexes(Skada.char.sets[i], mt)
+			end
+		end
+
+		if Skada.tempsets then
+			for i = 1, #Skada.tempsets do
+				ClearIndexes(Skada.tempsets[i], mt)
 			end
 		end
 	end
@@ -3504,7 +3526,7 @@ function Skada:NewPhase()
 
 		self.tempsets[#self.tempsets + 1] = set
 
-		self:Printf("|cffffbb00%s|r - |cff00ff00Phase %s|r started.", set.mobname, set.phase)
+		self:Printf(L["|cffffbb00%s|r - |cff00ff00Phase %s|r started."], set.mobname or L.Unknown, set.phase)
 	end
 end
 
@@ -3513,8 +3535,14 @@ function Skada:EndSegment()
 	self:ClearQueueUnits()
 
 	local curtime = time()
-	self:DispatchSets(ProcessSet, nil, curtime)
-	T.free("Skada_TempSegments", self.tempsets)
+	ProcessSet(self.current, curtime)
+
+	if self.tempsets then
+		for i = 1, #self.tempsets do
+			ProcessSet(self.tempsets[i], curtime, self.current.name)
+		end
+		T.free("Skada_TempSegments", self.tempsets)
+	end
 
 	-- remove players ".last" key from total segment.
 	for i = 1, #self.total.players do
@@ -3567,52 +3595,80 @@ function Skada:EndSegment()
 	self:ScheduleTimer("CheckMemory", 3)
 end
 
-function Skada:StopSegment(msg)
+function Skada:StopSegment(msg, phase)
 	if self.current then
 		local curtime = time()
 
-		-- stop current segment.
-		self.current.stopped = true
-		self.current.endtime = curtime
-		self.current.time = max(0.1, self.current.endtime - self.current.starttime)
-
-		-- stop phase segments.
-		if self.tempsets then
-			for i = 1, #self.tempsets do
-				local set = self.tempsets[i]
-				if set and not set.stopped then
-					set.stopped = true
-					set.endtime = curtime
-					set.time = max(0.1, set.endtime - set.starttime)
-				end
+		-- stop phase segment?
+		if phase and self.tempsets and #self.tempsets > 0 then
+			local set = self.tempsets[tonumber(phase) or 0] or self.tempsets[#self.tempsets]
+			if set and not set.stopped then
+				set.stopped = true
+				set.endtime = curtime
+				set.time = max(0.1, set.endtime - set.starttime)
+				self:Printf(L["|cffffbb00%s|r - |cff00ff00Phase %s|r stopped."], set.mobname or L.Unknown, set.phase)
 			end
+			return
 		end
 
-		self:Print(msg or L["Segment Stopped."])
-		self:RegisterEvent("PLAYER_REGEN_ENABLED")
+		-- stop current segment?
+		if not self.current.stopped then
+			self.current.stopped = true
+			self.current.endtime = curtime
+			self.current.time = max(0.1, self.current.endtime - self.current.starttime)
+
+			-- stop phase segments?
+			if self.tempsets and not phase then
+				for i = 1, #self.tempsets do
+					local set = self.tempsets[i]
+					if set and not set.stopped then
+						set.stopped = true
+						set.endtime = curtime
+						set.time = max(0.1, set.endtime - set.starttime)
+					end
+				end
+			end
+
+			self:Print(msg or L["Segment Stopped."])
+			self:RegisterEvent("PLAYER_REGEN_ENABLED")
+		end
 	end
 end
 
-function Skada:ResumeSegment(msg)
-	if self.current and self.current.stopped then
-		-- resume current segment.
-		self.current.stopped = nil
-		self.current.endtime = nil
-		self.current.time = 0
-
-		-- resume phase segments.
-		if self.tempsets then
-			for i = 1, #self.tempsets do
-				local set = self.tempsets[i]
-				if set and set.stopped then
-					set.stopped = nil
-					set.endtime = nil
-					set.time = 0
-				end
+function Skada:ResumeSegment(msg, phase)
+	if self.current then
+		-- resume phase segment?
+		if phase and self.tempsets and #self.tempsets > 0 then
+			local set = self.tempsets[tonumber(phase) or 0] or self.tempsets[#self.tempsets]
+			if set and set.stopped then
+				set.stopped = nil
+				set.endtime = nil
+				set.time = 0
+				self:Printf(L["|cffffbb00%s|r - |cff00ff00Phase %s|r resumed."], set.mobname or L.Unknown, set.phase)
 			end
+			return
 		end
 
-		self:Print(msg or L["Segment Resumed."])
+		-- resume current segment?
+		if self.current.stopped then
+			self.current.stopped = nil
+			self.current.endtime = nil
+			self.current.time = 0
+
+			-- resume phase segments?
+			if self.tempsets and not phase then
+				for i = 1, #self.tempsets do
+					local set = self.tempsets[i]
+					if set and set.stopped then
+						set.stopped = nil
+						set.endtime = nil
+						set.time = 0
+					end
+				end
+			end
+
+			self:Print(msg or L["Segment Resumed."])
+		end
 	end
 end
 
@@ -3853,7 +3909,7 @@ do
 				end
 			-- default boss defeated event? (no DBM/BigWigs)
 			elseif (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") and self.current.gotboss == GetCreatureId(dstGUID) then
-				self:ScheduleTimer("DispatchSets", self.db.profile.updatefrequency or 0.5, BossDefeated)
+				self:ScheduleTimer(BossDefeated, self.db.profile.updatefrequency or 0.5)
 			end
 
 			-- set mobname
@@ -3863,7 +3919,7 @@ do
 				elseif self.current.type == "arena" then
 					self.current.mobname = GetInstanceInfo()
 					self.current.gold = GetBattlefieldArenaFaction()
-				elseif src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+				elseif (src_is_interesting or band(srcFlags, BITMASK_GROUP) ~= 0) and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
 					self.current.mobname = dstName
 				elseif (dst_is_interesting or band(dstFlags, BITMASK_GROUP) ~= 0) and band(srcFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
 					self.current.mobname = srcName

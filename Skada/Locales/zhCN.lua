@@ -571,6 +571,9 @@ L["%s - Phase %s"] = "%s - 第 %s 阶段"
 L["%s - Phase 1"] = "%s - 第 1 阶段"
 L["%s - Phase 2"] = "%s - 第 2 阶段"
 L["%s - Phase 3"] = "%s - 第 3 阶段"
+L["|cffffbb00%s|r - |cff00ff00Phase %s|r started."] = "|cffffbb00%s|r - |cff00ff00第 %s|r 开始。"
+L["|cffffbb00%s|r - |cff00ff00Phase %s|r stopped."] = "|cffffbb00%s|r - |cff00ff00第 %s|r 停止。"
+L["|cffffbb00%s|r - |cff00ff00Phase %s|r resumed."] = "|cffffbb00%s|r - |cff00ff00第 %s|r 恢复。"
 -- enemy healing done module
 L["Enemy Healing Done"] = "敌方的治疗"
 -- avoidance and mitigation module

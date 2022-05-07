@@ -407,7 +407,7 @@ L["Stop"] = "중지"
 L.btn_stop_desc = "현재 세분화를 중지하거나 재개합니다. 전멸 후 자료를 제외하는 데 유용합니다. 설정에서 자동으로 중지하도록 설정할 수 있습니다."
 L["Segment Stopped."] = "세그먼트 중지됨."
 L["Segment Paused."] = "세그먼트 일시 중지됨."
-L["Segment Resumed."] = "재개된 세그먼트."
+L["Segment Resumed."] = "세그먼트 재개됨."
 L["Quick Access"] = "빠른 접근"
 -- default segments
 L["Total"] = "전체"
@@ -574,6 +574,9 @@ L["%s - Phase %s"] = "%s - 위상 %s"
 L["%s - Phase 1"] = "%s - 위상 1"
 L["%s - Phase 2"] = "%s - 위상 2"
 L["%s - Phase 3"] = "%s - 위상 3"
+L["|cffffbb00%s|r - |cff00ff00Phase %s|r started."] = "|cffffbb00%s|r - |cff00ff00위상 %s|r 시작됨."
+L["|cffffbb00%s|r - |cff00ff00Phase %s|r stopped."] = "|cffffbb00%s|r - |cff00ff00위상 %s|r 중지됨."
+L["|cffffbb00%s|r - |cff00ff00Phase %s|r resumed."] = "|cffffbb00%s|r - |cff00ff00위상 %s|r 재개됨."
 -- enemy healing done module
 L["Enemy Healing Done"] = "적의 치유량"
 -- avoidance and mitigation module

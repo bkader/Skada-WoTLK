@@ -116,9 +116,19 @@ do
 	end
 
 	local function stopOnClick(self, button)
-		if Skada.current and Skada.current.stopped and button == "LeftButton" then
+		if not Skada.current then
+			return
+		elseif Skada.tempsets and #Skada.tempsets > 0 then
+			if (IsShiftKeyDown() or button == "RightButton") and Skada.current.stopped then
+				Skada:ResumeSegment()
+			elseif IsShiftKeyDown() or button == "RightButton" then
+				Skada:StopSegment()
+			else
+				Skada:PhaseMenu(self.list.win)
+			end
+		elseif button == "LeftButton" and Skada.current.stopped then
 			Skada:ResumeSegment()
-		elseif Skada.current and button == "LeftButton" then
+		elseif button == "LeftButton" and Skada.current then
 			Skada:StopSegment()
 		end
 	end

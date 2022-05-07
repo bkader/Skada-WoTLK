@@ -574,6 +574,9 @@ L["%s - Phase %s"] = "%s - Fase %s"
 L["%s - Phase 1"] = "%s - Fase 1"
 L["%s - Phase 2"] = "%s - Fase 2"
 L["%s - Phase 3"] = "%s - Fase 3"
+L["|cffffbb00%s|r - |cff00ff00Phase %s|r started."] = "|cffffbb00%s|r - |cff00ff00Fase %s|r comenz\195\179."
+L["|cffffbb00%s|r - |cff00ff00Phase %s|r stopped."] = "|cffffbb00%s|r - |cff00ff00Fase %s|r detenida."
+L["|cffffbb00%s|r - |cff00ff00Phase %s|r resumed."] = "|cffffbb00%s|r - |cff00ff00Fase %s|r continu\195\179."
 -- enemy healing done module
 L["Enemy Healing Done"] = "Sanaci\195\179n de Enemigos"
 -- avoidance and mitigation module

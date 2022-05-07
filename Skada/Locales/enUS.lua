@@ -597,6 +597,9 @@ L["%s - Phase %s"] = true
 L["%s - Phase 1"] = true
 L["%s - Phase 2"] = true
 L["%s - Phase 3"] = true
+L["|cffffbb00%s|r - |cff00ff00Phase %s|r started."] = true
+L["|cffffbb00%s|r - |cff00ff00Phase %s|r stopped."] = true
+L["|cffffbb00%s|r - |cff00ff00Phase %s|r resumed."] = true
 -- enemy healing done module
 L["Enemy Healing Done"] = true
 -- avoidance and mitigation module
