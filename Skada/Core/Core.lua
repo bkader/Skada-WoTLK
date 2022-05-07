@@ -2004,7 +2004,7 @@ local function GenerateTotal()
 				end
 
 				if not index then
-					tinsert(Skada.total.players, player)
+					Skada.total.players[#Skada.total.players + 1] = player
 				end
 			end
 		end
@@ -3502,7 +3502,7 @@ function Skada:NewPhase()
 		set.started = self.current.started
 		set.phase = 2 + #self.tempsets
 
-		tinsert(self.tempsets, set)
+		self.tempsets[#self.tempsets + 1] = set
 
 		self:Printf("|cffffbb00%s|r - |cff00ff00Phase %s|r started.", set.mobname, set.phase)
 	end

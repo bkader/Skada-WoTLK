@@ -43,7 +43,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 
 		local WhoPulled
 		do
-			local tinsert, tconcat = table.insert, table.concat
+			local tconcat = table.concat
 			local UnitExists, UnitName = UnitExists, UnitName
 			local new, del = Skada.newTable, Skada.delTable
 
@@ -69,7 +69,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 							target = Skada:ClassColor(class, target)
 						end
 
-						tinsert(targettable, format("%s > %s", UnitName(boss) or L.Unknown, target))
+						targettable[#targettable + 1] = format("%s > %s", UnitName(boss) or L.Unknown, target)
 					end
 				end
 

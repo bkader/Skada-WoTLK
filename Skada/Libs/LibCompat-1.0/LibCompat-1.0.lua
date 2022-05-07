@@ -4,21 +4,18 @@
 -- @author: Kader B (https://github.com/bkader/LibCompat-1.0)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0-Skada", 30
+local MAJOR, MINOR = "LibCompat-1.0-Skada", 31
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
 lib.embeds = lib.embeds or {}
 
 local pairs, ipairs, select, type = pairs, ipairs, select, type
-local tinsert, tremove, tconcat, wipe = table.insert, table.remove, table.concat, wipe
+local tconcat, wipe = table.concat, wipe
 local max, min = math.max, math.min
-local format = format or string.format
-local strbyte = strbyte or string.byte
-local strchar = strchar or string.char
-local tostring, tonumber = tostring, tonumber
+local format, tonumber = format or string.format, tonumber
+local strbyte, strchar = strbyte or string.byte, strchar or string.char
 local setmetatable = setmetatable
-local CreateFrame = CreateFrame
 local error = error
 local _
 

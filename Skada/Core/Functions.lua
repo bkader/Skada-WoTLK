@@ -557,7 +557,7 @@ do
 				heal = random(250, 1500)
 			end
 
-			tinsert(fakeSet.players, {
+			fakeSet.players[#fakeSet.players + 1] = {
 				id = name,
 				name = name,
 				class = class,
@@ -566,7 +566,7 @@ do
 				damage = damage,
 				heal = heal,
 				absorb = absorb
-			})
+			}
 
 			fakeSet.damage = fakeSet.damage + damage
 			fakeSet.heal = fakeSet.heal + heal

@@ -1,7 +1,7 @@
 -- LibToast-1.0 modified by Kader
 -- Specialized ( = enhanced) for Skada
 
-local MAJOR, MINOR = "SpecializedLibToast-1.0", 1
+local MAJOR, MINOR = "SpecializedLibToast-1.0", 2
 
 local LibStub = LibStub
 assert(LibStub, MAJOR .. " requires LibStub")
@@ -13,8 +13,8 @@ if not lib then return end -- No upgrade needed
 -- Upvalued Lua API.
 -----------------------------------------------------------------------
 -- Functions
-local pairs, unpack, error, type = pairs, unpack, error, type
-local tinsert, tremove = table.insert, table.remove
+local pairs, type, error = pairs, type, error
+local tremove, unpack = table.remove, unpack
 local min, max = math.min, math.max
 local find, lower, format = string.find, string.lower, string.format
 local CreateFrame, UIFrameFade = CreateFrame, UIFrameFade
@@ -247,7 +247,7 @@ local function _reclaimButton(button)
 	button:ClearAllPoints()
 	button:SetParent(nil)
 	button:SetText(nil)
-	tinsert(button_heap, button)
+	button_heap[#button_heap + 1] = button
 end
 
 local function _reclaimToast(toast)
@@ -265,7 +265,7 @@ local function _reclaimToast(toast)
 	toast:Hide()
 
 	UIFrameFadeRemoveFrame(toast)
-	tinsert(toast_heap, toast)
+	toast_heap[#toast_heap + 1] = toast
 
 	local remove_index
 	for index = 1, #active_toasts do

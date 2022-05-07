@@ -417,7 +417,7 @@ function mod:Update(win)
 
 	for k, bardata in pairs(wd) do
 		if bardata.id then
-			tinsert(mybars, mod:UpdateBar(mod:GetBar(win), bardata, win.db))
+			mybars[#mybars + 1] = mod:UpdateBar(mod:GetBar(win), bardata, win.db)
 		end
 	end
 

@@ -230,7 +230,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 					log.amount = -deathlog.maxhp
 					log.time = deathlog.time-0.001
 					log.hp = deathlog.maxhp
-					tinsert(deathlog.log, log)
+					deathlog.log[#deathlog.log + 1] = log
 				end
 
 				-- announce death
