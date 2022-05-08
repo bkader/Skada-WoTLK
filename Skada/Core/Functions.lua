@@ -1051,8 +1051,14 @@ function Skada:ApplyBorder(frame, texture, color, thickness, padtop, padbottom, 
 		frame.borderFrame = CreateFrame("Frame", "$parentBorder", frame)
 		frame.borderFrame:SetFrameLevel(frame:GetFrameLevel() - 1)
 	end
-	frame.borderFrame:SetPoint("TOPLEFT", frame, -thickness - (padleft or 0), thickness + (padtop or 0))
-	frame.borderFrame:SetPoint("BOTTOMRIGHT", frame, thickness + (padright or 0), -thickness - (padbottom or 0))
+
+	padtop = padtop or 0
+	padbottom = padbottom or padtop
+	padleft = padleft or padtop
+	padright = padright or padtop
+
+	frame.borderFrame:SetPoint("TOPLEFT", frame, -thickness - padleft, thickness + padtop)
+	frame.borderFrame:SetPoint("BOTTOMRIGHT", frame, thickness + padright, -thickness - padbottom)
 
 	local borderbackdrop = T.get("Skada_BorderBackdrop")
 	borderbackdrop.edgeFile = (texture and thickness > 0) and self:MediaFetch("border", texture) or nil

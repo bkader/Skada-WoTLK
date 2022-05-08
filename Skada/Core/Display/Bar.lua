@@ -1045,7 +1045,7 @@ do
 		end
 
 		-- Window border
-		Skada:ApplyBorder(g, p.background.bordertexture, p.background.bordercolor, p.background.borderthickness)
+		Skada:ApplyBorder(g, p.background.bordertexture, p.background.bordercolor, p.background.borderthickness, p.background.borderinsets)
 
 		windowbackdrop.bgFile = p.background.texturepath or Skada:MediaFetch("background", p.background.texture)
 		windowbackdrop.tile = p.background.tile

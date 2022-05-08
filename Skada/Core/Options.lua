@@ -56,6 +56,7 @@ Skada.windowdefaults = {
 		bordercolor = {r = 0, g = 0, b = 0, a = 0.5},
 		bordertexture = "None",
 		borderthickness = 1,
+		borderinsets = 0,
 		height = 200
 	},
 	strata = "LOW",
@@ -1017,7 +1018,6 @@ function Skada:FrameSettings(db, include_dimensions)
 								name = L["Border texture"],
 								desc = L["The texture used for the borders."],
 								order = 10,
-								width = "double",
 								values = Skada:MediaList("border"),
 								get = function()
 									return db.background.bordertexture
@@ -1026,6 +1026,7 @@ function Skada:FrameSettings(db, include_dimensions)
 									db.background.bordertexture = key
 									if key == "None" then
 										db.background.borderthickness = 0
+										db.background.borderinsets = 0
 									end
 									Skada:ApplySettings(db.name)
 								end
@@ -1063,6 +1064,23 @@ function Skada:FrameSettings(db, include_dimensions)
 								end,
 								set = function(_, val)
 									db.background.borderthickness = val
+									Skada:ApplySettings(db.name)
+								end
+							},
+							borderinsets = {
+								type = "range",
+								name = L["Border Insets"],
+								desc = L["The distance between the window and its border."],
+								order = 40,
+								min = -32,
+								max = 32,
+								step = 0.01,
+								bigStep = 1,
+								get = function()
+									return db.background.borderinsets
+								end,
+								set = function(_, val)
+									db.background.borderinsets = val
 									Skada:ApplySettings(db.name)
 								end
 							}

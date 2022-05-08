@@ -163,7 +163,11 @@ local function titleOnMouseDown(self, button)
 end
 
 local function menuOnClick(self, button)
-	Skada:OpenMenu(self.win, button)
+	if button == "RightButton" then
+		Skada:OpenOptions(self.win)
+	else
+		Skada:OpenMenu(self.win)
+	end
 end
 
 function mod:Create(window, isnew)
@@ -563,7 +567,7 @@ function mod:ApplySettings(win)
 		f:SetBackdrop(fbackdrop)
 		f:SetBackdropColor(p.background.color.r, p.background.color.g, p.background.color.b, p.background.color.a)
 		f:SetFrameStrata(p.strata)
-		Skada:ApplyBorder(f, p.background.bordertexture, p.background.bordercolor, p.background.borderthickness)
+		Skada:ApplyBorder(f, p.background.bordertexture, p.background.bordercolor, p.background.borderthickness, p.background.borderinsets)
 	end
 
 	if p.hidden and win.frame:IsShown() then

@@ -247,12 +247,7 @@ function mod:ApplySettings(win)
 			db.background.color.a
 		)
 
-		Skada:ApplyBorder(
-			win.frame,
-			db.background.bordertexture,
-			db.background.bordercolor,
-			db.background.borderthickness
-		)
+		Skada:ApplyBorder(win.frame, db.background.bordertexture, db.background.bordercolor, db.background.borderthickness, db.background.borderinsets)
 
 		local color = db.textcolor or {r = 1, g = 1, b = 1, a = 1}
 		title:SetTextColor(color.r, color.g, color.b, color.a)
