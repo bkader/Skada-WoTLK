@@ -273,10 +273,6 @@ do
 			ttactive = true
 			Skada:SetTooltipPosition(GameTooltip, win.bargroup, win.db.display, win)
 			Skada:ShowTooltip(win, id, label, bar)
-			if not win.db.disablehighlight then
-				bar:SetOpacity(1)
-				bar:SetBackdropColor(0, 0, 0, 0.25)
-			end
 		end
 	end
 
@@ -284,10 +280,6 @@ do
 		if ttactive then
 			GameTooltip:Hide()
 			ttactive = false
-		end
-		if not bar.win.db.disablehighlight then
-			bar:SetOpacity(0.85)
-			bar:SetBackdropColor(0, 0, 0, 0)
 		end
 	end
 end
@@ -403,19 +395,14 @@ function mod:WindowLocked(_, group, locked)
 	end
 end
 
-do
-	local barbackdrop = {bgFile = [[Interface\Buttons\WHITE8X8]]}
-	function mod:CreateBar(win, name, label, value, maxvalue, icon, o)
-		local bar, isnew = win.bargroup:NewBar(name, label, value, maxvalue, icon, o)
-		bar.win = win
-		bar.iconFrame:SetScript("OnEnter", nil)
-		bar.iconFrame:SetScript("OnLeave", nil)
-		bar.iconFrame:SetScript("OnMouseDown", nil)
-		bar.iconFrame:EnableMouse(false)
-		bar:SetBackdrop(win.db.disablehighlight and nil or barbackdrop)
-		bar:SetBackdropColor(0, 0, 0, 0)
-		return bar, isnew
-	end
+function mod:CreateBar(win, name, label, value, maxvalue, icon, o)
+	local bar, isnew = win.bargroup:NewBar(name, label, value, maxvalue, icon, o)
+	bar.win = win
+	bar.iconFrame:SetScript("OnEnter", nil)
+	bar.iconFrame:SetScript("OnLeave", nil)
+	bar.iconFrame:SetScript("OnMouseDown", nil)
+	bar.iconFrame:EnableMouse(false)
+	return bar, isnew
 end
 
 -- ======================================================= --
@@ -559,8 +546,7 @@ do
 			end
 		end
 
-		color.a = db.disablehighlight and (color.a or 1) or 0.85
-		bar:SetColorAt(0, color.r, color.g, color.b, color.a)
+		bar:SetColorAt(0, color.r, color.g, color.b, color.a or 1)
 	end
 
 	function mod:Update(win)
@@ -978,6 +964,7 @@ do
 		g:SetWidth(p.barwidth)
 		g:SetLength(p.barwidth)
 		g:SetTexture(p.bartexturepath or Skada:MediaFetch("statusbar", p.bartexture))
+		g:SetBarHighlight(not p.disablehighlight)
 		g:SetBarBackgroundColor(p.barbgcolor.r, p.barbgcolor.g, p.barbgcolor.b, p.barbgcolor.a or 0.6)
 		g:SetButtonMouseOver(p.title.hovermode)
 		g:SetButtonsOpacity(p.title.toolbaropacity or 0.25)

@@ -2,7 +2,7 @@
 -- Specialized ( = enhanced) for Skada
 -- Note to self: don't forget to notify original author of changes
 -- in the unlikely event they end up being usable outside of Skada.
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90004
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90005
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 
@@ -546,6 +546,10 @@ function barListPrototype:AdjustTitle(ignoreMouseover)
 	end
 end
 
+function barListPrototype:SetBarHighlight(enable)
+	self.barhighlight = enable or nil
+end
+
 function barListPrototype:SetBarBackgroundColor(r, g, b, a)
 	self.barbackgroundcolor[1] = r
 	self.barbackgroundcolor[2] = g
@@ -662,6 +666,7 @@ do
 		list.button = list.button or CreateFrame("Button", "$parentAnchor", list)
 		list.button:SetText(name)
 		list.button:SetBackdrop(frame_defaults)
+		list.button:SetBackdropColor(0, 0, 0, 1)
 		list.button:SetNormalFontObject(myfont)
 		list.button.text = list.button:GetFontString()
 
@@ -675,7 +680,6 @@ do
 
 		list.button:SetScript("OnMouseDown", move)
 		list.button:SetScript("OnMouseUp", stopMove)
-		list.button:SetBackdropColor(0, 0, 0, 1)
 		list.button:RegisterForClicks("LeftButtonUp", "RightButtonUp", "MiddleButtonUp", "Button4Up", "Button5Up")
 
 		list.buttons = {}
@@ -1502,15 +1506,25 @@ do
 
 	local function barEnter(self, motion)
 		local parent = self:GetParent()
-		if parent and parent.callbacks then
-			parent.callbacks:Fire("BarEnter", self, motion)
+		if parent then
+			if parent.barhighlight then
+				self.hitexture:SetVertexColor(1, 1, 1, 0.1)
+			end
+			if parent.callbacks then
+				parent.callbacks:Fire("BarEnter", self, motion)
+			end
 		end
 	end
 
 	local function barLeave(self, motion)
 		local parent = self:GetParent()
-		if parent and parent.callbacks then
-			parent.callbacks:Fire("BarLeave", self, motion)
+		if parent then
+			if parent.barhighlight then
+				self.hitexture:SetVertexColor(0, 0, 0, 0)
+			end
+			if parent.callbacks then
+				parent.callbacks:Fire("BarLeave", self, motion)
+			end
 		end
 	end
 
@@ -1521,19 +1535,24 @@ do
 		self:SetScript("OnMouseDown", barClick)
 		self:SetScript("OnEnter", barEnter)
 		self:SetScript("OnLeave", barLeave)
-
 		self:SetScript("OnSizeChanged", self.OnSizeChanged)
-		self.texture = self.texture or self:CreateTexture(nil, "ARTWORK")
+
+		self.bgtexture = self.bgtexture or self:CreateTexture(nil, "BACKGROUND")
+		self.bgtexture:SetAllPoints()
+		self.bgtexture:SetVertexColor(0.3, 0.3, 0.3, 0.6)
+
+		self.texture = self.texture or self:CreateTexture(nil, "BORDER")
+
+		self.hitexture = self.hitexture or self:CreateTexture(nil, "ARTWORK")
+		self.hitexture:SetAllPoints()
+		self.hitexture:SetTexture([[Interface\Buttons\WHITE8X8]])
+		self.hitexture:SetVertexColor(0, 0, 0, 0)
 
 		self.spark = self.spark or self:CreateTexture(nil, "OVERLAY")
 		self.spark:SetTexture([[Interface\CastingBar\UI-CastingBar-Spark]])
 		self.spark:SetSize(10, 10)
 		self.spark:SetBlendMode("ADD")
 		self.spark:Hide()
-
-		self.bgtexture = self.bgtexture or self:CreateTexture(nil, "BACKGROUND")
-		self.bgtexture:SetAllPoints()
-		self.bgtexture:SetVertexColor(0.3, 0.3, 0.3, 0.6)
 
 		self.icon = self.icon or self:CreateTexture(nil, "OVERLAY")
 		self.icon:SetPoint("LEFT", self, "LEFT", 0, 0)

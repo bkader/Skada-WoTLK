@@ -3112,26 +3112,6 @@ end
 
 -------------------------------------------------------------------------------
 
-function Skada:ApplyBorder(frame, texture, color, thickness, padtop, padbottom, padleft, padright)
-	if not frame.borderFrame then
-		frame.borderFrame = CreateFrame("Frame", "$parentBorder", frame)
-		frame.borderFrame:SetFrameLevel(frame:GetFrameLevel() - 1)
-	end
-	frame.borderFrame:SetPoint("TOPLEFT", frame, -thickness - (padleft or 0), thickness + (padtop or 0))
-	frame.borderFrame:SetPoint("BOTTOMRIGHT", frame, thickness + (padright or 0), -thickness - (padbottom or 0))
-
-	local borderbackdrop = T.get("Skada_BorderBackdrop")
-	borderbackdrop.edgeFile = (texture and thickness > 0) and self:MediaFetch("border", texture) or nil
-	borderbackdrop.edgeSize = thickness
-	frame.borderFrame:SetBackdrop(borderbackdrop)
-	T.free("Skada_BorderBackdrop", borderbackdrop)
-	if color then
-		frame.borderFrame:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
-	end
-end
-
--------------------------------------------------------------------------------
-
 function Skada:OnInitialize()
 	self.db = LibStub("AceDB-3.0"):New("SkadaDB", self.defaults, "Default")
 
