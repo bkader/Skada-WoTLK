@@ -538,8 +538,8 @@ function mod:ApplySettings(win)
 
 		--background
 		local fbackdrop = {}
-		local borderR, borderG, borderB = unpack(ElvUI[1]["media"].bordercolor)
-		local backdropR, backdropG, backdropB = unpack(ElvUI[1]["media"].backdropcolor)
+		local borderR, borderG, borderB = ElvUI[1]["media"].bordercolor[1], ElvUI[1]["media"].bordercolor[2], ElvUI[1]["media"].bordercolor[3]
+		local backdropR, backdropG, backdropB = ElvUI[1]["media"].backdropcolor[1], ElvUI[1]["media"].backdropcolor[2], ElvUI[1]["media"].backdropcolor[3]
 		local backdropA = 0
 		if p.issolidbackdrop then
 			backdropA = 1.0

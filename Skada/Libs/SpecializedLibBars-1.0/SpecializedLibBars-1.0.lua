@@ -558,7 +558,12 @@ function barListPrototype:SetBarBackgroundColor(r, g, b, a)
 
 	if bars[self] then
 		for _, bar in pairs(bars[self]) do
-			bar.bgtexture:SetVertexColor(unpack(self.barbackgroundcolor))
+			bar.bgtexture:SetVertexColor(
+				self.barbackgroundcolor[1],
+				self.barbackgroundcolor[2],
+				self.barbackgroundcolor[3],
+				self.barbackgroundcolor[4]
+			)
 		end
 	end
 end
@@ -956,7 +961,13 @@ end
 
 function barListPrototype:NewBar(name, text, value, maxVal, icon)
 	local bar, isNew = self:NewBarFromPrototype(barPrototype, name, text, value, maxVal, icon, self.orientation, self.length, self.thickness)
-	bar.bgtexture:SetVertexColor(unpack(self.barbackgroundcolor))
+	bar.bgtexture:SetVertexColor(
+		self.barbackgroundcolor[1],
+		self.barbackgroundcolor[2],
+		self.barbackgroundcolor[3],
+		self.barbackgroundcolor[4]
+	)
+
 	return bar, isNew
 end
 
@@ -1168,8 +1179,8 @@ end
 function barListPrototype:UpdateTextColor()
 	if bars[self] then
 		for k, v in pairs(bars[self]) do
-			v.label:SetTextColor(unpack(self.textcolor))
-			v.timerLabel:SetTextColor(unpack(self.textcolor))
+			v.label:SetTextColor(self.textcolor[1], self.textcolor[2], self.textcolor[3], self.textcolor[4])
+			v.timerLabel:SetTextColor(self.textcolor[1], self.textcolor[2], self.textcolor[3], self.textcolor[4])
 		end
 	end
 end

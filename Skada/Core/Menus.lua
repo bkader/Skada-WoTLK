@@ -1020,10 +1020,10 @@ do
 			Skada.db.profile.report.chantype = channellist[value][2]
 			if channellist[origchan][3] ~= channellist[value][3] then
 				-- redraw in-place to add/remove whisper widget
-				local pos = {frame:GetPoint()}
+				local point, relativeTo, relativePoint, xOfs, yOfs = frame:GetPoint()
 				DestroyWindow()
 				CreateReportWindow(window)
-				Skada.reportwindow:SetPoint(unpack(pos))
+				Skada.reportwindow:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs)
 			end
 		end)
 		frame:AddChild(channelbox)

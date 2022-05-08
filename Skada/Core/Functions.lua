@@ -463,7 +463,6 @@ end
 -- test mode
 
 do
-	local unpack = unpack
 	local random = math.random
 	local IsGroupInCombat = Skada.IsGroupInCombat
 	local InCombatLockdown = InCombatLockdown
@@ -536,7 +535,7 @@ do
 
 		local players = FakePlayers()
 		for i = 1, #players do
-			local name, class, role, spec = unpack(players[i])
+			local name, class, role, spec = players[i][1], players[i][2], players[i][3], players[i][4]
 			local damage, heal, absorb = 0, 0, 0
 
 			if role == "TANK" then
