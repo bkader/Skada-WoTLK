@@ -3904,6 +3904,8 @@ do
 					self.current.mobname = dstName
 				elseif (dst_is_interesting or band(dstFlags, BITMASK_GROUP) ~= 0) and band(srcFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
 					self.current.mobname = srcName
+				else -- fallback
+					self.current.mobname = L["Unknown"]
 				end
 			end
 

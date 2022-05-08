@@ -2422,8 +2422,8 @@ do
 		Skada.options.args.themeoptions = GetThemeOptions()
 		Skada.options.args.themeoptions.order = 960
 
-		Skada.options.args.scrolloptions = GetScrollOptions()
-		Skada.options.args.scrolloptions.order = 970
+		Skada.options.args.tweaks.args.advanced.args.scroll = GetScrollOptions()
+		Skada.options.args.tweaks.args.advanced.args.scroll.order = 980
 
 		self:SetScrollSpeed(self.db.speed)
 

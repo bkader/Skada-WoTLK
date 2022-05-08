@@ -552,72 +552,19 @@ Skada.options = {
 				}
 			}
 		},
-		tooltips = {
-			type = "group",
-			name = L["Tooltips"],
-			desc = fmt(L["Options for %s."], L["Tooltips"]),
-			order = 30,
-			args = {
-				tooltips = {
-					type = "toggle",
-					name = L["Show Tooltips"],
-					desc = L["Shows tooltips with extra information in some modes."],
-					order = 1
-				},
-				informativetooltips = {
-					type = "toggle",
-					name = L["Informative Tooltips"],
-					desc = L["Shows subview summaries in the tooltips."],
-					order = 2,
-					disabled = function()
-						return not Skada.db.profile.tooltips
-					end
-				},
-				tooltiprows = {
-					type = "range",
-					name = L["Subview Rows"],
-					desc = L["The number of rows from each subview to show when using informative tooltips."],
-					order = 3,
-					min = 1,
-					max = 10,
-					step = 1,
-					disabled = function()
-						return not Skada.db.profile.tooltips
-					end
-				},
-				tooltippos = {
-					type = "select",
-					name = L["Tooltip Position"],
-					desc = L["Position of the tooltips."],
-					order = 4,
-					values = {
-						["default"] = L["Default"],
-						["smart"] = L["Smart"],
-						["topright"] = L["Top Right"],
-						["topleft"] = L["Top Left"],
-						["bottomright"] = L["Bottom Right"],
-						["bottomleft"] = L["Bottom Left"],
-						["cursor"] = L["Follow Cursor"]
-					},
-					disabled = function()
-						return not Skada.db.profile.tooltips
-					end
-				}
-			}
-		},
 		columns = {
 			type = "group",
 			name = L["Columns"],
 			desc = fmt(L["Options for %s."], L["Columns"]),
 			childGroups = "select",
-			order = 40,
+			order = 30,
 			args = {}
 		},
 		resetoptions = {
 			type = "group",
 			name = L["Data Resets"],
 			desc = fmt(L["Options for %s."], L["Data Resets"]),
-			order = 50,
+			order = 40,
 			get = function(i)
 				return Skada.db.profile.reset[i[#i]]
 			end,
@@ -675,7 +622,7 @@ Skada.options = {
 			type = "group",
 			name = L["Modules Options"],
 			desc = fmt(L["Options for %s."], L["Modules"]),
-			order = 60,
+			order = 50,
 			width = "double",
 			get = function(i)
 				return Skada.db.profile.modules[i[#i]]
@@ -726,6 +673,66 @@ Skada.options = {
 							name = L["Absorbed Damage"],
 							desc = L["Enable this if you want the damage absorbed to be included in the damage done."],
 							order = 100
+						},
+						sep_850 = {
+							type = "description",
+							name = " ",
+							width = "full",
+							order = 850
+						},
+						tooltips = {
+							type = "group",
+							name = L["Tooltips"],
+							desc = fmt(L["Options for %s."], L["Tooltips"]),
+							inline = true,
+							order = 900,
+							args = {
+								tooltips = {
+									type = "toggle",
+									name = L["Show Tooltips"],
+									desc = L["Shows tooltips with extra information in some modes."],
+									order = 1
+								},
+								informativetooltips = {
+									type = "toggle",
+									name = L["Informative Tooltips"],
+									desc = L["Shows subview summaries in the tooltips."],
+									order = 2,
+									disabled = function()
+										return not Skada.db.profile.tooltips
+									end
+								},
+								tooltiprows = {
+									type = "range",
+									name = L["Subview Rows"],
+									desc = L["The number of rows from each subview to show when using informative tooltips."],
+									order = 3,
+									min = 1,
+									max = 10,
+									step = 1,
+									disabled = function()
+										return not Skada.db.profile.tooltips
+									end
+								},
+								tooltippos = {
+									type = "select",
+									name = L["Tooltip Position"],
+									desc = L["Position of the tooltips."],
+									order = 4,
+									values = {
+										["default"] = L["Default"],
+										["smart"] = L["Smart"],
+										["topright"] = L["Top Right"],
+										["topleft"] = L["Top Left"],
+										["bottomright"] = L["Bottom Right"],
+										["bottomleft"] = L["Bottom Left"],
+										["cursor"] = L["Follow Cursor"]
+									},
+									disabled = function()
+										return not Skada.db.profile.tooltips
+									end
+								}
+							}
 						}
 					}
 				},
@@ -746,7 +753,7 @@ Skada.options = {
 			name = L["Profiles"],
 			desc = fmt(L["Options for %s."], L["Profiles"]),
 			childGroups = "tab",
-			order = 10000,
+			order = 1000,
 			args = {}
 		}
 	}
