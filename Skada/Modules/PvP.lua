@@ -271,8 +271,8 @@ Skada:AddLoadableModule("Player vs. Player", "mod_pvp_desc", function(L)
 		end
 
 		-- localize arena team colors (just in case)
-		L.ARENA_GREEN = L["Green Team"]
-		L.ARENA_GOLD = L["Gold Team"]
+		L["ARENA_GREEN"] = L["Green Team"]
+		L["ARENA_GOLD"] = L["Gold Team"]
 
 		-- add custom colors to tweaks
 		Skada.options.args.tweaks.args.advanced.args.colors.args.arean = {
@@ -284,13 +284,13 @@ Skada:AddLoadableModule("Player vs. Player", "mod_pvp_desc", function(L)
 			args = {
 				ARENA_GOLD = {
 					type = "color",
-					name = L.ARENA_GOLD,
-					desc = format(L["Color for %s."], L.ARENA_GOLD)
+					name = L["ARENA_GOLD"],
+					desc = format(L["Color for %s."], L["ARENA_GOLD"])
 				},
 				ARENA_GREEN = {
 					type = "color",
-					name = L.ARENA_GREEN,
-					desc = format(L["Color for %s."], L.ARENA_GREEN)
+					name = L["ARENA_GREEN"],
+					desc = format(L["Color for %s."], L["ARENA_GREEN"])
 				}
 			}
 		}

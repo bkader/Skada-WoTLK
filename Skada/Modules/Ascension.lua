@@ -174,7 +174,7 @@ Skada:AddLoadableModule("Project Ascension", function(L)
 				},
 				ascensiondesc = {
 					type = "description",
-					name = L.project_ascension_desc,
+					name = L["project_ascension_desc"],
 					fontSize = "medium",
 					width = "full",
 					order = 10

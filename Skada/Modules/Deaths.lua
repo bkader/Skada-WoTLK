@@ -283,7 +283,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 	function deathlogmod:Enter(win, id, label)
 		win.datakey = id
-		win.title = format(L["%s's death log"], win.actorname or L.Unknown)
+		win.title = format(L["%s's death log"], win.actorname or L["Unknown"])
 	end
 
 	do
@@ -292,7 +292,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 		end
 
 		function deathlogmod:Update(win, set)
-			win.title = format(L["%s's death log"], win.actorname or L.Unknown)
+			win.title = format(L["%s's death log"], win.actorname or L["Unknown"])
 			if set == Skada.current then return end -- don't show while in combat
 
 			local player = Skada:FindPlayer(set, win.actorid, win.actorname)
@@ -339,7 +339,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 						if log.spellid then
 							spellname, _, spellicon = GetSpellInfo(log.spellid)
 						else
-							spellname = L.Unknown
+							spellname = L["Unknown"]
 							spellicon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
 						end
 
@@ -351,7 +351,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 						-- used for tooltip
 						d.hp = log.hp or 0
 						d.amount = log.amount or 0
-						d.source = log.source or L.Unknown
+						d.source = log.source or L["Unknown"]
 						d.spellname = spellname
 						d.value = d.hp
 
@@ -457,7 +457,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 						end
 					end
 
-					d.label = d.label or L.Unknown
+					d.label = d.label or L["Unknown"]
 					d.value = death.time
 					d.valuetext = death.timeStr
 
@@ -532,15 +532,15 @@ Skada:AddLoadableModule("Deaths", function(L)
 			end
 
 			if (entry.resisted or 0) > 0 then
-				tooltip:AddDoubleLine(L.RESIST, Skada:FormatNumber(entry.resisted), 1, 1, 1)
+				tooltip:AddDoubleLine(L["RESIST"], Skada:FormatNumber(entry.resisted), 1, 1, 1)
 			end
 
 			if (entry.blocked or 0) > 0 then
-				tooltip:AddDoubleLine(L.BLOCK, Skada:FormatNumber(entry.blocked), 1, 1, 1)
+				tooltip:AddDoubleLine(L["BLOCK"], Skada:FormatNumber(entry.blocked), 1, 1, 1)
 			end
 
 			if (entry.absorbed or 0) > 0 then
-				tooltip:AddDoubleLine(L.ABSORB, Skada:FormatNumber(entry.absorbed), 1, 1, 1, 0.45, 1, 0.45)
+				tooltip:AddDoubleLine(L["ABSORB"], Skada:FormatNumber(entry.absorbed), 1, 1, 1, 0.45, 1, 0.45)
 			end
 		end
 	end
@@ -681,9 +681,9 @@ Skada:AddLoadableModule("Deaths", function(L)
 		-- prepare the output.
 		local output = format(
 			(channel == "SELF") and "%s > %s (%s) %s" or "Skada: %s > %s (%s) %s",
-			log.source or L.Unknown, -- source name
-			playername or L.Unknown, -- player name
-			log.spellid and GetSpellInfo(log.spellid) or L.Unknown, -- spell name
+			log.source or L["Unknown"], -- source name
+			playername or L["Unknown"], -- player name
+			log.spellid and GetSpellInfo(log.spellid) or L["Unknown"], -- spell name
 			log.amount and Skada:FormatNumber(0 - log.amount, 1) or 0 -- spell amount
 		)
 

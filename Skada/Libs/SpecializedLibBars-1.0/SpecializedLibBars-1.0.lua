@@ -29,54 +29,54 @@ local L = {
 	unlock_window = "Unlock Window"
 }
 if LOCALE_deDE then
-	L.resize_header = "Größe ändern"
-	L.resize_click = "|cff00ff00Klicken|r, um die Fenstergröße frei zu ändern."
-	L.resize_shift_click = "|cff00ff00Umschalt-Klick|r, um die Breite zu ändern."
-	L.resize_alt_click = "|cff00ff00Alt-Klick|r, um die Höhe zu ändern."
-	L.lock_window = "Fenster sperren"
-	L.unlock_window = "Fenster entsperren"
+	L["resize_header"] = "Größe ändern"
+	L["resize_click"] = "|cff00ff00Klicken|r, um die Fenstergröße frei zu ändern."
+	L["resize_shift_click"] = "|cff00ff00Umschalt-Klick|r, um die Breite zu ändern."
+	L["resize_alt_click"] = "|cff00ff00Alt-Klick|r, um die Höhe zu ändern."
+	L["lock_window"] = "Fenster sperren"
+	L["unlock_window"] = "Fenster entsperren"
 elseif LOCALE_esES or LOCALE_esMX then
-	L.resize_header = "Redimensionar"
-	L.resize_click = "|cff00ff00Haga clic|r para cambiar el tamaño de la ventana."
-	L.resize_shift_click = "|cff00ff00Shift-Click|r para cambiar el ancho de la ventana."
-	L.resize_alt_click = "|cff00ff00Alt-Click|r para cambiar la altura de la ventana."
-	L.lock_window = "Bloquear ventana"
-	L.unlock_window = "Desbloquear ventana"
+	L["resize_header"] = "Redimensionar"
+	L["resize_click"] = "|cff00ff00Haga clic|r para cambiar el tamaño de la ventana."
+	L["resize_shift_click"] = "|cff00ff00Shift-Click|r para cambiar el ancho de la ventana."
+	L["resize_alt_click"] = "|cff00ff00Alt-Click|r para cambiar la altura de la ventana."
+	L["lock_window"] = "Bloquear ventana"
+	L["unlock_window"] = "Desbloquear ventana"
 elseif LOCALE_frFR then
-	L.resize_header = "Redimensionner"
-	L.resize_click = "|cff00ff00Clic|r pour redimensionner."
-	L.resize_shift_click = "|cff00ff00Shift clic|r pour changer la largeur."
-	L.resize_alt_click = "|cff00ff00Alt clic|r pour changer la hauteur."
-	L.lock_window = "Verrouiller la fenêtre"
-	L.unlock_window = "Déverrouiller la fenêtre"
+	L["resize_header"] = "Redimensionner"
+	L["resize_click"] = "|cff00ff00Clic|r pour redimensionner."
+	L["resize_shift_click"] = "|cff00ff00Shift clic|r pour changer la largeur."
+	L["resize_alt_click"] = "|cff00ff00Alt clic|r pour changer la hauteur."
+	L["lock_window"] = "Verrouiller la fenêtre"
+	L["unlock_window"] = "Déverrouiller la fenêtre"
 elseif LOCALE_koKR then
-	L.resize_header = "크기 조정"
-	L.resize_click = "|cff00ff00클릭|r하여 창 크기를 자유롭게 조정합니다."
-	L.resize_shift_click = "너비를 변경하려면 |cff00ff00Shift-클릭|r하십시오."
-	L.resize_alt_click = "높이를 변경하려면 |cff00ff00Alt-클릭|r하십시오"
-	L.lock_window = "잠금 창"
-	L.unlock_window = "잠금 해제 창"
+	L["resize_header"] = "크기 조정"
+	L["resize_click"] = "|cff00ff00클릭|r하여 창 크기를 자유롭게 조정합니다."
+	L["resize_shift_click"] = "너비를 변경하려면 |cff00ff00Shift-클릭|r하십시오."
+	L["resize_alt_click"] = "높이를 변경하려면 |cff00ff00Alt-클릭|r하십시오"
+	L["lock_window"] = "잠금 창"
+	L["unlock_window"] = "잠금 해제 창"
 elseif LOCALE_ruRU then
-	L.resize_header = "Изменение размера"
-	L.resize_click = "|cff00ff00Щелкните|r, чтобы изменить размер окна."
-	L.resize_shift_click = "|cff00ff00Shift-Click|r, чтобы изменить ширину."
-	L.resize_alt_click = "|cff00ff00ALT-Click|r, чтобы изменить высоту."
-	L.lock_window = "Заблокировать окно"
-	L.unlock_window = "Разблокировать окно"
+	L["resize_header"] = "Изменение размера"
+	L["resize_click"] = "|cff00ff00Щелкните|r, чтобы изменить размер окна."
+	L["resize_shift_click"] = "|cff00ff00Shift-Click|r, чтобы изменить ширину."
+	L["resize_alt_click"] = "|cff00ff00ALT-Click|r, чтобы изменить высоту."
+	L["lock_window"] = "Заблокировать окно"
+	L["unlock_window"] = "Разблокировать окно"
 elseif LOCALE_zhCN then
-	L.resize_header = "调整大小"
-	L.resize_click = "|cff00ff00单击|r以调整窗口大小。"
-	L.resize_shift_click = "|cff00ff00Shift-Click|r改变窗口的宽度。"
-	L.resize_alt_click = "|cff00ff00Alt-Click|r更改窗口高度。"
-	L.lock_window = "锁定窗口"
-	L.unlock_window = "解锁窗口"
+	L["resize_header"] = "调整大小"
+	L["resize_click"] = "|cff00ff00单击|r以调整窗口大小。"
+	L["resize_shift_click"] = "|cff00ff00Shift-Click|r改变窗口的宽度。"
+	L["resize_alt_click"] = "|cff00ff00Alt-Click|r更改窗口高度。"
+	L["lock_window"] = "锁定窗口"
+	L["unlock_window"] = "解锁窗口"
 elseif LOCALE_zhTW then
-	L.resize_header = "調整大小"
-	L.resize_click = "|cff00ff00單擊|r以調整窗口大小。"
-	L.resize_shift_click = "|cff00ff00Shift-Click|r改變窗口的寬度。"
-	L.resize_alt_click = "|cff00ff00Alt-Click|r更改窗口高度。"
-	L.lock_window = "鎖定窗口"
-	L.unlock_window = "解鎖窗口"
+	L["resize_header"] = "調整大小"
+	L["resize_click"] = "|cff00ff00單擊|r以調整窗口大小。"
+	L["resize_shift_click"] = "|cff00ff00Shift-Click|r改變窗口的寬度。"
+	L["resize_alt_click"] = "|cff00ff00Alt-Click|r更改窗口高度。"
+	L["lock_window"] = "鎖定窗口"
+	L["unlock_window"] = "解鎖窗口"
 end
 
 --[[ xpcall safecall implementation ]]--
@@ -799,10 +799,10 @@ do
 		GameTooltip:SetOwner(self, "ANCHOR_NONE")
 		GameTooltip:SetPoint("BOTTOM", self, "TOP", 0, 0)
 		GameTooltip:ClearLines()
-		GameTooltip:AddLine(L.resize_header)
-		GameTooltip:AddLine(L.resize_click, 1, 1, 1)
-		GameTooltip:AddLine(L.resize_shift_click, 1, 1, 1)
-		GameTooltip:AddLine(L.resize_alt_click, 1, 1, 1)
+		GameTooltip:AddLine(L["resize_header"])
+		GameTooltip:AddLine(L["resize_click"], 1, 1, 1)
+		GameTooltip:AddLine(L["resize_shift_click"], 1, 1, 1)
+		GameTooltip:AddLine(L["resize_alt_click"], 1, 1, 1)
 		GameTooltip:Show()
 		listOnEnter(self:GetParent())
 		self.icon:SetVertexColor(1, 1, 1, 0.7)
@@ -819,7 +819,7 @@ do
 		GameTooltip:SetPoint("BOTTOM", self, "TOP", 0, 0)
 		GameTooltip:ClearLines()
 		GameTooltip:AddLine(p.name)
-		GameTooltip:AddLine(p.locked and L.unlock_window or L.lock_window, 1, 1, 1)
+		GameTooltip:AddLine(p.locked and L["unlock_window"] or L["lock_window"], 1, 1, 1)
 		GameTooltip:Show()
 		listOnEnter(self:GetParent())
 		self.icon:SetVertexColor(1, 1, 1, 0.7)

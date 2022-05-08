@@ -116,7 +116,7 @@ Skada:AddLoadableModule("Resources", function(L)
 	-- this is the main module update function that shows the list
 	-- of players depending on the selected power gain type.
 	function basemod:Update(win, set)
-		win.title = self.moduleName or L.Unknown
+		win.title = self.moduleName or L["Unknown"]
 		if win.class then
 			win.title = format("%s (%s)", win.title, L[win.class])
 		end
@@ -168,12 +168,12 @@ Skada:AddLoadableModule("Resources", function(L)
 	-- player mods common Enter function.
 	function playermod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's gained %s"], label, namesTable[self.powerid] or L.Unknown)
+		win.title = format(L["%s's gained %s"], label, namesTable[self.powerid] or L["Unknown"])
 	end
 
 	-- player mods main update function
 	function playermod:Update(win, set)
-		win.title = format(L["%s's gained %s"], win.actorname or L.Unknown, self.powername or L.Unknown)
+		win.title = format(L["%s's gained %s"], win.actorname or L["Unknown"], self.powername or L["Unknown"])
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)

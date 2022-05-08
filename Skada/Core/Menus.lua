@@ -34,7 +34,7 @@ end
 function Skada:OpenMenu(window)
 	self.skadamenu = self.skadamenu or CreateFrame("Frame", "SkadaMenu", UIParent, "UIDropDownMenuTemplate")
 	self.skadamenu.displayMode = "MENU"
-	self.skadamenu.initialize = function(self, level)
+	self.skadamenu.initialize = self.skadamenu.initialize or function(self, level)
 		if not level then return end
 		local info = UIDropDownMenu_CreateInfo()
 
@@ -141,6 +141,7 @@ function Skada:OpenMenu(window)
 				Skada:NewSegment()
 			end
 			info.notCheckable = 1
+			info.disabled = (Skada.current == nil)
 			UIDropDownMenu_AddButton(info, level)
 
 			-- start new phase
@@ -150,6 +151,7 @@ function Skada:OpenMenu(window)
 				Skada:NewPhase()
 			end
 			info.notCheckable = 1
+			info.disabled = (Skada.current == nil)
 			UIDropDownMenu_AddButton(info, level)
 
 			wipe(info)
@@ -278,7 +280,7 @@ function Skada:OpenMenu(window)
 				wipe(info)
 				info.text = L["Lock Window"]
 				info.func = function()
-					window.db.barslocked = not window.db.barslocked
+					window.db.barslocked = (window.db.barslocked ~= true) and true or nil
 					Skada:ApplySettings(window.db.name)
 				end
 				info.checked = window.db.barslocked
@@ -305,7 +307,7 @@ function Skada:OpenMenu(window)
 					wipe(info)
 					info.text = L["Sticky Window"]
 					info.func = function()
-						window.db.sticky = not window.db.sticky
+						window.db.sticky = (window.db.sticky ~= true) and true or nil
 						if not window.db.sticky then
 							windows = Skada:GetWindows()
 							for i = 1, #windows do
@@ -325,7 +327,7 @@ function Skada:OpenMenu(window)
 				wipe(info)
 				info.text = L["Clamped To Screen"]
 				info.func = function()
-					window.db.clamped = not window.db.clamped
+					window.db.clamped = (window.db.clamped ~= true) and true or nil
 					Skada:ApplySettings(window.db.name)
 				end
 				info.checked = window.db.clamped
@@ -344,19 +346,32 @@ function Skada:OpenMenu(window)
 					info.notCheckable = 1
 					UIDropDownMenu_AddButton(info, level)
 
-					wipe(info)
-					info.text = L["Always show self"]
-					info.func = function()
-						window.db.showself = not window.db.showself
-						Skada:ApplySettings(window.db.name)
+					if Skada.db.profile.showself ~= true then
+						wipe(info)
+						info.text = L["Always show self"]
+						info.func = function()
+							window.db.showself = (window.db.showself ~= true) and true or nil
+							Skada:ApplySettings(window.db.name)
+						end
+						info.checked = (window.db.showself == true)
+						UIDropDownMenu_AddButton(info, level)
 					end
-					info.checked = (window.db.showself == true)
-					UIDropDownMenu_AddButton(info, level)
+
+					if Skada.db.profile.showtotals ~= true then
+						wipe(info)
+						info.text = L["Show totals"]
+						info.func = function()
+							window.db.showtotals = (window.db.showtotals ~= true) and true or nil
+							Skada:ReloadSettings(window.db.name)
+						end
+						info.checked = (window.db.showtotals == true)
+						UIDropDownMenu_AddButton(info, level)
+					end
 
 					wipe(info)
 					info.text = L["Include set"]
 					info.func = function()
-						window.db.titleset = not window.db.titleset
+						window.db.titleset = (window.db.titleset ~= true) and true or nil
 						Skada:ApplySettings(window.db.name)
 					end
 					info.checked = (window.db.titleset == true)
@@ -365,7 +380,7 @@ function Skada:OpenMenu(window)
 					wipe(info)
 					info.text = L["Encounter Timer"]
 					info.func = function()
-						window.db.combattimer = not window.db.combattimer
+						window.db.combattimer = (window.db.combattimer ~= true) and true or nil
 						Skada:ApplySettings(window.db.name)
 					end
 					info.checked = (window.db.combattimer == true)
@@ -462,7 +477,7 @@ function Skada:OpenMenu(window)
 					wipe(info)
 					info.text = Skada:GetSetLabel(set)
 					info.func = function()
-						set.keep = not set.keep
+						set.keep = (set.keep ~= true) and true or nil
 						window:UpdateDisplay()
 					end
 					info.checked = set.keep
@@ -587,17 +602,16 @@ function Skada:OpenMenu(window)
 				wipe(info)
 				info.text = L["Show totals"]
 				info.func = function()
-					Skada.db.profile.showtotals = not Skada.db.profile.showtotals
+					Skada.db.profile.showtotals = (Skada.db.profile.showtotals ~= true) and true or nil
 					Skada:ReloadSettings()
 				end
 				info.checked = (Skada.db.profile.showtotals == true)
-				info.keepShownOnClick = 1
 				UIDropDownMenu_AddButton(info, level)
 
 				wipe(info)
 				info.text = L["Show rank numbers"]
 				info.func = function()
-					Skada.db.profile.showranks = not Skada.db.profile.showranks
+					Skada.db.profile.showranks = (Skada.db.profile.showranks ~= true) and true or nil
 					Skada:ApplySettings()
 				end
 				info.checked = (Skada.db.profile.showranks == true)
@@ -607,7 +621,7 @@ function Skada:OpenMenu(window)
 				wipe(info)
 				info.text = L["Always show self"]
 				info.func = function()
-					Skada.db.profile.showself = not Skada.db.profile.showself
+					Skada.db.profile.showself = (Skada.db.profile.showself ~= true) and true or nil
 					Skada:ApplySettings()
 				end
 				info.checked = (Skada.db.profile.showself == true)
@@ -617,7 +631,7 @@ function Skada:OpenMenu(window)
 				wipe(info)
 				info.text = L["Aggressive combat detection"]
 				info.func = function()
-					Skada.db.profile.tentativecombatstart = not Skada.db.profile.tentativecombatstart
+					Skada.db.profile.tentativecombatstart = (Skada.db.profile.tentativecombatstart ~= true) and true or nil
 					Skada:ApplySettings()
 				end
 				info.checked = (Skada.db.profile.tentativecombatstart == true)
@@ -627,7 +641,7 @@ function Skada:OpenMenu(window)
 				wipe(info)
 				info.text = L["Absorbed Damage"]
 				info.func = function()
-					Skada.db.profile.absdamage = not Skada.db.profile.absdamage
+					Skada.db.profile.absdamage = (Skada.db.profile.absdamage ~= true) and true or nil
 					Skada:ApplySettings()
 				end
 				info.checked = (Skada.db.profile.absdamage == true)
@@ -688,7 +702,7 @@ function Skada:SegmentMenu(window)
 	if self.testMode then return end
 	self.segmentsmenu = self.segmentsmenu or CreateFrame("Frame", "SkadaWindowButtonsSegments", UIParent, "UIDropDownMenuTemplate")
 	self.segmentsmenu.displayMode = "MENU"
-	self.segmentsmenu.initialize = function(self, level)
+	self.segmentsmenu.initialize = self.segmentsmenu.initialize or function(self, level)
 		if not level then return end
 		local info = UIDropDownMenu_CreateInfo()
 
@@ -774,7 +788,7 @@ do
 		end
 
 		self.modesmenu.displayMode = "MENU"
-		self.modesmenu.initialize = function(self, level)
+		self.modesmenu.initialize = self.modesmenu.initialize or function(self, level)
 			if not level then return end
 			local info = UIDropDownMenu_CreateInfo()
 
@@ -1080,7 +1094,7 @@ function Skada:PhaseMenu(window)
 	if self.testMode then return end
 	self.phasesmenu = self.phasesmenu or CreateFrame("Frame", "SkadaWindowButtonsPhases", UIParent, "UIDropDownMenuTemplate")
 	self.phasesmenu.displayMode = "MENU"
-	self.phasesmenu.initialize = function(self, level)
+	self.phasesmenu.initialize = self.phasesmenu.initialize or function(self, level)
 		if not level then return end
 		local info = UIDropDownMenu_CreateInfo()
 

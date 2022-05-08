@@ -377,11 +377,11 @@ Skada:AddLoadableModule("Buffs", function(L)
 
 	function playermod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format(L["%s's targets"], label or L.Unknown)
+		win.title = format(L["%s's targets"], label or L["Unknown"])
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's targets"], win.spellname or L.Unknown)
+		win.title = format(L["%s's targets"], win.spellname or L["Unknown"])
 		if not (win.spellid and set) then return end
 
 		local players, count = set:GetAuraPlayers(win.spellid)
@@ -421,7 +421,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's buffs"], win.actorname or L.Unknown)
+		win.title = format(L["%s's buffs"], win.actorname or L["Unknown"])
 		SpellUpdateFunction("BUFF", win, set, mod)
 	end
 
@@ -547,12 +547,12 @@ Skada:AddLoadableModule("Debuffs", function(L)
 	end
 
 	function targetspellmod:Enter(win, id, label)
-		win.targetname = label or L.Unknown
-		win.title = L["actor debuffs"](win.actorname or L.Unknown, label)
+		win.targetname = label or L["Unknown"]
+		win.title = L["actor debuffs"](win.actorname or L["Unknown"], label)
 	end
 
 	function targetspellmod:Update(win, set)
-		win.title = L["actor debuffs"](win.actorname or L.Unknown, win.targetname or L.Unknown)
+		win.title = L["actor debuffs"](win.actorname or L["Unknown"], win.targetname or L["Unknown"])
 		if not win.targetname then return end
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
@@ -590,11 +590,11 @@ Skada:AddLoadableModule("Debuffs", function(L)
 
 	function spelltargetmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format(L["%s's <%s> targets"], win.actorname or L.Unknown, label)
+		win.title = format(L["%s's <%s> targets"], win.actorname or L["Unknown"], label)
 	end
 
 	function spelltargetmod:Update(win, set)
-		win.title = format(L["%s's <%s> targets"], win.actorname or L.Unknown, win.spellname or L.Unknown)
+		win.title = format(L["%s's <%s> targets"], win.actorname or L["Unknown"], win.spellname or L["Unknown"])
 		if not win.spellid then
 			return
 		end
@@ -641,7 +641,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's targets"], win.actorname or L.Unknown)
+		win.title = format(L["%s's targets"], win.actorname or L["Unknown"])
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		if not player then return end
@@ -683,7 +683,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = L["actor debuffs"](win.actorname or L.Unknown)
+		win.title = L["actor debuffs"](win.actorname or L["Unknown"])
 		SpellUpdateFunction("DEBUFF", win, set, mod)
 	end
 

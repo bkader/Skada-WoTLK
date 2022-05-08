@@ -74,7 +74,7 @@ Skada:AddLoadableModule("Dispels", function(L)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's dispelled spells"], win.actorname or L.Unknown)
+		win.title = format(L["%s's dispelled spells"], win.actorname or L["Unknown"])
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.dispel or 0
@@ -113,7 +113,7 @@ Skada:AddLoadableModule("Dispels", function(L)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's dispelled targets"], win.actorname or L.Unknown)
+		win.title = format(L["%s's dispelled targets"], win.actorname or L["Unknown"])
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.dispel or 0
@@ -154,7 +154,7 @@ Skada:AddLoadableModule("Dispels", function(L)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's dispel spells"], win.actorname or L.Unknown)
+		win.title = format(L["%s's dispel spells"], win.actorname or L["Unknown"])
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.dispel or 0

@@ -157,7 +157,7 @@ local optionsValues = {
 		FULLSCREEN_DIALOG = "FULLSCREEN_DIALOG"
 	},
 	AUTOHIDE = {
-		L.None, -- [1]
+		L["None"], -- [1]
 		L["While in combat"], -- [2]
 		L["While out of combat"], -- [3]
 		L["While not in a group"], -- [4]
@@ -171,7 +171,7 @@ local optionsValues = {
 		L["Mode"], -- [3]
 	},
 	TOOLTIPPOS = {
-		NONE = L.None,
+		NONE = L["None"],
 		BOTTOM = L["Bottom"],
 		BOTTOMLEFT = L["Bottom Left"],
 		BOTTOMRIGHT = L["Bottom Right"],
@@ -289,7 +289,7 @@ Skada.options = {
 						shortmenu = {
 							type = "toggle",
 							name = L["Shorten menus"],
-							desc = L.opt_shortmenu_desc,
+							desc = L["opt_shortmenu_desc"],
 							order = 20
 						},
 						mergepets = {
@@ -375,7 +375,7 @@ Skada.options = {
 						showself = {
 							type = "toggle",
 							name = L["Always show self"],
-							desc = L.opt_showself_desc,
+							desc = L["opt_showself_desc"],
 							order = 140
 						},
 						reportlinks = {
@@ -393,13 +393,13 @@ Skada.options = {
 						autostop = {
 							type = "toggle",
 							name = L["Autostop"],
-							desc = L.opt_autostop_desc,
+							desc = L["opt_autostop_desc"],
 							order = 170
 						},
 						tentativecombatstart = {
 							type = "toggle",
 							name = L["Aggressive combat detection"],
-							desc = L.opt_tentativecombatstart_desc,
+							desc = L["opt_tentativecombatstart_desc"],
 							order = 180
 						}
 					}
@@ -428,14 +428,14 @@ Skada.options = {
 							type = "select",
 							name = L["Brackets"],
 							desc = L["Choose which type of brackets to use."],
-							values = {"(", "{", "[", "<", L.None},
+							values = {"(", "{", "[", "<", L["None"]},
 							order = 30
 						},
 						separator = {
 							type = "select",
 							name = L["Separator"],
 							desc = L["Choose which character is used to separator values between brackets."],
-							values = {",", ".", ";", "-", "|", "/", "\\", "~", L.None},
+							values = {",", ".", ";", "-", "|", "/", "\\", "~", L["None"]},
 							order = 40
 						},
 						decimals = {
@@ -473,7 +473,7 @@ Skada.options = {
 						timemesure = {
 							type = "select",
 							name = L["Time Measure"],
-							desc = L.opt_timemesure_desc,
+							desc = L["opt_timemesure_desc"],
 							values = {[1] = L["Activity Time"], [2] = L["Effective Time"]},
 							get = function()
 								return Skada.db.profile.timemesure or 1
@@ -484,10 +484,10 @@ Skada.options = {
 						feed = {
 							type = "select",
 							name = L["Data Feed"],
-							desc = L.opt_feed_desc,
+							desc = L["opt_feed_desc"],
 							width = "double",
 							values = function()
-								local list = {[""] = L.None}
+								local list = {[""] = L["None"]}
 								local feeds = Skada:GetFeeds()
 								for name in next, feeds do
 									list[name] = name
@@ -657,7 +657,7 @@ Skada.options = {
 				skippopup = {
 					type = "toggle",
 					name = L["Skip reset dialog"],
-					desc = L.opt_skippopup_desc,
+					desc = L["opt_skippopup_desc"],
 					descStyle = "inline",
 					order = 5,
 					width = "double",
@@ -856,13 +856,13 @@ function Skada:AddColumnOptions(mod)
 		}
 
 		-- proper and reasonable columns order.
-		if col.name == L.APS or col.name == L.DPS or col.name == L.DTPS or col.name == L.HPS or col.name == L.TPS then
+		if col.name == L["APS"] or col.name == L["DPS"] or col.name == L["DTPS"] or col.name == L["HPS"] or col.name == L["TPS"] then
 			col.order = 6
-		elseif col.name == L.sAPS or col.name == L.sDPS or col.name == L.sDTPS or col.name == L.sHPS then
+		elseif col.name == L["sAPS"] or col.name == L["sDPS"] or col.name == L["sDTPS"] or col.name == L["sHPS"] then
 			col.order = 8
-		elseif col.name == L.Percent then
+		elseif col.name == L["Percent"] then
 			col.order = 7
-		elseif col.name == L.sPercent then
+		elseif col.name == L["sPercent"] then
 			col.order = 9
 		else
 			order = order + 1
@@ -1142,11 +1142,11 @@ function Skada:FrameSettings(db, include_dimensions)
 							modeincombat = {
 								type = "select",
 								name = L["Combat Mode"],
-								desc = L.opt_combatmode_desc,
+								desc = L["opt_combatmode_desc"],
 								order = 10,
 								values = function()
 									if not modesList then
-										modesList = {[""] = L.None}
+										modesList = {[""] = L["None"]}
 										local modes = Skada:GetModes()
 										for i = 1, #modes do
 											if modes[i] then
@@ -1160,11 +1160,11 @@ function Skada:FrameSettings(db, include_dimensions)
 							wipemode = {
 								type = "select",
 								name = L["Wipe Mode"],
-								desc = L.opt_wipemode_desc,
+								desc = L["opt_wipemode_desc"],
 								order = 20,
 								values = function()
 									if not modesList then
-										modesList = {[""] = L.None}
+										modesList = {[""] = L["None"]}
 										local modes = Skada:GetModes()
 										for i = 1, #modes do
 											if modes[i] then
@@ -1185,7 +1185,7 @@ function Skada:FrameSettings(db, include_dimensions)
 							autocurrent = {
 								type = "toggle",
 								name = L["Auto switch to current"],
-								desc = L.opt_autocurrent_desc,
+								desc = L["opt_autocurrent_desc"],
 								order = 40
 							}
 						}
@@ -1247,7 +1247,7 @@ function Skada:FrameSettings(db, include_dimensions)
 					name = L["Window"],
 					order = 10,
 					values = function()
-						local list = {[""] = L.None}
+						local list = {[""] = L["None"]}
 						windows = Skada:GetWindows()
 						for i = 1, #windows do
 							local win = windows[i]

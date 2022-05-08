@@ -16,7 +16,7 @@ local RGBPercToHex = Skada.RGBPercToHex
 local FONT_FLAGS = Skada.fontFlags
 if not FONT_FLAGS then
 	FONT_FLAGS = {
-		[""] = L.None,
+		[""] = L["None"],
 		["OUTLINE"] = L["Outline"],
 		["THICKOUTLINE"] = L["Thick outline"],
 		["MONOCHROME"] = L["Monochrome"],
@@ -41,13 +41,13 @@ end
 
 local function formatLabel(win, data)
 	if win.db.isusingclasscolors and data.class then
-		return Skada:ClassColor(data.class, data.text or data.label or L.Unknown)
+		return Skada:ClassColor(data.class, data.text or data.label or L["Unknown"])
 	elseif data.color and data.color.colorStr then
-		return format("|c%s%s|r", data.color.colorStr, data.text or data.label or L.Unknown)
+		return format("|c%s%s|r", data.color.colorStr, data.text or data.label or L["Unknown"])
 	elseif data.color then
-		return WrapTextInColorCode(data.text or data.label or L.Unknown, RGBPercToHex(data.color.r or 1, data.color.g or 1, data.color.b or 1, true))
+		return WrapTextInColorCode(data.text or data.label or L["Unknown"], RGBPercToHex(data.color.r or 1, data.color.g or 1, data.color.b or 1, true))
 	else
-		return data.text or data.label or L.Unknown
+		return data.text or data.label or L["Unknown"]
 	end
 end
 
@@ -295,7 +295,7 @@ function mod:AddDisplayOptions(win, options)
 			useframe = {
 				type = "toggle",
 				name = L["Use frame"],
-				desc = L.opt_useframe_desc,
+				desc = L["opt_useframe_desc"],
 				order = 10,
 				width = "double"
 			},
@@ -355,6 +355,6 @@ end
 
 function mod:OnInitialize()
 	self.name = name
-	self.description = L.mod_broker_desc
+	self.description = L["mod_broker_desc"]
 	Skada:AddDisplaySystem("broker", self)
 end

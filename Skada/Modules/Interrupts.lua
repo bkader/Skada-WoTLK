@@ -54,7 +54,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 		local spellid, spellname, _, extraspellid, extraspellname, _ = ...
 
 		spellid = spellid or 6603
-		spellname = spellname or L.Melee
+		spellname = spellname or L["Melee"]
 
 		-- invalid/ignored spell?
 		if ignoredSpells[spellid] or (extraspellid and ignoredSpells[extraspellid]) then return end
@@ -89,7 +89,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's interrupted spells"], win.actorname or L.Unknown)
+		win.title = format(L["%s's interrupted spells"], win.actorname or L["Unknown"])
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -130,7 +130,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's interrupted targets"], win.actorname or L.Unknown)
+		win.title = format(L["%s's interrupted targets"], win.actorname or L["Unknown"])
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -174,7 +174,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's interrupt spells"], win.actorname or L.Unknown)
+		win.title = format(L["%s's interrupt spells"], win.actorname or L["Unknown"])
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)

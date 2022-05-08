@@ -69,7 +69,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 							target = Skada:ClassColor(class, target)
 						end
 
-						targettable[#targettable + 1] = format("%s > %s", UnitName(boss) or L.Unknown, target)
+						targettable[#targettable + 1] = format("%s > %s", UnitName(boss) or L["Unknown"], target)
 					end
 				end
 
@@ -115,7 +115,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 
 				if band(dstFlags, BITMASK_GROUP) ~= 0 and self:IsBoss(srcGUID, srcName) then -- boss started?
 					if self:IsPet(dstGUID, dstFlags) then
-						output = format(hitformats[1], srcName, dstName or L.Unknown)
+						output = format(hitformats[1], srcName, dstName or L["Unknown"])
 					elseif dstName then
 						local _, class = UnitClass(dstName)
 						if class and self.classcolors[class] then
@@ -476,7 +476,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			Skada.options.args.tweaks.args.general.args.firsthit = {
 				type = "toggle",
 				name = L["First hit"],
-				desc = L.opt_tweaks_firsthit_desc,
+				desc = L["opt_tweaks_firsthit_desc"],
 				set = SetValue,
 				order = 10
 			}
@@ -490,7 +490,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			Skada.options.args.tweaks.args.general.args.spamage = {
 				type = "toggle",
 				name = L["Filter DPS meters Spam"],
-				desc = L.opt_tweaks_spamage_desc,
+				desc = L["opt_tweaks_spamage_desc"],
 				set = SetValue,
 				order = 30
 			}
@@ -512,7 +512,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 				args = {
 					smartdesc = {
 						type = "description",
-						name = L.opt_tweaks_smarthalt_desc,
+						name = L["opt_tweaks_smarthalt_desc"],
 						fontSize = "medium",
 						order = 10,
 						width = "full"
@@ -525,7 +525,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 					smartwait = {
 						type = "range",
 						name = L["Duration"],
-						desc = L.opt_tweaks_smartwait_desc,
+						desc = L["opt_tweaks_smartwait_desc"],
 						disabled = function()
 							return not Skada.db.profile.smartstop
 						end,
@@ -547,7 +547,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 				args = {
 					desc = {
 						type = "description",
-						name = L.opt_tweaks_combatlogfix_desc,
+						name = L["opt_tweaks_combatlogfix_desc"],
 						fontSize = "medium",
 						order = 10,
 						width = "full"
@@ -560,7 +560,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 					combatlogfixalt = {
 						type = "toggle",
 						name = L["Aggressive Mode"],
-						desc = L.opt_tweaks_combatlogfixalt_desc,
+						desc = L["opt_tweaks_combatlogfixalt_desc"],
 						disabled = function()
 							return not Skada.db.profile.combatlogfix
 						end,

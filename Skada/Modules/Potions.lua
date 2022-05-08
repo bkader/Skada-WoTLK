@@ -80,7 +80,7 @@ Skada:AddLoadableModule("Potions", function(L)
 	end
 
 	function potionmod:Update(win, set)
-		win.title = win.potionname or L.Unknown
+		win.title = win.potionname or L["Unknown"]
 		if win.class then
 			win.title = format("%s (%s)", win.title, L[win.class])
 		end

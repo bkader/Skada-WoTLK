@@ -20,7 +20,7 @@ local RGBPercToHex = Skada.RGBPercToHex
 local FONT_FLAGS = Skada.fontFlags
 if not FONT_FLAGS then
 	FONT_FLAGS = {
-		[""] = L.None,
+		[""] = L["None"],
 		["OUTLINE"] = L["Outline"],
 		["THICKOUTLINE"] = L["Thick outline"],
 		["MONOCHROME"] = L["Monochrome"],
@@ -350,15 +350,15 @@ function mod:GetBar(win)
 end
 
 function mod:UpdateBar(bar, bardata, db)
-	local label = bardata.text or bardata.label or L.Unknown
+	local label = bardata.text or bardata.label or L["Unknown"]
 	if db.isusingclasscolors and bardata.class then
-		label = Skada:ClassColor(bardata.class, bardata.text or bardata.label or L.Unknown)
+		label = Skada:ClassColor(bardata.class, bardata.text or bardata.label or L["Unknown"])
 	elseif bardata.color and bardata.color.colorStr then
-		label = format("|c%s%s|r", bardata.color.colorStr, bardata.text or bardata.label or L.Unknown)
+		label = format("|c%s%s|r", bardata.color.colorStr, bardata.text or bardata.label or L["Unknown"])
 	elseif bardata.color then
-		label = WrapTextInColorCode(bardata.text or bardata.label or L.Unknown, RGBPercToHex(bardata.color.r or 1, bardata.color.g or 1, bardata.color.b or 1, true))
+		label = WrapTextInColorCode(bardata.text or bardata.label or L["Unknown"], RGBPercToHex(bardata.color.r or 1, bardata.color.g or 1, bardata.color.b or 1, true))
 	else
-		label = bardata.text or bardata.label or L.Unknown
+		label = bardata.text or bardata.label or L["Unknown"]
 	end
 
 	if bardata.valuetext then
@@ -383,7 +383,7 @@ function mod:UpdateBar(bar, bardata, db)
 	end
 
 	bar.valueid = bardata.id
-	bar.valuetext = bardata.text or bardata.label or L.Unknown
+	bar.valuetext = bardata.text or bardata.label or L["Unknown"]
 	return bar
 end
 
@@ -634,7 +634,7 @@ function mod:AddDisplayOptions(win, options)
 			barwidth = {
 				type = "range",
 				name = L["Width"],
-				desc = L.opt_barwidth_desc,
+				desc = L["opt_barwidth_desc"],
 				min = 100,
 				max = 300,
 				step = 1.0,
@@ -650,19 +650,19 @@ function mod:AddDisplayOptions(win, options)
 			fixedbarwidth = {
 				type = "toggle",
 				name = L["Fixed bar width"],
-				desc = L.opt_fixedbarwidth_desc,
+				desc = L["opt_fixedbarwidth_desc"],
 				order = 70
 			},
 			isusingclasscolors = {
 				type = "toggle",
 				name = L["Class Colors"],
-				desc = L.opt_isusingclasscolors_desc,
+				desc = L["opt_isusingclasscolors_desc"],
 				order = 80,
 			},
 			isonnewline = {
 				type = "toggle",
 				name = L["Put values on new line."],
-				desc = L.opt_isonnewline_desc,
+				desc = L["opt_isonnewline_desc"],
 				order = 90
 			},
 			clickthrough = {
@@ -690,7 +690,7 @@ function mod:AddDisplayOptions(win, options)
 			isusingelvuiskin = {
 				type = "toggle",
 				name = L["Use ElvUI skin if avaliable."],
-				desc = L.opt_isusingelvuiskin_desc,
+				desc = L["opt_isusingelvuiskin_desc"],
 				descStyle = "inline",
 				order = 10,
 				width = "full"

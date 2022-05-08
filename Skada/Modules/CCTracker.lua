@@ -258,7 +258,7 @@ Skada:AddLoadableModule("CC Done", function(L)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's control spells"], win.actorname or L.Unknown)
+		win.title = format(L["%s's control spells"], win.actorname or L["Unknown"])
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.ccdone or 0
@@ -297,7 +297,7 @@ Skada:AddLoadableModule("CC Done", function(L)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's control targets"], win.actorname or L.Unknown)
+		win.title = format(L["%s's control targets"], win.actorname or L["Unknown"])
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.ccdone or 0
@@ -516,7 +516,7 @@ Skada:AddLoadableModule("CC Taken", function(L)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's control spells"], win.actorname or L.Unknown)
+		win.title = format(L["%s's control spells"], win.actorname or L["Unknown"])
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.cctaken or 0
@@ -555,7 +555,7 @@ Skada:AddLoadableModule("CC Taken", function(L)
 	end
 
 	function sourcemod:Update(win, set)
-		win.title = format(L["%s's control sources"], win.actorname or L.Unknown)
+		win.title = format(L["%s's control sources"], win.actorname or L["Unknown"])
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.cctaken or 0
@@ -796,7 +796,7 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's control spells"], win.actorname or L.Unknown)
+		win.title = format(L["%s's control spells"], win.actorname or L["Unknown"])
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.ccbreak or 0
@@ -835,7 +835,7 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's control targets"], win.actorname or L.Unknown)
+		win.title = format(L["%s's control targets"], win.actorname or L["Unknown"])
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.ccbreak or 0

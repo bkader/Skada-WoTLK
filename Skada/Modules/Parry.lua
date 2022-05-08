@@ -67,7 +67,7 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's parry targets"], win.actorname or L.Unknown)
+		win.title = format(L["%s's parry targets"], win.actorname or L["Unknown"])
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)

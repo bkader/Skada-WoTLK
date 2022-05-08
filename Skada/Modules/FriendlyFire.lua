@@ -78,7 +78,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's targets"], win.actorname or L.Unknown)
+		win.title = format(L["%s's targets"], win.actorname or L["Unknown"])
 
 		local actor = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = actor and actor.friendfire or 0
@@ -120,7 +120,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = L["actor damage"](win.actorname or L.Unknown)
+		win.title = L["actor damage"](win.actorname or L["Unknown"])
 
 		local actor = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = actor and actor.friendfire or 0
@@ -155,11 +155,11 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 
 	function spelltargetmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format(L["%s's <%s> damage"], win.actorname or L.Unknown, label)
+		win.title = format(L["%s's <%s> damage"], win.actorname or L["Unknown"], label)
 	end
 
 	function spelltargetmod:Update(win, set)
-		win.title = format(L["%s's <%s> damage"], win.actorname or L.Unknown, win.spellname or L.Unknown)
+		win.title = format(L["%s's <%s> damage"], win.actorname or L["Unknown"], win.spellname or L["Unknown"])
 		if not win.spellid then return end
 
 		local actor = set and set:GetPlayer(win.actorid, win.actorname)

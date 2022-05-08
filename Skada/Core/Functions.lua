@@ -158,7 +158,7 @@ function Skada:RegisterClasses()
 			args = {
 				enable = {
 					type = "toggle",
-					name = L.Enable,
+					name = L["Enable"],
 					width = "double",
 					order = 10,
 					get = function()
@@ -191,7 +191,7 @@ function Skada:RegisterClasses()
 				},
 				reset = {
 					type = "execute",
-					name = L.Reset,
+					name = L["Reset"],
 					width = "double",
 					order = 90,
 					disabled = disabled,
@@ -445,7 +445,7 @@ do
 				if spellid == 75 then
 					res3 = [[Interface\Icons\INV_Weapon_Bow_07]]
 				elseif spellid == 6603 then
-					res1, res3 = L.Melee, [[Interface\Icons\INV_Sword_04]]
+					res1, res3 = L["Melee"], [[Interface\Icons\INV_Sword_04]]
 				end
 			end
 		end
@@ -768,7 +768,7 @@ do
 				args = {
 					toastdesc = {
 						type = "description",
-						name = L.opt_toast_desc,
+						name = L["opt_toast_desc"],
 						fontSize = "medium",
 						width = "full",
 						order = 0
@@ -881,35 +881,35 @@ do
 					al = {
 						type = "toggle",
 						name = L["All Segments"],
-						desc = L.opt_tweaks_total_all_desc,
+						desc = L["opt_tweaks_total_all_desc"],
 						width = "full",
 						order = 10
 					},
 					rb = {
 						type = "toggle",
 						name = L["Raid Bosses"],
-						desc = format(L.opt_tweaks_total_fmt_desc, L["Raid Bosses"]),
+						desc = format(L["opt_tweaks_total_fmt_desc"], L["Raid Bosses"]),
 						order = 20,
 						disabled = disabled
 					},
 					rt = {
 						type = "toggle",
 						name = L["Raid Trash"],
-						desc = format(L.opt_tweaks_total_fmt_desc, L["Raid Trash"]),
+						desc = format(L["opt_tweaks_total_fmt_desc"], L["Raid Trash"]),
 						order = 30,
 						disabled = disabled
 					},
 					db = {
 						type = "toggle",
 						name = L["Dungeon Bosses"],
-						desc = format(L.opt_tweaks_total_fmt_desc, L["Dungeon Bosses"]),
+						desc = format(L["opt_tweaks_total_fmt_desc"], L["Dungeon Bosses"]),
 						order = 40,
 						disabled = disabled
 					},
 					dt = {
 						type = "toggle",
 						name = L["Dungeon Trash"],
-						desc = format(L.opt_tweaks_total_fmt_desc, L["Dungeon Trash"]),
+						desc = format(L["opt_tweaks_total_fmt_desc"], L["Dungeon Trash"]),
 						order = 50,
 						disabled = disabled
 					},

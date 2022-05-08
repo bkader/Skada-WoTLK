@@ -74,7 +74,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 					mod.targets[dstGUID] = del(mod.targets[dstGUID])
 					if Skada.db.profile.modules.sunderannounce then
 						if not Skada.db.profile.modules.sunderbossonly or (Skada.db.profile.modules.sunderbossonly and Skada:IsBoss(dstGUID)) then
-							mod:Announce(format(L["%s dropped from %s!"], sunderLink or sunder, dstName or L.Unknown))
+							mod:Announce(format(L["%s dropped from %s!"], sunderLink or sunder, dstName or L["Unknown"]))
 						end
 					end
 				end
@@ -102,7 +102,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 
 	function targetmod:Update(win, set)
 		DoubleCheckSunder()
-		win.title = format(L["%s's <%s> targets"], win.actorname or L.Unknown, sunder)
+		win.title = format(L["%s's <%s> targets"], win.actorname or L["Unknown"], sunder)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -259,7 +259,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 				sunderannounce = {
 					type = "toggle",
 					name = format(L["Announce %s"], sunder),
-					desc = format(L["Announces how long it took to apply %d stacks of %s and announces when it drops."], 5, sunder or L.Unknown),
+					desc = format(L["Announces how long it took to apply %d stacks of %s and announces when it drops."], 5, sunder or L["Unknown"]),
 					descStyle = "inline",
 					order = 10,
 					width = "double"

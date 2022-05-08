@@ -46,7 +46,7 @@ Skada:AddLoadableModule("Fails", function(L)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's fails"], win.spellname or L.Unknown)
+		win.title = format(L["%s's fails"], win.spellname or L["Unknown"])
 		if not win.spellid then return end
 
 		local total = set and set:GetFailCount(win.spellid) or 0
@@ -89,7 +89,7 @@ Skada:AddLoadableModule("Fails", function(L)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's fails"], win.actorname or L.Unknown)
+		win.title = format(L["%s's fails"], win.actorname or L["Unknown"])
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.fail or 0

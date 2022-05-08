@@ -24,7 +24,7 @@ local COLOR_WHITE = HIGHLIGHT_FONT_COLOR
 local FONT_FLAGS = Skada.fontFlags
 if not FONT_FLAGS then
 	FONT_FLAGS = {
-		[""] = L.None,
+		[""] = L["None"],
 		["OUTLINE"] = L["Outline"],
 		["THICKOUTLINE"] = L["Thick outline"],
 		["MONOCHROME"] = L["Monochrome"],
@@ -158,12 +158,12 @@ do
 			)
 
 			-- Add window buttons.
-			AddWindowButton(bargroup, p.title.toolbar, "config", L.Configure, L.btn_config_desc, configOnClick)
-			AddWindowButton(bargroup, p.title.toolbar, "reset", L.Reset, L.btn_reset_desc, resetOnClick)
-			AddWindowButton(bargroup, p.title.toolbar, "segment", L.Segment, L.btn_segment_desc, segmentOnClick)
-			AddWindowButton(bargroup, p.title.toolbar, "mode", L.Mode, L["Jump to a specific mode."], modeOnClick)
-			AddWindowButton(bargroup, p.title.toolbar, "report", L.Report, L.btn_report_desc, reportOnClick)
-			AddWindowButton(bargroup, p.title.toolbar, "stop", L.Stop, L.btn_stop_desc, stopOnClick)
+			AddWindowButton(bargroup, p.title.toolbar, "config", L["Configure"], L["btn_config_desc"], configOnClick)
+			AddWindowButton(bargroup, p.title.toolbar, "reset", L["Reset"], L["btn_reset_desc"], resetOnClick)
+			AddWindowButton(bargroup, p.title.toolbar, "segment", L["Segment"], L["btn_segment_desc"], segmentOnClick)
+			AddWindowButton(bargroup, p.title.toolbar, "mode", L["Mode"], L["Jump to a specific mode."], modeOnClick)
+			AddWindowButton(bargroup, p.title.toolbar, "report", L["Report"], L["btn_report_desc"], reportOnClick)
+			AddWindowButton(bargroup, p.title.toolbar, "stop", L["Stop"], L["btn_stop_desc"], stopOnClick)
 		end
 
 		bargroup.win = window
@@ -706,12 +706,12 @@ do
 
 				if win.metadata.showspots and Skada.db.profile.showranks and not data.ignore then
 					if win.db.barorientation == 1 then
-						bar:SetLabel(format("%d. %s", nr, data.text or data.label or L.Unknown))
+						bar:SetLabel(format("%d. %s", nr, data.text or data.label or L["Unknown"]))
 					else
-						bar:SetLabel(format("%s .%d", data.text or data.label or L.Unknown, nr))
+						bar:SetLabel(format("%s .%d", data.text or data.label or L["Unknown"], nr))
 					end
 				else
-					bar:SetLabel(data.text or data.label or L.Unknown)
+					bar:SetLabel(data.text or data.label or L["Unknown"])
 				end
 				bar:SetTimerLabel(data.valuetext)
 
@@ -1042,7 +1042,7 @@ do
 			g:ShowAnchor()
 
 			g:ShowButton(L["Configure"], p.buttons.menu)
-			g:ShowButton(L.Reset, p.buttons.reset)
+			g:ShowButton(L["Reset"], p.buttons.reset)
 			g:ShowButton(L["Segment"], p.buttons.segment)
 			g:ShowButton(L["Mode"], p.buttons.mode)
 			g:ShowButton(L["Report"], p.buttons.report)
@@ -1143,10 +1143,14 @@ function mod:AddDisplayOptions(win, options)
 		end,
 		set = function(i, val)
 			db[i[#i]] = val
-			Skada:ApplySettings(db.name)
-			if i[#i] == "barmax" then
-				mod:Wipe(win)
-				win:UpdateDisplay()
+			if i[#i] == "showtotals" then
+				Skada:ReloadSettings(win)
+			else
+				Skada:ApplySettings(db.name)
+				if i[#i] == "barmax" then
+					mod:Wipe(win)
+					win:UpdateDisplay()
+				end
 			end
 		end,
 		args = {
@@ -1433,10 +1437,18 @@ function mod:AddDisplayOptions(win, options)
 					showself = {
 						type = "toggle",
 						name = L["Always show self"],
-						desc = L.opt_showself_desc,
+						desc = L["opt_showself_desc"],
 						descStyle = "inline",
 						width = "double",
 						order = 10
+					},
+					showtotals = {
+						type = "toggle",
+						name = L["Show totals"],
+						desc = L["Shows a extra row with a summary in certain modes."],
+						descStyle = "inline",
+						width = "double",
+						order = 20
 					},
 					disablehighlight = {
 						type = "toggle",
@@ -1444,7 +1456,7 @@ function mod:AddDisplayOptions(win, options)
 						desc = L["Hovering a bar won't make it brighter."],
 						descStyle = "inline",
 						width = "double",
-						order = 20
+						order = 30
 					},
 					clickthrough = {
 						type = "toggle",
@@ -1452,7 +1464,7 @@ function mod:AddDisplayOptions(win, options)
 						desc = L["Disables mouse clicks on bars."],
 						descStyle = "inline",
 						width = "double",
-						order = 30
+						order = 40
 					},
 					smoothing = {
 						type = "toggle",
@@ -1460,7 +1472,7 @@ function mod:AddDisplayOptions(win, options)
 						desc = L["Animate bar changes smoothly rather than immediately."],
 						descStyle = "inline",
 						width = "double",
-						order = 40
+						order = 50
 					}
 				}
 			}
@@ -1703,19 +1715,19 @@ function mod:AddDisplayOptions(win, options)
 							menu = {
 								type = "toggle",
 								name = L["Configure"],
-								desc = L.btn_config_desc,
+								desc = L["btn_config_desc"],
 								order = 10
 							},
 							reset = {
 								type = "toggle",
-								name = L.Reset,
-								desc = L.btn_reset_desc,
+								name = L["Reset"],
+								desc = L["btn_reset_desc"],
 								order = 20
 							},
 							segment = {
 								type = "toggle",
 								name = L["Segment"],
-								desc = L.btn_segment_desc,
+								desc = L["btn_segment_desc"],
 								order = 30
 							},
 							mode = {
@@ -1727,13 +1739,13 @@ function mod:AddDisplayOptions(win, options)
 							report = {
 								type = "toggle",
 								name = L["Report"],
-								desc = L.btn_report_desc,
+								desc = L["btn_report_desc"],
 								order = 50
 							},
 							stop = {
 								type = "toggle",
 								name = L["Stop"],
-								desc = L.btn_stop_desc,
+								desc = L["btn_stop_desc"],
 								order = 60
 							}
 						}
@@ -2337,7 +2349,7 @@ do
 							speed = {
 								type = "range",
 								name = L["Wheel Speed"],
-								desc = L.opt_wheelspeed_desc,
+								desc = L["opt_wheelspeed_desc"],
 								set = function(_, val)
 									mod.db.speed = val
 									mod:SetScrollSpeed(val)
@@ -2420,7 +2432,7 @@ do
 
 	function mod:OnInitialize()
 		self.name = L["Bar display"]
-		self.description = L.mod_bar_desc
+		self.description = L["mod_bar_desc"]
 		Skada:AddDisplaySystem("bar", self)
 
 		self.db = Skada.db.profile.scroll

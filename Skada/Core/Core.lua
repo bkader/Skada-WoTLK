@@ -45,10 +45,10 @@ local dataobj = LDB:NewDataObject("Skada", {
 BINDING_HEADER_SKADA = "Skada"
 BINDING_NAME_SKADA_TOGGLE = L["Toggle Windows"]
 BINDING_NAME_SKADA_SHOWHIDE = L["Show/Hide Windows"]
-BINDING_NAME_SKADA_RESET = L.Reset
+BINDING_NAME_SKADA_RESET = L["Reset"]
 BINDING_NAME_SKADA_NEWSEGMENT = L["Start New Segment"]
 BINDING_NAME_SKADA_NEWPHASE = L["Start New Phase"]
-BINDING_NAME_SKADA_STOP = L.Stop
+BINDING_NAME_SKADA_STOP = L["Stop"]
 
 -- Skada-Revisited flag
 Skada.revisited = true
@@ -185,7 +185,7 @@ end
 
 -- prepares the given set name.
 local function CheckSetName(set)
-	local setname = set.mobname or L.Unknown
+	local setname = set.mobname or L["Unknown"]
 
 	if set.phase then
 		setname = format(L["%s - Phase %s"], setname, set.phase)
@@ -552,7 +552,7 @@ do
 					order = 10,
 					hidden = true,
 					values = function()
-						local list = {[""] = L.None}
+						local list = {[""] = L["None"]}
 						for i = 1, #windows do
 							local win = windows[i]
 							if win and win.db and win.db.name ~= self.db.name and win.db.display == self.db.display then
@@ -1027,7 +1027,7 @@ function Skada:CreateWindow(name, db, display)
 			self:RestoreView(window, window.db.set, window.db.mode)
 		end
 	else
-		self:Printf("Window \"|cffffbb00%s|r\" was not loaded because its display module, \"|cff00ff00%s|r\" was not found.", name, window.db.display or L.Unknown)
+		self:Printf("Window \"|cffffbb00%s|r\" was not loaded because its display module, \"|cff00ff00%s|r\" was not found.", name, window.db.display or L["Unknown"])
 	end
 
 	ACR:NotifyChange("Skada")
@@ -1069,8 +1069,8 @@ do
 		if not StaticPopupDialogs["SkadaDeleteWindowDialog"] then
 			StaticPopupDialogs["SkadaDeleteWindowDialog"] = {
 				text = L["Are you sure you want to delete this window?"],
-				button1 = L.Yes,
-				button2 = L.No,
+				button1 = L["Yes"],
+				button2 = L["No"],
 				timeout = 30,
 				whileDead = 0,
 				hideOnEscape = 1,
@@ -1930,25 +1930,25 @@ do
 				end
 
 				if type(md.click1) == "function" then
-					t:AddLine(format(L["Click for |cff00ff00%s|r"], md.click1_label or L.Unknown))
+					t:AddLine(format(L["Click for |cff00ff00%s|r"], md.click1_label or L["Unknown"]))
 				elseif md.click1 and not self:NoTotalClick(win.selectedset, md.click1) then
 					t:AddLine(format(L["Click for |cff00ff00%s|r"], md.click1_label or md.click1.moduleName))
 				end
 
 				if type(md.click2) == "function" then
-					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], md.click2_label or L.Unknown))
+					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], md.click2_label or L["Unknown"]))
 				elseif md.click2 and not self:NoTotalClick(win.selectedset, md.click2) then
 					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], md.click2_label or md.click2.moduleName))
 				end
 
 				if type(md.click3) == "function" then
-					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], md.click3_label or L.Unknown))
+					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], md.click3_label or L["Unknown"]))
 				elseif md.click3 and not self:NoTotalClick(win.selectedset, md.click3) then
 					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], md.click3_label or md.click3.moduleName))
 				end
 
 				if not self.Ascension and type(md.click4) == "function" then
-					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], md.click4_label or L.Unknown))
+					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], md.click4_label or L["Unknown"]))
 				elseif not self.Ascension and md.click4 and not self:NoTotalClick(win.selectedset, md.click4) then
 					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], md.click4_label or md.click4.moduleName))
 				end
@@ -2565,9 +2565,10 @@ function Skada:UpdateDisplay(force)
 					end
 
 					if
-						self.db.profile.showtotals and
+						(win.db.display == "bar" or win.db.display == "inline") and
+						(self.db.profile.showtotals or win.db.showtotals) and
 						win.selectedmode.GetSetSummary and
-						((set.type and set.type ~= "none") or set.name == L.Total)
+						((set.type and set.type ~= "none") or set.name == L["Total"])
 					then
 						local valuetext, total = win.selectedmode:GetSetSummary(set, win)
 						if valuetext or total then
@@ -2872,7 +2873,7 @@ do
 		if not set then
 			return ""
 		end
-		return SetLabelFormat(set.name or L.Unknown, set.starttime, set.endtime or time())
+		return SetLabelFormat(set.name or L["Unknown"], set.starttime, set.endtime or time())
 	end
 
 	function Window:set_mode_title()
@@ -3526,7 +3527,7 @@ function Skada:NewPhase()
 
 		self.tempsets[#self.tempsets + 1] = set
 
-		self:Printf(L["|cffffbb00%s|r - |cff00ff00Phase %s|r started."], set.mobname or L.Unknown, set.phase)
+		self:Printf(L["|cffffbb00%s|r - |cff00ff00Phase %s|r started."], set.mobname or L["Unknown"], set.phase)
 	end
 end
 
@@ -3606,7 +3607,7 @@ function Skada:StopSegment(msg, phase)
 				set.stopped = true
 				set.endtime = curtime
 				set.time = max(0.1, set.endtime - set.starttime)
-				self:Printf(L["|cffffbb00%s|r - |cff00ff00Phase %s|r stopped."], set.mobname or L.Unknown, set.phase)
+				self:Printf(L["|cffffbb00%s|r - |cff00ff00Phase %s|r stopped."], set.mobname or L["Unknown"], set.phase)
 			end
 			return
 		end
@@ -3644,7 +3645,7 @@ function Skada:ResumeSegment(msg, phase)
 				set.stopped = nil
 				set.endtime = nil
 				set.time = 0
-				self:Printf(L["|cffffbb00%s|r - |cff00ff00Phase %s|r resumed."], set.mobname or L.Unknown, set.phase)
+				self:Printf(L["|cffffbb00%s|r - |cff00ff00Phase %s|r resumed."], set.mobname or L["Unknown"], set.phase)
 			end
 			return
 		end
