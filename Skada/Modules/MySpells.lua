@@ -6,6 +6,7 @@ Skada:AddLoadableModule("My Spells", function(L)
 
 	local pairs, format = pairs, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+	local spellschools = Skada.spellschools
 	local _
 
 	local function spell_tooltip(win, id, label, tooltip)
@@ -24,13 +25,8 @@ Skada:AddLoadableModule("My Spells", function(L)
 
 		if spell then
 			tooltip:AddLine(player.name .. " - " .. label)
-			if spell.school and Skada.spellschools[spell.school] then
-				tooltip:AddLine(
-					Skada.spellschools[spell.school].name,
-					Skada.spellschools[spell.school].r,
-					Skada.spellschools[spell.school].g,
-					Skada.spellschools[spell.school].b
-				)
+			if spell.school and spellschools[spell.school] then
+				tooltip:AddLine(spellschools(spell.school))
 			end
 
 			-- count stats

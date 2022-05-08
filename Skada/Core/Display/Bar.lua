@@ -18,7 +18,13 @@ local IsControlKeyDown = IsControlKeyDown
 local IsModifierKeyDown = IsModifierKeyDown
 local _
 
-local windows = nil -- reference to Skada windows
+-- references
+local spellschools = nil
+local classcolors = nil
+local classcoords = nil
+local rolecoords = nil
+local speccoords = nil
+local windows = nil
 
 local COLOR_WHITE = HIGHLIGHT_FONT_COLOR
 local FONT_FLAGS = Skada.fontFlags
@@ -32,10 +38,6 @@ if not FONT_FLAGS then
 	}
 	Skada.fontFlags = FONT_FLAGS
 end
-
--- class, role & specs
-local classicons, roleicons, specicons
-local classcoords, rolecoords, speccoords
 
 local function WindowOnMouseDown(self, button)
 	if IsShiftKeyDown() then
@@ -196,17 +198,6 @@ do
 
 		bargroup:SetMaxBars(nil, p.snapto)
 		window.bargroup = bargroup
-
-		if not classicons then
-			classicons = Skada.classicons
-			classcoords = Skada.classcoords
-
-			roleicons = Skada.roleicons
-			rolecoords = Skada.rolecoords
-
-			specicons = Skada.specicons
-			speccoords = Skada.speccoords
-		end
 	end
 end
 
@@ -539,10 +530,10 @@ do
 
 			if data.color then
 				color = data.color
-			elseif db.spellschoolcolors and data.spellschool and Skada.spellschools[data.spellschool] then
-				color = Skada.spellschools[data.spellschool]
-			elseif db.classcolorbars and data.class and Skada.classcolors[data.class] then
-				color = Skada:ClassColor(data.class)
+			elseif db.spellschoolcolors and data.spellschool and spellschools[data.spellschool] then
+				color = spellschools[data.spellschool]
+			elseif db.classcolorbars and data.class and classcolors[data.class] then
+				color = classcolors(data.class)
 			end
 		end
 
@@ -646,13 +637,13 @@ do
 
 					if win.db.specicons and speccoords and data.spec and speccoords[data.spec] then
 						bar:ShowIcon()
-						bar:SetIcon(specicons, speccoords[data.spec][1], speccoords[data.spec][2], speccoords[data.spec][3], speccoords[data.spec][4])
+						bar:SetIcon(Skada.specicons, speccoords(data.spec))
 					elseif win.db.roleicons and rolecoords and data.role and data.role ~= "NONE" and rolecoords[data.role] then
 						bar:ShowIcon()
-						bar:SetIcon(roleicons, rolecoords[data.role][1], rolecoords[data.role][2], rolecoords[data.role][3], rolecoords[data.role][4])
+						bar:SetIcon(Skada.roleicons, rolecoords(data.role))
 					elseif win.db.classicons and data.class and classcoords[data.class] and data.icon == nil then
 						bar:ShowIcon()
-						bar:SetIcon(classicons, classcoords[data.class][1], classcoords[data.class][2], classcoords[data.class][3], classcoords[data.class][4])
+						bar:SetIcon(Skada.classicons, classcoords(data.class))
 					elseif not data.ignore and not data.spellid and not data.hyperlink then
 						if data.icon and not bar:IsIconShown() then
 							bar:ShowIcon()
@@ -665,10 +656,10 @@ do
 
 					if
 						data.class and
-						Skada.classcolors[data.class] and
+						classcolors[data.class] and
 						(win.db.classcolortext or win.db.classcolorleft or win.db.classcolorright)
 					then
-						local c = Skada:ClassColor(data.class)
+						local c = classcolors(data.class)
 						if win.db.classcolortext or win.db.classcolorleft then
 							bar.label:SetTextColor(c.r, c.g, c.b, c.a or 1)
 						end
@@ -2435,6 +2426,14 @@ do
 		Skada.options.args.scrolloptions.order = 970
 
 		self:SetScrollSpeed(self.db.speed)
+
+		if not spellschools then
+			spellschools = Skada.spellschools
+			classcolors = Skada.classcolors
+			classcoords = Skada.classcoords
+			rolecoords = Skada.rolecoords
+			speccoords = Skada.speccoords
+		end
 	end
 end
 

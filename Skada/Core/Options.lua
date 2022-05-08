@@ -720,7 +720,14 @@ Skada.options = {
 					name = L["General"],
 					desc = fmt(L["General options for %s."], L["Tweaks"]),
 					order = 10,
-					args = {}
+					args = {
+						absdamage = {
+							type = "toggle",
+							name = L["Absorbed Damage"],
+							desc = L["Enable this if you want the damage absorbed to be included in the damage done."],
+							order = 100
+						}
+					}
 				},
 				advanced = {
 					type = "group",

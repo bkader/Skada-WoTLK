@@ -12,6 +12,7 @@ local CloseDropDownMenus = CloseDropDownMenus
 
 local WrapTextInColorCode = Skada.WrapTextInColorCode
 local RGBPercToHex = Skada.RGBPercToHex
+local classcolors = nil
 
 local FONT_FLAGS = Skada.fontFlags
 if not FONT_FLAGS then
@@ -41,7 +42,7 @@ end
 
 local function formatLabel(win, data)
 	if win.db.isusingclasscolors and data.class then
-		return Skada:ClassColor(data.class, data.text or data.label or L["Unknown"])
+		return classcolors(data.class, data.text or data.label or L["Unknown"])
 	elseif data.color and data.color.colorStr then
 		return format("|c%s%s|r", data.color.colorStr, data.text or data.label or L["Unknown"])
 	elseif data.color then
@@ -112,6 +113,10 @@ end
 local ttactive = false
 
 function mod:Create(win, isnew)
+	if not classcolors then
+		classcolors = Skada.classcolors
+	end
+
 	-- Optional internal frame
 	if not win.frame then
 		win.frame = CreateFrame("Frame", win.db.name .. "BrokerFrame", UIParent)

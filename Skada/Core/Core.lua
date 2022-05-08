@@ -1858,14 +1858,14 @@ do
 
 			for i = 1, #win.ttwin.dataset do
 				local data = win.ttwin.dataset[i]
-				if data and data.id and not data.ignore and nr < Skada.db.profile.tooltiprows then
+				if data and data.id and not data.ignore and nr < self.db.profile.tooltiprows then
 					nr = nr + 1
 					local color = white
 
 					if data.color then
 						color = data.color
-					elseif data.class and Skada.validclass[data.class] then
-						color = Skada:ClassColor(data.class)
+					elseif data.class and self.validclass[data.class] then
+						color = self.classcolors(data.class)
 					end
 
 					local title = data.text or data.label
@@ -1873,7 +1873,7 @@ do
 						title = format("|cffffffff%d.|r %s", nr, title)
 					end
 					tooltip:AddDoubleLine(title, data.valuetext, color.r, color.g, color.b)
-				elseif nr >= Skada.db.profile.tooltiprows then
+				elseif nr >= self.db.profile.tooltiprows then
 					break -- no need to continue
 				end
 			end

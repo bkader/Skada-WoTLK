@@ -48,7 +48,7 @@ Skada:AddLoadableModule("Activity", function(L)
 						d.spec = player.spec
 
 						if Skada.forPVP and set.type == "arena" then
-							d.color = Skada:ClassColor(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
+							d.color = Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
 						end
 
 						d.value = activetime
@@ -80,7 +80,7 @@ Skada:AddLoadableModule("Activity", function(L)
 							d.class = enemy.class
 							d.role = enemy.role
 							d.spec = enemy.spec
-							d.color = Skada:ClassColor(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
+							d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 							d.value = activetime
 							d.valuetext = Skada:FormatValueCols(

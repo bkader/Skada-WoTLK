@@ -19,6 +19,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 	local sourcemod = mod:NewModule(L["Damage source list"])
 	local tdetailmod = sourcemod:NewModule(L["Damage spell list"])
 	local new, del = Skada.newTable, Skada.delTable
+	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local GetTime = GetTime
 
@@ -75,7 +76,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			player.damagetakenspells[spellname] = spell
 		elseif dmg.spellid and dmg.spellid ~= spell.id then
 			if dmg.spellschool and dmg.spellschool ~= spell.school then
-				spellname = spellname .. " (" .. (Skada.spellschools[dmg.spellschool] and Skada.spellschools[dmg.spellschool].name or OTHER) .. ")"
+				spellname = spellname .. " (" .. (spellschools[dmg.spellschool] and spellschools[dmg.spellschool].name or OTHER) .. ")"
 			else
 				spellname = GetSpellInfo(dmg.spellid)
 			end
@@ -341,13 +342,8 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 		local spell = actor and actor.damagetakenspells and actor.damagetakenspells[label]
 		if spell then
 			tooltip:AddLine(label .. " - " .. actor.name)
-			if spell.school and Skada.spellschools[spell.school] then
-				tooltip:AddLine(
-					Skada.spellschools[spell.school].name,
-					Skada.spellschools[spell.school].r,
-					Skada.spellschools[spell.school].g,
-					Skada.spellschools[spell.school].b
-				)
+			if spell.school and spellschools[spell.school] then
+				tooltip:AddLine(spellschools(spell.school))
 			end
 
 			if (spell.casts or 0) > 0 then
@@ -385,13 +381,8 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			local spell = actor and actor.damagetakenspells and actor.damagetakenspells[win.spellname]
 			if spell then
 				tooltip:AddLine(actor.name .. " - " .. win.spellname)
-				if spell.school and Skada.spellschools[spell.school] then
-					tooltip:AddLine(
-						Skada.spellschools[spell.school].name,
-						Skada.spellschools[spell.school].r,
-						Skada.spellschools[spell.school].g,
-						Skada.spellschools[spell.school].b
-					)
+				if spell.school and spellschools[spell.school] then
+					tooltip:AddLine(spellschools(spell.school))
 				end
 
 				if label == L["Critical Hits"] and spell.criticalamount then
@@ -728,7 +719,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 						d.spec = player.spec
 
 						if Skada.forPVP and set.type == "arena" then
-							d.color = Skada:ClassColor(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
+							d.color = Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
 						end
 
 						d.value = amount
@@ -761,7 +752,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 							d.class = enemy.class
 							d.role = enemy.role
 							d.spec = enemy.spec
-							d.color = Skada:ClassColor(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
+							d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 							d.value = amount
 							d.valuetext = Skada:FormatValueCols(
@@ -946,7 +937,7 @@ Skada:AddLoadableModule("DTPS", function(L)
 						d.spec = player.spec
 
 						if Skada.forPVP and set.type == "arena" then
-							d.color = Skada:ClassColor(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
+							d.color = Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
 						end
 
 						d.value = dtps
@@ -978,7 +969,7 @@ Skada:AddLoadableModule("DTPS", function(L)
 							d.class = enemy.class
 							d.role = enemy.role
 							d.spec = enemy.spec
-							d.color = Skada:ClassColor(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
+							d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 							d.value = dtps
 							d.valuetext = Skada:FormatValueCols(

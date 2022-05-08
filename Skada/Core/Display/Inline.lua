@@ -16,6 +16,7 @@ local ttactive = false
 
 local WrapTextInColorCode = Skada.WrapTextInColorCode
 local RGBPercToHex = Skada.RGBPercToHex
+local classcolors = nil
 
 local FONT_FLAGS = Skada.fontFlags
 if not FONT_FLAGS then
@@ -171,6 +172,10 @@ local function menuOnClick(self, button)
 end
 
 function mod:Create(window, isnew)
+	if not classcolors then
+		classcolors = Skada.classcolors
+	end
+
 	if not window.frame then
 		window.frame = CreateFrame("Frame", window.db.name .. "InlineFrame", UIParent)
 		window.frame.win = window
@@ -356,7 +361,7 @@ end
 function mod:UpdateBar(bar, bardata, db)
 	local label = bardata.text or bardata.label or L["Unknown"]
 	if db.isusingclasscolors and bardata.class then
-		label = Skada:ClassColor(bardata.class, bardata.text or bardata.label or L["Unknown"])
+		label = classcolors(bardata.class, bardata.text or bardata.label or L["Unknown"])
 	elseif bardata.color and bardata.color.colorStr then
 		label = format("|c%s%s|r", bardata.color.colorStr, bardata.text or bardata.label or L["Unknown"])
 	elseif bardata.color then

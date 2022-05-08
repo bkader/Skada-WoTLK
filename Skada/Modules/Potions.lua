@@ -58,7 +58,7 @@ Skada:AddLoadableModule("Potions", function(L)
 
 				-- add to print out:
 				if next(potions) ~= nil and class and Skada.validclass[class] then
-					prepot[#prepot + 1] = format(prepotionStr, Skada:ClassColor(class, true), playername, tconcat(potions, " "))
+					prepot[#prepot + 1] = format(prepotionStr, Skada.classcolors(class, true), playername, tconcat(potions, " "))
 				end
 				del(potions)
 			end

@@ -51,6 +51,23 @@ function Skada:RegisterClasses()
 	self.classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
 	self.classcolors.UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
 
+	setmetatable(self.classcolors, {__call = function(t, class, arg)
+		local color = HIGHLIGHT_FONT_COLOR
+		if class and t[class] then
+			color = t[class]
+			-- using a custom color?
+			if Skada.db.profile.usecustomcolors and Skada.db.profile.customcolors and Skada.db.profile.customcolors[class] then
+				color = Skada.db.profile.customcolors[class]
+			end
+		end
+		-- missing colorStr?
+		if not color.colorStr then
+			color.colorStr = Skada.RGBPercToHex(color.r, color.g, color.b, true)
+		end
+
+		return (arg == nil) and color or (type(arg) == "string") and format("|c%s%s|r", color.colorStr, arg) or color.colorStr
+	end})
+
 	-- set classes icon file & Skada custom classes.
 	if self.AscensionCoA then
 		self.classicons = [[Interface\AddOns\Skada\Media\Textures\icon-classes-coa]]
@@ -78,22 +95,31 @@ function Skada:RegisterClasses()
 		end
 	end
 
+	-- common metatable for coordinates tables.
+	local coords_mt = {__call = function(t, key)
+		if key and t[key] then
+			return t[key][1], t[key][2], t[key][3], t[key][4]
+		end
+		return 0, 1, 0, 1
+	end}
+	setmetatable(self.classcoords, coords_mt)
+
 	-- we ignore roles & specs on Project Ascension since players
 	-- have a custom module to set their own colors & icons.
 	if not self.Ascension and not self.AscensionCoA then
 		-- role icon file and texture coordinates
 		self.roleicons = [[Interface\AddOns\Skada\Media\Textures\icon-roles]]
-		self.rolecoords = {
+		self.rolecoords = setmetatable({
 			LEADER = {0, 0.25, 0, 1},
 			DAMAGER = {0.25, 0.5, 0, 1},
 			TANK = {0.5, 0.75, 0, 1},
 			HEALER = {0.75, 1, 0, 1},
 			NONE = ""
-		}
+		}, coords_mt)
 
 		-- specialization icons
 		self.specicons = [[Interface\AddOns\Skada\Media\Textures\icon-specs]]
-		self.speccoords = {
+		self.speccoords = setmetatable({
 			[62] = {0.25, 0.375, 0.25, 0.5}, --> Mage: Arcane
 			[63] = {0.375, 0.5, 0.25, 0.5}, --> Mage: Fire
 			[64] = {0.5, 0.625, 0.25, 0.5}, --> Mage: Frost
@@ -125,7 +151,7 @@ function Skada:RegisterClasses()
 			[265] = {0.125, 0.25, 0.75, 1}, --> Warlock: Affliction
 			[266] = {0.25, 0.375, 0.75, 1}, --> Warlock: Demonology
 			[267] = {0.375, 0.5, 0.75, 1} --> Warlock: Destruction
-		}
+		}, coords_mt)
 	end
 
 	-- customize class colors
@@ -230,8 +256,7 @@ function Skada:RegisterSchools()
 	-- handles adding spell schools
 	local function add_school(key, name, r, g, b)
 		if key and name and not self.spellschools[key] then
-			local newname = name:match("%((.+)%)")
-			self.spellschools[key] = {r = r or 1, g = g or 1, b = b or 1, name = newname or name}
+			self.spellschools[key] = {r = r or 1, g = g or 1, b = b or 1, name = name:match("%((.+)%)") or name}
 		end
 	end
 
@@ -256,6 +281,13 @@ function Skada:RegisterSchools()
 	-- Multiple Schools (can be extended if needed)
 	add_school(SCHOOL_FIRE + SCHOOL_FROST, STRING_SCHOOL_FROSTFIRE, 0.5, 1, 1) -- Frostfire
 	add_school(SCHOOL_PHYSICAL + SCHOOL_SHADOW, STRING_SCHOOL_SHADOWSTRIKE, 0.5, 0.5, 1) -- Shadowstrike
+
+	setmetatable(self.spellschools, {__call = function(t, school)
+		if school and t[school] then
+			return t[school].name, t[school].r, t[school].g, t[school].b
+		end
+		return L["Unknown"], 1, 1, 1
+	end})
 end
 
 -------------------------------------------------------------------------------
@@ -393,33 +425,6 @@ function Skada.unitClass(guid, flag, set, db, name)
 	end
 
 	return class
-end
-
--- returns custom or default class colors table
-function Skada:ClassColor(class, arg)
-	local color = HIGHLIGHT_FONT_COLOR
-
-	if class and self.classcolors then
-		color = self.classcolors[class]
-
-		-- using a custom color?
-		if self.db.profile.usecustomcolors and self.db.profile.customcolors and self.db.profile.customcolors[class] then
-			color = self.db.profile.customcolors[class]
-		end
-	end
-
-	-- missing colorStr?
-	if not color.colorStr then
-		color.colorStr = self.RGBPercToHex(color.r, color.g, color.b, true)
-	end
-
-	if arg ~= nil then
-		-- return class-colored text or color string.
-		return (type(arg) == "string") and format("|c%s%s|r", color.colorStr, arg) or color.colorStr
-	end
-
-	-- return full table
-	return color
 end
 
 -------------------------------------------------------------------------------

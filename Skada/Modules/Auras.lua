@@ -21,9 +21,11 @@ local UpdateFunction, SpellUpdateFunction, aura_tooltip
 do
 	local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 	local mod = Skada:NewModule(L["Buffs and Debuffs"])
+	local spellschools = nil
 
 	function mod:OnEnable()
 		if not Skada:IsDisabled("Buffs") or not Skada:IsDisabled("Debuffs") then
+			spellschools = spellschools or Skada.spellschools
 			Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "Clean")
 
 			-- add player's aura uptime getter.
@@ -289,13 +291,8 @@ do
 		local aura = player and player.auras and player.auras[id]
 		if aura then
 			tooltip:AddLine(player.name .. ": " .. label)
-			if aura.school and Skada.spellschools[aura.school] then
-				tooltip:AddLine(
-					Skada.spellschools[aura.school].name,
-					Skada.spellschools[aura.school].r,
-					Skada.spellschools[aura.school].g,
-					Skada.spellschools[aura.school].b
-				)
+			if aura.school and spellschools and spellschools[aura.school] then
+				tooltip:AddLine(spellschools(aura.school))
 			end
 			if aura.count or aura.refresh then
 				tooltip:AddDoubleLine(L["Count"], aura.count or 0, 1, 1, 1)
