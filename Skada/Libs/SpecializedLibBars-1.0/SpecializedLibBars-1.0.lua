@@ -2,7 +2,7 @@
 -- Specialized ( = enhanced) for Skada
 -- Note to self: don't forget to notify original author of changes
 -- in the unlikely event they end up being usable outside of Skada.
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90005
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90006
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 
@@ -156,15 +156,6 @@ lib.recycledBars = lib.recycledBars or {}
 local bars = lib.bars
 local barLists = lib.barLists
 local recycledBars = lib.recycledBars
-
-local frame_defaults = {
-	bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],
-	edgeFile = [[Interface\Tooltips\UI-Tooltip-Border]],
-	inset = 4,
-	edgeSize = 8,
-	tile = true,
-	insets = {left = 2, right = 2, top = 2, bottom = 2}
-}
 
 lib.embeds = lib.embeds or {}
 do
@@ -384,8 +375,12 @@ do
 		local btn = CreateFrame("Button", "$parent" .. title:gsub("%s+", "_"), self.button)
 		btn:SetFrameLevel(self.button:GetFrameLevel() + 1)
 		btn:SetSize(14, 14)
+
 		btn:SetNormalTexture(normaltex)
 		btn:SetHighlightTexture(highlighttex or normaltex, 1.0)
+		btn.normalTex = btn:GetNormalTexture()
+		btn.highlightTex = btn:GetHighlightTexture()
+
 		btn:RegisterForClicks("AnyUp")
 		btn:SetScript("OnClick", clickfunc)
 
@@ -558,7 +553,7 @@ function barListPrototype:SetBarBackgroundColor(r, g, b, a)
 
 	if bars[self] then
 		for _, bar in pairs(bars[self]) do
-			bar.bgtexture:SetVertexColor(
+			bar.bg:SetVertexColor(
 				self.barbackgroundcolor[1],
 				self.barbackgroundcolor[2],
 				self.barbackgroundcolor[3],
@@ -670,10 +665,11 @@ do
 
 		list.button = list.button or CreateFrame("Button", "$parentAnchor", list)
 		list.button:SetText(name)
-		list.button:SetBackdrop(frame_defaults)
-		list.button:SetBackdropColor(0, 0, 0, 1)
 		list.button:SetNormalFontObject(myfont)
+
 		list.button.text = list.button:GetFontString()
+		list.button.bg = list.button:CreateTexture("$parentTexture", "BACKGROUND")
+		list.button.bg:SetAllPoints()
 
 		list.button.icon = list.button.icon or list.button:CreateTexture(nil, "ARTWORK")
 		list.button.icon:SetTexCoord(0.094, 0.906, 0.094, 0.906)
@@ -961,7 +957,7 @@ end
 
 function barListPrototype:NewBar(name, text, value, maxVal, icon)
 	local bar, isNew = self:NewBarFromPrototype(barPrototype, name, text, value, maxVal, icon, self.orientation, self.length, self.thickness)
-	bar.bgtexture:SetVertexColor(
+	bar.bg:SetVertexColor(
 		self.barbackgroundcolor[1],
 		self.barbackgroundcolor[2],
 		self.barbackgroundcolor[3],
@@ -1519,7 +1515,7 @@ do
 		local parent = self:GetParent()
 		if parent then
 			if parent.barhighlight then
-				self.hitexture:SetVertexColor(1, 1, 1, 0.1)
+				self.hg:SetVertexColor(1, 1, 1, 0.1)
 			end
 			if parent.callbacks then
 				parent.callbacks:Fire("BarEnter", self, motion)
@@ -1531,7 +1527,7 @@ do
 		local parent = self:GetParent()
 		if parent then
 			if parent.barhighlight then
-				self.hitexture:SetVertexColor(0, 0, 0, 0)
+				self.hg:SetVertexColor(0, 0, 0, 0)
 			end
 			if parent.callbacks then
 				parent.callbacks:Fire("BarLeave", self, motion)
@@ -1548,16 +1544,16 @@ do
 		self:SetScript("OnLeave", barLeave)
 		self:SetScript("OnSizeChanged", self.OnSizeChanged)
 
-		self.bgtexture = self.bgtexture or self:CreateTexture(nil, "BACKGROUND")
-		self.bgtexture:SetAllPoints()
-		self.bgtexture:SetVertexColor(0.3, 0.3, 0.3, 0.6)
+		self.bg = self.bg or self:CreateTexture(nil, "BACKGROUND")
+		self.bg:SetAllPoints()
+		self.bg:SetVertexColor(0.3, 0.3, 0.3, 0.6)
 
-		self.texture = self.texture or self:CreateTexture(nil, "BORDER")
+		self.fg = self.fg or self:CreateTexture(nil, "BORDER")
 
-		self.hitexture = self.hitexture or self:CreateTexture(nil, "ARTWORK")
-		self.hitexture:SetAllPoints()
-		self.hitexture:SetTexture([[Interface\Buttons\WHITE8X8]])
-		self.hitexture:SetVertexColor(0, 0, 0, 0)
+		self.hg = self.hg or self:CreateTexture(nil, "ARTWORK")
+		self.hg:SetAllPoints()
+		self.hg:SetTexture([[Interface\Buttons\WHITE8X8]])
+		self.hg:SetVertexColor(0, 0, 0, 0)
 
 		self.spark = self.spark or self:CreateTexture(nil, "OVERLAY")
 		self.spark:SetTexture([[Interface\CastingBar\UI-CastingBar-Spark]])
@@ -1634,7 +1630,7 @@ function barPrototype:OnBarReleased()
 		wipe(self.gradMap)
 	end
 
-	self.texture:SetVertexColor(1, 1, 1, 0)
+	self.fg:SetVertexColor(1, 1, 1, 0)
 	self:SetScript("OnEnter", nil)
 	self:SetScript("OnLeave", nil)
 	self:SetScript("OnUpdate", nil)
@@ -1755,14 +1751,14 @@ function barPrototype:IsValueLabelShown()
 end
 
 function barPrototype:SetTexture(texture)
-	self.texture:SetTexture(texture)
-	self.bgtexture:SetTexture(texture)
+	self.fg:SetTexture(texture)
+	self.bg:SetTexture(texture)
 end
 
 function barPrototype:SetBackgroundColor(r, g, b, a)
 	a = a or .6
 	if r and g and b and a then
-		self.bgtexture:SetVertexColor(r, g, b, a)
+		self.bg:SetVertexColor(r, g, b, a)
 	end
 end
 
@@ -1804,11 +1800,11 @@ do
 
 			t = self.spark
 			t:ClearAllPoints()
-			t:SetPoint("TOP", self.texture, "TOPRIGHT", 0, 7)
-			t:SetPoint("BOTTOM", self.texture, "BOTTOMRIGHT", 0, -7)
+			t:SetPoint("TOP", self.fg, "TOPRIGHT", 0, 7)
+			t:SetPoint("BOTTOM", self.fg, "BOTTOMRIGHT", 0, -7)
 			t:SetTexCoord(0, 1, 0, 1)
 
-			t = self.texture
+			t = self.fg
 			t.SetValue = t.SetWidth
 			t:ClearAllPoints()
 			t:SetPoint("TOPLEFT", self, "TOPLEFT")
@@ -1827,18 +1823,18 @@ do
 			t:SetJustifyH("LEFT")
 			t:SetJustifyV("MIDDLE")
 
-			self.bgtexture:SetTexCoord(0, 1, 0, 1)
+			self.bg:SetTexCoord(0, 1, 0, 1)
 		elseif orientation == 2 then
 			self.icon:ClearAllPoints()
 			self.icon:SetPoint("LEFT", self, "RIGHT", 0, 0)
 
 			t = self.spark
 			t:ClearAllPoints()
-			t:SetPoint("TOP", self.texture, "TOPLEFT", 0, 7)
-			t:SetPoint("BOTTOM", self.texture, "BOTTOMLEFT", 0, -7)
+			t:SetPoint("TOP", self.fg, "TOPLEFT", 0, 7)
+			t:SetPoint("BOTTOM", self.fg, "BOTTOMLEFT", 0, -7)
 			t:SetTexCoord(0, 1, 0, 1)
 
-			t = self.texture
+			t = self.fg
 			t.SetValue = t.SetWidth
 			t:ClearAllPoints()
 			t:SetPoint("TOPRIGHT", self, "TOPRIGHT")
@@ -1857,7 +1853,7 @@ do
 			t:SetJustifyH("RIGHT")
 			t:SetJustifyV("MIDDLE")
 
-			self.bgtexture:SetTexCoord(0, 1, 0, 1)
+			self.bg:SetTexCoord(0, 1, 0, 1)
 		end
 		self:SetValue(self.value or 0)
 	end
@@ -1948,7 +1944,7 @@ end
 
 function barPrototype:SetTextureValue(amt, dist)
 	dist = max(0.0001, dist - (self.showIcon and self.thickness or 0))
-	local t, o = self.texture, self.orientation
+	local t, o = self.fg, self.orientation
 	t:SetValue(amt * dist)
 
 	if o == 1 then
@@ -1980,7 +1976,7 @@ function barPrototype:UpdateColor()
 		map = self.ownerGroup.gradMap
 	end
 	if map then
-		self.texture:SetVertexColor(map[amt], map[amt + 1], map[amt + 2], map[amt + 3])
+		self.fg:SetVertexColor(map[amt], map[amt + 1], map[amt + 2], map[amt + 3])
 	end
 end
 

@@ -43,9 +43,6 @@ Skada.windowdefaults = {
 		color = {r = 0.3, g = 0.3, b = 0.3, a = 1},
 		texture = "Armory",
 		textcolor = {r = 0.9, g = 0.9, b = 0.9, a = 1},
-		bordertexture = "None",
-		borderthickness = 2,
-		bordercolor = {r = 0, g = 0, b = 0, a = 1},
 		toolbar = 1,
 		spacing = 1
 	},
@@ -982,28 +979,11 @@ function Skada:FrameSettings(db, include_dimensions)
 									Skada:ApplySettings(db.name)
 								end
 							},
-							tile = {
-								type = "toggle",
-								name = L["Tile"],
-								desc = L["Tile the background texture."],
-								order = 20
-							},
-							tilesize = {
-								type = "range",
-								name = L["Tile Size"],
-								desc = L["The size of the texture pattern."],
-								order = 30,
-								min = 0,
-								max = getScreenWidth(),
-								step = 0.1,
-								bigStep = 1
-							},
 							color = {
 								type = "color",
 								name = L["Background Color"],
 								desc = L["The color of the background."],
-								order = 40,
-								width = "double",
+								order = 20,
 								hasAlpha = true,
 								get = function()
 									local c = db.background.color or Skada.windowdefaults.background.color
@@ -1017,6 +997,23 @@ function Skada:FrameSettings(db, include_dimensions)
 									db.background.color.a = a
 									Skada:ApplySettings(db.name)
 								end
+							},
+							tile = {
+								type = "toggle",
+								name = L["Tile"],
+								desc = L["Tile the background texture."],
+								order = 30
+							},
+							tilesize = {
+								type = "range",
+								name = L["Tile Size"],
+								desc = L["The size of the texture pattern."],
+								order = 40,
+								width = "double",
+								min = 0,
+								max = getScreenWidth(),
+								step = 0.1,
+								bigStep = 1
 							}
 						}
 					},

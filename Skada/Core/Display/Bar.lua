@@ -476,7 +476,7 @@ do
 
 	local function BarResize(bar)
 		if bar.bgwidth then
-			bar.bgtexture:SetWidth(bar.bgwidth * bar:GetWidth())
+			bar.bg:SetWidth(bar.bgwidth * bar:GetWidth())
 		else
 			bar:SetScript("OnSizeChanged", bar.OnSizeChanged)
 		end
@@ -705,7 +705,7 @@ do
 				end
 
 				if data.backgroundcolor then
-					bar.bgtexture:SetVertexColor(
+					bar.bg:SetVertexColor(
 						data.backgroundcolor.r,
 						data.backgroundcolor.g,
 						data.backgroundcolor.b,
@@ -714,9 +714,9 @@ do
 				end
 
 				if data.backgroundwidth then
-					bar.bgtexture:ClearAllPoints()
-					bar.bgtexture:SetPoint("BOTTOMLEFT")
-					bar.bgtexture:SetPoint("TOPLEFT")
+					bar.bg:ClearAllPoints()
+					bar.bg:SetPoint("BOTTOMLEFT")
+					bar.bg:SetPoint("TOPLEFT")
 					bar.bgwidth = data.backgroundwidth
 					bar:SetScript("OnSizeChanged", BarResize)
 					BarResize(bar)
@@ -853,7 +853,6 @@ end
 -- ======================================================= --
 
 do
-	local titlebackdrop = {}
 	local windowbackdrop = {}
 
 	local lastStretchTime = 0
@@ -994,25 +993,18 @@ do
 		end
 		g.button:SetNormalFontObject(fo)
 
-		titlebackdrop.bgFile = Skada:MediaFetch("statusbar", p.title.texture)
-		titlebackdrop.tile = false
-		titlebackdrop.tileSize = 0
-		titlebackdrop.edgeSize = p.title.borderthickness
-		g.button:SetBackdrop(titlebackdrop)
-
 		local color = p.title.color
-		g.button:SetBackdropColor(color.r, color.g, color.b, color.a or 1)
+		g.button.bg:SetTexture(Skada:MediaFetch("statusbar", p.title.texture))
+		g.button.bg:SetVertexColor(color.r, color.g, color.b, color.a or 1)
 		g.button:SetHeight(p.title.height or 15)
-
-		Skada:ApplyBorder(g.button, p.title.bordertexture, p.title.bordercolor, p.title.borderthickness)
 
 		g.button.toolbar = g.button.toolbar or p.title.toolbar or 1
 		if g.button.toolbar ~= p.title.toolbar then
 			g.button.toolbar = p.title.toolbar or 1
 			for i = 1, #g.buttons do
 				local b = g.buttons[i]
-				b:GetNormalTexture():SetTexture(format(buttonsTexPath, g.button.toolbar, b.index))
-				b:GetHighlightTexture():SetTexture(format(buttonsTexPath, g.button.toolbar, b.index), 1.0)
+				b.normalTex:SetTexture(format(buttonsTexPath, g.button.toolbar, b.index))
+				b.highlightTex:SetTexture(format(buttonsTexPath, g.button.toolbar, b.index), 1.0)
 			end
 		end
 
@@ -1571,102 +1563,57 @@ function mod:AddDisplayOptions(win, options)
 							}
 						}
 					},
-					border = {
+					font = {
 						type = "group",
-						name = L["Border"],
+						name = L["Font"],
+						desc = format(L["The font used by %s."], L["Title Bar"]),
 						inline = true,
 						order = 70,
 						args = {
-							bordertexture = {
+							font = {
 								type = "select",
-								dialogControl = "LSM30_Border",
-								name = L["Border texture"],
-								desc = L["The texture used for the border of the title."],
-								order = 10,
-								width = "double",
-								values = Skada:MediaList("border")
+								name = L["Font"],
+								desc = format(L["The font used by %s."], L["Title Bar"]),
+								dialogControl = "LSM30_Font",
+								values = Skada:MediaList("font"),
+								order = 10
 							},
-							bordercolor = {
-								type = "color",
-								name = L["Border Color"],
-								desc = L["The color used for the border."],
-								hasAlpha = true,
+							fontflags = {
+								type = "select",
+								name = L["Font Outline"],
+								desc = L["Sets the font outline."],
 								order = 20,
+								values = FONT_FLAGS
+							},
+							fontsize = {
+								type = "range",
+								name = L["Font Size"],
+								desc = format(L["The font size of %s."], L["Title Bar"]),
+								order = 30,
+								min = 5,
+								max = 32,
+								step = 1
+							},
+							textcolor = {
+								type = "color",
+								name = L["Text Color"],
+								desc = format(L["The text color of %s."], L["Title Bar"]),
+								order = 40,
+								hasAlpha = true,
 								get = function()
-									local c = db.title.bordercolor or Skada.windowdefaults.title.bordercolor
+									local c = db.title.textcolor or Skada.windowdefaults.title.textcolor
 									return c.r, c.g, c.b, c.a or 1
 								end,
 								set = function(_, r, g, b, a)
-									db.title.bordercolor = db.title.bordercolor or {}
-									db.title.bordercolor.r = r
-									db.title.bordercolor.g = g
-									db.title.bordercolor.b = b
-									db.title.bordercolor.a = a
+									db.title.textcolor = db.title.textcolor or {}
+									db.title.textcolor.r = r
+									db.title.textcolor.g = g
+									db.title.textcolor.b = b
+									db.title.textcolor.a = a
 									Skada:ApplySettings(db.name)
 								end
-							},
-							borderthickness = {
-								type = "range",
-								name = L["Border Thickness"],
-								desc = L["The thickness of the borders."],
-								order = 30,
-								min = 0,
-								max = 50,
-								step = 0.01,
-								bigStep = 0.1
 							}
 						}
-					}
-				}
-			},
-			text = {
-				type = "group",
-				name = L["Text"],
-				desc = format(L["Text options for %s."], L["Title Bar"]),
-				order = 20,
-				args = {
-					font = {
-						type = "select",
-						name = L["Font"],
-						desc = format(L["The font used by %s."], L["Title Bar"]),
-						dialogControl = "LSM30_Font",
-						values = Skada:MediaList("font"),
-						order = 10
-					},
-					fontflags = {
-						type = "select",
-						name = L["Font Outline"],
-						desc = L["Sets the font outline."],
-						order = 20,
-						values = FONT_FLAGS
-					},
-					fontsize = {
-						type = "range",
-						name = L["Font Size"],
-						desc = format(L["The font size of %s."], L["Title Bar"]),
-						order = 30,
-						min = 5,
-						max = 32,
-						step = 1
-					},
-					textcolor = {
-						type = "color",
-						name = L["Text Color"],
-						desc = format(L["The text color of %s."], L["Title Bar"]),
-						order = 40,
-						hasAlpha = true,
-						get = function()
-							local c = db.title.textcolor or Skada.windowdefaults.title.textcolor
-							return c.r, c.g, c.b, c.a or 1
-						end,
-						set = function(_, r, g, b, a)
-							db.title.textcolor = db.title.textcolor or {}
-							db.title.textcolor.r = r
-							db.title.textcolor.g = g
-							db.title.textcolor.b = b
-							db.title.textcolor.a = a
-							Skada:ApplySettings(db.name)
-						end
 					}
 				}
 			},
@@ -1674,7 +1621,7 @@ function mod:AddDisplayOptions(win, options)
 				type = "group",
 				name = L["Buttons"],
 				desc = format(L["Options for %s."], L["Buttons"]),
-				order = 30,
+				order = 20,
 				width = "double",
 				args = {
 					buttons = {
@@ -1902,9 +1849,6 @@ do
 						font = "Accidental Presidency",
 						fontsize = 13,
 						texture = "Armory",
-						bordercolor = {r = 0, g = 0, b = 0, a = 1},
-						bordertexture = "None",
-						borderthickness = 2,
 						color = {r = 0.3, g = 0.3, b = 0.3, a = 1},
 						fontflags = ""
 					},
@@ -1946,9 +1890,6 @@ do
 						font = "Accidental Presidency",
 						fontsize = 12,
 						texture = "Armory",
-						bordercolor = {r = 0, g = 0, b = 0, a = 1},
-						bordertexture = "None",
-						borderthickness = 0,
 						color = {r = 0.6, g = 0.6, b = 0.8, a = 1},
 						fontflags = ""
 					},
@@ -1990,9 +1931,6 @@ do
 						font = "ABF",
 						fontsize = 12,
 						texture = "Aluminium",
-						bordercolor = {r = 0, g = 0, b = 0, a = 1},
-						bordertexture = "None",
-						borderthickness = 0,
 						color = {r = 0.6, g = 0.6, b = 0.8, a = 1},
 						fontflags = ""
 					},
@@ -2032,9 +1970,6 @@ do
 						font = "Arial Narrow",
 						fontsize = 12,
 						texture = "Gloss",
-						bordercolor = {r = 0, g = 0, b = 0, a = 1},
-						bordertexture = "None",
-						borderthickness = 0,
 						color = {r = 1, g = 0, b = 0, a = 0.75},
 						fontflags = ""
 					},
@@ -2078,9 +2013,6 @@ do
 						font = "Friz Quadrata TT",
 						fontsize = 10,
 						texture = "Blizzard",
-						bordercolor = {r = 1, g = 0.75, b = 0, a = 1},
-						bordertexture = "Blizzard Dialog",
-						borderthickness = 1,
 						color = {r = 0.2, g = 0.2, b = 0.2, a = 0},
 						fontflags = ""
 					},
