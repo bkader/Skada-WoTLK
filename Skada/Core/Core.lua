@@ -467,7 +467,7 @@ do
 
 	-- creates or reuses a dataset table
 	function Window:nr(i)
-		local d = self.dataset[i] or {}
+		local d = self.dataset[i] or new()
 		self.dataset[i] = d
 		return d
 	end
@@ -666,7 +666,13 @@ end
 
 -- destroy a window
 function Window:Destroy()
-	self.dataset = nil
+	if self.dataset then
+		for i = 1, #self.dataset do
+			del(tremove(self.dataset, i))
+		end
+		self.dataset = nil
+	end
+
 	if self.display then
 		self.display:Destroy(self)
 	end
@@ -753,19 +759,20 @@ end
 function Window:Reset()
 	if self.dataset then
 		for i = 1, #self.dataset do
-			wipe(self.dataset[i])
+			del(tremove(self.dataset, i))
 		end
 	end
 end
 
-function Window:Wipe()
+function Window:Wipe(changed)
 	self:Reset()
 	if self.display then
 		self.display:Wipe(self)
 	end
 
+	self.changed = changed or self.changed
 	if self.child and self.db.childmode == 1 then
-		self.child:Wipe()
+		self.child:Wipe(changed)
 	end
 end
 
@@ -835,6 +842,10 @@ function Window:DisplayMode(mode, class)
 	self:set_mode_title()
 
 	if self.child and (self.db.childmode == 1 or self.db.childmode == 3) then
+		if self.db.childmode == 1 and self.child.selectedset ~= self.selectedset then
+			self.child.selectedset = self.selectedset
+			self.child.changed = true
+		end
 		self.child:DisplayMode(mode)
 	end
 
@@ -904,8 +915,12 @@ do
 		self.changed = true
 		self.display:SetTitle(self, self.metadata.title)
 
-		if self.child and (self.db.childmode == 1 or self.db.childmode == 3) then
-			self.child:DisplayModes(settime)
+		if self.child then
+			if self.db.childmode == 1 or self.db.childmode == 3 then
+				self.child:DisplayModes(settime)
+			elseif self.db.childmode == 2 then
+				self.child:set_selected_set(self.selectedset)
+			end
 		end
 
 		Skada:UpdateDisplay()
@@ -936,7 +951,7 @@ do
 		self.metadata.maxvalue = 1
 		self.changed = true
 
-		if self.child and (self.db.childmode == 1 or self.db.childmode == 2) then
+		if self.child and self.db.childmode == 1 then
 			self.child:DisplaySets()
 		end
 
@@ -1130,7 +1145,7 @@ function Skada:RestoreView(win, theset, themode)
 		win.selectedset = "current"
 	end
 
-	self.changed = true
+	win.changed = true
 
 	if themode then
 		win:DisplayMode(FindMode(themode) or win.selectedset)
@@ -1830,16 +1845,13 @@ do
 		end
 	end
 
-	local white = {r = 1, g = 1, b = 1}
+	local white = HIGHLIGHT_FONT_COLOR
 	function Skada:AddSubviewToTooltip(tooltip, win, mode, id, label)
 		if not (type(mode) == "table" and mode.Update) then return end
 
 		-- windows should have separate tooltip tables in order
 		-- to display different numbers for same spells for example.
-		if not win.ttwin then
-			win.ttwin = Window:New(true)
-		end
-
+		win.ttwin = win.ttwin or Window:New(true)
 		win.ttwin:Reset()
 
 		if mode.Enter then
@@ -2532,9 +2544,7 @@ function Skada:Reset(force)
 end
 
 function Skada:UpdateDisplay(force)
-	if force then
-		self.changed = true
-	end
+	self.changed = self.changed or force
 
 	if type(selected_feed) == "function" then
 		local feedtext = selected_feed()
@@ -2546,7 +2556,7 @@ function Skada:UpdateDisplay(force)
 	for i = 1, #windows do
 		local win = windows[i]
 		if win and (self.changed or win.changed or (self.current and (win.selectedset == "current" or win.selectedset == "total"))) then
-			win.changed = false
+			win.changed = nil
 
 			if win.selectedmode then
 				local set = win:GetSelectedSet()
@@ -3237,9 +3247,12 @@ end
 function Skada:DBM(_, mod, wipe)
 	if not wipe and mod and mod.combatInfo then
 		local set = self.current or self.last -- just in case DBM was late.
-		if set and not set.success and mod.combatInfo.name and find(lower(set.mobname), lower(mod.combatInfo.name)) ~= nil then
+		if set and not set.success and mod.combatInfo.name and (not set.mobname or find(lower(set.mobname), lower(mod.combatInfo.name)) ~= nil) then
 			self:Debug("COMBAT_BOSS_DEFEATED: DBM")
+
 			set.success = true
+			set.gotboss = set.gotboss or mod.combatInfo.creatureId or true
+			set.mobname = (not set.mobname or set.mobname == L["Unknown"]) and mod.combatInfo.name or set.mobname
 			self:SendMessage("COMBAT_BOSS_DEFEATED", set)
 
 			if self.tempsets then -- phases
@@ -3247,6 +3260,8 @@ function Skada:DBM(_, mod, wipe)
 					local s = self.tempsets[i]
 					if s and not s.success then
 						s.success = true
+						s.gotboss = s.gotboss or mod.combatInfo.creatureId or true
+						s.mobname = (not s.mobname or s.mobname == L["Unknown"]) and mod.combatInfo.name or s.mobname
 						self:SendMessage("COMBAT_BOSS_DEFEATED", s)
 					end
 				end

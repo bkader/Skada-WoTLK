@@ -23,7 +23,6 @@ Skada.windowdefaults = {
 	numfontsize = 13,
 	barheight = 18,
 	barwidth = 240,
-	barmax = 40,
 	barorientation = 1,
 	barcolor = {r = 0.3, g = 0.3, b = 0.8, a = 1},
 	barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6},
@@ -190,10 +189,11 @@ Skada.options = {
 	end,
 	set = function(i, val)
 		Skada.db.profile[i[#i]] = val or nil
+		Skada:ApplySettings()
+
 		if i[#i] == "showtotals" then
-			Skada:ReloadSettings()
-		else
-			Skada:ApplySettings()
+			Skada:Wipe()
+			Skada:UpdateDisplay(true)
 		end
 	end,
 	args = {
@@ -809,7 +809,7 @@ end
 function Skada:OpenOptions(win)
 	if not ACR:GetOptionsTable("Skada") then
 		LibStub("AceConfig-3.0"):RegisterOptionsTable("Skada", Skada.options)
-		ACD:SetDefaultSize("Skada", 625, 500)
+		ACD:SetDefaultSize("Skada", 630, 500)
 	end
 
 	if not ACD:Close("Skada") then
@@ -945,8 +945,8 @@ function Skada:FrameSettings(db, include_dimensions)
 						desc = L["Sets the scale of the window."],
 						order = 10,
 						width = "double",
-						min = 0.1,
-						max = 3,
+						min = 0.5,
+						max = 2,
 						step = 0.01,
 						isPercent = true
 					},
@@ -1236,8 +1236,13 @@ function Skada:FrameSettings(db, include_dimensions)
 					windows = Skada:GetWindows()
 					for i = 1, #windows do
 						local win = windows[i]
-						if win and win.db and win.db.sticked and win.db.sticked[db.name] then
-							win.db.sticked[db.name] = nil
+						if win and win.db and win.db.sticked then
+							if win.db.sticked[db.name] then
+								win.db.sticked[db.name] = nil
+							end
+							if next(win.db.sticked) == nil then
+								win.db.sticked = nil
+							end
 						end
 					end
 				end
@@ -1252,11 +1257,25 @@ function Skada:FrameSettings(db, include_dimensions)
 			order = 40
 		}
 
-		obj.args.position.args.hidebuttons = {
+		obj.args.position.args.noresize = {
 			type = "toggle",
 			name = L["Disable Resize Buttons"],
 			desc = L["Resize and lock/unlock buttons won't show up when you hover over the window."],
-			order = 45
+			order = 51
+		}
+
+		obj.args.position.args.nostrech = {
+			type = "toggle",
+			name = L["Disable stretch button"],
+			desc = L["Stretch button won't show up when you hover over the window."],
+			order = 52
+		}
+
+		obj.args.position.args.botstretch = {
+			type = "toggle",
+			name = L["Reverse window stretch"],
+			desc = L["opt_botstretch_desc"],
+			order = 53
 		}
 
 		obj.args.advanced.args.childoptions = {
