@@ -30,10 +30,12 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 		Skada.missTypes = missTypes
 	end
 
-	local function log_spellcast(set, dmg)
-		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
+	local function log_spellcast(set, playerid, playername, playerflags, spellname, spellschool)
+		if not set or set == Skada.total then return end
+
+		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
 		if player and player.damagetakenspells then
-			local spell = player.damagetakenspells[dmg.spellname] or player.damagetakenspells[dmg.spellname..L["DoT"]]
+			local spell = player.damagetakenspells[spellname] or player.damagetakenspells[spellname..L["DoT"]]
 			if spell then
 				-- because some DoTs don't have an initial damage
 				-- we start from 1 and not from 0 if casts wasn't
@@ -41,8 +43,8 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				spell.casts = (spell.casts or 1) + 1
 
 				-- fix possible missing spell school.
-				if not spell.school and dmg.spellschool then
-					spell.school = dmg.spellschool
+				if not spell.school and spellschool then
+					spell.school = spellschool
 				end
 			end
 		end
@@ -166,28 +168,10 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 	local extraATT
 
 	local function SpellCast(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		if srcGUID and dstGUID then
-			dmg.spellid, dmg.spellname, dmg.spellschool = ...
-			if dmg.spellid and dmg.spellname and not ignoredSpells[dmg.spellid] then
-				dmg.srcGUID = srcGUID
-				dmg.srcName = srcName
-				dmg.srcFlags = srcFlags
-
-				dmg.playerid = dstGUID
-				dmg.playername = dstName
-				dmg.playerflags = dstFlags
-
-				dmg.amount = nil
-				dmg.overkill = nil
-				dmg.resisted = nil
-				dmg.blocked = nil
-				dmg.absorbed = nil
-				dmg.critical = nil
-				dmg.glancing = nil
-				dmg.crushing = nil
-				dmg.misstype = nil
-
-				Skada:DispatchSets(log_spellcast, nil, dmg)
+		if srcGUID ~= dstGUID then
+			local spellid, spellname, spellschool = ...
+			if spellid and spellname and not ignoredSpells[spellid] then
+				Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, spellname, spellschool)
 			end
 		end
 	end
@@ -244,7 +228,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 
 				dmg.misstype = nil
 
-				Skada:DispatchSets(log_damage, true, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
+				Skada:DispatchSets(log_damage, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
 			end
 		end
 	end
@@ -309,7 +293,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 					dmg.resisted = amount or 0
 				end
 
-				Skada:DispatchSets(log_damage, true, dmg, eventtype == "SPELL_PERIODIC_MISSED")
+				Skada:DispatchSets(log_damage, dmg, eventtype == "SPELL_PERIODIC_MISSED")
 			end
 		end
 	end

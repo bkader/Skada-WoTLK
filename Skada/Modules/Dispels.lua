@@ -65,7 +65,7 @@ Skada:AddLoadableModule("Dispels", function(L)
 		data.dstName = dstName
 		data.dstFlags = dstFlags
 
-		Skada:DispatchSets(log_dispel, true, data)
+		Skada:DispatchSets(log_dispel, data)
 	end
 
 	function spellmod:Enter(win, id, label)

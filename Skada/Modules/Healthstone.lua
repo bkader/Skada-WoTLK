@@ -26,7 +26,7 @@ Skada:AddLoadableModule("Healthstones", function(L)
 
 	local function StoneUsed(_, eventtype, srcGUID, srcName, srcFlags, _, _, _, spellid, spellname)
 		if (spellid and stonespells[spellid]) or spellname and spellname == stonename then
-			Skada:DispatchSets(log_healthstone, true, srcGUID, srcName, srcFlags)
+			Skada:DispatchSets(log_healthstone, srcGUID, srcName, srcFlags)
 		end
 	end
 

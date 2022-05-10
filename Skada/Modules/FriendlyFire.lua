@@ -67,7 +67,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 
 				dmg.amount = (amount or 0) + (absorbed or 0)
 
-				Skada:DispatchSets(log_damage, true, dmg)
+				Skada:DispatchSets(log_damage, dmg)
 			end
 		end
 	end

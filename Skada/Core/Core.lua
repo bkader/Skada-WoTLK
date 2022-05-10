@@ -3668,13 +3668,13 @@ function Skada:ResumeSegment(msg, phase)
 	end
 end
 
-function Skada:DispatchSets(func, total, ...)
+function Skada:DispatchSets(func, ...)
 	if self.current and type(func) == "function" then
 		-- record to current
 		func(self.current, ...)
 
 		-- record to total
-		if total and self.total and self:CanRecordTotal(self.current) then
+		if self:CanRecordTotal(self.current) then
 			func(self.total, ...)
 		end
 

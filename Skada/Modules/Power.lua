@@ -72,7 +72,7 @@ Skada:AddLoadableModule("Resources", function(L)
 
 			Skada:FixPets(gain)
 
-			Skada:DispatchSets(log_gain, true, gain)
+			Skada:DispatchSets(log_gain, gain)
 		end
 	end
 

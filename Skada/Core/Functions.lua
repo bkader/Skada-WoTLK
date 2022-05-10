@@ -937,7 +937,7 @@ do
 	end
 
 	function Skada:CanRecordTotal(set)
-		if set then
+		if self.total and set then
 			-- just in case
 			if not self.db.profile.totalflag then
 				self.db.profile.totalflag = 0x10
@@ -1030,9 +1030,9 @@ do
 
 	function Skada:FixUnit(spellid, guid, name, flag)
 		if spellid and guid and queued_units and queued_units[spellid] and queued_units[spellid][guid] then
-			guid = queued_units[spellid][guid].id or guid
-			name = queued_units[spellid][guid].name or name
 			flag = queued_units[spellid][guid].flag or flag
+			name = queued_units[spellid][guid].name or name
+			guid = queued_units[spellid][guid].id or guid
 		end
 		return guid, name, flag
 	end

@@ -19,17 +19,19 @@ Skada:AddLoadableModule("Healing", function(L)
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
-	local function log_spellcast(set, heal)
-		local player = Skada:GetPlayer(set, heal.playerid, heal.playername, heal.playerflags)
-		if player and player.healspells and player.healspells[heal.spellid] then
+	local function log_spellcast(set, playerid, playername, playerflags, spellid, spellschool)
+		if not set or set == Skada.total then return end
+
+		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
+		if player and player.healspells and player.healspells[spellid] then
 			-- because some HoTs don't have an initial amount
 			-- we start from 1 and not from 0 if casts wasn't
 			-- previously set. Otherwise we just increment.
-			player.healspells[heal.spellid].casts = (player.healspells[heal.spellid].casts or 1) + 1
+			player.healspells[spellid].casts = (player.healspells[spellid].casts or 1) + 1
 
 			-- fix possible missing spell school.
-			if not player.healspells[heal.spellid].school and heal.spellschool then
-				player.healspells[heal.spellid].school = heal.spellschool
+			if not player.healspells[spellid].school and spellschool then
+				player.healspells[spellid].school = spellschool
 			end
 		end
 	end
@@ -107,24 +109,10 @@ Skada:AddLoadableModule("Healing", function(L)
 
 	local function SpellCast(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID and dstGUID then
-			heal.spellid, _, heal.spellschool = ...
-			if heal.spellid and not ignoredSpells[heal.spellid] then
-				heal.playerid = srcGUID
-				heal.playername = srcName
-				heal.playerflags = srcFlags
-
-				heal.dstGUID = dstGUID
-				heal.dstName = dstName
-				heal.dstFlags = dstFlags
-
-				heal.amount = nil
-				heal.overheal = nil
-				heal.critical = nil
-				heal.petname = nil
-
-				Skada:FixPets(heal)
-
-				Skada:DispatchSets(log_spellcast, nil, heal)
+			local spellid, _, spellschool = ...
+			if spellid and not ignoredSpells[spellid] then
+				srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+				Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, spellid, spellschool)
 			end
 		end
 	end
@@ -147,7 +135,7 @@ Skada:AddLoadableModule("Healing", function(L)
 			heal.petname = nil
 			Skada:FixPets(heal)
 
-			Skada:DispatchSets(log_heal, true, heal, eventtype == "SPELL_PERIODIC_HEAL")
+			Skada:DispatchSets(log_heal, heal, eventtype == "SPELL_PERIODIC_HEAL")
 		end
 	end
 

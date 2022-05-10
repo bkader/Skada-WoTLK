@@ -72,7 +72,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 
 		Skada:FixPets(data)
 
-		Skada:DispatchSets(log_interrupt, true, data)
+		Skada:DispatchSets(log_interrupt, data)
 
 		if Skada.db.profile.modules.interruptannounce and srcGUID == Skada.userGUID then
 			local spelllink = extraspellname or dstName

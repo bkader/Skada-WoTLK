@@ -197,6 +197,8 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 	end
 
 	local function log_damage(set, dmg)
+		if not set or set == Skada.total then return end
+
 		local absorbed = dmg.absorbed or 0
 		if (dmg.amount + absorbed) == 0 then return end
 
@@ -329,7 +331,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 				dmg.srcName = srcName
 				dmg.srcFlags = srcFlags
 
-				Skada:DispatchSets(log_damage, nil, dmg)
+				Skada:DispatchSets(log_damage, dmg)
 			end
 		end
 	end
@@ -361,7 +363,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 				dmg.amount = 0
 				dmg.absorbed = amount
 
-				Skada:DispatchSets(log_damage, nil, dmg)
+				Skada:DispatchSets(log_damage, dmg)
 			end
 		end
 	end
@@ -800,6 +802,8 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local function log_damage(set, dmg)
+		if not set or set == Skada.total then return end
+
 		local absorbed = dmg.absorbed or 0
 		if (dmg.amount + absorbed) == 0 then return end
 
@@ -879,7 +883,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 				dmg.dstName = dstName
 				dmg.dstFlags = dstFlags
 
-				Skada:DispatchSets(log_damage, nil, dmg)
+				Skada:DispatchSets(log_damage, dmg)
 			end
 		end
 	end
@@ -911,7 +915,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 				dmg.amount = 0
 				dmg.absorbed = amount
 
-				Skada:DispatchSets(log_damage, nil, dmg)
+				Skada:DispatchSets(log_damage, dmg)
 			end
 		end
 	end
@@ -1307,6 +1311,8 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local function log_heal(set, data)
+		if not set or set == Skada.total then return end
+
 		if (data.amount or 0) == 0 then return end
 
 		local e = Skada:GetEnemy(set, data.enemyname, data.enemyid, data.enemyflags)
@@ -1353,7 +1359,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 			heal.spellschool = spellschool
 			heal.amount = max(0, amount - overheal)
 
-			Skada:DispatchSets(log_heal, nil, heal)
+			Skada:DispatchSets(log_heal, heal)
 		end
 	end
 

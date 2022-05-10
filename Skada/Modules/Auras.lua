@@ -121,7 +121,9 @@ do
 	-- common functions.
 
 	function log_auraapply(set, aura)
-		if not (set and aura and aura.spellid) then return end
+		if not set or set == Skada.total then return end
+		if not aura or not aura.spellid then return end
+
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
 		if player then
 			local spell = player.auras and player.auras[aura.spellid]
@@ -158,7 +160,9 @@ do
 	end
 
 	function log_aurarefresh(set, aura)
-		if not (set and aura and aura.spellid) then return end
+		if not set or set == Skada.total then return end
+		if not aura or not aura.spellid then return end
+
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
 		local spell = player and player.auras and player.auras[aura.spellid]
 
@@ -171,7 +175,9 @@ do
 	end
 
 	function log_auraremove(set, aura)
-		if not (set and aura and aura.spellid) then return end
+		if not set or set == Skada.total then return end
+		if not aura or not aura.spellid then return end
+
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
 		local spell = player and player.auras and player.auras[aura.spellid]
 
@@ -326,7 +332,9 @@ Skada:AddLoadableModule("Buffs", function(L)
 	}
 
 	local function log_specialaura(set, aura)
-		if not (set and aura and aura.spellid) then return end
+		if not set or set == Skada.total then return end
+		if not aura or not aura.spellid then return end
+
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
 		if player then
 			local spell = player.auras and player.auras[aura.spellid]
@@ -361,13 +369,13 @@ Skada:AddLoadableModule("Buffs", function(L)
 			Skada:FixPets(aura)
 
 			if event == "SPELL_PERIODIC_ENERGIZE" then
-				Skada:DispatchSets(log_specialaura, nil, aura)
+				Skada:DispatchSets(log_specialaura, aura)
 			elseif event == "SPELL_AURA_APPLIED" or event == true then
-				Skada:DispatchSets(log_auraapply, nil, aura)
+				Skada:DispatchSets(log_auraapply, aura)
 			elseif event == "SPELL_AURA_REFRESH" then
-				Skada:DispatchSets(log_aurarefresh, nil, aura)
+				Skada:DispatchSets(log_aurarefresh, aura)
 			elseif event == "SPELL_AURA_REMOVED" then
-				Skada:DispatchSets(log_auraremove, nil, aura)
+				Skada:DispatchSets(log_auraremove, aura)
 			end
 		end
 	end
@@ -528,14 +536,14 @@ Skada:AddLoadableModule("Debuffs", function(L)
 			Skada:FixPets(aura)
 
 			if event == "SPELL_AURA_APPLIED" then
-				Skada:DispatchSets(log_auraapply, nil, aura)
+				Skada:DispatchSets(log_auraapply, aura)
 				if queuedSpells[spellid] then
 					Skada:QueueUnit(queuedSpells[spellid], srcGUID, srcName, srcFlags, dstGUID)
 				end
 			elseif event == "SPELL_AURA_REFRESH" then
-				Skada:DispatchSets(log_aurarefresh, nil, aura)
+				Skada:DispatchSets(log_aurarefresh, aura)
 			elseif event == "SPELL_AURA_REMOVED" then
-				Skada:DispatchSets(log_auraremove, nil, aura)
+				Skada:DispatchSets(log_auraremove, aura)
 				if queuedSpells[spellid] then
 					Skada:UnqueueUnit(queuedSpells[spellid], dstGUID)
 				end

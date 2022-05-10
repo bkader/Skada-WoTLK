@@ -95,10 +95,12 @@ Skada:AddLoadableModule("Damage", function(L)
 		[70542] = true -- Mutated Slash (Mutated Abomination)
 	}
 
-	local function log_spellcast(set, dmg)
-		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
+	local function log_spellcast(set, playerid, playername, playerflags, spellname, spellschool)
+		if not set or set == Skada.total then return end
+
+		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
 		if player and player.damagespells then
-			local spell = player.damagespells[dmg.spellname] or player.damagespells[dmg.spellname..L["DoT"]]
+			local spell = player.damagespells[spellname] or player.damagespells[spellname..L["DoT"]]
 			if spell then
 				-- because some DoTs don't have an initial damage
 				-- we start from 1 and not from 0 if casts wasn't
@@ -106,8 +108,8 @@ Skada:AddLoadableModule("Damage", function(L)
 				spell.casts = (spell.casts or 1) + 1
 
 				-- fix possible missing spell school.
-				if not spell.school and dmg.spellschool then
-					spell.school = dmg.spellschool
+				if not spell.school and spellschool then
+					spell.school = spellschool
 				end
 			end
 		end
@@ -234,29 +236,10 @@ Skada:AddLoadableModule("Damage", function(L)
 
 	local function SpellCast(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID and dstGUID then
-			dmg.spellid, dmg.spellname, dmg.spellschool = ...
-			if dmg.spellid and dmg.spellname and not ignoredSpells[dmg.spellid] then
-				dmg.playerid = srcGUID
-				dmg.playerflags = srcFlags
-				dmg.playername = srcName
-
-				dmg.dstGUID = dstGUID
-				dmg.dstName = dstName
-				dmg.dstFlags = dstFlags
-
-				dmg.amount = nil
-				dmg.overkill = nil
-				dmg.resisted = nil
-				dmg.blocked = nil
-				dmg.absorbed = nil
-				dmg.critical = nil
-				dmg.glancing = nil
-				dmg.misstype = nil
-				dmg.petname = nil
-
-				Skada:FixPets(dmg)
-
-				Skada:DispatchSets(log_spellcast, nil, dmg)
+			local spellid, spellname, spellschool = ...
+			if spellid and spellname and not ignoredSpells[spellid] then
+				srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+				Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, spellname, spellschool)
 			end
 		end
 	end
@@ -315,7 +298,7 @@ Skada:AddLoadableModule("Damage", function(L)
 				dmg.petname = nil
 				Skada:FixPets(dmg)
 
-				Skada:DispatchSets(log_damage, true, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
+				Skada:DispatchSets(log_damage, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
 			end
 		end
 	end
@@ -359,7 +342,7 @@ Skada:AddLoadableModule("Damage", function(L)
 				dmg.petname = nil
 				Skada:FixPets(dmg)
 
-				Skada:DispatchSets(log_damage, true, dmg, eventtype == "SPELL_PERIODIC_MISSED")
+				Skada:DispatchSets(log_damage, dmg, eventtype == "SPELL_PERIODIC_MISSED")
 			end
 		end
 	end

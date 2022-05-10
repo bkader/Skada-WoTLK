@@ -40,6 +40,8 @@ Skada:AddLoadableModule("Deaths", function(L)
 	end
 
 	local function log_deathlog(set, data, deathlog, override)
+		if not set or set == Skada.total then return end
+
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if player then
 			deathlog = deathlog or player.deathlog and player.deathlog[1]
@@ -106,7 +108,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 			data.amount = 0 - data.amount
 			data.overheal = nil
 
-			Skada:DispatchSets(log_deathlog, nil, data)
+			Skada:DispatchSets(log_deathlog, data)
 		end
 	end
 
@@ -144,7 +146,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 				data.absorbed = amount
 			end
 
-			Skada:DispatchSets(log_deathlog, nil, data)
+			Skada:DispatchSets(log_deathlog, data)
 		end
 	end
 
@@ -193,7 +195,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 			data.blocked = nil
 			data.absorbed = nil
 
-			Skada:DispatchSets(log_deathlog, nil, data)
+			Skada:DispatchSets(log_deathlog, data)
 		end
 	end
 
@@ -243,7 +245,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 	local function UnitDied(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags)
 		if not UnitIsFeignDeath(dstName) then
-			Skada:DispatchSets(log_death, true, dstGUID, dstName, dstFlags)
+			Skada:DispatchSets(log_death, dstGUID, dstName, dstFlags)
 		end
 	end
 
@@ -277,7 +279,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 	local function SpellResurrect(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
 		if spellid then
-			Skada:DispatchSets(log_resurrect, nil, dstGUID, dstName, dstFlags, srcName, spellid)
+			Skada:DispatchSets(log_resurrect, dstGUID, dstName, dstFlags, srcName, spellid)
 		end
 	end
 
