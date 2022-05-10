@@ -78,20 +78,20 @@ Skada:AddLoadableModule("Comparison", function(L)
 					end
 
 					if label == L["Critical Hits"] and spell.criticalamount then
+						if spell.criticalmin then
+							tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.criticalmin), 1, 1, 1)
+						end
 						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.criticalamount / spell.critical), 1, 1, 1)
-						if spell.criticalmin and spell.criticalmax then
-							tooltip:AddLine(" ")
-							tooltip:AddDoubleLine(L["Minimum Hit"], Skada:FormatNumber(spell.criticalmin), 1, 1, 1)
-							tooltip:AddDoubleLine(L["Maximum Hit"], Skada:FormatNumber(spell.criticalmax), 1, 1, 1)
-							tooltip:AddDoubleLine(L["Average Hit"], Skada:FormatNumber((spell.criticalmin + spell.criticalmax) / 2), 1, 1, 1)
+						if spell.criticalmax then
+							tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.criticalmax), 1, 1, 1)
 						end
 					elseif label == L["Normal Hits"] and spell.hitamount then
+						if spell.hitmin then
+							tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
+						end
 						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
-						if spell.hitmin and spell.hitmax then
-							tooltip:AddLine(" ")
-							tooltip:AddDoubleLine(L["Minimum Hit"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
-							tooltip:AddDoubleLine(L["Maximum Hit"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
-							tooltip:AddDoubleLine(L["Average Hit"], Skada:FormatNumber((spell.hitmin + spell.hitmax) / 2), 1, 1, 1)
+						if spell.hitmax then
+							tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
 						end
 					end
 				end
@@ -116,31 +116,27 @@ Skada:AddLoadableModule("Comparison", function(L)
 					num = (spell and spell.criticalamount) and (spell.criticalamount / spell.critical) or 0
 					mynum = (myspell and myspell.criticalamount) and (myspell.criticalamount / myspell.critical) or 0
 
+					if (spell and spell.criticalmin) or (myspell and myspell.criticalmin) then
+						tooltip:AddDoubleLine(L["Minimum"], FormatValueNumber(spell and spell.criticalmin, myspell and myspell.criticalmin, true), 1, 1, 1)
+					end
+
 					tooltip:AddDoubleLine(L["Average"], FormatValueNumber(num, mynum, true), 1, 1, 1)
 
-					if (spell and spell.criticalmin and spell.criticalmax) or (myspell and myspell.criticalmin and myspell.criticalmax) then
-						tooltip:AddLine(" ")
-						tooltip:AddDoubleLine(L["Minimum Hit"], FormatValueNumber(spell and spell.criticalmin, myspell and myspell.criticalmin, true), 1, 1, 1)
-						tooltip:AddDoubleLine(L["Maximum Hit"], FormatValueNumber(spell and spell.criticalmax, myspell and myspell.criticalmax, true), 1, 1, 1)
-
-						num = (spell and spell.criticalmin and spell.criticalmax) and ((spell.criticalmin + spell.criticalmax) / 2) or 0
-						mynum = (myspell and myspell.criticalmin and myspell.criticalmax) and ((myspell.criticalmin + myspell.criticalmax) / 2) or 0
-						tooltip:AddDoubleLine(L["Average Hit"], FormatValueNumber(num, mynum, true), 1, 1, 1)
+					if (spell and spell.criticalmax) or (myspell and myspell.criticalmax) then
+						tooltip:AddDoubleLine(L["Maximum"], FormatValueNumber(spell and spell.criticalmax, myspell and myspell.criticalmax, true), 1, 1, 1)
 					end
 				elseif label == L["Normal Hits"] and ((spell and spell.hitamount) or (myspell and myspell.hitamount)) then
 					local num = (spell and spell.hitamount) and (spell.hitamount / spell.hit) or 0
 					local mynum = (myspell and myspell.hitamount) and (myspell.hitamount / myspell.hit) or 0
 
+					if (spell and spell.hitmin) or (myspell and myspell.hitmin) then
+						tooltip:AddDoubleLine(L["Minimum"], FormatValueNumber(spell and spell.hitmin, myspell and myspell.hitmin, true), 1, 1, 1)
+					end
+
 					tooltip:AddDoubleLine(L["Average"], FormatValueNumber(num, mynum, true), 1, 1, 1)
 
-					if (spell and spell.hitmin and spell.hitmax) or (myspell and myspell.hitmin and myspell.hitmax) then
-						tooltip:AddLine(" ")
-						tooltip:AddDoubleLine(L["Minimum Hit"], FormatValueNumber(spell and spell.hitmin, myspell and myspell.hitmin, true), 1, 1, 1)
-						tooltip:AddDoubleLine(L["Maximum Hit"], FormatValueNumber(spell and spell.hitmax, myspell and myspell.hitmax, true), 1, 1, 1)
-
-						num = (spell and spell.hitmin and spell.hitmax) and ((spell.hitmin + spell.hitmax) / 2) or 0
-						mynum = (myspell and myspell.hitmin and myspell.hitmax) and ((myspell.hitmin + myspell.hitmax) / 2) or 0
-						tooltip:AddDoubleLine(L["Average Hit"], FormatValueNumber(num, mynum, true), 1, 1, 1)
+					if (spell and spell.hitmax) or (myspell and myspell.hitmax) then
+						tooltip:AddDoubleLine(L["Maximum"], FormatValueNumber(spell and spell.hitmax, myspell and myspell.hitmax, true), 1, 1, 1)
 					end
 				end
 			end

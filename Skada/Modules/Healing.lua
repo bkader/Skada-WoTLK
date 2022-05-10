@@ -172,34 +172,53 @@ Skada:AddLoadableModule("Healing", function(L)
 				tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
 			end
 
+			local average = nil
 			if (spell.count or 0) > 0 then
 				tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
-				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
+				average = spell.amount / spell.count
 
 				if (spell.critical or 0) > 0 then
-					tooltip:AddDoubleLine(L["Critical"], Skada:FormatPercent(spell.critical, spell.count), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Critical"], Skada:FormatPercent(spell.critical, spell.count), 0.67, 1, 0.67)
 				end
 
-				if spell.overheal > 0 then
-					tooltip:AddDoubleLine(L["Overheal"], Skada:FormatPercent(spell.overheal, spell.overheal + spell.amount), 1, 1, 1)
+				if (spell.overheal or 0) > 0 then
+					tooltip:AddDoubleLine(L["Overheal"], Skada:FormatPercent(spell.overheal, spell.overheal + spell.amount), 1, 0.67, 0.67)
 				end
-			else
-				tooltip:AddDoubleLine(L["Total"], Skada:FormatNumber(spell.amount), 1, 1, 1)
 			end
 
-			if spell.min and spell.max then
+			local separator = nil
+
+			if spell.min then
+				tooltip:AddLine(" ")
+				separator = true
+
 				local spellmin = spell.min
 				if spell.criticalmin and spell.criticalmin < spellmin then
 					spellmin = spell.criticalmin
 				end
+				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
+			end
+
+			if average then
+				if not separator then
+					tooltip:AddLine(" ")
+					separator = true
+				end
+
+				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(average), 1, 1, 1)
+			end
+
+			if spell.max then
+				if not separator then
+					tooltip:AddLine(" ")
+					separator = true
+				end
+
 				local spellmax = spell.max
 				if spell.criticalmax and spell.criticalmax > spellmax then
 					spellmax = spell.criticalmax
 				end
-				tooltip:AddLine(" ")
-				tooltip:AddDoubleLine(L["Minimum Hit"], Skada:FormatNumber(spellmin), 1, 1, 1)
-				tooltip:AddDoubleLine(L["Maximum Hit"], Skada:FormatNumber(spellmax), 1, 1, 1)
-				tooltip:AddDoubleLine(L["Average Hit"], Skada:FormatNumber((spellmin + spellmax) / 2), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
 			end
 		end
 	end
@@ -748,36 +767,52 @@ Skada:AddLoadableModule("Total Healing", function(L)
 				tooltip:AddLine(spellschools(spell.school))
 			end
 
-			if (spell.casts or 0) > 0 then
+			if spell.casts then
 				tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
-			end
-
-			if (spell.count or 0) > 0 then
-				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
 			end
 
 			local total = spell.amount + (spell.overheal or 0)
 			tooltip:AddDoubleLine(L["Total"], Skada:FormatNumber(total), 1, 1, 1)
 			if spell.amount > 0 then
-				tooltip:AddDoubleLine(L["Healing"], format("%s (%s)", Skada:FormatNumber(spell.amount), Skada:FormatPercent(spell.amount, total)), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Healing"], format("%s (%s)", Skada:FormatNumber(spell.amount), Skada:FormatPercent(spell.amount, total)), 0.67, 1, 0.67)
 			end
 			if (spell.overheal or 0) > 0 then
-				tooltip:AddDoubleLine(L["Overheal"], format("%s (%s)", Skada:FormatNumber(spell.overheal), Skada:FormatPercent(spell.overheal, total)), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Overheal"], format("%s (%s)", Skada:FormatNumber(spell.overheal), Skada:FormatPercent(spell.overheal, total)), 1, 0.67, 0.67)
 			end
 
-			if spell.min and spell.max then
+			local separator = nil
+
+			if spell.min then
+				tooltip:AddLine(" ")
+				separator = true
+
 				local spellmin = spell.min
 				if spell.criticalmin and spell.criticalmin < spellmin then
 					spellmin = spell.criticalmin
 				end
+				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
+			end
+
+			if (spell.count or 0) > 0 then
+				if not separator then
+					tooltip:AddLine(" ")
+					separator = true
+				end
+
+				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
+			end
+
+			if spell.max then
+				if not separator then
+					tooltip:AddLine(" ")
+					separator = true
+				end
+
 				local spellmax = spell.max
 				if spell.criticalmax and spell.criticalmax > spellmax then
 					spellmax = spell.criticalmax
 				end
-				tooltip:AddLine(" ")
-				tooltip:AddDoubleLine(L["Minimum Hit"], Skada:FormatNumber(spellmin), 1, 1, 1)
-				tooltip:AddDoubleLine(L["Maximum Hit"], Skada:FormatNumber(spellmax), 1, 1, 1)
-				tooltip:AddDoubleLine(L["Average Hit"], Skada:FormatNumber((spellmin + spellmax) / 2), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
 			end
 		end
 	end
