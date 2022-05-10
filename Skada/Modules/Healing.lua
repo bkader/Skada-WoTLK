@@ -20,7 +20,7 @@ Skada:AddLoadableModule("Healing", function(L)
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local function log_spellcast(set, playerid, playername, playerflags, spellid, spellschool)
-		if not set or set == Skada.total then return end
+		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
 
 		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
 		if player and player.healspells and player.healspells[spellid] then
@@ -52,7 +52,7 @@ Skada:AddLoadableModule("Healing", function(L)
 			set.overheal = (set.overheal or 0) + data.overheal
 
 			-- saving this to total set may become a memory hog deluxe.
-			if set == Skada.total then return end
+			if set == Skada.total and not Skada.db.profile.totalidc then return end
 
 			-- record the spell
 			local spell = player.healspells and player.healspells[data.spellid]

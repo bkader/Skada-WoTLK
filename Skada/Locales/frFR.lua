@@ -725,6 +725,8 @@ L["Dungeon Bosses"] = "Boss de donjon"
 L["Dungeon Trash"] = "Trash de donjon"
 L["opt_tweaks_total_all_desc"] = "Tous les segments sont ajout\195\169s aux donn\195\169es du segment total."
 L["opt_tweaks_total_fmt_desc"] = "Les segments avec %s sont ajout\195\169s aux donn\195\169es du segment total."
+L["Detailed total segment"] = "Segment total d\195\169taill\195\169"
+L["opt_tweaks_total_full_desc"] = "Si activ\195\169e, Skada enregistrera tout dans le segment |cffffbb00Total|r, au lieu que des totaux."
 -- project ascension
 L["Project Ascension"] = "Project Ascension"
 L["project_ascension_desc"] = [=[Sur |cffffbb00Project Ascension|r, vos héros sans classe ayant à leur portée n'importe quelle capacité ou talent.

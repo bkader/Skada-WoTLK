@@ -719,6 +719,8 @@ L["Dungeon Bosses"] = "地牢首领" -- needs review
 L["Dungeon Trash"] = "地牢垃圾" -- needs review
 L["opt_tweaks_total_all_desc"] = "将所有段添加到总段的数据中。" -- needs review
 L["opt_tweaks_total_fmt_desc"] = "将带有 %s 的段添加到总段的数据中。" -- needs review
+L["Detailed total segment"] = "详细的总段"
+-- L["opt_tweaks_total_full_desc"] = "When enabled, Skada will record everything to the total segment, instead of total numbers (record spell details, their targets as their sources)."
 -- project ascension
 L["Project Ascension"] = "Project Ascension"
 L["project_ascension_desc"] = "在 |cffffbb00Project Ascension|r 中，您的角色是拥有任何能力或天赋的英雄。\n\n图标和颜色被发送给组成员使用，而不是默认的图标和颜色。"

@@ -123,6 +123,7 @@ Skada.defaults = {
 			["Healing Taken"] = true,
 			["Healthstones"] = true,
 			["HPS"] = true,
+			["Total Healing"] = true,
 			["Improvement"] = true,
 			["My Spells"] = true,
 			["Overhealing"] = true,
@@ -1309,7 +1310,7 @@ function Skada:FrameSettings(db, include_dimensions)
 					set = function(_, child)
 						db.child = (child == "") and nil or child
 						db.childmode = db.child and (db.childmode or 1) or nil
-						Skada:ReloadSettings(db.name)
+						Skada:ReloadSettings()
 					end
 				},
 				childmode = {

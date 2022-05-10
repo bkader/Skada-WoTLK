@@ -2,7 +2,6 @@ local Skada = Skada
 
 local mod = Skada:NewModule("BarDisplay", "SpecializedLibBars-1.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
-local ACR = LibStub("AceConfigRegistry-3.0")
 local LibWindow = LibStub("LibWindow-1.1")
 local FlyPaper = LibStub("LibFlyPaper-1.1", true)
 
@@ -90,10 +89,10 @@ do
 	end
 
 	local function segmentOnClick(self, button)
-		if button == "MiddleButton" then
-			self.list.win:set_selected_set("current")
-		elseif IsModifierKeyDown() then
+		if IsModifierKeyDown() then
 			self.list.win:set_selected_set(nil, button == "RightButton" and 1 or -1)
+		elseif button == "MiddleButton" or button == "RightButton" then
+			self.list.win:set_selected_set("current")
 		elseif button == "LeftButton" then
 			Skada:SegmentMenu(self.list.win)
 		end
@@ -350,7 +349,6 @@ do
 		end
 
 		CloseDropDownMenus()
-		ACR:NotifyChange("Skada")
 	end
 end
 
@@ -405,7 +403,6 @@ function mod:WindowResized(_, group)
 	end
 
 	Skada:ApplySettings(p.name)
-	ACR:NotifyChange("Skada")
 end
 
 function mod:WindowLocked(_, group, locked)
@@ -938,12 +935,7 @@ do
 		g:SetFont(Skada:MediaFetch("font", p.barfont), p.barfontsize, p.barfontflags, Skada:MediaFetch("font", p.numfont), p.numfontsize, p.numfontflags)
 		g:SetSpacing(p.barspacing)
 		g:SetColor(p.barcolor.r, p.barcolor.g, p.barcolor.b, p.barcolor.a)
-
-		if p.barslocked then
-			g:Lock()
-		else
-			g:Unlock()
-		end
+		g:SetLocked(p.barslocked)
 
 		if p.strata then
 			g:SetFrameStrata(p.strata)
@@ -1068,12 +1060,11 @@ function mod:AddDisplayOptions(win, options)
 			return db[i[#i]]
 		end,
 		set = function(i, val)
-			db[i[#i]] = (type(val) == "boolean") and val or nil
-			Skada:ApplySettings(db.name)
-			if i[#i] == "showtotals" then
+			db[i[#i]] = (type(val) == "boolean" and val or nil) or val
+			if i[#i] == "showtotals" or i[#i] == "classcolortext" or i[#i] == "classcolorleft" or i[#i] == "classcolorright" then
 				win:Wipe(true)
-				Skada:UpdateDisplay()
 			end
+			Skada:ApplySettings(win)
 		end,
 		args = {
 			general = {
@@ -1200,7 +1191,8 @@ function mod:AddDisplayOptions(win, options)
 							if db.roleicons and not db.classicons then
 								db.classicons = true
 							end
-							Skada:ReloadSettings(db.name)
+							win:Wipe(true)
+							Skada:ApplySettings(win)
 						end,
 						hidden = Skada.Ascension
 					},
@@ -1214,7 +1206,8 @@ function mod:AddDisplayOptions(win, options)
 							if db.specicons and not db.classicons then
 								db.classicons = true
 							end
-							Skada:ReloadSettings(db.name)
+							win:Wipe(true)
+							Skada:ApplySettings(win)
 						end,
 						hidden = Skada.Ascension
 					},

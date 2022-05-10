@@ -40,7 +40,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 	end
 
 	local function log_deathlog(set, data, deathlog, override)
-		if not set or set == Skada.total then return end
+		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
 
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if player then
@@ -206,7 +206,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 			player.death = (player.death or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
-			if set == Skada.total then return end
+			if set == Skada.total and not Skada.db.profile.totalidc then return end
 
 			local deathlog = player.deathlog and player.deathlog[1]
 			if deathlog then
@@ -236,7 +236,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 				end
 
 				-- announce death
-				if Skada.db.profile.modules.deathannounce then
+				if Skada.db.profile.modules.deathannounce and set ~= Skada.total then
 					mod:Announce(deathlog.log, player.name)
 				end
 			end

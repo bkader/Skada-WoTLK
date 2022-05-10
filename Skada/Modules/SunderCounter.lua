@@ -18,7 +18,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 			set.sunder = (set.sunder or 0) + 1
 			player.sunder = (player.sunder or 0) + 1
 
-			if set ~= Skada.total and data.dstName then
+			if (set ~= Skada.total or Skada.db.profile.totalidc) and data.dstName then
 				player.sundertargets = player.sundertargets or {}
 				player.sundertargets[data.dstName] = (player.sundertargets[data.dstName] or 0) + 1
 			end

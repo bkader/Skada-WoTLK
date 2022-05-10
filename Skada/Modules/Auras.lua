@@ -121,7 +121,7 @@ do
 	-- common functions.
 
 	function log_auraapply(set, aura)
-		if not set or set == Skada.total then return end
+		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
 		if not aura or not aura.spellid then return end
 
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
@@ -157,7 +157,7 @@ do
 	end
 
 	function log_aurarefresh(set, aura)
-		if not set or set == Skada.total then return end
+		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
 		if not aura or not aura.spellid then return end
 
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
@@ -172,7 +172,7 @@ do
 	end
 
 	function log_auraremove(set, aura)
-		if not set or set == Skada.total then return end
+		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
 		if not aura or not aura.spellid then return end
 
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
@@ -329,7 +329,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 	}
 
 	local function log_specialaura(set, aura)
-		if not set or set == Skada.total then return end
+		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
 		if not aura or not aura.spellid then return end
 
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)

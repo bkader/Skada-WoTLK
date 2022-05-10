@@ -31,11 +31,11 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 			set.parry = (set.parry or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
-			if set ~= Skada.total then
+			if (set ~= Skada.total or Skada.db.profile.totalidc) and data.dstName then
 				player.parrytargets = player.parrytargets or {}
 				player.parrytargets[data.dstName] = (player.parrytargets[data.dstName] or 0) + 1
 
-				if Skada.db.profile.modules.parryannounce then
+				if Skada.db.profile.modules.parryannounce and set ~= Skada.total then
 					Skada:SendChat(format(L["%s parried %s (%s)"], data.dstName, data.playername, player.parrytargets[data.dstName] or 1), Skada.db.profile.modules.parrychannel, "preset")
 				end
 			end

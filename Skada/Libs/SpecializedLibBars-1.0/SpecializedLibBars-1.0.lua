@@ -123,7 +123,7 @@ lib.listPosition = lib.listPosition or {}
 local bars = lib.bars
 local barLists = lib.barLists
 local recycledBars = lib.recycledBars
-local listPosition = lib.listPosition
+local posix = lib.listPosition
 
 local scrollspeed = 1
 local dummyTable = {}
@@ -159,7 +159,7 @@ end
 
 -- lib:NewBarGroup - bar list creation
 do
-	local function listOnMouseDown(self)
+	local function anchorOnMouseDown(self)
 		local p = self:GetParent()
 		if not p.locked and not p.isMoving then
 			p.isMoving = true
@@ -172,7 +172,7 @@ do
 		end
 	end
 
-	local function listOnMouseUp(self)
+	local function anchorOnMouseUp(self)
 		local p = self:GetParent()
 		if not p.locked and p.isMoving then
 			p.isMoving = nil
@@ -253,8 +253,8 @@ do
 		list.length = length or 200
 		list.thickness = thickness or 15
 
-		list.button:SetScript("OnMouseDown", listOnMouseDown)
-		list.button:SetScript("OnMouseUp", listOnMouseUp)
+		list.button:SetScript("OnMouseDown", anchorOnMouseDown)
+		list.button:SetScript("OnMouseUp", anchorOnMouseUp)
 		list.button:RegisterForClicks("LeftButtonUp", "RightButtonUp", "MiddleButtonUp", "Button4Up", "Button5Up")
 
 		list.buttons = {}
@@ -323,6 +323,7 @@ do
 			list.stretcher.icon = list.stretcher:CreateTexture("$parentTexture", "OVERLAY")
 			list.stretcher.icon:SetAllPoints(list.stretcher)
 			list.stretcher.icon:SetTexture(ICON_STRETCH)
+			list.stretcher.icon:SetDesaturated(true)
 			list.stretcher:Hide()
 		end
 
@@ -424,6 +425,10 @@ end
 function lib:SavePosition()
 	if self == lib then return end
 
+	wipe(posix) -- always wipe
+	posix.width = self:GetWidth()
+	posix.height = self:GetHeight()
+
 	local xOfs, yOfs = self:GetCenter()
 	if not xOfs then return end
 
@@ -432,29 +437,30 @@ function lib:SavePosition()
 
 	xOfs = (xOfs * scale) - (GetScreenWidth() * uiScale) / 2
 	yOfs = (yOfs * scale) - (GetScreenHeight() * uiScale) / 2
-
-	wipe(listPosition)
-	listPosition.width = self:GetWidth()
-	listPosition.height = self:GetHeight()
-	listPosition.xOfs = xOfs / uiScale
-	listPosition.yOfs = yOfs / uiScale
+	posix.xOfs = xOfs / uiScale
+	posix.yOfs = yOfs / uiScale
 end
 
 function lib:RestorePosition()
-	if self ~= lib and listPosition.width and listPosition.height then
-		self:SetWidth(listPosition.width)
-		self:SetHeight(listPosition.height)
+	if self == lib then return end
 
+	if posix.xOfs and posix.yOfs then
 		local scale = self:GetEffectiveScale()
 		local uiScale = UIParent:GetScale()
-		local xOfs = listPosition.xOfs * uiScale / scale
-		local yOfs = listPosition.yOfs * uiScale / scale
 
 		self:ClearAllPoints()
-		self:SetPoint("CENTER", UIParent, "CENTER", xOfs, yOfs)
+		self:SetPoint("CENTER", UIParent, "CENTER", posix.xOfs * uiScale / scale, posix.yOfs * uiScale / scale)
 	end
 
-	wipe(listPosition) -- wipe it anyways
+	if posix.width then
+		self:SetWidth(posix.width)
+	end
+
+	if posix.height then
+		self:SetHeight(posix.height)
+	end
+
+	wipe(posix) -- always wipe
 end
 
 barListPrototype.SavePosition = lib.SavePosition
@@ -464,7 +470,7 @@ barListPrototype.RestorePosition = lib.RestorePosition
 -- bar lists/groups functions
 
 -- locks the bar group
-function barListPrototype:Lock(fireEvent)
+function barListPrototype:Lock(fireevent)
 	self.locked = true
 	self.lockbutton.icon:SetTexture(ICON_UNLOCK)
 
@@ -473,13 +479,13 @@ function barListPrototype:Lock(fireEvent)
 		self.resizeleft:Hide()
 	end
 
-	if fireEvent then
+	if fireevent then
 		self.callbacks:Fire("WindowLocked", self, self.locked)
 	end
 end
 
 -- unlocks the bar group
-function barListPrototype:Unlock(fireEvent)
+function barListPrototype:Unlock(fireevent)
 	self.locked = nil
 	self.lockbutton.icon:SetTexture(ICON_LOCK)
 
@@ -488,14 +494,23 @@ function barListPrototype:Unlock(fireEvent)
 		self.resizeleft:Show()
 	end
 
-	if fireEvent then
+	if fireevent then
 		self.callbacks:Fire("WindowLocked", self, self.locked)
+	end
+end
+
+-- toggle lock state
+function barListPrototype:SetLocked(lock, fireevent)
+	if lock then
+		self:Lock(fireevent)
+	else
+		self:Unlock(fireevent)
 	end
 end
 
 -- changes bars height
 function barListPrototype:SetThickness(thickness)
-	if self.thickness ~= thickness then
+	if thickness and self.thickness ~= thickness then
 		self.thickness = thickness
 		if bars[self] then
 			for _, bar in pairs(bars[self]) do
@@ -513,7 +528,7 @@ end
 
 -- changes spacing between bars
 function barListPrototype:SetSpacing(spacing)
-	if self.spacing ~= spacing then
+	if spacing and self.spacing ~= spacing then
 		self.spacing = spacing
 		self:SortBars()
 	end
@@ -526,8 +541,8 @@ end
 
 -- changes bars orientation
 function barListPrototype:SetOrientation(o)
-	if self.orientation ~= o then
-		assert(o == 1 or o == 2, "orientation must be 1-4")
+	if o and self.orientation ~= o then
+		assert(o == 1 or o == 2, "orientation must be 1 or 2.")
 		self.orientation = o
 		if bars[self] then
 			for _, bar in pairs(bars[self]) do
@@ -1132,10 +1147,12 @@ do
 	end
 
 	local function stretchOnEnter(self)
+		self.icon:SetDesaturated(false)
 		listOnEnter(self:GetParent())
 	end
 
 	local function stretchOnLeave(self)
+		self.icon:SetDesaturated(true)
 		listOnLeave(self:GetParent())
 	end
 
@@ -1227,6 +1244,11 @@ end
 -- returns bars sort function
 function barListPrototype:GetSortFunction(func)
 	return self.sortFunc
+end
+
+-- changes bars width
+function barListPrototype:SetBarWidth(width)
+	self:SetLength(width)
 end
 
 -- changes bars height
@@ -1871,13 +1893,16 @@ end
 -- barPrototype:SetLength -- changes bar's width
 -- barPrototype:SetThickness -- changes bar's heght
 do
+	barPrototype.SetWidth = barPrototype.super.SetWidth
+	barPrototype.SetHeight = barPrototype.super.SetHeight
+
 	local function updateSize(self)
 		local iconSize = self.showIcon and self.thickness or 0
 		local width = max(0.0001, self.length - iconSize)
 		local height = self.thickness
 
-		self.super.SetWidth(self, width)
-		self.super.SetHeight(self, height)
+		self:SetWidth(width)
+		self:SetHeight(height)
 		self.icon:SetSize(height, height)
 	end
 

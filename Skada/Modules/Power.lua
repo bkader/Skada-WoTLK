@@ -54,7 +54,7 @@ Skada:AddLoadableModule("Resources", function(L)
 			player[gainTable[gain.type]] = (player[gainTable[gain.type]] or 0) + gain.amount
 			set[gainTable[gain.type]] = (set[gainTable[gain.type]] or 0) + gain.amount
 
-			if set ~= Skada.total then
+			if (set ~= Skada.total or Skada.db.profile.totalidc) and gain.spellid then
 				player[spellTable[gain.type]] = player[spellTable[gain.type]] or {}
 				player[spellTable[gain.type]][gain.spellid] = (player[spellTable[gain.type]][gain.spellid] or 0) + gain.amount
 			end

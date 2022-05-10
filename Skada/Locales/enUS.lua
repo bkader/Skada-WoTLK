@@ -755,6 +755,8 @@ L["Dungeon Bosses"] = true
 L["Dungeon Trash"] = true
 L["opt_tweaks_total_all_desc"] = "All segments are added to total segment data."
 L["opt_tweaks_total_fmt_desc"] = "Segments with %s are added to total segment data."
+L["Detailed total segment"] = true
+L["opt_tweaks_total_full_desc"] = "When enabled, Skada will record everything to the total segment, instead of total numbers (record spell details, their targets as their sources)."
 -- project ascension
 L["Project Ascension"] = true
 L["project_ascension_desc"] = [=[On |cffffbb00Project Ascension|r, your characters are classless Heroes that have any ability or talent within their reach.

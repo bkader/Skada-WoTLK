@@ -197,7 +197,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 	end
 
 	local function log_damage(set, dmg)
-		if not set or set == Skada.total then return end
+		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
 
 		local absorbed = dmg.absorbed or 0
 		if (dmg.amount + absorbed) == 0 then return end
@@ -602,6 +602,11 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 			icon = [[Interface\Icons\spell_fire_felflamebolt]]
 		}
 
+		-- no total click.
+		sourcemod.nototal = true
+		spellmod.nototal = true
+		usefulmod.nototal = true
+
 		local damagedone = Skada:GetModule(L["Damage"], true)
 		if damagedone then
 			sourcemod.metadata.click1 = damagedone:GetModule(L["Damage target list"], true)
@@ -799,7 +804,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local function log_damage(set, dmg)
-		if not set or set == Skada.total then return end
+		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
 
 		local absorbed = dmg.absorbed or 0
 		if (dmg.amount + absorbed) == 0 then return end
@@ -1163,6 +1168,10 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 			icon = [[Interface\Icons\spell_shadow_shadowbolt]]
 		}
 
+		-- no total click.
+		targetmod.nototal = true
+		spellmod.nototal = true
+
 		local flags_dst_src = {dst_is_interesting_nopets = true, src_is_not_interesting = true}
 
 		Skada:RegisterForCL(
@@ -1303,7 +1312,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local function log_heal(set, data)
-		if not set or set == Skada.total then return end
+		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
 
 		if (data.amount or 0) == 0 then return end
 

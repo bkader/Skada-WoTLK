@@ -96,7 +96,7 @@ Skada:AddLoadableModule("Damage", function(L)
 	}
 
 	local function log_spellcast(set, playerid, playername, playerflags, spellname, spellschool)
-		if not set or set == Skada.total then return end
+		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
 
 		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
 		if player and player.damagespells then
@@ -142,7 +142,7 @@ Skada:AddLoadableModule("Damage", function(L)
 		end
 
 		-- saving this to total set may become a memory hog deluxe.
-		if set == Skada.total then return end
+		if set == Skada.total and not Skada.db.profile.totalidc then return end
 
 		-- spell
 		local spellname = dmg.spellname .. (tick and L["DoT"] or "")

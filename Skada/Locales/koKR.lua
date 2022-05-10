@@ -723,6 +723,8 @@ L["Dungeon Bosses"] = "던전 보스" -- needs review
 L["Dungeon Trash"] = "던전 휴지통" -- needs review
 L["opt_tweaks_total_all_desc"] = "모든 세그먼트는 전체 세그먼트의 데이터에 추가됩니다." -- needs review
 L["opt_tweaks_total_fmt_desc"] = "전체 세그먼트의 데이터에 %s가 있는 세그먼트가 추가됩니다." -- needs review
+L["Detailed total segment"] = "상세 합계"
+-- L["opt_tweaks_total_full_desc"] = "When enabled, Skada will record everything to the total segment, instead of total numbers (record spell details, their targets as their sources)."
 -- project ascension
 L["Project Ascension"] = "Project Ascension"
 L["project_ascension_desc"] = "|cffffbb00Project Ascension|r에서 캐릭터는 능력이나 재능이 있는 클래스가 없는 영웅입니다.\n\n아이콘 및 색상은 기본 아이콘 및 색상 대신 사용할 그룹 구성원에게 전송됩니다."

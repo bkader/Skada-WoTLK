@@ -1,4 +1,4 @@
---[[ Translators: Ícar#8167 / Septimun#8954 ]] --
+--[[ Translators: Ícar#8167 / Septimun#8954 / 𝔸𝕓𝕖𝕝#9150 ]] --
 local AceLocale = LibStub("AceLocale-3.0")
 local L = AceLocale:NewLocale("Skada", "esES") or AceLocale:NewLocale("Skada", "esMX")
 if not L then return end
@@ -671,11 +671,11 @@ L["Your nickname is too long, max of 12 characters is allowed."] = "Su apodo es 
 L["Only letters and two spaces are allowed."] = "Solo se permiten letras y dos espacios."
 L["Your nickname contains a forbidden word."] = "Tu apodo contiene una palabra prohibida."
 L["You can't use the same letter three times consecutively, two spaces consecutively or more then two spaces."] = "No puede usar la misma letra tres veces consecutivas, dos espacios consecutivos o m\195\161s de dos espacios."
-L["Ignore Nicknames"] = "Ignorar apodos y avatares"
-L["When enabled, nicknames set by Skada users are ignored."] = "Cuando est\195\161 habilitado, los apodos y avatares establecidos por otros miembros de la hermandad se ignoran."
+L["Ignore Nicknames"] = "Ignorar apodos"
+L["When enabled, nicknames set by Skada users are ignored."] = "Cuando est\195\161 habilitado, los apodos establecidos por los usuarios de Skada se ignoran."
 L["Name display"] = "Formato de nombres"
 L["Choose how names are shown on your bars."] = "Elija c\195\179mo se muestran los nombres en sus barras."
-L["Clear Cache"] = "Limpiar cache"
+L["Clear Cache"] = "Limpiar Cach\195\169"
 L["Are you sure you want clear cached nicknames?"] = "¿Est\195\161s seguro de que quieres borrar los apodos almacenados en cach\195\169?"
 -- overkill module lines --
 L["Overkill"] = "Exceso de da\195\177o"
@@ -723,6 +723,8 @@ L["Dungeon Bosses"] = "Jefes de mazmorra" -- needs review
 L["Dungeon Trash"] = "Trash de mazmorra" -- needs review
 L["opt_tweaks_total_all_desc"] = "Todos los segmentos se a\195\177aden a los datos del segmento total." -- needs review
 L["opt_tweaks_total_fmt_desc"] = "Los segmentos con %s se a\195\177aden a los datos del segmento total." -- needs review
+L["Detailed total segment"] = "Segmento total detallado"
+L["opt_tweaks_total_full_desc"] = "Cuando est\195\161 habilitado, Registrar\195\161 todo en el segmento total en lugar de solo los totales (registre los detalles del hechizo en el segmento |cffffbb00total|r)."
 -- project ascension
 L["Project Ascension"] = "Project Ascension"
 L["project_ascension_desc"] = [=[En |cffffbb00Project Ascension|r, tus personajes son héroes sin clase que tienen cualquier habilidad o talento a su alcance.

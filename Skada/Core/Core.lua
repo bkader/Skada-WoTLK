@@ -531,7 +531,7 @@ do
 					end,
 					set = function(_, display)
 						self.db.display = display
-						Skada:ReloadSettings(self)
+						Skada:ReloadSettings()
 					end
 				},
 				separator1 = {
@@ -3073,60 +3073,30 @@ function Skada:ApplySettings(name, hidemenu)
 	Skada:UpdateDisplay(true)
 end
 
-function Skada:ReloadSettings(win)
-	if win then
-		if type(win) == "string" then
-			for i = 1, #windows do
-				local w = windows[i]
-				if w.db.name == win then
-					win = w
-					break
-				end
-			end
+function Skada:ReloadSettings()
+	for i = 1, #windows do
+		local win = windows[i]
+		if win and win.Destroy then
+			win:Destroy()
 		end
+	end
+	wipe(windows)
 
-		win:Destroy()
-
-		for i = 1, #windows do
-			if win == windows[i] then
-				tremove(windows, i)
-				break
-			end
+	for i = 1, #self.db.profile.windows do
+		local win = self.db.profile.windows[i]
+		if win then
+			self:CreateWindow(win.name, win)
 		end
-
-		for i = 1, #Skada.db.profile.windows do
-			local w = Skada.db.profile.windows[i]
-			if w and w.name == win.db.name then
-				Skada:CreateWindow(w.name, w)
-				break
-			end
-		end
-	else
-		for i = 1, #windows do
-			local w = windows[i]
-			if w then
-				w:Destroy()
-			end
-		end
-		wipe(windows)
-
-		for i = 1, #Skada.db.profile.windows do
-			local w = Skada.db.profile.windows[i]
-			if w then
-				Skada:CreateWindow(w.name, w)
-			end
-		end
-
-		if DBI and not DBI:IsRegistered("Skada") then
-			DBI:Register("Skada", dataobj, Skada.db.profile.icon)
-		end
-
-		Skada:ClearAllIndexes()
-		Skada:RefreshMMButton()
 	end
 
-	Skada.total = Skada.char.total
-	Skada:ApplySettings(win)
+	if DBI and not DBI:IsRegistered("Skada") then
+		DBI:Register("Skada", dataobj, self.db.profile.icon)
+	end
+
+	self:ClearAllIndexes()
+	self:RefreshMMButton()
+	self.total = self.char.total
+	self:ApplySettings()
 end
 
 -------------------------------------------------------------------------------
