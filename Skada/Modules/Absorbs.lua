@@ -311,11 +311,8 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 			-- record the target
 			if absorb.dstName then
-				local actor = Skada:GetActor(set, absorb.dstGUID, absorb.dstName, absorb.dstFlags)
-				if actor then
-					spell.targets = spell.targets or {}
-					spell.targets[absorb.dstName] = (spell.targets[absorb.dstName] or 0) + absorb.amount
-				end
+				spell.targets = spell.targets or {}
+				spell.targets[absorb.dstName] = (spell.targets[absorb.dstName] or 0) + absorb.amount
 			end
 		end
 	end

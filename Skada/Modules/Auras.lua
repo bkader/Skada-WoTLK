@@ -144,16 +144,13 @@ do
 
 			-- only records targets for debuffs
 			if aura.type == "DEBUFF" and aura.dstName then
-				local actor = Skada:GetActor(set, aura.dstGUID, aura.dstName, aura.dstFlags)
-				if actor then
-					spell.targets = spell.targets or {}
-					if not spell.targets[aura.dstName] then
-						spell.targets[aura.dstName] = {count = 1, active = 1, uptime = 0, start = time()}
-					else
-						spell.targets[aura.dstName].count = spell.targets[aura.dstName].count + 1
-						spell.targets[aura.dstName].active = (spell.targets[aura.dstName].active or 0) + 1
-						spell.targets[aura.dstName].start = spell.targets[aura.dstName].start or time()
-					end
+				spell.targets = spell.targets or {}
+				if not spell.targets[aura.dstName] then
+					spell.targets[aura.dstName] = {count = 1, active = 1, uptime = 0, start = time()}
+				else
+					spell.targets[aura.dstName].count = spell.targets[aura.dstName].count + 1
+					spell.targets[aura.dstName].active = (spell.targets[aura.dstName].active or 0) + 1
+					spell.targets[aura.dstName].start = spell.targets[aura.dstName].start or time()
 				end
 			end
 		end
@@ -760,8 +757,6 @@ Skada:AddLoadableModule("Debuffs", function(L)
 								tbl[name].class = actor.class
 								tbl[name].role = actor.role
 								tbl[name].spec = actor.spec
-							else
-								tbl[name].class = "UNKNOWN"
 							end
 						end
 					end
@@ -783,8 +778,6 @@ Skada:AddLoadableModule("Debuffs", function(L)
 					tbl[name].class = actor.class
 					tbl[name].role = actor.role
 					tbl[name].spec = actor.spec
-				else
-					tbl[name].class = "UNKNOWN"
 				end
 			end
 			return tbl, maxtime

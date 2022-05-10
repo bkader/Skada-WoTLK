@@ -38,11 +38,8 @@ Skada:AddLoadableModule("Dispels", function(L)
 
 				-- the dispelled target
 				if data.dstName then
-					local actor = Skada:GetActor(set, data.dstGUID, data.dstName, data.dstFlags)
-					if actor then
-						spell.targets = spell.targets or {}
-						spell.targets[data.dstName] = (spell.targets[data.dstName] or 0) + 1
-					end
+					spell.targets = spell.targets or {}
+					spell.targets[data.dstName] = (spell.targets[data.dstName] or 0) + 1
 				end
 			end
 		end
@@ -306,8 +303,6 @@ Skada:AddLoadableModule("Dispels", function(L)
 									tbl[name].class = actor.class
 									tbl[name].role = actor.role
 									tbl[name].spec = actor.spec
-								else
-									tbl[name].class = "UNKNOWN"
 								end
 							end
 						end

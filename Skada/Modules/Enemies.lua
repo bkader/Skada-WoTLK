@@ -150,7 +150,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 	end
 
 	local function log_custom_unit(set, name, playername, spellid, spellschool, amount, absorbed)
-		local e = Skada:GetEnemy(set, name)
+		local e = Skada:GetEnemy(set, name, nil, nil, true)
 		if e then
 			e.fake = true
 			e.damagetaken = (e.damagetaken or 0) + amount
@@ -202,7 +202,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 		local absorbed = dmg.absorbed or 0
 		if (dmg.amount + absorbed) == 0 then return end
 
-		local e = Skada:GetEnemy(set, dmg.enemyname, dmg.enemyid, dmg.enemyflags)
+		local e = Skada:GetEnemy(set, dmg.enemyname, dmg.enemyid, dmg.enemyflags, true)
 		if e then
 			set.edamagetaken = (set.edamagetaken or 0) + dmg.amount
 			set.etotaldamagetaken = (set.etotaldamagetaken or 0) + dmg.amount
@@ -231,9 +231,6 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 
 			-- damage source.
 			if dmg.srcName then
-				local actor = Skada:GetActor(set, dmg.srcGUID, dmg.srcName, dmg.srcFlags)
-				if not actor then return end -- missing for some reason!
-
 				-- the source
 				local source = spell.sources and spell.sources[dmg.srcName]
 				if not source then
@@ -807,7 +804,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 		local absorbed = dmg.absorbed or 0
 		if (dmg.amount + absorbed) == 0 then return end
 
-		local e = Skada:GetEnemy(set, dmg.enemyname, dmg.enemyid, dmg.enemyflags)
+		local e = Skada:GetEnemy(set, dmg.enemyname, dmg.enemyid, dmg.enemyflags, true)
 		if e then
 			if (set.type == "arena" or set.type == "pvp") and e.class and Skada.validclass[e.class] then
 				Skada:AddActiveTime(e, e.role ~= "HEALER" and dmg.amount > 0)
@@ -837,9 +834,6 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 
 			-- damage target.
 			if dmg.dstName then
-				local actor = Skada:GetActor(set, dmg.dstGUID, dmg.dstName, dmg.dstFlags)
-				if not actor then return end
-
 				local target = spell.targets and spell.targets[dmg.dstName]
 				if not target then
 					spell.targets = spell.targets or {}
@@ -1288,8 +1282,6 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 						tbl[name].class = actor.class
 						tbl[name].role = actor.role
 						tbl[name].spec = actor.spec
-					else
-						tbl[name].class = "UNKNOWN"
 					end
 				end
 			end
@@ -1315,7 +1307,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 
 		if (data.amount or 0) == 0 then return end
 
-		local e = Skada:GetEnemy(set, data.enemyname, data.enemyid, data.enemyflags)
+		local e = Skada:GetEnemy(set, data.enemyname, data.enemyid, data.enemyflags, true)
 		if e then
 			if (set.type == "arena" or set.type == "pvp") and e.class and Skada.validclass[e.class] then
 				Skada:AddActiveTime(e, e.role == "HEALER" and data.amount > 0)
@@ -1333,11 +1325,8 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 			spell.amount = spell.amount + data.amount
 
 			if data.dstName then
-				local actor = Skada:GetActor(set, data.dstGUID, data.dstName, data.dstFlags)
-				if actor then
-					spell.targets = spell.targets or {}
-					spell.targets[data.dstName] = (spell.targets[data.dstName] or 0) + data.amount
-				end
+				spell.targets = spell.targets or {}
+				spell.targets[data.dstName] = (spell.targets[data.dstName] or 0) + data.amount
 			end
 		end
 	end

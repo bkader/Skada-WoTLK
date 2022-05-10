@@ -145,8 +145,6 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 
 		-- record the source
 		if dmg.srcName then
-			local actor = Skada:GetActor(set, dmg.srcGUID, dmg.srcName, dmg.srcFlags)
-			if not actor then return end
 			local source = spell.sources and spell.sources[dmg.srcName]
 			if not source then
 				spell.sources = spell.sources or {}

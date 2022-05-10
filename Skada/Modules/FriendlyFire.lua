@@ -34,11 +34,8 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 
 			-- target
 			if dmg.dstName then
-				local actor = Skada:GetActor(set, dmg.dstGUID, dmg.dstName, dmg.dstFlags)
-				if actor then
-					spell.targets = spell.targets or {}
-					spell.targets[dmg.dstName] = (spell.targets[dmg.dstName] or 0) + dmg.amount
-				end
+				spell.targets = spell.targets or {}
+				spell.targets[dmg.dstName] = (spell.targets[dmg.dstName] or 0) + dmg.amount
 			end
 		end
 	end
@@ -333,8 +330,6 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 									cacheTable[name].class = actor.class
 									cacheTable[name].role = actor.role
 									cacheTable[name].spec = actor.spec
-								else
-									cacheTable[name].class = "UNKNOWN"
 								end
 							end
 						end

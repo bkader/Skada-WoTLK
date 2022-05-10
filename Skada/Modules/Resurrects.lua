@@ -45,11 +45,8 @@ Skada:AddLoadableModule("Resurrects", function(L)
 
 			-- spell targets
 			if data.dstName then
-				local actor = Skada:FindActor(set, data.dstGUID, data.dstName, data.dstFlags)
-				if actor then
-					spell.targets = spell.targets or {}
-					spell.targets[data.dstName] = (spell.targets[data.dstName] or 0) + 1
-				end
+				spell.targets = spell.targets or {}
+				spell.targets[data.dstName] = (spell.targets[data.dstName] or 0) + 1
 			end
 		end
 	end
@@ -252,8 +249,6 @@ Skada:AddLoadableModule("Resurrects", function(L)
 									tbl[name].class = actor.class
 									tbl[name].role = actor.role
 									tbl[name].spec = actor.spec
-								else
-									tbl[name].class = "UNKNOWN"
 								end
 							end
 						end

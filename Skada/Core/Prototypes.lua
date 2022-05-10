@@ -498,8 +498,6 @@ function actorPrototype:GetDamageTargets(tbl)
 							tbl[name].class = actor.class
 							tbl[name].role = actor.role
 							tbl[name].spec = actor.spec
-						else
-							tbl[name].class = "UNKNOWN"
 						end
 					end
 				end
@@ -597,8 +595,6 @@ function actorPrototype:GetDamageSources(tbl)
 							tbl[name].class = actor.class
 							tbl[name].role = actor.role
 							tbl[name].spec = actor.spec
-						else
-							tbl[name].class = "UNKNOWN"
 						end
 					end
 				end
@@ -724,8 +720,6 @@ function actorPrototype:GetHealTargets(tbl)
 							tbl[name].class = actor.class
 							tbl[name].role = actor.role
 							tbl[name].spec = actor.spec
-						else
-							tbl[name].class = "UNKNOWN"
 						end
 					end
 				end
@@ -782,8 +776,6 @@ function actorPrototype:GetOverhealTargets(tbl)
 								tbl[name].class = actor.class
 								tbl[name].role = actor.role
 								tbl[name].spec = actor.spec
-							else
-								tbl[name].class = "UNKNOWN"
 							end
 						end
 					end
@@ -840,8 +832,6 @@ function actorPrototype:GetTotalHealTargets(tbl)
 							tbl[name].class = actor.class
 							tbl[name].role = actor.role
 							tbl[name].spec = actor.spec
-						else
-							tbl[name].class = "UNKNOWN"
 						end
 					end
 				end
@@ -927,8 +917,6 @@ function actorPrototype:GetAbsorbTargets(tbl)
 							tbl[name].class = actor.class
 							tbl[name].role = actor.role
 							tbl[name].spec = actor.spec
-						else
-							tbl[name].class = "UNKNOWN"
 						end
 					end
 				end
@@ -963,8 +951,6 @@ function actorPrototype:GetAbsorbHealTargets(tbl)
 								tbl[name].class = actor.class
 								tbl[name].role = actor.role
 								tbl[name].spec = actor.spec
-							else
-								tbl[name].class = "UNKNOWN"
 							end
 						end
 					end
@@ -1002,8 +988,6 @@ function actorPrototype:GetAbsorbHealTargets(tbl)
 								tbl[name].class = actor.class
 								tbl[name].role = actor.role
 								tbl[name].spec = actor.spec
-							else
-								tbl[name].class = "UNKNOWN"
 							end
 						end
 					end

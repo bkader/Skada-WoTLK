@@ -167,12 +167,7 @@ local function CreateSet(setname, set)
 	set.starttime = time()
 	set.time = 0
 	set.players = set.players or {}
-
-	-- only for current segment
-	if setname ~= L["Total"] then
-		set.last_action = set.last_action or set.starttime
-		set.enemies = set.enemies or {}
-	end
+	set.last_action = (setname ~= L["Total"]) and set.starttime or nil
 
 	-- last alterations before returning.
 	for i = 1, #modes do
@@ -1509,15 +1504,29 @@ end
 
 -- finds or create an enemy entry
 -- function Skada:FindEnemy(set, name, guid)
-function Skada:GetEnemy(set, name, guid, flag)
-	if not (set and set.enemies and name) then return end
+function Skada:GetEnemy(set, name, guid, flag, create)
+	if not set or not name then return end -- no set and now name
+	if not set.enemies and not create then return end -- no enemies table
+
 	local enemy = self:FindEnemy(set, name, guid)
 	if not enemy then
+		-- should create table?
+		if create and not set.enemies then
+			set.enemies = {}
+		end
+
 		enemy = {id = guid or name, name = name, flag = flag}
 		if guid or flag then
 			enemy.class = self.unitClass(guid, flag)
 		else
 			enemy.class = "ENEMY"
+		end
+
+		for i = 1, #modes do
+			local mode = modes[i]
+			if mode and mode.AddEnemyAttributes then
+				mode:AddEnemyAttributes(enemy, set)
+			end
 		end
 
 		set.enemies[#set.enemies + 1] = enemy
@@ -3891,39 +3900,6 @@ do
 				end
 			end
 
-			-- check for boss fights
-			if not self.current.gotboss then
-				-- marking set as boss fights relies only on src_is_interesting
-				if src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
-					local isboss, bossid, bossname = self:IsBoss(dstGUID)
-					if isboss then
-						self.current.mobname = bossname or dstName
-						self.current.gotboss = bossid or true
-						self.current.keep = self.db.profile.alwayskeepbosses or nil
-						self:SendMessage("COMBAT_ENCOUNTER_START", self.current)
-					end
-				end
-			-- default boss defeated event? (no DBM/BigWigs)
-			elseif (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") and self.current.gotboss == GetCreatureId(dstGUID) then
-				self:ScheduleTimer(BossDefeated, self.db.profile.updatefrequency or 0.5)
-			end
-
-			-- set mobname
-			if not self.current.mobname then
-				if self.current.type == "pvp" then
-					self.current.mobname = GetInstanceInfo()
-				elseif self.current.type == "arena" then
-					self.current.mobname = GetInstanceInfo()
-					self.current.gold = GetBattlefieldArenaFaction()
-				elseif (src_is_interesting or band(srcFlags, BITMASK_GROUP) ~= 0) and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
-					self.current.mobname = dstName
-				elseif (dst_is_interesting or band(dstFlags, BITMASK_GROUP) ~= 0) and band(srcFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
-					self.current.mobname = srcName
-				else -- fallback
-					self.current.mobname = L["Unknown"]
-				end
-			end
-
 			-- valid combatlog event
 			if combatlog_events[eventtype] then
 				if self.current.stopped then return end
@@ -3987,6 +3963,37 @@ do
 						self.current.last_action = time()
 						mod.func(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 					end
+				end
+			end
+
+			-- check for boss fights
+			if not self.current.gotboss then
+				-- marking set as boss fights relies only on src_is_interesting
+				if src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+					local isboss, bossid, bossname = self:IsBoss(dstGUID)
+					if isboss then
+						self.current.mobname = bossname or dstName
+						self.current.gotboss = bossid or true
+						self.current.keep = self.db.profile.alwayskeepbosses or nil
+						self:SendMessage("COMBAT_ENCOUNTER_START", self.current)
+					end
+				end
+			-- default boss defeated event? (no DBM/BigWigs)
+			elseif (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") and self.current.gotboss == GetCreatureId(dstGUID) then
+				self:ScheduleTimer(BossDefeated, self.db.profile.updatefrequency or 0.5)
+			end
+
+			-- set mobname
+			if not self.current.mobname then
+				if self.current.type == "pvp" then
+					self.current.mobname = GetInstanceInfo()
+				elseif self.current.type == "arena" then
+					self.current.mobname = GetInstanceInfo()
+					self.current.gold = GetBattlefieldArenaFaction()
+				elseif src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+					self.current.mobname = dstName
+				elseif dst_is_interesting and band(srcFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+					self.current.mobname = srcName
 				end
 			end
 		end

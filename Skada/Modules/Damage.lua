@@ -214,9 +214,6 @@ Skada:AddLoadableModule("Damage", function(L)
 
 		-- target
 		if dmg.dstName then
-			-- we make sure to record the target!
-			local actor = Skada:GetActor(set, dmg.dstGUID, dmg.dstName, dmg.dstFlags)
-			if not actor then return end
 			local target = spell.targets and spell.targets[dmg.dstName]
 			if not target then
 				spell.targets = spell.targets or {}

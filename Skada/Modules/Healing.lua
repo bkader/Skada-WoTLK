@@ -91,8 +91,6 @@ Skada:AddLoadableModule("Healing", function(L)
 
 			-- record the target
 			if data.dstName then
-				local actor = Skada:GetActor(set, data.dstGUID, data.dstName, data.dstFlags)
-				if not actor then return end
 				local target = spell.targets and spell.targets[data.dstName]
 				if not target then
 					spell.targets = spell.targets or {}
@@ -1271,7 +1269,6 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 											tbl[name].time = actor:GetTime()
 										end
 									else
-										tbl[name].class = "UNKNOWN"
 										tbl[name].time = self:GetTime()
 									end
 								end
@@ -1304,7 +1301,6 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 											tbl[name].time = actor:GetTime()
 										end
 									else
-										tbl[name].class = "UNKNOWN"
 										tbl[name].time = self:GetTime()
 									end
 								end

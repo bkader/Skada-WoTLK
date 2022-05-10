@@ -19,11 +19,8 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 			player.sunder = (player.sunder or 0) + 1
 
 			if set ~= Skada.total and data.dstName then
-				local actor = Skada:GetActor(set, data.dstGUID, data.dstName, data.dstFlags)
-				if actor then
-					player.sundertargets = player.sundertargets or {}
-					player.sundertargets[data.dstName] = (player.sundertargets[data.dstName] or 0) + 1
-				end
+				player.sundertargets = player.sundertargets or {}
+				player.sundertargets[data.dstName] = (player.sundertargets[data.dstName] or 0) + 1
 			end
 		end
 	end
@@ -297,8 +294,6 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 						tbl[name].class = actor.class
 						tbl[name].role = actor.role
 						tbl[name].spec = actor.spec
-					else
-						tbl[name].class = "UNKNOWN"
 					end
 				end
 				return tbl
