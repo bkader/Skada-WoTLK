@@ -256,8 +256,6 @@ L["Are you sure you want to reinstall Skada?"] = "M\195\182chten Sie Skada wirkl
 -- general options
 L["Show minimap button"] = "Minikartenbutton zeigen"
 L["Toggles showing the minimap button."] = "Zeigt oder versteckt den Minikartenbutton"
-L["Shorten menus"] = "Men\195\188s k\195\188rzen"
-L["opt_shortmenu_desc"] = "Modus und Segmentmen\195\188s aus dem Skada-Men\195\188 entfernt, um die H\195\182he zu verringern. Auf die Men\195\188s kann weiterhin \195\188ber Fenstertasten zugegriffen werden."
 L["Transliterate"] = "Transliterieren"
 L["Converts Cyrillic letters into Latin letters."] = "Wandelt kyrillische Buchstaben in lateinische Buchstaben um."
 L["Merge pets"] = "Begleiter zusammenf\195\188gen"

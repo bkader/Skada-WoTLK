@@ -257,8 +257,6 @@ L["Are you sure you want to reinstall Skada?"] = "Вы уверены, что х
 -- general options
 L["Show minimap button"] = "Показывать кнопку у миникарты"
 L["Toggles showing the minimap button."] = "Отобразить/скрыть кнопку у миникарты."
-L["Shorten menus"] = "Сокращенное меню"
-L["opt_shortmenu_desc"] = "Удаляет меню режимов и сегментов из меню Skada, чтобы уменьшить его высоту. Меню по-прежнему доступны с помощью оконных кнопок."
 L["Transliterate"] = "Транслитерация"
 L["Converts Cyrillic letters into Latin letters."] = "Представление кириллических символов латинскими."
 L["Merge pets"] = "Объединять питомцев"

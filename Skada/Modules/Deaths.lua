@@ -460,7 +460,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 					end
 
 					d.label = d.label or L["Unknown"]
-					d.value = death.time
+					d.value = death.time or 0
 					d.valuetext = death.timeStr
 
 					if win.metadata and d.value > win.metadata.maxvalue then

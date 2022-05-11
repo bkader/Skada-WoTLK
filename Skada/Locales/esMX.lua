@@ -25,7 +25,7 @@ L["Press CTRL-C to copy the configuration to your clipboard."] = "Pulse CTRL-C p
 -- common lines
 L["Options"] = "Opciones"
 L["Options for %s."] = "Opciones de %s."
-L["General"] = "Generale"
+L["General"] = "General"
 L["General options for %s."] = "Opciones generales de %s."
 L["Text"] = "Texto"
 L["Text options for %s."] = "Opciones de texto de %s."
@@ -258,8 +258,6 @@ L["Are you sure you want to reinstall Skada?"] = "¿Est\195\161s seguro de que q
 -- general options
 L["Show minimap button"] = "Mostrar bot\195\179n minimapa"
 L["Toggles showing the minimap button."] = "Mostrar/No mostrar el bot\195\179n del minimapa"
-L["Shorten menus"] = "Acortar men\195\186s"
-L["opt_shortmenu_desc"] = "Se eliminaron los men\195\186s de modo y segmento del men\195\186 Skada para disminuir la altitud. A\195\186n se puede acceder a los men\195\186s a trav\195\169s de los botones de la ventana."
 L["Transliterate"] = "Transliterar"
 L["Converts Cyrillic letters into Latin letters."] = "Convierte letras cir\195\173licas en letras latinas."
 L["Merge pets"] = "Unir mascotas"
@@ -357,7 +355,7 @@ L["Left"] = "Izquierda"
 -- disabled modules
 L["Modules"] = "M\195\179dulos"
 L["Disabled Modules"] = "M\195\179dulos deshabilitados"
-L["Modules"] = "Opciones de m\195\179dulos"
+L["Modules Options"] = "Opciones de m\195\179dulos"
 L["Tick the modules you want to disable."] = "Marque los m\195\179dulos que desea deshabilitar."
 L["This change requires a UI reload. Are you sure?"] = "Este cambio requiere una recarga de la UI. ¿Est\195\161s seguro?"
 -- themes options

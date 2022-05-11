@@ -13,7 +13,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 local ACD = LibStub("AceConfigDialog-3.0")
 local ACR = LibStub("AceConfigRegistry-3.0")
 local DBI = LibStub("LibDBIcon-1.0", true)
-local LDS = LibStub("LibDualSpec-1.0", true)
 local Translit = LibStub("LibTranslit-1.0", true)
 
 -- cache frequently used globlas
@@ -120,7 +119,6 @@ Skada.BITMASK_ENEMY = BITMASK_ENEMY
 -- local functions.
 
 Skada.newTable, Skada.delTable = Skada.TablePool("kv")
-local new, del = Skada.newTable, Skada.delTable
 
 -- verifies a set
 local function VerifySet(mode, set)
@@ -462,7 +460,7 @@ do
 
 	-- creates or reuses a dataset table
 	function Window:nr(i)
-		local d = self.dataset[i] or new()
+		local d = self.dataset[i] or {}
 		self.dataset[i] = d
 		return d
 	end
@@ -696,7 +694,7 @@ function Window:UpdateDisplay()
 		if self.dataset then
 			for i = 1, #self.dataset do
 				local data = self.dataset[i]
-				if data and data.id and data.value > self.metadata.maxvalue then
+				if data and data.id and data.value and data.value > self.metadata.maxvalue then
 					self.metadata.maxvalue = data.value
 				end
 			end
@@ -754,7 +752,7 @@ end
 function Window:Reset()
 	if self.dataset then
 		for i = 1, #self.dataset do
-			del(tremove(self.dataset, i))
+			wipe(self.dataset[i])
 		end
 	end
 end
@@ -2047,6 +2045,8 @@ end
 
 function Skada:Command(param)
 	local cmd, arg1, arg2, arg3 = self:GetArgs(param, 4)
+	cmd = (cmd and cmd ~= "") and lower(cmd) or cmd
+
 	if cmd == "pets" then
 		self:PetDebug()
 	elseif cmd == "reset" then
@@ -2085,7 +2085,7 @@ function Skada:Command(param)
 	elseif cmd == "export" and self.ExportProfile then
 		self:ExportProfile()
 	elseif cmd == "about" or cmd == "info" then
-		self:OpenOptions("about")
+		InterfaceOptionsFrame_OpenToCategory("Skada")
 	elseif cmd == "version" or cmd == "checkversion" then
 		self:Printf("|cffffbb00%s|r: %s - |cffffbb00%s|r: %s", L["Version"], self.version, L["Date"], GetAddOnMetadata("Skada", "X-Date"))
 		CheckVersion()
@@ -3113,10 +3113,10 @@ function Skada:OnInitialize()
 	-- Profiles
 	local AceDBOptions = LibStub("AceDBOptions-3.0", true)
 	if AceDBOptions then
+		local LDS = LibStub("LibDualSpec-1.0", true)
 		if LDS then LDS:EnhanceDatabase(self.db, "Skada") end
 
 		self.options.args.profiles.args.general = AceDBOptions:GetOptionsTable(self.db)
-		self.options.args.profiles.args.general.name = L["General"]
 		self.options.args.profiles.args.general.order = 0
 
 		if LDS then LDS:EnhanceOptions(self.options.args.profiles.args.general, self.db) end

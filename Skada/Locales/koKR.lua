@@ -256,9 +256,6 @@ L["Are you sure you want to reinstall Skada?"] = "Skada를 다시 설치하시�
 -- general options
 L["Show minimap button"] = "미니맵 버튼 표시"
 L["Toggles showing the minimap button."] = "미니맵 버튼 표시를 전환합니다."
-L["Shorten menus"] = "메뉴 줄이기"
-L["opt_shortmenu_desc"] = [[Skada 메뉴에서 모드 및 세그먼트 메뉴를 제거하여 높이를 줄입니다.
-메뉴는 여전히 창 버튼을 사용하여 액세스할 수 있습니다.]]
 L["Transliterate"] = "음역하다"
 L["Converts Cyrillic letters into Latin letters."] = "키릴 문자를 라틴 문자로 변환합니다."
 L["Merge pets"] = "소환수 합산"

@@ -269,8 +269,6 @@ L["Are you sure you want to reinstall Skada?"] = true
 -- general options
 L["Show minimap button"] = true
 L["Toggles showing the minimap button."] = true
-L["Shorten menus"] = true
-L["opt_shortmenu_desc"] = "Removes mode and segment menus from Skada menu to reduce its height. Menus are still accessible using window buttons."
 L["Transliterate"] = true
 L["Converts Cyrillic letters into Latin letters."] = true
 L["Merge pets"] = true

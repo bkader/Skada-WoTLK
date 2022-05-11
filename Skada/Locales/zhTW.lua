@@ -256,8 +256,6 @@ L["Are you sure you want to reinstall Skada?"] = "您確定要重新安裝 Skada
 -- general options
 L["Show minimap button"] = "顯示小地圖按鈕"
 L["Toggles showing the minimap button."] = "切換顯示小地圖按鈕。"
--- L["Shorten menus"] = ""
--- L["opt_shortmenu_desc"] = ""
 L["Transliterate"] = "音譯"
 L["Converts Cyrillic letters into Latin letters."] = "將西里爾字母轉換為拉丁字母。"
 L["Merge pets"] = "合併寵物"
