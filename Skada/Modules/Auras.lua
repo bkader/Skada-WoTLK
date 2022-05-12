@@ -132,8 +132,8 @@ do
 				player.auras = player.auras or {}
 				player.auras[aura.spellid] = spell
 			else
-				spell.active = spell.active + 1
-				spell.count = spell.count + 1
+				spell.active = (spell.active or 0) + 1
+				spell.count = (spell.count or 0) + 1
 				spell.start = spell.start or time()
 
 				-- fix missing school
@@ -148,8 +148,8 @@ do
 				if not spell.targets[aura.dstName] then
 					spell.targets[aura.dstName] = {count = 1, active = 1, uptime = 0, start = time()}
 				else
-					spell.targets[aura.dstName].count = spell.targets[aura.dstName].count + 1
 					spell.targets[aura.dstName].active = (spell.targets[aura.dstName].active or 0) + 1
+					spell.targets[aura.dstName].count = (spell.targets[aura.dstName].count or 0) + 1
 					spell.targets[aura.dstName].start = spell.targets[aura.dstName].start or time()
 				end
 			end
