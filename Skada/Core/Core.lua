@@ -659,12 +659,7 @@ end
 
 -- destroy a window
 function Window:Destroy()
-	if self.dataset then
-		for i = 1, #self.dataset do
-			del(tremove(self.dataset, i))
-		end
-		self.dataset = nil
-	end
+	self.dataset = nil
 
 	if self.display then
 		self.display:Destroy(self)
