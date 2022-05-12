@@ -295,7 +295,6 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 		function deathlogmod:Update(win, set)
 			win.title = format(L["%s's death log"], win.actorname or L["Unknown"])
-			if set == Skada.current then return end -- don't show while in combat
 
 			local player = Skada:FindPlayer(set, win.actorid, win.actorname)
 			if player and win.datakey then
