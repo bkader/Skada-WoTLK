@@ -401,8 +401,16 @@ local function sortFunc(a, b)
 		return false
 	elseif not b or b.value == nil then
 		return true
+	elseif a.value < b.value then
+		return false
+	elseif a.value > b.value then
+		return true
+	elseif not a.label then
+		return false
+	elseif not b.label then
+		return true
 	else
-		return a.value > b.value
+		return a.label > b.label
 	end
 end
 

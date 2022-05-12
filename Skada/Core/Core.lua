@@ -857,6 +857,10 @@ do
 		end
 	end
 
+	local function defaultFunc(a, b)
+		return a.name < b.name
+	end
+
 	local function sortFunc(a, b)
 		if Skada.db.profile.sortmodesbyusage and Skada.db.profile.modeclicks then
 			return (Skada.db.profile.modeclicks[a.moduleName] or 0) > (Skada.db.profile.modeclicks[b.moduleName] or 0)
@@ -898,7 +902,7 @@ do
 
 		self.metadata.click = ClickOnMode
 		self.metadata.maxvalue = 1
-		self.metadata.sortfunc = function(a, b) return a.name < b.name end
+		self.metadata.sortfunc = defaultFunc
 
 		self.changed = true
 		self.display:SetTitle(self, self.metadata.title)
@@ -1832,8 +1836,16 @@ do
 			return false
 		elseif not b or b.value == nil then
 			return true
+		elseif a.value < b.value then
+			return false
+		elseif a.value > b.value then
+			return true
+		elseif not a.label then
+			return false
+		elseif not b.label then
+			return true
 		else
-			return a.value > b.value
+			return a.label > b.label
 		end
 	end
 

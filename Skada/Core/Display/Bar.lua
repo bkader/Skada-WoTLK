@@ -566,13 +566,35 @@ do
 			return false
 		elseif not b or b.value == nil then
 			return true
+		elseif a.value < b.value then
+			return false
+		elseif a.value > b.value then
+			return true
+		elseif not a.label then
+			return false
+		elseif not b.label then
+			return true
 		else
-			return a.value > b.value
+			return a.label > b.label
 		end
 	end
 
 	local function bar_order_sort(a, b)
-		return a and b and a.order and b.order and a.order < b.order
+		if not a or a.order == nil then
+			return true
+		elseif not b or b.order == nil then
+			return false
+		elseif a.order < b.order then
+			return true
+		elseif a.order > b.order then
+			return false
+		elseif not a.label then
+			return true
+		elseif not b.label then
+			return false
+		else
+			return a.label < b.label
+		end
 	end
 
 	local function bar_setcolor(bar, db, data, color)

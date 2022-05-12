@@ -331,7 +331,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 				for i = #deathlog.log, 1, -1 do
 					local log = deathlog.log[i]
-					local diff = tonumber(log.time) - tonumber(deathlog.time)
+					local diff = tonumber(log.time) - tonumber(deathlog.time or GetTime())
 					if diff > -60 then
 						local nr = i + 1
 						local d = win:nr(nr)
