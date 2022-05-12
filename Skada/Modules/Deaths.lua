@@ -314,6 +314,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 					d.id = 1
 					d.label = deathlog.timeStr
 					d.icon = [[Interface\Icons\Ability_Rogue_FeignDeath]]
+					d.color = nil
 					d.value = 0
 					d.valuetext = format(L["%s dies"], player.name)
 				end
@@ -336,18 +337,18 @@ Skada:AddLoadableModule("Deaths", function(L)
 						local nr = i + 1
 						local d = win:nr(nr)
 
-						local spellname, spellicon
+						local spellname
 						if log.spellid then
-							spellname, _, spellicon = GetSpellInfo(log.spellid)
+							d.spellid = log.spellid
+							spellname, _, d.icon = GetSpellInfo(log.spellid)
 						else
 							spellname = L["Unknown"]
-							spellicon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
+							d.spellid = nil
+							d.icon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
 						end
 
 						d.id = nr
-						d.spellid = log.spellid
 						d.label = format("%02.2fs: %s", diff, spellname)
-						d.icon = spellicon
 
 						-- used for tooltip
 						d.hp = log.hp or 0
@@ -459,8 +460,8 @@ Skada:AddLoadableModule("Deaths", function(L)
 					end
 
 					d.label = d.label or L["Unknown"]
-					d.value = death.time or 0
-					d.valuetext = death.timeStr
+					d.value = death.time or GetTime()
+					d.valuetext = death.timeStr or "..."
 
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value

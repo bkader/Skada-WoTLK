@@ -588,12 +588,12 @@ do
 			return true
 		elseif a.order > b.order then
 			return false
-		elseif not a.label then
+		elseif not a.GetLabel then
 			return true
-		elseif not b.label then
+		elseif not b.GetLabel then
 			return false
 		else
-			return a.label < b.label
+			return a:GetLabel() < b:GetLabel()
 		end
 	end
 
