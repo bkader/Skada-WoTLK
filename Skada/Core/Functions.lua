@@ -288,6 +288,43 @@ function Skada:RegisterSchools()
 		end
 		return L["Unknown"], 1, 1, 1
 	end})
+
+	if self.Ascension then return end
+
+	-- spells ignored when adding active time to actors
+	self.ignoredSpells = self.ignoredSpells or {}
+	self.ignoredSpells.activeTime = self.ignoredSpells.activeTime or {}
+
+	self.ignoredSpells.activeTime[7294] = true -- Retribution Aura (Rank 1)
+	self.ignoredSpells.activeTime[10298] = true -- Retribution Aura (Rank 2)
+	self.ignoredSpells.activeTime[10299] = true -- Retribution Aura (Rank 3)
+	self.ignoredSpells.activeTime[10300] = true -- Retribution Aura (Rank 4)
+	self.ignoredSpells.activeTime[10301] = true -- Retribution Aura (Rank 5)
+	self.ignoredSpells.activeTime[27150] = true -- Retribution Aura (Rank 6)
+	self.ignoredSpells.activeTime[54043] = true -- Retribution Aura (Rank 7)
+
+	self.ignoredSpells.activeTime[34913] = true -- Molten Armor (Rank 1)
+	self.ignoredSpells.activeTime[43043] = true -- Molten Armor (Rank 2)
+	self.ignoredSpells.activeTime[43044] = true -- Molten Armor (Rank 3)
+
+	self.ignoredSpells.activeTime[26364] = true -- Lightning Shield (Rank 1)
+	self.ignoredSpells.activeTime[26365] = true -- Lightning Shield (Rank 2)
+	self.ignoredSpells.activeTime[26366] = true -- Lightning Shield (Rank 3)
+	self.ignoredSpells.activeTime[26367] = true -- Lightning Shield (Rank 5)
+	self.ignoredSpells.activeTime[26370] = true -- Lightning Shield (Rank 6)
+	self.ignoredSpells.activeTime[26363] = true -- Lightning Shield (Rank 7)
+	self.ignoredSpells.activeTime[26371] = true -- Lightning Shield (Rank 8)
+	self.ignoredSpells.activeTime[26372] = true -- Lightning Shield (Rank 9)
+	self.ignoredSpells.activeTime[49278] = true -- Lightning Shield (Rank 10)
+	self.ignoredSpells.activeTime[49279] = true -- Lightning Shield (Rank 11)
+
+	self.ignoredSpells.activeTime[2947] = true -- Fire Shield (Rank 1)
+	self.ignoredSpells.activeTime[8316] = true -- Fire Shield (Rank 2)
+	self.ignoredSpells.activeTime[8317] = true -- Fire Shield (Rank 3)
+	self.ignoredSpells.activeTime[11770] = true -- Fire Shield (Rank 4)
+	self.ignoredSpells.activeTime[11771] = true -- Fire Shield (Rank 5)
+	self.ignoredSpells.activeTime[27269] = true -- Fire Shield (Rank 6)
+	self.ignoredSpells.activeTime[47983] = true -- Fire Shield (Rank 7)
 end
 
 -------------------------------------------------------------------------------
@@ -451,6 +488,8 @@ do
 					res3 = [[Interface\Icons\INV_Weapon_Bow_07]]
 				elseif spellid == 6603 then
 					res1, res3 = L["Melee"], [[Interface\Icons\INV_Sword_04]]
+				elseif spellid == 47882 or spellid == 27240 or spellid == 20761 or spellid == 20760 or spellid == 20759 or spellid == 20758 or spellid == 3026 then
+					res3 = [[Interface\Icons\Spell_Shadow_Soulgem]]
 				end
 			end
 		end

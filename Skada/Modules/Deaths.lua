@@ -7,7 +7,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 	local deathlogmod = mod:NewModule(L["Death log"])
 
 	local tinsert, tremove, tsort, tconcat = table.insert, table.remove, table.sort, table.concat
-	local tostring, format, select = tostring, string.format, select
+	local tostring, format = tostring, string.format
 	local max, floor = math.max, math.floor
 	local UnitHealthInfo = Skada.UnitHealthInfo
 	local UnitIsFeignDeath = UnitIsFeignDeath
@@ -53,7 +53,8 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 			-- seet player maxhp if not already set
 			if not deathlog.maxhp or deathlog.maxhp == 0 then
-				deathlog.maxhp = select(3, UnitHealthInfo(player.name, player.id, "group")) or 0
+				_, _, deathlog.maxhp = UnitHealthInfo(player.name, player.id, "group")
+				deathlog.maxhp = deathlog.maxhp or 0
 			end
 
 			local log = new()

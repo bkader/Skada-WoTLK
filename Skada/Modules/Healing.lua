@@ -18,6 +18,7 @@ Skada:AddLoadableModule("Healing", function(L)
 	local spellmod = targetmod:NewModule(L["Healing spell list"])
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local function log_spellcast(set, playerid, playername, playerflags, spellid, spellschool)
 		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
@@ -41,7 +42,9 @@ Skada:AddLoadableModule("Healing", function(L)
 		if player then
 			-- get rid of overheal
 			local amount = max(0, data.amount - data.overheal)
-			Skada:AddActiveTime(player, (player.role == "HEALER" and amount > 0 and not data.petname))
+			if player.role == "HEALER" and amount > 0 and not data.petname then
+				Skada:AddActiveTime(player, data.spellid and not passiveSpells[data.spellid])
+			end
 
 			-- record the healing
 			player.heal = (player.heal or 0) + amount
@@ -479,8 +482,13 @@ Skada:AddLoadableModule("Healing", function(L)
 		Skada:AddMode(self, L["Absorbs and Healing"])
 
 		-- table of ignored spells:
-		if Skada.ignoredSpells and Skada.ignoredSpells.heals then
-			ignoredSpells = Skada.ignoredSpells.heals
+		if Skada.ignoredSpells then
+			if Skada.ignoredSpells.heals then
+				ignoredSpells = Skada.ignoredSpells.heals
+			end
+			if Skada.ignoredSpells.activeTime then
+				passiveSpells = Skada.ignoredSpells.activeTime
+			end
 		end
 	end
 

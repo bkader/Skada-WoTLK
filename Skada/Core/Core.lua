@@ -31,6 +31,7 @@ local GetNumGroupMembers, GetGroupTypeAndCount = Skada.GetNumGroupMembers, Skada
 local GetUnitIdFromGUID, GetUnitSpec, GetUnitRole = Skada.GetUnitIdFromGUID, Skada.GetUnitSpec, Skada.GetUnitRole
 local UnitIterator, IsGroupDead = Skada.UnitIterator, Skada.IsGroupDead
 local EscapeStr, GetCreatureId, T = Skada.EscapeStr, Skada.GetCreatureId, Skada.Table
+local _
 
 local LDB = LibStub("LibDataBroker-1.1")
 local dataobj = LDB:NewDataObject("Skada", {
@@ -54,7 +55,7 @@ Skada.revisited = true
 
 -- things we need
 Skada.userName = UnitName("player")
-Skada.userClass = select(2, UnitClass("player"))
+_, Skada.userClass = UnitClass("player")
 
 -- available display types
 Skada.displays = {}
@@ -1421,7 +1422,7 @@ function Skada:GetPlayer(set, guid, name, flag)
 		player = {id = guid, name = name, flag = flag, time = 0}
 
 		if players[guid] then
-			player.class = select(2, UnitClass(players[guid]))
+			_, player.class = UnitClass(players[guid])
 		elseif pets[guid] then
 			player.class = "PET"
 		else
@@ -2685,7 +2686,7 @@ function Skada:UpdateDisplay(force)
 						d = win:nr(nr)
 
 						d.id = tostring(set.starttime)
-						d.label, d.valuetext = select(2, self:GetSetLabel(set))
+						_, d.label, d.valuetext = self:GetSetLabel(set)
 						d.value = 1
 						d.emphathize = set.keep
 					end
@@ -3290,11 +3291,10 @@ do
 		local result = LibCompress:CompressHuffman(AceSerializer:Serialize(...))
 		if hex then
 			return self.HexEncode(result, title)
-		else
-			encodeTable = encodeTable or LibCompress:GetAddonEncodeTable()
-			return encodeTable:Encode(result)
 		end
 
+		encodeTable = encodeTable or LibCompress:GetAddonEncodeTable()
+		return encodeTable:Encode(result)
 	end
 
 	function Skada:Deserialize(data, hex)
@@ -3327,8 +3327,8 @@ do
 			elseif t == "party" then
 				channel = "PARTY"
 			else
-				local zoneType = select(2, IsInInstance())
-				if zoneType == "pvp" or zoneType == "arena" then
+				_, self.instanceType = IsInInstance()
+				if self.instanceType == "pvp" or self.instanceType == "arena" then
 					channel = "BATTLEGROUND"
 				end
 			end

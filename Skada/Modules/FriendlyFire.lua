@@ -7,6 +7,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 	local spellmod = mod:NewModule(L["Damage spell list"])
 	local spelltargetmod = spellmod:NewModule(L["Damage spell targets"])
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local pairs, format = pairs, string.format
 	local GetSpellInfo, T = Skada.GetSpellInfo or GetSpellInfo, Skada.Table
@@ -15,7 +16,9 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 	local function log_damage(set, dmg)
 		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
 		if player then
-			Skada:AddActiveTime(player, dmg.amount > 0)
+			if dmg.amount > 0 and dmg.spellid then
+				Skada:AddActiveTime(player, not passiveSpells[dmg.spellid])
+			end
 
 			player.friendfire = (player.friendfire or 0) + dmg.amount
 			set.friendfire = (set.friendfire or 0) + dmg.amount
@@ -271,8 +274,13 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 		Skada:AddMode(self, L["Damage Done"])
 
 		-- table of ignored spells:
-		if Skada.ignoredSpells and Skada.ignoredSpells.friendfire then
-			ignoredSpells = Skada.ignoredSpells.friendfire
+		if Skada.ignoredSpells then
+			if Skada.ignoredSpells.friendfire then
+				ignoredSpells = Skada.ignoredSpells.friendfire
+			end
+			if Skada.ignoredSpells.activeTime then
+				passiveSpells = Skada.ignoredSpells.activeTime
+			end
 		end
 	end
 

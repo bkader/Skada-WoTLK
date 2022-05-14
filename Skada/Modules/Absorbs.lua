@@ -20,6 +20,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local spellmod = targetmod:NewModule(L["Absorb spell list"])
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local GroupIterator = Skada.GroupIterator
 	local UnitName, UnitExists, UnitBuff = UnitName, UnitExists, UnitBuff
@@ -239,7 +240,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	}
 
 	-- spells iof which we don't record casts.
-	local passivespells = {
+	local passiveShields = {
 		[31230] = true, -- Cheat Death
 		[49497] = true, -- Spell Deflection
 		[50150] = true, -- Will of the Necropolis
@@ -272,7 +273,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 		local player = Skada:GetPlayer(set, absorb.playerid, absorb.playername)
 		if player then
-			Skada:AddActiveTime(player, (player.role ~= "DAMAGER" and not nocount))
+			if player.role ~= "DAMAGER" and not nocount then
+				Skada:AddActiveTime(player, not passiveSpells[absorb.spellid])
+			end
 
 			-- add absorbs amount
 			player.absorb = (player.absorb or 0) + absorb.amount
@@ -298,7 +301,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			end
 
 			-- start cast counter.
-			if not spell.casts and not passivespells[absorb.spellid] then
+			if not spell.casts and not passiveShields[absorb.spellid] then
 				spell.casts = 1
 			end
 
@@ -462,7 +465,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		shields[dstName][spellid] = shields[dstName][spellid] or {}
 
 		-- log spell casts.
-		if not passivespells[spellid] then
+		if not passiveShields[spellid] then
 			Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, spellid, spellschool)
 		end
 
@@ -643,7 +646,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 					absorb.amount = absorbed
 
 					-- always increment the count of passive shields.
-					Skada:DispatchSets(log_absorb, absorb, passivespells[absorb.spellid] == nil)
+					Skada:DispatchSets(log_absorb, absorb, passiveShields[absorb.spellid] == nil)
 				end
 				break
 			end
@@ -1052,7 +1055,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			-- I don't know the whole list of effects but, if you want to add yours
 			-- please do : CLASS = {[index] = {spellid, spellschool}}
 			-- see: http://wotlk.cavernoftime.com/spell=<spellid>
-			local passiveshields = {
+			local passive = {
 				DEATHKNIGHT = {
 					{50150, 1}, -- Will of the Necropolis
 					{49497, 1}, -- Spell Deflection
@@ -1083,9 +1086,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 					-- passive shields (not for pets)
 					if owner == nil then
 						local _, class = UnitClass(unit)
-						if passiveshields[class] then
-							for i = 1, #passiveshields[class] do
-								local spell = passiveshields[class][i]
+						if passive[class] then
+							for i = 1, #passive[class] do
+								local spell = passive[class][i]
 								local points = spell and LGT:GUIDHasTalent(dstGUID, GetSpellInfo(spell[1]), LGT:GetActiveTalentGroup(unit))
 								if points then
 									HandleShield(timestamp - 60, nil, dstGUID, dstGUID, nil, dstGUID, dstName, nil, spell[1], nil, spell[2], nil, points)
@@ -1165,8 +1168,13 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		Skada:AddMode(self, L["Absorbs and Healing"])
 
 		-- table of ignored spells:
-		if Skada.ignoredSpells and Skada.ignoredSpells.absorbs then
-			ignoredSpells = Skada.ignoredSpells.absorbs
+		if Skada.ignoredSpells then
+			if Skada.ignoredSpells.absorbs then
+				ignoredSpells = Skada.ignoredSpells.absorbs
+			end
+			if Skada.ignoredSpells.activeTime then
+				passiveSpells = Skada.ignoredSpells.activeTime
+			end
 		end
 	end
 

@@ -22,6 +22,7 @@ Skada:AddLoadableModule("Damage", function(L)
 	local new, del = Skada.newTable, Skada.delTable
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	-- damage miss types
 	local missTypes = Skada.missTypes
@@ -30,73 +31,9 @@ Skada:AddLoadableModule("Damage", function(L)
 		Skada.missTypes = missTypes
 	end
 
-	-- spells on the list below are ignored when it comes
-	-- to updating player's active time.
-	local blacklist = {
-		[7294] = true, -- Retribution Aura (Rank 1)
-		[10298] = true, -- Retribution Aura (Rank 2)
-		[10299] = true, -- Retribution Aura (Rank 3)
-		[10300] = true, -- Retribution Aura (Rank 4)
-		[10301] = true, -- Retribution Aura (Rank 5)
-		[27150] = true, -- Retribution Aura (Rank 6)
-		[54043] = true, -- Retribution Aura (Rank 7)
-		[30482] = true, -- Molten Armor (Rank 1)
-		[34913] = true, -- Molten Armor (Rank 1)
-		[43043] = true, -- Molten Armor (Rank 2)
-		[43044] = true, -- Molten Armor (Rank 3)
-		[43045] = true, -- Molten Armor (Rank 2)
-		[43046] = true, -- Molten Armor (Rank 3)
-		[324] = true, -- Lightning Shield (Rank 1)
-		[325] = true, -- Lightning Shield (Rank 2)
-		[905] = true, -- Lightning Shield (Rank 3)
-		[945] = true, -- Lightning Shield (Rank 4)
-		[8134] = true, -- Lightning Shield (Rank 5)
-		[10431] = true, -- Lightning Shield (Rank 6)
-		[10432] = true, -- Lightning Shield (Rank 7)
-		[25469] = true, -- Lightning Shield (Rank 8)
-		[25472] = true, -- Lightning Shield (Rank 9)
-		[49280] = true, -- Lightning Shield (Rank 10)
-		[49281] = true, -- Lightning Shield (Rank 11)
-		[2947] = true, -- Fire Shield (Rank 1)
-		[8316] = true, -- Fire Shield (Rank 2)
-		[8317] = true, -- Fire Shield (Rank 3)
-		[11770] = true, -- Fire Shield (Rank 4)
-		[11771] = true, -- Fire Shield (Rank 5)
-		[27269] = true, -- Fire Shield (Rank 6)
-		[47983] = true -- Fire Shield (Rank 7)
-	}
-
 	-- spells on the list below are used to update player's active time
 	-- no matter their role or damage amount, since pets aren't considered.
-	local whitelist = {
-		-- The Oculus
-		[49840] = true, -- Shock Lance (Amber Drake)
-		[50232] = true, -- Searing Wrath (Ruby Drake)
-		[50341] = true, -- Touch the Nightmare (Emerald Drake)
-		[50344] = true, -- Dream Funnel (Emerald Drake)
-		-- Eye of Eternity: Wyrmrest Skytalon
-		[56091] = true, -- Flame Spike
-		[56092] = true, -- Engulf in Flames
-		-- Naxxramas: Instructor Razuvious
-		[61696] = true, -- Blood Strike (Death Knight Understudy)
-		-- Ulduar - Flame Leviathan
-		[62306] = true, -- Salvaged Demolisher: Hurl Boulder
-		[62308] = true, -- Salvaged Demolisher: Ram
-		[62490] = true, -- Salvaged Demolisher: Hurl Pyrite Barrel
-		[62634] = true, -- Salvaged Demolisher Mechanic Seat: Mortar
-		[64979] = true, -- Salvaged Demolisher Mechanic Seat: Anti-Air Rocket
-		[62345] = true, -- Salvaged Siege Engine: Ram
-		[62346] = true, -- Salvaged Siege Engine: Steam Rush
-		[62522] = true, -- Salvaged Siege Engine: Electroshock
-		[62358] = true, -- Salvaged Siege Turret: Fire Cannon
-		[62359] = true, -- Salvaged Siege Turret: Anti-Air Rocket
-		[62974] = true, -- Salvaged Chopper: Sonic Horn
-		-- Icecrown Citadel
-		[69399] = true, -- Cannon Blast (Gunship Battle Cannons)
-		[70175] = true, -- Incinerating Blast (Gunship Battle Cannons)
-		[70539] = 5.5, -- Regurgitated Ooze (Mutated Abomination)
-		[70542] = true -- Mutated Slash (Mutated Abomination)
-	}
+	local whitelist = {}
 
 	local function log_spellcast(set, playerid, playername, playerflags, spellname, spellschool)
 		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
@@ -123,10 +60,10 @@ Skada:AddLoadableModule("Damage", function(L)
 		if not player then return end
 
 		-- update activity
-		if whitelist[dmg.spellid] ~= nil then
+		if whitelist[dmg.spellid] ~= nil and not dmg.petname then
 			Skada:AddActiveTime(player, (dmg.amount > 0), tonumber(whitelist[dmg.spellid]))
 		elseif player.role ~= "HEALER" and not dmg.petname then
-			Skada:AddActiveTime(player, (dmg.amount > 0 and not blacklist[dmg.spellid]))
+			Skada:AddActiveTime(player, (dmg.amount > 0 and not passiveSpells[dmg.spellid]))
 		end
 
 		-- add absorbed damage to total damage
@@ -888,9 +825,14 @@ Skada:AddLoadableModule("Damage", function(L)
 		Skada:AddFeed(L["Damage: Raid DPS"], feed_raid_dps)
 		Skada:AddMode(self, L["Damage Done"])
 
-		-- table of ignored spells:
-		if Skada.ignoredSpells and Skada.ignoredSpells.damage then
-			ignoredSpells = Skada.ignoredSpells.damage
+		-- table of ignored damage/time spells:
+		if Skada.ignoredSpells then
+			if Skada.ignoredSpells.damage then
+				ignoredSpells = Skada.ignoredSpells.damage
+			end
+			if Skada.ignoredSpells.activeTime then
+				passiveSpells = Skada.ignoredSpells.activeTime
+			end
 		end
 	end
 
@@ -938,6 +880,42 @@ Skada:AddLoadableModule("Damage", function(L)
 				end
 			end
 		end
+	end
+
+	function mod:OnInitialize()
+		if Skada.Ascension then return end
+
+		-- The Oculus
+		whitelist[49840] = true -- Shock Lance (Amber Drake)
+		whitelist[50232] = true -- Searing Wrath (Ruby Drake)
+		whitelist[50341] = true -- Touch the Nightmare (Emerald Drake)
+		whitelist[50344] = true -- Dream Funnel (Emerald Drake)
+
+		-- Eye of Eternity: Wyrmrest Skytalon
+		whitelist[56091] = true -- Flame Spike
+		whitelist[56092] = true -- Engulf in Flames
+
+		-- Naxxramas: Instructor Razuvious
+		whitelist[61696] = true -- Blood Strike (Death Knight Understudy)
+
+		-- Ulduar - Flame Leviathan
+		whitelist[62306] = true -- Salvaged Demolisher: Hurl Boulder
+		whitelist[62308] = true -- Salvaged Demolisher: Ram
+		whitelist[62490] = true -- Salvaged Demolisher: Hurl Pyrite Barrel
+		whitelist[62634] = true -- Salvaged Demolisher Mechanic Seat: Mortar
+		whitelist[64979] = true -- Salvaged Demolisher Mechanic Seat: Anti-Air Rocket
+		whitelist[62345] = true -- Salvaged Siege Engine: Ram
+		whitelist[62346] = true -- Salvaged Siege Engine: Steam Rush
+		whitelist[62522] = true -- Salvaged Siege Engine: Electroshock
+		whitelist[62358] = true -- Salvaged Siege Turret: Fire Cannon
+		whitelist[62359] = true -- Salvaged Siege Turret: Anti-Air Rocket
+		whitelist[62974] = true -- Salvaged Chopper: Sonic Horn
+
+		-- Icecrown Citadel
+		whitelist[69399] = true -- Cannon Blast (Gunship Battle Cannons)
+		whitelist[70175] = true -- Incinerating Blast (Gunship Battle Cannons)
+		whitelist[70539] = 5.5 -- Regurgitated Ooze (Mutated Abomination)
+		whitelist[70542] = true -- Mutated Slash (Mutated Abomination)
 	end
 end)
 

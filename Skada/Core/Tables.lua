@@ -84,6 +84,9 @@ ignoredSpells.firsthit = {
 	[60122] = true -- Baby Spice
 }
 
+-- [[ no active time spells ]] --
+-- ignoredSpells.activeTime = {}
+
 -->> end of editable lines <<--
 
 -- ----------------------------- --
