@@ -748,7 +748,9 @@ end
 function Window:Reset()
 	if self.dataset then
 		for i = 1, #self.dataset do
-			wipe(self.dataset[i])
+			if self.dataset[i] then
+				wipe(self.dataset[i])
+			end
 		end
 	end
 end
@@ -3536,6 +3538,8 @@ function Skada:EndSegment()
 	self.last = self.current
 	self.total.time = self.total.time + self.current.time
 	self.current = nil
+	self.inCombat = nil
+
 	CleanSets()
 
 	for i = 1, #windows do
@@ -3742,6 +3746,7 @@ do
 	end
 
 	function Skada:Tick()
+		self.inCombat = true
 		if not disabled and self.current and not InCombatLockdown() and not IsGroupInCombat() and self.instanceType ~= "pvp" and self.instanceType ~= "arena" then
 			self:Debug("EndSegment: Tick")
 			self:EndSegment()

@@ -423,15 +423,18 @@ end
 function Skada.unitClass(guid, flag, set, db, name)
 	set = set or Skada.current
 	if set then
-		-- an existing player
-		for i = 1, #set.players do
-			local p = set.players[i]
-			if p and p.id == guid then
-				return p.class, p.role, p.spec
-			elseif p and name and p.name == name and p.class and Skada.validclass[p.class] then
-				return p.class, p.role, p.spec
+		-- an existing player?
+		if set.players then
+			for i = 1, #set.players do
+				local p = set.players[i]
+				if p and p.id == guid then
+					return p.class, p.role, p.spec
+				elseif p and name and p.name == name and p.class and Skada.validclass[p.class] then
+					return p.class, p.role, p.spec
+				end
 			end
 		end
+		-- an existing enemy?
 		if set.enemies then
 			for i = 1, #set.enemies do
 				local e = set.enemies[i]

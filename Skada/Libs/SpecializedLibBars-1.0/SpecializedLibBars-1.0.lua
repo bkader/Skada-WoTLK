@@ -2,7 +2,7 @@
 -- Specialized ( = enhanced) for Skada
 -- Note to self: don't forget to notify original author of changes
 -- in the unlikely event they end up being usable outside of Skada.
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90007
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90009
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 
@@ -414,6 +414,7 @@ function lib:ReleaseBar(name)
 		bars[self][bar.name] = nil
 		recycledBars[#recycledBars + 1] = bar
 		self.numBars = self.numBars - 1
+		self.callbacks:Fire("BarReleased", bar, bar.name, self.numBars)
 	end
 end
 
@@ -1649,8 +1650,6 @@ do
 
 	local DEFAULT_ICON = [[Interface\Icons\INV_Misc_QuestionMark]]
 	function barPrototype:Create(text, value, maxVal, icon, orientation, length, thickness)
-		self.callbacks = self.callbacks or CallbackHandler:New(self)
-
 		self:SetScript("OnMouseDown", barOnMouseDown)
 		self:SetScript("OnEnter", barOnEnter)
 		self:SetScript("OnLeave", barOnLeave)
@@ -1721,8 +1720,6 @@ end
 
 -- releases a bar that's no longer in use
 function barPrototype:OnBarReleased()
-	self.callbacks:Fire("BarReleased", self, self.name)
-
 	self.ownerGroup = nil
 
 	if self.colors then
@@ -1740,18 +1737,6 @@ function barPrototype:OnBarReleased()
 	local f, s, m = ChatFontNormal:GetFont()
 	self.label:SetFont(f, s or 10, m)
 	self.timerLabel:SetFont(f, s or 10, m)
-
-	if self.callbacks.insertQueue then
-		for eventname, callbacks in pairs(self.callbacks.insertQueue) do
-			wipe(callbacks)
-		end
-	end
-	for eventname, callbacks in pairs(self.callbacks.events) do
-		wipe(callbacks)
-		if self.callbacks.OnUnused then
-			self.callbacks:OnUnused(self, eventname)
-		end
-	end
 end
 
 -- handles size change

@@ -46,8 +46,10 @@ end
 do
 	function tLength(tbl)
 		local len = 0
-		for _ in pairs(tbl) do
-			len = len + 1
+		if tbl then
+			for _ in pairs(tbl) do
+				len = len + 1
+			end
 		end
 		return len
 	end

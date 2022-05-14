@@ -5,8 +5,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 local LibWindow = LibStub("LibWindow-1.1")
 local FlyPaper = LibStub("LibFlyPaper-1.1", true)
 
-local pairs, ipairs = pairs, ipairs
-local tsort, tContains = table.sort, tContains
+local pairs, tsort = pairs, table.sort
 local format, max, min = string.format, math.max, math.min
 local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 local CloseDropDownMenus = CloseDropDownMenus
@@ -166,6 +165,7 @@ do
 		bargroup.RegisterCallback(mod, "BarClick")
 		bargroup.RegisterCallback(mod, "BarEnter")
 		bargroup.RegisterCallback(mod, "BarLeave")
+		bargroup.RegisterCallback(mod, "BarReleased")
 
 		bargroup.RegisterCallback(mod, "WindowMoveStart")
 		bargroup.RegisterCallback(mod, "WindowMoveStop")
@@ -269,6 +269,16 @@ do
 			GameTooltip:Hide()
 			ttactive = false
 		end
+	end
+end
+
+function mod:BarReleased(_, bar)
+	if bar then
+		bar.changed = nil
+		bar.fixed = nil
+		bar.order = nil
+		bar.text = nil
+		bar.win = nil
 	end
 end
 
@@ -597,23 +607,40 @@ do
 		end
 	end
 
-	local function bar_setcolor(bar, db, data, color)
-		if not color then
-			color = db.barcolor or Skada.windowdefaults.barcolor
-			local a = color.a or 1
+	local function bar_seticon(bar, db, data, icon)
+		if icon then
+			bar:SetIcon(icon)
+			bar:ShowIcon()
+		elseif db.specicons and data.spec and speccoords and speccoords[data.spec] then
+			bar:SetIcon(Skada.specicons, speccoords(data.spec))
+			bar:ShowIcon()
+		elseif db.roleicons and data.role and data.role ~= "NONE" and rolecoords and rolecoords[data.role] then
+			bar:SetIcon(Skada.roleicons, rolecoords(data.role))
+			bar:ShowIcon()
+		elseif db.classicons and data.class and classcoords[data.class] and data.icon == nil then
+			bar:SetIcon(Skada.classicons, classcoords(data.class))
+			bar:ShowIcon()
+		elseif data.icon and not data.ignore and not data.spellid and not data.hyperlink then
+			bar:SetIcon(data.icon)
+			bar:ShowIcon()
+		end
+	end
 
-			if data.color then
-				color = data.color
-				bar:SetColor(color.r, color.g, color.b, color.a or a, true)
-			elseif db.spellschoolcolors and data.spellschool and spellschools[data.spellschool] then
-				color = spellschools[data.spellschool]
-				bar:SetColor(color.r, color.g, color.b, color.a or a, true)
-			elseif db.classcolorbars and data.class and classcolors[data.class] then
-				color = classcolors(data.class)
-				bar:SetColor(color.r, color.g, color.b, color.a or a, true)
-			else
-				bar:SetColor(color.r, color.g, color.b, a)
-			end
+	local function bar_setcolor(bar, db, data, color)
+		if color then
+			bar:SetColor(color.r, color.g, color.b, color.a or 1)
+		elseif data.color then
+			color = data.color
+			bar:SetColor(color.r, color.g, color.b, color.a or 1, true)
+		elseif db.spellschoolcolors and data.spellschool and spellschools[data.spellschool] then
+			color = spellschools[data.spellschool]
+			bar:SetColor(color.r, color.g, color.b, color.a or 1, true)
+		elseif db.classcolorbars and data.class and classcolors[data.class] then
+			color = classcolors(data.class)
+			bar:SetColor(color.r, color.g, color.b, color.a or 1, true)
+		else
+			color = db.barcolor or Skada.windowdefaults.barcolor
+			bar:SetColor(color.r, color.g, color.b, color.a or 1)
 		end
 	end
 
@@ -626,12 +653,13 @@ do
 		end
 
 		local hasicon
-		for _, data in ipairs(win.dataset) do
+		for i = 1, #win.dataset do
+			local data = win.dataset[i]
 			if
-				(data.icon and not data.ignore) or
-				(win.db.classicons and data.class) or
-				(win.db.roleicons and rolecoords and data.role) or
-				(win.db.specicons and speccoords and data.spec)
+				(data and data.icon and not data.ignore) or
+				(data and win.db.classicons and data.class) or
+				(data and win.db.roleicons and rolecoords and data.role) or
+				(data and win.db.specicons and speccoords and data.spec)
 			then
 				hasicon = true
 				break
@@ -652,8 +680,9 @@ do
 		end
 
 		local nr = 1
-		for i, data in ipairs(win.dataset) do
-			if data.id then
+		for i = 1, #win.dataset do
+			local data = win.dataset[i]
+			if data and data.id then
 				local bar = win.bargroup:GetBar(data.id)
 
 				if bar and bar.missingclass and data.class and not data.ignore then
@@ -708,23 +737,8 @@ do
 						bar.missingclass = nil
 					end
 
-					if win.db.specicons and speccoords and data.spec and speccoords[data.spec] then
-						bar:ShowIcon()
-						bar:SetIcon(Skada.specicons, speccoords(data.spec))
-					elseif win.db.roleicons and rolecoords and data.role and data.role ~= "NONE" and rolecoords[data.role] then
-						bar:ShowIcon()
-						bar:SetIcon(Skada.roleicons, rolecoords(data.role))
-					elseif win.db.classicons and data.class and classcoords[data.class] and data.icon == nil then
-						bar:ShowIcon()
-						bar:SetIcon(Skada.classicons, classcoords(data.class))
-					elseif not data.ignore and not data.spellid and not data.hyperlink then
-						if data.icon and not bar:IsIconShown() then
-							bar:ShowIcon()
-							bar:SetIcon(data.icon)
-						end
-					end
-
-					-- set bar color
+					-- set bar icon and color
+					bar_seticon(bar, win.db, data)
 					bar_setcolor(bar, win.db, data)
 
 					if
@@ -800,12 +814,12 @@ do
 				if not data.ignore then
 					nr = nr + 1
 
-					if data.color and not data.changed then
+					if data.color and not bar.changed then
+						bar.changed = true
 						bar_setcolor(bar, win.db, data, data.color)
-						data.changed = true
-					elseif not data.color and data.changed then
+					elseif not data.color and bar.changed then
+						bar.changed = nil
 						bar_setcolor(bar, win.db, data)
-						data.changed = nil
 					end
 				end
 			end
