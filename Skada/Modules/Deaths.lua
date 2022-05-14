@@ -39,12 +39,12 @@ Skada:AddLoadableModule("Deaths", function(L)
 		end
 	end
 
-	local function log_deathlog(set, data, deathlog, override)
+	local function log_deathlog(set, data, override)
 		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
 
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if player then
-			deathlog = deathlog or player.deathlog and player.deathlog[1]
+			local deathlog = player.deathlog and player.deathlog[1]
 			if not deathlog or (deathlog.time and not override) then
 				deathlog = {log = {}}
 				player.deathlog = player.deathlog or {}
@@ -61,10 +61,12 @@ Skada:AddLoadableModule("Deaths", function(L)
 			log.spellid = data.spellid
 			log.school = data.spellschool
 			log.source = data.srcName
-			log.amount = data.amount
 			log.time = GetTime()
 			_, log.hp = UnitHealthInfo(player.name, player.id, "group")
 
+			if data.amount and data.amount ~= 0 then
+				log.amount = data.amount
+			end
 			if data.overheal and data.overheal > 0 then
 				log.overheal = data.overheal
 			end
@@ -256,15 +258,37 @@ Skada:AddLoadableModule("Deaths", function(L)
 		end
 	end
 
-	local function log_resurrect(set, playerid, playername, playerflags, srcName, spellid)
-		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
-		local deathlog = player and player.deathlog and player.deathlog[1]
-		if deathlog then
+	local resurrectSpells = {
+		-- Reincarnation
+		[16184] = true,
+		[16209] = true,
+		[20608] = true,
+		[21169] = true,
+		-- Use Soulstone
+		[3026] = true,
+		[20758] = true,
+		[20759] = true,
+		[20760] = true,
+		[20761] = true,
+		[27240] = true,
+		[47882] = true
+	}
+
+	local function SpellResurrect(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
+		if spellid and (event == "SPELL_RESURRECT" or resurrectSpells[spellid]) then
 			data.spellid = spellid
-			data.srcName = srcName
-			data.playerid = player.id or playerid
-			data.playername = player.name or playername
-			data.playerflags = player.flag or playerflags
+
+			if event == "SPELL_RESURRECT" then
+				data.srcName = srcName
+				data.playerid = dstGUID
+				data.playername = dstName
+				data.playerflags = dstFlags
+			else
+				data.srcName = srcName
+				data.playerid = srcGUID
+				data.playername = srcName
+				data.playerflags = srcFlags
+			end
 
 			data.amount = nil
 			data.overkill = nil
@@ -273,14 +297,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 			data.blocked = nil
 			data.absorbed = nil
 
-			-- log resurrection.
-			log_deathlog(set, data, deathlog, true)
-		end
-	end
-
-	local function SpellResurrect(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
-		if spellid then
-			Skada:DispatchSets(log_resurrect, dstGUID, dstName, dstFlags, srcName, spellid)
+			Skada:DispatchSets(log_deathlog, data, true)
 		end
 	end
 
@@ -297,36 +314,33 @@ Skada:AddLoadableModule("Deaths", function(L)
 		function deathlogmod:Update(win, set)
 			win.title = format(L["%s's death log"], win.actorname or L["Unknown"])
 
-			local player = Skada:FindPlayer(set, win.actorid, win.actorname)
-			if player and win.datakey then
-				local deathlog
-				if player.deathlog and player.deathlog[win.datakey] then
-					deathlog = player.deathlog[win.datakey]
-				end
-				if not deathlog then return end
-
+			local player = win.datakey and Skada:FindPlayer(set, win.actorid, win.actorname)
+			local deathlog = player and player.deathlog and player.deathlog[win.datakey]
+			if deathlog then
 				if win.metadata then
 					win.metadata.maxvalue = deathlog.maxhp
 				end
 
-				-- add a fake entry for the actual death
-				if win.metadata and deathlog.timeStr then
-					local d = win:nr(1)
-					d.id = 1
-					d.label = deathlog.timeStr
-					d.icon = [[Interface\Icons\Ability_Rogue_FeignDeath]]
-					d.color = nil
-					d.value = 0
-					d.valuetext = format(L["%s dies"], player.name)
-				end
+				-- 1. postfix empty table
+				-- 2. add a fake entry for the actual death
+				if deathlog.timeStr then
+					if #deathlog.log == 0 then
+						local log = new()
+						log.amount = deathlog.maxhp and -deathlog.maxhp or 0
+						log.time = deathlog.time-0.001
+						log.hp = deathlog.maxhp or 0
+						deathlog.log[1] = log
+					end
 
-				-- postfix
-				if #deathlog.log == 0 then
-					local log = new()
-					log.amount = deathlog.maxhp and -deathlog.maxhp or 0
-					log.time = deathlog.time-0.001
-					log.hp = deathlog.maxhp or 0
-					deathlog.log[1] = log
+					if deathlog.timeStr then
+						local d = win:nr(1)
+						d.id = 1
+						d.label = deathlog.timeStr
+						d.icon = [[Interface\Icons\Ability_Rogue_FeignDeath]]
+						d.color = nil
+						d.value = 0
+						d.valuetext = format(L["%s dies"], player.name)
+					end
 				end
 
 				tsort(deathlog.log, sort_logs)
@@ -462,7 +476,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 					d.label = d.label or L["Unknown"]
 					d.value = death.time or GetTime()
-					d.valuetext = death.timeStr or "..."
+					d.valuetext = death.timeStr
 
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
@@ -496,7 +510,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 					d.spec = player.spec
 
 					d.value = player.death
-					d.valuetext = tostring(player.death)
+					d.valuetext = tostring(d.value)
 					if player.deathlog and player.deathlog[1] and player.deathlog[1].time then
 						d.value = player.deathlog[1].time
 					end
@@ -519,11 +533,11 @@ Skada:AddLoadableModule("Deaths", function(L)
 				tooltip:AddDoubleLine(L["Source"], entry.source, 1, 1, 1, 1, 1, 1)
 			end
 
-			if entry.hp then
+			if entry.hp and entry.hp ~= 0 then
 				tooltip:AddDoubleLine(HEALTH, Skada:FormatNumber(entry.hp), 1, 1, 1)
 			end
 
-			if entry.amount then
+			if entry.amount and entry.amount ~= 0 then
 				local amount = (entry.amount < 0) and (0 - entry.amount) or entry.amount
 				tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(amount), 1, 1, 1)
 			end
@@ -622,6 +636,12 @@ Skada:AddLoadableModule("Deaths", function(L)
 			SpellResurrect,
 			"SPELL_RESURRECT",
 			flags_dst_nopets
+		)
+
+		Skada:RegisterForCL(
+			SpellResurrect,
+			"SPELL_CAST_SUCCESS",
+			{src_is_interesting = true, dst_is_not_interesting = true}
 		)
 
 		Skada:AddMode(self)
