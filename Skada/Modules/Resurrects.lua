@@ -10,7 +10,7 @@ Skada:AddLoadableModule("Resurrects", function(L)
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local _
 
-	local spellschools = {
+	local resurrectSpells = {
 		-- Rebirth
 		[20484] = 0x08,
 		[20739] = 0x08,
@@ -22,7 +22,16 @@ Skada:AddLoadableModule("Resurrects", function(L)
 		-- Reincarnation
 		[16184] = 0x08,
 		[16209] = 0x08,
-		[20608] = 0x08
+		[20608] = 0x08,
+		[21169] = 0x08,
+		-- Use Soulstone
+		[3026] = 0x01,
+		[20758] = 0x01,
+		[20759] = 0x01,
+		[20760] = 0x01,
+		[20761] = 0x01,
+		[27240] = 0x01,
+		[47882] = 0x01
 	}
 
 	local function log_resurrect(set, data)
@@ -53,20 +62,24 @@ Skada:AddLoadableModule("Resurrects", function(L)
 
 	local data = {}
 
-	local function SpellResurrect(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
-		if not spellid then return end
+	local function SpellResurrect(_, event, srcGUID, srcName, srcFlags, _, dstName, _, spellid)
+		if spellid and (event == "SPELL_RESURRECT" or resurrectSpells[spellid]) then
+			data.spellid = spellid
 
-		data.spellid = spellid
+			if event == "SPELL_RESURRECT" then
+				data.playerid = srcGUID
+				data.playername = srcName
+				data.playerflags = srcFlags
+				data.dstName = dstName
+			else
+				data.playerid = srcGUID
+				data.playername = srcName
+				data.playerflags = srcFlags
+				data.dstName = srcName
+			end
 
-		data.playerid = srcGUID
-		data.playername = srcName
-		data.playerflags = srcFlags
-
-		data.dstGUID = dstGUID
-		data.dstName = dstName
-		data.dstFlags = dstFlags
-
-		Skada:DispatchSets(log_resurrect, data)
+			Skada:DispatchSets(log_resurrect, data)
+		end
 	end
 
 	function playermod:Enter(win, id, label)
@@ -95,7 +108,7 @@ Skada:AddLoadableModule("Resurrects", function(L)
 				d.id = spellid
 				d.spellid = spellid
 				d.label, _, d.icon = GetSpellInfo(spellid)
-				d.spellschool = spellschools[spellid]
+				d.spellschool = resurrectSpells[spellid]
 
 				d.value = spell.count
 				d.valuetext = Skada:FormatValueCols(
@@ -209,6 +222,12 @@ Skada:AddLoadableModule("Resurrects", function(L)
 			SpellResurrect,
 			"SPELL_RESURRECT",
 			{src_is_interesting = true, dst_is_interesting = true}
+		)
+
+		Skada:RegisterForCL(
+			SpellResurrect,
+			"SPELL_CAST_SUCCESS",
+			{src_is_interesting = true, dst_is_not_interesting = true}
 		)
 
 		Skada:AddMode(self)
