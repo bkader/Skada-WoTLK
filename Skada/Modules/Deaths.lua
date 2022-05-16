@@ -321,10 +321,13 @@ Skada:AddLoadableModule("Deaths", function(L)
 					win.metadata.maxvalue = deathlog.maxhp
 				end
 
-				-- 1. postfix empty table
-				-- 2. add a fake entry for the actual death
+				-- 1. remove "datakey" from ended logs.
+				-- 2. postfix empty table
+				-- 3. add a fake entry for the actual death
 				if deathlog.timeStr then
-					if #deathlog.log == 0 then
+					win.datakey = nil -- [1]
+
+					if #deathlog.log == 0 then -- [2]
 						local log = new()
 						log.amount = deathlog.maxhp and -deathlog.maxhp or 0
 						log.time = deathlog.time-0.001
@@ -332,15 +335,14 @@ Skada:AddLoadableModule("Deaths", function(L)
 						deathlog.log[1] = log
 					end
 
-					if deathlog.timeStr then
-						local d = win:nr(1)
-						d.id = 1
-						d.label = deathlog.timeStr
-						d.icon = [[Interface\Icons\Ability_Rogue_FeignDeath]]
-						d.color = nil
-						d.value = 0
-						d.valuetext = format(L["%s dies"], player.name)
-					end
+					-- [3]
+					local d = win:nr(1)
+					d.id = 1
+					d.label = deathlog.timeStr
+					d.icon = [[Interface\Icons\Ability_Rogue_FeignDeath]]
+					d.color = nil
+					d.value = 0
+					d.valuetext = format(L["%s dies"], player.name)
 				end
 
 				tsort(deathlog.log, sort_logs)
@@ -372,55 +374,62 @@ Skada:AddLoadableModule("Deaths", function(L)
 						d.spellname = spellname
 						d.value = d.hp
 
-						local change = d.amount
+						local change, color = d.amount, GetColor("red")
 						if change > 0 then
 							change = "+" .. Skada:FormatNumber(change)
-							d.color = GetColor("green")
+							color = GetColor("green")
 						elseif change == 0 and (log.resisted or log.blocked or log.absorbed) then
 							change = "+" .. Skada:FormatNumber(log.resisted or log.blocked or log.absorbed)
-							d.color = GetColor("orange")
+							color = GetColor("orange")
+						elseif log.overheal then
+							change = Skada:FormatNumber(change)
+							color = GetColor("yellow")
 						else
 							change = Skada:FormatNumber(change)
-							d.color = log.overheal and GetColor("yellow") or GetColor("red")
 						end
 
-						d.reportlabel = "%02.2fs: %s (%s)   %s [%s]"
+						d.changed = (d.color and d.color ~= color) and true or nil
+						d.color = color
 
-						if Skada.db.profile.reportlinks and log.spellid then
-							d.reportlabel = format(d.reportlabel, diff, GetSpellLink(log.spellid) or spellname, d.source, change, Skada:FormatNumber(d.value))
-						else
-							d.reportlabel = format(d.reportlabel, diff, spellname, d.source, change, Skada:FormatNumber(d.value))
-						end
+						-- only format report for ended logs
+						if deathlog.timeStr ~= nil then
+							d.reportlabel = "%02.2fs: %s (%s)   %s [%s]"
 
-						local extra = new()
+							if Skada.db.profile.reportlinks and log.spellid then
+								d.reportlabel = format(d.reportlabel, diff, GetSpellLink(log.spellid) or spellname, d.source, change, Skada:FormatNumber(d.value))
+							else
+								d.reportlabel = format(d.reportlabel, diff, spellname, d.source, change, Skada:FormatNumber(d.value))
+							end
 
-						if (log.overheal or 0) > 0 then
-							d.overheal = log.overheal
-							extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.overheal)
-						end
-						if (log.overkill or 0) > 0 then
-							d.overkill = log.overkill
-							extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.overkill)
-						end
-						if (log.resisted or 0) > 0 then
-							d.resisted = log.resisted
-							extra[#extra + 1] = "R:" .. Skada:FormatNumber(log.resisted)
-						end
-						if (log.blocked or 0) > 0 then
-							d.blocked = log.blocked
-							extra[#extra + 1] = "B:" .. Skada:FormatNumber(log.blocked)
-						end
-						if (log.absorbed or 0) > 0 then
-							d.absorbed = log.absorbed
-							extra[#extra + 1] = "A:" .. Skada:FormatNumber(log.absorbed)
-						end
+							local extra = new()
 
-						if next(extra) then
-							-- change = "(|cffff0000*|r) " .. change -- uncomment for * back.
-							d.reportlabel = d.reportlabel .. " (" .. tconcat(extra, " - ") .. ")"
-						end
+							if (log.overheal or 0) > 0 then
+								d.overheal = log.overheal
+								extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.overheal)
+							end
+							if (log.overkill or 0) > 0 then
+								d.overkill = log.overkill
+								extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.overkill)
+							end
+							if (log.resisted or 0) > 0 then
+								d.resisted = log.resisted
+								extra[#extra + 1] = "R:" .. Skada:FormatNumber(log.resisted)
+							end
+							if (log.blocked or 0) > 0 then
+								d.blocked = log.blocked
+								extra[#extra + 1] = "B:" .. Skada:FormatNumber(log.blocked)
+							end
+							if (log.absorbed or 0) > 0 then
+								d.absorbed = log.absorbed
+								extra[#extra + 1] = "A:" .. Skada:FormatNumber(log.absorbed)
+							end
 
-						extra = del(extra)
+							if next(extra) then
+								d.reportlabel = format("%s (%s)", d.reportlabel, tconcat(extra, " - "))
+							end
+
+							extra = del(extra)
+						end
 
 						d.valuetext = Skada:FormatValueCols(
 							self.metadata.columns.Change and change,
@@ -446,7 +455,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 		if player then
 			win.title = format(L["%s's deaths"], player.name)
 
-			if (player.death or 0) > 0 and player.deathlog then
+			if player.death and player.deathlog then
 				if win.metadata then
 					win.metadata.maxvalue = 0
 				end
@@ -537,27 +546,33 @@ Skada:AddLoadableModule("Deaths", function(L)
 				tooltip:AddDoubleLine(HEALTH, Skada:FormatNumber(entry.hp), 1, 1, 1)
 			end
 
+			local c = nil
+
 			if entry.amount and entry.amount ~= 0 then
-				local amount = (entry.amount < 0) and (0 - entry.amount) or entry.amount
-				tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(amount), 1, 1, 1)
+				c = GetColor(entry.amount < 0 and "red" or "green")
+				tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(entry.amount), 1, 1, 1, c.r, c.g, c.b)
 			end
 
 			if (entry.overkill or 0) > 0 then
-				tooltip:AddDoubleLine(L["Overkill"], Skada:FormatNumber(entry.overkill), 1, 1, 1, 1, 0.45, 0.45)
+				tooltip:AddDoubleLine(L["Overkill"], Skada:FormatNumber(entry.overkill), 1, 1, 1, 0.77, 0.64, 0)
 			elseif (entry.overheal or 0) > 0 then
-				tooltip:AddDoubleLine(L["Overheal"], Skada:FormatNumber(entry.overheal), 1, 1, 1, 0.45, 1, 0.45)
+				c = GetColor("yellow")
+				tooltip:AddDoubleLine(L["Overheal"], Skada:FormatNumber(entry.overheal), 1, 1, 1, c.r, c.g, c.b)
 			end
 
 			if (entry.resisted or 0) > 0 then
-				tooltip:AddDoubleLine(L["RESIST"], Skada:FormatNumber(entry.resisted), 1, 1, 1)
+				c = GetColor("orange")
+				tooltip:AddDoubleLine(L["RESIST"], Skada:FormatNumber(entry.resisted), 1, 1, 1, c.r, c.g, c.b)
 			end
 
 			if (entry.blocked or 0) > 0 then
-				tooltip:AddDoubleLine(L["BLOCK"], Skada:FormatNumber(entry.blocked), 1, 1, 1)
+				c = GetColor("orange")
+				tooltip:AddDoubleLine(L["BLOCK"], Skada:FormatNumber(entry.blocked), 1, 1, 1, c.r, c.g, c.b)
 			end
 
 			if (entry.absorbed or 0) > 0 then
-				tooltip:AddDoubleLine(L["ABSORB"], Skada:FormatNumber(entry.absorbed), 1, 1, 1, 0.45, 1, 0.45)
+				c = GetColor("orange")
+				tooltip:AddDoubleLine(L["ABSORB"], Skada:FormatNumber(entry.absorbed), 1, 1, 1, c.r, c.g, c.b)
 			end
 		end
 	end

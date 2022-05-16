@@ -2978,7 +2978,6 @@ function Window:RestoreView(theset, themode)
 		self.title = nil
 
 		-- all all stuff that were registered by modules
-		self.datakey = nil
 		self.actorid, self.actorname = nil, nil
 		self.spellid, self.spellname = nil, nil
 		self.targetid, self.targetname = nil, nil

@@ -814,11 +814,13 @@ do
 				if not data.ignore then
 					nr = nr + 1
 
-					if data.color and not bar.changed then
+					if data.changed and not bar.changed then
 						bar.changed = true
+						bar_seticon(bar, win.db, data, data.icon)
 						bar_setcolor(bar, win.db, data, data.color)
-					elseif not data.color and bar.changed then
+					elseif not data.changed and bar.changed then
 						bar.changed = nil
+						bar_seticon(bar, win.db, data)
 						bar_setcolor(bar, win.db, data)
 					end
 				end
