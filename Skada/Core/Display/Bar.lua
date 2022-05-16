@@ -38,13 +38,15 @@ if not FONT_FLAGS then
 end
 
 local function listOnMouseDown(self, button)
-	if IsShiftKeyDown() then
+	if button == "LeftButton" then
+		return
+	elseif IsShiftKeyDown() then
 		Skada:OpenMenu(self.win)
-	elseif button == "RightButton" and IsControlKeyDown() then
+	elseif IsControlKeyDown() then
 		Skada:SegmentMenu(self.win)
-	elseif button == "RightButton" and IsAltKeyDown() then
+	elseif IsAltKeyDown() then
 		Skada:ModeMenu(self.win)
-	elseif button == "RightButton" then
+	else
 		self.win:RightClick(nil, button)
 	end
 end
@@ -179,7 +181,7 @@ do
 		bargroup.RegisterCallback(mod, "WindowStretchStop")
 
 		bargroup:EnableMouse(true)
-		bargroup:SetScript("OnMouseDown", listOnMouseDown)
+		bargroup:HookScript("OnMouseDown", listOnMouseDown)
 		bargroup.button:SetScript("OnClick", anchorOnClick)
 		bargroup:HideBarIcons()
 

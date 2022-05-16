@@ -2,7 +2,7 @@
 -- Specialized ( = enhanced) for Skada
 -- Note to self: don't forget to notify original author of changes
 -- in the unlikely event they end up being usable outside of Skada.
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90009
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90010
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 
@@ -186,6 +186,18 @@ do
 		end
 	end
 
+	local function listOnMouseDown(self, button)
+		if button == "LeftButton" then
+			anchorOnMouseDown(self.button, button)
+		end
+	end
+
+	local function listOnMouseUp(self, button)
+		if button == "LeftButton" then
+			anchorOnMouseUp(self.button, button)
+		end
+	end
+
 	local function listOnSizeChanged(self, width)
 		self:SetLength(width)
 		self:GuessMaxBars()
@@ -225,6 +237,8 @@ do
 		local list = barListPrototype:Bind(CreateFrame("Frame", frameName, UIParent))
 		list:SetResizable(true)
 		list:SetMovable(true)
+		list:SetScript("OnMouseDown", listOnMouseDown)
+		list:SetScript("OnMouseUp", listOnMouseUp)
 
 		list.callbacks = list.callbacks or CallbackHandler:New(list)
 		barLists[self][name] = list
