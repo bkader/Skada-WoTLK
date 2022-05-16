@@ -12,7 +12,7 @@ local _
 Skada:AddLoadableModule("Damage", function(L)
 	if Skada:IsDisabled("Damage") then return end
 
-	local mod = Skada:NewModule(L["Damage"])
+	local mod = Skada:NewModule("Damage")
 	local playermod = mod:NewModule(L["Damage spell list"])
 	local spellmod = playermod:NewModule(L["Damage spell details"])
 	local sdetailmod = playermod:NewModule(L["Damage Breakdown"])
@@ -781,7 +781,7 @@ Skada:AddLoadableModule("Damage", function(L)
 		playermod.nototal = true
 		targetmod.nototal = true
 
-		local compare = Skada:GetModule(L["Comparison"], true)
+		local compare = Skada:GetModule("Comparison", true)
 		if compare then
 			self.metadata.click3 = compare.SetActor
 			self.metadata.click3_label = L["Damage Comparison"]
@@ -926,7 +926,7 @@ end)
 Skada:AddLoadableModule("DPS", function(L)
 	if Skada:IsDisabled("Damage", "DPS") then return end
 
-	local mod = Skada:NewModule(L["DPS"])
+	local mod = Skada:NewModule("DPS")
 
 	local function dps_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
@@ -1034,7 +1034,7 @@ Skada:AddLoadableModule("DPS", function(L)
 			icon = [[Interface\Icons\achievement_bg_topdps]]
 		}
 
-		local parentmod = Skada:GetModule(L["Damage"], true)
+		local parentmod = Skada:GetModule("Damage", true)
 		if parentmod then
 			self.metadata.click1 = parentmod.metadata.click1
 			self.metadata.click2 = parentmod.metadata.click2
@@ -1061,7 +1061,7 @@ end)
 Skada:AddLoadableModule("Damage Done By Spell", function(L)
 	if Skada:IsDisabled("Damage", "Damage Done By Spell") then return end
 
-	local mod = Skada:NewModule(L["Damage Done By Spell"])
+	local mod = Skada:NewModule("Damage Done By Spell")
 	local sourcemod = mod:NewModule(L["Damage spell sources"])
 
 	function sourcemod:Enter(win, id, label)
@@ -1213,7 +1213,7 @@ end)
 Skada:AddLoadableModule("Useful Damage", function(L)
 	if Skada:IsDisabled("Damage", "Useful Damage") then return end
 
-	local mod = Skada:NewModule(L["Useful Damage"])
+	local mod = Skada:NewModule("Useful Damage")
 	local playermod = mod:NewModule(L["Damage spell list"])
 	local targetmod = mod:NewModule(L["Damage target list"])
 	local detailmod = targetmod:NewModule(L["More Details"])
@@ -1495,7 +1495,7 @@ end)
 Skada:AddLoadableModule("Overkill", function(L)
 	if Skada:IsDisabled("Damage", "Overkill") then return end
 
-	local mod = Skada:NewModule(L["Overkill"])
+	local mod = Skada:NewModule("Overkill")
 	local playermod = mod:NewModule(L["Overkill spell list"])
 	local targetmod = mod:NewModule(L["Overkill target list"])
 	local detailmod = targetmod:NewModule(L["Overkill spell list"])

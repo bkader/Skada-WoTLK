@@ -419,7 +419,7 @@ L["Lines"] = "Линии"
 L["There is nothing to report."] = "Нет данных для отчета."
 L["No mode or segment selected for report."] = "Для отчета не выбран режим или сегмент."
 -- Bar Display Module --
-L["Bar display"] = "Отображение полос"
+L["Bar Display"] = "Отображение полос"
 L["mod_bar_desc"] = "Отображение полос - это обычное окно с полосами, которое использует большинство измерителей урона. Имеет множество возможностей для стилизации."
 -- Threat Module --
 L["Threat"] = "Угроза"
@@ -635,7 +635,10 @@ L["%s's interrupted targets"] = "%s - Цели прерывания"
 L["%s interrupted!"] = "%s прервано!"
 -- Power gained module --
 L["Resources"] = "Ресурсы"
-L["Power gained: %s"] = "Получено энергии - %s"
+L["Power gained: Mana"] = "Получено энергии - Мана"
+L["Power gained: Rage"] = "Получено энергии - Ярость"
+L["Power gained: Energy"] = "Получено энергии - Энергия"
+L["Power gained: Runic Power"] = "Получено энергии - Сила рун"
 L["%s gained spells"] = "Заклинания получения %s"
 L["%s's gained %s"] = "Получено %s - %s"
 -- Parry module lines --

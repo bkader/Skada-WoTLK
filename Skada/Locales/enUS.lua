@@ -1,4 +1,4 @@
-local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "enUS", true)
+local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "enUS", true, true)
 if not L then return end
 
 L["A damage meter."] = true
@@ -443,7 +443,7 @@ L["Lines"] = true
 L["There is nothing to report."] = true
 L["No mode or segment selected for report."] = true
 -- Bar Display Module --
-L["Bar display"] = true
+L["Bar Display"] = true
 L["mod_bar_desc"] = "Bar display is the normal bar window used by most damage meters. It can be extensively styled."
 -- Threat Module --
 L["Threat"] = true
@@ -664,7 +664,14 @@ L["%s's interrupted targets"] = true
 L["%s interrupted!"] = true
 -- Power gained module --
 L["Resources"] = true
-L["Power gained: %s"] = true
+L["Mana"] = MANA
+L["Rage"] = RAGE
+L["Energy"] = ENERGY
+L["Runic Power"] = RUNIC_POWER
+L["Power gained: Mana"] = true
+L["Power gained: Rage"] = true
+L["Power gained: Energy"] = true
+L["Power gained: Runic Power"] = true
 L["%s gained spells"] = true
 L["%s's gained %s"] = true
 -- Parry module lines --
@@ -754,7 +761,7 @@ L["Dungeon Trash"] = true
 L["opt_tweaks_total_all_desc"] = "All segments are added to total segment data."
 L["opt_tweaks_total_fmt_desc"] = "Segments with %s are added to total segment data."
 L["Detailed total segment"] = true
-L["opt_tweaks_total_full_desc"] = "When enabled, Skada will record everything to the total segment, instead of total numbers (record spell details, their targets as their sources)."
+L["opt_tweaks_total_full_desc"] = "When enabled, Skada will record everything to the total segment, instead of total numbers (record spell details, their targets and their sources)."
 -- project ascension
 L["Project Ascension"] = true
 L["project_ascension_desc"] = [=[On |cffffbb00Project Ascension|r, your characters are classless Heroes that have any ability or talent within their reach.

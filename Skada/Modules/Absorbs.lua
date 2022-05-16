@@ -14,7 +14,7 @@ local _
 Skada:AddLoadableModule("Absorbs", function(L)
 	if Skada:IsDisabled("Absorbs") then return end
 
-	local mod = Skada:NewModule(L["Absorbs"])
+	local mod = Skada:NewModule("Absorbs")
 	local playermod = mod:NewModule(L["Absorb spell list"])
 	local targetmod = mod:NewModule(L["Absorbed target list"])
 	local spellmod = targetmod:NewModule(L["Absorb spell list"])
@@ -1244,7 +1244,7 @@ end)
 Skada:AddLoadableModule("Absorbs and Healing", function(L)
 	if Skada:IsDisabled("Healing", "Absorbs", "Absorbs and Healing") then return end
 
-	local mod = Skada:NewModule(L["Absorbs and Healing"])
+	local mod = Skada:NewModule("Absorbs and Healing")
 	local playermod = mod:NewModule(L["Absorbs and healing spells"])
 	local targetmod = mod:NewModule(L["Absorbed and healed targets"])
 	local spellmod = targetmod:NewModule(L["Absorbs and healing spells"])
@@ -1697,7 +1697,7 @@ end)
 Skada:AddLoadableModule("HPS", function(L)
 	if Skada:IsDisabled("Absorbs", "Healing", "Absorbs and Healing", "HPS") then return end
 
-	local mod = Skada:NewModule(L["HPS"])
+	local mod = Skada:NewModule("HPS")
 
 	local function hps_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
@@ -1807,7 +1807,7 @@ Skada:AddLoadableModule("HPS", function(L)
 			icon = [[Interface\Icons\spell_nature_rejuvenation]]
 		}
 
-		local parentmod = Skada:GetModule(L["Absorbs and Healing"], true)
+		local parentmod = Skada:GetModule("Absorbs and Healing", true)
 		if parentmod then
 			self.metadata.click1 = parentmod.metadata.click1
 			self.metadata.click2 = parentmod.metadata.click2
@@ -1832,7 +1832,7 @@ end)
 Skada:AddLoadableModule("Healing Done By Spell", function(L)
 	if Skada:IsDisabled("Healing", "Absorbs", "Healing Done By Spell") then return end
 
-	local mod = Skada:NewModule(L["Healing Done By Spell"])
+	local mod = Skada:NewModule("Healing Done By Spell")
 	local spellmod = mod:NewModule(L["Healing spell sources"])
 	local cacheTable = Skada.cacheTable
 	local spellschools = Skada.spellschools

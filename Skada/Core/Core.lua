@@ -288,7 +288,7 @@ end
 local function FindMode(name)
 	for i = 1, #modes do
 		local mode = modes[i]
-		if mode and mode.moduleName == name then
+		if mode and (mode.name == name or mode.moduleName == name) then
 			return mode
 		end
 	end
@@ -434,6 +434,7 @@ do
 	end
 
 	function Skada:Reinstall()
+		self.db.global.reinstall = true
 		Skada:ConfirmDialog(L["Are you sure you want to reinstall Skada?"], f, t)
 	end
 end
@@ -524,7 +525,7 @@ do
 					values = function()
 						local list = wipe(templist)
 						for name, display in pairs(displays) do
-							list[name] = display.name
+							list[name] = display.moduleName
 						end
 						return list
 					end,
@@ -1024,6 +1025,10 @@ function Skada:CreateWindow(name, db, display)
 	end
 
 	window.db.name = name
+	if self.db.global.reinstall then
+		self.db.global.reinstall = nil
+		window.db.mode = "Damage"
+	end
 
 	window:SetDisplay(window.db.display or "bar")
 	if window.db.display and displays[window.db.display] then
@@ -1031,8 +1036,8 @@ function Skada:CreateWindow(name, db, display)
 		windows[#windows + 1] = window
 		window:DisplaySets()
 
-		if isnew and FindMode(L["Damage"]) then
-			self:RestoreView(window, "current", L["Damage"])
+		if isnew and FindMode("Damage") then
+			self:RestoreView(window, "current", "Damage")
 		elseif window.db.set or window.db.mode then
 			self:RestoreView(window, window.db.set, window.db.mode)
 		end
@@ -1248,8 +1253,8 @@ do
 		for i = 1, #windows do
 			local win = windows[i]
 			if win then
-				if win.db and mode.moduleName == win.db.mode then
-					self:RestoreView(win, win.db.set, mode.moduleName)
+				if win.db and mode.name == win.db.mode then
+					self:RestoreView(win, win.db.set, mode.name)
 				end
 				if win.Wipe then
 					win:Wipe()
@@ -1285,6 +1290,11 @@ function Skada:AddLoadableModule(name, description, func)
 	end
 end
 
+function Skada:OnModuleCreated(module)
+	module.name = module.moduleName
+	module.moduleName = L[module.moduleName]
+end
+
 -- checks whether the select module(s) are disabled
 function Skada:IsDisabled(...)
 	for i = 1, select("#", ...) do
@@ -1303,7 +1313,7 @@ do
 		if mod.description then
 			Skada.options.args.windows.args[format("%sdesc", key)] = {
 				type = "description",
-				name = format("\n|cffffd700%s|r:\n%s", mod.name, mod.description),
+				name = format("\n|cffffd700%s|r:\n%s", mod.moduleName, mod.description),
 				fontSize = "medium",
 				order = numorder
 			}
@@ -2131,7 +2141,7 @@ function Skada:Command(param)
 		end
 
 		local chan = arg1 and arg1:trim()
-		local report_mode_name = arg2 or L["Damage"]
+		local report_mode_name = arg2 or "Damage"
 		local num = tonumber(arg3) or 10
 
 		-- automatic
@@ -2210,7 +2220,7 @@ do
 		local report_table, report_set, report_mode
 
 		if window == nil then
-			report_mode = FindMode(report_mode_name or L["Damage"])
+			report_mode = FindMode(report_mode_name or "Damage")
 			report_set = self:GetSet(report_set_name or "current")
 			if report_set == nil then
 				self:Print(L["No mode or segment selected for report."])
@@ -2645,7 +2655,7 @@ function Skada:UpdateDisplay(force)
 					if mode then
 						local d = win:nr(j)
 
-						d.id = mode.moduleName
+						d.id = mode.name
 						d.label = mode.moduleName
 						d.value = 1
 
@@ -2909,19 +2919,24 @@ do
 		if
 			not self.db.enabletitle or -- title bar disabled
 			not self.selectedmode or -- window has no selected mode
-			not self.selectedmode.moduleName or -- selected mode isn't a valid mode
+			not self.selectedmode.name or -- selected mode isn't a valid mode
 			not self.selectedset  -- window has no selected set
 		then
 			return
 		end
 
-		local name = (self.parentmode and self.parentmode.moduleName) or self.selectedmode.title or self.selectedmode.moduleName
+		local name = self.selectedmode.title or self.selectedmode.moduleName
+		local savemode = self.selectedmode.name
+
+		if self.parentmode then
+			name = self.selectedmode.moduleName or name
+			savemode = self.selectedmode.name or savemode
+		end
 
 		-- save window settings for RestoreView after reload
 		self.db.set = self.selectedset
-		local savemode = name
 		if self.history[1] then -- can't currently preserve a nested mode, use topmost one
-			savemode = self.history[1].title or self.history[1].moduleName
+			savemode = self.history[1].name or savemode
 		end
 		self.db.mode = savemode
 

@@ -2,7 +2,7 @@ local Skada = Skada
 Skada:AddLoadableModule("Player vs. Player", "mod_pvp_desc", function(L)
 	if Skada:IsDisabled("Player vs. Player") then return end
 
-	local mod = Skada:NewModule(L["Player vs. Player"], "AceEvent-3.0")
+	local mod = Skada:NewModule("Player vs. Player", "AceEvent-3.0")
 
 	local format, wipe, GetTime = string.format, wipe, GetTime
 	local UnitGUID, UnitClass, UnitBuff, UnitIsPlayer = UnitGUID, UnitClass, UnitBuff, UnitIsPlayer

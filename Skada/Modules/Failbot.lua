@@ -5,7 +5,7 @@ local Skada = Skada
 Skada:AddLoadableModule("Fails", function(L)
 	if Skada:IsDisabled("Fails") then return end
 
-	local mod = Skada:NewModule(L["Fails"])
+	local mod = Skada:NewModule("Fails")
 	local playermod = mod:NewModule(L["Player's failed events"])
 	local spellmod = mod:NewModule(L["Event's failed players"])
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua

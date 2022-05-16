@@ -419,7 +419,7 @@ L["Lines"] = "Lineas"
 L["There is nothing to report."] = "No hay nada que informar."
 L["No mode or segment selected for report."] = "No hay modo o segmento seleccionado para informe."
 -- Bar Display Module --
-L["Bar display"] = "Visualizaci\195\179n de la barra"
+L["Bar Display"] = "Visualizaci\195\179n de la barra"
 L["mod_bar_desc"] = "Lo que muestra la barra es la normal usada por la mayor\195\173a de extensiones Medidores de Da\195\177o. Puede ser profusamente customizada."
 -- Threat Module --
 L["Threat"] = "Amenaza"
@@ -636,7 +636,10 @@ L["%s's interrupted targets"] = "Objetivos interrumpidos de %s"
 L["%s interrupted!"] = "¡%s interrumpida!"
 -- Power gained module --
 L["Resources"] = "Recursos"
-L["Power gained: %s"] = "Recursos obtenidos: %s"
+L["Power gained: Mana"] = "Recursos obtenidos: Man\195\161"
+L["Power gained: Rage"] = "Recursos obtenidos: Ira"
+L["Power gained: Energy"] = "Recursos obtenidos: Energ\195\173a"
+L["Power gained: Runic Power"] = "Recursos obtenidos: Poder r\195\186nico"
 L["%s gained spells"] = "Hechizos de %s ganado"
 L["%s's gained %s"] = "%2$s ganado de %1$s"
 -- Parry module lines --

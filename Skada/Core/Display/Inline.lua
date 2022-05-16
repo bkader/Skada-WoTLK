@@ -1,6 +1,6 @@
 local Skada = Skada
 
-local mod = Skada:NewModule("InlineDisplay")
+local mod = Skada:NewModule("Inline Bar Display")
 local LibWindow = LibStub("LibWindow-1.1")
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 

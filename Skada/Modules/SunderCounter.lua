@@ -2,7 +2,7 @@ local Skada = Skada
 Skada:AddLoadableModule("Sunder Counter", function(L)
 	if Skada:IsDisabled("Sunder Counter") then return end
 
-	local mod = Skada:NewModule(L["Sunder Counter"])
+	local mod = Skada:NewModule("Sunder Counter")
 	local targetmod = mod:NewModule(L["Sunder target list"])
 
 	local pairs, tostring, format = pairs, tostring, string.format

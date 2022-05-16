@@ -422,7 +422,7 @@ L["Lines"] = "Lignes"
 L["There is nothing to report."] = "Il n'y a rien \195\160 rapporter."
 L["No mode or segment selected for report."] = "Aucun mode ou segment n'a \195\169t\195\169 s\195\169lectionn\195\169 pour le rapport."
 -- Bar Display Module --
-L["Bar display"] = "Affichage \195\160 barres"
+L["Bar Display"] = "Affichage \195\160 barres"
 L["mod_bar_desc"] = "L'affichage \195\160 barres est la fen\195\170tre de barres habituellement utilis\195\169e par la plupart des damage meters. Il peut \195\170tre personnalis\195\169 de fa\195\167on approfondie."
 -- Threat Module --
 L["Threat"] = "Menace"
@@ -638,7 +638,10 @@ L["%s's interrupted targets"] = "Cibles interrompues par %s"
 L["%s interrupted!"] = "%s interrompu!"
 -- Power gained module --
 L["Resources"] = "Ressources"
-L["Power gained: %s"] = "Ressources: %s"
+L["Power gained: Mana"] = "Ressources: Mana"
+L["Power gained: Rage"] = "Ressources: Rage"
+L["Power gained: Energy"] = "Ressources: \195\137nergie"
+L["Power gained: Runic Power"] = "Ressources: P. runique"
 L["%s gained spells"] = "Sorts de gain \1242 %s"
 L["%s's gained %s"] = "Gains \1242 %2$s \1242 %1$s"
 -- Parry module lines --

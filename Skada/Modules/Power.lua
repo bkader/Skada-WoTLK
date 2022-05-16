@@ -2,7 +2,7 @@ local Skada = Skada
 Skada:AddLoadableModule("Resources", function(L)
 	if Skada:IsDisabled("Resources") then return end
 
-	local mod = Skada:NewModule(L["Resources"])
+	local mod = Skada:NewModule("Resources")
 	mod.icon = [[Interface\Icons\spell_holy_rapture]]
 
 	local pairs, format = pairs, string.format
@@ -18,10 +18,10 @@ Skada:AddLoadableModule("Resources", function(L)
 
 	-- used to localize modules names.
 	local namesTable = {
-		[SPELL_POWER_MANA] = MANA,
-		[SPELL_POWER_RAGE] = RAGE,
-		[SPELL_POWER_ENERGY] = ENERGY,
-		[SPELL_POWER_RUNIC_POWER] = RUNIC_POWER
+		[SPELL_POWER_MANA] = "Mana",
+		[SPELL_POWER_RAGE] = "Rage",
+		[SPELL_POWER_ENERGY] = "Energy",
+		[SPELL_POWER_RUNIC_POWER] = "Runic Power"
 	}
 
 	-- used to store total amounts for sets and players
@@ -88,10 +88,10 @@ Skada:AddLoadableModule("Resources", function(L)
 	function basemod:Create(power)
 		if gainTable[power] then
 			local powername = namesTable[power]
-			local instance = Skada:NewModule(format(L["Power gained: %s"], powername))
+			local instance = Skada:NewModule(format("Power gained: %s", powername))
 			setmetatable(instance, basemod_mt)
 
-			local pmode = instance:NewModule(format(L["%s gained spells"], powername))
+			local pmode = instance:NewModule(format(L["%s gained spells"], L[powername]))
 			setmetatable(pmode, playermod_mt)
 
 			pmode.powerid = power
@@ -173,7 +173,7 @@ Skada:AddLoadableModule("Resources", function(L)
 
 	-- player mods main update function
 	function playermod:Update(win, set)
-		win.title = format(L["%s's gained %s"], win.actorname or L["Unknown"], self.powername or L["Unknown"])
+		win.title = format(L["%s's gained %s"], win.actorname or L["Unknown"], L[self.powername])
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)

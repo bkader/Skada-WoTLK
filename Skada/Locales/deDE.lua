@@ -417,7 +417,7 @@ L["Lines"] = "Zeilen"
 L["There is nothing to report."] = "Es gibt nichts zu berichten."
 L["No mode or segment selected for report."] = "Kein Modus oder Segment zum Berichten ausgew\195\164hlt."
 -- Bar Display Module --
-L["Bar display"] = "Leistenanzeige"
+L["Bar Display"] = "Leistenanzeige"
 L["mod_bar_desc"] = "Leistenanzeige ist das normale Leistenfenster, diese Anzeigeart wird von den meisten Schadensmetern verwendet. Sie kann optisch stark ver\195\164ndert werden."
 -- Threat Module --
 L["Threat"] = "Bedrohung"
@@ -633,7 +633,10 @@ L["%s's interrupted targets"] = "%s unterbrochene Ziele"
 L["%s interrupted!"] = "%s unterbrochen!"
 -- Power gained module --
 L["Resources"] = "Ressourcen"
-L["Power gained: %s"] = "Gewonnene Kraft: %s"
+L["Power gained: Mana"] = "Gewonnene Kraft: Mana"
+L["Power gained: Rage"] = "Gewonnene Kraft: Wut"
+L["Power gained: Energy"] = "Gewonnene Kraft: Energie"
+L["Power gained: Runic Power"] = "Gewonnene Kraft: Runenmacht"
 L["%s gained spells"] = "%s hat Zauber gewonnen"
 L["%s's gained %s"] = "%s hat %s gewonnen"
 -- Parry module lines --

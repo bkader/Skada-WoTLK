@@ -2,7 +2,7 @@ local Skada = Skada
 Skada:AddLoadableModule("Nickname", function(L)
 	if Skada:IsDisabled("Nickname") then return end
 
-	local mod = Skada:NewModule(L["Nickname"], "AceTimer-3.0")
+	local mod = Skada:NewModule("Nickname", "AceTimer-3.0")
 	local Translit = LibStub("LibTranslit-1.0", true)
 
 	local time, wipe, format = time, wipe, string.format

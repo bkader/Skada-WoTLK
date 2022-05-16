@@ -2,7 +2,7 @@ local Skada = Skada
 Skada:AddLoadableModule("Deaths", function(L)
 	if Skada:IsDisabled("Deaths") then return end
 
-	local mod = Skada:NewModule(L["Deaths"])
+	local mod = Skada:NewModule("Deaths")
 	local playermod = mod:NewModule(L["Player's deaths"])
 	local deathlogmod = mod:NewModule(L["Death log"])
 

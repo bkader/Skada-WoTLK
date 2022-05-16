@@ -416,7 +416,7 @@ L["Lines"] = "线路"
 L["There is nothing to report."] = "没有可报告的内容。"
 L["No mode or segment selected for report."] = "没有为报告选定模式或分段。"
 -- Bar Display Module --
-L["Bar display"] = "条形图显示"
+L["Bar Display"] = "条形图显示"
 L["mod_bar_desc"] = "条形图显示是被大多数伤害统计插件所采用的普通条形图窗口。可以高度样式化。"
 -- Threat Module --
 L["Threat"] = "威胁"
@@ -632,7 +632,10 @@ L["%s's interrupted targets"] = "%s的已打断目标"
 L["%s interrupted!"] = "%s已打断！"
 -- Power gained module --
 L["Resources"] = "能量"
-L["Power gained: %s"] = "能量获得：%s"
+L["Power gained: Mana"] = "能量获得：法力值"
+L["Power gained: Rage"] = "能量获得：怒气"
+L["Power gained: Energy"] = "能量获得：能量"
+L["Power gained: Runic Power"] = "能量获得：符文能量"
 L["%s gained spells"] = "%s获得法术列表"
 L["%s's gained %s"] = "%s的获得%s"
 -- Parry module lines --

@@ -418,7 +418,7 @@ L["Lines"] = "줄"
 L["There is nothing to report."] = "보고할 자료가 없습니다."
 L["No mode or segment selected for report."] = "보고서를 위한 모드나 세분화가 선택되지 않았습니다."
 -- Bar Display Module --
--- L["Bar display"] = ""
+L["Bar Display"] = "바 표시"
 L["mod_bar_desc"] = "바 표시는 대부분의 데미지 미터기가 사용하는 일반적인 바 형식의 창입니다. 폭 넓게 스타일링할 수 있습니다."
 -- Threat Module --
 L["Threat"] = "위협 수준"
@@ -635,7 +635,10 @@ L["Ignored Events"] = "무시된 이벤트"
 L["%s interrupted!"] = "%s 차단!"
 -- Power gained module --
 L["Resources"] = "자원"
-L["Power gained: %s"] = "%s 획득"
+L["Power gained: Mana"] = "마나 획득"
+L["Power gained: Rage"] = "분노 획득"
+L["Power gained: Energy"] = "기력 획득"
+L["Power gained: Runic Power"] = "룬 마력 획득"
 L["%s gained spells"] = "%s 획득 주문 목록"
 -- L["%s's gained %s"] = ""
 -- Parry module lines --

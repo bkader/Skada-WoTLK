@@ -6,7 +6,7 @@ if not Skada.Ascension or Skada.AscensionCoA then return end
 Skada:AddLoadableModule("Project Ascension", function(L)
 	if Skada:IsDisabled("Project Ascension") then return end
 
-	local mod = Skada:NewModule(L["Project Ascension"], "AceTimer-3.0")
+	local mod = Skada:NewModule("Project Ascension", "AceTimer-3.0")
 
 	local type, next = type, next
 	local time, wipe, format = time, wipe, string.format

@@ -2,7 +2,7 @@ local Skada = Skada
 Skada:AddLoadableModule("Threat", function(L)
 	if Skada:IsDisabled("Threat") then return end
 
-	local mod = Skada:NewModule(L["Threat"])
+	local mod = Skada:NewModule("Threat")
 
 	local format, max = string.format, math.max
 	local GroupIterator, UnitExists = Skada.GroupIterator, UnitExists

@@ -2,18 +2,18 @@ local Skada = Skada
 Skada:AddLoadableModule("Healthstones", function(L)
 	if Skada:IsDisabled("Healthstones") then return end
 
-	local mod = Skada:NewModule(L["Healthstones"])
+	local mod = Skada:NewModule("Healthstones")
 	local stonename = GetSpellInfo(47874)
 	local stonespells = {
-		[27235] = true,
-		[27236] = true,
-		[27237] = true,
-		[47872] = true,
-		[47873] = true,
-		[47874] = true,
-		[47875] = true,
-		[47876] = true,
-		[47877] = true
+		[27235] = true, -- Master Healthstone (2080)
+		[27236] = true, -- Master Healthstone (2288)
+		[27237] = true, -- Master Healthstone (2496)
+		[47872] = true, -- Demonic Healthstone (4200)
+		[47873] = true, -- Demonic Healthstone (3850)
+		[47874] = true, -- Demonic Healthstone (3500)
+		[47875] = true, -- Fel Healthstone (4280)
+		[47876] = true, -- Fel Healthstone (4708)
+		[47877] = true -- Fel Healthstone (5136)
 	}
 
 	local function log_healthstone(set, playerid, playername, playerflags)
@@ -25,7 +25,7 @@ Skada:AddLoadableModule("Healthstones", function(L)
 	end
 
 	local function StoneUsed(_, eventtype, srcGUID, srcName, srcFlags, _, _, _, spellid, spellname)
-		if (spellid and stonespells[spellid]) or spellname and spellname == stonename then
+		if (spellid and stonespells[spellid]) or (spellname and spellname == stonename) then
 			Skada:DispatchSets(log_healthstone, srcGUID, srcName, srcFlags)
 		end
 	end

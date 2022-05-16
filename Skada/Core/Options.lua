@@ -820,7 +820,6 @@ function Skada:OpenOptions(win)
 end
 
 -- Adds column configuration options for a mode.
-local nameIcon = "|T%s:18:18:-5:0:32:32:2:30:2:30|t %s"
 function Skada:AddColumnOptions(mod)
 	if not (mod and mod.metadata and mod.metadata.columns) then return end
 
@@ -833,14 +832,28 @@ function Skada:AddColumnOptions(mod)
 
 	local moduleName = mod.moduleName
 	if mod.metadata.icon or mod.icon then
-		moduleName = fmt(nameIcon, mod.metadata.icon or mod.icon, moduleName)
+		moduleName = fmt("|T%s:18:18:-5:0:32:32:2:30:2:30|t %s", mod.metadata.icon or mod.icon, moduleName)
 	end
 
-	local cols = {type = "group", name = moduleName, inline = true, args = {}}
+	local cols = {
+		type = "group",
+		name = moduleName,
+		inline = true,
+		get = function(i)
+			return mod.metadata.columns[i[#i]]
+		end,
+		set = function(i, val)
+			local colname = i[#i]
+			mod.metadata.columns[colname] = val
+			db[mod.name .. "_" .. colname] = val
+			Skada:UpdateDisplay(true)
+		end,
+		args = {}
+	}
 
 	local order = 0
 	for colname in next, mod.metadata.columns do
-		local c = mod.moduleName .. "_" .. colname
+		local c = mod.name .. "_" .. colname
 
 		-- Set initial value from db if available, otherwise use mod default value.
 		if db[c] ~= nil then
@@ -848,18 +861,7 @@ function Skada:AddColumnOptions(mod)
 		end
 
 		-- Add column option.
-		local col = {
-			type = "toggle",
-			name = _G[colname] or L[colname],
-			get = function()
-				return mod.metadata.columns[colname]
-			end,
-			set = function()
-				mod.metadata.columns[colname] = not mod.metadata.columns[colname]
-				db[c] = mod.metadata.columns[colname]
-				Skada:UpdateDisplay(true)
-			end
-		}
+		local col = {type = "toggle", name = _G[colname] or L[colname]}
 
 		-- proper and reasonable columns order.
 		if col.name == L["APS"] or col.name == L["DPS"] or col.name == L["DTPS"] or col.name == L["HPS"] or col.name == L["TPS"] then
@@ -875,18 +877,17 @@ function Skada:AddColumnOptions(mod)
 			col.order = order
 		end
 
-		cols.args[c] = col
+		cols.args[colname] = col
 	end
 
-	Skada.options.args.columns.args[category].args[mod.moduleName] = cols
+	Skada.options.args.columns.args[category].args[mod.name] = cols
 end
 
 function Skada:AddLoadableModuleCheckbox(mod, name, description)
-	self.options.args.modules.args.blocked.args[mod] = {
-		type = "toggle",
-		name = _G[name] or L[name],
-		desc = description and L[description]
-	}
+	self.options.args.modules.args.blocked.args[mod] = {type = "toggle", name = _G[name] or L[name]}
+	if description then
+		self.options.args.modules.args.blocked.args[mod].desc = L[description]
+	end
 end
 
 local getScreenWidth
@@ -1143,7 +1144,7 @@ function Skada:FrameSettings(db, include_dimensions)
 										local modes = Skada:GetModes()
 										for i = 1, #modes do
 											if modes[i] then
-												modesList[modes[i].moduleName] = modes[i].moduleName
+												modesList[modes[i].name] = modes[i].moduleName
 											end
 										end
 									end
@@ -1161,7 +1162,7 @@ function Skada:FrameSettings(db, include_dimensions)
 										local modes = Skada:GetModes()
 										for i = 1, #modes do
 											if modes[i] then
-												modesList[modes[i].moduleName] = modes[i].moduleName
+												modesList[modes[i].name] = modes[i].moduleName
 											end
 										end
 									end

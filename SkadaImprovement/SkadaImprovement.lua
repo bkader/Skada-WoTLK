@@ -3,7 +3,7 @@ if not Skada then return end
 Skada:AddLoadableModule("Improvement", function(L)
 	if Skada:IsDisabled("Improvement") then return end
 
-	local mod = Skada:NewModule(L["Improvement"])
+	local mod = Skada:NewModule("Improvement")
 	local mod_modes = mod:NewModule(L["Improvement modes"])
 	local mod_comparison = mod:NewModule(L["Improvement comparison"])
 

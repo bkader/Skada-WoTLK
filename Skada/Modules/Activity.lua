@@ -2,7 +2,7 @@ local Skada = Skada
 Skada:AddLoadableModule("Activity", function(L)
 	if Skada:IsDisabled("Activity") then return end
 
-	local mod = Skada:NewModule(L["Activity"])
+	local mod = Skada:NewModule("Activity")
 	local date, format, max = date, string.format, math.max
 
 	local function activity_tooltip(win, id, label, tooltip)

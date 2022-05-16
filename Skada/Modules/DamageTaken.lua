@@ -12,7 +12,7 @@ local _
 Skada:AddLoadableModule("Damage Taken", function(L)
 	if Skada:IsDisabled("Damage Taken") then return end
 
-	local mod = Skada:NewModule(L["Damage Taken"])
+	local mod = Skada:NewModule("Damage Taken")
 	local playermod = mod:NewModule(L["Damage spell list"])
 	local spellmod = playermod:NewModule(L["Damage spell details"])
 	local sdetailmod = spellmod:NewModule(L["Damage Breakdown"])
@@ -887,7 +887,7 @@ end)
 Skada:AddLoadableModule("DTPS", function(L)
 	if Skada:IsDisabled("Damage Taken", "DTPS") then return end
 
-	local mod = Skada:NewModule(L["DTPS"])
+	local mod = Skada:NewModule("DTPS")
 
 	local function dtps_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
@@ -995,7 +995,7 @@ Skada:AddLoadableModule("DTPS", function(L)
 			icon = [[Interface\Icons\inv_weapon_shortblade_06]]
 		}
 
-		local parentmod = Skada:GetModule(L["Damage Taken"], true)
+		local parentmod = Skada:GetModule("Damage Taken", true)
 		if parentmod then
 			self.metadata.click1 = parentmod.metadata.click1
 			self.metadata.click2 = parentmod.metadata.click2
@@ -1020,7 +1020,7 @@ end)
 Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 	if Skada:IsDisabled("Damage Taken", "Damage Taken By Spell") then return end
 
-	local mod = Skada:NewModule(L["Damage Taken By Spell"])
+	local mod = Skada:NewModule("Damage Taken By Spell")
 	local targetmod = mod:NewModule(L["Damage spell targets"])
 	local sourcemod = mod:NewModule(L["Damage spell sources"])
 	local cacheTable = T.get("Skada_CacheTable2")
@@ -1244,7 +1244,7 @@ end)
 Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 	if Skada:IsDisabled("Damage Taken", "Avoidance & Mitigation") then return end
 
-	local mod = Skada:NewModule(L["Avoidance & Mitigation"])
+	local mod = Skada:NewModule("Avoidance & Mitigation")
 	local playermod = mod:NewModule(L["Damage Breakdown"])
 	local cacheTable = T.get("Skada_CacheTable2")
 

@@ -2,7 +2,7 @@ local Skada = Skada
 Skada:AddLoadableModule("Tweaks", function(L)
 	if Skada:IsDisabled("Tweaks") then return end
 
-	local mod = Skada:NewModule(L["Tweaks"], "AceHook-3.0")
+	local mod = Skada:NewModule("Tweaks", "AceHook-3.0")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local band, format = bit.band, string.format

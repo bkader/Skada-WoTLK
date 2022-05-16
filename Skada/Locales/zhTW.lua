@@ -416,7 +416,7 @@ L["Lines"] = "行數"
 L["There is nothing to report."] = "沒有資料可以報告。"
 L["No mode or segment selected for report."] = "沒有選擇可報告的模組或分段資料。"
 -- Bar Display Module --
-L["Bar display"] = "顯示計量條"
+L["Bar Display"] = "顯示計量條"
 L["mod_bar_desc"] = "條列顯示是大多數傷害統計使用的一般條列視窗。它可以是廣泛的樣式。"
 -- Threat Module --
 L["Threat"] = "威脅值"
@@ -632,7 +632,10 @@ L["Ignored Events"] = "忽略的事件"
 L["%s interrupted!"] = "%s 打斷!"
 -- Power gained module --
 L["Resources"] = "能量"
-L["Power gained: %s"] = "獲得%s"
+L["Power gained: Mana"] = "獲得法力"
+L["Power gained: Rage"] = "獲得怒氣"
+L["Power gained: Energy"] = "獲得能量"
+L["Power gained: Runic Power"] = "獲得符能"
 L["%s gained spells"] = "獲得%s的法術列表"
 -- L["%s's gained %s"] = ""
 -- Parry module lines --

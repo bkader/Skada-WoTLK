@@ -2,7 +2,7 @@ local Skada = Skada
 Skada:AddLoadableModule("Interrupts", function(L)
 	if Skada:IsDisabled("Interrupts") then return end
 
-	local mod = Skada:NewModule(L["Interrupts"])
+	local mod = Skada:NewModule("Interrupts")
 	local spellmod = mod:NewModule(L["Interrupted spells"])
 	local targetmod = mod:NewModule(L["Interrupted targets"])
 	local playermod = mod:NewModule(L["Interrupt spells"])

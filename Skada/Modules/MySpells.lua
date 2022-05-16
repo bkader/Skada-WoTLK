@@ -2,7 +2,7 @@ local Skada = Skada
 Skada:AddLoadableModule("My Spells", function(L)
 	if Skada:IsDisabled("My Spells") then return end
 
-	local mod = Skada:NewModule(L["My Spells"])
+	local mod = Skada:NewModule("My Spells")
 
 	local pairs, format = pairs, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo

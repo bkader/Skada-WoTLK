@@ -1,6 +1,6 @@
 local Skada = Skada
 
-local mod = Skada:NewModule("BarDisplay", "SpecializedLibBars-1.0")
+local mod = Skada:NewModule("Bar Display", "SpecializedLibBars-1.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 local LibWindow = LibStub("LibWindow-1.1")
 local FlyPaper = LibStub("LibFlyPaper-1.1", true)
@@ -2318,7 +2318,6 @@ do
 	end
 
 	function mod:OnInitialize()
-		self.name = L["Bar display"]
 		self.description = L["mod_bar_desc"]
 		Skada:AddDisplaySystem("bar", self)
 

@@ -2,7 +2,7 @@ local Skada = Skada
 Skada:AddLoadableModule("Comparison", function(L)
 	if Skada:IsDisabled("Damage", "Comparison") then return end
 
-	local mod = Skada:NewModule(L["Comparison"])
+	local mod = Skada:NewModule("Comparison")
 
 	local spellmod = mod:NewModule(L["Damage spell list"])
 	local dspellmod = spellmod:NewModule(L["Damage spell details"])

@@ -1,8 +1,7 @@
 local Skada = Skada
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 
-local name = L["Data Text"]
-local mod = Skada:NewModule(name)
+local mod = Skada:NewModule("Data Text")
 
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 local LibWindow = LibStub("LibWindow-1.1")
@@ -362,7 +361,6 @@ function mod:AddDisplayOptions(win, options)
 end
 
 function mod:OnInitialize()
-	self.name = name
 	self.description = L["mod_broker_desc"]
 	Skada:AddDisplaySystem("broker", self)
 end

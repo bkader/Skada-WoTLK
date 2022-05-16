@@ -575,9 +575,9 @@ function Skada:OpenMenu(window)
 					local mode = modes[i]
 					wipe(info)
 					info.text = mode.moduleName
-					info.checked = (Skada.db.profile.report.mode == mode.moduleName)
+					info.checked = (Skada.db.profile.report.mode == mode.name)
 					info.func = function()
-						Skada.db.profile.report.mode = mode.moduleName
+						Skada.db.profile.report.mode = mode.name
 					end
 					UIDropDownMenu_AddButton(info, level)
 				end
@@ -882,7 +882,7 @@ do
 
 			modes = Skada:GetModes()
 			for i = 1, #modes do
-				modebox:AddItem(modes[i].moduleName, modes[i].moduleName)
+				modebox:AddItem(modes[i].name, modes[i].moduleName)
 			end
 			modebox:SetCallback("OnValueChanged", function(f, e, value) Skada.db.profile.report.mode = value end)
 			modebox:SetValue(Skada.db.profile.report.mode or Skada:GetModes()[1])

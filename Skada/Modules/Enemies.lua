@@ -12,7 +12,7 @@ local _
 Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 	if Skada:IsDisabled("Enemy Damage Taken") then return end
 
-	local mod = Skada:NewModule(L["Enemy Damage Taken"])
+	local mod = Skada:NewModule("Enemy Damage Taken")
 	local spellmod = mod:NewModule(L["Damage spell list"])
 	local sourcemod = mod:NewModule(L["Damage source list"])
 	local usefulmod = mod:NewModule(L["Useful Damage"])
@@ -607,7 +607,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 		spellmod.nototal = true
 		usefulmod.nototal = true
 
-		local damagedone = Skada:GetModule(L["Damage"], true)
+		local damagedone = Skada:GetModule("Damage", true)
 		if damagedone then
 			sourcemod.metadata.click1 = damagedone:GetModule(L["Damage target list"], true)
 			sourcemod.metadata.click2 = damagedone:GetModule(L["Damage spell list"], true)
@@ -796,7 +796,7 @@ end)
 Skada:AddLoadableModule("Enemy Damage Done", function(L)
 	if Skada:IsDisabled("Enemy Damage Done") then return end
 
-	local mod = Skada:NewModule(L["Enemy Damage Done"])
+	local mod = Skada:NewModule("Enemy Damage Done")
 	local targetmod = mod:NewModule(L["Damage target list"])
 	local targetspellmod = targetmod:NewModule(L["Damage spell targets"])
 	local spellmod = mod:NewModule(L["Damage spell list"])
@@ -1312,7 +1312,7 @@ end)
 Skada:AddLoadableModule("Enemy Healing Done", function(L)
 	if Skada:IsDisabled("Enemy Healing Done") then return end
 
-	local mod = Skada:NewModule(L["Enemy Healing Done"])
+	local mod = Skada:NewModule("Enemy Healing Done")
 	local targetmod = mod:NewModule(L["Healed target list"])
 	local spellmod = mod:NewModule(L["Healing spell list"])
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua

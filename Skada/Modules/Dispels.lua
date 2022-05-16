@@ -2,7 +2,7 @@ local Skada = Skada
 Skada:AddLoadableModule("Dispels", function(L)
 	if Skada:IsDisabled("Dispels") then return end
 
-	local mod = Skada:NewModule(L["Dispels"])
+	local mod = Skada:NewModule("Dispels")
 	local spellmod = mod:NewModule(L["Dispelled spell list"])
 	local targetmod = mod:NewModule(L["Dispelled target list"])
 	local playermod = mod:NewModule(L["Dispel spell list"])
