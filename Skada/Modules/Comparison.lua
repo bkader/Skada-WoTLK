@@ -4,12 +4,12 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 	local mod = Skada:NewModule("Comparison")
 
-	local spellmod = mod:NewModule(L["Damage spell list"])
-	local dspellmod = spellmod:NewModule(L["Damage spell details"])
-	local bspellmod = spellmod:NewModule(L["Damage Breakdown"])
+	local spellmod = mod:NewModule("Damage spell list")
+	local dspellmod = spellmod:NewModule("Damage spell details")
+	local bspellmod = spellmod:NewModule("Damage Breakdown")
 
-	local targetmod = mod:NewModule(L["Damage target list"])
-	local dtargetmod = targetmod:NewModule(L["Damage spell list"])
+	local targetmod = mod:NewModule("Damage target list")
+	local dtargetmod = targetmod:NewModule("Damage spell list")
 
 	local pairs, format, max = pairs, string.format, math.max
 	local GetSpellInfo, T = Skada.GetSpellInfo or GetSpellInfo, Skada.Table

@@ -3,9 +3,9 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 	if Skada:IsDisabled("Friendly Fire") then return end
 
 	local mod = Skada:NewModule("Friendly Fire")
-	local targetmod = mod:NewModule(L["Damage target list"])
-	local spellmod = mod:NewModule(L["Damage spell list"])
-	local spelltargetmod = spellmod:NewModule(L["Damage spell targets"])
+	local targetmod = mod:NewModule("Damage target list")
+	local spellmod = mod:NewModule("Damage spell list")
+	local spelltargetmod = spellmod:NewModule("Damage spell targets")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 

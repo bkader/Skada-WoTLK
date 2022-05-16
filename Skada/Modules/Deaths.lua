@@ -3,8 +3,8 @@ Skada:AddLoadableModule("Deaths", function(L)
 	if Skada:IsDisabled("Deaths") then return end
 
 	local mod = Skada:NewModule("Deaths")
-	local playermod = mod:NewModule(L["Player's deaths"])
-	local deathlogmod = mod:NewModule(L["Death log"])
+	local playermod = mod:NewModule("Player's deaths")
+	local deathlogmod = mod:NewModule("Death log")
 
 	local tinsert, tremove, tsort, tconcat = table.insert, table.remove, table.sort, table.concat
 	local tostring, format = tostring, string.format
@@ -463,32 +463,34 @@ Skada:AddLoadableModule("Deaths", function(L)
 				local nr = 0
 				for i = 1, #player.deathlog do
 					local death = player.deathlog[i]
-					nr = nr + 1
-					local d = win:nr(nr)
+					if death and death.timeStr then
+						nr = nr + 1
+						local d = win:nr(nr)
 
-					d.id = i
-					d.icon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
+						d.id = i
+						d.icon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
 
-					for k = 1, #death.log do
-						local v = death.log[k]
-						if v and v.amount and v.amount < 0 and (v.spellid or v.source) then
-							if v.spellid then
-								d.label, _, d.icon = GetSpellInfo(v.spellid)
-								d.spellid = v.spellid
-								d.spellschool = v.school
-							elseif v.source then
-								d.label = v.source
+						for k = 1, #death.log do
+							local v = death.log[k]
+							if v and v.amount and v.amount < 0 and (v.spellid or v.source) then
+								if v.spellid then
+									d.label, _, d.icon = GetSpellInfo(v.spellid)
+									d.spellid = v.spellid
+									d.spellschool = v.school
+								elseif v.source then
+									d.label = v.source
+								end
+								break
 							end
-							break
 						end
-					end
 
-					d.label = d.label or L["Unknown"]
-					d.value = death.time or GetTime()
-					d.valuetext = death.timeStr
+						d.label = d.label or L["Unknown"]
+						d.value = death.time or GetTime()
+						d.valuetext = death.timeStr
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
+						if win.metadata and d.value > win.metadata.maxvalue then
+							win.metadata.maxvalue = d.value
+						end
 					end
 				end
 			end
@@ -498,8 +500,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Deaths"], L[win.class]) or L["Deaths"]
 
-		local total = set.death or 0
-		if total > 0 then
+		if set.death then
 			if win.metadata then
 				win.metadata.maxvalue = 0
 			end
@@ -757,12 +758,12 @@ Skada:AddLoadableModule("Deaths", function(L)
 			if not options then
 				options = {
 					type = "group",
-					name = mod.moduleName,
+					name = mod.localeName,
 					desc = format(L["Options for %s."], L["Death log"]),
 					args = {
 						header = {
 							type = "description",
-							name = mod.moduleName,
+							name = mod.localeName,
 							fontSize = "large",
 							image = [[Interface\Icons\ability_rogue_feigndeath]],
 							imageWidth = 18,

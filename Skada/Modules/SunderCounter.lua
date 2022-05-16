@@ -3,7 +3,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 	if Skada:IsDisabled("Sunder Counter") then return end
 
 	local mod = Skada:NewModule("Sunder Counter")
-	local targetmod = mod:NewModule(L["Sunder target list"])
+	local targetmod = mod:NewModule("Sunder target list")
 
 	local pairs, tostring, format = pairs, tostring, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
@@ -233,12 +233,12 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 
 		Skada.options.args.modules.args.sundercounter = {
 			type = "group",
-			name = self.moduleName,
-			desc = format(L["Options for %s."], self.moduleName),
+			name = self.localeName,
+			desc = format(L["Options for %s."], self.localeName),
 			args = {
 				header = {
 					type = "description",
-					name = self.moduleName,
+					name = self.localeName,
 					fontSize = "large",
 					image = [[Interface\Icons\ability_warrior_sunder]],
 					imageWidth = 18,

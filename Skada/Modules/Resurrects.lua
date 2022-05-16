@@ -3,8 +3,8 @@ Skada:AddLoadableModule("Resurrects", function(L)
 	if Skada:IsDisabled("Resurrects") then return end
 
 	local mod = Skada:NewModule("Resurrects")
-	local playermod = mod:NewModule(L["Resurrect spell list"])
-	local targetmod = mod:NewModule(L["Resurrect target list"])
+	local playermod = mod:NewModule("Resurrect spell list")
+	local targetmod = mod:NewModule("Resurrect target list")
 
 	local pairs, tostring, format = pairs, tostring, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo

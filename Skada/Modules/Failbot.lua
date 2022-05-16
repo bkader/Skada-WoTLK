@@ -6,8 +6,8 @@ Skada:AddLoadableModule("Fails", function(L)
 	if Skada:IsDisabled("Fails") then return end
 
 	local mod = Skada:NewModule("Fails")
-	local playermod = mod:NewModule(L["Player's failed events"])
-	local spellmod = mod:NewModule(L["Event's failed players"])
+	local playermod = mod:NewModule("Player's failed events")
+	local spellmod = mod:NewModule("Event's failed players")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local pairs, tostring, format, tContains = pairs, tostring, string.format, tContains
@@ -203,12 +203,12 @@ Skada:AddLoadableModule("Fails", function(L)
 			if not options then
 				options = {
 					type = "group",
-					name = mod.moduleName,
-					desc = format(L["Options for %s."], mod.moduleName),
+					name = mod.localeName,
+					desc = format(L["Options for %s."], mod.localeName),
 					args = {
 						header = {
 							type = "description",
-							name = mod.moduleName,
+							name = mod.localeName,
 							fontSize = "large",
 							image = [[Interface\Icons\ability_creature_cursed_01]],
 							imageWidth = 18,

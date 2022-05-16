@@ -131,17 +131,17 @@ Skada:AddLoadableModule("Project Ascension", function(L)
 		self:OnEvent()
 
 		-- override display modules.
-		local display = Skada:GetModule("BarDisplay", true)
+		local display = Skada:GetModule("Bar Display", true)
 		if display then
 			display.Orig_Update = display.Update
 			display.Update = Ascension_BarDisplay
 		end
-		display = Skada:GetModule("InlineDisplay", true)
+		display = Skada:GetModule("Inline Bar Display", true)
 		if display then
 			display.Orig_Update = display.Update
 			display.Update = Ascension_OthereDisplay
 		end
-		display = Skada:GetModule(L["Data Text"], true)
+		display = Skada:GetModule("Data Text", true)
 		if display then
 			display.Orig_Update = display.Update
 			display.Update = Ascension_OthereDisplay
@@ -158,8 +158,8 @@ Skada:AddLoadableModule("Project Ascension", function(L)
 
 		Skada.options.args.tweaks.args.advanced.args.ascension = {
 			type = "group",
-			name = self.moduleName,
-			desc = format(L["Options for %s."], self.moduleName),
+			name = self.localeName,
+			desc = format(L["Options for %s."], self.localeName),
 			order = 0,
 			args = {
 				ascensionlogo = {

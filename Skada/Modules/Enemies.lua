@@ -13,9 +13,9 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 	if Skada:IsDisabled("Enemy Damage Taken") then return end
 
 	local mod = Skada:NewModule("Enemy Damage Taken")
-	local spellmod = mod:NewModule(L["Damage spell list"])
-	local sourcemod = mod:NewModule(L["Damage source list"])
-	local usefulmod = mod:NewModule(L["Useful Damage"])
+	local spellmod = mod:NewModule("Damage spell list")
+	local sourcemod = mod:NewModule("Damage source list")
+	local usefulmod = mod:NewModule("Useful Damage")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local instanceDiff, customGroupsTable, customUnitsTable, customUnitsInfo
@@ -609,8 +609,8 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 
 		local damagedone = Skada:GetModule("Damage", true)
 		if damagedone then
-			sourcemod.metadata.click1 = damagedone:GetModule(L["Damage target list"], true)
-			sourcemod.metadata.click2 = damagedone:GetModule(L["Damage spell list"], true)
+			sourcemod.metadata.click1 = damagedone:GetModule("Damage target list", true)
+			sourcemod.metadata.click2 = damagedone:GetModule("Damage spell list", true)
 		end
 
 		local flags_src_dst = {src_is_interesting = true, dst_is_not_interesting = true}
@@ -797,10 +797,10 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 	if Skada:IsDisabled("Enemy Damage Done") then return end
 
 	local mod = Skada:NewModule("Enemy Damage Done")
-	local targetmod = mod:NewModule(L["Damage target list"])
-	local targetspellmod = targetmod:NewModule(L["Damage spell targets"])
-	local spellmod = mod:NewModule(L["Damage spell list"])
-	local spelltargetmod = spellmod:NewModule(L["Damage spell targets"])
+	local targetmod = mod:NewModule("Damage target list")
+	local targetspellmod = targetmod:NewModule("Damage spell targets")
+	local spellmod = mod:NewModule("Damage spell list")
+	local spelltargetmod = spellmod:NewModule("Damage spell targets")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
@@ -1313,8 +1313,8 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 	if Skada:IsDisabled("Enemy Healing Done") then return end
 
 	local mod = Skada:NewModule("Enemy Healing Done")
-	local targetmod = mod:NewModule(L["Healed target list"])
-	local spellmod = mod:NewModule(L["Healing spell list"])
+	local targetmod = mod:NewModule("Healed target list")
+	local spellmod = mod:NewModule("Healing spell list")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 

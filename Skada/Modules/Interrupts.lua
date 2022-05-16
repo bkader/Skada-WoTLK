@@ -3,9 +3,9 @@ Skada:AddLoadableModule("Interrupts", function(L)
 	if Skada:IsDisabled("Interrupts") then return end
 
 	local mod = Skada:NewModule("Interrupts")
-	local spellmod = mod:NewModule(L["Interrupted spells"])
-	local targetmod = mod:NewModule(L["Interrupted targets"])
-	local playermod = mod:NewModule(L["Interrupt spells"])
+	local spellmod = mod:NewModule("Interrupted spells")
+	local targetmod = mod:NewModule("Interrupted targets")
+	local playermod = mod:NewModule("Interrupt spells")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local _
 
@@ -290,12 +290,12 @@ Skada:AddLoadableModule("Interrupts", function(L)
 
 		Skada.options.args.modules.args.interrupts = {
 			type = "group",
-			name = self.moduleName,
-			desc = format(L["Options for %s."], self.moduleName),
+			name = self.localeName,
+			desc = format(L["Options for %s."], self.localeName),
 			args = {
 				header = {
 					type = "description",
-					name = self.moduleName,
+					name = self.localeName,
 					fontSize = "large",
 					image = [[Interface\Icons\ability_kick]],
 					imageWidth = 18,
@@ -312,7 +312,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 				},
 				interruptannounce = {
 					type = "toggle",
-					name = format(L["Announce %s"], self.moduleName),
+					name = format(L["Announce %s"], self.localeName),
 					order = 10,
 					width = "double"
 				},

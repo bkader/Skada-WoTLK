@@ -319,8 +319,8 @@ Skada:AddLoadableModule("Buffs", function(L)
 	if Skada:IsDisabled("Buffs") then return end
 
 	local mod = Skada:NewModule("Buffs")
-	local spellmod = mod:NewModule(L["Buff spell list"])
-	local playermod = spellmod:NewModule(L["Players list"])
+	local spellmod = mod:NewModule("Buff spell list")
+	local playermod = spellmod:NewModule("Players list")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	-- list of spells that don't trigger SPELL_AURA_x events
@@ -500,10 +500,10 @@ Skada:AddLoadableModule("Debuffs", function(L)
 	if Skada:IsDisabled("Debuffs") then return end
 
 	local mod = Skada:NewModule("Debuffs")
-	local spellmod = mod:NewModule(L["Debuff spell list"])
-	local spelltargetmod = spellmod:NewModule(L["Debuff target list"])
-	local targetmod = mod:NewModule(L["Debuff target list"])
-	local targetspellmod = targetmod:NewModule(L["Debuff spell list"])
+	local spellmod = mod:NewModule("Debuff spell list")
+	local spelltargetmod = spellmod:NewModule("Debuff target list")
+	local targetmod = mod:NewModule("Debuff target list")
+	local targetspellmod = targetmod:NewModule("Debuff spell list")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	-- list of spells used to queue units.

@@ -88,10 +88,11 @@ Skada:AddLoadableModule("Resources", function(L)
 	function basemod:Create(power)
 		if gainTable[power] then
 			local powername = namesTable[power]
+
 			local instance = Skada:NewModule(format("Power gained: %s", powername))
 			setmetatable(instance, basemod_mt)
 
-			local pmode = instance:NewModule(format(L["%s gained spells"], L[powername]))
+			local pmode = instance:NewModule(format("%s gained spells", powername))
 			setmetatable(pmode, playermod_mt)
 
 			pmode.powerid = power
@@ -116,7 +117,7 @@ Skada:AddLoadableModule("Resources", function(L)
 	-- this is the main module update function that shows the list
 	-- of players depending on the selected power gain type.
 	function basemod:Update(win, set)
-		win.title = self.moduleName or L["Unknown"]
+		win.title = self.localeName or self.moduleName or L["Unknown"]
 		if win.class then
 			win.title = format("%s (%s)", win.title, L[win.class])
 		end

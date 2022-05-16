@@ -824,13 +824,13 @@ function Skada:AddColumnOptions(mod)
 	if not (mod and mod.metadata and mod.metadata.columns) then return end
 
 	local db = self.db.profile.columns
-	local category = mod.category or OTHER
+	local category = mod.category or L["Other"]
 
 	if not Skada.options.args.columns.args[category] then
 		Skada.options.args.columns.args[category] = {type = "group", name = category, args = {}}
 	end
 
-	local moduleName = mod.moduleName
+	local moduleName = mod.localeName
 	if mod.metadata.icon or mod.icon then
 		moduleName = fmt("|T%s:18:18:-5:0:32:32:2:30:2:30|t %s", mod.metadata.icon or mod.icon, moduleName)
 	end
@@ -1144,7 +1144,7 @@ function Skada:FrameSettings(db, include_dimensions)
 										local modes = Skada:GetModes()
 										for i = 1, #modes do
 											if modes[i] then
-												modesList[modes[i].name] = modes[i].moduleName
+												modesList[modes[i].moduleName] = modes[i].localeName
 											end
 										end
 									end
@@ -1162,7 +1162,7 @@ function Skada:FrameSettings(db, include_dimensions)
 										local modes = Skada:GetModes()
 										for i = 1, #modes do
 											if modes[i] then
-												modesList[modes[i].name] = modes[i].moduleName
+												modesList[modes[i].moduleName] = modes[i].localeName
 											end
 										end
 									end

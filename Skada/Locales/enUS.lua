@@ -86,6 +86,9 @@ L["Only for bosses."] = true
 L["Enable this only against bosses."] = true
 L["Melee"] = MELEE
 L["Unknown"] = UNKNOWN
+L["Other"] = OTHER
+L["Category"] = CATEGORY
+L["Categories"] = CATEGORIES
 -- windows section:
 L["Window"] = true
 L["Windows"] = true
@@ -672,7 +675,10 @@ L["Power gained: Mana"] = true
 L["Power gained: Rage"] = true
 L["Power gained: Energy"] = true
 L["Power gained: Runic Power"] = true
-L["%s gained spells"] = true
+L["Mana gained spells"] = true
+L["Rage gained spells"] = true
+L["Energy gained spells"] = true
+L["Runic Power gained spells"] = true
 L["%s's gained %s"] = true
 -- Parry module lines --
 L["Parry-Haste"] = true

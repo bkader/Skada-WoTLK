@@ -4,8 +4,8 @@ Skada:AddLoadableModule("Improvement", function(L)
 	if Skada:IsDisabled("Improvement") then return end
 
 	local mod = Skada:NewModule("Improvement")
-	local mod_modes = mod:NewModule(L["Improvement modes"])
-	local mod_comparison = mod:NewModule(L["Improvement comparison"])
+	local mod_modes = mod:NewModule("Improvement modes")
+	local mod_comparison = mod:NewModule("Improvement comparison")
 
 	local pairs, select = pairs, select
 	local date, tostring = date, tostring

@@ -395,8 +395,8 @@ Skada:AddLoadableModule("Threat", function(L)
 	do
 		local opts = {
 			type = "group",
-			name = mod.moduleName,
-			desc = format(L["Options for %s."], mod.moduleName),
+			name = mod.localeName,
+			desc = format(L["Options for %s."], mod.localeName),
 			get = function(i)
 				return mod.db[i[#i]]
 			end,
@@ -406,7 +406,7 @@ Skada:AddLoadableModule("Threat", function(L)
 			args = {
 				header = {
 					type = "description",
-					name = mod.moduleName,
+					name = mod.localeName,
 					fontSize = "large",
 					image = aggroIcon,
 					imageWidth = 18,

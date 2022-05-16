@@ -101,11 +101,16 @@ function Skada:OpenMenu(window)
 				UIDropDownMenu_AddButton(info, level)
 			end
 
-			if self.win then
+			if self.win and (not self.win.db.enabletitle or (self.win.db.enabletitle and not self.win.db.buttons.segment)) then
 				wipe(info)
 				info.text = L["Select Segment"]
 				info.value = "segment"
 				info.hasArrow = 1
+				info.notCheckable = 1
+				UIDropDownMenu_AddButton(info, level)
+			else
+				wipe(info)
+				info.disabled = 1
 				info.notCheckable = 1
 				UIDropDownMenu_AddButton(info, level)
 			end
@@ -513,7 +518,7 @@ function Skada:OpenMenu(window)
 
 				-- number format
 				wipe(info)
-				info.text = OTHER
+				info.text = L["Other"]
 				info.isTitle = 1
 				info.notCheckable = 1
 				UIDropDownMenu_AddButton(info, level)
@@ -574,10 +579,10 @@ function Skada:OpenMenu(window)
 				for i = 1, #modes do
 					local mode = modes[i]
 					wipe(info)
-					info.text = mode.moduleName
-					info.checked = (Skada.db.profile.report.mode == mode.name)
+					info.text = mode.localeName
+					info.checked = (Skada.db.profile.report.mode == mode.moduleName)
 					info.func = function()
-						Skada.db.profile.report.mode = mode.name
+						Skada.db.profile.report.mode = mode.moduleName
 					end
 					UIDropDownMenu_AddButton(info, level)
 				end
@@ -680,8 +685,8 @@ do
 	local categorized, categories
 
 	local function sort_categories(a, b)
-		local a_score = (a == OTHER) and 1000 or 0
-		local b_score = (b == OTHER) and 1000 or 0
+		local a_score = (a == L["Other"]) and 1000 or 0
+		local b_score = (b == L["Other"]) and 1000 or 0
 		a_score = a_score + (sbyte(a, 1) * 10) + sbyte(a, 1)
 		b_score = b_score + (sbyte(b, 1) * 10) + sbyte(b, 1)
 		return a_score < b_score
@@ -746,9 +751,9 @@ do
 					wipe(info)
 
 					if Skada.db.profile.moduleicons and mode.metadata and mode.metadata.icon then
-						info.text = format(iconName, mode.metadata.icon, mode.moduleName)
+						info.text = format(iconName, mode.metadata.icon, mode.localeName)
 					else
-						info.text = mode.moduleName
+						info.text = mode.localeName
 					end
 
 					info.func = function()
@@ -882,7 +887,7 @@ do
 
 			modes = Skada:GetModes()
 			for i = 1, #modes do
-				modebox:AddItem(modes[i].name, modes[i].moduleName)
+				modebox:AddItem(modes[i].moduleName, modes[i].localeName)
 			end
 			modebox:SetCallback("OnValueChanged", function(f, e, value) Skada.db.profile.report.mode = value end)
 			modebox:SetValue(Skada.db.profile.report.mode or Skada:GetModes()[1])

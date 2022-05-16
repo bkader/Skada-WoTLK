@@ -4,7 +4,7 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 	if Skada:IsDisabled("Parry-Haste") then return end
 
 	local mod = Skada:NewModule("Parry-Haste")
-	local targetmod = mod:NewModule(L["Parry target list"])
+	local targetmod = mod:NewModule("Parry target list")
 
 	local pairs, tostring, format = pairs, tostring, string.format
 
@@ -172,12 +172,12 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 		end
 		Skada.options.args.modules.args.Parry = {
 			type = "group",
-			name = self.moduleName,
-			desc = format(L["Options for %s."], self.moduleName),
+			name = self.localeName,
+			desc = format(L["Options for %s."], self.localeName),
 			args = {
 				header = {
 					type = "description",
-					name = self.moduleName,
+					name = self.localeName,
 					fontSize = "large",
 					image = [[Interface\Icons\ability_parry]],
 					imageWidth = 18,
@@ -194,7 +194,7 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 				},
 				parryannounce = {
 					type = "toggle",
-					name = format(L["Announce %s"], self.moduleName),
+					name = format(L["Announce %s"], self.localeName),
 					order = 10,
 					width = "double"
 				},

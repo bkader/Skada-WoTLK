@@ -121,6 +121,14 @@ Skada.BITMASK_ENEMY = BITMASK_ENEMY
 
 Skada.newTable, Skada.delTable = Skada.TablePool("kv")
 
+-- when modules are created w make sure to save
+-- their english "name" then localize "moduleName"
+local function OnModuleCreated(self, module)
+	module.localeName = L[module.moduleName]
+	module.OnModuleCreated = module.OnModuleCreated or OnModuleCreated
+end
+Skada.OnModuleCreated = OnModuleCreated
+
 -- verifies a set
 local function VerifySet(mode, set)
 	if not mode or not set then return end
@@ -288,7 +296,7 @@ end
 local function FindMode(name)
 	for i = 1, #modes do
 		local mode = modes[i]
-		if mode and (mode.name == name or mode.moduleName == name) then
+		if mode and (mode.moduleName == name or mode.localeName == name) then
 			return mode
 		end
 	end
@@ -525,7 +533,7 @@ do
 					values = function()
 						local list = wipe(templist)
 						for name, display in pairs(displays) do
-							list[name] = display.moduleName
+							list[name] = display.localeName
 						end
 						return list
 					end,
@@ -1240,7 +1248,7 @@ do
 			VerifySet(mode, self.char.sets[i])
 		end
 
-		mode.category = category or OTHER
+		mode.category = category or L["Other"]
 		modes[#modes + 1] = mode
 
 		if selected_feed == nil and self.db.profile.feed ~= "" then
@@ -1253,8 +1261,8 @@ do
 		for i = 1, #windows do
 			local win = windows[i]
 			if win then
-				if win.db and mode.name == win.db.mode then
-					self:RestoreView(win, win.db.set, mode.name)
+				if win.db and mode.moduleName == win.db.mode then
+					self:RestoreView(win, win.db.set, mode.moduleName)
 				end
 				if win.Wipe then
 					win:Wipe()
@@ -1290,11 +1298,6 @@ function Skada:AddLoadableModule(name, description, func)
 	end
 end
 
-function Skada:OnModuleCreated(module)
-	module.name = module.moduleName
-	module.moduleName = L[module.moduleName]
-end
-
 -- checks whether the select module(s) are disabled
 function Skada:IsDisabled(...)
 	for i = 1, select("#", ...) do
@@ -1313,7 +1316,7 @@ do
 		if mod.description then
 			Skada.options.args.windows.args[format("%sdesc", key)] = {
 				type = "description",
-				name = format("\n|cffffd700%s|r:\n%s", mod.moduleName, mod.description),
+				name = format("\n|cffffd700%s|r:\n%s", mod.localeName, mod.description),
 				fontSize = "medium",
 				order = numorder
 			}
@@ -1892,7 +1895,7 @@ do
 		end
 
 		if #win.ttwin.dataset > 0 then
-			tooltip:AddLine(win.ttwin.title or mode.title or mode.moduleName)
+			tooltip:AddLine(win.ttwin.title or mode.title or mode.localeName)
 			local nr = 0
 
 			for i = 1, #win.ttwin.dataset do
@@ -1971,25 +1974,25 @@ do
 				if type(md.click1) == "function" then
 					t:AddLine(format(L["Click for |cff00ff00%s|r"], md.click1_label or L["Unknown"]))
 				elseif md.click1 and not self:NoTotalClick(win.selectedset, md.click1) then
-					t:AddLine(format(L["Click for |cff00ff00%s|r"], md.click1_label or md.click1.moduleName))
+					t:AddLine(format(L["Click for |cff00ff00%s|r"], md.click1_label or md.click1.localeName))
 				end
 
 				if type(md.click2) == "function" then
 					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], md.click2_label or L["Unknown"]))
 				elseif md.click2 and not self:NoTotalClick(win.selectedset, md.click2) then
-					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], md.click2_label or md.click2.moduleName))
+					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], md.click2_label or md.click2.localeName))
 				end
 
 				if type(md.click3) == "function" then
 					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], md.click3_label or L["Unknown"]))
 				elseif md.click3 and not self:NoTotalClick(win.selectedset, md.click3) then
-					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], md.click3_label or md.click3.moduleName))
+					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], md.click3_label or md.click3.localeName))
 				end
 
 				if not self.Ascension and type(md.click4) == "function" then
 					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], md.click4_label or L["Unknown"]))
 				elseif not self.Ascension and md.click4 and not self:NoTotalClick(win.selectedset, md.click4) then
-					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], md.click4_label or md.click4.moduleName))
+					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], md.click4_label or md.click4.localeName))
 				end
 
 				t:Show()
@@ -2259,7 +2262,7 @@ do
 			return
 		end
 
-		local title = (window and window.title) or report_mode.title or report_mode.moduleName
+		local title = (window and window.title) or report_mode.title or report_mode.localeName
 		local label = (report_mode_name == L["Improvement"]) and self.userName or Skada:GetSetLabel(report_set)
 		self:SendChat(format(L["Skada: %s for %s:"], title, label), channel, chantype)
 
@@ -2361,8 +2364,8 @@ function Skada:CheckGroup()
 
 	-- update my spec and role.
 	if not Skada.Ascension and not Skada.AscensionCoA then
-		Skada.userSpec = GetUnitSpec("player", Skada.userClass)
-		Skada.userRole = GetUnitRole("player", Skada.userClass)
+		Skada.userSpec = GetUnitSpec("player", Skada.userClass) or Skada.userSpec
+		Skada.userRole = GetUnitRole("player", Skada.userClass) or Skada.userRole
 	end
 end
 
@@ -2597,10 +2600,10 @@ function Skada:UpdateDisplay(force)
 						if set then
 							win.selectedmode:Update(win, set)
 						else
-							self:Printf("No set available to pass to %s Update function! Try to reset Skada.", win.selectedmode.moduleName)
+							self:Printf("No set available to pass to %s Update function! Try to reset Skada.", win.selectedmode.localeName)
 						end
-					elseif win.selectedmode.moduleName then
-						self:Print("Mode %s does not have an Update function!", win.selectedmode.moduleName)
+					elseif win.selectedmode.localeName then
+						self:Print("Mode %s does not have an Update function!", win.selectedmode.localeName)
 					end
 
 					if
@@ -2655,8 +2658,8 @@ function Skada:UpdateDisplay(force)
 					if mode then
 						local d = win:nr(j)
 
-						d.id = mode.name
-						d.label = mode.moduleName
+						d.id = mode.moduleName
+						d.label = mode.localeName
 						d.value = 1
 
 						if self.db.profile.moduleicons and mode.metadata and mode.metadata.icon then
@@ -2919,24 +2922,24 @@ do
 		if
 			not self.db.enabletitle or -- title bar disabled
 			not self.selectedmode or -- window has no selected mode
-			not self.selectedmode.name or -- selected mode isn't a valid mode
+			not self.selectedmode.moduleName or -- selected mode isn't a valid mode
 			not self.selectedset  -- window has no selected set
 		then
 			return
 		end
 
-		local name = self.selectedmode.title or self.selectedmode.moduleName
-		local savemode = self.selectedmode.name
+		local name = self.selectedmode.title or self.selectedmode.localeName
+		local savemode = self.selectedmode.moduleName
 
 		if self.parentmode then
-			name = self.selectedmode.moduleName or name
-			savemode = self.selectedmode.name or savemode
+			name = self.selectedmode.localeName or name
+			savemode = self.selectedmode.moduleName or savemode
 		end
 
 		-- save window settings for RestoreView after reload
 		self.db.set = self.selectedset
 		if self.history[1] then -- can't currently preserve a nested mode, use topmost one
-			savemode = self.history[1].name or savemode
+			savemode = self.history[1].moduleName or savemode
 		end
 		self.db.mode = savemode
 

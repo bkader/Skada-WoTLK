@@ -392,8 +392,8 @@ Skada:AddLoadableModule("Nickname", function(L)
 
 		Skada.options.args.tweaks.args.advanced.args.nickname = {
 			type = "group",
-			name = self.moduleName,
-			desc = format(L["Options for %s."], self.moduleName),
+			name = self.localeName,
+			desc = format(L["Options for %s."], self.localeName),
 			order = 900,
 			get = function(i)
 				return Skada.db.profile[i[#i]]

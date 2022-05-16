@@ -200,8 +200,8 @@ Skada:AddLoadableModule("CC Done", function(L)
 	if Skada:IsDisabled("CC Done") then return end
 
 	local mod = Skada:NewModule("CC Done")
-	local playermod = mod:NewModule(L["Crowd Control Spells"])
-	local targetmod = mod:NewModule(L["Crowd Control Targets"])
+	local playermod = mod:NewModule("Crowd Control Spells")
+	local targetmod = mod:NewModule("Crowd Control Targets")
 
 	local function log_ccdone(set, cc)
 		local player = Skada:GetPlayer(set, cc.playerid, cc.playername, cc.playerflags)
@@ -440,8 +440,8 @@ Skada:AddLoadableModule("CC Taken", function(L)
 	if Skada:IsDisabled("CC Taken") then return end
 
 	local mod = Skada:NewModule("CC Taken")
-	local playermod = mod:NewModule(L["Crowd Control Spells"])
-	local sourcemod = mod:NewModule(L["Crowd Control Sources"])
+	local playermod = mod:NewModule("Crowd Control Spells")
+	local sourcemod = mod:NewModule("Crowd Control Sources")
 
 	local RaidCCSpells = {
 		[16869] = 0x10, -- Maleki the Pallid/Ossirian the Unscarred: Ice Tomb (Stratholme/??)
@@ -693,8 +693,8 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 	if Skada:IsDisabled("CC Breaks") then return end
 
 	local mod = Skada:NewModule("CC Breaks")
-	local playermod = mod:NewModule(L["Crowd Control Spells"])
-	local targetmod = mod:NewModule(L["Crowd Control Targets"])
+	local playermod = mod:NewModule("Crowd Control Spells")
+	local targetmod = mod:NewModule("Crowd Control Targets")
 
 	local UnitName, UnitInRaid, IsInRaid = UnitName, UnitInRaid, Skada.IsInRaid
 	local GetPartyAssignment, UnitIterator = GetPartyAssignment, Skada.UnitIterator
@@ -963,12 +963,12 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 	function mod:OnInitialize()
 		Skada.options.args.modules.args.ccoptions = {
 			type = "group",
-			name = self.moduleName,
-			desc = format(L["Options for %s."], self.moduleName),
+			name = self.localeName,
+			desc = format(L["Options for %s."], self.localeName),
 			args = {
 				header = {
 					type = "description",
-					name = self.moduleName,
+					name = self.localeName,
 					fontSize = "large",
 					image = [[Interface\Icons\spell_holy_sealofvalor]],
 					imageWidth = 18,
@@ -985,7 +985,7 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 				},
 				ccannounce = {
 					type = "toggle",
-					name = format(L["Announce %s"], self.moduleName),
+					name = format(L["Announce %s"], self.localeName),
 					order = 10,
 					width = "double"
 				},

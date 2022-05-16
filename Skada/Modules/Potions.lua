@@ -3,8 +3,8 @@ Skada:AddLoadableModule("Potions", function(L)
 	if Skada:IsDisabled("Potions") then return end
 
 	local mod = Skada:NewModule("Potions")
-	local playermod = mod:NewModule(L["Potions list"])
-	local potionmod = mod:NewModule(L["Players list"])
+	local playermod = mod:NewModule("Potions list")
+	local potionmod = mod:NewModule("Players list")
 
 	-- cache frequently used globals
 	local pairs, tconcat, format, strsub = pairs, table.concat, string.format, string.sub

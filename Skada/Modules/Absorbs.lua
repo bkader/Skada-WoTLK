@@ -15,9 +15,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	if Skada:IsDisabled("Absorbs") then return end
 
 	local mod = Skada:NewModule("Absorbs")
-	local playermod = mod:NewModule(L["Absorb spell list"])
-	local targetmod = mod:NewModule(L["Absorbed target list"])
-	local spellmod = targetmod:NewModule(L["Absorb spell list"])
+	local playermod = mod:NewModule("Absorb spell list")
+	local targetmod = mod:NewModule("Absorbed target list")
+	local spellmod = targetmod:NewModule("Absorb spell list")
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
@@ -1245,9 +1245,9 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 	if Skada:IsDisabled("Healing", "Absorbs", "Absorbs and Healing") then return end
 
 	local mod = Skada:NewModule("Absorbs and Healing")
-	local playermod = mod:NewModule(L["Absorbs and healing spells"])
-	local targetmod = mod:NewModule(L["Absorbed and healed targets"])
-	local spellmod = targetmod:NewModule(L["Absorbs and healing spells"])
+	local playermod = mod:NewModule("Absorbs and healing spells")
+	local targetmod = mod:NewModule("Absorbed and healed targets")
+	local spellmod = targetmod:NewModule("Absorbs and healing spells")
 	local spellschools = Skada.spellschools
 
 	local function hps_tooltip(win, id, label, tooltip)
@@ -1833,7 +1833,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 	if Skada:IsDisabled("Healing", "Absorbs", "Healing Done By Spell") then return end
 
 	local mod = Skada:NewModule("Healing Done By Spell")
-	local spellmod = mod:NewModule(L["Healing spell sources"])
+	local spellmod = mod:NewModule("Healing spell sources")
 	local cacheTable = Skada.cacheTable
 	local spellschools = Skada.spellschools
 

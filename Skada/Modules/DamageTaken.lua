@@ -13,11 +13,11 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 	if Skada:IsDisabled("Damage Taken") then return end
 
 	local mod = Skada:NewModule("Damage Taken")
-	local playermod = mod:NewModule(L["Damage spell list"])
-	local spellmod = playermod:NewModule(L["Damage spell details"])
-	local sdetailmod = spellmod:NewModule(L["Damage Breakdown"])
-	local sourcemod = mod:NewModule(L["Damage source list"])
-	local tdetailmod = sourcemod:NewModule(L["Damage spell list"])
+	local playermod = mod:NewModule("Damage spell list")
+	local spellmod = playermod:NewModule("Damage spell details")
+	local sdetailmod = spellmod:NewModule("Damage Breakdown")
+	local sourcemod = mod:NewModule("Damage source list")
+	local tdetailmod = sourcemod:NewModule("Damage spell list")
 	local new, del = Skada.newTable, Skada.delTable
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
@@ -78,7 +78,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			player.damagetakenspells[spellname] = spell
 		elseif dmg.spellid and dmg.spellid ~= spell.id then
 			if dmg.spellschool and dmg.spellschool ~= spell.school then
-				spellname = spellname .. " (" .. (spellschools[dmg.spellschool] and spellschools[dmg.spellschool].name or OTHER) .. ")"
+				spellname = spellname .. " (" .. (spellschools[dmg.spellschool] and spellschools[dmg.spellschool].name or L["Other"]) .. ")"
 			else
 				spellname = GetSpellInfo(dmg.spellid)
 			end
@@ -1021,8 +1021,8 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 	if Skada:IsDisabled("Damage Taken", "Damage Taken By Spell") then return end
 
 	local mod = Skada:NewModule("Damage Taken By Spell")
-	local targetmod = mod:NewModule(L["Damage spell targets"])
-	local sourcemod = mod:NewModule(L["Damage spell sources"])
+	local targetmod = mod:NewModule("Damage spell targets")
+	local sourcemod = mod:NewModule("Damage spell sources")
 	local cacheTable = T.get("Skada_CacheTable2")
 
 	function sourcemod:Enter(win, id, label)
@@ -1245,7 +1245,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 	if Skada:IsDisabled("Damage Taken", "Avoidance & Mitigation") then return end
 
 	local mod = Skada:NewModule("Avoidance & Mitigation")
-	local playermod = mod:NewModule(L["Damage Breakdown"])
+	local playermod = mod:NewModule("Damage Breakdown")
 	local cacheTable = T.get("Skada_CacheTable2")
 
 	-- damage miss types

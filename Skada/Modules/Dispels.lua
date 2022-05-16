@@ -3,9 +3,9 @@ Skada:AddLoadableModule("Dispels", function(L)
 	if Skada:IsDisabled("Dispels") then return end
 
 	local mod = Skada:NewModule("Dispels")
-	local spellmod = mod:NewModule(L["Dispelled spell list"])
-	local targetmod = mod:NewModule(L["Dispelled target list"])
-	local playermod = mod:NewModule(L["Dispel spell list"])
+	local spellmod = mod:NewModule("Dispelled spell list")
+	local targetmod = mod:NewModule("Dispelled target list")
+	local playermod = mod:NewModule("Dispel spell list")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	-- cache frequently used globals

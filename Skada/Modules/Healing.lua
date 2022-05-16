@@ -13,9 +13,9 @@ Skada:AddLoadableModule("Healing", function(L)
 	if Skada:IsDisabled("Healing") then return end
 
 	local mod = Skada:NewModule("Healing")
-	local playermod = mod:NewModule(L["Healing spell list"])
-	local targetmod = mod:NewModule(L["Healed target list"])
-	local spellmod = targetmod:NewModule(L["Healing spell list"])
+	local playermod = mod:NewModule("Healing spell list")
+	local targetmod = mod:NewModule("Healed target list")
+	local spellmod = targetmod:NewModule("Healing spell list")
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
@@ -537,9 +537,9 @@ Skada:AddLoadableModule("Overhealing", function(L)
 	if Skada:IsDisabled("Healing", "Overhealing") then return end
 
 	local mod = Skada:NewModule("Overhealing")
-	local playermod = mod:NewModule(L["Overheal spell list"])
-	local targetmod = mod:NewModule(L["Overhealed target list"])
-	local spellmod = targetmod:NewModule(L["Overheal spell list"])
+	local playermod = mod:NewModule("Overheal spell list")
+	local targetmod = mod:NewModule("Overhealed target list")
+	local spellmod = targetmod:NewModule("Overheal spell list")
 
 	function spellmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
@@ -760,9 +760,9 @@ Skada:AddLoadableModule("Total Healing", function(L)
 	if Skada:IsDisabled("Healing", "Total Healing") then return end
 
 	local mod = Skada:NewModule("Total Healing")
-	local playermod = mod:NewModule(L["Healing spell list"])
-	local targetmod = mod:NewModule(L["Healed target list"])
-	local spellmod = targetmod:NewModule(L["Healing spell list"])
+	local playermod = mod:NewModule("Healing spell list")
+	local targetmod = mod:NewModule("Healed target list")
+	local spellmod = targetmod:NewModule("Healing spell list")
 	local spellschools = Skada.spellschools
 
 	local function spell_tooltip(win, id, label, tooltip)
@@ -1090,8 +1090,8 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 	if Skada:IsDisabled("Healing", "Absorbs", "Absorbs and Healing", "Healing Taken") then return end
 
 	local mod = Skada:NewModule("Healing Taken")
-	local sourcemod = mod:NewModule(L["Healing source list"])
-	local sourcespellmod = sourcemod:NewModule(L["Healing spell list"])
+	local sourcemod = mod:NewModule("Healing source list")
+	local sourcespellmod = sourcemod:NewModule("Healing spell list")
 	local cacheTable, wipe = T.get("Skada_CacheTable2"), wipe
 
 	function sourcespellmod:Enter(win, id, label)

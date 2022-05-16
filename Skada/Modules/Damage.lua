@@ -13,11 +13,11 @@ Skada:AddLoadableModule("Damage", function(L)
 	if Skada:IsDisabled("Damage") then return end
 
 	local mod = Skada:NewModule("Damage")
-	local playermod = mod:NewModule(L["Damage spell list"])
-	local spellmod = playermod:NewModule(L["Damage spell details"])
-	local sdetailmod = playermod:NewModule(L["Damage Breakdown"])
-	local targetmod = mod:NewModule(L["Damage target list"])
-	local tdetailmod = targetmod:NewModule(L["Damage spell list"])
+	local playermod = mod:NewModule("Damage spell list")
+	local spellmod = playermod:NewModule("Damage spell details")
+	local sdetailmod = playermod:NewModule("Damage Breakdown")
+	local targetmod = mod:NewModule("Damage target list")
+	local tdetailmod = targetmod:NewModule("Damage spell list")
 	local UnitGUID, GetTime = UnitGUID, GetTime
 	local new, del = Skada.newTable, Skada.delTable
 	local spellschools = Skada.spellschools
@@ -93,7 +93,7 @@ Skada:AddLoadableModule("Damage", function(L)
 			player.damagespells[spellname] = spell
 		elseif dmg.spellid and dmg.spellid ~= spell.id then
 			if dmg.spellschool and dmg.spellschool ~= spell.school then
-				spellname = spellname .. " (" .. (spellschools[dmg.spellschool] and spellschools[dmg.spellschool].name or OTHER) .. ")"
+				spellname = spellname .. " (" .. (spellschools[dmg.spellschool] and spellschools[dmg.spellschool].name or L["Other"]) .. ")"
 			else
 				spellname = GetSpellInfo(dmg.spellid)
 			end
@@ -1062,7 +1062,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(L)
 	if Skada:IsDisabled("Damage", "Damage Done By Spell") then return end
 
 	local mod = Skada:NewModule("Damage Done By Spell")
-	local sourcemod = mod:NewModule(L["Damage spell sources"])
+	local sourcemod = mod:NewModule("Damage spell sources")
 
 	function sourcemod:Enter(win, id, label)
 		win.spellname = label
@@ -1214,9 +1214,9 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 	if Skada:IsDisabled("Damage", "Useful Damage") then return end
 
 	local mod = Skada:NewModule("Useful Damage")
-	local playermod = mod:NewModule(L["Damage spell list"])
-	local targetmod = mod:NewModule(L["Damage target list"])
-	local detailmod = targetmod:NewModule(L["More Details"])
+	local playermod = mod:NewModule("Damage spell list")
+	local targetmod = mod:NewModule("Damage target list")
+	local detailmod = targetmod:NewModule("More Details")
 
 	function playermod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
@@ -1496,9 +1496,9 @@ Skada:AddLoadableModule("Overkill", function(L)
 	if Skada:IsDisabled("Damage", "Overkill") then return end
 
 	local mod = Skada:NewModule("Overkill")
-	local playermod = mod:NewModule(L["Overkill spell list"])
-	local targetmod = mod:NewModule(L["Overkill target list"])
-	local detailmod = targetmod:NewModule(L["Overkill spell list"])
+	local playermod = mod:NewModule("Overkill spell list")
+	local targetmod = mod:NewModule("Overkill target list")
+	local detailmod = targetmod:NewModule("Overkill spell list")
 
 	function playermod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
