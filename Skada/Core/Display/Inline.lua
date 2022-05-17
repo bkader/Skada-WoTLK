@@ -114,7 +114,7 @@ local function showmode(win, id, label, mode)
 end
 
 local function BarClick(win, bar, button)
-	if bar.ignore then return end
+	if Skada.testMode or bar.ignore then return end
 
 	local id, label = bar.valueid, bar.valuetext
 
@@ -136,7 +136,7 @@ local function BarClick(win, bar, button)
 end
 
 local function frameOnMouseDown(self, button)
-	if button == "RightButton" then
+	if button == "RightButton" and not Skada.testMode then
 		self.win:RightClick(nil, button)
 	end
 end
@@ -410,7 +410,7 @@ local function sortFunc(a, b)
 	elseif not b.label then
 		return true
 	else
-		return a.label > b.label
+		return a.label:GetText() > b.label:GetText()
 	end
 end
 

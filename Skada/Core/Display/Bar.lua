@@ -61,7 +61,7 @@ local function anchorOnClick(self, button)
 			Skada:SegmentMenu(bargroup.win)
 		elseif IsAltKeyDown() then
 			Skada:ModeMenu(bargroup.win)
-		elseif not bargroup.clickthrough then
+		elseif not bargroup.clickthrough and not Skada.testMode then
 			bargroup.win:RightClick(nil, button)
 		end
 	end
@@ -516,6 +516,8 @@ do
 	end
 
 	function mod:BarClick(_, bar, button)
+		if Skada.testMode then return end
+
 		local win, id, label = bar.win, bar.id, bar.text
 
 		if button == self.db.button then
@@ -944,9 +946,7 @@ end
 -- ======================================================= --
 
 do
-	local backdrop = {}
-	local backdrop_insets = {left = 0, right = 0, top = 0, bottom = 0}
-
+	local backdrop = {insets = {left = 0, right = 0, top = 0, bottom = 0}}
 	-- Called by Skada windows when window settings have changed.
 	function mod:ApplySettings(win)
 		if not win or not win.bargroup then return end
@@ -1020,11 +1020,10 @@ do
 		-- Window border
 		Skada:ApplyBorder(g, p.background.bordertexture, p.background.bordercolor, p.background.borderthickness, p.background.borderinsets)
 
-		backdrop_insets.left, backdrop_insets.right, backdrop_insets.top, backdrop_insets.bottom = 0, 0, 0, 0
 		backdrop.bgFile = p.background.texturepath or Skada:MediaFetch("background", p.background.texture)
 		backdrop.tile = p.background.tile
 		backdrop.tileSize = p.background.tilesize
-		backdrop.insets = backdrop_insets
+		backdrop.insets.left, backdrop.insets.right, backdrop.insets.top, backdrop.insets.bottom = 0, 0, 0, 0
 		if p.enabletitle then
 			if p.reversegrowth then
 				backdrop.insets.top = 0

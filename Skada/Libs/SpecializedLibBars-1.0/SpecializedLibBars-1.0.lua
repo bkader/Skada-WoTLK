@@ -2,7 +2,7 @@
 -- Specialized ( = enhanced) for Skada
 -- Note to self: don't forget to notify original author of changes
 -- in the unlikely event they end up being usable outside of Skada.
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90010
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90011
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 
@@ -23,63 +23,62 @@ local GetScreenHeight = GetScreenHeight
 -------------------------------------------------------------------------------
 -- localization
 
-local L = {
-	resize_header = "Resize",
-	resize_click = "|cff00ff00Click|r to freely resize window.",
-	resize_shift_click = "|cff00ff00Shift-Click|r to change the width.",
-	resize_alt_click = "|cff00ff00Alt-Click|r to change the height.",
-	lock_window = "Lock Window",
-	unlock_window = "Unlock Window"
-}
+local L_RESIZE_HEADER = "Resize"
+local L_RESIZE_CLICK = "|cff00ff00Click|r to freely resize window."
+local L_RESIZE_SHIFT_CLICK = "|cff00ff00Shift-Click|r to change the width."
+local L_RESIZE_ALT_CLICK = "|cff00ff00Alt-Click|r to change the height."
+local L_LOCK_WINDOW = "Lock Window"
+local L_UNLOCK_WINDOW = "Unlock Window"
+
 if LOCALE_deDE then
-	L["resize_header"] = "Größe ändern"
-	L["resize_click"] = "|cff00ff00Klicken|r, um die Fenstergröße frei zu ändern."
-	L["resize_shift_click"] = "|cff00ff00Umschalt-Klick|r, um die Breite zu ändern."
-	L["resize_alt_click"] = "|cff00ff00Alt-Klick|r, um die Höhe zu ändern."
-	L["lock_window"] = "Fenster sperren"
-	L["unlock_window"] = "Fenster entsperren"
+	L_RESIZE_HEADER = "Größe ändern"
+	L_RESIZE_CLICK = "|cff00ff00Klicken|r, um die Fenstergröße frei zu ändern."
+	L_RESIZE_SHIFT_CLICK = "|cff00ff00Umschalt-Klick|r, um die Breite zu ändern."
+	L_RESIZE_ALT_CLICK = "|cff00ff00Alt-Klick|r, um die Höhe zu ändern."
+	L_LOCK_WINDOW = "Fenster sperren"
+	L_UNLOCK_WINDOW = "Fenster entsperren"
 elseif LOCALE_esES or LOCALE_esMX then
-	L["resize_header"] = "Redimensionar"
-	L["resize_click"] = "|cff00ff00Haga clic|r para cambiar el tamaño de la ventana."
-	L["resize_shift_click"] = "|cff00ff00Shift-Click|r para cambiar el ancho de la ventana."
-	L["resize_alt_click"] = "|cff00ff00Alt-Click|r para cambiar la altura de la ventana."
-	L["lock_window"] = "Bloquear ventana"
-	L["unlock_window"] = "Desbloquear ventana"
+	L_RESIZE_HEADER = "Redimensionar"
+	L_RESIZE_CLICK = "|cff00ff00Haga clic|r para cambiar el tamaño de la ventana."
+	L_RESIZE_SHIFT_CLICK = "|cff00ff00Shift-Click|r para cambiar el ancho de la ventana."
+	L_RESIZE_ALT_CLICK = "|cff00ff00Alt-Click|r para cambiar la altura de la ventana."
+	L_LOCK_WINDOW = "Bloquear ventana"
+	L_UNLOCK_WINDOW = "Desbloquear ventana"
 elseif LOCALE_frFR then
-	L["resize_header"] = "Redimensionner"
-	L["resize_click"] = "|cff00ff00Clic|r pour redimensionner."
-	L["resize_shift_click"] = "|cff00ff00Shift clic|r pour changer la largeur."
-	L["resize_alt_click"] = "|cff00ff00Alt clic|r pour changer la hauteur."
-	L["lock_window"] = "Verrouiller la fenêtre"
-	L["unlock_window"] = "Déverrouiller la fenêtre"
+	L_RESIZE_HEADER = "Redimensionner"
+	L_RESIZE_CLICK = "|cff00ff00Clic|r pour redimensionner."
+	L_RESIZE_SHIFT_CLICK = "|cff00ff00Shift clic|r pour changer la largeur."
+	L_RESIZE_ALT_CLICK = "|cff00ff00Alt clic|r pour changer la hauteur."
+	L_LOCK_WINDOW = "Verrouiller la fenêtre"
+	L_UNLOCK_WINDOW = "Déverrouiller la fenêtre"
 elseif LOCALE_koKR then
-	L["resize_header"] = "크기 조정"
-	L["resize_click"] = "|cff00ff00클릭|r하여 창 크기를 자유롭게 조정합니다."
-	L["resize_shift_click"] = "너비를 변경하려면 |cff00ff00Shift-클릭|r하십시오."
-	L["resize_alt_click"] = "높이를 변경하려면 |cff00ff00Alt-클릭|r하십시오"
-	L["lock_window"] = "잠금 창"
-	L["unlock_window"] = "잠금 해제 창"
+	L_RESIZE_HEADER = "크기 조정"
+	L_RESIZE_CLICK = "|cff00ff00클릭|r하여 창 크기를 자유롭게 조정합니다."
+	L_RESIZE_SHIFT_CLICK = "너비를 변경하려면 |cff00ff00Shift-클릭|r하십시오."
+	L_RESIZE_ALT_CLICK = "높이를 변경하려면 |cff00ff00Alt-클릭|r하십시오"
+	L_LOCK_WINDOW = "잠금 창"
+	L_UNLOCK_WINDOW = "잠금 해제 창"
 elseif LOCALE_ruRU then
-	L["resize_header"] = "Изменение размера"
-	L["resize_click"] = "|cff00ff00Щелкните|r, чтобы изменить размер окна."
-	L["resize_shift_click"] = "|cff00ff00Shift-Click|r, чтобы изменить ширину."
-	L["resize_alt_click"] = "|cff00ff00ALT-Click|r, чтобы изменить высоту."
-	L["lock_window"] = "Заблокировать окно"
-	L["unlock_window"] = "Разблокировать окно"
+	L_RESIZE_HEADER = "Изменение размера"
+	L_RESIZE_CLICK = "|cff00ff00Щелкните|r, чтобы изменить размер окна."
+	L_RESIZE_SHIFT_CLICK = "|cff00ff00Shift-Click|r, чтобы изменить ширину."
+	L_RESIZE_ALT_CLICK = "|cff00ff00ALT-Click|r, чтобы изменить высоту."
+	L_LOCK_WINDOW = "Заблокировать окно"
+	L_UNLOCK_WINDOW = "Разблокировать окно"
 elseif LOCALE_zhCN then
-	L["resize_header"] = "调整大小"
-	L["resize_click"] = "|cff00ff00单击|r以调整窗口大小。"
-	L["resize_shift_click"] = "|cff00ff00Shift-Click|r改变窗口的宽度。"
-	L["resize_alt_click"] = "|cff00ff00Alt-Click|r更改窗口高度。"
-	L["lock_window"] = "锁定窗口"
-	L["unlock_window"] = "解锁窗口"
+	L_RESIZE_HEADER = "调整大小"
+	L_RESIZE_CLICK = "|cff00ff00单击|r以调整窗口大小。"
+	L_RESIZE_SHIFT_CLICK = "|cff00ff00Shift-Click|r改变窗口的宽度。"
+	L_RESIZE_ALT_CLICK = "|cff00ff00Alt-Click|r更改窗口高度。"
+	L_LOCK_WINDOW = "锁定窗口"
+	L_UNLOCK_WINDOW = "解锁窗口"
 elseif LOCALE_zhTW then
-	L["resize_header"] = "調整大小"
-	L["resize_click"] = "|cff00ff00單擊|r以調整窗口大小。"
-	L["resize_shift_click"] = "|cff00ff00Shift-Click|r改變窗口的寬度。"
-	L["resize_alt_click"] = "|cff00ff00Alt-Click|r更改窗口高度。"
-	L["lock_window"] = "鎖定窗口"
-	L["unlock_window"] = "解鎖窗口"
+	L_RESIZE_HEADER = "調整大小"
+	L_RESIZE_CLICK = "|cff00ff00單擊|r以調整窗口大小。"
+	L_RESIZE_SHIFT_CLICK = "|cff00ff00Shift-Click|r改變窗口的寬度。"
+	L_RESIZE_ALT_CLICK = "|cff00ff00Alt-Click|r更改窗口高度。"
+	L_LOCK_WINDOW = "鎖定窗口"
+	L_UNLOCK_WINDOW = "解鎖窗口"
 end
 
 -------------------------------------------------------------------------------
@@ -166,9 +165,11 @@ do
 
 			p.startX = p:GetLeft()
 			p.startY = p:GetTop()
-			p.callbacks:Fire("WindowMoveStart", p, p.startX, p.startY)
-
 			p:StartMoving()
+
+			if p.callbacks then
+				p.callbacks:Fire("WindowMoveStart", p, p.startX, p.startY)
+			end
 		end
 	end
 
@@ -180,7 +181,7 @@ do
 
 			local endX = p:GetLeft()
 			local endY = p:GetTop()
-			if self.startX ~= endX or self.startY ~= endY then
+			if p.callbacks and (self.startX ~= endX or self.startY ~= endY) then
 				p.callbacks:Fire("WindowMoveStop", p, endX, endY)
 			end
 		end
@@ -234,6 +235,7 @@ do
 		orientation = (orientation == "LEFT") and 1 or orientation
 		orientation = (orientation == "RIGHT") and 3 or orientation
 
+		frameName = frameName:gsub("%W","")
 		local list = barListPrototype:Bind(CreateFrame("Frame", frameName, UIParent))
 		list:SetResizable(true)
 		list:SetMovable(true)
@@ -256,6 +258,7 @@ do
 		list.button:SetNormalFontObject(myfont)
 
 		list.button.text = list.button:GetFontString()
+		list.button.text:SetWordWrap(false)
 		list.button.bg = list.button:CreateTexture("$parentTexture", "BACKGROUND")
 		list.button.bg:SetAllPoints()
 
@@ -582,7 +585,7 @@ end
 
 -- barListPrototype:SetSmoothing - bars animation
 do
-	local function listOnUpdate(self, elapsed)
+	local function smoothUpdate(self, elapsed)
 		if bars[self] then
 			for _, bar in pairs(bars[self]) do
 				if bar.targetamount and bar:IsShown() then
@@ -606,9 +609,9 @@ do
 	function barListPrototype:SetSmoothing(smoothing)
 		self.smoothing = smoothing or nil
 		if self.smoothing then
-			self:AddOnUpdate(listOnUpdate)
+			self:AddOnUpdate(smoothUpdate)
 		else
-			self:RemoveOnUpdate(listOnUpdate)
+			self:RemoveOnUpdate(smoothUpdate)
 		end
 	end
 end
@@ -734,12 +737,14 @@ end
 -- shows anchor
 function barListPrototype:ShowAnchor()
 	self.button:Show()
+	self:GuessMaxBars()
 	self:SortBars()
 end
 
 -- hides anchor
 function barListPrototype:HideAnchor()
 	self.button:Hide()
+	self:GuessMaxBars()
 	self:SortBars()
 end
 
@@ -817,7 +822,7 @@ function barListPrototype:AdjustTitle(nomouseover)
 
 	if self.lastbtn and self.orientation == 2 then
 		if self.mouseover and not nomouseover then
-			self.button.text:SetPoint("LEFT", self.button, "LEFT", 5, 0)
+			self.button.text:SetPoint("LEFT", self.button, "LEFT", 5, 1)
 		else
 			self.button.text:SetPoint("LEFT", self.lastbtn, "RIGHT")
 		end
@@ -827,7 +832,7 @@ function barListPrototype:AdjustTitle(nomouseover)
 		self.button.icon:SetPoint("LEFT", self.button, "LEFT", 5, -1)
 		self.button.text:SetPoint("LEFT", self.button, "LEFT", self.showAnchorIcon and 23 or 5, 0)
 		if self.mouseover and not nomouseover then
-			self.button.text:SetPoint("RIGHT", self.button, "RIGHT", -5, 0)
+			self.button.text:SetPoint("RIGHT", self.button, "RIGHT", -5, 1)
 		else
 			self.button.text:SetPoint("RIGHT", self.lastbtn, "LEFT")
 		end
@@ -977,18 +982,30 @@ end
 -- barListPrototype:SetDisableResize - disable group resize
 do
 	function listOnEnter(self)
-		self.lockbutton:SetAlpha(1)
-		self.stretcher:SetAlpha(1)
-		self.resizeright:SetAlpha(1)
-		self.resizeleft:SetAlpha(1)
+		if self.lockbutton then
+			self.lockbutton:SetAlpha(1)
+		end
+		if self.stretcher then
+			self.stretcher:SetAlpha(1)
+		end
+		if self.resizeright then
+			self.resizeright:SetAlpha(1)
+			self.resizeleft:SetAlpha(1)
+		end
 	end
 
 	function listOnLeave(self)
 		GameTooltip:Hide()
-		self.lockbutton:SetAlpha(0)
-		self.stretcher:SetAlpha(0)
-		self.resizeright:SetAlpha(0)
-		self.resizeleft:SetAlpha(0)
+		if self.lockbutton then
+			self.lockbutton:SetAlpha(0)
+		end
+		if self.stretcher then
+			self.stretcher:SetAlpha(0)
+		end
+		if self.resizeright then
+			self.resizeright:SetAlpha(0)
+			self.resizeleft:SetAlpha(0)
+		end
 	end
 
 	local strfind = strfind or string.find
@@ -1016,8 +1033,10 @@ do
 			p:StopMovingOrSizing()
 			p:SetLength(p:GetLength())
 			p:GuessMaxBars()
-			p.callbacks:Fire("WindowResized", p)
 			p:SortBars()
+			if p.callbacks then
+				p.callbacks:Fire("WindowResized", p)
+			end
 		end
 	end
 
@@ -1025,10 +1044,10 @@ do
 		GameTooltip:SetOwner(self, "ANCHOR_NONE")
 		GameTooltip:SetPoint("BOTTOM", self, "TOP", 0, 0)
 		GameTooltip:ClearLines()
-		GameTooltip:AddLine(L["resize_header"])
-		GameTooltip:AddLine(L["resize_click"], 1, 1, 1)
-		GameTooltip:AddLine(L["resize_shift_click"], 1, 1, 1)
-		GameTooltip:AddLine(L["resize_alt_click"], 1, 1, 1)
+		GameTooltip:AddLine(L_RESIZE_HEADER)
+		GameTooltip:AddLine(L_RESIZE_CLICK, 1, 1, 1)
+		GameTooltip:AddLine(L_RESIZE_SHIFT_CLICK, 1, 1, 1)
+		GameTooltip:AddLine(L_RESIZE_ALT_CLICK, 1, 1, 1)
 		GameTooltip:Show()
 		listOnEnter(self:GetParent())
 		self.icon:SetVertexColor(1, 1, 1, 0.7)
@@ -1045,7 +1064,7 @@ do
 		GameTooltip:SetPoint("BOTTOM", self, "TOP", 0, 0)
 		GameTooltip:ClearLines()
 		GameTooltip:AddLine(p.name)
-		GameTooltip:AddLine(p.locked and L["unlock_window"] or L["lock_window"], 1, 1, 1)
+		GameTooltip:AddLine(p.locked and L_UNLOCK_WINDOW or L_LOCK_WINDOW, 1, 1, 1)
 		GameTooltip:Show()
 		listOnEnter(self:GetParent())
 		self.icon:SetVertexColor(1, 1, 1, 0.7)
@@ -1605,12 +1624,26 @@ do
 	end
 end
 
--- adds OnUpdate function
-function barListPrototype:AddOnUpdate(func)
-	if type(func) == "function" then
-		self.updateFuncs = self.updateFuncs or {}
-		self.updateFuncs[func] = true
-		self:SetScript("OnUpdate", self.OnUpdate)
+-- barListPrototype:AddOnUpdate
+do
+	-- handles OnUpdate
+	local function listOnUpdate(self, elapsed)
+		if not self.updateFuncs or next(self.updateFuncs) == nil then
+			self:SetScript("OnUpdate", nil)
+		else
+			for func in pairs(self.updateFuncs) do
+				func(self, elapsed)
+			end
+		end
+	end
+
+	-- adds OnUpdate function
+	function barListPrototype:AddOnUpdate(func)
+		if type(func) == "function" then
+			self.updateFuncs = self.updateFuncs or {}
+			self.updateFuncs[func] = true
+			self:SetScript("OnUpdate", listOnUpdate)
+		end
 	end
 end
 
@@ -1618,17 +1651,6 @@ end
 function barListPrototype:RemoveOnUpdate(func)
 	if self.updateFuncs then
 		self.updateFuncs[func] = nil
-	end
-end
-
--- handles OnUpdate
-function barListPrototype:OnUpdate(elapsed)
-	if self.updateFuncs and next(self.updateFuncs) ~= nil then
-		for func in pairs(self.updateFuncs) do
-			func(self, elapsed)
-		end
-	else
-		self:SetScript("OnUpdate", nil)
 	end
 end
 
@@ -1647,18 +1669,22 @@ do
 	local function barOnEnter(self, motion)
 		local p = self:GetParent()
 		listOnEnter(p)
-		p.callbacks:Fire("BarEnter", self, motion)
 		if p.barhighlight then
 			self.hg:SetVertexColor(1, 1, 1, 0.1)
+		end
+		if p.callbacks then
+			p.callbacks:Fire("BarEnter", self, motion)
 		end
 	end
 
 	local function barOnLeave(self, motion)
 		local p = self:GetParent()
 		listOnLeave(p)
-		p.callbacks:Fire("BarLeave", self, motion)
 		if p.barhighlight then
 			self.hg:SetVertexColor(0, 0, 0, 0)
+		end
+		if p.callbacks then
+			p.callbacks:Fire("BarLeave", self, motion)
 		end
 	end
 
