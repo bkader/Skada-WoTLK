@@ -199,13 +199,15 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 	end
 
 	function mod:AddToTooltip(set, tooltip)
-		if set and (set.sunder or 0) > 0 then
-			tooltip:AddDoubleLine(sunder, set.sunder or 0, 1, 1, 1)
+		if set.sunder and set.sunder > 0 then
+			tooltip:AddDoubleLine(sunder, set.sunder, 1, 1, 1)
 		end
 	end
 
 	function mod:GetSetSummary(set)
-		return tostring(set.sunder or 0), set.sunder or 0
+		if set.sunder and set.sunder > 0 then
+			return tostring(set.sunder), set.sunder
+		end
 	end
 
 	function mod:SetComplete(set)

@@ -32,11 +32,11 @@ Skada:AddLoadableModule("My Spells", function(L)
 			-- count stats
 			tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
 
-			if (spell.hit or 0) > 0 then
+			if spell.hit and spell.hit > 0 then
 				tooltip:AddDoubleLine(L["Normal Hits"], format("%s (%s)", spell.hit, Skada:FormatPercent(spell.hit, spell.count)), 1, 1, 1)
 			end
 
-			if (spell.critical or 0) > 0 then
+			if spell.critical and spell.critical > 0 then
 				tooltip:AddDoubleLine(L["Critical Hits"], format("%s (%s)", spell.critical, Skada:FormatPercent(spell.critical, spell.count)), 1, 1, 1)
 			end
 

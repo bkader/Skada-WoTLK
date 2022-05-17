@@ -76,7 +76,7 @@ Skada:AddLoadableModule("Damage", function(L)
 		set.totaldamage = (set.totaldamage or 0) + dmg.amount + absorbed
 
 		-- add the damage overkill
-		if (dmg.overkill or 0) > 0 then
+		if dmg.overkill and dmg.overkill > 0 then
 			set.overkill = (set.overkill or 0) + dmg.overkill
 			player.overkill = (player.overkill or 0) + dmg.overkill
 		end
@@ -114,7 +114,7 @@ Skada:AddLoadableModule("Damage", function(L)
 		spell.amount = spell.amount + dmg.amount
 		spell.total = spell.total + dmg.amount
 
-		if (dmg.overkill or 0) > 0 then
+		if dmg.overkill and dmg.overkill > 0 then
 			spell.overkill = (spell.overkill or 0) + dmg.overkill
 		end
 
@@ -144,11 +144,11 @@ Skada:AddLoadableModule("Damage", function(L)
 			end
 		end
 
-		if (dmg.blocked or 0) > 0 then
+		if dmg.blocked and dmg.blocked > 0 then
 			spell.blocked = (spell.blocked or 0) + dmg.blocked
 		end
 
-		if (dmg.resisted or 0) > 0 then
+		if dmg.resisted and dmg.resisted > 0 then
 			spell.resisted = (spell.resisted or 0) + dmg.resisted
 		end
 
@@ -162,7 +162,7 @@ Skada:AddLoadableModule("Damage", function(L)
 			end
 			target.amount = target.amount + dmg.amount
 			target.total = target.total + dmg.amount + absorbed
-			if (dmg.overkill or 0) > 0 then
+			if dmg.overkill and dmg.overkill > 0 then
 				target.overkill = (target.overkill or 0) + dmg.overkill
 			end
 		end
@@ -321,7 +321,7 @@ Skada:AddLoadableModule("Damage", function(L)
 			-- show the aura uptime in case of a debuff.
 			if actor.GetAuraUptime then
 				local uptime, activetime = actor:GetAuraUptime(spell.id)
-				if (uptime or 0) > 0 then
+				if uptime and uptime > 0 then
 					uptime = 100 * (uptime / activetime)
 					tooltip:AddDoubleLine(L["Uptime"], Skada:FormatPercent(uptime), nil, nil, nil, PercentToRGB(uptime))
 				end
@@ -536,20 +536,20 @@ Skada:AddLoadableModule("Damage", function(L)
 				local nr = add_detail_bar(win, 0, L["Hits"], spell.count)
 				win.dataset[nr].value = win.dataset[nr].value + 1 -- to be always first
 
-				if (spell.casts or 0) > 0 then
+				if spell.casts and spell.casts > 0 then
 					nr = add_detail_bar(win, nr, L["Casts"], spell.casts)
 					win.dataset[nr].value = win.dataset[nr].value * 1e3 -- to be always first
 				end
 
-				if (spell.hit or 0) > 0 then
+				if spell.hit and spell.hit > 0 then
 					nr = add_detail_bar(win, nr, L["Normal Hits"], spell.hit, spell.count, true)
 				end
 
-				if (spell.critical or 0) > 0 then
+				if spell.critical and spell.critical > 0 then
 					nr = add_detail_bar(win, nr, L["Critical Hits"], spell.critical, spell.count, true)
 				end
 
-				if (spell.glancing or 0) > 0 then
+				if spell.glancing and spell.glancing > 0 then
 					nr = add_detail_bar(win, nr, L["Glancing"], spell.glancing, spell.count, true)
 				end
 
@@ -591,7 +591,7 @@ Skada:AddLoadableModule("Damage", function(L)
 				nr = add_detail_bar(win, nr, L["Damage"], spell.amount, total, true, true)
 			end
 
-			if (spell.overkill or 0) > 0 then
+			if spell.overkill and spell.overkill > 0 then
 				nr = add_detail_bar(win, nr, L["Overkill"], spell.overkill, total, true, true)
 			end
 
@@ -863,14 +863,14 @@ Skada:AddLoadableModule("Damage", function(L)
 		T.free("Damage_ExtraAttacks", extraATT, nil, del)
 
 		-- clean set from garbage before it is saved.
-		if (set.totaldamage or 0) == 0 then return end
+		if not set.totaldamage or set.totaldamage == 0 then return end
 		for i = 1, #set.players do
 			local p = set.players[i]
 			if p and p.totaldamage == 0 then
 				p.damagespells = nil
 			elseif p and p.damagespells then
 				for spellname, spell in pairs(p.damagespells) do
-					if (spell.total or 0) == 0 or (spell.count or 0) == 0 then
+					if not spell.total or spell.total == 0 or not spell.count or spell.count == 0 then
 						p.damagespells[spellname] = nil
 					end
 				end
@@ -1081,7 +1081,8 @@ Skada:AddLoadableModule("Damage Done By Spell", function(L)
 					player and
 					player.damagespells and
 					player.damagespells[win.spellname] and
-					(player.damagespells[win.spellname].total or 0) > 0
+					player.damagespells[win.spellname].total and
+					player.damagespells[win.spellname].total > 0
 				then
 					cacheTable[player.name] = {
 						id = player.id,
@@ -1518,7 +1519,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 
 			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
 			for spellname, spell in pairs(actor.damagespells) do
-				if (spell.overkill or 0) > 0 then
+				if spell.overkill and spell.overkill > 0 then
 					nr = nr + 1
 					local d = win:nr(nr)
 
@@ -1570,7 +1571,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 
 			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
 			for targetname, target in pairs(targets) do
-				if (target.overkill or 0) > 0 then
+				if target.overkill and target.overkill > 0 then
 					nr = nr + 1
 					local d = win:nr(nr)
 
@@ -1605,7 +1606,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 		if not set or not win.targetname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		if not actor or (actor.overkill or 0) == 0 then return end
+		if not actor or not actor.overkill or actor.overkill == 0 then return end
 
 		local targets = actor:GetDamageTargets()
 		local total = (targets and targets[win.targetname]) and targets[win.targetname].overkill or 0
@@ -1617,7 +1618,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 
 			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
 			for spellname, spell in pairs(actor.damagespells) do
-				if spell.targets and spell.targets[win.targetname] and (spell.targets[win.targetname].overkill or 0) > 0 then
+				if spell.targets and spell.targets[win.targetname] and spell.targets[win.targetname].overkill and spell.targets[win.targetname].overkill > 0 then
 					nr = nr + 1
 					local d = win:nr(nr)
 

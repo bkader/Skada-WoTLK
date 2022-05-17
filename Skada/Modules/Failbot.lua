@@ -190,7 +190,7 @@ Skada:AddLoadableModule("Fails", function(L)
 	end
 
 	function mod:AddToTooltip(set, tooltip)
-		if set and (set.fail or 0) > 0 then
+		if set.fail and set.fail > 0 then
 			tooltip:AddDoubleLine(L["Fails"], set.fail, 1, 1, 1)
 		end
 	end
@@ -262,7 +262,7 @@ Skada:AddLoadableModule("Fails", function(L)
 	end
 
 	function mod:SetComplete(set)
-		if (set.fail or 0) > 0 and Skada.db.profile.modules.failsannounce then
+		if set.fail and set.fail > 0 and Skada.db.profile.modules.failsannounce then
 			local channel = Skada.db.profile.modules.failschannel or "AUTO"
 			if channel == "SELF" or channel == "GUILD" or IsInGroup() then
 				Skada:Report(channel, "preset", L["Fails"], nil, 10)

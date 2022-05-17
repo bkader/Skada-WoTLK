@@ -29,7 +29,7 @@ Skada:AddLoadableModule("Threat", function(L)
 
 		local function add_to_threattable(unit, owner, target, win)
 			if unit == "AGGRO" then
-				if mod.db.showAggroBar and (tankThreat or 0) > 0 then
+				if mod.db.showAggroBar and tankThreat and tankThreat > 0 then
 					if not rubyAcorn then
 						rubyAcorn = GetItemInfo(37727)
 					end
@@ -202,7 +202,7 @@ Skada:AddLoadableModule("Threat", function(L)
 				for i = 1, #win.dataset do
 					local data = win.dataset[i]
 					if data and data.id == "AGGRO" then
-						if self.db.showAggroBar and (tankThreat or 0) > 0 then
+						if self.db.showAggroBar and tankThreat and tankThreat > 0 then
 							data.valuetext = Skada:FormatValueCols(
 								self.metadata.columns.Threat and format_threatvalue(data.threat),
 								self.metadata.columns.TPS and getTPS(data.threat),

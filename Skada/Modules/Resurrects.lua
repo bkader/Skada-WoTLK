@@ -238,7 +238,7 @@ Skada:AddLoadableModule("Resurrects", function(L)
 	end
 
 	function mod:AddToTooltip(set, tooltip)
-		if (set.ress or 0) > 0 then
+		if set.ress and set.ress > 0 then
 			tooltip:AddDoubleLine(L["Resurrects"], set.ress, 1, 1, 1)
 		end
 	end

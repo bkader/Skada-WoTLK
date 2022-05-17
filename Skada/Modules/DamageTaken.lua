@@ -131,15 +131,15 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			spell.total = spell.total + absorbed
 		end
 
-		if (dmg.blocked or 0) > 0 then
+		if dmg.blocked and dmg.blocked > 0 then
 			spell.blocked = (spell.blocked or 0) + dmg.blocked
 		end
 
-		if (dmg.resisted or 0) > 0 then
+		if dmg.resisted and dmg.resisted > 0 then
 			spell.resisted = (spell.resisted or 0) + dmg.resisted
 		end
 
-		if (dmg.overkill or 0) > 0 then
+		if dmg.overkill and dmg.overkill > 0 then
 			spell.overkill = (spell.overkill or 0) + dmg.overkill
 		end
 
@@ -156,7 +156,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			if absorbed > 0 then
 				source.total = source.total + absorbed
 			end
-			if (dmg.overkill or 0) > 0 then
+			if dmg.overkill and dmg.overkill > 0 then
 				source.overkill = (source.overkill or 0) + dmg.overkill
 			end
 		end
@@ -551,24 +551,24 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				local nr = add_detail_bar(win, 0, L["Hits"], spell.count)
 				win.dataset[nr].value = win.dataset[nr].value + 1 -- to be always first
 
-				if (spell.casts or 0) > 0 then
+				if spell.casts and spell.casts > 0 then
 					nr = add_detail_bar(win, nr, L["Casts"], spell.casts)
 					win.dataset[nr].value = win.dataset[nr].value * 1e3 -- to be always first
 				end
 
-				if (spell.hit or 0) > 0 then
+				if spell.hit and spell.hit > 0 then
 					nr = add_detail_bar(win, nr, L["Normal Hits"], spell.hit, spell.count, true)
 				end
 
-				if (spell.critical or 0) > 0 then
+				if spell.critical and spell.critical > 0 then
 					nr = add_detail_bar(win, nr, L["Critical Hits"], spell.critical, spell.count, true)
 				end
 
-				if (spell.glancing or 0) > 0 then
+				if spell.glancing and spell.glancing > 0 then
 					nr = add_detail_bar(win, nr, L["Glancing"], spell.glancing, spell.count, true)
 				end
 
-				if (spell.crushing or 0) > 0 then
+				if spell.crushing and spell.crushing > 0 then
 					nr = add_detail_bar(win, nr, L["Crushing"], spell.crushing, spell.count, true)
 				end
 
@@ -610,7 +610,7 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				nr = add_detail_bar(win, nr, L["Damage"], spell.amount, total, true, true)
 			end
 
-			if (spell.overkill or 0) > 0 then
+			if spell.overkill and spell.overkill > 0 then
 				nr = add_detail_bar(win, nr, L["Overkill"], spell.overkill, total, true, true)
 			end
 
@@ -618,11 +618,11 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 				nr = add_detail_bar(win, nr, L["ABSORB"], absorbed, total, true, true)
 			end
 
-			if (spell.blocked or 0) > 0 then
+			if spell.blocked and spell.blocked > 0 then
 				nr = add_detail_bar(win, nr, L["BLOCK"], spell.blocked, total, true, true)
 			end
 
-			if (spell.resisted or 0) > 0 then
+			if spell.resisted and spell.resisted > 0 then
 				nr = add_detail_bar(win, nr, L["RESIST"], spell.resisted, total, true, true)
 			end
 		end
@@ -860,14 +860,14 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 		T.free("Damage_ExtraAttacks", extraATT, nil, del)
 
 		-- clean set from garbage before it is saved.
-		if (set.totaldamagetaken or 0) == 0 then return end
+		if not set.totaldamagetaken or set.totaldamagetaken == 0 then return end
 		for i = 1, #set.players do
 			local p = set.players[i]
 			if p and p.totaldamagetaken == 0 then
 				p.damagetakenspells = nil
 			elseif p and p.damagetakenspells then
 				for spellname, spell in pairs(p.damagetakenspells) do
-					if (spell.total or 0) == 0 or (spell.count or 0) == 0 then
+					if not spell.total or spell.total == 0 or not spell.count or spell.count == 0 then
 						p.damagetakenspells[spellname] = nil
 					end
 				end
@@ -1118,7 +1118,8 @@ Skada:AddLoadableModule("Damage Taken By Spell", function(L)
 					player and
 					player.damagetakenspells and
 					player.damagetakenspells[win.spellname] and
-					(player.damagetakenspells[win.spellname].total or 0) > 0
+					player.damagetakenspells[win.spellname].total and
+					player.damagetakenspells[win.spellname].total > 0
 				 then
 					cacheTable[player.name] = {
 						id = player.id,
@@ -1294,7 +1295,7 @@ Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Avoidance & Mitigation"], L[win.class]) or L["Avoidance & Mitigation"]
 
-		if (set.totaldamagetaken or 0) > 0 then
+		if set.totaldamagetaken and set.totaldamagetaken > 0 then
 			wipe(cacheTable) -- used later
 
 			if win.metadata then

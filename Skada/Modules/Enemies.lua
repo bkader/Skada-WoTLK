@@ -68,7 +68,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 		for uid in UnitIterator() do
 			if UnitExists(uid .. "target") and UnitGUID(uid .. "target") == guid then
 				maxval = (unit.power ~= nil) and UnitPowerMax(uid .. "target", unit.power) or UnitHealthMax(uid .. "target")
-				if (maxval or 0) > 0 then break end -- break only if found!
+				if maxval and maxval > 0 then break end -- break only if found!
 			end
 		end
 
@@ -84,7 +84,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 			maxval = unit.values[GetRaidDiff()]
 		end
 
-		if (maxval or 0) > 0 then
+		if maxval and maxval > 0 then
 			customUnitsInfo = customUnitsInfo or T.get("Enemies_UnitsInfo")
 			customUnitsInfo[id] = maxval
 		end
@@ -109,7 +109,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 
 			-- get the unit max value.
 			local maxval = CustomUnitsMaxValue(id, guid, unit)
-			if (maxval or 0) == 0 then
+			if not maxval or maxval == 0 then
 				customUnitsTable[guid] = -1
 				return false
 			end
@@ -244,7 +244,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 					source.total = source.total + absorbed
 				end
 
-				if (dmg.overkill or 0) > 0 then
+				if dmg.overkill and dmg.overkill > 0 then
 					spell.overkill = (spell.overkill or 0) + dmg.overkill
 					source.overkill = (source.overkill or 0) + dmg.overkill
 				end
@@ -515,7 +515,7 @@ Skada:AddLoadableModule("Enemy Damage Taken", function(L)
 
 			local actortime, nr = mod.metadata.columns.sDTPS and actor:GetTime(), 0
 			for sourcename, source in pairs(sources) do
-				if (not win.class or win.class == source.class) and (source.useful or 0) > 0 then
+				if source.useful and source.useful > 0 and (not win.class or win.class == source.class) then
 					nr = nr + 1
 					local d = win:nr(nr)
 
@@ -853,7 +853,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 					target.total = target.total + absorbed
 				end
 
-				if (dmg.overkill or 0) > 0 then
+				if dmg.overkill and dmg.overkill > 0 then
 					set.eoverkill = (set.eoverkill or 0) + dmg.overkill
 					e.overkill = (e.overkill or 0) + dmg.overkill
 					spell.overkill = (spell.overkill or 0) + dmg.overkill
@@ -1321,7 +1321,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 	local function log_heal(set, data)
 		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
 
-		if (data.amount or 0) == 0 then return end
+		if not data.amount or data.amount == 0 then return end
 
 		local e = Skada:GetEnemy(set, data.enemyname, data.enemyid, data.enemyflags, true)
 		if e then

@@ -269,7 +269,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	end
 
 	local function log_absorb(set, absorb, nocount)
-		if not absorb.spellid or (absorb.amount or 0) == 0 then return end
+		if not absorb.spellid or not absorb.amount or absorb.amount == 0 then return end
 
 		local player = Skada:GetPlayer(set, absorb.playerid, absorb.playername)
 		if player then
@@ -716,7 +716,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			_, _, spellschool, amount, _, _, _, _, absorbed = ...
 		end
 
-		if (absorbed or 0) > 0 and dstName and shields and shields[dstName] then
+		if absorbed and absorbed > 0 and dstName and shields and shields[dstName] then
 			process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool or 1, amount, amount > absorbed)
 		end
 	end
@@ -730,14 +730,14 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			_, _, spellschool, misstype, absorbed = ...
 		end
 
-		if misstype == "ABSORB" and (absorbed or 0) > 0 and dstName and shields and shields[dstName] then
+		if misstype == "ABSORB" and absorbed and absorbed > 0 and dstName and shields and shields[dstName] then
 			process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool or 1, 0, false)
 		end
 	end
 
 	local function EnvironmentDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local envtype, amount, _, _, _, _, absorbed = ...
-		if (absorbed or 0) > 0 and dstName and shields and shields[dstName] then
+		if absorbed and absorbed > 0 and dstName and shields and shields[dstName] then
 			local spellschool = 0x01
 
 			if envtype == "Fire" or envtype == "FIRE" then
@@ -772,12 +772,12 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				tooltip:AddLine(spellschools(spell.school))
 			end
 
-			if (spell.casts or 0) > 0 then
+			if spell.casts and spell.casts > 0 then
 				tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
 			end
 
 			local average = nil
-			if (spell.count or 0) > 0 then
+			if spell.count and spell.count > 0 then
 				tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
 				average = spell.amount / spell.count
 			end
@@ -1218,7 +1218,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		self.checked = nil
 
 		-- clean absorbspells table:
-		if (set.absorb or 0) == 0 then return end
+		if not set.absorb or set.absorb == 0 then return end
 		for i = 1, #set.players do
 			local p = set.players[i]
 			if p and p.absorb == 0 then
@@ -1296,16 +1296,16 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 			end
 
 			local average = nil
-			if (spell.count or 0) > 0 then
+			if spell.count and spell.count > 0 then
 				tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
 				average = spell.amount / spell.count
 
-				if (spell.critical or 0) > 0 then
+				if spell.critical and spell.critical > 0 then
 					tooltip:AddDoubleLine(L["Critical"], Skada:FormatPercent(spell.critical, spell.count), 0.67, 1, 0.67)
 				end
 			end
 
-			if (spell.overheal or 0) > 0 then
+			if spell.overheal and spell.overheal > 0 then
 				tooltip:AddDoubleLine(L["Total Healing"], Skada:FormatNumber(spell.overheal + spell.amount), 1, 1, 1)
 				tooltip:AddDoubleLine(L["Overheal"], format("%s (%s)", Skada:FormatNumber(spell.overheal), Skada:FormatPercent(spell.overheal, spell.overheal + spell.amount)), 1, 0.67, 0.67)
 			end
@@ -1674,7 +1674,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 			tooltip:AddDoubleLine(L["Healing"], Skada:FormatNumber(amount), 1, 1, 1)
 			tooltip:AddDoubleLine(L["HPS"], Skada:FormatNumber(hps), 1, 1, 1)
 		end
-		if (set.overheal or 0) > 0 then
+		if set.overheal and set.overheal > 0 then
 			amount = amount + set.overheal
 			tooltip:AddDoubleLine(L["Overheal"], Skada:FormatPercent(set.overheal, amount), 1, 1, 1)
 		end
@@ -1866,15 +1866,15 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 				tooltip:AddLine(spellschools(spell.school))
 			end
 
-			if (spell.casts or 0) > 0 then
+			if spell.casts and spell.casts > 0 then
 				tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
 			end
 
-			if (spell.count or 0) > 0 then
+			if spell.count and spell.count > 0 then
 				tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
 			end
 			tooltip:AddDoubleLine(spell.isabsorb and L["Absorbs"] or L["Healing"], format("%s (%s)", Skada:FormatNumber(spell.amount), Skada:FormatPercent(spell.amount, total)), 1, 1, 1)
-			if set.overheal and (spell.overheal or 0) > 0 then
+			if set.overheal and spell.overheal and spell.overheal > 0 then
 				tooltip:AddDoubleLine(L["Overheal"], format("%s (%s)", Skada:FormatNumber(spell.overheal), Skada:FormatPercent(spell.overheal, set.overheal)), 1, 1, 1)
 			end
 		end

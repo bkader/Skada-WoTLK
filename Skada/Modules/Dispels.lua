@@ -258,7 +258,7 @@ Skada:AddLoadableModule("Dispels", function(L)
 	end
 
 	function mod:AddToTooltip(set, tooltip)
-		if set and (set.dispel or 0) > 0 then
+		if set.dispel and set.dispel > 0 then
 			tooltip:AddDoubleLine(L["Dispels"], set.dispel, 1, 1, 1)
 		end
 	end

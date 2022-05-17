@@ -52,7 +52,7 @@ end
 
 -- returns the segment's time
 function setPrototype:GetTime()
-	return max((self.time or 0) > 0 and self.time or (time() - self.starttime), 0.1)
+	return max((self.time and self.time > 0) and self.time or (time() - self.starttime), 0.1)
 end
 
 -- returns the actor's time if found (player or enemy)
@@ -758,9 +758,9 @@ function actorPrototype:GetOverhealTargets(tbl)
 		tbl = wipe(tbl or cacheTable)
 
 		for _, spell in pairs(self.healspells) do
-			if (spell.overheal or 0) > 0 and spell.targets then
+			if spell.overheal and spell.overheal > 0 and spell.targets then
 				for name, target in pairs(spell.targets) do
-					if (target.overheal or 0) > 0 then
+					if target.overheal and target.overheal > 0 then
 						if not tbl[name] then
 							tbl[name] = {amount = target.overheal, total = target.amount + target.overheal}
 						else
@@ -793,7 +793,7 @@ function actorPrototype:GetOverhealOnTarget(name)
 
 	if self.overheal and self.healspells and name then
 		for _, spell in pairs(self.healspells) do
-			if (spell.overheal or 0) > 0 and spell.targets and spell.targets[name] and spell.targets[name].overheal then
+			if spell.overheal and spell.overheal > 0 and spell.targets and spell.targets[name] and spell.targets[name].overheal then
 				overheal = overheal + spell.targets[name].overheal
 			end
 		end

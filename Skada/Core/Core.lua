@@ -325,7 +325,7 @@ end
 
 -- returns the selected set time.
 function Skada:GetSetTime(set)
-	return set and max((set.time or 0) > 0 and set.time or (time() - set.starttime), 0.1) or 0
+	return set and max((set.time and set.time > 0) and set.time or (time() - set.starttime), 0.1) or 0
 end
 
 -- returns a formmatted set time
@@ -335,7 +335,7 @@ end
 
 -- returns the player active/effective time
 function Skada:GetActiveTime(set, player, active)
-	if (self.db.profile.timemesure ~= 2 or active) and player and (player.time or 0) > 0 then
+	if (self.db.profile.timemesure ~= 2 or active) and player and player.time and player.time > 0 then
 		return max(0.1, player.time)
 	end
 	return self:GetSetTime(set)
@@ -347,7 +347,7 @@ function Skada:AddActiveTime(player, cond, diff)
 		local curtime = GetTime()
 		local delta = curtime - player.last
 
-		if (diff or 0) > 0 and delta > diff then
+		if diff and diff > 0 and diff < delta then
 			delta = diff
 		elseif delta > 3.5 then
 			delta = 3.5

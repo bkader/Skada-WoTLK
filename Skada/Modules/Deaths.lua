@@ -125,7 +125,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 			data.spellid, _, data.spellschool, misstype, amount = ...
 		end
 
-		if (amount or 0) > 0 and (misstype == "RESIST" or misstype == "BLOCK" or misstype == "ABSORB") then
+		if amount and amount > 0 and (misstype == "RESIST" or misstype == "BLOCK" or misstype == "ABSORB") then
 			data.srcName = srcName
 			data.playerid = dstGUID
 			data.playername = dstName
@@ -347,9 +347,10 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 				tsort(deathlog.log, sort_logs)
 
+				local curtime = GetTime()
 				for i = #deathlog.log, 1, -1 do
 					local log = deathlog.log[i]
-					local diff = tonumber(log.time) - tonumber(deathlog.time or GetTime())
+					local diff = tonumber(log.time) - tonumber(deathlog.time or curtime)
 					if diff > -60 then
 						local nr = i + 1
 						local d = win:nr(nr)
@@ -403,23 +404,23 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 							local extra = new()
 
-							if (log.overheal or 0) > 0 then
+							if log.overheal and log.overheal > 0 then
 								d.overheal = log.overheal
 								extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.overheal)
 							end
-							if (log.overkill or 0) > 0 then
+							if log.overkill and log.overkill > 0 then
 								d.overkill = log.overkill
 								extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.overkill)
 							end
-							if (log.resisted or 0) > 0 then
+							if log.resisted and log.resisted > 0 then
 								d.resisted = log.resisted
 								extra[#extra + 1] = "R:" .. Skada:FormatNumber(log.resisted)
 							end
-							if (log.blocked or 0) > 0 then
+							if log.blocked and log.blocked > 0 then
 								d.blocked = log.blocked
 								extra[#extra + 1] = "B:" .. Skada:FormatNumber(log.blocked)
 							end
-							if (log.absorbed or 0) > 0 then
+							if log.absorbed and log.absorbed > 0 then
 								d.absorbed = log.absorbed
 								extra[#extra + 1] = "A:" .. Skada:FormatNumber(log.absorbed)
 							end
@@ -460,7 +461,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 					win.metadata.maxvalue = 0
 				end
 
-				local nr = 0
+				local nr, curtime = 0, GetTime()
 				for i = 1, #player.deathlog do
 					local death = player.deathlog[i]
 					if death and death.timeStr then
@@ -485,7 +486,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 						end
 
 						d.label = d.label or L["Unknown"]
-						d.value = death.time or GetTime()
+						d.value = death.time or curtime
 						d.valuetext = death.timeStr
 
 						if win.metadata and d.value > win.metadata.maxvalue then
@@ -554,24 +555,24 @@ Skada:AddLoadableModule("Deaths", function(L)
 				tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(entry.amount), 1, 1, 1, c.r, c.g, c.b)
 			end
 
-			if (entry.overkill or 0) > 0 then
+			if entry.overkill and entry.overkill > 0 then
 				tooltip:AddDoubleLine(L["Overkill"], Skada:FormatNumber(entry.overkill), 1, 1, 1, 0.77, 0.64, 0)
-			elseif (entry.overheal or 0) > 0 then
+			elseif entry.overheal and entry.overheal > 0 then
 				c = GetColor("yellow")
 				tooltip:AddDoubleLine(L["Overheal"], Skada:FormatNumber(entry.overheal), 1, 1, 1, c.r, c.g, c.b)
 			end
 
-			if (entry.resisted or 0) > 0 then
+			if entry.resisted and entry.resisted > 0 then
 				c = GetColor("orange")
 				tooltip:AddDoubleLine(L["RESIST"], Skada:FormatNumber(entry.resisted), 1, 1, 1, c.r, c.g, c.b)
 			end
 
-			if (entry.blocked or 0) > 0 then
+			if entry.blocked and entry.blocked > 0 then
 				c = GetColor("orange")
 				tooltip:AddDoubleLine(L["BLOCK"], Skada:FormatNumber(entry.blocked), 1, 1, 1, c.r, c.g, c.b)
 			end
 
-			if (entry.absorbed or 0) > 0 then
+			if entry.absorbed and entry.absorbed > 0 then
 				c = GetColor("orange")
 				tooltip:AddDoubleLine(L["ABSORB"], Skada:FormatNumber(entry.absorbed), 1, 1, 1, c.r, c.g, c.b)
 			end
@@ -687,7 +688,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 	end
 
 	function mod:AddToTooltip(set, tooltip)
-		if (set.death or 0) > 0 then
+		if set.death and set.death > 0 then
 			tooltip:AddDoubleLine(DEATHS, set.death, 1, 1, 1)
 		end
 	end

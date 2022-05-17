@@ -296,7 +296,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 	function mod:SetComplete(set)
 		T.clear(dmg)
 
-		if (set.friendfire or 0) == 0 then return end
+		if not set.friendfire or set.friendfire == 0 then return end
 		for i = 1, #set.players do
 			local p = set.players[i]
 			if p and p.friendfire and p.friendfire == 0 then

@@ -30,7 +30,7 @@ do
 
 			-- add player's aura uptime getter.
 			playerPrototype.GetAuraUptime = function(self, spellid)
-				if self.auras and spellid and self.auras[spellid] and (self.auras[spellid].uptime or 0) > 0 then
+				if self.auras and spellid and self.auras[spellid] and self.auras[spellid].uptime and self.auras[spellid].uptime > 0 then
 					return self.auras[spellid].uptime, self:GetTime()
 				end
 			end
@@ -163,7 +163,7 @@ do
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
 		local spell = player and player.auras and player.auras[aura.spellid]
 
-		if spell and (spell.active or 0) > 0 then
+		if spell and spell.active and spell.active > 0 then
 			spell.refresh = (spell.refresh or 0) + 1
 			if spell.targets and aura.dstName and spell.targets[aura.dstName] then
 				spell.targets[aura.dstName].refresh = (spell.targets[aura.dstName].refresh or 0) + 1
@@ -178,7 +178,7 @@ do
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
 		local spell = player and player.auras and player.auras[aura.spellid]
 
-		if spell and (spell.active or 0) > 0 then
+		if spell and spell.active and spell.active > 0 then
 			spell.active = spell.active - 1
 			if spell.active == 0 and spell.start then
 				spell.uptime = spell.uptime + floor((time() - spell.start) + 0.5)
@@ -186,7 +186,7 @@ do
 			end
 
 			-- targets
-			if spell.targets and aura.dstName and spell.targets[aura.dstName] and (spell.targets[aura.dstName].active or 0) > 0 then
+			if spell.targets and aura.dstName and spell.targets[aura.dstName] and spell.targets[aura.dstName].active and spell.targets[aura.dstName].active > 0 then
 				spell.targets[aura.dstName].active = spell.targets[aura.dstName].active - 1
 				if spell.targets[aura.dstName].active == 0 and spell.targets[aura.dstName].start then
 					spell.targets[aura.dstName].uptime = spell.targets[aura.dstName].uptime + floor((time() - spell.targets[aura.dstName].start) + 0.5)

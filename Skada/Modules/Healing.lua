@@ -171,20 +171,20 @@ Skada:AddLoadableModule("Healing", function(L)
 				tooltip:AddLine(spellschools(spell.school))
 			end
 
-			if (spell.casts or 0) > 0 then
+			if spell.casts and spell.casts > 0 then
 				tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
 			end
 
 			local average = nil
-			if (spell.count or 0) > 0 then
+			if spell.count and spell.count > 0 then
 				tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
 				average = spell.amount / spell.count
 
-				if (spell.critical or 0) > 0 then
+				if spell.critical and spell.critical > 0 then
 					tooltip:AddDoubleLine(L["Critical"], Skada:FormatPercent(spell.critical, spell.count), 0.67, 1, 0.67)
 				end
 
-				if (spell.overheal or 0) > 0 then
+				if spell.overheal and spell.overheal > 0 then
 					tooltip:AddDoubleLine(L["Overheal"], Skada:FormatPercent(spell.overheal, spell.overheal + spell.amount), 1, 0.67, 0.67)
 				end
 			end
@@ -509,7 +509,7 @@ Skada:AddLoadableModule("Healing", function(L)
 		T.clear(heal)
 
 		-- clean healspells table!
-		if (set.heal or 0) > 0 or (set.overheal or 0) > 0 then
+		if (set.heal and set.heal > 0) or (set.overheal and set.overheal > 0) then
 			for i = 1, #set.players do
 				local p = set.players[i]
 				if p and p.heal and (p.heal + p.overheal) == 0 then
@@ -560,7 +560,7 @@ Skada:AddLoadableModule("Overhealing", function(L)
 
 			local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
 			for spellid, spell in pairs(actor.healspells) do
-				if spell.targets and spell.targets[win.targetname] and (spell.targets[win.targetname].overheal or 0) > 0 then
+				if spell.targets and spell.targets[win.targetname] and spell.targets[win.targetname].overheal and spell.targets[win.targetname].overheal > 0 then
 					nr = nr + 1
 					local d = win:nr(nr)
 
@@ -606,7 +606,7 @@ Skada:AddLoadableModule("Overhealing", function(L)
 
 			local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
 			for spellid, spell in pairs(actor.healspells) do
-				if (spell.overheal or 0) > 0 then
+				if spell.overheal and spell.overheal > 0 then
 					nr = nr + 1
 					local d = win:nr(nr)
 
@@ -784,7 +784,7 @@ Skada:AddLoadableModule("Total Healing", function(L)
 			if spell.amount > 0 then
 				tooltip:AddDoubleLine(L["Healing"], format("%s (%s)", Skada:FormatNumber(spell.amount), Skada:FormatPercent(spell.amount, total)), 0.67, 1, 0.67)
 			end
-			if (spell.overheal or 0) > 0 then
+			if spell.overheal and spell.overheal > 0 then
 				tooltip:AddDoubleLine(L["Overheal"], format("%s (%s)", Skada:FormatNumber(spell.overheal), Skada:FormatPercent(spell.overheal, total)), 1, 0.67, 0.67)
 			end
 
@@ -801,7 +801,7 @@ Skada:AddLoadableModule("Total Healing", function(L)
 				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
 			end
 
-			if (spell.count or 0) > 0 then
+			if spell.count and spell.count > 0 then
 				if not separator then
 					tooltip:AddLine(" ")
 					separator = true

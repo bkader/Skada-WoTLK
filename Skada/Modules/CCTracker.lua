@@ -397,7 +397,7 @@ Skada:AddLoadableModule("CC Done", function(L)
 	end
 
 	function mod:AddToTooltip(set, tooltip)
-		if (set.ccdone or 0) > 0 then
+		if set.ccdone and set.ccdone > 0 then
 			tooltip:AddDoubleLine(L["CC Done"], set.ccdone, 1, 1, 1)
 		end
 	end
@@ -650,7 +650,7 @@ Skada:AddLoadableModule("CC Taken", function(L)
 	end
 
 	function mod:AddToTooltip(set, tooltip)
-		if (set.cctaken or 0) > 0 then
+		if set.cctaken and set.cctaken > 0 then
 			tooltip:AddDoubleLine(L["CC Taken"], set.cctaken, 1, 1, 1)
 		end
 	end
@@ -925,7 +925,7 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 	end
 
 	function mod:AddToTooltip(set, tooltip)
-		if (set.ccbreak or 0) > 0 then
+		if set.ccbreak and set.ccbreak > 0 then
 			tooltip:AddDoubleLine(L["CC Breaks"], set.ccbreak, 1, 1, 1)
 		end
 	end

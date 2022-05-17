@@ -274,7 +274,7 @@ Skada:AddLoadableModule("Interrupts", function(L)
 	end
 
 	function mod:AddToTooltip(set, tooltip)
-		if set and (set.interrupt or 0) > 0 then
+		if set.interrupt and set.interrupt > 0 then
 			tooltip:AddDoubleLine(L["Interrupts"], set.interrupt, 1, 1, 1)
 		end
 	end

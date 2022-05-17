@@ -208,20 +208,20 @@ Skada:AddLoadableModule("Comparison", function(L)
 				local nr = add_detail_bar(win, 0, L["Hits"], spell.count, nil, nil, true)
 				win.dataset[nr].value = win.dataset[nr].value + 1 -- to be always first
 
-				if (spell.casts or 0) > 0 then
+				if spell.casts and spell.casts > 0 then
 					nr = add_detail_bar(win, nr, L["Casts"], spell.casts, nil, nil, true)
 					win.dataset[nr].value = win.dataset[nr].value * 1e3 -- to be always first
 				end
 
-				if (spell.hit or 0) > 0 then
+				if spell.hit and spell.hit > 0 then
 					nr = add_detail_bar(win, nr, L["Normal Hits"], spell.hit, nil, nil, true)
 				end
 
-				if (spell.critical or 0) > 0 then
+				if spell.critical and spell.critical > 0 then
 					nr = add_detail_bar(win, nr, L["Critical Hits"], spell.critical, nil, nil, true)
 				end
 
-				if (spell.glancing or 0) > 0 then
+				if spell.glancing and spell.glancing > 0 then
 					nr = add_detail_bar(win, nr, L["Glancing"], spell.glancing, nil, nil, true)
 				end
 
@@ -247,20 +247,20 @@ Skada:AddLoadableModule("Comparison", function(L)
 			local nr = add_detail_bar(win, 0, L["Hits"], spell and spell.count, myspell and myspell.count)
 			win.dataset[nr].value = win.dataset[nr].value + 1 -- to be always first
 
-			if (spell and (spell.casts or 0) > 0) or (myspell and (myspell.casts or 0) > 0) then
+			if (spell and spell.casts and spell.casts > 0) or (myspell and myspell.casts and myspell.casts > 0) then
 				nr = add_detail_bar(win, nr, L["Casts"], spell and spell.casts, myspell and myspell.casts)
 				win.dataset[nr].value = win.dataset[nr].value * 1e3 -- to be always first
 			end
 
-			if (spell and (spell.hit or 0) > 0) or (myspell and (myspell.hit or 0) > 0) then
+			if (spell and spell.hit and spell.hit > 0) or (myspell and myspell.hit and myspell.hit > 0) then
 				nr = add_detail_bar(win, nr, L["Normal Hits"], spell and spell.hit, myspell and myspell.hit)
 			end
 
-			if (spell and (spell.critical or 0) > 0) or (myspell and (myspell.critical or 0) > 0) then
+			if (spell and spell.critical and spell.critical > 0) or (myspell and myspell.critical and myspell.critical > 0) then
 				nr = add_detail_bar(win, nr, L["Critical Hits"], spell and spell.critical, myspell and myspell.critical)
 			end
 
-			if (spell and (spell.glancing or 0) > 0) or (myspell and (myspell.glancing or 0) > 0) then
+			if (spell and spell.glancing and spell.glancing > 0) or (myspell and myspell.glancing and myspell.glancing > 0) then
 				nr = add_detail_bar(win, nr, L["Glancing"], spell and spell.glancing, myspell and myspell.glancing)
 			end
 
@@ -308,17 +308,17 @@ Skada:AddLoadableModule("Comparison", function(L)
 				end
 
 				-- overkill damage
-				if (spell.overkill or 0) > 0 then
+				if spell.overkill and spell.overkill > 0 then
 					nr = add_detail_bar(win, nr, L["Overkill"], spell.overkill, nil, true, true)
 				end
 
 				-- blocked damage
-				if (spell.blocked or 0) > 0 then
+				if spell.blocked and spell.blocked > 0 then
 					nr = add_detail_bar(win, nr, L["BLOCK"], spell.blocked, nil, true, true)
 				end
 
 				-- resisted damage
-				if (spell.resisted or 0) > 0 then
+				if spell.resisted and spell.resisted > 0 then
 					nr = add_detail_bar(win, nr, L["RESIST"], spell.resisted, nil, true, true)
 				end
 			end
@@ -353,17 +353,17 @@ Skada:AddLoadableModule("Comparison", function(L)
 			end
 
 			-- overkill damage
-			if (spell and (spell.overkill or 0) > 0) or (myspell and (myspell.overkill or 0) > 0) then
+			if (spell and spell.overkill and spell.overkill > 0) or (myspell and myspell.overkill and myspell.overkill > 0) then
 				nr = add_detail_bar(win, nr, L["Overkill"], spell and spell.overkill, myspell and myspell.overkill, true)
 			end
 
 			-- blocked damage
-			if (spell and (spell.blocked or 0) > 0) or (myspell and (myspell.blocked or 0) > 0) then
+			if (spell and spell.blocked and spell.blocked > 0) or (myspell and myspell.blocked and myspell.blocked > 0) then
 				nr = add_detail_bar(win, nr, L["BLOCK"], spell and spell.blocked, myspell and myspell.blocked, true)
 			end
 
 			-- resisted damage
-			if (spell and (spell.resisted or 0) > 0) or (myspell and (myspell.resisted or 0) > 0) then
+			if (spell and spell.resisted and spell.resisted > 0) or (myspell and myspell.resisted and myspell.resisted > 0) then
 				nr = add_detail_bar(win, nr, L["RESIST"], spell and spell.resisted, myspell and myspell.resisted, true)
 			end
 		end
