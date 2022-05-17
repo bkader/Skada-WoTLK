@@ -14,7 +14,8 @@ local UIDropDownMenu_AddButton = UIDropDownMenu_AddButton
 local CloseDropDownMenus = CloseDropDownMenus
 local ToggleDropDownMenu = ToggleDropDownMenu
 
-local iconName = "|T%s:19:19:0:-1:32:32:2:30:2:30|t %s"
+local info = nil
+local iconName = "\124T%s:19:19:0:-1:32:32:2:30:2:30\124t %s"
 
 -- references: windows, modes, sets
 local windows, modes, sets = nil, nil, nil
@@ -30,6 +31,32 @@ local function getDropdownPoint()
 	return point, x, y
 end
 
+local function setInfoText(set, i, num)
+	if set.type == "pvp" or set.type == "arena" then
+		if i and num then
+			return format("\124cffc0c0c0%02.f.\124r \124cffffd100%s\124r", num - i + 1, Skada:GetSetLabel(set, true))
+		else
+			return format("\124cffff1919%s\124r", Skada:GetSetLabel(set, true))
+		end
+	elseif set.gotboss and set.success then
+		if i and num then
+			return format("\124cffc0c0c0%02.f.\124r \124cff19ff19%s\124r", num - i + 1, Skada:GetSetLabel(set, true))
+		else
+			return format("\124cff19ff19%s\124r", Skada:GetSetLabel(set, true))
+		end
+	elseif set.gotboss then
+		if i and num then
+			return format("\124cffc0c0c0%02.f.\124r \124cffff1919%s\124r", num - i + 1, Skada:GetSetLabel(set, true))
+		else
+			return format("\124cffff1919%s\124r", Skada:GetSetLabel(set, true))
+		end
+	elseif i and num then
+		return format("\124cffc0c0c0%02.f.\124r %s", num - i + 1, Skada:GetSetLabel(set, true))
+	else
+		return Skada:GetSetLabel(set, true)
+	end
+end
+
 -- Configuration menu.
 function Skada:OpenMenu(window)
 	self.skadamenu = self.skadamenu or CreateFrame("Frame", "SkadaMenu", UIParent, "UIDropDownMenuTemplate")
@@ -37,7 +64,7 @@ function Skada:OpenMenu(window)
 	self.skadamenu.win = window
 	self.skadamenu.initialize = self.skadamenu.initialize or function(self, level)
 		if not level then return end
-		local info = UIDropDownMenu_CreateInfo()
+		info = info or UIDropDownMenu_CreateInfo()
 
 		if level == 1 then
 			-- window menus
@@ -50,7 +77,7 @@ function Skada:OpenMenu(window)
 					info.hasArrow = 1
 					info.value = win
 					info.notCheckable = 1
-					info.colorCode = (self.win and self.win == win) and "|cffffd100"
+					info.colorCode = (self.win and self.win == win) and "\124cffffd100"
 					UIDropDownMenu_AddButton(info, level)
 				end
 			end
@@ -327,7 +354,7 @@ function Skada:OpenMenu(window)
 				end
 				info.notCheckable = 1
 				info.leftPadding = 16
-				info.colorCode = "|cffeb4c34"
+				info.colorCode = "\124cffeb4c34"
 				UIDropDownMenu_AddButton(info, level)
 			elseif UIDROPDOWNMENU_MENU_VALUE == "segment" then
 				wipe(info)
@@ -355,18 +382,14 @@ function Skada:OpenMenu(window)
 					UIDropDownMenu_AddButton(info, level)
 
 					sets = Skada:GetSets()
-					for i = 1, #sets do
+					local num = #sets
+					for i = 1, num do
 						local set = sets[i]
 						wipe(info)
-						info.text = Skada:GetSetLabel(set)
+						info.text = setInfoText(set, i, num)
 						info.func = function()
 							self.win:set_selected_set(i)
 							Skada:UpdateDisplay()
-						end
-						if set.gotboss then
-							info.colorCode = set.success and "|cff19ff19" or "|cffff1919"
-						elseif set.type == "pvp" or set.type == "arena" then
-							info.colorCode = "|cffffd100"
 						end
 						info.checked = (self.win.selectedset == i)
 						UIDropDownMenu_AddButton(info, level)
@@ -374,43 +397,32 @@ function Skada:OpenMenu(window)
 				end
 			elseif UIDROPDOWNMENU_MENU_VALUE == "delete" then
 				sets = Skada:GetSets()
-				for i = 1, #sets do
+				local num = #sets
+				for i = 1, num do
 					local set = sets[i]
 					wipe(info)
-					info.text = Skada:GetSetLabel(set)
+					info.text = setInfoText(set, i, num)
 					info.func = function()
 						Skada:DeleteSet(set, i)
 					end
 					info.notCheckable = 1
-					if set.gotboss then
-						info.colorCode = set.success and "|cff19ff19" or "|cffff1919"
-					elseif set.type == "pvp" or set.type == "arena" then
-						info.colorCode = "|cffffd100"
-					end
 					UIDropDownMenu_AddButton(info, level)
 				end
 			elseif UIDROPDOWNMENU_MENU_VALUE == "keep" then
-				local num, kept = 0, 0
-
 				sets = Skada:GetSets()
-				for i = 1, #sets do
+				local num, kept = #sets, 0
+				for i = 1, num do
 					local set = sets[i]
-					num = num + 1
 					if set.keep then kept = kept + 1 end
 
 					wipe(info)
-					info.text = Skada:GetSetLabel(set)
+					info.text = setInfoText(set, i, num)
 					info.func = function()
 						set.keep = (set.keep ~= true) and true or nil
 						self.win:UpdateDisplay()
 					end
 					info.checked = set.keep
 					info.keepShownOnClick = true
-					if set.gotboss then
-						info.colorCode = set.success and "|cff19ff19" or "|cffff1919"
-					elseif set.type == "pvp" or set.type == "arena" then
-						info.colorCode = "|cffffd100"
-					end
 					UIDropDownMenu_AddButton(info, level)
 				end
 
@@ -604,10 +616,11 @@ function Skada:OpenMenu(window)
 				UIDropDownMenu_AddButton(info, level)
 
 				sets = Skada:GetSets()
-				for i = 1, #sets do
+				local num = #sets
+				for i = 1, num do
 					local set = sets[i]
 					wipe(info)
-					info.text = Skada:GetSetLabel(set)
+					info.text = setInfoText(set, i, num)
 					info.func = function()
 						Skada.db.profile.report.set = i
 					end
@@ -630,7 +643,7 @@ function Skada:SegmentMenu(window)
 	self.segmentsmenu.win = window
 	self.segmentsmenu.initialize = self.segmentsmenu.initialize or function(self, level)
 		if not level or not self.win then return end
-		local info = UIDropDownMenu_CreateInfo()
+		info = info or UIDropDownMenu_CreateInfo()
 
 		wipe(info)
 		info.text = L["Total"]
@@ -657,20 +670,16 @@ function Skada:SegmentMenu(window)
 			UIDropDownMenu_AddButton(info, level)
 
 			sets = Skada:GetSets()
-			for i = 1, #sets do
+			local num = #sets
+			for i = 1, num do
 				local set = sets[i]
 				wipe(info)
-				info.text = Skada:GetSetLabel(set)
+				info.text = setInfoText(set, i, num)
 				info.func = function()
 					self.win:set_selected_set(i)
 					Skada:UpdateDisplay()
 				end
 				info.checked = (self.win.selectedset == i)
-				if set.gotboss then
-					info.colorCode = set.success and "|cff19ff19" or "|cffff1919"
-				elseif set.type == "pvp" or set.type == "arena" then
-					info.colorCode = "|cffffd100"
-				end
 				UIDropDownMenu_AddButton(info, level)
 			end
 		end
@@ -714,7 +723,7 @@ do
 		self.modesmenu.win = window
 		self.modesmenu.initialize = self.modesmenu.initialize or function(self, level)
 			if not level or not self.win then return end
-			local info = UIDropDownMenu_CreateInfo()
+			info = info or UIDropDownMenu_CreateInfo()
 
 			if level == 1 then
 				if #categories > 0 then
@@ -726,7 +735,7 @@ do
 						info.hasArrow = 1
 						info.notCheckable = 1
 						if self.win and self.win.selectedmode and (self.win.selectedmode.category == category or (self.win.parentmode and self.win.parentmode.category == category)) then
-							info.colorCode = "|cffffd100"
+							info.colorCode = "\124cffffd100"
 						end
 						UIDropDownMenu_AddButton(info, level)
 					end
@@ -763,7 +772,7 @@ do
 
 					if self.win and self.win.selectedmode and (self.win.selectedmode == mode or self.win.parentmode == mode) then
 						info.checked = 1
-						info.colorCode = "|cffffd100"
+						info.colorCode = "\124cffffd100"
 					end
 
 					UIDropDownMenu_AddButton(info, level)
@@ -847,7 +856,7 @@ do
 			frame:SetTitle(L["Report"])
 		end
 
-		frame:SetCallback("OnClose", function(widget, callback) DestroyWindow() end)
+		frame:SetCallback("OnClose", DestroyWindow)
 
 		-- make the frame closable with Escape button
 		_G.SkadaReportWindow = frame.frame
@@ -1015,12 +1024,11 @@ end
 
 function Skada:PhaseMenu(window)
 	if self.testMode or not self.tempsets or #self.tempsets == 0 then return end
-	if self.testMode then return end
 	self.phasesmenu = self.phasesmenu or CreateFrame("Frame", "SkadaWindowButtonsPhases", UIParent, "UIDropDownMenuTemplate")
 	self.phasesmenu.displayMode = "MENU"
 	self.phasesmenu.initialize = self.phasesmenu.initialize or function(self, level)
 		if not level then return end
-		local info = UIDropDownMenu_CreateInfo()
+		info = info or UIDropDownMenu_CreateInfo()
 
 		for i = #Skada.tempsets, 1, -1 do
 			wipe(info)
@@ -1034,7 +1042,7 @@ function Skada:PhaseMenu(window)
 				end
 			end
 			info.notCheckable = 1
-			info.colorCode = set.stopped and "|cffff1919"
+			info.colorCode = set.stopped and "\124cffff1919"
 			UIDropDownMenu_AddButton(info, level)
 		end
 
@@ -1052,7 +1060,7 @@ function Skada:PhaseMenu(window)
 				Skada:StopSegment()
 			end
 		end
-		info.colorCode = Skada.current.stopped and "|cffff1919"
+		info.colorCode = Skada.current.stopped and "\124cffff1919"
 		info.notCheckable = 1
 		UIDropDownMenu_AddButton(info, level)
 	end

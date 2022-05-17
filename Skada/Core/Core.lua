@@ -632,9 +632,9 @@ do
 			self.display:AddDisplayOptions(self, options.args)
 		else
 			options.name = function()
-				return format("|cffff0000%s|r - %s", self.db.name, ERROR_CAPS)
+				return format("\124cffff0000%s\124r - %s", self.db.name, ERROR_CAPS)
 			end
-			options.args.display.name = format("%s - |cffff0000%s|r", L["Display System"], ERROR_CAPS)
+			options.args.display.name = format("%s - \124cffff0000%s\124r", L["Display System"], ERROR_CAPS)
 		end
 
 		Skada.options.args.windows.args[self.db.name] = options
@@ -1050,7 +1050,7 @@ function Skada:CreateWindow(name, db, display)
 			self:RestoreView(window, window.db.set, window.db.mode)
 		end
 	else
-		self:Printf("Window \"|cffffbb00%s|r\" was not loaded because its display module, \"|cff00ff00%s|r\" was not found.", name, window.db.display or L["Unknown"])
+		self:Printf("Window \"\124cffffbb00%s\124r\" was not loaded because its display module, \"\124cff00ff00%s\124r\" was not found.", name, window.db.display or L["Unknown"])
 	end
 
 	ACR:NotifyChange("Skada")
@@ -1188,13 +1188,13 @@ function Skada:SetActive(enable)
 
 	if not enable and self.db.profile.hidedisables then
 		if not disabled then
-			self:Debug(format("%s |cffff0000%s|r", L["Data Collection"], L["DISABLED"]))
+			self:Debug(format("%s \124cffff0000%s\124r", L["Data Collection"], L["DISABLED"]))
 		end
 		disabled = true
 		self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	else
 		if disabled then
-			self:Debug(format("%s |cff00ff00%s|r", L["Data Collection"], L["ENABLED"]))
+			self:Debug(format("%s \124cff00ff00%s\124r", L["Data Collection"], L["ENABLED"]))
 		end
 		disabled = false
 		self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "CombatLogEvent")
@@ -1316,7 +1316,7 @@ do
 		if mod.description then
 			Skada.options.args.windows.args[format("%sdesc", key)] = {
 				type = "description",
-				name = format("\n|cffffd700%s|r:\n%s", mod.localeName, mod.description),
+				name = format("\n\124cffffd700%s\124r:\n%s", mod.localeName, mod.description),
 				fontSize = "medium",
 				order = numorder
 			}
@@ -1912,7 +1912,7 @@ do
 
 					local title = data.text or data.label
 					if mode.metadata and mode.metadata.showspots then
-						title = format("|cffffffff%d.|r %s", nr, title)
+						title = format("\124cffffffff%d.\124r %s", nr, title)
 					end
 					tooltip:AddDoubleLine(title, data.valuetext, color.r, color.g, color.b)
 				elseif nr >= self.db.profile.tooltiprows then
@@ -1972,27 +1972,27 @@ do
 				end
 
 				if type(md.click1) == "function" then
-					t:AddLine(format(L["Click for |cff00ff00%s|r"], md.click1_label or L["Unknown"]))
+					t:AddLine(format(L["Click for \124cff00ff00%s\124r"], md.click1_label or L["Unknown"]))
 				elseif md.click1 and not self:NoTotalClick(win.selectedset, md.click1) then
-					t:AddLine(format(L["Click for |cff00ff00%s|r"], md.click1_label or md.click1.localeName))
+					t:AddLine(format(L["Click for \124cff00ff00%s\124r"], md.click1_label or md.click1.localeName))
 				end
 
 				if type(md.click2) == "function" then
-					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], md.click2_label or L["Unknown"]))
+					t:AddLine(format(L["Shift-Click for \124cff00ff00%s\124r"], md.click2_label or L["Unknown"]))
 				elseif md.click2 and not self:NoTotalClick(win.selectedset, md.click2) then
-					t:AddLine(format(L["Shift-Click for |cff00ff00%s|r"], md.click2_label or md.click2.localeName))
+					t:AddLine(format(L["Shift-Click for \124cff00ff00%s\124r"], md.click2_label or md.click2.localeName))
 				end
 
 				if type(md.click3) == "function" then
-					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], md.click3_label or L["Unknown"]))
+					t:AddLine(format(L["Control-Click for \124cff00ff00%s\124r"], md.click3_label or L["Unknown"]))
 				elseif md.click3 and not self:NoTotalClick(win.selectedset, md.click3) then
-					t:AddLine(format(L["Control-Click for |cff00ff00%s|r"], md.click3_label or md.click3.localeName))
+					t:AddLine(format(L["Control-Click for \124cff00ff00%s\124r"], md.click3_label or md.click3.localeName))
 				end
 
 				if not self.Ascension and type(md.click4) == "function" then
-					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], md.click4_label or L["Unknown"]))
+					t:AddLine(format(L["Alt-Click for \124cff00ff00%s\124r"], md.click4_label or L["Unknown"]))
 				elseif not self.Ascension and md.click4 and not self:NoTotalClick(win.selectedset, md.click4) then
-					t:AddLine(format(L["Alt-Click for |cff00ff00%s|r"], md.click4_label or md.click4.localeName))
+					t:AddLine(format(L["Alt-Click for \124cff00ff00%s\124r"], md.click4_label or md.click4.localeName))
 				end
 
 				t:Show()
@@ -2098,7 +2098,7 @@ function Skada:Command(param)
 		end
 	elseif cmd == "debug" then
 		self.db.profile.debug = not self.db.profile.debug
-		self:Print("Debug mode " .. (self.db.profile.debug and ("|cff00ff00" .. L["ENABLED"] .. "|r") or ("|cffff0000" .. L["DISABLED"] .. "|r")))
+		self:Print("Debug mode " .. (self.db.profile.debug and ("\124cff00ff00" .. L["ENABLED"] .. "\124r") or ("\124cffff0000" .. L["DISABLED"] .. "\124r")))
 	elseif cmd == "config" or cmd == "options" then
 		self:OpenOptions()
 	elseif cmd == "clear" or cmd == "clean" then
@@ -2110,12 +2110,12 @@ function Skada:Command(param)
 	elseif cmd == "about" or cmd == "info" then
 		InterfaceOptionsFrame_OpenToCategory("Skada")
 	elseif cmd == "version" or cmd == "checkversion" then
-		self:Printf("|cffffbb00%s|r: %s - |cffffbb00%s|r: %s", L["Version"], self.version, L["Date"], GetAddOnMetadata("Skada", "X-Date"))
+		self:Printf("\124cffffbb00%s\124r: %s - \124cffffbb00%s\124r: %s", L["Version"], self.version, L["Date"], GetAddOnMetadata("Skada", "X-Date"))
 		CheckVersion()
 	elseif cmd == "website" or cmd == "github" then
-		self:Printf("|cffffbb00%s|r", self.website)
+		self:Printf("\124cffffbb00%s\124r", self.website)
 	elseif cmd == "discord" then
-		self:Printf("|cffffbb00%s|r", self.discord)
+		self:Printf("\124cffffbb00%s\124r", self.discord)
 	elseif cmd == "timemesure" or cmd == "measure" then
 		if self.db.profile.timemesure == 2 then
 			self.db.profile.timemesure = 1
@@ -2161,14 +2161,14 @@ function Skada:Command(param)
 		end
 	else
 		self:Print(L["Usage:"])
-		print("|cffffaeae/skada|r |cffffff33report|r [channel] [mode] [lines]")
-		print("|cffffaeae/skada|r |cffffff33toggle|r / |cffffff33show|r / |cffffff33hide|r")
-		print("|cffffaeae/skada|r |cffffff33newsegment|r / |cffffff33newphase|r")
-		print("|cffffaeae/skada|r |cffffff33numformat|r / |cffffff33measure|r")
-		print("|cffffaeae/skada|r |cffffff33import|r / |cffffff33export|r")
-		print("|cffffaeae/skada|r |cffffff33about|r / |cffffff33version|r / |cffffff33website|r / |cffffff33discord|r")
-		print("|cffffaeae/skada|r |cffffff33reset|r / |cffffff33clean|r / |cffffff33reinstall|r")
-		print("|cffffaeae/skada|r |cffffff33config|r / |cffffff33debug|r")
+		print("\124cffffaeae/skada\124r \124cffffff33report\124r [channel] [mode] [lines]")
+		print("\124cffffaeae/skada\124r \124cffffff33toggle\124r / \124cffffff33show\124r / \124cffffff33hide\124r")
+		print("\124cffffaeae/skada\124r \124cffffff33newsegment\124r / \124cffffff33newphase\124r")
+		print("\124cffffaeae/skada\124r \124cffffff33numformat\124r / \124cffffff33measure\124r")
+		print("\124cffffaeae/skada\124r \124cffffff33import\124r / \124cffffff33export\124r")
+		print("\124cffffaeae/skada\124r \124cffffff33about\124r / \124cffffff33version\124r / \124cffffff33website\124r / \124cffffff33discord\124r")
+		print("\124cffffaeae/skada\124r \124cffffff33reset\124r / \124cffffff33clean\124r / \124cffffff33reinstall\124r")
+		print("\124cffffaeae/skada\124r \124cffffff33config\124r / \124cffffff33debug\124r")
 	end
 end
 
@@ -2426,7 +2426,7 @@ do
 			end
 
 			if version > ver then
-				self:Printf(L["Skada is out of date. You can download the newest version from |cffffbb00%s|r"], self.website)
+				self:Printf(L["Skada is out of date. You can download the newest version from \124cffffbb00%s\124r"], self.website)
 			elseif version < ver then
 				self:SendComm("WHISPER", sender, "VersionCheck", self.version)
 			end
@@ -2818,7 +2818,7 @@ end
 do
 	-- brackets and separators
 	local brackets = {"(%s)", "{%s}", "[%s]", "<%s>", "%s"}
-	local separators = {"%s, %s", "%s. %s", "%s; %s", "%s - %s", "%s || %s", "%s / %s", "%s \\ %s", "%s ~ %s", "%s %s"}
+	local separators = {"%s, %s", "%s. %s", "%s; %s", "%s - %s", "%s \124\124 %s", "%s / %s", "%s \\ %s", "%s ~ %s", "%s %s"}
 
 	-- formats default values
 	local format_2 = "%s (%s)"
@@ -2868,39 +2868,37 @@ do
 end
 
 do
-	local function SetLabelFormat(name, starttime, endtime, fmt)
-		fmt = fmt or Skada.db.profile.setformat
-		local namelabel = name
-		if fmt < 1 or fmt > 8 then
-			fmt = 3
-		end
+	local function SetLabelFormat(name, starttime, endtime, fmt, dye)
+		fmt = max(1, min(8, fmt or Skada.db.profile.setformat or 3))
 
-		local timelabel = ""
+		local namelabel, timelabel = name, ""
 		if starttime and endtime and fmt > 1 then
 			local duration = SecondsToTime(endtime - starttime, false, false, 2)
 
 			if fmt == 2 then
-				timelabel = duration
+				timelabel = dye and format("\124cffffff00%s\124r", duration) or duration
 			elseif fmt == 3 then
-				timelabel = format("%s (%s)", date("%H:%M", starttime), duration)
+				timelabel = format(dye and "%s \124cffffff00(%s)\124r" or "%s (%s)", date("%H:%M", starttime), duration)
 			elseif fmt == 4 then
-				timelabel = format("%s (%s)", date("%I:%M %p", starttime), duration)
+				timelabel = format(dye and "%s \124cffffff00(%s)\124r" or "%s (%s)", date("%I:%M %p", starttime), duration)
 			elseif fmt == 5 then
-				timelabel = format("%s - %s", date("%H:%M", starttime), date("%H:%M", endtime))
+				timelabel = format(dye and "\124cffffff00%s - %s\124r" or "%s - %s", date("%H:%M", starttime), date("%H:%M", endtime))
 			elseif fmt == 6 then
-				timelabel = format("%s - %s", date("%I:%M %p", starttime), date("%I:%M %p", endtime))
+				timelabel = format(dye and "\124cffffff00%s - %s\124r" or "%s - %s", date("%I:%M %p", starttime), date("%I:%M %p", endtime))
 			elseif fmt == 7 then
-				timelabel = format("%s - %s", date("%H:%M:%S", starttime), date("%H:%M:%S", endtime))
+				timelabel = format(dye and "\124cffffff00%s - %s\124r" or "%s - %s", date("%H:%M:%S", starttime), date("%H:%M:%S", endtime))
 			elseif fmt == 8 then
-				timelabel = format("%s - %s (%s)", date("%H:%M", starttime), date("%H:%M", endtime), duration)
+				timelabel = format(dye and "\124cffffff00%s - %s\124r \124cffffff00(%s)\124r" or "%s - %s (%s)", date("%H:%M", starttime), date("%H:%M", endtime), duration)
 			end
 		end
 
 		if #namelabel == 0 or #timelabel == 0 then
 			return format("%s%s", namelabel, timelabel), namelabel, timelabel
+		elseif strmatch(timelabel, "^%p") then
+			return format("%s %s", namelabel, timelabel), namelabel, timelabel
+		else
+			return format("%s: %s", namelabel, timelabel), namelabel, timelabel
 		end
-
-		return format("%s%s%s", namelabel, strmatch(timelabel, "^%p") and " " or ": ", timelabel), namelabel, timelabel
 	end
 
 	function Skada:SetLabelFormats()
@@ -2911,11 +2909,8 @@ do
 		return ret
 	end
 
-	function Skada:GetSetLabel(set)
-		if not set then
-			return ""
-		end
-		return SetLabelFormat(set.name or L["Unknown"], set.starttime, set.endtime or time())
+	function Skada:GetSetLabel(set, dye)
+		return set and SetLabelFormat(set.name or L["Unknown"], set.starttime, set.endtime or time(), nil, dye) or ""
 	end
 
 	function Window:set_mode_title()
@@ -3015,10 +3010,10 @@ function dataobj:OnEnter()
 		self.tooltip:AddDoubleLine("Skada", Skada.version, nil, nil, nil, 0, 1, 0)
 	end
 
-	self.tooltip:AddLine(L["|cff00ff00Left-Click|r to toggle windows."], 1, 1, 1)
-	self.tooltip:AddLine(L["|cff00ff00Ctrl+Left-Click|r to show/hide windows."], 1, 1, 1)
-	self.tooltip:AddLine(L["|cff00ff00Shift+Left-Click|r to reset."], 1, 1, 1)
-	self.tooltip:AddLine(L["|cff00ff00Right-Click|r to open menu."], 1, 1, 1)
+	self.tooltip:AddLine(L["\124cff00ff00Left-Click\124r to toggle windows."], 1, 1, 1)
+	self.tooltip:AddLine(L["\124cff00ff00Ctrl+Left-Click\124r to show/hide windows."], 1, 1, 1)
+	self.tooltip:AddLine(L["\124cff00ff00Shift+Left-Click\124r to reset."], 1, 1, 1)
+	self.tooltip:AddLine(L["\124cff00ff00Right-Click\124r to open menu."], 1, 1, 1)
 
 	self.tooltip:Show()
 end
@@ -3527,7 +3522,7 @@ function Skada:NewPhase()
 
 		self.tempsets[#self.tempsets + 1] = set
 
-		self:Printf(L["|cffffbb00%s|r - |cff00ff00Phase %s|r started."], set.mobname or L["Unknown"], set.phase)
+		self:Printf(L["\124cffffbb00%s\124r - \124cff00ff00Phase %s\124r started."], set.mobname or L["Unknown"], set.phase)
 	end
 end
 
@@ -3562,6 +3557,10 @@ function Skada:EndSegment()
 	for i = 1, #windows do
 		local win = windows[i]
 		if win then
+			if win.selectedset ~= "current" and win.selectedset ~= "total" then
+				win:set_selected_set(nil, 1) -- move to next set
+			end
+
 			win:Wipe()
 			self.changed = true
 
@@ -3609,7 +3608,7 @@ function Skada:StopSegment(msg, phase)
 				set.stopped = true
 				set.endtime = curtime
 				set.time = max(0.1, set.endtime - set.starttime)
-				self:Printf(L["|cffffbb00%s|r - |cff00ff00Phase %s|r stopped."], set.mobname or L["Unknown"], set.phase)
+				self:Printf(L["\124cffffbb00%s\124r - \124cff00ff00Phase %s\124r stopped."], set.mobname or L["Unknown"], set.phase)
 			end
 			return
 		end
@@ -3647,7 +3646,7 @@ function Skada:ResumeSegment(msg, phase)
 				set.stopped = nil
 				set.endtime = nil
 				set.time = 0
-				self:Printf(L["|cffffbb00%s|r - |cff00ff00Phase %s|r resumed."], set.mobname or L["Unknown"], set.phase)
+				self:Printf(L["\124cffffbb00%s\124r - \124cff00ff00Phase %s\124r resumed."], set.mobname or L["Unknown"], set.phase)
 			end
 			return
 		end
