@@ -2,8 +2,8 @@ local Skada = Skada
 
 local mod = Skada:NewModule("Bar Display", "SpecializedLibBars-1.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
-local LibWindow = LibStub("LibWindow-1.1")
 local FlyPaper = LibStub("LibFlyPaper-1.1", true)
+local ACR = LibStub("AceConfigRegistry-3.0")
 
 local pairs, tsort = pairs, table.sort
 local format, max, min = string.format, math.max, math.min
@@ -182,29 +182,24 @@ do
 
 		bargroup:EnableMouse(true)
 		bargroup:HookScript("OnMouseDown", listOnMouseDown)
-		bargroup.button:SetScript("OnClick", anchorOnClick)
 		bargroup:HideBarIcons()
 
-		local titletext = bargroup.button:GetFontString()
-		titletext:SetWordWrap(false)
-		titletext:SetPoint("LEFT", bargroup.button, "LEFT", 5, 1)
-		titletext:SetJustifyH("LEFT")
+		bargroup.button:SetScript("OnClick", anchorOnClick)
 		bargroup.button:SetHeight(p.title.height or 15)
 		bargroup:SetAnchorMouseover(p.title.hovermode)
 
-		-- Register with LibWindow-1.0.
-		LibWindow.RegisterConfig(bargroup, p)
-
 		-- Restore window position.
-		LibWindow.RestorePosition(bargroup)
+		Skada:RestorePosition(bargroup, p)
 
 		window.bargroup = bargroup
 	end
 end
 
 function mod:Destroy(win)
-	win.bargroup:Hide()
-	win.bargroup = nil
+	if win and win.bargroup then
+		win.bargroup:Hide()
+		win.bargroup = nil
+	end
 end
 
 function mod:Wipe(win)
@@ -291,7 +286,7 @@ do
 	local Yanchors = {TL = true, TR = true, TC = true, BL = true, BR = true, BC = true}
 
 	function mod:WindowMoveStop(_, group, x, y)
-		LibWindow.SavePosition(group) -- save window position
+		Skada:SavePosition(group, group.win.db) -- save window position
 
 		-- handle sticked windows
 		if FlyPaper and group.win.db.sticky and not group.locked then
@@ -353,7 +348,7 @@ do
 								win.db.sticked = nil
 							end
 						elseif p.sticked and p.sticked[win.db.name] then
-							LibWindow.SavePosition(win.bargroup)
+							Skada:SavePosition(win.bargroup, win.db)
 						end
 					end
 				end
@@ -361,11 +356,12 @@ do
 		end
 
 		CloseDropDownMenus()
+		ACR:NotifyChange("Skada")
 	end
 end
 
 function mod:WindowMoveStart(_, group, startX, startY)
-	if FlyPaper and group and group.win and group.win.db then
+	if FlyPaper and group and group.win and group.win.db and group.win.db.sticky then
 		if group.win.db.hidden then return end
 
 		local offset = group.win.db.background.borderthickness
@@ -382,28 +378,29 @@ end
 function mod:WindowResized(_, group)
 	local p = group.win.db
 	local width, height = group:GetSize()
+	local oheight = height
 
 	-- Snap to best fit
 	if p.snapto then
 		local maxbars = group:GetMaxBars()
-		local oheight = height
+		local sheight = height
 
 		if p.enabletitle then
-			oheight = p.title.height + ((p.barheight + p.barspacing) * maxbars) - p.barspacing
+			sheight = p.title.height + ((p.barheight + p.barspacing) * maxbars) - p.barspacing
 		else
-			oheight = ((p.barheight + p.barspacing) * maxbars) - p.barspacing
+			sheight = ((p.barheight + p.barspacing) * maxbars) - p.barspacing
 		end
 
-		height = oheight
+		height = sheight
 	end
 
-	LibWindow.SavePosition(group)
+	Skada:SavePosition(group, p, oheight - height)
 
 	p.barwidth = width
 	p.background.height = height
 
 	-- resize sticked windows as well.
-	if FlyPaper then
+	if FlyPaper and p.sticky then
 		local offset = p.background.borderthickness
 		windows = Skada:GetWindows()
 		for i = 1, #windows do
@@ -415,6 +412,7 @@ function mod:WindowResized(_, group)
 	end
 
 	Skada:ApplySettings(p.name)
+	ACR:NotifyChange("Skada")
 end
 
 function mod:WindowLocked(_, group, locked)
@@ -1041,27 +1039,26 @@ do
 		color = p.textcolor or COLOR_WHITE
 		g:SetTextColor(color.r, color.g, color.b, color.a or 1)
 
-		if FlyPaper then
-			if p.sticky then
-				FlyPaper.AddFrame("Skada", p.name, g)
-			else
-				FlyPaper.RemoveFrame("Skada", p.name)
-			end
+		if FlyPaper and p.sticky then
+			FlyPaper.AddFrame("Skada", p.name, g)
+		elseif FlyPaper then
+			FlyPaper.RemoveFrame("Skada", p.name)
 		end
 
 		-- make player's bar fixed.
 		g.showself = Skada.db.profile.showself or p.showself
 
+		Skada:SavePosition(g, p)
 		g:SetClickthrough(p.clickthrough)
 		g:SetClampedToScreen(p.clamped)
 		g:SetSmoothing(p.smoothing)
 		g:SetShown(not p.hidden)
-		LibWindow.SetScale(g, p.scale)
+		g:SetScale(p.scale or 1)
 		g:SortBars()
 	end
 
 	function mod:WindowResizing(_, group)
-		if FlyPaper and not group.isStretching then
+		if FlyPaper and group and not group.isStretching and group.win and group.win.db and group.win.db.sticky then
 			local offset = group.win.db.background.borderthickness
 			windows = Skada:GetWindows()
 			for i = 1, #windows do
@@ -1754,7 +1751,7 @@ function mod:AddDisplayOptions(win, options)
 		end
 	}
 
-	local x, y = floor(GetScreenWidth() / 2), floor(GetScreenHeight() / 2)
+	local x, y = floor(GetScreenWidth() / 40) * 20, floor(GetScreenHeight() / 40) * 20
 	options.windowoptions.args.position.args.x = {
 		type = "range",
 		name = L["X Offset"],
@@ -1767,7 +1764,7 @@ function mod:AddDisplayOptions(win, options)
 			local window = mod:GetBarGroup(db.name)
 			if window then
 				db.x = val
-				LibWindow.RestorePosition(window)
+				Skada:RestorePosition(window, db)
 			end
 		end
 	}
@@ -1783,7 +1780,7 @@ function mod:AddDisplayOptions(win, options)
 			local window = mod:GetBarGroup(db.name)
 			if window then
 				db.y = val
-				LibWindow.RestorePosition(window)
+				Skada:RestorePosition(window, db)
 			end
 		end
 	}
@@ -1804,7 +1801,7 @@ do
 			local applytheme, applywindow = nil, nil
 			local savetheme, savewindow = nil, nil
 			local deletetheme = nil
-			local skipped = {"name", "sticked", "x", "y", "point", "modeincombat", "set", "wipemode", "returnaftercombat"}
+			local skipped = {"name", "x", "y", "sticked", "set", "modeincombat", "wipemode", "returnaftercombat"}
 			local list = {}
 
 			local themes = {

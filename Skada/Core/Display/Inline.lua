@@ -1,7 +1,6 @@
 local Skada = Skada
 
 local mod = Skada:NewModule("Inline Bar Display")
-local LibWindow = LibStub("LibWindow-1.1")
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 
 local pairs, tostring, type = pairs, tostring, type
@@ -95,9 +94,7 @@ local function onEnter(win, id, label, mode)
 end
 
 local function showmode(win, id, label, mode)
-	if Skada:NoTotalClick(win.selectedset, mode) then
-		return
-	end
+	if Skada:NoTotalClick(win.selectedset, mode) then return end
 
 	inserthistory(win)
 
@@ -152,7 +149,7 @@ end
 local function frameOnDragStop(self)
 	self:StopMovingOrSizing()
 	self.isDragging = false
-	LibWindow.SavePosition(self)
+	Skada:SavePosition(self, self.win.db)
 end
 
 local function titleOnMouseDown(self, button)
@@ -197,12 +194,11 @@ function mod:Create(window, isnew)
 
 	window.frame:EnableMouse()
 	window.frame:SetScript("OnMouseDown", frameOnMouseDown)
-	LibWindow.RegisterConfig(window.frame, window.db)
 
 	if isnew then
-		LibWindow.SavePosition(window.frame)
+		Skada:SavePosition(window.frame, window.db)
 	else
-		LibWindow.RestorePosition(window.frame)
+		Skada:RestorePosition(window.frame, window.db)
 	end
 
 	window.frame:EnableMouse(true)
@@ -415,9 +411,7 @@ local function sortFunc(a, b)
 end
 
 function mod:Update(win)
-	if not win or not win.frame then
-		return
-	end
+	if not win or not win.frame then return end
 
 	local wd = win.dataset
 	for i = #wd, 1, -1 do
@@ -517,9 +511,7 @@ function mod:GetFontColor(db)
 end
 
 function mod:ApplySettings(win)
-	if not win or not win.frame then
-		return
-	end
+	if not win or not win.frame then return end
 
 	local f = win.frame
 	local p = win.db

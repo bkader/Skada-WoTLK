@@ -1129,3 +1129,45 @@ function Skada:ApplyBorder(frame, texture, color, thickness, padtop, padbottom, 
 		frame.borderFrame:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
 	end
 end
+
+-------------------------------------------------------------------------------
+-- save/restore windows positions
+
+do
+	local GetScreenWidth = GetScreenWidth
+	local GetScreenHeight = GetScreenHeight
+	local math_abs = math.abs
+
+	function Skada:SavePosition(frame, db, diff)
+		if frame and db then
+			local xOfs, yOfs = frame:GetCenter()
+			if diff and math_abs(diff) > 0.01 then
+				yOfs = yOfs + diff
+			end
+
+			local scale = frame:GetEffectiveScale()
+			local uiScale = UIParent:GetScale()
+			xOfs = (xOfs * scale) - (GetScreenWidth() * uiScale) / 2
+			yOfs = (yOfs * scale) - (GetScreenHeight() * uiScale) / 2
+
+			db.x = xOfs / uiScale
+			db.y = yOfs / uiScale
+		end
+	end
+
+	function Skada:RestorePosition(frame, db)
+		if frame and db then
+			local xOfs = db.x or 0
+			db.x = xOfs
+
+			local yOfs = db.y or 0
+			db.y = yOfs
+
+			local scale = frame:GetEffectiveScale()
+			local uiScale = UIParent:GetScale()
+
+			frame:ClearAllPoints()
+			frame:SetPoint("CENTER", UIParent, "CENTER", xOfs * uiScale / scale, yOfs * uiScale / scale)
+		end
+	end
+end

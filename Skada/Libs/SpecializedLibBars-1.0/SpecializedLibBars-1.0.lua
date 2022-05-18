@@ -112,6 +112,7 @@ local barListPrototype = lib.barListPrototype
 
 local listOnEnter, listOnLeave
 local anchorOnEnter, anchorOnLeave
+local stretchOnMouseDown, stretchOnMouseUp
 local SetTextureValue
 
 lib.bars = lib.bars or {}
@@ -129,8 +130,8 @@ local dummyTable = {}
 
 local ICON_LOCK = [[Interface\AddOns\Skada\Libs\SpecializedLibBars-1.0\lock.tga]]
 local ICON_UNLOCK = [[Interface\AddOns\Skada\Libs\SpecializedLibBars-1.0\unlock.tga]]
-local ICON_RESIZE = [[Interface\AddOns\Skada\Libs\SpecializedLibBars-1.0\resize.blp]]
-local ICON_STRETCH = [[Interface\AddOns\Skada\Libs\SpecializedLibBars-1.0\stretch.blp]]
+local ICON_RESIZE = [[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Up]]
+local ICON_STRETCH = [[Interface\MINIMAP\ROTATING-MINIMAPGUIDEARROW.blp]]
 
 -------------------------------------------------------------------------------
 -- local functions
@@ -158,9 +159,11 @@ end
 
 -- lib:NewBarGroup - bar list creation
 do
-	local function anchorOnMouseDown(self)
+	local function anchorOnMouseDown(self, button)
 		local p = self:GetParent()
-		if not p.locked and not p.isMoving then
+		if p.locked then
+			stretchOnMouseDown(p.stretcher, button)
+		elseif not p.locked and not p.isMoving then
 			p.isMoving = true
 
 			p.startX = p:GetLeft()
@@ -173,9 +176,11 @@ do
 		end
 	end
 
-	local function anchorOnMouseUp(self)
+	local function anchorOnMouseUp(self, button)
 		local p = self:GetParent()
-		if not p.locked and p.isMoving then
+		if p.locked then
+			stretchOnMouseUp(p.stretcher, button)
+		elseif not p.locked and p.isMoving then
 			p.isMoving = nil
 			p:StopMovingOrSizing()
 
@@ -188,13 +193,13 @@ do
 	end
 
 	local function listOnMouseDown(self, button)
-		if button == "LeftButton" then
+		if button == "LeftButton" and not self.locked then
 			anchorOnMouseDown(self.button, button)
 		end
 	end
 
 	local function listOnMouseUp(self, button)
-		if button == "LeftButton" then
+		if button == "LeftButton" and not self.locked then
 			anchorOnMouseUp(self.button, button)
 		end
 	end
@@ -237,6 +242,7 @@ do
 
 		frameName = frameName:gsub("%W","")
 		local list = barListPrototype:Bind(CreateFrame("Frame", frameName, UIParent))
+		list:SetFrameLevel(1)
 		list:SetResizable(true)
 		list:SetMovable(true)
 		list:SetScript("OnMouseDown", listOnMouseDown)
@@ -300,7 +306,7 @@ do
 			list.resizeright.icon = list.resizeright:CreateTexture("$parentIcon", "OVERLAY")
 			list.resizeright.icon:SetAllPoints(list.resizeright)
 			list.resizeright.icon:SetTexture(ICON_RESIZE)
-			list.resizeright.icon:SetVertexColor(0.6, 0.6, 0.6, 0.7)
+			list.resizeright.icon:SetVertexColor(1, 1, 1, 0.65)
 			list.resizeright:Hide()
 		end
 
@@ -313,7 +319,7 @@ do
 			list.resizeleft.icon = list.resizeleft:CreateTexture("$parentIcon", "OVERLAY")
 			list.resizeleft.icon:SetAllPoints(list.resizeleft)
 			list.resizeleft.icon:SetTexture(ICON_RESIZE)
-			list.resizeleft.icon:SetVertexColor(0.6, 0.6, 0.6, 0.7)
+			list.resizeleft.icon:SetVertexColor(1, 1, 1, 0.65)
 			list.resizeleft:Hide()
 		end
 
@@ -321,7 +327,7 @@ do
 		if not list.lockbutton then
 			list.lockbutton = CreateFrame("Button", "$parentLockButton", list)
 			list.lockbutton:SetPoint("BOTTOM", list, "BOTTOM", 0, 2)
-			list.lockbutton:SetFrameLevel(list:GetFrameLevel() + 5)
+			list.lockbutton:SetFrameLevel(list:GetFrameLevel() + 3)
 			list.lockbutton:SetSize(12, 12)
 			list.lockbutton:SetAlpha(0)
 			list.lockbutton.icon = list.lockbutton:CreateTexture("$parentIcon", "OVERLAY")
@@ -334,11 +340,16 @@ do
 		-- stretch button
 		if not list.stretcher then
 			list.stretcher = CreateFrame("Button", "$parentStretcher", list)
-			list.stretcher:SetFrameLevel(list:GetFrameLevel() + 5)
-			list.stretcher:SetSize(32, 16)
+			list.stretcher:SetFrameLevel(list:GetFrameLevel() + 3)
+			list.stretcher:SetSize(32, 12)
 			list.stretcher:SetAlpha(0)
-			list.stretcher.icon = list.stretcher:CreateTexture("$parentTexture", "OVERLAY")
-			list.stretcher.icon:SetAllPoints(list.stretcher)
+			list.stretcher.bg = list.stretcher:CreateTexture(nil, "BACKGROUND")
+			list.stretcher.bg:SetAllPoints(true)
+			list.stretcher.bg:SetTexture([[Interface\Buttons\WHITE8X8]])
+			list.stretcher.bg:SetVertexColor(0, 0, 0, 0.85)
+			list.stretcher.icon = list.stretcher:CreateTexture("$parentIcon", "OVERLAY")
+			list.stretcher.icon:SetSize(12, 12)
+			list.stretcher.icon:SetPoint("CENTER")
 			list.stretcher.icon:SetTexture(ICON_STRETCH)
 			list.stretcher.icon:SetDesaturated(true)
 			list.stretcher:Hide()
@@ -1050,12 +1061,12 @@ do
 		GameTooltip:AddLine(L_RESIZE_ALT_CLICK, 1, 1, 1)
 		GameTooltip:Show()
 		listOnEnter(self:GetParent())
-		self.icon:SetVertexColor(1, 1, 1, 0.7)
+		self.icon:SetVertexColor(1, 1, 1, 1)
 	end
 
 	local function sizerOnLeave(self)
 		listOnLeave(self:GetParent())
-		self.icon:SetVertexColor(0.6, 0.6, 0.6, 0.7)
+		self.icon:SetVertexColor(1, 1, 1, 0.65)
 	end
 
 	local function lockOnEnter(self)
@@ -1165,7 +1176,7 @@ do
 		end
 	end
 
-	local function stretchOnMouseDown(self, button)
+	function stretchOnMouseDown(self, button)
 		local p = self:GetParent()
 		if button == "LeftButton" and p then
 			p.stretch_on = true
@@ -1173,7 +1184,7 @@ do
 		end
 	end
 
-	local function stretchOnMouseUp(self, button)
+	function stretchOnMouseUp(self, button)
 		local p = self:GetParent()
 		if p and p.stretch_on then
 			p.stretch_off = true
@@ -1215,10 +1226,10 @@ function barListPrototype:SetReverseStretch(stretchdown)
 		self.stretcher:ClearAllPoints()
 		if self.stretchdown then
 			self.stretcher:SetPoint("TOP", self, "BOTTOM")
-			self.stretcher.icon:SetTexCoord(0, 1, 1, 0)
+			self.stretcher.icon:SetTexCoord(0.219, 0.781, 0.781, 0)
 		else
 			self.stretcher:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT")
-			self.stretcher.icon:SetTexCoord(0, 1, 0, 1)
+			self.stretcher.icon:SetTexCoord(0.219, 0.781, 0, 0.781)
 		end
 	end
 end

@@ -4,7 +4,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 local mod = Skada:NewModule("Data Text")
 
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
-local LibWindow = LibStub("LibWindow-1.1")
 
 local tsort, format = table.sort, string.format
 local CloseDropDownMenus = CloseDropDownMenus
@@ -64,9 +63,7 @@ local function formatValue(win, data)
 end
 
 local function clickHandler(win, frame, button)
-	if not win.obj then
-		return
-	end
+	if not win.obj then return end
 
 	if button == "LeftButton" and IsShiftKeyDown() then
 		Skada:OpenMenu(win)
@@ -131,14 +128,11 @@ function mod:Create(win, isnew)
 		win.frame:SetWidth(win.db.width or 200)
 		win.frame:SetPoint("CENTER", 0, 0)
 
-		-- Register with LibWindow-1.1.
-		LibWindow.RegisterConfig(win.frame, win.db)
-
 		-- Restore window position.
 		if isnew then
-			LibWindow.SavePosition(win.frame)
+			Skada:SavePosition(win.frame, win.db)
 		else
-			LibWindow.RestorePosition(win.frame)
+			Skada:RestorePosition(win.frame, win.db)
 		end
 
 		local title = win.frame:CreateFontString("frameTitle", 6)
@@ -161,7 +155,7 @@ function mod:Create(win, isnew)
 		win.frame:SetScript("OnDragStop", function(frame)
 			frame:StopMovingOrSizing()
 			frame.isDragging = false
-			LibWindow.SavePosition(frame)
+			Skada:SavePosition(frame, win.db)
 		end)
 	end
 
