@@ -463,7 +463,6 @@ L["Message Output"] = true
 L["Choose where warning messages should be displayed."] = true
 L["Chat Frame"] = true
 L["Blizzard Error Frame"] = true
-L["Threat sound"] = true
 L["opt_threat_soundfile_desc"] = "The sound that will be played when your threat percentage reaches a certain point."
 L["Warning Frequency"] = true
 L["Threat Threshold"] = true
@@ -490,6 +489,9 @@ L["opt_threat_hideempty_desc"] = "Hide window entirely if there are no bars."
 L["Test Warnings"] = true
 L["TPS"] = true
 L["Threat: Personal Threat"] = true
+L["Threat sound"] = true
+L["%d%% Threat"] = THREAT_TOOLTIP
+L["High Threat"] = COMBAT_THREAT_INCREASE_1
 -- Absorbs & Healing Module --
 L["Healing"] = true
 L["Healing Done"] = true

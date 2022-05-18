@@ -2,14 +2,12 @@ local Skada = Skada
 Skada:AddLoadableModule("Threat", function(L)
 	if Skada:IsDisabled("Threat") then return end
 
-	local mod = Skada:NewModule("Threat")
+	local mod = Skada:NewModule("Threat", "AceEvent-3.0")
 
 	local format, max = string.format, math.max
-	local GroupIterator, UnitExists = Skada.GroupIterator, UnitExists
-	local UnitName, UnitClass, UnitGUID = UnitName, UnitClass, UnitGUID
-	local GetUnitRole, GetUnitSpec = Skada.GetUnitRole, Skada.GetUnitSpec
-	local UnitDetailedThreatSituation = UnitDetailedThreatSituation
-	local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
+	local UnitExists, UnitName = UnitExists, UnitName
+	local UnitDetailedThreatSituation, InCombatLockdown = UnitDetailedThreatSituation, InCombatLockdown
+	local GroupIterator, GetUnitRole, GetUnitSpec = Skada.GroupIterator, Skada.GetUnitRole, Skada.GetUnitSpec
 	local PlaySoundFile = PlaySoundFile
 	local T = Skada.Table
 	local _
@@ -19,9 +17,9 @@ Skada:AddLoadableModule("Threat", function(L)
 	do
 		local CheckInteractDistance, ItemRefTooltip = CheckInteractDistance, ItemRefTooltip
 		local GetItemInfo, IsItemInRange = GetItemInfo, IsItemInRange
+		local UnitGUID, UnitClass = UnitGUID, UnitClass
 		local nr, maxthreat, last_warn, mypercent = 0, 0, time(), nil
-		local threatUnits, threatTable = {"focus", "focustarget", "target", "targettarget"}, nil
-		local tankThreat, tankValue, rubyAcorn, queried
+		local threatTable, tankThreat, tankValue, rubyAcorn, queried
 
 		-- bar colors
 		local aggroColor = RED_FONT_COLOR
@@ -141,39 +139,22 @@ Skada:AddLoadableModule("Threat", function(L)
 			end
 		end
 
-		local function find_threat_unit()
-			local n = mod.db.focustarget and 1 or 3
-			for i = n, 4 do
-				local u = threatUnits[i]
-				if UnitExists(u) and not UnitIsPlayer(u) and UnitCanAttack("player", u) and UnitHealth(u) > 0 then
-					return u
-				end
-			end
-		end
-
 		local function getTPS(threatvalue)
 			return Skada.current and format_threatvalue(threatvalue / Skada.current:GetTime()) or "0"
 		end
 
 		function mod:Update(win, set)
-			if not self.db then
-				self.db = Skada.db.profile.modules.threat
-			end
-
 			win.title = L["Threat"]
 
-			if not IsGroupInCombat() then return end
-
-			local target = find_threat_unit()
-
-			if target then
-				win.title = UnitName(target) or L["Threat"]
+			if Skada.inCombat and self.unitID then
+				self.unitName = self.unitName or UnitName(self.unitID)
+				win.title = self.unitName or L["Threat"]
 
 				-- reset stuff & check group
 				maxthreat, nr = 0, 0
-				GroupIterator(add_to_threattable, target, win)
+				GroupIterator(add_to_threattable, self.unitID, win)
 				if maxthreat > 0 and self.db.showAggroBar then
-					add_to_threattable("AGGRO", nil, target, win)
+					add_to_threattable("AGGRO", nil, self.unitID, win)
 				end
 
 				-- nothing was added.
@@ -188,9 +169,7 @@ Skada:AddLoadableModule("Threat", function(L)
 				end
 
 				-- If we are going by raw threat we got the max threat from above; otherwise it's always 100.
-				if not self.db.rawvalue then
-					maxthreat = 100
-				end
+				maxthreat = self.db.rawvalue and maxthreat or 100
 
 				if win.metadata then
 					win.metadata.maxvalue = maxthreat
@@ -239,10 +218,10 @@ Skada:AddLoadableModule("Threat", function(L)
 
 				-- Warn
 				if we_should_warn and time() - last_warn > (self.db.frequency or 2) then
-					self:Warn(self.db.sound, self.db.flash, self.db.shake, mypercent and format(THREAT_TOOLTIP, mypercent) or COMBAT_THREAT_INCREASE_1)
+					self:Warn(self.db.sound, self.db.flash, self.db.shake, mypercent and format(L["%d%% Threat"], mypercent) or L["High Threat"])
 					last_warn = time()
 				end
-			elseif self.db.hideEmpty then
+			elseif self.db and self.db.hideEmpty then
 				win:Hide()
 			end
 		end
@@ -250,6 +229,7 @@ Skada:AddLoadableModule("Threat", function(L)
 		function mod:SetComplete(set)
 			tankThreat, tankValue = nil, nil
 			T.free("Threat_Table", threatTable)
+			self.unitID, self.unitName = nil, nil
 		end
 	end
 
@@ -341,7 +321,7 @@ Skada:AddLoadableModule("Threat", function(L)
 		local CombatText_StandardScroll = CombatText_StandardScroll
 		local RaidNotice_AddMessage = RaidNotice_AddMessage
 		local UIErrorsFrame = UIErrorsFrame
-		local white = {r = 1, g = 1, b = 1}
+		local white = HIGHLIGHT_FONT_COLOR
 
 		local handlers = {
 			-- Default
@@ -402,6 +382,7 @@ Skada:AddLoadableModule("Threat", function(L)
 			end,
 			set = function(i, val)
 				mod.db[i[#i]] = val
+				mod:ApplySettings()
 			end,
 			args = {
 				header = {
@@ -419,7 +400,7 @@ Skada:AddLoadableModule("Threat", function(L)
 					type = "description",
 					name = " ",
 					width = "full",
-					order = 1,
+					order = 1
 				},
 				warning = {
 					type = "group",
@@ -521,7 +502,7 @@ Skada:AddLoadableModule("Threat", function(L)
 					type = "toggle",
 					name = L["Ignore Pets"],
 					desc = L["opt_threat_ignorepets_desc"],
-					order = 50,
+					order = 50
 				},
 				showAggroBar = {
 					type = "toggle",
@@ -588,7 +569,6 @@ Skada:AddLoadableModule("Threat", function(L)
 		end
 
 		function mod:OnEnable()
-			self.db = self.db or Skada.db.profile.modules.threat
 			self.metadata = {
 				wipestale = true,
 				columns = {Threat = true, TPS = false, Percent = true},
@@ -596,13 +576,67 @@ Skada:AddLoadableModule("Threat", function(L)
 				icon = aggroIcon
 			}
 
+			Skada.RegisterCallback(self, "Skada_UpdateConfig", "ApplySettings")
 			Skada:AddFeed(L["Threat: Personal Threat"], add_threat_feed)
 			Skada:AddMode(self)
 		end
 	end
 
 	function mod:OnDisable()
+		Skada.UnregisterAllCallbacks(self)
 		Skada:RemoveFeed(L["Threat: Personal Threat"])
 		Skada:RemoveMode(self)
+	end
+
+	function mod:ApplySettings()
+		self.db = self.db or Skada.db.profile.modules.threat
+
+		self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", "SetUnit")
+		self:RegisterEvent("UNIT_THREAT_SITUATION_UPDATE", "SetUnit")
+		self:RegisterEvent("PLAYER_TARGET_CHANGED", "SetUnit")
+
+		if self.db.focustarget then
+			self:RegisterEvent("UNIT_TARGET")
+		else
+			self:UnregisterEvent("UNIT_TARGET")
+		end
+	end
+
+	do
+		local UnitIsPlayer = UnitIsPlayer
+		local UnitCanAttack = UnitCanAttack
+		local UnitHealth = UnitHealth
+
+		local throttleFrame = CreateFrame("Frame")
+		local threatUnits = {"focus", "focustarget", "target", "targettarget"}
+
+		local function find_threat_unit()
+			mod.unitID, mod.unitName = nil, nil -- reset
+
+			local n = mod.db.focustarget and 1 or 3
+			for i = n, 4 do
+				local unit = threatUnits[i]
+				if UnitExists(unit) and not UnitIsPlayer(unit) and UnitCanAttack("player", unit) and UnitHealth(unit) > 0 then
+					mod.unitID = unit
+					mod.unitName = UnitName(unit)
+					break
+				end
+			end
+
+			throttleFrame:Hide()
+		end
+
+		throttleFrame:Hide()
+		throttleFrame:SetScript("OnUpdate", find_threat_unit)
+
+		function mod:SetUnit(event)
+			throttleFrame:Show()
+		end
+
+		function mod:UNIT_TARGET(event, unit)
+			if unit == "focus" and self.db.focustarget and self.unitID == "focustarget" then
+				throttleFrame:Show()
+			end
+		end
 	end
 end)
