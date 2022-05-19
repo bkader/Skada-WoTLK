@@ -340,6 +340,7 @@ L["Persistent segments"] = true
 L["The number of persistent fight segments to keep."] = true
 L["Memory Check"] = true
 L["Checks memory usage and warns you if it is greater than or equal to %dmb."] = true
+L["Disable Comms"] = true
 L["Minimum segment length"] = true
 L["The minimum length required in seconds for a segment to be saved."] = true
 L["Update frequency"] = true

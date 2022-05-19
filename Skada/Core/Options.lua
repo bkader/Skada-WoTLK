@@ -192,6 +192,8 @@ local function SetValue(i, val)
 	if i[#i] == "showtotals" then
 		Skada:Wipe()
 		Skada:UpdateDisplay(true)
+	elseif i[#i] == "syncoff" then
+		Skada:SetupNetwork(val ~= true)
 	end
 end
 
@@ -593,8 +595,12 @@ Skada.options = {
 							type = "toggle",
 							name = L["Memory Check"],
 							desc = function() return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], 10 + (Skada.db.profile.setstokeep + Skada.db.profile.setslimit) * 2) end,
-							width = "double",
 							order = 850
+						},
+						syncoff = {
+							type = "toggle",
+							name = L["Disable Comms"],
+							order = 860
 						}
 					}
 				}

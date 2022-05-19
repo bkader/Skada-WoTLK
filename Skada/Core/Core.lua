@@ -22,7 +22,7 @@ local tonumber, tostring, strmatch, format, gsub, lower, find = tonumber, tostri
 local floor, max, min, band, time, GetTime = math.floor, math.max, math.min, bit.band, time, GetTime
 local IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction = IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction
 local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
-local UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected = UnitExists, UnitGUID, UnitName, UnitClass, UnitIsConnected
+local UnitExists, UnitGUID, UnitName, UnitClass = UnitExists, UnitGUID, UnitName, UnitClass
 local ReloadUI, GetScreenWidth = ReloadUI, GetScreenWidth
 local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 local CloseDropDownMenus = CloseDropDownMenus
@@ -120,14 +120,6 @@ Skada.BITMASK_ENEMY = BITMASK_ENEMY
 -- local functions.
 
 Skada.newTable, Skada.delTable = Skada.TablePool("kv")
-
--- when modules are created w make sure to save
--- their english "name" then localize "moduleName"
-local function OnModuleCreated(self, module)
-	module.localeName = L[module.moduleName]
-	module.OnModuleCreated = module.OnModuleCreated or OnModuleCreated
-end
-Skada.OnModuleCreated = OnModuleCreated
 
 -- verifies a set
 local function VerifySet(mode, set)
@@ -1284,6 +1276,14 @@ end
 
 -------------------------------------------------------------------------------
 -- modules functions
+
+-- when modules are created w make sure to save
+-- their english "name" then localize "moduleName"
+local function OnModuleCreated(self, module)
+	module.localeName = L[module.moduleName]
+	module.OnModuleCreated = module.OnModuleCreated or OnModuleCreated
+end
+Skada.OnModuleCreated = OnModuleCreated
 
 -- adds a module to the loadable modules table.
 function Skada:AddLoadableModule(name, description, func)
@@ -3193,7 +3193,7 @@ function Skada:OnEnable()
 	self.userGUID = UnitGUID("player")
 
 	self:ReloadSettings()
-	self:RegisterComm("Skada")
+	self:SetupNetwork(not self.db.profile.syncoff)
 
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("PARTY_MEMBERS_CHANGED", "UpdateRoster")
@@ -3292,88 +3292,6 @@ function Skada:CleanGarbage()
 	if not InCombatLockdown() then
 		collectgarbage("collect")
 		Skada:Debug("CleanGarbage")
-	end
-end
-
--------------------------------------------------------------------------------
--- AddOn Synchronization
-
-do
-	local AceSerializer = LibStub("AceSerializer-3.0")
-	local LibCompress = LibStub("LibCompress")
-	local encodeTable
-
-	function Skada:Serialize(hex, title, ...)
-		local result = LibCompress:CompressHuffman(AceSerializer:Serialize(...))
-		if hex then
-			return self.HexEncode(result, title)
-		end
-
-		encodeTable = encodeTable or LibCompress:GetAddonEncodeTable()
-		return encodeTable:Encode(result)
-	end
-
-	function Skada:Deserialize(data, hex)
-		local err
-		if hex then
-			data, err = self.HexDecode(data)
-		else
-			encodeTable = encodeTable or LibCompress:GetAddonEncodeTable()
-			data, err = encodeTable:Decode(data), "Error decoding"
-		end
-
-		if data then
-			data, err = LibCompress:DecompressHuffman(data)
-			if data then
-				return AceSerializer:Deserialize(data)
-			end
-		end
-		return false, err
-	end
-
-	function Skada:SendComm(channel, target, ...)
-		if target == self.userName or not IsInGroup() then return end
-
-		if not channel then
-			local t = GetGroupTypeAndCount()
-			if t == nil then
-				return -- with whom you want to sync man!
-			elseif t == "raid" then
-				channel = "RAID"
-			elseif t == "party" then
-				channel = "PARTY"
-			else
-				_, self.instanceType = IsInInstance()
-				if self.instanceType == "pvp" or self.instanceType == "arena" then
-					channel = "BATTLEGROUND"
-				end
-			end
-		end
-
-		if channel == "WHISPER" and not (target and UnitIsConnected(target)) then
-			return
-		elseif channel then
-			self:SendCommMessage("Skada", self:Serialize(false, nil, ...), channel, target)
-		end
-	end
-
-	local function DispatchComm(sender, ok, commType, ...)
-		if ok and type(commType) == "string" then
-			local func = "OnComm" .. commType
-
-			if type(Skada[func]) ~= "function" then
-				Skada.callbacks:Fire(func, sender, ...)
-				return
-			end
-
-			Skada[func](Skada, sender, ...)
-		end
-	end
-
-	function Skada:OnCommReceived(prefix, message, channel, sender)
-		if prefix == "Skada" and channel and sender and sender ~= self.userName then
-			DispatchComm(sender, self:Deserialize(message))
-		end
 	end
 end
 
@@ -3834,6 +3752,7 @@ do
 
 		update_timer = self:ScheduleRepeatingTimer("UpdateDisplay", self.db.profile.updatefrequency or 0.5)
 		tick_timer = self:ScheduleRepeatingTimer("Tick", 1)
+
 		if self.db.profile.tentativecombatstart then
 			toggle_timer = self:ScheduleTimer("Toggle", 0.1)
 		end

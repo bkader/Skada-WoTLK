@@ -14,6 +14,7 @@ local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 local GetPlayerInfoByGUID = GetPlayerInfoByGUID
 local GetClassFromGUID = Skada.GetClassFromGUID
 local T = Skada.Table
+local _
 
 local COMBATLOG_OBJECT_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
 
@@ -1168,6 +1169,102 @@ do
 
 			frame:ClearAllPoints()
 			frame:SetPoint("CENTER", UIParent, "CENTER", xOfs * uiScale / scale, yOfs * uiScale / scale)
+		end
+	end
+end
+
+-------------------------------------------------------------------------------
+-- data serialization
+
+do
+	local AceSerializer = LibStub("AceSerializer-3.0")
+	local LibCompress = LibStub("LibCompress")
+	local encodeTable = nil
+
+	function Skada:Serialize(hex, title, ...)
+		local result = LibCompress:CompressHuffman(AceSerializer:Serialize(...))
+		if hex then
+			return self.HexEncode(result, title)
+		end
+
+		encodeTable = encodeTable or LibCompress:GetAddonEncodeTable()
+		return encodeTable:Encode(result)
+	end
+
+	function Skada:Deserialize(data, hex)
+		local err
+		if hex then
+			data, err = self.HexDecode(data)
+		else
+			encodeTable = encodeTable or LibCompress:GetAddonEncodeTable()
+			data, err = encodeTable:Decode(data), "Error decoding"
+		end
+
+		if data then
+			data, err = LibCompress:DecompressHuffman(data)
+			if data then
+				return AceSerializer:Deserialize(data)
+			end
+		end
+		return false, err
+	end
+end
+
+-------------------------------------------------------------------------------
+-- addon communication
+
+do
+	local IsInInstance = IsInInstance
+	local UnitIsConnected = UnitIsConnected
+	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
+
+	local function SendCommMessage(self, channel, target, ...)
+		if target == self.userName or not IsInGroup() then return end
+
+		if not channel then
+			channel = IsInRaid() and "RAID" or "PARTY"
+
+			-- check arena/battlegrounds
+			_, self.instanceType = IsInInstance()
+			if self.instanceType == "pvp" or self.instanceType == "arena" then
+				channel = "BATTLEGROUND"
+			end
+		end
+
+		if channel == "WHISPER" and not (target and UnitIsConnected(target)) then
+			return
+		elseif channel then
+			self:SendCommMessage("Skada", self:Serialize(false, nil, ...), channel, target)
+		end
+	end
+
+	local function DispatchComm(sender, ok, commType, ...)
+		if ok and type(commType) == "string" then
+			local func = format("OnComm%s", commType)
+
+			if type(Skada[func]) == "function" then
+				Skada[func](Skada, sender, ...)
+			else
+				Skada.callbacks:Fire(func, sender, ...)
+			end
+		end
+	end
+
+	local function OnCommReceived(self, prefix, message, channel, sender)
+		if prefix == "Skada" and channel and sender and sender ~= self.userName then
+			DispatchComm(sender, self:Deserialize(message))
+		end
+	end
+
+	function Skada:SetupNetwork(enable)
+		if enable then
+			self.SendComm = SendCommMessage
+			self.OnCommReceived = OnCommReceived
+			self:RegisterComm("Skada")
+		else
+			self.SendComm = Multibar_EmptyFunc
+			self.OnCommReceived = Multibar_EmptyFunc
+			self:UnregisterAllComm()
 		end
 	end
 end
