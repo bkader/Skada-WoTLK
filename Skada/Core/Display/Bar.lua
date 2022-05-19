@@ -14,6 +14,8 @@ local IsShiftKeyDown = IsShiftKeyDown
 local IsAltKeyDown = IsAltKeyDown
 local IsControlKeyDown = IsControlKeyDown
 local IsModifierKeyDown = IsModifierKeyDown
+local SavePosition = Skada.SavePosition
+local RestorePosition = Skada.RestorePosition
 local _
 
 -- references
@@ -189,7 +191,7 @@ do
 		bargroup:SetAnchorMouseover(p.title.hovermode)
 
 		-- Restore window position.
-		Skada:RestorePosition(bargroup, p)
+		RestorePosition(bargroup, p)
 
 		window.bargroup = bargroup
 	end
@@ -276,6 +278,11 @@ function mod:BarReleased(_, bar)
 		bar.order = nil
 		bar.text = nil
 		bar.win = nil
+
+		bar.iconFrame:SetScript("OnEnter", nil)
+		bar.iconFrame:SetScript("OnLeave", nil)
+		bar.iconFrame:SetScript("OnMouseDown", nil)
+		bar.iconFrame:EnableMouse(false)
 	end
 end
 
@@ -286,7 +293,7 @@ do
 	local Yanchors = {TL = true, TR = true, TC = true, BL = true, BR = true, BC = true}
 
 	function mod:WindowMoveStop(_, group, x, y)
-		Skada:SavePosition(group, group.win.db) -- save window position
+		SavePosition(group, group.win.db) -- save window position
 
 		-- handle sticked windows
 		if FlyPaper and group.win.db.sticky and not group.locked then
@@ -348,7 +355,7 @@ do
 								win.db.sticked = nil
 							end
 						elseif p.sticked and p.sticked[win.db.name] then
-							Skada:SavePosition(win.bargroup, win.db)
+							SavePosition(win.bargroup, win.db)
 						end
 					end
 				end
@@ -378,7 +385,6 @@ end
 function mod:WindowResized(_, group)
 	local p = group.win.db
 	local width, height = group:GetSize()
-	local oheight = height
 
 	-- Snap to best fit
 	if p.snapto then
@@ -393,8 +399,6 @@ function mod:WindowResized(_, group)
 
 		height = sheight
 	end
-
-	Skada:SavePosition(group, p, oheight - height)
 
 	p.barwidth = width
 	p.background.height = height
@@ -411,6 +415,7 @@ function mod:WindowResized(_, group)
 		end
 	end
 
+	SavePosition(group, p)
 	Skada:ApplySettings(p.name)
 	ACR:NotifyChange("Skada")
 end
@@ -454,10 +459,6 @@ end
 function mod:CreateBar(win, name, label, value, maxvalue, icon, o)
 	local bar, isnew = win.bargroup:NewBar(name, label, value, maxvalue, icon, o)
 	bar.win = win
-	bar.iconFrame:SetScript("OnEnter", nil)
-	bar.iconFrame:SetScript("OnLeave", nil)
-	bar.iconFrame:SetScript("OnMouseDown", nil)
-	bar.iconFrame:EnableMouse(false)
 	return bar, isnew
 end
 
@@ -950,9 +951,8 @@ do
 		if not win or not win.bargroup then return end
 
 		local g = win.bargroup
-		g:SetFrameLevel(1)
-
 		local p = win.db
+
 		g.name = p.name -- update name
 		g:SetReverseGrowth(p.reversegrowth)
 		g:SetOrientation(p.barorientation)
@@ -1048,13 +1048,15 @@ do
 		-- make player's bar fixed.
 		g.showself = Skada.db.profile.showself or p.showself
 
-		Skada:SavePosition(g, p)
 		g:SetClickthrough(p.clickthrough)
 		g:SetClampedToScreen(p.clamped)
 		g:SetSmoothing(p.smoothing)
 		g:SetShown(not p.hidden)
 		g:SetScale(p.scale or 1)
 		g:SortBars()
+
+		-- restore position
+		RestorePosition(g, p)
 	end
 
 	function mod:WindowResizing(_, group)
@@ -1096,8 +1098,9 @@ function mod:AddDisplayOptions(win, options)
 			return db[i[#i]]
 		end,
 		set = function(i, val)
-			db[i[#i]] = (type(val) == "boolean" and val or nil) or val
-			if i[#i] == "showtotals" or i[#i] == "classcolortext" or i[#i] == "classcolorleft" or i[#i] == "classcolorright" then
+			local key = i[#i]
+			db[key] = (type(val) == "boolean" and val or nil) or val
+			if key == "showtotals" or key == "classcolortext" or key == "classcolorleft" or key == "classcolorright" then
 				win:Wipe(true)
 			end
 			Skada:ApplySettings(win)
@@ -1764,7 +1767,7 @@ function mod:AddDisplayOptions(win, options)
 			local window = mod:GetBarGroup(db.name)
 			if window then
 				db.x = val
-				Skada:RestorePosition(window, db)
+				RestorePosition(window, db)
 			end
 		end
 	}
@@ -1780,7 +1783,7 @@ function mod:AddDisplayOptions(win, options)
 			local window = mod:GetBarGroup(db.name)
 			if window then
 				db.y = val
-				Skada:RestorePosition(window, db)
+				RestorePosition(window, db)
 			end
 		end
 	}

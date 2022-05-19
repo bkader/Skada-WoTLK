@@ -4,11 +4,12 @@
 -- @author: Kader B (https://github.com/bkader/LibCompat-1.0)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0-Skada", 31
+local MAJOR, MINOR = "LibCompat-1.0-Skada", 32
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
 lib.embeds = lib.embeds or {}
+lib.EmptyFunc = Multibar_EmptyFunc
 
 local pairs, ipairs, select, type = pairs, ipairs, select, type
 local tconcat, wipe = table.concat, wipe
@@ -744,9 +745,46 @@ do
 end
 
 -------------------------------------------------------------------------------
+-- Save/Restore frame positions to/from db
+
+do
+	local floor = math.floor
+	local GetScreenWidth, GetScreenHeight = GetScreenWidth, GetScreenHeight
+
+	local function SavePosition(self, db)
+		if self and self.GetCenter and db then
+			local x, y = self:GetCenter()
+			local scale = self:GetEffectiveScale()
+			local uscale = UIParent:GetScale()
+
+			db.x = ((x * scale) - (GetScreenWidth() * uscale) / 2) / uscale
+			db.y = ((y * scale) - (GetScreenHeight() * uscale) / 2) / uscale
+			db.scale = floor(self:GetScale() * 100) / 100
+		end
+	end
+
+	local function RestorePosition(self, db)
+		if self and self.SetPoint and db then
+			local scale = self:GetEffectiveScale()
+			local uscale = UIParent:GetScale()
+			local x = (db.x or 0) * uscale / scale
+			local y = (db.y or 0) * uscale / scale
+
+			self:ClearAllPoints()
+			self:SetPoint("CENTER", UIParent, "CENTER", x, y)
+			self:SetScale(db.scale or 1)
+		end
+	end
+
+	lib.SavePosition = SavePosition
+	lib.RestorePosition = RestorePosition
+end
+
+-------------------------------------------------------------------------------
 
 local mixins = {
 	"QuickDispatch",
+	"EmptyFunc",
 	-- table util
 	"tLength",
 	"tCopy",
@@ -780,7 +818,10 @@ local mixins = {
 	"HexDecode",
 	"EscapeStr",
 	"GetClassColorsTable",
-	"WrapTextInColorCode"
+	"WrapTextInColorCode",
+	-- frame position
+	"SavePosition",
+	"RestorePosition"
 }
 
 function lib:Embed(target)

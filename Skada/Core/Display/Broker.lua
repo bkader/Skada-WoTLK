@@ -7,7 +7,8 @@ local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 
 local tsort, format = table.sort, string.format
 local CloseDropDownMenus = CloseDropDownMenus
-
+local SavePosition = Skada.SavePosition
+local RestorePosition = Skada.RestorePosition
 local WrapTextInColorCode = Skada.WrapTextInColorCode
 local RGBPercToHex = Skada.RGBPercToHex
 local classcolors = nil
@@ -130,9 +131,9 @@ function mod:Create(win, isnew)
 
 		-- Restore window position.
 		if isnew then
-			Skada:SavePosition(win.frame, win.db)
+			SavePosition(win.frame, win.db)
 		else
-			Skada:RestorePosition(win.frame, win.db)
+			RestorePosition(win.frame, win.db)
 		end
 
 		local title = win.frame:CreateFontString("frameTitle", 6)
@@ -155,7 +156,7 @@ function mod:Create(win, isnew)
 		win.frame:SetScript("OnDragStop", function(frame)
 			frame:StopMovingOrSizing()
 			frame.isDragging = false
-			Skada:SavePosition(frame, win.db)
+			SavePosition(frame, win.db)
 		end)
 	end
 
@@ -266,6 +267,9 @@ function mod:ApplySettings(win)
 
 		win.frame:SetScale(db.scale)
 		win.frame:SetFrameStrata(db.strata)
+
+		-- restore position
+		RestorePosition(win.frame, db)
 
 		if db.hidden and win.frame:IsShown() then
 			win.frame:Hide()

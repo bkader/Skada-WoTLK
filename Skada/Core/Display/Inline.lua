@@ -7,6 +7,8 @@ local pairs, tostring, type = pairs, tostring, type
 local strrep, format, _match = string.rep, string.format, string.match
 local tinsert, tremove, tsort = table.insert, table.remove, table.sort
 local CloseDropDownMenus = CloseDropDownMenus
+local SavePosition = Skada.SavePosition
+local RestorePosition = Skada.RestorePosition
 
 local mybars = {}
 local barlibrary = {bars = {}, nextuuid = 1}
@@ -149,7 +151,7 @@ end
 local function frameOnDragStop(self)
 	self:StopMovingOrSizing()
 	self.isDragging = false
-	Skada:SavePosition(self, self.win.db)
+	SavePosition(self, self.win.db)
 end
 
 local function titleOnMouseDown(self, button)
@@ -196,9 +198,9 @@ function mod:Create(window, isnew)
 	window.frame:SetScript("OnMouseDown", frameOnMouseDown)
 
 	if isnew then
-		Skada:SavePosition(window.frame, window.db)
+		SavePosition(window.frame, window.db)
 	else
-		Skada:RestorePosition(window.frame, window.db)
+		RestorePosition(window.frame, window.db)
 	end
 
 	window.frame:EnableMouse(true)
@@ -207,7 +209,7 @@ function mod:Create(window, isnew)
 	window.frame:SetScript("OnDragStart", frameOnDragStart)
 	window.frame:SetScript("OnDragStop", frameOnDragStop)
 
-	local titlebg = CreateFrame("Frame", "InlineTitleBackground", window.frame)
+	local titlebg = CreateFrame("Frame", "$parentTitleBackground", window.frame)
 	titlebg.win = window
 
 	local title = window.frame:CreateFontString("frameTitle", 6)
@@ -286,7 +288,7 @@ function barlibrary:CreateBar(uuid, win)
 	bar.value = 0
 	bar.win = win
 
-	bar.bg = CreateFrame("Frame", "bg" .. bar.uuid, win.frame)
+	bar.bg = CreateFrame("Frame", "$parentBackground" .. bar.uuid, win.frame)
 	bar.label = bar.bg:CreateFontString("label" .. bar.uuid)
 	bar.label:SetFont(mod:GetFont(win.db))
 	bar.label:SetTextColor(mod:GetFontColor(win.db))
@@ -530,6 +532,9 @@ function mod:ApplySettings(win)
 
 	f:EnableMouse(not p.clickthrough)
 	f:SetScale(p.scale)
+
+	-- restore position
+	RestorePosition(f, p)
 
 	--ElvUI
 	if p.isusingelvuiskin and ElvUI then
