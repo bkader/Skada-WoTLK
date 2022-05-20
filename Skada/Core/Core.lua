@@ -430,11 +430,12 @@ do
 		if SkadaDB.profileKeys then
 			wipe(SkadaDB.profileKeys)
 		end
+
+		Skada.db.global.reinstall = true
 		ReloadUI()
 	end
 
 	function Skada:Reinstall()
-		self.db.global.reinstall = true
 		Skada:ConfirmDialog(L["Are you sure you want to reinstall Skada?"], f, t)
 	end
 end
@@ -624,9 +625,9 @@ do
 			self.display:AddDisplayOptions(self, options.args)
 		else
 			options.name = function()
-				return format("\124cffff0000%s\124r - %s", self.db.name, ERROR_CAPS)
+				return format("\124cffff0000%s\124r - %s", self.db.name, L["ERROR"])
 			end
-			options.args.display.name = format("%s - \124cffff0000%s\124r", L["Display System"], ERROR_CAPS)
+			options.args.display.name = format("%s - \124cffff0000%s\124r", L["Display System"], L["ERROR"])
 		end
 
 		Skada.options.args.windows.args[self.db.name] = options
@@ -976,7 +977,7 @@ end
 -- windows and misc
 
 function Skada:CreateWindow(name, db, display)
-	name = name and name:trim() or "Skada"
+	name = name and name:trim() or db.name or "Skada"
 	if not name or name == "" then
 		name = "Skada" -- default
 	else
@@ -1107,6 +1108,11 @@ function Skada:Toggle()
 		if win then
 			win:Toggle()
 		end
+	end
+
+	if toggle_timer then
+		self:CancelTimer(toggle_timer, true)
+		toggle_timer = nil
 	end
 end
 
@@ -2068,7 +2074,7 @@ local function GenerateTotal()
 	ReloadUI()
 end
 
-function Skada:Command(param)
+function Skada:SlashCommand(param)
 	local cmd, arg1, arg2, arg3 = self:GetArgs(param, 4)
 	cmd = (cmd and cmd ~= "") and lower(cmd) or cmd
 
@@ -2103,6 +2109,8 @@ function Skada:Command(param)
 		self:Print("Debug mode " .. (self.db.profile.debug and ("\124cff00ff00" .. L["ENABLED"] .. "\124r") or ("\124cffff0000" .. L["DISABLED"] .. "\124r")))
 	elseif cmd == "config" or cmd == "options" then
 		self:OpenOptions()
+	elseif cmd == "memorycheck" or cmd == "memory" or cmd == "ram" then
+		self:CheckMemory()
 	elseif cmd == "clear" or cmd == "clean" then
 		self:CleanGarbage()
 	elseif cmd == "import" and self.OpenImport then
@@ -2134,9 +2142,6 @@ function Skada:Command(param)
 			self.db.profile.numberformat = 1
 		end
 		self:ApplySettings()
-	elseif cmd == "raise" and arg1 then
-		if tonumber(arg1) then self.db.profile.setslimit = max(0, min(50, arg1)) end
-		self:Print(L["Persistent segments"], self.db.profile.setslimit)
 	elseif cmd == "total" or cmd == "generate" then
 		GenerateTotal()
 	elseif cmd == "report" then
@@ -2614,31 +2619,31 @@ function Skada:UpdateDisplay(force)
 						win.selectedmode.GetSetSummary and
 						((set.type and set.type ~= "none") or set.name == L["Total"])
 					then
-						local valuetext, total = win.selectedmode:GetSetSummary(set, win)
-						if valuetext or total then
+						local valuetext, value = win.selectedmode:GetSetSummary(set, win)
+						if valuetext or value then
 							local existing = nil  -- an existing bar?
 
-							if not total then
-								total = 0
+							if not value then
+								value = 0
 								for j = 1, #win.dataset do
 									local data = win.dataset[j]
 									if data and data.id then
-										total = total + data.value
+										value = value + data.value
 									end
 									if data and not existing and not data.id then
 										existing = data
 									end
 								end
 							end
-							total = total + 1
+							value = value + 1
 
 							local d = existing or {}
 							d.id = "total"
 							d.label = L["Total"]
 							d.text = nil
 							d.ignore = true
-							d.value = total
-							d.valuetext = valuetext or total
+							d.value = value
+							d.valuetext = valuetext or tostring(d.value)
 
 							if self.db.profile.moduleicons and win.selectedmode.metadata and win.selectedmode.metadata.icon then
 								d.icon = win.selectedmode.metadata.icon
@@ -2669,7 +2674,8 @@ function Skada:UpdateDisplay(force)
 						end
 
 						if set and mode.GetSetSummary then
-							d.valuetext = mode:GetSetSummary(set, win)
+							local valuetext, value = mode:GetSetSummary(set, win)
+							d.valuetext = valuetext or tostring(value)
 						end
 					end
 				end
@@ -2912,7 +2918,8 @@ do
 	end
 
 	function Skada:GetSetLabel(set, dye)
-		return set and SetLabelFormat(set.name or L["Unknown"], set.starttime, set.endtime or time(), nil, dye) or ""
+		if not set then return "" end
+		return SetLabelFormat(set.name or L["Unknown"], set.starttime, set.endtime or time(), nil, dye)
 	end
 
 	function Window:set_mode_title()
@@ -3151,7 +3158,7 @@ function Skada:OnInitialize()
 		end
 	end
 
-	self:RegisterChatCommand("skada", "Command")
+	self:RegisterChatCommand("skada", "SlashCommand", true) -- force flag set
 	self.db.RegisterCallback(self, "OnProfileChanged", "ReloadSettings")
 	self.db.RegisterCallback(self, "OnProfileCopied", "ReloadSettings")
 	self.db.RegisterCallback(self, "OnProfileReset", "ReloadSettings")
@@ -3514,7 +3521,7 @@ function Skada:EndSegment()
 		toggle_timer = nil
 	end
 
-	self:ScheduleTimer("CheckMemory", 3)
+	self:ScheduleTimer("CleanGarbage", 5)
 end
 
 function Skada:StopSegment(msg, phase)

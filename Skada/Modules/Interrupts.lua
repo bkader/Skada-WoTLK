@@ -280,7 +280,8 @@ Skada:AddLoadableModule("Interrupts", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		return tostring(set.interrupt or 0), set.interrupt or 0
+		local interrupts = set.interrupt or 0
+		return tostring(interrupts), interrupts
 	end
 
 	function mod:OnInitialize()

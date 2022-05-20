@@ -16,6 +16,8 @@ Skada:AddLoadableModule("Healthstones", function(L)
 		[47877] = true -- Fel Healthstone (5136)
 	}
 
+	local format, tostring = string.format, tostring
+
 	local function log_healthstone(set, playerid, playername, playerflags)
 		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
 		if player then
@@ -86,6 +88,7 @@ Skada:AddLoadableModule("Healthstones", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		return set.healthstone or 0
+		local stones = set.healthstone or 0
+		return tostring(stones), stones
 	end
 end)

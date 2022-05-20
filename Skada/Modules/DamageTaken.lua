@@ -30,26 +30,6 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 		Skada.missTypes = missTypes
 	end
 
-	local function log_spellcast(set, playerid, playername, playerflags, spellname, spellschool)
-		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
-
-		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
-		if player and player.damagetakenspells then
-			local spell = player.damagetakenspells[spellname] or player.damagetakenspells[spellname..L["DoT"]]
-			if spell then
-				-- because some DoTs don't have an initial damage
-				-- we start from 1 and not from 0 if casts wasn't
-				-- previously set. Otherwise we just increment.
-				spell.casts = (spell.casts or 1) + 1
-
-				-- fix possible missing spell school.
-				if not spell.school and spellschool then
-					spell.school = spellschool
-				end
-			end
-		end
-	end
-
 	local function log_damage(set, dmg, tick)
 		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
 		if not player then return end
@@ -88,11 +68,6 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			spell = player.damagetakenspells[spellname]
 		elseif not spell.school and dmg.spellschool then
 			spell.school = dmg.spellschool
-		end
-
-		-- start casts count for non DoTs.
-		if dmg.spellid ~= 6603 and not tick then
-			spell.casts = spell.casts or 1
 		end
 
 		spell.count = (spell.count or 0) + 1
@@ -164,15 +139,6 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 
 	local dmg = {}
 	local extraATT
-
-	local function SpellCast(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		if srcGUID ~= dstGUID then
-			local spellid, spellname, spellschool = ...
-			if spellid and spellname and not ignoredSpells[spellid] then
-				Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, spellname, spellschool)
-			end
-		end
-	end
 
 	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
@@ -326,10 +292,6 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			tooltip:AddLine(label .. " - " .. actor.name)
 			if spell.school and spellschools[spell.school] then
 				tooltip:AddLine(spellschools(spell.school))
-			end
-
-			if spell.casts then
-				tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
 			end
 
 			local separator = nil
@@ -550,11 +512,6 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 			else
 				local nr = add_detail_bar(win, 0, L["Hits"], spell.count)
 				win.dataset[nr].value = win.dataset[nr].value + 1 -- to be always first
-
-				if spell.casts and spell.casts > 0 then
-					nr = add_detail_bar(win, nr, L["Casts"], spell.casts)
-					win.dataset[nr].value = win.dataset[nr].value * 1e3 -- to be always first
-				end
 
 				if spell.hit and spell.hit > 0 then
 					nr = add_detail_bar(win, nr, L["Normal Hits"], spell.hit, spell.count, true)
@@ -791,13 +748,6 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 		local flags_dst = {dst_is_interesting_nopets = true}
 
 		Skada:RegisterForCL(
-			SpellCast,
-			"SPELL_CAST_START",
-			"SPELL_CAST_SUCCESS",
-			flags_dst
-		)
-
-		Skada:RegisterForCL(
 			SpellDamage,
 			"DAMAGE_SHIELD",
 			"DAMAGE_SPLIT",
@@ -847,12 +797,12 @@ Skada:AddLoadableModule("Damage Taken", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		if not set then return end
 		local dtps, amount = set:GetDTPS()
-		return Skada:FormatValueCols(
+		local valuetext = Skada:FormatValueCols(
 			self.metadata.columns.Damage and Skada:FormatNumber(amount),
 			self.metadata.columns.DTPS and Skada:FormatNumber(dtps)
-		), amount
+		)
+		return valuetext, amount
 	end
 
 	function mod:SetComplete(set)
@@ -1009,7 +959,8 @@ Skada:AddLoadableModule("DTPS", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		return Skada:FormatNumber(set and set:GetDTPS() or 0)
+		local dtps = set:GetDTPS()
+		return Skada:FormatNumber(dtps), dtps
 	end
 end)
 

@@ -186,7 +186,8 @@ Skada:AddLoadableModule("Fails", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		return tostring(set.fail or 0), set.fail or 0
+		local fails = set.fail or 0
+		return tostring(fails), fails
 	end
 
 	function mod:AddToTooltip(set, tooltip)

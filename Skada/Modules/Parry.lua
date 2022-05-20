@@ -163,7 +163,8 @@ Skada:AddLoadableModule("Parry-Haste", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		return tostring(set.parry or 0), set.parry or 0
+		local parries = set.parry or 0
+		return tostring(parries), parries
 	end
 
 	function mod:OnInitialize()

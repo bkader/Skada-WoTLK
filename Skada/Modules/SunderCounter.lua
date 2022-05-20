@@ -205,9 +205,8 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		if set.sunder and set.sunder > 0 then
-			return tostring(set.sunder), set.sunder
-		end
+		local sunders = set.sunder or 0
+		return tostring(sunders), sunders
 	end
 
 	function mod:SetComplete(set)

@@ -290,7 +290,11 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 
 	function mod:GetSetSummary(set)
 		local value = set.friendfire or 0
-		return Skada:FormatNumber(value), value
+		local valuetext = Skada:FormatValueCols(
+			self.metadata.columns.Damage and Skada:FormatNumber(value),
+			self.metadata.columns.DPS and Skada:FormatNumber(value / set:GetTime())
+		)
+		return valuetext, value
 	end
 
 	function mod:SetComplete(set)

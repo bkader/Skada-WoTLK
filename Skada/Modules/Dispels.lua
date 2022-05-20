@@ -264,7 +264,8 @@ Skada:AddLoadableModule("Dispels", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		return tostring(set.dispel or 0), set.dispel or 0
+		local dispels = set.dispel or 0
+		return tostring(dispels), dispels
 	end
 
 	do

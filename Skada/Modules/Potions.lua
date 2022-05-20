@@ -7,7 +7,7 @@ Skada:AddLoadableModule("Potions", function(L)
 	local potionmod = mod:NewModule("Players list")
 
 	-- cache frequently used globals
-	local pairs, tconcat, format, strsub = pairs, table.concat, string.format, string.sub
+	local pairs, tconcat, format, strsub, tostring = pairs, table.concat, string.format, string.sub, tostring
 	local GetItemInfo, GetSpellInfo = GetItemInfo, Skada.GetSpellInfo or GetSpellInfo
 	local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
 	local UnitGUID, UnitName, UnitClass, UnitBuff = UnitGUID, UnitName, UnitClass, UnitBuff
@@ -47,12 +47,16 @@ Skada:AddLoadableModule("Potions", function(L)
 				local _, class = UnitClass(unit)
 
 				local potions = new()
-				for potionid, _ in pairs(potionIDs) do
-					local _, _, icon, _, _, _, _, _, _, _, spellid = UnitBuff(unit, GetSpellInfo(potionid))
-					if spellid and potionIDs[spellid] then
-						-- instant recording doesn't work, so we delay it
-						Skada:ScheduleTimer(function() PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid) end, 1)
-						potions[#potions + 1] = format(potionStr, icon)
+				for i = 1, 40 do
+					local _, _, icon, _, _, _, _, _, _, _, spellid = UnitBuff(unit, i)
+					if spellid then
+						if potionIDs[spellid] then
+							-- instant recording doesn't work, so we delay it
+							Skada:ScheduleTimer(function() PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid) end, 1)
+							potions[#potions + 1] = format(potionStr, icon)
+						end
+					else
+						break -- nothing found
 					end
 				end
 
@@ -373,7 +377,8 @@ Skada:AddLoadableModule("Potions", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		return set.potion or 0
+		local potions = set.potion or 0
+		return tostring(potions), potions
 	end
 
 	function mod:SetComplete(set)

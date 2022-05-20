@@ -549,38 +549,32 @@ Skada.options = {
 							end,
 							order = 20
 						},
-						sep1 = {
-							type = "description",
-							name = " ",
-							width = "full",
-							order = 800
-						},
 						setstokeep = {
 							type = "range",
 							name = L["Segments to keep"],
 							desc = L["The number of fight segments to keep. Persistent segments are not included in this."],
-							min = 0,
-							max = 30,
+							min = 1,
+							max = 25,
 							step = 1,
-							order = 810
+							order = 210
 						},
 						setslimit = {
 							type = "range",
 							name = L["Persistent segments"],
 							desc = L["The number of persistent fight segments to keep."],
 							min = 0,
-							max = 30,
+							max = 25,
 							step = 1,
-							order = 820
+							order = 220
 						},
 						updatefrequency = {
 							type = "range",
 							name = L["Update frequency"],
 							desc = L["How often windows are updated. Shorter for faster updates. Increases CPU usage."],
-							min = 0.10,
+							min = 0.05,
 							max = 3,
 							step = 0.01,
-							order = 830
+							order = 310
 						},
 						minsetlength = {
 							type = "range",
@@ -589,18 +583,18 @@ Skada.options = {
 							min = 3,
 							max = 30,
 							step = 1,
-							order = 840
+							order = 320
 						},
 						memorycheck = {
 							type = "toggle",
 							name = L["Memory Check"],
 							desc = function() return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], 10 + (Skada.db.profile.setstokeep + Skada.db.profile.setslimit) * 2) end,
-							order = 850
+							order = 410
 						},
 						syncoff = {
 							type = "toggle",
 							name = L["Disable Comms"],
-							order = 860
+							order = 420
 						}
 					}
 				}

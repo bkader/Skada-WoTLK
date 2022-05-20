@@ -694,7 +694,8 @@ Skada:AddLoadableModule("Deaths", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		return tostring(set.death or 0)
+		local deaths = set.death or 0
+		return tostring(deaths), deaths
 	end
 
 	function mod:Announce(logs, playername)

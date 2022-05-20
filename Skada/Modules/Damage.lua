@@ -38,7 +38,7 @@ Skada:AddLoadableModule("Damage", function(L)
 	local function log_spellcast(set, playerid, playername, playerflags, spellname, spellschool)
 		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
 
-		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
+		local player = Skada:FindPlayer(set, playerid, playername, playerflags)
 		if player and player.damagespells then
 			local spell = player.damagespells[spellname] or player.damagespells[spellname..L["DoT"]]
 			if spell then
@@ -850,12 +850,12 @@ Skada:AddLoadableModule("Damage", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		if not set then return end
 		local dps, amount = set:GetDPS()
-		return Skada:FormatValueCols(
+		local valuetext = Skada:FormatValueCols(
 			self.metadata.columns.Damage and Skada:FormatNumber(amount),
 			self.metadata.columns.DPS and Skada:FormatNumber(dps)
-		), amount
+		)
+		return valuetext, amount
 	end
 
 	function mod:SetComplete(set)
@@ -1050,7 +1050,8 @@ Skada:AddLoadableModule("DPS", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		return Skada:FormatNumber(set and set:GetDPS() or 0)
+		local dps = set:GetDPS()
+		return Skada:FormatNumber(dps), dps
 	end
 end)
 
@@ -1343,7 +1344,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 				if Skada.db.profile.absdamage and source.total then
 					amount = source.total
 				end
-				if sources.overkill then
+				if source.overkill then
 					amount = max(0, amount - source.overkill)
 				end
 
@@ -1481,11 +1482,12 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 
 	function mod:GetSetSummary(set)
 		if not set then return end
-		local dps, damage = set:GetDPS(true)
-		return Skada:FormatValueCols(
-			self.metadata.columns.Damage and Skada:FormatNumber(damage),
+		local dps, amount = set:GetDPS(true)
+		local valuetext = Skada:FormatValueCols(
+			self.metadata.columns.Damage and Skada:FormatNumber(amount),
 			self.metadata.columns.DPS and Skada:FormatNumber(dps)
-		), damage
+		)
+		return valuetext, amount
 	end
 end)
 

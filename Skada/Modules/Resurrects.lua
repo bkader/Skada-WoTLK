@@ -244,7 +244,8 @@ Skada:AddLoadableModule("Resurrects", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		return tostring(set.ress or 0), set.ress or 0
+		local ress = set.ress or 0
+		return tostring(ress), ress
 	end
 
 	do

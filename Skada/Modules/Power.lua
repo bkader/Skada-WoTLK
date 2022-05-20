@@ -159,11 +159,8 @@ Skada:AddLoadableModule("Resources", function(L)
 
 	-- base function used to return sets summaries
 	function basemod:GetSetSummary(set)
-		if set and self.power then
-			local value = set[self.power] or 0
-			local valuetext = (self.power == "mana") and Skada:FormatNumber(value) or value
-			return valuetext, value
-		end
+		local value = self.power and set[self.power] or 0
+		return Skada:FormatNumber(value), value
 	end
 
 	-- player mods common Enter function.

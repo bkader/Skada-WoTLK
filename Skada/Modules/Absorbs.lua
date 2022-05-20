@@ -257,7 +257,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local function log_spellcast(set, playerid, playername, playerflags, spellid, spellschool)
 		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
 
-		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
+		local player = Skada:FindPlayer(set, playerid, playername, playerflags)
 		if player and player.absorbspells and player.absorbspells[spellid] then
 			player.absorbspells[spellid].casts = (player.absorbspells[spellid].casts or 1) + 1
 
@@ -1185,12 +1185,12 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		if not set then return end
 		local aps, amount = set:GetAPS()
-		return Skada:FormatValueCols(
+		local valuetext = Skada:FormatValueCols(
 			self.metadata.columns.Absorbs and Skada:FormatNumber(amount),
 			self.metadata.columns.APS and Skada:FormatNumber(aps)
-		), amount
+		)
+		return valuetext, amount
 	end
 
 	function mod:ZoneModifier()

@@ -17,7 +17,7 @@
 ## Author: Kader (|cff808080bkader#6361|r)
 ## Version: 1.8.77
 ## X-Revision: 2
-## X-Date: 2022-05-19 @ 12:15 PM |cff808080UTC|r
+## X-Date: 2022-05-20 @ 08:13 AM |cff808080UTC|r
 ## X-Credits: Zarnivoop
 ## X-Category: Combat
 ## X-License: MIT/X

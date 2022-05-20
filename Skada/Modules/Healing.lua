@@ -23,7 +23,7 @@ Skada:AddLoadableModule("Healing", function(L)
 	local function log_spellcast(set, playerid, playername, playerflags, spellid, spellschool)
 		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
 
-		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
+		local player = Skada:FindPlayer(set, playerid, playername, playerflags)
 		if player and player.healspells and player.healspells[spellid] then
 			-- because some HoTs don't have an initial amount
 			-- we start from 1 and not from 0 if casts wasn't
@@ -497,12 +497,12 @@ Skada:AddLoadableModule("Healing", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		if not set then return end
 		local hps, amount = set:GetHPS()
-		return Skada:FormatValueCols(
+		local valuetext = Skada:FormatValueCols(
 			self.metadata.columns.Healing and Skada:FormatNumber(amount),
 			self.metadata.columns.HPS and Skada:FormatNumber(hps)
-		), amount
+		)
+		return valuetext, amount
 	end
 
 	function mod:SetComplete(set)
@@ -743,12 +743,12 @@ Skada:AddLoadableModule("Overhealing", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		if not set then return end
 		local ohps, overheal = set:GetOHPS()
-		return Skada:FormatValueCols(
+		local valuetext = Skada:FormatValueCols(
 			self.metadata.columns.Overhealing and Skada:FormatNumber(overheal),
 			self.metadata.columns.HPS and Skada:FormatNumber(ohps)
 		)
+		return valuetext, overheal
 	end
 end)
 
@@ -1073,12 +1073,12 @@ Skada:AddLoadableModule("Total Healing", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		if not set then return end
 		local ops, amount = set:GetTHPS()
-		return Skada:FormatValueCols(
+		local valuetext = Skada:FormatValueCols(
 			self.metadata.columns.Healing and Skada:FormatNumber(amount),
 			self.metadata.columns.HPS and Skada:FormatNumber(ops)
-		), amount
+		)
+		return valuetext, amount
 	end
 end)
 
@@ -1276,8 +1276,13 @@ Skada:AddLoadableModule("Healing Taken", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		local amount = set and set:GetAbsorbHeal() or 0
-		return Skada:FormatNumber(amount), amount
+		local settime = set:GetTime()
+		local hps, value = set:GetAHPS()
+		local valuetext = Skada:FormatValueCols(
+			self.metadata.columns.Healing and Skada:FormatNumber(value),
+			self.metadata.columns.HPS and Skada:FormatNumber(value / settime)
+		)
+		return valuetext, value
 	end
 
 	---------------------------------------------------------------------------
