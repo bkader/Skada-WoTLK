@@ -22,12 +22,12 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
-	local GroupIterator = Skada.GroupIterator
+	local GroupIterator, GetCurrentMapAreaID = Skada.GroupIterator,GetCurrentMapAreaID
 	local UnitName, UnitExists, UnitBuff = UnitName, UnitExists, UnitBuff
 	local UnitIsDeadOrGhost, UnitHealthInfo = UnitIsDeadOrGhost, Skada.UnitHealthInfo
+	local IsActiveBattlefieldArena, UnitInBattleground = IsActiveBattlefieldArena, UnitInBattleground
 	local GetTime, band, tsort = GetTime, bit.band, table.sort
-	local T = Skada.Table
-	local new, del = Skada.newTable, Skada.delTable
+	local T, new, del = Skada.Table, Skada.newTable, Skada.delTable
 
 	-- INCOMPLETE
 	-- the following list is incomplete due to the lack of testing for different
@@ -1163,7 +1163,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			flags_dst
 		)
 
-		Skada.RegisterCallback(self, "Skada_ZoneCheck", "ZoneModifier")
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CheckPreShields")
 		Skada:AddMode(self, L["Absorbs and Healing"])
 
@@ -1179,7 +1178,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	end
 
 	function mod:OnDisable()
-		Skada.UnregisterAllCallbacks(self)
 		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
 	end

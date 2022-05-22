@@ -2,7 +2,7 @@ local Skada = Skada
 Skada:AddLoadableModule("Threat", function(L)
 	if Skada:IsDisabled("Threat") then return end
 
-	local mod = Skada:NewModule("Threat", "AceEvent-3.0")
+	local mod = Skada:NewModule("Threat")
 
 	local format, max = string.format, math.max
 	local UnitExists, UnitName = UnitExists, UnitName
@@ -146,7 +146,7 @@ Skada:AddLoadableModule("Threat", function(L)
 		function mod:Update(win, set)
 			win.title = L["Threat"]
 
-			if Skada.inCombat and self.unitID then
+			if Skada.inCombat and self.unitID and UnitExists(self.unitID) then
 				self.unitName = self.unitName or UnitName(self.unitID)
 				win.title = self.unitName or L["Threat"]
 
@@ -576,29 +576,28 @@ Skada:AddLoadableModule("Threat", function(L)
 				icon = aggroIcon
 			}
 
+			Skada.RegisterBucketEvent(self, {"UNIT_THREAT_LIST_UPDATE", "UNIT_THREAT_SITUATION_UPDATE", "PLAYER_TARGET_CHANGED"}, 0.05, "SetUnit")
 			Skada.RegisterCallback(self, "Skada_UpdateConfig", "ApplySettings")
+
 			Skada:AddFeed(L["Threat: Personal Threat"], add_threat_feed)
 			Skada:AddMode(self)
 		end
 	end
 
 	function mod:OnDisable()
+		Skada.UnregisterAllBuckets(self)
 		Skada.UnregisterAllCallbacks(self)
+
 		Skada:RemoveFeed(L["Threat: Personal Threat"])
 		Skada:RemoveMode(self)
 	end
 
 	function mod:ApplySettings()
 		self.db = self.db or Skada.db.profile.modules.threat
-
-		self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", "SetUnit")
-		self:RegisterEvent("UNIT_THREAT_SITUATION_UPDATE", "SetUnit")
-		self:RegisterEvent("PLAYER_TARGET_CHANGED", "SetUnit")
-
 		if self.db.focustarget then
-			self:RegisterEvent("UNIT_TARGET")
+			Skada.RegisterEvent(self, "UNIT_TARGET")
 		else
-			self:UnregisterEvent("UNIT_TARGET")
+			Skada.UnregisterEvent(self, "UNIT_TARGET")
 		end
 	end
 
@@ -629,11 +628,11 @@ Skada:AddLoadableModule("Threat", function(L)
 		throttleFrame:Hide()
 		throttleFrame:SetScript("OnUpdate", find_threat_unit)
 
-		function mod:SetUnit(event)
+		function mod:SetUnit()
 			throttleFrame:Show()
 		end
 
-		function mod:UNIT_TARGET(event, unit)
+		function mod:UNIT_TARGET(_, unit)
 			if unit == "focus" and self.db.focustarget and self.unitID == "focustarget" then
 				throttleFrame:Show()
 			end

@@ -6,8 +6,9 @@
 <Script file="CallbackHandler-1.0\CallbackHandler-1.0.lua"/>
 <Script file="AceAddon-3.0\AceAddon-3.0.lua"/>
 <Script file="AceEvent-3.0\AceEvent-3.0.lua"/>
-<Script file="AceHook-3.0\AceHook-3.0.lua"/>
 <Script file="AceTimer-3.0\AceTimer-3.0.lua"/>
+<Script file="AceBucket-3.0\AceBucket-3.0.lua"/>
+<Script file="AceHook-3.0\AceHook-3.0.lua"/>
 <Script file="AceDB-3.0\AceDB-3.0.lua"/>
 <Script file="AceDBOptions-3.0\AceDBOptions-3.0.lua"/>
 <Script file="AceLocale-3.0\AceLocale-3.0.lua"/>

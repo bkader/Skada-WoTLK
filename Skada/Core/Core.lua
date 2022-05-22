@@ -1,4 +1,4 @@
-local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceEvent-3.0", "AceHook-3.0", "AceTimer-3.0", "AceConsole-3.0", "AceComm-3.0", "LibCompat-1.0-Skada")
+local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceEvent-3.0", "AceTimer-3.0", "AceBucket-3.0", "AceHook-3.0", "AceConsole-3.0", "AceComm-3.0", "LibCompat-1.0-Skada")
 _G.Skada = Skada
 
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
@@ -166,7 +166,7 @@ local function CreateSet(setname, set)
 	set.starttime = time()
 	set.time = 0
 	set.players = set.players or {}
-	set.last_action = (setname ~= L["Total"]) and set.starttime or nil
+	set.last_action = (setname ~= L["Total"] or Skada.db.profile.totalidc) and set.starttime or nil
 
 	-- last alterations before returning.
 	for i = 1, #modes do
@@ -2377,12 +2377,12 @@ function Skada:CheckGroup()
 end
 
 do
-	local inInstance, isininstance, isinpvp
+	local inInstance, instanceType, isininstance, isinpvp
 	local was_in_instance, was_in_pvp
 
 	function Skada:CheckZone()
-		inInstance, self.instanceType = IsInInstance()
-		isininstance = inInstance and (self.instanceType == "party" or self.instanceType == "raid")
+		inInstance, instanceType = IsInInstance()
+		isininstance = inInstance and (instanceType == "party" or instanceType == "raid")
 		isinpvp = IsInPvP()
 
 		if isininstance and was_in_instance ~= nil and not was_in_instance and self.db.profile.reset.instance ~= 1 and self:CanReset() then
@@ -2401,9 +2401,15 @@ do
 			end
 		end
 
+		if self.instanceType == "arena" and instanceType ~= "arena" then
+			self:SendMessage("COMBAT_ARENA_END")
+		elseif self.instanceType ~= instanceType then
+			self:SendMessage("ZONE_TYPE_CHANGED", instanceType, self.instanceType)
+		end
+		self.instanceType = instanceType
+
 		was_in_instance = (isininstance == true)
 		was_in_pvp = (isinpvp == true)
-		self.callbacks:Fire("Skada_ZoneCheck")
 		self:Toggle()
 	end
 end
@@ -2493,16 +2499,16 @@ end
 
 do
 	local UnitHasVehicleUI = UnitHasVehicleUI
-	local ignoredUnits = {"target", "focus", "npc", "NPC", "mouseover"}
+	local ignoredUnits = {target = true, focus = true, npc = true, NPC = true, mouseover = true}
 
 	function Skada:UNIT_PET(_, unit)
-		if unit and not tContains(ignoredUnits, unit) then
+		if unit and not ignoredUnits[unit] then
 			self:CheckGroup()
 		end
 	end
 
 	function Skada:CheckVehicle(_, unit)
-		if unit and not tContains(ignoredUnits, unit) then
+		if unit and not ignoredUnits[unit] then
 			local guid = UnitGUID(unit)
 			if guid and players[guid] then
 				if UnitHasVehicleUI(unit) then
@@ -2577,6 +2583,7 @@ function Skada:Reset(force)
 	dataobj.text = "n/a"
 	self:UpdateDisplay(true)
 	self:Notify(L["All data has been reset."])
+	self.callbacks:Fire("Skada_DataReset")
 	self:CleanGarbage()
 	StaticPopup_Hide("SkadaCommonConfirmDialog")
 	CloseDropDownMenus()
@@ -3203,14 +3210,13 @@ function Skada:OnEnable()
 	self:SetupNetwork(not self.db.profile.syncoff)
 
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
-	self:RegisterEvent("PARTY_MEMBERS_CHANGED", "UpdateRoster")
-	self:RegisterEvent("RAID_ROSTER_UPDATE", "UpdateRoster")
 	self:RegisterEvent("UNIT_PET")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 	self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "CheckZone")
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "CombatLogEvent")
 	self:RegisterEvent("UNIT_ENTERED_VEHICLE", "CheckVehicle")
 	self:RegisterEvent("UNIT_EXITED_VEHICLE", "CheckVehicle")
+	self:RegisterBucketEvent({"PARTY_MEMBERS_CHANGED", "RAID_ROSTER_UPDATE"}, 0.25, "UpdateRoster")
 
 	if self.modulelist then
 		for i = 1, #self.modulelist do
@@ -3887,6 +3893,7 @@ do
 						end
 
 						self.current.last_action = time()
+						self.total.last_action = self.db.profile.totalidc and self.current.last_action or nil
 						mod.func(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 					end
 				end
@@ -3916,6 +3923,7 @@ do
 				elseif self.current.type == "arena" then
 					self.current.mobname = GetInstanceInfo()
 					self.current.gold = GetBattlefieldArenaFaction()
+					self:SendMessage("COMBAT_ARENA_START", self.current, self.current.mobname)
 				elseif src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
 					self.current.mobname = dstName
 				elseif dst_is_interesting and band(srcFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
