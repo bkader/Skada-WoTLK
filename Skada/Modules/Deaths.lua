@@ -5,6 +5,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 	local mod = Skada:NewModule("Deaths")
 	local playermod = mod:NewModule("Player's deaths")
 	local deathlogmod = mod:NewModule("Death log")
+	local WATCH = nil -- true to watch alive players
 
 	local tinsert, tremove, tsort, tconcat = table.insert, table.remove, table.sort, table.concat
 	local tostring, format = tostring, string.format
@@ -18,6 +19,13 @@ Skada:AddLoadableModule("Deaths", function(L)
 	local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
 	local GetTime, date = GetTime, date
 	local _
+
+	-- cache colors
+	local GRAY_FONT_COLOR = GRAY_FONT_COLOR
+	local GREEN_FONT_COLOR = GREEN_FONT_COLOR
+	local ORANGE_FONT_COLOR = ORANGE_FONT_COLOR
+	local RED_FONT_COLOR = RED_FONT_COLOR
+	local YELLOW_FONT_COLOR = YELLOW_FONT_COLOR
 
 	local function GetColor(key)
 		if
@@ -45,7 +53,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if player then
 			local deathlog = player.deathlog and player.deathlog[1]
-			if not deathlog or (deathlog.time and not override) then
+			if not deathlog or (deathlog.timeStr and not override) then
 				deathlog = {log = {}}
 				player.deathlog = player.deathlog or {}
 				tinsert(player.deathlog, 1, deathlog)
@@ -64,8 +72,16 @@ Skada:AddLoadableModule("Deaths", function(L)
 			log.time = GetTime()
 			_, log.hp = UnitHealthInfo(player.name, player.id, "group")
 
+			deathlog.time = log.time -- death log time
+
 			if data.amount and data.amount ~= 0 then
 				log.amount = data.amount
+
+				if data.amount < 0 then
+					deathlog.spellid = log.spellid
+					deathlog.school = log.school
+					deathlog.source = log.source
+				end
 			end
 			if data.overheal and data.overheal > 0 then
 				log.overheal = data.overheal
@@ -76,7 +92,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 			if data.resisted and data.resisted > 0 then
 				log.resisted = data.resisted
 			end
-			if data.blocke and data.blocked > 0 then
+			if data.blocked and data.blocked > 0 then
 				log.blocked = data.blocked
 			end
 			if data.absorbed and data.absorbed > 0 then
@@ -191,8 +207,8 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 			data.spellid = spellid
 			data.spellschool = spellschool
-			data.amount = max(0, amount - (overheal or 0))
-			data.overheal = overheal
+			data.overheal = overheal or 0
+			data.amount = max(0, amount - data.overheal)
 			data.overkill = nil
 			data.resisted = nil
 			data.blocked = nil
@@ -321,6 +337,8 @@ Skada:AddLoadableModule("Deaths", function(L)
 					win.metadata.maxvalue = deathlog.maxhp
 				end
 
+				local nr = 1
+
 				-- 1. remove "datakey" from ended logs.
 				-- 2. postfix empty table
 				-- 3. add a fake entry for the actual death
@@ -335,24 +353,27 @@ Skada:AddLoadableModule("Deaths", function(L)
 						deathlog.log[1] = log
 					end
 
-					-- [3]
-					local d = win:nr(1)
-					d.id = 1
-					d.label = deathlog.timeStr
-					d.icon = [[Interface\Icons\Ability_Rogue_FeignDeath]]
-					d.color = nil
-					d.value = 0
-					d.valuetext = format(L["%s dies"], player.name)
+					if win.metadata then -- [3]
+						nr = nr + 1
+						local d = win:nr(nr)
+
+						d.id = nr
+						d.label = deathlog.timeStr
+						d.icon = [[Interface\Icons\Ability_Rogue_FeignDeath]]
+						d.color = nil
+						d.value = 0
+						d.valuetext = format(L["%s dies"], player.name)
+					end
 				end
 
 				tsort(deathlog.log, sort_logs)
 
-				local curtime = GetTime()
+				local curtime = deathlog.time or GetTime()
 				for i = #deathlog.log, 1, -1 do
 					local log = deathlog.log[i]
-					local diff = tonumber(log.time) - tonumber(deathlog.time or curtime)
+					local diff = tonumber(log.time) - tonumber(curtime)
 					if diff > -60 then
-						local nr = i + 1
+						nr = i + 1
 						local d = win:nr(nr)
 
 						local spellname
@@ -372,7 +393,6 @@ Skada:AddLoadableModule("Deaths", function(L)
 						d.hp = log.hp or 0
 						d.amount = log.amount or 0
 						d.source = log.source or L["Unknown"]
-						d.spellname = spellname
 						d.value = d.hp
 
 						local change, color = d.amount, GetColor("red")
@@ -389,7 +409,13 @@ Skada:AddLoadableModule("Deaths", function(L)
 							change = Skada:FormatNumber(change)
 						end
 
-						d.changed = (d.color and d.color ~= color) and true or nil
+						if WATCH and ((d.color and d.color ~= color) or (d.spellname and d.spellname ~= spellname)) then
+							d.changed = true
+						elseif WATCH and d.changed then
+							d.changed = nil
+						end
+
+						d.spellname = spellname
 						d.color = color
 
 						-- only format report for ended logs
@@ -430,6 +456,22 @@ Skada:AddLoadableModule("Deaths", function(L)
 							end
 
 							extra = del(extra)
+						else
+							if log.overheal and log.overheal > 0 then
+								d.overheal = log.overheal
+							end
+							if log.overkill and log.overkill > 0 then
+								d.overkill = log.overkill
+							end
+							if log.resisted and log.resisted > 0 then
+								d.resisted = log.resisted
+							end
+							if log.blocked and log.blocked > 0 then
+								d.blocked = log.blocked
+							end
+							if log.absorbed and log.absorbed > 0 then
+								d.absorbed = log.absorbed
+							end
 						end
 
 						d.valuetext = Skada:FormatValueCols(
@@ -456,7 +498,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 		if player then
 			win.title = format(L["%s's deaths"], player.name)
 
-			if player.death and player.deathlog then
+			if player.deathlog and (player.death or WATCH) then
 				if win.metadata then
 					win.metadata.maxvalue = 0
 				end
@@ -464,30 +506,24 @@ Skada:AddLoadableModule("Deaths", function(L)
 				local nr, curtime = 0, GetTime()
 				for i = 1, #player.deathlog do
 					local death = player.deathlog[i]
-					if death and death.timeStr then
+					if death and (death.timeStr or WATCH) then
 						nr = nr + 1
 						local d = win:nr(nr)
 
 						d.id = i
 						d.icon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
 
-						for k = 1, #death.log do
-							local v = death.log[k]
-							if v and v.amount and v.amount < 0 and (v.spellid or v.source) then
-								if v.spellid then
-									d.label, _, d.icon = GetSpellInfo(v.spellid)
-									d.spellid = v.spellid
-									d.spellschool = v.school
-								elseif v.source then
-									d.label = v.source
-								end
-								break
+						if death.spellid then
+							d.label, _, d.icon = GetSpellInfo(death.spellid)
+							d.spellschool = death.school
+							if death.source then
+								d.text = format("%s (%s)", d.label, death.source)
 							end
 						end
 
 						d.label = d.label or L["Unknown"]
 						d.value = death.time or curtime
-						d.valuetext = death.timeStr
+						d.valuetext = death.timeStr or "..."
 
 						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
@@ -501,15 +537,15 @@ Skada:AddLoadableModule("Deaths", function(L)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Deaths"], L[win.class]) or L["Deaths"]
 
-		if set.death then
+		if set.death or WATCH then
 			if win.metadata then
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local nr, curtime = 0, GetTime()
 			for i = 1, #set.players do
 				local player = set.players[i]
-				if player and player.death and (not win.class or win.class == player.class) then
+				if player and player.deathlog and (player.death or WATCH) and (not win.class or win.class == player.class) then
 					nr = nr + 1
 					local d = win:nr(nr)
 
@@ -520,10 +556,23 @@ Skada:AddLoadableModule("Deaths", function(L)
 					d.role = player.role
 					d.spec = player.spec
 
-					d.value = player.death
-					d.valuetext = tostring(d.value)
-					if player.deathlog and player.deathlog[1] and player.deathlog[1].time then
-						d.value = player.deathlog[1].time
+					if player.death then
+						d.value = player.death
+						d.valuetext = tostring(player.death)
+
+						if player.deathlog[1] and player.deathlog[1].time then
+							if player.deathlog[1].timeStr then -- dead
+								d.value = player.deathlog[1].time
+								d.color = WATCH and GRAY_FONT_COLOR or nil
+							else -- resurrected
+								d.value = curtime
+								d.color = nil
+							end
+						end
+					else
+						d.value = curtime
+						d.valuetext = "..."
+						d.color = nil
 					end
 
 					if win.metadata and d.value > win.metadata.maxvalue then
@@ -767,7 +816,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 							type = "description",
 							name = mod.localeName,
 							fontSize = "large",
-							image = [[Interface\Icons\ability_rogue_feigndeath]],
+							image = mod.metadata.icon,
 							imageWidth = 18,
 							imageHeight = 18,
 							imageCoords = {0.05, 0.95, 0.05, 0.95},
