@@ -65,7 +65,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 	end
 
 	local function spellmod_tooltip(win, id, label, tooltip)
-		if label == L["Critical Hits"] or label == L["Normal Hits"] then
+		if label == L["Critical Hits"] or label == L["Normal Hits"] or label == L["Glancing"] then
 			local set = win:GetSelectedSet()
 			local actor = set and set:GetActor(win.actorname, win.actorid)
 			local spell = actor.damagespells and actor.damagespells[win.spellname]
@@ -92,6 +92,14 @@ Skada:AddLoadableModule("Comparison", function(L)
 						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
 						if spell.hitmax then
 							tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
+						end
+					elseif label == L["Glancing"] and spell.glance then
+						if spell.glancemin then
+							tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.glancemin), 1, 1, 1)
+						end
+						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.glance / spell.glancing), 1, 1, 1)
+						if spell.glancemax then
+							tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.glancemax), 1, 1, 1)
 						end
 					end
 				end
@@ -137,6 +145,19 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 					if (spell and spell.hitmax) or (myspell and myspell.hitmax) then
 						tooltip:AddDoubleLine(L["Maximum"], FormatValueNumber(spell and spell.hitmax, myspell and myspell.hitmax, true), 1, 1, 1)
+					end
+				elseif label == L["Glancing"] and ((spell and spell.glance) or (myspell and myspell.glance)) then
+					local num = (spell and spell.glance) and (spell.glance / spell.glancing) or 0
+					local mynum = (myspell and myspell.glance) and (myspell.glance / myspell.glancing) or 0
+
+					if (spell and spell.glancemin) or (myspell and myspell.glancemin) then
+						tooltip:AddDoubleLine(L["Minimum"], FormatValueNumber(spell and spell.glancemin, myspell and myspell.glancemin, true), 1, 1, 1)
+					end
+
+					tooltip:AddDoubleLine(L["Average"], FormatValueNumber(num, mynum, true), 1, 1, 1)
+
+					if (spell and spell.glancemax) or (myspell and myspell.glancemax) then
+						tooltip:AddDoubleLine(L["Maximum"], FormatValueNumber(spell and spell.glancemax, myspell and myspell.glancemax, true), 1, 1, 1)
 					end
 				end
 			end

@@ -133,6 +133,13 @@ Skada:AddLoadableModule("Damage", function(L)
 			spell[dmg.misstype] = (spell[dmg.misstype] or 0) + 1
 		elseif dmg.glancing then
 			spell.glancing = (spell.glancing or 0) + 1
+			spell.glance = (spell.glance or 0) + dmg.amount
+			if not spell.glancemax or dmg.amount > spell.glancemax then
+				spell.glancemax = dmg.amount
+			end
+			if not spell.glancemin or dmg.amount < spell.glancemin then
+				spell.glancemin = dmg.amount
+			end
 		else
 			spell.hit = (spell.hit or 0) + 1
 			spell.hitamount = (spell.hitamount or 0) + dmg.amount
@@ -366,7 +373,7 @@ Skada:AddLoadableModule("Damage", function(L)
 	end
 
 	local function spellmod_tooltip(win, id, label, tooltip)
-		if label == L["Critical Hits"] or label == L["Normal Hits"] then
+		if label == L["Critical Hits"] or label == L["Normal Hits"] or label == L["Glancing"] then
 			local set = win:GetSelectedSet()
 			local actor = set and set:GetPlayer(win.actorid, win.actorname)
 			local spell = actor.damagespells and actor.damagespells[win.spellname]
@@ -391,6 +398,14 @@ Skada:AddLoadableModule("Damage", function(L)
 					tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
 					if spell.hitmax then
 						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
+					end
+				elseif label == L["Glancing"] and spell.glance then
+					if spell.glancemin then
+						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.glancemin), 1, 1, 1)
+					end
+					tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.glance / spell.glancing), 1, 1, 1)
+					if spell.glancemax then
+						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.glancemax), 1, 1, 1)
 					end
 				end
 			end
