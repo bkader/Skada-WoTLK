@@ -1,4 +1,4 @@
-# Skada for WoTLK (_Revisited - v1.8.77_)
+# Skada for WoTLK (_Revisited - v1.8.78_)
 
 ![Discord](https://img.shields.io/discord/795698054371868743?label=discord)
 ![GitHub last commit](https://img.shields.io/github/last-commit/bkader/Skada-WoTLK)
@@ -10,7 +10,7 @@ Skada is a modular damage meter with various viewing modes, segmented fights and
 
 _**Also available for [Cataclysm](https://github.com/bkader/Skada-Cata/)**_
 
-<p align="center"><img src="https://repository-images.githubusercontent.com/306277951/dcdd501d-57be-43cb-81d5-c791c0b255a3" alt="Skada WotLK"></p>
+<p align="center"><img src="https://user-images.githubusercontent.com/4732702/170839578-72a9a952-c999-457a-8f57-7d151e3b76a8.png" alt="Skada WotLK"></p>
 
 ## IMPORTANT: How to install
 

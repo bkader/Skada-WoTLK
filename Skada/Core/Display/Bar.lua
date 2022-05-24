@@ -392,7 +392,7 @@ function mod:WindowResized(_, group)
 		local sheight = height
 
 		if p.enabletitle then
-			sheight = p.title.height + ((p.barheight + p.barspacing) * maxbars) - p.barspacing
+			sheight = p.title.height + p.baroffset + ((p.barheight + p.barspacing) * maxbars) - p.barspacing
 		else
 			sheight = ((p.barheight + p.barspacing) * maxbars) - p.barspacing
 		end
@@ -630,20 +630,18 @@ do
 	end
 
 	local function bar_setcolor(bar, db, data, color)
-		if color then
-			bar:SetColor(color.r, color.g, color.b, color.a or 1)
-		elseif data.color then
+		local default = db.barcolor or Skada.windowdefaults.barcolor
+		if not color and data.color then
 			color = data.color
-			bar:SetColor(color.r, color.g, color.b, color.a or 1, true)
-		elseif db.spellschoolcolors and data.spellschool and spellschools[data.spellschool] then
+		elseif not color and db.spellschoolcolors and data.spellschool and spellschools[data.spellschool] then
 			color = spellschools[data.spellschool]
-			bar:SetColor(color.r, color.g, color.b, color.a or 1, true)
-		elseif db.classcolorbars and data.class and classcolors[data.class] then
+		elseif not color and db.classcolorbars and data.class and classcolors[data.class] then
 			color = classcolors(data.class)
-			bar:SetColor(color.r, color.g, color.b, color.a or 1, true)
+		end
+		if color then
+			bar:SetColor(color.r, color.g, color.b, color.a or default.a or 1, true)
 		else
-			color = db.barcolor or Skada.windowdefaults.barcolor
-			bar:SetColor(color.r, color.g, color.b, color.a or 1)
+			bar:SetColor(default.r, default.g, default.b, default.a or 1)
 		end
 	end
 
@@ -974,6 +972,7 @@ do
 		g:SetSpacing(p.barspacing)
 		g:SetColor(p.barcolor.r, p.barcolor.g, p.barcolor.b, p.barcolor.a)
 		g:SetLocked(p.barslocked)
+		g:SetDisplacement(p.baroffset or 0)
 
 		if p.strata then
 			g:SetFrameStrata(p.strata)
@@ -986,11 +985,19 @@ do
 			fo:SetTextColor(p.title.textcolor.r, p.title.textcolor.g, p.title.textcolor.b, p.title.textcolor.a)
 		end
 		g.button:SetNormalFontObject(fo)
+		g.button:SetHeight(p.title.height or 15)
+
+		backdrop.bgFile = p.title.texturepath or Skada:MediaFetch("statusbar", p.title.texture)
+		backdrop.tile = false
+		backdrop.tileSize = 0
+		backdrop.edgeSize = p.title.borderthickness
+		backdrop.insets.left, backdrop.insets.right = 0, 0
+		backdrop.insets.top, backdrop.insets.bottom = 0, 0
+		g.button:SetBackdrop(backdrop)
 
 		local color = p.title.color
-		g.button.bg:SetTexture(Skada:MediaFetch("statusbar", p.title.texture))
-		g.button.bg:SetVertexColor(color.r, color.g, color.b, color.a or 1)
-		g.button:SetHeight(p.title.height or 15)
+		g.button:SetBackdropColor(color.r, color.g, color.b, color.a or 1)
+		Skada:ApplyBorder(g.button, p.title.bordertexture, p.title.bordercolor, p.title.borderthickness, p.title.borderinsets)
 
 		g.button.toolbar = g.button.toolbar or p.title.toolbar or 1
 		if g.button.toolbar ~= p.title.toolbar then
@@ -1015,26 +1022,23 @@ do
 			g:HideAnchor()
 		end
 
-		-- Window border
-		Skada:ApplyBorder(g, p.background.bordertexture, p.background.bordercolor, p.background.borderthickness, p.background.borderinsets)
-
 		backdrop.bgFile = p.background.texturepath or Skada:MediaFetch("background", p.background.texture)
 		backdrop.tile = p.background.tile
 		backdrop.tileSize = p.background.tilesize
-		backdrop.insets.left, backdrop.insets.right, backdrop.insets.top, backdrop.insets.bottom = 0, 0, 0, 0
-		if p.enabletitle then
-			if p.reversegrowth then
-				backdrop.insets.top = 0
-				backdrop.insets.bottom = p.title.height
-			else
-				backdrop.insets.top = p.title.height
-				backdrop.insets.bottom = 0
-			end
+		backdrop.insets.left, backdrop.insets.right = 0, 0
+		backdrop.insets.top, backdrop.insets.bottom = 0, 0
+		if p.enabletitle and p.reversegrowth then
+			backdrop.insets.top = 0
+			backdrop.insets.bottom = p.title.height
+		elseif p.enabletitle then
+			backdrop.insets.top = p.title.height
+			backdrop.insets.bottom = 0
 		end
 		g:SetBackdrop(backdrop)
 
 		color = p.background.color
 		g:SetBackdropColor(color.r, color.g, color.b, color.a or 1)
+		Skada:ApplyBorder(g, p.background.bordertexture, p.background.bordercolor, p.background.borderthickness, p.background.borderinsets)
 
 		color = p.textcolor or COLOR_WHITE
 		g:SetTextColor(color.r, color.g, color.b, color.a or 1)
@@ -1146,9 +1150,18 @@ function mod:AddDisplayOptions(win, options)
 						name = L["Spacing"],
 						desc = format(L["Distance between %s."], L["Bars"]),
 						order = 40,
-						width = "double",
 						min = 0,
 						max = 10,
+						step = 0.01,
+						bigStep = 1
+					},
+					baroffset = {
+						type = "range",
+						name = L["Displacement"],
+						desc = L["The distance between the edge of the window and the first bar."],
+						order = 50,
+						min = 0,
+						max = 40,
 						step = 0.01,
 						bigStep = 1
 					},
@@ -1156,7 +1169,7 @@ function mod:AddDisplayOptions(win, options)
 						type = "select",
 						name = L["Bar Orientation"],
 						desc = L["The direction the bars are drawn in."],
-						order = 50,
+						order = 60,
 						width = "double",
 						values = optionsValues.ORIENTATION
 					},
@@ -1164,14 +1177,14 @@ function mod:AddDisplayOptions(win, options)
 						type = "toggle",
 						name = L["Reverse bar growth"],
 						desc = L["Bars will grow up instead of down."],
-						order = 60,
+						order = 70,
 						width = "double"
 					},
 					color = {
 						type = "color",
 						name = L["Bar Color"],
 						desc = L["Choose the default color of the bars."],
-						order = 70,
+						order = 80,
 						hasAlpha = true,
 						get = function()
 							local c = db.barcolor or Skada.windowdefaults.barcolor
@@ -1187,7 +1200,7 @@ function mod:AddDisplayOptions(win, options)
 						type = "color",
 						name = L["Background Color"],
 						desc = L["Choose the background color of the bars."],
-						order = 80,
+						order = 90,
 						hasAlpha = true,
 						get = function()
 							local c = db.barbgcolor or Skada.windowdefaults.barbgcolor
@@ -1203,19 +1216,19 @@ function mod:AddDisplayOptions(win, options)
 						type = "toggle",
 						name = L["Class Colors"],
 						desc = L["When possible, bars will be colored according to player class."],
-						order = 90
+						order = 100
 					},
 					spellschoolcolors = {
 						type = "toggle",
 						name = L["Spell school colors"],
 						desc = L["Use spell school colors where applicable."],
-						order = 100
+						order = 110
 					},
 					classicons = {
 						type = "toggle",
 						name = L["Class Icons"],
 						desc = L["Use class icons where applicable."],
-						order = 110,
+						order = 120,
 						disabled = function()
 							return (db.specicons or db.roleicons)
 						end
@@ -1224,7 +1237,7 @@ function mod:AddDisplayOptions(win, options)
 						type = "toggle",
 						name = L["Role Icons"],
 						desc = L["Use role icons where applicable."],
-						order = 120,
+						order = 130,
 						set = function()
 							db.roleicons = not db.roleicons
 							if db.roleicons and not db.classicons then
@@ -1239,7 +1252,7 @@ function mod:AddDisplayOptions(win, options)
 						type = "toggle",
 						name = L["Spec Icons"],
 						desc = L["Use specialization icons where applicable."],
-						order = 130,
+						order = 140,
 						set = function()
 							db.specicons = not db.specicons
 							if db.specicons and not db.classicons then
@@ -1253,7 +1266,7 @@ function mod:AddDisplayOptions(win, options)
 					spark = {
 						type = "toggle",
 						name = L["Show Spark Effect"],
-						order = 140
+						order = 150
 					}
 				}
 			},
@@ -1543,57 +1556,111 @@ function mod:AddDisplayOptions(win, options)
 							}
 						}
 					},
-					font = {
+					border = {
 						type = "group",
-						name = L["Font"],
-						desc = format(L["The font used by %s."], L["Title Bar"]),
+						name = L["Border"],
 						inline = true,
 						order = 70,
 						args = {
-							font = {
+							bordertexture = {
 								type = "select",
-								name = L["Font"],
-								desc = format(L["The font used by %s."], L["Title Bar"]),
-								dialogControl = "LSM30_Font",
-								values = Skada:MediaList("font"),
-								order = 10
+								dialogControl = "LSM30_Border",
+								name = L["Border texture"],
+								desc = L["The texture used for the borders."],
+								order = 10,
+								values = Skada:MediaList("border")
 							},
-							fontflags = {
-								type = "select",
-								name = L["Font Outline"],
-								desc = L["Sets the font outline."],
-								order = 20,
-								values = FONT_FLAGS
-							},
-							fontsize = {
-								type = "range",
-								name = L["Font Size"],
-								desc = format(L["The font size of %s."], L["Title Bar"]),
-								order = 30,
-								min = 5,
-								max = 32,
-								step = 1
-							},
-							textcolor = {
+							bordercolor = {
 								type = "color",
-								name = L["Text Color"],
-								desc = format(L["The text color of %s."], L["Title Bar"]),
-								order = 40,
+								name = L["Border Color"],
+								desc = L["The color used for the border."],
 								hasAlpha = true,
+								order = 20,
 								get = function()
-									local c = db.title.textcolor or Skada.windowdefaults.title.textcolor
+									local c = db.title.bordercolor or Skada.windowdefaults.title.bordercolor
 									return c.r, c.g, c.b, c.a or 1
 								end,
 								set = function(_, r, g, b, a)
-									db.title.textcolor = db.title.textcolor or {}
-									db.title.textcolor.r = r
-									db.title.textcolor.g = g
-									db.title.textcolor.b = b
-									db.title.textcolor.a = a
+									db.title.bordercolor = db.title.bordercolor or {}
+									db.title.bordercolor.r = r
+									db.title.bordercolor.g = g
+									db.title.bordercolor.b = b
+									db.title.bordercolor.a = a
 									Skada:ApplySettings(db.name)
 								end
+							},
+							borderthickness = {
+								type = "range",
+								name = L["Border Thickness"],
+								desc = L["The thickness of the borders."],
+								order = 30,
+								min = 0,
+								max = 50,
+								step = 0.01,
+								bigStep = 0.1
+							},
+							borderinsets = {
+								type = "range",
+								name = L["Border Insets"],
+								desc = L["The distance between the window and its border."],
+								order = 40,
+								min = -32,
+								max = 32,
+								step = 0.01,
+								bigStep = 1
 							}
 						}
+					}
+				}
+			},
+			text = {
+				type = "group",
+				name = L["Text"],
+				desc = format(L["Text options for %s."], L["Title Bar"]),
+				order = 20,
+				args = {
+					font = {
+						type = "select",
+						name = L["Font"],
+						desc = format(L["The font used by %s."], L["Title Bar"]),
+						dialogControl = "LSM30_Font",
+						values = Skada:MediaList("font"),
+						order = 10
+					},
+					fontflags = {
+						type = "select",
+						name = L["Font Outline"],
+						desc = L["Sets the font outline."],
+						order = 20,
+						values = FONT_FLAGS
+					},
+					fontsize = {
+						type = "range",
+						name = L["Font Size"],
+						desc = format(L["The font size of %s."], L["Title Bar"]),
+						order = 30,
+						min = 5,
+						max = 32,
+						step = 1
+					},
+					textcolor = {
+						type = "color",
+						name = L["Text Color"],
+						desc = format(L["The text color of %s."], L["Title Bar"]),
+						order = 40,
+						hasAlpha = true,
+						get = function()
+							local c = db.title.textcolor or Skada.windowdefaults.title.textcolor
+							return c.r, c.g, c.b, c.a or 1
+						end,
+						set = function(_, r, g, b, a)
+							db.title.textcolor = db.title.textcolor or {}
+							db.title.textcolor.r = r
+							db.title.textcolor.g = g
+							db.title.textcolor.b = b
+							db.title.textcolor.a = a
+							Skada:ApplySettings(db.name)
+						end
 					}
 				}
 			},
@@ -1601,7 +1668,7 @@ function mod:AddDisplayOptions(win, options)
 				type = "group",
 				name = L["Buttons"],
 				desc = format(L["Options for %s."], L["Buttons"]),
-				order = 20,
+				order = 30,
 				width = "double",
 				args = {
 					buttons = {
@@ -1817,6 +1884,7 @@ do
 					barfontsize = 13,
 					barheight = 18,
 					barwidth = 240,
+					baroffset = 0,
 					barorientation = 1,
 					barcolor = {r = 0.3, g = 0.3, b = 0.8, a = 1},
 					barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6},
@@ -1829,6 +1897,10 @@ do
 						font = "Accidental Presidency",
 						fontsize = 13,
 						texture = "Armory",
+						bordercolor = {r = 0, g = 0, b = 0, a = 1},
+						bordertexture = "None",
+						borderthickness = 2,
+						borderinsets = 0,
 						color = {r = 0.3, g = 0.3, b = 0.3, a = 1},
 						fontflags = ""
 					},
@@ -1838,6 +1910,7 @@ do
 						bordercolor = {r = 0, g = 0, b = 0, a = 1},
 						bordertexture = "Blizzard Party",
 						borderthickness = 2,
+						borderinsets = 0,
 						color = {r = 0, g = 0, b = 0, a = 0.4},
 						tilesize = 0
 					},
@@ -1858,6 +1931,7 @@ do
 					barfontsize = 12,
 					barheight = 16,
 					barwidth = 240,
+					baroffset = 0,
 					barorientation = 1,
 					barcolor = {r = 0.3, g = 0.3, b = 0.8, a = 1},
 					barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6},
@@ -1870,6 +1944,10 @@ do
 						font = "Accidental Presidency",
 						fontsize = 12,
 						texture = "Armory",
+						bordercolor = {r = 0, g = 0, b = 0, a = 1},
+						bordertexture = "None",
+						borderthickness = 0,
+						borderinsets = 0,
 						color = {r = 0.6, g = 0.6, b = 0.8, a = 1},
 						fontflags = ""
 					},
@@ -1879,6 +1957,7 @@ do
 						bordercolor = {r = 0, g = 0, b = 0, a = 1},
 						bordertexture = "Blizzard Party",
 						borderthickness = 0,
+						borderinsets = 0,
 						color = {r = 0, g = 0, b = 0, a = 0.4},
 						tilesize = 0
 					},
@@ -1899,6 +1978,7 @@ do
 					barfontsize = 12,
 					barheight = 16,
 					barwidth = 240,
+					baroffset = 0,
 					barorientation = 1,
 					barcolor = {r = 0.3, g = 0.3, b = 0.8, a = 1},
 					barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6},
@@ -1911,6 +1991,10 @@ do
 						font = "ABF",
 						fontsize = 12,
 						texture = "Aluminium",
+						bordercolor = {r = 0, g = 0, b = 0, a = 1},
+						bordertexture = "None",
+						borderthickness = 0,
+						borderinsets = 0,
 						color = {r = 0.6, g = 0.6, b = 0.8, a = 1},
 						fontflags = ""
 					},
@@ -1920,6 +2004,7 @@ do
 						bordercolor = {r = 0.9, g = 0.9, b = 0.5, a = 0.6},
 						bordertexture = "Glow",
 						borderthickness = 5,
+						borderinsets = 0,
 						color = {r = 0, g = 0, b = 0, a = 0.4},
 						tilesize = 0
 					},
@@ -1939,6 +2024,7 @@ do
 					barfontsize = 12,
 					barheight = 18,
 					barwidth = 240,
+					baroffset = 0,
 					barorientation = 1,
 					barcolor = {r = 0.3, g = 0.3, b = 0.8, a = 1},
 					barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6},
@@ -1950,6 +2036,10 @@ do
 						font = "Arial Narrow",
 						fontsize = 12,
 						texture = "Gloss",
+						bordercolor = {r = 0, g = 0, b = 0, a = 1},
+						bordertexture = "None",
+						borderthickness = 0,
+						borderinsets = 0,
 						color = {r = 1, g = 0, b = 0, a = 0.75},
 						fontflags = ""
 					},
@@ -1959,6 +2049,7 @@ do
 						bordercolor = {r = 0.9, g = 0.9, b = 0.5, a = 0.6},
 						bordertexture = "None",
 						borderthickness = 5,
+						borderinsets = 0,
 						color = {r = 0, g = 0, b = 0, a = 0.4},
 						tilesize = 0
 					},
@@ -1981,6 +2072,7 @@ do
 					numfontsize = 10,
 					barheight = 14,
 					barwidth = 200,
+					baroffset = 0,
 					barorientation = 1,
 					barcolor = {r = 0.8, g = 0.05, b = 0, a = 1},
 					barbgcolor = {r = 0.3, g = 0.01, b = 0, a = 0.6},
@@ -1993,6 +2085,10 @@ do
 						font = "Friz Quadrata TT",
 						fontsize = 10,
 						texture = "Blizzard",
+						bordercolor = {r = 1, g = 0.75, b = 0, a = 1},
+						bordertexture = "Blizzard Dialog",
+						borderthickness = 1,
+						borderinsets = 0,
 						color = {r = 0.2, g = 0.2, b = 0.2, a = 0},
 						fontflags = ""
 					},
@@ -2002,6 +2098,7 @@ do
 						bordercolor = {r = 1, g = 1, b = 1, a = 1},
 						bordertexture = "Blizzard Dialog",
 						borderthickness = 1,
+						borderinsets = 0,
 						color = {r = 1, g = 1, b = 1, a = 1},
 						tilesize = 0
 					},

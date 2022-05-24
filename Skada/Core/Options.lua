@@ -23,6 +23,7 @@ Skada.windowdefaults = {
 	numfontsize = 13,
 	barheight = 18,
 	barwidth = 240,
+	baroffset = 0,
 	barorientation = 1,
 	barcolor = {r = 0.3, g = 0.3, b = 0.8, a = 1},
 	barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6},
@@ -42,6 +43,10 @@ Skada.windowdefaults = {
 		color = {r = 0.3, g = 0.3, b = 0.3, a = 1},
 		texture = "Armory",
 		textcolor = {r = 0.9, g = 0.9, b = 0.9, a = 1},
+		bordercolor = {r = 0, g = 0, b = 0, a = 1},
+		bordertexture = "None",
+		borderthickness = 2,
+		borderinsets = 0,
 		toolbar = 1,
 		spacing = 1
 	},

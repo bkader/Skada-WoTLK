@@ -2,7 +2,7 @@
 -- Specialized ( = enhanced) for Skada
 -- Note to self: don't forget to notify original author of changes
 -- in the unlikely event they end up being usable outside of Skada.
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90011
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90012
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 
@@ -230,6 +230,15 @@ do
 	end
 
 	local DEFAULT_TEXTURE = [[Interface\TARGETINGFRAME\UI-StatusBar]]
+	local DEFAULT_BACKDROP = {
+		bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],
+		edgeFile = [[Interface\Tooltips\UI-Tooltip-Border]],
+		inset = 4,
+		edgeSize = 8,
+		tile = true,
+		insets = {left = 2, right = 2, top = 2, bottom = 2}
+	}
+
 	function lib:NewBarGroup(name, orientation, height, length, thickness, frameName)
 		assert(self ~= lib, "You may only call :NewBarGroup as an embedded function")
 
@@ -260,13 +269,14 @@ do
 		end
 
 		list.button = list.button or CreateFrame("Button", "$parentAnchor", list)
+		list.button:SetFrameLevel(list:GetFrameLevel() + 3)
 		list.button:SetText(name)
 		list.button:SetNormalFontObject(myfont)
+		list.button:SetBackdrop(DEFAULT_BACKDROP)
+		list.button:SetBackdropColor(0, 0, 0, 1)
 
 		list.button.text = list.button:GetFontString()
 		list.button.text:SetWordWrap(false)
-		list.button.bg = list.button:CreateTexture("$parentTexture", "BACKGROUND")
-		list.button.bg:SetAllPoints()
 
 		list.button.icon = list.button.icon or list.button:CreateTexture(nil, "ARTWORK")
 		list.button.icon:SetTexCoord(0.094, 0.906, 0.094, 0.906)
@@ -294,6 +304,7 @@ do
 
 		list.texture = DEFAULT_TEXTURE
 		list.spacing = 0
+		list.startpoint = 0
 		list.offset = 0
 		list.numBars = 0
 
@@ -778,6 +789,15 @@ function barListPrototype:HideAnchorIcon()
 		self.button.icon:SetTexture(nil)
 		self.button.icon:Hide()
 		self:AdjustTitle()
+	end
+end
+
+-- adds an offset to bars starting point.
+function barListPrototype:SetDisplacement(startpoint)
+	if startpoint and self.startpoint ~= startpoint then
+		self.startpoint = startpoint
+		self:GuessMaxBars()
+		self:SortBars()
 	end
 end
 
@@ -1320,7 +1340,8 @@ function barListPrototype:GuessMaxBars()
 
 	if self.button:IsVisible() then
 		local height = self:GetHeight() + self.spacing
-		maxbars = ((maxbars - 1) * ((height - self.button:GetHeight()) / height)) + 1
+		local height2 = self.button:GetHeight() + self.startpoint
+		maxbars = ((maxbars - 1) * ((height - height2) / height)) + 1
 	end
 
 	self.maxBars = floor(maxbars)
@@ -1553,7 +1574,7 @@ do
 		local orientation = self.orientation
 		local growup = self.growup
 		local spacing = self.spacing
-		local startpoint = self.button:IsVisible() and self.button:GetHeight() or 0
+		local startpoint = self.button:IsVisible() and (self.button:GetHeight() + self.startpoint) or 0
 
 		local from, to
 		local thickness, showIcon = self.thickness, self.showIcon
