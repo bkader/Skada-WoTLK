@@ -5,7 +5,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 	local mod = Skada:NewModule("Deaths")
 	local playermod = mod:NewModule("Player's deaths")
 	local deathlogmod = mod:NewModule("Death log")
-	local WATCH = nil -- true to watch alive players
+	local WATCH = nil -- true to watch those alive
 
 	local tinsert, tremove, tsort, tconcat = table.insert, table.remove, table.sort, table.concat
 	local tostring, format = tostring, string.format
@@ -69,7 +69,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 			log.spellid = data.spellid
 			log.school = data.spellschool
 			log.source = data.srcName
-			log.time = GetTime()
+			log.time = set.last_time or GetTime()
 			_, log.hp = UnitHealthInfo(player.name, player.id, "group")
 
 			deathlog.time = log.time -- death log time
@@ -131,6 +131,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 		end
 	end
 
+	local missTypes = {RESIST = true, BLOCK = true, ABSORB = true}
 	local function SpellMissed(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local misstype, amount
 
@@ -141,7 +142,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 			data.spellid, _, data.spellschool, misstype, amount = ...
 		end
 
-		if amount and amount > 0 and (misstype == "RESIST" or misstype == "BLOCK" or misstype == "ABSORB") then
+		if amount and amount > 0 and misstype and missTypes[misstype] then
 			data.srcName = srcName
 			data.playerid = dstGUID
 			data.playername = dstName
@@ -193,7 +194,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 	end
 
 	local function SpellHeal(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, _, spellschool, amount, overheal = ...
+		local spellid, _, _, amount, overheal = ...
 
 		if amount > (Skada.db.profile.modules.deathlogthreshold or 0) then
 			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
@@ -206,9 +207,10 @@ Skada:AddLoadableModule("Deaths", function(L)
 			data.playerflags = dstFlags
 
 			data.spellid = spellid
-			data.spellschool = spellschool
 			data.overheal = overheal or 0
 			data.amount = max(0, amount - data.overheal)
+
+			data.spellschool = nil
 			data.overkill = nil
 			data.resisted = nil
 			data.blocked = nil
@@ -229,7 +231,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 			local deathlog = player.deathlog and player.deathlog[1]
 			if deathlog then
-				deathlog.time = GetTime()
+				deathlog.time = set.last_time or GetTime()
 				deathlog.timeStr = date("%H:%M:%S")
 
 				for i = #deathlog.log, 1, -1 do
@@ -337,7 +339,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 					win.metadata.maxvalue = deathlog.maxhp
 				end
 
-				local nr = 1
+				local nr = 0
 
 				-- 1. remove "datakey" from ended logs.
 				-- 2. postfix empty table
@@ -368,7 +370,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 				tsort(deathlog.log, sort_logs)
 
-				local curtime = deathlog.time or GetTime()
+				local curtime = deathlog.time or set.last_time or GetTime()
 				for i = #deathlog.log, 1, -1 do
 					local log = deathlog.log[i]
 					local diff = tonumber(log.time) - tonumber(curtime)
@@ -503,7 +505,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 					win.metadata.maxvalue = 0
 				end
 
-				local nr, curtime = 0, GetTime()
+				local curtime, nr = set.last_time or GetTime(), 0
 				for i = 1, #player.deathlog do
 					local death = player.deathlog[i]
 					if death and (death.timeStr or WATCH) then
@@ -542,7 +544,7 @@ Skada:AddLoadableModule("Deaths", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr, curtime = 0, GetTime()
+			local curtime, nr = set.last_time or GetTime(), 0
 			for i = 1, #set.players do
 				local player = set.players[i]
 				if player and player.deathlog and (player.death or WATCH) and (not win.class or win.class == player.class) then

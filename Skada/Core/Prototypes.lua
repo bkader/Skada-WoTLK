@@ -52,7 +52,7 @@ end
 
 -- returns the segment's time
 function setPrototype:GetTime()
-	return max((self.time and self.time > 0) and self.time or (time() - self.starttime), 0.1)
+	return max(1, self.time > 0 and self.time or (time() - self.starttime))
 end
 
 -- returns the actor's time if found (player or enemy)
@@ -165,7 +165,7 @@ function setPrototype:GetDPS(useful)
 	local dps, damage = 0, self:GetDamage(useful)
 
 	if damage > 0 then
-		dps = damage / max(1, self:GetTime())
+		dps = damage / self:GetTime()
 	end
 
 	return dps, damage
@@ -250,7 +250,7 @@ function setPrototype:GetDTPS()
 	local dtps, damage = 0, self:GetDamageTaken()
 
 	if damage > 0 then
-		dtps = damage / max(1, self:GetTime())
+		dtps = damage / self:GetTime()
 	end
 
 	return dtps, damage
@@ -314,7 +314,7 @@ end
 function setPrototype:GetHPS()
 	local heal = self:GetHeal()
 	if heal > 0 then
-		return heal / max(1, self:GetTime()), heal
+		return heal / self:GetTime(), heal
 	end
 	return 0, heal
 end
@@ -335,7 +335,7 @@ end
 function setPrototype:GetOHPS()
 	local overheal = self:GetOverheal()
 	if overheal > 0 then
-		return overheal / max(1, self:GetTime()), overheal
+		return overheal / self:GetTime(), overheal
 	end
 	return 0, overheal
 end
@@ -360,7 +360,7 @@ end
 function setPrototype:GetTHPS()
 	local heal = self:GetTotalHeal()
 	if heal > 0 then
-		return heal / max(1, self:GetTime()), heal
+		return heal / self:GetTime(), heal
 	end
 	return 0, heal
 end
@@ -381,7 +381,7 @@ end
 function setPrototype:GetAPS()
 	local absorb = self:GetAbsorb()
 	if absorb > 0 then
-		return absorb / max(1, self:GetTime()), absorb
+		return absorb / self:GetTime(), absorb
 	end
 	return 0, absorb
 end
@@ -411,7 +411,7 @@ end
 function setPrototype:GetAHPS()
 	local heal = self:GetAbsorbHeal()
 	if heal > 0 then
-		return heal / max(1, self:GetTime()), heal
+		return heal / self:GetTime(), heal
 	end
 	return 0, heal
 end
@@ -431,7 +431,6 @@ end
 
 -- for better dps calculation, we use active time for Arena/BGs.
 function actorPrototype:GetTime(active)
-	active = active or (self.super.type == "pvp") or (self.super.type == "arena")
 	return Skada:GetActiveTime(self.super, self, active)
 end
 

@@ -61,9 +61,9 @@ Skada:AddLoadableModule("Damage", function(L)
 
 		-- update activity
 		if whitelist[dmg.spellid] ~= nil and not dmg.petname then
-			Skada:AddActiveTime(player, (dmg.amount > 0), tonumber(whitelist[dmg.spellid]))
+			Skada:AddActiveTime(set, player, (dmg.amount > 0), tonumber(whitelist[dmg.spellid]))
 		elseif player.role ~= "HEALER" and not dmg.petname then
-			Skada:AddActiveTime(player, (dmg.amount > 0 and not passiveSpells[dmg.spellid]))
+			Skada:AddActiveTime(set, player, (dmg.amount > 0 and not passiveSpells[dmg.spellid]))
 		end
 
 		-- add absorbed damage to total damage
@@ -200,7 +200,7 @@ Skada:AddLoadableModule("Damage", function(L)
 						extraATT[srcName] = new()
 						extraATT[srcName].proc = spellname
 						extraATT[srcName].count = amount
-						extraATT[srcName].time = GetTime()
+						extraATT[srcName].time = Skada.current.last_time or GetTime()
 					end
 				end
 
@@ -213,9 +213,10 @@ Skada:AddLoadableModule("Damage", function(L)
 
 				-- an extra attack?
 				if extraATT and extraATT[srcName] then
+					local curtime = Skada.current.last_time or GetTime()
 					if not extraATT[srcName].spellname then -- queue spell
 						extraATT[srcName].spellname = dmg.spellname
-					elseif dmg.spellname == L["Melee"] and extraATT[srcName].time < (GetTime() - 5) then -- expired proc
+					elseif dmg.spellname == L["Melee"] and extraATT[srcName].time < (curtime - 5) then -- expired proc
 						extraATT[srcName] = del(extraATT[srcName])
 					elseif dmg.spellname == L["Melee"] then -- valid damage contribution
 						dmg.spellname = extraATT[srcName].spellname .. " (" .. extraATT[srcName].proc .. ")"
@@ -347,16 +348,6 @@ Skada:AddLoadableModule("Damage", function(L)
 				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
 			end
 
-			if (spell.count or 0) > 1 then
-				if not separator then
-					tooltip:AddLine(" ")
-					separator = true
-				end
-
-				local amount = Skada.db.profile.absdamage and spell.total or spell.amount
-				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(amount / spell.count), 1, 1, 1)
-			end
-
 			if spell.hitmax then
 				if not separator then
 					tooltip:AddLine(" ")
@@ -368,6 +359,16 @@ Skada:AddLoadableModule("Damage", function(L)
 					spellmax = spell.criticalmax
 				end
 				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
+			end
+
+			if (spell.count or 0) > 1 then
+				if not separator then
+					tooltip:AddLine(" ")
+					separator = true
+				end
+
+				local amount = Skada.db.profile.absdamage and spell.total or spell.amount
+				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(amount / spell.count), 1, 1, 1)
 			end
 		end
 	end
@@ -387,26 +388,26 @@ Skada:AddLoadableModule("Damage", function(L)
 					if spell.criticalmin then
 						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.criticalmin), 1, 1, 1)
 					end
-					tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.criticalamount / spell.critical), 1, 1, 1)
 					if spell.criticalmax then
 						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.criticalmax), 1, 1, 1)
 					end
+					tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.criticalamount / spell.critical), 1, 1, 1)
 				elseif label == L["Normal Hits"] and spell.hitamount then
 					if spell.hitmin then
 						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
 					end
-					tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
 					if spell.hitmax then
 						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
 					end
+					tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
 				elseif label == L["Glancing"] and spell.glance then
 					if spell.glancemin then
 						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.glancemin), 1, 1, 1)
 					end
-					tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.glance / spell.glancing), 1, 1, 1)
 					if spell.glancemax then
 						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.glancemax), 1, 1, 1)
 					end
+					tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.glance / spell.glancing), 1, 1, 1)
 				end
 			end
 		end

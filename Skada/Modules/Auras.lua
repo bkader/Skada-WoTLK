@@ -44,7 +44,7 @@ do
 	function mod:Clean(event, set, curtime)
 		if event == "COMBAT_PLAYER_LEAVE" and set then
 			local maxtime = Skada:GetSetTime(set)
-			curtime = curtime or time()
+			curtime = curtime or set.last_action or time()
 
 			for i = 1, #set.players do
 				local player = set.players[i]
@@ -126,15 +126,16 @@ do
 
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
 		if player then
+			local curtime = set.last_action or time()
 			local spell = player.auras and player.auras[aura.spellid]
 			if not spell then
-				spell = {school = aura.spellschool, type = aura.type, active = 1, count = 1, uptime = 0, start = time()}
+				spell = {school = aura.spellschool, type = aura.type, active = 1, count = 1, uptime = 0, start = curtime}
 				player.auras = player.auras or {}
 				player.auras[aura.spellid] = spell
 			else
 				spell.active = (spell.active or 0) + 1
 				spell.count = (spell.count or 0) + 1
-				spell.start = spell.start or time()
+				spell.start = spell.start or curtime
 
 				-- fix missing school
 				if not spell.school and aura.spellschool then
@@ -146,11 +147,11 @@ do
 			if aura.type == "DEBUFF" and aura.dstName then
 				spell.targets = spell.targets or {}
 				if not spell.targets[aura.dstName] then
-					spell.targets[aura.dstName] = {count = 1, active = 1, uptime = 0, start = time()}
+					spell.targets[aura.dstName] = {count = 1, active = 1, uptime = 0, start = curtime}
 				else
 					spell.targets[aura.dstName].active = (spell.targets[aura.dstName].active or 0) + 1
 					spell.targets[aura.dstName].count = (spell.targets[aura.dstName].count or 0) + 1
-					spell.targets[aura.dstName].start = spell.targets[aura.dstName].start or time()
+					spell.targets[aura.dstName].start = spell.targets[aura.dstName].start or curtime
 				end
 			end
 		end
@@ -179,9 +180,10 @@ do
 		local spell = player and player.auras and player.auras[aura.spellid]
 
 		if spell and spell.active and spell.active > 0 then
+			local curtime = set.last_action or time()
 			spell.active = spell.active - 1
 			if spell.active == 0 and spell.start then
-				spell.uptime = spell.uptime + floor((time() - spell.start) + 0.5)
+				spell.uptime = spell.uptime + floor((curtime - spell.start) + 0.5)
 				spell.start = nil
 			end
 
@@ -189,7 +191,7 @@ do
 			if spell.targets and aura.dstName and spell.targets[aura.dstName] and spell.targets[aura.dstName].active and spell.targets[aura.dstName].active > 0 then
 				spell.targets[aura.dstName].active = spell.targets[aura.dstName].active - 1
 				if spell.targets[aura.dstName].active == 0 and spell.targets[aura.dstName].start then
-					spell.targets[aura.dstName].uptime = spell.targets[aura.dstName].uptime + floor((time() - spell.targets[aura.dstName].start) + 0.5)
+					spell.targets[aura.dstName].uptime = spell.targets[aura.dstName].uptime + floor((curtime - spell.targets[aura.dstName].start) + 0.5)
 					spell.targets[aura.dstName].start = nil
 				end
 			end
@@ -367,9 +369,9 @@ Skada:AddLoadableModule("Buffs", function(L)
 
 			if event == "SPELL_PERIODIC_ENERGIZE" then
 				Skada:DispatchSets(log_specialaura, aura)
-			elseif event == "SPELL_AURA_APPLIED" or event == true then
+			elseif event == "SPELL_AURA_APPLIED" then
 				Skada:DispatchSets(log_auraapply, aura)
-			elseif event == "SPELL_AURA_REFRESH" then
+			elseif event == "SPELL_AURA_REFRESH" or event == "SPELL_AURA_APPLIED_DOSE" then
 				Skada:DispatchSets(log_aurarefresh, aura)
 			elseif event == "SPELL_AURA_REMOVED" then
 				Skada:DispatchSets(log_auraremove, aura)
@@ -440,7 +442,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 					local _, rank, _, _, _, _, _, unitCaster, _, _, spellid = UnitBuff(unit, i)
 					if spellid then
 						if unitCaster and rank ~= SPELL_PASSIVE then
-							HandleBuff(nil, true, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, nil, nil, "BUFF")
+							HandleBuff(nil, "SPELL_AURA_APPLIED", UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, nil, nil, "BUFF")
 						end
 					else
 						break -- nothing found!
@@ -474,8 +476,9 @@ Skada:AddLoadableModule("Buffs", function(L)
 		Skada:RegisterForCL(
 			HandleBuff,
 			"SPELL_AURA_APPLIED",
-			"SPELL_AURA_REFRESH",
 			"SPELL_AURA_REMOVED",
+			"SPELL_AURA_REFRESH",
+			"SPELL_AURA_APPLIED_DOSE",
 			"SPELL_PERIODIC_ENERGIZE",
 			{dst_is_interesting = true}
 		)
@@ -537,7 +540,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 				if queuedSpells[spellid] then
 					Skada:QueueUnit(queuedSpells[spellid], srcGUID, srcName, srcFlags, dstGUID)
 				end
-			elseif event == "SPELL_AURA_REFRESH" then
+			elseif event == "SPELL_AURA_REFRESH" or event == "SPELL_AURA_APPLIED_DOSE" then
 				Skada:DispatchSets(log_aurarefresh, aura)
 			elseif event == "SPELL_AURA_REMOVED" then
 				Skada:DispatchSets(log_auraremove, aura)
@@ -713,8 +716,9 @@ Skada:AddLoadableModule("Debuffs", function(L)
 		Skada:RegisterForCL(
 			HandleDebuff,
 			"SPELL_AURA_APPLIED",
-			"SPELL_AURA_REFRESH",
 			"SPELL_AURA_REMOVED",
+			"SPELL_AURA_REFRESH",
+			"SPELL_AURA_APPLIED_DOSE",
 			{src_is_interesting = true}
 		)
 

@@ -166,7 +166,10 @@ local function CreateSet(setname, set)
 	set.starttime = time()
 	set.time = 0
 	set.players = set.players or {}
-	set.last_action = (setname ~= L["Total"] or Skada.db.profile.totalidc) and set.starttime or nil
+	if setname ~= L["Total"] or Skada.db.profile.totalidc then
+		set.last_action = set.starttime
+		set.last_time = GetTime()
+	end
 
 	-- last alterations before returning.
 	for i = 1, #modes do
@@ -228,7 +231,7 @@ local function ProcessSet(set, curtime, mobname)
 		set.mobname = mobname or set.mobname -- override name
 		if set.mobname ~= nil and curtime - set.starttime >= (Skada.db.profile.minsetlength or 5) then
 			set.endtime = set.endtime or curtime
-			set.time = max(0.1, set.endtime - set.starttime)
+			set.time = max(1, set.endtime - set.starttime)
 			set.name = CheckSetName(set)
 
 			for i = 1, #modes do
@@ -249,7 +252,7 @@ local function ProcessSet(set, curtime, mobname)
 	-- the segment didn't have the chance to get saved
 	if set.endtime == nil then
 		set.endtime = curtime
-		set.time = max(0.1, set.endtime - set.starttime)
+		set.time = max(1, set.endtime - set.starttime)
 	end
 end
 
@@ -317,7 +320,7 @@ end
 
 -- returns the selected set time.
 function Skada:GetSetTime(set)
-	return set and max((set.time and set.time > 0) and set.time or (time() - set.starttime), 0.1) or 0
+	return set and max(1, set.time > 0 and set.time or (time() - set.starttime)) or 0
 end
 
 -- returns a formmatted set time
@@ -325,19 +328,24 @@ function Skada:GetFormatedSetTime(set)
 	return self:FormatTime(self:GetSetTime(set))
 end
 
--- returns the player active/effective time
-function Skada:GetActiveTime(set, player, active)
-	if (self.db.profile.timemesure ~= 2 or active) and player and player.time and player.time > 0 then
-		return max(0.1, player.time)
+-- returns the actor's active/effective time
+function Skada:GetActiveTime(set, actor, active)
+	active = active or (set.type == "pvp") or (set.type == "arena") -- force active for pvp/arena
+
+	-- active: actor's time.
+	if (self.db.profile.timemesure ~= 2 or active) and actor.time and actor.time > 0 then
+		return max(1, actor.time)
 	end
-	return self:GetSetTime(set)
+
+	-- effective: combat time.
+	return max(1, set.time > 0 and set.time or (time() - set.starttime))
 end
 
--- updates the player's active time
-function Skada:AddActiveTime(player, cond, diff)
-	if player and player.last and cond then
-		local curtime = GetTime()
-		local delta = curtime - player.last
+-- updates the actor's active time
+function Skada:AddActiveTime(set, actor, cond, diff)
+	if actor and actor.last and cond then
+		local curtime = set.last_time or GetTime()
+		local delta = curtime - actor.last
 
 		if diff and diff > 0 and diff < delta then
 			delta = diff
@@ -345,8 +353,8 @@ function Skada:AddActiveTime(player, cond, diff)
 			delta = 3.5
 		end
 
-		player.last = curtime
-		player.time = (player.time or 0) + floor(100 * delta + 0.5) / 100
+		actor.last = curtime
+		actor.time = (actor.time or 0) + floor(100 * delta + 0.5) / 100
 	end
 end
 
@@ -1226,7 +1234,7 @@ do
 				if mode.metadata.click3 then
 					ScanForColumns(mode.metadata.click3)
 				end
-				if not Skada.Ascension and mode.metadata.click4 then
+				if (not Skada.Ascension or Skada.AscensionCoA) and mode.metadata.click4 then
 					ScanForColumns(mode.metadata.click4)
 				end
 			end
@@ -1494,10 +1502,10 @@ function Skada:GetPlayer(set, guid, name, flag)
 	end
 
 	-- total set has "last" always removed.
-	player.last = player.last or GetTime()
+	player.last = player.last or set.last_time or GetTime()
 
 	self.changed = true
-	self.callbacks:Fire("Skada_GetPlayer", player)
+	self.callbacks:Fire("Skada_GetPlayer", player, set)
 	return self.playerPrototype:Bind(player, set)
 end
 
@@ -1552,7 +1560,7 @@ function Skada:GetEnemy(set, name, guid, flag, create)
 	end
 
 	self.changed = true
-	self.callbacks:Fire("Skada_GetEnemy", enemy)
+	self.callbacks:Fire("Skada_GetEnemy", enemy, set)
 	return self.enemyPrototype:Bind(enemy, set)
 end
 
@@ -1940,9 +1948,9 @@ do
 				t:ClearLines()
 				self:AddSubviewToTooltip(t, win, FindMode(id), id, label)
 				t:Show()
-			elseif md.click1 or md.click2 or md.click3 or (not self.Ascension and md.click4) or md.tooltip then
+			elseif md.click1 or md.click2 or md.click3 or ((not self.Ascension or self.AscensionCoA) and md.click4) or md.tooltip then
 				t:ClearLines()
-				local hasClick = md.click1 or md.click2 or md.click3 or md.click4
+				local hasClick = md.click1 or md.click2 or md.click3 or ((not self.Ascension or self.AscensionCoA) and md.click4) or nil
 
 				if md.tooltip then
 					local numLines = t:NumLines()
@@ -1963,7 +1971,7 @@ do
 					if md.click3 and not self:NoTotalClick(win.selectedset, md.click3) then
 						self:AddSubviewToTooltip(t, win, md.click3, id, label)
 					end
-					if not self.Ascension and md.click4 and not self:NoTotalClick(win.selectedset, md.click4) then
+					if (not self.Ascension or self.AscensionCoA) and md.click4 and not self:NoTotalClick(win.selectedset, md.click4) then
 						self:AddSubviewToTooltip(t, win, md.click4, id, label)
 					end
 				end
@@ -1996,9 +2004,9 @@ do
 						t:AddLine(format(L["Control-Click for \124cff00ff00%s\124r"], md.click3_label or md.click3.localeName))
 					end
 
-					if not self.Ascension and type(md.click4) == "function" then
+					if (not self.Ascension or self.AscensionCoA) and type(md.click4) == "function" then
 						t:AddLine(format(L["Alt-Click for \124cff00ff00%s\124r"], md.click4_label or L["Unknown"]))
-					elseif not self.Ascension and md.click4 and not self:NoTotalClick(win.selectedset, md.click4) then
+					elseif (not self.Ascension or self.AscensionCoA) and md.click4 and not self:NoTotalClick(win.selectedset, md.click4) then
 						t:AddLine(format(L["Alt-Click for \124cff00ff00%s\124r"], md.click4_label or md.click4.localeName))
 					end
 				end
@@ -3473,6 +3481,16 @@ function Skada:EndSegment()
 		T.free("Skada_TempSegments", self.tempsets)
 	end
 
+	-- clear total semgnt
+	if self.db.profile.totalidc then
+		for i = 1, #modes do
+			local mode = modes[i]
+			if mode and mode.SetComplete then
+				mode:SetComplete(self.total)
+			end
+		end
+	end
+
 	-- remove players ".last" key from total segment.
 	for i = 1, #self.total.players do
 		if self.total.players[i] then
@@ -3540,7 +3558,7 @@ function Skada:StopSegment(msg, phase)
 			if set and not set.stopped then
 				set.stopped = true
 				set.endtime = curtime
-				set.time = max(0.1, set.endtime - set.starttime)
+				set.time = max(1, set.endtime - set.starttime)
 				self:Printf(L["\124cffffbb00%s\124r - \124cff00ff00Phase %s\124r stopped."], set.mobname or L["Unknown"], set.phase)
 			end
 			return
@@ -3550,7 +3568,7 @@ function Skada:StopSegment(msg, phase)
 		if not self.current.stopped then
 			self.current.stopped = true
 			self.current.endtime = curtime
-			self.current.time = max(0.1, self.current.endtime - self.current.starttime)
+			self.current.time = max(1, self.current.endtime - self.current.starttime)
 
 			-- stop phase segments?
 			if self.tempsets and not phase then
@@ -3559,7 +3577,7 @@ function Skada:StopSegment(msg, phase)
 					if set and not set.stopped then
 						set.stopped = true
 						set.endtime = curtime
-						set.time = max(0.1, set.endtime - set.starttime)
+						set.time = max(1, set.endtime - set.starttime)
 					end
 				end
 			end
@@ -3637,7 +3655,6 @@ do
 
 	-- list of combat events that we don't care about
 	local ignored_events = {
-		SPELL_AURA_APPLIED_DOSE = true,
 		SPELL_AURA_REMOVED_DOSE = true,
 		SPELL_CAST_START = true,
 		SPELL_CAST_SUCCESS = true,
@@ -3836,6 +3853,24 @@ do
 			if combatlog_events[eventtype] then
 				if self.current.stopped then return end
 
+				self.current.last_action = time()
+				self.current.last_time = GetTime()
+
+				if self.db.profile.totalidc then -- add to total segment
+					self.total.last_action = self.current.last_action
+					self.total.last_time = self.current.last_time
+				end
+
+				if self.tempsets then -- add to phases
+					for j = 1, #self.tempsets do
+						local set = self.tempsets[j]
+						if set and not set.stopped then
+							set.last_action = self.current.last_action
+							set.last_time = self.current.last_time
+						end
+					end
+				end
+
 				for i = 1, #combatlog_events[eventtype] do
 					local mod = combatlog_events[eventtype][i]
 					local fail = false
@@ -3892,8 +3927,6 @@ do
 							end
 						end
 
-						self.current.last_action = time()
-						self.total.last_action = self.db.profile.totalidc and self.current.last_action or nil
 						mod.func(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 					end
 				end

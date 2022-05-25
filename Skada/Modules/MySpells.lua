@@ -50,9 +50,6 @@ Skada:AddLoadableModule("My Spells", function(L)
 				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
 			end
 
-			local amount = damage and (Skada.db.profile.absdamage and spell.total or spell.amount) or spell.amount
-			tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(amount / spell.count), 1, 1, 1)
-
 			if spell.hitmax or spell.max then
 				local spellmax = spell.hitmax or spell.max
 				if spell.criticalmax and spell.criticalmax < spellmax then
@@ -60,6 +57,9 @@ Skada:AddLoadableModule("My Spells", function(L)
 				end
 				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
 			end
+
+			local amount = damage and (Skada.db.profile.absdamage and spell.total or spell.amount) or spell.amount
+			tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(amount / spell.count), 1, 1, 1)
 		end
 	end
 

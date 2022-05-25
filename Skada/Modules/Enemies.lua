@@ -813,7 +813,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 		local e = Skada:GetEnemy(set, dmg.enemyname, dmg.enemyid, dmg.enemyflags, true)
 		if e then
 			if (set.type == "arena" or set.type == "pvp") and e.class and Skada.validclass[e.class] and e.role ~= "HEALER" then
-				Skada:AddActiveTime(e, dmg.amount > 0 and dmg.spellid and not passiveSpells[dmg.spellid])
+				Skada:AddActiveTime(set, e, dmg.amount > 0 and dmg.spellid and not passiveSpells[dmg.spellid])
 			end
 
 			set.edamage = (set.edamage or 0) + dmg.amount
@@ -1326,7 +1326,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 		local e = Skada:GetEnemy(set, data.enemyname, data.enemyid, data.enemyflags, true)
 		if e then
 			if (set.type == "arena" or set.type == "pvp") and e.class and Skada.validclass[e.class] and e.role == "HEALER" then
-				Skada:AddActiveTime(e, data.amount > 0 and data.spellid and not passiveSpells[data.spellid])
+				Skada:AddActiveTime(set, e, data.amount > 0 and data.spellid and not passiveSpells[data.spellid])
 			end
 
 			set.eheal = (set.eheal or 0) + data.amount

@@ -43,7 +43,7 @@ Skada:AddLoadableModule("Healing", function(L)
 			-- get rid of overheal
 			local amount = max(0, data.amount - data.overheal)
 			if player.role == "HEALER" and amount > 0 and not data.petname then
-				Skada:AddActiveTime(player, data.spellid and not passiveSpells[data.spellid])
+				Skada:AddActiveTime(set, player, data.spellid and not passiveSpells[data.spellid])
 			end
 
 			-- record the healing
@@ -202,15 +202,6 @@ Skada:AddLoadableModule("Healing", function(L)
 				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
 			end
 
-			if average then
-				if not separator then
-					tooltip:AddLine(" ")
-					separator = true
-				end
-
-				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(average), 1, 1, 1)
-			end
-
 			if spell.max then
 				if not separator then
 					tooltip:AddLine(" ")
@@ -222,6 +213,15 @@ Skada:AddLoadableModule("Healing", function(L)
 					spellmax = spell.criticalmax
 				end
 				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
+			end
+
+			if average then
+				if not separator then
+					tooltip:AddLine(" ")
+					separator = true
+				end
+
+				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(average), 1, 1, 1)
 			end
 		end
 	end
@@ -801,15 +801,6 @@ Skada:AddLoadableModule("Total Healing", function(L)
 				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
 			end
 
-			if spell.count and spell.count > 0 then
-				if not separator then
-					tooltip:AddLine(" ")
-					separator = true
-				end
-
-				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
-			end
-
 			if spell.max then
 				if not separator then
 					tooltip:AddLine(" ")
@@ -821,6 +812,15 @@ Skada:AddLoadableModule("Total Healing", function(L)
 					spellmax = spell.criticalmax
 				end
 				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
+			end
+
+			if spell.count and spell.count > 0 then
+				if not separator then
+					tooltip:AddLine(" ")
+					separator = true
+				end
+
+				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
 			end
 		end
 	end

@@ -17,7 +17,7 @@ Skada:AddLoadableModule("Friendly Fire", function(L)
 		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
 		if player then
 			if dmg.amount > 0 and dmg.spellid then
-				Skada:AddActiveTime(player, not passiveSpells[dmg.spellid])
+				Skada:AddActiveTime(set, player, not passiveSpells[dmg.spellid])
 			end
 
 			player.friendfire = (player.friendfire or 0) + dmg.amount

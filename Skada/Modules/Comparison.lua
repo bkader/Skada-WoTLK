@@ -81,26 +81,26 @@ Skada:AddLoadableModule("Comparison", function(L)
 						if spell.criticalmin then
 							tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.criticalmin), 1, 1, 1)
 						end
-						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.criticalamount / spell.critical), 1, 1, 1)
 						if spell.criticalmax then
 							tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.criticalmax), 1, 1, 1)
 						end
+						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.criticalamount / spell.critical), 1, 1, 1)
 					elseif label == L["Normal Hits"] and spell.hitamount then
 						if spell.hitmin then
 							tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
 						end
-						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
 						if spell.hitmax then
 							tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
 						end
+						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
 					elseif label == L["Glancing"] and spell.glance then
 						if spell.glancemin then
 							tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.glancemin), 1, 1, 1)
 						end
-						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.glance / spell.glancing), 1, 1, 1)
 						if spell.glancemax then
 							tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.glancemax), 1, 1, 1)
 						end
+						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.glance / spell.glancing), 1, 1, 1)
 					end
 				end
 				return
@@ -128,11 +128,11 @@ Skada:AddLoadableModule("Comparison", function(L)
 						tooltip:AddDoubleLine(L["Minimum"], FormatValueNumber(spell and spell.criticalmin, myspell and myspell.criticalmin, true), 1, 1, 1)
 					end
 
-					tooltip:AddDoubleLine(L["Average"], FormatValueNumber(num, mynum, true), 1, 1, 1)
-
 					if (spell and spell.criticalmax) or (myspell and myspell.criticalmax) then
 						tooltip:AddDoubleLine(L["Maximum"], FormatValueNumber(spell and spell.criticalmax, myspell and myspell.criticalmax, true), 1, 1, 1)
 					end
+
+					tooltip:AddDoubleLine(L["Average"], FormatValueNumber(num, mynum, true), 1, 1, 1)
 				elseif label == L["Normal Hits"] and ((spell and spell.hitamount) or (myspell and myspell.hitamount)) then
 					local num = (spell and spell.hitamount) and (spell.hitamount / spell.hit) or 0
 					local mynum = (myspell and myspell.hitamount) and (myspell.hitamount / myspell.hit) or 0
@@ -141,11 +141,11 @@ Skada:AddLoadableModule("Comparison", function(L)
 						tooltip:AddDoubleLine(L["Minimum"], FormatValueNumber(spell and spell.hitmin, myspell and myspell.hitmin, true), 1, 1, 1)
 					end
 
-					tooltip:AddDoubleLine(L["Average"], FormatValueNumber(num, mynum, true), 1, 1, 1)
-
 					if (spell and spell.hitmax) or (myspell and myspell.hitmax) then
 						tooltip:AddDoubleLine(L["Maximum"], FormatValueNumber(spell and spell.hitmax, myspell and myspell.hitmax, true), 1, 1, 1)
 					end
+
+					tooltip:AddDoubleLine(L["Average"], FormatValueNumber(num, mynum, true), 1, 1, 1)
 				elseif label == L["Glancing"] and ((spell and spell.glance) or (myspell and myspell.glance)) then
 					local num = (spell and spell.glance) and (spell.glance / spell.glancing) or 0
 					local mynum = (myspell and myspell.glance) and (myspell.glance / myspell.glancing) or 0
@@ -154,11 +154,11 @@ Skada:AddLoadableModule("Comparison", function(L)
 						tooltip:AddDoubleLine(L["Minimum"], FormatValueNumber(spell and spell.glancemin, myspell and myspell.glancemin, true), 1, 1, 1)
 					end
 
-					tooltip:AddDoubleLine(L["Average"], FormatValueNumber(num, mynum, true), 1, 1, 1)
-
 					if (spell and spell.glancemax) or (myspell and myspell.glancemax) then
 						tooltip:AddDoubleLine(L["Maximum"], FormatValueNumber(spell and spell.glancemax, myspell and myspell.glancemax, true), 1, 1, 1)
 					end
+
+					tooltip:AddDoubleLine(L["Average"], FormatValueNumber(num, mynum, true), 1, 1, 1)
 				end
 			end
 		end

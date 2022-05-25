@@ -48,7 +48,7 @@ local function listOnMouseDown(self, button)
 		Skada:SegmentMenu(self.win)
 	elseif IsAltKeyDown() then
 		Skada:ModeMenu(self.win)
-	else
+	elseif not self.clickthrough then
 		self.win:RightClick(nil, button)
 	end
 end
@@ -533,7 +533,7 @@ do
 			win:RightClick(bar, button)
 		elseif button == "LeftButton" and win.metadata.click2 and IsShiftKeyDown() then
 			showmode(win, id, label, win.metadata.click2)
-		elseif button == "LeftButton" and not Skada.Ascension and win.metadata.click4 and IsAltKeyDown() then
+		elseif button == "LeftButton" and (not Skada.Ascension or Skada.AscensionCoA) and win.metadata.click4 and IsAltKeyDown() then
 			showmode(win, id, label, win.metadata.click4)
 		elseif button == "LeftButton" and win.metadata.click3 and IsControlKeyDown() then
 			showmode(win, id, label, win.metadata.click3)
@@ -1860,6 +1860,7 @@ end
 
 do
 	local tremove = table.remove
+	local strmatch = strmatch or string.match
 	local GetBindingKey = GetBindingKey
 	local SetBinding = SetBinding
 	local SaveBindings = SaveBindings
@@ -2255,7 +2256,26 @@ do
 											local theme = {}
 											Skada.tCopy(theme, win.db, skipped)
 											theme.name = savetheme or win.db.name
+
+											-- duplicate names
+											local num = 0
+											for j = 1, #Skada.db.global.themes do
+												local t = Skada.db.global.themes[j]
+												if t and t.name == theme.name and num == 0 then
+													num = 1
+												elseif t then
+													local n, c = strmatch(t.name, "^(.-)%s*%((%d+)%)$")
+													if n == theme.name then
+														num = max(num, tonumber(c) or 0)
+													end
+												end
+											end
+											if num > 0 then
+												theme.name = format("%s (%s)", theme.name, num + 1)
+											end
+
 											Skada.db.global.themes[#Skada.db.global.themes + 1] = theme
+											break -- stop
 										end
 									end
 									savetheme, savewindow = nil, nil
@@ -2313,6 +2333,7 @@ do
 			}
 		end
 
+		GetThemeOptions = nil
 		return opt_themes
 	end
 
@@ -2414,6 +2435,7 @@ do
 			}
 		end
 
+		GetScrollOptions = nil
 		return opt_scroll
 	end
 
