@@ -10,6 +10,8 @@ L["Skada: Fights"] = "Skada：战斗"
 L["Data Collection"] = "数据收集"
 L["ENABLED"] = "已启用"
 L["DISABLED"] = "已禁用"
+L["Enable All"] = "全部启用"
+L["Disable All"] = "禁用所有"
 L["Stopping for wipe."] = "因擦拭而停止。"
 L["Usage:"] = "利用："
 -- profiles

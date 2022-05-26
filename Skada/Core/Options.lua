@@ -688,7 +688,7 @@ Skada.options = {
 				},
 				apply = {
 					type = "execute",
-					name = APPLY,
+					name = L["Apply"],
 					width = "full",
 					func = ReloadUI,
 					confirm = function() return L["This change requires a UI reload. Are you sure?"] end,
@@ -708,6 +708,32 @@ Skada.options = {
 						Skada.options.args.modules.args.apply.disabled = nil
 					end,
 					args = {}
+				},
+				enableall = {
+					type = "execute",
+					name = L["Enable All"],
+					func = function()
+						for name in pairs(Skada.options.args.modules.args.blocked.args) do
+							if Skada.defaults.profile.modulesBlocked[name] then
+								Skada.db.profile.modulesBlocked[name] = false
+							else
+								Skada.db.profile.modulesBlocked[name] = nil
+							end
+						end
+						Skada.options.args.modules.args.apply.disabled = nil
+					end,
+					order = 40,
+				},
+				disable = {
+					type = "execute",
+					name = L["Disable All"],
+					func = function()
+						for name in pairs(Skada.options.args.modules.args.blocked.args) do
+							Skada.db.profile.modulesBlocked[name] = true
+						end
+						Skada.options.args.modules.args.apply.disabled = nil
+					end,
+					order = 50,
 				}
 			}
 		},

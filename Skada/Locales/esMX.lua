@@ -11,6 +11,8 @@ L["Skada: Fights"] = "Skada: Luchas"
 L["Data Collection"] = "Recopilaci\195\179n de datos"
 L["ENABLED"] = "HABILITADO"
 L["DISABLED"] = "DESHABILITDO"
+L["Enable All"] = "Habilitar todo"
+L["Disable All"] = "Deshabilitar todo"
 L["Stopping for wipe."] = "Detenido por muerte de la banda."
 L["Usage:"] = "Utilizar:"
 -- profiles

@@ -9,6 +9,8 @@ L["Skada: Fights"] = "Skada: 전투"
 L["Data Collection"] = "데이터 수집"
 L["ENABLED"] = "활성화됨"
 L["DISABLED"] = "비활성화됨"
+L["Enable All"] = "모두 활성화"
+L["Disable All"] = "모두 비활성화"
 L["Stopping for wipe."] = "때문에 닦아의 중지."
 L["Usage:"] = "사용:"
 -- profiles
