@@ -52,7 +52,7 @@ end
 
 -- returns the segment's time
 function setPrototype:GetTime()
-	return max(1, self.time > 0 and self.time or (time() - self.starttime))
+	return Skada:GetSetTime(self)
 end
 
 -- returns the actor's time if found (player or enemy)
@@ -63,59 +63,16 @@ end
 
 -- attempts to retrieve a player
 function setPrototype:GetPlayer(id, name)
-	if self.players and ((id and id ~= "total") or name) then
-		for i = 1, #self.players do
-			local actor = self.players[i]
-			if actor and ((id and actor.id == id) or (name and actor.name == name)) then
-				return playerPrototype:Bind(actor, self)
-			end
-		end
-	end
-
-	-- couldn't be found, rely on skada.
-	local actor = Skada:FindPlayer(self, id, name, true)
-	return actor and playerPrototype:Bind(actor, self)
+	return Skada:FindPlayer(self, id, name, true)
 end
 
 -- attempts to retrieve an enemy
 function setPrototype:GetEnemy(name, id)
-	if self.enemies and name then
-		for i = 1, #self.enemies do
-			local actor = self.enemies[i]
-			if actor and ((name and actor.name == name) or (id and actor.id == id)) then
-				return enemyPrototype:Bind(actor, self)
-			end
-		end
-	end
-
-	-- couldn't be found, rely on skada.
-	local actor = Skada:FindEnemy(self, name, id)
-	return actor and enemyPrototype:Bind(actor, self)
+	return Skada:FindEnemy(self, name, id)
 end
 
 -- attempts to find an actor (player or enemy)
 function setPrototype:GetActor(name, id)
-	-- player first.
-	if self.players and ((id and id ~= "total") or name) then
-		for i = 1, #self.players do
-			local actor = self.players[i]
-			if actor and ((id and actor.id == id) or (name and actor.name == name)) then
-				return playerPrototype:Bind(actor, self)
-			end
-		end
-	end
-
-	-- enemy second
-	if self.enemies and name then
-		for i = 1, #self.enemies do
-			local actor = self.enemies[i]
-			if actor and ((name and actor.name == name) or (id and actor.id == id)) then
-				return enemyPrototype:Bind(actor, self), true
-			end
-		end
-	end
-
-	-- couldn't be found, rely on skada.
 	return Skada:FindActor(self, id, name)
 end
 

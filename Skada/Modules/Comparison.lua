@@ -405,9 +405,12 @@ Skada:RegisterModule("Comparison", function(L)
 		if actor.id == mod.userGUID then
 			win.title = L["actor damage"](actor.name, win.targetname)
 
-			local total = targets[win.targetname] and targets[win.targetname].amount or 0
-			if Skada.db.profile.absdamage and targets[win.targetname] and targets[win.targetname].total then
-				total = targets[win.targetname].total
+			local total = 0
+			if targets[win.targetname] then
+				total = targets[win.targetname].amount or total
+				if Skada.db.profile.absdamage and targets[win.targetname].total then
+					total = targets[win.targetname].total or total
+				end
 			end
 
 			if total > 0 and actor.damagespells then
@@ -447,9 +450,12 @@ Skada:RegisterModule("Comparison", function(L)
 		local mytargets, myself = set:GetActorDamageTargets(mod.userGUID, mod.userName, cacheTable)
 
 		-- the compared actor
-		local total = targets[win.targetname] and targets[win.targetname].amount or 0
-		if Skada.db.profile.absdamage and targets[win.targetname] and targets[win.targetname].total then
-			total = targets[win.targetname].total
+		local total = 0
+		if targets[win.targetname] then
+			total = targets[win.targetname].amount or total
+			if Skada.db.profile.absdamage and targets[win.targetname].total then
+				total = targets[win.targetname].total or total
+			end
 		end
 
 		-- existing targets.
@@ -508,10 +514,14 @@ Skada:RegisterModule("Comparison", function(L)
 
 		-- unexisting targets.
 		if mytargets then
-			local mytotal = mytargets[win.targetname] and mytargets[win.targetname].amount or 0
-			if Skada.db.profile.absdamage and mytargets[win.targetname] and mytargets[win.targetname].total then
-				mytotal = mytargets[win.targetname].total
+			local mytotal = 0
+			if mytargets[win.targetname] then
+				mytotal = mytargets[win.targetname].amount or mytotal
+				if Skada.db.profile.absdamage and mytargets[win.targetname].total then
+					mytotal = mytargets[win.targetname].total or mytotal
+				end
 			end
+
 			if mytotal > 0 then
 				if win.metadata then
 					win.metadata.maxvalue = 0
@@ -610,12 +620,12 @@ Skada:RegisterModule("Comparison", function(L)
 				if Skada.db.profile.absdamage then
 					d.value = spell.total or spell.amount or 0
 					if myspells and myspells[spellname] then
-						myamount = myspells[spellname].total or myspells[spellname].amount or 0
+						myamount = myspells[spellname].total or myspells[spellname].amount or myamount
 					end
 				else
 					d.value = spell.amount or 0
 					if myspells and myspells[spellname] then
-						myamount = myspells[spellname].amount or 0
+						myamount = myspells[spellname].amount or myamount
 					end
 				end
 
@@ -639,15 +649,12 @@ Skada:RegisterModule("Comparison", function(L)
 						_, _, d.icon = GetSpellInfo(spell.id)
 						d.spellschool = spell.school
 
-						local myamount = 0
+						d.value = spell.amount or 0
 						if Skada.db.profile.absdamage and spell.total then
-							myamount = spell.total
-						else
-							myamount = spell.amount or 0
+							d.value = spell.total or d.value
 						end
 
-						d.value = myamount
-						d.valuetext = FormatValueNumber(0, myamount, true)
+						d.valuetext = FormatValueNumber(0, d.value, true)
 
 						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
@@ -689,10 +696,9 @@ Skada:RegisterModule("Comparison", function(L)
 					d.role = target.role
 					d.spec = target.spec
 
+					d.value = target.amount or 0
 					if Skada.db.profile.absdamage and target.total then
-						d.value = target.total
-					else
-						d.value = target.amount or 0
+						d.value = target.total or d.value
 					end
 
 					d.valuetext = Skada:FormatValueCols(mod.metadata.columns.Damage and Skada:FormatNumber(d.value))
@@ -751,15 +757,12 @@ Skada:RegisterModule("Comparison", function(L)
 						d.role = target.role
 						d.spec = target.spec
 
-						local myamount = 0
+						d.value = target.amount or 0
 						if Skada.db.profile.absdamage and target.total then
-							myamount = target.total
-						else
-							myamount = target.amount or 0
+							d.value = target.total or d.value
 						end
 
-						d.value = myamount
-						d.valuetext = FormatValueNumber(0, myamount, true, actor.id == mod.userGUID)
+						d.valuetext = FormatValueNumber(0, d.value, true, actor.id == mod.userGUID)
 
 						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value

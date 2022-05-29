@@ -391,11 +391,15 @@ do
 		local id = self:IsCreature(guid) and self.GetCreatureId(guid) or 0
 
 		if LBI.BossIDs[id] or creatureToFight[id] or creatureToBoss[id] then
-			if creatureToFight[id] then
-				return true, nil, creatureToFight[id]
+			if creatureToFight[id] then -- should fix name?
+				name = creatureToFight[id]
 			end
 
-			return true, creatureToBoss[id] or id, name
+			if creatureToBoss[id] then -- only boss itself returns true.
+				return (creatureToBoss[id] == id), creatureToBoss[id], name
+			end
+
+			return true, id, name
 		end
 
 		return false, id, name

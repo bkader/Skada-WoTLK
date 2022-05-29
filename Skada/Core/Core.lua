@@ -219,6 +219,7 @@ local function ProcessSet(set, curtime, mobname)
 
 	-- remove any additional keys.
 	set.started, set.stopped = nil, nil
+	set.gotboss = set.gotboss or nil -- remove false
 
 	-- trigger events.
 	Skada:SendMessage("COMBAT_PLAYER_LEAVE", set, curtime)
@@ -1388,7 +1389,9 @@ end
 
 -- finds a player that was already recorded
 function Skada:FindPlayer(set, id, name, strict)
-	if set and set.players and id and id ~= "total" then
+	if set and set.players and ((id and id ~= "total") or (name and name ~= L["Total"])) then
+		id = id or name -- fallback
+
 		set._playeridx = set._playeridx or {}
 
 		local player = set._playeridx[id]
@@ -1405,16 +1408,15 @@ function Skada:FindPlayer(set, id, name, strict)
 			end
 		end
 
-		-- needed for certain bosses
-		local isboss, _, npcname = self:IsBoss(id, name)
-		if isboss then
-			player = {id = id, name = npcname or name, class = "BOSS"}
-			set._playeridx[id] = self.playerPrototype:Bind(player, set)
-			return player
+		-- search friendly enemies
+		local e = self:FindEnemy(set, name, id)
+		if e and e.flag and band(e.flag, COMBATLOG_OBJECT_REACTION_FRIENDLY) ~= 0 then
+			set._playeridx[id] = e
+			return e
 		end
 
 		-- our last hope!
-		if not strict then
+		if not strict and not player then
 			player = self.playerPrototype:Bind({id = id, name = name or UNKNOWN, class = "PET"}, set)
 		end
 
@@ -2558,6 +2560,7 @@ function Skada:Reset(force)
 		self.char.total = nil
 	elseif not self:CanReset() then
 		self:Wipe()
+		self:UpdateDisplay(true)
 		self:Print(L["There is no data to reset."])
 		return
 	end
@@ -3293,25 +3296,26 @@ function Skada:DBM(_, mod, wipe)
 	end
 end
 
-function Skada:CheckMemory()
-	if Skada.db.profile.memorycheck then
+function Skada:CheckMemory(clean)
+	self:CleanGarbage() -- collect garbage first.
+
+	if self.db.profile.memorycheck then
 		UpdateAddOnMemoryUsage()
 
-		local compare = 10 + (Skada.db.profile.setstokeep + Skada.db.profile.setslimit) * 2
+		local compare = 10 + (self.db.profile.setstokeep + self.db.profile.setslimit) * 2
 		if GetAddOnMemoryUsage("Skada") > (compare * 1024) then
-			Skada:Notify(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."], L["Memory Check"], nil, "emergency")
+			self:Notify(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."], L["Memory Check"], nil, "emergency")
 		end
 	end
-	Skada:CleanGarbage() -- optional
 end
 
 -- this can be used to clear combat log and garbage.
 -- note that "collect" isn't used because it blocks all execution for too long.
 function Skada:CleanGarbage()
 	CombatLogClearEntries()
-	if not InCombatLockdown() then
+	if self.db.profile.memorycheck and not InCombatLockdown() then
 		collectgarbage("collect")
-		Skada:Debug("CleanGarbage")
+		self:Debug("CleanGarbage")
 	end
 end
 
@@ -3931,10 +3935,27 @@ do
 				end
 			end
 
+			-- set mobname
+			if not self.current.mobname then
+				if self.current.type == "pvp" then
+					self.current.gotboss = false -- skip boss check
+					self.current.mobname = GetInstanceInfo()
+				elseif self.current.type == "arena" then
+					self.current.gotboss = false -- skip boss check
+					self.current.mobname = GetInstanceInfo()
+					self.current.gold = GetBattlefieldArenaFaction()
+					self:SendMessage("COMBAT_ARENA_START", self.current, self.current.mobname)
+				elseif src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+					self.current.mobname = dstName
+				elseif dst_is_interesting and band(srcFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+					self.current.mobname = srcName
+				end
+			end
+
 			-- check for boss fights
 			if not self.current.gotboss then
 				-- marking set as boss fights relies only on src_is_interesting
-				if src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+				if self.current.gotboss == nil and src_is_interesting then
 					local isboss, bossid, bossname = self:IsBoss(dstGUID)
 					if isboss then
 						self.current.mobname = bossname or dstName
@@ -3946,21 +3967,6 @@ do
 			-- default boss defeated event? (no DBM/BigWigs)
 			elseif (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") and self.current.gotboss == GetCreatureId(dstGUID) then
 				self:ScheduleTimer(BossDefeated, self.db.profile.updatefrequency or 0.5)
-			end
-
-			-- set mobname
-			if not self.current.mobname then
-				if self.current.type == "pvp" then
-					self.current.mobname = GetInstanceInfo()
-				elseif self.current.type == "arena" then
-					self.current.mobname = GetInstanceInfo()
-					self.current.gold = GetBattlefieldArenaFaction()
-					self:SendMessage("COMBAT_ARENA_START", self.current, self.current.mobname)
-				elseif src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
-					self.current.mobname = dstName
-				elseif dst_is_interesting and band(srcFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
-					self.current.mobname = srcName
-				end
 			end
 		end
 	end

@@ -16,12 +16,12 @@ local _
 -- common functions
 local log_auraapply, log_aurarefresh, log_auraremove
 local UpdateFunction, SpellUpdateFunction, aura_tooltip
+local spellschools = nil
 
 -- main module that handles common stuff
 do
 	local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 	local mod = Skada:NewModule("Buffs and Debuffs")
-	local spellschools = nil
 
 	function mod:OnEnable()
 		if not Skada:IsDisabled("Buffs") or not Skada:IsDisabled("Debuffs") then
@@ -300,8 +300,12 @@ do
 				tooltip:AddLine(spellschools(aura.school))
 			end
 			if aura.count or aura.refresh then
-				tooltip:AddDoubleLine(L["Count"], aura.count or 0, 1, 1, 1)
-				tooltip:AddDoubleLine(L["Refresh"], aura.refresh or 0 or 0, 1, 1, 1)
+				if aura.count then
+					tooltip:AddDoubleLine(L["Count"], aura.count, 1, 1, 1)
+				end
+				if aura.refresh then
+					tooltip:AddDoubleLine(L["Refresh"], aura.refresh, 1, 1, 1)
+				end
 				tooltip:AddLine(" ")
 			end
 
@@ -459,8 +463,27 @@ Skada:RegisterModule("Buffs", function(L)
 		end
 	end
 
+	local function aura_subtooltip(win, id, label, tooltip)
+		local set = win.spellid and win:GetSelectedSet()
+		local actor = set and set:GetPlayer(id, label)
+		local aura = actor and actor.auras and actor.auras[win.spellid]
+		if aura then
+			tooltip:AddLine(actor.name .. ": " .. win.spellname)
+			if aura.school and spellschools and spellschools[aura.school] then
+				tooltip:AddLine(spellschools(aura.school))
+			end
+
+			if aura.count then
+				tooltip:AddDoubleLine(L["Count"], aura.count, 1, 1, 1)
+			end
+			if aura.refresh then
+				tooltip:AddDoubleLine(L["Refresh"], aura.refresh, 1, 1, 1)
+			end
+		end
+	end
+
 	function mod:OnEnable()
-		playermod.metadata = {showspots = true, ordersort = true}
+		playermod.metadata = {showspots = true, ordersort = true, tooltip = aura_subtooltip}
 		spellmod.metadata = {valueorder = true, tooltip = aura_tooltip, click1 = playermod}
 		self.metadata = {
 			click1 = spellmod,
@@ -697,7 +720,27 @@ Skada:RegisterModule("Debuffs", function(L)
 		UpdateFunction("DEBUFF", win, set, self)
 	end
 
+	local function aura_subtooltip(win, id, label, tooltip)
+		local set = win.spellid and win:GetSelectedSet()
+		local actor = set and set:GetPlayer(win.actorid, win.actorname)
+		local aura = actor and actor.auras and actor.auras[win.spellid]
+		if aura and aura.targets and aura.targets[label] then
+			tooltip:AddLine(actor.name .. ": " .. win.spellname)
+			if aura.school and spellschools and spellschools[aura.school] then
+				tooltip:AddLine(spellschools(aura.school))
+			end
+
+			if aura.targets[label].count then
+				tooltip:AddDoubleLine(L["Count"], aura.targets[label].count, 1, 1, 1)
+			end
+			if aura.targets[label].refresh then
+				tooltip:AddDoubleLine(L["Refresh"], aura.targets[label].refresh, 1, 1, 1)
+			end
+		end
+	end
+
 	function mod:OnEnable()
+		spelltargetmod.metadata = {tooltip = aura_subtooltip}
 		spellmod.metadata = {click1 = spelltargetmod, post_tooltip = aura_tooltip}
 		targetmod.metadata = {click1 = targetspellmod}
 		self.metadata = {
