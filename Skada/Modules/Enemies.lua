@@ -9,7 +9,7 @@ local _
 ---------------------------------------------------------------------------
 -- Enemy Damage Taken
 
-Skada:AddLoadableModule("Enemy Damage Taken", function(L)
+Skada:RegisterModule("Enemy Damage Taken", function(L)
 	if Skada:IsDisabled("Enemy Damage Taken") then return end
 
 	local mod = Skada:NewModule("Enemy Damage Taken")
@@ -793,7 +793,7 @@ end)
 ---------------------------------------------------------------------------
 -- Enemy Damage Done
 
-Skada:AddLoadableModule("Enemy Damage Done", function(L)
+Skada:RegisterModule("Enemy Damage Done", function(L)
 	if Skada:IsDisabled("Enemy Damage Done") then return end
 
 	local mod = Skada:NewModule("Enemy Damage Done")
@@ -1309,7 +1309,7 @@ end)
 ---------------------------------------------------------------------------
 -- Enemy Healing Done
 
-Skada:AddLoadableModule("Enemy Healing Done", function(L)
+Skada:RegisterModule("Enemy Healing Done", function(L)
 	if Skada:IsDisabled("Enemy Healing Done") then return end
 
 	local mod = Skada:NewModule("Enemy Healing Done")

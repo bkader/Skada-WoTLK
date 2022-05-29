@@ -1,6 +1,6 @@
 local Skada = Skada
 if Skada.Ascension then return end -- skipped on ascension
-Skada:AddLoadableModule("Parry-Haste", function(L)
+Skada:RegisterModule("Parry-Haste", function(L)
 	if Skada:IsDisabled("Parry-Haste") then return end
 
 	local mod = Skada:NewModule("Parry-Haste")

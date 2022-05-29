@@ -3,7 +3,7 @@
 -- own custom icons and colors that best represent their builds.
 local Skada = Skada
 if not Skada.Ascension or Skada.AscensionCoA then return end
-Skada:AddLoadableModule("Project Ascension", function(L)
+Skada:RegisterModule("Project Ascension", function(L)
 	if Skada:IsDisabled("Project Ascension") then return end
 
 	local mod = Skada:NewModule("Project Ascension", "AceTimer-3.0")

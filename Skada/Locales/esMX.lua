@@ -772,6 +772,7 @@ L["Thanks"] = "Gracias"
 L["Version"] = "Versi\195\179n"
 L["Website"] = "Sitio web"
 -- some bosses entries
+L["World Boss"] = "Jefe de mundo"
 L["Acidmaw"] = "Fauce\195\161cida"
 L["Auriaya"] = "Auriaya"
 L["Blood Prince Council"] = "Consejo de Pr\195\173ncipes de Sangre"

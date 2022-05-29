@@ -824,6 +824,7 @@ L["PET"] = PET
 L["PLAYER"] = PLAYER
 L["UNKNOWN"] = UNKNOWN
 -- some bosses entries
+L["World Boss"] = true
 L["Acidmaw"] = true
 L["Auriaya"] = true
 L["Blood Prince Council"] = true

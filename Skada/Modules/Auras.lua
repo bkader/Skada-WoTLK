@@ -317,7 +317,7 @@ do
 	end
 end
 
-Skada:AddLoadableModule("Buffs", function(L)
+Skada:RegisterModule("Buffs", function(L)
 	if Skada:IsDisabled("Buffs") then return end
 
 	local mod = Skada:NewModule("Buffs")
@@ -499,7 +499,7 @@ Skada:AddLoadableModule("Buffs", function(L)
 	end
 end)
 
-Skada:AddLoadableModule("Debuffs", function(L)
+Skada:RegisterModule("Debuffs", function(L)
 	if Skada:IsDisabled("Debuffs") then return end
 
 	local mod = Skada:NewModule("Debuffs")

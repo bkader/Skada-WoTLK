@@ -851,73 +851,68 @@ function Skada:OpenOptions(win)
 end
 
 -- Adds column configuration options for a mode.
-function Skada:AddColumnOptions(mod)
-	if not (mod and mod.metadata and mod.metadata.columns) then return end
-
-	local db = self.db.profile.columns
-	local category = mod.category or L["Other"]
-
-	if not Skada.options.args.columns.args[category] then
-		Skada.options.args.columns.args[category] = {type = "group", name = category, args = {}}
-	end
-
-	local moduleName = mod.localeName
-	if mod.metadata.icon or mod.icon then
-		moduleName = fmt("|T%s:18:18:-5:0:32:32:2:30:2:30|t %s", mod.metadata.icon or mod.icon, moduleName)
-	end
-
-	local cols = {
-		type = "group",
-		name = moduleName,
-		inline = true,
-		get = function(i)
-			return mod.metadata.columns[i[#i]]
-		end,
-		set = function(i, val)
-			local colname = i[#i]
-			mod.metadata.columns[colname] = val
-			db[mod.name .. "_" .. colname] = val
-			Skada:UpdateDisplay(true)
-		end,
-		args = {}
+do
+	local col_order = {
+		APS = 6, DPS = 6, DTPS = 6, HPS = 6, TPS = 6,
+		Percent = 7,
+		sAPS = 8, sDPS = 8, sDTPS = 8, sHPS = 8,
+		sPercent = 9
 	}
+	function Skada:AddColumnOptions(mod)
+		if not (mod and mod.metadata and mod.metadata.columns) then return end
 
-	local order = 0
-	for colname in next, mod.metadata.columns do
-		local c = mod.name .. "_" .. colname
+		local db = self.db.profile.columns
+		local category = mod.category or L["Other"]
 
-		-- Set initial value from db if available, otherwise use mod default value.
-		if db[c] ~= nil then
-			mod.metadata.columns[colname] = db[c]
+		if not Skada.options.args.columns.args[category] then
+			Skada.options.args.columns.args[category] = {type = "group", name = category, args = {}}
 		end
 
-		-- Add column option.
-		local col = {type = "toggle", name = _G[colname] or L[colname]}
-
-		-- proper and reasonable columns order.
-		if col.name == L["APS"] or col.name == L["DPS"] or col.name == L["DTPS"] or col.name == L["HPS"] or col.name == L["TPS"] then
-			col.order = 6
-		elseif col.name == L["sAPS"] or col.name == L["sDPS"] or col.name == L["sDTPS"] or col.name == L["sHPS"] then
-			col.order = 8
-		elseif col.name == L["Percent"] then
-			col.order = 7
-		elseif col.name == L["sPercent"] then
-			col.order = 9
-		else
-			order = order + 1
-			col.order = order
+		local moduleName = mod.localeName
+		if mod.metadata.icon or mod.icon then
+			moduleName = fmt("|T%s:18:18:-5:0:32:32:2:30:2:30|t %s", mod.metadata.icon or mod.icon, moduleName)
 		end
 
-		cols.args[colname] = col
-	end
+		local cols = {
+			type = "group",
+			name = moduleName,
+			inline = true,
+			get = function(i)
+				return mod.metadata.columns[i[#i]]
+			end,
+			set = function(i, val)
+				local colname = i[#i]
+				mod.metadata.columns[colname] = val
+				db[mod.name .. "_" .. colname] = val
+				Skada:UpdateDisplay(true)
+			end,
+			args = {}
+		}
 
-	Skada.options.args.columns.args[category].args[mod.name] = cols
-end
+		local order = 0
+		for colname in next, mod.metadata.columns do
+			local c = mod.name .. "_" .. colname
 
-function Skada:AddLoadableModuleCheckbox(mod, name, description)
-	self.options.args.modules.args.blocked.args[mod] = {type = "toggle", name = _G[name] or L[name]}
-	if description then
-		self.options.args.modules.args.blocked.args[mod].desc = L[description]
+			-- Set initial value from db if available, otherwise use mod default value.
+			if db[c] ~= nil then
+				mod.metadata.columns[colname] = db[c]
+			end
+
+			-- Add column option.
+			local col = {type = "toggle", name = _G[colname] or L[colname]}
+
+			-- proper and reasonable columns order.
+			if col_order[colname] then
+				col.order = col_order[colname]
+			else
+				order = order + 1
+				col.order = order
+			end
+
+			cols.args[colname] = col
+		end
+
+		Skada.options.args.columns.args[category].args[mod.name] = cols
 	end
 end
 

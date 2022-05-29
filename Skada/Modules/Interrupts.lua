@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Interrupts", function(L)
+Skada:RegisterModule("Interrupts", function(L)
 	if Skada:IsDisabled("Interrupts") then return end
 
 	local mod = Skada:NewModule("Interrupts")

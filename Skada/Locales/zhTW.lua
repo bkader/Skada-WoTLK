@@ -1,4 +1,4 @@
-local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "zhTW", false)
+local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "zhTW")
 if not L then return end
 
 L["A damage meter."] = "一個傷害統計。"
@@ -766,6 +766,7 @@ L["Thanks"] = "謝謝"
 L["Version"] = "版本"
 L["Website"] = "網站"
 -- some bosses entries
+L["World Boss"] = "世界首領"
 L["Acidmaw"] = "酸喉"
 L["Auriaya"] = "奧芮雅"
 L["Blood Prince Council"] = "血親王議會"

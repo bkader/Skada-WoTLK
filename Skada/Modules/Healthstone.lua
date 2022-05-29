@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Healthstones", function(L)
+Skada:RegisterModule("Healthstones", function(L)
 	if Skada:IsDisabled("Healthstones") then return end
 
 	local mod = Skada:NewModule("Healthstones")

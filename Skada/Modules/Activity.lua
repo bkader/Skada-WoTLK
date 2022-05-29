@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Activity", function(L)
+Skada:RegisterModule("Activity", function(L)
 	if Skada:IsDisabled("Activity") then return end
 
 	local mod = Skada:NewModule("Activity")

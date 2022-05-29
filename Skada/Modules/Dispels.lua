@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Dispels", function(L)
+Skada:RegisterModule("Dispels", function(L)
 	if Skada:IsDisabled("Dispels") then return end
 
 	local mod = Skada:NewModule("Dispels")

@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Resources", function(L)
+Skada:RegisterModule("Resources", function(L)
 	if Skada:IsDisabled("Resources") then return end
 
 	local mod = Skada:NewModule("Resources")

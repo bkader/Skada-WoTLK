@@ -196,7 +196,7 @@ end
 -- ======= --
 -- CC Done --
 -- ======= --
-Skada:AddLoadableModule("CC Done", function(L)
+Skada:RegisterModule("CC Done", function(L)
 	if Skada:IsDisabled("CC Done") then return end
 
 	local mod = Skada:NewModule("CC Done")
@@ -437,7 +437,7 @@ end)
 -- ======== --
 -- CC Taken --
 -- ======== --
-Skada:AddLoadableModule("CC Taken", function(L)
+Skada:RegisterModule("CC Taken", function(L)
 	if Skada:IsDisabled("CC Taken") then return end
 
 	local mod = Skada:NewModule("CC Taken")
@@ -691,7 +691,7 @@ end)
 -- =========== --
 -- CC Breakers --
 -- =========== --
-Skada:AddLoadableModule("CC Breaks", function(L)
+Skada:RegisterModule("CC Breaks", function(L)
 	if Skada:IsDisabled("CC Breaks") then return end
 
 	local mod = Skada:NewModule("CC Breaks")
@@ -753,7 +753,7 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 		-- Optional announce
 		srcName = srcName_modified or srcName
 		if Skada.db.profile.modules.ccannounce and IsInRaid() and UnitInRaid(srcName) then
-			if Skada.instanceType == "pvp" then return end
+			if Skada.insType == "pvp" then return end
 
 			-- Ignore main tanks and main assist?
 			if Skada.db.profile.modules.ccignoremaintanks then

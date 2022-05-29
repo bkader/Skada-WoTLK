@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Tweaks", function(L)
+Skada:RegisterModule("Tweaks", function(L)
 	if Skada:IsDisabled("Tweaks") then return end
 
 	local mod = Skada:NewModule("Tweaks", "AceHook-3.0")

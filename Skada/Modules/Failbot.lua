@@ -2,7 +2,7 @@ local LibFail = LibStub("LibFail-1.0", true)
 if not LibFail then return end
 
 local Skada = Skada
-Skada:AddLoadableModule("Fails", function(L)
+Skada:RegisterModule("Fails", function(L)
 	if Skada:IsDisabled("Fails") then return end
 
 	local mod = Skada:NewModule("Fails")

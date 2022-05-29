@@ -1,6 +1,6 @@
 local Skada = _G.Skada
 if not Skada then return end
-Skada:AddLoadableModule("Improvement", function(L)
+Skada:RegisterModule("Improvement", function(L)
 	if Skada:IsDisabled("Improvement") then return end
 
 	local mod = Skada:NewModule("Improvement")

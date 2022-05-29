@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Potions", function(L)
+Skada:RegisterModule("Potions", function(L)
 	if Skada:IsDisabled("Potions") then return end
 
 	local mod = Skada:NewModule("Potions")

@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Friendly Fire", function(L)
+Skada:RegisterModule("Friendly Fire", function(L)
 	if Skada:IsDisabled("Friendly Fire") then return end
 
 	local mod = Skada:NewModule("Friendly Fire")

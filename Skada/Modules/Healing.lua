@@ -9,7 +9,7 @@ local _
 -- Healing module --
 -- ============== --
 
-Skada:AddLoadableModule("Healing", function(L)
+Skada:RegisterModule("Healing", function(L)
 	if Skada:IsDisabled("Healing") then return end
 
 	local mod = Skada:NewModule("Healing")
@@ -533,7 +533,7 @@ end)
 -- Overhealing module --
 -- ================== --
 
-Skada:AddLoadableModule("Overhealing", function(L)
+Skada:RegisterModule("Overhealing", function(L)
 	if Skada:IsDisabled("Healing", "Overhealing") then return end
 
 	local mod = Skada:NewModule("Overhealing")
@@ -756,7 +756,7 @@ end)
 -- Total healing module --
 -- ==================== --
 
-Skada:AddLoadableModule("Total Healing", function(L)
+Skada:RegisterModule("Total Healing", function(L)
 	if Skada:IsDisabled("Healing", "Total Healing") then return end
 
 	local mod = Skada:NewModule("Total Healing")
@@ -1086,7 +1086,7 @@ end)
 -- Healing taken --
 -- ================ --
 
-Skada:AddLoadableModule("Healing Taken", function(L)
+Skada:RegisterModule("Healing Taken", function(L)
 	if Skada:IsDisabled("Healing", "Absorbs", "Absorbs and Healing", "Healing Taken") then return end
 
 	local mod = Skada:NewModule("Healing Taken")

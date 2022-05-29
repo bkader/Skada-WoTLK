@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Threat", function(L)
+Skada:RegisterModule("Threat", function(L)
 	if Skada:IsDisabled("Threat") then return end
 
 	local mod = Skada:NewModule("Threat")

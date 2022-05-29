@@ -1,5 +1,5 @@
 --[[ Translators: NGL#7282 / Barsoom#0484 ]] --
-local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "ruRU", false)
+local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "ruRU")
 if not L then return end
 
 L["A damage meter."] = "Измеритель урона."
@@ -772,6 +772,7 @@ L["Thanks"] = "Благодарю"
 L["Version"] = "Версия"
 L["Website"] = "Сайт"
 -- some bosses entries
+L["World Boss"] = "Босс вне подземелья"
 L["Acidmaw"] = "Кислотная Утроба"
 L["Auriaya"] = "Ауриайя"
 L["Blood Prince Council"] = "Совет Принцев Крови"

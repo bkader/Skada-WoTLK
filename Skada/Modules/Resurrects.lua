@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Resurrects", function(L)
+Skada:RegisterModule("Resurrects", function(L)
 	if Skada:IsDisabled("Resurrects") then return end
 
 	local mod = Skada:NewModule("Resurrects")

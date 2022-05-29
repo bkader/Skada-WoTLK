@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Comparison", function(L)
+Skada:RegisterModule("Comparison", function(L)
 	if Skada:IsDisabled("Damage", "Comparison") then return end
 
 	local mod = Skada:NewModule("Comparison")

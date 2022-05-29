@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Sunder Counter", function(L)
+Skada:RegisterModule("Sunder Counter", function(L)
 	if Skada:IsDisabled("Sunder Counter") then return end
 
 	local mod = Skada:NewModule("Sunder Counter")

@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:AddLoadableModule("Player vs. Player", "mod_pvp_desc", function(L)
+Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L)
 	if Skada:IsDisabled("Player vs. Player") then return end
 
 	local mod = Skada:NewModule("Player vs. Player")
@@ -166,7 +166,7 @@ Skada:AddLoadableModule("Player vs. Player", "mod_pvp_desc", function(L)
 	end
 
 	function mod:UNIT_AURA(_, unit)
-		if Skada.instanceType ~= "pvp" and Skada.instanceType ~= "arena" then
+		if Skada.insType ~= "pvp" and Skada.insType ~= "arena" then
 			Skada.UnregisterEvent(self, "UNIT_AURA")
 		elseif unit and UnitIsPlayer(unit) and not specsCache[UnitGUID(unit)] then
 			local _, class = UnitClass(unit)
@@ -186,7 +186,7 @@ Skada:AddLoadableModule("Player vs. Player", "mod_pvp_desc", function(L)
 	end
 
 	function mod:UNIT_SPELLCAST_START(_, unit)
-		if Skada.instanceType ~= "pvp" and Skada.instanceType ~= "arena" then
+		if Skada.insType ~= "pvp" and Skada.insType ~= "arena" then
 			Skada.UnregisterEvent(self, "UNIT_SPELLCAST_START")
 		elseif unit and UnitIsPlayer(unit) and not specsCache[UnitGUID(unit)] then
 			local _, class = UnitClass(unit)

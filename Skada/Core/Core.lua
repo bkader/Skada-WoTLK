@@ -56,10 +56,11 @@ Skada.revisited = true
 -- things we need
 Skada.userName = UnitName("player")
 _, Skada.userClass = UnitClass("player")
+Skada.newTable, Skada.delTable = Skada.TablePool("kv")
 
--- available display types
-Skada.displays = {}
-local displays = Skada.displays
+-- tables of displays and loadable modules.
+local displays, modulelist = {}, {}
+Skada.displays = displays -- make externally available
 
 -- flag to check if disabled
 local disabled = false
@@ -118,8 +119,6 @@ Skada.BITMASK_ENEMY = BITMASK_ENEMY
 
 -------------------------------------------------------------------------------
 -- local functions.
-
-Skada.newTable, Skada.delTable = Skada.TablePool("kv")
 
 -- verifies a set
 local function VerifySet(mode, set)
@@ -742,8 +741,8 @@ function Window:Toggle()
 		((Skada.db.profile.hidepvp or self.db.hideauto == 7) and IsInPvP()) or
 		((Skada.db.profile.showcombat or self.db.hideauto == 3) and not IsGroupInCombat()) or
 		((Skada.db.profile.hidecombat or self.db.hideauto == 2) and IsGroupInCombat()) or
-		(self.db.hideauto == 5 and (Skada.instanceType == "raid" or Skada.instanceType == "party")) or
-		(self.db.hideauto == 6 and Skada.instanceType ~= "raid" and Skada.instanceType ~= "party")
+		(self.db.hideauto == 5 and (Skada.insType == "raid" or Skada.insType == "party")) or
+		(self.db.hideauto == 6 and Skada.insType ~= "raid" and Skada.insType ~= "party")
 	then
 		self.display:Hide(self)
 	else
@@ -1300,16 +1299,15 @@ end
 Skada.OnModuleCreated = OnModuleCreated
 
 -- adds a module to the loadable modules table.
-function Skada:AddLoadableModule(name, description, func)
-	self.modulelist = self.modulelist or {}
-
-	if type(description) == "function" then
-		self.modulelist[#self.modulelist + 1] = description
-		self:AddLoadableModuleCheckbox(name, name)
-	else
-		self.modulelist[#self.modulelist + 1] = func
-		self:AddLoadableModuleCheckbox(name, name, description)
+function Skada:RegisterModule(name, desc, func)
+	if type(desc) == "function" then
+		func = desc
+		desc = nil
 	end
+
+	modulelist = modulelist or {}
+	modulelist[#modulelist + 1] = func
+	self.options.args.modules.args.blocked.args[name] = {type = "toggle", name = L[name], desc = desc and L[desc]}
 end
 
 -- checks whether the select module(s) are disabled
@@ -2200,7 +2198,7 @@ do
 		elseif lower(chan) == "auto" then
 			if not IsInGroup() then
 				return
-			elseif Skada.instanceType == "pvp" or Skada.instanceType == "arena" then
+			elseif Skada.insType == "pvp" or Skada.insType == "arena" then
 				chan = "battleground"
 			else
 				chan = IsInRaid() and "raid" or "party"
@@ -2409,12 +2407,12 @@ do
 			end
 		end
 
-		if self.instanceType == "arena" and instanceType ~= "arena" then
+		if self.insType == "arena" and instanceType ~= "arena" then
 			self:SendMessage("COMBAT_ARENA_END")
-		elseif self.instanceType ~= instanceType then
-			self:SendMessage("ZONE_TYPE_CHANGED", instanceType, self.instanceType)
+		elseif self.insType ~= instanceType then
+			self:SendMessage("ZONE_TYPE_CHANGED", instanceType, self.insType)
 		end
-		self.instanceType = instanceType
+		self.insType = instanceType
 
 		was_in_instance = (isininstance == true)
 		was_in_pvp = (isinpvp == true)
@@ -2559,6 +2557,7 @@ function Skada:Reset(force)
 		wipe(self.char.sets)
 		self.char.total = nil
 	elseif not self:CanReset() then
+		self:Wipe()
 		self:Print(L["There is no data to reset."])
 		return
 	end
@@ -3226,11 +3225,11 @@ function Skada:OnEnable()
 	self:RegisterEvent("UNIT_EXITED_VEHICLE", "CheckVehicle")
 	self:RegisterBucketEvent({"PARTY_MEMBERS_CHANGED", "RAID_ROSTER_UPDATE"}, 0.25, "UpdateRoster")
 
-	if self.modulelist then
-		for i = 1, #self.modulelist do
-			self.modulelist[i](L)
+	if modulelist then
+		for i = 1, #modulelist do
+			modulelist[i](L)
 		end
-		self.modulelist = nil
+		modulelist = nil
 	end
 
 	if _G.BigWigs then
@@ -3713,7 +3712,7 @@ do
 
 	function Skada:Tick()
 		self.inCombat = true
-		if not disabled and self.current and not InCombatLockdown() and not IsGroupInCombat() and self.instanceType ~= "pvp" and self.instanceType ~= "arena" then
+		if not disabled and self.current and not InCombatLockdown() and not IsGroupInCombat() and self.insType ~= "pvp" and self.insType ~= "arena" then
 			self:Debug("EndSegment: Tick")
 			self:EndSegment()
 		end
@@ -3830,8 +3829,8 @@ do
 			-- segment not yet flagged as started?
 			if not self.current.started then
 				self.current.started = true
-				if self.instanceType == nil then self:CheckZone() end
-				self.current.type = (self.instanceType == "none" and IsInGroup()) and "group" or self.instanceType
+				if self.insType == nil then self:CheckZone() end
+				self.current.type = (self.insType == "none" and IsInGroup()) and "group" or self.insType
 				self:SendMessage("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 			end
 

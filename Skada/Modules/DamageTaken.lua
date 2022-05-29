@@ -9,7 +9,7 @@ local _
 -- Damage Taken Module --
 -- =================== --
 
-Skada:AddLoadableModule("Damage Taken", function(L)
+Skada:RegisterModule("Damage Taken", function(L)
 	if Skada:IsDisabled("Damage Taken") then return end
 
 	local mod = Skada:NewModule("Damage Taken")
@@ -850,7 +850,7 @@ end)
 -- Damage taken per second module --
 -- ============================== --
 
-Skada:AddLoadableModule("DTPS", function(L)
+Skada:RegisterModule("DTPS", function(L)
 	if Skada:IsDisabled("Damage Taken", "DTPS") then return end
 
 	local mod = Skada:NewModule("DTPS")
@@ -984,7 +984,7 @@ end)
 -- Damage Taken By Spell Module --
 -- ============================ --
 
-Skada:AddLoadableModule("Damage Taken By Spell", function(L)
+Skada:RegisterModule("Damage Taken By Spell", function(L)
 	if Skada:IsDisabled("Damage Taken", "Damage Taken By Spell") then return end
 
 	local mod = Skada:NewModule("Damage Taken By Spell")
@@ -1209,7 +1209,7 @@ end)
 -- Avoidance & Mitigation Module --
 -- ============================= --
 
-Skada:AddLoadableModule("Avoidance & Mitigation", function(L)
+Skada:RegisterModule("Avoidance & Mitigation", function(L)
 	if Skada:IsDisabled("Damage Taken", "Avoidance & Mitigation") then return end
 
 	local mod = Skada:NewModule("Avoidance & Mitigation")

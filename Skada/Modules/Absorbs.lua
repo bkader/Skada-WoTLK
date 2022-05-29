@@ -11,7 +11,7 @@ local _
 -- Absorbs module --
 -- ============== --
 
-Skada:AddLoadableModule("Absorbs", function(L)
+Skada:RegisterModule("Absorbs", function(L)
 	if Skada:IsDisabled("Absorbs") then return end
 
 	local mod = Skada:NewModule("Absorbs")
@@ -1239,7 +1239,7 @@ end)
 -- Absorbs and healing module --
 -- ========================== --
 
-Skada:AddLoadableModule("Absorbs and Healing", function(L)
+Skada:RegisterModule("Absorbs and Healing", function(L)
 	if Skada:IsDisabled("Healing", "Absorbs", "Absorbs and Healing") then return end
 
 	local mod = Skada:NewModule("Absorbs and Healing")
@@ -1692,7 +1692,7 @@ end)
 -- Healing done per second module --
 -- ============================== --
 
-Skada:AddLoadableModule("HPS", function(L)
+Skada:RegisterModule("HPS", function(L)
 	if Skada:IsDisabled("Absorbs", "Healing", "Absorbs and Healing", "HPS") then return end
 
 	local mod = Skada:NewModule("HPS")
@@ -1827,7 +1827,7 @@ end)
 -- Healing done by spell --
 -- ===================== --
 
-Skada:AddLoadableModule("Healing Done By Spell", function(L)
+Skada:RegisterModule("Healing Done By Spell", function(L)
 	if Skada:IsDisabled("Healing", "Absorbs", "Healing Done By Spell") then return end
 
 	local mod = Skada:NewModule("Healing Done By Spell")

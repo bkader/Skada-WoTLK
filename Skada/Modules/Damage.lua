@@ -9,7 +9,7 @@ local _
 -- Damage Done Module --
 -- ================== --
 
-Skada:AddLoadableModule("Damage", function(L)
+Skada:RegisterModule("Damage", function(L)
 	if Skada:IsDisabled("Damage") then return end
 
 	local mod = Skada:NewModule("Damage")
@@ -939,7 +939,7 @@ end)
 -- Damage done per second module --
 -- ============================= --
 
-Skada:AddLoadableModule("DPS", function(L)
+Skada:RegisterModule("DPS", function(L)
 	if Skada:IsDisabled("Damage", "DPS") then return end
 
 	local mod = Skada:NewModule("DPS")
@@ -1075,7 +1075,7 @@ end)
 -- Damage Done By Spell Module --
 -- =========================== --
 
-Skada:AddLoadableModule("Damage Done By Spell", function(L)
+Skada:RegisterModule("Damage Done By Spell", function(L)
 	if Skada:IsDisabled("Damage", "Damage Done By Spell") then return end
 
 	local mod = Skada:NewModule("Damage Done By Spell")
@@ -1228,7 +1228,7 @@ end)
 -- the overkill from the amount of damage done.
 --
 
-Skada:AddLoadableModule("Useful Damage", function(L)
+Skada:RegisterModule("Useful Damage", function(L)
 	if Skada:IsDisabled("Damage", "Useful Damage") then return end
 
 	local mod = Skada:NewModule("Useful Damage")
@@ -1511,7 +1511,7 @@ end)
 -- Overkill Module --
 -- =============== --
 
-Skada:AddLoadableModule("Overkill", function(L)
+Skada:RegisterModule("Overkill", function(L)
 	if Skada:IsDisabled("Damage", "Overkill") then return end
 
 	local mod = Skada:NewModule("Overkill")
