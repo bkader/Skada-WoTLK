@@ -57,9 +57,10 @@ Skada.revisited = true
 Skada.userName = UnitName("player")
 _, Skada.userClass = UnitClass("player")
 Skada.newTable, Skada.delTable = Skada.TablePool("kv")
+local new, del = Skada.newTable, Skada.delTable
 
--- tables of displays and loadable modules.
-local displays, modulelist = {}, {}
+-- available display types
+local displays = {}
 Skada.displays = displays -- make externally available
 
 -- flag to check if disabled
@@ -1306,8 +1307,8 @@ function Skada:RegisterModule(name, desc, func)
 		desc = nil
 	end
 
-	modulelist = modulelist or {}
-	modulelist[#modulelist + 1] = func
+	self.modulelist = self.modulelist or new()
+	self.modulelist[#self.modulelist + 1] = func
 	self.options.args.modules.args.blocked.args[name] = {type = "toggle", name = L[name], desc = desc and L[desc]}
 end
 
@@ -3155,8 +3156,6 @@ function Skada:OnInitialize()
 	if type(SkadaCharDB) ~= "table" then
 		SkadaCharDB = {}
 	end
-	self.char = SkadaCharDB
-	self.char.sets = self.char.sets or {}
 
 	-- Profiles
 	local AceDBOptions = LibStub("AceDBOptions-3.0", true)
@@ -3200,24 +3199,28 @@ function Skada:OnInitialize()
 	end
 
 	-- remove old stuff.
+	if self.db.global.revision then
+		self.db.global.revision = nil
+	end
+	self.db.global.version = self.db.global.version or 0
+end
+
+function Skada:SetupStorage()
+	self.char = self.char or SkadaCharDB
+	self.char.sets = self.char.sets or {}
+
+	-- remove old stuff.
 	if self.char.improvement then
 		self.char.improvement = nil
 	end
-	if self.db.global.revision or self.char.revision then
-		self.db.global.revision = nil
+	if self.char.revision then
 		self.char.revision = nil
 	end
-
-	self.db.global.version = self.db.global.version or 0
 	self.char.version = self.char.version or 0
 end
 
 function Skada:OnEnable()
-	-- well, my ID!
-	self.userGUID = UnitGUID("player")
-
-	self:ReloadSettings()
-	self:SetupNetwork(not self.db.profile.syncoff)
+	self.userGUID = self.userGUID or UnitGUID("player")
 
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("UNIT_PET")
@@ -3228,11 +3231,11 @@ function Skada:OnEnable()
 	self:RegisterEvent("UNIT_EXITED_VEHICLE", "CheckVehicle")
 	self:RegisterBucketEvent({"PARTY_MEMBERS_CHANGED", "RAID_ROSTER_UPDATE"}, 0.25, "UpdateRoster")
 
-	if modulelist then
-		for i = 1, #modulelist do
-			modulelist[i](L)
+	if self.modulelist then
+		for i = 1, #self.modulelist do
+			self.modulelist[i](L)
 		end
-		modulelist = nil
+		self.modulelist = del(self.modulelist)
 	end
 
 	if _G.BigWigs then
@@ -3244,6 +3247,10 @@ function Skada:OnEnable()
 	elseif self.bossmod then
 		self.bossmod = nil
 	end
+
+	self:SetupStorage()
+	self:ReloadSettings()
+	self:SetupNetwork(not self.db.profile.syncoff)
 
 	-- SharedMedia is sometimes late, we wait few seconds then re-apply settings.
 	self:ScheduleTimer("ApplySettings", 2)

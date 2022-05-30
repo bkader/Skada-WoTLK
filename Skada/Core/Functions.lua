@@ -255,13 +255,16 @@ function Skada:RegisterSchools()
 	self.spellschools = self.spellschools or {}
 
 	-- handles adding spell schools
+	local order = {}
 	local function add_school(key, name, r, g, b)
 		if key and name and not self.spellschools[key] then
 			self.spellschools[key] = {r = r or 1, g = g or 1, b = b or 1, name = name:match("%((.+)%)") or name}
+			order[#order + 1] = key
 		end
 	end
 
 	-- main school
+	local SCHOOL_NONE = SCHOOL_MASK_NONE or 0x00 -- None
 	local SCHOOL_PHYSICAL = SCHOOL_MASK_PHYSICAL or 0x01 -- Physical
 	local SCHOOL_HOLY = SCHOOL_MASK_HOLY or 0x02 -- Holy
 	local SCHOOL_FIRE = SCHOOL_MASK_FIRE or 0x04 -- Fire
@@ -271,6 +274,7 @@ function Skada:RegisterSchools()
 	local SCHOOL_ARCANE = SCHOOL_MASK_ARCANE or 0x40 -- Arcane
 
 	-- Single Schools
+	add_school(SCHOOL_NONE, STRING_SCHOOL_UNKNOWN, 1, 1, 1) -- Unknown
 	add_school(SCHOOL_PHYSICAL, STRING_SCHOOL_PHYSICAL, 1, 1, 0) -- Physical
 	add_school(SCHOOL_HOLY, STRING_SCHOOL_HOLY, 1, 0.9, 0.5) -- Holy
 	add_school(SCHOOL_FIRE, STRING_SCHOOL_FIRE, 1, 0.5, 0) -- Fire
@@ -279,53 +283,61 @@ function Skada:RegisterSchools()
 	add_school(SCHOOL_SHADOW, STRING_SCHOOL_SHADOW, 0.5, 0.5, 1) -- Shadow
 	add_school(SCHOOL_ARCANE, STRING_SCHOOL_ARCANE, 1, 0.5, 1) -- Arcane
 
-	-- Multiple Schools (can be extended if needed)
-	add_school(SCHOOL_FIRE + SCHOOL_FROST, STRING_SCHOOL_FROSTFIRE, 0.5, 1, 1) -- Frostfire
-	add_school(SCHOOL_PHYSICAL + SCHOOL_SHADOW, STRING_SCHOOL_SHADOWSTRIKE, 0.5, 0.5, 1) -- Shadowstrike
-
-	setmetatable(self.spellschools, {__call = function(t, school)
-		if school and t[school] then
-			return t[school].name, t[school].r, t[school].g, t[school].b
+	-- reference to CombatLog_String_SchoolString
+	local colorFunc = CombatLog_Color_ColorArrayBySchool
+	local function GetSchoolName(key)
+		if not nameFunc then -- late availability
+			nameFunc = CombatLog_String_SchoolString
 		end
-		return L["Unknown"], 1, 1, 1
-	end})
 
-	if self.Ascension then return end
+		local name = nameFunc(key)
+		local isnone = (name == STRING_SCHOOL_UNKNOWN)
+		return name:match("%((.+)%)") or name, isnone
+	end
 
-	-- spells ignored when adding active time to actors
-	self.ignoredSpells = self.ignoredSpells or {}
-	self.ignoredSpells.activeTime = self.ignoredSpells.activeTime or {}
+	-- reference to COMBATLOG_DEFAULT_COLORS.schoolColoring
+	local colorTable = COMBATLOG_DEFAULT_COLORS and COMBATLOG_DEFAULT_COLORS.schoolColoring
+	local function GetSchoolColor(key)
+		if not colorTable then -- late availability
+			colorTable = COMBATLOG_DEFAULT_COLORS and COMBATLOG_DEFAULT_COLORS.schoolColoring
+		end
 
-	self.ignoredSpells.activeTime[7294] = true -- Retribution Aura (Rank 1)
-	self.ignoredSpells.activeTime[10298] = true -- Retribution Aura (Rank 2)
-	self.ignoredSpells.activeTime[10299] = true -- Retribution Aura (Rank 3)
-	self.ignoredSpells.activeTime[10300] = true -- Retribution Aura (Rank 4)
-	self.ignoredSpells.activeTime[10301] = true -- Retribution Aura (Rank 5)
-	self.ignoredSpells.activeTime[27150] = true -- Retribution Aura (Rank 6)
-	self.ignoredSpells.activeTime[54043] = true -- Retribution Aura (Rank 7)
+		local r, g, b = 1.0, 1.0, 1.0
 
-	self.ignoredSpells.activeTime[34913] = true -- Molten Armor (Rank 1)
-	self.ignoredSpells.activeTime[43043] = true -- Molten Armor (Rank 2)
-	self.ignoredSpells.activeTime[43044] = true -- Molten Armor (Rank 3)
+		if colorTable and colorTable[key] then
+			r = colorTable[key].r or r
+			g = colorTable[key].g or g
+			b = colorTable[key].b or b
+		elseif colorTable then
+			for i = #order, 1, -1 do
+				local k = order[i]
+				if band(key, k) == k then
+					r = colorTable[k].r or r
+					g = colorTable[k].g or g
+					b = colorTable[k].b or b
+					break
+				end
+			end
+		end
 
-	self.ignoredSpells.activeTime[26364] = true -- Lightning Shield (Rank 1)
-	self.ignoredSpells.activeTime[26365] = true -- Lightning Shield (Rank 2)
-	self.ignoredSpells.activeTime[26366] = true -- Lightning Shield (Rank 3)
-	self.ignoredSpells.activeTime[26367] = true -- Lightning Shield (Rank 5)
-	self.ignoredSpells.activeTime[26370] = true -- Lightning Shield (Rank 6)
-	self.ignoredSpells.activeTime[26363] = true -- Lightning Shield (Rank 7)
-	self.ignoredSpells.activeTime[26371] = true -- Lightning Shield (Rank 8)
-	self.ignoredSpells.activeTime[26372] = true -- Lightning Shield (Rank 9)
-	self.ignoredSpells.activeTime[49278] = true -- Lightning Shield (Rank 10)
-	self.ignoredSpells.activeTime[49279] = true -- Lightning Shield (Rank 11)
+		return r, g, b
+	end
 
-	self.ignoredSpells.activeTime[2947] = true -- Fire Shield (Rank 1)
-	self.ignoredSpells.activeTime[8316] = true -- Fire Shield (Rank 2)
-	self.ignoredSpells.activeTime[8317] = true -- Fire Shield (Rank 3)
-	self.ignoredSpells.activeTime[11770] = true -- Fire Shield (Rank 4)
-	self.ignoredSpells.activeTime[11771] = true -- Fire Shield (Rank 5)
-	self.ignoredSpells.activeTime[27269] = true -- Fire Shield (Rank 6)
-	self.ignoredSpells.activeTime[47983] = true -- Fire Shield (Rank 7)
+	setmetatable(self.spellschools, {
+		__index = function(t, key)
+			local name, isnone = GetSchoolName(key)
+			if not isnone then
+				local r, g, b = GetSchoolColor(key)
+				t[key] = {name = name, r = r, g = g, b = b}
+				return t[key]
+			end
+			return t[0x00] -- unknown
+		end,
+		__call = function(t, key)
+			local school = t[key]
+			return school.name, school.r, school.g, school.b
+		end
+	})
 end
 
 -------------------------------------------------------------------------------

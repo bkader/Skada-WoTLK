@@ -809,7 +809,6 @@ L["Author"] = true
 L["Credits"] = true
 L["Date"] = true
 L["Discord"] = true
-L["Donate"] = true
 L["License"] = true
 L["Localizations"] = true
 L["Revision"] = true
