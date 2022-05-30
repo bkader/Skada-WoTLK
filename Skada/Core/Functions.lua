@@ -1223,3 +1223,42 @@ do
 		end
 	end
 end
+
+-------------------------------------------------------------------------------
+-- instance difficulty
+
+do
+	local GetRaidDifficulty = GetRaidDifficulty
+	local GetDungeonDifficulty = GetDungeonDifficulty
+
+	function Skada:GetInstanceDiff()
+		local _, insType, diff, _, count, dynDiff, isDynamic = GetInstanceInfo()
+		if insType == "none" then
+			return diff == 1 and "wb" or "NaN" -- World Boss
+		elseif insType == "raid" and isDynamic then
+			if diff == 1 or diff == 3 then
+				return (dynDiff == 0) and "10n" or (dynDiff == 1) and "10h" or "NaN"
+			elseif diff == 2 or diff == 4 then
+				return (dynDiff == 0) and "25n" or (dynDiff == 1) and "25h" or "NaN"
+			end
+		elseif insType then
+			if diff == 1 then
+				local comp_diff = GetRaidDifficulty()
+				if diff ~= comp_diff and (comp_diff == 2 or comp_diff == 4) then
+					return "tw" -- timewalker
+				else
+					return count and format("%dn", count) or "10n"
+				end
+			else
+				return diff == 2 and "25n" or diff == 3 and "10h" or diff == 4 and "25h" or "NaN"
+			end
+		elseif insType == "party" then
+			if diff == 1 then
+				return "5n"
+			elseif diff == 2 then
+				local comp_diff = GetDungeonDifficulty()
+				return comp_diff == 3 and "mc" or "5h" -- mythic or heroic 5man
+			end
+		end
+	end
+end
