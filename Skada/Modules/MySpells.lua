@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("My Spells", function(L)
+Skada:RegisterModule("My Spells", function(L, P)
 	if Skada:IsDisabled("My Spells") then return end
 
 	local mod = Skada:NewModule("My Spells")
@@ -58,7 +58,7 @@ Skada:RegisterModule("My Spells", function(L)
 				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
 			end
 
-			local amount = damage and (Skada.db.profile.absdamage and spell.total or spell.amount) or spell.amount
+			local amount = damage and (P.absdamage and spell.total or spell.amount) or spell.amount
 			tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(amount / spell.count), 1, 1, 1)
 		end
 	end
@@ -86,7 +86,7 @@ Skada:RegisterModule("My Spells", function(L)
 					_, _, d.icon = GetSpellInfo(spell.id)
 					d.spellschool = spell.school
 
-					d.value = Skada.db.profile.absdamage and spell.total or spell.amount
+					d.value = P.absdamage and spell.total or spell.amount
 					d.valuetext = Skada:FormatNumber(d.value)
 
 					if win.metadata and d.value > win.metadata.maxvalue then

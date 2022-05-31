@@ -1,6 +1,6 @@
 local Skada = Skada
 if Skada.Ascension then return end -- skipped on ascension
-Skada:RegisterModule("Parry-Haste", function(L)
+Skada:RegisterModule("Parry-Haste", function(L, P)
 	if Skada:IsDisabled("Parry-Haste") then return end
 
 	local mod = Skada:NewModule("Parry-Haste")
@@ -31,12 +31,12 @@ Skada:RegisterModule("Parry-Haste", function(L)
 			set.parry = (set.parry or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
-			if (set ~= Skada.total or Skada.db.profile.totalidc) and data.dstName then
+			if (set ~= Skada.total or P.totalidc) and data.dstName then
 				player.parrytargets = player.parrytargets or {}
 				player.parrytargets[data.dstName] = (player.parrytargets[data.dstName] or 0) + 1
 
-				if Skada.db.profile.modules.parryannounce and set ~= Skada.total then
-					Skada:SendChat(format(L["%s parried %s (%s)"], data.dstName, data.playername, player.parrytargets[data.dstName] or 1), Skada.db.profile.modules.parrychannel, "preset")
+				if P.modules.parryannounce and set ~= Skada.total then
+					Skada:SendChat(format(L["%s parried %s (%s)"], data.dstName, data.playername, player.parrytargets[data.dstName] or 1), P.modules.parrychannel, "preset")
 				end
 			end
 		end
@@ -168,8 +168,8 @@ Skada:RegisterModule("Parry-Haste", function(L)
 	end
 
 	function mod:OnInitialize()
-		if not Skada.db.profile.modules.parrychannel then
-			Skada.db.profile.modules.parrychannel = "AUTO"
+		if not P.modules.parrychannel then
+			P.modules.parrychannel = "AUTO"
 		end
 		Skada.options.args.modules.args.Parry = {
 			type = "group",

@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Deaths", function(L)
+Skada:RegisterModule("Deaths", function(L, P)
 	if Skada:IsDisabled("Deaths") then return end
 
 	local mod = Skada:NewModule("Deaths")
@@ -28,12 +28,8 @@ Skada:RegisterModule("Deaths", function(L)
 	local YELLOW_FONT_COLOR = YELLOW_FONT_COLOR
 
 	local function GetColor(key)
-		if
-			Skada.db.profile.usecustomcolors and
-			Skada.db.profile.customcolors and
-			Skada.db.profile.customcolors["deathlog_" .. key]
-		then
-			return Skada.db.profile.customcolors["deathlog_" .. key]
+		if P.usecustomcolors and P.customcolors and P.customcolors["deathlog_" .. key] then
+			return P.customcolors["deathlog_" .. key]
 		end
 
 		if key == "orange" then
@@ -48,7 +44,7 @@ Skada:RegisterModule("Deaths", function(L)
 	end
 
 	local function log_deathlog(set, data, override)
-		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
+		if not set or (set == Skada.total and not P.totalidc) then return end
 
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if player then
@@ -102,7 +98,7 @@ Skada:RegisterModule("Deaths", function(L)
 			tinsert(deathlog.log, 1, log)
 
 			-- trim things and limit to deathlogevents (defaul: 14)
-			while #deathlog.log > (Skada.db.profile.modules.deathlogevents or 14) - 1 do
+			while #deathlog.log > (P.modules.deathlogevents or 14) - 1 do
 				del(tremove(deathlog.log))
 			end
 		end
@@ -196,7 +192,7 @@ Skada:RegisterModule("Deaths", function(L)
 	local function SpellHeal(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, _, _, amount, overheal = ...
 
-		if amount > (Skada.db.profile.modules.deathlogthreshold or 0) then
+		if amount > (P.modules.deathlogthreshold or 0) then
 			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 			dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName, dstFlags)
 
@@ -227,7 +223,7 @@ Skada:RegisterModule("Deaths", function(L)
 			player.death = (player.death or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
-			if set == Skada.total and not Skada.db.profile.totalidc then return end
+			if set == Skada.total and not P.totalidc then return end
 
 			local deathlog = player.deathlog and player.deathlog[1]
 			if deathlog then
@@ -257,7 +253,7 @@ Skada:RegisterModule("Deaths", function(L)
 				end
 
 				-- announce death
-				if Skada.db.profile.modules.deathannounce and set ~= Skada.total then
+				if P.modules.deathannounce and set ~= Skada.total then
 					mod:Announce(deathlog.log, player.name)
 				end
 			end
@@ -424,7 +420,7 @@ Skada:RegisterModule("Deaths", function(L)
 						if deathlog.timeStr ~= nil then
 							d.reportlabel = "%02.2fs: %s (%s)   %s [%s]"
 
-							if Skada.db.profile.reportlinks and log.spellid then
+							if P.reportlinks and log.spellid then
 								d.reportlabel = format(d.reportlabel, diff, GetSpellLink(log.spellid) or spellname, d.source, change, Skada:FormatNumber(d.value))
 							else
 								d.reportlabel = format(d.reportlabel, diff, spellname, d.source, change, Skada:FormatNumber(d.value))
@@ -756,7 +752,7 @@ Skada:RegisterModule("Deaths", function(L)
 		-- 	3. player is in a group or channel set to self or guild.
 		if not logs or IsInPvP() then return end
 
-		local channel = Skada.db.profile.modules.deathchannel
+		local channel = P.modules.deathchannel
 		if channel ~= "SELF" and channel ~= "GUILD" and not IsInGroup() then return end
 
 		local log = nil
@@ -882,7 +878,7 @@ Skada:RegisterModule("Deaths", function(L)
 									values = {AUTO = INSTANCE, SELF = L["Self"], GUILD = GUILD},
 									order = 30,
 									disabled = function()
-										return not Skada.db.profile.modules.deathannounce
+										return not P.modules.deathannounce
 									end
 								}
 							}
@@ -894,14 +890,14 @@ Skada:RegisterModule("Deaths", function(L)
 		end
 
 		function mod:OnInitialize()
-			if Skada.db.profile.modules.deathlogevents == nil then
-				Skada.db.profile.modules.deathlogevents = 14
+			if P.modules.deathlogevents == nil then
+				P.modules.deathlogevents = 14
 			end
-			if Skada.db.profile.modules.deathlogthreshold == nil then
-				Skada.db.profile.modules.deathlogthreshold = 1000 -- default
+			if P.modules.deathlogthreshold == nil then
+				P.modules.deathlogthreshold = 1000 -- default
 			end
-			if Skada.db.profile.modules.deathchannel == nil then
-				Skada.db.profile.modules.deathchannel = "AUTO"
+			if P.modules.deathchannel == nil then
+				P.modules.deathchannel = "AUTO"
 			end
 
 			Skada.options.args.modules.args.deathlog = GetOptions()
@@ -918,12 +914,12 @@ Skada:RegisterModule("Deaths", function(L)
 					return color.r, color.g, color.b
 				end,
 				set = function(i, r, g, b)
-					Skada.db.profile.customcolors = Skada.db.profile.customcolors or {}
+					P.customcolors = P.customcolors or {}
 					local key = "deathlog_" .. i[#i]
-					Skada.db.profile.customcolors[key] = Skada.db.profile.customcolors[key] or {}
-					Skada.db.profile.customcolors[key].r = r
-					Skada.db.profile.customcolors[key].g = g
-					Skada.db.profile.customcolors[key].b = b
+					P.customcolors[key] = P.customcolors[key] or {}
+					P.customcolors[key].r = r
+					P.customcolors[key].g = g
+					P.customcolors[key].b = b
 				end,
 				args = {
 					green = {

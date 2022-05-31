@@ -196,7 +196,7 @@ end
 -- ======= --
 -- CC Done --
 -- ======= --
-Skada:RegisterModule("CC Done", function(L)
+Skada:RegisterModule("CC Done", function(L, P)
 	if Skada:IsDisabled("CC Done") then return end
 
 	local mod = Skada:NewModule("CC Done")
@@ -211,7 +211,7 @@ Skada:RegisterModule("CC Done", function(L)
 			set.ccdone = (set.ccdone or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
-			if set == Skada.total and not Skada.db.profile.totalidc then return end
+			if set == Skada.total and not P.totalidc then return end
 
 			-- record the spell.
 			local spell = player.ccdonespells and player.ccdonespells[cc.spellid]
@@ -437,7 +437,7 @@ end)
 -- ======== --
 -- CC Taken --
 -- ======== --
-Skada:RegisterModule("CC Taken", function(L)
+Skada:RegisterModule("CC Taken", function(L, P)
 	if Skada:IsDisabled("CC Taken") then return end
 
 	local mod = Skada:NewModule("CC Taken")
@@ -464,7 +464,7 @@ Skada:RegisterModule("CC Taken", function(L)
 			set.cctaken = (set.cctaken or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
-			if set == Skada.total and not Skada.db.profile.totalidc then return end
+			if set == Skada.total and not P.totalidc then return end
 
 			-- record the spell.
 			local spell = player.cctakenspells and player.cctakenspells[cc.spellid]
@@ -691,7 +691,7 @@ end)
 -- =========== --
 -- CC Breakers --
 -- =========== --
-Skada:RegisterModule("CC Breaks", function(L)
+Skada:RegisterModule("CC Breaks", function(L, P)
 	if Skada:IsDisabled("CC Breaks") then return end
 
 	local mod = Skada:NewModule("CC Breaks")
@@ -709,7 +709,7 @@ Skada:RegisterModule("CC Breaks", function(L)
 			set.ccbreak = (set.ccbreak or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
-			if set == Skada.total and not Skada.db.profile.totalidc then return end
+			if set == Skada.total and not P.totalidc then return end
 
 			-- record the spell.
 			local spell = player.ccbreakspells and player.ccbreakspells[cc.spellid]
@@ -752,11 +752,11 @@ Skada:RegisterModule("CC Breaks", function(L)
 
 		-- Optional announce
 		srcName = srcName_modified or srcName
-		if Skada.db.profile.modules.ccannounce and IsInRaid() and UnitInRaid(srcName) then
+		if P.modules.ccannounce and IsInRaid() and UnitInRaid(srcName) then
 			if Skada.insType == "pvp" then return end
 
 			-- Ignore main tanks and main assist?
-			if Skada.db.profile.modules.ccignoremaintanks then
+			if P.modules.ccignoremaintanks then
 				-- Loop through our raid and return if src is a main tank.
 				for unit in UnitIterator(true) do -- exclude pets
 					if UnitName(unit) == srcName and (GetPartyAssignment("MAINTANK", unit) or GetPartyAssignment("MAINASSIST", unit)) then

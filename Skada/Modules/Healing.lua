@@ -9,7 +9,7 @@ local _
 -- Healing module --
 -- ============== --
 
-Skada:RegisterModule("Healing", function(L)
+Skada:RegisterModule("Healing", function(L, P)
 	if Skada:IsDisabled("Healing") then return end
 
 	local mod = Skada:NewModule("Healing")
@@ -21,7 +21,7 @@ Skada:RegisterModule("Healing", function(L)
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local function log_spellcast(set, playerid, playername, playerflags, spellid, spellschool)
-		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
+		if not set or (set == Skada.total and not P.totalidc) then return end
 
 		local player = Skada:FindPlayer(set, playerid, playername, playerflags)
 		if player and player.healspells and player.healspells[spellid] then
@@ -55,7 +55,7 @@ Skada:RegisterModule("Healing", function(L)
 			set.overheal = (set.overheal or 0) + data.overheal
 
 			-- saving this to total set may become a memory hog deluxe.
-			if set == Skada.total and not Skada.db.profile.totalidc then return end
+			if set == Skada.total and not P.totalidc then return end
 
 			-- record the spell
 			local spell = player.healspells and player.healspells[data.spellid]
@@ -153,7 +153,7 @@ Skada:RegisterModule("Healing", function(L)
 			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Healing"], Skada:FormatNumber(amount), 1, 1, 1)
 
-			local suffix = Skada:FormatTime(Skada.db.profile.timemesure == 1 and activetime or totaltime)
+			local suffix = Skada:FormatTime(P.timemesure == 1 and activetime or totaltime)
 			tooltip:AddDoubleLine(Skada:FormatNumber(amount) .. "/" .. suffix, Skada:FormatNumber(hps), 1, 1, 1)
 		end
 	end

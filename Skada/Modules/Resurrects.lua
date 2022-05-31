@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Resurrects", function(L)
+Skada:RegisterModule("Resurrects", function(L, P)
 	if Skada:IsDisabled("Resurrects") then return end
 
 	local mod = Skada:NewModule("Resurrects")
@@ -41,7 +41,7 @@ Skada:RegisterModule("Resurrects", function(L)
 			set.ress = (set.ress or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
-			if (set == Skada.total and not Skada.db.profile.totalidc) or not data.spellid then return end
+			if (set == Skada.total and not P.totalidc) or not data.spellid then return end
 
 			-- spell
 			local spell = player.resspells and player.resspells[data.spellid]

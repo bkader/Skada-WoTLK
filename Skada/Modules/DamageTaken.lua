@@ -9,7 +9,7 @@ local _
 -- Damage Taken Module --
 -- =================== --
 
-Skada:RegisterModule("Damage Taken", function(L)
+Skada:RegisterModule("Damage Taken", function(L, P)
 	if Skada:IsDisabled("Damage Taken") then return end
 
 	local mod = Skada:NewModule("Damage Taken")
@@ -48,7 +48,7 @@ Skada:RegisterModule("Damage Taken", function(L)
 		end
 
 		-- saving this to total set may become a memory hog deluxe.
-		if set == Skada.total and not Skada.db.profile.totalidc then return end
+		if set == Skada.total and not P.totalidc then return end
 
 		local spellname = dmg.spellname .. (tick and L["DoT"] or "")
 		local spell = player.damagetakenspells and player.damagetakenspells[spellname]
@@ -283,7 +283,7 @@ Skada:RegisterModule("Damage Taken", function(L)
 			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Damage Taken"], Skada:FormatNumber(damage), 1, 1, 1)
 
-			local suffix = Skada:FormatTime(Skada.db.profile.timemesure == 1 and activetime or totaltime)
+			local suffix = Skada:FormatTime(P.timemesure == 1 and activetime or totaltime)
 			tooltip:AddDoubleLine(Skada:FormatNumber(damage) .. "/" .. suffix, Skada:FormatNumber(dtps), 1, 1, 1)
 		end
 	end
@@ -336,7 +336,7 @@ Skada:RegisterModule("Damage Taken", function(L)
 					separator = true
 				end
 
-				local amount = Skada.db.profile.absdamage and spell.total or spell.amount
+				local amount = P.absdamage and spell.total or spell.amount
 				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(amount / spell.count), 1, 1, 1)
 			end
 		end
@@ -417,7 +417,7 @@ Skada:RegisterModule("Damage Taken", function(L)
 				end
 
 				d.value = spell.amount
-				if Skada.db.profile.absdamage and spell.total then
+				if P.absdamage and spell.total then
 					d.value = min(total, spell.total)
 				end
 
@@ -464,7 +464,7 @@ Skada:RegisterModule("Damage Taken", function(L)
 				d.role = source.role
 				d.spec = source.spec
 
-				d.value = Skada.db.profile.absdamage and source.total or source.amount
+				d.value = P.absdamage and source.total or source.amount
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
 					actortime and Skada:FormatNumber(d.value / actortime),
@@ -512,14 +512,14 @@ Skada:RegisterModule("Damage Taken", function(L)
 		if spell then
 			if win.metadata then
 				if enemy then
-					win.metadata.maxvalue = Skada.db.profile.absdamage and spell.total or spell.amount
+					win.metadata.maxvalue = P.absdamage and spell.total or spell.amount
 				else
 					win.metadata.maxvalue = spell.count
 				end
 			end
 
 			if enemy then
-				local amount = Skada.db.profile.absdamage and spell.total or spell.amount
+				local amount = P.absdamage and spell.total or spell.amount
 				local nr = add_detail_bar(win, 0, L["Damage"], amount, nil, nil, true)
 
 				if spell.total ~= spell.amount then
@@ -614,7 +614,7 @@ Skada:RegisterModule("Damage Taken", function(L)
 		local sources = actor and actor:GetDamageSources()
 		if sources then
 			local total = sources[win.targetname] and sources[win.targetname].amount or 0
-			if Skada.db.profile.absdamage and sources[win.targetname].total then
+			if P.absdamage and sources[win.targetname].total then
 				total = sources[win.targetname].total
 			end
 
@@ -643,7 +643,7 @@ Skada:RegisterModule("Damage Taken", function(L)
 						d.spellschool = spell.school
 
 						d.value = spell.sources[win.targetname].amount or 0
-						if Skada.db.profile.absdamage then
+						if P.absdamage then
 							d.value = spell.sources[win.targetname].total or d.value
 						end
 
@@ -850,7 +850,7 @@ end)
 -- Damage taken per second module --
 -- ============================== --
 
-Skada:RegisterModule("DTPS", function(L)
+Skada:RegisterModule("DTPS", function(L, P)
 	if Skada:IsDisabled("Damage Taken", "DTPS") then return end
 
 	local mod = Skada:NewModule("DTPS")
@@ -868,7 +868,7 @@ Skada:RegisterModule("DTPS", function(L)
 			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Damage Taken"], Skada:FormatNumber(damage), 1, 1, 1)
 
-			local suffix = Skada:FormatTime(Skada.db.profile.timemesure == 1 and activetime or totaltime)
+			local suffix = Skada:FormatTime(P.timemesure == 1 and activetime or totaltime)
 			tooltip:AddDoubleLine(Skada:FormatNumber(damage) .. "/" .. suffix, Skada:FormatNumber(dtps), 1, 1, 1)
 		end
 	end
@@ -984,7 +984,7 @@ end)
 -- Damage Taken By Spell Module --
 -- ============================ --
 
-Skada:RegisterModule("Damage Taken By Spell", function(L)
+Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 	if Skada:IsDisabled("Damage Taken", "Damage Taken By Spell") then return end
 
 	local mod = Skada:NewModule("Damage Taken By Spell")
@@ -1013,8 +1013,8 @@ Skada:RegisterModule("Damage Taken By Spell", function(L)
 				then
 					for sourcename, source in pairs(player.damagetakenspells[win.spellname].sources) do
 						if not cacheTable[sourcename] then
-							cacheTable[sourcename] = {amount = Skada.db.profile.absdamage and source.total or source.amount}
-						elseif Skada.db.profile.absdamage then
+							cacheTable[sourcename] = {amount = P.absdamage and source.total or source.amount}
+						elseif P.absdamage then
 							cacheTable[sourcename].amount = cacheTable[sourcename].amount + source.total
 						else
 							cacheTable[sourcename].amount = cacheTable[sourcename].amount + source.amount
@@ -1096,7 +1096,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L)
 						amount = player.damagetakenspells[win.spellname].amount,
 						time = mod.metadata.columns.sDTPS and player:GetTime()
 					}
-					if Skada.db.profile.absdamage then
+					if P.absdamage then
 						cacheTable[player.name].amount = player.damagetakenspells[win.spellname].total
 					end
 
@@ -1150,7 +1150,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L)
 						if not cacheTable[spellname] then
 							cacheTable[spellname] = {id = spell.id, school = spell.school, amount = 0}
 						end
-						if Skada.db.profile.absdamage then
+						if P.absdamage then
 							cacheTable[spellname].amount = cacheTable[spellname].amount + spell.total
 						else
 							cacheTable[spellname].amount = cacheTable[spellname].amount + spell.amount

@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Friendly Fire", function(L)
+Skada:RegisterModule("Friendly Fire", function(L, P)
 	if Skada:IsDisabled("Friendly Fire") then return end
 
 	local mod = Skada:NewModule("Friendly Fire")
@@ -24,7 +24,7 @@ Skada:RegisterModule("Friendly Fire", function(L)
 			set.friendfire = (set.friendfire or 0) + dmg.amount
 
 			-- to save up memory, we only record the rest to the current set.
-			if (set == Skada.total and not Skada.db.profile.totalidc) or not dmg.spellid then return end
+			if (set == Skada.total and not P.totalidc) or not dmg.spellid then return end
 
 			-- spell
 			local spell = player.friendfirespells and player.friendfirespells[dmg.spellid]

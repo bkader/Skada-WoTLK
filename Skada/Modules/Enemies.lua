@@ -9,7 +9,7 @@ local _
 ---------------------------------------------------------------------------
 -- Enemy Damage Taken
 
-Skada:RegisterModule("Enemy Damage Taken", function(L)
+Skada:RegisterModule("Enemy Damage Taken", function(L, P)
 	if Skada:IsDisabled("Enemy Damage Taken") then return end
 
 	local mod = Skada:NewModule("Enemy Damage Taken")
@@ -177,7 +177,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L)
 	end
 
 	local function log_damage(set, dmg)
-		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
+		if not set or (set == Skada.total and not P.totalidc) then return end
 
 		local absorbed = dmg.absorbed or 0
 		if (dmg.amount + absorbed) == 0 then return end
@@ -411,7 +411,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L)
 					d.spec = source.spec
 
 					d.value = source.amount
-					if Skada.db.profile.absdamage then
+					if P.absdamage then
 						d.value = source.total or d.value
 					end
 
@@ -456,7 +456,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L)
 				d.label, _, d.icon = GetSpellInfo(spellid)
 
 				d.value = spell.amount or 0
-				if Skada.db.profile.absdamage and spell.total then
+				if P.absdamage and spell.total then
 					d.value = spell.total
 				end
 
@@ -726,7 +726,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L)
 	function setPrototype:GetEnemyDamageTaken()
 		if not self.enemies then
 			return 0
-		elseif Skada.db.profile.absdamage and self.etotaldamagetaken then
+		elseif P.absdamage and self.etotaldamagetaken then
 			return self.etotaldamagetaken
 		elseif self.edamagetaken then
 			return self.edamagetaken
@@ -735,7 +735,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L)
 		local total = 0
 		for i = 1, #self.enemies do
 			local e = self.enemies[i]
-			if e and not e.fake and Skada.db.profile.absdamage and e.totaldamagetaken then
+			if e and not e.fake and P.absdamage and e.totaldamagetaken then
 				total = total + e.totaldamagetaken
 			elseif e and not e.fake and e.damagetaken then
 				total = total + e.damagetaken
@@ -773,7 +773,7 @@ end)
 ---------------------------------------------------------------------------
 -- Enemy Damage Done
 
-Skada:RegisterModule("Enemy Damage Done", function(L)
+Skada:RegisterModule("Enemy Damage Done", function(L, P)
 	if Skada:IsDisabled("Enemy Damage Done") then return end
 
 	local mod = Skada:NewModule("Enemy Damage Done")
@@ -785,7 +785,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L)
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local function log_damage(set, dmg)
-		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
+		if not set or (set == Skada.total and not P.totalidc) then return end
 
 		local absorbed = dmg.absorbed or 0
 		if (dmg.amount + absorbed) == 0 then return end
@@ -1026,7 +1026,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L)
 					d.spec = target.spec
 
 					d.value = target.amount
-					if Skada.db.profile.absdamage then
+					if P.absdamage then
 						d.value = target.total or d.value
 					end
 
@@ -1071,7 +1071,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L)
 				d.label, _, d.icon = GetSpellInfo(spellid)
 
 				d.value = spell.amount
-				if Skada.db.profile.absdamage then
+				if P.absdamage then
 					d.value = spell.total or d.value
 				end
 
@@ -1197,7 +1197,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L)
 	function setPrototype:GetEnemyDamage()
 		if not self.enemies then
 			return 0
-		elseif Skada.db.profile.absdamage and self.etotaldamage then
+		elseif P.absdamage and self.etotaldamage then
 			return self.etotaldamage
 		elseif self.edamage then
 			return self.edamage
@@ -1206,7 +1206,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L)
 		local total = 0
 		for i = 1, #self.enemies do
 			local e = self.enemies[i]
-			if e and not e.fake and Skada.db.profile.absdamage and e.totaldamage then
+			if e and not e.fake and P.absdamage and e.totaldamage then
 				total = total + e.totaldamage
 			elseif e and not e.fake and e.damage then
 				total = total + e.damage
@@ -1236,7 +1236,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L)
 				if spell.targets and spell.targets[name] then
 					tbl[spellid] = tbl[spellid] or {school = spell.school, amount = 0}
 
-					if Skada.db.profile.absdamage and spell.targets[name].total then
+					if P.absdamage and spell.targets[name].total then
 						tbl[spellid].amount = tbl[spellid].amount + spell.targets[name].total
 					else
 						tbl[spellid].amount = tbl[spellid].amount + spell.targets[name].amount
@@ -1254,7 +1254,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L)
 			tbl = wipe(tbl or Skada.cacheTable)
 
 			local total = 0
-			if Skada.db.profile.absdamage and self.damagespells[spellid].total then
+			if P.absdamage and self.damagespells[spellid].total then
 				total = self.damagespells[spellid].total
 			else
 				total = self.damagespells[spellid].amount
@@ -1262,8 +1262,8 @@ Skada:RegisterModule("Enemy Damage Done", function(L)
 
 			for name, target in pairs(self.damagespells[spellid].targets) do
 				if not tbl[name] then
-					tbl[name] = {amount = Skada.db.profile.absdamage and target.total or target.amount}
-				elseif Skada.db.profile.absdamage and target.total then
+					tbl[name] = {amount = P.absdamage and target.total or target.amount}
+				elseif P.absdamage and target.total then
 					tbl[name].amount = tbl[name].amount + target.total
 				else
 					tbl[name].amount = tbl[name].amount + target.amount
@@ -1289,7 +1289,7 @@ end)
 ---------------------------------------------------------------------------
 -- Enemy Healing Done
 
-Skada:RegisterModule("Enemy Healing Done", function(L)
+Skada:RegisterModule("Enemy Healing Done", function(L, P)
 	if Skada:IsDisabled("Enemy Healing Done") then return end
 
 	local mod = Skada:NewModule("Enemy Healing Done")
@@ -1299,7 +1299,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L)
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local function log_heal(set, data)
-		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
+		if not set or (set == Skada.total and not P.totalidc) then return end
 
 		if not data.amount or data.amount == 0 then return end
 

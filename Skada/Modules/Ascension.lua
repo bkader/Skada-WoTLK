@@ -3,7 +3,7 @@
 -- own custom icons and colors that best represent their builds.
 local Skada = Skada
 if not Skada.Ascension or Skada.AscensionCoA then return end
-Skada:RegisterModule("Project Ascension", function(L)
+Skada:RegisterModule("Project Ascension", function(L, _, G)
 	if Skada:IsDisabled("Project Ascension") then return end
 
 	local mod = Skada:NewModule("Project Ascension", "AceTimer-3.0")
@@ -194,7 +194,7 @@ Skada:RegisterModule("Project Ascension", function(L)
 						L["Icon"]
 					),
 					get = function()
-						return tempData[1] or Skada.db.global.ascension.player[Skada.userGUID][1]
+						return tempData[1] or G.ascension.player[Skada.userGUID][1]
 					end,
 					set = function(_, val)
 						tempData[1] = val:trim() ~= "" and val
@@ -206,9 +206,9 @@ Skada:RegisterModule("Project Ascension", function(L)
 					name = L["Color"],
 					desc = format(L["Choose the %s that fits your character's build."], L["Color"]),
 					get = function()
-						local r = tempData[2] or Skada.db.global.ascension.player[Skada.userGUID][2]
-						local g = tempData[3] or Skada.db.global.ascension.player[Skada.userGUID][3]
-						local b = tempData[4] or Skada.db.global.ascension.player[Skada.userGUID][4]
+						local r = tempData[2] or G.ascension.player[Skada.userGUID][2]
+						local g = tempData[3] or G.ascension.player[Skada.userGUID][3]
+						local b = tempData[4] or G.ascension.player[Skada.userGUID][4]
 						return r, g, b
 					end,
 					set = function(_, r, g, b)
@@ -224,7 +224,7 @@ Skada:RegisterModule("Project Ascension", function(L)
 					name = "",
 					width = "full",
 					image = function()
-						return format(patternIcon, tempData[1] or Skada.db.global.ascension.player[Skada.userGUID][1] or "Spell_Lightning_LightningBolt01")
+						return format(patternIcon, tempData[1] or G.ascension.player[Skada.userGUID][1] or "Spell_Lightning_LightningBolt01")
 					end,
 					imageWidth = 32,
 					imageHeight = 32,
@@ -236,16 +236,16 @@ Skada:RegisterModule("Project Ascension", function(L)
 					name = SAVE,
 					func = function()
 						if tempData[1] ~= nil then
-							Skada.db.global.ascension.player[Skada.userGUID][1] = tempData[1]
+							G.ascension.player[Skada.userGUID][1] = tempData[1]
 						end
 						if tempData[2] ~= nil then
-							Skada.db.global.ascension.player[Skada.userGUID][2] = round(tempData[2]) or 1
-							Skada.db.global.ascension.player[Skada.userGUID][3] = round(tempData[3]) or 1
-							Skada.db.global.ascension.player[Skada.userGUID][4] = round(tempData[4]) or 1
-							Skada.db.global.ascension.player[Skada.userGUID][5] = RGBPercToHex(
-								Skada.db.global.ascension.player[Skada.userGUID][2],
-								Skada.db.global.ascension.player[Skada.userGUID][3],
-								Skada.db.global.ascension.player[Skada.userGUID][4],
+							G.ascension.player[Skada.userGUID][2] = round(tempData[2]) or 1
+							G.ascension.player[Skada.userGUID][3] = round(tempData[3]) or 1
+							G.ascension.player[Skada.userGUID][4] = round(tempData[4]) or 1
+							G.ascension.player[Skada.userGUID][5] = RGBPercToHex(
+								G.ascension.player[Skada.userGUID][2],
+								G.ascension.player[Skada.userGUID][3],
+								G.ascension.player[Skada.userGUID][4],
 								true
 							)
 						end
@@ -274,12 +274,12 @@ Skada:RegisterModule("Project Ascension", function(L)
 						return L["Are you sure you want clear cached icons and colors?"]
 					end,
 					func = function()
-						Skada.db.global.ascension.reset = time() + (60 * 60 * 24 * 15)
-						wipe(Skada.db.global.ascension.others)
-						mod.db = Skada.db.global.ascension
+						G.ascension.reset = time() + (60 * 60 * 24 * 15)
+						wipe(G.ascension.others)
+						mod.db = G.ascension
 					end,
 					disabled = function()
-						return next(Skada.db.global.ascension.others) == nil
+						return next(G.ascension.others) == nil
 					end
 				}
 			}
@@ -302,27 +302,27 @@ Skada:RegisterModule("Project Ascension", function(L)
 
 		function mod:SetCacheTable()
 			if not self.db then
-				if not Skada.db.global.ascension then
-					Skada.db.global.ascension = {others = {}, player = {}}
+				if not G.ascension then
+					G.ascension = {others = {}, player = {}}
 				end
 
 				-- add the curent character data is missing
-				if not Skada.db.global.ascension.player[Skada.userGUID] then
-					Skada.db.global.ascension.player[Skada.userGUID] = {}
+				if not G.ascension.player[Skada.userGUID] then
+					G.ascension.player[Skada.userGUID] = {}
 
 					local mycolor = Skada.classcolors(Skada.userClass)
-					Skada.db.global.ascension.player[Skada.userGUID][2] = round(mycolor.r)
-					Skada.db.global.ascension.player[Skada.userGUID][3] = round(mycolor.g)
-					Skada.db.global.ascension.player[Skada.userGUID][4] = round(mycolor.b)
-					Skada.db.global.ascension.player[Skada.userGUID][5] = RGBPercToHex(
-						Skada.db.global.ascension.player[Skada.userGUID][2],
-						Skada.db.global.ascension.player[Skada.userGUID][3],
-						Skada.db.global.ascension.player[Skada.userGUID][4],
+					G.ascension.player[Skada.userGUID][2] = round(mycolor.r)
+					G.ascension.player[Skada.userGUID][3] = round(mycolor.g)
+					G.ascension.player[Skada.userGUID][4] = round(mycolor.b)
+					G.ascension.player[Skada.userGUID][5] = RGBPercToHex(
+						G.ascension.player[Skada.userGUID][2],
+						G.ascension.player[Skada.userGUID][3],
+						G.ascension.player[Skada.userGUID][4],
 						true
 					)
 				end
 
-				self.db = Skada.db.global.ascension
+				self.db = G.ascension
 			end
 
 			CheckForReset()
@@ -330,30 +330,30 @@ Skada:RegisterModule("Project Ascension", function(L)
 
 		function mod:Reset(event)
 			if event == "Skada_UpdateCore" then
-				if not Skada.db.global.ascension then
-					Skada.db.global.ascension = {others = {}, player = {}}
+				if not G.ascension then
+					G.ascension = {others = {}, player = {}}
 				else
-					Skada.db.global.ascension.reset = time() + (60 * 60 * 24 * 15)
-					wipe(Skada.db.global.ascension.others)
+					G.ascension.reset = time() + (60 * 60 * 24 * 15)
+					wipe(G.ascension.others)
 				end
 
 				-- add the curent character data is missing
-				if not Skada.db.global.ascension.player[Skada.userGUID] then
-					Skada.db.global.ascension.player[Skada.userGUID] = {}
+				if not G.ascension.player[Skada.userGUID] then
+					G.ascension.player[Skada.userGUID] = {}
 
 					local mycolor = Skada.classcolors(Skada.userClass)
-					Skada.db.global.ascension.player[Skada.userGUID][2] = round(mycolor.r)
-					Skada.db.global.ascension.player[Skada.userGUID][3] = round(mycolor.g)
-					Skada.db.global.ascension.player[Skada.userGUID][4] = round(mycolor.b)
-					Skada.db.global.ascension.player[Skada.userGUID][5] = RGBPercToHex(
-						Skada.db.global.ascension.player[Skada.userGUID][2],
-						Skada.db.global.ascension.player[Skada.userGUID][3],
-						Skada.db.global.ascension.player[Skada.userGUID][4],
+					G.ascension.player[Skada.userGUID][2] = round(mycolor.r)
+					G.ascension.player[Skada.userGUID][3] = round(mycolor.g)
+					G.ascension.player[Skada.userGUID][4] = round(mycolor.b)
+					G.ascension.player[Skada.userGUID][5] = RGBPercToHex(
+						G.ascension.player[Skada.userGUID][2],
+						G.ascension.player[Skada.userGUID][3],
+						G.ascension.player[Skada.userGUID][4],
 						true
 					)
 				end
 
-				self.db = Skada.db.global.ascension
+				self.db = G.ascension
 			end
 		end
 	end

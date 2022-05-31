@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Interrupts", function(L)
+Skada:RegisterModule("Interrupts", function(L, P)
 	if Skada:IsDisabled("Interrupts") then return end
 
 	local mod = Skada:NewModule("Interrupts")
@@ -21,7 +21,7 @@ Skada:RegisterModule("Interrupts", function(L)
 			set.interrupt = (set.interrupt or 0) + 1
 
 			-- to save up memory, we only record the rest to the current set.
-			if (set ~= Skada.total or Skada.db.profile.totalidc) and data.spellid then
+			if (set ~= Skada.total or P.totalidc) and data.spellid then
 				local spell = player.interruptspells and player.interruptspells[data.spellid]
 				if not spell then
 					player.interruptspells = player.interruptspells or {}
@@ -71,12 +71,12 @@ Skada:RegisterModule("Interrupts", function(L)
 
 		Skada:DispatchSets(log_interrupt, data)
 
-		if Skada.db.profile.modules.interruptannounce and srcGUID == Skada.userGUID then
+		if P.modules.interruptannounce and srcGUID == Skada.userGUID then
 			local spelllink = extraspellname or dstName
-			if Skada.db.profile.reportlinks then
+			if P.reportlinks then
 				spelllink = GetSpellLink(extraspellid or extraspellname) or spelllink
 			end
-			Skada:SendChat(format(L["%s interrupted!"], spelllink), Skada.db.profile.modules.interruptchannel or "SAY", "preset")
+			Skada:SendChat(format(L["%s interrupted!"], spelllink), P.modules.interruptchannel or "SAY", "preset")
 		end
 	end
 
@@ -285,8 +285,8 @@ Skada:RegisterModule("Interrupts", function(L)
 	end
 
 	function mod:OnInitialize()
-		if not Skada.db.profile.modules.interruptchannel then
-			Skada.db.profile.modules.interruptchannel = "SAY"
+		if not P.modules.interruptchannel then
+			P.modules.interruptchannel = "SAY"
 		end
 
 		Skada.options.args.modules.args.interrupts = {

@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Comparison", function(L)
+Skada:RegisterModule("Comparison", function(L, P)
 	if Skada:IsDisabled("Damage", "Comparison") then return end
 
 	local mod = Skada:NewModule("Comparison")
@@ -408,7 +408,7 @@ Skada:RegisterModule("Comparison", function(L)
 			local total = 0
 			if targets[win.targetname] then
 				total = targets[win.targetname].amount or total
-				if Skada.db.profile.absdamage and targets[win.targetname].total then
+				if P.absdamage and targets[win.targetname].total then
 					total = targets[win.targetname].total or total
 				end
 			end
@@ -431,7 +431,7 @@ Skada:RegisterModule("Comparison", function(L)
 						d.spellschool = spell.school
 
 						d.value = spell.targets[win.targetname].amount or 0
-						if Skada.db.profile.absdamage and spell.targets[win.targetname].total then
+						if P.absdamage and spell.targets[win.targetname].total then
 							d.value = spell.targets[win.targetname].total
 						end
 
@@ -453,7 +453,7 @@ Skada:RegisterModule("Comparison", function(L)
 		local total = 0
 		if targets[win.targetname] then
 			total = targets[win.targetname].amount or total
-			if Skada.db.profile.absdamage and targets[win.targetname].total then
+			if P.absdamage and targets[win.targetname].total then
 				total = targets[win.targetname].total or total
 			end
 		end
@@ -477,7 +477,7 @@ Skada:RegisterModule("Comparison", function(L)
 					d.spellschool = spell.school
 
 					local myamount = 0
-					if Skada.db.profile.absdamage then
+					if P.absdamage then
 						d.value = spell.targets[win.targetname].total or spell.targets[win.targetname].amount or 0
 						if
 							myself and
@@ -517,7 +517,7 @@ Skada:RegisterModule("Comparison", function(L)
 			local mytotal = 0
 			if mytargets[win.targetname] then
 				mytotal = mytargets[win.targetname].amount or mytotal
-				if Skada.db.profile.absdamage and mytargets[win.targetname].total then
+				if P.absdamage and mytargets[win.targetname].total then
 					mytotal = mytargets[win.targetname].total or mytotal
 				end
 			end
@@ -540,7 +540,7 @@ Skada:RegisterModule("Comparison", function(L)
 						d.spellschool = spell.school
 
 						local myamount = spell.targets[win.targetname].amount or 0
-						if Skada.db.profile.absdamage and spell.targets[win.targetname].total then
+						if P.absdamage and spell.targets[win.targetname].total then
 							myamount = spell.targets[win.targetname].total
 						end
 
@@ -588,7 +588,7 @@ Skada:RegisterModule("Comparison", function(L)
 					d.spellschool = spell.school
 
 					d.value = spell.amount or 0
-					if Skada.db.profile.absdamage and spell.total then
+					if P.absdamage and spell.total then
 						d.value = spell.total
 					end
 
@@ -617,7 +617,7 @@ Skada:RegisterModule("Comparison", function(L)
 				d.spellschool = spell.school
 
 				local myamount = 0
-				if Skada.db.profile.absdamage then
+				if P.absdamage then
 					d.value = spell.total or spell.amount or 0
 					if myspells and myspells[spellname] then
 						myamount = myspells[spellname].total or myspells[spellname].amount or myamount
@@ -650,7 +650,7 @@ Skada:RegisterModule("Comparison", function(L)
 						d.spellschool = spell.school
 
 						d.value = spell.amount or 0
-						if Skada.db.profile.absdamage and spell.total then
+						if P.absdamage and spell.total then
 							d.value = spell.total or d.value
 						end
 
@@ -697,7 +697,7 @@ Skada:RegisterModule("Comparison", function(L)
 					d.spec = target.spec
 
 					d.value = target.amount or 0
-					if Skada.db.profile.absdamage and target.total then
+					if P.absdamage and target.total then
 						d.value = target.total or d.value
 					end
 
@@ -725,7 +725,7 @@ Skada:RegisterModule("Comparison", function(L)
 				d.spec = target.spec
 
 				local myamount = 0
-				if Skada.db.profile.absdamage then
+				if P.absdamage then
 					d.value = target.total or target.amount or 0
 					if mytargets and mytargets[targetname] then
 						myamount = mytargets[targetname].amount or mytargets[targetname].amount or 0
@@ -758,7 +758,7 @@ Skada:RegisterModule("Comparison", function(L)
 						d.spec = target.spec
 
 						d.value = target.amount or 0
-						if Skada.db.profile.absdamage and target.total then
+						if P.absdamage and target.total then
 							d.value = target.total or d.value
 						end
 

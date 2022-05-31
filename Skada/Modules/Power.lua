@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Resources", function(L)
+Skada:RegisterModule("Resources", function(L, P)
 	if Skada:IsDisabled("Resources") then return end
 
 	local mod = Skada:NewModule("Resources")
@@ -54,7 +54,7 @@ Skada:RegisterModule("Resources", function(L)
 			player[gainTable[gain.type]] = (player[gainTable[gain.type]] or 0) + gain.amount
 			set[gainTable[gain.type]] = (set[gainTable[gain.type]] or 0) + gain.amount
 
-			if (set ~= Skada.total or Skada.db.profile.totalidc) and gain.spellid then
+			if (set ~= Skada.total or P.totalidc) and gain.spellid then
 				player[spellTable[gain.type]] = player[spellTable[gain.type]] or {}
 				player[spellTable[gain.type]][gain.spellid] = (player[spellTable[gain.type]][gain.spellid] or 0) + gain.amount
 			end

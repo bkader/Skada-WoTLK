@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Dispels", function(L)
+Skada:RegisterModule("Dispels", function(L, P)
 	if Skada:IsDisabled("Dispels") then return end
 
 	local mod = Skada:NewModule("Dispels")
@@ -21,7 +21,7 @@ Skada:RegisterModule("Dispels", function(L)
 			set.dispel = (set.dispel or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
-			if (set ~= Skada.total or Skada.db.profile.totalidc) and data.spellid then
+			if (set ~= Skada.total or P.totalidc) and data.spellid then
 				local spell = player.dispelspells and player.dispelspells[data.spellid]
 				if not spell then
 					player.dispelspells = player.dispelspells or {}

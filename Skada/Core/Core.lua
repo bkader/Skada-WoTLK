@@ -3233,7 +3233,7 @@ function Skada:OnEnable()
 
 	if self.modulelist then
 		for i = 1, #self.modulelist do
-			self.modulelist[i](L)
+			self.modulelist[i](L, self.db.profile, self.db.global)
 		end
 		self.modulelist = del(self.modulelist)
 	end

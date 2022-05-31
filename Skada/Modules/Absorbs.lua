@@ -11,7 +11,7 @@ local _
 -- Absorbs module --
 -- ============== --
 
-Skada:RegisterModule("Absorbs", function(L)
+Skada:RegisterModule("Absorbs", function(L, P)
 	if Skada:IsDisabled("Absorbs") then return end
 
 	local mod = Skada:NewModule("Absorbs")
@@ -255,7 +255,7 @@ Skada:RegisterModule("Absorbs", function(L)
 	local absorb = {}
 
 	local function log_spellcast(set, playerid, playername, playerflags, spellid, spellschool)
-		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
+		if not set or (set == Skada.total and not P.totalidc) then return end
 
 		local player = Skada:FindPlayer(set, playerid, playername, playerflags)
 		if player and player.absorbspells and player.absorbspells[spellid] then
@@ -282,7 +282,7 @@ Skada:RegisterModule("Absorbs", function(L)
 			set.absorb = (set.absorb or 0) + absorb.amount
 
 			-- saving this to total set may become a memory hog deluxe.
-			if set == Skada.total and not Skada.db.profile.totalidc then return end
+			if set == Skada.total and not P.totalidc then return end
 
 			-- record the spell
 			local spell = player.absorbspells and player.absorbspells[absorb.spellid]
@@ -1239,7 +1239,7 @@ end)
 -- Absorbs and healing module --
 -- ========================== --
 
-Skada:RegisterModule("Absorbs and Healing", function(L)
+Skada:RegisterModule("Absorbs and Healing", function(L, P)
 	if Skada:IsDisabled("Healing", "Absorbs", "Absorbs and Healing") then return end
 
 	local mod = Skada:NewModule("Absorbs and Healing")
@@ -1263,7 +1263,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L)
 			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Absorbs and Healing"], Skada:FormatNumber(amount), 1, 1, 1)
 
-			local suffix = Skada:FormatTime(Skada.db.profile.timemesure == 1 and activetime or totaltime)
+			local suffix = Skada:FormatTime(P.timemesure == 1 and activetime or totaltime)
 			tooltip:AddDoubleLine(Skada:FormatNumber(amount) .. "/" .. suffix, Skada:FormatNumber(hps), 1, 1, 1)
 		end
 	end
@@ -1692,7 +1692,7 @@ end)
 -- Healing done per second module --
 -- ============================== --
 
-Skada:RegisterModule("HPS", function(L)
+Skada:RegisterModule("HPS", function(L, P)
 	if Skada:IsDisabled("Absorbs", "Healing", "Absorbs and Healing", "HPS") then return end
 
 	local mod = Skada:NewModule("HPS")
@@ -1712,7 +1712,7 @@ Skada:RegisterModule("HPS", function(L)
 			tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Absorbs and Healing"], Skada:FormatNumber(amount), 1, 1, 1)
 
-			local suffix = Skada:FormatTime(Skada.db.profile.timemesure == 1 and activetime or totaltime)
+			local suffix = Skada:FormatTime(P.timemesure == 1 and activetime or totaltime)
 			tooltip:AddDoubleLine(Skada:FormatNumber(amount) .. "/" .. suffix, Skada:FormatNumber(hps), 1, 1, 1)
 		end
 	end

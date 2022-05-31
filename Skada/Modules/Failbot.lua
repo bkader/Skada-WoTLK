@@ -2,7 +2,7 @@ local LibFail = LibStub("LibFail-1.0", true)
 if not LibFail then return end
 
 local Skada = Skada
-Skada:RegisterModule("Fails", function(L)
+Skada:RegisterModule("Fails", function(L, P)
 	if Skada:IsDisabled("Fails") then return end
 
 	local mod = Skada:NewModule("Fails")
@@ -21,7 +21,7 @@ Skada:RegisterModule("Fails", function(L)
 			set.fail = (set.fail or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
-			if set ~= Skada.total or Skada.db.profile.totalidc then
+			if set ~= Skada.total or P.totalidc then
 				player.failspells = player.failspells or {}
 				player.failspells[spellid] = (player.failspells[spellid] or 0) + 1
 			end
@@ -251,11 +251,11 @@ Skada:RegisterModule("Fails", function(L)
 				LibFail:RegisterCallback(events[i], onFail)
 			end
 
-			if Skada.db.profile.modules.failschannel == nil then
-				Skada.db.profile.modules.failschannel = "AUTO"
+			if P.modules.failschannel == nil then
+				P.modules.failschannel = "AUTO"
 			end
-			if Skada.db.profile.modules.ignoredfails then
-				Skada.db.profile.modules.ignoredfails = nil
+			if P.modules.ignoredfails then
+				P.modules.ignoredfails = nil
 			end
 
 			Skada.options.args.modules.args.failbot = GetOptions()
@@ -263,8 +263,8 @@ Skada:RegisterModule("Fails", function(L)
 	end
 
 	function mod:SetComplete(set)
-		if set.fail and set.fail > 0 and Skada.db.profile.modules.failsannounce then
-			local channel = Skada.db.profile.modules.failschannel or "AUTO"
+		if set.fail and set.fail > 0 and P.modules.failsannounce then
+			local channel = P.modules.failschannel or "AUTO"
 			if channel == "SELF" or channel == "GUILD" or IsInGroup() then
 				Skada:Report(channel, "preset", L["Fails"], nil, 10)
 			end

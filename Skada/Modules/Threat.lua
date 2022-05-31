@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Threat", function(L)
+Skada:RegisterModule("Threat", function(L, P)
 	if Skada:IsDisabled("Threat") then return end
 
 	local mod = Skada:NewModule("Threat")
@@ -535,8 +535,8 @@ Skada:RegisterModule("Threat", function(L)
 		}
 
 		function mod:OnInitialize()
-			if not Skada.db.profile.modules.threat then
-				Skada.db.profile.modules.threat = {
+			if not P.modules.threat then
+				P.modules.threat = {
 					sound = true,
 					flash = true,
 					output = 1,
@@ -548,14 +548,14 @@ Skada:RegisterModule("Threat", function(L)
 					showAggroBar = true
 				}
 			end
-			if Skada.db.profile.modules.threat.sinkOptions then
-				Skada.db.profile.modules.threat.sinkOptions = nil
+			if P.modules.threat.sinkOptions then
+				P.modules.threat.sinkOptions = nil
 			end
-			if Skada.db.profile.modules.threat.output == nil then
-				Skada.db.profile.modules.threat.output = 1
+			if P.modules.threat.output == nil then
+				P.modules.threat.output = 1
 			end
 
-			self.db = Skada.db.profile.modules.threat
+			self.db = P.modules.threat
 			Skada.options.args.modules.args.threat = opts
 		end
 	end
@@ -593,7 +593,7 @@ Skada:RegisterModule("Threat", function(L)
 	end
 
 	function mod:ApplySettings()
-		self.db = self.db or Skada.db.profile.modules.threat
+		self.db = self.db or P.modules.threat
 		if self.db.focustarget then
 			Skada.RegisterEvent(self, "UNIT_TARGET")
 		else

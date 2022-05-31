@@ -321,7 +321,7 @@ do
 	end
 end
 
-Skada:RegisterModule("Buffs", function(L)
+Skada:RegisterModule("Buffs", function(L, P)
 	if Skada:IsDisabled("Buffs") then return end
 
 	local mod = Skada:NewModule("Buffs")
@@ -335,7 +335,7 @@ Skada:RegisterModule("Buffs", function(L)
 	}
 
 	local function log_specialaura(set, aura)
-		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
+		if not set or (set == Skada.total and not P.totalidc) then return end
 		if not aura or not aura.spellid then return end
 
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)

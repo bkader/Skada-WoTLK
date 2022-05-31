@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Sunder Counter", function(L)
+Skada:RegisterModule("Sunder Counter", function(L, P)
 	if Skada:IsDisabled("Sunder Counter") then return end
 
 	local mod = Skada:NewModule("Sunder Counter")
@@ -18,7 +18,7 @@ Skada:RegisterModule("Sunder Counter", function(L)
 			set.sunder = (set.sunder or 0) + 1
 			player.sunder = (player.sunder or 0) + 1
 
-			if (set ~= Skada.total or Skada.db.profile.totalidc) and data.dstName then
+			if (set ~= Skada.total or P.totalidc) and data.dstName then
 				player.sundertargets = player.sundertargets or {}
 				player.sundertargets[data.dstName] = (player.sundertargets[data.dstName] or 0) + 1
 			end
@@ -39,8 +39,8 @@ Skada:RegisterModule("Sunder Counter", function(L)
 
 			Skada:DispatchSets(log_sunder, data)
 
-			if Skada.db.profile.modules.sunderannounce then
-				if not Skada.db.profile.modules.sunderbossonly or (Skada.db.profile.modules.sunderbossonly and Skada:IsBoss(dstGUID)) then
+			if P.modules.sunderannounce then
+				if not P.modules.sunderbossonly or (P.modules.sunderbossonly and Skada:IsBoss(dstGUID)) then
 					mod.targets = mod.targets or T.get("Sunder_Targets")
 					if not mod.targets[dstGUID] then
 						mod.targets[dstGUID] = new()
@@ -69,8 +69,8 @@ Skada:RegisterModule("Sunder Counter", function(L)
 			Skada:ScheduleTimer(function()
 				if mod.targets and mod.targets[dstGUID] then
 					mod.targets[dstGUID] = del(mod.targets[dstGUID])
-					if Skada.db.profile.modules.sunderannounce then
-						if not Skada.db.profile.modules.sunderbossonly or (Skada.db.profile.modules.sunderbossonly and Skada:IsBoss(dstGUID)) then
+					if P.modules.sunderannounce then
+						if not P.modules.sunderbossonly or (P.modules.sunderbossonly and Skada:IsBoss(dstGUID)) then
 							mod:Announce(format(L["%s dropped from %s!"], sunderLink or sunder, dstName or L["Unknown"]))
 						end
 					end
@@ -80,7 +80,7 @@ Skada:RegisterModule("Sunder Counter", function(L)
 	end
 
 	local function TargetDied(timestamp, eventtype, _, _, _, dstGUID)
-		if Skada.db.profile.modules.sunderannounce and dstGUID and mod.targets and mod.targets[dstGUID] then
+		if P.modules.sunderannounce and dstGUID and mod.targets and mod.targets[dstGUID] then
 			mod.targets[dstGUID] = nil
 		end
 	end
@@ -88,7 +88,7 @@ Skada:RegisterModule("Sunder Counter", function(L)
 	local function DoubleCheckSunder()
 		if not sunder then
 			sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
-			sunderLink = Skada.db.profile.reportlinks and GetSpellLink(47467)
+			sunderLink = P.reportlinks and GetSpellLink(47467)
 		end
 	end
 
@@ -222,14 +222,14 @@ Skada:RegisterModule("Sunder Counter", function(L)
 	end
 
 	function mod:Announce(msg)
-		Skada:SendChat(msg, Skada.db.profile.modules.sunderchannel or "SAY", "preset")
+		Skada:SendChat(msg, P.modules.sunderchannel or "SAY", "preset")
 	end
 
 	function mod:OnInitialize()
 		DoubleCheckSunder()
 
-		if Skada.db.profile.modules.sunderchannel == nil then
-			Skada.db.profile.modules.sunderchannel = "SAY"
+		if P.modules.sunderchannel == nil then
+			P.modules.sunderchannel = "SAY"
 		end
 
 		Skada.options.args.modules.args.sundercounter = {

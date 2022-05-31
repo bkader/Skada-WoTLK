@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Potions", function(L)
+Skada:RegisterModule("Potions", function(L, P)
 	if Skada:IsDisabled("Potions") then return end
 
 	local mod = Skada:NewModule("Potions")
@@ -25,7 +25,7 @@ Skada:RegisterModule("Potions", function(L)
 			set.potion = (set.potion or 0) + 1
 
 			-- saving this to total set may become a memory hog deluxe.
-			if (set ~= Skada.total or Skada.db.profile.totalidc) and spellid then
+			if (set ~= Skada.total or P.totalidc) and spellid then
 				local potionid = potionIDs[spellid]
 				player.potionspells = player.potionspells or {}
 				player.potionspells[potionid] = (player.potionspells[potionid] or 0) + 1
@@ -70,7 +70,7 @@ Skada:RegisterModule("Potions", function(L)
 
 		-- we use this function to record pre-pots as well.
 		function mod:CheckPrePot(event)
-			if event == "COMBAT_PLAYER_ENTER" and Skada.db.profile.prepotion and not self.checked then
+			if event == "COMBAT_PLAYER_ENTER" and P.prepotion and not self.checked then
 				prepotion = prepotion or T.get("Potions_PrePotions")
 				GroupIterator(CheckUnitPotions, prepotion)
 				self.checked = true
@@ -335,8 +335,8 @@ Skada:RegisterModule("Potions", function(L)
 		potionIDs[67490] = 42545 -- Runic Mana Injector
 
 		-- don't edit below unless you know what you're doing.
-		if Skada.db.profile.prepotion == nil then
-			Skada.db.profile.prepotion = true
+		if P.prepotion == nil then
+			P.prepotion = true
 		end
 
 		Skada.options.args.tweaks.args.general.args.prepotion = {
@@ -345,6 +345,14 @@ Skada:RegisterModule("Potions", function(L)
 			desc = L["Prints pre-potion after the end of the combat."],
 			order = 0
 		}
+	end
+
+	function mod:ApplySettings()
+		if P.prepotion then
+			Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CheckPrePot")
+		else
+			Skada.UnregisterAllMessages(self)
+		end
 	end
 
 	function mod:OnEnable()
@@ -367,12 +375,12 @@ Skada:RegisterModule("Potions", function(L)
 		playermod.nototal = true
 
 		Skada:RegisterForCL(PotionUsed, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})
-		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CheckPrePot")
+		Skada.RegisterCallback(self, "Skada_UpdateConfig", "ApplySettings")
 		Skada:AddMode(self)
 	end
 
 	function mod:OnDisable()
-		Skada.UnregisterAllMessages(self)
+		Skada.UnregisterAllCallbacks(self)
 		Skada:RemoveMode(self)
 	end
 
@@ -382,11 +390,13 @@ Skada:RegisterModule("Potions", function(L)
 	end
 
 	function mod:SetComplete(set)
-		if Skada.db.profile.prepotion and prepotion and next(prepotion) ~= nil then
-			Skada:Printf(L["pre-potion: %s"], tconcat(prepotion, ", "))
+		if prepotion then
+			if P.prepotion and next(prepotion) ~= nil then
+				Skada:Printf(L["pre-potion: %s"], tconcat(prepotion, ", "))
+			end
+			T.free("Potions_PrePotions", prepotion)
+			self.checked = nil
 		end
-		T.free("Potions_PrePotions", prepotion)
-		self.checked = nil
 	end
 
 	do

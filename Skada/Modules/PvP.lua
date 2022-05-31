@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L)
+Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 	if Skada:IsDisabled("Player vs. Player") then return end
 
 	local mod = Skada:NewModule("Player vs. Player")
@@ -251,8 +251,8 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L)
 	---------------------------------------------------------------------------
 
 	function mod:OnInitialize()
-		if Skada.db.profile.modules.arena then
-			Skada.db.profile.modules.arena = nil
+		if P.modules.arena then
+			P.modules.arena = nil
 		end
 
 		-- arena custom colors

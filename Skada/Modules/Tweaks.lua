@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Tweaks", function(L)
+Skada:RegisterModule("Tweaks", function(L, P)
 	if Skada:IsDisabled("Tweaks") then return end
 
 	local mod = Skada:NewModule("Tweaks", "AceHook-3.0")
@@ -100,12 +100,12 @@ Skada:RegisterModule("Tweaks", function(L)
 					end
 				end
 				-- ignore the spell
-				if self.db.profile.fofrostmourne then return end
+				if P.fofrostmourne then return end
 			end
 
 			-- first hit
 			if
-				self.db.profile.firsthit and
+				P.firsthit and
 				firsthit.hitline == nil and
 				trigger_events[eventtype] and
 				srcName and dstName and
@@ -359,7 +359,7 @@ Skada:RegisterModule("Tweaks", function(L)
 			-- was the last combat event within a second of cast succeeding?
 			if self.lastEvent and (GetTime() - self.lastEvent) <= 1 then return end
 
-			if Skada.db.profile.combatlogfixverbose then
+			if P.combatlogfixverbose then
 				if not self.throttle or self.throttle < GetTime() then
 					Skada:Printf(
 						L["%d filtered / %d events found. Cleared combat log, as it broke."],
@@ -393,15 +393,15 @@ Skada:RegisterModule("Tweaks", function(L)
 		end
 
 		function mod:COMBAT_PLAYER_ENTER()
-			if Skada.db.profile.combatlogfix then
+			if P.combatlogfix then
 				Skada:ScheduleTimer(CombatLogClearEntries, 0.01)
 			end
 		end
 
 		function mod:CombatLogFix()
-			if Skada.db.profile.combatlogfix then
+			if P.combatlogfix then
 				frame = frame or CreateFrame("Frame")
-				if Skada.db.profile.combatlogfixalt then
+				if P.combatlogfixalt then
 					frame:UnregisterAllEvents()
 					frame.timeout = 0
 					frame:SetScript("OnUpdate", AggressiveOnUpdate)
@@ -457,7 +457,7 @@ Skada:RegisterModule("Tweaks", function(L)
 						Skada:StopSegment(L["Smart Stop"])
 					end
 				end,
-				Skada.db.profile.smartwait or 3)
+				P.smartwait or 3)
 			end
 		end
 	end
@@ -466,7 +466,7 @@ Skada:RegisterModule("Tweaks", function(L)
 
 	function mod:ApplySettings()
 		-- First Hit!
-		if Skada.db.profile.firsthit then
+		if P.firsthit then
 			Skada.RegisterMessage(self, "COMBAT_ENCOUNTER_START", "PrintFirstHit")
 			Skada.RegisterMessage(self, "COMBAT_ENCOUNTER_END", "ClearFirstHit")
 		else
@@ -479,14 +479,14 @@ Skada:RegisterModule("Tweaks", function(L)
 		considerFoF = not Skada.Ascension
 
 		-- smart stop
-		if Skada.db.profile.smartstop then
+		if P.smartstop then
 			Skada.RegisterMessage(self, "COMBAT_BOSS_DEFEATED", "BossDefeated")
 		else
 			Skada.UnregisterMessage(self, "COMBAT_BOSS_DEFEATED")
 		end
 
 		-- filter dps meters
-		if Skada.db.profile.spamage then
+		if P.spamage then
 			if not self:IsHooked("SetItemRef") then
 				self:RawHook("SetItemRef", "ParseLink", true)
 			end
@@ -506,29 +506,29 @@ Skada:RegisterModule("Tweaks", function(L)
 
 	do
 		local function SetValue(i, val)
-			Skada.db.profile[i[#i]] = val
+			P[i[#i]] = val
 			mod:ApplySettings()
 		end
 
 		function mod:OnInitialize()
 			-- first hit.
-			if Skada.db.profile.firsthit == nil then
-				Skada.db.profile.firsthit = true
+			if P.firsthit == nil then
+				P.firsthit = true
 			end
 			-- smart stop & duration
-			if Skada.db.profile.smartstop == nil then
+			if P.smartstop == nil then
 			end
-			if Skada.db.profile.smartwait == nil then
-				Skada.db.profile.smartwait = 3
+			if P.smartwait == nil then
+				P.smartwait = 3
 			end
 			-- combatlog fix
-			if Skada.db.profile.combatlogfix == nil then
-				Skada.db.profile.combatlogfix = true
+			if P.combatlogfix == nil then
+				P.combatlogfix = true
 			end
 
 			-- old spamage module
-			if type(Skada.db.profile.spamage) == "table" then
-				Skada.db.profile.spamage = nil
+			if type(P.spamage) == "table" then
+				P.spamage = nil
 			end
 
 			-- Fury of Frostmourne
@@ -589,7 +589,7 @@ Skada:RegisterModule("Tweaks", function(L)
 						name = L["Duration"],
 						desc = L["opt_tweaks_smartwait_desc"],
 						disabled = function()
-							return not Skada.db.profile.smartstop
+							return not P.smartstop
 						end,
 						min = 0,
 						max = 10,
@@ -624,7 +624,7 @@ Skada:RegisterModule("Tweaks", function(L)
 						name = L["Aggressive Mode"],
 						desc = L["opt_tweaks_combatlogfixalt_desc"],
 						disabled = function()
-							return not Skada.db.profile.combatlogfix
+							return not P.combatlogfix
 						end,
 						order = 30
 					},
@@ -633,7 +633,7 @@ Skada:RegisterModule("Tweaks", function(L)
 						name = L["Verbose Mode"],
 						desc = format(L["Enable verbose mode for %s."], L["Combat Log"]),
 						disabled = function()
-							return Skada.db.profile.combatlogfixalt or not Skada.db.profile.combatlogfix
+							return P.combatlogfixalt or not P.combatlogfix
 						end,
 						order = 40
 					}
