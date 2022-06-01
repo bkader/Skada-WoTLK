@@ -393,7 +393,6 @@ end
 -- boss and creature functions
 
 do
-	local LBI = LibStub("LibBossIDs-1.0")
 	local creatureToFight = Skada.creatureToFight or Skada.dummyTable
 	local creatureToBoss = Skada.creatureToBoss or Skada.dummyTable
 
@@ -402,12 +401,12 @@ do
 	function Skada:IsBoss(guid, name)
 		local id = self:IsCreature(guid) and self.GetCreatureId(guid) or 0
 
-		if LBI.BossIDs[id] or creatureToFight[id] or creatureToBoss[id] then
+		if creatureToFight[id] or creatureToBoss[id] then
 			if creatureToFight[id] then -- should fix name?
 				name = creatureToFight[id]
 			end
 
-			if creatureToBoss[id] then -- only boss itself returns true.
+			if creatureToBoss[id] and creatureToBoss[id] ~= true then -- only boss itself returns true.
 				return (creatureToBoss[id] == id), creatureToBoss[id], name
 			end
 
