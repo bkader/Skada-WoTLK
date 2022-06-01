@@ -322,10 +322,6 @@ Skada:RegisterModule("Damage", function(L, P)
 				tooltip:AddLine(spellschools(spell.school))
 			end
 
-			if spell.casts then
-				tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
-			end
-
 			-- show the aura uptime in case of a debuff.
 			if actor.GetAuraUptime then
 				local uptime, activetime = actor:GetAuraUptime(spell.id)
@@ -335,12 +331,7 @@ Skada:RegisterModule("Damage", function(L, P)
 				end
 			end
 
-			local separator = nil
-
 			if spell.hitmin then
-				tooltip:AddLine(" ")
-				separator = true
-
 				local spellmin = spell.hitmin
 				if spell.criticalmin and spell.criticalmin < spellmin then
 					spellmin = spell.criticalmin
@@ -349,11 +340,6 @@ Skada:RegisterModule("Damage", function(L, P)
 			end
 
 			if spell.hitmax then
-				if not separator then
-					tooltip:AddLine(" ")
-					separator = true
-				end
-
 				local spellmax = spell.hitmax
 				if spell.criticalmax and spell.criticalmax > spellmax then
 					spellmax = spell.criticalmax
@@ -362,11 +348,6 @@ Skada:RegisterModule("Damage", function(L, P)
 			end
 
 			if (spell.count or 0) > 1 then
-				if not separator then
-					tooltip:AddLine(" ")
-					separator = true
-				end
-
 				local amount = P.absdamage and spell.total or spell.amount
 				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(amount / spell.count), 1, 1, 1)
 			end
@@ -1081,6 +1062,43 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P)
 	local mod = Skada:NewModule("Damage Done By Spell")
 	local sourcemod = mod:NewModule("Damage spell sources")
 
+	local function player_tooltip(win, id, label, tooltip)
+		local set = win.spellname and win:GetSelectedSet()
+		local player = set and set:GetActor(label, id)
+		local spell = player and player.damagespells and player.damagespells[win.spellname]
+		if spell then
+			tooltip:AddLine(label .. " - " .. win.spellname)
+
+			if spell.casts then
+				tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
+			end
+
+			if spell.count then
+				tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
+				local diff = spell.count -- used later
+
+				if spell.hit then
+					tooltip:AddDoubleLine(L["Normal Hits"], Skada:FormatPercent(spell.hit, spell.count), 1, 1, 1)
+					diff = diff - spell.hit
+				end
+
+				if spell.critical then
+					tooltip:AddDoubleLine(L["Critical Hits"], Skada:FormatPercent(spell.critical, spell.count), 1, 1, 1)
+					diff = diff - spell.critical
+				end
+
+				if spell.glancing then
+					tooltip:AddDoubleLine(L["Glancing"], Skada:FormatPercent(spell.glancing, spell.count), 1, 1, 1)
+					diff = diff - spell.glancing
+				end
+
+				if diff > 0 then
+					tooltip:AddDoubleLine(L["Other"], Skada:FormatPercent(diff, spell.count), nil, nil, nil, 1, 1, 1)
+				end
+			end
+		end
+	end
+
 	function sourcemod:Enter(win, id, label)
 		win.spellname = label
 		win.title = format(L["%s's sources"], label)
@@ -1163,9 +1181,8 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P)
 				for spellname, spell in pairs(player.damagespells) do
 					if spell.total > 0 then
 						if not cacheTable[spellname] then
-							cacheTable[spellname] = {id = spell.id, school = spell.school, amount = 0}
-						end
-						if P.absdamage then
+							cacheTable[spellname] = {id = spell.id, school = spell.school, amount = P.absdamage and spell.total or spell.amount or 0}
+						elseif P.absdamage then
 							cacheTable[spellname].amount = cacheTable[spellname].amount + spell.total
 						else
 							cacheTable[spellname].amount = cacheTable[spellname].amount + spell.amount
@@ -1204,7 +1221,7 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P)
 	end
 
 	function mod:OnEnable()
-		sourcemod.metadata = {showspots = true}
+		sourcemod.metadata = {showspots = true, tooltip = player_tooltip}
 		self.metadata = {
 			showspots = true,
 			click1 = sourcemod,

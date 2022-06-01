@@ -302,14 +302,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 				tooltip:AddLine(spellschools(spell.school))
 			end
 
-			local separator = nil
-
 			if spell.hitmin then
-				if not separator then
-					tooltip:AddLine(" ")
-					separator = true
-				end
-
 				local spellmin = spell.hitmin
 				if spell.criticalmin and spell.criticalmin < spellmin then
 					spellmin = spell.criticalmin
@@ -318,11 +311,6 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 			end
 
 			if spell.hitmax then
-				if not separator then
-					tooltip:AddLine(" ")
-					separator = true
-				end
-
 				local spellmax = spell.hitmax
 				if spell.criticalmax and spell.criticalmax > spellmax then
 					spellmax = spell.criticalmax
@@ -331,11 +319,6 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 			end
 
 			if spell.count then
-				if not separator then
-					tooltip:AddLine(" ")
-					separator = true
-				end
-
 				local amount = P.absdamage and spell.total or spell.amount
 				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(amount / spell.count), 1, 1, 1)
 			end
@@ -992,6 +975,37 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 	local sourcemod = mod:NewModule("Damage spell sources")
 	local cacheTable = T.get("Skada_CacheTable2")
 
+	local function player_tooltip(win, id, label, tooltip)
+		local set = win.spellname and win:GetSelectedSet()
+		local player = set and set:GetActor(label, id)
+		local spell = player and player.damagetakenspells and player.damagetakenspells[win.spellname]
+		if spell and spell.count then
+			tooltip:AddLine(label .. " - " .. win.spellname)
+
+			tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
+			local diff = spell.count -- used later
+
+			if spell.hit then
+				tooltip:AddDoubleLine(L["Normal Hits"], Skada:FormatPercent(spell.hit, spell.count), 1, 1, 1)
+				diff = diff - spell.hit
+			end
+
+			if spell.critical then
+				tooltip:AddDoubleLine(L["Critical Hits"], Skada:FormatPercent(spell.critical, spell.count), 1, 1, 1)
+				diff = diff - spell.critical
+			end
+
+			if spell.glancing then
+				tooltip:AddDoubleLine(L["Glancing"], Skada:FormatPercent(spell.glancing, spell.count), 1, 1, 1)
+				diff = diff - spell.glancing
+			end
+
+			if diff > 0 then
+				tooltip:AddDoubleLine(L["Other"], Skada:FormatPercent(diff, spell.count), nil, nil, nil, 1, 1, 1)
+			end
+		end
+	end
+
 	function sourcemod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
 		win.title = format(L["%s's targets"], label)
@@ -1189,7 +1203,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 	end
 
 	function mod:OnEnable()
-		targetmod.metadata = {showspots = true}
+		targetmod.metadata = {showspots = true, tooltip = player_tooltip}
 		self.metadata = {
 			showspots = true,
 			click1 = targetmod,

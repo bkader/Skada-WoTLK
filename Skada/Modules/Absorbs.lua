@@ -1835,6 +1835,40 @@ Skada:RegisterModule("Healing Done By Spell", function(L)
 	local cacheTable = Skada.cacheTable
 	local spellschools = Skada.spellschools
 
+	local function player_tooltip(win, id, label, tooltip)
+		local set = win.spellname and win:GetSelectedSet()
+		local player = set and set:GetActor(label, id)
+		if not player then return end
+		local spell = player.healspells and player.healspells[win.spellid]
+		spell = spell or player.absorbspells and player.absorbspells[win.spellid]
+		if spell then
+			tooltip:AddLine(label .. " - " .. win.spellname)
+
+			if spell.casts then
+				tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
+			end
+
+			if spell.count then
+				tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
+
+				if spell.critical then
+					tooltip:AddDoubleLine(L["Critical"], Skada:FormatPercent(spell.critical, spell.count), 1, 1, 1)
+					tooltip:AddLine(" ")
+				end
+
+				if spell.min and spell.max then
+					tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.min), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.max), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
+				end
+			end
+
+			if spell.overheal then
+				tooltip:AddDoubleLine(L["Overheal"], format("%s (%s)", Skada:FormatNumber(spell.overheal), Skada:FormatPercent(spell.overheal, spell.amount + spell.overheal)), nil, nil, nil, 1, 0.67, 0.67)
+			end
+		end
+	end
+
 	local function spell_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
 		local total = set and set:GetAbsorbHeal() or 0
@@ -1978,7 +2012,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L)
 	end
 
 	function mod:OnEnable()
-		spellmod.metadata = {showspots = true}
+		spellmod.metadata = {showspots = true, tooltip = player_tooltip}
 		self.metadata = {
 			click1 = spellmod,
 			post_tooltip = spell_tooltip,
