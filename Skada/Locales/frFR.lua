@@ -332,7 +332,7 @@ L["The number of fight segments to keep. Persistent segments are not included in
 L["Persistent segments"] = "Segments persistants"
 L["The number of persistent fight segments to keep."] = "Le nombre de segments persistants \195\160 conserver."
 L["Memory Check"] = "V\195\169rif. de la m\195\169moire"
-L["Checks memory usage and warns you if it is greater than or equal to %dmb."] = "V\195\169rifie l'utilisation de la m\195\169moire et vous avertit si elle est sup\195\169rieure ou \195\169gale \195\160 %d Mo."
+L["Checks memory usage and warns you if it is greater than or equal to 30mb."] = "V\195\169rifie l'utilisation de la m\195\169moire et vous avertit si elle est sup\195\169rieure ou \195\169gale \195\160 30 Mo."
 L["Disable Comms"] = "D\195\169sac. les communications"
 L["Minimum segment length"] = "Dur\195\169e minimale des segments"
 L["The minimum length required in seconds for a segment to be saved."] = "La dur\195\169e minimale requise en secondes pour qu'un segment soit enregistr\195\169."

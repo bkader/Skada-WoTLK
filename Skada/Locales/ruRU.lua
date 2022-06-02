@@ -329,7 +329,7 @@ L["The number of fight segments to keep. Persistent segments are not included in
 L["Persistent segments"] = "Постоянные сегменты"
 L["The number of persistent fight segments to keep."] = "Количество сохраняемых постоянных сегментов."
 L["Memory Check"] = "Проверка памяти"
-L["Checks memory usage and warns you if it is greater than or equal to %dmb."] = "Проверяет использование памяти и предупреждает, если оно больше или равно %d МБ."
+L["Checks memory usage and warns you if it is greater than or equal to 30mb."] = "Проверяет использование памяти и предупреждает, если оно больше или равно 30 МБ."
 L["Disable Comms"] = "Отключить связь"
 L["Minimum segment length"] = "Минимальная длина сегмента"
 L["The minimum length required in seconds for a segment to be saved."] = "Минимальная длина в секундах, необходимая для сохранения сегмента."

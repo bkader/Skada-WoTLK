@@ -3308,9 +3308,8 @@ function Skada:CheckMemory(clean)
 
 	if self.db.profile.memorycheck then
 		UpdateAddOnMemoryUsage()
-
-		local compare = 10 + (self.db.profile.setstokeep + self.db.profile.setslimit) * 2
-		if GetAddOnMemoryUsage("Skada") > (compare * 1024) then
+		local memory = GetAddOnMemoryUsage("Skada")
+		if memory > 30000 then
 			self:Notify(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."], L["Memory Check"], nil, "emergency")
 		end
 	end

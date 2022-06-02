@@ -594,7 +594,7 @@ Skada.options = {
 						memorycheck = {
 							type = "toggle",
 							name = L["Memory Check"],
-							desc = function() return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], 10 + (Skada.db.profile.setstokeep + Skada.db.profile.setslimit) * 2) end,
+							desc = L["Checks memory usage and warns you if it is greater than or equal to 30mb."],
 							order = 410
 						},
 						syncoff = {
