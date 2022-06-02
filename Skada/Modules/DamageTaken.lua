@@ -601,7 +601,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 				total = sources[win.targetname].total
 			end
 
-			if total > 0 and actor.damagetakenspells then
+			if total > 0 then
 				if win.metadata then
 					win.metadata.maxvalue = 0
 				end

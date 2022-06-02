@@ -406,7 +406,6 @@ Skada:RegisterModule("Damage", function(L, P)
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetDamage() or 0
 
-
 		if total > 0 and actor.damagespells then
 			if win.metadata then
 				win.metadata.maxvalue = 0
@@ -623,7 +622,7 @@ Skada:RegisterModule("Damage", function(L, P)
 				total = targets[win.targetname].total
 			end
 
-			if total > 0 and actor.damagespells then
+			if total > 0 then
 				if win.metadata then
 					win.metadata.maxvalue = 0
 				end
@@ -1646,7 +1645,7 @@ Skada:RegisterModule("Overkill", function(L)
 		local targets = actor:GetDamageTargets()
 		local total = (targets and targets[win.targetname]) and targets[win.targetname].overkill or 0
 
-		if total > 0 and actor.damagespells then
+		if total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
 			end

@@ -238,7 +238,7 @@ Skada:RegisterModule("Healing", function(L, P)
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetHealOnTarget(win.targetname) or 0
 
-		if total > 0 and actor.healspells then
+		if total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
 			end
@@ -553,7 +553,7 @@ Skada:RegisterModule("Overhealing", function(L)
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetOverhealOnTarget(win.targetname) or 0
 
-		if total > 0 and actor.healspells then
+		if total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
 			end
@@ -836,7 +836,7 @@ Skada:RegisterModule("Total Healing", function(L)
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetTotalHealOnTarget(win.targetname) or 0
-		if total > 0 and actor.healspells then
+		if total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
 			end
