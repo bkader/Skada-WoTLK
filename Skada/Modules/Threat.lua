@@ -577,7 +577,7 @@ Skada:RegisterModule("Threat", function(L, P)
 			}
 
 			Skada.RegisterBucketEvent(self, {"UNIT_THREAT_LIST_UPDATE", "UNIT_THREAT_SITUATION_UPDATE", "PLAYER_TARGET_CHANGED"}, 0.05, "SetUnit")
-			Skada.RegisterCallback(self, "Skada_UpdateConfig", "ApplySettings")
+			Skada.RegisterCallback(self, "Skada_ApplySettings", "ApplySettings")
 
 			Skada:AddFeed(L["Threat: Personal Threat"], add_threat_feed)
 			Skada:AddMode(self)

@@ -1,7 +1,7 @@
 local Skada = Skada
 
 local pairs, wipe, max = pairs, wipe, math.max
-local getmetatable, setmetatable, time = getmetatable, setmetatable, time
+local getmetatable, setmetatable = getmetatable, setmetatable
 
 -- a dummy table used as fallback
 local dummyTable = {}

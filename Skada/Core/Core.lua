@@ -1170,11 +1170,11 @@ function Skada:RestoreView(win, theset, themode)
 end
 
 -- wipes all windows
-function Skada:Wipe()
+function Skada:Wipe(changed)
 	for i = 1, #windows do
 		local win = windows[i]
 		if win and win.Wipe then
-			win:Wipe()
+			win:Wipe(changed)
 		end
 	end
 end
@@ -1242,6 +1242,19 @@ do
 		end
 	end
 
+	local function ReloadMode(self)
+		if self.metadata then
+			for i = 1, #windows do
+				local win = windows[i]
+				if win and win.selectedmode == self and win.metadata then
+					for key, value in pairs(self.metadata) do
+						win.metadata[key] = value
+					end
+				end
+			end
+		end
+	end
+
 	function Skada:AddMode(mode, category)
 		if self.total then
 			VerifySet(mode, self.total)
@@ -1255,6 +1268,7 @@ do
 			VerifySet(mode, self.char.sets[i])
 		end
 
+		mode.Reload = mode.Reload or ReloadMode
 		mode.category = category or L["Other"]
 		modes[#modes + 1] = mode
 
@@ -3087,7 +3101,7 @@ function Skada:ApplySettings(name, hidemenu)
 	end
 
 	-- fire callback in case modules need it
-	Skada.callbacks:Fire("Skada_UpdateConfig")
+	Skada.callbacks:Fire("Skada_ApplySettings")
 
 	for i = 1, #windows do
 		local win = windows[i]
