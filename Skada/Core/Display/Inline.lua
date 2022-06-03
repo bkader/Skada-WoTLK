@@ -332,7 +332,7 @@ function barlibrary:Withdraw(win)
 			uuid = barlibrary.bars[#barlibrary.bars].uuid + 1
 		else
 			uuid = 1
-			print("|c0033ff99SkadaInline|r: THIS SHOULD NEVER HAPPEN")
+			print("\124c0033ff99SkadaInline\124r: THIS SHOULD NEVER HAPPEN")
 		end
 		replacement = self:CreateBar(uuid, win)
 		barlibrary.bars[#barlibrary.bars + 1] = replacement
@@ -361,7 +361,7 @@ function mod:UpdateBar(bar, bardata, db)
 	if db.isusingclasscolors and bardata.class then
 		label = classcolors(bardata.class, bardata.text or bardata.label or L["Unknown"])
 	elseif bardata.color and bardata.color.colorStr then
-		label = format("|c%s%s|r", bardata.color.colorStr, bardata.text or bardata.label or L["Unknown"])
+		label = format("\124c%s%s\124r", bardata.color.colorStr, bardata.text or bardata.label or L["Unknown"])
 	elseif bardata.color then
 		label = WrapTextInColorCode(bardata.text or bardata.label or L["Unknown"], RGBPercToHex(bardata.color.r or 1, bardata.color.g or 1, bardata.color.b or 1, true))
 	else

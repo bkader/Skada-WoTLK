@@ -29,7 +29,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 		local MAX_BOSS_FRAMES = MAX_BOSS_FRAMES or 5
 		local T = Skada.Table
 		local firsthit, firsthittimer = T.get("Skada_FirstHit"), nil
-		local hitformats = {"%s (%s)", "%s (|c%s%s|r)", "|c%s%s|r", "|c%s%s|r (%s)"}
+		local hitformats = {"%s (%s)", "%s (\124c%s%s\124r)", "\124c%s%s\124r", "\124c%s%s\124r (%s)"}
 
 		-- thank you Details!
 		local Skada_CombatLogEvent = Skada.CombatLogEvent
@@ -49,7 +49,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 
 			function WhoPulled(hitline)
 				-- first hit
-				hitline = hitline or L["|cffffbb00First Hit|r: *?*"]
+				hitline = hitline or L["\124cffffbb00First Hit\124r: *?*"]
 
 				-- firt boss target
 				local targetline = nil
@@ -74,7 +74,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 				end
 
 				if targettable then
-					targetline = format(L["|cffffbb00Boss First Target|r: %s"], tconcat(targettable, " \124\124 "))
+					targetline = format(L["\124cffffbb00Boss First Target\124r: %s"], tconcat(targettable, " \124\124 "))
 					targettable = del(targettable)
 				end
 
@@ -147,7 +147,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 
 				if output then
 					local spell = (eventtype == "SWING_DAMAGE") and GetSpellLink(6603) or GetSpellLink(spellid) or GetSpellInfo(spellid)
-					firsthit.hitline, firsthit.targetline = WhoPulled(format(L["|cffffff00First Hit|r: %s from %s"], spell or "", output))
+					firsthit.hitline, firsthit.targetline = WhoPulled(format(L["\124cffffff00First Hit\124r: %s from %s"], spell or "", output))
 				end
 			end
 
@@ -249,16 +249,16 @@ Skada:RegisterModule("Tweaks", function(L, P)
 				if line and msg:match(line) then
 					local newID = 0
 					local curtime = GetTime()
-					if find(msg, "|cff(.+)|r") then
-						msg = gsub(msg, "|cff%w%w%w%w%w%w", "")
-						msg = gsub(msg, "|r", "")
+					if find(msg, "\124cff(.+)\124r") then
+						msg = gsub(msg, "\124cff%w%w%w%w%w%w", "")
+						msg = gsub(msg, "\124r", "")
 					end
 					for j = 1, #meters do
 						local meter = meters[j]
 						local elapsed = meter and (curtime - meter.time) or 0
 						if meter and meter.src == source and meter.evt == event and elapsed < 1 then
 							newID = j
-							return true, true, format("|HSKSP:%1$d|h|cffffff00[%2$s]|r|h", newID or 0, msg or "nil")
+							return true, true, format("\124HSKSP:%1$d\124h\124cffffff00[%2$s]\124r\124h", newID or 0, msg or "nil")
 						end
 					end
 					meters[#meters + 1] = {src = source, evt = event, time = curtime, data = {}, title = msg}
@@ -268,7 +268,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 							newID = j
 						end
 					end
-					return true, true, format("|HSKSP:%1$d|h|cffffff00[%2$s]|r|h", newID or 0, msg or "nil")
+					return true, true, format("\124HSKSP:%1$d\124h\124cffffff00[%2$s]\124r\124h", newID or 0, msg or "nil")
 				end
 			end
 
@@ -559,7 +559,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 			Skada.options.args.tweaks.args.general.args.fofrostmourne = {
 				type = "toggle",
 				name = fofrostmourne,
-				desc = format(L["Enable this if you want to ignore |cffffbb00%s|r."], fofrostmourne),
+				desc = format(L["Enable this if you want to ignore \124cffffbb00%s\124r."], fofrostmourne),
 				hidden = Skada.Ascension,
 				set = SetValue,
 				order = 40

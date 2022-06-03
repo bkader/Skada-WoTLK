@@ -27,9 +27,9 @@ Skada:RegisterModule("Comparison", function(L, P)
 	end
 
 	-- percentage colors
-	local red = "|cffffaaaa-%s|r"
-	local green = "|cffaaffaa+%s|r"
-	local grey = "|cff808080%s|r"
+	local red = "\124cffffaaaa-%s\124r"
+	local green = "\124cffaaffaa+%s\124r"
+	local grey = "\124cff808080%s\124r"
 
 	local function FormatPercent(value1, value2, cond)
 		if cond == false then return end

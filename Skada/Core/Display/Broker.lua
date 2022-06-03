@@ -1,8 +1,7 @@
 local Skada = Skada
+
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
-
 local mod = Skada:NewModule("Data Text")
-
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 
 local tsort, format = table.sort, string.format
@@ -51,7 +50,7 @@ local function formatLabel(win, data)
 	if win.db.isusingclasscolors and data.class then
 		return classcolors(data.class, data.text or data.label or L["Unknown"])
 	elseif data.color and data.color.colorStr then
-		return format("|c%s%s|r", data.color.colorStr, data.text or data.label or L["Unknown"])
+		return format("\124c%s%s\124r", data.color.colorStr, data.text or data.label or L["Unknown"])
 	elseif data.color then
 		return WrapTextInColorCode(data.text or data.label or L["Unknown"], RGBPercToHex(data.color.r or 1, data.color.g or 1, data.color.b or 1, true))
 	else

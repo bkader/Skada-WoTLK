@@ -14,7 +14,7 @@ Skada:RegisterModule("Potions", function(L, P)
 	local new, del = Skada.newTable, Skada.delTable
 	local T, potionIDs, _= Skada.Table, {}, nil
 
-	local prepotionStr, potionStr = "|c%s%s|r %s", "|T%s:14:14:1:-2:32:32:2:30:2:30|t"
+	local prepotionStr, potionStr = "\124c%s%s\124r %s", "\124T%s:14:14:1:-2:32:32:2:30:2:30\124t"
 	local prepotion
 
 	local function log_potion(set, playerid, playername, playerflags, spellid)

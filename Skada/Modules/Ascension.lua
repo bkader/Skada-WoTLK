@@ -2,7 +2,7 @@
 -- this module allows players on classless realms to choose their
 -- own custom icons and colors that best represent their builds.
 local Skada = Skada
-if not Skada.Ascension or Skada.AscensionCoA then return end
+-- if not Skada.Ascension or Skada.AscensionCoA then return end
 Skada:RegisterModule("Project Ascension", function(L, _, G)
 	if Skada:IsDisabled("Project Ascension") then return end
 
@@ -189,7 +189,7 @@ Skada:RegisterModule("Project Ascension", function(L, _, G)
 					type = "input",
 					name = L["Icon"],
 					desc = format(
-						"%s\n\n|cffffbb00Interface\\Icons\\|r<%s>",
+						"%s\n\n\124cffffbb00Interface\\Icons\\\124r<%s>",
 						format(L["Choose the %s that fits your character's build."], L["Icon"]),
 						L["Icon"]
 					),

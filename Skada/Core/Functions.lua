@@ -23,7 +23,7 @@ local COMBATLOG_OBJECT_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
 
 function Skada:Debug(...)
 	if self.db.profile.debug then
-		print("|cff33ff99Skada Debug|r:", ...)
+		print("\124cff33ff99Skada Debug\124r:", ...)
 	end
 end
 
@@ -66,7 +66,7 @@ function Skada:RegisterClasses()
 			color.colorStr = Skada.RGBPercToHex(color.r, color.g, color.b, true)
 		end
 
-		return (arg == nil) and color or (type(arg) == "string") and format("|c%s%s|r", color.colorStr, arg) or color.colorStr
+		return (arg == nil) and color or (type(arg) == "string") and format("\124c%s%s\124r", color.colorStr, arg) or color.colorStr
 	end})
 
 	-- set classes icon file & Skada custom classes.

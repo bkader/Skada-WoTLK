@@ -33,7 +33,7 @@ do
 		if type(func) ~= "function" then return end
 		local ok, err = pcall(func, ...)
 		if not ok then
-			print("|cffff9900Error|r:" .. (err or "<no error given>"))
+			print("\124cffff9900Error\124r:" .. (err or "<no error given>"))
 			return
 		end
 		return true
@@ -730,7 +730,7 @@ end
 
 do
 	local function WrapTextInColorCode(text, colorHexString)
-		return format("|c%s%s|r", colorHexString, text)
+		return format("\124c%s%s\124r", colorHexString, text)
 	end
 
 	lib.WrapTextInColorCode = WrapTextInColorCode

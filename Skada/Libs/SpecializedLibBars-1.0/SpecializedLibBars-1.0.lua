@@ -24,59 +24,59 @@ local GetScreenHeight = GetScreenHeight
 -- localization
 
 local L_RESIZE_HEADER = "Resize"
-local L_RESIZE_CLICK = "|cff00ff00Click|r to freely resize window."
-local L_RESIZE_SHIFT_CLICK = "|cff00ff00Shift-Click|r to change the width."
-local L_RESIZE_ALT_CLICK = "|cff00ff00Alt-Click|r to change the height."
+local L_RESIZE_CLICK = "\124cff00ff00Click\124r to freely resize window."
+local L_RESIZE_SHIFT_CLICK = "\124cff00ff00Shift-Click\124r to change the width."
+local L_RESIZE_ALT_CLICK = "\124cff00ff00Alt-Click\124r to change the height."
 local L_LOCK_WINDOW = "Lock Window"
 local L_UNLOCK_WINDOW = "Unlock Window"
 
 if LOCALE_deDE then
 	L_RESIZE_HEADER = "Größe ändern"
-	L_RESIZE_CLICK = "|cff00ff00Klicken|r, um die Fenstergröße frei zu ändern."
-	L_RESIZE_SHIFT_CLICK = "|cff00ff00Umschalt-Klick|r, um die Breite zu ändern."
-	L_RESIZE_ALT_CLICK = "|cff00ff00Alt-Klick|r, um die Höhe zu ändern."
+	L_RESIZE_CLICK = "\124cff00ff00Klicken\124r, um die Fenstergröße frei zu ändern."
+	L_RESIZE_SHIFT_CLICK = "\124cff00ff00Umschalt-Klick\124r, um die Breite zu ändern."
+	L_RESIZE_ALT_CLICK = "\124cff00ff00Alt-Klick\124r, um die Höhe zu ändern."
 	L_LOCK_WINDOW = "Fenster sperren"
 	L_UNLOCK_WINDOW = "Fenster entsperren"
 elseif LOCALE_esES or LOCALE_esMX then
 	L_RESIZE_HEADER = "Redimensionar"
-	L_RESIZE_CLICK = "|cff00ff00Haga clic|r para cambiar el tamaño de la ventana."
-	L_RESIZE_SHIFT_CLICK = "|cff00ff00Shift-Click|r para cambiar el ancho de la ventana."
-	L_RESIZE_ALT_CLICK = "|cff00ff00Alt-Click|r para cambiar la altura de la ventana."
+	L_RESIZE_CLICK = "\124cff00ff00Haga clic\124r para cambiar el tamaño de la ventana."
+	L_RESIZE_SHIFT_CLICK = "\124cff00ff00Shift-Click\124r para cambiar el ancho de la ventana."
+	L_RESIZE_ALT_CLICK = "\124cff00ff00Alt-Click\124r para cambiar la altura de la ventana."
 	L_LOCK_WINDOW = "Bloquear ventana"
 	L_UNLOCK_WINDOW = "Desbloquear ventana"
 elseif LOCALE_frFR then
 	L_RESIZE_HEADER = "Redimensionner"
-	L_RESIZE_CLICK = "|cff00ff00Clic|r pour redimensionner."
-	L_RESIZE_SHIFT_CLICK = "|cff00ff00Shift clic|r pour changer la largeur."
-	L_RESIZE_ALT_CLICK = "|cff00ff00Alt clic|r pour changer la hauteur."
+	L_RESIZE_CLICK = "\124cff00ff00Clic\124r pour redimensionner."
+	L_RESIZE_SHIFT_CLICK = "\124cff00ff00Shift clic\124r pour changer la largeur."
+	L_RESIZE_ALT_CLICK = "\124cff00ff00Alt clic\124r pour changer la hauteur."
 	L_LOCK_WINDOW = "Verrouiller la fenêtre"
 	L_UNLOCK_WINDOW = "Déverrouiller la fenêtre"
 elseif LOCALE_koKR then
 	L_RESIZE_HEADER = "크기 조정"
-	L_RESIZE_CLICK = "|cff00ff00클릭|r하여 창 크기를 자유롭게 조정합니다."
-	L_RESIZE_SHIFT_CLICK = "너비를 변경하려면 |cff00ff00Shift-클릭|r하십시오."
-	L_RESIZE_ALT_CLICK = "높이를 변경하려면 |cff00ff00Alt-클릭|r하십시오"
+	L_RESIZE_CLICK = "\124cff00ff00클릭\124r하여 창 크기를 자유롭게 조정합니다."
+	L_RESIZE_SHIFT_CLICK = "너비를 변경하려면 \124cff00ff00Shift-클릭\124r하십시오."
+	L_RESIZE_ALT_CLICK = "높이를 변경하려면 \124cff00ff00Alt-클릭\124r하십시오"
 	L_LOCK_WINDOW = "잠금 창"
 	L_UNLOCK_WINDOW = "잠금 해제 창"
 elseif LOCALE_ruRU then
 	L_RESIZE_HEADER = "Изменение размера"
-	L_RESIZE_CLICK = "|cff00ff00Щелкните|r, чтобы изменить размер окна."
-	L_RESIZE_SHIFT_CLICK = "|cff00ff00Shift-Click|r, чтобы изменить ширину."
-	L_RESIZE_ALT_CLICK = "|cff00ff00ALT-Click|r, чтобы изменить высоту."
+	L_RESIZE_CLICK = "\124cff00ff00Щелкните\124r, чтобы изменить размер окна."
+	L_RESIZE_SHIFT_CLICK = "\124cff00ff00Shift-Click\124r, чтобы изменить ширину."
+	L_RESIZE_ALT_CLICK = "\124cff00ff00ALT-Click\124r, чтобы изменить высоту."
 	L_LOCK_WINDOW = "Заблокировать окно"
 	L_UNLOCK_WINDOW = "Разблокировать окно"
 elseif LOCALE_zhCN then
 	L_RESIZE_HEADER = "调整大小"
-	L_RESIZE_CLICK = "|cff00ff00单击|r以调整窗口大小。"
-	L_RESIZE_SHIFT_CLICK = "|cff00ff00Shift-Click|r改变窗口的宽度。"
-	L_RESIZE_ALT_CLICK = "|cff00ff00Alt-Click|r更改窗口高度。"
+	L_RESIZE_CLICK = "\124cff00ff00单击\124r以调整窗口大小。"
+	L_RESIZE_SHIFT_CLICK = "\124cff00ff00Shift-Click\124r改变窗口的宽度。"
+	L_RESIZE_ALT_CLICK = "\124cff00ff00Alt-Click\124r更改窗口高度。"
 	L_LOCK_WINDOW = "锁定窗口"
 	L_UNLOCK_WINDOW = "解锁窗口"
 elseif LOCALE_zhTW then
 	L_RESIZE_HEADER = "調整大小"
-	L_RESIZE_CLICK = "|cff00ff00單擊|r以調整窗口大小。"
-	L_RESIZE_SHIFT_CLICK = "|cff00ff00Shift-Click|r改變窗口的寬度。"
-	L_RESIZE_ALT_CLICK = "|cff00ff00Alt-Click|r更改窗口高度。"
+	L_RESIZE_CLICK = "\124cff00ff00單擊\124r以調整窗口大小。"
+	L_RESIZE_SHIFT_CLICK = "\124cff00ff00Shift-Click\124r改變窗口的寬度。"
+	L_RESIZE_ALT_CLICK = "\124cff00ff00Alt-Click\124r更改窗口高度。"
 	L_LOCK_WINDOW = "鎖定窗口"
 	L_UNLOCK_WINDOW = "解鎖窗口"
 end
@@ -1999,8 +1999,9 @@ end
 function barPrototype:UpdateOrientationLayout(orientation)
 	local t = nil
 	if orientation == 1 then
-		self.icon:ClearAllPoints()
-		self.icon:SetPoint("RIGHT", self, "LEFT", 0, 0)
+		t = self.icon
+		t:ClearAllPoints()
+		t:SetPoint("RIGHT", self, "LEFT", 0, 0)
 
 		t = self.spark
 		t:ClearAllPoints()
@@ -2029,8 +2030,9 @@ function barPrototype:UpdateOrientationLayout(orientation)
 
 		self.bg:SetTexCoord(0, 1, 0, 1)
 	elseif orientation == 2 then
-		self.icon:ClearAllPoints()
-		self.icon:SetPoint("LEFT", self, "RIGHT", 0, 0)
+		t = self.icon
+		t:ClearAllPoints()
+		t:SetPoint("LEFT", self, "RIGHT", 0, 0)
 
 		t = self.spark
 		t:ClearAllPoints()

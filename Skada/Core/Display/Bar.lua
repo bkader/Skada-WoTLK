@@ -1083,9 +1083,9 @@ local optionsValues = {
 		[2] = L["Right to left"]
 	},
 	TITLEBTNS = {
-		[1] = format("|T%s:22:88|t", format(buttonsTexPath, 1, "_prev")),
-		[2] = format("|T%s:22:88|t", format(buttonsTexPath, 2, "_prev")),
-		[3] = format("|T%s:22:88|t", format(buttonsTexPath, 3, "_prev"))
+		[1] = format("\124T%s:22:88\124t", format(buttonsTexPath, 1, "_prev")),
+		[2] = format("\124T%s:22:88\124t", format(buttonsTexPath, 2, "_prev")),
+		[3] = format("\124T%s:22:88\124t", format(buttonsTexPath, 3, "_prev"))
 	}
 }
 

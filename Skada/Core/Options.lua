@@ -205,7 +205,7 @@ end
 
 Skada.options = {
 	type = "group",
-	name = fmt("Skada |cffffffff%s|r", Skada.version),
+	name = fmt("Skada \124cffffffff%s\124r", Skada.version),
 	get = GetValue,
 	set = SetValue,
 	args = {
@@ -493,7 +493,7 @@ Skada.options = {
 							type = "select",
 							name = L["Separator"],
 							desc = L["Choose which character is used to separator values between brackets."],
-							values = {",", ".", ";", "-", "|", "/", "\\", "~", L["None"]},
+							values = {",", ".", ";", "-", "\124", "/", "\\", "~", L["None"]},
 							order = 40
 						},
 						decimals = {
@@ -791,7 +791,7 @@ do
 		if not initOptions then
 			initOptions = {
 				type = "group",
-				name = fmt("|T%s:18:18:0:0:32:32:2:30:2:30|t |cffffd200Skada|r |cffffffff%s|r", Skada.logo, Skada.version),
+				name = fmt("\124T%s:18:18:0:0:32:32:2:30:2:30\124t \124cffffd200Skada\124r \124cffffffff%s\124r", Skada.logo, Skada.version),
 				args = {
 					open = {
 						type = "execute",
@@ -810,11 +810,11 @@ do
 				local meta = GetAddOnMetadata("Skada", field) or GetAddOnMetadata("Skada", "X-" .. field)
 				if meta then
 					if meta:match("^http[s]://[a-zA-Z0-9_/]-%.[a-zA-Z]") or meta:match("^[%w.]+@%w+%.%w+$") then
-						meta = format("|cff20ff20%s|r", meta)
+						meta = format("\124cff20ff20%s\124r", meta)
 					end
 					initOptions.args[field] = {
 						type = "description",
-						name = fmt("\n|cffffd200%s|r:  %s", L[field], meta),
+						name = fmt("\n\124cffffd200%s\124r:  %s", L[field], meta),
 						fontSize = "medium",
 						width = "double",
 						order = i
@@ -871,7 +871,7 @@ do
 
 		local moduleName = mod.localeName
 		if mod.metadata.icon or mod.icon then
-			moduleName = fmt("|T%s:18:18:-5:0:32:32:2:30:2:30|t %s", mod.metadata.icon or mod.icon, moduleName)
+			moduleName = fmt("\124T%s:18:18:-5:0:32:32:2:30:2:30\124t %s", mod.metadata.icon or mod.icon, moduleName)
 		end
 
 		local cols = {
