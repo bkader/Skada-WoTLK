@@ -534,6 +534,8 @@ L["Ignore Main Tanks"] = "Игнорировать танков"
 L["%s on %s removed by %s"] = "%s на %s прервал %s"
 L["%s on %s removed by %s's %s"] = "%s на %s прервал %s (%s)"
 -- Damage Module --
+-- environmental damage
+L["Environment"] = "Окружающая среда"
 -- damage done module
 L["Damage"] = "Урон"
 L["Damage target list"] = "Урон по врагам"
@@ -613,6 +615,8 @@ L["Minimum Healing"] = "Минимальное исцеление"
 L["Ignore heal events that are below this threshold."] = "Игнорировать события исцеления ниже этого порога."
 L["Announce Deaths"] = "Объявить Смерти"
 L["Announces information about the last hit the player took before they died."] = "Объявляет последний удар игрок принял перед смертью."
+L["Alternative Display"] = "Альтернативное отображение"
+L["If a player dies multiple times, each death will be displayed as a separate bar."] = "Если игрок умирает несколько раз, каждая смерть будет отображаться отдельной полосой."
 -- activity module
 L["Activity"] = "Активность"
 -- dispels module lines --

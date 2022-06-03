@@ -565,6 +565,14 @@ L["Ignore Main Tanks"] = true
 L["%s on %s removed by %s"] = true
 L["%s on %s removed by %s's %s"] = true
 -- Damage Module --
+-- environmental damage
+L["Environment"] = true
+L["Falling"] = ACTION_ENVIRONMENTAL_DAMAGE_FALLING
+L["Drowning"] = ACTION_ENVIRONMENTAL_DAMAGE_DROWNING
+L["Fatigue"] = ACTION_ENVIRONMENTAL_DAMAGE_FATIGUE
+L["Fire"] = ACTION_ENVIRONMENTAL_DAMAGE_FIRE
+L["Lava"] = ACTION_ENVIRONMENTAL_DAMAGE_LAVA
+L["Slime"] = ACTION_ENVIRONMENTAL_DAMAGE_SLIME
 -- damage done module
 L["Damage"] = true
 L["Damage target list"] = true
@@ -646,6 +654,8 @@ L["Minimum Healing"] = true
 L["Ignore heal events that are below this threshold."] = true
 L["Announce Deaths"] = true
 L["Announces information about the last hit the player took before they died."] = true
+L["Alternative Display"] = true
+L["If a player dies multiple times, each death will be displayed as a separate bar."] = true
 -- activity module
 L["Activity"] = true
 -- dispels module lines --

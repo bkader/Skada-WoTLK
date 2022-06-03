@@ -210,21 +210,21 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		local spellid, spellname, spellschool = nil, nil, 0x01
 
 		if envtype == "Falling" or envtype == "FALLING" then
-			spellid, spellname = 3, ACTION_ENVIRONMENTAL_DAMAGE_FALLING
+			spellid, spellname = 3, L["Falling"]
 		elseif envtype == "Drowning" or envtype == "DROWNING" then
-			spellid, spellname = 4, ACTION_ENVIRONMENTAL_DAMAGE_DROWNING
+			spellid, spellname = 4, L["Drowning"]
 		elseif envtype == "Fatigue" or envtype == "FATIGUE" then
-			spellid, spellname = 5, ACTION_ENVIRONMENTAL_DAMAGE_FATIGUE
+			spellid, spellname = 5, L["Fatigue"]
 		elseif envtype == "Fire" or envtype == "FIRE" then
-			spellid, spellname, spellschool = 6, ACTION_ENVIRONMENTAL_DAMAGE_FIRE, 0x04
+			spellid, spellname, spellschool = 6, L["Fire"], 0x04
 		elseif envtype == "Lava" or envtype == "LAVA" then
-			spellid, spellname, spellschool = 7, ACTION_ENVIRONMENTAL_DAMAGE_LAVA, 0x04
+			spellid, spellname, spellschool = 7, L["Lava"], 0x04
 		elseif envtype == "Slime" or envtype == "SLIME" then
-			spellid, spellname, spellschool = 8, ACTION_ENVIRONMENTAL_DAMAGE_SLIME, 0x08
+			spellid, spellname, spellschool = 8, L["Slime"], 0x08
 		end
 
 		if spellid and spellname then
-			SpellDamage(nil, nil, nil, ENVIRONMENTAL_DAMAGE, nil, dstGUID, dstName, dstFlags, spellid, spellname, spellschool, select(2, ...))
+			SpellDamage(nil, nil, nil, L["Environment"], nil, dstGUID, dstName, dstFlags, spellid, spellname, spellschool, select(2, ...))
 		end
 	end
 

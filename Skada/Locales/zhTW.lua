@@ -531,6 +531,8 @@ L["Ignore Main Tanks"] = "忽略主坦克"
 L["%s on %s removed by %s"] = "%s在%s被%s移除了"
 L["%s on %s removed by %s's %s"] = "%s在%s被%s的%s移除了"
 -- Damage Module --
+-- environmental damage
+L["Environment"] = "環境"
 -- damage done module
 L["Damage"] = "傷害"
 L["Damage target list"] = "傷害目標"
@@ -610,6 +612,8 @@ L["Minimum Healing"] = "最小癒合"
 L["Ignore heal events that are below this threshold."] = "忽略低於此閾值的修復事件。"
 L["Announce Deaths"] = "宣布死亡"
 L["Announces information about the last hit the player took before they died."] = "宣布玩家死前最後一次命中。"
+L["Alternative Display"] = "另类显示"
+L["If a player dies multiple times, each death will be displayed as a separate bar."] = "如果玩家多次死亡，每次死亡都会显示为单独的条形图。"
 -- activity module
 L["Activity"] = "活躍度"
 -- dispels module lines --

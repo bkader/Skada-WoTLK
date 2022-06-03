@@ -482,12 +482,12 @@ end
 
 do
 	local customSpells = {
-		[3] = {ACTION_ENVIRONMENTAL_DAMAGE_FALLING, [[Interface\Icons\ability_rogue_quickrecovery]]},
-		[4] = {ACTION_ENVIRONMENTAL_DAMAGE_DROWNING, [[Interface\Icons\spell_shadow_demonbreath]]},
-		[5] = {ACTION_ENVIRONMENTAL_DAMAGE_FATIGUE, [[Interface\Icons\ability_creature_cursed_05]]},
-		[6] = {ACTION_ENVIRONMENTAL_DAMAGE_FIRE, [[Interface\Icons\spell_fire_fire]]},
-		[7] = {ACTION_ENVIRONMENTAL_DAMAGE_LAVA, [[Interface\Icons\spell_shaman_lavaflow]]},
-		[8] = {ACTION_ENVIRONMENTAL_DAMAGE_SLIME, [[Interface\Icons\inv_misc_slime_01]]}
+		[3] = {L["Falling"], [[Interface\Icons\ability_rogue_quickrecovery]]},
+		[4] = {L["Drowning"], [[Interface\Icons\spell_shadow_demonbreath]]},
+		[5] = {L["Fatigue"], [[Interface\Icons\ability_creature_cursed_05]]},
+		[6] = {L["Fire"], [[Interface\Icons\spell_fire_fire]]},
+		[7] = {L["Lava"], [[Interface\Icons\spell_shaman_lavaflow]]},
+		[8] = {L["Slime"], [[Interface\Icons\inv_misc_slime_01]]}
 	}
 
 	function Skada.GetSpellInfo(spellid)

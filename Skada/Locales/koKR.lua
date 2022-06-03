@@ -533,6 +533,8 @@ L["Ignore Main Tanks"] = "방어 전담 무시"
 L["%s on %s removed by %s"] = "%2$s에게 걸린 %1$s\1241이;가; %3$s\1241으로;로; 제거되었습니다"
 L["%s on %s removed by %s's %s"] = "%2$s에게 걸린 %1$s\1241이;가; %3$s의 %4$s\1241으로;로; 제거되었습니다"
 -- Damage Module --
+-- environmental damage
+L["Environment"] = "환경"
 -- damage done module
 L["Damage"] = "피해"
 -- L["Damage target list"] = ""
@@ -613,6 +615,8 @@ L["Minimum Healing"] = "최소 치유"
 L["Ignore heal events that are below this threshold."] = "이 임계 값보다 낮은 치유 이벤트는 무시하십시오."
 L["Announce Deaths"] = "사망 발표"
 L["Announces information about the last hit the player took before they died."] = "플레이어가 죽기 전에 마지막으로 한 명중을 알려줍니다."
+L["Alternative Display"] = "대체 디스플레이"
+L["If a player dies multiple times, each death will be displayed as a separate bar."] = "플레이어가 여러 번 사망하면 각 사망은 별도의 막대로 표시됩니다."
 -- activity module
 L["Activity"] = "활동"
 -- dispels module lines --

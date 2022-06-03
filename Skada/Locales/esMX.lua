@@ -534,6 +534,8 @@ L["Ignore Main Tanks"] = "Ignorar los tanques principales"
 L["%s on %s removed by %s"] = "%s sobre %s eliminado por %s"
 L["%s on %s removed by %s's %s"] = "%1$s sobre %2$s eliminado por %4$s de %3$s"
 -- Damage Module --
+-- environmental damage
+L["Environment"] = "Entorno"
 -- damage done module
 L["Damage"] = "Da\195\177o"
 L["Damage target list"] = "Lista de objetivos de da\195\177o"
@@ -613,6 +615,8 @@ L["Minimum Healing"] = "Curaci\195\179n m\195\173nima"
 L["Ignore heal events that are below this threshold."] = "Ignore los eventos de curaci\195\179n que est\195\169n por debajo de este umbral."
 L["Announce Deaths"] = "Anunciar muertes"
 L["Announces information about the last hit the player took before they died."] = "Anuncia el \195\186ltimo golpe que recibi\195\179 el jugador antes de morir."
+L["Alternative Display"] = "Visualizaci\195\179n alternativa"
+L["If a player dies multiple times, each death will be displayed as a separate bar."] = "Si un jugador mueren varias veces, cada muerte ser\195\161 visualizada como una barra separada."
 -- activity module
 L["Activity"] = "Actividad"
 -- dispels module lines --
