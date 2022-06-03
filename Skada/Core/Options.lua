@@ -316,7 +316,7 @@ Skada.options = {
 						},
 						alwayskeepbosses = {
 							type = "toggle",
-							name = L["Always keep boss fights"],
+							name = L["Always save boss fights"],
 							desc = L["Boss fights will be kept with this on and will not be affected by Skada reset."],
 							order = 50
 						},

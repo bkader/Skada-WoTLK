@@ -528,6 +528,7 @@ Skada:RegisterModule("Debuffs", function(L)
 	local mod = Skada:NewModule("Debuffs")
 	local spellmod = mod:NewModule("Debuff spell list")
 	local spelltargetmod = spellmod:NewModule("Debuff target list")
+	local spellsourcemod = spellmod:NewModule("Debuff source list")
 	local targetmod = mod:NewModule("Debuff target list")
 	local targetspellmod = targetmod:NewModule("Debuff spell list")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
@@ -623,14 +624,10 @@ Skada:RegisterModule("Debuffs", function(L)
 
 	function spelltargetmod:Update(win, set)
 		win.title = format(L["%s's <%s> targets"], win.actorname or L["Unknown"], win.spellname or L["Unknown"])
-		if not win.spellid then
-			return
-		end
+		if not win.spellid then return end
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
-		if not player then
-			return
-		end
+		if not player then return end
 
 		local targets, maxtime = player:GetDebuffTargets(win.spellid)
 		if targets and maxtime > 0 then
@@ -659,6 +656,40 @@ Skada:RegisterModule("Debuffs", function(L)
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
+			end
+		end
+	end
+
+	function spellsourcemod:Enter(win, id, label)
+		win.spellid, win.spellname = id, label
+		win.title = format(L["%s's sources"], label)
+	end
+
+	function spellsourcemod:Update(win, set)
+		win.title = format(L["%s's sources"], win.spellname or L["Unknown"])
+		if not win.spellid then return end
+
+		local nr = 0
+		for i = 1, #set.players do
+			local player = set.players[i]
+			local aura = player and player.auras and player.auras[win.spellid]
+			if aura then
+				nr = nr + 1
+				local d = win:nr(nr)
+
+				d.id = player.id
+				d.label = player.name
+				d.text = player.id and Skada:FormatName(player.name, player.id)
+				d.class = player.class
+				d.role = player.role
+				d.spec = player.spec
+
+				d.value = aura.uptime
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Uptime and Skada:FormatTime(d.value),
+					mod.metadata.columns.Count and aura.count,
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, player:GetTime())
+				)
 			end
 		end
 	end
@@ -720,7 +751,7 @@ Skada:RegisterModule("Debuffs", function(L)
 		UpdateFunction("DEBUFF", win, set, self)
 	end
 
-	local function aura_subtooltip(win, id, label, tooltip)
+	local function aura_target_tooltip(win, id, label, tooltip)
 		local set = win.spellid and win:GetSelectedSet()
 		local actor = set and set:GetPlayer(win.actorid, win.actorname)
 		local aura = actor and actor.auras and actor.auras[win.spellid]
@@ -739,9 +770,27 @@ Skada:RegisterModule("Debuffs", function(L)
 		end
 	end
 
+	local function aura_source_tooltip(win, id, label, tooltip)
+		local set = win.spellid and win:GetSelectedSet()
+		local actor = set and set:GetPlayer(id, label)
+		local aura = actor and actor.auras and actor.auras[win.spellid]
+		if aura and aura.count then
+			tooltip:AddLine(label .. ": " .. win.spellname)
+			if aura.school and spellschools and spellschools[aura.school] then
+				tooltip:AddLine(spellschools(aura.school))
+			end
+
+			tooltip:AddDoubleLine(L["Count"], aura.count, 1, 1, 1)
+			if aura.refresh then
+				tooltip:AddDoubleLine(L["Refresh"], aura.refresh, 1, 1, 1)
+			end
+		end
+	end
+
 	function mod:OnEnable()
-		spelltargetmod.metadata = {tooltip = aura_subtooltip}
-		spellmod.metadata = {click1 = spelltargetmod, post_tooltip = aura_tooltip}
+		spelltargetmod.metadata = {tooltip = aura_target_tooltip}
+		spellsourcemod.metadata = {showspots = true, tooltip = aura_source_tooltip}
+		spellmod.metadata = {click1 = spelltargetmod, click2 = spellsourcemod, post_tooltip = aura_tooltip}
 		targetmod.metadata = {click1 = targetspellmod}
 		self.metadata = {
 			click1 = spellmod,

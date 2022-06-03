@@ -285,7 +285,7 @@ L["Show totals"] = true
 L["Shows a extra row with a summary in certain modes."] = true
 L["Only keep boss fighs"] = true
 L["Boss fights will be kept with this on, and non-boss fights are discarded."] = true
-L["Always keep boss fights"] = true
+L["Always save boss fights"] = true
 L["Boss fights will be kept with this on and will not be affected by Skada reset."] = true
 L["Hide when solo"] = true
 L["Hides Skada's window when not in a party or raid."] = true
@@ -545,6 +545,7 @@ L["%s's buffs"] = true
 L["Debuffs"] = true
 L["Debuff spell list"] = true
 L["Debuff target list"] = true
+L["Debuff source list"] = true
 L["actor debuffs"] = function(n1, n2) return ((not n2 or n1 == n2) and "%s's debuffs" or "%s's debuffs on %s"):format(n1, n2) end
 L["%s's <%s> targets"] = true
 L["%s's <%s> sources"] = true
