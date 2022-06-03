@@ -777,13 +777,6 @@ Skada:RegisterModule("Damage", function(L, P)
 		playermod.nototal = true
 		targetmod.nototal = true
 
-		local compare = Skada:GetModule("Comparison", true)
-		if compare then
-			self.metadata.click3 = compare.SetActor
-			self.metadata.click3_label = L["Damage Comparison"]
-			compare.nototal = true -- no total click.
-		end
-
 		local flags_src_dst = {src_is_interesting = true, dst_is_not_interesting = true}
 
 		Skada:RegisterForCL(

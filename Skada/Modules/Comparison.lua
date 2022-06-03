@@ -2,7 +2,8 @@ local Skada = Skada
 Skada:RegisterModule("Comparison", function(L, P)
 	if Skada:IsDisabled("Damage", "Comparison") then return end
 
-	local mod = Skada:NewModule("Comparison")
+	local parent = Skada:GetModule("Damage")
+	local mod = parent:NewModule("Comparison")
 
 	local spellmod = mod:NewModule("Damage spell list")
 	local dspellmod = spellmod:NewModule("Damage spell details")
@@ -826,9 +827,9 @@ Skada:RegisterModule("Comparison", function(L, P)
 		end
 	end
 
-	function mod:SetActor(win, id, label)
+	local function SetActor(_, win, id, label)
 		-- no DisplayMode func?
-		if not win.DisplayMode then return end
+		if not win or not win.DisplayMode then return end
 
 		-- same actor or me? reset to the player
 		if id == Skada.userGUID or (id == mod.userGUID and win.selectedmode == mod) then
@@ -866,24 +867,22 @@ Skada:RegisterModule("Comparison", function(L, P)
 			post_tooltip = activity_tooltip,
 			click1 = spellmod,
 			click2 = targetmod,
-			click3 = self.SetActor,
+			click3 = SetActor,
 			click3_label = L["Damage Comparison"],
 			columns = {Damage = true, DPS = true, Comparison = true, Percent = true},
 			icon = [[Interface\Icons\Ability_Warrior_OffensiveStance]]
 		}
 
 		-- no total click.
+		self.nototal = true
 		spellmod.nototal = true
 		targetmod.nototal = true
 
-		self.userGUID = Skada.userGUID
-		self.userName = Skada.userName
-		self.userClass = Skada.userClass
+		self.category = parent.category or L["Damage Done"]
+		Skada:AddColumnOptions(self)
 
-		Skada:AddMode(self, L["Damage Done"])
-	end
-
-	function mod:OnDisable()
-		Skada:RemoveMode(self)
+		parent.metadata.click3 = SetActor
+		parent.metadata.click3_label = L["Damage Comparison"]
+		parent:Reload()
 	end
 end)
