@@ -199,7 +199,7 @@ local function SetValue(info, value)
 		Skada:Wipe()
 		Skada:UpdateDisplay(true)
 	elseif key == "syncoff" then
-		Skada:SetupNetwork(value ~= true)
+		Skada:RegisterComms(value ~= true)
 	end
 end
 

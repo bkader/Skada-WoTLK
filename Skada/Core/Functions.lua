@@ -873,7 +873,7 @@ do
 						isPercent = true,
 						order = 40
 					},
-					empty_1 = {
+					empty_2 = {
 						type = "description",
 						name = " ",
 						width = "full",
@@ -1223,7 +1223,7 @@ do
 		end
 	end
 
-	function Skada:SetupNetwork(enable)
+	function Skada:RegisterComms(enable)
 		if enable then
 			self.SendComm = SendCommMessage
 			self.OnCommReceived = OnCommReceived

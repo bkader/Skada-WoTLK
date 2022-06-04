@@ -375,13 +375,13 @@ function Skada:OpenMenu(window)
 				info.checked = (self.win.selectedset == "current")
 				UIDropDownMenu_AddButton(info, level)
 
-				if #Skada.char.sets > 0 then
+				sets = Skada.char.sets
+				if #sets > 0 then
 					wipe(info)
 					info.disabled = 1
 					info.notCheckable = 1
 					UIDropDownMenu_AddButton(info, level)
 
-					sets = Skada:GetSets()
 					local num = #sets
 					for i = 1, num do
 						local set = sets[i]
@@ -396,7 +396,7 @@ function Skada:OpenMenu(window)
 					end
 				end
 			elseif UIDROPDOWNMENU_MENU_VALUE == "delete" then
-				sets = Skada:GetSets()
+				sets = Skada.char.sets
 				local num = #sets
 				for i = 1, num do
 					local set = sets[i]
@@ -409,7 +409,7 @@ function Skada:OpenMenu(window)
 					UIDropDownMenu_AddButton(info, level)
 				end
 			elseif UIDROPDOWNMENU_MENU_VALUE == "keep" then
-				sets = Skada:GetSets()
+				sets = Skada.char.sets
 				local num, kept = #sets, 0
 				for i = 1, num do
 					local set = sets[i]
@@ -435,7 +435,7 @@ function Skada:OpenMenu(window)
 					wipe(info)
 					info.text = L["Select All"]
 					info.func = function()
-						sets = Skada:GetSets()
+						sets = Skada.char.sets
 						for i = 1, #sets do
 							sets[i].keep = true
 						end
@@ -448,7 +448,7 @@ function Skada:OpenMenu(window)
 					wipe(info)
 					info.text = L["Deselect All"]
 					info.func = function()
-						sets = Skada:GetSets()
+						sets = Skada.char.sets
 						for i = 1, #sets do
 							sets[i].keep = nil
 						end
@@ -615,7 +615,7 @@ function Skada:OpenMenu(window)
 				info.checked = (Skada.db.profile.report.set == "current")
 				UIDropDownMenu_AddButton(info, level)
 
-				sets = Skada:GetSets()
+				sets = Skada.char.sets
 				local num = #sets
 				for i = 1, num do
 					local set = sets[i]
@@ -669,7 +669,7 @@ function Skada:SegmentMenu(window)
 			info.notCheckable = 1
 			UIDropDownMenu_AddButton(info, level)
 
-			sets = Skada:GetSets()
+			sets = Skada.char.sets
 			local num = #sets
 			for i = 1, num do
 				local set = sets[i]
@@ -906,7 +906,7 @@ do
 			local setbox = AceGUI:Create("Dropdown")
 			setbox:SetLabel(L["Segment"])
 			setbox:SetList({total = L["Total"], current = L["Current"]})
-			sets = Skada:GetSets()
+			sets = Skada.char.sets
 			for i = 1, #sets do
 				setbox:AddItem(i, sets[i].name)
 			end

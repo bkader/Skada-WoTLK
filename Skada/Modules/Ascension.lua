@@ -2,7 +2,7 @@
 -- this module allows players on classless realms to choose their
 -- own custom icons and colors that best represent their builds.
 local Skada = Skada
--- if not Skada.Ascension or Skada.AscensionCoA then return end
+if not Skada.Ascension or Skada.AscensionCoA then return end
 Skada:RegisterModule("Project Ascension", function(L, _, G)
 	if Skada:IsDisabled("Project Ascension") then return end
 

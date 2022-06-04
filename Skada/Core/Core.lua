@@ -3202,6 +3202,7 @@ function Skada:OnInitialize()
 	self:RegisterClasses()
 	self:RegisterSchools()
 	self:RegisterToast()
+	self:RegisterComms(not self.db.profile.syncoff)
 
 	-- fix setstokeep, setslimit and timemesure and remove old stuff
 	self.db.profile.setstokeep = min(25, max(0, self.db.profile.setstokeep or 0))
@@ -3258,7 +3259,6 @@ function Skada:OnEnable()
 
 	self:SetupStorage()
 	self:ReloadSettings()
-	self:SetupNetwork(not self.db.profile.syncoff)
 
 	-- SharedMedia is sometimes late, we wait few seconds then re-apply settings.
 	self:ScheduleTimer("ApplySettings", 2)

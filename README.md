@@ -330,14 +330,14 @@ actor:GetTime(active) -- returns actor's active/effective time.
 
 actor:GetDamage(useful) -- returns actor's damage, excluding overkill if "useful" is true
 actor:GetDPS(useful, active) -- returns the actor's active/effective DPS and damage amount
-actor:GetDamageTargets(tbl) -- returns the actor's damage targets table.
+actor:GetDamageTargets(tbl) -- returns the actor's damage targets table and the damage amount.
 actor:GetDamageOnTarget(name) -- returns the damage, overkill [and userful] on the given target
 
 actor:GetOverkill() -- returns the amount of overkill
 
 actor:GetDamageTaken() -- returns the amount of damage taken
 actor:GetDTPS(active) -- returns the DTPS and the amount of damage taken
-actor:GetDamageSources(tbl) -- returns the table of damage taken sources.
+actor:GetDamageSources(tbl) -- returns the table of damage taken sources and damage amount.
 actor:GetDamageFromSource(name) -- returns the damage, overkill [and useful for enemies]
 
 actor:GetHeal() -- returns the actor's heal amount.

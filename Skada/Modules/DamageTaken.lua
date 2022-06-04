@@ -427,10 +427,8 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		if not actor then return end
 
-		local total = actor:GetDamageTaken()
-		local sources = (total > 0) and actor:GetDamageSources()
-
-		if sources then
+		local sources, total = actor:GetDamageSources()
+		if sources and total > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
 			end
@@ -594,8 +592,8 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local sources = actor and actor:GetDamageSources()
-		if sources then
-			local total = sources[win.targetname] and sources[win.targetname].amount or 0
+		if sources and sources[win.targetname] then
+			local total = sources[win.targetname].amount or 0
 			if P.absdamage and sources[win.targetname].total then
 				total = sources[win.targetname].total
 			end

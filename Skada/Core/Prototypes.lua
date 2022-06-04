@@ -30,24 +30,33 @@ Skada.enemyPrototype = enemyPrototype
 -------------------------------------------------------------------------------
 -- segment/set prototype & functions
 
+local BITMASK_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY or 0x00000010
+local band, tremove = bit.band, tremove or table.remove
+
 -- binds a set table to set prototype
 function setPrototype:Bind(obj)
 	if obj and getmetatable(obj) ~= self then
-		setmetatable(obj, self)
-		self.__index = self
-
 		if obj.players then
-			for i = 1, #obj.players do
-				playerPrototype:Bind(obj.players[i], obj)
+			for i = #obj.players, 1, -1 do
+				local p = obj.players[i]
+				if p and p.flag and band(p.flag, BITMASK_FRIENDLY) == 0 then
+					tremove(obj.players, i) -- postfix
+				elseif p then
+					playerPrototype:Bind(p, obj)
+				end
 			end
 		end
 
 		if obj.enemies then
-			for i = 1, #obj.enemies do
+			for i = #obj.enemies, 1, -1 do
 				enemyPrototype:Bind(obj.enemies[i], obj)
 			end
 		end
+
+		setmetatable(obj, self)
+		self.__index = self
 	end
+
 	return obj
 end
 
@@ -429,9 +438,16 @@ end
 
 -- returns the actor's damage targets table if found
 function actorPrototype:GetDamageTargets(tbl)
-	if self.damagespells then
-		tbl = clear(tbl or cacheTable)
+	local damage = 0
 
+	if self.damagespells then
+		if Skada.db.profile.absdamage and self.totaldamage then
+			damage = self.totaldamage
+		elseif self.damage then
+			damage = self.damage
+		end
+
+		tbl = clear(tbl or cacheTable)
 		for _, spell in pairs(self.damagespells) do
 			if spell.targets then
 				for name, tar in pairs(spell.targets) do
@@ -465,7 +481,7 @@ function actorPrototype:GetDamageTargets(tbl)
 		end
 	end
 
-	return tbl
+	return tbl, damage
 end
 
 -- returns the damage on the given target
@@ -521,9 +537,16 @@ end
 
 -- returns the actors damage sources
 function actorPrototype:GetDamageSources(tbl)
-	if self.damagetakenspells then
-		tbl = clear(tbl or cacheTable)
+	local damage = 0
 
+	if self.damagetakenspells then
+		if Skada.db.profile.absdamage and self.totaldamagetaken then
+			damage = self.totaldamagetaken
+		elseif self.damagetaken then
+			damage = self.damagetaken
+		end
+
+		tbl = clear(tbl or cacheTable)
 		for _, spell in pairs(self.damagetakenspells) do
 			if spell.sources then
 				for name, source in pairs(spell.sources) do
@@ -561,7 +584,7 @@ function actorPrototype:GetDamageSources(tbl)
 		end
 	end
 
-	return tbl
+	return tbl, damage
 end
 
 -- returns the actors damage from the given source
