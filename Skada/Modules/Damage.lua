@@ -1,7 +1,7 @@
 local Skada = Skada
 
 local pairs, format, max = pairs, string.format, math.max
-local GetSpellInfo, cacheTable, T = Skada.GetSpellInfo, Skada.cacheTable, Skada.Table
+local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local PercentToRGB = Skada.PercentToRGB
 local _
 
@@ -9,7 +9,7 @@ local _
 -- Damage Done Module --
 -- ================== --
 
-Skada:RegisterModule("Damage", function(L, P)
+Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 	if Skada:IsDisabled("Damage") then return end
 
 	local mod = Skada:NewModule("Damage")
@@ -19,10 +19,10 @@ Skada:RegisterModule("Damage", function(L, P)
 	local targetmod = mod:NewModule("Damage target list")
 	local tdetailmod = targetmod:NewModule("Damage spell list")
 	local UnitGUID, GetTime = UnitGUID, GetTime
-	local new, del = Skada.newTable, Skada.delTable
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local T = Skada.Table
 
 	-- damage miss types
 	local missTypes = Skada.missTypes
@@ -1048,7 +1048,7 @@ end)
 -- Damage Done By Spell Module --
 -- =========================== --
 
-Skada:RegisterModule("Damage Done By Spell", function(L, P)
+Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C, new, _, clear)
 	if Skada:IsDisabled("Damage", "Damage Done By Spell") then return end
 
 	local mod = Skada:NewModule("Damage Done By Spell")
@@ -1099,9 +1099,7 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P)
 	function sourcemod:Update(win, set)
 		win.title = format(L["%s's sources"], win.spellname or L["Unknown"])
 		if win.spellname then
-			wipe(cacheTable)
-			local total = 0
-
+			local sources, total = clear(C), 0
 			for i = 1, #set.players do
 				local player = set.players[i]
 				if
@@ -1111,19 +1109,19 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P)
 					player.damagespells[win.spellname].total and
 					player.damagespells[win.spellname].total > 0
 				then
-					cacheTable[player.name] = {
-						id = player.id,
-						class = player.class,
-						role = player.role,
-						spec = player.spec,
-						amount = player.damagespells[win.spellname].amount,
-						time = mod.metadata.columns.sDPS and player:GetTime()
-					}
-					if P.absdamage then
-						cacheTable[player.name].amount = player.damagespells[win.spellname].total
+					sources[player.name] = new()
+					sources[player.name].id = player.id
+					sources[player.name].class = player.class
+					sources[player.name].role = player.role
+					sources[player.name].spec = player.spec
+					sources[player.name].amount = player.damagespells[win.spellname].amount
+					sources[player.name].time = mod.metadata.columns.sDPS and player:GetTime()
+
+					if P.absdamage and player.damagespells[win.spellname].total then
+						sources[player.name].amount = player.damagespells[win.spellname].total
 					end
 
-					total = total + cacheTable[player.name].amount
+					total = total + sources[player.name].amount
 				end
 			end
 
@@ -1133,7 +1131,7 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P)
 				end
 
 				local nr = 0
-				for playername, player in pairs(cacheTable) do
+				for playername, player in pairs(sources) do
 					nr = nr + 1
 					local d = win:nr(nr)
 
@@ -1165,19 +1163,21 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P)
 		local total = set and set:GetDamage() or 0
 		if total == 0 then return end
 
-		wipe(cacheTable)
-
+		local spells = clear(C)
 		for i = 1, #set.players do
 			local player = set.players[i]
 			if player and player.damagespells then
 				for spellname, spell in pairs(player.damagespells) do
 					if spell.total > 0 then
-						if not cacheTable[spellname] then
-							cacheTable[spellname] = {id = spell.id, school = spell.school, amount = P.absdamage and spell.total or spell.amount or 0}
+						if not spells[spellname] then
+							spells[spellname] = new()
+							spells[spellname].id = spell.id
+							spells[spellname].school = spell.school
+							spells[spellname].amount = P.absdamage and spell.total or spell.amount or 0
 						elseif P.absdamage then
-							cacheTable[spellname].amount = cacheTable[spellname].amount + spell.total
+							spells[spellname].amount = spells[spellname].amount + spell.total
 						else
-							cacheTable[spellname].amount = cacheTable[spellname].amount + spell.amount
+							spells[spellname].amount = spells[spellname].amount + spell.amount
 						end
 					end
 				end
@@ -1189,7 +1189,7 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P)
 		end
 
 		local settime, nr = self.metadata.columns.DPS and set:GetTime(), 0
-		for spellname, spell in pairs(cacheTable) do
+		for spellname, spell in pairs(spells) do
 			nr = nr + 1
 			local d = win:nr(nr)
 

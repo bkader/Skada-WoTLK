@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Potions", function(L, P)
+Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 	if Skada:IsDisabled("Potions") then return end
 
 	local mod = Skada:NewModule("Potions")
@@ -11,7 +11,6 @@ Skada:RegisterModule("Potions", function(L, P)
 	local GetItemInfo, GetSpellInfo = GetItemInfo, Skada.GetSpellInfo or GetSpellInfo
 	local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
 	local UnitGUID, UnitName, UnitClass, UnitBuff = UnitGUID, UnitName, UnitClass, UnitBuff
-	local new, del = Skada.newTable, Skada.delTable
 	local T, potionIDs, _= Skada.Table, {}, nil
 
 	local prepotionStr, potionStr = "\124c%s%s\124r %s", "\124T%s:14:14:1:-2:32:32:2:30:2:30\124t"
@@ -405,20 +404,19 @@ Skada:RegisterModule("Potions", function(L, P)
 
 		function setPrototype:GetPotion(potionid, class, tbl)
 			if potionid and self.potion then
-				tbl = wipe(tbl or Skada.cacheTable)
+				tbl = clear(tbl or C)
 				local total = 0
 
 				for i = 1, #self.players do
 					local p = self.players[i]
 					if p and p.potionspells and p.potionspells[potionid] and (not class or class == p.class) then
 						total = total + p.potionspells[potionid]
-						tbl[p.name] = {
-							id = p.id,
-							class = p.class,
-							role = p.role,
-							spec = p.spec,
-							count = p.potionspells[potionid]
-						}
+						tbl[p.name] = new()
+						tbl[p.name].id = p.id
+						tbl[p.name].class = p.class
+						tbl[p.name].role = p.role
+						tbl[p.name].spec = p.spec
+						tbl[p.name].count = p.potionspells[potionid]
 					end
 				end
 

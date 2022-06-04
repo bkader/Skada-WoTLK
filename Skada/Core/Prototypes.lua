@@ -1,16 +1,17 @@
 local Skada = Skada
 
-local pairs, wipe, max = pairs, wipe, math.max
+local pairs, max = pairs, math.max
 local getmetatable, setmetatable = getmetatable, setmetatable
+local new, clear = Skada.newTable, Skada.clearTable
 
 -- a dummy table used as fallback
 local dummyTable = {}
 Skada.dummyTable = dummyTable
 
 -- this one should be used at modules level
-local T = Skada.Table
-local cacheTable = T.get("Skada_CacheTable")
+local cacheTable, cacheTable2 = {}, {}
 Skada.cacheTable = cacheTable
+Skada.cacheTable2 = cacheTable2
 
 -- prototypes declaration
 local setPrototype = {} -- sets
@@ -429,13 +430,16 @@ end
 -- returns the actor's damage targets table if found
 function actorPrototype:GetDamageTargets(tbl)
 	if self.damagespells then
-		tbl = wipe(tbl or cacheTable)
+		tbl = clear(tbl or cacheTable)
 
 		for _, spell in pairs(self.damagespells) do
 			if spell.targets then
 				for name, tar in pairs(spell.targets) do
 					if not tbl[name] then
-						tbl[name] = {amount = tar.amount, total = tar.total, overkill = tar.overkill}
+						tbl[name] = new()
+						tbl[name].amount = tar.amount
+						tbl[name].total = tar.total
+						tbl[name].overkill = tar.overkill
 					else
 						tbl[name].amount = tbl[name].amount + tar.amount
 						if tar.total then
@@ -518,18 +522,17 @@ end
 -- returns the actors damage sources
 function actorPrototype:GetDamageSources(tbl)
 	if self.damagetakenspells then
-		tbl = wipe(tbl or cacheTable)
+		tbl = clear(tbl or cacheTable)
 
 		for _, spell in pairs(self.damagetakenspells) do
 			if spell.sources then
 				for name, source in pairs(spell.sources) do
 					if not tbl[name] then
-						tbl[name] = {
-							amount = source.amount,
-							total = source.total,
-							overkill = source.overkill, -- nil for players
-							useful = source.useful, -- nil for enemies
-						}
+						tbl[name] = new()
+						tbl[name].amount = source.amount
+						tbl[name].total = source.total
+						tbl[name].overkill = source.overkill -- nil for players
+						tbl[name].useful = source.useful -- nil for enemies
 					else
 						tbl[name].amount = tbl[name].amount + source.amount
 						if source.total then
@@ -646,20 +649,23 @@ end
 -- returns the actor's heal targets table if found
 function actorPrototype:GetHealTargets(tbl)
 	if self.healspells then
-		tbl = wipe(tbl or cacheTable)
+		tbl = clear(tbl or cacheTable)
 
 		for _, spell in pairs(self.healspells) do
 			if spell.targets then
 				for name, target in pairs(spell.targets) do
 					if type(target) == "number" then
 						if not tbl[name] then
-							tbl[name] = {amount = target}
+							tbl[name] = new()
+							tbl[name].amount = target
 						else
 							tbl[name].amount = tbl[name].amount + target
 						end
 					else
 						if not tbl[name] then
-							tbl[name] = {amount = target.amount, overheal = target.overheal}
+							tbl[name] = new()
+							tbl[name].amount = target.amount
+							tbl[name].overheal = target.overheal
 						else
 							tbl[name].amount = tbl[name].amount + target.amount
 							if target.overheal then
@@ -711,14 +717,16 @@ end
 -- returns the table of overheal targets if found
 function actorPrototype:GetOverhealTargets(tbl)
 	if self.overheal and self.healspells then
-		tbl = wipe(tbl or cacheTable)
+		tbl = clear(tbl or cacheTable)
 
 		for _, spell in pairs(self.healspells) do
 			if spell.overheal and spell.overheal > 0 and spell.targets then
 				for name, target in pairs(spell.targets) do
 					if target.overheal and target.overheal > 0 then
 						if not tbl[name] then
-							tbl[name] = {amount = target.overheal, total = target.amount + target.overheal}
+							tbl[name] = new()
+							tbl[name].amount = target.overheal
+							tbl[name].total = target.amount + target.overheal
 						else
 							tbl[name].amount = tbl[name].amount + target.overheal
 							tbl[name].total = tbl[name].total + target.amount + target.overheal
@@ -761,20 +769,22 @@ end
 -- returns the total heal amount on the given target
 function actorPrototype:GetTotalHealTargets(tbl)
 	if self.healspells then
-		tbl = wipe(tbl or cacheTable)
+		tbl = clear(tbl or cacheTable)
 
 		for _, spell in pairs(self.healspells) do
 			if spell.targets then
 				for name, target in pairs(spell.targets) do
 					if type(target) == "number" then
 						if not tbl[name] then
-							tbl[name] = {amount = target}
+							tbl[name] = new()
+							tbl[name].amount = target
 						else
 							tbl[name].amount = tbl[name].amount + target
 						end
 					else
 						if not tbl[name] then
-							tbl[name] = {amount = target.amount + target.overheal}
+							tbl[name] = new()
+							tbl[name].amount = target.amount + target.overheal
 						else
 							tbl[name].amount = tbl[name].amount + target.amount + target.overheal
 						end
@@ -854,13 +864,14 @@ end
 -- returns the actor's absorb targets table if found
 function actorPrototype:GetAbsorbTargets(tbl)
 	if self.absorbspells then
-		tbl = wipe(tbl or cacheTable)
+		tbl = clear(tbl or cacheTable)
 
 		for _, spell in pairs(self.absorbspells) do
 			if spell.targets then
 				for name, amount in pairs(spell.targets) do
 					if not tbl[name] then
-						tbl[name] = {amount = amount}
+						tbl[name] = new()
+						tbl[name].amount = amount
 					else
 						tbl[name].amount = tbl[name].amount + amount
 					end
@@ -886,7 +897,7 @@ end
 -- returns the actor's absorb and heal targets table if found
 function actorPrototype:GetAbsorbHealTargets(tbl)
 	if self.healspells or self.absorbspells then
-		tbl = wipe(tbl or cacheTable)
+		tbl = clear(tbl or cacheTable)
 
 		-- absorb targets
 		if self.absorbspells then
@@ -894,7 +905,8 @@ function actorPrototype:GetAbsorbHealTargets(tbl)
 				if spell.targets then
 					for name, amount in pairs(spell.targets) do
 						if not tbl[name] then
-							tbl[name] = {amount = amount}
+							tbl[name] = new()
+							tbl[name].amount = amount
 						else
 							tbl[name].amount = tbl[name].amount + amount
 						end
@@ -921,13 +933,16 @@ function actorPrototype:GetAbsorbHealTargets(tbl)
 					for name, target in pairs(spell.targets) do
 						if type(target) == "number" then
 							if not tbl[name] then
-								tbl[name] = {amount = target}
+								tbl[name] = new()
+								tbl[name].amount = target
 							else
 								tbl[name].amount = tbl[name].amount + target
 							end
 						else
 							if not tbl[name] then
-								tbl[name] = {amount = target.amount, overheal = target.overheal}
+								tbl[name] = new()
+								tbl[name].amount = target.amount
+								tbl[name].overheal = target.overheal
 							else
 								tbl[name].amount = tbl[name].amount + target.amount
 								if target.overheal then

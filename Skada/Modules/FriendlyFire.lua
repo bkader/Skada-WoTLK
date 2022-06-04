@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Friendly Fire", function(L, P)
+Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, _, clear)
 	if Skada:IsDisabled("Friendly Fire") then return end
 
 	local mod = Skada:NewModule("Friendly Fire")
@@ -321,27 +321,25 @@ Skada:RegisterModule("Friendly Fire", function(L, P)
 
 	do
 		local playerPrototype = Skada.playerPrototype
-		local cacheTable = Skada.cacheTable
-		local wipe = wipe
-
 		function playerPrototype:GetFriendlyFireTargets(tbl)
 			if self.friendfirespells then
-				tbl = wipe(tbl or cacheTable)
+				tbl = clear(tbl or C)
 				for _, spell in pairs(self.friendfirespells) do
 					if spell.targets then
 						for name, amount in pairs(spell.targets) do
-							if not cacheTable[name] then
-								cacheTable[name] = {amount = amount}
+							if not tbl[name] then
+								tbl[name] = new()
+								tbl[name].amount = amount
 							else
-								cacheTable[name].amount = cacheTable[name].amount + amount
+								tbl[name].amount = tbl[name].amount + amount
 							end
-							if not cacheTable[name].class then
+							if not tbl[name].class then
 								local actor = self.super:GetActor(name)
 								if actor then
-									cacheTable[name].id = actor.id
-									cacheTable[name].class = actor.class
-									cacheTable[name].role = actor.role
-									cacheTable[name].spec = actor.spec
+									tbl[name].id = actor.id
+									tbl[name].class = actor.class
+									tbl[name].role = actor.role
+									tbl[name].spec = actor.spec
 								end
 							end
 						end

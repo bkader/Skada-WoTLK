@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Tweaks", function(L, P)
+Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 	if Skada:IsDisabled("Tweaks") then return end
 
 	local mod = Skada:NewModule("Tweaks", "AceHook-3.0")
@@ -45,7 +45,6 @@ Skada:RegisterModule("Tweaks", function(L, P)
 		do
 			local tconcat = table.concat
 			local UnitExists, UnitName = UnitExists, UnitName
-			local new, del = Skada.newTable, Skada.delTable
 
 			function WhoPulled(hitline)
 				-- first hit

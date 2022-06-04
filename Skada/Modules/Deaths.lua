@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Deaths", function(L, P)
+Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 	if Skada:IsDisabled("Deaths") then return end
 
 	local mod = Skada:NewModule("Deaths")
@@ -9,13 +9,11 @@ Skada:RegisterModule("Deaths", function(L, P)
 
 	local tinsert, tremove, tsort, tconcat = table.insert, table.remove, table.sort, table.concat
 	local tostring, strmatch, format = tostring, strmatch, string.format
-	local max, floor = math.max, math.floor
+	local max, floor, wipe = math.max, math.floor, wipe
 	local UnitHealthInfo = Skada.UnitHealthInfo
 	local UnitIsFeignDeath = UnitIsFeignDeath
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
-	local T, wipe = Skada.Table, wipe
-	local new, del = Skada.newTable, Skada.delTable
 	local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
 	local GetTime, date = GetTime, date
 	local _
@@ -778,7 +776,7 @@ Skada:RegisterModule("Deaths", function(L, P)
 	end
 
 	function mod:SetComplete(set)
-		T.clear(data)
+		wipe(data)
 
 		-- clean deathlogs.
 		for i = 1, #set.players do

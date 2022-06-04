@@ -1,7 +1,7 @@
 local Skada = Skada
 
 -- frequently used globals --
-local pairs, type, format, max, wipe = pairs, type, string.format, math.max, wipe
+local pairs, type, format, max = pairs, type, string.format, math.max
 local GetSpellInfo, T = Skada.GetSpellInfo or GetSpellInfo, Skada.Table
 local setPrototype, enemyPrototype = Skada.setPrototype, Skada.enemyPrototype
 local _
@@ -9,7 +9,7 @@ local _
 ---------------------------------------------------------------------------
 -- Enemy Damage Taken
 
-Skada:RegisterModule("Enemy Damage Taken", function(L, P)
+Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, _, clear)
 	if Skada:IsDisabled("Enemy Damage Taken") then return end
 
 	local mod = Skada:NewModule("Enemy Damage Taken")
@@ -860,7 +860,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P)
 
 	function enemyPrototype:GetDamageSpellSources(spellid, tbl)
 		if self.damagetakenspells and self.damagetakenspells[spellid] and self.damagetakenspells[spellid].sources then
-			tbl = wipe(tbl or Skada.cacheTable)
+			tbl = clear(tbl or C)
 
 			local total = self.damagetakenspells[spellid].amount or 0
 			if P.absdamage and self.damagetakenspells[spellid].total then
@@ -869,7 +869,8 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P)
 
 			for name, source in pairs(self.damagetakenspells[spellid].sources) do
 				if not tbl[name] then
-					tbl[name] = {amount = P.absdamage and source.total or source.amount or 0}
+					tbl[name] = new()
+					tbl[name].amount = P.absdamage and source.total or source.amount or 0
 				elseif P.absdamage and source.total then
 					tbl[name].amount = tbl[name].amount + source.total
 				else
@@ -913,7 +914,7 @@ end)
 ---------------------------------------------------------------------------
 -- Enemy Damage Done
 
-Skada:RegisterModule("Enemy Damage Done", function(L, P)
+Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 	if Skada:IsDisabled("Enemy Damage Done") then return end
 
 	local mod = Skada:NewModule("Enemy Damage Done")
@@ -1369,12 +1370,18 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P)
 
 	function enemyPrototype:GetDamageTargetSpells(name, tbl)
 		if self.damagespells and name then
-			tbl = wipe(tbl or Skada.cacheTable)
+			tbl = clear(tbl or C)
 			local total = 0
 
 			for spellid, spell in pairs(self.damagespells) do
 				if spell.targets and spell.targets[name] then
-					tbl[spellid] = tbl[spellid] or {school = spell.school, amount = 0}
+					if not tbl[spellid] then
+						tbl[spellid] = new()
+						tbl[spellid].school = spell.school
+						tbl[spellid].amount = 0
+					elseif not tbl[spellid].school and spell.school then
+						tbl[spellid].school = spell.school
+					end
 
 					if P.absdamage and spell.targets[name].total then
 						tbl[spellid].amount = tbl[spellid].amount + spell.targets[name].total
@@ -1391,7 +1398,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P)
 
 	function enemyPrototype:GetDamageSpellTargets(spellid, tbl)
 		if self.damagespells and self.damagespells[spellid] and self.damagespells[spellid].targets then
-			tbl = wipe(tbl or Skada.cacheTable)
+			tbl = clear(tbl or C)
 
 			local total = 0
 			if P.absdamage and self.damagespells[spellid].total then
@@ -1402,7 +1409,8 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P)
 
 			for name, target in pairs(self.damagespells[spellid].targets) do
 				if not tbl[name] then
-					tbl[name] = {amount = P.absdamage and target.total or target.amount}
+					tbl[name] = new()
+					tbl[name].amount = P.absdamage and target.total or target.amount
 				elseif P.absdamage and target.total then
 					tbl[name].amount = tbl[name].amount + target.total
 				else

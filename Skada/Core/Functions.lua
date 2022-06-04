@@ -1123,6 +1123,7 @@ function Skada:ApplyBorder(frame, texture, color, thickness, padtop, padbottom, 
 		frame.borderFrame:SetFrameLevel(frame:GetFrameLevel() - 1)
 	end
 
+	thickness = thickness or 0
 	padtop = padtop or 0
 	padbottom = padbottom or padtop
 	padleft = padleft or padtop

@@ -2,14 +2,14 @@ local Skada = Skada
 
 -- cache frequently used globals
 local pairs, select, format, max = pairs, select, string.format, math.max
-local GetSpellInfo, cacheTable, T = Skada.GetSpellInfo, Skada.cacheTable, Skada.Table
+local GetSpellInfo, T = Skada.GetSpellInfo, Skada.Table
 local _
 
 -- =================== --
 -- Damage Taken Module --
 -- =================== --
 
-Skada:RegisterModule("Damage Taken", function(L, P)
+Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 	if Skada:IsDisabled("Damage Taken") then return end
 
 	local mod = Skada:NewModule("Damage Taken")
@@ -18,7 +18,6 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 	local sdetailmod = spellmod:NewModule("Damage Breakdown")
 	local sourcemod = mod:NewModule("Damage source list")
 	local tdetailmod = sourcemod:NewModule("Damage spell list")
-	local new, del = Skada.newTable, Skada.delTable
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local GetTime = GetTime
@@ -967,13 +966,13 @@ end)
 -- Damage Taken By Spell Module --
 -- ============================ --
 
-Skada:RegisterModule("Damage Taken By Spell", function(L, P)
+Skada:RegisterModule("Damage Taken By Spell", function(L, P, _, _, new, _, clear)
 	if Skada:IsDisabled("Damage Taken", "Damage Taken By Spell") then return end
 
 	local mod = Skada:NewModule("Damage Taken By Spell")
 	local targetmod = mod:NewModule("Damage spell targets")
 	local sourcemod = mod:NewModule("Damage spell sources")
-	local cacheTable = T.get("Skada_CacheTable2")
+	local C = Skada.cacheTable2
 
 	local function player_tooltip(win, id, label, tooltip)
 		local set = win.spellname and win:GetSelectedSet()
@@ -1014,9 +1013,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 	function sourcemod:Update(win, set)
 		win.title = format(L["%s's sources"], win.spellname or L["Unknown"])
 		if win.spellname then
-			wipe(cacheTable)
-
-			local total = 0
+			local sources, total = clear(C), 0
 			for i = 1, #set.players do
 				local player = set.players[i]
 				if
@@ -1026,25 +1023,26 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 					player.damagetakenspells[win.spellname].sources
 				then
 					for sourcename, source in pairs(player.damagetakenspells[win.spellname].sources) do
-						if not cacheTable[sourcename] then
-							cacheTable[sourcename] = {amount = P.absdamage and source.total or source.amount}
+						if not sources[sourcename] then
+							sources[sourcename] = new()
+							sources[sourcename].amount = P.absdamage and source.total or source.amount
 						elseif P.absdamage then
-							cacheTable[sourcename].amount = cacheTable[sourcename].amount + source.total
+							sources[sourcename].amount = sources[sourcename].amount + source.total
 						else
-							cacheTable[sourcename].amount = cacheTable[sourcename].amount + source.amount
+							sources[sourcename].amount = sources[sourcename].amount + source.amount
 						end
-						total = total + cacheTable[sourcename].amount
+						total = total + sources[sourcename].amount
 
-						if not cacheTable[sourcename].class or (mod.metadata.columns.sDTPS and not cacheTable[sourcename].time) then
+						if not sources[sourcename].class or (mod.metadata.columns.sDTPS and not sources[sourcename].time) then
 							local actor = set:GetActor(sourcename)
-							if actor and not cacheTable[sourcename].class then
-								cacheTable[sourcename].id = actor.id or actor.name
-								cacheTable[sourcename].class = actor.class
-								cacheTable[sourcename].role = actor.role
-								cacheTable[sourcename].spec = actor.spec
+							if actor and not sources[sourcename].class then
+								sources[sourcename].id = actor.id or actor.name
+								sources[sourcename].class = actor.class
+								sources[sourcename].role = actor.role
+								sources[sourcename].spec = actor.spec
 							end
-							if actor and mod.metadata.columns.sDTPS and not cacheTable[sourcename].time then
-								cacheTable[sourcename].time = set:GetActorTime(actor.id, actor.name)
+							if actor and mod.metadata.columns.sDTPS and not sources[sourcename].time then
+								sources[sourcename].time = set:GetActorTime(actor.id, actor.name)
 							end
 						end
 					end
@@ -1057,7 +1055,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 				end
 
 				local nr = 0
-				for sourcename, source in pairs(cacheTable) do
+				for sourcename, source in pairs(sources) do
 					nr = nr + 1
 					local d = win:nr(nr)
 
@@ -1090,9 +1088,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 	function targetmod:Update(win, set)
 		win.title = format(L["%s's targets"], win.spellname or L["Unknown"])
 		if win.spellname then
-			wipe(cacheTable)
-			local total = 0
-
+			local targets, total = clear(C), 0
 			for i = 1, #set.players do
 				local player = set.players[i]
 				if
@@ -1101,20 +1097,20 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 					player.damagetakenspells[win.spellname] and
 					player.damagetakenspells[win.spellname].total and
 					player.damagetakenspells[win.spellname].total > 0
-				 then
-					cacheTable[player.name] = {
-						id = player.id,
-						class = player.class,
-						role = player.role,
-						spec = player.spec,
-						amount = player.damagetakenspells[win.spellname].amount,
-						time = mod.metadata.columns.sDTPS and player:GetTime()
-					}
-					if P.absdamage then
-						cacheTable[player.name].amount = player.damagetakenspells[win.spellname].total
+				then
+					targets[player.name] = new()
+					targets[player.name].id = player.id
+					targets[player.name].class = player.class
+					targets[player.name].role = player.role
+					targets[player.name].spec = player.spec
+					targets[player.name].amount = player.damagetakenspells[win.spellname].amount
+					targets[player.name].time = mod.metadata.columns.sDTPS and player:GetTime()
+
+					if P.absdamage and player.damagetakenspells[win.spellname].total then
+						targets[player.name].amount = player.damagetakenspells[win.spellname].total
 					end
 
-					total = total + cacheTable[player.name].amount
+					total = total + targets[player.name].amount
 				end
 			end
 
@@ -1124,7 +1120,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 				end
 
 				local nr = 0
-				for playername, player in pairs(cacheTable) do
+				for playername, player in pairs(targets) do
 					nr = nr + 1
 					local d = win:nr(nr)
 
@@ -1155,19 +1151,22 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 		local total = set and set:GetDamageTaken() or 0
 		if total == 0 then return end
 
-		wipe(cacheTable)
+		local spells = clear(C)
 		for i = 1, #set.players do
 			local player = set.players[i]
 			if player and player.damagetakenspells then
 				for spellname, spell in pairs(player.damagetakenspells) do
 					if spell.total > 0 then
-						if not cacheTable[spellname] then
-							cacheTable[spellname] = {id = spell.id, school = spell.school, amount = 0}
+						if not spells[spellname] then
+							spells[spellname] = new()
+							spells[spellname].id = spell.id
+							spells[spellname].school = spell.school
+							spells[spellname].amount = 0
 						end
 						if P.absdamage then
-							cacheTable[spellname].amount = cacheTable[spellname].amount + spell.total
+							spells[spellname].amount = spells[spellname].amount + spell.total
 						else
-							cacheTable[spellname].amount = cacheTable[spellname].amount + spell.amount
+							spells[spellname].amount = spells[spellname].amount + spell.amount
 						end
 					end
 				end
@@ -1179,7 +1178,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 		end
 
 		local settime, nr = self.metadata.columns.DTPS and set:GetTime(), 0
-		for spellname, spell in pairs(cacheTable) do
+		for spellname, spell in pairs(spells) do
 			nr = nr + 1
 			local d = win:nr(nr)
 
@@ -1223,12 +1222,12 @@ end)
 -- Avoidance & Mitigation Module --
 -- ============================= --
 
-Skada:RegisterModule("Avoidance & Mitigation", function(L)
+Skada:RegisterModule("Avoidance & Mitigation", function(L, _, _, _, new, _, clear)
 	if Skada:IsDisabled("Damage Taken", "Avoidance & Mitigation") then return end
 
 	local mod = Skada:NewModule("Avoidance & Mitigation")
 	local playermod = mod:NewModule("Damage Breakdown")
-	local cacheTable = T.get("Skada_CacheTable2")
+	local C = Skada.cacheTable2
 
 	-- damage miss types
 	local missTypes = Skada.missTypes
@@ -1243,8 +1242,8 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 	end
 
 	function playermod:Update(win, set)
-		if cacheTable[win.actorid] then
-			local actor = cacheTable[win.actorid]
+		if C[win.actorid] then
+			local actor = C[win.actorid]
 			win.title = format(L["%s's damage breakdown"], actor.name)
 
 			if win.metadata then
@@ -1277,7 +1276,7 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 		win.title = win.class and format("%s (%s)", L["Avoidance & Mitigation"], L[win.class]) or L["Avoidance & Mitigation"]
 
 		if set.totaldamagetaken and set.totaldamagetaken > 0 then
-			wipe(cacheTable) -- used later
+			clear(C, true) -- used later
 
 			if win.metadata then
 				win.metadata.maxvalue = 0
@@ -1288,7 +1287,8 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 				local player = set.players[i]
 				if player and (not win.class or win.class == player.class) then
 					if player.damagetakenspells then
-						local tmp = {name = player.name, data = {}}
+						local tmp = new()
+						tmp.name = player.name
 
 						local total, avoid = 0, 0
 						for _, spell in pairs(player.damagetakenspells) do
@@ -1298,6 +1298,7 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 								local t = missTypes[j]
 								if t and spell[t] then
 									avoid = avoid + spell[t]
+									tmp.data = tmp.data or new()
 									tmp.data[t] = (tmp.data[t] or 0) + spell[t]
 								end
 							end
@@ -1306,7 +1307,7 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 						if avoid > 0 then
 							tmp.total = total
 							tmp.avoid = avoid
-							cacheTable[player.id] = tmp
+							C[player.id] = tmp
 
 							nr = nr + 1
 							local d = win:nr(nr)
@@ -1328,8 +1329,8 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 							if win.metadata and d.value > win.metadata.maxvalue then
 								win.metadata.maxvalue = d.value
 							end
-						elseif cacheTable[player.id] then
-							cacheTable[player.id] = nil
+						elseif C[player.id] then
+							C[player.id] = nil
 						end
 					end
 				end

@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Dispels", function(L, P)
+Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 	if Skada:IsDisabled("Dispels") then return end
 
 	local mod = Skada:NewModule("Dispels")
@@ -224,8 +224,8 @@ Skada:RegisterModule("Dispels", function(L, P)
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
-			click1 = spellmod,
-			click2 = targetmod,
+			click1 = targetmod,
+			click2 = spellmod,
 			click3 = playermod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
@@ -270,11 +270,10 @@ Skada:RegisterModule("Dispels", function(L, P)
 
 	do
 		local playerPrototype = Skada.playerPrototype
-		local wipe = wipe
 
 		function playerPrototype:GetDispelledSpells(tbl)
 			if self.dispelspells then
-				tbl = wipe(tbl or Skada.cacheTable)
+				tbl = clear(tbl or C)
 				for _, spell in pairs(self.dispelspells) do
 					if spell.spells then
 						for spellid, count in pairs(spell.spells) do
@@ -288,12 +287,13 @@ Skada:RegisterModule("Dispels", function(L, P)
 
 		function playerPrototype:GetDispelledTargets(tbl)
 			if self.dispelspells then
-				tbl = wipe(tbl or Skada.cacheTable)
+				tbl = clear(tbl or C)
 				for _, spell in pairs(self.dispelspells) do
 					if spell.targets then
 						for name, count in pairs(spell.targets) do
 							if not tbl[name] then
-								tbl[name] = {count = count}
+								tbl[name] = new()
+								tbl[name].count = count
 							else
 								tbl[name].count = tbl[name].count + count
 							end

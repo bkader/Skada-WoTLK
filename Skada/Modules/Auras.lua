@@ -9,8 +9,6 @@ local PercentToRGB = Skada.PercentToRGB
 local dummyTable = Skada.dummyTable
 local setPrototype = Skada.setPrototype
 local playerPrototype = Skada.playerPrototype
-local cacheTable = Skada.cacheTable
-local wipe = wipe
 local _
 
 -- common functions
@@ -28,10 +26,36 @@ do
 			spellschools = spellschools or Skada.spellschools
 			Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "Clean")
 
+			-- add functions to segment prototype
+			local cache, new, clear = Skada.cacheTable, Skada.newTable, Skada.clearTable
+			setPrototype.GetAuraPlayers = function(set, spellid)
+				local count = 0
+				if spellid and set.players then
+					clear(cache)
+					for i = 1, #set.players do
+						local p = set.players[i]
+						if p and p.auras and p.auras[spellid] then
+							local maxtime = floor(p:GetTime())
+							local uptime = min(maxtime, p.auras[spellid].uptime)
+							count = count + 1
+							cache[p.name] = new()
+							cache[p.name].id = p.id
+							cache[p.name].class = p.class
+							cache[p.name].role = p.role
+							cache[p.name].spec = p.spec
+							cache[p.name].uptime = uptime
+							cache[p.name].maxtime = maxtime
+						end
+					end
+					return cache, count
+				end
+				return nil, count
+			end
+
 			-- add player's aura uptime getter.
-			playerPrototype.GetAuraUptime = function(self, spellid)
-				if self.auras and spellid and self.auras[spellid] and self.auras[spellid].uptime and self.auras[spellid].uptime > 0 then
-					return self.auras[spellid].uptime, self:GetTime()
+			playerPrototype.GetAuraUptime = function(p, spellid)
+				if p.auras and spellid and p.auras[spellid] and p.auras[spellid].uptime and p.auras[spellid].uptime > 0 then
+					return p.auras[spellid].uptime, p:GetTime()
 				end
 			end
 		end
@@ -89,33 +113,6 @@ do
 				end
 			end
 		end
-	end
-
-	-- add functions to segment prototype
-
-	function setPrototype:GetAuraPlayers(spellid, tbl)
-		local count = 0
-		if spellid and self.players then
-			tbl = wipe(tbl or cacheTable)
-			for i = 1, #self.players do
-				local p = self.players[i]
-				if p and p.auras and p.auras[spellid] then
-					local maxtime = floor(p:GetTime())
-					local uptime = min(maxtime, p.auras[spellid].uptime)
-					count = count + 1
-					tbl[p.name] = {
-						id = p.id,
-						class = p.class,
-						role = p.role,
-						spec = p.spec,
-						uptime = uptime,
-						maxtime = maxtime
-					}
-				end
-			end
-			return tbl, count
-		end
-		return nil, count
 	end
 
 	-- common functions.
@@ -351,7 +348,7 @@ Skada:RegisterModule("Buffs", function(L, P)
 	end
 
 	local aura = {}
-	local function HandleBuff(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
+	local function HandleBuff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
 		if
 			spellid and -- just in case, you never know!
 			not ignoredSpells[spellid] and
@@ -522,7 +519,7 @@ Skada:RegisterModule("Buffs", function(L, P)
 	end
 end)
 
-Skada:RegisterModule("Debuffs", function(L)
+Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 	if Skada:IsDisabled("Debuffs") then return end
 
 	local mod = Skada:NewModule("Debuffs")
@@ -537,7 +534,7 @@ Skada:RegisterModule("Debuffs", function(L)
 	local queuedSpells = {[49005] = 50424}
 
 	local aura = {}
-	local function HandleDebuff(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
+	local function HandleDebuff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
 		if spellid and not ignoredSpells[spellid] and auratype == "DEBUFF" then
 			if srcName == nil and #srcGUID == 0 and dstName and #dstGUID > 0 then
 				srcGUID = dstGUID
@@ -830,14 +827,17 @@ Skada:RegisterModule("Debuffs", function(L)
 
 	function playerPrototype:GetDebuffsTargets(tbl)
 		if self.auras then
-			tbl = wipe(tbl or cacheTable)
+			tbl = clear(tbl or C)
 			local maxtime = 0
 			for _, aura in pairs(self.auras) do
 				if aura.targets then
 					maxtime = maxtime + aura.uptime
 					for name, target in pairs(aura.targets) do
 						if not tbl[name] then
-							tbl[name] = {count = target.count, refresh = target.refresh, uptime = target.uptime}
+							tbl[name] = new()
+							tbl[name].count = target.count
+							tbl[name].refresh = target.refresh
+							tbl[name].uptime = target.uptime
 						else
 							tbl[name].count = tbl[name].count + target.count
 							tbl[name].uptime = tbl[name].uptime + target.uptime
@@ -864,10 +864,13 @@ Skada:RegisterModule("Debuffs", function(L)
 
 	function playerPrototype:GetDebuffTargets(spellid, tbl)
 		if self.auras and spellid and self.auras[spellid] and self.auras[spellid].targets then
-			tbl = wipe(tbl or cacheTable)
+			tbl = clear(tbl or C)
 			local maxtime = self.auras[spellid].uptime
 			for name, target in pairs(self.auras[spellid].targets) do
-				tbl[name] = {count = target.count, refresh = target.refresh, uptime = target.uptime}
+				tbl[name] = new()
+				tbl[name].count = target.count
+				tbl[name].refresh = target.refresh
+				tbl[name].uptime = target.uptime
 				local actor = self.super:GetActor(name)
 				if actor then
 					tbl[name].id = actor.id
@@ -882,17 +885,16 @@ Skada:RegisterModule("Debuffs", function(L)
 
 	function playerPrototype:GetDebuffsOnTarget(name, tbl)
 		if self.auras and name then
-			tbl = wipe(tbl or cacheTable)
+			tbl = clear(tbl or C)
 			local maxtime = 0
 			for spellid, aura in pairs(self.auras) do
 				if aura.targets and aura.targets[name] then
 					maxtime = maxtime + aura.uptime
-					tbl[spellid] = {
-						school = aura.school,
-						count = aura.targets[name].count,
-						refresh = aura.targets[name].refresh,
-						uptime = aura.targets[name].uptime
-					}
+					tbl[spellid] = new()
+					tbl[spellid].school = aura.school
+					tbl[spellid].count = aura.targets[name].count
+					tbl[spellid].refresh = aura.targets[name].refresh
+					tbl[spellid].uptime = aura.targets[name].uptime
 				end
 			end
 			return tbl, maxtime

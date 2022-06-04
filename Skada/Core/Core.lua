@@ -56,8 +56,10 @@ Skada.revisited = true
 -- things we need
 Skada.userName = UnitName("player")
 _, Skada.userClass = UnitClass("player")
-Skada.newTable, Skada.delTable = Skada.TablePool("kv")
-local new, del = Skada.newTable, Skada.delTable
+
+-- reusable tables
+local new, del, clear = Skada.TablePool("kv")
+Skada.newTable, Skada.delTable, Skada.clearTable = new, del, clear
 
 -- available display types
 local displays = {}
@@ -281,7 +283,7 @@ local function CleanSets(force)
 	-- because some players may enable the "always keep boss fights" option,
 	-- the amount of segments kept can grow big, so we make sure to keep
 	-- the player reasonable, otherwise they'll encounter memory issues.
-	local limit = Skada.db.profile.setstokeep + (Skada.db.profile.setslimit or 10)
+	local limit = Skada.db.profile.setstokeep + Skada.db.profile.setslimit
 	while maxsets > limit and Skada.char.sets[maxsets] do
 		tremove(Skada.char.sets, maxsets)
 		maxsets = maxsets - 1
@@ -1830,7 +1832,7 @@ end
 
 -- sets the tooltip position
 function Skada:SetTooltipPosition(tooltip, frame, display, win)
-	if win and win.db.tooltippos ~= "NONE" then
+	if win and win.db.tooltippos and win.db.tooltippos ~= "NONE" then
 		tooltip:SetOwner(UIParent, "ANCHOR_NONE")
 
 		local anchor = find(win.db.tooltippos, "TOP") and "TOP" or "BOTTOM"
@@ -3201,21 +3203,13 @@ function Skada:OnInitialize()
 	self:RegisterSchools()
 	self:RegisterToast()
 
-	-- fix setstokeep, setslimit and timemesure.
-	if (self.db.profile.setstokeep or 0) > 30 then
-		self.db.profile.setstokeep = 30
-	end
-	if not self.db.profile.setslimit then
-		self.db.profile.setslimit = 15
-	end
-	if not self.db.profile.timemesure then
-		self.db.profile.timemesure = 2
-	end
+	-- fix setstokeep, setslimit and timemesure and remove old stuff
+	self.db.profile.setstokeep = min(25, max(0, self.db.profile.setstokeep or 0))
+	self.db.profile.setslimit = min(25, max(0, self.db.profile.setslimit or 0))
+	self.db.profile.timemesure = min(2, max(1, self.db.profile.timemesure or 0))
+	self.db.global.revision = nil
 
-	-- remove old stuff.
-	if self.db.global.revision then
-		self.db.global.revision = nil
-	end
+	-- store the version
 	self.db.global.version = self.db.global.version or 0
 end
 
@@ -3247,7 +3241,7 @@ function Skada:OnEnable()
 
 	if self.modulelist then
 		for i = 1, #self.modulelist do
-			self.modulelist[i](L, self.db.profile, self.db.global)
+			self.modulelist[i](L, self.db.profile, self.db.global, self.cacheTable, new, del, clear)
 		end
 		self.modulelist = del(self.modulelist)
 	end

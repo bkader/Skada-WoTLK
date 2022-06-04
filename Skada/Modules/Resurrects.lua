@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Resurrects", function(L, P)
+Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 	if Skada:IsDisabled("Resurrects") then return end
 
 	local mod = Skada:NewModule("Resurrects")
@@ -250,15 +250,15 @@ Skada:RegisterModule("Resurrects", function(L, P)
 
 	do
 		local playerPrototype = Skada.playerPrototype
-
 		function playerPrototype:GetRessTargets(tbl)
 			if self.resspells then
-				tbl = wipe(tbl or Skada.cacheTable)
+				tbl = clear(tbl or C)
 				for _, spell in pairs(self.resspells) do
 					if spell.targets then
 						for name, count in pairs(spell.targets) do
 							if not tbl[name] then
-								tbl[name] = {count = count}
+								tbl[name] = new()
+								tbl[name].count = count
 							else
 								tbl[name].count = tbl[name].count + count
 							end

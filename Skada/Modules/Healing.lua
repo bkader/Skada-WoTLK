@@ -1086,13 +1086,13 @@ end)
 -- Healing taken --
 -- ================ --
 
-Skada:RegisterModule("Healing Taken", function(L)
+Skada:RegisterModule("Healing Taken", function(L, _, _, _, new, _, clear)
 	if Skada:IsDisabled("Healing", "Absorbs", "Absorbs and Healing", "Healing Taken") then return end
 
 	local mod = Skada:NewModule("Healing Taken")
 	local sourcemod = mod:NewModule("Healing source list")
 	local sourcespellmod = sourcemod:NewModule("Healing spell list")
-	local cacheTable, wipe = T.get("Skada_CacheTable2"), wipe
+	local C = Skada.cacheTable2
 
 	function sourcespellmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
@@ -1194,7 +1194,7 @@ Skada:RegisterModule("Healing Taken", function(L)
 			end
 
 			local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
-			for sourcename, source in pairs(cacheTable) do
+			for sourcename, source in pairs(C) do
 				nr = nr + 1
 				local d = win:nr(nr)
 
@@ -1292,7 +1292,7 @@ Skada:RegisterModule("Healing Taken", function(L)
 
 	function setPrototype:GetAbsorbHealTaken(tbl)
 		if self.heal or self.absorb then
-			tbl = wipe(tbl or cacheTable)
+			tbl = clear(tbl or C)
 
 			-- healed by players.
 			for i = 1, #self.players do
@@ -1302,7 +1302,8 @@ Skada:RegisterModule("Healing Taken", function(L)
 						if spell.targets then
 							for name, amount in pairs(spell.targets) do
 								if not tbl[name] then
-									tbl[name] = {amount = amount}
+									tbl[name] = new()
+									tbl[name].amount = amount
 								else
 									tbl[name].amount = tbl[name].amount + amount
 								end
@@ -1331,7 +1332,9 @@ Skada:RegisterModule("Healing Taken", function(L)
 						if spell.targets then
 							for name, target in pairs(spell.targets) do
 								if not tbl[name] then
-									tbl[name] = {amount = target.amount, overheal = target.overheal}
+									tbl[name] = new()
+									tbl[name].amount = target.amount
+									tbl[name].overheal = target.overheal
 								else
 									tbl[name].amount = tbl[name].amount + target.amount
 									if target.overheal then
@@ -1369,7 +1372,9 @@ Skada:RegisterModule("Healing Taken", function(L)
 							if spell.targets then
 								for name, target in pairs(spell.targets) do
 									if not tbl[name] then
-										tbl[name] = {amount = target.amount, overheal = target.overheal}
+										tbl[name] = new()
+										tbl[name].amount = target.amount
+										tbl[name].overheal = target.overheal
 									else
 										tbl[name].amount = tbl[name].amount + target.amount
 										if target.overheal then
@@ -1407,7 +1412,7 @@ Skada:RegisterModule("Healing Taken", function(L)
 		local total = 0
 
 		if self.super then
-			tbl = wipe(tbl or cacheTable)
+			tbl = clear(tbl or C)
 
 			-- healed by players.
 			for i = 1, #self.super.players do
@@ -1417,13 +1422,12 @@ Skada:RegisterModule("Healing Taken", function(L)
 						if spell.targets and spell.targets[self.name] then
 							total = total + spell.amount
 							if not tbl[p.name] then
-								tbl[p.name] = {
-									id = p.id,
-									class = p.class,
-									role = p.role,
-									spec = p.spec,
-									amount = spell.targets[self.name]
-								}
+								tbl[p.name] = new()
+								tbl[p.name].id = p.id
+								tbl[p.name].class = p.class
+								tbl[p.name].role = p.role
+								tbl[p.name].spec = p.spec
+								tbl[p.name].amount = spell.targets[self.name]
 							else
 								tbl[p.name].amount = tbl[p.name].amount + spell.targets[self.name]
 							end
@@ -1435,13 +1439,12 @@ Skada:RegisterModule("Healing Taken", function(L)
 						if spell.targets and spell.targets[self.name] then
 							total = total + spell.amount
 							if not tbl[p.name] then
-								tbl[p.name] = {
-									id = p.id,
-									class = p.class,
-									role = p.role,
-									spec = p.spec,
-									amount = spell.targets[self.name].amount
-								}
+								tbl[p.name] = new()
+								tbl[p.name].id = p.id
+								tbl[p.name].class = p.class
+								tbl[p.name].role = p.role
+								tbl[p.name].spec = p.spec
+								tbl[p.name].amount = spell.targets[self.name].amount
 							else
 								tbl[p.name].amount = tbl[p.name].amount + spell.targets[self.name].amount
 							end
@@ -1459,13 +1462,12 @@ Skada:RegisterModule("Healing Taken", function(L)
 							if spell.targets and spell.targets[self.name] then
 								total = total + spell.amount
 								if not tbl[p.name] then
-									tbl[p.name] = {
-										id = p.id,
-										class = p.class,
-										role = p.role,
-										spec = p.spec,
-										amount = spell.targets[self.name].amount
-									}
+									tbl[p.name] = new()
+									tbl[p.name].id = p.id
+									tbl[p.name].class = p.class
+									tbl[p.name].role = p.role
+									tbl[p.name].spec = p.spec
+									tbl[p.name].amount = spell.targets[self.name].amount
 								else
 									tbl[p.name].amount = tbl[p.name].amount + spell.targets[self.name].amount
 								end

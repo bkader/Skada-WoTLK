@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Interrupts", function(L, P)
+Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 	if Skada:IsDisabled("Interrupts") then return end
 
 	local mod = Skada:NewModule("Interrupts")
@@ -330,11 +330,10 @@ Skada:RegisterModule("Interrupts", function(L, P)
 
 	do
 		local playerPrototype = Skada.playerPrototype
-		local wipe = wipe
 
 		function playerPrototype:GetInterruptedSpells(tbl)
 			if self.interruptspells then
-				tbl = wipe(tbl or Skada.cacheTable)
+				tbl = clear(tbl or C)
 				for _, spell in pairs(self.interruptspells) do
 					if spell.spells then
 						for spellid, count in pairs(spell.spells) do
@@ -348,12 +347,13 @@ Skada:RegisterModule("Interrupts", function(L, P)
 
 		function playerPrototype:GetInterruptTargets(tbl)
 			if self.interruptspells then
-				tbl = wipe(tbl or Skada.cacheTable)
+				tbl = clear(tbl or C)
 				for _, spell in pairs(self.interruptspells) do
 					if spell.targets then
 						for name, count in pairs(spell.targets) do
 							if not tbl[name] then
-								tbl[name] = {count = count}
+								tbl[name] = new()
+								tbl[name].count = count
 							else
 								tbl[name].count = tbl[name].count + count
 							end

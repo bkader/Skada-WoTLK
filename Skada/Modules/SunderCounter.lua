@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Sunder Counter", function(L, P)
+Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 	if Skada:IsDisabled("Sunder Counter") then return end
 
 	local mod = Skada:NewModule("Sunder Counter")
@@ -9,7 +9,6 @@ Skada:RegisterModule("Sunder Counter", function(L, P)
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 	local T = Skada.Table
-	local new, del = Skada.newTable, Skada.delTable
 	local sunder, sunderLink, devastate, _
 
 	local function log_sunder(set, data)
@@ -211,14 +210,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P)
 
 	function mod:SetComplete(set)
 		T.clear(data)
-
-		-- delete to reuse
-		if self.targets then
-			for k, _ in pairs(self.targets) do
-				self.targets[k] = del(self.targets[k])
-			end
-			T.free("Sunder_Targets", self.targets)
-		end
+		T.free("Sunder_Targets", self.targets, nil, del)
 	end
 
 	function mod:Announce(msg)
@@ -282,13 +274,12 @@ Skada:RegisterModule("Sunder Counter", function(L, P)
 
 	do
 		local playerPrototype = Skada.playerPrototype
-		local wipe = wipe
-
 		function playerPrototype:GetSunderTargets(tbl)
 			if self.sundertargets then
-				tbl = wipe(tbl or Skada.cacheTable)
+				tbl = clear(tbl or C)
 				for name, count in pairs(self.sundertargets) do
-					tbl[name] = {count = count}
+					tbl[name] = new()
+					tbl[name].count = count
 					local actor = self.super:GetActor(name)
 					if actor then
 						tbl[name].id = actor.id

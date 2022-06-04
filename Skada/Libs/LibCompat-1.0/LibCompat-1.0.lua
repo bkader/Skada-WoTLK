@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader/LibCompat-1.0)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0-Skada", 32
+local MAJOR, MINOR = "LibCompat-1.0-Skada", 33
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
@@ -20,16 +20,25 @@ local setmetatable = setmetatable
 local error = error
 local _
 
-local QuickDispatch
+local Dispatch
 local IsInGroup, IsInRaid
 local GetUnitIdFromGUID
 local tLength
+
 -------------------------------------------------------------------------------
 
 do
 	local pcall = pcall
 
-	function QuickDispatch(func, ...)
+	function Dispatch(func, ...)
+		if type(func) ~= "function" then
+			print("\124cffff9900Error\124r: Dispatch requires a function.")
+			return
+		end
+		return func(...)
+	end
+
+	local function QuickDispatch(func, ...)
 		if type(func) ~= "function" then return end
 		local ok, err = pcall(func, ...)
 		if not ok then
@@ -39,6 +48,7 @@ do
 		return true
 	end
 
+	lib.Dispatch = Dispatch
 	lib.QuickDispatch = QuickDispatch
 end
 
@@ -220,7 +230,18 @@ do
 			return nil
 		end
 
-		return new, del
+		-- optional function used to wipe a table that contains
+		-- other reusable tables.
+		local function clear(t, recursive)
+			if type(t) == "table" then
+				for k, v in pairs(t) do
+					t[k] = del(v, recursive)
+				end
+			end
+			return t
+		end
+
+		return new, del, clear
 	end
 end
 
@@ -349,7 +370,7 @@ do
 
 	local function GroupIterator(func, ...)
 		for unit, owner in UnitIterator() do
-			QuickDispatch(func, unit, owner, ...)
+			Dispatch(func, unit, owner, ...)
 		end
 	end
 
@@ -775,8 +796,9 @@ end
 -------------------------------------------------------------------------------
 
 local mixins = {
-	"QuickDispatch",
 	"EmptyFunc",
+	"Dispatch",
+	"QuickDispatch",
 	-- table util
 	"tLength",
 	"tCopy",

@@ -3,18 +3,17 @@ Skada:RegisterModule("Comparison", function(L, P)
 	if Skada:IsDisabled("Damage", "Comparison") then return end
 
 	local parent = Skada:GetModule("Damage")
-	local mod = parent:NewModule("Comparison")
 
+	local mod = parent:NewModule("Comparison")
 	local spellmod = mod:NewModule("Damage spell list")
 	local dspellmod = spellmod:NewModule("Damage spell details")
 	local bspellmod = spellmod:NewModule("Damage Breakdown")
-
 	local targetmod = mod:NewModule("Damage target list")
 	local dtargetmod = targetmod:NewModule("Damage spell list")
+	local C = Skada.cacheTable2
 
 	local pairs, format, max = pairs, string.format, math.max
-	local GetSpellInfo, T = Skada.GetSpellInfo or GetSpellInfo, Skada.Table
-	local cacheTable = T.get("Skada_CacheTable2")
+	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local spellschools = Skada.spellschools
 	local COLOR_GOLD = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
 	local _
@@ -448,7 +447,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 			return
 		end
 
-		local mytargets, myself = set:GetActorDamageTargets(mod.userGUID, mod.userName, cacheTable)
+		local mytargets, myself = set:GetActorDamageTargets(mod.userGUID, mod.userName, C)
 
 		-- the compared actor
 		local total = 0
@@ -712,7 +711,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 			end
 
 			-- collect compared actor's targets.
-			local mytargets = set:GetActorDamageTargets(mod.userGUID, mod.userName, cacheTable)
+			local mytargets = set:GetActorDamageTargets(mod.userGUID, mod.userName, C)
 
 			-- iterate comparison actor's targets.
 			for targetname, target in pairs(targets) do
