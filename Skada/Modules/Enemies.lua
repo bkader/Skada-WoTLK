@@ -9,7 +9,7 @@ local _
 ---------------------------------------------------------------------------
 -- Enemy Damage Taken
 
-Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, _, clear)
+Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 	if Skada:IsDisabled("Enemy Damage Taken") then return end
 
 	local mod = Skada:NewModule("Enemy Damage Taken")
@@ -36,8 +36,22 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, _, clear)
 	-- to collect damage done to the units at certain phases.
 	local customUnits = {}
 
+	-- table of acceptable/trackable instance difficulties
+	-- uncomments those you want to use or add custom ones.
+	local allowed_diffs = {
+		-- ["5n"] = true, -- 5man Normal
+		-- ["5h"] = true, -- 5man Heroic
+		-- ["mc"] = true, -- Mythic Dungeons
+		-- ["tw"] = true, -- Time Walker
+		-- ["wb"] = true, -- World Boss
+		["10n"] = true, -- 10man Normal
+		["10h"] = true, -- 10man Heroic
+		["25n"] = true, -- 25man Normal
+		["25h"] = true, -- 25man Heroic
+	}
+
 	local function GetRaidDiff()
-		instanceDiff = instanceDiff or Skada:GetInstanceDiff()
+		instanceDiff = instanceDiff or Skada:GetInstanceDiff() or "NaN"
 		return instanceDiff
 	end
 
@@ -106,17 +120,17 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, _, clear)
 				return false
 			end
 
-			customUnitsTable[guid] = {
-				oname = name or L["Unknown"],
-				name = unit.name,
-				guid = guid,
-				curval = curval,
-				minval = minval,
-				maxval = floor(maxval * (unit.start or 1)),
-				full = maxval,
-				power = (unit.power ~= nil),
-				useful = unit.useful
-			}
+			customUnitsTable[guid] = new()
+			customUnitsTable[guid].oname = name or L["Unknown"]
+			customUnitsTable[guid].name = unit.name
+			customUnitsTable[guid].guid = guid
+			customUnitsTable[guid].curval = curval
+			customUnitsTable[guid].minval = minval
+			customUnitsTable[guid].maxval = floor(maxval * (unit.start or 1))
+			customUnitsTable[guid].full = maxval
+			customUnitsTable[guid].power = (unit.power ~= nil)
+			customUnitsTable[guid].useful = unit.useful
+
 			if unit.name == nil then
 				customUnitsTable[guid].name = format(
 					unit.text or (unit.stop and L["%s - %s%% to %s%%"] or L["%s below %s%%"]),
@@ -231,17 +245,21 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, _, clear)
 					source.overkill = (source.overkill or 0) + dmg.overkill
 				end
 
-				-- the rest of the code is only for raids.
-				if GetRaidDiff() == nil or GetRaidDiff() == "NaN" then return end
+				-- the rest of the code is only for allowed instance diffs.
+				if not allowed_diffs[GetRaidDiff()] then return end
+
 				if IsCustomUnit(dmg.enemyid, dmg.enemyname, dmg.amount, dmg.overkill) then
 					local unit = customUnitsTable[dmg.enemyid]
 					-- started with less than max?
 					if unit.full then
+						local amount = unit.full - unit.curval
 						if unit.useful then
-							local amount = unit.full - unit.curval
 							e.usefuldamagetaken = (e.usefuldamagetaken or 0) + amount
 							spell.useful = (spell.useful or 0) + amount
 							source.useful = (source.useful or 0) + amount
+						end
+						if unit.maxval == unit.full then
+							log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, dmg.spellschool, amount, absorbed)
 						end
 						unit.full = nil
 					elseif unit.curval >= unit.maxval then
@@ -272,11 +290,17 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, _, clear)
 						if customGroups[unit.name] then
 							log_custom_group(set, unit.guid, unit.name, dmg.srcName, dmg.spellid, dmg.spellschool, amount, dmg.overkill, absorbed)
 						end
+
 						if unit.curval <= unit.minval then
-							amount = amount - (unit.minval - unit.curval)
-							customUnitsTable[unit.guid] = -1 -- remove it
+							log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, dmg.spellschool, amount - (unit.minval - unit.curval), absorbed)
+
+							-- remove it
+							local guid = unit.guid
+							customUnitsTable[guid] = del(customUnitsTable[guid])
+							customUnitsTable[guid] = -1
+						else
+							log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, dmg.spellschool, amount, absorbed)
 						end
-						log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, dmg.spellschool, amount, absorbed)
 					elseif unit.power then
 						log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, dmg.spellschool, dmg.amount - (unit.useful and dmg.overkill or 0), absorbed)
 					end
@@ -738,7 +762,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, _, clear)
 	function mod:SetComplete(set)
 		instanceDiff = nil
 		T.free("Enemies_UnitsInfo", customUnitsInfo)
-		T.free("Enemies_UnitsTable", customUnitsTable)
+		T.free("Enemies_UnitsTable", customUnitsTable, nil, del)
 		T.free("Enemies_GroupsTable", customGroupsTable)
 	end
 
