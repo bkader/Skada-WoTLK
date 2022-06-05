@@ -327,7 +327,7 @@ L["The number of fight segments to keep. Persistent segments are not included in
 L["Persistent segments"] = "Dauerhafte Segmente"
 L["The number of persistent fight segments to keep."] = "Die Anzahl der persistenten Segmente, die beibehalten werden sollen."
 L["Memory Check"] = "Speicherpr\195\188fung"
-L["Checks memory usage and warns you if it is greater than or equal to 30mb."] = "Überpr\195\188ft die Speichernutzung und warnt Sie, wenn sie gr\195\182\195\159er oder gleich 30 MB ist."
+L["Checks memory usage and warns you if it is greater than or equal to %dmb."] = "Überpr\195\188ft die Speichernutzung und warnt Sie, wenn sie gr\195\182\195\159er oder gleich %d MB ist."
 L["Disable Comms"] = "Kommunikation deaktivieren"
 L["Minimum segment length"] = "Minimale Segmentl\195\164nge"
 L["The minimum length required in seconds for a segment to be saved."] = "Die erforderliche Mindestl\195\164nge in Sekunden, damit ein Segment gespeichert werden kann."

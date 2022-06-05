@@ -4,8 +4,8 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 local ACD = LibStub("AceConfigDialog-3.0")
 local ACR = LibStub("AceConfigRegistry-3.0")
 
-local fmt = string.format
-local next = next
+local min, max = math.min, math.max
+local next, fmt = next, format or string.format
 
 -- references: windows, modes
 local windows = nil
@@ -200,6 +200,9 @@ local function SetValue(info, value)
 		Skada:UpdateDisplay(true)
 	elseif key == "syncoff" then
 		Skada:RegisterComms(value ~= true)
+	elseif key == "setstokeep" or key == "setslimit" then
+		Skada.maxsets = Skada.db.profile.setstokeep + Skada.db.profile.setslimit
+		Skada.maxmeme = min(60, max(30, Skada.maxsets + 10))
 	end
 end
 
@@ -559,7 +562,7 @@ Skada.options = {
 							type = "range",
 							name = L["Segments to keep"],
 							desc = L["The number of fight segments to keep. Persistent segments are not included in this."],
-							min = 1,
+							min = 0,
 							max = 25,
 							step = 1,
 							order = 210
@@ -594,7 +597,7 @@ Skada.options = {
 						memorycheck = {
 							type = "toggle",
 							name = L["Memory Check"],
-							desc = L["Checks memory usage and warns you if it is greater than or equal to 30mb."],
+							desc = function() return fmt(L["Checks memory usage and warns you if it is greater than or equal to %dmb."], Skada.maxmeme) end,
 							order = 410
 						},
 						syncoff = {

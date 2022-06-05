@@ -274,7 +274,7 @@ local function CleanSets(force)
 	-- we trim segments without touching persistent ones.
 	for i = #Skada.char.sets, 1, -1 do
 		if (force or numsets > Skada.db.profile.setstokeep) and not Skada.char.sets[i].keep then
-			tremove(Skada.char.sets, i)
+			del(tremove(Skada.char.sets, i), true)
 			numsets = numsets - 1
 			maxsets = maxsets - 1
 		end
@@ -283,9 +283,8 @@ local function CleanSets(force)
 	-- because some players may enable the "always keep boss fights" option,
 	-- the amount of segments kept can grow big, so we make sure to keep
 	-- the player reasonable, otherwise they'll encounter memory issues.
-	local limit = Skada.db.profile.setstokeep + Skada.db.profile.setslimit
-	while maxsets > limit and Skada.char.sets[maxsets] do
-		tremove(Skada.char.sets, maxsets)
+	while maxsets > Skada.maxsets and Skada.char.sets[maxsets] do
+		del(tremove(Skada.char.sets, maxsets), true)
 		maxsets = maxsets - 1
 	end
 end
@@ -1372,7 +1371,9 @@ function Skada:DeleteSet(set, index)
 	end
 
 	if set and index then
-		self.callbacks:Fire("Skada_SetDeleted", index, tremove(self.char.sets, index))
+		local s = tremove(self.char.sets, index)
+		self.callbacks:Fire("Skada_SetDeleted", index, s)
+		del(s, true)
 
 		if set == self.last then
 			self.last = nil
@@ -3197,7 +3198,6 @@ function Skada:OnInitialize()
 	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes", true)
 
 	self:RegisterInitOptions()
-
 	self:RegisterMedias()
 	self:RegisterClasses()
 	self:RegisterSchools()
@@ -3212,6 +3212,10 @@ function Skada:OnInitialize()
 
 	-- store the version
 	self.db.global.version = self.db.global.version or 0
+
+	-- sets limit
+	self.maxsets = self.db.profile.setstokeep + self.db.profile.setslimit
+	self.maxmeme = min(60, max(30, self.maxsets + 10))
 end
 
 function Skada:SetupStorage()
@@ -3317,7 +3321,7 @@ function Skada:CheckMemory(clean)
 	if self.db.profile.memorycheck then
 		UpdateAddOnMemoryUsage()
 		local memory = GetAddOnMemoryUsage("Skada")
-		if memory > 30000 then
+		if memory > (self.maxmeme * 1024) then
 			self:Notify(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."], L["Memory Check"], nil, "emergency")
 		end
 	end

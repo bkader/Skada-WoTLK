@@ -326,7 +326,7 @@ L["The number of fight segments to keep. Persistent segments are not included in
 L["Persistent segments"] = "持久段"
 L["The number of persistent fight segments to keep."] = "要保留的持久段数。"
 L["Memory Check"] = "内存检查"
-L["Checks memory usage and warns you if it is greater than or equal to 30mb."] = "检查内存占用，并在高于30mb时发出警告。"
+L["Checks memory usage and warns you if it is greater than or equal to %dmb."] = "检查内存占用，并在高于%dmb时发出警告。"
 L["Disable Comms"] = "禁用通信"
 L["Minimum segment length"] = "最小分段长度"
 L["The minimum length required in seconds for a segment to be saved."] = "保存段所需的最小长度（秒）。"

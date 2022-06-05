@@ -328,7 +328,7 @@ L["The number of fight segments to keep. Persistent segments are not included in
 L["Persistent segments"] = "영구 세그먼트"
 L["The number of persistent fight segments to keep."] = "유지할 영구 세그먼트의 수입니다."
 L["Memory Check"] = "메모리 확인"
-L["Checks memory usage and warns you if it is greater than or equal to 30mb."] = "메모리 사용량을 확인하고 30MB보다 크거나 같은 경우 경고합니다."
+L["Checks memory usage and warns you if it is greater than or equal to %dmb."] = "메모리 사용량을 확인하고 %dMB보다 크거나 같은 경우 경고합니다."
 L["Disable Comms"] = "통신 비활성화"
 L["Minimum segment length"] = "최소 세그먼트 길이"
 L["The minimum length required in seconds for a segment to be saved."] = "저장될 세그먼트에 필요한 최소 길이(초)입니다."
