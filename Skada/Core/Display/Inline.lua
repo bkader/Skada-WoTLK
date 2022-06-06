@@ -31,15 +31,6 @@ if not FONT_FLAGS then
 	Skada.fontFlags = FONT_FLAGS
 end
 
-local buttonBackdrop = {
-	bgFile = [[Interface\Buttons\UI-OptionsButton]],
-	edgeFile = [[Interface\Buttons\UI-OptionsButton]],
-	tile = true,
-	tileSize = 12,
-	edgeSize = 0,
-	insets = {left = 0, right = 0, top = 0, bottom = 0}
-}
-
 local buttonTexture = [[Interface\AddOns\Skada\Media\Textures\toolbar%s\config.blp]]
 
 local function serial(val, name, skipnewlines, depth)
@@ -67,9 +58,6 @@ local function serial(val, name, skipnewlines, depth)
 		tmp = tmp .. '"[inserializeable datatype:' .. type(val) .. ']"'
 	end
 	return tmp
-end
-
-function mod:OnInitialize()
 end
 
 local function BarLeave(bar)
@@ -171,91 +159,81 @@ local function menuOnClick(self, button)
 end
 
 function mod:Create(window, isnew)
-	if not classcolors then
-		classcolors = Skada.classcolors
-	end
+	local p = window.db
+	local frame = window.frame
 
-	if not window.frame then
-		window.frame = CreateFrame("Frame", window.db.name .. "InlineFrame", UIParent)
-		window.frame.win = window
-		window.frame:SetFrameLevel(5)
-		window.frame:SetClampedToScreen(true)
+	if not frame then
+		frame = CreateFrame("Frame", p.name .. "InlineFrame", UIParent)
+		frame:SetFrameLevel(1)
 
-		if window.db.height == 15 then
-			window.db.height = 23
+		if p.height == 15 then
+			p.height = 23
 		end
-		window.frame:SetHeight(window.db.height)
-		window.frame:SetWidth(window.db.width or GetScreenWidth())
-		window.frame:ClearAllPoints()
-		window.frame:SetPoint("BOTTOM", -1)
-		window.frame:SetPoint("LEFT", -1)
-		if window.db.background.color.a == 51 / 255 then
-			window.db.background.color = {r = 255, b = 250 / 255, g = 250 / 255, a = 1}
+
+		frame:SetHeight(p.height)
+		frame:SetWidth(p.width or GetScreenWidth())
+		frame:ClearAllPoints()
+		frame:SetPoint("BOTTOM", -1)
+		frame:SetPoint("LEFT", -1)
+		if p.background.color.a == 51 / 255 then
+			p.background.color = {r = 255, b = 250 / 255, g = 250 / 255, a = 1}
 		end
 	end
-
-	window.frame:EnableMouse()
-	window.frame:SetScript("OnMouseDown", frameOnMouseDown)
 
 	if isnew then
-		SavePosition(window.frame, window.db)
+		SavePosition(frame, p)
 	else
-		RestorePosition(window.frame, window.db)
+		RestorePosition(frame, p)
 	end
 
-	window.frame:EnableMouse(true)
-	window.frame:SetMovable(true)
-	window.frame:RegisterForDrag("LeftButton")
-	window.frame:SetScript("OnDragStart", frameOnDragStart)
-	window.frame:SetScript("OnDragStop", frameOnDragStop)
+	frame:SetClampedToScreen(true)
+	frame:EnableMouse(true)
+	frame:SetMovable(true)
+	frame:RegisterForDrag("LeftButton")
+	frame:SetScript("OnMouseDown", frameOnMouseDown)
+	frame:SetScript("OnDragStart", frameOnDragStart)
+	frame:SetScript("OnDragStop", frameOnDragStop)
 
-	local titlebg = CreateFrame("Frame", "$parentTitleBackground", window.frame)
+	local titlebg = CreateFrame("Frame", "$parentTitleBackground", frame)
 	titlebg.win = window
 
-	local title = window.frame:CreateFontString("frameTitle", 6)
-	title:SetTextColor(self:GetFontColor(window.db))
-	title:SetFont(self:GetFont(window.db))
+	local title = frame:CreateFontString("frameTitle", 6)
+	title:SetTextColor(self:GetFontColor(p))
+	title:SetFont(self:GetFont(p))
 	title:SetText(window.metadata.title or "Skada")
 	title:SetWordWrap(false)
 	title:SetJustifyH("LEFT")
 	title:SetPoint("LEFT", leftmargin, -1)
 	title:SetPoint("CENTER", 0, 0)
-	title:SetHeight(window.db.height or 23)
-	window.frame.fstitle = title
-	window.frame.titlebg = titlebg
+	title:SetHeight(p.height or 23)
+	frame.fstitle = title
+	frame.titlebg = titlebg
 
 	titlebg:SetAllPoints(title)
 	titlebg:EnableMouse(true)
 	titlebg:SetScript("OnMouseDown", titleOnMouseDown)
 
-	local menu = CreateFrame("Button", "$parentMenuButton", window.frame)
+	local menu = CreateFrame("Button", "$parentMenuButton", frame)
 	menu:ClearAllPoints()
 	menu:SetSize(12, 12)
-	menu:SetNormalTexture(format(buttonTexture, window.db.title.toolbar or 1))
-	menu:SetHighlightTexture(format(buttonTexture, window.db.title.toolbar or 1), 1.0)
+	menu:SetNormalTexture(format(buttonTexture, p.title.toolbar or 1))
+	menu:SetHighlightTexture(format(buttonTexture, p.title.toolbar or 1), 1.0)
 	menu:SetAlpha(0.5)
 	menu:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-	menu:SetBackdropColor(
-		window.db.title.textcolor.r,
-		window.db.title.textcolor.g,
-		window.db.title.textcolor.b,
-		window.db.title.textcolor.a
-	)
-	menu:SetPoint("LEFT", window.frame, "LEFT", 6, 0)
-	menu:SetFrameLevel(window.frame:GetFrameLevel() + 5)
-	menu:SetBackdrop(buttonBackdrop)
+	menu:SetPoint("LEFT", frame, "LEFT", 6, 0)
+	menu:SetFrameLevel(frame:GetFrameLevel() + 5)
 	menu.win = window
 	menu:SetScript("OnClick", menuOnClick)
 
-	window.frame.menu = menu
-	window.frame.skadamenubutton = title
-	window.frame.barstartx = leftmargin + window.frame.fstitle:GetStringWidth()
+	frame.menu = menu
+	frame.skadamenubutton = title
+	frame.barstartx = leftmargin + frame.fstitle:GetStringWidth()
 
-	window.frame.win = window
-	window.frame:EnableMouse(true)
+	frame.win = window
+	window.frame = frame
 
 	--create 20 barframes
-	local temp = 25
+	local temp = 20
 	repeat
 		local bar = barlibrary:CreateBar(nil, window)
 		barlibrary.bars[temp] = bar
@@ -271,8 +249,7 @@ function mod:Destroy(win)
 	end
 end
 
-function mod:Wipe(win)
-end
+mod.Wipe = Skada.EmptyFunc
 
 function mod:SetTitle(win, title)
 	if win and win.frame then
@@ -289,6 +266,7 @@ function barlibrary:CreateBar(uuid, win)
 	bar.win = win
 
 	bar.bg = CreateFrame("Frame", "$parentBackground" .. bar.uuid, win.frame)
+	bar.bg:SetFrameLevel(win.frame:GetFrameLevel() + 6)
 	bar.label = bar.bg:CreateFontString("label" .. bar.uuid)
 	bar.label:SetFont(mod:GetFont(win.db))
 	bar.label:SetTextColor(mod:GetFontColor(win.db))
@@ -440,7 +418,6 @@ function mod:Update(win)
 	local left = win.frame.barstartx + 40
 
 	for key, bar in pairs(mybars) do
-		bar.bg:SetFrameLevel(9)
 		bar.bg:SetHeight(win.db.height)
 		bar.bg:SetPoint("BOTTOMLEFT", win.frame, "BOTTOMLEFT", left, 0)
 		bar.label:SetHeight(win.db.height)
@@ -530,6 +507,7 @@ function mod:ApplySettings(win)
 	end
 	f.menu:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 6, p.height / 2 - 8)
 
+	f:SetClampedToScreen(p.clamped)
 	f:EnableMouse(not p.clickthrough)
 	f:SetScale(p.scale)
 
@@ -724,6 +702,7 @@ function mod:AddDisplayOptions(win, options)
 end
 
 function mod:OnInitialize()
+	classcolors = classcolors or Skada.classcolors
 	self.name = L["Inline Bar Display"]
 	self.description = L["Inline display is a horizontal window style."]
 	Skada:AddDisplaySystem("inline", self)

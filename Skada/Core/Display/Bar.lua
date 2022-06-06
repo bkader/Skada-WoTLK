@@ -131,7 +131,7 @@ do
 		end
 	end
 
-	function mod:Create(window)
+	function mod:Create(window, isnew)
 		-- Re-use bargroup if it exists.
 		local p = window.db
 		local bargroup = mod:GetBarGroup(p.name)
@@ -191,7 +191,11 @@ do
 		bargroup:SetAnchorMouseover(p.title.hovermode)
 
 		-- Restore window position.
-		RestorePosition(bargroup, p)
+		if isnew then
+			SavePosition(bargroup, p)
+		else
+			RestorePosition(bargroup, p)
+		end
 
 		window.bargroup = bargroup
 	end

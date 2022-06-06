@@ -697,6 +697,126 @@ end
 
 -- tell window to update the display of its dataset, using its display provider.
 function Window:UpdateDisplay()
+	-- hidden window? nothing to do...
+	if not self:IsShown() then return end
+
+	if self.selectedmode then
+		local set = self:GetSelectedSet()
+		if set then
+			self:UpdateInProgress()
+
+			if self.selectedmode.Update then
+				if set then
+					self.selectedmode:Update(self, set)
+				else
+					Skada:Printf("No set available to pass to %s Update function! Try to reset Skada.", self.selectedmode.localeName or self.selectedmode.moduleName)
+				end
+			else
+				self:Print("Mode %s does not have an Update function!", self.selectedmode.localeName or self.selectedmode.moduleName)
+			end
+
+			if
+				(self.db.display == "bar" or self.display.display == "inline") and
+				(Skada.db.profile.showtotals or self.db.showtotals) and
+				self.selectedmode.GetSetSummary and
+				((set.type and set.type ~= "none") or set.name == L["Total"])
+			then
+				local valuetext, value = self.selectedmode:GetSetSummary(set, self)
+				if valuetext or value then
+					local existing = nil -- an existing bar?
+
+					if not value then
+						value = 0
+						for j = 1, #self.dataset do
+							local data = self.dataset[j]
+							if data and data.id then
+								value = value + data.value
+							end
+							if data and not existing and not data.id then
+								existing = data
+							end
+						end
+					end
+					value = value + 1
+
+					local d = existing or {}
+					d.id = "total"
+					d.label = L["Total"]
+					d.text = nil
+					d.ignore = true
+					d.value = value
+					d.valuetext = valuetext or tostring(d.value)
+
+					if Skada.db.profile.moduleicons and self.selectedmode.metadata and self.selectedmode.metadata.icon then
+						d.icon = self.selectedmode.metadata.icon
+					else
+						d.icon = dataobj.icon
+					end
+					if not existing then
+						tinsert(self.dataset, 1, d)
+					end
+				end
+			end
+		end
+	elseif self.selectedset then
+		local set = self:GetSelectedSet()
+
+		for j = 1, #modes do
+			local mode = modes[j]
+			if mode then
+				local d = self:nr(j)
+
+				d.id = mode.moduleName
+				d.label = mode.localeName
+				d.value = 1
+
+				if Skada.db.profile.moduleicons and mode.metadata and mode.metadata.icon then
+					d.icon = mode.metadata.icon
+				end
+
+				if set and mode.GetSetSummary then
+					local valuetext, value = mode:GetSetSummary(set, self)
+					d.valuetext = valuetext or tostring(value)
+				end
+			end
+		end
+
+		self.metadata.ordersort = true
+
+		if set then
+			self.metadata.is_modelist = true
+		end
+	else
+		local nr = 1
+		local d = self:nr(nr)
+
+		d.id = "total"
+		d.label = L["Total"]
+		d.value = 1
+
+		nr = nr + 1
+		d = self:nr(nr)
+
+		d.id = "current"
+		d.label = L["Current"]
+		d.value = 1
+
+		for j = 1, #Skada.char.sets do
+			local set = Skada.char.sets[j]
+			if set then
+				nr = nr + 1
+				d = self:nr(nr)
+
+				d.id = tostring(set.starttime)
+				_, d.label, d.valuetext = Skada:GetSetLabel(set)
+				d.value = 1
+				d.emphathize = set.keep
+			end
+		end
+
+		self.metadata.ordersort = true
+	end
+
 	if not self.metadata.maxvalue then
 		self.metadata.maxvalue = 0
 		if self.dataset then
@@ -709,6 +829,7 @@ function Window:UpdateDisplay()
 		end
 	end
 
+	self.changed = nil
 	self.display:Update(self)
 	self:set_mode_title()
 end
@@ -727,8 +848,15 @@ function Window:UpdateInProgress()
 	end
 end
 
+function Window:IsShown()
+	return self.display:IsShown(self)
+end
+
 function Window:Show()
 	self.display:Show(self)
+	if self.changed then
+		self:UpdateDisplay()
+	end
 end
 
 function Window:Hide()
@@ -747,14 +875,10 @@ function Window:Toggle()
 		(self.db.hideauto == 5 and (Skada.insType == "raid" or Skada.insType == "party")) or
 		(self.db.hideauto == 6 and Skada.insType ~= "raid" and Skada.insType ~= "party")
 	then
-		self.display:Hide(self)
+		self:Hide()
 	else
-		self.display:Show(self)
+		self:Show()
 	end
-end
-
-function Window:IsShown()
-	return self.display:IsShown(self)
 end
 
 function Window:Reset()
@@ -1043,7 +1167,7 @@ function Skada:CreateWindow(name, db, display)
 
 	window:SetDisplay(window.db.display or "bar")
 	if window.db.display and displays[window.db.display] then
-		window.display:Create(window)
+		window.display:Create(window, isnew)
 		windows[#windows + 1] = window
 		window:DisplaySets()
 
@@ -1187,9 +1311,9 @@ function Skada:SetActive(enable)
 
 	for i = 1, #windows do
 		local win = windows[i]
-		if win and enable and not win:IsShown() then
+		if win and enable and not win.db.hidden and not win:IsShown() then
 			win:Show()
-		elseif win and not enable and win:IsShown() then
+		elseif win and not enable or not win.db.hidden and win:IsShown() then
 			win:Hide()
 		end
 	end
@@ -2630,129 +2754,7 @@ function Skada:UpdateDisplay(force)
 	for i = 1, #windows do
 		local win = windows[i]
 		if win and (self.changed or win.changed or (self.current and (win.selectedset == "current" or win.selectedset == "total"))) then
-			win.changed = nil
-
-			if win.selectedmode then
-				local set = win:GetSelectedSet()
-
-				if set then
-					win:UpdateInProgress()
-
-					if win.selectedmode.Update then
-						if set then
-							win.selectedmode:Update(win, set)
-						else
-							self:Printf("No set available to pass to %s Update function! Try to reset Skada.", win.selectedmode.localeName)
-						end
-					elseif win.selectedmode.localeName then
-						self:Print("Mode %s does not have an Update function!", win.selectedmode.localeName)
-					end
-
-					if
-						(win.db.display == "bar" or win.db.display == "inline") and
-						(self.db.profile.showtotals or win.db.showtotals) and
-						win.selectedmode.GetSetSummary and
-						((set.type and set.type ~= "none") or set.name == L["Total"])
-					then
-						local valuetext, value = win.selectedmode:GetSetSummary(set, win)
-						if valuetext or value then
-							local existing = nil  -- an existing bar?
-
-							if not value then
-								value = 0
-								for j = 1, #win.dataset do
-									local data = win.dataset[j]
-									if data and data.id then
-										value = value + data.value
-									end
-									if data and not existing and not data.id then
-										existing = data
-									end
-								end
-							end
-							value = value + 1
-
-							local d = existing or {}
-							d.id = "total"
-							d.label = L["Total"]
-							d.text = nil
-							d.ignore = true
-							d.value = value
-							d.valuetext = valuetext or tostring(d.value)
-
-							if self.db.profile.moduleicons and win.selectedmode.metadata and win.selectedmode.metadata.icon then
-								d.icon = win.selectedmode.metadata.icon
-							else
-								d.icon = dataobj.icon
-							end
-
-							if not existing then tinsert(win.dataset, 1, d) end
-						end
-					end
-				end
-
-				win:UpdateDisplay()
-			elseif win.selectedset then
-				local set = win:GetSelectedSet()
-
-				for j = 1, #modes do
-					local mode = modes[j]
-					if mode then
-						local d = win:nr(j)
-
-						d.id = mode.moduleName
-						d.label = mode.localeName
-						d.value = 1
-
-						if self.db.profile.moduleicons and mode.metadata and mode.metadata.icon then
-							d.icon = mode.metadata.icon
-						end
-
-						if set and mode.GetSetSummary then
-							local valuetext, value = mode:GetSetSummary(set, win)
-							d.valuetext = valuetext or tostring(value)
-						end
-					end
-				end
-
-				win.metadata.ordersort = true
-
-				if set then
-					win.metadata.is_modelist = true
-				end
-
-				win:UpdateDisplay()
-			else
-				local nr = 1
-				local d = win:nr(nr)
-
-				d.id = "total"
-				d.label = L["Total"]
-				d.value = 1
-
-				nr = nr + 1
-				d = win:nr(nr)
-
-				d.id = "current"
-				d.label = L["Current"]
-				d.value = 1
-
-				for j = 1, #self.char.sets do
-					local set = self.char.sets[j]
-					if set then
-						nr = nr + 1
-						d = win:nr(nr)
-
-						d.id = tostring(set.starttime)
-						_, d.label, d.valuetext = self:GetSetLabel(set)
-						d.value = 1
-						d.emphathize = set.keep
-					end
-				end
-
-				win.metadata.ordersort = true
-				win:UpdateDisplay()
-			end
+			win:UpdateDisplay()
 		end
 	end
 
