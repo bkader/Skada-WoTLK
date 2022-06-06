@@ -5,6 +5,7 @@ local AceGUI = LibStub("AceGUI-3.0")
 
 local pairs, type, tsort = pairs, type, table.sort
 local format, sbyte = string.format, string.byte
+local min, max = math.min, math.max
 local GetCursorPosition = GetCursorPosition
 local GetScreenWidth, GetScreenHeight = GetScreenWidth, GetScreenHeight
 
@@ -413,7 +414,9 @@ function Skada:OpenMenu(window)
 				local num, kept = #sets, 0
 				for i = 1, num do
 					local set = sets[i]
-					if set.keep then kept = kept + 1 end
+					if set.keep then
+						kept = kept + 1
+					end
 
 					wipe(info)
 					info.text = setInfoText(set, i, num)
@@ -585,49 +588,6 @@ function Skada:OpenMenu(window)
 				info.keepShownOnClick = 1
 				UIDropDownMenu_AddButton(info, level)
 			end
-		elseif level == 3 then
-			if UIDROPDOWNMENU_MENU_VALUE == "modes" then
-				modes = Skada:GetModes()
-				for i = 1, #modes do
-					local mode = modes[i]
-					wipe(info)
-					info.text = mode.localeName
-					info.checked = (Skada.db.profile.report.mode == mode.moduleName)
-					info.func = function()
-						Skada.db.profile.report.mode = mode.moduleName
-					end
-					UIDropDownMenu_AddButton(info, level)
-				end
-			elseif UIDROPDOWNMENU_MENU_VALUE == "segment" then
-				wipe(info)
-				info.text = L["Total"]
-				info.func = function()
-					Skada.db.profile.report.set = "total"
-				end
-				info.checked = (Skada.db.profile.report.set == "total")
-				UIDropDownMenu_AddButton(info, level)
-
-				wipe(info)
-				info.text = L["Current"]
-				info.func = function()
-					Skada.db.profile.report.set = "current"
-				end
-				info.checked = (Skada.db.profile.report.set == "current")
-				UIDropDownMenu_AddButton(info, level)
-
-				sets = Skada.char.sets
-				local num = #sets
-				for i = 1, num do
-					local set = sets[i]
-					wipe(info)
-					info.text = setInfoText(set, i, num)
-					info.func = function()
-						Skada.db.profile.report.set = i
-					end
-					info.checked = (Skada.db.profile.report.set == i)
-					UIDropDownMenu_AddButton(info, level)
-				end
-			end
 		end
 	end
 
@@ -645,42 +605,93 @@ function Skada:SegmentMenu(window)
 		if not level or not self.win then return end
 		info = info or UIDropDownMenu_CreateInfo()
 
-		wipe(info)
-		info.text = L["Total"]
-		info.func = function()
-			self.win:set_selected_set("total")
-			Skada:UpdateDisplay()
-		end
-		info.checked = (self.win.selectedset == "total")
-		UIDropDownMenu_AddButton(info, level)
+		sets = Skada.char.sets
+		local numsets = #sets
 
-		wipe(info)
-		info.text = L["Current"]
-		info.func = function()
-			self.win:set_selected_set("current")
-			Skada:UpdateDisplay()
-		end
-		info.checked = (self.win.selectedset == "current")
-		UIDropDownMenu_AddButton(info, level)
-
-		if #Skada.char.sets > 0 then
+		if level == 1 then
 			wipe(info)
-			info.disabled = 1
-			info.notCheckable = 1
+			info.text = L["Total"]
+			info.func = function()
+				self.win:set_selected_set("total")
+				Skada:UpdateDisplay()
+			end
+			info.checked = (self.win.selectedset == "total")
 			UIDropDownMenu_AddButton(info, level)
 
-			sets = Skada.char.sets
-			local num = #sets
-			for i = 1, num do
-				local set = sets[i]
+			wipe(info)
+			info.text = L["Current"]
+			info.func = function()
+				self.win:set_selected_set("current")
+				Skada:UpdateDisplay()
+			end
+			info.checked = (self.win.selectedset == "current")
+			UIDropDownMenu_AddButton(info, level)
+
+			if numsets > 0 then
 				wipe(info)
-				info.text = setInfoText(set, i, num)
-				info.func = function()
-					self.win:set_selected_set(i)
-					Skada:UpdateDisplay()
-				end
-				info.checked = (self.win.selectedset == i)
+				info.disabled = 1
+				info.notCheckable = 1
 				UIDropDownMenu_AddButton(info, level)
+
+				local offset = 1
+				if type(self.win.selectedset) == "number" and self.win.selectedset > 25 then
+					offset = min(25, max(1, numsets - 24))
+				end
+
+				local nr = 0
+				for i = offset, numsets do
+					nr = nr + 1
+					local set = sets[i]
+					wipe(info)
+					info.text = setInfoText(set, i, numsets)
+					info.func = function()
+						self.win:set_selected_set(i)
+						Skada:UpdateDisplay()
+					end
+					info.checked = (self.win.selectedset == i)
+					UIDropDownMenu_AddButton(info, level)
+					if nr == 25 then
+						break
+					end
+				end
+
+				if numsets > nr then
+					wipe(info)
+					info.disabled = 1
+					info.notCheckable = 1
+					UIDropDownMenu_AddButton(info, level)
+
+					wipe(info)
+					if offset == 1 then
+						info.text = L["Previous"]
+						info.value = "prev"
+					else
+						info.text = L["Next"]
+						info.value = "next"
+					end
+					info.padding = 40
+					info.hasArrow = 1
+					UIDropDownMenu_AddButton(info, level)
+				end
+			end
+		elseif level == 2 then
+			if UIDROPDOWNMENU_MENU_VALUE == "prev" or UIDROPDOWNMENU_MENU_VALUE == "next" then
+				local start, stop = 26, numsets
+				if UIDROPDOWNMENU_MENU_VALUE == "next" then
+					start, stop = 1, max(1, numsets - 25)
+				end
+
+				for i = start, stop do
+					local set = sets[i]
+					wipe(info)
+					info.text = setInfoText(set, i, numsets)
+					info.func = function()
+						self.win:set_selected_set(i)
+						Skada:UpdateDisplay()
+					end
+					info.checked = (self.win.selectedset == i)
+					UIDropDownMenu_AddButton(info, level)
+				end
 			end
 		end
 	end

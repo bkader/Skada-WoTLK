@@ -421,6 +421,8 @@ L["Start New Segment"] = true
 L["Start New Phase"] = true
 L["Select All"] = true
 L["Deselect All"] = true
+L["Next"] = NEXT
+L["Previous"] = PREVIOUS
 -- window buttons
 L["Configure"] = true
 L["Open Config"] = true
