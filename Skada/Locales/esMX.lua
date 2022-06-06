@@ -520,6 +520,7 @@ L["%s's <%s> targets"] = "Objetivos de <%2$s> de %1$s"
 L["%s's <%s> sources"] = "Fuentes de <%2$s> de %1$s"
 L["Sunder Counter"] = "Hender armadura"
 L["Sunder target list"] = "Objetivos de Hender armadura"
+L["Sunder source list"] = "Fuentes de Hender armadura"
 -- CC Tracker Module --
 L["Crowd Control"] = "Controles de masas"
 L["CC Done"] = "Controles hechos"

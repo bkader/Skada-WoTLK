@@ -517,6 +517,7 @@ L["%s's <%s> targets"] = "%s的<%s>目標"
 L["%s's <%s> sources"] = "%s的<%s>的來源"
 L["Sunder Counter"] = "破甲統計"
 L["Sunder target list"] = "破甲目標列表"
+L["Sunder source list"] = "破甲的來源列表"
 -- CC Tracker Module --
 L["Crowd Control"] = "控場"
 L["CC Done"] = "施放控場"

@@ -4,6 +4,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 
 	local mod = Skada:NewModule("Sunder Counter")
 	local targetmod = mod:NewModule("Sunder target list")
+	local sourcemod = mod:NewModule("Sunder source list")
 
 	local pairs, tostring, format = pairs, tostring, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
@@ -88,6 +89,46 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 		if not sunder then
 			sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
 			sunderLink = P.reportlinks and GetSpellLink(47467)
+		end
+	end
+
+	function sourcemod:Enter(win, id, label)
+		win.targetid, win.targetname = id, label
+		win.title = format(L["%s's <%s> sources"], label, sunder)
+	end
+
+	function sourcemod:Update(win, set)
+		win.title = format(L["%s's <%s> sources"], win.targetname or L["Unknown"], sunder)
+		if not win.targetname then return end
+
+		local sources, total = set:GetSunderSources(win.targetname)
+		if sources then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
+			local nr = 0
+			for sourcename, source in pairs(sources) do
+				nr = nr + 1
+				local d = win:nr(nr)
+
+				d.id = source.id
+				d.label = sourcename
+				d.text = source.id and Skada:FormatName(sourcename, source.id)
+				d.class = source.class
+				d.role = source.role
+				d.spec = source.spec
+
+				d.value = source.count
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Count and d.value,
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+				)
+
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
+				end
+			end
 		end
 	end
 
@@ -176,10 +217,12 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 	end
 
 	function mod:OnEnable()
+		sourcemod.metadata = {showspots = true}
+		targetmod.metadata = {click1 = sourcemod}
 		self.metadata = {
 			showspots = true,
 			click1 = targetmod,
-			columns = {Count = true, Percent = false, sPercent = true},
+			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\ability_warrior_sunder]]
 		}
 
@@ -273,6 +316,28 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 	end
 
 	do
+		local setPrototype = Skada.setPrototype
+		function setPrototype:GetSunderSources(name, tbl)
+			local total = 0
+			if self.sunder and name then
+				tbl = clear(tbl or C)
+				for i = 1, #self.players do
+					local p = self.players[i]
+					if p and p.sundertargets and p.sundertargets[name] then
+						tbl[name] = new()
+						tbl[name].id = p.id
+						tbl[name].name = p.name
+						tbl[name].class = p.class
+						tbl[name].role = p.role
+						tbl[name].spec = p.spec
+						tbl[name].count = p.sundertargets[name]
+						total = total + p.sundertargets[name]
+					end
+				end
+			end
+			return tbl, total
+		end
+
 		local playerPrototype = Skada.playerPrototype
 		function playerPrototype:GetSunderTargets(tbl)
 			if self.sundertargets then

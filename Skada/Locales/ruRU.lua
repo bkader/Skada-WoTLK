@@ -520,6 +520,7 @@ L["%s's <%s> targets"] = "%s - Цели <%s>"
 L["%s's <%s> sources"] = "%s - Источник <%s>"
 L["Sunder Counter"] = "Раскол брони"
 L["Sunder target list"] = "Цели раскола брони"
+L["Sunder source list"] = "Источник раскола брони"
 -- CC Tracker Module --
 L["Crowd Control"] = "Контроль толпы"
 L["CC Done"] = "Контроль - Успешный"

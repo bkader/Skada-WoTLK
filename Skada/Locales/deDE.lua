@@ -517,7 +517,8 @@ L["actor debuffs"] = function(n1, n2) return ((not n2 or n1 == n2) and "%s Debuf
 L["%s's <%s> targets"] = "%s <%s> Ziele"
 L["%s's <%s> sources"] = "%s <%s> Quellen"
 L["Sunder Counter"] = "Sunder Counter"
-L["Sunder target list"] = "Zielliste trennen"
+L["Sunder target list"] = "Zielliste R\195\188stung zerrei\195\159en"
+L["Sunder source list"] = "Quellenliste R\195\188stung zerrei\195\159en"
 -- CC Tracker Module --
 L["Crowd Control"] = "Massenkontrolle"
 L["CC Done"] = "Verursachte Massenkontrolle"
