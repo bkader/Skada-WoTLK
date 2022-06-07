@@ -16,6 +16,7 @@ local IsControlKeyDown = IsControlKeyDown
 local IsModifierKeyDown = IsModifierKeyDown
 local SavePosition = Skada.SavePosition
 local RestorePosition = Skada.RestorePosition
+local new, del = Skada.newTable, Skada.delTable
 local _
 
 -- references
@@ -190,10 +191,9 @@ do
 		bargroup.button:SetHeight(p.title.height or 15)
 		bargroup:SetAnchorMouseover(p.title.hovermode)
 
-		-- Restore window position.
-		if isnew then
+		if isnew then -- save position if new
 			SavePosition(bargroup, p)
-		else
+		else -- restore position if not
 			RestorePosition(bargroup, p)
 		end
 
@@ -310,7 +310,7 @@ do
 			-- found a frame to stick it to?
 			if anchor and frame and frame.win then
 				-- change the window it is sticked to.
-				frame.win.db.sticked = frame.win.db.sticked or {}
+				frame.win.db.sticked = frame.win.db.sticked or new()
 				frame.win.db.sticked[p.name] = true
 
 				-- if the window that we are sticking this one to was
@@ -356,7 +356,7 @@ do
 							end
 							-- remove table if empty
 							if next(win.db.sticked) == nil then
-								win.db.sticked = nil
+								win.db.sticked = del(win.db.sticked)
 							end
 						elseif p.sticked and p.sticked[win.db.name] then
 							SavePosition(win.bargroup, win.db)
@@ -614,6 +614,24 @@ do
 		end
 	end
 
+	local function bar_reverse_sort(a, b)
+		if not a or a.order == nil then
+			return false
+		elseif not b or b.order == nil then
+			return true
+		elseif a.order < b.order then
+			return false
+		elseif a.order > b.order then
+			return true
+		elseif not a.GetLabel then
+			return false
+		elseif not b.GetLabel then
+			return true
+		else
+			return a:GetLabel() > b:GetLabel()
+		end
+	end
+
 	local function bar_seticon(bar, db, data, icon)
 		if icon then
 			bar:SetIcon(icon)
@@ -769,7 +787,7 @@ do
 					end
 				end
 
-				if win.metadata.ordersort then
+				if win.metadata.ordersort or win.metadata.reversesort then
 					bar.order = i
 				end
 
@@ -840,7 +858,14 @@ do
 			end
 		end
 
-		win.bargroup:SetSortFunction(win.metadata.ordersort and bar_order_sort or nil)
+		if win.metadata.reversesort then
+			win.bargroup:SetSortFunction(bar_reverse_sort)
+		elseif win.metadata.ordersort then
+			win.bargroup:SetSortFunction(bar_order_sort)
+		else
+			win.bargroup:SetSortFunction(nil)
+		end
+
 		win.bargroup:SortBars()
 	end
 end

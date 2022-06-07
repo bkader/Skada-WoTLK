@@ -15,7 +15,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 	local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
-	local GetTime, date = GetTime, date
+	local GetTime, time, date = GetTime, time, date
 	local _
 
 	-- cache colors
@@ -46,7 +46,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		if player then
 			local deathlog = player.deathlog and player.deathlog[1]
 			if not deathlog or (deathlog.timeStr and not override) then
-				deathlog = {log = {}}
+				deathlog = {log = new()}
 				player.deathlog = player.deathlog or {}
 				tinsert(player.deathlog, 1, deathlog)
 			end
@@ -94,7 +94,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			tinsert(deathlog.log, 1, log)
 
 			-- trim things and limit to deathlogevents (defaul: 14)
-			while #deathlog.log > (P.modules.deathlogevents or 14) - 1 do
+			while #deathlog.log > (P.modules.deathlogevents or 14) do
 				del(tremove(deathlog.log))
 			end
 		end
@@ -224,7 +224,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			local deathlog = player.deathlog and player.deathlog[1]
 			if deathlog then
 				deathlog.time = set.last_time or GetTime()
-				deathlog.timeStr = date("%H:%M:%S")
+				deathlog.timeStr = date("%H:%M:%S", set.last_action or time())
 
 				for i = #deathlog.log, 1, -1 do
 					local e = deathlog.log[i]
@@ -554,7 +554,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			local curtime, nr = set.last_time or GetTime(), 0
 			for i = 1, #set.players do
 				local player = set.players[i]
-				if player and player.deathlog and (player.death or WATCH) and (not win.class or win.class == player.class) then
+				if player and (player.death or WATCH) and (not win.class or win.class == player.class) then
 					nr = nr + 1
 					local d = win:nr(nr)
 
@@ -569,9 +569,12 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 						d.value = player.death
 						d.valuetext = tostring(player.death)
 
-						if player.deathlog[#player.deathlog] and player.deathlog[#player.deathlog].time then
-							d.value = player.deathlog[#player.deathlog].time
-							d.color = (WATCH and player.deathlog[#player.deathlog].time) and GRAY_FONT_COLOR or nil
+						if player.deathlog then
+							local first_death = player.deathlog[#player.deathlog]
+							if first_death and first_death.time then
+								d.value = first_death.time
+								d.color = (WATCH and first_death.time) and GRAY_FONT_COLOR or nil
+							end
 						end
 					else
 						d.value = curtime
@@ -634,7 +637,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 	end
 
 	function mod:Update(win, set)
-		if P.modules.alternativedeaths then
+		if P.modules.alternativedeaths and (set ~= Skada.total or P.totalidc) then
 			Alt_Update(self, win, set)
 		else
 			Def_Update(self, win, set)
@@ -693,15 +696,22 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			columns = {Change = true, Health = true, Percent = true},
 			icon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
 		}
-		playermod.metadata = {click1 = P.modules.alternativedeaths and nil or playermod}
+		playermod.metadata = {click1 = playermod}
 		self.metadata = {
-			click1 = P.modules.alternativedeaths and deathlogmod or playermod,
+			click1 = playermod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			icon = [[Interface\Icons\ability_rogue_feigndeath]]
 		}
 
+		-- alternative display
+		if P.modules.alternativedeaths then
+			playermod.metadata.click1 = nil
+			self.metadata.click1 = deathlogmod
+		end
+
 		-- no total click.
+		deathlogmod.nototal = true
 		playermod.nototal = true
 
 		local flags_dst_nopets = {dst_is_interesting_nopets = true}
@@ -782,13 +792,13 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		for i = 1, #set.players do
 			local player = set.players[i]
 			if player and (not set.death or not player.death) then
-				player.death, player.deathlog = nil, nil
+				player.death, player.deathlog = nil, del(player.deathlog, true)
 			elseif player and player.deathlog then
 				while #player.deathlog > (player.death or 0) do
-					tremove(player.deathlog, 1)
+					del(tremove(player.deathlog, 1), true)
 				end
 				if #player.deathlog == 0 then
-					player.deathlog = nil
+					player.deathlog = del(player.deathlog)
 				end
 			end
 		end

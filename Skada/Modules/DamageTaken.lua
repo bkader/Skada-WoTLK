@@ -810,16 +810,16 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 		for i = 1, #set.players do
 			local p = set.players[i]
 			if p and p.totaldamagetaken == 0 then
-				p.damagetakenspells = nil
+				p.damagetakenspells = del(p.damagetakenspells, true)
 			elseif p and p.damagetakenspells then
 				for spellname, spell in pairs(p.damagetakenspells) do
 					if not spell.total or spell.total == 0 or not spell.count or spell.count == 0 then
-						p.damagetakenspells[spellname] = nil
+						p.damagetakenspells[spellname] = del(p.damagetakenspells[spellname])
 					end
 				end
 				-- nothing left?
 				if next(p.damagetakenspells) == nil then
-					p.damagetakenspells = nil
+					p.damagetakenspells = del(p.damagetakenspells)
 				end
 			end
 		end
@@ -1220,7 +1220,7 @@ end)
 -- Avoidance & Mitigation Module --
 -- ============================= --
 
-Skada:RegisterModule("Avoidance & Mitigation", function(L, _, _, _, new, _, clear)
+Skada:RegisterModule("Avoidance & Mitigation", function(L, _, _, _, new, del, clear)
 	if Skada:IsDisabled("Damage Taken", "Avoidance & Mitigation") then return end
 
 	local mod = Skada:NewModule("Avoidance & Mitigation")
@@ -1328,7 +1328,7 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L, _, _, _, new, _, clea
 								win.metadata.maxvalue = d.value
 							end
 						elseif C[player.id] then
-							C[player.id] = nil
+							C[player.id] = del(C[player.id])
 						end
 					end
 				end

@@ -81,7 +81,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 
 	local function TargetDied(timestamp, eventtype, _, _, _, dstGUID)
 		if P.modules.sunderannounce and dstGUID and mod.targets and mod.targets[dstGUID] then
-			mod.targets[dstGUID] = nil
+			mod.targets[dstGUID] = del(mod.targets[dstGUID])
 		end
 	end
 

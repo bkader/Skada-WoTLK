@@ -3,7 +3,7 @@ local Skada = Skada
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 local AceGUI = LibStub("AceGUI-3.0")
 
-local pairs, type, tsort = pairs, type, table.sort
+local pairs, next, type, tsort = pairs, next, type, table.sort
 local format, sbyte = string.format, string.byte
 local min, max = math.min, math.max
 local GetCursorPosition = GetCursorPosition
@@ -14,6 +14,7 @@ local UIDropDownMenu_CreateInfo = UIDropDownMenu_CreateInfo
 local UIDropDownMenu_AddButton = UIDropDownMenu_AddButton
 local CloseDropDownMenus = CloseDropDownMenus
 local ToggleDropDownMenu = ToggleDropDownMenu
+local del = Skada.delTable
 
 local info = nil
 local iconName = "\124T%s:19:19:0:-1:32:32:2:30:2:30\124t %s"
@@ -268,6 +269,9 @@ function Skada:OpenMenu(window)
 								local w = windows[i]
 								if w and w.db and w.db.sticked and w.db.sticked[win.db.name] then
 									w.db.sticked[win.db.name] = nil
+									if next(w.db.sticked) == nil then
+										w.db.sticked = del(w.db.sticked)
+									end
 								end
 							end
 						end

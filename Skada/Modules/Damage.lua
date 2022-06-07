@@ -854,16 +854,16 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 		for i = 1, #set.players do
 			local p = set.players[i]
 			if p and p.totaldamage == 0 then
-				p.damagespells = nil
+				p.damagespells = del(p.damagespells, true)
 			elseif p and p.damagespells then
 				for spellname, spell in pairs(p.damagespells) do
 					if not spell.total or spell.total == 0 or not spell.count or spell.count == 0 then
-						p.damagespells[spellname] = nil
+						p.damagespells[spellname] = del(p.damagespells[spellname])
 					end
 				end
 				-- nothing left?
 				if next(p.damagespells) == nil then
-					p.damagespells = nil
+					p.damagespells = del(p.damagespells)
 				end
 			end
 		end

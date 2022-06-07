@@ -672,7 +672,7 @@ end
 
 -- destroy a window
 function Window:Destroy()
-	self.dataset = nil
+	self.dataset = del(self.dataset, true)
 
 	if self.display then
 		self.display:Destroy(self)
@@ -1111,9 +1111,9 @@ end
 -- windows and misc
 
 function Skada:CreateWindow(name, db, display)
-	name = name and name:trim() or db.name or "Skada"
+	name = name and name:trim() or db.name or self.windowdefaults.name
 	if not name or name == "" then
-		name = "Skada" -- default
+		name = self.windowdefaults.name -- default
 	else
 		name = gsub(name, "^%l", strupper, 1)
 	end
@@ -1895,12 +1895,9 @@ do
 end
 
 function Skada:AssignPet(ownerGUID, ownerName, petGUID)
-	if pets[petGUID] then
-		pets[petGUID].id = ownerGUID
-		pets[petGUID].name = ownerName
-	else
-		pets[petGUID] = {id = ownerGUID, name = ownerName}
-	end
+	pets[petGUID] = pets[petGUID] or new()
+	pets[petGUID].id = ownerGUID
+	pets[petGUID].name = ownerName
 end
 
 function Skada:SummonPet(petGUID, petFlags, ownerGUID, ownerName, ownerFlags)
@@ -1914,7 +1911,9 @@ function Skada:SummonPet(petGUID, petFlags, ownerGUID, ownerName, ownerFlags)
 			self.fixsummon = nil
 			for pet, owner in pairs(pets) do
 				if pets[owner.id] then
-					pets[pet] = {id = pets[owner.id].id, name = pets[owner.id].name}
+					pets[pet] = new()
+					pets[pet].id = pets[owner.id].id
+					pets[pet].name = pets[owner.id].name
 					self.fixsummon = true
 				end
 			end
@@ -1925,7 +1924,7 @@ end
 function Skada:DismissPet(petGUID, delay)
 	if petGUID and pets[petGUID] then
 		-- delayed for a reason (2 x MAINMENU_SLIDETIME).
-		Skada:ScheduleTimer(function() pets[petGUID] = nil end, delay or 0.6)
+		Skada:ScheduleTimer(function() pets[petGUID] = del(pets[petGUID]) end, delay or 0.6)
 	end
 end
 

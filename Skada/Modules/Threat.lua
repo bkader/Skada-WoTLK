@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Threat", function(L, P)
+Skada:RegisterModule("Threat", function(L, P, _, _, new, del)
 	if Skada:IsDisabled("Threat") then return end
 
 	local mod = Skada:NewModule("Threat")
@@ -66,7 +66,11 @@ Skada:RegisterModule("Threat", function(L, P)
 				local player = threatTable and threatTable[guid]
 
 				if not player then
-					player = {id = guid, unit = unit, name = UnitName(unit)}
+					player = new()
+					player.id = guid
+					player.unit = unit
+					player.name = UnitName(unit)
+
 					if owner ~= nil then
 						player.name = player.name .. " (" .. UnitName(owner) .. ")"
 						player.class = "PET"
@@ -228,7 +232,7 @@ Skada:RegisterModule("Threat", function(L, P)
 
 		function mod:SetComplete(set)
 			tankThreat, tankValue = nil, nil
-			T.free("Threat_Table", threatTable)
+			T.free("Threat_Table", threatTable, nil, del)
 			self.unitID, self.unitName = nil, nil
 		end
 	end

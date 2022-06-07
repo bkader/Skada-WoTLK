@@ -20,6 +20,7 @@ local spellschools = nil
 do
 	local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 	local mod = Skada:NewModule("Buffs and Debuffs")
+	local del = Skada.delTable
 
 	function mod:OnEnable()
 		if not Skada:IsDisabled("Buffs") or not Skada:IsDisabled("Debuffs") then
@@ -82,7 +83,7 @@ do
 
 						if spell.uptime == 0 then
 							-- remove spell with 0 uptime.
-							player.auras[spellid] = nil
+							player.auras[spellid] = del(player.auras[spellid], true)
 						elseif spell.targets then
 							-- debuff targets
 							for name, target in pairs(spell.targets) do
@@ -92,7 +93,7 @@ do
 
 								-- remove targets with 0 uptime.
 								if target.uptime == 0 then
-									spell.targets[name] = nil
+									spell.targets[name] = del(spell.targets[name])
 								else
 									-- remove temporary keys
 									target.active, target.start = nil, nil
@@ -101,14 +102,14 @@ do
 
 							-- an empty targets table? Remove it
 							if next(spell.targets) == nil then
-								player.auras[spellid] = nil
+								player.auras[spellid] = del(player.auras[spellid])
 							end
 						end
 					end
 
 					-- remove table if no auras left
 					if next(player.auras) == nil then
-						player.auras = nil
+						player.auras = del(player.auras)
 					end
 				end
 			end

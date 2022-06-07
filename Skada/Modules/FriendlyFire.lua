@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, _, clear)
+Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 	if Skada:IsDisabled("Friendly Fire") then return end
 
 	local mod = Skada:NewModule("Friendly Fire")
@@ -304,16 +304,16 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, _, clear)
 		for i = 1, #set.players do
 			local p = set.players[i]
 			if p and p.friendfire and p.friendfire == 0 then
-				p.friendfirespells = nil
+				p.friendfirespells = del(p.friendfirespells, true)
 			elseif p and p.friendfirespells then
 				for spellid, spell in pairs(p.friendfirespells) do
 					if spell.amount == 0 then
-						p.friendfirespells[spellid] = nil
+						p.friendfirespells[spellid] = del(p.friendfirespells[spellid])
 					end
-					-- nothing left?!
-					if next(p.friendfirespells) == nil then
-						p.friendfirespells = nil
-					end
+				end
+				-- nothing left?!
+				if next(p.friendfirespells) == nil then
+					p.friendfirespells = del(p.friendfirespells)
 				end
 			end
 		end

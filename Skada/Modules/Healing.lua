@@ -9,7 +9,7 @@ local _
 -- Healing module --
 -- ============== --
 
-Skada:RegisterModule("Healing", function(L, P)
+Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 	if Skada:IsDisabled("Healing") then return end
 
 	local mod = Skada:NewModule("Healing")
@@ -513,15 +513,15 @@ Skada:RegisterModule("Healing", function(L, P)
 			for i = 1, #set.players do
 				local p = set.players[i]
 				if p and p.heal and (p.heal + p.overheal) == 0 then
-					p.healspells = nil
+					p.healspells = del(p.healspells, true)
 				elseif p and p.healspells then
 					for spellid, spell in pairs(p.healspells) do
 						if (spell.amount + spell.overheal) == 0 then
-							p.healspells[spellid] = nil
+							p.healspells[spellid] = del(p.healspells[spellid])
 						end
 					end
 					if next(p.healspells) == nil then
-						p.healspells = nil
+						p.healspells = del(p.healspells)
 					end
 				end
 			end
