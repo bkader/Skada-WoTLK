@@ -391,7 +391,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 			end
 		end
 
-		function mod:COMBAT_PLAYER_ENTER()
+		function mod:CombatEnter()
 			if P.combatlogfix then
 				Skada:ScheduleTimer(CombatLogClearEntries, 0.01)
 			end
@@ -425,7 +425,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 					frame:Hide()
 				end
 
-				Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER")
+				Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
 			else
 				if frame then
 					frame:UnregisterAllEvents()
@@ -434,7 +434,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 					frame:Hide()
 					frame = nil
 				end
-				Skada.UnregisterMessage(self, "COMBAT_PLAYER_ENTER")
+				Skada.UnregisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
 			end
 		end
 	end

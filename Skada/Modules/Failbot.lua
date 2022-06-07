@@ -173,6 +173,7 @@ Skada:RegisterModule("Fails", function(L, P)
 		-- no total click.
 		playermod.nototal = true
 
+		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self)
 
 		-- table of ignored spells:
@@ -182,6 +183,7 @@ Skada:RegisterModule("Fails", function(L, P)
 	end
 
 	function mod:OnDisable()
+		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
 	end
 
@@ -262,8 +264,8 @@ Skada:RegisterModule("Fails", function(L, P)
 		end
 	end
 
-	function mod:SetComplete(set)
-		if set.fail and set.fail > 0 and P.modules.failsannounce then
+	function mod:CombatLeave(_, set)
+		if set and set.fail and set.fail > 0 and P.modules.failsannounce then
 			local channel = P.modules.failschannel or "AUTO"
 			if channel == "SELF" or channel == "GUILD" or IsInGroup() then
 				Skada:Report(channel, "preset", L["Fails"], nil, 10)

@@ -479,6 +479,7 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 			flags_src
 		)
 
+		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self, L["Absorbs and Healing"])
 
 		-- table of ignored spells:
@@ -493,6 +494,7 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 	end
 
 	function mod:OnDisable()
+		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
 	end
 
@@ -505,9 +507,11 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 		return valuetext, amount
 	end
 
-	function mod:SetComplete(set)
+	function mod:CombatLeave()
 		T.clear(heal)
+	end
 
+	function mod:SetComplete(set)
 		-- clean healspells table!
 		if (set.heal and set.heal > 0) or (set.overheal and set.overheal > 0) then
 			for i = 1, #set.players do

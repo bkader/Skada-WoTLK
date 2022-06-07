@@ -233,10 +233,12 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 		Skada:RegisterForCL(SunderRemoved, "SPELL_AURA_REMOVED", {src_is_interesting_nopets = true})
 		Skada:RegisterForCL(TargetDied, "UNIT_DIED", "UNIT_DESTROYED", "UNIT_DISSIPATES", {dst_is_not_interesting = true})
 
+		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self, L["Buffs and Debuffs"])
 	end
 
 	function mod:OnDisable()
+		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
 	end
 
@@ -251,7 +253,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 		return tostring(sunders), sunders
 	end
 
-	function mod:SetComplete(set)
+	function mod:CombatLeave()
 		T.clear(data)
 		T.free("Sunder_Targets", self.targets, nil, del)
 	end

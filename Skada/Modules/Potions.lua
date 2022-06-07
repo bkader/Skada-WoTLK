@@ -68,11 +68,21 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 		end
 
 		-- we use this function to record pre-pots as well.
-		function mod:CheckPrePot(event)
-			if event == "COMBAT_PLAYER_ENTER" and P.prepotion and not self.checked then
+		function mod:CombatEnter()
+			if P.prepotion and not self.checked then
 				prepotion = prepotion or T.get("Potions_PrePotions")
 				GroupIterator(CheckUnitPotions, prepotion)
 				self.checked = true
+			end
+		end
+
+		function mod:CombatLeave()
+			if prepotion then
+				if P.prepotion and next(prepotion) ~= nil then
+					Skada:Printf(L["pre-potion: %s"], tconcat(prepotion, ", "))
+				end
+				T.free("Potions_PrePotions", prepotion)
+				self.checked = nil
 			end
 		end
 	end
@@ -348,7 +358,8 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 
 	function mod:ApplySettings()
 		if P.prepotion then
-			Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CheckPrePot")
+			Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
+			Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		else
 			Skada.UnregisterAllMessages(self)
 		end
@@ -386,16 +397,6 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 	function mod:GetSetSummary(set)
 		local potions = set.potion or 0
 		return tostring(potions), potions
-	end
-
-	function mod:SetComplete(set)
-		if prepotion then
-			if P.prepotion and next(prepotion) ~= nil then
-				Skada:Printf(L["pre-potion: %s"], tconcat(prepotion, ", "))
-			end
-			T.free("Potions_PrePotions", prepotion)
-			self.checked = nil
-		end
 	end
 
 	do

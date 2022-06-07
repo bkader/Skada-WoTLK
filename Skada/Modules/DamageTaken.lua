@@ -773,6 +773,7 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 			flags_dst
 		)
 
+		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self, L["Damage Taken"])
 
 		-- table of ignored spells:
@@ -782,6 +783,7 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 	end
 
 	function mod:OnDisable()
+		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
 	end
 
@@ -801,10 +803,12 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 		return valuetext, amount
 	end
 
-	function mod:SetComplete(set)
+	function mod:CombatLeave()
 		T.clear(dmg)
 		T.free("Damage_ExtraAttacks", extraATT, nil, del)
+	end
 
+	function mod:SetComplete(set)
 		-- clean set from garbage before it is saved.
 		if not set.totaldamagetaken or set.totaldamagetaken == 0 then return end
 		for i = 1, #set.players do

@@ -747,6 +747,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 			flags_src_dst
 		)
 
+		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self, L["Enemies"])
 
 		-- table of ignored spells:
@@ -756,10 +757,11 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 	end
 
 	function mod:OnDisable()
+		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
 	end
 
-	function mod:SetComplete(set)
+	function mod:CombatLeave()
 		instanceDiff = nil
 		T.free("Enemies_UnitsInfo", customUnitsInfo)
 		T.free("Enemies_UnitsTable", customUnitsTable, nil, del)

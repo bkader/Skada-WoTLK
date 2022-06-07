@@ -271,6 +271,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 			{dst_is_interesting_nopets = true, src_is_interesting_nopets = true}
 		)
 
+		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self, L["Damage Done"])
 
 		-- table of ignored spells:
@@ -285,6 +286,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 	end
 
 	function mod:OnDisable()
+		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
 	end
 
@@ -297,9 +299,11 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 		return valuetext, value
 	end
 
-	function mod:SetComplete(set)
+	function mod:CombatLeave()
 		T.clear(dmg)
+	end
 
+	function mod:SetComplete(set)
 		if not set.friendfire or set.friendfire == 0 then return end
 		for i = 1, #set.players do
 			local p = set.players[i]

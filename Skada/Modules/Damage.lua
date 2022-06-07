@@ -808,6 +808,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 			flags_src_dst
 		)
 
+		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddFeed(L["Damage: Personal DPS"], feed_personal_dps)
 		Skada:AddFeed(L["Damage: Raid DPS"], feed_raid_dps)
 		Skada:AddMode(self, L["Damage Done"])
@@ -824,6 +825,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 	end
 
 	function mod:OnDisable()
+		Skada.UnregisterAllMessages(self)
 		Skada:RemoveFeed(L["Damage: Personal DPS"])
 		Skada:RemoveFeed(L["Damage: Raid DPS"])
 		Skada:RemoveMode(self)
@@ -845,10 +847,12 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 		return valuetext, amount
 	end
 
-	function mod:SetComplete(set)
+	function mod:CombatLeave()
 		T.clear(dmg)
 		T.free("Damage_ExtraAttacks", extraATT, nil, del)
+	end
 
+	function mod:SetComplete(set)
 		-- clean set from garbage before it is saved.
 		if not set.totaldamage or set.totaldamage == 0 then return end
 		for i = 1, #set.players do
