@@ -2,7 +2,7 @@
 -- Specialized ( = enhanced) for Skada
 -- Note to self: don't forget to notify original author of changes
 -- in the unlikely event they end up being usable outside of Skada.
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90012
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90013
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 
@@ -15,7 +15,8 @@ local GetTime = GetTime
 local sin, cos, rad = math.sin, math.cos, math.rad
 local abs, min, max, floor = math.abs, math.min, math.max, math.floor
 local tsort, tinsert, tremove, tconcat, wipe = table.sort, tinsert, tremove, table.concat, wipe
-local next, pairs, assert, error, type, xpcall = next, pairs, assert, error, type, xpcall
+local next, pairs, error, type, xpcall = next, pairs, error, type, xpcall
+local CreateFrame = CreateFrame
 local GameTooltip = GameTooltip
 local GetScreenWidth = GetScreenWidth
 local GetScreenHeight = GetScreenHeight
@@ -82,7 +83,54 @@ elseif LOCALE_zhTW then
 end
 
 -------------------------------------------------------------------------------
--- class creation
+-- frame and class creation
+
+-- manageable textures and fontstrings z level
+local createFrame
+do
+	local function setZLevel(self, level)
+		local parent = self._parent
+		if level <= 0 then
+			self:SetParent(parent)
+		else
+			local zlevels = parent._zlevels
+			if level > #zlevels then
+				for i = #zlevels + 1, level do
+					zlevels[i] = CreateFrame("Frame", nil, (zlevels[i - 1] or parent))
+					zlevels[i]:SetAllPoints(true)
+				end
+			end
+			self:SetParent(zlevels[level])
+		end
+	end
+
+	local function createTexture(self, ...)
+		local tx = self:_CreateTexture(...)
+		tx._parent = self
+		tx.SetZLevel = setZLevel
+		return tx
+	end
+
+	local function createFontString(self, ...)
+		local fs = self:_CreateFontString(...)
+		fs._parent = self
+		fs.SetZLevel = setZLevel
+		return fs
+	end
+
+	function createFrame(...)
+		local f = CreateFrame(...)
+		f._zlevels = f._zlevels or {}
+
+		f._CreateTexture = f.CreateTexture
+		f.CreateTexture = createTexture
+
+		f._CreateFontString = f.CreateFontString
+		f.CreateFontString = createFontString
+
+		return f
+	end
+end
 
 local function createClass(ftype, parent)
 	local class = (type(ftype) == "table") and ftype or CreateFrame(ftype)
@@ -240,17 +288,22 @@ do
 	}
 
 	function lib:NewBarGroup(name, orientation, height, length, thickness, frameName)
-		assert(self ~= lib, "You may only call :NewBarGroup as an embedded function")
+		if self == lib then
+			error("You may only call :NewBarGroup as an embedded function")
+		end
+
+		if barLists[self] and barLists[self][name] then
+			error("A bar list named " .. name .. " already exists.")
+		end
 
 		barLists[self] = barLists[self] or {}
-		assert(barLists[self][name] == nil, "A bar list named " .. name .. " already exists.")
 
 		orientation = orientation or 1
 		orientation = (orientation == "LEFT") and 1 or orientation
 		orientation = (orientation == "RIGHT") and 3 or orientation
 
 		frameName = frameName:gsub("%W","")
-		local list = barListPrototype:Bind(CreateFrame("Frame", frameName, UIParent))
+		local list = barListPrototype:Bind(createFrame("Frame", frameName, UIParent))
 		list:SetFrameLevel(1)
 		list:SetResizable(true)
 		list:SetMovable(true)
@@ -268,17 +321,17 @@ do
 			lib.defaultFont = myfont
 		end
 
-		list.button = list.button or CreateFrame("Button", "$parentAnchor", list)
+		list.button = list.button or createFrame("Button", "$parentAnchor", list)
 		list.button:SetFrameLevel(list:GetFrameLevel() + 3)
 		list.button:SetText(name)
 		list.button:SetNormalFontObject(myfont)
 		list.button:SetBackdrop(DEFAULT_BACKDROP)
 		list.button:SetBackdropColor(0, 0, 0, 1)
 
-		list.button.text = list.button:GetFontString()
+		list.button.text = list.button:GetFontString(nil, "ARTWORK")
 		list.button.text:SetWordWrap(false)
 
-		list.button.icon = list.button.icon or list.button:CreateTexture(nil, "ARTWORK")
+		list.button.icon = list.button.icon or list.button:CreateTexture("$parentIcon", "ARTWORK")
 		list.button.icon:SetTexCoord(0.094, 0.906, 0.094, 0.906)
 		list.button.icon:SetPoint("LEFT", list.button, "LEFT", 5, 0)
 		list.button.icon:SetSize(14, 14)
@@ -354,11 +407,11 @@ do
 			list.stretcher:SetFrameLevel(list:GetFrameLevel() + 3)
 			list.stretcher:SetSize(32, 12)
 			list.stretcher:SetAlpha(0)
-			list.stretcher.bg = list.stretcher:CreateTexture(nil, "BACKGROUND")
+			list.stretcher.bg = list.stretcher:CreateTexture("$parentBG", "BACKGROUND")
 			list.stretcher.bg:SetAllPoints(true)
 			list.stretcher.bg:SetTexture([[Interface\Buttons\WHITE8X8]])
 			list.stretcher.bg:SetVertexColor(0, 0, 0, 0.85)
-			list.stretcher.icon = list.stretcher:CreateTexture("$parentIcon", "OVERLAY")
+			list.stretcher.icon = list.stretcher:CreateTexture("$parentIcon", "ARTWORK")
 			list.stretcher.icon:SetSize(12, 12)
 			list.stretcher.icon:SetPoint("CENTER")
 			list.stretcher.icon:SetTexture(ICON_STRETCH)
@@ -398,8 +451,14 @@ end
 
 -- lib:NewBarFromPrototype - creates a new bar
 function lib:NewBarFromPrototype(prototype, name, ...)
-	assert(self ~= lib, "You may only call :NewBar as an embedded function")
-	assert(type(prototype) == "table" and type(prototype.mt) == "table", "Invalid bar prototype")
+	if self == lib then
+		error("You may only call :NewBar as an embedded function")
+	end
+
+	if type(prototype) ~= "table" or type(prototype.mt) ~= "table" then
+		error("Invalid bar prototype")
+	end
+
 	bars[self] = bars[self] or {}
 	local bar = bars[self][name]
 	local isNew = false
@@ -407,7 +466,7 @@ function lib:NewBarFromPrototype(prototype, name, ...)
 		self.numBars = self.numBars + 1
 		bar = tremove(recycledBars)
 		if not bar then
-			bar = prototype:Bind(CreateFrame("Frame"))
+			bar = prototype:Bind(createFrame("Frame"))
 		else
 			bar:Show()
 		end
@@ -582,7 +641,10 @@ end
 -- changes bars orientation
 function barListPrototype:SetOrientation(o)
 	if o and self.orientation ~= o then
-		assert(o == 1 or o == 2, "orientation must be 1 or 2.")
+		if o ~= 1 and o ~= 2 then
+			error("orientation must be 1 or 2.")
+		end
+
 		self.orientation = o
 		if bars[self] then
 			for _, bar in pairs(bars[self]) do
@@ -1301,7 +1363,10 @@ end
 -- sets bars sort function
 function barListPrototype:SetSortFunction(func)
 	if self.sortFunc ~= func then
-		assert(func == nil or type(func) == "function")
+		if func and type(func) ~= "function" then
+			error(":SetSortFunction requires a valid function.")
+		end
+
 		self.sortFunc = func
 	end
 end
@@ -2083,7 +2148,10 @@ do
 	end
 
 	function barPrototype:SetValue(val)
-		assert(val ~= nil, "value cannot be nil!")
+		if not val then
+			error("value cannot be nil!")
+		end
+
 		self.value = val
 		if not self.maxValue or val > self.maxValue then
 			self.maxValue = val
