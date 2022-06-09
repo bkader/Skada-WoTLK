@@ -2,8 +2,9 @@ local Skada = Skada
 Skada:RegisterModule("Nickname", function(L, P, G)
 	if Skada:IsDisabled("Nickname") then return end
 
-	local mod = Skada:NewModule("Nickname", "AceTimer-3.0")
+	local mod = Skada:NewModule("Nickname")
 	local Translit = LibStub("LibTranslit-1.0", true)
+	local CONST_COMM_MOD = "Nickname"
 
 	local time, wipe, format = time, wipe, string.format
 	local CheckNickname
@@ -347,7 +348,7 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 
 	function mod:OnEvent(event)
 		if self.sendCooldown > time() then
-			self:ScheduleTimer("SendNickname", 30)
+			self.nicknameTimer = self.nicknameTimer or Skada.ScheduleTimer(self, "SendNickname", 30)
 		else
 			self:SendNickname()
 		end
@@ -360,13 +361,17 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 			self.sendCooldown = time() + 29
 		end
 
-		Skada:SendComm(nil, nil, "Nickname", Skada.userGUID, G.nickname)
+		if self.nicknameTimer then
+			Skada.CancelTimer(self, "SendNickname", true)
+			self.nicknameTimer = nil
+		end
+
+		Skada:SendComm(nil, nil, CONST_COMM_MOD, Skada.userGUID, G.nickname)
 	end
 
-	function mod:OnCommNickname(event, sender, guid, nickname)
+	function mod:OnCommNickname(sender, guid, nickname)
 		self:SetCacheTable()
-		if P.ignorenicknames then return end
-		if sender and guid and guid ~= Skada.userGUID and nickname then
+		if not P.ignorenicknames and sender and guid and nickname then
 			local okey = nil
 			okey, nickname = CheckNickname(nickname)
 			if not okey or nickname == "" then
@@ -445,6 +450,11 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 					type = "toggle",
 					name = L["Ignore Nicknames"],
 					desc = L["When enabled, nicknames set by Skada users are ignored."],
+					set = function(_, value)
+						P.ignorenicknames = value
+						mod:UpdateComms(nil, not P.syncoff)
+						Skada:ApplySettings()
+					end,
 					order = 30,
 					width = "full"
 				},
@@ -469,20 +479,32 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 		}
 	end
 
+	function mod:UpdateComms(_, enable)
+		if enable and not P.ignorenicknames then
+			Skada.AddComm(self, CONST_COMM_MOD, "OnCommNickname")
+			Skada.RegisterMessage(self, "GROUP_ROSTER_UPDATE", "OnEvent")
+			Skada:Debug(format("%s Comms: \124cff00ff00%s\124r", self.localeName, L["ENABLED"]))
+		else
+			Skada.RemoveAllComms(self)
+			Skada.UnregisterAllMessages(self)
+			Skada:Debug(format("%s Comms: \124cffff0000%s\124r", self.localeName, L["DISABLED"]))
+		end
+	end
+
 	function mod:OnEnable()
 		self.sendCooldown = 0
 		self:SetCacheTable()
 
 		Skada.RegisterCallback(self, "Skada_UpdateCore", "Reset")
-		Skada.RegisterCallback(self, "OnCommNickname")
+		Skada.RegisterCallback(self, "Skada_UpdateComms", "UpdateComms")
 
-		Skada:RegisterMessage("GROUP_ROSTER_UPDATE", self.OnEvent, self)
-		self:OnEvent()
+		self:UpdateComms(nil, not P.syncoff)
 	end
 
 	function mod:OnDisable()
 		Skada.UnregisterAllCallbacks(self)
 		Skada:UnregisterAllMessages(self)
+		Skada.RemoveAllComms(self)
 	end
 
 	-----------------------------------------------------------

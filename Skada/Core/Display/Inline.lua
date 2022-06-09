@@ -6,6 +6,9 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 local pairs, tostring, type = pairs, tostring, type
 local strrep, format, _match = string.rep, string.format, string.match
 local tinsert, tremove, tsort = table.insert, table.remove, table.sort
+local GameTooltip = GameTooltip
+local GetScreenWidth = GetScreenWidth
+local GetScreenHeight = GetScreenHeight
 local CloseDropDownMenus = CloseDropDownMenus
 local SavePosition = Skada.SavePosition
 local RestorePosition = Skada.RestorePosition
@@ -98,6 +101,7 @@ local function showmode(win, id, label, mode)
 	end
 
 	CloseDropDownMenus()
+	GameTooltip:Hide()
 end
 
 local function BarClick(win, bar, button)

@@ -23,7 +23,7 @@ local floor, max, min, band, time, GetTime = math.floor, math.max, math.min, bit
 local IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction = IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction
 local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
 local UnitExists, UnitGUID, UnitName, UnitClass = UnitExists, UnitGUID, UnitName, UnitClass
-local ReloadUI, GetScreenWidth = ReloadUI, GetScreenWidth
+local GameTooltip, ReloadUI, GetScreenWidth = GameTooltip, ReloadUI, GetScreenWidth
 local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 local CloseDropDownMenus = CloseDropDownMenus
 local IsInGroup, IsInRaid, IsInPvP = Skada.IsInGroup, Skada.IsInRaid, Skada.IsInPvP
@@ -2551,19 +2551,16 @@ do
 	end
 
 	function ConvertVersion(ver)
-		return tonumber(type(ver) == "string" and gsub(ver, "%.", "") or ver) or 0
+		return tonumber(type(ver) == "string" and gsub(ver, "%.", "", 2) or ver) or 0
 	end
 
-	function Skada:OnCommVersionCheck(sender, version)
-		if sender and sender ~= self.userName and version then
+	function Skada:VersionCheck(sender, version)
+		if sender and version then
 			version = ConvertVersion(version)
-
 			local ver = ConvertVersion(self.version)
 			if not (version and ver) or self.versionChecked then
 				return
-			end
-
-			if version > ver then
+			elseif version > ver then
 				self:Printf(L["Skada is out of date. You can download the newest version from \124cffffbb00%s\124r"], self.website)
 			elseif version < ver then
 				self:SendComm("WHISPER", sender, "VersionCheck", self.version)

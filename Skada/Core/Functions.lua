@@ -5,7 +5,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 local select, pairs = select, pairs
 local tostring, tonumber, format = tostring, tonumber, string.format
 local setmetatable, getmetatable, wipe, band = setmetatable, getmetatable, wipe, bit.band
-local print = print
+local next, print = next, print
 
 local GetNumRaidMembers, GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
 local UnitExists, UnitGUID, UnitClass = UnitExists, UnitGUID, UnitClass
@@ -1205,14 +1205,16 @@ do
 		end
 	end
 
-	local function DispatchComm(sender, ok, commType, ...)
-		if ok and type(commType) == "string" then
-			local func = format("OnComm%s", commType)
-
-			if type(Skada[func]) == "function" then
-				Skada[func](Skada, sender, ...)
-			else
-				Skada.callbacks:Fire(func, sender, ...)
+	local function DispatchComm(sender, ok, const, ...)
+		if ok and Skada.comms and type(const) == "string" and Skada.comms[const] then
+			for self, funcs in pairs(Skada.comms[const]) do
+				for func in pairs(funcs) do
+					if type(self[func]) == "function" then
+						self[func](self, sender, ...)
+					elseif type(func) == "function" then
+						func(sender, ...)
+					end
+				end
 			end
 		end
 	end
@@ -1228,10 +1230,53 @@ do
 			self.SendComm = SendCommMessage
 			self.OnCommReceived = OnCommReceived
 			self:RegisterComm("Skada")
+			self:AddComm("VersionCheck")
 		else
 			self.SendComm = self.EmptyFunc
 			self.OnCommReceived = self.EmptyFunc
 			self:UnregisterAllComm()
+			self:RemoveAllComms()
+		end
+
+		self.callbacks:Fire("Skada_UpdateComms", enable)
+	end
+
+	function Skada.AddComm(self, const, func)
+		if self and const then
+			Skada.comms = Skada.comms or {}
+			Skada.comms[const] = Skada.comms[const] or {}
+			Skada.comms[const][self] = Skada.comms[const][self] or {}
+			Skada.comms[const][self][func or const] = true
+		end
+	end
+
+	function Skada.RemoveComm(self, func)
+		if self and Skada.comms then
+			for const, selfs in pairs(Skada.comms) do
+				if selfs[self] then
+					selfs[self][func] = nil
+
+					-- remove the table if empty
+					if next(selfs[self]) == nil then
+						selfs[self] = nil
+					end
+
+					break
+				end
+			end
+		end
+	end
+
+	function Skada.RemoveAllComms(self)
+		if self and Skada.comms then
+			for const, selfs in pairs(Skada.comms) do
+				for _self in pairs(selfs) do
+					if self == _self then
+						selfs[self] = nil
+						break
+					end
+				end
+			end
 		end
 	end
 end

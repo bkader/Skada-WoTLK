@@ -7,6 +7,7 @@ local ACR = LibStub("AceConfigRegistry-3.0")
 
 local pairs, tsort = pairs, table.sort
 local format, max, min = string.format, math.max, math.min
+local GameTooltip = GameTooltip
 local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 local CloseDropDownMenus = CloseDropDownMenus
 local GetScreenWidth, GetScreenHeight = GetScreenWidth, GetScreenHeight
@@ -502,6 +503,7 @@ do
 		end
 
 		CloseDropDownMenus()
+		GameTooltip:Hide()
 	end
 
 	local function BarClickIgnore(bar, button)
