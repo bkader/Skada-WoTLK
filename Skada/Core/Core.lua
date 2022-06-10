@@ -25,7 +25,7 @@ local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInComba
 local UnitExists, UnitGUID, UnitName, UnitClass = UnitExists, UnitGUID, UnitName, UnitClass
 local GameTooltip, ReloadUI, GetScreenWidth = GameTooltip, ReloadUI, GetScreenWidth
 local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
-local CloseDropDownMenus = CloseDropDownMenus
+local CloseDropDownMenus, SecondsToTime = CloseDropDownMenus, SecondsToTime
 local IsInGroup, IsInRaid, IsInPvP = Skada.IsInGroup, Skada.IsInRaid, Skada.IsInPvP
 local GetNumGroupMembers, GetGroupTypeAndCount = Skada.GetNumGroupMembers, Skada.GetGroupTypeAndCount
 local GetUnitIdFromGUID, GetUnitSpec, GetUnitRole = Skada.GetUnitIdFromGUID, Skada.GetUnitSpec, Skada.GetUnitRole
@@ -2812,16 +2812,18 @@ function Skada:FormatPercent(value, total, dec)
 	end
 end
 
-function Skada:FormatTime(sec)
+function Skada:FormatTime(sec, alt, ...)
 	if sec then
-		if sec >= 3600 then
+		if alt then
+			return SecondsToTime(sec, ...)
+		elseif sec >= 3600 then
 			local h = floor(sec / 3600)
 			local m = floor(sec / 60 - (h * 60))
 			local s = floor(sec - h * 3600 - m * 60)
 			return format("%02.f:%02.f:%02.f", h, m, s)
+		else
+			return format("%02.f:%02.f", floor(sec / 60), floor(sec % 60))
 		end
-
-		return format("%02.f:%02.f", floor(sec / 60), floor(sec % 60))
 	end
 end
 
