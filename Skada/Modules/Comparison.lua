@@ -310,7 +310,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 			win.title = format(L["%s's <%s> damage"], actor.name, win.spellname)
 
 			if spell then
-				local absorbed = max(0, spell.total - spell.amount)
+				local absorbed = spell.total and max(0, spell.total - spell.amount) or 0
 				local blocked, resisted = spell.blocked or 0, spell.resisted or 0
 				local total = spell.amount + absorbed + blocked + resisted
 
@@ -351,8 +351,8 @@ Skada:RegisterModule("Comparison", function(L, P)
 		local myspell = myspells and myspells[win.spellname]
 
 		if spell or myspell then
-			local absorbed = spell and max(0, spell.total - spell.amount) or 0
-			local myabsorbed = myspell and max(0, myspell.total - myspell.amount) or 0
+			local absorbed = (spell and spell.total) and max(0, spell.total - spell.amount) or 0
+			local myabsorbed = (myspell and myspell.total) and max(0, myspell.total - myspell.amount) or 0
 			local blocked, myblocked = spell and spell.blocked or 0, myspell and myspell.blocked or 0
 			local resisted, myresisted = spell and spell.resisted or 0, myspell and myspell.resisted or 0
 
@@ -476,28 +476,31 @@ Skada:RegisterModule("Comparison", function(L, P)
 					_, _, d.icon = GetSpellInfo(spell.id)
 					d.spellschool = spell.school
 
+					d.value = spell.targets[win.targetname].amount or 0
 					local myamount = 0
+					if
+						myself and
+						myself.damagespells and
+						myself.damagespells[spellname] and
+						myself.damagespells[spellname].targets and
+						myself.damagespells[spellname].targets[win.targetname]
+					then
+						myamount = myself.damagespells[spellname].targets[win.targetname].amount or myamount
+					end
+
 					if P.absdamage then
-						d.value = spell.targets[win.targetname].total or spell.targets[win.targetname].amount or 0
-						if
-							myself and
-							myself.damagespells and
-							myself.damagespells[spellname] and
-							myself.damagespells[spellname].targets and
-							myself.damagespells[spellname].targets[win.targetname]
-						then
-							myamount = myself.damagespells[spellname].targets[win.targetname].total or myself.damagespells[spellname].targets[win.targetname].amount or 0
+						if spell.targets[win.targetname].total then
+							d.value = spell.targets[win.targetname].total
 						end
-					else
-						d.value = spell.targets[win.targetname].amount or 0
 						if
 							myself and
 							myself.damagespells and
 							myself.damagespells[spellname] and
 							myself.damagespells[spellname].targets and
-							myself.damagespells[spellname].targets[win.targetname]
+							myself.damagespells[spellname].targets[win.targetname] and
+							myself.damagespells[spellname].targets[win.targetname].total
 						then
-							myamount = myself.damagespells[spellname].targets[win.targetname].amount or 0
+							myamount = myself.damagespells[spellname].targets[win.targetname].total
 						end
 					end
 
@@ -616,16 +619,18 @@ Skada:RegisterModule("Comparison", function(L, P)
 				_, _, d.icon = GetSpellInfo(spell.id)
 				d.spellschool = spell.school
 
+				d.value = spell.amount or 0
 				local myamount = 0
+				if myspells and myspells[spellname] then
+					myamount = myspells[spellname].amount or myamount
+				end
+
 				if P.absdamage then
-					d.value = spell.total or spell.amount or 0
-					if myspells and myspells[spellname] then
-						myamount = myspells[spellname].total or myspells[spellname].amount or myamount
+					if spell.total then
+						d.value = spell.total
 					end
-				else
-					d.value = spell.amount or 0
-					if myspells and myspells[spellname] then
-						myamount = myspells[spellname].amount or myamount
+					if myspells and myspells[spellname] and myspells[spellname].total then
+						myamount = myspells[spellname].total
 					end
 				end
 
@@ -724,16 +729,18 @@ Skada:RegisterModule("Comparison", function(L, P)
 				d.role = target.role
 				d.spec = target.spec
 
+				d.value = target.amount or 0
 				local myamount = 0
+				if mytargets and mytargets[targetname] then
+					myamount = mytargets[targetname].amount or myamount
+				end
+
 				if P.absdamage then
-					d.value = target.total or target.amount or 0
-					if mytargets and mytargets[targetname] then
-						myamount = mytargets[targetname].amount or mytargets[targetname].amount or 0
+					if target.total then
+						d.value = target.total
 					end
-				else
-					d.value = target.amount or 0
-					if mytargets and mytargets[targetname] then
-						myamount = mytargets[targetname].amount or 0
+					if mytargets and mytargets[targetname] and mytargets[targetname].total then
+						myamount = mytargets[targetname].total
 					end
 				end
 
@@ -759,7 +766,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 						d.value = target.amount or 0
 						if P.absdamage and target.total then
-							d.value = target.total or d.value
+							d.value = target.total
 						end
 
 						d.valuetext = FormatValueNumber(0, d.value, true, actor.id == mod.userGUID)

@@ -159,26 +159,32 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 			local spell = e.damagetakenspells and e.damagetakenspells[spellid]
 			if not spell then
 				e.damagetakenspells = e.damagetakenspells or {}
-				e.damagetakenspells[spellid] = {school = spellschool, amount = 0, total = 0}
+				e.damagetakenspells[spellid] = {school = spellschool, amount = amount}
 				spell = e.damagetakenspells[spellid]
+			else
+				spell.amount = spell.amount + amount
+			end
+
+			if spell.total then
+				spell.total = spell.total + amount + absorbed
+			elseif absorbed > 0 then
+				spell.total = spell.amount + absorbed
 			end
 
 			-- source
 			local source = spell.sources and spell.sources[playername]
 			if not source then
 				spell.sources = spell.sources or {}
-				spell.sources[playername] = {amount = 0, total = 0}
+				spell.sources[playername] = {amount = amount}
 				source = spell.sources[playername]
+			else
+				source.amount = source.amount + amount
 			end
 
-			spell.amount = spell.amount + amount
-			source.amount = source.amount + amount
-
-			spell.total = spell.total + amount
-			source.total = source.total + amount
-			if absorbed > 0 then
-				spell.total = spell.total + absorbed
-				source.total = source.total + absorbed
+			if source.total then
+				source.total = source.total + amount + absorbed
+			elseif absorbed > 0 then
+				source.total = source.amount + absorbed
 			end
 		end
 	end
@@ -214,15 +220,21 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 			local spell = e.damagetakenspells and e.damagetakenspells[dmg.spellid]
 			if not spell then
 				e.damagetakenspells = e.damagetakenspells or {}
-				e.damagetakenspells[dmg.spellid] = {school = dmg.spellschool, amount = 0, total = 0}
+				e.damagetakenspells[dmg.spellid] = {school = dmg.spellschool, amount = dmg.amount}
 				spell = e.damagetakenspells[dmg.spellid]
+			else
+				spell.amount = spell.amount + dmg.amount
 			end
 
-			-- add amounts to sepll.
-			spell.amount = spell.amount + dmg.amount
-			spell.total = spell.total + dmg.amount
-			if absorbed > 0 then
-				spell.total = spell.total + absorbed
+			if spell.total then
+				spell.total = spell.total + dmg.amount + absorbed
+			elseif absorbed > 0 then
+				spell.total = spell.amount + absorbed
+			end
+
+			local overkill = dmg.overkill or 0
+			if overkill > 0 then
+				spell.overkill = (spell.overkill or 0) + overkill
 			end
 
 			-- damage source.
@@ -231,24 +243,26 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 				local source = spell.sources and spell.sources[dmg.srcName]
 				if not source then
 					spell.sources = spell.sources or {}
-					spell.sources[dmg.srcName] = {amount = 0, total = 0}
+					spell.sources[dmg.srcName] = {amount = dmg.amount}
 					source = spell.sources[dmg.srcName]
-				end
-				source.amount = source.amount + dmg.amount
-				source.total = source.total + dmg.amount
-				if absorbed > 0 then
-					source.total = source.total + absorbed
+				else
+					source.amount = source.amount + dmg.amount
 				end
 
-				if dmg.overkill and dmg.overkill > 0 then
-					spell.overkill = (spell.overkill or 0) + dmg.overkill
+				if source.total then
+					source.total = source.total + dmg.amount + absorbed
+				elseif absorbed > 0 then
+					source.total = source.amount + absorbed
+				end
+
+				if overkill > 0 then
 					source.overkill = (source.overkill or 0) + dmg.overkill
 				end
 
 				-- the rest of the code is only for allowed instance diffs.
 				if not allowed_diffs[GetRaidDiff()] then return end
 
-				if IsCustomUnit(dmg.enemyid, dmg.enemyname, dmg.amount, dmg.overkill) then
+				if IsCustomUnit(dmg.enemyid, dmg.enemyname, dmg.amount, overkill) then
 					local unit = customUnitsTable[dmg.enemyid]
 					-- started with less than max?
 					if unit.full then
@@ -263,19 +277,19 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 						end
 						unit.full = nil
 					elseif unit.curval >= unit.maxval then
-						local amount = dmg.amount - dmg.overkill
+						local amount = dmg.amount - overkill
 						unit.curval = unit.curval - amount
 
 						if unit.curval <= unit.maxval then
 							log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, dmg.spellschool, unit.maxval - unit.curval, absorbed)
 							amount = amount - (unit.maxval - unit.curval)
 							if customGroups[unit.oname] and unit.useful then
-								log_custom_group(set, unit.guid, unit.oname, dmg.srcName, dmg.spellid, dmg.spellschool, amount, dmg.overkill, absorbed)
+								log_custom_group(set, unit.guid, unit.oname, dmg.srcName, dmg.spellid, dmg.spellschool, amount, overkill, absorbed)
 								customGroupsTable = customGroupsTable or T.get("Enemies_GroupsTable")
 								customGroupsTable[unit.guid] = true
 							end
 							if customGroups[unit.name] then
-								log_custom_group(set, unit.guid, unit.name, dmg.srcName, dmg.spellid, dmg.spellschool, unit.maxval - unit.curval, dmg.overkill, absorbed)
+								log_custom_group(set, unit.guid, unit.name, dmg.srcName, dmg.spellid, dmg.spellschool, unit.maxval - unit.curval, overkill, absorbed)
 							end
 						end
 						if unit.useful then
@@ -284,11 +298,11 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 							source.useful = (source.useful or 0) + amount
 						end
 					elseif unit.curval >= unit.minval then
-						local amount = dmg.amount - dmg.overkill
+						local amount = dmg.amount - overkill
 						unit.curval = unit.curval - amount
 
 						if customGroups[unit.name] then
-							log_custom_group(set, unit.guid, unit.name, dmg.srcName, dmg.spellid, dmg.spellschool, amount, dmg.overkill, absorbed)
+							log_custom_group(set, unit.guid, unit.name, dmg.srcName, dmg.spellid, dmg.spellschool, amount, overkill, absorbed)
 						end
 
 						if unit.curval <= unit.minval then
@@ -302,12 +316,12 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 							log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, dmg.spellschool, amount, absorbed)
 						end
 					elseif unit.power then
-						log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, dmg.spellschool, dmg.amount - (unit.useful and dmg.overkill or 0), absorbed)
+						log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, dmg.spellschool, dmg.amount - (unit.useful and overkill or 0), absorbed)
 					end
 				end
 
 				-- custom groups
-				log_custom_group(set, dmg.enemyid, dmg.enemyname, dmg.srcName, dmg.spellid, dmg.spellschool, dmg.amount, dmg.overkill, absorbed)
+				log_custom_group(set, dmg.enemyid, dmg.enemyname, dmg.srcName, dmg.spellid, dmg.spellschool, dmg.amount, overkill, absorbed)
 			end
 		end
 	end
@@ -487,9 +501,9 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 					d.role = source.role
 					d.spec = source.spec
 
-					d.value = source.amount
-					if P.absdamage then
-						d.value = source.total or d.value
+					d.value = source.amount or 0
+					if P.absdamage and source.total then
+						d.value = source.total
 					end
 
 					d.valuetext = Skada:FormatValueCols(
@@ -548,7 +562,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 							mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
 							actortime and Skada:FormatNumber(d.value / actortime),
 							mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-							)
+						)
 
 						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
@@ -969,20 +983,30 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 			e.damage = (e.damage or 0) + dmg.amount
 			e.totaldamage = (e.totaldamage or 0) + dmg.amount
 
+			local overkill = dmg.overkill or 0
+			if overkill > 0 then
+				set.eoverkill = (set.eoverkill or 0) + dmg.overkill
+				e.overkill = (e.overkill or 0) + dmg.overkill
+			end
+
 			-- damage spell.
 			local spell = e.damagespells and e.damagespells[dmg.spellid]
 			if not spell then
 				e.damagespells = e.damagespells or {}
-				e.damagespells[dmg.spellid] = {school = dmg.spellschool, amount = 0, total = 0}
+				e.damagespells[dmg.spellid] = {school = dmg.spellschool, amount = dmg.amount}
 				spell = e.damagespells[dmg.spellid]
+			else
+				spell.amount = spell.amount + dmg.amount
 			end
-			spell.amount = spell.amount + dmg.amount
-			spell.total = spell.total + dmg.amount
 
 			if absorbed > 0 then
 				set.etotaldamage = set.etotaldamage + absorbed
 				e.totaldamage = e.totaldamage + absorbed
-				spell.total = spell.total + absorbed
+				spell.total = (spell.total and (spell.total + dmg.amount) or spell.amount) + absorbed
+			end
+
+			if overkill > 0 then
+				spell.overkill = (spell.overkill or 0) + dmg.overkill
 			end
 
 			-- damage target.
@@ -990,20 +1014,19 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 				local target = spell.targets and spell.targets[dmg.dstName]
 				if not target then
 					spell.targets = spell.targets or {}
-					spell.targets[dmg.dstName] = {amount = 0, total = 0}
+					spell.targets[dmg.dstName] = {amount = dmg.amount}
 					target = spell.targets[dmg.dstName]
-				end
-				target.amount = target.amount + dmg.amount
-				target.total = target.total + dmg.amount
-
-				if absorbed > 0 then
-					target.total = target.total + absorbed
+				else
+					target.amount = target.amount + dmg.amount
 				end
 
-				if dmg.overkill and dmg.overkill > 0 then
-					set.eoverkill = (set.eoverkill or 0) + dmg.overkill
-					e.overkill = (e.overkill or 0) + dmg.overkill
-					spell.overkill = (spell.overkill or 0) + dmg.overkill
+				if target.total then
+					target.total = target.total + dmg.amount + absorbed
+				elseif absorbed > 0 then
+					target.total = target.amount + absorbed
+				end
+
+				if overkill > 0 then
 					target.overkill = (target.overkill or 0) + dmg.overkill
 				end
 			end
@@ -1193,8 +1216,8 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 					d.spec = target.spec
 
 					d.value = target.amount
-					if P.absdamage then
-						d.value = target.total or d.value
+					if P.absdamage and target.total then
+						d.value = target.total
 					end
 
 					d.valuetext = Skada:FormatValueCols(
@@ -1238,8 +1261,8 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 				d.label, _, d.icon = GetSpellInfo(spellid)
 
 				d.value = spell.amount
-				if P.absdamage then
-					d.value = spell.total or d.value
+				if P.absdamage and spell.total then
+					d.value = spell.total
 				end
 
 				d.valuetext = Skada:FormatValueCols(
@@ -1401,19 +1424,15 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 
 			for spellid, spell in pairs(self.damagespells) do
 				if spell.targets and spell.targets[name] then
+					local amount = P.absdamage and spell.targets[name].total or spell.targets[name].amount
 					if not tbl[spellid] then
 						tbl[spellid] = new()
 						tbl[spellid].school = spell.school
-						tbl[spellid].amount = 0
-					elseif not tbl[spellid].school and spell.school then
-						tbl[spellid].school = spell.school
+						tbl[spellid].amount = amount
+					else
+						tbl[spellid].amount = tbl[spellid].amount + amount
 					end
 
-					if P.absdamage and spell.targets[name].total then
-						tbl[spellid].amount = tbl[spellid].amount + spell.targets[name].total
-					else
-						tbl[spellid].amount = tbl[spellid].amount + spell.targets[name].amount
-					end
 					total = total + tbl[spellid].amount
 				end
 			end
@@ -1426,21 +1445,18 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 		if self.damagespells and self.damagespells[spellid] and self.damagespells[spellid].targets then
 			tbl = clear(tbl or C)
 
-			local total = 0
+			local total = self.damagespells[spellid].amount or 0
 			if P.absdamage and self.damagespells[spellid].total then
 				total = self.damagespells[spellid].total
-			else
-				total = self.damagespells[spellid].amount
 			end
 
 			for name, target in pairs(self.damagespells[spellid].targets) do
+				local amount = P.absdamage and target.total or target.amount
 				if not tbl[name] then
 					tbl[name] = new()
-					tbl[name].amount = P.absdamage and target.total or target.amount
-				elseif P.absdamage and target.total then
-					tbl[name].amount = tbl[name].amount + target.total
+					tbl[name].amount = amount
 				else
-					tbl[name].amount = tbl[name].amount + target.amount
+					tbl[name].amount = tbl[name].amount + amount
 				end
 
 				-- attempt to get the class
@@ -1489,10 +1505,11 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 			local spell = e.healspells and e.healspells[data.spellid]
 			if not spell then
 				e.healspells = e.healspells or {}
-				e.healspells[data.spellid] = {school = data.spellschool, amount = 0}
+				e.healspells[data.spellid] = {school = data.spellschool, amount = data.amount}
 				spell = e.healspells[data.spellid]
+			else
+				spell.amount = spell.amount + data.amount
 			end
-			spell.amount = spell.amount + data.amount
 
 			if data.dstName then
 				spell.targets = spell.targets or {}

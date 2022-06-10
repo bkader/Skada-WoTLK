@@ -53,7 +53,7 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 		local spell = player.damagetakenspells and player.damagetakenspells[spellname]
 		if not spell then
 			player.damagetakenspells = player.damagetakenspells or {}
-			spell = {id = dmg.spellid, school = dmg.spellschool, amount = 0, total = 0}
+			spell = {id = dmg.spellid, school = dmg.spellschool, amount = 0}
 			player.damagetakenspells[spellname] = spell
 		elseif dmg.spellid and dmg.spellid ~= spell.id then
 			if dmg.spellschool and dmg.spellschool ~= spell.school then
@@ -62,7 +62,7 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 				spellname = GetSpellInfo(dmg.spellid)
 			end
 			if not player.damagetakenspells[spellname] then
-				player.damagetakenspells[spellname] = {id = dmg.spellid, school = dmg.spellschool, amount = 0, total = 0}
+				player.damagetakenspells[spellname] = {id = dmg.spellid, school = dmg.spellschool, amount = 0}
 			end
 			spell = player.damagetakenspells[spellname]
 		elseif not spell.school and dmg.spellschool then
@@ -71,7 +71,12 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 
 		spell.count = (spell.count or 0) + 1
 		spell.amount = spell.amount + dmg.amount
-		spell.total = spell.total + dmg.amount
+
+		if spell.total then
+			spell.total = spell.total + dmg.amount + absorbed
+		elseif absorbed > 0 then
+			spell.total = spell.amount + absorbed
+		end
 
 		if dmg.critical then
 			spell.critical = (spell.critical or 0) + 1
@@ -108,10 +113,6 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 			end
 		end
 
-		if absorbed > 0 then
-			spell.total = spell.total + absorbed
-		end
-
 		if dmg.blocked and dmg.blocked > 0 then
 			spell.blocked = (spell.blocked or 0) + dmg.blocked
 		end
@@ -120,7 +121,8 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 			spell.resisted = (spell.resisted or 0) + dmg.resisted
 		end
 
-		if dmg.overkill and dmg.overkill > 0 then
+		local overkill = dmg.overkill or 0
+		if overkill > 0 then
 			spell.overkill = (spell.overkill or 0) + dmg.overkill
 		end
 
@@ -129,15 +131,18 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 			local source = spell.sources and spell.sources[dmg.srcName]
 			if not source then
 				spell.sources = spell.sources or {}
-				spell.sources[dmg.srcName] = {amount = 0, total = 0}
+				spell.sources[dmg.srcName] = {amount = 0}
 				source = spell.sources[dmg.srcName]
 			end
 			source.amount = source.amount + dmg.amount
-			source.total = source.total + dmg.amount
-			if absorbed > 0 then
-				source.total = source.total + absorbed
+
+			if source.total then
+				source.total = source.total + dmg.amount + absorbed
+			elseif absorbed > 0 then
+				source.total = source.amount + absorbed
 			end
-			if dmg.overkill and dmg.overkill > 0 then
+
+			if overkill > 0 then
 				source.overkill = (source.overkill or 0) + dmg.overkill
 			end
 		end
@@ -492,7 +497,7 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 		if spell then
 			if win.metadata then
 				if enemy then
-					win.metadata.maxvalue = P.absdamage and spell.total or spell.amount
+					win.metadata.maxvalue = P.absdamage and spell.total or spell.amount or 0
 				else
 					win.metadata.maxvalue = spell.count
 				end
@@ -502,7 +507,7 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 				local amount = P.absdamage and spell.total or spell.amount
 				local nr = add_detail_bar(win, 0, L["Damage"], amount, nil, nil, true)
 
-				if spell.total ~= spell.amount then
+				if spell.total and spell.total ~= spell.amount then
 					nr = add_detail_bar(win, nr, L["ABSORB"], spell.total - spell.amount, nil, nil, true)
 				end
 			else
@@ -623,8 +628,8 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 						d.spellschool = spell.school
 
 						d.value = spell.sources[win.targetname].amount or 0
-						if P.absdamage then
-							d.value = spell.sources[win.targetname].total or d.value
+						if P.absdamage and spell.sources[win.targetname].total then
+							d.value = spell.sources[win.targetname].total
 						end
 
 						d.valuetext = Skada:FormatValueCols(
@@ -1025,26 +1030,28 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P, _, _, new, _, clear
 					player.damagetakenspells[win.spellname].sources
 				then
 					for sourcename, source in pairs(player.damagetakenspells[win.spellname].sources) do
-						if not sources[sourcename] then
-							sources[sourcename] = new()
-							sources[sourcename].amount = P.absdamage and source.total or source.amount
-						elseif P.absdamage then
-							sources[sourcename].amount = sources[sourcename].amount + source.total
-						else
-							sources[sourcename].amount = sources[sourcename].amount + source.amount
-						end
-						total = total + sources[sourcename].amount
-
-						if not sources[sourcename].class or (mod.metadata.columns.sDTPS and not sources[sourcename].time) then
-							local actor = set:GetActor(sourcename)
-							if actor and not sources[sourcename].class then
-								sources[sourcename].id = actor.id or actor.name
-								sources[sourcename].class = actor.class
-								sources[sourcename].role = actor.role
-								sources[sourcename].spec = actor.spec
+						local amount = P.absdamage and source.total or source.amount or 0
+						if amount > 0 then
+							if not sources[sourcename] then
+								sources[sourcename] = new()
+								sources[sourcename].amount = amount
+							else
+								sources[sourcename].amount = sources[sourcename].amount + amount
 							end
-							if actor and mod.metadata.columns.sDTPS and not sources[sourcename].time then
-								sources[sourcename].time = set:GetActorTime(actor.id, actor.name)
+
+							total = total + amount
+
+							if not sources[sourcename].class or (mod.metadata.columns.sDTPS and not sources[sourcename].time) then
+								local actor = set:GetActor(sourcename)
+								if actor and not sources[sourcename].class then
+									sources[sourcename].id = actor.id or actor.name
+									sources[sourcename].class = actor.class
+									sources[sourcename].role = actor.role
+									sources[sourcename].spec = actor.spec
+								end
+								if actor and mod.metadata.columns.sDTPS and not sources[sourcename].time then
+									sources[sourcename].time = set:GetActorTime(actor.id, actor.name)
+								end
 							end
 						end
 					end
@@ -1093,26 +1100,20 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P, _, _, new, _, clear
 			local targets, total = clear(C), 0
 			for i = 1, #set.players do
 				local player = set.players[i]
-				if
-					player and
-					player.damagetakenspells and
-					player.damagetakenspells[win.spellname] and
-					player.damagetakenspells[win.spellname].total and
-					player.damagetakenspells[win.spellname].total > 0
-				then
-					targets[player.name] = new()
-					targets[player.name].id = player.id
-					targets[player.name].class = player.class
-					targets[player.name].role = player.role
-					targets[player.name].spec = player.spec
-					targets[player.name].amount = player.damagetakenspells[win.spellname].amount
-					targets[player.name].time = mod.metadata.columns.sDTPS and player:GetTime()
+				local spell = player and player.damagetakenspells and player.damagetakenspells[win.spellname]
+				if spell then
+					local amount = P.absdamage and spell.total or spell.amount or 0
+					if amount > 0 then
+						targets[player.name] = new()
+						targets[player.name].id = player.id
+						targets[player.name].class = player.class
+						targets[player.name].role = player.role
+						targets[player.name].spec = player.spec
+						targets[player.name].amount = amount
+						targets[player.name].time = mod.metadata.columns.sDTPS and player:GetTime()
 
-					if P.absdamage and player.damagetakenspells[win.spellname].total then
-						targets[player.name].amount = player.damagetakenspells[win.spellname].total
+						total = total + amount
 					end
-
-					total = total + targets[player.name].amount
 				end
 			end
 
@@ -1158,17 +1159,15 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P, _, _, new, _, clear
 			local player = set.players[i]
 			if player and player.damagetakenspells then
 				for spellname, spell in pairs(player.damagetakenspells) do
-					if spell.total > 0 then
+					local amount = P.absdamage and spell.total or spell.amount or 0
+					if amount > 0 then
 						if not spells[spellname] then
 							spells[spellname] = new()
 							spells[spellname].id = spell.id
 							spells[spellname].school = spell.school
-							spells[spellname].amount = 0
-						end
-						if P.absdamage then
-							spells[spellname].amount = spells[spellname].amount + spell.total
+							spells[spellname].amount = amount
 						else
-							spells[spellname].amount = spells[spellname].amount + spell.amount
+							spells[spellname].amount = spells[spellname].amount + amount
 						end
 					end
 				end
