@@ -818,18 +818,9 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 		if not set.totaldamagetaken or set.totaldamagetaken == 0 then return end
 		for i = 1, #set.players do
 			local p = set.players[i]
-			if p and p.totaldamagetaken == 0 then
+			if p and (p.totaldamagetaken == 0 or (not p.totaldamagetaken and p.damagetakenspells)) then
+				p.damagetaken, p.totaldamagetaken = nil, nil
 				p.damagetakenspells = del(p.damagetakenspells, true)
-			elseif p and p.damagetakenspells then
-				for spellname, spell in pairs(p.damagetakenspells) do
-					if not spell.total or spell.total == 0 or not spell.count or spell.count == 0 then
-						p.damagetakenspells[spellname] = del(p.damagetakenspells[spellname])
-					end
-				end
-				-- nothing left?
-				if next(p.damagetakenspells) == nil then
-					p.damagetakenspells = del(p.damagetakenspells)
-				end
 			end
 		end
 	end

@@ -1222,17 +1222,8 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 		if not set.absorb or set.absorb == 0 then return end
 		for i = 1, #set.players do
 			local p = set.players[i]
-			if p and p.absorb == 0 then
-				p.absorbspells = del(p.absorbspells, true)
-			elseif p and p.absorbspells then
-				for spellid, spell in pairs(p.absorbspells) do
-					if spell.amount == 0 then
-						p.absorbspells[spellid] = del(p.absorbspells[spellid])
-					end
-				end
-				if next(p.absorbspells) == nil then
-					p.absorbspells = del(p.absorbspells)
-				end
+			if p and (p.absorb == 0 or (not p.absorb and p.absorbspells)) then
+				p.absorb, p.absorbspells = nil, del(p.absorbspells, true)
 			end
 		end
 	end

@@ -874,7 +874,8 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 		if not set.totaldamage or set.totaldamage == 0 then return end
 		for i = 1, #set.players do
 			local p = set.players[i]
-			if p and p.totaldamage == 0 then
+			if p and (p.totaldamage == 0 or (not p.totaldamage and p.damagespells)) then
+				p.damage, p.totaldamage = nil, nil
 				p.damagespells = del(p.damagespells, true)
 			end
 		end
