@@ -76,6 +76,9 @@ local CheckForJoinAndLeave
 -- list of players, pets and vehicles
 local players, pets, vehicles = {}, {}, {}
 
+-- targets table used when detecting boss fights.
+local _targets = nil
+
 -- format funtions.
 local SetNumeralFormat, SetValueFormat
 
@@ -410,11 +413,11 @@ end
 do
 	local t = {timeout = 15, whileDead = 0}
 	local f = function()
-		if SkadaDB.profiles then
-			wipe(SkadaDB.profiles)
+		if Skada.db.profiles then
+			wipe(Skada.db.profiles)
 		end
-		if SkadaDB.profileKeys then
-			wipe(SkadaDB.profileKeys)
+		if Skada.db.profileKeys then
+			wipe(Skada.db.profileKeys)
 		end
 
 		Skada.db.global.reinstall = true
@@ -3192,6 +3195,10 @@ function Skada:OnInitialize()
 	-- sets limit
 	self.maxsets = self.db.profile.setstokeep + self.db.profile.setslimit
 	self.maxmeme = min(60, max(30, self.maxsets + 10))
+
+	-- use our custom functions
+	GetSpellInfo = self.GetSpellInfo or GetSpellInfo
+	GetSpellLink = self.GetSpellLink or GetSpellLink
 end
 
 function Skada:SetupStorage()
@@ -3521,10 +3528,14 @@ function Skada:EndSegment()
 		end
 	end
 
+	if self.current.time >= self.db.profile.minsetlength then
+		self.total.time = self.total.time + self.current.time
+	end
+
 	self.last = self.current
-	self.total.time = self.total.time + self.current.time
 	self.current = nil
 	self.inCombat = nil
+	_targets = del(_targets)
 
 	CleanSets()
 
@@ -3706,6 +3717,13 @@ do
 	local spellcast_events = {
 		SPELL_CAST_START = true,
 		SPELL_CAST_SUCCESS = true
+	}
+
+	-- events used to trigger deaths
+	local death_events = {
+		UNIT_DIED = true,
+		UNIT_DESTROYED = true,
+		UNIT_DISSIPATES = true
 	}
 
 	-- list of registered combat log event functions.
@@ -3972,19 +3990,32 @@ do
 			end
 
 			-- check for boss fights
-			if not self.current.gotboss then
+			if not self.current.gotboss and not spellcast_events[eventtype] then
 				-- marking set as boss fights relies only on src_is_interesting
-				if self.current.gotboss == nil and src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
-					local isboss, bossid, bossname = self:IsEncounter(dstGUID, dstName)
-					if isboss then
-						self.current.mobname = bossname or dstName
-						self.current.gotboss = bossid or true
-						self.current.keep = self.db.profile.alwayskeepbosses or nil
-						self:SendMessage("COMBAT_ENCOUNTER_START", self.current)
+				if src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+					if self.current.gotboss == nil then
+						if not _targets or not _targets[dstName] then
+							local isboss, bossid, bossname = self:IsEncounter(dstGUID, dstName)
+							if isboss then -- found?
+								self.current.mobname = bossname or dstName
+								self.current.gotboss = bossid or true
+								self.current.keep = self.db.profile.alwayskeepbosses or nil
+								self:SendMessage("COMBAT_ENCOUNTER_START", self.current)
+								_targets = del(_targets)
+							else
+								_targets = _targets or new()
+								_targets[dstName] = true
+								self.current.gotboss = false
+							end
+						end
+					elseif _targets and not _targets[dstName] then
+						_targets = _targets or new()
+						_targets[dstName] = true
+						self.current.gotboss = nil
 					end
 				end
 			-- default boss defeated event? (no DBM/BigWigs)
-			elseif (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") and self.current.gotboss == GetCreatureId(dstGUID) then
+			elseif self.current.gotboss and death_events[eventtype] and self.current.gotboss == GetCreatureId(dstGUID) then
 				self:ScheduleTimer("BossDefeated", self.db.profile.updatefrequency or 0.5)
 			end
 		end
