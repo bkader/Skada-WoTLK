@@ -18,7 +18,7 @@ _**Also available for [Cataclysm](https://github.com/bkader/Skada-Cata/)**_
 2. [Download the package](https://github.com/bkader/Skada-WoTLK/archive/refs/heads/main.zip).
 3. Open the Zip package inside which you will find a single folder named `Skada-WoTLK-main`.
 4. Extract or drag and drop the unique folder `Skada` into your `Interface\AddOns` folder.
-5. If you want to use `SkadaImprovement` module, drop it there as well.
+5. If you want to use `SkadaImprovement` and/or `SkadaStorage` modules, drop them there as well.
 
 ## Show Love & Support
 

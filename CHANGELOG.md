@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.8.78] - 2022-06-12
+
+[view diff](https://github.com/bkader/Skada-WoTLK/compare/1.8.77...1.8.78)
+
 ## [1.8.77] - 2022-05-12
 
 [view diff](https://github.com/bkader/Skada-WoTLK/compare/1.8.76...1.8.77)

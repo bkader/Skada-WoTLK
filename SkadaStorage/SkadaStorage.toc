@@ -1,0 +1,27 @@
+## Interface: 30300
+## Title: Skada: |cff7fff7fStorage|r
+## Title-deDE: Skada: |cff7fff7fLagerung|r
+## Title-esES: Skada: |cff7fff7fAlmacenamiento|r
+## Title-esMX: Skada: |cff7fff7fAlmacenamiento|r
+## Title-frFR: Skada: |cff7fff7fStockage|r
+## Title-koKR: Skada: |cff7fff7f스토리지|r
+## Title-ruRU: Skada: |cff7fff7ffХранение|r
+## Title-zhCN: Skada: |cff7fff7f存储|r
+## Title-zhTW: Skada: |cff7fff7f存儲|r
+## Notes: Stores Skada segments.
+## Notes-deDE: Speichert Skada-Segmente.
+## Notes-esES: Tiandas segmentos de Skada.
+## Notes-esMX: Tiandas segmentos de Skada.
+## Notes-frFR: Stocke les segments Skada.
+## Notes-koKR: Skada 세그먼트를 저장합니다.
+## Notes-ruRU: Магазины Skada сегменты.
+## Notes-zhCN: 存储 Skada 段。
+## Notes-zhTW: 存儲 Skada 段。
+## Dependencies: Skada
+## SavedVariablesPerCharacter: SkadaStorageDB
+## DefaultState: enabled
+## Author: Kader (|cff808080bkader#6361|r)
+## X-Website: https://github.com/bkader/Skada-WoTLK
+## X-Email: bkader@email.com
+
+SkadaStorage.lua
