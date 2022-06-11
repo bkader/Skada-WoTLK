@@ -13,7 +13,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 	local UnitGUID, UnitName, UnitClass, UnitBuff = UnitGUID, UnitName, UnitClass, UnitBuff
 	local T, potionIDs, _= Skada.Table, {}, nil
 
-	local prepotionStr, potionStr = "\124c%s%s\124r %s", "\124T%s:14:14:1:-2:32:32:2:30:2:30\124t"
+	local prepotionStr, potionStr = "\124c%s%s\124r %s", "\124T%s:14:14:0:0:64:64:4:60:4:60\124t"
 	local prepotion
 
 	local function log_potion(set, playerid, playername, playerflags, spellid)

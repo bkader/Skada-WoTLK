@@ -105,14 +105,14 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 			-- first hit
 			if
 				P.firsthit and
-				firsthit.hitline == nil and
+				firsthit.checked == nil and
 				trigger_events[eventtype] and
 				srcName and dstName and
 				not ignoredSpells[spellid]
 			then
 				local output -- initial output
 
-				if band(dstFlags, BITMASK_GROUP) ~= 0 and self:IsBoss(srcGUID, srcName) then -- boss started?
+				if band(dstFlags, BITMASK_GROUP) ~= 0 and self:IsBoss(srcGUID) then -- boss started?
 					if self:IsPet(dstGUID, dstFlags) then
 						output = format(hitformats[1], srcName, dstName or L["Unknown"])
 					elseif dstName then
@@ -125,7 +125,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 					else
 						output = srcName
 					end
-				elseif band(srcFlags, BITMASK_GROUP) ~= 0 and self:IsBoss(dstGUID, dstName) then -- a player started?
+				elseif band(srcFlags, BITMASK_GROUP) ~= 0 and self:IsBoss(dstGUID) then -- a player started?
 					local owner = self:GetPetOwner(srcGUID)
 					if owner then
 						local _, class = UnitClass(owner.name)
@@ -148,6 +148,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 					local spell = (eventtype == "SWING_DAMAGE") and GetSpellLink(6603) or GetSpellLink(spellid) or GetSpellInfo(spellid)
 					firsthit.hitline, firsthit.targetline = WhoPulled(format(L["\124cffffff00First Hit\124r: %s from %s"], spell or "", output))
 				end
+				firsthit.checked = true -- once only
 			end
 
 			-- use the original function

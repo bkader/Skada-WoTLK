@@ -40,7 +40,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 			Skada:DispatchSets(log_sunder, data)
 
 			if P.modules.sunderannounce then
-				if not P.modules.sunderbossonly or (P.modules.sunderbossonly and Skada:IsBoss(dstGUID)) then
+				if not P.modules.sunderbossonly or (P.modules.sunderbossonly and Skada:IsBoss(dstGUID, true)) then
 					mod.targets = mod.targets or T.get("Sunder_Targets")
 					if not mod.targets[dstGUID] then
 						mod.targets[dstGUID] = new()
@@ -70,7 +70,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 				if mod.targets and mod.targets[dstGUID] then
 					mod.targets[dstGUID] = del(mod.targets[dstGUID])
 					if P.modules.sunderannounce then
-						if not P.modules.sunderbossonly or (P.modules.sunderbossonly and Skada:IsBoss(dstGUID)) then
+						if not P.modules.sunderbossonly or (P.modules.sunderbossonly and Skada:IsBoss(dstGUID, true)) then
 							mod:Announce(format(L["%s dropped from %s!"], sunderLink or sunder, dstName or L["Unknown"]))
 						end
 					end

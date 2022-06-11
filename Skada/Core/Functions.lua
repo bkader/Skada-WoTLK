@@ -2,7 +2,7 @@ local Skada = Skada
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 
-local select, pairs = select, pairs
+local select, pairs, type = select, pairs, type
 local tostring, tonumber, format = tostring, tonumber, string.format
 local setmetatable, getmetatable, wipe, band = setmetatable, getmetatable, wipe, bit.band
 local next, print = next, print
@@ -397,23 +397,33 @@ do
 	local creatureToBoss = Skada.creatureToBoss or Skada.dummyTable
 
 	-- checks if the provided guid is a boss
-	-- returns a boolean, boss id and boss name
-	function Skada:IsBoss(guid, name)
-		local id = self:IsCreature(guid) and self.GetCreatureId(guid) or 0
-
-		if creatureToFight[id] or creatureToBoss[id] then
-			if creatureToFight[id] then -- should fix name?
-				name = creatureToFight[id]
+	function Skada:IsBoss(guid, strict)
+		local id = self.GetCreatureId(guid)
+		if creatureToBoss[id] and creatureToBoss[id] ~= true then
+			if strict then
+				return false
 			end
-
-			if creatureToBoss[id] and creatureToBoss[id] ~= true then -- only boss itself returns true.
-				return (creatureToBoss[id] == id), creatureToBoss[id], name
-			end
-
-			return true, id, name
+			return true, id
+		elseif creatureToBoss[id] or creatureToFight[id] then
+			return true, id
 		end
+		return false
+	end
 
-		return false, id, name
+	function Skada:IsEncounter(guid, name)
+		local isboss, id = self:IsBoss(guid, nil, "IsEncounter")
+		if isboss and id then
+			if creatureToBoss[id] and creatureToBoss[id] ~= true then
+				return true, creatureToBoss[id], creatureToFight[id] or name
+			end
+
+			if creatureToFight[id] then
+				return true, true, creatureToFight[id] or name
+			end
+
+			return true, id, creatureToFight[id] or name
+		end
+		return false
 	end
 end
 
@@ -464,7 +474,7 @@ function Skada.unitClass(guid, flag, set, db, name)
 		end
 	elseif Skada:IsPet(guid, flag) then
 		class = "PET"
-	elseif Skada:IsBoss(guid) then
+	elseif Skada:IsBoss(guid, true) then
 		class = "BOSS"
 	elseif Skada:IsCreature(guid, flag) then
 		class = "MONSTER"
