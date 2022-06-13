@@ -5,7 +5,7 @@
 ## Title-esMX: Skada: |cff7fff7fAlmacenamiento|r
 ## Title-frFR: Skada: |cff7fff7fStockage|r
 ## Title-koKR: Skada: |cff7fff7f스토리지|r
-## Title-ruRU: Skada: |cff7fff7ffХранение|r
+## Title-ruRU: Skada: |cff7fff7fХранение|r
 ## Title-zhCN: Skada: |cff7fff7f存储|r
 ## Title-zhTW: Skada: |cff7fff7f存儲|r
 ## Notes: Stores Skada segments.
