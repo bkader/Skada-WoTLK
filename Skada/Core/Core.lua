@@ -4015,7 +4015,7 @@ do
 					end
 				end
 			-- default boss defeated event? (no DBM/BigWigs)
-			elseif self.current.gotboss and death_events[eventtype] and self.current.gotboss == GetCreatureId(dstGUID) then
+			elseif not self.bossmod and self.current.gotboss and death_events[eventtype] and self.current.gotboss == GetCreatureId(dstGUID) then
 				self:ScheduleTimer("BossDefeated", self.db.profile.updatefrequency or 0.5)
 			end
 		end
