@@ -234,6 +234,11 @@ local function ProcessSet(set, curtime, mobname)
 			set.time = max(1, set.endtime - set.starttime)
 			set.name = CheckSetName(set)
 
+			-- always keep boss fights
+			if set.gotboss and Skada.db.profile.alwayskeepbosses then
+				set.keep = true
+			end
+
 			for i = 1, #modes do
 				local mode = modes[i]
 				if mode and mode.SetComplete then
@@ -3999,7 +4004,6 @@ do
 							if isboss then -- found?
 								self.current.mobname = bossname or dstName
 								self.current.gotboss = bossid or true
-								self.current.keep = self.db.profile.alwayskeepbosses or nil
 								self:SendMessage("COMBAT_ENCOUNTER_START", self.current)
 								_targets = del(_targets)
 							else

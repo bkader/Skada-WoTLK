@@ -5,14 +5,12 @@ local AddOnName = ...
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 
 local function SetupStorage(self)
-	self:Print("External: SetupStorage")
 	self.char = self.char or SkadaStorageDB
 	self.char.sets = self.char.sets or {}
 	self.char.version = self.char.version or SkadaCharDB and SkadaCharDB.version or 0
 end
 
 local function CheckMemory(self, clean)
-	self:Print("External: CheckMemory")
 	self:CleanGarbage()
 
 	if self.db.profile.memorycheck then

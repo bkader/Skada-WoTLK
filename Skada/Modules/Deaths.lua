@@ -64,15 +64,16 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			log.time = set.last_time or GetTime()
 			_, log.hp = UnitHealthInfo(player.name, player.id, "group")
 
-			deathlog.time = log.time -- death log time
+			if data.amount then
+				deathlog.time = log.time
+				if data.amount ~= 0 then
+					log.amount = data.amount
 
-			if data.amount and data.amount ~= 0 then
-				log.amount = data.amount
-
-				if data.amount < 0 then
-					deathlog.spellid = log.spellid
-					deathlog.school = log.school
-					deathlog.source = log.source
+					if log.amount < 0 then
+						deathlog.spellid = log.spellid
+						deathlog.school = log.school
+						deathlog.source = log.source
+					end
 				end
 			end
 			if data.overheal and data.overheal > 0 then
@@ -395,7 +396,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 						end
 
 						d.id = nr
-						d.label = format("%02.2fs: %s", diff, spellname)
+						d.label = format("%s%02.2fs: %s", diff > 0 and "+" or "", diff, spellname)
 
 						-- used for tooltip
 						d.hp = log.hp or 0
@@ -485,7 +486,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 						d.valuetext = Skada:FormatValueCols(
 							self.metadata.columns.Change and change,
 							self.metadata.columns.Health and Skada:FormatNumber(d.value),
-							self.metadata.columns.Percent and Skada:FormatPercent(log.hp or 1, deathlog.maxhp or 1)
+							self.metadata.columns.Percent and Skada:FormatPercent(log.hp or 0, deathlog.maxhp or 1)
 						)
 					else
 						del(tremove(deathlog.log, i))
