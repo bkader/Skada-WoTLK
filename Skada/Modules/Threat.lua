@@ -152,7 +152,8 @@ Skada:RegisterModule("Threat", function(L, P, _, _, new, del)
 
 			if Skada.inCombat and self.unitID and UnitExists(self.unitID) then
 				self.unitName = self.unitName or UnitName(self.unitID)
-				win.title = self.unitName or L["Threat"]
+				win.title = self.unitName or win.title
+				win._forceUpdate = win._forceUpdate or self.db.hideEmpty or nil
 
 				-- reset stuff & check group
 				maxthreat, nr = 0, 0
@@ -164,11 +165,11 @@ Skada:RegisterModule("Threat", function(L, P, _, _, new, del)
 				-- nothing was added.
 				if nr == 0 then
 					-- hide if empty?
-					if self.db.hideEmpty then
+					if win._forceUpdate then
 						win:Hide()
 					end
 					return
-				elseif self.db.hideEmpty then
+				elseif win._forceUpdate then
 					win:Show()
 				end
 
@@ -225,7 +226,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, new, del)
 					self:Warn(self.db.sound, self.db.flash, self.db.shake, mypercent and format(L["%d%% Threat"], mypercent) or L["High Threat"])
 					last_warn = time()
 				end
-			elseif self.db and self.db.hideEmpty then
+			elseif self.db and win._forceUpdate then
 				win:Hide()
 			end
 		end
