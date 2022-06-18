@@ -617,6 +617,10 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 			if resisted > 0 then
 				nr = add_detail_bar(win, nr, L["RESIST"], resisted, total, true, true)
 			end
+
+			if spell.glance and spell.glance > 0 then
+				nr = add_detail_bar(win, nr, L["Glancing"], spell.glance, total, true, true)
+			end
 		end
 	end
 
