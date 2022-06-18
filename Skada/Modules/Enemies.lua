@@ -1070,8 +1070,6 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 			end
 
 			if misstype == "ABSORB" and spellid and not ignoredSpells[spellid] then
-				srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
-
 				dmg.enemyid = srcGUID
 				dmg.enemyname = srcName
 				dmg.enemyflags = srcFlags
@@ -1297,7 +1295,6 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 						local d = win:nr(nr)
 
 						d.id = enemy.id or enemy.name
-						d.id = enemy.name
 						d.label = enemy.name
 						d.class = enemy.class
 						d.role = enemy.role
