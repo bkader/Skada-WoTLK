@@ -254,7 +254,7 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 					d.spellschool = spell.school
 					d.label, _, d.icon = GetSpellInfo(spellid)
 					if spell.ishot then
-						d.text = d.label .. L["HoT"]
+						d.label = format("%s%s", d.label, L["HoT"])
 					end
 
 					if enemy then
@@ -304,7 +304,7 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 				d.spellschool = spell.school
 				d.label, _, d.icon = GetSpellInfo(spellid)
 				if spell.ishot then
-					d.text = d.label .. L["HoT"]
+					d.label = format("%s%s", d.label, L["HoT"])
 				end
 
 				d.value = spell.amount
@@ -574,7 +574,7 @@ Skada:RegisterModule("Overhealing", function(L)
 					d.spellschool = spell.school
 					d.label, _, d.icon = GetSpellInfo(spellid)
 					if spell.ishot then
-						d.text = d.label .. L["HoT"]
+						d.label = format("%s%s", d.label, L["HoT"])
 					end
 
 					d.value = spell.targets[win.targetname].overheal / (spell.targets[win.targetname].amount + spell.targets[win.targetname].overheal)
@@ -621,7 +621,7 @@ Skada:RegisterModule("Overhealing", function(L)
 					d.label, _, d.icon = GetSpellInfo(spellid)
 
 					if spell.ishot then
-						d.text = d.label .. L["HoT"]
+						d.label = format("%s%s", d.label, L["HoT"])
 					end
 
 					d.value = spell.overheal / (spell.amount + spell.overheal)
@@ -857,7 +857,7 @@ Skada:RegisterModule("Total Healing", function(L)
 					d.spellschool = spell.school
 					d.label, _, d.icon = GetSpellInfo(spellid)
 					if spell.ishot then
-						d.text = d.label .. L["HoT"]
+						d.label = format("%s%s", d.label, L["HoT"])
 					end
 
 					if enemy then
@@ -913,7 +913,7 @@ Skada:RegisterModule("Total Healing", function(L)
 					d.label, _, d.icon = GetSpellInfo(spellid)
 
 					if spell.ishot then
-						d.text = d.label .. L["HoT"]
+						d.label = format("%s%s", d.label, L["HoT"])
 					end
 
 					d.value = amount
@@ -1156,7 +1156,7 @@ Skada:RegisterModule("Healing Taken", function(L, _, _, _, new, _, clear)
 						d.spellschool = spell.school
 						d.label, _, d.icon = GetSpellInfo(spellid)
 						if spell.ishot then
-							d.text = d.label .. L["HoT"]
+							d.label = format("%s%s", d.label, L["HoT"])
 						end
 
 						if enemy then

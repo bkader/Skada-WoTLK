@@ -106,7 +106,7 @@ Skada:RegisterModule("My Spells", function(L, P)
 					d.spellschool = spell.school
 					d.label, _, d.icon = GetSpellInfo(spellid)
 					if spell.ishot then
-						d.text = d.label .. L["HoT"]
+						d.label = format("%s%s", d.label, L["HoT"])
 					end
 
 					d.value = spell.amount
