@@ -24,6 +24,11 @@ L["Paste here a profile in text format."] = "Pegue aqui un perfil en formato de 
 L["Press CTRL-V to paste a Skada configuration text."] = "Pulse CTRL+V para pegar un texto de configuraci\195\179n."
 L["This is your current profile in text format."] = "Este es su actual perfil en formato the texto."
 L["Press CTRL-C to copy the configuration to your clipboard."] = "Pulse CTRL-C para copiar la configuraci\195\179n al Portapapeles."
+L["Network Sharing"] = "Compartici\195\179n de red"
+L["Player Name"] = "Nombre del jugador"
+L["Send Profile"] = "Enviar perfil"
+L["Accept profiles from other players."] = "Aceptar perfiles de otros jugadores."
+L["opt_profile_received"] = "%s te ha enviado una configuraci\195\179n para el Skada. Quieres activar el perfil recibido?"
 -- common lines
 L["Options"] = "Opciones"
 L["Options for %s."] = "Opciones de %s."

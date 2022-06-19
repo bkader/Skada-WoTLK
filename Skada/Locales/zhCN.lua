@@ -23,6 +23,11 @@ L["Paste here a profile in text format."] = "在此处粘贴文本格式的配�
 L["Press CTRL-V to paste a Skada configuration text."] = "按 CTRL-V 粘贴 Skada 配置文本。"
 L["This is your current profile in text format."] = "这是您当前的文本格式的个人资料。"
 L["Press CTRL-C to copy the configuration to your clipboard."] = "按 CTRL-C 将配置复制到剪贴板。"
+L["Network Sharing"] = "網絡共享"
+L["Player Name"] = "选手姓名"
+L["Send Profile"] = "发送个人资料"
+L["Accept profiles from other players."] = "接受来自其他玩家的个人资料。"
+L["opt_profile_received"] = "%s 發送一份設定檔給你，你是否想啟用他?"
 -- common lines
 L["Options"] = "选项"
 L["Options for %s."] = "%s状态的选项。"

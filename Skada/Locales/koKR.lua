@@ -22,6 +22,11 @@ L["Paste here a profile in text format."] = "여기에 문자 형식으로 프�
 L["Press CTRL-V to paste a Skada configuration text."] = "CTRL-V를 눌러 Skada 구성 텍스트를 붙여넣습니다."
 L["This is your current profile in text format."] = "이것은 문자 형식의 현재 프로필입니다."
 L["Press CTRL-C to copy the configuration to your clipboard."] = "CTRL-C를 눌러 구성을 클립보드에 복사합니다."
+L["Network Sharing"] = "네트워크 공유"
+L["Player Name"] = "플레이어 이름"
+L["Send Profile"] = "프로필 보내기"
+L["Accept profiles from other players."] = "다른 플레이어의 프로필 수락."
+L["opt_profile_received"] = "%s님이 프로필을 보내드렸습니다. 받은 프로필을 활성화 하시겠습니까?"
 -- common lines
 L["Options"] = "옵션"
 L["Options for %s."] = "%s\1241을;를; 위한 옵션을 설정합니다."

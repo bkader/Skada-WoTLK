@@ -7,6 +7,7 @@ local ACR = LibStub("AceConfigRegistry-3.0")
 local min, max = math.min, math.max
 local next, fmt = next, format or string.format
 local del = Skada.delTable
+local collectgarbage = collectgarbage
 
 -- references: windows, modes
 local windows = nil
@@ -1367,9 +1368,11 @@ end
 -------------------------------------------------------------------------------
 -- profile import, export and sharing
 
+local SerializeProfile = nil
 do
-	local collectgarbage, ipairs = collectgarbage, ipairs
-	local UnitName, GetRealmName = UnitName, GetRealmName
+	local ipairs = ipairs
+	local UnitName = UnitName
+	local GetRealmName = GetRealmName
 	local AceGUI
 
 	local function GetProfileName(str)
@@ -1402,7 +1405,7 @@ do
 	end
 
 	local temp = {}
-	local function SerializeProfile()
+	function SerializeProfile()
 		wipe(temp)
 		Skada.tCopy(temp, Skada.db.profile, "modeclicks")
 		return Skada:Serialize(true, fmt("%s profile", Skada.db:GetCurrentProfile()), temp)
@@ -1508,17 +1511,82 @@ do
 	function Skada:AdvancedProfile(args)
 		if not args then return end
 		self.AdvancedProfile = nil -- remove it
+		local CONST_COMM_PROFILE = "PR"
+
+		local Share = {}
+
+		function Share:Enable(receive)
+			if receive then
+				self.enabled = true
+				Skada.AddComm(self, CONST_COMM_PROFILE, "Receive")
+			else
+				self.enabled = nil
+				Skada.RemoveAllComms(self)
+			end
+		end
+
+		function Share:Receive(sender, profileStr)
+			Skada:ConfirmDialog(fmt(L["opt_profile_received"], sender or L["Unknown"]), function()
+				Skada:ImportProfile(profileStr, sender)
+				collectgarbage()
+				self:Enable(false) -- disable receiving
+				self.target = nil -- reset target
+			end)
+		end
+
+		function Share:Send(profileStr, target)
+			Skada:SendComm("WHISPER", target, CONST_COMM_PROFILE, profileStr)
+		end
 
 		args.advanced = {
 			type = "group",
 			name = L["Advanced"],
 			order = 10,
 			args = {
+				sharing = {
+					type = "group",
+					name = L["Network Sharing"],
+					inline = true,
+					order = 10,
+					hidden = function() return Skada.db.profile.syncoff end,
+					args = {
+						name = {
+							type = "input",
+							name = L["Player Name"],
+							get = function()
+								return Share.target or ""
+							end,
+							set = function(_, value)
+								Share.target = value:trim()
+							end,
+							order = 10
+						},
+						send = {
+							type = "execute",
+							name = L["Send Profile"],
+							func = function()
+								if Share.target and Share.target ~= "" then
+									Share:Send(SerializeProfile(), Share.target)
+								end
+							end,
+							disabled = function() return (not Share.target or Share.target == "") end,
+							order = 20
+						},
+						accept = {
+							type = "toggle",
+							name = L["Accept profiles from other players."],
+							get = function() return Share.enabled end,
+							set = function() Share:Enable(not Share.enabled) end,
+							width = "full",
+							order = 30
+						}
+					}
+				},
 				importexport = {
 					type = "group",
 					name = L["Profile Import/Export"],
 					inline = true,
-					order = 10,
+					order = 20,
 					args = {
 						importbtn = {
 							type = "execute",

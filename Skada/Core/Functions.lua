@@ -1197,9 +1197,9 @@ do
 	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
 
 	local function SendCommMessage(self, channel, target, ...)
-		if target == self.userName or not IsInGroup() then return end
-
-		if not channel then
+		if target == self.userName or (channel ~= "WHISPER" and not IsInGroup()) then
+			return
+		elseif not channel then
 			channel = IsInRaid() and "RAID" or "PARTY"
 
 			-- check arena/battlegrounds

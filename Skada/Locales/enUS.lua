@@ -24,6 +24,11 @@ L["Paste here a profile in text format."] = true
 L["Press CTRL-V to paste a Skada configuration text."] = true
 L["This is your current profile in text format."] = true
 L["Press CTRL-C to copy the configuration to your clipboard."] = true
+L["Network Sharing"] = true
+L["Player Name"] = true
+L["Send Profile"] = true
+L["Accept profiles from other players."] = true
+L["opt_profile_received"] = "%s has sent you a profile configuration. Do you want to activate received profile?"
 -- common lines
 L["ERROR"] = ERROR_CAPS
 L["Yes"] = YES
