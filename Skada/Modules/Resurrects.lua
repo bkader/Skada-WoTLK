@@ -103,12 +103,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 			local nr = 0
 			for spellid, spell in pairs(actor.resspells) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = spellid
-				d.spellid = spellid
-				d.label, _, d.icon = GetSpellInfo(spellid)
-				d.spellschool = resurrectSpells[spellid]
+				local d = win:spell(nr, spellid, nil, resurrectSpells[spellid])
 
 				d.value = spell.count
 				d.valuetext = Skada:FormatValueCols(
@@ -146,14 +141,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = target.id or targetname
-				d.label = targetname
-				d.text = target.id and Skada:FormatName(targetname, target.id)
-				d.class = target.class
-				d.role = target.role
-				d.spec = target.spec
+				local d = win:actor(nr, target, nil, targetname)
 
 				d.value = target.count
 				d.valuetext = Skada:FormatValueCols(
@@ -182,14 +170,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 				local player = set.players[i]
 				if player and player.ress then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = player.id or player.name
-					d.label = player.name
-					d.text = player.id and Skada:FormatName(player.name, player.id)
-					d.class = player.class
-					d.role = player.role
-					d.spec = player.spec
+					local d = win:actor(nr, player)
 
 					d.value = player.ress
 					d.valuetext = Skada:FormatValueCols(

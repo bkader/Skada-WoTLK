@@ -270,6 +270,14 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 	end
 
 	local resurrectSpells = {
+		-- Rebirth
+		[20484] = true,
+		[20739] = true,
+		[20742] = true,
+		[20747] = true,
+		[20748] = true,
+		[26994] = true,
+		[48477] = true,
 		-- Reincarnation
 		[16184] = true,
 		[16209] = true,
@@ -397,6 +405,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 
 						d.id = nr
 						d.label = format("%s%02.2fs: %s", diff > 0 and "+" or "", diff, spellname)
+						d.spellname = spellname
 
 						-- used for tooltip
 						d.hp = log.hp or 0
@@ -404,90 +413,95 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 						d.source = log.source or L["Unknown"]
 						d.value = d.hp
 
-						local change, color = d.amount, GetColor("red")
-						if change > 0 then
-							change = "+" .. Skada:FormatNumber(change)
-							color = GetColor("green")
-						elseif change == 0 and (log.resisted or log.blocked or log.absorbed) then
-							change = "+" .. Skada:FormatNumber(log.resisted or log.blocked or log.absorbed)
-							color = GetColor("orange")
-						elseif log.overheal then
-							change = Skada:FormatNumber(change)
-							color = GetColor("yellow")
+						if d.spellid and resurrectSpells[d.spellid] then
+							d.color, d.overheal, d.overkill = nil, nil, nil
+							d.resisted, d.blocked, d.absorbed = nil, nil, nil
+							d.valuetext = d.source
 						else
-							change = Skada:FormatNumber(change)
-						end
-
-						if WATCH and ((d.color and d.color ~= color) or (d.spellname and d.spellname ~= spellname)) then
-							d.changed = true
-						elseif WATCH and d.changed then
-							d.changed = nil
-						end
-
-						d.spellname = spellname
-						d.color = color
-
-						-- only format report for ended logs
-						if deathlog.timeod ~= nil then
-							d.reportlabel = "%02.2fs: %s (%s)   %s [%s]"
-
-							if P.reportlinks and log.spellid then
-								d.reportlabel = format(d.reportlabel, diff, GetSpellLink(log.spellid) or spellname, d.source, change, Skada:FormatNumber(d.value))
+							local change, color = d.amount, GetColor("red")
+							if change > 0 then
+								change = "+" .. Skada:FormatNumber(change)
+								color = GetColor("green")
+							elseif change == 0 and (log.resisted or log.blocked or log.absorbed) then
+								change = "+" .. Skada:FormatNumber(log.resisted or log.blocked or log.absorbed)
+								color = GetColor("orange")
+							elseif log.overheal then
+								change = "+" .. Skada:FormatNumber(log.overheal)
+								color = GetColor("yellow")
 							else
-								d.reportlabel = format(d.reportlabel, diff, spellname, d.source, change, Skada:FormatNumber(d.value))
+								change = Skada:FormatNumber(change)
 							end
 
-							local extra = new()
-
-							if log.overheal and log.overheal > 0 then
-								d.overheal = log.overheal
-								extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.overheal)
-							end
-							if log.overkill and log.overkill > 0 then
-								d.overkill = log.overkill
-								extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.overkill)
-							end
-							if log.resisted and log.resisted > 0 then
-								d.resisted = log.resisted
-								extra[#extra + 1] = "R:" .. Skada:FormatNumber(log.resisted)
-							end
-							if log.blocked and log.blocked > 0 then
-								d.blocked = log.blocked
-								extra[#extra + 1] = "B:" .. Skada:FormatNumber(log.blocked)
-							end
-							if log.absorbed and log.absorbed > 0 then
-								d.absorbed = log.absorbed
-								extra[#extra + 1] = "A:" .. Skada:FormatNumber(log.absorbed)
+							if WATCH and ((d.color and d.color ~= color) or (d.spellname and d.spellname ~= spellname)) then
+								d.changed = true
+							elseif WATCH and d.changed then
+								d.changed = nil
 							end
 
-							if next(extra) then
-								d.reportlabel = format("%s (%s)", d.reportlabel, tconcat(extra, " - "))
+							d.color = color
+
+							-- only format report for ended logs
+							if deathlog.timeod ~= nil then
+								d.reportlabel = "%02.2fs: %s (%s)   %s [%s]"
+
+								if P.reportlinks and log.spellid then
+									d.reportlabel = format(d.reportlabel, diff, GetSpellLink(log.spellid) or spellname, d.source, change, Skada:FormatNumber(d.value))
+								else
+									d.reportlabel = format(d.reportlabel, diff, spellname, d.source, change, Skada:FormatNumber(d.value))
+								end
+
+								local extra = new()
+
+								if log.overheal and log.overheal > 0 then
+									d.overheal = log.overheal
+									extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.overheal)
+								end
+								if log.overkill and log.overkill > 0 then
+									d.overkill = log.overkill
+									extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.overkill)
+								end
+								if log.resisted and log.resisted > 0 then
+									d.resisted = log.resisted
+									extra[#extra + 1] = "R:" .. Skada:FormatNumber(log.resisted)
+								end
+								if log.blocked and log.blocked > 0 then
+									d.blocked = log.blocked
+									extra[#extra + 1] = "B:" .. Skada:FormatNumber(log.blocked)
+								end
+								if log.absorbed and log.absorbed > 0 then
+									d.absorbed = log.absorbed
+									extra[#extra + 1] = "A:" .. Skada:FormatNumber(log.absorbed)
+								end
+
+								if next(extra) then
+									d.reportlabel = format("%s (%s)", d.reportlabel, tconcat(extra, " - "))
+								end
+
+								extra = del(extra)
+							else
+								if log.overheal and log.overheal > 0 then
+									d.overheal = log.overheal
+								end
+								if log.overkill and log.overkill > 0 then
+									d.overkill = log.overkill
+								end
+								if log.resisted and log.resisted > 0 then
+									d.resisted = log.resisted
+								end
+								if log.blocked and log.blocked > 0 then
+									d.blocked = log.blocked
+								end
+								if log.absorbed and log.absorbed > 0 then
+									d.absorbed = log.absorbed
+								end
 							end
 
-							extra = del(extra)
-						else
-							if log.overheal and log.overheal > 0 then
-								d.overheal = log.overheal
-							end
-							if log.overkill and log.overkill > 0 then
-								d.overkill = log.overkill
-							end
-							if log.resisted and log.resisted > 0 then
-								d.resisted = log.resisted
-							end
-							if log.blocked and log.blocked > 0 then
-								d.blocked = log.blocked
-							end
-							if log.absorbed and log.absorbed > 0 then
-								d.absorbed = log.absorbed
-							end
+							d.valuetext = Skada:FormatValueCols(
+								self.metadata.columns.Change and change,
+								self.metadata.columns.Health and Skada:FormatNumber(d.value),
+								self.metadata.columns.Percent and Skada:FormatPercent(log.hp or 0, deathlog.maxhp or 1)
+							)
 						end
-
-						d.valuetext = Skada:FormatValueCols(
-							self.metadata.columns.Change and change,
-							self.metadata.columns.Health and Skada:FormatNumber(d.value),
-							self.metadata.columns.Percent and Skada:FormatPercent(log.hp or 0, deathlog.maxhp or 1)
-						)
 					else
 						del(tremove(deathlog.log, i))
 					end
@@ -564,14 +578,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 				local player = set.players[i]
 				if player and (player.death or WATCH) and (not win.class or win.class == player.class) then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = player.id or player.name
-					d.label = player.name
-					d.text = player.id and Skada:FormatName(player.name, player.id)
-					d.class = player.class
-					d.role = player.role
-					d.spec = player.spec
+					local d = win:actor(nr, player)
 
 					if player.death then
 						d.value = player.death
@@ -611,14 +618,8 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 						local death = p.deathlog[j]
 						if death and (death.timeod or WATCH) then
 							nr = nr + 1
-							local d = win:nr(nr)
-
+							local d = win:actor(nr, p)
 							d.id = format("%s::%d", p.id, j)
-							d.label = p.name
-							d.text = p.id and Skada:FormatName(p.name, p.id)
-							d.class = p.class
-							d.role = p.role
-							d.spec = p.spec
 
 							if death.timeod then
 								d.color = WATCH and GRAY_FONT_COLOR or nil

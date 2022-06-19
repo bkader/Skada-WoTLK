@@ -426,7 +426,6 @@ function Skada:OpenMenu(window)
 					info.text = setInfoText(set, i, num)
 					info.func = function()
 						set.keep = (set.keep ~= true) and true or nil
-						self.win:UpdateDisplay()
 					end
 					info.checked = set.keep
 					info.keepShownOnClick = true

@@ -92,13 +92,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = target.id or targetname
-				d.label = targetname
-				d.class = target.class
-				d.role = target.role
-				d.spec = target.spec
+				local d = win:actor(nr, target, nil, targetname)
 
 				d.value = target.amount
 				d.valuetext = Skada:FormatValueCols(
@@ -133,11 +127,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
 			for spellid, spell in pairs(actor.friendfirespells) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = spellid
-				d.spellid = spellid
-				d.label, _, d.icon = GetSpellInfo(spellid)
+				local d = win:spell(nr, spellid)
 
 				d.value = spell.amount
 				d.valuetext = Skada:FormatValueCols(
@@ -178,14 +168,11 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
 			for targetname, amount in pairs(targets) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = targetname
-				d.label = targetname
+				local d = win:actor(nr, targetname)
 
 				local tactor = set:GetActor(targetname)
 				if tactor then
-					d.id = tactor.id or targetname
+					d.id = tactor.id or d.id or targetname
 					d.class = tactor.class
 					d.role = tactor.role
 					d.spec = tactor.spec
@@ -219,14 +206,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 				local player = set.players[i]
 				if player and player.friendfire and (not win.class or win.class == player.class) then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = player.id or player.name
-					d.label = player.name
-					d.text = player.id and Skada:FormatName(player.name, player.id)
-					d.class = player.class
-					d.role = player.role
-					d.spec = player.spec
+					local d = win:actor(nr, player)
 
 					d.value = player.friendfire
 					d.valuetext = Skada:FormatValueCols(

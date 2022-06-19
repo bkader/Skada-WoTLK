@@ -110,14 +110,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 			local nr = 0
 			for sourcename, source in pairs(sources) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = source.id
-				d.label = sourcename
-				d.text = source.id and Skada:FormatName(sourcename, source.id)
-				d.class = source.class
-				d.role = source.role
-				d.spec = source.spec
+				local d = win:actor(nr, source, nil, sourcename)
 
 				d.value = source.count
 				d.valuetext = Skada:FormatValueCols(
@@ -156,13 +149,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = target.id or targetname
-				d.label = targetname
-				d.class = target.class
-				d.role = target.role
-				d.spec = target.spec
+				local d = win:actor(nr, target, true, targetname)
 
 				d.value = target.count
 				d.valuetext = Skada:FormatValueCols(
@@ -193,14 +180,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 				local player = set.players[i]
 				if player and player.sunder then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = player.id or player.name
-					d.label = player.name
-					d.text = player.id and Skada:FormatName(player.name, player.id)
-					d.class = player.class
-					d.spec = player.spec
-					d.role = player.role
+					local d = win:actor(nr, player)
 
 					d.value = player.sunder
 					d.valuetext = Skada:FormatValueCols(

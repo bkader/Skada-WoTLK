@@ -455,13 +455,6 @@ do
 		return setmetatable(win, window_mt)
 	end
 
-	-- creates or reuses a dataset table
-	function Window:nr(i)
-		local d = self.dataset[i] or {}
-		self.dataset[i] = d
-		return d
-	end
-
 	-- add window options
 	function Window:AddOptions()
 		local templist = {}
@@ -865,6 +858,93 @@ function Window:Toggle()
 	end
 end
 
+-- creates or reuses a dataset table
+function Window:nr(i)
+	local d = self.dataset[i] or {}
+	self.dataset[i] = d
+	return d
+end
+
+-- generates spell's dataset
+function Window:spell(d, spellid, spell, school)
+	if d and spellid then
+		-- create the dataset?
+		if type(d) == "number" then
+			d = self:nr(d)
+		end
+
+		d.id = spellid
+
+		if type(spellid) == "number" or not spell then
+			d.spellid = spellid
+			d.label, _, d.icon = GetSpellInfo(d.spellid)
+
+			if spell and spell.ishot then
+				d.label = format("%s%s", d.label, L["HoT"])
+			end
+			if spell and spell.school then
+				d.spellschool = spell.school
+			elseif school then
+				d.spellschool = school
+			end
+			return d
+		end
+
+		if type(spell) == "table" then
+			d.spellid = spell.id
+			d.label = spellid
+			_, _, d.icon = GetSpellInfo(d.spellid)
+
+			if spell and spell.ishot then
+				d.label = format("%s%s", d.label, L["HoT"])
+			end
+			if spell and spell.school then
+				d.spellschool = spell.school
+			elseif school then
+				d.spellschool = school
+			end
+			return d
+		end
+
+		-- fallback
+		d.label = spellid
+		d.spellschool = school
+	end
+	return d
+end
+
+-- generates actor's dataset
+function Window:actor(d, actor, enemy, actorname)
+	if d and actor then
+		-- create the dataset?
+		if type(d) == "number" then
+			d = self:nr(d)
+		end
+
+		if type(actor) == "string" then
+			d.id = actor
+			d.label = actorname or actor
+			return d
+		end
+
+		d.id = actor.id or actor.name or actorname
+		d.label = actor.name or actorname or L["Unknown"]
+		d.class = actor.class
+		d.role = actor.role
+		d.spec = actor.spec
+
+		if not enemy and actor.id and d.class and Skada.validclass[d.class] then
+			d.text = Skada:FormatName(actor.name or actorname, actor.id)
+		elseif d.text then
+			d.text = nil
+		elseif not enemy and not d.class then -- fallback to pets
+			d.class = "PET"
+		end
+	end
+	return d
+end
+
+-- wipes windown's dataset table
 function Window:Reset()
 	if self.dataset then
 		for i = 1, #self.dataset do
@@ -1113,7 +1193,6 @@ function Skada:CreateWindow(name, db, display)
 		db.display = display
 	end
 
-	db.barmax = db.barmax or self.windowdefaults.barmax
 	db.barbgcolor = db.barbgcolor or self.windowdefaults.barbgcolor
 	db.buttons = db.buttons or self.windowdefaults.buttons
 	db.scale = db.scale or self.windowdefaults.scale or 1

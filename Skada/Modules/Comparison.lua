@@ -422,13 +422,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 				for spellname, spell in pairs(actor.damagespells) do
 					if spell.targets and spell.targets[win.targetname] then
 						nr = nr + 1
-						local d = win:nr(nr)
-
-						d.id = spellname
-						d.spellid = spell.id
-						d.label = spellname
-						_, _, d.icon = GetSpellInfo(spell.id)
-						d.spellschool = spell.school
+						local d = win:spell(nr, spellname, spell)
 
 						d.value = spell.targets[win.targetname].amount or 0
 						if P.absdamage and spell.targets[win.targetname].total then
@@ -468,13 +462,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 			for spellname, spell in pairs(actor.damagespells) do
 				if spell.targets and spell.targets[win.targetname] then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = spellname
-					d.spellid = spell.id
-					d.label = spellname
-					_, _, d.icon = GetSpellInfo(spell.id)
-					d.spellschool = spell.school
+					local d = win:spell(nr, spellname, spell)
 
 					d.value = spell.targets[win.targetname].amount or 0
 					local myamount = 0
@@ -534,13 +522,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 				for spellname, spell in pairs(myself.damagespells) do
 					if spell.targets and spell.targets[win.targetname] then
 						nr = nr + 1
-						local d = win:nr(nr)
-
-						d.id = spellname
-						d.spellid = spell.id
-						d.label = spellname
-						_, _, d.icon = GetSpellInfo(spell.id)
-						d.spellschool = spell.school
+						local d = win:spell(nr, spellname, spell)
 
 						local myamount = spell.targets[win.targetname].amount or 0
 						if P.absdamage and spell.targets[win.targetname].total then
@@ -582,13 +564,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 				for spellname, spell in pairs(spells) do
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = spellname
-					d.spellid = spell.id
-					d.label = spellname
-					_, _, d.icon = GetSpellInfo(spell.id)
-					d.spellschool = spell.school
+					local d = win:spell(nr, spellname, spell)
 
 					d.value = spell.amount or 0
 					if P.absdamage and spell.total then
@@ -611,13 +587,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 			-- iterate comparison actor's spells.
 			for spellname, spell in pairs(spells) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = spellname
-				d.spellid = spell.id
-				d.label = spellname
-				_, _, d.icon = GetSpellInfo(spell.id)
-				d.spellschool = spell.school
+				local d = win:spell(nr, spellname, spell)
 
 				d.value = spell.amount or 0
 				local myamount = 0
@@ -646,13 +616,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 				for spellname, spell in pairs(myspells) do
 					if not spells[spellname] then
 						nr = nr + 1
-						local d = win:nr(nr)
-
-						d.id = spellname
-						d.spellid = spell.id
-						d.label = spellname
-						_, _, d.icon = GetSpellInfo(spell.id)
-						d.spellschool = spell.school
+						local d = win:spell(nr, spellname, spell)
 
 						d.value = spell.amount or 0
 						if P.absdamage and spell.total then
@@ -693,13 +657,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 				for targetname, target in pairs(targets) do
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = target.id or targetname
-					d.label = targetname
-					d.class = target.class
-					d.role = target.role
-					d.spec = target.spec
+					local d = win:actor(nr, target, true, targetname)
 
 					d.value = target.amount or 0
 					if P.absdamage and target.total then
@@ -721,13 +679,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 			-- iterate comparison actor's targets.
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = target.id or targetname
-				d.label = targetname
-				d.class = target.class
-				d.role = target.role
-				d.spec = target.spec
+				local d = win:actor(nr, target, true, targetname)
 
 				d.value = target.amount or 0
 				local myamount = 0
@@ -756,13 +708,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 				for targetname, target in pairs(mytargets) do
 					if not targets[targetname] then
 						nr = nr + 1
-						local d = win:nr(nr)
-
-						d.id = target.id or targetname
-						d.label = targetname
-						d.class = target.class
-						d.role = target.role
-						d.spec = target.spec
+						local d = win:actor(nr, target, true, targetname)
 
 						d.value = target.amount or 0
 						if P.absdamage and target.total then
@@ -797,14 +743,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 					local dps, amount = player:GetDPS()
 					if amount > 0 then
 						nr = nr + 1
-						local d = win:nr(nr)
-
-						d.id = player.id or player.name
-						d.label = player.name
-						d.text = player.id and Skada:FormatName(player.name, player.id)
-						d.class = player.class
-						d.role = player.role
-						d.spec = player.spec
+						local d = win:actor(nr, player)
 
 						d.value = amount
 						d.valuetext = Skada:FormatValueCols(

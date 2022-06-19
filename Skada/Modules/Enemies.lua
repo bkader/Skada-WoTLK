@@ -444,14 +444,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 			for sourcename, source in pairs(sources) do
 				if not win.class or win.class == source.class then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = source.id or sourcename
-					d.label = sourcename
-					d.text = source.id and Skada:FormatName(sourcename, source.id)
-					d.class = source.class
-					d.role = source.role
-					d.spec = source.spec
+					local d = win:actor(nr, source, nil, sourcename)
 
 					d.value = source.amount
 					d.valuetext = Skada:FormatValueCols(
@@ -492,14 +485,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 			for sourcename, source in pairs(sources) do
 				if not win.class or win.class == source.class then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = source.id or sourcename
-					d.label = sourcename
-					d.text = source.id and Skada:FormatName(sourcename, source.id)
-					d.class = source.class
-					d.role = source.role
-					d.spec = source.spec
+					local d = win:actor(nr, source, nil, sourcename)
 
 					d.value = source.amount or 0
 					if P.absdamage and source.total then
@@ -546,12 +532,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 				for spellid, spell in pairs(actor.damagetakenspells) do
 					if spell.sources and spell.sources[win.actorname] then
 						nr = nr + 1
-						local d = win:nr(nr)
-
-						d.id = spellid
-						d.spellid = spellid
-						d.label, _, d.icon = GetSpellInfo(spellid)
-						d.spellschool = spell.school
+						local d = win:spell(nr, spellid, spell)
 
 						d.value = spell.sources[win.actorname].amount or 0
 						if P.absdamage and spell.sources[win.actorname].total then
@@ -592,12 +573,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 			local actortime, nr = mod.metadata.columns.sDTPS and actor:GetTime(), 0
 			for spellid, spell in pairs(actor.damagetakenspells) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = spellid
-				d.spellid = spellid
-				d.spellschool = spell.school
-				d.label, _, d.icon = GetSpellInfo(spellid)
+				local d = win:spell(nr, spellid, spell)
 
 				d.value = spell.amount or 0
 				if P.absdamage and spell.total then
@@ -641,14 +617,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 			for sourcename, source in pairs(sources) do
 				if source.useful and source.useful > 0 and (not win.class or win.class == source.class) then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = source.id or sourcename
-					d.label = sourcename
-					d.text = source.id and Skada:FormatName(sourcename, source.id)
-					d.class = source.class
-					d.role = source.role
-					d.spec = source.spec
+					local d = win:actor(nr, source, nil, sourcename)
 
 					d.value = source.useful
 					d.valuetext = Skada:FormatValueCols(
@@ -680,13 +649,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 					local dtps, amount = enemy:GetDTPS()
 					if amount > 0 then
 						nr = nr + 1
-						local d = win:nr(nr)
-
-						d.id = enemy.id or enemy.name
-						d.label = enemy.name
-						d.class = enemy.class
-						d.role = enemy.role
-						d.spec = enemy.spec
+						local d = win:actor(nr, enemy, true)
 
 						d.value = amount
 						d.valuetext = Skada:FormatValueCols(
@@ -1109,12 +1072,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
 			for spellid, spell in pairs(spells) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = spellid
-				d.spellid = spellid
-				d.label, _, d.icon = GetSpellInfo(spellid)
-				d.spellschool = spell.school
+				local d = win:spell(nr, spellid, spell)
 
 				d.value = spell.amount
 				d.valuetext = Skada:FormatValueCols(
@@ -1157,14 +1115,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 			for targetname, target in pairs(targets) do
 				if not win.class or win.class == target.class then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = target.id or targetname
-					d.label = targetname
-					d.text = target.id and Skada:FormatName(targetname, target.id)
-					d.class = target.class
-					d.role = target.role
-					d.spec = target.spec
+					local d = win:actor(nr, target, nil, targetname)
 
 					d.value = target.amount
 					d.valuetext = Skada:FormatValueCols(
@@ -1205,13 +1156,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 			for targetname, target in pairs(targets) do
 				if not win.class or win.class == target.class then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = target.id or targetname
-					d.label = targetname
-					d.class = target.class
-					d.role = target.role
-					d.spec = target.spec
+					local d = win:actor(nr, target, true, targetname)
 
 					d.value = target.amount
 					if P.absdamage and target.total then
@@ -1251,12 +1196,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
 			for spellid, spell in pairs(actor.damagespells) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = spellid
-				d.spellid = spellid
-				d.spellschool = spell.school
-				d.label, _, d.icon = GetSpellInfo(spellid)
+				local d = win:spell(nr, spellid, spell)
 
 				d.value = spell.amount
 				if P.absdamage and spell.total then
@@ -1292,13 +1232,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 					local dps, amount = enemy:GetDPS()
 					if amount > 0 then
 						nr = nr + 1
-						local d = win:nr(nr)
-
-						d.id = enemy.id or enemy.name
-						d.label = enemy.name
-						d.class = enemy.class
-						d.role = enemy.role
-						d.spec = enemy.spec
+						local d = win:actor(nr, enemy, true)
 
 						d.value = amount
 						d.valuetext = Skada:FormatValueCols(
@@ -1556,13 +1490,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 			local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = target.id or targetname
-				d.label = targetname
-				d.class = target.class
-				d.role = target.role
-				d.spec = target.spec
+				local d = win:actor(nr, target, true, targetname)
 
 				d.value = target.amount
 				d.valuetext = Skada:FormatValueCols(
@@ -1597,12 +1525,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 			local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
 			for spellid, spell in pairs(actor.healspells) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = spellid
-				d.spellid = spellid
-				d.spellschool = spell.school
-				d.label, _, d.icon = GetSpellInfo(spellid)
+				local d = win:spell(nr, spellid, spell)
 
 				d.value = spell.amount
 				d.valuetext = Skada:FormatValueCols(
@@ -1637,13 +1560,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 					local hps, amount = enemy:GetHPS()
 					if amount > 0 then
 						nr = nr + 1
-						local d = win:nr(nr)
-
-						d.id = enemy.id or enemy.name
-						d.label = enemy.name
-						d.class = enemy.class
-						d.role = enemy.role
-						d.spec = enemy.spec
+						local d = win:actor(nr, enemy, true)
 
 						d.value = amount
 						d.valuetext = Skada:FormatValueCols(

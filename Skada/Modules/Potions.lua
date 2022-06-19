@@ -109,14 +109,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 			local nr = 0
 			for playername, player in pairs(players) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = player.id or playername
-				d.label = playername
-				d.text = player.id and Skada:FormatName(playername, player.id)
-				d.class = player.class
-				d.role = player.role
-				d.spec = player.spec
+				local d = win:actor(nr, player, nil, playername)
 
 				d.value = player.count
 				d.valuetext = Skada:FormatValueCols(
@@ -199,14 +192,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 				local player = set.players[i]
 				if player and player.potion and (not win.class or win.class == player.class) then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = player.id or player.name
-					d.label = player.name
-					d.text = player.id and Skada:FormatName(player.name, player.id)
-					d.class = player.class
-					d.role = player.role
-					d.spec = player.spec
+					local d = win:actor(nr, player)
 
 					d.value = player.potion
 					d.valuetext = Skada:FormatValueCols(

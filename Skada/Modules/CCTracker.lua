@@ -3,16 +3,17 @@ local Skada = Skada
 local pairs, tostring, format = pairs, tostring, string.format
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local GetSpellLink = Skada.GetSpellLink or GetSpellLink
+local setPrototype = Skada.setPrototype
 local playerPrototype = Skada.playerPrototype
 local _
 
 local CCSpells = {
-	[118] = true, -- Polymorph (rank 1)
-	[12824] = true, -- Polymorph (rank 2)
-	[12825] = true, -- Polymorph (rank 3)
-	[12826] = true, -- Polymorph (rank 4)
-	[28272] = true, -- Polymorph (rank 1:pig)
-	[28271] = true, -- Polymorph (rank 1:turtle)
+	[118] = 0x40, -- Polymorph (rank 1)
+	[12824] = 0x40, -- Polymorph (rank 2)
+	[12825] = 0x40, -- Polymorph (rank 3)
+	[12826] = 0x40, -- Polymorph (rank 4)
+	[28272] = 0x40, -- Polymorph (rank 1:pig)
+	[28271] = 0x40, -- Polymorph (rank 1:turtle)
 	[3355] = 0x10, -- Freezing Trap Effect (rank 1)
 	[14308] = 0x10, -- Freezing Trap Effect (rank 2)
 	[14309] = 0x10, -- Freezing Trap Effect (rank 3)
@@ -69,7 +70,7 @@ local ExtraCCSpells = {
 	[49802] = 0x01, -- Maim (rank 2)
 	[49803] = 0x01, -- Pounce
 	-- Hunter
-	[5116] = true, -- Concussive Shot
+	[5116] = 0x01, -- Concussive Shot
 	[19503] = 0x01, -- Scatter Shot
 	[19386] = 0x08, -- Wyvern Sting (rank 1)
 	[24132] = 0x08, -- Wyvern Sting (rank 2)
@@ -85,7 +86,7 @@ local ExtraCCSpells = {
 	[53568] = 0x08, -- Sonic Blast (Bat)
 	[53543] = 0x01, -- Snatch (Bird of Prey)
 	[50541] = 0x01, -- Clench (Scorpid)
-	[55492] = true, -- Froststorm Breath (Chimaera)
+	[55492] = 0x10, -- Froststorm Breath (Chimaera)
 	[26090] = 0x08, -- Pummel (Gorilla)
 	[53575] = 0x01, -- Tendon Rip (Hyena)
 	[53589] = 0x20, -- Nether Shock (Nether Ray)
@@ -93,9 +94,9 @@ local ExtraCCSpells = {
 	[1513] = 0x08, -- Scare Beast
 	[64803] = 0x01, -- Entrapment
 	-- Mage
-	[61305] = true, -- Polymorph Cat
-	[61721] = true, -- Polymorph Rabbit
-	[61780] = true, -- Polymorph Turkey
+	[61305] = 0x40, -- Polymorph Cat
+	[61721] = 0x40, -- Polymorph Rabbit
+	[61780] = 0x40, -- Polymorph Turkey
 	[31661] = 0x04, -- Dragon's Breath
 	[44572] = 0x10, -- Deep Freeze
 	[122] = 0x10, -- Frost Nova (rank 1)
@@ -105,7 +106,7 @@ local ExtraCCSpells = {
 	[27088] = 0x10, -- Frost Nova (rank 5)
 	[42917] = 0x10, -- Frost Nova (rank 6)
 	[33395] = 0x10, -- Freeze (Frost Water Elemental)
-	[55021] = true, -- Silenced - Improved Counterspell
+	[55021] = 0x40, -- Silenced - Improved Counterspell
 	-- Paladin
 	[853] = 0x02, -- Hammer of Justice (rank 1)
 	[5588] = 0x02, -- Hammer of Justice (rank 2)
@@ -177,9 +178,9 @@ local ExtraCCSpells = {
 	[12323] = 0x01, -- Piercing Howl
 	-- Racials
 	[20549] = 0x01, -- War Stomp (Tauren)
-	[28730] = true, -- Arcane Torrent (Bloodelf)
-	[47779] = true, -- Arcane Torrent (Bloodelf)
-	[50613] = true, -- Arcane Torrent (Bloodelf)
+	[28730] = 0x40, -- Arcane Torrent (Bloodelf)
+	[47779] = 0x40, -- Arcane Torrent (Bloodelf)
+	[50613] = 0x40, -- Arcane Torrent (Bloodelf)
 	-- Engineering
 	[67890] = 0x04 -- Cobalt Frag Bomb
 }
@@ -202,6 +203,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 	local mod = Skada:NewModule("CC Done")
 	local playermod = mod:NewModule("Crowd Control Spells")
 	local targetmod = mod:NewModule("Crowd Control Targets")
+	local sourcemod = playermod:NewModule("Crowd Control Sources")
 
 	local function log_ccdone(set, cc)
 		local player = Skada:GetPlayer(set, cc.playerid, cc.playername, cc.playerflags)
@@ -268,12 +270,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 			local nr = 0
 			for spellid, spell in pairs(player.ccdonespells) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = spellid
-				d.spellid = spellid
-				d.label, _, d.icon = GetSpellInfo(spellid)
-				d.spellschool = GetSpellSchool(spellid)
+				local d = win:spell(nr, spellid, nil, GetSpellSchool(spellid))
 
 				d.value = spell.count
 				d.valuetext = Skada:FormatValueCols(
@@ -308,15 +305,42 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = target.id or targetname
-				d.label = targetname
-				d.class = target.class
-				d.role = target.role
-				d.spec = target.spec
+				local d = win:actor(nr, target, true, targetname)
 
 				d.value = target.count
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Count and d.value,
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+				)
+
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
+				end
+			end
+		end
+	end
+
+	function sourcemod:Enter(win, id, label)
+		win.spellid, win.spellname = id, label
+		win.title = format(L["%s's sources"], label)
+	end
+
+	function sourcemod:Update(win, set)
+		win.title = format(L["%s's sources"], win.spellname or L["Unknown"])
+		if not set or not win.spellid then return end
+
+		local total, sources = set:GetCCDoneSources(win.spellid)
+		if sources then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
+			local nr = 0
+			for sourcename, source in pairs(sources) do
+				nr = nr + 1
+				local d = win:actor(nr, source, true, sourcename)
+
+				d.value = source.count
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Count and d.value,
 					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
@@ -343,14 +367,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 				local player = set.players[i]
 				if player and player.ccdone and (not win.class or win.class == player.class) then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = player.id or player.name
-					d.label = player.name
-					d.text = player.id and Skada:FormatName(player.name, player.id)
-					d.class = player.class
-					d.role = player.role
-					d.spec = player.spec
+					local d = win:actor(nr, player)
 
 					d.value = player.ccdone
 					d.valuetext = Skada:FormatValueCols(
@@ -367,6 +384,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 	end
 
 	function mod:OnEnable()
+		playermod.metadata = {click1 = sourcemod}
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
@@ -379,6 +397,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 		}
 
 		-- no total click.
+		sourcemod.nototal = true
 		playermod.nototal = true
 		targetmod.nototal = true
 
@@ -405,6 +424,26 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 	function mod:GetSetSummary(set)
 		local ccdone = set.ccdone or 0
 		return tostring(ccdone), ccdone
+	end
+
+	function setPrototype:GetCCDoneSources(spellid, tbl)
+		local total = 0
+		if self.ccdone and spellid then
+			tbl = clear(tbl or C)
+			for i = 1, #self.players do
+				local p = self.players[i]
+				if p and p.ccdonespells and p.ccdonespells[spellid] then
+					tbl[p.name] = new()
+					tbl[p.name].id = p.id
+					tbl[p.name].class = p.class
+					tbl[p.name].role = p.role
+					tbl[p.name].spec = p.spec
+					tbl[p.name].count = p.ccdonespells[spellid].count
+					total = total + p.ccdonespells[spellid].count
+				end
+			end
+		end
+		return total, tbl
 	end
 
 	function playerPrototype:GetCCDoneTargets(tbl)
@@ -444,17 +483,18 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 	local mod = Skada:NewModule("CC Taken")
 	local playermod = mod:NewModule("Crowd Control Spells")
 	local sourcemod = mod:NewModule("Crowd Control Sources")
+	local targetmod = playermod:NewModule("Crowd Control Targets")
 
 	local RaidCCSpells = {
 		[16869] = 0x10, -- Maleki the Pallid/Ossirian the Unscarred: Ice Tomb (Stratholme/??)
 		[29670] = 0x10, -- Frostwarden Sorceress: Ice Tomb (Karazhan) / Skeletal Usher: Ice Tomb (Karazhan)
 		[69065] = 0x01, -- Bone Spike: Impale (Icecrown Citadel: Lord Marrowgar)
 		[70157] = 0x10, -- Sindragosa: Ice Tomb (Icecrown Citadel)
-		[70447] = 64, -- Green Ooze: Volatile Ooze Adhesive (Icecrown Citadel: Professor Putricide)
+		[70447] = 0x40, -- Green Ooze: Volatile Ooze Adhesive (Icecrown Citadel: Professor Putricide)
 		[71289] = 0x20, -- Lady Deathwhisper: Dominate Mind (Icecrown Citadel)
-		[72836] = 64, -- Green Ooze: Volatile Ooze Adhesive (Icecrown Citadel: Professor Putricide)
-		[72837] = 64, -- Green Ooze: Volatile Ooze Adhesive (Icecrown Citadel: Professor Putricide)
-		[72838] = 64 -- Green Ooze: Volatile Ooze Adhesive (Icecrown Citadel: Professor Putricide)
+		[72836] = 0x40, -- Green Ooze: Volatile Ooze Adhesive (Icecrown Citadel: Professor Putricide)
+		[72837] = 0x40, -- Green Ooze: Volatile Ooze Adhesive (Icecrown Citadel: Professor Putricide)
+		[72838] = 0x40 -- Green Ooze: Volatile Ooze Adhesive (Icecrown Citadel: Professor Putricide)
 	}
 
 	local function log_cctaken(set, cc)
@@ -523,12 +563,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 			local nr = 0
 			for spellid, spell in pairs(player.cctakenspells) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = spellid
-				d.spellid = spellid
-				d.label, _, d.icon = GetSpellInfo(spellid)
-				d.spellschool = GetSpellSchool(spellid) or RaidCCSpells[spellid]
+				local d = win:spell(nr, spellid, nil, GetSpellSchool(spellid) or RaidCCSpells[spellid])
 
 				d.value = spell.count
 				d.valuetext = Skada:FormatValueCols(
@@ -563,15 +598,42 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 			local nr = 0
 			for sourcename, source in pairs(sources) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = source.id or sourcename
-				d.label = sourcename
-				d.class = source.class
-				d.role = source.role
-				d.spec = source.spec
+				local d = win:actor(nr, source, true, sourcename)
 
 				d.value = source.count
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Count and d.value,
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+				)
+
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
+				end
+			end
+		end
+	end
+
+	function targetmod:Enter(win, id, label)
+		win.spellid, win.spellname = id, label
+		win.title = format(L["%s's targets"], label)
+	end
+
+	function targetmod:Update(win, set)
+		win.title = format(L["%s's targets"], win.spellname or L["Unknown"])
+		if not set or not win.spellid then return end
+
+		local total, targets = set:GetCCTakenTargets(win.spellid)
+		if targets then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
+			local nr = 0
+			for targetname, target in pairs(targets) do
+				nr = nr + 1
+				local d = win:actor(nr, target, true, targetname)
+
+				d.value = target.count
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Count and d.value,
 					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
@@ -598,14 +660,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 				local player = set.players[i]
 				if player and player.cctaken and (not win.class or win.class == player.class) then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = player.id or player.name
-					d.label = player.name
-					d.text = player.id and Skada:FormatName(player.name, player.id)
-					d.class = player.class
-					d.role = player.role
-					d.spec = player.spec
+					local d = win:actor(nr, player)
 
 					d.value = player.cctaken
 					d.valuetext = Skada:FormatValueCols(
@@ -622,6 +677,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 	end
 
 	function mod:OnEnable()
+		playermod.metadata = {click1 = targetmod}
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
@@ -636,6 +692,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 		-- no total click.
 		playermod.nototal = true
 		sourcemod.nototal = true
+		targetmod.nototal = true
 
 		Skada:RegisterForCL(
 			AuraApplied,
@@ -660,6 +717,26 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 	function mod:GetSetSummary(set)
 		local cctaken = set.cctaken or 0
 		return tostring(cctaken), cctaken
+	end
+
+	function setPrototype:GetCCTakenTargets(spellid, tbl)
+		local total = 0
+		if self.cctaken and spellid then
+			tbl = clear(tbl or C)
+			for i = 1, #self.players do
+				local p = self.players[i]
+				if p and p.cctakenspells and p.cctakenspells[spellid] then
+					tbl[p.name] = new()
+					tbl[p.name].id = p.id
+					tbl[p.name].class = p.class
+					tbl[p.name].role = p.role
+					tbl[p.name].spec = p.spec
+					tbl[p.name].count = p.cctakenspells[spellid].count
+					total = total + p.cctakenspells[spellid].count
+				end
+			end
+		end
+		return total, tbl
 	end
 
 	function playerPrototype:GetCCTakenSources(tbl)
@@ -800,12 +877,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 			local nr = 0
 			for spellid, spell in pairs(player.ccbreakspells) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = spellid
-				d.spellid = spellid
-				d.label, _, d.icon = GetSpellInfo(spellid)
-				d.spellschool = GetSpellSchool(spellid)
+				local d = win:spell(nr, spellid, nil, GetSpellSchool(spellid))
 
 				d.value = spell.count
 				d.valuetext = Skada:FormatValueCols(
@@ -840,13 +912,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = target.id or targetname
-				d.label = targetname
-				d.class = target.class
-				d.role = target.role
-				d.spec = target.spec
+				local d = win:actor(nr, target, true, targetname)
 
 				d.value = target.count
 				d.valuetext = Skada:FormatValueCols(
@@ -875,14 +941,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 				local player = set.players[i]
 				if player and player.ccbreak and (not win.class or win.class == player.class) then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = player.id or player.name
-					d.label = player.name
-					d.text = player.id and Skada:FormatName(player.name, player.id)
-					d.class = player.class
-					d.role = player.role
-					d.spec = player.spec
+					local d = win:actor(nr, player)
 
 					d.value = player.ccbreak
 					d.valuetext = Skada:FormatValueCols(

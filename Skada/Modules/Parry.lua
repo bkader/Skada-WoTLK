@@ -82,10 +82,7 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 			local nr = 0
 			for targetname, count in pairs(actor.parrytargets) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = targetname
-				d.label = targetname
+				local d = win:actor(nr, targetname)
 				d.class = "BOSS" -- what else can it be?
 
 				d.value = count
@@ -115,14 +112,7 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 				local player = set.players[i]
 				if player and player.parry and (not win.class or win.class == player.class) then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = player.id or player.name
-					d.label = player.name
-					d.text = player.id and Skada:FormatName(player.name, player.id)
-					d.class = player.class
-					d.role = player.role
-					d.spec = player.spec
+					local d = win:actor(nr, player)
 
 					d.value = player.parry
 					d.valuetext = Skada:FormatValueCols(

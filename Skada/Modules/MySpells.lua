@@ -78,13 +78,7 @@ Skada:RegisterModule("My Spells", function(L, P)
 			if player.damagespells then
 				for spellname, spell in pairs(player.damagespells) do
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = spellname
-					d.spellid = spell.id
-					d.label = spellname
-					_, _, d.icon = GetSpellInfo(spell.id)
-					d.spellschool = spell.school
+					local d = win:spell(nr, spellname, spell)
 
 					d.value = P.absdamage and spell.total or spell.amount
 					d.valuetext = Skada:FormatNumber(d.value)
@@ -99,15 +93,7 @@ Skada:RegisterModule("My Spells", function(L, P)
 			if player.healspells then
 				for spellid, spell in pairs(player.healspells) do
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = spellid
-					d.spellid = spellid
-					d.spellschool = spell.school
-					d.label, _, d.icon = GetSpellInfo(spellid)
-					if spell.ishot then
-						d.label = format("%s%s", d.label, L["HoT"])
-					end
+					local d = win:spell(nr, spellid, spell)
 
 					d.value = spell.amount
 					d.valuetext = Skada:FormatNumber(d.value)
@@ -122,12 +108,7 @@ Skada:RegisterModule("My Spells", function(L, P)
 			if player.absorbspells then
 				for spellid, spell in pairs(player.absorbspells) do
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = spellid
-					d.spellid = spellid
-					d.spellschool = spell.school
-					d.label, _, d.icon = GetSpellInfo(spellid)
+					local d = win:spell(nr, spellid, spell)
 
 					d.value = spell.amount
 					d.valuetext = Skada:FormatNumber(d.value)

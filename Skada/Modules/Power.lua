@@ -134,14 +134,7 @@ Skada:RegisterModule("Resources", function(L, P)
 				local player = set.players[i]
 				if player and player[self.power] and (not win.class or win.class == player.class) then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = player.id or player.name
-					d.label = player.name
-					d.text = player.id and Skada:FormatName(player.name, player.id)
-					d.class = player.class
-					d.role = player.role
-					d.spec = player.spec
+					local d = win:actor(nr, player)
 
 					d.value = player[self.power]
 					d.valuetext = Skada:FormatValueCols(
@@ -186,11 +179,7 @@ Skada:RegisterModule("Resources", function(L, P)
 			local nr = 0
 			for spellid, amount in pairs(actor[self.spells]) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = spellid
-				d.spellid = spellid
-				d.label, _, d.icon = GetSpellInfo(spellid)
+				local d = win:spell(nr, spellid)
 
 				d.value = amount
 				d.valuetext = Skada:FormatValueCols(
