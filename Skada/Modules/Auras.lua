@@ -329,14 +329,14 @@ Skada:RegisterModule("Buffs", function(L, P)
 			local spell = player.auras and player.auras[aura.spellid]
 			if not spell then
 				player.auras = player.auras or {}
-				player.auras[aura.spellid] = {school = aura.spellschool, type = "BUFF", uptime = 0}
+				player.auras[aura.spellid] = {school = aura.spellschool, type = aura.type, uptime = 0}
 				spell = player.auras[aura.spellid]
 			end
 			spell.uptime = spell.uptime + 1
 		end
 	end
 
-	local aura = {}
+	local aura = {type = "BUFF"}
 	local function HandleBuff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
 		if
 			spellid and -- just in case, you never know!
@@ -353,9 +353,6 @@ Skada:RegisterModule("Buffs", function(L, P)
 
 			aura.spellid = spellid
 			aura.spellschool = spellschool
-			aura.type = auratype or "BUFF"
-
-			Skada:FixPets(aura)
 
 			if event == "SPELL_PERIODIC_ENERGIZE" then
 				Skada:DispatchSets(log_specialaura, aura)
@@ -486,7 +483,7 @@ Skada:RegisterModule("Buffs", function(L, P)
 			"SPELL_AURA_REFRESH",
 			"SPELL_AURA_APPLIED_DOSE",
 			"SPELL_PERIODIC_ENERGIZE",
-			{dst_is_interesting = true}
+			{dst_is_interesting_nopets = true}
 		)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
@@ -519,7 +516,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 	-- list of spells used to queue units.
 	local queuedSpells = {[49005] = 50424}
 
-	local aura = {}
+	local aura = {type = "DEBUFF"}
 	local function HandleDebuff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
 		if spellid and not ignoredSpells[spellid] and auratype == "DEBUFF" then
 			if srcName == nil and #srcGUID == 0 and dstName and #dstGUID > 0 then
@@ -538,7 +535,6 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 
 			aura.spellid = spellid
 			aura.spellschool = spellschool
-			aura.type = "DEBUFF"
 
 			Skada:FixPets(aura)
 
