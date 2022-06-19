@@ -326,13 +326,12 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 				for i = 1, #self.players do
 					local p = self.players[i]
 					if p and p.sundertargets and p.sundertargets[name] then
-						tbl[name] = new()
-						tbl[name].id = p.id
-						tbl[name].name = p.name
-						tbl[name].class = p.class
-						tbl[name].role = p.role
-						tbl[name].spec = p.spec
-						tbl[name].count = p.sundertargets[name]
+						tbl[p.name] = new()
+						tbl[p.name].id = p.id
+						tbl[p.name].class = p.class
+						tbl[p.name].role = p.role
+						tbl[p.name].spec = p.spec
+						tbl[p.name].count = p.sundertargets[name]
 						total = total + p.sundertargets[name]
 					end
 				end
