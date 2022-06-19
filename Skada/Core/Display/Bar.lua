@@ -345,6 +345,8 @@ do
 
 					group:SortBars()
 				end
+
+				SavePosition(group, p)
 			else
 				-- the window wasn't sticked to any? remove just incase
 				windows = Skada:GetWindows()
@@ -359,6 +361,8 @@ do
 							if next(win.db.sticked) == nil then
 								win.db.sticked = del(win.db.sticked)
 							end
+
+							SavePosition(win.bargroup, win.db)
 						elseif p.sticked and p.sticked[win.db.name] then
 							SavePosition(win.bargroup, win.db)
 						end

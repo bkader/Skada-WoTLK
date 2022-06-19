@@ -1368,13 +1368,37 @@ end
 -- profile import, export and sharing
 
 do
-	local collectgarbage = collectgarbage
+	local collectgarbage, ipairs = collectgarbage, ipairs
+	local UnitName, GetRealmName = UnitName, GetRealmName
 	local AceGUI
 
-	local function getProfileName(str)
+	local function GetProfileName(str)
 		local header = strsub(str, 1, 64)
 		local name = (header:match("%[(.-)%]") or header):gsub("=", ""):gsub("profile", ""):trim()
 		return (name ~= "") and name
+	end
+
+	local function CheckProfileName(name)
+		local profiles = Skada.db:GetProfiles()
+		local ProfileExists = function(name)
+			if name then
+				for _, v in ipairs(profiles) do
+					if name == v then
+						return true
+					end
+				end
+			end
+		end
+
+		name = name or fmt("%s - %s", UnitName("player"), GetRealmName())
+
+		local n, i = name, 1
+		while ProfileExists(name) do
+			i = i + 1
+			name = fmt("%s (%d)", n, i)
+		end
+
+		return name
 	end
 
 	local temp = {}
@@ -1450,13 +1474,15 @@ do
 		)
 	end
 
-	function Skada:ImportProfile(data)
+	function Skada:ImportProfile(data, name)
 		if type(data) ~= "string" then
 			Skada:Print("Import profile failed, data supplied must be a string.")
 			return false
 		end
 
-		local profileName = getProfileName(data)
+		name = name or GetProfileName(data)
+		local profileName = CheckProfileName(name)
+
 		local success
 		success, data = UnserializeProfile(data)
 
@@ -1480,9 +1506,9 @@ do
 	end
 
 	function Skada:AdvancedProfile(args)
-		if not args then
-			return
-		end
+		if not args then return end
+		self.AdvancedProfile = nil -- remove it
+
 		args.advanced = {
 			type = "group",
 			name = L["Advanced"],
