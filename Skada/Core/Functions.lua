@@ -1195,23 +1195,130 @@ end
 do
 	local UnitIsConnected = UnitIsConnected
 	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
+	local collectgarbage = collectgarbage
 
+	local function CreateProgress()
+		local frame = CreateFrame("Frame", "SkadaProgressWindow", UIParent)
+		frame:SetFrameStrata("TOOLTIP")
+
+		local elem = frame:CreateTexture(nil, "BORDER")
+		elem:SetTexture([[Interface\Buttons\WHITE8X8]])
+		elem:SetVertexColor(0, 0, 0, 1)
+		elem:SetPoint("TOPLEFT")
+		elem:SetPoint("RIGHT")
+		elem:SetHeight(25)
+		frame.head = elem
+
+		elem = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+		elem:SetJustifyH("CENTER")
+		elem:SetJustifyV("MIDDLE")
+		elem:SetPoint("TOPLEFT", frame.head, "TOPLEFT", 25, 0)
+		elem:SetPoint("BOTTOMRIGHT", frame.head, "BOTTOMRIGHT", -25, 0)
+		elem:SetText(L["Progress"])
+		frame.title = elem
+
+		elem = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
+		elem:SetWidth(24)
+		elem:SetHeight(24)
+		elem:SetPoint("RIGHT", frame.head, "RIGHT", -4, 0)
+		frame.close = elem
+
+		elem = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+		elem:SetJustifyH("CENTER")
+		elem:SetJustifyV("MIDDLE")
+		elem:SetPoint("TOPLEFT", frame.head, "BOTTOMLEFT", 0, -10)
+		elem:SetPoint("TOPRIGHT", frame.head, "BOTTOMRIGHT", 0, -10)
+		frame.text = elem
+
+		elem = CreateFrame("StatusBar", nil, frame)
+		elem:SetMinMaxValues(0, 100)
+		elem:SetPoint("TOPLEFT", frame.text, "BOTTOMLEFT", 20, -15)
+		elem:SetPoint("TOPRIGHT", frame.text, "BOTTOMRIGHT", -20, -15)
+		elem:SetHeight(5)
+		elem:SetStatusBarTexture([[Interface\AddOns\Skada\Media\Statusbar\Flat.tga]])
+		elem:SetStatusBarColor(0, 1, 0)
+		frame.bar = elem
+
+		elem = frame.bar:CreateTexture(nil, "BACKGROUND")
+		elem:SetTexture([[Interface\Buttons\WHITE8X8]])
+		elem:SetVertexColor(1, 1, 1, 0.2)
+		elem:SetAllPoints(true)
+
+		elem = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+		elem:SetPoint("TOP", frame.bar, "BOTTOM", 0, -15)
+		frame.size = elem
+
+		frame:SetBackdrop {
+			bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],
+			edgeFile = [[Interface\Tooltips\UI-Tooltip-Border]],
+			edgeSize = 16,
+			insets = {left = 4, right = 4, top = 4, bottom = 4}
+		}
+		frame:SetBackdropColor(0, 0, 0, 0.6)
+		frame:SetBackdropBorderColor(0, 0, 0, 1)
+		frame:SetPoint("CENTER", 0, 0)
+		frame:SetWidth(360)
+		frame:SetHeight(110)
+
+		frame:SetScript("OnShow", function(self)
+			self.size:SetText(format(L["Data Size: \124cffffffff%.1f\124rKB"], self.total / 1000))
+		end)
+
+		frame:SetScript("OnHide", function(self)
+			self.total = 0
+			self.text:SetText(self.fmt)
+			self.size:SetText("")
+			self.bar:SetValue(0)
+			collectgarbage()
+		end)
+
+		frame.fmt = L["Transmision Progress: %02.f%%"]
+		frame:Hide()
+		return frame
+	end
+
+	local function ShowProgress(self, sent, total)
+		local progress = self.ProgressWindow or CreateProgress()
+		self.ProgressWindow = progress
+		if not progress:IsShown() then
+			progress.total = total
+			progress:Show()
+		end
+
+		if sent < total then
+			local p = sent * 100 / total
+			progress.text:SetText(format(progress.fmt, p))
+			progress.bar:SetValue(p)
+		else
+			progress.text:SetText(L["Transmission Completed"])
+			progress.bar:SetValue(100)
+		end
+	end
+
+	-- "PURR" is a special key to whisper with progress window.
 	local function SendCommMessage(self, channel, target, ...)
-		if target == self.userName or (channel ~= "WHISPER" and not IsInGroup()) then
-			return
-		elseif not channel then
-			channel = IsInRaid() and "RAID" or "PARTY"
+		if target == self.userName then
+			return -- to yourself? really...
+		elseif channel ~= "WHISPER" and channel ~= "PURR" and not IsInGroup() then
+			return -- only for group members!
+		elseif (channel == "WHISPER" or channel == "PURR") and not (target and UnitIsConnected(target)) then
+			return -- whisper target must be connected!
+		end
 
-			-- check arena/battlegrounds
+		-- not channel provided?
+		if not channel then
+			channel = IsInRaid() and "RAID" or "PARTY" -- default
+
+			-- arena or battlegrounds?
 			if self.insType == "pvp" or self.insType == "arena" then
 				channel = "BATTLEGROUND"
 			end
 		end
 
-		if channel == "WHISPER" and not (target and UnitIsConnected(target)) then
-			return
+		if channel == "PURR" then
+			self:SendCommMessage("Skada", self:Serialize(nil, nil, ...), "WHISPER", target, "NORMAL", ShowProgress, self)
 		elseif channel then
-			self:SendCommMessage("Skada", self:Serialize(false, nil, ...), channel, target)
+			self:SendCommMessage("Skada", self:Serialize(nil, nil, ...), channel, target)
 		end
 	end
 

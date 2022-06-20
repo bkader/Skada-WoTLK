@@ -29,6 +29,10 @@ L["Player Name"] = true
 L["Send Profile"] = true
 L["Accept profiles from other players."] = true
 L["opt_profile_received"] = "%s has sent you a profile configuration. Do you want to activate received profile?"
+L["Progress"] = true
+L["Data Size: \124cffffffff%.1f\124rKB"] = true
+L["Transmision Progress: %02.f%%"] = true
+L["Transmission Completed"] = true
 -- common lines
 L["ERROR"] = ERROR_CAPS
 L["Yes"] = YES
