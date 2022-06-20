@@ -1385,14 +1385,15 @@ end
 local SerializeProfile = nil
 do
 	local ipairs = ipairs
+	local strmatch = strmatch
 	local UnitName = UnitName
 	local GetRealmName = GetRealmName
 	local AceGUI
 
 	local function GetProfileName(str)
-		local header = strsub(str, 1, 64)
-		local name = (header:match("%[(.-)%]") or header):gsub("=", ""):gsub("profile", ""):trim()
-		return (name ~= "") and name
+		str = strmatch(strsub(str, 1, 64), "%[(.-)%]")
+		str = str and str:gsub("=", ""):gsub("profile", ""):trim()
+		return (str ~= "") and str
 	end
 
 	local function CheckProfileName(name)
@@ -1422,7 +1423,8 @@ do
 	function SerializeProfile()
 		wipe(temp)
 		Skada.tCopy(temp, Skada.db.profile, "modeclicks")
-		return Skada:Serialize(true, fmt("%s profile", Skada.db:GetCurrentProfile()), temp)
+		temp.__name = Skada.db:GetCurrentProfile()
+		return Skada:Serialize(true, fmt("%s profile", temp.__name), temp)
 	end
 
 	local function UnserializeProfile(data)
@@ -1497,24 +1499,27 @@ do
 			return false
 		end
 
-		name = name or GetProfileName(data)
-		local profileName = CheckProfileName(name)
-
-		local success
-		success, data = UnserializeProfile(data)
-
+		local success, profile = UnserializeProfile(data)
 		if not success then
-			Skada:Print("Import profile failed:", data)
+			Skada:Print("Import profile failed!")
 			return false
 		end
+
+		name = name or GetProfileName(data)
+		if profile.__name then
+			name = name or profile.__name
+			profile.__name = nil
+		end
+		local profileName = CheckProfileName(name)
 
 		local Old_ReloadSettings = Skada.ReloadSettings
 		Skada.ReloadSettings = function(self)
 			self.ReloadSettings = Old_ReloadSettings
-			self.tCopy(self.db.profile, data)
+			self.tCopy(self.db.profile, profile)
 			self:ReloadSettings()
 			ACR:NotifyChange("Skada")
 		end
+
 		Skada.db:SetProfile(profileName)
 		Skada:ReloadSettings()
 		Skada:Wipe()

@@ -1156,33 +1156,41 @@ end
 -- data serialization
 
 do
-	local AceSerializer = LibStub("AceSerializer-3.0")
-	local LibCompress = LibStub("LibCompress")
+	local AS = LibStub("AceSerializer-3.0")
+	local LC = LibStub("LibCompress")
+	local LD = LibStub("LibDeflate")
+	local LL = {level = 9}
+
 	local encodeTable = nil
 
 	function Skada:Serialize(hex, title, ...)
-		local result = LibCompress:CompressHuffman(AceSerializer:Serialize(...))
+		local result = LD:CompressDeflate(AS:Serialize(...), LL)
 		if hex then
-			return self.HexEncode(result, title)
+			return LD:EncodeForPrint(result)
 		end
-
-		encodeTable = encodeTable or LibCompress:GetAddonEncodeTable()
-		return encodeTable:Encode(result)
+		return LD:EncodeForWoWChatChannel(result)
 	end
 
 	function Skada:Deserialize(data, hex)
+		local result = hex and LD:DecodeForPrint(data) or LD:DecodeForWoWChatChannel(data)
+		result = result and LD:DecompressDeflate(result) or nil
+		if result then
+			return AS:Deserialize(result)
+		end
+
+		-- backwards compatibility
 		local err
 		if hex then
 			data, err = self.HexDecode(data)
 		else
-			encodeTable = encodeTable or LibCompress:GetAddonEncodeTable()
+			encodeTable = encodeTable or LC:GetAddonEncodeTable()
 			data, err = encodeTable:Decode(data), "Error decoding"
 		end
 
 		if data then
-			data, err = LibCompress:DecompressHuffman(data)
+			data, err = LC:DecompressHuffman(data)
 			if data then
-				return AceSerializer:Deserialize(data)
+				return AS:Deserialize(data)
 			end
 		end
 		return false, err
