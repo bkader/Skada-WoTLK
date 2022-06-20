@@ -369,8 +369,8 @@ function Skada:NewWindow()
 	if not StaticPopupDialogs["SkadaCreateWindowDialog"] then
 		StaticPopupDialogs["SkadaCreateWindowDialog"] = {
 			text = L["Enter the name for the new window."],
-			button1 = CREATE,
-			button2 = CANCEL,
+			button1 = L["Create"],
+			button2 = L["Cancel"],
 			timeout = 30,
 			whileDead = 0,
 			hideOnEscape = 1,
@@ -1509,8 +1509,8 @@ function Skada:RegisterModule(name, desc, func)
 		desc = nil
 	end
 
-	self.modulelist = self.modulelist or new()
-	self.modulelist[#self.modulelist + 1] = func
+	self.LoadableModules = self.LoadableModules or new()
+	self.LoadableModules[#self.LoadableModules + 1] = func
 	self.options.args.modules.args.blocked.args[name] = {type = "toggle", name = L[name], desc = desc and L[desc]}
 end
 
@@ -1524,8 +1524,8 @@ function Skada:IsDisabled(...)
 	return false
 end
 
--- add a display system
 do
+	-- adds a display system
 	local numorder = 80
 	function Skada:AddDisplaySystem(key, mod)
 		displays[key] = mod
@@ -1538,6 +1538,25 @@ do
 			}
 			numorder = numorder + 10
 		end
+	end
+
+	-- registers a loadable display system
+	local cbxorder = 910
+	function Skada:RegisterDisplay(name, desc, func)
+		if type(desc) == "function" then
+			func = desc
+			desc = nil
+		end
+
+		self.LoadableDisplay = self.LoadableDisplay or new()
+		self.LoadableDisplay[#self.LoadableDisplay + 1] = func
+		self.options.args.modules.args.blocked.args[name] = {
+			type = "toggle",
+			name = L[name],
+			desc = desc and L[desc],
+			order = cbxorder
+		}
+		cbxorder = cbxorder + 10
 	end
 end
 
@@ -3268,6 +3287,13 @@ function Skada:OnInitialize()
 	self:RegisterToast()
 	self:RegisterComms(not self.db.profile.syncoff)
 
+	if self.LoadableDisplay then
+		for i = 1, #self.LoadableDisplay do
+			self.LoadableDisplay[i](L, self.db.profile, self.db.global, self.cacheTable, new, del, clear)
+		end
+		self.LoadableDisplay = del(self.LoadableDisplay)
+	end
+
 	-- fix setstokeep, setslimit and timemesure and remove old stuff
 	self.db.profile.setstokeep = min(25, max(0, self.db.profile.setstokeep or 0))
 	self.db.profile.setslimit = min(25, max(0, self.db.profile.setslimit or 0))
@@ -3312,11 +3338,11 @@ function Skada:OnEnable()
 	self:RegisterEvent("UNIT_EXITED_VEHICLE", "CheckVehicle")
 	self:RegisterBucketEvent({"PARTY_MEMBERS_CHANGED", "RAID_ROSTER_UPDATE"}, 0.25, "UpdateRoster")
 
-	if self.modulelist then
-		for i = 1, #self.modulelist do
-			self.modulelist[i](L, self.db.profile, self.db.global, self.cacheTable, new, del, clear)
+	if self.LoadableModules then
+		for i = 1, #self.LoadableModules do
+			self.LoadableModules[i](L, self.db.profile, self.db.global, self.cacheTable, new, del, clear)
 		end
-		self.modulelist = del(self.modulelist)
+		self.LoadableModules = del(self.LoadableModules)
 	end
 
 	if _G.BigWigs then

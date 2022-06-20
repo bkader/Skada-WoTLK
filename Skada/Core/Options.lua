@@ -137,7 +137,10 @@ Skada.defaults = {
 			["Project Ascension"] = true,
 			["Player vs. Player"] = true,
 			["Themes"] = true,
-			["Useful Damage"] = true
+			["Useful Damage"] = true,
+			-- display systems
+			["Inline Bar Display"] = true,
+			["Data Text"] = true
 		},
 		windows = {windefaultscopy}
 	}
@@ -730,7 +733,18 @@ Skada.options = {
 						Skada.db.profile.modulesBlocked[info[#info]] = value
 						Skada.options.args.modules.args.apply.disabled = nil
 					end,
-					args = {}
+					args = {
+						modes_header = {
+							type = "header",
+							name = L["Skada: Modes"],
+							order = 0
+						},
+						display_header = {
+							type = "header",
+							name = L["Display System"],
+							order = 900
+						}
+					}
 				},
 				enableall = {
 					type = "execute",
