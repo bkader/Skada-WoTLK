@@ -191,11 +191,11 @@ local optionsValues = {
 local newdisplay = "bar"
 local newwindow = nil
 
-local function GetValue(info)
+local function get_value(info)
 	return Skada.db.profile[info[#info]]
 end
 
-local function SetValue(info, value)
+local function set_value(info, value)
 	local key = info[#info]
 	Skada.db.profile[key] = value
 	Skada:ApplySettings()
@@ -214,8 +214,8 @@ end
 Skada.options = {
 	type = "group",
 	name = fmt("Skada \124cffffffff%s\124r", Skada.version),
-	get = GetValue,
-	set = SetValue,
+	get = get_value,
+	set = set_value,
 	args = {
 		windows = {
 			type = "group",
@@ -688,8 +688,8 @@ Skada.options = {
 					descStyle = "inline",
 					order = 5,
 					width = "double",
-					get = GetValue,
-					set = SetValue
+					get = get_value,
+					set = set_value
 				}
 			}
 		},
@@ -823,7 +823,7 @@ do
 	local GetAddOnMetadata = GetAddOnMetadata
 	local initOptions
 
-	local function GetInitOptions()
+	local function get_init_options()
 		if not initOptions then
 			initOptions = {
 				type = "group",
@@ -862,7 +862,7 @@ do
 	end
 
 	function Skada:RegisterInitOptions()
-		LibStub("AceConfig-3.0"):RegisterOptionsTable("Skada Dialog", GetInitOptions)
+		LibStub("AceConfig-3.0"):RegisterOptionsTable("Skada Dialog", get_init_options)
 		self.optionsFrame = ACD:AddToBlizOptions("Skada Dialog", "Skada")
 		self.RegisterInitOptions = nil
 	end
@@ -953,12 +953,12 @@ do
 	end
 end
 
-local getScreenWidth
+local get_screen_width
 do
 	local floor = math.floor
 	local GetScreenWidth = GetScreenWidth
 	local screenWidth = nil
-	function getScreenWidth()
+	function get_screen_width()
 		screenWidth = screenWidth or floor(GetScreenWidth() / 20) * 20
 		return screenWidth
 	end
@@ -1051,7 +1051,7 @@ function Skada:FrameSettings(db, include_dimensions)
 								order = 40,
 								width = "double",
 								min = 0,
-								max = getScreenWidth(),
+								max = get_screen_width(),
 								step = 0.1,
 								bigStep = 1
 							}
@@ -1360,7 +1360,7 @@ function Skada:FrameSettings(db, include_dimensions)
 			name = L["Width"],
 			order = 70,
 			min = 100,
-			max = getScreenWidth(),
+			max = get_screen_width(),
 			step = 0.01,
 			bigStep = 1
 		}
@@ -1382,7 +1382,7 @@ end
 -------------------------------------------------------------------------------
 -- profile import, export and sharing
 
-local SerializeProfile = nil
+local serialize_profile = nil
 do
 	local ipairs = ipairs
 	local strmatch = strmatch
@@ -1390,13 +1390,13 @@ do
 	local GetRealmName = GetRealmName
 	local AceGUI
 
-	local function GetProfileName(str)
+	local function get_profile_name(str)
 		str = strmatch(strsub(str, 1, 64), "%[(.-)%]")
 		str = str and str:gsub("=", ""):gsub("profile", ""):trim()
 		return (str ~= "") and str
 	end
 
-	local function CheckProfileName(name)
+	local function check_profile_name(name)
 		local profiles = Skada.db:GetProfiles()
 		local ProfileExists = function(name)
 			if name then
@@ -1420,18 +1420,18 @@ do
 	end
 
 	local temp = {}
-	function SerializeProfile()
+	function serialize_profile()
 		wipe(temp)
 		Skada.tCopy(temp, Skada.db.profile, "modeclicks")
 		temp.__name = Skada.db:GetCurrentProfile()
 		return Skada:Serialize(true, fmt("%s profile", temp.__name), temp)
 	end
 
-	local function UnserializeProfile(data)
+	local function deserialize_profile(data)
 		return Skada:Deserialize(data, true)
 	end
 
-	local function OpenImportExportWindow(title, subtitle, data)
+	local function open_import_export_window(title, subtitle, data)
 		AceGUI = AceGUI or LibStub("AceGUI-3.0")
 		local frame = AceGUI:Create("Frame")
 		frame:SetTitle(L["Profile Import/Export"])
@@ -1479,17 +1479,17 @@ do
 	end
 
 	function Skada:OpenImport()
-		OpenImportExportWindow(
+		open_import_export_window(
 			L["Paste here a profile in text format."],
 			L["Press CTRL-V to paste a Skada configuration text."]
 		)
 	end
 
 	function Skada:ExportProfile()
-		OpenImportExportWindow(
+		open_import_export_window(
 			L["This is your current profile in text format."],
 			L["Press CTRL-C to copy the configuration to your clipboard."],
-			SerializeProfile()
+			serialize_profile()
 		)
 	end
 
@@ -1499,18 +1499,18 @@ do
 			return false
 		end
 
-		local success, profile = UnserializeProfile(data)
+		local success, profile = deserialize_profile(data)
 		if not success then
 			Skada:Print("Import profile failed!")
 			return false
 		end
 
-		name = name or GetProfileName(data)
+		name = name or get_profile_name(data)
 		if profile.__name then
 			name = name or profile.__name
 			profile.__name = nil
 		end
-		local profileName = CheckProfileName(name)
+		local profileName = check_profile_name(name)
 
 		local Old_ReloadSettings = Skada.ReloadSettings
 		Skada.ReloadSettings = function(self)
@@ -1585,7 +1585,7 @@ do
 							name = L["Send Profile"],
 							func = function()
 								if Share.target and Share.target ~= "" then
-									Share:Send(SerializeProfile(), Share.target)
+									Share:Send(serialize_profile(), Share.target)
 								end
 							end,
 							disabled = function() return (not Share.target or Share.target == "") end,

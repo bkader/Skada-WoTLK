@@ -35,28 +35,29 @@ local band, tremove = bit.band, tremove or table.remove
 
 -- binds a set table to set prototype
 function setPrototype:Bind(obj)
-	if obj and getmetatable(obj) ~= self then
-		if obj.players then
-			for i = #obj.players, 1, -1 do
-				local p = obj.players[i]
-				if p and p.flag and band(p.flag, BITMASK_FRIENDLY) == 0 then
-					tremove(obj.players, i) -- postfix
-				elseif p then
-					playerPrototype:Bind(p, obj)
-				end
-			end
-		end
-
-		if obj.enemies then
-			for i = #obj.enemies, 1, -1 do
-				enemyPrototype:Bind(obj.enemies[i], obj)
-			end
-		end
-
-		setmetatable(obj, self)
-		self.__index = self
+	if not obj or getmetatable(obj) == self then
+		return obj
 	end
 
+	if obj.players then
+		for i = #obj.players, 1, -1 do
+			local p = obj.players[i]
+			if p and p.flag and band(p.flag, BITMASK_FRIENDLY) == 0 then
+				tremove(obj.players, i) -- postfix
+			elseif p then
+				playerPrototype:Bind(p, obj)
+			end
+		end
+	end
+
+	if obj.enemies then
+		for i = #obj.enemies, 1, -1 do
+			enemyPrototype:Bind(obj.enemies[i], obj)
+		end
+	end
+
+	setmetatable(obj, self)
+	self.__index = self
 	return obj
 end
 
@@ -90,6 +91,19 @@ end
 function setPrototype:GetActorTime(id, name, active)
 	local actor = self:GetActor(name, id)
 	return actor and actor:GetTime(active) or 0
+end
+
+-- fills the give table with actor's details
+function setPrototype:_fill_actor_table(t, name)
+	if t and not t.class then
+		local actor = self:GetActor(name)
+		if actor then
+			t.id = actor.id
+			t.class = actor.class
+			t.role = actor.role
+			t.spec = actor.spec
+		end
+	end
 end
 
 -- ------------------------------------
@@ -388,11 +402,13 @@ end
 
 -- binds a table to the prototype table
 function actorPrototype:Bind(obj, set)
-	if obj and getmetatable(obj) ~= self then
-		setmetatable(obj, self)
-		self.__index = self
-		obj.super = set
+	if not obj or getmetatable(obj) == self then
+		return obj
 	end
+
+	setmetatable(obj, self)
+	self.__index = self
+	obj.super = set
 	return obj
 end
 
@@ -437,11 +453,33 @@ function actorPrototype:GetOverkill()
 end
 
 -- returns the actor's damage targets table if found
-function actorPrototype:GetDamageTargets(tbl)
-	local damage = 0
+do
+	local function fill_damage_targets_table(set, t, name, info)
+		local tbl = t[name]
+		if not tbl then
+			tbl = new()
+			tbl.amount = info.amount
+			tbl.total = info.total
+			tbl.overkill = info.overkill
+			t[name] = tbl
+		else
+			tbl.amount = tbl.amount + info.amount
+			if info.total then
+				tbl.total = (tbl.total or 0) + info.total
+			end
+			if info.overkill then
+				tbl.overkill = (tbl.overkill or 0) + info.overkill
+			end
+		end
 
-	if self.damagespells then
-		if Skada.db.profile.absdamage and self.totaldamage then
+		set:_fill_actor_table(tbl, name)
+	end
+
+	function actorPrototype:GetDamageTargets(tbl)
+		local damage = 0
+		if not self.damagespells then
+			return damage
+		elseif Skada.db.profile.absdamage and self.totaldamage then
 			damage = self.totaldamage
 		elseif self.damage then
 			damage = self.damage
@@ -450,67 +488,42 @@ function actorPrototype:GetDamageTargets(tbl)
 		tbl = clear(tbl or cacheTable)
 		for _, spell in pairs(self.damagespells) do
 			if spell.targets then
-				for name, tar in pairs(spell.targets) do
-					if not tbl[name] then
-						tbl[name] = new()
-						tbl[name].amount = tar.amount
-						tbl[name].total = tar.total
-						tbl[name].overkill = tar.overkill
-					else
-						tbl[name].amount = tbl[name].amount + tar.amount
-						if tar.total then
-							tbl[name].total = (tbl[name].total or 0) + tar.total
-						end
-						if tar.overkill then
-							tbl[name].overkill = (tbl[name].overkill or 0) + tar.overkill
-						end
-					end
-
-					-- attempt to get actor details
-					if not tbl[name].class then
-						local actor = self.super:GetActor(name)
-						if actor then
-							tbl[name].id = actor.id
-							tbl[name].class = actor.class
-							tbl[name].role = actor.role
-							tbl[name].spec = actor.spec
-						end
-					end
+				for name, target in pairs(spell.targets) do
+					fill_damage_targets_table(self.super, tbl, name, target)
 				end
 			end
 		end
+		return tbl, damage
 	end
-
-	return tbl, damage
 end
 
 -- returns the damage on the given target
 function actorPrototype:GetDamageOnTarget(name)
 	local damage, overkill, useful = 0, 0, 0
+	if not name or not self.damagespells then
+		return damage, overkill, useful
+	end
 
-	if self.damagespells and name then
-		for _, spell in pairs(self.damagespells) do
-			if spell.targets and spell.targets[name] then
-				-- damage
-				if Skada.db.profile.absdamage and spell.targets[name].total then
-					damage = damage + spell.targets[name].total
-				elseif spell.targets[name].amount then
-					damage = damage + spell.targets[name].amount
-				end
+	for _, spell in pairs(self.damagespells) do
+		if spell.targets and spell.targets[name] then
+			-- damage
+			if Skada.db.profile.absdamage and spell.targets[name].total then
+				damage = damage + spell.targets[name].total
+			elseif spell.targets[name].amount then
+				damage = damage + spell.targets[name].amount
+			end
 
-				-- overkill
-				if spell.targets[name].overkill then
-					overkill = overkill + spell.targets[name].overkill
-				end
+			-- overkill
+			if spell.targets[name].overkill then
+				overkill = overkill + spell.targets[name].overkill
+			end
 
-				-- useful
-				if spell.targets[name].useful then
-					useful = useful + spell.targets[name].useful
-				end
+			-- useful
+			if spell.targets[name].useful then
+				useful = useful + spell.targets[name].useful
 			end
 		end
 	end
-
 	return damage, overkill, useful
 end
 
@@ -536,84 +549,86 @@ function actorPrototype:GetDTPS(active)
 end
 
 -- returns the actors damage sources
-function actorPrototype:GetDamageSources(tbl)
-	local damage = 0
-
-	if self.damagetakenspells then
-		if Skada.db.profile.absdamage and self.totaldamagetaken then
-			damage = self.totaldamagetaken
-		elseif self.damagetaken then
-			damage = self.damagetaken
+do
+	local function fill_damage_sources_table(set, t, name, info)
+		local tbl = t[name]
+		if not tbl then
+			tbl = new()
+			tbl.amount = info.amount
+			tbl.total = info.total
+			tbl.overkill = info.overkill -- nil for players
+			tbl.useful = info.useful -- nil for enemies
+			t[name] = tbl
+		else
+			tbl.amount = tbl.amount + info.amount
+			if info.total then
+				tbl.total = (tbl.total or 0) + info.total
+			end
+			if info.overkill then -- nil for players
+				tbl.overkill = (tbl.overkill or 0) + info.overkill
+			end
+			if info.useful then -- nil for enemies
+				tbl.useful = (tbl.useful or 0) + info.useful
+			end
 		end
 
-		tbl = clear(tbl or cacheTable)
-		for _, spell in pairs(self.damagetakenspells) do
-			if spell.sources then
-				for name, source in pairs(spell.sources) do
-					if not tbl[name] then
-						tbl[name] = new()
-						tbl[name].amount = source.amount
-						tbl[name].total = source.total
-						tbl[name].overkill = source.overkill -- nil for players
-						tbl[name].useful = source.useful -- nil for enemies
-					else
-						tbl[name].amount = tbl[name].amount + source.amount
-						if source.total then
-							tbl[name].total = (tbl[name].total or 0) + source.total
-						end
-						if source.overkill then -- nil for players
-							tbl[name].overkill = (tbl[name].overkill or 0) + source.overkill
-						end
-						if source.useful then -- nil for enemies
-							tbl[name].useful = (tbl[name].useful or 0) + source.useful
-						end
-					end
+		set:_fill_actor_table(tbl, name)
+	end
 
-					-- attempt to get actor details
-					if not tbl[name].class then
-						local actor = self.super:GetActor(name)
-						if actor then
-							tbl[name].id = actor.id
-							tbl[name].class = actor.class
-							tbl[name].role = actor.role
-							tbl[name].spec = actor.spec
-						end
+	function actorPrototype:GetDamageSources(tbl)
+		local damage = 0
+		if not self.damagetakenspells then
+			return tbl, 0
+		end
+
+		if self.damagetakenspells then
+			if Skada.db.profile.absdamage and self.totaldamagetaken then
+				damage = self.totaldamagetaken
+			elseif self.damagetaken then
+				damage = self.damagetaken
+			end
+
+			tbl = clear(tbl or cacheTable)
+			for _, spell in pairs(self.damagetakenspells) do
+				if spell.sources then
+					for name, source in pairs(spell.sources) do
+						fill_damage_sources_table(self.super, tbl, name, source)
 					end
 				end
 			end
 		end
-	end
 
-	return tbl, damage
+		return tbl, damage
+	end
 end
 
 -- returns the actors damage from the given source
 function actorPrototype:GetDamageFromSource(name)
 	local damage, overkill, useful = 0, 0, 0
+	if not name or not self.damagetakenspells then
+		return damage, overkill, useful
+	end
 
-	if self.damagetakenspells and name then
-		for _, spell in pairs(self.damagetakenspells) do
-			if spell.sources and spell.sources[name] then
-				-- damage
-				if Skada.db.profile.absdamage and spell.sources[name].total then
-					damage = damage + spell.sources[name].total
-				elseif spell.sources[name].amount then
-					damage = damage + spell.sources[name].amount
-				end
+	for _, spell in pairs(self.damagetakenspells) do
+		if spell.sources and spell.sources[name] then
+			-- damage
+			if Skada.db.profile.absdamage and spell.sources[name].total then
+				damage = damage + spell.sources[name].total
+			elseif spell.sources[name].amount then
+				damage = damage + spell.sources[name].amount
+			end
 
-				-- overkill
-				if spell.sources[name].overkill then
-					overkill = overkill + spell.sources[name].overkill
-				end
+			-- overkill
+			if spell.sources[name].overkill then
+				overkill = overkill + spell.sources[name].overkill
+			end
 
-				-- useful
-				if spell.sources[name].useful then
-					useful = useful + spell.sources[name].useful
-				end
+			-- useful
+			if spell.sources[name].useful then
+				useful = useful + spell.sources[name].useful
 			end
 		end
 	end
-
 	return damage, overkill, useful
 end
 
@@ -669,184 +684,62 @@ function actorPrototype:GetTHPS(active)
 	return 0, heal
 end
 
--- returns the actor's heal targets table if found
-function actorPrototype:GetHealTargets(tbl)
-	if self.healspells then
-		tbl = clear(tbl or cacheTable)
-
-		for _, spell in pairs(self.healspells) do
-			if spell.targets then
-				for name, target in pairs(spell.targets) do
-					if type(target) == "number" then
-						if not tbl[name] then
-							tbl[name] = new()
-							tbl[name].amount = target
-						else
-							tbl[name].amount = tbl[name].amount + target
-						end
-					else
-						if not tbl[name] then
-							tbl[name] = new()
-							tbl[name].amount = target.amount
-							tbl[name].overheal = target.overheal
-						else
-							tbl[name].amount = tbl[name].amount + target.amount
-							if target.overheal then
-								tbl[name].overheal = (tbl[name].overheal or 0) + target.overheal
-							end
-						end
-					end
-
-					-- attempt to get actor details
-					if not tbl[name].class then
-						local actor = self.super:GetActor(name)
-						if actor then
-							tbl[name].id = actor.id
-							tbl[name].class = actor.class
-							tbl[name].role = actor.role
-							tbl[name].spec = actor.spec
-						end
-					end
-				end
-			end
-		end
-	end
-
-	return tbl
-end
-
 -- returns the amount of heal and overheal on the given target
 function actorPrototype:GetHealOnTarget(name)
 	local heal, overheal = 0, 0
+	if not name or not self.healspells then
+		return heal, overheal
+	end
 
-	if self.healspells and name then
-		for _, spell in pairs(self.healspells) do
-			if spell.targets and spell.targets[name] then
-				if type(spell.targets[name]) == "number" then
-					heal = heal + spell.targets[name]
-				else
-					heal = heal + spell.targets[name].amount
-					if spell.targets[name].overheal then
-						overheal = overheal + spell.targets[name].overheal
-					end
+	for _, spell in pairs(self.healspells) do
+		if spell.targets and spell.targets[name] then
+			if type(spell.targets[name]) == "number" then
+				heal = heal + spell.targets[name]
+			else
+				heal = heal + spell.targets[name].amount
+				if spell.targets[name].overheal then
+					overheal = overheal + spell.targets[name].overheal
 				end
 			end
 		end
 	end
-
 	return heal, overheal
-end
-
--- returns the table of overheal targets if found
-function actorPrototype:GetOverhealTargets(tbl)
-	if self.overheal and self.healspells then
-		tbl = clear(tbl or cacheTable)
-
-		for _, spell in pairs(self.healspells) do
-			if spell.overheal and spell.overheal > 0 and spell.targets then
-				for name, target in pairs(spell.targets) do
-					if target.overheal and target.overheal > 0 then
-						if not tbl[name] then
-							tbl[name] = new()
-							tbl[name].amount = target.overheal
-							tbl[name].total = target.amount + target.overheal
-						else
-							tbl[name].amount = tbl[name].amount + target.overheal
-							tbl[name].total = tbl[name].total + target.amount + target.overheal
-						end
-
-						-- attempt to get actor details
-						if not tbl[name].class then
-							local actor = self.super:GetActor(name)
-							if actor then
-								tbl[name].id = actor.id
-								tbl[name].class = actor.class
-								tbl[name].role = actor.role
-								tbl[name].spec = actor.spec
-							end
-						end
-					end
-				end
-			end
-		end
-	end
-
-	return tbl
 end
 
 -- returns the amount of overheal on the given target
 function actorPrototype:GetOverhealOnTarget(name)
-	local overheal = 0
-
-	if self.overheal and self.healspells and name then
-		for _, spell in pairs(self.healspells) do
-			if spell.overheal and spell.overheal > 0 and spell.targets and spell.targets[name] and spell.targets[name].overheal then
-				overheal = overheal + spell.targets[name].overheal
-			end
-		end
+	if not self.overheal or not self.healspells or not name then
+		return 0
 	end
 
+	local overheal = 0
+	for _, spell in pairs(self.healspells) do
+		if spell.overheal and spell.overheal > 0 and spell.targets and spell.targets[name] and spell.targets[name].overheal then
+			overheal = overheal + spell.targets[name].overheal
+		end
+	end
 	return overheal
 end
 
 -- returns the total heal amount on the given target
-function actorPrototype:GetTotalHealTargets(tbl)
-	if self.healspells then
-		tbl = clear(tbl or cacheTable)
-
-		for _, spell in pairs(self.healspells) do
-			if spell.targets then
-				for name, target in pairs(spell.targets) do
-					if type(target) == "number" then
-						if not tbl[name] then
-							tbl[name] = new()
-							tbl[name].amount = target
-						else
-							tbl[name].amount = tbl[name].amount + target
-						end
-					else
-						if not tbl[name] then
-							tbl[name] = new()
-							tbl[name].amount = target.amount + target.overheal
-						else
-							tbl[name].amount = tbl[name].amount + target.amount + target.overheal
-						end
-					end
-
-					-- attempt to get actor details
-					if not tbl[name].class then
-						local actor = self.super:GetActor(name)
-						if actor then
-							tbl[name].id = actor.id
-							tbl[name].class = actor.class
-							tbl[name].role = actor.role
-							tbl[name].spec = actor.spec
-						end
-					end
-				end
-			end
-		end
-	end
-
-	return tbl
-end
-
--- returns the total heal amount on the given target
 function actorPrototype:GetTotalHealOnTarget(name)
-	local heal = 0
+	if not name or not self.healspells then
+		return 0
+	end
 
-	if self.healspells and name then
-		for _, spell in pairs(self.healspells) do
-			if spell.targets and spell.targets[name] then
-				if type(spell.targets[name]) == "number" then
-					heal = heal + spell.targets[name]
-				else
-					heal = heal + spell.targets[name].amount + spell.targets[name].overheal
+	local heal = 0
+	for _, spell in pairs(self.healspells) do
+		if spell.targets and spell.targets[name] then
+			if type(spell.targets[name]) == "number" then
+				heal = heal + spell.targets[name]
+			else
+				heal = heal + spell.targets[name].amount
+				if spell.targets[name].overheal then
+					heal = heal + spell.targets[name].overheal
 				end
 			end
 		end
 	end
-
 	return heal
 end
 
@@ -884,121 +777,15 @@ function actorPrototype:GetAHPS(active)
 	return 0, heal
 end
 
--- returns the actor's absorb targets table if found
-function actorPrototype:GetAbsorbTargets(tbl)
-	if self.absorbspells then
-		tbl = clear(tbl or cacheTable)
-
-		for _, spell in pairs(self.absorbspells) do
-			if spell.targets then
-				for name, amount in pairs(spell.targets) do
-					if not tbl[name] then
-						tbl[name] = new()
-						tbl[name].amount = amount
-					else
-						tbl[name].amount = tbl[name].amount + amount
-					end
-
-					-- attempt to get actor details
-					if not tbl[name].class then
-						local actor = self.super:GetActor(name)
-						if actor then
-							tbl[name].id = actor.id
-							tbl[name].class = actor.class
-							tbl[name].role = actor.role
-							tbl[name].spec = actor.spec
-						end
-					end
-				end
-			end
-		end
-	end
-
-	return tbl
-end
-
--- returns the actor's absorb and heal targets table if found
-function actorPrototype:GetAbsorbHealTargets(tbl)
-	if self.healspells or self.absorbspells then
-		tbl = clear(tbl or cacheTable)
-
-		-- absorb targets
-		if self.absorbspells then
-			for _, spell in pairs(self.absorbspells) do
-				if spell.targets then
-					for name, amount in pairs(spell.targets) do
-						if not tbl[name] then
-							tbl[name] = new()
-							tbl[name].amount = amount
-						else
-							tbl[name].amount = tbl[name].amount + amount
-						end
-
-						-- attempt to get actor details
-						if not tbl[name].class then
-							local actor = self.super:GetActor(name)
-							if actor then
-								tbl[name].id = actor.id
-								tbl[name].class = actor.class
-								tbl[name].role = actor.role
-								tbl[name].spec = actor.spec
-							end
-						end
-					end
-				end
-			end
-		end
-
-		-- heal targets
-		if self.healspells then
-			for _, spell in pairs(self.healspells) do
-				if spell.targets then
-					for name, target in pairs(spell.targets) do
-						if type(target) == "number" then
-							if not tbl[name] then
-								tbl[name] = new()
-								tbl[name].amount = target
-							else
-								tbl[name].amount = tbl[name].amount + target
-							end
-						else
-							if not tbl[name] then
-								tbl[name] = new()
-								tbl[name].amount = target.amount
-								tbl[name].overheal = target.overheal
-							else
-								tbl[name].amount = tbl[name].amount + target.amount
-								if target.overheal then
-									tbl[name].overheal = (tbl[name].overheal or 0) + target.overheal
-								end
-							end
-						end
-
-						-- attempt to get actor details
-						if not tbl[name].class then
-							local actor = self.super:GetActor(name)
-							if actor then
-								tbl[name].id = actor.id
-								tbl[name].class = actor.class
-								tbl[name].role = actor.role
-								tbl[name].spec = actor.spec
-							end
-						end
-					end
-				end
-			end
-		end
-	end
-
-	return tbl
-end
-
 -- returns the amount of absorb and heal on the given target
 function actorPrototype:GetAbsorbHealOnTarget(name)
 	local heal, overheal = 0, 0
+	if not name then
+		return heal, overheal
+	end
 
 	-- absorb spells
-	if name and self.absorbspells then
+	if self.absorbspells then
 		for _, spell in pairs(self.absorbspells) do
 			if spell.targets and spell.targets[name] then
 				heal = heal + spell.targets[name]
@@ -1007,7 +794,7 @@ function actorPrototype:GetAbsorbHealOnTarget(name)
 	end
 
 	-- heal spells
-	if self.healspells and name then
+	if self.healspells then
 		for _, spell in pairs(self.healspells) do
 			if spell.targets and spell.targets[name] then
 				if type(spell.targets[name]) == "number" then
@@ -1023,4 +810,173 @@ function actorPrototype:GetAbsorbHealOnTarget(name)
 	end
 
 	return heal, overheal
+end
+
+do
+	local function fill_absorb_targets_table(set, t, name, amount)
+		local tbl = t[name]
+		if not tbl then
+			tbl = new()
+			tbl.amount = amount
+			t[name] = tbl
+		else
+			tbl.amount = tbl.amount + amount
+		end
+
+		set:_fill_actor_table(tbl, name)
+	end
+
+	local function fill_heal_targets_table(set, t, name, info)
+		local tbl = t[name] or new()
+		t[name] = tbl
+
+		if type(info) == "number" then
+			tbl.amount = (tbl.amount or 0) + info
+		else
+			tbl.amount = (tbl.amount or 0) + info.amount
+			if info.overheal then
+				tbl.overheal = (tbl.overheal or 0) + info.overheal
+			end
+		end
+
+		set:_fill_actor_table(tbl, name)
+	end
+
+	-- returns the actor's absorb targets table if found
+	function actorPrototype:GetAbsorbTargets(tbl)
+		if not self.absorbspells then
+			return tbl
+		end
+
+		tbl = clear(tbl or cacheTable)
+		for _, spell in pairs(self.absorbspells) do
+			if spell.targets then
+				for name, amount in pairs(spell.targets) do
+					fill_absorb_targets_table(self.super, tbl, name, amount)
+				end
+			end
+		end
+		return tbl
+	end
+
+	-- returns the actor's heal targets table if found
+	function actorPrototype:GetHealTargets(tbl)
+		if not self.healspells then
+			return tbl
+		end
+
+		tbl = clear(tbl or cacheTable)
+		for _, spell in pairs(self.healspells) do
+			if spell.targets then
+				for name, target in pairs(spell.targets) do
+					fill_heal_targets_table(self.super, tbl, name, target)
+				end
+			end
+		end
+		return tbl
+	end
+
+	-- returns the actor's absorb and heal targets table if found
+	function actorPrototype:GetAbsorbHealTargets(tbl)
+		if not self.healspells and not self.absorbspells then
+			return tbl
+		end
+
+		tbl = clear(tbl or cacheTable)
+
+		-- absorb targets
+		if self.absorbspells then
+			for _, spell in pairs(self.absorbspells) do
+				if spell.targets then
+					for name, amount in pairs(spell.targets) do
+						fill_absorb_targets_table(self.super, tbl, name, amount)
+					end
+				end
+			end
+		end
+
+		-- heal targets
+		if self.healspells then
+			for _, spell in pairs(self.healspells) do
+				if spell.targets then
+					for name, target in pairs(spell.targets) do
+						fill_heal_targets_table(self.super, tbl, name, target)
+					end
+				end
+			end
+		end
+
+		return tbl
+	end
+end
+
+-- returns the table of overheal targets if found
+do
+	local function fill_overheal_targets_table(set, t, name, info)
+		if info.overheal or info.overheal == 0 then return end
+
+		local tbl = t[name]
+		if not tbl then
+			tbl = new()
+			tbl.amount = info.overheal
+			tbl.total = info.amount + info.overheal
+			tbl = t[name]
+		else
+			tbl.amount = tbl.amount + info.overheal
+			tbl.total = tbl.total + info.amount + info.overheal
+		end
+
+		set:_fill_actor_table(tbl, name)
+	end
+
+	function actorPrototype:GetOverhealTargets(tbl)
+		if not self.overheal or not self.healspells then
+			return tbl
+		end
+
+		tbl = clear(tbl or cacheTable)
+		for _, spell in pairs(self.healspells) do
+			if spell.overheal and spell.overheal > 0 and spell.targets then
+				for name, target in pairs(spell.targets) do
+					fill_overheal_targets_table(self.super, tbl, name, target)
+				end
+			end
+		end
+		return tbl
+	end
+end
+
+-- returns the total heal amount on the given target
+do
+	local function fill_total_heal_targets_table(set, t, name, info)
+		local tbl = t[name] or new()
+		t[name] = tbl
+
+		if type(info) == "number" then
+			tbl.amount = (tbl.amount or 0) + info
+		else
+			tbl.amount = (tbl.amount or 0) + info.amount
+			if info.overheal then
+				tbl.amount = tbl.amount + info.overheal
+			end
+		end
+
+		set:_fill_actor_table(tbl, name)
+	end
+
+	function actorPrototype:GetTotalHealTargets(tbl)
+		if not self.healspells then
+			return tbl
+		end
+
+		tbl = clear(tbl or cacheTable)
+		for _, spell in pairs(self.healspells) do
+			if spell.targets then
+				for name, target in pairs(spell.targets) do
+					fill_total_heal_targets_table(self.super, tbl, name, target)
+				end
+			end
+		end
+		return tbl
+	end
 end

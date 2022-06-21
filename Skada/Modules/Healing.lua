@@ -106,7 +106,7 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 
 	local heal = {}
 
-	local function SpellCast(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_cast(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID and dstGUID then
 			local spellid, _, spellschool = ...
 			if spellid and not ignoredSpells[spellid] then
@@ -116,7 +116,7 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 		end
 	end
 
-	local function SpellHeal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_heal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid = ...
 		if spellid and not ignoredSpells[spellid] then
 			srcGUID, srcName, srcFlags = Skada:FixUnit(spellid, srcGUID, srcName, srcFlags)
@@ -423,14 +423,14 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 		local flags_src = {src_is_interesting = true}
 
 		Skada:RegisterForCL(
-			SpellCast,
+			spell_cast,
 			"SPELL_CAST_START",
 			"SPELL_CAST_SUCCESS",
 			flags_src
 		)
 
 		Skada:RegisterForCL(
-			SpellHeal,
+			spell_heal,
 			"SPELL_HEAL",
 			"SPELL_PERIODIC_HEAL",
 			flags_src

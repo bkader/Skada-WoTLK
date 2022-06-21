@@ -6,14 +6,13 @@ local UnitName, UnitGUID, UnitBuff = UnitName, UnitGUID, UnitBuff
 local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local PercentToRGB = Skada.PercentToRGB
-local dummyTable = Skada.dummyTable
 local setPrototype = Skada.setPrototype
 local playerPrototype = Skada.playerPrototype
 local _
 
 -- common functions
 local log_auraapply, log_aurarefresh, log_auraremove
-local UpdateFunction, SpellUpdateFunction, aura_tooltip
+local mod_update_func, aura_update_func, aura_tooltip
 local spellschools = nil
 
 -- main module that handles common stuff
@@ -197,18 +196,20 @@ do
 	end
 
 	do
-		local function CountAuras(auras, atype)
+		local function count_auras_by_type(auras, atype)
 			local count, uptime = 0, 0
-			for _, spell in pairs(auras or dummyTable) do
-				if spell.type == atype and spell.uptime > 0 then
-					count = count + 1
-					uptime = uptime + spell.uptime
+			if auras then
+				for _, spell in pairs(auras) do
+					if spell.type == atype and spell.uptime > 0 then
+						count = count + 1
+						uptime = uptime + spell.uptime
+					end
 				end
 			end
 			return count, uptime
 		end
 
-		function UpdateFunction(atype, win, set, mode)
+		function mod_update_func(atype, win, set, mode)
 			if not atype then return end
 			local settime = set and set:GetTime()
 			if settime > 0 then
@@ -220,7 +221,7 @@ do
 				for i = 1, #set.players do
 					local player = set.players[i]
 					if player and (not win.class or win.class == player.class) then
-						local auracount, aurauptime = CountAuras(player.auras, atype)
+						local auracount, aurauptime = count_auras_by_type(player.auras, atype)
 						if auracount > 0 and aurauptime > 0 then
 							nr = nr + 1
 							local d = win:actor(nr, player)
@@ -243,7 +244,7 @@ do
 		end
 	end
 
-	function SpellUpdateFunction(atype, win, set, mode)
+	function aura_update_func(atype, win, set, mode)
 		if not atype then return end
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
@@ -335,7 +336,7 @@ Skada:RegisterModule("Buffs", function(L, P)
 	end
 
 	local aura = {type = "BUFF"}
-	local function HandleBuff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
+	local function handle_buff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
 		if
 			spellid and -- just in case, you never know!
 			not ignoredSpells[spellid] and
@@ -404,23 +405,23 @@ Skada:RegisterModule("Buffs", function(L, P)
 
 	function spellmod:Update(win, set)
 		win.title = format(L["%s's buffs"], win.actorname or L["Unknown"])
-		SpellUpdateFunction("BUFF", win, set, mod)
+		aura_update_func("BUFF", win, set, mod)
 	end
 
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Buffs"], L[win.class]) or L["Buffs"]
-		UpdateFunction("BUFF", win, set, self)
+		mod_update_func("BUFF", win, set, self)
 	end
 
 	do
-		local function CheckUnitBuffs(unit, owner)
+		local function check_unit_buffs(unit, owner)
 			if owner == nil and not UnitIsDeadOrGhost(unit) then
 				local dstGUID, dstName = UnitGUID(unit), UnitName(unit)
 				for i = 1, 40 do
 					local _, rank, _, _, _, _, _, unitCaster, _, _, spellid = UnitBuff(unit, i)
 					if spellid then
 						if unitCaster and rank ~= SPELL_PASSIVE then
-							HandleBuff(nil, "SPELL_AURA_APPLIED", UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, nil, nil, "BUFF")
+							handle_buff(nil, "SPELL_AURA_APPLIED", UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, nil, nil, "BUFF")
 						end
 					else
 						break -- nothing found!
@@ -431,7 +432,7 @@ Skada:RegisterModule("Buffs", function(L, P)
 
 		function mod:CombatEnter(event, set)
 			if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped and not self.checked then
-				GroupIterator(CheckUnitBuffs)
+				GroupIterator(check_unit_buffs)
 				self.checked = true
 			end
 		end
@@ -475,7 +476,7 @@ Skada:RegisterModule("Buffs", function(L, P)
 		spellmod.nototal = true
 
 		Skada:RegisterForCL(
-			HandleBuff,
+			handle_buff,
 			"SPELL_AURA_APPLIED",
 			"SPELL_AURA_REMOVED",
 			"SPELL_AURA_REFRESH",
@@ -513,7 +514,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 	local queuedSpells = {[49005] = 50424}
 
 	local aura = {type = "DEBUFF"}
-	local function HandleDebuff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
+	local function handle_debuff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
 		if spellid and not ignoredSpells[spellid] and auratype == "DEBUFF" then
 			if srcName == nil and #srcGUID == 0 and dstName and #dstGUID > 0 then
 				srcGUID = dstGUID
@@ -694,12 +695,12 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 
 	function spellmod:Update(win, set)
 		win.title = L["actor debuffs"](win.actorname or L["Unknown"])
-		SpellUpdateFunction("DEBUFF", win, set, mod)
+		aura_update_func("DEBUFF", win, set, mod)
 	end
 
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Debuffs"], L[win.class]) or L["Debuffs"]
-		UpdateFunction("DEBUFF", win, set, self)
+		mod_update_func("DEBUFF", win, set, self)
 	end
 
 	local function aura_target_tooltip(win, id, label, tooltip)
@@ -757,7 +758,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 		targetmod.nototal = true
 
 		Skada:RegisterForCL(
-			HandleDebuff,
+			handle_debuff,
 			"SPELL_AURA_APPLIED",
 			"SPELL_AURA_REMOVED",
 			"SPELL_AURA_REFRESH",

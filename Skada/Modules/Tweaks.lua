@@ -39,12 +39,12 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 			SWING_DAMAGE = true
 		}
 
-		local WhoPulled
+		local who_pulled
 		do
 			local tconcat = table.concat
 			local UnitExists, UnitName = UnitExists, UnitName
 
-			function WhoPulled(hitline)
+			function who_pulled(hitline)
 				-- first hit
 				hitline = hitline or L["\124cffffbb00First Hit\124r: *?*"]
 
@@ -144,7 +144,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 
 				if output then
 					local spell = (eventtype == "SWING_DAMAGE") and GetSpellLink(6603) or GetSpellLink(spellid) or GetSpellInfo(spellid)
-					firsthit.hitline, firsthit.targetline = WhoPulled(format(L["\124cffffff00First Hit\124r: %s from %s"], spell or "", output))
+					firsthit.hitline, firsthit.targetline = who_pulled(format(L["\124cffffff00First Hit\124r: %s from %s"], spell or "", output))
 				end
 				firsthit.checked = true -- once only
 			end
@@ -156,7 +156,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 		function mod:PrintFirstHit()
 			if firsthit.hitline and not firsthittimer then
 				Skada:ScheduleTimer(function()
-					firsthit.hitline, firsthit.targetline = WhoPulled(firsthit.hitline)
+					firsthit.hitline, firsthit.targetline = who_pulled(firsthit.hitline)
 					Skada:Print(firsthit.hitline)
 					if firsthit.targetline then
 						Skada:Print(firsthit.targetline)
@@ -341,7 +341,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 		local CombatLogClearEntries, CombatLogGetNumEntries = CombatLogClearEntries, CombatLogGetNumEntries
 		local frame, playerspells
 
-		local function AggressiveOnUpdate(self, elapsed)
+		local function aggressive_OnUpdate(self, elapsed)
 			self.timeout = self.timeout + elapsed
 			if self.timeout >= 2 then
 				CombatLogClearEntries()
@@ -349,7 +349,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 			end
 		end
 
-		local function ConservativeOnUpdate(self, elapsed)
+		local function default_OnUpdate(self, elapsed)
 			self.timeout = (self.timeout or 0) - elapsed
 			if self.timeout > 0 then return end
 			self:Hide()
@@ -373,7 +373,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 			Skada:ScheduleTimer(CombatLogClearEntries, 0.1)
 		end
 
-		local function OnEvent(self, event, unit, spellname)
+		local function frame_OnEvent(self, event, unit, spellname)
 			if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 				self.lastEvent = unit -- timestamp
 			elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
@@ -402,7 +402,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 				if P.combatlogfixalt then
 					frame:UnregisterAllEvents()
 					frame.timeout = 0
-					frame:SetScript("OnUpdate", AggressiveOnUpdate)
+					frame:SetScript("OnUpdate", aggressive_OnUpdate)
 					frame:SetScript("OnEvent", nil)
 					frame:Show()
 				else
@@ -419,8 +419,8 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 					frame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 					frame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 					frame.timeout = 0
-					frame:SetScript("OnUpdate", ConservativeOnUpdate)
-					frame:SetScript("OnEvent", OnEvent)
+					frame:SetScript("OnUpdate", default_OnUpdate)
+					frame:SetScript("OnEvent", frame_OnEvent)
 					frame:Hide()
 				end
 
@@ -503,7 +503,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 	end
 
 	do
-		local function SetValue(i, val)
+		local function set_value(i, val)
 			P[i[#i]] = val
 			mod:ApplySettings()
 		end
@@ -537,21 +537,21 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 				type = "toggle",
 				name = L["First hit"],
 				desc = L["opt_tweaks_firsthit_desc"],
-				set = SetValue,
+				set = set_value,
 				order = 10
 			}
 			Skada.options.args.tweaks.args.general.args.moduleicons = {
 				type = "toggle",
 				name = L["Modes Icons"],
 				desc = L["Show modes icons on bars and menus."],
-				set = SetValue,
+				set = set_value,
 				order = 20
 			}
 			Skada.options.args.tweaks.args.general.args.spamage = {
 				type = "toggle",
 				name = L["Filter DPS meters Spam"],
 				desc = L["opt_tweaks_spamage_desc"],
-				set = SetValue,
+				set = set_value,
 				order = 30
 			}
 			Skada.options.args.tweaks.args.general.args.fofrostmourne = {
@@ -559,7 +559,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 				name = fofrostmourne,
 				desc = format(L["Enable this if you want to ignore \124cffffbb00%s\124r."], fofrostmourne),
 				hidden = Skada.Ascension,
-				set = SetValue,
+				set = set_value,
 				order = 40
 			}
 
@@ -567,7 +567,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 				type = "group",
 				name = L["Smart Stop"],
 				desc = format(L["Options for %s."], L["Smart Stop"]),
-				set = SetValue,
+				set = set_value,
 				order = 10,
 				args = {
 					smartdesc = {
@@ -602,7 +602,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 				type = "group",
 				name = L["Combat Log"],
 				desc = format(L["Options for %s."], L["Combat Log"]),
-				set = SetValue,
+				set = set_value,
 				order = 20,
 				args = {
 					desc = {

@@ -25,7 +25,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 
 	local data = {}
 
-	local function SunderApplied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, _, spellname)
+	local function sunder_applied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, _, spellname)
 		if spellname == sunder or spellname == devastate then
 			data.playerid = srcGUID
 			data.playername = srcName
@@ -62,7 +62,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 		end
 	end
 
-	local function SunderRemoved(timestamp, eventtype, _, _, _, dstGUID, dstName, _, _, spellname)
+	local function sunder_removed(timestamp, eventtype, _, _, _, dstGUID, dstName, _, _, spellname)
 		if spellname == sunder then
 			Skada:ScheduleTimer(function()
 				if mod.targets and mod.targets[dstGUID] then
@@ -77,13 +77,13 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 		end
 	end
 
-	local function TargetDied(timestamp, eventtype, _, _, _, dstGUID)
+	local function unit_died(timestamp, eventtype, _, _, _, dstGUID)
 		if P.modules.sunderannounce and dstGUID and mod.targets and mod.targets[dstGUID] then
 			mod.targets[dstGUID] = del(mod.targets[dstGUID])
 		end
 	end
 
-	local function DoubleCheckSunder()
+	local function double_check_sunder()
 		if not sunder then
 			sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
 			sunderLink = P.reportlinks and GetSpellLink(47467)
@@ -129,7 +129,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 	end
 
 	function targetmod:Update(win, set)
-		DoubleCheckSunder()
+		double_check_sunder()
 		win.title = format(L["%s's <%s> targets"], win.actorname or L["Unknown"], sunder)
 		if not set or not win.actorname then return end
 
@@ -163,7 +163,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 	end
 
 	function mod:Update(win, set)
-		DoubleCheckSunder()
+		double_check_sunder()
 
 		win.title = L["Sunder Counter"]
 		local total = set.sunder or 0
@@ -207,9 +207,9 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 		-- no total click.
 		targetmod.nototal = true
 
-		Skada:RegisterForCL(SunderApplied, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})
-		Skada:RegisterForCL(SunderRemoved, "SPELL_AURA_REMOVED", {src_is_interesting_nopets = true})
-		Skada:RegisterForCL(TargetDied, "UNIT_DIED", "UNIT_DESTROYED", "UNIT_DISSIPATES", {dst_is_not_interesting = true})
+		Skada:RegisterForCL(sunder_applied, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})
+		Skada:RegisterForCL(sunder_removed, "SPELL_AURA_REMOVED", {src_is_interesting_nopets = true})
+		Skada:RegisterForCL(unit_died, "UNIT_DIED", "UNIT_DESTROYED", "UNIT_DISSIPATES", {dst_is_not_interesting = true})
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self, L["Buffs and Debuffs"])
@@ -241,7 +241,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 	end
 
 	function mod:OnInitialize()
-		DoubleCheckSunder()
+		double_check_sunder()
 
 		if P.modules.sunderchannel == nil then
 			P.modules.sunderchannel = "SAY"

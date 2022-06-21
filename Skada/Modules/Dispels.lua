@@ -45,7 +45,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 
 	local data = {}
 
-	local function SpellDispel(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_dispel(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		data.spellid, _, _, data.extraspellid = ...
 		data.extraspellid = data.extraspellid or 6603
 
@@ -215,12 +215,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 		targetmod.nototal = true
 		playermod.nototal = true
 
-		Skada:RegisterForCL(
-			SpellDispel,
-			"SPELL_DISPEL",
-			"SPELL_STOLEN",
-			{src_is_interesting = true}
-		)
+		Skada:RegisterForCL(spell_dispel, "SPELL_DISPEL", "SPELL_STOLEN", {src_is_interesting = true})
 
 		Skada:AddMode(self)
 

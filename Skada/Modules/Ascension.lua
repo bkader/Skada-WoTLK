@@ -15,7 +15,7 @@ Skada:RegisterModule("Project Ascension", function(L, _, G)
 	-- a table to hold temporary data.
 	local tempData = {}
 
-	local function CheckAscension(data)
+	local function check_ascension_data(data)
 		return (type(data) == "table" and type(data[5]) == "string")
 	end
 
@@ -40,7 +40,7 @@ Skada:RegisterModule("Project Ascension", function(L, _, G)
 	end
 
 	function mod:OnCommAscension(event, sender, guid, data)
-		if sender and guid and guid ~= Skada.userGUID and data and CheckAscension(data) then
+		if sender and guid and guid ~= Skada.userGUID and data and check_ascension_data(data) then
 			self.db.others[guid] = self.db.others[guid] or {}
 			for i = 1, #data do
 				self.db.others[guid][i] = data[i]
@@ -51,7 +51,7 @@ Skada:RegisterModule("Project Ascension", function(L, _, G)
 	---------------------------------------------------------------------------
 	-- functions that override displays
 
-	local function Ascension_BarDisplay(self, win)
+	local function ascension_bar_display(self, win)
 		if win and win.bargroup then
 			if not mod.db then
 				mod:SetCacheTable()
@@ -88,7 +88,7 @@ Skada:RegisterModule("Project Ascension", function(L, _, G)
 		end
 	end
 
-	local function Ascension_OthereDisplay(self, win)
+	local function ascension_other_display(self, win)
 		if win and win.frame then
 			if not mod.db then
 				mod:SetCacheTable()
@@ -132,17 +132,17 @@ Skada:RegisterModule("Project Ascension", function(L, _, G)
 		local display = Skada:GetModule("Bar Display", true)
 		if display then
 			display.Orig_Update = display.Update
-			display.Update = Ascension_BarDisplay
+			display.Update = ascension_bar_display
 		end
 		display = Skada:GetModule("Inline Bar Display", true)
 		if display then
 			display.Orig_Update = display.Update
-			display.Update = Ascension_OthereDisplay
+			display.Update = ascension_other_display
 		end
 		display = Skada:GetModule("Data Text", true)
 		if display then
 			display.Orig_Update = display.Update
-			display.Update = Ascension_OthereDisplay
+			display.Update = ascension_other_display
 		end
 	end
 
@@ -288,7 +288,7 @@ Skada:RegisterModule("Project Ascension", function(L, _, G)
 	-- cache table functions
 
 	do
-		local function CheckForReset()
+		local function check_for_reset()
 			if not mod.db.reset then
 				mod.db.reset = time() + (60 * 60 * 24 * 15)
 				mod.db.others = {}
@@ -323,7 +323,7 @@ Skada:RegisterModule("Project Ascension", function(L, _, G)
 				self.db = G.ascension
 			end
 
-			CheckForReset()
+			check_for_reset()
 		end
 
 		function mod:Reset(event)

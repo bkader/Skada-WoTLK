@@ -42,7 +42,7 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 
 	local data = {}
 
-	local function SpellMissed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, _, _, _, misstype)
+	local function spell_missed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, _, _, _, misstype)
 		if parrybosses[dstName] and srcGUID ~= dstGUID and misstype == "PARRY" then
 			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 
@@ -55,8 +55,8 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 		end
 	end
 
-	local function SwingMissed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		SpellMissed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, nil, nil, nil, ...)
+	local function swing_missed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		spell_missed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, nil, nil, nil, ...)
 	end
 
 	function targetmod:Enter(win, id, label)
@@ -140,8 +140,8 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 		-- no total click.
 		targetmod.nototal = true
 
-		Skada:RegisterForCL(SpellMissed, "SPELL_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(SwingMissed, "SWING_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(spell_missed, "SPELL_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(swing_missed, "SWING_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
 
 		Skada:AddMode(self)
 	end

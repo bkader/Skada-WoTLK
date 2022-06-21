@@ -141,7 +141,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, new, del)
 			end
 		end
 
-		local function getTPS(threatvalue)
+		local function get_tps(threatvalue)
 			return Skada.current and format_threatvalue(threatvalue / Skada.current:GetTime()) or "0"
 		end
 
@@ -187,7 +187,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, new, del)
 						if self.db.showAggroBar and tankThreat and tankThreat > 0 then
 							data.valuetext = Skada:FormatValueCols(
 								self.metadata.columns.Threat and format_threatvalue(data.threat),
-								self.metadata.columns.TPS and getTPS(data.threat),
+								self.metadata.columns.TPS and get_tps(data.threat),
 								self.metadata.columns.Percent and Skada:FormatPercent(data.value, max(0.000001, maxthreat))
 							)
 
@@ -210,7 +210,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, new, del)
 
 							data.valuetext = Skada:FormatValueCols(
 								self.metadata.columns.Threat and format_threatvalue(data.threat),
-								self.metadata.columns.TPS and getTPS(data.threat),
+								self.metadata.columns.TPS and get_tps(data.threat),
 								self.metadata.columns.Percent and Skada:FormatPercent(percent)
 							)
 						else

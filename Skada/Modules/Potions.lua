@@ -30,7 +30,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 		end
 	end
 
-	local function PotionUsed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function potion_used(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid = ...
 		if spellid and potionIDs[spellid] then
 			Skada:DispatchSets(log_potion, srcGUID, srcName, srcFlags, spellid)
@@ -38,7 +38,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 	end
 
 	do
-		local function CheckUnitPotions(unit, owner, prepot)
+		local function check_unit_potions(unit, owner, prepot)
 			if owner == nil and not UnitIsDeadOrGhost(unit) then
 				local playerid, playername = UnitGUID(unit), UnitName(unit)
 				local _, class = UnitClass(unit)
@@ -49,7 +49,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 					if spellid then
 						if potionIDs[spellid] then
 							-- instant recording doesn't work, so we delay it
-							Skada:ScheduleTimer(function() PotionUsed(nil, nil, playerid, playername, nil, nil, nil, nil, spellid) end, 1)
+							Skada:ScheduleTimer(function() potion_used(nil, nil, playerid, playername, nil, nil, nil, nil, spellid) end, 1)
 							potions[#potions + 1] = format(potionStr, icon)
 						end
 					else
@@ -69,7 +69,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 		function mod:CombatEnter()
 			if P.prepotion and not self.checked then
 				prepotion = prepotion or T.get("Potions_PrePotions")
-				GroupIterator(CheckUnitPotions, prepotion)
+				GroupIterator(check_unit_potions, prepotion)
 				self.checked = true
 			end
 		end
@@ -127,7 +127,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 		win.title = format(L["%s's used potions"], label)
 	end
 
-	local function RequestPotion(potionid)
+	local function request_potion(potionid)
 		if potionid and potionid ~= nil and potionid ~= "" and potionid ~= 0 and strsub(potionid, 1, 1) ~= "s" then
 			GameTooltip:SetHyperlink("item:" .. potionid .. ":0:0:0:0:0:0:0")
 			GameTooltip:Hide()
@@ -149,7 +149,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 				for potionid, count in pairs(player.potionspells) do
 					local potionname, potionlink, _, _, _, _, _, _, _, potionicon = GetItemInfo(potionid)
 					if not potionname then
-						RequestPotion(potionid)
+						request_potion(potionid)
 					end
 
 					if potionname then
@@ -368,7 +368,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 		-- no total click.
 		playermod.nototal = true
 
-		Skada:RegisterForCL(PotionUsed, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})
+		Skada:RegisterForCL(potion_used, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})
 		Skada.RegisterCallback(self, "Skada_ApplySettings", "ApplySettings")
 		Skada:AddMode(self)
 	end

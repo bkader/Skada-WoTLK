@@ -48,12 +48,12 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 		["25h"] = true, -- 25man Heroic
 	}
 
-	local function GetRaidDiff()
+	local function get_instance_diff()
 		instanceDiff = instanceDiff or Skada:GetInstanceDiff() or "NaN"
 		return instanceDiff
 	end
 
-	local function CustomUnitsMaxValue(id, guid, unit)
+	local function custom_units_max_value(id, guid, unit)
 		if id and customUnitsInfo and customUnitsInfo[id] then
 			return customUnitsInfo[id]
 		end
@@ -75,7 +75,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 		end
 
 		if not maxval and unit.values then
-			maxval = unit.values[GetRaidDiff()]
+			maxval = unit.values[get_instance_diff()]
 		end
 
 		if maxval and maxval > 0 then
@@ -86,7 +86,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 		return maxval
 	end
 
-	local function IsCustomUnit(guid, name, amount, overkill)
+	local function is_custom_unit(guid, name, amount, overkill)
 		if guid and customUnitsTable and customUnitsTable[guid] then
 			return (customUnitsTable[guid] ~= -1)
 		end
@@ -96,13 +96,13 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 		if unit then
 			customUnitsTable = customUnitsTable or T.get("Enemies_UnitsTable")
 
-			if unit.diff ~= nil and ((type(unit.diff) == "table" and not tContains(unit.diff, GetRaidDiff())) or (type(unit.diff) == "string" and GetRaidDiff() ~= unit.diff)) then
+			if unit.diff ~= nil and ((type(unit.diff) == "table" and not tContains(unit.diff, get_instance_diff())) or (type(unit.diff) == "string" and get_instance_diff() ~= unit.diff)) then
 				customUnitsTable[guid] = -1
 				return false
 			end
 
 			-- get the unit max value.
-			local maxval = CustomUnitsMaxValue(id, guid, unit)
+			local maxval = custom_units_max_value(id, guid, unit)
 			if not maxval or maxval == 0 then
 				customUnitsTable[guid] = -1
 				return false
@@ -189,7 +189,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 
 	local function log_custom_group(set, id, name, playername, spellid, spellschool, amount, overkill, absorbed)
 		if not (name and customGroups[name]) then return end -- not a custom group.
-		if customGroups[name] == L["Halion and Inferno"] and GetRaidDiff() ~= "25h" then return end -- rs25hm only
+		if customGroups[name] == L["Halion and Inferno"] and get_instance_diff() ~= "25h" then return end -- rs25hm only
 		if customGroupsTable and customGroupsTable[id] then return end -- a custom unit with useful damage.
 
 		amount = (customGroups[name] == L["Princes overkilling"]) and overkill or amount
@@ -258,9 +258,9 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 				end
 
 				-- the rest of the code is only for allowed instance diffs.
-				if not allowed_diffs[GetRaidDiff()] then return end
+				if not allowed_diffs[get_instance_diff()] then return end
 
-				if IsCustomUnit(dmg.enemyid, dmg.enemyname, dmg.amount, overkill) then
+				if is_custom_unit(dmg.enemyid, dmg.enemyname, dmg.amount, overkill) then
 					local unit = customUnitsTable[dmg.enemyid]
 					-- started with less than max?
 					if unit.full then
@@ -326,7 +326,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 
 	local dmg = {}
 
-	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_damage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcName and dstName then
 			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 
@@ -351,7 +351,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 		end
 	end
 
-	local function SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_missed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcName and dstName then
 			local spellid, spellschool, misstype, amount
 
@@ -701,7 +701,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 		local flags_src_dst = {src_is_interesting = true, dst_is_not_interesting = true}
 
 		Skada:RegisterForCL(
-			SpellDamage,
+			spell_damage,
 			"DAMAGE_SHIELD",
 			"DAMAGE_SPLIT",
 			"RANGE_DAMAGE",
@@ -712,7 +712,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 		)
 
 		Skada:RegisterForCL(
-			SpellMissed,
+			spell_missed,
 			"DAMAGE_SHIELD_MISSED",
 			"RANGE_MISSED",
 			"SPELL_BUILDING_MISSED",
@@ -994,7 +994,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 
 	local dmg = {}
 
-	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_damage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcName and dstName then
 			if eventtype == "SWING_DAMAGE" then
 				dmg.spellid, dmg.spellschool = 6603, 0x01
@@ -1017,7 +1017,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 		end
 	end
 
-	local function SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_missed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcName and dstName then
 			local spellid, spellschool, misstype, amount
 
@@ -1273,7 +1273,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 		local flags_dst_src = {dst_is_interesting_nopets = true, src_is_not_interesting = true}
 
 		Skada:RegisterForCL(
-			SpellDamage,
+			spell_damage,
 			"DAMAGE_SHIELD",
 			"DAMAGE_SPLIT",
 			"RANGE_DAMAGE",
@@ -1284,7 +1284,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 		)
 
 		Skada:RegisterForCL(
-			SpellMissed,
+			spell_missed,
 			"DAMAGE_SHIELD_MISSED",
 			"RANGE_MISSED",
 			"SPELL_BUILDING_MISSED",
@@ -1445,7 +1445,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 
 	local heal = {}
 
-	local function SpellHeal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_heal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, _, spellschool, amount, overheal = ...
 		if spellid and not ignoredSpells[spellid] then
 			heal.enemyid = srcGUID
@@ -1589,7 +1589,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		targetmod.nototal = true
 
 		Skada:RegisterForCL(
-			SpellHeal,
+			spell_heal,
 			"SPELL_HEAL",
 			"SPELL_PERIODIC_HEAL",
 			{src_is_not_interesting = true, dst_is_not_interesting = true}

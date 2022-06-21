@@ -45,7 +45,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 
 	local data = {}
 
-	local function SpellInterrupt(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_interrupt(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, spellname, _, extraspellid, extraspellname, _ = ...
 
 		spellid = spellid or 6603
@@ -237,7 +237,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 		targetmod.nototal = true
 		playermod.nototal = true
 
-		Skada:RegisterForCL(SpellInterrupt, "SPELL_INTERRUPT", {src_is_interesting = true})
+		Skada:RegisterForCL(spell_interrupt, "SPELL_INTERRUPT", {src_is_interesting = true})
 		Skada:AddMode(self)
 
 		-- table of ignored spells:

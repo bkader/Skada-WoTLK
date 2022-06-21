@@ -23,7 +23,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 	local RED_FONT_COLOR = RED_FONT_COLOR
 	local YELLOW_FONT_COLOR = YELLOW_FONT_COLOR
 
-	local function GetColor(key)
+	local function get_color(key)
 		if P.usecustomcolors and P.customcolors and P.customcolors["deathlog_" .. key] then
 			return P.customcolors["deathlog_" .. key]
 		elseif key == "orange" then
@@ -101,7 +101,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 
 	local data = {}
 
-	local function SpellDamage(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_damage(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if event == "SWING_DAMAGE" then
 			data.spellid, data.spellschool = 6603, 0x01
 			data.amount, data.overkill, _, data.resisted, data.blocked, data.absorbed = ...
@@ -123,7 +123,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 	end
 
 	local missTypes = {RESIST = true, BLOCK = true, ABSORB = true}
-	local function SpellMissed(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_missed(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local misstype, amount
 
 		if event == "SWING_MISSED" then
@@ -161,7 +161,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		end
 	end
 
-	local function EnvironmentDamage(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function environment_damage(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local envtype, amount = ...
 		local spellid, spellschool = nil, 0x01
 
@@ -180,11 +180,11 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		end
 
 		if spellid then
-			SpellDamage(nil, event, nil, L["Environment"], nil, dstGUID, dstName, dstFlags, spellid, nil, spellschool, amount)
+			spell_damage(nil, event, nil, L["Environment"], nil, dstGUID, dstName, dstFlags, spellid, nil, spellschool, amount)
 		end
 	end
 
-	local function SpellHeal(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_heal(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, _, _, amount, overheal = ...
 
 		if amount > (P.modules.deathlogthreshold or 0) then
@@ -255,15 +255,15 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		end
 	end
 
-	local function UnitDied(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags)
+	local function unit_died(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags)
 		if not UnitIsFeignDeath(dstName) then
 			Skada:DispatchSets(log_death, dstGUID, dstName, dstFlags)
 		end
 	end
 
-	local function AuraApplied(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
+	local function aura_applied(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
 		if spellid == 27827 then -- Spirit of Redemption (Holy Priest)
-			Skada:ScheduleTimer(function() UnitDied(nil, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags) end, 0.01)
+			Skada:ScheduleTimer(function() unit_died(nil, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags) end, 0.01)
 		end
 	end
 
@@ -291,7 +291,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		[47882] = true
 	}
 
-	local function SpellResurrect(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
+	local function spell_resurrect(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
 		if spellid and (event == "SPELL_RESURRECT" or resurrectSpells[spellid]) then
 			data.spellid = spellid
 
@@ -416,16 +416,16 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 							d.resisted, d.blocked, d.absorbed = nil, nil, nil
 							d.valuetext = d.source
 						else
-							local change, color = d.amount, GetColor("red")
+							local change, color = d.amount, get_color("red")
 							if change > 0 then
 								change = "+" .. Skada:FormatNumber(change)
-								color = GetColor("green")
+								color = get_color("green")
 							elseif change == 0 and (log.resisted or log.blocked or log.absorbed) then
 								change = "+" .. Skada:FormatNumber(log.resisted or log.blocked or log.absorbed)
-								color = GetColor("orange")
+								color = get_color("orange")
 							elseif log.overheal then
 								change = "+" .. Skada:FormatNumber(log.overheal)
-								color = GetColor("yellow")
+								color = get_color("yellow")
 							else
 								change = Skada:FormatNumber(change)
 							end
@@ -563,7 +563,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 	end
 
 	-- default Deaths module:
-	local function Def_Update(self, win, set)
+	local function mod_update(self, win, set)
 		win.title = win.class and format("%s (%s)", L["Deaths"], L[win.class]) or L["Deaths"]
 
 		if set.death or WATCH then
@@ -600,7 +600,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 	end
 
 	-- alternative Deaths module:
-	local function Alt_Update(self, win, set)
+	local function alt_update(self, win, set)
 		win.title = win.class and format("%s (%s)", L["Deaths"], L[win.class]) or L["Deaths"]
 		if set.death or WATCH then
 			if win.metadata then
@@ -648,9 +648,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 
 	function mod:Update(win, set)
 		if P.modules.alternativedeaths and (set ~= Skada.total or P.totalidc) then
-			Alt_Update(self, win, set)
+			alt_update(self, win, set)
 		else
-			Def_Update(self, win, set)
+			mod_update(self, win, set)
 		end
 	end
 
@@ -671,29 +671,29 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			local c = nil
 
 			if entry.amount and entry.amount ~= 0 then
-				c = GetColor(entry.amount < 0 and "red" or "green")
+				c = get_color(entry.amount < 0 and "red" or "green")
 				tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(entry.amount), 1, 1, 1, c.r, c.g, c.b)
 			end
 
 			if entry.overkill and entry.overkill > 0 then
 				tooltip:AddDoubleLine(L["Overkill"], Skada:FormatNumber(entry.overkill), 1, 1, 1, 0.77, 0.64, 0)
 			elseif entry.overheal and entry.overheal > 0 then
-				c = GetColor("yellow")
+				c = get_color("yellow")
 				tooltip:AddDoubleLine(L["Overheal"], Skada:FormatNumber(entry.overheal), 1, 1, 1, c.r, c.g, c.b)
 			end
 
 			if entry.resisted and entry.resisted > 0 then
-				c = GetColor("orange")
+				c = get_color("orange")
 				tooltip:AddDoubleLine(L["RESIST"], Skada:FormatNumber(entry.resisted), 1, 1, 1, c.r, c.g, c.b)
 			end
 
 			if entry.blocked and entry.blocked > 0 then
-				c = GetColor("orange")
+				c = get_color("orange")
 				tooltip:AddDoubleLine(L["BLOCK"], Skada:FormatNumber(entry.blocked), 1, 1, 1, c.r, c.g, c.b)
 			end
 
 			if entry.absorbed and entry.absorbed > 0 then
-				c = GetColor("orange")
+				c = get_color("orange")
 				tooltip:AddDoubleLine(L["ABSORB"], Skada:FormatNumber(entry.absorbed), 1, 1, 1, c.r, c.g, c.b)
 			end
 		end
@@ -728,13 +728,13 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		local flags_dst_nopets = {dst_is_interesting_nopets = true}
 
 		Skada:RegisterForCL(
-			AuraApplied,
+			aura_applied,
 			"SPELL_AURA_APPLIED",
 			flags_dst_nopets
 		)
 
 		Skada:RegisterForCL(
-			SpellDamage,
+			spell_damage,
 			"DAMAGE_SHIELD",
 			"DAMAGE_SPLIT",
 			"RANGE_DAMAGE",
@@ -746,7 +746,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		)
 
 		Skada:RegisterForCL(
-			SpellMissed,
+			spell_missed,
 			"DAMAGE_SHIELD_MISSED",
 			"RANGE_MISSED",
 			"SPELL_BUILDING_MISSED",
@@ -757,20 +757,20 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		)
 
 		Skada:RegisterForCL(
-			EnvironmentDamage,
+			environment_damage,
 			"ENVIRONMENTAL_DAMAGE",
 			flags_dst_nopets
 		)
 
 		Skada:RegisterForCL(
-			SpellHeal,
+			spell_heal,
 			"SPELL_HEAL",
 			"SPELL_PERIODIC_HEAL",
 			flags_dst_nopets
 		)
 
 		Skada:RegisterForCL(
-			UnitDied,
+			unit_died,
 			"UNIT_DIED",
 			"UNIT_DESTROYED",
 			"UNIT_DISSIPATES",
@@ -778,13 +778,13 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		)
 
 		Skada:RegisterForCL(
-			SpellResurrect,
+			spell_resurrect,
 			"SPELL_RESURRECT",
 			flags_dst_nopets
 		)
 
 		Skada:RegisterForCL(
-			SpellResurrect,
+			spell_resurrect,
 			"SPELL_CAST_SUCCESS",
 			{src_is_interesting = true, dst_is_not_interesting = true}
 		)
@@ -888,7 +888,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 
 	do
 		local options
-		local function GetOptions()
+		local function get_options()
 			if not options then
 				options = {
 					type = "group",
@@ -975,12 +975,12 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 							set = function(_, value)
 								if P.modules.alternativedeaths then
 									P.modules.alternativedeaths = nil
-									mod.Update = Def_Update
+									mod.Update = mod_update
 									mod.metadata.click1 = playermod
 									playermod.metadata.click1 = deathlogmod
 								else
 									P.modules.alternativedeaths = true
-									mod.Update = Alt_Update
+									mod.Update = alt_update
 									mod.metadata.click1 = deathlogmod
 									playermod.metadata.click1 = nil
 								end
@@ -1009,7 +1009,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 				P.modules.deathchannel = "AUTO"
 			end
 
-			Skada.options.args.modules.args.deathlog = GetOptions()
+			Skada.options.args.modules.args.deathlog = get_options()
 
 			-- add colors to tweaks
 			Skada.options.args.tweaks.args.advanced.args.colors.args.deathlog = {
@@ -1019,7 +1019,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 				hidden = Skada.options.args.tweaks.args.advanced.args.colors.args.custom.disabled,
 				disabled = Skada.options.args.tweaks.args.advanced.args.colors.args.custom.disabled,
 				get = function(i)
-					local color = GetColor(i[#i])
+					local color = get_color(i[#i])
 					return color.r, color.g, color.b
 				end,
 				set = function(i, r, g, b)

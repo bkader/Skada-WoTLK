@@ -26,7 +26,7 @@ Skada:RegisterModule("Fails", function(L, P)
 		end
 	end
 
-	local function onFail(event, who, failtype)
+	local function on_fail(event, who, failtype)
 		if who and event then
 			local spellid = LibFail:GetEventSpellId(event)
 			if spellid and not ignoredSpells[spellid] then
@@ -182,7 +182,7 @@ Skada:RegisterModule("Fails", function(L, P)
 
 	do
 		local options  -- holds the options table
-		local function GetOptions()
+		local function get_options()
 			if not options then
 				options = {
 					type = "group",
@@ -230,7 +230,7 @@ Skada:RegisterModule("Fails", function(L, P)
 		function mod:OnInitialize()
 			local events = LibFail:GetSupportedEvents()
 			for i = 1, #events do
-				LibFail:RegisterCallback(events[i], onFail)
+				LibFail:RegisterCallback(events[i], on_fail)
 			end
 
 			if P.modules.failschannel == nil then
@@ -240,7 +240,7 @@ Skada:RegisterModule("Fails", function(L, P)
 				P.modules.ignoredfails = nil
 			end
 
-			Skada.options.args.modules.args.failbot = GetOptions()
+			Skada.options.args.modules.args.failbot = get_options()
 		end
 	end
 

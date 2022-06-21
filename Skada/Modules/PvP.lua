@@ -10,7 +10,7 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 	local specsCache, specsRoles = nil, nil
 	local spellsTable, aurasTable = nil, nil
 
-	local function BuildSpellsList()
+	local function build_spell_list()
 		if not specsRoles then
 			specsRoles = {
 				[105] = "HEALER", -- Druid: Restoration
@@ -201,7 +201,7 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 		specsCache = wipe(specsCache or {})
 
 		if current == "arena" or current == "pvp" then
-			BuildSpellsList()
+			build_spell_list()
 			Skada.RegisterEvent(self, "UNIT_AURA")
 			Skada.RegisterEvent(self, "UNIT_SPELLCAST_START")
 			Skada.RegisterCallback(self, "Skada_GetEnemy", "GetEnemy")

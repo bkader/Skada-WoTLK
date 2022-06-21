@@ -43,7 +43,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 
 	local dmg = {}
 
-	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_damage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
 			local amount, absorbed
 
@@ -238,7 +238,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 		targetmod.nototal = true
 
 		Skada:RegisterForCL(
-			SpellDamage,
+			spell_damage,
 			"DAMAGE_SHIELD",
 			"DAMAGE_SPLIT",
 			"RANGE_DAMAGE",

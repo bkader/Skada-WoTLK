@@ -193,7 +193,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 	local dmg = {}
 	local extraATT
 
-	local function SpellCast(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_cast(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID and dstGUID then
 			local spellid, spellname, spellschool = ...
 			if spellid and spellname and not ignoredSpells[spellid] then
@@ -203,7 +203,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 		end
 	end
 
-	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_damage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
 			-- handle extra attacks
 			if eventtype == "SPELL_EXTRA_ATTACKS" then
@@ -263,7 +263,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 		end
 	end
 
-	local function SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_missed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
 			local amount
 
@@ -752,14 +752,14 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 		local flags_src_dst = {src_is_interesting = true, dst_is_not_interesting = true}
 
 		Skada:RegisterForCL(
-			SpellCast,
+			spell_cast,
 			"SPELL_CAST_START",
 			"SPELL_CAST_SUCCESS",
 			flags_src_dst
 		)
 
 		Skada:RegisterForCL(
-			SpellDamage,
+			spell_damage,
 			"DAMAGE_SHIELD",
 			"DAMAGE_SPLIT",
 			"RANGE_DAMAGE",
@@ -772,7 +772,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 		)
 
 		Skada:RegisterForCL(
-			SpellMissed,
+			spell_missed,
 			"DAMAGE_SHIELD_MISSED",
 			"RANGE_MISSED",
 			"SPELL_BUILDING_MISSED",

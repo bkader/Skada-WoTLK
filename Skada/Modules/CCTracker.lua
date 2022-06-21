@@ -185,7 +185,7 @@ local ExtraCCSpells = {
 	[67890] = 0x04 -- Cobalt Frag Bomb
 }
 
-local function GetSpellSchool(spellid)
+local function get_spell_school(spellid)
 	if CCSpells[spellid] and CCSpells[spellid] ~= true then
 		return CCSpells[spellid]
 	end
@@ -232,7 +232,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 
 	local data = {}
 
-	local function AuraApplied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function aura_applied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid = ...
 
 		if CCSpells[spellid] or ExtraCCSpells[spellid] then
@@ -268,7 +268,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 			local nr = 0
 			for spellid, spell in pairs(player.ccdonespells) do
 				nr = nr + 1
-				local d = win:spell(nr, spellid, nil, GetSpellSchool(spellid))
+				local d = win:spell(nr, spellid, nil, get_spell_school(spellid))
 
 				d.value = spell.count
 				d.valuetext = Skada:FormatValueCols(
@@ -400,7 +400,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 		targetmod.nototal = true
 
 		Skada:RegisterForCL(
-			AuraApplied,
+			aura_applied,
 			"SPELL_AURA_APPLIED",
 			"SPELL_AURA_REFRESH",
 			{src_is_interesting = true}
@@ -522,7 +522,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 
 	local data = {}
 
-	local function AuraApplied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function aura_applied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid = ...
 
 		if CCSpells[spellid] or ExtraCCSpells[spellid] or RaidCCSpells[spellid] then
@@ -559,7 +559,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 			local nr = 0
 			for spellid, spell in pairs(player.cctakenspells) do
 				nr = nr + 1
-				local d = win:spell(nr, spellid, nil, GetSpellSchool(spellid) or RaidCCSpells[spellid])
+				local d = win:spell(nr, spellid, nil, get_spell_school(spellid) or RaidCCSpells[spellid])
 
 				d.value = spell.count
 				d.valuetext = Skada:FormatValueCols(
@@ -691,7 +691,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 		targetmod.nototal = true
 
 		Skada:RegisterForCL(
-			AuraApplied,
+			aura_applied,
 			"SPELL_AURA_APPLIED",
 			"SPELL_AURA_REFRESH",
 			{dst_is_interesting = true}
@@ -803,7 +803,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 
 	local data = {}
 
-	local function AuraBroken(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function aura_broken(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, spellname, _, extraspellid, extraspellname, _, auratype = ...
 		if not CCSpells[spellid] then return end
 
@@ -871,7 +871,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 			local nr = 0
 			for spellid, spell in pairs(player.ccbreakspells) do
 				nr = nr + 1
-				local d = win:spell(nr, spellid, nil, GetSpellSchool(spellid))
+				local d = win:spell(nr, spellid, nil, get_spell_school(spellid))
 
 				d.value = spell.count
 				d.valuetext = Skada:FormatValueCols(
@@ -968,7 +968,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 		targetmod.nototal = true
 
 		Skada:RegisterForCL(
-			AuraBroken,
+			aura_broken,
 			"SPELL_AURA_BROKEN",
 			"SPELL_AURA_BROKEN_SPELL",
 			{src_is_interesting = true}

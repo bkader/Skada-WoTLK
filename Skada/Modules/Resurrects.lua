@@ -60,7 +60,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 
 	local data = {}
 
-	local function SpellResurrect(_, event, srcGUID, srcName, srcFlags, _, dstName, _, spellid)
+	local function spell_resurrect(_, event, srcGUID, srcName, srcFlags, _, dstName, _, spellid)
 		if spellid and (event == "SPELL_RESURRECT" or resurrectSpells[spellid]) then
 			data.spellid = spellid
 
@@ -197,17 +197,8 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 		playermod.nototal = true
 		targetmod.nototal = true
 
-		Skada:RegisterForCL(
-			SpellResurrect,
-			"SPELL_RESURRECT",
-			{src_is_interesting = true, dst_is_interesting = true}
-		)
-
-		Skada:RegisterForCL(
-			SpellResurrect,
-			"SPELL_CAST_SUCCESS",
-			{src_is_interesting = true, dst_is_not_interesting = true}
-		)
+		Skada:RegisterForCL(spell_resurrect, "SPELL_RESURRECT", {src_is_interesting = true, dst_is_interesting = true})
+		Skada:RegisterForCL(spell_resurrect, "SPELL_CAST_SUCCESS", {src_is_interesting = true, dst_is_not_interesting = true})
 
 		Skada:AddMode(self)
 	end

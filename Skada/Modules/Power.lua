@@ -61,7 +61,7 @@ Skada:RegisterModule("Resources", function(L, P)
 
 	local gain = {}
 
-	local function SpellEnergize(timestamp, eventtype, srcGUID, srcName, srcFlags, _, _, _, ...)
+	local function spell_energize(timestamp, eventtype, srcGUID, srcName, srcFlags, _, _, _, ...)
 		gain.spellid, _, _, gain.amount, gain.type = ...
 		if gain.spellid and not ignoredSpells[gain.spellid] then
 			gain.playerid = srcGUID
@@ -203,7 +203,7 @@ Skada:RegisterModule("Resources", function(L, P)
 		self.metadata = {columns = {Amount = true, Percent = true, sPercent = true}}
 		Skada:AddColumnOptions(self)
 
-		Skada:RegisterForCL(SpellEnergize, "SPELL_ENERGIZE", "SPELL_PERIODIC_ENERGIZE", {src_is_interesting = true})
+		Skada:RegisterForCL(spell_energize, "SPELL_ENERGIZE", "SPELL_PERIODIC_ENERGIZE", {src_is_interesting = true})
 
 		manamod.metadata.icon = [[Interface\Icons\spell_frost_summonwaterelemental]]
 		ragemod.metadata.icon = [[Interface\Icons\spell_nature_shamanrage]]

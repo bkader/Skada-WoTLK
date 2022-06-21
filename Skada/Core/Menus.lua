@@ -23,7 +23,7 @@ local iconName = "\124T%s:19:19:0:-1:32:32:2:30:2:30\124t %s"
 local windows, modes, sets = nil, nil, nil
 
 -- guesses the dropdown location
-local function getDropdownPoint()
+local function get_dropdown_point()
 	local x, y = GetCursorPosition(UIParent)
 	x = x / UIParent:GetEffectiveScale()
 	y = y / UIParent:GetEffectiveScale()
@@ -33,7 +33,7 @@ local function getDropdownPoint()
 	return point, x, y
 end
 
-local function setInfoText(set, i, num)
+local function set_info_text(set, i, num)
 	if set.type == "pvp" or set.type == "arena" then
 		if i and num then
 			return format("\124cffc0c0c0%02.f.\124r \124cffffd100%s\124r", num - i + 1, Skada:GetSetLabel(set, true))
@@ -391,7 +391,7 @@ function Skada:OpenMenu(window)
 					for i = 1, num do
 						local set = sets[i]
 						wipe(info)
-						info.text = setInfoText(set, i, num)
+						info.text = set_info_text(set, i, num)
 						info.func = function()
 							self.win:set_selected_set(i)
 							Skada:UpdateDisplay()
@@ -406,7 +406,7 @@ function Skada:OpenMenu(window)
 				for i = 1, num do
 					local set = sets[i]
 					wipe(info)
-					info.text = setInfoText(set, i, num)
+					info.text = set_info_text(set, i, num)
 					info.func = function()
 						Skada:DeleteSet(set, i)
 					end
@@ -423,7 +423,7 @@ function Skada:OpenMenu(window)
 					end
 
 					wipe(info)
-					info.text = setInfoText(set, i, num)
+					info.text = set_info_text(set, i, num)
 					info.func = function()
 						set.keep = (set.keep ~= true) and true or nil
 					end
@@ -595,7 +595,7 @@ function Skada:OpenMenu(window)
 	end
 
 	local x, y
-	self.skadamenu.point, x, y = getDropdownPoint()
+	self.skadamenu.point, x, y = get_dropdown_point()
 	ToggleDropDownMenu(1, nil, self.skadamenu, "UIParent", x, y)
 end
 
@@ -646,7 +646,7 @@ function Skada:SegmentMenu(window)
 					nr = nr + 1
 					local set = sets[i]
 					wipe(info)
-					info.text = setInfoText(set, i, numsets)
+					info.text = set_info_text(set, i, numsets)
 					info.func = function()
 						self.win:set_selected_set(i)
 						Skada:UpdateDisplay()
@@ -687,7 +687,7 @@ function Skada:SegmentMenu(window)
 				for i = start, stop do
 					local set = sets[i]
 					wipe(info)
-					info.text = setInfoText(set, i, numsets)
+					info.text = set_info_text(set, i, numsets)
 					info.func = function()
 						self.win:set_selected_set(i)
 						Skada:UpdateDisplay()
@@ -700,7 +700,7 @@ function Skada:SegmentMenu(window)
 	end
 
 	local x, y
-	self.segmentsmenu.point, x, y = getDropdownPoint()
+	self.segmentsmenu.point, x, y = get_dropdown_point()
 	ToggleDropDownMenu(1, nil, self.segmentsmenu, "UIParent", x, y)
 end
 
@@ -795,7 +795,7 @@ do
 		end
 
 		local x, y
-		self.modesmenu.point, x, y = getDropdownPoint()
+		self.modesmenu.point, x, y = get_dropdown_point()
 		ToggleDropDownMenu(1, nil, self.modesmenu, "UIParent", x, y)
 	end
 end
@@ -805,7 +805,7 @@ do
 	local UnitExists, UnitName = UnitExists, UnitName
 
 	-- handles reporting
-	local function DoReport(window, barid)
+	local function do_report(window, barid)
 		local mode = Skada.db.profile.report.mode
 		local set = Skada.db.profile.report.set
 		local channel = Skada.db.profile.report.channel
@@ -842,7 +842,7 @@ do
 		end
 	end
 
-	local function DestroyWindow()
+	local function destroy_report_window()
 		if Skada.reportwindow then
 			-- remove AceGUI hacks before recycling the widget
 			local frame = Skada.reportwindow
@@ -855,7 +855,7 @@ do
 		end
 	end
 
-	local function CreateReportWindow(window)
+	local function create_report_window(window)
 		Skada.reportwindow = AceGUI:Create("Window")
 
 		local frame = Skada.reportwindow
@@ -870,7 +870,7 @@ do
 			frame:SetTitle(L["Report"])
 		end
 
-		frame:SetCallback("OnClose", DestroyWindow)
+		frame:SetCallback("OnClose", destroy_report_window)
 
 		-- make the frame closable with Escape button
 		_G.SkadaReportWindow = frame.frame
@@ -968,8 +968,8 @@ do
 			if channellist[origchan][3] ~= channellist[value][3] then
 				-- redraw in-place to add/remove whisper widget
 				local point, relativeTo, relativePoint, xOfs, yOfs = frame:GetPoint()
-				DestroyWindow()
-				CreateReportWindow(window)
+				destroy_report_window()
+				create_report_window(window)
 				Skada.reportwindow:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs)
 			end
 		end)
@@ -1014,7 +1014,7 @@ do
 		frame.button = report
 		report:SetText(L["Report"])
 		report:SetCallback("OnClick", function()
-			DoReport(window, barid)
+			do_report(window, barid)
 		end)
 
 		report:SetFullWidth(true)
@@ -1025,9 +1025,9 @@ do
 		if self.testMode then
 			return -- nothing to do.
 		elseif IsShiftKeyDown() then
-			DoReport(window) -- quick report?
+			do_report(window) -- quick report?
 		elseif self.reportwindow == nil then
-			CreateReportWindow(window)
+			create_report_window(window)
 		elseif self.reportwindow:IsShown() then
 			self.reportwindow:Hide()
 		else
@@ -1080,6 +1080,6 @@ function Skada:PhaseMenu(window)
 	end
 
 	local x, y
-	self.phasesmenu.point, x, y = getDropdownPoint()
+	self.phasesmenu.point, x, y = get_dropdown_point()
 	ToggleDropDownMenu(1, nil, self.phasesmenu, "UIParent", x, y)
 end

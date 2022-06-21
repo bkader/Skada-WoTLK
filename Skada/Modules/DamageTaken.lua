@@ -149,7 +149,7 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 	local dmg = {}
 	local extraATT
 
-	local function SpellDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_damage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
 			-- handle extra attacks
 			if eventtype == "SPELL_EXTRA_ATTACKS" then
@@ -207,7 +207,7 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 		end
 	end
 
-	local function EnvironmentDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function environment_damage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local envtype = ...
 		local spellid, spellname, spellschool = nil, nil, 0x01
 
@@ -226,11 +226,11 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 		end
 
 		if spellid and spellname then
-			SpellDamage(nil, nil, nil, L["Environment"], nil, dstGUID, dstName, dstFlags, spellid, spellname, spellschool, select(2, ...))
+			spell_damage(nil, nil, nil, L["Environment"], nil, dstGUID, dstName, dstFlags, spellid, spellname, spellschool, select(2, ...))
 		end
 	end
 
-	local function SpellMissed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_missed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
 			local amount
 
@@ -706,7 +706,7 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 		local flags_dst = {dst_is_interesting_nopets = true}
 
 		Skada:RegisterForCL(
-			SpellDamage,
+			spell_damage,
 			"DAMAGE_SHIELD",
 			"DAMAGE_SPLIT",
 			"RANGE_DAMAGE",
@@ -719,13 +719,13 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 		)
 
 		Skada:RegisterForCL(
-			EnvironmentDamage,
+			environment_damage,
 			"ENVIRONMENTAL_DAMAGE",
 			flags_dst
 		)
 
 		Skada:RegisterForCL(
-			SpellMissed,
+			spell_missed,
 			"DAMAGE_SHIELD_MISSED",
 			"RANGE_MISSED",
 			"SPELL_BUILDING_MISSED",

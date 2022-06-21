@@ -24,7 +24,7 @@ Skada:RegisterModule("Healthstones", function(L)
 		end
 	end
 
-	local function StoneUsed(_, eventtype, srcGUID, srcName, srcFlags, _, _, _, spellid, spellname)
+	local function stone_used(_, eventtype, srcGUID, srcName, srcFlags, _, _, _, spellid, spellname)
 		if (spellid and stonespells[spellid]) or (spellname and spellname == stonename) then
 			Skada:DispatchSets(log_healthstone, srcGUID, srcName, srcFlags)
 		end
@@ -70,7 +70,7 @@ Skada:RegisterModule("Healthstones", function(L)
 			columns = {Count = true, Percent = true},
 			icon = [[Interface\Icons\inv_stone_04]]
 		}
-		Skada:RegisterForCL(StoneUsed, "SPELL_CAST_SUCCESS", {src_is_interesting = true})
+		Skada:RegisterForCL(stone_used, "SPELL_CAST_SUCCESS", {src_is_interesting = true})
 		Skada:AddMode(self)
 	end
 

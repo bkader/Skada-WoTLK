@@ -5,17 +5,17 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 	local CONST_COMM_MOD = "Nickname"
 
 	local time, wipe, format = time, wipe, string.format
-	local CheckNickname
+	local check_nickname
 
 	do
 		local type, strlen, strfind, strgsub = type, string.len, string.find, string.gsub
 
-		local function _trim(str)
+		local function str_trim(str)
 			local from = str:match("^%s*()")
 			return from > #str and "" or str:match(".*%S", from)
 		end
 
-		local function titlecase(first, rest)
+		local function title_case(first, rest)
 			return first:upper() .. rest:lower()
 		end
 
@@ -306,12 +306,12 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 			end
 		end
 
-		function CheckNickname(name)
+		function check_nickname(name)
 			if type(name) ~= "string" then
 				return false, L["Nickname isn't a valid string."]
 			end
 
-			name = _trim(name)
+			name = str_trim(name)
 
 			local len = strlen(name)
 			if len > 12 then
@@ -340,7 +340,7 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 				return false, L["You can't use the same letter three times consecutively, two spaces consecutively or more then two spaces."]
 			end
 
-			return true, name:gsub("(%a)([%w_']*)", titlecase)
+			return true, name:gsub("(%a)([%w_']*)", title_case)
 		end
 	end
 
@@ -371,7 +371,7 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 		self:SetCacheTable()
 		if not P.ignorenicknames and sender and guid and nickname then
 			local okey = nil
-			okey, nickname = CheckNickname(nickname)
+			okey, nickname = check_nickname(nickname)
 			if not okey or nickname == "" then
 				self.db.cache[guid] = nil -- remove if invalid or empty
 			elseif not self.db.cache[guid] or self.db.cache[guid] ~= nickname then
@@ -422,7 +422,7 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 						return G.nickname
 					end,
 					set = function(_, val)
-						local okey, nickname = CheckNickname(val)
+						local okey, nickname = check_nickname(val)
 						if okey == true then
 							G.nickname = nickname
 							mod:SendNickname(true)
@@ -535,7 +535,7 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 	-----------------------------------------------------------
 	-- cache table functions
 
-	local function CheckForReset()
+	local function check_for_reset()
 		if not mod.db.reset then
 			mod.db.reset = time() + (60 * 60 * 24 * 15)
 			mod.db.cache = {}
@@ -552,7 +552,7 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 			end
 			self.db = G.nicknames
 		end
-		CheckForReset()
+		check_for_reset()
 	end
 
 	function mod:Reset(event)

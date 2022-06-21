@@ -30,7 +30,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 	local green = "\124cffaaffaa+%s\124r"
 	local grey = "\124cff808080%s\124r"
 
-	local function FormatPercent(value1, value2, cond)
+	local function format_percent(value1, value2, cond)
 		if cond == false then return end
 
 		value1, value2 = value1 or 0, value2 or 0
@@ -43,24 +43,24 @@ Skada:RegisterModule("Comparison", function(L, P)
 		end
 	end
 
-	local function FormatValuePercent(val, myval, disabled)
+	local function format_value_percent(val, myval, disabled)
 		return Skada:FormatValueCols(
 			mod.metadata.columns.Damage and Skada:FormatPercent(val),
 			(mod.metadata.columns.Comparison and not disabled) and Skada:FormatPercent(myval),
-			(mod.metadata.columns.Percent and not disabled) and FormatPercent(myval, val)
+			(mod.metadata.columns.Percent and not disabled) and format_percent(myval, val)
 		)
 	end
 
-	local function FormatValueNumber(val, myval, fmt, disabled)
+	local function format_value_number(val, myval, fmt, disabled)
 		val, myval = val or 0, myval or 0 -- sanity check
 		return Skada:FormatValueCols(
 			mod.metadata.columns.Damage and (fmt and Skada:FormatNumber(val) or val),
 			(mod.metadata.columns.Comparison and not disabled) and (fmt and Skada:FormatNumber(myval) or myval),
-			FormatPercent(myval, val, mod.metadata.columns.Percent and not disabled)
+			format_percent(myval, val, mod.metadata.columns.Percent and not disabled)
 		)
 	end
 
-	local function CanCompare(actor)
+	local function can_compare(actor)
 		return (actor and actor.class == mod.userClass and actor.role == "DAMAGER")
 	end
 
@@ -119,46 +119,46 @@ Skada:RegisterModule("Comparison", function(L, P)
 					local num = spell and spell.critical and (100 * spell.critical / spell.count) or 0
 					local mynum = myspell and myspell.critical and (100 * myspell.critical / myspell.count) or 0
 
-					tooltip:AddDoubleLine(L["Critical"], FormatValuePercent(mynum, num, actor.id == mod.userGUID), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Critical"], format_value_percent(mynum, num, actor.id == mod.userGUID), 1, 1, 1)
 
 					num = (spell and spell.criticalamount) and (spell.criticalamount / spell.critical) or 0
 					mynum = (myspell and myspell.criticalamount) and (myspell.criticalamount / myspell.critical) or 0
 
 					if (spell and spell.criticalmin) or (myspell and myspell.criticalmin) then
-						tooltip:AddDoubleLine(L["Minimum"], FormatValueNumber(spell and spell.criticalmin, myspell and myspell.criticalmin, true), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Minimum"], format_value_number(spell and spell.criticalmin, myspell and myspell.criticalmin, true), 1, 1, 1)
 					end
 
 					if (spell and spell.criticalmax) or (myspell and myspell.criticalmax) then
-						tooltip:AddDoubleLine(L["Maximum"], FormatValueNumber(spell and spell.criticalmax, myspell and myspell.criticalmax, true), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Maximum"], format_value_number(spell and spell.criticalmax, myspell and myspell.criticalmax, true), 1, 1, 1)
 					end
 
-					tooltip:AddDoubleLine(L["Average"], FormatValueNumber(num, mynum, true), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Average"], format_value_number(num, mynum, true), 1, 1, 1)
 				elseif label == L["Normal Hits"] and ((spell and spell.hitamount) or (myspell and myspell.hitamount)) then
 					local num = (spell and spell.hitamount) and (spell.hitamount / spell.hit) or 0
 					local mynum = (myspell and myspell.hitamount) and (myspell.hitamount / myspell.hit) or 0
 
 					if (spell and spell.hitmin) or (myspell and myspell.hitmin) then
-						tooltip:AddDoubleLine(L["Minimum"], FormatValueNumber(spell and spell.hitmin, myspell and myspell.hitmin, true), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Minimum"], format_value_number(spell and spell.hitmin, myspell and myspell.hitmin, true), 1, 1, 1)
 					end
 
 					if (spell and spell.hitmax) or (myspell and myspell.hitmax) then
-						tooltip:AddDoubleLine(L["Maximum"], FormatValueNumber(spell and spell.hitmax, myspell and myspell.hitmax, true), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Maximum"], format_value_number(spell and spell.hitmax, myspell and myspell.hitmax, true), 1, 1, 1)
 					end
 
-					tooltip:AddDoubleLine(L["Average"], FormatValueNumber(num, mynum, true), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Average"], format_value_number(num, mynum, true), 1, 1, 1)
 				elseif label == L["Glancing"] and ((spell and spell.glance) or (myspell and myspell.glance)) then
 					local num = (spell and spell.glance) and (spell.glance / spell.glancing) or 0
 					local mynum = (myspell and myspell.glance) and (myspell.glance / myspell.glancing) or 0
 
 					if (spell and spell.glancemin) or (myspell and myspell.glancemin) then
-						tooltip:AddDoubleLine(L["Minimum"], FormatValueNumber(spell and spell.glancemin, myspell and myspell.glancemin, true), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Minimum"], format_value_number(spell and spell.glancemin, myspell and myspell.glancemin, true), 1, 1, 1)
 					end
 
 					if (spell and spell.glancemax) or (myspell and myspell.glancemax) then
-						tooltip:AddDoubleLine(L["Maximum"], FormatValueNumber(spell and spell.glancemax, myspell and myspell.glancemax, true), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Maximum"], format_value_number(spell and spell.glancemax, myspell and myspell.glancemax, true), 1, 1, 1)
 					end
 
-					tooltip:AddDoubleLine(L["Average"], FormatValueNumber(num, mynum, true), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Average"], format_value_number(num, mynum, true), 1, 1, 1)
 				end
 			end
 		end
@@ -172,7 +172,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 			local activetime = actor:GetTime(true)
 			local mytime = set:GetActorTime(mod.userGUID, mod.userName, true)
 
-			tooltip:AddDoubleLine(L["Activity"], FormatValuePercent(100 * activetime / totaltime, 100 * mytime / totaltime, actor.id == mod.userGUID), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Activity"], format_value_percent(100 * activetime / totaltime, 100 * mytime / totaltime, actor.id == mod.userGUID), 1, 1, 1)
 			tooltip:AddDoubleLine(L["Active Time"], format(actor.id ~= mod.userGUID and "%s (%s)" or "%s", Skada:FormatTime(activetime), Skada:FormatTime(mytime)), 1, 1, 1)
 		end
 	end
@@ -196,7 +196,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 			myvalue = myvalue or 0
 		end
 
-		d.valuetext = FormatValueNumber(value, myvalue, fmt, disabled)
+		d.valuetext = format_value_number(value, myvalue, fmt, disabled)
 
 		if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 			win.metadata.maxvalue = d.value
@@ -492,7 +492,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 						end
 					end
 
-					d.valuetext = FormatValueNumber(d.value, myamount, true)
+					d.valuetext = format_value_number(d.value, myamount, true)
 
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
@@ -530,7 +530,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 						end
 
 						d.value = myamount
-						d.valuetext = FormatValueNumber(0, myamount, true)
+						d.valuetext = format_value_number(0, myamount, true)
 
 						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
@@ -604,7 +604,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 					end
 				end
 
-				d.valuetext = FormatValueNumber(d.value, myamount, true)
+				d.valuetext = format_value_number(d.value, myamount, true)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
@@ -623,7 +623,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 							d.value = spell.total or d.value
 						end
 
-						d.valuetext = FormatValueNumber(0, d.value, true)
+						d.valuetext = format_value_number(0, d.value, true)
 
 						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
@@ -696,7 +696,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 					end
 				end
 
-				d.valuetext = FormatValueNumber(d.value, myamount, true, actor.id == mod.userGUID)
+				d.valuetext = format_value_number(d.value, myamount, true, actor.id == mod.userGUID)
 
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
@@ -715,7 +715,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 							d.value = target.total
 						end
 
-						d.valuetext = FormatValueNumber(0, d.value, true, actor.id == mod.userGUID)
+						d.valuetext = format_value_number(0, d.value, true, actor.id == mod.userGUID)
 
 						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
@@ -739,7 +739,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 			for i = 1, #set.players do
 				local player = set.players[i]
-				if CanCompare(player) then
+				if can_compare(player) then
 					local dps, amount = player:GetDPS()
 					if amount > 0 then
 						nr = nr + 1
@@ -749,7 +749,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 						d.valuetext = Skada:FormatValueCols(
 							mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
 							mod.metadata.columns.DPS and Skada:FormatNumber(dps),
-							FormatPercent(myamount, d.value, mod.metadata.columns.Percent and player.id ~= mod.userGUID)
+							format_percent(myamount, d.value, mod.metadata.columns.Percent and player.id ~= mod.userGUID)
 						)
 
 						-- a valid window, not a tooltip
@@ -772,7 +772,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 		end
 	end
 
-	local function SetActor(_, win, id, label)
+	local function set_actor(_, win, id, label)
 		-- no DisplayMode func?
 		if not win or not win.DisplayMode then return end
 
@@ -794,10 +794,10 @@ Skada:RegisterModule("Comparison", function(L, P)
 		end
 	end
 
-	-- just to alter "CanCompare" function
+	-- just to alter "can_compare" function
 	function mod:OnInitialize()
 		if Skada.Ascension then
-			CanCompare = function(actor)
+			can_compare = function(actor)
 				return (actor and actor.class == mod.userClass)
 			end
 		end
@@ -812,7 +812,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 			post_tooltip = activity_tooltip,
 			click1 = spellmod,
 			click2 = targetmod,
-			click3 = SetActor,
+			click3 = set_actor,
 			click3_label = L["Damage Comparison"],
 			columns = {Damage = true, DPS = true, Comparison = true, Percent = true},
 			icon = [[Interface\Icons\Ability_Warrior_OffensiveStance]]
@@ -826,7 +826,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 		self.category = parent.category or L["Damage Done"]
 		Skada:AddColumnOptions(self)
 
-		parent.metadata.click3 = SetActor
+		parent.metadata.click3 = set_actor
 		parent.metadata.click3_label = L["Damage Comparison"]
 		parent:Reload()
 	end
