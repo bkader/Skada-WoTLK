@@ -10,8 +10,6 @@ local _
 -- =================== --
 
 Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
-	if Skada:IsDisabled("Damage Taken") then return end
-
 	local mod = Skada:NewModule("Damage Taken")
 	local playermod = mod:NewModule("Damage spell list")
 	local spellmod = playermod:NewModule("Damage spell details")
@@ -790,7 +788,7 @@ end)
 -- ============================== --
 
 Skada:RegisterModule("DTPS", function(L, P)
-	if Skada:IsDisabled("Damage Taken", "DTPS") then return end
+	if Skada:IsDisabled("Damage Taken") then return end
 
 	local mod = Skada:NewModule("DTPS")
 
@@ -887,7 +885,7 @@ Skada:RegisterModule("DTPS", function(L, P)
 		}
 
 		local parentmod = Skada:GetModule("Damage Taken", true)
-		if parentmod then
+		if parentmod and parentmod.metadata then
 			self.metadata.click1 = parentmod.metadata.click1
 			self.metadata.click2 = parentmod.metadata.click2
 		end
@@ -910,7 +908,7 @@ end)
 -- ============================ --
 
 Skada:RegisterModule("Damage Taken By Spell", function(L, P, _, _, new, _, clear)
-	if Skada:IsDisabled("Damage Taken", "Damage Taken By Spell") then return end
+	if Skada:IsDisabled("Damage Taken") then return end
 
 	local mod = Skada:NewModule("Damage Taken By Spell")
 	local targetmod = mod:NewModule("Damage spell targets")
@@ -1141,7 +1139,7 @@ end)
 -- ============================= --
 
 Skada:RegisterModule("Avoidance & Mitigation", function(L, _, _, _, new, del, clear)
-	if Skada:IsDisabled("Damage Taken", "Avoidance & Mitigation") then return end
+	if Skada:IsDisabled("Damage Taken") then return end
 
 	local mod = Skada:NewModule("Avoidance & Mitigation")
 	local playermod = mod:NewModule("Damage Breakdown")

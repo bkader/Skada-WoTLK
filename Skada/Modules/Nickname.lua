@@ -1,7 +1,5 @@
 local Skada = Skada
 Skada:RegisterModule("Nickname", function(L, P, G)
-	if Skada:IsDisabled("Nickname") then return end
-
 	local mod = Skada:NewModule("Nickname")
 	local Translit = LibStub("LibTranslit-1.0", true)
 	local CONST_COMM_MOD = "Nickname"

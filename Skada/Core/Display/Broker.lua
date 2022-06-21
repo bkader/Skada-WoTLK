@@ -1,7 +1,5 @@
 local Skada = Skada
 Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
-	if Skada:IsDisabled("Data Text") then return end
-
 	local mod = Skada:NewModule("Data Text")
 	local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 

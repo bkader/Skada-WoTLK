@@ -4,8 +4,6 @@
 local Skada = Skada
 if not Skada.Ascension or Skada.AscensionCoA then return end
 Skada:RegisterModule("Project Ascension", function(L, _, G)
-	if Skada:IsDisabled("Project Ascension") then return end
-
 	local mod = Skada:NewModule("Project Ascension", "AceTimer-3.0")
 
 	local type, next = type, next

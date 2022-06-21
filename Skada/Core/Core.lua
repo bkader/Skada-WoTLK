@@ -1510,7 +1510,12 @@ function Skada:RegisterModule(name, desc, func)
 	end
 
 	self.LoadableModules = self.LoadableModules or new()
-	self.LoadableModules[#self.LoadableModules + 1] = func
+
+	local pos = #self.LoadableModules + 1
+	self.LoadableModules[pos] = new()
+	self.LoadableModules[pos].name = name
+	self.LoadableModules[pos].func = func
+
 	self.options.args.modules.args.blocked.args[name] = {type = "toggle", name = L[name], desc = desc and L[desc]}
 end
 
@@ -1549,7 +1554,7 @@ do
 		end
 
 		self.LoadableDisplay = self.LoadableDisplay or new()
-		self.LoadableDisplay[#self.LoadableDisplay + 1] = func
+		self.LoadableDisplay[name] = func
 		self.options.args.modules.args.blocked.args[name] = {
 			type = "toggle",
 			name = L[name],
@@ -3288,8 +3293,10 @@ function Skada:OnInitialize()
 	self:RegisterComms(not self.db.profile.syncoff)
 
 	if self.LoadableDisplay then
-		for i = 1, #self.LoadableDisplay do
-			self.LoadableDisplay[i](L, self.db.profile, self.db.global, self.cacheTable, new, del, clear)
+		for name, func in pairs(self.LoadableDisplay) do
+			if not self:IsDisabled(name) then
+				func(L, self.db.profile, self.db.global, self.cacheTable, new, del, clear)
+			end
 		end
 		self.LoadableDisplay = del(self.LoadableDisplay)
 	end
@@ -3340,9 +3347,12 @@ function Skada:OnEnable()
 
 	if self.LoadableModules then
 		for i = 1, #self.LoadableModules do
-			self.LoadableModules[i](L, self.db.profile, self.db.global, self.cacheTable, new, del, clear)
+			local mod = self.LoadableModules[i]
+			if mod and mod.name and mod.func and not self:IsDisabled(mod.name) then
+				mod.func(L, self.db.profile, self.db.global, self.cacheTable, new, del, clear)
+			end
 		end
-		self.LoadableModules = del(self.LoadableModules)
+		self.LoadableModules = del(self.LoadableModules, true)
 	end
 
 	if _G.BigWigs then

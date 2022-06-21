@@ -1,7 +1,5 @@
 local Skada = Skada
 Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
-	if Skada:IsDisabled("Dispels") then return end
-
 	local mod = Skada:NewModule("Dispels")
 	local spellmod = mod:NewModule("Dispelled spell list")
 	local targetmod = mod:NewModule("Dispelled target list")

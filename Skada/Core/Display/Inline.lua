@@ -1,7 +1,5 @@
 local Skada = Skada
 Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
-	if Skada:IsDisabled("Inline Bar Display") then return end
-
 	local mod = Skada:NewModule("Inline Bar Display")
 
 	local pairs, tostring, type = pairs, tostring, type

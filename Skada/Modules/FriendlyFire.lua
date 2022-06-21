@@ -1,7 +1,5 @@
 local Skada = Skada
 Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
-	if Skada:IsDisabled("Friendly Fire") then return end
-
 	local mod = Skada:NewModule("Friendly Fire")
 	local targetmod = mod:NewModule("Damage target list")
 	local spellmod = mod:NewModule("Damage spell list")

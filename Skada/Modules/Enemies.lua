@@ -10,8 +10,6 @@ local _
 -- Enemy Damage Taken
 
 Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
-	if Skada:IsDisabled("Enemy Damage Taken") then return end
-
 	local mod = Skada:NewModule("Enemy Damage Taken")
 	local sourcemod = mod:NewModule("Damage source list")
 	local sourcespellmod = sourcemod:NewModule("Damage spell list")
@@ -918,8 +916,6 @@ end)
 -- Enemy Damage Done
 
 Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
-	if Skada:IsDisabled("Enemy Damage Done") then return end
-
 	local mod = Skada:NewModule("Enemy Damage Done")
 	local targetmod = mod:NewModule("Damage target list")
 	local targetspellmod = targetmod:NewModule("Damage spell targets")
@@ -1411,8 +1407,6 @@ end)
 -- Enemy Healing Done
 
 Skada:RegisterModule("Enemy Healing Done", function(L, P)
-	if Skada:IsDisabled("Enemy Healing Done") then return end
-
 	local mod = Skada:NewModule("Enemy Healing Done")
 	local targetmod = mod:NewModule("Healed target list")
 	local spellmod = mod:NewModule("Healing spell list")

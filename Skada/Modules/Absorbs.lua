@@ -12,8 +12,6 @@ local _
 -- ============== --
 
 Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
-	if Skada:IsDisabled("Absorbs") then return end
-
 	local mod = Skada:NewModule("Absorbs")
 	local playermod = mod:NewModule("Absorb spell list")
 	local targetmod = mod:NewModule("Absorbed target list")
@@ -1205,7 +1203,7 @@ end)
 -- ========================== --
 
 Skada:RegisterModule("Absorbs and Healing", function(L, P)
-	if Skada:IsDisabled("Healing", "Absorbs", "Absorbs and Healing") then return end
+	if Skada:IsDisabled("Healing", "Absorbs") then return end
 
 	local mod = Skada:NewModule("Absorbs and Healing")
 	local playermod = mod:NewModule("Absorbs and healing spells")
@@ -1605,7 +1603,7 @@ end)
 -- ============================== --
 
 Skada:RegisterModule("HPS", function(L, P)
-	if Skada:IsDisabled("Absorbs", "Healing", "Absorbs and Healing", "HPS") then return end
+	if Skada:IsDisabled("Absorbs", "Healing", "Absorbs and Healing") then return end
 
 	local mod = Skada:NewModule("HPS")
 
@@ -1726,7 +1724,7 @@ end)
 -- ===================== --
 
 Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear)
-	if Skada:IsDisabled("Healing", "Absorbs", "Healing Done By Spell") then return end
+	if Skada:IsDisabled("Healing", "Absorbs") then return end
 
 	local mod = Skada:NewModule("Healing Done By Spell")
 	local spellmod = mod:NewModule("Healing spell sources")

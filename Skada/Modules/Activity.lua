@@ -1,7 +1,5 @@
 local Skada = Skada
 Skada:RegisterModule("Activity", function(L)
-	if Skada:IsDisabled("Activity") then return end
-
 	local mod = Skada:NewModule("Activity")
 	local date, format, max = date, string.format, math.max
 

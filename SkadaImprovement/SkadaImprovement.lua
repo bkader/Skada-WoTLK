@@ -1,8 +1,6 @@
 local Skada = _G.Skada
 if not Skada then return end
 Skada:RegisterModule("Improvement", function(L)
-	if Skada:IsDisabled("Improvement") then return end
-
 	local mod = Skada:NewModule("Improvement")
 	local mod_modes = mod:NewModule("Improvement modes")
 	local mod_comparison = mod:NewModule("Improvement comparison")

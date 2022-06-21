@@ -1,7 +1,5 @@
 local Skada = Skada
 Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
-	if Skada:IsDisabled("Tweaks") then return end
-
 	local mod = Skada:NewModule("Tweaks", "AceHook-3.0")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 

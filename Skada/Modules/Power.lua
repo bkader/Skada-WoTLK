@@ -1,7 +1,5 @@
 local Skada = Skada
 Skada:RegisterModule("Resources", function(L, P)
-	if Skada:IsDisabled("Resources") then return end
-
 	local mod = Skada:NewModule("Resources")
 	mod.icon = [[Interface\Icons\spell_holy_rapture]]
 

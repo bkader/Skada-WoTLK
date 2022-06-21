@@ -1,7 +1,5 @@
 local Skada = Skada
 Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
-	if Skada:IsDisabled("Interrupts") then return end
-
 	local mod = Skada:NewModule("Interrupts")
 	local spellmod = mod:NewModule("Interrupted spells")
 	local targetmod = mod:NewModule("Interrupted targets")

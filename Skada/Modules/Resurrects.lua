@@ -1,7 +1,5 @@
 local Skada = Skada
 Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
-	if Skada:IsDisabled("Resurrects") then return end
-
 	local mod = Skada:NewModule("Resurrects")
 	local playermod = mod:NewModule("Resurrect spell list")
 	local targetmod = mod:NewModule("Resurrect target list")

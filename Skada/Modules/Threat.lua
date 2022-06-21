@@ -1,7 +1,5 @@
 local Skada = Skada
 Skada:RegisterModule("Threat", function(L, P, _, _, new, del)
-	if Skada:IsDisabled("Threat") then return end
-
 	local mod = Skada:NewModule("Threat")
 
 	local format, max = string.format, math.max

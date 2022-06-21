@@ -1,7 +1,5 @@
 local Skada = Skada
 Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
-	if Skada:IsDisabled("Player vs. Player") then return end
-
 	local mod = Skada:NewModule("Player vs. Player")
 
 	local format, wipe, GetTime = string.format, wipe, GetTime

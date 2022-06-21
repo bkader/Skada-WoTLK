@@ -308,8 +308,6 @@ do
 end
 
 Skada:RegisterModule("Buffs", function(L, P)
-	if Skada:IsDisabled("Buffs") then return end
-
 	local mod = Skada:NewModule("Buffs")
 	local spellmod = mod:NewModule("Buff spell list")
 	local playermod = spellmod:NewModule("Players list")
@@ -503,8 +501,6 @@ Skada:RegisterModule("Buffs", function(L, P)
 end)
 
 Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
-	if Skada:IsDisabled("Debuffs") then return end
-
 	local mod = Skada:NewModule("Debuffs")
 	local spellmod = mod:NewModule("Debuff spell list")
 	local spelltargetmod = spellmod:NewModule("Debuff target list")

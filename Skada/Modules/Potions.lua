@@ -1,7 +1,5 @@
 local Skada = Skada
 Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
-	if Skada:IsDisabled("Potions") then return end
-
 	local mod = Skada:NewModule("Potions")
 	local playermod = mod:NewModule("Potions list")
 	local potionmod = mod:NewModule("Players list")

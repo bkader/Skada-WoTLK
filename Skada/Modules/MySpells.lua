@@ -1,7 +1,5 @@
 local Skada = Skada
 Skada:RegisterModule("My Spells", function(L, P)
-	if Skada:IsDisabled("My Spells") then return end
-
 	local mod = Skada:NewModule("My Spells")
 
 	local pairs, format = pairs, string.format

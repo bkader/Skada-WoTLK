@@ -1,7 +1,5 @@
 local Skada = Skada
 Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
-	if Skada:IsDisabled("Deaths") then return end
-
 	local mod = Skada:NewModule("Deaths")
 	local playermod = mod:NewModule("Player's deaths")
 	local deathlogmod = mod:NewModule("Death log")

@@ -10,8 +10,6 @@ local _
 -- ============== --
 
 Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
-	if Skada:IsDisabled("Healing") then return end
-
 	local mod = Skada:NewModule("Healing")
 	local playermod = mod:NewModule("Healing spell list")
 	local targetmod = mod:NewModule("Healed target list")
@@ -498,7 +496,7 @@ end)
 -- ================== --
 
 Skada:RegisterModule("Overhealing", function(L)
-	if Skada:IsDisabled("Healing", "Overhealing") then return end
+	if Skada:IsDisabled("Healing") then return end
 
 	local mod = Skada:NewModule("Overhealing")
 	local playermod = mod:NewModule("Overheal spell list")
@@ -691,7 +689,7 @@ end)
 -- ==================== --
 
 Skada:RegisterModule("Total Healing", function(L)
-	if Skada:IsDisabled("Healing", "Total Healing") then return end
+	if Skada:IsDisabled("Healing") then return end
 
 	local mod = Skada:NewModule("Total Healing")
 	local playermod = mod:NewModule("Healing spell list")
@@ -984,7 +982,7 @@ end)
 -- ================ --
 
 Skada:RegisterModule("Healing Taken", function(L, _, _, _, new, _, clear)
-	if Skada:IsDisabled("Healing", "Absorbs", "Absorbs and Healing", "Healing Taken") then return end
+	if Skada:IsDisabled("Healing", "Absorbs") then return end
 
 	local mod = Skada:NewModule("Healing Taken")
 	local sourcemod = mod:NewModule("Healing source list")

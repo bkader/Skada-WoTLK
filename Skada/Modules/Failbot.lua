@@ -3,8 +3,6 @@ if not LibFail then return end
 
 local Skada = Skada
 Skada:RegisterModule("Fails", function(L, P)
-	if Skada:IsDisabled("Fails") then return end
-
 	local mod = Skada:NewModule("Fails")
 	local playermod = mod:NewModule("Player's failed events")
 	local spellmod = mod:NewModule("Event's failed players")

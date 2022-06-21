@@ -198,8 +198,6 @@ end
 -- CC Done --
 -- ======= --
 Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
-	if Skada:IsDisabled("CC Done") then return end
-
 	local mod = Skada:NewModule("CC Done")
 	local playermod = mod:NewModule("Crowd Control Spells")
 	local targetmod = mod:NewModule("Crowd Control Targets")
@@ -478,8 +476,6 @@ end)
 -- CC Taken --
 -- ======== --
 Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
-	if Skada:IsDisabled("CC Taken") then return end
-
 	local mod = Skada:NewModule("CC Taken")
 	local playermod = mod:NewModule("Crowd Control Spells")
 	local sourcemod = mod:NewModule("Crowd Control Sources")
@@ -771,8 +767,6 @@ end)
 -- CC Breakers --
 -- =========== --
 Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
-	if Skada:IsDisabled("CC Breaks") then return end
-
 	local mod = Skada:NewModule("CC Breaks")
 	local playermod = mod:NewModule("Crowd Control Spells")
 	local targetmod = mod:NewModule("Crowd Control Targets")

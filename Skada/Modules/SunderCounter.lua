@@ -1,7 +1,5 @@
 local Skada = Skada
 Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
-	if Skada:IsDisabled("Sunder Counter") then return end
-
 	local mod = Skada:NewModule("Sunder Counter")
 	local targetmod = mod:NewModule("Sunder target list")
 	local sourcemod = mod:NewModule("Sunder source list")

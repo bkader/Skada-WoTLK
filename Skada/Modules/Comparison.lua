@@ -1,6 +1,6 @@
 local Skada = Skada
 Skada:RegisterModule("Comparison", function(L, P)
-	if Skada:IsDisabled("Damage", "Comparison") then return end
+	if Skada:IsDisabled("Damage") then return end
 
 	local parent = Skada:GetModule("Damage")
 

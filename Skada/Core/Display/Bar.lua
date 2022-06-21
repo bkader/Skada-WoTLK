@@ -1,7 +1,5 @@
 local Skada = Skada
 Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, new, del)
-	if Skada:IsDisabled("Bar Display") then return end
-
 	local mod = Skada:NewModule("Bar Display", "SpecializedLibBars-1.0")
 	local FlyPaper = LibStub("LibFlyPaper-1.1", true)
 	local ACR = LibStub("AceConfigRegistry-3.0")
