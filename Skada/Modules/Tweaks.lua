@@ -145,8 +145,8 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 				if output then
 					local spell = (eventtype == "SWING_DAMAGE") and GetSpellLink(6603) or GetSpellLink(spellid) or GetSpellInfo(spellid)
 					firsthit.hitline, firsthit.targetline = who_pulled(format(L["\124cffffff00First Hit\124r: %s from %s"], spell or "", output))
+					firsthit.checked = true -- once only
 				end
-				firsthit.checked = true -- once only
 			end
 
 			-- use the original function
