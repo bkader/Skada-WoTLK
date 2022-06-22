@@ -365,8 +365,22 @@ do
 end
 
 -- new window creation dialog
-function Skada:NewWindow()
+function Skada:NewWindow(window)
 	if not StaticPopupDialogs["SkadaCreateWindowDialog"] then
+		local function create_window(name, win)
+			name = name and name:trim()
+			if not name or name == "" then return end
+
+			if IsShiftKeyDown() and win and win.db then
+				local w = Skada:CreateWindow(name, nil, win.db.display)
+				Skada.tCopy(w.db, win.db, "name", "sticked", "point", "snapped", "child", "childmode")
+				w.db.x, w.db.y = 0, 0
+				Skada:ApplySettings(name)
+			else
+				Skada:CreateWindow(name)
+			end
+		end
+
 		StaticPopupDialogs["SkadaCreateWindowDialog"] = {
 			text = L["Enter the name for the new window."],
 			button1 = L["Create"],
@@ -395,23 +409,17 @@ function Skada:NewWindow()
 					self:GetParent().button1:Enable()
 				end
 			end,
-			EditBoxOnEnterPressed = function(self)
-				local name = self:GetText()
-				if name:trim() ~= "" then
-					Skada:CreateWindow(name)
-				end
+			EditBoxOnEnterPressed = function(self, win)
+				create_window(self:GetText(), win)
 				self:GetParent():Hide()
 			end,
-			OnAccept = function(self)
-				local name = self.editBox:GetText()
-				if name:trim() ~= "" then
-					Skada:CreateWindow(name)
-				end
+			OnAccept = function(self, win)
+				create_window(self.editBox:GetText(), win)
 				self:Hide()
 			end
 		}
 	end
-	StaticPopup_Show("SkadaCreateWindowDialog")
+	StaticPopup_Show("SkadaCreateWindowDialog", nil, nil, window)
 end
 
 -- reinstall the addon
@@ -1276,7 +1284,9 @@ do
 
 	function Skada:DeleteWindow(name, internal)
 		if internal then
-			return delete_window(name)
+			delete_window(name)
+			CloseDropDownMenus()
+			return
 		end
 
 		if not StaticPopupDialogs["SkadaDeleteWindowDialog"] then
@@ -3283,7 +3293,7 @@ function Skada:OnInitialize()
 	self.db.RegisterCallback(self, "OnProfileChanged", "ReloadSettings")
 	self.db.RegisterCallback(self, "OnProfileCopied", "ReloadSettings")
 	self.db.RegisterCallback(self, "OnProfileReset", "ReloadSettings")
-	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes", true)
+	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes")
 
 	self:RegisterInitOptions()
 	self:RegisterMedias()
@@ -3462,47 +3472,26 @@ end
 -------------------------------------------------------------------------------
 
 do
-	local function clear_indexes(set, mt)
+	local function clear_indexes(set)
 		if set then
 			set._playeridx = nil
 			set._enemyidx = nil
-
-			-- delete our metatables.
-			if mt then
-				if set.players then
-					for i = 1, #set.players do
-						local p = set.players[i]
-						if p and p.super then
-							p.super = nil
-						end
-					end
-				end
-
-				if set.enemies then
-					for i = 1, #set.enemies do
-						local e = set.enemies[i]
-						if e and e.super then
-							e.super = nil
-						end
-					end
-				end
-			end
 		end
 	end
 
-	function Skada:ClearAllIndexes(mt)
-		clear_indexes(Skada.current, mt)
-		clear_indexes(Skada.total, mt)
+	function Skada:ClearAllIndexes()
+		clear_indexes(Skada.current)
+		clear_indexes(Skada.total)
 
 		if Skada.char.sets then
 			for i = 1, #Skada.char.sets do
-				clear_indexes(Skada.char.sets[i], mt)
+				clear_indexes(Skada.char.sets[i])
 			end
 		end
 
 		if Skada.tempsets then
 			for i = 1, #Skada.tempsets do
-				clear_indexes(Skada.tempsets[i], mt)
+				clear_indexes(Skada.tempsets[i])
 			end
 		end
 	end
@@ -3851,17 +3840,23 @@ do
 	local combatlog_events = {}
 
 	function Skada:RegisterForCL(...)
-		local args = {...}
+		local args = new()
+		for i = 1, select("#", ...) do
+			args[i] = select(i, ...)
+		end
+
 		if #args >= 3 then
 			-- first arg must always be the callback.
 			local callback = tremove(args, 1)
 			if type(callback) ~= "function" then
+				args = del(args)
 				return
 			end
 
 			-- last arg must always be the flags table.
 			local flags = tremove(args)
 			if type(flags) ~= "table" then
+				args = del(args)
 				return
 			end
 
@@ -3870,7 +3865,10 @@ do
 				combatlog_events[event] = combatlog_events[event] or {}
 				combatlog_events[event][callback] = flags
 			end
+
 		end
+
+		args = del(args)
 	end
 
 	function Skada:Tick()

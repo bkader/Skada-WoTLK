@@ -18,13 +18,13 @@ local setPrototype = {} -- sets
 Skada.setPrototype = setPrototype
 
 local actorPrototype = {} -- common to actors
-local actorPrototype_mt = {__index = actorPrototype}
+actorPrototype.mt = {__index = actorPrototype}
 Skada.actorPrototype = actorPrototype
 
-local playerPrototype = setmetatable({}, actorPrototype_mt) -- players
+local playerPrototype = setmetatable({}, actorPrototype.mt) -- players
 Skada.playerPrototype = playerPrototype
 
-local enemyPrototype = setmetatable({}, actorPrototype_mt) -- enemies
+local enemyPrototype = setmetatable({}, actorPrototype.mt) -- enemies
 Skada.enemyPrototype = enemyPrototype
 
 -------------------------------------------------------------------------------
@@ -402,13 +402,9 @@ end
 
 -- binds a table to the prototype table
 function actorPrototype:Bind(obj, set)
-	if not obj or getmetatable(obj) == self then
-		return obj
-	end
-
-	setmetatable(obj, self)
+	obj = obj and setmetatable(obj, self)
 	self.__index = self
-	obj.super = set
+	self.super = set
 	return obj
 end
 
@@ -478,7 +474,7 @@ do
 	function actorPrototype:GetDamageTargets(tbl)
 		local damage = 0
 		if not self.damagespells then
-			return damage
+			return nil, damage
 		elseif Skada.db.profile.absdamage and self.totaldamage then
 			damage = self.totaldamage
 		elseif self.damage then
@@ -578,7 +574,7 @@ do
 	function actorPrototype:GetDamageSources(tbl)
 		local damage = 0
 		if not self.damagetakenspells then
-			return tbl, 0
+			return nil, 0
 		end
 
 		if self.damagetakenspells then
@@ -844,9 +840,7 @@ do
 
 	-- returns the actor's absorb targets table if found
 	function actorPrototype:GetAbsorbTargets(tbl)
-		if not self.absorbspells then
-			return tbl
-		end
+		if not self.absorbspells then return end
 
 		tbl = clear(tbl or cacheTable)
 		for _, spell in pairs(self.absorbspells) do
@@ -861,9 +855,7 @@ do
 
 	-- returns the actor's heal targets table if found
 	function actorPrototype:GetHealTargets(tbl)
-		if not self.healspells then
-			return tbl
-		end
+		if not self.healspells then return end
 
 		tbl = clear(tbl or cacheTable)
 		for _, spell in pairs(self.healspells) do
@@ -878,9 +870,7 @@ do
 
 	-- returns the actor's absorb and heal targets table if found
 	function actorPrototype:GetAbsorbHealTargets(tbl)
-		if not self.healspells and not self.absorbspells then
-			return tbl
-		end
+		if not self.healspells and not self.absorbspells then return end
 
 		tbl = clear(tbl or cacheTable)
 
@@ -930,9 +920,7 @@ do
 	end
 
 	function actorPrototype:GetOverhealTargets(tbl)
-		if not self.overheal or not self.healspells then
-			return tbl
-		end
+		if not self.overheal or not self.healspells then return end
 
 		tbl = clear(tbl or cacheTable)
 		for _, spell in pairs(self.healspells) do
@@ -965,9 +953,7 @@ do
 	end
 
 	function actorPrototype:GetTotalHealTargets(tbl)
-		if not self.healspells then
-			return tbl
-		end
+		if not self.healspells then return end
 
 		tbl = clear(tbl or cacheTable)
 		for _, spell in pairs(self.healspells) do

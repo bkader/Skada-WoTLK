@@ -14,6 +14,7 @@ local UIDropDownMenu_CreateInfo = UIDropDownMenu_CreateInfo
 local UIDropDownMenu_AddButton = UIDropDownMenu_AddButton
 local CloseDropDownMenus = CloseDropDownMenus
 local ToggleDropDownMenu = ToggleDropDownMenu
+local IsShiftKeyDown = IsShiftKeyDown
 local del = Skada.delTable
 
 local info = nil
@@ -87,7 +88,9 @@ function Skada:OpenMenu(window)
 			-- create window
 			wipe(info)
 			info.text = L["Create Window"]
-			info.func = Skada.NewWindow
+			info.func = function()
+				Skada:NewWindow(self.win)
+			end
 			info.notCheckable = 1
 			UIDropDownMenu_AddButton(info, level)
 
@@ -355,7 +358,7 @@ function Skada:OpenMenu(window)
 				wipe(info)
 				info.text = L["Delete Window"]
 				info.func = function()
-					return Skada:DeleteWindow(win.db.name)
+					return Skada:DeleteWindow(win.db.name, IsShiftKeyDown())
 				end
 				info.notCheckable = 1
 				info.leftPadding = 16
