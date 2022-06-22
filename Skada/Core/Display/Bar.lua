@@ -4,8 +4,8 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, new, d
 	local FlyPaper = LibStub("LibFlyPaper-1.1", true)
 	local ACR = LibStub("AceConfigRegistry-3.0")
 
-	local pairs, tsort = pairs, table.sort
-	local format, max, min = string.format, math.max, math.min
+	local pairs, tsort, format = pairs, table.sort, string.format
+	local max, min, abs = math.max, math.min, math.abs
 	local GameTooltip = GameTooltip
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 	local CloseDropDownMenus = CloseDropDownMenus
@@ -734,7 +734,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, new, d
 
 								bar.link = nil
 								if data.spellid then
-									bar.link = GetSpellLink(data.spellid)
+									bar.link = GetSpellLink(abs(data.spellid))
 								elseif data.hyperlink then
 									bar.link = data.hyperlink
 								end

@@ -324,13 +324,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 				for name, count in pairs(self.sundertargets) do
 					tbl[name] = new()
 					tbl[name].count = count
-					local actor = self.super:GetActor(name)
-					if actor then
-						tbl[name].id = actor.id
-						tbl[name].class = actor.class
-						tbl[name].role = actor.role
-						tbl[name].spec = actor.spec
-					end
+					self.super:_fill_actor_table(tbl[name], name)
 				end
 				return tbl
 			end

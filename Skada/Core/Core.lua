@@ -19,7 +19,7 @@ local Translit = LibStub("LibTranslit-1.0", true)
 local tsort, tinsert, tremove, tmaxn, wipe, setmetatable = table.sort, table.insert, table.remove, table.maxn, wipe, setmetatable
 local next, pairs, ipairs, type = next, pairs, ipairs, type
 local tonumber, tostring, strmatch, format, gsub, lower, find = tonumber, tostring, strmatch, string.format, string.gsub, string.lower, string.find
-local floor, max, min, band, time, GetTime = math.floor, math.max, math.min, bit.band, time, GetTime
+local floor, max, min, abs, band, time, GetTime = math.floor, math.max, math.min, math.abs, bit.band, time, GetTime
 local IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction = IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction
 local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
 local UnitExists, UnitGUID, UnitName, UnitClass = UnitExists, UnitGUID, UnitName, UnitClass
@@ -874,21 +874,28 @@ function Window:nr(i)
 end
 
 -- generates spell's dataset
-function Window:spell(d, spellid, spell, school)
+function Window:spell(d, spellid, spell, school, isheal)
 	if d and spellid then
 		-- create the dataset?
 		if type(d) == "number" then
 			d = self:nr(d)
 		end
 
+		if school == true then
+			isheal = true
+			school = nil
+		end
+
 		d.id = spellid
 
 		if type(spellid) == "number" or not spell then
 			d.spellid = spellid
-			d.label, _, d.icon = GetSpellInfo(d.spellid)
+			d.label, _, d.icon = GetSpellInfo(abs(d.spellid))
 
-			if spell and spell.ishot then
+			if (spell and spell.ishot) or isheal then
 				d.label = format("%s%s", d.label, L["HoT"])
+			elseif spellid < 0 then
+				d.label = format("%s%s", d.label, L["DoT"])
 			end
 			if spell and spell.school then
 				d.spellschool = spell.school
@@ -901,7 +908,7 @@ function Window:spell(d, spellid, spell, school)
 		if type(spell) == "table" then
 			d.spellid = spell.id
 			d.label = spellid
-			_, _, d.icon = GetSpellInfo(d.spellid)
+			_, _, d.icon = GetSpellInfo(abs(d.spellid))
 
 			if spell and spell.ishot then
 				d.label = format("%s%s", d.label, L["HoT"])
@@ -2530,7 +2537,7 @@ do
 				if data.reportlabel then
 					label = data.reportlabel
 				elseif self.db.profile.reportlinks and (data.spellid or data.hyperlink) then
-					label = format("%s   %s", data.hyperlink or self.GetSpellLink(data.spellid) or data.label, data.valuetext)
+					label = format("%s   %s", data.hyperlink or self.GetSpellLink(abs(data.spellid)) or data.label, data.valuetext)
 				else
 					label = format("%s   %s", data.label, data.valuetext)
 				end

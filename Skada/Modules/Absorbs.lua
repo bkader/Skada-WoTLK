@@ -1910,41 +1910,44 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear
 
 	local setPrototype = Skada.setPrototype
 
+	local function fill_spells_table(t, spellid, info)
+		local spell = t[spellid]
+		if not spell then
+			spell = new()
+			-- common
+			spell.school = info.school
+			spell.amount = info.amount
+
+			-- for heals
+			spell.ishot = info.ishot
+			spell.overheal = info.overheal
+
+			t[spellid] = spell
+		else
+			spell.amount = spell.amount + info.amount
+			if info.overheal then -- for heals
+				spell.overheal = (spell.overheal or 0) + info.overheal
+			end
+		end
+	end
+
 	function setPrototype:GetAbsorbHealSpells(tbl)
-		if (self.absorb or self.heal) and self.players then
-			tbl = clear(tbl or C)
-			for i = 1, #self.players do
-				local player = self.players[i]
-				if player and player.healspells then
-					for spellid, spell in pairs(player.healspells) do
-						if not tbl[spellid] then
-							tbl[spellid] = new()
-							tbl[spellid].ishot = spell.ishot
-							tbl[spellid].school = spell.school
-							tbl[spellid].amount = spell.amount
-							tbl[spellid].overheal = spell.overheal
-						else
-							tbl[spellid].amount = tbl[spellid].amount + spell.amount
-							if spell.overheal then
-								tbl[spellid].overheal = (tbl[spellid].overheal or 0) + spell.overheal
-							end
-						end
-					end
+		if not self.players or not (self.absorb or self.heal) then return end
+
+		tbl = clear(tbl or C)
+		for i = 1, #self.players do
+			local player = self.players[i]
+			if player and player.healspells then
+				for spellid, spell in pairs(player.healspells) do
+					fill_spells_table(tbl, spellid, spell)
 				end
-				if player and player.absorbspells then
-					for spellid, spell in pairs(player.absorbspells) do
-						if not tbl[spellid] then
-							tbl[spellid] = new()
-							tbl[spellid].school = spell.school
-							tbl[spellid].amount = spell.amount
-						else
-							tbl[spellid].amount = tbl[spellid].amount + spell.amount
-						end
-					end
+			end
+			if player and player.absorbspells then
+				for spellid, spell in pairs(player.absorbspells) do
+					fill_spells_table(tbl, spellid, spell)
 				end
 			end
 		end
-
 		return tbl
 	end
 end)

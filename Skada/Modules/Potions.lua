@@ -385,28 +385,26 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 
 	do
 		local setPrototype = Skada.setPrototype
-		local wipe = wipe
-
 		function setPrototype:GetPotion(potionid, class, tbl)
-			if potionid and self.potion then
-				tbl = clear(tbl or C)
-				local total = 0
-
-				for i = 1, #self.players do
-					local p = self.players[i]
-					if p and p.potionspells and p.potionspells[potionid] and (not class or class == p.class) then
-						total = total + p.potionspells[potionid]
-						tbl[p.name] = new()
-						tbl[p.name].id = p.id
-						tbl[p.name].class = p.class
-						tbl[p.name].role = p.role
-						tbl[p.name].spec = p.spec
-						tbl[p.name].count = p.potionspells[potionid]
-					end
-				end
-
-				return tbl, total
+			if not self.potion or not potionid then
+				return nil, 0
 			end
+
+			tbl = clear(tbl or C)
+			local total = 0
+			for i = 1, #self.players do
+				local p = self.players[i]
+				if p and p.potionspells and p.potionspells[potionid] and (not class or class == p.class) then
+					total = total + p.potionspells[potionid]
+					tbl[p.name] = new()
+					tbl[p.name].id = p.id
+					tbl[p.name].class = p.class
+					tbl[p.name].role = p.role
+					tbl[p.name].spec = p.spec
+					tbl[p.name].count = p.potionspells[potionid]
+				end
+			end
+			return tbl, total
 		end
 	end
 end)

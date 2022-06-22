@@ -426,49 +426,42 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 
 	function setPrototype:GetCCDoneSources(spellid, tbl)
 		local total = 0
-		if self.ccdone and spellid then
-			tbl = clear(tbl or C)
-			for i = 1, #self.players do
-				local p = self.players[i]
-				if p and p.ccdonespells and p.ccdonespells[spellid] then
-					tbl[p.name] = new()
-					tbl[p.name].id = p.id
-					tbl[p.name].class = p.class
-					tbl[p.name].role = p.role
-					tbl[p.name].spec = p.spec
-					tbl[p.name].count = p.ccdonespells[spellid].count
-					total = total + p.ccdonespells[spellid].count
-				end
+		if not self.ccdone or not spellid then return total end
+
+		tbl = clear(tbl or C)
+		for i = 1, #self.players do
+			local p = self.players[i]
+			if p and p.ccdonespells and p.ccdonespells[spellid] then
+				tbl[p.name] = new()
+				tbl[p.name].id = p.id
+				tbl[p.name].class = p.class
+				tbl[p.name].role = p.role
+				tbl[p.name].spec = p.spec
+				tbl[p.name].count = p.ccdonespells[spellid].count
+				total = total + p.ccdonespells[spellid].count
 			end
 		end
 		return total, tbl
 	end
 
 	function playerPrototype:GetCCDoneTargets(tbl)
-		if self.ccdonespells then
-			tbl = clear(tbl or C)
-			for _, spell in pairs(self.ccdonespells) do
-				if spell.targets then
-					for name, count in pairs(spell.targets) do
-						if not tbl[name] then
-							tbl[name] = new()
-							tbl[name].count = count
-						else
-							tbl[name].count = tbl[name].count + count
-						end
-						if not tbl[name].class then
-							local actor = self.super:GetActor(name)
-							if actor then
-								tbl[name].class = actor.class
-								tbl[name].role = actor.role
-								tbl[name].spec = actor.spec
-							end
-						end
+		if not self.ccdonespells then return end
+
+		tbl = clear(tbl or C)
+		for _, spell in pairs(self.ccdonespells) do
+			if spell.targets then
+				for name, count in pairs(spell.targets) do
+					if not tbl[name] then
+						tbl[name] = new()
+						tbl[name].count = count
+					else
+						tbl[name].count = tbl[name].count + count
 					end
+					self.super:_fill_actor_table(tbl[name], name)
 				end
 			end
-			return tbl
 		end
+		return tbl
 	end
 end)
 
@@ -717,49 +710,42 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 
 	function setPrototype:GetCCTakenTargets(spellid, tbl)
 		local total = 0
-		if self.cctaken and spellid then
-			tbl = clear(tbl or C)
-			for i = 1, #self.players do
-				local p = self.players[i]
-				if p and p.cctakenspells and p.cctakenspells[spellid] then
-					tbl[p.name] = new()
-					tbl[p.name].id = p.id
-					tbl[p.name].class = p.class
-					tbl[p.name].role = p.role
-					tbl[p.name].spec = p.spec
-					tbl[p.name].count = p.cctakenspells[spellid].count
-					total = total + p.cctakenspells[spellid].count
-				end
+		if not self.cctaken or not spellid then return total end
+
+		tbl = clear(tbl or C)
+		for i = 1, #self.players do
+			local p = self.players[i]
+			if p and p.cctakenspells and p.cctakenspells[spellid] then
+				tbl[p.name] = new()
+				tbl[p.name].id = p.id
+				tbl[p.name].class = p.class
+				tbl[p.name].role = p.role
+				tbl[p.name].spec = p.spec
+				tbl[p.name].count = p.cctakenspells[spellid].count
+				total = total + p.cctakenspells[spellid].count
 			end
 		end
 		return total, tbl
 	end
 
 	function playerPrototype:GetCCTakenSources(tbl)
-		if self.cctakenspells then
-			tbl = clear(tbl or C)
-			for _, spell in pairs(self.cctakenspells) do
-				if spell.sources then
-					for name, count in pairs(spell.sources) do
-						if not tbl[name] then
-							tbl[name] = new()
-							tbl[name].count = count
-						else
-							tbl[name].count = tbl[name].count + count
-						end
-						if not tbl[name].class then
-							local actor = self.super:GetActor(name)
-							if actor then
-								tbl[name].class = actor.class
-								tbl[name].role = actor.role
-								tbl[name].spec = actor.spec
-							end
-						end
+		if not self.cctakenspells then return end
+
+		tbl = clear(tbl or C)
+		for _, spell in pairs(self.cctakenspells) do
+			if spell.sources then
+				for name, count in pairs(spell.sources) do
+					if not tbl[name] then
+						tbl[name] = new()
+						tbl[name].count = count
+					else
+						tbl[name].count = tbl[name].count + count
 					end
+					self.super:_fill_actor_table(tbl[name], name)
 				end
 			end
-			return tbl
 		end
+		return tbl
 	end
 end)
 
@@ -992,33 +978,6 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 		return tostring(ccbreak), ccbreak
 	end
 
-	function playerPrototype:GetCCBreakTargets(tbl)
-		if self.ccbreakspells then
-			tbl = clear(tbl or C)
-			for _, spell in pairs(self.ccbreakspells) do
-				if spell.targets then
-					for name, count in pairs(spell.targets) do
-						if not tbl[name] then
-							tbl[name] = new()
-							tbl[name].count = count
-						else
-							tbl[name].count = tbl[name].count + count
-						end
-						if not tbl[name].class then
-							local actor = self.super:GetActor(name)
-							if actor then
-								tbl[name].class = actor.class
-								tbl[name].role = actor.role
-								tbl[name].spec = actor.spec
-							end
-						end
-					end
-				end
-			end
-			return tbl
-		end
-	end
-
 	function mod:OnInitialize()
 		Skada.options.args.modules.args.ccoptions = {
 			type = "group",
@@ -1056,5 +1015,25 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 				}
 			}
 		}
+	end
+
+	function playerPrototype:GetCCBreakTargets(tbl)
+		if not self.ccbreakspells then return end
+
+		tbl = clear(tbl or C)
+		for _, spell in pairs(self.ccbreakspells) do
+			if spell.targets then
+				for name, count in pairs(spell.targets) do
+					if not tbl[name] then
+						tbl[name] = new()
+						tbl[name].count = count
+					else
+						tbl[name].count = tbl[name].count + count
+					end
+					self.super:_fill_actor_table(tbl[name], name)
+				end
+			end
+		end
+		return tbl
 	end
 end)

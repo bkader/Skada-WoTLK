@@ -221,31 +221,23 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 	do
 		local playerPrototype = Skada.playerPrototype
 		function playerPrototype:GetRessTargets(tbl)
-			if self.resspells then
-				tbl = clear(tbl or C)
-				for _, spell in pairs(self.resspells) do
-					if spell.targets then
-						for name, count in pairs(spell.targets) do
-							if not tbl[name] then
-								tbl[name] = new()
-								tbl[name].count = count
-							else
-								tbl[name].count = tbl[name].count + count
-							end
-							if not tbl[name].class then
-								local actor = self.super:GetActor(name)
-								if actor then
-									tbl[name].id = actor.id
-									tbl[name].class = actor.class
-									tbl[name].role = actor.role
-									tbl[name].spec = actor.spec
-								end
-							end
+			if not self.resspells then return end
+
+			tbl = clear(tbl or C)
+			for _, spell in pairs(self.resspells) do
+				if spell.targets then
+					for name, count in pairs(spell.targets) do
+						if not tbl[name] then
+							tbl[name] = new()
+							tbl[name].count = count
+						else
+							tbl[name].count = tbl[name].count + count
 						end
+						self.super:_fill_actor_table(tbl[name], name)
 					end
 				end
-				return tbl
 			end
+			return tbl
 		end
 	end
 end)

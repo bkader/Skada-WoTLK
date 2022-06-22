@@ -22,7 +22,7 @@ Skada:RegisterModule("Activity", function(L)
 		win.title = win.class and format("%s (%s)", L["Activity"], L[win.class]) or L["Activity"]
 
 		local settime = set and set:GetTime()
-		if settime > 0 then
+		if settime and settime > 0 then
 			if win.metadata then
 				win.metadata.maxvalue = 0
 			end

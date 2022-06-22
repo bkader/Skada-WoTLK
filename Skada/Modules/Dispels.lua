@@ -269,15 +269,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 							else
 								tbl[name].count = tbl[name].count + count
 							end
-							if not tbl[name].class then
-								local actor = self.super:GetActor(name)
-								if actor then
-									tbl[name].id = actor.id
-									tbl[name].class = actor.class
-									tbl[name].role = actor.role
-									tbl[name].spec = actor.spec
-								end
-							end
+							self.super:_fill_actor_table(tbl[name], name)
 						end
 					end
 				end

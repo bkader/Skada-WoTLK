@@ -6,7 +6,6 @@ local UnitName, UnitGUID, UnitBuff = UnitName, UnitGUID, UnitBuff
 local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local PercentToRGB = Skada.PercentToRGB
-local setPrototype = Skada.setPrototype
 local playerPrototype = Skada.playerPrototype
 local _
 
@@ -25,32 +24,6 @@ do
 		if not Skada:IsDisabled("Buffs") or not Skada:IsDisabled("Debuffs") then
 			spellschools = spellschools or Skada.spellschools
 			Skada.RegisterCallback(self, "Skada_SetComplete", "Clean")
-
-			-- add functions to segment prototype
-			local cache, new, clear = Skada.cacheTable, Skada.newTable, Skada.clearTable
-			setPrototype.GetAuraPlayers = function(set, spellid)
-				local count = 0
-				if spellid and set.players then
-					clear(cache)
-					for i = 1, #set.players do
-						local p = set.players[i]
-						if p and p.auras and p.auras[spellid] then
-							local maxtime = floor(p:GetTime())
-							local uptime = min(maxtime, p.auras[spellid].uptime)
-							count = count + 1
-							cache[p.name] = new()
-							cache[p.name].id = p.id
-							cache[p.name].class = p.class
-							cache[p.name].role = p.role
-							cache[p.name].spec = p.spec
-							cache[p.name].uptime = uptime
-							cache[p.name].maxtime = maxtime
-						end
-					end
-					return cache, count
-				end
-				return nil, count
-			end
 
 			-- add player's aura uptime getter.
 			playerPrototype.GetAuraUptime = function(p, spellid)
@@ -124,11 +97,12 @@ do
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
 		if player then
 			local curtime = set.last_action or time()
-			local spell = player.auras and player.auras[aura.spellid]
+			local spellid = (aura.type == "DEBUFF") and -aura.spellid or aura.spellid
+			local spell = player.auras and player.auras[spellid]
 			if not spell then
-				spell = {school = aura.spellschool, type = aura.type, active = 1, count = 1, uptime = 0, start = curtime}
+				spell = {school = aura.spellschool, active = 1, count = 1, uptime = 0, start = curtime}
 				player.auras = player.auras or {}
-				player.auras[aura.spellid] = spell
+				player.auras[spellid] = spell
 			else
 				spell.active = (spell.active or 0) + 1
 				spell.count = (spell.count or 0) + 1
@@ -159,7 +133,10 @@ do
 		if not aura or not aura.spellid then return end
 
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
-		local spell = player and player.auras and player.auras[aura.spellid]
+		if not player then return end
+
+		local spellid = (aura.type == "DEBUFF") and -aura.spellid or aura.spellid
+		local spell = player and player.auras and player.auras[spellid]
 
 		if spell and spell.active and spell.active > 0 then
 			spell.refresh = (spell.refresh or 0) + 1
@@ -174,7 +151,10 @@ do
 		if not aura or not aura.spellid then return end
 
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
-		local spell = player and player.auras and player.auras[aura.spellid]
+		if not player then return end
+
+		local spellid = (aura.type == "DEBUFF") and -aura.spellid or aura.spellid
+		local spell = player and player.auras and player.auras[spellid]
 
 		if spell and spell.active and spell.active > 0 then
 			local curtime = set.last_action or time()
@@ -199,8 +179,17 @@ do
 		local function count_auras_by_type(auras, atype)
 			local count, uptime = 0, 0
 			if auras then
-				for _, spell in pairs(auras) do
-					if spell.type == atype and spell.uptime > 0 then
+				for spellid, spell in pairs(auras) do
+					-- fix old data
+					if spell.type == "BUFF" or spell.type == "DEBUFF" then
+						spell.type = nil
+						if spell.type == "DEBUFF" and spellid > 0 then
+							auras[spellid] = nil
+							spellid = -spellid
+							auras[spellid] = spell
+						end
+					end
+					if (atype == "BUFF" and spellid > 0) or (atype == "DEBUFF" and spellid < 0) then
 						count = count + 1
 						uptime = uptime + spell.uptime
 					end
@@ -212,7 +201,7 @@ do
 		function mod_update_func(atype, win, set, mode)
 			if not atype then return end
 			local settime = set and set:GetTime()
-			if settime > 0 then
+			if settime and settime > 0 then
 				if win.metadata then
 					win.metadata.maxvalue = 0
 				end
@@ -257,7 +246,7 @@ do
 
 			local nr = 0
 			for spellid, spell in pairs(player.auras) do
-				if spell.type == atype and spell.uptime > 0 then
+				if (atype == "BUFF" and spellid > 0 and spell.uptime > 0) or (atype == "DEBUFF" and spellid < 0 and spell.uptime > 0) then
 					nr = nr + 1
 					local d = win:spell(nr, spellid, spell)
 
@@ -278,8 +267,8 @@ do
 
 	function aura_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local settime = set and set:GetTime() or 0
-		local player = (settime > 0) and set:GetPlayer(win.actorid, win.actorname)
+		local settime = set and set:GetTime()
+		local player = (settime and settime > 0) and set:GetPlayer(win.actorid, win.actorname)
 		local aura = player and player.auras and player.auras[id]
 		if aura then
 			tooltip:AddLine(player.name .. ": " .. label)
@@ -308,7 +297,7 @@ do
 	end
 end
 
-Skada:RegisterModule("Buffs", function(L, P)
+Skada:RegisterModule("Buffs", function(L, P, _, C, new, _, clear)
 	local mod = Skada:NewModule("Buffs")
 	local spellmod = mod:NewModule("Buff spell list")
 	local playermod = spellmod:NewModule("Players list")
@@ -328,7 +317,7 @@ Skada:RegisterModule("Buffs", function(L, P)
 			local spell = player.auras and player.auras[aura.spellid]
 			if not spell then
 				player.auras = player.auras or {}
-				player.auras[aura.spellid] = {school = aura.spellschool, type = aura.type, uptime = 0}
+				player.auras[aura.spellid] = {school = aura.spellschool, uptime = 0}
 				spell = player.auras[aura.spellid]
 			end
 			spell.uptime = spell.uptime + 1
@@ -498,6 +487,32 @@ Skada:RegisterModule("Buffs", function(L, P)
 	function mod:OnDisable()
 		Skada.UnregisterAllMessages(self)
 		Skada:AddMode(self)
+	end
+
+	local setPrototype = Skada.setPrototype
+	function setPrototype:GetAuraPlayers(spellid, tbl)
+		local count = 0
+		if not spellid or not self.players then
+			return nil, count
+		end
+
+		tbl = clear(tbl or C)
+		for i = 1, #self.players do
+			local p = self.players[i]
+			if p and p.auras and p.auras[spellid] then
+				local maxtime = floor(p:GetTime())
+				local uptime = min(maxtime, p.auras[spellid].uptime)
+				count = count + 1
+				tbl[p.name] = new()
+				tbl[p.name].id = p.id
+				tbl[p.name].class = p.class
+				tbl[p.name].role = p.role
+				tbl[p.name].spec = p.spec
+				tbl[p.name].uptime = uptime
+				tbl[p.name].maxtime = maxtime
+			end
+		end
+		return tbl, count
 	end
 end)
 
@@ -780,6 +795,14 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 
 	-- add functions to player's prototype.
 
+	local function new_debuff_table(info)
+		local debuff = new()
+		debuff.count = info.count
+		debuff.refresh = info.refresh
+		debuff.uptime = info.uptime
+		return debuff
+	end
+
 	function playerPrototype:GetDebuffsTargets(tbl)
 		if self.auras then
 			tbl = clear(tbl or C)
@@ -788,28 +811,19 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 				if aura.targets then
 					maxtime = maxtime + aura.uptime
 					for name, target in pairs(aura.targets) do
-						if not tbl[name] then
-							tbl[name] = new()
-							tbl[name].count = target.count
-							tbl[name].refresh = target.refresh
-							tbl[name].uptime = target.uptime
+						local debuff = tbl[name]
+						if not debuff then
+							debuff = new_debuff_table(target)
+							tbl[name] = debuff
 						else
-							tbl[name].count = tbl[name].count + target.count
-							tbl[name].uptime = tbl[name].uptime + target.uptime
+							debuff.count = debuff.count + target.count
+							debuff.uptime = debuff.uptime + target.uptime
 							if target.refresh then
-								tbl[name].refresh = (tbl[name].refresh or 0) + target.refresh
+								debuff.refresh = (debuff.refresh or 0) + target.refresh
 							end
 						end
 
-						if not tbl[name].class then
-							local actor = self.super:GetActor(name)
-							if actor then
-								tbl[name].id = actor.id
-								tbl[name].class = actor.class
-								tbl[name].role = actor.role
-								tbl[name].spec = actor.spec
-							end
-						end
+						self.super:_fill_actor_table(debuff, name)
 					end
 				end
 			end
@@ -822,17 +836,8 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 			tbl = clear(tbl or C)
 			local maxtime = self.auras[spellid].uptime
 			for name, target in pairs(self.auras[spellid].targets) do
-				tbl[name] = new()
-				tbl[name].count = target.count
-				tbl[name].refresh = target.refresh
-				tbl[name].uptime = target.uptime
-				local actor = self.super:GetActor(name)
-				if actor then
-					tbl[name].id = actor.id
-					tbl[name].class = actor.class
-					tbl[name].role = actor.role
-					tbl[name].spec = actor.spec
-				end
+				tbl[name] = new_debuff_table(target)
+				self.super:_fill_actor_table(tbl[name], name)
 			end
 			return tbl, maxtime
 		end
@@ -845,11 +850,8 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 			for spellid, aura in pairs(self.auras) do
 				if aura.targets and aura.targets[name] then
 					maxtime = maxtime + aura.uptime
-					tbl[spellid] = new()
+					tbl[spellid] = new_debuff_table(aura.targets[name])
 					tbl[spellid].school = aura.school
-					tbl[spellid].count = aura.targets[name].count
-					tbl[spellid].refresh = aura.targets[name].refresh
-					tbl[spellid].uptime = aura.targets[name].uptime
 				end
 			end
 			return tbl, maxtime
