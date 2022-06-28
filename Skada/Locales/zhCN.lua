@@ -432,6 +432,14 @@ L["No mode or segment selected for report."] = "没有为报告选定模式或�
 -- Bar Display Module --
 L["Bar Display"] = "条形图显示"
 L["mod_bar_desc"] = "条形图显示是被大多数伤害统计插件所采用的普通条形图窗口。可以高度样式化。"
+-- Bar Display (Legacy)
+L["Legacy Bar Display"] = "条形图显示（旧）"
+L["Max Bars"] = "最大条数量"
+L["The maximum number of bars shown."] = "显示条的最大数量"
+L["Show Menu Button"] = "显示菜单按钮"
+L["Shows a button for opening the menu in the window title bar."] = "在窗口标题条显示打开菜单的按钮。"
+L["Class Color Bars"] = "按职业着色计量条"
+L["Class Color Text"] = "按职业着色文本"
 -- Threat Module --
 L["Threat"] = "威胁"
 L["Threat Warning"] = "威胁警告"

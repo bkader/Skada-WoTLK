@@ -83,7 +83,10 @@ Skada.windowdefaults = {
 	isusingelvuiskin = true,
 	-- data broker display
 	textcolor = {r = 0.9, g = 0.9, b = 0.9},
-	useframe = true
+	useframe = true,
+	-- legacy display
+	baraltcolor = {r = 0.45, g = 0.45, b = 0.8, a = 1},
+	barmax = 10
 }
 
 local windefaultscopy = {}

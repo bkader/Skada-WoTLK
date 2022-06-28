@@ -438,6 +438,14 @@ L["No mode or segment selected for report."] = "Aucun mode ou segment n'a \195\1
 -- Bar Display Module --
 L["Bar Display"] = "Affichage \195\160 barres"
 L["mod_bar_desc"] = "L'affichage \195\160 barres est la fen\195\170tre de barres habituellement utilis\195\169e par la plupart des damage meters. Il peut \195\170tre personnalis\195\169 de fa\195\167on approfondie."
+-- Bar Display (Legacy)
+L["Legacy Bar Display"] = "Affichage \195\160 barres (ancien)"
+L["Max Bars"] = "Nbre max. de barres"
+L["The maximum number of bars shown."] = "Le nombre maximal de barres \195\160 afficher."
+L["Show Menu Button"] = "Aff. bouton Menu"
+L["Shows a button for opening the menu in the window title bar."] = "Affiche un bouton permettant d'ouvrir le menu sur la barre du titre de la fen\195\170tre."
+L["Class Color Bars"] = "Barres: couleur de classe"
+L["Class Color Text"] = "Texte: couleur de classe"
 -- Threat Module --
 L["Threat"] = "Menace"
 L["Threat Warning"] = "Avertissement de la menace"

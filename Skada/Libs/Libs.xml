@@ -27,6 +27,7 @@
 	<Script file="LibDataBroker-1.1\LibDataBroker-1.1.lua"/>
 	<Script file="LibDBIcon-1.0\LibDBIcon-1.0.lua"/>
 	<Script file="SpecializedLibBars-1.0\SpecializedLibBars-1.0.lua"/>
+	<Script file="LegacyLibBars-1.0\LegacyLibBars-1.0.lua"/>
 	<Script file="SpecializedLibToast-1.0\SpecializedLibToast-1.0.lua"/>
 	<Script file="LibTranslit-1.0\LibTranslit-1.0.lua"/>
 	<Script file="LibBossIDs-1.0\LibBossIDs-1.0.lua"/>

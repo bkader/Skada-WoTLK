@@ -434,6 +434,14 @@ L["No mode or segment selected for report."] = "보고서를 위한 모드나 �
 -- Bar Display Module --
 L["Bar Display"] = "바 표시"
 L["mod_bar_desc"] = "바 표시는 대부분의 데미지 미터기가 사용하는 일반적인 바 형식의 창입니다. 폭 넓게 스타일링할 수 있습니다."
+-- Bar Display (Legacy)
+L["Legacy Bar Display"] = "바 표시(구)"
+L["Max Bars"] = "최대 바"
+L["The maximum number of bars shown."] = "표시할 바의 최대 수치입니다."
+L["Show Menu Button"] = "메뉴 버튼 표시"
+L["Shows a button for opening the menu in the window title bar."] = "창 제목 바에 메뉴를 여는 버튼을 표시합니다."
+L["Class Color Bars"] = "직업 색상 바"
+L["Class Color Text"] = "직업 색상 문자"
 -- Threat Module --
 L["Threat"] = "위협 수준"
 L["Threat Warning"] = "위협 수준 경고"

@@ -435,6 +435,14 @@ L["No mode or segment selected for report."] = "No hay modo o segmento seleccion
 -- Bar Display Module --
 L["Bar Display"] = "Visualizaci\195\179n de la barra"
 L["mod_bar_desc"] = "Lo que muestra la barra es la normal usada por la mayor\195\173a de extensiones Medidores de Da\195\177o. Puede ser profusamente customizada."
+-- Bar Display (Legacy)
+L["Legacy Bar Display"] = "Visualizaci\195\179n de barra (antiguo)"
+L["Max Bars"] = "Barras M\195\161ximas"
+L["The maximum number of bars shown."] = "El n\195\186mero m\195\161ximo de barras para mostrar."
+L["Show Menu Button"] = "Mostrar bot\195\179n\195\173de men\195\186"
+L["Shows a button for opening the menu in the window title bar."] = "Muestra un bot\195\179n para abrir el men\195\186 en la barra de t\195\173tulo de la ventana."
+L["Class Color Bars"] = "Barras coloreadas por clase"
+L["Class Color Text"] = "Texto coloreado por clase"
 -- Threat Module --
 L["Threat"] = "Amenaza"
 L["Threat Warning"] = "Advertencia de amenaza"

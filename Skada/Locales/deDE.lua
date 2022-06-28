@@ -433,6 +433,14 @@ L["No mode or segment selected for report."] = "Kein Modus oder Segment zum Beri
 -- Bar Display Module --
 L["Bar Display"] = "Leistenanzeige"
 L["mod_bar_desc"] = "Leistenanzeige ist das normale Leistenfenster, diese Anzeigeart wird von den meisten Schadensmetern verwendet. Sie kann optisch stark ver\195\164ndert werden."
+-- Bar Display (Legacy)
+L["Legacy Bar Display"] = "Leistenanzeige (alt)"
+L["Max Bars"] = "Max. Leisten"
+L["The maximum number of bars shown."] = "Die maximale Anzahl an angezeigten Leisten."
+L["Show Menu Button"] = "Zeige Men\195\188knopf"
+L["Shows a button for opening the menu in the window title bar."] = "Zeigt einen Knopf in der Titelleiste f\195\188r das Men\195\188."
+L["Class Color Bars"] = "Klassen farbige Leisten"
+L["Class Color Text"] = "Klassen farbiger Text"
 -- Threat Module --
 L["Threat"] = "Bedrohung"
 L["Threat Warning"] = "Threat Warning"

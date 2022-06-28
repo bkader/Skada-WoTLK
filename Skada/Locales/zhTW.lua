@@ -432,6 +432,14 @@ L["No mode or segment selected for report."] = "沒有選擇可報告的模組�
 -- Bar Display Module --
 L["Bar Display"] = "顯示計量條"
 L["mod_bar_desc"] = "條列顯示是大多數傷害統計使用的一般條列視窗。它可以是廣泛的樣式。"
+-- Bar Display (Legacy)
+L["Legacy Bar Display"] = "顯示計量條（舊）"
+L["Max Bars"] = "最多計量條數量"
+L["The maximum number of bars shown."] = "顯示最多數量的計量條。"
+L["Show Menu Button"] = "顯示選單按鈕"
+L["Shows a button for opening the menu in the window title bar."] = "在視窗標題條上顯示一個按鈕以開啟選單。"
+L["Class Color Bars"] = "計量條的職業顏色"
+L["Class Color Text"] = "文字的職業顏色"
 -- Threat Module --
 L["Threat"] = "威脅值"
 L["Threat Warning"] = "威脅值的警告"

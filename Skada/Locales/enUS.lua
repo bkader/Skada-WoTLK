@@ -466,6 +466,14 @@ L["No mode or segment selected for report."] = true
 -- Bar Display Module --
 L["Bar Display"] = true
 L["mod_bar_desc"] = "Bar display is the normal bar window used by most damage meters. It can be extensively styled."
+-- Bar Display (Legacy)
+L["Legacy Bar Display"] = true
+L["Max Bars"] = true
+L["The maximum number of bars shown."] = true
+L["Show Menu Button"] = true
+L["Shows a button for opening the menu in the window title bar."] = true
+L["Class Color Bars"] = true
+L["Class Color Text"] = true
 -- Threat Module --
 L["Threat"] = true
 L["Threat Warning"] = true
