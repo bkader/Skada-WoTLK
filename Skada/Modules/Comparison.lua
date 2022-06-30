@@ -1,8 +1,7 @@
 local Skada = Skada
 Skada:RegisterModule("Comparison", function(L, P)
-	if Skada:IsDisabled("Damage") then return end
-
-	local parent = Skada:GetModule("Damage")
+	local parent = Skada:GetModule("Damage", true)
+	if not parent then return end
 
 	local mod = parent:NewModule("Comparison")
 	local spellmod = mod:NewModule("Damage spell list")
@@ -830,4 +829,4 @@ Skada:RegisterModule("Comparison", function(L, P)
 		parent.metadata.click3_label = L["Damage Comparison"]
 		parent:Reload()
 	end
-end)
+end, "Damage")

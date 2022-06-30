@@ -364,6 +364,7 @@ L["Bottom"] = "下"
 L["Right"] = "右"
 L["Left"] = "左"
 -- disabled modules
+L["\124cff00ff00Requires\124r: %s"] = "\124cff00ff00需要\124r：%s"
 L["Modules"] = "组件"
 L["Disabled Modules"] = "禁用模块"
 L["Modules Options"] = "模块选项"

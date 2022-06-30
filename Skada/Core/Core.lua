@@ -16,8 +16,8 @@ local DBI = LibStub("LibDBIcon-1.0", true)
 local Translit = LibStub("LibTranslit-1.0", true)
 
 -- cache frequently used globlas
-local tsort, tinsert, tremove, tmaxn, wipe, setmetatable = table.sort, table.insert, table.remove, table.maxn, wipe, setmetatable
-local next, pairs, ipairs, type = next, pairs, ipairs, type
+local tsort, tinsert, tremove, tmaxn, tconcat, wipe = table.sort, table.insert, table.remove, table.maxn, table.concat, wipe
+local next, pairs, ipairs, unpack, type, setmetatable = next, pairs, ipairs, unpack, type, setmetatable
 local tonumber, tostring, strmatch, format, gsub, lower, find = tonumber, tostring, strmatch, string.format, string.gsub, string.lower, string.find
 local floor, max, min, abs, band, time, GetTime = math.floor, math.max, math.min, math.abs, bit.band, time, GetTime
 local IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction = IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction
@@ -1520,20 +1520,60 @@ end
 Skada.OnModuleCreated = on_module_created
 
 -- adds a module to the loadable modules table.
-function Skada:RegisterModule(name, desc, func)
-	if type(desc) == "function" then
-		func = desc
-		desc = nil
+function Skada:RegisterModule(...)
+	local args = new()
+	for i = 1, select("#", ...) do
+		args[i] = select(i, ...)
 	end
 
-	self.LoadableModules = self.LoadableModules or new()
+	if #args >= 2 then
+		-- name must always be first.
+		local name = tremove(args, 1)
+		if type(name) ~= "string" then
+			return
+		end
 
-	local pos = #self.LoadableModules + 1
-	self.LoadableModules[pos] = new()
-	self.LoadableModules[pos].name = name
-	self.LoadableModules[pos].func = func
+		-- second arg can be string (desc) or callback (init)
+		local func = nil
+		local desc = tremove(args, 1)
+		if type(desc) == "string" then
+			func = tremove(args, 1) -- func is the next arg
+			desc = L[desc]
+		elseif type(desc) == "function" then
+			func = desc
+			desc = nil
+		end
 
-	self.options.args.modules.args.blocked.args[name] = {type = "toggle", name = L[name], desc = desc and L[desc]}
+		-- double check func is a callback
+		if type(func) ~= "function" then
+			return
+		end
+
+		local module = new()
+		module.name = name
+		module.func = func
+
+		if #args > 0 then
+			module.deps = new()
+			for i = 1, #args do
+				module.deps[i] = args[i]
+				args[i] = L[args[i]] -- localize
+			end
+
+			if desc then
+				desc = format("%s\n%s", desc, format(L["\124cff00ff00Requires\124r: %s"], tconcat(args, ", ")))
+			else
+				desc = format(L["\124cff00ff00Requires\124r: %s"], tconcat(args, ", "))
+			end
+		end
+
+		self.LoadableModules = self.LoadableModules or new()
+		self.LoadableModules[#self.LoadableModules + 1] = module
+
+		self.options.args.modules.args.blocked.args[name] = {type = "toggle", name = L[name], desc = desc}
+	end
+
+	args = del(args)
 end
 
 -- checks whether the select module(s) are disabled
@@ -2597,7 +2637,7 @@ function Skada:PLAYER_ENTERING_WORLD()
 
 	-- character-specific addon version
 	if version ~= self.char.version then
-		if (version - self.char.version) >= 5 or (version - self.char.version) <= -5 then
+		if (version - self.char.version) >= 3 or (version - self.char.version) <= -3 then
 			self:Reset(true)
 		end
 		self.callbacks:Fire("Skada_UpdateData", self.char.version, version)
@@ -3365,7 +3405,7 @@ function Skada:OnEnable()
 	if self.LoadableModules then
 		for i = 1, #self.LoadableModules do
 			local mod = self.LoadableModules[i]
-			if mod and mod.name and mod.func and not self:IsDisabled(mod.name) then
+			if mod.name and mod.func and not self:IsDisabled(mod.name) and not (mod.deps and self:IsDisabled(unpack(mod.deps))) then
 				mod.func(L, self.db.profile, self.db.global, self.cacheTable, new, del, clear)
 			end
 		end

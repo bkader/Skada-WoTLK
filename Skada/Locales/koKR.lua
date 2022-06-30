@@ -366,6 +366,7 @@ L["Bottom"] = "하단"
 L["Right"] = "오른쪽"
 L["Left"] = "왼쪽"
 -- disabled modules
+L["\124cff00ff00Requires\124r: %s"] = "\124cff00ff00필요사항\124r: %s"
 L["Modules"] = "모듈"
 L["Disabled Modules"] = "비활성화된 모듈"
 L["Modules Options"] = "모듈 설정"

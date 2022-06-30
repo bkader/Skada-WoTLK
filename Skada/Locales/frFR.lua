@@ -370,6 +370,7 @@ L["Bottom"] = "Bas"
 L["Right"] = "Droite"
 L["Left"] = "Gauche"
 -- disabled modules
+L["\124cff00ff00Requires\124r: %s"] = "\124cff00ff00Requiert\124r: %s"
 L["Modules"] = "Modules"
 L["Disabled Modules"] = "Modules D\195\169sactive\195\169s"
 L["Modules Options"] = "Options des modules"

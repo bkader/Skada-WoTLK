@@ -384,6 +384,7 @@ L["Bottom"] = true
 L["Right"] = true
 L["Left"] = true
 -- disabled modules
+L["\124cff00ff00Requires\124r: %s"] = true
 L["Modules"] = true
 L["Disabled Modules"] = true
 L["Modules Options"] = true

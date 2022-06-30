@@ -1203,8 +1203,6 @@ end)
 -- ========================== --
 
 Skada:RegisterModule("Absorbs and Healing", function(L, P)
-	if Skada:IsDisabled("Healing", "Absorbs") then return end
-
 	local mod = Skada:NewModule("Absorbs and Healing")
 	local playermod = mod:NewModule("Absorbs and healing spells")
 	local targetmod = mod:NewModule("Absorbed and healed targets")
@@ -1596,15 +1594,13 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 			self.metadata.columns.HPS and Skada:FormatNumber(hps)
 		), amount
 	end
-end)
+end, "Absorbs", "Healing")
 
 -- ============================== --
 -- Healing done per second module --
 -- ============================== --
 
 Skada:RegisterModule("HPS", function(L, P)
-	if Skada:IsDisabled("Absorbs", "Healing", "Absorbs and Healing") then return end
-
 	local mod = Skada:NewModule("HPS")
 
 	local function hps_tooltip(win, id, label, tooltip)
@@ -1717,15 +1713,13 @@ Skada:RegisterModule("HPS", function(L, P)
 	function mod:GetSetSummary(set)
 		return Skada:FormatNumber(set and set:GetAHPS() or 0)
 	end
-end)
+end, "Absorbs", "Healing", "Absorbs and Healing")
 
 -- ===================== --
 -- Healing done by spell --
 -- ===================== --
 
 Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear)
-	if Skada:IsDisabled("Healing", "Absorbs") then return end
-
 	local mod = Skada:NewModule("Healing Done By Spell")
 	local spellmod = mod:NewModule("Healing spell sources")
 	local spellschools = Skada.spellschools
@@ -1950,4 +1944,4 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear
 		end
 		return tbl
 	end
-end)
+end, "Absorbs", "Healing")

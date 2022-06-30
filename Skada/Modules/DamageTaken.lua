@@ -777,8 +777,6 @@ end)
 -- ============================== --
 
 Skada:RegisterModule("DTPS", function(L, P)
-	if Skada:IsDisabled("Damage Taken") then return end
-
 	local mod = Skada:NewModule("DTPS")
 
 	local function dtps_tooltip(win, id, label, tooltip)
@@ -890,15 +888,13 @@ Skada:RegisterModule("DTPS", function(L, P)
 		local dtps = set:GetDTPS()
 		return Skada:FormatNumber(dtps), dtps
 	end
-end)
+end, "Damage Taken")
 
 -- ============================ --
 -- Damage Taken By Spell Module --
 -- ============================ --
 
 Skada:RegisterModule("Damage Taken By Spell", function(L, P, _, _, new, _, clear)
-	if Skada:IsDisabled("Damage Taken") then return end
-
 	local mod = Skada:NewModule("Damage Taken By Spell")
 	local targetmod = mod:NewModule("Damage spell targets")
 	local sourcemod = mod:NewModule("Damage spell sources")
@@ -1121,15 +1117,13 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P, _, _, new, _, clear
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
 	end
-end)
+end, "Damage Taken")
 
 -- ============================= --
 -- Avoidance & Mitigation Module --
 -- ============================= --
 
 Skada:RegisterModule("Avoidance & Mitigation", function(L, _, _, _, new, del, clear)
-	if Skada:IsDisabled("Damage Taken") then return end
-
 	local mod = Skada:NewModule("Avoidance & Mitigation")
 	local playermod = mod:NewModule("Damage Breakdown")
 	local C = Skada.cacheTable2
@@ -1253,4 +1247,4 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L, _, _, _, new, del, cl
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
 	end
-end)
+end, "Damage Taken")

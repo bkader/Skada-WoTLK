@@ -365,6 +365,7 @@ L["Bottom"] = "Unten"
 L["Right"] = "Rechts"
 L["Left"] = "Links"
 -- disabled modules
+L["\124cff00ff00Requires\124r: %s"] = "\124cff00ff00Ben\195\182tigt\124r: %s"
 L["Modules"] = "Module"
 L["Disabled Modules"] = "Deaktivierte Module"
 L["Modules Options"] = "Moduloptionen"
