@@ -272,7 +272,7 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 		local player = Skada:GetPlayer(set, absorb.playerid, absorb.playername)
 		if player then
 			if player.role ~= "DAMAGER" and not nocount then
-				Skada:AddActiveTime(set, player, not passiveSpells[absorb.spellid])
+				Skada:AddActiveTime(set, player, not passiveSpells[absorb.spellid], nil, absorb.dstName)
 			end
 
 			-- add absorbs amount

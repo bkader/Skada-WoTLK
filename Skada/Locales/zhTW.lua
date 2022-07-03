@@ -638,6 +638,8 @@ L["Alternative Display"] = "另类显示"
 L["If a player dies multiple times, each death will be displayed as a separate bar."] = "如果玩家多次死亡，每次死亡都会显示为单独的条形图。"
 -- activity module
 L["Activity"] = "活躍度"
+L["Activity per Target"] = "每個目標的活動"
+L["%s's activity"] = "%s 的活動"
 -- dispels module lines --
 L["Dispel spell list"] = "驅散法術列表"
 L["Dispelled spell list"] = "已驅散法術列表"

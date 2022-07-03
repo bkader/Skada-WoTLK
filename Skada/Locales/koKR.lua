@@ -641,6 +641,8 @@ L["Alternative Display"] = "대체 디스플레이"
 L["If a player dies multiple times, each death will be displayed as a separate bar."] = "플레이어가 여러 번 사망하면 각 사망은 별도의 막대로 표시됩니다."
 -- activity module
 L["Activity"] = "활동"
+L["Activity per Target"] = "대상당 활동"
+L["%s's activity"] = "%s의 활동"
 -- dispels module lines --
 -- L["Dispel spell list"] = ""
 -- L["Dispelled spell list"] = ""

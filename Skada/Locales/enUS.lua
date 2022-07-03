@@ -683,6 +683,8 @@ L["Alternative Display"] = true
 L["If a player dies multiple times, each death will be displayed as a separate bar."] = true
 -- activity module
 L["Activity"] = true
+L["Activity per Target"] = true
+L["%s's activity"] = true
 -- dispels module lines --
 L["Dispels"] = DISPELS
 L["Dispel spell list"] = true

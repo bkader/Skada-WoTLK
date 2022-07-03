@@ -641,6 +641,8 @@ L["Alternative Display"] = "Альтернативное отображение"
 L["If a player dies multiple times, each death will be displayed as a separate bar."] = "Если игрок умирает несколько раз, каждая смерть будет отображаться отдельной полосой."
 -- activity module
 L["Activity"] = "Активность"
+L["Activity per Target"] = "Активность по цели"
+L["%s's activity"] = "%s активность"
 -- dispels module lines --
 L["Dispel spell list"] = "Заклинания рассеивания"
 L["Dispelled spell list"] = "Рассеянные заклинания"

@@ -41,7 +41,7 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 			-- get rid of overheal
 			local amount = max(0, data.amount - data.overheal)
 			if player.role == "HEALER" and amount > 0 and not data.petname then
-				Skada:AddActiveTime(set, player, data.spellid and not passiveSpells[data.spellid])
+				Skada:AddActiveTime(set, player, data.spellid and not passiveSpells[data.spellid], nil, data.dstName)
 			end
 
 			-- record the healing

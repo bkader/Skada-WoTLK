@@ -644,6 +644,8 @@ L["Alternative Display"] = "Affichage alternatif"
 L["If a player dies multiple times, each death will be displayed as a separate bar."] = "Si un joueur meurt plusieurs fois, chaque mort aura sa propre barre."
 -- activity module
 L["Activity"] = "Activit\195\169"
+L["Activity per Target"] = "Activit\195\169 par cible"
+L["%s's activity"] = "Activit\195\169 \1242 %s"
 -- dispels module lines --
 L["Dispel spell list"] = "Sorts de dissipation"
 L["Dispelled spell list"] = "Sorts dissip\195\169s"

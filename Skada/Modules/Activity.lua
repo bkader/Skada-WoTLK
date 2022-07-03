@@ -1,7 +1,8 @@
 local Skada = Skada
-Skada:RegisterModule("Activity", function(L)
+Skada:RegisterModule("Activity", function(L, P, _, C, new, _, clear)
 	local mod = Skada:NewModule("Activity")
-	local date, format, max = date, string.format, math.max
+	local targetmod = mod:NewModule("Activity per Target")
+	local date, pairs, format, max = date, pairs, string.format, math.max
 
 	local function activity_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
@@ -14,6 +15,42 @@ Skada:RegisterModule("Activity", function(L)
 				tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
 				tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
 				tooltip:AddDoubleLine(L["Activity"], Skada:FormatPercent(activetime, settime), nil, nil, nil, 1, 1, 1)
+			end
+		end
+	end
+
+	function targetmod:Enter(win, id, label)
+		win.actorid, win.actorname = id, label
+		win.title = format(L["%s's activity"], label)
+	end
+
+	function targetmod:Update(win, set)
+		win.title = format(L["%s's activity"], win.actorname or L["Unknown"])
+		if not win.actorname then return end
+
+		local actor = set:GetActor(win.actorname, win.actorid)
+		local maxtime = actor and actor:GetTime(true)
+		local targets = maxtime and actor:GetActivityTargets()
+
+		if not targets then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
+
+		local nr = 0
+		for name, target in pairs(targets) do
+			nr = nr + 1
+			local d = win:actor(nr, target, true, name)
+
+			d.value = target.time
+			d.valuetext = Skada:FormatValueCols(
+				mod.metadata.columns["Active Time"] and Skada:FormatTime(d.value),
+				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, maxtime)
+			)
+
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
 			end
 		end
 	end
@@ -82,6 +119,14 @@ Skada:RegisterModule("Activity", function(L)
 		end
 	end
 
+	function mod:OnInitialize()
+		Skada.options.args.tweaks.args.general.args.tartime = {
+			type = "toggle",
+			name = L["Activity per Target"],
+			order = 110
+		}
+	end
+
 	function mod:OnEnable()
 		self.metadata = {
 			showspots = true,
@@ -89,13 +134,19 @@ Skada:RegisterModule("Activity", function(L)
 			tooltip = activity_tooltip,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			columns = {["Active Time"] = true, Percent = true},
+			columns = {["Active Time"] = true, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\spell_holy_borrowedtime]]
 		}
+
+		-- no total click.
+		targetmod.nototal = true
+
+		Skada.RegisterCallback(self, "Skada_ApplySettings", "ApplySettings")
 		Skada:AddMode(self)
 	end
 
 	function mod:OnDisable()
+		Skada.UnregisterAllCallbacks(self)
 		Skada:RemoveMode(self)
 	end
 
@@ -106,5 +157,56 @@ Skada:RegisterModule("Activity", function(L)
 			self.metadata.columns.Percent and format("%s - %s", date("%H:%M", set.starttime), date("%H:%M", set.endtime))
 		)
 		return valuetext, settime
+	end
+
+	---------------------------------------------------------------------------
+
+	local Old_AddActiveTime = Skada.AddActiveTime
+	local function Alt_AddActiveTime(self, set, actor, cond, diff, target)
+		if actor and actor.last and cond then
+			local curtime = set.last_time or GetTime()
+			local delta = curtime - actor.last
+
+			if diff and diff > 0 and diff < delta then
+				delta = diff
+			elseif delta > 3.5 then
+				delta = 3.5
+			end
+
+			actor.last = curtime
+			local add = floor(100 * delta + 0.5) / 100
+			actor.time = (actor.time or 0) + add
+
+			if target and (set ~= self.total or self.db.profile.totalidc) then
+				actor.tartime = actor.tartime or {}
+				actor.tartime[target] = (actor.tartime[target] or 0) + add
+			end
+		end
+	end
+	function mod:ApplySettings()
+		if P.tartime and Skada.AddActiveTime ~= Alt_AddActiveTime then
+			Skada.AddActiveTime = Alt_AddActiveTime
+			self.metadata.click1 = targetmod
+			self:Reload()
+		elseif not P.tartime and Skada.AddActiveTime ~= Old_AddActiveTime then
+			Skada.AddActiveTime = Old_AddActiveTime
+			self.metadata.click1 = nil
+			self:Reload()
+		end
+	end
+
+	---------------------------------------------------------------------------
+
+	local actorPrototype = Skada.actorPrototype
+	function actorPrototype:GetActivityTargets(tbl)
+		if not self.tartime then return end
+
+		tbl = clear(tbl or C)
+		for name, _time in pairs(self.tartime) do
+			tbl[name] = new()
+			tbl[name].time = _time
+			self.super:_fill_actor_table(tbl[name], name)
+		end
+		return tbl
 	end
 end)

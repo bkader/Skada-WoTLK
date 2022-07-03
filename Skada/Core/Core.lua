@@ -2987,10 +2987,10 @@ function Skada:FormatTime(sec, alt, ...)
 		elseif sec >= 3600 then
 			local h = floor(sec / 3600)
 			local m = floor(sec / 60 - (h * 60))
-			local s = floor(sec - h * 3600 - m * 60)
+			local s = floor(sec - h * 3600 - m * 60 + 0.5)
 			return format("%02.f:%02.f:%02.f", h, m, s)
 		else
-			return format("%02.f:%02.f", floor(sec / 60), floor(sec % 60))
+			return format("%02.f:%02.f", floor(sec / 60), floor(sec % 60 + 0.5))
 		end
 	end
 end

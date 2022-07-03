@@ -59,9 +59,9 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 
 		-- update activity
 		if whitelist[dmg.spellid] ~= nil and not dmg.petname then
-			Skada:AddActiveTime(set, player, (dmg.amount > 0), tonumber(whitelist[dmg.spellid]))
-		elseif player.role ~= "HEALER" and not dmg.petname then
-			Skada:AddActiveTime(set, player, (dmg.amount > 0 and not passiveSpells[dmg.spellid]))
+			Skada:AddActiveTime(set, player, (dmg.amount > 0), tonumber(whitelist[dmg.spellid]), dmg.dstName)
+		elseif player.role ~= "HEALER" and not dmg.petname and not passiveSpells[dmg.spellid] then
+			Skada:AddActiveTime(set, player, (dmg.amount > 0), tonumber(whitelist[dmg.spellid]), dmg.dstName)
 		end
 
 		-- absorbed and overkill

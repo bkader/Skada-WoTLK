@@ -14,8 +14,8 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 	local function log_damage(set, dmg)
 		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
 		if player then
-			if dmg.amount > 0 and dmg.spellid then
-				Skada:AddActiveTime(set, player, not passiveSpells[dmg.spellid])
+			if dmg.amount > 0 and dmg.spellid and not passiveSpells[dmg.spellid] then
+				Skada:AddActiveTime(set, player, true, nil, dmg.dstName)
 			end
 
 			player.friendfire = (player.friendfire or 0) + dmg.amount
