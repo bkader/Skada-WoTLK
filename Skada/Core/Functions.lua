@@ -678,6 +678,11 @@ do
 		end
 	end
 
+	local function update_fake_data(self)
+		randomize_fake_data(self.current, self.db.profile.updatefrequency or 0.25)
+		self:UpdateDisplay(true)
+	end
+
 	function Skada:TestMode()
 		if InCombatLockdown() or IsGroupInCombat() then
 			wipe(fakeSet)
@@ -703,10 +708,7 @@ do
 
 		self:Wipe()
 		self.current = generate_fake_data()
-		updateTimer = self:ScheduleRepeatingTimer(function()
-			randomize_fake_data(self.current, self.db.profile.updatefrequency or 0.25)
-			self:UpdateDisplay(true)
-		end, self.db.profile.updatefrequency or 0.25)
+		updateTimer = self:ScheduleRepeatingTimer(update_fake_data, self.db.profile.updatefrequency or 0.25, self)
 	end
 end
 

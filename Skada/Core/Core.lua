@@ -65,9 +65,6 @@ Skada.newTable, Skada.delTable, Skada.clearTable = new, del, clear
 local displays = {}
 Skada.displays = displays -- make externally available
 
--- flag to check if disabled
-local disabled = false
-
 -- update & tick timers
 local update_timer, tick_timer, toggle_timer, version_timer
 local check_version, convert_version
@@ -306,7 +303,7 @@ end
 
 -- returns the selected set time.
 function Skada:GetSetTime(set)
-	return set and max(1, set.time > 0 and set.time or (time() - set.starttime)) or 0
+	return (set and set.time) and max(1, set.time > 0 and set.time or (time() - set.starttime)) or 0
 end
 
 -- returns a formmatted set time
@@ -324,7 +321,7 @@ function Skada:GetActiveTime(set, actor, active)
 	end
 
 	-- effective: combat time.
-	return max(1, set.time > 0 and set.time or (time() - set.starttime))
+	return (set and set.time) and max(1, set.time > 0 and set.time or (time() - set.starttime)) or 0
 end
 
 -- updates the actor's active time
@@ -874,7 +871,7 @@ function Window:nr(i)
 end
 
 -- generates spell's dataset
-function Window:spell(d, spellid, spell, school, isheal)
+function Window:spell(d, spellid, spell, school, isheal, no_suffix)
 	if d and spellid then
 		-- create the dataset?
 		if type(d) == "number" then
@@ -892,9 +889,9 @@ function Window:spell(d, spellid, spell, school, isheal)
 			d.spellid = spellid
 			d.label, _, d.icon = GetSpellInfo(abs(d.spellid))
 
-			if (spell and spell.ishot) or isheal then
+			if ((spell and spell.ishot) or isheal) and not no_suffix then
 				d.label = format("%s%s", d.label, L["HoT"])
-			elseif spellid < 0 then
+			elseif spellid < 0 and not no_suffix then
 				d.label = format("%s%s", d.label, L["DoT"])
 			end
 			if spell and spell.school then
@@ -1399,17 +1396,17 @@ function Skada:SetActive(enable)
 	end
 
 	if not enable and self.db.profile.hidedisables then
-		if not disabled then
+		if not self.disabled then
 			self:Debug(format("%s \124cffff0000%s\124r", L["Data Collection"], L["DISABLED"]))
 		end
-		disabled = true
+		self.disabled = true
 		self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	else
-		if disabled then
+		if self.disabled then
 			self:Debug(format("%s \124cff00ff00%s\124r", L["Data Collection"], L["ENABLED"]))
 		end
-		disabled = false
-		self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "CombatLogEvent")
+		self.disabled = nil
+		self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "OnCombatEvent")
 	end
 
 	self:UpdateDisplay(true)
@@ -3397,7 +3394,7 @@ function Skada:OnEnable()
 	self:RegisterEvent("UNIT_PET")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 	self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "CheckZone")
-	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "CombatLogEvent")
+	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "OnCombatEvent")
 	self:RegisterEvent("UNIT_ENTERED_VEHICLE", "CheckVehicle")
 	self:RegisterEvent("UNIT_EXITED_VEHICLE", "CheckVehicle")
 	self:RegisterBucketEvent({"PARTY_MEMBERS_CHANGED", "RAID_ROSTER_UPDATE"}, 0.25, "UpdateRoster")
@@ -3617,7 +3614,7 @@ function Skada:PLAYER_REGEN_ENABLED()
 end
 
 function Skada:PLAYER_REGEN_DISABLED()
-	if not disabled and not self.current then
+	if not self.disabled and not self.current then
 		self:Debug("StartCombat: PLAYER_REGEN_DISABLED")
 		self:StartCombat()
 	end
@@ -3920,7 +3917,7 @@ do
 
 	function Skada:Tick()
 		self.inCombat = true
-		if not disabled and self.current and not InCombatLockdown() and not IsGroupInCombat() and self.insType ~= "pvp" and self.insType ~= "arena" then
+		if not self.disabled and self.current and not InCombatLockdown() and not IsGroupInCombat() and self.insType ~= "pvp" and self.insType ~= "arena" then
 			self:Debug("EndSegment: Tick")
 			self:EndSegment()
 		end
@@ -3995,12 +3992,17 @@ do
 		end
 	end
 
-	function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		-- disabled module or test mode?
-		if disabled or self.testMode then return end
+	function Skada:OnCombatEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		-- disabled or test mode?
+		if self.disabled or self.testMode then return end
+
+		return self:CombatLogEvent(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	end
+
+	function Skada:CombatLogEvent(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 
 		-- ignored combat event?
-		if ignored_events[eventtype] and not (spellcast_events[eventtype] and self.current) then return end
+		if (not eventtype or ignored_events[eventtype]) and not (spellcast_events[eventtype] and self.current) then return end
 
 		local src_is_interesting = nil
 		local dst_is_interesting = nil

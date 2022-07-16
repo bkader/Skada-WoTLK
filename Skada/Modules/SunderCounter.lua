@@ -207,7 +207,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 		-- no total click.
 		targetmod.nototal = true
 
-		Skada:RegisterForCL(sunder_applied, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})
+		Skada:RegisterForCL(sunder_applied, "SPELL_AURA_APPLIED", "SPELL_AURA_APPLIED_DOSE", {src_is_interesting_nopets = true})
 		Skada:RegisterForCL(sunder_removed, "SPELL_AURA_REMOVED", {src_is_interesting_nopets = true})
 		Skada:RegisterForCL(unit_died, "UNIT_DIED", "UNIT_DESTROYED", "UNIT_DISSIPATES", {dst_is_not_interesting = true})
 

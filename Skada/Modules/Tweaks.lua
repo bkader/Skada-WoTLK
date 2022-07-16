@@ -30,7 +30,6 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 		local hitformats = {"%s (%s)", "%s (\124c%s%s\124r)", "\124c%s%s\124r", "\124c%s%s\124r (%s)"}
 
 		-- thank you Details!
-		local Skada_CombatLogEvent = Skada.CombatLogEvent
 		local trigger_events = {
 			RANGE_DAMAGE = true,
 			SPELL_BUILDING_DAMAGE = true,
@@ -79,7 +78,10 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 			end
 		end
 
-		function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
+		function Skada:OnCombatEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
+			-- disabled or test mode?
+			if self.disabled or self.testMode then return end
+
 			-- The Lich King fight & Fury of Frostmourne
 			if considerFoF and (spellid == 72350 or spellname == fofrostmourne) then
 				if self.current and not self.current.success then
@@ -149,8 +151,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 				end
 			end
 
-			-- use the original function
-			Skada_CombatLogEvent(self, nil, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
+			return self:CombatLogEvent(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
 		end
 
 		function mod:PrintFirstHit()

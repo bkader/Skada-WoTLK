@@ -248,7 +248,7 @@ do
 			for spellid, spell in pairs(player.auras) do
 				if (atype == "BUFF" and spellid > 0 and spell.uptime > 0) or (atype == "DEBUFF" and spellid < 0 and spell.uptime > 0) then
 					nr = nr + 1
-					local d = win:spell(nr, spellid, spell)
+					local d = win:spell(nr, spellid, spell, nil, nil, true)
 
 					d.value = min(maxtime, spell.uptime)
 					d.valuetext = Skada:FormatValueCols(
@@ -587,7 +587,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 			local nr = 0
 			for spellid, aura in pairs(auras) do
 				nr = nr + 1
-				local d = win:spell(nr, spellid, aura)
+				local d = win:spell(nr, spellid, aura, nil, nil, true)
 
 				d.value = aura.uptime
 				d.valuetext = Skada:FormatValueCols(
@@ -756,7 +756,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 
 	function mod:OnEnable()
 		spelltargetmod.metadata = {tooltip = aura_target_tooltip}
-		spellsourcemod.metadata = {showspots = true, tooltip = aura_source_tooltip}
+		spellsourcemod.metadata = {tooltip = aura_source_tooltip}
 		spellmod.metadata = {click1 = spelltargetmod, click2 = spellsourcemod, post_tooltip = aura_tooltip}
 		targetmod.metadata = {click1 = targetspellmod}
 		self.metadata = {
