@@ -1,7 +1,7 @@
 local Skada = Skada
 
-local pairs, format, tostring = pairs, string.format, tostring
-local min, max, floor = math.min, math.max, math.floor
+local format, pformat, tostring = string.format, Skada.pformat, tostring
+local pairs, min, max, floor = pairs, math.min, math.max, math.floor
 local UnitName, UnitGUID, UnitBuff = UnitName, UnitGUID, UnitBuff
 local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
@@ -356,11 +356,11 @@ Skada:RegisterModule("Buffs", function(L, P, _, C, new, _, clear)
 
 	function playermod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format(L["%s's targets"], label or L["Unknown"])
+		win.title = pformat(L["%s's targets"], label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's targets"], win.spellname or L["Unknown"])
+		win.title = pformat(L["%s's targets"], win.spellname)
 		if not (win.spellid and set) then return end
 
 		local players, count = set:GetAuraPlayers(win.spellid)
@@ -389,11 +389,11 @@ Skada:RegisterModule("Buffs", function(L, P, _, C, new, _, clear)
 
 	function spellmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's buffs"], label)
+		win.title = pformat(L["%s's buffs"], label)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's buffs"], win.actorname or L["Unknown"])
+		win.title = pformat(L["%s's buffs"], win.actorname)
 		aura_update_func("BUFF", win, set, mod)
 	end
 
@@ -605,11 +605,11 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 
 	function spelltargetmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format(L["%s's <%s> targets"], win.actorname or L["Unknown"], label)
+		win.title = pformat(L["%s's <%s> targets"], win.actorname, label)
 	end
 
 	function spelltargetmod:Update(win, set)
-		win.title = format(L["%s's <%s> targets"], win.actorname or L["Unknown"], win.spellname or L["Unknown"])
+		win.title = pformat(L["%s's <%s> targets"], win.actorname, win.spellname)
 		if not win.spellid then return end
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
@@ -642,11 +642,11 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 
 	function spellsourcemod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format(L["%s's sources"], label)
+		win.title = pformat(L["%s's sources"], label)
 	end
 
 	function spellsourcemod:Update(win, set)
-		win.title = format(L["%s's sources"], win.spellname or L["Unknown"])
+		win.title = pformat(L["%s's sources"], win.spellname)
 		if not win.spellid then return end
 
 		local nr = 0
@@ -669,11 +669,11 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 
 	function targetmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's targets"], label)
+		win.title = pformat(L["%s's targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's targets"], win.actorname or L["Unknown"])
+		win.title = pformat(L["%s's targets"], win.actorname)
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		if not player then return end

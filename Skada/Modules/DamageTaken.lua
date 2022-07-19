@@ -1,7 +1,8 @@
 local Skada = Skada
 
 -- cache frequently used globals
-local pairs, select, format, max, T = pairs, select, string.format, math.max, Skada.Table
+local pairs, select, max = pairs, select, math.max
+local format, pformat, T = string.format, Skada.pformat, Skada.Table
 local _
 
 -- =================== --
@@ -362,7 +363,7 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["Damage taken by %s"], win.actorname or L["Unknown"])
+		win.title = pformat(L["Damage taken by %s"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)
@@ -402,7 +403,7 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 	end
 
 	function sourcemod:Update(win, set)
-		win.title = format(L["%s's damage sources"], win.actorname or L["Unknown"])
+		win.title = pformat(L["%s's damage sources"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		if not actor then return end
@@ -453,11 +454,11 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 
 	function spellmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format("%s: %s", win.actorname or L["Unknown"], format(L["%s's damage breakdown"], label))
+		win.title = pformat("%s: %s", win.actorname, format(L["%s's damage breakdown"], label))
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format("%s: %s", win.actorname or L["Unknown"], format(L["%s's damage breakdown"], win.spellname or L["Unknown"]))
+		win.title = pformat("%s: %s", win.actorname, pformat(L["%s's damage breakdown"], win.spellname))
 		if not set or not win.spellid then return end
 
 		-- details only available for players
@@ -511,11 +512,11 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 
 	function sdetailmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format("%s: %s", win.actorname or L["Unknown"], format(L["Damage from %s"], label))
+		win.title = pformat("%s: %s", win.actorname, format(L["Damage from %s"], label))
 	end
 
 	function sdetailmod:Update(win, set)
-		win.title = format("%s: %s", win.actorname or L["Unknown"], format(L["Damage from %s"], win.spellname or L["Unknown"]))
+		win.title = pformat("%s: %s", win.actorname, pformat(L["Damage from %s"], win.spellname))
 		if not set or not win.spellid then return end
 
 		-- only available for players
@@ -937,7 +938,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P, _, _, new, _, clear
 	end
 
 	function sourcemod:Update(win, set)
-		win.title = format(L["%s's sources"], win.spellname or L["Unknown"])
+		win.title = pformat(L["%s's sources"], win.spellname)
 		if not win.spellid then return end
 
 		local sources, total = clear(C), 0
@@ -1008,7 +1009,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P, _, _, new, _, clear
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's targets"], win.spellname or L["Unknown"])
+		win.title = pformat(L["%s's targets"], win.spellname)
 		if not win.spellid then return end
 
 		local targets, total = clear(C), 0

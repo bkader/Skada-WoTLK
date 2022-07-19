@@ -8,7 +8,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 
 	-- cache frequently used globals
 	local pairs, tostring, format = pairs, tostring, string.format
-	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+	local GetSpellInfo, pformat = Skada.GetSpellInfo or GetSpellInfo, Skada.pformat
 	local _
 
 	local function log_dispel(set, data)
@@ -69,7 +69,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's dispelled spells"], win.actorname or L["Unknown"])
+		win.title = pformat(L["%s's dispelled spells"], win.actorname)
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.dispel or 0
@@ -104,7 +104,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's dispelled targets"], win.actorname or L["Unknown"])
+		win.title = pformat(L["%s's dispelled targets"], win.actorname)
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.dispel or 0
@@ -139,7 +139,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's dispel spells"], win.actorname or L["Unknown"])
+		win.title = pformat(L["%s's dispel spells"], win.actorname)
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.dispel or 0

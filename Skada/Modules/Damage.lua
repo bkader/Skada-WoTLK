@@ -1,8 +1,8 @@
 local Skada = Skada
 
-local pairs, format, max = pairs, string.format, math.max
-local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-local PercentToRGB = Skada.PercentToRGB
+local pairs, max = pairs, math.max
+local format, pformat = string.format, Skada.pformat
+local GetSpellInfo, PercentToRGB = Skada.GetSpellInfo or GetSpellInfo, Skada.PercentToRGB
 local _
 
 -- ================== --
@@ -451,7 +451,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's targets"], win.actorname or L["Unknown"])
+		win.title = pformat(L["%s's targets"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		if not actor then return end
@@ -497,11 +497,11 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 
 	function spellmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format("%s: %s", win.actorname or L["Unknown"], format(L["%s's damage breakdown"], label))
+		win.title = pformat("%s: %s", win.actorname, format(L["%s's damage breakdown"], label))
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format("%s: %s", win.actorname or L["Unknown"], format(L["%s's damage breakdown"], win.spellname or L["Unknown"]))
+		win.title = pformat("%s: %s", win.actorname, pformat(L["%s's damage breakdown"], win.spellname))
 		if not set or not win.spellname then return end
 
 		-- details only available for players
@@ -556,11 +556,11 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 
 	function sdetailmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format(L["%s's <%s> damage"], win.actorname or L["Unknown"], label)
+		win.title = pformat(L["%s's <%s> damage"], win.actorname, label)
 	end
 
 	function sdetailmod:Update(win, set)
-		win.title = format(L["%s's <%s> damage"], win.actorname or L["Unknown"], win.spellname or L["Unknown"])
+		win.title = pformat(L["%s's <%s> damage"], win.actorname, win.spellname)
 		if not win.spellname then return end
 
 		-- only available for players
@@ -1046,7 +1046,7 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C, new, _, clear)
 	end
 
 	function sourcemod:Update(win, set)
-		win.title = format(L["%s's sources"], win.spellname or L["Unknown"])
+		win.title = pformat(L["%s's sources"], win.spellname)
 		if win.spellname then
 			local sources, total = clear(C), 0
 			for i = 1, #set.players do
@@ -1218,7 +1218,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's targets"], win.actorname or L["Unknown"])
+		win.title = pformat(L["%s's targets"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)
@@ -1259,7 +1259,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 	end
 
 	function detailmod:Update(win, set)
-		win.title = format(L["Useful damage on %s"], win.targetname or L["Unknown"])
+		win.title = pformat(L["Useful damage on %s"], win.targetname)
 		if not set or not win.targetname then return end
 
 		local actor, enemy = set:GetActor(win.targetname, win.targetid)
@@ -1420,7 +1420,7 @@ Skada:RegisterModule("Overkill", function(L)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's overkill spells"], win.actorname or L["Unknown"])
+		win.title = pformat(L["%s's overkill spells"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)
@@ -1457,7 +1457,7 @@ Skada:RegisterModule("Overkill", function(L)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's overkill targets"], win.actorname or L["Unknown"])
+		win.title = pformat(L["%s's overkill targets"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)
@@ -1492,11 +1492,11 @@ Skada:RegisterModule("Overkill", function(L)
 
 	function detailmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = format(L["%s's overkill spells"], win.actorname or L["Unknown"])
+		win.title = pformat(L["%s's overkill spells"], win.actorname)
 	end
 
 	function detailmod:Update(win, set)
-		win.title = format(L["%s's overkill spells"], win.actorname or L["Unknown"])
+		win.title = pformat(L["%s's overkill spells"], win.actorname)
 		if not set or not win.targetname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)

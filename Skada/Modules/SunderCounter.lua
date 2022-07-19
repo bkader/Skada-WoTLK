@@ -4,7 +4,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 	local targetmod = mod:NewModule("Sunder target list")
 	local sourcemod = mod:NewModule("Sunder source list")
 
-	local pairs, tostring, format = pairs, tostring, string.format
+	local pairs, tostring, format, pformat = pairs, tostring, string.format, Skada.pformat
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 	local T = Skada.Table
@@ -69,7 +69,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 					mod.targets[dstGUID] = del(mod.targets[dstGUID])
 					if P.modules.sunderannounce then
 						if not P.modules.sunderbossonly or (P.modules.sunderbossonly and Skada:IsBoss(dstGUID, true)) then
-							mod:Announce(format(L["%s dropped from %s!"], sunderLink or sunder, dstName or L["Unknown"]))
+							mod:Announce(pformat(L["%s dropped from %s!"], sunderLink or sunder, dstName))
 						end
 					end
 				end
@@ -96,7 +96,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 	end
 
 	function sourcemod:Update(win, set)
-		win.title = format(L["%s's <%s> sources"], win.targetname or L["Unknown"], sunder)
+		win.title = pformat(L["%s's <%s> sources"], win.targetname, sunder)
 		if not win.targetname then return end
 
 		local sources, total = set:GetSunderSources(win.targetname)
@@ -130,7 +130,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 
 	function targetmod:Update(win, set)
 		double_check_sunder()
-		win.title = format(L["%s's <%s> targets"], win.actorname or L["Unknown"], sunder)
+		win.title = pformat(L["%s's <%s> targets"], win.actorname, sunder)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -272,7 +272,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 				sunderannounce = {
 					type = "toggle",
 					name = format(L["Announce %s"], sunder),
-					desc = format(L["Announces how long it took to apply %d stacks of %s and announces when it drops."], 5, sunder or L["Unknown"]),
+					desc = pformat(L["Announces how long it took to apply %d stacks of %s and announces when it drops."], 5, sunder),
 					descStyle = "inline",
 					order = 10,
 					width = "double"

@@ -4,7 +4,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 	local playermod = mod:NewModule("Resurrect spell list")
 	local targetmod = mod:NewModule("Resurrect target list")
 
-	local pairs, tostring, format = pairs, tostring, string.format
+	local pairs, tostring, format, pformat = pairs, tostring, string.format, Skada.pformat
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local _
 
@@ -86,7 +86,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's resurrect spells"], win.actorname or L["Unknown"])
+		win.title = pformat(L["%s's resurrect spells"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -122,7 +122,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's resurrect targets"], win.actorname or L["Unknown"])
+		win.title = pformat(L["%s's resurrect targets"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)

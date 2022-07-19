@@ -2,7 +2,8 @@ local Skada = Skada
 Skada:RegisterModule("Activity", function(L, P, _, C, new, _, clear)
 	local mod = Skada:NewModule("Activity")
 	local targetmod = mod:NewModule("Activity per Target")
-	local date, pairs, format, max = date, pairs, string.format, math.max
+	local date, pairs, max = date, pairs, math.max
+	local format, pformat = string.format, Skada.pformat
 
 	local function activity_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
@@ -21,11 +22,11 @@ Skada:RegisterModule("Activity", function(L, P, _, C, new, _, clear)
 
 	function targetmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's activity"], label)
+		win.title = pformat(L["%s's activity"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's activity"], win.actorname or L["Unknown"])
+		win.title = pformat(L["%s's activity"], win.actorname)
 		if not win.actorname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)

@@ -3,8 +3,7 @@ if Skada.Ascension then return end -- skipped on ascension
 Skada:RegisterModule("Parry-Haste", function(L, P)
 	local mod = Skada:NewModule("Parry-Haste")
 	local targetmod = mod:NewModule("Parry target list")
-
-	local pairs, tostring, format = pairs, tostring, string.format
+	local pairs, tostring, format, pformat = pairs, tostring, string.format, Skada.pformat
 
 	local parrybosses = {
 		[L["Acidmaw"]] = true,
@@ -65,7 +64,7 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's parry targets"], win.actorname or L["Unknown"])
+		win.title = pformat(L["%s's parry targets"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)

@@ -6,7 +6,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 	local WATCH = nil -- true to watch those alive
 
 	local tinsert, tremove, tsort, tconcat = table.insert, table.remove, table.sort, table.concat
-	local tostring, strmatch, format = tostring, strmatch, string.format
+	local tostring, strmatch, format, pformat = tostring, strmatch, string.format, Skada.pformat
 	local max, floor, wipe = math.max, math.floor, wipe
 	local UnitHealthInfo = Skada.UnitHealthInfo
 	local UnitIsFeignDeath = UnitIsFeignDeath
@@ -327,7 +327,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			win.datakey = id
 		end
 
-		win.title = format(L["%s's death log"], win.actorname or L["Unknown"])
+		win.title = pformat(L["%s's death log"], win.actorname)
 	end
 
 	do
@@ -336,7 +336,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		end
 
 		function deathlogmod:Update(win, set)
-			win.title = format(L["%s's death log"], win.actorname or L["Unknown"])
+			win.title = pformat(L["%s's death log"], win.actorname)
 
 			local player = win.datakey and Skada:FindPlayer(set, win.actorid, win.actorname)
 			local deathlog = player and player.deathlog and player.deathlog[win.datakey]

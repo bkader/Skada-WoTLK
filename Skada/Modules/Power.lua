@@ -3,7 +3,7 @@ Skada:RegisterModule("Resources", function(L, P)
 	local mod = Skada:NewModule("Resources")
 	mod.icon = [[Interface\Icons\spell_holy_rapture]]
 
-	local pairs, format = pairs, string.format
+	local pairs, format, pformat = pairs, string.format, Skada.pformat
 	local setmetatable, GetSpellInfo = setmetatable, Skada.GetSpellInfo or GetSpellInfo
 	local _
 
@@ -157,12 +157,12 @@ Skada:RegisterModule("Resources", function(L, P)
 	-- player mods common Enter function.
 	function playermod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's gained %s"], label, namesTable[self.powerid] or L["Unknown"])
+		win.title = pformat(L["%s's gained %s"], label, namesTable[self.powerid])
 	end
 
 	-- player mods main update function
 	function playermod:Update(win, set)
-		win.title = format(L["%s's gained %s"], win.actorname or L["Unknown"], L[self.powername])
+		win.title = pformat(L["%s's gained %s"], win.actorname, L[self.powername])
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)

@@ -30,8 +30,8 @@ local IsInGroup, IsInRaid, IsInPvP = Skada.IsInGroup, Skada.IsInRaid, Skada.IsIn
 local GetNumGroupMembers, GetGroupTypeAndCount = Skada.GetNumGroupMembers, Skada.GetGroupTypeAndCount
 local GetUnitIdFromGUID, GetUnitSpec, GetUnitRole = Skada.GetUnitIdFromGUID, Skada.GetUnitSpec, Skada.GetUnitRole
 local UnitIterator, IsGroupDead = Skada.UnitIterator, Skada.IsGroupDead
-local EscapeStr, GetCreatureId, T = Skada.EscapeStr, Skada.GetCreatureId, Skada.Table
-local _
+local pformat, EscapeStr, GetCreatureId = Skada.pformat, Skada.EscapeStr, Skada.GetCreatureId
+local T, _ = Skada.Table, nil
 
 local LDB = LibStub("LibDataBroker-1.1")
 local dataobj = LDB:NewDataObject("Skada", {
@@ -694,7 +694,7 @@ function Window:UpdateDisplay()
 					Skada:Printf("No set available to pass to %s Update function! Try to reset Skada.", self.selectedmode.localeName or self.selectedmode.moduleName)
 				end
 			else
-				self:Print("Mode %s does not have an Update function!", self.selectedmode.localeName or self.selectedmode.moduleName)
+				Skada:Printf("Mode \124cffffbb00%s\124r does not have an Update function!", self.selectedmode.localeName or self.selectedmode.moduleName)
 			end
 
 			if
@@ -889,10 +889,10 @@ function Window:spell(d, spellid, spell, school, isheal, no_suffix)
 			d.spellid = spellid
 			d.label, _, d.icon = GetSpellInfo(abs(d.spellid))
 
-			if ((spell and spell.ishot) or isheal) and not no_suffix then
+			if (spell and spell.ishot) and not no_suffix then
 				d.label = format("%s%s", d.label, L["HoT"])
 			elseif spellid < 0 and not no_suffix then
-				d.label = format("%s%s", d.label, L["DoT"])
+				d.label = format("%s%s", d.label, isheal and L["HoT"] or L["DoT"])
 			end
 			if spell and spell.school then
 				d.spellschool = spell.school
@@ -907,7 +907,7 @@ function Window:spell(d, spellid, spell, school, isheal, no_suffix)
 			d.label = spellid
 			_, _, d.icon = GetSpellInfo(abs(d.spellid))
 
-			if spell and spell.ishot then
+			if spell and (spell.ishot or d.spellid < 0) and not no_suffix then
 				d.label = format("%s%s", d.label, L["HoT"])
 			end
 			if spell and spell.school then
@@ -2269,25 +2269,25 @@ do
 
 				if not self.testMode then
 					if type(md.click1) == "function" then
-						t:AddLine(format(L["Click for \124cff00ff00%s\124r"], md.click1_label or L["Unknown"]))
+						t:AddLine(pformat(L["Click for \124cff00ff00%s\124r"], md.click1_label))
 					elseif md.click1 and not self:NoTotalClick(win.selectedset, md.click1) then
 						t:AddLine(format(L["Click for \124cff00ff00%s\124r"], md.click1_label or md.click1.localeName))
 					end
 
 					if type(md.click2) == "function" then
-						t:AddLine(format(L["Shift-Click for \124cff00ff00%s\124r"], md.click2_label or L["Unknown"]))
+						t:AddLine(pformat(L["Shift-Click for \124cff00ff00%s\124r"], md.click2_label))
 					elseif md.click2 and not self:NoTotalClick(win.selectedset, md.click2) then
 						t:AddLine(format(L["Shift-Click for \124cff00ff00%s\124r"], md.click2_label or md.click2.localeName))
 					end
 
 					if type(md.click3) == "function" then
-						t:AddLine(format(L["Control-Click for \124cff00ff00%s\124r"], md.click3_label or L["Unknown"]))
+						t:AddLine(pformat(L["Control-Click for \124cff00ff00%s\124r"], md.click3_label))
 					elseif md.click3 and not self:NoTotalClick(win.selectedset, md.click3) then
 						t:AddLine(format(L["Control-Click for \124cff00ff00%s\124r"], md.click3_label or md.click3.localeName))
 					end
 
 					if (not self.Ascension or self.AscensionCoA) and type(md.click4) == "function" then
-						t:AddLine(format(L["Alt-Click for \124cff00ff00%s\124r"], md.click4_label or L["Unknown"]))
+						t:AddLine(pformat(L["Alt-Click for \124cff00ff00%s\124r"], md.click4_label))
 					elseif (not self.Ascension or self.AscensionCoA) and md.click4 and not self:NoTotalClick(win.selectedset, md.click4) then
 						t:AddLine(format(L["Alt-Click for \124cff00ff00%s\124r"], md.click4_label or md.click4.localeName))
 					end
@@ -3055,7 +3055,7 @@ do
 	local function set_label_format(name, starttime, endtime, fmt, dye)
 		fmt = max(1, min(8, fmt or Skada.db.profile.setformat or 3))
 
-		local namelabel, timelabel = name, ""
+		local namelabel, timelabel = name or L["Unknown"], ""
 		if starttime and endtime and fmt > 1 then
 			local duration = SecondsToTime(endtime - starttime, false, false, 2)
 
@@ -3095,7 +3095,7 @@ do
 
 	function Skada:GetSetLabel(set, dye)
 		if not set then return "" end
-		return set_label_format(set.name or L["Unknown"], set.starttime, set.endtime or time(), nil, dye)
+		return set_label_format(set.name, set.starttime, set.endtime or time(), nil, dye)
 	end
 
 	function Window:set_mode_title()

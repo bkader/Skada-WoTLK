@@ -8,7 +8,7 @@ Skada:RegisterModule("Fails", function(L, P)
 	local spellmod = mod:NewModule("Event's failed players")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
-	local pairs, tostring, format, tContains = pairs, tostring, string.format, tContains
+	local pairs, tostring, format, pformat, tContains = pairs, tostring, string.format, Skada.pformat, tContains
 	local GetSpellInfo, UnitGUID, IsInGroup = Skada.GetSpellInfo or GetSpellInfo, UnitGUID, Skada.IsInGroup
 	local _
 
@@ -44,7 +44,7 @@ Skada:RegisterModule("Fails", function(L, P)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's fails"], win.spellname or L["Unknown"])
+		win.title = pformat(L["%s's fails"], win.spellname)
 		if not win.spellid then return end
 
 		local total = set and set:GetFailCount(win.spellid) or 0
@@ -80,7 +80,7 @@ Skada:RegisterModule("Fails", function(L, P)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's fails"], win.actorname or L["Unknown"])
+		win.title = pformat(L["%s's fails"], win.actorname)
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.fail or 0

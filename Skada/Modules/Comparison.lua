@@ -11,7 +11,8 @@ Skada:RegisterModule("Comparison", function(L, P)
 	local dtargetmod = targetmod:NewModule("Damage spell list")
 	local C = Skada.cacheTable2
 
-	local pairs, format, max = pairs, string.format, math.max
+	local pairs, max = pairs, math.max
+	local format, pformat = string.format, Skada.pformat
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local spellschools = Skada.spellschools
 	local COLOR_GOLD = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
@@ -109,7 +110,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 			local myspell = myspells and myspells[win.spellname]
 
 			if spell or myspell then
-				tooltip:AddLine(format(L["%s vs %s: %s"], actor and actor.name or L["Unknown"], mod.userName, win.spellname))
+				tooltip:AddLine(pformat(L["%s vs %s: %s"], actor and actor.name, mod.userName, win.spellname))
 				if (spell.school and spellschools[spell.school]) or (myspell.school and spellschools[myspell.school]) then
 					tooltip:AddLine(spellschools(spell and spell.school or myspell.school))
 				end
@@ -206,14 +207,16 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 	function dspellmod:Enter(win, id, label)
 		win.spellname = label
-		win.title = format(L["%s vs %s: %s"], win.actorname or L["Unknown"], mod.userName or L["Unknown"], format(L["%s's damage breakdown"], label))
+		win.title = pformat(L["%s vs %s: %s"], win.actorname, mod.userName, pformat(L["%s's damage breakdown"], label))
 	end
 
 	function dspellmod:Update(win, set)
-		win.title = format(L["%s vs %s: %s"], win.actorname or L["Unknown"], mod.userName or L["Unknown"], format(L["%s's damage breakdown"], win.spellname or L["Unknown"]))
+		win.title = pformat(L["%s vs %s: %s"], win.actorname, mod.userName, pformat(L["%s's damage breakdown"], win.spellname))
 		if not set or not win.spellname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)
+		if not actor then return end
+
 		local spell = actor and actor.damagespells and actor.damagespells[win.spellname]
 
 		-- same actor?
@@ -295,18 +298,20 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 	function bspellmod:Enter(win, id, label)
 		win.spellname = label
-		win.title = format(L["%s vs %s: %s"], win.actorname or L["Unknown"], mod.userName or L["Unknown"], L["actor damage"](label))
+		win.title = pformat(L["%s vs %s: %s"], win.actorname, mod.userName, L["actor damage"](label))
 	end
 
 	function bspellmod:Update(win, set)
-		win.title = format(L["%s vs %s: %s"], win.actorname or L["Unknown"], mod.userName or L["Unknown"], L["actor damage"](win.spellname or L["Unknown"]))
+		win.title = pformat(L["%s vs %s: %s"], win.actorname, mod.userName, L["actor damage"](win.spellname or L["Unknown"]))
 		if not set or not win.spellname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)
+		if not actor then return end
+
 		local spell = actor and actor.damagespells and actor.damagespells[win.spellname]
 
 		if actor.id == mod.userGUID then
-			win.title = format(L["%s's <%s> damage"], actor.name, win.spellname)
+			win.title = pformat(L["%s's <%s> damage"], actor.name, win.spellname)
 
 			if spell then
 				local absorbed = spell.total and max(0, spell.total - spell.amount) or 0
@@ -391,11 +396,11 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 	function dtargetmod:Enter(win, id, label)
 		win.targetname = label
-		win.title = format(L["%s vs %s: Damage on %s"], win.actorname or L["Unknown"], mod.userName or L["Unknown"], label)
+		win.title = pformat(L["%s vs %s: Damage on %s"], win.actorname, mod.userName, label)
 	end
 
 	function dtargetmod:Update(win, set)
-		win.title = format(L["%s vs %s: Damage on %s"], win.actorname or L["Unknown"], mod.userName or L["Unknown"], win.targetname or L["Unknown"])
+		win.title = pformat(L["%s vs %s: Damage on %s"], win.actorname, mod.userName, win.targetname)
 		if not set or not win.targetname then return end
 
 		local targets, actor = set:GetActorDamageTargets(win.actorid, win.actorname)
@@ -542,11 +547,11 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 	function spellmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s vs %s: Spells"], label, mod.userName or L["Unknown"])
+		win.title = pformat(L["%s vs %s: Spells"], label, mod.userName)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s vs %s: Spells"], win.actorname or L["Unknown"], mod.userName or L["Unknown"])
+		win.title = pformat(L["%s vs %s: Spells"], win.actorname, mod.userName)
 		if not set or not win.actorname then return end
 
 		local spells, actor = set:GetActorDamageSpells(win.actorid, win.actorname)
@@ -635,11 +640,11 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 	function targetmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s vs %s: Targets"], label, mod.userName or L["Unknown"])
+		win.title = pformat(L["%s vs %s: Targets"], label, mod.userName)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s vs %s: Targets"], win.actorname or L["Unknown"], mod.userName or L["Unknown"])
+		win.title = pformat(L["%s vs %s: Targets"], win.actorname, mod.userName)
 		if not set or not win.actorname then return end
 
 		local targets, actor = set:GetActorDamageTargets(win.actorid, win.actorname)
