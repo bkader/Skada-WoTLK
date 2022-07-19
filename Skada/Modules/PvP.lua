@@ -234,9 +234,6 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 
 	function mod:OnEnable()
 		Skada.forPVP = true
-		-- things are disabled on Project Ascension sadly
-		if Skada.Ascension then return end
-
 		specsCache = specsCache or {}
 		Skada.RegisterMessage(self, "ZONE_TYPE_CHANGED", "CheckZone")
 	end

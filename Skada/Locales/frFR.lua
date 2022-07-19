@@ -764,19 +764,11 @@ L["opt_tweaks_total_all_desc"] = "Tous les segments sont ajout\195\169s aux donn
 L["opt_tweaks_total_fmt_desc"] = "Les segments avec %s sont ajout\195\169s aux donn\195\169es du segment total."
 L["Detailed total segment"] = "Segment total d\195\169taill\195\169"
 L["opt_tweaks_total_full_desc"] = "Si activ\195\169e, Skada enregistrera tout dans le segment \124cffffbb00Total\124r, au lieu que des totaux."
--- project ascension
-L["Project Ascension"] = "Project Ascension"
-L["project_ascension_desc"] = [=[Sur |cffffbb00Project Ascension|r, vos héros sans classe ayant à leur portée n'importe quelle capacité ou talent.
-
-Les icônes et les couleurs sont envoyées aux membres du groupe afain d'être utilisées au lieu des icônes et couleurs par défaut.]=]
-L["Icon"] = "Ic\195\180ne"
-L["Color for %s."] = "Couleur \1242 %s."
-L["Choose the %s that fits your character's build."] = "Choix \1242 %s qui correspond au build de votre personnage."
-L["Are you sure you want clear cached icons and colors?"] = "\195\138tes-vous s\195\187r de vouloir vider le cache des ic\195\180nes et des couleurs?"
 -- arena
 L["mod_pvp_desc"] = "Ajoute la d\195\169tection des sp\195\169cialisations pour les ar\195\168nes et les champs de bataille, et affiche les adversaires de l'ar\195\168ne dans la m\195\170me fen\195\170tre."
 L["Gold Team"] = "\195\137quipe dor\195\169e"
 L["Green Team"] = "\195\137quipe verte"
+L["Color for %s."] = "Couleur \1242 %s."
 -- notifications
 L["Notifications"] = "Notifications"
 L["opt_toast_desc"] = "Utiliser des notifications visuelles au lieu des messages de chat quand cela est possible."

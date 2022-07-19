@@ -74,10 +74,8 @@ Skada:RegisterModule("Threat", function(L, P, _, _, new, del)
 						player.class = "PET"
 					else
 						_, player.class = UnitClass(unit)
-						if not Skada.Ascension then
-							player.role = GetUnitRole(unit, player.class)
-							player.spec = GetUnitSpec(unit, player.class)
-						end
+						player.role = GetUnitRole(unit, player.class)
+						player.spec = GetUnitSpec(unit, player.class)
 					end
 
 					-- cache the player.

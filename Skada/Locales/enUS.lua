@@ -813,21 +813,13 @@ L["opt_tweaks_total_all_desc"] = "All segments are added to total segment data."
 L["opt_tweaks_total_fmt_desc"] = "Segments with %s are added to total segment data."
 L["Detailed total segment"] = true
 L["opt_tweaks_total_full_desc"] = "When enabled, Skada will record everything to the total segment, instead of total numbers (record spell details, their targets and their sources)."
--- project ascension
-L["Project Ascension"] = true
-L["project_ascension_desc"] = [=[On |cffffbb00Project Ascension|r, your characters are classless Heroes that have any ability or talent within their reach.
-
-Icons and colors are sent to group members and Skada can use them instead of your character's default class icon and color.]=]
-L["Icon"] = true
-L["Color"] = COLOR
-L["Color for %s."] = true
-L["Choose the %s that fits your character's build."] = true
-L["Are you sure you want clear cached icons and colors?"] = true
 -- arena
 L["Player vs. Player"] = PLAYER_V_PLAYER
 L["mod_pvp_desc"] = "Adds specialization detection for arenas and battlegrounds, and shows arena opponents on the same window."
 L["Gold Team"] = true
 L["Green Team"] = true
+L["Color"] = COLOR
+L["Color for %s."] = true
 -- notifications
 L["Opacity"] = OPACITY
 L["Notifications"] = true

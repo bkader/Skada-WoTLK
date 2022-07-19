@@ -1437,7 +1437,7 @@ do
 				if mode.metadata.click3 then
 					scan_for_columns(mode.metadata.click3)
 				end
-				if (not Skada.Ascension or Skada.AscensionCoA) and mode.metadata.click4 then
+				if mode.metadata.click4 then
 					scan_for_columns(mode.metadata.click4)
 				end
 			end
@@ -1766,8 +1766,7 @@ function Skada:GetPlayer(set, guid, name, flag)
 	end
 
 	-- fix players created before their info was received
-	-- roles and specs are temporary disabled for Project Ascension
-	if not self.Ascension and not self.AscensionCoA and player.class and Skada.validclass[player.class] then
+	if player.class and Skada.validclass[player.class] and (player.role == nil or player.role == "NONE" or player.spec == nil) then
 		if player.role == nil or player.role == "NONE" then
 			if player.id == self.userGUID and self.userRole then
 				player.role = self.userRole
@@ -2230,9 +2229,9 @@ do
 				t:ClearLines()
 				self:AddSubviewToTooltip(t, win, find_mode(id), id, label)
 				t:Show()
-			elseif md.click1 or md.click2 or md.click3 or ((not self.Ascension or self.AscensionCoA) and md.click4) or md.tooltip then
+			elseif md.click1 or md.click2 or md.click3 or md.click4 or md.tooltip then
 				t:ClearLines()
-				local hasClick = md.click1 or md.click2 or md.click3 or ((not self.Ascension or self.AscensionCoA) and md.click4) or nil
+				local hasClick = md.click1 or md.click2 or md.click3 or md.click4 or nil
 
 				if md.tooltip then
 					local numLines = t:NumLines()
@@ -2253,7 +2252,7 @@ do
 					if md.click3 and not self:NoTotalClick(win.selectedset, md.click3) then
 						self:AddSubviewToTooltip(t, win, md.click3, id, label)
 					end
-					if (not self.Ascension or self.AscensionCoA) and md.click4 and not self:NoTotalClick(win.selectedset, md.click4) then
+					if md.click4 and not self:NoTotalClick(win.selectedset, md.click4) then
 						self:AddSubviewToTooltip(t, win, md.click4, id, label)
 					end
 				end
@@ -2286,9 +2285,9 @@ do
 						t:AddLine(format(L["Control-Click for \124cff00ff00%s\124r"], md.click3_label or md.click3.localeName))
 					end
 
-					if (not self.Ascension or self.AscensionCoA) and type(md.click4) == "function" then
+					if type(md.click4) == "function" then
 						t:AddLine(pformat(L["Alt-Click for \124cff00ff00%s\124r"], md.click4_label))
-					elseif (not self.Ascension or self.AscensionCoA) and md.click4 and not self:NoTotalClick(win.selectedset, md.click4) then
+					elseif md.click4 and not self:NoTotalClick(win.selectedset, md.click4) then
 						t:AddLine(format(L["Alt-Click for \124cff00ff00%s\124r"], md.click4_label or md.click4.localeName))
 					end
 				end
@@ -2660,10 +2659,8 @@ function Skada:CheckGroup()
 	end
 
 	-- update my spec and role.
-	if not Skada.Ascension and not Skada.AscensionCoA then
-		Skada.userSpec = GetUnitSpec("player", Skada.userClass) or Skada.userSpec
-		Skada.userRole = GetUnitRole("player", Skada.userClass) or Skada.userRole
-	end
+	Skada.userSpec = GetUnitSpec("player", Skada.userClass) or Skada.userSpec
+	Skada.userRole = GetUnitRole("player", Skada.userClass) or Skada.userRole
 end
 
 do

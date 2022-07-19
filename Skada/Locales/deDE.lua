@@ -759,19 +759,11 @@ L["opt_tweaks_total_all_desc"] = "Alle Segmente werden zu den Daten des Gesamtse
 L["opt_tweaks_total_fmt_desc"] = "Segmente mit %s werden zu den Daten des Gesamtsegments hinzugef\195\188gt." -- needs review
 L["Detailed total segment"] = "Detailliertes Gesamtsegment"
 -- L["opt_tweaks_total_full_desc"] = "When enabled, Skada will record everything to the total segment, instead of total numbers (record spell details, their targets as their sources)."
--- project ascension
-L["Project Ascension"] = "Project Ascension"
-L["project_ascension_desc"] = [=[Bei |cffffbb00Project Ascension|r sind deine Charaktere Helden, die alle Fähigkeiten oder Talente in Reichweite haben.
-
-Symbole und Farben werden an Gruppenmitglieder gesendet, um sie anstelle der Standardsymbole und -farben zu verwenden.]=]
-L["Icon"] = "Symbol"
-L["Color for %s."] = "Farbe f\195\188r %s."
-L["Choose the %s that fits your character's build."] = "W\195\164hle das %s, das zum Build deines Charakters passt."
-L["Are you sure you want clear cached icons and colors?"] = "M\195\182chten Sie die zwischengespeicherten Symbole und Farben wirklich l\195\182schen?"
 -- arena
 L["mod_pvp_desc"] = "F\195\188gen Sie eine Spezialisierungserkennung f\195\188r Arenen und Schlachtfelder hinzu und zeigen Sie Arenagegner im selben Fenster an."
 L["Gold Team"] = "Goldenes Team"
 L["Green Team"] = "Gr\195\188nes Team"
+L["Color for %s."] = "Farbe f\195\188r %s."
 -- notifications
 L["Notifications"] = "Benachrichtigungen"
 L["opt_toast_desc"] = "Verwendet visuelle Benachrichtigungen anstelle von Chatfenster-Nachrichten, wann immer zutreffend."

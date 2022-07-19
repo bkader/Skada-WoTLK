@@ -37,6 +37,5 @@
 
 	<!-- Modules without modes -->
 	<Script file="Nickname.lua" />
-	<Script file="Ascension.lua" />
 	<Script file="PvP.lua" />
 </Ui>

@@ -1,4 +1,4 @@
-# Skada for WoTLK (_Revisited - v1.8.79_)
+# Skada for WoTLK (_Revisited - v1.8.80_)
 
 ![Discord](https://img.shields.io/discord/795698054371868743?label=discord)
 ![GitHub last commit](https://img.shields.io/github/last-commit/bkader/Skada-WoTLK)
@@ -9,6 +9,7 @@ _This version is a total **Rewrite** of Skada `r301` for `3.3.5` and not a **Bac
 Skada is a modular damage meter with various viewing modes, segmented fights and customizable windows. It aims to be highly efficient with memory and CPU.
 
 _**Also available for [Cataclysm](https://github.com/bkader/Skada-Cata/)**_
+_**Project Ascension players should use [v1.8.79](https://github.com/bkader/Skada-WoTLK/tree/1.8.79/) and below because developement and support for it was dropped as of v1.8.80**_
 
 <p align="center"><img src="https://user-images.githubusercontent.com/4732702/170839578-72a9a952-c999-457a-8f57-7d151e3b76a8.png" alt="Skada WotLK"></p>
 
@@ -53,7 +54,6 @@ Though it's not required, **PayPal** donations are most welcome at **bkader[at]m
   * [Themes](#themes)
   * [Tweaks](#tweaks)
   * [PvP](#pvp)
-  * [Project Ascension](#project-ascension)
 
 ## What's the difference?
 
@@ -223,14 +223,6 @@ Enemies specs and roles are guessed from their buffs or certain spells they can.
 **Arena Features**
 - It shows both group members and enemies on the same damage and healing windows.
 - Players are colored by their team (_flag_) color: Gold for Yellow/Gold Team and Green for the Green Team. If the in-game color blind mode is enabled, the Green team appears Purple.
-
-### Project Ascension
-
-After requests from players to make the addon work properly on [Project Ascension](https://ascension.gg/) and after their staff's help, I could access their [Conquest of Azeroth](https://ascension.gg/news/conquest-of-azeroth-alpha/332) and work on the addon. Thus, as of `v1.8.73`, CoA classes are available on Skada.
-
-Project Ascension is also a **Classless** game that allows you to imagine and build the character of your dreams. Your custom character has any ability or talent within their reach. For this reason and as of `v1.8.73.330`, a special tweaks module was added to Skada to give freedom to players to choose their icons and colors. This module is only available if you play there and you can find in `Tweaks` panel, `Advanced` tab.
-
-Icons and colors are saved per character and cached ones (_from other players_) are saved per account. Your hero is unique, your build is unique, so why not make your character on Skada unique!
 
 ### API
 

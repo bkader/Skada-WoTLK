@@ -746,15 +746,6 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 	end
 
 	function mod:OnInitialize()
-		-- don't add anything for Project Ascension
-		if Skada.Ascension then
-			--
-			-- add your ascension-specific stuff
-			--
-
-			return -- skip the rest of the code.
-		end
-
 		-- ----------------------------
 		-- Custom Groups
 		-- ----------------------------

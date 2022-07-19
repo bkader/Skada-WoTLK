@@ -103,70 +103,40 @@ ignoredSpells.firsthit = {
 }
 
 -- [[ no active time spells ]] --
-if not Skada.Ascension then -- not meant for Ascension
-	ignoredSpells.activeTime = {
-		-- Retribution Aura
-		[7294] = true, -- Rank 1
-		[7294] = true, -- Rank 1
-		[10298] = true, -- Rank 2
-		[10299] = true, -- Rank 3
-		[10300] = true, -- Rank 4
-		[10301] = true, -- Rank 5
-		[27150] = true, -- Rank 6
-		[54043] = true, -- Rank 7
-		-- Molten Armor
-		[34913] = true, -- Rank 1
-		[43043] = true, -- Rank 2
-		[43044] = true, -- Rank 3
-		-- Lightning Shield
-		[26364] = true, -- Rank 1
-		[26365] = true, -- Rank 2
-		[26366] = true, -- Rank 3
-		[26367] = true, -- Rank 5
-		[26370] = true, -- Rank 6
-		[26363] = true, -- Rank 7
-		[26371] = true, -- Rank 8
-		[26372] = true, -- Rank 9
-		[49278] = true, -- Rank 10
-		[49279] = true, -- Rank 11
-		-- Fire Shield
-		[2947] = true, -- Rank 1
-		[8316] = true, -- Rank 2
-		[8317] = true, -- Rank 3
-		[11770] = true, -- Rank 4
-		[11771] = true, -- Rank 5
-		[27269] = true, -- Rank 6
-		[47983] = true, -- Rank 7
-	}
-
--- ----------------------------- --
--- >>>>> PROJECT ASCENSION <<<<< --
--- ----------------------------- --
-
-else -- <= Skada.Ascension == true
-	--
-	-- add your ascension-specific stuff
-	--
-
-	-- Tempest Keep: The Eye (Ascended 10man)
-	creatureToBoss[218805] = true -- High Astromancer Solarian
-	creatureToBoss[219514] = true -- Al'ar
-	creatureToBoss[219516] = true -- Void Reaver
-	creatureToBoss[219622] = true -- Kael'thas Sunstrider
-	creatureToBoss[220060] = true -- Lord Sanguinar
-	creatureToBoss[220062] = true -- Grand Astromancer Capernian
-	creatureToBoss[220063] = true -- Master Engineer Telonicus
-	creatureToBoss[220064] = true -- Thaladred the Darkener
-	creatureToBoss[221268] = true -- Netherstrand Longbow
-	creatureToBoss[221269] = true -- Devastation
-	creatureToBoss[221270] = true -- Cosmic Infuser
-	creatureToBoss[221271] = true -- Infinity Blades
-	creatureToBoss[221272] = true -- Warp Slicer
-	creatureToBoss[221273] = true -- Phaseshift Bulwark
-	creatureToBoss[221274] = true -- Staff of Disintegration
-
-	return -- skip the rest of the file.
-end
+ignoredSpells.activeTime = {
+	-- Retribution Aura
+	[7294] = true, -- Rank 1
+	[7294] = true, -- Rank 1
+	[10298] = true, -- Rank 2
+	[10299] = true, -- Rank 3
+	[10300] = true, -- Rank 4
+	[10301] = true, -- Rank 5
+	[27150] = true, -- Rank 6
+	[54043] = true, -- Rank 7
+	-- Molten Armor
+	[34913] = true, -- Rank 1
+	[43043] = true, -- Rank 2
+	[43044] = true, -- Rank 3
+	-- Lightning Shield
+	[26364] = true, -- Rank 1
+	[26365] = true, -- Rank 2
+	[26366] = true, -- Rank 3
+	[26367] = true, -- Rank 5
+	[26370] = true, -- Rank 6
+	[26363] = true, -- Rank 7
+	[26371] = true, -- Rank 8
+	[26372] = true, -- Rank 9
+	[49278] = true, -- Rank 10
+	[49279] = true, -- Rank 11
+	-- Fire Shield
+	[2947] = true, -- Rank 1
+	[8316] = true, -- Rank 2
+	[8317] = true, -- Rank 3
+	[11770] = true, -- Rank 4
+	[11771] = true, -- Rank 5
+	[27269] = true, -- Rank 6
+	[47983] = true, -- Rank 7
+}
 
 -------------------------------------------------------------------------------
 -- creatureToFight

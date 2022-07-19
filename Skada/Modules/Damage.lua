@@ -839,8 +839,6 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 	end
 
 	function mod:OnInitialize()
-		if Skada.Ascension then return end
-
 		-- The Oculus
 		whitelist[49840] = true -- Shock Lance (Amber Drake)
 		whitelist[50232] = true -- Searing Wrath (Ruby Drake)

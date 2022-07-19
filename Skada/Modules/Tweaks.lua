@@ -9,7 +9,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 	local _
 
-	local channel_events, considerFoF, fofrostmourne
+	local channel_events, fofrostmourne
 
 	---------------------------------------------------------------------------
 	-- CombatLogEvent Hook
@@ -83,7 +83,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 			if self.disabled or self.testMode then return end
 
 			-- The Lich King fight & Fury of Frostmourne
-			if considerFoF and (spellid == 72350 or spellname == fofrostmourne) then
+			if spellid == 72350 or spellname == fofrostmourne then
 				if self.current and not self.current.success then
 					self.current.success = true
 					self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
@@ -475,7 +475,6 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 
 		-- fury of frostmourne
 		fofrostmourne = fofrostmourne or GetSpellInfo(72350)
-		considerFoF = not Skada.Ascension
 
 		-- smart stop
 		if P.smartstop then
@@ -559,7 +558,6 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 				type = "toggle",
 				name = fofrostmourne,
 				desc = format(L["Enable this if you want to ignore \124cffffbb00%s\124r."], fofrostmourne),
-				hidden = Skada.Ascension,
 				set = set_value,
 				order = 40
 			}

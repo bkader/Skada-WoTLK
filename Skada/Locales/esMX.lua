@@ -762,19 +762,11 @@ L["opt_tweaks_total_all_desc"] = "Todos los segmentos se a\195\177aden a los dat
 L["opt_tweaks_total_fmt_desc"] = "Los segmentos con %s se a\195\177aden a los datos del segmento total." -- needs review
 L["Detailed total segment"] = "Segmento total detallado"
 L["opt_tweaks_total_full_desc"] = "Cuando est\195\161 habilitado, Registrar\195\161 todo en el segmento total en lugar de solo los totales (registre los detalles del hechizo en el segmento \124cffffbb00total\124r)."
--- project ascension
-L["Project Ascension"] = "Project Ascension"
-L["project_ascension_desc"] = [=[En |cffffbb00Project Ascension|r, tus personajes son héroes sin clase que tienen cualquier habilidad o talento a su alcance.
-
-Los iconos y colores se envían a los miembros del grupo para que los utilicen en lugar de los iconos y colores predeterminados.]=]
-L["Icon"] = "Icono"
-L["Color for %s."] = "Color para %s."
-L["Choose the %s that fits your character's build."] = "Elige el %s que se adapte a la estructura de tu personaje."
-L["Are you sure you want clear cached icons and colors?"] = "¿Est\195\161 seguro de que desea borrar los iconos y colores almacenados en cach\195\169?"
 -- arena
 L["mod_pvp_desc"] = "A\195\177adir detecci\195\179n de especializaci\195\179n para arenas y campos de batalla, y mostrar a los oponentes de la arena en la misma ventana."
 L["Gold Team"] = "Equipo dorado"
 L["Green Team"] = "Equipo verde"
+L["Color for %s."] = "Color para %s."
 -- notifications
 L["Notifications"] = "Notificaciones"
 L["opt_toast_desc"] = "Utiliza notificaciones visuales en lugar de mensajes de la ventana de chat cuando corresponde."

@@ -761,17 +761,11 @@ L["opt_tweaks_total_all_desc"] = "모든 세그먼트는 전체 세그먼트의 
 L["opt_tweaks_total_fmt_desc"] = "전체 세그먼트의 데이터에 %s가 있는 세그먼트가 추가됩니다." -- needs review
 L["Detailed total segment"] = "상세 합계"
 -- L["opt_tweaks_total_full_desc"] = "When enabled, Skada will record everything to the total segment, instead of total numbers (record spell details, their targets as their sources)."
--- project ascension
-L["Project Ascension"] = "Project Ascension"
-L["project_ascension_desc"] = "\124cffffbb00Project Ascension\124r에서 캐릭터는 능력이나 재능이 있는 클래스가 없는 영웅입니다.\n\n아이콘 및 색상은 기본 아이콘 및 색상 대신 사용할 그룹 구성원에게 전송됩니다."
-L["Icon"] = "아이콘"
-L["Color for %s."] = "%s의 색상입니다."
-L["Choose the %s that fits your character's build."] = "캐릭터의 빌드에 맞는 %s을 선택하십시오."
-L["Are you sure you want clear cached icons and colors?"] = "캐시된 아이콘과 색상을 삭제하시겠습니까?"
 -- arena
 L["mod_pvp_desc"] = "투기장 및 전장에 대한 전문화 감지를 추가하고 같은 창에 투기장 상대를 표시합니다."
 L["Gold Team"] = "금색팀"
 L["Green Team"] = "녹색팀"
+L["Color for %s."] = "%s의 색상입니다."
 -- notifications
 L["Notifications"] = "알림"
 L["opt_toast_desc"] = "해당되는 경우 채팅 창 메시지 대신 시각적 알림을 사용합니다."

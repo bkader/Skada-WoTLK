@@ -70,30 +70,16 @@ function Skada:RegisterClasses()
 	end})
 
 	-- set classes icon file & Skada custom classes.
-	if self.AscensionCoA then
-		self.classicons = [[Interface\AddOns\Skada\Media\Textures\icon-classes-coa]]
+	self.classicons = [[Interface\AddOns\Skada\Media\Textures\icon-classes]]
 
-		-- custom class coordinates
-		if not self.classcoords.BOSS then
-			self.classcoords.BOSS = {0, 0.125, 0.875, 1}
-			self.classcoords.MONSTER = {0.125, 0.25, 0.875, 1}
-			self.classcoords.ENEMY = {0.25, 0.375, 0.875, 1}
-			self.classcoords.PET = {0.375, 0.5, 0.875, 1}
-			self.classcoords.UNKNOWN = {0.5, 0.625, 0.875, 1}
-			self.classcoords.PLAYER = {0.625, 0.75, 0.875, 1}
-		end
-	else
-		self.classicons = [[Interface\AddOns\Skada\Media\Textures\icon-classes]]
-
-		-- custom class coordinates
-		if not self.classcoords.BOSS then
-			self.classcoords.BOSS = {0.5, 0.75, 0.5, 0.75}
-			self.classcoords.MONSTER = {0.75, 1, 0.5, 0.75}
-			self.classcoords.ENEMY = {0, 0.25, 0.75, 1}
-			self.classcoords.PET = {0.25, 0.5, 0.75, 1}
-			self.classcoords.PLAYER = {0.75, 1, 0.75, 1}
-			self.classcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
-		end
+	-- custom class coordinates
+	if not self.classcoords.BOSS then
+		self.classcoords.BOSS = {0.5, 0.75, 0.5, 0.75}
+		self.classcoords.MONSTER = {0.75, 1, 0.5, 0.75}
+		self.classcoords.ENEMY = {0, 0.25, 0.75, 1}
+		self.classcoords.PET = {0.25, 0.5, 0.75, 1}
+		self.classcoords.PLAYER = {0.75, 1, 0.75, 1}
+		self.classcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
 	end
 
 	-- common metatable for coordinates tables.
@@ -105,149 +91,143 @@ function Skada:RegisterClasses()
 	end}
 	setmetatable(self.classcoords, coords_mt)
 
-	-- we ignore roles & specs on Project Ascension since players
-	-- have a custom module to set their own colors & icons.
-	if not self.Ascension and not self.AscensionCoA then
-		-- role icon file and texture coordinates
-		self.roleicons = [[Interface\AddOns\Skada\Media\Textures\icon-roles]]
-		self.rolecoords = setmetatable({
-			LEADER = {0, 0.25, 0, 1},
-			DAMAGER = {0.25, 0.5, 0, 1},
-			TANK = {0.5, 0.75, 0, 1},
-			HEALER = {0.75, 1, 0, 1},
-			NONE = ""
-		}, coords_mt)
+	-- role icon file and texture coordinates
+	self.roleicons = [[Interface\AddOns\Skada\Media\Textures\icon-roles]]
+	self.rolecoords = setmetatable({
+		LEADER = {0, 0.25, 0, 1},
+		DAMAGER = {0.25, 0.5, 0, 1},
+		TANK = {0.5, 0.75, 0, 1},
+		HEALER = {0.75, 1, 0, 1},
+		NONE = ""
+	}, coords_mt)
 
-		-- specialization icons
-		self.specicons = [[Interface\AddOns\Skada\Media\Textures\icon-specs]]
-		self.speccoords = setmetatable({
-			[62] = {0.25, 0.375, 0.25, 0.5}, --> Mage: Arcane
-			[63] = {0.375, 0.5, 0.25, 0.5}, --> Mage: Fire
-			[64] = {0.5, 0.625, 0.25, 0.5}, --> Mage: Frost
-			[65] = {0.625, 0.75, 0.25, 0.5}, --> Paladin: Holy
-			[66] = {0.75, 0.875, 0.25, 0.5}, --> Paladin: Protection
-			[70] = {0.875, 1, 0.25, 0.5}, --> Paladin: Retribution
-			[71] = {0.5, 0.625, 0.75, 1}, --> Warrior: Arms
-			[72] = {0.625, 0.75, 0.75, 1}, --> Warrior: Fury
-			[73] = {0.75, 0.875, 0.75, 1}, --> Warrior: Protection
-			[102] = {0.375, 0.5, 0, 0.25}, --> Druid: Balance
-			[103] = {0.5, 0.625, 0, 0.25}, --> Druid: Feral
-			[104] = {0.625, 0.75, 0, 0.25}, --> Druid: Tank
-			[105] = {0.75, 0.875, 0, 0.25}, --> Druid: Restoration
-			[250] = {0, 0.125, 0, 0.25}, --> Death Knight: Blood
-			[251] = {0.125, 0.25, 0, 0.25}, --> Death Knight: Frost
-			[252] = {0.25, 0.375, 0, 0.25}, --> Death Knight: Unholy
-			[253] = {0.875, 1, 0, 0.25}, --> Hunter: Beastmastery
-			[254] = {0, 0.125, 0.25, 0.5}, --> Hunter: Marksmalship
-			[255] = {0.125, 0.25, 0.25, 0.5}, --> Hunter: Survival
-			[256] = {0, 0.125, 0.5, 0.75}, --> Priest: Discipline
-			[257] = {0.125, 0.25, 0.5, 0.75}, --> Priest: Holy
-			[258] = {0.25, 0.375, 0.5, 0.75}, --> Priest: Shadow
-			[259] = {0.375, 0.5, 0.5, 0.75}, --> Rogue: Assassination
-			[260] = {0.5, 0.625, 0.5, 0.75}, --> Rogue: Combat
-			[261] = {0.625, 0.75, 0.5, 0.75}, --> Rogue: Subtlty
-			[262] = {0.75, 0.875, 0.5, 0.75}, --> Shaman: Elemental
-			[263] = {0.875, 1, 0.5, 0.75}, --> Shaman: Enhancement
-			[264] = {0, 0.125, 0.75, 1}, --> Shaman: Restoration
-			[265] = {0.125, 0.25, 0.75, 1}, --> Warlock: Affliction
-			[266] = {0.25, 0.375, 0.75, 1}, --> Warlock: Demonology
-			[267] = {0.375, 0.5, 0.75, 1} --> Warlock: Destruction
-		}, coords_mt)
-	end
+	-- specialization icons
+	self.specicons = [[Interface\AddOns\Skada\Media\Textures\icon-specs]]
+	self.speccoords = setmetatable({
+		[62] = {0.25, 0.375, 0.25, 0.5}, --> Mage: Arcane
+		[63] = {0.375, 0.5, 0.25, 0.5}, --> Mage: Fire
+		[64] = {0.5, 0.625, 0.25, 0.5}, --> Mage: Frost
+		[65] = {0.625, 0.75, 0.25, 0.5}, --> Paladin: Holy
+		[66] = {0.75, 0.875, 0.25, 0.5}, --> Paladin: Protection
+		[70] = {0.875, 1, 0.25, 0.5}, --> Paladin: Retribution
+		[71] = {0.5, 0.625, 0.75, 1}, --> Warrior: Arms
+		[72] = {0.625, 0.75, 0.75, 1}, --> Warrior: Fury
+		[73] = {0.75, 0.875, 0.75, 1}, --> Warrior: Protection
+		[102] = {0.375, 0.5, 0, 0.25}, --> Druid: Balance
+		[103] = {0.5, 0.625, 0, 0.25}, --> Druid: Feral
+		[104] = {0.625, 0.75, 0, 0.25}, --> Druid: Tank
+		[105] = {0.75, 0.875, 0, 0.25}, --> Druid: Restoration
+		[250] = {0, 0.125, 0, 0.25}, --> Death Knight: Blood
+		[251] = {0.125, 0.25, 0, 0.25}, --> Death Knight: Frost
+		[252] = {0.25, 0.375, 0, 0.25}, --> Death Knight: Unholy
+		[253] = {0.875, 1, 0, 0.25}, --> Hunter: Beastmastery
+		[254] = {0, 0.125, 0.25, 0.5}, --> Hunter: Marksmalship
+		[255] = {0.125, 0.25, 0.25, 0.5}, --> Hunter: Survival
+		[256] = {0, 0.125, 0.5, 0.75}, --> Priest: Discipline
+		[257] = {0.125, 0.25, 0.5, 0.75}, --> Priest: Holy
+		[258] = {0.25, 0.375, 0.5, 0.75}, --> Priest: Shadow
+		[259] = {0.375, 0.5, 0.5, 0.75}, --> Rogue: Assassination
+		[260] = {0.5, 0.625, 0.5, 0.75}, --> Rogue: Combat
+		[261] = {0.625, 0.75, 0.5, 0.75}, --> Rogue: Subtlty
+		[262] = {0.75, 0.875, 0.5, 0.75}, --> Shaman: Elemental
+		[263] = {0.875, 1, 0.5, 0.75}, --> Shaman: Enhancement
+		[264] = {0, 0.125, 0.75, 1}, --> Shaman: Restoration
+		[265] = {0.125, 0.25, 0.75, 1}, --> Warlock: Affliction
+		[266] = {0.25, 0.375, 0.75, 1}, --> Warlock: Demonology
+		[267] = {0.375, 0.5, 0.75, 1} --> Warlock: Destruction
+	}, coords_mt)
 
 	-- customize class colors
-	if not self.Ascension or not self.AscensionCoA then
-		local disabled = function()
-			return not self.db.profile.usecustomcolors
-		end
+	local disabled = function()
+		return not self.db.profile.usecustomcolors
+	end
 
-		local colorsOpt = {
-			type = "group",
-			name = L["Colors"],
-			desc = format(L["Options for %s."], L["Colors"]),
-			order = 1000,
-			get = function(i)
-				local color = self.classcolors[i[#i]]
-				if self.db.profile.customcolors and self.db.profile.customcolors[i[#i]] then
-					color = self.db.profile.customcolors[i[#i]]
+	local colorsOpt = {
+		type = "group",
+		name = L["Colors"],
+		desc = format(L["Options for %s."], L["Colors"]),
+		order = 1000,
+		get = function(i)
+			local color = self.classcolors[i[#i]]
+			if self.db.profile.customcolors and self.db.profile.customcolors[i[#i]] then
+				color = self.db.profile.customcolors[i[#i]]
+			end
+			return color.r, color.g, color.b
+		end,
+		set = function(i, r, g, b)
+			local class = i[#i]
+			self.db.profile.customcolors = self.db.profile.customcolors or {}
+			self.db.profile.customcolors[class] = self.db.profile.customcolors[class] or {}
+			self.db.profile.customcolors[class].r = r
+			self.db.profile.customcolors[class].g = g
+			self.db.profile.customcolors[class].b = b
+			self.db.profile.customcolors[class].colorStr = self.RGBPercToHex(r, g, b, true)
+		end,
+		args = {
+			enable = {
+				type = "toggle",
+				name = L["Enable"],
+				width = "double",
+				order = 10,
+				get = function()
+					return self.db.profile.usecustomcolors
+				end,
+				set = function(_, val)
+					if val then
+						self.db.profile.usecustomcolors = true
+					else
+						self.db.profile.usecustomcolors = nil
+						self.db.profile.customcolors = nil -- free it
+					end
 				end
-				return color.r, color.g, color.b
-			end,
-			set = function(i, r, g, b)
-				local class = i[#i]
-				self.db.profile.customcolors = self.db.profile.customcolors or {}
-				self.db.profile.customcolors[class] = self.db.profile.customcolors[class] or {}
-				self.db.profile.customcolors[class].r = r
-				self.db.profile.customcolors[class].g = g
-				self.db.profile.customcolors[class].b = b
-				self.db.profile.customcolors[class].colorStr = self.RGBPercToHex(r, g, b, true)
-			end,
-			args = {
-				enable = {
-					type = "toggle",
-					name = L["Enable"],
-					width = "double",
-					order = 10,
-					get = function()
-						return self.db.profile.usecustomcolors
-					end,
-					set = function(_, val)
-						if val then
-							self.db.profile.usecustomcolors = true
-						else
-							self.db.profile.usecustomcolors = nil
-							self.db.profile.customcolors = nil -- free it
-						end
-					end
-				},
-				class = {
-					type = "group",
-					name = L["Class Colors"],
-					order = 20,
-					hidden = disabled,
-					disabled = disabled,
-					args = {}
-				},
-				custom = {
-					type = "group",
-					name = L["Custom Colors"],
-					order = 30,
-					hidden = disabled,
-					disabled = disabled,
-					args = {}
-				},
-				reset = {
-					type = "execute",
-					name = L["Reset"],
-					width = "double",
-					order = 90,
-					disabled = disabled,
-					confirm = function() return L["Are you sure you want to reset all colors?"] end,
-					func = function()
-						self.db.profile.customcolors = wipe(self.db.profile.customcolors or {})
-					end
-				}
+			},
+			class = {
+				type = "group",
+				name = L["Class Colors"],
+				order = 20,
+				hidden = disabled,
+				disabled = disabled,
+				args = {}
+			},
+			custom = {
+				type = "group",
+				name = L["Custom Colors"],
+				order = 30,
+				hidden = disabled,
+				disabled = disabled,
+				args = {}
+			},
+			reset = {
+				type = "execute",
+				name = L["Reset"],
+				width = "double",
+				order = 90,
+				disabled = disabled,
+				confirm = function() return L["Are you sure you want to reset all colors?"] end,
+				func = function()
+					self.db.profile.customcolors = wipe(self.db.profile.customcolors or {})
+				end
 			}
 		}
+	}
 
-		for class, data in pairs(self.classcolors) do
-			if self.validclass[class] then
-				colorsOpt.args.class.args[class] = {
-					type = "color",
-					name = L[class],
-					desc = format(L["Color for %s."], L[class])
-				}
-			else
-				colorsOpt.args.custom.args[class] = {
-					type = "color",
-					name = L[class],
-					desc = format(L["Color for %s."], L[class])
-				}
-			end
+	for class, data in pairs(self.classcolors) do
+		if self.validclass[class] then
+			colorsOpt.args.class.args[class] = {
+				type = "color",
+				name = L[class],
+				desc = format(L["Color for %s."], L[class])
+			}
+		else
+			colorsOpt.args.custom.args[class] = {
+				type = "color",
+				name = L[class],
+				desc = format(L["Color for %s."], L[class])
+			}
 		end
-
-		self.options.args.tweaks.args.advanced.args.colors = colorsOpt
 	end
+
+	self.options.args.tweaks.args.advanced.args.colors = colorsOpt
 end
 
 function Skada:RegisterSchools()
@@ -545,31 +525,7 @@ do
 	do
 		local playersTable = nil
 		function fake_players()
-			if not playersTable and Skada.AscensionCoA then
-				playersTable = {
-					{"Necromancer", "NECROMANCER"},
-					{"Sun Cleric", "SUNCLERIC"},
-					{"Starcaller", "STARCALLER"},
-					{"Reaper", "REAPER"},
-					{"Tinker", "TINKER"},
-					{"Stormbringer", "STORMBRINGER"},
-					{"Knight of Xoroth", "FLESHWARDEN"},
-					{"Barbarian", "BARBARIAN"},
-					{"Cultist", "CULTIST"},
-					{"Pyromancer", "PYROMANCER"},
-					{"Ranger", "RANGER"},
-					{"Runemaster", "SPIRITMAGE"},
-					{"Demon Hunter", "DEMONHUNTER"},
-					{"Guardian", "GUARDIAN"},
-					{"Witch Hunter", "WITCHHUNTER"},
-					{"Son of Arugal", "SONOFARUGAL"},
-					{"Monk", "MONK"},
-					{"Chronomancer", "CHRONOMANCER"},
-					{"Venomancer", "PROPHET"},
-					{"Primalist", "WILDWALKER"},
-					{"Witch Doctor", "WITCHDOCTOR"}
-				}
-			elseif not playersTable then
+			if not playersTable then
 				playersTable = {
 					-- Tanks & Healers
 					{"Deafknight", "DEATHKNIGHT", "TANK", 250}, -- Blood Death Knight

@@ -544,10 +544,6 @@ end
 do
 	local classColorsTable, classCoordsTable
 
-	-- flags for Projects Ascension
-	lib.Ascension = (type(IsCoA) == "function")
-	lib.AscensionCoA = lib.Ascension and IsCoA()
-
 	local function GetClassColorsTable()
 		-- fill class colors table.
 		if classColorsTable == nil then
@@ -562,24 +558,8 @@ do
 		-- fill class coords table
 		if classCoordsTable == nil then
 			classCoordsTable = {}
-			if lib.AscensionCoA then -- for Project Ascension!
-				-- original wow classes
-				classCoordsTable.WARRIOR = {0.25, 0.375, 0.5, 0.625}
-				classCoordsTable.MAGE = {0.375, 0.5, 0.5, 0.625}
-				classCoordsTable.ROGUE = {0, 0.125, 0.625, 0.75}
-				classCoordsTable.DRUID = {0.125, 0.25, 0.625, 0.75}
-				classCoordsTable.HUNTER = {0.25, 0.375, 0.625, 0.75}
-				classCoordsTable.SHAMAN = {0.375, 0.5, 0.625, 0.75}
-				classCoordsTable.PRIEST = {0, 0.125, 0.75, 0.875}
-				classCoordsTable.WARLOCK = {0.125, 0.25, 0.75, 0.875}
-				classCoordsTable.PALADIN = {0.25, 0.375, 0.75, 0.875}
-				classCoordsTable.DEATHKNIGHT = {0.375, 0.5, 0.75, 0.875}
-			end
 			for class, coords in pairs(CLASS_ICON_TCOORDS) do
-				-- skip original classes for Ascension CoA
-				if not classCoordsTable[class] then
-					classCoordsTable[class] = coords
-				end
+				classCoordsTable[class] = coords
 			end
 		end
 
@@ -830,8 +810,6 @@ local mixins = {
 	"UnitIterator",
 	-- unit util
 	"GetUnitIdFromGUID",
-	"Ascension",
-	"AscensionCoA",
 	"GetClassFromGUID",
 	"GetCreatureId",
 	"UnitHealthInfo",

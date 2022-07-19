@@ -992,6 +992,25 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 	end
 
 	do
+		-- some effects aren't shields but rather special effects, such us talents.
+		-- in order to track them, we simply add them as fake shields before all.
+		-- I don't know the whole list of effects but, if you want to add yours
+		-- please do : CLASS = {[index] = {spellid, spellschool}}
+		-- see: http://wotlk.cavernoftime.com/spell=<spellid>
+		local _passive = {
+			DEATHKNIGHT = {
+				{50150, 1}, -- Will of the Necropolis
+				{49497, 1}, -- Spell Deflection
+			},
+			PALADIN = {
+				{66233, 1}, -- Ardent Defender
+			},
+			ROGUE = {
+				{31230, 1}, -- Cheat Death
+			}
+		}
+
+		local LGT = LibStub("LibGroupTalents-1.0")
 		local function check_unit_shields(unit, owner, timestamp, curtime)
 			if not UnitIsDeadOrGhost(unit) then
 				local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
@@ -1003,6 +1022,20 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 						end
 					else
 						break -- nothing found
+					end
+				end
+
+				-- passive shields (not for pets)
+				if owner == nil then
+					local _, class = UnitClass(unit)
+					if _passive[class] then
+						for i = 1, #_passive[class] do
+							local spell = _passive[class][i]
+							local points = spell and LGT:GUIDHasTalent(dstGUID, GetSpellInfo(spell[1]), LGT:GetActiveTalentGroup(unit))
+							if points then
+								handle_shield(timestamp - 60, nil, dstGUID, dstGUID, nil, dstGUID, dstName, nil, spell[1], nil, spell[2], nil, points)
+							end
+						end
 					end
 				end
 			end
@@ -1023,60 +1056,6 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 			T.free("Skada_ShieldAmounts", shieldamounts)
 			T.free("Skada_ShieldsPopped", shieldspopped, nil, del)
 			self.checked = nil
-		end
-
-		function mod:OnInitialize()
-			-- nothing to do for Project Ascension
-			if Skada.Ascension then return end
-
-			-- some effects aren't shields but rather special effects, such us talents.
-			-- in order to track them, we simply add them as fake shields before all.
-			-- I don't know the whole list of effects but, if you want to add yours
-			-- please do : CLASS = {[index] = {spellid, spellschool}}
-			-- see: http://wotlk.cavernoftime.com/spell=<spellid>
-			local passive = {
-				DEATHKNIGHT = {
-					{50150, 1}, -- Will of the Necropolis
-					{49497, 1}, -- Spell Deflection
-				},
-				PALADIN = {
-					{66233, 1}, -- Ardent Defender
-				},
-				ROGUE = {
-					{31230, 1}, -- Cheat Death
-				}
-			}
-
-			local LGT = LibStub("LibGroupTalents-1.0")
-			check_unit_shields = function(unit, owner, timestamp, curtime)
-				if not UnitIsDeadOrGhost(unit) then
-					local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
-					for i = 1, 40 do
-						local _, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitBuff(unit, i)
-						if spellid then
-							if absorbspells[spellid] and unitCaster then
-								handle_shield(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
-							end
-						else
-							break -- nothing found
-						end
-					end
-
-					-- passive shields (not for pets)
-					if owner == nil then
-						local _, class = UnitClass(unit)
-						if passive[class] then
-							for i = 1, #passive[class] do
-								local spell = passive[class][i]
-								local points = spell and LGT:GUIDHasTalent(dstGUID, GetSpellInfo(spell[1]), LGT:GetActiveTalentGroup(unit))
-								if points then
-									handle_shield(timestamp - 60, nil, dstGUID, dstGUID, nil, dstGUID, dstName, nil, spell[1], nil, spell[2], nil, points)
-								end
-							end
-						end
-					end
-				end
-			end
 		end
 	end
 

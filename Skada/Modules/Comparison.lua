@@ -798,15 +798,6 @@ Skada:RegisterModule("Comparison", function(L, P)
 		end
 	end
 
-	-- just to alter "can_compare" function
-	function mod:OnInitialize()
-		if Skada.Ascension then
-			can_compare = function(actor)
-				return (actor and actor.class == mod.userClass)
-			end
-		end
-	end
-
 	function mod:OnEnable()
 		dspellmod.metadata = {tooltip = spellmod_tooltip}
 		targetmod.metadata = {click1 = dtargetmod}

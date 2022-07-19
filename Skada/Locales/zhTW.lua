@@ -758,17 +758,11 @@ L["opt_tweaks_total_all_desc"] = "将所有段添加到总段的数据中。" --
 L["opt_tweaks_total_fmt_desc"] = "将带有 %s 的段添加到总段的数据中。" -- needs review
 L["Detailed total segment"] = "詳細的總段"
 -- L["opt_tweaks_total_full_desc"] = "When enabled, Skada will record everything to the total segment, instead of total numbers (record spell details, their targets as their sources)."
--- project ascension
-L["Project Ascension"] = "Project Ascension"
-L["project_ascension_desc"] = "在 \124cffffbb00Project Ascension\124r 中，您的角色是擁有任何能力或天賦的英雄。\n\n图标和颜色被发送给群组成员以代替默认图标和颜色使用。"
-L["Icon"] = "圖標"
-L["Color for %s."] = "%s 的顏色。"
-L["Choose the %s that fits your character's build."] = "選擇適合您角色體型的%s。"
-L["Are you sure you want clear cached icons and colors?"] = "您確定要刪除緩存的圖標和顏色嗎？"
 -- arena
 L["mod_pvp_desc"] = "為競技場和戰場添加專業化檢測，並在同一窗口顯示競技場對手。"
 L["Gold Team"] = "金隊"
 L["Green Team"] = "綠隊"
+L["Color for %s."] = "%s 的顏色。"
 -- notifications
 L["Notifications"] = "通知"
 L["opt_toast_desc"] = "在適用時使用視覺通知而不是聊天窗口消息。"
