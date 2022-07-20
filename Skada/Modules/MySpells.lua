@@ -30,28 +30,28 @@ Skada:RegisterModule("My Spells", function(L, P)
 			-- count stats
 			tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
 
-			if spell.hit and spell.hit > 0 then
-				tooltip:AddDoubleLine(L["Normal Hits"], format("%s (%s)", spell.hit, Skada:FormatPercent(spell.hit, spell.count)), 1, 1, 1)
+			if spell.n_num and spell.n_num > 0 then
+				tooltip:AddDoubleLine(L["Normal Hits"], format("%s (%s)", spell.n_num, Skada:FormatPercent(spell.n_num, spell.count)), 1, 1, 1)
 			end
 
-			if spell.critical and spell.critical > 0 then
-				tooltip:AddDoubleLine(L["Critical Hits"], format("%s (%s)", spell.critical, Skada:FormatPercent(spell.critical, spell.count)), 1, 1, 1)
+			if spell.c_num and spell.c_num > 0 then
+				tooltip:AddDoubleLine(L["Critical Hits"], format("%s (%s)", spell.c_num, Skada:FormatPercent(spell.c_num, spell.count)), 1, 1, 1)
 			end
 
 			tooltip:AddLine(" ")
 
-			if spell.hitmin or spell.min then
-				local spellmin = spell.hitmin or spell.min
-				if spell.criticalmin and spell.criticalmin < spellmin then
-					spellmin = spell.criticalmin
+			if spell.n_min or spell.min then
+				local spellmin = spell.n_min or spell.min
+				if spell.c_min and spell.c_min < spellmin then
+					spellmin = spell.c_min
 				end
 				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
 			end
 
-			if spell.hitmax or spell.max then
-				local spellmax = spell.hitmax or spell.max
-				if spell.criticalmax and spell.criticalmax < spellmax then
-					spellmax = spell.criticalmax
+			if spell.n_max or spell.max then
+				local spellmax = spell.n_max or spell.max
+				if spell.c_max and spell.c_max < spellmax then
+					spellmax = spell.c_max
 				end
 				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
 			end

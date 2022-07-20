@@ -456,15 +456,15 @@ do
 			tbl = new()
 			tbl.amount = info.amount
 			tbl.total = info.total
-			tbl.overkill = info.overkill
+			tbl.o_amt = info.o_amt
 			t[name] = tbl
 		else
 			tbl.amount = tbl.amount + info.amount
 			if info.total then
 				tbl.total = (tbl.total or 0) + info.total
 			end
-			if info.overkill then
-				tbl.overkill = (tbl.overkill or 0) + info.overkill
+			if info.o_amt then
+				tbl.o_amt = (tbl.o_amt or 0) + info.o_amt
 			end
 		end
 
@@ -510,8 +510,8 @@ function actorPrototype:GetDamageOnTarget(name)
 			end
 
 			-- overkill
-			if spell.targets[name].overkill then
-				overkill = overkill + spell.targets[name].overkill
+			if spell.targets[name].o_amt then
+				overkill = overkill + spell.targets[name].o_amt
 			end
 
 			-- useful
@@ -552,7 +552,7 @@ do
 			tbl = new()
 			tbl.amount = info.amount
 			tbl.total = info.total
-			tbl.overkill = info.overkill -- nil for players
+			tbl.o_amt = info.o_amt -- nil for players
 			tbl.useful = info.useful -- nil for enemies
 			t[name] = tbl
 		else
@@ -560,8 +560,8 @@ do
 			if info.total then
 				tbl.total = (tbl.total or 0) + info.total
 			end
-			if info.overkill then -- nil for players
-				tbl.overkill = (tbl.overkill or 0) + info.overkill
+			if info.o_amt then -- nil for players
+				tbl.o_amt = (tbl.o_amt or 0) + info.o_amt
 			end
 			if info.useful then -- nil for enemies
 				tbl.useful = (tbl.useful or 0) + info.useful
@@ -615,8 +615,8 @@ function actorPrototype:GetDamageFromSource(name)
 			end
 
 			-- overkill
-			if spell.sources[name].overkill then
-				overkill = overkill + spell.sources[name].overkill
+			if spell.sources[name].o_amt then
+				overkill = overkill + spell.sources[name].o_amt
 			end
 
 			-- useful
@@ -693,8 +693,8 @@ function actorPrototype:GetHealOnTarget(name)
 				heal = heal + spell.targets[name]
 			else
 				heal = heal + spell.targets[name].amount
-				if spell.targets[name].overheal then
-					overheal = overheal + spell.targets[name].overheal
+				if spell.targets[name].o_amt then
+					overheal = overheal + spell.targets[name].o_amt
 				end
 			end
 		end
@@ -710,8 +710,8 @@ function actorPrototype:GetOverhealOnTarget(name)
 
 	local overheal = 0
 	for _, spell in pairs(self.healspells) do
-		if spell.overheal and spell.overheal > 0 and spell.targets and spell.targets[name] and spell.targets[name].overheal then
-			overheal = overheal + spell.targets[name].overheal
+		if spell.o_amt and spell.o_amt > 0 and spell.targets and spell.targets[name] and spell.targets[name].o_amt then
+			overheal = overheal + spell.targets[name].o_amt
 		end
 	end
 	return overheal
@@ -730,8 +730,8 @@ function actorPrototype:GetTotalHealOnTarget(name)
 				heal = heal + spell.targets[name]
 			else
 				heal = heal + spell.targets[name].amount
-				if spell.targets[name].overheal then
-					heal = heal + spell.targets[name].overheal
+				if spell.targets[name].o_amt then
+					heal = heal + spell.targets[name].o_amt
 				end
 			end
 		end
@@ -797,8 +797,8 @@ function actorPrototype:GetAbsorbHealOnTarget(name)
 					heal = heal + spell.targets[name]
 				else
 					heal = heal + spell.targets[name].amount
-					if spell.targets[name].overheal then
-						overheal = overheal + spell.targets[name].overheal
+					if spell.targets[name].o_amt then
+						overheal = overheal + spell.targets[name].o_amt
 					end
 				end
 			end
@@ -830,8 +830,8 @@ do
 			tbl.amount = (tbl.amount or 0) + info
 		else
 			tbl.amount = (tbl.amount or 0) + info.amount
-			if info.overheal then
-				tbl.overheal = (tbl.overheal or 0) + info.overheal
+			if info.o_amt then
+				tbl.o_amt = (tbl.o_amt or 0) + info.o_amt
 			end
 		end
 
@@ -903,17 +903,17 @@ end
 -- returns the table of overheal targets if found
 do
 	local function fill_overheal_targets_table(set, t, name, info)
-		if info.overheal or info.overheal == 0 then return end
+		if not info.o_amt or info.o_amt == 0 then return end
 
 		local tbl = t[name]
 		if not tbl then
 			tbl = new()
-			tbl.amount = info.overheal
-			tbl.total = info.amount + info.overheal
+			tbl.amount = info.o_amt
+			tbl.total = info.amount + info.o_amt
 			tbl = t[name]
 		else
-			tbl.amount = tbl.amount + info.overheal
-			tbl.total = tbl.total + info.amount + info.overheal
+			tbl.amount = tbl.amount + info.o_amt
+			tbl.total = tbl.total + info.amount + info.o_amt
 		end
 
 		set:_fill_actor_table(tbl, name)
@@ -924,7 +924,7 @@ do
 
 		tbl = clear(tbl or cacheTable)
 		for _, spell in pairs(self.healspells) do
-			if spell.overheal and spell.overheal > 0 and spell.targets then
+			if spell.o_amt and spell.o_amt > 0 and spell.targets then
 				for name, target in pairs(spell.targets) do
 					fill_overheal_targets_table(self.super, tbl, name, target)
 				end
@@ -944,8 +944,8 @@ do
 			tbl.amount = (tbl.amount or 0) + info
 		else
 			tbl.amount = (tbl.amount or 0) + info.amount
-			if info.overheal then
-				tbl.amount = tbl.amount + info.overheal
+			if info.o_amt then
+				tbl.amount = tbl.amount + info.o_amt
 			end
 		end
 

@@ -234,7 +234,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 
 			local overkill = dmg.overkill or 0
 			if overkill > 0 then
-				spell.overkill = (spell.overkill or 0) + overkill
+				spell.o_amt = (spell.o_amt or 0) + overkill
 			end
 
 			-- damage source.
@@ -256,7 +256,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 				end
 
 				if overkill > 0 then
-					source.overkill = (source.overkill or 0) + dmg.overkill
+					source.o_amt = (source.o_amt or 0) + dmg.overkill
 				end
 
 				-- the rest of the code is only for allowed instance diffs.
@@ -950,7 +950,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 			end
 
 			if overkill > 0 then
-				spell.overkill = (spell.overkill or 0) + dmg.overkill
+				spell.o_amt = (spell.o_amt or 0) + dmg.overkill
 			end
 
 			-- damage target.
@@ -971,7 +971,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 				end
 
 				if overkill > 0 then
-					target.overkill = (target.overkill or 0) + dmg.overkill
+					target.o_amt = (target.o_amt or 0) + dmg.overkill
 				end
 			end
 		end

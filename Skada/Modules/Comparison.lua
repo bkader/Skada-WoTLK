@@ -20,10 +20,6 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 	-- damage miss types
 	local missTypes = Skada.missTypes
-	if not missTypes then
-		missTypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}
-		Skada.missTypes = missTypes
-	end
 
 	-- percentage colors
 	local red = "\124cffffaaaa-%s\124r"
@@ -77,30 +73,30 @@ Skada:RegisterModule("Comparison", function(L, P)
 						tooltip:AddLine(spellschools(spell.school))
 					end
 
-					if label == L["Critical Hits"] and spell.criticalamount then
-						if spell.criticalmin then
-							tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.criticalmin), 1, 1, 1)
+					if label == L["Critical Hits"] and spell.c_amt then
+						if spell.c_min then
+							tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.c_min), 1, 1, 1)
 						end
-						if spell.criticalmax then
-							tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.criticalmax), 1, 1, 1)
+						if spell.c_max then
+							tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.c_max), 1, 1, 1)
 						end
-						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.criticalamount / spell.critical), 1, 1, 1)
-					elseif label == L["Normal Hits"] and spell.hitamount then
-						if spell.hitmin then
-							tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.c_amt / spell.c_num), 1, 1, 1)
+					elseif label == L["Normal Hits"] and spell.n_amt then
+						if spell.n_min then
+							tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.n_min), 1, 1, 1)
 						end
-						if spell.hitmax then
-							tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
+						if spell.n_max then
+							tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.n_max), 1, 1, 1)
 						end
-						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
-					elseif label == L["Glancing"] and spell.glance then
-						if spell.glancemin then
-							tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.glancemin), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.n_amt / spell.n_num), 1, 1, 1)
+					elseif label == L["Glancing"] and spell.g_amt then
+						if spell.g_min then
+							tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.g_min), 1, 1, 1)
 						end
-						if spell.glancemax then
-							tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.glancemax), 1, 1, 1)
+						if spell.g_max then
+							tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.g_max), 1, 1, 1)
 						end
-						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.glance / spell.glancing), 1, 1, 1)
+						tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.g_amt / spell.g_num), 1, 1, 1)
 					end
 				end
 				return
@@ -115,47 +111,47 @@ Skada:RegisterModule("Comparison", function(L, P)
 					tooltip:AddLine(spellschools(spell and spell.school or myspell.school))
 				end
 
-				if label == L["Critical Hits"] and (spell and spell.criticalamount or myspell.criticalamount) then
-					local num = spell and spell.critical and (100 * spell.critical / spell.count) or 0
-					local mynum = myspell and myspell.critical and (100 * myspell.critical / myspell.count) or 0
+				if label == L["Critical Hits"] and (spell and spell.c_amt or myspell.c_amt) then
+					local num = spell and spell.c_num and (100 * spell.c_num / spell.count) or 0
+					local mynum = myspell and myspell.c_num and (100 * myspell.c_num / myspell.count) or 0
 
 					tooltip:AddDoubleLine(L["Critical"], format_value_percent(mynum, num, actor.id == mod.userGUID), 1, 1, 1)
 
-					num = (spell and spell.criticalamount) and (spell.criticalamount / spell.critical) or 0
-					mynum = (myspell and myspell.criticalamount) and (myspell.criticalamount / myspell.critical) or 0
+					num = (spell and spell.c_amt) and (spell.c_amt / spell.c_num) or 0
+					mynum = (myspell and myspell.c_amt) and (myspell.c_amt / myspell.c_num) or 0
 
-					if (spell and spell.criticalmin) or (myspell and myspell.criticalmin) then
-						tooltip:AddDoubleLine(L["Minimum"], format_value_number(spell and spell.criticalmin, myspell and myspell.criticalmin, true), 1, 1, 1)
+					if (spell and spell.c_min) or (myspell and myspell.c_min) then
+						tooltip:AddDoubleLine(L["Minimum"], format_value_number(spell and spell.c_min, myspell and myspell.c_min, true), 1, 1, 1)
 					end
 
-					if (spell and spell.criticalmax) or (myspell and myspell.criticalmax) then
-						tooltip:AddDoubleLine(L["Maximum"], format_value_number(spell and spell.criticalmax, myspell and myspell.criticalmax, true), 1, 1, 1)
-					end
-
-					tooltip:AddDoubleLine(L["Average"], format_value_number(num, mynum, true), 1, 1, 1)
-				elseif label == L["Normal Hits"] and ((spell and spell.hitamount) or (myspell and myspell.hitamount)) then
-					local num = (spell and spell.hitamount) and (spell.hitamount / spell.hit) or 0
-					local mynum = (myspell and myspell.hitamount) and (myspell.hitamount / myspell.hit) or 0
-
-					if (spell and spell.hitmin) or (myspell and myspell.hitmin) then
-						tooltip:AddDoubleLine(L["Minimum"], format_value_number(spell and spell.hitmin, myspell and myspell.hitmin, true), 1, 1, 1)
-					end
-
-					if (spell and spell.hitmax) or (myspell and myspell.hitmax) then
-						tooltip:AddDoubleLine(L["Maximum"], format_value_number(spell and spell.hitmax, myspell and myspell.hitmax, true), 1, 1, 1)
+					if (spell and spell.c_max) or (myspell and myspell.c_max) then
+						tooltip:AddDoubleLine(L["Maximum"], format_value_number(spell and spell.c_max, myspell and myspell.c_max, true), 1, 1, 1)
 					end
 
 					tooltip:AddDoubleLine(L["Average"], format_value_number(num, mynum, true), 1, 1, 1)
-				elseif label == L["Glancing"] and ((spell and spell.glance) or (myspell and myspell.glance)) then
-					local num = (spell and spell.glance) and (spell.glance / spell.glancing) or 0
-					local mynum = (myspell and myspell.glance) and (myspell.glance / myspell.glancing) or 0
+				elseif label == L["Normal Hits"] and ((spell and spell.n_amt) or (myspell and myspell.n_amt)) then
+					local num = (spell and spell.n_amt) and (spell.n_amt / spell.n_num) or 0
+					local mynum = (myspell and myspell.n_amt) and (myspell.n_amt / myspell.n_num) or 0
 
-					if (spell and spell.glancemin) or (myspell and myspell.glancemin) then
-						tooltip:AddDoubleLine(L["Minimum"], format_value_number(spell and spell.glancemin, myspell and myspell.glancemin, true), 1, 1, 1)
+					if (spell and spell.n_min) or (myspell and myspell.n_min) then
+						tooltip:AddDoubleLine(L["Minimum"], format_value_number(spell and spell.n_min, myspell and myspell.n_min, true), 1, 1, 1)
 					end
 
-					if (spell and spell.glancemax) or (myspell and myspell.glancemax) then
-						tooltip:AddDoubleLine(L["Maximum"], format_value_number(spell and spell.glancemax, myspell and myspell.glancemax, true), 1, 1, 1)
+					if (spell and spell.n_max) or (myspell and myspell.n_max) then
+						tooltip:AddDoubleLine(L["Maximum"], format_value_number(spell and spell.n_max, myspell and myspell.n_max, true), 1, 1, 1)
+					end
+
+					tooltip:AddDoubleLine(L["Average"], format_value_number(num, mynum, true), 1, 1, 1)
+				elseif label == L["Glancing"] and ((spell and spell.g_amt) or (myspell and myspell.g_amt)) then
+					local num = (spell and spell.g_amt) and (spell.g_amt / spell.g_num) or 0
+					local mynum = (myspell and myspell.g_amt) and (myspell.g_amt / myspell.g_num) or 0
+
+					if (spell and spell.g_min) or (myspell and myspell.g_min) then
+						tooltip:AddDoubleLine(L["Minimum"], format_value_number(spell and spell.g_min, myspell and myspell.g_min, true), 1, 1, 1)
+					end
+
+					if (spell and spell.g_max) or (myspell and myspell.g_max) then
+						tooltip:AddDoubleLine(L["Maximum"], format_value_number(spell and spell.g_max, myspell and myspell.g_max, true), 1, 1, 1)
 					end
 
 					tooltip:AddDoubleLine(L["Average"], format_value_number(num, mynum, true), 1, 1, 1)
@@ -236,22 +232,21 @@ Skada:RegisterModule("Comparison", function(L, P)
 					win.dataset[nr].value = win.dataset[nr].value * 1e3 -- to be always first
 				end
 
-				if spell.hit and spell.hit > 0 then
-					nr = add_detail_bar(win, nr, L["Normal Hits"], spell.hit, nil, nil, true)
+				if spell.n_num and spell.n_num > 0 then
+					nr = add_detail_bar(win, nr, L["Normal Hits"], spell.n_num, nil, nil, true)
 				end
 
-				if spell.critical and spell.critical > 0 then
-					nr = add_detail_bar(win, nr, L["Critical Hits"], spell.critical, nil, nil, true)
+				if spell.c_num and spell.c_num > 0 then
+					nr = add_detail_bar(win, nr, L["Critical Hits"], spell.c_num, nil, nil, true)
 				end
 
-				if spell.glancing and spell.glancing > 0 then
-					nr = add_detail_bar(win, nr, L["Glancing"], spell.glancing, nil, nil, true)
+				if spell.g_num and spell.g_num > 0 then
+					nr = add_detail_bar(win, nr, L["Glancing"], spell.g_num, nil, nil, true)
 				end
 
-				for i = 1, #missTypes do
-					local misstype = missTypes[i]
-					if misstype and spell[misstype] then
-						nr = add_detail_bar(win, nr, L[misstype], spell[misstype], nil, nil, true)
+				for k, v in pairs(missTypes) do
+					if spell[v] then
+						nr = add_detail_bar(win, nr, L[k], spell[v], nil, nil, true)
 					end
 				end
 			end
@@ -275,22 +270,21 @@ Skada:RegisterModule("Comparison", function(L, P)
 				win.dataset[nr].value = win.dataset[nr].value * 1e3 -- to be always first
 			end
 
-			if (spell and spell.hit and spell.hit > 0) or (myspell and myspell.hit and myspell.hit > 0) then
-				nr = add_detail_bar(win, nr, L["Normal Hits"], spell and spell.hit, myspell and myspell.hit)
+			if (spell and spell.n_num and spell.n_num > 0) or (myspell and myspell.n_num and myspell.n_num > 0) then
+				nr = add_detail_bar(win, nr, L["Normal Hits"], spell and spell.n_num, myspell and myspell.n_num)
 			end
 
-			if (spell and spell.critical and spell.critical > 0) or (myspell and myspell.critical and myspell.critical > 0) then
-				nr = add_detail_bar(win, nr, L["Critical Hits"], spell and spell.critical, myspell and myspell.critical)
+			if (spell and spell.c_num and spell.c_num > 0) or (myspell and myspell.c_num and myspell.c_num > 0) then
+				nr = add_detail_bar(win, nr, L["Critical Hits"], spell and spell.c_num, myspell and myspell.c_num)
 			end
 
-			if (spell and spell.glancing and spell.glancing > 0) or (myspell and myspell.glancing and myspell.glancing > 0) then
-				nr = add_detail_bar(win, nr, L["Glancing"], spell and spell.glancing, myspell and myspell.glancing)
+			if (spell and spell.g_num and spell.g_num > 0) or (myspell and myspell.g_num and myspell.g_num > 0) then
+				nr = add_detail_bar(win, nr, L["Glancing"], spell and spell.g_num, myspell and myspell.g_num)
 			end
 
-			for i = 1, #missTypes do
-				local misstype = missTypes[i]
-				if misstype and ((spell and spell[misstype]) or (myspell and myspell[misstype])) then
-					nr = add_detail_bar(win, nr, L[misstype], spell and spell[misstype], myspell and myspell[misstype])
+			for k, v in pairs(missTypes) do
+				if (spell and spell[v]) or (myspell and myspell[v]) then
+					nr = add_detail_bar(win, nr, L[k], spell and spell[v], myspell and myspell[v])
 				end
 			end
 		end
@@ -315,7 +309,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 			if spell then
 				local absorbed = spell.total and max(0, spell.total - spell.amount) or 0
-				local blocked, resisted = spell.blocked or 0, spell.resisted or 0
+				local blocked, resisted = spell.b_amt or 0, spell.r_amt or 0
 				local total = spell.amount + absorbed + blocked + resisted
 
 				-- total damage
@@ -333,18 +327,18 @@ Skada:RegisterModule("Comparison", function(L, P)
 				end
 
 				-- overkill damage
-				if spell.overkill and spell.overkill > 0 then
-					nr = add_detail_bar(win, nr, L["Overkill"], spell.overkill, nil, true, true)
+				if spell.o_amt and spell.o_amt > 0 then
+					nr = add_detail_bar(win, nr, L["Overkill"], spell.o_amt, nil, true, true)
 				end
 
 				-- blocked damage
-				if spell.blocked and spell.blocked > 0 then
-					nr = add_detail_bar(win, nr, L["BLOCK"], spell.blocked, nil, true, true)
+				if spell.b_amt and spell.b_amt > 0 then
+					nr = add_detail_bar(win, nr, L["BLOCK"], spell.b_amt, nil, true, true)
 				end
 
 				-- resisted damage
-				if spell.resisted and spell.resisted > 0 then
-					nr = add_detail_bar(win, nr, L["RESIST"], spell.resisted, nil, true, true)
+				if spell.r_amt and spell.r_amt > 0 then
+					nr = add_detail_bar(win, nr, L["RESIST"], spell.r_amt, nil, true, true)
 				end
 			end
 
@@ -357,8 +351,8 @@ Skada:RegisterModule("Comparison", function(L, P)
 		if spell or myspell then
 			local absorbed = (spell and spell.total) and max(0, spell.total - spell.amount) or 0
 			local myabsorbed = (myspell and myspell.total) and max(0, myspell.total - myspell.amount) or 0
-			local blocked, myblocked = spell and spell.blocked or 0, myspell and myspell.blocked or 0
-			local resisted, myresisted = spell and spell.resisted or 0, myspell and myspell.resisted or 0
+			local blocked, myblocked = spell and spell.b_amt or 0, myspell and myspell.b_amt or 0
+			local resisted, myresisted = spell and spell.r_amt or 0, myspell and myspell.r_amt or 0
 
 			local total = (spell and spell.amount or 0) + absorbed + blocked + resisted
 			local mytotal = (myspell and myspell.amount or 0) + myabsorbed + myblocked + myresisted
@@ -378,18 +372,18 @@ Skada:RegisterModule("Comparison", function(L, P)
 			end
 
 			-- overkill damage
-			if (spell and spell.overkill and spell.overkill > 0) or (myspell and myspell.overkill and myspell.overkill > 0) then
-				nr = add_detail_bar(win, nr, L["Overkill"], spell and spell.overkill, myspell and myspell.overkill, true)
+			if (spell and spell.o_amt and spell.o_amt > 0) or (myspell and myspell.o_amt and myspell.o_amt > 0) then
+				nr = add_detail_bar(win, nr, L["Overkill"], spell and spell.o_amt, myspell and myspell.o_amt, true)
 			end
 
 			-- blocked damage
-			if (spell and spell.blocked and spell.blocked > 0) or (myspell and myspell.blocked and myspell.blocked > 0) then
-				nr = add_detail_bar(win, nr, L["BLOCK"], spell and spell.blocked, myspell and myspell.blocked, true)
+			if (spell and spell.b_amt and spell.b_amt > 0) or (myspell and myspell.b_amt and myspell.b_amt > 0) then
+				nr = add_detail_bar(win, nr, L["BLOCK"], spell and spell.b_amt, myspell and myspell.b_amt, true)
 			end
 
 			-- resisted damage
-			if (spell and spell.resisted and spell.resisted > 0) or (myspell and myspell.resisted and myspell.resisted > 0) then
-				nr = add_detail_bar(win, nr, L["RESIST"], spell and spell.resisted, myspell and myspell.resisted, true)
+			if (spell and spell.r_amt and spell.r_amt > 0) or (myspell and myspell.r_amt and myspell.r_amt > 0) then
+				nr = add_detail_bar(win, nr, L["RESIST"], spell and spell.r_amt, myspell and myspell.r_amt, true)
 			end
 		end
 	end

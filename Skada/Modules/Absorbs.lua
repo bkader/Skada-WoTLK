@@ -1239,14 +1239,14 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 				tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
 				average = spell.amount / spell.count
 
-				if spell.critical and spell.critical > 0 then
-					tooltip:AddDoubleLine(L["Critical"], Skada:FormatPercent(spell.critical, spell.count), 0.67, 1, 0.67)
+				if spell.c_num and spell.c_num > 0 then
+					tooltip:AddDoubleLine(L["Critical"], Skada:FormatPercent(spell.c_num, spell.count), 0.67, 1, 0.67)
 				end
 			end
 
-			if spell.overheal and spell.overheal > 0 then
-				tooltip:AddDoubleLine(L["Total Healing"], Skada:FormatNumber(spell.overheal + spell.amount), 1, 1, 1)
-				tooltip:AddDoubleLine(L["Overheal"], format("%s (%s)", Skada:FormatNumber(spell.overheal), Skada:FormatPercent(spell.overheal, spell.overheal + spell.amount)), 1, 0.67, 0.67)
+			if spell.o_amt and spell.o_amt > 0 then
+				tooltip:AddDoubleLine(L["Total Healing"], Skada:FormatNumber(spell.o_amt + spell.amount), 1, 1, 1)
+				tooltip:AddDoubleLine(L["Overheal"], format("%s (%s)", Skada:FormatNumber(spell.o_amt), Skada:FormatPercent(spell.o_amt, spell.o_amt + spell.amount)), 1, 0.67, 0.67)
 			end
 
 			local separator = nil
@@ -1256,8 +1256,8 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 				separator = true
 
 				local spellmin = spell.min
-				if spell.criticalmin and spell.criticalmin < spellmin then
-					spellmin = spell.criticalmin
+				if spell.c_min and spell.c_min < spellmin then
+					spellmin = spell.c_min
 				end
 				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
 			end
@@ -1269,8 +1269,8 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 				end
 
 				local spellmax = spell.max
-				if spell.criticalmax and spell.criticalmax > spellmax then
-					spellmax = spell.criticalmax
+				if spell.c_max and spell.c_max > spellmax then
+					spellmax = spell.c_max
 				end
 				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
 			end
@@ -1720,8 +1720,8 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear
 			if spell.count then
 				tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
 
-				if spell.critical then
-					tooltip:AddDoubleLine(L["Critical"], Skada:FormatPercent(spell.critical, spell.count), 1, 1, 1)
+				if spell.c_num then
+					tooltip:AddDoubleLine(L["Critical"], Skada:FormatPercent(spell.c_num, spell.count), 1, 1, 1)
 					tooltip:AddLine(" ")
 				end
 
@@ -1732,8 +1732,8 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear
 				end
 			end
 
-			if spell.overheal then
-				tooltip:AddDoubleLine(L["Overheal"], format("%s (%s)", Skada:FormatNumber(spell.overheal), Skada:FormatPercent(spell.overheal, spell.amount + spell.overheal)), nil, nil, nil, 1, 0.67, 0.67)
+			if spell.o_amt then
+				tooltip:AddDoubleLine(L["Overheal"], format("%s (%s)", Skada:FormatNumber(spell.o_amt), Skada:FormatPercent(spell.o_amt, spell.amount + spell.o_amt)), nil, nil, nil, 1, 0.67, 0.67)
 			end
 		end
 	end
@@ -1752,12 +1752,12 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear
 					C[id] = new()
 					C[id].school = spell.school
 					C[id].amount = spell.amount
-					C[id].overheal = spell.overheal
+					C[id].o_amt = spell.o_amt
 					C[id].isabsorb = (p.absorbspells and p.absorbspells[id])
 				else
 					C[id].amount = C[id].amount + spell.amount
-					if spell.overheal then
-						C[id].overheal = (C[id].overheal or 0) + spell.overheal
+					if spell.o_amt then
+						C[id].o_amt = (C[id].o_amt or 0) + spell.o_amt
 					end
 				end
 			end
@@ -1778,8 +1778,8 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear
 				tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
 			end
 			tooltip:AddDoubleLine(spell.isabsorb and L["Absorbs"] or L["Healing"], format("%s (%s)", Skada:FormatNumber(spell.amount), Skada:FormatPercent(spell.amount, total)), 1, 1, 1)
-			if set.overheal and spell.overheal and spell.overheal > 0 then
-				tooltip:AddDoubleLine(L["Overheal"], format("%s (%s)", Skada:FormatNumber(spell.overheal), Skada:FormatPercent(spell.overheal, set.overheal)), 1, 1, 1)
+			if set.overheal and spell.o_amt and spell.o_amt > 0 then
+				tooltip:AddDoubleLine(L["Overheal"], format("%s (%s)", Skada:FormatNumber(spell.o_amt), Skada:FormatPercent(spell.o_amt, set.overheal)), 1, 1, 1)
 			end
 		end
 	end
@@ -1893,13 +1893,13 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear
 			spell.amount = info.amount
 
 			-- for heals
-			spell.overheal = info.overheal
+			spell.o_amt = info.o_amt
 
 			t[spellid] = spell
 		else
 			spell.amount = spell.amount + info.amount
-			if info.overheal then -- for heals
-				spell.overheal = (spell.overheal or 0) + info.overheal
+			if info.o_amt then -- for heals
+				spell.o_amt = (spell.o_amt or 0) + info.o_amt
 			end
 		end
 	end

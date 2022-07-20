@@ -50,44 +50,44 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			end
 
 			-- seet player maxhp if not already set
-			if not deathlog.maxhp or deathlog.maxhp == 0 then
-				_, _, deathlog.maxhp = UnitHealthInfo(player.name, player.id, "group")
-				deathlog.maxhp = deathlog.maxhp or 0
+			if not deathlog.hpm or deathlog.hpm == 0 then
+				_, _, deathlog.hpm = UnitHealthInfo(player.name, player.id, "group")
+				deathlog.hpm = deathlog.hpm or 0
 			end
 
 			local log = new()
-			log.spellid = data.spellid
-			log.school = data.spellschool
-			log.source = data.srcName
+			log.id = data.spellid
+			log.sch = data.spellschool
+			log.src = data.srcName
 			log.time = set.last_time or GetTime()
 			_, log.hp = UnitHealthInfo(player.name, player.id, "group")
 
 			if data.amount then
 				deathlog.time = log.time
 				if data.amount ~= 0 then
-					log.amount = data.amount
+					log.amt = data.amount
 
-					if log.amount < 0 then
-						deathlog.spellid = log.spellid
-						deathlog.school = log.school
-						deathlog.source = log.source
+					if log.amt < 0 then
+						deathlog.id = log.id
+						deathlog.sch = log.sch
+						deathlog.src = log.src
 					end
 				end
 			end
 			if data.overheal and data.overheal > 0 then
-				log.overheal = data.overheal
+				log.ovh = data.overheal
 			end
 			if data.overkill and data.overkill > 0 then
-				log.overkill = data.overkill
+				log.ovk = data.overkill
 			end
 			if data.resisted and data.resisted > 0 then
-				log.resisted = data.resisted
+				log.res = data.resisted
 			end
 			if data.blocked and data.blocked > 0 then
-				log.blocked = data.blocked
+				log.blo = data.blocked
 			end
 			if data.absorbed and data.absorbed > 0 then
-				log.absorbed = data.absorbed
+				log.abs = data.absorbed
 			end
 
 			tinsert(deathlog.log, 1, log)
@@ -241,9 +241,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 				-- no entry left? insert an unknown entry
 				if #deathlog.log == 0 then
 					local log = new()
-					log.amount = -deathlog.maxhp
+					log.amt = -deathlog.hpm
 					log.time = deathlog.time - 0.001
-					log.hp = deathlog.maxhp
+					log.hp = deathlog.hpm
 					deathlog.log[#deathlog.log + 1] = log
 				end
 
@@ -349,7 +349,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 				end
 
 				if win.metadata then
-					win.metadata.maxvalue = deathlog.maxhp
+					win.metadata.maxvalue = deathlog.hpm
 				end
 
 				local nr = 0
@@ -362,9 +362,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 
 					if #deathlog.log == 0 then -- [2]
 						local log = new()
-						log.amount = deathlog.maxhp and -deathlog.maxhp or 0
+						log.amt = deathlog.hpm and -deathlog.hpm or 0
 						log.time = deathlog.time - 0.001
-						log.hp = deathlog.maxhp or 0
+						log.hp = deathlog.hpm or 0
 						deathlog.log[1] = log
 					end
 
@@ -392,9 +392,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 						local d = win:nr(nr)
 
 						local spellname
-						if log.spellid then
-							d.spellid = log.spellid
-							spellname, _, d.icon = GetSpellInfo(log.spellid)
+						if log.id then
+							d.spellid = log.id
+							spellname, _, d.icon = GetSpellInfo(log.id)
 						else
 							spellname = L["Unknown"]
 							d.spellid = nil
@@ -407,8 +407,8 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 
 						-- used for tooltip
 						d.hp = log.hp or 0
-						d.amount = log.amount or 0
-						d.source = log.source or L["Unknown"]
+						d.amount = log.amt or 0
+						d.source = log.src or L["Unknown"]
 						d.value = d.hp
 
 						if d.spellid and resurrectSpells[d.spellid] then
@@ -420,11 +420,11 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 							if change > 0 then
 								change = "+" .. Skada:FormatNumber(change)
 								color = get_color("green")
-							elseif change == 0 and (log.resisted or log.blocked or log.absorbed) then
-								change = "+" .. Skada:FormatNumber(log.resisted or log.blocked or log.absorbed)
+							elseif change == 0 and (log.res or log.blo or log.abs) then
+								change = "+" .. Skada:FormatNumber(log.res or log.blo or log.abs)
 								color = get_color("orange")
-							elseif log.overheal then
-								change = "+" .. Skada:FormatNumber(log.overheal)
+							elseif log.ovh then
+								change = "+" .. Skada:FormatNumber(log.ovh)
 								color = get_color("yellow")
 							else
 								change = Skada:FormatNumber(change)
@@ -442,33 +442,33 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 							if deathlog.timeod ~= nil then
 								d.reportlabel = "%02.2fs: %s (%s)   %s [%s]"
 
-								if P.reportlinks and log.spellid then
-									d.reportlabel = format(d.reportlabel, diff, GetSpellLink(log.spellid) or spellname, d.source, change, Skada:FormatNumber(d.value))
+								if P.reportlinks and log.id then
+									d.reportlabel = format(d.reportlabel, diff, GetSpellLink(log.id) or spellname, d.source, change, Skada:FormatNumber(d.value))
 								else
 									d.reportlabel = format(d.reportlabel, diff, spellname, d.source, change, Skada:FormatNumber(d.value))
 								end
 
 								local extra = new()
 
-								if log.overheal and log.overheal > 0 then
-									d.overheal = log.overheal
-									extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.overheal)
+								if log.ovh and log.ovh > 0 then
+									d.overheal = log.ovh
+									extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.ovh)
 								end
-								if log.overkill and log.overkill > 0 then
-									d.overkill = log.overkill
-									extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.overkill)
+								if log.ovk and log.ovk > 0 then
+									d.overkill = log.ovk
+									extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.ovk)
 								end
-								if log.resisted and log.resisted > 0 then
-									d.resisted = log.resisted
-									extra[#extra + 1] = "R:" .. Skada:FormatNumber(log.resisted)
+								if log.res and log.res > 0 then
+									d.resisted = log.res
+									extra[#extra + 1] = "R:" .. Skada:FormatNumber(log.res)
 								end
-								if log.blocked and log.blocked > 0 then
-									d.blocked = log.blocked
-									extra[#extra + 1] = "B:" .. Skada:FormatNumber(log.blocked)
+								if log.blo and log.blo > 0 then
+									d.blocked = log.blo
+									extra[#extra + 1] = "B:" .. Skada:FormatNumber(log.blo)
 								end
-								if log.absorbed and log.absorbed > 0 then
-									d.absorbed = log.absorbed
-									extra[#extra + 1] = "A:" .. Skada:FormatNumber(log.absorbed)
+								if log.abs and log.abs > 0 then
+									d.absorbed = log.abs
+									extra[#extra + 1] = "A:" .. Skada:FormatNumber(log.abs)
 								end
 
 								if next(extra) then
@@ -477,27 +477,27 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 
 								extra = del(extra)
 							else
-								if log.overheal and log.overheal > 0 then
-									d.overheal = log.overheal
+								if log.ovh and log.ovh > 0 then
+									d.overheal = log.ovh
 								end
-								if log.overkill and log.overkill > 0 then
-									d.overkill = log.overkill
+								if log.ovk and log.ovk > 0 then
+									d.overkill = log.ovk
 								end
-								if log.resisted and log.resisted > 0 then
-									d.resisted = log.resisted
+								if log.res and log.res > 0 then
+									d.resisted = log.res
 								end
-								if log.blocked and log.blocked > 0 then
-									d.blocked = log.blocked
+								if log.blo and log.blo > 0 then
+									d.blocked = log.blo
 								end
-								if log.absorbed and log.absorbed > 0 then
-									d.absorbed = log.absorbed
+								if log.abs and log.abs > 0 then
+									d.absorbed = log.abs
 								end
 							end
 
 							d.valuetext = Skada:FormatValueCols(
 								self.metadata.columns.Change and change,
 								self.metadata.columns.Health and Skada:FormatNumber(d.value),
-								self.metadata.columns.Percent and Skada:FormatPercent(log.hp or 0, deathlog.maxhp or 1)
+								self.metadata.columns.Percent and Skada:FormatPercent(log.hp or 0, deathlog.hpm or 1)
 							)
 						end
 					else
@@ -536,7 +536,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 
 						if death.spellid then
 							d.label, _, d.icon = GetSpellInfo(death.spellid)
-							d.spellschool = death.school
+							d.spellschool = death.sch
 							if death.source then
 								d.text = format("%s (%s)", d.label, death.source)
 							end
@@ -843,7 +843,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		local log = nil
 		for i = 1, #logs do
 			local l = logs[i]
-			if l and l.amount and l.amount < 0 then
+			if l and l.amt and l.amt < 0 then
 				log = l
 				break
 			end
@@ -854,27 +854,27 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		-- prepare the output.
 		local output = format(
 			(channel == "SELF") and "%s > %s (%s) %s" or "Skada: %s > %s (%s) %s",
-			log.source or L["Unknown"], -- source name
+			log.src or L["Unknown"], -- source name
 			playername or L["Unknown"], -- player name
-			log.spellid and GetSpellInfo(log.spellid) or L["Unknown"], -- spell name
-			log.amount and Skada:FormatNumber(0 - log.amount, 1) or 0 -- spell amount
+			log.id and GetSpellInfo(log.id) or L["Unknown"], -- spell name
+			log.amt and Skada:FormatNumber(0 - log.amt, 1) or 0 -- spell amount
 		)
 
 		-- prepare any extra info.
-		if log.overkill or log.resisted or log.blocked or log.absorbed then
+		if log.ovk or log.res or log.blo or log.abs then
 			local extra = new()
 
-			if log.overkill then
-				extra[#extra + 1] = format("O:%s", Skada:FormatNumber(log.overkill, 1))
+			if log.ovk then
+				extra[#extra + 1] = format("O:%s", Skada:FormatNumber(log.ovk, 1))
 			end
-			if log.resisted then
-				extra[#extra + 1] = format("R:%s", Skada:FormatNumber(log.resisted, 1))
+			if log.res then
+				extra[#extra + 1] = format("R:%s", Skada:FormatNumber(log.res, 1))
 			end
-			if log.blocked then
-				extra[#extra + 1] = format("B:%s", Skada:FormatNumber(log.blocked, 1))
+			if log.blo then
+				extra[#extra + 1] = format("B:%s", Skada:FormatNumber(log.blo, 1))
 			end
-			if log.absorbed then
-				extra[#extra + 1] = format("A:%s", Skada:FormatNumber(log.absorbed, 1))
+			if log.abs then
+				extra[#extra + 1] = format("A:%s", Skada:FormatNumber(log.abs, 1))
 			end
 			if next(extra) then
 				output = format("%s [%s]", output, tconcat(extra, " - "))

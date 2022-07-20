@@ -273,3 +273,21 @@ creatureToBoss[33651] = 33350 -- VX-001 > Mimiron
 creatureToBoss[33670] = 33350 -- Aerial Command Unit > Mimiron
 
 -->> END OF EDITABLE CODE <<--
+
+-->> DO NOT TOUCH CODE BELOW <<--
+
+-------------------------------------------------------------------------------
+-- CLEU Miss Types
+
+Skada.missTypes = {
+	ABSORB = "abs_n",
+	BLOCK = "blo_n",
+	DEFLECT = "def_n",
+	DODGE = "dod_n",
+	EVADE = "eva_n",
+	IMMUNE = "imm_n",
+	MISS = "mis_n",
+	PARRY = "par_n",
+	REFLECT = "ref_n",
+	RESIST = "res_n"
+}

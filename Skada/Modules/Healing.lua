@@ -49,8 +49,11 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 			set.heal = (set.heal or 0) + amount
 
 			-- record the overheal
-			player.overheal = (player.overheal or 0) + data.overheal
-			set.overheal = (set.overheal or 0) + data.overheal
+			local overheal = (data.overheal > 0) and data.overheal or nil
+			if overheal then
+				player.overheal = (player.overheal or 0) + overheal
+				set.overheal = (set.overheal or 0) + overheal
+			end
 
 			-- saving this to total set may become a memory hog deluxe.
 			if set == Skada.total and not P.totalidc then return end
@@ -60,7 +63,7 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 			local spell = player.healspells and player.healspells[spellid]
 			if not spell then
 				player.healspells = player.healspells or {}
-				player.healspells[spellid] = {school = data.spellschool, amount = 0, overheal = 0}
+				player.healspells[spellid] = {school = data.spellschool, amount = 0}
 				spell = player.healspells[spellid]
 			elseif not spell.school and data.spellschool then
 				spell.school = data.spellschool
@@ -68,7 +71,10 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 
 			spell.count = (spell.count or 0) + 1
 			spell.amount = spell.amount + amount
-			spell.overheal = spell.overheal + data.overheal
+
+			if overheal then
+				spell.o_amt = (spell.o_amt or 0) + overheal
+			end
 
 			if (not spell.min or amount < spell.min) and amount > 0 then
 				spell.min = amount
@@ -78,15 +84,15 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 			end
 
 			if data.critical then
-				spell.critical = (spell.critical or 0) + 1
-				spell.criticalamount = (spell.criticalamount or 0) + amount
+				spell.c_num = (spell.c_num or 0) + 1
+				spell.c_amt = (spell.c_amt or 0) + amount
 
-				if not spell.criticalmax or amount > spell.criticalmax then
-					spell.criticalmax = amount
+				if not spell.c_max or amount > spell.c_max then
+					spell.c_max = amount
 				end
 
-				if not spell.criticalmin or amount < spell.criticalmin then
-					spell.criticalmin = amount
+				if not spell.c_min or amount < spell.c_min then
+					spell.c_min = amount
 				end
 			end
 
@@ -95,11 +101,14 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 				local target = spell.targets and spell.targets[data.dstName]
 				if not target then
 					spell.targets = spell.targets or {}
-					spell.targets[data.dstName] = {amount = 0, overheal = 0}
+					spell.targets[data.dstName] = {amount = 0}
 					target = spell.targets[data.dstName]
 				end
 				target.amount = target.amount + amount
-				target.overheal = target.overheal + data.overheal
+
+				if overheal then
+					target.o_amt = (target.o_amt or 0) + overheal
+				end
 			end
 		end
 	end
@@ -178,12 +187,12 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 				tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
 				average = spell.amount / spell.count
 
-				if spell.critical and spell.critical > 0 then
-					tooltip:AddDoubleLine(L["Critical"], Skada:FormatPercent(spell.critical, spell.count), 0.67, 1, 0.67)
+				if spell.c_num and spell.c_num > 0 then
+					tooltip:AddDoubleLine(L["Critical"], Skada:FormatPercent(spell.c_num, spell.count), 0.67, 1, 0.67)
 				end
 
-				if spell.overheal and spell.overheal > 0 then
-					tooltip:AddDoubleLine(L["Overheal"], Skada:FormatPercent(spell.overheal, spell.overheal + spell.amount), 1, 0.67, 0.67)
+				if spell.o_amt and spell.o_amt > 0 then
+					tooltip:AddDoubleLine(L["Overheal"], Skada:FormatPercent(spell.o_amt, spell.o_amt + spell.amount), 1, 0.67, 0.67)
 				end
 			end
 
@@ -194,8 +203,8 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 				separator = true
 
 				local spellmin = spell.min
-				if spell.criticalmin and spell.criticalmin < spellmin then
-					spellmin = spell.criticalmin
+				if spell.c_min and spell.c_min < spellmin then
+					spellmin = spell.c_min
 				end
 				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
 			end
@@ -207,8 +216,8 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 				end
 
 				local spellmax = spell.max
-				if spell.criticalmax and spell.criticalmax > spellmax then
-					spellmax = spell.criticalmax
+				if spell.c_max and spell.c_max > spellmax then
+					spellmax = spell.c_max
 				end
 				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
 			end
@@ -473,12 +482,12 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 		if (set.heal and set.heal > 0) or (set.overheal and set.overheal > 0) then
 			for i = 1, #set.players do
 				local p = set.players[i]
-				if p and ((p.heal and (p.heal + p.overheal) == 0) or (not p.heal and p.healspells)) then
+				if p and ((p.heal and (p.heal + (p.overheal or 0)) == 0) or (not p.heal and p.healspells)) then
 					p.heal, p.overheal = nil, nil
 					p.healspells = del(p.healspells, true)
 				elseif p and p.healspells then
 					for spellid, spell in pairs(p.healspells) do
-						if (spell.amount + spell.overheal) == 0 then
+						if (spell.amount + (spell.o_amt or 0)) == 0 then
 							p.healspells[spellid] = del(p.healspells[spellid])
 						end
 					end
@@ -520,14 +529,14 @@ Skada:RegisterModule("Overhealing", function(L)
 
 			local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
 			for spellid, spell in pairs(actor.healspells) do
-				if spell.targets and spell.targets[win.targetname] and spell.targets[win.targetname].overheal and spell.targets[win.targetname].overheal > 0 then
+				if spell.targets and spell.targets[win.targetname] and spell.targets[win.targetname].o_amt and spell.targets[win.targetname].o_amt > 0 then
 					nr = nr + 1
 					local d = win:spell(nr, spellid, spell, nil, true)
 
-					d.value = spell.targets[win.targetname].overheal / (spell.targets[win.targetname].amount + spell.targets[win.targetname].overheal)
+					d.value = spell.targets[win.targetname].o_amt / (spell.targets[win.targetname].amount + spell.targets[win.targetname].o_amt)
 					d.valuetext = Skada:FormatValueCols(
-						mod.metadata.columns.Overhealing and Skada:FormatNumber(spell.targets[win.targetname].overheal),
-						actortime and Skada:FormatNumber(spell.targets[win.targetname].overheal / actortime),
+						mod.metadata.columns.Overhealing and Skada:FormatNumber(spell.targets[win.targetname].o_amt),
+						actortime and Skada:FormatNumber(spell.targets[win.targetname].o_amt / actortime),
 						mod.metadata.columns.sPercent and Skada:FormatPercent(100 * d.value)
 					)
 
@@ -558,14 +567,14 @@ Skada:RegisterModule("Overhealing", function(L)
 
 			local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
 			for spellid, spell in pairs(actor.healspells) do
-				if spell.overheal and spell.overheal > 0 then
+				if spell.o_amt and spell.o_amt > 0 then
 					nr = nr + 1
 					local d = win:spell(nr, spellid, spell, nil, true)
 
-					d.value = spell.overheal / (spell.amount + spell.overheal)
+					d.value = spell.o_amt / (spell.amount + spell.o_amt)
 					d.valuetext = Skada:FormatValueCols(
-						mod.metadata.columns.Overhealing and Skada:FormatNumber(spell.overheal),
-						actortime and Skada:FormatNumber(spell.overheal / actortime),
+						mod.metadata.columns.Overhealing and Skada:FormatNumber(spell.o_amt),
+						actortime and Skada:FormatNumber(spell.o_amt / actortime),
 						mod.metadata.columns.sPercent and Skada:FormatPercent(100 * d.value)
 					)
 
@@ -707,13 +716,13 @@ Skada:RegisterModule("Total Healing", function(L)
 				tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
 			end
 
-			local total = spell.amount + (spell.overheal or 0)
+			local total = spell.amount + (spell.o_amt or 0)
 			tooltip:AddDoubleLine(L["Total"], Skada:FormatNumber(total), 1, 1, 1)
 			if spell.amount > 0 then
 				tooltip:AddDoubleLine(L["Healing"], format("%s (%s)", Skada:FormatNumber(spell.amount), Skada:FormatPercent(spell.amount, total)), 0.67, 1, 0.67)
 			end
-			if spell.overheal and spell.overheal > 0 then
-				tooltip:AddDoubleLine(L["Overheal"], format("%s (%s)", Skada:FormatNumber(spell.overheal), Skada:FormatPercent(spell.overheal, total)), 1, 0.67, 0.67)
+			if spell.o_amt and spell.o_amt > 0 then
+				tooltip:AddDoubleLine(L["Overheal"], format("%s (%s)", Skada:FormatNumber(spell.o_amt), Skada:FormatPercent(spell.o_amt, total)), 1, 0.67, 0.67)
 			end
 
 			local separator = nil
@@ -723,8 +732,8 @@ Skada:RegisterModule("Total Healing", function(L)
 				separator = true
 
 				local spellmin = spell.min
-				if spell.criticalmin and spell.criticalmin < spellmin then
-					spellmin = spell.criticalmin
+				if spell.c_min and spell.c_min < spellmin then
+					spellmin = spell.c_min
 				end
 				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
 			end
@@ -736,8 +745,8 @@ Skada:RegisterModule("Total Healing", function(L)
 				end
 
 				local spellmax = spell.max
-				if spell.criticalmax and spell.criticalmax > spellmax then
-					spellmax = spell.criticalmax
+				if spell.c_max and spell.c_max > spellmax then
+					spellmax = spell.c_max
 				end
 				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
 			end
@@ -779,8 +788,8 @@ Skada:RegisterModule("Total Healing", function(L)
 						d.value = spell.targets[win.targetname]
 					else
 						d.value = spell.targets[win.targetname].amount
-						if spell.targets[win.targetname].overheal then
-							d.value = d.value + spell.targets[win.targetname].overheal
+						if spell.targets[win.targetname].o_amt then
+							d.value = d.value + spell.targets[win.targetname].o_amt
 						end
 					end
 
@@ -817,7 +826,7 @@ Skada:RegisterModule("Total Healing", function(L)
 
 			local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
 			for spellid, spell in pairs(actor.healspells) do
-				local amount = spell.amount + (spell.overheal or 0)
+				local amount = spell.amount + (spell.o_amt or 0)
 				if amount > 0 then
 					nr = nr + 1
 					local d = win:spell(nr, spellid, spell, nil, true)
@@ -1191,11 +1200,11 @@ Skada:RegisterModule("Healing Taken", function(L, _, _, _, new, _, clear)
 								if not tbl[name] then
 									tbl[name] = new()
 									tbl[name].amount = target.amount
-									tbl[name].overheal = target.overheal
+									tbl[name].o_amt = target.o_amt
 								else
 									tbl[name].amount = tbl[name].amount + target.amount
-									if target.overheal then
-										tbl[name].overheal = (tbl[name].overheal or 0) + target.overheal
+									if target.o_amt then
+										tbl[name].o_amt = (tbl[name].o_amt or 0) + target.o_amt
 									end
 								end
 								if not tbl[name].class or not tbl[name].time then

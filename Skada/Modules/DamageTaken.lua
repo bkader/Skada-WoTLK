@@ -18,14 +18,8 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 	local tdetailmod = sourcemod:NewModule("Damage spell list")
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local GetTime = GetTime
-
-	-- damage miss types
 	local missTypes = Skada.missTypes
-	if not missTypes then
-		missTypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}
-		Skada.missTypes = missTypes
-	end
+	local GetTime = GetTime
 
 	local function log_damage(set, dmg, isdot)
 		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
@@ -67,51 +61,51 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 		end
 
 		if dmg.critical then
-			spell.critical = (spell.critical or 0) + 1
-			spell.criticalamount = (spell.criticalamount or 0) + dmg.amount
+			spell.c_num = (spell.c_num or 0) + 1
+			spell.c_amt = (spell.c_amt or 0) + dmg.amount
 
-			if not spell.criticalmax or dmg.amount > spell.criticalmax then
-				spell.criticalmax = dmg.amount
+			if not spell.c_max or dmg.amount > spell.c_max then
+				spell.c_max = dmg.amount
 			end
 
-			if not spell.criticalmin or dmg.amount < spell.criticalmin then
-				spell.criticalmin = dmg.amount
+			if not spell.c_min or dmg.amount < spell.c_min then
+				spell.c_min = dmg.amount
 			end
-		elseif dmg.misstype ~= nil then
-			spell[dmg.misstype] = (spell[dmg.misstype] or 0) + 1
+		elseif dmg.misstype ~= nil and missTypes[dmg.misstype] then
+			spell[missTypes[dmg.misstype]] = (spell[missTypes[dmg.misstype]] or 0) + 1
 		elseif dmg.glancing then
-			spell.glancing = (spell.glancing or 0) + 1
-			spell.glance = (spell.glance or 0) + dmg.amount
-			if not spell.glancemax or dmg.amount > spell.glancemax then
-				spell.glancemax = dmg.amount
+			spell.g_num = (spell.g_num or 0) + 1
+			spell.g_amt = (spell.g_amt or 0) + dmg.amount
+			if not spell.g_max or dmg.amount > spell.g_max then
+				spell.g_max = dmg.amount
 			end
-			if not spell.glancemin or dmg.amount < spell.glancemin then
-				spell.glancemin = dmg.amount
+			if not spell.g_min or dmg.amount < spell.g_min then
+				spell.g_min = dmg.amount
 			end
 		elseif dmg.crushing then
 			spell.crushing = (spell.crushing or 0) + 1
-		else
-			spell.hit = (spell.hit or 0) + 1
-			spell.hitamount = (spell.hitamount or 0) + dmg.amount
-			if not spell.hitmax or dmg.amount > spell.hitmax then
-				spell.hitmax = dmg.amount
+		elseif not dmg.misstype then
+			spell.n_num = (spell.n_num or 0) + 1
+			spell.n_amt = (spell.n_amt or 0) + dmg.amount
+			if not spell.n_max or dmg.amount > spell.n_max then
+				spell.n_max = dmg.amount
 			end
-			if not spell.hitmin or dmg.amount < spell.hitmin then
-				spell.hitmin = dmg.amount
+			if not spell.n_min or dmg.amount < spell.n_min then
+				spell.n_min = dmg.amount
 			end
 		end
 
 		if dmg.blocked and dmg.blocked > 0 then
-			spell.blocked = (spell.blocked or 0) + dmg.blocked
+			spell.b_amt = (spell.b_amt or 0) + dmg.blocked
 		end
 
 		if dmg.resisted and dmg.resisted > 0 then
-			spell.resisted = (spell.resisted or 0) + dmg.resisted
+			spell.r_amt = (spell.r_amt or 0) + dmg.resisted
 		end
 
-		local overkill = dmg.overkill or 0
-		if overkill > 0 then
-			spell.overkill = (spell.overkill or 0) + dmg.overkill
+		local overkill = (dmg.overkill and dmg.overkill > 0) and dmg.overkill or nil
+		if overkill then
+			spell.o_amt = (spell.o_amt or 0) + dmg.overkill
 		end
 
 		-- record the source
@@ -130,8 +124,8 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 				source.total = source.amount + absorbed
 			end
 
-			if overkill > 0 then
-				source.overkill = (source.overkill or 0) + dmg.overkill
+			if overkill then
+				source.o_amt = (source.o_amt or 0) + dmg.overkill
 			end
 		end
 	end
@@ -294,18 +288,18 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 				tooltip:AddLine(spellschools(spell.school))
 			end
 
-			if spell.hitmin then
-				local spellmin = spell.hitmin
-				if spell.criticalmin and spell.criticalmin < spellmin then
-					spellmin = spell.criticalmin
+			if spell.n_min then
+				local spellmin = spell.n_min
+				if spell.c_min and spell.c_min < spellmin then
+					spellmin = spell.c_min
 				end
 				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
 			end
 
-			if spell.hitmax then
-				local spellmax = spell.hitmax
-				if spell.criticalmax and spell.criticalmax > spellmax then
-					spellmax = spell.criticalmax
+			if spell.n_max then
+				local spellmax = spell.n_max
+				if spell.c_max and spell.c_max > spellmax then
+					spellmax = spell.c_max
 				end
 				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
 			end
@@ -328,30 +322,30 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 					tooltip:AddLine(spellschools(spell.school))
 				end
 
-				if label == L["Critical Hits"] and spell.criticalamount then
-					if spell.criticalmin then
-						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.criticalmin), 1, 1, 1)
+				if label == L["Critical Hits"] and spell.c_amt then
+					if spell.c_min then
+						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.c_min), 1, 1, 1)
 					end
-					if spell.criticalmax then
-						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.criticalmax), 1, 1, 1)
+					if spell.c_max then
+						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.c_max), 1, 1, 1)
 					end
-					tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.criticalamount / spell.critical), 1, 1, 1)
-				elseif label == L["Normal Hits"] and spell.hitamount then
-					if spell.hitmin then
-						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.hitmin), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.c_amt / spell.c_num), 1, 1, 1)
+				elseif label == L["Normal Hits"] and spell.n_amt then
+					if spell.n_min then
+						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.n_min), 1, 1, 1)
 					end
-					if spell.hitmax then
-						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.hitmax), 1, 1, 1)
+					if spell.n_max then
+						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.n_max), 1, 1, 1)
 					end
-					tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.hitamount / spell.hit), 1, 1, 1)
-				elseif label == L["Glancing"] and spell.glance then
-					if spell.glancemin then
-						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.glancemin), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.n_amt / spell.n_num), 1, 1, 1)
+				elseif label == L["Glancing"] and spell.g_amt then
+					if spell.g_min then
+						tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.g_min), 1, 1, 1)
 					end
-					if spell.glancemax then
-						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.glancemax), 1, 1, 1)
+					if spell.g_max then
+						tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.g_max), 1, 1, 1)
 					end
-					tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.glance / spell.glancing), 1, 1, 1)
+					tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.g_amt / spell.g_num), 1, 1, 1)
 				end
 			end
 		end
@@ -484,26 +478,25 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 				local nr = add_detail_bar(win, 0, L["Hits"], spell.count)
 				win.dataset[nr].value = win.dataset[nr].value + 1 -- to be always first
 
-				if spell.hit and spell.hit > 0 then
-					nr = add_detail_bar(win, nr, L["Normal Hits"], spell.hit, spell.count, true)
+				if spell.n_num and spell.n_num > 0 then
+					nr = add_detail_bar(win, nr, L["Normal Hits"], spell.n_num, spell.count, true)
 				end
 
-				if spell.critical and spell.critical > 0 then
-					nr = add_detail_bar(win, nr, L["Critical Hits"], spell.critical, spell.count, true)
+				if spell.c_num and spell.c_num > 0 then
+					nr = add_detail_bar(win, nr, L["Critical Hits"], spell.c_num, spell.count, true)
 				end
 
-				if spell.glancing and spell.glancing > 0 then
-					nr = add_detail_bar(win, nr, L["Glancing"], spell.glancing, spell.count, true)
+				if spell.g_num and spell.g_num > 0 then
+					nr = add_detail_bar(win, nr, L["Glancing"], spell.g_num, spell.count, true)
 				end
 
 				if spell.crushing and spell.crushing > 0 then
 					nr = add_detail_bar(win, nr, L["Crushing"], spell.crushing, spell.count, true)
 				end
 
-				for i = 1, #missTypes do
-					local misstype = missTypes[i]
-					if misstype and spell[misstype] then
-						nr = add_detail_bar(win, nr, L[misstype], spell[misstype], spell.count, true)
+				for k, v in pairs(missTypes) do
+					if spell[v] then
+						nr = add_detail_bar(win, nr, L[k], spell[v], spell.count, true)
 					end
 				end
 			end
@@ -524,8 +517,8 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 		local spell = actor and actor.damagetakenspells and actor.damagetakenspells[win.spellid]
 		if spell then
 			local absorbed = spell.total and (spell.total - spell.amount) or 0
-			local blocked = spell.blocked or 0
-			local resisted = spell.resisted or 0
+			local blocked = spell.b_amt or 0
+			local resisted = spell.r_amt or 0
 			local total = spell.amount + absorbed + blocked + resisted
 			if win.metadata then
 				win.metadata.maxvalue = total
@@ -538,24 +531,24 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 				nr = add_detail_bar(win, nr, L["Damage"], spell.amount, total, true, true)
 			end
 
-			if spell.overkill and spell.overkill > 0 then
-				nr = add_detail_bar(win, nr, L["Overkill"], spell.overkill, total, true, true)
+			if spell.o_amt and spell.o_amt > 0 then
+				nr = add_detail_bar(win, nr, L["Overkill"], spell.o_amt, total, true, true)
 			end
 
 			if absorbed > 0 then
 				nr = add_detail_bar(win, nr, L["ABSORB"], absorbed, total, true, true)
 			end
 
-			if spell.blocked and spell.blocked > 0 then
-				nr = add_detail_bar(win, nr, L["BLOCK"], spell.blocked, total, true, true)
+			if spell.b_amt and spell.b_amt > 0 then
+				nr = add_detail_bar(win, nr, L["BLOCK"], spell.b_amt, total, true, true)
 			end
 
-			if spell.resisted and spell.resisted > 0 then
-				nr = add_detail_bar(win, nr, L["RESIST"], spell.resisted, total, true, true)
+			if spell.r_amt and spell.r_amt > 0 then
+				nr = add_detail_bar(win, nr, L["RESIST"], spell.r_amt, total, true, true)
 			end
 
-			if spell.glance and spell.glance > 0 then
-				nr = add_detail_bar(win, nr, L["Glancing"], spell.glance, total, true, true)
+			if spell.g_amt and spell.g_amt > 0 then
+				nr = add_detail_bar(win, nr, L["Glancing"], spell.g_amt, total, true, true)
 			end
 		end
 	end
@@ -911,19 +904,19 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P, _, _, new, _, clear
 			tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
 			local diff = spell.count -- used later
 
-			if spell.hit then
-				tooltip:AddDoubleLine(L["Normal Hits"], Skada:FormatPercent(spell.hit, spell.count), 1, 1, 1)
-				diff = diff - spell.hit
+			if spell.n_num then
+				tooltip:AddDoubleLine(L["Normal Hits"], Skada:FormatPercent(spell.n_num, spell.count), 1, 1, 1)
+				diff = diff - spell.n_num
 			end
 
-			if spell.critical then
-				tooltip:AddDoubleLine(L["Critical Hits"], Skada:FormatPercent(spell.critical, spell.count), 1, 1, 1)
-				diff = diff - spell.critical
+			if spell.c_num then
+				tooltip:AddDoubleLine(L["Critical Hits"], Skada:FormatPercent(spell.c_num, spell.count), 1, 1, 1)
+				diff = diff - spell.c_num
 			end
 
-			if spell.glancing then
-				tooltip:AddDoubleLine(L["Glancing"], Skada:FormatPercent(spell.glancing, spell.count), 1, 1, 1)
-				diff = diff - spell.glancing
+			if spell.g_num then
+				tooltip:AddDoubleLine(L["Glancing"], Skada:FormatPercent(spell.g_num, spell.count), 1, 1, 1)
+				diff = diff - spell.g_num
 			end
 
 			if diff > 0 then
@@ -1127,14 +1120,8 @@ end, "Damage Taken")
 Skada:RegisterModule("Avoidance & Mitigation", function(L, _, _, _, new, del, clear)
 	local mod = Skada:NewModule("Avoidance & Mitigation")
 	local playermod = mod:NewModule("Damage Breakdown")
-	local C = Skada.cacheTable2
-
-	-- damage miss types
 	local missTypes = Skada.missTypes
-	if not missTypes then
-		missTypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}
-		Skada.missTypes = missTypes
-	end
+	local C = Skada.cacheTable2
 
 	function playermod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
@@ -1194,12 +1181,11 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L, _, _, _, new, del, cl
 						for _, spell in pairs(player.damagetakenspells) do
 							total = total + spell.count
 
-							for j = 1, #missTypes do
-								local t = missTypes[j]
-								if t and spell[t] then
-									avoid = avoid + spell[t]
+							for k, v in pairs(missTypes) do
+								if spell[v] then
+									avoid = avoid + spell[v]
 									tmp.data = tmp.data or new()
-									tmp.data[t] = (tmp.data[t] or 0) + spell[t]
+									tmp.data[k] = (tmp.data[k] or 0) + spell[v]
 								end
 							end
 						end
