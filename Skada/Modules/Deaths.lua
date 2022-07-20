@@ -41,61 +41,61 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		if not set or (set == Skada.total and not P.totalidc) then return end
 
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
-		if player then
-			local deathlog = player.deathlog and player.deathlog[1]
-			if not deathlog or (deathlog.timeod and not override) then
-				deathlog = {log = new()}
-				player.deathlog = player.deathlog or {}
-				tinsert(player.deathlog, 1, deathlog)
-			end
+		if not player then return end
 
-			-- seet player maxhp if not already set
-			if not deathlog.hpm or deathlog.hpm == 0 then
-				_, _, deathlog.hpm = UnitHealthInfo(player.name, player.id, "group")
-				deathlog.hpm = deathlog.hpm or 0
-			end
+		local deathlog = player.deathlog and player.deathlog[1]
+		if not deathlog or (deathlog.timeod and not override) then
+			deathlog = {log = new()}
+			player.deathlog = player.deathlog or {}
+			tinsert(player.deathlog, 1, deathlog)
+		end
 
-			local log = new()
-			log.id = data.spellid
-			log.sch = data.spellschool
-			log.src = data.srcName
-			log.time = set.last_time or GetTime()
-			_, log.hp = UnitHealthInfo(player.name, player.id, "group")
+		-- seet player maxhp if not already set
+		if not deathlog.hpm or deathlog.hpm == 0 then
+			_, _, deathlog.hpm = UnitHealthInfo(player.name, player.id, "group")
+			deathlog.hpm = deathlog.hpm or 0
+		end
 
-			if data.amount then
-				deathlog.time = log.time
-				if data.amount ~= 0 then
-					log.amt = data.amount
+		local log = new()
+		log.id = data.spellid
+		log.sch = data.spellschool
+		log.src = data.srcName
+		log.time = set.last_time or GetTime()
+		_, log.hp = UnitHealthInfo(player.name, player.id, "group")
 
-					if log.amt < 0 then
-						deathlog.id = log.id
-						deathlog.sch = log.sch
-						deathlog.src = log.src
-					end
+		if data.amount then
+			deathlog.time = log.time
+			if data.amount ~= 0 then
+				log.amt = data.amount
+
+				if log.amt < 0 then
+					deathlog.id = log.id
+					deathlog.sch = log.sch
+					deathlog.src = log.src
 				end
 			end
-			if data.overheal and data.overheal > 0 then
-				log.ovh = data.overheal
-			end
-			if data.overkill and data.overkill > 0 then
-				log.ovk = data.overkill
-			end
-			if data.resisted and data.resisted > 0 then
-				log.res = data.resisted
-			end
-			if data.blocked and data.blocked > 0 then
-				log.blo = data.blocked
-			end
-			if data.absorbed and data.absorbed > 0 then
-				log.abs = data.absorbed
-			end
+		end
+		if data.overheal and data.overheal > 0 then
+			log.ovh = data.overheal
+		end
+		if data.overkill and data.overkill > 0 then
+			log.ovk = data.overkill
+		end
+		if data.resisted and data.resisted > 0 then
+			log.res = data.resisted
+		end
+		if data.blocked and data.blocked > 0 then
+			log.blo = data.blocked
+		end
+		if data.absorbed and data.absorbed > 0 then
+			log.abs = data.absorbed
+		end
 
-			tinsert(deathlog.log, 1, log)
+		tinsert(deathlog.log, 1, log)
 
-			-- trim things and limit to deathlogevents (defaul: 14)
-			while #deathlog.log > (P.modules.deathlogevents or 14) do
-				del(tremove(deathlog.log))
-			end
+		-- trim things and limit to deathlogevents (defaul: 14)
+		while #deathlog.log > (P.modules.deathlogevents or 14) do
+			del(tremove(deathlog.log))
 		end
 	end
 
@@ -213,45 +213,45 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 
 	local function log_death(set, playerid, playername, playerflags)
 		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
-		if player then
-			set.death = (set.death or 0) + 1
-			player.death = (player.death or 0) + 1
+		if not player then return end
 
-			-- saving this to total set may become a memory hog deluxe.
-			if set == Skada.total and not P.totalidc then return end
+		set.death = (set.death or 0) + 1
+		player.death = (player.death or 0) + 1
 
-			local deathlog = player.deathlog and player.deathlog[1]
-			if deathlog then
-				deathlog.time = set.last_time or GetTime()
-				deathlog.timeod = set.last_action or time()
+		-- saving this to total set may become a memory hog deluxe.
+		if set == Skada.total and not P.totalidc then return end
 
-				for i = #deathlog.log, 1, -1 do
-					local e = deathlog.log[i]
-					if (deathlog.time - e.time) >= 60 then
-						-- in certain situations, such us The Ruby Sanctum,
-						-- deathlog contain old data which are irrelevant to keep.
-						del(tremove(deathlog.log, i))
-					else
-						-- sometimes multiple close events arrive with the same timestamp
-						-- so we add a small correction to ensure sort stability.
-						e.time = e.time + (i * 0.001)
-					end
-				end
+		local deathlog = player.deathlog and player.deathlog[1]
+		if not deathlog then return end
 
-				-- no entry left? insert an unknown entry
-				if #deathlog.log == 0 then
-					local log = new()
-					log.amt = -deathlog.hpm
-					log.time = deathlog.time - 0.001
-					log.hp = deathlog.hpm
-					deathlog.log[#deathlog.log + 1] = log
-				end
+		deathlog.time = set.last_time or GetTime()
+		deathlog.timeod = set.last_action or time()
 
-				-- announce death
-				if P.modules.deathannounce and set ~= Skada.total then
-					mod:Announce(deathlog.log, player.name)
-				end
+		for i = #deathlog.log, 1, -1 do
+			local e = deathlog.log[i]
+			if (deathlog.time - e.time) >= 60 then
+				-- in certain situations, such us The Ruby Sanctum,
+				-- deathlog contain old data which are irrelevant to keep.
+				del(tremove(deathlog.log, i))
+			else
+				-- sometimes multiple close events arrive with the same timestamp
+				-- so we add a small correction to ensure sort stability.
+				e.time = e.time + (i * 0.001)
 			end
+		end
+
+		-- no entry left? insert an unknown entry
+		if #deathlog.log == 0 then
+			local log = new()
+			log.amt = -deathlog.hpm
+			log.time = deathlog.time - 0.001
+			log.hp = deathlog.hpm
+			deathlog.log[#deathlog.log + 1] = log
+		end
+
+		-- announce death
+		if P.modules.deathannounce and set ~= Skada.total then
+			mod:Announce(deathlog.log, player.name)
 		end
 	end
 
@@ -340,169 +340,169 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 
 			local player = win.datakey and Skada:FindPlayer(set, win.actorid, win.actorname)
 			local deathlog = player and player.deathlog and player.deathlog[win.datakey]
-			if deathlog then
-				if P.modules.alternativedeaths then
-					local num = #player.deathlog
-					if win.datakey ~= num then
-						win.title = format("%s (%d)", win.title, num - win.datakey + 1)
-					end
+			if not deathlog then return end
+
+			if P.modules.alternativedeaths then
+				local num = #player.deathlog
+				if win.datakey ~= num then
+					win.title = format("%s (%d)", win.title, num - win.datakey + 1)
+				end
+			end
+
+			if win.metadata then
+				win.metadata.maxvalue = deathlog.hpm
+			end
+
+			local nr = 0
+
+			-- 1. remove "datakey" from ended logs.
+			-- 2. postfix empty table
+			-- 3. add a fake entry for the actual death
+			if deathlog.timeod then
+				win.datakey = nil -- [1]
+
+				if #deathlog.log == 0 then -- [2]
+					local log = new()
+					log.amt = deathlog.hpm and -deathlog.hpm or 0
+					log.time = deathlog.time - 0.001
+					log.hp = deathlog.hpm or 0
+					deathlog.log[1] = log
 				end
 
-				if win.metadata then
-					win.metadata.maxvalue = deathlog.hpm
+				if win.metadata then -- [3]
+					nr = nr + 1
+					local d = win:nr(nr)
+
+					d.id = nr
+					d.label = date("%H:%M:%S", deathlog.timeod)
+					d.icon = [[Interface\Icons\Ability_Rogue_FeignDeath]]
+					d.color = nil
+					d.value = 0
+					d.valuetext = format(L["%s dies"], player.name)
 				end
+			end
 
-				local nr = 0
+			tsort(deathlog.log, sort_logs)
 
-				-- 1. remove "datakey" from ended logs.
-				-- 2. postfix empty table
-				-- 3. add a fake entry for the actual death
-				if deathlog.timeod then
-					win.datakey = nil -- [1]
+			local curtime = deathlog.time or set.last_time or GetTime()
+			for i = #deathlog.log, 1, -1 do
+				local log = deathlog.log[i]
+				local diff = tonumber(log.time) - tonumber(curtime)
+				if diff > -60 then
+					nr = i + 1
+					local d = win:nr(nr)
 
-					if #deathlog.log == 0 then -- [2]
-						local log = new()
-						log.amt = deathlog.hpm and -deathlog.hpm or 0
-						log.time = deathlog.time - 0.001
-						log.hp = deathlog.hpm or 0
-						deathlog.log[1] = log
-					end
-
-					if win.metadata then -- [3]
-						nr = nr + 1
-						local d = win:nr(nr)
-
-						d.id = nr
-						d.label = date("%H:%M:%S", deathlog.timeod)
-						d.icon = [[Interface\Icons\Ability_Rogue_FeignDeath]]
-						d.color = nil
-						d.value = 0
-						d.valuetext = format(L["%s dies"], player.name)
-					end
-				end
-
-				tsort(deathlog.log, sort_logs)
-
-				local curtime = deathlog.time or set.last_time or GetTime()
-				for i = #deathlog.log, 1, -1 do
-					local log = deathlog.log[i]
-					local diff = tonumber(log.time) - tonumber(curtime)
-					if diff > -60 then
-						nr = i + 1
-						local d = win:nr(nr)
-
-						local spellname
-						if log.id then
-							d.spellid = log.id
-							spellname, _, d.icon = GetSpellInfo(log.id)
-						else
-							spellname = L["Unknown"]
-							d.spellid = nil
-							d.icon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
-						end
-
-						d.id = nr
-						d.label = format("%s%02.2fs: %s", diff > 0 and "+" or "", diff, spellname)
-						d.spellname = spellname
-
-						-- used for tooltip
-						d.hp = log.hp or 0
-						d.amount = log.amt or 0
-						d.source = log.src or L["Unknown"]
-						d.value = d.hp
-
-						if d.spellid and resurrectSpells[d.spellid] then
-							d.color, d.overheal, d.overkill = nil, nil, nil
-							d.resisted, d.blocked, d.absorbed = nil, nil, nil
-							d.valuetext = d.source
-						else
-							local change, color = d.amount, get_color("red")
-							if change > 0 then
-								change = "+" .. Skada:FormatNumber(change)
-								color = get_color("green")
-							elseif change == 0 and (log.res or log.blo or log.abs) then
-								change = "+" .. Skada:FormatNumber(log.res or log.blo or log.abs)
-								color = get_color("orange")
-							elseif log.ovh then
-								change = "+" .. Skada:FormatNumber(log.ovh)
-								color = get_color("yellow")
-							else
-								change = Skada:FormatNumber(change)
-							end
-
-							if WATCH and ((d.color and d.color ~= color) or (d.spellname and d.spellname ~= spellname)) then
-								d.changed = true
-							elseif WATCH and d.changed then
-								d.changed = nil
-							end
-
-							d.color = color
-
-							-- only format report for ended logs
-							if deathlog.timeod ~= nil then
-								d.reportlabel = "%02.2fs: %s (%s)   %s [%s]"
-
-								if P.reportlinks and log.id then
-									d.reportlabel = format(d.reportlabel, diff, GetSpellLink(log.id) or spellname, d.source, change, Skada:FormatNumber(d.value))
-								else
-									d.reportlabel = format(d.reportlabel, diff, spellname, d.source, change, Skada:FormatNumber(d.value))
-								end
-
-								local extra = new()
-
-								if log.ovh and log.ovh > 0 then
-									d.overheal = log.ovh
-									extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.ovh)
-								end
-								if log.ovk and log.ovk > 0 then
-									d.overkill = log.ovk
-									extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.ovk)
-								end
-								if log.res and log.res > 0 then
-									d.resisted = log.res
-									extra[#extra + 1] = "R:" .. Skada:FormatNumber(log.res)
-								end
-								if log.blo and log.blo > 0 then
-									d.blocked = log.blo
-									extra[#extra + 1] = "B:" .. Skada:FormatNumber(log.blo)
-								end
-								if log.abs and log.abs > 0 then
-									d.absorbed = log.abs
-									extra[#extra + 1] = "A:" .. Skada:FormatNumber(log.abs)
-								end
-
-								if next(extra) then
-									d.reportlabel = format("%s (%s)", d.reportlabel, tconcat(extra, " - "))
-								end
-
-								extra = del(extra)
-							else
-								if log.ovh and log.ovh > 0 then
-									d.overheal = log.ovh
-								end
-								if log.ovk and log.ovk > 0 then
-									d.overkill = log.ovk
-								end
-								if log.res and log.res > 0 then
-									d.resisted = log.res
-								end
-								if log.blo and log.blo > 0 then
-									d.blocked = log.blo
-								end
-								if log.abs and log.abs > 0 then
-									d.absorbed = log.abs
-								end
-							end
-
-							d.valuetext = Skada:FormatValueCols(
-								self.metadata.columns.Change and change,
-								self.metadata.columns.Health and Skada:FormatNumber(d.value),
-								self.metadata.columns.Percent and Skada:FormatPercent(log.hp or 0, deathlog.hpm or 1)
-							)
-						end
+					local spellname
+					if log.id then
+						d.spellid = log.id
+						spellname, _, d.icon = GetSpellInfo(log.id)
 					else
-						del(tremove(deathlog.log, i))
+						spellname = L["Unknown"]
+						d.spellid = nil
+						d.icon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
 					end
+
+					d.id = nr
+					d.label = format("%s%02.2fs: %s", diff > 0 and "+" or "", diff, spellname)
+					d.spellname = spellname
+
+					-- used for tooltip
+					d.hp = log.hp or 0
+					d.amount = log.amt or 0
+					d.source = log.src or L["Unknown"]
+					d.value = d.hp
+
+					if d.spellid and resurrectSpells[d.spellid] then
+						d.color, d.overheal, d.overkill = nil, nil, nil
+						d.resisted, d.blocked, d.absorbed = nil, nil, nil
+						d.valuetext = d.source
+					else
+						local change, color = d.amount, get_color("red")
+						if change > 0 then
+							change = "+" .. Skada:FormatNumber(change)
+							color = get_color("green")
+						elseif change == 0 and (log.res or log.blo or log.abs) then
+							change = "+" .. Skada:FormatNumber(log.res or log.blo or log.abs)
+							color = get_color("orange")
+						elseif log.ovh then
+							change = "+" .. Skada:FormatNumber(log.ovh)
+							color = get_color("yellow")
+						else
+							change = Skada:FormatNumber(change)
+						end
+
+						if WATCH and ((d.color and d.color ~= color) or (d.spellname and d.spellname ~= spellname)) then
+							d.changed = true
+						elseif WATCH and d.changed then
+							d.changed = nil
+						end
+
+						d.color = color
+
+						-- only format report for ended logs
+						if deathlog.timeod ~= nil then
+							d.reportlabel = "%02.2fs: %s (%s)   %s [%s]"
+
+							if P.reportlinks and log.id then
+								d.reportlabel = format(d.reportlabel, diff, GetSpellLink(log.id) or spellname, d.source, change, Skada:FormatNumber(d.value))
+							else
+								d.reportlabel = format(d.reportlabel, diff, spellname, d.source, change, Skada:FormatNumber(d.value))
+							end
+
+							local extra = new()
+
+							if log.ovh and log.ovh > 0 then
+								d.overheal = log.ovh
+								extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.ovh)
+							end
+							if log.ovk and log.ovk > 0 then
+								d.overkill = log.ovk
+								extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.ovk)
+							end
+							if log.res and log.res > 0 then
+								d.resisted = log.res
+								extra[#extra + 1] = "R:" .. Skada:FormatNumber(log.res)
+							end
+							if log.blo and log.blo > 0 then
+								d.blocked = log.blo
+								extra[#extra + 1] = "B:" .. Skada:FormatNumber(log.blo)
+							end
+							if log.abs and log.abs > 0 then
+								d.absorbed = log.abs
+								extra[#extra + 1] = "A:" .. Skada:FormatNumber(log.abs)
+							end
+
+							if next(extra) then
+								d.reportlabel = format("%s (%s)", d.reportlabel, tconcat(extra, " - "))
+							end
+
+							extra = del(extra)
+						else
+							if log.ovh and log.ovh > 0 then
+								d.overheal = log.ovh
+							end
+							if log.ovk and log.ovk > 0 then
+								d.overkill = log.ovk
+							end
+							if log.res and log.res > 0 then
+								d.resisted = log.res
+							end
+							if log.blo and log.blo > 0 then
+								d.blocked = log.blo
+							end
+							if log.abs and log.abs > 0 then
+								d.absorbed = log.abs
+							end
+						end
+
+						d.valuetext = Skada:FormatValueCols(
+							self.metadata.columns.Change and change,
+							self.metadata.columns.Health and Skada:FormatNumber(d.value),
+							self.metadata.columns.Percent and Skada:FormatPercent(log.hp or 0, deathlog.hpm or 1)
+						)
+					end
+				else
+					del(tremove(deathlog.log, i))
 				end
 			end
 		end
@@ -515,47 +515,46 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 
 	function playermod:Update(win, set)
 		local player = Skada:FindPlayer(set, win.actorid)
+		if not player then return end
 
-		if player then
-			win.title = format(L["%s's deaths"], player.name)
+		win.title = format(L["%s's deaths"], player.name)
 
-			if player.deathlog and (player.death or WATCH) then
-				if win.metadata then
-					win.metadata.maxvalue = 0
-				end
+		if player.deathlog and (player.death or WATCH) then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
-				local curtime, nr = set.last_time or GetTime(), 0
-				for i = 1, #player.deathlog do
-					local death = player.deathlog[i]
-					if death and (death.timeod or WATCH) then
-						nr = nr + 1
-						local d = win:nr(nr)
+			local curtime, nr = set.last_time or GetTime(), 0
+			for i = 1, #player.deathlog do
+				local death = player.deathlog[i]
+				if death and (death.timeod or WATCH) then
+					nr = nr + 1
+					local d = win:nr(nr)
 
-						d.id = i
-						d.icon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
+					d.id = i
+					d.icon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
 
-						if death.spellid then
-							d.label, _, d.icon = GetSpellInfo(death.spellid)
-							d.spellschool = death.sch
-							if death.source then
-								d.text = format("%s (%s)", d.label, death.source)
-							end
+					if death.spellid then
+						d.label, _, d.icon = GetSpellInfo(death.spellid)
+						d.spellschool = death.sch
+						if death.source then
+							d.text = format("%s (%s)", d.label, death.source)
 						end
+					end
 
-						d.label = d.label or L["Unknown"]
-						d.value = death.time or curtime
-						if death.timeod then
-							d.valuetext = Skada:FormatValueCols(
-								mod.metadata.columns.Time and date("%H:%M:%S", death.timeod),
-								mod.metadata.columns.Survivability and Skada:FormatTime(death.timeod - set.starttime, true)
-							)
-						else
-							d.valuetext = "..."
-						end
+					d.label = d.label or L["Unknown"]
+					d.value = death.time or curtime
+					if death.timeod then
+						d.valuetext = Skada:FormatValueCols(
+							mod.metadata.columns.Time and date("%H:%M:%S", death.timeod),
+							mod.metadata.columns.Survivability and Skada:FormatTime(death.timeod - set.starttime, true)
+						)
+					else
+						d.valuetext = "..."
+					end
 
-						if win.metadata and d.value > win.metadata.maxvalue then
-							win.metadata.maxvalue = d.value
-						end
+					if win.metadata and d.value > win.metadata.maxvalue then
+						win.metadata.maxvalue = d.value
 					end
 				end
 			end
@@ -566,34 +565,34 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 	local function mod_update(self, win, set)
 		win.title = win.class and format("%s (%s)", L["Deaths"], L[win.class]) or L["Deaths"]
 
-		if set.death or WATCH then
-			if win.metadata then
-				win.metadata.maxvalue = 1
-			end
+		if not (set.death or WATCH) then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 1
+		end
 
-			local curtime, nr = set.last_time or GetTime(), 0
-			for i = 1, #set.players do
-				local player = set.players[i]
-				if player and (player.death or WATCH) and (not win.class or win.class == player.class) then
-					nr = nr + 1
-					local d = win:actor(nr, player)
+		local curtime, nr = set.last_time or GetTime(), 0
+		for i = 1, #set.players do
+			local player = set.players[i]
+			if player and (player.death or WATCH) and (not win.class or win.class == player.class) then
+				nr = nr + 1
+				local d = win:actor(nr, player)
 
-					if player.death then
-						d.value = player.death
-						d.valuetext = tostring(player.death)
+				if player.death then
+					d.value = player.death
+					d.valuetext = tostring(player.death)
 
-						if player.deathlog then
-							local first_death = player.deathlog[#player.deathlog]
-							if first_death and first_death.time then
-								d.value = first_death.time
-								d.color = (WATCH and first_death.time) and GRAY_FONT_COLOR or nil
-							end
+					if player.deathlog then
+						local first_death = player.deathlog[#player.deathlog]
+						if first_death and first_death.time then
+							d.value = first_death.time
+							d.color = (WATCH and first_death.time) and GRAY_FONT_COLOR or nil
 						end
-					else
-						d.value = curtime
-						d.valuetext = "..."
-						d.color = nil
 					end
+				else
+					d.value = curtime
+					d.valuetext = "..."
+					d.color = nil
 				end
 			end
 		end
@@ -602,44 +601,45 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 	-- alternative Deaths module:
 	local function alt_update(self, win, set)
 		win.title = win.class and format("%s (%s)", L["Deaths"], L[win.class]) or L["Deaths"]
-		if set.death or WATCH then
-			if win.metadata then
-				win.metadata.maxvalue = 1
-			end
 
-			local curtime, nr = WATCH and GetTime(), 0
-			for i = 1, #set.players do
-				local p = set.players[i]
-				if p and p.deathlog and (p.death or WATCH) and (not win.class or win.class == p.class) then
-					local num = #p.deathlog
-					for j = 1, num do
-						local death = p.deathlog[j]
-						if death and (death.timeod or WATCH) then
-							nr = nr + 1
-							local d = win:actor(nr, p)
-							d.id = format("%s::%d", p.id, j)
+		if not (set.death or WATCH) then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 1
+		end
 
-							if death.timeod then
-								d.color = WATCH and GRAY_FONT_COLOR or nil
-								d.value = death.time
-								d.valuetext = Skada:FormatValueCols(
-									self.metadata.columns.Time and date("%H:%M:%S", death.timeod),
-									self.metadata.columns.Survivability and Skada:FormatTime(death.timeod - set.starttime, true)
-								)
-							else
-								d.color = nil
-								d.value = curtime or GetTime()
-								d.valuetext = "..."
-							end
+		local curtime, nr = WATCH and GetTime(), 0
+		for i = 1, #set.players do
+			local p = set.players[i]
+			if p and p.deathlog and (p.death or WATCH) and (not win.class or win.class == p.class) then
+				local num = #p.deathlog
+				for j = 1, num do
+					local death = p.deathlog[j]
+					if death and (death.timeod or WATCH) then
+						nr = nr + 1
+						local d = win:actor(nr, p)
+						d.id = format("%s::%d", p.id, j)
 
-							if num ~= 1 then
-								d.reportlabel = format("%s (%d)   %s", d.label, num, d.valuetext)
-								d.text = format("%s (%d)", d.text or d.label, num)
-							else
-								d.reportlabel = nil
-							end
-							num = num - 1
+						if death.timeod then
+							d.color = WATCH and GRAY_FONT_COLOR or nil
+							d.value = death.time
+							d.valuetext = Skada:FormatValueCols(
+								self.metadata.columns.Time and date("%H:%M:%S", death.timeod),
+								self.metadata.columns.Survivability and Skada:FormatTime(death.timeod - set.starttime, true)
+							)
+						else
+							d.color = nil
+							d.value = curtime or GetTime()
+							d.valuetext = "..."
 						end
+
+						if num ~= 1 then
+							d.reportlabel = format("%s (%d)   %s", d.label, num, d.valuetext)
+							d.text = format("%s (%d)", d.text or d.label, num)
+						else
+							d.reportlabel = nil
+						end
+						num = num - 1
 					end
 				end
 			end
@@ -656,46 +656,46 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 
 	local function entry_tooltip(win, id, label, tooltip)
 		local entry = win.dataset[id]
-		if entry and entry.spellname then
-			tooltip:AddLine(L["Spell details"])
-			tooltip:AddDoubleLine(L["Spell"], entry.spellname, 1, 1, 1, 1, 1, 1)
+		if not entry or not entry.spellname then return end
 
-			if entry.source then
-				tooltip:AddDoubleLine(L["Source"], entry.source, 1, 1, 1, 1, 1, 1)
-			end
+		tooltip:AddLine(L["Spell details"])
+		tooltip:AddDoubleLine(L["Spell"], entry.spellname, 1, 1, 1, 1, 1, 1)
 
-			if entry.hp and entry.hp ~= 0 then
-				tooltip:AddDoubleLine(HEALTH, Skada:FormatNumber(entry.hp), 1, 1, 1)
-			end
+		if entry.source then
+			tooltip:AddDoubleLine(L["Source"], entry.source, 1, 1, 1, 1, 1, 1)
+		end
 
-			local c = nil
+		if entry.hp and entry.hp ~= 0 then
+			tooltip:AddDoubleLine(HEALTH, Skada:FormatNumber(entry.hp), 1, 1, 1)
+		end
 
-			if entry.amount and entry.amount ~= 0 then
-				c = get_color(entry.amount < 0 and "red" or "green")
-				tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(entry.amount), 1, 1, 1, c.r, c.g, c.b)
-			end
+		local c = nil
 
-			if entry.overkill and entry.overkill > 0 then
-				tooltip:AddDoubleLine(L["Overkill"], Skada:FormatNumber(entry.overkill), 1, 1, 1, 0.77, 0.64, 0)
-			elseif entry.overheal and entry.overheal > 0 then
-				c = get_color("yellow")
-				tooltip:AddDoubleLine(L["Overheal"], Skada:FormatNumber(entry.overheal), 1, 1, 1, c.r, c.g, c.b)
-			end
+		if entry.amount and entry.amount ~= 0 then
+			c = get_color(entry.amount < 0 and "red" or "green")
+			tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(entry.amount), 1, 1, 1, c.r, c.g, c.b)
+		end
 
-			if entry.resisted and entry.resisted > 0 then
-				c = get_color("orange")
-				tooltip:AddDoubleLine(L["RESIST"], Skada:FormatNumber(entry.resisted), 1, 1, 1, c.r, c.g, c.b)
-			end
+		if entry.overkill and entry.overkill > 0 then
+			tooltip:AddDoubleLine(L["Overkill"], Skada:FormatNumber(entry.overkill), 1, 1, 1, 0.77, 0.64, 0)
+		elseif entry.overheal and entry.overheal > 0 then
+			c = get_color("yellow")
+			tooltip:AddDoubleLine(L["Overheal"], Skada:FormatNumber(entry.overheal), 1, 1, 1, c.r, c.g, c.b)
+		end
 
-			if entry.blocked and entry.blocked > 0 then
-				c = get_color("orange")
-				tooltip:AddDoubleLine(L["BLOCK"], Skada:FormatNumber(entry.blocked), 1, 1, 1, c.r, c.g, c.b)
-			end
+		if entry.resisted and entry.resisted > 0 then
+			c = get_color("orange")
+			tooltip:AddDoubleLine(L["RESIST"], Skada:FormatNumber(entry.resisted), 1, 1, 1, c.r, c.g, c.b)
+		end
 
-			if entry.absorbed and entry.absorbed > 0 then
-				c = get_color("orange")
-				tooltip:AddDoubleLine(L["ABSORB"], Skada:FormatNumber(entry.absorbed), 1, 1, 1, c.r, c.g, c.b)
-			end
+		if entry.blocked and entry.blocked > 0 then
+			c = get_color("orange")
+			tooltip:AddDoubleLine(L["BLOCK"], Skada:FormatNumber(entry.blocked), 1, 1, 1, c.r, c.g, c.b)
+		end
+
+		if entry.absorbed and entry.absorbed > 0 then
+			c = get_color("orange")
+			tooltip:AddDoubleLine(L["ABSORB"], Skada:FormatNumber(entry.absorbed), 1, 1, 1, c.r, c.g, c.b)
 		end
 	end
 

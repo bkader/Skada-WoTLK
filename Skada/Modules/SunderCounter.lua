@@ -12,15 +12,16 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 
 	local function log_sunder(set, data)
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
-		if player then
-			set.sunder = (set.sunder or 0) + 1
-			player.sunder = (player.sunder or 0) + 1
+		if not player then return end
 
-			if (set ~= Skada.total or P.totalidc) and data.dstName then
-				player.sundertargets = player.sundertargets or {}
-				player.sundertargets[data.dstName] = (player.sundertargets[data.dstName] or 0) + 1
-			end
-		end
+		set.sunder = (set.sunder or 0) + 1
+		player.sunder = (player.sunder or 0) + 1
+
+		-- saving this to total set may become a memory hog deluxe.
+		if (set == Skada.total and not P.totalidc) or not data.dstName then return end
+
+		player.sundertargets = player.sundertargets or {}
+		player.sundertargets[data.dstName] = (player.sundertargets[data.dstName] or 0) + 1
 	end
 
 	local data = {}
@@ -37,44 +38,43 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 
 			Skada:DispatchSets(log_sunder, data)
 
-			if P.modules.sunderannounce then
-				if not P.modules.sunderbossonly or (P.modules.sunderbossonly and Skada:IsBoss(dstGUID, true)) then
-					mod.targets = mod.targets or T.get("Sunder_Targets")
-					if not mod.targets[dstGUID] then
-						mod.targets[dstGUID] = new()
-						mod.targets[dstGUID].count = 1
-						mod.targets[dstGUID].time = timestamp
-					elseif not mod.targets[dstGUID].full then
-						mod.targets[dstGUID].count = (mod.targets[dstGUID].count or 0) + 1
-						if mod.targets[dstGUID].count == 5 then
-							mod:Announce(format(
-								L["%s stacks of %s applied on %s in %s sec!"],
-								mod.targets[dstGUID].count,
-								sunderLink or sunder,
-								dstName,
-								format("%.1f", timestamp - mod.targets[dstGUID].time)
-							))
-							mod.targets[dstGUID].full = true
-						end
-					end
+			if not P.modules.sunderannounce then return end -- announce disabled
+			if P.modules.sunderbossonly and not Skada:IsBoss(dstGUID, true) then return end -- only for bosses
+
+			mod.targets = mod.targets or T.get("Sunder_Targets")
+			if not mod.targets[dstGUID] then
+				mod.targets[dstGUID] = new()
+				mod.targets[dstGUID].count = 1
+				mod.targets[dstGUID].time = timestamp
+			elseif not mod.targets[dstGUID].full then
+				mod.targets[dstGUID].count = (mod.targets[dstGUID].count or 0) + 1
+				if mod.targets[dstGUID].count == 5 then
+					mod:Announce(format(
+						L["%s stacks of %s applied on %s in %s sec!"],
+						mod.targets[dstGUID].count,
+						sunderLink or sunder,
+						dstName,
+						format("%.1f", timestamp - mod.targets[dstGUID].time)
+					))
+					mod.targets[dstGUID].full = true
 				end
 			end
 		end
 	end
 
 	local function sunder_removed(timestamp, eventtype, _, _, _, dstGUID, dstName, _, _, spellname)
-		if spellname == sunder then
-			Skada:ScheduleTimer(function()
-				if mod.targets and mod.targets[dstGUID] then
-					mod.targets[dstGUID] = del(mod.targets[dstGUID])
-					if P.modules.sunderannounce then
-						if not P.modules.sunderbossonly or (P.modules.sunderbossonly and Skada:IsBoss(dstGUID, true)) then
-							mod:Announce(pformat(L["%s dropped from %s!"], sunderLink or sunder, dstName))
-						end
+		if not spellname or spellname ~= sunder then return end
+
+		Skada:ScheduleTimer(function()
+			if mod.targets and mod.targets[dstGUID] then
+				mod.targets[dstGUID] = del(mod.targets[dstGUID])
+				if P.modules.sunderannounce then
+					if not P.modules.sunderbossonly or (P.modules.sunderbossonly and Skada:IsBoss(dstGUID, true)) then
+						mod:Announce(pformat(L["%s dropped from %s!"], sunderLink or sunder, dstName))
 					end
 				end
-			end, 0.1)
-		end
+			end
+		end, 0.1)
 	end
 
 	local function unit_died(timestamp, eventtype, _, _, _, dstGUID)
@@ -84,10 +84,9 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 	end
 
 	local function double_check_sunder()
-		if not sunder then
-			sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
-			sunderLink = P.reportlinks and GetSpellLink(47467)
-		end
+		if sunder then return end
+		sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
+		sunderLink = P.reportlinks and GetSpellLink(47467)
 	end
 
 	function sourcemod:Enter(win, id, label)
@@ -100,25 +99,26 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 		if not win.targetname then return end
 
 		local sources, total = set:GetSunderSources(win.targetname)
-		if sources then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
 
-			local nr = 0
-			for sourcename, source in pairs(sources) do
-				nr = nr + 1
-				local d = win:actor(nr, source, nil, sourcename)
+		if not sources or total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-				d.value = source.count
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
+		local nr = 0
+		for sourcename, source in pairs(sources) do
+			nr = nr + 1
+			local d = win:actor(nr, source, nil, sourcename)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+			d.value = source.count
+			d.valuetext = Skada:FormatValueCols(
+				mod.metadata.columns.Count and d.value,
+				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+			)
+
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
 			end
 		end
 	end
@@ -134,30 +134,28 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		if enemy then return end -- unavailable for enemies yet
-
-		local total = actor and actor.sunder or 0
+		local total = (actor and not enemy) and actor.sunder or 0
 		local targets = (total > 0) and actor:GetSunderTargets()
 
-		if targets then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		if not targets then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local nr = 0
-			for targetname, target in pairs(targets) do
-				nr = nr + 1
-				local d = win:actor(nr, target, true, targetname)
+		local nr = 0
+		for targetname, target in pairs(targets) do
+			nr = nr + 1
+			local d = win:actor(nr, target, true, targetname)
 
-				d.value = target.count
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
+			d.value = target.count
+			d.valuetext = Skada:FormatValueCols(
+				mod.metadata.columns.Count and d.value,
+				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+			)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
 			end
 		end
 	end
@@ -168,27 +166,27 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 		win.title = L["Sunder Counter"]
 		local total = set.sunder or 0
 
-		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		if total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local nr = 0
-			for i = 1, #set.players do
-				local player = set.players[i]
-				if player and player.sunder then
-					nr = nr + 1
-					local d = win:actor(nr, player)
+		local nr = 0
+		for i = 1, #set.players do
+			local player = set.players[i]
+			if player and player.sunder then
+				nr = nr + 1
+				local d = win:actor(nr, player)
 
-					d.value = player.sunder
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Count and d.value,
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
+				d.value = player.sunder
+				d.valuetext = Skada:FormatValueCols(
+					self.metadata.columns.Count and d.value,
+					self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+				)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
 		end

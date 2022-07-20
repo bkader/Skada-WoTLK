@@ -22,19 +22,19 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 
 	local function log_parry(set, data)
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
-		if player then
-			player.parry = (player.parry or 0) + 1
-			set.parry = (set.parry or 0) + 1
+		if not player then return end
 
-			-- saving this to total set may become a memory hog deluxe.
-			if (set ~= Skada.total or P.totalidc) and data.dstName then
-				player.parrytargets = player.parrytargets or {}
-				player.parrytargets[data.dstName] = (player.parrytargets[data.dstName] or 0) + 1
+		player.parry = (player.parry or 0) + 1
+		set.parry = (set.parry or 0) + 1
 
-				if P.modules.parryannounce and set ~= Skada.total then
-					Skada:SendChat(format(L["%s parried %s (%s)"], data.dstName, data.playername, player.parrytargets[data.dstName] or 1), P.modules.parrychannel, "preset")
-				end
-			end
+		-- saving this to total set may become a memory hog deluxe.
+		if (set == Skada.total and not P.totalidc) or not data.dstName then return end
+
+		player.parrytargets = player.parrytargets or {}
+		player.parrytargets[data.dstName] = (player.parrytargets[data.dstName] or 0) + 1
+
+		if P.modules.parryannounce and set ~= Skada.total then
+			Skada:SendChat(format(L["%s parried %s (%s)"], data.dstName, data.playername, player.parrytargets[data.dstName] or 1), P.modules.parrychannel, "preset")
 		end
 	end
 
@@ -67,29 +67,28 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		if enemy then return end -- unavailable for enemies yet
+		local total = (actor and not enemy) and actor.parry or 0
 
-		local total = actor and actor.parry or 0
-		if total > 0 and actor.parrytargets then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		if total == 0 or not actor.parrytargets then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local nr = 0
-			for targetname, count in pairs(actor.parrytargets) do
-				nr = nr + 1
-				local d = win:actor(nr, targetname)
-				d.class = "BOSS" -- what else can it be?
+		local nr = 0
+		for targetname, count in pairs(actor.parrytargets) do
+			nr = nr + 1
+			local d = win:actor(nr, targetname)
+			d.class = "BOSS" -- what else can it be?
 
-				d.value = count
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-				)
+			d.value = count
+			d.valuetext = Skada:FormatValueCols(
+				mod.metadata.columns.Count and d.value,
+				mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+			)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
 			end
 		end
 	end
@@ -98,27 +97,28 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 		win.title = win.class and format("%s (%s)", L["Parry-Haste"], L[win.class]) or L["Parry-Haste"]
 
 		local total = set.parry or 0
-		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
 
-			local nr = 0
-			for i = 1, #set.players do
-				local player = set.players[i]
-				if player and player.parry and (not win.class or win.class == player.class) then
-					nr = nr + 1
-					local d = win:actor(nr, player)
+		if total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-					d.value = player.parry
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Count and d.value,
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
+		local nr = 0
+		for i = 1, #set.players do
+			local player = set.players[i]
+			if player and player.parry and (not win.class or win.class == player.class) then
+				nr = nr + 1
+				local d = win:actor(nr, player)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+				d.value = player.parry
+				d.valuetext = Skada:FormatValueCols(
+					self.metadata.columns.Count and d.value,
+					self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+				)
+
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
 		end

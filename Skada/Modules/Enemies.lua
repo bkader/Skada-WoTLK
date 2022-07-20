@@ -146,45 +146,45 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 
 	local function log_custom_unit(set, name, playername, spellid, spellschool, amount, absorbed)
 		local e = Skada:GetEnemy(set, name, nil, nil, true)
-		if e then
-			e.fake = true
-			e.damagetaken = (e.damagetaken or 0) + amount
-			e.totaldamagetaken = (e.totaldamagetaken or 0) + amount
-			if absorbed > 0 then
-				e.totaldamagetaken = e.totaldamagetaken + absorbed
-			end
+		if not e then return end
 
-			-- spell
-			local spell = e.damagetakenspells and e.damagetakenspells[spellid]
-			if not spell then
-				e.damagetakenspells = e.damagetakenspells or {}
-				e.damagetakenspells[spellid] = {school = spellschool, amount = amount}
-				spell = e.damagetakenspells[spellid]
-			else
-				spell.amount = spell.amount + amount
-			end
+		e.fake = true
+		e.damagetaken = (e.damagetaken or 0) + amount
+		e.totaldamagetaken = (e.totaldamagetaken or 0) + amount
+		if absorbed > 0 then
+			e.totaldamagetaken = e.totaldamagetaken + absorbed
+		end
 
-			if spell.total then
-				spell.total = spell.total + amount + absorbed
-			elseif absorbed > 0 then
-				spell.total = spell.amount + absorbed
-			end
+		-- spell
+		local spell = e.damagetakenspells and e.damagetakenspells[spellid]
+		if not spell then
+			e.damagetakenspells = e.damagetakenspells or {}
+			e.damagetakenspells[spellid] = {school = spellschool, amount = amount}
+			spell = e.damagetakenspells[spellid]
+		else
+			spell.amount = spell.amount + amount
+		end
 
-			-- source
-			local source = spell.sources and spell.sources[playername]
-			if not source then
-				spell.sources = spell.sources or {}
-				spell.sources[playername] = {amount = amount}
-				source = spell.sources[playername]
-			else
-				source.amount = source.amount + amount
-			end
+		if spell.total then
+			spell.total = spell.total + amount + absorbed
+		elseif absorbed > 0 then
+			spell.total = spell.amount + absorbed
+		end
 
-			if source.total then
-				source.total = source.total + amount + absorbed
-			elseif absorbed > 0 then
-				source.total = source.amount + absorbed
-			end
+		-- source
+		local source = spell.sources and spell.sources[playername]
+		if not source then
+			spell.sources = spell.sources or {}
+			spell.sources[playername] = {amount = amount}
+			source = spell.sources[playername]
+		else
+			source.amount = source.amount + amount
+		end
+
+		if source.total then
+			source.total = source.total + amount + absorbed
+		elseif absorbed > 0 then
+			source.total = source.amount + absorbed
 		end
 	end
 
@@ -204,126 +204,126 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 		if (dmg.amount + absorbed) == 0 then return end
 
 		local e = Skada:GetEnemy(set, dmg.enemyname, dmg.enemyid, dmg.enemyflags, true)
-		if e then
-			set.edamagetaken = (set.edamagetaken or 0) + dmg.amount
-			set.etotaldamagetaken = (set.etotaldamagetaken or 0) + dmg.amount
+		if not e then return end
 
-			e.damagetaken = (e.damagetaken or 0) + dmg.amount
-			e.totaldamagetaken = (e.totaldamagetaken or 0) + dmg.amount
-			if absorbed > 0 then
-				set.etotaldamagetaken = set.etotaldamagetaken + absorbed
-				e.totaldamagetaken = e.totaldamagetaken + absorbed
-			end
+		set.edamagetaken = (set.edamagetaken or 0) + dmg.amount
+		set.etotaldamagetaken = (set.etotaldamagetaken or 0) + dmg.amount
 
-			-- damage spell.
-			local spellid = isdot and -dmg.spellid or dmg.spellid
-			local spell = e.damagetakenspells and e.damagetakenspells[spellid]
-			if not spell then
-				e.damagetakenspells = e.damagetakenspells or {}
-				e.damagetakenspells[spellid] = {school = dmg.spellschool, amount = dmg.amount}
-				spell = e.damagetakenspells[spellid]
-			else
-				spell.amount = spell.amount + dmg.amount
-			end
+		e.damagetaken = (e.damagetaken or 0) + dmg.amount
+		e.totaldamagetaken = (e.totaldamagetaken or 0) + dmg.amount
+		if absorbed > 0 then
+			set.etotaldamagetaken = set.etotaldamagetaken + absorbed
+			e.totaldamagetaken = e.totaldamagetaken + absorbed
+		end
 
-			if spell.total then
-				spell.total = spell.total + dmg.amount + absorbed
-			elseif absorbed > 0 then
-				spell.total = spell.amount + absorbed
-			end
+		-- damage spell.
+		local spellid = isdot and -dmg.spellid or dmg.spellid
+		local spell = e.damagetakenspells and e.damagetakenspells[spellid]
+		if not spell then
+			e.damagetakenspells = e.damagetakenspells or {}
+			e.damagetakenspells[spellid] = {school = dmg.spellschool, amount = dmg.amount}
+			spell = e.damagetakenspells[spellid]
+		else
+			spell.amount = spell.amount + dmg.amount
+		end
 
-			local overkill = dmg.overkill or 0
-			if overkill > 0 then
-				spell.o_amt = (spell.o_amt or 0) + overkill
-			end
+		if spell.total then
+			spell.total = spell.total + dmg.amount + absorbed
+		elseif absorbed > 0 then
+			spell.total = spell.amount + absorbed
+		end
 
-			-- damage source.
-			if dmg.srcName then
-				-- the source
-				local source = spell.sources and spell.sources[dmg.srcName]
-				if not source then
-					spell.sources = spell.sources or {}
-					spell.sources[dmg.srcName] = {amount = dmg.amount}
-					source = spell.sources[dmg.srcName]
-				else
-					source.amount = source.amount + dmg.amount
+		local overkill = dmg.overkill or 0
+		if overkill > 0 then
+			spell.o_amt = (spell.o_amt or 0) + overkill
+		end
+
+		-- damage source.
+		if not dmg.srcName then return end
+
+		-- the source
+		local source = spell.sources and spell.sources[dmg.srcName]
+		if not source then
+			spell.sources = spell.sources or {}
+			spell.sources[dmg.srcName] = {amount = dmg.amount}
+			source = spell.sources[dmg.srcName]
+		else
+			source.amount = source.amount + dmg.amount
+		end
+
+		if source.total then
+			source.total = source.total + dmg.amount + absorbed
+		elseif absorbed > 0 then
+			source.total = source.amount + absorbed
+		end
+
+		if overkill > 0 then
+			source.o_amt = (source.o_amt or 0) + dmg.overkill
+		end
+
+		-- the rest of the code is only for allowed instance diffs.
+		if not allowed_diffs[get_instance_diff()] then return end
+
+		if is_custom_unit(dmg.enemyid, dmg.enemyname, dmg.amount, overkill) then
+			local unit = customUnitsTable[dmg.enemyid]
+			-- started with less than max?
+			if unit.full then
+				local amount = unit.full - unit.curval
+				if unit.useful then
+					e.usefuldamagetaken = (e.usefuldamagetaken or 0) + amount
+					spell.useful = (spell.useful or 0) + amount
+					source.useful = (source.useful or 0) + amount
 				end
-
-				if source.total then
-					source.total = source.total + dmg.amount + absorbed
-				elseif absorbed > 0 then
-					source.total = source.amount + absorbed
+				if unit.maxval == unit.full then
+					log_custom_unit(set, unit.name, dmg.srcName, spellid, dmg.spellschool, amount, absorbed)
 				end
+				unit.full = nil
+			elseif unit.curval >= unit.maxval then
+				local amount = dmg.amount - overkill
+				unit.curval = unit.curval - amount
 
-				if overkill > 0 then
-					source.o_amt = (source.o_amt or 0) + dmg.overkill
-				end
-
-				-- the rest of the code is only for allowed instance diffs.
-				if not allowed_diffs[get_instance_diff()] then return end
-
-				if is_custom_unit(dmg.enemyid, dmg.enemyname, dmg.amount, overkill) then
-					local unit = customUnitsTable[dmg.enemyid]
-					-- started with less than max?
-					if unit.full then
-						local amount = unit.full - unit.curval
-						if unit.useful then
-							e.usefuldamagetaken = (e.usefuldamagetaken or 0) + amount
-							spell.useful = (spell.useful or 0) + amount
-							source.useful = (source.useful or 0) + amount
-						end
-						if unit.maxval == unit.full then
-							log_custom_unit(set, unit.name, dmg.srcName, spellid, dmg.spellschool, amount, absorbed)
-						end
-						unit.full = nil
-					elseif unit.curval >= unit.maxval then
-						local amount = dmg.amount - overkill
-						unit.curval = unit.curval - amount
-
-						if unit.curval <= unit.maxval then
-							log_custom_unit(set, unit.name, dmg.srcName, spellid, dmg.spellschool, unit.maxval - unit.curval, absorbed)
-							amount = amount - (unit.maxval - unit.curval)
-							if customGroups[unit.oname] and unit.useful then
-								log_custom_group(set, unit.guid, unit.oname, dmg.srcName, spellid, dmg.spellschool, amount, overkill, absorbed)
-								customGroupsTable = customGroupsTable or T.get("Enemies_GroupsTable")
-								customGroupsTable[unit.guid] = true
-							end
-							if customGroups[unit.name] then
-								log_custom_group(set, unit.guid, unit.name, dmg.srcName, spellid, dmg.spellschool, unit.maxval - unit.curval, overkill, absorbed)
-							end
-						end
-						if unit.useful then
-							e.usefuldamagetaken = (e.usefuldamagetaken or 0) + amount
-							spell.useful = (spell.useful or 0) + amount
-							source.useful = (source.useful or 0) + amount
-						end
-					elseif unit.curval >= unit.minval then
-						local amount = dmg.amount - overkill
-						unit.curval = unit.curval - amount
-
-						if customGroups[unit.name] then
-							log_custom_group(set, unit.guid, unit.name, dmg.srcName, spellid, dmg.spellschool, amount, overkill, absorbed)
-						end
-
-						if unit.curval <= unit.minval then
-							log_custom_unit(set, unit.name, dmg.srcName, spellid, dmg.spellschool, amount - (unit.minval - unit.curval), absorbed)
-
-							-- remove it
-							local guid = unit.guid
-							customUnitsTable[guid] = del(customUnitsTable[guid])
-							customUnitsTable[guid] = -1
-						else
-							log_custom_unit(set, unit.name, dmg.srcName, spellid, dmg.spellschool, amount, absorbed)
-						end
-					elseif unit.power then
-						log_custom_unit(set, unit.name, dmg.srcName, spellid, dmg.spellschool, dmg.amount - (unit.useful and overkill or 0), absorbed)
+				if unit.curval <= unit.maxval then
+					log_custom_unit(set, unit.name, dmg.srcName, spellid, dmg.spellschool, unit.maxval - unit.curval, absorbed)
+					amount = amount - (unit.maxval - unit.curval)
+					if customGroups[unit.oname] and unit.useful then
+						log_custom_group(set, unit.guid, unit.oname, dmg.srcName, spellid, dmg.spellschool, amount, overkill, absorbed)
+						customGroupsTable = customGroupsTable or T.get("Enemies_GroupsTable")
+						customGroupsTable[unit.guid] = true
+					end
+					if customGroups[unit.name] then
+						log_custom_group(set, unit.guid, unit.name, dmg.srcName, spellid, dmg.spellschool, unit.maxval - unit.curval, overkill, absorbed)
 					end
 				end
+				if unit.useful then
+					e.usefuldamagetaken = (e.usefuldamagetaken or 0) + amount
+					spell.useful = (spell.useful or 0) + amount
+					source.useful = (source.useful or 0) + amount
+				end
+			elseif unit.curval >= unit.minval then
+				local amount = dmg.amount - overkill
+				unit.curval = unit.curval - amount
 
-				-- custom groups
-				log_custom_group(set, dmg.enemyid, dmg.enemyname, dmg.srcName, spellid, dmg.spellschool, dmg.amount, overkill, absorbed)
+				if customGroups[unit.name] then
+					log_custom_group(set, unit.guid, unit.name, dmg.srcName, spellid, dmg.spellschool, amount, overkill, absorbed)
+				end
+
+				if unit.curval <= unit.minval then
+					log_custom_unit(set, unit.name, dmg.srcName, spellid, dmg.spellschool, amount - (unit.minval - unit.curval), absorbed)
+
+					-- remove it
+					local guid = unit.guid
+					customUnitsTable[guid] = del(customUnitsTable[guid])
+					customUnitsTable[guid] = -1
+				else
+					log_custom_unit(set, unit.name, dmg.srcName, spellid, dmg.spellschool, amount, absorbed)
+				end
+			elseif unit.power then
+				log_custom_unit(set, unit.name, dmg.srcName, spellid, dmg.spellschool, dmg.amount - (unit.useful and overkill or 0), absorbed)
 			end
 		end
+
+		-- custom groups
+		log_custom_group(set, dmg.enemyid, dmg.enemyname, dmg.srcName, spellid, dmg.spellschool, dmg.amount, overkill, absorbed)
 	end
 
 	local dmg = {}
@@ -388,19 +388,20 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 	local function sourcemod_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
 		if not set then return end
-		local damage, overkill, useful = set:GetActorDamageFromSource(win.targetid, win.targetname, label)
-		if damage > 0 then
-			tooltip:AddLine(format(L["%s's damage breakdown"], label))
-			tooltip:AddDoubleLine(L["Damage Done"], Skada:FormatNumber(damage), 1, 1, 1)
-			if useful > 0 then
-				tooltip:AddDoubleLine(L["Useful Damage"], format("%s (%s)", Skada:FormatNumber(useful), Skada:FormatPercent(useful, damage)), 1, 1, 1)
 
-				-- override overkill
-				overkill = max(0, damage - useful)
-				tooltip:AddDoubleLine(L["Overkill"], format("%s (%s)", Skada:FormatNumber(overkill), Skada:FormatPercent(overkill, damage)), 1, 1, 1)
-			elseif overkill > 0 then
-				tooltip:AddDoubleLine(L["Overkill"], format("%s (%s)", Skada:FormatNumber(overkill), Skada:FormatPercent(overkill, damage)), 1, 1, 1)
-			end
+		local damage, overkill, useful = set:GetActorDamageFromSource(win.targetid, win.targetname, label)
+		if damage == 0 then return end
+
+		tooltip:AddLine(format(L["%s's damage breakdown"], label))
+		tooltip:AddDoubleLine(L["Damage Done"], Skada:FormatNumber(damage), 1, 1, 1)
+		if useful > 0 then
+			tooltip:AddDoubleLine(L["Useful Damage"], format("%s (%s)", Skada:FormatNumber(useful), Skada:FormatPercent(useful, damage)), 1, 1, 1)
+
+			-- override overkill
+			overkill = max(0, damage - useful)
+			tooltip:AddDoubleLine(L["Overkill"], format("%s (%s)", Skada:FormatNumber(overkill), Skada:FormatPercent(overkill, damage)), 1, 1, 1)
+		elseif overkill > 0 then
+			tooltip:AddDoubleLine(L["Overkill"], format("%s (%s)", Skada:FormatNumber(overkill), Skada:FormatPercent(overkill, damage)), 1, 1, 1)
 		end
 	end
 
@@ -408,13 +409,13 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 		local set = win:GetSelectedSet()
 		local e = set and set:GetEnemy(label, id)
 		local amount, total, useful = e:GetDamageTakenBreakdown()
-		if useful and useful > 0 then
-			tooltip:AddLine(format(L["%s's damage breakdown"], label))
-			tooltip:AddDoubleLine(L["Damage Done"], Skada:FormatNumber(total), 1, 1, 1)
-			tooltip:AddDoubleLine(L["Useful Damage"], format("%s (%s)", Skada:FormatNumber(useful), Skada:FormatPercent(useful, total)), 1, 1, 1)
-			local overkill = max(0, total - useful)
-			tooltip:AddDoubleLine(L["Overkill"], format("%s (%s)", Skada:FormatNumber(overkill), Skada:FormatPercent(overkill, total)), 1, 1, 1)
-		end
+		if not useful or useful == 0 then return end
+
+		tooltip:AddLine(format(L["%s's damage breakdown"], label))
+		tooltip:AddDoubleLine(L["Damage Done"], Skada:FormatNumber(total), 1, 1, 1)
+		tooltip:AddDoubleLine(L["Useful Damage"], format("%s (%s)", Skada:FormatNumber(useful), Skada:FormatPercent(useful, total)), 1, 1, 1)
+		local overkill = max(0, total - useful)
+		tooltip:AddDoubleLine(L["Overkill"], format("%s (%s)", Skada:FormatNumber(overkill), Skada:FormatPercent(overkill, total)), 1, 1, 1)
 	end
 
 	function spellsourcemod:Enter(win, id, label)
@@ -435,27 +436,27 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 
 		local sources, total = actor:GetDamageSpellSources(win.spellid)
 
-		if sources and total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		if not sources or total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local actortime, nr = mod.metadata.columns.sDTPS and actor:GetTime(), 0
-			for sourcename, source in pairs(sources) do
-				if not win.class or win.class == source.class then
-					nr = nr + 1
-					local d = win:actor(nr, source, nil, sourcename)
+		local actortime, nr = mod.metadata.columns.sDTPS and actor:GetTime(), 0
+		for sourcename, source in pairs(sources) do
+			if not win.class or win.class == source.class then
+				nr = nr + 1
+				local d = win:actor(nr, source, nil, sourcename)
 
-					d.value = source.amount
-					d.valuetext = Skada:FormatValueCols(
-						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-						actortime and Skada:FormatNumber(d.value / actortime),
-						mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-					)
+				d.value = source.amount
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+					actortime and Skada:FormatNumber(d.value / actortime),
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+				)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
 		end
@@ -476,31 +477,32 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 		if not actor then return end
 
 		local sources, total = actor:GetDamageSources()
-		if sources and total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
 
-			local actortime, nr = mod.metadata.columns.sDTPS and actor:GetTime(), 0
-			for sourcename, source in pairs(sources) do
-				if not win.class or win.class == source.class then
-					nr = nr + 1
-					local d = win:actor(nr, source, nil, sourcename)
+		if not sources or total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-					d.value = source.amount or 0
-					if P.absdamage and source.total then
-						d.value = source.total
-					end
+		local actortime, nr = mod.metadata.columns.sDTPS and actor:GetTime(), 0
+		for sourcename, source in pairs(sources) do
+			if not win.class or win.class == source.class then
+				nr = nr + 1
+				local d = win:actor(nr, source, nil, sourcename)
 
-					d.valuetext = Skada:FormatValueCols(
-						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-						actortime and Skada:FormatNumber(d.value / actortime),
-						mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-					)
+				d.value = source.amount or 0
+				if P.absdamage and source.total then
+					d.value = source.total
+				end
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+					actortime and Skada:FormatNumber(d.value / actortime),
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+				)
+
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
 		end
@@ -523,31 +525,31 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 				total = sources[win.actorname].total
 			end
 
-			if total > 0 then
-				if win.metadata then
-					win.metadata.maxvalue = 0
-				end
+			if total == 0 then
+				return
+			elseif win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
-				local actortime, nr = mod.metadata.columns.sDTPS and actor:GetTime(), 0
-				for spellid, spell in pairs(actor.damagetakenspells) do
-					if spell.sources and spell.sources[win.actorname] then
-						nr = nr + 1
-						local d = win:spell(nr, spellid, spell)
+			local actortime, nr = mod.metadata.columns.sDTPS and actor:GetTime(), 0
+			for spellid, spell in pairs(actor.damagetakenspells) do
+				if spell.sources and spell.sources[win.actorname] then
+					nr = nr + 1
+					local d = win:spell(nr, spellid, spell)
 
-						d.value = spell.sources[win.actorname].amount or 0
-						if P.absdamage and spell.sources[win.actorname].total then
-							d.value = spell.sources[win.actorname].total
-						end
+					d.value = spell.sources[win.actorname].amount or 0
+					if P.absdamage and spell.sources[win.actorname].total then
+						d.value = spell.sources[win.actorname].total
+					end
 
-						d.valuetext = Skada:FormatValueCols(
-							mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-							actortime and Skada:FormatNumber(d.value / actortime),
-							mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-						)
+					d.valuetext = Skada:FormatValueCols(
+						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+						actortime and Skada:FormatNumber(d.value / actortime),
+						mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+					)
 
-						if win.metadata and d.value > win.metadata.maxvalue then
-							win.metadata.maxvalue = d.value
-						end
+					if win.metadata and d.value > win.metadata.maxvalue then
+						win.metadata.maxvalue = d.value
 					end
 				end
 			end
@@ -565,30 +567,30 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 		local actor = set and set:GetEnemy(win.targetname, win.targetid)
 		local total = actor and actor:GetDamageTaken() or 0
 
-		if total > 0 and actor.damagetakenspells then
-			if win.metadata then
-				win.metadata.maxvalue = 0
+		if total == 0 or not actor.damagetakenspells then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
+
+		local actortime, nr = mod.metadata.columns.sDTPS and actor:GetTime(), 0
+		for spellid, spell in pairs(actor.damagetakenspells) do
+			nr = nr + 1
+			local d = win:spell(nr, spellid, spell)
+
+			d.value = spell.amount or 0
+			if P.absdamage and spell.total then
+				d.value = spell.total
 			end
 
-			local actortime, nr = mod.metadata.columns.sDTPS and actor:GetTime(), 0
-			for spellid, spell in pairs(actor.damagetakenspells) do
-				nr = nr + 1
-				local d = win:spell(nr, spellid, spell)
+			d.valuetext = Skada:FormatValueCols(
+				mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+				actortime and Skada:FormatNumber(d.value / actortime),
+				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+			)
 
-				d.value = spell.amount or 0
-				if P.absdamage and spell.total then
-					d.value = spell.total
-				end
-
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
 			end
 		end
 	end
@@ -608,27 +610,27 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 		local total = actor and actor.usefuldamagetaken or 0
 		local sources = (total > 0) and actor:GetDamageSources()
 
-		if sources then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		if not sources then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local actortime, nr = mod.metadata.columns.sDTPS and actor:GetTime(), 0
-			for sourcename, source in pairs(sources) do
-				if source.useful and source.useful > 0 and (not win.class or win.class == source.class) then
-					nr = nr + 1
-					local d = win:actor(nr, source, nil, sourcename)
+		local actortime, nr = mod.metadata.columns.sDTPS and actor:GetTime(), 0
+		for sourcename, source in pairs(sources) do
+			if source.useful and source.useful > 0 and (not win.class or win.class == source.class) then
+				nr = nr + 1
+				local d = win:actor(nr, source, nil, sourcename)
 
-					d.value = source.useful
-					d.valuetext = Skada:FormatValueCols(
-						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-						actortime and Skada:FormatNumber(d.value / actortime),
-						mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-					)
+				d.value = source.useful
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+					actortime and Skada:FormatNumber(d.value / actortime),
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+				)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
 		end
@@ -637,30 +639,31 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 	function mod:Update(win, set)
 		win.title = L["Enemy Damage Taken"]
 		local total = set and set:GetEnemyDamageTaken() or 0
-		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
 
-			local nr = 0
-			for i = 1, #set.enemies do
-				local enemy = set.enemies[i]
-				if enemy then
-					local dtps, amount = enemy:GetDTPS()
-					if amount > 0 then
-						nr = nr + 1
-						local d = win:actor(nr, enemy, true)
+		if total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-						d.value = amount
-						d.valuetext = Skada:FormatValueCols(
-							self.metadata.columns.Damage and Skada:FormatNumber(d.value),
-							self.metadata.columns.DTPS and Skada:FormatNumber(dtps),
-							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-						)
+		local nr = 0
+		for i = 1, #set.enemies do
+			local enemy = set.enemies[i]
+			if enemy then
+				local dtps, amount = enemy:GetDTPS()
+				if amount > 0 then
+					nr = nr + 1
+					local d = win:actor(nr, enemy, true)
 
-						if win.metadata and not enemy.fake and d.value > win.metadata.maxvalue then
-							win.metadata.maxvalue = d.value
-						end
+					d.value = amount
+					d.valuetext = Skada:FormatValueCols(
+						self.metadata.columns.Damage and Skada:FormatNumber(d.value),
+						self.metadata.columns.DTPS and Skada:FormatNumber(dtps),
+						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					)
+
+					if win.metadata and not enemy.fake and d.value > win.metadata.maxvalue then
+						win.metadata.maxvalue = d.value
 					end
 				end
 			end
@@ -915,65 +918,65 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 		if (dmg.amount + absorbed) == 0 then return end
 
 		local e = Skada:GetEnemy(set, dmg.enemyname, dmg.enemyid, dmg.enemyflags, true)
-		if e then
-			if (set.type == "arena" or set.type == "pvp") and e.class and Skada.validclass[e.class] and e.role ~= "HEALER" then
-				Skada:AddActiveTime(set, e, dmg.amount > 0 and dmg.spellid and not passiveSpells[dmg.spellid], nil, dmg.dstName)
-			end
+		if not e then return end
 
-			set.edamage = (set.edamage or 0) + dmg.amount
-			set.etotaldamage = (set.etotaldamage or 0) + dmg.amount
+		if (set.type == "arena" or set.type == "pvp") and e.class and Skada.validclass[e.class] and e.role ~= "HEALER" then
+			Skada:AddActiveTime(set, e, dmg.amount > 0 and dmg.spellid and not passiveSpells[dmg.spellid], nil, dmg.dstName)
+		end
 
-			e.damage = (e.damage or 0) + dmg.amount
-			e.totaldamage = (e.totaldamage or 0) + dmg.amount
+		set.edamage = (set.edamage or 0) + dmg.amount
+		set.etotaldamage = (set.etotaldamage or 0) + dmg.amount
 
-			local overkill = dmg.overkill or 0
-			if overkill > 0 then
-				set.eoverkill = (set.eoverkill or 0) + dmg.overkill
-				e.overkill = (e.overkill or 0) + dmg.overkill
-			end
+		e.damage = (e.damage or 0) + dmg.amount
+		e.totaldamage = (e.totaldamage or 0) + dmg.amount
 
-			-- damage spell.
-			local spellid = isdot and -dmg.spellid or dmg.spellid
-			local spell = e.damagespells and e.damagespells[spellid]
-			if not spell then
-				e.damagespells = e.damagespells or {}
-				e.damagespells[spellid] = {school = dmg.spellschool, amount = dmg.amount}
-				spell = e.damagespells[spellid]
-			else
-				spell.amount = spell.amount + dmg.amount
-			end
+		local overkill = dmg.overkill or 0
+		if overkill > 0 then
+			set.eoverkill = (set.eoverkill or 0) + dmg.overkill
+			e.overkill = (e.overkill or 0) + dmg.overkill
+		end
 
-			if absorbed > 0 then
-				set.etotaldamage = set.etotaldamage + absorbed
-				e.totaldamage = e.totaldamage + absorbed
-				spell.total = (spell.total and (spell.total + dmg.amount) or spell.amount) + absorbed
-			end
+		-- damage spell.
+		local spellid = isdot and -dmg.spellid or dmg.spellid
+		local spell = e.damagespells and e.damagespells[spellid]
+		if not spell then
+			e.damagespells = e.damagespells or {}
+			e.damagespells[spellid] = {school = dmg.spellschool, amount = dmg.amount}
+			spell = e.damagespells[spellid]
+		else
+			spell.amount = spell.amount + dmg.amount
+		end
 
-			if overkill > 0 then
-				spell.o_amt = (spell.o_amt or 0) + dmg.overkill
-			end
+		if absorbed > 0 then
+			set.etotaldamage = set.etotaldamage + absorbed
+			e.totaldamage = e.totaldamage + absorbed
+			spell.total = (spell.total and (spell.total + dmg.amount) or spell.amount) + absorbed
+		end
 
-			-- damage target.
-			if dmg.dstName then
-				local target = spell.targets and spell.targets[dmg.dstName]
-				if not target then
-					spell.targets = spell.targets or {}
-					spell.targets[dmg.dstName] = {amount = dmg.amount}
-					target = spell.targets[dmg.dstName]
-				else
-					target.amount = target.amount + dmg.amount
-				end
+		if overkill > 0 then
+			spell.o_amt = (spell.o_amt or 0) + dmg.overkill
+		end
 
-				if target.total then
-					target.total = target.total + dmg.amount + absorbed
-				elseif absorbed > 0 then
-					target.total = target.amount + absorbed
-				end
+		-- damage target.
+		if not dmg.dstName then return end
 
-				if overkill > 0 then
-					target.o_amt = (target.o_amt or 0) + dmg.overkill
-				end
-			end
+		local target = spell.targets and spell.targets[dmg.dstName]
+		if not target then
+			spell.targets = spell.targets or {}
+			spell.targets[dmg.dstName] = {amount = dmg.amount}
+			target = spell.targets[dmg.dstName]
+		else
+			target.amount = target.amount + dmg.amount
+		end
+
+		if target.total then
+			target.total = target.total + dmg.amount + absorbed
+		elseif absorbed > 0 then
+			target.total = target.amount + absorbed
+		end
+
+		if overkill > 0 then
+			target.o_amt = (target.o_amt or 0) + dmg.overkill
 		end
 	end
 
@@ -1045,26 +1048,26 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 		if not (actor and actor.GetDamageTargetSpells) then return end
 		local spells, total = actor:GetDamageTargetSpells(win.actorname)
 
-		if spells and total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		if not spells or total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
-			for spellid, spell in pairs(spells) do
-				nr = nr + 1
-				local d = win:spell(nr, spellid, spell)
+		local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
+		for spellid, spell in pairs(spells) do
+			nr = nr + 1
+			local d = win:spell(nr, spellid, spell)
 
-				d.value = spell.amount
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
+			d.value = spell.amount
+			d.valuetext = Skada:FormatValueCols(
+				mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+				actortime and Skada:FormatNumber(d.value / actortime),
+				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+			)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
 			end
 		end
 	end
@@ -1087,27 +1090,27 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 
 		local targets, total = actor:GetDamageSpellTargets(win.spellid)
 
-		if targets and total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		if not targets or total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
-			for targetname, target in pairs(targets) do
-				if not win.class or win.class == target.class then
-					nr = nr + 1
-					local d = win:actor(nr, target, nil, targetname)
+		local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
+		for targetname, target in pairs(targets) do
+			if not win.class or win.class == target.class then
+				nr = nr + 1
+				local d = win:actor(nr, target, nil, targetname)
 
-					d.value = target.amount
-					d.valuetext = Skada:FormatValueCols(
-						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-						actortime and Skada:FormatNumber(d.value / actortime),
-						mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-					)
+				d.value = target.amount
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+					actortime and Skada:FormatNumber(d.value / actortime),
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+				)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
 		end
@@ -1128,31 +1131,32 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 		if not actor then return end
 
 		local targets, total = actor:GetDamageTargets()
-		if targets and total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
 
-			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
-			for targetname, target in pairs(targets) do
-				if not win.class or win.class == target.class then
-					nr = nr + 1
-					local d = win:actor(nr, target, true, targetname)
+		if not targets or total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-					d.value = target.amount
-					if P.absdamage and target.total then
-						d.value = target.total
-					end
+		local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
+		for targetname, target in pairs(targets) do
+			if not win.class or win.class == target.class then
+				nr = nr + 1
+				local d = win:actor(nr, target, true, targetname)
 
-					d.valuetext = Skada:FormatValueCols(
-						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-						actortime and Skada:FormatNumber(d.value / actortime),
-						mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-					)
+				d.value = target.amount
+				if P.absdamage and target.total then
+					d.value = target.total
+				end
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+					actortime and Skada:FormatNumber(d.value / actortime),
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+				)
+
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
 		end
@@ -1169,30 +1173,30 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 		local actor = set and set:GetEnemy(win.targetname, win.targetid)
 		local total = actor and actor:GetDamage() or 0
 
-		if total > 0 and actor.damagespells then
-			if win.metadata then
-				win.metadata.maxvalue = 0
+		if total == 0 or not actor.damagespells then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
+
+		local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
+		for spellid, spell in pairs(actor.damagespells) do
+			nr = nr + 1
+			local d = win:spell(nr, spellid, spell)
+
+			d.value = spell.amount
+			if P.absdamage and spell.total then
+				d.value = spell.total
 			end
 
-			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
-			for spellid, spell in pairs(actor.damagespells) do
-				nr = nr + 1
-				local d = win:spell(nr, spellid, spell)
+			d.valuetext = Skada:FormatValueCols(
+				mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+				actortime and Skada:FormatNumber(d.value / actortime),
+				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+			)
 
-				d.value = spell.amount
-				if P.absdamage and spell.total then
-					d.value = spell.total
-				end
-
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
 			end
 		end
 	end
@@ -1201,30 +1205,31 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 		win.title = L["Enemy Damage Done"]
 
 		local total = set and set:GetEnemyDamage() or 0
-		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
 
-			local nr = 0
-			for i = 1, #set.enemies do
-				local enemy = set.enemies[i]
-				if enemy and not enemy.fake then
-					local dps, amount = enemy:GetDPS()
-					if amount > 0 then
-						nr = nr + 1
-						local d = win:actor(nr, enemy, true)
+		if total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-						d.value = amount
-						d.valuetext = Skada:FormatValueCols(
-							self.metadata.columns.Damage and Skada:FormatNumber(d.value),
-							self.metadata.columns.DPS and Skada:FormatNumber(dps),
-							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-						)
+		local nr = 0
+		for i = 1, #set.enemies do
+			local enemy = set.enemies[i]
+			if enemy and not enemy.fake then
+				local dps, amount = enemy:GetDPS()
+				if amount > 0 then
+					nr = nr + 1
+					local d = win:actor(nr, enemy, true)
 
-						if win.metadata and d.value > win.metadata.maxvalue then
-							win.metadata.maxvalue = d.value
-						end
+					d.value = amount
+					d.valuetext = Skada:FormatValueCols(
+						self.metadata.columns.Damage and Skada:FormatNumber(d.value),
+						self.metadata.columns.DPS and Skada:FormatNumber(dps),
+						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					)
+
+					if win.metadata and d.value > win.metadata.maxvalue then
+						win.metadata.maxvalue = d.value
 					end
 				end
 			end
@@ -1395,28 +1400,28 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		if not data.amount or data.amount == 0 then return end
 
 		local e = Skada:GetEnemy(set, data.enemyname, data.enemyid, data.enemyflags, true)
-		if e then
-			if (set.type == "arena" or set.type == "pvp") and e.class and Skada.validclass[e.class] and e.role == "HEALER" then
-				Skada:AddActiveTime(set, e, data.amount > 0 and data.spellid and not passiveSpells[data.spellid], nil, data.dstName)
-			end
+		if not e then return end
 
-			set.eheal = (set.eheal or 0) + data.amount
-			e.heal = (e.heal or 0) + data.amount
+		if (set.type == "arena" or set.type == "pvp") and e.class and Skada.validclass[e.class] and e.role == "HEALER" then
+			Skada:AddActiveTime(set, e, data.amount > 0 and data.spellid and not passiveSpells[data.spellid], nil, data.dstName)
+		end
 
-			local spellid = ishot and -data.spellid or data.spellid
-			local spell = e.healspells and e.healspells[spellid]
-			if not spell then
-				e.healspells = e.healspells or {}
-				e.healspells[spellid] = {school = data.spellschool, amount = data.amount}
-				spell = e.healspells[spellid]
-			else
-				spell.amount = spell.amount + data.amount
-			end
+		set.eheal = (set.eheal or 0) + data.amount
+		e.heal = (e.heal or 0) + data.amount
 
-			if data.dstName then
-				spell.targets = spell.targets or {}
-				spell.targets[data.dstName] = (spell.targets[data.dstName] or 0) + data.amount
-			end
+		local spellid = ishot and -data.spellid or data.spellid
+		local spell = e.healspells and e.healspells[spellid]
+		if not spell then
+			e.healspells = e.healspells or {}
+			e.healspells[spellid] = {school = data.spellschool, amount = data.amount}
+			spell = e.healspells[spellid]
+		else
+			spell.amount = spell.amount + data.amount
+		end
+
+		if data.dstName then
+			spell.targets = spell.targets or {}
+			spell.targets[data.dstName] = (spell.targets[data.dstName] or 0) + data.amount
 		end
 	end
 
@@ -1453,26 +1458,26 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		local total = actor and actor.heal or 0
 		local targets = (total > 0) and actor:GetHealTargets()
 
-		if total > 0 and targets then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		if not targets or total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
-			for targetname, target in pairs(targets) do
-				nr = nr + 1
-				local d = win:actor(nr, target, true, targetname)
+		local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
+		for targetname, target in pairs(targets) do
+			nr = nr + 1
+			local d = win:actor(nr, target, true, targetname)
 
-				d.value = target.amount
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
-					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
+			d.value = target.amount
+			d.valuetext = Skada:FormatValueCols(
+				mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
+				actortime and Skada:FormatNumber(d.value / actortime),
+				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+			)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
 			end
 		end
 	end
@@ -1488,26 +1493,26 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		local actor = set and set:GetEnemy(win.targetname, win.targetid)
 		local total = actor and actor.heal or 0
 
-		if total > 0 and actor.healspells then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		if total == 0 or not actor.healspells then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
-			for spellid, spell in pairs(actor.healspells) do
-				nr = nr + 1
-				local d = win:spell(nr, spellid, spell, true)
+		local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
+		for spellid, spell in pairs(actor.healspells) do
+			nr = nr + 1
+			local d = win:spell(nr, spellid, spell, true)
 
-				d.value = spell.amount
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
-					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
+			d.value = spell.amount
+			d.valuetext = Skada:FormatValueCols(
+				mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
+				actortime and Skada:FormatNumber(d.value / actortime),
+				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+			)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
 			end
 		end
 	end
@@ -1519,30 +1524,31 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		end
 
 		local total = set and set:GetEnemyHeal() or 0
-		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
 
-			local nr = 0
-			for i = 1, #set.enemies do
-				local enemy = set.enemies[i]
-				if enemy and enemy.heal and (not win.class or win.class == enemy.class) then
-					local hps, amount = enemy:GetHPS()
-					if amount > 0 then
-						nr = nr + 1
-						local d = win:actor(nr, enemy, true)
+		if total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-						d.value = amount
-						d.valuetext = Skada:FormatValueCols(
-							self.metadata.columns.Healing and Skada:FormatNumber(d.value),
-							self.metadata.columns.HPS and Skada:FormatNumber(hps),
-							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-						)
+		local nr = 0
+		for i = 1, #set.enemies do
+			local enemy = set.enemies[i]
+			if enemy and enemy.heal and (not win.class or win.class == enemy.class) then
+				local hps, amount = enemy:GetHPS()
+				if amount > 0 then
+					nr = nr + 1
+					local d = win:actor(nr, enemy, true)
 
-						if win.metadata and d.value > win.metadata.maxvalue then
-							win.metadata.maxvalue = d.value
-						end
+					d.value = amount
+					d.valuetext = Skada:FormatValueCols(
+						self.metadata.columns.Healing and Skada:FormatNumber(d.value),
+						self.metadata.columns.HPS and Skada:FormatNumber(hps),
+						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+					)
+
+					if win.metadata and d.value > win.metadata.maxvalue then
+						win.metadata.maxvalue = d.value
 					end
 				end
 			end

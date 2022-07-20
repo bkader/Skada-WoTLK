@@ -13,7 +13,7 @@ Skada:RegisterModule("Fails", function(L, P)
 	local _
 
 	local function log_fail(set, playerid, playername, spellid, event)
-		local player = Skada:FindPlayer(set, playerid, playername)
+		local player = Skada:GetPlayer(set, playerid, playername)
 		if player and (player.role ~= "TANK" or not tContains(LibFail:GetFailsWhereTanksDoNotFail(), event)) then
 			player.fail = (player.fail or 0) + 1
 			set.fail = (set.fail or 0) + 1
@@ -48,27 +48,28 @@ Skada:RegisterModule("Fails", function(L, P)
 		if not win.spellid then return end
 
 		local total = set and set:GetFailCount(win.spellid) or 0
-		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
 
-			local nr = 0
-			for i = 1, #set.players do
-				local player = set.players[i]
-				if player and player.failspells and player.failspells[win.spellid] then
-					nr = nr + 1
-					local d = win:actor(nr, player)
+		if total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-					d.value = player.failspells[win.spellid]
-					d.valuetext = Skada:FormatValueCols(
-						mod.metadata.columns.Count and d.value,
-						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
+		local nr = 0
+		for i = 1, #set.players do
+			local player = set.players[i]
+			if player and player.failspells and player.failspells[win.spellid] then
+				nr = nr + 1
+				local d = win:actor(nr, player)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+				d.value = player.failspells[win.spellid]
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Count and d.value,
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+				)
+
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
 		end
@@ -85,25 +86,25 @@ Skada:RegisterModule("Fails", function(L, P)
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.fail or 0
 
-		if total > 0 and player.failspells then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		if total == 0 or not player.failspells then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local nr = 0
-			for spellid, count in pairs(player.failspells) do
-				nr = nr + 1
-				local d = win:spell(nr, spellid)
+		local nr = 0
+		for spellid, count in pairs(player.failspells) do
+			nr = nr + 1
+			local d = win:spell(nr, spellid)
 
-				d.value = count
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
+			d.value = count
+			d.valuetext = Skada:FormatValueCols(
+				mod.metadata.columns.Count and d.value,
+				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+			)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
 			end
 		end
 	end
@@ -112,27 +113,28 @@ Skada:RegisterModule("Fails", function(L, P)
 		win.title = win.class and format("%s (%s)", L["Fails"], L[win.class]) or L["Fails"]
 
 		local total = set.fail or 0
-		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
 
-			local nr = 0
-			for i = 1, #set.players do
-				local player = set.players[i]
-				if player and player.fail and (not win.class or win.class == player.class) then
-					nr = nr + 1
-					local d = win:actor(nr, player)
+		if total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-					d.value = player.fail
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Count and d.value,
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
+		local nr = 0
+		for i = 1, #set.players do
+			local player = set.players[i]
+			if player and player.fail and (not win.class or win.class == player.class) then
+				nr = nr + 1
+				local d = win:actor(nr, player)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+				d.value = player.fail
+				d.valuetext = Skada:FormatValueCols(
+					self.metadata.columns.Count and d.value,
+					self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+				)
+
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
 		end

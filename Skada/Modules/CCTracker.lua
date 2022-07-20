@@ -203,28 +203,28 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 
 	local function log_ccdone(set, cc)
 		local player = Skada:GetPlayer(set, cc.playerid, cc.playername, cc.playerflags)
-		if player then
-			-- increment the count.
-			player.ccdone = (player.ccdone or 0) + 1
-			set.ccdone = (set.ccdone or 0) + 1
+		if not player then return end
 
-			-- saving this to total set may become a memory hog deluxe.
-			if set == Skada.total and not P.totalidc then return end
+		-- increment the count.
+		player.ccdone = (player.ccdone or 0) + 1
+		set.ccdone = (set.ccdone or 0) + 1
 
-			-- record the spell.
-			local spell = player.ccdonespells and player.ccdonespells[cc.spellid]
-			if not spell then
-				player.ccdonespells = player.ccdonespells or {}
-				player.ccdonespells[cc.spellid] = {count = 0}
-				spell = player.ccdonespells[cc.spellid]
-			end
-			spell.count = spell.count + 1
+		-- saving this to total set may become a memory hog deluxe.
+		if set == Skada.total and not P.totalidc then return end
 
-			-- record the target.
-			if cc.dstName then
-				spell.targets = spell.targets or {}
-				spell.targets[cc.dstName] = (spell.targets[cc.dstName] or 0) + 1
-			end
+		-- record the spell.
+		local spell = player.ccdonespells and player.ccdonespells[cc.spellid]
+		if not spell then
+			player.ccdonespells = player.ccdonespells or {}
+			player.ccdonespells[cc.spellid] = {count = 0}
+			spell = player.ccdonespells[cc.spellid]
+		end
+		spell.count = spell.count + 1
+
+		-- record the target.
+		if cc.dstName then
+			spell.targets = spell.targets or {}
+			spell.targets[cc.dstName] = (spell.targets[cc.dstName] or 0) + 1
 		end
 	end
 
@@ -258,25 +258,25 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.ccdone or 0
 
-		if total > 0 and player.ccdonespells then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		if total == 0 or not player.ccdonespells then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local nr = 0
-			for spellid, spell in pairs(player.ccdonespells) do
-				nr = nr + 1
-				local d = win:spell(nr, spellid, nil, get_spell_school(spellid))
+		local nr = 0
+		for spellid, spell in pairs(player.ccdonespells) do
+			nr = nr + 1
+			local d = win:spell(nr, spellid, nil, get_spell_school(spellid))
 
-				d.value = spell.count
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
+			d.value = spell.count
+			d.valuetext = Skada:FormatValueCols(
+				mod.metadata.columns.Count and d.value,
+				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+			)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
 			end
 		end
 	end
@@ -293,25 +293,25 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 		local total = player and player.ccdone or 0
 		local targets = (total > 0) and player:GetCCDoneTargets()
 
-		if targets then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		if not targets then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local nr = 0
-			for targetname, target in pairs(targets) do
-				nr = nr + 1
-				local d = win:actor(nr, target, true, targetname)
+		local nr = 0
+		for targetname, target in pairs(targets) do
+			nr = nr + 1
+			local d = win:actor(nr, target, true, targetname)
 
-				d.value = target.count
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
+			d.value = target.count
+			d.valuetext = Skada:FormatValueCols(
+				mod.metadata.columns.Count and d.value,
+				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+			)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
 			end
 		end
 	end
@@ -326,25 +326,26 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 		if not set or not win.spellid then return end
 
 		local total, sources = set:GetCCDoneSources(win.spellid)
-		if sources then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
 
-			local nr = 0
-			for sourcename, source in pairs(sources) do
-				nr = nr + 1
-				local d = win:actor(nr, source, true, sourcename)
+		if not sources then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-				d.value = source.count
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
+		local nr = 0
+		for sourcename, source in pairs(sources) do
+			nr = nr + 1
+			local d = win:actor(nr, source, true, sourcename)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+			d.value = source.count
+			d.valuetext = Skada:FormatValueCols(
+				mod.metadata.columns.Count and d.value,
+				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+			)
+
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
 			end
 		end
 	end
@@ -353,27 +354,28 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 		win.title = win.class and format("%s (%s)", L["CC Done"], L[win.class]) or L["CC Done"]
 
 		local total = set.ccdone or 0
-		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
 
-			local nr = 0
-			for i = 1, #set.players do
-				local player = set.players[i]
-				if player and player.ccdone and (not win.class or win.class == player.class) then
-					nr = nr + 1
-					local d = win:actor(nr, player)
+		if total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-					d.value = player.ccdone
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Count and d.value,
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
+		local nr = 0
+		for i = 1, #set.players do
+			local player = set.players[i]
+			if player and player.ccdone and (not win.class or win.class == player.class) then
+				nr = nr + 1
+				local d = win:actor(nr, player)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+				d.value = player.ccdone
+				d.valuetext = Skada:FormatValueCols(
+					self.metadata.columns.Count and d.value,
+					self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+				)
+
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
 		end
@@ -486,28 +488,28 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 
 	local function log_cctaken(set, cc)
 		local player = Skada:GetPlayer(set, cc.playerid, cc.playername, cc.playerflags)
-		if player then
-			-- increment the count.
-			player.cctaken = (player.cctaken or 0) + 1
-			set.cctaken = (set.cctaken or 0) + 1
+		if not player then return end
 
-			-- saving this to total set may become a memory hog deluxe.
-			if set == Skada.total and not P.totalidc then return end
+		-- increment the count.
+		player.cctaken = (player.cctaken or 0) + 1
+		set.cctaken = (set.cctaken or 0) + 1
 
-			-- record the spell.
-			local spell = player.cctakenspells and player.cctakenspells[cc.spellid]
-			if not spell then
-				player.cctakenspells = player.cctakenspells or {}
-				player.cctakenspells[cc.spellid] = {count = 0}
-				spell = player.cctakenspells[cc.spellid]
-			end
-			spell.count = spell.count + 1
+		-- saving this to total set may become a memory hog deluxe.
+		if set == Skada.total and not P.totalidc then return end
 
-			-- record the source.
-			if cc.srcName then
-				spell.sources = spell.sources or {}
-				spell.sources[cc.srcName] = (spell.sources[cc.srcName] or 0) + 1
-			end
+		-- record the spell.
+		local spell = player.cctakenspells and player.cctakenspells[cc.spellid]
+		if not spell then
+			player.cctakenspells = player.cctakenspells or {}
+			player.cctakenspells[cc.spellid] = {count = 0}
+			spell = player.cctakenspells[cc.spellid]
+		end
+		spell.count = spell.count + 1
+
+		-- record the source.
+		if cc.srcName then
+			spell.sources = spell.sources or {}
+			spell.sources[cc.srcName] = (spell.sources[cc.srcName] or 0) + 1
 		end
 	end
 
@@ -542,25 +544,25 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.cctaken or 0
 
-		if total > 0 and player.cctakenspells then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		if total == 0 or not player.cctakenspells then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local nr = 0
-			for spellid, spell in pairs(player.cctakenspells) do
-				nr = nr + 1
-				local d = win:spell(nr, spellid, nil, get_spell_school(spellid) or RaidCCSpells[spellid])
+		local nr = 0
+		for spellid, spell in pairs(player.cctakenspells) do
+			nr = nr + 1
+			local d = win:spell(nr, spellid, nil, get_spell_school(spellid) or RaidCCSpells[spellid])
 
-				d.value = spell.count
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
+			d.value = spell.count
+			d.valuetext = Skada:FormatValueCols(
+				mod.metadata.columns.Count and d.value,
+				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+			)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
 			end
 		end
 	end
@@ -577,25 +579,25 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 		local total = player and player.cctaken or 0
 		local sources = (total > 0) and player:GetCCTakenSources()
 
-		if sources then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		if not sources then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local nr = 0
-			for sourcename, source in pairs(sources) do
-				nr = nr + 1
-				local d = win:actor(nr, source, true, sourcename)
+		local nr = 0
+		for sourcename, source in pairs(sources) do
+			nr = nr + 1
+			local d = win:actor(nr, source, true, sourcename)
 
-				d.value = source.count
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
+			d.value = source.count
+			d.valuetext = Skada:FormatValueCols(
+				mod.metadata.columns.Count and d.value,
+				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+			)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
 			end
 		end
 	end
@@ -610,25 +612,26 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 		if not set or not win.spellid then return end
 
 		local total, targets = set:GetCCTakenTargets(win.spellid)
-		if targets then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
 
-			local nr = 0
-			for targetname, target in pairs(targets) do
-				nr = nr + 1
-				local d = win:actor(nr, target, true, targetname)
+		if not targets then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-				d.value = target.count
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
+		local nr = 0
+		for targetname, target in pairs(targets) do
+			nr = nr + 1
+			local d = win:actor(nr, target, true, targetname)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+			d.value = target.count
+			d.valuetext = Skada:FormatValueCols(
+				mod.metadata.columns.Count and d.value,
+				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+			)
+
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
 			end
 		end
 	end
@@ -637,27 +640,28 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 		win.title = win.class and format("%s (%s)", L["CC Taken"], L[win.class]) or L["CC Taken"]
 
 		local total = set.cctaken or 0
-		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
 
-			local nr = 0
-			for i = 1, #set.players do
-				local player = set.players[i]
-				if player and player.cctaken and (not win.class or win.class == player.class) then
-					nr = nr + 1
-					local d = win:actor(nr, player)
+		if total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-					d.value = player.cctaken
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Count and d.value,
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
+		local nr = 0
+		for i = 1, #set.players do
+			local player = set.players[i]
+			if player and player.cctaken and (not win.class or win.class == player.class) then
+				nr = nr + 1
+				local d = win:actor(nr, player)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+				d.value = player.cctaken
+				d.valuetext = Skada:FormatValueCols(
+					self.metadata.columns.Count and d.value,
+					self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+				)
+
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
 		end
@@ -760,28 +764,28 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 
 	local function log_ccbreak(set, cc)
 		local player = Skada:GetPlayer(set, cc.playerid, cc.playername)
-		if player then
-			-- increment the count.
-			player.ccbreak = (player.ccbreak or 0) + 1
-			set.ccbreak = (set.ccbreak or 0) + 1
+		if not player then return end
 
-			-- saving this to total set may become a memory hog deluxe.
-			if set == Skada.total and not P.totalidc then return end
+		-- increment the count.
+		player.ccbreak = (player.ccbreak or 0) + 1
+		set.ccbreak = (set.ccbreak or 0) + 1
 
-			-- record the spell.
-			local spell = player.ccbreakspells and player.ccbreakspells[cc.spellid]
-			if not spell then
-				player.ccbreakspells = player.ccbreakspells or {}
-				player.ccbreakspells[cc.spellid] = {count = 0}
-				spell = player.ccbreakspells[cc.spellid]
-			end
-			spell.count = spell.count + 1
+		-- saving this to total set may become a memory hog deluxe.
+		if set == Skada.total and not P.totalidc then return end
 
-			-- record the target.
-			if cc.dstName then
-				spell.targets = spell.targets or {}
-				spell.targets[cc.dstName] = (spell.targets[cc.dstName] or 0) + 1
-			end
+		-- record the spell.
+		local spell = player.ccbreakspells and player.ccbreakspells[cc.spellid]
+		if not spell then
+			player.ccbreakspells = player.ccbreakspells or {}
+			player.ccbreakspells[cc.spellid] = {count = 0}
+			spell = player.ccbreakspells[cc.spellid]
+		end
+		spell.count = spell.count + 1
+
+		-- record the target.
+		if cc.dstName then
+			spell.targets = spell.targets or {}
+			spell.targets[cc.dstName] = (spell.targets[cc.dstName] or 0) + 1
 		end
 	end
 
@@ -847,25 +851,25 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.ccbreak or 0
 
-		if total > 0 and player.ccbreakspells then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		if total == 0 or not player.ccbreakspells then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local nr = 0
-			for spellid, spell in pairs(player.ccbreakspells) do
-				nr = nr + 1
-				local d = win:spell(nr, spellid, nil, get_spell_school(spellid))
+		local nr = 0
+		for spellid, spell in pairs(player.ccbreakspells) do
+			nr = nr + 1
+			local d = win:spell(nr, spellid, nil, get_spell_school(spellid))
 
-				d.value = spell.count
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
+			d.value = spell.count
+			d.valuetext = Skada:FormatValueCols(
+				mod.metadata.columns.Count and d.value,
+				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+			)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
 			end
 		end
 	end
@@ -882,25 +886,25 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 		local total = player and player.ccbreak or 0
 		local targets = (total > 0) and player:GetCCBreakTargets()
 
-		if targets then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		if not targets then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local nr = 0
-			for targetname, target in pairs(targets) do
-				nr = nr + 1
-				local d = win:actor(nr, target, true, targetname)
+		local nr = 0
+		for targetname, target in pairs(targets) do
+			nr = nr + 1
+			local d = win:actor(nr, target, true, targetname)
 
-				d.value = target.count
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
+			d.value = target.count
+			d.valuetext = Skada:FormatValueCols(
+				mod.metadata.columns.Count and d.value,
+				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+			)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
 			end
 		end
 	end
@@ -909,27 +913,28 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 		win.title = win.class and format("%s (%s)", L["CC Breaks"], L[win.class]) or L["CC Breaks"]
 
 		local total = set.ccbreak or 0
-		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
 
-			local nr = 0
-			for i = 1, #set.players do
-				local player = set.players[i]
-				if player and player.ccbreak and (not win.class or win.class == player.class) then
-					nr = nr + 1
-					local d = win:actor(nr, player)
+		if total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-					d.value = player.ccbreak
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Count and d.value,
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
+		local nr = 0
+		for i = 1, #set.players do
+			local player = set.players[i]
+			if player and player.ccbreak and (not win.class or win.class == player.class) then
+				nr = nr + 1
+				local d = win:actor(nr, player)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+				d.value = player.ccbreak
+				d.valuetext = Skada:FormatValueCols(
+					self.metadata.columns.Count and d.value,
+					self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+				)
+
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
 		end

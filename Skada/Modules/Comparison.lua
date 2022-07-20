@@ -549,84 +549,83 @@ Skada:RegisterModule("Comparison", function(L, P)
 		if not set or not win.actorname then return end
 
 		local spells, actor = set:GetActorDamageSpells(win.actorid, win.actorname)
-		if actor and spells then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		if not actor or not spells then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local nr = 0
+		local nr = 0
 
-			-- same actor?
-			if actor.id == mod.userGUID then
-				win.title = L["actor damage"](actor.name)
+		-- same actor?
+		if actor.id == mod.userGUID then
+			win.title = L["actor damage"](actor.name)
 
-				for spellname, spell in pairs(spells) do
-					nr = nr + 1
-					local d = win:spell(nr, spellname, spell)
-
-					d.value = spell.amount or 0
-					if P.absdamage and spell.total then
-						d.value = spell.total
-					end
-
-					d.valuetext = Skada:FormatValueCols(mod.metadata.columns.Damage and Skada:FormatNumber(d.value))
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
-				end
-
-				return
-			end
-
-			-- collect compared actor's spells.
-			local myspells = set:GetActorDamageSpells(mod.userGUID, mod.userName)
-
-			-- iterate comparison actor's spells.
 			for spellname, spell in pairs(spells) do
 				nr = nr + 1
 				local d = win:spell(nr, spellname, spell)
 
 				d.value = spell.amount or 0
-				local myamount = 0
-				if myspells and myspells[spellname] then
-					myamount = myspells[spellname].amount or myamount
+				if P.absdamage and spell.total then
+					d.value = spell.total
 				end
 
-				if P.absdamage then
-					if spell.total then
-						d.value = spell.total
-					end
-					if myspells and myspells[spellname] and myspells[spellname].total then
-						myamount = myspells[spellname].total
-					end
-				end
-
-				d.valuetext = format_value_number(d.value, myamount, true)
+				d.valuetext = Skada:FormatValueCols(mod.metadata.columns.Damage and Skada:FormatNumber(d.value))
 
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
 
-			-- any other left spells.
-			if myspells then
-				for spellname, spell in pairs(myspells) do
-					if not spells[spellname] then
-						nr = nr + 1
-						local d = win:spell(nr, spellname, spell)
+			return
+		end
 
-						d.value = spell.amount or 0
-						if P.absdamage and spell.total then
-							d.value = spell.total or d.value
-						end
+		-- collect compared actor's spells.
+		local myspells = set:GetActorDamageSpells(mod.userGUID, mod.userName)
 
-						d.valuetext = format_value_number(0, d.value, true)
+		-- iterate comparison actor's spells.
+		for spellname, spell in pairs(spells) do
+			nr = nr + 1
+			local d = win:spell(nr, spellname, spell)
 
-						if win.metadata and d.value > win.metadata.maxvalue then
-							win.metadata.maxvalue = d.value
-						end
-					end
+			d.value = spell.amount or 0
+			local myamount = 0
+			if myspells and myspells[spellname] then
+				myamount = myspells[spellname].amount or myamount
+			end
+
+			if P.absdamage then
+				if spell.total then
+					d.value = spell.total
+				end
+				if myspells and myspells[spellname] and myspells[spellname].total then
+					myamount = myspells[spellname].total
+				end
+			end
+
+			d.valuetext = format_value_number(d.value, myamount, true)
+
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
+			end
+		end
+
+		-- any other left spells.
+		if not myspells then return end
+		for spellname, spell in pairs(myspells) do
+			if not spells[spellname] then
+				nr = nr + 1
+				local d = win:spell(nr, spellname, spell)
+
+				d.value = spell.amount or 0
+				if P.absdamage and spell.total then
+					d.value = spell.total or d.value
+				end
+
+				d.valuetext = format_value_number(0, d.value, true)
+
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
 		end
@@ -642,83 +641,83 @@ Skada:RegisterModule("Comparison", function(L, P)
 		if not set or not win.actorname then return end
 
 		local targets, actor = set:GetActorDamageTargets(win.actorid, win.actorname)
-		if targets then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
 
-			local nr = 0
+		if not targets then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			-- same actor?
-			if actor.id == mod.userGUID then
-				win.title = format(L["%s's targets"], actor.name)
+		local nr = 0
 
-				for targetname, target in pairs(targets) do
-					nr = nr + 1
-					local d = win:actor(nr, target, true, targetname)
+		-- same actor?
+		if actor.id == mod.userGUID then
+			win.title = format(L["%s's targets"], actor.name)
 
-					d.value = target.amount or 0
-					if P.absdamage and target.total then
-						d.value = target.total or d.value
-					end
-
-					d.valuetext = Skada:FormatValueCols(mod.metadata.columns.Damage and Skada:FormatNumber(d.value))
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
-				end
-				return
-			end
-
-			-- collect compared actor's targets.
-			local mytargets = set:GetActorDamageTargets(mod.userGUID, mod.userName, C)
-
-			-- iterate comparison actor's targets.
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
 				local d = win:actor(nr, target, true, targetname)
 
 				d.value = target.amount or 0
-				local myamount = 0
-				if mytargets and mytargets[targetname] then
-					myamount = mytargets[targetname].amount or myamount
+				if P.absdamage and target.total then
+					d.value = target.total or d.value
 				end
 
-				if P.absdamage then
-					if target.total then
-						d.value = target.total
-					end
-					if mytargets and mytargets[targetname] and mytargets[targetname].total then
-						myamount = mytargets[targetname].total
-					end
-				end
-
-				d.valuetext = format_value_number(d.value, myamount, true, actor.id == mod.userGUID)
+				d.valuetext = Skada:FormatValueCols(mod.metadata.columns.Damage and Skada:FormatNumber(d.value))
 
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
 				end
 			end
+			return
+		end
 
-			-- any other left targets.
-			if mytargets then
-				for targetname, target in pairs(mytargets) do
-					if not targets[targetname] then
-						nr = nr + 1
-						local d = win:actor(nr, target, true, targetname)
+		-- collect compared actor's targets.
+		local mytargets = set:GetActorDamageTargets(mod.userGUID, mod.userName, C)
 
-						d.value = target.amount or 0
-						if P.absdamage and target.total then
-							d.value = target.total
-						end
+		-- iterate comparison actor's targets.
+		for targetname, target in pairs(targets) do
+			nr = nr + 1
+			local d = win:actor(nr, target, true, targetname)
 
-						d.valuetext = format_value_number(0, d.value, true, actor.id == mod.userGUID)
+			d.value = target.amount or 0
+			local myamount = 0
+			if mytargets and mytargets[targetname] then
+				myamount = mytargets[targetname].amount or myamount
+			end
 
-						if win.metadata and d.value > win.metadata.maxvalue then
-							win.metadata.maxvalue = d.value
-						end
-					end
+			if P.absdamage then
+				if target.total then
+					d.value = target.total
+				end
+				if mytargets and mytargets[targetname] and mytargets[targetname].total then
+					myamount = mytargets[targetname].total
+				end
+			end
+
+			d.valuetext = format_value_number(d.value, myamount, true, actor.id == mod.userGUID)
+
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
+			end
+		end
+
+		-- any other left targets.
+		if not mytargets then return end
+		for targetname, target in pairs(mytargets) do
+			if not targets[targetname] then
+				nr = nr + 1
+				local d = win:actor(nr, target, true, targetname)
+
+				d.value = target.amount or 0
+				if P.absdamage and target.total then
+					d.value = target.total
+				end
+
+				d.valuetext = format_value_number(0, d.value, true, actor.id == mod.userGUID)
+
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
 		end
@@ -727,42 +726,42 @@ Skada:RegisterModule("Comparison", function(L, P)
 	function mod:Update(win, set)
 		win.title = format("%s: %s", L["Comparison"], self.userName)
 
-		if set and set:GetDamage() > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		if not set or set:GetDamage() == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local myamount = set:GetActorDamage(mod.userGUID, mod.userName)
-			local nr = 0
+		local myamount = set:GetActorDamage(mod.userGUID, mod.userName)
+		local nr = 0
 
-			for i = 1, #set.players do
-				local player = set.players[i]
-				if can_compare(player) then
-					local dps, amount = player:GetDPS()
-					if amount > 0 then
-						nr = nr + 1
-						local d = win:actor(nr, player)
+		for i = 1, #set.players do
+			local player = set.players[i]
+			if can_compare(player) then
+				local dps, amount = player:GetDPS()
+				if amount > 0 then
+					nr = nr + 1
+					local d = win:actor(nr, player)
 
-						d.value = amount
-						d.valuetext = Skada:FormatValueCols(
-							mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-							mod.metadata.columns.DPS and Skada:FormatNumber(dps),
-							format_percent(myamount, d.value, mod.metadata.columns.Percent and player.id ~= mod.userGUID)
-						)
+					d.value = amount
+					d.valuetext = Skada:FormatValueCols(
+						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+						mod.metadata.columns.DPS and Skada:FormatNumber(dps),
+						format_percent(myamount, d.value, mod.metadata.columns.Percent and player.id ~= mod.userGUID)
+					)
 
-						-- a valid window, not a tooltip
-						if win.metadata then
-							-- color the selected player's bar.
-							if player.id == mod.userGUID then
-								d.color = COLOR_GOLD
-							elseif d.color then
-								d.color = nil
-							end
+					-- a valid window, not a tooltip
+					if win.metadata then
+						-- color the selected player's bar.
+						if player.id == mod.userGUID then
+							d.color = COLOR_GOLD
+						elseif d.color then
+							d.color = nil
+						end
 
-							-- order bars.
-							if not win.metadata.maxvalue or d.value > win.metadata.maxvalue then
-								win.metadata.maxvalue = d.value
-							end
+						-- order bars.
+						if not win.metadata.maxvalue or d.value > win.metadata.maxvalue then
+							win.metadata.maxvalue = d.value
 						end
 					end
 				end

@@ -16,18 +16,18 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 
 	local function log_potion(set, playerid, playername, playerflags, spellid)
 		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
-		if player then
-			-- record potion usage for player and set
-			player.potion = (player.potion or 0) + 1
-			set.potion = (set.potion or 0) + 1
+		if not player then return end
 
-			-- saving this to total set may become a memory hog deluxe.
-			if (set ~= Skada.total or P.totalidc) and spellid then
-				local potionid = potionIDs[spellid]
-				player.potionspells = player.potionspells or {}
-				player.potionspells[potionid] = (player.potionspells[potionid] or 0) + 1
-			end
-		end
+		-- record potion usage for player and set
+		player.potion = (player.potion or 0) + 1
+		set.potion = (set.potion or 0) + 1
+
+		-- saving this to total set may become a memory hog deluxe.
+		if (set == Skada.total and not P.totalidc) or not spellid then return end
+
+		local potionid = potionIDs[spellid]
+		player.potionspells = player.potionspells or {}
+		player.potionspells[potionid] = (player.potionspells[potionid] or 0) + 1
 	end
 
 	local function potion_used(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
@@ -39,30 +39,32 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 
 	do
 		local function check_unit_potions(unit, owner, prepot)
-			if owner == nil and not UnitIsDeadOrGhost(unit) then
-				local playerid, playername = UnitGUID(unit), UnitName(unit)
-				local _, class = UnitClass(unit)
+			if owner or UnitIsDeadOrGhost(unit) then return end
 
-				local potions = new()
-				for i = 1, 40 do
-					local _, _, icon, _, _, _, _, _, _, _, spellid = UnitBuff(unit, i)
-					if spellid then
-						if potionIDs[spellid] then
-							-- instant recording doesn't work, so we delay it
-							Skada:ScheduleTimer(function() potion_used(nil, nil, playerid, playername, nil, nil, nil, nil, spellid) end, 1)
-							potions[#potions + 1] = format(potionStr, icon)
-						end
-					else
-						break -- nothing found
+			local playerid, playername = UnitGUID(unit), UnitName(unit)
+			local _, class = UnitClass(unit)
+
+			local potions = nil
+			for i = 1, 40 do
+				local _, _, icon, _, _, _, _, _, _, _, spellid = UnitBuff(unit, i)
+				if spellid then
+					if potionIDs[spellid] then
+						potions = potions or new()
+						-- instant recording doesn't work, so we delay it
+						Skada:ScheduleTimer(function() potion_used(nil, nil, playerid, playername, nil, nil, nil, nil, spellid) end, 1)
+						potions[#potions + 1] = format(potionStr, icon)
 					end
+				else
+					break -- nothing found
 				end
-
-				-- add to print out:
-				if next(potions) ~= nil and class and Skada.validclass[class] then
-					prepot[#prepot + 1] = format(prepotionStr, Skada.classcolors(class, true), playername, tconcat(potions, " "))
-				end
-				del(potions)
 			end
+
+			if not potions then
+				return
+			elseif next(potions) ~= nil and class and Skada.validclass[class] then
+				prepot[#prepot + 1] = format(prepotionStr, Skada.classcolors(class, true), playername, tconcat(potions, " "))
+			end
+			del(potions)
 		end
 
 		-- we use this function to record pre-pots as well.
@@ -99,25 +101,26 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 		if not (set and win.potionname) then return end
 
 		local players, total = set:GetPotion(win.potionid, win.class)
-		if players and total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
 
-			local nr = 0
-			for playername, player in pairs(players) do
-				nr = nr + 1
-				local d = win:actor(nr, player, nil, playername)
+		if not players or total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-				d.value = player.count
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-				)
+		local nr = 0
+		for playername, player in pairs(players) do
+			nr = nr + 1
+			local d = win:actor(nr, player, nil, playername)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+			d.value = player.count
+			d.valuetext = Skada:FormatValueCols(
+				mod.metadata.columns.Count and d.value,
+				mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+			)
+
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
 			end
 		end
 	end
@@ -136,41 +139,41 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 
 	function playermod:Update(win, set)
 		local player = Skada:FindPlayer(set, win.actorid)
-		if player then
-			win.title = format(L["%s's used potions"], player.name)
-			local total = player.potion or 0
+		if not player then return end
 
-			if total > 0 and player.potionspells then
-				if win.metadata then
-					win.metadata.maxvalue = 0
-				end
+	win.title = format(L["%s's used potions"], player.name)
+	local total = player.potion or 0
 
-				local nr = 0
-				for potionid, count in pairs(player.potionspells) do
-					local potionname, potionlink, _, _, _, _, _, _, _, potionicon = GetItemInfo(potionid)
-					if not potionname then
-						request_potion(potionid)
-					end
+	if total == 0 or not player.potionspells then
+		return
+	elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-					if potionname then
-						nr = nr + 1
-						local d = win:nr(nr)
+		local nr = 0
+		for potionid, count in pairs(player.potionspells) do
+			local potionname, potionlink, _, _, _, _, _, _, _, potionicon = GetItemInfo(potionid)
+			if not potionname then
+				request_potion(potionid)
+			end
 
-						d.id = potionid
-						d.hyperlink = potionlink
-						d.label = potionname
-						d.icon = potionicon
+			if potionname then
+				nr = nr + 1
+				local d = win:nr(nr)
 
-						d.value = count
-						d.valuetext = Skada:FormatValueCols(
-							mod.metadata.columns.Count and d.value,
-							mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-						)
+				d.id = potionid
+				d.hyperlink = potionlink
+				d.label = potionname
+				d.icon = potionicon
 
-						if win.metadata and d.value > win.metadata.maxvalue then
-							win.metadata.maxvalue = d.value
-						end
-					end
+				d.value = count
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Count and d.value,
+					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+				)
+
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
 		end
@@ -180,27 +183,28 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 		win.title = win.class and format("%s (%s)", L["Potions"], L[win.class]) or L["Potions"]
 
 		local total = set.potion or 0
-		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
 
-			local nr = 0
-			for i = 1, #set.players do
-				local player = set.players[i]
-				if player and player.potion and (not win.class or win.class == player.class) then
-					nr = nr + 1
-					local d = win:actor(nr, player)
+		if total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-					d.value = player.potion
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Count and d.value,
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
+		local nr = 0
+		for i = 1, #set.players do
+			local player = set.players[i]
+			if player and player.potion and (not win.class or win.class == player.class) then
+				nr = nr + 1
+				local d = win:actor(nr, player)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+				d.value = player.potion
+				d.valuetext = Skada:FormatValueCols(
+					self.metadata.columns.Count and d.value,
+					self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+				)
+
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
 		end

@@ -48,15 +48,16 @@ Skada:RegisterModule("Resources", function(L, P)
 		if not (gain and gain.type and gainTable[gain.type]) then return end
 
 		local player = Skada:GetPlayer(set, gain.playerid, gain.playername, gain.playerflags)
-		if player then
-			player[gainTable[gain.type]] = (player[gainTable[gain.type]] or 0) + gain.amount
-			set[gainTable[gain.type]] = (set[gainTable[gain.type]] or 0) + gain.amount
+		if not player then return end
 
-			if (set ~= Skada.total or P.totalidc) and gain.spellid then
-				player[spellTable[gain.type]] = player[spellTable[gain.type]] or {}
-				player[spellTable[gain.type]][gain.spellid] = (player[spellTable[gain.type]][gain.spellid] or 0) + gain.amount
-			end
-		end
+		player[gainTable[gain.type]] = (player[gainTable[gain.type]] or 0) + gain.amount
+		set[gainTable[gain.type]] = (set[gainTable[gain.type]] or 0) + gain.amount
+
+		-- saving this to total set may become a memory hog deluxe.
+		if (set == Skada.total and not P.totalidc) or not gain.spellid then return end
+
+		player[spellTable[gain.type]] = player[spellTable[gain.type]] or {}
+		player[spellTable[gain.type]][gain.spellid] = (player[spellTable[gain.type]][gain.spellid] or 0) + gain.amount
 	end
 
 	local gain = {}
@@ -84,32 +85,32 @@ Skada:RegisterModule("Resources", function(L, P)
 
 	-- allows us to create a module for each power type.
 	function basemod:Create(power)
-		if gainTable[power] then
-			local powername = namesTable[power]
+		if not power or not gainTable[power] then return end
 
-			local instance = Skada:NewModule(format("Power gained: %s", powername))
-			setmetatable(instance, basemod_mt)
+		local powername = namesTable[power]
 
-			local pmode = instance:NewModule(format("%s gained spells", powername))
-			setmetatable(pmode, playermod_mt)
+		local instance = Skada:NewModule(format("Power gained: %s", powername))
+		setmetatable(instance, basemod_mt)
 
-			pmode.powerid = power
-			pmode.power = gainTable[power]
-			pmode.powername = powername
-			pmode.spells = spellTable[power]
-			instance.power = gainTable[power]
-			instance.metadata = {
-				showspots = true,
-				click1 = pmode,
-				click4 = Skada.FilterClass,
-				click4_label = L["Toggle Class Filter"]
-			}
+		local pmode = instance:NewModule(format("%s gained spells", powername))
+		setmetatable(pmode, playermod_mt)
 
-			-- no total click.
-			pmode.nototal = true
+		pmode.powerid = power
+		pmode.power = gainTable[power]
+		pmode.powername = powername
+		pmode.spells = spellTable[power]
+		instance.power = gainTable[power]
+		instance.metadata = {
+			showspots = true,
+			click1 = pmode,
+			click4 = Skada.FilterClass,
+			click4_label = L["Toggle Class Filter"]
+		}
 
-			return instance
-		end
+		-- no total click.
+		pmode.nototal = true
+
+		return instance
 	end
 
 	-- this is the main module update function that shows the list
@@ -122,27 +123,27 @@ Skada:RegisterModule("Resources", function(L, P)
 
 		local total = set and self.power and set[self.power] or 0
 
-		if total > 0 then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		if total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local nr = 0
-			for i = 1, #set.players do
-				local player = set.players[i]
-				if player and player[self.power] and (not win.class or win.class == player.class) then
-					nr = nr + 1
-					local d = win:actor(nr, player)
+		local nr = 0
+		for i = 1, #set.players do
+			local player = set.players[i]
+			if player and player[self.power] and (not win.class or win.class == player.class) then
+				nr = nr + 1
+				local d = win:actor(nr, player)
 
-					d.value = player[self.power]
-					d.valuetext = Skada:FormatValueCols(
-						mod.metadata.columns.Amount and Skada:FormatNumber(d.value),
-						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
+				d.value = player[self.power]
+				d.valuetext = Skada:FormatValueCols(
+					mod.metadata.columns.Amount and Skada:FormatNumber(d.value),
+					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
+				)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
 		end
@@ -169,25 +170,26 @@ Skada:RegisterModule("Resources", function(L, P)
 		if enemy then return end -- unavailable for enemies yet
 
 		local total = actor and self.power and actor[self.power] or 0
-		if total > 0 and actor[self.spells] then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
 
-			local nr = 0
-			for spellid, amount in pairs(actor[self.spells]) do
-				nr = nr + 1
-				local d = win:spell(nr, spellid)
+		if total == 0 or not actor[self.spells] then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-				d.value = amount
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Amount and Skada:FormatNumber(d.value),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
+		local nr = 0
+		for spellid, amount in pairs(actor[self.spells]) do
+			nr = nr + 1
+			local d = win:spell(nr, spellid)
 
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+			d.value = amount
+			d.valuetext = Skada:FormatValueCols(
+				mod.metadata.columns.Amount and Skada:FormatNumber(d.value),
+				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
+			)
+
+			if win.metadata and d.value > win.metadata.maxvalue then
+				win.metadata.maxvalue = d.value
 			end
 		end
 	end

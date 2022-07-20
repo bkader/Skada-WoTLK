@@ -65,55 +65,56 @@ Skada:RegisterModule("My Spells", function(L, P)
 		win.title = L["My Spells"]
 
 		local player = set and set:GetPlayer(Skada.userGUID, Skada.userName)
-		if player then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
 
-			local nr = 0
+		if not player then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			-- damage spells
-			if player.damagespells then
-				for spellname, spell in pairs(player.damagespells) do
-					nr = nr + 1
-					local d = win:spell(nr, spellname, spell)
+		local nr = 0
 
-					d.value = P.absdamage and spell.total or spell.amount
-					d.valuetext = Skada:FormatNumber(d.value)
+		-- damage spells
+		if player.damagespells then
+			for spellname, spell in pairs(player.damagespells) do
+				nr = nr + 1
+				local d = win:spell(nr, spellname, spell)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+				d.value = P.absdamage and spell.total or spell.amount
+				d.valuetext = Skada:FormatNumber(d.value)
+
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
+		end
 
-			-- heal spells
-			if player.healspells then
-				for spellid, spell in pairs(player.healspells) do
-					nr = nr + 1
-					local d = win:spell(nr, spellid, spell)
+		-- heal spells
+		if player.healspells then
+			for spellid, spell in pairs(player.healspells) do
+				nr = nr + 1
+				local d = win:spell(nr, spellid, spell)
 
-					d.value = spell.amount
-					d.valuetext = Skada:FormatNumber(d.value)
+				d.value = spell.amount
+				d.valuetext = Skada:FormatNumber(d.value)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
+		end
 
-			-- absorb spells
-			if player.absorbspells then
-				for spellid, spell in pairs(player.absorbspells) do
-					nr = nr + 1
-					local d = win:spell(nr, spellid, spell)
+		-- absorb spells
+		if player.absorbspells then
+			for spellid, spell in pairs(player.absorbspells) do
+				nr = nr + 1
+				local d = win:spell(nr, spellid, spell)
 
-					d.value = spell.amount
-					d.valuetext = Skada:FormatNumber(d.value)
+				d.value = spell.amount
+				d.valuetext = Skada:FormatNumber(d.value)
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
 		end
