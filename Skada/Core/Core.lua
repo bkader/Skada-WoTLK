@@ -3334,7 +3334,7 @@ function Skada:OnInitialize()
 	self.db.RegisterCallback(self, "OnProfileChanged", "ReloadSettings")
 	self.db.RegisterCallback(self, "OnProfileCopied", "ReloadSettings")
 	self.db.RegisterCallback(self, "OnProfileReset", "ReloadSettings")
-	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes")
+	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes", true)
 
 	self:RegisterInitOptions()
 	self:RegisterMedias()
@@ -3513,26 +3513,47 @@ end
 -------------------------------------------------------------------------------
 
 do
-	local function clear_indexes(set)
+	local function clear_indexes(set, mt)
 		if set then
 			set._playeridx = nil
 			set._enemyidx = nil
+
+			-- should clear metatables?
+			if not mt then return end
+
+			if set.players then -- players
+				for i = 1, #set.players do
+					local p = set.players[i]
+					if p and p.super then
+						p.super = nil
+					end
+				end
+			end
+
+			if set.enemies then -- enemies
+				for i = 1, #set.enemies do
+					local e = set.enemies[i]
+					if e and e.super then
+						e.super = nil
+					end
+				end
+			end
 		end
 	end
 
-	function Skada:ClearAllIndexes()
-		clear_indexes(Skada.current)
-		clear_indexes(Skada.total)
+	function Skada:ClearAllIndexes(mt)
+		clear_indexes(Skada.current, mt)
+		clear_indexes(Skada.total, mt)
 
 		if Skada.char.sets then
 			for i = 1, #Skada.char.sets do
-				clear_indexes(Skada.char.sets[i])
+				clear_indexes(Skada.char.sets[i], mt)
 			end
 		end
 
 		if Skada.tempsets then
 			for i = 1, #Skada.tempsets do
-				clear_indexes(Skada.tempsets[i])
+				clear_indexes(Skada.tempsets[i], mt)
 			end
 		end
 	end
@@ -3997,7 +4018,6 @@ do
 	end
 
 	function Skada:CombatLogEvent(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-
 		-- ignored combat event?
 		if (not eventtype or ignored_events[eventtype]) and not (spellcast_events[eventtype] and self.current) then return end
 

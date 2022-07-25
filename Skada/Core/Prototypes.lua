@@ -402,9 +402,11 @@ end
 
 -- binds a table to the prototype table
 function actorPrototype:Bind(obj, set)
-	obj = obj and setmetatable(obj, self)
-	self.__index = self
-	self.super = set
+	if obj and getmetatable(obj) ~= self then
+		setmetatable(obj, self)
+		self.__index = self
+		obj.super = set
+	end
 	return obj
 end
 
