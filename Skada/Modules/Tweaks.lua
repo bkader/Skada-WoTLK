@@ -78,12 +78,14 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 			end
 		end
 
-		function Skada:OnCombatEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
+		function Skada:OnCombatEvent(...)
 			-- disabled or test mode?
 			if self.disabled or self.testMode then return end
 
+			local timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12 = self:ParseCombatLog(...)
+
 			-- The Lich King fight & Fury of Frostmourne
-			if spellid == 72350 or spellname == fofrostmourne then
+			if A1 == 72350 or A2 == fofrostmourne then
 				if self.current and not self.current.success then
 					self.current.success = true
 					self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
@@ -108,7 +110,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 				firsthit.checked == nil and
 				trigger_events[eventtype] and
 				srcName and dstName and
-				not ignoredSpells[spellid]
+				not ignoredSpells[A1]
 			then
 				local output -- initial output
 
@@ -145,13 +147,13 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 				end
 
 				if output then
-					local spell = (eventtype == "SWING_DAMAGE") and GetSpellLink(6603) or GetSpellLink(spellid) or GetSpellInfo(spellid)
+					local spell = (eventtype == "SWING_DAMAGE") and GetSpellLink(6603) or GetSpellLink(A1) or GetSpellInfo(A1)
 					firsthit.hitline, firsthit.targetline = who_pulled(format(L["\124cffffff00First Hit\124r: %s from %s"], spell or "", output))
 					firsthit.checked = true -- once only
 				end
 			end
 
-			return self:CombatLogEvent(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
+			return self:CombatLogEvent(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12)
 		end
 
 		function mod:PrintFirstHit()

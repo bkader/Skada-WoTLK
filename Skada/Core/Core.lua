@@ -4009,11 +4009,15 @@ do
 		end
 	end
 
-	function Skada:OnCombatEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	function Skada:ParseCombatLog(...)
+		local _, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12 = ...
+		return timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12
+	end
+
+	function Skada:OnCombatEvent(...)
 		-- disabled or test mode?
 		if self.disabled or self.testMode then return end
-
-		return self:CombatLogEvent(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		return self:CombatLogEvent(self:ParseCombatLog(...))
 	end
 
 	function Skada:CombatLogEvent(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)

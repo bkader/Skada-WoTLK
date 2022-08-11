@@ -65,7 +65,6 @@ globals = {
 	"GetNumSubgroupMembers",
 	"GetNumGroupMembers",
 	"LibCompat_TimerFrame",
-
 	"AceGUIWidgetLSMlists",
 
 	"nop",
