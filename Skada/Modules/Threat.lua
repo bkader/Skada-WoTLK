@@ -149,7 +149,6 @@ Skada:RegisterModule("Threat", function(L, P, _, _, new, del)
 			if Skada.inCombat and self.unitID and UnitExists(self.unitID) then
 				self.unitName = self.unitName or UnitName(self.unitID)
 				win.title = self.unitName or win.title
-				win._forceUpdate = win._forceUpdate or self.db.hideEmpty or nil
 
 				-- reset stuff & check group
 				maxthreat, nr = 0, 0
@@ -159,15 +158,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, new, del)
 				end
 
 				-- nothing was added.
-				if nr == 0 then
-					-- hide if empty?
-					if win._forceUpdate then
-						win:Hide()
-					end
-					return
-				elseif win._forceUpdate then
-					win:Show()
-				end
+				if nr == 0 then return end
 
 				-- If we are going by raw threat we got the max threat from above; otherwise it's always 100.
 				maxthreat = self.db.rawvalue and maxthreat or 100
@@ -222,8 +213,6 @@ Skada:RegisterModule("Threat", function(L, P, _, _, new, del)
 					self:Warn(self.db.sound, self.db.flash, self.db.shake, mypercent and format(L["%d%% Threat"], mypercent) or L["High Threat"])
 					last_warn = time()
 				end
-			elseif self.db and win._forceUpdate then
-				win:Hide()
 			end
 		end
 
@@ -511,12 +500,6 @@ Skada:RegisterModule("Threat", function(L, P, _, _, new, del)
 					name = L["Show Pull Aggro Bar"],
 					desc = L["opt_threat_showaggrobar_desc"],
 					order = 60
-				},
-				hideEmpty = {
-					type = "toggle",
-					name = L["Hide empty window"],
-					desc = L["opt_threat_hideempty_desc"],
-					order = 70
 				},
 				sep = {
 					type = "description",

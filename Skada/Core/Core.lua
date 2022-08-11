@@ -679,8 +679,8 @@ end
 
 -- tell window to update the display of its dataset, using its display provider.
 function Window:UpdateDisplay()
-	-- hidden window? nothing to do... unless update is forced!
-	if not self:IsShown() and not self._forceUpdate then
+	-- hidden window? nothing to do.
+	if not self:IsShown() then
 		return
 	elseif self.selectedmode then
 		local set = self:GetSelectedSet()
@@ -3158,7 +3158,6 @@ function Window:RestoreView(theset, themode)
 		self.title = nil
 
 		-- all all stuff that were registered by modules
-		self._forceUpdate = nil
 		self.actorid, self.actorname = nil, nil
 		self.spellid, self.spellname = nil, nil
 		self.targetid, self.targetname = nil, nil

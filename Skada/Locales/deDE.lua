@@ -479,8 +479,6 @@ Wenn ein Spielerbegleiter dazu aufgefordert wird, zu |cffffff78Folgen|r, wird di
 L["> Pull Aggro <"] = "> Aggro ziehen <"
 L["Show Pull Aggro Bar"] = "\"Aggro ziehen\" Leiste anzeigen"
 L["opt_threat_showaggrobar_desc"] = "Zeigt eine Leiste mit dem Wert an Bedrohung der ben\195\182tigt wird um Aggro zu ziehen."
-L["Hide empty window"] = "Leeres Fenster ausblenden"
-L["opt_threat_hideempty_desc"] = "Fenster vollst\195\164ndig ausblenden, wenn nichts zu zeigen ist."
 L["Test Warnings"] = "Testwarnung"
 L["TPS"] = "TPS"
 L["Threat: Personal Threat"] = "Bedrohung: Pers\195\182nliche Bedrohung"

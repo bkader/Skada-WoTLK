@@ -511,8 +511,6 @@ When a player pet is instructed to |cffffff78Follow|r, the pet's threat table is
 L["> Pull Aggro <"] = true
 L["Show Pull Aggro Bar"] = true
 L["opt_threat_showaggrobar_desc"] = "Show a bar for the amount of threat you will need to reach in order to pull aggro."
-L["Hide empty window"] = true
-L["opt_threat_hideempty_desc"] = "Hide window entirely if there are no bars."
 L["Test Warnings"] = true
 L["TPS"] = true
 L["Threat: Personal Threat"] = true

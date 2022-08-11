@@ -481,8 +481,6 @@ Cuando a una mascota se le indica |cffffff78Seguir|r al jugador, su tabla de ame
 L["> Pull Aggro <"] = "> Amenaza para Aggro <"
 L["Show Pull Aggro Bar"] = "Mostrar Barra de Amenaza para Aggro"
 L["opt_threat_showaggrobar_desc"] = "Mostrar una barra que indica la amenaza que necesitas para conseguir el aggro y te ataquen (Amenaza para Aggro)."
-L["Hide empty window"] = "Ocultar ventana vac\195\173a"
-L["opt_threat_hideempty_desc"] = "Oculte la ventana por completo cuando no haya nada que mostrar."
 L["Test Warnings"] = "Avisos de Prueba"
 L["TPS"] = "APS"
 L["Threat: Personal Threat"] = "Amenaza: Amenaza Personal"

@@ -478,8 +478,6 @@ L["opt_threat_ignorepets_desc"] = [=[让 Skada 忽略敌对玩家宠物以确定
 L["> Pull Aggro <"] = ">获得仇恨<"
 L["Show Pull Aggro Bar"] = "显示获得仇恨计量条"
 L["opt_threat_showaggrobar_desc"] = "显示一个数值威胁计量条，以帮助获得仇恨。"
-L["Hide empty window"] = "隐藏空窗口"
-L["opt_threat_hideempty_desc"] = "没有可显示的内容时完全隐藏窗口。"
 L["Test Warnings"] = "测试警报"
 L["TPS"] = "TPS"
 L["Threat: Personal Threat"] = "威胁：个人威胁"

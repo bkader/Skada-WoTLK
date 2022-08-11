@@ -480,8 +480,6 @@ L["opt_threat_ignorepets_desc"] = [=[위협 수준 데이터를 표시할 유닛
 L["> Pull Aggro <"] = "> 어그로 획득 <"
 L["Show Pull Aggro Bar"] = "어그로 획득 바 표시"
 L["opt_threat_showaggrobar_desc"] = "어그로를 획득하기 위해 당신이 넘어야 할 위협 바를 표시합니다."
-L["Hide empty window"] = "빈 창 숨기기"
-L["opt_threat_hideempty_desc"] = "표시할 것이 없으면 창을 완전히 숨깁니다."
 L["Test Warnings"] = "테스트 경고"
 L["TPS"] = "TPS"
 L["Threat: Personal Threat"] = "위협 수준: 개인 위협 수준"

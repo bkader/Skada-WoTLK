@@ -484,8 +484,6 @@ Quand un fam. de joueur reçoit l'ordre de |cffffff78suivre|r, la table des mena
 L["> Pull Aggro <"] = "> Reprise d'aggro <"
 L["Show Pull Aggro Bar"] = "Barre reprise d'aggro"
 L["opt_threat_showaggrobar_desc"] = "Affiche une barre indiquant la quantit\195\169 de menace que vous avez besoin de faire pour reprendre l'aggro."
-L["Hide empty window"] = "Cacher la fen\195\170tre vide"
-L["opt_threat_hideempty_desc"] = "Cacher compl\195\168tement la fen\195\170tre lorsqu'il n'y a rien \195\160 afficher."
 L["Test Warnings"] = "Test d'avertissement"
 L["TPS"] = "MPS"
 L["Threat: Personal Threat"] = "Menace : Menace perso."
