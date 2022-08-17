@@ -56,11 +56,11 @@ Skada:RegisterModule("Improvement", function(L)
 	end
 
 	updaters.DamageTaken = function(set, player)
-		return player.damagetaken or 0
+		return player.damaged or player.damagetaken or 0
 	end
 
 	updaters.Deaths = function(set, player)
-		return player.deaths or 0
+		return player.deaths or player.death or 0
 	end
 
 	updaters.Healing = function(set, player)

@@ -149,18 +149,18 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 		if not e then return end
 
 		e.fake = true
-		e.damagetaken = (e.damagetaken or 0) + amount
-		e.totaldamagetaken = (e.totaldamagetaken or 0) + amount
+		e.damaged = (e.damaged or 0) + amount
+		e.totaldamaged = (e.totaldamaged or 0) + amount
 		if absorbed > 0 then
-			e.totaldamagetaken = e.totaldamagetaken + absorbed
+			e.totaldamaged = e.totaldamaged + absorbed
 		end
 
 		-- spell
-		local spell = e.damagetakenspells and e.damagetakenspells[spellid]
+		local spell = e.damagedspells and e.damagedspells[spellid]
 		if not spell then
-			e.damagetakenspells = e.damagetakenspells or {}
-			e.damagetakenspells[spellid] = {school = spellschool, amount = amount}
-			spell = e.damagetakenspells[spellid]
+			e.damagedspells = e.damagedspells or {}
+			e.damagedspells[spellid] = {school = spellschool, amount = amount}
+			spell = e.damagedspells[spellid]
 		else
 			spell.amount = spell.amount + amount
 		end
@@ -206,23 +206,23 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 		local e = Skada:GetEnemy(set, dmg.enemyname, dmg.enemyid, dmg.enemyflags, true)
 		if not e then return end
 
-		set.edamagetaken = (set.edamagetaken or 0) + dmg.amount
-		set.etotaldamagetaken = (set.etotaldamagetaken or 0) + dmg.amount
+		set.edamaged = (set.edamaged or 0) + dmg.amount
+		set.etotaldamaged = (set.etotaldamaged or 0) + dmg.amount
 
-		e.damagetaken = (e.damagetaken or 0) + dmg.amount
-		e.totaldamagetaken = (e.totaldamagetaken or 0) + dmg.amount
+		e.damaged = (e.damaged or 0) + dmg.amount
+		e.totaldamaged = (e.totaldamaged or 0) + dmg.amount
 		if absorbed > 0 then
-			set.etotaldamagetaken = set.etotaldamagetaken + absorbed
-			e.totaldamagetaken = e.totaldamagetaken + absorbed
+			set.etotaldamaged = set.etotaldamaged + absorbed
+			e.totaldamaged = e.totaldamaged + absorbed
 		end
 
 		-- damage spell.
 		local spellid = isdot and -dmg.spellid or dmg.spellid
-		local spell = e.damagetakenspells and e.damagetakenspells[spellid]
+		local spell = e.damagedspells and e.damagedspells[spellid]
 		if not spell then
-			e.damagetakenspells = e.damagetakenspells or {}
-			e.damagetakenspells[spellid] = {school = dmg.spellschool, amount = dmg.amount}
-			spell = e.damagetakenspells[spellid]
+			e.damagedspells = e.damagedspells or {}
+			e.damagedspells[spellid] = {school = dmg.spellschool, amount = dmg.amount}
+			spell = e.damagedspells[spellid]
 		else
 			spell.amount = spell.amount + dmg.amount
 		end
@@ -270,7 +270,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 			if unit.full then
 				local amount = unit.full - unit.curval
 				if unit.useful then
-					e.usefuldamagetaken = (e.usefuldamagetaken or 0) + amount
+					e.usefuldamaged = (e.usefuldamaged or 0) + amount
 					spell.useful = (spell.useful or 0) + amount
 					source.useful = (source.useful or 0) + amount
 				end
@@ -295,7 +295,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 					end
 				end
 				if unit.useful then
-					e.usefuldamagetaken = (e.usefuldamagetaken or 0) + amount
+					e.usefuldamaged = (e.usefuldamaged or 0) + amount
 					spell.useful = (spell.useful or 0) + amount
 					source.useful = (source.useful or 0) + amount
 				end
@@ -532,7 +532,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 			end
 
 			local actortime, nr = mod.metadata.columns.sDTPS and actor:GetTime(), 0
-			for spellid, spell in pairs(actor.damagetakenspells) do
+			for spellid, spell in pairs(actor.damagedspells or actor.damagetakenspells) do
 				if spell.sources and spell.sources[win.actorname] then
 					nr = nr + 1
 					local d = win:spell(nr, spellid, spell)
@@ -567,14 +567,14 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 		local actor = set and set:GetEnemy(win.targetname, win.targetid)
 		local total = actor and actor:GetDamageTaken() or 0
 
-		if total == 0 or not actor.damagetakenspells then
+		if total == 0 or not (actor.damagedspells or actor.damagetakenspells) then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local actortime, nr = mod.metadata.columns.sDTPS and actor:GetTime(), 0
-		for spellid, spell in pairs(actor.damagetakenspells) do
+		for spellid, spell in pairs(actor.damagedspells or actor.damagetakenspells) do
 			nr = nr + 1
 			local d = win:spell(nr, spellid, spell)
 
@@ -607,7 +607,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 		end
 
 		local actor = set and set:GetEnemy(win.targetname, win.targetid)
-		local total = actor and actor.usefuldamagetaken or 0
+		local total = actor and (actor.usefuldamaged or actor.usefuldamagetaken) or 0
 		local sources = (total > 0) and actor:GetDamageSources()
 
 		if not sources then
@@ -829,19 +829,19 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 	function setPrototype:GetEnemyDamageTaken()
 		if not self.enemies then
 			return 0
-		elseif P.absdamage and self.etotaldamagetaken then
-			return self.etotaldamagetaken
-		elseif self.edamagetaken then
-			return self.edamagetaken
+		elseif P.absdamage and (self.etotaldamaged or self.totaldamagetaken) then
+			return self.etotaldamaged or self.totaldamagetaken
+		elseif self.edamaged or self.edamagetaken then
+			return self.edamaged or self.edamagetaken
 		end
 
 		local total = 0
 		for i = 1, #self.enemies do
 			local e = self.enemies[i]
-			if e and not e.fake and P.absdamage and e.totaldamagetaken then
-				total = total + e.totaldamagetaken
-			elseif e and not e.fake and e.damagetaken then
-				total = total + e.damagetaken
+			if e and not e.fake and P.absdamage and (e.totaldamaged or e.totaldamagetaken) then
+				total = total + (e.totaldamaged or e.totaldamagetaken)
+			elseif e and not e.fake and (e.damaged or e.damagetaken) then
+				total = total + (e.damaged or e.damagetaken)
 			end
 		end
 		return total
@@ -856,15 +856,18 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 	end
 
 	function enemyPrototype:GetDamageSpellSources(spellid, tbl)
-		if self.damagetakenspells and self.damagetakenspells[spellid] and self.damagetakenspells[spellid].sources then
+		local spell = self.damagedspells and self.damagedspells[spellid]
+		spell = spell or self.damagetakenspells and self.damagetakenspells[spellid]
+
+		if spell and spell.sources then
 			tbl = clear(tbl or C)
 
-			local total = self.damagetakenspells[spellid].amount or 0
-			if P.absdamage and self.damagetakenspells[spellid].total then
-				total = self.damagetakenspells[spellid].total
+			local total = spell.amount or 0
+			if P.absdamage and spell.total then
+				total = spell.total
 			end
 
-			for name, source in pairs(self.damagetakenspells[spellid].sources) do
+			for name, source in pairs(spell.sources) do
 				if not tbl[name] then
 					tbl[name] = new()
 					tbl[name].amount = P.absdamage and source.total or source.amount or 0
@@ -882,7 +885,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 	end
 
 	function enemyPrototype:GetDamageTakenBreakdown()
-		if self.damagetakenspells then
+		if self.damagedspells or self.damagetakenspells then
 			local amount, total, useful = 0, 0, 0
 			local sources = self:GetDamageSources()
 			if sources then
@@ -1288,8 +1291,8 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 
 		-- table of ignored damage/time spells:
 		if Skada.ignoredSpells then
-			if Skada.ignoredSpells.damagetaken then
-				ignoredSpells = Skada.ignoredSpells.damagetaken
+			if Skada.ignoredSpells.damaged then
+				ignoredSpells = Skada.ignoredSpells.damaged
 			end
 			if Skada.ignoredSpells.activeTime then
 				passiveSpells = Skada.ignoredSpells.activeTime

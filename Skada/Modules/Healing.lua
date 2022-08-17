@@ -608,11 +608,11 @@ Skada:RegisterModule("Overhealing", function(L)
 			nr = nr + 1
 			local d = win:actor(nr, target, nil, targetname)
 
-			d.value = target.amount / target.total
+			d.value = target.amount
 			d.valuetext = Skada:FormatValueCols(
 				mod.metadata.columns.Overhealing and Skada:FormatNumber(target.amount),
 				actortime and Skada:FormatNumber(target.amount / actortime),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(100 * d.value)
+				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, target.total)
 			)
 
 			if win.metadata and d.value > win.metadata.maxvalue then
