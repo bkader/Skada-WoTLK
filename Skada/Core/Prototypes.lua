@@ -103,6 +103,7 @@ function setPrototype:_fill_actor_table(t, name)
 			t.role = actor.role
 			t.spec = actor.spec
 		end
+		return actor
 	end
 end
 

@@ -315,9 +315,6 @@ set:GetAbsorbHealSpells(tbl) -- returns the table of heal spells and absorbs spe
 -- below are functions available only if certain modules are enabled.
 --
 
--- requires Healing Taken module
-set:GetAbsorbHealTaken(tbl) -- returns the amount of heal taken.
-
 -- requires either Buffs or Debuffs modules.
 set:GetAuraPlayers(spellid) -- returns the list of players that had the aura.
 
@@ -413,9 +410,6 @@ player:GetDispelledTargets() -- returns the table of actor's dispelled targets.
 
 -- requires Friendly Fire module
 player:GetFriendlyFireTargets(tbl) -- returns the table of actor's friendly fire targets.
-
--- requires Healing Taken module
-player:GetAbsorbHealSources(tbl) -- returns the table of actor's heal and absorb sources.
 
 -- require Interrupts module
 player:GetInterruptedSpells() -- returns the table of actor's interrupted spells.
