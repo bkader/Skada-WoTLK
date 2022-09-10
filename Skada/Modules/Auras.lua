@@ -181,13 +181,14 @@ do
 			if auras then
 				for spellid, spell in pairs(auras) do
 					-- fix old data
-					if spell.type == "BUFF" or spell.type == "DEBUFF" then
-						spell.type = nil
+					if spell.type then
 						if spell.type == "DEBUFF" and spellid > 0 then
-							auras[spellid] = nil
+							local sid = spellid
 							spellid = -spellid
 							auras[spellid] = spell
+							auras[sid] = nil
 						end
+						spell.type = nil
 					end
 					if (atype == "BUFF" and spellid > 0) or (atype == "DEBUFF" and spellid < 0) then
 						count = count + 1
