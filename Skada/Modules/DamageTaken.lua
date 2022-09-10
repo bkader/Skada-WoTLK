@@ -125,7 +125,7 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 		end
 
 		if overkill then
-			source.o_amt = (source.o_amt or 0) + dmg.overkill
+			source.o_amt = (source.o_amt or 0) + overkill
 		end
 	end
 
@@ -506,8 +506,8 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 			end
 
 			for k, v in pairs(missTypes) do
-				if spell[v] then
-					nr = add_detail_bar(win, nr, L[k], spell[v], spell.count, true)
+				if spell[v] or spell[k] then
+					nr = add_detail_bar(win, nr, L[k], spell[v] or spell[k], spell.count, true)
 				end
 			end
 		end
@@ -531,8 +531,8 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 		if not spell then return end
 
 		local absorbed = spell.total and (spell.total - spell.amount) or 0
-		local blocked = spell.b_amt or 0
-		local resisted = spell.r_amt or 0
+		local blocked = spell.b_amt or spell.blocked or 0
+		local resisted = spell.r_amt or spell.resisted or 0
 		local total = spell.amount + absorbed + blocked + resisted
 		if win.metadata then
 			win.metadata.maxvalue = total
@@ -545,20 +545,20 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 			nr = add_detail_bar(win, nr, L["Damage"], spell.amount, total, true, true)
 		end
 
-		if spell.o_amt and spell.o_amt > 0 then
-			nr = add_detail_bar(win, nr, L["Overkill"], spell.o_amt, total, true, true)
+		if (spell.o_amt and spell.o_amt > 0) or (spell.overkill and spell.overkill > 0) then
+			nr = add_detail_bar(win, nr, L["Overkill"], spell.o_amt or spell.overkill, total, true, true)
 		end
 
 		if absorbed > 0 then
 			nr = add_detail_bar(win, nr, L["ABSORB"], absorbed, total, true, true)
 		end
 
-		if spell.b_amt and spell.b_amt > 0 then
-			nr = add_detail_bar(win, nr, L["BLOCK"], spell.b_amt, total, true, true)
+		if blocked > 0 then
+			nr = add_detail_bar(win, nr, L["BLOCK"], blocked, total, true, true)
 		end
 
-		if spell.r_amt and spell.r_amt > 0 then
-			nr = add_detail_bar(win, nr, L["RESIST"], spell.r_amt, total, true, true)
+		if resisted > 0 then
+			nr = add_detail_bar(win, nr, L["RESIST"], resisted, total, true, true)
 		end
 
 		if spell.g_amt and spell.g_amt > 0 then
@@ -1198,10 +1198,11 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L, _, _, _, new, del, cl
 							total = total + spell.count
 
 							for k, v in pairs(missTypes) do
-								if spell[v] then
-									avoid = avoid + spell[v]
+								local num = spell[v] or spell[k]
+								if num then
+									avoid = avoid + num
 									tmp.data = tmp.data or new()
-									tmp.data[k] = (tmp.data[k] or 0) + spell[v]
+									tmp.data[k] = (tmp.data[k] or 0) + num
 								end
 							end
 						end

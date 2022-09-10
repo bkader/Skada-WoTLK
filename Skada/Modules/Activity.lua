@@ -60,7 +60,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C, new, _, clear)
 		win.title = win.class and format("%s (%s)", L["Activity"], L[win.class]) or L["Activity"]
 
 		local settime = set and set:GetTime()
-		if settime or settime == 0 then
+		if not settime or settime == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
@@ -177,12 +177,13 @@ Skada:RegisterModule("Activity", function(L, P, _, C, new, _, clear)
 			local add = floor(100 * delta + 0.5) / 100
 			actor.time = (actor.time or 0) + add
 
-			if target and (set ~= self.total or self.db.profile.totalidc) then
+			if target and (set ~= self.total or P.totalidc) then
 				actor.tartime = actor.tartime or {}
 				actor.tartime[target] = (actor.tartime[target] or 0) + add
 			end
 		end
 	end
+
 	function mod:ApplySettings()
 		if P.tartime and Skada.AddActiveTime ~= Alt_AddActiveTime then
 			Skada.AddActiveTime = Alt_AddActiveTime

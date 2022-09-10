@@ -245,8 +245,8 @@ Skada:RegisterModule("Comparison", function(L, P)
 				end
 
 				for k, v in pairs(missTypes) do
-					if spell[v] then
-						nr = add_detail_bar(win, nr, L[k], spell[v], nil, nil, true)
+					if spell[v] or spell[k] then
+						nr = add_detail_bar(win, nr, L[k], spell[v] or spell[k], nil, nil, true)
 					end
 				end
 			end
@@ -283,8 +283,8 @@ Skada:RegisterModule("Comparison", function(L, P)
 			end
 
 			for k, v in pairs(missTypes) do
-				if (spell and spell[v]) or (myspell and myspell[v]) then
-					nr = add_detail_bar(win, nr, L[k], spell and spell[v], myspell and myspell[v])
+				if (spell and (spell[v] or spell[k])) or (myspell and (myspell[v] or myspell[k])) then
+					nr = add_detail_bar(win, nr, L[k], spell and (spell[v] or spell[k]), myspell and (myspell[v] or myspell[k]))
 				end
 			end
 		end
@@ -309,7 +309,8 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 			if spell then
 				local absorbed = spell.total and max(0, spell.total - spell.amount) or 0
-				local blocked, resisted = spell.b_amt or 0, spell.r_amt or 0
+				local blocked = spell.b_amt or spell.blocked or 0
+				local resisted = spell.r_amt or spell.resisted or 0
 				local total = spell.amount + absorbed + blocked + resisted
 
 				-- total damage
@@ -323,22 +324,22 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 				-- absorbed damage
 				if absorbed > 0 then
-					nr = add_detail_bar(win, nr, L["Overkill"], absorbed, nil, true, true)
+					nr = add_detail_bar(win, nr, L["ABSORB"], absorbed, nil, true, true)
 				end
 
 				-- overkill damage
-				if spell.o_amt and spell.o_amt > 0 then
-					nr = add_detail_bar(win, nr, L["Overkill"], spell.o_amt, nil, true, true)
+				if (spell.o_amt and spell.o_amt > 0) or (spell.overkill and spell.overkill > 0) then
+					nr = add_detail_bar(win, nr, L["Overkill"], spell.o_amt or spell.overkill, nil, true, true)
 				end
 
 				-- blocked damage
-				if spell.b_amt and spell.b_amt > 0 then
-					nr = add_detail_bar(win, nr, L["BLOCK"], spell.b_amt, nil, true, true)
+				if blocked > 0 then
+					nr = add_detail_bar(win, nr, L["BLOCK"], blocked, nil, true, true)
 				end
 
 				-- resisted damage
-				if spell.r_amt and spell.r_amt > 0 then
-					nr = add_detail_bar(win, nr, L["RESIST"], spell.r_amt, nil, true, true)
+				if resisted > 0 then
+					nr = add_detail_bar(win, nr, L["RESIST"], resisted, nil, true, true)
 				end
 			end
 
@@ -351,8 +352,12 @@ Skada:RegisterModule("Comparison", function(L, P)
 		if spell or myspell then
 			local absorbed = (spell and spell.total) and max(0, spell.total - spell.amount) or 0
 			local myabsorbed = (myspell and myspell.total) and max(0, myspell.total - myspell.amount) or 0
-			local blocked, myblocked = spell and spell.b_amt or 0, myspell and myspell.b_amt or 0
-			local resisted, myresisted = spell and spell.r_amt or 0, myspell and myspell.r_amt or 0
+
+			local blocked = spell and (spell.b_amt or spell.blocked) or 0
+			local myblocked = myspell and (myspell.b_amt or myspell.blocked) or 0
+
+			local resisted = spell and (spell.r_amt or spell.resisted) or 0
+			local myresisted = myspell and (myspell.r_amt or myspell.resisted) or 0
 
 			local total = (spell and spell.amount or 0) + absorbed + blocked + resisted
 			local mytotal = (myspell and myspell.amount or 0) + myabsorbed + myblocked + myresisted
@@ -372,18 +377,21 @@ Skada:RegisterModule("Comparison", function(L, P)
 			end
 
 			-- overkill damage
-			if (spell and spell.o_amt and spell.o_amt > 0) or (myspell and myspell.o_amt and myspell.o_amt > 0) then
-				nr = add_detail_bar(win, nr, L["Overkill"], spell and spell.o_amt, myspell and myspell.o_amt, true)
+			local overkill = spell and (spell.o_amt or spell.overkill) or 0
+			local myoverkill = myspell and (myspell.o_amt or myspell.overkill) or 0
+
+			if overkill > 0 or myoverkill > 0 then
+				nr = add_detail_bar(win, nr, L["Overkill"], overkill, myoverkill, true)
 			end
 
 			-- blocked damage
-			if (spell and spell.b_amt and spell.b_amt > 0) or (myspell and myspell.b_amt and myspell.b_amt > 0) then
-				nr = add_detail_bar(win, nr, L["BLOCK"], spell and spell.b_amt, myspell and myspell.b_amt, true)
+			if blocked > 0 or myblocked > 0 then
+				nr = add_detail_bar(win, nr, L["BLOCK"], blocked, myblocked, true)
 			end
 
 			-- resisted damage
-			if (spell and spell.r_amt and spell.r_amt > 0) or (myspell and myspell.r_amt and myspell.r_amt > 0) then
-				nr = add_detail_bar(win, nr, L["RESIST"], spell and spell.r_amt, myspell and myspell.r_amt, true)
+			if resisted > 0 or myresisted > 0 then
+				nr = add_detail_bar(win, nr, L["RESIST"], resisted, myresisted, true)
 			end
 		end
 	end

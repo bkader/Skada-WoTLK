@@ -7,8 +7,8 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
-	local pairs, format, pformat, max = pairs, string.format, Skada.pformat, math.max
-	local GetSpellInfo, T = Skada.GetSpellInfo or GetSpellInfo, Skada.Table
+	local pairs, max, format = pairs, math.max, string.format
+	local pformat, T = Skada.pformat, Skada.Table
 	local _
 
 	local function log_damage(set, dmg)
