@@ -3,6 +3,8 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 	local mod = Skada:NewModule("Sunder Counter")
 	local targetmod = mod:NewModule("Sunder target list")
 	local sourcemod = mod:NewModule("Sunder source list")
+	local get_sunder_sources = nil
+	local get_sunder_targets = nil
 
 	local pairs, tostring, format, pformat = pairs, tostring, string.format, Skada.pformat
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
@@ -98,7 +100,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 		win.title = pformat(L["%s's <%s> sources"], win.targetname, sunder)
 		if not win.targetname then return end
 
-		local sources, total = set:GetSunderSources(win.targetname)
+		local sources, total = get_sunder_sources(set, win.targetname)
 
 		if not sources or total == 0 then
 			return
@@ -135,7 +137,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local total = (actor and not enemy) and actor.sunder or 0
-		local targets = (total > 0) and actor:GetSunderTargets()
+		local targets = (total > 0) and get_sunder_targets(actor)
 
 		if not targets then
 			return
@@ -293,39 +295,37 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 		}
 	end
 
-	do
-		local setPrototype = Skada.setPrototype
-		function setPrototype:GetSunderSources(name, tbl)
-			local total = 0
-			if self.sunder and name then
-				tbl = clear(tbl or C)
-				for i = 1, #self.players do
-					local p = self.players[i]
-					if p and p.sundertargets and p.sundertargets[name] then
-						tbl[p.name] = new()
-						tbl[p.name].id = p.id
-						tbl[p.name].class = p.class
-						tbl[p.name].role = p.role
-						tbl[p.name].spec = p.spec
-						tbl[p.name].count = p.sundertargets[name]
-						total = total + p.sundertargets[name]
-					end
-				end
-			end
-			return tbl, total
-		end
+	---------------------------------------------------------------------------
 
-		local playerPrototype = Skada.playerPrototype
-		function playerPrototype:GetSunderTargets(tbl)
-			if self.sundertargets then
-				tbl = clear(tbl or C)
-				for name, count in pairs(self.sundertargets) do
-					tbl[name] = new()
-					tbl[name].count = count
-					self.super:_fill_actor_table(tbl[name], name)
+	get_sunder_sources = function(self, name, tbl)
+		local total = 0
+		if self.sunder and name then
+			tbl = clear(tbl or C)
+			for i = 1, #self.players do
+				local p = self.players[i]
+				if p and p.sundertargets and p.sundertargets[name] then
+					tbl[p.name] = new()
+					tbl[p.name].id = p.id
+					tbl[p.name].class = p.class
+					tbl[p.name].role = p.role
+					tbl[p.name].spec = p.spec
+					tbl[p.name].count = p.sundertargets[name]
+					total = total + p.sundertargets[name]
 				end
-				return tbl
 			end
+		end
+		return tbl, total
+	end
+
+	get_sunder_targets = function(self, tbl)
+		if self.sundertargets then
+			tbl = clear(tbl or C)
+			for name, count in pairs(self.sundertargets) do
+				tbl[name] = new()
+				tbl[name].count = count
+				self.super:_fill_actor_table(tbl[name], name)
+			end
+			return tbl
 		end
 	end
 end)

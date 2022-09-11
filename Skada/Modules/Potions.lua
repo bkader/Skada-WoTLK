@@ -3,6 +3,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 	local mod = Skada:NewModule("Potions")
 	local playermod = mod:NewModule("Potions list")
 	local potionmod = mod:NewModule("Players list")
+	local get_players_by_potion = nil
 
 	-- cache frequently used globals
 	local pairs, tconcat, format, strsub, tostring = pairs, table.concat, string.format, string.sub, tostring
@@ -100,7 +101,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 
 		if not (set and win.potionname) then return end
 
-		local players, total = set:GetPotion(win.potionid, win.class)
+		local players, total = get_players_by_potion(set, win.potionid, win.class)
 
 		if not players or total == 0 then
 			return
@@ -387,28 +388,27 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 		return tostring(potions), potions
 	end
 
-	do
-		local setPrototype = Skada.setPrototype
-		function setPrototype:GetPotion(potionid, class, tbl)
-			if not self.potion or not potionid then
-				return nil, 0
-			end
+	---------------------------------------------------------------------------
 
-			tbl = clear(tbl or C)
-			local total = 0
-			for i = 1, #self.players do
-				local p = self.players[i]
-				if p and p.potionspells and p.potionspells[potionid] and (not class or class == p.class) then
-					total = total + p.potionspells[potionid]
-					tbl[p.name] = new()
-					tbl[p.name].id = p.id
-					tbl[p.name].class = p.class
-					tbl[p.name].role = p.role
-					tbl[p.name].spec = p.spec
-					tbl[p.name].count = p.potionspells[potionid]
-				end
-			end
-			return tbl, total
+	get_players_by_potion = function(self, potionid, class, tbl)
+		if not self.potion or not potionid then
+			return nil, 0
 		end
+
+		tbl = clear(tbl or C)
+		local total = 0
+		for i = 1, #self.players do
+			local p = self.players[i]
+			if p and p.potionspells and p.potionspells[potionid] and (not class or class == p.class) then
+				total = total + p.potionspells[potionid]
+				tbl[p.name] = new()
+				tbl[p.name].id = p.id
+				tbl[p.name].class = p.class
+				tbl[p.name].role = p.role
+				tbl[p.name].spec = p.spec
+				tbl[p.name].count = p.potionspells[potionid]
+			end
+		end
+		return tbl, total
 	end
 end)

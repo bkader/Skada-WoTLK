@@ -5,7 +5,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 	local targetmod = mod:NewModule("Interrupted targets")
 	local playermod = mod:NewModule("Interrupt spells")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local _
+	local get_interrupted_spells, get_interrupted_targets, _
 
 	-- cache frequently used globals
 	local pairs, tostring, format, pformat = pairs, tostring, string.format, Skada.pformat
@@ -89,7 +89,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local total = (actor and not enemy) and actor.interrupt or 0
-		local spells = (total > 0) and actor:GetInterruptedSpells()
+		local spells = (total > 0) and get_interrupted_spells(actor)
 
 		if not spells or total == 0 then
 			return
@@ -125,7 +125,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local total = (actor and not enemy) and actor.interrupt or 0
-		local targets = (total > 0) and actor:GetInterruptTargets()
+		local targets = (total > 0) and get_interrupted_targets(actor)
 
 		if not targets then
 			return
@@ -302,41 +302,39 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 		}
 	end
 
-	do
-		local playerPrototype = Skada.playerPrototype
+	---------------------------------------------------------------------------
 
-		function playerPrototype:GetInterruptedSpells(tbl)
-			if self.interruptspells then
-				tbl = clear(tbl or C)
-				for _, spell in pairs(self.interruptspells) do
-					if spell.spells then
-						for spellid, count in pairs(spell.spells) do
-							tbl[spellid] = (tbl[spellid] or 0) + count
-						end
+	get_interrupted_spells = function(self, tbl)
+		if self.interruptspells then
+			tbl = clear(tbl or C)
+			for _, spell in pairs(self.interruptspells) do
+				if spell.spells then
+					for spellid, count in pairs(spell.spells) do
+						tbl[spellid] = (tbl[spellid] or 0) + count
 					end
 				end
-				return tbl
 			end
+			return tbl
 		end
+	end
 
-		function playerPrototype:GetInterruptTargets(tbl)
-			if self.interruptspells then
-				tbl = clear(tbl or C)
-				for _, spell in pairs(self.interruptspells) do
-					if spell.targets then
-						for name, count in pairs(spell.targets) do
-							if not tbl[name] then
-								tbl[name] = new()
-								tbl[name].count = count
-							else
-								tbl[name].count = tbl[name].count + count
-							end
-							self.super:_fill_actor_table(tbl[name], name)
+	get_interrupted_targets = function(self, tbl)
+		if self.interruptspells then
+			tbl = clear(tbl or C)
+			for _, spell in pairs(self.interruptspells) do
+				if spell.targets then
+					for name, count in pairs(spell.targets) do
+						if not tbl[name] then
+							tbl[name] = new()
+							tbl[name].count = count
+						else
+							tbl[name].count = tbl[name].count + count
 						end
+						self.super:_fill_actor_table(tbl[name], name)
 					end
 				end
-				return tbl
 			end
+			return tbl
 		end
 	end
 end)

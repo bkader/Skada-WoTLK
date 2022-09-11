@@ -4,6 +4,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C, new, _, clear)
 	local targetmod = mod:NewModule("Activity per Target")
 	local date, pairs, max = date, pairs, math.max
 	local format, pformat = string.format, Skada.pformat
+	local get_activity_targets = nil
 
 	local function activity_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
@@ -31,7 +32,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C, new, _, clear)
 
 		local actor = set:GetActor(win.actorname, win.actorid)
 		local maxtime = actor and actor:GetTime(true)
-		local targets = maxtime and actor:GetActivityTargets()
+		local targets = maxtime and get_activity_targets(actor)
 
 		if not targets then
 			return
@@ -198,8 +199,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C, new, _, clear)
 
 	---------------------------------------------------------------------------
 
-	local actorPrototype = Skada.actorPrototype
-	function actorPrototype:GetActivityTargets(tbl)
+	get_activity_targets = function(self, tbl)
 		if not self.tartime then return end
 
 		tbl = clear(tbl or C)

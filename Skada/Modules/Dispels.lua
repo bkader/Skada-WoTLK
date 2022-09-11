@@ -5,6 +5,8 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 	local targetmod = mod:NewModule("Dispelled target list")
 	local playermod = mod:NewModule("Dispel spell list")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local get_dispelled_spells = nil
+	local get_dispelled_targets = nil
 
 	-- cache frequently used globals
 	local pairs, tostring, format = pairs, tostring, string.format
@@ -73,7 +75,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.dispel or 0
-		local spells = (total > 0) and player:GetDispelledSpells()
+		local spells = (total > 0) and get_dispelled_spells(player)
 
 		if not spells or total == 0 then
 			return
@@ -108,7 +110,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.dispel or 0
-		local targets = (total > 0) and player:GetDispelledTargets()
+		local targets = (total > 0) and get_dispelled_targets(player)
 
 		if not targets or total == 0 then
 			return
@@ -241,41 +243,39 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 		return tostring(dispels), dispels
 	end
 
-	do
-		local playerPrototype = Skada.playerPrototype
+	---------------------------------------------------------------------------
 
-		function playerPrototype:GetDispelledSpells(tbl)
-			if self.dispelspells then
-				tbl = clear(tbl or C)
-				for _, spell in pairs(self.dispelspells) do
-					if spell.spells then
-						for spellid, count in pairs(spell.spells) do
-							tbl[spellid] = (tbl[spellid] or 0) + count
-						end
-					end
+	get_dispelled_spells = function(self, tbl)
+		if not self.dispelspells then return end
+
+		tbl = clear(tbl or C)
+		for _, spell in pairs(self.dispelspells) do
+			if spell.spells then
+				for spellid, count in pairs(spell.spells) do
+					tbl[spellid] = (tbl[spellid] or 0) + count
 				end
-				return tbl
 			end
 		end
+		return tbl
+	end
 
-		function playerPrototype:GetDispelledTargets(tbl)
-			if self.dispelspells then
-				tbl = clear(tbl or C)
-				for _, spell in pairs(self.dispelspells) do
-					if spell.targets then
-						for name, count in pairs(spell.targets) do
-							if not tbl[name] then
-								tbl[name] = new()
-								tbl[name].count = count
-							else
-								tbl[name].count = tbl[name].count + count
-							end
-							self.super:_fill_actor_table(tbl[name], name)
-						end
+	get_dispelled_targets = function(self, tbl)
+		if not self.dispelspells then return end
+
+		tbl = clear(tbl or C)
+		for _, spell in pairs(self.dispelspells) do
+			if spell.targets then
+				for name, count in pairs(spell.targets) do
+					if not tbl[name] then
+						tbl[name] = new()
+						tbl[name].count = count
+					else
+						tbl[name].count = tbl[name].count + count
 					end
+					self.super:_fill_actor_table(tbl[name], name)
 				end
-				return tbl
 			end
 		end
+		return tbl
 	end
 end)

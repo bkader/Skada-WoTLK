@@ -6,7 +6,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 
 	local pairs, tostring, format, pformat = pairs, tostring, string.format, Skada.pformat
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-	local _
+	local get_resurrected_targets, _
 
 	local resurrectSpells = {
 		-- Rebirth
@@ -126,7 +126,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local total = (actor and not enemy) and actor.ress or 0
-		local targets = (total > 0) and actor:GetRessTargets()
+		local targets = (total > 0) and get_resurrected_targets(actor)
 
 		if not targets then
 			return
@@ -215,26 +215,25 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 		return tostring(ress), ress
 	end
 
-	do
-		local playerPrototype = Skada.playerPrototype
-		function playerPrototype:GetRessTargets(tbl)
-			if not self.resspells then return end
+	---------------------------------------------------------------------------
 
-			tbl = clear(tbl or C)
-			for _, spell in pairs(self.resspells) do
-				if spell.targets then
-					for name, count in pairs(spell.targets) do
-						if not tbl[name] then
-							tbl[name] = new()
-							tbl[name].count = count
-						else
-							tbl[name].count = tbl[name].count + count
-						end
-						self.super:_fill_actor_table(tbl[name], name)
+	get_resurrected_targets = function(self, tbl)
+		if not self.resspells then return end
+
+		tbl = clear(tbl or C)
+		for _, spell in pairs(self.resspells) do
+			if spell.targets then
+				for name, count in pairs(spell.targets) do
+					if not tbl[name] then
+						tbl[name] = new()
+						tbl[name].count = count
+					else
+						tbl[name].count = tbl[name].count + count
 					end
+					self.super:_fill_actor_table(tbl[name], name)
 				end
 			end
-			return tbl
 		end
+		return tbl
 	end
 end)

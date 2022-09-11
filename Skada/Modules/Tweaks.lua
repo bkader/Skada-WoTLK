@@ -534,29 +534,32 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 			-- Fury of Frostmourne
 			fofrostmourne = fofrostmourne or GetSpellInfo(72350)
 
+			local gen_opt = Skada.options.args.tweaks.args.general -- Tweaks > General
+			local adv_opt = Skada.options.args.tweaks.args.advanced -- Tweaks > Advanced
+
 			-- options.
-			Skada.options.args.tweaks.args.general.args.firsthit = {
+			gen_opt.args.firsthit = {
 				type = "toggle",
 				name = L["First hit"],
 				desc = L["opt_tweaks_firsthit_desc"],
 				set = set_value,
 				order = 10
 			}
-			Skada.options.args.tweaks.args.general.args.moduleicons = {
+			gen_opt.args.moduleicons = {
 				type = "toggle",
 				name = L["Modes Icons"],
 				desc = L["Show modes icons on bars and menus."],
 				set = set_value,
 				order = 20
 			}
-			Skada.options.args.tweaks.args.general.args.spamage = {
+			gen_opt.args.spamage = {
 				type = "toggle",
 				name = L["Filter DPS meters Spam"],
 				desc = L["opt_tweaks_spamage_desc"],
 				set = set_value,
 				order = 30
 			}
-			Skada.options.args.tweaks.args.general.args.fofrostmourne = {
+			gen_opt.args.fofrostmourne = {
 				type = "toggle",
 				name = fofrostmourne,
 				desc = format(L["Enable this if you want to ignore \124cffffbb00%s\124r."], fofrostmourne),
@@ -564,7 +567,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 				order = 40
 			}
 
-			Skada.options.args.tweaks.args.advanced.args.smarthalt = {
+			adv_opt.args.smarthalt = {
 				type = "group",
 				name = L["Smart Stop"],
 				desc = format(L["Options for %s."], L["Smart Stop"]),
@@ -599,7 +602,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 				}
 			}
 
-			Skada.options.args.tweaks.args.advanced.args.combatlog = {
+			adv_opt.args.combatlog = {
 				type = "group",
 				name = L["Combat Log"],
 				desc = format(L["Options for %s."], L["Combat Log"]),

@@ -26,37 +26,6 @@ _**Project Ascension players should use [v1.8.79](https://github.com/bkader/Skad
 
 Though it's not required, **PayPal** donations are most welcome at **bkader[at]mail.com**, or via Discord [Donate Bot](https://donatebot.io/checkout/795698054371868743).
 
-##   OTHER ADDONS
-
-* **!ElvinCDs**: [https://github.com/bkader/ElvinCDs](https://github.com/bkader/ElvinCDs)
-* **!KTracker**: [https://github.com/bkader/KTracker](https://github.com/bkader/KTracker)
-* **BigWigs**: [https://github.com/bkader/BigWigs-WoTLK](https://github.com/bkader/BigWigs-WoTLK)
-* **BloodyMask**: [https://github.com/bkader/BloodyMask](https://github.com/bkader/BloodyMask)
-* **ButtonFacade**: [https://github.com/bkader/ButtonFacade](https://github.com/bkader/ButtonFacade)
-* **Comix**: [https://github.com/bkader/Comix-WoTLK](https://github.com/bkader/Comix-WoTLK)
-* **Crosshairs**: [https://github.com/bkader/Crosshairs-WotLK](https://github.com/bkader/Crosshairs-WotLK)
-* **Dominos**: [https://github.com/bkader/Dominos](https://github.com/bkader/Dominos)
-* **EclipseBar**: [https://github.com/bkader/EclipseBar-WotLK](https://github.com/bkader/EclipseBar-WotLK)
-* **FixGroups**: [https://github.com/bkader/FixGroups-WoTLK](https://github.com/bkader/FixGroups-WoTLK)
-* **GarbageProtector**: [https://github.com/bkader/GarbageProtector](https://github.com/bkader/GarbageProtector)
-* **Grid2**: [https://github.com/bkader/Grid2-WoTLK](https://github.com/bkader/Grid2-WoTLK)
-* **HalionHelper**: [https://github.com/bkader/HalionHelper-WoTLK](https://github.com/bkader/HalionHelper-WoTLK)
-* **Hermes**: [https://github.com/bkader/Hermes-WotLK](https://github.com/bkader/Hermes-WotLK)
-* **KPack**: [https://github.com/bkader/KPack](https://github.com/bkader/KPack)
-* **KRaidTools**: [https://github.com/bkader/KRT](https://github.com/bkader/KRT)
-* **KRaidUtilities**: [https://github.com/bkader/KRU-WoTLK](https://github.com/bkader/KRU-WoTLK)
-* **KuiNameplates**: [https://github.com/bkader/KuiNameplates-WoTLK](https://github.com/bkader/KuiNameplates-WoTLK)
-* **Masque**: [https://github.com/bkader/Masque-WoTLK](https://github.com/bkader/Masque-WoTLK)
-* **NameplateSCT**: [https://github.com/bkader/NameplateSCT_WoTLK](https://github.com/bkader/NameplateSCT_WoTLK)
-* **PlateBuffs**: [https://github.com/bkader/PlateBuffs_WoTLK](https://github.com/bkader/PlateBuffs_WoTLK)
-* **RUF**: [https://github.com/bkader/RUF-WoTLK](https://github.com/bkader/RUF-WoTLK)
-* **Raven**: [https://github.com/bkader/Raven-WotLK](https://github.com/bkader/Raven-WotLK)
-* **SharedMedia**: [https://github.com/bkader/SharedMedia](https://github.com/bkader/SharedMedia)
-* **Talented**: [https://github.com/bkader/Talented_WoTLK](https://github.com/bkader/Talented_WoTLK)
-* **TellMeWhen**: [https://github.com/bkader/TellMeWhen_3.3.5](https://github.com/bkader/TellMeWhen_3.3.5)
-* **TheClassicRace**: [https://github.com/bkader/TheClassicRace-WotLK](https://github.com/bkader/TheClassicRace-WotLK)
-* **TidyPlates & ThreatPlates**: [https://github.com/bkader/TidyPlates_WoTLK](https://github.com/bkader/TidyPlates_WoTLK)
-
 ## Table of content
 
 * [What's the difference?](#whats-the-difference)
@@ -309,14 +278,10 @@ set:GetAPS() -- returns the amount of absorbs per second and the absorb amount.
 
 set:GetAbsorbHeal() -- returns the amount of heals and absorbs combined.
 set:GetAHPS() -- returns the amount of heals and absorbs combined per second.
-set:GetAbsorbHealSpells(tbl) -- returns the table of heal spells and absorbs spells combined.
 
 --
 -- below are functions available only if certain modules are enabled.
 --
-
--- requires either Buffs or Debuffs modules.
-set:GetAuraPlayers(spellid) -- returns the list of players that had the aura.
 
 -- requires Enemies modules
 set:GetEnemyDamage() -- returns the damage done by enemeies.
@@ -329,12 +294,6 @@ set:GetEnemyHPS(absorb, active) -- returns enemies HPS and heal amount.
 
 -- requires Absorbed Damage module
 set:GetAbsorbedDamage() -- returns the amount of absorbed damage.
-
--- requires Fails module
-set:GetFailCount(spellid) -- returns the number of fails for the given spell.
-
--- requires Potions module
-set:GetPotion(potionid, class) -- returns the list of players for the given potion id (optional class filter)
 ```
 
 #### Actors functions (_Common to both players and enemies_)
@@ -386,61 +345,54 @@ actor:GetAbsorbHealTargets(tbl) -- returns the table of actor's healed and absor
 actor:GetAbsorbHealOnTarget(name) -- returns the actor's heal (including absorbs) and overheal on the target.
 ```
 
-#### Players functions
+#### Extending Players functions
 
-First, you would want to get the segment, then the player. After, you will have access to a set of predefined functions that only work if **their modules are enabled**:
+If you wish to extend players API, you only need to add whatever function you want to the **playerPrototype** table like so:
+
+```lua
+local playerPrototype = Skada.playerPrototype
+
+-- example of getting the uptime of the given aura
+function playerPrototype:GetAuraUptime(spellid)
+  if self.auras and spellid and self.auras[spellid] then
+    return self.auras[spellid].uptime or 0
+  end
+end
+```
+
+Now in order to use the function, you simply do like so:
 
 ```lua
 local set = Skada:GetSet("current")
 local player = set:GetPlayer(UnitGUID("player"), UnitName("player")) -- get my own table
 
--- require Debuffs module
-player:GetDebuffsTargets() -- returns the table of actor's debuffs targets.
-player:GetDebuffTargets(spellid) -- returns the table of actor's given debuff targets.
-player:GetDebuffsOnTarget(name) -- returns the list of actor's debuffs on the given target.
+-- dummy aura: 12345
+local uptime = player:GetAuraUptime(12345)
 
--- require CC Done, CC Taken or CC Break modules.
-player:GetCCDoneTargets() -- returns the table of CC Done targets.
-player:GetCCTakenSources() -- returns the table of CC Taken sources.
-player:GetCCBreakTargets() -- returns the table of CC Break targets.
-
--- require Dispel module
-player:GetDispelledSpells() -- returns the table of actor's dispelled spells.
-player:GetDispelledTargets() -- returns the table of actor's dispelled targets.
-
--- requires Friendly Fire module
-player:GetFriendlyFireTargets(tbl) -- returns the table of actor's friendly fire targets.
-
--- require Interrupts module
-player:GetInterruptedSpells() -- returns the table of actor's interrupted spells.
-player:GetInterruptTargets() -- returns the table of actor's interrupted targets.
-
--- requires Resurrects module
-player:GetRessTargets() -- returns the table of actor's resurrected targets.
-
--- required Sunder Counter
-player:GetSunderTargets() -- returns the table of actor's Sunder Armor targets.
 ```
 
-#### Enemies functions
+#### Extending Enemies functions
 
-The same deal, you want first to get the segment then the enemy, after that you have access to a set of functions:
+The same thing mentioned above can be added to enemies, but this time by adding it to the **enemyPrototype** object/table.
+
+Skada comes with a set of predefined enemies functions that you can use:
 
 ```lua
 local set = Skada:GetSet("current")
 local enemy = set:GetEnemy("The Lich King") -- example
 
 -- requires: Enemy Damage Taken module
-enemy:GetDamageTakenBreakdown() -- returns damage, total and useful
+enemy:GetDamageTakenBreakdown() -- returns damage, total and useful.
+enemy:GetDamageSpellSources() -- returns the list of players by the given spell.
 
 -- require Enemy Damage Done module
 enemy:GetDamageTargetSpells(name) -- returns the table of enemy's damage spells on the target.
 enemy:GetDamageSpellTargets(spellid) -- returns the targets of the enemy's given damage spell.
 ```
 
-#### Extending the API
+#### RECAP: Extending the API
 
-You can easily extend the API if you know the table structure of course, which will be added and explained another time:
+You can easily extend the API if you know the table structure of course:
 
 ```lua
 -- To extend segments functions:
@@ -467,3 +419,34 @@ function enemyPrototype:MyOwnEnemyFunction()
   -- do your thing
 end
 ```
+
+##   OTHER ADDONS
+
+* **!ElvinCDs**: [https://github.com/bkader/ElvinCDs](https://github.com/bkader/ElvinCDs)
+* **!KTracker**: [https://github.com/bkader/KTracker](https://github.com/bkader/KTracker)
+* **BigWigs**: [https://github.com/bkader/BigWigs-WoTLK](https://github.com/bkader/BigWigs-WoTLK)
+* **BloodyMask**: [https://github.com/bkader/BloodyMask](https://github.com/bkader/BloodyMask)
+* **ButtonFacade**: [https://github.com/bkader/ButtonFacade](https://github.com/bkader/ButtonFacade)
+* **Comix**: [https://github.com/bkader/Comix-WoTLK](https://github.com/bkader/Comix-WoTLK)
+* **Crosshairs**: [https://github.com/bkader/Crosshairs-WotLK](https://github.com/bkader/Crosshairs-WotLK)
+* **Dominos**: [https://github.com/bkader/Dominos](https://github.com/bkader/Dominos)
+* **EclipseBar**: [https://github.com/bkader/EclipseBar-WotLK](https://github.com/bkader/EclipseBar-WotLK)
+* **FixGroups**: [https://github.com/bkader/FixGroups-WoTLK](https://github.com/bkader/FixGroups-WoTLK)
+* **GarbageProtector**: [https://github.com/bkader/GarbageProtector](https://github.com/bkader/GarbageProtector)
+* **Grid2**: [https://github.com/bkader/Grid2-WoTLK](https://github.com/bkader/Grid2-WoTLK)
+* **HalionHelper**: [https://github.com/bkader/HalionHelper-WoTLK](https://github.com/bkader/HalionHelper-WoTLK)
+* **Hermes**: [https://github.com/bkader/Hermes-WotLK](https://github.com/bkader/Hermes-WotLK)
+* **KPack**: [https://github.com/bkader/KPack](https://github.com/bkader/KPack)
+* **KRaidTools**: [https://github.com/bkader/KRT](https://github.com/bkader/KRT)
+* **KRaidUtilities**: [https://github.com/bkader/KRU-WoTLK](https://github.com/bkader/KRU-WoTLK)
+* **KuiNameplates**: [https://github.com/bkader/KuiNameplates-WoTLK](https://github.com/bkader/KuiNameplates-WoTLK)
+* **Masque**: [https://github.com/bkader/Masque-WoTLK](https://github.com/bkader/Masque-WoTLK)
+* **NameplateSCT**: [https://github.com/bkader/NameplateSCT_WoTLK](https://github.com/bkader/NameplateSCT_WoTLK)
+* **PlateBuffs**: [https://github.com/bkader/PlateBuffs_WoTLK](https://github.com/bkader/PlateBuffs_WoTLK)
+* **RUF**: [https://github.com/bkader/RUF-WoTLK](https://github.com/bkader/RUF-WoTLK)
+* **Raven**: [https://github.com/bkader/Raven-WotLK](https://github.com/bkader/Raven-WotLK)
+* **SharedMedia**: [https://github.com/bkader/SharedMedia](https://github.com/bkader/SharedMedia)
+* **Talented**: [https://github.com/bkader/Talented_WoTLK](https://github.com/bkader/Talented_WoTLK)
+* **TellMeWhen**: [https://github.com/bkader/TellMeWhen_3.3.5](https://github.com/bkader/TellMeWhen_3.3.5)
+* **TheClassicRace**: [https://github.com/bkader/TheClassicRace-WotLK](https://github.com/bkader/TheClassicRace-WotLK)
+* **TidyPlates & ThreatPlates**: [https://github.com/bkader/TidyPlates_WoTLK](https://github.com/bkader/TidyPlates_WoTLK)

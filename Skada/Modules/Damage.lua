@@ -332,12 +332,11 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 		end
 
 		-- show the aura uptime in case of a debuff.
-		if actor.GetAuraUptime then
-			local uptime, activetime = actor:GetAuraUptime(spell.id)
-			if uptime and uptime > 0 then
-				uptime = 100 * (uptime / activetime)
-				tooltip:AddDoubleLine(L["Uptime"], Skada:FormatPercent(uptime), nil, nil, nil, PercentToRGB(uptime))
-			end
+		local debuff_id = -spell.id
+		local uptime = actor.auras and actor.auras[debuff_id] and actor.auras[debuff_id].uptime or 0
+		if uptime > 0 then
+			uptime = 100 * (uptime / actor:GetTime())
+			tooltip:AddDoubleLine(L["Uptime"], Skada:FormatPercent(uptime), nil, nil, nil, PercentToRGB(uptime))
 		end
 
 		if spell.n_min then

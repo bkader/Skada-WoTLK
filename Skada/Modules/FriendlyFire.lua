@@ -6,6 +6,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 	local spelltargetmod = spellmod:NewModule("Damage spell targets")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local get_friendly_fire_targets = nil
 
 	local pairs, max, format = pairs, math.max, string.format
 	local pformat, T = Skada.pformat, Skada.Table
@@ -80,7 +81,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 
 		local actor = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = actor and actor.friendfire or 0
-		local targets = (total > 0) and actor:GetFriendlyFireTargets()
+		local targets = (total > 0) and get_friendly_fire_targets(actor)
 
 		if not targets then
 			return
@@ -302,26 +303,25 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 		end
 	end
 
-	do
-		local playerPrototype = Skada.playerPrototype
-		function playerPrototype:GetFriendlyFireTargets(tbl)
-			if not self.friendfirespells then return end
+	---------------------------------------------------------------------------
 
-			tbl = clear(tbl or C)
-			for _, spell in pairs(self.friendfirespells) do
-				if spell.targets then
-					for name, amount in pairs(spell.targets) do
-						if not tbl[name] then
-							tbl[name] = new()
-							tbl[name].amount = amount
-						else
-							tbl[name].amount = tbl[name].amount + amount
-						end
-						self.super:_fill_actor_table(tbl[name], name)
+	get_friendly_fire_targets = function(self, tbl)
+		if not self.friendfirespells then return end
+
+		tbl = clear(tbl or C)
+		for _, spell in pairs(self.friendfirespells) do
+			if spell.targets then
+				for name, amount in pairs(spell.targets) do
+					if not tbl[name] then
+						tbl[name] = new()
+						tbl[name].amount = amount
+					else
+						tbl[name].amount = tbl[name].amount + amount
 					end
+					self.super:_fill_actor_table(tbl[name], name)
 				end
 			end
-			return tbl
 		end
+		return tbl
 	end
 end)

@@ -7,9 +7,10 @@ Skada:RegisterModule("Fails", function(L, P)
 	local playermod = mod:NewModule("Player's failed events")
 	local spellmod = mod:NewModule("Event's failed players")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local count_fails_by_spell = nil
 
 	local pairs, tostring, format, pformat, tContains = pairs, tostring, string.format, Skada.pformat, tContains
-	local GetSpellInfo, UnitGUID, IsInGroup = Skada.GetSpellInfo or GetSpellInfo, UnitGUID, Skada.IsInGroup
+	local UnitGUID, IsInGroup = UnitGUID, Skada.IsInGroup
 	local _
 
 	local function log_fail(set, playerid, playername, spellid, event)
@@ -47,7 +48,7 @@ Skada:RegisterModule("Fails", function(L, P)
 		win.title = pformat(L["%s's fails"], win.spellname)
 		if not win.spellid then return end
 
-		local total = set and set:GetFailCount(win.spellid) or 0
+		local total = set and count_fails_by_spell(set, win.spellid) or 0
 
 		if total == 0 then
 			return
@@ -255,19 +256,18 @@ Skada:RegisterModule("Fails", function(L, P)
 		end
 	end
 
-	do
-		local setPrototype = Skada.setPrototype
-		function setPrototype:GetFailCount(spellid)
-			if spellid and self.fail then
-				local count = 0
-				for i = 1, #self.players do
-					local p = self.players[i]
-					if p and p.failspells and p.failspells[spellid] then
-						count = count + p.failspells[spellid]
-					end
+	---------------------------------------------------------------------------
+
+	count_fails_by_spell = function(self, spellid)
+		if spellid and self.fail then
+			local count = 0
+			for i = 1, #self.players do
+				local p = self.players[i]
+				if p and p.failspells and p.failspells[spellid] then
+					count = count + p.failspells[spellid]
 				end
-				return count
 			end
+			return count
 		end
 	end
 end)

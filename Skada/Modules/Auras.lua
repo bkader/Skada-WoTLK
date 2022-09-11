@@ -6,7 +6,6 @@ local UnitName, UnitGUID, UnitBuff = UnitName, UnitGUID, UnitBuff
 local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local PercentToRGB = Skada.PercentToRGB
-local playerPrototype = Skada.playerPrototype
 local _
 
 -- common functions
@@ -24,13 +23,6 @@ do
 		if not Skada:IsDisabled("Buffs") or not Skada:IsDisabled("Debuffs") then
 			spellschools = spellschools or Skada.spellschools
 			Skada.RegisterCallback(self, "Skada_SetComplete", "Clean")
-
-			-- add player's aura uptime getter.
-			playerPrototype.GetAuraUptime = function(p, spellid)
-				if p.auras and spellid and p.auras[spellid] and p.auras[spellid].uptime and p.auras[spellid].uptime > 0 then
-					return p.auras[spellid].uptime, p:GetTime()
-				end
-			end
 		end
 	end
 
@@ -304,6 +296,7 @@ Skada:RegisterModule("Buffs", function(L, P, _, C, new, _, clear)
 	local spellmod = mod:NewModule("Buff spell list")
 	local playermod = spellmod:NewModule("Players list")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local get_players_by_buff = nil
 
 	-- list of spells that don't trigger SPELL_AURA_x events
 	local speciallist = {
@@ -365,7 +358,7 @@ Skada:RegisterModule("Buffs", function(L, P, _, C, new, _, clear)
 		win.title = pformat(L["%s's targets"], win.spellname)
 		if not (win.spellid and set) then return end
 
-		local players, count = set:GetAuraPlayers(win.spellid)
+		local players, count = get_players_by_buff(set, win.spellid)
 
 		if count == 0 then
 			return
@@ -491,12 +484,14 @@ Skada:RegisterModule("Buffs", function(L, P, _, C, new, _, clear)
 		Skada:AddMode(self)
 	end
 
-	local setPrototype = Skada.setPrototype
-	function setPrototype:GetAuraPlayers(spellid, tbl)
+	---------------------------------------------------------------------------
+
+	get_players_by_buff = function(self, spellid, tbl)
 		local count = 0
 		if not spellid or not self.players then
 			return nil, count
 		end
+
 
 		tbl = clear(tbl or C)
 		for i = 1, #self.players do
@@ -526,6 +521,10 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 	local targetmod = mod:NewModule("Debuff target list")
 	local targetspellmod = targetmod:NewModule("Debuff spell list")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+
+	local get_debuffs_targets = nil
+	local get_debuff_targets = nil
+	local get_debuffs_on_target = nil
 
 	-- list of spells used to queue units.
 	local queuedSpells = {[49005] = 50424}
@@ -580,7 +579,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		if not player then return end
 
-		local auras, maxtime = player:GetDebuffsOnTarget(win.targetname)
+		local auras, maxtime = get_debuffs_on_target(player, win.targetname)
 
 		if not auras or maxtime == 0 then
 			return
@@ -618,7 +617,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		if not player then return end
 
-		local targets, maxtime = player:GetDebuffTargets(win.spellid)
+		local targets, maxtime = get_debuff_targets(player, win.spellid)
 
 		if not targets or maxtime == 0 then
 			return
@@ -682,7 +681,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		if not player then return end
 
-		local targets, maxtime = player:GetDebuffsTargets()
+		local targets, maxtime = get_debuffs_targets(player)
 
 		if not targets or maxtime == 0 then
 			return
@@ -808,7 +807,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 		return debuff
 	end
 
-	function playerPrototype:GetDebuffsTargets(tbl)
+	get_debuffs_targets = function(self, tbl)
 		if self.auras then
 			tbl = clear(tbl or C)
 			local maxtime = 0
@@ -836,7 +835,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 		end
 	end
 
-	function playerPrototype:GetDebuffTargets(spellid, tbl)
+	get_debuff_targets = function(self, spellid, tbl)
 		if self.auras and spellid and self.auras[spellid] and self.auras[spellid].targets then
 			tbl = clear(tbl or C)
 			local maxtime = self.auras[spellid].uptime
@@ -848,7 +847,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 		end
 	end
 
-	function playerPrototype:GetDebuffsOnTarget(name, tbl)
+	get_debuffs_on_target = function(self, name, tbl)
 		if self.auras and name then
 			tbl = clear(tbl or C)
 			local maxtime = 0
