@@ -3,6 +3,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 	local mod = Skada:NewModule("Deaths")
 	local playermod = mod:NewModule("Player's deaths")
 	local deathlogmod = mod:NewModule("Death log")
+	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local WATCH = nil -- true to watch those alive
 
 	local tinsert, tremove, tsort, tconcat = table.insert, table.remove, table.sort, table.concat
@@ -17,23 +18,26 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 	local _
 
 	-- cache colors
-	local GRAY_FONT_COLOR = GRAY_FONT_COLOR
-	local GREEN_FONT_COLOR = GREEN_FONT_COLOR
-	local ORANGE_FONT_COLOR = ORANGE_FONT_COLOR
-	local RED_FONT_COLOR = RED_FONT_COLOR
-	local YELLOW_FONT_COLOR = YELLOW_FONT_COLOR
+	local GRAY_COLOR = GREEN_FONT_COLOR
+	local GREEN_COLOR = GREEN_FONT_COLOR
+	local ORANGE_COLOR = ORANGE_FONT_COLOR
+	local RED_COLOR = RED_FONT_COLOR
+	local YELLOW_COLOR = YELLOW_FONT_COLOR
+	local PURPLE_COLOR = {r = 0.69, g = 0.38, b = 1}
 
 	local function get_color(key)
 		if P.usecustomcolors and P.customcolors and P.customcolors["deathlog_" .. key] then
 			return P.customcolors["deathlog_" .. key]
 		elseif key == "orange" then
-			return ORANGE_FONT_COLOR
+			return ORANGE_COLOR
 		elseif key == "yellow" then
-			return YELLOW_FONT_COLOR
+			return YELLOW_COLOR
 		elseif key == "green" then
-			return GREEN_FONT_COLOR
+			return GREEN_COLOR
+		elseif key == "purple" then
+			return PURPLE_COLOR
 		else
-			return RED_FONT_COLOR
+			return RED_COLOR
 		end
 	end
 
@@ -60,11 +64,13 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		log.id = data.spellid
 		log.sch = data.spellschool
 		log.src = data.srcName
+		log.cri = data.critical
 		log.time = set.last_time or GetTime()
 		_, log.hp = UnitHealthInfo(player.name, player.id, "group")
 
 		if data.amount then
 			deathlog.time = log.time
+			log.deb = nil
 			if data.amount ~= 0 then
 				log.amt = data.amount
 
@@ -74,7 +80,10 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 					deathlog.src = log.src
 				end
 			end
+		elseif data.debuff then
+			log.deb = 1
 		end
+
 		if data.overheal and data.overheal > 0 then
 			log.ovh = data.overheal
 		end
@@ -104,9 +113,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 	local function spell_damage(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if event == "SWING_DAMAGE" then
 			data.spellid, data.spellschool = 6603, 0x01
-			data.amount, data.overkill, _, data.resisted, data.blocked, data.absorbed = ...
+			data.amount, data.overkill, _, data.resisted, data.blocked, data.absorbed, data.critical = ...
 		else
-			data.spellid, _, data.spellschool, data.amount, data.overkill, _, data.resisted, data.blocked, data.absorbed = ...
+			data.spellid, _, data.spellschool, data.amount, data.overkill, _, data.resisted, data.blocked, data.absorbed, data.critical = ...
 		end
 
 		if data.amount then
@@ -142,6 +151,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			data.amount = nil
 			data.overkill = nil
 			data.overheal = nil
+			data.debuff = nil
 
 			if misstype == "RESIST" then
 				data.resisted = amount
@@ -206,6 +216,8 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			data.resisted = nil
 			data.blocked = nil
 			data.absorbed = nil
+			data.critical = nil
+			data.debuff = nil
 
 			Skada:DispatchSets(log_deathlog, data)
 		end
@@ -261,7 +273,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		end
 	end
 
-	local function aura_applied(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
+	local function sor_applied(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
 		if spellid == 27827 then -- Spirit of Redemption (Holy Priest)
 			Skada:ScheduleTimer(function() unit_died(nil, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags) end, 0.01)
 		end
@@ -313,8 +325,33 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			data.resisted = nil
 			data.blocked = nil
 			data.absorbed = nil
+			data.critical = nil
+			data.debuff = nil
 
 			Skada:DispatchSets(log_deathlog, data, true)
+		end
+	end
+
+	local function debuff_applied(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
+		if auratype == "DEBUFF" and spellid and not ignoredSpells[spellid] then
+			data.spellid = spellid
+			data.spellschool = spellschool
+			data.debuff = true
+
+			data.srcName = srcName
+			data.playerid = dstGUID
+			data.playername = dstName
+			data.playerflags = dstFlags
+
+			data.amount = nil
+			data.overkill = nil
+			data.overheal = nil
+			data.resisted = nil
+			data.blocked = nil
+			data.absorbed = nil
+			data.critical = nil
+
+			Skada:DispatchSets(log_deathlog, data)
 		end
 	end
 
@@ -418,7 +455,10 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 						d.valuetext = d.source
 					else
 						local change, color = d.amount, get_color("red")
-						if change > 0 then
+						if log.deb then
+							change = L["debuff"]
+							color = get_color("purple")
+						elseif change > 0 then
 							change = "+" .. Skada:FormatNumber(change)
 							color = get_color("green")
 						elseif change == 0 and (log.res or log.blo or log.abs) then
@@ -427,6 +467,8 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 						elseif log.ovh then
 							change = "+" .. Skada:FormatNumber(log.ovh)
 							color = get_color("yellow")
+						elseif log.cri then
+							change = format("%s (%s)", Skada:FormatNumber(change), L["Crit"])
 						else
 							change = Skada:FormatNumber(change)
 						end
@@ -586,7 +628,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 						local first_death = player.deathlog[#player.deathlog]
 						if first_death and first_death.time then
 							d.value = first_death.time
-							d.color = (WATCH and first_death.time) and GRAY_FONT_COLOR or nil
+							d.color = (WATCH and first_death.time) and GRAY_COLOR or nil
 						end
 					end
 				else
@@ -621,7 +663,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 						d.id = format("%s::%d", p.id, j)
 
 						if death.timeod then
-							d.color = WATCH and GRAY_FONT_COLOR or nil
+							d.color = WATCH and GRAY_COLOR or nil
 							d.value = death.time
 							d.valuetext = Skada:FormatValueCols(
 								self.metadata.columns.Time and date("%H:%M:%S", death.timeod),
@@ -728,7 +770,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		local flags_dst_nopets = {dst_is_interesting_nopets = true}
 
 		Skada:RegisterForCL(
-			aura_applied,
+			sor_applied,
 			"SPELL_AURA_APPLIED",
 			flags_dst_nopets
 		)
@@ -789,8 +831,15 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			{src_is_interesting = true, dst_is_not_interesting = true}
 		)
 
+		flags_dst_nopets.src_is_not_interesting = true
+		Skada:RegisterForCL(debuff_applied, "SPELL_AURA_APPLIED", flags_dst_nopets)
+
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self)
+
+		if Skada.ignoredSpells and Skada.ignoredSpells.debuffs then
+			ignoredSpells = Skada.ignoredSpells.debuffs
+		end
 	end
 
 	function mod:OnDisable()
@@ -1054,6 +1103,12 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 						name = L["Avoidance & Mitigation"],
 						desc = format(L["Color for %s."], L["Avoidance & Mitigation"]),
 						order = 20
+					},
+					purple = {
+						type = "color",
+						name = L["Debuffs"],
+						desc = format(L["Color for %s."], L["Debuffs"]),
+						order = 30
 					}
 				}
 			}

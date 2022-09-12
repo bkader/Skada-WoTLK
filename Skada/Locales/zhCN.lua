@@ -234,7 +234,6 @@ L["Font Color.\nClick \"Class Colors\" to begin."] = "字体的颜色。\n点击
 L["opt_barwidth_desc"] = "统计条的宽度。此项仅在“固定统计条宽度”选项启用后生效。"
 L["Fixed bar width"] = "固定统计条宽度"
 L["opt_fixedbarwidth_desc"] = "勾选后，统计条的宽度固定。否则，统计条宽度取决于文字长度。"
-L["Class Colors"] = "班级颜色"
 L["Use class colors for %s."] = "对 %s 使用类颜色。"
 L["opt_isusingclasscolors_desc"] = "职业颜色：\n\124cFFF58CBAKader\124r - 5.71M (21.7K)\n\n普通颜色：\nKader - 5.71M (21.7K)"
 L["Put values on new line."] = "提行显示数值"
@@ -322,8 +321,8 @@ L["opt_feed_desc"] = "选择显示在DataBroker上的数据反馈。需要一个
 L["Time Measure"] = "时间测量"
 L["Activity Time"] = "活跃时间"
 L["Effective Time"] = "有效时间"
-L["opt_timemesure_desc"] = [=[\124cFFFFFF00活跃\124r：每个团队成员的计时器将在其活动停止后暂停，并在恢复活跃时再次计时。这是测量DPS和HPS的常用方法。
-\124cFFFFFF00有效\124r：用于排名，此方法使用经历的战斗时间来测量全部团队成员的DPS和HPS。]=]
+L["opt_timemesure_desc"] = [=[|cFFFFFF00活跃|r：每个团队成员的计时器将在其活动停止后暂停，并在恢复活跃时再次计时。这是测量DPS和HPS的常用方法。
+|cFFFFFF00有效|r：用于排名，此方法使用经历的战斗时间来测量全部团队成员的DPS和HPS。]=]
 L["Number set duplicates"] = "数字集重复"
 L["Append a count to set names with duplicate mob names."] = "在集合名称中附加一个重复怪物名字的计数。"
 L["Set Format"] = "集合格式"
@@ -470,11 +469,11 @@ L["opt_threat_notankwarnings_desc"] = "如果在防御姿态、熊形态、正�
 L["Ignore Pets"] = "忽略宠物"
 L["opt_threat_ignorepets_desc"] = [=[让 Skada 忽略敌对玩家宠物以确定显示哪些单位的威胁。
 
-玩家宠物\124cffffff78攻击\124r或者\124cffffff78防御\124r状态保持威胁与正常的怪物相同，正被攻击目标具有最高的威胁。如果宠物指定攻击一个具体目标，宠物仍然保持在威胁列表，但保持在指定的目标定义100%威胁之上。可以玩家宠物嘲讽以攻击你。
+玩家宠物|cffffff78攻击|r或者|cffffff78防御|r状态保持威胁与正常的怪物相同，正被攻击目标具有最高的威胁。如果宠物指定攻击一个具体目标，宠物仍然保持在威胁列表，但保持在指定的目标定义100%威胁之上。可以玩家宠物嘲讽以攻击你。
 
-然而，玩家宠物在\124cffffff78被动\124r模式并没有威胁列表，嘲讽依然不起作用。它们只攻击指定的目标和指令时没有仇恨列表。
+然而，玩家宠物在|cffffff78被动|r模式并没有威胁列表，嘲讽依然不起作用。它们只攻击指定的目标和指令时没有仇恨列表。
 
-当玩家宠物处于\124cffffff78跟随\124r状态时，宠物的威胁列表被消除并立刻停止攻击，虽然它可能会立即重新指定目标位于攻击/防御模式。]=]
+当玩家宠物处于|cffffff78跟随|r状态时，宠物的威胁列表被消除并立刻停止攻击，虽然它可能会立即重新指定目标位于攻击/防御模式。]=]
 L["> Pull Aggro <"] = ">获得仇恨<"
 L["Show Pull Aggro Bar"] = "显示获得仇恨计量条"
 L["opt_threat_showaggrobar_desc"] = "显示一个数值威胁计量条，以帮助获得仇恨。"
@@ -619,6 +618,7 @@ L["Death log"] = "死亡记录"
 L["%s's death log"] = "%s的死亡记录"
 L["Player's deaths"] = "玩家的死亡"
 L["%s dies"] = "%s死了"
+L["debuff"] = "减益"
 L["Spell details"] = "法术详情"
 L["Spell"] = "法术"
 L["Amount"] = "数量"
