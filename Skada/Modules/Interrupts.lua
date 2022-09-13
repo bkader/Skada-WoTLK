@@ -11,6 +11,17 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 	local pairs, tostring, format, pformat = pairs, tostring, string.format, Skada.pformat
 	local GetSpellInfo, GetSpellLink = Skada.GetSpellInfo or GetSpellInfo, Skada.GetSpellLink or GetSpellLink
 
+	local function format_valuetext(d, columns, total, metadata, subview)
+		d.valuetext = Skada:FormatValueCols(
+			columns.Count and d.value,
+			columns[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
+		)
+
+		if metadata and d.value > metadata.maxvalue then
+			metadata.maxvalue = d.value
+		end
+	end
+
 	local function log_interrupt(set, data)
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if not player then return end
@@ -103,14 +114,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 			local d = win:spell(nr, spellid)
 
 			d.value = count
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Count and d.value,
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
 		end
 	end
 
@@ -139,14 +143,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 			local d = win:actor(nr, target, true, targetname)
 
 			d.value = target.count
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Count and d.value,
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
 		end
 	end
 
@@ -174,14 +171,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 			local d = win:spell(nr, spellid)
 
 			d.value = spell.count
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Count and d.value,
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
 		end
 	end
 
@@ -204,14 +194,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 				local d = win:actor(nr, player)
 
 				d.value = player.interrupt
-				d.valuetext = Skada:FormatValueCols(
-					self.metadata.columns.Count and d.value,
-					self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, self.metadata.columns, total, win.metadata)
 			end
 		end
 	end

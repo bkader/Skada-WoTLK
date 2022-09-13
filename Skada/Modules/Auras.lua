@@ -1,17 +1,16 @@
 local Skada = Skada
 
-local format, pformat, tostring = string.format, Skada.pformat, tostring
-local pairs, min, max, floor = pairs, math.min, math.max, math.floor
+local format, pformat = string.format, Skada.pformat
+local pairs, min, floor = pairs, math.min, math.floor
 local UnitName, UnitGUID, UnitBuff = UnitName, UnitGUID, UnitBuff
 local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
-local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local PercentToRGB = Skada.PercentToRGB
 local _
 
 -- common functions
 local log_auraapply, log_aurarefresh, log_auraremove
 local mod_update_func, aura_update_func, aura_tooltip
-local spellschools = nil
+local format_valuetext, spellschools = nil, nil
 
 -- main module that handles common stuff
 do
@@ -31,50 +30,50 @@ do
 	end
 
 	function mod:Clean(_, set, curtime)
-		if set then
-			local maxtime = Skada:GetSetTime(set)
-			curtime = curtime or set.last_action or time()
+		if not set then return end
 
-			for i = 1, #set.players do
-				local player = set.players[i]
-				if player and player.auras then
-					for spellid, spell in pairs(player.auras) do
-						if spell.active ~= nil and spell.start then
-							spell.uptime = min(maxtime, spell.uptime + floor((curtime - spell.start) + 0.5))
-						end
-						-- remove temporary keys
-						spell.active, spell.start = nil, nil
+		local maxtime = Skada:GetSetTime(set)
+		curtime = curtime or set.last_action or time()
 
-						if spell.uptime == 0 then
-							-- remove spell with 0 uptime.
-							player.auras[spellid] = del(player.auras[spellid], true)
-						elseif spell.targets then
-							-- debuff targets
-							for name, target in pairs(spell.targets) do
-								if target.active ~= nil and target.start then
-									target.uptime = min(spell.uptime, target.uptime + floor((curtime - target.start) + 0.5))
-								end
+		for i = 1, #set.players do
+			local player = set.players[i]
+			if player and player.auras then
+				for spellid, spell in pairs(player.auras) do
+					if spell.active ~= nil and spell.start then
+						spell.uptime = min(maxtime, spell.uptime + floor((curtime - spell.start) + 0.5))
+					end
+					-- remove temporary keys
+					spell.active, spell.start = nil, nil
 
-								-- remove targets with 0 uptime.
-								if target.uptime == 0 then
-									spell.targets[name] = del(spell.targets[name])
-								else
-									-- remove temporary keys
-									target.active, target.start = nil, nil
-								end
+					if spell.uptime == 0 then
+						-- remove spell with 0 uptime.
+						player.auras[spellid] = del(player.auras[spellid], true)
+					elseif spell.targets then
+						-- debuff targets
+						for name, target in pairs(spell.targets) do
+							if target.active ~= nil and target.start then
+								target.uptime = min(spell.uptime, target.uptime + floor((curtime - target.start) + 0.5))
 							end
 
-							-- an empty targets table? Remove it
-							if next(spell.targets) == nil then
-								player.auras[spellid] = del(player.auras[spellid])
+							-- remove targets with 0 uptime.
+							if target.uptime == 0 then
+								spell.targets[name] = del(spell.targets[name])
+							else
+								-- remove temporary keys
+								target.active, target.start = nil, nil
 							end
 						end
-					end
 
-					-- remove table if no auras left
-					if next(player.auras) == nil then
-						player.auras = del(player.auras)
+						-- an empty targets table? Remove it
+						if next(spell.targets) == nil then
+							player.auras[spellid] = del(player.auras[spellid])
+						end
 					end
+				end
+
+				-- remove table if no auras left
+				if next(player.auras) == nil then
+					player.auras = del(player.auras)
 				end
 			end
 		end
@@ -93,9 +92,9 @@ do
 		local spellid = (aura.type == "DEBUFF") and -aura.spellid or aura.spellid
 		local spell = player.auras and player.auras[spellid]
 		if not spell then
-			spell = {school = aura.spellschool, active = 1, count = 1, uptime = 0, start = curtime}
 			player.auras = player.auras or {}
-			player.auras[spellid] = spell
+			player.auras[spellid] = {school = aura.spellschool, active = 1, count = 1, uptime = 0, start = curtime}
+			spell = player.auras[spellid]
 		else
 			spell.active = (spell.active or 0) + 1
 			spell.count = (spell.count or 0) + 1
@@ -108,15 +107,16 @@ do
 		end
 
 		-- only records targets for debuffs
-		if aura.type == "DEBUFF" and aura.dstName then
+		if aura.type ~= "DEBUFF" or not aura.dstName then return end
+
+		local target = spell.targets and spell.targets[aura.dstName]
+		if not target then
 			spell.targets = spell.targets or {}
-			if not spell.targets[aura.dstName] then
-				spell.targets[aura.dstName] = {count = 1, active = 1, uptime = 0, start = curtime}
-			else
-				spell.targets[aura.dstName].active = (spell.targets[aura.dstName].active or 0) + 1
-				spell.targets[aura.dstName].count = (spell.targets[aura.dstName].count or 0) + 1
-				spell.targets[aura.dstName].start = spell.targets[aura.dstName].start or curtime
-			end
+			spell.targets[aura.dstName] = {count = 1, active = 1, uptime = 0, start = curtime}
+		else
+			target.active = (target.active or 0) + 1
+			target.count = (target.count or 0) + 1
+			target.start = target.start or curtime
 		end
 	end
 
@@ -132,8 +132,9 @@ do
 
 		if spell and spell.active and spell.active > 0 then
 			spell.refresh = (spell.refresh or 0) + 1
-			if spell.targets and aura.dstName and spell.targets[aura.dstName] then
-				spell.targets[aura.dstName].refresh = (spell.targets[aura.dstName].refresh or 0) + 1
+			local target = spell.targets and aura.dstName and spell.targets[aura.dstName]
+			if target then
+				target.refresh = (target.refresh or 0) + 1
 			end
 		end
 	end
@@ -157,13 +158,28 @@ do
 			end
 
 			-- targets
-			if spell.targets and aura.dstName and spell.targets[aura.dstName] and spell.targets[aura.dstName].active and spell.targets[aura.dstName].active > 0 then
-				spell.targets[aura.dstName].active = spell.targets[aura.dstName].active - 1
-				if spell.targets[aura.dstName].active == 0 and spell.targets[aura.dstName].start then
-					spell.targets[aura.dstName].uptime = spell.targets[aura.dstName].uptime + floor((curtime - spell.targets[aura.dstName].start) + 0.5)
-					spell.targets[aura.dstName].start = nil
+			local target = spell.targets and aura.dstName and spell.targets[aura.dstName]
+			if target and target.active and target.active > 0 then
+				target.active = target.active - 1
+				if target.active == 0 and target.start then
+					target.uptime = target.uptime + floor((curtime - target.start) + 0.5)
+					target.start = nil
 				end
 			end
+		end
+	end
+
+	function format_valuetext(d, columns, count, uptime, metadata, subview, no_order)
+		d.valuetext = Skada:FormatValueCols(
+			columns.Uptime and Skada:FormatTime(d.value),
+			columns.Count and Skada:FormatNumber(count),
+			columns[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, uptime)
+		)
+
+		if no_order then
+			return
+		elseif metadata and d.value > metadata.maxvalue then
+			metadata.maxvalue = d.value
 		end
 	end
 
@@ -191,7 +207,7 @@ do
 			return count, uptime
 		end
 
-		function mod_update_func(atype, win, set, mode)
+		function mod_update_func(self, atype, win, set)
 			if not atype then return end
 			local settime = set and set:GetTime()
 
@@ -212,22 +228,14 @@ do
 
 						local maxtime = floor(player:GetTime())
 						d.value = min(floor(aurauptime / auracount), maxtime)
-						d.valuetext = Skada:FormatValueCols(
-							mode.metadata.columns.Uptime and Skada:FormatTime(d.value),
-							mode.metadata.columns.Count and auracount,
-							mode.metadata.columns.Percent and Skada:FormatPercent(d.value, maxtime)
-						)
-
-						if win.metadata and d.value > win.metadata.maxvalue then
-							win.metadata.maxvalue = d.value
-						end
+						format_valuetext(d, self.metadata.columns, auracount, maxtime, win.metadata)
 					end
 				end
 			end
 		end
 	end
 
-	function aura_update_func(atype, win, set, mode)
+	function aura_update_func(self, atype, win, set)
 		if not atype then return end
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
@@ -246,15 +254,7 @@ do
 				local d = win:spell(nr, spellid, spell, nil, nil, true)
 
 				d.value = min(maxtime, spell.uptime)
-				d.valuetext = Skada:FormatValueCols(
-					mode.metadata.columns.Uptime and Skada:FormatTime(d.value),
-					mode.metadata.columns.Count and spell.count,
-					mode.metadata.columns.sPercent and Skada:FormatPercent(d.value, maxtime)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, self.metadata.columns, spell.count, maxtime, win.metadata, true)
 			end
 		end
 	end
@@ -320,7 +320,7 @@ Skada:RegisterModule("Buffs", function(L, P, _, C, new, _, clear)
 	end
 
 	local aura = {type = "BUFF"}
-	local function handle_buff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
+	local function handle_buff(_, event, _, _, _, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
 		if
 			spellid and -- just in case, you never know!
 			not ignoredSpells[spellid] and
@@ -372,14 +372,7 @@ Skada:RegisterModule("Buffs", function(L, P, _, C, new, _, clear)
 			local d = win:actor(nr, player, nil, playername)
 
 			d.value = player.uptime
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Uptime and Skada:FormatTime(d.value),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, player.maxtime)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, nil, player.maxtime, win.metadata, true)
 		end
 	end
 
@@ -390,12 +383,12 @@ Skada:RegisterModule("Buffs", function(L, P, _, C, new, _, clear)
 
 	function spellmod:Update(win, set)
 		win.title = pformat(L["%s's buffs"], win.actorname)
-		aura_update_func("BUFF", win, set, mod)
+		aura_update_func(mod, "BUFF", win, set)
 	end
 
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Buffs"], L[win.class]) or L["Buffs"]
-		mod_update_func("BUFF", win, set, self)
+		mod_update_func(self, "BUFF", win, set)
 	end
 
 	do
@@ -404,12 +397,10 @@ Skada:RegisterModule("Buffs", function(L, P, _, C, new, _, clear)
 			local dstGUID, dstName = UnitGUID(unit), UnitName(unit)
 			for i = 1, 40 do
 				local _, rank, _, _, _, _, _, unitCaster, _, _, spellid = UnitBuff(unit, i)
-				if spellid then
-					if unitCaster and rank ~= SPELL_PASSIVE then
-						handle_buff(nil, "SPELL_AURA_APPLIED", UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, nil, nil, "BUFF")
-					end
-				else
+				if not spellid then
 					break -- nothing found!
+				elseif unitCaster and rank ~= SPELL_PASSIVE then
+					handle_buff(nil, "SPELL_AURA_APPLIED", nil, nil, nil, dstGUID, dstName, nil, spellid, nil, nil, "BUFF")
 				end
 			end
 		end
@@ -492,21 +483,20 @@ Skada:RegisterModule("Buffs", function(L, P, _, C, new, _, clear)
 			return nil, count
 		end
 
-
 		tbl = clear(tbl or C)
 		for i = 1, #self.players do
 			local p = self.players[i]
 			if p and p.auras and p.auras[spellid] then
-				local maxtime = floor(p:GetTime())
-				local uptime = min(maxtime, p.auras[spellid].uptime)
 				count = count + 1
-				tbl[p.name] = new()
-				tbl[p.name].id = p.id
-				tbl[p.name].class = p.class
-				tbl[p.name].role = p.role
-				tbl[p.name].spec = p.spec
-				tbl[p.name].uptime = uptime
-				tbl[p.name].maxtime = maxtime
+
+				local t = new()
+				t.id = p.id
+				t.class = p.class
+				t.role = p.role
+				t.spec = p.spec
+				t.maxtime = floor(p:GetTime())
+				t.uptime = min(t.maxtime, p.auras[spellid].uptime)
+				tbl[p.name] = t
 			end
 		end
 		return tbl, count
@@ -593,15 +583,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 			local d = win:spell(nr, spellid, aura, nil, nil, true)
 
 			d.value = aura.uptime
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Uptime and Skada:FormatTime(d.value),
-				mod.metadata.columns.Count and aura.count,
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, maxtime)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, aura.count, maxtime, win.metadata, true)
 		end
 	end
 
@@ -631,15 +613,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 			local d = win:actor(nr, target, true, targetname)
 
 			d.value = target.uptime
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Uptime and Skada:FormatTime(d.value),
-				mod.metadata.columns.Count and target.count,
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, maxtime)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, target.count, maxtime, win.metadata, true)
 		end
 	end
 
@@ -661,11 +635,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 				local d = win:actor(nr, player)
 
 				d.value = aura.uptime
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Uptime and Skada:FormatTime(d.value),
-					mod.metadata.columns.Count and aura.count,
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, player:GetTime())
-				)
+				format_valuetext(d, mod.metadata.columns, aura.count, player:GetTime(), win.metadata, true, true)
 			end
 		end
 	end
@@ -695,15 +665,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 			local d = win:actor(nr, target, true, targetname)
 
 			d.value = target.uptime
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Uptime and Skada:FormatTime(d.value),
-				mod.metadata.columns.Count and target.count,
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, maxtime)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, target.count, maxtime, win.metadata, true)
 		end
 	end
 
@@ -714,12 +676,12 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 
 	function spellmod:Update(win, set)
 		win.title = L["actor debuffs"](win.actorname or L["Unknown"])
-		aura_update_func("DEBUFF", win, set, mod)
+		aura_update_func(mod, "DEBUFF", win, set)
 	end
 
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Debuffs"], L[win.class]) or L["Debuffs"]
-		mod_update_func("DEBUFF", win, set, self)
+		mod_update_func(self, "DEBUFF", win, set)
 	end
 
 	local function aura_target_tooltip(win, id, label, tooltip)

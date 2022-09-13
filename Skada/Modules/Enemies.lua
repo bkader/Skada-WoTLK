@@ -1,9 +1,8 @@
 local Skada = Skada
 
 -- frequently used globals --
-local pairs, type, max = pairs, type, math.max
-local format, pformat = string.format, Skada.pformat
-local GetSpellInfo, T = Skada.GetSpellInfo or GetSpellInfo, Skada.Table
+local pairs, type, max, format = pairs, type, math.max, string.format
+local pformat, T = Skada.pformat, Skada.Table
 local setPrototype, enemyPrototype = Skada.setPrototype, Skada.enemyPrototype
 local _
 
@@ -48,6 +47,18 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 		["25n"] = true, -- 25man Normal
 		["25h"] = true, -- 25man Heroic
 	}
+
+	local function format_valuetext(d, columns, total, dtps, metadata, subview)
+		d.valuetext = Skada:FormatValueCols(
+			columns.Damage and Skada:FormatNumber(d.value),
+			columns[subview and "sDTPS" or "DTPS"] and Skada:FormatNumber(dtps),
+			columns[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
+		)
+
+		if metadata and d.value > metadata.maxvalue then
+			metadata.maxvalue = d.value
+		end
+	end
 
 	local function get_instance_diff()
 		instanceDiff = instanceDiff or Skada:GetInstanceDiff() or "NaN"
@@ -449,15 +460,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 				local d = win:actor(nr, source, nil, sourcename)
 
 				d.value = source.amount
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -495,15 +498,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 					d.value = source.total
 				end
 
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -542,15 +537,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 						d.value = spell.sources[win.actorname].total
 					end
 
-					d.valuetext = Skada:FormatValueCols(
-						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-						actortime and Skada:FormatNumber(d.value / actortime),
-						mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+					format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 				end
 			end
 		end
@@ -583,15 +570,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 				d.value = spell.total
 			end
 
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-				actortime and Skada:FormatNumber(d.value / actortime),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -623,15 +602,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 				local d = win:actor(nr, source, nil, sourcename)
 
 				d.value = source.useful
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -656,15 +627,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 					local d = win:actor(nr, enemy, true)
 
 					d.value = amount
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Damage and Skada:FormatNumber(d.value),
-						self.metadata.columns.DTPS and Skada:FormatNumber(dtps),
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
-
-					if win.metadata and not enemy.fake and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+					format_valuetext(d, self.metadata.columns, total, dtps, win.metadata)
 				end
 			end
 		end
@@ -914,6 +877,18 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
+	local function format_valuetext(d, columns, total, dps, metadata, subview)
+		d.valuetext = Skada:FormatValueCols(
+			columns.Damage and Skada:FormatNumber(d.value),
+			columns[subview and "sDPS" or "DPS"] and dps and Skada:FormatNumber(dps),
+			columns[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
+		)
+
+		if metadata and d.value > metadata.maxvalue then
+			metadata.maxvalue = d.value
+		end
+	end
+
 	local function log_damage(set, dmg, isdot)
 		if not set or (set == Skada.total and not P.totalidc) then return end
 
@@ -1063,15 +1038,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 			local d = win:spell(nr, spellid, spell)
 
 			d.value = spell.amount
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-				actortime and Skada:FormatNumber(d.value / actortime),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -1106,15 +1073,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 				local d = win:actor(nr, target, nil, targetname)
 
 				d.value = target.amount
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -1152,15 +1111,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 					d.value = target.total
 				end
 
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -1192,15 +1143,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 				d.value = spell.total
 			end
 
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-				actortime and Skada:FormatNumber(d.value / actortime),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -1225,15 +1168,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 					local d = win:actor(nr, enemy, true)
 
 					d.value = amount
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Damage and Skada:FormatNumber(d.value),
-						self.metadata.columns.DPS and Skada:FormatNumber(dps),
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+					format_valuetext(d, self.metadata.columns, total, dps, win.metadata)
 				end
 			end
 		end
@@ -1397,6 +1332,18 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
+	local function format_valuetext(d, columns, total, dps, metadata, subview)
+		d.valuetext = Skada:FormatValueCols(
+			columns.Healing and Skada:FormatNumber(d.value),
+			columns[subview and "sHPS" or "HPS"] and hps and Skada:FormatNumber(dps),
+			columns[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
+		)
+
+		if metadata and d.value > metadata.maxvalue then
+			metadata.maxvalue = d.value
+		end
+	end
+
 	local function log_heal(set, data, ishot)
 		if not set or (set == Skada.total and not P.totalidc) then return end
 
@@ -1473,15 +1420,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 			local d = win:actor(nr, target, true, targetname)
 
 			d.value = target.amount
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
-				actortime and Skada:FormatNumber(d.value / actortime),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -1508,15 +1447,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 			local d = win:spell(nr, spellid, spell, true)
 
 			d.value = spell.amount
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
-				actortime and Skada:FormatNumber(d.value / actortime),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -1544,15 +1475,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 					local d = win:actor(nr, enemy, true)
 
 					d.value = amount
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Healing and Skada:FormatNumber(d.value),
-						self.metadata.columns.HPS and Skada:FormatNumber(hps),
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+					format_valuetext(d, self.metadata.columns, total, hps, win.metadata)
 				end
 			end
 		end

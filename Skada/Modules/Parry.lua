@@ -20,6 +20,17 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 		[L["Sapphiron"]] = true,
 	}
 
+	local function format_valuetext(d, columns, total, metadata, subview)
+		d.valuetext = Skada:FormatValueCols(
+			columns.Count and d.value,
+			columns[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
+		)
+
+		if metadata and d.value > metadata.maxvalue then
+			metadata.maxvalue = d.value
+		end
+	end
+
 	local function log_parry(set, data)
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if not player then return end
@@ -82,14 +93,7 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 			d.class = "BOSS" -- what else can it be?
 
 			d.value = count
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Count and d.value,
-				mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
 		end
 	end
 
@@ -112,14 +116,7 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 				local d = win:actor(nr, player)
 
 				d.value = player.parry
-				d.valuetext = Skada:FormatValueCols(
-					self.metadata.columns.Count and d.value,
-					self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, self.metadata.columns, total, win.metadata)
 			end
 		end
 	end
@@ -131,7 +128,7 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 			click1 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			columns = {Count = true, Percent = false},
+			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\ability_parry]]
 		}
 

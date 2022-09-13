@@ -5,6 +5,18 @@ local pairs, format, pformat, max = pairs, string.format, Skada.pformat, math.ma
 local GetSpellInfo, T = Skada.GetSpellInfo or GetSpellInfo, Skada.Table
 local _
 
+local function format_valuetext(d, columns, total, hps, metadata, subview)
+	d.valuetext = Skada:FormatValueCols(
+		columns.Healing and Skada:FormatNumber(d.value),
+		columns[subview and "sHPS" or "HPS"] and hps and Skada:FormatNumber(hps),
+		columns[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
+	)
+
+	if metadata and d.value > metadata.maxvalue then
+		metadata.maxvalue = d.value
+	end
+end
+
 -- ============== --
 -- Healing module --
 -- ============== --
@@ -256,15 +268,7 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 				local d = win:spell(nr, spellid, spell, nil, true)
 
 				d.value = enemy and spell.targets[win.targetname] or spell.targets[win.targetname].amount or 0
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
-					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -293,15 +297,7 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 			local d = win:spell(nr, spellid, spell, nil, true)
 
 			d.value = spell.amount
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
-				actortime and Skada:FormatNumber(d.value / actortime),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -331,15 +327,7 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 			local d = win:actor(nr, target, nil, targetname)
 
 			d.value = target.amount
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
-				actortime and Skada:FormatNumber(d.value / actortime),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -370,15 +358,7 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 					end
 
 					d.value = amount
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Healing and Skada:FormatNumber(d.value),
-						self.metadata.columns.HPS and Skada:FormatNumber(hps),
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+					format_valuetext(d, self.metadata.columns, total, hps, win.metadata)
 				end
 			end
 		end
@@ -395,15 +375,7 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 					d.value = amount
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Healing and Skada:FormatNumber(d.value),
-						self.metadata.columns.HPS and Skada:FormatNumber(hps),
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+					format_valuetext(d, self.metadata.columns, total, hps, win.metadata)
 				end
 			end
 		end
@@ -508,6 +480,18 @@ Skada:RegisterModule("Overhealing", function(L)
 	local targetmod = mod:NewModule("Overhealed target list")
 	local spellmod = targetmod:NewModule("Overheal spell list")
 
+	local function fmt_valuetext(d, columns, total, dps, metadata, subview)
+		d.valuetext = Skada:FormatValueCols(
+			columns.Overhealing and Skada:FormatNumber(d.value),
+			columns[subview and "sHPS" or "HPS"] and Skada:FormatNumber(dps),
+			columns[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
+		)
+
+		if metadata and d.value > metadata.maxvalue then
+			metadata.maxvalue = d.value
+		end
+	end
+
 	function spellmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
 		win.title = L["actor overheal spells"](win.actorname or L["Unknown"], label)
@@ -532,16 +516,8 @@ Skada:RegisterModule("Overhealing", function(L)
 				nr = nr + 1
 				local d = win:spell(nr, spellid, spell, nil, true)
 
-				d.value = spell.targets[win.targetname].o_amt / (spell.targets[win.targetname].amount + spell.targets[win.targetname].o_amt)
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Overhealing and Skada:FormatNumber(spell.targets[win.targetname].o_amt),
-					actortime and Skada:FormatNumber(spell.targets[win.targetname].o_amt / actortime),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(100 * d.value)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				d.value = spell.targets[win.targetname].o_amt
+				fmt_valuetext(d, mod.metadata.columns, spell.targets[win.targetname].amount + d.value, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -570,16 +546,8 @@ Skada:RegisterModule("Overhealing", function(L)
 				nr = nr + 1
 				local d = win:spell(nr, spellid, spell, nil, true)
 
-				d.value = spell.o_amt / (spell.amount + spell.o_amt)
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Overhealing and Skada:FormatNumber(spell.o_amt),
-					actortime and Skada:FormatNumber(spell.o_amt / actortime),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(100 * d.value)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				d.value = spell.o_amt
+				fmt_valuetext(d, mod.metadata.columns, spell.amount + spell.o_amt, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -609,15 +577,7 @@ Skada:RegisterModule("Overhealing", function(L)
 			local d = win:actor(nr, target, nil, targetname)
 
 			d.value = target.amount
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Overhealing and Skada:FormatNumber(target.amount),
-				actortime and Skada:FormatNumber(target.amount / actortime),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, target.total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			fmt_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -643,15 +603,7 @@ Skada:RegisterModule("Overhealing", function(L)
 
 					local overall = player.heal + player.overheal
 					d.value = player.overheal
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Overhealing and Skada:FormatNumber(d.value),
-						self.metadata.columns.HPS and Skada:FormatNumber(ohps),
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, overall)
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+					fmt_valuetext(d, self.metadata.columns, total, ohps, win.metadata)
 				end
 			end
 		end
@@ -794,15 +746,7 @@ Skada:RegisterModule("Total Healing", function(L)
 					end
 				end
 
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
-					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -833,15 +777,7 @@ Skada:RegisterModule("Total Healing", function(L)
 				local d = win:spell(nr, spellid, spell, nil, true)
 
 				d.value = amount
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
-					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -870,15 +806,7 @@ Skada:RegisterModule("Total Healing", function(L)
 			local d = win:actor(nr, target, nil, targetname)
 
 			d.value = target.amount
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
-				actortime and Skada:FormatNumber(d.value / actortime),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -909,15 +837,7 @@ Skada:RegisterModule("Total Healing", function(L)
 					end
 
 					d.value = amount
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Healing and Skada:FormatNumber(d.value),
-						self.metadata.columns.HPS and Skada:FormatNumber(hps),
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+					format_valuetext(d, self.metadata.columns, total, hps, win.metadata)
 				end
 			end
 		end
@@ -934,15 +854,7 @@ Skada:RegisterModule("Total Healing", function(L)
 					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 					d.value = amount
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Healing and Skada:FormatNumber(d.value),
-						self.metadata.columns.HPS and Skada:FormatNumber(hps),
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+					format_valuetext(d, self.metadata.columns, total, hps, win.metadata)
 				end
 			end
 		end
@@ -1059,15 +971,7 @@ Skada:RegisterModule("Healing Taken", function(L, P, _, _, new, _, clear)
 					local d = win:spell(nr, spellid, spell)
 
 					d.value = spell.targets[win.actorname]
-					d.valuetext = Skada:FormatValueCols(
-						mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
-						actortime and Skada:FormatNumber(d.value / actortime),
-						mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+					format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 				end
 			end
 		end
@@ -1079,15 +983,7 @@ Skada:RegisterModule("Healing Taken", function(L, P, _, _, new, _, clear)
 					local d = win:spell(nr, spellid, spell, nil, true)
 
 					d.value = enemy and spell.targets[win.actorname] or spell.targets[win.actorname].amount or 0
-					d.valuetext = Skada:FormatValueCols(
-						mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
-						actortime and Skada:FormatNumber(d.value / actortime),
-						mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+					format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 				end
 			end
 		end
@@ -1119,15 +1015,7 @@ Skada:RegisterModule("Healing Taken", function(L, P, _, _, new, _, clear)
 			local d = win:actor(nr, source, nil, sourcename)
 
 			d.value = source.amount
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Healing and Skada:FormatNumber(d.value),
-				actortime and Skada:FormatNumber(d.value / actortime),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -1150,15 +1038,7 @@ Skada:RegisterModule("Healing Taken", function(L, P, _, _, new, _, clear)
 				local d = win:actor(nr, player, nil, playername)
 
 				d.value = player.amount
-				d.valuetext = Skada:FormatValueCols(
-					self.metadata.columns.Healing and Skada:FormatNumber(d.value),
-					self.metadata.columns.HPS and Skada:FormatNumber(d.value / player.time),
-					self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, self.metadata.columns, total, d.value / player.time, win.metadata)
 			end
 		end
 	end

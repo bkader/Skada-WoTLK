@@ -94,15 +94,21 @@ function setPrototype:GetActorTime(id, name, active)
 end
 
 -- fills the give table with actor's details
-function setPrototype:_fill_actor_table(t, name)
-	if t and not t.class then
+function setPrototype:_fill_actor_table(t, name, actortime)
+	if t and (not t.class or not t.time) then
 		local actor = self:GetActor(name)
-		if actor then
-			t.id = actor.id
-			t.class = actor.class
-			t.role = actor.role
-			t.spec = actor.spec
+		if not actor then return end
+
+		t.id = t.id or actor.id
+		t.class = t.class or actor.class
+		t.role = t.role or actor.role
+		t.spec = t.spec or actor.spec
+
+		-- should add time?
+		if actortime then
+			t.time = t.time or actor:GetTime()
 		end
+
 		return actor
 	end
 end
@@ -440,9 +446,9 @@ function actorPrototype:GetDamage(useful)
 end
 
 -- returns the actor's dps and damage amount
-function actorPrototype:GetDPS(useful, active)
+function actorPrototype:GetDPS(useful, active, skip)
 	local damage = self:GetDamage(useful)
-	if damage > 0 then
+	if damage > 0 and not skip then -- skip calculation (i.e: disabled columns)
 		return damage / max(1, self:GetTime(active)), damage
 	end
 	return 0, damage
@@ -541,9 +547,9 @@ function actorPrototype:GetDamageTaken()
 end
 
 -- returns the actor's dtps and damage taken amount
-function actorPrototype:GetDTPS(active)
+function actorPrototype:GetDTPS(active, skip)
 	local damage = self:GetDamageTaken()
-	if damage > 0 then
+	if damage > 0 and not skip then -- skip calculation (i.e: disabled columns)
 		return damage / max(1, self:GetTime(active)), damage
 	end
 	return 0, damage
@@ -646,9 +652,9 @@ function actorPrototype:GetHeal()
 end
 
 -- returns the actor's hps and heal amount
-function actorPrototype:GetHPS(active)
+function actorPrototype:GetHPS(active, skip)
 	local heal = self.heal or 0
-	if heal > 0 then
+	if heal > 0 and not skip then -- skip calculation (i.e: disabled columns)
 		return heal / max(1, self:GetTime(active)), heal
 	end
 	return 0, heal
@@ -660,9 +666,9 @@ function actorPrototype:GetOverheal()
 end
 
 -- returns the actor's overheal per second and overheal amount
-function actorPrototype:GetOHPS(active)
+function actorPrototype:GetOHPS(active, skip)
 	local overheal = self.overheal or 0
-	if overheal > 0 then
+	if overheal > 0 and not skip then -- skip calculation (i.e: disabled columns)
 		return overheal / max(1, self:GetTime(active)), overheal
 	end
 	return 0, overheal
@@ -680,9 +686,9 @@ function actorPrototype:GetTotalHeal()
 end
 
 -- returns the actor's total hps and heal
-function actorPrototype:GetTHPS(active)
+function actorPrototype:GetTHPS(active, skip)
 	local heal = self:GetTotalHeal()
-	if heal > 0 then
+	if heal > 0 and not skip then -- skip calculation (i.e: disabled columns)
 		return heal / max(1, self:GetTime(active)), heal
 	end
 	return 0, heal
@@ -757,9 +763,9 @@ function actorPrototype:GetAbsorb()
 end
 
 -- returns the actor's absorb per second and absorb amount
-function actorPrototype:GetAPS(active)
+function actorPrototype:GetAPS(active, skip)
 	local absorb = self.absorb or 0
-	if absorb > 0 then
+	if absorb > 0 and not skip then -- skip calculation (i.e: disabled columns)
 		return absorb / max(1, self:GetTime(active)), absorb
 	end
 	return 0, absorb
@@ -777,9 +783,9 @@ function actorPrototype:GetAbsorbHeal()
 end
 
 -- returns the actor's absorb and heal per sec
-function actorPrototype:GetAHPS(active)
+function actorPrototype:GetAHPS(active, skip)
 	local heal = self:GetAbsorbHeal()
-	if heal > 0 then
+	if heal > 0 and not skip then -- skip calculation (i.e: disabled columns)
 		return heal / max(1, self:GetTime(active)), heal
 	end
 	return 0, heal

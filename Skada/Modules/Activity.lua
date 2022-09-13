@@ -6,6 +6,17 @@ Skada:RegisterModule("Activity", function(L, P, _, C, new, _, clear)
 	local format, pformat = string.format, Skada.pformat
 	local get_activity_targets = nil
 
+	local function format_valuetext(d, columns, maxtime, metadata, subview)
+		d.valuetext = Skada:FormatValueCols(
+			columns["Active Time"] and Skada:FormatTime(d.value),
+			columns[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, maxtime)
+		)
+
+		if metadata and d.value > metadata.maxvalue then
+			metadata.maxvalue = d.value
+		end
+	end
+
 	local function activity_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
 		local player = set and set:GetPlayer(id, label)
@@ -46,14 +57,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C, new, _, clear)
 			local d = win:actor(nr, target, true, name)
 
 			d.value = target.time
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns["Active Time"] and Skada:FormatTime(d.value),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, maxtime)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, maxtime, win.metadata, true)
 		end
 	end
 
@@ -83,14 +87,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C, new, _, clear)
 					end
 
 					d.value = activetime
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns["Active Time"] and Skada:FormatTime(d.value),
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, settime)
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+					format_valuetext(d, self.metadata.columns, settime, win.metadata)
 				end
 			end
 		end
@@ -107,14 +104,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C, new, _, clear)
 					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 					d.value = activetime
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns["Active Time"] and Skada:FormatTime(d.value),
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, settime)
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+					format_valuetext(d, self.metadata.columns, settime, win.metadata)
 				end
 			end
 		end

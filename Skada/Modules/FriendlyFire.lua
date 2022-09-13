@@ -8,9 +8,21 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local get_friendly_fire_targets = nil
 
-	local pairs, max, format = pairs, math.max, string.format
+	local pairs, format = pairs, string.format
 	local pformat, T = Skada.pformat, Skada.Table
 	local _
+
+	local function format_valuetext(d, columns, total, dps, metadata, subview)
+		d.valuetext = Skada:FormatValueCols(
+			columns.Damage and Skada:FormatNumber(d.value),
+			columns[subview and "sDPS" or "DPS"] and dps and Skada:FormatNumber(dps),
+			columns[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
+		)
+
+		if metadata and d.value > metadata.maxvalue then
+			metadata.maxvalue = d.value
+		end
+	end
 
 	local function log_damage(set, dmg)
 		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
@@ -95,15 +107,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 			local d = win:actor(nr, target, nil, targetname)
 
 			d.value = target.amount
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-				actortime and Skada:FormatNumber(d.value / actortime),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -130,15 +134,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 			local d = win:spell(nr, spellid)
 
 			d.value = spell.amount
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-				actortime and Skada:FormatNumber(d.value / actortime),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -179,15 +175,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 			end
 
 			d.value = amount
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-				actortime and Skada:FormatNumber(d.value / actortime),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -210,15 +198,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 				local d = win:actor(nr, player)
 
 				d.value = player.friendfire
-				d.valuetext = Skada:FormatValueCols(
-					self.metadata.columns.Damage and Skada:FormatNumber(d.value),
-					self.metadata.columns.DPS and Skada:FormatNumber(d.value / max(1, player:GetTime())),
-					self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, self.metadata.columns, total, d.value / player:GetTime(), win.metadata)
 			end
 		end
 	end

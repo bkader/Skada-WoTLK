@@ -44,6 +44,17 @@ Skada:RegisterModule("Resources", function(L, P)
 
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
+	local function format_valuetext(d, columns, total, metadata, subview)
+		d.valuetext = Skada:FormatValueCols(
+			columns.Amount and Skada:FormatNumber(d.value),
+			columns[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
+		)
+
+		if metadata and d.value > metadata.maxvalue then
+			metadata.maxvalue = d.value
+		end
+	end
+
 	local function log_gain(set, gain)
 		if not (gain and gain.type and gainTable[gain.type]) then return end
 
@@ -137,14 +148,7 @@ Skada:RegisterModule("Resources", function(L, P)
 				local d = win:actor(nr, player)
 
 				d.value = player[self.power]
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Amount and Skada:FormatNumber(d.value),
-					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, mod.metadata.columns, total, win.metadata)
 			end
 		end
 	end
@@ -183,14 +187,7 @@ Skada:RegisterModule("Resources", function(L, P)
 			local d = win:spell(nr, spellid)
 
 			d.value = amount
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Amount and Skada:FormatNumber(d.value),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
 		end
 	end
 

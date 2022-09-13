@@ -2939,16 +2939,19 @@ do
 		end
 
 		Skada.FormatNumber = function(self, num, fmt)
-			if num then
+			if not num then
+				return
+			else
 				fmt = fmt or self.db.profile.numberformat or 1
-				if fmt == 1 and (num >= 1e3 or num <= -1e3) then
-					return ShortenValue(num)
-				elseif fmt == 2 and (num >= 1e3 or num <= -1e3) then
-					local left, mid, right = strmatch(tostring(floor(num)), "^([^%d]*%d)(%d*)(.-)$")
-					return format("%s%s%s", left, reverse(gsub(reverse(mid), "(%d%d%d)", "%1,")), right)
-				else
-					return format("%.0f", num)
-				end
+			end
+
+			if fmt == 1 and (num >= 1e3 or num <= -1e3) then
+				return ShortenValue(num)
+			elseif fmt == 2 and (num >= 1e3 or num <= -1e3) then
+				local left, mid, right = strmatch(tostring(floor(num)), "^([^%d]*%d)(%d*)(.-)$")
+				return format("%s%s%s", left, reverse(gsub(reverse(mid), "(%d%d%d)", "%1,")), right)
+			else
+				return format("%.0f", num)
 			end
 		end
 	end
@@ -2975,17 +2978,17 @@ function Skada:FormatPercent(value, total, dec)
 end
 
 function Skada:FormatTime(sec, alt, ...)
-	if sec then
-		if alt then
-			return SecondsToTime(sec, ...)
-		elseif sec >= 3600 then
-			local h = floor(sec / 3600)
-			local m = floor(sec / 60 - (h * 60))
-			local s = floor(sec - h * 3600 - m * 60 + 0.5)
-			return format("%02.f:%02.f:%02.f", h, m, s)
-		else
-			return format("%02.f:%02.f", floor(sec / 60), floor(sec % 60 + 0.5))
-		end
+	if not sec then
+		return
+	elseif alt then
+		return SecondsToTime(sec, ...)
+	elseif sec >= 3600 then
+		local h = floor(sec / 3600)
+		local m = floor(sec / 60 - (h * 60))
+		local s = floor(sec - h * 3600 - m * 60 + 0.5)
+		return format("%02.f:%02.f:%02.f", h, m, s)
+	else
+		return format("%02.f:%02.f", floor(sec / 60), floor(sec % 60 + 0.5))
 	end
 end
 

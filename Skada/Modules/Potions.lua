@@ -15,6 +15,17 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 	local prepotionStr, potionStr = "\124c%s%s\124r %s", "\124T%s:14:14:0:0:64:64:4:60:4:60\124t"
 	local prepotion
 
+	local function format_valuetext(d, columns, total, metadata, subview)
+		d.valuetext = Skada:FormatValueCols(
+			columns.Count and d.value,
+			columns[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
+		)
+
+		if metadata and d.value > metadata.maxvalue then
+			metadata.maxvalue = d.value
+		end
+	end
+
 	local function log_potion(set, playerid, playername, playerflags, spellid)
 		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
 		if not player then return end
@@ -115,14 +126,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 			local d = win:actor(nr, player, nil, playername)
 
 			d.value = player.count
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Count and d.value,
-				mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
 		end
 	end
 
@@ -168,14 +172,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 				d.icon = potionicon
 
 				d.value = count
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Count and d.value,
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
 			end
 		end
 	end
@@ -199,14 +196,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 				local d = win:actor(nr, player)
 
 				d.value = player.potion
-				d.valuetext = Skada:FormatValueCols(
-					self.metadata.columns.Count and d.value,
-					self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, self.metadata.columns, total, win.metadata)
 			end
 		end
 	end

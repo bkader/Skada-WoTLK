@@ -5,6 +5,18 @@ local format, pformat = string.format, Skada.pformat
 local GetSpellInfo, PercentToRGB = Skada.GetSpellInfo or GetSpellInfo, Skada.PercentToRGB
 local _
 
+local function format_valuetext(d, columns, total, dps, metadata, subview)
+	d.valuetext = Skada:FormatValueCols(
+		columns.Damage and Skada:FormatNumber(d.value),
+		columns[subview and "sDPS" or "DPS"] and dps and Skada:FormatNumber(dps),
+		columns[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
+	)
+
+	if metadata and d.value > metadata.maxvalue then
+		metadata.maxvalue = d.value
+	end
+end
+
 -- ================== --
 -- Damage Done Module --
 -- ================== --
@@ -425,15 +437,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 			local d = win:spell(nr, spellname, spell)
 
 			d.value = P.absdamage and spell.total or spell.amount
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-				actortime and Skada:FormatNumber(d.value / actortime),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -462,15 +466,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 			local d = win:actor(nr, target, true, targetname)
 
 			d.value = P.absdamage and target.total or target.amount
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-				actortime and Skada:FormatNumber(d.value / actortime),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -632,15 +628,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 					d.value = spell.targets[win.targetname].total
 				end
 
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -672,15 +660,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 					end
 
 					d.value = amount
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Damage and Skada:FormatNumber(d.value),
-						self.metadata.columns.DPS and Skada:FormatNumber(dps),
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+					format_valuetext(d, self.metadata.columns, total, dps, win.metadata)
 				end
 			end
 		end
@@ -697,15 +677,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 					d.value = amount
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Damage and Skada:FormatNumber(d.value),
-						self.metadata.columns.DPS and Skada:FormatNumber(dps),
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+					format_valuetext(d, self.metadata.columns, total, dps, win.metadata)
 				end
 			end
 		end
@@ -1070,15 +1042,7 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C, new, _, clear)
 			local d = win:actor(nr, player, nil, playername)
 
 			d.value = player.amount
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-				player.time and Skada:FormatNumber(d.value / player.time),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, player.time and (d.value / player.time), win.metadata, true)
 		end
 	end
 
@@ -1119,15 +1083,7 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C, new, _, clear)
 			local d = win:spell(nr, spellname, spell)
 
 			d.value = spell.amount
-			d.valuetext = Skada:FormatValueCols(
-				self.metadata.columns.Damage and Skada:FormatNumber(d.value),
-				settime and Skada:FormatNumber(d.value / settime),
-				self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, self.metadata.columns, total, settime and (d.value / settime), win.metadata)
 		end
 	end
 
@@ -1190,15 +1146,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 				d.value = max(0, d.value - (spell.o_amt or spell.overkill))
 			end
 
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-				actortime and Skada:FormatNumber(d.value / actortime),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -1231,15 +1179,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 				d.value = max(0, d.value - (target.o_amt or target.overkill))
 			end
 
-			d.valuetext = Skada:FormatValueCols(
-				mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-				actortime and Skada:FormatNumber(d.value / actortime),
-				mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-			)
-
-			if win.metadata and d.value > win.metadata.maxvalue then
-				win.metadata.maxvalue = d.value
-			end
+			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -1279,15 +1219,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 				d.text = (source.id and enemy) and Skada:FormatName(sourcename, source.id)
 
 				d.value = amount
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -1320,15 +1252,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 					end
 
 					d.value = amount
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Damage and Skada:FormatNumber(d.value),
-						self.metadata.columns.DPS and Skada:FormatNumber(dps),
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+					format_valuetext(d, self.metadata.columns, total, dps, win.metadata)
 				end
 			end
 		end
@@ -1346,15 +1270,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 					d.value = amount
-					d.valuetext = Skada:FormatValueCols(
-						self.metadata.columns.Damage and Skada:FormatNumber(d.value),
-						self.metadata.columns.DPS and Skada:FormatNumber(dps),
-						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+					format_valuetext(d, self.metadata.columns, total, dps, win.metadata)
 				end
 			end
 		end
@@ -1431,15 +1347,7 @@ Skada:RegisterModule("Overkill", function(L)
 				local d = win:spell(nr, spellname, spell)
 
 				d.value = spell.o_amt or spell.overkill
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -1470,15 +1378,7 @@ Skada:RegisterModule("Overkill", function(L)
 				local d = win:actor(nr, target, true, targetname)
 
 				d.value = target.o_amt
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -1514,15 +1414,7 @@ Skada:RegisterModule("Overkill", function(L)
 				local d = win:actor(nr, target, nil, targetname)
 
 				d.value = o_amt
-				d.valuetext = Skada:FormatValueCols(
-					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-					actortime and Skada:FormatNumber(d.value / actortime),
-					mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -1560,15 +1452,7 @@ Skada:RegisterModule("Overkill", function(L)
 					local d = win:spell(nr, spellname, spell)
 
 					d.value = o_amt
-					d.valuetext = Skada:FormatValueCols(
-						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
-						actortime and Skada:FormatNumber(d.value / actortime),
-						mod.metadata.columns.sPercent and Skada:FormatPercent(d.value, total)
-					)
-
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+					format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
 				end
 			end
 		end
@@ -1599,15 +1483,7 @@ Skada:RegisterModule("Overkill", function(L)
 				end
 
 				d.value = player.overkill
-				d.valuetext = Skada:FormatValueCols(
-					self.metadata.columns.Damage and Skada:FormatNumber(d.value),
-					self.metadata.columns.DPS and Skada:FormatNumber(d.value / max(1, player:GetTime())),
-					self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, self.metadata.columns, total, self.metadata.columns.DPS and (d.value / player:GetTime()), win.metadata)
 			end
 		end
 
@@ -1621,15 +1497,7 @@ Skada:RegisterModule("Overkill", function(L)
 				d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 				d.value = enemy.overkill
-				d.valuetext = Skada:FormatValueCols(
-					self.metadata.columns.Damage and Skada:FormatNumber(d.value),
-					self.metadata.columns.DPS and Skada:FormatNumber(d.value / max(1, enemy:GetTime())),
-					self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
-				)
-
-				if win.metadata and d.value > win.metadata.maxvalue then
-					win.metadata.maxvalue = d.value
-				end
+				format_valuetext(d, self.metadata.columns, total, self.metadata.columns.DPS and (d.value / enemy:GetTime()), win.metadata)
 			end
 		end
 	end
