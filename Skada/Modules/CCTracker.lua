@@ -2,6 +2,7 @@ local Skada = Skada
 
 local pairs, tostring, format, pformat = pairs, tostring, string.format, Skada.pformat
 local GetSpellInfo, GetSpellLink = Skada.GetSpellInfo or GetSpellInfo, Skada.GetSpellLink or GetSpellLink
+local cc_table = {} -- holds stuff from cleu
 local _
 
 local CCSpells = {
@@ -213,8 +214,8 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 	local get_cc_done_sources = nil
 	local get_cc_done_targets = nil
 
-	local function log_ccdone(set, cc)
-		local player = Skada:GetPlayer(set, cc.playerid, cc.playername, cc.playerflags)
+	local function log_ccdone(set)
+		local player = Skada:GetPlayer(set, cc_table.srcGUID, cc_table.srcName, cc_table.srcFlags)
 		if not player then return end
 
 		-- increment the count.
@@ -225,37 +226,34 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 		if set == Skada.total and not P.totalidc then return end
 
 		-- record the spell.
-		local spell = player.ccdonespells and player.ccdonespells[cc.spellid]
+		local spell = player.ccdonespells and player.ccdonespells[cc_table.spellid]
 		if not spell then
 			player.ccdonespells = player.ccdonespells or {}
-			player.ccdonespells[cc.spellid] = {count = 0}
-			spell = player.ccdonespells[cc.spellid]
+			player.ccdonespells[cc_table.spellid] = {count = 0}
+			spell = player.ccdonespells[cc_table.spellid]
 		end
 		spell.count = spell.count + 1
 
 		-- record the target.
-		if cc.dstName then
+		if cc_table.dstName then
 			spell.targets = spell.targets or {}
-			spell.targets[cc.dstName] = (spell.targets[cc.dstName] or 0) + 1
+			spell.targets[cc_table.dstName] = (spell.targets[cc_table.dstName] or 0) + 1
 		end
 	end
 
-	local data = {}
-
-	local function aura_applied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid = ...
-
+	local function aura_applied(_, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
 		if CCSpells[spellid] or ExtraCCSpells[spellid] then
-			data.playerid, data.playername = Skada:FixMyPets(srcGUID, srcName, srcFlags)
-			data.playerflags = srcFlags
+			cc_table.srcGUID, cc_table.srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+			cc_table.srcFlags = srcFlags
 
-			data.dstGUID = dstGUID
-			data.dstName = dstName
-			data.dstFlags = dstFlags
+			cc_table.dstGUID = dstGUID
+			cc_table.dstName = dstName
+			cc_table.dstFlags = dstFlags
 
-			data.spellid = spellid
+			cc_table.spellid = spellid
+			cc_table.extraspellid = nil
 
-			Skada:DispatchSets(log_ccdone, data)
+			Skada:DispatchSets(log_ccdone)
 		end
 	end
 
@@ -472,8 +470,8 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 		[72838] = 0x40 -- Green Ooze: Volatile Ooze Adhesive (Icecrown Citadel: Professor Putricide)
 	}
 
-	local function log_cctaken(set, cc)
-		local player = Skada:GetPlayer(set, cc.playerid, cc.playername, cc.playerflags)
+	local function log_cctaken(set)
+		local player = Skada:GetPlayer(set, cc_table.dstGUID, cc_table.dstName, cc_table.dstFlags)
 		if not player then return end
 
 		-- increment the count.
@@ -484,38 +482,35 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 		if set == Skada.total and not P.totalidc then return end
 
 		-- record the spell.
-		local spell = player.cctakenspells and player.cctakenspells[cc.spellid]
+		local spell = player.cctakenspells and player.cctakenspells[cc_table.spellid]
 		if not spell then
 			player.cctakenspells = player.cctakenspells or {}
-			player.cctakenspells[cc.spellid] = {count = 0}
-			spell = player.cctakenspells[cc.spellid]
+			player.cctakenspells[cc_table.spellid] = {count = 0}
+			spell = player.cctakenspells[cc_table.spellid]
 		end
 		spell.count = spell.count + 1
 
 		-- record the source.
-		if cc.srcName then
+		if cc_table.srcName then
 			spell.sources = spell.sources or {}
-			spell.sources[cc.srcName] = (spell.sources[cc.srcName] or 0) + 1
+			spell.sources[cc_table.srcName] = (spell.sources[cc_table.srcName] or 0) + 1
 		end
 	end
 
-	local data = {}
-
-	local function aura_applied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid = ...
-
+	local function aura_applied(_, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
 		if CCSpells[spellid] or ExtraCCSpells[spellid] or RaidCCSpells[spellid] then
-			data.srcGUID = srcGUID
-			data.srcName = srcName
-			data.srcFlags = srcFlags
+			cc_table.srcGUID = srcGUID
+			cc_table.srcName = srcName
+			cc_table.srcFlags = srcFlags
 
-			data.playerid = dstGUID
-			data.playername = dstName
-			data.playerflags = dstFlags
+			cc_table.dstGUID = dstGUID
+			cc_table.dstName = dstName
+			cc_table.dstFlags = dstFlags
 
-			data.spellid = spellid
+			cc_table.spellid = spellid
+			cc_table.extraspellid = nil
 
-			Skada:DispatchSets(log_cctaken, data)
+			Skada:DispatchSets(log_cctaken)
 		end
 	end
 
@@ -721,8 +716,8 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 	local UnitName, UnitInRaid, IsInRaid = UnitName, UnitInRaid, Skada.IsInRaid
 	local GetPartyAssignment, UnitIterator = GetPartyAssignment, Skada.UnitIterator
 
-	local function log_ccbreak(set, cc)
-		local player = Skada:GetPlayer(set, cc.playerid, cc.playername)
+	local function log_ccbreak(set)
+		local player = Skada:GetPlayer(set, cc_table.srcGUID, cc_table.srcName, cc_table.srcFlags)
 		if not player then return end
 
 		-- increment the count.
@@ -733,42 +728,40 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 		if set == Skada.total and not P.totalidc then return end
 
 		-- record the spell.
-		local spell = player.ccbreakspells and player.ccbreakspells[cc.spellid]
+		local spell = player.ccbreakspells and player.ccbreakspells[cc_table.spellid]
 		if not spell then
 			player.ccbreakspells = player.ccbreakspells or {}
-			player.ccbreakspells[cc.spellid] = {count = 0}
-			spell = player.ccbreakspells[cc.spellid]
+			player.ccbreakspells[cc_table.spellid] = {count = 0}
+			spell = player.ccbreakspells[cc_table.spellid]
 		end
 		spell.count = spell.count + 1
 
 		-- record the target.
-		if cc.dstName then
+		if cc_table.dstName then
 			spell.targets = spell.targets or {}
-			spell.targets[cc.dstName] = (spell.targets[cc.dstName] or 0) + 1
+			spell.targets[cc_table.dstName] = (spell.targets[cc_table.dstName] or 0) + 1
 		end
 	end
 
-	local data = {}
-
-	local function aura_broken(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, spellname, _, extraspellid, extraspellname, _, auratype = ...
+	local function aura_broken(_, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		local spellid, spellname, _, extraspellid, extraspellname = ...
 		if not CCSpells[spellid] then return end
 
 		local petid, petname = srcGUID, srcName
 		local srcGUID_modified, srcName_modified = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 
-		data.playerid = srcGUID_modified or srcGUID
-		data.playername = srcName_modified or srcName
-		data.playerflags = srcFlags
+		cc_table.srcGUID = srcGUID_modified or srcGUID
+		cc_table.srcName = srcName_modified or srcName
+		cc_table.srcFlags = srcFlags
 
-		data.dstGUID = dstGUID
-		data.dstName = dstName
-		data.dstFlags = dstFlags
+		cc_table.dstGUID = dstGUID
+		cc_table.dstName = dstName
+		cc_table.dstFlags = dstFlags
 
-		data.spellid = spellid
-		data.extraspellid = extraspellid
+		cc_table.spellid = spellid
+		cc_table.extraspellid = extraspellid
 
-		Skada:DispatchSets(log_ccbreak, data)
+		Skada:DispatchSets(log_ccbreak)
 
 		-- Optional announce
 		srcName = srcName_modified or srcName

@@ -41,7 +41,8 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		end
 	end
 
-	local function log_deathlog(set, data, override)
+	local data = {}
+	local function log_deathlog(set, override)
 		if not set or (set == Skada.total and not P.totalidc) then return end
 
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
@@ -62,7 +63,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 
 		local log = new()
 		log.id = data.spellid
-		log.sch = data.spellschool
+		log.sch = data.school
 		log.src = data.srcName
 		log.cri = data.critical
 		log.time = set.last_time or GetTime()
@@ -108,14 +109,12 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		end
 	end
 
-	local data = {}
-
-	local function spell_damage(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_damage(_, event, _, srcName, _, dstGUID, dstName, dstFlags, ...)
 		if event == "SWING_DAMAGE" then
-			data.spellid, data.spellschool = 6603, 0x01
+			data.spellid, data.school = 6603, 0x01
 			data.amount, data.overkill, _, data.resisted, data.blocked, data.absorbed, data.critical = ...
 		else
-			data.spellid, _, data.spellschool, data.amount, data.overkill, _, data.resisted, data.blocked, data.absorbed, data.critical = ...
+			data.spellid, _, data.school, data.amount, data.overkill, _, data.resisted, data.blocked, data.absorbed, data.critical = ...
 		end
 
 		if data.amount then
@@ -127,19 +126,19 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			data.amount = 0 - data.amount
 			data.overheal = nil
 
-			Skada:DispatchSets(log_deathlog, data)
+			Skada:DispatchSets(log_deathlog)
 		end
 	end
 
 	local missTypes = {RESIST = true, BLOCK = true, ABSORB = true}
-	local function spell_missed(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_missed(_, event, _, srcName, _, dstGUID, dstName, dstFlags, ...)
 		local misstype, amount
 
 		if event == "SWING_MISSED" then
-			data.spellid, data.spellschool = 6603, 0x01
+			data.spellid, data.school = 6603, 0x01
 			misstype, amount = ...
 		else
-			data.spellid, _, data.spellschool, misstype, amount = ...
+			data.spellid, _, data.school, misstype, amount = ...
 		end
 
 		if amount and amount > 0 and misstype and missTypes[misstype] then
@@ -151,6 +150,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			data.amount = nil
 			data.overkill = nil
 			data.overheal = nil
+			data.critical = nil
 			data.debuff = nil
 
 			if misstype == "RESIST" then
@@ -167,12 +167,11 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 				data.absorbed = amount
 			end
 
-			Skada:DispatchSets(log_deathlog, data)
+			Skada:DispatchSets(log_deathlog)
 		end
 	end
 
-	local function environment_damage(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local envtype, amount = ...
+	local function environment_damage(_, _, _, _, _, dstGUID, dstName, dstFlags, envtype, amount)
 		local spellid, spellschool = nil, 0x01
 
 		if envtype == "Falling" or envtype == "FALLING" then
@@ -190,14 +189,12 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		end
 
 		if spellid then
-			spell_damage(nil, event, nil, L["Environment"], nil, dstGUID, dstName, dstFlags, spellid, nil, spellschool, amount)
+			spell_damage(nil, nil, nil, L["Environment"], nil, dstGUID, dstName, dstFlags, spellid, nil, spellschool, amount)
 		end
 	end
 
-	local function spell_heal(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, _, _, amount, overheal = ...
-
-		if amount > (P.modules.deathlogthreshold or 0) then
+	local function spell_heal(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, _, amount, overheal)
+		if spellid and amount > (P.modules.deathlogthreshold or 0) then
 			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 			dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName, dstFlags)
 
@@ -211,7 +208,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			data.overheal = overheal or 0
 			data.amount = max(0, amount - data.overheal)
 
-			data.spellschool = nil
+			data.school = nil
 			data.overkill = nil
 			data.resisted = nil
 			data.blocked = nil
@@ -219,7 +216,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			data.critical = nil
 			data.debuff = nil
 
-			Skada:DispatchSets(log_deathlog, data)
+			Skada:DispatchSets(log_deathlog)
 		end
 	end
 
@@ -319,6 +316,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 				data.playerflags = srcFlags
 			end
 
+			data.school = nil
 			data.amount = nil
 			data.overkill = nil
 			data.overheal = nil
@@ -328,15 +326,14 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			data.critical = nil
 			data.debuff = nil
 
-			Skada:DispatchSets(log_deathlog, data, true)
+			Skada:DispatchSets(log_deathlog, true)
 		end
 	end
 
-	local function debuff_applied(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
+	local function debuff_applied(_, _, _, srcName, _, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
 		if auratype == "DEBUFF" and spellid and not ignoredSpells[spellid] then
 			data.spellid = spellid
-			data.spellschool = spellschool
-			data.debuff = true
+			data.school = spellschool
 
 			data.srcName = srcName
 			data.playerid = dstGUID
@@ -350,8 +347,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			data.blocked = nil
 			data.absorbed = nil
 			data.critical = nil
+			data.debuff = true
 
-			Skada:DispatchSets(log_deathlog, data)
+			Skada:DispatchSets(log_deathlog)
 		end
 	end
 
@@ -831,8 +829,11 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			{src_is_interesting = true, dst_is_not_interesting = true}
 		)
 
-		flags_dst_nopets.src_is_not_interesting = true
-		Skada:RegisterForCL(debuff_applied, "SPELL_AURA_APPLIED", flags_dst_nopets)
+		Skada:RegisterForCL(
+			debuff_applied,
+			"SPELL_AURA_APPLIED",
+			{src_is_not_interesting = true, dst_is_interesting_nopets = true}
+		)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self)

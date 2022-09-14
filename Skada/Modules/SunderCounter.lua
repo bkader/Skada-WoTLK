@@ -39,7 +39,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 
 	local data = {}
 
-	local function sunder_applied(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, _, spellname)
+	local function sunder_applied(timestamp, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, _, spellname)
 		if spellname == sunder or spellname == devastate then
 			data.playerid = srcGUID
 			data.playername = srcName
@@ -75,7 +75,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 		end
 	end
 
-	local function sunder_removed(timestamp, eventtype, _, _, _, dstGUID, dstName, _, _, spellname)
+	local function sunder_removed(timestamp, _, _, _, _, dstGUID, dstName, _, _, spellname)
 		if not spellname or spellname ~= sunder then return end
 
 		Skada:ScheduleTimer(function()
@@ -90,7 +90,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 		end, 0.1)
 	end
 
-	local function unit_died(timestamp, eventtype, _, _, _, dstGUID)
+	local function unit_died(timestamp, _, _, _, _, dstGUID)
 		if P.modules.sunderannounce and dstGUID and mod.targets and mod.targets[dstGUID] then
 			mod.targets[dstGUID] = del(mod.targets[dstGUID])
 		end

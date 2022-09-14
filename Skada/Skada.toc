@@ -15,8 +15,8 @@
 ## SavedVariablesPerCharacter: SkadaCharDB
 ## DefaultState: enabled
 ## Author: Kader (|cff808080bkader#5341|r)
-## Version: 1.8.80
-## X-Date: 2022-09-13 @ 01:41 AM |cff808080UTC|r
+## Version: 1.8.81
+## X-Date: 2022-09-14 @ 10:50 AM |cff808080UTC|r
 ## X-Credits: Zarnivoop
 ## X-Category: Combat
 ## X-License: MIT/X

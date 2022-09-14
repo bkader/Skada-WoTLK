@@ -5,7 +5,6 @@ local pairs, select = pairs, select
 local format, pformat = string.format, Skada.pformat
 local min, floor = math.min, math.floor
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-local UnitGUID, UnitClass = UnitGUID, UnitClass
 local _
 
 -- ============== --
@@ -21,11 +20,11 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
+	local GetTime, band, tsort, max = GetTime, bit.band, table.sort, math.max
 	local GroupIterator, GetCurrentMapAreaID = Skada.GroupIterator,GetCurrentMapAreaID
-	local UnitName, UnitExists, UnitBuff = UnitName, UnitExists, UnitBuff
+	local UnitGUID, UnitName, UnitClass, UnitExists, UnitBuff = UnitGUID, UnitName, UnitClass, UnitExists, UnitBuff
 	local UnitIsDeadOrGhost, UnitHealthInfo = UnitIsDeadOrGhost, Skada.UnitHealthInfo
 	local IsActiveBattlefieldArena, UnitInBattleground = IsActiveBattlefieldArena, UnitInBattleground
-	local GetTime, band, tsort = GetTime, bit.band, table.sort
 	local T = Skada.Table
 
 	-- INCOMPLETE
@@ -35,8 +34,8 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 	local absorbspells = {
 		[48707] = {dur = 5}, -- Anti-Magic Shell (rank 1)
 		[51052] = {dur = 10}, -- Anti-Magic Zone( (rank 1)
-		[50150] = {dur = 86400}, -- Will of the Necropolis
-		[49497] = {dur = 86400}, -- Spell Deflection
+		[50150] = {dur = 86400, school = 0x01}, -- Will of the Necropolis
+		[49497] = {dur = 86400, school = 0x01}, -- Spell Deflection
 		[62606] = {dur = 10, avg = 1600, cap = 2500}, -- Savage Defense
 		[11426] = {dur = 60}, -- Ice Barrier (rank 1)
 		[13031] = {dur = 60}, -- Ice Barrier (rank 2)
@@ -70,43 +69,44 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 		[27128] = {dur = 30}, -- Fire Ward (rank 6)
 		[43010] = {dur = 30, avg = 5200, cap = 7000}, -- Fire Ward (rank 7)
 		[58597] = {dur = 6, avg = 4400, cap = 6000}, -- Sacred Shield
-		[66233] = {dur = 86400}, -- Ardent Defender
-		[31230] = {dur = 86400}, -- Cheat Death
-		[17] = {dur = 30}, -- Power Word: Shield (rank 1)
-		[592] = {dur = 30}, -- Power Word: Shield (rank 2)
-		[600] = {dur = 30}, -- Power Word: Shield (rank 3)
-		[3747] = {dur = 30}, -- Power Word: Shield (rank 4)
-		[6065] = {dur = 30}, -- Power Word: Shield (rank 5)
-		[6066] = {dur = 30}, -- Power Word: Shield (rank 6)
-		[10898] = {dur = 30, avg = 721, cap = 848}, -- Power Word: Shield (rank 7)
-		[10899] = {dur = 30, avg = 898, cap = 1057}, -- Power Word: Shield (rank 8)
-		[10900] = {dur = 30, avg = 1543, cap = 1816}, -- Power Word: Shield (rank 9)
-		[10901] = {dur = 30, avg = 3643, cap = 4288}, -- Power Word: Shield (rank 10)
-		[25217] = {dur = 30, avg = 5436, cap = 6398}, -- Power Word: Shield (rank 11)
-		[25218] = {dur = 30, avg = 7175, cap = 8444}, -- Power Word: Shield (rank 12)
-		[48065] = {dur = 30, avg = 9596, cap = 11293}, -- Power Word: Shield (rank 13)
-		[48066] = {dur = 30, avg = 10000, cap = 11769}, -- Power Word: Shield (rank 14)
+		[66233] = {dur = 86400, school = 0x02}, -- Ardent Defender
+		[31230] = {dur = 86400, school = 0x01}, -- Cheat Death
+		[17] = {dur = 30, school = 0x02}, -- Power Word: Shield (rank 1)
+		[592] = {dur = 30, school = 0x02}, -- Power Word: Shield (rank 2)
+		[600] = {dur = 30, school = 0x02}, -- Power Word: Shield (rank 3)
+		[3747] = {dur = 30, school = 0x02}, -- Power Word: Shield (rank 4)
+		[6065] = {dur = 30, school = 0x02}, -- Power Word: Shield (rank 5)
+		[6066] = {dur = 30, school = 0x02}, -- Power Word: Shield (rank 6)
+		[10898] = {dur = 30, avg = 721, cap = 848, school = 0x02}, -- Power Word: Shield (rank 7)
+		[10899] = {dur = 30, avg = 898, cap = 1057, school = 0x02}, -- Power Word: Shield (rank 8)
+		[10900] = {dur = 30, avg = 1543, cap = 1816, school = 0x02}, -- Power Word: Shield (rank 9)
+		[10901] = {dur = 30, avg = 3643, cap = 4288, school = 0x02}, -- Power Word: Shield (rank 10)
+		[25217] = {dur = 30, avg = 5436, cap = 6398, school = 0x02}, -- Power Word: Shield (rank 11)
+		[25218] = {dur = 30, avg = 7175, cap = 8444, school = 0x02}, -- Power Word: Shield (rank 12)
+		[48065] = {dur = 30, avg = 9596, cap = 11293, school = 0x02}, -- Power Word: Shield (rank 13)
+		[48066] = {dur = 30, avg = 10000, cap = 11769, school = 0x02}, -- Power Word: Shield (rank 14)
 		[47509] = {dur = 12}, -- Divine Aegis (rank 1)
 		[47511] = {dur = 12}, -- Divine Aegis (rank 2)
 		[47515] = {dur = 12}, -- Divine Aegis (rank 3)
 		[47753] = {dur = 12, cap = 10000}, -- Divine Aegis (rank 1)
 		[54704] = {dur = 12, cap = 10000}, -- Divine Aegis (rank 1)
 		[47788] = {dur = 10}, -- Guardian Spirit
-		[7812] = {dur = 30}, -- Sacrifice (rank 1)
-		[19438] = {dur = 30}, -- Sacrifice (rank 2)
-		[19440] = {dur = 30}, -- Sacrifice (rank 3)
-		[19441] = {dur = 30}, -- Sacrifice (rank 4)
-		[19442] = {dur = 30}, -- Sacrifice (rank 5)
-		[19443] = {dur = 30}, -- Sacrifice (rank 6)
-		[27273] = {dur = 30}, -- Sacrifice (rank 7)
-		[47985] = {dur = 30}, -- Sacrifice (rank 8)
-		[47986] = {dur = 30}, -- Sacrifice (rank 9)
-		[6229] = {dur = 30}, -- Shadow Ward (rank 1)
-		[11739] = {dur = 30}, -- Shadow Ward (rank 1)
-		[11740] = {dur = 30}, -- Shadow Ward (rank 2)
-		[28610] = {dur = 30}, -- Shadow Ward (rank 3)
-		[47890] = {dur = 30}, -- Shadow Ward (rank 4)
-		[47891] = {dur = 30, avg = 6500, cap = 8300}, -- Shadow Ward (rank 5)
+		[7812] = {dur = 30, cap = 305}, -- Sacrifice (rank 1)
+		[19438] = {dur = 30, cap = 510}, -- Sacrifice (rank 2)
+		[19440] = {dur = 30, cap = 770}, -- Sacrifice (rank 3)
+		[19441] = {dur = 30, cap = 1095}, -- Sacrifice (rank 4)
+		[19442] = {dur = 30, cap = 1470}, -- Sacrifice (rank 5)
+		[19443] = {dur = 30, cap = 1905}, -- Sacrifice (rank 6)
+		[27273] = {dur = 30, cap = 2855}, -- Sacrifice (rank 7)
+		[47985] = {dur = 30, cap = 6750}, -- Sacrifice (rank 8)
+		[47986] = {dur = 30, cap = 8350}, -- Sacrifice (rank 9)
+		[6229] = {dur = 30, cap = 290}, -- Shadow Ward (rank 1)
+		[11739] = {dur = 30, cap = 470}, -- Shadow Ward (rank 2)
+		[11740] = {dur = 30, avg = 675}, -- Shadow Ward (rank 3)
+		[28610] = {dur = 30, avg = 875}, -- Shadow Ward (rank 4)
+		[47890] = {dur = 30, avg = 2750}, -- Shadow Ward (rank 5)
+		[47891] = {dur = 30, avg = 3300, cap = 8300}, -- Shadow Ward (rank 6)
+		[25228] = {dur = 86400, school = 0x20}, -- Soul Link
 		[29674] = {dur = 86400, cap = 1000}, -- Lesser Ward of Shielding
 		[29719] = {dur = 86400, cap = 4000}, -- Greater Ward of Shielding
 		[29701] = {dur = 86400, cap = 4000}, -- Greater Shielding
@@ -135,14 +135,12 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 		[28527] = {dur = 15, avg = 1000, cap = 1250}, -- Fel Blossom
 		[29432] = {dur = 3600, avg = 2000, cap = 2500}, -- Frozen Rune
 		[36481] = {dur = 4, cap = 100000}, -- Arcane Barrier (TK Kael'Thas) Shield
-		[57350] = {dur = 6, cap = 1500}, -- Darkmoon Card: Illusion
 		[17252] = {dur = 1800, cap = 500}, -- Mark of the Dragon Lord (LBRS epic ring)
 		[25750] = {dur = 15, avg = 151, cap = 302}, -- Defiler's Talisman/Talisman of Arathor
 		[25747] = {dur = 15, avg = 344, cap = 378}, -- Defiler's Talisman/Talisman of Arathor
 		[25746] = {dur = 15, avg = 435, cap = 478}, -- Defiler's Talisman/Talisman of Arathor
 		[23991] = {dur = 15, avg = 550, cap = 605}, -- Defiler's Talisman/Talisman of Arathor
-		[31000] = {dur = 300, avg = 1800, cap = 2700}, -- Pendant of Shadow's End Usage
-		[30997] = {dur = 300, avg = 1800, cap = 2700}, -- Pendant of Frozen Flame Usage
+		[30997] = {dur = 300, avg = 1800, cap = 2700}, -- Pendant of Frozen Flame
 		[31002] = {dur = 300, avg = 1800, cap = 2700}, -- Pendant of the Null Rune
 		[30999] = {dur = 300, avg = 1800, cap = 2700}, -- Pendant of Withering
 		[30994] = {dur = 300, avg = 1800, cap = 2700}, -- Pendant of Thawing
@@ -180,7 +178,7 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 		[67259] = {dur = 15, cap = 700000}, -- Twin Val'kyr's: Shield of Lights
 		[67261] = {dur = 15, cap = 1200000}, -- Twin Val'kyr's: Shield of Lights
 		[65686] = {dur = 86400, cap = 1000000}, -- Twin Val'kyr: Light Essence
-		[65684] = {dur = 86400, cap = 1000000} -- Twin Val'kyr: Dark Essence86400
+		[65684] = {dur = 86400, cap = 1000000} -- Twin Val'kyr: Dark Essence
 	}
 
 	local priest_divine_aegis = { -- Divine Aegis
@@ -279,7 +277,7 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 		end
 	end
 
-	local function log_absorb(set, absorb, nocount)
+	local function log_absorb(set, nocount)
 		if not absorb.spellid or not absorb.amount or absorb.amount == 0 then return end
 
 		local player = Skada:GetPlayer(set, absorb.playerid, absorb.playername)
@@ -453,8 +451,7 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 		return (a.ts > b.ts)
 	end
 
-	local function handle_shield(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid = ...
+	local function handle_shield(timestamp, eventtype, srcGUID, srcName, srcFlags, _, dstName, _, spellid, _, spellschool, _, points)
 		if not spellid or not absorbspells[spellid] or not dstName or ignoredSpells[spellid] then return end
 
 		shields = shields or T.get("Skada_Shields") -- create table if missing
@@ -467,13 +464,17 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 			return
 		end
 
-		-- complete data
-		local spellschool, points
-		spellid, _, spellschool, _, points = ...
-
 		-- shield applied
 		shields[dstName] = shields[dstName] or {}
 		shields[dstName][spellid] = shields[dstName][spellid] or {}
+
+		-- Soul Link
+		if spellid == 25228 then
+			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+		end
+
+		-- fix spellschool (if possible)
+		spellschool = spellschool or absorbspells[spellid].school
 
 		-- log spell casts.
 		if not passiveShields[spellid] then
@@ -502,7 +503,7 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 			amount = UnitHealthMax(dstName) * 0.5
 		elseif spellid == 70845 and UnitHealthMax(dstName) then -- Stoicism
 			amount = UnitHealthMax(dstName) * 0.2
-		elseif absorbspells[spellid].cap then
+		elseif absorbspells[spellid].cap or absorbspells[spellid].avg then
 			if shieldamounts and shieldamounts[srcName] and shieldamounts[srcName][spellid] then
 				local shield = shields[dstName][spellid][srcName]
 				if not shield then
@@ -609,8 +610,9 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 			local s = shieldspopped[1]
 			shieldamounts = shieldamounts or T.get("Skada_ShieldAmounts") -- create table if missing
 			shieldamounts[s.srcName] = shieldamounts[s.srcName] or {}
-			if (not shieldamounts[s.srcName][s.spellid] or shieldamounts[s.srcName][s.spellid] < absorbed) and absorbed < (absorbspells[s.spellid].cap * zoneModifier) then
-				shieldamounts[s.srcName][s.spellid] = absorbed
+			local src = shieldamounts[s.srcName]
+			if (not src[s.spellid] or src[s.spellid] < absorbed) and absorbed < (absorbspells[s.spellid].cap * zoneModifier) then
+				src[s.spellid] = absorbed
 			end
 		end
 
@@ -629,7 +631,10 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 				local hppercent = UnitHealthInfo(dstName, dstGUID)
 				s.amount = (hppercent and hppercent <= 36) and floor((damage + absorbed) * 0.0667 * s.points) or 0
 			elseif s and s.spellid == 31230 and s.points then -- Cheat Death
-				s.amount = floor((select(3, UnitHealthInfo(dstName, dstGUID)) or 0) * 0.1)
+				local _, _, hpmax = UnitHealthInfo(dstName, dstGUID)
+				s.amount = floor((hpmax or 0) * 0.1)
+			elseif s and s.spellid == 25228 then -- Soul Link
+				s.amount = floor((absorbed + damage) * 0.2)
 			end
 		end
 
@@ -657,7 +662,7 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 					absorb.amount = absorbed
 
 					-- always increment the count of passive shields.
-					Skada:DispatchSets(log_absorb, absorb, passiveShields[absorb.spellid] == nil)
+					Skada:DispatchSets(log_absorb, passiveShields[absorb.spellid] == nil)
 				end
 				break
 			end
@@ -688,7 +693,7 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 				absorb.school = s.school
 				absorb.amount = absorbed
 
-				Skada:DispatchSets(log_absorb, absorb)
+				Skada:DispatchSets(log_absorb)
 				break
 			-- arriving at this point means that the shield broke,
 			-- so we make sure to remove it first, use its max
@@ -696,7 +701,7 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 			else
 				-- if the "points" key exists, we don't remove the shield because
 				-- for us it means it's a passive shield that should always be kept.
-				if s.points == nil then
+				if s.points == nil and s.spellid ~= 25228 then
 					shields[dstName][s.spellid][s.srcName] = del(shields[dstName][s.spellid][s.srcName])
 				end
 
@@ -712,27 +717,29 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 				absorb.school = s.school
 				absorb.amount = s.amount
 
-				Skada:DispatchSets(log_absorb, absorb)
+				Skada:DispatchSets(log_absorb)
 				absorbed = absorbed - s.amount
 			end
 		end
 	end
 
-	local function spell_damage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_damage(timestamp, eventtype, _, _, _, dstGUID, dstName, dstFlags, ...)
 		local spellschool, amount, absorbed
 
 		if eventtype == "SWING_DAMAGE" then
 			amount, _, _, _, _, absorbed = ...
+		elseif eventtype == "ENVIRONMENTAL_DAMAGE" then
+			_, amount, _, spellschool, _, _, absorbed = ...
 		else
 			_, _, spellschool, amount, _, _, _, _, absorbed = ...
 		end
 
 		if absorbed and absorbed > 0 and dstName and shields and shields[dstName] then
-			process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool or 1, amount, amount > absorbed)
+			process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool or 0x01, amount, amount > absorbed)
 		end
 	end
 
-	local function spell_missed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_missed(timestamp, eventtype, _, _, _, dstGUID, dstName, dstFlags, ...)
 		local spellschool, misstype, absorbed
 
 		if eventtype == "SWING_MISSED" then
@@ -742,11 +749,11 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 		end
 
 		if misstype == "ABSORB" and absorbed and absorbed > 0 and dstName and shields and shields[dstName] then
-			process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool or 1, 0, false)
+			process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool or 0x01, 0, false)
 		end
 	end
 
-	local function environment_damage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function environment_damage(timestamp, eventtype, _, _, _, dstGUID, dstName, dstFlags, ...)
 		local envtype, amount, _, _, _, _, absorbed = ...
 		if absorbed and absorbed > 0 and dstName and shields and shields[dstName] then
 			local spellschool = 0x01
@@ -763,7 +770,7 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 		end
 	end
 
-	local function spell_heal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, _, _, _, amount)
+	local function spell_heal(timestamp, _, _, srcName, _, _, dstName, _, _, _, _, amount)
 		heals = heals or T.get("Skada_Heals") -- create table if missing
 		heals[dstName] = heals[dstName] or {}
 		heals[dstName][srcName] = heals[dstName][srcName] or {}
@@ -987,18 +994,18 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 		-- some effects aren't shields but rather special effects, such us talents.
 		-- in order to track them, we simply add them as fake shields before all.
 		-- I don't know the whole list of effects but, if you want to add yours
-		-- please do : CLASS = {[index] = {spellid, spellschool}}
+		-- please do : CLASS = {[spellid] = true}
 		-- see: http://wotlk.cavernoftime.com/spell=<spellid>
 		local _passive = {
 			DEATHKNIGHT = {
-				{50150, 1}, -- Will of the Necropolis
-				{49497, 1}, -- Spell Deflection
+				[50150] = true, -- Will of the Necropolis
+				[49497] = true -- Spell Deflection
 			},
 			PALADIN = {
-				{66233, 1}, -- Ardent Defender
+				[66233] = true -- Ardent Defender
 			},
 			ROGUE = {
-				{31230, 1}, -- Cheat Death
+				[31230] = true -- Cheat Death
 			}
 		}
 
@@ -1008,26 +1015,23 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 				local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
 				for i = 1, 40 do
 					local _, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitBuff(unit, i)
-					if spellid then
-						if absorbspells[spellid] and unitCaster then
-							handle_shield(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
-						end
-					else
+					if not spellid then
 						break -- nothing found
+					elseif absorbspells[spellid] and unitCaster then
+						handle_shield(timestamp + max(0, expires - curtime), nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
 					end
 				end
 
 				-- passive shields (not for pets)
-				if owner == nil then
-					local _, class = UnitClass(unit)
-					if _passive[class] then
-						for i = 1, #_passive[class] do
-							local spell = _passive[class][i]
-							local points = spell and LGT:GUIDHasTalent(dstGUID, GetSpellInfo(spell[1]), LGT:GetActiveTalentGroup(unit))
-							if points then
-								handle_shield(timestamp - 60, nil, dstGUID, dstGUID, nil, dstGUID, dstName, nil, spell[1], nil, spell[2], nil, points)
-							end
-						end
+				if owner then return end
+
+				local _, class = UnitClass(unit)
+				if not _passive[class] then return end
+
+				for spellid, _ in pairs(_passive[class]) do
+					local points = LGT:GUIDHasTalent(dstGUID, GetSpellInfo(spellid), LGT:GetActiveTalentGroup(unit))
+					if points then
+						handle_shield(timestamp - 60, nil, dstGUID, dstGUID, nil, dstGUID, dstName, nil, spellid, nil, nil, nil, points)
 					end
 				end
 			end
@@ -1069,7 +1073,7 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 		playermod.nototal = true
 		targetmod.nototal = true
 
-		local flags_src = {src_is_interesting_nopets = true}
+		local flags_src = {src_is_interesting = true}
 
 		Skada:RegisterForCL(
 			handle_shield,
@@ -1096,11 +1100,6 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 			"SPELL_BUILDING_DAMAGE",
 			"RANGE_DAMAGE",
 			"SWING_DAMAGE",
-			flags_dst
-		)
-
-		Skada:RegisterForCL(
-			environment_damage,
 			"ENVIRONMENTAL_DAMAGE",
 			flags_dst
 		)
@@ -1725,7 +1724,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear
 		local spell = C[id]
 		if not spell then return end
 
-		tooltip:AddLine(GetSpellInfo(id))
+		tooltip:AddLine((GetSpellInfo(id)))
 		if spell.school and spellschools[spell.school] then
 			tooltip:AddLine(spellschools(spell.school))
 		end

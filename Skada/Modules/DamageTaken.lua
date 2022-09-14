@@ -33,7 +33,8 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 	local missTypes = Skada.missTypes
 	local GetTime = GetTime
 
-	local function log_damage(set, dmg, isdot)
+	local dmg = {}
+	local function log_damage(set, isdot)
 		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
 		if not player then return end
 
@@ -57,10 +58,10 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 		local spell = player.damagedspells and player.damagedspells[spellid]
 		if not spell then
 			player.damagedspells = player.damagedspells or {}
-			spell = {id = dmg.spellid, school = dmg.spellschool, amount = 0}
+			spell = {id = spellid, school = dmg.school, amount = 0}
 			player.damagedspells[spellid] = spell
-		elseif not spell.school and dmg.spellschool then
-			spell.school = dmg.spellschool
+		elseif not spell.school and dmg.school then
+			spell.school = dmg.school
 		end
 
 		spell.count = (spell.count or 0) + 1
@@ -141,10 +142,8 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 		end
 	end
 
-	local dmg = {}
-	local extraATT
-
-	local function spell_damage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local extraATT = nil
+	local function spell_damage(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
 			-- handle extra attacks
 			if eventtype == "SPELL_EXTRA_ATTACKS" then
@@ -164,7 +163,7 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 			end
 
 			if eventtype == "SWING_DAMAGE" then
-				dmg.spellid, _, dmg.spellschool = 6603, L["Melee"], 0x01
+				dmg.spellid, _, dmg.school = 6603, L["Melee"], 0x01
 				dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing, dmg.crushing = ...
 
 				-- an extra attack?
@@ -183,7 +182,7 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 					end
 				end
 			else
-				dmg.spellid, _, dmg.spellschool, dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing, dmg.crushing = ...
+				dmg.spellid, _, dmg.school, dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing, dmg.crushing = ...
 			end
 
 			if dmg.spellid and not ignoredSpells[dmg.spellid] then
@@ -197,13 +196,12 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 
 				dmg.misstype = nil
 
-				Skada:DispatchSets(log_damage, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
+				Skada:DispatchSets(log_damage, eventtype == "SPELL_PERIODIC_DAMAGE")
 			end
 		end
 	end
 
-	local function environment_damage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local envtype, amount = ...
+	local function environment_damage(_, _, _, _, _, dstGUID, dstName, dstFlags, envtype, amount)
 		local spellid, spellschool = nil, 0x01
 
 		if envtype == "Falling" or envtype == "FALLING" then
@@ -225,15 +223,15 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 		end
 	end
 
-	local function spell_missed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_missed(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
 			local amount
 
 			if eventtype == "SWING_MISSED" then
-				dmg.spellid, _, dmg.spellschool = 6603, L["Melee"], 0x01
+				dmg.spellid, _, dmg.school = 6603, L["Melee"], 0x01
 				dmg.misstype, amount = ...
 			else
-				dmg.spellid, _, dmg.spellschool, dmg.misstype, amount = ...
+				dmg.spellid, _, dmg.school, dmg.misstype, amount = ...
 			end
 
 			if dmg.spellid and not ignoredSpells[dmg.spellid] then
@@ -262,7 +260,7 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 					dmg.resisted = amount or 0
 				end
 
-				Skada:DispatchSets(log_damage, dmg, eventtype == "SPELL_PERIODIC_MISSED")
+				Skada:DispatchSets(log_damage, eventtype == "SPELL_PERIODIC_MISSED")
 			end
 		end
 	end

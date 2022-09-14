@@ -43,7 +43,8 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 		end
 	end
 
-	local function log_resurrect(set, data)
+	local data = {}
+	local function log_resurrect(set)
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if not player then return end
 
@@ -69,25 +70,15 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 		end
 	end
 
-	local data = {}
-
 	local function spell_resurrect(_, event, srcGUID, srcName, srcFlags, _, dstName, _, spellid)
 		if spellid and (event == "SPELL_RESURRECT" or resurrectSpells[spellid]) then
 			data.spellid = spellid
+			data.playerid = srcGUID
+			data.playername = srcName
+			data.playerflags = srcFlags
+			data.dstName = (event == "SPELL_RESURRECT") and dstName or srcName
 
-			if event == "SPELL_RESURRECT" then
-				data.playerid = srcGUID
-				data.playername = srcName
-				data.playerflags = srcFlags
-				data.dstName = dstName
-			else
-				data.playerid = srcGUID
-				data.playername = srcName
-				data.playerflags = srcFlags
-				data.dstName = srcName
-			end
-
-			Skada:DispatchSets(log_resurrect, data)
+			Skada:DispatchSets(log_resurrect)
 		end
 	end
 

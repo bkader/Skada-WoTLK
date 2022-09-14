@@ -24,7 +24,8 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 		end
 	end
 
-	local function log_damage(set, dmg)
+	local dmg = {}
+	local function log_damage(set)
 		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
 		if not player then return end
 
@@ -54,9 +55,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 		end
 	end
 
-	local dmg = {}
-
-	local function spell_damage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_damage(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
 			local amount, absorbed
 
@@ -78,7 +77,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 
 				dmg.amount = (amount or 0) + (absorbed or 0)
 
-				Skada:DispatchSets(log_damage, dmg)
+				Skada:DispatchSets(log_damage)
 			end
 		end
 	end

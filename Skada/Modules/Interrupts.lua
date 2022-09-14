@@ -5,7 +5,9 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 	local targetmod = mod:NewModule("Interrupted targets")
 	local playermod = mod:NewModule("Interrupt spells")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local get_interrupted_spells, get_interrupted_targets, _
+	local get_interrupted_spells = nil
+	local get_interrupted_targets = nil
+	local _
 
 	-- cache frequently used globals
 	local pairs, tostring, format, pformat = pairs, tostring, string.format, Skada.pformat
@@ -22,7 +24,8 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 		end
 	end
 
-	local function log_interrupt(set, data)
+	local data = {}
+	local function log_interrupt(set)
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if not player then return end
 
@@ -36,10 +39,11 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 		local spell = player.interruptspells and player.interruptspells[data.spellid]
 		if not spell then
 			player.interruptspells = player.interruptspells or {}
-			player.interruptspells[data.spellid] = {count = 0}
+			player.interruptspells[data.spellid] = {count = 1}
 			spell = player.interruptspells[data.spellid]
+		else
+			spell.count = spell.count + 1
 		end
-		spell.count = spell.count + 1
 
 		-- record interrupted spell
 		if data.extraspellid then
@@ -54,9 +58,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 		end
 	end
 
-	local data = {}
-
-	local function spell_interrupt(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_interrupt(_, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, spellname, _, extraspellid, extraspellname, _ = ...
 
 		spellid = spellid or 6603
@@ -78,7 +80,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 
 		Skada:FixPets(data)
 
-		Skada:DispatchSets(log_interrupt, data)
+		Skada:DispatchSets(log_interrupt)
 
 		if not P.modules.interruptannounce or srcGUID ~= Skada.userGUID then return end
 

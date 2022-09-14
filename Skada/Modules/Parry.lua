@@ -31,7 +31,8 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 		end
 	end
 
-	local function log_parry(set, data)
+	local data = {}
+	local function log_parry(set)
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if not player then return end
 
@@ -49,23 +50,14 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 		end
 	end
 
-	local data = {}
-
-	local function spell_missed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, _, _, _, misstype)
-		if parrybosses[dstName] and srcGUID ~= dstGUID and misstype == "PARRY" then
-			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
-
-			data.playerid = srcGUID
-			data.playername = srcName
+	local function spell_missed(_, _, srcGUID, srcName, srcFlags, _, dstName, _, swing_miss, _, _, spell_miss)
+		if (swing_miss == "PARRY" or spell_miss == "PARRY") and dstName and parrybosses[dstName] then
+			data.playerid, data.playername = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 			data.playerflags = srcFlags
 			data.dstName = dstName
 
-			Skada:DispatchSets(log_parry, data)
+			Skada:DispatchSets(log_parry)
 		end
-	end
-
-	local function swing_missed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		spell_missed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, nil, nil, nil, ...)
 	end
 
 	function targetmod:Enter(win, id, label)
@@ -135,8 +127,12 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 		-- no total click.
 		targetmod.nototal = true
 
-		Skada:RegisterForCL(spell_missed, "SPELL_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
-		Skada:RegisterForCL(swing_missed, "SWING_MISSED", {src_is_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(
+			spell_missed,
+			"SPELL_MISSED",
+			"SWING_MISSED",
+			{src_is_interesting = true, dst_is_not_interesting = true}
+		)
 
 		Skada:AddMode(self)
 	end

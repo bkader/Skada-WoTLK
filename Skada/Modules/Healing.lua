@@ -47,14 +47,15 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 		end
 	end
 
-	local function log_heal(set, data, tick)
-		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
+	local heal = {}
+	local function log_heal(set, ishot)
+		local player = Skada:GetPlayer(set, heal.playerid, heal.playername, heal.playerflags)
 		if not player then return end
 
 		-- get rid of overheal
-		local amount = max(0, data.amount - data.overheal)
-		if player.role == "HEALER" and amount > 0 and not data.petname then
-			Skada:AddActiveTime(set, player, data.spellid and not passiveSpells[data.spellid], nil, data.dstName)
+		local amount = max(0, heal.amount - heal.overheal)
+		if player.role == "HEALER" and amount > 0 and not heal.petname then
+			Skada:AddActiveTime(set, player, heal.spellid and not passiveSpells[heal.spellid], nil, heal.dstName)
 		end
 
 		-- record the healing
@@ -62,7 +63,7 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 		set.heal = (set.heal or 0) + amount
 
 		-- record the overheal
-		local overheal = (data.overheal > 0) and data.overheal or nil
+		local overheal = (heal.overheal > 0) and heal.overheal or nil
 		if overheal then
 			player.overheal = (player.overheal or 0) + overheal
 			set.overheal = (set.overheal or 0) + overheal
@@ -72,14 +73,13 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 		if set == Skada.total and not P.totalidc then return end
 
 		-- record the spell
-		local spellid = tick and -data.spellid or data.spellid
-		local spell = player.healspells and player.healspells[spellid]
+		local spell = player.healspells and player.healspells[heal.spellid]
 		if not spell then
 			player.healspells = player.healspells or {}
-			player.healspells[spellid] = {school = data.spellschool, amount = 0}
-			spell = player.healspells[spellid]
-		elseif not spell.school and data.spellschool then
-			spell.school = data.spellschool
+			player.healspells[heal.spellid] = {school = heal.school, amount = 0}
+			spell = player.healspells[heal.spellid]
+		elseif not spell.school and heal.school then
+			spell.school = heal.school
 		end
 
 		spell.count = (spell.count or 0) + 1
@@ -96,7 +96,7 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 			spell.max = amount
 		end
 
-		if data.critical then
+		if heal.critical then
 			spell.c_num = (spell.c_num or 0) + 1
 			spell.c_amt = (spell.c_amt or 0) + amount
 
@@ -110,12 +110,12 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 		end
 
 		-- record the target
-		if not data.dstName then return end
-		local target = spell.targets and spell.targets[data.dstName]
+		if not heal.dstName then return end
+		local target = spell.targets and spell.targets[heal.dstName]
 		if not target then
 			spell.targets = spell.targets or {}
-			spell.targets[data.dstName] = {amount = 0}
-			target = spell.targets[data.dstName]
+			spell.targets[heal.dstName] = {amount = 0}
+			target = spell.targets[heal.dstName]
 		end
 		target.amount = target.amount + amount
 
@@ -124,20 +124,14 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 		end
 	end
 
-	local heal = {}
-
-	local function spell_cast(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		if srcGUID and dstGUID then
-			local spellid, _, spellschool = ...
-			if spellid and not ignoredSpells[spellid] then
-				srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
-				Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, spellid, spellschool)
-			end
+	local function spell_cast(_, _, srcGUID, srcName, srcFlags, dstGUID, _, _, spellid, _, spellschool)
+		if srcGUID and dstGUID and spellid and not ignoredSpells[spellid] then
+			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+			Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, spellid, spellschool)
 		end
 	end
 
-	local function spell_heal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid = ...
+	local function spell_heal(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, ...)
 		if spellid and not ignoredSpells[spellid] then
 			srcGUID, srcName, srcFlags = Skada:FixUnit(spellid, srcGUID, srcName, srcFlags)
 
@@ -149,12 +143,13 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 			heal.dstName = dstName
 			heal.dstFlags = dstFlags
 
-			heal.spellid, _, heal.spellschool, heal.amount, heal.overheal, _, heal.critical = ...
+			heal.spellid = (eventtype == "SPELL_PERIODIC_HEAL") and -spellid or spellid
+			_, heal.school, heal.amount, heal.overheal, _, heal.critical = ...
 
 			heal.petname = nil
 			Skada:FixPets(heal)
 
-			Skada:DispatchSets(log_heal, heal, eventtype == "SPELL_PERIODIC_HEAL")
+			Skada:DispatchSets(log_heal)
 		end
 	end
 

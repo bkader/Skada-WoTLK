@@ -2,24 +2,24 @@ local Skada = Skada
 
 local format, pformat = string.format, Skada.pformat
 local pairs, min, floor = pairs, math.min, math.floor
-local UnitName, UnitGUID, UnitBuff = UnitName, UnitGUID, UnitBuff
-local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
-local PercentToRGB = Skada.PercentToRGB
 local _
 
 -- common functions
 local log_auraapply, log_aurarefresh, log_auraremove
 local mod_update_func, aura_update_func, aura_tooltip
-local format_valuetext, spellschools = nil, nil
+local format_valuetext, spellschools, aura = nil, nil, nil
 
 -- main module that handles common stuff
 do
 	local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 	local mod = Skada:NewModule("Buffs and Debuffs")
-	local del = Skada.delTable
+
+	local PercentToRGB = Skada.PercentToRGB
+	local del, clear = Skada.delTable, Skada.clearTable
 
 	function mod:OnEnable()
 		if not Skada:IsDisabled("Buffs") or not Skada:IsDisabled("Debuffs") then
+			aura = {}
 			spellschools = spellschools or Skada.spellschools
 			Skada.RegisterCallback(self, "Skada_SetComplete", "Clean")
 		end
@@ -30,6 +30,7 @@ do
 	end
 
 	function mod:Clean(_, set, curtime)
+		clear(aura)
 		if not set then return end
 
 		local maxtime = Skada:GetSetTime(set)
@@ -89,25 +90,24 @@ do
 		if not player then return end
 
 		local curtime = set.last_action or time()
-		local spellid = (aura.type == "DEBUFF") and -aura.spellid or aura.spellid
-		local spell = player.auras and player.auras[spellid]
+		local spell = player.auras and player.auras[aura.spellid]
 		if not spell then
 			player.auras = player.auras or {}
-			player.auras[spellid] = {school = aura.spellschool, active = 1, count = 1, uptime = 0, start = curtime}
-			spell = player.auras[spellid]
+			player.auras[aura.spellid] = {school = aura.school, active = 1, count = 1, uptime = 0, start = curtime}
+			spell = player.auras[aura.spellid]
 		else
 			spell.active = (spell.active or 0) + 1
 			spell.count = (spell.count or 0) + 1
 			spell.start = spell.start or curtime
 
 			-- fix missing school
-			if not spell.school and aura.spellschool then
-				spell.school = aura.spellschool
+			if not spell.school and aura.school then
+				spell.school = aura.school
 			end
 		end
 
 		-- only records targets for debuffs
-		if aura.type ~= "DEBUFF" or not aura.dstName then return end
+		if aura.spellid > 0 or not aura.dstName then return end
 
 		local target = spell.targets and spell.targets[aura.dstName]
 		if not target then
@@ -127,9 +127,7 @@ do
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
 		if not player then return end
 
-		local spellid = (aura.type == "DEBUFF") and -aura.spellid or aura.spellid
-		local spell = player and player.auras and player.auras[spellid]
-
+		local spell = player and player.auras and player.auras[aura.spellid]
 		if spell and spell.active and spell.active > 0 then
 			spell.refresh = (spell.refresh or 0) + 1
 			local target = spell.targets and aura.dstName and spell.targets[aura.dstName]
@@ -146,9 +144,7 @@ do
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
 		if not player then return end
 
-		local spellid = (aura.type == "DEBUFF") and -aura.spellid or aura.spellid
-		local spell = player and player.auras and player.auras[spellid]
-
+		local spell = player and player.auras and player.auras[aura.spellid]
 		if spell and spell.active and spell.active > 0 then
 			local curtime = set.last_action or time()
 			spell.active = spell.active - 1
@@ -298,6 +294,9 @@ Skada:RegisterModule("Buffs", function(L, P, _, C, new, _, clear)
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local get_players_by_buff = nil
 
+	local UnitName, UnitGUID, UnitBuff = UnitName, UnitGUID, UnitBuff
+	local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
+
 	-- list of spells that don't trigger SPELL_AURA_x events
 	local speciallist = {
 		[57669] = true -- Replenishment
@@ -313,14 +312,13 @@ Skada:RegisterModule("Buffs", function(L, P, _, C, new, _, clear)
 		local spell = player.auras and player.auras[aura.spellid]
 		if not spell then
 			player.auras = player.auras or {}
-			player.auras[aura.spellid] = {school = aura.spellschool, uptime = 0}
+			player.auras[aura.spellid] = {school = aura.school, uptime = 0}
 			spell = player.auras[aura.spellid]
 		end
 		spell.uptime = spell.uptime + 1
 	end
 
-	local aura = {type = "BUFF"}
-	local function handle_buff(_, event, _, _, _, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
+	local function handle_buff(_, event, _, _, _, dstGUID, dstName, dstFlags, spellid, _, school, auratype)
 		if
 			spellid and -- just in case, you never know!
 			not ignoredSpells[spellid] and
@@ -335,7 +333,7 @@ Skada:RegisterModule("Buffs", function(L, P, _, C, new, _, clear)
 			aura.dstFlags = nil
 
 			aura.spellid = spellid
-			aura.spellschool = spellschool
+			aura.school = school
 
 			if event == "SPELL_PERIODIC_ENERGIZE" then
 				Skada:DispatchSets(log_specialaura, aura)
@@ -519,8 +517,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 	-- list of spells used to queue units.
 	local queuedSpells = {[49005] = 50424}
 
-	local aura = {type = "DEBUFF"}
-	local function handle_debuff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
+	local function handle_debuff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, school, auratype)
 		if spellid and not ignoredSpells[spellid] and auratype == "DEBUFF" then
 			if srcName == nil and #srcGUID == 0 and dstName and #dstGUID > 0 then
 				srcGUID = dstGUID
@@ -536,8 +533,8 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 			aura.dstName = dstName
 			aura.dstFlags = dstFlags
 
-			aura.spellid = spellid
-			aura.spellschool = spellschool
+			aura.spellid = -spellid
+			aura.school = school
 
 			Skada:FixPets(aura)
 

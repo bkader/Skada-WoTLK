@@ -23,8 +23,9 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 		end
 	end
 
-	local function log_dispel(set, data)
-		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
+	local dispel = {}
+	local function log_dispel(set)
+		local player = Skada:GetPlayer(set, dispel.playerid, dispel.playername, dispel.playerflags)
 		if not player then return end
 
 		-- increment player's and set's dispels count
@@ -32,47 +33,46 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 		set.dispel = (set.dispel or 0) + 1
 
 		-- saving this to total set may become a memory hog deluxe.
-		if (set == Skada.total and not P.totalidc) or not data.spellid then return end
+		if (set == Skada.total and not P.totalidc) or not dispel.spellid then return end
 
-		local spell = player.dispelspells and player.dispelspells[data.spellid]
+		local spell = player.dispelspells and player.dispelspells[dispel.spellid]
 		if not spell then
 			player.dispelspells = player.dispelspells or {}
-			player.dispelspells[data.spellid] = {count = 0}
-			spell = player.dispelspells[data.spellid]
+			player.dispelspells[dispel.spellid] = {count = 1}
+			spell = player.dispelspells[dispel.spellid]
+		else
+			spell.count = spell.count + 1
 		end
-		spell.count = spell.count + 1
 
 		-- the dispelled spell
-		if data.extraspellid then
+		if dispel.extraspellid then
 			spell.spells = spell.spells or {}
-			spell.spells[data.extraspellid] = (spell.spells[data.extraspellid] or 0) + 1
+			spell.spells[dispel.extraspellid] = (spell.spells[dispel.extraspellid] or 0) + 1
 		end
 
 		-- the dispelled target
-		if data.dstName then
+		if dispel.dstName then
 			spell.targets = spell.targets or {}
-			spell.targets[data.dstName] = (spell.targets[data.dstName] or 0) + 1
+			spell.targets[dispel.dstName] = (spell.targets[dispel.dstName] or 0) + 1
 		end
 	end
 
-	local data = {}
-
-	local function spell_dispel(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		data.spellid, _, _, data.extraspellid = ...
-		data.extraspellid = data.extraspellid or 6603
+	local function spell_dispel(_, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		dispel.spellid, _, _, dispel.extraspellid = ...
+		dispel.extraspellid = dispel.extraspellid or 6603
 
 		-- invalid/ignored spell?
-		if (data.spellid and ignoredSpells[data.spellid]) or ignoredSpells[data.extraspellid] then return end
+		if (dispel.spellid and ignoredSpells[dispel.spellid]) or ignoredSpells[dispel.extraspellid] then return end
 
-		data.playerid = srcGUID
-		data.playername = srcName
-		data.playerflags = srcFlags
+		dispel.playerid = srcGUID
+		dispel.playername = srcName
+		dispel.playerflags = srcFlags
 
-		data.dstGUID = dstGUID
-		data.dstName = dstName
-		data.dstFlags = dstFlags
+		dispel.dstGUID = dstGUID
+		dispel.dstName = dstName
+		dispel.dstFlags = dstFlags
 
-		Skada:DispatchSets(log_dispel, data)
+		Skada:DispatchSets(log_dispel)
 	end
 
 	function spellmod:Enter(win, id, label)

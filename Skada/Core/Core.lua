@@ -315,13 +315,16 @@ end
 function Skada:GetActiveTime(set, actor, active)
 	active = active or (set.type == "pvp") or (set.type == "arena") -- force active for pvp/arena
 
+	-- use settime to clamp
+	local settime = self:GetSetTime(set)
+
 	-- active: actor's time.
 	if (self.db.profile.timemesure ~= 2 or active) and actor.time and actor.time > 0 then
-		return max(1, actor.time)
+		return max(1, min(actor.time, settime))
 	end
 
 	-- effective: combat time.
-	return (set and set.time) and max(1, set.time > 0 and set.time or (time() - set.starttime)) or 0
+	return settime
 end
 
 -- updates the actor's active time
@@ -3696,9 +3699,11 @@ function Skada:EndSegment()
 	end
 
 	-- remove players ".last" key from total segment.
-	for i = 1, #self.total.players do
-		if self.total.players[i] then
-			self.total.players[i].last = nil
+	if self.total.players then
+		for i = 1, #self.total.players do
+			if self.total.players[i] then
+				self.total.players[i].last = nil
+			end
 		end
 	end
 

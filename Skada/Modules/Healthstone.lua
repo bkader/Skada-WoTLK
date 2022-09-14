@@ -24,7 +24,7 @@ Skada:RegisterModule("Healthstones", function(L)
 		end
 	end
 
-	local function stone_used(_, eventtype, srcGUID, srcName, srcFlags, _, _, _, spellid, spellname)
+	local function stone_used(_, _, srcGUID, srcName, srcFlags, _, _, _, spellid, spellname)
 		if (spellid and stonespells[spellid]) or (spellname and spellname == stonename) then
 			Skada:DispatchSets(log_healthstone, srcGUID, srcName, srcFlags)
 		end

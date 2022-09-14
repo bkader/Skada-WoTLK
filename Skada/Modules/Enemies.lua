@@ -208,7 +208,8 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 		log_custom_unit(set, customGroups[name], playername, spellid, spellschool, amount, absorbed)
 	end
 
-	local function log_damage(set, dmg, isdot)
+	local dmg = {}
+	local function log_damage(set, isdot)
 		if not set or (set == Skada.total and not P.totalidc) then return end
 
 		local absorbed = dmg.absorbed or 0
@@ -337,9 +338,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 		log_custom_group(set, dmg.enemyid, dmg.enemyname, dmg.srcName, spellid, dmg.spellschool, dmg.amount, overkill, absorbed)
 	end
 
-	local dmg = {}
-
-	local function spell_damage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_damage(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcName and dstName then
 			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 
@@ -359,12 +358,12 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 				dmg.srcName = srcName
 				dmg.srcFlags = srcFlags
 
-				Skada:DispatchSets(log_damage, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
+				Skada:DispatchSets(log_damage, eventtype == "SPELL_PERIODIC_DAMAGE")
 			end
 		end
 	end
 
-	local function spell_missed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_missed(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcName and dstName then
 			local spellid, spellschool, misstype, amount
 
@@ -391,7 +390,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 				dmg.amount = 0
 				dmg.absorbed = amount
 
-				Skada:DispatchSets(log_damage, dmg, eventtype == "SPELL_PERIODIC_MISSED")
+				Skada:DispatchSets(log_damage, eventtype == "SPELL_PERIODIC_MISSED")
 			end
 		end
 	end
@@ -889,7 +888,8 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 		end
 	end
 
-	local function log_damage(set, dmg, isdot)
+	local dmg = {}
+	local function log_damage(set, isdot)
 		if not set or (set == Skada.total and not P.totalidc) then return end
 
 		local absorbed = dmg.absorbed or 0
@@ -958,9 +958,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 		end
 	end
 
-	local dmg = {}
-
-	local function spell_damage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_damage(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcName and dstName then
 			if eventtype == "SWING_DAMAGE" then
 				dmg.spellid, dmg.spellschool = 6603, 0x01
@@ -978,12 +976,12 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 				dmg.dstName = dstName
 				dmg.dstFlags = dstFlags
 
-				Skada:DispatchSets(log_damage, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
+				Skada:DispatchSets(log_damage, eventtype == "SPELL_PERIODIC_DAMAGE")
 			end
 		end
 	end
 
-	local function spell_missed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_missed(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcName and dstName then
 			local spellid, spellschool, misstype, amount
 
@@ -1008,7 +1006,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
 				dmg.amount = 0
 				dmg.absorbed = amount
 
-				Skada:DispatchSets(log_damage, dmg, eventtype == "SPELL_PERIODIC_MISSED")
+				Skada:DispatchSets(log_damage, eventtype == "SPELL_PERIODIC_MISSED")
 			end
 		end
 	end
@@ -1335,7 +1333,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 	local function format_valuetext(d, columns, total, dps, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
 			columns.Healing and Skada:FormatNumber(d.value),
-			columns[subview and "sHPS" or "HPS"] and hps and Skada:FormatNumber(dps),
+			columns[subview and "sHPS" or "HPS"] and dps and Skada:FormatNumber(dps),
 			columns[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
 		)
 
@@ -1344,40 +1342,39 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		end
 	end
 
-	local function log_heal(set, data, ishot)
+	local heal = {}
+	local function log_heal(set, ishot)
 		if not set or (set == Skada.total and not P.totalidc) then return end
 
-		if not data.amount or data.amount == 0 then return end
+		if not heal.amount or heal.amount == 0 then return end
 
-		local e = Skada:GetEnemy(set, data.enemyname, data.enemyid, data.enemyflags, true)
+		local e = Skada:GetEnemy(set, heal.enemyname, heal.enemyid, heal.enemyflags, true)
 		if not e then return end
 
 		if (set.type == "arena" or set.type == "pvp") and e.class and Skada.validclass[e.class] and e.role == "HEALER" then
-			Skada:AddActiveTime(set, e, data.amount > 0 and data.spellid and not passiveSpells[data.spellid], nil, data.dstName)
+			Skada:AddActiveTime(set, e, heal.amount > 0 and heal.spellid and not passiveSpells[heal.spellid], nil, heal.dstName)
 		end
 
-		set.eheal = (set.eheal or 0) + data.amount
-		e.heal = (e.heal or 0) + data.amount
+		set.eheal = (set.eheal or 0) + heal.amount
+		e.heal = (e.heal or 0) + heal.amount
 
-		local spellid = ishot and -data.spellid or data.spellid
+		local spellid = ishot and -heal.spellid or heal.spellid
 		local spell = e.healspells and e.healspells[spellid]
 		if not spell then
 			e.healspells = e.healspells or {}
-			e.healspells[spellid] = {school = data.spellschool, amount = data.amount}
+			e.healspells[spellid] = {school = heal.spellschool, amount = heal.amount}
 			spell = e.healspells[spellid]
 		else
-			spell.amount = spell.amount + data.amount
+			spell.amount = spell.amount + heal.amount
 		end
 
-		if data.dstName then
+		if heal.dstName then
 			spell.targets = spell.targets or {}
-			spell.targets[data.dstName] = (spell.targets[data.dstName] or 0) + data.amount
+			spell.targets[heal.dstName] = (spell.targets[heal.dstName] or 0) + heal.amount
 		end
 	end
 
-	local heal = {}
-
-	local function spell_heal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_heal(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, _, spellschool, amount, overheal = ...
 		if spellid and not ignoredSpells[spellid] then
 			heal.enemyid = srcGUID
@@ -1392,7 +1389,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 			heal.spellschool = spellschool
 			heal.amount = max(0, amount - overheal)
 
-			Skada:DispatchSets(log_heal, heal, eventtype == "SPELL_PERIODIC_HEAL")
+			Skada:DispatchSets(log_heal, eventtype == "SPELL_PERIODIC_HEAL")
 		end
 	end
 
@@ -1522,31 +1519,31 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 	end
 
 	function setPrototype:GetEnemyHeal(absorb)
-		local heal = 0
+		local total = 0
 		if not self.enemies then
-			return heal
+			return total
 		end
 
 		if self.eheal then
-			heal = self.eheal
+			total = self.eheal
 
 			if absorb and self.eabsorb then
-				heal = heal + self.eabsorb
+				total = total + self.eabsorb
 			end
 		else
 			for i = 1, #self.enemies do
 				local e = self.enemies[i]
 				if e and e.heal then
-					heal = heal + e.heal
+					total = total + e.heal
+				end
 
-					if absorb and e.absorb then
-						heal = heal + e.absorb
-					end
+				if absorb and e and e.absorb then
+					total = total + e.absorb
 				end
 			end
 		end
 
-		return heal
+		return total
 	end
 
 	function setPrototype:GetEnemyHPS(absorb, active)

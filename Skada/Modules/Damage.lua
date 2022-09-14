@@ -2,7 +2,6 @@ local Skada = Skada
 
 local pairs, max = pairs, math.max
 local format, pformat = string.format, Skada.pformat
-local GetSpellInfo, PercentToRGB = Skada.GetSpellInfo or GetSpellInfo, Skada.PercentToRGB
 local _
 
 local function format_valuetext(d, columns, total, dps, metadata, subview)
@@ -28,7 +27,10 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 	local sdetailmod = playermod:NewModule("Damage Breakdown")
 	local targetmod = mod:NewModule("Damage target list")
 	local tdetailmod = targetmod:NewModule("Damage spell list")
+
 	local UnitGUID, GetTime = UnitGUID, GetTime
+	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+	local PercentToRGB = Skada.PercentToRGB
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
@@ -59,7 +61,8 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 		end
 	end
 
-	local function log_damage(set, dmg, tick)
+	local dmg = {}
+	local function log_damage(set, isdot)
 		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
 		if not player then return end
 
@@ -95,28 +98,28 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 		if set == Skada.total and not P.totalidc then return end
 
 		-- spell
-		local spellname = dmg.spellname .. (tick and L["DoT"] or "")
+		local spellname = dmg.spellname .. (isdot and L["DoT"] or "")
 		local spell = player.damagespells and player.damagespells[spellname]
 		if not spell then
 			player.damagespells = player.damagespells or {}
-			spell = {id = dmg.spellid, school = dmg.spellschool, amount = 0}
+			spell = {id = dmg.spellid, school = dmg.school, amount = 0}
 			player.damagespells[spellname] = spell
 		elseif dmg.spellid and dmg.spellid ~= spell.id then
-			if dmg.spellschool and dmg.spellschool ~= spell.school then
-				spellname = spellname .. " (" .. (spellschools[dmg.spellschool] and spellschools[dmg.spellschool].name or L["Other"]) .. ")"
+			if dmg.school and dmg.school ~= spell.school then
+				spellname = spellname .. " (" .. (spellschools[dmg.school] and spellschools[dmg.school].name or L["Other"]) .. ")"
 			else
 				spellname = GetSpellInfo(dmg.spellid)
 			end
 			if not player.damagespells[spellname] then
-				player.damagespells[spellname] = {id = dmg.spellid, school = dmg.spellschool, amount = 0}
+				player.damagespells[spellname] = {id = dmg.spellid, school = dmg.school, amount = 0}
 			end
 			spell = player.damagespells[spellname]
-		elseif not spell.school and dmg.spellschool then
-			spell.school = dmg.spellschool
+		elseif not spell.school and dmg.school then
+			spell.school = dmg.school
 		end
 
 		-- start casts count for non DoTs.
-		if dmg.spellid ~= 6603 and not tick then
+		if dmg.spellid ~= 6603 and not isdot then
 			spell.casts = spell.casts or 1
 		end
 
@@ -195,20 +198,15 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 		end
 	end
 
-	local dmg = {}
-	local extraATT
-
-	local function spell_cast(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		if srcGUID and dstGUID then
-			local spellid, spellname, spellschool = ...
-			if spellid and spellname and not ignoredSpells[spellid] then
-				srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
-				Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, spellname, spellschool)
-			end
+	local function spell_cast(_, _, srcGUID, srcName, srcFlags, dstGUID, _, _, spellid, spellname, spellschool)
+		if srcGUID and dstGUID and spellid and spellname and not ignoredSpells[spellid] then
+			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+			Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, spellname, spellschool)
 		end
 	end
 
-	local function spell_damage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local extraATT = nil
+	local function spell_damage(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
 			-- handle extra attacks
 			if eventtype == "SPELL_EXTRA_ATTACKS" then
@@ -228,7 +226,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 			end
 
 			if eventtype == "SWING_DAMAGE" then
-				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, L["Melee"], 0x01
+				dmg.spellid, dmg.spellname, dmg.school = 6603, L["Melee"], 0x01
 				dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing = ...
 
 				-- an extra attack?
@@ -247,7 +245,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 					end
 				end
 			else
-				dmg.spellid, dmg.spellname, dmg.spellschool, dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing = ...
+				dmg.spellid, dmg.spellname, dmg.school, dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing = ...
 			end
 
 			if dmg.spellid and dmg.spellname and not ignoredSpells[dmg.spellid] then
@@ -263,20 +261,20 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 				dmg.petname = nil
 				Skada:FixPets(dmg)
 
-				Skada:DispatchSets(log_damage, dmg, eventtype == "SPELL_PERIODIC_DAMAGE")
+				Skada:DispatchSets(log_damage, eventtype == "SPELL_PERIODIC_DAMAGE")
 			end
 		end
 	end
 
-	local function spell_missed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_missed(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID ~= dstGUID then
 			local amount
 
 			if eventtype == "SWING_MISSED" then
-				dmg.spellid, dmg.spellname, dmg.spellschool = 6603, L["Melee"], 0x01
+				dmg.spellid, dmg.spellname, dmg.school = 6603, L["Melee"], 0x01
 				dmg.misstype, amount = ...
 			else
-				dmg.spellid, dmg.spellname, dmg.spellschool, dmg.misstype, amount = ...
+				dmg.spellid, dmg.spellname, dmg.school, dmg.misstype, amount = ...
 			end
 
 			if dmg.spellid and dmg.spellname and not ignoredSpells[dmg.spellid] then
@@ -307,7 +305,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 				dmg.petname = nil
 				Skada:FixPets(dmg)
 
-				Skada:DispatchSets(log_damage, dmg, eventtype == "SPELL_PERIODIC_MISSED")
+				Skada:DispatchSets(log_damage, eventtype == "SPELL_PERIODIC_MISSED")
 			end
 		end
 	end
