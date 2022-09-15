@@ -4,9 +4,10 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 	local playermod = mod:NewModule("Resurrect spell list")
 	local targetmod = mod:NewModule("Resurrect target list")
 
-	local pairs, tostring, format, pformat = pairs, tostring, string.format, Skada.pformat
-	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-	local get_resurrected_targets, _
+	local pairs, tostring = pairs, tostring
+	local format, pformat = string.format, Skada.pformat
+	local get_resurrected_targets = nil
+	local _
 
 	local resurrectSpells = {
 		-- Rebirth
@@ -92,21 +93,23 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		local total = (actor and not enemy) and actor.ress or 0
+		local total = (actor and not enemy) and actor.ress
 
-		if total == 0 or not actor.resspells then
+		if not total or total == 0 or not actor.resspells then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
+		local cols = mod.metadata.columns
+
 		for spellid, spell in pairs(actor.resspells) do
 			nr = nr + 1
-			local d = win:spell(nr, spellid, nil, resurrectSpells[spellid])
 
+			local d = win:spell(nr, spellid, nil, resurrectSpells[spellid])
 			d.value = spell.count
-			format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
+			format_valuetext(d, cols, total, win.metadata, true)
 		end
 	end
 
@@ -120,8 +123,8 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		local total = (actor and not enemy) and actor.ress or 0
-		local targets = (total > 0) and get_resurrected_targets(actor)
+		local total = (actor and not enemy) and actor.ress
+		local targets = (total and total > 0) and get_resurrected_targets(actor)
 
 		if not targets then
 			return
@@ -130,34 +133,39 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 		end
 
 		local nr = 0
+		local cols = mod.metadata.columns
+
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
-			local d = win:actor(nr, target, nil, targetname)
 
+			local d = win:actor(nr, target, nil, targetname)
 			d.value = target.count
-			format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
+			format_valuetext(d, cols, total, win.metadata, true)
 		end
 	end
 
 	function mod:Update(win, set)
 		win.title = L["Resurrects"]
-		local total = set.ress or 0
+		local total = set.ress
 
-		if total == 0 then
+		if not total or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		for i = 1, #set.players do
-			local player = set.players[i]
-			if player and player.ress then
-				nr = nr + 1
-				local d = win:actor(nr, player)
+		local cols = self.metadata.columns
 
-				d.value = player.ress
-				format_valuetext(d, self.metadata.columns, total, win.metadata)
+		local actors = set.players -- players
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and actor.ress then
+				nr = nr + 1
+
+				local d = win:actor(nr, actor)
+				d.value = actor.ress
+				format_valuetext(d, cols, total, win.metadata)
 			end
 		end
 	end
@@ -205,13 +213,15 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 		for _, spell in pairs(self.resspells) do
 			if spell.targets then
 				for name, count in pairs(spell.targets) do
-					if not tbl[name] then
-						tbl[name] = new()
-						tbl[name].count = count
+					local t = tbl[name]
+					if not t then
+						t = new()
+						t.count = count
+						tbl[name] = t
 					else
-						tbl[name].count = tbl[name].count + count
+						t.count = t.count + count
 					end
-					self.super:_fill_actor_table(tbl[name], name)
+					self.super:_fill_actor_table(t, name)
 				end
 			end
 		end

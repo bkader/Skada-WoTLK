@@ -39,20 +39,22 @@ function setPrototype:Bind(obj)
 		return obj
 	end
 
-	if obj.players then
-		for i = #obj.players, 1, -1 do
-			local p = obj.players[i]
+	local actors = obj.players -- players
+	if actors then
+		for i = #actors, 1, -1 do
+			local p = actors[i]
 			if p and p.flag and band(p.flag, BITMASK_FRIENDLY) == 0 then
-				tremove(obj.players, i) -- postfix
+				tremove(actors, i) -- postfix
 			elseif p then
 				playerPrototype:Bind(p, obj)
 			end
 		end
 	end
 
-	if obj.enemies then
-		for i = #obj.enemies, 1, -1 do
-			enemyPrototype:Bind(obj.enemies[i], obj)
+	actors = obj.enemies -- enemies
+	if actors then
+		for i = #actors, 1, -1 do
+			enemyPrototype:Bind(actors[i], obj)
 		end
 	end
 
@@ -95,7 +97,7 @@ end
 
 -- fills the give table with actor's details
 function setPrototype:_fill_actor_table(t, name, actortime)
-	if t and (not t.class or not t.time) then
+	if t and (not t.class or (actortime and not t.time)) then
 		local actor = self:GetActor(name)
 		if not actor then return end
 
@@ -119,55 +121,54 @@ end
 
 -- returns the set's damage amount
 function setPrototype:GetDamage(useful)
-	local damage = 0
+	local total = 0
 
 	-- players
 	if Skada.db.profile.absdamage and self.totaldamage then
-		damage = self.totaldamage
+		total = self.totaldamage
 	elseif self.damage then
-		damage = self.damage
+		total = self.damage
 	end
 
 	if useful and self.overkill then
-		damage = max(0, damage - self.overkill)
+		total = max(0, total - self.overkill)
 	end
 
 	-- arena damage
 	if Skada.forPVP and self.type == "arena" then
 		if Skada.db.profile.absdamage and self.etotaldamage then
-			damage = damage + self.etotaldamage
+			total = total + self.etotaldamage
 		elseif self.edamage then
-			damage = damage + self.edamage
+			total = total + self.edamage
 		end
 
 		if useful and self.eoverkill then
-			damage = max(0, damage - self.eoverkill)
+			total = max(0, total - self.eoverkill)
 		end
 	end
 
-	return damage
+	return total
 end
 
 -- returns set's dps and damage amount
 function setPrototype:GetDPS(useful)
-	local dps, damage = 0, self:GetDamage(useful)
-
-	if damage > 0 then
-		dps = damage / self:GetTime()
+	local total = self:GetDamage(useful)
+	if total == 0 then
+		return 0, total
 	end
 
-	return dps, damage
+	return total / self:GetTime(), total
 end
 
 -- returns the set's overkill
 function setPrototype:GetOverkill()
-	local overkill = self.overkill or 0
+	local total = self.overkill or 0
 
 	if Skada.forPVP and self.type == "arena" and self.eoverkill then
-		overkill = overkill + self.eoverkill
+		total = total + self.eoverkill
 	end
 
-	return overkill
+	return total
 end
 
 -- returns the actor's damage amount
@@ -216,32 +217,37 @@ end
 
 -- returns the set's damage taken amount
 function setPrototype:GetDamageTaken()
-	local damage = 0
+	local total = 0
 
 	-- players
 	if Skada.db.profile.absdamage and (self.totaldamaged or self.totaldamagetaken) then
-		damage = self.totaldamaged or self.totaldamagetaken
+		total = self.totaldamaged or self.totaldamagetaken
 	elseif self.damaged or self.damagetaken then
-		damage = self.damaged or self.damagetaken
+		total = self.damaged or self.damagetaken
+	end
+
+	if not Skada.forPVP or self.type ~= "arena" then
+		return total
 	end
 
 	-- arena damage
-	if Skada.forPVP and self.type == "arena" and self.GetEnemyDamageTaken then
-		damage = damage + self:GetEnemyDamageTaken()
+	if Skada.db.profile.absdamage and self.etotaldamage then
+		total = total + self.etotaldamage
+	elseif self.edamage then
+		total = total + self.edamage
 	end
 
-	return damage
+	return total
 end
 
 -- returns the set's dtps and damage taken amount
 function setPrototype:GetDTPS()
-	local dtps, damage = 0, self:GetDamageTaken()
-
-	if damage > 0 then
-		dtps = damage / self:GetTime()
+	local total = self:GetDamageTaken()
+	if total == 0 then
+		return 0, total
 	end
 
-	return dtps, damage
+	return total / self:GetTime(), total
 end
 
 -- returns the actor's damage taken amount
@@ -290,120 +296,127 @@ end
 
 -- returns the set's heal amount
 function setPrototype:GetHeal()
-	local heal = self.heal or 0
+	local total = self.heal or 0
 
 	-- include enemies healing in arena
 	if Skada.forPVP and self.type == "arena" and self.eheal then
-		heal = heal + self.eheal
+		total = total + self.eheal
 	end
 
-	return heal
+	return total
 end
 
 -- returns the set's hps and heal amount
 function setPrototype:GetHPS()
-	local heal = self:GetHeal()
-	if heal > 0 then
-		return heal / self:GetTime(), heal
+	local total = self:GetHeal()
+	if total == 0 then
+		return 0, total
 	end
-	return 0, heal
+
+	return total / self:GetTime(), total
 end
 
 -- returns the set's overheal amount
 function setPrototype:GetOverheal()
-	local overheal = self.overheal or 0
+	local total = self.overheal or 0
 
 	-- include enemies healing in arena
 	if Skada.forPVP and self.type == "arena" and self.eoverheal then
-		overheal = overheal + self.eoverheal
+		total = total + self.eoverheal
 	end
 
-	return overheal
+	return total
 end
 
 -- returns the set's overheal per second and overheal amount
 function setPrototype:GetOHPS()
-	local overheal = self:GetOverheal()
-	if overheal > 0 then
-		return overheal / self:GetTime(), overheal
+	local total = self:GetOverheal()
+	if total == 0 then
+		return 0, total
 	end
-	return 0, overheal
+
+	return total / self:GetTime(), total
 end
 
 -- returns the set's total heal amount, including overheal amount
 function setPrototype:GetTotalHeal()
-	local heal = self.heal or 0
+	local total = self.heal or 0
 
 	if self.overheal then
-		heal = heal + self.overheal
+		total = total + self.overheal
 	end
 
 	-- include enemies in arena
 	if Skada.forPVP and self.type == "arena" and self.eheal then
-		heal = heal + self.eheal
+		total = total + self.eheal
 	end
 
-	return heal
+	return total
 end
 
 -- returns the set's total hps and heal
 function setPrototype:GetTHPS()
-	local heal = self:GetTotalHeal()
-	if heal > 0 then
-		return heal / self:GetTime(), heal
+	local total = self:GetTotalHeal()
+	if total == 0 then
+		return 0, total
 	end
-	return 0, heal
+
+	return total / self:GetTime(), total
 end
 
 -- returns the set's absorb amount
 function setPrototype:GetAbsorb()
-	local absorb = self.absorb or 0
+	local total = self.absorb or 0
 
 	-- include enemies in arena
 	if Skada.forPVP and self.type == "arena" and self.eabsorb then
-		absorb = absorb + self.eabsorb
+		total = total + self.eabsorb
 	end
 
-	return absorb
+	return total
 end
 
 -- returns the set's absorb per second and absorb amount
 function setPrototype:GetAPS()
-	local absorb = self:GetAbsorb()
-	if absorb > 0 then
-		return absorb / self:GetTime(), absorb
+	local total = self:GetAbsorb()
+	if total == 0 then
+		return 0, total
 	end
-	return 0, absorb
+
+	return total / self:GetTime(), total
 end
 
 -- returns the set's amount of heal and absorb combined
 function setPrototype:GetAbsorbHeal()
-	local heal = self.heal or 0
+	local total = self.heal or 0
 
 	if self.absorb then
-		heal = heal + self.absorb
+		total = total + self.absorb
+	end
+
+	if not Skada.forPVP or self.type ~= "arena" then
+		return total
 	end
 
 	-- include enemies healing in arena
-	if Skada.forPVP and self.type == "arena" then
-		if self.eheal then
-			heal = heal + self.eheal
-		end
-		if self.eabsorb then
-			heal = heal + self.eabsorb
-		end
+	if self.eheal then
+		total = total + self.eheal
+	end
+	if self.eabsorb then
+		total = total + self.eabsorb
 	end
 
-	return heal
+	return total
 end
 
 -- returns the set's absorb and heal per sec
 function setPrototype:GetAHPS()
-	local heal = self:GetAbsorbHeal()
-	if heal > 0 then
-		return heal / self:GetTime(), heal
+	local total = self:GetAbsorbHeal()
+	if total == 0 then
+		return 0, total
 	end
-	return 0, heal
+
+	return total / self:GetTime(), total
 end
 
 -------------------------------------------------------------------------------
@@ -430,28 +443,29 @@ end
 
 -- returns the actor's damage amount
 function actorPrototype:GetDamage(useful)
-	local damage = 0
+	local total = 0
 
 	if Skada.db.profile.absdamage and self.totaldamage then
-		damage = self.totaldamage
+		total = self.totaldamage
 	elseif self.damage then
-		damage = self.damage
+		total = self.damage
 	end
 
 	if useful and self.overkill then
-		damage = max(0, damage - self.overkill)
+		total = max(0, total - self.overkill)
 	end
 
-	return damage
+	return total
 end
 
 -- returns the actor's dps and damage amount
-function actorPrototype:GetDPS(useful, active, skip)
-	local damage = self:GetDamage(useful)
-	if damage > 0 and not skip then -- skip calculation (i.e: disabled columns)
-		return damage / max(1, self:GetTime(active)), damage
+function actorPrototype:GetDPS(useful, active, no_calc)
+	local total = self:GetDamage(useful)
+	if total == 0 or no_calc then
+		return 0, total
 	end
-	return 0, damage
+
+	return total / self:GetTime(active), total
 end
 
 -- returns the actor's overkill
@@ -547,12 +561,13 @@ function actorPrototype:GetDamageTaken()
 end
 
 -- returns the actor's dtps and damage taken amount
-function actorPrototype:GetDTPS(active, skip)
-	local damage = self:GetDamageTaken()
-	if damage > 0 and not skip then -- skip calculation (i.e: disabled columns)
-		return damage / max(1, self:GetTime(active)), damage
+function actorPrototype:GetDTPS(active, no_calc)
+	local total = self:GetDamageTaken()
+	if total == 0 or no_calc then
+		return 0, total
 	end
-	return 0, damage
+
+	return total / self:GetTime(active), total
 end
 
 -- returns the actors damage sources
@@ -583,30 +598,26 @@ do
 	end
 
 	function actorPrototype:GetDamageSources(tbl)
-		local damage, spells = 0, self.damagedspells or self.damagetakenspells
+		local spells = self.damagedspells or self.damagetakenspells
+		if not spells then return end
 
-		if not spells then
-			return nil, 0
+		local total = 0
+		if Skada.db.profile.absdamage and (self.totaldamaged or self.totaldamagetaken) then
+			total = self.totaldamaged or self.totaldamagetaken
+		elseif self.damaged or self.damagetaken then
+			total = self.damaged or self.damagetaken
 		end
 
-		if spells then
-			if Skada.db.profile.absdamage and (self.totaldamaged or self.totaldamagetaken) then
-				damage = self.totaldamaged or self.totaldamagetaken
-			elseif self.damaged or self.damagetaken then
-				damage = self.damaged or self.damagetaken
-			end
-
-			tbl = clear(tbl or cacheTable)
-			for _, spell in pairs(spells) do
-				if spell.sources then
-					for name, source in pairs(spell.sources) do
-						fill_damage_sources_table(self.super, tbl, name, source)
-					end
+		tbl = clear(tbl or cacheTable)
+		for _, spell in pairs(spells) do
+			if spell.sources then
+				for name, source in pairs(spell.sources) do
+					fill_damage_sources_table(self.super, tbl, name, source)
 				end
 			end
 		end
 
-		return tbl, damage
+		return tbl, total
 	end
 end
 
@@ -652,12 +663,13 @@ function actorPrototype:GetHeal()
 end
 
 -- returns the actor's hps and heal amount
-function actorPrototype:GetHPS(active, skip)
-	local heal = self.heal or 0
-	if heal > 0 and not skip then -- skip calculation (i.e: disabled columns)
-		return heal / max(1, self:GetTime(active)), heal
+function actorPrototype:GetHPS(active, no_calc)
+	local total = self.heal or 0
+	if total == 0 or no_calc then
+		return 0, total
 	end
-	return 0, heal
+
+	return total / self:GetTime(active), total
 end
 
 -- returns the actor's overheal amount
@@ -666,95 +678,102 @@ function actorPrototype:GetOverheal()
 end
 
 -- returns the actor's overheal per second and overheal amount
-function actorPrototype:GetOHPS(active, skip)
-	local overheal = self.overheal or 0
-	if overheal > 0 and not skip then -- skip calculation (i.e: disabled columns)
-		return overheal / max(1, self:GetTime(active)), overheal
+function actorPrototype:GetOHPS(active, no_calc)
+	local total = self.overheal or 0
+	if total == 0 or no_calc then
+		return 0, total
 	end
-	return 0, overheal
+
+	return total / self:GetTime(active), total
 end
 
 -- returns the actor's total heal, including overheal
 function actorPrototype:GetTotalHeal()
-	local heal = self.heal or 0
+	local total = self.heal or 0
 
 	if self.overheal then
-		heal = heal + self.overheal
+		total = total + self.overheal
 	end
 
-	return heal
+	return total
 end
 
 -- returns the actor's total hps and heal
-function actorPrototype:GetTHPS(active, skip)
-	local heal = self:GetTotalHeal()
-	if heal > 0 and not skip then -- skip calculation (i.e: disabled columns)
-		return heal / max(1, self:GetTime(active)), heal
+function actorPrototype:GetTHPS(active, no_calc)
+	local total = self:GetTotalHeal()
+	if total == 0 or no_calc then
+		return 0, total
 	end
-	return 0, heal
+
+	return total / self:GetTime(active), total
 end
 
 -- returns the amount of heal and overheal on the given target
-function actorPrototype:GetHealOnTarget(name)
-	local heal, overheal = 0, 0
-	if not name or not self.healspells then
-		return heal, overheal
+function actorPrototype:GetHealOnTarget(name, inc_overheal)
+	local spells = name and self.healspells
+	if not spells and inc_overheal then
+		return 0, 0
+	elseif not spells then
+		return 0
 	end
 
-	for _, spell in pairs(self.healspells) do
-		if spell.targets and spell.targets[name] then
-			if type(spell.targets[name]) == "number" then
-				heal = heal + spell.targets[name]
-			else
-				heal = heal + spell.targets[name].amount
-				if spell.targets[name].o_amt or spell.targets[name].overheal then
-					overheal = overheal + (spell.targets[name].o_amt or spell.targets[name].overheal)
-				end
+	local heal = 0
+	local overheal = inc_overheal and 0 or nil
+
+	for _, spell in pairs(spells) do
+		local target = spell.targets and spell.targets[name]
+		if type(target) == "number" then
+			heal = heal + target
+		elseif target then
+			heal = heal + target.amount
+			if inc_overheal and (target.o_amt or target.overheal) then
+				overheal = overheal + (target.o_amt or target.overheal)
 			end
 		end
 	end
+
 	return heal, overheal
 end
 
 -- returns the amount of overheal on the given target
 function actorPrototype:GetOverhealOnTarget(name)
-	if not self.overheal or not self.healspells or not name then
+	local spells = self.overheal and name and self.healspells
+	if not spells then
 		return 0
 	end
 
-	local overheal = 0
-	for _, spell in pairs(self.healspells) do
-		if
-			((spell.o_amt and spell.o_amt > 0) or (spell.overheal and spell.overheal > 0)) and
-			spell.targets and
-			spell.targets[name] and
-			(spell.targets[name].o_amt or spell.targets[name].overheal) then
-			overheal = overheal + (spell.targets[name].o_amt or spell.targets[name].overheal)
+	local total = 0
+	for _, spell in pairs(spells) do
+		local o_amt = spell.o_amt or spell.overheal
+		o_amt = (o_amt and o_amt > 0) and spell.targets and spell.targets[name] and (spell.targets[name].o_amt or spell.targets[name].overheal)
+		if o_amt then
+			total = total + o_amt
 		end
 	end
-	return overheal
+	return total
 end
 
 -- returns the total heal amount on the given target
 function actorPrototype:GetTotalHealOnTarget(name)
-	if not name or not self.healspells then
+	local spells = name and self.healspells
+	if not spells then
 		return 0
 	end
 
-	local heal = 0
-	for _, spell in pairs(self.healspells) do
-		if spell.targets and spell.targets[name] then
-			if type(spell.targets[name]) == "number" then
-				heal = heal + spell.targets[name]
-			else
-				heal = heal + spell.targets[name].amount
-				if spell.targets[name].o_amt or spell.targets[name].overheal then
-					heal = heal + (spell.targets[name].o_amt or spell.targets[name].overheal)
-				end
+	local total = 0
+	for _, spell in pairs(spells) do
+		local target = spell.targets and spell.targets[name]
+		if type(target) == "number" then
+			total = total + target
+		elseif target then
+			total = total + target.amount
+			if target.o_amt or target.overheal then
+				total = total + (target.o_amt or target.overheal)
 			end
 		end
 	end
-	return heal
+
+	return total
 end
 
 -- returns the actor's absorb amount
@@ -763,61 +782,64 @@ function actorPrototype:GetAbsorb()
 end
 
 -- returns the actor's absorb per second and absorb amount
-function actorPrototype:GetAPS(active, skip)
-	local absorb = self.absorb or 0
-	if absorb > 0 and not skip then -- skip calculation (i.e: disabled columns)
-		return absorb / max(1, self:GetTime(active)), absorb
+function actorPrototype:GetAPS(active, no_calc)
+	local total = self.absorb or 0
+	if total == 0 or no_calc then
+		return 0, total
 	end
-	return 0, absorb
+
+	return total / self:GetTime(active), total
 end
 
 -- returns the actor's amount of heal and absorb combined
 function actorPrototype:GetAbsorbHeal()
-	local heal = self.heal or 0
-
-	if self.absorb then
-		heal = heal + self.absorb
+	local total = self.heal or 0
+	if not self.absorb then
+		return total
 	end
 
-	return heal
+	total = total + self.absorb
+	return total
 end
 
 -- returns the actor's absorb and heal per sec
-function actorPrototype:GetAHPS(active, skip)
-	local heal = self:GetAbsorbHeal()
-	if heal > 0 and not skip then -- skip calculation (i.e: disabled columns)
-		return heal / max(1, self:GetTime(active)), heal
+function actorPrototype:GetAHPS(active, no_calc)
+	local total = self:GetAbsorbHeal()
+	if total == 0 or no_calc then
+		return 0, total
 	end
-	return 0, heal
+
+	return total / self:GetTime(active), total
 end
 
 -- returns the amount of absorb and heal on the given target
-function actorPrototype:GetAbsorbHealOnTarget(name)
-	local heal, overheal = 0, 0
-	if not name then
-		return heal, overheal
+function actorPrototype:GetAbsorbHealOnTarget(name, inc_overheal)
+	if not name or not (self.absorbspells or self.healspells) then
+		return 0, inc_overheal and 0 or nil
 	end
 
-	-- absorb spells
-	if self.absorbspells then
-		for _, spell in pairs(self.absorbspells) do
+	local heal = 0
+	local overheal = inc_overheal and 0 or nil
+
+	local spells = self.absorbspells -- absorb spells
+	if spells then
+		for _, spell in pairs(spells) do
 			if spell.targets and spell.targets[name] then
 				heal = heal + spell.targets[name]
 			end
 		end
 	end
 
-	-- heal spells
-	if self.healspells then
-		for _, spell in pairs(self.healspells) do
-			if spell.targets and spell.targets[name] then
-				if type(spell.targets[name]) == "number" then
-					heal = heal + spell.targets[name]
-				else
-					heal = heal + spell.targets[name].amount
-					if spell.targets[name].o_amt or spell.targets[name].overheal then
-						overheal = overheal + (spell.targets[name].o_amt or spell.targets[name].overheal)
-					end
+	spells = self.healspells -- heal spells
+	if spells then
+		for _, spell in pairs(spells) do
+			local target = spell.targets and spell.targets[name]
+			if type(target) == "number" then
+				heal = heal + target
+			elseif target then
+				heal = heal + target.amount
+				if inc_overheal and (target.o_amt or target.overheal) then
+					overheal = overheal + (target.o_amt or target.overheal)
 				end
 			end
 		end
@@ -858,10 +880,11 @@ do
 
 	-- returns the actor's absorb targets table if found
 	function actorPrototype:GetAbsorbTargets(tbl)
-		if not self.absorbspells then return end
+		local spells = self.absorbspells
+		if not spells then return end
 
 		tbl = clear(tbl or cacheTable)
-		for _, spell in pairs(self.absorbspells) do
+		for _, spell in pairs(spells) do
 			if spell.targets then
 				for name, amount in pairs(spell.targets) do
 					fill_absorb_targets_table(self.super, tbl, name, amount)
@@ -873,10 +896,11 @@ do
 
 	-- returns the actor's heal targets table if found
 	function actorPrototype:GetHealTargets(tbl)
-		if not self.healspells then return end
+		local spells = self.healspells
+		if not spells then return end
 
 		tbl = clear(tbl or cacheTable)
-		for _, spell in pairs(self.healspells) do
+		for _, spell in pairs(spells) do
 			if spell.targets then
 				for name, target in pairs(spell.targets) do
 					fill_heal_targets_table(self.super, tbl, name, target)
@@ -888,13 +912,13 @@ do
 
 	-- returns the actor's absorb and heal targets table if found
 	function actorPrototype:GetAbsorbHealTargets(tbl)
-		if not self.healspells and not self.absorbspells then return end
+		if not (self.healspells or self.absorbspells) then return end
 
 		tbl = clear(tbl or cacheTable)
 
-		-- absorb targets
-		if self.absorbspells then
-			for _, spell in pairs(self.absorbspells) do
+		local spells = self.absorbspells -- absorb spells
+		if spells then
+			for _, spell in pairs(spells) do
 				if spell.targets then
 					for name, amount in pairs(spell.targets) do
 						fill_absorb_targets_table(self.super, tbl, name, amount)
@@ -903,9 +927,9 @@ do
 			end
 		end
 
-		-- heal targets
-		if self.healspells then
-			for _, spell in pairs(self.healspells) do
+		spells = self.healspells -- heal spells
+		if spells then
+			for _, spell in pairs(spells) do
 				if spell.targets then
 					for name, target in pairs(spell.targets) do
 						fill_heal_targets_table(self.super, tbl, name, target)
@@ -939,11 +963,13 @@ do
 	end
 
 	function actorPrototype:GetOverhealTargets(tbl)
-		if not self.overheal or not self.healspells then return end
+		local spells = self.overheal and self.healspells
+		if not spells then return end
 
 		tbl = clear(tbl or cacheTable)
-		for _, spell in pairs(self.healspells) do
-			if ((spell.o_amt and spell.o_amt > 0) or (spell.overheal and spell.overheal > 0)) and spell.targets then
+		for _, spell in pairs(spells) do
+			local o_amt = spell.o_amt or spell.overheal
+			if o_amt and o_amt > 0 and spell.targets then
 				for name, target in pairs(spell.targets) do
 					fill_overheal_targets_table(self.super, tbl, name, target)
 				end
@@ -972,10 +998,11 @@ do
 	end
 
 	function actorPrototype:GetTotalHealTargets(tbl)
-		if not self.healspells then return end
+		local spells = self.healspells
+		if not spells then return end
 
 		tbl = clear(tbl or cacheTable)
-		for _, spell in pairs(self.healspells) do
+		for _, spell in pairs(spells) do
 			if spell.targets then
 				for name, target in pairs(spell.targets) do
 					fill_total_heal_targets_table(self.super, tbl, name, target)

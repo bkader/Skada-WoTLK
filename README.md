@@ -323,7 +323,7 @@ actor:GetDamageFromSource(name) -- returns the damage, overkill [and useful for 
 actor:GetHeal() -- returns the actor's heal amount.
 actor:GetHPS(active) -- returns the actor's HPS and heal amount.
 actor:GetHealTargets(tbl) -- returns the actor's heal targets table.
-actor:GetHealOnTarget(name) -- returns the actor's heal and overheal amount on the target.
+actor:GetHealOnTarget(name, inc_overheal) -- returns the actor's heal and overheal amount on the target.
 
 actor:GetOverheal() -- returns the actor's overheal amount.
 actor:GetOHPS(active) -- returns the actor's overheal per second and overheal amount.
@@ -342,7 +342,7 @@ actor:GetAbsorbTargets(tbl) -- returns the table of actor's absorbed targets.
 actor:GetAbsorbHeal() -- returns the amounts of heal and absorb combined.
 actor:GetAHPS(active) -- returns the heal and absorb combined, per second and their combined amount.
 actor:GetAbsorbHealTargets(tbl) -- returns the table of actor's healed and absorbed targets.
-actor:GetAbsorbHealOnTarget(name) -- returns the actor's heal (including absorbs) and overheal on the target.
+actor:GetAbsorbHealOnTarget(name, inc_overheal) -- returns the actor's heal (including absorbs) and overheal on the target.
 ```
 
 #### Extending Players functions

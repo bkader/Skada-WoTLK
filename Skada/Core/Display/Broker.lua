@@ -45,6 +45,7 @@ Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 
 	local function sortDataset(win)
 		tsort(win.dataset, sortFunc)
+		return win.dataset
 	end
 
 	local function formatLabel(win, data)
@@ -85,12 +86,12 @@ Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 
 		tooltip:AddLine(win.metadata.title)
 
-		sortDataset(win)
-		if #win.dataset > 0 then
+		local dataset = sortDataset(win)
+		if #dataset > 0 then
 			tooltip:AddLine(" ")
 			local n = 0 -- used to fix spots starting from 2
-			for i = 1, #win.dataset do
-				local data = win.dataset[i]
+			for i = 1, #dataset do
+				local data = dataset[i]
 				if data and data.id and not data.ignore and i < 30 then
 					n = n + 1
 					local label = formatLabel(win, data)
@@ -213,19 +214,18 @@ Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 		if win.obj then
 			win.obj.text = ""
 		end
-		sortDataset(win)
-		if #win.dataset > 0 then
-			local data = win.dataset[1]
-			if data.id then
-				local label = (formatLabel(win, data) or "") .. " - " .. (formatValue(win, data) or "")
 
-				if win.obj then
-					win.obj.text = label
-				end
-				if win.db.useframe then
-					win.frame.title:SetText(label)
-				end
-			end
+		local dataset = sortDataset(win)
+		local data = (#dataset > 0) and dataset[1]
+		if not data or not data.id then return end
+
+		local label = (formatLabel(win, data) or "") .. " - " .. (formatValue(win, data) or "")
+
+		if win.obj then
+			win.obj.text = label
+		end
+		if win.db.useframe then
+			win.frame.title:SetText(label)
 		end
 	end
 

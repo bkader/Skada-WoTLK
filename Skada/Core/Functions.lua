@@ -424,9 +424,10 @@ function Skada.unitClass(guid, flag, set, db, name)
 	set = set or Skada.current
 	if set then
 		-- an existing player?
-		if set.players then
-			for i = 1, #set.players do
-				local p = set.players[i]
+		local actors = set.players
+		if actors then
+			for i = 1, #actors do
+				local p = actors[i]
 				if p and p.id == guid then
 					return p.class, p.role, p.spec
 				elseif p and name and p.name == name and p.class and Skada.validclass[p.class] then
@@ -435,9 +436,10 @@ function Skada.unitClass(guid, flag, set, db, name)
 			end
 		end
 		-- an existing enemy?
-		if set.enemies then
-			for i = 1, #set.enemies do
-				local e = set.enemies[i]
+		actors = set.enemies
+		if actors then
+			for i = 1, #actors do
+				local e = actors[i]
 				if e and ((e.id == guid or e.name == guid)) and e.class then
 					return e.class
 				end
@@ -600,8 +602,9 @@ do
 	local function randomize_fake_data(set, coef)
 		set.time = time() - set.starttime
 
-		for i = 1, #set.players do
-			local player = playerPrototype:Bind(set.players[i], set)
+		local players = set.players
+		for i = 1, #players do
+			local player = playerPrototype:Bind(players[i], set)
 			if player then
 				local damage, heal, absorb = 0, 0, 0
 
@@ -693,10 +696,8 @@ do
 		LSM:Register("font", "ABF", [[Interface\Addons\Skada\Media\Fonts\ABF.ttf]])
 		LSM:Register("font", "Accidental Presidency", [[Interface\Addons\Skada\Media\Fonts\Accidental Presidency.ttf]])
 		LSM:Register("font", "Adventure", [[Interface\Addons\Skada\Media\Fonts\Adventure.ttf]])
-		LSM:Register("font", "Continuum Medium", [[Interface\Addons\Skada\Media\Fonts\ContinuumMedium.ttf]])
 		LSM:Register("font", "Diablo", [[Interface\Addons\Skada\Media\Fonts\Diablo.ttf]])
 		LSM:Register("font", "Forced Square", [[Interface\Addons\Skada\Media\Fonts\FORCED SQUARE.ttf]])
-		LSM:Register("font", "FrancoisOne", [[Interface\Addons\Skada\Media\Fonts\FrancoisOne.ttf]])
 		LSM:Register("font", "Hooge", [[Interface\Addons\Skada\Media\Fonts\Hooge.ttf]])
 
 		-- statusbars
@@ -704,7 +705,6 @@ do
 		LSM:Register("statusbar", "Armory", [[Interface\Addons\Skada\Media\Statusbar\Armory]])
 		LSM:Register("statusbar", "BantoBar", [[Interface\Addons\Skada\Media\Statusbar\BantoBar]])
 		LSM:Register("statusbar", "Flat", [[Interface\Addons\Skada\Media\Statusbar\Flat]])
-		LSM:Register("statusbar", "Glass", [[Interface\AddOns\Skada\Media\Statusbar\Glass]])
 		LSM:Register("statusbar", "Gloss", [[Interface\Addons\Skada\Media\Statusbar\Gloss]])
 		LSM:Register("statusbar", "Graphite", [[Interface\Addons\Skada\Media\Statusbar\Graphite]])
 		LSM:Register("statusbar", "Grid", [[Interface\Addons\Skada\Media\Statusbar\Grid]])
@@ -715,16 +715,13 @@ do
 		LSM:Register("statusbar", "Outline", [[Interface\Addons\Skada\Media\Statusbar\Outline]])
 		LSM:Register("statusbar", "Round", [[Interface\Addons\Skada\Media\Statusbar\Round]])
 		LSM:Register("statusbar", "Serenity", [[Interface\AddOns\Skada\Media\Statusbar\Serenity]])
-		LSM:Register("statusbar", "Smooth v2", [[Interface\Addons\Skada\Media\Statusbar\Smoothv2]])
 		LSM:Register("statusbar", "Smooth", [[Interface\Addons\Skada\Media\Statusbar\Smooth]])
 		LSM:Register("statusbar", "Solid", [[Interface\Buttons\WHITE8X8]])
 		LSM:Register("statusbar", "TukTex", [[Interface\Addons\Skada\Media\Statusbar\TukTex]])
-		LSM:Register("statusbar", "WorldState Score", [[Interface\WorldStateFrame\WORLDSTATEFINALSCORE-HIGHLIGHT]])
 
 		-- borders
 		LSM:Register("border", "Glow", [[Interface\Addons\Skada\Media\Border\Glow]])
 		LSM:Register("border", "Roth", [[Interface\Addons\Skada\Media\Border\Roth]])
-		LSM:Register("background", "Copper", [[Interface\Addons\Skada\Media\Background\copper]])
 
 		-- sounds
 		LSM:Register("sound", "Cartoon FX", [[Sound\Doodad\Goblin_Lottery_Open03.wav]])

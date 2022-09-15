@@ -368,7 +368,7 @@ function Skada:OpenMenu(window)
 				wipe(info)
 				info.text = L["Total"]
 				info.func = function()
-					self.win:set_selected_set("total")
+					self.win:SetSelectedSet("total")
 					Skada:UpdateDisplay()
 				end
 				info.checked = (self.win.selectedset == "total")
@@ -377,7 +377,7 @@ function Skada:OpenMenu(window)
 				wipe(info)
 				info.text = L["Current"]
 				info.func = function()
-					self.win:set_selected_set("current")
+					self.win:SetSelectedSet("current")
 					Skada:UpdateDisplay()
 				end
 				info.checked = (self.win.selectedset == "current")
@@ -396,7 +396,7 @@ function Skada:OpenMenu(window)
 						wipe(info)
 						info.text = set_info_text(set, i, num)
 						info.func = function()
-							self.win:set_selected_set(i)
+							self.win:SetSelectedSet(i)
 							Skada:UpdateDisplay()
 						end
 						info.checked = (self.win.selectedset == i)
@@ -618,7 +618,7 @@ function Skada:SegmentMenu(window)
 			wipe(info)
 			info.text = L["Total"]
 			info.func = function()
-				self.win:set_selected_set("total")
+				self.win:SetSelectedSet("total")
 				Skada:UpdateDisplay()
 			end
 			info.checked = (self.win.selectedset == "total")
@@ -627,7 +627,7 @@ function Skada:SegmentMenu(window)
 			wipe(info)
 			info.text = L["Current"]
 			info.func = function()
-				self.win:set_selected_set("current")
+				self.win:SetSelectedSet("current")
 				Skada:UpdateDisplay()
 			end
 			info.checked = (self.win.selectedset == "current")
@@ -651,7 +651,7 @@ function Skada:SegmentMenu(window)
 					wipe(info)
 					info.text = set_info_text(set, i, numsets)
 					info.func = function()
-						self.win:set_selected_set(i)
+						self.win:SetSelectedSet(i)
 						Skada:UpdateDisplay()
 					end
 					info.checked = (self.win.selectedset == i)
@@ -692,7 +692,7 @@ function Skada:SegmentMenu(window)
 					wipe(info)
 					info.text = set_info_text(set, i, numsets)
 					info.func = function()
-						self.win:set_selected_set(i)
+						self.win:SetSelectedSet(i)
 						Skada:UpdateDisplay()
 					end
 					info.checked = (self.win.selectedset == i)
@@ -895,8 +895,10 @@ do
 				local linebox = AceGUI:Create("Dropdown")
 				linebox:SetLabel(L["Line"])
 				linebox:SetList({[""] = L["None"]})
-				for i = 1, #window.dataset do
-					local data = window.dataset[i]
+
+				local dataset = window.dataset
+				for i = 1, #dataset do
+					local data = dataset[i]
 					if data and data.id and not data.ignore then
 						linebox:AddItem(data.id, format("%s   %s", data.text or data.label, data.valuetext))
 					end

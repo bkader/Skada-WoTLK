@@ -1,8 +1,9 @@
 local Skada = Skada
 
 -- cache frequently used globals
-local pairs, format, pformat, max = pairs, string.format, Skada.pformat, math.max
-local GetSpellInfo, T = Skada.GetSpellInfo or GetSpellInfo, Skada.Table
+local pairs, max = pairs, math.max
+local format, pformat = string.format, Skada.pformat
+local T = Skada.Table
 local _
 
 local function format_valuetext(d, columns, total, hps, metadata, subview)
@@ -132,25 +133,25 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 	end
 
 	local function spell_heal(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, ...)
-		if spellid and not ignoredSpells[spellid] then
-			srcGUID, srcName, srcFlags = Skada:FixUnit(spellid, srcGUID, srcName, srcFlags)
+		if not spellid or ignoredSpells[spellid] then return end
 
-			heal.playerid = srcGUID
-			heal.playername = srcName
-			heal.playerflags = srcFlags
+		srcGUID, srcName, srcFlags = Skada:FixUnit(spellid, srcGUID, srcName, srcFlags)
 
-			heal.dstGUID = dstGUID
-			heal.dstName = dstName
-			heal.dstFlags = dstFlags
+		heal.playerid = srcGUID
+		heal.playername = srcName
+		heal.playerflags = srcFlags
 
-			heal.spellid = (eventtype == "SPELL_PERIODIC_HEAL") and -spellid or spellid
-			_, heal.school, heal.amount, heal.overheal, _, heal.critical = ...
+		heal.dstGUID = dstGUID
+		heal.dstName = dstName
+		heal.dstFlags = dstFlags
 
-			heal.petname = nil
-			Skada:FixPets(heal)
+		heal.spellid = (eventtype == "SPELL_PERIODIC_HEAL") and -spellid or spellid
+		_, heal.school, heal.amount, heal.overheal, _, heal.critical = ...
 
-			Skada:DispatchSets(log_heal)
-		end
+		heal.petname = nil
+		Skada:FixPets(heal)
+
+		Skada:DispatchSets(log_heal)
 	end
 
 	local function healing_tooltip(win, id, label, tooltip)
@@ -248,22 +249,27 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 		if not set or not win.targetname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		local total = actor and actor:GetHealOnTarget(win.targetname) or 0
+		local total = actor and actor:GetHealOnTarget(win.targetname)
+		local spells = (total and total > 0) and actor.healspells
 
-		if total == 0 then
+		if not spells then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
-		local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
-		for spellid, spell in pairs(actor.healspells) do
-			if spell.targets and spell.targets[win.targetname] then
-				nr = nr + 1
-				local d = win:spell(nr, spellid, spell, nil, true)
+		local nr = 0
+		local cols = mod.metadata.columns
+		local actortime = cols.sHPS and actor:GetTime()
 
-				d.value = enemy and spell.targets[win.targetname] or spell.targets[win.targetname].amount or 0
-				format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
+		for spellid, spell in pairs(spells) do
+			local tar = spell.targets and spell.targets[win.targetname]
+			if tar then
+				nr = nr + 1
+
+				local d = win:spell(nr, spellid, spell, nil, true)
+				d.value = enemy and tar or tar.amount or 0
+				format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -278,21 +284,25 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		local total = actor and actor.heal or 0
+		local total = actor and actor.heal
+		local spells = (total and total > 0) and actor.healspells
 
-		if total == 0 or not actor.healspells then
+		if not spells then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
-		local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
-		for spellid, spell in pairs(actor.healspells) do
-			nr = nr + 1
-			local d = win:spell(nr, spellid, spell, nil, true)
+		local nr = 0
+		local cols = mod.metadata.columns
+		local actortime = cols.sHPS and actor:GetTime()
 
+		for spellid, spell in pairs(spells) do
+			nr = nr + 1
+
+			local d = win:spell(nr, spellid, spell, nil, true)
 			d.value = spell.amount
-			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -305,10 +315,8 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 		win.title = pformat(L["%s's healed targets"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
-		if not actor then return end
-
-		local total = actor.heal or 0
-		local targets = (total > 0) and actor:GetHealTargets()
+		local total = actor and actor.heal
+		local targets = (total and total > 0) and actor:GetHealTargets()
 
 		if not targets then
 			return
@@ -316,61 +324,63 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 			win.metadata.maxvalue = 0
 		end
 
-		local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
+		local nr = 0
+		local cols = mod.metadata.columns
+		local actortime = cols.sHPS and actor:GetTime()
+
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
-			local d = win:actor(nr, target, nil, targetname)
 
+			local d = win:actor(nr, target, nil, targetname)
 			d.value = target.amount
-			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Healing"], L[win.class]) or L["Healing"]
 
-		local total = set and set:GetHeal() or 0
-
-		if total == 0 then
+		local total = set and set:GetHeal()
+		if not total or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
+		local cols = self.metadata.columns
+		local is_arena = (Skada.forPVP and set.type == "arena")
 
-		-- players
-		for i = 1, #set.players do
-			local player = set.players[i]
-			if player and (not win.class or win.class == player.class) then
-				local hps, amount = player:GetHPS()
+		local actors = set.players -- players
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and (not win.class or win.class == actor.class) then
+				local hps, amount = actor:GetHPS(nil, not cols.sHPS)
 				if amount > 0 then
 					nr = nr + 1
-					local d = win:actor(nr, player)
 
-					if Skada.forPVP and set.type == "arena" then
-						d.color = Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
-					end
-
+					local d = win:actor(nr, actor)
+					d.color = is_arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = amount
-					format_valuetext(d, self.metadata.columns, total, hps, win.metadata)
+					format_valuetext(d, cols, total, hps, win.metadata)
 				end
 			end
 		end
 
-		-- arena enemies
-		if not (Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyHeal) then return end
-		for i = 1, #set.enemies do
-			local enemy = set.enemies[i]
-			if enemy and not enemy.fake and (not win.class or win.class == enemy.class) then
-				local hps, amount = enemy:GetHPS()
+		actors = is_arena and set.enemies or nil -- arena enemies
+		if not actors then return end
+
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and not actor.fake and (not win.class or win.class == actor.class) then
+				local hps, amount = actor:GetHPS(nil, not cols.sHPS)
 				if amount > 0 then
 					nr = nr + 1
-					local d = win:actor(nr, enemy, true)
-					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
+					local d = win:actor(nr, actor, true)
+					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 					d.value = amount
-					format_valuetext(d, self.metadata.columns, total, hps, win.metadata)
+					format_valuetext(d, cols, total, hps, win.metadata)
 				end
 			end
 		end
@@ -497,22 +507,28 @@ Skada:RegisterModule("Overhealing", function(L)
 		if not set or not win.targetname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		local total = actor and actor:GetOverhealOnTarget(win.targetname) or 0
+		local total = actor and actor:GetOverhealOnTarget(win.targetname)
 
-		if total == 0 then
+		if not total or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
-		local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
-		for spellid, spell in pairs(actor.healspells) do
-			if spell.targets and spell.targets[win.targetname] and spell.targets[win.targetname].o_amt and spell.targets[win.targetname].o_amt > 0 then
-				nr = nr + 1
-				local d = win:spell(nr, spellid, spell, nil, true)
+		local nr = 0
+		local cols = mod.metadata.columns
+		local actortime = cols.sHPS and actor:GetTime()
+		local spells = actor.healspells
 
-				d.value = spell.targets[win.targetname].o_amt
-				fmt_valuetext(d, mod.metadata.columns, spell.targets[win.targetname].amount + d.value, actortime and (d.value / actortime), win.metadata, true)
+		for spellid, spell in pairs(spells) do
+			local tar = spell.targets and spell.targets[win.targetname]
+			local o_amt = tar and (tar.o_amt or tar.overheal)
+			if o_amt and o_amt > 0 then
+				nr = nr + 1
+
+				local d = win:spell(nr, spellid, spell, nil, true)
+				d.value = o_amt
+				fmt_valuetext(d, mod.metadata.columns, tar.amount + d.value, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -527,22 +543,27 @@ Skada:RegisterModule("Overhealing", function(L)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		local total = actor and actor:GetOverheal() or 0
+		local total = actor and actor:GetOverheal()
+		local spells = (total and total > 0) and actor.healspells
 
-		if total == 0 or not actor.healspells then
+		if not spells then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
-		local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
-		for spellid, spell in pairs(actor.healspells) do
-			if spell.o_amt and spell.o_amt > 0 then
-				nr = nr + 1
-				local d = win:spell(nr, spellid, spell, nil, true)
+		local nr = 0
+		local cols = mod.metadata.columns
+		local actortime = cols.sHPS and actor:GetTime()
 
-				d.value = spell.o_amt
-				fmt_valuetext(d, mod.metadata.columns, spell.amount + spell.o_amt, actortime and (d.value / actortime), win.metadata, true)
+		for spellid, spell in pairs(spells) do
+			local o_amt = spell.o_amt or spell.overheal
+			if o_amt and o_amt > 0 then
+				nr = nr + 1
+
+				local d = win:spell(nr, spellid, spell, nil, true)
+				d.value = o_amt
+				fmt_valuetext(d, cols, spell.amount + o_amt, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -557,8 +578,8 @@ Skada:RegisterModule("Overhealing", function(L)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		local total = actor and actor.overheal or 0
-		local targets = (total > 0) and actor:GetOverhealTargets()
+		local total = actor and actor.overheal
+		local targets = (total and total > 0) and actor:GetOverhealTargets()
 
 		if not targets then
 			return
@@ -566,39 +587,43 @@ Skada:RegisterModule("Overhealing", function(L)
 			win.metadata.maxvalue = 0
 		end
 
-		local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
+		local nr = 0
+		local cols = mod.metadata.columns
+		local actortime = cols.sHPS and actor:GetTime()
+
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
-			local d = win:actor(nr, target, nil, targetname)
 
+			local d = win:actor(nr, target, nil, targetname)
 			d.value = target.amount
-			fmt_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
+			fmt_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Overhealing"], L[win.class]) or L["Overhealing"]
 
-		local total = set.overheal or 0
-
-		if total == 0 then
+		local total = set and set.overheal
+		if not total or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		for i = 1, #set.players do
-			local player = set.players[i]
-			if player and (not win.class or win.class == player.class) then
-				local ohps, overheal = player:GetOHPS()
+		local cols = self.metadata.columns
+
+		local actors = set.players -- players
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and (not win.class or win.class == actor.class) then
+				local ohps, overheal = actor:GetOHPS(nil, not cols.HPS)
 				if overheal > 0 then
 					nr = nr + 1
-					local d = win:actor(nr, player)
 
-					local overall = player.heal + player.overheal
-					d.value = player.overheal
-					fmt_valuetext(d, self.metadata.columns, total, ohps, win.metadata)
+					local d = win:actor(nr, actor)
+					d.value = actor.overheal
+					fmt_valuetext(d, cols, actor.heal + d.value, ohps, win.metadata)
 				end
 			end
 		end
@@ -718,30 +743,27 @@ Skada:RegisterModule("Total Healing", function(L)
 		if not set or not win.targetname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		local total = actor and actor:GetTotalHealOnTarget(win.targetname) or 0
+		local total = actor and actor:GetTotalHealOnTarget(win.targetname)
+		local spells = (total and total > 0) and actor.healspells
 
-		if total == 0 then
+		if not spells then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
-		local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
-		for spellid, spell in pairs(actor.healspells) do
-			if spell.targets and spell.targets[win.targetname] then
+		local nr = 0
+		local cols = mod.metadata.columns
+		local actortime = cols.sHPS
+
+		for spellid, spell in pairs(spells) do
+			local tar = spell.targets and spell.targets[win.targetname]
+			if tar then
 				nr = nr + 1
+
 				local d = win:spell(nr, spellid, spell, nil, true)
-
-				if enemy then
-					d.value = spell.targets[win.targetname]
-				else
-					d.value = spell.targets[win.targetname].amount
-					if spell.targets[win.targetname].o_amt then
-						d.value = d.value + spell.targets[win.targetname].o_amt
-					end
-				end
-
-				format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
+				d.value = enemy and tar or (tar.amount + (tar.o_amt or 0))
+				format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -756,23 +778,27 @@ Skada:RegisterModule("Total Healing", function(L)
 		if not win.actorname then return end
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
-		local total = actor and actor:GetTotalHeal() or 0
+		local total = actor and actor:GetTotalHeal()
+		local spells = (total and total > 0) and actor.healspells
 
-		if total == 0 or not actor.healspells then
+		if not spells then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
-		local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
-		for spellid, spell in pairs(actor.healspells) do
-			local amount = spell.amount + (spell.o_amt or 0)
+		local nr = 0
+		local cols = mod.metadata.columns
+		local actortime = cols.sHPS and actor:GetTime()
+
+		for spellid, spell in pairs(spells) do
+			local amount = spell.amount + (spell.o_amt or spell.overheal or 0)
 			if amount > 0 then
 				nr = nr + 1
-				local d = win:spell(nr, spellid, spell, nil, true)
 
+				local d = win:spell(nr, spellid, spell, nil, true)
 				d.value = amount
-				format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
+				format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -787,7 +813,7 @@ Skada:RegisterModule("Total Healing", function(L)
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetTotalHeal()
-		local targets = (total > 0) and actor:GetTotalHealTargets()
+		local targets = (total and total > 0) and actor:GetTotalHealTargets()
 
 		if not targets then
 			return
@@ -795,61 +821,63 @@ Skada:RegisterModule("Total Healing", function(L)
 			win.metadata.maxvalue = 0
 		end
 
-		local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
+		local nr = 0
+		local cols = mod.metadata.columns
+		local actortime = cols.sHPS and actor:GetTime()
+
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
-			local d = win:actor(nr, target, nil, targetname)
 
+			local d = win:actor(nr, target, nil, targetname)
 			d.value = target.amount
-			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Total Healing"], L[win.class]) or L["Total Healing"]
 
-		local total = set and set:GetTotalHeal() or 0
-
-		if total == 0 then
+		local total = set and set:GetTotalHeal()
+		if not total or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
+		local cols = self.metadata.columns
+		local is_arena = (Skada.forPVP and set.type == "arena")
 
-		-- players
-		for i = 1, #set.players do
-			local player = set.players[i]
-			if player and (not win.class or win.class == player.class) then
-				local hps, amount = player:GetTHPS()
+		local actors = set.players -- players
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and (not win.class or win.class == actor.class) then
+				local hps, amount = actor:GetTHPS(nil, not cols.HPS)
 				if amount > 0 then
 					nr = nr + 1
-					local d = win:actor(nr, player)
 
-					if Skada.forPVP and set.type == "arena" then
-						d.color = Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
-					end
-
+					local d = win:actor(nr, actor)
+					d.color = is_arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = amount
-					format_valuetext(d, self.metadata.columns, total, hps, win.metadata)
+					format_valuetext(d, cols, total, hps, win.metadata)
 				end
 			end
 		end
 
-		-- arena enemies
-		if not (Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyHeal) then return end
-		for i = 1, #set.enemies do
-			local enemy = set.enemies[i]
-			if enemy and not enemy.fake and (not win.class or win.class == enemy.class) then
-				local hps, amount = enemy:GetHPS()
+		actors = is_arena and set.enemies or nil -- arena enemies
+		if not actors then return end
+
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and not actor.fake and (not win.class or win.class == actor.class) then
+				local hps, amount = actor:GetHPS(nil, not cols.HPS)
 				if amount > 0 then
 					nr = nr + 1
-					local d = win:actor(nr, enemy, true)
-					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
+					local d = win:actor(nr, actor, true)
+					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 					d.value = amount
-					format_valuetext(d, self.metadata.columns, total, hps, win.metadata)
+					format_valuetext(d, cols, total, hps, win.metadata)
 				end
 			end
 		end
@@ -937,53 +965,6 @@ Skada:RegisterModule("Healing Taken", function(L, P, _, _, new, _, clear)
 		end
 	end
 
-	function sourcespellmod:Enter(win, id, label)
-		win.targetid, win.targetname = id, label
-		win.title = L["actor heal spells"](label, win.actorname or L["Unknown"])
-	end
-
-	function sourcespellmod:Update(win, set)
-		win.title = L["actor heal spells"](win.targetname or L["Unknown"], win.actorname or L["Unknown"])
-		if not set or not win.actorname then return end
-
-		local actor, enemy = set:GetActor(win.targetname, win.targetid)
-		if enemy then return end -- unavailable for enemies yet
-
-		local total = actor and actor:GetAbsorbHealOnTarget(win.actorname)
-
-		if total == 0 then
-			return
-		elseif win.metadata then
-			win.metadata.maxvalue = 0
-		end
-
-		local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
-
-		if actor.absorbspells then
-			for spellid, spell in pairs(actor.absorbspells) do
-				if spell.targets and spell.targets[win.actorname] then
-					nr = nr + 1
-					local d = win:spell(nr, spellid, spell)
-
-					d.value = spell.targets[win.actorname]
-					format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
-				end
-			end
-		end
-
-		if actor.healspells then
-			for spellid, spell in pairs(actor.healspells) do
-				if spell.targets and spell.targets[win.actorname] then
-					nr = nr + 1
-					local d = win:spell(nr, spellid, spell, nil, true)
-
-					d.value = enemy and spell.targets[win.actorname] or spell.targets[win.actorname].amount or 0
-					format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
-				end
-			end
-		end
-	end
-
 	function sourcemod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's received healing"], label)
@@ -1004,21 +985,75 @@ Skada:RegisterModule("Healing Taken", function(L, P, _, _, new, _, clear)
 			win.metadata.maxvalue = 0
 		end
 
-		local actortime, nr = mod.metadata.columns.sHPS and actor:GetTime(), 0
+		local nr = 0
+		local cols = mod.metadata.columns
+		local actortime = cols.sHPS and actor:GetTime()
+
 		for sourcename, source in pairs(C) do
 			nr = nr + 1
-			local d = win:actor(nr, source, nil, sourcename)
 
+			local d = win:actor(nr, source, nil, sourcename)
 			d.value = source.amount
-			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+		end
+	end
+
+	function sourcespellmod:Enter(win, id, label)
+		win.targetid, win.targetname = id, label
+		win.title = L["actor heal spells"](label, win.actorname or L["Unknown"])
+	end
+
+	function sourcespellmod:Update(win, set)
+		win.title = L["actor heal spells"](win.targetname or L["Unknown"], win.actorname or L["Unknown"])
+		if not set or not win.actorname then return end
+
+		local actor, enemy = set:GetActor(win.targetname, win.targetid)
+		if enemy then return end -- unavailable for enemies yet
+
+		local total = actor and actor:GetAbsorbHealOnTarget(win.actorname)
+		if not total or total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
+
+		local nr = 0
+		local cols = mod.metadata.columns
+		local actortime = cols.sHPS and actor:GetTime()
+
+		local spells = actor.absorbspells -- absorb spells
+		if spells then
+			for spellid, spell in pairs(spells) do
+				local amt = spell.targets and spell.targets[win.actorname]
+				if amt then
+					nr = nr + 1
+
+					local d = win:spell(nr, spellid, spell)
+					d.value = amt
+					format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+				end
+			end
+		end
+
+		if actor.healspells then
+			for spellid, spell in pairs(actor.healspells) do
+				local tar = spell.targets and spell.targets[win.actorname]
+				if tar then
+					nr = nr + 1
+
+					local d = win:spell(nr, spellid, spell, nil, true)
+					d.value = enemy and tar or tar.amount
+					format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+				end
+			end
 		end
 	end
 
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Healing Taken"], L[win.class]) or L["Healing Taken"]
 
-		local total = set and set:GetAbsorbHeal() or 0
-		local players = (total > 0) and get_healing_taken_list(set)
+		local total = set and set:GetAbsorbHeal()
+		local players = (total and total > 0) and get_healing_taken_list(set)
 
 		if not players then
 			return
@@ -1027,13 +1062,16 @@ Skada:RegisterModule("Healing Taken", function(L, P, _, _, new, _, clear)
 		end
 
 		local nr = 0
+		local cols = self.metadata.columns
+		local settime = set:GetTime()
+
 		for playername, player in pairs(players) do
 			if not win.class or win.class == player.class then
 				nr = nr + 1
-				local d = win:actor(nr, player, nil, playername)
 
+				local d = win:actor(nr, player, nil, playername)
 				d.value = player.amount
-				format_valuetext(d, self.metadata.columns, total, d.value / player.time, win.metadata)
+				format_valuetext(d, cols, total, d.value / (player.time or settime), win.metadata)
 			end
 		end
 	end
@@ -1073,50 +1111,50 @@ Skada:RegisterModule("Healing Taken", function(L, P, _, _, new, _, clear)
 
 		tbl = clear(tbl or C)
 
-		-- healed by players.
-		for i = 1, #self.players do
-			local p = self.players[i]
-			if p and p.absorbspells then
-				for _, spell in pairs(p.absorbspells) do
+		local actors = self.players -- healed by players.
+		for i = 1, #actors do
+			local spells = actors[i] and actors[i].absorbspells -- absorb spells
+			if spells then
+				for _, spell in pairs(spells) do
 					if spell.targets then
 						for name, amount in pairs(spell.targets) do
 							if amount > 0 then
-								if not tbl[name] then
-									tbl[name] = new()
-									tbl[name].amount = amount
+								local t = tbl[name]
+								if not t then
+									t = new()
+									t.amount = amount
+									tbl[name] = t
 								else
-									tbl[name].amount = tbl[name].amount + amount
+									t.amount = t.amount + amount
 								end
 
-								if not tbl[name].class or not tbl[name].time then
-									local actor = self:_fill_actor_table(tbl[name], name)
-									tbl[name].time = actor and actor:GetTime() or self:GetTime()
-								end
+								self:_fill_actor_table(t, name, true)
 							end
 						end
 					end
 				end
 			end
-			if p and p.healspells then
-				for _, spell in pairs(p.healspells) do
+
+			spells = actors[i] and actors[i].healspells -- heal spells
+			if spells then
+				for _, spell in pairs(spells) do
 					if spell.targets then
 						for name, target in pairs(spell.targets) do
 							if target.amount > 0 then
-								if not tbl[name] then
-									tbl[name] = new()
-									tbl[name].amount = target.amount
-									tbl[name].o_amt = target.o_amt
+								local t = tbl[name]
+								if not t then
+									t = new()
+									t.amount = target.amount
+									t.o_amt = target.o_amt or target.overheal
+									tbl[name] = t
 								else
-									tbl[name].amount = tbl[name].amount + target.amount
-									if target.o_amt then
-										tbl[name].o_amt = (tbl[name].o_amt or 0) + target.o_amt
+									t.amount = t.amount + target.amount
+									if target.o_amt or target.overheal then
+										t.o_amt = (t.o_amt or 0) + (target.o_amt or target.overheal)
 									end
 								end
 
-								if not tbl[name].class or not tbl[name].time then
-									local actor = self:_fill_actor_table(tbl[name], name)
-									tbl[name].time = actor and actor:GetTime() or self:GetTime()
-								end
+								self:_fill_actor_table(t, name, true)
 							end
 						end
 					end
@@ -1128,25 +1166,24 @@ Skada:RegisterModule("Healing Taken", function(L, P, _, _, new, _, clear)
 			return tbl
 		end
 
-		-- healed by enemies.
-		for i = 1, #self.enemies do
-			local p = self.enemies[i]
-			if p and p.healspells then
-				for _, spell in pairs(p.healspells) do
+		actors = self.enemies -- healed by enemies.
+		for i = 1, #actors do
+			local spells = actors[i] and actors[i].healspells -- heal spells
+			if spells then
+				for _, spell in pairs(spells) do
 					if spell.targets then
 						for name, amount in pairs(spell.targets) do
 							if amount > 0 then
-								if not tbl[name] then
-									tbl[name] = new()
-									tbl[name].amount = amount
+								local t = tbl[name]
+								if not t then
+									t = new()
+									t.amount = amount
+									tbl[name] = t
 								else
-									tbl[name].amount = tbl[name].amount + amount
+									t.amount = t.amount + amount
 								end
 
-								if not tbl[name].class or not tbl[name].time then
-									local actor = self:_fill_actor_table(tbl[name], name)
-									tbl[name].time = actor and actor:GetTime() or self:GetTime()
-								end
+								self:_fill_actor_table(t, name, true)
 							end
 						end
 					end
@@ -1158,82 +1195,95 @@ Skada:RegisterModule("Healing Taken", function(L, P, _, _, new, _, clear)
 	end
 
 	get_healing_taken_sources = function(self, tbl)
+		local set = self.super
+		if not set then
+			return nil, 0
+		end
+
+		tbl = clear(tbl or C)
 		local total = 0
 
-		if self.super then
-			tbl = clear(tbl or C)
+		local actors = set.players -- healed by players.
+		for i = 1, #actors do
+			local p = actors[i]
 
-			-- healed by players.
-			for i = 1, #self.super.players do
-				local p = self.super.players[i]
-				if p and p.absorbspells then
-					for spellid, spell in pairs(p.absorbspells) do
-						if spell.targets and spell.targets[self.name] then
-							local amount = spell.targets[self.name]
-							if amount > 0 then
-								total = total + amount
+			local spells = p and p.absorbspells -- absorb spells
+			if spells then
+				for spellid, spell in pairs(spells) do
+					if spell.targets and spell.targets[self.name] then
+						local amount = spell.targets[self.name]
+						if amount > 0 then
+							total = total + amount
 
-								if not tbl[p.name] then
-									tbl[p.name] = new()
-									tbl[p.name].id = p.id
-									tbl[p.name].class = p.class
-									tbl[p.name].role = p.role
-									tbl[p.name].spec = p.spec
-									tbl[p.name].amount = amount
-								else
-									tbl[p.name].amount = tbl[p.name].amount + amount
-								end
-							end
-						end
-					end
-				end
-				if p and p.healspells then
-					for spellid, spell in pairs(p.healspells) do
-						if spell.targets and spell.targets[self.name] then
-							local amount = spell.targets[self.name].amount
-							if amount > 0 then
-								total = total + amount
-
-								if not tbl[p.name] then
-									tbl[p.name] = new()
-									tbl[p.name].id = p.id
-									tbl[p.name].class = p.class
-									tbl[p.name].role = p.role
-									tbl[p.name].spec = p.spec
-									tbl[p.name].amount = amount
-								else
-									tbl[p.name].amount = tbl[p.name].amount + amount
-								end
+							local t = tbl[p.name]
+							if not t then
+								t = new()
+								t.id = p.id
+								t.class = p.class
+								t.role = p.role
+								t.spec = p.spec
+								t.amount = amount
+								tbl[p.name] = t
+							else
+								t.amount = t.amount + amount
 							end
 						end
 					end
 				end
 			end
 
-			if not self.super.enemies or not self.super.eheal then
-				return tbl, total
+			spells = p and p.healspells -- heal spells
+			if spells then
+				for spellid, spell in pairs(spells) do
+					if spell.targets and spell.targets[self.name] then
+						local amount = spell.targets[self.name].amount
+						if amount > 0 then
+							total = total + amount
+
+							local t = tbl[p.name]
+							if not t then
+								t = new()
+								t.id = p.id
+								t.class = p.class
+								t.role = p.role
+								t.spec = p.spec
+								t.amount = amount
+								tbl[p.name] = t
+							else
+								t.amount = t.amount + amount
+							end
+						end
+					end
+				end
 			end
+		end
 
-			-- healed by enemies.
-			for i = 1, #self.super.enemies do
-				local p = self.super.enemies[i]
-				if p and p.healspells then
-					for spellid, spell in pairs(p.healspells) do
-						if spell.targets and spell.targets[self.name] then
-							local amount = spell.targets[self.name]
-							if amount > 0 then
-								total = total + amount
+		if not set.enemies or not set.eheal then
+			return tbl, total
+		end
 
-								if not tbl[p.name] then
-									tbl[p.name] = new()
-									tbl[p.name].id = p.id
-									tbl[p.name].class = p.class
-									tbl[p.name].role = p.role
-									tbl[p.name].spec = p.spec
-									tbl[p.name].amount = amount
-								else
-									tbl[p.name].amount = tbl[p.name].amount + amount
-								end
+		actors = set.enemies -- healed by enemies.
+		for i = 1, #actors do
+			local p = actors[i]
+			local spells = p and p.healspells -- heal spells
+			if spells then
+				for spellid, spell in pairs(spells) do
+					if spell.targets and spell.targets[self.name] then
+						local amount = spell.targets[self.name]
+						if amount > 0 then
+							total = total + amount
+
+							local t = tbl[p.name]
+							if not t then
+								t = new()
+								t.id = p.id
+								t.class = p.class
+								t.role = p.role
+								t.spec = p.spec
+								t.amount = amount
+								tbl[p.name] = t
+							else
+								t.amount = t.amount + amount
 							end
 						end
 					end

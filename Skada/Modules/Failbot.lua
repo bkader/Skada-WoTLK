@@ -9,7 +9,8 @@ Skada:RegisterModule("Fails", function(L, P)
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local count_fails_by_spell = nil
 
-	local pairs, tostring, format, pformat, tContains = pairs, tostring, string.format, Skada.pformat, tContains
+	local pairs, tostring, tContains = pairs, tostring, tContains
+	local format, pformat = string.format, Skada.pformat
 	local UnitGUID, IsInGroup = UnitGUID, Skada.IsInGroup
 	local _
 
@@ -39,15 +40,15 @@ Skada:RegisterModule("Fails", function(L, P)
 	end
 
 	local function on_fail(event, who, failtype)
-		if who and event then
-			local spellid = LibFail:GetEventSpellId(event)
-			if spellid and not ignoredSpells[spellid] then
-				local unitGUID = UnitGUID(who)
-				if unitGUID then
-					Skada:DispatchSets(log_fail, unitGUID, who, spellid, event)
-				end
-			end
-		end
+		if not who or not event then return end
+
+		local spellid = LibFail:GetEventSpellId(event)
+		if not spellid or ignoredSpells[spellid] then return end
+
+		local unitGUID = UnitGUID(who)
+		if not unitGUID then return end
+
+		Skada:DispatchSets(log_fail, unitGUID, who, spellid, event)
 	end
 
 	function spellmod:Enter(win, id, label)
@@ -59,23 +60,25 @@ Skada:RegisterModule("Fails", function(L, P)
 		win.title = pformat(L["%s's fails"], win.spellname)
 		if not win.spellid then return end
 
-		local total = set and count_fails_by_spell(set, win.spellid) or 0
-
-		if total == 0 then
+		local total = set and count_fails_by_spell(set, win.spellid)
+		if not total or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		for i = 1, #set.players do
-			local player = set.players[i]
-			if player and player.failspells and player.failspells[win.spellid] then
-				nr = nr + 1
-				local d = win:actor(nr, player)
+		local cols = mod.metadata.columns
 
-				d.value = player.failspells[win.spellid]
-				format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
+		local actors = set.players -- players
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and actor.failspells and actor.failspells[win.spellid] then
+				nr = nr + 1
+
+				local d = win:actor(nr, actor)
+				d.value = actor.failspells[win.spellid]
+				format_valuetext(d, cols, total, win.metadata, true)
 			end
 		end
 	end
@@ -88,45 +91,50 @@ Skada:RegisterModule("Fails", function(L, P)
 	function playermod:Update(win, set)
 		win.title = pformat(L["%s's fails"], win.actorname)
 
-		local player = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = player and player.fail or 0
+		local actor = set and set:GetPlayer(win.actorid, win.actorname)
+		local total = actor and actor.fail
+		local spells = (total and total > 0) and actor.failspells
 
-		if total == 0 or not player.failspells then
+		if not spells then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		for spellid, count in pairs(player.failspells) do
-			nr = nr + 1
-			local d = win:spell(nr, spellid)
+		local cols = mod.metadata.columns
 
+		for spellid, count in pairs(spells) do
+			nr = nr + 1
+
+			local d = win:spell(nr, spellid)
 			d.value = count
-			format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
+			format_valuetext(d, cols, total, win.metadata, true)
 		end
 	end
 
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Fails"], L[win.class]) or L["Fails"]
 
-		local total = set.fail or 0
-
-		if total == 0 then
+		local total = set and set.fail
+		if not total or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		for i = 1, #set.players do
-			local player = set.players[i]
-			if player and player.fail and (not win.class or win.class == player.class) then
-				nr = nr + 1
-				local d = win:actor(nr, player)
+		local cols = self.metadata.columns
 
-				d.value = player.fail
-				format_valuetext(d, self.metadata.columns, total, win.metadata)
+		local actors = set.players -- players
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and actor.fail and (not win.class or win.class == actor.class) then
+				nr = nr + 1
+
+				local d = win:actor(nr, actor)
+				d.value = actor.fail
+				format_valuetext(d, cols, total, win.metadata)
 			end
 		end
 	end
@@ -249,15 +257,18 @@ Skada:RegisterModule("Fails", function(L, P)
 	---------------------------------------------------------------------------
 
 	count_fails_by_spell = function(self, spellid)
-		if spellid and self.fail then
-			local count = 0
-			for i = 1, #self.players do
-				local p = self.players[i]
-				if p and p.failspells and p.failspells[spellid] then
-					count = count + p.failspells[spellid]
-				end
-			end
-			return count
+		local total = 0
+		if not self.fail or not spellid then
+			return total
 		end
+
+		local actors = self.players -- players
+		for i = 1, #actors do
+			local a = actors[i]
+			if a and a.failspells and a.failspells[spellid] then
+				total = total + a.failspells[spellid]
+			end
+		end
+		return total
 	end
 end)

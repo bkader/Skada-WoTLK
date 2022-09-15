@@ -112,7 +112,6 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 		if not win.targetname then return end
 
 		local sources, total = get_sunder_sources(set, win.targetname)
-
 		if not sources or total == 0 then
 			return
 		elseif win.metadata then
@@ -120,12 +119,14 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 		end
 
 		local nr = 0
+		local cols = mod.metadata.columns
+
 		for sourcename, source in pairs(sources) do
 			nr = nr + 1
-			local d = win:actor(nr, source, nil, sourcename)
 
+			local d = win:actor(nr, source, nil, sourcename)
 			d.value = source.count
-			format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
+			format_valuetext(d, cols, total, win.metadata, true)
 		end
 	end
 
@@ -140,8 +141,8 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		local total = (actor and not enemy) and actor.sunder or 0
-		local targets = (total > 0) and get_sunder_targets(actor)
+		local total = (actor and not enemy) and actor.sunder
+		local targets = (total and total > 0) and get_sunder_targets(actor)
 
 		if not targets then
 			return
@@ -150,36 +151,40 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 		end
 
 		local nr = 0
+		local cols = mod.metadata.columns
+
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
-			local d = win:actor(nr, target, true, targetname)
 
+			local d = win:actor(nr, target, true, targetname)
 			d.value = target.count
-			format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
+			format_valuetext(d, cols, total, win.metadata, true)
 		end
 	end
 
 	function mod:Update(win, set)
 		double_check_sunder()
-
 		win.title = L["Sunder Counter"]
-		local total = set.sunder or 0
 
-		if total == 0 then
+		local total = set.sunder
+		if not total or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		for i = 1, #set.players do
-			local player = set.players[i]
-			if player and player.sunder then
-				nr = nr + 1
-				local d = win:actor(nr, player)
+		local cols = self.metadata.columns
 
-				d.value = player.sunder
-				format_valuetext(d, self.metadata.columns, total, win.metadata)
+		local actors = set.players -- players
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and actor.sunder then
+				nr = nr + 1
+
+				local d = win:actor(nr, actor)
+				d.value = actor.sunder
+				format_valuetext(d, cols, total, win.metadata)
 			end
 		end
 	end

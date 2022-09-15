@@ -9,7 +9,8 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 	local get_dispelled_targets = nil
 
 	-- cache frequently used globals
-	local pairs, tostring, format, pformat = pairs, tostring, string.format, Skada.pformat
+	local pairs, tostring = pairs, tostring
+	local format, pformat = string.format, Skada.pformat
 	local _
 
 	local function format_valuetext(d, columns, total, metadata, subview)
@@ -71,6 +72,8 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 		dispel.dstGUID = dstGUID
 		dispel.dstName = dstName
 		dispel.dstFlags = dstFlags
+		dispel.petname = nil
+		Skada:FixPets(dispel) -- assign pet dispels to owners
 
 		Skada:DispatchSets(log_dispel)
 	end
@@ -83,23 +86,25 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 	function spellmod:Update(win, set)
 		win.title = pformat(L["%s's dispelled spells"], win.actorname)
 
-		local player = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = player and player.dispel or 0
-		local spells = (total > 0) and get_dispelled_spells(player)
+		local actor = set and set:GetPlayer(win.actorid, win.actorname)
+		local total = actor and actor.dispel
+		local spells = (total and total > 0) and get_dispelled_spells(actor)
 
-		if not spells or total == 0 then
+		if not spells then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
+		local cols = mod.metadata.columns
+
 		for spellid, count in pairs(spells) do
 			nr = nr + 1
-			local d = win:spell(nr, spellid)
 
+			local d = win:spell(nr, spellid)
 			d.value = count
-			format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
+			format_valuetext(d, cols, total, win.metadata, true)
 		end
 	end
 
@@ -111,23 +116,25 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 	function targetmod:Update(win, set)
 		win.title = pformat(L["%s's dispelled targets"], win.actorname)
 
-		local player = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = player and player.dispel or 0
-		local targets = (total > 0) and get_dispelled_targets(player)
+		local actor = set and set:GetPlayer(win.actorid, win.actorname)
+		local total = actor and actor.dispel
+		local targets = (total and total > 0) and get_dispelled_targets(actor)
 
-		if not targets or total == 0 then
+		if not targets then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
+		local cols = mod.metadata.columns
+
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
-			local d = win:actor(nr, target, true, targetname)
 
+			local d = win:actor(nr, target, true, targetname)
 			d.value = target.count
-			format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
+			format_valuetext(d, cols, total, win.metadata, true)
 		end
 	end
 
@@ -139,45 +146,50 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 	function playermod:Update(win, set)
 		win.title = pformat(L["%s's dispel spells"], win.actorname)
 
-		local player = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = player and player.dispel or 0
+		local actor = set and set:GetPlayer(win.actorid, win.actorname)
+		local total = actor and actor.dispel
+		local spells = (total and total > 0) and actor.dispelspells
 
-		if total == 0 or not player.dispelspells then
+		if not spells then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		for spellid, spell in pairs(player.dispelspells) do
-			nr = nr + 1
-			local d = win:spell(nr, spellid)
+		local cols = mod.metadata.columns
 
+		for spellid, spell in pairs(spells) do
+			nr = nr + 1
+
+			local d = win:spell(nr, spellid)
 			d.value = spell.count
-			format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
+			format_valuetext(d, cols, total, win.metadata, true)
 		end
 	end
 
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Dispels"], L[win.class]) or L["Dispels"]
 
-		local total = set.dispel or 0
-
-		if total == 0 then
+		local total = set and set.dispel
+		if not total or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		for i = 1, #set.players do
-			local player = set.players[i]
-			if player and player.dispel and (not win.class or win.class == player.class) then
-				nr = nr + 1
-				local d = win:actor(nr, player)
+		local cols = self.metadata.columns
 
-				d.value = player.dispel
-				format_valuetext(d, self.metadata.columns, total, win.metadata)
+		local actors = set.players -- players
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and actor.dispel and (not win.class or win.class == actor.class) then
+				nr = nr + 1
+
+				local d = win:actor(nr, actor)
+				d.value = actor.dispel
+				format_valuetext(d, cols, total, win.metadata)
 			end
 		end
 	end
@@ -228,10 +240,11 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 	---------------------------------------------------------------------------
 
 	get_dispelled_spells = function(self, tbl)
-		if not self.dispelspells then return end
+		local spells = self.dispelspells
+		if not spells then return end
 
 		tbl = clear(tbl or C)
-		for _, spell in pairs(self.dispelspells) do
+		for _, spell in pairs(spells) do
 			if spell.spells then
 				for spellid, count in pairs(spell.spells) do
 					tbl[spellid] = (tbl[spellid] or 0) + count
@@ -242,19 +255,22 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 	end
 
 	get_dispelled_targets = function(self, tbl)
-		if not self.dispelspells then return end
+		local spells = self.dispelspells
+		if not spells then return end
 
 		tbl = clear(tbl or C)
-		for _, spell in pairs(self.dispelspells) do
+		for _, spell in pairs(spells) do
 			if spell.targets then
 				for name, count in pairs(spell.targets) do
-					if not tbl[name] then
-						tbl[name] = new()
-						tbl[name].count = count
+					local t = tbl[name]
+					if not t then
+						t = new()
+						t.count = count
+						tbl[name] = t
 					else
-						tbl[name].count = tbl[name].count + count
+						t.count = t.count + count
 					end
-					self.super:_fill_actor_table(tbl[name], name)
+					self.super:_fill_actor_table(t, name)
 				end
 			end
 		end

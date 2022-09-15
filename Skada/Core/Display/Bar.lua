@@ -93,9 +93,9 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, new, d
 
 		local function segmentOnClick(self, button)
 			if IsModifierKeyDown() then
-				self.list.win:set_selected_set(nil, button == "RightButton" and 1 or -1)
+				self.list.win:SetSelectedSet(nil, button == "RightButton" and 1 or -1)
 			elseif button == "MiddleButton" or button == "RightButton" then
-				self.list.win:set_selected_set("current")
+				self.list.win:SetSelectedSet("current")
 			elseif button == "LeftButton" then
 				Skada:SegmentMenu(self.list.win)
 			end
@@ -675,13 +675,14 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, new, d
 			if not win or not win.bargroup then return end
 			win.bargroup.button:SetText(win.metadata.title)
 
+			local dataset = win.dataset
 			if win.metadata.showspots or win.metadata.valueorder then
-				tsort(win.dataset, value_sort)
+				tsort(dataset, value_sort)
 			end
 
-			local hasicon
-			for i = 1, #win.dataset do
-				local data = win.dataset[i]
+			local hasicon = nil
+			for i = 1, #dataset do
+				local data = dataset[i]
 				if
 					(data and data.icon and not data.ignore) or
 					(data and win.db.classicons and data.class) or
@@ -707,8 +708,8 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, new, d
 			end
 
 			local nr = 1
-			for i = 1, #win.dataset do
-				local data = win.dataset[i]
+			for i = 1, #dataset do
+				local data = dataset[i]
 				if data and data.id then
 					local bar = win.bargroup:GetBar(data.id)
 
@@ -977,6 +978,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, new, d
 
 	do
 		local backdrop = {insets = {left = 0, right = 0, top = 0, bottom = 0}}
+
 		-- Called by Skada windows when window settings have changed.
 		function mod:ApplySettings(win)
 			if not win or not win.bargroup then return end

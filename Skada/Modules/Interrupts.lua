@@ -10,8 +10,9 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 	local _
 
 	-- cache frequently used globals
-	local pairs, tostring, format, pformat = pairs, tostring, string.format, Skada.pformat
-	local GetSpellInfo, GetSpellLink = Skada.GetSpellInfo or GetSpellInfo, Skada.GetSpellLink or GetSpellLink
+	local pairs, tostring = pairs, tostring
+	local format, pformat = string.format, Skada.pformat
+	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 
 	local function format_valuetext(d, columns, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -101,22 +102,24 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		local total = (actor and not enemy) and actor.interrupt or 0
-		local spells = (total > 0) and get_interrupted_spells(actor)
+		local total = (actor and not enemy) and actor.interrupt
+		local spells = (total and total > 0) and get_interrupted_spells(actor)
 
-		if not spells or total == 0 then
+		if not spells then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
+		local cols = mod.metadata.columns
+
 		for spellid, count in pairs(spells) do
 			nr = nr + 1
-			local d = win:spell(nr, spellid)
 
+			local d = win:spell(nr, spellid)
 			d.value = count
-			format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
+			format_valuetext(d, cols, total, win.metadata, true)
 		end
 	end
 
@@ -130,8 +133,8 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		local total = (actor and not enemy) and actor.interrupt or 0
-		local targets = (total > 0) and get_interrupted_targets(actor)
+		local total = (actor and not enemy) and actor.interrupt
+		local targets = (total and total > 0) and get_interrupted_targets(actor)
 
 		if not targets then
 			return
@@ -140,12 +143,14 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 		end
 
 		local nr = 0
+		local cols = mod.metadata.columns
+
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
-			local d = win:actor(nr, target, true, targetname)
 
+			local d = win:actor(nr, target, true, targetname)
 			d.value = target.count
-			format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
+			format_valuetext(d, cols, total, win.metadata, true)
 		end
 	end
 
@@ -159,44 +164,49 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		local total = (actor and not enemy) and actor.interrupt or 0
+		local total = (actor and not enemy) and actor.interrupt
+		local spells = (total and total > 0) and actor.interruptspells
 
-		if total == 0 or not actor.interruptspells then
+		if not spells then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		for spellid, spell in pairs(actor.interruptspells) do
-			nr = nr + 1
-			local d = win:spell(nr, spellid)
+		local cols = mod.metadata.columns
 
+		for spellid, spell in pairs(spells) do
+			nr = nr + 1
+
+			local d = win:spell(nr, spellid)
 			d.value = spell.count
-			format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
+			format_valuetext(d, cols, total, win.metadata, true)
 		end
 	end
 
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Interrupts"], L[win.class]) or L["Interrupts"]
 
-		local total = set.interrupt or 0
-
-		if total == 0 then
+		local total = set and set.interrupt
+		if not total or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		for i = 1, #set.players do
-			local player = set.players[i]
-			if player and player.interrupt and (not win.class or win.class == player.class) then
-				nr = nr + 1
-				local d = win:actor(nr, player)
+		local cols = self.metadata.columns
 
-				d.value = player.interrupt
-				format_valuetext(d, self.metadata.columns, total, win.metadata)
+		local actors = set.players -- players
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and actor.interrupt and (not win.class or win.class == actor.class) then
+				nr = nr + 1
+
+				local d = win:actor(nr, actor)
+				d.value = actor.interrupt
+				format_valuetext(d, cols, total, win.metadata)
 			end
 		end
 	end
@@ -290,36 +300,40 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 	---------------------------------------------------------------------------
 
 	get_interrupted_spells = function(self, tbl)
-		if self.interruptspells then
-			tbl = clear(tbl or C)
-			for _, spell in pairs(self.interruptspells) do
-				if spell.spells then
-					for spellid, count in pairs(spell.spells) do
-						tbl[spellid] = (tbl[spellid] or 0) + count
-					end
+		local spells = self.interruptspells
+		if not spells then return end
+
+		tbl = clear(tbl or C)
+		for _, spell in pairs(spells) do
+			if spell.spells then
+				for spellid, count in pairs(spell.spells) do
+					tbl[spellid] = (tbl[spellid] or 0) + count
 				end
 			end
-			return tbl
 		end
+		return tbl
 	end
 
 	get_interrupted_targets = function(self, tbl)
-		if self.interruptspells then
-			tbl = clear(tbl or C)
-			for _, spell in pairs(self.interruptspells) do
-				if spell.targets then
-					for name, count in pairs(spell.targets) do
-						if not tbl[name] then
-							tbl[name] = new()
-							tbl[name].count = count
-						else
-							tbl[name].count = tbl[name].count + count
-						end
-						self.super:_fill_actor_table(tbl[name], name)
+		local spells = self.interruptspells
+		if not spells then return end
+
+		tbl = clear(tbl or C)
+		for _, spell in pairs(spells) do
+			if spell.targets then
+				for name, count in pairs(spell.targets) do
+					local t = tbl[name]
+					if not t then
+						t = new()
+						t.count = count
+						tbl[name] = t
+					else
+						t.count = t.count + count
 					end
+					self.super:_fill_actor_table(t, name)
 				end
 			end
-			return tbl
 		end
+		return tbl
 	end
 end)

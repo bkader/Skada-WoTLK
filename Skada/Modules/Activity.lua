@@ -52,12 +52,14 @@ Skada:RegisterModule("Activity", function(L, P, _, C, new, _, clear)
 		end
 
 		local nr = 0
+		local cols = mod.metadata.columns
+
 		for name, target in pairs(targets) do
 			nr = nr + 1
-			local d = win:actor(nr, target, true, name)
 
+			local d = win:actor(nr, target, true, name)
 			d.value = target.time
-			format_valuetext(d, mod.metadata.columns, maxtime, win.metadata, true)
+			format_valuetext(d, cols, maxtime, win.metadata, true)
 		end
 	end
 
@@ -72,39 +74,39 @@ Skada:RegisterModule("Activity", function(L, P, _, C, new, _, clear)
 		end
 
 		local nr = 0
+		local cols = self.metadata.columns
+		local is_arena = (Skada.forPVP and set.type == "arena")
 
-		-- players.
-		for i = 1, #set.players do
-			local player = set.players[i]
-			if player and Skada.validclass[player.class or "NaN"] and (not win.class or win.class == player.class) then
-				local activetime = player:GetTime(true)
+		local actors = set.players -- players.
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and Skada.validclass[actor.class or "NaN"] and (not win.class or win.class == actor.class) then
+				local activetime = actor:GetTime(true)
 				if activetime > 0 then
 					nr = nr + 1
-					local d = win:actor(nr, player)
 
-					if Skada.forPVP and set.type == "arena" then
-						d.color = Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
-					end
-
+					local d = win:actor(nr, actor)
+					d.color = is_arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = activetime
-					format_valuetext(d, self.metadata.columns, settime, win.metadata)
+					format_valuetext(d, cols, settime, win.metadata)
 				end
 			end
 		end
 
-		-- arena enemies
-		if not (Skada.forPVP and set.type == "arena" and set.enemies) then return end
-		for i = 1, #set.enemies do
-			local enemy = set.enemies[i]
-			if enemy and Skada.validclass[enemy.class or "NaN"] and (not win.class or win.class == enemy.class) then
-				local activetime = enemy:GetTime(true)
+		actors = is_arena and set.enemies or nil -- arena enemies
+		if not actors then return end
+
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and Skada.validclass[actor.class or "NaN"] and (not win.class or win.class == actor.class) then
+				local activetime = actor:GetTime(true)
 				if activetime > 0 then
 					nr = nr + 1
-					local d = win:actor(nr, enemy, true)
-					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
+					local d = win:actor(nr, actor, true)
+					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 					d.value = activetime
-					format_valuetext(d, self.metadata.columns, settime, win.metadata)
+					format_valuetext(d, cols, settime, win.metadata)
 				end
 			end
 		end

@@ -3,8 +3,8 @@ Skada:RegisterModule("Resources", function(L, P)
 	local mod = Skada:NewModule("Resources")
 	mod.icon = [[Interface\Icons\spell_holy_rapture]]
 
-	local pairs, format, pformat = pairs, string.format, Skada.pformat
-	local setmetatable, GetSpellInfo = setmetatable, Skada.GetSpellInfo or GetSpellInfo
+	local setmetatable, pairs = setmetatable, pairs
+	local format, pformat = string.format, Skada.pformat
 	local _
 
 	local SPELL_POWER_MANA = SPELL_POWER_MANA or 0
@@ -134,23 +134,25 @@ Skada:RegisterModule("Resources", function(L, P)
 			win.title = format("%s (%s)", win.title, L[win.class])
 		end
 
-		local total = set and self.power and set[self.power] or 0
-
-		if total == 0 then
+		local total = set and self.power and set[self.power]
+		if not total or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		for i = 1, #set.players do
-			local player = set.players[i]
-			if player and player[self.power] and (not win.class or win.class == player.class) then
-				nr = nr + 1
-				local d = win:actor(nr, player)
+		local cols = mod.metadata.columns
 
-				d.value = player[self.power]
-				format_valuetext(d, mod.metadata.columns, total, win.metadata)
+		local actors = set.players -- players
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and actor[self.power] and (not win.class or win.class == actor.class) then
+				nr = nr + 1
+
+				local d = win:actor(nr, actor)
+				d.value = actor[self.power]
+				format_valuetext(d, cols, total, win.metadata)
 			end
 		end
 	end
@@ -175,21 +177,24 @@ Skada:RegisterModule("Resources", function(L, P)
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		if enemy then return end -- unavailable for enemies yet
 
-		local total = actor and self.power and actor[self.power] or 0
+		local total = actor and self.power and actor[self.power]
+		local spells = (total and total > 0) and actor[self.spells]
 
-		if total == 0 or not actor[self.spells] then
+		if not spells then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		for spellid, amount in pairs(actor[self.spells]) do
-			nr = nr + 1
-			local d = win:spell(nr, spellid)
+		local cols = mod.metadata.columns
 
+		for spellid, amount in pairs(spells) do
+			nr = nr + 1
+
+			local d = win:spell(nr, spellid)
 			d.value = amount
-			format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
+			format_valuetext(d, cols, total, win.metadata, true)
 		end
 	end
 

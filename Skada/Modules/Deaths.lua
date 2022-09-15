@@ -877,6 +877,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 
 	function mod:GetSetSummary(set)
 		local deaths = set.death or 0
+		if P.modules.alternativedeaths then
+			return tostring(deaths), set.last_time or GetTime()
+		end
 		return tostring(deaths), deaths
 	end
 

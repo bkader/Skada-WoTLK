@@ -70,45 +70,50 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		local total = (actor and not enemy) and actor.parry or 0
+		local total = (actor and not enemy) and actor.parry
+		local targets = (total and total > 0) and actor.parrytargets
 
-		if total == 0 or not actor.parrytargets then
+		if not targets then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		for targetname, count in pairs(actor.parrytargets) do
+		local cols = mod.metadata.columns
+
+		for targetname, count in pairs(targets) do
 			nr = nr + 1
+
 			local d = win:actor(nr, targetname)
 			d.class = "BOSS" -- what else can it be?
-
 			d.value = count
-			format_valuetext(d, mod.metadata.columns, total, win.metadata, true)
+			format_valuetext(d, cols, total, win.metadata, true)
 		end
 	end
 
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Parry-Haste"], L[win.class]) or L["Parry-Haste"]
 
-		local total = set.parry or 0
-
-		if total == 0 then
+		local total = set and set.parry
+		if not total or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		for i = 1, #set.players do
-			local player = set.players[i]
-			if player and player.parry and (not win.class or win.class == player.class) then
-				nr = nr + 1
-				local d = win:actor(nr, player)
+		local cols = self.metadata.columns
 
-				d.value = player.parry
-				format_valuetext(d, self.metadata.columns, total, win.metadata)
+		local actors = set.players -- players
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and actor.parry and (not win.class or win.class == actor.class) then
+				nr = nr + 1
+
+				local d = win:actor(nr, actor)
+				d.value = actor.parry
+				format_valuetext(d, cols, total, win.metadata)
 			end
 		end
 	end

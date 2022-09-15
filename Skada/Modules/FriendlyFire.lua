@@ -43,7 +43,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 		local spell = player.friendfirespells and player.friendfirespells[dmg.spellid]
 		if not spell then
 			player.friendfirespells = player.friendfirespells or {}
-			player.friendfirespells[dmg.spellid] = {amount = 0}
+			player.friendfirespells[dmg.spellid] = {amount = 0, school = dmg.school}
 			spell = player.friendfirespells[dmg.spellid]
 		end
 		spell.amount = spell.amount + dmg.amount
@@ -56,29 +56,29 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 	end
 
 	local function spell_damage(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		if srcGUID ~= dstGUID then
-			local amount, absorbed
+		if srcGUID == dstGUID then return end -- ignore damage done to self
 
-			if eventtype == "SWING_DAMAGE" then
-				dmg.spellid = 6603
-				amount, _, _, _, _, absorbed = ...
-			else
-				dmg.spellid, _, _, amount, _, _, _, _, absorbed = ...
-			end
+		local amount, absorbed
 
-			if dmg.spellid and not ignoredSpells[dmg.spellid] then
-				dmg.playerid = srcGUID
-				dmg.playername = srcName
-				dmg.playerflags = srcFlags
+		if eventtype == "SWING_DAMAGE" then
+			dmg.spellid, dmg.school = 6603, 0x01
+			amount, _, _, _, _, absorbed = ...
+		else
+			dmg.spellid, _, dmg.school, amount, _, _, _, _, absorbed = ...
+		end
 
-				dmg.dstGUID = dstGUID
-				dmg.dstName = dstName
-				dmg.dstFlags = dstFlags
+		if dmg.spellid and not ignoredSpells[dmg.spellid] then
+			dmg.playerid = srcGUID
+			dmg.playername = srcName
+			dmg.playerflags = srcFlags
 
-				dmg.amount = (amount or 0) + (absorbed or 0)
+			dmg.dstGUID = dstGUID
+			dmg.dstName = dstName
+			dmg.dstFlags = dstFlags
 
-				Skada:DispatchSets(log_damage)
-			end
+			dmg.amount = (amount or 0) + (absorbed or 0)
+
+			Skada:DispatchSets(log_damage)
 		end
 	end
 
@@ -91,8 +91,8 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 		win.title = pformat(L["%s's targets"], win.actorname)
 
 		local actor = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = actor and actor.friendfire or 0
-		local targets = (total > 0) and get_friendly_fire_targets(actor)
+		local total = actor and actor.friendfire
+		local targets = (total and total > 0) and get_friendly_fire_targets(actor)
 
 		if not targets then
 			return
@@ -100,13 +100,16 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 			win.metadata.maxvalue = 0
 		end
 
-		local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
+		local nr = 0
+		local cols = mod.metadata.columns
+		local actortime = cols.sDPS and actor:GetTime()
+
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
-			local d = win:actor(nr, target, nil, targetname)
 
+			local d = win:actor(nr, target, nil, targetname)
 			d.value = target.amount
-			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -119,21 +122,25 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 		win.title = L["actor damage"](win.actorname or L["Unknown"])
 
 		local actor = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = actor and actor.friendfire or 0
+		local total = actor and actor.friendfire
+		local spells = (total and total > 0) and actor.friendfirespells
 
-		if total == 0 or not actor.friendfirespells then
+		if not spells then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
-		local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
-		for spellid, spell in pairs(actor.friendfirespells) do
-			nr = nr + 1
-			local d = win:spell(nr, spellid)
+		local nr = 0
+		local cols = mod.metadata.columns
+		local actortime = cols.sDPS and actor:GetTime()
 
+		for spellid, spell in pairs(spells) do
+			nr = nr + 1
+
+			local d = win:spell(nr, spellid)
 			d.value = spell.amount
-			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -147,57 +154,56 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 		if not win.spellid then return end
 
 		local actor = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = actor and actor.friendfire or 0
-		local targets = nil
-		if total > 0 and actor.friendfirespells and actor.friendfirespells[win.spellid] then
-			total = actor.friendfirespells[win.spellid].amount
-			targets = actor.friendfirespells[win.spellid].targets
-		end
+		local total = actor and actor.friendfire
+		local spell = (total and total > 0) and actor.friendfirespells and actor.friendfirespells[win.spellid]
 
-		if not targets then
+		if not spell then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
-		local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
+		total = spell.amount -- total becomes that of the spell
+		local targets = spell.targets
+
+		local nr = 0
+		local cols = mod.metadata.columns
+		local actortime = cols.sDPS and actor:GetTime()
+
+
 		for targetname, amount in pairs(targets) do
 			nr = nr + 1
-			local d = win:actor(nr, targetname)
 
-			local tactor = set:GetActor(targetname)
-			if tactor then
-				d.id = tactor.id or d.id or targetname
-				d.class = tactor.class
-				d.role = tactor.role
-				d.spec = tactor.spec
-			end
+			local d = win:actor(nr, targetname)
+			set:_fill_actor_table(d, targetname)
 
 			d.value = amount
-			format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Friendly Fire"], L[win.class]) or L["Friendly Fire"]
 
-		local total = set.friendfire or 0
-
-		if total == 0 then
+		local total = set and set.friendfire
+		if not total or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		for i = 1, #set.players do
-			local player = set.players[i]
-			if player and player.friendfire and (not win.class or win.class == player.class) then
-				nr = nr + 1
-				local d = win:actor(nr, player)
+		local cols = self.metadata.columns
 
-				d.value = player.friendfire
-				format_valuetext(d, self.metadata.columns, total, d.value / player:GetTime(), win.metadata)
+		local actors = set.players -- players
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and actor.friendfire and (not win.class or win.class == actor.class) then
+				nr = nr + 1
+
+				local d = win:actor(nr, actor)
+				d.value = actor.friendfire
+				format_valuetext(d, cols, total, cols.DPS and (d.value / actor:GetTime()), win.metadata)
 			end
 		end
 	end
@@ -285,19 +291,22 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 	---------------------------------------------------------------------------
 
 	get_friendly_fire_targets = function(self, tbl)
-		if not self.friendfirespells then return end
+		local spells = self.friendfirespells
+		if not spells then return end
 
 		tbl = clear(tbl or C)
-		for _, spell in pairs(self.friendfirespells) do
+		for _, spell in pairs(spells) do
 			if spell.targets then
 				for name, amount in pairs(spell.targets) do
-					if not tbl[name] then
-						tbl[name] = new()
-						tbl[name].amount = amount
+					local t = tbl[name]
+					if not t then
+						t = new()
+						t.amount = amount
+						tbl[name] = t
 					else
-						tbl[name].amount = tbl[name].amount + amount
+						t.amount = t.amount + amount
 					end
-					self.super:_fill_actor_table(tbl[name], name)
+					self.super:_fill_actor_table(t, name)
 				end
 			end
 		end

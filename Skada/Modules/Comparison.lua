@@ -13,7 +13,6 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 	local pairs, max = pairs, math.max
 	local format, pformat = string.format, Skada.pformat
-	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local spellschools = Skada.spellschools
 	local COLOR_GOLD = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
 	local _
