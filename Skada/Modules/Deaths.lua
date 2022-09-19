@@ -72,7 +72,12 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		if data.amount then
 			deathlog.time = log.time
 			log.deb = nil
-			if data.amount ~= 0 then
+			if data.amount == true then -- instakill
+				log.amt = -log.hp
+				deathlog.id = log.id
+				deathlog.sch = log.sch
+				deathlog.src = log.src
+			elseif data.amount ~= 0 then
 				log.amt = data.amount
 
 				if log.amt < 0 then
@@ -113,8 +118,13 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		if event == "SWING_DAMAGE" then
 			data.spellid, data.school = 6603, 0x01
 			data.amount, data.overkill, _, data.resisted, data.blocked, data.absorbed, data.critical = ...
+			data.amount = 0 - data.amount
+		elseif event == "SPELL_INSTAKILL" then
+			data.spellid, _, data.school = ...
+			data.amount = true
 		else
 			data.spellid, _, data.school, data.amount, data.overkill, _, data.resisted, data.blocked, data.absorbed, data.critical = ...
+			data.amount = 0 - data.amount
 		end
 
 		if data.amount then
@@ -123,7 +133,6 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			data.playername = dstName
 			data.playerflags = dstFlags
 
-			data.amount = 0 - data.amount
 			data.overheal = nil
 
 			Skada:DispatchSets(log_deathlog)
@@ -574,8 +583,8 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 					d.id = i
 					d.icon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
 
-					if death.spellid then
-						d.label, _, d.icon = GetSpellInfo(death.spellid)
+					if death.id then
+						d.label, _, d.icon = GetSpellInfo(death.id)
 						d.spellschool = death.sch
 						if death.source then
 							d.text = format("%s (%s)", d.label, death.source)
@@ -782,6 +791,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			"SPELL_DAMAGE",
 			"SPELL_PERIODIC_DAMAGE",
 			"SWING_DAMAGE",
+			"SPELL_INSTAKILL",
 			flags_dst_nopets
 		)
 
@@ -876,11 +886,8 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 	end
 
 	function mod:GetSetSummary(set)
-		local deaths = set.death or 0
-		if P.modules.alternativedeaths then
-			return tostring(deaths), set.last_time or GetTime()
-		end
-		return tostring(deaths), deaths
+		local deaths = set and set.death or 0
+		return tostring(deaths), set and set.last_time or GetTime()
 	end
 
 	function mod:Announce(logs, playername)
