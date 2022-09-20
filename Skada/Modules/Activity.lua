@@ -113,12 +113,12 @@ Skada:RegisterModule("Activity", function(L, P, _, C, new, _, clear)
 	end
 
 	function mod:GetSetSummary(set)
-		local settime = set:GetTime()
+		local value = set:GetTime()
 		local valuetext = Skada:FormatValueCols(
-			self.metadata.columns["Active Time"] and Skada:FormatTime(settime),
+			self.metadata.columns["Active Time"] and Skada:FormatTime(value),
 			self.metadata.columns.Percent and format("%s - %s", date("%H:%M", set.starttime), date("%H:%M", set.endtime))
 		)
-		return valuetext, settime
+		return value, valuetext
 	end
 
 	function mod:OnInitialize()

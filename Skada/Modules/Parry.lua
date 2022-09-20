@@ -2,7 +2,7 @@ local Skada = Skada
 Skada:RegisterModule("Parry-Haste", function(L, P)
 	local mod = Skada:NewModule("Parry-Haste")
 	local targetmod = mod:NewModule("Parry target list")
-	local pairs, tostring, format, pformat = pairs, tostring, string.format, Skada.pformat
+	local pairs, format, pformat = pairs, string.format, Skada.pformat
 
 	local parrybosses = {
 		[L["Acidmaw"]] = true,
@@ -135,8 +135,7 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 	end
 
 	function mod:GetSetSummary(set, win)
-		local parries = get_total_parry(set, win and win.class) or 0
-		return tostring(parries), parries
+		return get_total_parry(set, win and win.class) or 0
 	end
 
 	function mod:OnEnable()

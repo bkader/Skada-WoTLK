@@ -6,7 +6,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 	local get_actors_by_potion = nil
 
 	-- cache frequently used globals
-	local pairs, tconcat, format, strsub, tostring = pairs, table.concat, string.format, string.sub, tostring
+	local pairs, tconcat, format, strsub = pairs, table.concat, string.format, string.sub
 	local GetItemInfo, UnitIsDeadOrGhost, GroupIterator = GetItemInfo, UnitIsDeadOrGhost, Skada.GroupIterator
 	local UnitGUID, UnitName, UnitClass, UnitBuff = UnitGUID, UnitName, UnitClass, UnitBuff
 	local T, pformat = Skada.Table, Skada.pformat
@@ -222,8 +222,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 	end
 
 	function mod:GetSetSummary(set, win)
-		local potions = get_total_potions(set, win and win.class) or 0
-		return tostring(potions), potions
+		return get_total_potions(set, win and win.class) or 0
 	end
 
 	function mod:OnInitialize()

@@ -6,7 +6,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 	local get_sunder_sources = nil
 	local get_sunder_targets = nil
 
-	local pairs, tostring, format, pformat = pairs, tostring, string.format, Skada.pformat
+	local pairs, format, pformat = pairs, string.format, Skada.pformat
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 	local T = Skada.Table
@@ -190,8 +190,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 	end
 
 	function mod:GetSetSummary(set)
-		local sunders = set.sunder or 0
-		return tostring(sunders), sunders
+		return set and set.sunder or 0
 	end
 
 	function mod:OnEnable()

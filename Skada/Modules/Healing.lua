@@ -392,7 +392,7 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 			self.metadata.columns.Healing and Skada:FormatNumber(amount),
 			self.metadata.columns.HPS and Skada:FormatNumber(hps)
 		)
-		return valuetext, amount
+		return amount, valuetext
 	end
 
 	function mod:OnEnable()
@@ -635,7 +635,7 @@ Skada:RegisterModule("Overhealing", function(L)
 			self.metadata.columns.Overhealing and Skada:FormatNumber(overheal),
 			self.metadata.columns.HPS and Skada:FormatNumber(ohps)
 		)
-		return valuetext, overheal
+		return overheal, valuetext
 	end
 
 	function mod:OnEnable()
@@ -889,7 +889,7 @@ Skada:RegisterModule("Total Healing", function(L)
 			self.metadata.columns.Healing and Skada:FormatNumber(amount),
 			self.metadata.columns.HPS and Skada:FormatNumber(ops)
 		)
-		return valuetext, amount
+		return amount, valuetext
 	end
 
 	function mod:OnEnable()

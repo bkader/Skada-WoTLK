@@ -4,8 +4,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 	local playermod = mod:NewModule("Resurrect spell list")
 	local targetmod = mod:NewModule("Resurrect target list")
 
-	local pairs, tostring = pairs, tostring
-	local format, pformat = string.format, Skada.pformat
+	local pairs, format, pformat = pairs, string.format, Skada.pformat
 	local get_resurrected_targets = nil
 	local _
 
@@ -171,8 +170,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 	end
 
 	function mod:GetSetSummary(set)
-		local ress = set.ress or 0
-		return tostring(ress), ress
+		return set and set.ress or 0
 	end
 
 	function mod:OnEnable()

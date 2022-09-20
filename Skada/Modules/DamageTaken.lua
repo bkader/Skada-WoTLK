@@ -647,7 +647,7 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 			self.metadata.columns.Damage and Skada:FormatNumber(amount),
 			self.metadata.columns.DTPS and Skada:FormatNumber(dtps)
 		)
-		return valuetext, amount
+		return amount, valuetext
 	end
 
 	function mod:AddToTooltip(set, tooltip)
@@ -818,7 +818,7 @@ Skada:RegisterModule("DTPS", function(L, P)
 
 	function mod:GetSetSummary(set, win)
 		local dtps = set:GetDTPS(win and win.class)
-		return Skada:FormatNumber(dtps), dtps
+		return dtps, Skada:FormatNumber(dtps)
 	end
 
 	function mod:OnEnable()

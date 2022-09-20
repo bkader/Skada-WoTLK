@@ -697,7 +697,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 			self.metadata.columns.Damage and Skada:FormatNumber(amount),
 			self.metadata.columns.DPS and Skada:FormatNumber(dps)
 		)
-		return valuetext, amount
+		return amount, valuetext
 	end
 
 	function mod:AddToTooltip(set, tooltip)
@@ -920,7 +920,7 @@ Skada:RegisterModule("DPS", function(L, P)
 
 	function mod:GetSetSummary(set, win)
 		local dps = set:GetDPS(nil, win and win.class)
-		return Skada:FormatNumber(dps), dps
+		return dps, Skada:FormatNumber(dps)
 	end
 
 	function mod:OnEnable()
@@ -1286,7 +1286,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 			self.metadata.columns.Damage and Skada:FormatNumber(amount),
 			self.metadata.columns.DPS and Skada:FormatNumber(dps)
 		)
-		return valuetext, amount
+		return amount, valuetext
 	end
 
 	function mod:OnEnable()
@@ -1512,7 +1512,7 @@ Skada:RegisterModule("Overkill", function(L, _, _, C, new, del, clear)
 
 	function mod:GetSetSummary(set, win)
 		local overkill = set:GetOverkill(win and win.class)
-		return Skada:FormatNumber(overkill), overkill
+		return overkill, Skada:FormatNumber(overkill)
 	end
 
 	function mod:OnEnable()

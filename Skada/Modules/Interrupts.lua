@@ -10,8 +10,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 	local _
 
 	-- cache frequently used globals
-	local pairs, tostring = pairs, tostring
-	local format, pformat = string.format, Skada.pformat
+	local pairs, format, pformat = pairs, string.format, Skada.pformat
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 
 	local function format_valuetext(d, columns, total, metadata, subview)
@@ -228,8 +227,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 	end
 
 	function mod:GetSetSummary(set, win)
-		local interrupts = get_total_interrupts(set, win and win.class) or 0
-		return tostring(interrupts), interrupts
+		return get_total_interrupts(set, win and win.class) or 0
 	end
 
 	function mod:OnEnable()

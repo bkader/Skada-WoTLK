@@ -230,7 +230,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 			self.metadata.columns.Damage and Skada:FormatNumber(value),
 			self.metadata.columns.DPS and Skada:FormatNumber(value / set:GetTime())
 		)
-		return valuetext, value
+		return value, valuetext
 	end
 
 	function mod:OnEnable()

@@ -175,8 +175,8 @@ Skada:RegisterModule("Resources", function(L, P)
 
 	-- base function used to return sets summaries
 	function basemod:GetSetSummary(set, win)
-		local value = get_total_power(set, self.power, win and win.class)
-		return Skada:FormatNumber(value), value
+		local value = get_total_power(set, self.power, win and win.class) or 0
+		return value, Skada:FormatNumber(value)
 	end
 
 	-- player mods common Enter function.

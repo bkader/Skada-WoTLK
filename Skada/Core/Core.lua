@@ -737,8 +737,8 @@ function Window:UpdateDisplay()
 				self.selectedmode.GetSetSummary and
 				((set.type and set.type ~= "none") or set.name == L["Total"])
 			then
-				local valuetext, value = self.selectedmode:GetSetSummary(set, self)
-				if valuetext or value then
+				local value, valuetext = self.selectedmode:GetSetSummary(set, self)
+				if value or valuetext then
 					local existing = nil -- an existing bar?
 
 					if not value then
@@ -753,15 +753,14 @@ function Window:UpdateDisplay()
 							end
 						end
 					end
-					value = value + 1
 
 					local d = existing or {}
 					d.id = "total"
 					d.label = L["Total"]
 					d.text = nil
 					d.ignore = true
-					d.value = value
-					d.valuetext = valuetext or tostring(d.value)
+					d.value = value + 1 -- to be always first
+					d.valuetext = valuetext or tostring(value)
 
 					if P.moduleicons and self.selectedmode.metadata and self.selectedmode.metadata.icon then
 						d.icon = self.selectedmode.metadata.icon
@@ -791,7 +790,7 @@ function Window:UpdateDisplay()
 				end
 
 				if set and mode.GetSetSummary then
-					local valuetext, value = mode:GetSetSummary(set, self)
+					local value, valuetext = mode:GetSetSummary(set, self)
 					d.valuetext = valuetext or tostring(value)
 				end
 			end

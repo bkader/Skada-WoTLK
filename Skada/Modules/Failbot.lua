@@ -156,8 +156,7 @@ Skada:RegisterModule("Fails", function(L, P)
 	end
 
 	function mod:GetSetSummary(set, win)
-		local fails = get_total_fails(set, win and win.class)
-		return tostring(fails), fails
+		return get_total_fails(set, win and win.class) or 0
 	end
 
 	function mod:AddToTooltip(set, tooltip)

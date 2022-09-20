@@ -14,7 +14,7 @@ Skada:RegisterModule("Healthstones", function(L)
 		[47877] = true -- Fel Healthstone (5136)
 	}
 
-	local format, tostring = string.format, tostring
+	local format = string.format
 
 	local function format_valuetext(d, columns, total, metadata)
 		d.valuetext = Skada:FormatValueCols(
@@ -84,8 +84,7 @@ Skada:RegisterModule("Healthstones", function(L)
 	end
 
 	function mod:GetSetSummary(set, win)
-		local stones = get_total_stones(set, win and win.class) or 0
-		return tostring(stones), stones
+		return get_total_stones(set, win and win.class) or 0
 	end
 
 	function mod:OnEnable()

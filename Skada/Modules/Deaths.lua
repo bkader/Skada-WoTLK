@@ -721,7 +721,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 
 	function mod:GetSetSummary(set, win)
 		local deaths = get_total_deaths(set, win and win.class) or 0
-		return tostring(deaths), set and set.last_time or GetTime()
+		return set and set.last_time or GetTime(), tostring(deaths)
 	end
 
 	function mod:AddToTooltip(set, tooltip)

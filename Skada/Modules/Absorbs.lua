@@ -986,7 +986,7 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 			self.metadata.columns.Absorbs and Skada:FormatNumber(amount),
 			self.metadata.columns.APS and Skada:FormatNumber(aps)
 		)
-		return valuetext, amount
+		return amount, valuetext
 	end
 
 	do
@@ -1459,10 +1459,11 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 	function mod:GetSetSummary(set, win)
 		if not set then return end
 		local hps, amount = set:GetAHPS(win and win.class)
-		return Skada:FormatValueCols(
+		local valuetext = Skada:FormatValueCols(
 			self.metadata.columns.Healing and Skada:FormatNumber(amount),
 			self.metadata.columns.HPS and Skada:FormatNumber(hps)
-		), amount
+		)
+		return amount, valuetext
 	end
 
 	function mod:AddToTooltip(set, tooltip)
@@ -1611,7 +1612,7 @@ Skada:RegisterModule("HPS", function(L, P)
 
 	function mod:GetSetSummary(set, win)
 		local value =  set:GetAHPS(win and win.class)
-		return Skada:FormatNumber(value), value
+		return value, Skada:FormatNumber(value)
 	end
 
 	function mod:OnEnable()

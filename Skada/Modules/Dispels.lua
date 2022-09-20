@@ -9,8 +9,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 	local get_dispelled_targets = nil
 
 	-- cache frequently used globals
-	local pairs, tostring = pairs, tostring
-	local format, pformat = string.format, Skada.pformat
+	local pairs, format, pformat = pairs, string.format, Skada.pformat
 	local _
 
 	local function format_valuetext(d, columns, total, metadata, subview)
@@ -211,8 +210,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 	end
 
 	function mod:GetSetSummary(set, win)
-		local dispels = get_total_dispels(set, win and win.class)
-		return tostring(dispels), dispels
+		return get_total_dispels(set, win and win.class) or 0
 	end
 
 	function mod:AddToTooltip(set, tooltip)
