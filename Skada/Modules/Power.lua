@@ -126,22 +126,6 @@ Skada:RegisterModule("Resources", function(L, P)
 		return instance
 	end
 
-	local function get_total_power(set, power, class)
-		if not set or not power then return end
-
-		local total = set[power] or 0
-		if class and Skada.validclass[class] then
-			total = 0 -- reset value
-			for i = 1, #set.players do
-				local p = set.players[i]
-				if p and p.class == class and p[power] then
-					total = total + p[power]
-				end
-			end
-		end
-		return total
-	end
-
 	-- this is the main module update function that shows the list
 	-- of players depending on the selected power gain type.
 	function basemod:Update(win, set)
@@ -150,7 +134,7 @@ Skada:RegisterModule("Resources", function(L, P)
 			win.title = format("%s (%s)", win.title, L[win.class])
 		end
 
-		local total = get_total_power(set, self.power, win.class)
+		local total = set and set:GetTotal(win.class, nil, self.power)
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -175,7 +159,8 @@ Skada:RegisterModule("Resources", function(L, P)
 
 	-- base function used to return sets summaries
 	function basemod:GetSetSummary(set, win)
-		local value = get_total_power(set, self.power, win and win.class) or 0
+		if not set then return end
+		local value = set:GetTotal(win and win.class, nil, self.power) or 0
 		return value, Skada:FormatNumber(value)
 	end
 

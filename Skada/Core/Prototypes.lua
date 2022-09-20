@@ -1,6 +1,6 @@
 local Skada = Skada
 
-local pairs, max = pairs, math.max
+local pairs, max, select = pairs, math.max, select
 local getmetatable, setmetatable = getmetatable, setmetatable
 local new, clear = Skada.newTable, Skada.clearTable
 
@@ -99,6 +99,51 @@ function setPrototype:GetActorTime(id, name, active)
 	return actor and actor:GetTime(active) or 0
 end
 
+do
+	local function calc_set_total(set, key, class, arena)
+		local total = set[key] or 0
+
+		if class then
+			total = 0
+
+			local actors = set.players -- players
+			for i = 1, #actors do
+				local actor = actors[i]
+				if actor and actor.class == class and actor[key] then
+					total = total + actor[key]
+				end
+			end
+
+			actors = arena and set.enemies or nil -- arena enemies
+			if actors then
+				for i = 1, #actors do
+					local actor = actors[i]
+					if actor and actor.class == class and actor[key] then
+						total = total + actor[key]
+					end
+				end
+			end
+		elseif arena and set["e" .. key] then
+			total = total + set["e" .. key]
+		end
+
+		return total
+	end
+
+	-- returns the total value by given key/class
+	function setPrototype:GetTotal(class, arena, ...)
+		if not ... then return end
+		local __arena = (arena and self.__arena)
+
+		local total = 0
+		for i = 1, select("#", ...) do
+			local key = select(i, ...)
+			total = total + calc_set_total(self, key, class, __arena)
+		end
+		return total
+	end
+end
+
 -- fills the give table with actor's details
 function setPrototype:_fill_actor_table(t, name, actortime)
 	if t and (not t.class or (actortime and not t.time)) then
@@ -126,52 +171,13 @@ end
 -- returns the set's damage amount
 function setPrototype:GetDamage(useful, class)
 	local inc_absorbed = Skada.db.profile.absdamage
-
-	local total = inc_absorbed and self.totaldamage or self.damage or 0
-	if class and Skada.validclass[class] then
-		total = 0
-
-		local actors = self.players -- players
-		for i = 1, #actors do
-			local actor = actors[i]
-			if actor and actor.class == class and inc_absorbed and actor.totaldamage then
-				total = total + actor.totaldamage
-			elseif actor and actor.class == class and actor.damage then
-				total = total + actor.damage
-			end
-			if useful and actor.overkill then
-				total = max(0, total - actor.overkill)
-			end
+	local total = self:GetTotal(class, true, inc_absorbed and "totaldamage" or "damage")
+	if useful then
+		local overkill = self:GetTotal(class, true, "overkill")
+		if overkill then
+			total = max(0, total - overkill)
 		end
-
-		actors = self.__arena and self.enemies or nil -- arena enemies
-		if actors then
-			for i = 1, #actors do
-				local actor = actors[i]
-				if actor and actor.class == class and inc_absorbed and actor.totaldamage then
-					total = total + actor.totaldamage
-				elseif actor and actor.class == class and actor.damage then
-					total = total + actor.damage
-				end
-				if useful and actor.overkill then
-					total = max(0, total - actor.overkill)
-				end
-			end
-		end
-	elseif self.__arena then
-		if inc_absorbed and self.etotaldamage then
-			total = total + self.etotaldamage
-		elseif self.edamage then
-			total = total + self.edamage
-		end
-
-		if useful and self.eoverkill then
-			total = max(0, total - self.eoverkill)
-		end
-	elseif useful and self.overkill then
-		total = max(0, total - self.overkill)
 	end
-
 	return total
 end
 
@@ -187,32 +193,7 @@ end
 
 -- returns the set's overkill
 function setPrototype:GetOverkill(class)
-	local total = self.overkill or 0
-	if class and Skada.validclass[class] then
-		total = 0
-
-		local actors = self.players -- players
-		for i = 1, #actors do
-			local actor = actors[i]
-			if actor and actor.class == class and actor.overkill then
-				total = total + actor.overkill
-			end
-		end
-
-		actors = self.__arena and self.enemies or nil -- arena enemies
-		if actors then
-			for i = 1, #actors do
-				local actor = actors[i]
-				if actor and actor.class == class and actor.overkill then
-					total = total + actor.overkill
-				end
-			end
-		end
-	elseif self.__arena and self.eoverkill then
-		total = total + self.eoverkill
-	end
-
-	return total
+	return self:GetTotal(class, true, "overkill")
 end
 
 -- returns the actor's damage amount
@@ -262,43 +243,8 @@ end
 -- returns the set's damage taken amount
 function setPrototype:GetDamageTaken(class)
 	local inc_absorbed = Skada.db.profile.absdamage
-
-	local total = self.damaged or self.damagetaken
-	if inc_absorbed then
-		total = self.totaldamaged or self.totaldamagetaken or total
-	end
-
-	if class and Skada.validclass[class] then
-		total = 0
-
-		local actors = self.players -- players
-		for i = 1, #actors do
-			local actor = actors[i]
-			if actor and actor.class == class and inc_absorbed and (actor.totaldamaged or actor.totaldamagetaken) then
-				total = total + (actor.totaldamaged or actor.totaldamagetaken)
-			elseif actor and actor.class == class and (actor.damaged or actor.damagetaken) then
-				total = total + (actor.damaged or actor.damagetaken)
-			end
-		end
-
-		actors = self.__arena and self.enemies or nil -- arena enemies
-		if actors then
-			for i = 1, #actors do
-				local actor = actors[i]
-				if actor and actor.class == class and inc_absorbed and (actor.totaldamaged or actor.totaldamagetaken) then
-					total = total + (actor.totaldamaged or actor.totaldamagetaken)
-				elseif actor and actor.class == class and (actor.damaged or actor.damagetaken) then
-					total = total + (actor.damaged or actor.damagetaken)
-				end
-			end
-		end
-	elseif self.__arena and inc_absorbed and self.etotaldamaged then
-		total = total + self.etotaldamaged
-	elseif self.__arena and self.edamaged then
-		total = total + self.edamaged
-	end
-
-	return total
+	local key = (inc_absorbed and "total" or "") .. (self.damagetaken and "damagetaken" or "damaged")
+	return self:GetTotal(class, true, key)
 end
 
 -- returns the set's dtps and damage taken amount
@@ -357,31 +303,7 @@ end
 
 -- returns the set's heal amount
 function setPrototype:GetHeal(class)
-	local total = self.heal or 0
-	if class and Skada.validclass[class] then
-		total = 0
-		local actors = self.players -- players
-		for i = 1, #actors do
-			local actor = actors[i]
-			if actor and actor.class == class and actor.heal then
-				total = total + actor.heal
-			end
-		end
-
-		actors = self.__arena and self.enemies or nil -- arena enemies
-		if actors then
-			for i = 1, #actors do
-				local actor = actors[i]
-				if actor and actor.class == class and actor.heal then
-					total = total + actor.heal
-				end
-			end
-		end
-	elseif self.__arena and self.eheal then
-		total = total + self.eheal
-	end
-
-	return total
+	return self:GetTotal(class, true, "heal")
 end
 
 -- returns the set's hps and heal amount
@@ -396,31 +318,7 @@ end
 
 -- returns the set's overheal amount
 function setPrototype:GetOverheal(class)
-	local total = self.overheal or 0
-	if class and Skada.validclass[class] then
-		total = 0
-		local actors = self.players -- players
-		for i = 1, #actors do
-			local actor = actors[i]
-			if actor and actor.class == class and actor.overheal then
-				total = total + actor.overheal
-			end
-		end
-
-		actors = self.__arena and self.enemies or nil -- arena enemies
-		if actors then
-			for i = 1, #actors do
-				local actor = actors[i]
-				if actor and actor.class == class and actor.overheal then
-					total = total + actor.overheal
-				end
-			end
-		end
-	elseif self.__arena and self.eoverheal then
-		total = total + self.eoverheal
-	end
-
-	return total
+	return self:GetTotal(class, true, "overheal")
 end
 
 -- returns the set's overheal per second and overheal amount
@@ -435,31 +333,7 @@ end
 
 -- returns the set's total heal amount, including overheal amount
 function setPrototype:GetTotalHeal(class)
-	local total = (self.heal or 0) + (self.overheal or 0)
-	if class and Skada.validclass[class] then
-		total = 0
-		local actors = self.players -- players
-		for i = 1, #actors do
-			local actor = actors[i]
-			if actor and actor.class == class and (actor.heal or actor.overheal) then
-				total = total + (actor.heal or 0) + (actor.overheal or 0)
-			end
-		end
-
-		actors = self.__arena and self.enemies or nil -- arena enemies
-		if actors then
-			for i = 1, #actors do
-				local actor = actors[i]
-				if actor and actor.class == class and (actor.heal or actor.overheal) then
-					total = total + (actor.heal or 0) + (actor.overheal or 0)
-				end
-			end
-		end
-	elseif self.__arena and (self.eheal or self.eoverheal) then
-		total = total + (self.eheal or 0) + (self.eoverheal or 0)
-	end
-
-	return total
+	return self:GetTotal(class, true, "heal", "overheal")
 end
 
 -- returns the set's total hps and heal
@@ -474,32 +348,7 @@ end
 
 -- returns the set's absorb amount
 function setPrototype:GetAbsorb(class)
-	local total = self.absorb or 0
-	if class and Skada.validclass[class] then
-		total = 0
-
-		local actors = self.players -- players
-		for i = 1, #actors do
-			local actor = actors[i]
-			if actor and actor.class == class and actor.absorb then
-				total = total + actor.absorb
-			end
-		end
-
-		actors = self.__arena and self.enemies or nil -- arena enemies
-		if actors then
-			for i = 1, #actors do
-				local actor = actors[i]
-				if actor and actor.class == class and actor.absorb then
-					total = total + actor.absorb
-				end
-			end
-		end
-	elseif self.__arena and self.eabsorb then
-		total = total + self.eabsorb
-	end
-
-	return total
+	return self:GetTotal(class, true, "absorb")
 end
 
 -- returns the set's absorb per second and absorb amount

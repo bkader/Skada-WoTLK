@@ -203,22 +203,6 @@ local function format_valuetext(d, columns, total, metadata, subview)
 	end
 end
 
-local function get_total_cc(set, key, class)
-	if not set or not key then return end
-
-	local total = set[key] or 0
-	if class and Skada.validclass[class] then
-		total = 0
-		for i = 1, #set.players do
-			local p = set.players[i]
-			if p and p.class == class and p[key] then
-				total = total + p[key]
-			end
-		end
-	end
-	return total
-end
-
 -- ======= --
 -- CC Done --
 -- ======= --
@@ -365,7 +349,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["CC Done"], L[win.class]) or L["CC Done"]
 
-		local total = get_total_cc(set, "ccdone", win.class)
+		local total = set:GetTotal(win.class, nil, "ccdone")
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -389,7 +373,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 	end
 
 	function mod:GetSetSummary(set, win)
-		return get_total_cc(set, "ccdone", win and win.class) or 0
+		return set and set:GetTotal(win and win.class, nil, "ccdone") or 0
 	end
 
 	function mod:AddToTooltip(set, tooltip)
@@ -635,7 +619,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["CC Taken"], L[win.class]) or L["CC Taken"]
 
-		local total = get_total_cc(set, "cctaken", win.class)
+		local total = set:GetTotal(win.class, nil, "cctaken")
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -659,7 +643,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 	end
 
 	function mod:GetSetSummary(set, win)
-		return get_total_cc(set, "cctaken", win and win.class) or 0
+		return set and set:GetTotal(win and win.class, nil, "cctaken") or 0
 	end
 
 	function mod:AddToTooltip(set, tooltip)
@@ -897,7 +881,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["CC Breaks"], L[win.class]) or L["CC Breaks"]
 
-		local total = get_total_cc(set, "ccbreak", win.class)
+		local total = set:GetTotal(win.class, nil, "ccbreak")
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -921,7 +905,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 	end
 
 	function mod:GetSetSummary(set, win)
-		return get_total_cc(set, "ccbreak", win and win.class) or 0
+		return set and set:GetTotal(win and win.class, nil, "ccbreak") or 0
 	end
 
 	function mod:AddToTooltip(set, tooltip)

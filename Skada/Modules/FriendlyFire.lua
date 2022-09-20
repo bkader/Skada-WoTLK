@@ -182,26 +182,10 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 		end
 	end
 
-	local function get_total_friendly_damage(set, class)
-		if not set then return end
-
-		local total = set.friendfire or 0
-		if class and Skada.validclass[class] then
-			total = 0
-			for i = 1, #set.players do
-				local p = set.players[i]
-				if p and p.class == class and p.friendfire then
-					total = total + p.friendfire
-				end
-			end
-		end
-		return total
-	end
-
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Friendly Fire"], L[win.class]) or L["Friendly Fire"]
 
-		local total = get_total_friendly_damage(set, win.class)
+		local total = set and set:GetTotal(win.class, nil, "friendfire")
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -225,7 +209,8 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 	end
 
 	function mod:GetSetSummary(set, win)
-		local value = get_total_friendly_damage(set, win and win.class) or 0
+		if not set then return end
+		local value = set:GetTotal(win and win.class, nil, "friendfire") or 0
 		local valuetext = Skada:FormatValueCols(
 			self.metadata.columns.Damage and Skada:FormatNumber(value),
 			self.metadata.columns.DPS and Skada:FormatNumber(value / set:GetTime())

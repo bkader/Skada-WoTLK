@@ -113,26 +113,10 @@ Skada:RegisterModule("Fails", function(L, P)
 		end
 	end
 
-	local function get_total_fails(set, class)
-		if not set then return end
-
-		local total = set.fail or 0
-		if class and Skada.validclass[class] then
-			total = 0
-			for i = 1, #set.players do
-				local p = set.players[i]
-				if p and p.class == class and p.fail then
-					total = total + p.fail
-				end
-			end
-		end
-		return total
-	end
-
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Fails"], L[win.class]) or L["Fails"]
 
-		local total = get_total_fails(set, win.class)
+		local total = set and set:GetTotal(win.class, nil, "fail")
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -156,13 +140,13 @@ Skada:RegisterModule("Fails", function(L, P)
 	end
 
 	function mod:GetSetSummary(set, win)
-		return get_total_fails(set, win and win.class) or 0
+		if not set then return end
+		return set:GetTotal(win and win.class, nil, "fail") or 0
 	end
 
 	function mod:AddToTooltip(set, tooltip)
-		local fails = get_total_fails(set)
-		if fails and fails > 0 then
-			tooltip:AddDoubleLine(L["Fails"], fails, 1, 1, 1)
+		if set.fail and set.fail > 0 then
+			tooltip:AddDoubleLine(L["Fails"], set.fail, 1, 1, 1)
 		end
 	end
 

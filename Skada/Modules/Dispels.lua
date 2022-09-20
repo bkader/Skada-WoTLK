@@ -167,26 +167,10 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 		end
 	end
 
-	local function get_total_dispels(set, class)
-		if not set then return end
-
-		local total = set.dispel or 0
-		if class and Skada.validclass[class] then
-			total = 0
-			for i = 1, #set.players do
-				local p = set.players[i]
-				if p and p.class == class and p.dispel then
-					total = total + p.dispel
-				end
-			end
-		end
-		return total
-	end
-
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Dispels"], L[win.class]) or L["Dispels"]
 
-		local total = get_total_dispels(set, win.class)
+		local total = set and set:GetTotal(win.class, nil, "dispel")
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -210,7 +194,9 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 	end
 
 	function mod:GetSetSummary(set, win)
-		return get_total_dispels(set, win and win.class) or 0
+		if not set then return end
+		local value = set:GetTotal(win and win.class, nil, "dispel") or 0
+		return value, Skada:FormatNumber(value)
 	end
 
 	function mod:AddToTooltip(set, tooltip)

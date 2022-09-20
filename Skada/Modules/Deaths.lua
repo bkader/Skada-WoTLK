@@ -703,25 +703,10 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		end
 	end
 
-	local function get_total_deaths(set, class)
-		if not set then return end
-
-		local total = set.death or 0
-		if class and Skada.validclass[class] then
-			total = 0
-			for i = 1, #set.players do
-				local p = set.players[i]
-				if p and p.class == class and p.death then
-					total = total + p.death
-				end
-			end
-		end
-		return total
-	end
-
 	function mod:GetSetSummary(set, win)
-		local deaths = get_total_deaths(set, win and win.class) or 0
-		return set and set.last_time or GetTime(), tostring(deaths)
+		if not set then return end
+		local deaths = set:GetTotal(win and win.class, nil, "death") or 0
+		return set.last_time or GetTime(), tostring(deaths)
 	end
 
 	function mod:AddToTooltip(set, tooltip)
