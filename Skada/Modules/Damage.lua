@@ -654,7 +654,6 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 
 		local nr = 0
 		local cols = self.metadata.columns
-		local is_arena = (Skada.forPVP and set.type == "arena")
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -665,14 +664,14 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
-					d.color = is_arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = amount
 					format_valuetext(d, cols, total, dps, win.metadata)
 				end
 			end
 		end
 
-		actors = is_arena and set.enemies or nil -- arena enemies
+		actors = set.__arena and set.enemies or nil -- arena enemies
 		if not actors then return end
 
 		for i = 1, #actors do
@@ -881,7 +880,6 @@ Skada:RegisterModule("DPS", function(L, P)
 
 		local nr = 0
 		local cols = self.metadata.columns
-		local is_arena = (Skada.forPVP and set.type == "arena")
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -892,14 +890,14 @@ Skada:RegisterModule("DPS", function(L, P)
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
-					d.color = is_arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = dps
 					format_valuetext(d, cols, total, dps, win.metadata)
 				end
 			end
 		end
 
-		actors = is_arena and set.enemies or nil -- arena enemies
+		actors = set.__arena and set.enemies or nil -- arena enemies
 		if not actors then return end
 
 		for i = 1, #actors do
@@ -1242,7 +1240,6 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 
 		local nr = 0
 		local cols = self.metadata.columns
-		local is_arena = (Skada.forPVP and set.type == "arena")
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -1253,14 +1250,14 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
-					d.color = is_arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = amount
 					format_valuetext(d, cols, total, dps, win.metadata)
 				end
 			end
 		end
 
-		actors = is_arena and set.enemies or nil -- arena enemies
+		actors = set.__arena and set.enemies or nil -- arena enemies
 		if not actors then return end
 
 		for i = 1, #actors do
@@ -1479,7 +1476,6 @@ Skada:RegisterModule("Overkill", function(L, _, _, C, new, del, clear)
 
 		local nr = 0
 		local cols = self.metadata.columns
-		local is_arena = (Skada.forPVP and set.type == "arena")
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -1488,13 +1484,13 @@ Skada:RegisterModule("Overkill", function(L, _, _, C, new, del, clear)
 				nr = nr + 1
 
 				local d = win:actor(nr, actor)
-				d.color = is_arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+				d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 				d.value = actor.overkill
 				format_valuetext(d, cols, total, cols.DPS and (d.value / actor:GetTime()), win.metadata)
 			end
 		end
 
-		actors = is_arena and set.enemies or nil -- arena enemies
+		actors = set.__arena and set.enemies or nil -- arena enemies
 		if not actors then return end
 
 		for i = 1, #actors do

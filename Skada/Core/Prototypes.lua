@@ -35,7 +35,10 @@ local band, tremove = bit.band, tremove or table.remove
 
 -- binds a set table to set prototype
 function setPrototype:Bind(obj)
-	if not obj or getmetatable(obj) == self then
+	if not obj then
+		return
+	elseif getmetatable(obj) == self then
+		self.__arena = (Skada.forPVP and obj.type == "arena")
 		return obj
 	end
 
@@ -60,6 +63,7 @@ function setPrototype:Bind(obj)
 
 	setmetatable(obj, self)
 	self.__index = self
+	self.__arena = (Skada.forPVP and obj.type == "arena")
 	return obj
 end
 
@@ -122,7 +126,6 @@ end
 -- returns the set's damage amount
 function setPrototype:GetDamage(useful, class)
 	local inc_absorbed = Skada.db.profile.absdamage
-	local is_arena = (Skada.forPVP and self.type == "arena")
 
 	local total = inc_absorbed and self.totaldamage or self.damage or 0
 	if class and Skada.validclass[class] then
@@ -141,7 +144,7 @@ function setPrototype:GetDamage(useful, class)
 			end
 		end
 
-		actors = is_arena and self.enemies or nil -- arena enemies
+		actors = self.__arena and self.enemies or nil -- arena enemies
 		if actors then
 			for i = 1, #actors do
 				local actor = actors[i]
@@ -155,7 +158,7 @@ function setPrototype:GetDamage(useful, class)
 				end
 			end
 		end
-	elseif is_arena then
+	elseif self.__arena then
 		if inc_absorbed and self.etotaldamage then
 			total = total + self.etotaldamage
 		elseif self.edamage then
@@ -184,8 +187,6 @@ end
 
 -- returns the set's overkill
 function setPrototype:GetOverkill(class)
-	local is_arena = (Skada.forPVP and self.type == "arena")
-
 	local total = self.overkill or 0
 	if class and Skada.validclass[class] then
 		total = 0
@@ -198,7 +199,7 @@ function setPrototype:GetOverkill(class)
 			end
 		end
 
-		actors = is_arena and self.enemies or nil -- arena enemies
+		actors = self.__arena and self.enemies or nil -- arena enemies
 		if actors then
 			for i = 1, #actors do
 				local actor = actors[i]
@@ -207,7 +208,7 @@ function setPrototype:GetOverkill(class)
 				end
 			end
 		end
-	elseif is_arena and self.eoverkill then
+	elseif self.__arena and self.eoverkill then
 		total = total + self.eoverkill
 	end
 
@@ -261,7 +262,6 @@ end
 -- returns the set's damage taken amount
 function setPrototype:GetDamageTaken(class)
 	local inc_absorbed = Skada.db.profile.absdamage
-	local is_arena = (Skada.forPVP and self.type == "arena")
 
 	local total = self.damaged or self.damagetaken
 	if inc_absorbed then
@@ -281,7 +281,7 @@ function setPrototype:GetDamageTaken(class)
 			end
 		end
 
-		actors = is_arena and self.enemies or nil -- arena enemies
+		actors = self.__arena and self.enemies or nil -- arena enemies
 		if actors then
 			for i = 1, #actors do
 				local actor = actors[i]
@@ -292,9 +292,9 @@ function setPrototype:GetDamageTaken(class)
 				end
 			end
 		end
-	elseif is_arena and inc_absorbed and self.etotaldamaged then
+	elseif self.__arena and inc_absorbed and self.etotaldamaged then
 		total = total + self.etotaldamaged
-	elseif is_arena and self.edamaged then
+	elseif self.__arena and self.edamaged then
 		total = total + self.edamaged
 	end
 
@@ -357,8 +357,6 @@ end
 
 -- returns the set's heal amount
 function setPrototype:GetHeal(class)
-	local is_arena = (Skada.forPVP and self.type == "arena" and self.eheal)
-
 	local total = self.heal or 0
 	if class and Skada.validclass[class] then
 		total = 0
@@ -370,7 +368,7 @@ function setPrototype:GetHeal(class)
 			end
 		end
 
-		actors = is_arena and self.enemies or nil -- arena enemies
+		actors = self.__arena and self.enemies or nil -- arena enemies
 		if actors then
 			for i = 1, #actors do
 				local actor = actors[i]
@@ -379,7 +377,7 @@ function setPrototype:GetHeal(class)
 				end
 			end
 		end
-	elseif is_arena then
+	elseif self.__arena and self.eheal then
 		total = total + self.eheal
 	end
 
@@ -398,8 +396,6 @@ end
 
 -- returns the set's overheal amount
 function setPrototype:GetOverheal(class)
-	local is_arena = (Skada.forPVP and self.type == "arena" and self.eoverheal)
-
 	local total = self.overheal or 0
 	if class and Skada.validclass[class] then
 		total = 0
@@ -411,7 +407,7 @@ function setPrototype:GetOverheal(class)
 			end
 		end
 
-		actors = is_arena and self.enemies or nil -- arena enemies
+		actors = self.__arena and self.enemies or nil -- arena enemies
 		if actors then
 			for i = 1, #actors do
 				local actor = actors[i]
@@ -420,7 +416,7 @@ function setPrototype:GetOverheal(class)
 				end
 			end
 		end
-	elseif is_arena then
+	elseif self.__arena and self.eoverheal then
 		total = total + self.eoverheal
 	end
 
@@ -439,8 +435,6 @@ end
 
 -- returns the set's total heal amount, including overheal amount
 function setPrototype:GetTotalHeal(class)
-	local is_arena = (Skada.forPVP and self.type == "arena" and (self.eheal or self.eoverheal))
-
 	local total = (self.heal or 0) + (self.overheal or 0)
 	if class and Skada.validclass[class] then
 		total = 0
@@ -452,7 +446,7 @@ function setPrototype:GetTotalHeal(class)
 			end
 		end
 
-		actors = is_arena and self.enemies or nil -- arena enemies
+		actors = self.__arena and self.enemies or nil -- arena enemies
 		if actors then
 			for i = 1, #actors do
 				local actor = actors[i]
@@ -461,8 +455,8 @@ function setPrototype:GetTotalHeal(class)
 				end
 			end
 		end
-	elseif is_arena then
-		total = total + self.eheal + (self.eoverheal or 0)
+	elseif self.__arena and (self.eheal or self.eoverheal) then
+		total = total + (self.eheal or 0) + (self.eoverheal or 0)
 	end
 
 	return total
@@ -480,8 +474,6 @@ end
 
 -- returns the set's absorb amount
 function setPrototype:GetAbsorb(class)
-	local is_arena = (Skada.forPVP and self.type == "arena" and self.eabsorb)
-
 	local total = self.absorb or 0
 	if class and Skada.validclass[class] then
 		total = 0
@@ -494,7 +486,7 @@ function setPrototype:GetAbsorb(class)
 			end
 		end
 
-		actors = is_arena and self.enemies or nil -- arena enemies
+		actors = self.__arena and self.enemies or nil -- arena enemies
 		if actors then
 			for i = 1, #actors do
 				local actor = actors[i]
@@ -503,7 +495,7 @@ function setPrototype:GetAbsorb(class)
 				end
 			end
 		end
-	elseif is_arena then
+	elseif self.__arena and self.eabsorb then
 		total = total + self.eabsorb
 	end
 

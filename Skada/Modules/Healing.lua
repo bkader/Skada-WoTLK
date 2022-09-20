@@ -349,7 +349,6 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 
 		local nr = 0
 		local cols = self.metadata.columns
-		local is_arena = (Skada.forPVP and set.type == "arena")
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -360,14 +359,14 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
-					d.color = is_arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = amount
 					format_valuetext(d, cols, total, hps, win.metadata)
 				end
 			end
 		end
 
-		actors = is_arena and set.enemies or nil -- arena enemies
+		actors = set.__arena and set.enemies or nil -- arena enemies
 		if not actors then return end
 
 		for i = 1, #actors do
@@ -846,7 +845,6 @@ Skada:RegisterModule("Total Healing", function(L)
 
 		local nr = 0
 		local cols = self.metadata.columns
-		local is_arena = (Skada.forPVP and set.type == "arena")
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -857,14 +855,14 @@ Skada:RegisterModule("Total Healing", function(L)
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
-					d.color = is_arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = amount
 					format_valuetext(d, cols, total, hps, win.metadata)
 				end
 			end
 		end
 
-		actors = is_arena and set.enemies or nil -- arena enemies
+		actors = set.__arena and set.enemies or nil -- arena enemies
 		if not actors then return end
 
 		for i = 1, #actors do
@@ -1099,7 +1097,6 @@ Skada:RegisterModule("Healing Taken", function(L, P, _, _, new, _, clear)
 		if not self.heal and not self.absorb then return end
 
 		tbl = clear(tbl or C)
-		local is_arena = (Skada.forPVP and self.type == "arena" and self.eheal)
 
 		local actors = self.players -- players
 		for i = 1, #actors do
@@ -1152,7 +1149,7 @@ Skada:RegisterModule("Healing Taken", function(L, P, _, _, new, _, clear)
 			end
 		end
 
-		actors = is_arena and self.enemies or nil
+		actors = self.__arena and self.enemies or nil
 		if not actors then
 			return tbl
 		end

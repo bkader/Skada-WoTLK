@@ -604,7 +604,6 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 
 		local nr = 0
 		local cols = self.metadata.columns
-		local is_arena = (Skada.forPVP and set.type == "arena")
 
 		local actors = set.players -- players.
 		for i = 1, #actors do
@@ -615,14 +614,14 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
-					d.color = is_arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = amount
 					format_valuetext(d, cols, total, dtps, win.metadata)
 				end
 			end
 		end
 
-		actors = is_arena and set.enemies or nil -- arena enemies
+		actors = set.__arena and set.enemies or nil -- arena enemies
 		if not actors then return end
 
 		for i = 1, #actors do
@@ -777,7 +776,6 @@ Skada:RegisterModule("DTPS", function(L, P)
 
 		local nr = 0
 		local cols = self.metadata.columns
-		local is_arena = (Skada.forPVP and set.type == "arena")
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -788,17 +786,15 @@ Skada:RegisterModule("DTPS", function(L, P)
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
-					d.color = is_arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = dtps
 					format_valuetext(d, cols, total, dtps, win.metadata)
 				end
 			end
 		end
 
-		actors = is_arena and set.enemies or nil -- arena enemies
+		actors = set.__arena and set.enemies or nil -- arena enemies
 		if not actors then return end
-		-- needs review
-		-- if not (Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyDamageTaken) then return end
 
 		for i = 1, #actors do
 			local actor = actors[i]
