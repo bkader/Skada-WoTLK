@@ -539,6 +539,7 @@ L["%s's <%s> sources"] = "Sources \1242 <%2$s> \1242 %1$s"
 L["Sunder Counter"] = "Fracasser armure"
 L["Sunder target list"] = "Cibles de Fracasser armure"
 L["Sunder source list"] = "Sources de Fracasser armure"
+L["Number of seconds after application to count refreshs."] = "Nombre de secondes \195\160 attendre apr\195\168s application pour compter les rafra\195\174chissements."
 -- CC Tracker Module --
 L["Crowd Control"] = "Contr\195\180le de foule"
 L["CC Done"] = "Contr\195\180les effectu\195\169s"

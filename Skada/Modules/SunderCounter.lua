@@ -6,12 +6,17 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C)
 	local get_sunder_sources = nil
 	local get_sunder_targets = nil
 
-	local pairs, format, pformat = pairs, string.format, Skada.pformat
+	local pairs, format, GetTime, pformat = pairs, string.format, GetTime, Skada.pformat
 	local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 	local T = Skada.Table
-	local sunder, sunderLink, devastate, _
+
+	local sunder_targets -- holds sunder targets details for announcement
+	local active_sunders = {} -- holds sunder targets to consider refreshes
+	local spell_sunder, spell_devastate, sunder_link
+	local last_srcGUID, last_srcName, last_srcFlags
+	local _
 
 	local function format_valuetext(d, columns, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -24,7 +29,8 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C)
 		end
 	end
 
-	local function log_sunder(set, data)
+	local data = {}
+	local function log_sunder(set)
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if not player then return end
 
@@ -38,78 +44,105 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C)
 		player.sundertargets[data.dstName] = (player.sundertargets[data.dstName] or 0) + 1
 	end
 
-	local data = {}
+	local function sunder_dropped(dstGUID)
+		if dstGUID and sunder_targets and sunder_targets[dstGUID] then
+			local dstName = sunder_targets[dstGUID].name
+			sunder_targets[dstGUID] = del(sunder_targets[dstGUID])
 
-	local function sunder_applied(timestamp, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, _, spellname)
-		if spellname == sunder or spellname == devastate then
-			data.playerid = srcGUID
-			data.playername = srcName
-			data.playerflags = srcFlags
-
-			data.dstGUID = dstGUID
-			data.dstName = dstName
-			data.dstFlags = dstFlags
-
-			Skada:DispatchSets(log_sunder, data)
-
-			if not P.modules.sunderannounce then return end -- announce disabled
-			if P.modules.sunderbossonly and not Skada:IsBoss(dstGUID, true) then return end -- only for bosses
-
-			mod.targets = mod.targets or T.get("Sunder_Targets")
-			if not mod.targets[dstGUID] then
-				mod.targets[dstGUID] = new()
-				mod.targets[dstGUID].count = 1
-				mod.targets[dstGUID].time = timestamp
-			elseif not mod.targets[dstGUID].full then
-				mod.targets[dstGUID].count = (mod.targets[dstGUID].count or 0) + 1
-				if mod.targets[dstGUID].count == 5 then
-					mod:Announce(format(
-						L["%s stacks of %s applied on %s in %s sec!"],
-						mod.targets[dstGUID].count,
-						sunderLink or sunder,
-						dstName,
-						format("%.1f", timestamp - mod.targets[dstGUID].time)
-					))
-					mod.targets[dstGUID].full = true
-				end
+			if not P.modules.sunderannounce then
+				return
+			elseif not P.modules.sunderbossonly or (P.modules.sunderbossonly and Skada:IsBoss(dstGUID, true)) then
+				mod:Announce(pformat(L["%s dropped from %s!"], sunder_link or spell_sunder, dstName))
 			end
 		end
 	end
 
-	local function sunder_removed(timestamp, _, _, _, _, dstGUID, dstName, _, _, spellname)
-		if not spellname or spellname ~= sunder then return end
+	local function sunder_applied(_, eventtype, _, _, _, dstGUID, dstName, dstFlags, _, spellname)
+		if spellname ~= spell_sunder and spellname ~= spell_devastate then return end
 
-		Skada:ScheduleTimer(function()
-			if mod.targets and mod.targets[dstGUID] then
-				mod.targets[dstGUID] = del(mod.targets[dstGUID])
-				if P.modules.sunderannounce then
-					if not P.modules.sunderbossonly or (P.modules.sunderbossonly and Skada:IsBoss(dstGUID, true)) then
-						mod:Announce(pformat(L["%s dropped from %s!"], sunderLink or sunder, dstName))
-					end
-				end
+		-- sunder removed!
+		if eventtype == "SPELL_AURA_REMOVED" then
+			Skada:ScheduleTimer(sunder_dropped, 0.1, dstGUID)
+			return
+		end
+
+		-- sunder refreshed
+		if eventtype == "SPELL_AURA_REFRESH" and active_sunders[dstGUID] and active_sunders[dstGUID] > GetTime() then
+			active_sunders[dstGUID] = GetTime() + P.modules.sunderdelay -- useless refresh
+			return
+		else
+			active_sunders[dstGUID] = GetTime() + P.modules.sunderdelay
+		end
+
+		data.playerid = last_srcGUID
+		data.playername = last_srcName
+		data.playerflags = last_srcFlags
+
+		data.dstGUID = dstGUID
+		data.dstName = dstName
+		data.dstFlags = dstFlags
+
+		Skada:DispatchSets(log_sunder)
+
+		if not P.modules.sunderannounce then return end -- announce disabled
+		if P.modules.sunderbossonly and not Skada:IsBoss(dstGUID, true) then return end -- only for bosses
+
+		local t = sunder_targets and sunder_targets[dstGUID]
+		if not t then
+			t = new()
+			t.name = dstName
+			t.count = 1
+			t.time = GetTime()
+			sunder_targets = sunder_targets or T.get("Sunder_Targets")
+			sunder_targets[dstGUID] = t
+		elseif not t.full then
+			t.count = (t.count or 0) + 1
+			if t.count == 5 then
+				mod:Announce(format(
+					L["%s stacks of %s applied on %s in %s sec!"],
+					t.count,
+					sunder_link or spell_sunder,
+					dstName,
+					format("%.1f", GetTime() - t.time)
+				))
+				t.full = true
 			end
-		end, 0.1)
+		end
 	end
 
-	local function unit_died(timestamp, _, _, _, _, dstGUID)
-		if P.modules.sunderannounce and dstGUID and mod.targets and mod.targets[dstGUID] then
-			mod.targets[dstGUID] = del(mod.targets[dstGUID])
+	local function sunder_cast(_, _, srcGUID, srcName, srcFlags, _, _, _, _, spellname)
+		if spellname == spell_sunder or spellname == spell_devastate then
+			last_srcGUID = srcGUID
+			last_srcName = srcName
+			last_srcFlags = srcFlags
+		end
+	end
+
+	local function unit_died(_, _, _, _, _, dstGUID)
+		if P.modules.sunderannounce and dstGUID and sunder_targets and sunder_targets[dstGUID] then
+			sunder_targets[dstGUID] = del(sunder_targets[dstGUID])
 		end
 	end
 
 	local function double_check_sunder()
-		if sunder then return end
-		sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
-		sunderLink = P.reportlinks and GetSpellLink(47467)
+		if not spell_sunder then
+			spell_sunder = GetSpellInfo(47467)
+		end
+		if not spell_devastate then
+			spell_devastate = GetSpellInfo(47498)
+		end
+		if not sunder_link then
+			sunder_link = GetSpellLink(47467)
+		end
 	end
 
 	function sourcemod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = format(L["%s's <%s> sources"], label, sunder)
+		win.title = format(L["%s's <%s> sources"], label, spell_sunder)
 	end
 
 	function sourcemod:Update(win, set)
-		win.title = pformat(L["%s's <%s> sources"], win.targetname, sunder)
+		win.title = pformat(L["%s's <%s> sources"], win.targetname, spell_sunder)
 		if not win.targetname then return end
 
 		local sources, total = get_sunder_sources(set, win.targetname)
@@ -133,12 +166,12 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C)
 
 	function targetmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's <%s> targets"], label, sunder)
+		win.title = format(L["%s's <%s> targets"], label, spell_sunder)
 	end
 
 	function targetmod:Update(win, set)
 		double_check_sunder()
-		win.title = pformat(L["%s's <%s> targets"], win.actorname, sunder)
+		win.title = pformat(L["%s's <%s> targets"], win.actorname, spell_sunder)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -194,6 +227,12 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C)
 		return set and set.sunder or 0
 	end
 
+	function mod:AddToTooltip(set, tooltip)
+		if set.sunder and set.sunder > 0 then
+			tooltip:AddDoubleLine(spell_sunder, set.sunder, 1, 1, 1)
+		end
+	end
+
 	function mod:OnEnable()
 		sourcemod.metadata = {showspots = true}
 		targetmod.metadata = {click1 = sourcemod}
@@ -207,9 +246,29 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C)
 		-- no total click.
 		targetmod.nototal = true
 
-		Skada:RegisterForCL(sunder_applied, "SPELL_AURA_APPLIED", "SPELL_AURA_APPLIED_DOSE", {src_is_interesting_nopets = true})
-		Skada:RegisterForCL(sunder_removed, "SPELL_AURA_REMOVED", {src_is_interesting_nopets = true})
-		Skada:RegisterForCL(unit_died, "UNIT_DIED", "UNIT_DESTROYED", "UNIT_DISSIPATES", {dst_is_not_interesting = true})
+		local flags_src = {src_is_interesting_nopets = true}
+		Skada:RegisterForCL(
+			sunder_applied,
+			"SPELL_AURA_APPLIED",
+			"SPELL_AURA_APPLIED_DOSE",
+			"SPELL_AURA_REFRESH",
+			"SPELL_AURA_REMOVED",
+			flags_src
+		)
+
+		Skada:RegisterForCL(
+			sunder_cast,
+			"SPELL_CAST_SUCCESS",
+			flags_src
+		)
+
+		Skada:RegisterForCL(
+			unit_died,
+			"UNIT_DIED",
+			"UNIT_DESTROYED",
+			"UNIT_DISSIPATES",
+			{dst_is_not_interesting = true}
+		)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self, L["Buffs and Debuffs"])
@@ -220,15 +279,10 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C)
 		Skada:RemoveMode(self)
 	end
 
-	function mod:AddToTooltip(set, tooltip)
-		if set.sunder and set.sunder > 0 then
-			tooltip:AddDoubleLine(sunder, set.sunder, 1, 1, 1)
-		end
-	end
-
 	function mod:CombatLeave()
 		T.clear(data)
-		T.free("Sunder_Targets", self.targets, nil, del)
+		T.free("Sunder_Targets", sunder_targets, nil, del)
+		last_srcGUID, last_srcName, last_srcFlags = nil, nil, nil
 	end
 
 	function mod:Announce(msg)
@@ -237,10 +291,8 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C)
 
 	function mod:OnInitialize()
 		double_check_sunder()
-
-		if P.modules.sunderchannel == nil then
-			P.modules.sunderchannel = "SAY"
-		end
+		P.modules.sunderchannel = P.modules.sunderchannel or "SAY"
+		P.modules.sunderdelay = P.modules.sunderdelay or 20
 
 		Skada.options.args.modules.args.sundercounter = {
 			type = "group",
@@ -258,7 +310,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C)
 					width = "full",
 					order = 0
 				},
-				sep = {
+				empty_1 = {
 					type = "description",
 					name = " ",
 					width = "full",
@@ -266,8 +318,8 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C)
 				},
 				sunderannounce = {
 					type = "toggle",
-					name = format(L["Announce %s"], sunder),
-					desc = pformat(L["Announces how long it took to apply %d stacks of %s and announces when it drops."], 5, sunder),
+					name = format(L["Announce %s"], spell_sunder),
+					desc = pformat(L["Announces how long it took to apply %d stacks of %s and announces when it drops."], 5, spell_sunder),
 					descStyle = "inline",
 					order = 10,
 					width = "double"
@@ -284,6 +336,22 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C)
 					name = L["Only for bosses."],
 					desc = L["Enable this only against bosses."],
 					order = 30,
+					width = "double"
+				},
+				empty_2 = {
+					type = "description",
+					name = " ",
+					width = "full",
+					order = 31
+				},
+				sunderdelay = {
+					type = "range",
+					name = L["Refresh"],
+					desc = L["Number of seconds after application to count refreshs."],
+					min = 0,
+					max = 30,
+					step = 1,
+					order = 40,
 					width = "double"
 				}
 			}

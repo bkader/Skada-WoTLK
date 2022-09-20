@@ -534,6 +534,7 @@ L["%s's <%s> sources"] = "%s <%s> Quellen"
 L["Sunder Counter"] = "Sunder Counter"
 L["Sunder target list"] = "Zielliste R\195\188stung zerrei\195\159en"
 L["Sunder source list"] = "Quellenliste R\195\188stung zerrei\195\159en"
+L["Number of seconds after application to count refreshs."] = "Anzahl der Sekunden, die nach der Anwendung gewartet wird, um die Aktualisierungen zu z\195\164hlen."
 -- CC Tracker Module --
 L["Crowd Control"] = "Massenkontrolle"
 L["CC Done"] = "Verursachte Massenkontrolle"

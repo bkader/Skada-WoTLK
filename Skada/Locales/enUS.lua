@@ -573,6 +573,7 @@ L["%s's <%s> sources"] = true
 L["Sunder Counter"] = true
 L["Sunder target list"] = true
 L["Sunder source list"] = true
+L["Number of seconds after application to count refreshs."] = true
 -- CC Tracker Module --
 L["Crowd Control"] = true
 L["CC Done"] = true
