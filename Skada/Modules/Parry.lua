@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Parry-Haste", function(L, P)
+Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Parry-Haste")
 	local targetmod = mod:NewModule("Parry target list")
 	local pairs, format, pformat = pairs, string.format, Skada.pformat
@@ -45,8 +45,8 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 		player.parrytargets = player.parrytargets or {}
 		player.parrytargets[data.dstName] = (player.parrytargets[data.dstName] or 0) + 1
 
-		if P.modules.parryannounce and set ~= Skada.total then
-			Skada:SendChat(format(L["%s parried %s (%s)"], data.dstName, data.playername, player.parrytargets[data.dstName] or 1), P.modules.parrychannel, "preset")
+		if M.parryannounce and set ~= Skada.total then
+			Skada:SendChat(format(L["%s parried %s (%s)"], data.dstName, data.playername, player.parrytargets[data.dstName] or 1), M.parrychannel, "preset")
 		end
 	end
 
@@ -152,9 +152,8 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 	end
 
 	function mod:OnInitialize()
-		if not P.modules.parrychannel then
-			P.modules.parrychannel = "AUTO"
-		end
+		M.parrychannel = M.parrychannel or "AUTO"
+
 		Skada.options.args.modules.args.Parry = {
 			type = "group",
 			name = self.localeName,

@@ -2,7 +2,7 @@ local LibFail = LibStub("LibFail-1.0", true)
 if not LibFail then return end
 
 local Skada = Skada
-Skada:RegisterModule("Fails", function(L, P)
+Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Fails")
 	local playermod = mod:NewModule("Player's failed events")
 	local spellmod = mod:NewModule("Event's failed players")
@@ -234,11 +234,11 @@ Skada:RegisterModule("Fails", function(L, P)
 				LibFail:RegisterCallback(events[i], on_fail)
 			end
 
-			if P.modules.failschannel == nil then
-				P.modules.failschannel = "AUTO"
+			if M.failschannel == nil then
+				M.failschannel = "AUTO"
 			end
-			if P.modules.ignoredfails then
-				P.modules.ignoredfails = nil
+			if M.ignoredfails then
+				M.ignoredfails = nil
 			end
 
 			Skada.options.args.modules.args.failbot = get_options()
@@ -246,8 +246,8 @@ Skada:RegisterModule("Fails", function(L, P)
 	end
 
 	function mod:CombatLeave(_, set)
-		if set and set.fail and set.fail > 0 and P.modules.failsannounce then
-			local channel = P.modules.failschannel or "AUTO"
+		if set and set.fail and set.fail > 0 and M.failsannounce then
+			local channel = M.failschannel or "AUTO"
 			if channel == "SELF" or channel == "GUILD" or IsInGroup() then
 				Skada:Report(channel, "preset", L["Fails"], nil, 10)
 			end

@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Sunder Counter", function(L, P, _, C)
+Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 	local mod = Skada:NewModule("Sunder Counter")
 	local targetmod = mod:NewModule("Sunder target list")
 	local sourcemod = mod:NewModule("Sunder source list")
@@ -49,9 +49,9 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C)
 			local dstName = sunder_targets[dstGUID].name
 			sunder_targets[dstGUID] = del(sunder_targets[dstGUID])
 
-			if not P.modules.sunderannounce then
+			if not M.sunderannounce then
 				return
-			elseif not P.modules.sunderbossonly or (P.modules.sunderbossonly and Skada:IsBoss(dstGUID, true)) then
+			elseif not M.sunderbossonly or (M.sunderbossonly and Skada:IsBoss(dstGUID, true)) then
 				mod:Announce(pformat(L["%s dropped from %s!"], sunder_link or spell_sunder, dstName))
 			end
 		end
@@ -68,10 +68,10 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C)
 
 		-- sunder refreshed
 		if eventtype == "SPELL_AURA_REFRESH" and active_sunders[dstGUID] and active_sunders[dstGUID] > GetTime() then
-			active_sunders[dstGUID] = GetTime() + P.modules.sunderdelay -- useless refresh
+			active_sunders[dstGUID] = GetTime() + M.sunderdelay -- useless refresh
 			return
 		else
-			active_sunders[dstGUID] = GetTime() + P.modules.sunderdelay
+			active_sunders[dstGUID] = GetTime() + M.sunderdelay
 		end
 
 		data.playerid = last_srcGUID
@@ -84,8 +84,8 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C)
 
 		Skada:DispatchSets(log_sunder)
 
-		if not P.modules.sunderannounce then return end -- announce disabled
-		if P.modules.sunderbossonly and not Skada:IsBoss(dstGUID, true) then return end -- only for bosses
+		-- announce disabled or only for bosses
+		if not M.sunderannounce or (M.sunderbossonly and not Skada:IsBoss(dstGUID, true)) then return end
 
 		local t = sunder_targets and sunder_targets[dstGUID]
 		if not t then
@@ -119,7 +119,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C)
 	end
 
 	local function unit_died(_, _, _, _, _, dstGUID)
-		if P.modules.sunderannounce and dstGUID and sunder_targets and sunder_targets[dstGUID] then
+		if M.sunderannounce and dstGUID and sunder_targets and sunder_targets[dstGUID] then
 			sunder_targets[dstGUID] = del(sunder_targets[dstGUID])
 		end
 	end
@@ -286,13 +286,14 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C)
 	end
 
 	function mod:Announce(msg)
-		Skada:SendChat(msg, P.modules.sunderchannel or "SAY", "preset")
+		Skada:SendChat(msg, M.sunderchannel or "SAY", "preset")
 	end
 
 	function mod:OnInitialize()
 		double_check_sunder()
-		P.modules.sunderchannel = P.modules.sunderchannel or "SAY"
-		P.modules.sunderdelay = P.modules.sunderdelay or 20
+
+		M.sunderchannel = M.sunderchannel or "SAY"
+		M.sunderdelay = M.sunderdelay or 20
 
 		Skada.options.args.modules.args.sundercounter = {
 			type = "group",

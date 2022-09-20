@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Threat", function(L, P)
+Skada:RegisterModule("Threat", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Threat")
 
 	local format, max = string.format, math.max
@@ -521,8 +521,8 @@ Skada:RegisterModule("Threat", function(L, P)
 		}
 
 		function mod:OnInitialize()
-			if not P.modules.threat then
-				P.modules.threat = {
+			if not M.threat then
+				M.threat = {
 					sound = true,
 					flash = true,
 					output = 1,
@@ -534,14 +534,12 @@ Skada:RegisterModule("Threat", function(L, P)
 					showAggroBar = true
 				}
 			end
-			if P.modules.threat.sinkOptions then
-				P.modules.threat.sinkOptions = nil
-			end
-			if P.modules.threat.output == nil then
-				P.modules.threat.output = 1
+			if M.threat.sinkOptions then
+				M.threat.sinkOptions = nil
 			end
 
-			self.db = P.modules.threat
+			M.threat.output = M.threat.output or 1
+			self.db = M.threat
 			Skada.options.args.modules.args.threat = opts
 		end
 	end
@@ -581,7 +579,7 @@ Skada:RegisterModule("Threat", function(L, P)
 	end
 
 	function mod:ApplySettings()
-		self.db = self.db or P.modules.threat
+		self.db = self.db or M.threat
 		if self.db.focustarget then
 			Skada.RegisterEvent(self, "UNIT_TARGET")
 		else

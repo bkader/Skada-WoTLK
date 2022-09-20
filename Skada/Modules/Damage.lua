@@ -1566,5 +1566,4 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 
 		return total, tbl
 	end
-
 end, "Damage")

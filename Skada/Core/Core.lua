@@ -3442,7 +3442,7 @@ function Skada:OnEnable()
 		for i = 1, #self.LoadableModules do
 			local mod = self.LoadableModules[i]
 			if mod.name and mod.func and not self:IsDisabled(mod.name) and not (mod.deps and self:IsDisabled(unpack(mod.deps))) then
-				mod.func(L, self.db.profile, self.db.global, self.cacheTable)
+				mod.func(L, self.db.profile, self.db.global, self.cacheTable, self.db.profile.modules)
 			end
 		end
 		self.LoadableModules = del(self.LoadableModules, true)

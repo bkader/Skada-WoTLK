@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Interrupts", function(L, P, _, C)
+Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 	local mod = Skada:NewModule("Interrupts")
 	local spellmod = mod:NewModule("Interrupted spells")
 	local targetmod = mod:NewModule("Interrupted targets")
@@ -83,13 +83,13 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C)
 
 		Skada:DispatchSets(log_interrupt)
 
-		if not P.modules.interruptannounce or srcGUID ~= Skada.userGUID then return end
+		if not M.interruptannounce or srcGUID ~= Skada.userGUID then return end
 
 		local spelllink = extraspellname or dstName
 		if P.reportlinks then
 			spelllink = GetSpellLink(extraspellid or extraspellname) or spelllink
 		end
-		Skada:SendChat(format(L["%s interrupted!"], spelllink), P.modules.interruptchannel or "SAY", "preset")
+		Skada:SendChat(format(L["%s interrupted!"], spelllink), M.interruptchannel or "SAY", "preset")
 	end
 
 	function spellmod:Enter(win, id, label)
@@ -254,9 +254,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C)
 	end
 
 	function mod:OnInitialize()
-		if not P.modules.interruptchannel then
-			P.modules.interruptchannel = "SAY"
-		end
+		M.interruptchannel = M.interruptchannel or  "SAY"
 
 		Skada.options.args.modules.args.interrupts = {
 			type = "group",

@@ -734,7 +734,7 @@ end)
 -- =========== --
 -- CC Breakers --
 -- =========== --
-Skada:RegisterModule("CC Breaks", function(L, P, _, C)
+Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 	local mod = Skada:NewModule("CC Breaks")
 	local playermod = mod:NewModule("Crowd Control Spells")
 	local targetmod = mod:NewModule("Crowd Control Targets")
@@ -792,11 +792,11 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C)
 
 		-- Optional announce
 		srcName = srcName_modified or srcName
-		if P.modules.ccannounce and IsInRaid() and UnitInRaid(srcName) then
+		if M.ccannounce and IsInRaid() and UnitInRaid(srcName) then
 			if Skada.insType == "pvp" then return end
 
 			-- Ignore main tanks and main assist?
-			if P.modules.ccignoremaintanks then
+			if M.ccignoremaintanks then
 				-- Loop through our raid and return if src is a main tank.
 				for unit in UnitIterator(true) do -- exclude pets
 					if UnitName(unit) == srcName and (GetPartyAssignment("MAINTANK", unit) or GetPartyAssignment("MAINASSIST", unit)) then

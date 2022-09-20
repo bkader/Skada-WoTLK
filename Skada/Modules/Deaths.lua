@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Deaths", function(L, P)
+Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Deaths")
 	local playermod = mod:NewModule("Player's deaths")
 	local deathlogmod = mod:NewModule("Death log")
@@ -110,7 +110,7 @@ Skada:RegisterModule("Deaths", function(L, P)
 		tinsert(deathlog.log, 1, log)
 
 		-- trim things and limit to deathlogevents (defaul: 14)
-		while #deathlog.log > (P.modules.deathlogevents or 14) do
+		while #deathlog.log > (M.deathlogevents or 14) do
 			del(tremove(deathlog.log))
 		end
 	end
@@ -204,7 +204,7 @@ Skada:RegisterModule("Deaths", function(L, P)
 	end
 
 	local function spell_heal(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, _, amount, overheal)
-		if spellid and amount > (P.modules.deathlogthreshold or 0) then
+		if spellid and amount > (M.deathlogthreshold or 0) then
 			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 			dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName, dstFlags)
 
@@ -269,7 +269,7 @@ Skada:RegisterModule("Deaths", function(L, P)
 		end
 
 		-- announce death
-		if P.modules.deathannounce and set ~= Skada.total then
+		if M.deathannounce and set ~= Skada.total then
 			mod:Announce(deathlog.log, player.name)
 		end
 	end
@@ -364,7 +364,7 @@ Skada:RegisterModule("Deaths", function(L, P)
 	end
 
 	function deathlogmod:Enter(win, id, label)
-		if P.modules.alternativedeaths then
+		if M.alternativedeaths then
 			win.actorid, win.datakey = strmatch(id, "(%w+)::(%d+)")
 			win.datakey = tonumber(win.datakey or 0)
 			win.actorname = label
@@ -387,7 +387,7 @@ Skada:RegisterModule("Deaths", function(L, P)
 			local deathlog = player and player.deathlog and player.deathlog[win.datakey]
 			if not deathlog then return end
 
-			if P.modules.alternativedeaths then
+			if M.alternativedeaths then
 				local num = #player.deathlog
 				if win.datakey ~= num then
 					win.title = format("%s (%d)", win.title, num - win.datakey + 1)
@@ -697,7 +697,7 @@ Skada:RegisterModule("Deaths", function(L, P)
 	end
 
 	function mod:Update(win, set)
-		if P.modules.alternativedeaths and (set ~= Skada.total or P.totalidc) then
+		if M.alternativedeaths and (set ~= Skada.total or P.totalidc) then
 			alt_update(self, win, set)
 		else
 			mod_update(self, win, set)
@@ -778,7 +778,7 @@ Skada:RegisterModule("Deaths", function(L, P)
 		}
 
 		-- alternative display
-		if P.modules.alternativedeaths then
+		if M.alternativedeaths then
 			playermod.metadata.click1 = nil
 			self.metadata.click1 = deathlogmod
 		end
@@ -899,7 +899,7 @@ Skada:RegisterModule("Deaths", function(L, P)
 		-- 	3. player is in a group or channel set to self or guild.
 		if not logs or IsInPvP() then return end
 
-		local channel = P.modules.deathchannel
+		local channel = M.deathchannel
 		if channel ~= "SELF" and channel ~= "GUILD" and not IsInGroup() then return end
 
 		local log = nil
@@ -1025,7 +1025,7 @@ Skada:RegisterModule("Deaths", function(L, P)
 									values = {AUTO = INSTANCE, SELF = L["Self"], GUILD = GUILD},
 									order = 30,
 									disabled = function()
-										return not P.modules.deathannounce
+										return not M.deathannounce
 									end
 								}
 							}
@@ -1035,13 +1035,13 @@ Skada:RegisterModule("Deaths", function(L, P)
 							name = L["Alternative Display"],
 							desc = L["If a player dies multiple times, each death will be displayed as a separate bar."],
 							set = function(_, value)
-								if P.modules.alternativedeaths then
-									P.modules.alternativedeaths = nil
+								if M.alternativedeaths then
+									M.alternativedeaths = nil
 									mod.Update = mod_update
 									mod.metadata.click1 = playermod
 									playermod.metadata.click1 = deathlogmod
 								else
-									P.modules.alternativedeaths = true
+									M.alternativedeaths = true
 									mod.Update = alt_update
 									mod.metadata.click1 = deathlogmod
 									playermod.metadata.click1 = nil
@@ -1061,14 +1061,14 @@ Skada:RegisterModule("Deaths", function(L, P)
 		end
 
 		function mod:OnInitialize()
-			if P.modules.deathlogevents == nil then
-				P.modules.deathlogevents = 14
+			if M.deathlogevents == nil then
+				M.deathlogevents = 14
 			end
-			if P.modules.deathlogthreshold == nil then
-				P.modules.deathlogthreshold = 1000 -- default
+			if M.deathlogthreshold == nil then
+				M.deathlogthreshold = 1000 -- default
 			end
-			if P.modules.deathchannel == nil then
-				P.modules.deathchannel = "AUTO"
+			if M.deathchannel == nil then
+				M.deathchannel = "AUTO"
 			end
 
 			Skada.options.args.modules.args.deathlog = get_options()
