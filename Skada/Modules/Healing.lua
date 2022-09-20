@@ -340,7 +340,7 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Healing"], L[win.class]) or L["Healing"]
 
-		local total = set and set:GetHeal()
+		local total = set and set:GetHeal(win.class)
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -384,6 +384,15 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 				end
 			end
 		end
+	end
+
+	function mod:GetSetSummary(set, win)
+		local hps, amount = set:GetHPS(win and win.class)
+		local valuetext = Skada:FormatValueCols(
+			self.metadata.columns.Healing and Skada:FormatNumber(amount),
+			self.metadata.columns.HPS and Skada:FormatNumber(hps)
+		)
+		return valuetext, amount
 	end
 
 	function mod:OnEnable()
@@ -437,15 +446,6 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 	function mod:OnDisable()
 		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
-	end
-
-	function mod:GetSetSummary(set)
-		local hps, amount = set:GetHPS()
-		local valuetext = Skada:FormatValueCols(
-			self.metadata.columns.Healing and Skada:FormatNumber(amount),
-			self.metadata.columns.HPS and Skada:FormatNumber(hps)
-		)
-		return valuetext, amount
 	end
 
 	function mod:CombatLeave()
@@ -629,6 +629,15 @@ Skada:RegisterModule("Overhealing", function(L)
 		end
 	end
 
+	function mod:GetSetSummary(set, win)
+		local ohps, overheal = set:GetOHPS(win and win.class)
+		local valuetext = Skada:FormatValueCols(
+			self.metadata.columns.Overhealing and Skada:FormatNumber(overheal),
+			self.metadata.columns.HPS and Skada:FormatNumber(ohps)
+		)
+		return valuetext, overheal
+	end
+
 	function mod:OnEnable()
 		targetmod.metadata = {click1 = spellmod}
 		self.metadata = {
@@ -650,15 +659,6 @@ Skada:RegisterModule("Overhealing", function(L)
 
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
-	end
-
-	function mod:GetSetSummary(set)
-		local ohps, overheal = set:GetOHPS()
-		local valuetext = Skada:FormatValueCols(
-			self.metadata.columns.Overhealing and Skada:FormatNumber(overheal),
-			self.metadata.columns.HPS and Skada:FormatNumber(ohps)
-		)
-		return valuetext, overheal
 	end
 end, "Healing")
 
@@ -837,7 +837,7 @@ Skada:RegisterModule("Total Healing", function(L)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Total Healing"], L[win.class]) or L["Total Healing"]
 
-		local total = set and set:GetTotalHeal()
+		local total = set and set:GetTotalHeal(win.class)
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -883,6 +883,15 @@ Skada:RegisterModule("Total Healing", function(L)
 		end
 	end
 
+	function mod:GetSetSummary(set, win)
+		local ops, amount = set:GetTHPS(win and win.class)
+		local valuetext = Skada:FormatValueCols(
+			self.metadata.columns.Healing and Skada:FormatNumber(amount),
+			self.metadata.columns.HPS and Skada:FormatNumber(ops)
+		)
+		return valuetext, amount
+	end
+
 	function mod:OnEnable()
 		targetmod.metadata = {showspots = true, click1 = spellmod}
 		playermod.metadata = {tooltip = spell_tooltip}
@@ -905,15 +914,6 @@ Skada:RegisterModule("Total Healing", function(L)
 
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
-	end
-
-	function mod:GetSetSummary(set)
-		local ops, amount = set:GetTHPS()
-		local valuetext = Skada:FormatValueCols(
-			self.metadata.columns.Healing and Skada:FormatNumber(amount),
-			self.metadata.columns.HPS and Skada:FormatNumber(ops)
-		)
-		return valuetext, amount
 	end
 end, "Healing")
 
@@ -974,11 +974,10 @@ Skada:RegisterModule("Healing Taken", function(L, P, _, _, new, _, clear)
 		win.title = pformat(L["%s's received healing"], win.actorname)
 		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		if enemy then return end -- unavailable for enemies yet
+		local actor, enemy = set:GetActor(win.actorname, win.actorid, true)
+		if not actor or enemy then return end -- unavailable for enemies
 
 		local sources, total = get_healing_taken_sources(actor)
-
 		if not sources or total == 0 then
 			return
 		elseif win.metadata then
@@ -1094,24 +1093,15 @@ Skada:RegisterModule("Healing Taken", function(L, P, _, _, new, _, clear)
 		Skada:RemoveMode(self)
 	end
 
-	function mod:GetSetSummary(set)
-		local settime = set:GetTime()
-		local hps, value = set:GetAHPS()
-		local valuetext = Skada:FormatValueCols(
-			self.metadata.columns.Healing and Skada:FormatNumber(value),
-			self.metadata.columns.HPS and Skada:FormatNumber(value / settime)
-		)
-		return valuetext, value
-	end
-
 	---------------------------------------------------------------------------
 
 	get_healing_taken_list = function(self, tbl)
 		if not self.heal and not self.absorb then return end
 
 		tbl = clear(tbl or C)
+		local is_arena = (Skada.forPVP and self.type == "arena" and self.eheal)
 
-		local actors = self.players -- healed by players.
+		local actors = self.players -- players
 		for i = 1, #actors do
 			local spells = actors[i] and actors[i].absorbspells -- absorb spells
 			if spells then
@@ -1162,11 +1152,11 @@ Skada:RegisterModule("Healing Taken", function(L, P, _, _, new, _, clear)
 			end
 		end
 
-		if not self.enemies or not self.eheal then
+		actors = is_arena and self.enemies or nil
+		if not actors then
 			return tbl
 		end
 
-		actors = self.enemies -- healed by enemies.
 		for i = 1, #actors do
 			local spells = actors[i] and actors[i].healspells -- heal spells
 			if spells then
@@ -1195,7 +1185,7 @@ Skada:RegisterModule("Healing Taken", function(L, P, _, _, new, _, clear)
 	end
 
 	get_healing_taken_sources = function(self, tbl)
-		local set = self.super
+		local set = self and self.super
 		if not set then
 			return nil, 0
 		end

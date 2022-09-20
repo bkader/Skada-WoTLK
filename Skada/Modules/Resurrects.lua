@@ -170,6 +170,11 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 		end
 	end
 
+	function mod:GetSetSummary(set)
+		local ress = set.ress or 0
+		return tostring(ress), ress
+	end
+
 	function mod:OnEnable()
 		self.metadata = {
 			valuesort = true,
@@ -197,11 +202,6 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 		if set.ress and set.ress > 0 then
 			tooltip:AddDoubleLine(L["Resurrects"], set.ress, 1, 1, 1)
 		end
-	end
-
-	function mod:GetSetSummary(set)
-		local ress = set.ress or 0
-		return tostring(ress), ress
 	end
 
 	---------------------------------------------------------------------------

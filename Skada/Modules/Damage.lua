@@ -645,7 +645,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Damage"], L[win.class]) or L["Damage"]
 
-		local total = set and set:GetDamage()
+		local total = set and set:GetDamage(nil, win.class)
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -689,6 +689,22 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 				end
 			end
 		end
+	end
+
+	function mod:GetSetSummary(set, win)
+		local dps, amount = set:GetDPS(nil, win and win.class)
+		local valuetext = Skada:FormatValueCols(
+			self.metadata.columns.Damage and Skada:FormatNumber(amount),
+			self.metadata.columns.DPS and Skada:FormatNumber(dps)
+		)
+		return valuetext, amount
+	end
+
+	function mod:AddToTooltip(set, tooltip)
+		if not set then return end
+		local dps, amount = set:GetDPS()
+		tooltip:AddDoubleLine(L["Damage"], Skada:FormatNumber(amount), 1, 1, 1)
+		tooltip:AddDoubleLine(L["DPS"], Skada:FormatNumber(dps), 1, 1, 1)
 	end
 
 	local function feed_personal_dps()
@@ -777,22 +793,6 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 		Skada:RemoveMode(self)
 	end
 
-	function mod:AddToTooltip(set, tooltip)
-		if not set then return end
-		local dps, amount = set:GetDPS()
-		tooltip:AddDoubleLine(L["Damage"], Skada:FormatNumber(amount), 1, 1, 1)
-		tooltip:AddDoubleLine(L["DPS"], Skada:FormatNumber(dps), 1, 1, 1)
-	end
-
-	function mod:GetSetSummary(set)
-		local dps, amount = set:GetDPS()
-		local valuetext = Skada:FormatValueCols(
-			self.metadata.columns.Damage and Skada:FormatNumber(amount),
-			self.metadata.columns.DPS and Skada:FormatNumber(dps)
-		)
-		return valuetext, amount
-	end
-
 	function mod:CombatLeave()
 		T.clear(dmg)
 		T.free("Damage_ExtraAttacks", extraATT, nil, del)
@@ -872,7 +872,7 @@ Skada:RegisterModule("DPS", function(L, P)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["DPS"], L[win.class]) or L["DPS"]
 
-		local total = set and set:GetDPS()
+		local total = set and set:GetDPS(nil, win.class)
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -918,6 +918,11 @@ Skada:RegisterModule("DPS", function(L, P)
 		end
 	end
 
+	function mod:GetSetSummary(set, win)
+		local dps = set:GetDPS(nil, win and win.class)
+		return Skada:FormatNumber(dps), dps
+	end
+
 	function mod:OnEnable()
 		self.metadata = {
 			showspots = true,
@@ -939,11 +944,6 @@ Skada:RegisterModule("DPS", function(L, P)
 
 	function mod:OnDisable()
 		Skada:RemoveMode(self, L["Damage Done"])
-	end
-
-	function mod:GetSetSummary(set)
-		local dps = set:GetDPS()
-		return Skada:FormatNumber(dps), dps
 	end
 end, "Damage")
 
@@ -1233,7 +1233,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Useful Damage"], L[win.class]) or L["Useful Damage"]
 
-		local total = set and set:GetDamage(true)
+		local total = set and set:GetDamage(true, win.class)
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -1279,6 +1279,16 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 		end
 	end
 
+	function mod:GetSetSummary(set, win)
+		if not set then return end
+		local dps, amount = set:GetDPS(true, win and win.class)
+		local valuetext = Skada:FormatValueCols(
+			self.metadata.columns.Damage and Skada:FormatNumber(amount),
+			self.metadata.columns.DPS and Skada:FormatNumber(dps)
+		)
+		return valuetext, amount
+	end
+
 	function mod:OnEnable()
 		detailmod.metadata = {showspots = true}
 		targetmod.metadata = {click1 = detailmod}
@@ -1301,16 +1311,6 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
-	end
-
-	function mod:GetSetSummary(set)
-		if not set then return end
-		local dps, amount = set:GetDPS(true)
-		local valuetext = Skada:FormatValueCols(
-			self.metadata.columns.Damage and Skada:FormatNumber(amount),
-			self.metadata.columns.DPS and Skada:FormatNumber(dps)
-		)
-		return valuetext, amount
 	end
 end, "Damage")
 
@@ -1470,7 +1470,7 @@ Skada:RegisterModule("Overkill", function(L, _, _, C, new, del, clear)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Overkill"], L[win.class]) or L["Overkill"]
 
-		local total = set and set:GetOverkill()
+		local total = set and set:GetOverkill(win.class)
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -1510,6 +1510,11 @@ Skada:RegisterModule("Overkill", function(L, _, _, C, new, del, clear)
 		end
 	end
 
+	function mod:GetSetSummary(set, win)
+		local overkill = set:GetOverkill(win and win.class)
+		return Skada:FormatNumber(overkill), overkill
+	end
+
 	function mod:OnEnable()
 		targetmod.metadata = {click1 = targetspellmod}
 		spellmod.metadata = {click1 = spelltargetmod}
@@ -1532,11 +1537,6 @@ Skada:RegisterModule("Overkill", function(L, _, _, C, new, del, clear)
 
 	function mod:OnDisable()
 		Skada:RemoveMode(self, L["Damage Done"])
-	end
-
-	function mod:GetSetSummary(set)
-		local overkill = set:GetOverkill()
-		return Skada:FormatNumber(overkill), overkill
 	end
 
 	---------------------------------------------------------------------------

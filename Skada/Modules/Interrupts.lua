@@ -185,10 +185,26 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 		end
 	end
 
+	local function get_total_interrupts(set, class)
+		if not set then return end
+
+		local total = set.interrupt or 0
+		if class and Skada.validclass[class] then
+			total = 0
+			for i = 1, #set.players do
+				local p = set.players[i]
+				if p and p.class == class and p.interrupt then
+					total = total + p.interrupt
+				end
+			end
+		end
+		return total
+	end
+
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Interrupts"], L[win.class]) or L["Interrupts"]
 
-		local total = set and set.interrupt
+		local total = get_total_interrupts(set, win.class)
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -209,6 +225,11 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 				format_valuetext(d, cols, total, win.metadata)
 			end
 		end
+	end
+
+	function mod:GetSetSummary(set, win)
+		local interrupts = get_total_interrupts(set, win and win.class) or 0
+		return tostring(interrupts), interrupts
 	end
 
 	function mod:OnEnable()
@@ -246,11 +267,6 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 		if set.interrupt and set.interrupt > 0 then
 			tooltip:AddDoubleLine(L["Interrupts"], set.interrupt, 1, 1, 1)
 		end
-	end
-
-	function mod:GetSetSummary(set)
-		local interrupts = set.interrupt or 0
-		return tostring(interrupts), interrupts
 	end
 
 	function mod:OnInitialize()

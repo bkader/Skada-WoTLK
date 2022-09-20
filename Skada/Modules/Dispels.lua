@@ -168,10 +168,26 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 		end
 	end
 
+	local function get_total_dispels(set, class)
+		if not set then return end
+
+		local total = set.dispel or 0
+		if class and Skada.validclass[class] then
+			total = 0
+			for i = 1, #set.players do
+				local p = set.players[i]
+				if p and p.class == class and p.dispel then
+					total = total + p.dispel
+				end
+			end
+		end
+		return total
+	end
+
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Dispels"], L[win.class]) or L["Dispels"]
 
-		local total = set and set.dispel
+		local total = get_total_dispels(set, win.class)
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -191,6 +207,17 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 				d.value = actor.dispel
 				format_valuetext(d, cols, total, win.metadata)
 			end
+		end
+	end
+
+	function mod:GetSetSummary(set, win)
+		local dispels = get_total_dispels(set, win and win.class)
+		return tostring(dispels), dispels
+	end
+
+	function mod:AddToTooltip(set, tooltip)
+		if set.dispel and set.dispel > 0 then
+			tooltip:AddDoubleLine(L["Dispels"], set.dispel, 1, 1, 1)
 		end
 	end
 
@@ -224,17 +251,6 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
-	end
-
-	function mod:AddToTooltip(set, tooltip)
-		if set.dispel and set.dispel > 0 then
-			tooltip:AddDoubleLine(L["Dispels"], set.dispel, 1, 1, 1)
-		end
-	end
-
-	function mod:GetSetSummary(set)
-		local dispels = set.dispel or 0
-		return tostring(dispels), dispels
 	end
 
 	---------------------------------------------------------------------------

@@ -92,10 +92,26 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 		end
 	end
 
+	local function get_total_parry(set, class)
+		if not set then return end
+
+		local total = set.parry or 0
+		if class and Skada.validclass[class] then
+			total = 0
+			for i = 1, #set.players do
+				local p = set.players[i]
+				if p and p.class == class and p.parry then
+					total = total + p.parry
+				end
+			end
+		end
+		return total
+	end
+
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Parry-Haste"], L[win.class]) or L["Parry-Haste"]
 
-		local total = set and set.parry
+		local total = get_total_parry(set, win.class)
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -116,6 +132,11 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 				format_valuetext(d, cols, total, win.metadata)
 			end
 		end
+	end
+
+	function mod:GetSetSummary(set, win)
+		local parries = get_total_parry(set, win and win.class) or 0
+		return tostring(parries), parries
 	end
 
 	function mod:OnEnable()
@@ -144,11 +165,6 @@ Skada:RegisterModule("Parry-Haste", function(L, P)
 
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
-	end
-
-	function mod:GetSetSummary(set)
-		local parries = set.parry or 0
-		return tostring(parries), parries
 	end
 
 	function mod:OnInitialize()

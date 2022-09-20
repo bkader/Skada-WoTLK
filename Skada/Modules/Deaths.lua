@@ -703,6 +703,33 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		end
 	end
 
+	local function get_total_deaths(set, class)
+		if not set then return end
+
+		local total = set.death or 0
+		if class and Skada.validclass[class] then
+			total = 0
+			for i = 1, #set.players do
+				local p = set.players[i]
+				if p and p.class == class and p.death then
+					total = total + p.death
+				end
+			end
+		end
+		return total
+	end
+
+	function mod:GetSetSummary(set, win)
+		local deaths = get_total_deaths(set, win and win.class) or 0
+		return tostring(deaths), set and set.last_time or GetTime()
+	end
+
+	function mod:AddToTooltip(set, tooltip)
+		if set.death and set.death > 0 then
+			tooltip:AddDoubleLine(DEATHS, set.death, 1, 1, 1)
+		end
+	end
+
 	local function entry_tooltip(win, id, label, tooltip)
 		local entry = win.dataset[id]
 		if not entry or not entry.spellname then return end
@@ -877,17 +904,6 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 				end
 			end
 		end
-	end
-
-	function mod:AddToTooltip(set, tooltip)
-		if set.death and set.death > 0 then
-			tooltip:AddDoubleLine(DEATHS, set.death, 1, 1, 1)
-		end
-	end
-
-	function mod:GetSetSummary(set)
-		local deaths = set and set.death or 0
-		return tostring(deaths), set and set.last_time or GetTime()
 	end
 
 	function mod:Announce(logs, playername)

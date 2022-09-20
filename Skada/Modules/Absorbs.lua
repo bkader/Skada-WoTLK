@@ -934,7 +934,7 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Absorbs"], L[win.class]) or L["Absorbs"]
 
-		local total = set and set:GetAbsorb()
+		local total = set and set:GetAbsorb(win.class)
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -978,6 +978,15 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 				end
 			end
 		end
+	end
+
+	function mod:GetSetSummary(set, win)
+		local aps, amount = set:GetAPS(win and win.class)
+		local valuetext = Skada:FormatValueCols(
+			self.metadata.columns.Absorbs and Skada:FormatNumber(amount),
+			self.metadata.columns.APS and Skada:FormatNumber(aps)
+		)
+		return valuetext, amount
 	end
 
 	do
@@ -1122,15 +1131,6 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 	function mod:OnDisable()
 		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
-	end
-
-	function mod:GetSetSummary(set)
-		local aps, amount = set:GetAPS()
-		local valuetext = Skada:FormatValueCols(
-			self.metadata.columns.Absorbs and Skada:FormatNumber(amount),
-			self.metadata.columns.APS and Skada:FormatNumber(aps)
-		)
-		return valuetext, amount
 	end
 
 	function mod:ZoneModifier()
@@ -1410,9 +1410,8 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Absorbs and Healing"], L[win.class]) or L["Absorbs and Healing"]
 
-		local total = set and set:GetAbsorbHeal() or 0
-
-		if total == 0 then
+		local total = set and set:GetAbsorbHeal(win.class)
+		if not total or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
@@ -1454,6 +1453,28 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 					format_valuetext(d, cols, total, hps, win.metadata)
 				end
 			end
+		end
+	end
+
+	function mod:GetSetSummary(set, win)
+		if not set then return end
+		local hps, amount = set:GetAHPS(win and win.class)
+		return Skada:FormatValueCols(
+			self.metadata.columns.Healing and Skada:FormatNumber(amount),
+			self.metadata.columns.HPS and Skada:FormatNumber(hps)
+		), amount
+	end
+
+	function mod:AddToTooltip(set, tooltip)
+		if not set then return end
+		local hps, amount = set:GetAHPS()
+		if amount > 0 then
+			tooltip:AddDoubleLine(L["Healing"], Skada:FormatNumber(amount), 1, 1, 1)
+			tooltip:AddDoubleLine(L["HPS"], Skada:FormatNumber(hps), 1, 1, 1)
+		end
+		if set.overheal and set.overheal > 0 then
+			amount = amount + set.overheal
+			tooltip:AddDoubleLine(L["Overheal"], Skada:FormatPercent(set.overheal, amount), 1, 1, 1)
 		end
 	end
 
@@ -1499,28 +1520,6 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		Skada:RemoveFeed(L["Healing: Raid HPS"])
 		Skada:RemoveMode(self)
 	end
-
-	function mod:AddToTooltip(set, tooltip)
-		if not set then return end
-		local hps, amount = set:GetAHPS()
-		if amount > 0 then
-			tooltip:AddDoubleLine(L["Healing"], Skada:FormatNumber(amount), 1, 1, 1)
-			tooltip:AddDoubleLine(L["HPS"], Skada:FormatNumber(hps), 1, 1, 1)
-		end
-		if set.overheal and set.overheal > 0 then
-			amount = amount + set.overheal
-			tooltip:AddDoubleLine(L["Overheal"], Skada:FormatPercent(set.overheal, amount), 1, 1, 1)
-		end
-	end
-
-	function mod:GetSetSummary(set)
-		if not set then return end
-		local hps, amount = set:GetAHPS()
-		return Skada:FormatValueCols(
-			self.metadata.columns.Healing and Skada:FormatNumber(amount),
-			self.metadata.columns.HPS and Skada:FormatNumber(hps)
-		), amount
-	end
 end, "Absorbs", "Healing")
 
 -- ============================== --
@@ -1564,8 +1563,7 @@ Skada:RegisterModule("HPS", function(L, P)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["HPS"], L[win.class]) or L["HPS"]
 
-		local total = set and set:GetAHPS()
-
+		local total = set and set:GetAHPS(win.class)
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -1611,6 +1609,11 @@ Skada:RegisterModule("HPS", function(L, P)
 		end
 	end
 
+	function mod:GetSetSummary(set, win)
+		local value =  set:GetAHPS(win and win.class)
+		return Skada:FormatNumber(value), value
+	end
+
 	function mod:OnEnable()
 		self.metadata = {
 			showspots = true,
@@ -1632,10 +1635,6 @@ Skada:RegisterModule("HPS", function(L, P)
 
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
-	end
-
-	function mod:GetSetSummary(set)
-		return Skada:FormatNumber(set and set:GetAHPS() or 0)
 	end
 end, "Absorbs", "Healing", "Absorbs and Healing")
 

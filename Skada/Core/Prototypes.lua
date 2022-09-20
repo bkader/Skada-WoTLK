@@ -85,8 +85,8 @@ function setPrototype:GetEnemy(name, id)
 end
 
 -- attempts to find an actor (player or enemy)
-function setPrototype:GetActor(name, id)
-	return Skada:FindActor(self, id, name)
+function setPrototype:GetActor(name, id, no_strict)
+	return Skada:FindActor(self, id, name, no_strict)
 end
 
 -- returns the actor's time
@@ -120,23 +120,43 @@ end
 -- ------------------------------------
 
 -- returns the set's damage amount
-function setPrototype:GetDamage(useful)
-	local total = 0
+function setPrototype:GetDamage(useful, class)
+	local inc_absorbed = Skada.db.profile.absdamage
+	local is_arena = (Skada.forPVP and self.type == "arena")
 
-	-- players
-	if Skada.db.profile.absdamage and self.totaldamage then
-		total = self.totaldamage
-	elseif self.damage then
-		total = self.damage
-	end
+	local total = inc_absorbed and self.totaldamage or self.damage or 0
+	if class and Skada.validclass[class] then
+		total = 0
 
-	if useful and self.overkill then
-		total = max(0, total - self.overkill)
-	end
+		local actors = self.players -- players
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and actor.class == class and inc_absorbed and actor.totaldamage then
+				total = total + actor.totaldamage
+			elseif actor and actor.class == class and actor.damage then
+				total = total + actor.damage
+			end
+			if useful and actor.overkill then
+				total = max(0, total - actor.overkill)
+			end
+		end
 
-	-- arena damage
-	if Skada.forPVP and self.type == "arena" then
-		if Skada.db.profile.absdamage and self.etotaldamage then
+		actors = is_arena and self.enemies or nil -- arena enemies
+		if actors then
+			for i = 1, #actors do
+				local actor = actors[i]
+				if actor and actor.class == class and inc_absorbed and actor.totaldamage then
+					total = total + actor.totaldamage
+				elseif actor and actor.class == class and actor.damage then
+					total = total + actor.damage
+				end
+				if useful and actor.overkill then
+					total = max(0, total - actor.overkill)
+				end
+			end
+		end
+	elseif is_arena then
+		if inc_absorbed and self.etotaldamage then
 			total = total + self.etotaldamage
 		elseif self.edamage then
 			total = total + self.edamage
@@ -145,14 +165,16 @@ function setPrototype:GetDamage(useful)
 		if useful and self.eoverkill then
 			total = max(0, total - self.eoverkill)
 		end
+	elseif useful and self.overkill then
+		total = max(0, total - self.overkill)
 	end
 
 	return total
 end
 
 -- returns set's dps and damage amount
-function setPrototype:GetDPS(useful)
-	local total = self:GetDamage(useful)
+function setPrototype:GetDPS(useful, class)
+	local total = self:GetDamage(useful, class)
 	if total == 0 then
 		return 0, total
 	end
@@ -161,10 +183,31 @@ function setPrototype:GetDPS(useful)
 end
 
 -- returns the set's overkill
-function setPrototype:GetOverkill()
-	local total = self.overkill or 0
+function setPrototype:GetOverkill(class)
+	local is_arena = (Skada.forPVP and self.type == "arena")
 
-	if Skada.forPVP and self.type == "arena" and self.eoverkill then
+	local total = self.overkill or 0
+	if class and Skada.validclass[class] then
+		total = 0
+
+		local actors = self.players -- players
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and actor.class == class and actor.overkill then
+				total = total + actor.overkill
+			end
+		end
+
+		actors = is_arena and self.enemies or nil -- arena enemies
+		if actors then
+			for i = 1, #actors do
+				local actor = actors[i]
+				if actor and actor.class == class and actor.overkill then
+					total = total + actor.overkill
+				end
+			end
+		end
+	elseif is_arena and self.eoverkill then
 		total = total + self.eoverkill
 	end
 
@@ -216,33 +259,51 @@ end
 -- ------------------------------------
 
 -- returns the set's damage taken amount
-function setPrototype:GetDamageTaken()
-	local total = 0
+function setPrototype:GetDamageTaken(class)
+	local inc_absorbed = Skada.db.profile.absdamage
+	local is_arena = (Skada.forPVP and self.type == "arena")
 
-	-- players
-	if Skada.db.profile.absdamage and (self.totaldamaged or self.totaldamagetaken) then
-		total = self.totaldamaged or self.totaldamagetaken
-	elseif self.damaged or self.damagetaken then
-		total = self.damaged or self.damagetaken
+	local total = self.damaged or self.damagetaken
+	if inc_absorbed then
+		total = self.totaldamaged or self.totaldamagetaken or total
 	end
 
-	if not Skada.forPVP or self.type ~= "arena" then
-		return total
-	end
+	if class and Skada.validclass[class] then
+		total = 0
 
-	-- arena damage
-	if Skada.db.profile.absdamage and self.etotaldamage then
-		total = total + self.etotaldamage
-	elseif self.edamage then
-		total = total + self.edamage
+		local actors = self.players -- players
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and actor.class == class and inc_absorbed and (actor.totaldamaged or actor.totaldamagetaken) then
+				total = total + (actor.totaldamaged or actor.totaldamagetaken)
+			elseif actor and actor.class == class and (actor.damaged or actor.damagetaken) then
+				total = total + (actor.damaged or actor.damagetaken)
+			end
+		end
+
+		actors = is_arena and self.enemies or nil -- arena enemies
+		if actors then
+			for i = 1, #actors do
+				local actor = actors[i]
+				if actor and actor.class == class and inc_absorbed and (actor.totaldamaged or actor.totaldamagetaken) then
+					total = total + (actor.totaldamaged or actor.totaldamagetaken)
+				elseif actor and actor.class == class and (actor.damaged or actor.damagetaken) then
+					total = total + (actor.damaged or actor.damagetaken)
+				end
+			end
+		end
+	elseif is_arena and inc_absorbed and self.etotaldamaged then
+		total = total + self.etotaldamaged
+	elseif is_arena and self.edamaged then
+		total = total + self.edamaged
 	end
 
 	return total
 end
 
 -- returns the set's dtps and damage taken amount
-function setPrototype:GetDTPS()
-	local total = self:GetDamageTaken()
+function setPrototype:GetDTPS(class)
+	local total = self:GetDamageTaken(class)
 	if total == 0 then
 		return 0, total
 	end
@@ -257,10 +318,10 @@ function setPrototype:GetActorDamageTaken(id, name)
 end
 
 -- returns the actor's dtps and damage taken amount
-function setPrototype:GetActorDTPS(id, name, active)
+function setPrototype:GetActorDTPS(id, name)
 	local actor = self:GetActor(name, id)
 	if actor then
-		return actor:GetDTPS(active)
+		return actor:GetDTPS()
 	end
 	return 0, 0
 end
@@ -295,11 +356,30 @@ end
 -- ------------------------------------
 
 -- returns the set's heal amount
-function setPrototype:GetHeal()
-	local total = self.heal or 0
+function setPrototype:GetHeal(class)
+	local is_arena = (Skada.forPVP and self.type == "arena" and self.eheal)
 
-	-- include enemies healing in arena
-	if Skada.forPVP and self.type == "arena" and self.eheal then
+	local total = self.heal or 0
+	if class and Skada.validclass[class] then
+		total = 0
+		local actors = self.players -- players
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and actor.class == class and actor.heal then
+				total = total + actor.heal
+			end
+		end
+
+		actors = is_arena and self.enemies or nil -- arena enemies
+		if actors then
+			for i = 1, #actors do
+				local actor = actors[i]
+				if actor and actor.class == class and actor.heal then
+					total = total + actor.heal
+				end
+			end
+		end
+	elseif is_arena then
 		total = total + self.eheal
 	end
 
@@ -307,8 +387,8 @@ function setPrototype:GetHeal()
 end
 
 -- returns the set's hps and heal amount
-function setPrototype:GetHPS()
-	local total = self:GetHeal()
+function setPrototype:GetHPS(class)
+	local total = self:GetHeal(class)
 	if total == 0 then
 		return 0, total
 	end
@@ -317,11 +397,30 @@ function setPrototype:GetHPS()
 end
 
 -- returns the set's overheal amount
-function setPrototype:GetOverheal()
-	local total = self.overheal or 0
+function setPrototype:GetOverheal(class)
+	local is_arena = (Skada.forPVP and self.type == "arena" and self.eoverheal)
 
-	-- include enemies healing in arena
-	if Skada.forPVP and self.type == "arena" and self.eoverheal then
+	local total = self.overheal or 0
+	if class and Skada.validclass[class] then
+		total = 0
+		local actors = self.players -- players
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and actor.class == class and actor.overheal then
+				total = total + actor.overheal
+			end
+		end
+
+		actors = is_arena and self.enemies or nil -- arena enemies
+		if actors then
+			for i = 1, #actors do
+				local actor = actors[i]
+				if actor and actor.class == class and actor.overheal then
+					total = total + actor.overheal
+				end
+			end
+		end
+	elseif is_arena then
 		total = total + self.eoverheal
 	end
 
@@ -329,8 +428,8 @@ function setPrototype:GetOverheal()
 end
 
 -- returns the set's overheal per second and overheal amount
-function setPrototype:GetOHPS()
-	local total = self:GetOverheal()
+function setPrototype:GetOHPS(class)
+	local total = self:GetOverheal(class)
 	if total == 0 then
 		return 0, total
 	end
@@ -339,24 +438,39 @@ function setPrototype:GetOHPS()
 end
 
 -- returns the set's total heal amount, including overheal amount
-function setPrototype:GetTotalHeal()
-	local total = self.heal or 0
+function setPrototype:GetTotalHeal(class)
+	local is_arena = (Skada.forPVP and self.type == "arena" and (self.eheal or self.eoverheal))
 
-	if self.overheal then
-		total = total + self.overheal
-	end
+	local total = (self.heal or 0) + (self.overheal or 0)
+	if class and Skada.validclass[class] then
+		total = 0
+		local actors = self.players -- players
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and actor.class == class and (actor.heal or actor.overheal) then
+				total = total + (actor.heal or 0) + (actor.overheal or 0)
+			end
+		end
 
-	-- include enemies in arena
-	if Skada.forPVP and self.type == "arena" and self.eheal then
-		total = total + self.eheal
+		actors = is_arena and self.enemies or nil -- arena enemies
+		if actors then
+			for i = 1, #actors do
+				local actor = actors[i]
+				if actor and actor.class == class and (actor.heal or actor.overheal) then
+					total = total + (actor.heal or 0) + (actor.overheal or 0)
+				end
+			end
+		end
+	elseif is_arena then
+		total = total + self.eheal + (self.eoverheal or 0)
 	end
 
 	return total
 end
 
 -- returns the set's total hps and heal
-function setPrototype:GetTHPS()
-	local total = self:GetTotalHeal()
+function setPrototype:GetTHPS(class)
+	local total = self:GetTotalHeal(class)
 	if total == 0 then
 		return 0, total
 	end
@@ -365,11 +479,31 @@ function setPrototype:GetTHPS()
 end
 
 -- returns the set's absorb amount
-function setPrototype:GetAbsorb()
-	local total = self.absorb or 0
+function setPrototype:GetAbsorb(class)
+	local is_arena = (Skada.forPVP and self.type == "arena" and self.eabsorb)
 
-	-- include enemies in arena
-	if Skada.forPVP and self.type == "arena" and self.eabsorb then
+	local total = self.absorb or 0
+	if class and Skada.validclass[class] then
+		total = 0
+
+		local actors = self.players -- players
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and actor.class == class and actor.absorb then
+				total = total + actor.absorb
+			end
+		end
+
+		actors = is_arena and self.enemies or nil -- arena enemies
+		if actors then
+			for i = 1, #actors do
+				local actor = actors[i]
+				if actor and actor.class == class and actor.absorb then
+					total = total + actor.absorb
+				end
+			end
+		end
+	elseif is_arena then
 		total = total + self.eabsorb
 	end
 
@@ -377,8 +511,8 @@ function setPrototype:GetAbsorb()
 end
 
 -- returns the set's absorb per second and absorb amount
-function setPrototype:GetAPS()
-	local total = self:GetAbsorb()
+function setPrototype:GetAPS(class)
+	local total = self:GetAbsorb(class)
 	if total == 0 then
 		return 0, total
 	end
@@ -387,31 +521,13 @@ function setPrototype:GetAPS()
 end
 
 -- returns the set's amount of heal and absorb combined
-function setPrototype:GetAbsorbHeal()
-	local total = self.heal or 0
-
-	if self.absorb then
-		total = total + self.absorb
-	end
-
-	if not Skada.forPVP or self.type ~= "arena" then
-		return total
-	end
-
-	-- include enemies healing in arena
-	if self.eheal then
-		total = total + self.eheal
-	end
-	if self.eabsorb then
-		total = total + self.eabsorb
-	end
-
-	return total
+function setPrototype:GetAbsorbHeal(class)
+	return (self:GetHeal(class) or 0) + (self:GetAbsorb(class) or 0)
 end
 
 -- returns the set's absorb and heal per sec
-function setPrototype:GetAHPS()
-	local total = self:GetAbsorbHeal()
+function setPrototype:GetAHPS(class)
+	local total = self:GetAbsorbHeal(class)
 	if total == 0 then
 		return 0, total
 	end
@@ -561,13 +677,13 @@ function actorPrototype:GetDamageTaken()
 end
 
 -- returns the actor's dtps and damage taken amount
-function actorPrototype:GetDTPS(active, no_calc)
+function actorPrototype:GetDTPS(no_calc)
 	local total = self:GetDamageTaken()
 	if total == 0 or no_calc then
 		return 0, total
 	end
 
-	return total / self:GetTime(active), total
+	return total / self:GetTime(), total
 end
 
 -- returns the actors damage sources

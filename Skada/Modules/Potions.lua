@@ -179,10 +179,26 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 		end
 	end
 
+	local function get_total_potions(set, class)
+		if not set then return end
+
+		local total = set.potion or 0
+		if class and Skada.validclass[class] then
+			total = 0
+			for i = 1, #set.players do
+				local p = set.players[i]
+				if p and p.class == class and p.potion then
+					total = total + p.potion
+				end
+			end
+		end
+		return total
+	end
+
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Potions"], L[win.class]) or L["Potions"]
 
-		local total = set and set.potion
+		local total = get_total_potions(set, win.class)
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -203,6 +219,11 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 				format_valuetext(d, cols, total, win.metadata)
 			end
 		end
+	end
+
+	function mod:GetSetSummary(set, win)
+		local potions = get_total_potions(set, win and win.class) or 0
+		return tostring(potions), potions
 	end
 
 	function mod:OnInitialize()
@@ -375,11 +396,6 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 	function mod:OnDisable()
 		Skada.UnregisterAllCallbacks(self)
 		Skada:RemoveMode(self)
-	end
-
-	function mod:GetSetSummary(set)
-		local potions = set.potion or 0
-		return tostring(potions), potions
 	end
 
 	---------------------------------------------------------------------------

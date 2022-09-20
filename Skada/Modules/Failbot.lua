@@ -113,10 +113,26 @@ Skada:RegisterModule("Fails", function(L, P)
 		end
 	end
 
+	local function get_total_fails(set, class)
+		if not set then return end
+
+		local total = set.fail or 0
+		if class and Skada.validclass[class] then
+			total = 0
+			for i = 1, #set.players do
+				local p = set.players[i]
+				if p and p.class == class and p.fail then
+					total = total + p.fail
+				end
+			end
+		end
+		return total
+	end
+
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Fails"], L[win.class]) or L["Fails"]
 
-		local total = set and set.fail
+		local total = get_total_fails(set, win.class)
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -136,6 +152,18 @@ Skada:RegisterModule("Fails", function(L, P)
 				d.value = actor.fail
 				format_valuetext(d, cols, total, win.metadata)
 			end
+		end
+	end
+
+	function mod:GetSetSummary(set, win)
+		local fails = get_total_fails(set, win and win.class)
+		return tostring(fails), fails
+	end
+
+	function mod:AddToTooltip(set, tooltip)
+		local fails = get_total_fails(set)
+		if fails and fails > 0 then
+			tooltip:AddDoubleLine(L["Fails"], fails, 1, 1, 1)
 		end
 	end
 
@@ -166,17 +194,6 @@ Skada:RegisterModule("Fails", function(L, P)
 	function mod:OnDisable()
 		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
-	end
-
-	function mod:GetSetSummary(set)
-		local fails = set.fail or 0
-		return tostring(fails), fails
-	end
-
-	function mod:AddToTooltip(set, tooltip)
-		if set.fail and set.fail > 0 then
-			tooltip:AddDoubleLine(L["Fails"], set.fail, 1, 1, 1)
-		end
 	end
 
 	--------------------------------------------------------------------------

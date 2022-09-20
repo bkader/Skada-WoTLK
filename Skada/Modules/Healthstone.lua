@@ -41,10 +41,26 @@ Skada:RegisterModule("Healthstones", function(L)
 		end
 	end
 
+	local function get_total_stones(set, class)
+		if not set then return end
+
+		local total = set.healthstone or 0
+		if class and Skada.validclass[class] then
+			total = 0
+			for i = 1, #set.players do
+				local p = set.players[i]
+				if p and p.class == class and p.healthstone then
+					total = total + p.healthstone
+				end
+			end
+		end
+		return total
+	end
+
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Healthstones"], L[win.class]) or L["Healthstones"]
 
-		local total = set and set.healthstone
+		local total = get_total_stones(set, win.class)
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -67,6 +83,11 @@ Skada:RegisterModule("Healthstones", function(L)
 		end
 	end
 
+	function mod:GetSetSummary(set, win)
+		local stones = get_total_stones(set, win and win.class) or 0
+		return tostring(stones), stones
+	end
+
 	function mod:OnEnable()
 		stonename = stonename or GetSpellInfo(47874)
 		self.metadata = {
@@ -83,10 +104,5 @@ Skada:RegisterModule("Healthstones", function(L)
 
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
-	end
-
-	function mod:GetSetSummary(set)
-		local stones = set.healthstone or 0
-		return tostring(stones), stones
 	end
 end)

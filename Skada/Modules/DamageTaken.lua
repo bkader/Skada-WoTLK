@@ -595,7 +595,7 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Damage Taken"], L[win.class]) or L["Damage Taken"]
 
-		local total = set and set:GetDamageTaken()
+		local total = set and set:GetDamageTaken(win.class)
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -610,7 +610,7 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 		for i = 1, #actors do
 			local actor = actors[i]
 			if actor and (not win.class or win.class == actor.class) then
-				local dtps, amount = actor:GetDTPS(nil, not cols.DTPS)
+				local dtps, amount = actor:GetDTPS(not cols.DTPS)
 				if amount > 0 then
 					nr = nr + 1
 
@@ -628,7 +628,7 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 		for i = 1, #actors do
 			local actor = actors[i]
 			if actor and not actor.fake and (not win.class or win.class == actor.class) then
-				local dtps, amount = actor:GetDTPS(nil, not cols.DTPS)
+				local dtps, amount = actor:GetDTPS(not cols.DTPS)
 				if amount > 0 then
 					nr = nr + 1
 
@@ -639,6 +639,22 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 				end
 			end
 		end
+	end
+
+	function mod:GetSetSummary(set, win)
+		local dtps, amount = set:GetDTPS(win and win.class)
+		local valuetext = Skada:FormatValueCols(
+			self.metadata.columns.Damage and Skada:FormatNumber(amount),
+			self.metadata.columns.DTPS and Skada:FormatNumber(dtps)
+		)
+		return valuetext, amount
+	end
+
+	function mod:AddToTooltip(set, tooltip)
+		if not set then return end
+		local dtps, amount = set:GetDTPS()
+		tooltip:AddDoubleLine(L["Damage Taken"], Skada:FormatNumber(amount), 1, 1, 1)
+		tooltip:AddDoubleLine(L["DTPS"], Skada:FormatNumber(dtps), 1, 1, 1)
 	end
 
 	function mod:OnEnable()
@@ -706,22 +722,6 @@ Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
 		Skada:RemoveMode(self)
 	end
 
-	function mod:AddToTooltip(set, tooltip)
-		if not set then return end
-		local dtps, amount = set:GetDTPS()
-		tooltip:AddDoubleLine(L["Damage Taken"], Skada:FormatNumber(amount), 1, 1, 1)
-		tooltip:AddDoubleLine(L["DTPS"], Skada:FormatNumber(dtps), 1, 1, 1)
-	end
-
-	function mod:GetSetSummary(set)
-		local dtps, amount = set:GetDTPS()
-		local valuetext = Skada:FormatValueCols(
-			self.metadata.columns.Damage and Skada:FormatNumber(amount),
-			self.metadata.columns.DTPS and Skada:FormatNumber(dtps)
-		)
-		return valuetext, amount
-	end
-
 	function mod:CombatLeave()
 		T.clear(dmg)
 		T.free("Damage_ExtraAttacks", extraATT, nil, del)
@@ -768,7 +768,7 @@ Skada:RegisterModule("DTPS", function(L, P)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["DTPS"], L[win.class]) or L["DTPS"]
 
-		local total = set and set:GetDTPS()
+		local total = set and set:GetDTPS(win.class)
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -816,6 +816,11 @@ Skada:RegisterModule("DTPS", function(L, P)
 		end
 	end
 
+	function mod:GetSetSummary(set, win)
+		local dtps = set:GetDTPS(win and win.class)
+		return Skada:FormatNumber(dtps), dtps
+	end
+
 	function mod:OnEnable()
 		self.metadata = {
 			showspots = true,
@@ -837,11 +842,6 @@ Skada:RegisterModule("DTPS", function(L, P)
 
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
-	end
-
-	function mod:GetSetSummary(set)
-		local dtps = set:GetDTPS()
-		return Skada:FormatNumber(dtps), dtps
 	end
 end, "Damage Taken")
 

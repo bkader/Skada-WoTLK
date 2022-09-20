@@ -1701,6 +1701,7 @@ end
 -- player & enemies functions
 
 -- finds a player that was already recorded
+local dummy_pet = {class = "PET"} -- used as fallback
 function Skada:FindPlayer(set, id, name, strict)
 	if set and set.players and ((id and id ~= "total") or (name and name ~= L["Total"])) then
 		id = id or name -- fallback
@@ -1731,7 +1732,9 @@ function Skada:FindPlayer(set, id, name, strict)
 
 		-- our last hope!
 		if not strict and not player then
-			player = self.playerPrototype:Bind({id = id, name = name or UNKNOWN, class = "PET"}, set)
+			dummy_pet.id = id
+			dummy_pet.name = name or L["Unknown"]
+			player = self.playerPrototype:Bind(dummy_pet, set)
 		end
 
 		return player
@@ -1866,8 +1869,8 @@ function Skada:GetEnemy(set, name, guid, flag, create)
 end
 
 -- generic find a player or an enemey
-function Skada:FindActor(set, id, name)
-	local actor, enemy = self:FindPlayer(set, id, name, true), nil
+function Skada:FindActor(set, id, name, no_strict)
+	local actor, enemy = self:FindPlayer(set, id, name, not no_strict), nil
 	if not actor then
 		actor, enemy = self:FindEnemy(set, name, id), true
 	end

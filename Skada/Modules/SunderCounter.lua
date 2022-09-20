@@ -189,6 +189,11 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 		end
 	end
 
+	function mod:GetSetSummary(set)
+		local sunders = set.sunder or 0
+		return tostring(sunders), sunders
+	end
+
 	function mod:OnEnable()
 		sourcemod.metadata = {showspots = true}
 		targetmod.metadata = {click1 = sourcemod}
@@ -219,11 +224,6 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 		if set.sunder and set.sunder > 0 then
 			tooltip:AddDoubleLine(sunder, set.sunder, 1, 1, 1)
 		end
-	end
-
-	function mod:GetSetSummary(set)
-		local sunders = set.sunder or 0
-		return tostring(sunders), sunders
 	end
 
 	function mod:CombatLeave()

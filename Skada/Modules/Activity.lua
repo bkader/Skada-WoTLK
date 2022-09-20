@@ -112,6 +112,15 @@ Skada:RegisterModule("Activity", function(L, P, _, C, new, _, clear)
 		end
 	end
 
+	function mod:GetSetSummary(set)
+		local settime = set:GetTime()
+		local valuetext = Skada:FormatValueCols(
+			self.metadata.columns["Active Time"] and Skada:FormatTime(settime),
+			self.metadata.columns.Percent and format("%s - %s", date("%H:%M", set.starttime), date("%H:%M", set.endtime))
+		)
+		return valuetext, settime
+	end
+
 	function mod:OnInitialize()
 		Skada.options.args.tweaks.args.general.args.tartime = {
 			type = "toggle",
@@ -141,15 +150,6 @@ Skada:RegisterModule("Activity", function(L, P, _, C, new, _, clear)
 	function mod:OnDisable()
 		Skada.UnregisterAllCallbacks(self)
 		Skada:RemoveMode(self)
-	end
-
-	function mod:GetSetSummary(set)
-		local settime = set:GetTime()
-		local valuetext = Skada:FormatValueCols(
-			self.metadata.columns["Active Time"] and Skada:FormatTime(settime),
-			self.metadata.columns.Percent and format("%s - %s", date("%H:%M", set.starttime), date("%H:%M", set.endtime))
-		)
-		return valuetext, settime
 	end
 
 	---------------------------------------------------------------------------
