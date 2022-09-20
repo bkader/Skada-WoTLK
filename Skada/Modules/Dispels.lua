@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
+Skada:RegisterModule("Dispels", function(L, P, _, C)
 	local mod = Skada:NewModule("Dispels")
 	local spellmod = mod:NewModule("Dispelled spell list")
 	local targetmod = mod:NewModule("Dispelled target list")
@@ -10,6 +10,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C, new, _, clear)
 
 	-- cache frequently used globals
 	local pairs, format, pformat = pairs, string.format, Skada.pformat
+	local new, clear = Skada.newTable, Skada.clearTable
 	local _
 
 	local function format_valuetext(d, columns, total, metadata, subview)

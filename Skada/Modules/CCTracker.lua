@@ -2,6 +2,7 @@ local Skada = Skada
 
 local pairs, format, pformat = pairs, string.format, Skada.pformat
 local GetSpellLink = Skada.GetSpellLink or GetSpellLink
+local new, clear = Skada.newTable, Skada.clearTable
 local cc_table = {} -- holds stuff from cleu
 local _
 
@@ -206,7 +207,7 @@ end
 -- ======= --
 -- CC Done --
 -- ======= --
-Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
+Skada:RegisterModule("CC Done", function(L, P, _, C)
 	local mod = Skada:NewModule("CC Done")
 	local playermod = mod:NewModule("Crowd Control Spells")
 	local targetmod = mod:NewModule("Crowd Control Targets")
@@ -463,7 +464,7 @@ end)
 -- ======== --
 -- CC Taken --
 -- ======== --
-Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
+Skada:RegisterModule("CC Taken", function(L, P, _, C)
 	local mod = Skada:NewModule("CC Taken")
 	local playermod = mod:NewModule("Crowd Control Spells")
 	local sourcemod = mod:NewModule("Crowd Control Sources")
@@ -733,7 +734,7 @@ end)
 -- =========== --
 -- CC Breakers --
 -- =========== --
-Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
+Skada:RegisterModule("CC Breaks", function(L, P, _, C)
 	local mod = Skada:NewModule("CC Breaks")
 	local playermod = mod:NewModule("Crowd Control Spells")
 	local targetmod = mod:NewModule("Crowd Control Targets")

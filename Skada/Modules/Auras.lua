@@ -5,6 +5,7 @@ local pairs, min, floor = pairs, math.min, math.floor
 local _
 
 -- common functions
+local new, clear = Skada.newTable, Skada.clearTable
 local log_auraapply, log_aurarefresh, log_auraremove
 local mod_update_func, aura_update_func, aura_tooltip
 local format_valuetext, spellschools, aura = nil, nil, nil
@@ -13,9 +14,8 @@ local format_valuetext, spellschools, aura = nil, nil, nil
 do
 	local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 	local mod = Skada:NewModule("Buffs and Debuffs")
-
 	local PercentToRGB = Skada.PercentToRGB
-	local del, clear = Skada.delTable, Skada.clearTable
+	local del = Skada.delTable
 
 	function mod:OnEnable()
 		if not Skada:IsDisabled("Buffs") or not Skada:IsDisabled("Debuffs") then
@@ -293,7 +293,7 @@ do
 	end
 end
 
-Skada:RegisterModule("Buffs", function(L, P, _, C, new, _, clear)
+Skada:RegisterModule("Buffs", function(L, P, _, C)
 	local mod = Skada:NewModule("Buffs")
 	local spellmod = mod:NewModule("Buff spell list")
 	local playermod = spellmod:NewModule("Players list")
@@ -513,7 +513,7 @@ Skada:RegisterModule("Buffs", function(L, P, _, C, new, _, clear)
 	end
 end)
 
-Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
+Skada:RegisterModule("Debuffs", function(L, _, _, C)
 	local mod = Skada:NewModule("Debuffs")
 	local spellmod = mod:NewModule("Debuff spell list")
 	local spelltargetmod = spellmod:NewModule("Debuff target list")

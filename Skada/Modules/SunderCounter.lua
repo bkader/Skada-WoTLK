@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
+Skada:RegisterModule("Sunder Counter", function(L, P, _, C)
 	local mod = Skada:NewModule("Sunder Counter")
 	local targetmod = mod:NewModule("Sunder target list")
 	local sourcemod = mod:NewModule("Sunder source list")
@@ -7,6 +7,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, new, del, clear)
 	local get_sunder_targets = nil
 
 	local pairs, format, pformat = pairs, string.format, Skada.pformat
+	local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 	local T = Skada.Table

@@ -1,10 +1,11 @@
 local Skada = Skada
-Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
+Skada:RegisterModule("Resurrects", function(L, P, _, C)
 	local mod = Skada:NewModule("Resurrects")
 	local playermod = mod:NewModule("Resurrect spell list")
 	local targetmod = mod:NewModule("Resurrect target list")
 
 	local pairs, format, pformat = pairs, string.format, Skada.pformat
+	local new, clear = Skada.newTable, Skada.clearTable
 	local get_resurrected_targets = nil
 	local _
 

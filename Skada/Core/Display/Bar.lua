@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, new, del)
+Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 	local mod = Skada:NewModule("Bar Display", "SpecializedLibBars-1.0")
 	local FlyPaper = LibStub("LibFlyPaper-1.1", true)
 	local ACR = LibStub("AceConfigRegistry-3.0")
@@ -16,6 +16,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, new, d
 	local IsModifierKeyDown = IsModifierKeyDown
 	local SavePosition = Skada.SavePosition
 	local RestorePosition = Skada.RestorePosition
+	local new, del = Skada.newTable, Skada.delTable
 	local _
 
 	-- references

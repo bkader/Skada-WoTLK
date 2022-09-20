@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
+Skada:RegisterModule("Interrupts", function(L, P, _, C)
 	local mod = Skada:NewModule("Interrupts")
 	local spellmod = mod:NewModule("Interrupted spells")
 	local targetmod = mod:NewModule("Interrupted targets")
@@ -11,6 +11,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, new, _, clear)
 
 	-- cache frequently used globals
 	local pairs, format, pformat = pairs, string.format, Skada.pformat
+	local new, clear = Skada.newTable, Skada.clearTable
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 
 	local function format_valuetext(d, columns, total, metadata, subview)

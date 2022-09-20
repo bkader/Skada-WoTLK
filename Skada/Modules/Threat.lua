@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Threat", function(L, P, _, _, new, del)
+Skada:RegisterModule("Threat", function(L, P)
 	local mod = Skada:NewModule("Threat")
 
 	local format, max = string.format, math.max
@@ -7,6 +7,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, new, del)
 	local UnitDetailedThreatSituation, InCombatLockdown = UnitDetailedThreatSituation, InCombatLockdown
 	local GroupIterator, GetUnitRole, GetUnitSpec = Skada.GroupIterator, Skada.GetUnitRole, Skada.GetUnitSpec
 	local PlaySoundFile = PlaySoundFile
+	local new, del = Skada.newTable, Skada.delTable
 	local T = Skada.Table
 	local _
 

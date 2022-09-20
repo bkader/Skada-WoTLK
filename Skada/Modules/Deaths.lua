@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
+Skada:RegisterModule("Deaths", function(L, P)
 	local mod = Skada:NewModule("Deaths")
 	local playermod = mod:NewModule("Player's deaths")
 	local deathlogmod = mod:NewModule("Death log")
@@ -9,6 +9,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 	local tinsert, tremove, tsort, tconcat = table.insert, table.remove, table.sort, table.concat
 	local tostring, strmatch, format, pformat = tostring, strmatch, string.format, Skada.pformat
 	local max, floor, wipe = math.max, math.floor, wipe
+	local new, del = Skada.newTable, Skada.delTable
 	local UnitHealthInfo = Skada.UnitHealthInfo
 	local UnitIsFeignDeath = UnitIsFeignDeath
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo

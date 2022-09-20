@@ -3388,7 +3388,7 @@ function Skada:OnInitialize()
 	if self.LoadableDisplay then
 		for name, func in pairs(self.LoadableDisplay) do
 			if not self:IsDisabled(name) then
-				func(L, P, G, self.cacheTable, new, del, clear)
+				func(L, self.db.profile, self.db.global, self.cacheTable)
 			end
 		end
 		self.LoadableDisplay = del(self.LoadableDisplay)
@@ -3442,7 +3442,7 @@ function Skada:OnEnable()
 		for i = 1, #self.LoadableModules do
 			local mod = self.LoadableModules[i]
 			if mod.name and mod.func and not self:IsDisabled(mod.name) and not (mod.deps and self:IsDisabled(unpack(mod.deps))) then
-				mod.func(L, P, G, self.cacheTable, new, del, clear)
+				mod.func(L, self.db.profile, self.db.global, self.cacheTable)
 			end
 		end
 		self.LoadableModules = del(self.LoadableModules, true)

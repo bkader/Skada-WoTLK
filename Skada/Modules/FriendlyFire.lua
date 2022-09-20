@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
+Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	local mod = Skada:NewModule("Friendly Fire")
 	local targetmod = mod:NewModule("Damage target list")
 	local spellmod = mod:NewModule("Damage spell list")
@@ -10,6 +10,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C, new, del, clear)
 
 	local pairs, format = pairs, string.format
 	local pformat, T = Skada.pformat, Skada.Table
+	local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
 	local _
 
 	local function format_valuetext(d, columns, total, dps, metadata, subview)

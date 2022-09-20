@@ -2,7 +2,7 @@ local Skada = Skada
 
 -- cache frequently used globals
 local pairs, format, pformat = pairs, string.format, Skada.pformat
-local min, floor = math.min, math.floor
+local min, floor, new = math.min, math.floor, Skada.newTable
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 local _
 
@@ -10,7 +10,7 @@ local _
 -- Absorbs module --
 -- ============== --
 
-Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
+Skada:RegisterModule("Absorbs", function(L, P)
 	local mod = Skada:NewModule("Absorbs")
 	local playermod = mod:NewModule("Absorb spell list")
 	local targetmod = mod:NewModule("Absorbed target list")
@@ -24,6 +24,7 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 	local UnitGUID, UnitName, UnitClass, UnitExists, UnitBuff = UnitGUID, UnitName, UnitClass, UnitExists, UnitBuff
 	local UnitIsDeadOrGhost, UnitHealthInfo = UnitIsDeadOrGhost, Skada.UnitHealthInfo
 	local IsActiveBattlefieldArena, UnitInBattleground = IsActiveBattlefieldArena, UnitInBattleground
+	local del = Skada.delTable
 	local T = Skada.Table
 
 	-- INCOMPLETE
@@ -1640,10 +1641,11 @@ end, "Absorbs", "Healing", "Absorbs and Healing")
 -- Healing done by spell --
 -- ===================== --
 
-Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear)
+Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 	local mod = Skada:NewModule("Healing Done By Spell")
 	local spellmod = mod:NewModule("Healing spell sources")
 	local spellschools = Skada.spellschools
+	local clear = Skada.clearTable
 	local get_absorb_heal_spells = nil
 
 	local function format_valuetext(d, columns, total, hps, metadata, subview)

@@ -22,7 +22,7 @@ end
 -- Healing module --
 -- ============== --
 
-Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
+Skada:RegisterModule("Healing", function(L, P)
 	local mod = Skada:NewModule("Healing")
 	local playermod = mod:NewModule("Healing spell list")
 	local targetmod = mod:NewModule("Healed target list")
@@ -30,6 +30,7 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local del = Skada.delTable
 
 	local function log_spellcast(set, playerid, playername, playerflags, spellid, spellschool)
 		if not set or (set == Skada.total and not P.totalidc) then return end
@@ -919,10 +920,11 @@ end, "Healing")
 -- Healing taken --
 -- ================ --
 
-Skada:RegisterModule("Healing Taken", function(L, P, _, _, new, _, clear)
+Skada:RegisterModule("Healing Taken", function(L, P)
 	local mod = Skada:NewModule("Healing Taken")
 	local sourcemod = mod:NewModule("Healing source list")
 	local sourcespellmod = sourcemod:NewModule("Healing spell list")
+	local new, clear = Skada.newTable, Skada.clearTable
 	local C = Skada.cacheTable2
 
 	local get_healing_taken_list = nil

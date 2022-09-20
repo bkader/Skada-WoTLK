@@ -3,13 +3,14 @@ local Skada = Skada
 -- frequently used globals --
 local pairs, type, max, format = pairs, type, math.max, string.format
 local pformat, T = Skada.pformat, Skada.Table
+local new, clear = Skada.newTable, Skada.clearTable
 local setPrototype, enemyPrototype = Skada.setPrototype, Skada.enemyPrototype
 local _
 
 ---------------------------------------------------------------------------
 -- Enemy Damage Taken
 
-Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
+Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	local mod = Skada:NewModule("Enemy Damage Taken")
 	local sourcemod = mod:NewModule("Damage source list")
 	local sourcespellmod = sourcemod:NewModule("Damage spell list")
@@ -23,7 +24,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C, new, del, clear)
 	local UnitHealthInfo, UnitPowerInfo = Skada.UnitHealthInfo, Skada.UnitPowerInfo
 	local UnitExists, UnitGUID = UnitExists, UnitGUID
 	local UnitHealthMax, UnitPowerMax = UnitHealthMax, UnitPowerMax
-	local tContains = tContains
+	local tContains, del = tContains, Skada.delTable
 
 	-- this table holds the units to which the damage done is
 	-- collected into a new fake unit.
@@ -872,7 +873,7 @@ end)
 ---------------------------------------------------------------------------
 -- Enemy Damage Done
 
-Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C, new, _, clear)
+Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 	local mod = Skada:NewModule("Enemy Damage Done")
 	local targetmod = mod:NewModule("Damage target list")
 	local targetspellmod = targetmod:NewModule("Damage spell targets")

@@ -3,6 +3,7 @@ local Skada = Skada
 -- cache frequently used globals
 local pairs, select, min, max = pairs, select, math.min, math.max
 local format, pformat, T = string.format, Skada.pformat, Skada.Table
+local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
 local _
 
 local function format_valuetext(d, columns, total, dtps, metadata, subview)
@@ -21,7 +22,7 @@ end
 -- Damage Taken Module --
 -- =================== --
 
-Skada:RegisterModule("Damage Taken", function(L, P, _, _, new, del)
+Skada:RegisterModule("Damage Taken", function(L, P)
 	local mod = Skada:NewModule("Damage Taken")
 	local playermod = mod:NewModule("Damage spell list")
 	local spellmod = playermod:NewModule("Damage spell details")
@@ -845,7 +846,7 @@ end, "Damage Taken")
 -- Damage Taken By Spell Module --
 -- ============================ --
 
-Skada:RegisterModule("Damage Taken By Spell", function(L, P, _, _, new, _, clear)
+Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 	local mod = Skada:NewModule("Damage Taken By Spell")
 	local targetmod = mod:NewModule("Damage spell targets")
 	local sourcemod = mod:NewModule("Damage spell sources")
@@ -1069,7 +1070,7 @@ end, "Damage Taken")
 -- Avoidance & Mitigation Module --
 -- ============================= --
 
-Skada:RegisterModule("Avoidance & Mitigation", function(L, _, _, _, new, del, clear)
+Skada:RegisterModule("Avoidance & Mitigation", function(L)
 	local mod = Skada:NewModule("Avoidance & Mitigation")
 	local playermod = mod:NewModule("Damage Breakdown")
 	local missTypes = Skada.missTypes

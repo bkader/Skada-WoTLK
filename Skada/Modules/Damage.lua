@@ -2,6 +2,7 @@ local Skada = Skada
 
 local pairs, max = pairs, math.max
 local format, pformat = string.format, Skada.pformat
+local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
 local _
 
 local function format_valuetext(d, columns, total, dps, metadata, subview)
@@ -20,7 +21,7 @@ end
 -- Damage Done Module --
 -- ================== --
 
-Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
+Skada:RegisterModule("Damage", function(L, P)
 	local mod = Skada:NewModule("Damage")
 	local playermod = mod:NewModule("Damage spell list")
 	local spellmod = playermod:NewModule("Damage spell details")
@@ -949,7 +950,7 @@ end, "Damage")
 -- Damage Done By Spell Module --
 -- =========================== --
 
-Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C, new, _, clear)
+Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C)
 	local mod = Skada:NewModule("Damage Done By Spell")
 	local sourcemod = mod:NewModule("Damage spell sources")
 
@@ -1315,7 +1316,7 @@ end, "Damage")
 -- Overkill Module --
 -- =============== --
 
-Skada:RegisterModule("Overkill", function(L, _, _, C, new, del, clear)
+Skada:RegisterModule("Overkill", function(L, _, _, C)
 	local mod = Skada:NewModule("Overkill")
 	local spellmod = mod:NewModule("Overkill spell list")
 	local targetmod = mod:NewModule("Overkill target list")

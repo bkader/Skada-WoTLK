@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
+Skada:RegisterModule("Potions", function(L, P, _, C)
 	local mod = Skada:NewModule("Potions")
 	local playermod = mod:NewModule("Potions list")
 	local potionmod = mod:NewModule("Players list")
@@ -9,6 +9,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C, new, del, clear)
 	local pairs, tconcat, format, strsub = pairs, table.concat, string.format, string.sub
 	local GetItemInfo, UnitIsDeadOrGhost, GroupIterator = GetItemInfo, UnitIsDeadOrGhost, Skada.GroupIterator
 	local UnitGUID, UnitName, UnitClass, UnitBuff = UnitGUID, UnitName, UnitClass, UnitBuff
+	local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
 	local T, pformat = Skada.Table, Skada.pformat
 	local potion_ids = {}
 	local _

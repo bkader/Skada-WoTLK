@@ -1,9 +1,10 @@
 local Skada = Skada
-Skada:RegisterModule("Activity", function(L, P, _, C, new, _, clear)
+Skada:RegisterModule("Activity", function(L, P, _, C)
 	local mod = Skada:NewModule("Activity")
 	local targetmod = mod:NewModule("Activity per Target")
 	local date, pairs, max = date, pairs, math.max
 	local format, pformat = string.format, Skada.pformat
+	local new, clear = Skada.newTable, Skada.clearTable
 	local get_activity_targets = nil
 
 	local function format_valuetext(d, columns, maxtime, metadata, subview)

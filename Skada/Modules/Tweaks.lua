@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
+Skada:RegisterModule("Tweaks", function(L, P)
 	local mod = Skada:NewModule("Tweaks", "AceHook-3.0")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
@@ -7,6 +7,7 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, new, del)
 	local UnitClass, GetTime = UnitClass, GetTime
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
+	local new, del = Skada.newTable, Skada.delTable
 	local _
 
 	local channel_events, fofrostmourne
