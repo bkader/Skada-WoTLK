@@ -7,7 +7,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local WATCH = nil -- true to watch those alive
 
 	local tinsert, tremove, tsort, tconcat = table.insert, table.remove, table.sort, table.concat
-	local tostring, strmatch, format, pformat = tostring, strmatch, string.format, Skada.pformat
+	local strmatch, format, pformat = strmatch, string.format, Skada.pformat
 	local max, floor, wipe = math.max, math.floor, wipe
 	local new, del = Skada.newTable, Skada.delTable
 	local UnitHealthInfo = Skada.UnitHealthInfo
@@ -25,6 +25,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local RED_COLOR = RED_FONT_COLOR
 	local YELLOW_COLOR = YELLOW_FONT_COLOR
 	local PURPLE_COLOR = {r = 0.69, g = 0.38, b = 1}
+	local icon_death = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
 
 	local function get_color(key)
 		if P.usecustomcolors and P.customcolors and P.customcolors["deathlog_" .. key] then
@@ -73,6 +74,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		if data.amount then
 			deathlog.time = log.time
 			log.deb = nil
+
 			if data.amount == true then -- instakill
 				log.amt = -log.hp
 				deathlog.id = log.id
@@ -204,7 +206,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	end
 
 	local function spell_heal(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, _, amount, overheal)
-		if spellid and amount > (M.deathlogthreshold or 0) then
+		if spellid and amount and (not M.deathlogthreshold or amount > M.deathlogthreshold) then
 			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 			dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName, dstFlags)
 
@@ -215,16 +217,21 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			data.playerflags = dstFlags
 
 			data.spellid = spellid
-			data.overheal = overheal or 0
-			data.amount = max(0, amount - data.overheal)
+			data.amount = amount
 
 			data.school = nil
+			data.overheal = nil
 			data.overkill = nil
 			data.resisted = nil
 			data.blocked = nil
 			data.absorbed = nil
 			data.critical = nil
 			data.debuff = nil
+
+			if overheal and overheal > 0 then
+				data.amount = max(0, data.amount - overheal)
+				data.overheal = overheal
+			end
 
 			Skada:DispatchSets(log_deathlog)
 		end
@@ -408,9 +415,14 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 				if #deathlog.log == 0 then -- [2]
 					local log = new()
-					log.amt = deathlog.hpm and -deathlog.hpm or 0
 					log.time = deathlog.time - 0.001
-					log.hp = deathlog.hpm or 0
+					if deathlog.hpm then
+						log.amt = -deathlog.hpm
+						log.hp = deathlog.hpm
+					else
+						log.amt = 0
+						log.hp = 0
+					end
 					deathlog.log[1] = log
 				end
 
@@ -430,6 +442,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			tsort(deathlog.log, sort_logs)
 
 			local curtime = deathlog.time or set.last_time or GetTime()
+			local cols = self.metadata.columns
 			for i = #deathlog.log, 1, -1 do
 				local log = deathlog.log[i]
 				local diff = tonumber(log.time) - tonumber(curtime)
@@ -444,7 +457,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 					else
 						spellname = L["Unknown"]
 						d.spellid = nil
-						d.icon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
+						d.icon = icon_death
 					end
 
 					d.id = nr
@@ -546,9 +559,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 						end
 
 						d.valuetext = Skada:FormatValueCols(
-							self.metadata.columns.Change and change,
-							self.metadata.columns.Health and Skada:FormatNumber(d.value),
-							self.metadata.columns.Percent and Skada:FormatPercent(log.hp or 0, deathlog.hpm or 1)
+							cols.Change and change,
+							cols.Health and Skada:FormatNumber(d.value),
+							cols.Percent and Skada:FormatPercent(log.hp or 0, deathlog.hpm or 1)
 						)
 					end
 				else
@@ -564,48 +577,54 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	end
 
 	function playermod:Update(win, set)
-		local player = Skada:FindPlayer(set, win.actorid)
-		if not player then return end
+		win.title = pformat(L["%s's deaths"], win.actorname)
+		if not set or not win.actorid then return end
 
-		win.title = format(L["%s's deaths"], player.name)
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
+		if not actor or enemy then return end
 
-		if player.deathlog and (player.death or WATCH) then
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		local deathlog = (actor.death or WATCH) and actor.deathlog
+		if not deathlog then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local curtime, nr = set.last_time or GetTime(), 0
-			for i = 1, #player.deathlog do
-				local death = player.deathlog[i]
-				if death and (death.timeod or WATCH) then
-					nr = nr + 1
-					local d = win:nr(nr)
+		local nr = 0
+		local curtime = set.last_time or GetTime()
+		local cols = mod.metadata.columns
 
-					d.id = i
-					d.icon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
+		for i = 1, #deathlog do
+			local death = deathlog[i]
+			if death and (death.timeod or WATCH) then
+				nr = nr + 1
 
-					if death.id then
-						d.label, _, d.icon = GetSpellInfo(death.id)
-						d.spellschool = death.sch
-						if death.source then
-							d.text = format("%s (%s)", d.label, death.source)
-						end
-					end
+				local d = win:nr(nr)
+				d.id = i
 
-					d.label = d.label or L["Unknown"]
-					d.value = death.time or curtime
-					if death.timeod then
-						d.valuetext = Skada:FormatValueCols(
-							mod.metadata.columns.Time and date("%H:%M:%S", death.timeod),
-							mod.metadata.columns.Survivability and Skada:FormatTime(death.timeod - set.starttime, true)
-						)
-					else
-						d.valuetext = "..."
-					end
+				if death.id then -- spell id
+					d.label, _, d.icon = GetSpellInfo(death.id)
+					d.spellschool = death.sch
+				end
 
-					if win.metadata and d.value > win.metadata.maxvalue then
-						win.metadata.maxvalue = d.value
-					end
+				d.icon = d.icon or icon_death
+				d.label = d.label or L["Unknown"]
+				if cols.Source and death.src then
+					d.text = format("%s (%s)", d.label, death.src)
+				end
+
+				d.value = death.time or curtime
+				if death.timeod then
+					d.valuetext = Skada:FormatValueCols(
+						cols.Time and date("%H:%M:%S", death.timeod),
+						cols.Survivability and Skada:FormatTime(death.timeod - set.starttime, true)
+					)
+				else
+					d.valuetext = "..."
+				end
+
+				if win.metadata and d.value > win.metadata.maxvalue then
+					win.metadata.maxvalue = d.value
 				end
 			end
 		end
@@ -615,25 +634,28 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local function mod_update(self, win, set)
 		win.title = win.class and format("%s (%s)", L["Deaths"], L[win.class]) or L["Deaths"]
 
-		if not (set.death or WATCH) then
+		if not set or not (set.death or WATCH) then
 			return
 		elseif win.metadata then
-			win.metadata.maxvalue = 1
+			win.metadata.maxvalue = 0
 		end
 
-		local curtime, nr = set.last_time or GetTime(), 0
-		for i = 1, #set.players do
-			local player = set.players[i]
-			if player and (player.death or WATCH) and (not win.class or win.class == player.class) then
+		local nr = 0
+		local curtime = set.last_time or GetTime()
+
+		local actors = set.players -- players
+		for i = 1, #actors do
+			local p = actors[i]
+			if p and (p.death or WATCH) and (not win.class or win.class == p.class) then
 				nr = nr + 1
-				local d = win:actor(nr, player)
+				local d = win:actor(nr, p)
 
-				if player.death then
-					d.value = player.death
-					d.valuetext = tostring(player.death)
+				if p.death then
+					d.value = p.death
+					d.valuetext = p.death
 
-					if player.deathlog then
-						local first_death = player.deathlog[#player.deathlog]
+					if p.deathlog then
+						local first_death = p.deathlog[#p.deathlog]
 						if first_death and first_death.time then
 							d.value = first_death.time
 							d.color = (WATCH and first_death.time) and GRAY_COLOR or nil
@@ -652,15 +674,19 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local function alt_update(self, win, set)
 		win.title = win.class and format("%s (%s)", L["Deaths"], L[win.class]) or L["Deaths"]
 
-		if not (set.death or WATCH) then
+		if not set or not (set.death or WATCH) then
 			return
 		elseif win.metadata then
-			win.metadata.maxvalue = 1
+			win.metadata.maxvalue = 0
 		end
 
-		local curtime, nr = WATCH and GetTime(), 0
-		for i = 1, #set.players do
-			local p = set.players[i]
+		local nr = 0
+		local cols = self.metadata.columns
+		local curtime = set.last_time or GetTime()
+
+		local actors = set.players -- players
+		for i = 1, #actors do
+			local p = actors[i]
 			if p and p.deathlog and (p.death or WATCH) and (not win.class or win.class == p.class) then
 				local num = #p.deathlog
 				for j = 1, num do
@@ -674,8 +700,8 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 							d.color = WATCH and GRAY_COLOR or nil
 							d.value = death.time
 							d.valuetext = Skada:FormatValueCols(
-								self.metadata.columns.Time and date("%H:%M:%S", death.timeod),
-								self.metadata.columns.Survivability and Skada:FormatTime(death.timeod - set.starttime, true)
+								cols.Time and date("%H:%M:%S", death.timeod),
+								cols.Survivability and Skada:FormatTime(death.timeod - set.starttime, true)
 							)
 						else
 							d.color = nil
@@ -683,12 +709,15 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 							d.valuetext = "..."
 						end
 
+						local src = cols.Source and death.src
 						if num ~= 1 then
-							d.reportlabel = format("%s (%d)   %s", d.label, num, d.valuetext)
-							d.text = format("%s (%d)", d.text or d.label, num)
+							d.text = format(src and "%s (%d) < %s" or "%s (%d)", d.text or d.label, num, src)
+							d.reportlabel = format("%s   %s", d.text, d.valuetext)
 						else
-							d.reportlabel = nil
+							d.text = src and format("%s < %s", d.text or d.label, src) or nil
+							d.reportlabel = d.text and format("%s   %s", d.text, d.valuetext) or nil
 						end
+
 						num = num - 1
 					end
 				end
@@ -707,7 +736,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	function mod:GetSetSummary(set, win)
 		if not set then return end
 		local deaths = set:GetTotal(win and win.class, nil, "death") or 0
-		return set.last_time or GetTime(), tostring(deaths)
+		return set.last_time or GetTime(), deaths
 	end
 
 	function mod:AddToTooltip(set, tooltip)
@@ -766,14 +795,14 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			ordersort = true,
 			tooltip = entry_tooltip,
 			columns = {Change = true, Health = true, Percent = true},
-			icon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
+			icon = icon_death
 		}
 		playermod.metadata = {click1 = deathlogmod}
 		self.metadata = {
 			click1 = playermod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			columns = {Time = true, Survivability = false},
+			columns = {Time = true, Survivability = false, Source = false},
 			icon = [[Interface\Icons\ability_rogue_feigndeath]]
 		}
 
@@ -1037,12 +1066,10 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 							set = function(_, value)
 								if M.alternativedeaths then
 									M.alternativedeaths = nil
-									mod.Update = mod_update
 									mod.metadata.click1 = playermod
 									playermod.metadata.click1 = deathlogmod
 								else
 									M.alternativedeaths = true
-									mod.Update = alt_update
 									mod.metadata.click1 = deathlogmod
 									playermod.metadata.click1 = nil
 								end
