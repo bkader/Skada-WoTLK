@@ -12,6 +12,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	local pairs, tostring, tContains = pairs, tostring, tContains
 	local format, pformat = string.format, Skada.pformat
 	local UnitGUID, IsInGroup = UnitGUID, Skada.IsInGroup
+	local mod_cols = nil
 	local _
 
 	local function format_valuetext(d, columns, total, metadata, subview)
@@ -68,7 +69,6 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -78,7 +78,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 
 				local d = win:actor(nr, actor)
 				d.value = actor.failspells[win.spellid]
-				format_valuetext(d, cols, total, win.metadata, true)
+				format_valuetext(d, mod_cols, total, win.metadata, true)
 			end
 		end
 	end
@@ -102,14 +102,12 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for spellid, count in pairs(spells) do
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid)
 			d.value = count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -124,7 +122,6 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -134,7 +131,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 
 				local d = win:actor(nr, actor)
 				d.value = actor.fail
-				format_valuetext(d, cols, total, win.metadata)
+				format_valuetext(d, mod_cols, total, win.metadata)
 			end
 		end
 	end
@@ -161,6 +158,8 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\ability_creature_cursed_01]]
 		}
+
+		mod_cols = self.metadata.columns
 
 		-- no total click.
 		playermod.nototal = true

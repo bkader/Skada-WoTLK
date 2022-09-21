@@ -127,7 +127,7 @@ do
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
 		if not player then return end
 
-		local spell = player and player.auras and player.auras[aura.spellid]
+		local spell = player.auras and player.auras[aura.spellid]
 		if not spell or not spell.active or spell.active == 0 then return end
 
 		spell.refresh = (spell.refresh or 0) + 1
@@ -144,7 +144,7 @@ do
 		local player = Skada:GetPlayer(set, aura.playerid, aura.playername, aura.playerflags)
 		if not player then return end
 
-		local spell = player and player.auras and player.auras[aura.spellid]
+		local spell = player.auras and player.auras[aura.spellid]
 		if not spell or not spell.active or spell.active == 0 then return end
 
 		local curtime = set.last_action or time()
@@ -180,7 +180,7 @@ do
 	end
 
 	do
-		local function count_auras_by_type(auras, atype)
+		local function count_auras_by_type(auras, auratype)
 			local count, uptime = 0, 0
 			if auras then
 				for spellid, spell in pairs(auras) do
@@ -194,7 +194,7 @@ do
 						end
 						spell.type = nil
 					end
-					if (atype == "BUFF" and spellid > 0) or (atype == "DEBUFF" and spellid < 0) then
+					if (auratype == "BUFF" and spellid > 0) or (auratype == "DEBUFF" and spellid < 0) then
 						count = count + 1
 						uptime = uptime + spell.uptime
 					end
@@ -203,8 +203,8 @@ do
 			return count, uptime
 		end
 
-		function mod_update_func(self, atype, win, set)
-			if not atype then return end
+		function mod_update_func(self, auratype, win, set, cols)
+			if not auratype then return end
 			local settime = set and set:GetTime()
 
 			if not settime or settime == 0 then
@@ -214,13 +214,12 @@ do
 			end
 
 			local nr = 0
-			local cols = self.metadata.columns
 
 			local actors = set.players -- players
 			for i = 1, #actors do
 				local actor = actors[i]
 				if actor and (not win.class or win.class == actor.class) then
-					local count, uptime = count_auras_by_type(actor.auras, atype)
+					local count, uptime = count_auras_by_type(actor.auras, auratype)
 					if count > 0 and uptime > 0 then
 						nr = nr + 1
 
@@ -234,8 +233,8 @@ do
 		end
 	end
 
-	function aura_update_func(self, atype, win, set)
-		if not atype then return end
+	function aura_update_func(self, auratype, win, set, cols)
+		if not auratype then return end
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local maxtime = player and player:GetTime()
@@ -248,10 +247,8 @@ do
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
-
 		for spellid, spell in pairs(spells) do
-			if (atype == "BUFF" and spellid > 0 and spell.uptime > 0) or (atype == "DEBUFF" and spellid < 0 and spell.uptime > 0) then
+			if (auratype == "BUFF" and spellid > 0 and spell.uptime > 0) or (auratype == "DEBUFF" and spellid < 0 and spell.uptime > 0) then
 				nr = nr + 1
 
 				local d = win:spell(nr, spellid, spell, nil, nil, true)
@@ -299,6 +296,7 @@ Skada:RegisterModule("Buffs", function(L, P, _, C)
 	local playermod = spellmod:NewModule("Players list")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local get_players_by_buff = nil
+	local mod_cols = nil
 
 	local UnitName, UnitGUID, UnitBuff = UnitName, UnitGUID, UnitBuff
 	local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
@@ -375,14 +373,12 @@ Skada:RegisterModule("Buffs", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for playername, player in pairs(players) do
 			nr = nr + 1
 
 			local d = win:actor(nr, player, nil, playername)
 			d.value = player.uptime
-			format_valuetext(d, cols, nil, player.maxtime, win.metadata, true)
+			format_valuetext(d, mod_cols, nil, player.maxtime, win.metadata, true)
 		end
 	end
 
@@ -393,12 +389,12 @@ Skada:RegisterModule("Buffs", function(L, P, _, C)
 
 	function spellmod:Update(win, set)
 		win.title = pformat(L["%s's buffs"], win.actorname)
-		aura_update_func(mod, "BUFF", win, set)
+		aura_update_func(mod, "BUFF", win, set, mod_cols)
 	end
 
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Buffs"], L[win.class]) or L["Buffs"]
-		mod_update_func(self, "BUFF", win, set)
+		mod_update_func(self, "BUFF", win, set, mod_cols)
 	end
 
 	do
@@ -456,6 +452,8 @@ Skada:RegisterModule("Buffs", function(L, P, _, C)
 			columns = {Uptime = true, Count = false, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\spell_holy_divinespirit]]
 		}
+
+		mod_cols = self.metadata.columns
 
 		-- no total click.
 		spellmod.nototal = true
@@ -525,18 +523,13 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C)
 	local get_debuffs_targets = nil
 	local get_debuff_targets = nil
 	local get_debuffs_on_target = nil
+	local mod_cols = nil
 
 	-- list of spells used to queue units.
 	local queuedSpells = {[49005] = 50424}
 
-	local function handle_debuff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, school, auratype)
+	local function handle_debuff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, _, spellid, _, school, auratype)
 		if not spellid or ignoredSpells[spellid] or auratype ~= "DEBUFF" then return end
-
-		if srcName == nil and #srcGUID == 0 and dstName and #dstGUID > 0 then
-			srcGUID = dstGUID
-			srcName = dstName
-			srcFlags = dstFlags
-		end
 
 		aura.playerid = srcGUID
 		aura.playername = srcName
@@ -587,14 +580,12 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
-		for spellid, aura in pairs(auras) do
+		for spellid, spell in pairs(auras) do
 			nr = nr + 1
 
-			local d = win:spell(nr, spellid, aura, nil, nil, true)
-			d.value = aura.uptime
-			format_valuetext(d, cols, aura.count, maxtime, win.metadata, true)
+			local d = win:spell(nr, spellid, spell, nil, nil, true)
+			d.value = spell.uptime
+			format_valuetext(d, mod_cols, spell.count, maxtime, win.metadata, true)
 		end
 	end
 
@@ -619,14 +610,12 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
 			local d = win:actor(nr, target, true, targetname)
 			d.value = target.uptime
-			format_valuetext(d, cols, target.count, maxtime, win.metadata, true)
+			format_valuetext(d, mod_cols, target.count, maxtime, win.metadata, true)
 		end
 	end
 
@@ -640,8 +629,6 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C)
 		if not win.spellid then return end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
@@ -651,7 +638,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C)
 
 				local d = win:actor(nr, actor)
 				d.value = spell.uptime
-				format_valuetext(d, cols, spell.count, actor:GetTime(), win.metadata, true, true)
+				format_valuetext(d, mod_cols, spell.count, actor:GetTime(), win.metadata, true, true)
 			end
 		end
 	end
@@ -676,14 +663,12 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
 			local d = win:actor(nr, target, true, targetname)
 			d.value = target.uptime
-			format_valuetext(d, cols, target.count, maxtime, win.metadata, true)
+			format_valuetext(d, mod_cols, target.count, maxtime, win.metadata, true)
 		end
 	end
 
@@ -694,12 +679,12 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C)
 
 	function spellmod:Update(win, set)
 		win.title = L["actor debuffs"](win.actorname or L["Unknown"])
-		aura_update_func(mod, "DEBUFF", win, set)
+		aura_update_func(mod, "DEBUFF", win, set, mod_cols)
 	end
 
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Debuffs"], L[win.class]) or L["Debuffs"]
-		mod_update_func(self, "DEBUFF", win, set)
+		mod_update_func(self, "DEBUFF", win, set, mod_cols)
 	end
 
 	local function aura_target_tooltip(win, id, label, tooltip)
@@ -752,6 +737,8 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C)
 			icon = [[Interface\Icons\spell_shadow_shadowwordpain]]
 		}
 
+		mod_cols = self.metadata.columns
+
 		-- no total click.
 		spellmod.nototal = true
 		targetmod.nototal = true
@@ -792,10 +779,10 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C)
 
 		tbl = clear(tbl or C)
 		local maxtime = 0
-		for _, aura in pairs(self.auras) do
-			if aura.targets then
-				maxtime = maxtime + aura.uptime
-				for name, target in pairs(aura.targets) do
+		for _, spell in pairs(self.auras) do
+			if spell.targets then
+				maxtime = maxtime + spell.uptime
+				for name, target in pairs(spell.targets) do
 					local debuff = tbl[name]
 					if not debuff then
 						debuff = new_debuff_table(target)
@@ -831,11 +818,11 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C)
 		if self.auras and name then
 			tbl = clear(tbl or C)
 			local maxtime = 0
-			for spellid, aura in pairs(self.auras) do
-				if aura.targets and aura.targets[name] then
-					maxtime = maxtime + aura.uptime
-					tbl[spellid] = new_debuff_table(aura.targets[name])
-					tbl[spellid].school = aura.school
+			for spellid, spell in pairs(self.auras) do
+				if spell.targets and spell.targets[name] then
+					maxtime = maxtime + spell.uptime
+					tbl[spellid] = new_debuff_table(spell.targets[name])
+					tbl[spellid].school = spell.school
 				end
 			end
 			return tbl, maxtime

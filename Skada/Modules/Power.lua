@@ -5,6 +5,7 @@ Skada:RegisterModule("Resources", function(L, P)
 
 	local setmetatable, pairs = setmetatable, pairs
 	local format, pformat = string.format, Skada.pformat
+	local mod_cols = nil
 	local _
 
 	local SPELL_POWER_MANA = SPELL_POWER_MANA or 0
@@ -142,7 +143,6 @@ Skada:RegisterModule("Resources", function(L, P)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -152,7 +152,7 @@ Skada:RegisterModule("Resources", function(L, P)
 
 				local d = win:actor(nr, actor)
 				d.value = actor[self.power]
-				format_valuetext(d, cols, total, win.metadata)
+				format_valuetext(d, mod_cols, total, win.metadata)
 			end
 		end
 	end
@@ -188,14 +188,12 @@ Skada:RegisterModule("Resources", function(L, P)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for spellid, amount in pairs(spells) do
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid)
 			d.value = amount
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -208,6 +206,7 @@ Skada:RegisterModule("Resources", function(L, P)
 
 	function mod:OnEnable()
 		self.metadata = {columns = {Amount = true, Percent = true, sPercent = true}}
+		mod_cols = self.metadata.columns
 		Skada:AddColumnOptions(self)
 
 		Skada:RegisterForCL(spell_energize, "SPELL_ENERGIZE", "SPELL_PERIODIC_ENERGIZE", {src_is_interesting = true})

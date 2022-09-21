@@ -15,6 +15,7 @@ Skada:RegisterModule("Healthstones", function(L)
 	}
 
 	local format = string.format
+	local mod_cols = nil
 
 	local function format_valuetext(d, columns, total, metadata)
 		d.valuetext = Skada:FormatValueCols(
@@ -52,7 +53,6 @@ Skada:RegisterModule("Healthstones", function(L)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -62,7 +62,7 @@ Skada:RegisterModule("Healthstones", function(L)
 				local d = win:actor(nr, actor)
 
 				d.value = actor.healthstone
-				format_valuetext(d, cols, total, win.metadata)
+				format_valuetext(d, mod_cols, total, win.metadata)
 			end
 		end
 	end
@@ -82,6 +82,9 @@ Skada:RegisterModule("Healthstones", function(L)
 			columns = {Count = true, Percent = true},
 			icon = [[Interface\Icons\inv_stone_04]]
 		}
+
+		mod_cols = self.metadata.columns
+
 		Skada:RegisterForCL(stone_used, "SPELL_CAST_SUCCESS", {src_is_interesting = true})
 		Skada:AddMode(self)
 	end

@@ -24,8 +24,8 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	local UnitGUID, UnitName, UnitClass, UnitExists, UnitBuff = UnitGUID, UnitName, UnitClass, UnitExists, UnitBuff
 	local UnitIsDeadOrGhost, UnitHealthInfo = UnitIsDeadOrGhost, Skada.UnitHealthInfo
 	local IsActiveBattlefieldArena, UnitInBattleground = IsActiveBattlefieldArena, UnitInBattleground
-	local del = Skada.delTable
-	local T = Skada.Table
+	local T, del = Skada.Table, Skada.delTable
+	local mod_cols = nil
 
 	-- INCOMPLETE
 	-- the following list is incomplete due to the lack of testing for different
@@ -784,9 +784,9 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		if not set then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		if enemy then return end -- unavailable for enemies yet
+		if not actor or enemy then return end -- unavailable for enemies yet
 
-		local spell = actor and actor.absorbspells and actor.absorbspells[id]
+		local spell = actor.absorbspells and actor.absorbspells[id]
 		if not spell then return end
 
 		tooltip:AddLine(actor.name .. " - " .. label)
@@ -840,27 +840,26 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		if not set or not win.targetname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		if enemy then return end -- unavailable for enemies yet
+		if not actor or enemy then return end -- unavailable for enemies yet
 
-		local total = actor and actor.absorb or 0
-
-		if total == 0 or not actor.absorbspells then
+		local total = actor.absorb
+		local spells = (total and total > 0) and actor.absorbspells
+		if not spells then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sAPS and actor:GetTime()
+		local actortime = mod_cols.sAPS and actor:GetTime()
 
-		for spellid, spell in pairs(actor.absorbspells) do
+		for spellid, spell in pairs(spells) do
 			if spell.targets and spell.targets[win.targetname] then
 				nr = nr + 1
 
 				local d = win:spell(nr, spellid, spell)
 				d.value = spell.targets[win.targetname]
-				format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+				format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -875,26 +874,25 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		if enemy then return end -- unavailable for enemies yet
+		if not actor or enemy then return end -- unavailable for enemies yet
 
-		local total = actor and actor.absorb or 0
-
-		if total == 0 or not actor.absorbspells then
+		local total = actor.absorb
+		local spells = (total and total > 0) and actor.absorbspells
+		if not spells then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sAPS and actor:GetTime()
+		local actortime = mod_cols.sAPS and actor:GetTime()
 
-		for spellid, spell in pairs(actor.absorbspells) do
+		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid, spell)
 			d.value = spell.amount
-			format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -908,7 +906,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		if enemy then return end -- unavailable for enemies yet
+		if not actor or enemy then return end -- unavailable for enemies yet
 
 		local total = actor and actor.absorb or 0
 		local targets = (total > 0) and actor:GetAbsorbTargets()
@@ -920,15 +918,14 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sAPS and actor:GetTime()
+		local actortime = mod_cols.sAPS and actor:GetTime()
 
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
 			local d = win:actor(nr, target, nil, targetname)
 			d.value = target.amount
-			format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -943,20 +940,19 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
 			if actor and (not win.class or win.class == actor.class) then
-				local aps, amount = actor:GetAPS(nil, not cols.APS)
+				local aps, amount = actor:GetAPS(nil, not mod_cols.APS)
 				if amount > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
 					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = amount
-					format_valuetext(d, cols, total, aps, win.metadata)
+					format_valuetext(d, mod_cols, total, aps, win.metadata)
 				end
 			end
 		end
@@ -967,14 +963,14 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		for i = 1, #actors do
 			local actor = actors[i]
 			if actor and not actor.fake and (not win.class or win.class == actor.class) then
-				local aps, amount = actor:GetAPS(nil, not cols.APS)
+				local aps, amount = actor:GetAPS(nil, not mod_cols.APS)
 				if amount > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor, true)
 					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 					d.value = amount
-					format_valuetext(d, cols, total, aps, win.metadata)
+					format_valuetext(d, mod_cols, total, aps, win.metadata)
 				end
 			end
 		end
@@ -1067,6 +1063,8 @@ Skada:RegisterModule("Absorbs", function(L, P)
 			columns = {Absorbs = true, APS = true, Percent = true, sAPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_holy_devineaegis]]
 		}
+
+		mod_cols = self.metadata.columns
 
 		-- no total click.
 		playermod.nototal = true
@@ -1171,6 +1169,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 	local targetmod = mod:NewModule("Absorbed and healed targets")
 	local spellmod = targetmod:NewModule("Absorbs and healing spells")
 	local spellschools = Skada.spellschools
+	local mod_cols = nil
 
 	local function format_valuetext(d, columns, total, hps, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -1299,18 +1298,19 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sHPS and actor:GetTime()
+		local actortime = mod_cols.sHPS and actor:GetTime()
 
 		local spells = actor.healspells -- heal spells
 		if spells then
 			for spellid, spell in pairs(spells) do
-				if spell.targets and spell.targets[win.targetname] then
+				local amount = spell.targets and spell.targets[win.targetname]
+				amount = amount and (enemy and amount or amount.amount)
+				if amount then
 					nr = nr + 1
 
 					local d = win:spell(nr, spellid, spell, nil, true)
-					d.value = enemy and spell.targets[win.targetname] or spell.targets[win.targetname].amount or 0
-					format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
+					d.value = amount
+					format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 				end
 			end
 		end
@@ -1319,12 +1319,13 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		if not spells then return end
 
 		for spellid, spell in pairs(spells) do
-			if spell.targets and spell.targets[win.targetname] then
+			local amount = spell.targets and spell.targets[win.targetname]
+			if amount then
 				nr = nr + 1
 
 				local d = win:spell(nr, spellid, spell)
-				d.value = spell.targets[win.targetname] or 0
-				format_valuetext(d, mod.metadata.columns, total, actortime and (d.value / actortime), win.metadata, true)
+				d.value = amount
+				format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -1348,8 +1349,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sHPS and actor:GetTime()
+		local actortime = mod_cols.sHPS and actor:GetTime()
 
 		local spells = actor.healspells -- heal spells
 		if spells then
@@ -1358,7 +1358,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 
 				local d = win:spell(nr, spellid, spell, nil, true)
 				d.value = spell.amount
-				format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+				format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 
@@ -1370,7 +1370,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 
 			local d = win:spell(nr, spellid, spell)
 			d.value = spell.amount
-			format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -1383,8 +1383,8 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		win.title = pformat(L["%s's absorbed and healed targets"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
-		local total = actor and actor:GetAbsorbHeal() or 0
-		local targets = (total > 0) and actor:GetAbsorbHealTargets()
+		local total = actor and actor:GetAbsorbHeal()
+		local targets = (total and total > 0) and actor:GetAbsorbHealTargets()
 
 		if not targets then
 			return
@@ -1393,8 +1393,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sAPS and actor:GetTime()
+		local actortime = mod_cols.sAPS and actor:GetTime()
 
 		for targetname, target in pairs(targets) do
 			if target.amount > 0 then
@@ -1402,7 +1401,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 
 				local d = win:actor(nr, target, nil, targetname)
 				d.value = target.amount
-				format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+				format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -1418,20 +1417,19 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
 			if actor and (not win.class or win.class == actor.class) then
-				local hps, amount = actor:GetAHPS(nil, not cols.HPS)
+				local hps, amount = actor:GetAHPS(nil, not mod_cols.HPS)
 				if amount > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
 					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = amount
-					format_valuetext(d, cols, total, hps, win.metadata)
+					format_valuetext(d, mod_cols, total, hps, win.metadata)
 				end
 			end
 		end
@@ -1442,14 +1440,14 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		for i = 1, #actors do
 			local actor = actors[i]
 			if actor and not actor.fake and (not win.class or win.class == actor.class) then
-				local hps, amount = actor:GetAHPS(nil, not cols.HPS)
+				local hps, amount = actor:GetAHPS(nil, not mod_cols.HPS)
 				if amount > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor, true)
 					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 					d.value = amount
-					format_valuetext(d, cols, total, hps, win.metadata)
+					format_valuetext(d, mod_cols, total, hps, win.metadata)
 				end
 			end
 		end
@@ -1505,6 +1503,8 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 			icon = [[Interface\Icons\spell_holy_healingfocus]]
 		}
 
+		mod_cols = self.metadata.columns
+
 		-- no total click.
 		playermod.nototal = true
 		targetmod.nototal = true
@@ -1528,6 +1528,7 @@ end, "Absorbs", "Healing")
 
 Skada:RegisterModule("HPS", function(L, P)
 	local mod = Skada:NewModule("HPS")
+	local mod_cols = nil
 
 	local function format_valuetext(d, columns, total, metadata)
 		d.valuetext = Skada:FormatValueCols(
@@ -1571,20 +1572,19 @@ Skada:RegisterModule("HPS", function(L, P)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
 			if actor and (not win.class or win.class == actor.class) then
-				local amount = actor:GetAHPS(nil, not cols.HPS)
+				local amount = actor:GetAHPS(nil, not mod_cols.HPS)
 				if amount > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
 					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = amount
-					format_valuetext(d, cols, total, win.metadata)
+					format_valuetext(d, mod_cols, total, win.metadata)
 				end
 			end
 		end
@@ -1595,14 +1595,14 @@ Skada:RegisterModule("HPS", function(L, P)
 		for i = 1, #actors do
 			local actor = actors[i]
 			if actor and not actor.fake and (not win.class or win.class == actor.class) then
-				local amount = actor:GetHPS(nil, not cols.HPS)
+				local amount = actor:GetHPS(nil, not mod_cols.HPS)
 				if amount > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor, true)
 					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 					d.value = amount
-					format_valuetext(d, cols, total, win.metadata)
+					format_valuetext(d, mod_cols, total, win.metadata)
 				end
 			end
 		end
@@ -1622,6 +1622,8 @@ Skada:RegisterModule("HPS", function(L, P)
 			columns = {HPS = true, Percent = true},
 			icon = [[Interface\Icons\spell_nature_rejuvenation]]
 		}
+
+		mod_cols = self.metadata.columns
 
 		local parentmod = Skada:GetModule("Absorbs and Healing", true)
 		if parentmod then
@@ -1647,6 +1649,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 	local spellschools = Skada.spellschools
 	local clear = Skada.clearTable
 	local get_absorb_heal_spells = nil
+	local mod_cols = nil
 
 	local function format_valuetext(d, columns, total, hps, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -1697,8 +1700,8 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 
 	local function spell_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local total = set and set:GetAbsorbHeal() or 0
-		if total == 0 then return end
+		local total = set and set:GetAbsorbHeal()
+		if not total or total == 0 then return end
 
 		clear(C)
 		for i = 1, #set.players do
@@ -1709,12 +1712,12 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 					C[id] = new()
 					C[id].school = spell.school
 					C[id].amount = spell.amount
-					C[id].o_amt = spell.o_amt
+					C[id].o_amt = spell.o_amt or spell.overheal
 					C[id].isabsorb = (p.absorbspells and p.absorbspells[id])
 				else
 					C[id].amount = C[id].amount + spell.amount
-					if spell.o_amt then
-						C[id].o_amt = (C[id].o_amt or 0) + spell.o_amt
+					if spell.o_amt or spell.overheal then
+						C[id].o_amt = (C[id].o_amt or 0) + (spell.o_amt or spell.overheal)
 					end
 				end
 			end
@@ -1778,14 +1781,12 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for playername, player in pairs(players) do
 			nr = nr + 1
 
 			local d = win:actor(nr, player, nil, playername)
 			d.value = player.amount
-			format_valuetext(d, cols, total, player.time and (d.value / player.time), win.metadata, true)
+			format_valuetext(d, mod_cols, total, player.time and (d.value / player.time), win.metadata, true)
 		end
 	end
 
@@ -1801,15 +1802,14 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
-		local settime = cols.HPS and set:GetTime()
+		local settime = mod_cols.HPS and set:GetTime()
 
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid, spell, nil, true)
 			d.value = spell.amount
-			format_valuetext(d, cols, total, settime and (d.value / settime), win.metadata)
+			format_valuetext(d, mod_cols, total, settime and (d.value / settime), win.metadata)
 		end
 	end
 
@@ -1821,6 +1821,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 			columns = {Healing = true, HPS = false, Percent = true, sHPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_nature_healingwavelesser]]
 		}
+		mod_cols = self.metadata.columns
 		Skada:AddMode(self, L["Absorbs and Healing"])
 	end
 

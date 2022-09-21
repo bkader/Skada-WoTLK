@@ -145,9 +145,9 @@ do
 end
 
 -- fills the give table with actor's details
-function setPrototype:_fill_actor_table(t, name, actortime)
+function setPrototype:_fill_actor_table(t, name, actortime, no_strict)
 	if t and (not t.class or (actortime and not t.time)) then
-		local actor = self:GetActor(name)
+		local actor = self:GetActor(name, nil, no_strict)
 		if not actor then return end
 
 		t.id = t.id or actor.id

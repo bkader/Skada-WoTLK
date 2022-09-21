@@ -16,6 +16,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 	local active_sunders = {} -- holds sunder targets to consider refreshes
 	local spell_sunder, spell_devastate, sunder_link
 	local last_srcGUID, last_srcName, last_srcFlags
+	local mod_cols = nil
 	local _
 
 	local function format_valuetext(d, columns, total, metadata, subview)
@@ -153,14 +154,12 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for sourcename, source in pairs(sources) do
 			nr = nr + 1
 
 			local d = win:actor(nr, source, nil, sourcename)
 			d.value = source.count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -185,14 +184,12 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
 			local d = win:actor(nr, target, true, targetname)
 			d.value = target.count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -208,7 +205,6 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -218,7 +214,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 
 				local d = win:actor(nr, actor)
 				d.value = actor.sunder
-				format_valuetext(d, cols, total, win.metadata)
+				format_valuetext(d, mod_cols, total, win.metadata)
 			end
 		end
 	end
@@ -242,6 +238,8 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\ability_warrior_sunder]]
 		}
+
+		mod_cols = self.metadata.columns
 
 		-- no total click.
 		targetmod.nototal = true

@@ -18,6 +18,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	local spellsourcemod = spellmod:NewModule("Damage spell sources")
 	local usefulmod = mod:NewModule("Useful Damage")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local mod_cols = nil
 
 	local instanceDiff, customGroupsTable, customUnitsTable, customUnitsInfo
 	local UnitIterator, GetCreatureId = Skada.UnitIterator, Skada.GetCreatureId
@@ -453,8 +454,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sDTPS and actor:GetTime()
+		local actortime = mod_cols.sDTPS and actor:GetTime()
 
 		for sourcename, source in pairs(sources) do
 			if not win.class or win.class == source.class then
@@ -462,7 +462,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 
 				local d = win:actor(nr, source, nil, sourcename)
 				d.value = source.amount
-				format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+				format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -489,8 +489,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sDTPS and actor:GetTime()
+		local actortime = mod_cols.sDTPS and actor:GetTime()
 
 		for sourcename, source in pairs(sources) do
 			if not win.class or win.class == source.class then
@@ -498,7 +497,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 
 				local d = win:actor(nr, source, nil, sourcename)
 				d.value = P.absdamage and source.total or source.amount
-				format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+				format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -525,8 +524,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sDTPS and actor:GetTime()
+		local actortime = mod_cols.sDTPS and actor:GetTime()
 		local spells = actor.damagedspells or actor.damagetakenspells
 
 		for spellid, spell in pairs(spells) do
@@ -536,7 +534,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 
 				local d = win:spell(nr, spellid, spell)
 				d.value = P.absdamage and src.total or src.amount
-				format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+				format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -560,15 +558,14 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sDTPS
+		local actortime = mod_cols.sDTPS and actor:GetTime()
 
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid, spell)
 			d.value = P.absdamage and spell.total or spell.amount
-			format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -594,8 +591,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sDTPS and actor:GetTime()
+		local actortime = mod_cols.sDTPS and actor:GetTime()
 
 		for sourcename, source in pairs(sources) do
 			if source.useful and source.useful > 0 and (not win.class or win.class == source.class) then
@@ -603,7 +599,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 
 				local d = win:actor(nr, source, nil, sourcename)
 				d.value = source.useful
-				format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+				format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -619,19 +615,18 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.enemies -- enemies
 		for i = 1, #actors do
 			local actor = actors[i]
 			if actor then
-				local dtps, amount = actor:GetDTPS(nil, not cols.sDTPS)
+				local dtps, amount = actor:GetDTPS(nil, not mod_cols.sDTPS)
 				if amount > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor, true)
 					d.value = amount
-					format_valuetext(d, cols, total, dtps, win.metadata)
+					format_valuetext(d, mod_cols, total, dtps, win.metadata)
 				end
 			end
 		end
@@ -664,6 +659,8 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 			columns = {Damage = true, DTPS = false, Percent = true, sDTPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_fire_felflamebolt]]
 		}
+
+		mod_cols = self.metadata.columns
 
 		-- no total click.
 		sourcemod.nototal = true
@@ -881,6 +878,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 	local spelltargetmod = spellmod:NewModule("Damage spell targets")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local mod_cols = nil
 
 	local function format_valuetext(d, columns, total, dps, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -1037,15 +1035,14 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime()
 
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid, spell)
 			d.value = spell.amount
-			format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -1073,8 +1070,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime()
 
 		for targetname, target in pairs(targets) do
 			if not win.class or win.class == target.class then
@@ -1082,7 +1078,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 
 				local d = win:actor(nr, target, nil, targetname)
 				d.value = target.amount
-				format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+				format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -1109,8 +1105,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime()
 
 		for targetname, target in pairs(targets) do
 			if not win.class or win.class == target.class then
@@ -1118,7 +1113,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 
 				local d = win:actor(nr, target, true, targetname)
 				d.value = P.absdamage and target.total or target.amount
-				format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+				format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -1142,15 +1137,14 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime()
 
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid, spell)
 			d.value = P.absdamage and spell.total or spell.amount
-			format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -1165,7 +1159,6 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.enemies -- enemies
 		for i = 1, #actors do
@@ -1177,7 +1170,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 
 					local d = win:actor(nr, actor, true)
 					d.value = amount
-					format_valuetext(d, cols, total, dps, win.metadata)
+					format_valuetext(d, mod_cols, total, dps, win.metadata)
 				end
 			end
 		end
@@ -1202,6 +1195,8 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 			columns = {Damage = true, DPS = false, Percent = true, sDPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_shadow_shadowbolt]]
 		}
+
+		mod_cols = self.metadata.columns
 
 		-- no total click.
 		targetmod.nototal = true
@@ -1342,6 +1337,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 	local spellmod = mod:NewModule("Healing spell list")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local mod_cols = nil
 
 	local function format_valuetext(d, columns, total, dps, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -1425,15 +1421,14 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sHPS and actor:GetTime()
+		local actortime = mod_cols.sHPS and actor:GetTime()
 
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
 			local d = win:actor(nr, target, true, targetname)
 			d.value = target.amount
-			format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -1456,15 +1451,14 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sHPS and actor:GetTime()
+		local actortime = mod_cols.sHPS and actor:GetTime()
 
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid, spell, true)
 			d.value = spell.amount
-			format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -1483,7 +1477,6 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.enemies -- enemies
 		for i = 1, #actors do
@@ -1495,7 +1488,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 
 					local d = win:actor(nr, actor, true)
 					d.value = amount
-					format_valuetext(d, cols, total, hps, win.metadata)
+					format_valuetext(d, mod_cols, total, hps, win.metadata)
 				end
 			end
 		end
@@ -1512,6 +1505,8 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 			columns = {Healing = true, HPS = true, Percent = true, sHPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_holy_blessedlife]]
 		}
+
+		mod_cols = self.metadata.columns
 
 		-- no total click.
 		spellmod.nototal = true

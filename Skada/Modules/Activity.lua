@@ -6,6 +6,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 	local format, pformat = string.format, Skada.pformat
 	local new, clear = Skada.newTable, Skada.clearTable
 	local get_activity_targets = nil
+	local mod_cols = nil
 
 	local function format_valuetext(d, columns, maxtime, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -53,14 +54,12 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for name, target in pairs(targets) do
 			nr = nr + 1
 
 			local d = win:actor(nr, target, true, name)
 			d.value = target.time
-			format_valuetext(d, cols, maxtime, win.metadata, true)
+			format_valuetext(d, mod_cols, maxtime, win.metadata, true)
 		end
 	end
 
@@ -75,7 +74,6 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.players -- players.
 		for i = 1, #actors do
@@ -88,7 +86,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 					local d = win:actor(nr, actor)
 					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = activetime
-					format_valuetext(d, cols, settime, win.metadata)
+					format_valuetext(d, mod_cols, settime, win.metadata)
 				end
 			end
 		end
@@ -106,7 +104,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 					local d = win:actor(nr, actor, true)
 					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 					d.value = activetime
-					format_valuetext(d, cols, settime, win.metadata)
+					format_valuetext(d, mod_cols, settime, win.metadata)
 				end
 			end
 		end
@@ -139,6 +137,8 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 			columns = {["Active Time"] = true, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\spell_holy_borrowedtime]]
 		}
+
+		mod_cols = self.metadata.columns
 
 		-- no total click.
 		targetmod.nototal = true

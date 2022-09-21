@@ -3,6 +3,7 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Parry-Haste")
 	local targetmod = mod:NewModule("Parry target list")
 	local pairs, format, pformat = pairs, string.format, Skada.pformat
+	local mod_cols = nil
 
 	local parrybosses = {
 		[L["Acidmaw"]] = true,
@@ -80,15 +81,13 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for targetname, count in pairs(targets) do
 			nr = nr + 1
 
 			local d = win:actor(nr, targetname)
 			d.class = "BOSS" -- what else can it be?
 			d.value = count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -103,7 +102,6 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -113,7 +111,7 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 
 				local d = win:actor(nr, actor)
 				d.value = actor.parry
-				format_valuetext(d, cols, total, win.metadata)
+				format_valuetext(d, mod_cols, total, win.metadata)
 			end
 		end
 	end
@@ -133,6 +131,8 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\ability_parry]]
 		}
+
+		mod_cols = self.metadata.columns
 
 		-- no total click.
 		targetmod.nototal = true

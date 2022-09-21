@@ -13,6 +13,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 	local pairs, format, pformat = pairs, string.format, Skada.pformat
 	local new, clear = Skada.newTable, Skada.clearTable
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
+	local mod_cols = nil
 
 	local function format_valuetext(d, columns, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -112,14 +113,12 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for spellid, count in pairs(spells) do
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid)
 			d.value = count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -143,14 +142,12 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
 			local d = win:actor(nr, target, true, targetname)
 			d.value = target.count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -174,14 +171,12 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid)
 			d.value = spell.count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -196,7 +191,6 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -206,7 +200,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 
 				local d = win:actor(nr, actor)
 				d.value = actor.interrupt
-				format_valuetext(d, cols, total, win.metadata)
+				format_valuetext(d, mod_cols, total, win.metadata)
 			end
 		end
 	end
@@ -228,6 +222,8 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 			columns = {Count = true, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\ability_kick]]
 		}
+
+		mod_cols = self.metadata.columns
 
 		-- no total click.
 		spellmod.nototal = true

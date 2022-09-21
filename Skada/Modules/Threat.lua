@@ -9,123 +9,128 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 	local PlaySoundFile = PlaySoundFile
 	local new, del = Skada.newTable, Skada.delTable
 	local T = Skada.Table
+	local mod_cols = nil
 	local _
 
-	local aggroIcon = [[Interface\Icons\ability_physical_taunt]]
+	local aggro_icon = [[Interface\Icons\ability_physical_taunt]]
 
 	do
 		local CheckInteractDistance, ItemRefTooltip = CheckInteractDistance, ItemRefTooltip
 		local GetItemInfo, IsItemInRange = GetItemInfo, IsItemInRange
 		local UnitGUID, UnitClass = UnitGUID, UnitClass
-		local nr, maxthreat, last_warn, mypercent = 0, 0, time(), nil
-		local threatTable, tankThreat, tankValue, rubyAcorn, queried
+		local nr, max_threat, last_warn, my_percent = 0, 0, time(), nil
+		local threat_table, tank_threat, tank_value, ruby_acorn, queried
+		local we_should_warn = false
 
 		-- bar colors
-		local aggroColor = RED_FONT_COLOR
-		local negativeColor = GRAY_FONT_COLOR
+		local aggro_color = RED_FONT_COLOR
+		local negative_color = GRAY_FONT_COLOR
 
 		local function add_to_threattable(unit, owner, target, win)
 			if unit == "AGGRO" then
-				if mod.db.showAggroBar and tankThreat and tankThreat > 0 then
-					if not rubyAcorn then
-						rubyAcorn = GetItemInfo(37727)
-					end
+				if not mod.db.showAggroBar or not tank_threat or tank_threat == 0 then return end
 
-					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = "AGGRO"
-					d.label = L["> Pull Aggro <"]
-					d.text = nil
-
-					d.icon = aggroIcon
-					d.color = aggroColor
-					d.ignore = true
-					d.changed = nil
-
-					d.class = nil
-					d.role = nil
-					d.spec = nil
-					d.isTanking = nil
-
-					if rubyAcorn then
-						d.threat = tankThreat * (IsItemInRange(37727, target) == 1 and 1.1 or 1.3)
-						d.value = tankValue * (IsItemInRange(37727, target) == 1 and 1.1 or 1.3)
-					else
-						d.threat = tankThreat * (CheckInteractDistance(target, 3) and 1.1 or 1.3)
-						d.value = tankValue * (CheckInteractDistance(target, 3) and 1.1 or 1.3)
-						if not queried and not ItemRefTooltip:IsVisible() then
-							ItemRefTooltip:SetHyperlink("item:37727")
-							queried = true
-						end
-					end
-				end
-			elseif not mod.db.ignorePets or (mod.db.ignorePets and owner == nil) then
-				local guid = UnitGUID(unit)
-				local player = threatTable and threatTable[guid]
-
-				if not player then
-					player = new()
-					player.id = guid
-					player.unit = unit
-					player.name = UnitName(unit)
-
-					if owner ~= nil then
-						player.name = player.name .. " (" .. UnitName(owner) .. ")"
-						player.class = "PET"
-					else
-						_, player.class = UnitClass(unit)
-						player.role = GetUnitRole(unit, player.class)
-						player.spec = GetUnitSpec(unit, player.class)
-					end
-
-					-- cache the player.
-					threatTable = threatTable or T.get("Threat_Table")
-					threatTable[guid] = player
+				if not ruby_acorn then
+					ruby_acorn = GetItemInfo(37727)
 				end
 
-				if player and player.unit then
-					local isTanking, _, threatpct, _, threatvalue = UnitDetailedThreatSituation(player.unit, target)
+				nr = nr + 1
+				local d = win:nr(nr)
 
-					if threatvalue then
-						nr = nr + 1
-						local d = win:nr(nr)
+				d.id = "AGGRO"
+				d.label = L["> Pull Aggro <"]
+				d.text = nil
 
-						d.id = player.id or player.name
-						d.label = player.name
-						d.text = player.id and Skada:FormatName(player.name, player.id)
+				d.icon = aggro_icon
+				d.color = aggro_color
+				d.ignore = true
+				d.changed = nil
 
-						d.icon = nil
-						d.color = nil
-						d.ignore = nil
-						d.changed = nil
+				d.class = nil
+				d.role = nil
+				d.spec = nil
+				d.isTanking = nil
 
-						d.class = player.class
-						d.role = player.role
-						d.spec = player.spec
-						d.isTanking = isTanking
-
-						if mod.db.rawvalue then
-							if threatvalue < 0 then
-								d.value = threatvalue + 410065408
-								d.threat = threatvalue + 410065408
-								d.color = negativeColor
-								d.changed = true
-							else
-								d.value = threatvalue
-								d.threat = threatvalue
-							end
-						elseif threatpct then
-							d.value = threatpct
-							d.threat = threatvalue
-						end
-
-						if d.value > maxthreat then
-							maxthreat = d.value
-							tankThreat = d.threat
-							tankValue = d.value
-						end
+				if ruby_acorn then
+					d.threat = tank_threat * (IsItemInRange(37727, target) == 1 and 1.1 or 1.3)
+					d.value = tank_value * (IsItemInRange(37727, target) == 1 and 1.1 or 1.3)
+				else
+					d.threat = tank_threat * (CheckInteractDistance(target, 3) and 1.1 or 1.3)
+					d.value = tank_value * (CheckInteractDistance(target, 3) and 1.1 or 1.3)
+					if not queried and not ItemRefTooltip:IsVisible() then
+						ItemRefTooltip:SetHyperlink("item:37727")
+						queried = true
 					end
+				end
+
+				return
+			elseif mod.db.ignorePets and owner then -- ignore pets
+				return
+			end
+
+			local guid = UnitGUID(unit)
+			local player = threat_table and threat_table[guid]
+
+			if not player then
+				player = new()
+				player.id = guid
+				player.unit = unit
+				player.name = UnitName(unit)
+
+				if owner ~= nil then
+					player.name = player.name .. " (" .. UnitName(owner) .. ")"
+					player.class = "PET"
+				else
+					_, player.class = UnitClass(unit)
+					player.role = GetUnitRole(unit, player.class)
+					player.spec = GetUnitSpec(unit, player.class)
+				end
+
+				-- cache the player.
+				threat_table = threat_table or T.get("Threat_Table")
+				threat_table[guid] = player
+			end
+
+			if not player or not player.unit then return end
+
+			local isTanking, _, threatpct, _, threatvalue = UnitDetailedThreatSituation(player.unit, target)
+			if threatvalue then
+				nr = nr + 1
+				local d = win:nr(nr)
+
+				d.id = player.id or player.name
+				d.label = player.name
+				d.text = player.id and Skada:FormatName(player.name, player.id)
+
+				d.icon = nil
+				d.color = nil
+				d.ignore = nil
+				d.changed = nil
+
+				d.class = player.class
+				d.role = player.role
+				d.spec = player.spec
+				d.isTanking = isTanking
+
+				if mod.db.rawvalue then
+					if threatvalue < 0 then
+						d.value = threatvalue + 410065408
+						d.threat = threatvalue + 410065408
+						d.color = negative_color
+						d.changed = true
+					else
+						d.value = threatvalue
+						d.threat = threatvalue
+					end
+				elseif threatpct then
+					d.value = threatpct
+					d.threat = threatvalue
+				end
+
+				if d.value > max_threat then
+					max_threat = d.value
+					tank_threat = d.threat
+					tank_value = d.value
 				end
 			end
 		end
@@ -152,9 +157,9 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 				win.title = self.unitName or win.title
 
 				-- reset stuff & check group
-				maxthreat, nr = 0, 0
+				max_threat, nr = 0, 0
 				GroupIterator(add_to_threattable, self.unitID, win)
-				if maxthreat > 0 and self.db.showAggroBar then
+				if max_threat > 0 and self.db.showAggroBar then
 					add_to_threattable("AGGRO", nil, self.unitID, win)
 				end
 
@@ -162,23 +167,23 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 				if nr == 0 then return end
 
 				-- If we are going by raw threat we got the max threat from above; otherwise it's always 100.
-				maxthreat = self.db.rawvalue and maxthreat or 100
+				max_threat = self.db.rawvalue and max_threat or 100
 
 				if win.metadata then
-					win.metadata.maxvalue = maxthreat
+					win.metadata.maxvalue = max_threat
 				end
 
-				local we_should_warn = false
+				we_should_warn = false
 				-- We now have a a complete threat table.
 				-- Now we need to add valuetext.
 				for i = 1, #win.dataset do
 					local data = win.dataset[i]
 					if data and data.id == "AGGRO" then
-						if self.db.showAggroBar and tankThreat and tankThreat > 0 then
+						if self.db.showAggroBar and tank_threat and tank_threat > 0 then
 							data.valuetext = Skada:FormatValueCols(
-								self.metadata.columns.Threat and format_threatvalue(data.threat),
-								self.metadata.columns.TPS and get_tps(data.threat),
-								self.metadata.columns.Percent and Skada:FormatPercent(data.value, max(0.000001, maxthreat))
+								mod_cols.Threat and format_threatvalue(data.threat),
+								mod_cols.TPS and get_tps(data.threat),
+								mod_cols.Percent and Skada:FormatPercent(data.value, max(0.000001, max_threat))
 							)
 
 							if win.metadata then
@@ -190,18 +195,18 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 					elseif data and data.id then
 						if data.threat and data.threat > 0 then
 							-- Warn if this is ourselves and we are over the treshold.
-							local percent = 100 * data.value / max(0.000001, maxthreat)
+							local percent = 100 * data.value / max(0.000001, max_threat)
 							if data.id == Skada.userGUID then
-								mypercent = percent
+								my_percent = percent
 								if self.db.threshold and self.db.threshold < percent and (not data.isTanking or not self.db.notankwarnings) then
 									we_should_warn = (data.color == nil)
 								end
 							end
 
 							data.valuetext = Skada:FormatValueCols(
-								self.metadata.columns.Threat and format_threatvalue(data.threat),
-								self.metadata.columns.TPS and get_tps(data.threat),
-								self.metadata.columns.Percent and Skada:FormatPercent(percent)
+								mod_cols.Threat and format_threatvalue(data.threat),
+								mod_cols.TPS and get_tps(data.threat),
+								mod_cols.Percent and Skada:FormatPercent(percent)
 							)
 						else
 							data.id = nil
@@ -211,15 +216,15 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 
 				-- Warn
 				if we_should_warn and time() - last_warn > (self.db.frequency or 2) then
-					self:Warn(self.db.sound, self.db.flash, self.db.shake, mypercent and format(L["%d%% Threat"], mypercent) or L["High Threat"])
+					self:Warn(self.db.sound, self.db.flash, self.db.shake, my_percent and format(L["%d%% Threat"], my_percent) or L["High Threat"])
 					last_warn = time()
 				end
 			end
 		end
 
 		function mod:CombatLeave()
-			tankThreat, tankValue = nil, nil
-			T.free("Threat_Table", threatTable, nil, del)
+			tank_threat, tank_value = nil, nil
+			T.free("Threat_Table", threat_table, nil, del)
 			self.unitID, self.unitName = nil, nil
 		end
 	end
@@ -381,7 +386,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 					type = "description",
 					name = mod.localeName,
 					fontSize = "large",
-					image = aggroIcon,
+					image = aggro_icon,
 					imageWidth = 18,
 					imageHeight = 18,
 					imageCoords = {0.05, 0.95, 0.05, 0.95},
@@ -557,8 +562,10 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 				wipestale = true,
 				columns = {Threat = true, TPS = false, Percent = true},
 				notitleset = true, -- ignore title set
-				icon = aggroIcon
+				icon = aggro_icon
 			}
+
+			mod_cols = self.metadata.columns
 
 			Skada.RegisterBucketEvent(self, {"UNIT_THREAT_LIST_UPDATE", "UNIT_THREAT_SITUATION_UPDATE", "PLAYER_TARGET_CHANGED"}, 0.05, "SetUnit")
 			Skada.RegisterCallback(self, "Skada_ApplySettings", "ApplySettings")

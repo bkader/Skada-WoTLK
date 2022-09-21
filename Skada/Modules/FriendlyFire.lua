@@ -11,6 +11,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	local pairs, format = pairs, string.format
 	local pformat, T = Skada.pformat, Skada.Table
 	local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
+	local mod_cols = nil
 	local _
 
 	local function format_valuetext(d, columns, total, dps, metadata, subview)
@@ -46,6 +47,8 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 			player.friendfirespells = player.friendfirespells or {}
 			player.friendfirespells[dmg.spellid] = {amount = 0, school = dmg.school}
 			spell = player.friendfirespells[dmg.spellid]
+		elseif not spell.school and dmg.school then
+			spell.school = dmg.school
 		end
 		spell.amount = spell.amount + dmg.amount
 
@@ -59,13 +62,13 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	local function spell_damage(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		if srcGUID == dstGUID then return end -- ignore damage done to self
 
-		local amount, absorbed
+		local absorbed
 
 		if eventtype == "SWING_DAMAGE" then
 			dmg.spellid, dmg.school = 6603, 0x01
-			amount, _, _, _, _, absorbed = ...
+			dmg.amount, _, _, _, _, absorbed = ...
 		else
-			dmg.spellid, _, dmg.school, amount, _, _, _, _, absorbed = ...
+			dmg.spellid, _, dmg.school, dmg.amount, _, _, _, _, absorbed = ...
 		end
 
 		if dmg.spellid and not ignoredSpells[dmg.spellid] then
@@ -77,7 +80,34 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 			dmg.dstName = dstName
 			dmg.dstFlags = dstFlags
 
-			dmg.amount = (amount or 0) + (absorbed or 0)
+			if absorbed and absorbed > 0 then
+				dmg.amount = dmg.amount + absorbed
+			end
+
+			Skada:DispatchSets(log_damage)
+		end
+	end
+
+	local function spell_missed(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		if srcGUID == dstGUID then return end -- ignore damage done to self
+
+		local misstype
+
+		if eventtype == "SWING_MISSED" then
+			dmg.spellid, dmg.school = 6603, 0x01
+			misstype, dmg.amount = ...
+		else
+			dmg.spellid, _, dmg.school, misstype, dmg.amount = ...
+		end
+
+		if misstype == "ABSORB" and dmg.spellid and not ignoredSpells[dmg.spellid] then
+			dmg.playerid = srcGUID
+			dmg.playername = srcName
+			dmg.playerflags = srcFlags
+
+			dmg.dstGUID = dstGUID
+			dmg.dstName = dstName
+			dmg.dstFlags = dstFlags
 
 			Skada:DispatchSets(log_damage)
 		end
@@ -102,15 +132,14 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime()
 
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
 			local d = win:actor(nr, target, nil, targetname)
 			d.value = target.amount
-			format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -133,15 +162,14 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime()
 
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
-			local d = win:spell(nr, spellid)
+			local d = win:spell(nr, spellid, spell)
 			d.value = spell.amount
-			format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -168,9 +196,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		local targets = spell.targets
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sDPS and actor:GetTime()
-
+		local actortime = mod_cols.sDPS and actor:GetTime()
 
 		for targetname, amount in pairs(targets) do
 			nr = nr + 1
@@ -179,7 +205,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 			set:_fill_actor_table(d, targetname)
 
 			d.value = amount
-			format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -194,7 +220,6 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -204,7 +229,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 
 				local d = win:actor(nr, actor)
 				d.value = actor.friendfire
-				format_valuetext(d, cols, total, cols.DPS and (d.value / actor:GetTime()), win.metadata)
+				format_valuetext(d, mod_cols, total, mod_cols.DPS and (d.value / actor:GetTime()), win.metadata)
 			end
 		end
 	end
@@ -231,9 +256,13 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 			icon = [[Interface\Icons\inv_gizmo_supersappercharge]]
 		}
 
+		mod_cols = self.metadata.columns
+
 		-- no total click.
 		spellmod.nototal = true
 		targetmod.nototal = true
+
+		local flags_src_dst = {src_is_interesting_nopets = true, dst_is_interesting_nopets = true}
 
 		Skada:RegisterForCL(
 			spell_damage,
@@ -244,7 +273,18 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 			"SPELL_DAMAGE",
 			"SPELL_PERIODIC_DAMAGE",
 			"SWING_DAMAGE",
-			{dst_is_interesting_nopets = true, src_is_interesting_nopets = true}
+			flags_src_dst
+		)
+
+		Skada:RegisterForCL(
+			spell_missed,
+			"DAMAGE_SHIELD_MISSED",
+			"RANGE_MISSED",
+			"SPELL_BUILDING_MISSED",
+			"SPELL_MISSED",
+			"SPELL_PERIODIC_MISSED",
+			"SWING_MISSED",
+			flags_src_dst
 		)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")

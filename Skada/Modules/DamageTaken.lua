@@ -33,6 +33,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local missTypes = Skada.missTypes
 	local GetTime = GetTime
+	local mod_cols = nil
 
 	local dmg = {}
 	local function log_damage(set, isdot)
@@ -253,12 +254,12 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 				dmg.glancing = nil
 				dmg.crushing = nil
 
-				if dmg.misstype == "ABSORB" then
-					dmg.absorbed = amount or 0
-				elseif dmg.misstype == "BLOCK" then
-					dmg.blocked = amount or 0
-				elseif dmg.misstype == "RESIST" then
-					dmg.resisted = amount or 0
+				if dmg.misstype == "ABSORB" and amount then
+					dmg.absorbed = amount
+				elseif dmg.misstype == "BLOCK" and amount then
+					dmg.blocked = amount
+				elseif dmg.misstype == "RESIST" and amount then
+					dmg.resisted = amount
 				end
 
 				Skada:DispatchSets(log_damage, eventtype == "SPELL_PERIODIC_MISSED")
@@ -387,15 +388,14 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sDTPS and actor:GetTime()
+		local actortime = mod_cols.sDTPS and actor:GetTime()
 
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid, spell)
 			d.value = min(total, P.absdamage and spell.total or spell.amount)
-			format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -418,15 +418,14 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sDTPS and actor:GetTime()
+		local actortime = mod_cols.sDTPS and actor:GetTime()
 
 		for sourcename, source in pairs(sources) do
 			nr = nr + 1
 
 			local d = win:actor(nr, source, true, sourcename)
 			d.value = P.absdamage and source.total or source.amount
-			format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -516,10 +515,23 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		spell = spell or actor.damagetakenspells and actor.damagetakenspells[win.spellid]
 		if not spell then return end
 
-		local absorbed = spell.total and (spell.total - spell.amount) or 0
-		local blocked = spell.b_amt or spell.blocked or 0
-		local resisted = spell.r_amt or spell.resisted or 0
-		local total = spell.amount + absorbed + blocked + resisted
+		local total = spell.amount
+
+		local absorbed = spell.total and (spell.total - spell.amount)
+		if absorbed then
+			total = spell.total
+		end
+
+		local blocked = spell.b_amt or spell.blocked
+		if blocked then
+			total = total + blocked
+		end
+
+		local resisted = spell.r_amt or spell.resisted
+		if resisted then
+			total = total + resisted
+		end
+
 		if win.metadata then
 			win.metadata.maxvalue = total
 		end
@@ -531,19 +543,20 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 			nr = add_detail_bar(win, nr, L["Damage"], spell.amount, total, true, true)
 		end
 
-		if (spell.o_amt and spell.o_amt > 0) or (spell.overkill and spell.overkill > 0) then
-			nr = add_detail_bar(win, nr, L["Overkill"], spell.o_amt or spell.overkill, total, true, true)
+		local overkill = spell.o_amt or spell.overkill
+		if overkill and overkill > 0 then
+			nr = add_detail_bar(win, nr, L["Overkill"], overkill, total, true, true)
 		end
 
-		if absorbed > 0 then
+		if absorbed and absorbed > 0 then
 			nr = add_detail_bar(win, nr, L["ABSORB"], absorbed, total, true, true)
 		end
 
-		if blocked > 0 then
+		if blocked and blocked > 0 then
 			nr = add_detail_bar(win, nr, L["BLOCK"], blocked, total, true, true)
 		end
 
-		if resisted > 0 then
+		if resisted and resisted > 0 then
 			nr = add_detail_bar(win, nr, L["RESIST"], resisted, total, true, true)
 		end
 
@@ -565,30 +578,26 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		local sources = actor and actor:GetDamageSources()
 		if not sources or not sources[win.targetname] then return end
 
-		local total = sources[win.targetname].amount or 0
-		if P.absdamage and sources[win.targetname].total then
-			total = sources[win.targetname].total
-		end
-
-		if total == 0 then
+		local total = P.absdamage and sources[win.targetname].total or sources[win.targetname].amount
+		local spells = (total and total > 0) and (actor.damagedspells or actor.damagetakenspells)
+		if not spells then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-		local actortime = cols.sDTPS and actor:GetTime()
+		local actortime = mod_cols.sDTPS and actor:GetTime()
 
-		local spells = actor.damagedspells or actor.damagetakenspells
 		for spellid, spell in pairs(spells) do
 			local source = spell.sources and spell.sources[win.targetname]
-			if source then
+			local amount = source and (P.absdamage and source.total or source.amount)
+			if amount then
 				nr = nr + 1
 
 				local d = win:spell(nr, spellid, spell)
-				d.value = P.absdamage and source.total or source.amount or 0
-				format_valuetext(d, cols, total, actortime and (d.value / actortime), win.metadata, true)
+				d.value = amount
+				format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -604,20 +613,19 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.players -- players.
 		for i = 1, #actors do
 			local actor = actors[i]
 			if actor and (not win.class or win.class == actor.class) then
-				local dtps, amount = actor:GetDTPS(not cols.DTPS)
+				local dtps, amount = actor:GetDTPS(not mod_cols.DTPS)
 				if amount > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
 					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = amount
-					format_valuetext(d, cols, total, dtps, win.metadata)
+					format_valuetext(d, mod_cols, total, dtps, win.metadata)
 				end
 			end
 		end
@@ -628,14 +636,14 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		for i = 1, #actors do
 			local actor = actors[i]
 			if actor and not actor.fake and (not win.class or win.class == actor.class) then
-				local dtps, amount = actor:GetDTPS(not cols.DTPS)
+				local dtps, amount = actor:GetDTPS(not mod_cols.DTPS)
 				if amount > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor, true)
 					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 					d.value = amount
-					format_valuetext(d, cols, total, dtps, win.metadata)
+					format_valuetext(d, mod_cols, total, dtps, win.metadata)
 				end
 			end
 		end
@@ -644,8 +652,8 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 	function mod:GetSetSummary(set, win)
 		local dtps, amount = set:GetDTPS(win and win.class)
 		local valuetext = Skada:FormatValueCols(
-			self.metadata.columns.Damage and Skada:FormatNumber(amount),
-			self.metadata.columns.DTPS and Skada:FormatNumber(dtps)
+			mod_cols.Damage and Skada:FormatNumber(amount),
+			mod_cols.DTPS and Skada:FormatNumber(dtps)
 		)
 		return amount, valuetext
 	end
@@ -671,6 +679,8 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 			columns = {Damage = true, DTPS = false, Percent = true, sDTPS = false, sPercent = true},
 			icon = [[Interface\Icons\ability_mage_frostfirebolt]]
 		}
+
+		mod_cols = self.metadata.columns
 
 		-- no total click.
 		playermod.nototal = true
@@ -746,6 +756,7 @@ end)
 
 Skada:RegisterModule("DTPS", function(L, P)
 	local mod = Skada:NewModule("DTPS")
+	local mod_cols = nil
 
 	local function dtps_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
@@ -776,7 +787,6 @@ Skada:RegisterModule("DTPS", function(L, P)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -789,7 +799,7 @@ Skada:RegisterModule("DTPS", function(L, P)
 					local d = win:actor(nr, actor)
 					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = dtps
-					format_valuetext(d, cols, total, dtps, win.metadata)
+					format_valuetext(d, mod_cols, total, dtps, win.metadata)
 				end
 			end
 		end
@@ -807,7 +817,7 @@ Skada:RegisterModule("DTPS", function(L, P)
 					local d = win:actor(nr, actor, true)
 					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 					d.value = dtps
-					format_valuetext(d, cols, total, dtps, win.metadata)
+					format_valuetext(d, mod_cols, total, dtps, win.metadata)
 				end
 			end
 		end
@@ -827,6 +837,8 @@ Skada:RegisterModule("DTPS", function(L, P)
 			columns = {DTPS = true, Percent = true},
 			icon = [[Interface\Icons\inv_weapon_shortblade_06]]
 		}
+
+		mod_cols = self.metadata.columns
 
 		local parentmod = Skada:GetModule("Damage Taken", true)
 		if parentmod and parentmod.metadata then
@@ -851,6 +863,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 	local targetmod = mod:NewModule("Damage spell targets")
 	local sourcemod = mod:NewModule("Damage spell sources")
 	local C = Skada.cacheTable2
+	local mod_cols = nil
 
 	local function player_tooltip(win, id, label, tooltip)
 		local set = win.spellid and win:GetSelectedSet()
@@ -918,7 +931,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 
 						total = total + amount
 
-						if not src.class or (mod.metadata.columns.sDTPS and not src.time) then
+						if not src.class or (mod_cols.sDTPS and not src.time) then
 							local actor = set:GetActor(sourcename)
 							if actor and not src.class then
 								src.id = actor.id or actor.name
@@ -926,7 +939,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 								src.role = actor.role
 								src.spec = actor.spec
 							end
-							if actor and mod.metadata.columns.sDTPS and not src.time then
+							if actor and mod_cols.sDTPS and not src.time then
 								src.time = set:GetActorTime(actor.id, actor.name)
 							end
 						end
@@ -942,14 +955,12 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for sourcename, source in pairs(sources) do
 			nr = nr + 1
 
 			local d = win:actor(nr, source, true, sourcename)
 			d.value = source.amount
-			format_valuetext(d, cols, total, source.time and (d.value / source.time), win.metadata, true)
+			format_valuetext(d, mod_cols, total, source.time and (d.value / source.time), win.metadata, true)
 		end
 	end
 
@@ -964,7 +975,6 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 
 		local total = 0
 		local targets = clear(C)
-		local cols = mod.metadata.columns
 
 		local players = set.players
 		for i = 1, #players do
@@ -980,7 +990,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 					targets[player.name].role = player.role
 					targets[player.name].spec = player.spec
 					targets[player.name].amount = amount
-					targets[player.name].time = cols.sDTPS and player:GetTime()
+					targets[player.name].time = mod_cols.sDTPS and player:GetTime()
 
 					total = total + amount
 				end
@@ -999,7 +1009,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 
 			local d = win:actor(nr, player, nil, playername)
 			d.value = player.amount
-			format_valuetext(d, cols, total, player.time and (d.value / player.time), win.metadata, true)
+			format_valuetext(d, mod_cols, total, player.time and (d.value / player.time), win.metadata, true)
 		end
 	end
 
@@ -1037,15 +1047,14 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
-		local settime = cols.DTPS and set:GetTime()
+		local settime = mod_cols.DTPS and set:GetTime()
 
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid, spell)
 			d.value = spell.amount
-			format_valuetext(d, cols, total, settime and (d.value / settime), win.metadata)
+			format_valuetext(d, mod_cols, total, settime and (d.value / settime), win.metadata)
 		end
 	end
 
@@ -1058,6 +1067,9 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 			columns = {Damage = true, DTPS = false, Percent = true, sDTPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_arcane_starfire]]
 		}
+
+		mod_cols = self.metadata.columns
+
 		Skada:AddMode(self, L["Damage Taken"])
 	end
 
@@ -1075,6 +1087,7 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 	local playermod = mod:NewModule("Damage Breakdown")
 	local missTypes = Skada.missTypes
 	local C = Skada.cacheTable2
+	local mod_cols = nil
 
 	local function fmt_valuetext(d, columns, total, count, metadata)
 		d.valuetext = Skada:FormatValueCols(
@@ -1103,8 +1116,6 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 			end
 
 			local nr = 0
-			local cols = mod.metadata.columns
-
 			for event, count in pairs(actor.data) do
 				nr = nr + 1
 
@@ -1112,7 +1123,7 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 				d.id = event
 				d.label = L[event]
 				d.value = 100 * count / actor.total
-				fmt_valuetext(d, cols, actor.total, count, win.metadata)
+				fmt_valuetext(d, mod_cols, actor.total, count, win.metadata)
 			end
 		end
 	end
@@ -1121,15 +1132,15 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 		win.title = win.class and format("%s (%s)", L["Avoidance & Mitigation"], L[win.class]) or L["Avoidance & Mitigation"]
 
 		local total = set and (set.totaldamaged or set.totaldamagetaken)
-		if not total or total == 0 then return end
-
-		clear(C, true) -- used later
-		if win.metadata then
+		if not total or total == 0 then
+			return
+		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
+		clear(C, true) -- used later
+
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -1163,7 +1174,7 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 						local d = win:actor(nr, player)
 
 						d.value = 100 * avoid / count
-						fmt_valuetext(d, cols, count, avoid, win.metadata)
+						fmt_valuetext(d, mod_cols, count, avoid, win.metadata)
 					elseif C[player.id] then
 						C[player.id] = del(C[player.id])
 					end
@@ -1182,6 +1193,8 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 			columns = {Percent = true, Count = true, Total = true},
 			icon = [[Interface\Icons\ability_warlock_avoidance]]
 		}
+
+		mod_cols = self.metadata.columns
 
 		Skada:AddMode(self, L["Damage Taken"])
 	end

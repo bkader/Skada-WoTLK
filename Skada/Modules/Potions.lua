@@ -12,6 +12,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 	local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
 	local T, pformat = Skada.Table, Skada.pformat
 	local potion_ids = {}
+	local mod_cols = nil
 	local _
 
 	local prepotionStr, potionStr = "\124c%s%s\124r %s", "\124T%s:14:14:0:0:64:64:4:60:4:60\124t"
@@ -119,14 +120,12 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for actorname, actor in pairs(actors) do
 			nr = nr + 1
 
 			local d = win:actor(nr, actor, nil, actorname)
 			d.value = actor.count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -157,8 +156,6 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for potionid, count in pairs(potions) do
 			local potionname, potionlink, _, _, _, _, _, _, _, potionicon = GetItemInfo(potionid)
 			if not potionname then
@@ -175,7 +172,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 				d.icon = potionicon
 
 				d.value = count
-				format_valuetext(d, cols, total, win.metadata, true)
+				format_valuetext(d, mod_cols, total, win.metadata, true)
 			end
 		end
 	end
@@ -191,7 +188,6 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -201,7 +197,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 
 				local d = win:actor(nr, actor)
 				d.value = actor.potion
-				format_valuetext(d, cols, total, win.metadata)
+				format_valuetext(d, mod_cols, total, win.metadata)
 			end
 		end
 	end
@@ -369,6 +365,8 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\inv_potion_31]]
 		}
+
+		mod_cols = self.metadata.columns
 
 		-- no total click.
 		playermod.nototal = true

@@ -11,6 +11,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	-- cache frequently used globals
 	local pairs, format, pformat = pairs, string.format, Skada.pformat
 	local new, clear = Skada.newTable, Skada.clearTable
+	local mod_cols = nil
 	local _
 
 	local function format_valuetext(d, columns, total, metadata, subview)
@@ -97,14 +98,12 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for spellid, count in pairs(spells) do
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid)
 			d.value = count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -127,14 +126,12 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
 			local d = win:actor(nr, target, true, targetname)
 			d.value = target.count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -157,14 +154,12 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid)
 			d.value = spell.count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -179,7 +174,6 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -189,7 +183,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 
 				local d = win:actor(nr, actor)
 				d.value = actor.dispel
-				format_valuetext(d, cols, total, win.metadata)
+				format_valuetext(d, mod_cols, total, win.metadata)
 			end
 		end
 	end
@@ -218,6 +212,8 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_holy_dispelmagic]]
 		}
+
+		mod_cols = self.metadata.columns
 
 		-- no total click.
 		spellmod.nototal = true
@@ -271,7 +267,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 					else
 						t.count = t.count + count
 					end
-					self.super:_fill_actor_table(t, name)
+					self.super:_fill_actor_table(t, name, nil, true)
 				end
 			end
 		end
