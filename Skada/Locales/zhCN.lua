@@ -514,7 +514,7 @@ L["Absorbed and healed targets"] = "吸收和治疗玩家列表"
 L["%s's absorbed and healed targets"] = "%s的吸收和治疗玩家"
 L["actor absorb and heal spells"] = function(n1, n2) return ((not n2 or n1 == n2) and "%s的吸收和治疗法术" or "%s对%s的吸收和治疗"):format(n1, n2) end
 L["Healing source list"] = "治疗玩家列表"
-L["%s's received healing"] = "%s受到的治疗"
+L["%s's heal sources"] = "%s的治疗源"
 L["Healing Done By Spell"] = "法术造成的治疗"
 L["Healing spell sources"] = "治疗法术的来源"
 -- Auras Module --

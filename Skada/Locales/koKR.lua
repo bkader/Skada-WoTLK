@@ -516,7 +516,7 @@ L["Absorbed and healed targets"] = "대상 흡수 및 치유"
 L["%s's absorbed and healed targets"] = "%s - 대상 흡수 및 치유"
 L["actor absorb and heal spells"] = function(n1, n2) return ((not n2 or n1 == n2) and "%s - 주문 흡수 및 치유" or "%1$s의 %2$s 흡수 및 치유"):format(n1, n2) end
 L["Healing source list"] = "치유의 근원"
-L["%s's received healing"] = "%s에 대한 치유"
+L["%s's heal sources"] = "%s의 치유 소스"
 L["Healing Done By Spell"] = "주문에서 치유"
 L["Healing spell sources"] = "치유 주문 소스"
 -- Auras Module --

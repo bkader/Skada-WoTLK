@@ -491,7 +491,7 @@ L["Healed target list"] = "Lista de objetivos curados"
 L["Healing spell list"] = "Lista de hechizos curativos"
 L["%s's healing"] = "Curaci\195\179n de %s"
 L["%s's healed targets"] = "Objetivos curados de %s"
-L["actor heal spells"] = function(n1, n2) return ((not n2 or n1 == n2) and "Hechizos de curaci\195\179n de %s" or "Sanaci\195\179n de %s a %s"):format(n1, n2) end
+L["actor heal spells"] = function(n1, n2) return ((not n2 or n1 == n2) and "Hechizos de sanaci\195\179n de %s" or "Sanaci\195\179n de %s a %s"):format(n1, n2) end
 L["HPS"] = "SPS"
 L["sHPS"] = "SPS (subvistas)"
 L["Healing: Personal HPS"] = "Sanaci\195\179n: HPS Personal"
@@ -517,7 +517,7 @@ L["Absorbed and healed targets"] = "Jugadores de absorci\195\179n y sanaci\195\1
 L["%s's absorbed and healed targets"] = "Objetivos absorbidos y sanados de %s"
 L["actor absorb and heal spells"] = function(n1, n2) return ((not n2 or n1 == n2) and "Hechizos de absorci\195\179n y sanaci\195\179n de %s" or "Absorci\195\179n y sanaci\195\179n de %s a %s"):format(n1, n2) end
 L["Healing source list"] = "Lista de fuentes curativas"
-L["%s's received healing"] = "Sanaci\195\179n recibida por %s"
+L["%s's heal sources"] = "Fuentes de sanaci\195\179n de %s"
 L["Healing Done By Spell"] = "Sanaci\195\179n hecha por hechizo"
 L["Healing spell sources"] = "Fuentes del hechizo de sanaci\195\179n"
 -- Auras Module --
@@ -633,7 +633,7 @@ L["Survivability"] = "Supervivencia"
 L["Events Amount"] = "Cantidad de eventos"
 L["Set the amount of events the death log should record."] = "Establecer la cantidad de eventos del registro de muerte debe registrar."
 L["Minimum Healing"] = "Curaci\195\179n m\195\173nima"
-L["Ignore heal events that are below this threshold."] = "Ignore los eventos de curaci\195\179n que est\195\169n por debajo de este umbral."
+L["Ignore heal events that are below this threshold."] = "Ignore los eventos de sanaci\195\179n que est\195\169n por debajo de este umbral."
 L["Announce Deaths"] = "Anunciar muertes"
 L["Announces information about the last hit the player took before they died."] = "Anuncia el \195\186ltimo golpe que recibi\195\179 el jugador antes de morir."
 L["Alternative Display"] = "Visualizaci\195\179n alternativa"

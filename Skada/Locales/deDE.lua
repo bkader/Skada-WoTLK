@@ -514,8 +514,8 @@ L["Absorbs and healing spells"] = "Liste der heilenden und absorbierenden Zauber
 L["Absorbed and healed targets"] = "Geheilte und absorbierte Ziele"
 L["%s's absorbed and healed targets"] = "%s absorbierte und geheilte Ziele"
 L["actor absorb and heal spells"] = function(n1, n2) return ((not n2 or n1 == n2) and "%s absorbieren und heilen Zauber" or "%s absorbierte und geheilte an %s"):format(n1, n2) end
-L["Healing source list"] = "Heilende Quellenliste"
-L["%s's received healing"] = "%s hat eine Heilungsliste erhalten "
+L["Healing source list"] = "Quellen der Heilung"
+L["%s's heal sources"] = "%s - Heilungsquellen"
 L["Healing Done By Spell"] = "Heilung durch Zauber"
 L["Healing spell sources"] = "Quellen des Heilzaubers"
 -- Auras Module --

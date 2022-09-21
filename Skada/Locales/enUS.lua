@@ -554,7 +554,7 @@ L["%s's absorbed and healed targets"] = true
 L["actor absorb and heal spells"] = function(n1, n2) return ((not n2 or n1 == n2) and "%s's absorb and healing spells" or "%s's absorbs and healing on %s"):format(n1, n2) end
 L["Healing received"] = true
 L["Healing source list"] = true
-L["%s's received healing"] = true
+L["%s's heal sources"] = true
 L["Healing Done By Spell"] = true
 L["Healing spell sources"] = true
 -- Auras Module --
