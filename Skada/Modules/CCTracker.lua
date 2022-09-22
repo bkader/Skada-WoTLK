@@ -1,10 +1,9 @@
-local Skada = Skada
+local _, Skada = ...
 
 local pairs, format, pformat = pairs, string.format, Skada.pformat
 local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 local new, clear = Skada.newTable, Skada.clearTable
 local cc_table = {} -- holds stuff from cleu
-local _
 
 local CCSpells = {
 	[118] = 0x40, -- Polymorph (rank 1)

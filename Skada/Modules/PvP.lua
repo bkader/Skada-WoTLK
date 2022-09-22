@@ -1,11 +1,10 @@
-local Skada = Skada
+local _, Skada = ...
 Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 	local mod = Skada:NewModule("Player vs. Player")
 
 	local format, wipe, GetTime = string.format, wipe, GetTime
 	local UnitGUID, UnitClass, UnitBuff, UnitIsPlayer = UnitGUID, UnitClass, UnitBuff, UnitIsPlayer
 	local GetSpellInfo, UnitCastingInfo = GetSpellInfo, UnitCastingInfo
-	local _
 
 	local specsCache, specsRoles = nil, nil
 	local spellsTable, aurasTable = nil, nil

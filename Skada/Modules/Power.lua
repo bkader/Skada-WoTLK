@@ -1,4 +1,4 @@
-local Skada = Skada
+local _, Skada = ...
 Skada:RegisterModule("Resources", function(L, P)
 	local mod = Skada:NewModule("Resources")
 	mod.icon = [[Interface\Icons\spell_holy_rapture]]
@@ -6,7 +6,6 @@ Skada:RegisterModule("Resources", function(L, P)
 	local setmetatable, pairs = setmetatable, pairs
 	local format, pformat = string.format, Skada.pformat
 	local mod_cols = nil
-	local _
 
 	local SPELL_POWER_MANA = SPELL_POWER_MANA or 0
 	local SPELL_POWER_RAGE = SPELL_POWER_RAGE or 1

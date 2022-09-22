@@ -1,4 +1,4 @@
-local Skada = Skada
+local folder, Skada = ...
 Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 	local mod = Skada:NewModule("Data Text")
 	local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
@@ -257,7 +257,7 @@ Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 			title:SetJustifyH("CENTER")
 			title:SetJustifyV("MIDDLE")
 			title:SetHeight(db.height or 30)
-			title:SetText(win.metadata.title or "Skada")
+			title:SetText(win.metadata.title or folder)
 
 			-- restore position
 			RestorePosition(win.frame, db)

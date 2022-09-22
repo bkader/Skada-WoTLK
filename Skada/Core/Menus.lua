@@ -1,6 +1,6 @@
-local Skada = Skada
+local folder, Skada = ...
 
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
+local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 local AceGUI = LibStub("AceGUI-3.0")
 
 local pairs, next, type, tsort = pairs, next, type, table.sort

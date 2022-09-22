@@ -1,18 +1,18 @@
-local Skada = Skada
+local folder, Skada = ...
 
 local format, pformat = string.format, Skada.pformat
 local pairs, min, floor = pairs, math.min, math.floor
-local _
 
 -- common functions
 local new, clear = Skada.newTable, Skada.clearTable
 local log_auraapply, log_aurarefresh, log_auraremove
 local mod_update_func, aura_update_func, aura_tooltip
 local format_valuetext, spellschools, aura = nil, nil, nil
+local _
 
 -- main module that handles common stuff
 do
-	local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
+	local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 	local mod = Skada:NewModule("Buffs and Debuffs")
 	local PercentToRGB = Skada.PercentToRGB
 	local del = Skada.delTable

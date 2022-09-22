@@ -1,4 +1,4 @@
-local Skada = Skada
+local _, Skada = ...
 Skada:RegisterModule("Activity", function(L, P, _, C)
 	local mod = Skada:NewModule("Activity")
 	local targetmod = mod:NewModule("Activity per Target")

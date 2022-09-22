@@ -1,7 +1,7 @@
 -- Tables.lua
 -- Contains all tables used by different files and modules.
-local Skada = Skada
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
+local folder, Skada = ...
+local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 
 -------------------------------------------------------------------------------
 -- table we need.

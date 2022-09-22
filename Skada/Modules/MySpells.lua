@@ -1,10 +1,9 @@
-local Skada = Skada
+local _, Skada = ...
 Skada:RegisterModule("My Spells", function(L, P)
 	local mod = Skada:NewModule("My Spells")
 
 	local pairs, format = pairs, string.format
 	local spellschools = Skada.spellschools
-	local _
 
 	local function format_valuetext(d, metadata)
 		d.valuetext = Skada:FormatNumber(d.value)

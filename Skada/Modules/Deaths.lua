@@ -1,4 +1,4 @@
-local Skada = Skada
+local _, Skada = ...
 Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Deaths")
 	local playermod = mod:NewModule("Player's deaths")
@@ -17,7 +17,6 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
 	local GetTime, time, date = GetTime, time, date
 	local mod_cols, submod_cols = nil, nil
-	local _
 
 	-- cache colors
 	local GRAY_COLOR = GREEN_FONT_COLOR

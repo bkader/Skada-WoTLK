@@ -1,4 +1,4 @@
-local Skada = Skada
+local _, Skada = ...
 
 local pairs, max, select = pairs, math.max, select
 local getmetatable, setmetatable = getmetatable, setmetatable

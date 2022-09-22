@@ -1,9 +1,8 @@
-local Skada = Skada
+local _, Skada = ...
 
 local pairs, max = pairs, math.max
 local format, pformat = string.format, Skada.pformat
 local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
-local _
 
 local function format_valuetext(d, columns, total, dps, metadata, subview)
 	d.valuetext = Skada:FormatValueCols(

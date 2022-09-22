@@ -1,4 +1,4 @@
-local Skada = Skada
+local _, Skada = ...
 Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	local mod = Skada:NewModule("Friendly Fire")
 	local targetmod = mod:NewModule("Damage target list")
@@ -12,7 +12,6 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	local pformat, T = Skada.pformat, Skada.Table
 	local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
 	local mod_cols = nil
-	local _
 
 	local function format_valuetext(d, columns, total, dps, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(

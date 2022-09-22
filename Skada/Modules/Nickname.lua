@@ -1,4 +1,4 @@
-local Skada = Skada
+local _, Skada = ...
 Skada:RegisterModule("Nickname", function(L, P, G)
 	local mod = Skada:NewModule("Nickname")
 	local Translit = LibStub("LibTranslit-1.0", true)

@@ -1,4 +1,4 @@
-local Skada = Skada
+local _, Skada = ...
 Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 	local mod = Skada:NewModule("Interrupts")
 	local spellmod = mod:NewModule("Interrupted spells")
@@ -7,7 +7,6 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local get_interrupted_spells = nil
 	local get_interrupted_targets = nil
-	local _
 
 	-- cache frequently used globals
 	local pairs, format, pformat = pairs, string.format, Skada.pformat

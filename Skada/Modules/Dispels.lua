@@ -1,4 +1,4 @@
-local Skada = Skada
+local _, Skada = ...
 Skada:RegisterModule("Dispels", function(L, P, _, C)
 	local mod = Skada:NewModule("Dispels")
 	local spellmod = mod:NewModule("Dispelled spell list")
@@ -12,7 +12,6 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	local pairs, format, pformat = pairs, string.format, Skada.pformat
 	local new, clear = Skada.newTable, Skada.clearTable
 	local mod_cols = nil
-	local _
 
 	local function format_valuetext(d, columns, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(

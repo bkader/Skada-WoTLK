@@ -1,4 +1,4 @@
-local Skada = Skada
+local _, Skada = ...
 Skada:RegisterModule("Healthstones", function(L)
 	local mod = Skada:NewModule("Healthstones")
 	local stonename = GetSpellInfo(47874)

@@ -1,11 +1,10 @@
-local Skada = Skada
+local _, Skada = ...
 
 -- frequently used globals --
 local pairs, type, max, format = pairs, type, math.max, string.format
 local pformat, T = Skada.pformat, Skada.Table
 local new, clear = Skada.newTable, Skada.clearTable
 local setPrototype, enemyPrototype = Skada.setPrototype, Skada.enemyPrototype
-local _
 
 ---------------------------------------------------------------------------
 -- Enemy Damage Taken
@@ -63,7 +62,9 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	end
 
 	local function get_instance_diff()
-		instanceDiff = instanceDiff or Skada:GetInstanceDiff() or "NaN"
+		if not instanceDiff then
+			instanceDiff = Skada:GetInstanceDiff() or "NaN"
+		end
 		return instanceDiff
 	end
 
@@ -132,25 +133,23 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 				return false
 			end
 
-			customUnitsTable[guid] = new()
-			customUnitsTable[guid].oname = name or L["Unknown"]
-			customUnitsTable[guid].name = unit.name
-			customUnitsTable[guid].guid = guid
-			customUnitsTable[guid].curval = curval
-			customUnitsTable[guid].minval = minval
-			customUnitsTable[guid].maxval = floor(maxval * (unit.start or 1))
-			customUnitsTable[guid].full = maxval
-			customUnitsTable[guid].power = (unit.power ~= nil)
-			customUnitsTable[guid].useful = unit.useful
+			local t = new()
+			t.oname = name or L["Unknown"]
+			t.name = unit.name
+			t.guid = guid
+			t.curval = curval
+			t.minval = minval
+			t.maxval = floor(maxval * (unit.start or 1))
+			t.full = maxval
+			t.power = (unit.power ~= nil)
+			t.useful = unit.useful
 
 			if unit.name == nil then
-				customUnitsTable[guid].name = format(
-					unit.text or (unit.stop and L["%s - %s%% to %s%%"] or L["%s below %s%%"]),
-					name or L["Unknown"],
-					(unit.start or 1) * 100,
-					(unit.stop or 0) * 100
-				)
+				local str = unit.text or (unit.stop and L["%s - %s%% to %s%%"] or L["%s below %s%%"])
+				t.name = format(str, t.oname, (unit.start or 1) * 100, (unit.stop or 0) * 100)
 			end
+
+			customUnitsTable[guid] = t
 			return true
 		end
 

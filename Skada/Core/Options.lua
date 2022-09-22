@@ -1,6 +1,6 @@
-local Skada = Skada
+local folder, Skada = ...
 
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
+local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 local ACD = LibStub("AceConfigDialog-3.0")
 local ACR = LibStub("AceConfigRegistry-3.0")
 
@@ -14,7 +14,7 @@ local windows = nil
 local modes = nil
 
 Skada.windowdefaults = {
-	name = "Skada",
+	name = folder,
 	barspacing = 0,
 	bartexture = "BantoBar",
 	barfont = "Accidental Presidency",
@@ -291,7 +291,7 @@ Skada.options = {
 				general = {
 					type = "group",
 					name = L["General"],
-					desc = fmt(L["General options for %s."], "Skada"),
+					desc = fmt(L["General options for %s."], folder),
 					order = 10,
 					args = {
 						mmbutton = {
@@ -476,7 +476,7 @@ Skada.options = {
 				format = {
 					type = "group",
 					name = L["Format"],
-					desc = fmt(L["Format options for %s."], "Skada"),
+					desc = fmt(L["Format options for %s."], folder),
 					order = 20,
 					args = {
 						numberformat = {
@@ -542,7 +542,7 @@ Skada.options = {
 				advanced = {
 					type = "group",
 					name = L["Advanced"],
-					desc = fmt(L["Advanced options for %s."], "Skada"),
+					desc = fmt(L["Advanced options for %s."], folder),
 					order = 30,
 					args = {
 						timemesure = {
@@ -846,7 +846,7 @@ do
 			local fields = {"Version", "Date", "Author", "Credits", "License", "Website", "Discord", "Localizations", "Thanks"}
 			for i = 1, #fields do
 				local field = fields[i]
-				local meta = GetAddOnMetadata("Skada", field) or GetAddOnMetadata("Skada", "X-" .. field)
+				local meta = GetAddOnMetadata(folder, field) or GetAddOnMetadata(folder, "X-" .. field)
 				if meta then
 					if meta:match("^http[s]://[a-zA-Z0-9_/]-%.[a-zA-Z]") or meta:match("^[%w.]+@%w+%.%w+$") then
 						meta = format("\124cff20ff20%s\124r", meta)
@@ -866,26 +866,26 @@ do
 
 	function Skada:RegisterInitOptions()
 		LibStub("AceConfig-3.0"):RegisterOptionsTable("Skada Dialog", get_init_options)
-		self.optionsFrame = ACD:AddToBlizOptions("Skada Dialog", "Skada")
+		self.optionsFrame = ACD:AddToBlizOptions("Skada Dialog", folder)
 		self.RegisterInitOptions = nil
 	end
 end
 
 function Skada:OpenOptions(win)
-	if not ACR:GetOptionsTable("Skada") then
-		LibStub("AceConfig-3.0"):RegisterOptionsTable("Skada", Skada.options)
-		ACD:SetDefaultSize("Skada", 630, 500)
+	if not ACR:GetOptionsTable(folder) then
+		LibStub("AceConfig-3.0"):RegisterOptionsTable(folder, Skada.options)
+		ACD:SetDefaultSize(folder, 630, 500)
 	end
 
-	if not ACD:Close("Skada") then
+	if not ACD:Close(folder) then
 		HideUIPanel(InterfaceOptionsFrame)
 		HideUIPanel(GameMenuFrame)
 		if type(win) == "table" then
-			ACD:Open("Skada")
-			ACD:SelectGroup("Skada", "windows", win.db.name)
+			ACD:Open(folder)
+			ACD:SelectGroup(folder, "windows", win.db.name)
 		else
-			ACD:Open("Skada")
-			ACD:SelectGroup("Skada", win or "generaloptions")
+			ACD:Open(folder)
+			ACD:SelectGroup(folder, win or "generaloptions")
 		end
 	end
 end
@@ -1516,8 +1516,8 @@ do
 		local profileName = check_profile_name(name)
 
 		-- backwards compatibility
-		if profile["Skada"] and type(profile["Skada"]) == "table" then
-			profile = profile["Skada"]
+		if profile[folder] and type(profile[folder]) == "table" then
+			profile = profile[folder]
 		end
 
 		local Old_ReloadSettings = Skada.ReloadSettings
@@ -1525,7 +1525,7 @@ do
 			self.ReloadSettings = Old_ReloadSettings
 			self.tCopy(self.db.profile, profile)
 			self:ReloadSettings()
-			ACR:NotifyChange("Skada")
+			ACR:NotifyChange(folder)
 		end
 
 		Skada.db:SetProfile(profileName)

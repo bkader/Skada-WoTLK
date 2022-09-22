@@ -1,7 +1,7 @@
 local LibFail = LibStub("LibFail-1.0", true)
 if not LibFail then return end
 
-local Skada = Skada
+local _, Skada = ...
 Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Fails")
 	local playermod = mod:NewModule("Player's failed events")
@@ -13,7 +13,6 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	local format, pformat = string.format, Skada.pformat
 	local UnitGUID, IsInGroup = UnitGUID, Skada.IsInGroup
 	local mod_cols = nil
-	local _
 
 	local function format_valuetext(d, columns, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(

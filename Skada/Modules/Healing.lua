@@ -1,10 +1,9 @@
-local Skada = Skada
+local _, Skada = ...
 
 -- cache frequently used globals
 local pairs, max = pairs, math.max
 local format, pformat = string.format, Skada.pformat
 local T = Skada.Table
-local _
 
 local function format_valuetext(d, columns, total, hps, metadata, subview)
 	d.valuetext = Skada:FormatValueCols(

@@ -1,10 +1,9 @@
-local Skada = Skada
+local _, Skada = ...
 
 -- cache frequently used globals
 local pairs, format, pformat = pairs, string.format, Skada.pformat
 local min, floor, new = math.min, math.floor, Skada.newTable
 local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-local _
 
 -- ============== --
 -- Absorbs module --

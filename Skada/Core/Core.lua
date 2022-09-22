@@ -1,15 +1,16 @@
-local Skada = LibStub("AceAddon-3.0"):NewAddon("Skada", "AceEvent-3.0", "AceTimer-3.0", "AceBucket-3.0", "AceHook-3.0", "AceConsole-3.0", "AceComm-3.0", "LibCompat-1.0-Skada")
-_G.Skada = Skada
+local folder, ns = ...
 
+local _G, GetAddOnMetadata = _G, GetAddOnMetadata
+ns.version = GetAddOnMetadata(folder, "Version")
+ns.website = GetAddOnMetadata(folder, "X-Website")
+ns.discord = GetAddOnMetadata(folder, "X-Discord")
+ns.logo = [[Interface\Icons\Spell_Lightning_LightningBolt01]]
+
+local Skada = LibStub("AceAddon-3.0"):NewAddon(ns, folder, "AceEvent-3.0", "AceTimer-3.0", "AceBucket-3.0", "AceHook-3.0", "AceConsole-3.0", "AceComm-3.0", "LibCompat-1.0-Skada")
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
+_G[folder] = ns
 
-local GetAddOnMetadata = GetAddOnMetadata
-Skada.version = GetAddOnMetadata("Skada", "Version")
-Skada.website = GetAddOnMetadata("Skada", "X-Website")
-Skada.discord = GetAddOnMetadata("Skada", "X-Discord")
-Skada.logo = [[Interface\Icons\Spell_Lightning_LightningBolt01]]
-
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
+local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 local ACD = LibStub("AceConfigDialog-3.0")
 local ACR = LibStub("AceConfigRegistry-3.0")
 local DBI = LibStub("LibDBIcon-1.0", true)
@@ -35,15 +36,15 @@ local T, P, G = Skada.Table, nil, nil
 local _
 
 local LDB = LibStub("LibDataBroker-1.1")
-local dataobj = LDB:NewDataObject("Skada", {
-	label = "Skada",
+local dataobj = LDB:NewDataObject(folder, {
+	label = folder,
 	type = "data source",
 	icon = Skada.logo,
 	text = "n/a"
 })
 
 -- Keybindings
-BINDING_HEADER_SKADA = "Skada"
+BINDING_HEADER_SKADA = folder
 BINDING_NAME_SKADA_TOGGLE = L["Toggle Windows"]
 BINDING_NAME_SKADA_SHOWHIDE = L["Show/Hide Windows"]
 BINDING_NAME_SKADA_RESET = L["Reset"]
@@ -1277,7 +1278,7 @@ function Skada:CreateWindow(name, db, display)
 		self:Printf("Window \"\124cffffbb00%s\124r\" was not loaded because its display module, \"\124cff00ff00%s\124r\" was not found.", name, window.db.display or L["Unknown"])
 	end
 
-	ACR:NotifyChange("Skada")
+	ACR:NotifyChange(folder)
 	self:ApplySettings()
 	return window
 end
@@ -1327,7 +1328,7 @@ do
 				hideOnEscape = 1,
 				OnAccept = function(self, data)
 					CloseDropDownMenus()
-					ACR:NotifyChange("Skada")
+					ACR:NotifyChange(folder)
 					return delete_window(data)
 				end
 			}
@@ -2437,9 +2438,9 @@ local function slash_command(param)
 	elseif cmd == "export" and Skada.ExportProfile then
 		Skada:ExportProfile()
 	elseif cmd == "about" or cmd == "info" then
-		InterfaceOptionsFrame_OpenToCategory("Skada")
+		InterfaceOptionsFrame_OpenToCategory(folder)
 	elseif cmd == "version" or cmd == "checkversion" then
-		Skada:Printf("\124cffffbb00%s\124r: %s - \124cffffbb00%s\124r: %s", L["Version"], Skada.version, L["Date"], GetAddOnMetadata("Skada", "X-Date"))
+		Skada:Printf("\124cffffbb00%s\124r: %s - \124cffffbb00%s\124r: %s", L["Version"], Skada.version, L["Date"], GetAddOnMetadata(folder, "X-Date"))
 		check_version()
 	elseif cmd == "website" or cmd == "github" then
 		Skada:Printf("\124cffffbb00%s\124r", Skada.website)
@@ -3227,7 +3228,7 @@ function dataobj:OnEnter()
 		end
 		self.tooltip:AddLine(" ")
 	else
-		self.tooltip:AddDoubleLine("Skada", Skada.version, nil, nil, nil, 0, 1, 0)
+		self.tooltip:AddDoubleLine(folder, Skada.version, nil, nil, nil, 0, 1, 0)
 	end
 
 	self.tooltip:AddLine(L["\124cff00ff00Left-Click\124r to toggle windows."], 1, 1, 1)
@@ -3257,11 +3258,11 @@ end
 
 function Skada:RefreshMMButton()
 	if DBI then
-		DBI:Refresh("Skada", P.icon)
+		DBI:Refresh(folder, P.icon)
 		if P.icon.hide then
-			DBI:Hide("Skada")
+			DBI:Hide(folder)
 		else
-			DBI:Show("Skada")
+			DBI:Show(folder)
 		end
 	end
 end
@@ -3333,8 +3334,8 @@ function Skada:ReloadSettings()
 		end
 	end
 
-	if DBI and not DBI:IsRegistered("Skada") then
-		DBI:Register("Skada", dataobj, P.icon)
+	if DBI and not DBI:IsRegistered(folder) then
+		DBI:Register(folder, dataobj, P.icon)
 	end
 
 	self:ClearAllIndexes()
@@ -3356,7 +3357,7 @@ function Skada:OnInitialize()
 	local AceDBOptions = LibStub("AceDBOptions-3.0", true)
 	if AceDBOptions then
 		local LDS = LibStub("LibDualSpec-1.0", true)
-		if LDS then LDS:EnhanceDatabase(self.db, "Skada") end
+		if LDS then LDS:EnhanceDatabase(self.db, folder) end
 
 		self.options.args.profiles.args.general = AceDBOptions:GetOptionsTable(self.db)
 		self.options.args.profiles.args.general.order = 0
@@ -3536,7 +3537,7 @@ function Skada:CheckMemory(clean)
 
 	if P.memorycheck then
 		UpdateAddOnMemoryUsage()
-		local memory = GetAddOnMemoryUsage("Skada")
+		local memory = GetAddOnMemoryUsage(folder)
 		if memory > (self.maxmeme * 1024) then
 			self:Notify(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."], L["Memory Check"], nil, "emergency")
 		end

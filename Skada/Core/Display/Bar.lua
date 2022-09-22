@@ -1,4 +1,4 @@
-local Skada = Skada
+local folder, Skada = ...
 Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 	local mod = Skada:NewModule("Bar Display", "SpecializedLibBars-1.0")
 	local FlyPaper = LibStub("LibFlyPaper-1.1", true)
@@ -305,7 +305,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 
 				-- attempt to stick to the closest frame.
 				local offset = p.background.borderthickness
-				local anchor, name, frame = FlyPaper.StickToClosestFrameInGroup(group, "Skada", nil, offset, offset)
+				local anchor, name, frame = FlyPaper.StickToClosestFrameInGroup(group, folder, nil, offset, offset)
 
 				-- found a frame to stick it to?
 				if anchor and frame and frame.win then
@@ -371,7 +371,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			end
 
 			CloseDropDownMenus()
-			ACR:NotifyChange("Skada")
+			ACR:NotifyChange(folder)
 		end
 	end
 
@@ -425,7 +425,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 
 		SavePosition(group, p)
 		Skada:ApplySettings(p.name)
-		ACR:NotifyChange("Skada")
+		ACR:NotifyChange(folder)
 	end
 
 	function mod:WindowLocked(_, group, locked)
@@ -1080,9 +1080,9 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			g:SetTextColor(color.r, color.g, color.b, color.a or 1)
 
 			if FlyPaper and p.sticky then
-				FlyPaper.AddFrame("Skada", p.name, g)
+				FlyPaper.AddFrame(folder, p.name, g)
 			elseif FlyPaper then
-				FlyPaper.RemoveFrame("Skada", p.name)
+				FlyPaper.RemoveFrame(folder, p.name)
 			end
 
 			-- make player's bar fixed.

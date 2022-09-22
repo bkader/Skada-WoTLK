@@ -1,4 +1,4 @@
-local Skada = Skada
+local _, Skada = ...
 Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 
 	local mod = Skada:NewModule("Legacy Bar Display", "LegacyLibBars-1.0")

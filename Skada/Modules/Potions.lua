@@ -1,4 +1,4 @@
-local Skada = Skada
+local _, Skada = ...
 Skada:RegisterModule("Potions", function(L, P, _, C)
 	local mod = Skada:NewModule("Potions")
 	local playermod = mod:NewModule("Potions list")
@@ -13,7 +13,6 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 	local T, pformat = Skada.Table, Skada.pformat
 	local potion_ids = {}
 	local mod_cols = nil
-	local _
 
 	local prepotionStr, potionStr = "\124c%s%s\124r %s", "\124T%s:14:14:0:0:64:64:4:60:4:60\124t"
 	local prepotion

@@ -1,4 +1,4 @@
-local Skada = Skada
+local _, Skada = ...
 Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 	local mod = Skada:NewModule("Sunder Counter")
 	local targetmod = mod:NewModule("Sunder target list")
@@ -17,7 +17,6 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 	local spell_sunder, spell_devastate, sunder_link
 	local last_srcGUID, last_srcName, last_srcFlags
 	local mod_cols = nil
-	local _
 
 	local function format_valuetext(d, columns, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(

@@ -1,4 +1,4 @@
-local Skada = Skada
+local _, Skada = ...
 Skada:RegisterModule("Resurrects", function(L, P, _, C)
 	local mod = Skada:NewModule("Resurrects")
 	local playermod = mod:NewModule("Resurrect spell list")
@@ -8,7 +8,6 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 	local new, clear = Skada.newTable, Skada.clearTable
 	local get_resurrected_targets = nil
 	local mod_cols = nil
-	local _
 
 	local resurrectSpells = {
 		-- Rebirth

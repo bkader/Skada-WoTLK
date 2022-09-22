@@ -1,4 +1,4 @@
-local Skada = Skada
+local folder, Skada = ...
 Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 	local mod = Skada:NewModule("Inline Bar Display")
 
@@ -203,7 +203,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 		local title = frame:CreateFontString("frameTitle", 6)
 		title:SetTextColor(self:GetFontColor(p))
 		title:SetFont(self:GetFont(p))
-		title:SetText(window.metadata.title or "Skada")
+		title:SetText(window.metadata.title or folder)
 		title:SetWordWrap(false)
 		title:SetJustifyH("LEFT")
 		title:SetPoint("LEFT", leftmargin, -1)

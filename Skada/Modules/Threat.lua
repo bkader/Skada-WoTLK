@@ -1,4 +1,4 @@
-local Skada = Skada
+local _, Skada = ...
 Skada:RegisterModule("Threat", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Threat")
 
@@ -10,7 +10,6 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 	local new, del = Skada.newTable, Skada.delTable
 	local T = Skada.Table
 	local mod_cols = nil
-	local _
 
 	local aggro_icon = [[Interface\Icons\ability_physical_taunt]]
 

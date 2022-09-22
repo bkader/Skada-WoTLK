@@ -1,6 +1,6 @@
-local Skada = Skada
+local folder, Skada = ...
 
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
+local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 
 local select, pairs, type = select, pairs, type
 local tostring, tonumber, format = tostring, tonumber, string.format
@@ -756,7 +756,7 @@ do
 			end
 
 			LibToast:Register("SkadaToastFrame", function(toast, text, title, icon, urgency)
-				toast:SetTitle(title or "Skada")
+				toast:SetTitle(title or folder)
 				toast:SetText(text or L["A damage meter."])
 				toast:SetIconTexture(icon or self.logo)
 				toast:SetUrgencyLevel(urgency or "normal")
@@ -1279,9 +1279,9 @@ do
 		end
 
 		if channel == "PURR" then
-			self:SendCommMessage("Skada", self:Serialize(nil, nil, ...), "WHISPER", target, "NORMAL", show_progress_window, self)
+			self:SendCommMessage(folder, self:Serialize(nil, nil, ...), "WHISPER", target, "NORMAL", show_progress_window, self)
 		elseif channel then
-			self:SendCommMessage("Skada", self:Serialize(nil, nil, ...), channel, target)
+			self:SendCommMessage(folder, self:Serialize(nil, nil, ...), channel, target)
 		end
 	end
 
@@ -1300,7 +1300,7 @@ do
 	end
 
 	local function on_comm_received(self, prefix, message, channel, sender)
-		if prefix == "Skada" and channel and sender and sender ~= self.userName then
+		if prefix == folder and channel and sender and sender ~= self.userName then
 			dispatch_comm(sender, self:Deserialize(message))
 		end
 	end
@@ -1309,7 +1309,7 @@ do
 		if enable then
 			self.SendComm = send_comm_message
 			self.OnCommReceived = on_comm_received
-			self:RegisterComm("Skada")
+			self:RegisterComm(folder)
 			self:AddComm("VersionCheck")
 		else
 			self.SendComm = self.EmptyFunc

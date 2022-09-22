@@ -1,4 +1,4 @@
-local Skada = Skada
+local _, Skada = ...
 Skada:RegisterModule("Comparison", function(L, P)
 	local parent = Skada:GetModule("Damage", true)
 	if not parent then return end
@@ -16,7 +16,6 @@ Skada:RegisterModule("Comparison", function(L, P)
 	local spellschools = Skada.spellschools
 	local COLOR_GOLD = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
 	local mod_cols = nil
-	local _
 
 	-- damage miss types
 	local missTypes = Skada.missTypes
