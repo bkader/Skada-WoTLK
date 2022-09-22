@@ -1,4 +1,5 @@
 local _, Skada = ...
+local private = Skada.private
 
 local pairs, max, select = pairs, math.max, select
 local getmetatable, setmetatable = getmetatable, setmetatable
@@ -30,7 +31,9 @@ Skada.enemyPrototype = enemyPrototype
 -------------------------------------------------------------------------------
 -- segment/set prototype & functions
 
-local BITMASK_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY or 0x00000010
+local BITMASK_FRIENDLY = private.BITMASK_FRIENDLY or COMBATLOG_OBJECT_REACTION_FRIENDLY or 0x00000010
+private.BITMASK_FRIENDLY = BITMASK_FRIENDLY
+
 local band, tremove = bit.band, tremove or table.remove
 
 -- binds a set table to set prototype

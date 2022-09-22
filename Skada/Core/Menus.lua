@@ -1,4 +1,5 @@
 local folder, Skada = ...
+local private = Skada.private
 
 local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 local AceGUI = LibStub("AceGUI-3.0")
@@ -127,7 +128,7 @@ function Skada:OpenMenu(window)
 				info.text = L["Report"]
 				info.value = "report"
 				info.func = function()
-					Skada:OpenReportWindow(self.win)
+					private.open_report(self.win)
 				end
 				info.notCheckable = 1
 				UIDropDownMenu_AddButton(info, level)
@@ -210,7 +211,7 @@ function Skada:OpenMenu(window)
 			wipe(info)
 			info.text = L["Configure"]
 			info.func = function()
-				Skada:OpenOptions(self.win)
+				private.open_options(self.win)
 			end
 			info.notCheckable = 1
 			UIDropDownMenu_AddButton(info, level)
@@ -1026,17 +1027,17 @@ do
 		frame:AddChild(report)
 	end
 
-	function Skada:OpenReportWindow(window)
-		if self.testMode then
+	function private.open_report(window)
+		if Skada.testMode then
 			return -- nothing to do.
 		elseif IsShiftKeyDown() then
 			do_report(window) -- quick report?
-		elseif self.reportwindow == nil then
+		elseif Skada.reportwindow == nil then
 			create_report_window(window)
-		elseif self.reportwindow:IsShown() then
-			self.reportwindow:Hide()
+		elseif Skada.reportwindow:IsShown() then
+			Skada.reportwindow:Hide()
 		else
-			self.reportwindow:Show()
+			Skada.reportwindow:Show()
 		end
 	end
 end

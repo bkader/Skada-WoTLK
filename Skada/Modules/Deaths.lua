@@ -1,4 +1,5 @@
 local _, Skada = ...
+local private = Skada.private
 Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Deaths")
 	local playermod = mod:NewModule("Player's deaths")
@@ -12,8 +13,8 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local new, del = Skada.newTable, Skada.delTable
 	local UnitHealthInfo = Skada.UnitHealthInfo
 	local UnitIsFeignDeath = UnitIsFeignDeath
-	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
+	local GetSpellInfo = private.spell_info or GetSpellInfo
+	local GetSpellLink = private.spell_link or GetSpellLink
 	local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
 	local GetTime, time, date = GetTime, time, date
 	local mod_cols, submod_cols = nil, nil
@@ -708,7 +709,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 						local src = mod_cols.Source and death.src
 						if num ~= 1 then
-							d.text = format(src and "%s (%d) < %s" or "%s (%d)", d.text or d.label, num, src)
+							d.text = format(src and "%s (%d) (%s)" or "%s (%d)", d.text or d.label, num, src)
 							d.reportlabel = format("%s   %s", d.text, d.valuetext)
 						else
 							d.text = src and format("%s (%s)", d.text or d.label, src) or nil

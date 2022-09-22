@@ -1,4 +1,5 @@
 local folder, Skada = ...
+local private = Skada.private
 Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 	local mod = Skada:NewModule("Inline Bar Display")
 
@@ -86,7 +87,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 	end
 
 	local function showmode(win, id, label, mode)
-		if Skada:NoTotalClick(win.selectedset, mode) then return end
+		if private.total_noclick(win.selectedset, mode) then return end
 
 		inserthistory(win)
 
@@ -155,7 +156,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 
 	local function menuOnClick(self, button)
 		if button == "RightButton" then
-			Skada:OpenOptions(self.win)
+			private.open_options(self.win)
 		else
 			Skada:OpenMenu(self.win)
 		end
@@ -701,7 +702,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 			}
 		}
 
-		options.frameoptions = Skada:FrameSettings(db, true)
+		options.windowoptions = private.frame_options(db, true)
 	end
 
 	function mod:OnInitialize()

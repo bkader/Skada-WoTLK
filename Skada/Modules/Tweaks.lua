@@ -1,12 +1,13 @@
 local _, Skada = ...
+local private = Skada.private
 Skada:RegisterModule("Tweaks", function(L, P)
 	local mod = Skada:NewModule("Tweaks", "AceHook-3.0")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local band, format = bit.band, string.format
 	local UnitClass, GetTime = UnitClass, GetTime
-	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
+	local GetSpellInfo = private.spell_info or GetSpellInfo
+	local GetSpellLink = private.spell_link or GetSpellLink
 	local new, del = Skada.newTable, Skada.delTable
 
 	local channel_events, fofrostmourne
@@ -15,13 +16,13 @@ Skada:RegisterModule("Tweaks", function(L, P)
 	-- CombatLogEvent Hook
 
 	do
-		local BITMASK_GROUP = Skada.BITMASK_GROUP
+		local BITMASK_GROUP = private.BITMASK_GROUP
 		if not BITMASK_GROUP then
 			local COMBATLOG_OBJECT_AFFILIATION_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE or 0x00000001
 			local COMBATLOG_OBJECT_AFFILIATION_PARTY = COMBATLOG_OBJECT_AFFILIATION_PARTY or 0x00000002
 			local COMBATLOG_OBJECT_AFFILIATION_RAID = COMBATLOG_OBJECT_AFFILIATION_RAID or 0x00000004
 			BITMASK_GROUP = COMBATLOG_OBJECT_AFFILIATION_MINE + COMBATLOG_OBJECT_AFFILIATION_PARTY + COMBATLOG_OBJECT_AFFILIATION_RAID
-			Skada.BITMASK_GROUP = BITMASK_GROUP
+			private.BITMASK_GROUP = BITMASK_GROUP
 		end
 
 		local MAX_BOSS_FRAMES = MAX_BOSS_FRAMES or 5
@@ -451,15 +452,14 @@ Skada:RegisterModule("Tweaks", function(L, P)
 			[37025] = true -- Stinky
 		}
 
+		local function smart_stop(set)
+			if set.endtime then return end
+			Skada:StopSegment(L["Smart Stop"])
+		end
+
 		function mod:BossDefeated(_, set)
-			if set and not set.stopped and set.gotboss and not ignoredBosses[set.gotboss] then
-				Skada:ScheduleTimer(function()
-					if not set.endtime then
-						Skada:StopSegment(L["Smart Stop"])
-					end
-				end,
-				P.smartwait or 3)
-			end
+			if not set or set.stopped or not set.gotboss or ignoredBosses[set.gotboss] then return end
+			Skada:ScheduleTimer(smart_stop, P.smartwait or 3, set)
 		end
 	end
 

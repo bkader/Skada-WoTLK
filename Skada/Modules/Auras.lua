@@ -525,9 +525,6 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C)
 	local get_debuffs_on_target = nil
 	local mod_cols = nil
 
-	-- list of spells used to queue units.
-	local queuedSpells = {[49005] = 50424}
-
 	local function handle_debuff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, _, spellid, _, school, auratype)
 		if not spellid or ignoredSpells[spellid] or auratype ~= "DEBUFF" then return end
 
@@ -546,16 +543,10 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C)
 
 		if event == "SPELL_AURA_APPLIED" then
 			Skada:DispatchSets(log_auraapply)
-			if queuedSpells[spellid] then
-				Skada:QueueUnit(queuedSpells[spellid], srcGUID, srcName, srcFlags, dstGUID)
-			end
-		elseif event == "SPELL_AURA_REFRESH" or event == "SPELL_AURA_APPLIED_DOSE" then
-			Skada:DispatchSets(log_aurarefresh)
 		elseif event == "SPELL_AURA_REMOVED" then
 			Skada:DispatchSets(log_auraremove)
-			if queuedSpells[spellid] then
-				Skada:UnqueueUnit(queuedSpells[spellid], dstGUID)
-			end
+		else
+			Skada:DispatchSets(log_aurarefresh)
 		end
 	end
 

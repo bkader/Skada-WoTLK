@@ -1,4 +1,5 @@
 local folder, Skada = ...
+local private = Skada.private
 Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 	local mod = Skada:NewModule("Data Text")
 	local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
@@ -348,7 +349,7 @@ Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 			}
 		}
 
-		options.window = Skada:FrameSettings(db, true)
+		options.windowoptions = private.frame_options(db, true)
 	end
 
 	function mod:OnInitialize()

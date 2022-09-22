@@ -53,4 +53,7 @@
 	<Script file="Modules\Threat.lua" />
 	<Script file="Modules\Nickname.lua" />
 	<Script file="Modules\PvP.lua" />
+
+	<!-- Let's go! -->
+	<Script file="Core\Finalize.lua" />
 </Ui>

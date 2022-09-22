@@ -5,6 +5,7 @@ ns.version = GetAddOnMetadata(folder, "Version")
 ns.website = GetAddOnMetadata(folder, "X-Website")
 ns.discord = GetAddOnMetadata(folder, "X-Discord")
 ns.logo = [[Interface\Icons\Spell_Lightning_LightningBolt01]]
+ns.private = {}
 
 local Skada = LibStub("AceAddon-3.0"):NewAddon(ns, folder, "AceEvent-3.0", "AceTimer-3.0", "AceBucket-3.0", "AceHook-3.0", "AceConsole-3.0", "AceComm-3.0", "LibCompat-1.0-Skada")
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
@@ -33,6 +34,7 @@ local GetUnitIdFromGUID, GetUnitSpec, GetUnitRole = Skada.GetUnitIdFromGUID, Ska
 local UnitIterator, IsGroupDead = Skada.UnitIterator, Skada.IsGroupDead
 local pformat, EscapeStr, GetCreatureId = Skada.pformat, Skada.EscapeStr, Skada.GetCreatureId
 local T, P, G = Skada.Table, nil, nil
+local private = Skada.private
 local _
 
 local LDB = LibStub("LibDataBroker-1.1")
@@ -117,10 +119,10 @@ local BITMASK_OWNERS = COMBATLOG_OBJECT_AFFILIATION_MASK + COMBATLOG_OBJECT_REAC
 local BITMASK_ENEMY = COMBATLOG_OBJECT_REACTION_NEUTRAL + COMBATLOG_OBJECT_REACTION_HOSTILE
 
 -- to allow external usage
-Skada.BITMASK_GROUP = BITMASK_GROUP
-Skada.BITMASK_PETS = BITMASK_PETS
-Skada.BITMASK_OWNERS = BITMASK_OWNERS
-Skada.BITMASK_ENEMY = BITMASK_ENEMY
+private.BITMASK_GROUP = BITMASK_GROUP
+private.BITMASK_PETS = BITMASK_PETS
+private.BITMASK_OWNERS = BITMASK_OWNERS
+private.BITMASK_ENEMY = BITMASK_ENEMY
 
 -------------------------------------------------------------------------------
 -- local functions.
@@ -375,7 +377,7 @@ do
 			return
 		end
 
-		Skada:ConfirmDialog(L["Do you want to reset Skada?\nHold SHIFT to reset all data."], f, t)
+		private.confirm_dialog(L["Do you want to reset Skada?\nHold SHIFT to reset all data."], f, t)
 	end
 end
 
@@ -454,7 +456,7 @@ do
 	end
 
 	function Skada:Reinstall()
-		Skada:ConfirmDialog(L["Are you sure you want to reinstall Skada?"], f, t)
+		private.confirm_dialog(L["Are you sure you want to reinstall Skada?"], f, t)
 	end
 end
 
@@ -545,7 +547,7 @@ do
 					end,
 					set = function(_, display)
 						db.display = display
-						Skada:ReloadSettings()
+						private.reload_settings()
 					end
 				},
 				separator1 = {
@@ -1757,7 +1759,7 @@ function Skada:GetPlayer(set, guid, name, flag)
 		elseif pets[guid] then
 			player.class = "PET"
 		else
-			player.class = self.unitClass(guid, flag, nil, nil, name)
+			player.class = private.unit_class(guid, flag, nil, nil, name)
 		end
 
 		for i = 1, #modes do
@@ -1848,7 +1850,7 @@ function Skada:GetEnemy(set, name, guid, flag, create)
 
 		enemy = {id = guid or name, name = name, flag = flag}
 		if guid or flag then
-			enemy.class = self.unitClass(guid, flag)
+			enemy.class = private.unit_class(guid, flag)
 		else
 			enemy.class = "ENEMY"
 		end
@@ -2268,16 +2270,16 @@ do
 				end
 
 				if P.informativetooltips then
-					if md.click1 and not self:NoTotalClick(win.selectedset, md.click1) then
+					if md.click1 and not private.total_noclick(win.selectedset, md.click1) then
 						add_tooltip_subview(t, win, md.click1, id, label)
 					end
-					if md.click2 and not self:NoTotalClick(win.selectedset, md.click2) then
+					if md.click2 and not private.total_noclick(win.selectedset, md.click2) then
 						add_tooltip_subview(t, win, md.click2, id, label)
 					end
-					if md.click3 and not self:NoTotalClick(win.selectedset, md.click3) then
+					if md.click3 and not private.total_noclick(win.selectedset, md.click3) then
 						add_tooltip_subview(t, win, md.click3, id, label)
 					end
-					if md.click4 and not self:NoTotalClick(win.selectedset, md.click4) then
+					if md.click4 and not private.total_noclick(win.selectedset, md.click4) then
 						add_tooltip_subview(t, win, md.click4, id, label)
 					end
 				end
@@ -2294,25 +2296,25 @@ do
 				if not self.testMode then
 					if type(md.click1) == "function" then
 						t:AddLine(pformat(L["Click for \124cff00ff00%s\124r"], md.click1_label))
-					elseif md.click1 and not self:NoTotalClick(win.selectedset, md.click1) then
+					elseif md.click1 and not private.total_noclick(win.selectedset, md.click1) then
 						t:AddLine(format(L["Click for \124cff00ff00%s\124r"], md.click1_label or md.click1.localeName))
 					end
 
 					if type(md.click2) == "function" then
 						t:AddLine(pformat(L["Shift-Click for \124cff00ff00%s\124r"], md.click2_label))
-					elseif md.click2 and not self:NoTotalClick(win.selectedset, md.click2) then
+					elseif md.click2 and not private.total_noclick(win.selectedset, md.click2) then
 						t:AddLine(format(L["Shift-Click for \124cff00ff00%s\124r"], md.click2_label or md.click2.localeName))
 					end
 
 					if type(md.click3) == "function" then
 						t:AddLine(pformat(L["Control-Click for \124cff00ff00%s\124r"], md.click3_label))
-					elseif md.click3 and not self:NoTotalClick(win.selectedset, md.click3) then
+					elseif md.click3 and not private.total_noclick(win.selectedset, md.click3) then
 						t:AddLine(format(L["Control-Click for \124cff00ff00%s\124r"], md.click3_label or md.click3.localeName))
 					end
 
 					if type(md.click4) == "function" then
 						t:AddLine(pformat(L["Alt-Click for \124cff00ff00%s\124r"], md.click4_label))
-					elseif md.click4 and not self:NoTotalClick(win.selectedset, md.click4) then
+					elseif md.click4 and not private.total_noclick(win.selectedset, md.click4) then
 						t:AddLine(format(L["Alt-Click for \124cff00ff00%s\124r"], md.click4_label or md.click4.localeName))
 					end
 				end
@@ -2428,15 +2430,15 @@ local function slash_command(param)
 		P.debug = not P.debug
 		Skada:Print("Debug mode " .. (P.debug and ("\124cff00ff00" .. L["ENABLED"] .. "\124r") or ("\124cffff0000" .. L["DISABLED"] .. "\124r")))
 	elseif cmd == "config" or cmd == "options" then
-		Skada:OpenOptions()
+		private.open_options()
 	elseif cmd == "memorycheck" or cmd == "memory" or cmd == "ram" then
 		Skada:CheckMemory()
 	elseif cmd == "clear" or cmd == "clean" then
 		Skada:CleanGarbage()
-	elseif cmd == "import" and Skada.OpenImport then
-		Skada:OpenImport()
-	elseif cmd == "export" and Skada.ExportProfile then
-		Skada:ExportProfile()
+	elseif cmd == "import" and private.open_import then
+		private.open_import()
+	elseif cmd == "export" and private.open_export then
+		private.open_export()
 	elseif cmd == "about" or cmd == "info" then
 		InterfaceOptionsFrame_OpenToCategory(folder)
 	elseif cmd == "version" or cmd == "checkversion" then
@@ -3256,14 +3258,14 @@ function dataobj:OnClick(button)
 	end
 end
 
-function Skada:RefreshMMButton()
-	if DBI then
-		DBI:Refresh(folder, P.icon)
-		if P.icon.hide then
-			DBI:Hide(folder)
-		else
-			DBI:Show(folder)
-		end
+function private.refresh_button()
+	if not DBI then return end
+
+	DBI:Refresh(folder, Skada.db.profile.icon)
+	if Skada.db.profile.icon.hide then
+		DBI:Hide(folder)
+	else
+		DBI:Show(folder)
 	end
 end
 
@@ -3317,7 +3319,7 @@ function Skada:ApplySettings(name, hidemenu)
 	Skada:UpdateDisplay(true)
 end
 
-function Skada:ReloadSettings()
+function private.reload_settings()
 	for i = 1, #windows do
 		local win = windows[i]
 		if win and win.Destroy then
@@ -3326,11 +3328,15 @@ function Skada:ReloadSettings()
 	end
 	wipe(windows)
 
+	-- refresh refrences
+	P = Skada.db.profile
+	G = Skada.db.global
+
 	local wins = P.windows
 	for i = 1, #wins do
 		local win = wins[i]
 		if win then
-			self:CreateWindow(win.name, win)
+			Skada:CreateWindow(win.name, win)
 		end
 	end
 
@@ -3338,10 +3344,10 @@ function Skada:ReloadSettings()
 		DBI:Register(folder, dataobj, P.icon)
 	end
 
-	self:ClearAllIndexes()
-	self:RefreshMMButton()
-	self.total = self.char.total
-	self:ApplySettings()
+	Skada:ClearAllIndexes()
+	private.refresh_button()
+	Skada.total = Skada.char.total
+	Skada:ApplySettings()
 end
 
 -------------------------------------------------------------------------------
@@ -3365,8 +3371,8 @@ function Skada:OnInitialize()
 		if LDS then LDS:EnhanceOptions(self.options.args.profiles.args.general, self.db) end
 
 		-- import/export profile if found.
-		if self.AdvancedProfile then
-			self:AdvancedProfile(self.options.args.profiles.args)
+		if private.advanced_profile then
+			private.advanced_profile(self.options.args.profiles.args)
 		end
 	end
 
@@ -3374,16 +3380,16 @@ function Skada:OnInitialize()
 	G = self.db.global
 
 	self:RegisterChatCommand("skada", slash_command, true) -- force flag set
-	self.db.RegisterCallback(self, "OnProfileChanged", "ReloadSettings")
-	self.db.RegisterCallback(self, "OnProfileCopied", "ReloadSettings")
-	self.db.RegisterCallback(self, "OnProfileReset", "ReloadSettings")
+	self.db.RegisterCallback(self, "OnProfileChanged", private.reload_settings)
+	self.db.RegisterCallback(self, "OnProfileCopied", private.reload_settings)
+	self.db.RegisterCallback(self, "OnProfileReset", private.reload_settings)
 	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes", true)
 
-	self:RegisterInitOptions()
-	self:RegisterMedias()
-	self:RegisterClasses()
-	self:RegisterSchools()
-	self:RegisterToast()
+	private.init_options()
+	private.register_medias()
+	private.register_classes()
+	private.register_schools()
+	private.register_toast()
 	self:RegisterComms(not P.syncoff)
 
 	if self.LoadableDisplay then
@@ -3460,7 +3466,7 @@ function Skada:OnEnable()
 	end
 
 	self:SetupStorage()
-	self:ReloadSettings()
+	private.reload_settings()
 
 	-- SharedMedia is sometimes late, we wait few seconds then re-apply settings.
 	self:ScheduleTimer("ApplySettings", 2)
@@ -3468,23 +3474,24 @@ function Skada:OnEnable()
 end
 
 -- called on boss defeat
-function Skada:BossDefeated()
-	if self.current and not self.current.success then
-		self.current.success = true
+function private.boss_defeated()
+	local set = Skada.current
+	if not set or set.success then return end
 
-		-- phase segments.
-		if self.tempsets then
-			for i = 1, #self.tempsets do
-				local set = self.tempsets[i]
-				if set and not set.success then
-					set.success = true
-				end
+	set.success = true
+
+	-- phase segments.
+	if Skada.tempsets then
+		for i = 1, #Skada.tempsets do
+			local s = Skada.tempsets[i]
+			if s and not s.success then
+				s.success = true
 			end
 		end
-
-		self:Debug("COMBAT_BOSS_DEFEATED: Skada")
-		self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
 	end
+
+	Skada:Debug("COMBAT_BOSS_DEFEATED: Skada")
+	Skada:SendMessage("COMBAT_BOSS_DEFEATED", set)
 end
 
 function Skada:BigWigs(_, _, event, message)
@@ -3696,7 +3703,6 @@ end
 
 function combat_end()
 	if not Skada.current then return end
-	Skada:ClearQueueUnits()
 
 	-- trigger events.
 	local curtime = time()
@@ -3870,7 +3876,7 @@ function Skada:DispatchSets(func, ...)
 	if not self.current or type(func) ~= "function" then return end
 
 	func(self.current, ...) -- record to current
-	if self:CanRecordTotal(self.current) then -- record to total
+	if private.total_record(self.current) then -- record to total
 		func(self.total, ...)
 	end
 
@@ -4157,7 +4163,7 @@ do
 
 					if not fail and flags.src_is_interesting or flags.src_is_not_interesting then
 						if not src_is_interesting then
-							src_is_interesting = band(srcFlags, BITMASK_GROUP) ~= 0 or (band(srcFlags, BITMASK_PETS) ~= 0 and pets[srcGUID]) or players[srcGUID] or self:IsQueuedUnit(srcGUID)
+							src_is_interesting = band(srcFlags, BITMASK_GROUP) ~= 0 or (band(srcFlags, BITMASK_PETS) ~= 0 and pets[srcGUID]) or players[srcGUID]
 						end
 
 						if (flags.src_is_interesting and not src_is_interesting) or (flags.src_is_not_interesting and src_is_interesting) then
@@ -4229,14 +4235,13 @@ do
 							end
 						end
 					elseif _targets and not _targets[dstName] then
-						_targets = _targets or new()
 						_targets[dstName] = true
 						self.current.gotboss = nil
 					end
 				end
 			-- default boss defeated event? (no DBM/BigWigs)
 			elseif not self.bossmod and self.current.gotboss and death_events[eventtype] and self.current.gotboss == GetCreatureId(dstGUID) then
-				self:ScheduleTimer("BossDefeated", P.updatefrequency or 0.5)
+				self:ScheduleTimer(private.boss_defeated, P.updatefrequency or 0.5)
 			end
 		end
 	end

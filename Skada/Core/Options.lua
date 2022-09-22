@@ -1,4 +1,5 @@
 local folder, Skada = ...
+local private = Skada.private
 
 local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 local ACD = LibStub("AceConfigDialog-3.0")
@@ -216,7 +217,7 @@ end
 
 Skada.options = {
 	type = "group",
-	name = fmt("Skada \124cffffffff%s\124r", Skada.version),
+	name = fmt("%s \124cffffffff%s\124r", folder, Skada.version),
 	get = get_value,
 	set = set_value,
 	args = {
@@ -304,7 +305,7 @@ Skada.options = {
 							end,
 							set = function()
 								Skada.db.profile.icon.hide = not Skada.db.profile.icon.hide
-								Skada:RefreshMMButton()
+								private.refresh_button()
 							end
 						},
 						mergepets = {
@@ -804,8 +805,8 @@ Skada.options = {
 					desc = fmt(L["Advanced options for %s."], L["Tweaks"]),
 					order = 900,
 					args = {
-						toast_opt = Skada:GetToastOptions(),
-						total_opt = Skada:GetTotalOptions()
+						toast_opt = private.toast_options(),
+						total_opt = private.total_options()
 					}
 				}
 			}
@@ -864,14 +865,16 @@ do
 		return initOptions
 	end
 
-	function Skada:RegisterInitOptions()
-		LibStub("AceConfig-3.0"):RegisterOptionsTable("Skada Dialog", get_init_options)
-		self.optionsFrame = ACD:AddToBlizOptions("Skada Dialog", folder)
-		self.RegisterInitOptions = nil
+	function private.init_options()
+		private.init_options = nil -- remove it
+
+		local frame_name = fmt("%s Dialog", folder)
+		LibStub("AceConfig-3.0"):RegisterOptionsTable(frame_name, get_init_options)
+		Skada.optionsFrame = ACD:AddToBlizOptions(frame_name, folder)
 	end
 end
 
-function Skada:OpenOptions(win)
+function private.open_options(win)
 	if not ACR:GetOptionsTable(folder) then
 		LibStub("AceConfig-3.0"):RegisterOptionsTable(folder, Skada.options)
 		ACD:SetDefaultSize(folder, 630, 500)
@@ -899,7 +902,9 @@ do
 		sPercent = 9
 	}
 	function Skada:AddColumnOptions(mod)
-		if not (mod and mod.metadata and mod.metadata.columns) then return end
+		local metadata = mod and mod.metadata
+		local columns = metadata and metadata.columns
+		if not columns then return end
 
 		local db = self.db.profile.columns
 		local category = mod.category or L["Other"]
@@ -909,8 +914,8 @@ do
 		end
 
 		local moduleName = mod.localeName
-		if mod.metadata.icon or mod.icon then
-			moduleName = fmt("\124T%s:18:18:-5:0:32:32:2:30:2:30\124t %s", mod.metadata.icon or mod.icon, moduleName)
+		if metadata.icon or mod.icon then
+			moduleName = fmt("\124T%s:18:18:-5:0:32:32:2:30:2:30\124t %s", metadata.icon or mod.icon, moduleName)
 		end
 
 		local cols = {
@@ -918,11 +923,11 @@ do
 			name = moduleName,
 			inline = true,
 			get = function(info)
-				return mod.metadata.columns[info[#info]]
+				return columns[info[#info]]
 			end,
 			set = function(info, value)
 				local colname = info[#info]
-				mod.metadata.columns[colname] = value
+				columns[colname] = value
 				db[mod.name .. "_" .. colname] = value
 				Skada:UpdateDisplay(true)
 			end,
@@ -930,12 +935,12 @@ do
 		}
 
 		local order = 0
-		for colname in next, mod.metadata.columns do
+		for colname in next, columns do
 			local c = mod.name .. "_" .. colname
 
 			-- Set initial value from db if available, otherwise use mod default value.
 			if db[c] ~= nil then
-				mod.metadata.columns[colname] = db[c]
+				columns[colname] = db[c]
 			end
 
 			-- Add column option.
@@ -968,7 +973,7 @@ do
 end
 
 local modesList = nil
-function Skada:FrameSettings(db, include_dimensions)
+function private.frame_options(db, include_dimensions)
 	local obj = {
 		type = "group",
 		name = L["Window"],
@@ -1342,7 +1347,7 @@ function Skada:FrameSettings(db, include_dimensions)
 					set = function(_, child)
 						db.child = (child == "") and nil or child
 						db.childmode = db.child and (db.childmode or 1) or nil
-						Skada:ReloadSettings()
+						private.reload_settings()
 					end
 				},
 				childmode = {
@@ -1427,11 +1432,7 @@ do
 		wipe(temp)
 		Skada.tCopy(temp, Skada.db.profile, "modeclicks")
 		temp.__name = Skada.db:GetCurrentProfile()
-		return Skada:Serialize(true, fmt("%s profile", temp.__name), temp)
-	end
-
-	local function deserialize_profile(data)
-		return Skada:Deserialize(data, true)
+		return private.serialize(true, fmt("%s profile", temp.__name), temp)
 	end
 
 	local function open_import_export_window(title, subtitle, data)
@@ -1471,7 +1472,7 @@ do
 			editbox:DisableButton(false)
 			editbox.editBox:SetFocus()
 			editbox.button:SetScript("OnClick", function(widget)
-				Skada:ImportProfile(editbox:GetText())
+				private.import_profile(editbox:GetText())
 				AceGUI:Release(frame)
 				collectgarbage()
 			end)
@@ -1481,14 +1482,14 @@ do
 		UISpecialFrames[#UISpecialFrames + 1] = "SkadaImportExportFrame"
 	end
 
-	function Skada:OpenImport()
+	function private.open_import()
 		open_import_export_window(
 			L["Paste here a profile in text format."],
 			L["Press CTRL-V to paste a Skada configuration text."]
 		)
 	end
 
-	function Skada:ExportProfile()
+	function private.open_export()
 		open_import_export_window(
 			L["This is your current profile in text format."],
 			L["Press CTRL-C to copy the configuration to your clipboard."],
@@ -1496,13 +1497,13 @@ do
 		)
 	end
 
-	function Skada:ImportProfile(data, name)
+	function private.import_profile(data, name)
 		if type(data) ~= "string" then
 			Skada:Print("Import profile failed, data supplied must be a string.")
 			return false
 		end
 
-		local success, profile = deserialize_profile(data)
+		local success, profile = private.deserialize(data, true)
 		if not success then
 			Skada:Print("Import profile failed!")
 			return false
@@ -1520,24 +1521,24 @@ do
 			profile = profile[folder]
 		end
 
-		local Old_ReloadSettings = Skada.ReloadSettings
-		Skada.ReloadSettings = function(self)
-			self.ReloadSettings = Old_ReloadSettings
-			self.tCopy(self.db.profile, profile)
-			self:ReloadSettings()
+		local old_reload_settings = private.reload_settings
+		private.reload_settings = function()
+			private.reload_settings = old_reload_settings
+			Skada.tCopy(Skada.db.profile, profile)
+			private.reload_settings()
 			ACR:NotifyChange(folder)
 		end
 
 		Skada.db:SetProfile(profileName)
-		Skada:ReloadSettings()
+		private.reload_settings()
 		Skada:Wipe()
 		Skada:UpdateDisplay(true)
 		return true
 	end
 
-	function Skada:AdvancedProfile(args)
+	function private.advanced_profile(args)
 		if not args then return end
-		self.AdvancedProfile = nil -- remove it
+		private.advanced_profile = nil -- remove it
 		local CONST_COMM_PROFILE = "PR"
 
 		local Share = {}
@@ -1553,8 +1554,8 @@ do
 		end
 
 		function Share:Receive(sender, profileStr)
-			Skada:ConfirmDialog(fmt(L["opt_profile_received"], sender or L["Unknown"]), function()
-				Skada:ImportProfile(profileStr, sender)
+			private.confirm_dialog(fmt(L["opt_profile_received"], sender or L["Unknown"]), function()
+				private.import_profile(profileStr, sender)
 				collectgarbage()
 				self:Enable(false) -- disable receiving
 				self.target = nil -- reset target

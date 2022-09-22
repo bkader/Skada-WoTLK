@@ -1,4 +1,5 @@
 local folder, Skada = ...
+local private = Skada.private
 
 local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 
@@ -10,7 +11,6 @@ local next, print = next, print
 local GetNumRaidMembers, GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
 local UnitExists, UnitGUID, UnitClass = UnitExists, UnitGUID, UnitClass
 local UnitAffectingCombat, UnitIsDeadOrGhost = UnitAffectingCombat, UnitIsDeadOrGhost
-local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 local GetPlayerInfoByGUID = GetPlayerInfoByGUID
 local GetClassFromGUID = Skada.GetClassFromGUID
 local T = Skada.Table
@@ -30,11 +30,13 @@ end
 -------------------------------------------------------------------------------
 -- Classes, Specs and Schools
 
-function Skada:RegisterClasses()
-	self.RegisterClasses = nil -- remove it
+function private.register_classes()
+	private.register_classes = nil -- remove it
+	local self = Skada
 
 	-- class colors & coordinates
 	self.classcolors, self.classcoords = self.GetClassColorsTable()
+	self.GetClassColorsTable = nil
 
 	-- valid classes!
 	self.validclass = {}
@@ -230,8 +232,10 @@ function Skada:RegisterClasses()
 	self.options.args.tweaks.args.advanced.args.colors = colorsOpt
 end
 
-function Skada:RegisterSchools()
-	self.RegisterSchools = nil -- remove it
+function private.register_schools()
+	private.register_schools = nil -- remove it
+
+	local self = Skada
 	self.spellschools = self.spellschools or {}
 
 	-- handles adding spell schools
@@ -323,7 +327,7 @@ end
 -------------------------------------------------------------------------------
 -- creates generic dialog
 
-function Skada:ConfirmDialog(text, accept, cancel, override)
+function private.confirm_dialog(text, accept, cancel, override)
 	if type(cancel) == "table" and override == nil then
 		override = cancel
 		cancel = nil
@@ -407,7 +411,7 @@ do
 	end
 end
 
-function Skada:IsCreature(guid, flag)
+function private.is_creature(guid, flag)
 	if tonumber(guid) then
 		return (band(guid:sub(1, 5), 0x00F) == 3 or band(guid:sub(1, 5), 0x00F) == 5)
 	end
@@ -420,7 +424,7 @@ end
 -------------------------------------------------------------------------------
 -- class, role and spec functions
 
-function Skada.unitClass(guid, flag, set, db, name)
+function private.unit_class(guid, flag, set, db, name)
 	set = set or Skada.current
 	if set then
 		-- an existing player?
@@ -458,7 +462,7 @@ function Skada.unitClass(guid, flag, set, db, name)
 		class = "PET"
 	elseif Skada:IsBoss(guid, true) then
 		class = "BOSS"
-	elseif Skada:IsCreature(guid, flag) then
+	elseif private.is_creature(guid, flag) then
 		class = "MONSTER"
 	end
 
@@ -473,6 +477,7 @@ end
 -- spell functions
 
 do
+	local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 	local customSpells = {
 		[3] = {L["Falling"], [[Interface\Icons\ability_rogue_quickrecovery]]},
 		[4] = {L["Drowning"], [[Interface\Icons\spell_shadow_demonbreath]]},
@@ -482,7 +487,7 @@ do
 		[8] = {L["Slime"], [[Interface\Icons\inv_misc_slime_01]]}
 	}
 
-	function Skada.GetSpellInfo(spellid)
+	function private.spell_info(spellid)
 		local res1, res2, res3, res4, res5, res6, res7, res8, res9
 		if spellid then
 			if customSpells[spellid] then
@@ -501,7 +506,7 @@ do
 		return res1, res2, res3, res4, res5, res6, res7, res8, res9
 	end
 
-	function Skada.GetSpellLink(spellid)
+	function private.spell_link(spellid)
 		if not customSpells[spellid] then
 			return GetSpellLink(spellid)
 		end
@@ -685,12 +690,8 @@ do
 		return LSM:HashTable(mediatype)
 	end
 
-	function Skada:RegisterMedia(mediatype, key, path)
-		LSM:Register(mediatype, key, path)
-	end
-
-	function Skada:RegisterMedias()
-		self.RegisterMedias = nil -- remove it
+	function private.register_medias()
+		private.register_medias = nil -- remove it
 
 		-- fonts
 		LSM:Register("font", "ABF", [[Interface\Addons\Skada\Media\Fonts\ABF.ttf]])
@@ -748,113 +749,118 @@ do
 	local toast_opt = nil
 
 	-- initialize LibToast
-	function Skada:RegisterToast()
-		if LibToast then
-			-- install default options
-			if not self.db.profile.toast then
-				self.db.profile.toast = self.defaults.toast
-			end
+	function private.register_toast()
+		private.register_toast = nil -- remove it
+		if not LibToast then return end
 
-			LibToast:Register("SkadaToastFrame", function(toast, text, title, icon, urgency)
-				toast:SetTitle(title or folder)
-				toast:SetText(text or L["A damage meter."])
-				toast:SetIconTexture(icon or self.logo)
-				toast:SetUrgencyLevel(urgency or "normal")
-			end)
-			if self.db.profile.toast then
-				LibToast.config.hide_toasts = self.db.profile.toast.hide_toasts
-				LibToast.config.spawn_point = self.db.profile.toast.spawn_point or "TOP"
-				LibToast.config.duration = self.db.profile.toast.duration or 7
-				LibToast.config.opacity = self.db.profile.toast.opacity or 0.75
-			end
+		local self = Skada
+
+		-- install default options
+		if not self.db.profile.toast then
+			self.db.profile.toast = self.defaults.toast
 		end
-		self.RegisterToast = nil
+
+		LibToast:Register("SkadaToastFrame", function(toast, text, title, icon, urgency)
+			toast:SetTitle(title or folder)
+			toast:SetText(text or L["A damage meter."])
+			toast:SetIconTexture(icon or self.logo)
+			toast:SetUrgencyLevel(urgency or "normal")
+		end)
+		if self.db.profile.toast then
+			LibToast.config.hide_toasts = self.db.profile.toast.hide_toasts
+			LibToast.config.spawn_point = self.db.profile.toast.spawn_point or "TOP"
+			LibToast.config.duration = self.db.profile.toast.duration or 7
+			LibToast.config.opacity = self.db.profile.toast.opacity or 0.75
+		end
 	end
 
 	-- returns toast options
-	function Skada:GetToastOptions()
-		self.GetToastOptions = nil -- remove it
+	function private.toast_options()
+		private.toast_options = nil -- remove it
 
-		if LibToast and not toast_opt then
-			toast_opt = {
-				type = "group",
-				name = L["Notifications"],
-				get = function(i)
-					return self.db.profile.toast[i[#i]] or LibToast.config[i[#i]]
-				end,
-				set = function(i, val)
-					self.db.profile.toast[i[#i]] = val
-					LibToast.config[i[#i]] = val
-				end,
-				order = 990,
-				args = {
-					toastdesc = {
-						type = "description",
-						name = L["opt_toast_desc"],
-						fontSize = "medium",
-						width = "full",
-						order = 0
-					},
-					empty_1 = {
-						type = "description",
-						name = " ",
-						width = "full",
-						order = 1
-					},
-					hide_toasts = {
-						type = "toggle",
-						name = L["Disable"],
-						order = 10
-					},
-					spawn_point = {
-						type = "select",
-						name = L["Position"],
-						order = 20,
-						values = {
-							TOPLEFT = L["Top Left"],
-							TOPRIGHT = L["Top Right"],
-							BOTTOMLEFT = L["Bottom Left"],
-							BOTTOMRIGHT = L["Bottom Right"],
-							TOP = L["Top"],
-							BOTTOM = L["Bottom"],
-							LEFT = L["Left"],
-							RIGHT = L["Right"]
-						}
-					},
-					duration = {
-						type = "range",
-						name = L["Duration"],
-						min = 5,
-						max = 15,
-						step = 1,
-						order = 30
-					},
-					opacity = {
-						type = "range",
-						name = L["Opacity"],
-						min = 0,
-						max = 1,
-						step = 0.01,
-						isPercent = true,
-						order = 40
-					},
-					empty_2 = {
-						type = "description",
-						name = " ",
-						width = "full",
-						order = 50
-					},
-					test = {
-						type = "execute",
-						name = L["Test Notifications"],
-						func = function() self:Notify() end,
-						disabled = function() return self.db.profile.toast.hide_toasts end,
-						width = "double",
-						order = 60
+		if not LibToast or toast_opt then
+			return toast_opt
+		end
+
+		local self = Skada
+		toast_opt = {
+			type = "group",
+			name = L["Notifications"],
+			get = function(i)
+				return self.db.profile.toast[i[#i]] or LibToast.config[i[#i]]
+			end,
+			set = function(i, val)
+				self.db.profile.toast[i[#i]] = val
+				LibToast.config[i[#i]] = val
+			end,
+			order = 990,
+			args = {
+				toastdesc = {
+					type = "description",
+					name = L["opt_toast_desc"],
+					fontSize = "medium",
+					width = "full",
+					order = 0
+				},
+				empty_1 = {
+					type = "description",
+					name = " ",
+					width = "full",
+					order = 1
+				},
+				hide_toasts = {
+					type = "toggle",
+					name = L["Disable"],
+					order = 10
+				},
+				spawn_point = {
+					type = "select",
+					name = L["Position"],
+					order = 20,
+					values = {
+						TOPLEFT = L["Top Left"],
+						TOPRIGHT = L["Top Right"],
+						BOTTOMLEFT = L["Bottom Left"],
+						BOTTOMRIGHT = L["Bottom Right"],
+						TOP = L["Top"],
+						BOTTOM = L["Bottom"],
+						LEFT = L["Left"],
+						RIGHT = L["Right"]
 					}
+				},
+				duration = {
+					type = "range",
+					name = L["Duration"],
+					min = 5,
+					max = 15,
+					step = 1,
+					order = 30
+				},
+				opacity = {
+					type = "range",
+					name = L["Opacity"],
+					min = 0,
+					max = 1,
+					step = 0.01,
+					isPercent = true,
+					order = 40
+				},
+				empty_2 = {
+					type = "description",
+					name = " ",
+					width = "full",
+					order = 50
+				},
+				test = {
+					type = "execute",
+					name = L["Test Notifications"],
+					func = function() self:Notify() end,
+					disabled = function() return self.db.profile.toast.hide_toasts end,
+					width = "double",
+					order = 60
 				}
 			}
-		end
+		}
 
 		return toast_opt
 	end
@@ -873,132 +879,135 @@ end
 do
 	local total_opt = nil
 
-	function Skada:GetTotalOptions()
-		self.GetTotalOptions = nil -- remove it
+	function private.total_options()
+		private.total_options = nil -- remove it
 
-		if not total_opt then
-			local values = {al = 0x10, rb = 0x01, rt = 0x02, db = 0x04, dt = 0x08}
+		if total_opt then
+			return total_opt
+		end
 
-			local disabled = function()
-				return band(self.db.profile.totalflag, values.al) ~= 0
-			end
+		local self = Skada
+		local values = {al = 0x10, rb = 0x01, rt = 0x02, db = 0x04, dt = 0x08}
 
-			total_opt = {
-				type = "group",
-				name = L["Total Segment"],
-				desc = format(L["Options for %s."], L["Total Segment"]),
-				order = 970,
-				args = {
-					collection = {
-						type = "group",
-						name = L["Data Collection"],
-						inline = true,
-						order = 10,
-						get = function(i)
-							return (band(self.db.profile.totalflag, values[i[#i]]) ~= 0)
-						end,
-						set = function(i, val)
-							local v = values[i[#i]]
-							if val and band(self.db.profile.totalflag, v) == 0 then
-								self.db.profile.totalflag = self.db.profile.totalflag + v
-							elseif not val and band(self.db.profile.totalflag, v) ~= 0 then
-								self.db.profile.totalflag = self.db.profile.totalflag - v
-							end
-						end,
-						args = {
-							al = {
-								type = "toggle",
-								name = L["All Segments"],
-								desc = L["opt_tweaks_total_all_desc"],
-								width = "full",
-								order = 10
-							},
-							rb = {
-								type = "toggle",
-								name = L["Raid Bosses"],
-								desc = format(L["opt_tweaks_total_fmt_desc"], L["Raid Bosses"]),
-								order = 20,
-								disabled = disabled
-							},
-							rt = {
-								type = "toggle",
-								name = L["Raid Trash"],
-								desc = format(L["opt_tweaks_total_fmt_desc"], L["Raid Trash"]),
-								order = 30,
-								disabled = disabled
-							},
-							db = {
-								type = "toggle",
-								name = L["Dungeon Bosses"],
-								desc = format(L["opt_tweaks_total_fmt_desc"], L["Dungeon Bosses"]),
-								order = 40,
-								disabled = disabled
-							},
-							dt = {
-								type = "toggle",
-								name = L["Dungeon Trash"],
-								desc = format(L["opt_tweaks_total_fmt_desc"], L["Dungeon Trash"]),
-								order = 50,
-								disabled = disabled
-							}
+		local disabled = function()
+			return band(self.db.profile.totalflag, values.al) ~= 0
+		end
+
+		total_opt = {
+			type = "group",
+			name = L["Total Segment"],
+			desc = format(L["Options for %s."], L["Total Segment"]),
+			order = 970,
+			args = {
+				collection = {
+					type = "group",
+					name = L["Data Collection"],
+					inline = true,
+					order = 10,
+					get = function(i)
+						return (band(self.db.profile.totalflag, values[i[#i]]) ~= 0)
+					end,
+					set = function(i, val)
+						local v = values[i[#i]]
+						if val and band(self.db.profile.totalflag, v) == 0 then
+							self.db.profile.totalflag = self.db.profile.totalflag + v
+						elseif not val and band(self.db.profile.totalflag, v) ~= 0 then
+							self.db.profile.totalflag = self.db.profile.totalflag - v
+						end
+					end,
+					args = {
+						al = {
+							type = "toggle",
+							name = L["All Segments"],
+							desc = L["opt_tweaks_total_all_desc"],
+							width = "full",
+							order = 10
+						},
+						rb = {
+							type = "toggle",
+							name = L["Raid Bosses"],
+							desc = format(L["opt_tweaks_total_fmt_desc"], L["Raid Bosses"]),
+							order = 20,
+							disabled = disabled
+						},
+						rt = {
+							type = "toggle",
+							name = L["Raid Trash"],
+							desc = format(L["opt_tweaks_total_fmt_desc"], L["Raid Trash"]),
+							order = 30,
+							disabled = disabled
+						},
+						db = {
+							type = "toggle",
+							name = L["Dungeon Bosses"],
+							desc = format(L["opt_tweaks_total_fmt_desc"], L["Dungeon Bosses"]),
+							order = 40,
+							disabled = disabled
+						},
+						dt = {
+							type = "toggle",
+							name = L["Dungeon Trash"],
+							desc = format(L["opt_tweaks_total_fmt_desc"], L["Dungeon Trash"]),
+							order = 50,
+							disabled = disabled
 						}
-					},
-					totalidc = {
-						type = "toggle",
-						name = L["Detailed total segment"],
-						desc = L["opt_tweaks_total_full_desc"],
-						order = 20
 					}
+				},
+				totalidc = {
+					type = "toggle",
+					name = L["Detailed total segment"],
+					desc = L["opt_tweaks_total_full_desc"],
+					order = 20
 				}
 			}
-		end
+		}
 
 		return total_opt
 	end
 
-	function Skada:NoTotalClick(set, mode)
-		return (not self.db.profile.totalidc and set == "total" and type(mode) == "table" and mode.nototal == true)
+	function private.total_noclick(set, mode)
+		return (not Skada.db.profile.totalidc and set == "total" and type(mode) == "table" and mode.nototal == true)
 	end
 
-	function Skada:CanRecordTotal(set)
-		if self.total and set then
+	function private.total_record(set)
+		if Skada.total and set then
 			-- just in case
-			if not self.db.profile.totalflag then
-				self.db.profile.totalflag = 0x10
+			if not Skada.db.profile.totalflag then
+				Skada.db.profile.totalflag = 0x10
 			end
 
 			-- raid bosses - 0x01
-			if band(self.db.profile.totalflag, 0x01) ~= 0 then
+			if band(Skada.db.profile.totalflag, 0x01) ~= 0 then
 				if set.type == "raid" and set.gotboss then
-					if set.time >= self.db.profile.minsetlength then
+					if set.time >= Skada.db.profile.minsetlength then
 						return true
 					end
 				end
 			end
 
 			-- raid trash - 0x02
-			if band(self.db.profile.totalflag, 0x02) ~= 0 then
+			if band(Skada.db.profile.totalflag, 0x02) ~= 0 then
 				if set.type == "raid" and not set.gotboss then
 					return true
 				end
 			end
 
 			-- dungeon boss - 0x04
-			if band(self.db.profile.totalflag, 0x04) ~= 0 then
-				if set.type == "party" and self.db.profile.gotboss then
+			if band(Skada.db.profile.totalflag, 0x04) ~= 0 then
+				if set.type == "party" and Skada.db.profile.gotboss then
 					return true
 				end
 			end
 
 			-- dungeon trash - 0x08
-			if band(self.db.profile.totalflag, 0x08) ~= 0 then
-				if set.type == "party" and not self.db.profile.gotboss then
+			if band(Skada.db.profile.totalflag, 0x08) ~= 0 then
+				if set.type == "party" and not Skada.db.profile.gotboss then
 					return true
 				end
 			end
 
 			-- any combat - 0x10
-			if band(self.db.profile.totalflag, 0x10) ~= 0 then
+			if band(Skada.db.profile.totalflag, 0x10) ~= 0 then
 				return true
 			end
 
@@ -1007,75 +1016,6 @@ do
 		end
 
 		return false
-	end
-end
-
--------------------------------------------------------------------------------
--- units fix function.
---
--- on certain servers, certain spells are not assigned properly and
--- in order to work around this, these functions were added.
---
--- for example, Death Knight' "Mark of Blood" healing is not considered
--- by Skada because the healing is attributed to the boss and not to the
--- player who used the spell, so in some modules you will find a table
--- called "queuedSpells" in which you can store a table of [spellid] = spellid
--- used by other modules.
--- In the case of "Mark of Blood" (49005), the healing from the spell 50424
--- is attributed to the target instead of the DK, so whenever Skada detects
--- a healing from 50424 it will check queued units, if found the player data
--- will be used.
-
-do
-	local queued_units = nil
-	local new, del = Skada.newTable, Skada.delTable
-
-	function Skada:QueueUnit(spellid, srcGUID, srcName, srcFlags, dstGUID)
-		if spellid and srcName and srcGUID and dstGUID and srcGUID ~= dstGUID then
-			queued_units = queued_units or T.get("Skada_QueuedUnits")
-			queued_units[spellid] = queued_units[spellid] or new()
-			queued_units[spellid][dstGUID] = new()
-			queued_units[spellid][dstGUID].id = srcGUID
-			queued_units[spellid][dstGUID].name = srcName
-			queued_units[spellid][dstGUID].flag = srcFlags
-		end
-	end
-
-	function Skada:UnqueueUnit(spellid, dstGUID)
-		if spellid and dstGUID and queued_units and queued_units[spellid] then
-			if queued_units[spellid][dstGUID] then
-				queued_units[spellid][dstGUID] = del(queued_units[spellid][dstGUID])
-			end
-			if Skada.tLength(queued_units[spellid]) == 0 then
-				queued_units[spellid] = del(queued_units[spellid])
-			end
-		end
-	end
-
-	function Skada:FixUnit(spellid, guid, name, flag)
-		if spellid and guid and queued_units and queued_units[spellid] and queued_units[spellid][guid] then
-			flag = queued_units[spellid][guid].flag or flag
-			name = queued_units[spellid][guid].name or name
-			guid = queued_units[spellid][guid].id or guid
-		end
-		return guid, name, flag
-	end
-
-	function Skada:IsQueuedUnit(guid)
-		if queued_units and tonumber(guid) then
-			for _, units in pairs(queued_units) do
-				for id, _ in pairs(units) do
-					if id == guid then
-						return true
-					end
-				end
-			end
-		end
-		return false
-	end
-
-	function Skada:ClearQueueUnits()
-		T.free("Skada_QueuedUnits", queued_units, nil, del, true)
 	end
 end
 
@@ -1118,7 +1058,7 @@ do
 
 	local encodeTable = nil
 
-	function Skada:Serialize(hex, title, ...)
+	function private.serialize(hex, title, ...)
 		local result = LD:CompressDeflate(AS:Serialize(...), LL)
 		if hex then
 			return LD:EncodeForPrint(result)
@@ -1126,7 +1066,7 @@ do
 		return LD:EncodeForWoWChatChannel(result)
 	end
 
-	function Skada:Deserialize(data, hex)
+	function private.deserialize(data, hex)
 		local result = hex and LD:DecodeForPrint(data) or LD:DecodeForWoWChatChannel(data)
 		result = result and LD:DecompressDeflate(result) or nil
 		if result then
@@ -1136,7 +1076,7 @@ do
 		-- backwards compatibility
 		local err
 		if hex then
-			data, err = self.HexDecode(data)
+			data, err = Skada.HexDecode(data)
 		else
 			encodeTable = encodeTable or LC:GetAddonEncodeTable()
 			data, err = encodeTable:Decode(data), "Error decoding"
@@ -1279,9 +1219,9 @@ do
 		end
 
 		if channel == "PURR" then
-			self:SendCommMessage(folder, self:Serialize(nil, nil, ...), "WHISPER", target, "NORMAL", show_progress_window, self)
+			self:SendCommMessage(folder, private.serialize(nil, nil, ...), "WHISPER", target, "NORMAL", show_progress_window, self)
 		elseif channel then
-			self:SendCommMessage(folder, self:Serialize(nil, nil, ...), channel, target)
+			self:SendCommMessage(folder, private.serialize(nil, nil, ...), channel, target)
 		end
 	end
 
@@ -1301,7 +1241,7 @@ do
 
 	local function on_comm_received(self, prefix, message, channel, sender)
 		if prefix == folder and channel and sender and sender ~= self.userName then
-			dispatch_comm(sender, self:Deserialize(message))
+			dispatch_comm(sender, private.deserialize(message))
 		end
 	end
 

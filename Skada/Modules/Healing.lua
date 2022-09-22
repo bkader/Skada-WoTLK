@@ -136,8 +136,6 @@ Skada:RegisterModule("Healing", function(L, P)
 	local function spell_heal(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, ...)
 		if not spellid or ignoredSpells[spellid] then return end
 
-		srcGUID, srcName, srcFlags = Skada:FixUnit(spellid, srcGUID, srcName, srcFlags)
-
 		heal.playerid = srcGUID
 		heal.playername = srcName
 		heal.playerflags = srcFlags

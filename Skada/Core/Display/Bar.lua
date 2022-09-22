@@ -1,4 +1,5 @@
 local folder, Skada = ...
+local private = Skada.private
 Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 	local mod = Skada:NewModule("Bar Display", "SpecializedLibBars-1.0")
 	local FlyPaper = LibStub("LibFlyPaper-1.1", true)
@@ -7,7 +8,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 	local pairs, tsort, format = pairs, table.sort, string.format
 	local max, min, abs = math.max, math.min, math.abs
 	local GameTooltip = GameTooltip
-	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
+	local GetSpellLink = private.spell_link or GetSpellLink
 	local CloseDropDownMenus = CloseDropDownMenus
 	local GetScreenWidth, GetScreenHeight = GetScreenWidth, GetScreenHeight
 	local IsShiftKeyDown = IsShiftKeyDown
@@ -80,7 +81,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 
 		local function configOnClick(self, button)
 			if button == "RightButton" then
-				Skada:OpenOptions(self.list.win)
+				private.open_options(self.list.win)
 			else
 				Skada:OpenMenu(self.list.win)
 			end
@@ -110,7 +111,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 
 		local function reportOnClick(self, button)
 			if button == "LeftButton" then
-				Skada:OpenReportWindow(self.list.win)
+				private.open_report(self.list.win)
 			end
 		end
 
@@ -490,7 +491,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 		end
 
 		local function showmode(win, id, label, mode)
-			if Skada:NoTotalClick(win.selectedset, mode) then
+			if private.total_noclick(win.selectedset, mode) then
 				return
 			end
 
@@ -1827,7 +1828,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			}
 		}
 
-		options.windowoptions = Skada:FrameSettings(db)
+		options.windowoptions = private.frame_options(db)
 
 		options.windowoptions.args.position.args.barwidth = {
 			type = "range",

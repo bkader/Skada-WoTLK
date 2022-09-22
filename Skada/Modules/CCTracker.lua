@@ -1,7 +1,8 @@
 local _, Skada = ...
+local private = Skada.private
 
 local pairs, format, pformat = pairs, string.format, Skada.pformat
-local GetSpellLink = Skada.GetSpellLink or GetSpellLink
+local GetSpellLink = private.spell_link or GetSpellLink
 local new, clear = Skada.newTable, Skada.clearTable
 local cc_table = {} -- holds stuff from cleu
 

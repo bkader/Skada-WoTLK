@@ -1,4 +1,5 @@
 local _, Skada = ...
+local private = Skada.private
 
 local pairs, max = pairs, math.max
 local format, pformat = string.format, Skada.pformat
@@ -29,7 +30,7 @@ Skada:RegisterModule("Damage", function(L, P)
 	local tdetailmod = targetmod:NewModule("Damage spell list")
 
 	local UnitGUID, GetTime = UnitGUID, GetTime
-	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+	local GetSpellInfo = private.spell_info or GetSpellInfo
 	local PercentToRGB = Skada.PercentToRGB
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua

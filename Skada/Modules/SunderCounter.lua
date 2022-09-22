@@ -1,4 +1,5 @@
 local _, Skada = ...
+local private = Skada.private
 Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 	local mod = Skada:NewModule("Sunder Counter")
 	local targetmod = mod:NewModule("Sunder target list")
@@ -8,8 +9,8 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 
 	local pairs, format, GetTime, pformat = pairs, string.format, GetTime, Skada.pformat
 	local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
-	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
-	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
+	local GetSpellInfo = private.spell_info or GetSpellInfo
+	local GetSpellLink = private.spell_link or GetSpellLink
 	local T = Skada.Table
 
 	local sunder_targets -- holds sunder targets details for announcement
