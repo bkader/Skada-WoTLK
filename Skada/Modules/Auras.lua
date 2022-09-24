@@ -543,7 +543,10 @@ Skada:RegisterModule("Buffs", function(_, P, _, C)
 	local UnitName, UnitGUID, UnitBuff = UnitName, UnitGUID, UnitBuff
 	local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
 
-	local function handle_buff(_, event, _, _, _, dstGUID, dstName, dstFlags, spellid, _, school, auratype)
+	-- list of spells used to queue units.
+	local queued_spells = {[49005] = 50424}
+
+	local function handle_buff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, school, auratype)
 		if spellid and not ignored_buffs[spellid] and (auratype == "BUFF" or spell_aura_list[spellid]) then
 			aura.srcGUID = dstGUID
 			aura.srcName = dstName
@@ -560,8 +563,14 @@ Skada:RegisterModule("Buffs", function(_, P, _, C)
 				Skada:DispatchSets(log_specialaura)
 			elseif event == "SPELL_AURA_APPLIED" then
 				Skada:DispatchSets(log_auraapplied)
+				if queued_spells[spellid] then
+					Skada:QueueUnit(queued_spells[spellid], srcGUID, srcName, srcFlags, dstGUID)
+				end
 			elseif event == "SPELL_AURA_REMOVED" then
 				Skada:DispatchSets(log_auraremove)
+				if queued_spells[spellid] then
+					Skada:UnqueueUnit(queued_spells[spellid], dstGUID)
+				end
 			else
 				Skada:DispatchSets(log_aurarefresh)
 			end

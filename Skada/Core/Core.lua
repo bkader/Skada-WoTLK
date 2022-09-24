@@ -3703,6 +3703,7 @@ end
 
 function combat_end()
 	if not Skada.current then return end
+	private.clear_queued_units()
 
 	-- trigger events.
 	local curtime = time()
@@ -4163,7 +4164,7 @@ do
 
 					if not fail and flags.src_is_interesting or flags.src_is_not_interesting then
 						if not src_is_interesting then
-							src_is_interesting = band(srcFlags, BITMASK_GROUP) ~= 0 or (band(srcFlags, BITMASK_PETS) ~= 0 and pets[srcGUID]) or players[srcGUID]
+							src_is_interesting = band(srcFlags, BITMASK_GROUP) ~= 0 or (band(srcFlags, BITMASK_PETS) ~= 0 and pets[srcGUID]) or players[srcGUID] or private.is_queued_unit(srcGUID)
 						end
 
 						if (flags.src_is_interesting and not src_is_interesting) or (flags.src_is_not_interesting and src_is_interesting) then

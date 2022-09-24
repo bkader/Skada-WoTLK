@@ -100,7 +100,7 @@ function private.register_classes()
 		DAMAGER = {0.25, 0.5, 0, 1},
 		TANK = {0.5, 0.75, 0, 1},
 		HEALER = {0.75, 1, 0, 1},
-		NONE = ""
+		NONE = {0.25, 0.5, 0, 1} -- fallback to damager
 	}, coords_mt)
 
 	-- specialization icons
@@ -1016,6 +1016,75 @@ do
 		end
 
 		return false
+	end
+end
+
+-------------------------------------------------------------------------------
+-- units fix function.
+--
+-- on certain servers, certain spells are not assigned properly and
+-- in order to work around this, these functions were added.
+--
+-- for example, Death Knight' "Mark of Blood" healing is not considered
+-- by Skada because the healing is attributed to the boss and not to the
+-- player who used the spell, so in some modules you will find a table
+-- called "queued_spells" in which you can store a table of [spellid] = spellid
+-- used by other modules.
+-- In the case of "Mark of Blood" (49005), the healing from the spell 50424
+-- is attributed to the target instead of the DK, so whenever Skada detects
+-- a healing from 50424 it will check queued units, if found the player data
+-- will be used.
+
+do
+	local new, del, tLength = Skada.newTable, Skada.delTable, Skada.tLength
+	local queued_units = nil
+
+	function Skada:QueueUnit(spellid, srcGUID, srcName, srcFlags, dstGUID)
+		if spellid and srcName and srcGUID and dstGUID and srcGUID ~= dstGUID then
+			queued_units = queued_units or T.get("Skada_QueuedUnits")
+			queued_units[spellid] = queued_units[spellid] or new()
+			queued_units[spellid][dstGUID] = new()
+			queued_units[spellid][dstGUID].id = srcGUID
+			queued_units[spellid][dstGUID].name = srcName
+			queued_units[spellid][dstGUID].flag = srcFlags
+		end
+	end
+
+	function Skada:UnqueueUnit(spellid, dstGUID)
+		if spellid and dstGUID and queued_units and queued_units[spellid] then
+			if queued_units[spellid][dstGUID] then
+				queued_units[spellid][dstGUID] = del(queued_units[spellid][dstGUID])
+			end
+			if tLength(queued_units[spellid]) == 0 then
+				queued_units[spellid] = del(queued_units[spellid])
+			end
+		end
+	end
+
+	function Skada:FixUnit(spellid, guid, name, flag)
+		if spellid and guid and queued_units and queued_units[spellid] and queued_units[spellid][guid] then
+			flag = queued_units[spellid][guid].flag or flag
+			name = queued_units[spellid][guid].name or name
+			guid = queued_units[spellid][guid].id or guid
+		end
+		return guid, name, flag
+	end
+
+	function private.is_queued_unit(guid)
+		if queued_units and tonumber(guid) then
+			for _, units in pairs(queued_units) do
+				for id, _ in pairs(units) do
+					if id == guid then
+						return true
+					end
+				end
+			end
+		end
+		return false
+	end
+
+	function private.clear_queued_units()
+		T.free("Skada_QueuedUnits", queued_units, nil, del, true)
 	end
 end
 
