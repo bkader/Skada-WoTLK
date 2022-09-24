@@ -2330,7 +2330,7 @@ function Skada:FilterClass(win, id, label)
 		win:DisplayMode(win.selectedmode, nil)
 	elseif win.GetSelectedSet and id then
 		local set = win:GetSelectedSet()
-		local actor = set and set:GetPlayer(id, label)
+		local actor = set and set:GetActor(label, id)
 		win:DisplayMode(win.selectedmode, actor and actor.class)
 	end
 end

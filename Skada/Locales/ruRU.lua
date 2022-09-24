@@ -537,6 +537,8 @@ L["Sunder Counter"] = "Раскол брони"
 L["Sunder target list"] = "Цели раскола брони"
 L["Sunder source list"] = "Источник раскола брони"
 L["Number of seconds after application to count refreshs."] = "Количество секунд ожидания после приложения для подсчета обновлений."
+L["Enemy Buffs"] = "Бафы врагом"
+L["Enemy Debuffs"] = "Дебафы врагом"
 -- CC Tracker Module --
 L["Crowd Control"] = "Контроль толпы"
 L["CC Done"] = "Контроль - Успешный"

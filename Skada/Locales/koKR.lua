@@ -536,6 +536,8 @@ L["%s's <%s> targets"] = "%s - %s의 대상"
 -- L["Sunder target list"] = ""
 -- L["Sunder source list"] = ""
 -- L["Number of seconds after application to count refreshs."] = ""
+-- L["Enemy Buffs"] = ""
+-- L["Enemy Debuffs"] = ""
 -- CC Tracker Module --
 L["Crowd Control"] = "군중 제어"
 L["CC Done"] = "시전한 군중 제어"

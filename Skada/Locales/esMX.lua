@@ -537,6 +537,8 @@ L["Sunder Counter"] = "Hender armadura"
 L["Sunder target list"] = "Objetivos de Hender armadura"
 L["Sunder source list"] = "Fuentes de Hender armadura"
 L["Number of seconds after application to count refreshs."] = "N\195\186mero de segundos despu\195\169s de la aplicaci\195\179n para contar las actualizaciones."
+L["Enemy Buffs"] = "Bufos de enemigo"
+L["Enemy Debuffs"] = "Debufos de enemigo"
 -- CC Tracker Module --
 L["Crowd Control"] = "Controles de masas"
 L["CC Done"] = "Controles hechos"

@@ -1,5 +1,6 @@
 _dev
 Makefile
+*_bak.lua
 *.zip
 *.7z
 *.sublime-project

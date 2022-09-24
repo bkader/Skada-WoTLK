@@ -534,6 +534,8 @@ L["Sunder Counter"] = "破甲統計"
 L["Sunder target list"] = "破甲目標列表"
 L["Sunder source list"] = "破甲的來源列表"
 L["Number of seconds after application to count refreshs."] = "應用後，在計算刷新前要等待多少秒。"
+L["Enemy Buffs"] = "敵人增益"
+L["Enemy Debuffs"] = "敵人減益"
 -- CC Tracker Module --
 L["Crowd Control"] = "控場"
 L["CC Done"] = "施放控場"
