@@ -1,7 +1,7 @@
 local LibFail = LibStub("LibFail-1.0", true)
 if not LibFail then return end
 
-local _, Skada = ...
+local folder, Skada = ...
 Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Fails")
 	local playermod = mod:NewModule("Player's failed events")
@@ -9,10 +9,9 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local count_fails_by_spell = nil
 
-	local pairs, tostring, tContains = pairs, tostring, tContains
-	local format, pformat = string.format, Skada.pformat
-	local UnitGUID, IsInGroup = UnitGUID, Skada.IsInGroup
-	local mod_cols = nil
+	local pairs, format, UnitGUID = pairs, string.format, UnitGUID
+	local pformat, IsInGroup = Skada.pformat, Skada.IsInGroup
+	local tank_events, mod_cols
 
 	local function format_valuetext(d, columns, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -25,30 +24,31 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 		end
 	end
 
-	local function log_fail(set, playerid, playername, spellid, event)
-		local player = Skada:GetPlayer(set, playerid, playername)
-		if player and (player.role ~= "TANK" or not tContains(LibFail:GetFailsWhereTanksDoNotFail(), event)) then
-			player.fail = (player.fail or 0) + 1
-			set.fail = (set.fail or 0) + 1
+	local function log_fail(set, playerid, playername, spellid, failname)
+		local actor = Skada:GetPlayer(set, playerid, playername)
+		if not actor or (actor.role == "TANK" and tank_events[failname]) then return end
 
-			-- saving this to total set may become a memory hog deluxe.
-			if set ~= Skada.total or P.totalidc then
-				player.failspells = player.failspells or {}
-				player.failspells[spellid] = (player.failspells[spellid] or 0) + 1
-			end
+		actor.fail = (actor.fail or 0) + 1
+		set.fail = (set.fail or 0) + 1
+
+		-- saving this to total set may become a memory hog deluxe.
+		if set == Skada.total and not P.totalidc then return end
+
+		local count = actor.failspells and actor.failspells[spellid]
+		if not count then
+			actor.failspells = actor.failspells or {}
+			actor.failspells[spellid] = 1
+		else
+			count = count + 1
 		end
 	end
 
-	local function on_fail(event, who, failtype)
-		if not who or not event then return end
+	local function on_fail(failname, playername, failtype, ...)
+		local spellid = failname and playername and LibFail:GetEventSpellId(failname)
+		local playerid = spellid and not ignoredSpells[spellid] and UnitGUID(playername)
+		if not playerid then return end
 
-		local spellid = LibFail:GetEventSpellId(event)
-		if not spellid or ignoredSpells[spellid] then return end
-
-		local unitGUID = UnitGUID(who)
-		if not unitGUID then return end
-
-		Skada:DispatchSets(log_fail, unitGUID, who, spellid, event)
+		Skada:DispatchSets(log_fail, playerid, playername, spellid, failname)
 	end
 
 	function spellmod:Enter(win, id, label)
@@ -229,16 +229,17 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 		function mod:OnInitialize()
 			local events = LibFail:GetSupportedEvents()
 			for i = 1, #events do
-				LibFail:RegisterCallback(events[i], on_fail)
+				LibFail.RegisterCallback(folder, events[i], on_fail)
 			end
 
-			if M.failschannel == nil then
-				M.failschannel = "AUTO"
-			end
-			if M.ignoredfails then
-				M.ignoredfails = nil
+			events = LibFail:GetFailsWhereTanksDoNotFail()
+			tank_events = tank_events or {}
+			for i = 1, #events do
+				tank_events[events[i]] = true
 			end
 
+			M.ignoredfails = nil
+			M.failschannel = M.failschannel or "AUTO"
 			Skada.options.args.modules.args.failbot = get_options()
 		end
 	end
