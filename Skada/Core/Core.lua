@@ -3395,16 +3395,17 @@ function Skada:OnInitialize()
 	if self.LoadableDisplay then
 		for name, func in pairs(self.LoadableDisplay) do
 			if not self:IsDisabled(name) then
-				func(L, self.db.profile, self.db.global, self.cacheTable)
+				func(L, P, G, self.cacheTable)
 			end
 		end
 		self.LoadableDisplay = del(self.LoadableDisplay)
 	end
 
-	-- fix setstokeep, setslimit and timemesure and remove old stuff
+	-- fix things and remove others
 	P.setstokeep = min(25, max(0, P.setstokeep or 0))
 	P.setslimit = min(25, max(0, P.setslimit or 0))
 	P.timemesure = min(2, max(1, P.timemesure or 0))
+	P.totalflag = P.totalflag or 0x10
 	G.revision = nil
 
 	-- store the version
@@ -3449,7 +3450,7 @@ function Skada:OnEnable()
 		for i = 1, #self.LoadableModules do
 			local mod = self.LoadableModules[i]
 			if mod.name and mod.func and not self:IsDisabled(mod.name) and not (mod.deps and self:IsDisabled(unpack(mod.deps))) then
-				mod.func(L, self.db.profile, self.db.global, self.cacheTable, self.db.profile.modules)
+				mod.func(L, P, G, self.cacheTable, P.modules)
 			end
 		end
 		self.LoadableModules = del(self.LoadableModules, true)
@@ -4080,6 +4081,66 @@ do
 		return is_interesting
 	end
 
+	local function check_boss_fight(set, event, srcName, srcFlags, src_is_interesting, dstGUID, dstName, dstFlags, dst_is_interesting)
+		-- set mobname
+		if not set.mobname then
+			if set.type == "pvp" then
+				set.gotboss = false -- skip boss check
+				set.mobname = GetInstanceInfo()
+			elseif set.type == "arena" then
+				set.gotboss = false -- skip boss check
+				set.mobname = GetInstanceInfo()
+				set.gold = GetBattlefieldArenaFaction()
+				Skada:SendMessage("COMBAT_ARENA_START", set, set.mobname)
+			elseif src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+				set.mobname = dstName
+			elseif dst_is_interesting and band(srcFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+				set.mobname = srcName
+			end
+		end
+
+		-- check for boss fights
+		if not set.gotboss and not spellcast_events[event] then
+			-- marking set as boss fights relies only on src_is_interesting
+			if src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+				if set.gotboss == nil then
+					if not _targets or not _targets[dstName] then
+						local isboss, bossid, bossname = Skada:IsEncounter(dstGUID, dstName)
+						if isboss then -- found?
+							set.mobname = bossname or dstName
+							set.gotboss = bossid or true
+							Skada:SendMessage("COMBAT_ENCOUNTER_START", set)
+							_targets = del(_targets)
+						else
+							_targets = _targets or new()
+							_targets[dstName] = true
+							set.gotboss = false
+						end
+					end
+				elseif _targets and not _targets[dstName] then
+					_targets[dstName] = true
+					set.gotboss = nil
+				end
+			end
+		-- default boss defeated event? (no DBM/BigWigs)
+		elseif not Skada.bossmod and set.gotboss and death_events[event] and set.gotboss == GetCreatureId(dstGUID) then
+			Skada:ScheduleTimer(private.boss_defeated, P.updatefrequency or 0.5)
+		end
+	end
+
+	local function check_autostop(set, event, guid, flags)
+		if event == "UNIT_DIED" and check_flags_interest(guid, flags, true) then
+			death_counter = death_counter + 1
+			-- If we reached the treshold for stopping the segment, do so.
+			if death_counter > 0 and death_counter / starting_members >= 0.5 and not set.stopped then
+				Skada:SendMessage("COMBAT_PLAYER_WIPE", set)
+				Skada:StopSegment(L["Stopping for wipe."])
+			end
+		elseif event == "SPELL_RESURRECT" and check_flags_interest(guid, flags, true) then
+			death_counter = death_counter - 1
+		end
+	end
+
 	function Skada:CombatLogEvent(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		-- ignored combat event?
 		if (not eventtype or ignored_events[eventtype]) and not (spellcast_events[eventtype] and self.current) then return end
@@ -4106,6 +4167,8 @@ do
 					self.current = nil
 				end, 1)
 				tentative = 0
+
+				check_boss_fight(self.current, eventtype, srcName, srcFlags, src_is_interesting, dstGUID, dstName, dstFlags, dst_is_interesting)
 			end
 		end
 
@@ -4125,17 +4188,8 @@ do
 			end
 
 			-- autostop on wipe enabled?
-			if P.autostop then
-				if eventtype == "UNIT_DIED" and check_flags_interest(srcGUID, srcFlags, true) then
-					death_counter = death_counter + 1
-					-- If we reached the treshold for stopping the segment, do so.
-					if death_counter > 0 and death_counter / starting_members >= 0.5 and not self.current.stopped then
-						self:SendMessage("COMBAT_PLAYER_WIPE", self.current)
-						self:StopSegment(L["Stopping for wipe."])
-					end
-				elseif eventtype == "SPELL_RESURRECT" and check_flags_interest(srcGUID, srcFlags, true) then
-					death_counter = death_counter - 1
-				end
+			if P.autostop and (eventtype == "UNIT_DIED" or eventtype == "SPELL_RESURRECT") then
+				check_autostop(self.current, eventtype, srcGUID, srcFlags)
 			end
 
 			-- valid combatlog event
@@ -4220,50 +4274,7 @@ do
 				end
 			end
 
-			-- set mobname
-			if not self.current.mobname then
-				if self.current.type == "pvp" then
-					self.current.gotboss = false -- skip boss check
-					self.current.mobname = GetInstanceInfo()
-				elseif self.current.type == "arena" then
-					self.current.gotboss = false -- skip boss check
-					self.current.mobname = GetInstanceInfo()
-					self.current.gold = GetBattlefieldArenaFaction()
-					self:SendMessage("COMBAT_ARENA_START", self.current, self.current.mobname)
-				elseif src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
-					self.current.mobname = dstName
-				elseif dst_is_interesting and band(srcFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
-					self.current.mobname = srcName
-				end
-			end
-
-			-- check for boss fights
-			if not self.current.gotboss and not spellcast_events[eventtype] then
-				-- marking set as boss fights relies only on src_is_interesting
-				if src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
-					if self.current.gotboss == nil then
-						if not _targets or not _targets[dstName] then
-							local isboss, bossid, bossname = self:IsEncounter(dstGUID, dstName)
-							if isboss then -- found?
-								self.current.mobname = bossname or dstName
-								self.current.gotboss = bossid or true
-								self:SendMessage("COMBAT_ENCOUNTER_START", self.current)
-								_targets = del(_targets)
-							else
-								_targets = _targets or new()
-								_targets[dstName] = true
-								self.current.gotboss = false
-							end
-						end
-					elseif _targets and not _targets[dstName] then
-						_targets[dstName] = true
-						self.current.gotboss = nil
-					end
-				end
-			-- default boss defeated event? (no DBM/BigWigs)
-			elseif not self.bossmod and self.current.gotboss and death_events[eventtype] and self.current.gotboss == GetCreatureId(dstGUID) then
-				self:ScheduleTimer(private.boss_defeated, P.updatefrequency or 0.5)
-			end
+			check_boss_fight(self.current, eventtype, srcName, srcFlags, src_is_interesting, dstGUID, dstName, dstFlags, dst_is_interesting)
 		end
 	end
 end

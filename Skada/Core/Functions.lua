@@ -32,56 +32,59 @@ end
 
 function private.register_classes()
 	private.register_classes = nil -- remove it
-	local self = Skada
 
 	-- class colors & coordinates
-	self.classcolors, self.classcoords = self.GetClassColorsTable()
-	self.GetClassColorsTable = nil
+	local classcolors, classcoords = Skada.GetClassColorsTable()
+	Skada.GetClassColorsTable = nil
 
 	-- valid classes!
-	self.validclass = {}
-	for class, classTable in pairs(self.classcolors) do
-		self.validclass[class] = true
+	local validclass = {}
+	for class, classTable in pairs(classcolors) do
+		validclass[class] = true
 		-- localized class names.
 		L[class] = classTable.className
 	end
+	Skada.validclass = validclass
 
 	-- Skada custom class colors!
-	self.classcolors.BOSS = {r = 0.203, g = 0.345, b = 0.525, colorStr = "ff345886"}
-	self.classcolors.ENEMY = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
-	self.classcolors.MONSTER = {r = 0.549, g = 0.388, b = 0.404, colorStr = "ff8c6367"}
-	self.classcolors.PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"}
-	self.classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
-	self.classcolors.UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
+	classcolors.BOSS = {r = 0.203, g = 0.345, b = 0.525, colorStr = "ff345886"}
+	classcolors.ENEMY = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
+	classcolors.MONSTER = {r = 0.549, g = 0.388, b = 0.404, colorStr = "ff8c6367"}
+	classcolors.PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"}
+	classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
+	classcolors.UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
 
-	setmetatable(self.classcolors, {__call = function(t, class, arg)
+	local RGBPercToHex = Skada.RGBPercToHex
+	local P = Skada.db.profile
+
+	Skada.classcolors = setmetatable(classcolors, {__call = function(t, class, arg)
 		local color = HIGHLIGHT_FONT_COLOR
 		if class and t[class] then
 			color = t[class]
 			-- using a custom color?
-			if Skada.db.profile.usecustomcolors and Skada.db.profile.customcolors and Skada.db.profile.customcolors[class] then
-				color = Skada.db.profile.customcolors[class]
+			if P.usecustomcolors and P.customcolors and P.customcolors[class] then
+				color = P.customcolors[class]
 			end
 		end
 		-- missing colorStr?
 		if not color.colorStr then
-			color.colorStr = Skada.RGBPercToHex(color.r, color.g, color.b, true)
+			color.colorStr = RGBPercToHex(color.r, color.g, color.b, true)
 		end
 
 		return (arg == nil) and color or (type(arg) == "string") and format("\124c%s%s\124r", color.colorStr, arg) or color.colorStr
 	end})
 
 	-- set classes icon file & Skada custom classes.
-	self.classicons = [[Interface\AddOns\Skada\Media\Textures\icon-classes]]
+	Skada.classicons = [[Interface\AddOns\Skada\Media\Textures\icon-classes]]
 
 	-- custom class coordinates
-	if not self.classcoords.BOSS then
-		self.classcoords.BOSS = {0.5, 0.75, 0.5, 0.75}
-		self.classcoords.MONSTER = {0.75, 1, 0.5, 0.75}
-		self.classcoords.ENEMY = {0, 0.25, 0.75, 1}
-		self.classcoords.PET = {0.25, 0.5, 0.75, 1}
-		self.classcoords.PLAYER = {0.75, 1, 0.75, 1}
-		self.classcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
+	if not classcoords.BOSS then
+		classcoords.BOSS = {0.5, 0.75, 0.5, 0.75}
+		classcoords.MONSTER = {0.75, 1, 0.5, 0.75}
+		classcoords.ENEMY = {0, 0.25, 0.75, 1}
+		classcoords.PET = {0.25, 0.5, 0.75, 1}
+		classcoords.PLAYER = {0.75, 1, 0.75, 1}
+		classcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
 	end
 
 	-- common metatable for coordinates tables.
@@ -91,11 +94,11 @@ function private.register_classes()
 		end
 		return 0, 1, 0, 1
 	end}
-	setmetatable(self.classcoords, coords_mt)
+	Skada.classcoords = setmetatable(classcoords, coords_mt)
 
 	-- role icon file and texture coordinates
-	self.roleicons = [[Interface\AddOns\Skada\Media\Textures\icon-roles]]
-	self.rolecoords = setmetatable({
+	Skada.roleicons = [[Interface\AddOns\Skada\Media\Textures\icon-roles]]
+	Skada.rolecoords = setmetatable({
 		LEADER = {0, 0.25, 0, 1},
 		DAMAGER = {0.25, 0.5, 0, 1},
 		TANK = {0.5, 0.75, 0, 1},
@@ -104,8 +107,8 @@ function private.register_classes()
 	}, coords_mt)
 
 	-- specialization icons
-	self.specicons = [[Interface\AddOns\Skada\Media\Textures\icon-specs]]
-	self.speccoords = setmetatable({
+	Skada.specicons = [[Interface\AddOns\Skada\Media\Textures\icon-specs]]
+	Skada.speccoords = setmetatable({
 		[62] = {0.25, 0.375, 0.25, 0.5}, --> Mage: Arcane
 		[63] = {0.375, 0.5, 0.25, 0.5}, --> Mage: Fire
 		[64] = {0.5, 0.625, 0.25, 0.5}, --> Mage: Frost
@@ -141,7 +144,7 @@ function private.register_classes()
 
 	-- customize class colors
 	local disabled = function()
-		return not self.db.profile.usecustomcolors
+		return not P.usecustomcolors
 	end
 
 	local colorsOpt = {
@@ -150,20 +153,20 @@ function private.register_classes()
 		desc = format(L["Options for %s."], L["Colors"]),
 		order = 1000,
 		get = function(i)
-			local color = self.classcolors[i[#i]]
-			if self.db.profile.customcolors and self.db.profile.customcolors[i[#i]] then
-				color = self.db.profile.customcolors[i[#i]]
+			local color = classcolors[i[#i]]
+			if P.customcolors and P.customcolors[i[#i]] then
+				color = P.customcolors[i[#i]]
 			end
 			return color.r, color.g, color.b
 		end,
 		set = function(i, r, g, b)
 			local class = i[#i]
-			self.db.profile.customcolors = self.db.profile.customcolors or {}
-			self.db.profile.customcolors[class] = self.db.profile.customcolors[class] or {}
-			self.db.profile.customcolors[class].r = r
-			self.db.profile.customcolors[class].g = g
-			self.db.profile.customcolors[class].b = b
-			self.db.profile.customcolors[class].colorStr = self.RGBPercToHex(r, g, b, true)
+			P.customcolors = P.customcolors or {}
+			P.customcolors[class] = P.customcolors[class] or {}
+			P.customcolors[class].r = r
+			P.customcolors[class].g = g
+			P.customcolors[class].b = b
+			P.customcolors[class].colorStr = RGBPercToHex(r, g, b, true)
 		end,
 		args = {
 			enable = {
@@ -172,14 +175,14 @@ function private.register_classes()
 				width = "double",
 				order = 10,
 				get = function()
-					return self.db.profile.usecustomcolors
+					return P.usecustomcolors
 				end,
 				set = function(_, val)
 					if val then
-						self.db.profile.usecustomcolors = true
+						P.usecustomcolors = true
 					else
-						self.db.profile.usecustomcolors = nil
-						self.db.profile.customcolors = nil -- free it
+						P.usecustomcolors = nil
+						P.customcolors = nil -- free it
 					end
 				end
 			},
@@ -207,14 +210,14 @@ function private.register_classes()
 				disabled = disabled,
 				confirm = function() return L["Are you sure you want to reset all colors?"] end,
 				func = function()
-					self.db.profile.customcolors = wipe(self.db.profile.customcolors or {})
+					P.customcolors = wipe(P.customcolors or {})
 				end
 			}
 		}
 	}
 
-	for class, data in pairs(self.classcolors) do
-		if self.validclass[class] then
+	for class, data in pairs(classcolors) do
+		if validclass[class] then
 			colorsOpt.args.class.args[class] = {
 				type = "color",
 				name = L[class],
@@ -229,20 +232,19 @@ function private.register_classes()
 		end
 	end
 
-	self.options.args.tweaks.args.advanced.args.colors = colorsOpt
+	Skada.options.args.tweaks.args.advanced.args.colors = colorsOpt
 end
 
 function private.register_schools()
 	private.register_schools = nil -- remove it
 
-	local self = Skada
-	self.spellschools = self.spellschools or {}
+	local spellschools = {}
 
 	-- handles adding spell schools
 	local order = {}
 	local function add_school(key, name, r, g, b)
-		if key and name and not self.spellschools[key] then
-			self.spellschools[key] = {r = r or 1, g = g or 1, b = b or 1, name = name:match("%((.+)%)") or name}
+		if key and name and not spellschools[key] then
+			spellschools[key] = {r = r or 1, g = g or 1, b = b or 1, name = name:match("%((.+)%)") or name}
 			order[#order + 1] = key
 		end
 	end
@@ -307,7 +309,7 @@ function private.register_schools()
 		return r, g, b
 	end
 
-	setmetatable(self.spellschools, {
+	Skada.spellschools = setmetatable(spellschools, {
 		__index = function(t, key)
 			local name, isnone = get_school_name(key)
 			if not isnone then
@@ -753,24 +755,23 @@ do
 		private.register_toast = nil -- remove it
 		if not LibToast then return end
 
-		local self = Skada
-
 		-- install default options
-		if not self.db.profile.toast then
-			self.db.profile.toast = self.defaults.toast
+		local P = Skada.db.profile
+		if not P.toast then
+			P.toast = Skada.defaults.toast
 		end
 
 		LibToast:Register("SkadaToastFrame", function(toast, text, title, icon, urgency)
 			toast:SetTitle(title or folder)
 			toast:SetText(text or L["A damage meter."])
-			toast:SetIconTexture(icon or self.logo)
+			toast:SetIconTexture(icon or Skada.logo)
 			toast:SetUrgencyLevel(urgency or "normal")
 		end)
-		if self.db.profile.toast then
-			LibToast.config.hide_toasts = self.db.profile.toast.hide_toasts
-			LibToast.config.spawn_point = self.db.profile.toast.spawn_point or "TOP"
-			LibToast.config.duration = self.db.profile.toast.duration or 7
-			LibToast.config.opacity = self.db.profile.toast.opacity or 0.75
+		if P.toast then
+			LibToast.config.hide_toasts = P.toast.hide_toasts
+			LibToast.config.spawn_point = P.toast.spawn_point or "TOP"
+			LibToast.config.duration = P.toast.duration or 7
+			LibToast.config.opacity = P.toast.opacity or 0.75
 		end
 	end
 
@@ -782,15 +783,14 @@ do
 			return toast_opt
 		end
 
-		local self = Skada
 		toast_opt = {
 			type = "group",
 			name = L["Notifications"],
 			get = function(i)
-				return self.db.profile.toast[i[#i]] or LibToast.config[i[#i]]
+				return Skada.db.profile.toast[i[#i]] or LibToast.config[i[#i]]
 			end,
 			set = function(i, val)
-				self.db.profile.toast[i[#i]] = val
+				Skada.db.profile.toast[i[#i]] = val
 				LibToast.config[i[#i]] = val
 			end,
 			order = 990,
@@ -854,8 +854,8 @@ do
 				test = {
 					type = "execute",
 					name = L["Test Notifications"],
-					func = function() self:Notify() end,
-					disabled = function() return self.db.profile.toast.hide_toasts end,
+					func = function() Skada:Notify() end,
+					disabled = function() return Skada.db.profile.toast.hide_toasts end,
 					width = "double",
 					order = 60
 				}
@@ -886,11 +886,9 @@ do
 			return total_opt
 		end
 
-		local self = Skada
 		local values = {al = 0x10, rb = 0x01, rt = 0x02, db = 0x04, dt = 0x08}
-
 		local disabled = function()
-			return band(self.db.profile.totalflag, values.al) ~= 0
+			return band(Skada.db.profile.totalflag, values.al) ~= 0
 		end
 
 		total_opt = {
@@ -905,14 +903,14 @@ do
 					inline = true,
 					order = 10,
 					get = function(i)
-						return (band(self.db.profile.totalflag, values[i[#i]]) ~= 0)
+						return (band(Skada.db.profile.totalflag, values[i[#i]]) ~= 0)
 					end,
 					set = function(i, val)
 						local v = values[i[#i]]
-						if val and band(self.db.profile.totalflag, v) == 0 then
-							self.db.profile.totalflag = self.db.profile.totalflag + v
-						elseif not val and band(self.db.profile.totalflag, v) ~= 0 then
-							self.db.profile.totalflag = self.db.profile.totalflag - v
+						if val and band(Skada.db.profile.totalflag, v) == 0 then
+							Skada.db.profile.totalflag = Skada.db.profile.totalflag + v
+						elseif not val and band(Skada.db.profile.totalflag, v) ~= 0 then
+							Skada.db.profile.totalflag = Skada.db.profile.totalflag - v
 						end
 					end,
 					args = {
@@ -970,52 +968,48 @@ do
 	end
 
 	function private.total_record(set)
-		if Skada.total and set then
-			-- just in case
-			if not Skada.db.profile.totalflag then
-				Skada.db.profile.totalflag = 0x10
-			end
+		local totalflag = Skada.total and set and Skada.db.profile.totalflag
 
-			-- raid bosses - 0x01
-			if band(Skada.db.profile.totalflag, 0x01) ~= 0 then
-				if set.type == "raid" and set.gotboss then
-					if set.time >= Skada.db.profile.minsetlength then
-						return true
-					end
-				end
-			end
-
-			-- raid trash - 0x02
-			if band(Skada.db.profile.totalflag, 0x02) ~= 0 then
-				if set.type == "raid" and not set.gotboss then
-					return true
-				end
-			end
-
-			-- dungeon boss - 0x04
-			if band(Skada.db.profile.totalflag, 0x04) ~= 0 then
-				if set.type == "party" and Skada.db.profile.gotboss then
-					return true
-				end
-			end
-
-			-- dungeon trash - 0x08
-			if band(Skada.db.profile.totalflag, 0x08) ~= 0 then
-				if set.type == "party" and not Skada.db.profile.gotboss then
-					return true
-				end
-			end
-
-			-- any combat - 0x10
-			if band(Skada.db.profile.totalflag, 0x10) ~= 0 then
-				return true
-			end
-
-			-- battlegrouns/arenas or nothing
-			return (set.type == "pvp" or set.type == "arena")
+		-- something missing
+		if not totalflag then
+			return false
 		end
 
-		return false
+		-- raid bosses - 0x01
+		if band(totalflag, 0x01) ~= 0 then
+			if set.type == "raid" and set.gotboss then
+				return true
+			end
+		end
+
+		-- raid trash - 0x02
+		if band(totalflag, 0x02) ~= 0 then
+			if set.type == "raid" and not set.gotboss then
+				return true
+			end
+		end
+
+		-- dungeon boss - 0x04
+		if band(totalflag, 0x04) ~= 0 then
+			if set.type == "party" and set.gotboss then
+				return true
+			end
+		end
+
+		-- dungeon trash - 0x08
+		if band(totalflag, 0x08) ~= 0 then
+			if set.type == "party" and not set.gotboss then
+				return true
+			end
+		end
+
+		-- any combat - 0x10
+		if band(totalflag, 0x10) ~= 0 then
+			return true
+		end
+
+		-- battlegrouns/arenas or nothing
+		return (set.type == "pvp" or set.type == "arena")
 	end
 end
 
