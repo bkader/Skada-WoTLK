@@ -3574,9 +3574,10 @@ do
 			local actors = set.players -- players
 			if actors then
 				for i = 1, #actors do
-					local p = actors[i]
-					if p and p.super then
-						p.super = nil
+					local actor = actors[i]
+					if actor and actor.super then
+						actor.super = nil
+						setmetatable(actor, nil)
 					end
 				end
 			end
@@ -3584,9 +3585,10 @@ do
 			actors = set.enemies -- enemies
 			if actors then
 				for i = 1, #actors do
-					local e = actors[i]
-					if e and e.super then
-						e.super = nil
+					local actor = actors[i]
+					if actor and actor.super then
+						actor.super = nil
+						setmetatable(actor, nil)
 					end
 				end
 			end
@@ -4060,6 +4062,24 @@ do
 		return self:CombatLogEvent(self:ParseCombatLog(...))
 	end
 
+	local function check_flags_interest(guid, flags, nopets)
+		local is_interesting = (players[guid] ~= nil)
+
+		if not is_interesting and band(flags, BITMASK_GROUP) ~= 0 then
+			if nopets then
+				is_interesting = band(flags, BITMASK_PETS) == 0
+			else
+				is_interesting = true
+			end
+		end
+
+		if not is_interesting and not nopets and band(flags, BITMASK_PETS) ~= 0 and pets[guid] then
+			is_interesting = true
+		end
+
+		return is_interesting
+	end
+
 	function Skada:CombatLogEvent(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		-- ignored combat event?
 		if (not eventtype or ignored_events[eventtype]) and not (spellcast_events[eventtype] and self.current) then return end
@@ -4068,10 +4088,10 @@ do
 		local dst_is_interesting = nil
 
 		if not self.current and P.tentativecombatstart and trigger_events[eventtype] and srcName and dstName and srcGUID ~= dstGUID then
-			src_is_interesting = band(srcFlags, BITMASK_GROUP) ~= 0 or (band(srcFlags, BITMASK_PETS) ~= 0 and pets[srcGUID]) or players[srcGUID]
+			src_is_interesting = check_flags_interest(srcGUID, srcFlags)
 
 			if eventtype ~= "SPELL_PERIODIC_DAMAGE" then
-				dst_is_interesting = band(dstFlags, BITMASK_GROUP) ~= 0 or (band(dstFlags, BITMASK_PETS) ~= 0 and pets[dstGUID]) or players[dstGUID]
+				dst_is_interesting = check_flags_interest(dstGUID, dstFlags)
 			end
 
 			if src_is_interesting or dst_is_interesting then
@@ -4106,14 +4126,14 @@ do
 
 			-- autostop on wipe enabled?
 			if P.autostop then
-				if eventtype == "UNIT_DIED" and ((band(srcFlags, BITMASK_GROUP) ~= 0 and band(srcFlags, BITMASK_PETS) == 0) or players[srcGUID]) then
+				if eventtype == "UNIT_DIED" and check_flags_interest(srcGUID, srcFlags, true) then
 					death_counter = death_counter + 1
 					-- If we reached the treshold for stopping the segment, do so.
 					if death_counter > 0 and death_counter / starting_members >= 0.5 and not self.current.stopped then
 						self:SendMessage("COMBAT_PLAYER_WIPE", self.current)
 						self:StopSegment(L["Stopping for wipe."])
 					end
-				elseif eventtype == "SPELL_RESURRECT" and ((band(srcFlags, BITMASK_GROUP) ~= 0 and band(srcFlags, BITMASK_PETS) == 0) or players[srcGUID]) then
+				elseif eventtype == "SPELL_RESURRECT" and check_flags_interest(srcGUID, srcFlags, true) then
 					death_counter = death_counter - 1
 				end
 			end
@@ -4144,7 +4164,7 @@ do
 					local fail = false
 
 					if flags.src_is_interesting_nopets then
-						local src_is_interesting_nopets = (band(srcFlags, BITMASK_GROUP) ~= 0 and band(srcFlags, BITMASK_PETS) == 0) or players[srcGUID]
+						local src_is_interesting_nopets = check_flags_interest(srcGUID, srcFlags, true)
 
 						if src_is_interesting_nopets then
 							src_is_interesting = true
@@ -4154,7 +4174,7 @@ do
 					end
 
 					if not fail and flags.dst_is_interesting_nopets then
-						local dst_is_interesting_nopets = (band(dstFlags, BITMASK_GROUP) ~= 0 and band(dstFlags, BITMASK_PETS) == 0) or players[dstGUID]
+						local dst_is_interesting_nopets = check_flags_interest(dstGUID, dstFlags, true)
 						if dst_is_interesting_nopets then
 							dst_is_interesting = true
 						else
@@ -4164,7 +4184,7 @@ do
 
 					if not fail and flags.src_is_interesting or flags.src_is_not_interesting then
 						if not src_is_interesting then
-							src_is_interesting = band(srcFlags, BITMASK_GROUP) ~= 0 or (band(srcFlags, BITMASK_PETS) ~= 0 and pets[srcGUID]) or players[srcGUID] or private.is_queued_unit(srcGUID)
+							src_is_interesting = check_flags_interest(srcGUID, srcFlags) or private.is_queued_unit(srcGUID)
 						end
 
 						if (flags.src_is_interesting and not src_is_interesting) or (flags.src_is_not_interesting and src_is_interesting) then
@@ -4174,7 +4194,7 @@ do
 
 					if not fail and flags.dst_is_interesting or flags.dst_is_not_interesting then
 						if not dst_is_interesting then
-							dst_is_interesting = band(dstFlags, BITMASK_GROUP) ~= 0 or (band(dstFlags, BITMASK_PETS) ~= 0 and pets[dstGUID]) or players[dstGUID]
+							dst_is_interesting = check_flags_interest(dstGUID, dstFlags)
 						end
 
 						if (flags.dst_is_interesting and not dst_is_interesting) or (flags.dst_is_not_interesting and dst_is_interesting) then
