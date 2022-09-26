@@ -21,11 +21,13 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 	local _
 
 	-- references
-	local spellschools = nil
-	local classcolors = nil
-	local classcoords = nil
-	local rolecoords = nil
-	local speccoords = nil
+	local classcolors = Skada.classcolors
+	local classicons = Skada.classicons
+	local classcoords = Skada.classcoords
+	local roleicons = Skada.roleicons
+	local rolecoords = Skada.rolecoords
+	local speccoords = Skada.speccoords
+	local spellschools = Skada.spellschools
 	local windows = nil
 
 	local COLOR_WHITE = HIGHLIGHT_FONT_COLOR
@@ -620,7 +622,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			end
 		end
 
-		local function bar_reverse_sort(a, b)
+		local function bar_order_reverse_sort(a, b)
 			if not a or a.order == nil then
 				return false
 			elseif not b or b.order == nil then
@@ -646,10 +648,10 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 				bar:SetIcon(Skada.specicons, speccoords(data.spec))
 				bar:ShowIcon()
 			elseif db.roleicons and data.role and data.role ~= "NONE" and rolecoords and rolecoords[data.role] then
-				bar:SetIcon(Skada.roleicons, rolecoords(data.role))
+				bar:SetIcon(roleicons, rolecoords(data.role))
 				bar:ShowIcon()
 			elseif db.classicons and data.class and classcoords[data.class] and data.icon == nil then
-				bar:SetIcon(Skada.classicons, classcoords(data.class))
+				bar:SetIcon(classicons, classcoords(data.class))
 				bar:ShowIcon()
 			elseif data.icon and not data.ignore and not data.spellid and not data.hyperlink then
 				bar:SetIcon(data.icon)
@@ -676,37 +678,41 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 		end
 
 		function mod:Update(win)
-			if not win or not win.bargroup then return end
-			win.bargroup.button:SetText(win.metadata.title)
+			local bargroup = win and win.bargroup
+			if not bargroup then return end
+			bargroup.button:SetText(win.metadata.title)
 
+			local metadata = win.metadata
 			local dataset = win.dataset
-			if win.metadata.showspots or win.metadata.valueorder then
+
+			if metadata.showspots or metadata.valueorder then
 				tsort(dataset, value_sort)
 			end
 
+			local db = win.db
 			local hasicon = nil
 			for i = 1, #dataset do
 				local data = dataset[i]
 				if
 					(data and data.icon and not data.ignore) or
-					(data and win.db.classicons and data.class) or
-					(data and win.db.roleicons and rolecoords and data.role) or
-					(data and win.db.specicons and speccoords and data.spec)
+					(data and db.classicons and data.class) or
+					(data and db.roleicons and rolecoords and data.role) or
+					(data and db.specicons and speccoords and data.spec)
 				then
 					hasicon = true
 					break
 				end
 			end
 
-			if hasicon and not win.bargroup.showIcon then
-				win.bargroup:ShowBarIcons()
+			if hasicon and not bargroup.showIcon then
+				bargroup:ShowBarIcons()
 			end
-			if not hasicon and win.bargroup.showIcon then
-				win.bargroup:HideBarIcons()
+			if not hasicon and bargroup.showIcon then
+				bargroup:HideBarIcons()
 			end
 
-			if win.metadata.wipestale then
-				for _, bar in pairs(win.bargroup:GetBars()) do
+			if metadata.wipestale then
+				for _, bar in pairs(bargroup:GetBars()) do
 					bar.checked = nil
 				end
 			end
@@ -715,20 +721,20 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			for i = 1, #dataset do
 				local data = dataset[i]
 				if data and data.id then
-					local bar = win.bargroup:GetBar(data.id)
+					local bar = bargroup:GetBar(data.id)
 
 					if bar and bar.missingclass and data.class and not data.ignore then
-						win.bargroup:RemoveBar(bar)
+						bargroup:RemoveBar(bar)
 						bar.missingclass = nil
 						bar = nil
 					end
 
 					if bar then
 						bar:SetValue(data.value)
-						bar:SetMaxValue(win.metadata.maxvalue or 1)
+						bar:SetMaxValue(metadata.maxvalue or 1)
 					else
 						-- Initialization of bars.
-						bar = mod:CreateBar(win, data.id, data.label, data.value, win.metadata.maxvalue or 1, data.icon, false)
+						bar = mod:CreateBar(win, data.id, data.label, data.value, metadata.maxvalue or 1, data.icon, false)
 						bar.id = data.id
 						bar.text = data.label
 						bar.fixed = nil
@@ -753,7 +759,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 								end
 							end
 
-							bar:EnableMouse(not win.db.clickthrough)
+							bar:EnableMouse(not db.clickthrough)
 						else
 							bar:SetScript("OnEnter", nil)
 							bar:SetScript("OnLeave", nil)
@@ -763,45 +769,45 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 
 						bar:SetValue(data.value)
 
-						if not data.class and (win.db.classicons or win.db.classcolorbars or win.db.classcolortext) then
+						if not data.class and (db.classicons or db.classcolorbars or db.classcolortext) then
 							bar.missingclass = true
 						else
 							bar.missingclass = nil
 						end
 
 						-- set bar icon and color
-						bar_seticon(bar, win.db, data)
-						bar_setcolor(bar, win.db, data)
+						bar_seticon(bar, db, data)
+						bar_setcolor(bar, db, data)
 
 						if
 							data.class and
 							classcolors[data.class] and
-							(win.db.classcolortext or win.db.classcolorleft or win.db.classcolorright)
+							(db.classcolortext or db.classcolorleft or db.classcolorright)
 						then
 							local c = classcolors(data.class)
-							if win.db.classcolortext or win.db.classcolorleft then
+							if db.classcolortext or db.classcolorleft then
 								bar.label:SetTextColor(c.r, c.g, c.b, c.a or 1)
 							end
-							if win.db.classcolortext or win.db.classcolorright then
+							if db.classcolortext or db.classcolorright then
 								bar.timerLabel:SetTextColor(c.r, c.g, c.b, c.a or 1)
 							end
 						else
-							local c = win.db.textcolor or COLOR_WHITE
+							local c = db.textcolor or COLOR_WHITE
 							bar.label:SetTextColor(c.r, c.g, c.b, c.a or 1)
 							bar.timerLabel:SetTextColor(c.r, c.g, c.b, c.a or 1)
 						end
 
-						if win.bargroup.showself and data.id == Skada.userGUID then
+						if bargroup.showself and data.id == Skada.userGUID then
 							bar.fixed = true
 						end
 					end
 
-					if win.metadata.ordersort or win.metadata.reversesort then
+					if metadata.ordersort or metadata.reversesort then
 						bar.order = i
 					end
 
-					if win.metadata.showspots and P.showranks and not data.ignore then
-						if win.db.barorientation == 1 then
+					if metadata.showspots and P.showranks and not data.ignore then
+						if db.barorientation == 1 then
 							bar:SetLabel(format("%d. %s", nr, data.text or data.label or L["Unknown"]))
 						else
 							bar:SetLabel(format("%s .%d", data.text or data.label or L["Unknown"], nr))
@@ -811,7 +817,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 					end
 					bar:SetTimerLabel(data.valuetext)
 
-					if win.metadata.wipestale then
+					if metadata.wipestale then
 						bar.checked = true
 					end
 
@@ -819,7 +825,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 						bar:SetFont(nil, nil, "OUTLINE", nil, nil, "OUTLINE")
 						bar.emphathize_set = true
 					elseif not data.emphathize and bar.emphathize_set ~= false then
-						bar:SetFont(nil, nil, win.db.barfontflags, nil, nil, win.db.numfontflags)
+						bar:SetFont(nil, nil, db.barfontflags, nil, nil, db.numfontflags)
 						bar.emphathize_set = false
 					end
 
@@ -848,34 +854,34 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 
 						if data.changed and not bar.changed then
 							bar.changed = true
-							bar_seticon(bar, win.db, data, data.icon)
-							bar_setcolor(bar, win.db, data, data.color)
+							bar_seticon(bar, db, data, data.icon)
+							bar_setcolor(bar, db, data, data.color)
 						elseif not data.changed and bar.changed then
 							bar.changed = nil
-							bar_seticon(bar, win.db, data)
-							bar_setcolor(bar, win.db, data)
+							bar_seticon(bar, db, data)
+							bar_setcolor(bar, db, data)
 						end
 					end
 				end
 			end
 
-			if win.metadata.wipestale then
-				for _, bar in pairs(win.bargroup:GetBars()) do
+			if metadata.wipestale then
+				for _, bar in pairs(bargroup:GetBars()) do
 					if not bar.checked then
-						win.bargroup:RemoveBar(bar)
+						bargroup:RemoveBar(bar)
 					end
 				end
 			end
 
-			if win.metadata.reversesort then
-				win.bargroup:SetSortFunction(bar_reverse_sort)
-			elseif win.metadata.ordersort then
-				win.bargroup:SetSortFunction(bar_order_sort)
+			if metadata.reversesort then
+				bargroup:SetSortFunction(bar_order_reverse_sort)
+			elseif metadata.ordersort then
+				bargroup:SetSortFunction(db.reversegrowth and bar_order_reverse_sort or bar_order_sort)
 			else
-				win.bargroup:SetSortFunction(nil)
+				bargroup:SetSortFunction(nil)
 			end
 
-			win.bargroup:SortBars()
+			bargroup:SortBars()
 		end
 	end
 
@@ -2518,13 +2524,13 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 
 			self:SetScrollSpeed(self.db.speed)
 
-			if not spellschools then
-				spellschools = Skada.spellschools
-				classcolors = Skada.classcolors
-				classcoords = Skada.classcoords
-				rolecoords = Skada.rolecoords
-				speccoords = Skada.speccoords
-			end
+			classcolors = classcolors or Skada.classcolors
+			classicons = classicons or Skada.classicons
+			classcoords = classcoords or Skada.classcoords
+			roleicons = roleicons or Skada.roleicons
+			rolecoords = rolecoords or Skada.rolecoords
+			speccoords = speccoords or Skada.speccoords
+			spellschools = spellschools or Skada.spellschools
 		end
 	end
 

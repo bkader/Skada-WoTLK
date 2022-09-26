@@ -1,13 +1,12 @@
-local Skada = _G.Skada
+local Skada = Skada
 if not Skada then return end
 Skada:RegisterModule("Improvement", function(L)
 	local mod = Skada:NewModule("Improvement")
 	local mod_modes = mod:NewModule("Improvement modes")
 	local mod_comparison = mod:NewModule("Improvement comparison")
 
-	local pairs, select = pairs, select
-	local date, tostring = date, tostring
-	local userGUID = UnitGUID("player")
+	local pairs, date, tostring = pairs, date, tostring
+	local userGUID = Skada.userGUID or UnitGUID("player")
 
 	local modes = {
 		"ActiveTime",

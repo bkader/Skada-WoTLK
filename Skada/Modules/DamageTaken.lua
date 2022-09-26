@@ -1,7 +1,7 @@
 local _, Skada = ...
 
 -- cache frequently used globals
-local pairs, select, min, max = pairs, select, math.min, math.max
+local pairs, min, max = pairs, math.min, math.max
 local format, pformat, T = string.format, Skada.pformat, Skada.Table
 local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
 

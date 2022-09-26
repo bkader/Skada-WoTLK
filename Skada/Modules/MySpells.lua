@@ -3,6 +3,7 @@ Skada:RegisterModule("My Spells", function(L, P)
 	local mod = Skada:NewModule("My Spells")
 
 	local pairs, format = pairs, string.format
+	local userGUID, userName = Skada.userGUID, Skada.userName
 	local spellschools = Skada.spellschools
 
 	local function format_valuetext(d, metadata)
@@ -15,7 +16,7 @@ Skada:RegisterModule("My Spells", function(L, P)
 
 	local function spell_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local player = set and set:GetPlayer(Skada.userGUID, Skada.userName)
+		local player = set and set:GetPlayer(userGUID, userName)
 		if not player then return end
 
 		local spell, damage = nil, nil
@@ -70,7 +71,7 @@ Skada:RegisterModule("My Spells", function(L, P)
 	function mod:Update(win, set)
 		win.title = L["My Spells"]
 
-		local player = set and set:GetPlayer(Skada.userGUID, Skada.userName)
+		local player = set and set:GetPlayer(userGUID, userName)
 		if not player then
 			return
 		elseif win.metadata then
@@ -114,7 +115,15 @@ Skada:RegisterModule("My Spells", function(L, P)
 	end
 
 	function mod:OnEnable()
-		self.metadata = {showspots = true, tooltip = spell_tooltip, icon = [[Interface\Icons\spell_nature_lightning]]}
+		self.metadata = {
+			showspots = true,
+			tooltip = spell_tooltip,
+			icon = [[Interface\Icons\spell_nature_lightning]]
+		}
+
+		userGUID = userGUID or Skada.userGUID
+		userName = userName or Skada.userName
+
 		Skada:AddMode(self)
 	end
 

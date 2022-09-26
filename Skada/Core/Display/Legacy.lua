@@ -2,13 +2,15 @@ local _, Skada = ...
 Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 
 	local mod = Skada:NewModule("Legacy Bar Display", "LegacyLibBars-1.0")
-	local SavePosition = Skada.SavePosition
-	local RestorePosition = Skada.RestorePosition
 
-	local media = LibStub("LibSharedMedia-3.0")
+	local pairs, type, format = pairs, type, string.format
+	local tinsert, tsort = table.insert, table.sort
+	local SavePosition, RestorePosition = Skada.SavePosition, Skada.RestorePosition
+	local classcolors = Skada.classcolors
 
 	-- Display implementation.
 	function mod:OnInitialize()
+		classcolors = classcolors or Skada.classcolors
 		self.description = L["mod_bar_desc"]
 		Skada:AddDisplaySystem("legacy", self)
 	end
@@ -163,8 +165,8 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 		local default = db.barcolor or Skada.windowdefaults.barcolor
 		if not color and data.color then
 			color = data.color
-		elseif not color and db.classcolorbars and data.class and Skada.classcolors[data.class] then
-			color = Skada.classcolors(data.class)
+		elseif not color and db.classcolorbars and data.class and classcolors[data.class] then
+			color = classcolors(data.class)
 		end
 
 		color = color or default
@@ -173,19 +175,23 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 
 	-- Called by Skada windows when the display should be updated to match the dataset.
 	function mod:Update(win)
+		if not win or not win.bargroup then return end
+
 		-- Set title.
 		win.bargroup.button:SetText(win.metadata.title)
 
 		-- Sort if we are showing spots with "showspots".
-		if win.metadata.showspots then
-			table.sort(win.dataset, value_sort)
+		local metadata = win.metadata
+		local dataset = win.dataset
+		if metadata.showspots or metadata.valueorder then
+			tsort(dataset, value_sort)
 		end
 
 		-- If we are using "wipestale", we may have removed data
 		-- and we need to remove unused bars.
 		-- The Threat module uses this.
 		-- For each bar, mark bar as unchecked.
-		if win.metadata.wipestale then
+		if metadata.wipestale then
 			local bars = win.bargroup:GetBars()
 			if bars then
 				for name, bar in pairs(bars) do
@@ -195,19 +201,20 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 		end
 
 		local nr = 1
-		for i, data in ipairs(win.dataset) do
-			if data.id then
+		for i = 1, #dataset do
+			local data = dataset[i]
+			if data and data.id then
 				local barid = data.id
 				local barlabel = data.label
 
 				local bar = win.bargroup:GetBar(barid)
 
 				if bar then
-					bar:SetMaxValue(win.metadata.maxvalue or 1)
+					bar:SetMaxValue(metadata.maxvalue or 1)
 					bar:SetValue(data.value)
 				else
 					-- Initialization of bars.
-					bar = mod:CreateBar(win, barid, barlabel, data.value, win.metadata.maxvalue or 1, data.icon, false)
+					bar = mod:CreateBar(win, barid, barlabel, data.value, metadata.maxvalue or 1, data.icon, false)
 					if data.icon and not data.ignore then
 						bar:ShowIcon()
 					end
@@ -231,7 +238,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 
 					if data.class and win.db.classcolortext then
 						-- Class color text.
-						local color = Skada.classcolors[data.class]
+						local color = classcolors[data.class]
 						if color then
 							bar.label:SetTextColor(color.r, color.g, color.b, color.a or 1)
 							bar.timerLabel:SetTextColor(color.r, color.g, color.b, color.a or 1)
@@ -243,22 +250,22 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 					end
 				end
 
-				if win.metadata.ordersort then
+				if metadata.ordersort then
 					bar.order = i
 				end
 
-				if win.metadata.showspots and P.showranks then
+				if metadata.showspots and P.showranks then
 					if win.db.barorientation == 3 then
-						bar:SetLabel(("%s .%2u"):format(data.label, nr))
+						bar:SetLabel(format("%s .%2u", data.label, nr))
 					else
-						bar:SetLabel(("%2u. %s"):format(nr, data.label))
+						bar:SetLabel(format("%2u. %s", nr, data.label))
 					end
 				else
 					bar:SetLabel(data.label)
 				end
 				bar:SetTimerLabel(data.valuetext)
 
-				if win.metadata.wipestale then
+				if metadata.wipestale then
 					bar.checked = true
 				end
 
@@ -307,7 +314,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 		end
 
 		-- If we are using "wipestale", remove all unchecked bars.
-		if win.metadata.wipestale then
+		if metadata.wipestale then
 			local bars = win.bargroup:GetBars()
 			for name, bar in pairs(bars) do
 				if not bar.checked then
@@ -322,17 +329,15 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 		end
 
 		-- Sort by the order in the data table if we are using "ordersort".
-		if win.metadata.ordersort then
-			if win.db.reversegrowth then
-				win.bargroup:SetSortFunction(bar_order_reverse_sort)
-			else
-				win.bargroup:SetSortFunction(bar_order_sort)
-			end
-			win.bargroup:SortBars()
+		if metadata.reversesort then
+			win.bargroup:SetSortFunction(bar_order_reverse_sort)
+		elseif metadata.ordersort then
+			win.bargroup:SetSortFunction(win.db.reversegrowth and bar_order_reverse_sort or bar_order_sort)
 		else
 			win.bargroup:SetSortFunction(nil)
-			win.bargroup:SortBars()
 		end
+
+		win.bargroup:SortBars()
 	end
 
 	function mod:AdjustBackgroundHeight(win)
@@ -415,8 +420,8 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 		g:SetOrientation(p.barorientation)
 		g:SetHeight(p.barheight)
 		g:SetWidth(p.barwidth)
-		g:SetTexture(media:Fetch("statusbar", p.bartexture))
-		g:SetFont(media:Fetch("font", p.barfont), p.barfontsize)
+		g:SetTexture(Skada:MediaFetch("statusbar", p.bartexture))
+		g:SetFont(Skada:MediaFetch("font", p.barfont), p.barfontsize)
 		g:SetSpacing(p.barspacing)
 		g:UnsetAllColors()
 		g:SetColorAt(0, p.barcolor.r, p.barcolor.g, p.barcolor.b, p.barcolor.a)
@@ -429,12 +434,12 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 
 		-- Header
 		local fo = CreateFont("TitleFont" .. win.db.name)
-		fo:SetFont(media:Fetch("font", p.title.font), p.title.fontsize)
+		fo:SetFont(Skada:MediaFetch("font", p.title.font), p.title.fontsize)
 		g.button:SetNormalFontObject(fo)
 		local inset = p.title.borderinsets
-		titlebackdrop.bgFile = media:Fetch("statusbar", p.title.texture)
+		titlebackdrop.bgFile = Skada:MediaFetch("statusbar", p.title.texture)
 		if p.title.borderthickness > 0 then
-			titlebackdrop.edgeFile = media:Fetch("border", p.title.bordertexture)
+			titlebackdrop.edgeFile = Skada:MediaFetch("border", p.title.bordertexture)
 		else
 			titlebackdrop.edgeFile = nil
 		end
@@ -490,9 +495,9 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 			end
 
 			inset = p.background.borderinsets
-			windowbackdrop.bgFile = media:Fetch("background", p.background.texture)
+			windowbackdrop.bgFile = Skada:MediaFetch("background", p.background.texture)
 			if p.background.borderthickness > 0 then
-				windowbackdrop.edgeFile = media:Fetch("border", p.background.bordertexture)
+				windowbackdrop.edgeFile = Skada:MediaFetch("border", p.background.bordertexture)
 			else
 				windowbackdrop.edgeFile = nil
 			end

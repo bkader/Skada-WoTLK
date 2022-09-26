@@ -7,12 +7,11 @@ Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 	mod.SetTitle = Skada.EmptyFunc
 
 	local wipe, tsort, format = wipe, table.sort, string.format
-	local CloseDropDownMenus = CloseDropDownMenus
 	local SavePosition = Skada.SavePosition
 	local RestorePosition = Skada.RestorePosition
 	local WrapTextInColorCode = Skada.WrapTextInColorCode
 	local RGBPercToHex = Skada.RGBPercToHex
-	local classcolors = nil
+	local classcolors = Skada.classcolors
 
 	local FONT_FLAGS = Skada.fontFlags
 	if not FONT_FLAGS then

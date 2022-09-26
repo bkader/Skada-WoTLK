@@ -1,20 +1,16 @@
 local folder, Skada = ...
 local private = Skada.private
 
-local L = LibStub("AceLocale-3.0"):GetLocale(folder)
-
 local select, pairs, type = select, pairs, type
-local tostring, tonumber, format = tostring, tonumber, string.format
-local setmetatable, getmetatable, wipe, band = setmetatable, getmetatable, wipe, bit.band
+local tonumber, format = tonumber, string.format
+local setmetatable, wipe, band = setmetatable, wipe, bit.band
 local next, print = next, print
+local _
 
-local GetNumRaidMembers, GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
-local UnitExists, UnitGUID, UnitClass = UnitExists, UnitGUID, UnitClass
-local UnitAffectingCombat, UnitIsDeadOrGhost = UnitAffectingCombat, UnitIsDeadOrGhost
-local GetPlayerInfoByGUID = GetPlayerInfoByGUID
+local L = LibStub("AceLocale-3.0"):GetLocale(folder)
+local UnitClass, GetPlayerInfoByGUID = UnitClass, GetPlayerInfoByGUID
 local GetClassFromGUID = Skada.GetClassFromGUID
 local T = Skada.Table
-local _
 
 local COMBATLOG_OBJECT_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
 

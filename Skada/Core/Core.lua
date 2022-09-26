@@ -18,7 +18,7 @@ local DBI = LibStub("LibDBIcon-1.0", true)
 local Translit = LibStub("LibTranslit-1.0", true)
 
 -- cache frequently used globals
-local tsort, tinsert, tremove, tmaxn, tconcat, wipe = table.sort, table.insert, table.remove, table.maxn, table.concat, wipe
+local tsort, tinsert, tremove, tconcat, wipe = table.sort, table.insert, table.remove, table.concat, wipe
 local next, pairs, ipairs, unpack, type, setmetatable = next, pairs, ipairs, unpack, type, setmetatable
 local tonumber, tostring, strmatch, format, gsub, lower, find = tonumber, tostring, strmatch, string.format, string.gsub, string.lower, string.find
 local floor, max, min, abs, band, time, GetTime = math.floor, math.max, math.min, math.abs, bit.band, time, GetTime
@@ -30,7 +30,7 @@ local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 local CloseDropDownMenus, SecondsToTime = CloseDropDownMenus, SecondsToTime
 local IsInGroup, IsInRaid, IsInPvP = Skada.IsInGroup, Skada.IsInRaid, Skada.IsInPvP
 local GetNumGroupMembers, GetGroupTypeAndCount = Skada.GetNumGroupMembers, Skada.GetGroupTypeAndCount
-local GetUnitIdFromGUID, GetUnitSpec, GetUnitRole = Skada.GetUnitIdFromGUID, Skada.GetUnitSpec, Skada.GetUnitRole
+local GetUnitSpec, GetUnitRole = Skada.GetUnitSpec, Skada.GetUnitRole
 local UnitIterator, IsGroupDead = Skada.UnitIterator, Skada.IsGroupDead
 local pformat, EscapeStr, GetCreatureId = Skada.pformat, Skada.EscapeStr, Skada.GetCreatureId
 local T, P, G = Skada.Table, nil, nil
@@ -58,8 +58,10 @@ BINDING_NAME_SKADA_STOP = L["Stop"]
 Skada.revisited = true
 
 -- things we need
-Skada.userName = UnitName("player")
-_, Skada.userClass = UnitClass("player")
+local userName = UnitName("player")
+local _, userClass = UnitClass("player")
+local userGUID, userRole, userSpec
+Skada.userName, Skada.userClass = userName, userClass
 
 -- reusable tables
 local new, del, clear = Skada.TablePool("kv")
@@ -1783,21 +1785,21 @@ function Skada:GetPlayer(set, guid, name, flag)
 		(player.name == UKNOWNBEING and name ~= UKNOWNBEING) or -- unknown unit
 		(player.name == player.id and name ~= player.id) -- GUID is the same as the name
 	then
-		player.name = (player.id == self.userGUID or guid == self.userGUID) and self.userName or name
+		player.name = (player.id == userGUID or guid == userGUID) and userName or name
 	end
 
 	-- fix players created before their info was received
 	if player.class and Skada.validclass[player.class] and (player.role == nil or player.role == "NONE" or player.spec == nil) then
 		if player.role == nil or player.role == "NONE" then
-			if player.id == self.userGUID and self.userRole then
-				player.role = self.userRole
+			if player.id == userGUID and userRole then
+				player.role = userRole
 			else
 				player.role = GetUnitRole(players[player.id] or player.name, player.class)
 			end
 		end
 		if player.spec == nil then
-			if player.id == self.userGUID and self.userSpec then
-				player.spec = self.userSpec
+			if player.id == userGUID and userSpec then
+				player.spec = userSpec
 			else
 				player.spec = GetUnitSpec(players[player.id] or player.name, player.class)
 			end
@@ -1991,7 +1993,7 @@ do
 
 		-- flag is provided and it is mine.
 		if guid and flag and band(flag, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
-			pets[guid] = {id = Skada.userGUID, name = Skada.userName}
+			pets[guid] = {id = userGUID, name = userName}
 			return pets[guid]
 		end
 
@@ -2596,7 +2598,7 @@ do
 		end
 
 		local title = (window and window.title) or report_mode.title or report_mode.localeName
-		local label = (report_mode_name == L["Improvement"]) and self.userName or Skada:GetSetLabel(report_set)
+		local label = (report_mode_name == L["Improvement"]) and userName or Skada:GetSetLabel(report_set)
 		self:SendChat(format(L["Skada: %s for %s:"], title, label), channel, chantype)
 
 		maxlines = maxlines or 10
@@ -2696,8 +2698,9 @@ function check_group()
 	end
 
 	-- update my spec and role.
-	Skada.userSpec = GetUnitSpec("player", Skada.userClass) or Skada.userSpec
-	Skada.userRole = GetUnitRole("player", Skada.userClass) or Skada.userRole
+	userSpec = GetUnitSpec("player", userClass) or userSpec
+	userRole = GetUnitRole("player", userClass) or userRole
+	Skada.userSpec, Skada.userRole = userSpec, userRole
 end
 
 do
@@ -3435,7 +3438,8 @@ function Skada:SetupStorage()
 end
 
 function Skada:OnEnable()
-	self.userGUID = self.userGUID or UnitGUID("player")
+	userGUID = userGUID or UnitGUID("player")
+	self.userGUID = userGUID
 
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("UNIT_PET")

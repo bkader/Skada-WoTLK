@@ -4,7 +4,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 	local mod = Skada:NewModule("Inline Bar Display")
 
 	local pairs, tostring, type = pairs, tostring, type
-	local strrep, format, _match = string.rep, string.format, string.match
+	local strrep, format, strmatch = string.rep, string.format, string.match
 	local tinsert, tremove, tsort = table.insert, table.remove, table.sort
 	local GameTooltip = GameTooltip
 	local GetScreenWidth = GetScreenWidth
@@ -20,7 +20,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 
 	local WrapTextInColorCode = Skada.WrapTextInColorCode
 	local RGBPercToHex = Skada.RGBPercToHex
-	local classcolors = nil
+	local classcolors = Skada.classcolors
 
 	local FONT_FLAGS = Skada.fontFlags
 	if not FONT_FLAGS then
@@ -539,7 +539,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 				backdropA = 0.8
 			end
 			local resolution = ({GetScreenResolutions()})[GetCurrentResolution()]
-			local mult = 768 / _match(resolution, "%d+x(%d+)") / (max(0.64, min(1.15, 768 / GetScreenHeight() or UIParent:GetScale())))
+			local mult = 768 / strmatch(resolution, "%d+x(%d+)") / (max(0.64, min(1.15, 768 / GetScreenHeight() or UIParent:GetScale())))
 
 			fbackdrop.bgFile = ElvUI[1]["media"].blankTex
 			fbackdrop.edgeFile = ElvUI[1]["media"].blankTex
