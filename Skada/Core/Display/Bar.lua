@@ -145,6 +145,11 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 				p.barorientation = 2
 			end
 
+			-- fix old toolbar texture
+			if p.title.toolbar == 3 then
+				p.title.toolbar = 2
+			end
+
 			-- Save a reference to window in bar group. Needed for some nasty callbacks.
 			if bargroup then
 				-- Clear callbacks.
@@ -1129,8 +1134,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 		},
 		TITLEBTNS = {
 			[1] = format("\124T%s:22:88\124t", format(buttonsTexPath, 1, "_prev")),
-			[2] = format("\124T%s:22:88\124t", format(buttonsTexPath, 2, "_prev")),
-			[3] = format("\124T%s:22:88\124t", format(buttonsTexPath, 3, "_prev"))
+			[2] = format("\124T%s:22:88\124t", format(buttonsTexPath, 3, "_prev"))
 		}
 	}
 
