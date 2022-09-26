@@ -4054,15 +4054,10 @@ do
 		end
 	end
 
-	function Skada:ParseCombatLog(...)
-		local _, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12 = ...
-		return timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12
-	end
-
-	function Skada:OnCombatEvent(...)
+	function Skada:OnCombatEvent(_, ...)
 		-- disabled or test mode?
 		if self.disabled or self.testMode then return end
-		return self:CombatLogEvent(self:ParseCombatLog(...))
+		return self:CombatLogEvent(...)
 	end
 
 	local function check_flags_interest(guid, flags, nopets)

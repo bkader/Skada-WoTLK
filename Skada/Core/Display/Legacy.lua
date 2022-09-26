@@ -660,7 +660,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 				baraltcolor = {
 					type = "color",
 					name = L["Background Color"],
-					desc = L["Choose the background color of the bars."],
+					desc = L["The color of the background."],
 					hasAlpha = true,
 					get = function(i)
 						local c = db.baraltcolor or Skada.windowdefaults.baraltcolor
@@ -750,7 +750,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 				color = {
 					type = "color",
 					name = L["Background Color"],
-					desc = L["The background color of the title."],
+					desc = L["The color of the background."],
 					hasAlpha = true,
 					get = function(i)
 						local c = db.title.color or Skada.windowdefaults.title.color

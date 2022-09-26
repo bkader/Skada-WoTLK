@@ -1248,7 +1248,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 						bgcolor = {
 							type = "color",
 							name = L["Background Color"],
-							desc = L["Choose the background color of the bars."],
+							desc = L["The color of the background."],
 							order = 90,
 							hasAlpha = true,
 							get = function()
@@ -1612,7 +1612,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 								color = {
 									type = "color",
 									name = L["Background Color"],
-									desc = L["The background color of the title."],
+									desc = L["The color of the background."],
 									order = 20,
 									hasAlpha = true,
 									get = function()

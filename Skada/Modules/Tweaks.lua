@@ -124,14 +124,12 @@ Skada:RegisterModule("Tweaks", function(L, P)
 			end
 		end
 
-		function Skada:OnCombatEvent(...)
+		function Skada:OnCombatEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
 			-- disabled or test mode?
 			if self.disabled or self.testMode then return end
 
-			local timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12 = self:ParseCombatLog(...)
-
 			-- The Lich King fight & Fury of Frostmourne
-			if A1 == 72350 or A2 == fofrostmourne then
+			if spellid == 72350 or spellname == fofrostmourne then
 				if self.current and not self.current.success then
 					self.current.success = true
 					self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
@@ -152,10 +150,10 @@ Skada:RegisterModule("Tweaks", function(L, P)
 
 			-- first hit
 			if P.firsthit and trigger_events[eventtype] and srcName and dstName and (not firsthit or not firsthit.checked) then
-				firsthit_check(eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2)
+				firsthit_check(eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname)
 			end
 
-			return self:CombatLogEvent(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12)
+			return self:CombatLogEvent(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
 		end
 
 		do
