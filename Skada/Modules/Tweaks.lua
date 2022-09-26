@@ -9,6 +9,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 	local GetSpellInfo = private.spell_info or GetSpellInfo
 	local GetSpellLink = private.spell_link or GetSpellLink
 	local new, del = Skada.newTable, Skada.delTable
+	local classcolors = Skada.classcolors
 
 	local channel_events, fofrostmourne
 
@@ -16,19 +17,10 @@ Skada:RegisterModule("Tweaks", function(L, P)
 	-- CombatLogEvent Hook
 
 	do
-		local BITMASK_GROUP = private.BITMASK_GROUP
-		if not BITMASK_GROUP then
-			local COMBATLOG_OBJECT_AFFILIATION_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE or 0x00000001
-			local COMBATLOG_OBJECT_AFFILIATION_PARTY = COMBATLOG_OBJECT_AFFILIATION_PARTY or 0x00000002
-			local COMBATLOG_OBJECT_AFFILIATION_RAID = COMBATLOG_OBJECT_AFFILIATION_RAID or 0x00000004
-			BITMASK_GROUP = COMBATLOG_OBJECT_AFFILIATION_MINE + COMBATLOG_OBJECT_AFFILIATION_PARTY + COMBATLOG_OBJECT_AFFILIATION_RAID
-			private.BITMASK_GROUP = BITMASK_GROUP
-		end
-
+		local BITMASK_GROUP = private.BITMASK_GROUP or 0x00000007
 		local MAX_BOSS_FRAMES = MAX_BOSS_FRAMES or 5
-		local T = Skada.Table
-		local firsthit, firsthittimer = T.get("Skada_FirstHit"), nil
-		local hitformats = {"%s (%s)", "%s (\124c%s%s\124r)", "\124c%s%s\124r", "\124c%s%s\124r (%s)"}
+		local firsthit_fmt = {"%s (%s)", "%s (\124c%s%s\124r)", "\124c%s%s\124r", "\124c%s%s\124r (%s)"}
+		local firsthit, firsthittimer = nil, nil
 
 		-- thank you Details!
 		local trigger_events = {
@@ -62,8 +54,8 @@ Skada:RegisterModule("Tweaks", function(L, P)
 						targettable = targettable or new()
 
 						local _, class = UnitClass(bosstarget)
-						if class and Skada.classcolors[class] then
-							target = Skada.classcolors(class, target)
+						if class and classcolors[class] then
+							target = classcolors(class, target)
 						end
 
 						targettable[#targettable + 1] = format("%s > %s", UnitName(boss) or L["Unknown"], target)
@@ -76,6 +68,59 @@ Skada:RegisterModule("Tweaks", function(L, P)
 				end
 
 				return hitline, targetline
+			end
+		end
+
+		local function firsthit_check(eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname)
+			-- src or dst must be in a group
+			if band(srcFlags, BITMASK_GROUP) == 0 and band(dstFlags, BITMASK_GROUP) == 0 then
+				return
+			end
+
+			-- ignore spell?
+			if eventtype ~= "SWING_DAMAGE" and spellid and ignoredSpells[spellid] then
+				return
+			end
+
+			local output = nil -- initial output
+
+			if band(dstFlags, BITMASK_GROUP) ~= 0 and Skada:IsBoss(srcGUID) then -- boss started?
+				if Skada:IsPet(dstGUID, dstFlags) then
+					output = format(firsthit_fmt[1], srcName, dstName or L["Unknown"])
+				elseif dstName then
+					local _, class = UnitClass(dstName)
+					if class and classcolors[class] then
+						output = format(firsthit_fmt[2], srcName, classcolors(class, true), dstName)
+					else
+						output = format(firsthit_fmt[1], srcName, dstName)
+					end
+				else
+					output = srcName
+				end
+			elseif band(srcFlags, BITMASK_GROUP) ~= 0 and Skada:IsBoss(dstGUID) then -- a player started?
+				local owner = Skada:GetPetOwner(srcGUID)
+				if owner then
+					local _, class = UnitClass(owner.name)
+					if class and classcolors[class] then
+						output = format(firsthit_fmt[4], classcolors(class, true), owner.name, L["PET"])
+					else
+						output = format(firsthit_fmt[1], owner.name, L["PET"])
+					end
+				elseif srcName then
+					local _, class = UnitClass(srcName)
+					if class and classcolors[class] then
+						output = format(firsthit_fmt[3], classcolors(class, true), srcName)
+					else
+						output = srcName
+					end
+				end
+			end
+
+			if output then
+				local spell = (eventtype == "SWING_DAMAGE") and GetSpellLink(6603) or GetSpellLink(spellid) or spellname
+				firsthit = firsthit or new()
+				firsthit.hitline, firsthit.targetline = who_pulled(format(L["\124cffffff00First Hit\124r: %s from %s"], spell or "", output))
+				firsthit.checked = true -- once only
 			end
 		end
 
@@ -106,74 +151,31 @@ Skada:RegisterModule("Tweaks", function(L, P)
 			end
 
 			-- first hit
-			if
-				P.firsthit and
-				firsthit.checked == nil and
-				trigger_events[eventtype] and
-				srcName and dstName and
-				not ignoredSpells[A1]
-			then
-				local output -- initial output
-
-				if band(dstFlags, BITMASK_GROUP) ~= 0 and self:IsBoss(srcGUID) then -- boss started?
-					if self:IsPet(dstGUID, dstFlags) then
-						output = format(hitformats[1], srcName, dstName or L["Unknown"])
-					elseif dstName then
-						local _, class = UnitClass(dstName)
-						if class and self.classcolors[class] then
-							output = format(hitformats[2], srcName, self.classcolors(class, true), dstName)
-						else
-							output = format(hitformats[1], srcName, dstName)
-						end
-					else
-						output = srcName
-					end
-				elseif band(srcFlags, BITMASK_GROUP) ~= 0 and self:IsBoss(dstGUID) then -- a player started?
-					local owner = self:GetPetOwner(srcGUID)
-					if owner then
-						local _, class = UnitClass(owner.name)
-						if class and self.classcolors[class] then
-							output = format(hitformats[4], self.classcolors(class, true), owner.name, PET)
-						else
-							output = format(hitformats[1], owner.name, PET)
-						end
-					elseif srcName then
-						local _, class = UnitClass(srcName)
-						if class and self.classcolors[class] then
-							output = format(hitformats[3], self.classcolors(class, true), srcName)
-						else
-							output = srcName
-						end
-					end
-				end
-
-				if output then
-					local spell = (eventtype == "SWING_DAMAGE") and GetSpellLink(6603) or GetSpellLink(A1) or GetSpellInfo(A1)
-					firsthit.hitline, firsthit.targetline = who_pulled(format(L["\124cffffff00First Hit\124r: %s from %s"], spell or "", output))
-					firsthit.checked = true -- once only
-				end
+			if P.firsthit and trigger_events[eventtype] and srcName and dstName and (not firsthit or not firsthit.checked) then
+				firsthit_check(eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2)
 			end
 
 			return self:CombatLogEvent(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12)
 		end
 
-		function mod:PrintFirstHit()
-			if firsthit.hitline and not firsthittimer then
-				Skada:ScheduleTimer(function()
-					firsthit.hitline, firsthit.targetline = who_pulled(firsthit.hitline)
-					Skada:Print(firsthit.hitline)
-					if firsthit.targetline then
-						Skada:Print(firsthit.targetline)
-					end
-					Skada:Debug("First Hit: Printed!")
-				end, 0.25)
+		do
+			local function firsthit_print()
+				firsthit.hitline, firsthit.targetline = who_pulled(firsthit.hitline)
+				Skada:Print(firsthit.hitline)
+				if firsthit.targetline then
+					Skada:Print(firsthit.targetline)
+				end
+				Skada:Debug("First Hit: Printed!")
 			end
-		end
 
-		function mod:ClearFirstHit()
-			if firsthit.hitline or firsthittimer then
-				T.free("Skada_FirstHit", firsthit)
-				Skada:Debug("First Hit: Cleared!")
+			function mod:PrintFirstHit()
+				if firsthit and firsthit.hitline and not firsthittimer then
+					firsthittimer = Skada:ScheduleTimer(firsthit_print, 0.25)
+				end
+			end
+
+			function mod:ClearFirstHit()
+				firsthit = del(firsthit)
 				if firsthittimer then
 					Skada:CancelTimer(firsthittimer, true)
 					firsthittimer = nil
@@ -245,7 +247,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 
 		local meters = {}
 
-		function mod:FilterLine(event, source, msg, ...)
+		local function filter_chat_line(event, source, msg, ...)
 			for i = 1, #firstlines do
 				local line = firstlines[i]
 				if line and msg:match(line) then
@@ -301,39 +303,37 @@ Skada:RegisterModule("Tweaks", function(L, P)
 			return false, false, nil
 		end
 
-		function mod:ParseChatEvent(event, msg, sender, ...)
-			local ismeter, isfirstline, message = mod:FilterLine(event, sender, msg)
-			if ismeter then
-				if isfirstline then
-					return false, message, sender, ...
-				else
-					return true
-				end
+		function private.parse_chat_event(_, event, msg, sender, ...)
+			local ismeter, isfirstline, message = filter_chat_line(event, sender, msg)
+			if ismeter and isfirstline then
+				return false, message, sender, ...
+			elseif ismeter then
+				return true
 			end
 		end
 
 		function mod:ParseLink(link, text, button, chatframe)
 			local linktype, id = split(":", link)
-			if linktype == "SKSP" then
-				local meterid = tonumber(id)
-				ShowUIPanel(ItemRefTooltip)
-				if not ItemRefTooltip:IsShown() then
-					ItemRefTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE")
-				end
-				ItemRefTooltip:ClearLines()
-				ItemRefTooltip:AddLine(meters[meterid].title)
-				ItemRefTooltip:AddLine(format(L["Reported by: %s"], meters[meterid].src))
-				ItemRefTooltip:AddLine(" ")
-				for i = 1, #meters[meterid].data do
-					local line = meters[meterid].data[i]
-					if line then
-						ItemRefTooltip:AddLine(line, 1, 1, 1)
-					end
-				end
-				ItemRefTooltip:Show()
-			else
+			if linktype ~= "SKSP" then
 				return mod.hooks.SetItemRef(link, text, button, chatframe)
 			end
+
+			local meterid = tonumber(id)
+			ShowUIPanel(ItemRefTooltip)
+			if not ItemRefTooltip:IsShown() then
+				ItemRefTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE")
+			end
+			ItemRefTooltip:ClearLines()
+			ItemRefTooltip:AddLine(meters[meterid].title)
+			ItemRefTooltip:AddLine(format(L["Reported by: %s"], meters[meterid].src))
+			ItemRefTooltip:AddLine(" ")
+			for i = 1, #meters[meterid].data do
+				local line = meters[meterid].data[i]
+				if line then
+					ItemRefTooltip:AddLine(line, 1, 1, 1)
+				end
+			end
+			ItemRefTooltip:Show()
 		end
 	end
 
@@ -342,12 +342,12 @@ Skada:RegisterModule("Tweaks", function(L, P)
 
 	do
 		local setmetatable, rawset, rawget = setmetatable, rawset, rawget
-		local CombatLogClearEntries, CombatLogGetNumEntries = CombatLogClearEntries, CombatLogGetNumEntries
+		local CombatLogClearEntries = CombatLogClearEntries
 		local frame, playerspells
 
 		local function aggressive_OnUpdate(self, elapsed)
 			self.timeout = self.timeout + elapsed
-			if self.timeout >= 2 then
+			if self.timeout >= P.combatlogfixtime then
 				CombatLogClearEntries()
 				self.timeout = 0
 			end
@@ -360,19 +360,6 @@ Skada:RegisterModule("Tweaks", function(L, P)
 
 			-- was the last combat event within a second of cast succeeding?
 			if self.lastEvent and (GetTime() - self.lastEvent) <= 1 then return end
-
-			if P.combatlogfixverbose then
-				if not self.throttle or self.throttle < GetTime() then
-					Skada:Printf(
-						L["%d filtered / %d events found. Cleared combat log, as it broke."],
-						CombatLogGetNumEntries(),
-						CombatLogGetNumEntries(true)
-					)
-					self.throttle = GetTime() + 60
-				end
-			elseif self.throttle then
-				self.throttle = nil
-			end
 
 			Skada:ScheduleTimer(CombatLogClearEntries, 0.1)
 		end
@@ -388,7 +375,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 			elseif event == "ZONE_CHANGED_NEW_AREA" then
 				local _, zt = IsInInstance()
 				if self.zonetype and zt ~= self.zonetype then
-					Skada:ScheduleTimer(CombatLogClearEntries, 0.01)
+					Skada:ScheduleTimer(CombatLogClearEntries, 0.1)
 				end
 				self.zonetype = zt
 			end
@@ -396,40 +383,12 @@ Skada:RegisterModule("Tweaks", function(L, P)
 
 		function mod:CombatEnter()
 			if P.combatlogfix then
-				Skada:ScheduleTimer(CombatLogClearEntries, 0.01)
+				Skada:ScheduleTimer(CombatLogClearEntries, 0.1)
 			end
 		end
 
 		function mod:CombatLogFix()
-			if P.combatlogfix then
-				frame = frame or CreateFrame("Frame")
-				if P.combatlogfixalt then
-					frame:UnregisterAllEvents()
-					frame.timeout = 0
-					frame:SetScript("OnUpdate", aggressive_OnUpdate)
-					frame:SetScript("OnEvent", nil)
-					frame:Show()
-				else
-					-- construct player's spells
-					if playerspells == nil then
-						playerspells = setmetatable({}, {__index = function(t, name)
-							local _, _, _, cost = GetSpellInfo(name)
-							rawset(t, name, not (not (cost and cost > 0)))
-							return rawget(t, name)
-						end})
-					end
-
-					frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-					frame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-					frame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-					frame.timeout = 0
-					frame:SetScript("OnUpdate", default_OnUpdate)
-					frame:SetScript("OnEvent", frame_OnEvent)
-					frame:Hide()
-				end
-
-				Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
-			else
+			if not P.combatlogfix then
 				if frame then
 					frame:UnregisterAllEvents()
 					frame:SetScript("OnUpdate", nil)
@@ -437,8 +396,38 @@ Skada:RegisterModule("Tweaks", function(L, P)
 					frame:Hide()
 					frame = nil
 				end
+
 				Skada.UnregisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
+				return
 			end
+
+			frame = frame or CreateFrame("Frame")
+			if P.combatlogfixalt then
+				frame:UnregisterAllEvents()
+				frame.timeout = 0
+				frame:SetScript("OnUpdate", aggressive_OnUpdate)
+				frame:SetScript("OnEvent", nil)
+				frame:Show()
+			else
+				-- construct player's spells
+				if playerspells == nil then
+					playerspells = setmetatable({}, {__index = function(t, name)
+						local _, _, _, cost = GetSpellInfo(name)
+						rawset(t, name, not (not (cost and cost > 0)))
+						return rawget(t, name)
+					end})
+				end
+
+				frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+				frame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+				frame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+				frame.timeout = 0
+				frame:SetScript("OnUpdate", default_OnUpdate)
+				frame:SetScript("OnEvent", frame_OnEvent)
+				frame:Hide()
+			end
+
+			Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
 		end
 	end
 
@@ -491,12 +480,12 @@ Skada:RegisterModule("Tweaks", function(L, P)
 				self:RawHook("SetItemRef", "ParseLink", true)
 			end
 			for i = 1, #channel_events do
-				ChatFrame_AddMessageEventFilter(channel_events[i], self.ParseChatEvent)
+				ChatFrame_AddMessageEventFilter(channel_events[i], private.parse_chat_event)
 			end
 		elseif self:IsHooked("SetItemRef") then
 			self:Unhook("SetItemRef")
 			for i = 1, #channel_events do
-				ChatFrame_RemoveMessageEventFilter(channel_events[i], self.ParseChatEvent)
+				ChatFrame_RemoveMessageEventFilter(channel_events[i], private.parse_chat_event)
 			end
 		end
 
@@ -511,13 +500,14 @@ Skada:RegisterModule("Tweaks", function(L, P)
 		end
 
 		function mod:OnInitialize()
+			-- class colors table
+			classcolors = classcolors or Skada.classcolors
+
 			-- first hit.
 			if P.firsthit == nil then
 				P.firsthit = true
 			end
 			-- smart stop & duration
-			if P.smartstop == nil then
-			end
 			if P.smartwait == nil then
 				P.smartwait = 3
 			end
@@ -525,7 +515,9 @@ Skada:RegisterModule("Tweaks", function(L, P)
 			if P.combatlogfix == nil then
 				P.combatlogfix = true
 			end
-
+			if P.combatlogfixtime then
+				P.combatlogfixtime = 2
+			end
 			-- old spamage module
 			if type(P.spamage) == "table" then
 				P.spamage = nil
@@ -630,12 +622,17 @@ Skada:RegisterModule("Tweaks", function(L, P)
 						end,
 						order = 30
 					},
-					combatlogfixverbose = {
-						type = "toggle",
-						name = L["Verbose Mode"],
-						desc = format(L["Enable verbose mode for %s."], L["Combat Log"]),
+					combatlogfixtime = {
+						type = "range",
+						name = L["Duration"],
+						min = 2,
+						max = 60,
+						step = 1,
 						disabled = function()
-							return P.combatlogfixalt or not P.combatlogfix
+							return not (P.combatlogfix and P.combatlogfixalt)
+						end,
+						hidden = function()
+							return not P.combatlogfixalt
 						end,
 						order = 40
 					}

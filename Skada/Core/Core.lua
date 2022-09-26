@@ -5,6 +5,7 @@ ns.version = GetAddOnMetadata(folder, "Version")
 ns.website = GetAddOnMetadata(folder, "X-Website")
 ns.discord = GetAddOnMetadata(folder, "X-Discord")
 ns.logo = [[Interface\Icons\Spell_Lightning_LightningBolt01]]
+ns.revisited = true -- Skada-Revisited flag
 ns.private = {}
 
 local Skada = LibStub("AceAddon-3.0"):NewAddon(ns, folder, "AceEvent-3.0", "AceTimer-3.0", "AceBucket-3.0", "AceHook-3.0", "AceConsole-3.0", "AceComm-3.0", "LibCompat-1.0-Skada")
@@ -53,9 +54,6 @@ BINDING_NAME_SKADA_RESET = L["Reset"]
 BINDING_NAME_SKADA_NEWSEGMENT = L["Start New Segment"]
 BINDING_NAME_SKADA_NEWPHASE = L["Start New Phase"]
 BINDING_NAME_SKADA_STOP = L["Stop"]
-
--- Skada-Revisited flag
-Skada.revisited = true
 
 -- things we need
 local userName = UnitName("player")
@@ -2199,7 +2197,7 @@ do
 	end
 
 	local white = HIGHLIGHT_FONT_COLOR
-	local function add_tooltip_subview(tooltip, win, mode, id, label)
+	local function add_subview_tooltip(tooltip, win, mode, id, label)
 		if not (type(mode) == "table" and mode.Update) then return end
 
 		-- windows should have separate tooltip tables in order
@@ -2256,7 +2254,7 @@ do
 
 			if md.is_modelist and P.informativetooltips then
 				t:ClearLines()
-				add_tooltip_subview(t, win, find_mode(id), id, label)
+				add_subview_tooltip(t, win, find_mode(id), id, label)
 				t:Show()
 			elseif md.click1 or md.click2 or md.click3 or md.click4 or md.tooltip then
 				t:ClearLines()
@@ -2273,16 +2271,16 @@ do
 
 				if P.informativetooltips then
 					if md.click1 and not private.total_noclick(win.selectedset, md.click1) then
-						add_tooltip_subview(t, win, md.click1, id, label)
+						add_subview_tooltip(t, win, md.click1, id, label)
 					end
 					if md.click2 and not private.total_noclick(win.selectedset, md.click2) then
-						add_tooltip_subview(t, win, md.click2, id, label)
+						add_subview_tooltip(t, win, md.click2, id, label)
 					end
 					if md.click3 and not private.total_noclick(win.selectedset, md.click3) then
-						add_tooltip_subview(t, win, md.click3, id, label)
+						add_subview_tooltip(t, win, md.click3, id, label)
 					end
 					if md.click4 and not private.total_noclick(win.selectedset, md.click4) then
-						add_tooltip_subview(t, win, md.click4, id, label)
+						add_subview_tooltip(t, win, md.click4, id, label)
 					end
 				end
 

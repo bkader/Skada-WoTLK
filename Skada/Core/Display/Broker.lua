@@ -7,6 +7,8 @@ Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 	mod.SetTitle = Skada.EmptyFunc
 
 	local wipe, tsort, format = wipe, table.sort, string.format
+	local GameTooltip = GameTooltip
+	local GameTooltip_Hide = GameTooltip_Hide
 	local SavePosition = Skada.SavePosition
 	local RestorePosition = Skada.RestorePosition
 	local WrapTextInColorCode = Skada.WrapTextInColorCode
@@ -138,7 +140,7 @@ Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 			frame:RegisterForDrag("LeftButton")
 			frame:SetScript("OnMouseUp", function(frame, button) clickHandler(win, frame, button) end)
 			frame:SetScript("OnEnter", function(frame) tooltipHandler(win, GameTooltip) end)
-			frame:SetScript("OnLeave", function(frame) GameTooltip:Hide() end)
+			frame:SetScript("OnLeave", GameTooltip_Hide)
 			frame:SetScript("OnDragStart", function(self)
 				if not p.barslocked then
 					GameTooltip:Hide()

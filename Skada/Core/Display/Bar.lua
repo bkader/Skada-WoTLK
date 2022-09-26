@@ -7,7 +7,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 
 	local pairs, tsort, format = pairs, table.sort, string.format
 	local max, min, abs = math.max, math.min, math.abs
-	local GameTooltip = GameTooltip
+	local GameTooltip, GameTooltip_Hide = GameTooltip, GameTooltip_Hide
 	local GetSpellLink = private.spell_link or GetSpellLink
 	local CloseDropDownMenus = CloseDropDownMenus
 	local GetScreenWidth, GetScreenHeight = GetScreenWidth, GetScreenHeight
@@ -1260,7 +1260,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 						useselfcolor = {
 							type = "toggle",
 							name = L["Custom Color"],
-							desc = L["Use a custom color for your bar."],
+							desc = L["Use a different color for my bar."],
 							order = 100
 						},
 						selfcolor = {
