@@ -663,6 +663,8 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 				color = data.color
 			elseif not color and db.spellschoolcolors and data.spellschool and spellschools[data.spellschool] then
 				color = spellschools[data.spellschool]
+			elseif not color and db.useselfcolor and db.selfcolor and data.id == Skada.userGUID then
+				color = db.selfcolor
 			elseif not color and db.classcolorbars and data.class and classcolors[data.class] then
 				color = classcolors(data.class)
 			end
@@ -1249,23 +1251,47 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 								Skada:ApplySettings(db.name)
 							end
 						},
+						useselfcolor = {
+							type = "toggle",
+							name = L["Custom Color"],
+							desc = L["Use a custom color for your bar."],
+							order = 100
+						},
+						selfcolor = {
+							type = "color",
+							name = L["My Color"],
+							order = 110,
+							hasAlpha = true,
+							get = function()
+								local c = db.selfcolor or Skada.windowdefaults.barcolor
+								return c.r, c.g, c.b, c.a or 1
+							end,
+							set = function(_, r, g, b, a)
+								db.selfcolor = db.selfcolor or {}
+								db.selfcolor.r, db.selfcolor.g, db.selfcolor.b, db.selfcolor.a = r, g, b, a
+								Skada:ApplySettings(db.name)
+							end,
+							disabled = function()
+								return not db.useselfcolor
+							end
+						},
 						classcolorbars = {
 							type = "toggle",
 							name = L["Class Colors"],
 							desc = L["When possible, bars will be colored according to player class."],
-							order = 100
+							order = 120
 						},
 						spellschoolcolors = {
 							type = "toggle",
 							name = L["Spell school colors"],
 							desc = L["Use spell school colors where applicable."],
-							order = 110
+							order = 130
 						},
 						classicons = {
 							type = "toggle",
 							name = L["Class Icons"],
 							desc = L["Use class icons where applicable."],
-							order = 120,
+							order = 140,
 							disabled = function()
 								return (db.specicons or db.roleicons)
 							end
@@ -1274,7 +1300,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 							type = "toggle",
 							name = L["Role Icons"],
 							desc = L["Use role icons where applicable."],
-							order = 130,
+							order = 150,
 							set = function()
 								db.roleicons = not db.roleicons
 								if db.roleicons and not db.classicons then
@@ -1288,7 +1314,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 							type = "toggle",
 							name = L["Spec Icons"],
 							desc = L["Use specialization icons where applicable."],
-							order = 140,
+							order = 160,
 							set = function()
 								db.specicons = not db.specicons
 								if db.specicons and not db.classicons then
@@ -1301,7 +1327,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 						spark = {
 							type = "toggle",
 							name = L["Show Spark Effect"],
-							order = 150
+							order = 170
 						}
 					}
 				},
