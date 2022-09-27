@@ -891,6 +891,16 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		end
 	end
 
+	local function add_actor_time(set, actor, spellid, target)
+		if not spellid or passiveSpells[spellid] then
+			return -- missing spellid or passive spell?
+		elseif not actor.class or not Skada.validclass[actor.class] or actor.role == "HEALER" then
+			return -- missing/invalid actor class or actor is a healer?
+		else
+			Skada:AddActiveTime(set, actor, target)
+		end
+	end
+
 	local dmg = {}
 	local function log_damage(set, isdot)
 		if not set or (set == Skada.total and not P.totalidc) then return end
@@ -899,10 +909,10 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		if (dmg.amount + absorbed) == 0 then return end
 
 		local e = Skada:GetEnemy(set, dmg.enemyname, dmg.enemyid, dmg.enemyflags, true)
-		if not e then return end
-
-		if (set.type == "arena" or set.type == "pvp") and e.class and Skada.validclass[e.class] and e.role ~= "HEALER" then
-			Skada:AddActiveTime(set, e, dmg.amount > 0 and dmg.spellid and not passiveSpells[dmg.spellid], nil, dmg.dstName)
+		if not e then
+			return
+		elseif (set.type == "arena" or set.type == "pvp") and dmg.amount > 0 then
+			add_actor_time(set, e, dmg.spellid, dmg.dstName)
 		end
 
 		set.edamage = (set.edamage or 0) + dmg.amount
@@ -1350,17 +1360,26 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		end
 	end
 
+	local function add_actor_time(set, actor, spellid, target)
+		if passiveSpells[spellid] then
+			return -- missing spellid or passive spell?
+		elseif not actor.class or not Skada.validclass[actor.class] or actor.role ~= "HEALER" then
+			return -- missing/invalid actor class or actor is not a healer?
+		else
+			Skada:AddActiveTime(set, actor, target)
+		end
+	end
+
 	local heal = {}
 	local function log_heal(set, ishot)
 		if not set or (set == Skada.total and not P.totalidc) then return end
-
-		if not heal.amount or heal.amount == 0 then return end
+		if not heal.spellid or not heal.amount or heal.amount == 0 then return end
 
 		local e = Skada:GetEnemy(set, heal.enemyname, heal.enemyid, heal.enemyflags, true)
-		if not e then return end
-
-		if (set.type == "arena" or set.type == "pvp") and e.class and Skada.validclass[e.class] and e.role == "HEALER" then
-			Skada:AddActiveTime(set, e, heal.amount > 0 and heal.spellid and not passiveSpells[heal.spellid], nil, heal.dstName)
+		if not e then
+			return
+		elseif (set.type == "arena" or set.type == "pvp") then
+			add_actor_time(set, e, heal.spellid, heal.dstName)
 		end
 
 		set.eheal = (set.eheal or 0) + heal.amount

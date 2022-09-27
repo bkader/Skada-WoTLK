@@ -63,16 +63,23 @@ Skada:RegisterModule("Damage", function(L, P)
 		end
 	end
 
+	local function add_actor_time(set, actor, spellid, target)
+		if whitelist[spellid] then
+			Skada:AddActiveTime(set, actor, target, tonumber(whitelist[spellid]))
+		elseif actor.role ~= "HEALER" and not passiveSpells[spellid] then
+			Skada:AddActiveTime(set, actor, target, tonumber(whitelist[spellid]))
+		end
+	end
+
 	local dmg = {}
 	local function log_damage(set, isdot)
-		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
-		if not player then return end
+		if not dmg.spellid or not dmg.amount then return end
 
-		-- update activity
-		if whitelist[dmg.spellid] ~= nil and not dmg.petname then
-			Skada:AddActiveTime(set, player, (dmg.amount > 0), tonumber(whitelist[dmg.spellid]), dmg.dstName)
-		elseif player.role ~= "HEALER" and not dmg.petname and not passiveSpells[dmg.spellid] then
-			Skada:AddActiveTime(set, player, (dmg.amount > 0), tonumber(whitelist[dmg.spellid]), dmg.dstName)
+		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
+		if not player then
+			return
+		elseif dmg.amount > 0 and not dmg.petname then
+			add_actor_time(set, player, dmg.spellid, dmg.dstName)
 		end
 
 		-- absorbed damage

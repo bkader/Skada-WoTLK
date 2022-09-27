@@ -110,20 +110,26 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 	end
 
 	function mod:GetSetSummary(set)
-		local value = set:GetTime()
-		local valuetext = Skada:FormatValueCols(
-			self.metadata.columns["Active Time"] and Skada:FormatTime(value),
-			self.metadata.columns.Percent and format("%s - %s", date("%H:%M", set.starttime), date("%H:%M", set.endtime))
-		)
-		return value, valuetext
-	end
+		if not set or not set.time then return end
 
-	function mod:OnInitialize()
-		Skada.options.args.tweaks.args.general.args.tartime = {
-			type = "toggle",
-			name = L["Activity per Target"],
-			order = 110
-		}
+		local settime = set.time
+		local value, valuetext = nil, nil
+
+		if set.activetime then
+			value = set.activetime
+			valuetext = Skada:FormatValueCols(
+				mod_cols["Active Time"] and Skada:FormatTime(value),
+				mod_cols.Percent and Skada:FormatPercent(value, settime)
+			)
+		else -- backwards compatibility
+			value = settime
+			valuetext = Skada:FormatValueCols(
+				mod_cols["Active Time"] and Skada:FormatTime(value),
+				mod_cols.Percent and format("%s - %s", date("%H:%M", set.starttime), date("%H:%M", set.endtime))
+			)
+		end
+
+		return value, valuetext
 	end
 
 	function mod:OnEnable()
@@ -131,6 +137,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 			showspots = true,
 			ordersort = true,
 			tooltip = activity_tooltip,
+			click1 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {["Active Time"] = true, Percent = true, sPercent = true},
@@ -142,61 +149,22 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 		-- no total click.
 		targetmod.nototal = true
 
-		Skada.RegisterCallback(self, "Skada_ApplySettings", "ApplySettings")
 		Skada:AddMode(self)
 	end
 
 	function mod:OnDisable()
-		Skada.UnregisterAllCallbacks(self)
 		Skada:RemoveMode(self)
 	end
 
 	---------------------------------------------------------------------------
 
-	local Old_AddActiveTime = Skada.AddActiveTime
-	local function Alt_AddActiveTime(self, set, actor, cond, diff, target)
-		if actor and actor.last and cond then
-			local curtime = set.last_time or GetTime()
-			local delta = curtime - actor.last
-
-			if diff and diff > 0 and diff < delta then
-				delta = diff
-			elseif delta > 3.5 then
-				delta = 3.5
-			end
-
-			actor.last = curtime
-			local add = floor(100 * delta + 0.5) / 100
-			actor.time = (actor.time or 0) + add
-
-			if target and (set ~= self.total or P.totalidc) then
-				actor.tartime = actor.tartime or {}
-				actor.tartime[target] = (actor.tartime[target] or 0) + add
-			end
-		end
-	end
-
-	function mod:ApplySettings()
-		if P.tartime and Skada.AddActiveTime ~= Alt_AddActiveTime then
-			Skada.AddActiveTime = Alt_AddActiveTime
-			self.metadata.click1 = targetmod
-			self:Reload()
-		elseif not P.tartime and Skada.AddActiveTime ~= Old_AddActiveTime then
-			Skada.AddActiveTime = Old_AddActiveTime
-			self.metadata.click1 = nil
-			self:Reload()
-		end
-	end
-
-	---------------------------------------------------------------------------
-
 	get_activity_targets = function(self, tbl)
-		if not self.tartime then return end
+		if not self.super or not self.timespent then return end
 
 		tbl = clear(tbl or C)
-		for name, _time in pairs(self.tartime) do
+		for name, timespent in pairs(self.timespent) do
 			tbl[name] = new()
-			tbl[name].time = _time
+			tbl[name].time = timespent
 			self.super:_fill_actor_table(tbl[name], name)
 		end
 		return tbl

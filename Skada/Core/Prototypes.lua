@@ -71,14 +71,14 @@ function setPrototype:Bind(obj)
 end
 
 -- returns the segment's time
-function setPrototype:GetTime()
-	return Skada:GetSetTime(self)
+function setPrototype:GetTime(active)
+	return Skada:GetSetTime(self, active)
 end
 
 -- returns the actor's time if found (player or enemy)
 function setPrototype:GetActorTime(id, name, active)
 	local actor = self:GetActor(name, id)
-	return actor and actor:GetTime(active) or self:GetTime()
+	return actor and actor:GetTime(active) or self:GetTime(active)
 end
 
 -- attempts to retrieve a player

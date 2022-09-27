@@ -281,10 +281,10 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		if not absorb.spellid or not absorb.amount or absorb.amount == 0 then return end
 
 		local player = Skada:GetPlayer(set, absorb.playerid, absorb.playername)
-		if not player then return end
-
-		if player.role ~= "DAMAGER" and not nocount then
-			Skada:AddActiveTime(set, player, not passiveSpells[absorb.spellid], nil, absorb.dstName)
+		if not player then
+			return
+		elseif player.role ~= "DAMAGER" and not passiveSpells[absorb.spellid] and not nocount then
+			Skada:AddActiveTime(set, player, absorb.dstName)
 		end
 
 		-- add absorbs amount

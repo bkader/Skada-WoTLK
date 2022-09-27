@@ -963,7 +963,7 @@ do
 		return (not Skada.db.profile.totalidc and set == "total" and type(mode) == "table" and mode.nototal == true)
 	end
 
-	function private.total_record(set)
+	local function total_record(set)
 		local totalflag = Skada.total and set and Skada.db.profile.totalflag
 
 		-- something missing
@@ -1007,6 +1007,24 @@ do
 		-- battlegrouns/arenas or nothing
 		return (set.type == "pvp" or set.type == "arena")
 	end
+
+	function Skada:DispatchSets(func, ...)
+		if not self.current or type(func) ~= "function" then return end
+
+		func(self.current, ...) -- record to current
+		if total_record(self.current) then -- record to total
+			func(self.total, ...)
+		end
+
+		-- record to phases
+		if not self.tempsets then return end
+		for i = 1, #self.tempsets do
+			local set = self.tempsets[i]
+			if set and not set.stopped then
+				func(set, ...)
+			end
+		end
+	end
 end
 
 -------------------------------------------------------------------------------
@@ -1033,7 +1051,7 @@ do
 		if spellid and srcName and srcGUID and dstGUID and srcGUID ~= dstGUID then
 			queued_units = queued_units or T.get("Skada_QueuedUnits")
 			queued_units[spellid] = queued_units[spellid] or new()
-			queued_units[spellid][dstGUID] = new()
+			queued_units[spellid][dstGUID] = queued_units[spellid][dstGUID] or new()
 			queued_units[spellid][dstGUID].id = srcGUID
 			queued_units[spellid][dstGUID].name = srcName
 			queued_units[spellid][dstGUID].flag = srcFlags

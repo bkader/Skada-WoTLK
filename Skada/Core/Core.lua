@@ -127,6 +127,7 @@ private.BITMASK_ENEMY = BITMASK_ENEMY
 -------------------------------------------------------------------------------
 -- local functions.
 
+local set_active, start_watching, stop_watching
 local new_window, reset_window, add_window_options
 local set_window_child, set_window_mode_title
 local restore_view, restore_window_view
@@ -319,8 +320,13 @@ end
 -- Active / Effetive time functions
 
 -- returns the selected set time.
-function Skada:GetSetTime(set)
-	return (set and set.time) and max(1, set.time > 0 and set.time or (time() - set.starttime)) or 0
+function Skada:GetSetTime(set, active)
+	if not set or not set.time then
+		return 0
+	end
+
+	local settime = active and set.activetime or set.time
+	return (settime >= 1) and settime or max(1, time() - set.starttime)
 end
 
 -- returns a formmatted set time
@@ -333,7 +339,7 @@ function Skada:GetActiveTime(set, actor, active)
 	active = active or (set.type == "pvp") or (set.type == "arena") -- force active for pvp/arena
 
 	-- use settime to clamp
-	local settime = self:GetSetTime(set)
+	local settime = self:GetSetTime(set, active)
 
 	-- active: actor's time.
 	if (P.timemesure ~= 2 or active) and actor.time and actor.time > 0 then
@@ -345,20 +351,28 @@ function Skada:GetActiveTime(set, actor, active)
 end
 
 -- updates the actor's active time
-function Skada:AddActiveTime(set, actor, cond, diff)
-	if actor and actor.last and cond then
-		local curtime = set.last_time or GetTime()
-		local delta = curtime - actor.last
+function Skada:AddActiveTime(set, actor, target, override)
+	if not actor or not actor.last then return end
 
-		if diff and diff > 0 and diff < delta then
-			delta = diff
-		elseif delta > 3.5 then
-			delta = 3.5
-		end
+	local curtime = set.last_time or GetTime()
+	local delta = curtime - actor.last
+	actor.last = curtime
 
-		actor.last = curtime
-		actor.time = (actor.time or 0) + floor(100 * delta + 0.5) / 100
+	if override and override > 0 and override <= delta then
+		delta = override
+	elseif delta > 3.5 then
+		delta = 3.5
 	end
+
+	local adding = floor(100 * delta + 0.5) / 100
+	actor.time = (actor.time or 0) + adding
+	set.activetime = (set.activetime or 0) + adding
+
+	-- to save up memory, we only record the rest to the current set.
+	if (set == self.total and not P.totalidc) or not target then return end
+
+	actor.timespent = actor.timespent or {}
+	actor.timespent[target] = (actor.timespent[target] or 0) + adding
 end
 
 -------------------------------------------------------------------------------
@@ -1408,7 +1422,25 @@ function Skada:Wipe(changed)
 	end
 end
 
-local function set_active(enable)
+do
+	local is_watching = nil
+
+	function start_watching()
+		if not is_watching then
+			Skada:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "OnCombatEvent")
+			is_watching = true
+		end
+	end
+
+	function stop_watching()
+		if is_watching then
+			Skada:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+			is_watching = nil
+		end
+	end
+end
+
+function set_active(enable)
 	if enable and P.hidden then
 		enable = false
 	end
@@ -1428,13 +1460,13 @@ local function set_active(enable)
 			Skada:Debug(format("%s \124cffff0000%s\124r", L["Data Collection"], L["DISABLED"]))
 		end
 		Skada.disabled = true
-		Skada:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+		stop_watching()
 	else
 		if Skada.disabled then
 			Skada:Debug(format("%s \124cff00ff00%s\124r", L["Data Collection"], L["ENABLED"]))
 		end
 		Skada.disabled = nil
-		Skada:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "OnCombatEvent")
+		start_watching()
 	end
 
 	Skada:UpdateDisplay(true)
@@ -1809,7 +1841,7 @@ function Skada:GetPlayer(set, guid, name, flag)
 
 	self.changed = true
 	self.callbacks:Fire("Skada_GetPlayer", player, set)
-	return self.playerPrototype:Bind(player, set)
+	return player
 end
 
 -- finds an enemy unit
@@ -1867,7 +1899,7 @@ function Skada:GetEnemy(set, name, guid, flag, create)
 
 	self.changed = true
 	self.callbacks:Fire("Skada_GetEnemy", enemy, set)
-	return self.enemyPrototype:Bind(enemy, set)
+	return enemy
 end
 
 -- generic find a player or an enemey
@@ -3443,10 +3475,10 @@ function Skada:OnEnable()
 	self:RegisterEvent("UNIT_PET")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 	self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "CheckZone")
-	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "OnCombatEvent")
 	self:RegisterEvent("UNIT_ENTERED_VEHICLE", "CheckVehicle")
 	self:RegisterEvent("UNIT_EXITED_VEHICLE", "CheckVehicle")
 	self:RegisterBucketEvent({"PARTY_MEMBERS_CHANGED", "RAID_ROSTER_UPDATE"}, 0.25, "UpdateRoster")
+	start_watching()
 
 	if self.LoadableModules then
 		for i = 1, #self.LoadableModules do
@@ -3874,24 +3906,6 @@ function Skada:ResumeSegment(msg, phase)
 			end
 
 			self:Print(msg or L["Segment Resumed."])
-		end
-	end
-end
-
-function Skada:DispatchSets(func, ...)
-	if not self.current or type(func) ~= "function" then return end
-
-	func(self.current, ...) -- record to current
-	if private.total_record(self.current) then -- record to total
-		func(self.total, ...)
-	end
-
-	-- record to phases
-	if not self.tempsets then return end
-	for i = 1, #self.tempsets do
-		local set = self.tempsets[i]
-		if set and not set.stopped then
-			func(set, ...)
 		end
 	end
 end
