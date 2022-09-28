@@ -56,10 +56,14 @@ BINDING_NAME_SKADA_NEWPHASE = L["Start New Phase"]
 BINDING_NAME_SKADA_STOP = L["Stop"]
 
 -- things we need
+local userGUID = UnitGUID("player")
+Skada.userGUID = userGUID
+
 local userName = UnitName("player")
+Skada.userName = userName
+
 local _, userClass = UnitClass("player")
-local userGUID, userRole, userSpec
-Skada.userName, Skada.userClass = userName, userClass
+Skada.userClass = userClass
 
 -- reusable tables
 local new, del, clear = Skada.TablePool("kv")
@@ -1821,18 +1825,10 @@ function Skada:GetPlayer(set, guid, name, flag)
 	-- fix players created before their info was received
 	if player.class and Skada.validclass[player.class] and (player.role == nil or player.role == "NONE" or player.spec == nil) then
 		if player.role == nil or player.role == "NONE" then
-			if player.id == userGUID and userRole then
-				player.role = userRole
-			else
-				player.role = GetUnitRole(players[player.id] or player.name, player.class)
-			end
+			player.role = GetUnitRole(player.id)
 		end
 		if player.spec == nil then
-			if player.id == userGUID and userSpec then
-				player.spec = userSpec
-			else
-				player.spec = GetUnitSpec(players[player.id] or player.name, player.class)
-			end
+			player.spec = GetUnitSpec(player.id)
 		end
 	end
 
@@ -2726,11 +2722,6 @@ function check_group()
 			assign_pet(UnitGUID(owner), UnitName(owner), UnitGUID(unit))
 		end
 	end
-
-	-- update my spec and role.
-	userSpec = GetUnitSpec("player", userClass) or userSpec
-	userRole = GetUnitRole("player", userClass) or userRole
-	Skada.userSpec, Skada.userRole = userSpec, userRole
 end
 
 do
