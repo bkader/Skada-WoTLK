@@ -2114,10 +2114,16 @@ local function summon_pet(petGUID, petFlags, ownerGUID, ownerName, ownerFlags)
 	end
 end
 
-local function dismiss_pet(petGUID, delay)
-	if petGUID and pets[petGUID] then
+local dismiss_pet
+do
+	local function dismiss_handler(petGUID)
+		pets[petGUID] = del(pets[petGUID])
+	end
+
+	function dismiss_pet(petGUID, delay)
+		if not petGUID or not pets[petGUID] then return end
 		-- delayed for a reason (2 x MAINMENU_SLIDETIME).
-		Skada:ScheduleTimer(function() pets[petGUID] = del(pets[petGUID]) end, delay or 0.6)
+		Skada:ScheduleTimer(dismiss_handler, delay or 0.6, petGUID)
 	end
 end
 
@@ -2225,7 +2231,7 @@ do
 	end
 
 	local white = HIGHLIGHT_FONT_COLOR
-	local function add_subview_tooltip(tooltip, win, mode, id, label)
+	local function add_subview_lines(tooltip, win, mode, id, label)
 		if not (type(mode) == "table" and mode.Update) then return end
 
 		-- windows should have separate tooltip tables in order
@@ -2276,79 +2282,74 @@ do
 		end
 	end
 
+	local function add_submode_lines(mode, win, id, label, tooltip)
+		if mode and not private.total_noclick(win.selectedset, mode) then
+			add_subview_lines(tooltip, win, mode, id, label)
+		end
+	end
+
+	local function add_click_lines(mode, label, win, t, fmt)
+		if type(mode) == "function" then
+			t:AddLine(pformat(fmt, label))
+		elseif not private.total_noclick(win.selectedset, mode) then
+			t:AddLine(format(fmt, label or mode.localeName))
+		end
+	end
+
 	function Skada:ShowTooltip(win, id, label, bar)
-		if P.tooltips and win and win.metadata and not (bar and bar.ignore) then
-			local t, md = GameTooltip, win.metadata
+		if self.testMode or not P.tooltips or (bar and bar.ignore) then return end
 
-			if md.is_modelist and P.informativetooltips then
-				t:ClearLines()
-				add_subview_tooltip(t, win, find_mode(id), id, label)
-				t:Show()
-			elseif md.click1 or md.click2 or md.click3 or md.click4 or md.tooltip then
-				t:ClearLines()
-				local hasClick = md.click1 or md.click2 or md.click3 or md.click4 or nil
+		local md = win and win.metadata
+		local t = md and GameTooltip
+		if not t then return end
 
-				if md.tooltip then
-					local numLines = t:NumLines()
-					md.tooltip(win, id, label, t)
+		if md.is_modelist and P.informativetooltips then
+			t:ClearLines()
+			add_subview_lines(t, win, find_mode(id), id, label)
+			t:Show()
+		elseif md.click1 or md.click2 or md.click3 or md.click4 or md.tooltip then
+			t:ClearLines()
+			local hasClick = md.click1 or md.click2 or md.click3 or md.click4 or nil
 
-					if t:NumLines() ~= numLines and hasClick then
-						t:AddLine(" ")
-					end
+			if md.tooltip then
+				local numLines = t:NumLines()
+				md.tooltip(win, id, label, t)
+
+				if t:NumLines() ~= numLines and hasClick then
+					t:AddLine(" ")
 				end
-
-				if P.informativetooltips then
-					if md.click1 and not private.total_noclick(win.selectedset, md.click1) then
-						add_subview_tooltip(t, win, md.click1, id, label)
-					end
-					if md.click2 and not private.total_noclick(win.selectedset, md.click2) then
-						add_subview_tooltip(t, win, md.click2, id, label)
-					end
-					if md.click3 and not private.total_noclick(win.selectedset, md.click3) then
-						add_subview_tooltip(t, win, md.click3, id, label)
-					end
-					if md.click4 and not private.total_noclick(win.selectedset, md.click4) then
-						add_subview_tooltip(t, win, md.click4, id, label)
-					end
-				end
-
-				if md.post_tooltip then
-					local numLines = t:NumLines()
-					md.post_tooltip(win, id, label, t)
-
-					if numLines > 0 and t:NumLines() ~= numLines and hasClick then
-						t:AddLine(" ")
-					end
-				end
-
-				if not self.testMode then
-					if type(md.click1) == "function" then
-						t:AddLine(pformat(L["Click for \124cff00ff00%s\124r"], md.click1_label))
-					elseif md.click1 and not private.total_noclick(win.selectedset, md.click1) then
-						t:AddLine(format(L["Click for \124cff00ff00%s\124r"], md.click1_label or md.click1.localeName))
-					end
-
-					if type(md.click2) == "function" then
-						t:AddLine(pformat(L["Shift-Click for \124cff00ff00%s\124r"], md.click2_label))
-					elseif md.click2 and not private.total_noclick(win.selectedset, md.click2) then
-						t:AddLine(format(L["Shift-Click for \124cff00ff00%s\124r"], md.click2_label or md.click2.localeName))
-					end
-
-					if type(md.click3) == "function" then
-						t:AddLine(pformat(L["Control-Click for \124cff00ff00%s\124r"], md.click3_label))
-					elseif md.click3 and not private.total_noclick(win.selectedset, md.click3) then
-						t:AddLine(format(L["Control-Click for \124cff00ff00%s\124r"], md.click3_label or md.click3.localeName))
-					end
-
-					if type(md.click4) == "function" then
-						t:AddLine(pformat(L["Alt-Click for \124cff00ff00%s\124r"], md.click4_label))
-					elseif md.click4 and not private.total_noclick(win.selectedset, md.click4) then
-						t:AddLine(format(L["Alt-Click for \124cff00ff00%s\124r"], md.click4_label or md.click4.localeName))
-					end
-				end
-
-				t:Show()
 			end
+
+			if P.informativetooltips then
+				add_submode_lines(md.click1, win, id, label, t)
+				add_submode_lines(md.click2, win, id, label, t)
+				add_submode_lines(md.click3, win, id, label, t)
+				add_submode_lines(md.click4, win, id, label, t)
+			end
+
+			if md.post_tooltip then
+				local numLines = t:NumLines()
+				md.post_tooltip(win, id, label, t)
+
+				if numLines > 0 and t:NumLines() ~= numLines and hasClick then
+					t:AddLine(" ")
+				end
+			end
+
+			if md.click1 then
+				add_click_lines(md.click1, md.click1_label, win, t, L["Click for \124cff00ff00%s\124r"])
+			end
+			if md.click2 then
+				add_click_lines(md.click2, md.click2_label, win, t, L["Shift-Click for \124cff00ff00%s\124r"])
+			end
+			if md.click3 then
+				add_click_lines(md.click3, md.click3_label, win, t, L["Control-Click for \124cff00ff00%s\124r"])
+			end
+			if md.click4 then
+				add_click_lines(md.click4, md.click4_label, win, t, L["Alt-Click for \124cff00ff00%s\124r"])
+			end
+
+			t:Show()
 		end
 	end
 end
@@ -3904,7 +3905,7 @@ end
 -------------------------------------------------------------------------------
 
 do
-	local tentative, tentative_handle
+	local tentative, tentative_timer
 	local death_counter, starting_members = 0, 0
 
 	-- list of combat events that we don't care about
@@ -3993,9 +3994,9 @@ do
 		death_counter = 0
 		starting_members = GetNumGroupMembers()
 
-		if tentative_handle then
-			Skada:CancelTimer(tentative_handle, true)
-			tentative_handle = nil
+		if tentative_timer then
+			Skada:CancelTimer(tentative_timer, true)
+			tentative_timer = nil
 		end
 
 		if update_timer then
@@ -4143,6 +4144,13 @@ do
 		end
 	end
 
+	local function tentative_handler()
+		Skada:CancelTimer(tentative_timer, true)
+		tentative_timer = nil
+		tentative = nil
+		Skada.current = nil
+	end
+
 	function Skada:CombatLogEvent(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		-- ignored combat event?
 		if (not eventtype or ignored_events[eventtype]) and not (spellcast_events[eventtype] and self.current) then return end
@@ -4163,11 +4171,7 @@ do
 					self.total = create_set(L["Total"])
 				end
 
-				tentative_handle = self:ScheduleTimer(function()
-					tentative = nil
-					tentative_handle = nil
-					self.current = nil
-				end, 1)
+				tentative_timer = self:ScheduleTimer(tentative_handler, 1)
 				tentative = 0
 
 				check_boss_fight(self.current, eventtype, srcName, srcFlags, src_is_interesting, dstGUID, dstName, dstFlags, dst_is_interesting)
@@ -4263,8 +4267,8 @@ do
 							tentative = tentative + 1
 							self:Debug(format("Tentative: %s (%d)", eventtype, tentative))
 							if tentative == 5 then
-								self:CancelTimer(tentative_handle, true)
-								tentative_handle = nil
+								self:CancelTimer(tentative_timer, true)
+								tentative_timer = nil
 								tentative = nil
 								self:Debug("StartCombat: tentative combat")
 								combat_start()

@@ -91,7 +91,7 @@ do
 		clear(aura) -- empty aura table first
 		if not set then return end
 
-		local maxtime = set and set:GetTime(set)
+		local maxtime = set and set:GetTime()
 		curtime = curtime or set.last_action or time()
 
 		local actors = (band(main_flag, player_flag) ~= 0) and set.players -- players
@@ -119,7 +119,7 @@ local spelltarget_update_func, targetspell_update_func
 local spell_tooltip, spelltarget_tooltip
 
 -- list of spells that don't trigger SPELL_AURA_x events
-local spell_aura_list = {
+local special_buffs = {
 	[57669] = true -- Replenishment
 }
 
@@ -139,24 +139,24 @@ do
 		end
 	end
 
-	local function find_or_create_actor(set, actorid, actorname, actorflags, is_enemy)
+	local function find_or_create_actor(set, info, is_enemy)
 		-- 1. make sure we can record to the segment.
 		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
 
 		-- 2. make sure we have valid data.
-		if not aura or not aura.spellid then return end
+		if not info or not info.spellid then return end
 
 		-- 3. retrieve the actor.
 		if is_enemy then -- enemy?
-			return Skada:GetEnemy(set, actorname, actorid, actorflags, true)
+			return Skada:GetEnemy(set, info.playername, info.playerid, info.playerflags, true)
 		end
 
-		return Skada:GetPlayer(set, actorid, actorname, actorflags) -- player?
+		return Skada:GetPlayer(set, info.playerid, info.playername, info.playerflags) -- player?
 	end
 
 	-- handles SPELL_AURA_APPLIED event
 	function log_auraapplied(set, is_enemy)
-		local actor = find_or_create_actor(set, aura.srcGUID, aura.srcName, aura.srcFlags, is_enemy)
+		local actor = find_or_create_actor(set, aura, is_enemy)
 		if not actor then return end
 
 		local curtime = set.last_action or time()
@@ -192,7 +192,7 @@ do
 
 	-- handles SPELL_AURA_REFRESH and SPELL_AURA_APPLIED_DOSE events
 	function log_aurarefresh(set, is_enemy)
-		local actor = find_or_create_actor(set, aura.srcGUID, aura.srcName, aura.srcFlags, is_enemy)
+		local actor = find_or_create_actor(set, aura, is_enemy)
 		if not actor then return end
 
 		-- spell
@@ -208,7 +208,7 @@ do
 
 	-- handles SPELL_AURA_REMOVED event
 	function log_auraremove(set, is_enemy)
-		local actor = find_or_create_actor(set, aura.srcGUID, aura.srcName, aura.srcFlags, is_enemy)
+		local actor = find_or_create_actor(set, aura, is_enemy)
 		if not actor then return end
 
 		-- spell
@@ -234,7 +234,7 @@ do
 	end
 
 	function log_specialaura(set, is_enemy)
-		local actor = find_or_create_actor(set, aura.srcGUID, aura.srcName, aura.srcFlags, is_enemy)
+		local actor = find_or_create_actor(set, aura, is_enemy)
 		if not actor then return end
 
 		-- spell
@@ -547,14 +547,12 @@ Skada:RegisterModule("Buffs", function(_, P, _, C)
 	local queued_spells = {[49005] = 50424}
 
 	local function handle_buff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, school, auratype)
-		if spellid and not ignored_buffs[spellid] and (auratype == "BUFF" or spell_aura_list[spellid]) then
-			aura.srcGUID = dstGUID
-			aura.srcName = dstName
-			aura.srcFlags = dstFlags
+		if spellid and not ignored_buffs[spellid] and (auratype == "BUFF" or special_buffs[spellid]) then
 
-			aura.dstGUID = nil
+			aura.playerid = dstGUID
+			aura.playername = dstName
+			aura.playerflags = dstFlags
 			aura.dstName = nil
-			aura.dstFlags = nil
 
 			aura.spellid = spellid
 			aura.school = school
@@ -722,16 +720,13 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 	local targetspellmod = targetmod:NewModule("Debuff spell list")
 	local mod_cols = nil
 
-	local function handle_debuff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, _, spellid, _, school, auratype)
+	local function handle_debuff(_, event, srcGUID, srcName, srcFlags, _, dstName, _, spellid, _, school, auratype)
 		if not spellid or ignored_debuffs[spellid] or auratype ~= "DEBUFF" then return end
 
-		aura.srcGUID = srcGUID
-		aura.srcName = srcName
-		aura.srcFlags = srcFlags
-
-		aura.dstGUID = nil
+		aura.playerid = srcGUID
+		aura.playername = srcName
+		aura.playerflags = srcFlags
 		aura.dstName = dstName
-		aura.dstFlags = nil
 
 		aura.spellid = -spellid
 		aura.school = school
@@ -888,14 +883,12 @@ Skada:RegisterModule("Enemy Buffs", function(_, P, _, C)
 	local mod_cols = nil
 
 	local function handle_buff(_, event, _, _, _, dstGUID, dstName, dstFlags, spellid, _, school, auratype)
-		if spellid and not ignored_buffs[spellid] and (auratype == "BUFF" or spell_aura_list[spellid]) then
-			aura.srcGUID = dstGUID
-			aura.srcName = dstName
-			aura.srcFlags = dstFlags
+		if spellid and not ignored_buffs[spellid] and (auratype == "BUFF" or special_buffs[spellid]) then
 
-			aura.dstGUID = nil
+			aura.playerid = dstGUID
+			aura.playername = dstName
+			aura.playerflags = dstFlags
 			aura.dstName = nil
-			aura.dstFlags = nil
 
 			aura.spellid = spellid
 			aura.school = school
@@ -974,13 +967,10 @@ Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
 	local function handle_debuff(_, event, srcGUID, srcName, srcFlags, _, dstName, _, spellid, _, school, auratype)
 		if not spellid or ignored_debuffs[spellid] or auratype ~= "DEBUFF" then return end
 
-		aura.srcGUID = srcGUID
-		aura.srcName = srcName
-		aura.srcFlags = srcFlags
-
-		aura.dstGUID = nil
+		aura.playerid = srcGUID
+		aura.playername = srcName
+		aura.playerflags = srcFlags
 		aura.dstName = dstName
-		aura.dstFlags = nil
 
 		aura.spellid = -spellid
 		aura.school = school
