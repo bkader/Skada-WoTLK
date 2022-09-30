@@ -479,7 +479,7 @@ do
 	local customSpells = {
 		[3] = {L["Falling"], [[Interface\Icons\ability_rogue_quickrecovery]]},
 		[4] = {L["Drowning"], [[Interface\Icons\spell_shadow_demonbreath]]},
-		[5] = {L["Fatigue"], [[Interface\Icons\ability_creature_cursed_05]]},
+		[5] = {L["Fatigue"], [[Interface\Icons\spell_nature_sleep]]},
 		[6] = {L["Fire"], [[Interface\Icons\spell_fire_fire]]},
 		[7] = {L["Lava"], [[Interface\Icons\spell_shaman_lavaflow]]},
 		[8] = {L["Slime"], [[Interface\Icons\inv_misc_slime_01]]}

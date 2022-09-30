@@ -215,7 +215,7 @@ Skada:RegisterModule("Damage", function(L, P)
 	end
 
 	local extraATT = nil
-	local function spell_damage(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_damage(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, _, ...)
 		if srcGUID ~= dstGUID then
 			-- handle extra attacks
 			if eventtype == "SPELL_EXTRA_ATTACKS" then
@@ -261,21 +261,16 @@ Skada:RegisterModule("Damage", function(L, P)
 				dmg.playerid = srcGUID
 				dmg.playername = srcName
 				dmg.playerflags = srcFlags
-
-				dmg.dstGUID = dstGUID
 				dmg.dstName = dstName
-				dmg.dstFlags = dstFlags
-
 				dmg.misstype = nil
-				dmg.petname = nil
-				Skada:FixPets(dmg)
 
+				Skada:FixPets(dmg)
 				Skada:DispatchSets(log_damage, eventtype == "SPELL_PERIODIC_DAMAGE")
 			end
 		end
 	end
 
-	local function spell_missed(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_missed(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, _, ...)
 		if srcGUID ~= dstGUID then
 			local amount
 
@@ -290,10 +285,7 @@ Skada:RegisterModule("Damage", function(L, P)
 				dmg.playerid = srcGUID
 				dmg.playername = srcName
 				dmg.playerflags = srcFlags
-
-				dmg.dstGUID = dstGUID
 				dmg.dstName = dstName
-				dmg.dstFlags = dstFlags
 
 				dmg.amount = 0
 				dmg.overkill = 0
@@ -311,9 +303,7 @@ Skada:RegisterModule("Damage", function(L, P)
 					dmg.resisted = amount
 				end
 
-				dmg.petname = nil
 				Skada:FixPets(dmg)
-
 				Skada:DispatchSets(log_damage, eventtype == "SPELL_PERIODIC_MISSED")
 			end
 		end

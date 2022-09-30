@@ -78,10 +78,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 		data.playerid = last_srcGUID
 		data.playername = last_srcName
 		data.playerflags = last_srcFlags
-
-		data.dstGUID = dstGUID
 		data.dstName = dstName
-		data.dstFlags = dstFlags
 
 		Skada:DispatchSets(log_sunder)
 

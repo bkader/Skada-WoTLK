@@ -1741,42 +1741,54 @@ end
 -- finds a player that was already recorded
 local dummy_pet = {class = "PET"} -- used as fallback
 function Skada:FindPlayer(set, id, name, strict)
-	if set and set.players and ((id and id ~= "total") or (name and name ~= L["Total"])) then
-		id = id or name -- fallback
+	id = id or name -- fallback
 
-		set._playeridx = set._playeridx or {}
-
-		local player = set._playeridx[id]
-		if player then
-			return self.playerPrototype:Bind(player, set)
-		end
-
-		-- search the set
-		local _players = set.players
-		for i = 1, #_players do
-			local p = _players[i]
-			if p and ((id and p.id == id) or (name and p.name == name)) then
-				set._playeridx[id] = self.playerPrototype:Bind(p, set)
-				return p
-			end
-		end
-
-		-- search friendly enemies
-		local e = self:FindEnemy(set, name, id)
-		if e and e.flag and band(e.flag, COMBATLOG_OBJECT_REACTION_FRIENDLY) ~= 0 then
-			set._playeridx[id] = e
-			return e
-		end
-
-		-- our last hope!
-		if not strict and not player then
-			dummy_pet.id = id
-			dummy_pet.name = name or L["Unknown"]
-			player = self.playerPrototype:Bind(dummy_pet, set)
-		end
-
-		return player
+	local actors = set and (id ~= "total") and (name ~= L["Total"]) and set.players
+	if not actors then
+		return
+	elseif not set._playeridx then
+		set._playeridx = {}
 	end
+
+	-- already cached player?
+	local player = set._playeridx[id]
+	if player then
+		return self.playerPrototype:Bind(player, set)
+	end
+
+	-- speed up things with pets
+	local ownerName = strmatch(name, "%<(%a+)%>")
+	if ownerName then
+		dummy_pet.id = id
+		dummy_pet.name = name
+		dummy_pet.owner = ownerName
+		return self.playerPrototype:Bind(dummy_pet, set)
+	end
+
+	-- search the set
+	for i = 1, #actors do
+		local actor = actors[i]
+		if actor and ((id and actor.id == id) or (name and actor.name == name)) then
+			set._playeridx[id] = actor
+			return actor
+		end
+	end
+
+	-- search friendly enemies
+	local enemy = self:FindEnemy(set, name, id)
+	if enemy and enemy.flag and band(enemy.flag, COMBATLOG_OBJECT_REACTION_FRIENDLY) ~= 0 then
+		set._playeridx[id] = enemy
+		return enemy
+	end
+
+	-- our last hope!
+	if not strict then
+		dummy_pet.id = id
+		dummy_pet.name = name or L["Unknown"]
+		return self.playerPrototype:Bind(dummy_pet, set)
+	end
+
+	return player
 end
 
 -- finds a player table or creates it if not found
@@ -1842,23 +1854,23 @@ end
 
 -- finds an enemy unit
 function Skada:FindEnemy(set, name, id)
-	if set and set.enemies and name then
-		set._enemyidx = set._enemyidx or {}
+	local actors = name and set and set.enemies
+	if not actors then
+		return
+	elseif not set._enemyidx then
+		set._enemyidx = {}
+	end
 
-		local enemy = set._enemyidx[name]
-		if enemy then
-			return self.enemyPrototype:Bind(enemy, set)
-		end
+	local enemy = set._enemyidx[name]
+	if enemy then
+		return self.enemyPrototype:Bind(enemy, set)
+	end
 
-		local _enemies = set.enemies
-		if not _enemies then return end
-
-		for i = 1, #_enemies do
-			local e = _enemies[i]
-			if e and ((id and id == e.id) or (name and e.name == name)) then
-				set._enemyidx[name] = self.enemyPrototype:Bind(e, set)
-				return e
-			end
+	for i = 1, #actors do
+		local actor = actors[i]
+		if actor and ((id and id == actor.id) or (name and actor.name == name)) then
+			set._enemyidx[name] = self.enemyPrototype:Bind(actor, set)
+			return actor
 		end
 	end
 end
@@ -1900,11 +1912,11 @@ end
 
 -- generic find a player or an enemey
 function Skada:FindActor(set, id, name, no_strict)
-	local actor, enemy = self:FindPlayer(set, id, name, not no_strict), nil
+	local actor = self:FindPlayer(set, id, name, not no_strict)
 	if not actor then
-		actor, enemy = self:FindEnemy(set, name, id), true
+		return self:FindEnemy(set, name, id), true
 	end
-	return actor, enemy
+	return actor
 end
 
 -- generic: finds a player/enemy or creates it.
@@ -2012,7 +2024,7 @@ do
 		end
 	end
 
-	local function common_fix_pets(guid, flag)
+	local function fix_pets_handler(guid, flag)
 		if guid and pets[guid] then
 			return pets[guid]
 		end
@@ -2044,46 +2056,54 @@ do
 	end
 
 	function Skada:FixPets(action)
-		if action and self:IsPlayer(action.playerid, action.playerflags, action.playername) == false then
-			local owner = pets[action.playerid] or common_fix_pets(action.playerid, action.playerflags)
+		if not action then return end
+		action.petname = nil -- clear it
 
-			if owner then
-				action.petname = action.playername
+		-- 1: group member / true: player / false: everything else
+		if self:IsPlayer(action.playerid, action.playerflags, action.playername) ~= false then return end
 
-				if P.mergepets then
-					if action.spellname and action.playername then
-						action.spellname = format("%s (%s)", action.spellname, action.playername)
-					end
-					action.playerid = owner.id
-					action.playername = owner.name
-				else
-					-- just append the creature id to the player
-					action.playerid = format("%s%s", owner.id, GetCreatureId(action.playerid))
-					action.playername = format("%s (%s)", action.playername, owner.name)
+		local owner = fix_pets_handler(action.playerid, action.playerflags)
+		if owner then
+			action.petname = format("%s <%s>", action.playername, owner.name)
+
+			if P.mergepets then
+				action.playerid = owner.id
+				action.playername = owner.name
+
+				if action.spellname and action.playername then
+					action.spellname = format("%s (%s)", action.spellname, action.playername)
 				end
 			else
-				-- if for any reason we fail to find the pets, we simply
-				-- adds them separately as a single entry.
-				action.playerid = action.playername
+				-- just append the creature id to the player
+				action.playerid = format("%s%s", owner.id, GetCreatureId(action.playerid))
+				action.playername = action.petname
 			end
+		else
+			-- if for any reason we fail to find the pets, we simply
+			-- adds them separately as a single entry.
+			action.playerid = action.playername
 		end
 	end
 
-	function Skada:FixMyPets(playerid, playername, playerflags)
-		if players[playerid] or not self:IsPet(playerid, playername, playerflags) then
-			return playerid, playername
+	function Skada:FixMyPets(guid, name, flags)
+		if players[guid] or not self:IsPet(guid, name, flags) then
+			return guid, name, flags
 		end
 
-		if pets[playerid] then
-			return pets[playerid].id or playerid, pets[playerid].name or playername
-		end
-
-		local owner = common_fix_pets(playerid, playerflags)
+		local owner = fix_pets_handler(guid, flags)
 		if owner then
-			return owner.id or playerid, owner.name or playername
+			return owner.id or guid, owner.name or name, owner.flag or flags
 		end
 
-		return playerid, playername
+		return guid, name, flags
+	end
+
+	function Skada:FixPetsName(guid, name, flags)
+		local _, ownerName = self:FixMyPets(guid, name, flags)
+		if ownerName and ownerName ~= name then
+			return format("%s <%s>", name, ownerName)
+		end
+		return name
 	end
 end
 
@@ -2639,7 +2659,7 @@ do
 				if data.reportlabel then
 					label = data.reportlabel
 				elseif P.reportlinks and (data.spellid or data.hyperlink) then
-					label = format("%s   %s", data.hyperlink or self.GetSpellLink(abs(data.spellid)) or data.label, data.valuetext)
+					label = format("%s   %s", data.hyperlink or GetSpellLink(abs(data.spellid)) or data.label, data.valuetext)
 				else
 					label = format("%s   %s", data.label, data.valuetext)
 				end
@@ -3441,8 +3461,8 @@ function Skada:OnInitialize()
 	self.maxmeme = min(60, max(30, self.maxsets + 10))
 
 	-- use our custom functions
-	GetSpellInfo = self.GetSpellInfo or GetSpellInfo
-	GetSpellLink = self.GetSpellLink or GetSpellLink
+	GetSpellInfo = private.spell_info or GetSpellInfo
+	GetSpellLink = private.spell_link or GetSpellLink
 end
 
 function Skada:SetupStorage()

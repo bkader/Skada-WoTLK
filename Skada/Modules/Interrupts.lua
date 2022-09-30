@@ -69,18 +69,11 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		-- invalid/ignored spell?
 		if ignoredSpells[spellid] or (extraspellid and ignoredSpells[extraspellid]) then return end
 
-		data.playerid = srcGUID
-		data.playername = srcName
-		data.playerflags = srcFlags
-
-		data.dstGUID = dstGUID
-		data.dstName = dstName
-		data.dstFlags = dstFlags
+		data.playerid, data.playername, data.playerflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+		data.dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
 
 		data.spellid = spellid
 		data.extraspellid = extraspellid
-
-		Skada:FixPets(data)
 
 		Skada:DispatchSets(log_interrupt)
 

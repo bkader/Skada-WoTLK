@@ -53,8 +53,7 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 
 	local function spell_missed(_, _, srcGUID, srcName, srcFlags, _, dstName, _, swing_miss, _, _, spell_miss)
 		if (swing_miss == "PARRY" or spell_miss == "PARRY") and dstName and parrybosses[dstName] then
-			data.playerid, data.playername = Skada:FixMyPets(srcGUID, srcName, srcFlags)
-			data.playerflags = srcFlags
+			data.playerid, data.playername, data.playerflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 			data.dstName = dstName
 
 			Skada:DispatchSets(log_parry)

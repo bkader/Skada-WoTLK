@@ -53,9 +53,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 		local deathlog = player.deathlog and player.deathlog[1]
 		if not deathlog or (deathlog.timeod and not override) then
-			deathlog = {log = new()}
 			player.deathlog = player.deathlog or {}
-			tinsert(player.deathlog, 1, deathlog)
+			tinsert(player.deathlog, 1, {log = new()})
+			deathlog = player.deathlog[1]
 		end
 
 		-- seet player maxhp if not already set

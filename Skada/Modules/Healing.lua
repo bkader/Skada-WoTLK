@@ -140,19 +140,11 @@ Skada:RegisterModule("Healing", function(L, P)
 
 		srcGUID, srcName, srcFlags = Skada:FixUnit(spellid, srcGUID, srcName, srcFlags)
 
-		heal.playerid = srcGUID
-		heal.playername = srcName
-		heal.playerflags = srcFlags
-
-		heal.dstGUID = dstGUID
-		heal.dstName = dstName
-		heal.dstFlags = dstFlags
+		heal.playerid, heal.playername, heal.playerflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+		heal.dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
 
 		heal.spellid = (eventtype == "SPELL_PERIODIC_HEAL") and -spellid or spellid
 		_, heal.school, heal.amount, heal.overheal, _, heal.critical = ...
-
-		heal.petname = nil
-		Skada:FixPets(heal)
 
 		Skada:DispatchSets(log_heal)
 	end

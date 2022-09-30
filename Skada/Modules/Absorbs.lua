@@ -451,10 +451,11 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		return (a.ts > b.ts)
 	end
 
-	local function handle_shield(timestamp, eventtype, srcGUID, srcName, srcFlags, _, dstName, _, spellid, _, spellschool, _, points)
+	local function handle_shield(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, _, points)
 		if not spellid or not absorbspells[spellid] or not dstName or ignoredSpells[spellid] then return end
 
 		shields = shields or T.get("Skada_Shields") -- create table if missing
+		dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
 
 		-- shield removed?
 		if eventtype == "SPELL_AURA_REMOVED" then
@@ -652,10 +653,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 					absorb.playerid = pshield.srcGUID
 					absorb.playername = pshield.srcName
 					absorb.playerflags = pshield.srcFlags
-
-					absorb.dstGUID = dstGUID
 					absorb.dstName = dstName
-					absorb.dstFlags = dstFlags
 
 					absorb.spellid = pshield.spellid
 					absorb.school = pshield.school
@@ -684,10 +682,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 				absorb.playerid = s.srcGUID
 				absorb.playername = s.srcName
 				absorb.playerflags = s.srcFlags
-
-				absorb.dstGUID = dstGUID
 				absorb.dstName = dstName
-				absorb.dstFlags = dstFlags
 
 				absorb.spellid = s.spellid
 				absorb.school = s.school
@@ -708,10 +703,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 				absorb.playerid = s.srcGUID
 				absorb.playername = s.srcName
 				absorb.playerflags = s.srcFlags
-
-				absorb.dstGUID = dstGUID
 				absorb.dstName = dstName
-				absorb.dstFlags = dstFlags
 
 				absorb.spellid = s.spellid
 				absorb.school = s.school
@@ -724,8 +716,9 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	end
 
 	local function spell_damage(timestamp, eventtype, _, _, _, dstGUID, dstName, dstFlags, ...)
-		local spellschool, amount, absorbed
+		if not shields or not dstName then return end
 
+		local spellschool, amount, absorbed
 		if eventtype == "SWING_DAMAGE" then
 			amount, _, _, _, _, absorbed = ...
 		elseif eventtype == "ENVIRONMENTAL_DAMAGE" then
@@ -734,26 +727,30 @@ Skada:RegisterModule("Absorbs", function(L, P)
 			_, _, spellschool, amount, _, _, _, _, absorbed = ...
 		end
 
-		if absorbed and absorbed > 0 and dstName and shields and shields[dstName] then
+		dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
+		if absorbed and absorbed > 0 and shields[dstName] then
 			process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool or 0x01, amount, amount > absorbed)
 		end
 	end
 
 	local function spell_missed(timestamp, eventtype, _, _, _, dstGUID, dstName, dstFlags, ...)
-		local spellschool, misstype, absorbed
+		if not shields or not dstName then return end
 
+		local spellschool, misstype, absorbed
 		if eventtype == "SWING_MISSED" then
 			misstype, absorbed = ...
 		else
 			_, _, spellschool, misstype, absorbed = ...
 		end
 
-		if misstype == "ABSORB" and absorbed and absorbed > 0 and dstName and shields and shields[dstName] then
+		dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
+		if misstype == "ABSORB" and absorbed and absorbed > 0 and shields[dstName] then
 			process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool or 0x01, 0, false)
 		end
 	end
 
 	local function spell_heal(timestamp, _, _, srcName, _, _, dstName, _, _, _, _, amount)
+		if not shields or not dstName then return end
 		heals = heals or T.get("Skada_Heals") -- create table if missing
 		heals[dstName] = heals[dstName] or {}
 		heals[dstName][srcName] = heals[dstName][srcName] or {}
@@ -1087,7 +1084,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 			flags_src
 		)
 
-		local flags_dst = {dst_is_interesting_nopets = true}
+		local flags_dst = {dst_is_interesting = true}
 
 		Skada:RegisterForCL(
 			spell_damage,

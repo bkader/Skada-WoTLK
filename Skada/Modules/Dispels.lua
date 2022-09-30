@@ -65,15 +65,8 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 		-- invalid/ignored spell?
 		if (dispel.spellid and ignoredSpells[dispel.spellid]) or ignoredSpells[dispel.extraspellid] then return end
 
-		dispel.playerid = srcGUID
-		dispel.playername = srcName
-		dispel.playerflags = srcFlags
-
-		dispel.dstGUID = dstGUID
-		dispel.dstName = dstName
-		dispel.dstFlags = dstFlags
-		dispel.petname = nil
-		Skada:FixPets(dispel) -- assign pet dispels to owners
+		dispel.playerid, dispel.playername, dispel.playerflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+		dispel.dstName = Skada:FixMyPets(dstGUID, dstName, dstFlags)
 
 		Skada:DispatchSets(log_dispel)
 	end

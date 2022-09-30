@@ -245,14 +245,12 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 
 	local function aura_applied(_, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
 		if CCSpells[spellid] or ExtraCCSpells[spellid] then
-			cc_table.srcGUID, cc_table.srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
-			cc_table.srcFlags = srcFlags
-
-			cc_table.dstGUID = dstGUID
-			cc_table.dstName = dstName
-			cc_table.dstFlags = dstFlags
-
+			cc_table.srcGUID, cc_table.srcName, cc_table.srcFlags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+			cc_table.dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
 			cc_table.spellid = spellid
+
+			cc_table.dstGUID = nil
+			cc_table.dstFlags = nil
 			cc_table.extraspellid = nil
 
 			Skada:DispatchSets(log_ccdone)
@@ -508,17 +506,14 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 		end
 	end
 
-	local function aura_applied(_, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
+	local function aura_applied(_, _, _, srcName, _, dstGUID, dstName, dstFlags, spellid)
 		if CCSpells[spellid] or ExtraCCSpells[spellid] or RaidCCSpells[spellid] then
-			cc_table.srcGUID = srcGUID
+			cc_table.dstGUID, cc_table.dstName, cc_table.dstFlags = Skada:FixMyPets(dstGUID, dstName, dstFlags)
 			cc_table.srcName = srcName
-			cc_table.srcFlags = srcFlags
-
-			cc_table.dstGUID = dstGUID
-			cc_table.dstName = dstName
-			cc_table.dstFlags = dstFlags
-
 			cc_table.spellid = spellid
+
+			cc_table.srcGUID = nil
+			cc_table.srcFlags = nil
 			cc_table.extraspellid = nil
 
 			Skada:DispatchSets(log_cctaken)
@@ -763,20 +758,19 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		end
 	end
 
-	local function aura_broken(_, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function aura_broken(_, _, srcGUID, srcName, srcFlags, _, dstName, _, ...)
 		local spellid, spellname, _, extraspellid, extraspellname = ...
 		if not CCSpells[spellid] then return end
 
-		local petid, petname = srcGUID, srcName
-		local srcGUID_modified, srcName_modified = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+		local _srcGUID, _srcName, _srcFlags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 
-		cc_table.srcGUID = srcGUID_modified or srcGUID
-		cc_table.srcName = srcName_modified or srcName
-		cc_table.srcFlags = srcFlags
-
-		cc_table.dstGUID = dstGUID
+		cc_table.srcGUID = _srcGUID
+		cc_table.srcName = _srcName
+		cc_table.srcFlags = _srcFlags
 		cc_table.dstName = dstName
-		cc_table.dstFlags = dstFlags
+
+		cc_table.dstGUID = nil
+		cc_table.dstFlags = nil
 
 		cc_table.spellid = spellid
 		cc_table.extraspellid = extraspellid
@@ -784,7 +778,6 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		Skada:DispatchSets(log_ccbreak)
 
 		-- Optional announce
-		srcName = srcName_modified or srcName
 		if M.ccannounce and IsInRaid() and UnitInRaid(srcName) then
 			if Skada.insType == "pvp" then return end
 
@@ -799,8 +792,8 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 			end
 
 			-- Prettify pets.
-			if petid ~= srcGUID_modified then
-				srcName = petname .. " (" .. srcName .. ")"
+			if srcName ~= _srcName then
+				srcName = format("%s <%s>", srcName, _srcName)
 			end
 
 			-- Go ahead and announce it.

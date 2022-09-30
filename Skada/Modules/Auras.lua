@@ -720,18 +720,13 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 	local targetspellmod = targetmod:NewModule("Debuff spell list")
 	local mod_cols = nil
 
-	local function handle_debuff(_, event, srcGUID, srcName, srcFlags, _, dstName, _, spellid, _, school, auratype)
+	local function handle_debuff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, school, auratype)
 		if not spellid or ignored_debuffs[spellid] or auratype ~= "DEBUFF" then return end
 
-		aura.playerid = srcGUID
-		aura.playername = srcName
-		aura.playerflags = srcFlags
-		aura.dstName = dstName
-
+		aura.playerid, aura.playername, aura.playerflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+		aura.dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
 		aura.spellid = -spellid
 		aura.school = school
-
-		Skada:FixPets(aura)
 
 		if event == "SPELL_AURA_APPLIED" then
 			Skada:DispatchSets(log_auraapplied)
@@ -964,13 +959,13 @@ Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
 	local targetspellmod = targetmod:NewModule("Debuff spell list")
 	local mod_cols = nil
 
-	local function handle_debuff(_, event, srcGUID, srcName, srcFlags, _, dstName, _, spellid, _, school, auratype)
+	local function handle_debuff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, school, auratype)
 		if not spellid or ignored_debuffs[spellid] or auratype ~= "DEBUFF" then return end
 
 		aura.playerid = srcGUID
 		aura.playername = srcName
 		aura.playerflags = srcFlags
-		aura.dstName = dstName
+		aura.dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
 
 		aura.spellid = -spellid
 		aura.school = school
