@@ -65,10 +65,6 @@ Skada.userName = userName
 local _, userClass = UnitClass("player")
 Skada.userClass = userClass
 
--- reusable tables
-local new, del, clear = Skada.TablePool("kv")
-Skada.newTable, Skada.delTable, Skada.clearTable = new, del, clear
-
 -- available display types
 local displays = {}
 Skada.displays = displays -- make externally available
@@ -123,10 +119,20 @@ local BITMASK_OWNERS = COMBATLOG_OBJECT_AFFILIATION_MASK + COMBATLOG_OBJECT_REAC
 local BITMASK_ENEMY = COMBATLOG_OBJECT_REACTION_NEUTRAL + COMBATLOG_OBJECT_REACTION_HOSTILE
 
 -- to allow external usage
-private.BITMASK_GROUP = BITMASK_GROUP
-private.BITMASK_PETS = BITMASK_PETS
-private.BITMASK_OWNERS = BITMASK_OWNERS
-private.BITMASK_ENEMY = BITMASK_ENEMY
+Skada.BITMASK_GROUP = BITMASK_GROUP
+Skada.BITMASK_PETS = BITMASK_PETS
+Skada.BITMASK_OWNERS = BITMASK_OWNERS
+Skada.BITMASK_ENEMY = BITMASK_ENEMY
+
+-------------------------------------------------------------------------------
+-- table pool
+
+local new, del, clear
+do
+	local __pool = Skada.TablePool()
+	new, del, clear = __pool.new, __pool.del, __pool.clear
+	Skada.newTable, Skada.delTable, Skada.clearTable = new, del, clear
+end
 
 -------------------------------------------------------------------------------
 -- local functions.

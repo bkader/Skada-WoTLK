@@ -214,47 +214,49 @@ do
 	-- creates a new table system that can be used to reuse tables
 	-- it returns both "new" and "del" functions.
 	function lib.TablePool(mode)
-		local pool = {}
-		setmetatable(pool, {__mode = mode or "k"})
+		local pool = {tables = {}, new = true, del = true, clear = true}
+		setmetatable(pool.tables, {__mode = mode or "kv"})
 
 		-- attempts to retrieve a table from the cache
 		-- creates if if it doesn't exist.
-		local function new()
-			local t = next(pool) or {}
-			pool[t] = nil
-			return t
+		pool.new = function()
+			local t = next(pool.tables)
+			if t then pool.tables[t] = nil end
+			return t or {}
 		end
 
 		-- it will wipe the provided table then cache it
 		-- to be reusable later.
-		local function del(t, recursive)
-			if type(t) == "table" then
-				setmetatable(t, nil)
-				for k, v in pairs(t) do
-					if recursive and type(v) == "table" then
-						del(v)
-					end
-					t[k] = nil
+		pool.del = function(t, recursive)
+			if type(t) ~= "table" then return end
+
+			for k, v in pairs(t) do
+				if recursive and type(v) == "table" then
+					pool.del(v)
 				end
-				t[""] = true
-				t[""] = nil
-				pool[t] = true
+				t[k] = nil
 			end
+
+			t[""] = true
+			t[""] = nil
+			setmetatable(t, nil)
+			pool.tables[t] = true
+
 			return nil
 		end
 
 		-- optional function used to wipe a table that contains
 		-- other reusable tables.
-		local function clear(t, recursive)
+		pool.clear = function(t, recursive)
 			if type(t) == "table" then
 				for k, v in pairs(t) do
-					t[k] = del(v, recursive)
+					t[k] = pool.del(v, recursive)
 				end
 			end
 			return t
 		end
 
-		return new, del, clear
+		return pool
 	end
 end
 

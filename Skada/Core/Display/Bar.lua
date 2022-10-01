@@ -1134,7 +1134,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 		},
 		TITLEBTNS = {
 			[1] = format("\124T%s:22:88\124t", format(buttonsTexPath, 1, "_prev")),
-			[2] = format("\124T%s:22:88\124t", format(buttonsTexPath, 3, "_prev"))
+			[2] = format("\124T%s:22:88\124t", format(buttonsTexPath, 2, "_prev"))
 		}
 	}
 

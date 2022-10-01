@@ -17,7 +17,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 	-- CombatLogEvent Hook
 
 	do
-		local BITMASK_GROUP = private.BITMASK_GROUP or 0x00000007
+		local BITMASK_GROUP = Skada.BITMASK_GROUP or 0x00000007
 		local MAX_BOSS_FRAMES = MAX_BOSS_FRAMES or 5
 		local firsthit_fmt = {"%s (%s)", "%s (\124c%s%s\124r)", "\124c%s%s\124r", "\124c%s%s\124r (%s)"}
 		local firsthit, firsthittimer = nil, nil

@@ -2,7 +2,7 @@
 -- Specialized ( = enhanced) for Skada
 -- Note to self: don't forget to notify original author of changes
 -- in the unlikely event they end up being usable outside of Skada.
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90013
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90014
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 
@@ -2188,6 +2188,36 @@ end
 function barPrototype:SetMaxValue(val)
 	self.maxValue = val
 	self:SetValue(self.value)
+end
+
+-- barPrototype:AddOnUpdate
+do
+	-- handles OnUpdate
+	local function barOnUpdate(self, elapsed)
+		if not self.updateFuncs or next(self.updateFuncs) == nil then
+			self:SetScript("OnUpdate", nil)
+		else
+			for func in pairs(self.updateFuncs) do
+				func(self, elapsed)
+			end
+		end
+	end
+
+	-- adds OnUpdate function
+	function barPrototype:AddOnUpdate(func)
+		if type(func) == "function" then
+			self.updateFuncs = self.updateFuncs or {}
+			self.updateFuncs[func] = true
+			self:SetScript("OnUpdate", barOnUpdate)
+		end
+	end
+end
+
+-- removes OnUpdate function
+function barPrototype:RemoveOnUpdate(func)
+	if self.updateFuncs then
+		self.updateFuncs[func] = nil
+	end
 end
 
 --- Finally: upgrade our old embeds
