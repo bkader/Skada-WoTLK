@@ -10,16 +10,16 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 	local GetScreenWidth = GetScreenWidth
 	local GetScreenHeight = GetScreenHeight
 	local CloseDropDownMenus = CloseDropDownMenus
-	local SavePosition = Skada.SavePosition
-	local RestorePosition = Skada.RestorePosition
+	local SavePosition = private.SavePosition
+	local RestorePosition = private.RestorePosition
 
 	local mybars = {}
 	local barlibrary = {bars = {}, nextuuid = 1}
 	local leftmargin = 40
 	local ttactive = false
 
-	local WrapTextInColorCode = Skada.WrapTextInColorCode
-	local RGBPercToHex = Skada.RGBPercToHex
+	local WrapTextInColorCode = private.WrapTextInColorCode
+	local RGBPercToHex = private.RGBPercToHex
 	local classcolors = Skada.classcolors
 
 	local FONT_FLAGS = Skada.fontFlags

@@ -1,8 +1,9 @@
 local _, Skada = ...
+local private = Skada.private
 Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Parry-Haste")
 	local targetmod = mod:NewModule("Parry target list")
-	local pairs, format, pformat = pairs, string.format, Skada.pformat
+	local pairs, format, uformat = pairs, string.format, private.uformat
 	local mod_cols = nil
 
 	local parrybosses = {
@@ -66,7 +67,7 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's parry targets"], win.actorname)
+		win.title = uformat(L["%s's parry targets"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)

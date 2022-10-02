@@ -91,7 +91,7 @@ Skada.windowdefaults = {
 }
 
 local windefaultscopy = {}
-Skada.tCopy(windefaultscopy, Skada.windowdefaults)
+private.tCopy(windefaultscopy, Skada.windowdefaults)
 
 Skada.defaults = {
 	profile = {
@@ -1432,7 +1432,7 @@ do
 	local temp = {}
 	function serialize_profile()
 		wipe(temp)
-		Skada.tCopy(temp, Skada.db.profile, "modeclicks")
+		private.tCopy(temp, Skada.db.profile, "modeclicks")
 		temp.__name = Skada.db:GetCurrentProfile()
 		return private.serialize(true, fmt("%s profile", temp.__name), temp)
 	end
@@ -1526,7 +1526,7 @@ do
 		local old_reload_settings = private.reload_settings
 		private.reload_settings = function()
 			private.reload_settings = old_reload_settings
-			Skada.tCopy(Skada.db.profile, profile)
+			private.tCopy(Skada.db.profile, profile)
 			private.reload_settings()
 			ACR:NotifyChange(folder)
 		end

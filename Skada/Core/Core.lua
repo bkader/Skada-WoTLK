@@ -1,12 +1,5 @@
 local folder, ns = ...
-
-local _G, GetAddOnMetadata = _G, GetAddOnMetadata
-ns.version = GetAddOnMetadata(folder, "Version")
-ns.website = GetAddOnMetadata(folder, "X-Website")
-ns.discord = GetAddOnMetadata(folder, "X-Discord")
-ns.logo = [[Interface\Icons\Spell_Lightning_LightningBolt01]]
-ns.revisited = true -- Skada-Revisited flag
-ns.private = {}
+local private = ns.private
 
 local Skada = LibStub("AceAddon-3.0"):NewAddon(ns, folder, "AceEvent-3.0", "AceTimer-3.0", "AceBucket-3.0", "AceHook-3.0", "AceConsole-3.0", "AceComm-3.0", "LibCompat-1.0-Skada")
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
@@ -19,6 +12,7 @@ local DBI = LibStub("LibDBIcon-1.0", true)
 local Translit = LibStub("LibTranslit-1.0", true)
 
 -- cache frequently used globals
+local _G, GetAddOnMetadata = _G, GetAddOnMetadata
 local tsort, tinsert, tremove, tconcat, wipe = table.sort, table.insert, table.remove, table.concat, wipe
 local next, pairs, ipairs, unpack, type, setmetatable = next, pairs, ipairs, unpack, type, setmetatable
 local tonumber, tostring, strmatch, format, gsub, lower, find = tonumber, tostring, strmatch, string.format, string.gsub, string.lower, string.find
@@ -33,9 +27,8 @@ local IsInGroup, IsInRaid, IsInPvP = Skada.IsInGroup, Skada.IsInRaid, Skada.IsIn
 local GetNumGroupMembers, GetGroupTypeAndCount = Skada.GetNumGroupMembers, Skada.GetGroupTypeAndCount
 local GetUnitSpec, GetUnitRole = Skada.GetUnitSpec, Skada.GetUnitRole
 local UnitIterator, IsGroupDead = Skada.UnitIterator, Skada.IsGroupDead
-local pformat, EscapeStr, GetCreatureId = Skada.pformat, Skada.EscapeStr, Skada.GetCreatureId
+local uformat, EscapeStr, GetCreatureId = private.uformat, private.EscapeStr, Skada.GetCreatureId
 local T, P, G = Skada.Table, nil, nil
-local private = Skada.private
 local _
 
 local LDB = LibStub("LibDataBroker-1.1")
@@ -95,34 +88,12 @@ local was_in_party = nil
 -- secret flags
 local _bound_sets = nil
 
-local COMBATLOG_OBJECT_AFFILIATION_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE or 0x00000001
-local COMBATLOG_OBJECT_AFFILIATION_PARTY = COMBATLOG_OBJECT_AFFILIATION_PARTY or 0x00000002
-local COMBATLOG_OBJECT_AFFILIATION_RAID = COMBATLOG_OBJECT_AFFILIATION_RAID or 0x00000004
-local COMBATLOG_OBJECT_AFFILIATION_MASK = COMBATLOG_OBJECT_AFFILIATION_MASK or 0x0000000F
-
-local COMBATLOG_OBJECT_REACTION_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY or 0x00000010
-local COMBATLOG_OBJECT_REACTION_NEUTRAL = COMBATLOG_OBJECT_REACTION_NEUTRAL or 0x00000020
-local COMBATLOG_OBJECT_REACTION_HOSTILE = COMBATLOG_OBJECT_REACTION_HOSTILE or 0x00000040
-local COMBATLOG_OBJECT_REACTION_MASK = COMBATLOG_OBJECT_REACTION_MASK or 0x000000F0
-
-local COMBATLOG_OBJECT_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100
-local COMBATLOG_OBJECT_CONTROL_NPC = COMBATLOG_OBJECT_CONTROL_NPC or 0x00000200
-local COMBATLOG_OBJECT_CONTROL_MASK = COMBATLOG_OBJECT_CONTROL_MASK or 0x00000300
-
-local COMBATLOG_OBJECT_TYPE_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER or 0x00000400
-local COMBATLOG_OBJECT_TYPE_PET = COMBATLOG_OBJECT_TYPE_PET or 0x00001000
-local COMBATLOG_OBJECT_TYPE_GUARDIAN = COMBATLOG_OBJECT_TYPE_GUARDIAN or 0x00002000
-
-local BITMASK_GROUP = COMBATLOG_OBJECT_AFFILIATION_MINE + COMBATLOG_OBJECT_AFFILIATION_PARTY + COMBATLOG_OBJECT_AFFILIATION_RAID
-local BITMASK_PETS = COMBATLOG_OBJECT_TYPE_PET + COMBATLOG_OBJECT_TYPE_GUARDIAN
-local BITMASK_OWNERS = COMBATLOG_OBJECT_AFFILIATION_MASK + COMBATLOG_OBJECT_REACTION_MASK + COMBATLOG_OBJECT_CONTROL_MASK
-local BITMASK_ENEMY = COMBATLOG_OBJECT_REACTION_NEUTRAL + COMBATLOG_OBJECT_REACTION_HOSTILE
-
--- to allow external usage
-Skada.BITMASK_GROUP = BITMASK_GROUP
-Skada.BITMASK_PETS = BITMASK_PETS
-Skada.BITMASK_OWNERS = BITMASK_OWNERS
-Skada.BITMASK_ENEMY = BITMASK_ENEMY
+-- bitmasks
+local BITMASK_MINE = private.BITMASK_MINE
+local BITMASK_GROUP = private.BITMASK_GROUP
+local BITMASK_PETS = private.BITMASK_PETS
+local BITMASK_FRIENDLY = private.BITMASK_FRIENDLY
+local BITMASK_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER or 0x00000400
 
 -------------------------------------------------------------------------------
 -- table pool
@@ -415,7 +386,7 @@ function Skada:NewWindow(window)
 			local db = win and win.db
 			if db and IsShiftKeyDown() then
 				local w = Skada:CreateWindow(name, nil, db.display)
-				Skada.tCopy(w.db, db, "name", "sticked", "point", "snapped", "child", "childmode")
+				private.tCopy(w.db, db, "name", "sticked", "point", "snapped", "child", "childmode")
 				w.db.x, w.db.y = 0, 0
 				Skada:ApplySettings(name)
 			else
@@ -613,7 +584,7 @@ do
 							for i = 1, #windows do
 								local _db = windows[i] and windows[i].db
 								if _db and _db.name == copywindow and _db.display == db.display then
-									Skada.tCopy(templist, _db, "name", "sticked", "x", "y", "point", "snapped", "child", "childmode")
+									private.tCopy(templist, _db, "name", "sticked", "x", "y", "point", "snapped", "child", "childmode")
 									break
 								end
 							end
@@ -1254,7 +1225,7 @@ function Skada:CreateWindow(name, db, display)
 	local isnew = false
 	if not db then
 		db, isnew = {}, true
-		self.tCopy(db, self.windowdefaults)
+		private.tCopy(db, self.windowdefaults)
 
 		local wins = P.windows
 		wins[#wins + 1] = db
@@ -1794,7 +1765,7 @@ function Skada:FindPlayer(set, id, name, is_create)
 
 	-- search friendly enemies
 	local enemy = self:FindEnemy(set, name, id)
-	if enemy and enemy.flag and band(enemy.flag, COMBATLOG_OBJECT_REACTION_FRIENDLY) ~= 0 then
+	if enemy and enemy.flag and band(enemy.flag, BITMASK_FRIENDLY) ~= 0 then
 		set._playeridx[id] = enemy
 		return enemy
 	end
@@ -1862,7 +1833,7 @@ function Skada:GetPlayer(set, guid, name, flag)
 
 	self.changed = true
 	self.callbacks:Fire("Skada_GetPlayer", player, set)
-	return player
+	return self.playerPrototype:Bind(player, set)
 end
 
 -- finds an enemy unit
@@ -1920,7 +1891,7 @@ function Skada:GetEnemy(set, name, guid, flag, create)
 
 	self.changed = true
 	self.callbacks:Fire("Skada_GetEnemy", enemy, set)
-	return enemy
+	return self.enemyPrototype:Bind(enemy, set)
 end
 
 -- generic find a player or an enemey
@@ -1954,7 +1925,7 @@ function Skada:IsPlayer(guid, flag, name)
 	if name and UnitIsPlayer(name) then
 		return true
 	end
-	if tonumber(flag) and band(flag, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0 then
+	if tonumber(flag) and band(flag, BITMASK_PLAYER) ~= 0 then
 		return true
 	end
 	return false
@@ -2043,7 +2014,7 @@ do
 		end
 
 		-- flag is provided and it is mine.
-		if guid and flag and band(flag, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0 then
+		if guid and flag and band(flag, BITMASK_MINE) ~= 0 then
 			pets[guid] = {id = userGUID, name = userName}
 			return pets[guid]
 		end
@@ -2084,7 +2055,7 @@ do
 				action.playername = owner.name
 
 				if action.spellname and action.playername then
-					action.spellname = format("%s (%s)", action.spellname, action.playername)
+					action.spellname = format("%s (%s)", action.spellname, action.petname)
 				end
 			else
 				-- just append the creature id to the player
@@ -2170,7 +2141,7 @@ function Skada:IsPet(guid, flag)
 	end
 	if tonumber(flag) and (band(flag, BITMASK_PETS) ~= 0) then
 		-- we return 1 for a friendly pet (probably group's) or true.
-		return (band(flag, COMBATLOG_OBJECT_REACTION_FRIENDLY) ~= 0) and 1 or true
+		return (band(flag, BITMASK_FRIENDLY) ~= 0) and 1 or true
 	end
 	return false
 end
@@ -2323,7 +2294,7 @@ do
 
 	local function add_click_lines(mode, label, win, t, fmt)
 		if type(mode) == "function" then
-			t:AddLine(pformat(fmt, label))
+			t:AddLine(uformat(fmt, label))
 		elseif not private.total_noclick(win.selectedset, mode) then
 			t:AddLine(format(fmt, label or mode.localeName))
 		end
@@ -4128,9 +4099,9 @@ do
 				set.mobname = GetInstanceInfo()
 				set.gold = GetBattlefieldArenaFaction()
 				Skada:SendMessage("COMBAT_ARENA_START", set, set.mobname)
-			elseif src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+			elseif src_is_interesting and band(dstFlags, BITMASK_FRIENDLY) == 0 then
 				set.mobname = dstName
-			elseif dst_is_interesting and band(srcFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+			elseif dst_is_interesting and band(srcFlags, BITMASK_FRIENDLY) == 0 then
 				set.mobname = srcName
 			end
 		end
@@ -4138,7 +4109,7 @@ do
 		-- check for boss fights
 		if not set.gotboss and not spellcast_events[event] then
 			-- marking set as boss fights relies only on src_is_interesting
-			if src_is_interesting and band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
+			if src_is_interesting and band(dstFlags, BITMASK_FRIENDLY) == 0 then
 				if set.gotboss == nil then
 					if not _targets or not _targets[dstName] then
 						local isboss, bossid, bossname = Skada:IsEncounter(dstGUID, dstName)

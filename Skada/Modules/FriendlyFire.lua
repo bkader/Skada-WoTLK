@@ -1,4 +1,5 @@
 local _, Skada = ...
+local private = Skada.private
 Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	local mod = Skada:NewModule("Friendly Fire")
 	local targetmod = mod:NewModule("Damage target list")
@@ -9,7 +10,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	local get_friendly_fire_targets = nil
 
 	local pairs, format = pairs, string.format
-	local pformat, T = Skada.pformat, Skada.Table
+	local uformat, T = private.uformat, Skada.Table
 	local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
 	local mod_cols = nil
 
@@ -114,7 +115,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's targets"], win.actorname)
+		win.title = uformat(L["%s's targets"], win.actorname)
 
 		local actor = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = actor and actor.friendfire
@@ -170,11 +171,11 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 
 	function spelltargetmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = pformat(L["%s's <%s> damage"], win.actorname, label)
+		win.title = uformat(L["%s's <%s> damage"], win.actorname, label)
 	end
 
 	function spelltargetmod:Update(win, set)
-		win.title = pformat(L["%s's <%s> damage"], win.actorname, win.spellname)
+		win.title = uformat(L["%s's <%s> damage"], win.actorname, win.spellname)
 		if not win.spellid then return end
 
 		local actor = set and set:GetPlayer(win.actorid, win.actorname)

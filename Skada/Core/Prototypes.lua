@@ -31,10 +31,8 @@ Skada.enemyPrototype = enemyPrototype
 -------------------------------------------------------------------------------
 -- segment/set prototype & functions
 
-local BITMASK_FRIENDLY = Skada.BITMASK_FRIENDLY or COMBATLOG_OBJECT_REACTION_FRIENDLY or 0x00000010
-Skada.BITMASK_FRIENDLY = BITMASK_FRIENDLY
-
 local band, tremove = bit.band, tremove or table.remove
+local BITMASK_FRIENDLY = private.BITMASK_FRIENDLY or 0x00000010
 
 -- binds a set table to set prototype
 function setPrototype:Bind(obj)

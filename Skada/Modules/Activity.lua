@@ -1,9 +1,10 @@
 local _, Skada = ...
+local private = Skada.private
 Skada:RegisterModule("Activity", function(L, P, _, C)
 	local mod = Skada:NewModule("Activity")
 	local targetmod = mod:NewModule("Activity per Target")
 	local date, pairs, format = date, pairs, string.format
-	local pformat, new, clear = Skada.pformat, Skada.newTable, Skada.clearTable
+	local uformat, new, clear = private.uformat, Skada.newTable, Skada.clearTable
 	local get_activity_targets = nil
 	local mod_cols = nil
 
@@ -35,11 +36,11 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 
 	function targetmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = pformat(L["%s's activity"], label)
+		win.title = uformat(L["%s's activity"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's activity"], win.actorname)
+		win.title = uformat(L["%s's activity"], win.actorname)
 		if not win.actorname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)

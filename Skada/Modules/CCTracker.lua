@@ -1,7 +1,7 @@
 local _, Skada = ...
 local private = Skada.private
 
-local pairs, format, pformat = pairs, string.format, Skada.pformat
+local pairs, format, uformat = pairs, string.format, private.uformat
 local GetSpellLink = private.spell_link or GetSpellLink
 local new, clear = Skada.newTable, Skada.clearTable
 local cc_table = {} -- holds stuff from cleu
@@ -259,11 +259,11 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 
 	function playermod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = pformat(L["%s's control spells"], label)
+		win.title = uformat(L["%s's control spells"], label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = pformat(L["%s's control spells"], win.actorname)
+		win.title = uformat(L["%s's control spells"], win.actorname)
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.ccdone
@@ -287,11 +287,11 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 
 	function targetmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = pformat(L["%s's control targets"], label)
+		win.title = uformat(L["%s's control targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's control targets"], win.actorname)
+		win.title = uformat(L["%s's control targets"], win.actorname)
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.ccdone
@@ -315,11 +315,11 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 
 	function sourcemod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = pformat(L["%s's sources"], label)
+		win.title = uformat(L["%s's sources"], label)
 	end
 
 	function sourcemod:Update(win, set)
-		win.title = pformat(L["%s's sources"], win.spellname)
+		win.title = uformat(L["%s's sources"], win.spellname)
 		if not set or not win.spellid then return end
 
 		local total, sources = get_cc_done_sources(set, win.spellid)
@@ -522,11 +522,11 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 
 	function playermod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = pformat(L["%s's control spells"], label)
+		win.title = uformat(L["%s's control spells"], label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = pformat(L["%s's control spells"], win.actorname)
+		win.title = uformat(L["%s's control spells"], win.actorname)
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.cctaken
@@ -550,11 +550,11 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 
 	function sourcemod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = pformat(L["%s's control sources"], label)
+		win.title = uformat(L["%s's control sources"], label)
 	end
 
 	function sourcemod:Update(win, set)
-		win.title = pformat(L["%s's control sources"], win.actorname)
+		win.title = uformat(L["%s's control sources"], win.actorname)
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.cctaken
@@ -578,11 +578,11 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 
 	function targetmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = pformat(L["%s's targets"], label)
+		win.title = uformat(L["%s's targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's targets"], win.spellname)
+		win.title = uformat(L["%s's targets"], win.spellname)
 		if not set or not win.spellid then return end
 
 		local total, targets = get_cc_taken_targets(set, win.spellid)
@@ -807,11 +807,11 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 
 	function playermod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = pformat(L["%s's control spells"], label)
+		win.title = uformat(L["%s's control spells"], label)
 	end
 
 	function playermod:Update(win, set)
-		win.title = pformat(L["%s's control spells"], win.actorname)
+		win.title = uformat(L["%s's control spells"], win.actorname)
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.ccbreak
@@ -835,11 +835,11 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 
 	function targetmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = pformat(L["%s's control targets"], label)
+		win.title = uformat(L["%s's control targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's control targets"], win.actorname)
+		win.title = uformat(L["%s's control targets"], win.actorname)
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.ccbreak

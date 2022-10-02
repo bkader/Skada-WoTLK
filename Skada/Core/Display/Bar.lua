@@ -15,8 +15,8 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 	local IsAltKeyDown = IsAltKeyDown
 	local IsControlKeyDown = IsControlKeyDown
 	local IsModifierKeyDown = IsModifierKeyDown
-	local SavePosition = Skada.SavePosition
-	local RestorePosition = Skada.RestorePosition
+	local SavePosition = private.SavePosition
+	local RestorePosition = private.RestorePosition
 	local new, del = Skada.newTable, Skada.delTable
 	local _
 
@@ -2268,7 +2268,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 												for i = 1, #windows do
 													local win = windows[i]
 													if win and win.db and win.db.name == applywindow then
-														Skada.tCopy(win.db, thetheme, skipped)
+														private.tCopy(win.db, thetheme, skipped)
 														Skada:ApplySettings()
 														Skada:Print(L["Theme applied!"])
 													end
@@ -2325,7 +2325,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 											if win and win.db and win.db.name == savewindow then
 												G.themes = G.themes or {}
 												local theme = {}
-												Skada.tCopy(theme, win.db, skipped)
+												private.tCopy(theme, win.db, skipped)
 												theme.name = savetheme or win.db.name
 
 												-- duplicate names

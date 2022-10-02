@@ -1,4 +1,5 @@
 local _, Skada = ...
+local private = Skada.private
 Skada:RegisterModule("Threat", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Threat")
 
@@ -316,8 +317,8 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 		local CombatText_StandardScroll = CombatText_StandardScroll
 		local RaidNotice_AddMessage = RaidNotice_AddMessage
 		local UIErrorsFrame = UIErrorsFrame
-		local WrapTextInColorCode = Skada.WrapTextInColorCode
-		local RGBPercToHex = Skada.RGBPercToHex
+		local WrapTextInColorCode = private.WrapTextInColorCode
+		local RGBPercToHex = private.RGBPercToHex
 		local white = HIGHLIGHT_FONT_COLOR
 
 		local handlers = {

@@ -1,8 +1,9 @@
 local _, Skada = ...
+local private = Skada.private
 
 -- frequently used globals --
 local pairs, type, max, format = pairs, type, math.max, string.format
-local pformat, T = Skada.pformat, Skada.Table
+local uformat, T = private.uformat, Skada.Table
 local new, clear = Skada.newTable, Skada.clearTable
 local setPrototype, enemyPrototype = Skada.setPrototype, Skada.enemyPrototype
 
@@ -423,11 +424,11 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 
 	function spellsourcemod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = pformat(L["%s's <%s> sources"], win.targetname, label)
+		win.title = uformat(L["%s's <%s> sources"], win.targetname, label)
 	end
 
 	function spellsourcemod:Update(win, set)
-		win.title = pformat(L["%s's <%s> sources"], win.targetname, win.spellname)
+		win.title = uformat(L["%s's <%s> sources"], win.targetname, win.spellname)
 		if win.class then
 			win.title = format("%s (%s)", win.title, L[win.class])
 		end
@@ -464,7 +465,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	end
 
 	function sourcemod:Update(win, set)
-		win.title = pformat(L["%s's damage sources"], win.targetname)
+		win.title = uformat(L["%s's damage sources"], win.targetname)
 		if win.class then
 			win.title = format("%s (%s)", win.title, L[win.class])
 		end
@@ -536,7 +537,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = pformat(L["Damage taken by %s"], win.targetname)
+		win.title = uformat(L["Damage taken by %s"], win.targetname)
 
 		local actor = set and set:GetEnemy(win.targetname, win.targetid)
 		local total = actor and actor:GetDamageTaken()
@@ -566,7 +567,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	end
 
 	function usefulmod:Update(win, set)
-		win.title = pformat(L["Useful damage on %s"], win.targetname)
+		win.title = uformat(L["Useful damage on %s"], win.targetname)
 		if win.class then
 			win.title = format("%s (%s)", win.title, L[win.class])
 		end
@@ -1045,11 +1046,11 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 
 	function spelltargetmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = pformat(L["%s's <%s> targets"], win.targetname, label)
+		win.title = uformat(L["%s's <%s> targets"], win.targetname, label)
 	end
 
 	function spelltargetmod:Update(win, set)
-		win.title = pformat(L["%s's <%s> targets"], win.targetname, win.spellname)
+		win.title = uformat(L["%s's <%s> targets"], win.targetname, win.spellname)
 		if win.class then
 			win.title = format("%s (%s)", win.title, L[win.class])
 		end
@@ -1086,7 +1087,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's targets"], win.targetname)
+		win.title = uformat(L["%s's targets"], win.targetname)
 		if win.class then
 			win.title = format("%s (%s)", win.title, L[win.class])
 		end
@@ -1389,16 +1390,13 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		end
 	end
 
-	local function spell_heal(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_heal(_, eventtype, srcGUID, srcName, srcFlags, _, dstName, _, ...)
 		local spellid, _, spellschool, amount, overheal = ...
 		if spellid and not ignoredSpells[spellid] then
 			heal.enemyid = srcGUID
 			heal.enemyname = srcName
 			heal.enemyflags = srcFlags
-
-			heal.dstGUID = dstGUID
 			heal.dstName = dstName
-			heal.dstFlags = dstFlags
 
 			heal.spellid = spellid
 			heal.spellschool = spellschool
@@ -1414,7 +1412,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's healed targets"], win.targetname)
+		win.title = uformat(L["%s's healed targets"], win.targetname)
 
 		local actor = set and set:GetEnemy(win.targetname, win.targetid)
 		local total = actor and actor.heal

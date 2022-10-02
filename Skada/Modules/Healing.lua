@@ -1,8 +1,9 @@
 local _, Skada = ...
+local private = Skada.private
 
 -- cache frequently used globals
 local pairs, max = pairs, math.max
-local format, pformat = string.format, Skada.pformat
+local format, uformat = string.format, private.uformat
 local T = Skada.Table
 
 local function format_valuetext(d, columns, total, hps, metadata, subview)
@@ -29,8 +30,11 @@ Skada:RegisterModule("Healing", function(L, P)
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local del = Skada.delTable
+	local next, del = next, Skada.delTable
 	local mod_cols = nil
+
+	-- list of spells used to queue units.
+	local queued_spells = {[49005] = 61607}
 
 	local function log_spellcast(set, playerid, playername, playerflags, spellid, spellschool)
 		if not set or (set == Skada.total and not P.totalidc) then return end
@@ -147,6 +151,17 @@ Skada:RegisterModule("Healing", function(L, P)
 		_, heal.school, heal.amount, heal.overheal, _, heal.critical = ...
 
 		Skada:DispatchSets(log_heal)
+	end
+
+	local function spell_aura(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, _, _, spellid)
+		spellid = spellid and queued_spells[spellid]
+		if not spellid then
+			return
+		elseif eventtype == "SPELL_AURA_APPLIED" then
+			Skada:QueueUnit(spellid, srcGUID, srcName, srcFlags, dstGUID)
+		else
+			Skada:UnqueueUnit(spellid, dstGUID)
+		end
 	end
 
 	local function healing_tooltip(win, id, label, tooltip)
@@ -306,7 +321,7 @@ Skada:RegisterModule("Healing", function(L, P)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's healed targets"], win.actorname)
+		win.title = uformat(L["%s's healed targets"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor.heal
@@ -419,6 +434,13 @@ Skada:RegisterModule("Healing", function(L, P)
 			spell_heal,
 			"SPELL_HEAL",
 			"SPELL_PERIODIC_HEAL",
+			flags_src
+		)
+
+		Skada:RegisterForCL(
+			spell_aura,
+			"SPELL_AURA_APPLIED",
+			"SPELL_AURA_REMOVED",
 			flags_src
 		)
 
@@ -566,7 +588,7 @@ Skada:RegisterModule("Overhealing", function(L)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's overheal targets"], win.actorname)
+		win.title = uformat(L["%s's overheal targets"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -800,7 +822,7 @@ Skada:RegisterModule("Total Healing", function(L)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's healed targets"], win.actorname)
+		win.title = uformat(L["%s's healed targets"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetTotalHeal()
@@ -967,7 +989,7 @@ Skada:RegisterModule("Healing Taken", function(L, P)
 	end
 
 	function sourcemod:Update(win, set)
-		win.title = pformat(L["%s's heal sources"], win.actorname)
+		win.title = uformat(L["%s's heal sources"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid, true)
@@ -1075,11 +1097,11 @@ Skada:RegisterModule("Healing Taken", function(L, P)
 
 	function spellsourcemod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = pformat(L["%s's <%s> sources"], win.actorname, label)
+		win.title = uformat(L["%s's <%s> sources"], win.actorname, label)
 	end
 
 	function spellsourcemod:Update(win, set)
-		win.title = pformat(L["%s's <%s> sources"], win.actorname, win.spellname)
+		win.title = uformat(L["%s's <%s> sources"], win.actorname, win.spellname)
 		if not set or not win.actorname or not win.spellid then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid, true)

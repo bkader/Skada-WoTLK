@@ -10,7 +10,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 	local get_interrupted_targets = nil
 
 	-- cache frequently used globals
-	local pairs, format, pformat = pairs, string.format, Skada.pformat
+	local pairs, format, uformat = pairs, string.format, private.uformat
 	local new, clear = Skada.newTable, Skada.clearTable
 	local GetSpellLink = private.spell_link or GetSpellLink
 	local mod_cols = nil
@@ -92,7 +92,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = pformat(L["%s's interrupted spells"], win.actorname)
+		win.title = uformat(L["%s's interrupted spells"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -121,7 +121,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's interrupted targets"], win.actorname)
+		win.title = uformat(L["%s's interrupted targets"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -150,7 +150,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 	end
 
 	function playermod:Update(win, set)
-		win.title = pformat(L["%s's interrupt spells"], win.actorname)
+		win.title = uformat(L["%s's interrupt spells"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)

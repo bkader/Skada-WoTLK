@@ -9,10 +9,10 @@ Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 	local wipe, tsort, format = wipe, table.sort, string.format
 	local GameTooltip = GameTooltip
 	local GameTooltip_Hide = GameTooltip_Hide
-	local SavePosition = Skada.SavePosition
-	local RestorePosition = Skada.RestorePosition
-	local WrapTextInColorCode = Skada.WrapTextInColorCode
-	local RGBPercToHex = Skada.RGBPercToHex
+	local SavePosition = private.SavePosition
+	local RestorePosition = private.RestorePosition
+	local WrapTextInColorCode = private.WrapTextInColorCode
+	local RGBPercToHex = private.RGBPercToHex
 	local classcolors = Skada.classcolors
 
 	local FONT_FLAGS = Skada.fontFlags

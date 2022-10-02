@@ -2,6 +2,7 @@ local LibFail = LibStub("LibFail-1.0", true)
 if not LibFail then return end
 
 local folder, Skada = ...
+local private = Skada.private
 Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Fails")
 	local playermod = mod:NewModule("Player's failed events")
@@ -10,7 +11,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	local count_fails_by_spell = nil
 
 	local pairs, format, UnitGUID = pairs, string.format, UnitGUID
-	local pformat, IsInGroup = Skada.pformat, Skada.IsInGroup
+	local uformat, IsInGroup = private.uformat, Skada.IsInGroup
 	local tank_events, mod_cols
 
 	local function format_valuetext(d, columns, total, metadata, subview)
@@ -57,7 +58,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = pformat(L["%s's fails"], win.spellname)
+		win.title = uformat(L["%s's fails"], win.spellname)
 		if not win.spellid then return end
 
 		local total = set and count_fails_by_spell(set, win.spellid)
@@ -88,7 +89,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	end
 
 	function playermod:Update(win, set)
-		win.title = pformat(L["%s's fails"], win.actorname)
+		win.title = uformat(L["%s's fails"], win.actorname)
 
 		local actor = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = actor and actor.fail

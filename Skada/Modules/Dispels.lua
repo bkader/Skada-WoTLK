@@ -1,4 +1,5 @@
 local _, Skada = ...
+local private = Skada.private
 Skada:RegisterModule("Dispels", function(L, P, _, C)
 	local mod = Skada:NewModule("Dispels")
 	local spellmod = mod:NewModule("Dispelled spell list")
@@ -9,7 +10,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	local get_dispelled_targets = nil
 
 	-- cache frequently used globals
-	local pairs, format, pformat = pairs, string.format, Skada.pformat
+	local pairs, format, uformat = pairs, string.format, private.uformat
 	local new, clear = Skada.newTable, Skada.clearTable
 	local mod_cols = nil
 
@@ -62,13 +63,11 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 		dispel.spellid, _, _, dispel.extraspellid = ...
 		dispel.extraspellid = dispel.extraspellid or 6603
 
-		-- invalid/ignored spell?
-		if (dispel.spellid and ignoredSpells[dispel.spellid]) or ignoredSpells[dispel.extraspellid] then return end
-
-		dispel.playerid, dispel.playername, dispel.playerflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
-		dispel.dstName = Skada:FixMyPets(dstGUID, dstName, dstFlags)
-
-		Skada:DispatchSets(log_dispel)
+		if dispel.spellid and not ignoredSpells[dispel.spellid] and not ignoredSpells[dispel.extraspellid] then
+			dispel.playerid, dispel.playername, dispel.playerflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+			dispel.dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
+			Skada:DispatchSets(log_dispel)
+		end
 	end
 
 	function spellmod:Enter(win, id, label)
@@ -77,7 +76,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = pformat(L["%s's dispelled spells"], win.actorname)
+		win.title = uformat(L["%s's dispelled spells"], win.actorname)
 
 		local actor = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = actor and actor.dispel
@@ -105,7 +104,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's dispelled targets"], win.actorname)
+		win.title = uformat(L["%s's dispelled targets"], win.actorname)
 
 		local actor = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = actor and actor.dispel
@@ -133,7 +132,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	end
 
 	function playermod:Update(win, set)
-		win.title = pformat(L["%s's dispel spells"], win.actorname)
+		win.title = uformat(L["%s's dispel spells"], win.actorname)
 
 		local actor = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = actor and actor.dispel

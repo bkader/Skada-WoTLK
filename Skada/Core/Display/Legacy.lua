@@ -1,11 +1,12 @@
 local _, Skada = ...
+local private = Skada.private
 Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 
 	local mod = Skada:NewModule("Legacy Bar Display", "LegacyLibBars-1.0")
 
 	local pairs, type, format = pairs, type, string.format
 	local tinsert, tsort = table.insert, table.sort
-	local SavePosition, RestorePosition = Skada.SavePosition, Skada.RestorePosition
+	local SavePosition, RestorePosition = private.SavePosition, private.RestorePosition
 	local classcolors = Skada.classcolors
 
 	-- Display implementation.

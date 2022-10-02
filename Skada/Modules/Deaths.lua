@@ -8,7 +8,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local WATCH = nil -- true to watch those alive
 
 	local tinsert, tremove, tsort, tconcat = table.insert, table.remove, table.sort, table.concat
-	local strmatch, format, pformat = strmatch, string.format, Skada.pformat
+	local strmatch, format, uformat = strmatch, string.format, private.uformat
 	local max, floor, wipe = math.max, math.floor, wipe
 	local new, del = Skada.newTable, Skada.delTable
 	local UnitHealthInfo = Skada.UnitHealthInfo
@@ -113,7 +113,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		tinsert(deathlog.log, 1, log)
 
 		-- trim things and limit to deathlogevents (defaul: 14)
-		while #deathlog.log > (M.deathlogevents or 14) do
+		if #deathlog.log > (M.deathlogevents or 14) then
 			del(tremove(deathlog.log))
 		end
 	end
@@ -380,7 +380,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			win.datakey = id
 		end
 
-		win.title = pformat(L["%s's death log"], win.actorname)
+		win.title = uformat(L["%s's death log"], win.actorname)
 	end
 
 	do
@@ -389,7 +389,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		end
 
 		function deathlogmod:Update(win, set)
-			win.title = pformat(L["%s's death log"], win.actorname)
+			win.title = uformat(L["%s's death log"], win.actorname)
 
 			local player = win.datakey and Skada:FindPlayer(set, win.actorid, win.actorname)
 			local deathlog = player and player.deathlog and player.deathlog[win.datakey]
@@ -577,7 +577,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	end
 
 	function playermod:Update(win, set)
-		win.title = pformat(L["%s's deaths"], win.actorname)
+		win.title = uformat(L["%s's deaths"], win.actorname)
 		if not set or not win.actorid then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)

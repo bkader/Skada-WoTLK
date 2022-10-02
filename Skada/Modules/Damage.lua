@@ -2,7 +2,7 @@ local _, Skada = ...
 local private = Skada.private
 
 local pairs, max = pairs, math.max
-local format, pformat = string.format, Skada.pformat
+local format, uformat = string.format, private.uformat
 local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
 
 local function format_valuetext(d, columns, total, dps, metadata, subview)
@@ -31,7 +31,7 @@ Skada:RegisterModule("Damage", function(L, P)
 
 	local UnitGUID, GetTime = UnitGUID, GetTime
 	local GetSpellInfo = private.spell_info or GetSpellInfo
-	local PercentToRGB = Skada.PercentToRGB
+	local PercentToRGB = private.PercentToRGB
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
@@ -447,7 +447,7 @@ Skada:RegisterModule("Damage", function(L, P)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's targets"], win.actorname)
+		win.title = uformat(L["%s's targets"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		if not actor then return end
@@ -488,11 +488,11 @@ Skada:RegisterModule("Damage", function(L, P)
 
 	function spellmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = pformat("%s: %s", win.actorname, format(L["%s's damage breakdown"], label))
+		win.title = uformat("%s: %s", win.actorname, format(L["%s's damage breakdown"], label))
 	end
 
 	function spellmod:Update(win, set)
-		win.title = pformat("%s: %s", win.actorname, pformat(L["%s's damage breakdown"], win.spellname))
+		win.title = uformat("%s: %s", win.actorname, uformat(L["%s's damage breakdown"], win.spellname))
 		if not set or not win.spellname then return end
 
 		-- details only available for players
@@ -543,11 +543,11 @@ Skada:RegisterModule("Damage", function(L, P)
 
 	function sdetailmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = pformat(L["%s's <%s> damage"], win.actorname, label)
+		win.title = uformat(L["%s's <%s> damage"], win.actorname, label)
 	end
 
 	function sdetailmod:Update(win, set)
-		win.title = pformat(L["%s's <%s> damage"], win.actorname, win.spellname)
+		win.title = uformat(L["%s's <%s> damage"], win.actorname, win.spellname)
 		if not win.spellname then return end
 
 		-- only available for players
@@ -1001,7 +1001,7 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C)
 	end
 
 	function sourcemod:Update(win, set)
-		win.title = pformat(L["%s's sources"], win.spellname)
+		win.title = uformat(L["%s's sources"], win.spellname)
 		if not win.spellname then return end
 
 		local total = 0
@@ -1159,7 +1159,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's targets"], win.actorname)
+		win.title = uformat(L["%s's targets"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)
@@ -1194,7 +1194,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 	end
 
 	function detailmod:Update(win, set)
-		win.title = pformat(L["Useful damage on %s"], win.targetname)
+		win.title = uformat(L["Useful damage on %s"], win.targetname)
 		if not set or not win.targetname then return end
 
 		local actor, enemy = set:GetActor(win.targetname, win.targetid)
@@ -1331,7 +1331,7 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = pformat(L["%s's overkill spells"], win.actorname)
+		win.title = uformat(L["%s's overkill spells"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)
@@ -1365,7 +1365,7 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's overkill targets"], win.actorname)
+		win.title = uformat(L["%s's overkill targets"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)
@@ -1395,11 +1395,11 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 
 	function spelltargetmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = pformat(L["%s's overkill targets"], win.actorname)
+		win.title = uformat(L["%s's overkill targets"], win.actorname)
 	end
 
 	function spelltargetmod:Update(win, set)
-		win.title = pformat(L["%s's overkill targets"], win.actorname)
+		win.title = uformat(L["%s's overkill targets"], win.actorname)
 		if not win.spellname or not win.actorname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)
@@ -1428,11 +1428,11 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 
 	function targetspellmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = pformat(L["%s's overkill spells"], win.actorname)
+		win.title = uformat(L["%s's overkill spells"], win.actorname)
 	end
 
 	function targetspellmod:Update(win, set)
-		win.title = pformat(L["%s's overkill spells"], win.actorname)
+		win.title = uformat(L["%s's overkill spells"], win.actorname)
 		if not set or not win.targetname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)

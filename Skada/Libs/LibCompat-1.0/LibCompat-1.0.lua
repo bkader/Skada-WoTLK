@@ -4,26 +4,20 @@
 -- @author: Kader B (https://github.com/bkader/LibCompat-1.0)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0-Skada", 34
+local MAJOR, MINOR = "LibCompat-1.0-Skada", 35
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
 lib.embeds = lib.embeds or {}
 lib.EmptyFunc = Multibar_EmptyFunc
 
-local pairs, ipairs, select, type = pairs, ipairs, select, type
-local tconcat, wipe = table.concat, wipe
-local max, min = math.max, math.min
+local pairs, type, max = pairs, type, math.max
 local format, tonumber = format or string.format, tonumber
-local strbyte, strchar = strbyte or string.byte, strchar or string.char
-local setmetatable = setmetatable
-local error = error
+local setmetatable, wipe = setmetatable, wipe
 local _
 
 local Dispatch
-local IsInGroup, IsInRaid
 local GetUnitIdFromGUID
-local tLength
 
 -------------------------------------------------------------------------------
 
@@ -48,80 +42,8 @@ do
 		return true
 	end
 
-	local pformat -- Thank you DBM!
-	do
-		local function replace(cap1)
-			return cap1 == "%" and UNKNOWN
-		end
-
-		function pformat(fstr, ...)
-			local ok, str = pcall(format, fstr, ...)
-			return ok and str or fstr:gsub("(%%+)([^%%%s<]+)", replace):gsub("%%%%", "%%")
-		end
-	end
-
 	lib.Dispatch = Dispatch
 	lib.QuickDispatch = QuickDispatch
-	lib.pformat = pformat
-end
-
--------------------------------------------------------------------------------
-
-do
-	function tLength(tbl)
-		local len = 0
-		if tbl then
-			for _ in pairs(tbl) do
-				len = len + 1
-			end
-		end
-		return len
-	end
-
-	-- copies a table from another
-	local function tCopy(to, from, ...)
-		for k, v in pairs(from) do
-			local skip = false
-			if ... then
-				if type(...) == "table" then
-					for _, j in ipairs(...) do
-						if j == k then
-							skip = true
-							break
-						end
-					end
-				else
-					for i = 1, select("#", ...) do
-						if select(i, ...) == k then
-							skip = true
-							break
-						end
-					end
-				end
-			end
-			if not skip then
-				if type(v) == "table" then
-					to[k] = {}
-					tCopy(to[k], v, ...)
-				else
-					to[k] = v
-				end
-			end
-		end
-	end
-
-	-- replace the global function
-	_G.tContains = function(tbl, item)
-		for _, v in pairs(tbl) do
-			if item == v then
-				return true
-			end
-		end
-		return false
-	end
-
-	lib.tLength = tLength
-	lib.tCopy = tCopy
 end
 
 -------------------------------------------------------------------------------
@@ -268,11 +190,11 @@ do
 	local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
 	local UnitPower, UnitPowerMax = UnitPower, UnitPowerMax
 
-	function IsInRaid()
+	local function IsInRaid()
 		return (GetNumRaidMembers() > 0)
 	end
 
-	function IsInGroup()
+	local function IsInGroup()
 		return (GetNumRaidMembers() > 0 or GetNumPartyMembers() > 0)
 	end
 
@@ -494,147 +416,6 @@ do
 end
 
 -------------------------------------------------------------------------------
--- Color functions
-
-local RGBPercToHex
-do
-	function RGBPercToHex(r, g, b, prefix)
-		r = r <= 1 and r >= 0 and r or 0
-		g = g <= 1 and g >= 0 and g or 0
-		b = b <= 1 and b >= 0 and b or 0
-		return format(prefix and "ff%02x%02x%02x" or "%02x%02x%02x", r * 255, g * 255, b * 255)
-	end
-
-	local function PercentToRGB(perc, reverse, hex)
-		-- clamp first
-		perc = min(100, max(0, perc or 0))
-
-		-- start with full red
-		local r, g, b = 1, 0, 0
-
-		-- reversed?
-		if reverse then
-			r, g = 0, 1
-
-			if perc <= 50 then -- increment red channel
-				r = r + (perc / 50)
-			else -- set red to 1 and decrement green channel
-				r, g = 1, g - ((perc - 50) / 50)
-			end
-		elseif perc <= 50 then -- increment green channel
-			g = g + (perc / 50)
-		else -- set green to 1 and decrement red channel
-			r, g = r - ((perc - 50) / 50), 1
-		end
-
-		-- return hex? channels will be as of 2nd param.
-		if hex then
-			return RGBPercToHex(r, g, b, true), r, g, b
-		end
-
-		-- return only channels.
-		return r, g, b
-	end
-
-	lib.RGBPercToHex = RGBPercToHex
-	lib.PercentToRGB = PercentToRGB
-end
-
--------------------------------------------------------------------------------
--- Classes & Colors
-
-do
-	local classColorsTable, classCoordsTable
-
-	local function GetClassColorsTable()
-		-- fill class colors table.
-		if classColorsTable == nil then
-			classColorsTable = {}
-			for class, tbl in pairs(CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS) do
-				classColorsTable[class] = tbl
-				classColorsTable[class].colorStr = RGBPercToHex(tbl.r, tbl.g, tbl.b, true)
-				classColorsTable[class].className = LOCALIZED_CLASS_NAMES_MALE[class] or UNKNOWN
-			end
-		end
-
-		-- fill class coords table
-		if classCoordsTable == nil then
-			classCoordsTable = {}
-			for class, coords in pairs(CLASS_ICON_TCOORDS) do
-				classCoordsTable[class] = coords
-			end
-		end
-
-		return classColorsTable, classCoordsTable
-	end
-
-	lib.GetClassColorsTable = GetClassColorsTable
-end
-
--------------------------------------------------------------------------------
--- Hex Encode, Decode and String Escape
-
-do
-	local band, rshift, lshift = bit.band, bit.rshift, bit.lshift
-
-	local function HexEncode(str, title)
-		local hex = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"}
-		local t = (title and title ~= "") and {format("[=== %s ===]", title)} or {}
-		local j = 0
-		for i = 1, #str do
-			if j <= 0 then
-				t[#t + 1], j = "\n", 32
-			end
-			j = j - 1
-
-			local b = strbyte(str, i)
-			t[#t + 1] = hex[band(b, 15) + 1]
-			t[#t + 1] = hex[band(rshift(b, 4), 15) + 1]
-		end
-		if title and title ~= "" then
-			t[#t + 1] = "\n" .. t[1]
-		end
-		return tconcat(t)
-	end
-
-	local function HexDecode(str)
-		str = str:gsub("%[.-%]", ""):gsub("[^0123456789ABCDEF]", "")
-		if (#str == 0) or (#str % 2 ~= 0) then
-			return false, "Invalid Hex string"
-		end
-
-		local t, bl, bh = {}
-		local i = 1
-		repeat
-			bl = strbyte(str, i)
-			bl = bl >= 65 and bl - 55 or bl - 48
-			i = i + 1
-			bh = strbyte(str, i)
-			bh = bh >= 65 and bh - 55 or bh - 48
-			i = i + 1
-			t[#t + 1] = strchar(lshift(bh, 4) + bl)
-		until i >= #str
-		return tconcat(t)
-	end
-
-	-- we a fake frame/fontstring to escape the string
-	local escapeFrame = CreateFrame("Frame")
-	escapeFrame.fs = escapeFrame:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
-	escapeFrame:Hide()
-
-	local function EscapeStr(str)
-		escapeFrame.fs:SetText(str)
-		str = escapeFrame.fs:GetText()
-		escapeFrame.fs:SetText("")
-		return str
-	end
-
-	lib.HexEncode = HexEncode
-	lib.HexDecode = HexDecode
-	lib.EscapeStr = EscapeStr
-end
-
--------------------------------------------------------------------------------
 -- Specs and Roles
 
 do
@@ -674,8 +455,8 @@ do
 	end
 
 	-- cached specs
-	local cachedSpecs = setmetatable({}, {__index = function(self, id)
-		local unit = id and (GetUnitIdFromGUID(id, "group") or GetUnitIdFromGUID(id, "player"))
+	local cachedSpecs = setmetatable({}, {__index = function(self, guid)
+		local unit = guid and (GetUnitIdFromGUID(guid, "group") or GetUnitIdFromGUID(guid, "player"))
 		if not unit then return end
 
 		local _, class = UnitClass(unit)
@@ -703,13 +484,13 @@ do
 		end
 
 		local spec = specsTable[class][index]
-		self[id] = spec
+		self[guid] = spec
 		return spec
 	end})
 
 	-- cached roles
-	local cachedRoles = setmetatable({}, {__index = function(self, id)
-		local unit = id and (GetUnitIdFromGUID(id, "group") or GetUnitIdFromGUID(id, "player"))
+	local cachedRoles = setmetatable({}, {__index = function(self, guid)
+		local unit = guid and (GetUnitIdFromGUID(guid, "group") or GetUnitIdFromGUID(guid, "player"))
 		if not unit then return end
 
 		local role = nil
@@ -732,7 +513,7 @@ do
 			end
 		end
 
-		self[id] = role
+		self[guid] = role
 		return role
 	end})
 
@@ -787,62 +568,12 @@ do
 end
 
 -------------------------------------------------------------------------------
--- Colors
-
-do
-	local function WrapTextInColorCode(text, colorHexString)
-		return format("\124c%s%s\124r", colorHexString, text)
-	end
-
-	lib.WrapTextInColorCode = WrapTextInColorCode
-end
-
--------------------------------------------------------------------------------
--- Save/Restore frame positions to/from db
-
-do
-	local floor = math.floor
-	local GetScreenWidth, GetScreenHeight = GetScreenWidth, GetScreenHeight
-
-	local function SavePosition(self, db)
-		if self and self.GetCenter and db then
-			local x, y = self:GetCenter()
-			local scale = self:GetEffectiveScale()
-			local uscale = UIParent:GetScale()
-
-			db.x = ((x * scale) - (GetScreenWidth() * uscale) / 2) / uscale
-			db.y = ((y * scale) - (GetScreenHeight() * uscale) / 2) / uscale
-			db.scale = floor(self:GetScale() * 100) / 100
-		end
-	end
-
-	local function RestorePosition(self, db)
-		if self and self.SetPoint and db then
-			local scale = self:GetEffectiveScale()
-			local uscale = UIParent:GetScale()
-			local x = (db.x or 0) * uscale / scale
-			local y = (db.y or 0) * uscale / scale
-
-			self:ClearAllPoints()
-			self:SetPoint("CENTER", UIParent, "CENTER", x, y)
-			self:SetScale(db.scale or 1)
-		end
-	end
-
-	lib.SavePosition = SavePosition
-	lib.RestorePosition = RestorePosition
-end
-
--------------------------------------------------------------------------------
 
 local mixins = {
 	"EmptyFunc",
 	"Dispatch",
 	"QuickDispatch",
-	"pformat",
 	-- table util
-	"tLength",
-	"tCopy",
 	"Table",
 	"TablePool",
 	-- roster util
@@ -862,19 +593,7 @@ local mixins = {
 	"UnitHealthInfo",
 	"UnitPowerInfo",
 	"GetUnitSpec",
-	"GetUnitRole",
-	-- color conversion
-	"RGBPercToHex",
-	"PercentToRGB",
-	-- misc util
-	"HexEncode",
-	"HexDecode",
-	"EscapeStr",
-	"GetClassColorsTable",
-	"WrapTextInColorCode",
-	-- frame position
-	"SavePosition",
-	"RestorePosition"
+	"GetUnitRole"
 }
 
 function lib:Embed(target)
