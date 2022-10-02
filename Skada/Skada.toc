@@ -16,7 +16,7 @@
 ## DefaultState: enabled
 ## Author: Kader (|cff808080bkader#5341|r)
 ## Version: 1.8.82
-## X-Date: 2022-10-01 @ 09:58 PM |cff808080UTC|r
+## X-Date: 2022-10-02 @ 05:49 AM |cff808080UTC|r
 ## X-Credits: Zarnivoop
 ## X-Category: Combat
 ## X-License: MIT/X
@@ -26,4 +26,7 @@
 ## X-Localizations: meatgaga (CN), Ícar & Septimun (ES), Kader (FR), NGL (RU)
 ## X-Thanks: Abel, Iqui, Jeb, Nomadra, Shoggoth, Havi & Ganrod, WotLK Community
 
-Skada.xml
+Libs\Load.xml
+Locales\Load.xml
+Core\Load.xml
+Modules\Load.xml
