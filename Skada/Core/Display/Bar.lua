@@ -17,7 +17,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 	local IsModifierKeyDown = IsModifierKeyDown
 	local SavePosition = private.SavePosition
 	local RestorePosition = private.RestorePosition
-	local new, del = Skada.newTable, Skada.delTable
+	local new, del = private.newTable, private.delTable
 	local _
 
 	-- references
@@ -1892,7 +1892,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			end
 		}
 
-		local x, y = floor(GetScreenWidth() / 40) * 20, floor(GetScreenHeight() / 40) * 20
+		local x, y = floor(GetScreenWidth() * 0.025) * 20, floor(GetScreenHeight() * 0.025) * 20
 		options.windowoptions.args.position.args.x = {
 			type = "range",
 			name = L["X Offset"],

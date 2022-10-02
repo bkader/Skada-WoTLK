@@ -8,7 +8,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 	local UnitClass, GetTime = UnitClass, GetTime
 	local GetSpellInfo = private.spell_info or GetSpellInfo
 	local GetSpellLink = private.spell_link or GetSpellLink
-	local new, del = Skada.newTable, Skada.delTable
+	local new, del = private.newTable, private.delTable
 	local classcolors = Skada.classcolors
 
 	local channel_events, fofrostmourne

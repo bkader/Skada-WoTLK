@@ -10,7 +10,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 	local pairs, tconcat, format, strsub = pairs, table.concat, string.format, string.sub
 	local GetItemInfo, UnitIsDeadOrGhost, GroupIterator = GetItemInfo, UnitIsDeadOrGhost, Skada.GroupIterator
 	local UnitGUID, UnitName, UnitClass, UnitBuff = UnitGUID, UnitName, UnitClass, UnitBuff
-	local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
+	local new, del, clear = private.newTable, private.delTable, private.clearTable
 	local T, uformat = Skada.Table, private.uformat
 	local potion_ids = {}
 	local mod_cols = nil

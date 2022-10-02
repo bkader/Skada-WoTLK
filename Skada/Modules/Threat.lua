@@ -8,7 +8,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 	local UnitDetailedThreatSituation, InCombatLockdown = UnitDetailedThreatSituation, InCombatLockdown
 	local GroupIterator, GetUnitRole, GetUnitSpec = Skada.GroupIterator, Skada.GetUnitRole, Skada.GetUnitSpec
 	local PlaySoundFile = PlaySoundFile
-	local new, del = Skada.newTable, Skada.delTable
+	local new, del = private.newTable, private.delTable
 	local T = Skada.Table
 	local mod_cols = nil
 
@@ -139,9 +139,9 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 			if value == nil then
 				return "0"
 			elseif value >= 100000 then
-				return format("%2.1fk", value / 100000)
+				return format("%2.1fk", value * 1e-05)
 			else
-				return format("%d", value / 100)
+				return format("%d", value * 0.01)
 			end
 		end
 

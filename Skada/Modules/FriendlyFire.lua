@@ -11,7 +11,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 
 	local pairs, format = pairs, string.format
 	local uformat, T = private.uformat, Skada.Table
-	local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
+	local new, del, clear = private.newTable, private.delTable, private.clearTable
 	local mod_cols = nil
 
 	local function format_valuetext(d, columns, total, dps, metadata, subview)

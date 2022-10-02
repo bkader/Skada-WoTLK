@@ -11,7 +11,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 
 	-- cache frequently used globals
 	local pairs, format, uformat = pairs, string.format, private.uformat
-	local new, clear = Skada.newTable, Skada.clearTable
+	local new, clear = private.newTable, private.clearTable
 	local GetSpellLink = private.spell_link or GetSpellLink
 	local mod_cols = nil
 

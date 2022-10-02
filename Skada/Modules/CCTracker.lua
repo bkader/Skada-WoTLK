@@ -3,7 +3,7 @@ local private = Skada.private
 
 local pairs, format, uformat = pairs, string.format, private.uformat
 local GetSpellLink = private.spell_link or GetSpellLink
-local new, clear = Skada.newTable, Skada.clearTable
+local new, clear = private.newTable, private.clearTable
 local cc_table = {} -- holds stuff from cleu
 
 local CCSpells = {
@@ -508,7 +508,10 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 
 	local function aura_applied(_, _, _, srcName, _, dstGUID, dstName, dstFlags, spellid)
 		if CCSpells[spellid] or ExtraCCSpells[spellid] or RaidCCSpells[spellid] then
-			cc_table.dstGUID, cc_table.dstName, cc_table.dstFlags = Skada:FixMyPets(dstGUID, dstName, dstFlags)
+			cc_table.dstGUID = dstGUID
+			cc_table.dstName = dstName
+			cc_table.dstFlags = dstFlags
+
 			cc_table.srcName = srcName
 			cc_table.spellid = spellid
 
@@ -662,7 +665,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 			aura_applied,
 			"SPELL_AURA_APPLIED",
 			"SPELL_AURA_REFRESH",
-			{dst_is_interesting = true}
+			{dst_is_interesting_nopets = true}
 		)
 
 		Skada:AddMode(self, L["Crowd Control"])

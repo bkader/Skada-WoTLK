@@ -16,7 +16,7 @@ local UIDropDownMenu_AddButton = UIDropDownMenu_AddButton
 local CloseDropDownMenus = CloseDropDownMenus
 local ToggleDropDownMenu = ToggleDropDownMenu
 local IsShiftKeyDown = IsShiftKeyDown
-local del = Skada.delTable
+local del = private.delTable
 
 local info = nil
 local iconName = "\124T%s:19:19:0:-1:32:32:2:30:2:30\124t %s"
@@ -30,8 +30,8 @@ local function get_dropdown_point()
 	x = x / UIParent:GetEffectiveScale()
 	y = y / UIParent:GetEffectiveScale()
 
-	local point = (x > GetScreenWidth() / 2) and "RIGHT" or "LEFT"
-	point = ((y > GetScreenHeight() / 2) and "TOP" or "BOTTOM") .. point
+	local point = (x > GetScreenWidth() * 0.5) and "RIGHT" or "LEFT"
+	point = ((y > GetScreenHeight() * 0.5) and "TOP" or "BOTTOM") .. point
 	return point, x, y
 end
 

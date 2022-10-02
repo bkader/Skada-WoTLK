@@ -3,7 +3,7 @@ local private = Skada.private
 
 -- cache frequently used globals
 local pairs, format, uformat = pairs, string.format, private.uformat
-local min, floor, new = math.min, math.floor, Skada.newTable
+local min, floor, new = math.min, math.floor, private.newTable
 local GetSpellInfo = private.spell_info or GetSpellInfo
 
 -- ============== --
@@ -20,11 +20,9 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local GetTime, band, tsort, max = GetTime, bit.band, table.sort, math.max
-	local GroupIterator, GetCurrentMapAreaID = Skada.GroupIterator,GetCurrentMapAreaID
-	local UnitGUID, UnitName, UnitClass, UnitExists, UnitBuff = UnitGUID, UnitName, UnitClass, UnitExists, UnitBuff
-	local UnitIsDeadOrGhost, UnitHealthInfo = UnitIsDeadOrGhost, Skada.UnitHealthInfo
+	local GetCurrentMapAreaID, UnitBuff, UnitHealthInfo = GetCurrentMapAreaID, UnitBuff, Skada.UnitHealthInfo
 	local IsActiveBattlefieldArena, UnitInBattleground = IsActiveBattlefieldArena, UnitInBattleground
-	local T, del = Skada.Table, Skada.delTable
+	local T, del = Skada.Table, private.delTable
 	local mod_cols = nil
 
 	-- INCOMPLETE
@@ -34,7 +32,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	local absorbspells = {
 		[48707] = {dur = 5}, -- Anti-Magic Shell (rank 1)
 		[51052] = {dur = 10}, -- Anti-Magic Zone( (rank 1)
-		[50150] = {dur = 86400, school = 0x01}, -- Will of the Necropolis
+		[52286] = {dur = 86400, school = 0x01}, -- Will of the Necropolis
 		[49497] = {dur = 86400, school = 0x01}, -- Spell Deflection
 		[62606] = {dur = 10, avg = 1600, cap = 2500}, -- Savage Defense
 		[11426] = {dur = 60}, -- Ice Barrier (rank 1)
@@ -240,7 +238,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	local passiveShields = {
 		[31230] = true, -- Cheat Death
 		[49497] = true, -- Spell Deflection
-		[50150] = true, -- Will of the Necropolis
+		[52286] = true, -- Will of the Necropolis
 		[66233] = true, -- Ardent Defender
 	}
 
@@ -425,10 +423,10 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 
 		-- Will of the Necropolis
-		if a_spellid == 50150 then
+		if a_spellid == 52286 then
 			return false
 		end
-		if b_spellid == 50150 then
+		if b_spellid == 52286 then
 			return true
 		end
 
@@ -623,7 +621,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 			local s = shieldspopped[i]
 			if s and s.full and shieldamounts and shieldamounts[s.srcName] and shieldamounts[s.srcName][s.spellid] then
 				s.amount = shieldamounts[s.srcName][s.spellid]
-			elseif s and s.spellid == 50150 and s.points then -- Will of the Necropolis
+			elseif s and s.spellid == 52286 and s.points then -- Will of the Necropolis
 				local hppercent = UnitHealthInfo(dstName, dstGUID)
 				s.amount = (hppercent and hppercent <= 36) and floor((damage + absorbed) * 0.05 * s.points) or 0
 			elseif s and s.spellid == 49497 and s.points then -- Spell Deflection
@@ -983,6 +981,10 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	end
 
 	do
+		local UnitGUID, UnitName, UnitClass = UnitGUID, UnitName, UnitClass
+		local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
+		local LGT = LibStub("LibGroupTalents-1.0")
+
 		-- some effects aren't shields but rather special effects, such us talents.
 		-- in order to track them, we simply add them as fake shields before all.
 		-- I don't know the whole list of effects but, if you want to add yours
@@ -990,7 +992,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		-- see: http://wotlk.cavernoftime.com/spell=<spellid>
 		local _passive = {
 			DEATHKNIGHT = {
-				[50150] = true, -- Will of the Necropolis
+				[52286] = true, -- Will of the Necropolis
 				[49497] = true -- Spell Deflection
 			},
 			PALADIN = {
@@ -1001,30 +1003,29 @@ Skada:RegisterModule("Absorbs", function(L, P)
 			}
 		}
 
-		local LGT = LibStub("LibGroupTalents-1.0")
 		local function check_unit_shields(unit, owner, timestamp, curtime)
-			if not UnitIsDeadOrGhost(unit) then
-				local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
-				for i = 1, 40 do
-					local _, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitBuff(unit, i)
-					if not spellid then
-						break -- nothing found
-					elseif absorbspells[spellid] and unitCaster then
-						handle_shield(timestamp + max(0, expires - curtime), nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
-					end
+			if UnitIsDeadOrGhost(unit) then return end
+
+			local dstGUID, dstName = UnitGUID(unit), UnitName(unit)
+			for i = 1, 40 do
+				local _, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitBuff(unit, i)
+				if not spellid then
+					break -- nothing found
+				elseif absorbspells[spellid] and unitCaster and not ignoredSpells[spellid] then
+					handle_shield(timestamp + max(0, expires - curtime), nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
 				end
+			end
 
-				-- passive shields (not for pets)
-				if owner then return end
+			-- passive shields (not for pets)
+			if owner then return end
 
-				local _, class = UnitClass(unit)
-				if not _passive[class] then return end
+			local _, class = UnitClass(unit)
+			if not _passive[class] then return end
 
-				for spellid, _ in pairs(_passive[class]) do
-					local points = LGT:GUIDHasTalent(dstGUID, GetSpellInfo(spellid), LGT:GetActiveTalentGroup(unit))
-					if points then
-						handle_shield(timestamp - 60, nil, dstGUID, dstGUID, nil, dstGUID, dstName, nil, spellid, nil, nil, nil, points)
-					end
+			for spellid, _ in pairs(_passive[class]) do
+				local points = LGT:GUIDHasTalent(dstGUID, GetSpellInfo(spellid), LGT:GetActiveTalentGroup(unit))
+				if points then
+					handle_shield(timestamp - 60, nil, dstGUID, dstGUID, nil, dstGUID, dstName, nil, spellid, nil, nil, nil, points)
 				end
 			end
 		end
@@ -1644,7 +1645,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 	local mod = Skada:NewModule("Healing Done By Spell")
 	local spellmod = mod:NewModule("Healing spell sources")
 	local spellschools = Skada.spellschools
-	local clear = Skada.clearTable
+	local clear = private.clearTable
 	local get_absorb_heal_spells = nil
 	local mod_cols = nil
 

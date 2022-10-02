@@ -7,10 +7,10 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local WATCH = nil -- true to watch those alive
 
-	local tinsert, tremove, tsort, tconcat = table.insert, table.remove, table.sort, table.concat
+	local tinsert, tremove, tsort, tconcat = table.insert, private.tremove, table.sort, table.concat
 	local strmatch, format, uformat = strmatch, string.format, private.uformat
 	local max, floor, wipe = math.max, math.floor, wipe
-	local new, del = Skada.newTable, Skada.delTable
+	local new, del = private.newTable, private.delTable
 	local UnitHealthInfo = Skada.UnitHealthInfo
 	local UnitIsFeignDeath = UnitIsFeignDeath
 	local GetSpellInfo = private.spell_info or GetSpellInfo
@@ -113,7 +113,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		tinsert(deathlog.log, 1, log)
 
 		-- trim things and limit to deathlogevents (defaul: 14)
-		if #deathlog.log > (M.deathlogevents or 14) then
+		if #deathlog.log > M.deathlogevents then
 			del(tremove(deathlog.log))
 		end
 	end
@@ -1089,20 +1089,16 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		end
 
 		function mod:OnInitialize()
-			if M.deathlogevents == nil then
-				M.deathlogevents = 14
-			end
-			if M.deathlogthreshold == nil then
-				M.deathlogthreshold = 1000 -- default
-			end
-			if M.deathchannel == nil then
-				M.deathchannel = "AUTO"
-			end
+			M.deathlogevents = M.deathlogevents or 14
+			M.deathlogthreshold = M.deathlogthreshold or 1000
+			M.deathchannel = M.deathchannel or "AUTO"
 
 			Skada.options.args.modules.args.deathlog = get_options()
 
 			-- add colors to tweaks
-			Skada.options.args.tweaks.args.advanced.args.colors.args.deathlog = {
+			local color_opt = Skada.options.args.tweaks.args.advanced.args.colors
+			if not color_opt then return end
+			color_opt.args.deathlog = {
 				type = "group",
 				name = L["Death log"],
 				order = 50,

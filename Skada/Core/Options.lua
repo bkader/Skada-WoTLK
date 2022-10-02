@@ -7,7 +7,7 @@ local ACR = LibStub("AceConfigRegistry-3.0")
 
 local min, max = math.min, math.max
 local next, fmt = next, format or string.format
-local del = Skada.delTable
+local del = private.delTable
 local collectgarbage = collectgarbage
 
 -- references: windows, modes
@@ -969,7 +969,7 @@ do
 	local GetScreenWidth = GetScreenWidth
 	local screenWidth = nil
 	function get_screen_width()
-		screenWidth = screenWidth or floor(GetScreenWidth() / 20) * 20
+		screenWidth = screenWidth or floor(GetScreenWidth() * 0.05) * 20
 		return screenWidth
 	end
 end

@@ -11,7 +11,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 
 	-- cache frequently used globals
 	local pairs, format, uformat = pairs, string.format, private.uformat
-	local new, clear = Skada.newTable, Skada.clearTable
+	local new, clear = private.newTable, private.clearTable
 	local mod_cols = nil
 
 	local function format_valuetext(d, columns, total, metadata, subview)

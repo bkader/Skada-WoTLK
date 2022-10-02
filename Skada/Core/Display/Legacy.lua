@@ -4,8 +4,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 
 	local mod = Skada:NewModule("Legacy Bar Display", "LegacyLibBars-1.0")
 
-	local pairs, type, format = pairs, type, string.format
-	local tinsert, tsort = table.insert, table.sort
+	local pairs, type, format, tsort = pairs, type, string.format, table.sort
 	local SavePosition, RestorePosition = private.SavePosition, private.RestorePosition
 	local classcolors = Skada.classcolors
 
@@ -75,7 +74,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 	local function showmode(win, id, label, mode)
 		-- Add current mode to window traversal history.
 		if win.selectedmode then
-			tinsert(win.history, win.selectedmode)
+			win.history[#win.history + 1] = win.selectedmode
 		end
 
 		if type(mode) == "function" then
@@ -469,7 +468,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 
 		-- Header config button
 		g.optbutton:ClearAllPoints()
-		g.optbutton:SetPoint("TOPRIGHT", g.button, "TOPRIGHT", -5, 0 - (math.max(g.button:GetHeight() - g.optbutton:GetHeight(), 1) / 2))
+		g.optbutton:SetPoint("TOPRIGHT", g.button, "TOPRIGHT", -5, 0 - (math.max(g.button:GetHeight() - g.optbutton:GetHeight(), 1) * 0.5))
 
 		-- Menu button - default on.
 		if p.title.menubutton == nil or p.title.menubutton then

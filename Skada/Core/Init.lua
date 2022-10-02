@@ -13,7 +13,8 @@ local private = ns.private or {}
 ns.private = private
 
 -- cache frequently used globals
-local pairs, ipairs, select = pairs, ipairs, select
+local pairs, ipairs = pairs, ipairs
+local select, next = select, next
 local band, tonumber, type = bit.band, tonumber, type
 local format, strmatch, strsub, gsub = string.format, string.match, string.sub, string.gsub
 local setmetatable = setmetatable
@@ -65,7 +66,7 @@ function private.register_classes()
 	classcolors.MONSTER = {r = 0.549, g = 0.388, b = 0.404, colorStr = "ff8c6367"}
 	classcolors.PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"}
 	classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
-	classcolors.UNKNOWN = {r = 0.2, g = 0.2, b = 0.2, colorStr = "ff333333"}
+	classcolors.UNKNOWN = {r = 0.353, g = 0.067, b = 0.027, colorStr = "ff5a1107"}
 
 	local P = ns.db.profile
 
@@ -451,14 +452,14 @@ function private.PercentToRGB(perc, reverse, hex)
 		r, g = 0, 1
 
 		if perc <= 50 then -- increment red channel
-			r = r + (perc / 50)
+			r = r + (perc * 0.02)
 		else -- set red to 1 and decrement green channel
-			r, g = 1, g - ((perc - 50) / 50)
+			r, g = 1, g - ((perc - 50) * 0.02)
 		end
 	elseif perc <= 50 then -- increment green channel
-		g = g + (perc / 50)
+		g = g + (perc * 0.02)
 	else -- set green to 1 and decrement red channel
-		r, g = r - ((perc - 50) / 50), 1
+		r, g = r - ((perc - 50) * 0.02), 1
 	end
 
 	-- return hex? channels will be as of 2nd param.
@@ -472,6 +473,22 @@ end
 
 -------------------------------------------------------------------------------
 -- table functions
+
+-- alternative to table.remove
+local error = error
+local tremove = table.remove
+function private.tremove(t, index)
+	if index then
+		return tremove(t, index)
+	elseif type(t) ~= "table" then
+		error("bad argument #1 to 'tremove' (table expected, got number)")
+	end
+
+	local n = #t
+	local val = t[n]
+	t[n] = nil
+	return val
+end
 
 -- returns the length of the given table
 function private.tLength(t)
@@ -514,6 +531,58 @@ function private.tCopy(to, from, ...)
 			end
 		end
 	end
+end
+
+-- creates a table pool
+function private.table_pool()
+	local pool = {tables = {}, new = true, del = true, clear = true}
+	setmetatable(pool.tables, {__mode = "k"})
+
+	-- reuses or creates a table
+	pool.new = function()
+		local t = next(pool.tables)
+		if t then pool.tables[t] = nil end
+		return t or {}
+	end
+
+	-- deletes a table to be reused later
+	pool.del = function(t, deep)
+		if type(t) ~= "table" then return end
+
+		for k, v in pairs(t) do
+			if deep and type(v) == "table" then
+				pool.del(v)
+			end
+			t[k] = nil
+		end
+
+		t[""] = true
+		t[""] = nil
+		setmetatable(t, nil)
+		pool.tables[t] = true
+
+		return nil
+	end
+
+	-- clears/wipes the given table
+	pool.clear = function(t)
+		if type(t) == "table" then
+			for k, v in pairs(t) do
+				t[k] = pool.del(v, true)
+			end
+		end
+		return t
+	end
+
+	return pool
+end
+
+-- create addon's default table pool
+do
+	local _pool = private.table_pool()
+	private.newTable = _pool.new
+	private.delTable = _pool.del
+	private.clearTable = _pool.clear
 end
 
 -------------------------------------------------------------------------------
@@ -563,9 +632,9 @@ do
 			local scale = f:GetEffectiveScale()
 			local uscale = UIParent:GetScale()
 
-			db.x = ((x * scale) - (GetScreenWidth() * uscale) / 2) / uscale
-			db.y = ((y * scale) - (GetScreenHeight() * uscale) / 2) / uscale
-			db.scale = floor(f:GetScale() * 100) / 100
+			db.x = ((x * scale) - (GetScreenWidth() * uscale) * 0.5) / uscale
+			db.y = ((y * scale) - (GetScreenHeight() * uscale) * 0.5) / uscale
+			db.scale = floor(f:GetScale() * 100) * 0.01
 		end
 	end
 

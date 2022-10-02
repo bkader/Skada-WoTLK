@@ -29,10 +29,11 @@ end
 do
 	local creatureToFight = Skada.creatureToFight or Skada.dummyTable
 	local creatureToBoss = Skada.creatureToBoss or Skada.dummyTable
+	local GetCreatureId = Skada.GetCreatureId
 
 	-- checks if the provided guid is a boss
 	function Skada:IsBoss(guid, strict)
-		local id = self.GetCreatureId(guid)
+		local id = GetCreatureId(guid)
 		if creatureToBoss[id] and creatureToBoss[id] ~= true then
 			if strict then
 				return false
@@ -293,7 +294,7 @@ end
 -- will be used.
 
 do
-	local new, del, tLength = Skada.newTable, Skada.delTable, private.tLength
+	local new, del, tLength = private.newTable, private.delTable, private.tLength
 	local queued_units = nil
 
 	function Skada:QueueUnit(spellid, srcGUID, srcName, srcFlags, dstGUID)
@@ -445,7 +446,7 @@ do
 		frame:SetHeight(110)
 
 		frame:SetScript("OnShow", function(self)
-			self.size:SetText(format(L["Data Size: \124cffffffff%.1f\124rKB"], self.total / 1000))
+			self.size:SetText(format(L["Data Size: \124cffffffff%.1f\124rKB"], self.total * 0.001))
 		end)
 
 		frame:SetScript("OnHide", function(self)
@@ -470,7 +471,7 @@ do
 		end
 
 		if sent < total then
-			local p = sent * 100 / total
+			local p = sent * (100 / total)
 			progress.text:SetText(format(progress.fmt, p))
 			progress.bar:SetValue(p)
 		else
@@ -616,6 +617,289 @@ do
 			elseif diff == 2 then
 				local comp_diff = GetDungeonDifficulty()
 				return comp_diff == 3 and "mc" or "5h" -- mythic or heroic 5man
+			end
+		end
+	end
+end
+
+-------------------------------------------------------------------------------
+-- Active / Effetive time functions
+
+-- returns the selected set time.
+function Skada:GetSetTime(set, active)
+	if not set or not set.time then
+		return 0
+	end
+
+	local settime = active and set.activetime or set.time
+	return (settime >= 1) and settime or max(1, time() - set.starttime)
+end
+
+-- returns the actor's active/effective time
+function Skada:GetActiveTime(set, actor, active)
+	active = active or (set.type == "pvp") or (set.type == "arena") -- force active for pvp/arena
+
+	-- use settime to clamp
+	local settime = self:GetSetTime(set, active)
+
+	-- active: actor's time.
+	if (self.db.profile.timemesure ~= 2 or active) and actor.time and actor.time > 0 then
+		return max(1, min(actor.time, settime))
+	end
+
+	-- effective: combat time.
+	return settime
+end
+
+-- updates the actor's active time
+function Skada:AddActiveTime(set, actor, target, override)
+	if not actor or not actor.last then return end
+
+	local curtime = set.last_time or GetTime()
+	local delta = curtime - actor.last
+	actor.last = curtime
+
+	if override and override > 0 and override <= delta then
+		delta = override
+	elseif delta > 3.5 then
+		delta = 3.5
+	end
+
+	local adding = floor(100 * delta + 0.5) * 0.01
+	actor.time = (actor.time or 0) + adding
+	set.activetime = (set.activetime or 0) + adding
+
+	-- to save up memory, we only record the rest to the current set.
+	if (set == self.total and not self.db.profile.totalidc) or not target then return end
+
+	actor.timespent = actor.timespent or {}
+	actor.timespent[target] = (actor.timespent[target] or 0) + adding
+end
+
+-------------------------------------------------------------------------------
+-- popup dialogs
+
+-- skada reset dialog
+do
+	local t = {timeout = 30, whileDead = 0}
+	local f = function() Skada:Reset(IsShiftKeyDown()) end
+
+	function Skada:ShowPopup(win, popup)
+		if Skada.testMode then return end
+
+		if Skada.db.profile.skippopup and not popup then
+			Skada:Reset(IsShiftKeyDown())
+			return
+		end
+
+		private.confirm_dialog(L["Do you want to reset Skada?\nHold SHIFT to reset all data."], f, t)
+	end
+end
+
+-- new window creation dialog
+function Skada:NewWindow(window)
+	if not StaticPopupDialogs["SkadaCreateWindowDialog"] then
+		local function create_window(name, win)
+			name = name and name:trim()
+			if not name or name == "" then return end
+
+			local db = win and win.db
+			if db and IsShiftKeyDown() then
+				local w = Skada:CreateWindow(name, nil, db.display)
+				private.tCopy(w.db, db, "name", "sticked", "point", "snapped", "child", "childmode")
+				w.db.x, w.db.y = 0, 0
+				Skada:ApplySettings(name)
+			else
+				Skada:CreateWindow(name)
+			end
+		end
+
+		StaticPopupDialogs["SkadaCreateWindowDialog"] = {
+			text = L["Enter the name for the new window."],
+			button1 = L["Create"],
+			button2 = L["Cancel"],
+			timeout = 30,
+			whileDead = 0,
+			hideOnEscape = 1,
+			hasEditBox = 1,
+			OnShow = function(self)
+				self.button1:Disable()
+				self.editBox:SetText("")
+				self.editBox:SetFocus()
+			end,
+			OnHide = function(self)
+				self.editBox:SetText("")
+				self.editBox:ClearFocus()
+			end,
+			EditBoxOnEscapePressed = function(self)
+				self:GetParent():Hide()
+			end,
+			EditBoxOnTextChanged = function(self)
+				local name = self:GetText()
+				if not name or name:trim() == "" then
+					self:GetParent().button1:Disable()
+				else
+					self:GetParent().button1:Enable()
+				end
+			end,
+			EditBoxOnEnterPressed = function(self, win)
+				create_window(self:GetText(), win)
+				self:GetParent():Hide()
+			end,
+			OnAccept = function(self, win)
+				create_window(self.editBox:GetText(), win)
+				self:Hide()
+			end
+		}
+	end
+	StaticPopup_Show("SkadaCreateWindowDialog", nil, nil, window)
+end
+
+-- reinstall the addon
+do
+	local ReloadUI = ReloadUI
+	local t = {timeout = 15, whileDead = 0}
+	local f = function()
+		if Skada.db.profiles then
+			wipe(Skada.db.profiles)
+		end
+		if Skada.db.profileKeys then
+			wipe(Skada.db.profileKeys)
+		end
+
+		Skada.db.global.reinstall = true
+		ReloadUI()
+	end
+
+	function Skada:Reinstall()
+		private.confirm_dialog(L["Are you sure you want to reinstall Skada?"], f, t)
+	end
+end
+
+-------------------------------------------------------------------------------
+-- bossmods callbacks
+
+local find, lower = string.find, string.lower
+
+function Skada:BigWigs(_, _, event, message)
+	if event == "bosskill" and message and self.current and self.current.gotboss then
+		if find(lower(message), lower(self.current.mobname)) ~= nil and not self.current.success then
+			self.current.success = true
+
+			if self.tempsets then -- phases
+				for i = 1, #self.tempsets do
+					local set = self.tempsets[i]
+					if set and not set.success then
+						set.success = true
+					end
+				end
+			end
+
+			self:Debug("COMBAT_BOSS_DEFEATED: BigWigs")
+			self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
+		end
+	end
+end
+
+function Skada:DBM(_, mod, wipe)
+	if not wipe and mod and mod.combatInfo then
+		local set = self.current or self.last -- just in case DBM was late.
+		if set and not set.success and mod.combatInfo.name and (not set.mobname or find(lower(set.mobname), lower(mod.combatInfo.name)) ~= nil) then
+			set.success = true
+			set.gotboss = set.gotboss or mod.combatInfo.creatureId or true
+			set.mobname = (not set.mobname or set.mobname == L["Unknown"]) and mod.combatInfo.name or set.mobname
+
+			if self.tempsets then -- phases
+				for i = 1, #self.tempsets do
+					local s = self.tempsets[i]
+					if s and not s.success then
+						s.success = true
+						s.gotboss = s.gotboss or mod.combatInfo.creatureId or true
+						s.mobname = (not s.mobname or s.mobname == L["Unknown"]) and mod.combatInfo.name or s.mobname
+					end
+				end
+			end
+
+			self:Debug("COMBAT_BOSS_DEFEATED: DBM")
+			self:SendMessage("COMBAT_BOSS_DEFEATED", set)
+		end
+	end
+end
+
+-------------------------------------------------------------------------------
+-- memory check and garbage collection
+
+function Skada:CheckMemory(clean)
+	self:CleanGarbage() -- collect garbage first.
+
+	if self.db.profile.memorycheck then
+		UpdateAddOnMemoryUsage()
+		local memory = GetAddOnMemoryUsage(folder)
+		if memory > (self.maxmeme * 1024) then
+			self:Notify(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."], L["Memory Check"], nil, "emergency")
+		end
+	end
+end
+
+-- this can be used to clear combat log and garbage.
+-- note that "collect" isn't used because it blocks all execution for too long.
+local InCombatLockdown = InCombatLockdown
+function Skada:CleanGarbage()
+	if self.db.profile.memorycheck and not InCombatLockdown() then
+		collectgarbage("collect")
+		self:Debug("CleanGarbage")
+	end
+end
+
+-------------------------------------------------------------------------------
+
+do
+	local function clear_indexes(set, mt)
+		if set then
+			set._playeridx = nil
+			set._enemyidx = nil
+
+			-- should clear metatables?
+			if not mt then return end
+
+			local actors = set.players -- players
+			if actors then
+				for i = 1, #actors do
+					local actor = actors[i]
+					if actor and actor.super then
+						actor.super = nil
+						setmetatable(actor, nil)
+					end
+				end
+			end
+
+			actors = set.enemies -- enemies
+			if actors then
+				for i = 1, #actors do
+					local actor = actors[i]
+					if actor and actor.super then
+						actor.super = nil
+						setmetatable(actor, nil)
+					end
+				end
+			end
+		end
+	end
+
+	function Skada:ClearAllIndexes(mt)
+		clear_indexes(Skada.current, mt)
+		clear_indexes(Skada.total, mt)
+
+		local sets = Skada.char.sets
+		if sets then
+			for i = 1, #sets do
+				clear_indexes(sets[i], mt)
+			end
+		end
+
+		if Skada.tempsets then
+			for i = 1, #Skada.tempsets do
+				clear_indexes(Skada.tempsets[i], mt)
 			end
 		end
 	end

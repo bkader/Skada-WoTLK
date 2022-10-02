@@ -132,59 +132,6 @@ end
 -------------------------------------------------------------------------------
 
 do
-	-- Table Pool for recycling tables
-	-- creates a new table system that can be used to reuse tables
-	-- it returns both "new" and "del" functions.
-	function lib.TablePool(mode)
-		local pool = {tables = {}, new = true, del = true, clear = true}
-		setmetatable(pool.tables, {__mode = mode or "kv"})
-
-		-- attempts to retrieve a table from the cache
-		-- creates if if it doesn't exist.
-		pool.new = function()
-			local t = next(pool.tables)
-			if t then pool.tables[t] = nil end
-			return t or {}
-		end
-
-		-- it will wipe the provided table then cache it
-		-- to be reusable later.
-		pool.del = function(t, recursive)
-			if type(t) ~= "table" then return end
-
-			for k, v in pairs(t) do
-				if recursive and type(v) == "table" then
-					pool.del(v)
-				end
-				t[k] = nil
-			end
-
-			t[""] = true
-			t[""] = nil
-			setmetatable(t, nil)
-			pool.tables[t] = true
-
-			return nil
-		end
-
-		-- optional function used to wipe a table that contains
-		-- other reusable tables.
-		pool.clear = function(t, recursive)
-			if type(t) == "table" then
-				for k, v in pairs(t) do
-					t[k] = pool.del(v, recursive)
-				end
-			end
-			return t
-		end
-
-		return pool
-	end
-end
-
--------------------------------------------------------------------------------
-
-do
 	local GetNumRaidMembers, GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
 	local UnitExists, UnitAffectingCombat, UnitIsDeadOrGhost = UnitExists, UnitAffectingCombat, UnitIsDeadOrGhost
 	local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
@@ -575,7 +522,6 @@ local mixins = {
 	"QuickDispatch",
 	-- table util
 	"Table",
-	"TablePool",
 	-- roster util
 	"IsInRaid",
 	"IsInGroup",

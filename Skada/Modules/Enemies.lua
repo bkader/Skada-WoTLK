@@ -4,7 +4,7 @@ local private = Skada.private
 -- frequently used globals --
 local pairs, type, max, format = pairs, type, math.max, string.format
 local uformat, T = private.uformat, Skada.Table
-local new, clear = Skada.newTable, Skada.clearTable
+local new, clear = private.newTable, private.clearTable
 local setPrototype, enemyPrototype = Skada.setPrototype, Skada.enemyPrototype
 
 ---------------------------------------------------------------------------
@@ -25,7 +25,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	local UnitHealthInfo, UnitPowerInfo = Skada.UnitHealthInfo, Skada.UnitPowerInfo
 	local UnitExists, UnitGUID = UnitExists, UnitGUID
 	local UnitHealthMax, UnitPowerMax = UnitHealthMax, UnitPowerMax
-	local tContains, del = tContains, Skada.delTable
+	local tContains, del = tContains, private.delTable
 
 	-- this table holds the units to which the damage done is
 	-- collected into a new fake unit.
@@ -1572,7 +1572,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		local hps, amount = 0, self:GetEnemyHeal(absorb)
 
 		if amount > 0 then
-			hps = amount / max(1, self:GetTime(active))
+			hps = amount / self:GetTime(active)
 		end
 
 		return hps, amount

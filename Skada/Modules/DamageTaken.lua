@@ -4,7 +4,7 @@ local private = Skada.private
 -- cache frequently used globals
 local pairs, min, max = pairs, math.min, math.max
 local format, uformat, T = string.format, private.uformat, Skada.Table
-local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
+local new, del, clear = private.newTable, private.delTable, private.clearTable
 
 local function format_valuetext(d, columns, total, dtps, metadata, subview)
 	d.valuetext = Skada:FormatValueCols(

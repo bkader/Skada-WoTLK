@@ -30,7 +30,7 @@ Skada:RegisterModule("Healing", function(L, P)
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local next, del = next, Skada.delTable
+	local next, del = next, private.delTable
 	local mod_cols = nil
 
 	-- list of spells used to queue units.
@@ -939,7 +939,7 @@ Skada:RegisterModule("Healing Taken", function(L, P)
 	local sourcespellmod = sourcemod:NewModule("Healing spell list")
 	local spellmod = mod:NewModule("Healing spell list")
 	local spellsourcemod = sourcemod:NewModule("Healing source list")
-	local new, clear = Skada.newTable, Skada.clearTable
+	local new, clear = private.newTable, private.clearTable
 	local C = Skada.cacheTable2
 	local mod_cols = nil
 

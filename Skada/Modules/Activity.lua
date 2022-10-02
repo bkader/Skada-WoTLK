@@ -4,7 +4,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 	local mod = Skada:NewModule("Activity")
 	local targetmod = mod:NewModule("Activity per Target")
 	local date, pairs, format = date, pairs, string.format
-	local uformat, new, clear = private.uformat, Skada.newTable, Skada.clearTable
+	local uformat, new, clear = private.uformat, private.newTable, private.clearTable
 	local get_activity_targets = nil
 	local mod_cols = nil
 

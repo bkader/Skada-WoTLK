@@ -179,8 +179,8 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 			frame:ClearAllPoints()
 			frame:SetPoint("BOTTOM", -1)
 			frame:SetPoint("LEFT", -1)
-			if p.background.color.a == 51 / 255 then
-				p.background.color = {r = 255, b = 250 / 255, g = 250 / 255, a = 1}
+			if p.background.color.a == 0.2 then
+				p.background.color = {r = 1, b = 0.98, g = 0.98, a = 1}
 			end
 		end
 
@@ -418,7 +418,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 
 		tsort(mybars, sortFunc)
 
-		local yoffset = (win.db.height - win.db.barfontsize) / 2
+		local yoffset = (win.db.height - win.db.barfontsize) * 0.5
 		local left = win.frame.barstartx + 40
 
 		for key, bar in pairs(mybars) do
@@ -509,7 +509,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 			bar.label:SetTextColor(self:GetFontColor(p))
 			bar.bg:EnableMouse(not p.clickthrough)
 		end
-		f.menu:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 6, p.height / 2 - 8)
+		f.menu:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 6, p.height * 0.5 - 8)
 
 		f:SetClampedToScreen(p.clamped)
 		f:EnableMouse(not p.clickthrough)

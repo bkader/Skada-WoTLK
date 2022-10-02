@@ -8,7 +8,7 @@ local time, min, floor = time, math.min, math.floor
 local _
 
 -- common functions and locals
-local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
+local new, del, clear = private.newTable, private.delTable, private.clearTable
 local ignored_buffs = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 local ignored_debuffs = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 local aura, spellschools
@@ -546,7 +546,6 @@ Skada:RegisterModule("Buffs", function(_, P, _, C)
 
 	local function handle_buff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, school, auratype)
 		if spellid and not ignored_buffs[spellid] and (auratype == "BUFF" or special_buffs[spellid]) then
-
 			aura.playerid = dstGUID
 			aura.playername = dstName
 			aura.playerflags = dstFlags
@@ -871,7 +870,6 @@ Skada:RegisterModule("Enemy Buffs", function(_, P, _, C)
 
 	local function handle_buff(_, event, _, _, _, dstGUID, dstName, dstFlags, spellid, _, school, auratype)
 		if spellid and not ignored_buffs[spellid] and (auratype == "BUFF" or special_buffs[spellid]) then
-
 			aura.playerid = dstGUID
 			aura.playername = dstName
 			aura.playerflags = dstFlags
@@ -1041,7 +1039,7 @@ Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
 			"SPELL_AURA_REFRESH",
 			"SPELL_AURA_REMOVED",
 			"SPELL_AURA_APPLIED_DOSE",
-			{src_is_not_interesting = true, dst_is_interesting_nopets = true}
+			{src_is_not_interesting = true, dst_is_interesting = true}
 		)
 
 		Skada:AddMode(self, L["Enemies"])

@@ -3,7 +3,7 @@ local private = Skada.private
 
 local pairs, max = pairs, math.max
 local format, uformat = string.format, private.uformat
-local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
+local new, del, clear = private.newTable, private.delTable, private.clearTable
 
 local function format_valuetext(d, columns, total, dps, metadata, subview)
 	d.valuetext = Skada:FormatValueCols(
@@ -216,96 +216,96 @@ Skada:RegisterModule("Damage", function(L, P)
 
 	local extraATT = nil
 	local function spell_damage(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, _, ...)
-		if srcGUID ~= dstGUID then
-			-- handle extra attacks
-			if eventtype == "SPELL_EXTRA_ATTACKS" then
-				local spellid, spellname, _, amount = ...
+		if srcGUID == dstGUID then return end
 
-				if spellid and spellname and not ignoredSpells[spellid] then
-					extraATT = extraATT or T.get("Damage_ExtraAttacks")
-					if not extraATT[srcName] then
-						extraATT[srcName] = new()
-						extraATT[srcName].proc = spellname
-						extraATT[srcName].count = amount
-						extraATT[srcName].time = Skada.current.last_time or GetTime()
-					end
+		-- handle extra attacks
+		if eventtype == "SPELL_EXTRA_ATTACKS" then
+			local spellid, spellname, _, amount = ...
+
+			if spellid and spellname and not ignoredSpells[spellid] then
+				extraATT = extraATT or T.get("Damage_ExtraAttacks")
+				if not extraATT[srcName] then
+					extraATT[srcName] = new()
+					extraATT[srcName].proc = spellname
+					extraATT[srcName].count = amount
+					extraATT[srcName].time = Skada.current.last_time or GetTime()
 				end
-
-				return
 			end
 
-			if eventtype == "SWING_DAMAGE" then
-				dmg.spellid, dmg.spellname, dmg.school = 6603, L["Melee"], 0x01
-				dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing = ...
+			return
+		end
 
-				-- an extra attack?
-				if extraATT and extraATT[srcName] then
-					local curtime = Skada.current.last_time or GetTime()
-					if not extraATT[srcName].spellname then -- queue spell
-						extraATT[srcName].spellname = dmg.spellname
-					elseif dmg.spellname == L["Melee"] and extraATT[srcName].time < (curtime - 5) then -- expired proc
+		if eventtype == "SWING_DAMAGE" then
+			dmg.spellid, dmg.spellname, dmg.school = 6603, L["Melee"], 0x01
+			dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing = ...
+
+			-- an extra attack?
+			if extraATT and extraATT[srcName] then
+				local curtime = Skada.current.last_time or GetTime()
+				if not extraATT[srcName].spellname then -- queue spell
+					extraATT[srcName].spellname = dmg.spellname
+				elseif dmg.spellname == L["Melee"] and extraATT[srcName].time < (curtime - 5) then -- expired proc
+					extraATT[srcName] = del(extraATT[srcName])
+				elseif dmg.spellname == L["Melee"] then -- valid damage contribution
+					dmg.spellname = extraATT[srcName].spellname .. " (" .. extraATT[srcName].proc .. ")"
+					extraATT[srcName].count = max(0, extraATT[srcName].count - 1)
+					if extraATT[srcName].count == 0 then -- no procs left
 						extraATT[srcName] = del(extraATT[srcName])
-					elseif dmg.spellname == L["Melee"] then -- valid damage contribution
-						dmg.spellname = extraATT[srcName].spellname .. " (" .. extraATT[srcName].proc .. ")"
-						extraATT[srcName].count = max(0, extraATT[srcName].count - 1)
-						if extraATT[srcName].count == 0 then -- no procs left
-							extraATT[srcName] = del(extraATT[srcName])
-						end
 					end
 				end
-			else
-				dmg.spellid, dmg.spellname, dmg.school, dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing = ...
 			end
+		else
+			dmg.spellid, dmg.spellname, dmg.school, dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing = ...
+		end
 
-			if dmg.spellid and dmg.spellname and not ignoredSpells[dmg.spellid] then
-				dmg.playerid = srcGUID
-				dmg.playername = srcName
-				dmg.playerflags = srcFlags
-				dmg.dstName = dstName
-				dmg.misstype = nil
+		if dmg.spellid and dmg.spellname and not ignoredSpells[dmg.spellid] then
+			dmg.playerid = srcGUID
+			dmg.playername = srcName
+			dmg.playerflags = srcFlags
+			dmg.dstName = dstName
+			dmg.misstype = nil
 
-				Skada:FixPets(dmg)
-				Skada:DispatchSets(log_damage, eventtype == "SPELL_PERIODIC_DAMAGE")
-			end
+			Skada:FixPets(dmg)
+			Skada:DispatchSets(log_damage, eventtype == "SPELL_PERIODIC_DAMAGE")
 		end
 	end
 
 	local function spell_missed(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, _, ...)
-		if srcGUID ~= dstGUID then
-			local amount
+		if srcGUID == dstGUID then return end
 
-			if eventtype == "SWING_MISSED" then
-				dmg.spellid, dmg.spellname, dmg.school = 6603, L["Melee"], 0x01
-				dmg.misstype, amount = ...
-			else
-				dmg.spellid, dmg.spellname, dmg.school, dmg.misstype, amount = ...
+		local amount
+
+		if eventtype == "SWING_MISSED" then
+			dmg.spellid, dmg.spellname, dmg.school = 6603, L["Melee"], 0x01
+			dmg.misstype, amount = ...
+		else
+			dmg.spellid, dmg.spellname, dmg.school, dmg.misstype, amount = ...
+		end
+
+		if dmg.spellid and dmg.spellname and not ignoredSpells[dmg.spellid] then
+			dmg.playerid = srcGUID
+			dmg.playername = srcName
+			dmg.playerflags = srcFlags
+			dmg.dstName = dstName
+
+			dmg.amount = 0
+			dmg.overkill = 0
+			dmg.resisted = nil
+			dmg.blocked = nil
+			dmg.absorbed = nil
+			dmg.critical = nil
+			dmg.glancing = nil
+
+			if dmg.misstype == "ABSORB" and amount then
+				dmg.absorbed = amount
+			elseif dmg.misstype == "BLOCK" and amount then
+				dmg.blocked = amount
+			elseif dmg.misstype == "RESIST" and amount then
+				dmg.resisted = amount
 			end
 
-			if dmg.spellid and dmg.spellname and not ignoredSpells[dmg.spellid] then
-				dmg.playerid = srcGUID
-				dmg.playername = srcName
-				dmg.playerflags = srcFlags
-				dmg.dstName = dstName
-
-				dmg.amount = 0
-				dmg.overkill = 0
-				dmg.resisted = nil
-				dmg.blocked = nil
-				dmg.absorbed = nil
-				dmg.critical = nil
-				dmg.glancing = nil
-
-				if dmg.misstype == "ABSORB" and amount then
-					dmg.absorbed = amount
-				elseif dmg.misstype == "BLOCK" and amount then
-					dmg.blocked = amount
-				elseif dmg.misstype == "RESIST" and amount then
-					dmg.resisted = amount
-				end
-
-				Skada:FixPets(dmg)
-				Skada:DispatchSets(log_damage, eventtype == "SPELL_PERIODIC_MISSED")
-			end
+			Skada:FixPets(dmg)
+			Skada:DispatchSets(log_damage, eventtype == "SPELL_PERIODIC_MISSED")
 		end
 	end
 

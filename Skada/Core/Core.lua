@@ -13,7 +13,8 @@ local Translit = LibStub("LibTranslit-1.0", true)
 
 -- cache frequently used globals
 local _G, GetAddOnMetadata = _G, GetAddOnMetadata
-local tsort, tinsert, tremove, tconcat, wipe = table.sort, table.insert, table.remove, table.concat, wipe
+local new, del = private.newTable, private.delTable
+local tsort, tinsert, tremove, tconcat, wipe = table.sort, table.insert, private.tremove, table.concat, wipe
 local next, pairs, ipairs, unpack, type, setmetatable = next, pairs, ipairs, unpack, type, setmetatable
 local tonumber, tostring, strmatch, format, gsub, lower, find = tonumber, tostring, strmatch, string.format, string.gsub, string.lower, string.find
 local floor, max, min, abs, band, time, GetTime = math.floor, math.max, math.min, math.abs, bit.band, time, GetTime
@@ -94,16 +95,6 @@ local BITMASK_GROUP = private.BITMASK_GROUP
 local BITMASK_PETS = private.BITMASK_PETS
 local BITMASK_FRIENDLY = private.BITMASK_FRIENDLY
 local BITMASK_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER or 0x00000400
-
--------------------------------------------------------------------------------
--- table pool
-
-local new, del, clear
-do
-	local __pool = Skada.TablePool()
-	new, del, clear = __pool.new, __pool.del, __pool.clear
-	Skada.newTable, Skada.delTable, Skada.clearTable = new, del, clear
-end
 
 -------------------------------------------------------------------------------
 -- local functions.
@@ -297,162 +288,9 @@ local function find_mode(name)
 	end
 end
 
--------------------------------------------------------------------------------
--- Active / Effetive time functions
-
--- returns the selected set time.
-function Skada:GetSetTime(set, active)
-	if not set or not set.time then
-		return 0
-	end
-
-	local settime = active and set.activetime or set.time
-	return (settime >= 1) and settime or max(1, time() - set.starttime)
-end
-
 -- returns a formmatted set time
 local function formatted_set_time(set)
 	return Skada:FormatTime(Skada:GetSetTime(set))
-end
-
--- returns the actor's active/effective time
-function Skada:GetActiveTime(set, actor, active)
-	active = active or (set.type == "pvp") or (set.type == "arena") -- force active for pvp/arena
-
-	-- use settime to clamp
-	local settime = self:GetSetTime(set, active)
-
-	-- active: actor's time.
-	if (P.timemesure ~= 2 or active) and actor.time and actor.time > 0 then
-		return max(1, min(actor.time, settime))
-	end
-
-	-- effective: combat time.
-	return settime
-end
-
--- updates the actor's active time
-function Skada:AddActiveTime(set, actor, target, override)
-	if not actor or not actor.last then return end
-
-	local curtime = set.last_time or GetTime()
-	local delta = curtime - actor.last
-	actor.last = curtime
-
-	if override and override > 0 and override <= delta then
-		delta = override
-	elseif delta > 3.5 then
-		delta = 3.5
-	end
-
-	local adding = floor(100 * delta + 0.5) / 100
-	actor.time = (actor.time or 0) + adding
-	set.activetime = (set.activetime or 0) + adding
-
-	-- to save up memory, we only record the rest to the current set.
-	if (set == self.total and not P.totalidc) or not target then return end
-
-	actor.timespent = actor.timespent or {}
-	actor.timespent[target] = (actor.timespent[target] or 0) + adding
-end
-
--------------------------------------------------------------------------------
--- popup dialogs
-
--- skada reset dialog
-do
-	local t = {timeout = 30, whileDead = 0}
-	local f = function() Skada:Reset(IsShiftKeyDown()) end
-
-	function Skada:ShowPopup(win, popup)
-		if Skada.testMode then return end
-
-		if P.skippopup and not popup then
-			Skada:Reset(IsShiftKeyDown())
-			return
-		end
-
-		private.confirm_dialog(L["Do you want to reset Skada?\nHold SHIFT to reset all data."], f, t)
-	end
-end
-
--- new window creation dialog
-function Skada:NewWindow(window)
-	if not StaticPopupDialogs["SkadaCreateWindowDialog"] then
-		local function create_window(name, win)
-			name = name and name:trim()
-			if not name or name == "" then return end
-
-			local db = win and win.db
-			if db and IsShiftKeyDown() then
-				local w = Skada:CreateWindow(name, nil, db.display)
-				private.tCopy(w.db, db, "name", "sticked", "point", "snapped", "child", "childmode")
-				w.db.x, w.db.y = 0, 0
-				Skada:ApplySettings(name)
-			else
-				Skada:CreateWindow(name)
-			end
-		end
-
-		StaticPopupDialogs["SkadaCreateWindowDialog"] = {
-			text = L["Enter the name for the new window."],
-			button1 = L["Create"],
-			button2 = L["Cancel"],
-			timeout = 30,
-			whileDead = 0,
-			hideOnEscape = 1,
-			hasEditBox = 1,
-			OnShow = function(self)
-				self.button1:Disable()
-				self.editBox:SetText("")
-				self.editBox:SetFocus()
-			end,
-			OnHide = function(self)
-				self.editBox:SetText("")
-				self.editBox:ClearFocus()
-			end,
-			EditBoxOnEscapePressed = function(self)
-				self:GetParent():Hide()
-			end,
-			EditBoxOnTextChanged = function(self)
-				local name = self:GetText()
-				if not name or name:trim() == "" then
-					self:GetParent().button1:Disable()
-				else
-					self:GetParent().button1:Enable()
-				end
-			end,
-			EditBoxOnEnterPressed = function(self, win)
-				create_window(self:GetText(), win)
-				self:GetParent():Hide()
-			end,
-			OnAccept = function(self, win)
-				create_window(self.editBox:GetText(), win)
-				self:Hide()
-			end
-		}
-	end
-	StaticPopup_Show("SkadaCreateWindowDialog", nil, nil, window)
-end
-
--- reinstall the addon
-do
-	local t = {timeout = 15, whileDead = 0}
-	local f = function()
-		if Skada.db.profiles then
-			wipe(Skada.db.profiles)
-		end
-		if Skada.db.profileKeys then
-			wipe(Skada.db.profileKeys)
-		end
-
-		G.reinstall = true
-		ReloadUI()
-	end
-
-	function Skada:Reinstall()
-		private.confirm_dialog(L["Are you sure you want to reinstall Skada?"], f, t)
-	end
 end
 
 -------------------------------------------------------------------------------
@@ -2191,7 +2029,7 @@ function Skada:SetTooltipPosition(tooltip, frame, display, win)
 		tooltip:SetOwner(frame, "ANCHOR_PRESERVE")
 		tooltip:ClearAllPoints()
 
-		if (frame:GetLeft() * s) < (GetScreenWidth() / 2) then
+		if (frame:GetLeft() * s) < (GetScreenWidth() * 0.5) then
 			tooltip:SetPoint("TOPLEFT", frame, "TOPRIGHT")
 		else
 			tooltip:SetPoint("TOPRIGHT", frame, "TOPLEFT")
@@ -2569,10 +2407,22 @@ do
 		end
 	end
 
+	local get_channel_list
+	do
+		local list = {}
+		function get_channel_list(...)
+			wipe(list)
+			for i = 1, select("#", ...) do
+				list[i] = select(i, ...)
+			end
+			return list
+		end
+	end
+
 	function Skada:Report(channel, chantype, report_mode_name, report_set_name, maxlines, window, barid)
 		if chantype == "channel" then
-			local list = {GetChannelList()}
-			for i = 1, table.getn(list) / 2 do
+			local list = get_channel_list(GetChannelList())
+			for i = 1, table.getn(list) * 0.5 do
 				if (P.report.channel == list[i * 2]) then
 					channel = list[i * 2 - 1]
 					break
@@ -2975,11 +2825,11 @@ do
 
 		local ShortenValue = function(num)
 			if num >= 1e9 or num <= -1e9 then
-				return format("%.2fB", num / 1e9)
+				return format("%.2fB", num * 1e-09)
 			elseif num >= 1e6 or num <= -1e6 then
-				return format("%.2fM", num / 1e6)
+				return format("%.2fM", num * 1e-06)
 			elseif num >= 1e3 or num <= -1e3 then
-				return format("%.1fK", num / 1e3)
+				return format("%.1fK", num * 0.001)
 			end
 			return format("%.0f", num)
 		end
@@ -2995,11 +2845,11 @@ do
 
 			ShortenValue = function(num)
 				if num >= 1e8 or num <= -1e8 then
-					return format("%.2f%s", num / 1e8, symbol_1b)
+					return format("%.2f%s", num * 1e-08, symbol_1b)
 				elseif num >= 1e4 or num <= -1e4 then
-					return format("%.2f%s", num / 1e4, symbol_10k)
+					return format("%.2f%s", num * 0.0001, symbol_10k)
 				elseif num >= 1e3 or num <= -1e3 then
-					return format("%.1f%s", num / 1e4, symbol_1k)
+					return format("%.1f%s", num * 0.0001, symbol_1k)
 				end
 				return format("%.0f", num)
 			end
@@ -3525,126 +3375,6 @@ function private.boss_defeated()
 	Skada:SendMessage("COMBAT_BOSS_DEFEATED", set)
 end
 
-function Skada:BigWigs(_, _, event, message)
-	if event == "bosskill" and message and self.current and self.current.gotboss then
-		if find(lower(message), lower(self.current.mobname)) ~= nil and not self.current.success then
-			self.current.success = true
-
-			if self.tempsets then -- phases
-				for i = 1, #self.tempsets do
-					local set = self.tempsets[i]
-					if set and not set.success then
-						set.success = true
-					end
-				end
-			end
-
-			self:Debug("COMBAT_BOSS_DEFEATED: BigWigs")
-			self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
-		end
-	end
-end
-
-function Skada:DBM(_, mod, wipe)
-	if not wipe and mod and mod.combatInfo then
-		local set = self.current or self.last -- just in case DBM was late.
-		if set and not set.success and mod.combatInfo.name and (not set.mobname or find(lower(set.mobname), lower(mod.combatInfo.name)) ~= nil) then
-			set.success = true
-			set.gotboss = set.gotboss or mod.combatInfo.creatureId or true
-			set.mobname = (not set.mobname or set.mobname == L["Unknown"]) and mod.combatInfo.name or set.mobname
-
-			if self.tempsets then -- phases
-				for i = 1, #self.tempsets do
-					local s = self.tempsets[i]
-					if s and not s.success then
-						s.success = true
-						s.gotboss = s.gotboss or mod.combatInfo.creatureId or true
-						s.mobname = (not s.mobname or s.mobname == L["Unknown"]) and mod.combatInfo.name or s.mobname
-					end
-				end
-			end
-
-			self:Debug("COMBAT_BOSS_DEFEATED: DBM")
-			self:SendMessage("COMBAT_BOSS_DEFEATED", set)
-		end
-	end
-end
-
-function Skada:CheckMemory(clean)
-	self:CleanGarbage() -- collect garbage first.
-
-	if P.memorycheck then
-		UpdateAddOnMemoryUsage()
-		local memory = GetAddOnMemoryUsage(folder)
-		if memory > (self.maxmeme * 1024) then
-			self:Notify(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."], L["Memory Check"], nil, "emergency")
-		end
-	end
-end
-
--- this can be used to clear combat log and garbage.
--- note that "collect" isn't used because it blocks all execution for too long.
-function Skada:CleanGarbage()
-	if P.memorycheck and not InCombatLockdown() then
-		collectgarbage("collect")
-		self:Debug("CleanGarbage")
-	end
-end
-
--------------------------------------------------------------------------------
-
-do
-	local function clear_indexes(set, mt)
-		if set then
-			set._playeridx = nil
-			set._enemyidx = nil
-
-			-- should clear metatables?
-			if not mt then return end
-
-			local actors = set.players -- players
-			if actors then
-				for i = 1, #actors do
-					local actor = actors[i]
-					if actor and actor.super then
-						actor.super = nil
-						setmetatable(actor, nil)
-					end
-				end
-			end
-
-			actors = set.enemies -- enemies
-			if actors then
-				for i = 1, #actors do
-					local actor = actors[i]
-					if actor and actor.super then
-						actor.super = nil
-						setmetatable(actor, nil)
-					end
-				end
-			end
-		end
-	end
-
-	function Skada:ClearAllIndexes(mt)
-		clear_indexes(Skada.current, mt)
-		clear_indexes(Skada.total, mt)
-
-		local sets = Skada.char.sets
-		if sets then
-			for i = 1, #sets do
-				clear_indexes(sets[i], mt)
-			end
-		end
-
-		if Skada.tempsets then
-			for i = 1, #Skada.tempsets do
-				clear_indexes(Skada.tempsets[i], mt)
-			end
-		end
-	end
-end
-
 -------------------------------------------------------------------------------
 -- Getters & Iterators
 
@@ -4139,7 +3869,7 @@ do
 		if event == "UNIT_DIED" and check_flags_interest(guid, flags, true) then
 			death_counter = death_counter + 1
 			-- If we reached the treshold for stopping the segment, do so.
-			if death_counter > 0 and death_counter / starting_members >= 0.5 and not set.stopped then
+			if death_counter >= starting_members * 0.5 and not set.stopped then
 				Skada:SendMessage("COMBAT_PLAYER_WIPE", set)
 				Skada:StopSegment(L["Stopping for wipe."])
 			end

@@ -8,7 +8,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 	local get_sunder_targets = nil
 
 	local pairs, format, GetTime, uformat = pairs, string.format, GetTime, private.uformat
-	local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
+	local new, del, clear = private.newTable, private.delTable, private.clearTable
 	local GetSpellInfo = private.spell_info or GetSpellInfo
 	local GetSpellLink = private.spell_link or GetSpellLink
 	local T = Skada.Table
