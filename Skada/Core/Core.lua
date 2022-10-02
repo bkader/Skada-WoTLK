@@ -987,16 +987,26 @@ function Window:actor(d, actor, enemy, actorname)
 
 		d.id = actor.id or actor.name or actorname
 		d.label = actor.name or actorname or L["Unknown"]
-		d.class = actor.class
+
+		-- speed up things if it's a pet/enemy.
+		if strmatch(d.label, "%<(%a+)%>") then
+			d.class = "PET"
+			return d
+		elseif enemy then
+			d.class = actor.class or "ENEMY"
+			d.role = actor.role
+			d.spec = actor.spec
+			return d
+		end
+
+		d.class = actor.class or "UNKNOWN"
 		d.role = actor.role
 		d.spec = actor.spec
 
-		if not enemy and actor.id and d.class and Skada.validclass[d.class] then
+		if actor.id and Skada.validclass[d.class] then
 			d.text = Skada:FormatName(actor.name or actorname, actor.id)
 		elseif d.text then
 			d.text = nil
-		elseif not enemy and not d.class then -- fallback to pets
-			d.class = "PET"
 		end
 	end
 	return d
@@ -1746,7 +1756,7 @@ end
 
 -- finds a player that was already recorded
 local dummy_pet = {class = "PET"} -- used as fallback
-function Skada:FindPlayer(set, id, name, strict)
+function Skada:FindPlayer(set, id, name, is_create)
 	id = id or name -- fallback
 
 	local actors = set and (id ~= "total") and (name ~= L["Total"]) and set.players
@@ -1762,15 +1772,6 @@ function Skada:FindPlayer(set, id, name, strict)
 		return self.playerPrototype:Bind(player, set)
 	end
 
-	-- speed up things with pets
-	local ownerName = strmatch(name, "%<(%a+)%>")
-	if ownerName then
-		dummy_pet.id = id
-		dummy_pet.name = name
-		dummy_pet.owner = ownerName
-		return self.playerPrototype:Bind(dummy_pet, set)
-	end
-
 	-- search the set
 	for i = 1, #actors do
 		local actor = actors[i]
@@ -1778,6 +1779,17 @@ function Skada:FindPlayer(set, id, name, strict)
 			set._playeridx[id] = actor
 			return actor
 		end
+	end
+
+	if is_create then return end
+
+	-- speed up things with pets
+	local ownerName = strmatch(name, "%<(%a+)%>")
+	if ownerName then
+		dummy_pet.id = id
+		dummy_pet.name = name
+		dummy_pet.owner = ownerName
+		return self.playerPrototype:Bind(dummy_pet, set)
 	end
 
 	-- search friendly enemies
@@ -1788,13 +1800,9 @@ function Skada:FindPlayer(set, id, name, strict)
 	end
 
 	-- our last hope!
-	if not strict then
-		dummy_pet.id = id
-		dummy_pet.name = name or L["Unknown"]
-		return self.playerPrototype:Bind(dummy_pet, set)
-	end
-
-	return player
+	dummy_pet.id = id
+	dummy_pet.name = name or L["Unknown"]
+	return self.playerPrototype:Bind(dummy_pet, set)
 end
 
 -- finds a player table or creates it if not found
@@ -1802,29 +1810,28 @@ function Skada:GetPlayer(set, guid, name, flag)
 	if not (set and set.players and guid) then return end
 
 	local player = self:FindPlayer(set, guid, name, true)
-
-	if not player then
-		if not name then return end
-
-		player = {id = guid, name = name, flag = flag, time = 0}
-
-		if players[guid] then
-			_, player.class = UnitClass(players[guid])
-		elseif pets[guid] then
-			player.class = "PET"
-		else
-			player.class = private.unit_class(guid, flag, nil, nil, name)
-		end
-
-		for i = 1, #modes do
-			local mode = modes[i]
-			if mode and mode.AddPlayerAttributes then
-				mode:AddPlayerAttributes(player, set)
-			end
-		end
-
-		set.players[#set.players + 1] = player
+	if player or not name then
+		return player
 	end
+
+	player = {id = guid, name = name, flag = flag, time = 0}
+
+	if players[guid] then
+		_, player.class = UnitClass(players[guid])
+	elseif pets[guid] then
+		player.class = "PET"
+	else
+		player.class = private.unit_class(guid, flag, nil, nil, name)
+	end
+
+	for i = 1, #modes do
+		local mode = modes[i]
+		if mode and mode.AddPlayerAttributes then
+			mode:AddPlayerAttributes(player, set)
+		end
+	end
+
+	set.players[#set.players + 1] = player
 
 	-- not all modules provide playerflags
 	if player.flag == nil and flag then
@@ -2070,7 +2077,7 @@ do
 
 		local owner = fix_pets_handler(action.playerid, action.playerflags)
 		if owner then
-			action.petname = format("%s <%s>", action.playername, owner.name)
+			action.petname = action.playername
 
 			if P.mergepets then
 				action.playerid = owner.id
@@ -2082,7 +2089,7 @@ do
 			else
 				-- just append the creature id to the player
 				action.playerid = format("%s%s", owner.id, GetCreatureId(action.playerid))
-				action.playername = action.petname
+				action.playername = format("%s <%s>", action.playername, owner.name)
 			end
 		else
 			-- if for any reason we fail to find the pets, we simply
