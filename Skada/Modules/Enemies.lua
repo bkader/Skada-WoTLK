@@ -1199,7 +1199,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		targetmod.nototal = true
 		spellmod.nototal = true
 
-		local flags_dst_src = {dst_is_interesting_nopets = true, src_is_not_interesting = true}
+		local flags_dst_src = {dst_is_interesting = true, src_is_not_interesting = true}
 
 		Skada:RegisterForCL(
 			spell_damage,
