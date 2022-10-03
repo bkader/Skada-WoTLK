@@ -21,6 +21,9 @@ local setmetatable = setmetatable
 local EmptyFunc = Multibar_EmptyFunc
 local _
 
+-- common weak table
+private.weaktable = {__mode = "kv"}
+
 -------------------------------------------------------------------------------
 -- flags/bitmasks
 

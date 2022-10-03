@@ -293,6 +293,24 @@ local function formatted_set_time(set)
 	return Skada:FormatTime(Skada:GetSetTime(set))
 end
 
+local function assign_pet(ownerGUID, ownerName, petGUID)
+	pets[petGUID] = pets[petGUID] or new()
+	pets[petGUID].id = ownerGUID
+	pets[petGUID].name = ownerName
+end
+
+local dismiss_pet
+do
+	local function dismiss_handler(petGUID)
+		pets[petGUID] = del(pets[petGUID])
+	end
+
+	function dismiss_pet(guid, delay)
+		if not guid or not pets[guid] then return end
+		Skada:ScheduleTimer(dismiss_handler, delay or 0.1, guid)
+	end
+end
+
 -------------------------------------------------------------------------------
 -- Windo functions
 
@@ -1755,20 +1773,6 @@ function Skada:GetActor(set, id, name, flag)
 	return actor, enemy
 end
 
--- checks if the unit is a player
-function Skada:IsPlayer(guid, flag, name)
-	if guid and (players[guid] or pets[guid]) then
-		return players[guid] and 1 or false -- 1 for player, else false
-	end
-	if name and UnitIsPlayer(name) then
-		return true
-	end
-	if tonumber(flag) and band(flag, BITMASK_PLAYER) ~= 0 then
-		return true
-	end
-	return false
-end
-
 -------------------------------------------------------------------------------
 -- pet functions
 
@@ -1853,7 +1857,7 @@ do
 
 		-- flag is provided and it is mine.
 		if guid and flag and band(flag, BITMASK_MINE) ~= 0 then
-			pets[guid] = {id = userGUID, name = userName}
+			assign_pet(userGUID, userName, guid)
 			return pets[guid]
 		end
 
@@ -1862,14 +1866,14 @@ do
 			-- guess the pet from roster.
 			local ownerUnit = get_pet_owner_unit(guid)
 			if ownerUnit then
-				pets[guid] = {id = UnitGUID(ownerUnit), name = UnitName(ownerUnit)}
+				assign_pet(UnitGUID(ownerUnit), UnitName(ownerUnit), guid)
 				return pets[guid]
 			end
 
 			-- guess the pet from tooltip.
 			local ownerGUID, ownerName = get_pet_owner_from_tooltip(guid)
 			if ownerGUID and ownerName then
-				pets[guid] = {id = ownerGUID, name = ownerName}
+				assign_pet(ownerGUID, ownerName, guid)
 				return pets[guid]
 			end
 		end
@@ -1929,12 +1933,6 @@ do
 	end
 end
 
-local function assign_pet(ownerGUID, ownerName, petGUID)
-	pets[petGUID] = pets[petGUID] or new()
-	pets[petGUID].id = ownerGUID
-	pets[petGUID].name = ownerName
-end
-
 local function summon_pet(petGUID, petFlags, ownerGUID, ownerName, ownerFlags)
 	if band(ownerFlags, BITMASK_GROUP) ~= 0 or band(ownerFlags, BITMASK_PETS) ~= 0 or (band(petFlags, BITMASK_PETS) ~= 0 and pets[petGUID]) then
 		-- we assign the pet the normal way
@@ -1956,32 +1954,8 @@ local function summon_pet(petGUID, petFlags, ownerGUID, ownerName, ownerFlags)
 	end
 end
 
-local dismiss_pet
-do
-	local function dismiss_handler(petGUID)
-		pets[petGUID] = del(pets[petGUID])
-	end
-
-	function dismiss_pet(petGUID, delay)
-		if not petGUID or not pets[petGUID] then return end
-		-- delayed for a reason (2 x MAINMENU_SLIDETIME).
-		Skada:ScheduleTimer(dismiss_handler, delay or 0.6, petGUID)
-	end
-end
-
 function Skada:GetPetOwner(petGUID)
 	return pets[petGUID]
-end
-
-function Skada:IsPet(guid, flag)
-	if guid and pets[guid] then
-		return 1 -- group pet
-	end
-	if tonumber(flag) and (band(flag, BITMASK_PETS) ~= 0) then
-		-- we return 1 for a friendly pet (probably group's) or true.
-		return (band(flag, BITMASK_FRIENDLY) ~= 0) and 1 or true
-	end
-	return false
 end
 
 local function debug_pets()
@@ -1989,6 +1963,89 @@ local function debug_pets()
 	Skada:Print(L["Pets"])
 	for pet, owner in pairs(pets) do
 		Skada:Printf("pet %s belongs to %s, %s", pet, owner.id, owner.name)
+	end
+end
+
+-------------------------------------------------------------------------------
+-- players and pets checkers
+
+do
+	-- since IsPlayer and IsPet are called lots of times
+	-- it is better if we cache results to speed up things.
+	local weaktable = private.weaktable
+	local _players = setmetatable({}, weaktable)
+	local _pets = setmetatable({}, weaktable)
+
+	-- checks if the unit is a player (extra: helps IsPet)
+	function Skada:IsPlayer(guid, flag, name)
+		-- already cached?
+		if _players[guid] ~= nil then
+			return _players[guid]
+		end
+
+		-- group member?
+		if players[guid] then
+			_players[guid] = 1
+			_pets[guid] = (_pets[guid] == nil) and false or _pets[guid]
+			return _players[guid]
+		end
+
+		-- group pet?
+		if pets[guid] then
+			_players[guid] = false
+			_pets[guid] = _pets[guid] or 1
+			return _players[guid]
+		end
+
+		-- player by UnitIsPlayer?
+		if name and UnitIsPlayer(name) then
+			_players[guid] = true
+			_pets[guid] = (_pets[guid] == nil) and false or _pets[guid]
+			return _players[guid]
+		end
+
+		-- player by flgs?
+		if tonumber(flag) and band(flag, BITMASK_PLAYER) ~= 0 then
+			_players[guid] = true
+			_pets[guid] = (_pets[guid] == nil) and false or _pets[guid]
+			return _players[guid]
+		end
+
+		-- just set it to false
+		_players[guid] = false
+		return _players[guid]
+	end
+
+	-- checks if the guid is a pet (extra: helps IsPlayer)
+	function Skada:IsPet(guid, flag)
+		-- already cached?
+		if _pets[guid] ~= nil then
+			return _pets[guid]
+		end
+
+		-- just in case
+		if players[guid] then
+			_pets[guid] = false
+			_players[guid] = 1
+			return _pets[guid]
+		end
+
+		-- grouped pet?
+		if pets[guid] then
+			_pets[guid] = 1
+			_players[guid] = false
+			return _pets[guid]
+		end
+
+		-- ungrouped pet?
+		if tonumber(flag) and (band(flag, BITMASK_PETS) ~= 0) then
+			_pets[guid] = (band(flag, BITMASK_FRIENDLY) ~= 0) and 1 or true
+			_players[guid] = false
+			return _pets[guid]
+		end
+
+		_pets[guid] = false
+		return _pets[guid]
 	end
 end
 
@@ -2719,7 +2776,8 @@ do
 						vehicles[guid] = UnitGUID(vUnitId)
 					end
 				elseif vehicles[guid] then
-					dismiss_pet(vehicles[guid])
+					-- delayed for a reason (2 x MAINMENU_SLIDETIME).
+					dismiss_pet(vehicles[guid], 0.6)
 				end
 			end
 		end
