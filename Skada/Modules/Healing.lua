@@ -30,7 +30,7 @@ Skada:RegisterModule("Healing", function(L, P)
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local next, del = next, private.delTable
+	local next, new, del = next, private.newTable, private.delTable
 	local mod_cols = nil
 
 	-- list of spells used to queue units.
@@ -142,7 +142,10 @@ Skada:RegisterModule("Healing", function(L, P)
 	local function spell_heal(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, ...)
 		if not spellid or ignoredSpells[spellid] then return end
 
-		srcGUID, srcName, srcFlags = Skada:FixUnit(spellid, srcGUID, srcName, srcFlags)
+		local srcQueued = private.get_temp_unit(srcGUID)
+		if srcQueued and srcQueued.spellid == spellid then
+			srcGUID, srcName, srcFlags = srcQueued.id, srcQueued.name, srcQueued.flag
+		end
 
 		heal.playerid, heal.playername, heal.playerflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 		heal.dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
@@ -154,13 +157,19 @@ Skada:RegisterModule("Healing", function(L, P)
 	end
 
 	local function spell_aura(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, _, _, spellid)
-		spellid = spellid and queued_spells[spellid]
+		spellid = spellid and not ignoredSpells[spellid] and queued_spells[spellid]
 		if not spellid then
 			return
 		elseif eventtype == "SPELL_AURA_APPLIED" then
-			Skada:QueueUnit(spellid, srcGUID, srcName, srcFlags, dstGUID)
+			local info = new()
+			info.id = srcGUID
+			info.name = srcName
+			info.flag = srcFlags
+			info.spellid = spellid
+
+			private.add_temp_unit(dstGUID, info)
 		else
-			Skada:UnqueueUnit(spellid, dstGUID)
+			private.del_temp_unit(dstGUID)
 		end
 	end
 

@@ -1039,11 +1039,6 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 
 		function mod:CombatLeave()
-			T.clear(absorb)
-			T.free("Skada_Heals", heals)
-			T.free("Skada_Shields", shields)
-			T.free("Skada_ShieldAmounts", shieldamounts)
-			T.free("Skada_ShieldsPopped", shieldspopped, nil, del)
 			self.checked = nil
 		end
 	end
@@ -1146,6 +1141,12 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	end
 
 	function mod:SetComplete(set)
+		T.clear(absorb)
+		T.free("Skada_Heals", heals)
+		T.free("Skada_Shields", shields)
+		T.free("Skada_ShieldAmounts", shieldamounts)
+		T.free("Skada_ShieldsPopped", shieldspopped, nil, del)
+
 		-- clean absorbspells table:
 		if not set.absorb or set.absorb == 0 then return end
 		for i = 1, #set.players do

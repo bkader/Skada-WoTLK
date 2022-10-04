@@ -278,71 +278,34 @@ do
 end
 
 -------------------------------------------------------------------------------
--- units fix function.
---
--- on certain servers, certain spells are not assigned properly and
--- in order to work around this, these functions were added.
---
--- for example, Death Knight' "Mark of Blood" healing is not considered
--- by Skada because the healing is attributed to the boss and not to the
--- player who used the spell, so in some modules you will find a table
--- called "queued_spells" in which you can store a table of [spellid] = spellid
--- used by other modules.
--- In the case of "Mark of Blood" (49005), the healing from the spell 50424
--- is attributed to the target instead of the DK, so whenever Skada detects
--- a healing from 50424 it will check queued units, if found the player data
--- will be used.
+-- temporary flags check bypass
 
 do
-	local new, del, tLength = private.newTable, private.delTable, private.tLength
-	local queued_units = nil
+	local new, del, clear = private.newTable, private.delTable, private.clearTable
+	local temp_units = nil
 
-	function Skada:QueueUnit(spellid, srcGUID, srcName, srcFlags, dstGUID)
-		if spellid and srcName and srcGUID and dstGUID and srcGUID ~= dstGUID then
-			queued_units = queued_units or T.get("Skada_QueuedUnits")
-			queued_units[spellid] = queued_units[spellid] or new()
-			queued_units[spellid][dstGUID] = queued_units[spellid][dstGUID] or new()
-			queued_units[spellid][dstGUID].id = srcGUID
-			queued_units[spellid][dstGUID].name = srcName
-			queued_units[spellid][dstGUID].flag = srcFlags
+	-- adds a temporary unit with optional info
+	function private.add_temp_unit(guid, info)
+		if not guid then return end
+		temp_units = temp_units or new()
+		temp_units[guid] = info or true
+	end
+
+	-- deletes a temporary unit if found
+	function private.del_temp_unit(guid)
+		if guid and temp_units and temp_units[guid] then
+			temp_units[guid] = del(temp_units[guid])
 		end
 	end
 
-	function Skada:UnqueueUnit(spellid, dstGUID)
-		if spellid and dstGUID and queued_units and queued_units[spellid] then
-			if queued_units[spellid][dstGUID] then
-				queued_units[spellid][dstGUID] = del(queued_units[spellid][dstGUID])
-			end
-			if tLength(queued_units[spellid]) == 0 then
-				queued_units[spellid] = del(queued_units[spellid])
-			end
-		end
+	-- returns the temporary unit stored "info" or false
+	function private.get_temp_unit(guid)
+		return guid and temp_units and temp_units[guid]
 	end
 
-	function Skada:FixUnit(spellid, guid, name, flag)
-		if spellid and guid and queued_units and queued_units[spellid] and queued_units[spellid][guid] then
-			flag = queued_units[spellid][guid].flag or flag
-			name = queued_units[spellid][guid].name or name
-			guid = queued_units[spellid][guid].id or guid
-		end
-		return guid, name, flag
-	end
-
-	function private.is_queued_unit(guid)
-		if queued_units and tonumber(guid) then
-			for _, units in pairs(queued_units) do
-				for id, _ in pairs(units) do
-					if id == guid then
-						return true
-					end
-				end
-			end
-		end
-		return false
-	end
-
-	function private.clear_queued_units()
-		T.free("Skada_QueuedUnits", queued_units, nil, del, true)
+	-- clears all store temporary units
+	function private.clear_temp_units()
+		temp_units = clear(temp_units)
 	end
 end
 

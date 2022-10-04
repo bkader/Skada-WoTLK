@@ -3524,7 +3524,7 @@ end
 
 function combat_end()
 	if not Skada.current then return end
-	private.clear_queued_units()
+	private.clear_temp_units()
 
 	-- trigger events.
 	local curtime = time()
@@ -4036,7 +4036,7 @@ do
 
 					if not fail and flags.src_is_interesting or flags.src_is_not_interesting then
 						if not src_is_interesting then
-							src_is_interesting = check_flags_interest(srcGUID, srcFlags) or private.is_queued_unit(srcGUID)
+							src_is_interesting = check_flags_interest(srcGUID, srcFlags) or private.get_temp_unit(srcGUID)
 						end
 
 						if (flags.src_is_interesting and not src_is_interesting) or (flags.src_is_not_interesting and src_is_interesting) then
