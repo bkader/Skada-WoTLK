@@ -161,7 +161,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 					p.background.height, -- window height
 					p.barwidth, -- window width
 					p.barheight, -- bars height
-					format("SkadaBarWindow%s", p.name) -- frame name
+					format("%sBarWindow%s", folder, p.name) -- frame name
 				)
 
 				-- Add window buttons.

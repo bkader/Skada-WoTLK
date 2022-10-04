@@ -1,5 +1,5 @@
 --[[ Translator: meatgaga#9470 ]] --
-local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "zhCN")
+local L = LibStub("AceLocale-3.0"):NewLocale(..., "zhCN")
 if not L then return end
 
 L["A damage meter."] = "伤害统计器"

@@ -16,7 +16,7 @@ ns.private = private
 local pairs, ipairs = pairs, ipairs
 local select, next = select, next
 local band, tonumber, type = bit.band, tonumber, type
-local format, strmatch, strsub, gsub = string.format, string.match, string.sub, string.gsub
+local format, strmatch, gsub = string.format, string.match, string.gsub
 local setmetatable = setmetatable
 local EmptyFunc = Multibar_EmptyFunc
 local _
@@ -38,9 +38,9 @@ do
 	private.BITMASK_GROUP = BITMASK_MINE + BITMASK_PARTY + BITMASK_RAID
 
 	-- pets and guardians
-	local BITMASK_PET = COMBATLOG_OBJECT_TYPE_PET or 0x00001000
-	local BITMASK_GUARDIAN = COMBATLOG_OBJECT_TYPE_GUARDIAN or 0x00002000
-	private.BITMASK_PETS = BITMASK_PET + BITMASK_GUARDIAN
+	local BITMASK_TYPE_PET = COMBATLOG_OBJECT_TYPE_PET or 0x00001000
+	local BITMASK_TYPE_GUARDIAN = COMBATLOG_OBJECT_TYPE_GUARDIAN or 0x00002000
+	private.BITMASK_PETS = BITMASK_TYPE_PET + BITMASK_TYPE_GUARDIAN
 
 	-- friendly units
 	private.BITMASK_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY or 0x00000010
@@ -675,7 +675,7 @@ do
 		local P = ns.db.profile
 		P.toast = P.toast or ns.defaults.toast
 
-		LibToast:Register("SkadaToastFrame", function(toast, text, title, icon, urgency)
+		LibToast:Register(format("%sToastFrame", folder), function(toast, text, title, icon, urgency)
 			toast:SetTitle(title or folder)
 			toast:SetText(text or L["A damage meter."])
 			toast:SetIconTexture(icon or ns.logo)
@@ -1117,16 +1117,129 @@ do
 end
 
 -------------------------------------------------------------------------------
--- misc functions
+-- creatures, players and pets checkers
 
--- checks if the given GUID/Flags are of a creature
-local COMBATLOG_OBJECT_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
-function private.is_creature(guid, flag)
-	if tonumber(guid) then
-		return (band(strsub(guid, 1, 5), 0x00F) == 3 or band(strsub(guid, 1, 5), 0x00F) == 5)
+do
+	local strsub = string.sub
+	local UnitIsPlayer = UnitIsPlayer
+
+	-- add extra bitmasks if needed
+	local BITMASK_PETS = private.BITMASK_PETS
+	local BITMASK_FRIENDLY = private.BITMASK_FRIENDLY
+	local BITMASK_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
+	private.BITMASK_TYPE_NPC = BITMASK_TYPE_NPC
+	local BITMASK_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER or 0x00000400
+	private.BITMASK_TYPE_PLAYER = BITMASK_PLAYER
+
+	-- checks if the given guid/flags are those of a creature.
+	function private.is_creature(guid, flags)
+		if tonumber(guid) then
+			return (band(strsub(guid, 1, 5), 0x00F) == 3 or band(strsub(guid, 1, 5), 0x00F) == 5)
+		end
+		if tonumber(flags) then
+			return (band(flags, BITMASK_TYPE_NPC) ~= 0)
+		end
+		return false
 	end
-	if tonumber(flag) then
-		return (band(flag, COMBATLOG_OBJECT_TYPE_NPC) ~= 0)
+
+	-- tables that will cache info about players and pets
+	local players = private.players or {} -- [guid] = unit
+	private.players = players
+	local pets = private.pets or {} -- [guid] = {id = ownerGUID, name = ownerName}
+	private.pets = pets
+
+	do
+		-- tables used to cached results in order to speed up check
+		local __t1 = setmetatable({}, private.weaktable) -- cached players
+		local __t2 = setmetatable({}, private.weaktable) -- cached pets
+
+		-- checks if the guid is a player (extra: helps is_pet)
+		function private.is_player(guid, name, flags)
+			-- already cached?
+			if __t1[guid] ~= nil then
+				return __t1[guid]
+			end
+
+			-- group member?
+			if players[guid] then
+				__t1[guid] = 1
+				__t2[guid] = (__t2[guid] == nil) and false or __t2[guid]
+				return __t1[guid]
+			end
+
+			-- group pet?
+			if pets[guid] then
+				__t1[guid] = false
+				__t2[guid] = __t2[guid] or 1
+				return __t1[guid]
+			end
+
+			-- player by UnitIsPlayer?
+			if name and UnitIsPlayer(name) then
+				__t1[guid] = true
+				__t2[guid] = (__t2[guid] == nil) and false or __t2[guid]
+				return __t1[guid]
+			end
+
+			-- player by flgs?
+			if tonumber(flags) and band(flags, BITMASK_PLAYER) ~= 0 then
+				__t1[guid] = true
+				__t2[guid] = (__t2[guid] == nil) and false or __t2[guid]
+				return __t1[guid]
+			end
+
+			-- just set it to false
+			__t1[guid] = false
+			return __t1[guid]
+		end
+
+		-- checks if the guid is a pet (extra: helps is_player)
+		function private.is_pet(guid, flags)
+			-- already cached?
+			if __t2[guid] ~= nil then
+				return __t2[guid]
+			end
+
+			-- just in case
+			if players[guid] then
+				__t2[guid] = false
+				__t1[guid] = 1
+				return __t2[guid]
+			end
+
+			-- grouped pet?
+			if pets[guid] then
+				__t2[guid] = 1
+				__t1[guid] = false
+				return __t2[guid]
+			end
+
+			-- ungrouped pet?
+			if tonumber(flags) and (band(flags, BITMASK_PETS) ~= 0) then
+				__t2[guid] = (band(flags, BITMASK_FRIENDLY) ~= 0) and 1 or true
+				__t1[guid] = false
+				return __t2[guid]
+			end
+
+			__t2[guid] = false
+			return __t2[guid]
+		end
 	end
-	return false
+
+	do
+		local new = private.newTable
+		local del = private.delTable
+
+		-- adds a pet to the table.
+		function private.assign_pet(ownerGUID, ownerName, petGUID)
+			pets[petGUID] = pets[petGUID] or new()
+			pets[petGUID].id = ownerGUID
+			pets[petGUID].name = ownerName
+		end
+
+		-- simply removes the pet from the table.
+		function private.dismiss_pet(petGUID)
+			pets[petGUID] = del(pets[petGUID])
+		end
+	end
 end

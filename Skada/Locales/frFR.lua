@@ -1,5 +1,5 @@
 --[[ Translator: Kader B ]] --
-local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "frFR")
+local L = LibStub("AceLocale-3.0"):NewLocale(..., "frFR")
 if not L then return end
 
 L["A damage meter."] = "Un \"damage meter\"."

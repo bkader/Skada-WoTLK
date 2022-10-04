@@ -1,4 +1,4 @@
-local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "deDE")
+local L = LibStub("AceLocale-3.0"):NewLocale(..., "deDE")
 if not L then return end
 
 L["A damage meter."] = "Ein Damage-Meter."

@@ -1,6 +1,7 @@
 --[[ Translators: Ícar#8167 / Septimun#8954 / 𝔸𝕓𝕖𝕝#9150 ]] --
+local folder = ...
 local AceLocale = LibStub("AceLocale-3.0")
-local L = AceLocale:NewLocale("Skada", "esES") or AceLocale:NewLocale("Skada", "esMX")
+local L = AceLocale:NewLocale(folder, "esES") or AceLocale:NewLocale(folder, "esMX")
 if not L then return end
 
 L["A damage meter."] = "Un medidor de da\195\177o."

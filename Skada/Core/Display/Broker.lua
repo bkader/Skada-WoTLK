@@ -166,7 +166,7 @@ Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 
 		-- LDB object
 		if not win.obj then
-			win.obj = LDB:NewDataObject("Skada: " .. p.name, {
+			win.obj = LDB:NewDataObject(format("%s: %s", folder, p.name), {
 				type = "data source",
 				text = "",
 				OnTooltipShow = function(tooltip) tooltipHandler(win, tooltip) end,

@@ -20,6 +20,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 		local BITMASK_GROUP = private.BITMASK_GROUP or 0x00000007
 		local MAX_BOSS_FRAMES = MAX_BOSS_FRAMES or 5
 		local firsthit_fmt = {"%s (%s)", "%s (\124c%s%s\124r)", "\124c%s%s\124r", "\124c%s%s\124r (%s)"}
+		local is_pet = private.is_pet
 		local firsthit, firsthittimer = nil, nil
 
 		-- thank you Details!
@@ -85,7 +86,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 			local output = nil -- initial output
 
 			if band(dstFlags, BITMASK_GROUP) ~= 0 and Skada:IsBoss(srcGUID) then -- boss started?
-				if Skada:IsPet(dstGUID, dstFlags) then
+				if is_pet(dstGUID, dstFlags) then
 					output = format(firsthit_fmt[1], srcName, dstName or L["Unknown"])
 				elseif dstName then
 					local _, class = UnitClass(dstName)

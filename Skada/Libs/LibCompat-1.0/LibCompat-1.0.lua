@@ -170,7 +170,7 @@ do
 					unit, owner, step = "player", nil, 2
 				elseif step == 2 then
 					if not excPets then
-						unit, owner = "playerpet", "player"
+						unit, owner = "pet", "player"
 					end
 					step = nil
 				end

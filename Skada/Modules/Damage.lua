@@ -1220,8 +1220,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 			if amount > 0 then
 				nr = nr + 1
 
-				local d = win:actor(nr, source, true, sourcename)
-				d.text = (source.id and not enemy) and Skada:FormatName(sourcename, source.id)
+				local d = win:actor(nr, source, enemy, sourcename)
 				d.value = amount
 				format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
