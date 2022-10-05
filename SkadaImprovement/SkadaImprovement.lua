@@ -323,7 +323,6 @@ Skada:RegisterModule("Improvement", function(L)
 
 		Skada:UpdateDisplay(true)
 		Skada:Print(L["All data has been reset."])
-		Skada:CleanGarbage()
 	end
 
 	local Default_ShowPopup = Skada.ShowPopup

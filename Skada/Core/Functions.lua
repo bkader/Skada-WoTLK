@@ -10,7 +10,7 @@ local _
 local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 local UnitClass, GetPlayerInfoByGUID = UnitClass, GetPlayerInfoByGUID
 local GetClassFromGUID = Skada.GetClassFromGUID
-local T = Skada.Table
+local new, del, clear = private.newTable, private.delTable, private.clearTable
 
 local COMBATLOG_OBJECT_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
 
@@ -161,13 +161,13 @@ do
 	end
 
 	local function generate_fake_data()
-		wipe(fakeSet)
 		fakeSet.name = "Fake Fight"
 		fakeSet.starttime = time() - 120
 		fakeSet.damage = 0
 		fakeSet.heal = 0
 		fakeSet.absorb = 0
-		fakeSet.players = wipe(fakeSet.players or {})
+		fakeSet.type = "raid"
+		fakeSet.players = clear(fakeSet.players) or new()
 
 		local players = fake_players()
 		for i = 1, #players do
@@ -192,16 +192,16 @@ do
 				heal = random(250, 1500)
 			end
 
-			fakeSet.players[#fakeSet.players + 1] = {
-				id = name,
-				name = name,
-				class = class,
-				role = role,
-				spec = spec,
-				damage = damage,
-				heal = heal,
-				absorb = absorb
-			}
+			local player = new()
+			player.id = name
+			player.name = name
+			player.class = class
+			player.role = role
+			player.spec = spec
+			player.damage = damage
+			player.heal = heal
+			player.absorb = absorb
+			fakeSet.players[#fakeSet.players + 1] = player
 
 			fakeSet.damage = fakeSet.damage + damage
 			fakeSet.heal = fakeSet.heal + heal
@@ -256,24 +256,22 @@ do
 
 	function Skada:TestMode()
 		if InCombatLockdown() or IsGroupInCombat() then
-			wipe(fakeSet)
+			clear(fakeSet)
 			self.testMode = nil
 			if updateTimer then
 				self:CancelTimer(updateTimer)
 				updateTimer = nil
 			end
-			self:CleanGarbage()
 			return
 		end
 		self.testMode = not self.testMode
 		if not self.testMode then
-			wipe(fakeSet)
+			clear(fakeSet)
 			if updateTimer then
 				self:CancelTimer(updateTimer)
 				updateTimer = nil
 			end
-			self.current = nil
-			self:CleanGarbage()
+			self.current = del(self.current, true)
 			return
 		end
 
@@ -287,7 +285,6 @@ end
 -- temporary flags check bypass
 
 do
-	local new, del, clear = private.newTable, private.delTable, private.clearTable
 	local temp_units = nil
 
 	-- adds a temporary unit with optional info
@@ -333,11 +330,11 @@ function Skada:ApplyBorder(frame, texture, color, thickness, padtop, padbottom, 
 	frame.borderFrame:SetPoint("TOPLEFT", frame, -thickness - padleft, thickness + padtop)
 	frame.borderFrame:SetPoint("BOTTOMRIGHT", frame, thickness + padright, -thickness - padbottom)
 
-	local borderbackdrop = T.get("Skada_BorderBackdrop")
+	local borderbackdrop = new()
 	borderbackdrop.edgeFile = (texture and thickness > 0) and self:MediaFetch("border", texture) or nil
 	borderbackdrop.edgeSize = thickness
 	frame.borderFrame:SetBackdrop(borderbackdrop)
-	T.free("Skada_BorderBackdrop", borderbackdrop)
+	del(borderbackdrop)
 	if color then
 		frame.borderFrame:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
 	end
@@ -798,27 +795,14 @@ function Skada:DBM(_, mod, wipe)
 end
 
 -------------------------------------------------------------------------------
--- memory check and garbage collection
+-- memory check
 
-function Skada:CheckMemory(clean)
-	self:CleanGarbage() -- collect garbage first.
-
-	if self.db.profile.memorycheck then
-		UpdateAddOnMemoryUsage()
-		local memory = GetAddOnMemoryUsage(folder)
-		if memory > (self.maxmeme * 1024) then
-			self:Notify(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."], L["Memory Check"], nil, "emergency")
-		end
-	end
-end
-
--- this can be used to clear combat log and garbage.
--- note that "collect" isn't used because it blocks all execution for too long.
-local InCombatLockdown = InCombatLockdown
-function Skada:CleanGarbage()
-	if self.db.profile.memorycheck and not InCombatLockdown() then
-		collectgarbage("collect")
-		self:Debug("CleanGarbage")
+function Skada:CheckMemory()
+	if not self.db.profile.memorycheck then return end
+	UpdateAddOnMemoryUsage()
+	local memory = GetAddOnMemoryUsage(folder)
+	if memory > (self.maxmeme * 1024) then
+		self:Notify(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."], L["Memory Check"], nil, "emergency")
 	end
 end
 
@@ -827,8 +811,8 @@ end
 do
 	local function clear_indexes(set, mt)
 		if set then
-			set._playeridx = nil
-			set._enemyidx = nil
+			set._playeridx = del(set._playeridx)
+			set._enemyidx = del(set._enemyidx)
 
 			-- should clear metatables?
 			if not mt then return end
@@ -873,5 +857,202 @@ do
 				clear_indexes(Skada.tempsets[i], mt)
 			end
 		end
+	end
+end
+
+-------------------------------------------------------------------------------
+-- profile import, export and sharing
+
+do
+	local ipairs, strmatch, uformat = ipairs, strmatch, private.uformat
+	local UnitName, GetRealmName = UnitName, GetRealmName
+	local open_window = private.open_import_export
+	local serialize_profile = nil
+
+	local function get_profile_name(str)
+		str = strmatch(strsub(str, 1, 64), "%[(.-)%]")
+		str = str and str:gsub("=", ""):gsub("profile", ""):trim()
+		return (str ~= "") and str
+	end
+
+	local function check_profile_name(name)
+		local profiles = Skada.db:GetProfiles()
+		local ProfileExists = function(name)
+			if name then
+				for _, v in ipairs(profiles) do
+					if name == v then
+						return true
+					end
+				end
+			end
+		end
+
+		name = name or format("%s - %s", UnitName("player"), GetRealmName())
+
+		local n, i = name, 1
+		while ProfileExists(name) do
+			i = i + 1
+			name = format("%s (%d)", n, i)
+		end
+
+		return name
+	end
+
+	local temp = {}
+	function serialize_profile()
+		wipe(temp)
+		private.tCopy(temp, Skada.db.profile, "modeclicks")
+		temp.__name = Skada.db:GetCurrentProfile()
+		return private.serialize(true, format("%s profile", temp.__name), temp)
+	end
+
+	local function import_profile(data, name)
+		if type(data) ~= "string" then
+			Skada:Print("Import profile failed, data supplied must be a string.")
+			return false
+		end
+
+		local success, profile = private.deserialize(data, true)
+		if not success then
+			Skada:Print("Import profile failed!")
+			return false
+		end
+
+		name = name or get_profile_name(data)
+		if profile.__name then
+			name = name or profile.__name
+			profile.__name = nil
+		end
+		local profileName = check_profile_name(name)
+
+		-- backwards compatibility
+		if profile[folder] and type(profile[folder]) == "table" then
+			profile = profile[folder]
+		end
+
+		local old_reload_settings = private.reload_settings
+		private.reload_settings = function()
+			private.reload_settings = old_reload_settings
+			private.tCopy(Skada.db.profile, profile)
+			private.reload_settings()
+			LibStub("AceConfigRegistry-3.0"):NotifyChange(folder)
+		end
+
+		Skada.db:SetProfile(profileName)
+		private.reload_settings()
+		Skada:Wipe()
+		Skada:UpdateDisplay(true)
+		return true
+	end
+
+	function Skada:ProfileImport()
+		local title = L["Paste here a profile in text format."]
+		local subtitle = L["Press CTRL-V to paste a Skada configuration text."]
+		return open_window(title, subtitle, import_profile)
+	end
+
+	function Skada:ProfileExport()
+		local title = L["This is your current profile in text format."]
+		local subtitle = L["Press CTRL-C to copy the configuration to your clipboard."]
+		return open_window(title, subtitle, serialize_profile())
+	end
+
+	function private.advanced_profile(args)
+		if not args then return end
+		private.advanced_profile = nil -- remove it
+		local CONST_COMM_PROFILE = "PR"
+
+		local Share = {}
+
+		function Share:Enable(receive)
+			if receive then
+				self.enabled = true
+				Skada.AddComm(self, CONST_COMM_PROFILE, "Receive")
+			else
+				self.enabled = nil
+				Skada.RemoveAllComms(self)
+			end
+		end
+
+		function Share:Receive(sender, profileStr)
+			local acceptfunc = function()
+				import_profile(profileStr, sender)
+				collectgarbage()
+				Share:Enable(false) -- disable receiving
+				Share.target = nil -- reset target
+			end
+			private.confirm_dialog(uformat(L["opt_profile_received"], sender), acceptfunc)
+		end
+
+		function Share:Send(profileStr, target)
+			Skada:SendComm("PURR", target, CONST_COMM_PROFILE, profileStr)
+		end
+
+		args.advanced = {
+			type = "group",
+			name = L["Advanced"],
+			order = 10,
+			args = {
+				sharing = {
+					type = "group",
+					name = L["Network Sharing"],
+					inline = true,
+					order = 10,
+					hidden = function() return Skada.db.profile.syncoff end,
+					args = {
+						name = {
+							type = "input",
+							name = L["Player Name"],
+							get = function()
+								return Share.target or ""
+							end,
+							set = function(_, value)
+								Share.target = value:trim()
+							end,
+							order = 10
+						},
+						send = {
+							type = "execute",
+							name = L["Send Profile"],
+							func = function()
+								if Share.target and Share.target ~= "" then
+									Share:Send(serialize_profile(), Share.target)
+								end
+							end,
+							disabled = function() return (not Share.target or Share.target == "") end,
+							order = 20
+						},
+						accept = {
+							type = "toggle",
+							name = L["Accept profiles from other players."],
+							get = function() return Share.enabled end,
+							set = function() Share:Enable(not Share.enabled) end,
+							width = "full",
+							order = 30
+						}
+					}
+				},
+				importexport = {
+					type = "group",
+					name = L["Profile Import/Export"],
+					inline = true,
+					order = 20,
+					args = {
+						importbtn = {
+							type = "execute",
+							name = L["Import Profile"],
+							order = 10,
+							func = Skada.OpenImport
+						},
+						exportbtn = {
+							type = "execute",
+							name = L["Export Profile"],
+							order = 20,
+							func = Skada.ExportProfile
+						}
+					}
+				}
+			}
+		}
 	end
 end

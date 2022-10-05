@@ -39,16 +39,10 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 
 				d.id = "AGGRO"
 				d.label = L["> Pull Aggro <"]
-				d.text = nil
-
 				d.icon = aggro_icon
 				d.color = aggro_color
 				d.ignore = true
 				d.changed = nil
-
-				d.class = nil
-				d.role = nil
-				d.spec = nil
 				d.isTanking = nil
 
 				if ruby_acorn then
@@ -101,11 +95,6 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 				d.id = player.id or player.name
 				d.label = player.name
 				d.text = player.id and Skada:FormatName(player.name, player.id)
-
-				d.icon = nil
-				d.color = nil
-				d.ignore = nil
-				d.changed = nil
 
 				d.class = player.class
 				d.role = player.role

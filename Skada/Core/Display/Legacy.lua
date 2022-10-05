@@ -7,6 +7,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 	local pairs, type, format, tsort = pairs, type, string.format, table.sort
 	local SavePosition, RestorePosition = private.SavePosition, private.RestorePosition
 	local classcolors = Skada.classcolors
+	local white = {r = 1, g = 1, b = 1, a = 1}
 
 	-- Display implementation.
 	function mod:OnInitialize()
@@ -165,7 +166,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 		local default = db.barcolor or Skada.windowdefaults.barcolor
 		if not color and data.color then
 			color = data.color
-		elseif not color and db.classcolorbars and data.class and classcolors[data.class] then
+		elseif not color and db.classcolorbars and data.class then
 			color = classcolors(data.class)
 		end
 
@@ -236,18 +237,9 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 					bar_seticon(bar, win.db, data)
 					bar_setcolor(bar, win.db, data)
 
-					if data.class and win.db.classcolortext then
-						-- Class color text.
-						local color = classcolors[data.class]
-						if color then
-							bar.label:SetTextColor(color.r, color.g, color.b, color.a or 1)
-							bar.timerLabel:SetTextColor(color.r, color.g, color.b, color.a or 1)
-						end
-					else
-						-- Default color text.
-						bar.label:SetTextColor(1, 1, 1, 1)
-						bar.timerLabel:SetTextColor(1, 1, 1, 1)
-					end
+					local color = data.class and win.db.classcolortext and classcolors[data.class] or white
+					bar.label:SetTextColor(color.r, color.g, color.b, color.a or 1)
+					bar.timerLabel:SetTextColor(color.r, color.g, color.b, color.a or 1)
 				end
 
 				if metadata.ordersort then

@@ -13,7 +13,7 @@ local Translit = LibStub("LibTranslit-1.0", true)
 
 -- cache frequently used globals
 local _G, GetAddOnMetadata = _G, GetAddOnMetadata
-local new, del = private.newTable, private.delTable
+local new, del, clear = private.newTable, private.delTable, private.clearTable
 local tsort, tinsert, tremove, tconcat, wipe = table.sort, table.insert, private.tremove, table.concat, wipe
 local next, pairs, ipairs, unpack, type, setmetatable = next, pairs, ipairs, unpack, type, setmetatable
 local tonumber, tostring, strmatch, format, gsub, lower, find = tonumber, tostring, strmatch, string.format, string.gsub, string.lower, string.find
@@ -30,8 +30,7 @@ local GetUnitSpec, GetUnitRole = Skada.GetUnitSpec, Skada.GetUnitRole
 local UnitIterator, IsGroupDead = Skada.UnitIterator, Skada.IsGroupDead
 local uformat, EscapeStr, GetCreatureId = private.uformat, private.EscapeStr, Skada.GetCreatureId
 local is_player, is_pet, assign_pet = private.is_player, private.is_pet, private.assign_pet
-local T, P, G = Skada.Table, nil, nil
-local _
+local P, G, _
 
 local LDB = LibStub("LibDataBroker-1.1")
 local dataobj = LDB:NewDataObject(folder, {
@@ -141,21 +140,21 @@ local function create_set(setname, set)
 		setmetatable(set, nil)
 		for k, v in pairs(set) do
 			if type(v) == "table" then
-				set[k] = wipe(v)
+				set[k] = clear(v)
 			else
 				set[k] = nil
 			end
 		end
 	else
 		Skada:Debug("create_set: New", setname)
-		set = {}
+		set = new()
 	end
 
 	-- add stuff.
 	set.name = setname
 	set.starttime = time()
 	set.time = 0
-	set.players = set.players or {}
+	set.players = set.players or new()
 	if setname ~= L["Total"] or P.totalidc then
 		set.last_action = set.starttime
 		set.last_time = GetTime()
@@ -332,12 +331,12 @@ do
 
 	-- create a new window
 	function new_window(ttwin)
-		local win = {}
+		local win = new()
 
-		win.dataset = {}
+		win.dataset = new()
 		if not ttwin then -- regular window?
-			win.metadata = {}
-			win.history = {}
+			win.metadata = new()
+			win.history = new()
 		end
 
 		return setmetatable(win, window_mt)
@@ -562,17 +561,18 @@ function Window:SetDisplay(name)
 	end
 end
 
--- called before dataset is updated.
-local function update_in_progress(self)
-	for i = 1, #self.dataset do
-		local data = self.dataset[i]
-		if data then
-			if data.ignore then
-				data.icon = nil
-			end
-			data.id = nil
-			data.ignore = nil
-		end
+-- checks if the window can show total bar/text
+local function can_show_total(win, set)
+	if not P.showtotals and not win.db.showtotals then
+		return false
+	elseif not win.selectedmode.GetSetSummary then
+		return false
+	elseif win.db.display ~= "bar" and win.db.display ~= "inline" then
+		return false
+	elseif not set.type or set.type == "none" and set.name ~= L["Total"] then
+		return false
+	else
+		return true
 	end
 end
 
@@ -584,8 +584,6 @@ function Window:UpdateDisplay()
 	elseif self.selectedmode then
 		local set = self:GetSelectedSet()
 		if set then
-			update_in_progress(self)
-
 			if self.selectedmode.Update then
 				if set then
 					self.selectedmode:Update(self, set)
@@ -596,16 +594,9 @@ function Window:UpdateDisplay()
 				Skada:Printf("Mode \124cffffbb00%s\124r does not have an Update function!", self.selectedmode.localeName or self.selectedmode.moduleName)
 			end
 
-			if
-				(self.db.display == "bar" or self.display.display == "inline") and
-				(P.showtotals or self.db.showtotals) and
-				self.selectedmode.GetSetSummary and
-				((set.type and set.type ~= "none") or set.name == L["Total"])
-			then
+			if can_show_total(self, set) then
 				local value, valuetext = self.selectedmode:GetSetSummary(set, self)
 				if value or valuetext then
-					local existing = nil -- an existing bar?
-
 					if not value then
 						value = 0
 						for j = 1, #self.dataset do
@@ -613,16 +604,12 @@ function Window:UpdateDisplay()
 							if data and data.id then
 								value = value + data.value
 							end
-							if data and not existing and not data.id then
-								existing = data
-							end
 						end
 					end
 
-					local d = existing or {}
+					local d = self:nr(0)
 					d.id = "total"
 					d.label = L["Total"]
-					d.text = nil
 					d.ignore = true
 					d.value = value + 1 -- to be always first
 					d.valuetext = valuetext or tostring(value)
@@ -631,9 +618,6 @@ function Window:UpdateDisplay()
 						d.icon = self.selectedmode.metadata.icon
 					else
 						d.icon = dataobj.icon
-					end
-					if not existing then
-						tinsert(self.dataset, 1, d)
 					end
 				end
 			end
@@ -749,7 +733,22 @@ end
 
 -- creates or reuses a dataset table
 function Window:nr(i)
-	local d = self.dataset[i] or {}
+	local d = self.dataset[i]
+	if d then
+		if d.ignore then
+			d.color = nil
+			d.icon = nil
+		end
+		d.id = nil
+		d.text = nil
+		d.class = nil
+		d.role = nil
+		d.spec = nil
+		d.ignore = nil
+		return d
+	end
+
+	d = new()
 	self.dataset[i] = d
 	return d
 end
@@ -843,8 +842,6 @@ function Window:actor(d, actor, enemy, actorname)
 
 		if actor.id and Skada.validclass[d.class] then
 			d.text = Skada:FormatName(actor.name or actorname, actor.id)
-		elseif d.text then
-			d.text = nil
 		end
 	end
 	return d
@@ -853,9 +850,9 @@ end
 -- wipes windown's dataset table
 function reset_window(self)
 	if self.dataset then
-		for i = 1, #self.dataset do
+		for i = 0, #self.dataset do
 			if self.dataset[i] then
-				wipe(self.dataset[i])
+				clear(self.dataset[i])
 			end
 		end
 	end
@@ -1091,7 +1088,7 @@ function Skada:CreateWindow(name, db, display)
 
 	local isnew = false
 	if not db then
-		db, isnew = {}, true
+		db, isnew = new(), true
 		private.tCopy(db, self.windowdefaults)
 
 		local wins = P.windows
@@ -1180,9 +1177,6 @@ do
 				win.sticked[name] = nil
 			end
 		end
-
-		-- clean garbage afterwards
-		Skada:CleanGarbage()
 	end
 
 	function Skada:DeleteWindow(name, internal)
@@ -1560,7 +1554,7 @@ function Skada:DeleteSet(set, index)
 	if set and index then
 		local s = tremove(sets, index)
 		self.callbacks:Fire("Skada_SetDeleted", index, s)
-		del(s, true)
+		s = del(s, true)
 
 		if set == self.last then
 			self.last = nil
@@ -1583,9 +1577,6 @@ function Skada:DeleteSet(set, index)
 
 		self:Wipe()
 		self:UpdateDisplay(true)
-
-		-- clean garbage afterwards
-		self:CleanGarbage()
 	end
 end
 
@@ -1601,7 +1592,7 @@ function Skada:FindPlayer(set, id, name, is_create)
 	if not actors then
 		return
 	elseif not set._playeridx then
-		set._playeridx = {}
+		set._playeridx = new()
 	end
 
 	-- already cached player?
@@ -1652,7 +1643,11 @@ function Skada:GetPlayer(set, guid, name, flag)
 		return player
 	end
 
-	player = {id = guid, name = name, flag = flag, time = 0}
+	player = new()
+	player.id = guid
+	player.name = name
+	player.flag = flag
+	player.time = 0
 
 	if players[guid] then
 		_, player.class = UnitClass(players[guid])
@@ -1709,7 +1704,7 @@ function Skada:FindEnemy(set, name, id)
 	if not actors then
 		return
 	elseif not set._enemyidx then
-		set._enemyidx = {}
+		set._enemyidx = new()
 	end
 
 	local enemy = set._enemyidx[name]
@@ -1736,10 +1731,14 @@ function Skada:GetEnemy(set, name, guid, flag, create)
 	if not enemy then
 		-- should create table?
 		if create and not set.enemies then
-			set.enemies = {}
+			set.enemies = new()
 		end
 
-		enemy = {id = guid or name, name = name, flag = flag}
+		enemy = new()
+		enemy.id = guid
+		enemy.name = name
+		enemy.flag = flag
+
 		if guid or flag then
 			enemy.class = private.unit_class(guid, flag)
 		else
@@ -1901,9 +1900,8 @@ do
 
 		local owner = fix_pets_handler(action.playerid, action.playerflags)
 		if owner then
-			action.petname = action.playername
-
 			if P.mergepets then
+				action.petname = action.playername
 				action.playerid = owner.id
 				action.playername = owner.name
 
@@ -2211,7 +2209,7 @@ local function generate_total()
 					end
 				end
 
-				local player = index and total_players[index] or {}
+				local player = index and total_players[index] or new()
 
 				for k, v in pairs(p) do
 					if (type(v) == "string" or k == "spec" or k == "flag") then
@@ -2268,12 +2266,10 @@ local function slash_command(param)
 		private.open_options()
 	elseif cmd == "memorycheck" or cmd == "memory" or cmd == "ram" then
 		Skada:CheckMemory()
-	elseif cmd == "clear" or cmd == "clean" then
-		Skada:CleanGarbage()
-	elseif cmd == "import" and private.open_import then
-		private.open_import()
-	elseif cmd == "export" and private.open_export then
-		private.open_export()
+	elseif cmd == "import" and Skada.ProfileImport then
+		Skada:ProfileImport()
+	elseif cmd == "export" and Skada.ProfileExport then
+		Skada:ProfileExport()
 	elseif cmd == "about" or cmd == "info" then
 		InterfaceOptionsFrame_OpenToCategory(folder)
 	elseif cmd == "version" or cmd == "checkversion" then
@@ -2320,18 +2316,18 @@ local function slash_command(param)
 		if chan and (chan == "say" or chan == "guild" or chan == "raid" or chan == "party" or chan == "officer") and (report_mode_name and find_mode(report_mode_name)) then
 			Skada:Report(chan, "preset", report_mode_name, "current", num)
 		else
-			Skada:Print("Usage:")
+			Skada:Print(L["Usage:"])
 			Skada:Printf("%-20s", "/skada report [channel] [mode] [lines]")
 		end
 	else
-		Skada:Print(L["Usage:"])
+		Skada:Print(L["Commands:"])
 		print("\124cffffaeae/skada\124r \124cffffff33report\124r [channel] [mode] [lines]")
 		print("\124cffffaeae/skada\124r \124cffffff33toggle\124r / \124cffffff33show\124r / \124cffffff33hide\124r")
 		print("\124cffffaeae/skada\124r \124cffffff33newsegment\124r / \124cffffff33newphase\124r")
 		print("\124cffffaeae/skada\124r \124cffffff33numformat\124r / \124cffffff33measure\124r")
 		print("\124cffffaeae/skada\124r \124cffffff33import\124r / \124cffffff33export\124r")
 		print("\124cffffaeae/skada\124r \124cffffff33about\124r / \124cffffff33version\124r / \124cffffff33website\124r / \124cffffff33discord\124r")
-		print("\124cffffaeae/skada\124r \124cffffff33reset\124r / \124cffffff33clean\124r / \124cffffff33reinstall\124r")
+		print("\124cffffaeae/skada\124r \124cffffff33reset\124r / \124cffffff33reinstall\124r")
 		print("\124cffffaeae/skada\124r \124cffffff33config\124r / \124cffffff33debug\124r")
 	end
 end
@@ -2476,9 +2472,7 @@ do
 			end
 		end
 
-		-- clean garbage afterwards
 		report_table, report_set, report_mode = nil, nil, nil
-		self:CleanGarbage()
 	end
 end
 
@@ -2679,10 +2673,8 @@ do
 
 	function Skada:UNIT_PET(owners)
 		for owner in pairs(owners) do
-			local unit = get_pet_from_owner(owner)
-			if not unit then
-				return
-			elseif UnitExists(unit) then
+			local unit = not ignoredUnits[owner] and get_pet_from_owner(owner)
+			if unit and UnitExists(unit) then
 				assign_pet(UnitGUID(owner), UnitName(owner), UnitGUID(unit))
 			end
 		end
@@ -2773,7 +2765,6 @@ function Skada:Reset(force)
 	self:UpdateDisplay(true)
 	self:Notify(L["All data has been reset."])
 	self.callbacks:Fire("Skada_DataReset")
-	self:CleanGarbage()
 	StaticPopup_Hide("SkadaCommonConfirmDialog")
 	CloseDropDownMenus()
 end
@@ -3185,13 +3176,13 @@ function Skada:ApplySettings(name, hidemenu)
 end
 
 function private.reload_settings()
-	for i = 1, #windows do
+	for i = #windows, 1, -1 do
 		local win = windows[i]
 		if win and win.Destroy then
 			win:Destroy()
 		end
+		tremove(windows, i)
 	end
-	wipe(windows)
 
 	-- refresh refrences
 	P = Skada.db.profile
@@ -3437,7 +3428,7 @@ end
 
 function Skada:NewPhase()
 	if self.current and (time() - self.current.starttime) >= (P.minsetlength or 5) then
-		self.tempsets = self.tempsets or T.get("Skada_TempSegments")
+		self.tempsets = self.tempsets or new()
 
 		local set = create_set(L["Current"])
 		set.mobname = self.current.mobname
@@ -3470,7 +3461,7 @@ function combat_end()
 		for i = 1, #Skada.tempsets do
 			process_set(Skada.tempsets[i], curtime, Skada.current.name)
 		end
-		T.free("Skada_TempSegments", Skada.tempsets)
+		clear(Skada.tempsets)
 	end
 
 	-- clear total semgnt
@@ -3542,8 +3533,6 @@ function combat_end()
 		Skada:CancelTimer(toggle_timer, true)
 		toggle_timer = nil
 	end
-
-	Skada:ScheduleTimer("CleanGarbage", 5)
 end
 
 function Skada:StopSegment(msg, phase)

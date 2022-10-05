@@ -649,13 +649,13 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			if icon then
 				bar:SetIcon(icon)
 				bar:ShowIcon()
-			elseif db.specicons and data.spec and speccoords and speccoords[data.spec] then
+			elseif db.specicons and data.spec and speccoords[data.spec] then
 				bar:SetIcon(Skada.specicons, speccoords(data.spec))
 				bar:ShowIcon()
-			elseif db.roleicons and data.role and data.role ~= "NONE" and rolecoords and rolecoords[data.role] then
+			elseif db.roleicons and data.role then
 				bar:SetIcon(roleicons, rolecoords(data.role))
 				bar:ShowIcon()
-			elseif db.classicons and data.class and classcoords[data.class] and data.icon == nil then
+			elseif db.classicons and data.class and data.icon == nil then
 				bar:SetIcon(classicons, classcoords(data.class))
 				bar:ShowIcon()
 			elseif data.icon and not data.ignore and not data.spellid and not data.hyperlink then
@@ -672,7 +672,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 				color = spellschools[data.spellschool]
 			elseif not color and db.useselfcolor and db.selfcolor and data.id == Skada.userGUID then
 				color = db.selfcolor
-			elseif not color and db.classcolorbars and data.class and classcolors[data.class] then
+			elseif not color and db.classcolorbars and data.class then
 				color = classcolors(data.class)
 			end
 			if color then
@@ -696,13 +696,13 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 
 			local db = win.db
 			local hasicon = nil
-			for i = 1, #dataset do
+			for i = 0, #dataset do
 				local data = dataset[i]
 				if
 					(data and data.icon and not data.ignore) or
 					(data and db.classicons and data.class) or
-					(data and db.roleicons and rolecoords and data.role) or
-					(data and db.specicons and speccoords and data.spec)
+					(data and db.roleicons and data.role) or
+					(data and db.specicons and data.spec)
 				then
 					hasicon = true
 					break
@@ -723,7 +723,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			end
 
 			local nr = 1
-			for i = 1, #dataset do
+			for i = 0, #dataset do
 				local data = dataset[i]
 				if data and data.id then
 					local bar = bargroup:GetBar(data.id)
@@ -786,7 +786,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 
 						if
 							data.class and
-							classcolors[data.class] and
+							Skada.validclass[data.class] and
 							(db.classcolortext or db.classcolorleft or db.classcolorright)
 						then
 							local c = classcolors(data.class)
@@ -1048,6 +1048,11 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			local color = p.title.color
 			g.button:SetBackdropColor(color.r, color.g, color.b, color.a or 1)
 			Skada:ApplyBorder(g.button, p.title.bordertexture, p.title.bordercolor, p.title.borderthickness, p.title.borderinsets)
+
+			if g.stretcher then
+				g.stretcher.bg:SetTexture(backdrop.bgFile)
+				g.stretcher.bg:SetVertexColor(color.r, color.g, color.b, color.a or 1)
+			end
 
 			g.button.toolbar = g.button.toolbar or p.title.toolbar or 1
 			if g.button.toolbar ~= p.title.toolbar then

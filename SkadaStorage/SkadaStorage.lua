@@ -10,15 +10,12 @@ local function SetupStorage(self)
 	self.char.version = self.char.version or SkadaCharDB and SkadaCharDB.version or 0
 end
 
-local function CheckMemory(self, clean)
-	self:CleanGarbage()
-
-	if self.db.profile.memorycheck then
-		UpdateAddOnMemoryUsage()
-		local memory = GetAddOnMemoryUsage(AddOnName)
-		if memory > (self.maxmeme * 1024) then
-			self:Notify(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."], L["Memory Check"], nil, "emergency")
-		end
+local function CheckMemory(self)
+	if not self.db.profile.memorycheck then return end
+	UpdateAddOnMemoryUsage()
+	local memory = GetAddOnMemoryUsage(AddOnName)
+	if memory > (self.maxmeme * 1024) then
+		self:Notify(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."], L["Memory Check"], nil, "emergency")
 	end
 end
 

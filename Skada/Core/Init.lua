@@ -52,10 +52,14 @@ end
 function private.register_classes()
 	private.register_classes = nil
 
+	-- class, role and spec icons (sprite)
+	ns.classicons = [[Interface\AddOns\Skada\Media\Textures\icons]]
+	ns.roleicons = ns.classicons
+	ns.specicons = ns.classicons
+
 	-- class colors/names and valid classes
-	local CLASS_COLORS = CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS
 	local classcolors, validclass = {}, {}
-	for class, info in pairs(CLASS_COLORS) do
+	for class, info in pairs(CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS) do
 		classcolors[class] = {r = info.r, g = info.g, b = info.b, colorStr = info.colorStr}
 		classcolors[class].colorStr = classcolors[class].colorStr or private.RGBPercToHex(info.r, info.g, info.b, true)
 		L[class] = LOCALIZED_CLASS_NAMES_MALE[class]
@@ -69,41 +73,41 @@ function private.register_classes()
 	classcolors.MONSTER = {r = 0.549, g = 0.388, b = 0.404, colorStr = "ff8c6367"}
 	classcolors.PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"}
 	classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
-	classcolors.UNKNOWN = {r = 0.353, g = 0.067, b = 0.027, colorStr = "ff5a1107"}
 
 	local P = ns.db.profile
 
 	-- returns class color or "arg" wrapped in class color
-	local default_color = HIGHLIGHT_FONT_COLOR
-	ns.classcolors = setmetatable(classcolors, {__call = function(t, class, arg)
-		local color = default_color
-		if class and t[class] then
-			color = P.usecustomcolors and P.customcolors and P.customcolors[class]
-			color = color or t[class]
+	local classcolors_mt = {
+		__index = function(t, class)
+			local color = {r = 0.353, g = 0.067, b = 0.027, colorStr = "ff5a1107"} -- unknown
+			t[class] = color
+			return color
+		end,
+		__call = function(t, class, arg)
+			local color = t[class]
+			if not color.colorStr then
+				color.colorStr = private.RGBPercToHex(color.r, color.g, color.b, true)
+			end
+			return (arg == nil) and color or (type(arg) == "string") and format("\124c%s%s\124r", color.colorStr, arg) or color.colorStr
 		end
+	}
+	ns.classcolors = setmetatable(classcolors, classcolors_mt)
 
-		-- missing colorStr
-		if not color.colorStr then
-			color.colorStr = private.RGBPercToHex(color.r, color.g, color.b, true)
-		end
-
-		return (arg == nil) and color or (type(arg) == "string") and format("\124c%s%s\124r", color.colorStr, arg) or color.colorStr
-	end})
-
-	-- used for coordinates callbacks
-	local coords_mt = {__call = function(t, key)
-		local x1, x2, y1, y2 = 0, 1, 0, 1
-		if key and t[key] then
-			x1 = t[key][1] or x1
-			x2 = t[key][2] or x2
-			y1 = t[key][3] or y1
-			y2 = t[key][4] or y2
-		end
-		return x1, x2, y1, y2
-	end}
+	-- common __call for coordinates
+	local coords__call = function(t, key)
+		local coords = t[key]
+		return coords[1], coords[2], coords[3], coords[4]
+	end
 
 	-- class icons and coordinates
-	ns.classicons = [[Interface\AddOns\Skada\Media\Textures\icons]]
+	local classcoords_mt = {
+		__index = function(t, class)
+			local coords = {384/512, 448/512, 64/512, 128/512} -- unknown
+			t[class] = coords
+			return coords
+		end,
+		__call = coords__call
+	}
 	ns.classcoords = setmetatable({
 		-- default classes
 		DEATHKNIGHT = {64/512, 128/512, 128/512, 192/512},
@@ -121,22 +125,27 @@ function private.register_classes()
 		ENEMY = {448/512, 512/512, 0/512, 64/512},
 		MONSTER = {384/512, 448/512, 0/512, 64/512},
 		PET = {320/512, 384/512, 64/512, 128/512},
-		PLAYER = {448/512, 512/512, 64/512, 128/512},
-		UNKNOWN = {384/512, 448/512, 64/512, 128/512}
-	}, coords_mt)
+		PLAYER = {448/512, 512/512, 64/512, 128/512}
+	}, classcoords_mt)
 
 	-- role icons and coordinates
-	ns.roleicons = ns.classicons
+	local rolecoords_mt = {
+		__index = function(t, role)
+			local coords = {480/512, 512/512, 128/512, 160/512}
+			t[role] = coords
+			return coords
+		end,
+		__call = coords__call
+	}
 	ns.rolecoords = setmetatable({
 		DAMAGER = {480/512, 512/512, 128/512, 160/512},
 		HEALER = {480/512, 512/512, 160/512, 192/512},
 		LEADER = {448/512, 480/512, 128/512, 160/512},
-		NONE = {480/512, 512/512, 128/512, 160/512}, -- fallback to damager
 		TANK = {448/512, 480/512, 160/512, 192/512}
-	}, coords_mt)
+	}, rolecoords_mt)
 
 	-- spec icons and coordinates
-	ns.specicons = ns.classicons
+	local speccoords_mt = {__call = coords__call}
 	ns.speccoords = setmetatable({
 		[62] = {192/512, 256/512, 192/512, 256/512}, --> Mage: Arcane
 		[63] = {256/512, 320/512, 192/512, 256/512}, --> Mage: Fire
@@ -169,7 +178,7 @@ function private.register_classes()
 		[265] = {384/512, 448/512, 320/512, 384/512}, --> Warlock: Affliction
 		[266] = {448/512, 512/512, 320/512, 384/512}, --> Warlock: Demonology
 		[267] = {0/512, 64/512, 384/512, 448/512} --> Warlock: Destruction
-	}, coords_mt)
+	}, speccoords_mt)
 
 	--------------------------
 	-- custom class options --
@@ -379,7 +388,7 @@ function private.register_medias()
 	LSM:Register("font", "Accidental Presidency", [[Interface\Addons\Skada\Media\Fonts\Accidental Presidency.ttf]])
 	LSM:Register("font", "Adventure", [[Interface\Addons\Skada\Media\Fonts\Adventure.ttf]])
 	LSM:Register("font", "Diablo", [[Interface\Addons\Skada\Media\Fonts\Diablo.ttf]])
-	LSM:Register("font", "Forced Square", [[Interface\Addons\Skada\Media\Fonts\FORCED SQUARE.ttf]])
+	LSM:Register("font", "FORCED SQUARE", [[Interface\Addons\Skada\Media\Fonts\FORCED SQUARE.ttf]])
 	LSM:Register("font", "Hooge", [[Interface\Addons\Skada\Media\Fonts\Hooge.ttf]])
 
 	-- statusbars
@@ -539,7 +548,7 @@ end
 -- creates a table pool
 function private.table_pool()
 	local pool = {tables = {}, new = true, del = true, clear = true}
-	setmetatable(pool.tables, {__mode = "k"})
+	setmetatable(pool.tables, private.weaktable)
 
 	-- reuses or creates a table
 	pool.new = function()
@@ -1241,5 +1250,69 @@ do
 		function private.dismiss_pet(petGUID)
 			pets[petGUID] = del(pets[petGUID])
 		end
+	end
+end
+
+-------------------------------------------------------------------------------
+-- generic import and export window
+
+do
+	local AceGUI = nil
+
+	local frame_name = format("%sImportExportFrame", folder)
+	local function open_window(title, subtitle, data, clickfunc)
+		AceGUI = AceGUI or LibStub("AceGUI-3.0")
+		local frame = AceGUI:Create("Frame")
+		frame:SetTitle(L["Import/Export"])
+		frame:SetStatusText(subtitle)
+		frame:SetLayout("Flow")
+		frame:SetCallback("OnClose", function(widget)
+			AceGUI:Release(widget)
+			collectgarbage()
+		end)
+		frame:SetWidth(535)
+		frame:SetHeight(350)
+
+		local editbox = AceGUI:Create("MultiLineEditBox")
+		editbox.editBox:SetFontObject(GameFontHighlightSmall)
+		editbox:SetLabel(title)
+		editbox:SetFullWidth(true)
+		editbox:SetFullHeight(true)
+		frame:AddChild(editbox)
+
+		if type(data) == "function" then
+			clickfunc = data
+			data = nil
+		end
+
+		if data then
+			editbox:DisableButton(true)
+			editbox:SetText(data)
+			editbox.editBox:SetFocus()
+			editbox.editBox:HighlightText()
+			editbox:SetCallback("OnLeave", function(widget)
+				widget.editBox:HighlightText()
+				widget.editBox:SetFocus()
+			end)
+			editbox:SetCallback("OnEnter", function(widget)
+				widget.editBox:HighlightText()
+				widget.editBox:SetFocus()
+			end)
+		else
+			editbox:DisableButton(false)
+			editbox.editBox:SetFocus()
+			editbox.button:SetScript("OnClick", function(widget)
+				clickfunc(editbox:GetText())
+				AceGUI:Release(frame)
+				collectgarbage()
+			end)
+		end
+		-- close on escape
+		_G[frame_name] = frame.frame
+		UISpecialFrames[#UISpecialFrames + 1] = frame_name
+	end
+
+	function private.open_import_export(title, subtitle, data, clickfunc)
+		return open_window(title, subtitle, data, clickfunc)
 	end
 end

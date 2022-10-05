@@ -15,6 +15,10 @@ L["Enable All"] = true
 L["Disable All"] = true
 L["Stopping for wipe."] = true
 L["Usage:"] = true
+L["Commands:"] = true
+L["Import"] = true
+L["Export"] = true
+L["Import/Export"] = true
 L["Pets"] = PETS or "Pets"
 -- profiles
 L["Profiles"] = true

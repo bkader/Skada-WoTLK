@@ -20,7 +20,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local mod_cols, submod_cols = nil, nil
 
 	-- cache colors
-	local GRAY_COLOR = GREEN_FONT_COLOR
+	local GRAY_COLOR = GRAY_FONT_COLOR
 	local GREEN_COLOR = GREEN_FONT_COLOR
 	local ORANGE_COLOR = ORANGE_FONT_COLOR
 	local RED_COLOR = RED_FONT_COLOR
