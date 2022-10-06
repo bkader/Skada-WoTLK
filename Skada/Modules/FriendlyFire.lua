@@ -310,18 +310,9 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		if not set.friendfire or set.friendfire == 0 then return end
 		for i = 1, #set.players do
 			local p = set.players[i]
-			if p and (p.friendfire == 0 or (not p.friendfire and p.friendfirespells)) then
+			local amount = p and p.friendfire
+			if (not amount and p.friendfirespells) or amount == 0 then
 				p.friendfire, p.friendfirespells = nil, del(p.friendfirespells, true)
-			elseif p and p.friendfirespells then
-				for spellid, spell in pairs(p.friendfirespells) do
-					if spell.amount == 0 then
-						p.friendfirespells[spellid] = del(p.friendfirespells[spellid])
-					end
-				end
-				-- nothing left?!
-				if next(p.friendfirespells) == nil then
-					p.friendfirespells = del(p.friendfirespells)
-				end
 			end
 		end
 	end

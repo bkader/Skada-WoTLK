@@ -41,16 +41,21 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		if not player then return end
 
 		player.damaged = (player.damaged or 0) + dmg.amount
-		player.totaldamaged = (player.totaldamaged or 0) + dmg.amount
-
 		set.damaged = (set.damaged or 0) + dmg.amount
-		set.totaldamaged = (set.totaldamaged or 0) + dmg.amount
 
 		-- add absorbed damage to total damage
 		local absorbed = dmg.absorbed or 0
-		if absorbed > 0 then
-			player.totaldamaged = player.totaldamaged + absorbed
-			set.totaldamaged = set.totaldamaged + absorbed
+
+		if player.totaldamaged then
+			player.totaldamaged = player.totaldamaged + dmg.amount + absorbed
+		elseif absorbed > 0 then
+			player.totaldamaged = player.damage + absorbed
+		end
+
+		if set.totaldamaged then
+			set.totaldamaged = set.totaldamaged + dmg.amount + absorbed
+		elseif absorbed > 0 then
+			set.totaldamaged = set.damage + absorbed
 		end
 
 		-- saving this to total set may become a memory hog deluxe.
@@ -732,10 +737,13 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 
 	function mod:SetComplete(set)
 		-- clean set from garbage before it is saved.
-		if not set.totaldamaged or set.totaldamaged == 0 then return end
+		local total = set.totaldamaged or set.damaged
+		if not total or total == 0 then return end
+
 		for i = 1, #set.players do
 			local p = set.players[i]
-			if p and (p.totaldamaged == 0 or (not p.totaldamaged and (p.damagedspells or p.damagetakenspells))) then
+			local amount = p and (p.totaldamaged or p.damaged)
+			if not amount or amount == 0 then
 				p.damaged, p.totaldamaged = nil, nil
 				p.damagedspells = del(p.damagedspells or p.damagetakenspells, true)
 			end

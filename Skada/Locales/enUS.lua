@@ -609,6 +609,7 @@ L["Damage spell list"] = true
 L["Damage spell details"] = true
 L["Damage spell targets"] = true
 L["Damage Done"] = true
+L["Pet Damage"] = SHOW_PET_MELEE_DAMAGE or "Pet Damage"
 L["actor damage"] = function(n1, n2) return ((not n2 or n1 == n2) and "%s's damage" or "%s's damage on %s"):format(n1, n2) end
 L["%s's <%s> damage"] = true
 L["Useful Damage"] = true

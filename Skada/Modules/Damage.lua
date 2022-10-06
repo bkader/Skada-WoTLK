@@ -82,18 +82,33 @@ Skada:RegisterModule("Damage", function(L, P)
 			add_actor_time(set, player, dmg.spellid, dmg.dstName)
 		end
 
+		player.damage = (player.damage or 0) + dmg.amount
+		set.damage = (set.damage or 0) + dmg.amount
+
+		-- add pet damage
+		if dmg.petname then
+			player.petdamage = (player.petdamage or 0) + dmg.amount
+		end
+
 		-- absorbed damage
 		local absorbed = dmg.absorbed or 0
 
-		player.damage = (player.damage or 0) + dmg.amount
-		player.totaldamage = (player.totaldamage or 0) + dmg.amount
+		if player.totaldamage then
+			player.totaldamage = player.totaldamage + dmg.amount + absorbed
+		elseif absorbed > 0 then
+			player.totaldamage = player.damage + absorbed
+		end
 
-		set.damage = (set.damage or 0) + dmg.amount
-		set.totaldamage = (set.totaldamage or 0) + dmg.amount
+		if set.totaldamage then
+			set.totaldamage = set.totaldamage + dmg.amount + absorbed
+		elseif absorbed > 0 then
+			set.totaldamage = set.damage + absorbed
+		end
 
-		if absorbed > 0 then -- add absorbed damage to total
-			player.totaldamage = player.totaldamage + absorbed
-			set.totaldamage = set.totaldamage + absorbed
+		if dmg.petname and player.pettotaldamage then
+			player.pettotaldamage = player.pettotaldamage + dmg.amount + absorbed
+		elseif dmg.petname and absorbed > 0 then
+			player.pettotaldamage = player.petdamage + absorbed
 		end
 
 		-- add the damage overkill
@@ -325,6 +340,11 @@ Skada:RegisterModule("Damage", function(L, P)
 
 		local suffix = Skada:FormatTime(P.timemesure == 1 and activetime or totaltime)
 		tooltip:AddDoubleLine(Skada:FormatNumber(damage) .. "/" .. suffix, Skada:FormatNumber(dps), 1, 1, 1)
+
+		local petdamage = P.absdamage and actor.pettotaldamage or actor.petdamage
+		if not petdamage then return end
+		petdamage = format("%s (\124cffffffff%s\124r)", Skada:FormatNumber(petdamage), Skada:FormatPercent(petdamage, damage))
+		tooltip:AddDoubleLine(L["Pet Damage"], petdamage)
 	end
 
 	local function playermod_tooltip(win, id, label, tooltip)
@@ -801,10 +821,13 @@ Skada:RegisterModule("Damage", function(L, P)
 
 	function mod:SetComplete(set)
 		-- clean set from garbage before it is saved.
-		if not set.totaldamage or set.totaldamage == 0 then return end
+		local total = set.totaldamage or set.damage
+		if not total or total == 0 then return end
+
 		for i = 1, #set.players do
 			local p = set.players[i]
-			if p and (p.totaldamage == 0 or (not p.totaldamage and p.damagespells)) then
+			local amount = p and (p.totaldamage or p.damage)
+			if (not amount and p.damagespells) or amount == 0 then
 				p.damage, p.totaldamage = nil, nil
 				p.damagespells = del(p.damagespells, true)
 			end
@@ -869,6 +892,11 @@ Skada:RegisterModule("DPS", function(L, P)
 
 		local suffix = Skada:FormatTime(P.timemesure == 1 and activetime or totaltime)
 		tooltip:AddDoubleLine(Skada:FormatNumber(damage) .. "/" .. suffix, Skada:FormatNumber(dps), 1, 1, 1)
+
+		local petdamage = P.absdamage and actor.pettotaldamage or actor.petdamage
+		if not petdamage then return end
+		petdamage = format("%s (\124cffffffff%s\124r)", Skada:FormatNumber(petdamage), Skada:FormatPercent(petdamage, damage))
+		tooltip:AddDoubleLine(L["Pet Damage"], petdamage)
 	end
 
 	function mod:Update(win, set)

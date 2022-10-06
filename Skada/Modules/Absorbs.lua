@@ -1151,7 +1151,8 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		if not set.absorb or set.absorb == 0 then return end
 		for i = 1, #set.players do
 			local p = set.players[i]
-			if p and (p.absorb == 0 or (not p.absorb and p.absorbspells)) then
+			local amount = p and p.absorb
+			if (not amount and p.absorbspells) or amount == 0 then
 				p.absorb, p.absorbspells = nil, del(p.absorbspells, true)
 			end
 		end
