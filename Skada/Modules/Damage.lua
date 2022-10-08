@@ -603,9 +603,8 @@ Skada:RegisterModule("Damage", function(L, P)
 			nr = add_detail_bar(win, nr, L["Damage"], spell.amount, total, true, true)
 		end
 
-		local overkill = spell.o_amt or spell.overkill
-		if overkill and overkill > 0 then
-			nr = add_detail_bar(win, nr, L["Overkill"], overkill, total, true, true)
+		if spell.o_amt and spell.o_amt > 0 then
+			nr = add_detail_bar(win, nr, L["Overkill"], spell.o_amt, total, true, true)
 		end
 
 		if absorbed and absorbed > 0 then
@@ -1173,8 +1172,8 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 
 			local d = win:spell(nr, spellname, spell)
 			d.value = P.absdamage and spell.total or spell.amount
-			if spell.o_amt or spell.overkill then
-				d.value = max(0, d.value - (spell.o_amt or spell.overkill))
+			if spell.o_amt then
+				d.value = max(0, d.value - spell.o_amt)
 			end
 
 			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
@@ -1208,8 +1207,8 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 
 			local d = win:actor(nr, target, true, targetname)
 			d.value = P.absdamage and target.total or target.amount
-			if target.o_amt or target.overkill then
-				d.value = max(0, d.value - (target.o_amt or target.overkill))
+			if target.o_amt then
+				d.value = max(0, d.value - target.o_amt)
 			end
 
 			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
@@ -1375,12 +1374,11 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 		local actortime = mod_cols.sDPS and actor:GetTime()
 
 		for spellname, spell in pairs(actor.damagespells) do
-			local o_amt = spell.o_amt or spell.overkill
-			if o_amt and o_amt > 0 then
+			if spell.o_amt and spell.o_amt > 0 then
 				nr = nr + 1
 
 				local d = win:spell(nr, spellname, spell)
-				d.value = o_amt
+				d.value = spell.o_amt
 				format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
@@ -1409,12 +1407,11 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 		local actortime = mod_cols.sDPS and actor:GetTime()
 
 		for targetname, target in pairs(targets) do
-			local o_amt = target.o_amt or target.overkill
-			if o_amt and o_amt > 0 then
+			if target.o_amt and target.o_amt > 0 then
 				nr = nr + 1
 
 				local d = win:actor(nr, target, true, targetname)
-				d.value = o_amt
+				d.value = target.o_amt
 				format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
@@ -1466,7 +1463,7 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 		if not actor or not actor.overkill or actor.overkill == 0 then return end
 
 		local targets = actor:GetDamageTargets()
-		local total = targets and targets[win.targetname] and (targets[win.targetname].o_amt or targets[win.targetname].overkill)
+		local total = targets and targets[win.targetname] and targets[win.targetname].o_amt
 
 		if not total or total == 0 then
 			return
@@ -1478,7 +1475,7 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 		local actortime = mod_cols.sDPS and actor:GetTime()
 
 		for spellname, spell in pairs(actor.damagespells) do
-			local o_amt = spell.targets and spell.targets[win.targetname] and (spell.targets[win.targetname].o_amt or spell.targets[win.targetname].overkill)
+			local o_amt = spell.targets and spell.targets[win.targetname] and spell.targets[win.targetname].o_amt
 			if o_amt and o_amt > 0 then
 				nr = nr + 1
 
@@ -1578,10 +1575,10 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 					local t = tbl[targetname]
 					if not t then
 						t = new()
-						t.o_amt = target.o_amt or target.overkill
+						t.o_amt = target.o_amt
 						tbl[targetname] = t
-					elseif target.o_amt or target.overkill then
-						t.o_amt = (t.o_amt or 0) + (target.o_amt or target.overkill)
+					elseif target.o_amt then
+						t.o_amt = (t.o_amt or 0) + target.o_amt
 					end
 
 					self.super:_fill_actor_table(t, targetname)

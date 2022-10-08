@@ -482,7 +482,8 @@ do
 	function spell_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
 		local settime = set and set:GetTime()
-		local actor = (settime and settime > 0) and set:GetActor(win.actorname, win.actorid)
+		if not settime or settime == 0 then return end
+		local actor, enemy = set:GetActor(win.actorname, win.actorid)
 		local spell = actor and actor.auras and actor.auras[id]
 		if not spell then return end
 
@@ -508,7 +509,7 @@ do
 
 		-- display aura uptime in colored percent
 		local uptime = 100 * (spell.uptime / actor:GetTime())
-		tooltip:AddDoubleLine(L["Uptime"], Skada:FormatPercent(uptime), nil, nil, nil, PercentToRGB(uptime))
+		tooltip:AddDoubleLine(L["Uptime"], Skada:FormatPercent(uptime), nil, nil, nil, PercentToRGB(uptime, enemy))
 	end
 
 	function spelltarget_tooltip(win, id, label, tooltip)

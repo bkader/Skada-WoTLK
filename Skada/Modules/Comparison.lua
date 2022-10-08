@@ -341,9 +341,8 @@ Skada:RegisterModule("Comparison", function(L, P)
 				end
 
 				-- overkill damage
-				local overkill = spell.o_amt or spell.overkill
-				if overkill and overkill > 0 then
-					nr = add_detail_bar(win, nr, L["Overkill"], overkill, nil, true, true)
+				if spell.o_amt and spell.o_amt > 0 then
+					nr = add_detail_bar(win, nr, L["Overkill"], spell.o_amt, nil, true, true)
 				end
 
 				-- blocked damage
@@ -412,8 +411,8 @@ Skada:RegisterModule("Comparison", function(L, P)
 			end
 
 			-- overkill damage
-			local overkill = spell and (spell.o_amt or spell.overkill)
-			local myoverkill = myspell and (myspell.o_amt or myspell.overkill)
+			local overkill = spell and spell.o_amt
+			local myoverkill = myspell and myspell.o_amt
 			if (overkill and overkill > 0) or (myoverkill and myoverkill > 0) then
 				nr = add_detail_bar(win, nr, L["Overkill"], overkill, myoverkill, true)
 			end

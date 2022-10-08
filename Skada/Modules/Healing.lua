@@ -546,12 +546,11 @@ Skada:RegisterModule("Overhealing", function(L)
 
 		for spellid, spell in pairs(spells) do
 			local tar = spell.targets and spell.targets[win.targetname]
-			local o_amt = tar and (tar.o_amt or tar.overheal)
-			if o_amt and o_amt > 0 then
+			if tar.o_amt and tar.o_amt > 0 then
 				nr = nr + 1
 
 				local d = win:spell(nr, spellid, spell, nil, true)
-				d.value = o_amt
+				d.value = tar.o_amt
 				fmt_valuetext(d, mod.metadata.columns, tar.amount + d.value, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
@@ -580,13 +579,12 @@ Skada:RegisterModule("Overhealing", function(L)
 		local actortime = mod_cols.sHPS and actor:GetTime()
 
 		for spellid, spell in pairs(spells) do
-			local o_amt = spell.o_amt or spell.overheal
-			if o_amt and o_amt > 0 then
+			if spell.o_amt and spell.o_amt > 0 then
 				nr = nr + 1
 
 				local d = win:spell(nr, spellid, spell, nil, true)
-				d.value = o_amt
-				fmt_valuetext(d, mod_cols, spell.amount + o_amt, actortime and (d.value / actortime), win.metadata, true)
+				d.value = spell.o_amt
+				fmt_valuetext(d, mod_cols, spell.amount + d.value, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
 	end
@@ -712,7 +710,7 @@ Skada:RegisterModule("Total Healing", function(L)
 			tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
 		end
 
-		local total = spell.amount + (spell.o_amt or spell.overheal or 0)
+		local total = spell.amount + (spell.o_amt or 0)
 		tooltip:AddDoubleLine(L["Total"], Skada:FormatNumber(total), 1, 1, 1)
 		if spell.amount > 0 then
 			tooltip:AddDoubleLine(L["Healing"], format("%s (%s)", Skada:FormatNumber(spell.amount), Skada:FormatPercent(spell.amount, total)), 0.67, 1, 0.67)
@@ -814,7 +812,7 @@ Skada:RegisterModule("Total Healing", function(L)
 		local actortime = mod_cols.sHPS and actor:GetTime()
 
 		for spellid, spell in pairs(spells) do
-			local amount = spell.amount + (spell.o_amt or spell.overheal or 0)
+			local amount = spell.amount + (spell.o_amt or 0)
 			if amount > 0 then
 				nr = nr + 1
 

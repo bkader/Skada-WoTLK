@@ -288,12 +288,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		if not set then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-
-		local spell = nil
-		if actor and not enemy then
-			spell = actor.damagedspells and actor.damagedspells[label]
-			spell = spell or actor.damagetakenspells and actor.damagetakenspells[label]
-		end
+		local spell = actor and actor.damagedspells and actor.damagedspells[id]
 		if not spell then return end
 
 		tooltip:AddLine(label .. " - " .. actor.name)
@@ -327,10 +322,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		if label == L["Critical Hits"] or label == L["Normal Hits"] or label == L["Glancing"] then
 			local set = win:GetSelectedSet()
 			local actor = set and set:GetPlayer(win.actorid, win.actorname)
-			if not actor then return end
-
-			local spell = actor.damagedspells and actor.damagedspells[win.spellid]
-			spell = spell or actor.damagetakenspells and actor.damagetakenspells[win.spellid]
+			local spell = actor and actor.damagedspells and actor.damagedspells[win.spellid]
 			if not spell then return end
 
 			tooltip:AddLine(actor.name .. " - " .. win.spellname)
@@ -377,7 +369,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 
 		local actor = set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetDamageTaken()
-		local spells = (total and total > 0) and actor.damagedspells or actor.damagetakenspells
+		local spells = (total and total > 0) and actor.damagedspells
 
 		if not spells then
 			return
@@ -448,13 +440,8 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		win.title = uformat("%s: %s", win.actorname, uformat(L["%s's damage breakdown"], win.spellname))
 		if not set or not win.spellid then return end
 
-		-- details only available for players
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		if not actor then return end
-
-		local spell = actor.damagedspells and actor.damagedspells[win.spellid]
-		spell = spell or actor.damagetakenspells and actor.damagetakenspells[win.spellid]
-
+		local spell = actor and actor.damagedspells and actor.damagedspells[win.spellid]
 		if not spell then
 			return
 		elseif win.metadata then
@@ -505,12 +492,8 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		win.title = uformat("%s: %s", win.actorname, uformat(L["Damage from %s"], win.spellname))
 		if not set or not win.spellid then return end
 
-		-- only available for players
 		local actor = set:GetPlayer(win.actorid, win.actorname)
-		if not actor then return end
-
-		local spell = actor.damagedspells and actor.damagedspells[win.spellid]
-		spell = spell or actor.damagetakenspells and actor.damagetakenspells[win.spellid]
+		local spell = actor and actor.damagedspells and actor.damagedspells[win.spellid]
 		if not spell then return end
 
 		local total = spell.amount
@@ -541,9 +524,8 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 			nr = add_detail_bar(win, nr, L["Damage"], spell.amount, total, true, true)
 		end
 
-		local overkill = spell.o_amt or spell.overkill
-		if overkill and overkill > 0 then
-			nr = add_detail_bar(win, nr, L["Overkill"], overkill, total, true, true)
+		if spell.o_amt and spell.o_amt > 0 then
+			nr = add_detail_bar(win, nr, L["Overkill"], spell.o_amt, total, true, true)
 		end
 
 		if absorbed and absorbed > 0 then
@@ -577,7 +559,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		if not sources or not sources[win.targetname] then return end
 
 		local total = P.absdamage and sources[win.targetname].total or sources[win.targetname].amount
-		local spells = (total and total > 0) and (actor.damagedspells or actor.damagetakenspells)
+		local spells = (total and total > 0) and actor.damagedspells
 		if not spells then
 			return
 		elseif win.metadata then
@@ -745,7 +727,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 			local amount = p and (p.totaldamaged or p.damaged)
 			if not amount or amount == 0 then
 				p.damaged, p.totaldamaged = nil, nil
-				p.damagedspells = del(p.damagedspells or p.damagetakenspells, true)
+				p.damagedspells = del(p.damagedspells, true)
 			end
 		end
 	end
@@ -872,7 +854,6 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 		if not player then return end
 
 		local spell = player.damagedspells and player.damagedspells[win.spellid]
-		spell = spell or player.damagetakenspells and player.damagetakenspells[win.spellid]
 		if not spell or not spell.count then return end
 
 		tooltip:AddLine(label .. " - " .. win.spellname)
@@ -915,7 +896,6 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 		for i = 1, #players do
 			local player = players[i]
 			local spell = player and player.damagedspells and player.damagedspells[win.spellid]
-			spell = spell or player and player.damagetakenspells and player.damagetakenspells[win.spellid]
 
 			if spell and spell.sources then
 				for sourcename, source in pairs(spell.sources) do
@@ -981,7 +961,6 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 		for i = 1, #players do
 			local player = players[i]
 			local spell = player and player.damagedspells and player.damagedspells[win.spellid]
-			spell = spell or player.damagetakenspells and player.damagetakenspells[win.spellid]
 			if spell then
 				local amount = P.absdamage and spell.total or spell.amount or 0
 				if amount > 0 then
@@ -1027,7 +1006,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 		local spells = clear(C)
 		for i = 1, #set.players do
 			local player = set.players[i]
-			local _spells = player and (player.damagedspells or player.damagetakenspells)
+			local _spells = player and player.damagedspells
 			if _spells then
 				for spellid, spell in pairs(_spells) do
 					local amount = P.absdamage and spell.total or spell.amount or 0
@@ -1132,7 +1111,7 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Avoidance & Mitigation"], L[win.class]) or L["Avoidance & Mitigation"]
 
-		local total = set and (set.totaldamaged or set.totaldamagetaken)
+		local total = set and set.totaldamaged
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -1147,13 +1126,12 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 		for i = 1, #actors do
 			local player = actors[i]
 			if player and (not win.class or win.class == player.class) then
-				local spells = player.damagedspells or player.damagetakenspells
-				if spells then
+				if player.damagedspells then
 					local tmp = new()
 					tmp.name = player.name
 
 					local count, avoid = 0, 0
-					for _, spell in pairs(spells) do
+					for _, spell in pairs(player.damagedspells) do
 						count = count + spell.count
 
 						for k, v in pairs(missTypes) do

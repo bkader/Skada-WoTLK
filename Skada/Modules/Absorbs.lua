@@ -1712,12 +1712,12 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 					C[id] = new()
 					C[id].school = spell.school
 					C[id].amount = spell.amount
-					C[id].o_amt = spell.o_amt or spell.overheal
+					C[id].o_amt = spell.o_amt
 					C[id].isabsorb = (p.absorbspells and p.absorbspells[id])
 				else
 					C[id].amount = C[id].amount + spell.amount
-					if spell.o_amt or spell.overheal then
-						C[id].o_amt = (C[id].o_amt or 0) + (spell.o_amt or spell.overheal)
+					if spell.o_amt then
+						C[id].o_amt = (C[id].o_amt or 0) + spell.o_amt
 					end
 				end
 			end
