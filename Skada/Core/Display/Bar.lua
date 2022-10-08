@@ -17,6 +17,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 	local IsModifierKeyDown = IsModifierKeyDown
 	local SavePosition = private.SavePosition
 	local RestorePosition = private.RestorePosition
+	local prevent_duplicate = private.prevent_duplicate
 	local new, del = private.newTable, private.delTable
 	local _
 
@@ -2331,25 +2332,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 												G.themes = G.themes or {}
 												local theme = {}
 												private.tCopy(theme, win.db, skipped)
-												theme.name = savetheme or win.db.name
-
-												-- duplicate names
-												local num = 0
-												for j = 1, #G.themes do
-													local t = G.themes[j]
-													if t and t.name == theme.name and num == 0 then
-														num = 1
-													elseif t then
-														local n, c = strmatch(t.name, "^(.-)%s*%((%d+)%)$")
-														if n == theme.name then
-															num = max(num, tonumber(c) or 0)
-														end
-													end
-												end
-												if num > 0 then
-													theme.name = format("%s (%s)", theme.name, num + 1)
-												end
-
+												theme.name = prevent_duplicate(savetheme or win.db.name, G.themes, "name")
 												G.themes[#G.themes + 1] = theme
 												break -- stop
 											end

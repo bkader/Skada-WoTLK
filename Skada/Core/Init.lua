@@ -14,7 +14,7 @@ ns.private = private
 
 -- cache frequently used globals
 local pairs, ipairs = pairs, ipairs
-local select, next = select, next
+local select, next, max = select, next, math.max
 local band, tonumber, type = bit.band, tonumber, type
 local format, strmatch, gsub = string.format, string.match, string.gsub
 local setmetatable = setmetatable
@@ -595,6 +595,23 @@ do
 	private.newTable = _pool.new
 	private.delTable = _pool.del
 	private.clearTable = _pool.clear
+end
+
+-- prevents duplicates in a table to format strings
+function private.prevent_duplicate(value, tbl, key)
+	local num = 0
+	for i = 1, #tbl do
+		local elem = tbl[i]
+		if elem and elem[key] == value and num == 0 then
+			num = 1
+		elseif elem and elem[key] then
+			local n, c = strmatch(elem[key], "^(.-)%s*%((%d+)%)$")
+			if n == value then
+				num = max(num, tonumber(c), 0)
+			end
+		end
+	end
+	return (num > 0) and format("%s (%d)", value, num + 1) or value
 end
 
 -------------------------------------------------------------------------------

@@ -10,7 +10,8 @@ local _
 local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 local UnitClass, GetPlayerInfoByGUID = UnitClass, GetPlayerInfoByGUID
 local GetClassFromGUID = Skada.GetClassFromGUID
-local new, del, clear = private.newTable, private.delTable, private.clearTable
+local new, del = private.newTable, private.delTable
+local clear, copy = private.clearTable, private.tCopy
 
 local COMBATLOG_OBJECT_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
 
@@ -674,7 +675,7 @@ function Skada:NewWindow(window)
 			local db = win and win.db
 			if db and IsShiftKeyDown() then
 				local w = Skada:CreateWindow(name, nil, db.display)
-				private.tCopy(w.db, db, "name", "sticked", "point", "snapped", "child", "childmode")
+				copy(w.db, db, "name", "sticked", "point", "snapped", "child", "childmode")
 				w.db.x, w.db.y = 0, 0
 				Skada:ApplySettings(name)
 			else
@@ -901,7 +902,7 @@ do
 	local temp = {}
 	function serialize_profile()
 		wipe(temp)
-		private.tCopy(temp, Skada.db.profile, "modeclicks")
+		copy(temp, Skada.db.profile, "modeclicks")
 		temp.__name = Skada.db:GetCurrentProfile()
 		return private.serialize(true, format("%s profile", temp.__name), temp)
 	end
@@ -933,7 +934,7 @@ do
 		local old_reload_settings = private.reload_settings
 		private.reload_settings = function()
 			private.reload_settings = old_reload_settings
-			private.tCopy(Skada.db.profile, profile)
+			copy(Skada.db.profile, profile)
 			private.reload_settings()
 			LibStub("AceConfigRegistry-3.0"):NotifyChange(folder)
 		end

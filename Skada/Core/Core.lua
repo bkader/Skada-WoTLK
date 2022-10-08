@@ -13,7 +13,7 @@ local Translit = LibStub("LibTranslit-1.0", true)
 
 -- cache frequently used globals
 local _G, GetAddOnMetadata = _G, GetAddOnMetadata
-local new, del, clear = private.newTable, private.delTable, private.clearTable
+local new, del, clear, copy = private.newTable, private.delTable, private.clearTable, private.tCopy
 local tsort, tinsert, tremove, tconcat, wipe = table.sort, table.insert, private.tremove, table.concat, wipe
 local next, pairs, ipairs, unpack, type, setmetatable = next, pairs, ipairs, unpack, type, setmetatable
 local tonumber, tostring, strmatch, format, gsub, lower, find = tonumber, tostring, strmatch, string.format, string.gsub, string.lower, string.find
@@ -26,9 +26,9 @@ local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 local CloseDropDownMenus, SecondsToTime = CloseDropDownMenus, SecondsToTime
 local IsInGroup, IsInRaid, IsInPvP = Skada.IsInGroup, Skada.IsInRaid, Skada.IsInPvP
 local GetNumGroupMembers, GetGroupTypeAndCount = Skada.GetNumGroupMembers, Skada.GetGroupTypeAndCount
-local GetUnitSpec, GetUnitRole = Skada.GetUnitSpec, Skada.GetUnitRole
+local GetCreatureId, GetUnitSpec, GetUnitRole = Skada.GetCreatureId, Skada.GetUnitSpec, Skada.GetUnitRole
 local UnitIterator, IsGroupDead = Skada.UnitIterator, Skada.IsGroupDead
-local uformat, EscapeStr, GetCreatureId = private.uformat, private.EscapeStr, Skada.GetCreatureId
+local prevent_duplicate, uformat, EscapeStr = private.prevent_duplicate, private.uformat, private.EscapeStr
 local is_player, is_pet, assign_pet = private.is_player, private.is_pet, private.assign_pet
 local P, G, _
 
@@ -179,23 +179,7 @@ local function check_set_name(set)
 	end
 
 	if P.setnumber then
-		local num = 0
-		local sets = Skada.char.sets
-
-		for i = 1, #sets do
-			local s = sets[i]
-			if s and s.name == setname and num == 0 then
-				num = 1
-			elseif s then
-				local n, c = strmatch(s.name, "^(.-)%s*%((%d+)%)$")
-				if n == setname then
-					num = max(num, tonumber(c) or 0)
-				end
-			end
-		end
-		if num > 0 then
-			setname = format("%s (%s)", setname, num + 1)
-		end
+		setname = prevent_duplicate(setname, Skada.char.sets, "name")
 	end
 
 	set.name = setname
@@ -367,28 +351,22 @@ do
 						val = val:trim()
 						if val ~= db.name and val ~= "" then
 							local oldname = db.name
+							db.name = prevent_duplicate(val, windows, "name")
+							if db.name ~= oldname then
+								-- move options table
+								Skada.options.args.windows.args[db.name] = Skada.options.args.windows.args[oldname]
+								Skada.options.args.windows.args[oldname] = nil
 
-							-- avoid duplicate names
-							local num = 0
-							for i = 1, #windows do
-								local _db = windows[i] and windows[i].db
-								local win = windows[i]
-								if _db and _db.name == val and num == 0 then
-									num = 1
-								elseif _db then
-									local n, c = strmatch(_db.name, "^(.-)%s*%((%d+)%)$")
-									if n == val then
-										num = max(num, tonumber(c) or 0)
+								-- rename window frame
+								for i = 1, #windows do
+									local win = windows[i]
+									if win and win.name == oldname then
+										win.name = db.name
+										break -- stop
 									end
 								end
 							end
-							if num > 0 then
-								val = format("%s (%s)", val, num + 1)
-							end
 
-							db.name = val
-							Skada.options.args.windows.args[val] = Skada.options.args.windows.args[oldname]
-							Skada.options.args.windows.args[oldname] = nil
 							Skada:ApplySettings(db.name)
 						end
 					end
@@ -450,7 +428,7 @@ do
 							for i = 1, #windows do
 								local _db = windows[i] and windows[i].db
 								if _db and _db.name == copywindow and _db.display == db.display then
-									private.tCopy(templist, _db, "name", "sticked", "x", "y", "point", "snapped", "child", "childmode")
+									copy(templist, _db, "name", "sticked", "x", "y", "point", "snapped", "child", "childmode")
 									break
 								end
 							end
@@ -599,8 +577,8 @@ function Window:UpdateDisplay()
 				if value or valuetext then
 					if not value then
 						value = 0
-						for j = 1, #self.dataset do
-							local data = self.dataset[j]
+						for i = 1, #self.dataset do
+							local data = self.dataset[i]
 							if data and data.id then
 								value = value + data.value
 							end
@@ -613,30 +591,22 @@ function Window:UpdateDisplay()
 					d.ignore = true
 					d.value = value + 1 -- to be always first
 					d.valuetext = valuetext or tostring(value)
-
-					if P.moduleicons and self.selectedmode.metadata and self.selectedmode.metadata.icon then
-						d.icon = self.selectedmode.metadata.icon
-					else
-						d.icon = dataobj.icon
-					end
+					d.icon = P.moduleicons and self.selectedmode.metadata and self.selectedmode.metadata.icon or ns.logo
 				end
 			end
 		end
 	elseif self.selectedset then
 		local set = self:GetSelectedSet()
 
-		for j = 1, #modes do
-			local mode = modes[j]
+		for i = 1, #modes do
+			local mode = modes[i]
 			if mode then
-				local d = self:nr(j)
+				local d = self:nr(i)
 
 				d.id = mode.moduleName
 				d.label = mode.localeName
+				d.icon = P.moduleicons and mode.metadata and mode.metadata.icon or nil
 				d.value = 1
-
-				if P.moduleicons and mode.metadata and mode.metadata.icon then
-					d.icon = mode.metadata.icon
-				end
 
 				if set and mode.GetSetSummary then
 					local value, valuetext = mode:GetSetSummary(set, self)
@@ -646,10 +616,7 @@ function Window:UpdateDisplay()
 		end
 
 		self.metadata.ordersort = true
-
-		if set then
-			self.metadata.is_modelist = true
-		end
+		self.metadata.is_modelist = set and true or nil
 	else
 		local nr = 1
 		local d = self:nr(nr)
@@ -665,8 +632,9 @@ function Window:UpdateDisplay()
 		d.label = L["Current"]
 		d.value = 1
 
-		for j = 1, #Skada.char.sets do
-			local set = Skada.char.sets[j]
+		local sets = Skada.char.sets
+		for i = 1, #sets do
+			local set = sets[i]
 			if set then
 				nr = nr + 1
 				d = self:nr(nr)
@@ -1089,7 +1057,7 @@ function Skada:CreateWindow(name, db, display)
 	local isnew = false
 	if not db then
 		db, isnew = new(), true
-		private.tCopy(db, self.windowdefaults)
+		copy(db, self.windowdefaults)
 
 		local wins = P.windows
 		wins[#wins + 1] = db
@@ -1109,26 +1077,9 @@ function Skada:CreateWindow(name, db, display)
 	local window = new_window()
 	window.db = db
 
-	-- avoid duplicate names
-	do
-		local num = 0
-		for i = 1, #windows do
-			local _db = windows[i] and windows[i].db
-			if _db and _db.name == name and num == 0 then
-				num = 1
-			elseif _db then
-				local n, c = strmatch(_db.name, "^(.-)%s*%((%d+)%)$")
-				if n == name then
-					num = max(num, tonumber(c) or 0)
-				end
-			end
-		end
-		if num > 0 then
-			name = format("%s (%s)", name, num + 1)
-		end
-	end
-
+	name = prevent_duplicate(name, windows, "name")
 	window.db.name = name
+	window.name = name
 	if G.reinstall then
 		G.reinstall = nil
 		window.db.mode = "Damage"
@@ -3937,8 +3888,8 @@ do
 				end
 
 				if self.tempsets then -- add to phases
-					for j = 1, #self.tempsets do
-						local set = self.tempsets[j]
+					for i = 1, #self.tempsets do
+						local set = self.tempsets[i]
 						if set and not set.stopped then
 							set.last_action = self.current.last_action
 							set.last_time = self.current.last_time
