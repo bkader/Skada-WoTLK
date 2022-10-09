@@ -914,7 +914,7 @@ do
 		end
 
 		local success, profile = private.deserialize(data, true)
-		if not success then
+		if not success or profile.numbersystem == nil then -- sanity check!
 			Skada:Print("Import profile failed!")
 			return false
 		end
@@ -947,15 +947,11 @@ do
 	end
 
 	function Skada:ProfileImport()
-		local title = L["Paste here a profile in text format."]
-		local subtitle = L["Press CTRL-V to paste a Skada configuration text."]
-		return open_window(title, subtitle, import_profile)
+		return open_window(L["Paste here a profile in text format."], import_profile)
 	end
 
 	function Skada:ProfileExport()
-		local title = L["This is your current profile in text format."]
-		local subtitle = L["Press CTRL-C to copy the configuration to your clipboard."]
-		return open_window(title, subtitle, serialize_profile())
+		return open_window(L["This is your current profile in text format."], serialize_profile())
 	end
 
 	function private.advanced_profile(args)
@@ -1043,13 +1039,13 @@ do
 							type = "execute",
 							name = L["Import Profile"],
 							order = 10,
-							func = Skada.OpenImport
+							func = Skada.ProfileImport
 						},
 						exportbtn = {
 							type = "execute",
 							name = L["Export Profile"],
 							order = 20,
-							func = Skada.ExportProfile
+							func = Skada.ProfileExport
 						}
 					}
 				}

@@ -280,7 +280,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 		bar.bg:SetScript("OnMouseDown", function(frame, button) BarClick(win, bar, button) end)
 		bar.bg:SetScript("OnEnter", function(frame, button)
 			ttactive = true
-			Skada:SetTooltipPosition(GameTooltip, win.frame, win.db.display, win)
+			Skada:SetTooltipPosition(GameTooltip, win.frame, "inline", win)
 			Skada:ShowTooltip(win, bar.valueid, bar.valuetext, bar)
 		end)
 		bar.bg:SetScript("OnLeave", BarLeave)

@@ -26,9 +26,9 @@ L["Profile Import/Export"] = true
 L["Import Profile"] = true
 L["Export Profile"] = true
 L["Paste here a profile in text format."] = true
-L["Press CTRL-V to paste a Skada configuration text."] = true
+L["Press CTRL-V to paste the text from your clipboard."] = true
 L["This is your current profile in text format."] = true
-L["Press CTRL-C to copy the configuration to your clipboard."] = true
+L["Press CTRL-C to copy the text to your clipboard."] = true
 L["Network Sharing"] = true
 L["Player Name"] = true
 L["Send Profile"] = true
@@ -398,6 +398,7 @@ L["This change requires a UI reload. Are you sure?"] = true
 -- themes options
 L["Theme"] = true
 L["Themes"] = true
+L["Manage Themes"] = true
 L["Apply Theme"] = true
 L["Apply"] = APPLY
 L["Theme applied!"] = true
@@ -407,6 +408,8 @@ L["Save"] = SAVE
 L["Delete Theme"] = true
 L["Delete"] = DELETE
 L["Are you sure you want to delete this theme?"] = true
+L["Paste here a theme in text format."] = true
+L["This is your current theme in text format."] = true
 -- scroll options
 L["Scroll"] = true
 L["Mouse"] = MOUSE_LABEL
@@ -708,7 +711,6 @@ L["Player's failed events"] = true
 L["Event's failed players"] = true
 L["Report Fails"] = true
 L["Reports the group fails at the end of combat if there are any."] = true
-L["Ignored Events"] = true
 -- interrupts module lines --
 L["Interrupts"] = INTERRUPTS
 L["Interrupt spells"] = true

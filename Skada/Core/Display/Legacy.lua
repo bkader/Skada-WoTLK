@@ -122,7 +122,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 		if bar and bar.win then
 			local win, id, label = bar.win, bar.id, bar.text
 			ttactive = true
-			Skada:SetTooltipPosition(GameTooltip, win.bargroup, win.db.display, win)
+			Skada:SetTooltipPosition(GameTooltip, win.bargroup, "legacy", win)
 			Skada:ShowTooltip(win, id, label, bar)
 		end
 	end

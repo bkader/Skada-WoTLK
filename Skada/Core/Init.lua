@@ -600,18 +600,24 @@ end
 -- prevents duplicates in a table to format strings
 function private.prevent_duplicate(value, tbl, key)
 	local num = 0
-	for i = 1, #tbl do
-		local elem = tbl[i]
-		if elem and elem[key] == value and num == 0 then
-			num = 1
-		elseif elem and elem[key] then
-			local n, c = strmatch(elem[key], "^(.-)%s*%((%d+)%)$")
-			if n == value then
-				num = max(num, tonumber(c), 0)
+	if type(tbl) == "table" then
+		local is_array = (#tbl > 0)
+		for k, v in pairs(tbl) do
+			local val = is_array and v[key] or k
+			if val == value and num == 0 then
+				num = 1
+			elseif val then
+				local n, c = strmatch(val, "^(.-)%s*%((%d+)%)$")
+				if n == value then
+					num = max(num, tonumber(c), 0)
+				end
 			end
 		end
+		if num > 0 then
+			value = format("%s (%d)", value, num + 1)
+		end
 	end
-	return (num > 0) and format("%s (%d)", value, num + 1) or value
+	return value
 end
 
 -------------------------------------------------------------------------------
@@ -1277,11 +1283,10 @@ do
 	local AceGUI = nil
 
 	local frame_name = format("%sImportExportFrame", folder)
-	local function open_window(title, subtitle, data, clickfunc)
+	local function open_window(title, data, clickfunc)
 		AceGUI = AceGUI or LibStub("AceGUI-3.0")
 		local frame = AceGUI:Create("Frame")
 		frame:SetTitle(L["Import/Export"])
-		frame:SetStatusText(subtitle)
 		frame:SetLayout("Flow")
 		frame:SetCallback("OnClose", function(widget)
 			AceGUI:Release(widget)
@@ -1303,6 +1308,7 @@ do
 		end
 
 		if data then
+			frame:SetStatusText(L["Press CTRL-C to copy the text to your clipboard."])
 			editbox:DisableButton(true)
 			editbox:SetText(data)
 			editbox.editBox:SetFocus()
@@ -1316,6 +1322,7 @@ do
 				widget.editBox:SetFocus()
 			end)
 		else
+			frame:SetStatusText(L["Press CTRL-V to paste the text from your clipboard."])
 			editbox:DisableButton(false)
 			editbox.editBox:SetFocus()
 			editbox.button:SetScript("OnClick", function(widget)
@@ -1329,7 +1336,7 @@ do
 		UISpecialFrames[#UISpecialFrames + 1] = frame_name
 	end
 
-	function private.open_import_export(title, subtitle, data, clickfunc)
-		return open_window(title, subtitle, data, clickfunc)
+	function private.open_import_export(title, data, clickfunc)
+		return open_window(title, data, clickfunc)
 	end
 end

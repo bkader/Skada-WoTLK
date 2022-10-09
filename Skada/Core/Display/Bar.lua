@@ -18,7 +18,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 	local SavePosition = private.SavePosition
 	local RestorePosition = private.RestorePosition
 	local prevent_duplicate = private.prevent_duplicate
-	local new, del = private.newTable, private.delTable
+	local new, del, copy = private.newTable, private.delTable, private.tCopy
 	local _
 
 	-- references
@@ -82,9 +82,10 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			end
 		end
 
+		local open_options = private.open_options
 		local function configOnClick(self, button)
 			if button == "RightButton" then
-				private.open_options(self.list.win)
+				open_options(self.list.win)
 			else
 				Skada:OpenMenu(self.list.win)
 			end
@@ -112,9 +113,10 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			end
 		end
 
+		local open_report = private.open_report
 		local function reportOnClick(self, button)
 			if button == "LeftButton" then
-				private.open_report(self.list.win)
+				open_report(self.list.win)
 			end
 		end
 
@@ -271,7 +273,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			if bar and bar.win then
 				local win, id, label = bar.win, bar.id, bar.text
 				ttactive = true
-				Skada:SetTooltipPosition(GameTooltip, win.bargroup, win.db.display, win)
+				Skada:SetTooltipPosition(GameTooltip, win.bargroup, "bar", win)
 				Skada:ShowTooltip(win, id, label, bar)
 			end
 		end
@@ -498,8 +500,9 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			end
 		end
 
+		local total_noclick = private.total_noclick
 		local function showmode(win, id, label, mode)
-			if private.total_noclick(win.selectedset, mode) then
+			if total_noclick(win.selectedset, mode) then
 				return
 			end
 
@@ -573,7 +576,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			local bar = icon.bar
 			local win = bar.win
 			if bar.link and win and win.bargroup then
-				Skada:SetTooltipPosition(GameTooltip, win.bargroup, win.db.display, win)
+				Skada:SetTooltipPosition(GameTooltip, win.bargroup, "bar", win)
 				GameTooltip:SetHyperlink(bar.link)
 				GameTooltip:Show()
 			end
@@ -1143,6 +1146,8 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			[2] = format("\124T%s:22:88\124t", format(buttonsTexPath, 2, "_prev"))
 		}
 	}
+
+	local frame_options = private.frame_options
 
 	function mod:AddDisplayOptions(win, options)
 		local db = win.db
@@ -1870,7 +1875,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			}
 		}
 
-		options.windowoptions = private.frame_options(db)
+		options.windowoptions = frame_options(db)
 
 		options.windowoptions.args.position.args.barwidth = {
 			type = "range",
@@ -1945,454 +1950,451 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 
 		local opt_themes
 		local function GetThemeOptions()
-			if not opt_themes then
-				local applytheme, applywindow = nil, nil
-				local savetheme, savewindow = nil, nil
-				local deletetheme = nil
-				local skipped = {"name", "x", "y", "sticked", "set", "modeincombat", "wipemode", "returnaftercombat"}
-				local list = {}
+			GetThemeOptions = nil
+			if opt_themes then
+				return opt_themes
+			end
 
-				local themes = {
-					{
-						name = "Skada default (Legion)",
-						barspacing = 0,
-						bartexture = "BantoBar",
-						barfont = "Accidental Presidency",
-						barfontflags = "",
-						barfontsize = 13,
-						barheight = 18,
-						barwidth = 240,
-						baroffset = 0,
-						barorientation = 1,
-						barcolor = {r = 0.3, g = 0.3, b = 0.8, a = 1},
-						barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6},
-						classcolorbars = true,
-						classicons = true,
-						buttons = {menu = true, reset = true, report = true, mode = true, segment = true},
-						title = {
-							textcolor = {r = 0.9, g = 0.9, b = 0.9, a = 1},
-							height = 20,
-							font = "Accidental Presidency",
-							fontsize = 13,
-							texture = "Armory",
-							bordercolor = {r = 0, g = 0, b = 0, a = 1},
-							bordertexture = "None",
-							borderthickness = 2,
-							borderinsets = 0,
-							color = {r = 0.3, g = 0.3, b = 0.3, a = 1},
-							fontflags = ""
-						},
-						background = {
-							height = 200,
-							texture = "Solid",
-							bordercolor = {r = 0, g = 0, b = 0, a = 1},
-							bordertexture = "Blizzard Party",
-							borderthickness = 2,
-							borderinsets = 0,
-							color = {r = 0, g = 0, b = 0, a = 0.4},
-							tilesize = 0
-						},
-						strata = "LOW",
-						scale = 1,
-						enabletitle = true,
-						titleset = true,
-						display = "bar",
-						snapto = true,
-						version = 1
+			local applytheme, applywindow = nil, nil
+			local savetheme, savewindow = nil, nil
+			local skipped = {"name", "x", "y", "sticked", "set", "modeincombat", "wipemode", "returnaftercombat"}
+			local list = {}
+
+			local themes = {
+				["All glowy 'n stuff"] = {
+					barspacing = 0,
+					bartexture = "LiteStep",
+					barfont = "ABF",
+					barfontflags = "",
+					barfontsize = 12,
+					barheight = 16,
+					barwidth = 240,
+					baroffset = 0,
+					barorientation = 1,
+					barcolor = {r = 0.3, g = 0.3, b = 0.8, a = 1},
+					barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6},
+					classcolorbars = true,
+					classicons = true,
+					buttons = {menu = true, reset = true, report = true, mode = true, segment = true},
+					title = {
+						textcolor = {r = 0.9, g = 0.9, b = 0.9, a = 1},
+						height = 20,
+						font = "ABF",
+						fontsize = 12,
+						texture = "Aluminium",
+						bordercolor = {r = 0, g = 0, b = 0, a = 1},
+						bordertexture = "None",
+						borderthickness = 0,
+						borderinsets = 0,
+						color = {r = 0.6, g = 0.6, b = 0.8, a = 1},
+						fontflags = ""
 					},
-					{
-						name = "Minimalistic",
-						barspacing = 0,
-						bartexture = "Armory",
-						barfont = "Accidental Presidency",
-						barfontflags = "",
-						barfontsize = 12,
-						barheight = 16,
-						barwidth = 240,
-						baroffset = 0,
-						barorientation = 1,
-						barcolor = {r = 0.3, g = 0.3, b = 0.8, a = 1},
-						barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6},
-						classcolorbars = true,
-						classicons = true,
-						buttons = {menu = true, reset = true, report = true, mode = true, segment = true},
-						title = {
-							textcolor = {r = 0.9, g = 0.9, b = 0.9, a = 1},
-							height = 18,
-							font = "Accidental Presidency",
-							fontsize = 12,
-							texture = "Armory",
-							bordercolor = {r = 0, g = 0, b = 0, a = 1},
-							bordertexture = "None",
-							borderthickness = 0,
-							borderinsets = 0,
-							color = {r = 0.6, g = 0.6, b = 0.8, a = 1},
-							fontflags = ""
-						},
-						background = {
-							height = 195,
-							texture = "None",
-							bordercolor = {r = 0, g = 0, b = 0, a = 1},
-							bordertexture = "Blizzard Party",
-							borderthickness = 0,
-							borderinsets = 0,
-							color = {r = 0, g = 0, b = 0, a = 0.4},
-							tilesize = 0
-						},
-						strata = "LOW",
-						scale = 1,
-						enabletitle = true,
-						titleset = true,
-						display = "bar",
-						snapto = true,
-						version = 1
+					background = {
+						height = 195,
+						texture = "None",
+						bordercolor = {r = 0.9, g = 0.9, b = 0.5, a = 0.6},
+						bordertexture = "Glow",
+						borderthickness = 5,
+						borderinsets = 0,
+						color = {r = 0, g = 0, b = 0, a = 0.4},
+						tilesize = 0
 					},
-					{
-						name = "All glowy 'n stuff",
-						barspacing = 0,
-						bartexture = "LiteStep",
-						barfont = "ABF",
-						barfontflags = "",
-						barfontsize = 12,
-						barheight = 16,
-						barwidth = 240,
-						baroffset = 0,
-						barorientation = 1,
-						barcolor = {r = 0.3, g = 0.3, b = 0.8, a = 1},
-						barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6},
-						classcolorbars = true,
-						classicons = true,
-						buttons = {menu = true, reset = true, report = true, mode = true, segment = true},
-						title = {
-							textcolor = {r = 0.9, g = 0.9, b = 0.9, a = 1},
-							height = 20,
-							font = "ABF",
-							fontsize = 12,
-							texture = "Aluminium",
-							bordercolor = {r = 0, g = 0, b = 0, a = 1},
-							bordertexture = "None",
-							borderthickness = 0,
-							borderinsets = 0,
-							color = {r = 0.6, g = 0.6, b = 0.8, a = 1},
-							fontflags = ""
-						},
-						background = {
-							height = 195,
-							texture = "None",
-							bordercolor = {r = 0.9, g = 0.9, b = 0.5, a = 0.6},
-							bordertexture = "Glow",
-							borderthickness = 5,
-							borderinsets = 0,
-							color = {r = 0, g = 0, b = 0, a = 0.4},
-							tilesize = 0
-						},
-						strata = "LOW",
-						scale = 1,
-						enabletitle = true,
-						titleset = true,
-						display = "bar",
-						snapto = true
+					strata = "LOW",
+					scale = 1,
+					enabletitle = true,
+					titleset = true,
+					display = "bar",
+					snapto = true
+				},
+				["Minimalistic"] = {
+					barspacing = 0,
+					bartexture = "Armory",
+					barfont = "Accidental Presidency",
+					barfontflags = "",
+					barfontsize = 12,
+					barheight = 16,
+					barwidth = 240,
+					baroffset = 0,
+					barorientation = 1,
+					barcolor = {r = 0.3, g = 0.3, b = 0.8, a = 1},
+					barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6},
+					classcolorbars = true,
+					classicons = true,
+					buttons = {menu = true, reset = true, report = true, mode = true, segment = true},
+					title = {
+						textcolor = {r = 0.9, g = 0.9, b = 0.9, a = 1},
+						height = 18,
+						font = "Accidental Presidency",
+						fontsize = 12,
+						texture = "Armory",
+						bordercolor = {r = 0, g = 0, b = 0, a = 1},
+						bordertexture = "None",
+						borderthickness = 0,
+						borderinsets = 0,
+						color = {r = 0.6, g = 0.6, b = 0.8, a = 1},
+						fontflags = ""
 					},
-					{
-						name = "Recount",
-						barspacing = 0,
-						bartexture = "BantoBar",
-						barfont = "Arial Narrow",
-						barfontflags = "",
-						barfontsize = 12,
-						barheight = 18,
-						barwidth = 240,
-						baroffset = 0,
-						barorientation = 1,
-						barcolor = {r = 0.3, g = 0.3, b = 0.8, a = 1},
-						barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6},
-						classcolorbars = true,
-						buttons = {menu = true, reset = true, report = true, mode = true, segment = true},
-						title = {
-							textcolor = {r = 1, g = 1, b = 1, a = 1},
-							height = 18,
-							font = "Arial Narrow",
-							fontsize = 12,
-							texture = "Gloss",
-							bordercolor = {r = 0, g = 0, b = 0, a = 1},
-							bordertexture = "None",
-							borderthickness = 0,
-							borderinsets = 0,
-							color = {r = 1, g = 0, b = 0, a = 0.75},
-							fontflags = ""
-						},
-						background = {
-							height = 150,
-							texture = "Solid",
-							bordercolor = {r = 0.9, g = 0.9, b = 0.5, a = 0.6},
-							bordertexture = "None",
-							borderthickness = 5,
-							borderinsets = 0,
-							color = {r = 0, g = 0, b = 0, a = 0.4},
-							tilesize = 0
-						},
-						strata = "LOW",
-						scale = 1,
-						enabletitle = true,
-						titleset = true,
-						display = "bar",
-						snapto = true
+					background = {
+						height = 195,
+						texture = "None",
+						bordercolor = {r = 0, g = 0, b = 0, a = 1},
+						bordertexture = "Blizzard Party",
+						borderthickness = 0,
+						borderinsets = 0,
+						color = {r = 0, g = 0, b = 0, a = 0.4},
+						tilesize = 0
 					},
-					{
-						name = "Omen Threat Meter",
-						barspacing = 1,
-						bartexture = "Blizzard",
-						barfont = "Friz Quadrata TT",
-						barfontflags = "",
-						barfontsize = 10,
-						numfont = "Friz Quadrata TT",
-						numfontflags = "",
-						numfontsize = 10,
-						barheight = 14,
-						barwidth = 200,
-						baroffset = 0,
-						barorientation = 1,
-						barcolor = {r = 0.8, g = 0.05, b = 0, a = 1},
-						barbgcolor = {r = 0.3, g = 0.01, b = 0, a = 0.6},
-						classcolorbars = true,
-						smoothing = true,
-						buttons = {menu = true, reset = true, mode = true},
-						title = {
-							textcolor = {r = 1, g = 1, b = 1, a = 1},
-							height = 16,
-							font = "Friz Quadrata TT",
-							fontsize = 10,
-							texture = "Blizzard",
-							bordercolor = {r = 1, g = 0.75, b = 0, a = 1},
-							bordertexture = "Blizzard Dialog",
-							borderthickness = 1,
-							borderinsets = 0,
-							color = {r = 0.2, g = 0.2, b = 0.2, a = 0},
-							fontflags = ""
-						},
-						background = {
-							height = 108,
-							texture = "Blizzard Parchment",
-							bordercolor = {r = 1, g = 1, b = 1, a = 1},
-							bordertexture = "Blizzard Dialog",
-							borderthickness = 1,
-							borderinsets = 0,
-							color = {r = 1, g = 1, b = 1, a = 1},
-							tilesize = 0
-						},
-						strata = "LOW",
-						scale = 1,
-						enabletitle = true,
-						display = "bar",
-						version = 1
-					}
+					strata = "LOW",
+					scale = 1,
+					enabletitle = true,
+					titleset = true,
+					display = "bar",
+					snapto = true,
+					version = 1
+				},
+				["Omen Threat Meter"] = {
+					barspacing = 1,
+					bartexture = "Blizzard",
+					barfont = "Friz Quadrata TT",
+					barfontflags = "",
+					barfontsize = 10,
+					numfont = "Friz Quadrata TT",
+					numfontflags = "",
+					numfontsize = 10,
+					barheight = 14,
+					barwidth = 200,
+					baroffset = 0,
+					barorientation = 1,
+					barcolor = {r = 0.8, g = 0.05, b = 0, a = 1},
+					barbgcolor = {r = 0.3, g = 0.01, b = 0, a = 0.6},
+					classcolorbars = true,
+					smoothing = true,
+					buttons = {menu = true, reset = true, mode = true},
+					title = {
+						textcolor = {r = 1, g = 1, b = 1, a = 1},
+						height = 16,
+						font = "Friz Quadrata TT",
+						fontsize = 10,
+						texture = "Blizzard",
+						bordercolor = {r = 1, g = 0.75, b = 0, a = 1},
+						bordertexture = "Blizzard Dialog",
+						borderthickness = 1,
+						borderinsets = 0,
+						color = {r = 0.2, g = 0.2, b = 0.2, a = 0},
+						fontflags = ""
+					},
+					background = {
+						height = 108,
+						texture = "Blizzard Parchment",
+						bordercolor = {r = 1, g = 1, b = 1, a = 1},
+						bordertexture = "Blizzard Dialog",
+						borderthickness = 1,
+						borderinsets = 0,
+						color = {r = 1, g = 1, b = 1, a = 1},
+						tilesize = 0
+					},
+					strata = "LOW",
+					scale = 1,
+					enabletitle = true,
+					display = "bar",
+					version = 1
+				},
+				["Recount"] = {
+					barspacing = 0,
+					bartexture = "BantoBar",
+					barfont = "Arial Narrow",
+					barfontflags = "",
+					barfontsize = 12,
+					barheight = 18,
+					barwidth = 240,
+					baroffset = 0,
+					barorientation = 1,
+					barcolor = {r = 0.3, g = 0.3, b = 0.8, a = 1},
+					barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6},
+					classcolorbars = true,
+					buttons = {menu = true, reset = true, report = true, mode = true, segment = true},
+					title = {
+						textcolor = {r = 1, g = 1, b = 1, a = 1},
+						height = 18,
+						font = "Arial Narrow",
+						fontsize = 12,
+						texture = "Gloss",
+						bordercolor = {r = 0, g = 0, b = 0, a = 1},
+						bordertexture = "None",
+						borderthickness = 0,
+						borderinsets = 0,
+						color = {r = 1, g = 0, b = 0, a = 0.75},
+						fontflags = ""
+					},
+					background = {
+						height = 150,
+						texture = "Solid",
+						bordercolor = {r = 0.9, g = 0.9, b = 0.5, a = 0.6},
+						bordertexture = "None",
+						borderthickness = 5,
+						borderinsets = 0,
+						color = {r = 0, g = 0, b = 0, a = 0.4},
+						tilesize = 0
+					},
+					strata = "LOW",
+					scale = 1,
+					enabletitle = true,
+					titleset = true,
+					display = "bar",
+					snapto = true
+				},
+				["Skada default (Legion)"] = {
+					barspacing = 0,
+					bartexture = "BantoBar",
+					barfont = "Accidental Presidency",
+					barfontflags = "",
+					barfontsize = 13,
+					barheight = 18,
+					barwidth = 240,
+					baroffset = 0,
+					barorientation = 1,
+					barcolor = {r = 0.3, g = 0.3, b = 0.8, a = 1},
+					barbgcolor = {r = 0.3, g = 0.3, b = 0.3, a = 0.6},
+					classcolorbars = true,
+					classicons = true,
+					buttons = {menu = true, reset = true, report = true, mode = true, segment = true},
+					title = {
+						textcolor = {r = 0.9, g = 0.9, b = 0.9, a = 1},
+						height = 20,
+						font = "Accidental Presidency",
+						fontsize = 13,
+						texture = "Armory",
+						bordercolor = {r = 0, g = 0, b = 0, a = 1},
+						bordertexture = "None",
+						borderthickness = 2,
+						borderinsets = 0,
+						color = {r = 0.3, g = 0.3, b = 0.3, a = 1},
+						fontflags = ""
+					},
+					background = {
+						height = 200,
+						texture = "Solid",
+						bordercolor = {r = 0, g = 0, b = 0, a = 1},
+						bordertexture = "Blizzard Party",
+						borderthickness = 2,
+						borderinsets = 0,
+						color = {r = 0, g = 0, b = 0, a = 0.4},
+						tilesize = 0
+					},
+					strata = "LOW",
+					scale = 1,
+					enabletitle = true,
+					titleset = true,
+					display = "bar",
+					snapto = true,
+					version = 1
 				}
+			}
 
-				opt_themes = {
-					type = "group",
-					name = L["Themes"],
-					desc = format(L["Options for %s."], L["Themes"]),
-					args = {
-						apply = {
-							type = "group",
-							name = L["Apply Theme"],
-							inline = true,
-							order = 10,
-							args = {
-								theme = {
-									type = "select",
-									name = L["Theme"],
-									order = 10,
-									get = function() return applytheme end,
-									set = function(_, val) applytheme = val end,
-									values = function()
-										wipe(list)
-										for i = 1, #themes do
-											local theme = themes[i]
-											if theme then
-												list[theme.name] = theme.name
-											end
-										end
-										if G.themes then
-											for i = 1, #G.themes do
-												local theme = G.themes[i]
-												if theme and theme.name then
-													list[theme.name] = theme.name
-												end
-											end
-										end
-										return list
-									end
-								},
-								window = {
-									type = "select",
-									name = L["Window"],
-									order = 20,
-									get = function() return applywindow end,
-									set = function(_, val) applywindow = val end,
-									values = function()
-										wipe(list)
-										windows = Skada:GetWindows()
-										for i = 1, #windows do
-											local win = windows[i]
-											if win and win.db and win.db.display == "bar" then
-												list[win.db.name] = win.db.name
-											end
-										end
-										return list
-									end
-								},
-								exec = {
-									type = "execute",
-									name = L["Apply"],
-									width = "double",
-									order = 30,
-									disabled = function()
-										return (applytheme == nil or applywindow == nil)
-									end,
-									func = function()
-										if applywindow and applytheme then
-											local thetheme = nil
-											for i = 1, #themes do
-												if themes[i] and themes[i].name == applytheme then
-													thetheme = themes[i]
-													break
-												end
-											end
-											if G.themes then
-												for i = 1, #G.themes do
-													local theme = G.themes[i]
-													if theme and theme.name == applytheme then
-														thetheme = theme
-														break
-													end
-												end
-											end
+			local function theme_locked()
+				return (applytheme == nil or themes[applytheme])
+			end
 
-											if thetheme then
-												windows = Skada:GetWindows()
-												for i = 1, #windows do
-													local win = windows[i]
-													if win and win.db and win.db.name == applywindow then
-														private.tCopy(win.db, thetheme, skipped)
-														Skada:ApplySettings()
-														Skada:Print(L["Theme applied!"])
-													end
+			local function check_theme_name(name)
+				return prevent_duplicate(prevent_duplicate(name, themes), G.themes)
+			end
+
+			local open_import_export = private.open_import_export
+			local serialize, deserialize = private.serialize, private.deserialize
+			local temp = {}
+
+			local function theme_export()
+				local theme = not theme_locked() and G.themes and G.themes[applytheme]
+				if not theme then return end
+
+				wipe(temp)
+				copy(temp, theme)
+				temp.__name = applytheme
+				return open_import_export(L["This is your current theme in text format."], serialize(true, nil, temp))
+			end
+
+			local function theme_import(data)
+				if type(data) ~= "string" then
+					Skada:Print("Import theme failed, data supplied must be a string.")
+					return false
+				end
+
+				local success, theme = deserialize(data, true)
+				if not success or theme.bartexture == nil then -- sanity check!
+					Skada:Print("Import theme failed!")
+					return false
+				end
+
+				local name = check_theme_name(theme.__name)
+				theme.__name = nil
+				G.themes[name] = theme
+				ACR:NotifyChange(folder)
+			end
+
+			opt_themes = {
+				type = "group",
+				name = L["Themes"],
+				desc = format(L["Options for %s."], L["Themes"]),
+				args = {
+					manage = {
+						type = "group",
+						name = L["Manage Themes"],
+						inline = true,
+						order = 10,
+						args = {
+							theme = {
+								type = "select",
+								name = L["Theme"],
+								order = 10,
+								get = function() return applytheme end,
+								set = function(_, val) applytheme = val end,
+								values = function()
+									wipe(list)
+									for name in pairs(themes) do
+										list[name] = name
+									end
+									if G.themes then
+										for name in pairs(G.themes) do
+											list[name] = name
+										end
+									end
+									return list
+								end
+							},
+							window = {
+								type = "select",
+								name = L["Window"],
+								order = 20,
+								get = function() return applywindow end,
+								set = function(_, val) applywindow = val end,
+								disabled = function() return (applytheme == nil) end,
+								values = function()
+									wipe(list)
+									windows = Skada:GetWindows()
+									for i = 1, #windows do
+										local win = windows[i]
+										if win and win.db and win.db.display == "bar" then
+											list[win.db.name] = win.db.name
+										end
+									end
+									return list
+								end
+							},
+							export = {
+								type = "execute",
+								name = L["Export"],
+								order = 30,
+								disabled = theme_locked,
+								func = theme_export
+							},
+							apply = {
+								type = "execute",
+								name = L["Apply"],
+								desc = L["Apply Theme"],
+								order = 40,
+								disabled = function()
+									return (applytheme == nil or applywindow == nil)
+								end,
+								func = function()
+									if applywindow and applytheme then
+										local theme = themes[applytheme] or G.themes and G.themes[applytheme]
+										if theme then
+											windows = Skada:GetWindows()
+											for i = 1, #windows do
+												local win = windows[i]
+												if win and win.db and win.db.name == applywindow then
+													copy(win.db, theme, skipped)
+													Skada:ApplySettings()
+													Skada:Print(L["Theme applied!"])
 												end
 											end
 										end
-										applytheme, applywindow = nil, nil
 									end
-								}
+									applytheme, applywindow = nil, nil
+								end
+							},
+							import = {
+								type = "execute",
+								name = L["Import"],
+								order = 50,
+								func = function()
+									return open_import_export(L["Paste here a theme in text format."], theme_import)
+								end
+							},
+							delete = {
+								type = "execute",
+								name = L["Delete"],
+								desc = L["Delete Theme"],
+								order = 60,
+								disabled = theme_locked,
+								confirm = function() return L["Are you sure you want to delete this theme?"] end,
+								func = function()
+									G.themes[applytheme] = del(G.themes[applytheme], true)
+									applytheme = nil
+								end
 							}
-						},
-						save = {
-							type = "group",
-							name = L["Save Theme"],
-							inline = true,
-							order = 20,
-							args = {
-								window = {
-									type = "select",
-									name = L["Window"],
-									order = 10,
-									get = function() return savewindow end,
-									set = function(_, val) savewindow = val end,
-									values = function()
-										wipe(list)
-										windows = Skada:GetWindows()
-										for i = 1, #windows do
-											local win = windows[i]
-											if win and win.db and win.db.display == "bar" then
-												list[win.db.name] = win.db.name
-											end
+						}
+					},
+					save = {
+						type = "group",
+						name = L["Save Theme"],
+						inline = true,
+						order = 20,
+						args = {
+							window = {
+								type = "select",
+								name = L["Window"],
+								order = 10,
+								get = function() return savewindow end,
+								set = function(_, val) savewindow = val end,
+								values = function()
+									wipe(list)
+									windows = Skada:GetWindows()
+									for i = 1, #windows do
+										local win = windows[i]
+										if win and win.db and win.db.display == "bar" then
+											list[win.db.name] = win.db.name
 										end
-										return list
 									end
-								},
-								theme = {
-									type = "input",
-									name = L["Name"],
-									desc = L["Name of your new theme."],
-									order = 20,
-									get = function() return savetheme end,
-									set = function(_, val) savetheme = val end
-								},
-								exec = {
-									type = "execute",
-									name = L["Save"],
-									width = "double",
-									order = 30,
-									disabled = function() return (savetheme == nil or savewindow == nil) end,
-									func = function()
-										windows = Skada:GetWindows()
-										for i = 1, #windows do
-											local win = windows[i]
-											if win and win.db and win.db.name == savewindow then
-												G.themes = G.themes or {}
-												local theme = {}
-												private.tCopy(theme, win.db, skipped)
-												theme.name = prevent_duplicate(savetheme or win.db.name, G.themes, "name")
-												G.themes[#G.themes + 1] = theme
-												break -- stop
-											end
+									return list
+								end
+							},
+							theme = {
+								type = "input",
+								name = L["Name"],
+								desc = L["Name of your new theme."],
+								order = 20,
+								get = function() return savetheme end,
+								set = function(_, val) savetheme = val end,
+								disabled = function() return (savewindow == nil) end
+							},
+							exec = {
+								type = "execute",
+								name = L["Save"],
+								width = "double",
+								order = 30,
+								disabled = function() return (savewindow == nil or savetheme == nil or savetheme:trim() == "") end,
+								func = function()
+									windows = Skada:GetWindows()
+									for i = 1, #windows do
+										local win = windows[i]
+										if win and win.db and win.db.name == savewindow then
+											G.themes = G.themes or {}
+											local theme = {}
+											copy(theme, win.db, skipped)
+											local name = check_theme_name(savetheme or win.db.name)
+											G.themes[name] = theme
+											break -- stop
 										end
-										savetheme, savewindow = nil, nil
 									end
-								}
-							}
-						},
-						delete = {
-							type = "group",
-							name = L["Delete Theme"],
-							inline = true,
-							order = 30,
-							args = {
-								theme = {
-									type = "select",
-									name = L["Theme"],
-									order = 10,
-									get = function() return deletetheme end,
-									set = function(_, name) deletetheme = name end,
-									values = function()
-										wipe(list)
-										if G.themes then
-											for i = 1, #G.themes do
-												local theme = G.themes[i]
-												if theme and theme.name then
-													list[theme.name] = theme.name
-												end
-											end
-										end
-										return list
-									end
-								},
-								exec = {
-									type = "execute",
-									name = L["Delete"],
-									order = 20,
-									disabled = function() return (deletetheme == nil) end,
-									confirm = function() return L["Are you sure you want to delete this theme?"] end,
-									func = function()
-										if G.themes then
-											for i = 1, #G.themes do
-												local theme = G.themes[i]
-												if theme and theme.name == deletetheme then
-													tremove(G.themes, i)
-													break
-												end
-											end
-										end
-										deletetheme = nil
-									end
-								}
+									savetheme, savewindow = nil, nil
+								end
 							}
 						}
 					}
 				}
-			end
+			}
 
-			GetThemeOptions = nil
 			return opt_themes
 		end
 
@@ -2523,6 +2525,21 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			rolecoords = rolecoords or Skada.rolecoords
 			speccoords = speccoords or Skada.speccoords
 			spellschools = spellschools or Skada.spellschools
+
+			-- fix old saved themes!
+			if G.themes and #G.themes > 0 then
+				local i = 1
+				local theme = G.themes[i]
+				while theme do
+					local name = theme.name or format("%s (%d)", L["Unknown"], i)
+					theme.name = nil
+					G.themes[name] = theme
+					tremove(G.themes, i)
+
+					i = i + 1
+					theme = G.themes[i]
+				end
+			end
 		end
 	end
 
