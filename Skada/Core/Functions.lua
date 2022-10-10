@@ -99,7 +99,7 @@ do
 		end
 
 		local class = "UNKNOWN"
-		if is_player(guid, flag, name) then
+		if is_player(guid, name, flag) then
 			class = name and select(2, UnitClass(name))
 			if not class and tonumber(guid) then
 				class = GetClassFromGUID(guid, "group")

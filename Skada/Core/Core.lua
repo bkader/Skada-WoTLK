@@ -1691,7 +1691,7 @@ function Skada:GetEnemy(set, name, guid, flag, create)
 		enemy.flag = flag
 
 		if guid or flag then
-			enemy.class = private.unit_class(guid, flag)
+			enemy.class = private.unit_class(guid, flag, nil, enemy, name)
 		else
 			enemy.class = "ENEMY"
 		end
@@ -1725,7 +1725,7 @@ function Skada:GetActor(set, id, name, flag)
 	local actor, enemy = self:FindActor(set, id, name)
 	-- creates it if not found
 	if not actor then
-		if is_player(id, flag, name) == 1 or is_pet(id, flag) == 1 then -- group members or group pets
+		if is_player(id, name, flag) == 1 or is_pet(id, flag) == 1 then -- group members or group pets
 			actor = self:GetPlayer(set, id, name, flag)
 		else -- an outsider maybe?
 			actor, enemy = self:GetEnemy(set, name, id, flag), true
@@ -1847,7 +1847,7 @@ do
 		action.petname = nil -- clear it
 
 		-- 1: group member / true: player / false: everything else
-		if is_player(action.playerid, action.playerflags, action.playername) ~= false then return end
+		if is_player(action.playerid, action.playername, action.playerflags) ~= false then return end
 
 		local owner = fix_pets_handler(action.playerid, action.playerflags)
 		if owner then

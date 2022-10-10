@@ -49,89 +49,6 @@ end
 -------------------------------------------------------------------------------
 
 do
-	local Table = {}
-	local max_pool_size = 200
-	local pools = {}
-
-	-- attempts to get a table from the table pool of the
-	-- specified tag name. if the pool doesn't exist or is empty
-	-- it creates a lua table.
-	function Table.get(tag)
-		local pool = pools[tag]
-		if not pool then
-			pool = {}
-			pools[tag] = pool
-			pool.c = 0
-			pool[0] = 0
-		else
-			local len = pool[0]
-			if len > 0 then
-				local obj = pool[len]
-				pool[len] = nil
-				pool[0] = len - 1
-				return obj
-			end
-		end
-		return {}
-	end
-
-	-- clears all items in a table.
-	function Table.clear(obj, func, ...)
-		if obj and func then
-			for k in pairs(obj) do
-				obj[k] = func(obj[k], ...)
-			end
-		elseif obj then
-			wipe(obj)
-		end
-		return obj
-	end
-
-	-- releases the already used lua table into the table pool
-	-- named "tag" or creates it right away.
-	function Table.free(tag, obj, noclear, func, ...)
-		if not obj then return end
-
-		local pool = pools[tag]
-		if not pool then
-			pool = {}
-			pools[tag] = pool
-			pool.c = 0
-			pool[0] = 0
-		end
-
-		if not noclear then
-			setmetatable(obj, nil)
-			obj = Table.clear(obj, func, ...)
-		end
-
-		do
-			local cnt = pool.c + 1
-			if cnt >= 20000 then
-				pool = {}
-				pools[tag] = pool
-				pool.c = 0
-				pool[0] = 0
-				return
-			end
-			pool.c = cnt
-		end
-
-		local len = pool[0] + 1
-		if len > max_pool_size then
-			return
-		end
-
-		pool[len] = obj
-		pool[0] = len
-	end
-
-	lib.Table = Table
-end
-
--------------------------------------------------------------------------------
-
-do
 	local GetNumRaidMembers, GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
 	local UnitExists, UnitAffectingCombat, UnitIsDeadOrGhost = UnitExists, UnitAffectingCombat, UnitIsDeadOrGhost
 	local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
@@ -520,8 +437,6 @@ local mixins = {
 	"EmptyFunc",
 	"Dispatch",
 	"QuickDispatch",
-	-- table util
-	"Table",
 	-- roster util
 	"IsInRaid",
 	"IsInGroup",

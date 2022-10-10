@@ -11,7 +11,6 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 	local new, del, clear = private.newTable, private.delTable, private.clearTable
 	local GetSpellInfo = private.spell_info or GetSpellInfo
 	local GetSpellLink = private.spell_link or GetSpellLink
-	local T = Skada.Table
 
 	local sunder_targets -- holds sunder targets details for announcement
 	local active_sunders = {} -- holds sunder targets to consider refreshes
@@ -91,7 +90,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 			t.name = dstName
 			t.count = 1
 			t.time = GetTime()
-			sunder_targets = sunder_targets or T.get("Sunder_Targets")
+			sunder_targets = sunder_targets or {}
 			sunder_targets[dstGUID] = t
 		elseif not t.full then
 			t.count = (t.count or 0) + 1
@@ -275,8 +274,8 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 	end
 
 	function mod:CombatLeave()
-		T.clear(data)
-		T.free("Sunder_Targets", sunder_targets, nil, del)
+		clear(data)
+		clear(sunder_targets)
 		last_srcGUID, last_srcName, last_srcFlags = nil, nil, nil
 	end
 

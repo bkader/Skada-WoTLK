@@ -7,11 +7,10 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 	local get_actors_by_potion = nil
 
 	-- cache frequently used globals
-	local pairs, tconcat, format, strsub = pairs, table.concat, string.format, string.sub
+	local pairs, tconcat, format, strsub, uformat = pairs, table.concat, string.format, string.sub, private.uformat
 	local GetItemInfo, UnitIsDeadOrGhost, GroupIterator = GetItemInfo, UnitIsDeadOrGhost, Skada.GroupIterator
 	local UnitGUID, UnitName, UnitClass, UnitBuff = UnitGUID, UnitName, UnitClass, UnitBuff
 	local new, del, clear = private.newTable, private.delTable, private.clearTable
-	local T, uformat = Skada.Table, private.uformat
 	local potion_ids = {}
 	local mod_cols = nil
 
@@ -82,7 +81,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		-- we use this function to record pre-pots as well.
 		function mod:CombatEnter()
 			if P.prepotion and not self.checked then
-				prepotion = prepotion or T.get("Potions_PrePotions")
+				prepotion = prepotion or {}
 				GroupIterator(check_unit_potions, prepotion)
 				self.checked = true
 			end
@@ -93,7 +92,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 				if P.prepotion and next(prepotion) ~= nil then
 					Skada:Printf(L["pre-potion: %s"], tconcat(prepotion, ", "))
 				end
-				T.free("Potions_PrePotions", prepotion)
+				clear(prepotion)
 				self.checked = nil
 			end
 		end

@@ -9,8 +9,8 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 	local tinsert, tremove, tsort, tconcat = table.insert, private.tremove, table.sort, table.concat
 	local strmatch, format, uformat = strmatch, string.format, private.uformat
-	local max, floor, wipe = math.max, math.floor, wipe
-	local new, del = private.newTable, private.delTable
+	local max, floor = math.max, math.floor
+	local new, del, clear = private.newTable, private.delTable, private.clearTable
 	local UnitHealthInfo = Skada.UnitHealthInfo
 	local UnitIsFeignDeath = UnitIsFeignDeath
 	local GetSpellInfo = private.spell_info or GetSpellInfo
@@ -903,7 +903,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	end
 
 	function mod:CombatLeave()
-		wipe(data)
+		clear(data)
 	end
 
 	function mod:SetComplete(set)

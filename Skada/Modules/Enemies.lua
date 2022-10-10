@@ -2,8 +2,7 @@ local _, Skada = ...
 local private = Skada.private
 
 -- frequently used globals --
-local pairs, type, max, format = pairs, type, math.max, string.format
-local uformat, T = private.uformat, Skada.Table
+local pairs, type, max, format, uformat = pairs, type, math.max, string.format, private.uformat
 local new, clear = private.newTable, private.clearTable
 local setPrototype, enemyPrototype = Skada.setPrototype, Skada.enemyPrototype
 
@@ -95,7 +94,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		end
 
 		if maxval and maxval > 0 then
-			customUnitsInfo = customUnitsInfo or T.get("Enemies_UnitsInfo")
+			customUnitsInfo = customUnitsInfo or {}
 			customUnitsInfo[id] = maxval
 		end
 
@@ -110,7 +109,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		local id = GetCreatureId(guid)
 		local unit = id and customUnits[id]
 		if unit then
-			customUnitsTable = customUnitsTable or T.get("Enemies_UnitsTable")
+			customUnitsTable = customUnitsTable or {}
 
 			if unit.diff ~= nil and ((type(unit.diff) == "table" and not tContains(unit.diff, get_instance_diff())) or (type(unit.diff) == "string" and get_instance_diff() ~= unit.diff)) then
 				customUnitsTable[guid] = -1
@@ -301,7 +300,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 					amount = amount - (unit.maxval - unit.curval)
 					if customGroups[unit.oname] and unit.useful then
 						log_custom_group(set, unit.guid, unit.oname, dmg.srcName, spellid, dmg.spellschool, amount, overkill, absorbed)
-						customGroupsTable = customGroupsTable or T.get("Enemies_GroupsTable")
+						customGroupsTable = customGroupsTable or {}
 						customGroupsTable[unit.guid] = true
 					end
 					if customGroups[unit.name] then
@@ -699,9 +698,9 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 
 	function mod:CombatLeave()
 		instanceDiff = nil
-		T.free("Enemies_UnitsInfo", customUnitsInfo)
-		T.free("Enemies_UnitsTable", customUnitsTable, nil, del)
-		T.free("Enemies_GroupsTable", customGroupsTable)
+		clear(customUnitsInfo)
+		clear(customUnitsTable)
+		clear(customGroupsTable)
 	end
 
 	function mod:OnInitialize()

@@ -4,7 +4,6 @@ local private = Skada.private
 -- cache frequently used globals
 local pairs, max = pairs, math.max
 local format, uformat = string.format, private.uformat
-local T = Skada.Table
 
 local function format_valuetext(d, columns, total, hps, metadata, subview)
 	d.valuetext = Skada:FormatValueCols(
@@ -30,7 +29,8 @@ Skada:RegisterModule("Healing", function(L, P)
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local next, new, del = next, private.newTable, private.delTable
+	local new, del = private.newTable, private.delTable
+	local next, clear = next, private.clearTable
 	local mod_cols = nil
 
 	-- list of spells used to queue units.
@@ -473,7 +473,7 @@ Skada:RegisterModule("Healing", function(L, P)
 	end
 
 	function mod:CombatLeave()
-		T.clear(heal)
+		clear(heal)
 	end
 
 	function mod:SetComplete(set)

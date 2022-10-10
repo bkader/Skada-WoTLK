@@ -9,8 +9,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local get_friendly_fire_targets = nil
 
-	local pairs, format = pairs, string.format
-	local uformat, T = private.uformat, Skada.Table
+	local pairs, format, uformat = pairs, string.format, private.uformat
 	local new, del, clear = private.newTable, private.delTable, private.clearTable
 	local mod_cols = nil
 
@@ -303,7 +302,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	end
 
 	function mod:CombatLeave()
-		T.clear(dmg)
+		clear(dmg)
 	end
 
 	function mod:SetComplete(set)

@@ -3,7 +3,7 @@ local private = Skada.private
 
 -- cache frequently used globals
 local pairs, min, max = pairs, math.min, math.max
-local format, uformat, T = string.format, private.uformat, Skada.Table
+local format, uformat = string.format, private.uformat
 local new, del, clear = private.newTable, private.delTable, private.clearTable
 
 local function format_valuetext(d, columns, total, dtps, metadata, subview)
@@ -149,7 +149,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		end
 	end
 
-	local extraATT = nil
+	local ext_attacks = nil
 	local function spell_damage(_, eventtype, srcGUID, srcName, _, dstGUID, dstName, dstFlags, ...)
 		if srcGUID == dstGUID then return end
 
@@ -158,12 +158,12 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 			local spellid, _, _, amount = ...
 
 			if spellid and not ignoredSpells[spellid] then
-				extraATT = extraATT or T.get("Damage_ExtraAttacks")
-				if not extraATT[srcName] then
-					extraATT[srcName] = new()
-					extraATT[srcName].proc = spellid
-					extraATT[srcName].count = amount
-					extraATT[srcName].time = Skada.current.last_time or GetTime()
+				ext_attacks = ext_attacks or {}
+				if not ext_attacks[srcName] then
+					ext_attacks[srcName] = new()
+					ext_attacks[srcName].proc = spellid
+					ext_attacks[srcName].count = amount
+					ext_attacks[srcName].time = Skada.current.last_time or GetTime()
 				end
 			end
 
@@ -175,17 +175,17 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 			dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing, dmg.crushing = ...
 
 			-- an extra attack?
-			if extraATT and extraATT[srcName] then
+			if ext_attacks and ext_attacks[srcName] then
 				local curtime = Skada.current.last_time or GetTime()
-				if not extraATT[srcName].spellid then -- queue spell
-					extraATT[srcName].spellid = dmg.spellid
-				elseif dmg.spellid == 6603 and extraATT[srcName].time < (curtime - 5) then -- expired proc
-					extraATT[srcName] = del(extraATT[srcName])
+				if not ext_attacks[srcName].spellid then -- queue spell
+					ext_attacks[srcName].spellid = dmg.spellid
+				elseif dmg.spellid == 6603 and ext_attacks[srcName].time < (curtime - 5) then -- expired proc
+					ext_attacks[srcName] = del(ext_attacks[srcName])
 				elseif dmg.spellid == 6603 then -- valid damage contribution
-					dmg.spellid = extraATT[srcName].proc
-					extraATT[srcName].count = max(0, extraATT[srcName].count - 1)
-					if extraATT[srcName].count == 0 then -- no procs left
-						extraATT[srcName] = del(extraATT[srcName])
+					dmg.spellid = ext_attacks[srcName].proc
+					ext_attacks[srcName].count = max(0, ext_attacks[srcName].count - 1)
+					if ext_attacks[srcName].count == 0 then -- no procs left
+						ext_attacks[srcName] = del(ext_attacks[srcName])
 					end
 				end
 			end
@@ -713,8 +713,8 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 	end
 
 	function mod:CombatLeave()
-		T.clear(dmg)
-		T.free("Damage_ExtraAttacks", extraATT, nil, del)
+		clear(dmg)
+		clear(ext_attacks)
 	end
 
 	function mod:SetComplete(set)

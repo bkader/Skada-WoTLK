@@ -445,9 +445,9 @@ end
 
 -- converts RGB colors to HEX.
 function private.RGBPercToHex(r, g, b, prefix)
-	r = r <= 1 and r >= 0 and r or 0
-	g = g <= 1 and g >= 0 and g or 0
-	b = b <= 1 and b >= 0 and b or 0
+	r = r and r <= 1 and r >= 0 and r or 0
+	g = g and g <= 1 and g >= 0 and g or 0
+	b = b and b <= 1 and b >= 0 and b or 0
 	return format(prefix and "ff%02x%02x%02x" or "%02x%02x%02x", r * 255, g * 255, b * 255)
 end
 
@@ -548,12 +548,12 @@ end
 -- creates a table pool
 function private.table_pool()
 	local pool = {tables = {}, new = true, del = true, clear = true}
-	setmetatable(pool.tables, private.weaktable)
+	local tables = setmetatable(pool.tables, private.weaktable)
 
 	-- reuses or creates a table
 	pool.new = function()
-		local t = next(pool.tables)
-		if t then pool.tables[t] = nil end
+		local t = next(tables)
+		if t then tables[t] = nil end
 		return t or {}
 	end
 
@@ -571,7 +571,7 @@ function private.table_pool()
 		t[""] = true
 		t[""] = nil
 		setmetatable(t, nil)
-		pool.tables[t] = true
+		tables[t] = true
 
 		return nil
 	end

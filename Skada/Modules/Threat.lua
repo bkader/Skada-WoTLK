@@ -8,8 +8,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 	local UnitDetailedThreatSituation, InCombatLockdown = UnitDetailedThreatSituation, InCombatLockdown
 	local GroupIterator, GetUnitRole, GetUnitSpec = Skada.GroupIterator, Skada.GetUnitRole, Skada.GetUnitSpec
 	local PlaySoundFile = PlaySoundFile
-	local new, del = private.newTable, private.delTable
-	local T = Skada.Table
+	local new, del, clear = private.newTable, private.delTable, private.clearTable
 	local mod_cols = nil
 
 	local aggro_icon = [[Interface\Icons\ability_physical_taunt]]
@@ -19,8 +18,8 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 		local GetItemInfo, IsItemInRange = GetItemInfo, IsItemInRange
 		local UnitGUID, UnitClass = UnitGUID, UnitClass
 		local nr, max_threat, last_warn, my_percent = 0, 0, time(), nil
-		local threat_table, tank_threat, tank_value, ruby_acorn, queried
-		local we_should_warn = false
+		local threat_table, we_should_warn = nil, false
+		local tank_threat, tank_value, ruby_acorn, queried
 
 		-- bar colors
 		local aggro_color = RED_FONT_COLOR
@@ -81,7 +80,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 				end
 
 				-- cache the player.
-				threat_table = threat_table or T.get("Threat_Table")
+				threat_table = threat_table or {}
 				threat_table[guid] = player
 			end
 
@@ -213,7 +212,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 
 		function mod:CombatLeave()
 			tank_threat, tank_value = nil, nil
-			T.free("Threat_Table", threat_table, nil, del)
+			clear(threat_table)
 			self.unitID, self.unitName = nil, nil
 		end
 	end
@@ -556,7 +555,10 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 
 			mod_cols = self.metadata.columns
 
-			Skada.RegisterBucketEvent(self, {"UNIT_THREAT_LIST_UPDATE", "UNIT_THREAT_SITUATION_UPDATE", "PLAYER_TARGET_CHANGED"}, 0.05, "SetUnit")
+			Skada.RegisterBucketEvent(self, "UNIT_THREAT_LIST_UPDATE", 0.1, "SetUnit")
+			Skada.RegisterBucketEvent(self, "UNIT_THREAT_SITUATION_UPDATE", 0.1, "SetUnit")
+			Skada.RegisterBucketEvent(self, "PLAYER_TARGET_CHANGED", 0.1, "SetUnit")
+
 			Skada.RegisterCallback(self, "Skada_ApplySettings", "ApplySettings")
 			Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 

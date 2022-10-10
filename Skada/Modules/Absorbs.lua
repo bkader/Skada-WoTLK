@@ -22,7 +22,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	local GetTime, band, tsort, max = GetTime, bit.band, table.sort, math.max
 	local GetCurrentMapAreaID, UnitBuff, UnitHealthInfo = GetCurrentMapAreaID, UnitBuff, Skada.UnitHealthInfo
 	local IsActiveBattlefieldArena, UnitInBattleground = IsActiveBattlefieldArena, UnitInBattleground
-	local T, del = Skada.Table, private.delTable
+	local del, clear = private.delTable, private.clearTable
 	local mod_cols = nil
 
 	-- INCOMPLETE
@@ -452,7 +452,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	local function handle_shield(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, _, points)
 		if not spellid or not absorbspells[spellid] or not dstName or ignoredSpells[spellid] then return end
 
-		shields = shields or T.get("Skada_Shields") -- create table if missing
+		shields = shields or {} -- create table if missing
 		dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
 
 		-- shield removed?
@@ -464,8 +464,8 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 
 		-- shield applied
-		shields[dstName] = shields[dstName] or {}
-		shields[dstName][spellid] = shields[dstName][spellid] or {}
+		shields[dstName] = shields[dstName] or new()
+		shields[dstName][spellid] = shields[dstName][spellid] or new()
 
 		-- Soul Link
 		if spellid == 25228 then
@@ -506,13 +506,12 @@ Skada:RegisterModule("Absorbs", function(L, P)
 			if shieldamounts and shieldamounts[srcName] and shieldamounts[srcName][spellid] then
 				local shield = shields[dstName][spellid][srcName]
 				if not shield then
-					shields[dstName][spellid][srcName] = {
-						srcGUID = srcGUID,
-						srcFlags = srcFlags,
-						school = spellschool,
-						points = points,
-					}
-					shield = shields[dstName][spellid][srcName]
+					shield = new()
+					shield.srcGUID = srcGUID
+					shield.srcFlags = srcFlags
+					shield.school = spellschool
+					shield.points = points
+					shields[dstName][spellid][srcName] = shield
 				end
 
 				shield.amount = shieldamounts[srcName][spellid]
@@ -537,13 +536,12 @@ Skada:RegisterModule("Absorbs", function(L, P)
 
 		local shield = shields[dstName][spellid][srcName]
 		if not shield then
-			shields[dstName][spellid][srcName] = {
-				srcGUID = srcGUID,
-				srcFlags = srcFlags,
-				school = spellschool,
-				points = points,
-			}
-			shield = shields[dstName][spellid][srcName]
+			shield = new()
+			shield.srcGUID = srcGUID
+			shield.srcFlags = srcFlags
+			shield.school = spellschool
+			shield.points = points
+			shields[dstName][spellid][srcName] = shield
 		end
 
 		shield.amount = floor(amount)
@@ -560,8 +558,8 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	end
 
 	local function process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool, damage, broke)
-		shields[dstName] = shields[dstName] or {}
-		shieldspopped = T.clear(shieldspopped or T.get("Skada_ShieldsPopped"), del)
+		shields[dstName] = shields[dstName] or new()
+		shieldspopped = clear(shieldspopped) or {}
 
 		for spellid, sources in pairs(shields[dstName]) do
 			for srcName, spell in pairs(sources) do
@@ -607,8 +605,8 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		-- if the player has a single shield and it broke, we update its max absorb
 		if #shieldspopped == 1 and broke and shieldspopped[1].full and absorbspells[shieldspopped[1].spellid].cap then
 			local s = shieldspopped[1]
-			shieldamounts = shieldamounts or T.get("Skada_ShieldAmounts") -- create table if missing
-			shieldamounts[s.srcName] = shieldamounts[s.srcName] or {}
+			shieldamounts = shieldamounts or {} -- create table if missing
+			shieldamounts[s.srcName] = shieldamounts[s.srcName] or new()
 			local src = shieldamounts[s.srcName]
 			if (not src[s.spellid] or src[s.spellid] < absorbed) and absorbed < (absorbspells[s.spellid].cap * zoneModifier) then
 				src[s.spellid] = absorbed
@@ -749,9 +747,9 @@ Skada:RegisterModule("Absorbs", function(L, P)
 
 	local function spell_heal(timestamp, _, _, srcName, _, _, dstName, _, _, _, _, amount)
 		if not shields or not dstName then return end
-		heals = heals or T.get("Skada_Heals") -- create table if missing
-		heals[dstName] = heals[dstName] or {}
-		heals[dstName][srcName] = heals[dstName][srcName] or {}
+		heals = heals or {} -- create table if missing
+		heals[dstName] = heals[dstName] or new()
+		heals[dstName][srcName] = heals[dstName][srcName] or new()
 		heals[dstName][srcName].ts = timestamp
 		heals[dstName][srcName].amount = amount
 	end
@@ -1141,11 +1139,11 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	end
 
 	function mod:SetComplete(set)
-		T.clear(absorb)
-		T.free("Skada_Heals", heals)
-		T.free("Skada_Shields", shields)
-		T.free("Skada_ShieldAmounts", shieldamounts)
-		T.free("Skada_ShieldsPopped", shieldspopped, nil, del)
+		clear(absorb)
+		clear(heals)
+		clear(shields)
+		clear(shieldamounts)
+		clear(shieldspopped)
 
 		-- clean absorbspells table:
 		if not set.absorb or set.absorb == 0 then return end

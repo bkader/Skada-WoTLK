@@ -36,7 +36,6 @@ Skada:RegisterModule("Damage", function(L, P)
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local missTypes = Skada.missTypes
-	local T = Skada.Table
 	local mod_cols = nil
 
 	-- spells on the list below are used to update player's active time
@@ -229,7 +228,7 @@ Skada:RegisterModule("Damage", function(L, P)
 		end
 	end
 
-	local extraATT = nil
+	local ext_attacks = nil
 	local function spell_damage(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, _, ...)
 		if srcGUID == dstGUID then return end
 
@@ -238,12 +237,12 @@ Skada:RegisterModule("Damage", function(L, P)
 			local spellid, spellname, _, amount = ...
 
 			if spellid and spellname and not ignoredSpells[spellid] then
-				extraATT = extraATT or T.get("Damage_ExtraAttacks")
-				if not extraATT[srcName] then
-					extraATT[srcName] = new()
-					extraATT[srcName].proc = spellname
-					extraATT[srcName].count = amount
-					extraATT[srcName].time = Skada.current.last_time or GetTime()
+				ext_attacks = ext_attacks or new()
+				if not ext_attacks[srcName] then
+					ext_attacks[srcName] = new()
+					ext_attacks[srcName].proc = spellname
+					ext_attacks[srcName].count = amount
+					ext_attacks[srcName].time = Skada.current.last_time or GetTime()
 				end
 			end
 
@@ -255,17 +254,17 @@ Skada:RegisterModule("Damage", function(L, P)
 			dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing = ...
 
 			-- an extra attack?
-			if extraATT and extraATT[srcName] then
+			if ext_attacks and ext_attacks[srcName] then
 				local curtime = Skada.current.last_time or GetTime()
-				if not extraATT[srcName].spellname then -- queue spell
-					extraATT[srcName].spellname = dmg.spellname
-				elseif dmg.spellname == L["Melee"] and extraATT[srcName].time < (curtime - 5) then -- expired proc
-					extraATT[srcName] = del(extraATT[srcName])
+				if not ext_attacks[srcName].spellname then -- queue spell
+					ext_attacks[srcName].spellname = dmg.spellname
+				elseif dmg.spellname == L["Melee"] and ext_attacks[srcName].time < (curtime - 5) then -- expired proc
+					ext_attacks[srcName] = del(ext_attacks[srcName])
 				elseif dmg.spellname == L["Melee"] then -- valid damage contribution
-					dmg.spellname = extraATT[srcName].spellname .. " (" .. extraATT[srcName].proc .. ")"
-					extraATT[srcName].count = max(0, extraATT[srcName].count - 1)
-					if extraATT[srcName].count == 0 then -- no procs left
-						extraATT[srcName] = del(extraATT[srcName])
+					dmg.spellname = ext_attacks[srcName].spellname .. " (" .. ext_attacks[srcName].proc .. ")"
+					ext_attacks[srcName].count = max(0, ext_attacks[srcName].count - 1)
+					if ext_attacks[srcName].count == 0 then -- no procs left
+						ext_attacks[srcName] = del(ext_attacks[srcName])
 					end
 				end
 			end
@@ -814,8 +813,8 @@ Skada:RegisterModule("Damage", function(L, P)
 	end
 
 	function mod:CombatLeave()
-		T.clear(dmg)
-		T.free("Damage_ExtraAttacks", extraATT, nil, del)
+		clear(dmg)
+		clear(ext_attacks)
 	end
 
 	function mod:SetComplete(set)
