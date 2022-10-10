@@ -188,8 +188,8 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 		playermod.nototal = true
 		targetmod.nototal = true
 
-		Skada:RegisterForCL(spell_resurrect, "SPELL_RESURRECT", {src_is_not_interesting = true, dst_is_interesting_nopets = true})
-		Skada:RegisterForCL(spell_resurrect, "SPELL_CAST_SUCCESS", {src_is_interesting = true, dst_is_not_interesting = true})
+		Skada:RegisterForCL(spell_resurrect, {src_is_not_interesting = true, dst_is_interesting_nopets = true}, "SPELL_RESURRECT")
+		Skada:RegisterForCL(spell_resurrect, {src_is_interesting = true, dst_is_not_interesting = true}, "SPELL_CAST_SUCCESS")
 
 		Skada:AddMode(self)
 	end

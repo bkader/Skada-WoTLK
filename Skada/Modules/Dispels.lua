@@ -211,7 +211,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 		targetmod.nototal = true
 		playermod.nototal = true
 
-		Skada:RegisterForCL(spell_dispel, "SPELL_DISPEL", "SPELL_STOLEN", {src_is_interesting = true})
+		Skada:RegisterForCL(spell_dispel, {src_is_interesting = true}, "SPELL_DISPEL", "SPELL_STOLEN")
 
 		Skada:AddMode(self)
 

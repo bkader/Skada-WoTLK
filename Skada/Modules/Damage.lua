@@ -761,13 +761,14 @@ Skada:RegisterModule("Damage", function(L, P)
 
 		Skada:RegisterForCL(
 			spell_cast,
+			flags_src_dst,
 			"SPELL_CAST_START",
-			"SPELL_CAST_SUCCESS",
-			flags_src_dst
+			"SPELL_CAST_SUCCESS"
 		)
 
 		Skada:RegisterForCL(
 			spell_damage,
+			flags_src_dst,
 			"DAMAGE_SHIELD",
 			"DAMAGE_SPLIT",
 			"RANGE_DAMAGE",
@@ -775,19 +776,18 @@ Skada:RegisterModule("Damage", function(L, P)
 			"SPELL_DAMAGE",
 			"SPELL_EXTRA_ATTACKS",
 			"SPELL_PERIODIC_DAMAGE",
-			"SWING_DAMAGE",
-			flags_src_dst
+			"SWING_DAMAGE"
 		)
 
 		Skada:RegisterForCL(
 			spell_missed,
+			flags_src_dst,
 			"DAMAGE_SHIELD_MISSED",
 			"RANGE_MISSED",
 			"SPELL_BUILDING_MISSED",
 			"SPELL_MISSED",
 			"SPELL_PERIODIC_MISSED",
-			"SWING_MISSED",
-			flags_src_dst
+			"SWING_MISSED"
 		)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")

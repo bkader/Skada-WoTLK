@@ -223,7 +223,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		targetmod.nototal = true
 		playermod.nototal = true
 
-		Skada:RegisterForCL(spell_interrupt, "SPELL_INTERRUPT", {src_is_interesting = true})
+		Skada:RegisterForCL(spell_interrupt, {src_is_interesting = true}, "SPELL_INTERRUPT")
 		Skada:AddMode(self)
 
 		-- table of ignored spells:

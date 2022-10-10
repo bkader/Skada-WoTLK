@@ -397,9 +397,9 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 
 		Skada:RegisterForCL(
 			aura_applied,
+			{src_is_interesting = true},
 			"SPELL_AURA_APPLIED",
-			"SPELL_AURA_REFRESH",
-			{src_is_interesting = true}
+			"SPELL_AURA_REFRESH"
 		)
 
 		Skada:AddMode(self, L["Crowd Control"])
@@ -663,9 +663,9 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 
 		Skada:RegisterForCL(
 			aura_applied,
+			{dst_is_interesting_nopets = true},
 			"SPELL_AURA_APPLIED",
-			"SPELL_AURA_REFRESH",
-			{dst_is_interesting_nopets = true}
+			"SPELL_AURA_REFRESH"
 		)
 
 		Skada:AddMode(self, L["Crowd Control"])
@@ -919,9 +919,9 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 
 		Skada:RegisterForCL(
 			aura_broken,
+			{src_is_interesting = true},
 			"SPELL_AURA_BROKEN",
-			"SPELL_AURA_BROKEN_SPELL",
-			{src_is_interesting = true}
+			"SPELL_AURA_BROKEN_SPELL"
 		)
 
 		Skada:AddMode(self, L["Crowd Control"])

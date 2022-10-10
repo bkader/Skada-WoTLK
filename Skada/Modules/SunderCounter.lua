@@ -244,25 +244,25 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 		local flags_src = {src_is_interesting_nopets = true}
 		Skada:RegisterForCL(
 			sunder_applied,
+			flags_src,
 			"SPELL_AURA_APPLIED",
 			"SPELL_AURA_APPLIED_DOSE",
 			"SPELL_AURA_REFRESH",
-			"SPELL_AURA_REMOVED",
-			flags_src
+			"SPELL_AURA_REMOVED"
 		)
 
 		Skada:RegisterForCL(
 			sunder_cast,
-			"SPELL_CAST_SUCCESS",
-			flags_src
+			flags_src,
+			"SPELL_CAST_SUCCESS"
 		)
 
 		Skada:RegisterForCL(
 			unit_died,
+			{dst_is_not_interesting = true},
 			"UNIT_DIED",
 			"UNIT_DESTROYED",
-			"UNIT_DISSIPATES",
-			{dst_is_not_interesting = true}
+			"UNIT_DISSIPATES"
 		)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")

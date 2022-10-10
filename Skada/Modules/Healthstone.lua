@@ -85,7 +85,7 @@ Skada:RegisterModule("Healthstones", function(L)
 
 		mod_cols = self.metadata.columns
 
-		Skada:RegisterForCL(stone_used, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})
+		Skada:RegisterForCL(stone_used, {src_is_interesting_nopets = true}, "SPELL_CAST_SUCCESS")
 		Skada:AddMode(self)
 	end
 

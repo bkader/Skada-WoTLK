@@ -371,7 +371,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		-- no total click.
 		playermod.nototal = true
 
-		Skada:RegisterForCL(potion_used, "SPELL_CAST_SUCCESS", {src_is_interesting_nopets = true})
+		Skada:RegisterForCL(potion_used, {src_is_interesting_nopets = true}, "SPELL_CAST_SUCCESS")
 		Skada.RegisterCallback(self, "Skada_ApplySettings", "ApplySettings")
 		Skada:AddMode(self)
 	end

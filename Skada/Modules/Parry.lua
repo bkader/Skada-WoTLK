@@ -139,9 +139,9 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 
 		Skada:RegisterForCL(
 			spell_missed,
+			{src_is_interesting = true, dst_is_not_interesting = true},
 			"SPELL_MISSED",
-			"SWING_MISSED",
-			{src_is_interesting = true, dst_is_not_interesting = true}
+			"SWING_MISSED"
 		)
 
 		Skada:AddMode(self)

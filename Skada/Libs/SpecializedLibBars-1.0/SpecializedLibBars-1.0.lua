@@ -2,7 +2,7 @@
 -- Specialized ( = enhanced) for Skada
 -- Note to self: don't forget to notify original author of changes
 -- in the unlikely event they end up being usable outside of Skada.
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90014
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90015
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 
@@ -18,6 +18,7 @@ local tsort, tinsert, tremove, tconcat, wipe = table.sort, tinsert, tremove, tab
 local next, pairs, error, type, xpcall = next, pairs, error, type, xpcall
 local CreateFrame = CreateFrame
 local GameTooltip = GameTooltip
+local setmetatable = setmetatable
 local GetScreenWidth = GetScreenWidth
 local GetScreenHeight = GetScreenHeight
 
@@ -334,7 +335,8 @@ do
 		list.button.icon = list.button.icon or list.button:CreateTexture("$parentIcon", "ARTWORK")
 		list.button.icon:SetTexCoord(0.094, 0.906, 0.094, 0.906)
 		list.button.icon:SetPoint("LEFT", list.button, "LEFT", 5, 0)
-		list.button.icon:SetSize(14, 14)
+		list.button.icon:SetWidth(14)
+		list.button.icon:SetHeight(14)
 
 		list.length = length or 200
 		list.thickness = thickness or 15
@@ -345,7 +347,7 @@ do
 
 		list.buttons = {}
 
-		list:SetPoint("TOPLEFT", UIParent, "CENTER", 0, 0)
+		list:SetPoint("TOPLEFT", UIParent, "CENTER")
 		list:SetMinResize(80, 60)
 		list:SetMaxResize(500, 500)
 
@@ -365,7 +367,8 @@ do
 		if not list.resizeright then
 			list.resizeright = CreateFrame("Button", "$parentRightResizer", list)
 			list.resizeright:SetFrameLevel(list:GetFrameLevel() + 3)
-			list.resizeright:SetSize(12, 12)
+			list.resizeright:SetWidth(12)
+			list.resizeright:SetHeight(12)
 			list.resizeright:SetAlpha(0)
 			list.resizeright.icon = list.resizeright:CreateTexture("$parentIcon", "OVERLAY")
 			list.resizeright.icon:SetAllPoints(list.resizeright)
@@ -378,7 +381,8 @@ do
 		if not list.resizeleft then
 			list.resizeleft = CreateFrame("Button", "$parentLeftResizer", list)
 			list.resizeleft:SetFrameLevel(list:GetFrameLevel() + 3)
-			list.resizeleft:SetSize(12, 12)
+			list.resizeleft:SetWidth(12)
+			list.resizeleft:SetHeight(12)
 			list.resizeleft:SetAlpha(0)
 			list.resizeleft.icon = list.resizeleft:CreateTexture("$parentIcon", "OVERLAY")
 			list.resizeleft.icon:SetAllPoints(list.resizeleft)
@@ -392,7 +396,8 @@ do
 			list.lockbutton = CreateFrame("Button", "$parentLockButton", list)
 			list.lockbutton:SetPoint("BOTTOM", list, "BOTTOM", 0, 2)
 			list.lockbutton:SetFrameLevel(list:GetFrameLevel() + 3)
-			list.lockbutton:SetSize(12, 12)
+			list.lockbutton:SetWidth(12)
+			list.lockbutton:SetHeight(12)
 			list.lockbutton:SetAlpha(0)
 			list.lockbutton.icon = list.lockbutton:CreateTexture("$parentIcon", "OVERLAY")
 			list.lockbutton.icon:SetAllPoints(list.lockbutton)
@@ -405,14 +410,16 @@ do
 		if not list.stretcher then
 			list.stretcher = CreateFrame("Button", "$parentStretcher", list)
 			list.stretcher:SetFrameLevel(list:GetFrameLevel() + 3)
-			list.stretcher:SetSize(32, 12)
+			list.stretcher:SetWidth(32)
+			list.stretcher:SetHeight(12)
 			list.stretcher:SetAlpha(0)
 			list.stretcher.bg = list.stretcher:CreateTexture("$parentBG", "BACKGROUND")
 			list.stretcher.bg:SetAllPoints(true)
 			list.stretcher.bg:SetTexture([[Interface\Buttons\WHITE8X8]])
 			list.stretcher.bg:SetVertexColor(0, 0, 0, 0.85)
 			list.stretcher.icon = list.stretcher:CreateTexture("$parentIcon", "ARTWORK")
-			list.stretcher.icon:SetSize(12, 12)
+			list.stretcher.icon:SetWidth(12)
+			list.stretcher.icon:SetHeight(12)
 			list.stretcher.icon:SetPoint("CENTER")
 			list.stretcher.icon:SetTexture(ICON_STRETCH)
 			list.stretcher.icon:SetDesaturated(true)
@@ -431,7 +438,8 @@ do
 
 		list:SetOrientation(orientation)
 		list:SetReverseGrowth(nil, true)
-		list:SetSize(length, height)
+		list:SetWidth(length)
+		list:SetHeight(height)
 
 		return list
 	end
@@ -716,10 +724,10 @@ function barListPrototype:SetReverseGrowth(reverse, update)
 		self.button:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT")
 
 		self.resizeright.icon:SetTexCoord(0, 1, 1, 0)
-		self.resizeright:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
+		self.resizeright:SetPoint("TOPRIGHT", self, "TOPRIGHT")
 
 		self.resizeleft.icon:SetTexCoord(1, 0, 1, 0)
-		self.resizeleft:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
+		self.resizeleft:SetPoint("TOPLEFT", self, "TOPLEFT")
 
 		self.lockbutton:SetPoint("TOP", self, "TOP", 0, -2)
 	else
@@ -727,10 +735,10 @@ function barListPrototype:SetReverseGrowth(reverse, update)
 		self.button:SetPoint("TOPRIGHT", self, "TOPRIGHT")
 
 		self.resizeright.icon:SetTexCoord(0, 1, 0, 1)
-		self.resizeright:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 0, 0)
+		self.resizeright:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT")
 
 		self.resizeleft.icon:SetTexCoord(1, 0, 0, 1)
-		self.resizeleft:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 0, 0)
+		self.resizeleft:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT")
 
 		self.lockbutton:SetPoint("BOTTOM", self, "BOTTOM", 0, 2)
 	end
@@ -780,7 +788,8 @@ do
 		-- Create button frame.
 		local btn = CreateFrame("Button", "$parent" .. title:gsub("%s+", "_"), self.button)
 		btn:SetFrameLevel(self.button:GetFrameLevel() + 1)
-		btn:SetSize(14, 14)
+		btn:SetWidth(14)
+		btn:SetHeight(14)
 
 		btn:SetNormalTexture(normaltex)
 		btn:SetHighlightTexture(highlighttex or normaltex, 1.0)
@@ -1135,7 +1144,7 @@ do
 
 	local function sizerOnEnter(self)
 		GameTooltip:SetOwner(self, "ANCHOR_NONE")
-		GameTooltip:SetPoint("BOTTOM", self, "TOP", 0, 0)
+		GameTooltip:SetPoint("BOTTOM", self, "TOP")
 		GameTooltip:ClearLines()
 		GameTooltip:AddLine(L_RESIZE_HEADER)
 		GameTooltip:AddLine(L_RESIZE_CLICK, 1, 1, 1)
@@ -1154,7 +1163,7 @@ do
 	local function lockOnEnter(self)
 		local p = self:GetParent()
 		GameTooltip:SetOwner(self, "ANCHOR_NONE")
-		GameTooltip:SetPoint("BOTTOM", self, "TOP", 0, 0)
+		GameTooltip:SetPoint("BOTTOM", self, "TOP")
 		GameTooltip:ClearLines()
 		GameTooltip:AddLine(p.name)
 		GameTooltip:AddLine(p.locked and L_UNLOCK_WINDOW or L_LOCK_WINDOW, 1, 1, 1)
@@ -1642,9 +1651,8 @@ do
 		local startpoint = self.button:IsVisible() and (self.button:GetHeight() + self.startpoint) or 0
 
 		local from, to
-		local thickness, showIcon = self.thickness, self.showIcon
 		local offset = self.offset
-		local x1, y1, x2, y2 = 0, startpoint, 0, startpoint
+		local y1, y2 = startpoint, startpoint
 		local maxbars = min(#values, self.maxBars)
 
 		local start, stop, step, fixnum
@@ -1674,7 +1682,10 @@ do
 			end
 		end
 
+		local showIcon = self.showIcon
+		local thickness = self.thickness
 		local shown = 0
+
 		for i = start, stop, step do
 			local origTo = to
 			local v = values[i]
@@ -1693,9 +1704,7 @@ do
 				end
 			end
 
-			x1, x2 = 0, 0
-
-			-- Silly hack to fix icon positions. I should just rewrite the whole thing, really. WTB energy.
+			local x1, x2 = 0, 0 -- TODO: find a better way
 			if showIcon and lastBar == self then
 				if orientation == 1 then
 					x1 = thickness
@@ -1805,22 +1814,22 @@ do
 
 		self.spark = self.spark or self:CreateTexture(nil, "OVERLAY")
 		self.spark:SetTexture([[Interface\CastingBar\UI-CastingBar-Spark]])
-		self.spark:SetSize(10, 10)
+		self.spark:SetWidth(10)
+		self.spark:SetHeight(10)
 		self.spark:SetBlendMode("ADD")
 		self.spark:Hide()
 
-		self.icon = self.icon or self:CreateTexture(nil, "OVERLAY")
-		self.icon:SetPoint("LEFT", self, "LEFT", 0, 0)
+		self.iconFrame = self.iconFrame or CreateFrame("Frame", nil, self)
+		self.iconFrame:SetPoint("LEFT", self, "LEFT")
+		self.iconFrame:SetFrameLevel(self:GetFrameLevel() + 1)
+
+		self.icon = self.icon or self.iconFrame:CreateTexture(nil, "OVERLAY")
+		self.icon:SetAllPoints(self.iconFrame)
 		self:SetIcon(icon or DEFAULT_ICON)
 		if icon then
 			self:ShowIcon()
 		end
 		self.icon:SetTexCoord(0.094, 0.906, 0.094, 0.906)
-
-		-- Lame frame solely used for handling mouse input on icon.
-		self.iconFrame = self.iconFrame or CreateFrame("Frame", nil, self)
-		self.iconFrame:SetAllPoints(self.icon)
-		self.iconFrame:SetFrameLevel(self:GetFrameLevel() + 1)
 
 		self.label = self.label or self:CreateFontString(nil, "OVERLAY", "ChatFontNormal")
 		self.label:SetWordWrap(false)
@@ -2025,7 +2034,8 @@ do
 
 		self:SetWidth(width)
 		self:SetHeight(height)
-		self.icon:SetSize(height, height)
+		self.iconFrame:SetWidth(height)
+		self.iconFrame:SetHeight(height)
 	end
 
 	function barPrototype:SetLength(length)
@@ -2064,9 +2074,9 @@ end
 function barPrototype:UpdateOrientationLayout(orientation)
 	local t = nil
 	if orientation == 1 then
-		t = self.icon
+		t = self.iconFrame
 		t:ClearAllPoints()
-		t:SetPoint("RIGHT", self, "LEFT", 0, 0)
+		t:SetPoint("RIGHT", self, "LEFT")
 
 		t = self.spark
 		t:ClearAllPoints()
@@ -2082,22 +2092,22 @@ function barPrototype:UpdateOrientationLayout(orientation)
 
 		t = self.timerLabel
 		t:ClearAllPoints()
-		t:SetPoint("RIGHT", self, "RIGHT", -3, 0)
+		t:SetPoint("RIGHT", self, "RIGHT", -5, 0)
 		t:SetJustifyH("RIGHT")
 		t:SetJustifyV("MIDDLE")
 
 		t = self.label
 		t:ClearAllPoints()
-		t:SetPoint("LEFT", self, "LEFT", 3, 0)
-		t:SetPoint("RIGHT", self.timerLabel, "LEFT", 0, 0)
+		t:SetPoint("LEFT", self, "LEFT", 5, 0)
+		t:SetPoint("RIGHT", self.timerLabel, "LEFT")
 		t:SetJustifyH("LEFT")
 		t:SetJustifyV("MIDDLE")
 
 		self.bg:SetTexCoord(0, 1, 0, 1)
 	elseif orientation == 2 then
-		t = self.icon
+		t = self.iconFrame
 		t:ClearAllPoints()
-		t:SetPoint("LEFT", self, "RIGHT", 0, 0)
+		t:SetPoint("LEFT", self, "RIGHT")
 
 		t = self.spark
 		t:ClearAllPoints()
@@ -2113,14 +2123,14 @@ function barPrototype:UpdateOrientationLayout(orientation)
 
 		t = self.timerLabel
 		t:ClearAllPoints()
-		t:SetPoint("LEFT", self, "LEFT", 3, 0)
+		t:SetPoint("LEFT", self, "LEFT", 5, 0)
 		t:SetJustifyH("LEFT")
 		t:SetJustifyV("MIDDLE")
 
 		t = self.label
 		t:ClearAllPoints()
-		t:SetPoint("RIGHT", self, "RIGHT", -3, 0)
-		t:SetPoint("LEFT", self.timerLabel, "RIGHT", 0, 0)
+		t:SetPoint("RIGHT", self, "RIGHT", -5, 0)
+		t:SetPoint("LEFT", self.timerLabel, "RIGHT")
 		t:SetJustifyH("RIGHT")
 		t:SetJustifyV("MIDDLE")
 

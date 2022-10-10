@@ -663,24 +663,24 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 
 		Skada:RegisterForCL(
 			spell_damage,
+			flags_src_dst,
 			"DAMAGE_SHIELD",
 			"DAMAGE_SPLIT",
 			"RANGE_DAMAGE",
 			"SPELL_DAMAGE",
 			"SPELL_PERIODIC_DAMAGE",
-			"SWING_DAMAGE",
-			flags_src_dst
+			"SWING_DAMAGE"
 		)
 
 		Skada:RegisterForCL(
 			spell_missed,
+			flags_src_dst,
 			"DAMAGE_SHIELD_MISSED",
 			"RANGE_MISSED",
 			"SPELL_BUILDING_MISSED",
 			"SPELL_MISSED",
 			"SPELL_PERIODIC_MISSED",
-			"SWING_MISSED",
-			flags_src_dst
+			"SWING_MISSED"
 		)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
@@ -1204,24 +1204,24 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 
 		Skada:RegisterForCL(
 			spell_damage,
+			flags_dst_src,
 			"DAMAGE_SHIELD",
 			"DAMAGE_SPLIT",
 			"RANGE_DAMAGE",
 			"SPELL_DAMAGE",
 			"SPELL_PERIODIC_DAMAGE",
-			"SWING_DAMAGE",
-			flags_dst_src
+			"SWING_DAMAGE"
 		)
 
 		Skada:RegisterForCL(
 			spell_missed,
+			flags_dst_src,
 			"DAMAGE_SHIELD_MISSED",
 			"RANGE_MISSED",
 			"SPELL_BUILDING_MISSED",
 			"SPELL_MISSED",
 			"SPELL_PERIODIC_MISSED",
-			"SWING_MISSED",
-			flags_dst_src
+			"SWING_MISSED"
 		)
 
 		Skada:AddMode(self, L["Enemies"])
@@ -1518,9 +1518,9 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 
 		Skada:RegisterForCL(
 			spell_heal,
+			{src_is_not_interesting = true, dst_is_not_interesting = true},
 			"SPELL_HEAL",
-			"SPELL_PERIODIC_HEAL",
-			{src_is_not_interesting = true, dst_is_not_interesting = true}
+			"SPELL_PERIODIC_HEAL"
 		)
 
 		Skada:AddMode(self, L["Enemies"])

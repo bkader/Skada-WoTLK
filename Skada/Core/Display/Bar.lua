@@ -908,7 +908,8 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 				local icon = scrollIcons and scrollIcons[win]
 				if not icon then
 					icon = CreateFrame("Frame", nil, win.bargroup)
-					icon:SetSize(32, 32)
+					icon:SetWidth(32)
+					icon:SetHeight(32)
 					icon:SetPoint("CENTER")
 					icon:SetFrameLevel(win.bargroup:GetFrameLevel() + 6)
 

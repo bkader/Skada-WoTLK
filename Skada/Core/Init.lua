@@ -1122,6 +1122,7 @@ do
 		[54755] = [[Interface\ICONS\inv_glyph_majordruid]], --> Glyph of Rejuvenation
 		[54968] = [[Interface\ICONS\inv_glyph_majorpaladin]], --> Glyph of Holy Light
 		[56160] = [[Interface\ICONS\inv_glyph_majorpriest]], --> Glyph of Power Word: Shield
+		[57842] = [[Interface\ICONS\ability_warrior_focusedrage]], --> Killing Spree
 		[61607] = [[Interface\ICONS\ability_hunter_rapidkilling]] --> Mark of Blood
 	}
 

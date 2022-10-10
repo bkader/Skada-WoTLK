@@ -681,12 +681,12 @@ Skada:RegisterModule("Buffs", function(_, P, _, C)
 
 		Skada:RegisterForCL(
 			handle_buff,
+			{dst_is_interesting_nopets = true},
 			"SPELL_AURA_APPLIED",
 			"SPELL_AURA_REMOVED",
 			"SPELL_AURA_REFRESH",
 			"SPELL_AURA_APPLIED_DOSE",
-			"SPELL_PERIODIC_ENERGIZE",
-			{dst_is_interesting_nopets = true}
+			"SPELL_PERIODIC_ENERGIZE"
 		)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
@@ -846,11 +846,11 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 
 		Skada:RegisterForCL(
 			handle_debuff,
+			{src_is_interesting = true},
 			"SPELL_AURA_APPLIED",
 			"SPELL_AURA_REMOVED",
 			"SPELL_AURA_REFRESH",
-			"SPELL_AURA_APPLIED_DOSE",
-			{src_is_interesting = true}
+			"SPELL_AURA_APPLIED_DOSE"
 		)
 
 		Skada:AddMode(self, L["Buffs and Debuffs"])
@@ -923,12 +923,12 @@ Skada:RegisterModule("Enemy Buffs", function(_, P, _, C)
 
 		Skada:RegisterForCL(
 			handle_buff,
+			{src_is_not_interesting = true, dst_is_not_interesting = true},
 			"SPELL_AURA_APPLIED",
 			"SPELL_AURA_REMOVED",
 			"SPELL_AURA_REFRESH",
 			"SPELL_AURA_APPLIED_DOSE",
-			"SPELL_PERIODIC_ENERGIZE",
-			{src_is_not_interesting = true, dst_is_not_interesting = true}
+			"SPELL_PERIODIC_ENERGIZE"
 		)
 
 		Skada:AddMode(self, L["Enemies"])
@@ -1036,11 +1036,11 @@ Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
 
 		Skada:RegisterForCL(
 			handle_debuff,
+			{src_is_not_interesting = true, dst_is_interesting = true},
 			"SPELL_AURA_APPLIED",
 			"SPELL_AURA_REFRESH",
 			"SPELL_AURA_REMOVED",
-			"SPELL_AURA_APPLIED_DOSE",
-			{src_is_not_interesting = true, dst_is_interesting = true}
+			"SPELL_AURA_APPLIED_DOSE"
 		)
 
 		Skada:AddMode(self, L["Enemies"])

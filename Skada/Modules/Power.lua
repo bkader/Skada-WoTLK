@@ -204,7 +204,7 @@ Skada:RegisterModule("Resources", function(L, P)
 		mod_cols = self.metadata.columns
 		Skada:AddColumnOptions(self)
 
-		Skada:RegisterForCL(spell_energize, "SPELL_ENERGIZE", "SPELL_PERIODIC_ENERGIZE", {src_is_interesting = true})
+		Skada:RegisterForCL(spell_energize, {src_is_interesting = true}, "SPELL_ENERGIZE", "SPELL_PERIODIC_ENERGIZE")
 
 		manamod.metadata.icon = [[Interface\Icons\spell_frost_summonwaterelemental]]
 		ragemod.metadata.icon = [[Interface\Icons\spell_nature_shamanrage]]

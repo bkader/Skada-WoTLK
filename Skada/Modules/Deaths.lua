@@ -26,6 +26,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local RED_COLOR = RED_FONT_COLOR
 	local YELLOW_COLOR = YELLOW_FONT_COLOR
 	local PURPLE_COLOR = {r = 0.69, g = 0.38, b = 1}
+	local icon_mode = [[Interface\Icons\Ability_Rogue_FeignDeath]]
 	local icon_death = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
 
 	local function get_color(key)
@@ -433,7 +434,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 					d.id = nr
 					d.label = date("%H:%M:%S", deathlog.timeod)
-					d.icon = [[Interface\Icons\Ability_Rogue_FeignDeath]]
+					d.icon = icon_mode
 					d.color = nil
 					d.value = 0
 					d.valuetext = format(L["%s dies"], player.name)
@@ -801,7 +802,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Time = true, Survivability = false, Source = false},
-			icon = [[Interface\Icons\ability_rogue_feigndeath]]
+			icon = icon_mode
 		}
 
 		-- alternative display
@@ -821,12 +822,13 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 		Skada:RegisterForCL(
 			sor_applied,
-			"SPELL_AURA_APPLIED",
-			flags_dst_nopets
+			flags_dst_nopets,
+			"SPELL_AURA_APPLIED"
 		)
 
 		Skada:RegisterForCL(
 			spell_damage,
+			flags_dst_nopets,
 			"DAMAGE_SHIELD",
 			"DAMAGE_SPLIT",
 			"RANGE_DAMAGE",
@@ -834,58 +836,57 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			"SPELL_DAMAGE",
 			"SPELL_PERIODIC_DAMAGE",
 			"SWING_DAMAGE",
-			"SPELL_INSTAKILL",
-			flags_dst_nopets
+			"SPELL_INSTAKILL"
 		)
 
 		Skada:RegisterForCL(
 			spell_missed,
+			flags_dst_nopets,
 			"DAMAGE_SHIELD_MISSED",
 			"RANGE_MISSED",
 			"SPELL_BUILDING_MISSED",
 			"SPELL_MISSED",
 			"SPELL_PERIODIC_MISSED",
-			"SWING_MISSED",
-			flags_dst_nopets
+			"SWING_MISSED"
 		)
 
 		Skada:RegisterForCL(
 			environment_damage,
-			"ENVIRONMENTAL_DAMAGE",
-			flags_dst_nopets
+			flags_dst_nopets,
+			"ENVIRONMENTAL_DAMAGE"
 		)
 
 		Skada:RegisterForCL(
 			spell_heal,
+			flags_dst_nopets,
 			"SPELL_HEAL",
-			"SPELL_PERIODIC_HEAL",
-			flags_dst_nopets
+			"SPELL_PERIODIC_HEAL"
 		)
 
 		Skada:RegisterForCL(
 			unit_died,
+			flags_dst_nopets,
 			"UNIT_DIED",
 			"UNIT_DESTROYED",
-			"UNIT_DISSIPATES",
-			flags_dst_nopets
+			"UNIT_DISSIPATES"
 		)
 
 		Skada:RegisterForCL(
 			spell_resurrect,
-			"SPELL_RESURRECT",
-			flags_dst_nopets
+			flags_dst_nopets,
+			"SPELL_RESURRECT"
 		)
 
 		Skada:RegisterForCL(
 			spell_resurrect,
-			"SPELL_CAST_SUCCESS",
-			{src_is_interesting = true, dst_is_not_interesting = true}
+			{src_is_interesting = true, dst_is_not_interesting = true},
+			"SPELL_CAST_SUCCESS"
 		)
 
 		Skada:RegisterForCL(
 			debuff_applied,
-			"SPELL_AURA_APPLIED",
-			{src_is_not_interesting = true, dst_is_interesting_nopets = true}
+			{src_is_not_interesting = true, dst_is_interesting_nopets = true},
+			"SPELL_AURA_APPLIED"
 		)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
@@ -991,7 +992,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 							type = "description",
 							name = mod.localeName,
 							fontSize = "large",
-							image = mod.metadata.icon,
+							image = icon_mode,
 							imageWidth = 18,
 							imageHeight = 18,
 							imageCoords = {0.05, 0.95, 0.05, 0.95},
