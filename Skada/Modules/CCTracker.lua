@@ -355,7 +355,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and actor.ccdone and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set) and actor.ccdone then
 				nr = nr + 1
 
 				local d = win:actor(nr, actor)
@@ -621,7 +621,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and actor.cctaken and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set) and actor.cctaken then
 				nr = nr + 1
 
 				local d = win:actor(nr, actor)
@@ -879,7 +879,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and actor.ccbreak and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set) and actor.ccbreak then
 				nr = nr + 1
 
 				local d = win:actor(nr, actor)

@@ -142,7 +142,7 @@ Skada:RegisterModule("Resources", function(L, P)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and actor[self.power] and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set) and actor[self.power] then
 				nr = nr + 1
 
 				local d = win:actor(nr, actor)

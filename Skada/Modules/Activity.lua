@@ -78,7 +78,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 		local actors = set.players -- players.
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and Skada.validclass[actor.class or "NaN"] and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set) and Skada.validclass[actor.class or "NaN"] then
 				local activetime = actor:GetTime(true)
 				if activetime > 0 then
 					nr = nr + 1
@@ -96,7 +96,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and Skada.validclass[actor.class or "NaN"] and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set) and Skada.validclass[actor.class or "NaN"] then
 				local activetime = actor:GetTime(true)
 				if activetime > 0 then
 					nr = nr + 1

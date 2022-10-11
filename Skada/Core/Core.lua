@@ -815,6 +815,18 @@ function Window:actor(d, actor, enemy, actorname)
 	return d
 end
 
+-- prevents repeated code to check for class
+function Window:show_actor(actor, set, strict)
+	if not actor then
+		return false
+	elseif self.class and actor.class ~= self.class then
+		return false
+	elseif strict and actor.fake then
+		return false
+	end
+	return true
+end
+
 -- wipes windown's dataset table
 function reset_window(self)
 	if self.dataset then

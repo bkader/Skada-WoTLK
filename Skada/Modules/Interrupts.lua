@@ -188,7 +188,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and actor.interrupt and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set) and actor.interrupt then
 				nr = nr + 1
 
 				local d = win:actor(nr, actor)

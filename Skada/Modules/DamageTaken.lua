@@ -597,7 +597,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		local actors = set.players -- players.
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set) then
 				local dtps, amount = actor:GetDTPS(not mod_cols.DTPS)
 				if amount > 0 then
 					nr = nr + 1
@@ -615,7 +615,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and not actor.fake and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set, true) then
 				local dtps, amount = actor:GetDTPS(not mod_cols.DTPS)
 				if amount > 0 then
 					nr = nr + 1
@@ -774,7 +774,7 @@ Skada:RegisterModule("DTPS", function(L, P)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set) then
 				local dtps = actor:GetDTPS()
 				if dtps > 0 then
 					nr = nr + 1
@@ -792,7 +792,7 @@ Skada:RegisterModule("DTPS", function(L, P)
 
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and not actor.fake and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set, true) then
 				local dtps = actor:GetDTPS()
 				if dtps > 0 then
 					nr = nr + 1
@@ -1124,14 +1124,14 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 
 		local actors = set.players -- players
 		for i = 1, #actors do
-			local player = actors[i]
-			if player and (not win.class or win.class == player.class) then
-				if player.damagedspells then
+			local actor = actors[i]
+			if win:show_actor(actor, set) then
+				if actor.damagedspells then
 					local tmp = new()
-					tmp.name = player.name
+					tmp.name = actor.name
 
 					local count, avoid = 0, 0
-					for _, spell in pairs(player.damagedspells) do
+					for _, spell in pairs(actor.damagedspells) do
 						count = count + spell.count
 
 						for k, v in pairs(missTypes) do
@@ -1147,15 +1147,15 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 					if avoid > 0 then
 						tmp.total = count
 						tmp.avoid = avoid
-						C[player.id] = tmp
+						C[actor.id] = tmp
 
 						nr = nr + 1
-						local d = win:actor(nr, player)
+						local d = win:actor(nr, actor)
 
 						d.value = 100 * avoid / count
 						fmt_valuetext(d, mod_cols, count, avoid, win.metadata)
-					elseif C[player.id] then
-						C[player.id] = del(C[player.id])
+					elseif C[actor.id] then
+						C[actor.id] = del(C[actor.id])
 					end
 				end
 			end

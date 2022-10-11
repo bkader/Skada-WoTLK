@@ -293,7 +293,7 @@ do
 			local nr = 0
 			for i = 1, #actors do
 				local actor = actors[i]
-				if actor and actor.auras and (not win.class or actor.class == win.class) then
+				if win:show_actor(actor, set) and actor.auras then
 					local count, uptime = count_auras_by_type(actor.auras, auratype)
 					if count and count > 0 and uptime > 0 then
 						nr = nr + 1
@@ -766,8 +766,8 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			local spell = actor and actor.auras and actor.auras[win.spellid]
-			if spell and (not win.class or actor.class == win.class) then
+			local spell = win:show_actor(actor, set) and actor.auras and actor.auras[win.spellid]
+			if spell then
 				nr = nr + 1
 
 				local d = win:actor(nr, actor)

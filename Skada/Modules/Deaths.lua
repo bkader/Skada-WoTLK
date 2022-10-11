@@ -646,7 +646,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local p = actors[i]
-			if p and (p.death or WATCH) and (not win.class or win.class == p.class) then
+			if win:show_actor(p, set) and (p.death or WATCH) then
 				nr = nr + 1
 				local d = win:actor(nr, p)
 
@@ -686,7 +686,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local p = actors[i]
-			if p and p.deathlog and (p.death or WATCH) and (not win.class or win.class == p.class) then
+			if win:show_actor(p, set) and p.deathlog and (p.death or WATCH) then
 				local num = #p.deathlog
 				for j = 1, num do
 					local death = p.deathlog[j]

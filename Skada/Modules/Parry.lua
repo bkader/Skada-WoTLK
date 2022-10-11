@@ -106,7 +106,7 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and actor.parry and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set) and actor.parry then
 				nr = nr + 1
 
 				local d = win:actor(nr, actor)

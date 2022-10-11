@@ -369,7 +369,7 @@ Skada:RegisterModule("Healing", function(L, P)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set) then
 				local hps, amount = actor:GetHPS(nil, not mod_cols.sHPS)
 				if amount > 0 then
 					nr = nr + 1
@@ -387,7 +387,7 @@ Skada:RegisterModule("Healing", function(L, P)
 
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and not actor.fake and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set, true) then
 				local hps, amount = actor:GetHPS(nil, not mod_cols.sHPS)
 				if amount > 0 then
 					nr = nr + 1
@@ -635,7 +635,7 @@ Skada:RegisterModule("Overhealing", function(L)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set) then
 				local ohps, overheal = actor:GetOHPS(nil, not mod_cols.HPS)
 				if overheal > 0 then
 					nr = nr + 1
@@ -868,7 +868,7 @@ Skada:RegisterModule("Total Healing", function(L)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set) then
 				local hps, amount = actor:GetTHPS(nil, not mod_cols.HPS)
 				if amount > 0 then
 					nr = nr + 1
@@ -886,7 +886,7 @@ Skada:RegisterModule("Total Healing", function(L)
 
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and not actor.fake and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set, true) then
 				local hps, amount = actor:GetHPS(nil, not mod_cols.HPS)
 				if amount > 0 then
 					nr = nr + 1

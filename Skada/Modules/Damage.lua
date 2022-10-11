@@ -676,7 +676,7 @@ Skada:RegisterModule("Damage", function(L, P)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set) then
 				local dps, amount = actor:GetDPS()
 				if amount > 0 then
 					nr = nr + 1
@@ -694,7 +694,7 @@ Skada:RegisterModule("Damage", function(L, P)
 
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and not actor.fake and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set, true) then
 				local dps, amount = actor:GetDPS()
 				if amount > 0 then
 					nr = nr + 1
@@ -912,7 +912,7 @@ Skada:RegisterModule("DPS", function(L, P)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set) then
 				local dps = actor:GetDPS()
 				if dps > 0 then
 					nr = nr + 1
@@ -930,7 +930,7 @@ Skada:RegisterModule("DPS", function(L, P)
 
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and not actor.fake and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set, true) then
 				local dps = actor:GetDPS()
 				if dps > 0 then
 					nr = nr + 1
@@ -1268,7 +1268,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set) then
 				local dps, amount = actor:GetDPS(true)
 				if amount > 0 then
 					nr = nr + 1
@@ -1286,7 +1286,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and not actor.fake and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set, true) then
 				local dps, amount = actor:GetDPS(true)
 				if amount > 0 then
 					nr = nr + 1
@@ -1500,7 +1500,7 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and actor.overkill and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set) and actor.overkill then
 				nr = nr + 1
 
 				local d = win:actor(nr, actor)
@@ -1515,7 +1515,7 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and not actor.fake and actor.overkill and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set, true) and actor.overkill then
 				nr = nr + 1
 
 				local d = win:actor(nr, actor, true)
