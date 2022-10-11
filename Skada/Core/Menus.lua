@@ -17,7 +17,13 @@ local CloseDropDownMenus = CloseDropDownMenus
 local ToggleDropDownMenu = ToggleDropDownMenu
 local IsShiftKeyDown = IsShiftKeyDown
 local del = private.delTable
+local _
 
+local _menu_main = nil
+local _menu_fight = nil
+local _menu_mode = nil
+local _menu_large = nil
+local _menu_phase = nil
 local info = nil
 local iconName = "\124T%s:19:19:0:-1:32:32:2:30:2:30\124t %s"
 
@@ -30,9 +36,21 @@ local function get_dropdown_point()
 	x = x / UIParent:GetEffectiveScale()
 	y = y / UIParent:GetEffectiveScale()
 
-	local point = (x > GetScreenWidth() * 0.5) and "RIGHT" or "LEFT"
-	point = ((y > GetScreenHeight() * 0.5) and "TOP" or "BOTTOM") .. point
-	return point, x, y
+	local point, point2 = "LEFT", "LEFT"
+	if x > GetScreenWidth() * 0.5 then
+		point = "RIGHT"
+		point2 = "RIGHT"
+	end
+
+	if y > GetScreenHeight() * 0.5 then
+		point = "TOP" .. point
+		point2 = "BOTTOM" .. point2
+	else
+		point = "BOTTOM" .. point
+		point2 = "TOP" .. point2
+	end
+
+	return point, point2, x, y
 end
 
 local function set_info_text(set, i, num)
@@ -63,10 +81,15 @@ end
 
 -- Configuration menu.
 function Skada:OpenMenu(window)
-	self.skadamenu = self.skadamenu or CreateFrame("Frame", "SkadaMenu", UIParent, "UIDropDownMenuTemplate")
-	self.skadamenu.displayMode = "MENU"
-	self.skadamenu.win = window
-	self.skadamenu.initialize = self.skadamenu.initialize or function(self, level)
+	local menu = _menu_main
+	if not menu then
+		menu = CreateFrame("Frame", format("%sMenuMain", folder), UIParent, "UIDropDownMenuTemplate")
+		menu.displayMode = "MENU"
+		_menu_main = menu
+	end
+
+	menu.win = window
+	menu.initialize = menu.initialize or function(self, level)
 		if not level then return end
 		info = info or UIDropDownMenu_CreateInfo()
 
@@ -599,16 +622,22 @@ function Skada:OpenMenu(window)
 	end
 
 	local x, y
-	self.skadamenu.point, x, y = get_dropdown_point()
-	ToggleDropDownMenu(1, nil, self.skadamenu, "UIParent", x, y)
+	menu.point, _, x, y = get_dropdown_point()
+	ToggleDropDownMenu(1, nil, menu, "UIParent", x, y)
 end
 
 function Skada:SegmentMenu(window)
 	if self.testMode then return end
-	self.segmentsmenu = self.segmentsmenu or CreateFrame("Frame", "SkadaWindowButtonsSegments", UIParent, "UIDropDownMenuTemplate")
-	self.segmentsmenu.displayMode = "MENU"
-	self.segmentsmenu.win = window
-	self.segmentsmenu.initialize = self.segmentsmenu.initialize or function(self, level)
+
+	local menu = _menu_fight
+	if not menu then
+		menu = CreateFrame("Frame", format("%sMenuFight", folder), UIParent, "UIDropDownMenuTemplate")
+		menu.displayMode = "MENU"
+		_menu_fight = menu
+	end
+
+	menu.win = window
+	menu.initialize = menu.initialize or function(self, level)
 		if not level or not self.win then return end
 		info = info or UIDropDownMenu_CreateInfo()
 
@@ -704,8 +733,8 @@ function Skada:SegmentMenu(window)
 	end
 
 	local x, y
-	self.segmentsmenu.point, x, y = get_dropdown_point()
-	ToggleDropDownMenu(1, nil, self.segmentsmenu, "UIParent", x, y)
+	menu.point, _, x, y = get_dropdown_point()
+	ToggleDropDownMenu(1, nil, menu, "UIParent", x, y)
 end
 
 do
@@ -719,27 +748,205 @@ do
 		return a_score < b_score
 	end
 
-	function Skada:ModeMenu(window)
-		self.modesmenu = self.modesmenu or CreateFrame("Frame", "SkadaWindowButtonsModes", UIParent, "UIDropDownMenuTemplate")
+	local function construct_categories()
+		if categories then return end
 
-		-- so we call it only once.
-		if categorized == nil then
-			categories, categorized = {}, {}
-			modes = Skada:GetModes()
-			for i = 1, #modes do
-				local mode = modes[i]
-				categorized[mode.category] = categorized[mode.category] or {}
-				categorized[mode.category][#categorized[mode.category] + 1] = mode
-				if not tContains(categories, mode.category) then
-					categories[#categories + 1] = mode.category
-				end
+		categories, categorized = {}, {}
+		modes = Skada:GetModes()
+		for i = 1, #modes do
+			local mode = modes[i]
+			categorized[mode.category] = categorized[mode.category] or {}
+			categorized[mode.category][#categorized[mode.category] + 1] = mode
+			if not tContains(categories, mode.category) then
+				categories[#categories + 1] = mode.category
 			end
-			tsort(categories, sort_categories)
+		end
+		tsort(categories, sort_categories)
+	end
+
+	local function build_large_menu()
+		local menu_name = format("%sMenuModeLarge", folder)
+		local menu = CreateFrame("Button", menu_name, UIParent)
+		menu:SetFrameStrata("TOOLTIP")
+		menu:SetClampedToScreen(true)
+		menu:SetBackdrop({
+			bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],
+			edgeFile = [[Interface\Tooltips\UI-Tooltip-Border]],
+			inset = 4,
+			edgeSize = 8,
+			tile = true,
+			insets = {left = 2, right = 2, top = 2, bottom = 2}
+		})
+		menu:SetBackdropColor(0, 0, 0, 0.83)
+		menu:SetBackdropBorderColor(0, 0, 0, 1)
+		menu:SetPoint("CENTER")
+		menu.headers = {}
+		menu.buttons = {}
+
+		local function click_on_mode(self, button)
+			local mode = menu.win and menu.buttons[self]
+			if mode and button == "LeftButton" then
+				menu.win:DisplayMode(mode)
+			end
+			menu:Hide()
 		end
 
-		self.modesmenu.displayMode = "MENU"
-		self.modesmenu.win = window
-		self.modesmenu.initialize = self.modesmenu.initialize or function(self, level)
+		local function create_button(mode, index, header)
+			local btn = CreateFrame("Button", nil, menu)
+			btn:SetFrameLevel(menu:GetFrameLevel() + 1)
+			btn:SetNormalFontObject("GameFontHighlightSmallLeft")
+			btn:SetHighlightFontObject("GameFontNormalSmallLeft")
+			btn:SetScript("OnClick", click_on_mode)
+
+			-- format button text
+			if mode.metadata and mode.metadata.icon then
+				btn:SetText(format(iconName, mode.metadata.icon, mode.localeName))
+			else
+				btn:SetText(mode.localeName)
+			end
+
+			local fs = btn:GetFontString()
+			local width = fs:GetStringWidth() + 12
+			local height = fs:GetStringHeight() + 4
+			btn:SetWidth(width)
+			btn:SetHeight(height)
+
+			-- position
+			local prev = header.buttons[index - 1]
+			btn:ClearAllPoints()
+			if index == 1 then
+				height = height + 12 -- extra bottom margin
+				btn:SetPoint("TOPLEFT", header, "BOTTOMLEFT")
+				btn:SetPoint("TOPRIGHT", header, "TOPRIGHT")
+			elseif prev then
+				btn:SetPoint("TOPLEFT", prev, "BOTTOMLEFT")
+				btn:SetPoint("TOPRIGHT", prev, "TOPRIGHT")
+			end
+
+			menu.buttons[btn] = mode
+			header.buttons[index] = btn
+			return width, height
+		end
+
+		local function create_header(text, index, modules)
+			local header = menu:CreateFontString(nil, "ARTWORK", "GameFontNormalSmallLeft")
+			header:SetWordWrap(false)
+			header:SetText(text)
+			menu.headers[index] = header
+			header.buttons = header.buttons or {}
+
+			local width = header:GetStringWidth() + 12
+			local height = header:GetStringHeight() + 8
+			header:SetHeight(height)
+
+			-- position
+			local prev = menu.headers[index - 1]
+			header:ClearAllPoints()
+			if index == 1 then
+				header:SetPoint("TOPLEFT", menu, "TOPLEFT", 12, -6)
+			elseif prev then
+				header:SetPoint("LEFT", prev, "RIGHT", 12, 0)
+			end
+
+			for i, mode in pairs(modules) do
+				local w, h = create_button(mode, i, header)
+				if w > width then
+					width = w
+				end
+				height = height + h
+			end
+
+			header:SetWidth(width)
+
+			if index > 0 then -- small left margin
+				width = width + 12
+			end
+			return width, height
+		end
+
+		local width, height = 12, 0
+		for index, name in pairs(categories) do
+			local w, h = create_header(name, index, categorized[name])
+			width = width + w
+			if h > height then
+				height = h
+			end
+		end
+
+		menu:SetWidth(width)
+		menu:SetHeight(height)
+
+		menu:RegisterForClicks("AnyUp")
+		menu:SetScript("OnMouseDown", function(self, button)
+			if button == "RightButton" then
+				self:Hide()
+			end
+		end)
+
+		-- to set highlight stuff
+		menu:SetScript("OnShow", function(self)
+			self.opened = true
+			local mode = self.win and self.win.selectedmode
+			if not mode then return end
+			for btn, module in pairs(self.buttons) do
+				if module == mode then
+					btn:LockHighlight()
+				else
+					btn:UnlockHighlight()
+				end
+			end
+		end)
+		menu:SetScript("OnHide", function(self)
+			self.opened = nil
+		end)
+
+		menu:Hide()
+		UISpecialFrames[#UISpecialFrames + 1] = menu_name
+		return menu
+	end
+
+	local function large_mode_menu(self, window, frame)
+		local menu = _menu_large
+		if not menu then
+			menu = build_large_menu()
+			_menu_large = menu
+		end
+
+		menu.win = window
+
+		if menu.opened then
+			menu:Hide()
+			menu.opened = nil
+		else
+			local point, rPoint = get_dropdown_point()
+			if point then
+				menu:ClearAllPoints()
+				menu:SetPoint(point, frame or UIParent, rPoint)
+			end
+			menu.opened = true
+			menu:Show()
+			CloseDropDownMenus()
+		end
+	end
+
+	function Skada:ModeMenu(window, frame, large)
+		construct_categories()
+
+		if large then
+			return large_mode_menu(self, window, frame)
+		elseif _menu_large then
+			_menu_large:Hide()
+		end
+
+		local menu = _menu_mode
+		if not menu then
+			menu = CreateFrame("Frame", format("%sMenuMode", folder), UIParent, "UIDropDownMenuTemplate")
+			menu.displayMode = "MENU"
+			_menu_mode = menu
+		end
+
+		menu.win = window
+		menu.initialize = menu.initialize or function(self, level)
 			if not level or not self.win then return end
 			info = info or UIDropDownMenu_CreateInfo()
 
@@ -799,8 +1006,8 @@ do
 		end
 
 		local x, y
-		self.modesmenu.point, x, y = get_dropdown_point()
-		ToggleDropDownMenu(1, nil, self.modesmenu, "UIParent", x, y)
+		menu.point, _, x, y = get_dropdown_point()
+		ToggleDropDownMenu(1, nil, menu, "UIParent", x, y)
 	end
 end
 
@@ -1044,9 +1251,15 @@ end
 
 function Skada:PhaseMenu(window)
 	if self.testMode or not self.tempsets or #self.tempsets == 0 then return end
-	self.phasesmenu = self.phasesmenu or CreateFrame("Frame", "SkadaWindowButtonsPhases", UIParent, "UIDropDownMenuTemplate")
-	self.phasesmenu.displayMode = "MENU"
-	self.phasesmenu.initialize = self.phasesmenu.initialize or function(self, level)
+
+	local menu = _menu_phase
+	if not menu then
+		menu = CreateFrame("Frame", format("%sMenuPhase", folder), UIParent, "UIDropDownMenuTemplate")
+		menu.displayMode = "MENU"
+		_menu_phase = menu
+	end
+
+	menu.initialize = menu.initialize or function(self, level)
 		if not level then return end
 		info = info or UIDropDownMenu_CreateInfo()
 
@@ -1086,6 +1299,13 @@ function Skada:PhaseMenu(window)
 	end
 
 	local x, y
-	self.phasesmenu.point, x, y = get_dropdown_point()
-	ToggleDropDownMenu(1, nil, self.phasesmenu, "UIParent", x, y)
+	menu.point, _, x, y = get_dropdown_point()
+	ToggleDropDownMenu(1, nil, menu, "UIParent", x, y)
+end
+
+function Skada:CloseMenus()
+	CloseDropDownMenus()
+	if _menu_large then
+		_menu_large:Hide()
+	end
 end

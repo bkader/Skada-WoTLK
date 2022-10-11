@@ -8,6 +8,15 @@ local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 
 -->> START OF PROTECTED CODE <<--
 
+-- a dummy table used as fallback
+local dummyTable = {}
+Skada.dummyTable = dummyTable
+
+-- this one should be used at modules level
+local cacheTable, cacheTable2 = {}, {}
+Skada.cacheTable = cacheTable
+Skada.cacheTable2 = cacheTable2
+
 local ignoredSpells = {} -- a table of spells that are ignored per module.
 local creatureToFight = {} -- a table of creatures IDs used to fix segments names.
 local creatureToBoss = {} -- a table of adds used to deternmine the main boss in encounters.

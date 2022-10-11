@@ -539,6 +539,12 @@ Skada.options = {
 							name = L["Transliterate"],
 							desc = L["Converts Cyrillic letters into Latin letters."],
 							order = 80
+						},
+						realmless = {
+							type = "toggle",
+							name = L["Remove realm name"],
+							desc = L["opt_realmless_desc"],
+							order = 90
 						}
 					}
 				},

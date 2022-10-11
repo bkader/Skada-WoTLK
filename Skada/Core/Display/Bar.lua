@@ -9,7 +9,6 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 	local max, min, abs = math.max, math.min, math.abs
 	local GameTooltip, GameTooltip_Hide = GameTooltip, GameTooltip_Hide
 	local GetSpellLink = private.spell_link or GetSpellLink
-	local CloseDropDownMenus = CloseDropDownMenus
 	local GetScreenWidth, GetScreenHeight = GetScreenWidth, GetScreenHeight
 	local IsShiftKeyDown = IsShiftKeyDown
 	local IsAltKeyDown = IsAltKeyDown
@@ -52,7 +51,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 		elseif IsControlKeyDown() then
 			Skada:SegmentMenu(self.win)
 		elseif IsAltKeyDown() then
-			Skada:ModeMenu(self.win)
+			Skada:ModeMenu(self.win, self)
 		elseif not self.clickthrough then
 			self.win:RightClick(nil, button)
 		end
@@ -67,7 +66,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			elseif IsControlKeyDown() then
 				Skada:SegmentMenu(bargroup.win)
 			elseif IsAltKeyDown() then
-				Skada:ModeMenu(bargroup.win)
+				Skada:ModeMenu(bargroup.win, self, true)
 			elseif not bargroup.clickthrough and not Skada.testMode then
 				bargroup.win:RightClick(nil, button)
 			end
@@ -108,8 +107,8 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 		end
 
 		local function modeOnClick(self, button)
-			if button == "LeftButton" then
-				Skada:ModeMenu(self.list.win)
+			if button == "LeftButton" or button == "RightButton" then
+				Skada:ModeMenu(self.list.win, self, button == "RightButton")
 			end
 		end
 
@@ -381,7 +380,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 				end
 			end
 
-			CloseDropDownMenus()
+			Skada:CloseMenus()
 			ACR:NotifyChange(folder)
 		end
 	end
@@ -458,7 +457,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			group:SetBackdropColor(0, 0, 0, group.backdropA)
 			group:SetFrameStrata("TOOLTIP")
 		end
-		CloseDropDownMenus()
+		Skada:CloseMenus()
 	end
 
 	function mod:WindowStretchStop(_, group)
@@ -517,7 +516,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 				win:DisplayMode(mode)
 			end
 
-			CloseDropDownMenus()
+			Skada:CloseMenus()
 			GameTooltip:Hide()
 		end
 
@@ -529,7 +528,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			elseif IsControlKeyDown() and button == "RightButton" then
 				Skada:SegmentMenu(bar.win)
 			elseif IsAltKeyDown() and button == "RightButton" then
-				Skada:ModeMenu(bar.win)
+				Skada:ModeMenu(bar.win, bar)
 			elseif button == "RightButton" then
 				bar.win:RightClick(bar, button)
 			end
@@ -545,7 +544,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			elseif button == "RightButton" and IsShiftKeyDown() then
 				Skada:OpenMenu(win)
 			elseif button == "RightButton" and IsAltKeyDown() then
-				Skada:ModeMenu(win)
+				Skada:ModeMenu(win, bar)
 			elseif button == "RightButton" and IsControlKeyDown() then
 				Skada:SegmentMenu(win)
 			elseif win.metadata.click then
@@ -897,68 +896,59 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 	-- ======================================================= --
 
 	do
+		local math_abs = math.abs
 		local CreateFrame = CreateFrame
 		local SetCursor = SetCursor
 		local ResetCursor = ResetCursor
-		local scrollIcons = nil
+		local GetCursorPosition = GetCursorPosition
+		local IsMouseButtonDown = IsMouseButtonDown
+
+		local f = CreateFrame("Frame")
+		local scrollWin = nil
+		local cursorYPos = nil
+		local lastUpdated = 0
+		local start_scroll = nil
+		local stop_scroll = nil
 
 		local function ShowCursor(win)
-			if mod.db.icon then
-				SetCursor("")
-				local icon = scrollIcons and scrollIcons[win]
-				if not icon then
-					icon = CreateFrame("Frame", nil, win.bargroup)
-					icon:SetWidth(32)
-					icon:SetHeight(32)
-					icon:SetPoint("CENTER")
-					icon:SetFrameLevel(win.bargroup:GetFrameLevel() + 6)
+			if not mod.db.icon then return end
 
-					local t = icon:CreateTexture(nil, "OVERLAY")
-					t:SetTexture([[Interface\AddOns\Skada\Media\Textures\icon-scroll]])
-					t:SetAllPoints(icon)
-					t:Show()
+			SetCursor("")
+			local icon = win.scroll_icon
+			if not icon then
+				icon = CreateFrame("Frame", nil, win.bargroup)
+				icon:SetWidth(32)
+				icon:SetHeight(32)
+				icon:SetPoint("CENTER")
+				icon:SetFrameLevel(win.bargroup:GetFrameLevel() + 6)
 
-					scrollIcons = scrollIcons or {}
-					scrollIcons[win] = icon
-				end
-				icon:Show()
+				local t = icon:CreateTexture(nil, "OVERLAY")
+				t:SetTexture([[Interface\AddOns\Skada\Media\Textures\icon-scroll]])
+				t:SetAllPoints(icon)
+
+				win.scroll_icon = icon
 			end
+			icon:Show()
 		end
 
 		local function HideCursor(win)
-			if mod.db.icon and scrollIcons and scrollIcons[win] then
-				ResetCursor()
-				scrollIcons[win]:Hide()
-			end
+			local icon = win and win.scroll_icon
+			if not icon then return end
+			ResetCursor()
+			icon:Hide()
 		end
-
-		local GetCursorPosition = GetCursorPosition
-		local scrollWin = nil
-
-		local cursorYPos = nil
-		function mod:ScrollStart(win)
-			_, cursorYPos = GetCursorPosition()
-			scrollWin = win
-			ShowCursor(win)
-		end
-
-		function mod:EndScroll(win)
-			scrollWin = nil
-			HideCursor(win)
-		end
-
-		local IsMouseButtonDown = IsMouseButtonDown
-		local lastUpdated = 0
-		local math_abs = math.abs
 
 		local function OnMouseWheel(win, direction)
 			win.OnMouseWheel = win.OnMouseWheel or win:GetScript("OnMouseWheel")
 			win.OnMouseWheel(win, direction)
 		end
 
-		local function OnUpdate(_, elapsed)
+		local function OnUpdate(self, elapsed)
 			-- no scrolled window
-			if not scrollWin then return end
+			if not scrollWin then
+				stop_scroll()
+				return
+			end
 
 			-- db button isn't used
 			if not IsMouseButtonDown(mod.db.button) then
@@ -984,8 +974,28 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			end
 		end
 
-		local f = CreateFrame("Frame", nil, UIParent)
-		f:SetScript("OnUpdate", OnUpdate)
+		function start_scroll()
+			f:SetScript("OnUpdate", OnUpdate)
+			f:Show()
+		end
+
+		function stop_scroll()
+			f:SetScript("OnUpdate", nil)
+			f:Hide()
+		end
+
+		function mod:ScrollStart(win)
+			_, cursorYPos = GetCursorPosition()
+			scrollWin = win
+			ShowCursor(win)
+			start_scroll()
+		end
+
+		function mod:EndScroll(win)
+			scrollWin = nil
+			HideCursor(win)
+			stop_scroll()
+		end
 
 		function Skada:Scroll(up)
 			for _, win in pairs(mod:GetBarGroups()) do

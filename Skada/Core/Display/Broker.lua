@@ -72,7 +72,7 @@ Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 		if button == "LeftButton" and IsShiftKeyDown() then
 			Skada:OpenMenu(win)
 		elseif button == "LeftButton" then
-			Skada:ModeMenu(win)
+			Skada:ModeMenu(win, frame)
 		elseif button == "RightButton" then
 			Skada:SegmentMenu(win)
 		end

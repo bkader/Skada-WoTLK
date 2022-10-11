@@ -4,15 +4,7 @@ local private = Skada.private
 local pairs, max, select = pairs, math.max, select
 local getmetatable, setmetatable = getmetatable, setmetatable
 local new, clear = private.newTable, private.clearTable
-
--- a dummy table used as fallback
-local dummyTable = {}
-Skada.dummyTable = dummyTable
-
--- this one should be used at modules level
-local cacheTable, cacheTable2 = {}, {}
-Skada.cacheTable = cacheTable
-Skada.cacheTable2 = cacheTable2
+local cacheTable = Skada.cacheTable
 
 -- prototypes declaration
 local setPrototype = {} -- sets

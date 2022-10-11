@@ -1,8 +1,11 @@
 local _, Skada = ...
 local private = Skada.private
 Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
-
 	local mod = Skada:NewModule("Legacy Bar Display", "LegacyLibBars-1.0")
+
+	local IsShiftKeyDown = IsShiftKeyDown
+	local IsAltKeyDown = IsAltKeyDown
+	local IsControlKeyDown = IsControlKeyDown
 
 	local pairs, type, format, tsort = pairs, type, string.format, table.sort
 	local SavePosition, RestorePosition = private.SavePosition, private.RestorePosition
@@ -347,15 +350,26 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 		end
 	end
 
+	local open_options = private.open_options
 	function mod:ConfigClicked(cbk, group, button)
-		Skada:OpenMenu(group.win)
+		if button == "RightButton" then
+			open_options(group.win)
+		else
+			Skada:OpenMenu(group.win)
+		end
 	end
 
 	function mod:AnchorClicked(cbk, group, button)
-		if IsShiftKeyDown() then
-			Skada:OpenMenu(group.win)
-		elseif button == "RightButton" then
-			group.win:RightClick()
+		if group and button == "RightButton" then
+			if IsShiftKeyDown() then
+				Skada:OpenMenu(group.win)
+			elseif IsControlKeyDown() then
+				Skada:SegmentMenu(group.win)
+			elseif IsAltKeyDown() then
+				Skada:ModeMenu(group.win, group, true)
+			elseif not group.clickthrough and not Skada.testMode then
+				group.win:RightClick(nil, button)
+			end
 		end
 	end
 

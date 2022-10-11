@@ -9,7 +9,6 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 	local GameTooltip = GameTooltip
 	local GetScreenWidth = GetScreenWidth
 	local GetScreenHeight = GetScreenHeight
-	local CloseDropDownMenus = CloseDropDownMenus
 	local SavePosition = private.SavePosition
 	local RestorePosition = private.RestorePosition
 
@@ -100,7 +99,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 			win:DisplayMode(mode)
 		end
 
-		CloseDropDownMenus()
+		Skada:CloseMenus()
 		GameTooltip:Hide()
 	end
 
@@ -150,7 +149,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 		if button == "RightButton" then
 			Skada:SegmentMenu(self.win)
 		elseif button == "LeftButton" then
-			Skada:ModeMenu(self.win)
+			Skada:ModeMenu(self.win, self)
 		end
 	end
 

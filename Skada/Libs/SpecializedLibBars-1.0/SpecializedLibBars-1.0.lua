@@ -215,12 +215,12 @@ do
 		elseif not p.locked and not p.isMoving then
 			p.isMoving = true
 
-			p.startX = p:GetLeft()
-			p.startY = p:GetTop()
+			self.startX = p:GetLeft()
+			self.startY = p:GetTop()
 			p:StartMoving()
 
 			if p.callbacks then
-				p.callbacks:Fire("WindowMoveStart", p, p.startX, p.startY)
+				p.callbacks:Fire("WindowMoveStart", p, self.startX, self.startY)
 			end
 		end
 	end
