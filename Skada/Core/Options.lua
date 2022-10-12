@@ -1,5 +1,5 @@
 local folder, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 
 local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 local ACD = LibStub("AceConfigDialog-3.0")
@@ -7,7 +7,7 @@ local ACR = LibStub("AceConfigRegistry-3.0")
 
 local min, max = math.min, math.max
 local next, fmt = next, format or string.format
-local del = private.delTable
+local del = Private.delTable
 local collectgarbage = collectgarbage
 
 -- references: windows, modes
@@ -91,7 +91,7 @@ Skada.windowdefaults = {
 }
 
 local windefaultscopy = {}
-private.tCopy(windefaultscopy, Skada.windowdefaults)
+Private.tCopy(windefaultscopy, Skada.windowdefaults)
 
 Skada.defaults = {
 	profile = {
@@ -307,7 +307,7 @@ Skada.options = {
 							end,
 							set = function()
 								Skada.db.profile.icon.hide = not Skada.db.profile.icon.hide
-								private.refresh_button()
+								Private.refresh_button()
 							end
 						},
 						mergepets = {
@@ -813,8 +813,8 @@ Skada.options = {
 					desc = fmt(L["Advanced options for %s."], L["Tweaks"]),
 					order = 900,
 					args = {
-						toast_opt = private.toast_options(),
-						total_opt = private.total_options()
+						toast_opt = Private.toast_options(),
+						total_opt = Private.total_options()
 					}
 				}
 			}
@@ -846,7 +846,7 @@ do
 						name = L["Open Config"],
 						width = "full",
 						order = 0,
-						func = private.open_options
+						func = Private.open_options
 					}
 				}
 			}
@@ -873,8 +873,8 @@ do
 		return initOptions
 	end
 
-	function private.init_options()
-		private.init_options = nil -- remove it
+	function Private.init_options()
+		Private.init_options = nil -- remove it
 
 		local frame_name = fmt("%s Dialog", folder)
 		LibStub("AceConfig-3.0"):RegisterOptionsTable(frame_name, get_init_options)
@@ -882,7 +882,7 @@ do
 	end
 end
 
-function private.open_options(win)
+function Private.open_options(win)
 	if not ACR:GetOptionsTable(folder) then
 		LibStub("AceConfig-3.0"):RegisterOptionsTable(folder, Skada.options)
 		ACD:SetDefaultSize(folder, 630, 500)
@@ -981,7 +981,7 @@ do
 end
 
 local modesList = nil
-function private.frame_options(db, include_dimensions)
+function Private.frame_options(db, include_dimensions)
 	local obj = {
 		type = "group",
 		name = L["Window"],
@@ -1355,7 +1355,7 @@ function private.frame_options(db, include_dimensions)
 					set = function(_, child)
 						db.child = (child == "") and nil or child
 						db.childmode = db.child and (db.childmode or 1) or nil
-						private.reload_settings()
+						Private.reload_settings()
 					end
 				},
 				childmode = {

@@ -1,14 +1,14 @@
 local folder, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 
 -- frequently used global (sort of...)
-local pairs, format, uformat = pairs, string.format, private.uformat
+local pairs, format, uformat = pairs, string.format, Private.uformat
 local time, min, floor = time, math.min, math.floor
 local _
 
 -- common functions and locals
-local new, del, clear = private.newTable, private.delTable, private.clearTable
+local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
 local ignored_buffs = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 local ignored_debuffs = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 local aura, spellschools
@@ -125,7 +125,7 @@ local special_buffs = {
 }
 
 do
-	local PercentToRGB = private.PercentToRGB
+	local PercentToRGB = Private.PercentToRGB
 
 	-- formats value texts
 	function format_valuetext(d, cols, count, maxtime, metadata, subview, no_order)

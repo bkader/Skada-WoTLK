@@ -1,9 +1,9 @@
 local _, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 
 -- cache frequently used globals
 local pairs, max = pairs, math.max
-local format, uformat = string.format, private.uformat
+local format, uformat = string.format, Private.uformat
 
 local function format_valuetext(d, columns, total, hps, metadata, subview)
 	d.valuetext = Skada:FormatValueCols(
@@ -29,8 +29,8 @@ Skada:RegisterModule("Healing", function(L, P)
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local new, del = private.newTable, private.delTable
-	local next, clear = next, private.clearTable
+	local new, del = Private.newTable, Private.delTable
+	local next, clear = next, Private.clearTable
 	local mod_cols = nil
 
 	-- list of spells used to queue units.
@@ -142,7 +142,7 @@ Skada:RegisterModule("Healing", function(L, P)
 	local function spell_heal(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, ...)
 		if not spellid or ignoredSpells[spellid] then return end
 
-		local srcQueued = private.get_temp_unit(srcGUID)
+		local srcQueued = Private.get_temp_unit(srcGUID)
 		if srcQueued and srcQueued.spellid == spellid then
 			srcGUID, srcName, srcFlags = srcQueued.id, srcQueued.name, srcQueued.flag
 		end
@@ -167,9 +167,9 @@ Skada:RegisterModule("Healing", function(L, P)
 			info.flag = srcFlags
 			info.spellid = spellid
 
-			private.add_temp_unit(dstGUID, info)
+			Private.add_temp_unit(dstGUID, info)
 		else
-			private.del_temp_unit(dstGUID)
+			Private.del_temp_unit(dstGUID)
 		end
 	end
 
@@ -946,7 +946,7 @@ Skada:RegisterModule("Healing Taken", function(L, P)
 	local sourcespellmod = sourcemod:NewModule("Healing spell list")
 	local spellmod = mod:NewModule("Healing spell list")
 	local spellsourcemod = sourcemod:NewModule("Healing source list")
-	local new, clear = private.newTable, private.clearTable
+	local new, clear = Private.newTable, Private.clearTable
 	local C = Skada.cacheTable2
 	local mod_cols = nil
 

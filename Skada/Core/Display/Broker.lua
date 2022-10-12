@@ -1,5 +1,5 @@
 local folder, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 	local mod = Skada:NewModule("Data Text")
 	local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
@@ -9,10 +9,10 @@ Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 	local wipe, tsort, format = wipe, table.sort, string.format
 	local GameTooltip = GameTooltip
 	local GameTooltip_Hide = GameTooltip_Hide
-	local SavePosition = private.SavePosition
-	local RestorePosition = private.RestorePosition
-	local WrapTextInColorCode = private.WrapTextInColorCode
-	local RGBPercToHex = private.RGBPercToHex
+	local SavePosition = Private.SavePosition
+	local RestorePosition = Private.RestorePosition
+	local WrapTextInColorCode = Private.WrapTextInColorCode
+	local RGBPercToHex = Private.RGBPercToHex
 	local classcolors = Skada.classcolors
 
 	local FONT_FLAGS = Skada.fontFlags
@@ -350,7 +350,7 @@ Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 			}
 		}
 
-		options.windowoptions = private.frame_options(db, true)
+		options.windowoptions = Private.frame_options(db, true)
 	end
 
 	function mod:OnInitialize()

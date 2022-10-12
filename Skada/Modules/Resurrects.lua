@@ -1,12 +1,12 @@
 local _, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 Skada:RegisterModule("Resurrects", function(L, P, _, C)
 	local mod = Skada:NewModule("Resurrects")
 	local playermod = mod:NewModule("Resurrect spell list")
 	local targetmod = mod:NewModule("Resurrect target list")
 
-	local pairs, format, uformat = pairs, string.format, private.uformat
-	local new, clear = private.newTable, private.clearTable
+	local pairs, format, uformat = pairs, string.format, Private.uformat
+	local new, clear = Private.newTable, Private.clearTable
 	local get_resurrected_targets = nil
 	local mod_cols = nil
 

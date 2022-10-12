@@ -1,14 +1,14 @@
 local _, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 Skada:RegisterModule("Tweaks", function(L, P)
 	local mod = Skada:NewModule("Tweaks", "AceHook-3.0")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local band, format = bit.band, string.format
 	local UnitClass, GetTime = UnitClass, GetTime
-	local GetSpellInfo = private.spell_info or GetSpellInfo
-	local GetSpellLink = private.spell_link or GetSpellLink
-	local new, del = private.newTable, private.delTable
+	local GetSpellInfo = Private.spell_info or GetSpellInfo
+	local GetSpellLink = Private.spell_link or GetSpellLink
+	local new, del = Private.newTable, Private.delTable
 	local classcolors = Skada.classcolors
 
 	local channel_events, fofrostmourne
@@ -17,10 +17,10 @@ Skada:RegisterModule("Tweaks", function(L, P)
 	-- CombatLogEvent Hook
 
 	do
-		local BITMASK_GROUP = private.BITMASK_GROUP or 0x00000007
+		local BITMASK_GROUP = Private.BITMASK_GROUP or 0x00000007
 		local MAX_BOSS_FRAMES = MAX_BOSS_FRAMES or 5
 		local firsthit_fmt = {"%s (%s)", "%s (\124c%s%s\124r)", "\124c%s%s\124r", "\124c%s%s\124r (%s)"}
-		local is_pet = private.is_pet
+		local is_pet = Private.is_pet
 		local firsthit, firsthittimer = nil, nil
 
 		-- thank you Details!
@@ -302,7 +302,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 			return false, false, nil
 		end
 
-		function private.parse_chat_event(_, event, msg, sender, ...)
+		function Private.parse_chat_event(_, event, msg, sender, ...)
 			local ismeter, isfirstline, message = filter_chat_line(event, sender, msg)
 			if ismeter and isfirstline then
 				return false, message, sender, ...
@@ -479,12 +479,12 @@ Skada:RegisterModule("Tweaks", function(L, P)
 				self:RawHook("SetItemRef", "ParseLink", true)
 			end
 			for i = 1, #channel_events do
-				ChatFrame_AddMessageEventFilter(channel_events[i], private.parse_chat_event)
+				ChatFrame_AddMessageEventFilter(channel_events[i], Private.parse_chat_event)
 			end
 		elseif self:IsHooked("SetItemRef") then
 			self:Unhook("SetItemRef")
 			for i = 1, #channel_events do
-				ChatFrame_RemoveMessageEventFilter(channel_events[i], private.parse_chat_event)
+				ChatFrame_RemoveMessageEventFilter(channel_events[i], Private.parse_chat_event)
 			end
 		end
 

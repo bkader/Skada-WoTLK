@@ -1,9 +1,9 @@
 local _, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 
 local pairs, max = pairs, math.max
-local format, uformat = string.format, private.uformat
-local new, del, clear = private.newTable, private.delTable, private.clearTable
+local format, uformat = string.format, Private.uformat
+local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
 
 local function format_valuetext(d, columns, total, dps, metadata, subview)
 	d.valuetext = Skada:FormatValueCols(
@@ -30,8 +30,8 @@ Skada:RegisterModule("Damage", function(L, P)
 	local tdetailmod = targetmod:NewModule("Damage spell list")
 
 	local UnitGUID, GetTime = UnitGUID, GetTime
-	local GetSpellInfo = private.spell_info or GetSpellInfo
-	local PercentToRGB = private.PercentToRGB
+	local GetSpellInfo = Private.spell_info or GetSpellInfo
+	local PercentToRGB = Private.PercentToRGB
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua

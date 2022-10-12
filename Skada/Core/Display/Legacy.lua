@@ -1,5 +1,5 @@
 local _, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 	local mod = Skada:NewModule("Legacy Bar Display", "LegacyLibBars-1.0")
 
@@ -8,7 +8,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 	local IsControlKeyDown = IsControlKeyDown
 
 	local pairs, type, format, tsort = pairs, type, string.format, table.sort
-	local SavePosition, RestorePosition = private.SavePosition, private.RestorePosition
+	local SavePosition, RestorePosition = Private.SavePosition, Private.RestorePosition
 	local classcolors = Skada.classcolors
 	local white = {r = 1, g = 1, b = 1, a = 1}
 
@@ -350,7 +350,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 		end
 	end
 
-	local open_options = private.open_options
+	local open_options = Private.open_options
 	function mod:ConfigClicked(cbk, group, button)
 		if button == "RightButton" then
 			open_options(group.win)

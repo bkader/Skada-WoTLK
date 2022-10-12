@@ -1,5 +1,5 @@
 local folder, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 	local mod = Skada:NewModule("Bar Display", "SpecializedLibBars-1.0")
 	local FlyPaper = LibStub("LibFlyPaper-1.1", true)
@@ -8,16 +8,16 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 	local pairs, tsort, format = pairs, table.sort, string.format
 	local max, min, abs = math.max, math.min, math.abs
 	local GameTooltip, GameTooltip_Hide = GameTooltip, GameTooltip_Hide
-	local GetSpellLink = private.spell_link or GetSpellLink
+	local GetSpellLink = Private.spell_link or GetSpellLink
 	local GetScreenWidth, GetScreenHeight = GetScreenWidth, GetScreenHeight
 	local IsShiftKeyDown = IsShiftKeyDown
 	local IsAltKeyDown = IsAltKeyDown
 	local IsControlKeyDown = IsControlKeyDown
 	local IsModifierKeyDown = IsModifierKeyDown
-	local SavePosition = private.SavePosition
-	local RestorePosition = private.RestorePosition
-	local prevent_duplicate = private.prevent_duplicate
-	local new, del, copy = private.newTable, private.delTable, private.tCopy
+	local SavePosition = Private.SavePosition
+	local RestorePosition = Private.RestorePosition
+	local prevent_duplicate = Private.prevent_duplicate
+	local new, del, copy = Private.newTable, Private.delTable, Private.tCopy
 	local _
 
 	-- references
@@ -81,7 +81,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			end
 		end
 
-		local open_options = private.open_options
+		local open_options = Private.open_options
 		local function configOnClick(self, button)
 			if button == "RightButton" then
 				open_options(self.list.win)
@@ -112,7 +112,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			end
 		end
 
-		local open_report = private.open_report
+		local open_report = Private.open_report
 		local function reportOnClick(self, button)
 			if button == "LeftButton" then
 				open_report(self.list.win)
@@ -499,7 +499,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			end
 		end
 
-		local total_noclick = private.total_noclick
+		local total_noclick = Private.total_noclick
 		local function showmode(win, id, label, mode)
 			if total_noclick(win.selectedset, mode) then
 				return
@@ -1158,7 +1158,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 		}
 	}
 
-	local frame_options = private.frame_options
+	local frame_options = Private.frame_options
 
 	function mod:AddDisplayOptions(win, options)
 		local db = win.db
@@ -2210,8 +2210,8 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 				return prevent_duplicate(prevent_duplicate(name, themes), G.themes)
 			end
 
-			local open_import_export = private.open_import_export
-			local serialize, deserialize = private.serialize, private.deserialize
+			local open_import_export = Private.open_import_export
+			local serialize, deserialize = Private.serialize, Private.deserialize
 			local temp = {}
 
 			local function theme_export()

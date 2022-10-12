@@ -2,7 +2,7 @@ local LibFail = LibStub("LibFail-1.0", true)
 if not LibFail then return end
 
 local folder, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Fails")
 	local playermod = mod:NewModule("Player's failed events")
@@ -11,7 +11,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	local count_fails_by_spell = nil
 
 	local pairs, format, UnitGUID = pairs, string.format, UnitGUID
-	local uformat, IsInGroup = private.uformat, Skada.IsInGroup
+	local uformat, IsInGroup = Private.uformat, Skada.IsInGroup
 	local tank_events, mod_cols
 
 	local function format_valuetext(d, columns, total, metadata, subview)

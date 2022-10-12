@@ -1,5 +1,5 @@
 local _, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 Skada:RegisterModule("Dispels", function(L, P, _, C)
 	local mod = Skada:NewModule("Dispels")
 	local spellmod = mod:NewModule("Dispelled spell list")
@@ -10,8 +10,8 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	local get_dispelled_targets = nil
 
 	-- cache frequently used globals
-	local pairs, format, uformat = pairs, string.format, private.uformat
-	local new, clear = private.newTable, private.clearTable
+	local pairs, format, uformat = pairs, string.format, Private.uformat
+	local new, clear = Private.newTable, Private.clearTable
 	local mod_cols = nil
 
 	local function format_valuetext(d, columns, total, metadata, subview)

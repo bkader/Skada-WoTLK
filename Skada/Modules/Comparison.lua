@@ -1,5 +1,5 @@
 local _, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 Skada:RegisterModule("Comparison", function(L, P)
 	local parent = Skada:GetModule("Damage", true)
 	if not parent then return end
@@ -13,7 +13,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 	local C = Skada.cacheTable2
 
 	local pairs, max = pairs, math.max
-	local format, uformat = string.format, private.uformat
+	local format, uformat = string.format, Private.uformat
 	local spellschools = Skada.spellschools
 	local COLOR_GOLD = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
 	local mod_cols = nil

@@ -1,5 +1,5 @@
 local _, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 Skada:RegisterModule("Potions", function(L, P, _, C)
 	local mod = Skada:NewModule("Potions")
 	local playermod = mod:NewModule("Potions list")
@@ -7,10 +7,10 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 	local get_actors_by_potion = nil
 
 	-- cache frequently used globals
-	local pairs, tconcat, format, strsub, uformat = pairs, table.concat, string.format, string.sub, private.uformat
+	local pairs, tconcat, format, strsub, uformat = pairs, table.concat, string.format, string.sub, Private.uformat
 	local GetItemInfo, UnitIsDeadOrGhost, GroupIterator = GetItemInfo, UnitIsDeadOrGhost, Skada.GroupIterator
 	local UnitGUID, UnitName, UnitClass, UnitBuff = UnitGUID, UnitName, UnitClass, UnitBuff
-	local new, del, clear = private.newTable, private.delTable, private.clearTable
+	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
 	local potion_ids = {}
 	local mod_cols = nil
 

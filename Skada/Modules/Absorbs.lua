@@ -1,10 +1,10 @@
 local _, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 
 -- cache frequently used globals
-local pairs, format, uformat = pairs, string.format, private.uformat
-local min, floor, new = math.min, math.floor, private.newTable
-local GetSpellInfo = private.spell_info or GetSpellInfo
+local pairs, format, uformat = pairs, string.format, Private.uformat
+local min, floor, new = math.min, math.floor, Private.newTable
+local GetSpellInfo = Private.spell_info or GetSpellInfo
 
 -- ============== --
 -- Absorbs module --
@@ -22,7 +22,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	local GetTime, band, tsort, max = GetTime, bit.band, table.sort, math.max
 	local GetCurrentMapAreaID, UnitBuff, UnitHealthInfo = GetCurrentMapAreaID, UnitBuff, Skada.UnitHealthInfo
 	local IsActiveBattlefieldArena, UnitInBattleground = IsActiveBattlefieldArena, UnitInBattleground
-	local del, clear = private.delTable, private.clearTable
+	local del, clear = Private.delTable, Private.clearTable
 	local mod_cols = nil
 
 	-- INCOMPLETE
@@ -1645,7 +1645,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 	local mod = Skada:NewModule("Healing Done By Spell")
 	local spellmod = mod:NewModule("Healing spell sources")
 	local spellschools = Skada.spellschools
-	local clear = private.clearTable
+	local clear = Private.clearTable
 	local get_absorb_heal_spells = nil
 	local mod_cols = nil
 

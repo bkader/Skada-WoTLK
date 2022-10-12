@@ -1,9 +1,9 @@
 local _, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 
 -- frequently used globals --
-local pairs, type, max, format, uformat = pairs, type, math.max, string.format, private.uformat
-local new, clear = private.newTable, private.clearTable
+local pairs, type, max, format, uformat = pairs, type, math.max, string.format, Private.uformat
+local new, clear = Private.newTable, Private.clearTable
 local setPrototype, enemyPrototype = Skada.setPrototype, Skada.enemyPrototype
 
 ---------------------------------------------------------------------------
@@ -24,7 +24,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	local UnitHealthInfo, UnitPowerInfo = Skada.UnitHealthInfo, Skada.UnitPowerInfo
 	local UnitExists, UnitGUID = UnitExists, UnitGUID
 	local UnitHealthMax, UnitPowerMax = UnitHealthMax, UnitPowerMax
-	local tContains, del = tContains, private.delTable
+	local tContains, del = tContains, Private.delTable
 
 	-- this table holds the units to which the damage done is
 	-- collected into a new fake unit.

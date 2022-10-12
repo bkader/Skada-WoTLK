@@ -1,5 +1,5 @@
 local _, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Deaths")
 	local playermod = mod:NewModule("Player's deaths")
@@ -8,14 +8,14 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local ignored_debuffs = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local WATCH = nil -- true to watch those alive
 
-	local tinsert, tremove, tsort, tconcat = table.insert, private.tremove, table.sort, table.concat
-	local strmatch, format, uformat = strmatch, string.format, private.uformat
+	local tinsert, tremove, tsort, tconcat = table.insert, Private.tremove, table.sort, table.concat
+	local strmatch, format, uformat = strmatch, string.format, Private.uformat
 	local max, floor, abs = math.max, math.floor, math.abs
-	local new, del, clear = private.newTable, private.delTable, private.clearTable
+	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
 	local UnitHealthInfo = Skada.UnitHealthInfo
 	local UnitIsFeignDeath = UnitIsFeignDeath
-	local GetSpellInfo = private.spell_info or GetSpellInfo
-	local GetSpellLink = private.spell_link or GetSpellLink
+	local GetSpellInfo = Private.spell_info or GetSpellInfo
+	local GetSpellLink = Private.spell_link or GetSpellLink
 	local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
 	local GetTime, time, date = GetTime, time, date
 	local mod_cols, submod_cols = nil, nil

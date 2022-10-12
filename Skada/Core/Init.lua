@@ -9,8 +9,8 @@ ns.logo = [[Interface\ICONS\spell_lightning_lightningbolt01]]
 ns.revisited = true -- Skada-Revisited flag
 
 -- holds private stuff
-local private = ns.private or {}
-ns.private = private
+local Private = ns.Private or {}
+ns.Private = Private
 
 -- cache frequently used globals
 local pairs, ipairs = pairs, ipairs
@@ -22,7 +22,7 @@ local EmptyFunc = Multibar_EmptyFunc
 local _
 
 -- common weak table
-private.weaktable = {__mode = "kv"}
+Private.weaktable = {__mode = "kv"}
 
 -------------------------------------------------------------------------------
 -- flags/bitmasks
@@ -30,27 +30,27 @@ private.weaktable = {__mode = "kv"}
 do
 	-- self-affilation
 	local BITMASK_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE or 0x00000001
-	private.BITMASK_MINE = BITMASK_MINE
+	Private.BITMASK_MINE = BITMASK_MINE
 
 	-- party/raid affiliation
 	local BITMASK_PARTY = COMBATLOG_OBJECT_AFFILIATION_PARTY or 0x00000002
 	local BITMASK_RAID = COMBATLOG_OBJECT_AFFILIATION_RAID or 0x00000004
-	private.BITMASK_GROUP = BITMASK_MINE + BITMASK_PARTY + BITMASK_RAID
+	Private.BITMASK_GROUP = BITMASK_MINE + BITMASK_PARTY + BITMASK_RAID
 
 	-- pets and guardians
 	local BITMASK_TYPE_PET = COMBATLOG_OBJECT_TYPE_PET or 0x00001000
 	local BITMASK_TYPE_GUARDIAN = COMBATLOG_OBJECT_TYPE_GUARDIAN or 0x00002000
-	private.BITMASK_PETS = BITMASK_TYPE_PET + BITMASK_TYPE_GUARDIAN
+	Private.BITMASK_PETS = BITMASK_TYPE_PET + BITMASK_TYPE_GUARDIAN
 
 	-- friendly units
-	private.BITMASK_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY or 0x00000010
+	Private.BITMASK_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY or 0x00000010
 end
 
 -------------------------------------------------------------------------------
 -- class, roles ans specs registration
 
-function private.register_classes()
-	private.register_classes = nil
+function Private.register_classes()
+	Private.register_classes = nil
 
 	-- class, role and spec icons (sprite)
 	ns.classicons = [[Interface\AddOns\Skada\Media\Textures\icons]]
@@ -61,7 +61,7 @@ function private.register_classes()
 	local classcolors, validclass = {}, {}
 	for class, info in pairs(CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS) do
 		classcolors[class] = {r = info.r, g = info.g, b = info.b, colorStr = info.colorStr}
-		classcolors[class].colorStr = classcolors[class].colorStr or private.RGBPercToHex(info.r, info.g, info.b, true)
+		classcolors[class].colorStr = classcolors[class].colorStr or Private.RGBPercToHex(info.r, info.g, info.b, true)
 		L[class] = LOCALIZED_CLASS_NAMES_MALE[class]
 		validclass[class] = true
 	end
@@ -86,7 +86,7 @@ function private.register_classes()
 		__call = function(t, class, arg)
 			local color = t[class]
 			if not color.colorStr then
-				color.colorStr = private.RGBPercToHex(color.r, color.g, color.b, true)
+				color.colorStr = Private.RGBPercToHex(color.r, color.g, color.b, true)
 			end
 			return (arg == nil) and color or (type(arg) == "string") and format("\124c%s%s\124r", color.colorStr, arg) or color.colorStr
 		end
@@ -207,7 +207,7 @@ function private.register_classes()
 			P.customcolors[class].r = r
 			P.customcolors[class].g = g
 			P.customcolors[class].b = b
-			P.customcolors[class].colorStr = private.RGBPercToHex(r, g, b, true)
+			P.customcolors[class].colorStr = Private.RGBPercToHex(r, g, b, true)
 		end,
 		args = {
 			enable = {
@@ -279,8 +279,8 @@ end
 -------------------------------------------------------------------------------
 -- spell schools registration
 
-function private.register_schools()
-	private.register_schools = nil
+function Private.register_schools()
+	Private.register_schools = nil
 
 	local spellschools = {}
 
@@ -373,8 +373,8 @@ end
 -------------------------------------------------------------------------------
 -- register LibSharedMedia stuff
 
-function private.register_medias()
-	private.register_medias = nil
+function Private.register_medias()
+	Private.register_medias = nil
 
 	local LSM = LibStub("LibSharedMedia-3.0", true)
 	if not LSM then
@@ -444,7 +444,7 @@ end
 -- color manipulation
 
 -- converts RGB colors to HEX.
-function private.RGBPercToHex(r, g, b, prefix)
+function Private.RGBPercToHex(r, g, b, prefix)
 	r = r and r <= 1 and r >= 0 and r or 0
 	g = g and g <= 1 and g >= 0 and g or 0
 	b = b and b <= 1 and b >= 0 and b or 0
@@ -452,7 +452,7 @@ function private.RGBPercToHex(r, g, b, prefix)
 end
 
 -- generates a color depending on the given percent
-function private.PercentToRGB(perc, reverse, hex)
+function Private.PercentToRGB(perc, reverse, hex)
 	-- clamp first
 	perc = min(100, max(0, perc or 0))
 
@@ -476,7 +476,7 @@ function private.PercentToRGB(perc, reverse, hex)
 
 	-- return hex? channels will be as of 2nd param.
 	if hex then
-		return private.RGBPercToHex(r, g, b, true), r, g, b
+		return Private.RGBPercToHex(r, g, b, true), r, g, b
 	end
 
 	-- return only channels.
@@ -489,7 +489,7 @@ end
 -- alternative to table.remove
 local error = error
 local tremove = table.remove
-function private.tremove(t, index)
+function Private.tremove(t, index)
 	if index then
 		return tremove(t, index)
 	elseif type(t) ~= "table" then
@@ -503,7 +503,7 @@ function private.tremove(t, index)
 end
 
 -- returns the length of the given table
-function private.tLength(t)
+function Private.tLength(t)
 	local len = 0
 	if t then
 		for _ in pairs(t) do
@@ -514,7 +514,7 @@ function private.tLength(t)
 end
 
 -- copies a table from another
-function private.tCopy(to, from, ...)
+function Private.tCopy(to, from, ...)
 	for k, v in pairs(from) do
 		local skip = false
 		if ... then
@@ -537,7 +537,7 @@ function private.tCopy(to, from, ...)
 		if not skip then
 			if type(v) == "table" then
 				to[k] = {}
-				private.tCopy(to[k], v, ...)
+				Private.tCopy(to[k], v, ...)
 			else
 				to[k] = v
 			end
@@ -546,9 +546,9 @@ function private.tCopy(to, from, ...)
 end
 
 -- creates a table pool
-function private.table_pool()
+function Private.table_pool()
 	local pool = {tables = {}, new = true, del = true, clear = true}
-	local tables = setmetatable(pool.tables, private.weaktable)
+	local tables = setmetatable(pool.tables, Private.weaktable)
 
 	-- reuses or creates a table
 	pool.new = function()
@@ -591,14 +591,14 @@ end
 
 -- create addon's default table pool
 do
-	local _pool = private.table_pool()
-	private.newTable = _pool.new
-	private.delTable = _pool.del
-	private.clearTable = _pool.clear
+	local _pool = Private.table_pool()
+	Private.newTable = _pool.new
+	Private.delTable = _pool.del
+	Private.clearTable = _pool.clear
 end
 
 -- prevents duplicates in a table to format strings
-function private.prevent_duplicate(value, tbl, key)
+function Private.prevent_duplicate(value, tbl, key)
 	local num = 0
 	if type(tbl) == "table" then
 		local is_array = (#tbl > 0)
@@ -626,7 +626,7 @@ end
 do
 	-- we a fake frame/fontstring to escape the string
 	local escapeFrame = nil
-	function private.EscapeStr(str)
+	function Private.EscapeStr(str)
 		if not escapeFrame then
 			escapeFrame = CreateFrame("Frame")
 			escapeFrame.fs = escapeFrame:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
@@ -644,12 +644,12 @@ do
 	end
 
 	local pcall = pcall
-	function private.uformat(fstr, ...)
+	function Private.uformat(fstr, ...)
 		local ok, str = pcall(format, fstr, ...)
 		return ok and str or gsub(gsub(fstr, "(%%+)([^%%%s<]+)", replace), "%%%%", "%%")
 	end
 
-	function private.WrapTextInColorCode(text, colorHexString)
+	function Private.WrapTextInColorCode(text, colorHexString)
 		return format("\124c%s%s\124r", colorHexString, text)
 	end
 end
@@ -661,7 +661,7 @@ do
 	local floor = math.floor
 	local GetScreenWidth, GetScreenHeight = GetScreenWidth, GetScreenHeight
 
-	function private.SavePosition(f, db)
+	function Private.SavePosition(f, db)
 		if f and f.GetCenter and db then
 			local x, y = f:GetCenter()
 			local scale = f:GetEffectiveScale()
@@ -673,7 +673,7 @@ do
 		end
 	end
 
-	function private.RestorePosition(f, db)
+	function Private.RestorePosition(f, db)
 		if f and f.SetPoint and db then
 			local scale = f:GetEffectiveScale()
 			local uscale = UIParent:GetScale()
@@ -695,8 +695,8 @@ do
 	local toast_opt = nil
 
 	-- initialize LibToast
-	function private.register_toast()
-		private.register_toast = nil -- remove it
+	function Private.register_toast()
+		Private.register_toast = nil -- remove it
 
 		if not LibToast then
 			ns.Notify = ns.Print
@@ -730,8 +730,8 @@ do
 	end
 
 	-- returns toast options
-	function private.toast_options()
-		private.toast_options = nil -- remove it
+	function Private.toast_options()
+		Private.toast_options = nil -- remove it
 
 		if not LibToast or toast_opt then
 			return toast_opt
@@ -826,8 +826,8 @@ end
 do
 	local total_opt = nil
 
-	function private.total_options()
-		private.total_options = nil -- remove it
+	function Private.total_options()
+		Private.total_options = nil -- remove it
 
 		if total_opt then
 			return total_opt
@@ -910,7 +910,7 @@ do
 		return total_opt
 	end
 
-	function private.total_noclick(set, mode)
+	function Private.total_noclick(set, mode)
 		return (not ns.db.profile.totalidc and set == "total" and type(mode) == "table" and mode.nototal == true)
 	end
 
@@ -982,7 +982,7 @@ end
 -- creates generic dialog
 
 local dialog_name = format("%sCommonConfirmDialog", folder)
-function private.confirm_dialog(text, accept, cancel, override)
+function Private.confirm_dialog(text, accept, cancel, override)
 	if type(cancel) == "table" and override == nil then
 		override = cancel
 		cancel = nil
@@ -1018,7 +1018,7 @@ function private.confirm_dialog(text, accept, cancel, override)
 	t.hideOnEscape = 1
 
 	if type(override) == "table" then
-		private.tCopy(t, override)
+		Private.tCopy(t, override)
 	end
 
 	dialog = StaticPopup_Show(dialog_name)
@@ -1062,7 +1062,7 @@ do
 		return tconcat(t)
 	end
 
-	function private.serialize(hex, title, ...)
+	function Private.serialize(hex, title, ...)
 		local result = LD:CompressDeflate(AS:Serialize(...), LL)
 		if hex then
 			return LD:EncodeForPrint(result)
@@ -1070,7 +1070,7 @@ do
 		return LD:EncodeForWoWChatChannel(result)
 	end
 
-	function private.deserialize(data, hex)
+	function Private.deserialize(data, hex)
 		local result = hex and LD:DecodeForPrint(data) or LD:DecodeForWoWChatChannel(data)
 		result = result and LD:DecompressDeflate(result) or nil
 		if result then
@@ -1126,7 +1126,7 @@ do
 		[61607] = [[Interface\ICONS\ability_hunter_rapidkilling]] --> Mark of Blood
 	}
 
-	function private.spell_info(spellid)
+	function Private.spell_info(spellid)
 		local res1, res2, res3, res4, res5, res6, res7, res8, res9
 		if spellid then
 			if customSpells[spellid] then
@@ -1142,7 +1142,7 @@ do
 		return res1, res2, res3, res4, res5, res6, res7, res8, res9
 	end
 
-	function private.spell_link(spellid)
+	function Private.spell_link(spellid)
 		if not customSpells[spellid] then
 			return GetSpellLink(spellid)
 		end
@@ -1157,15 +1157,15 @@ do
 	local UnitIsPlayer = UnitIsPlayer
 
 	-- add extra bitmasks if needed
-	local BITMASK_PETS = private.BITMASK_PETS
-	local BITMASK_FRIENDLY = private.BITMASK_FRIENDLY
+	local BITMASK_PETS = Private.BITMASK_PETS
+	local BITMASK_FRIENDLY = Private.BITMASK_FRIENDLY
 	local BITMASK_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
-	private.BITMASK_TYPE_NPC = BITMASK_TYPE_NPC
+	Private.BITMASK_TYPE_NPC = BITMASK_TYPE_NPC
 	local BITMASK_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER or 0x00000400
-	private.BITMASK_TYPE_PLAYER = BITMASK_PLAYER
+	Private.BITMASK_TYPE_PLAYER = BITMASK_PLAYER
 
 	-- checks if the given guid/flags are those of a creature.
-	function private.is_creature(guid, flags)
+	function Private.is_creature(guid, flags)
 		if tonumber(guid) then
 			return (band(strsub(guid, 1, 5), 0x00F) == 3 or band(strsub(guid, 1, 5), 0x00F) == 5)
 		end
@@ -1176,18 +1176,18 @@ do
 	end
 
 	-- tables that will cache info about players and pets
-	local players = private.players or {} -- [guid] = unit
-	private.players = players
-	local pets = private.pets or {} -- [guid] = {id = ownerGUID, name = ownerName}
-	private.pets = pets
+	local players = Private.players or {} -- [guid] = unit
+	Private.players = players
+	local pets = Private.pets or {} -- [guid] = {id = ownerGUID, name = ownerName}
+	Private.pets = pets
 
 	do
 		-- tables used to cached results in order to speed up check
-		local __t1 = setmetatable({}, private.weaktable) -- cached players
-		local __t2 = setmetatable({}, private.weaktable) -- cached pets
+		local __t1 = setmetatable({}, Private.weaktable) -- cached players
+		local __t2 = setmetatable({}, Private.weaktable) -- cached pets
 
 		-- checks if the guid is a player (extra: helps is_pet)
-		function private.is_player(guid, name, flags)
+		function Private.is_player(guid, name, flags)
 			-- already cached?
 			if __t1[guid] ~= nil then
 				return __t1[guid]
@@ -1227,7 +1227,7 @@ do
 		end
 
 		-- checks if the guid is a pet (extra: helps is_player)
-		function private.is_pet(guid, flags)
+		function Private.is_pet(guid, flags)
 			-- already cached?
 			if __t2[guid] ~= nil then
 				return __t2[guid]
@@ -1260,18 +1260,18 @@ do
 	end
 
 	do
-		local new = private.newTable
-		local del = private.delTable
+		local new = Private.newTable
+		local del = Private.delTable
 
 		-- adds a pet to the table.
-		function private.assign_pet(ownerGUID, ownerName, petGUID)
+		function Private.assign_pet(ownerGUID, ownerName, petGUID)
 			pets[petGUID] = pets[petGUID] or new()
 			pets[petGUID].id = ownerGUID
 			pets[petGUID].name = ownerName
 		end
 
 		-- simply removes the pet from the table.
-		function private.dismiss_pet(petGUID)
+		function Private.dismiss_pet(petGUID)
 			pets[petGUID] = del(pets[petGUID])
 		end
 	end
@@ -1337,7 +1337,71 @@ do
 		UISpecialFrames[#UISpecialFrames + 1] = frame_name
 	end
 
-	function private.open_import_export(title, data, clickfunc)
+	function Private.open_import_export(title, data, clickfunc)
 		return open_window(title, data, clickfunc)
+	end
+end
+
+-------------------------------------------------------------------------------
+-- prototypes and binding functions
+
+do
+	local getmetatable = getmetatable
+
+	-- fight/set prototype
+	local setPrototype = {}
+	ns.setPrototype = setPrototype
+
+	-- common actors prototype
+	local actorPrototype = {}
+	local actorPrototype_mt = {__index = actorPrototype}
+	ns.actorPrototype = actorPrototype
+
+	-- player prototype
+	local playerPrototype = setmetatable({}, actorPrototype_mt)
+	ns.playerPrototype = playerPrototype
+
+	-- enemy prototype
+	local enemyPrototype = setmetatable({}, actorPrototype_mt)
+	ns.enemyPrototype = enemyPrototype
+
+	local function bind_set_actors(actors, set, player)
+		if not actors then return end
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and player then
+				playerPrototype:Bind(actor, set)
+			elseif actor then
+				enemyPrototype:Bind(actor, set)
+			end
+		end
+	end
+
+	-- bind a set table to the set prototype
+	function setPrototype:Bind(obj)
+		if not obj then
+			return
+		elseif getmetatable(obj) == self then
+			self.__arena = (ns.forPVP and obj.type == "arena")
+			return obj
+		end
+
+		bind_set_actors(obj.players, obj, true)
+		bind_set_actors(obj.enemies, obj)
+
+		setmetatable(obj, self)
+		self.__index = self
+		self.__arena = (ns.forPVP and obj.type == "arena")
+		return obj
+	end
+
+	-- bind an actor table to the prototype
+	function actorPrototype:Bind(obj, set)
+		if obj and getmetatable(obj) ~= self then
+			setmetatable(obj, self)
+			self.__index = self
+			obj.super = set
+		end
+		return obj
 	end
 end

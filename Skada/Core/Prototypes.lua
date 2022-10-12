@@ -1,64 +1,17 @@
 local _, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 
 local pairs, max, select = pairs, math.max, select
 local getmetatable, setmetatable = getmetatable, setmetatable
-local new, clear = private.newTable, private.clearTable
+local new, clear = Private.newTable, Private.clearTable
 local cacheTable = Skada.cacheTable
 
--- prototypes declaration
-local setPrototype = {} -- sets
-Skada.setPrototype = setPrototype
-
-local actorPrototype = {} -- common to actors
-actorPrototype.mt = {__index = actorPrototype}
-Skada.actorPrototype = actorPrototype
-
-local playerPrototype = setmetatable({}, actorPrototype.mt) -- players
-Skada.playerPrototype = playerPrototype
-
-local enemyPrototype = setmetatable({}, actorPrototype.mt) -- enemies
-Skada.enemyPrototype = enemyPrototype
+-- prototypes
+local setPrototype = Skada.setPrototype
+local actorPrototype = Skada.actorPrototype
 
 -------------------------------------------------------------------------------
 -- segment/set prototype & functions
-
-local band, tremove = bit.band, tremove or table.remove
-local BITMASK_FRIENDLY = private.BITMASK_FRIENDLY or 0x00000010
-
--- binds a set table to set prototype
-function setPrototype:Bind(obj)
-	if not obj then
-		return
-	elseif getmetatable(obj) == self then
-		self.__arena = (Skada.forPVP and obj.type == "arena")
-		return obj
-	end
-
-	local actors = obj.players -- players
-	if actors then
-		for i = #actors, 1, -1 do
-			local p = actors[i]
-			if p and p.flag and band(p.flag, BITMASK_FRIENDLY) == 0 then
-				tremove(actors, i) -- postfix
-			elseif p then
-				playerPrototype:Bind(p, obj)
-			end
-		end
-	end
-
-	actors = obj.enemies -- enemies
-	if actors then
-		for i = #actors, 1, -1 do
-			enemyPrototype:Bind(actors[i], obj)
-		end
-	end
-
-	setmetatable(obj, self)
-	self.__index = self
-	self.__arena = (Skada.forPVP and obj.type == "arena")
-	return obj
-end
 
 -- returns the segment's time
 function setPrototype:GetTime(active)
@@ -363,16 +316,6 @@ end
 
 -------------------------------------------------------------------------------
 -- common actors functions
-
--- binds a table to the prototype table
-function actorPrototype:Bind(obj, set)
-	if obj and getmetatable(obj) ~= self then
-		setmetatable(obj, self)
-		self.__index = self
-		obj.super = set
-	end
-	return obj
-end
 
 -- for better dps calculation, we use active time for Arena/BGs.
 function actorPrototype:GetTime(active)

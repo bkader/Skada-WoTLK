@@ -1,9 +1,9 @@
 local _, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Parry-Haste")
 	local targetmod = mod:NewModule("Parry target list")
-	local pairs, format, uformat = pairs, string.format, private.uformat
+	local pairs, format, uformat = pairs, string.format, Private.uformat
 	local mod_cols = nil
 
 	local parrybosses = {

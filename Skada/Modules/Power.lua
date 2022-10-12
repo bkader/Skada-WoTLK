@@ -1,11 +1,11 @@
 local _, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 Skada:RegisterModule("Resources", function(L, P)
 	local mod = Skada:NewModule("Resources")
 	mod.icon = [[Interface\Icons\spell_holy_rapture]]
 
 	local setmetatable, pairs = setmetatable, pairs
-	local format, uformat = string.format, private.uformat
+	local format, uformat = string.format, Private.uformat
 	local mod_cols = nil
 
 	local SPELL_POWER_MANA = SPELL_POWER_MANA or 0

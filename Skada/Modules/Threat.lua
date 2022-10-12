@@ -1,5 +1,5 @@
 local _, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 Skada:RegisterModule("Threat", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Threat")
 
@@ -8,7 +8,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 	local UnitDetailedThreatSituation, InCombatLockdown = UnitDetailedThreatSituation, InCombatLockdown
 	local GroupIterator, GetUnitRole, GetUnitSpec = Skada.GroupIterator, Skada.GetUnitRole, Skada.GetUnitSpec
 	local PlaySoundFile = PlaySoundFile
-	local new, del, clear = private.newTable, private.delTable, private.clearTable
+	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
 	local mod_cols = nil
 
 	local aggro_icon = [[Interface\Icons\ability_physical_taunt]]
@@ -307,8 +307,8 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 		local CombatText_StandardScroll = CombatText_StandardScroll
 		local RaidNotice_AddMessage = RaidNotice_AddMessage
 		local UIErrorsFrame = UIErrorsFrame
-		local WrapTextInColorCode = private.WrapTextInColorCode
-		local RGBPercToHex = private.RGBPercToHex
+		local WrapTextInColorCode = Private.WrapTextInColorCode
+		local RGBPercToHex = Private.RGBPercToHex
 		local white = HIGHLIGHT_FONT_COLOR
 
 		local handlers = {

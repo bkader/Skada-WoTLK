@@ -1,5 +1,5 @@
 local _, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	local mod = Skada:NewModule("Friendly Fire")
 	local targetmod = mod:NewModule("Damage target list")
@@ -9,8 +9,8 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local get_friendly_fire_targets = nil
 
-	local pairs, format, uformat = pairs, string.format, private.uformat
-	local new, del, clear = private.newTable, private.delTable, private.clearTable
+	local pairs, format, uformat = pairs, string.format, Private.uformat
+	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
 	local mod_cols = nil
 
 	local function format_valuetext(d, columns, total, dps, metadata, subview)
