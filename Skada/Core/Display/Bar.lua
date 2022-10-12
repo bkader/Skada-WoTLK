@@ -740,6 +740,16 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 					if bar then
 						bar:SetValue(data.value)
 						bar:SetMaxValue(metadata.maxvalue or 1)
+
+						if data.changed and not bar.changed then
+							bar.changed = true
+							bar_seticon(bar, db, data, data.icon)
+							bar_setcolor(bar, db, data, data.color)
+						elseif not data.changed and bar.changed then
+							bar.changed = nil
+							bar_seticon(bar, db, data)
+							bar_setcolor(bar, db, data)
+						end
 					else
 						-- Initialization of bars.
 						bar = mod:CreateBar(win, data.id, data.label, data.value, metadata.maxvalue or 1, data.icon, false)
@@ -859,16 +869,6 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 
 					if not data.ignore then
 						nr = nr + 1
-
-						if data.changed and not bar.changed then
-							bar.changed = true
-							bar_seticon(bar, db, data, data.icon)
-							bar_setcolor(bar, db, data, data.color)
-						elseif not data.changed and bar.changed then
-							bar.changed = nil
-							bar_seticon(bar, db, data)
-							bar_setcolor(bar, db, data)
-						end
 					end
 				end
 			end

@@ -109,6 +109,8 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 					else
 						d.value = threatvalue
 						d.threat = threatvalue
+						d.color = nil
+						d.changed = nil
 					end
 				elseif threatpct then
 					d.value = threatpct

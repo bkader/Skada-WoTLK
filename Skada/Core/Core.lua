@@ -137,7 +137,7 @@ local function create_set(setname, set)
 		setmetatable(set, nil)
 		for k, v in pairs(set) do
 			if type(v) == "table" then
-				set[k] = clear(v)
+				set[k] = wipe(v)
 			else
 				set[k] = nil
 			end
@@ -696,8 +696,8 @@ function Window:nr(i)
 	local d = self.dataset[i]
 	if d then
 		if d.ignore then
-			d.color = nil
 			d.icon = nil
+			d.color = nil
 		end
 		d.id = nil
 		d.text = nil
@@ -822,9 +822,9 @@ end
 -- wipes windown's dataset table
 function reset_window(self)
 	if self.dataset then
-		for i = 0, #self.dataset do
+		for i = #self.dataset, 1, -1 do
 			if self.dataset[i] then
-				clear(self.dataset[i])
+				wipe(self.dataset[i])
 			end
 		end
 	end
@@ -3427,7 +3427,7 @@ function combat_end()
 	end
 
 	if Skada.current.time >= P.minsetlength then
-		Skada.total.time = Skada.total.time + Skada.current.time
+		Skada.total.time = (Skada.total.time or 0) + Skada.current.time
 	end
 
 	Skada.last = Skada.current
