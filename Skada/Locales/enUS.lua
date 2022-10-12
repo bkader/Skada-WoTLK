@@ -677,6 +677,7 @@ L["Death log"] = true
 L["%s's death log"] = true
 L["Player's deaths"] = true
 L["%s dies"] = true
+L["buff"] = true
 L["debuff"] = true
 L["Spell details"] = true
 L["Spell"] = true
