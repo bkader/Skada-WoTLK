@@ -760,8 +760,8 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		if not actor then return end
 
 		local totaltime = set:GetTime()
-		local activetime = actor:GetTime(true)
-		local aps, damage = actor:GetAPS()
+		local activetime = actor:GetTime(set, true)
+		local aps, damage = actor:GetAPS(set)
 
 		tooltip:AddDoubleLine(L["Activity"], Skada:FormatPercent(activetime, totaltime), nil, nil, nil, 1, 1, 1)
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
@@ -844,7 +844,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sAPS and actor:GetTime()
+		local actortime = mod_cols.sAPS and actor:GetTime(set)
 
 		for spellid, spell in pairs(spells) do
 			if spell.targets and spell.targets[win.targetname] then
@@ -878,7 +878,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sAPS and actor:GetTime()
+		local actortime = mod_cols.sAPS and actor:GetTime(set)
 
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
@@ -902,7 +902,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		if not actor or enemy then return end -- unavailable for enemies yet
 
 		local total = actor and actor.absorb or 0
-		local targets = (total > 0) and actor:GetAbsorbTargets()
+		local targets = (total > 0) and actor:GetAbsorbTargets(set)
 
 		if not targets then
 			return
@@ -911,7 +911,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sAPS and actor:GetTime()
+		local actortime = mod_cols.sAPS and actor:GetTime(set)
 
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
@@ -938,25 +938,25 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		for i = 1, #actors do
 			local actor = actors[i]
 			if win:show_actor(actor, set) then
-				local aps, amount = actor:GetAPS(nil, not mod_cols.APS)
+				local aps, amount = actor:GetAPS(set, nil, not mod_cols.APS)
 				if amount > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
-					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+					d.color = set.arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = amount
 					format_valuetext(d, mod_cols, total, aps, win.metadata)
 				end
 			end
 		end
 
-		actors = set.__arena and set.enemies or nil -- arena enemies
+		actors = set.arena and set.enemies or nil -- arena enemies
 		if not actors then return end
 
 		for i = 1, #actors do
 			local actor = actors[i]
 			if win:show_actor(actor, set, true) then
-				local aps, amount = actor:GetAPS(nil, not mod_cols.APS)
+				local aps, amount = actor:GetAPS(set, nil, not mod_cols.APS)
 				if amount > 0 then
 					nr = nr + 1
 
@@ -1189,8 +1189,8 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		if not actor then return end
 
 		local totaltime = set:GetTime()
-		local activetime = actor:GetTime(true)
-		local hps, amount = actor:GetAHPS()
+		local activetime = actor:GetTime(set, true)
+		local hps, amount = actor:GetAHPS(set)
 
 		tooltip:AddDoubleLine(L["Activity"], Skada:FormatPercent(activetime, totaltime), nil, nil, nil, 1, 1, 1)
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(set:GetTime()), 1, 1, 1)
@@ -1296,7 +1296,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sHPS and actor:GetTime()
+		local actortime = mod_cols.sHPS and actor:GetTime(set)
 
 		local spells = actor.healspells -- heal spells
 		if spells then
@@ -1347,7 +1347,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sHPS and actor:GetTime()
+		local actortime = mod_cols.sHPS and actor:GetTime(set)
 
 		local spells = actor.healspells -- heal spells
 		if spells then
@@ -1382,7 +1382,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetAbsorbHeal()
-		local targets = (total and total > 0) and actor:GetAbsorbHealTargets()
+		local targets = (total and total > 0) and actor:GetAbsorbHealTargets(set)
 
 		if not targets then
 			return
@@ -1391,7 +1391,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sAPS and actor:GetTime()
+		local actortime = mod_cols.sAPS and actor:GetTime(set)
 
 		for targetname, target in pairs(targets) do
 			if target.amount > 0 then
@@ -1420,25 +1420,25 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		for i = 1, #actors do
 			local actor = actors[i]
 			if win:show_actor(actor, set) then
-				local hps, amount = actor:GetAHPS(nil, not mod_cols.HPS)
+				local hps, amount = actor:GetAHPS(set, nil, not mod_cols.HPS)
 				if amount > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
-					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+					d.color = set.arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = amount
 					format_valuetext(d, mod_cols, total, hps, win.metadata)
 				end
 			end
 		end
 
-		actors = set.__arena and set.enemies or nil -- arena enemies
+		actors = set.arena and set.enemies or nil -- arena enemies
 		if not actors then return end
 
 		for i = 1, #actors do
 			local actor = actors[i]
 			if win:show_actor(actor, set, true) then
-				local hps, amount = actor:GetAHPS(nil, not mod_cols.HPS)
+				local hps, amount = actor:GetAHPS(set, nil, not mod_cols.HPS)
 				if amount > 0 then
 					nr = nr + 1
 
@@ -1476,9 +1476,9 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 
 	local function feed_personal_hps()
 		local set = Skada:GetSet("current")
-		local player = set and set:GetPlayer(Skada.userGUID, Skada.userName)
-		if player then
-			return Skada:FormatNumber(player:GetAHPS()) .. " " .. L["HPS"]
+		local actor = set and set:GetPlayer(Skada.userGUID, Skada.userName)
+		if actor then
+			return Skada:FormatNumber(actor:GetAHPS(set)) .. " " .. L["HPS"]
 		end
 	end
 
@@ -1547,8 +1547,8 @@ Skada:RegisterModule("HPS", function(L, P)
 		if not actor then return end
 
 		local totaltime = set:GetTime()
-		local activetime = actor:GetTime(true)
-		local hps, amount = actor:GetAHPS()
+		local activetime = actor:GetTime(set, true)
+		local hps, amount = actor:GetAHPS(set)
 
 		tooltip:AddLine(actor.name .. " - " .. L["HPS"])
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(set:GetTime()), 1, 1, 1)
@@ -1575,19 +1575,19 @@ Skada:RegisterModule("HPS", function(L, P)
 		for i = 1, #actors do
 			local actor = actors[i]
 			if win:show_actor(actor, set) then
-				local amount = actor:GetAHPS(nil, not mod_cols.HPS)
+				local amount = actor:GetAHPS(set, nil, not mod_cols.HPS)
 				if amount > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
-					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+					d.color = set.arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = amount
 					format_valuetext(d, mod_cols, total, win.metadata)
 				end
 			end
 		end
 
-		actors = set.__arena and set.enemies or nil -- arena enemies
+		actors = set.arena and set.enemies or nil -- arena enemies
 		if not actors then return end
 
 		for i = 1, #actors do

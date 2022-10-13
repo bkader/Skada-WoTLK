@@ -7,7 +7,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	local spelltargetmod = spellmod:NewModule("Damage spell targets")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local get_friendly_fire_targets = nil
+	local get_actor_friendfire_targets = nil
 
 	local pairs, format, uformat = pairs, string.format, Private.uformat
 	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
@@ -116,18 +116,15 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	function targetmod:Update(win, set)
 		win.title = uformat(L["%s's targets"], win.actorname)
 
-		local actor = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = actor and actor.friendfire
-		local targets = (total and total > 0) and get_friendly_fire_targets(actor)
-
-		if not targets then
+		local targets, total, actor = get_actor_friendfire_targets(set, win.actorid, win.actorname)
+		if not targets or not actor or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime(set)
 
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
@@ -157,7 +154,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime(set)
 
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
@@ -191,7 +188,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		local targets = spell.targets
 
 		local nr = 0
-		local actortime = mod_cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime(set)
 
 		for targetname, amount in pairs(targets) do
 			nr = nr + 1
@@ -224,7 +221,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 
 				local d = win:actor(nr, actor)
 				d.value = actor.friendfire
-				format_valuetext(d, mod_cols, total, mod_cols.DPS and (d.value / actor:GetTime()), win.metadata)
+				format_valuetext(d, mod_cols, total, mod_cols.DPS and (d.value / actor:GetTime(set)), win.metadata)
 			end
 		end
 	end
@@ -240,7 +237,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	end
 
 	function mod:OnEnable()
-		spellmod.metadata = {showspots = true, click1 = spelltargetmod}
+		spellmod.metadata = {click1 = spelltargetmod}
 		self.metadata = {
 			showspots = true,
 			click1 = spellmod,
@@ -318,26 +315,28 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 
 	---------------------------------------------------------------------------
 
-	get_friendly_fire_targets = function(self, tbl)
-		local spells = self.friendfirespells
+	get_actor_friendfire_targets = function(self, id, name, tbl)
+		local actor = self:GetActor(name, id)
+		local total = actor and actor.friendfire
+		local spells = total and actor.friendfirespells
 		if not spells then return end
 
 		tbl = clear(tbl or C)
 		for _, spell in pairs(spells) do
 			if spell.targets then
-				for name, amount in pairs(spell.targets) do
-					local t = tbl[name]
+				for targetname, amount in pairs(spell.targets) do
+					local t = tbl[targetname]
 					if not t then
 						t = new()
 						t.amount = amount
-						tbl[name] = t
+						tbl[targetname] = t
 					else
 						t.amount = t.amount + amount
 					end
-					self.super:_fill_actor_table(t, name)
+					self:_fill_actor_table(t, targetname)
 				end
 			end
 		end
-		return tbl
+		return tbl, total, actor
 	end
 end)

@@ -6,8 +6,8 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	local targetmod = mod:NewModule("Dispelled target list")
 	local playermod = mod:NewModule("Dispel spell list")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local get_dispelled_spells = nil
-	local get_dispelled_targets = nil
+	local get_actor_dispelled_spells = nil
+	local get_actor_dispelled_targets = nil
 
 	-- cache frequently used globals
 	local pairs, format, uformat = pairs, string.format, Private.uformat
@@ -78,10 +78,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	function spellmod:Update(win, set)
 		win.title = uformat(L["%s's dispelled spells"], win.actorname)
 
-		local actor = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = actor and actor.dispel
-		local spells = (total and total > 0) and get_dispelled_spells(actor)
-
+		local spells, total, actor = get_actor_dispelled_spells(set, win.actorid, win.actorname)
 		if not spells then
 			return
 		elseif win.metadata then
@@ -106,11 +103,8 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	function targetmod:Update(win, set)
 		win.title = uformat(L["%s's dispelled targets"], win.actorname)
 
-		local actor = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = actor and actor.dispel
-		local targets = (total and total > 0) and get_dispelled_targets(actor)
-
-		if not targets then
+		local targets, total, actor = get_actor_dispelled_targets(set, win.actorid, win.actorname)
+		if not targets or not actor or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
@@ -227,8 +221,10 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 
 	---------------------------------------------------------------------------
 
-	get_dispelled_spells = function(self, tbl)
-		local spells = self.dispelspells
+	get_actor_dispelled_spells = function(self, id, name, tbl)
+		local actor = self:GetActor(name, id)
+		local total = actor and actor.dispel
+		local spells = total and total > 0 and actor.dispelspells
 		if not spells then return end
 
 		tbl = clear(tbl or C)
@@ -239,29 +235,31 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 				end
 			end
 		end
-		return tbl
+		return tbl, total, actor
 	end
 
-	get_dispelled_targets = function(self, tbl)
-		local spells = self.dispelspells
+	get_actor_dispelled_targets = function(self, id, name, tbl)
+		local actor = self:GetActor(name, id)
+		local total = actor and actor.dispel
+		local spells = total and total > 0 and actor.dispelspells
 		if not spells then return end
 
 		tbl = clear(tbl or C)
 		for _, spell in pairs(spells) do
 			if spell.targets then
-				for name, count in pairs(spell.targets) do
-					local t = tbl[name]
+				for targetname, count in pairs(spell.targets) do
+					local t = tbl[targetname]
 					if not t then
 						t = new()
 						t.count = count
-						tbl[name] = t
+						tbl[targetname] = t
 					else
 						t.count = t.count + count
 					end
-					self.super:_fill_actor_table(t, name, nil, true)
+					self:_fill_actor_table(t, targetname, nil, true)
 				end
 			end
 		end
-		return tbl
+		return tbl, total, actor
 	end
 end)

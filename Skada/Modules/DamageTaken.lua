@@ -271,8 +271,8 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		if not actor then return end
 
 		local totaltime = set:GetTime()
-		local activetime = actor:GetTime(true)
-		local dtps, damage = actor:GetDTPS()
+		local activetime = actor:GetTime(set, true)
+		local dtps, damage = actor:GetDTPS(set)
 
 		tooltip:AddDoubleLine(L["Activity"], Skada:FormatPercent(activetime, totaltime), nil, nil, nil, 1, 1, 1)
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
@@ -378,7 +378,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDTPS and actor:GetTime()
+		local actortime = mod_cols.sDTPS and actor:GetTime(set)
 
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
@@ -397,18 +397,15 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 	function sourcemod:Update(win, set)
 		win.title = uformat(L["%s's damage sources"], win.actorname)
 
-		local actor = set and set:GetActor(win.actorname, win.actorid)
-		if not actor then return end
-
-		local sources, total = actor:GetDamageSources()
-		if not sources or total == 0 then
+		local sources, total, actor = set:GetActorDamageSources(win.actorid, win.actorname)
+		if not sources or not actor or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDTPS and actor:GetTime()
+		local actortime = mod_cols.sDTPS and actor:GetTime(set)
 
 		for sourcename, source in pairs(sources) do
 			nr = nr + 1
@@ -555,7 +552,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		if not set or not win.targetname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)
-		local sources = actor and actor:GetDamageSources()
+		local sources = actor and actor:GetDamageSources(set)
 		if not sources or not sources[win.targetname] then return end
 
 		local total = P.absdamage and sources[win.targetname].total or sources[win.targetname].amount
@@ -567,7 +564,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDTPS and actor:GetTime()
+		local actortime = mod_cols.sDTPS and actor:GetTime(set)
 
 		for spellid, spell in pairs(spells) do
 			local source = spell.sources and spell.sources[win.targetname]
@@ -598,25 +595,25 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		for i = 1, #actors do
 			local actor = actors[i]
 			if win:show_actor(actor, set) then
-				local dtps, amount = actor:GetDTPS(not mod_cols.DTPS)
+				local dtps, amount = actor:GetDTPS(set, not mod_cols.DTPS)
 				if amount > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
-					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+					d.color = set.arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = amount
 					format_valuetext(d, mod_cols, total, dtps, win.metadata)
 				end
 			end
 		end
 
-		actors = set.__arena and set.enemies or nil -- arena enemies
+		actors = set.arena and set.enemies or nil -- arena enemies
 		if not actors then return end
 
 		for i = 1, #actors do
 			local actor = actors[i]
 			if win:show_actor(actor, set, true) then
-				local dtps, amount = actor:GetDTPS(not mod_cols.DTPS)
+				local dtps, amount = actor:GetDTPS(set, not mod_cols.DTPS)
 				if amount > 0 then
 					nr = nr + 1
 
@@ -747,8 +744,8 @@ Skada:RegisterModule("DTPS", function(L, P)
 		if not actor then return end
 
 		local totaltime = set:GetTime()
-		local activetime = actor:GetTime(true)
-		local dtps, damage = actor:GetDTPS()
+		local activetime = actor:GetTime(set, true)
+		local dtps, damage = actor:GetDTPS(set)
 
 		tooltip:AddLine(actor.name .. " - " .. L["DTPS"])
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
@@ -775,25 +772,25 @@ Skada:RegisterModule("DTPS", function(L, P)
 		for i = 1, #actors do
 			local actor = actors[i]
 			if win:show_actor(actor, set) then
-				local dtps = actor:GetDTPS()
+				local dtps = actor:GetDTPS(set)
 				if dtps > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
-					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+					d.color = set.arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = dtps
 					format_valuetext(d, mod_cols, total, dtps, win.metadata)
 				end
 			end
 		end
 
-		actors = set.__arena and set.enemies or nil -- arena enemies
+		actors = set.arena and set.enemies or nil -- arena enemies
 		if not actors then return end
 
 		for i = 1, #actors do
 			local actor = actors[i]
 			if win:show_actor(actor, set, true) then
-				local dtps = actor:GetDTPS()
+				local dtps = actor:GetDTPS(set)
 				if dtps > 0 then
 					nr = nr + 1
 
@@ -957,20 +954,20 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 		local total = 0
 		local targets = clear(C)
 
-		local players = set.players
-		for i = 1, #players do
-			local player = players[i]
-			local spell = player and player.damagedspells and player.damagedspells[win.spellid]
+		local actors = set.players
+		for i = 1, #actors do
+			local actor = actors[i]
+			local spell = actor and actor.damagedspells and actor.damagedspells[win.spellid]
 			if spell then
 				local amount = P.absdamage and spell.total or spell.amount or 0
 				if amount > 0 then
-					targets[player.name] = new()
-					targets[player.name].id = player.id
-					targets[player.name].class = player.class
-					targets[player.name].role = player.role
-					targets[player.name].spec = player.spec
-					targets[player.name].amount = amount
-					targets[player.name].time = mod_cols.sDTPS and player:GetTime()
+					targets[actor.name] = new()
+					targets[actor.name].id = actor.id
+					targets[actor.name].class = actor.class
+					targets[actor.name].role = actor.role
+					targets[actor.name].spec = actor.spec
+					targets[actor.name].amount = amount
+					targets[actor.name].time = mod_cols.sDTPS and actor:GetTime(set)
 
 					total = total + amount
 				end
@@ -984,12 +981,12 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 		end
 
 		local nr = 0
-		for playername, player in pairs(targets) do
+		for actorname, actor in pairs(targets) do
 			nr = nr + 1
 
-			local d = win:actor(nr, player, nil, playername)
-			d.value = player.amount
-			format_valuetext(d, mod_cols, total, player.time and (d.value / player.time), win.metadata, true)
+			local d = win:actor(nr, actor, nil, actorname)
+			d.value = actor.amount
+			format_valuetext(d, mod_cols, total, actor.time and (d.value / actor.time), win.metadata, true)
 		end
 	end
 
@@ -1004,9 +1001,10 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 		end
 
 		local spells = clear(C)
-		for i = 1, #set.players do
-			local player = set.players[i]
-			local _spells = player and player.damagedspells
+		local actors = set.players
+		for i = 1, #actors do
+			local actor = actors[i]
+			local _spells = actor and actor.damagedspells
 			if _spells then
 				for spellid, spell in pairs(_spells) do
 					local amount = P.absdamage and spell.total or spell.amount or 0

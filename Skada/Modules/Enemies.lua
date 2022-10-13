@@ -416,7 +416,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	local function usefulmod_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
 		local e = set and set:GetEnemy(label, id)
-		local amount, total, useful = e:GetDamageTakenBreakdown()
+		local amount, total, useful = e:GetDamageTakenBreakdown(set)
 		if not useful or useful == 0 then return end
 
 		tooltip:AddLine(format(L["%s's damage breakdown"], label))
@@ -442,7 +442,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		local actor = set and set:GetEnemy(win.targetname, win.targetid)
 		if not (actor and actor.GetDamageSpellSources) then return end
 
-		local sources, total = actor:GetDamageSpellSources(win.spellid)
+		local sources, total = actor:GetDamageSpellSources(set, win.spellid)
 		if not sources or total == 0 then
 			return
 		elseif win.metadata then
@@ -450,7 +450,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDTPS and actor:GetTime()
+		local actortime = mod_cols.sDTPS and actor:GetTime(set)
 
 		for sourcename, source in pairs(sources) do
 			if not win.class or win.class == source.class then
@@ -474,18 +474,15 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 			win.title = format("%s (%s)", win.title, L[win.class])
 		end
 
-		local actor = set and set:GetEnemy(win.targetname, win.targetid)
-		if not actor then return end
-
-		local sources, total = actor:GetDamageSources()
-		if not sources or total == 0 then
+		local sources, total, actor = set:GetActorDamageSources(win.targetid, win.targetname)
+		if not sources or not actor or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDTPS and actor:GetTime()
+		local actortime = mod_cols.sDTPS and actor:GetTime(set)
 
 		for sourcename, source in pairs(sources) do
 			if not win.class or win.class == source.class then
@@ -508,7 +505,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		if not win.actorname or not win.targetname then return end
 
 		local actor = set and set:GetEnemy(win.targetname, win.targetid)
-		local sources = actor and actor:GetDamageSources()
+		local sources = actor and actor:GetDamageSources(set)
 		local source = sources and sources[win.actorname]
 		if not source then return end
 
@@ -520,7 +517,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDTPS and actor:GetTime()
+		local actortime = mod_cols.sDTPS and actor:GetTime(set)
 		local spells = actor.damagedspells
 
 		for spellid, spell in pairs(spells) do
@@ -554,7 +551,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDTPS and actor:GetTime()
+		local actortime = mod_cols.sDTPS and actor:GetTime(set)
 
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
@@ -578,7 +575,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 
 		local actor = set and set:GetEnemy(win.targetname, win.targetid)
 		local total = actor and actor.usefuldamaged
-		local sources = (total and total > 0) and actor:GetDamageSources()
+		local sources = (total and total > 0) and actor:GetDamageSources(set)
 
 		if not sources then
 			return
@@ -587,7 +584,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDTPS and actor:GetTime()
+		local actortime = mod_cols.sDTPS and actor:GetTime(set)
 
 		for sourcename, source in pairs(sources) do
 			if win:show_actor(source, set) and source.useful and source.useful > 0 then
@@ -616,7 +613,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		for i = 1, #actors do
 			local actor = actors[i]
 			if actor then
-				local dtps, amount = actor:GetDTPS(nil, not mod_cols.sDTPS)
+				local dtps, amount = actor:GetDTPS(set, nil, not mod_cols.sDTPS)
 				if amount > 0 then
 					nr = nr + 1
 
@@ -815,8 +812,8 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		return 0, damage
 	end
 
-	function enemyPrototype:GetDamageSpellSources(spellid, tbl)
-		local spell = spellid and self.damagedspells and self.damagedspells[spellid]
+	function enemyPrototype:GetDamageSpellSources(set, spellid, tbl)
+		local spell = set and spellid and self.damagedspells and self.damagedspells[spellid]
 		if not spell or not spell.sources then return end
 
 		tbl = clear(tbl or C)
@@ -830,19 +827,19 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 				t.amount = t.amount + (P.absdamage and source.total or source.amount or 0)
 			end
 
-			self.super:_fill_actor_table(t, name)
+			set:_fill_actor_table(t, name)
 		end
 
 		return tbl, P.absdamage and spell.total or spell.amount
 	end
 
-	function enemyPrototype:GetDamageTakenBreakdown()
+	function enemyPrototype:GetDamageTakenBreakdown(set)
 		local amount, total, useful = 0, 0, 0
 		if not self.damagedspells then
 			return amount, total, useful
 		end
 
-		local sources = self:GetDamageSources()
+		local sources = self:GetDamageSources(set)
 		if not sources then
 			return amount, total, useful
 		end
@@ -1046,7 +1043,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime(set)
 
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
@@ -1073,7 +1070,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		local actor = set and set:GetEnemy(win.targetname, win.targetid)
 		if not (actor and actor.GetDamageSpellTargets) then return end
 
-		local targets, total = actor:GetDamageSpellTargets(win.spellid)
+		local targets, total = actor:GetDamageSpellTargets(set, win.spellid)
 		if not targets or total == 0 then
 			return
 		elseif win.metadata then
@@ -1081,7 +1078,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime(set)
 
 		for targetname, target in pairs(targets) do
 			if not win.class or win.class == target.class then
@@ -1105,18 +1102,15 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 			win.title = format("%s (%s)", win.title, L[win.class])
 		end
 
-		local actor = set and set:GetEnemy(win.targetname, win.targetid)
-		if not actor then return end
-
-		local targets, total = actor:GetDamageTargets()
-		if not targets or total == 0 then
+		local targets, total, actor = set:GetActorDamageTargets(win.targetid, win.targetname)
+		if not targets or not actor or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime(set)
 
 		for targetname, target in pairs(targets) do
 			if not win.class or win.class == target.class then
@@ -1148,7 +1142,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime(set)
 
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
@@ -1175,7 +1169,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		for i = 1, #actors do
 			local actor = actors[i]
 			if actor and not actor.fake then
-				local dps, amount = actor:GetDPS()
+				local dps, amount = actor:GetDPS(set)
 				if amount > 0 then
 					nr = nr + 1
 
@@ -1311,31 +1305,27 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		end
 	end
 
-	function enemyPrototype:GetDamageSpellTargets(spellid, tbl)
-		if self.damagespells and self.damagespells[spellid] and self.damagespells[spellid].targets then
-			tbl = clear(tbl or C)
+	function enemyPrototype:GetDamageSpellTargets(set, spellid, tbl)
+		local spell = set and spellid and self.damagespells and self.damagespells[spellid]
+		if not spell or not spell.targets then return end
 
-			local total = self.damagespells[spellid].amount or 0
-			if P.absdamage and self.damagespells[spellid].total then
-				total = self.damagespells[spellid].total
+		local total = P.absdamage and spell.total or spell.amount or 0
+
+		tbl = clear(tbl or C)
+		for name, target in pairs(spell.targets) do
+			local amount = P.absdamage and target.total or target.amount
+			local t = tbl[name]
+			if not t then
+				t = new()
+				t.amount = amount
+				tbl[name] = t
+			else
+				t.amount = t.amount + amount
 			end
-
-			for name, target in pairs(self.damagespells[spellid].targets) do
-				local amount = P.absdamage and target.total or target.amount
-				local t = tbl[name]
-				if not t then
-					t = new()
-					t.amount = amount
-					tbl[name] = t
-				else
-					t.amount = t.amount + amount
-				end
-
-				self.super:_fill_actor_table(t, name)
-			end
-
-			return tbl, total
+			set:_fill_actor_table(t, name)
 		end
+
+		return tbl, total
 	end
 end)
 
@@ -1427,18 +1417,15 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 	function targetmod:Update(win, set)
 		win.title = uformat(L["%s's healed targets"], win.targetname)
 
-		local actor = set and set:GetEnemy(win.targetname, win.targetid)
-		local total = actor and actor.heal
-		local targets = (total and total > 0) and actor:GetHealTargets()
-
-		if not targets then
+		local targets, total, actor = set:GetActorHealTargets(win.targetid, win.targetname)
+		if not targets or not actor or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sHPS and actor:GetTime()
+		local actortime = mod_cols.sHPS and actor:GetTime(set)
 
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
@@ -1468,7 +1455,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sHPS and actor:GetTime()
+		local actortime = mod_cols.sHPS and actor:GetTime(set)
 
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
@@ -1499,7 +1486,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		for i = 1, #actors do
 			local actor = actors[i]
 			if win:show_actor(actor, set, true) and actor.heal then
-				local hps, amount = actor:GetHPS()
+				local hps, amount = actor:GetHPS(set)
 				if amount > 0 then
 					nr = nr + 1
 

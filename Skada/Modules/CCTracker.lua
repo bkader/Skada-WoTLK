@@ -212,8 +212,8 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 	local playermod = mod:NewModule("Crowd Control Spells")
 	local targetmod = mod:NewModule("Crowd Control Targets")
 	local sourcemod = playermod:NewModule("Crowd Control Sources")
+	local get_actor_cc_targets = nil
 	local get_cc_done_sources = nil
-	local get_cc_done_targets = nil
 	local mod_cols = nil
 
 	local function log_ccdone(set)
@@ -293,11 +293,8 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 	function targetmod:Update(win, set)
 		win.title = uformat(L["%s's control targets"], win.actorname)
 
-		local player = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = player and player.ccdone
-		local targets = (total and total > 0) and get_cc_done_targets(player)
-
-		if not targets then
+		local targets, total, actor = get_actor_cc_targets(set, win.actorid, win.actorname)
+		if not targets or not actor or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
@@ -432,26 +429,29 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 		return total, tbl
 	end
 
-	get_cc_done_targets = function(self, tbl)
-		if not self.ccdonespells then return end
+	get_actor_cc_targets = function(self, id, name, tbl)
+		local actor = self:GetActor(name, id)
+		local spells = actor and actor.ccdone and actor.ccdonespells
+		if not spells then return end
 
 		tbl = clear(tbl or C)
-		for _, spell in pairs(self.ccdonespells) do
+		for _, spell in pairs(spells) do
 			if spell.targets then
-				for name, count in pairs(spell.targets) do
-					local t = tbl[name]
+				for targetname, count in pairs(spell.targets) do
+					local t = tbl[targetname]
 					if not t then
 						t = new()
 						t.count = count
-						tbl[name] = t
+						tbl[targetname] = t
 					else
 						t.count = t.count + count
 					end
-					self.super:_fill_actor_table(t, name)
+					self:_fill_actor_table(t, targetname)
 				end
 			end
 		end
-		return tbl
+
+		return tbl, actor.ccdone, actor
 	end
 end)
 
@@ -463,8 +463,8 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 	local playermod = mod:NewModule("Crowd Control Spells")
 	local sourcemod = mod:NewModule("Crowd Control Sources")
 	local targetmod = playermod:NewModule("Crowd Control Targets")
+	local get_actor_cc_sources = nil
 	local get_cc_taken_targets = nil
-	local get_cc_taken_sources = nil
 	local mod_cols = nil
 
 	local RaidCCSpells = {
@@ -559,11 +559,8 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 	function sourcemod:Update(win, set)
 		win.title = uformat(L["%s's control sources"], win.actorname)
 
-		local player = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = player and player.cctaken
-		local sources = (total and total > 0) and get_cc_taken_sources(player)
-
-		if not sources then
+		local sources, total, actor = get_actor_cc_sources(set, win.actorid, win.actorname)
+		if not sources or not actor or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
@@ -698,26 +695,29 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 		return total, tbl
 	end
 
-	get_cc_taken_sources = function(self, tbl)
-		if not self.cctakenspells then return end
+	get_actor_cc_sources = function(self, id, name, tbl)
+		local actor = self:GetActor(name, id)
+		local spells = actor and actor.cctaken and actor.cctakenspells
+		if not spells then return end
 
 		tbl = clear(tbl or C)
-		for _, spell in pairs(self.cctakenspells) do
+		for _, spell in pairs(spells) do
 			if spell.sources then
-				for name, count in pairs(spell.sources) do
-					local t = tbl[name]
+				for sourcename, count in pairs(spell.sources) do
+					local t = tbl[sourcename]
 					if not t then
 						t = new()
 						t.count = count
-						tbl[name] = t
+						tbl[sourcename] = t
 					else
 						t.count = t.count + count
 					end
-					self.super:_fill_actor_table(t, name)
+					self:_fill_actor_table(t, sourcename)
 				end
 			end
 		end
-		return tbl
+
+		return tbl, actor.cctaken, actor
 	end
 end)
 
@@ -728,7 +728,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 	local mod = Skada:NewModule("CC Breaks")
 	local playermod = mod:NewModule("Crowd Control Spells")
 	local targetmod = mod:NewModule("Crowd Control Targets")
-	local get_cc_break_targets = nil
+	local get_actor_cc_break_targets = nil
 	local mod_cols = nil
 
 	local UnitName, UnitInRaid, IsInRaid = UnitName, UnitInRaid, Skada.IsInRaid
@@ -844,11 +844,8 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 	function targetmod:Update(win, set)
 		win.title = uformat(L["%s's control targets"], win.actorname)
 
-		local player = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = player and player.ccbreak
-		local targets = (total and total > 0) and get_cc_break_targets(player)
-
-		if not targets then
+		local targets, total, actor = get_actor_cc_break_targets(set, win.actorid, win.actorname)
+		if not targets or not actor or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
@@ -970,25 +967,28 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		}
 	end
 
-	get_cc_break_targets = function(self, tbl)
-		if not self.ccbreakspells then return end
+	get_actor_cc_break_targets = function(self, id, name, tbl)
+		local actor = self:GetActor(name, id)
+		local spells = actor and actor.ccbreak and actor.ccbreakspells
+		if not spells then return end
 
 		tbl = clear(tbl or C)
-		for _, spell in pairs(self.ccbreakspells) do
+		for _, spell in pairs(spells) do
 			if spell.targets then
-				for name, count in pairs(spell.targets) do
-					local t = tbl[name]
+				for targetname, count in pairs(spell.targets) do
+					local t = tbl[targetname]
 					if not t then
 						t = new()
 						t.count = count
-						tbl[name] = t
+						tbl[targetname] = t
 					else
 						t.count = t.count + count
 					end
-					self.super:_fill_actor_table(t, name)
+					self:_fill_actor_table(t, targetname)
 				end
 			end
 		end
-		return tbl
+
+		return tbl, actor.ccbreak, actor
 	end
 end)

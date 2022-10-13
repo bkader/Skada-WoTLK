@@ -738,7 +738,8 @@ function Skada:SegmentMenu(window)
 end
 
 do
-	local categorized, categories
+	local categories -- list of mode categories.
+	local categorized -- modes organized by category.
 
 	local function sort_categories(a, b)
 		local a_score = (a == L["Other"]) and 1000 or 0
@@ -751,7 +752,9 @@ do
 	local function construct_categories()
 		if categories then return end
 
-		categories, categorized = {}, {}
+		categories = {}
+		categorized = {}
+
 		modes = Skada:GetModes()
 		for i = 1, #modes do
 			local mode = modes[i]
@@ -761,6 +764,7 @@ do
 				categories[#categories + 1] = mode.category
 			end
 		end
+
 		tsort(categories, sort_categories)
 	end
 

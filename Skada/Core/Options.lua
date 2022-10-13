@@ -891,6 +891,7 @@ function Private.open_options(win)
 	if not ACD:Close(folder) then
 		HideUIPanel(InterfaceOptionsFrame)
 		HideUIPanel(GameMenuFrame)
+		Skada:CloseMenus()
 
 		ACD:Open(folder)
 		if type(win) == "table" and win.db then

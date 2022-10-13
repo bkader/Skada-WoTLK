@@ -299,7 +299,7 @@ do
 						nr = nr + 1
 
 						local d = win:actor(nr, actor)
-						local maxtime = floor(actor:GetTime())
+						local maxtime = floor(actor:GetTime(set))
 						d.value = min(floor(uptime / count), maxtime)
 						format_valuetext(d, cols, count, maxtime, win.metadata)
 					end
@@ -311,7 +311,7 @@ do
 	-- list actor's auras by type
 	function spell_update_func(self, auratype, win, set, cols)
 		local actor = set and auratype and set:GetActor(win.actorname, win.actorid)
-		local maxtime = actor and floor(actor:GetTime())
+		local maxtime = actor and floor(actor:GetTime(set))
 		local spells = (maxtime and maxtime > 0) and actor.auras
 
 		if not spells then
@@ -345,9 +345,8 @@ do
 	end
 
 	do
-		local function get_actor_auras_targets(self, auratype, tbl)
-			local set = self.super
-			local spells = auratype and set and self.auras
+		local function get_actor_auras_targets(self, set, auratype, tbl)
+			local spells = set and auratype and self.auras
 			if not spells then return end
 
 			tbl = clear(tbl)
@@ -381,7 +380,7 @@ do
 			local actor = set and auratype and set:GetActor(win.actorname, win.actorid)
 			if not actor then return end
 
-			local targets, maxtime = get_actor_auras_targets(actor, auratype, tbl)
+			local targets, maxtime = get_actor_auras_targets(actor, set, auratype, tbl)
 			if not targets or maxtime == 0 then
 				return
 			elseif win.metadata then
@@ -400,8 +399,7 @@ do
 	end
 
 	do
-		local function get_actor_aura_targets(self, spellid, tbl)
-			local set = self.super
+		local function get_actor_aura_targets(self, set, spellid, tbl)
 			local spell = set and spellid and self.auras and self.auras[spellid]
 			local targets = spell and spell.targets
 			if not targets then return end
@@ -419,7 +417,7 @@ do
 			local actor = set and auratype and set:GetActor(win.actorname, win.actorid)
 			if not actor then return end
 
-			local targets, maxtime = get_actor_aura_targets(actor, win.spellid, tbl)
+			local targets, maxtime = get_actor_aura_targets(actor, set, win.spellid, tbl)
 			if not targets or maxtime == 0 then
 				return
 			elseif win.metadata then
@@ -504,11 +502,11 @@ do
 
 		-- add segment and active times
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
-		tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(actor:GetTime(true)), 1, 1, 1)
+		tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(actor:GetTime(set, true)), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Duration"], Skada:FormatTime(spell.uptime), 1, 1, 1)
 
 		-- display aura uptime in colored percent
-		local uptime = 100 * (spell.uptime / actor:GetTime())
+		local uptime = 100 * (spell.uptime / actor:GetTime(set))
 		tooltip:AddDoubleLine(L["Uptime"], Skada:FormatPercent(uptime), nil, nil, nil, PercentToRGB(uptime, enemy))
 	end
 
@@ -593,7 +591,7 @@ Skada:RegisterModule("Buffs", function(_, P, _, C)
 				if spell then
 					local t = new_actor_table(actor)
 					t.count = spell.count
-					t.maxtime = floor(actor:GetTime())
+					t.maxtime = floor(actor:GetTime(self))
 					t.uptime = min(t.maxtime, spell.uptime)
 					tbl[actor.name] = t
 				end
@@ -772,7 +770,7 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 
 				local d = win:actor(nr, actor)
 				d.value = spell.uptime
-				format_valuetext(d, mod_cols, spell.count, actor:GetTime(), win.metadata, true, true)
+				format_valuetext(d, mod_cols, spell.count, actor:GetTime(set), win.metadata, true, true)
 			end
 		end
 	end

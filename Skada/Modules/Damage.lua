@@ -329,8 +329,8 @@ Skada:RegisterModule("Damage", function(L, P)
 		if not actor then return end
 
 		local totaltime = set:GetTime()
-		local activetime = actor:GetTime(true)
-		local dps, damage = actor:GetDPS()
+		local activetime = actor:GetTime(set, true)
+		local dps, damage = actor:GetDPS(set)
 
 		tooltip:AddDoubleLine(L["Activity"], Skada:FormatPercent(activetime, totaltime), nil, nil, nil, 1, 1, 1)
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
@@ -363,7 +363,7 @@ Skada:RegisterModule("Damage", function(L, P)
 		local debuff_id = -spell.id
 		local uptime = actor.auras and actor.auras[debuff_id] and actor.auras[debuff_id].uptime
 		if uptime and uptime > 0 then
-			uptime = 100 * (uptime / actor:GetTime())
+			uptime = 100 * (uptime / actor:GetTime(set))
 			tooltip:AddDoubleLine(L["Uptime"], Skada:FormatPercent(uptime), nil, nil, nil, PercentToRGB(uptime))
 		end
 
@@ -449,7 +449,7 @@ Skada:RegisterModule("Damage", function(L, P)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime(set)
 
 		for spellname, spell in pairs(spells) do
 			nr = nr + 1
@@ -468,19 +468,15 @@ Skada:RegisterModule("Damage", function(L, P)
 	function targetmod:Update(win, set)
 		win.title = uformat(L["%s's targets"], win.actorname)
 
-		local actor = set and set:GetActor(win.actorname, win.actorid)
-		if not actor then return end
-
-		local targets, total = actor:GetDamageTargets()
-
-		if not targets or total == 0 then
+		local targets, total, actor = set:GetActorDamageTargets(win.actorid, win.actorname)
+		if not targets or not actor or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime(set)
 
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
@@ -633,7 +629,7 @@ Skada:RegisterModule("Damage", function(L, P)
 		if not set or not win.targetname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)
-		local targets = actor and actor:GetDamageTargets()
+		local targets = actor and actor:GetDamageTargets(set)
 		if not targets or not targets[win.targetname] then return end
 
 		local total = P.absdamage and targets[win.targetname].total or targets[win.targetname].amount
@@ -646,7 +642,7 @@ Skada:RegisterModule("Damage", function(L, P)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime(set)
 
 		for spellname, spell in pairs(spells) do
 			local target = spell.targets and spell.targets[win.targetname]
@@ -677,25 +673,25 @@ Skada:RegisterModule("Damage", function(L, P)
 		for i = 1, #actors do
 			local actor = actors[i]
 			if win:show_actor(actor, set) then
-				local dps, amount = actor:GetDPS()
+				local dps, amount = actor:GetDPS(set)
 				if amount > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
-					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+					d.color = set.arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = amount
 					format_valuetext(d, mod_cols, total, dps, win.metadata)
 				end
 			end
 		end
 
-		actors = set.__arena and set.enemies or nil -- arena enemies
+		actors = set.arena and set.enemies or nil -- arena enemies
 		if not actors then return end
 
 		for i = 1, #actors do
 			local actor = actors[i]
 			if win:show_actor(actor, set, true) then
-				local dps, amount = actor:GetDPS()
+				local dps, amount = actor:GetDPS(set)
 				if amount > 0 then
 					nr = nr + 1
 
@@ -727,7 +723,7 @@ Skada:RegisterModule("Damage", function(L, P)
 	local function feed_personal_dps()
 		local set = Skada:GetSet("current")
 		local actor = set and set:GetPlayer(Skada.userGUID, Skada.userName)
-		return format("%s %s", Skada:FormatNumber(actor and actor:GetDPS() or 0), L["DPS"])
+		return format("%s %s", Skada:FormatNumber(actor and actor:GetDPS(set) or 0), L["DPS"])
 	end
 
 	local function feed_raid_dps()
@@ -881,8 +877,8 @@ Skada:RegisterModule("DPS", function(L, P)
 		if not actor then return end
 
 		local totaltime = set:GetTime()
-		local activetime = actor:GetTime(true)
-		local dps, damage = actor:GetDPS()
+		local activetime = actor:GetTime(set, true)
+		local dps, damage = actor:GetDPS(set)
 		tooltip:AddLine(actor.name .. " - " .. L["DPS"])
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
@@ -913,25 +909,25 @@ Skada:RegisterModule("DPS", function(L, P)
 		for i = 1, #actors do
 			local actor = actors[i]
 			if win:show_actor(actor, set) then
-				local dps = actor:GetDPS()
+				local dps = actor:GetDPS(set)
 				if dps > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
-					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+					d.color = set.arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = dps
 					format_valuetext(d, mod_cols, total, dps, win.metadata)
 				end
 			end
 		end
 
-		actors = set.__arena and set.enemies or nil -- arena enemies
+		actors = set.arena and set.enemies or nil -- arena enemies
 		if not actors then return end
 
 		for i = 1, #actors do
 			local actor = actors[i]
 			if win:show_actor(actor, set, true) then
-				local dps = actor:GetDPS()
+				local dps = actor:GetDPS(set)
 				if dps > 0 then
 					nr = nr + 1
 
@@ -1032,19 +1028,20 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C)
 
 		local total = 0
 		local sources = clear(C)
-		for i = 1, #set.players do
-			local player = set.players[i]
-			local spell = player and player.damagespells and player.damagespells[win.spellname]
+		local actors = set.players
+		for i = 1, #actors do
+			local actor = actors[i]
+			local spell = actor and actor.damagespells and actor.damagespells[win.spellname]
 			if spell then
 				local amount = P.absdamage and spell.total or spell.amount
 				if amount > 0 then
-					sources[player.name] = new()
-					sources[player.name].id = player.id
-					sources[player.name].class = player.class
-					sources[player.name].role = player.role
-					sources[player.name].spec = player.spec
-					sources[player.name].amount = amount
-					sources[player.name].time = mod.metadata.columns.sDPS and player:GetTime()
+					sources[actor.name] = new()
+					sources[actor.name].id = actor.id
+					sources[actor.name].class = actor.class
+					sources[actor.name].role = actor.role
+					sources[actor.name].spec = actor.spec
+					sources[actor.name].amount = amount
+					sources[actor.name].time = mod.metadata.columns.sDPS and actor:GetTime(set)
 
 					total = total + amount
 				end
@@ -1058,12 +1055,12 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C)
 		end
 
 		local nr = 0
-		for playername, player in pairs(sources) do
+		for actorname, actor in pairs(sources) do
 			nr = nr + 1
 
-			local d = win:actor(nr, player, nil, playername)
-			d.value = player.amount
-			format_valuetext(d, mod_cols, total, player.time and (d.value / player.time), win.metadata, true)
+			local d = win:actor(nr, actor, nil, actorname)
+			d.value = actor.amount
+			format_valuetext(d, mod_cols, total, actor.time and (d.value / actor.time), win.metadata, true)
 		end
 	end
 
@@ -1164,7 +1161,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime(set)
 
 		for spellname, spell in pairs(spells) do
 			nr = nr + 1
@@ -1188,18 +1185,15 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 		win.title = uformat(L["%s's targets"], win.actorname)
 		if not set or not win.actorname then return end
 
-		local actor = set:GetActor(win.actorname, win.actorid)
-		local total = actor and actor:GetDamage(true)
-		local targets = (total and total > 0) and actor:GetDamageTargets()
-
-		if not targets then
+		local targets, total, actor = set:GetActorDamageTargets(win.actorid, win.actorname)
+		if not targets or not actor or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime(set)
 
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
@@ -1223,19 +1217,15 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 		win.title = uformat(L["Useful damage on %s"], win.targetname)
 		if not set or not win.targetname then return end
 
-		local actor, enemy = set:GetActor(win.targetname, win.targetid)
-		if not actor then return end
-
-		local sources, total = actor:GetDamageSources()
-
-		if not sources or total == 0 then
+		local sources, total, actor, enemy = set:GetActorDamageSources(win.targetid, win.targetname)
+		if not sources or not actor or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime(set)
 
 		for sourcename, source in pairs(sources) do
 			local amount = P.absdamage and source.total or source.amount
@@ -1269,25 +1259,25 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 		for i = 1, #actors do
 			local actor = actors[i]
 			if win:show_actor(actor, set) then
-				local dps, amount = actor:GetDPS(true)
+				local dps, amount = actor:GetDPS(set, true)
 				if amount > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
-					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+					d.color = set.arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = amount
 					format_valuetext(d, mod_cols, total, dps, win.metadata)
 				end
 			end
 		end
 
-		actors = set.__arena and set.enemies or nil -- arena enemies
+		actors = set.arena and set.enemies or nil -- arena enemies
 		if not actors then return end
 
 		for i = 1, #actors do
 			local actor = actors[i]
 			if win:show_actor(actor, set, true) then
-				local dps, amount = actor:GetDPS(true)
+				local dps, amount = actor:GetDPS(set, true)
 				if amount > 0 then
 					nr = nr + 1
 
@@ -1347,7 +1337,7 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 	local targetmod = mod:NewModule("Overkill target list")
 	local spelltargetmod = spellmod:NewModule("Overkill target list")
 	local targetspellmod = targetmod:NewModule("Overkill spell list")
-	local get_spell_overkill_targets = nil
+	local get_actor_spell_overkill_targets = nil
 	local mod_cols = nil
 
 	function spellmod:Enter(win, id, label)
@@ -1370,7 +1360,7 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime(set)
 
 		for spellname, spell in pairs(actor.damagespells) do
 			if spell.o_amt and spell.o_amt > 0 then
@@ -1392,18 +1382,15 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 		win.title = uformat(L["%s's overkill targets"], win.actorname)
 		if not set or not win.actorname then return end
 
-		local actor = set:GetActor(win.actorname, win.actorid)
-		local total = actor and actor.overkill
-		local targets = (total and total > 0) and actor:GetDamageTargets()
-
-		if not targets then
+		local targets, total, actor = set:GetActorDamageTargets(win.actorid, win.actorname)
+		if not targets or not actor or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime(set)
 
 		for targetname, target in pairs(targets) do
 			if target.o_amt and target.o_amt > 0 then
@@ -1425,18 +1412,15 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 		win.title = uformat(L["%s's overkill targets"], win.actorname)
 		if not win.spellname or not win.actorname then return end
 
-		local actor = set:GetActor(win.actorname, win.actorid)
-		if not actor then return end
-
-		local total, targets = get_spell_overkill_targets(actor, win.spellname)
-		if not targets or total == 0 then
+		local targets, total, actor = get_actor_spell_overkill_targets(set, win.actorid, win.actorname, win.spellname)
+		if not targets or not actor or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime(set)
 
 		for targetname, target in pairs(targets) do
 			if target.o_amt and target.o_amt > 0 then
@@ -1461,7 +1445,7 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 		local actor = set:GetActor(win.actorname, win.actorid)
 		if not actor or not actor.overkill or actor.overkill == 0 then return end
 
-		local targets = actor:GetDamageTargets()
+		local targets = actor:GetDamageTargets(set)
 		local total = targets and targets[win.targetname] and targets[win.targetname].o_amt
 
 		if not total or total == 0 then
@@ -1471,7 +1455,7 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDPS and actor:GetTime()
+		local actortime = mod_cols.sDPS and actor:GetTime(set)
 
 		for spellname, spell in pairs(actor.damagespells) do
 			local o_amt = spell.targets and spell.targets[win.targetname] and spell.targets[win.targetname].o_amt
@@ -1504,13 +1488,13 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 				nr = nr + 1
 
 				local d = win:actor(nr, actor)
-				d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+				d.color = set.arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 				d.value = actor.overkill
-				format_valuetext(d, mod_cols, total, mod_cols.DPS and (d.value / actor:GetTime()), win.metadata)
+				format_valuetext(d, mod_cols, total, mod_cols.DPS and (d.value / actor:GetTime(set)), win.metadata)
 			end
 		end
 
-		actors = set.__arena and set.enemies or nil -- arena enemies
+		actors = set.arena and set.enemies or nil -- arena enemies
 		if not actors then return end
 
 		for i = 1, #actors do
@@ -1521,7 +1505,7 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 				local d = win:actor(nr, actor, true)
 				d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 				d.value = actor.overkill
-				format_valuetext(d, mod_cols, total, mod_cols.DPS and (d.value / actor:GetTime()), win.metadata)
+				format_valuetext(d, mod_cols, total, mod_cols.DPS and (d.value / actor:GetTime(set)), win.metadata)
 			end
 		end
 	end
@@ -1559,32 +1543,27 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 
 	---------------------------------------------------------------------------
 
-	get_spell_overkill_targets = function(self, spellname, tbl)
-		local total = self.overkill
-		local spells = (total and total > 0) and self.damagespells
+	get_actor_spell_overkill_targets = function(self, id, name, spellid, tbl)
+		local actor = self:GetActor(name, id)
+		if not actor or not actor.overkill or actor.overkill == 0 then return end
 
-		if not spells then
-			return total
-		end
+		local spell = actor.damagespells and actor.damagespells[spellid]
+		local total = spell and spell.targets and spell.o_amt
+		if not total or total == 0 then return end
 
 		tbl = clear(tbl or C)
-		for name, spell in pairs(spells) do
-			if spell.targets then
-				for targetname, target in pairs(spell.targets) do
-					local t = tbl[targetname]
-					if not t then
-						t = new()
-						t.o_amt = target.o_amt
-						tbl[targetname] = t
-					elseif target.o_amt then
-						t.o_amt = (t.o_amt or 0) + target.o_amt
-					end
-
-					self.super:_fill_actor_table(t, targetname)
-				end
+		for targetname, target in pairs(spell.targets) do
+			local t = tbl[targetname]
+			if not t then
+				t = new()
+				t.o_amt = target.o_amt
+				tbl[targetname] = t
+			elseif target.o_amt then
+				t.o_amt = (t.o_amt or 0) + target.o_amt
 			end
+			self:_fill_actor_table(t, targetname)
 		end
 
-		return total, tbl
+		return tbl, total, actor
 	end
 end, "Damage")

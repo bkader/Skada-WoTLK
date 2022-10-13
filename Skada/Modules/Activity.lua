@@ -21,14 +21,14 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 
 	local function activity_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local player = set and set:GetPlayer(id, label)
-		if not player then return end
+		local actor = set and set:GetPlayer(id, label)
+		if not actor then return end
 
 		local settime = set:GetTime()
 		if settime == 0 then return end
 
-		local activetime = player:GetTime(true)
-		tooltip:AddLine(player.name .. ": " .. L["Activity"])
+		local activetime = actor:GetTime(set, true)
+		tooltip:AddLine(actor.name .. ": " .. L["Activity"])
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Activity"], Skada:FormatPercent(activetime, settime), nil, nil, nil, 1, 1, 1)
@@ -44,8 +44,8 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 		if not win.actorname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)
-		local maxtime = actor and actor:GetTime(true)
-		local targets = maxtime and get_activity_targets(actor)
+		local maxtime = actor and actor:GetTime(set, true)
+		local targets = maxtime and get_activity_targets(actor, set)
 
 		if not targets then
 			return
@@ -79,25 +79,25 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 		for i = 1, #actors do
 			local actor = actors[i]
 			if win:show_actor(actor, set) and Skada.validclass[actor.class or "NaN"] then
-				local activetime = actor:GetTime(true)
+				local activetime = actor:GetTime(set, true)
 				if activetime > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
-					d.color = set.__arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+					d.color = set.arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = activetime
 					format_valuetext(d, mod_cols, settime, win.metadata)
 				end
 			end
 		end
 
-		actors = set.__arena and set.enemies or nil -- arena enemies
+		actors = set.arena and set.enemies or nil -- arena enemies
 		if not actors then return end
 
 		for i = 1, #actors do
 			local actor = actors[i]
 			if win:show_actor(actor, set) and Skada.validclass[actor.class or "NaN"] then
-				local activetime = actor:GetTime(true)
+				local activetime = actor:GetTime(set, true)
 				if activetime > 0 then
 					nr = nr + 1
 
@@ -159,14 +159,14 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 
 	---------------------------------------------------------------------------
 
-	get_activity_targets = function(self, tbl)
-		if not self.super or not self.timespent then return end
+	get_activity_targets = function(self, set, tbl)
+		if not set or not self.timespent then return end
 
 		tbl = clear(tbl or C)
 		for name, timespent in pairs(self.timespent) do
 			tbl[name] = new()
 			tbl[name].time = timespent
-			self.super:_fill_actor_table(tbl[name], name)
+			set:_fill_actor_table(tbl[name], name)
 		end
 		return tbl
 	end

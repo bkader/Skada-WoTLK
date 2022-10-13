@@ -9,7 +9,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 local ACD = LibStub("AceConfigDialog-3.0")
 local ACR = LibStub("AceConfigRegistry-3.0")
 local DBI = LibStub("LibDBIcon-1.0", true)
-local Translit = LibStub("LibTranslit-1.0", true)
 
 -- cache frequently used globals
 local _G, GetAddOnMetadata = _G, GetAddOnMetadata
@@ -30,6 +29,7 @@ local GetCreatureId, GetUnitSpec, GetUnitRole = Skada.GetCreatureId, Skada.GetUn
 local UnitIterator, IsGroupDead = Skada.UnitIterator, Skada.IsGroupDead
 local prevent_duplicate, uformat, EscapeStr = Private.prevent_duplicate, Private.uformat, Private.EscapeStr
 local is_player, is_pet, assign_pet = Private.is_player, Private.is_pet, Private.assign_pet
+local callbacks = Skada.callbacks
 local P, G, _
 
 local LDB = LibStub("LibDataBroker-1.1")
@@ -76,9 +76,6 @@ local vehicles = {}
 -- targets table used when detecting boss fights.
 local _targets = nil
 
--- format funtions.
-local set_numeral_format, set_value_format
-
 -- list of feeds & selected feed
 local feeds, selected_feed = {}, nil
 
@@ -94,6 +91,11 @@ local BITMASK_GROUP = Private.BITMASK_GROUP
 local BITMASK_PETS = Private.BITMASK_PETS
 local BITMASK_FRIENDLY = Private.BITMASK_FRIENDLY
 local BITMASK_TYPE_PLAYER = Private.BITMASK_TYPE_PLAYER
+
+-- prototypes
+local setPrototype = ns.setPrototype
+local playerPrototype = ns.playerPrototype
+local enemyPrototype = ns.enemyPrototype
 
 -------------------------------------------------------------------------------
 -- local functions.
@@ -162,8 +164,8 @@ local function create_set(setname, set)
 		verify_set(modes[i], set)
 	end
 
-	Skada.callbacks:Fire("Skada_SetCreated", set)
-	return Skada.setPrototype:Bind(set)
+	callbacks:Fire("Skada_SetCreated", set)
+	return setPrototype:Bind(set)
 end
 
 -- prepares the given set name.
@@ -213,7 +215,7 @@ local function process_set(set, curtime, mobname)
 			end
 
 			-- do you want to do something?
-			Skada.callbacks:Fire("Skada_SetComplete", set, curtime)
+			callbacks:Fire("Skada_SetComplete", set, curtime)
 
 			tinsert(Skada.char.sets, 1, set)
 			Skada:Debug("Segment Saved:", set.name)
@@ -486,9 +488,9 @@ do
 	-- fires a callback event
 	function Window:Fire(event, ...)
 		if self.bargroup and self.bargroup.callbacks then
-			self.bargroup.callbacks:Fire(event, self, ...)
+			self.callbacks:Fire(event, self, ...)
 		elseif self.frame and self.frame.callbacks then
-			self.frame.callbacks:Fire(event, self, ...)
+			self.callbacks:Fire(event, self, ...)
 		end
 	end
 end
@@ -1510,7 +1512,7 @@ function Skada:DeleteSet(set, index)
 
 	if set and index then
 		local s = tremove(sets, index)
-		self.callbacks:Fire("Skada_SetDeleted", index, s)
+		callbacks:Fire("Skada_SetDeleted", index, s)
 		s = del(s, true)
 
 		if set == self.last then
@@ -1555,7 +1557,7 @@ function Skada:FindPlayer(set, id, name, is_create)
 	-- already cached player?
 	local player = set._playeridx[id]
 	if player then
-		return self.playerPrototype:Bind(player, set)
+		return playerPrototype:Bind(player, set)
 	end
 
 	-- search the set
@@ -1575,7 +1577,7 @@ function Skada:FindPlayer(set, id, name, is_create)
 		dummy_pet.id = id
 		dummy_pet.name = name
 		dummy_pet.owner = ownerName
-		return self.playerPrototype:Bind(dummy_pet, set)
+		return playerPrototype:Bind(dummy_pet, set)
 	end
 
 	-- search friendly enemies
@@ -1588,7 +1590,7 @@ function Skada:FindPlayer(set, id, name, is_create)
 	-- our last hope!
 	dummy_pet.id = id
 	dummy_pet.name = name or L["Unknown"]
-	return self.playerPrototype:Bind(dummy_pet, set)
+	return playerPrototype:Bind(dummy_pet, set)
 end
 
 -- finds a player table or creates it if not found
@@ -1651,8 +1653,8 @@ function Skada:GetPlayer(set, guid, name, flag)
 	player.last = player.last or set.last_time or GetTime()
 
 	self.changed = true
-	self.callbacks:Fire("Skada_GetPlayer", player, set)
-	return self.playerPrototype:Bind(player, set)
+	callbacks:Fire("Skada_GetPlayer", player, set)
+	return playerPrototype:Bind(player, set)
 end
 
 -- finds an enemy unit
@@ -1666,13 +1668,13 @@ function Skada:FindEnemy(set, name, id)
 
 	local enemy = set._enemyidx[name]
 	if enemy then
-		return self.enemyPrototype:Bind(enemy, set)
+		return enemyPrototype:Bind(enemy, set)
 	end
 
 	for i = 1, #actors do
 		local actor = actors[i]
 		if actor and ((id and id == actor.id) or (name and actor.name == name)) then
-			set._enemyidx[name] = self.enemyPrototype:Bind(actor, set)
+			set._enemyidx[name] = enemyPrototype:Bind(actor, set)
 			return actor
 		end
 	end
@@ -1713,8 +1715,8 @@ function Skada:GetEnemy(set, name, guid, flag, create)
 	end
 
 	self.changed = true
-	self.callbacks:Fire("Skada_GetEnemy", enemy, set)
-	return self.enemyPrototype:Bind(enemy, set)
+	callbacks:Fire("Skada_GetEnemy", enemy, set)
+	return enemyPrototype:Bind(enemy, set)
 end
 
 -- generic find a player or an enemey
@@ -2462,7 +2464,7 @@ function Skada:PLAYER_ENTERING_WORLD()
 	-- account-wide addon version
 	local version = convert_version(self.version)
 	if version ~= G.version then
-		self.callbacks:Fire("Skada_UpdateCore", G.version, version)
+		callbacks:Fire("Skada_UpdateCore", G.version, version)
 		G.version = version
 	end
 
@@ -2471,7 +2473,7 @@ function Skada:PLAYER_ENTERING_WORLD()
 		if (version - self.char.version) >= 3 or (version - self.char.version) <= -3 then
 			self:Reset(true)
 		end
-		self.callbacks:Fire("Skada_UpdateData", self.char.version, version)
+		callbacks:Fire("Skada_UpdateData", self.char.version, version)
 		self.char.version = version
 	end
 end
@@ -2721,7 +2723,7 @@ function Skada:Reset(force)
 	dataobj.text = "n/a"
 	self:UpdateDisplay(true)
 	self:Notify(L["All data has been reset."])
-	self.callbacks:Fire("Skada_DataReset")
+	callbacks:Fire("Skada_DataReset")
 	StaticPopup_Hide("SkadaCommonConfirmDialog")
 	self:CloseMenus()
 end
@@ -2748,160 +2750,6 @@ end
 
 -------------------------------------------------------------------------------
 -- format functions
-
-do
-	local reverse = string.reverse
-	local numbersystem = nil
-	function set_numeral_format(system)
-		system = system or numbersystem
-		if numbersystem == system then return end
-		numbersystem = system
-
-		local ShortenValue = function(num)
-			if num >= 1e9 or num <= -1e9 then
-				return format("%.2fB", num * 1e-09)
-			elseif num >= 1e6 or num <= -1e6 then
-				return format("%.2fM", num * 1e-06)
-			elseif num >= 1e3 or num <= -1e3 then
-				return format("%.1fK", num * 0.001)
-			end
-			return format("%.0f", num)
-		end
-
-		if system == 3 or (system == 1 and (LOCALE_koKR or LOCALE_zhCN or LOCALE_zhTW)) then
-			-- default to chinese, even for western clients.
-			local symbol_1k, symbol_10k, symbol_1b = "千", "万", "亿"
-			if LOCALE_koKR then
-				symbol_1k, symbol_10k, symbol_1b = "천", "만", "억"
-			elseif LOCALE_zhTW then
-				symbol_1k, symbol_10k, symbol_1b = "千", "萬", "億"
-			end
-
-			ShortenValue = function(num)
-				if num >= 1e8 or num <= -1e8 then
-					return format("%.2f%s", num * 1e-08, symbol_1b)
-				elseif num >= 1e4 or num <= -1e4 then
-					return format("%.2f%s", num * 0.0001, symbol_10k)
-				elseif num >= 1e3 or num <= -1e3 then
-					return format("%.1f%s", num * 0.0001, symbol_1k)
-				end
-				return format("%.0f", num)
-			end
-		end
-
-		Skada.FormatNumber = function(self, num, fmt)
-			if not num then
-				return
-			else
-				fmt = fmt or P.numberformat or 1
-			end
-
-			if fmt == 1 and (num >= 1e3 or num <= -1e3) then
-				return ShortenValue(num)
-			elseif fmt == 2 and (num >= 1e3 or num <= -1e3) then
-				local left, mid, right = strmatch(tostring(floor(num)), "^([^%d]*%d)(%d*)(.-)$")
-				return format("%s%s%s", left, reverse(gsub(reverse(mid), "(%d%d%d)", "%1,")), right)
-			else
-				return format("%.0f", num)
-			end
-		end
-	end
-end
-
-function Skada:FormatPercent(value, total, dec)
-	dec = dec or P.decimals or 1
-
-	-- no value? 0%
-	if not value then
-		return format("%." .. dec .. "f%%", 0)
-	end
-
-	-- correct values.
-	value, total = total and (100 * value) or value, max(1, total or 0)
-
-	-- below 0? clamp to -999
-	if value <= 0 then
-		return format("%." .. dec .. "f%%", max(-999, value / total))
-	-- otherwise, clamp to 999
-	else
-		return format("%." .. dec .. "f%%", min(999, value / total))
-	end
-end
-
-function Skada:FormatTime(sec, alt, ...)
-	if not sec then
-		return
-	elseif alt then
-		return SecondsToTime(sec, ...)
-	elseif sec >= 3600 then
-		local h = floor(sec / 3600)
-		local m = floor(sec / 60 - (h * 60))
-		local s = floor(sec - h * 3600 - m * 60 + 0.5)
-		return format("%02.f:%02.f:%02.f", h, m, s)
-	else
-		return format("%02.f:%02.f", floor(sec / 60), floor(sec % 60 + 0.5))
-	end
-end
-
-function Skada:FormatName(name)
-	name = P.realmless and gsub(name, ("%-.*"), "") or name
-	if P.translit and Translit then
-		return Translit:Transliterate(name, "!")
-	end
-	return name
-end
-
-do
-	-- brackets and separators
-	local brackets = {"(%s)", "{%s}", "[%s]", "<%s>", "%s"}
-	local separators = {"%s, %s", "%s. %s", "%s; %s", "%s - %s", "%s \124\124 %s", "%s / %s", "%s \\ %s", "%s ~ %s", "%s %s"}
-
-	-- formats default values
-	local format_2 = "%s (%s)"
-	local format_3 = "%s (%s, %s)"
-
-	function set_value_format(bracket, separator)
-		format_2 = brackets[bracket or 1]
-		format_3 = "%s " .. format(format_2, separators[separator or 1])
-		format_2 = "%s " .. format_2
-	end
-
-	function Skada:FormatValueText(v1, b1, v2, b2, v3, b3)
-		if b1 and b2 and b3 then
-			return format(format_3, v1, v2, v3)
-		elseif b1 and b2 then
-			return format(format_2, v1, v2)
-		elseif b1 and b3 then
-			return format(format_2, v1, v3)
-		elseif b2 and b3 then
-			return format(format_2, v2, v3)
-		elseif b2 then
-			return v2
-		elseif b1 then
-			return v1
-		elseif b3 then
-			return v3
-		end
-	end
-
-	function Skada:FormatValueCols(col1, col2, col3)
-		if col1 and col2 and col3 then
-			return format(format_3, col1, col2, col3)
-		elseif col1 and col2 then
-			return format(format_2, col1, col2)
-		elseif col1 and col3 then
-			return format(format_2, col1, col3)
-		elseif col2 and col3 then
-			return format(format_2, col2, col3)
-		elseif col2 then
-			return col2
-		elseif col1 then
-			return col1
-		elseif col3 then
-			return col3
-		end
-	end
-end
 
 do
 	local function set_label_format(name, starttime, endtime, fmt, dye)
@@ -3097,7 +2945,7 @@ function Skada:ApplySettings(name, hidemenu)
 	end
 
 	-- fire callback in case modules need it
-	Skada.callbacks:Fire("Skada_ApplySettings")
+	callbacks:Fire("Skada_ApplySettings")
 
 	for i = 1, #windows do
 		local win = windows[i]
@@ -3127,8 +2975,8 @@ function Skada:ApplySettings(name, hidemenu)
 		end
 	end
 
-	set_numeral_format(P.numbersystem)
-	set_value_format(P.brackets, P.separator)
+	Private.set_numeral_format(P.numbersystem)
+	Private.set_value_format(P.brackets, P.separator)
 
 	Skada:UpdateDisplay(true)
 end
@@ -3197,7 +3045,7 @@ function Skada:OnInitialize()
 	self.db.RegisterCallback(self, "OnProfileChanged", Private.reload_settings)
 	self.db.RegisterCallback(self, "OnProfileCopied", Private.reload_settings)
 	self.db.RegisterCallback(self, "OnProfileReset", Private.reload_settings)
-	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes", true)
+	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes")
 
 	Private.init_options()
 	Private.register_medias()
@@ -3336,7 +3184,7 @@ function Skada:GetSet(s)
 		set = self.char.sets[s]
 	end
 
-	return self.setPrototype:Bind(set)
+	return setPrototype:Bind(set)
 end
 
 -------------------------------------------------------------------------------

@@ -1379,19 +1379,14 @@ do
 
 	-- bind a set table to the set prototype
 	function setPrototype:Bind(obj)
-		if not obj then
-			return
-		elseif getmetatable(obj) == self then
-			self.__arena = (ns.forPVP and obj.type == "arena")
-			return obj
+		if obj and getmetatable(obj) ~= self then
+			setmetatable(obj, self)
+			self.__index = self
+			bind_set_actors(obj.players, obj, true)
+			bind_set_actors(obj.enemies, obj)
 		end
 
-		bind_set_actors(obj.players, obj, true)
-		bind_set_actors(obj.enemies, obj)
-
-		setmetatable(obj, self)
-		self.__index = self
-		self.__arena = (ns.forPVP and obj.type == "arena")
+		self.arena = (ns.forPVP and obj and obj.type == "arena")
 		return obj
 	end
 
@@ -1400,7 +1395,6 @@ do
 		if obj and getmetatable(obj) ~= self then
 			setmetatable(obj, self)
 			self.__index = self
-			obj.super = set
 		end
 		return obj
 	end

@@ -25,6 +25,163 @@ function Skada:Debug(...)
 end
 
 -------------------------------------------------------------------------------
+-- format functions
+
+do
+	local reverse = string.reverse
+	local numbersystem = nil
+	function Private.set_numeral_format(system)
+		system = system or numbersystem
+		if numbersystem == system then return end
+		numbersystem = system
+
+		local ShortenValue = function(num)
+			if num >= 1e9 or num <= -1e9 then
+				return format("%.2fB", num * 1e-09)
+			elseif num >= 1e6 or num <= -1e6 then
+				return format("%.2fM", num * 1e-06)
+			elseif num >= 1e3 or num <= -1e3 then
+				return format("%.1fK", num * 0.001)
+			end
+			return format("%.0f", num)
+		end
+
+		if system == 3 or (system == 1 and (LOCALE_koKR or LOCALE_zhCN or LOCALE_zhTW)) then
+			-- default to chinese, even for western clients.
+			local symbol_1k, symbol_10k, symbol_1b = "千", "万", "亿"
+			if LOCALE_koKR then
+				symbol_1k, symbol_10k, symbol_1b = "천", "만", "억"
+			elseif LOCALE_zhTW then
+				symbol_1k, symbol_10k, symbol_1b = "千", "萬", "億"
+			end
+
+			ShortenValue = function(num)
+				if num >= 1e8 or num <= -1e8 then
+					return format("%.2f%s", num * 1e-08, symbol_1b)
+				elseif num >= 1e4 or num <= -1e4 then
+					return format("%.2f%s", num * 0.0001, symbol_10k)
+				elseif num >= 1e3 or num <= -1e3 then
+					return format("%.1f%s", num * 0.0001, symbol_1k)
+				end
+				return format("%.0f", num)
+			end
+		end
+
+		Skada.FormatNumber = function(self, num, fmt)
+			if not num then return end
+			fmt = fmt or self.db.profile.numberformat or 1
+
+			if fmt == 1 and (num >= 1e3 or num <= -1e3) then
+				return ShortenValue(num)
+			elseif fmt == 2 and (num >= 1e3 or num <= -1e3) then
+				local left, mid, right = strmatch(tostring(floor(num)), "^([^%d]*%d)(%d*)(.-)$")
+				return format("%s%s%s", left, reverse(gsub(reverse(mid), "(%d%d%d)", "%1,")), right)
+			else
+				return format("%.0f", num)
+			end
+		end
+	end
+end
+
+function Skada:FormatPercent(value, total, dec)
+	dec = dec or self.db.profile.decimals or 1
+
+	-- no value? 0%
+	if not value then
+		return format("%." .. dec .. "f%%", 0)
+	end
+
+	-- correct values.
+	value, total = total and (100 * value) or value, max(1, total or 0)
+
+	-- below 0? clamp to -999
+	if value <= 0 then
+		return format("%." .. dec .. "f%%", max(-999, value / total))
+	-- otherwise, clamp to 999
+	else
+		return format("%." .. dec .. "f%%", min(999, value / total))
+	end
+end
+
+function Skada:FormatTime(sec, alt, ...)
+	if not sec then
+		return
+	elseif alt then
+		return SecondsToTime(sec, ...)
+	elseif sec >= 3600 then
+		local h = floor(sec / 3600)
+		local m = floor(sec / 60 - (h * 60))
+		local s = floor(sec - h * 3600 - m * 60 + 0.5)
+		return format("%02.f:%02.f:%02.f", h, m, s)
+	else
+		return format("%02.f:%02.f", floor(sec / 60), floor(sec % 60 + 0.5))
+	end
+end
+
+local Translit = LibStub("LibTranslit-1.0", true)
+function Skada:FormatName(name)
+	if self.db.profile.realmless then
+		name = gsub(name, ("%-.*"), "")
+	end
+	if self.db.profile.translit and Translit then
+		return Translit:Transliterate(name, "!")
+	end
+	return name
+end
+
+do
+	-- brackets and separators
+	local brackets = {"(%s)", "{%s}", "[%s]", "<%s>", "%s"}
+	local separators = {"%s, %s", "%s. %s", "%s; %s", "%s - %s", "%s \124\124 %s", "%s / %s", "%s \\ %s", "%s ~ %s", "%s %s"}
+
+	-- formats default values
+	local format_2 = "%s (%s)"
+	local format_3 = "%s (%s, %s)"
+
+	function Private.set_value_format(bracket, separator)
+		format_2 = brackets[bracket or 1]
+		format_3 = "%s " .. format(format_2, separators[separator or 1])
+		format_2 = "%s " .. format_2
+	end
+
+	function Skada:FormatValueText(v1, b1, v2, b2, v3, b3)
+		if b1 and b2 and b3 then
+			return format(format_3, v1, v2, v3)
+		elseif b1 and b2 then
+			return format(format_2, v1, v2)
+		elseif b1 and b3 then
+			return format(format_2, v1, v3)
+		elseif b2 and b3 then
+			return format(format_2, v2, v3)
+		elseif b2 then
+			return v2
+		elseif b1 then
+			return v1
+		elseif b3 then
+			return v3
+		end
+	end
+
+	function Skada:FormatValueCols(col1, col2, col3)
+		if col1 and col2 and col3 then
+			return format(format_3, col1, col2, col3)
+		elseif col1 and col2 then
+			return format(format_2, col1, col2)
+		elseif col1 and col3 then
+			return format(format_2, col1, col3)
+		elseif col2 and col3 then
+			return format(format_2, col2, col3)
+		elseif col2 then
+			return col2
+		elseif col1 then
+			return col1
+		elseif col3 then
+			return col3
+		end
+	end
+end
+
+-------------------------------------------------------------------------------
 -- boss and creature functions
 
 do
@@ -810,52 +967,27 @@ end
 -------------------------------------------------------------------------------
 
 do
-	local function clear_indexes(set, mt)
-		if set then
-			set._playeridx = del(set._playeridx)
-			set._enemyidx = del(set._enemyidx)
-
-			-- should clear metatables?
-			if not mt then return end
-
-			local actors = set.players -- players
-			if actors then
-				for i = 1, #actors do
-					local actor = actors[i]
-					if actor and actor.super then
-						actor.super = nil
-						setmetatable(actor, nil)
-					end
-				end
-			end
-
-			actors = set.enemies -- enemies
-			if actors then
-				for i = 1, #actors do
-					local actor = actors[i]
-					if actor and actor.super then
-						actor.super = nil
-						setmetatable(actor, nil)
-					end
-				end
-			end
-		end
+	local function clear_indexes(set)
+		if not set then return end
+		set._playeridx = del(set._playeridx)
+		set._enemyidx = del(set._enemyidx)
 	end
 
-	function Skada:ClearAllIndexes(mt)
-		clear_indexes(Skada.current, mt)
-		clear_indexes(Skada.total, mt)
+	function Skada:ClearAllIndexes()
+		clear_indexes(Skada.current)
+		clear_indexes(Skada.total)
 
 		local sets = Skada.char.sets
 		if sets then
 			for i = 1, #sets do
-				clear_indexes(sets[i], mt)
+				clear_indexes(sets[i])
 			end
 		end
 
-		if Skada.tempsets then
-			for i = 1, #Skada.tempsets do
-				clear_indexes(Skada.tempsets[i], mt)
+		sets = Skada.tempsets
+		if sets then
+			for i = 1, #sets do
+				clear_indexes(sets[i])
 			end
 		end
 	end

@@ -4,8 +4,8 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 	local mod = Skada:NewModule("Sunder Counter")
 	local targetmod = mod:NewModule("Sunder target list")
 	local sourcemod = mod:NewModule("Sunder source list")
-	local get_sunder_sources = nil
-	local get_sunder_targets = nil
+	local get_actor_sunder_sources = nil
+	local get_actor_sunder_targets = nil
 
 	local pairs, format, GetTime, uformat = pairs, string.format, GetTime, Private.uformat
 	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
@@ -142,7 +142,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 		win.title = uformat(L["%s's <%s> sources"], win.targetname, spell_sunder)
 		if not win.targetname then return end
 
-		local sources, total = get_sunder_sources(set, win.targetname)
+		local sources, total = get_actor_sunder_sources(set, win.targetname)
 		if not sources or total == 0 then
 			return
 		elseif win.metadata then
@@ -169,11 +169,8 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 		win.title = uformat(L["%s's <%s> targets"], win.actorname, spell_sunder)
 		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		local total = (actor and not enemy) and actor.sunder
-		local targets = (total and total > 0) and get_sunder_targets(actor)
-
-		if not targets then
+		local targets, total, actor = get_actor_sunder_targets(set, win.actorid, win.actorname)
+		if not targets or not actor or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
@@ -355,35 +352,42 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 
 	---------------------------------------------------------------------------
 
-	get_sunder_sources = function(self, name, tbl)
+	get_actor_sunder_sources = function(self, name, tbl)
+		if not self.sunder or not name then return end
+
+		tbl = clear(tbl or C)
+
 		local total = 0
-		if self.sunder and name then
-			tbl = clear(tbl or C)
-			for i = 1, #self.players do
-				local p = self.players[i]
-				if p and p.sundertargets and p.sundertargets[name] then
-					tbl[p.name] = new()
-					tbl[p.name].id = p.id
-					tbl[p.name].class = p.class
-					tbl[p.name].role = p.role
-					tbl[p.name].spec = p.spec
-					tbl[p.name].count = p.sundertargets[name]
-					total = total + p.sundertargets[name]
-				end
+		local actors = self.players
+		for i = 1, #actors do
+			local actor = actors[i]
+			local count = actor and actor.sundertargets and actor.sundertargets[name]
+			if count then
+				local t = new()
+				t.id = actor.id
+				t.class = actor.class
+				t.role = actor.role
+				t.spec = actor.spec
+				t.count = count
+				tbl[actor.name] = t
+				-- add to total
+				total = total + count
 			end
 		end
 		return tbl, total
 	end
 
-	get_sunder_targets = function(self, tbl)
-		if self.sundertargets then
-			tbl = clear(tbl or C)
-			for name, count in pairs(self.sundertargets) do
-				tbl[name] = new()
-				tbl[name].count = count
-				self.super:_fill_actor_table(tbl[name], name)
-			end
-			return tbl
+	get_actor_sunder_targets = function(self, id, name, tbl)
+		local actor = self:GetActor(name, id)
+		local total = actor and actor.sunder
+		if not actor.sundertargets then return end
+
+		tbl = clear(tbl or C)
+		for targetname, count in pairs(actor.sundertargets) do
+			tbl[targetname] = new()
+			tbl[targetname].count = count
+			self:_fill_actor_table(tbl[targetname], targetname)
 		end
+		return tbl, total, actor
 	end
 end)
