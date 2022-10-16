@@ -92,10 +92,11 @@ local BITMASK_PETS = Private.BITMASK_PETS
 local BITMASK_FRIENDLY = Private.BITMASK_FRIENDLY
 local BITMASK_TYPE_PLAYER = Private.BITMASK_TYPE_PLAYER
 
--- prototypes
+-- prototypes and references
 local setPrototype = ns.setPrototype
 local playerPrototype = ns.playerPrototype
 local enemyPrototype = ns.enemyPrototype
+local classcolors = ns.classcolors
 
 -------------------------------------------------------------------------------
 -- local functions.
@@ -828,9 +829,9 @@ function Window:color(d, set, enemy)
 	if not d or not set then
 		return
 	elseif set.arena and enemy then
-		d.color = Skada.classcolors(set.faction and "ARENA_GREEN" or "ARENA_GOLD")
+		d.color = classcolors(set.faction and "ARENA_GREEN" or "ARENA_GOLD")
 	elseif set.arena then
-		d.color = Skada.classcolors(set.faction and "ARENA_GOLD" or "ARENA_GREEN")
+		d.color = classcolors(set.faction and "ARENA_GOLD" or "ARENA_GREEN")
 	elseif d.color then
 		d.color = nil
 	end
@@ -2043,7 +2044,7 @@ do
 					if data.color then
 						color = data.color
 					elseif data.class and Skada.validclass[data.class] then
-						color = Skada.classcolors(data.class)
+						color = classcolors(data.class)
 					end
 
 					local title = data.text or data.label
@@ -3087,9 +3088,10 @@ function Skada:OnInitialize()
 	self.maxsets = P.setstokeep + P.setslimit
 	self.maxmeme = min(60, max(30, self.maxsets + 10))
 
-	-- use our custom functions
+	-- update references
 	GetSpellInfo = Private.spell_info or GetSpellInfo
 	GetSpellLink = Private.spell_link or GetSpellLink
+	classcolors = self.classcolors
 end
 
 function Skada:SetupStorage()
@@ -3592,9 +3594,7 @@ do
 		return is_interesting
 	end
 
-	local BITMASK_HOSTILE = Private.BITMASK_HOSTILE
 	local BITMASK_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100
-
 	local function check_boss_fight(set, event, srcName, srcFlags, src_is_interesting, dstGUID, dstName, dstFlags, dst_is_interesting)
 		-- set mobname
 		if not set.mobname then
@@ -3606,13 +3606,13 @@ do
 				if set.type == "arena" then
 					Skada:SendMessage("COMBAT_ARENA_START", set, set.mobname)
 				end
-			elseif src_is_interesting and band(dstFlags, BITMASK_HOSTILE) ~= 0 then
+			elseif src_is_interesting and band(dstFlags, BITMASK_FRIENDLY) == 0 then
 				set.mobname = dstName
 				if band(dstFlags, BITMASK_CONTROL_PLAYER) ~= 0 then
 					set.type = "pvp"
 					set.gotboss = false
 				end
-			elseif dst_is_interesting and band(srcFlags, BITMASK_HOSTILE) ~= 0 then
+			elseif dst_is_interesting and band(srcFlags, BITMASK_FRIENDLY) == 0 then
 				set.mobname = srcName
 				if band(srcFlags, BITMASK_CONTROL_PLAYER) ~= 0 then
 					set.type = "pvp"
@@ -3636,7 +3636,7 @@ do
 		end
 
 		-- marking set as boss fights relies only on src_is_interesting
-		if not spellcast_events[event] and src_is_interesting and band(dstFlags, BITMASK_HOSTILE) ~= 0 then
+		if not spellcast_events[event] and src_is_interesting and band(dstFlags, BITMASK_FRIENDLY) == 0 then
 			if set.gotboss == nil then
 				if not _targets or not _targets[dstName] then
 					local isboss, bossid, bossname = Skada:IsEncounter(dstGUID, dstName)

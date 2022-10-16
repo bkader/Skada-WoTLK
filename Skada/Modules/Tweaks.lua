@@ -56,7 +56,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 
 						local _, class = UnitClass(bosstarget)
 						if class and classcolors[class] then
-							target = classcolors(class, target)
+							target = classcolors.format(class, target)
 						end
 
 						targettable[#targettable + 1] = format("%s > %s", UnitName(boss) or L["Unknown"], target)
@@ -91,7 +91,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 				elseif dstName then
 					local _, class = UnitClass(dstName)
 					if class and classcolors[class] then
-						output = format(firsthit_fmt[2], srcName, classcolors(class, true), dstName)
+						output = format(firsthit_fmt[2], srcName, classcolors.str(class), dstName)
 					else
 						output = format(firsthit_fmt[1], srcName, dstName)
 					end
@@ -103,14 +103,14 @@ Skada:RegisterModule("Tweaks", function(L, P)
 				if owner then
 					local _, class = UnitClass(owner.name)
 					if class and classcolors[class] then
-						output = format(firsthit_fmt[4], classcolors(class, true), owner.name, L["PET"])
+						output = format(firsthit_fmt[4], classcolors.str(class), owner.name, L["PET"])
 					else
 						output = format(firsthit_fmt[1], owner.name, L["PET"])
 					end
 				elseif srcName then
 					local _, class = UnitClass(srcName)
 					if class and classcolors[class] then
-						output = format(firsthit_fmt[3], classcolors(class, true), srcName)
+						output = format(firsthit_fmt[3], classcolors.str(class), srcName)
 					else
 						output = srcName
 					end

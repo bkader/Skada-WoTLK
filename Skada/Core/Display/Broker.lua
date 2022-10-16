@@ -52,7 +52,7 @@ Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 
 	local function formatLabel(win, data)
 		if win.db.isusingclasscolors and data.class then
-			return classcolors(data.class, data.text or data.label or L["Unknown"])
+			return classcolors.format(data.class, data.text or data.label or L["Unknown"])
 		elseif data.color and data.color.colorStr then
 			return format("\124c%s%s\124r", data.color.colorStr, data.text or data.label or L["Unknown"])
 		elseif data.color then

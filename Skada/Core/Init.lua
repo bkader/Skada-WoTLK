@@ -21,6 +21,15 @@ local setmetatable = setmetatable
 local EmptyFunc = Multibar_EmptyFunc
 local _
 
+-- options table
+ns.options = {
+	type = "group",
+	name = format("%s \124cffffffff%s\124r", folder, ns.version),
+	get = true,
+	set = true,
+	args = {}
+}
+
 -- common weak table
 Private.weaktable = {__mode = "kv"}
 
@@ -44,6 +53,7 @@ do
 
 	-- friendly and hostile units
 	Private.BITMASK_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY or 0x00000010
+	Private.BITMASK_NEUTRAL = COMBATLOG_OBJECT_REACTION_NEUTRAL or 0x00000020
 	Private.BITMASK_HOSTILE = COMBATLOG_OBJECT_REACTION_HOSTILE or 0x00000040
 end
 
@@ -79,6 +89,20 @@ function Private.register_classes()
 
 	local P = ns.db.profile
 
+	-- some useful functions
+	classcolors.unpack = function(class)
+		local color = classcolors(class)
+		return color.r, color.g, color.b
+	end
+	classcolors.str = function(class)
+		local color = classcolors(class)
+		return color.colorStr
+	end
+	classcolors.format = function(class, text)
+		local colorStr = classcolors(class)
+		return format("\124c%s%s\124r", colorStr, text)
+	end
+
 	-- returns class color or "arg" wrapped in class color
 	local classcolors_mt = {
 		__index = function(t, class)
@@ -86,12 +110,12 @@ function Private.register_classes()
 			t[class] = color
 			return color
 		end,
-		__call = function(t, class, arg)
+		__call = function(t, class)
 			local color = P.usecustomcolors and P.customcolors and P.customcolors[class] or t[class]
 			if not color.colorStr then
 				color.colorStr = Private.RGBPercToHex(color.r, color.g, color.b, true)
 			end
-			return (arg == nil) and color or (type(arg) == "string") and format("\124c%s%s\124r", color.colorStr, arg) or color.colorStr
+			return color
 		end
 	}
 	ns.classcolors = setmetatable(classcolors, classcolors_mt)
@@ -197,11 +221,7 @@ function Private.register_classes()
 		desc = format(L["Options for %s."], L["Colors"]),
 		order = 1000,
 		get = function(i)
-			local color = classcolors[i[#i]]
-			if P.customcolors and P.customcolors[i[#i]] then
-				color = P.customcolors[i[#i]]
-			end
-			return color.r, color.g, color.b
+			return classcolors.unpack(i[#i])
 		end,
 		set = function(i, r, g, b)
 			local class = i[#i]
@@ -267,7 +287,7 @@ function Private.register_classes()
 				name = L[class],
 				desc = format(L["Color for %s."], L[class])
 			}
-		else
+		elseif type(data) == "table" then
 			colorsOpt.args.custom.args[class] = {
 				type = "color",
 				name = L[class],

@@ -341,7 +341,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 	function mod:UpdateBar(bar, bardata, db)
 		local label = bardata.text or bardata.label or L["Unknown"]
 		if db.isusingclasscolors and bardata.class then
-			label = classcolors(bardata.class, bardata.text or bardata.label or L["Unknown"])
+			label = classcolors.format(bardata.class, bardata.text or bardata.label or L["Unknown"])
 		elseif bardata.color and bardata.color.colorStr then
 			label = format("\124c%s%s\124r", bardata.color.colorStr, bardata.text or bardata.label or L["Unknown"])
 		elseif bardata.color then

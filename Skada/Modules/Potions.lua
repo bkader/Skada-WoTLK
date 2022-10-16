@@ -11,6 +11,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 	local GetItemInfo, UnitIsDeadOrGhost, GroupIterator = GetItemInfo, UnitIsDeadOrGhost, Skada.GroupIterator
 	local UnitGUID, UnitName, UnitClass, UnitBuff = UnitGUID, UnitName, UnitClass, UnitBuff
 	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
+	local classcolors = Skada.classcolors
 	local potion_ids = {}
 	local mod_cols = nil
 
@@ -73,7 +74,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 			if not potions then
 				return
 			elseif next(potions) ~= nil and class and Skada.validclass[class] then
-				prepot[#prepot + 1] = format(prepotionStr, Skada.classcolors(class, true), playername, tconcat(potions, " "))
+				prepot[#prepot + 1] = format(prepotionStr, classcolors.str(class), playername, tconcat(potions, " "))
 			end
 			del(potions)
 		end
