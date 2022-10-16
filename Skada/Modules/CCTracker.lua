@@ -265,9 +265,9 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 	function playermod:Update(win, set)
 		win.title = uformat(L["%s's control spells"], win.actorname)
 
-		local player = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = player and player.ccdone
-		local spells = (total and total > 0) and player.ccdonespells
+		local actor = set and set:GetActor(win.actorname, win.actorid)
+		local total = actor and actor.ccdone
+		local spells = (total and total > 0) and actor.ccdonespells
 
 		if not spells then
 			return
@@ -320,8 +320,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 		if not set or not win.spellid then return end
 
 		local total, sources = get_cc_done_sources(set, win.spellid)
-
-		if not sources then
+		if not sources or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
@@ -331,7 +330,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 		for sourcename, source in pairs(sources) do
 			nr = nr + 1
 
-			local d = win:actor(nr, source, true, sourcename)
+			local d = win:actor(nr, source, source.enemy, sourcename)
 			d.value = source.count
 			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
@@ -348,14 +347,14 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 		end
 
 		local nr = 0
+		local actors = set.actors
 
-		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if win:show_actor(actor, set) and actor.ccdone then
+			if win:show_actor(actor, set, true) and actor.ccdone then
 				nr = nr + 1
 
-				local d = win:actor(nr, actor)
+				local d = win:actor(nr, actor, actor.enemy)
 				d.value = actor.ccdone
 				format_valuetext(d, mod_cols, total, win.metadata)
 			end
@@ -407,22 +406,24 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 	end
 
 	get_cc_done_sources = function(self, spellid, tbl)
-		local total = 0
-		if not self.ccdone or not spellid then return total end
+		if not self.ccdone or not spellid then return end
 
 		tbl = clear(tbl or C)
 
-		local actors = self.players -- players
+		local total = 0
+		local actors = self.actors
 		for i = 1, #actors do
-			local p = actors[i]
-			if p and p.ccdonespells and p.ccdonespells[spellid] then
-				tbl[p.name] = new()
-				tbl[p.name].id = p.id
-				tbl[p.name].class = p.class
-				tbl[p.name].role = p.role
-				tbl[p.name].spec = p.spec
-				tbl[p.name].count = p.ccdonespells[spellid].count
-				total = total + p.ccdonespells[spellid].count
+			local actor = actors[i]
+			local spell = actor and not actor.enemy and actor.ccdonespells and actor.ccdonespells[spellid]
+			if spell and spell.count then
+				tbl[actor.name] = new()
+				tbl[actor.name].id = actor.id
+				tbl[actor.name].class = actor.class
+				tbl[actor.name].role = actor.role
+				tbl[actor.name].spec = actor.spec
+				tbl[actor.name].enemy = actor.enemy
+				tbl[actor.name].count = spell.count
+				total = total + spell.count
 			end
 		end
 
@@ -531,9 +532,9 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 	function playermod:Update(win, set)
 		win.title = uformat(L["%s's control spells"], win.actorname)
 
-		local player = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = player and player.cctaken
-		local spells = (total and total > 0) and player.cctakenspells
+		local actor = set and set:GetActor(win.actorname, win.actorid)
+		local total = actor and actor.cctaken
+		local spells = (total and total > 0) and actor.cctakenspells
 
 		if not spells then
 			return
@@ -586,8 +587,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 		if not set or not win.spellid then return end
 
 		local total, targets = get_cc_taken_targets(set, win.spellid)
-
-		if not targets then
+		if not targets or total == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
@@ -597,7 +597,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
-			local d = win:actor(nr, target, true, targetname)
+			local d = win:actor(nr, target, target.enemy, targetname)
 			d.value = target.count
 			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
@@ -614,14 +614,14 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 		end
 
 		local nr = 0
+		local actors = set.actors
 
-		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if win:show_actor(actor, set) and actor.cctaken then
+			if win:show_actor(actor, set, true) and actor.cctaken then
 				nr = nr + 1
 
-				local d = win:actor(nr, actor)
+				local d = win:actor(nr, actor, actor.enemy)
 				d.value = actor.cctaken
 				format_valuetext(d, mod_cols, total, win.metadata)
 			end
@@ -673,22 +673,24 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 	end
 
 	get_cc_taken_targets = function(self, spellid, tbl)
-		local total = 0
-		if not self.cctaken or not spellid then return total end
+		if not self.cctaken or not spellid then return end
 
 		tbl = clear(tbl or C)
 
-		local actors = self.players -- players
+		local total = 0
+		local actors = self.actors
 		for i = 1, #actors do
-			local p = actors[i]
-			if p and p.cctakenspells and p.cctakenspells[spellid] then
-				tbl[p.name] = new()
-				tbl[p.name].id = p.id
-				tbl[p.name].class = p.class
-				tbl[p.name].role = p.role
-				tbl[p.name].spec = p.spec
-				tbl[p.name].count = p.cctakenspells[spellid].count
-				total = total + p.cctakenspells[spellid].count
+			local actor = actors[i]
+			local spell = actor and not actor.enemy and actor.cctakenspells and actor.cctakenspells[spellid]
+			if spell and spell.count then
+				tbl[actor.name] = new()
+				tbl[actor.name].id = actor.id
+				tbl[actor.name].class = actor.class
+				tbl[actor.name].role = actor.role
+				tbl[actor.name].spec = actor.spec
+				tbl[actor.name].enemy = actor.enemy
+				tbl[actor.name].count = spell.count
+				total = total + spell.count
 			end
 		end
 
@@ -816,9 +818,9 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 	function playermod:Update(win, set)
 		win.title = uformat(L["%s's control spells"], win.actorname)
 
-		local player = set and set:GetPlayer(win.actorid, win.actorname)
-		local total = player and player.ccbreak
-		local spells = (total and total > 0) and player.ccbreakspells
+		local actor = set and set:GetActor(win.actorname, win.actorid)
+		local total = actor and actor.ccbreak
+		local spells = (total and total > 0) and actor.ccbreakspells
 
 		if not spells then
 			return
@@ -872,14 +874,14 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		end
 
 		local nr = 0
+		local actors = set.actors
 
-		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if win:show_actor(actor, set) and actor.ccbreak then
+			if win:show_actor(actor, set, true) and actor.ccbreak then
 				nr = nr + 1
 
-				local d = win:actor(nr, actor)
+				local d = win:actor(nr, actor, actor.enemy)
 				d.value = actor.ccbreak
 				format_valuetext(d, mod_cols, total, win.metadata)
 			end

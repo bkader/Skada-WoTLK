@@ -69,14 +69,14 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 		end
 
 		local nr = 0
+		local actors = set.actors
 
-		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
 			if actor and actor.failspells and actor.failspells[win.spellid] then
 				nr = nr + 1
 
-				local d = win:actor(nr, actor)
+				local d = win:actor(nr, actor, actor.enemy)
 				d.value = actor.failspells[win.spellid]
 				format_valuetext(d, mod_cols, total, win.metadata, true)
 			end
@@ -122,14 +122,14 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 		end
 
 		local nr = 0
+		local actors = set.actors
 
-		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if win:show_actor(actor, set) and actor.fail then
+			if win:show_actor(actor, set, true) and actor.fail then
 				nr = nr + 1
 
-				local d = win:actor(nr, actor)
+				local d = win:actor(nr, actor, actor.name)
 				d.value = actor.fail
 				format_valuetext(d, mod_cols, total, win.metadata)
 			end
@@ -262,7 +262,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 			return total
 		end
 
-		local actors = self.players -- players
+		local actors = self.actors
 		for i = 1, #actors do
 			local a = actors[i]
 			if a and a.failspells and a.failspells[spellid] then

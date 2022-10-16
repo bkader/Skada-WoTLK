@@ -23,7 +23,7 @@ Skada:RegisterModule("Resources", function(L, P)
 		[SPELL_POWER_RUNIC_POWER] = "Runic Power"
 	}
 
-	-- used to store total amounts for sets and players
+	-- used to store total amounts for sets and actors
 	local gainTable = {
 		[SPELL_POWER_MANA] = "mana",
 		[SPELL_POWER_RAGE] = "rage",
@@ -60,17 +60,17 @@ Skada:RegisterModule("Resources", function(L, P)
 	local function log_gain(set)
 		if not (gain and gain.type and gainTable[gain.type]) then return end
 
-		local player = Skada:GetPlayer(set, gain.playerid, gain.playername, gain.playerflags)
-		if not player then return end
+		local actor = Skada:GetPlayer(set, gain.playerid, gain.playername, gain.playerflags)
+		if not actor then return end
 
-		player[gainTable[gain.type]] = (player[gainTable[gain.type]] or 0) + gain.amount
+		actor[gainTable[gain.type]] = (actor[gainTable[gain.type]] or 0) + gain.amount
 		set[gainTable[gain.type]] = (set[gainTable[gain.type]] or 0) + gain.amount
 
 		-- saving this to total set may become a memory hog deluxe.
 		if (set == Skada.total and not P.totalidc) or not gain.spellid then return end
 
-		player[spellTable[gain.type]] = player[spellTable[gain.type]] or {}
-		player[spellTable[gain.type]][gain.spellid] = (player[spellTable[gain.type]][gain.spellid] or 0) + gain.amount
+		actor[spellTable[gain.type]] = actor[spellTable[gain.type]] or {}
+		actor[spellTable[gain.type]][gain.spellid] = (actor[spellTable[gain.type]][gain.spellid] or 0) + gain.amount
 	end
 
 	local function spell_energize(_, _, srcGUID, srcName, srcFlags, _, _, _, spellid, _, _, amount, gain_type)
@@ -88,9 +88,9 @@ Skada:RegisterModule("Resources", function(L, P)
 	local basemod = {}
 	local basemod_mt = {__index = basemod}
 
-	-- a base player module used to create power gained per player modules.
-	local playermod = {}
-	local playermod_mt = {__index = playermod}
+	-- a base actor module used to create power gained per actor modules.
+	local actormod = {}
+	local actormod_mt = {__index = actormod}
 
 	-- allows us to create a module for each power type.
 	function basemod:Create(power)
@@ -102,7 +102,7 @@ Skada:RegisterModule("Resources", function(L, P)
 		setmetatable(instance, basemod_mt)
 
 		local pmode = instance:NewModule(format("%s gained spells", powername))
-		setmetatable(pmode, playermod_mt)
+		setmetatable(pmode, actormod_mt)
 
 		pmode.powerid = power
 		pmode.power = gainTable[power]
@@ -123,7 +123,7 @@ Skada:RegisterModule("Resources", function(L, P)
 	end
 
 	-- this is the main module update function that shows the list
-	-- of players depending on the selected power gain type.
+	-- of actors depending on the selected power gain type.
 	function basemod:Update(win, set)
 		win.title = self.localeName or self.moduleName or L["Unknown"]
 		if win.class then
@@ -138,14 +138,14 @@ Skada:RegisterModule("Resources", function(L, P)
 		end
 
 		local nr = 0
+		local actors = set.actors
 
-		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if win:show_actor(actor, set) and actor[self.power] then
+			if win:show_actor(actor, set, true) and actor[self.power] then
 				nr = nr + 1
 
-				local d = win:actor(nr, actor)
+				local d = win:actor(nr, actor, actor.enemy)
 				d.value = actor[self.power]
 				format_valuetext(d, mod_cols, total, win.metadata)
 			end
@@ -159,14 +159,14 @@ Skada:RegisterModule("Resources", function(L, P)
 		return value, Skada:FormatNumber(value)
 	end
 
-	-- player mods common Enter function.
-	function playermod:Enter(win, id, label)
+	-- actor mods common Enter function.
+	function actormod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = uformat(L["%s's gained %s"], label, namesTable[self.powerid])
 	end
 
-	-- player mods main update function
-	function playermod:Update(win, set)
+	-- actor mods main update function
+	function actormod:Update(win, set)
 		win.title = uformat(L["%s's gained %s"], win.actorname, L[self.powername])
 		if not set or not win.actorname then return end
 

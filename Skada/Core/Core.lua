@@ -115,17 +115,16 @@ local function verify_set(mode, set)
 		mode:AddSetAttributes(set)
 	end
 
-	local actors = mode.AddPlayerAttributes and set.players -- players
-	if actors then
+	if mode.AddPlayerAttributes or mode.AddEnemyAttributes then
+		local actors = set.actors
+		if not actors then return end
 		for i = 1, #actors do
-			mode:AddPlayerAttributes(actors[i], set)
-		end
-	end
-
-	actors = mode.AddEnemyAttributes and set.enemies -- enemies
-	if actors then
-		for i = 1, #actors do
-			mode:AddEnemyAttributes(actors[i], set)
+			local actor = actors[i]
+			if actor and actor.enemy and mode.AddEnemyAttributes then
+				mode:AddEnemyAttributes(actor, set)
+			elseif actor and not actor.enemy and mode.mode.AddPlayerAttributes then
+				mode:AddPlayerAttributes(actor, set)
+			end
 		end
 	end
 end
@@ -153,7 +152,7 @@ local function create_set(setname, set)
 	set.name = setname
 	set.starttime = time()
 	set.time = 0
-	set.players = set.players or new()
+	set.actors = set.actors or new()
 	if setname ~= L["Total"] or P.totalidc then
 		set.last_action = set.starttime
 		set.last_time = GetTime()
@@ -817,8 +816,24 @@ function Window:show_actor(actor, set, strict)
 		return false
 	elseif strict and actor.fake then
 		return false
+	elseif strict and actor.enemy and not set.arena then
+		return false
+	else
+		return true
 	end
-	return true
+end
+
+-- used to color bars for arenas
+function Window:color(d, set, enemy)
+	if not d or not set then
+		return
+	elseif set.arena and enemy then
+		d.color = Skada.classcolors(set.faction and "ARENA_GREEN" or "ARENA_GOLD")
+	elseif set.arena then
+		d.color = Skada.classcolors(set.faction and "ARENA_GOLD" or "ARENA_GREEN")
+	elseif d.color then
+		d.color = nil
+	end
 end
 
 -- wipes windown's dataset table
@@ -1547,15 +1562,15 @@ local dummy_pet = {class = "PET"} -- used as fallback
 function Skada:FindPlayer(set, id, name, is_create)
 	id = id or name -- fallback
 
-	local actors = set and (id ~= "total") and (name ~= L["Total"]) and set.players
+	local actors = set and (id ~= "total") and (name ~= L["Total"]) and set.actors
 	if not actors then
 		return
-	elseif not set._playeridx then
-		set._playeridx = new()
+	elseif not set._actoridx then
+		set._actoridx = new()
 	end
 
 	-- already cached player?
-	local player = set._playeridx[id]
+	local player = set._actoridx[id]
 	if player then
 		return playerPrototype:Bind(player, set)
 	end
@@ -1563,8 +1578,8 @@ function Skada:FindPlayer(set, id, name, is_create)
 	-- search the set
 	for i = 1, #actors do
 		local actor = actors[i]
-		if actor and ((id and actor.id == id) or (name and actor.name == name)) then
-			set._playeridx[id] = actor
+		if actor and not actor.enemy and (actor.id == id or actor.name == name) then
+			set._actoridx[id] = actor
 			return actor
 		end
 	end
@@ -1583,7 +1598,7 @@ function Skada:FindPlayer(set, id, name, is_create)
 	-- search friendly enemies
 	local enemy = self:FindEnemy(set, name, id)
 	if enemy and enemy.flag and band(enemy.flag, BITMASK_FRIENDLY) ~= 0 then
-		set._playeridx[id] = enemy
+		set._actoridx[id] = enemy
 		return enemy
 	end
 
@@ -1595,7 +1610,7 @@ end
 
 -- finds a player table or creates it if not found
 function Skada:GetPlayer(set, guid, name, flag)
-	if not (set and set.players and guid) then return end
+	if not (set and set.actors and guid) then return end
 
 	local player = self:FindPlayer(set, guid, name, true)
 	if player or not name then
@@ -1623,7 +1638,7 @@ function Skada:GetPlayer(set, guid, name, flag)
 		end
 	end
 
-	set.players[#set.players + 1] = player
+	set.actors[#set.actors + 1] = player
 
 	-- not all modules provide playerflags
 	if player.flag == nil and flag then
@@ -1659,22 +1674,24 @@ end
 
 -- finds an enemy unit
 function Skada:FindEnemy(set, name, id)
-	local actors = name and set and set.enemies
+	local actors = name and set and set.actors
 	if not actors then
 		return
-	elseif not set._enemyidx then
-		set._enemyidx = new()
+	elseif not set._actoridx then
+		set._actoridx = new()
 	end
 
-	local enemy = set._enemyidx[name]
+	id = id or name -- fallback
+
+	local enemy = set._actoridx[id]
 	if enemy then
 		return enemyPrototype:Bind(enemy, set)
 	end
 
 	for i = 1, #actors do
 		local actor = actors[i]
-		if actor and ((id and id == actor.id) or (name and actor.name == name)) then
-			set._enemyidx[name] = enemyPrototype:Bind(actor, set)
+		if actor and actor.enemy and (actor.id == id or actor.name == name) then
+			set._actoridx[name] = enemyPrototype:Bind(actor, set)
 			return actor
 		end
 	end
@@ -1684,19 +1701,20 @@ end
 -- function Skada:FindEnemy(set, name, guid)
 function Skada:GetEnemy(set, name, guid, flag, create)
 	if not set or not name then return end -- no set and now name
-	if not set.enemies and not create then return end -- no enemies table
+	if not set.actors and not create then return end -- no enemies table
 
 	local enemy = self:FindEnemy(set, name, guid)
 	if not enemy then
 		-- should create table?
-		if create and not set.enemies then
-			set.enemies = new()
+		if create and not set.actors then
+			set.actors = new()
 		end
 
 		enemy = new()
 		enemy.id = guid
 		enemy.name = name
 		enemy.flag = flag
+		enemy.enemy = true
 
 		if guid or flag then
 			enemy.class = Private.unit_class(guid, flag, nil, enemy, name)
@@ -1711,7 +1729,7 @@ function Skada:GetEnemy(set, name, guid, flag, create)
 			end
 		end
 
-		set.enemies[#set.enemies + 1] = enemy
+		set.actors[#set.actors + 1] = enemy
 	end
 
 	self.changed = true
@@ -1721,25 +1739,21 @@ end
 
 -- generic find a player or an enemey
 function Skada:FindActor(set, id, name, no_strict)
-	local actor = self:FindPlayer(set, id, name, not no_strict)
-	if not actor then
-		return self:FindEnemy(set, name, id), true
-	end
-	return actor
+	return self:FindPlayer(set, id, name, not no_strict) or self:FindEnemy(set, name, id)
 end
 
 -- generic: finds a player/enemy or creates it.
 function Skada:GetActor(set, id, name, flag)
-	local actor, enemy = self:FindActor(set, id, name)
+	local actor = self:FindActor(set, id, name)
 	-- creates it if not found
 	if not actor then
 		if is_player(id, name, flag) == 1 or is_pet(id, flag) == 1 then -- group members or group pets
 			actor = self:GetPlayer(set, id, name, flag)
 		else -- an outsider maybe?
-			actor, enemy = self:GetEnemy(set, name, id, flag), true
+			actor = self:GetEnemy(set, name, id, flag)
 		end
 	end
-	return actor, enemy
+	return actor
 end
 
 -------------------------------------------------------------------------------
@@ -1790,8 +1804,9 @@ do
 
 		-- attempt to get the pet's owner from tooltip
 		function get_pet_owner_from_tooltip(guid)
-			local _players = Skada.current and guid and Skada.current.players
-			if not _players then return end
+			local set = guid and Skada.current
+			local actors = set and set.actors
+			if not actors then return end
 
 			pettooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
 			pettooltip:ClearLines()
@@ -1800,11 +1815,13 @@ do
 			-- we only need to scan the 2nd line.
 			local text = _G["SkadaPetTooltipTextLeft2"] and _G["SkadaPetTooltipTextLeft2"]:GetText()
 			if text and text ~= "" then
-				for i = 1, #_players do
-					local p = _players[i]
-					local playername = p and gsub(p.name, "%-.*", "")
-					if playername and ((LOCALE_ruRU and find_name_declension(text, playername)) or validate_pet_owner(text, playername)) then
-						return p.id, p.name
+				for i = 1, #actors do
+					local actor = actors[i]
+					if actor and not actor.enemy then
+						local actorname = actor and gsub(actor.name, "%-.*", "")
+						if actorname and ((LOCALE_ruRU and find_name_declension(text, actorname)) or validate_pet_owner(text, actorname)) then
+							return actor.id, actor.name
+						end
 					end
 				end
 			end
@@ -2117,16 +2134,6 @@ do
 	end
 end
 
-function Skada:FilterClass(win, id, label)
-	if win.class then
-		win:DisplayMode(win.selectedmode, nil)
-	elseif win.GetSelectedSet and id then
-		local set = win:GetSelectedSet()
-		local actor = set and set:GetActor(label, id)
-		win:DisplayMode(win.selectedmode, actor and actor.class)
-	end
-end
-
 -------------------------------------------------------------------------------
 -- slash commands
 
@@ -2153,33 +2160,33 @@ local function generate_total()
 			end
 		end
 
-		local set_players = set.players
-		local total_players = total.players
+		local set_actors = set.actors
+		local total_actors = total.actors
 
-		for j = 1, #set_players do
-			local p = set_players[j]
-			if p then
+		for j = 1, #set_actors do
+			local p = set_actors[j]
+			if p and not p.enemy then
 				local index = nil
-				for k = 1, #total_players do
-					local a = total_players[k]
+				for k = 1, #total_actors do
+					local a = total_actors[k]
 					if a and a.id == p.id then
 						index = k
 						break
 					end
 				end
 
-				local player = index and total_players[index] or new()
+				local actor = index and total_actors[index] or new()
 
 				for k, v in pairs(p) do
 					if (type(v) == "string" or k == "spec" or k == "flag") then
-						player[k] = player[k] or v
+						actor[k] = actor[k] or v
 					elseif type(v) == "number" then
-						player[k] = (player[k] or 0) + v
+						actor[k] = (actor[k] or 0) + v
 					end
 				end
 
 				if not index then
-					total_players[#total_players + 1] = player
+					total_actors[#total_actors + 1] = actor
 				end
 			end
 		end
@@ -2456,6 +2463,9 @@ end
 -------------------------------------------------------------------------------
 
 function Skada:PLAYER_ENTERING_WORLD()
+	userGUID = self.userGUID or UnitGUID("player")
+	self.userGUID = userGUID
+
 	Skada:CheckZone()
 	if was_in_party == nil then
 		Skada:ScheduleTimer("UpdateRoster", 1)
@@ -2666,8 +2676,8 @@ end
 -------------------------------------------------------------------------------
 
 function Skada:CanReset()
-	local total_players = self.total and self.total.players
-	if total_players and next(total_players) then
+	local total_actors = self.total and self.total.actors
+	if total_actors and next(total_actors) then
 		return true
 	end
 
@@ -3097,9 +3107,6 @@ function Skada:SetupStorage()
 end
 
 function Skada:OnEnable()
-	userGUID = userGUID or UnitGUID("player")
-	self.userGUID = userGUID
-
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 	self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "CheckZone")
@@ -3266,10 +3273,12 @@ function combat_end()
 	end
 
 	-- remove players ".last" key from total segment.
-	if Skada.total.players then
-		for i = 1, #Skada.total.players do
-			if Skada.total.players[i] then
-				Skada.total.players[i].last = nil
+	local actors = Skada.total and Skada.total.actors
+	if actors then
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and actor.last then
+				actor.last = nil
 			end
 		end
 	end
@@ -3583,50 +3592,69 @@ do
 		return is_interesting
 	end
 
+	local BITMASK_HOSTILE = Private.BITMASK_HOSTILE
+	local BITMASK_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100
+
 	local function check_boss_fight(set, event, srcName, srcFlags, src_is_interesting, dstGUID, dstName, dstFlags, dst_is_interesting)
 		-- set mobname
 		if not set.mobname then
-			if set.type == "pvp" then
+			if Skada.insType == "pvp" or Skada.insType == "arena" then
+				set.type = Skada.insType
 				set.gotboss = false -- skip boss check
 				set.mobname = GetInstanceInfo()
-			elseif set.type == "arena" then
-				set.gotboss = false -- skip boss check
-				set.mobname = GetInstanceInfo()
-				set.gold = GetBattlefieldArenaFaction()
-				Skada:SendMessage("COMBAT_ARENA_START", set, set.mobname)
-			elseif src_is_interesting and band(dstFlags, BITMASK_FRIENDLY) == 0 then
+				set.faction = GetBattlefieldArenaFaction()
+				if set.type == "arena" then
+					Skada:SendMessage("COMBAT_ARENA_START", set, set.mobname)
+				end
+			elseif src_is_interesting and band(dstFlags, BITMASK_HOSTILE) ~= 0 then
 				set.mobname = dstName
-			elseif dst_is_interesting and band(srcFlags, BITMASK_FRIENDLY) == 0 then
+				if band(dstFlags, BITMASK_CONTROL_PLAYER) ~= 0 then
+					set.type = "pvp"
+					set.gotboss = false
+				end
+			elseif dst_is_interesting and band(srcFlags, BITMASK_HOSTILE) ~= 0 then
 				set.mobname = srcName
+				if band(srcFlags, BITMASK_CONTROL_PLAYER) ~= 0 then
+					set.type = "pvp"
+					set.gotboss = false
+				end
 			end
 		end
 
-		-- check for boss fights
-		if not set.gotboss and not spellcast_events[event] then
-			-- marking set as boss fights relies only on src_is_interesting
-			if src_is_interesting and band(dstFlags, BITMASK_FRIENDLY) == 0 then
-				if set.gotboss == nil then
-					if not _targets or not _targets[dstName] then
-						local isboss, bossid, bossname = Skada:IsEncounter(dstGUID, dstName)
-						if isboss then -- found?
-							set.mobname = bossname or dstName
-							set.gotboss = bossid or true
-							Skada:SendMessage("COMBAT_ENCOUNTER_START", set)
-							_targets = del(_targets)
-						else
-							_targets = _targets or new()
-							_targets[dstName] = true
-							set.gotboss = false
-						end
-					end
-				elseif _targets and not _targets[dstName] then
-					_targets[dstName] = true
-					set.gotboss = nil
-				end
+		-- don't go further for arena/pvp
+		if set.type == "pvp" or set.type == "arena" then
+			return
+		end
+
+		-- boss already detected?
+		if set.gotboss then
+			-- default boss defeated event? (no DBM/BigWigs)
+			if not Skada.bossmod and death_events[event] and set.gotboss == GetCreatureId(dstGUID) then
+				Skada:ScheduleTimer(Private.boss_defeated, P.updatefrequency or 0.5)
 			end
-		-- default boss defeated event? (no DBM/BigWigs)
-		elseif not Skada.bossmod and set.gotboss and death_events[event] and set.gotboss == GetCreatureId(dstGUID) then
-			Skada:ScheduleTimer(Private.boss_defeated, P.updatefrequency or 0.5)
+			return
+		end
+
+		-- marking set as boss fights relies only on src_is_interesting
+		if not spellcast_events[event] and src_is_interesting and band(dstFlags, BITMASK_HOSTILE) ~= 0 then
+			if set.gotboss == nil then
+				if not _targets or not _targets[dstName] then
+					local isboss, bossid, bossname = Skada:IsEncounter(dstGUID, dstName)
+					if isboss then -- found?
+						set.mobname = bossname or set.mobname or dstName
+						set.gotboss = bossid or true
+						Skada:SendMessage("COMBAT_ENCOUNTER_START", set)
+						_targets = del(_targets)
+					else
+						_targets = _targets or new()
+						_targets[dstName] = true
+						set.gotboss = false
+					end
+				end
+			elseif _targets and not _targets[dstName] then
+				_targets[dstName] = true
+				set.gotboss = nil
+			end
 		end
 	end
 
@@ -3682,104 +3710,104 @@ do
 			summon_pet(dstGUID, srcGUID, srcName)
 		end
 
-		-- current segment created?
-		if self.current then
-			-- segment not yet flagged as started?
-			if not self.current.started then
-				self.current.started = true
+		-- current segment not created?
+		if not self.current then
+			return
+		-- not yet flagged as started?
+		elseif not self.current.started then
+			if not self.current.type then
 				if self.insType == nil then self:CheckZone() end
 				self.current.type = (self.insType == "none" and IsInGroup()) and "group" or self.insType
-				self:SendMessage("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 			end
-
-			-- autostop on wipe enabled?
-			if P.autostop and (eventtype == "UNIT_DIED" or eventtype == "SPELL_RESURRECT") then
-				check_autostop(self.current, eventtype, srcGUID, srcFlags)
-			end
-
-			-- valid combatlog event
-			if combatlog_events[eventtype] then
-				if self.current.stopped then return end
-
-				self.current.last_action = time()
-				self.current.last_time = GetTime()
-
-				if P.totalidc then -- add to total segment
-					self.total.last_action = self.current.last_action
-					self.total.last_time = self.current.last_time
-				end
-
-				if self.tempsets then -- add to phases
-					for i = 1, #self.tempsets do
-						local set = self.tempsets[i]
-						if set and not set.stopped then
-							set.last_action = self.current.last_action
-							set.last_time = self.current.last_time
-						end
-					end
-				end
-
-				for func, flags in next, combatlog_events[eventtype] do
-					local fail = false
-
-					if flags.src_is_interesting_nopets then
-						local src_is_interesting_nopets = check_flags_interest(srcGUID, srcFlags, true)
-
-						if src_is_interesting_nopets then
-							src_is_interesting = true
-						else
-							fail = true
-						end
-					end
-
-					if not fail and flags.dst_is_interesting_nopets then
-						local dst_is_interesting_nopets = check_flags_interest(dstGUID, dstFlags, true)
-						if dst_is_interesting_nopets then
-							dst_is_interesting = true
-						else
-							fail = true
-						end
-					end
-
-					if not fail and flags.src_is_interesting or flags.src_is_not_interesting then
-						if not src_is_interesting then
-							src_is_interesting = check_flags_interest(srcGUID, srcFlags) or Private.get_temp_unit(srcGUID)
-						end
-
-						if (flags.src_is_interesting and not src_is_interesting) or (flags.src_is_not_interesting and src_is_interesting) then
-							fail = true
-						end
-					end
-
-					if not fail and flags.dst_is_interesting or flags.dst_is_not_interesting then
-						if not dst_is_interesting then
-							dst_is_interesting = check_flags_interest(dstGUID, dstFlags)
-						end
-
-						if (flags.dst_is_interesting and not dst_is_interesting) or (flags.dst_is_not_interesting and dst_is_interesting) then
-							fail = true
-						end
-					end
-
-					if not fail then
-						if tentative ~= nil then
-							tentative = tentative + 1
-							self:Debug(format("Tentative: %s (%d)", eventtype, tentative))
-							if tentative == 5 then
-								self:CancelTimer(tentative_timer, true)
-								tentative_timer = nil
-								tentative = nil
-								self:Debug("StartCombat: tentative combat")
-								combat_start()
-							end
-						end
-
-						func(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-					end
-				end
-			end
-
-			check_boss_fight(self.current, eventtype, srcName, srcFlags, src_is_interesting, dstGUID, dstName, dstFlags, dst_is_interesting)
+			self.current.started = true
+			self:SendMessage("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		end
+
+		-- autostop on wipe enabled?
+		if P.autostop and (eventtype == "UNIT_DIED" or eventtype == "SPELL_RESURRECT") then
+			check_autostop(self.current, eventtype, srcGUID, srcFlags)
+		end
+
+		-- stopped or invalid events?
+		if self.current.stopped or not combatlog_events[eventtype] then return end
+
+		self.current.last_action = time()
+		self.current.last_time = GetTime()
+
+		if P.totalidc then -- add to total segment
+			self.total.last_action = self.current.last_action
+			self.total.last_time = self.current.last_time
+		end
+
+		if self.tempsets then -- add to phases
+			for i = 1, #self.tempsets do
+				local set = self.tempsets[i]
+				if set and not set.stopped then
+					set.last_action = self.current.last_action
+					set.last_time = self.current.last_time
+				end
+			end
+		end
+
+		for func, flags in next, combatlog_events[eventtype] do
+			local fail = false
+
+			if flags.src_is_interesting_nopets then
+				local src_is_interesting_nopets = check_flags_interest(srcGUID, srcFlags, true)
+
+				if src_is_interesting_nopets then
+					src_is_interesting = true
+				else
+					fail = true
+				end
+			end
+
+			if not fail and flags.dst_is_interesting_nopets then
+				local dst_is_interesting_nopets = check_flags_interest(dstGUID, dstFlags, true)
+				if dst_is_interesting_nopets then
+					dst_is_interesting = true
+				else
+					fail = true
+				end
+			end
+
+			if not fail and flags.src_is_interesting or flags.src_is_not_interesting then
+				if not src_is_interesting then
+					src_is_interesting = check_flags_interest(srcGUID, srcFlags) or Private.get_temp_unit(srcGUID)
+				end
+
+				if (flags.src_is_interesting and not src_is_interesting) or (flags.src_is_not_interesting and src_is_interesting) then
+					fail = true
+				end
+			end
+
+			if not fail and flags.dst_is_interesting or flags.dst_is_not_interesting then
+				if not dst_is_interesting then
+					dst_is_interesting = check_flags_interest(dstGUID, dstFlags)
+				end
+
+				if (flags.dst_is_interesting and not dst_is_interesting) or (flags.dst_is_not_interesting and dst_is_interesting) then
+					fail = true
+				end
+			end
+
+			if not fail then
+				if tentative ~= nil then
+					tentative = tentative + 1
+					self:Debug(format("Tentative: %s (%d)", eventtype, tentative))
+					if tentative == 5 then
+						self:CancelTimer(tentative_timer, true)
+						tentative_timer = nil
+						tentative = nil
+						self:Debug("StartCombat: tentative combat")
+						combat_start()
+					end
+				end
+
+				func(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+			end
+		end
+
+		check_boss_fight(self.current, eventtype, srcName, srcFlags, src_is_interesting, dstGUID, dstName, dstFlags, dst_is_interesting)
 	end
 end

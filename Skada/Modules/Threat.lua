@@ -62,42 +62,42 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 			end
 
 			local guid = UnitGUID(unit)
-			local player = threat_table and threat_table[guid]
+			local actor = threat_table and threat_table[guid]
 
-			if not player then
-				player = new()
-				player.id = guid
-				player.unit = unit
-				player.name = UnitName(unit)
+			if not actor then
+				actor = new()
+				actor.id = guid
+				actor.unit = unit
+				actor.name = UnitName(unit)
 
 				if owner ~= nil then
-					player.name = player.name .. " (" .. UnitName(owner) .. ")"
-					player.class = "PET"
+					actor.name = actor.name .. " (" .. UnitName(owner) .. ")"
+					actor.class = "PET"
 				else
-					_, player.class = UnitClass(unit)
-					player.role = GetUnitRole(guid)
-					player.spec = GetUnitSpec(guid)
+					_, actor.class = UnitClass(unit)
+					actor.role = GetUnitRole(guid)
+					actor.spec = GetUnitSpec(guid)
 				end
 
-				-- cache the player.
+				-- cache the actor.
 				threat_table = threat_table or {}
-				threat_table[guid] = player
+				threat_table[guid] = actor
 			end
 
-			if not player or not player.unit then return end
+			if not actor or not actor.unit then return end
 
-			local isTanking, _, threatpct, _, threatvalue = UnitDetailedThreatSituation(player.unit, target)
+			local isTanking, _, threatpct, _, threatvalue = UnitDetailedThreatSituation(actor.unit, target)
 			if threatvalue then
 				nr = nr + 1
 				local d = win:nr(nr)
 
-				d.id = player.id or player.name
-				d.label = player.name
-				d.text = player.id and Skada:FormatName(player.name, player.id)
+				d.id = actor.id or actor.name
+				d.label = actor.name
+				d.text = actor.id and Skada:FormatName(actor.name, actor.id)
 
-				d.class = player.class
-				d.role = player.role
-				d.spec = player.spec
+				d.class = actor.class
+				d.role = actor.role
+				d.spec = actor.spec
 				d.isTanking = isTanking
 
 				if mod.db.rawvalue then

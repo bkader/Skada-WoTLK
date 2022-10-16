@@ -21,7 +21,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 
 	local function activity_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local actor = set and set:GetPlayer(id, label)
+		local actor = set and set:GetActor(label, id)
 		if not actor then return end
 
 		local settime = set:GetTime()
@@ -74,37 +74,19 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 		end
 
 		local nr = 0
+		local actors = set.actors
 
-		local actors = set.players -- players.
 		for i = 1, #actors do
 			local actor = actors[i]
-			if win:show_actor(actor, set) and Skada.validclass[actor.class or "NaN"] then
+			if win:show_actor(actor, set, true) then
 				local activetime = actor:GetTime(set, true)
 				if activetime > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor)
-					d.color = set.arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
 					d.value = activetime
 					format_valuetext(d, mod_cols, settime, win.metadata)
-				end
-			end
-		end
-
-		actors = set.arena and set.enemies or nil -- arena enemies
-		if not actors then return end
-
-		for i = 1, #actors do
-			local actor = actors[i]
-			if win:show_actor(actor, set) and Skada.validclass[actor.class or "NaN"] then
-				local activetime = actor:GetTime(set, true)
-				if activetime > 0 then
-					nr = nr + 1
-
-					local d = win:actor(nr, actor, true)
-					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
-					d.value = activetime
-					format_valuetext(d, mod_cols, settime, win.metadata)
+					win:color(d, set, actor.enemy)
 				end
 			end
 		end

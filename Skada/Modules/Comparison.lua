@@ -58,7 +58,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 	end
 
 	local function can_compare(actor)
-		return (actor and actor.class == mod.userClass and actor.role == "DAMAGER")
+		return (actor and not actor.enemy and actor.class == mod.userClass and actor.role == "DAMAGER")
 	end
 
 	local function spellmod_tooltip(win, id, label, tooltip)
@@ -438,7 +438,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 		win.title = uformat(L["%s vs %s: Damage on %s"], win.actorname, mod.userName, win.targetname)
 		if not set or not win.targetname then return end
 
-		local targets, actor = set:GetActorDamageTargets(win.actorid, win.actorname)
+		local targets, _, actor = set:GetActorDamageTargets(win.actorid, win.actorname)
 		if not targets then return end
 
 		if actor.id == mod.userGUID then
@@ -476,7 +476,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 			return
 		end
 
-		local mytargets, myself = set:GetActorDamageTargets(mod.userGUID, mod.userName, C)
+		local mytargets, _, myself = set:GetActorDamageTargets(mod.userGUID, mod.userName, C)
 
 		-- the compared actor
 		local total = targets[win.targetname] and targets[win.targetname].amount
@@ -650,7 +650,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 		win.title = uformat(L["%s vs %s: Targets"], win.actorname, mod.userName)
 		if not set or not win.actorname then return end
 
-		local targets, actor = set:GetActorDamageTargets(win.actorid, win.actorname)
+		local targets, _, actor = set:GetActorDamageTargets(win.actorid, win.actorname)
 
 		if not targets then
 			return
@@ -728,25 +728,25 @@ Skada:RegisterModule("Comparison", function(L, P)
 		local nr = 0
 		local myamount = set:GetActorDamage(mod.userGUID, mod.userName)
 
-		for i = 1, #set.players do
-			local player = set.players[i]
-			if can_compare(player) then
-				local dps, amount = player:GetDPS(set)
+		for i = 1, #set.actors do
+			local actor = set.actors[i]
+			if can_compare(actor) then
+				local dps, amount = actor:GetDPS(set)
 				if amount > 0 then
 					nr = nr + 1
-					local d = win:actor(nr, player)
+					local d = win:actor(nr, actor)
 
 					d.value = amount
 					d.valuetext = Skada:FormatValueCols(
 						mod_cols.Damage and Skada:FormatNumber(d.value),
 						mod_cols.DPS and Skada:FormatNumber(dps),
-						format_percent(myamount, d.value, mod_cols.Percent and player.id ~= mod.userGUID)
+						format_percent(myamount, d.value, mod_cols.Percent and actor.id ~= mod.userGUID)
 					)
 
 					-- a valid window, not a tooltip
 					if win.metadata then
-						-- color the selected player's bar.
-						if player.id == mod.userGUID then
+						-- color the selected actor's bar.
+						if actor.id == mod.userGUID then
 							d.color = COLOR_GOLD
 						elseif d.color then
 							d.color = nil
@@ -766,7 +766,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 		-- no DisplayMode func?
 		if not win or not win.DisplayMode then return end
 
-		-- same actor or me? reset to the player
+		-- same actor or me? reset to the actor
 		if id == Skada.userGUID or (id == mod.userGUID and win.selectedmode == mod) then
 			mod.userGUID = Skada.userGUID
 			mod.userName = Skada.userName

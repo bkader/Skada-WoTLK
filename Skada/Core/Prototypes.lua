@@ -41,30 +41,22 @@ end
 
 do
 	local function calc_set_total(set, key, class, arena)
-		local total = set[key] or 0
+		local total = set[key] -- can be nil
 
 		if class then
-			total = 0
+			total = nil
 
-			local actors = set.players -- players
+			local actors = set.actors
 			for i = 1, #actors do
 				local actor = actors[i]
-				if actor and actor.class == class and actor[key] then
-					total = total + actor[key]
-				end
+				local value = actor and actor.class == class and (not actor.enemy or arena) and actor[key]
+				if value then total = (total or 0) + value end
 			end
+			return total
+		end
 
-			actors = arena and set.enemies or nil -- arena enemies
-			if actors then
-				for i = 1, #actors do
-					local actor = actors[i]
-					if actor and actor.class == class and actor[key] then
-						total = total + actor[key]
-					end
-				end
-			end
-		elseif arena and set["e" .. key] then
-			total = total + set["e" .. key]
+		if arena and set["e" .. key] then
+			total = (total or 0) + set["e" .. key]
 		end
 
 		return total
@@ -73,12 +65,13 @@ do
 	-- returns the total value by given key/class
 	function setPrototype:GetTotal(class, arena, ...)
 		if not ... then return end
-		local is_arena = (arena and self.arena)
+		local combined = (arena and self.type == "arena")
 
-		local total = 0
+		local total = nil
 		for i = 1, select("#", ...) do
 			local key = select(i, ...)
-			total = total + calc_set_total(self, key, class, is_arena)
+			local value = calc_set_total(self, key, class, combined)
+			if value then total = (total or 0) + value end
 		end
 		return total
 	end
@@ -94,6 +87,7 @@ function setPrototype:_fill_actor_table(t, name, actortime, no_strict)
 		t.class = t.class or actor.class
 		t.role = t.role or actor.role
 		t.spec = t.spec or actor.spec
+		t.enemy = t.enemy or actor.enemy
 
 		-- should add time?
 		if actortime then
@@ -109,14 +103,12 @@ end
 -- ------------------------------------
 
 -- returns the set's damage amount
-function setPrototype:GetDamage(useful, class)
-	local inc_absorbed = Skada.db.profile.absdamage
-	local total = self:GetTotal(class, true, inc_absorbed and "totaldamage" or "damage")
-	if useful then
+function setPrototype:GetDamage(class, useful)
+	local absdamage = Skada.db.profile.absdamage
+	local total = absdamage and self:GetTotal(class, true, "totaldamage") or self:GetTotal(class, true, "damage")
+	if useful and total then
 		local overkill = self:GetTotal(class, true, "overkill")
-		if overkill then
-			total = max(0, total - overkill)
-		end
+		if overkill then total = max(0, total - overkill) end
 	end
 	return total
 end
@@ -124,10 +116,9 @@ end
 -- returns set's dps and damage amount
 function setPrototype:GetDPS(useful, class)
 	local total = self:GetDamage(useful, class)
-	if total == 0 then
+	if not total or total == 0 then
 		return 0, total
 	end
-
 	return total / self:GetTime(), total
 end
 
@@ -161,10 +152,10 @@ end
 
 -- returns the actor's damage targets table if found
 function setPrototype:GetActorDamageTargets(id, name, tbl)
-	local actor, enemy = self:GetActor(name, id)
+	local actor = self:GetActor(name, id)
 	if actor then
 		local targets, total = actor:GetDamageTargets(self, tbl)
-		return targets, total, actor, enemy
+		return targets, total, actor
 	end
 end
 
@@ -182,19 +173,20 @@ end
 -- ------------------------------------
 
 -- returns the set's damage taken amount
-function setPrototype:GetDamageTaken(class)
-	local inc_absorbed = Skada.db.profile.absdamage
-	local key = (inc_absorbed and "total" or "") .. "damaged"
-	return self:GetTotal(class, true, key)
+function setPrototype:GetDamageTaken(class, enemy)
+	local absdamage = Skada.db.profile.absdamage
+	if enemy then
+		return absdamage and self:GetTotal(class, true, "etotaldamaged") or self:GetTotal(class, true, "edamaged")
+	end
+	return absdamage and self:GetTotal(class, true, "totaldamaged") or self:GetTotal(class, true, "damaged")
 end
 
 -- returns the set's dtps and damage taken amount
-function setPrototype:GetDTPS(class)
-	local total = self:GetDamageTaken(class)
-	if total == 0 then
+function setPrototype:GetDTPS(class, enemy)
+	local total = self:GetDamageTaken(class, enemy)
+	if not total or total == 0 then
 		return 0, total
 	end
-
 	return total / self:GetTime(), total
 end
 
@@ -221,10 +213,10 @@ end
 
 -- returns the actor's damage taken sources table if found
 function setPrototype:GetActorDamageSources(id, name, tbl)
-	local actor, enemy = self:GetActor(name, id)
+	local actor = self:GetActor(name, id)
 	if actor then
 		local sources, total = actor:GetDamageSources(self, tbl)
-		return sources, total, actor, enemy
+		return sources, total, actor
 	end
 end
 
@@ -239,10 +231,10 @@ end
 
 -- actor heal targets
 function setPrototype:GetActorHealTargets(id, name, tbl)
-	local actor, enemy = self:GetActor(name, id)
+	local actor = self:GetActor(name, id)
 	if actor then
 		local targets, total = actor:GetHealTargets(self, tbl)
-		return targets, total, actor, enemy
+		return targets, total, actor
 	end
 end
 
@@ -251,17 +243,16 @@ end
 -- ------------------------------------
 
 -- returns the set's heal amount
-function setPrototype:GetHeal(class)
-	return self:GetTotal(class, true, "heal")
+function setPrototype:GetHeal(class, enemy)
+	return self:GetTotal(class, true, enemy and "eheal" or "heal")
 end
 
 -- returns the set's hps and heal amount
-function setPrototype:GetHPS(class)
-	local total = self:GetHeal(class)
-	if total == 0 then
+function setPrototype:GetHPS(class, enemy)
+	local total = self:GetHeal(class, enemy)
+	if not total or total == 0 then
 		return 0, total
 	end
-
 	return total / self:GetTime(), total
 end
 
@@ -273,10 +264,9 @@ end
 -- returns the set's overheal per second and overheal amount
 function setPrototype:GetOHPS(class)
 	local total = self:GetOverheal(class)
-	if total == 0 then
+	if not total or total == 0 then
 		return 0, total
 	end
-
 	return total / self:GetTime(), total
 end
 
@@ -288,40 +278,37 @@ end
 -- returns the set's total hps and heal
 function setPrototype:GetTHPS(class)
 	local total = self:GetTotalHeal(class)
-	if total == 0 then
+	if not total or total == 0 then
 		return 0, total
 	end
-
 	return total / self:GetTime(), total
 end
 
 -- returns the set's absorb amount
-function setPrototype:GetAbsorb(class)
-	return self:GetTotal(class, true, "absorb")
+function setPrototype:GetAbsorb(class, enemy)
+	return self:GetTotal(class, true, enemy and "eabsorb" or "absorb")
 end
 
 -- returns the set's absorb per second and absorb amount
-function setPrototype:GetAPS(class)
-	local total = self:GetAbsorb(class)
-	if total == 0 then
+function setPrototype:GetAPS(class, enemy)
+	local total = self:GetAbsorb(class, enemy)
+	if not total or total == 0 then
 		return 0, total
 	end
-
 	return total / self:GetTime(), total
 end
 
 -- returns the set's amount of heal and absorb combined
-function setPrototype:GetAbsorbHeal(class)
-	return (self:GetHeal(class) or 0) + (self:GetAbsorb(class) or 0)
+function setPrototype:GetAbsorbHeal(class, enemy)
+	return (self:GetHeal(class, enemy) or 0) + (self:GetAbsorb(class, enemy) or 0)
 end
 
 -- returns the set's absorb and heal per sec
-function setPrototype:GetAHPS(class)
-	local total = self:GetAbsorbHeal(class)
-	if total == 0 then
+function setPrototype:GetAHPS(class, enemy)
+	local total = self:GetAbsorbHeal(class, enemy)
+	if not total or total == 0 then
 		return 0, total
 	end
-
 	return total / self:GetTime(), total
 end
 

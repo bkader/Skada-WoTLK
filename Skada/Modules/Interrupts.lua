@@ -178,14 +178,14 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		end
 
 		local nr = 0
+		local actors = set.actors
 
-		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if win:show_actor(actor, set) and actor.interrupt then
+			if win:show_actor(actor, set, true) and actor.interrupt then
 				nr = nr + 1
 
-				local d = win:actor(nr, actor)
+				local d = win:actor(nr, actor, actor.enemy)
 				d.value = actor.interrupt
 				format_valuetext(d, mod_cols, total, win.metadata)
 			end

@@ -230,27 +230,16 @@ do
 
 	function Private.unit_class(guid, flag, set, db, name)
 		set = set or Skada.current
-		if set then
-			-- an existing player?
-			local actors = set.players
-			if actors then
-				for i = 1, #actors do
-					local p = actors[i]
-					if p and p.id == guid then
-						return p.class, p.role, p.spec
-					elseif p and name and p.name == name and p.class and Skada.validclass[p.class] then
-						return p.class, p.role, p.spec
-					end
-				end
-			end
-			-- an existing enemy?
-			actors = set.enemies
-			if actors then
-				for i = 1, #actors do
-					local e = actors[i]
-					if e and ((e.id == guid or e.name == guid)) and e.class then
-						return e.class
-					end
+
+		-- an existing actor?
+		local actors = set and set.actors
+		if actors then
+			for i = 1, #actors do
+				local actor = actors[i]
+				if actor and actor.id == guid then
+					return actor.class, actor.role, actor.spec
+				elseif actor and actor.name == name and actor.class and Skada.validclass[actor.class] then
+					return actor.class, actor.role, actor.spec
 				end
 			end
 		end
@@ -293,12 +282,12 @@ do
 	-- there was no discrimination with classes and specs
 	-- the only reason this group composition was made is
 	-- to have all 10 classes displayed on windows.
-	local fake_players
+	local fake_actors
 	do
-		local playersTable = nil
-		function fake_players()
-			if not playersTable then
-				playersTable = {
+		local actorsTable = nil
+		function fake_actors()
+			if not actorsTable then
+				actorsTable = {
 					-- Tanks & Healers
 					{"Deafknight", "DEATHKNIGHT", "TANK", 250}, -- Blood Death Knight
 					{"Bubbleboy", "PRIEST", "HEALER", 256}, -- Discipline Priest
@@ -314,7 +303,7 @@ do
 				}
 			end
 
-			return playersTable
+			return actorsTable
 		end
 	end
 
@@ -325,11 +314,11 @@ do
 		fakeSet.heal = 0
 		fakeSet.absorb = 0
 		fakeSet.type = "raid"
-		fakeSet.players = clear(fakeSet.players) or new()
+		fakeSet.actors = clear(fakeSet.actors) or new()
 
-		local players = fake_players()
-		for i = 1, #players do
-			local name, class, role, spec = players[i][1], players[i][2], players[i][3], players[i][4]
+		local actors = fake_actors()
+		for i = 1, #actors do
+			local name, class, role, spec = actors[i][1], actors[i][2], actors[i][3], actors[i][4]
 			local damage, heal, absorb = 0, 0, 0
 
 			if role == "TANK" then
@@ -350,16 +339,16 @@ do
 				heal = random(250, 1500)
 			end
 
-			local player = new()
-			player.id = name
-			player.name = name
-			player.class = class
-			player.role = role
-			player.spec = spec
-			player.damage = damage
-			player.heal = heal
-			player.absorb = absorb
-			fakeSet.players[#fakeSet.players + 1] = player
+			local actor = new()
+			actor.id = name
+			actor.name = name
+			actor.class = class
+			actor.role = role
+			actor.spec = spec
+			actor.damage = damage
+			actor.heal = heal
+			actor.absorb = absorb
+			fakeSet.actors[#fakeSet.actors + 1] = actor
 
 			fakeSet.damage = fakeSet.damage + damage
 			fakeSet.heal = fakeSet.heal + heal
@@ -372,22 +361,22 @@ do
 	local function randomize_fake_data(set, coef)
 		set.time = time() - set.starttime
 
-		local players = set.players
-		for i = 1, #players do
-			local player = playerPrototype:Bind(players[i], set)
-			if player then
+		local actors = set.actors
+		for i = 1, #actors do
+			local actor = playerPrototype:Bind(actors[i], set)
+			if actor then
 				local damage, heal, absorb = 0, 0, 0
 
-				if player.role == "HEALER" then
+				if actor.role == "HEALER" then
 					damage = coef * random(0, 1500)
-					if player.spec == 256 then
+					if actor.spec == 256 then
 						heal = coef * random(500, 1500)
 						absorb = coef * random(2500, 20000)
 					else
 						heal = coef * random(2500, 15000)
 						absorb = coef * random(0, 150)
 					end
-				elseif player.role == "TANK" then
+				elseif actor.role == "TANK" then
 					damage = coef * random(1000, 10000)
 					heal = coef * random(500, 1500)
 					absorb = coef * random(1000, 1500)
@@ -396,9 +385,9 @@ do
 					heal = coef * random(150, 1500)
 				end
 
-				player.damage = (player.damage or 0) + damage
-				player.heal = (player.heal or 0) + heal
-				player.absorb = (player.absorb or 0) + absorb
+				actor.damage = (actor.damage or 0) + damage
+				actor.heal = (actor.heal or 0) + heal
+				actor.absorb = (actor.absorb or 0) + absorb
 
 				set.damage = set.damage + damage
 				set.heal = set.heal + heal
@@ -953,8 +942,9 @@ function Skada:DBM(_, mod, wipe)
 end
 
 -------------------------------------------------------------------------------
--- memory check
+-- misc functions
 
+-- memory usage check
 function Skada:CheckMemory()
 	if not self.db.profile.memorycheck then return end
 	UpdateAddOnMemoryUsage()
@@ -964,15 +954,13 @@ function Skada:CheckMemory()
 	end
 end
 
--------------------------------------------------------------------------------
-
 do
 	local function clear_indexes(set)
 		if not set then return end
-		set._playeridx = del(set._playeridx)
-		set._enemyidx = del(set._enemyidx)
+		set._actoridx = del(set._actoridx)
 	end
 
+	-- clearing indexes
 	function Skada:ClearAllIndexes()
 		clear_indexes(Skada.current)
 		clear_indexes(Skada.total)
@@ -990,6 +978,17 @@ do
 				clear_indexes(sets[i])
 			end
 		end
+	end
+end
+
+-- filters by class
+function Skada:FilterClass(win, id, label)
+	if win.class then
+		win:DisplayMode(win.selectedmode, nil)
+	elseif win.GetSelectedSet and id then
+		local set = win:GetSelectedSet()
+		local actor = set and set:GetActor(label, id)
+		win:DisplayMode(win.selectedmode, actor and actor.class)
 	end
 end
 

@@ -568,7 +568,7 @@ L["%s on %s removed by %s's %s"] = "%s sur %s enlev\195\169(e) par %s avec %s"
 -- environmental damage
 L["Environment"] = "Environnement"
 -- damage done module
-L["Damage"] = "D\195\169g\195\162ts"
+L["Damage"] = "D\195\169g\195\162ts inflig\195\169s"
 L["Damage target list"] = "Cibles des d\195\169g\195\162ts"
 L["Damage spell list"] = "Sorts des d\195\169g\195\162ts"
 L["Damage spell details"] = "D\195\169tails du sort de d\195\169g\195\162t"

@@ -211,22 +211,22 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 		end
 	end
 
-	function mod:GetEnemy(_, enemy, set)
-		if enemy and not enemy.fake and enemy.class and Skada.validclass[enemy.class] then
-			if enemy.spec == nil then
-				enemy.spec = specsCache[enemy.id]
+	function mod:GetEnemy(_, actor, set)
+		if actor and not actor.fake and actor.class and Skada.validclass[actor.class] then
+			if actor.spec == nil then
+				actor.spec = specsCache[actor.id]
 			end
 
-			if enemy.spec and (enemy.role == nil or enemy.role == "NONE") then
-				enemy.role = specsRoles[enemy.spec] or "DAMAGER"
+			if actor.spec and (actor.role == nil or actor.role == "NONE") then
+				actor.role = specsRoles[actor.spec] or "DAMAGER"
 			end
 
-			if enemy.time == nil then
-				enemy.time = 0
+			if actor.time == nil then
+				actor.time = 0
 			end
 
-			if enemy.last == nil then
-				enemy.last = set.last_time or GetTime()
+			if actor.last == nil then
+				actor.last = set.last_time or GetTime()
 			end
 		end
 	end

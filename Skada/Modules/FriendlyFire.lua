@@ -9,7 +9,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local get_actor_friendfire_targets = nil
 
-	local pairs, format, uformat = pairs, string.format, Private.uformat
+	local pairs, wipe, format, uformat = pairs, wipe, string.format, Private.uformat
 	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
 	local mod_cols = nil
 
@@ -212,14 +212,14 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		end
 
 		local nr = 0
+		local actors = set.actors
 
-		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if win:show_actor(actor, set) and actor.friendfire then
+			if win:show_actor(actor, set, true) and actor.friendfire then
 				nr = nr + 1
 
-				local d = win:actor(nr, actor)
+				local d = win:actor(nr, actor, actor.enemy)
 				d.value = actor.friendfire
 				format_valuetext(d, mod_cols, total, mod_cols.DPS and (d.value / actor:GetTime(set)), win.metadata)
 			end
@@ -299,16 +299,17 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	end
 
 	function mod:CombatLeave()
-		clear(dmg)
+		wipe(dmg)
 	end
 
 	function mod:SetComplete(set)
 		if not set.friendfire or set.friendfire == 0 then return end
-		for i = 1, #set.players do
-			local p = set.players[i]
-			local amount = p and p.friendfire
-			if (not amount and p.friendfirespells) or amount == 0 then
-				p.friendfire, p.friendfirespells = nil, del(p.friendfirespells, true)
+		for i = 1, #set.actors do
+			local actor = set.actors[i]
+			local amount = actor and not actor.enemy and actor.friendfire
+			if (actor and not amount and actor.friendfirespells) or amount == 0 then
+				actor.friendfire = nil
+				actor.friendfirespells = del(actor.friendfirespells, true)
 			end
 		end
 	end

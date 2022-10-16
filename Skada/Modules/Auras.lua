@@ -18,8 +18,9 @@ local aura, spellschools
 
 do
 	local main = Skada:NewModule("Buffs and Debuffs")
-	local band, next = bit.band, next
+	local band, next, wipe = bit.band, next, wipe
 	local player_flag, enemy_flag = 0x02, 0x04
+	local player_clear, enemy_clear = false, false
 	local main_flag = 0
 
 	function main:OnEnable()
@@ -36,6 +37,10 @@ do
 		spellschools = Skada.spellschools
 		Skada.RegisterCallback(self, "Skada_SetComplete", "Clean")
 
+		-- what can be cleaned?
+		player_clear = (band(main_flag, player_flag) ~= 0)
+		enemy_clear = (band(main_flag, enemy_flag) ~= 0)
+
 		if Skada.ignoredSpells then
 			ignored_buffs = Skada.ignoredSpells.buffs or ignored_buffs
 			ignored_debuffs = Skada.ignoredSpells.debuffs or ignored_debuffs
@@ -46,8 +51,20 @@ do
 		Skada.UnregisterAllCallbacks(self)
 	end
 
+	local function can_clear_actor(actor)
+		if not actor or not actor.auras then
+			return false
+		elseif actor.enemy and not enemy_clear then
+			return false
+		elseif not actor.enemy and not player_clear then
+			return false
+		else
+			return true
+		end
+	end
+
 	local function clear_actor_table(actor, curtime, maxtime)
-		if not actor or not actor.auras then return end
+		if not can_clear_actor(actor) then return end
 
 		for spellid, spell in pairs(actor.auras) do
 			if spell.active ~= nil and spell.start then
@@ -89,21 +106,14 @@ do
 	end
 
 	function main:Clean(_, set, curtime)
-		clear(aura) -- empty aura table first
-		if not set then return end
+		wipe(aura) -- empty aura table first
+
+		local actors = set and set.actors
+		if not actors then return end
 
 		local maxtime = set and set:GetTime()
 		curtime = curtime or set.last_action or time()
 
-		local actors = (band(main_flag, player_flag) ~= 0) and set.players -- players
-		if actors then
-			for i = 1, #actors do
-				clear_actor_table(actors[i], curtime, maxtime)
-			end
-		end
-
-		actors = (band(main_flag, enemy_flag) ~= 0) and set.enemies -- enemies
-		if not actors then return end
 		for i = 1, #actors do
 			clear_actor_table(actors[i], curtime, maxtime)
 		end
@@ -278,12 +288,25 @@ do
 			return count, uptime
 		end
 
+		-- whether to show the actor or not (player/enemy)
+		local function should_show_actor(win, actor, set, is_enemy)
+			if not actor or not actor.auras then
+				return false
+			elseif is_enemy and not actor.enemy then
+				return false
+			elseif not is_enemy and actor.enemy then
+				return false
+			else
+				return win:show_actor(actor, set)
+			end
+		end
+
 		-- module's main update function.
 		function main_update_func(self, auratype, win, set, cols, is_enemy)
 			local settime = auratype and set and set:GetTime()
 			if not settime or settime == 0 then return end
 
-			local actors = is_enemy and set.enemies or set.players
+			local actors = set.actors
 			if not actors then
 				return
 			elseif win.metadata then
@@ -293,12 +316,12 @@ do
 			local nr = 0
 			for i = 1, #actors do
 				local actor = actors[i]
-				if win:show_actor(actor, set) and actor.auras then
+				if should_show_actor(win, actor, set, is_enemy) then
 					local count, uptime = count_auras_by_type(actor.auras, auratype)
 					if count and count > 0 and uptime > 0 then
 						nr = nr + 1
 
-						local d = win:actor(nr, actor)
+						local d = win:actor(nr, actor, actor.enemy)
 						local maxtime = floor(actor:GetTime(set))
 						d.value = min(floor(uptime / count), maxtime)
 						format_valuetext(d, cols, count, maxtime, win.metadata)
@@ -376,7 +399,7 @@ do
 		end
 
 		-- list actor's auras targets by type
-		function target_update_func(self, auratype, win, set, cols, tbl, is_enemy)
+		function target_update_func(self, auratype, win, set, cols, tbl)
 			local actor = set and auratype and set:GetActor(win.actorname, win.actorid)
 			if not actor then return end
 
@@ -391,7 +414,7 @@ do
 			for name, target in pairs(targets) do
 				nr = nr + 1
 
-				local d = win:actor(nr, target, is_enemy, name)
+				local d = win:actor(nr, target, target.enemy, name)
 				d.value = target.uptime
 				format_valuetext(d, cols, target.count, maxtime, win.metadata, true)
 			end
@@ -413,7 +436,7 @@ do
 		end
 
 		-- list targets of the given aura
-		function spelltarget_update_func(self, auratype, win, set, cols, tbl, is_enemy)
+		function spelltarget_update_func(self, auratype, win, set, cols, tbl)
 			local actor = set and auratype and set:GetActor(win.actorname, win.actorid)
 			if not actor then return end
 
@@ -428,7 +451,7 @@ do
 			for name, target in pairs(targets) do
 				nr = nr + 1
 
-				local d = win:actor(nr, target, is_enemy, name)
+				local d = win:actor(nr, target, target.enemy, name)
 				d.value = min(target.uptime, maxtime)
 				format_valuetext(d, cols, target.count, maxtime, win.metadata, true)
 			end
@@ -577,17 +600,18 @@ Skada:RegisterModule("Buffs", function(_, P, _, C)
 			t.class = info.class
 			t.role = info.role
 			t.spec = info.spec
+			t.enemy = info.enemy
 			return t
 		end
 
 		local function get_aura_targets(self, spellid, tbl)
-			local actors = spellid and self.players
+			local actors = spellid and self.actors
 			if not actors then return end
 
 			tbl = clear(tbl or C)
 			for i = 1, #actors do
 				local actor = actors[i]
-				local spell = actor and actor.auras and actor.auras[spellid]
+				local spell = actor and not actor.enemy and actor.auras and actor.auras[spellid]
 				if spell then
 					local t = new_actor_table(actor)
 					t.count = spell.count
@@ -613,7 +637,7 @@ Skada:RegisterModule("Buffs", function(_, P, _, C)
 			for name, target in pairs(targets) do
 				nr = nr + 1
 
-				local d = win:actor(nr, target, nil, name)
+				local d = win:actor(nr, target, target.enemy, name)
 				d.value = target.uptime
 				format_valuetext(d, mod_cols, target.count, target.maxtime, win.metadata, true)
 			end
@@ -761,14 +785,16 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 		if not win.spellid then return end
 
 		local nr = 0
-		local actors = set.players -- players
+		local actors = set.actors
+
 		for i = 1, #actors do
 			local actor = actors[i]
-			local spell = win:show_actor(actor, set) and actor.auras and actor.auras[win.spellid]
+			local auras = win:show_actor(actor, set, true) and not actor.enemy and actor.auras
+			local spell = auras and auras[win.spellid]
 			if spell then
 				nr = nr + 1
 
-				local d = win:actor(nr, actor)
+				local d = win:actor(nr, actor, actor.enemy)
 				d.value = spell.uptime
 				format_valuetext(d, mod_cols, spell.count, actor:GetTime(set), win.metadata, true, true)
 			end
@@ -802,7 +828,7 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 
 	local function spellsource_tooltip(win, id, label, tooltip)
 		local set = win.spellid and win:GetSelectedSet()
-		local actor = set and set:GetPlayer(label, id)
+		local actor = set and set:GetActor(label, id)
 		local spell = actor and actor.auras and actor.auras[win.spellid]
 		if not (spell and spell.count) then return end
 
@@ -985,7 +1011,7 @@ Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
 
 	function spelltargetmod:Update(win, set)
 		win.title = uformat(L["%s's <%s> targets"], win.actorname, win.spellname)
-		spelltarget_update_func(self, "DEBUFF", win, set, mod_cols, C, true)
+		spelltarget_update_func(self, "DEBUFF", win, set, mod_cols, C)
 	end
 
 	function targetmod:Enter(win, id, label)
@@ -995,7 +1021,7 @@ Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
 
 	function targetmod:Update(win, set)
 		win.title = uformat(L["%s's targets"], win.actorname)
-		target_update_func(self, "DEBUFF", win, set, mod_cols, C, true)
+		target_update_func(self, "DEBUFF", win, set, mod_cols, C)
 	end
 
 	function spellmod:Enter(win, id, label)

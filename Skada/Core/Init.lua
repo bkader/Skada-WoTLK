@@ -42,8 +42,9 @@ do
 	local BITMASK_TYPE_GUARDIAN = COMBATLOG_OBJECT_TYPE_GUARDIAN or 0x00002000
 	Private.BITMASK_PETS = BITMASK_TYPE_PET + BITMASK_TYPE_GUARDIAN
 
-	-- friendly units
+	-- friendly and hostile units
 	Private.BITMASK_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY or 0x00000010
+	Private.BITMASK_HOSTILE = COMBATLOG_OBJECT_REACTION_HOSTILE or 0x00000040
 end
 
 -------------------------------------------------------------------------------
@@ -73,6 +74,8 @@ function Private.register_classes()
 	classcolors.MONSTER = {r = 0.549, g = 0.388, b = 0.404, colorStr = "ff8c6367"}
 	classcolors.PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"}
 	classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
+	classcolors.ARENA_GOLD = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
+	classcolors.ARENA_GREEN = {r = 0.1, g = 1, b = 0.1, colorStr = "ff19ff19"}
 
 	local P = ns.db.profile
 
@@ -84,7 +87,7 @@ function Private.register_classes()
 			return color
 		end,
 		__call = function(t, class, arg)
-			local color = t[class]
+			local color = P.usecustomcolors and P.customcolors and P.customcolors[class] or t[class]
 			if not color.colorStr then
 				color.colorStr = Private.RGBPercToHex(color.r, color.g, color.b, true)
 			end
@@ -1127,8 +1130,8 @@ do
 	}
 
 	function Private.spell_info(spellid)
-		local res1, res2, res3, res4, res5, res6, res7, res8, res9
 		if spellid then
+			local res1, res2, res3, res4, res5, res6, res7, res8, res9
 			if customSpells[spellid] then
 				res1, res3 = customSpells[spellid][1], customSpells[spellid][2]
 			else
@@ -1138,8 +1141,8 @@ do
 				end
 				res3 = customIcons[spellid] or res3
 			end
+			return res1, res2, res3, res4, res5, res6, res7, res8, res9
 		end
-		return res1, res2, res3, res4, res5, res6, res7, res8, res9
 	end
 
 	function Private.spell_link(spellid)
@@ -1365,14 +1368,14 @@ do
 	local enemyPrototype = setmetatable({}, actorPrototype_mt)
 	ns.enemyPrototype = enemyPrototype
 
-	local function bind_set_actors(actors, set, player)
+	local function bind_set_actors(actors, set)
 		if not actors then return end
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and player then
-				playerPrototype:Bind(actor, set)
-			elseif actor then
+			if actor and actor.enemy then
 				enemyPrototype:Bind(actor, set)
+			elseif actor and not actor.enemy then
+				playerPrototype:Bind(actor, set)
 			end
 		end
 	end
@@ -1382,10 +1385,8 @@ do
 		if obj and getmetatable(obj) ~= self then
 			setmetatable(obj, self)
 			self.__index = self
-			bind_set_actors(obj.players, obj, true)
-			bind_set_actors(obj.enemies, obj)
+			bind_set_actors(obj.actors, obj)
 		end
-
 		self.arena = (ns.forPVP and obj and obj.type == "arena")
 		return obj
 	end

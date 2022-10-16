@@ -782,7 +782,6 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 							bar:SetScript("OnEnter", nil)
 							bar:SetScript("OnLeave", nil)
 							bar:SetScript("OnMouseDown", BarClickIgnore)
-							bar:EnableMouse(false)
 						end
 
 						bar:SetValue(data.value)

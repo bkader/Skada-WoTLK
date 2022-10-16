@@ -68,20 +68,20 @@ Skada:RegisterModule("Improvement", function(L)
 		end
 	end
 
-	updaters.Overhealing = function(set, player)
-		return player.overheal
+	updaters.Overhealing = function(set, actor)
+		return actor.overheal
 	end
 
-	updaters.Interrupts = function(set, player)
-		return player.interrupt
+	updaters.Interrupts = function(set, actor)
+		return actor.interrupt
 	end
 
-	updaters.Dispels = function(set, player)
-		return player.dispel
+	updaters.Dispels = function(set, actor)
+		return actor.dispel
 	end
 
-	updaters.Fails = function(set, player)
-		return player.fail
+	updaters.Fails = function(set, actor)
+		return actor.fail
 	end
 
 	local function find_boss_data(bossname)
@@ -248,7 +248,7 @@ Skada:RegisterModule("Improvement", function(L)
 		local encounter = find_encounter_data(boss, set.starttime)
 		if not encounter then return end
 
-		local actors = set.players
+		local actors = set.actors
 		for i = 1, #actors do
 			local actor = actors[i]
 			if actor and actor.id == userGUID then

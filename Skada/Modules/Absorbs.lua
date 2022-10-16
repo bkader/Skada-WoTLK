@@ -3,7 +3,8 @@ local Private = Skada.Private
 
 -- cache frequently used globals
 local pairs, format, uformat = pairs, string.format, Private.uformat
-local min, floor, new = math.min, math.floor, Private.newTable
+local min, floor = math.min, math.floor
+local new, del = Private.newTable, Private.delTable
 local GetSpellInfo = Private.spell_info or GetSpellInfo
 
 -- ============== --
@@ -22,7 +23,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	local GetTime, band, tsort, max = GetTime, bit.band, table.sort, math.max
 	local GetCurrentMapAreaID, UnitBuff, UnitHealthInfo = GetCurrentMapAreaID, UnitBuff, Skada.UnitHealthInfo
 	local IsActiveBattlefieldArena, UnitInBattleground = IsActiveBattlefieldArena, UnitInBattleground
-	local del, clear = Private.delTable, Private.clearTable
+	local clear = Private.clearTable
 	local mod_cols = nil
 
 	-- INCOMPLETE
@@ -847,11 +848,12 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		local actortime = mod_cols.sAPS and actor:GetTime(set)
 
 		for spellid, spell in pairs(spells) do
-			if spell.targets and spell.targets[win.targetname] then
+			local amount = spell.targets and spell.targets[win.targetname]
+			if amount then
 				nr = nr + 1
 
 				local d = win:spell(nr, spellid, spell)
-				d.value = spell.targets[win.targetname]
+				d.value = amount
 				format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
 		end
@@ -933,37 +935,19 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 
 		local nr = 0
+		local actors = set.actors
 
-		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if win:show_actor(actor, set) then
+			if win:show_actor(actor, set, true) and actor.absorb then
 				local aps, amount = actor:GetAPS(set, nil, not mod_cols.APS)
 				if amount > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor)
-					d.color = set.arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+					local d = win:actor(nr, actor, actor.enemy)
 					d.value = amount
 					format_valuetext(d, mod_cols, total, aps, win.metadata)
-				end
-			end
-		end
-
-		actors = set.arena and set.enemies or nil -- arena enemies
-		if not actors then return end
-
-		for i = 1, #actors do
-			local actor = actors[i]
-			if win:show_actor(actor, set, true) then
-				local aps, amount = actor:GetAPS(set, nil, not mod_cols.APS)
-				if amount > 0 then
-					nr = nr + 1
-
-					local d = win:actor(nr, actor, true)
-					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
-					d.value = amount
-					format_valuetext(d, mod_cols, total, aps, win.metadata)
+					win:color(d, set, actor.enemy)
 				end
 			end
 		end
@@ -1038,6 +1022,11 @@ Skada:RegisterModule("Absorbs", function(L, P)
 
 		function mod:CombatLeave()
 			self.checked = nil
+			wipe(absorb)
+			clear(heals)
+			clear(shields)
+			clear(shieldamounts)
+			clear(shieldspopped)
 		end
 	end
 
@@ -1139,19 +1128,16 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	end
 
 	function mod:SetComplete(set)
-		clear(absorb)
-		clear(heals)
-		clear(shields)
-		clear(shieldamounts)
-		clear(shieldspopped)
-
 		-- clean absorbspells table:
 		if not set.absorb or set.absorb == 0 then return end
-		for i = 1, #set.players do
-			local p = set.players[i]
-			local amount = p and p.absorb
-			if (not amount and p.absorbspells) or amount == 0 then
-				p.absorb, p.absorbspells = nil, del(p.absorbspells, true)
+		for i = 1, #set.actors do
+			local actor = set.actors[i]
+			if actor and not actor.enemy then
+				local amount = actor.absorb
+				if (not amount and actor.absorbspells) or amount == 0 then
+					actor.absorb = nil
+					actor.absorbspells = del(actor.absorbspells, true)
+				end
 			end
 		end
 	end
@@ -1415,37 +1401,19 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		end
 
 		local nr = 0
+		local actors = set.actors
 
-		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if win:show_actor(actor, set) then
+			if win:show_actor(actor, set, true) and (actor.absorb or actor.heal) then
 				local hps, amount = actor:GetAHPS(set, nil, not mod_cols.HPS)
 				if amount > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor)
-					d.color = set.arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+					local d = win:actor(nr, actor, actor.enemy)
 					d.value = amount
 					format_valuetext(d, mod_cols, total, hps, win.metadata)
-				end
-			end
-		end
-
-		actors = set.arena and set.enemies or nil -- arena enemies
-		if not actors then return end
-
-		for i = 1, #actors do
-			local actor = actors[i]
-			if win:show_actor(actor, set, true) then
-				local hps, amount = actor:GetAHPS(set, nil, not mod_cols.HPS)
-				if amount > 0 then
-					nr = nr + 1
-
-					local d = win:actor(nr, actor, true)
-					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
-					d.value = amount
-					format_valuetext(d, mod_cols, total, hps, win.metadata)
+					win:color(d, set, actor.enemy)
 				end
 			end
 		end
@@ -1570,37 +1538,19 @@ Skada:RegisterModule("HPS", function(L, P)
 		end
 
 		local nr = 0
+		local actors = set.actors
 
-		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if win:show_actor(actor, set) then
+			if win:show_actor(actor, set, true) and (actor.absorb or actor.heal) then
 				local amount = actor:GetAHPS(set, nil, not mod_cols.HPS)
 				if amount > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor)
-					d.color = set.arena and Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN") or nil
+					local d = win:actor(nr, actor, actor.enemy)
 					d.value = amount
 					format_valuetext(d, mod_cols, total, win.metadata)
-				end
-			end
-		end
-
-		actors = set.arena and set.enemies or nil -- arena enemies
-		if not actors then return end
-
-		for i = 1, #actors do
-			local actor = actors[i]
-			if win:show_actor(actor, set, true) then
-				local amount = actor:GetHPS(nil, not mod_cols.HPS)
-				if amount > 0 then
-					nr = nr + 1
-
-					local d = win:actor(nr, actor, true)
-					d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
-					d.value = amount
-					format_valuetext(d, mod_cols, total, win.metadata)
+					win:color(d, set, actor.enemy)
 				end
 			end
 		end
@@ -1702,20 +1652,24 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 		if not total or total == 0 then return end
 
 		clear(C)
-		for i = 1, #set.players do
-			local p = set.players[i]
-			local spell = p and ((p.absorbspells and p.absorbspells[id]) or (p.healspells and p.healspells[id])) or nil
-			if spell then
-				if not C[id] then
-					C[id] = new()
-					C[id].school = spell.school
-					C[id].amount = spell.amount
-					C[id].o_amt = spell.o_amt
-					C[id].isabsorb = (p.absorbspells and p.absorbspells[id])
-				else
-					C[id].amount = C[id].amount + spell.amount
-					if spell.o_amt then
-						C[id].o_amt = (C[id].o_amt or 0) + spell.o_amt
+		for i = 1, #set.actors do
+			local actor = set.actors[i]
+			if actor and not actor.enemy and (actor.absorbspells or actor.healspells) then
+				local spell = actor.absorbspells and actor.absorbspells[id] or actor.healspells and actor.healspells[id]
+				if spell and spell.amount then
+					local t = C[id]
+					if not t then
+						t = new()
+						t.school = spell.school
+						t.amount = spell.amount
+						t.o_amt = spell.o_amt
+						t.isabsorb = (actor.absorbspells and actor.absorbspells[id])
+						C[id] = t
+					else
+						t.amount = t.amount + spell.amount
+						if spell.o_amt then
+							t.o_amt = (t.o_amt or 0) + spell.o_amt
+						end
 					end
 				end
 			end
@@ -1753,38 +1707,46 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 
 		-- let's go...
 		local total = 0
-		local players = clear(C)
+		local overheal = 0
+		local sources = clear(C)
 
-		local _players = set.players
-		for i = 1, #_players do
-			local p = _players[i]
-			local spell = p and ((p.absorbspells and p.absorbspells[win.spellid]) or (p.healspells and p.healspells[win.spellid])) or nil
-			if spell then
-				players[p.name] = new()
-				players[p.name].id = p.id
-				players[p.name].class = p.class
-				players[p.name].role = p.role
-				players[p.name].spec = p.spec
-				players[p.name].amount = spell.amount
-				players[p.name].time = mod.metadata.columns.sHPS and p:GetTime()
-				-- calculate the total.
-				total = total + spell.amount
+		local actors = set.actors
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and not actor.enemy and (actor.absorbspells or actor.healspells) then
+				local spell = actor.absorbspells and actor.absorbspells[win.spellid]
+				spell = spell or actor.healspells and actor.healspells[win.spellid]
+				if spell and spell.amount then
+					sources[actor.name] = new()
+					sources[actor.name].id = actor.id
+					sources[actor.name].class = actor.class
+					sources[actor.name].role = actor.role
+					sources[actor.name].spec = actor.spec
+					sources[actor.name].enemy = actor.enemy
+					sources[actor.name].amount = spell.amount
+					sources[actor.name].time = mod.metadata.columns.sHPS and actor:GetTime(set)
+					-- calculate the total.
+					total = total + spell.amount
+					if spell.o_amt then
+						overheal = overheal + spell.o_amt
+					end
+				end
 			end
 		end
 
-		if total == 0 then
+		if total == 0 and overheal == 0 then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
 		end
 
 		local nr = 0
-		for playername, player in pairs(players) do
+		for sourcename, source in pairs(sources) do
 			nr = nr + 1
 
-			local d = win:actor(nr, player, nil, playername)
-			d.value = player.amount
-			format_valuetext(d, mod_cols, total, player.time and (d.value / player.time), win.metadata, true)
+			local d = win:actor(nr, source, source.enemy, sourcename)
+			d.value = source.amount
+			format_valuetext(d, mod_cols, total, source.time and (d.value / source.time), win.metadata, true)
 		end
 	end
 
@@ -1830,6 +1792,8 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 	---------------------------------------------------------------------------
 
 	local function fill_spells_table(t, spellid, info)
+		if not info or not (info.amount or info.o_amt) then return end
+
 		local spell = t[spellid]
 		if not spell then
 			spell = new()
@@ -1850,18 +1814,18 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 	end
 
 	get_absorb_heal_spells = function(self, tbl)
-		if not self.players or not (self.absorb or self.heal) then return end
+		if not self.actors or not (self.absorb or self.heal) then return end
 
 		tbl = clear(tbl or C)
-		for i = 1, #self.players do
-			local player = self.players[i]
-			if player and player.healspells then
-				for spellid, spell in pairs(player.healspells) do
+		for i = 1, #self.actors do
+			local actor = self.actors[i]
+			if actor and actor.healspells then
+				for spellid, spell in pairs(actor.healspells) do
 					fill_spells_table(tbl, spellid, spell)
 				end
 			end
-			if player and player.absorbspells then
-				for spellid, spell in pairs(player.absorbspells) do
+			if actor and actor.absorbspells then
+				for spellid, spell in pairs(actor.absorbspells) do
 					fill_spells_table(tbl, spellid, spell)
 				end
 			end

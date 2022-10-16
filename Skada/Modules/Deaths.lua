@@ -17,11 +17,10 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local GetSpellInfo = Private.spell_info or GetSpellInfo
 	local GetSpellLink = Private.spell_link or GetSpellLink
 	local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
-	local GetTime, time, date = GetTime, time, date
+	local GetTime, time, date, wipe = GetTime, time, date, wipe
 	local mod_cols, submod_cols = nil, nil
 
 	-- cache colors
-	local GRAY_COLOR = GRAY_FONT_COLOR
 	local GREEN_COLOR = GREEN_FONT_COLOR
 	local ORANGE_COLOR = ORANGE_FONT_COLOR
 	local RED_COLOR = RED_FONT_COLOR
@@ -427,13 +426,11 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 				win.metadata.maxvalue = deathlog.hpm
 			end
 
-			local nr = 0
-
 			-- 1. remove "datakey" from ended logs.
 			-- 2. postfix empty table
 			-- 3. add a fake entry for the actual death
 			if deathlog.timeod then
-				win.datakey = nil -- [1]
+				-- win.datakey = nil -- [1] -- TODO: needs review
 
 				if #deathlog.log == 0 then -- [2]
 					local log = new()
@@ -449,10 +446,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 				end
 
 				if win.metadata then -- [3]
-					nr = nr + 1
-					local d = win:nr(nr)
+					local d = win:nr(0)
 
-					d.id = nr
+					d.id = 0
 					d.label = date("%H:%M:%S", deathlog.timeod)
 					d.icon = icon_mode
 					d.color = nil
@@ -463,6 +459,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 			tsort(deathlog.log, sort_logs)
 
+			local nr = 0
 			local curtime = deathlog.time or set.last_time or GetTime()
 			for i = #deathlog.log, 1, -1 do
 				local log = deathlog.log[i]
@@ -637,29 +634,27 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 		local nr = 0
 		local curtime = set.last_time or GetTime()
+		local actors = set.actors
 
-		local actors = set.players -- players
 		for i = 1, #actors do
-			local p = actors[i]
-			if win:show_actor(p, set) and (p.death or WATCH) then
+			local actor = actors[i]
+			if win:show_actor(actor, set, true) and actor.deathlog and (actor.death or WATCH) then
 				nr = nr + 1
-				local d = win:actor(nr, p)
+				local d = win:actor(nr, actor, actor.enemy)
 
-				if p.death then
-					d.value = p.death
-					d.valuetext = p.death
+				if actor.death then
+					d.value = actor.death
+					d.valuetext = actor.death
 
-					if p.deathlog then
-						local first_death = p.deathlog[#p.deathlog]
+					if actor.deathlog then
+						local first_death = actor.deathlog[#actor.deathlog]
 						if first_death and first_death.time then
 							d.value = first_death.time
-							d.color = (WATCH and first_death.time) and GRAY_COLOR or nil
 						end
 					end
 				else
 					d.value = curtime
 					d.valuetext = "..."
-					d.color = nil
 				end
 			end
 		end
@@ -678,27 +673,25 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		local nr = 0
 		local curtime = set.last_time or GetTime()
 
-		local actors = set.players -- players
+		local actors = set.actors
 		for i = 1, #actors do
-			local p = actors[i]
-			if win:show_actor(p, set) and p.deathlog and (p.death or WATCH) then
-				local num = #p.deathlog
+			local actor = actors[i]
+			if win:show_actor(actor, set, true) and actor.deathlog and (actor.death or WATCH) then
+				local num = #actor.deathlog
 				for j = 1, num do
-					local death = p.deathlog[j]
+					local death = actor.deathlog[j]
 					if death and (death.timeod or WATCH) then
 						nr = nr + 1
-						local d = win:actor(nr, p)
-						d.id = format("%s::%d", p.id, j)
+						local d = win:actor(nr, actor)
+						d.id = format("%s::%d", actor.id, j)
 
 						if death.timeod then
-							d.color = WATCH and GRAY_COLOR or nil
 							d.value = death.time
 							d.valuetext = Skada:FormatValueCols(
 								mod_cols.Time and date("%H:%M:%S", death.timeod),
 								mod_cols.Survivability and Skada:FormatTime(death.timeod - set.starttime, true)
 							)
 						else
-							d.color = nil
 							d.value = curtime or GetTime()
 							d.valuetext = "..."
 						end
@@ -914,21 +907,21 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	end
 
 	function mod:CombatLeave()
-		clear(data)
+		wipe(data)
 	end
 
 	function mod:SetComplete(set)
 		-- clean deathlogs.
-		for i = 1, #set.players do
-			local player = set.players[i]
-			if player and (not set.death or not player.death) then
-				player.death, player.deathlog = nil, del(player.deathlog, true)
-			elseif player and player.deathlog then
-				while #player.deathlog > (player.death or 0) do
-					del(tremove(player.deathlog, 1), true)
+		for i = 1, #set.actors do
+			local actor = set.actors[i]
+			if actor and not actor.enemy and (not set.death or not actor.death) then
+				actor.death, actor.deathlog = nil, del(actor.deathlog, true)
+			elseif actor and not actor.enemy and actor.deathlog then
+				while #actor.deathlog > (actor.death or 0) do
+					del(tremove(actor.deathlog, 1), true)
 				end
-				if #player.deathlog == 0 then
-					player.deathlog = del(player.deathlog)
+				if #actor.deathlog == 0 then
+					actor.deathlog = del(actor.deathlog)
 				end
 			end
 		end

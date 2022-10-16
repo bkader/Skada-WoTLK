@@ -187,14 +187,14 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		end
 
 		local nr = 0
+		local actors = set.actors
 
-		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if win:show_actor(actor, set) and actor.potion then
+			if win:show_actor(actor, set, true) and actor.potion then
 				nr = nr + 1
 
-				local d = win:actor(nr, actor)
+				local d = win:actor(nr, actor, actor.enemy)
 				d.value = actor.potion
 				format_valuetext(d, mod_cols, total, win.metadata)
 			end
@@ -384,13 +384,13 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 
 	get_actors_by_potion = function(self, potionid, class, tbl)
 		local total = 0
-		if not self.potion or not potionid then
+		if not self.actors or not self.potion or not potionid then
 			return total
 		end
 
 		tbl = clear(tbl or C)
 
-		local actors = self.players -- players
+		local actors = self.actors
 		for i = 1, #actors do
 			local a = actors[i]
 			if a and a.potionspells and a.potionspells[potionid] and (not class or class == a.class) then
@@ -400,6 +400,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 				tbl[a.name].class = a.class
 				tbl[a.name].role = a.role
 				tbl[a.name].spec = a.spec
+				tbl[a.name].enemy = a.enemy
 				tbl[a.name].count = a.potionspells[potionid]
 			end
 		end
