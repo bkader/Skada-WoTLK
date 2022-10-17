@@ -1446,7 +1446,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		local set = Skada:GetSet("current")
 		local actor = set and set:GetPlayer(Skada.userGUID, Skada.userName)
 		if actor then
-			return Skada:FormatNumber(actor:GetAHPS(set)) .. " " .. L["HPS"]
+			return format("%s %s", Skada:FormatNumber((actor:GetAHPS(set))), L["HPS"])
 		end
 	end
 

@@ -528,12 +528,11 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 					ignorePets = true,
 					showAggroBar = true
 				}
-			end
-			if M.threat.sinkOptions then
-				M.threat.sinkOptions = nil
+			else
+				M.threat.sinkOptions = nil -- old stuff
+				M.threat.output = M.threat.output or 1
 			end
 
-			M.threat.output = M.threat.output or 1
 			self.db = M.threat
 			Skada.options.args.modules.args.threat = opts
 		end

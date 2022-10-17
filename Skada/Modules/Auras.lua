@@ -152,14 +152,14 @@ do
 
 	local function find_or_create_actor(set, info, is_enemy)
 		-- 1. make sure we can record to the segment.
-		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
+		if not set or (set == Skada.total and not Skada.db.totalidc) then return end
 
 		-- 2. make sure we have valid data.
 		if not info or not info.spellid then return end
 
 		-- 3. retrieve the actor.
 		if is_enemy then -- enemy?
-			return Skada:GetEnemy(set, info.actorname, info.actorid, info.actorflags, true)
+			return Skada:GetEnemy(set, info.actorname, info.actorid, info.actorflags)
 		end
 
 		return Skada:GetPlayer(set, info.actorid, info.actorname, info.actorflags) -- player?

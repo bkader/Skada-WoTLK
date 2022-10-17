@@ -4,7 +4,7 @@ local Private = Skada.Private
 local select, pairs, type = select, pairs, type
 local tonumber, format = tonumber, string.format
 local setmetatable, wipe, band = setmetatable, wipe, bit.band
-local next, print = next, print
+local next, print, GetTime = next, print, GetTime
 local _
 
 local L = LibStub("AceLocale-3.0"):GetLocale(folder)
@@ -12,6 +12,7 @@ local UnitClass, GetPlayerInfoByGUID = UnitClass, GetPlayerInfoByGUID
 local GetClassFromGUID = Skada.GetClassFromGUID
 local new, del = Private.newTable, Private.delTable
 local clear, copy = Private.clearTable, Private.tCopy
+local userName = Skada.userName
 
 local COMBATLOG_OBJECT_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
 
@@ -19,8 +20,160 @@ local COMBATLOG_OBJECT_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
 -- debug function
 
 function Skada:Debug(...)
-	if self.db.profile.debug then
+	if self.db.debug then
 		print("\124cff33ff99Skada Debug\124r:", ...)
+	end
+end
+
+-------------------------------------------------------------------------------
+-- modules and display functions
+
+do
+	-- when modules are created w make sure to save
+	-- their english "name" then localize "moduleName"
+	local function on_module_created(self, module)
+		module.localeName = L[module.moduleName]
+		module.OnModuleCreated = module.OnModuleCreated or on_module_created
+	end
+	Skada.OnModuleCreated = on_module_created
+
+	local tremove = table.remove
+	local tconcat = table.concat
+
+	local function module_table(...)
+		local args = new()
+		for i = 1, select("#", ...) do
+			args[i] = select(i, ...)
+		end
+
+		if #args >= 2 then
+			-- name must always be first
+			local name = tremove(args, 1)
+			if type(name) ~= "string" then
+				del(args)
+				return
+			end
+
+			-- second arg can be the desc or the callback
+			local func = nil
+			local desc = tremove(args, 1)
+			if type(desc) == "string" then
+				func = tremove(args, 1)
+				desc = L[desc]
+			elseif type(desc) == "function" then
+				func = desc
+				desc = nil
+			end
+
+			-- double check just in case
+			if type(func) ~= "function" then
+				del(args)
+				return
+			end
+
+			local module = new()
+			module.name = name
+			module.func = func
+
+			-- treat args left as dependencies
+			local args_rem = #args
+			if args_rem > 0 then
+				module.deps = {}
+				for i = 1, #args do
+					module.deps[i] = args[i]
+					args[i] = L[args[i]] -- localize
+				end
+
+				-- format module's description
+				if desc then
+					desc = format("%s\n%s", desc, format(L["\124cff00ff00Requires\124r: %s"], tconcat(args, ", ")))
+				else
+					desc = format(L["\124cff00ff00Requires\124r: %s"], tconcat(args, ", "))
+				end
+			end
+			module.desc = desc
+			del(args)
+
+			return module
+		end
+
+		del(args)
+	end
+
+	-- adds a module to the loadable modules table.
+	function Skada:RegisterModule(...)
+		local module = module_table(...)
+		if not module then return end
+
+		-- add to loadable modules table
+		self.LoadableModules = self.LoadableModules or new()
+		self.LoadableModules[#self.LoadableModules + 1] = module
+
+		-- add its check button
+		self.options.args.modules.args.blocked.args[module.name] = {
+			type = "toggle",
+			name = L[module.name],
+			desc = module.desc
+		}
+
+		-- return it so that RegisterDisplay changes order
+		return self.options.args.modules.args.blocked.args[module.name]
+	end
+
+	do
+		local cbxorder = 910
+
+		-- registers a loadable display system
+		function Skada:RegisterDisplay(...)
+			local args = self:RegisterModule(...)
+			if not args then return end
+			args.order = cbxorder
+			cbxorder = cbxorder + 10
+		end
+
+		local displays = Skada.displays
+		local numorder = 80
+
+		-- adds a display system
+		function Skada:AddDisplaySystem(key, mod)
+			displays[key] = mod
+			if mod.description then
+				self.options.args.windows.args[format("%sdesc", key)] = {
+					type = "description",
+					name = format("\n\124cffffd700%s\124r:\n%s", mod.localeName, mod.description),
+					fontSize = "medium",
+					order = numorder
+				}
+				numorder = numorder + 10
+			end
+		end
+	end
+
+	-- checks whether the select module(s) are disabled
+	function Skada:IsDisabled(...)
+		for i = 1, select("#", ...) do
+			if self.db.modulesBlocked[select(i, ...)] == true then
+				return true
+			end
+		end
+		return false
+	end
+
+	-- loads registered modules
+	function Skada:LoadModules(release)
+		-- loadable modules
+		if self.LoadableModules then
+			local mod = tremove(self.LoadableModules, 1)
+			while mod do
+				if mod.name and mod.func and not self:IsDisabled(mod.name) and not (mod.deps and self:IsDisabled(unpack(mod.deps))) then
+					mod.func(L, self.db, self.global, self.cacheTable, self.db.modules)
+				end
+				mod = tremove(self.LoadableModules, 1)
+			end
+		end
+
+		if not release then return end
+		self.LoadableModules = del(self.LoadableModules)
 	end
 end
 
@@ -69,7 +222,7 @@ do
 
 		Skada.FormatNumber = function(self, num, fmt)
 			if not num then return end
-			fmt = fmt or self.db.profile.numberformat or 1
+			fmt = fmt or self.db.numberformat or 1
 
 			if fmt == 1 and (num >= 1e3 or num <= -1e3) then
 				return ShortenValue(num)
@@ -84,7 +237,7 @@ do
 end
 
 function Skada:FormatPercent(value, total, dec)
-	dec = dec or self.db.profile.decimals or 1
+	dec = dec or self.db.decimals or 1
 
 	-- no value? 0%
 	if not value then
@@ -111,19 +264,19 @@ function Skada:FormatTime(sec, alt, ...)
 	elseif sec >= 3600 then
 		local h = floor(sec / 3600)
 		local m = floor(sec / 60 - (h * 60))
-		local s = floor(sec - h * 3600 - m * 60 + 0.5)
+		local s = floor(sec - h * 3600 - m * 60)
 		return format("%02.f:%02.f:%02.f", h, m, s)
 	else
-		return format("%02.f:%02.f", floor(sec / 60), floor(sec % 60 + 0.5))
+		return format("%02.f:%02.f", floor(sec / 60), floor(sec % 60))
 	end
 end
 
 local Translit = LibStub("LibTranslit-1.0", true)
 function Skada:FormatName(name)
-	if self.db.profile.realmless then
+	if self.db.realmless then
 		name = gsub(name, ("%-.*"), "")
 	end
-	if self.db.profile.translit and Translit then
+	if self.db.translit and Translit then
 		return Translit:Transliterate(name, "!")
 	end
 	return name
@@ -223,12 +376,13 @@ end
 -------------------------------------------------------------------------------
 -- class, role and spec functions
 
+local is_player = Private.is_player
+local is_pet = Private.is_pet
+local unit_class
 do
-	local is_player = Private.is_player
-	local is_pet = Private.is_pet
 	local is_creature = Private.is_creature
 
-	function Private.unit_class(guid, flag, set, db, name)
+	function unit_class(guid, flag, set, db, name)
 		set = set or Skada.current
 
 		-- an existing actor?
@@ -238,7 +392,7 @@ do
 				local actor = actors[i]
 				if actor and actor.id == guid then
 					return actor.class, actor.role, actor.spec
-				elseif actor and actor.name == name and actor.class and Skada.validclass[actor.class] then
+				elseif actor and actor.name == name and Skada.validclass[actor.class] then
 					return actor.class, actor.role, actor.spec
 				end
 			end
@@ -265,6 +419,7 @@ do
 
 		return class
 	end
+	Private.unit_class = unit_class
 end
 
 -------------------------------------------------------------------------------
@@ -363,7 +518,7 @@ do
 
 		local actors = set.actors
 		for i = 1, #actors do
-			local actor = playerPrototype:Bind(actors[i], set)
+			local actor = playerPrototype:Bind(actors[i])
 			if actor then
 				local damage, heal, absorb = 0, 0, 0
 
@@ -397,7 +552,7 @@ do
 	end
 
 	local function update_fake_data(self)
-		randomize_fake_data(self.current, self.db.profile.updatefrequency or 0.25)
+		randomize_fake_data(self.current, self.db.updatefrequency or 0.25)
 		self:UpdateDisplay(true)
 	end
 
@@ -424,7 +579,7 @@ do
 
 		self:Wipe()
 		self.current = generate_fake_data()
-		updateTimer = self:ScheduleRepeatingTimer(update_fake_data, self.db.profile.updatefrequency or 0.25, self)
+		updateTimer = self:ScheduleRepeatingTimer(update_fake_data, self.db.updatefrequency or 0.25, self)
 	end
 end
 
@@ -595,7 +750,7 @@ do
 
 	-- "PURR" is a special key to whisper with progress window.
 	local function send_comm_message(self, channel, target, ...)
-		if target == self.userName then
+		if target == userName then
 			return -- to yourself? really...
 		elseif channel ~= "WHISPER" and channel ~= "PURR" and not IsInGroup() then
 			return -- only for group members!
@@ -635,7 +790,7 @@ do
 	end
 
 	local function on_comm_received(self, prefix, message, channel, sender)
-		if prefix == folder and channel and sender and sender ~= self.userName then
+		if prefix == folder and channel and sender and sender ~= userName then
 			dispatch_comm(sender, Private.deserialize(message))
 		end
 	end
@@ -756,7 +911,7 @@ function Skada:GetActiveTime(set, actor, active)
 	local settime = self:GetSetTime(set, active)
 
 	-- active: actor's time.
-	if (self.db.profile.timemesure ~= 2 or active) and actor.time and actor.time > 0 then
+	if (self.db.timemesure ~= 2 or active) and actor.time and actor.time > 0 then
 		return max(1, min(actor.time, settime))
 	end
 
@@ -783,7 +938,7 @@ function Skada:AddActiveTime(set, actor, target, override)
 	set.activetime = (set.activetime or 0) + adding
 
 	-- to save up memory, we only record the rest to the current set.
-	if (set == self.total and not self.db.profile.totalidc) or not target then return end
+	if (set == self.total and not self.db.totalidc) or not target then return end
 
 	actor.timespent = actor.timespent or {}
 	actor.timespent[target] = (actor.timespent[target] or 0) + adding
@@ -800,7 +955,7 @@ do
 	function Skada:ShowPopup(win, popup)
 		if Skada.testMode then return end
 
-		if Skada.db.profile.skippopup and not popup then
+		if Skada.db.skippopup and not popup then
 			Skada:Reset(IsShiftKeyDown())
 			return
 		end
@@ -875,14 +1030,14 @@ do
 	local ReloadUI = ReloadUI
 	local t = {timeout = 15, whileDead = 0}
 	local f = function()
-		if Skada.db.profiles then
-			wipe(Skada.db.profiles)
+		if Skada.data.profiles then
+			wipe(Skada.data.profiles)
 		end
-		if Skada.db.profileKeys then
-			wipe(Skada.db.profileKeys)
+		if Skada.data.profileKeys then
+			wipe(Skada.data.profileKeys)
 		end
 
-		Skada.db.global.reinstall = true
+		Skada.global.reinstall = true
 		ReloadUI()
 	end
 
@@ -946,7 +1101,7 @@ end
 
 -- memory usage check
 function Skada:CheckMemory()
-	if not self.db.profile.memorycheck then return end
+	if not self.db.memorycheck then return end
 	UpdateAddOnMemoryUsage()
 	local memory = GetAddOnMemoryUsage(folder)
 	if memory > (self.maxmeme * 1024) then
@@ -993,194 +1148,257 @@ function Skada:FilterClass(win, id, label)
 end
 
 -------------------------------------------------------------------------------
--- profile import, export and sharing
+-- player & enemies functions
 
 do
-	local ipairs, strmatch, uformat = ipairs, strmatch, Private.uformat
-	local UnitName, GetRealmName = UnitName, GetRealmName
-	local open_window = Private.open_import_export
-	local serialize_profile = nil
+	local GetUnitRole = Skada.GetUnitRole
+	local GetUnitSpec = Skada.GetUnitSpec
+	local players, pets = Private.players, Private.pets
+	local modes, callbacks = Skada.modes, Skada.callbacks
+	local playerPrototype = Skada.playerPrototype
+	local enemyPrototype = Skada.enemyPrototype
+	local userGUID = Skada.userGUID
 
-	local function get_profile_name(str)
-		str = strmatch(strsub(str, 1, 64), "%[(.-)%]")
-		str = str and str:gsub("=", ""):gsub("profile", ""):trim()
-		return (str ~= "") and str
+	-- finds a player that was already recorded
+	local dummy_pet = {class = "PET"} -- used as fallback
+	function Skada:FindPlayer(set, id, name, is_create)
+		id = id or name -- fallback
+
+		local actors = set and (id ~= "total") and (name ~= L["Total"]) and set.actors
+		if not actors then
+			return
+		elseif not set._actoridx then
+			set._actoridx = new()
+		end
+
+		-- already cached player?
+		local player = set._actoridx[id]
+		if player then
+			return playerPrototype:Bind(player)
+		end
+
+		-- search the set
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and not actor.enemy and (actor.id == id or actor.name == name) then
+				set._actoridx[id] = actor
+				return actor
+			end
+		end
+
+		if is_create then return end
+
+		-- speed up things with pets
+		local ownerName = strmatch(name, "%<(%a+)%>")
+		if ownerName then
+			dummy_pet.id = id
+			dummy_pet.name = name
+			dummy_pet.owner = ownerName
+			return playerPrototype:Bind(dummy_pet)
+		end
+
+		-- search friendly enemies
+		local enemy = self:FindEnemy(set, name, id)
+		if enemy and enemy.flag and band(enemy.flag, BITMASK_FRIENDLY) ~= 0 then
+			set._actoridx[id] = enemy
+			return enemy
+		end
+
+		-- our last hope!
+		dummy_pet.id = id
+		dummy_pet.name = name or L["Unknown"]
+		return playerPrototype:Bind(dummy_pet)
 	end
 
-	local function check_profile_name(name)
-		local profiles = Skada.db:GetProfiles()
-		local ProfileExists = function(name)
-			if name then
-				for _, v in ipairs(profiles) do
-					if name == v then
-						return true
-					end
+	-- finds a player table or creates it if not found
+	function Skada:GetPlayer(set, guid, name, flag)
+		if not (set and set.actors and guid) then return end
+
+		local actor = self:FindPlayer(set, guid, name, true)
+
+		if not actor then
+			if not name then return end
+
+			actor = new()
+			actor.id = guid
+			actor.name = name
+			actor.flag = flag
+			actor.last = set.last_time or GetTime()
+			actor.time = 0
+			actor.__new = true -- new entry (removed later)
+
+			if players[guid] then
+				_, actor.class = UnitClass(players[guid])
+				actor.role = GetUnitRole(guid)
+				actor.spec = GetUnitSpec(guid)
+			elseif pets[guid] then
+				actor.class = "PET"
+			else
+				actor.class, actor.role, actor.pec = unit_class(guid, flag, nil, nil, name)
+			end
+
+			for i = 1, #modes do
+				local mode = modes[i]
+				if mode and mode.AddPlayerAttributes then
+					mode:AddPlayerAttributes(actor, set)
 				end
 			end
+
+			set.actors[#set.actors + 1] = actor
 		end
 
-		name = name or format("%s - %s", UnitName("player"), GetRealmName())
-
-		local n, i = name, 1
-		while ProfileExists(name) do
-			i = i + 1
-			name = format("%s (%d)", n, i)
+		-- not all modules provide flags
+		if actor.flag == nil and flag then
+			actor.flag = flag
+			actor.__mod = true
 		end
 
-		return name
+		-- attempt to fix player name:
+		if (actor.name == L["Unknown"] and name ~= L["Unknown"]) or (actor.name == actor.id and name ~= actor.id) then
+			actor.name = (actor.id == userGUID or guid == userGUID) and userName or name
+			actor.__mod = true
+		end
+
+		-- fix players created before their info was received
+		if self.validclass[actor.class] then
+			if actor.role == nil or actor.role == "NONE" then
+				actor.role = GetUnitRole(actor.id)
+				actor.__mod = true
+			end
+			if actor.spec == nil then
+				actor.spec = GetUnitSpec(actor.id)
+				actor.__mod = true
+			end
+		end
+
+		-- total set has "last" always removed.
+		if not actor.last then
+			actor.last = set.last_time or GetTime()
+			actor.__mod = true
+		end
+
+		if actor.__new or actor.__mod then
+			actor.__mod = nil
+			callbacks:Fire("Skada_GetPlayer", actor, set)
+		end
+
+		self.changed = true
+
+		if actor.__new then
+			actor.__new = nil
+			return playerPrototype:Bind(actor), true
+		end
+		return actor
 	end
 
-	local temp = {}
-	function serialize_profile()
-		wipe(temp)
-		copy(temp, Skada.db.profile, "modeclicks")
-		temp.__name = Skada.db:GetCurrentProfile()
-		return Private.serialize(true, format("%s profile", temp.__name), temp)
+	-- finds an enemy unit
+	function Skada:FindEnemy(set, name, id)
+		local actors = name and set and set.actors
+		if not actors then
+			return
+		elseif not set._actoridx then
+			set._actoridx = new()
+		end
+
+		id = id or name -- fallback
+
+		local enemy = set._actoridx[id]
+		if enemy then
+			return enemyPrototype:Bind(enemy)
+		end
+
+		for i = 1, #actors do
+			local actor = actors[i]
+			if actor and actor.enemy and (actor.id == id or actor.name == name) then
+				set._actoridx[name] = enemyPrototype:Bind(actor)
+				return actor
+			end
+		end
 	end
 
-	local function import_profile(data, name)
-		if type(data) ~= "string" then
-			Skada:Print("Import profile failed, data supplied must be a string.")
-			return false
-		end
+	-- finds or create an enemy entry
+	function Skada:GetEnemy(set, name, guid, flag)
+		if not (set and set.actors and name) then return end
 
-		local success, profile = Private.deserialize(data, true)
-		if not success or profile.numbersystem == nil then -- sanity check!
-			Skada:Print("Import profile failed!")
-			return false
-		end
+		local actor = self:FindEnemy(set, name, guid)
 
-		name = name or get_profile_name(data)
-		if profile.__name then
-			name = name or profile.__name
-			profile.__name = nil
-		end
-		local profileName = check_profile_name(name)
+		if not actor then
 
-		-- backwards compatibility
-		if profile[folder] and type(profile[folder]) == "table" then
-			profile = profile[folder]
-		end
+			actor = new()
+			actor.id = guid
+			actor.name = name
+			actor.flag = flag
+			actor.enemy = true
+			actor.__new = true
 
-		local old_reload_settings = Private.reload_settings
-		Private.reload_settings = function()
-			Private.reload_settings = old_reload_settings
-			copy(Skada.db.profile, profile)
-			Private.reload_settings()
-			LibStub("AceConfigRegistry-3.0"):NotifyChange(folder)
-		end
-
-		Skada.db:SetProfile(profileName)
-		Private.reload_settings()
-		Skada:Wipe()
-		Skada:UpdateDisplay(true)
-		return true
-	end
-
-	function Skada:ProfileImport()
-		return open_window(L["Paste here a profile in text format."], import_profile)
-	end
-
-	function Skada:ProfileExport()
-		return open_window(L["This is your current profile in text format."], serialize_profile())
-	end
-
-	function Private.advanced_profile(args)
-		if not args then return end
-		Private.advanced_profile = nil -- remove it
-		local CONST_COMM_PROFILE = "PR"
-
-		local Share = {}
-
-		function Share:Enable(receive)
-			if receive then
-				self.enabled = true
-				Skada.AddComm(self, CONST_COMM_PROFILE, "Receive")
+			if guid or flag then
+				actor.class = Private.unit_class(guid, flag, nil, actor, name)
 			else
-				self.enabled = nil
-				Skada.RemoveAllComms(self)
+				actor.class = "ENEMY"
+			end
+
+			for i = 1, #modes do
+				local mode = modes[i]
+				if mode and mode.AddEnemyAttributes then
+					mode:AddEnemyAttributes(actor, set)
+				end
+			end
+
+			set.actors[#set.actors + 1] = actor
+		end
+
+		-- in case of a missing guid
+		if actor.id == nil and guid and guid ~= name then
+			actor.id = guid
+			actor.__mod = true
+		end
+
+		-- not all modules provide flags
+		if actor.flag == nil and flag then
+			actor.flag = flag
+			actor.__mod = true
+		end
+
+		-- attempt to fix enemy name:
+		if actor.name == L["Unknown"] and name ~= L["Unknown"] then
+			actor.name = name
+			actor.__mod = true
+		end
+
+		-- in pvp while having pvp module enabled?
+		if self.forPVP and self.validclass[actor.class] then
+			actor.__mod = (actor.spec == nil) and true or nil
+		end
+
+		if actor.__new or actor.__mod then
+			actor.__mod = nil
+			callbacks:Fire("Skada_GetEnemy", actor, set)
+		end
+
+		self.changed = true
+		if actor.__new then
+			actor.__new = nil
+			return enemyPrototype:Bind(actor), true
+		end
+		return actor
+	end
+
+	-- generic find a player or an enemey
+	function Skada:FindActor(set, id, name, no_strict)
+		return self:FindPlayer(set, id, name, not no_strict) or self:FindEnemy(set, name, id)
+	end
+
+	-- generic: finds a player/enemy or creates it.
+	function Skada:GetActor(set, id, name, flag)
+		local actor = self:FindActor(set, id, name)
+		-- creates it if not found
+		if not actor then
+			if is_player(id, name, flag) == 1 or is_pet(id, flag) == 1 then -- group members or group pets
+				actor = self:GetPlayer(set, id, name, flag)
+			else -- an outsider maybe?
+				actor = self:GetEnemy(set, name, id, flag)
 			end
 		end
-
-		function Share:Receive(sender, profileStr)
-			local acceptfunc = function()
-				import_profile(profileStr, sender)
-				collectgarbage()
-				Share:Enable(false) -- disable receiving
-				Share.target = nil -- reset target
-			end
-			Private.confirm_dialog(uformat(L["opt_profile_received"], sender), acceptfunc)
-		end
-
-		function Share:Send(profileStr, target)
-			Skada:SendComm("PURR", target, CONST_COMM_PROFILE, profileStr)
-		end
-
-		args.advanced = {
-			type = "group",
-			name = L["Advanced"],
-			order = 10,
-			args = {
-				sharing = {
-					type = "group",
-					name = L["Network Sharing"],
-					inline = true,
-					order = 10,
-					hidden = function() return Skada.db.profile.syncoff end,
-					args = {
-						name = {
-							type = "input",
-							name = L["Player Name"],
-							get = function()
-								return Share.target or ""
-							end,
-							set = function(_, value)
-								Share.target = value:trim()
-							end,
-							order = 10
-						},
-						send = {
-							type = "execute",
-							name = L["Send Profile"],
-							func = function()
-								if Share.target and Share.target ~= "" then
-									Share:Send(serialize_profile(), Share.target)
-								end
-							end,
-							disabled = function() return (not Share.target or Share.target == "") end,
-							order = 20
-						},
-						accept = {
-							type = "toggle",
-							name = L["Accept profiles from other players."],
-							get = function() return Share.enabled end,
-							set = function() Share:Enable(not Share.enabled) end,
-							width = "full",
-							order = 30
-						}
-					}
-				},
-				importexport = {
-					type = "group",
-					name = L["Profile Import/Export"],
-					inline = true,
-					order = 20,
-					args = {
-						importbtn = {
-							type = "execute",
-							name = L["Import Profile"],
-							order = 10,
-							func = Skada.ProfileImport
-						},
-						exportbtn = {
-							type = "execute",
-							name = L["Export Profile"],
-							order = 20,
-							func = Skada.ProfileExport
-						}
-					}
-				}
-			}
-		}
+		return actor
 	end
 end

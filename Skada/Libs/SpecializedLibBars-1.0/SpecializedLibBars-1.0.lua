@@ -2,7 +2,7 @@
 -- Specialized ( = enhanced) for Skada
 -- Note to self: don't forget to notify original author of changes
 -- in the unlikely event they end up being usable outside of Skada.
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90015
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90016
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 
@@ -185,8 +185,31 @@ local ICON_STRETCH = [[Interface\MINIMAP\ROTATING-MINIMAPGUIDEARROW.blp]]
 -------------------------------------------------------------------------------
 -- local functions
 
+-- compares flaots
 local function equal_floats(a, b, epsilon)
 	return abs(a - b) <= ((abs(a) < abs(b) and abs(b) or abs(a)) * 0.000001)
+end
+
+-- table pool
+local new, del
+do
+	local table_pool = setmetatable({}, {__mode = "kv"})
+
+	function new()
+		local t = next(table_pool)
+		if t then table_pool[t] = nil end
+		return t or {}
+	end
+
+	function del(t)
+		if type(t) == "table" then
+			for k, v in pairs(t) do
+				t[k] = nil
+			end
+			table_pool[t] = true
+		end
+		return nil
+	end
 end
 
 -------------------------------------------------------------------------------
@@ -529,8 +552,7 @@ function lib:SetScrollSpeed(speed)
 	scrollspeed = min(10, max(1, speed or 0))
 end
 
-function lib:SavePosition()
-	if self == lib then return end
+local function SavePosition(self)
 
 	wipe(posix) -- always wipe
 	posix.width = self:GetWidth()
@@ -548,7 +570,7 @@ function lib:SavePosition()
 	posix.yOfs = yOfs / uiScale
 end
 
-function lib:RestorePosition()
+local function RestorePosition(self)
 	if self == lib then return end
 
 	if posix.xOfs and posix.yOfs then
@@ -570,8 +592,95 @@ function lib:RestorePosition()
 	wipe(posix) -- always wipe
 end
 
-barListPrototype.SavePosition = lib.SavePosition
-barListPrototype.RestorePosition = lib.RestorePosition
+barListPrototype.SavePosition = SavePosition
+barListPrototype.RestorePosition = RestorePosition
+
+do
+	local UIFrameFadeIn = UIFrameFadeIn
+	local UIFrameFadeOut = UIFrameFadeOut
+	function lib:Fade(timeToFade, startAlpha, endAlpha)
+		if self == lib then return end
+		local func = (startAlpha > endAlpha) and UIFrameFadeOut or UIFrameFadeIn
+		return func(self, timeToFade, startAlpha, endAlpha)
+	end
+end
+barListPrototype.Fade = lib.Fade
+barPrototype.Fade = lib.Fade
+
+-- returns bar(s) height
+local function GetThickness(self)
+	return self.thickness
+end
+barListPrototype.GetThickness = GetThickness
+barPrototype.GetThickness = GetThickness
+
+-- returns bar's length/group width
+local function GetLength(self)
+	return self.length
+end
+barListPrototype.GetLength = GetLength
+barPrototype.GetLength = GetLength
+
+-- changes size
+local function SetSize(self, width, height)
+	self:SetWidth(width)
+	self:SetHeight(height)
+end
+barListPrototype.SetSize = SetSize
+barPrototype.SetSize = SetSize
+
+-- handles bar/group show/hide
+local function SetShown(self, show)
+	if show and not self:IsShown() then
+		self:Show()
+	elseif not show and self:IsShown() then
+		self:Hide()
+	end
+end
+barListPrototype.SetShown = SetShown
+barPrototype.SetShown = SetShown
+
+-- barListPrototype:AddOnUpdate
+-- barPrototype:AddOnUpdate
+
+do
+	local function OnUpdate(self, elapsed)
+		if not self.updateFuncs or next(self.updateFuncs) == nil then
+			self:SetScript("OnUpdate", nil)
+			return
+		end
+		for func in pairs(self.updateFuncs) do
+			func(self, elapsed)
+		end
+	end
+
+	local function AddOnUpdate(self, func)
+		if self == lib then return end
+		if type(func) == "function" then
+			self.updateFuncs = self.updateFuncs or new()
+			self.updateFuncs[func] = true
+			self:SetScript("OnUpdate", self.OnUpdate)
+		end
+	end
+
+	local function RemoveOnUpdate(self, func)
+		if self == lib then return end
+		if self.updateFuncs then
+			self.updateFuncs[func] = nil
+			if next(self.updateFuncs) == nil then
+				self.updateFuncs = del(self.updateFuncs)
+			end
+		end
+	end
+
+	barListPrototype.OnUpdate = OnUpdate
+	barListPrototype.AddOnUpdate = AddOnUpdate
+	barListPrototype.RemoveOnUpdate = RemoveOnUpdate
+
+	barPrototype.OnUpdate = OnUpdate
+	barPrototype.AddOnUpdate = AddOnUpdate
+	barPrototype.RemoveOnUpdate = RemoveOnUpdate
+end
 
 -------------------------------------------------------------------------------
 -- bar lists/groups functions
@@ -628,11 +737,6 @@ function barListPrototype:SetThickness(thickness)
 	end
 end
 
--- returns bars height
-function barListPrototype:GetThickness()
-	return self.thickness
-end
-
 -- changes spacing between bars
 function barListPrototype:SetSpacing(spacing)
 	if spacing and self.spacing ~= spacing then
@@ -680,7 +784,7 @@ do
 	local function smoothUpdate(self, elapsed)
 		if bars[self] then
 			for _, bar in pairs(bars[self]) do
-				if bar.targetamount and bar:IsShown() then
+				if bar:IsShown() and bar.targetamount then
 					local amt
 					if bar.targetamount > bar.lastamount then
 						amt = min(((bar.targetamount - bar.lastamount) / 10) + bar.lastamount, bar.targetamount)
@@ -1046,15 +1150,6 @@ function barListPrototype:NewBar(name, text, value, maxVal, icon)
 	return bar, isNew
 end
 
--- handles bar group show/hide
-function barListPrototype:SetShown(show)
-	if show and not self:IsShown() then
-		self:Show()
-	elseif not show and self:IsShown() then
-		self:Hide()
-	end
-end
-
 -- removes the given bar
 function barListPrototype:RemoveBar(bar)
 	lib.ReleaseBar(self, bar)
@@ -1067,7 +1162,7 @@ end
 -- changes bars background color
 function barListPrototype:SetBarBackgroundColor(r, g, b, a)
 	if not self.bgcolor or self.bgcolor[1] ~= r or self.bgcolor[2] ~= g or self.bgcolor[3] ~= b or self.bgcolor[4] ~= a then
-		self.bgcolor = self.bgcolor or {}
+		self.bgcolor = self.bgcolor or new()
 		self.bgcolor[1] = r
 		self.bgcolor[2] = g
 		self.bgcolor[3] = b
@@ -1352,17 +1447,6 @@ function barListPrototype:SetLength(length)
 	end
 end
 
--- returns group width
-function barListPrototype:GetLength()
-	return self.length
-end
-
--- changes size
-function barListPrototype:SetSize(width, height)
-	self:SetWidth(width)
-	self:SetHeight(height)
-end
-
 -- changes group height
 function barListPrototype:SetHeight(height)
 	self.super.SetHeight(self, height)
@@ -1546,7 +1630,7 @@ end
 -- changes bars text color
 function barListPrototype:SetTextColor(r, g, b, a)
 	if not self.textcolor or self.textcolor[1] ~= r or self.textcolor[2] ~= g or self.textcolor[3] ~= b or self.textcolor[4] ~= a then
-		self.textcolor = self.textcolor or {}
+		self.textcolor = self.textcolor or new()
 		self.textcolor[1] = r or 1
 		self.textcolor[2] = g or 1
 		self.textcolor[3] = b or 1
@@ -1564,7 +1648,7 @@ end
 -- changes bar default color
 function barListPrototype:SetColor(r, g, b, a)
 	if not self.colors or self.colors[1] ~= r or self.colors[2] ~= g or self.colors[3] ~= b or self.colors[4] ~= a then
-		self.colors = self.colors or {}
+		self.colors = self.colors or new()
 		local alpha = (a and self.colors[4] ~= a)
 
 		self.colors[1] = r
@@ -1730,36 +1814,6 @@ do
 	end
 end
 
--- barListPrototype:AddOnUpdate
-do
-	-- handles OnUpdate
-	local function listOnUpdate(self, elapsed)
-		if not self.updateFuncs or next(self.updateFuncs) == nil then
-			self:SetScript("OnUpdate", nil)
-		else
-			for func in pairs(self.updateFuncs) do
-				func(self, elapsed)
-			end
-		end
-	end
-
-	-- adds OnUpdate function
-	function barListPrototype:AddOnUpdate(func)
-		if type(func) == "function" then
-			self.updateFuncs = self.updateFuncs or {}
-			self.updateFuncs[func] = true
-			self:SetScript("OnUpdate", listOnUpdate)
-		end
-	end
-end
-
--- removes OnUpdate function
-function barListPrototype:RemoveOnUpdate(func)
-	if self.updateFuncs then
-		self.updateFuncs[func] = nil
-	end
-end
-
 -------------------------------------------------------------------------------
 -- bar functions
 
@@ -1867,10 +1921,8 @@ end
 -- releases a bar that's no longer in use
 function barPrototype:OnBarReleased()
 	self.ownerGroup = nil
-
-	if self.colors then
-		wipe(self.colors)
-	end
+	self.colors = del(self.colors)
+	self.updateFuncs = del(self.updateFuncs)
 
 	self.fg:SetVertexColor(1, 1, 1, 0)
 	self:SetScript("OnEnter", nil)
@@ -1995,7 +2047,7 @@ end
 -- changes bar's color
 function barPrototype:SetColor(r, g, b, a, locked)
 	if not self.colors or self.colors[1] ~= r or self.colors[2] ~= g or self.colors[3] ~= b or self.colors[4] ~= a then
-		self.colors = self.colors or {}
+		self.colors = self.colors or new()
 
 		self.colors[1] = r or self.colors[1]
 		self.colors[2] = g or self.colors[2]
@@ -2009,9 +2061,7 @@ end
 
 -- unsets bar color
 function barPrototype:UnsetColor()
-	if self.colors then
-		wipe(self.colors)
-	end
+	self.colors = del(self.colors)
 end
 
 -- updates bar's foreground color
@@ -2047,16 +2097,6 @@ do
 		self.thickness = thickness
 		updateSize(self)
 	end
-end
-
--- returns bar's length
-function barPrototype:GetLength()
-	return self.length
-end
-
--- returns bar's thickness
-function barPrototype:GetThickness()
-	return self.thickness
 end
 
 -- changes bar's orientation
@@ -2198,36 +2238,6 @@ end
 function barPrototype:SetMaxValue(val)
 	self.maxValue = val
 	self:SetValue(self.value)
-end
-
--- barPrototype:AddOnUpdate
-do
-	-- handles OnUpdate
-	local function barOnUpdate(self, elapsed)
-		if not self.updateFuncs or next(self.updateFuncs) == nil then
-			self:SetScript("OnUpdate", nil)
-		else
-			for func in pairs(self.updateFuncs) do
-				func(self, elapsed)
-			end
-		end
-	end
-
-	-- adds OnUpdate function
-	function barPrototype:AddOnUpdate(func)
-		if type(func) == "function" then
-			self.updateFuncs = self.updateFuncs or {}
-			self.updateFuncs[func] = true
-			self:SetScript("OnUpdate", barOnUpdate)
-		end
-	end
-end
-
--- removes OnUpdate function
-function barPrototype:RemoveOnUpdate(func)
-	if self.updateFuncs then
-		self.updateFuncs[func] = nil
-	end
 end
 
 --- Finally: upgrade our old embeds

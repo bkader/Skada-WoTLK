@@ -467,6 +467,7 @@ Skada:RegisterModule("Damage", function(L, P)
 
 	function targetmod:Update(win, set)
 		win.title = uformat(L["%s's targets"], win.actorname)
+		if not set or not win.actorname then return end
 
 		local targets, total, actor = set:GetActorDamageTargets(win.actorid, win.actorname)
 		if not targets or not actor or total == 0 then

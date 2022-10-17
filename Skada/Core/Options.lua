@@ -11,8 +11,8 @@ local del = Private.delTable
 local collectgarbage = collectgarbage
 
 -- references: windows, modes
-local windows = nil
-local modes = nil
+local windows = Skada.windows
+local modes = Skada.modes
 
 Skada.windowdefaults = {
 	name = folder,
@@ -200,12 +200,12 @@ local newwindow = nil
 local options = Skada.options
 
 options.get = function(info)
-	return Skada.db.profile[info[#info]]
+	return Skada.db[info[#info]]
 end
 
 options.set = function(info, value)
 	local key = info[#info]
-	Skada.db.profile[key] = value
+	Skada.db[key] = value
 	Skada:ApplySettings()
 
 	if key == "showtotals" then
@@ -214,7 +214,7 @@ options.set = function(info, value)
 	elseif key == "syncoff" then
 		Skada:RegisterComms(value ~= true)
 	elseif key == "setstokeep" or key == "setslimit" then
-		Skada.maxsets = Skada.db.profile.setstokeep + Skada.db.profile.setslimit
+		Skada.maxsets = Skada.db.setstokeep + Skada.db.setslimit
 		Skada.maxmeme = min(60, max(30, Skada.maxsets + 10))
 	end
 end
@@ -302,10 +302,10 @@ options.args.generaloptions = {
 					desc = L["Toggles showing the minimap button."],
 					order = 10,
 					get = function()
-						return not Skada.db.profile.icon.hide
+						return not Skada.db.icon.hide
 					end,
 					set = function()
-						Skada.db.profile.icon.hide = not Skada.db.profile.icon.hide
+						Skada.db.icon.hide = not Skada.db.icon.hide
 						Private.refresh_button()
 					end
 				},
@@ -351,9 +351,9 @@ options.args.generaloptions = {
 					desc = L["Hides Skada's window when in combat."],
 					order = 80,
 					set = function(_, value)
-						Skada.db.profile.hidecombat = value or nil
-						if Skada.db.profile.hidecombat then
-							Skada.db.profile.showcombat = nil
+						Skada.db.hidecombat = value or nil
+						if Skada.db.hidecombat then
+							Skada.db.showcombat = nil
 						end
 						Skada:ApplySettings()
 					end
@@ -364,9 +364,9 @@ options.args.generaloptions = {
 					desc = L["Shows Skada's window when in combat."],
 					order = 90,
 					set = function(_, value)
-						Skada.db.profile.showcombat = value or nil
-						if Skada.db.profile.showcombat then
-							Skada.db.profile.hidecombat = nil
+						Skada.db.showcombat = value or nil
+						if Skada.db.showcombat then
+							Skada.db.hidecombat = nil
 						end
 						Skada:ApplySettings()
 					end
@@ -438,7 +438,7 @@ options.args.generaloptions = {
 							desc = L["Shows subview summaries in the tooltips."],
 							order = 2,
 							disabled = function()
-								return not Skada.db.profile.tooltips
+								return not Skada.db.tooltips
 							end
 						},
 						tooltiprows = {
@@ -450,7 +450,7 @@ options.args.generaloptions = {
 							max = 10,
 							step = 1,
 							disabled = function()
-								return not Skada.db.profile.tooltips
+								return not Skada.db.tooltips
 							end
 						},
 						tooltippos = {
@@ -468,7 +468,7 @@ options.args.generaloptions = {
 								["cursor"] = L["Follow Cursor"]
 							},
 							disabled = function()
-								return not Skada.db.profile.tooltips
+								return not Skada.db.tooltips
 							end
 						}
 					}
@@ -660,10 +660,10 @@ options.args.resetoptions = {
 	desc = format(L["Options for %s."], L["Data Resets"]),
 	order = 40,
 	get = function(info)
-		return Skada.db.profile.reset[info[#info]]
+		return Skada.db.reset[info[#info]]
 	end,
 	set = function(info, value)
-		Skada.db.profile.reset[info[#info]] = value
+		Skada.db.reset[info[#info]] = value
 	end,
 	args = {
 		instance = {
@@ -717,10 +717,10 @@ options.args.modules = {
 	order = 50,
 	width = "double",
 	get = function(info)
-		return Skada.db.profile.modules[info[#info]]
+		return Skada.db.modules[info[#info]]
 	end,
 	set = function(info, value)
-		Skada.db.profile.modules[info[#info]] = value or nil
+		Skada.db.modules[info[#info]] = value or nil
 		Skada:ApplySettings()
 	end,
 	args = {
@@ -744,10 +744,10 @@ options.args.modules = {
 			inline = true,
 			order = 30,
 			get = function(info)
-				return Skada.db.profile.modulesBlocked[info[#info]]
+				return Skada.db.modulesBlocked[info[#info]]
 			end,
 			set = function(info, value)
-				Skada.db.profile.modulesBlocked[info[#info]] = value
+				Skada.db.modulesBlocked[info[#info]] = value
 				options.args.modules.args.apply.disabled = nil
 			end,
 			args = {
@@ -769,9 +769,9 @@ options.args.modules = {
 			func = function()
 				for name in pairs(options.args.modules.args.blocked.args) do
 					if Skada.defaults.profile.modulesBlocked[name] then
-						Skada.db.profile.modulesBlocked[name] = false
+						Skada.db.modulesBlocked[name] = false
 					else
-						Skada.db.profile.modulesBlocked[name] = nil
+						Skada.db.modulesBlocked[name] = nil
 					end
 				end
 				options.args.modules.args.apply.disabled = nil
@@ -783,7 +783,7 @@ options.args.modules = {
 			name = L["Disable All"],
 			func = function()
 				for name in pairs(options.args.modules.args.blocked.args) do
-					Skada.db.profile.modulesBlocked[name] = true
+					Skada.db.modulesBlocked[name] = true
 				end
 				options.args.modules.args.apply.disabled = nil
 			end,
@@ -922,7 +922,7 @@ do
 		local columns = metadata and metadata.columns
 		if not columns then return end
 
-		local db = self.db.profile.columns
+		local db = self.db.columns
 		local category = mod.category or L["Other"]
 
 		if not options.args.columns.args[category] then
@@ -977,428 +977,622 @@ do
 	end
 end
 
-local get_screen_width
+-------------------------------------------------------------------------------
+-- frame/window options
+
 do
-	local floor = math.floor
-	local GetScreenWidth = GetScreenWidth
-	local screenWidth = nil
-	function get_screen_width()
-		screenWidth = screenWidth or floor(GetScreenWidth() * 0.05) * 20
-		return screenWidth
+	local get_screen_width
+	do
+		local floor = math.floor
+		local GetScreenWidth = GetScreenWidth
+		local screenWidth = nil
+		function get_screen_width()
+			screenWidth = screenWidth or floor(GetScreenWidth() * 0.05) * 20
+			return screenWidth
+		end
+	end
+
+	local modesList = nil
+	function Private.frame_options(db, include_dimensions)
+		local obj = {
+			type = "group",
+			name = L["Window"],
+			desc = format(L["Options for %s."], L["Window"]),
+			childGroups = "tab",
+			order = 30,
+			get = function(info)
+				return db[info[#info]]
+			end,
+			set = function(info, value)
+				db[info[#info]] = value
+				Skada:ApplySettings(db.name)
+			end,
+			args = {
+				appearance = {
+					type = "group",
+					name = L["Appearance"],
+					desc = format(L["Appearance options for %s."], db.name),
+					order = 10,
+					args = {
+						scale = {
+							type = "range",
+							name = L["Scale"],
+							desc = L["Sets the scale of the window."],
+							order = 10,
+							width = "double",
+							min = 0.5,
+							max = 2,
+							step = 0.01,
+							isPercent = true
+						},
+						background = {
+							type = "group",
+							name = L["Background"],
+							inline = true,
+							order = 20,
+							get = function(info)
+								return db.background[info[#info]]
+							end,
+							set = function(info, value)
+								db.background[info[#info]] = value
+								Skada:ApplySettings(db.name)
+							end,
+							args = {
+								texture = {
+									type = "select",
+									dialogControl = "LSM30_Background",
+									name = L["Background Texture"],
+									desc = L["The texture used as the background."],
+									order = 10,
+									width = "double",
+									values = Skada:MediaList("background")
+								},
+								color = {
+									type = "color",
+									name = L["Background Color"],
+									desc = L["The color of the background."],
+									order = 20,
+									hasAlpha = true,
+									get = function()
+										local c = db.background.color or Skada.windowdefaults.background.color
+										return c.r, c.g, c.b, c.a
+									end,
+									set = function(_, r, g, b, a)
+										db.background.color = db.background.color or {}
+										db.background.color.r = r
+										db.background.color.g = g
+										db.background.color.b = b
+										db.background.color.a = a
+										Skada:ApplySettings(db.name)
+									end
+								},
+								tile = {
+									type = "toggle",
+									name = L["Tile"],
+									desc = L["Tile the background texture."],
+									order = 30
+								},
+								tilesize = {
+									type = "range",
+									name = L["Tile Size"],
+									desc = L["The size of the texture pattern."],
+									order = 40,
+									width = "double",
+									min = 0,
+									max = get_screen_width(),
+									step = 0.1,
+									bigStep = 1
+								}
+							}
+						},
+						border = {
+							type = "group",
+							name = L["Border"],
+							inline = true,
+							order = 30,
+							get = function(info)
+								return db.background[info[#info]]
+							end,
+							set = function(info, value)
+								db.background[info[#info]] = value
+								Skada:ApplySettings(db.name)
+							end,
+							args = {
+								bordertexture = {
+									type = "select",
+									dialogControl = "LSM30_Border",
+									name = L["Border texture"],
+									desc = L["The texture used for the borders."],
+									order = 10,
+									values = Skada:MediaList("border"),
+									set = function(_, key)
+										db.background.bordertexture = key
+										if key == "None" then
+											db.background.borderthickness = 0
+											db.background.borderinsets = 0
+										end
+										Skada:ApplySettings(db.name)
+									end
+								},
+								bordercolor = {
+									type = "color",
+									name = L["Border Color"],
+									desc = L["The color used for the border."],
+									order = 20,
+									hasAlpha = true,
+									get = function()
+										local c = db.background.bordercolor or Skada.windowdefaults.background.bordercolor
+										return c.r, c.g, c.b, c.a
+									end,
+									set = function(_, r, g, b, a)
+										db.background.bordercolor = db.background.bordercolor or {}
+										db.background.bordercolor.r = r
+										db.background.bordercolor.g = g
+										db.background.bordercolor.b = b
+										db.background.bordercolor.a = a
+										Skada:ApplySettings(db.name)
+									end
+								},
+								borderthickness = {
+									type = "range",
+									name = L["Border Thickness"],
+									desc = L["The thickness of the borders."],
+									order = 30,
+									min = 0,
+									max = 50,
+									step = 0.01,
+									bigStep = 0.5
+								},
+								borderinsets = {
+									type = "range",
+									name = L["Border Insets"],
+									desc = L["The distance between the window and its border."],
+									order = 40,
+									min = -32,
+									max = 32,
+									step = 0.01,
+									bigStep = 1
+								}
+							}
+						}
+					}
+				},
+				position = {
+					type = "group",
+					name = L["Position"],
+					desc = format(L["Position settings for %s."], db.name),
+					order = 20,
+					args = {
+						barslocked = {
+							type = "toggle",
+							name = L["Lock Window"],
+							desc = L["Locks the bar window in place."],
+							order = 10
+						},
+						hidden = {
+							type = "toggle",
+							name = L["Hide Window"],
+							desc = L["Hides the window."],
+							order = 20
+						},
+						clamped = {
+							type = "toggle",
+							name = L["Clamped To Screen"],
+							desc = L["Toggle whether to permit movement out of screen."],
+							order = 50
+						},
+						sep = {
+							type = "description",
+							name = " ",
+							width = "full",
+							order = 60
+						},
+						strata = {
+							type = "select",
+							name = L["Strata"],
+							desc = L["This determines what other frames will be in front of the frame."],
+							order = 110,
+							values = optionsValues.STRATA
+						},
+						tooltippos = {
+							type = "select",
+							name = L["Tooltip Position"],
+							desc = L["Position of the tooltips."],
+							order = 120,
+							values = optionsValues.TOOLTIPPOS,
+							get = function()
+								return db.tooltippos or "NONE"
+							end
+						},
+						hideauto = {
+							type = "select",
+							name = L["Auto Hide"],
+							values = optionsValues.AUTOHIDE,
+							width = "double",
+							order = 999
+						}
+					}
+				},
+				advanced = {
+					type = "group",
+					name = L["Advanced"],
+					desc = format(L["Advanced options for %s."], db.name),
+					order = 30,
+					args = {
+						switch = {
+							type = "group",
+							name = L["Mode Switching"],
+							desc = format(L["Options for %s."], L["Mode Switching"]),
+							inline = true,
+							order = 10,
+							args = {
+								modeincombat = {
+									type = "select",
+									name = L["Combat Mode"],
+									desc = L["opt_combatmode_desc"],
+									order = 10,
+									values = function()
+										if not modesList then
+											modesList = {[""] = L["None"]}
+											for i = 1, #modes do
+												if modes[i] then
+													modesList[modes[i].moduleName] = modes[i].localeName
+												end
+											end
+										end
+										return modesList
+									end
+								},
+								wipemode = {
+									type = "select",
+									name = L["Wipe Mode"],
+									desc = L["opt_wipemode_desc"],
+									order = 20,
+									values = function()
+										if not modesList then
+											modesList = {[""] = L["None"]}
+											for i = 1, #modes do
+												if modes[i] then
+													modesList[modes[i].moduleName] = modes[i].localeName
+												end
+											end
+										end
+										return modesList
+									end
+								},
+								returnaftercombat = {
+									type = "toggle",
+									name = L["Return after combat"],
+									desc = L["Return to the previous set and mode after combat ends."],
+									order = 30,
+									disabled = function() return (db.modeincombat == "" and db.wipemode == "") end
+								},
+								autocurrent = {
+									type = "toggle",
+									name = L["Auto switch to current"],
+									desc = L["opt_autocurrent_desc"],
+									order = 40
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if db.display == "bar" then
+			obj.args.position.args.sticky = {
+				type = "toggle",
+				name = L["Sticky Window"],
+				desc = L["Allows the window to stick to other Skada windows."],
+				order = 30,
+				set = function(_, value)
+					db.sticky = value
+					if not db.sticky then
+						for i = 1, #windows do
+							local win = windows[i]
+							if win and win.db and win.db.sticked then
+								if win.db.sticked[db.name] then
+									win.db.sticked[db.name] = nil
+								end
+								if next(win.db.sticked) == nil then
+									win.db.sticked = del(win.db.sticked)
+								end
+							end
+						end
+					end
+					Skada:ApplySettings(db.name)
+				end
+			}
+
+			obj.args.position.args.snapto = {
+				type = "toggle",
+				name = L["Snap to best fit"],
+				desc = L["Snaps the window size to best fit when resizing."],
+				order = 40
+			}
+
+			obj.args.position.args.noresize = {
+				type = "toggle",
+				name = L["Disable Resize Buttons"],
+				desc = L["Resize and lock/unlock buttons won't show up when you hover over the window."],
+				order = 51
+			}
+
+			obj.args.position.args.nostrech = {
+				type = "toggle",
+				name = L["Disable stretch button"],
+				desc = L["Stretch button won't show up when you hover over the window."],
+				order = 52
+			}
+
+			obj.args.position.args.botstretch = {
+				type = "toggle",
+				name = L["Reverse window stretch"],
+				desc = L["opt_botstretch_desc"],
+				order = 53
+			}
+
+			obj.args.advanced.args.childoptions = {
+				type = "group",
+				name = L["Child Window"],
+				inline = true,
+				order = 100,
+				args = {
+					desc = {
+						type = "description",
+						name = L["A child window will replicate the parent window actions."],
+						width = "full",
+						order = 0
+					},
+					child = {
+						type = "select",
+						name = L["Window"],
+						order = 10,
+						values = function()
+							local list = {[""] = L["None"]}
+							for i = 1, #windows do
+								local win = windows[i]
+								if win and win.db and win.db.name ~= db.name and win.db.child ~= db.name and win.db.display == db.display then
+									list[win.db.name] = win.db.name
+								end
+							end
+							return list
+						end,
+						get = function() return db.child or "" end,
+						set = function(_, child)
+							db.child = (child == "") and nil or child
+							db.childmode = db.child and (db.childmode or 1) or nil
+							Private.reload_settings()
+						end
+					},
+					childmode = {
+						type = "select",
+						name = L["Child Window Mode"],
+						order = 20,
+						values = optionsValues.CHILDMODE,
+						get = function() return db.childmode or 1 end,
+						disabled = function() return not (db.child and db.child ~= "") end
+					}
+				}
+			}
+		end
+
+		if include_dimensions then
+			obj.args.position.args.width = {
+				type = "range",
+				name = L["Width"],
+				order = 70,
+				min = 100,
+				max = get_screen_width(),
+				step = 0.01,
+				bigStep = 1
+			}
+
+			obj.args.position.args.height = {
+				type = "range",
+				name = L["Height"],
+				order = 80,
+				min = 16,
+				max = 400,
+				step = 0.01,
+				bigStep = 1
+			}
+		end
+
+		return obj
 	end
 end
 
-local modesList = nil
-function Private.frame_options(db, include_dimensions)
-	local obj = {
-		type = "group",
-		name = L["Window"],
-		desc = format(L["Options for %s."], L["Window"]),
-		childGroups = "tab",
-		order = 30,
-		get = function(info)
-			return db[info[#info]]
-		end,
-		set = function(info, value)
-			db[info[#info]] = value
-			Skada:ApplySettings(db.name)
-		end,
-		args = {
-			appearance = {
-				type = "group",
-				name = L["Appearance"],
-				desc = format(L["Appearance options for %s."], db.name),
-				order = 10,
-				args = {
-					scale = {
-						type = "range",
-						name = L["Scale"],
-						desc = L["Sets the scale of the window."],
-						order = 10,
-						width = "double",
-						min = 0.5,
-						max = 2,
-						step = 0.01,
-						isPercent = true
-					},
-					background = {
-						type = "group",
-						name = L["Background"],
-						inline = true,
-						order = 20,
-						get = function(info)
-							return db.background[info[#info]]
-						end,
-						set = function(info, value)
-							db.background[info[#info]] = value
-							Skada:ApplySettings(db.name)
-						end,
-						args = {
-							texture = {
-								type = "select",
-								dialogControl = "LSM30_Background",
-								name = L["Background Texture"],
-								desc = L["The texture used as the background."],
-								order = 10,
-								width = "double",
-								values = Skada:MediaList("background")
-							},
-							color = {
-								type = "color",
-								name = L["Background Color"],
-								desc = L["The color of the background."],
-								order = 20,
-								hasAlpha = true,
-								get = function()
-									local c = db.background.color or Skada.windowdefaults.background.color
-									return c.r, c.g, c.b, c.a
-								end,
-								set = function(_, r, g, b, a)
-									db.background.color = db.background.color or {}
-									db.background.color.r = r
-									db.background.color.g = g
-									db.background.color.b = b
-									db.background.color.a = a
-									Skada:ApplySettings(db.name)
-								end
-							},
-							tile = {
-								type = "toggle",
-								name = L["Tile"],
-								desc = L["Tile the background texture."],
-								order = 30
-							},
-							tilesize = {
-								type = "range",
-								name = L["Tile Size"],
-								desc = L["The size of the texture pattern."],
-								order = 40,
-								width = "double",
-								min = 0,
-								max = get_screen_width(),
-								step = 0.1,
-								bigStep = 1
-							}
-						}
-					},
-					border = {
-						type = "group",
-						name = L["Border"],
-						inline = true,
-						order = 30,
-						get = function(info)
-							return db.background[info[#info]]
-						end,
-						set = function(info, value)
-							db.background[info[#info]] = value
-							Skada:ApplySettings(db.name)
-						end,
-						args = {
-							bordertexture = {
-								type = "select",
-								dialogControl = "LSM30_Border",
-								name = L["Border texture"],
-								desc = L["The texture used for the borders."],
-								order = 10,
-								values = Skada:MediaList("border"),
-								set = function(_, key)
-									db.background.bordertexture = key
-									if key == "None" then
-										db.background.borderthickness = 0
-										db.background.borderinsets = 0
-									end
-									Skada:ApplySettings(db.name)
-								end
-							},
-							bordercolor = {
-								type = "color",
-								name = L["Border Color"],
-								desc = L["The color used for the border."],
-								order = 20,
-								hasAlpha = true,
-								get = function()
-									local c = db.background.bordercolor or Skada.windowdefaults.background.bordercolor
-									return c.r, c.g, c.b, c.a
-								end,
-								set = function(_, r, g, b, a)
-									db.background.bordercolor = db.background.bordercolor or {}
-									db.background.bordercolor.r = r
-									db.background.bordercolor.g = g
-									db.background.bordercolor.b = b
-									db.background.bordercolor.a = a
-									Skada:ApplySettings(db.name)
-								end
-							},
-							borderthickness = {
-								type = "range",
-								name = L["Border Thickness"],
-								desc = L["The thickness of the borders."],
-								order = 30,
-								min = 0,
-								max = 50,
-								step = 0.01,
-								bigStep = 0.5
-							},
-							borderinsets = {
-								type = "range",
-								name = L["Border Insets"],
-								desc = L["The distance between the window and its border."],
-								order = 40,
-								min = -32,
-								max = 32,
-								step = 0.01,
-								bigStep = 1
-							}
-						}
-					}
-				}
-			},
-			position = {
-				type = "group",
-				name = L["Position"],
-				desc = format(L["Position settings for %s."], db.name),
-				order = 20,
-				args = {
-					barslocked = {
-						type = "toggle",
-						name = L["Lock Window"],
-						desc = L["Locks the bar window in place."],
-						order = 10
-					},
-					hidden = {
-						type = "toggle",
-						name = L["Hide Window"],
-						desc = L["Hides the window."],
-						order = 20
-					},
-					clamped = {
-						type = "toggle",
-						name = L["Clamped To Screen"],
-						desc = L["Toggle whether to permit movement out of screen."],
-						order = 50
-					},
-					sep = {
-						type = "description",
-						name = " ",
-						width = "full",
-						order = 60
-					},
-					strata = {
-						type = "select",
-						name = L["Strata"],
-						desc = L["This determines what other frames will be in front of the frame."],
-						order = 110,
-						values = optionsValues.STRATA
-					},
-					tooltippos = {
-						type = "select",
-						name = L["Tooltip Position"],
-						desc = L["Position of the tooltips."],
-						order = 120,
-						values = optionsValues.TOOLTIPPOS,
-						get = function()
-							return db.tooltippos or "NONE"
-						end
-					},
-					hideauto = {
-						type = "select",
-						name = L["Auto Hide"],
-						values = optionsValues.AUTOHIDE,
-						width = "double",
-						order = 999
-					}
-				}
-			},
-			advanced = {
-				type = "group",
-				name = L["Advanced"],
-				desc = format(L["Advanced options for %s."], db.name),
-				order = 30,
-				args = {
-					switch = {
-						type = "group",
-						name = L["Mode Switching"],
-						desc = format(L["Options for %s."], L["Mode Switching"]),
-						inline = true,
-						order = 10,
-						args = {
-							modeincombat = {
-								type = "select",
-								name = L["Combat Mode"],
-								desc = L["opt_combatmode_desc"],
-								order = 10,
-								values = function()
-									if not modesList then
-										modesList = {[""] = L["None"]}
-										local modes = Skada:GetModes()
-										for i = 1, #modes do
-											if modes[i] then
-												modesList[modes[i].moduleName] = modes[i].localeName
-											end
-										end
-									end
-									return modesList
-								end
-							},
-							wipemode = {
-								type = "select",
-								name = L["Wipe Mode"],
-								desc = L["opt_wipemode_desc"],
-								order = 20,
-								values = function()
-									if not modesList then
-										modesList = {[""] = L["None"]}
-										local modes = Skada:GetModes()
-										for i = 1, #modes do
-											if modes[i] then
-												modesList[modes[i].moduleName] = modes[i].localeName
-											end
-										end
-									end
-									return modesList
-								end
-							},
-							returnaftercombat = {
-								type = "toggle",
-								name = L["Return after combat"],
-								desc = L["Return to the previous set and mode after combat ends."],
-								order = 30,
-								disabled = function() return (db.modeincombat == "" and db.wipemode == "") end
-							},
-							autocurrent = {
-								type = "toggle",
-								name = L["Auto switch to current"],
-								desc = L["opt_autocurrent_desc"],
-								order = 40
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+-------------------------------------------------------------------------------
+-- profile import, export and sharing
 
-	if db.display == "bar" then
-		obj.args.position.args.sticky = {
-			type = "toggle",
-			name = L["Sticky Window"],
-			desc = L["Allows the window to stick to other Skada windows."],
-			order = 30,
-			set = function(_, value)
-				db.sticky = value
-				if not db.sticky then
-					windows = Skada:GetWindows()
-					for i = 1, #windows do
-						local win = windows[i]
-						if win and win.db and win.db.sticked then
-							if win.db.sticked[db.name] then
-								win.db.sticked[db.name] = nil
-							end
-							if next(win.db.sticked) == nil then
-								win.db.sticked = del(win.db.sticked)
-							end
-						end
+do
+	local ipairs, strmatch, uformat = ipairs, strmatch, Private.uformat
+	local UnitName, GetRealmName = UnitName, GetRealmName
+	local copy, open_window = Private.tCopy, Private.open_import_export
+	local serialize_profile = nil
+
+	local function get_profile_name(str)
+		str = strmatch(strsub(str, 1, 64), "%[(.-)%]")
+		str = str and str:gsub("=", ""):gsub("profile", ""):trim()
+		return (str ~= "") and str
+	end
+
+	local function check_profile_name(name)
+		local profiles = Skada.data:GetProfiles()
+		local ProfileExists = function(name)
+			if name then
+				for _, v in ipairs(profiles) do
+					if name == v then
+						return true
 					end
 				end
-				Skada:ApplySettings(db.name)
 			end
-		}
+		end
 
-		obj.args.position.args.snapto = {
-			type = "toggle",
-			name = L["Snap to best fit"],
-			desc = L["Snaps the window size to best fit when resizing."],
-			order = 40
-		}
+		name = name or format("%s - %s", UnitName("player"), GetRealmName())
 
-		obj.args.position.args.noresize = {
-			type = "toggle",
-			name = L["Disable Resize Buttons"],
-			desc = L["Resize and lock/unlock buttons won't show up when you hover over the window."],
-			order = 51
-		}
+		local n, i = name, 1
+		while ProfileExists(name) do
+			i = i + 1
+			name = format("%s (%d)", n, i)
+		end
 
-		obj.args.position.args.nostrech = {
-			type = "toggle",
-			name = L["Disable stretch button"],
-			desc = L["Stretch button won't show up when you hover over the window."],
-			order = 52
-		}
+		return name
+	end
 
-		obj.args.position.args.botstretch = {
-			type = "toggle",
-			name = L["Reverse window stretch"],
-			desc = L["opt_botstretch_desc"],
-			order = 53
-		}
+	local temp = {}
+	function serialize_profile()
+		wipe(temp)
+		copy(temp, Skada.db, "modeclicks")
+		temp.__name = Skada.data:GetCurrentProfile()
+		return Private.serialize(true, format("%s profile", temp.__name), temp)
+	end
 
-		obj.args.advanced.args.childoptions = {
+	local function import_profile(data, name)
+		if type(data) ~= "string" then
+			Skada:Print("Import profile failed, data supplied must be a string.")
+			return false
+		end
+
+		local success, profile = Private.deserialize(data, true)
+		if not success or profile.numbersystem == nil then -- sanity check!
+			Skada:Print("Import profile failed!")
+			return false
+		end
+
+		name = name or get_profile_name(data)
+		if profile.__name then
+			name = name or profile.__name
+			profile.__name = nil
+		end
+		local profileName = check_profile_name(name)
+
+		-- backwards compatibility
+		if profile[folder] and type(profile[folder]) == "table" then
+			profile = profile[folder]
+		end
+
+		local old_reload_settings = Private.reload_settings
+		Private.reload_settings = function()
+			Private.reload_settings = old_reload_settings
+			copy(Skada.db, profile)
+			Private.reload_settings()
+			LibStub("AceConfigRegistry-3.0"):NotifyChange(folder)
+		end
+
+		Skada.data:SetProfile(profileName)
+		Private.reload_settings()
+		Skada:Wipe()
+		Skada:UpdateDisplay(true)
+		return true
+	end
+
+	function Skada:ProfileImport()
+		return open_window(L["Paste here a profile in text format."], import_profile)
+	end
+
+	function Skada:ProfileExport()
+		return open_window(L["This is your current profile in text format."], serialize_profile())
+	end
+
+	function Private.advanced_profile(args)
+		if not args then return end
+		Private.advanced_profile = nil -- remove it
+		local CONST_COMM_PROFILE = "PR"
+
+		local Share = {}
+
+		function Share:Enable(receive)
+			if receive then
+				self.enabled = true
+				Skada.AddComm(self, CONST_COMM_PROFILE, "Receive")
+			else
+				self.enabled = nil
+				Skada.RemoveAllComms(self)
+			end
+		end
+
+		function Share:Receive(sender, profileStr)
+			local acceptfunc = function()
+				import_profile(profileStr, sender)
+				collectgarbage()
+				Share:Enable(false) -- disable receiving
+				Share.target = nil -- reset target
+			end
+			Private.confirm_dialog(uformat(L["opt_profile_received"], sender), acceptfunc)
+		end
+
+		function Share:Send(profileStr, target)
+			Skada:SendComm("PURR", target, CONST_COMM_PROFILE, profileStr)
+		end
+
+		args.advanced = {
 			type = "group",
-			name = L["Child Window"],
-			inline = true,
-			order = 100,
+			name = L["Advanced"],
+			order = 10,
 			args = {
-				desc = {
-					type = "description",
-					name = L["A child window will replicate the parent window actions."],
-					width = "full",
-					order = 0
-				},
-				child = {
-					type = "select",
-					name = L["Window"],
+				sharing = {
+					type = "group",
+					name = L["Network Sharing"],
+					inline = true,
 					order = 10,
-					values = function()
-						local list = {[""] = L["None"]}
-						windows = Skada:GetWindows()
-						for i = 1, #windows do
-							local win = windows[i]
-							if win and win.db and win.db.name ~= db.name and win.db.child ~= db.name and win.db.display == db.display then
-								list[win.db.name] = win.db.name
-							end
-						end
-						return list
-					end,
-					get = function() return db.child or "" end,
-					set = function(_, child)
-						db.child = (child == "") and nil or child
-						db.childmode = db.child and (db.childmode or 1) or nil
-						Private.reload_settings()
-					end
+					hidden = function() return Skada.db.syncoff end,
+					args = {
+						name = {
+							type = "input",
+							name = L["Player Name"],
+							get = function()
+								return Share.target or ""
+							end,
+							set = function(_, value)
+								Share.target = value:trim()
+							end,
+							order = 10
+						},
+						send = {
+							type = "execute",
+							name = L["Send Profile"],
+							func = function()
+								if Share.target and Share.target ~= "" then
+									Share:Send(serialize_profile(), Share.target)
+								end
+							end,
+							disabled = function() return (not Share.target or Share.target == "") end,
+							order = 20
+						},
+						accept = {
+							type = "toggle",
+							name = L["Accept profiles from other players."],
+							get = function() return Share.enabled end,
+							set = function() Share:Enable(not Share.enabled) end,
+							width = "full",
+							order = 30
+						}
+					}
 				},
-				childmode = {
-					type = "select",
-					name = L["Child Window Mode"],
+				importexport = {
+					type = "group",
+					name = L["Profile Import/Export"],
+					inline = true,
 					order = 20,
-					values = optionsValues.CHILDMODE,
-					get = function() return db.childmode or 1 end,
-					disabled = function() return not (db.child and db.child ~= "") end
+					args = {
+						importbtn = {
+							type = "execute",
+							name = L["Import Profile"],
+							order = 10,
+							func = Skada.ProfileImport
+						},
+						exportbtn = {
+							type = "execute",
+							name = L["Export Profile"],
+							order = 20,
+							func = Skada.ProfileExport
+						}
+					}
 				}
 			}
 		}
 	end
-
-	if include_dimensions then
-		obj.args.position.args.width = {
-			type = "range",
-			name = L["Width"],
-			order = 70,
-			min = 100,
-			max = get_screen_width(),
-			step = 0.01,
-			bigStep = 1
-		}
-
-		obj.args.position.args.height = {
-			type = "range",
-			name = L["Height"],
-			order = 80,
-			min = 16,
-			max = 400,
-			step = 0.01,
-			bigStep = 1
-		}
-	end
-
-	return obj
 end

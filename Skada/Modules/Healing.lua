@@ -37,7 +37,7 @@ Skada:RegisterModule("Healing", function(L, P)
 	local mod_cols = nil
 
 	-- list of spells used to queue units.
-	local queued_spells = {[49005] = 61607}
+	local queued_spells = {[49005] = 50424}
 
 	local function log_spellcast(set, actorid, actorname, actorflags, spellid, spellschool)
 		if not set or (set == Skada.total and not P.totalidc) then return end
@@ -334,6 +334,7 @@ Skada:RegisterModule("Healing", function(L, P)
 
 	function targetmod:Update(win, set)
 		win.title = uformat(L["%s's healed targets"], win.actorname)
+		if not set or not win.actorname then return end
 
 		local targets, total, actor = set:GetActorHealTargets(win.actorid, win.actorname)
 		if not targets or not actor or total == 0 then

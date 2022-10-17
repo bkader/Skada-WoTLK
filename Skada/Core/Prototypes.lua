@@ -104,7 +104,7 @@ end
 
 -- returns the set's damage amount
 function setPrototype:GetDamage(class, useful)
-	local absdamage = Skada.db.profile.absdamage
+	local absdamage = Skada.db.absdamage
 	local total = absdamage and self:GetTotal(class, true, "totaldamage") or self:GetTotal(class, true, "damage")
 	if useful and total then
 		local overkill = self:GetTotal(class, true, "overkill")
@@ -174,7 +174,7 @@ end
 
 -- returns the set's damage taken amount
 function setPrototype:GetDamageTaken(class, enemy)
-	local absdamage = Skada.db.profile.absdamage
+	local absdamage = Skada.db.absdamage
 	if enemy then
 		return absdamage and self:GetTotal(class, true, "etotaldamaged") or self:GetTotal(class, true, "edamaged")
 	end
@@ -328,7 +328,7 @@ end
 function actorPrototype:GetDamage(useful)
 	local total = 0
 
-	if Skada.db.profile.absdamage and self.totaldamage then
+	if Skada.db.absdamage and self.totaldamage then
 		total = self.totaldamage
 	elseif self.damage then
 		total = self.damage
@@ -383,7 +383,7 @@ do
 		local damage = 0
 		if not self.damagespells then
 			return nil, damage
-		elseif Skada.db.profile.absdamage and self.totaldamage then
+		elseif Skada.db.absdamage and self.totaldamage then
 			damage = self.totaldamage
 		elseif self.damage then
 			damage = self.damage
@@ -411,7 +411,7 @@ function actorPrototype:GetDamageOnTarget(name)
 	for _, spell in pairs(self.damagespells) do
 		if spell.targets and spell.targets[name] then
 			-- damage
-			if Skada.db.profile.absdamage and spell.targets[name].total then
+			if Skada.db.absdamage and spell.targets[name].total then
 				damage = damage + spell.targets[name].total
 			elseif spell.targets[name].amount then
 				damage = damage + spell.targets[name].amount
@@ -437,7 +437,7 @@ end
 
 -- returns the actor's damage taken amount
 function actorPrototype:GetDamageTaken()
-	if Skada.db.profile.absdamage and self.totaldamaged then
+	if Skada.db.absdamage and self.totaldamaged then
 		return self.totaldamaged
 	end
 	return self.damaged or 0
@@ -485,7 +485,7 @@ do
 		if not spells then return end
 
 		local total = 0
-		if Skada.db.profile.absdamage and self.totaldamaged then
+		if Skada.db.absdamage and self.totaldamaged then
 			total = self.totaldamaged
 		elseif self.damaged then
 			total = self.damaged
@@ -517,7 +517,7 @@ function actorPrototype:GetDamageFromSource(name)
 		local source = spell.sources and spell.sources[name]
 		if source then
 			-- damage
-			if Skada.db.profile.absdamage and source.total then
+			if Skada.db.absdamage and source.total then
 				damage = damage + source.total
 			elseif source.amount then
 				damage = damage + source.amount

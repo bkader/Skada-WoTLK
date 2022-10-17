@@ -6,6 +6,7 @@ Skada:RegisterModule("Improvement", function(L)
 	local mod_comparison = mod:NewModule("Improvement comparison")
 
 	local pairs, date, tostring = pairs, date, tostring
+	local windows = Skada.windows
 	local userGUID = Skada.userGUID or UnitGUID("player")
 
 	local modes = {
@@ -312,7 +313,6 @@ Skada:RegisterModule("Improvement", function(L)
 		self.db = nil
 		self:OnInitialize()
 
-		local windows = Skada:GetWindows()
 		for i = 1, #windows do
 			local win = windows[i]
 			local mode = (win and win.db) and win.db.mode or nil

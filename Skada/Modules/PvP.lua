@@ -167,7 +167,7 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 			Skada.UnregisterEvent(self, "UNIT_AURA")
 		elseif unit and UnitIsPlayer(unit) and not specsCache[UnitGUID(unit)] then
 			local _, class = UnitClass(unit)
-			if class and Skada.validclass[class] then
+			if Skada.validclass[class] then
 				local i = 1
 				local name = UnitBuff(unit, i)
 				while name do
@@ -188,7 +188,7 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 		elseif unit and UnitIsPlayer(unit) and not specsCache[UnitGUID(unit)] then
 			local _, class = UnitClass(unit)
 			local spell = UnitCastingInfo(unit)
-			if class and Skada.validclass[class] and spellsTable[class] and spellsTable[class][spell] then
+			if Skada.validclass[class] and spellsTable[class] and spellsTable[class][spell] then
 				specsCache[UnitGUID(unit)] = spellsTable[class][spell]
 			end
 		end
@@ -212,7 +212,7 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 	end
 
 	function mod:GetEnemy(_, actor, set)
-		if actor and not actor.fake and actor.class and Skada.validclass[actor.class] then
+		if actor and not actor.fake and Skada.validclass[actor.class] then
 			if actor.spec == nil then
 				actor.spec = specsCache[actor.id]
 			end
@@ -249,27 +249,6 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 			P.modules.arena = nil
 		end
 
-		-- arena custom colors
-		Skada.classcolors = Skada.classcolors or {}
-		if not Skada.classcolors.ARENA_GOLD then
-			Skada.classcolors.ARENA_GOLD = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
-		end
-		if not Skada.classcolors.ARENA_GREEN then
-			Skada.classcolors.ARENA_GREEN = {r = 0.1, g = 1, b = 0.1, colorStr = "ff19ff19"}
-		end
-
-		-- purple color instead of green for color blind mode.
-		if GetCVar("colorblindMode") == "1" then
-			Skada.classcolors.ARENA_GREEN.r = 0.686
-			Skada.classcolors.ARENA_GREEN.g = 0.384
-			Skada.classcolors.ARENA_GREEN.b = 1
-			Skada.classcolors.ARENA_GREEN.colorStr = "ffae61ff"
-		end
-
-		-- localize arena team colors (just in case)
-		L["ARENA_GREEN"] = L["Green Team"]
-		L["ARENA_GOLD"] = L["Gold Team"]
-
 		-- add custom colors to tweaks
 		Skada.options.args.tweaks.args.advanced.args.colors.args.arean = {
 			type = "group",
@@ -291,4 +270,25 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 			}
 		}
 	end
+
+	---------------------------------------------------------------------------
+
+	-- arena custom colors
+	local classcolors = Skada.classcolors or {}
+	Skada.classcolors = classcolors
+
+	classcolors.ARENA_GOLD = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
+	classcolors.ARENA_GREEN = {r = 0.1, g = 1, b = 0.1, colorStr = "ff19ff19"}
+
+	-- purple color instead of green for color blind mode.
+	if GetCVar("colorblindMode") == "1" then
+		classcolors.ARENA_GREEN.r = 0.686
+		classcolors.ARENA_GREEN.g = 0.384
+		classcolors.ARENA_GREEN.b = 1
+		classcolors.ARENA_GREEN.colorStr = "ffae61ff"
+	end
+
+	-- localize arena team colors (just in case)
+	L["ARENA_GREEN"] = L["Green Team"]
+	L["ARENA_GOLD"] = L["Gold Team"]
 end)

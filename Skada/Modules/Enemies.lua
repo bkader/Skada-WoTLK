@@ -157,7 +157,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	end
 
 	local function log_custom_unit(set, name, playername, spellid, spellschool, amount, absorbed)
-		local e = Skada:GetEnemy(set, name, nil, nil, true)
+		local e = Skada:GetEnemy(set, name)
 		if not e then return end
 
 		e.fake = true
@@ -216,7 +216,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		local absorbed = dmg.absorbed or 0
 		if (dmg.amount + absorbed) == 0 then return end
 
-		local e = Skada:GetEnemy(set, dmg.actorname, dmg.actorid, dmg.actorflags, true)
+		local e = Skada:GetEnemy(set, dmg.actorname, dmg.actorid, dmg.actorflags)
 		if not e then return end
 
 		e.damaged = (e.damaged or 0) + dmg.amount
@@ -861,7 +861,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 	local function add_actor_time(set, actor, spellid, target)
 		if not spellid or passiveSpells[spellid] then
 			return -- missing spellid or passive spell?
-		elseif not actor.class or not Skada.validclass[actor.class] or actor.role == "HEALER" then
+		elseif not Skada.validclass[actor.class] or actor.role == "HEALER" then
 			return -- missing/invalid actor class or actor is a healer?
 		else
 			Skada:AddActiveTime(set, actor, target)
@@ -875,7 +875,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		local absorbed = dmg.absorbed or 0
 		if (dmg.amount + absorbed) == 0 then return end
 
-		local e = Skada:GetEnemy(set, dmg.actorname, dmg.actorid, dmg.actorflags, true)
+		local e = Skada:GetEnemy(set, dmg.actorname, dmg.actorid, dmg.actorflags)
 		if not e then
 			return
 		elseif (set.type == "arena" or set.type == "pvp") and dmg.amount > 0 then
@@ -1332,7 +1332,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		if not set or (set == Skada.total and not P.totalidc) then return end
 		if not heal.spellid or not heal.amount or heal.amount == 0 then return end
 
-		local e = Skada:GetEnemy(set, heal.actorname, heal.actorid, heal.actorflags, true)
+		local e = Skada:GetEnemy(set, heal.actorname, heal.actorid, heal.actorflags)
 		if not e then
 			return
 		elseif (set.type == "arena" or set.type == "pvp") then

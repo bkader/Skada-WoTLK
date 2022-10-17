@@ -11,7 +11,7 @@ local function SetupStorage(self)
 end
 
 local function CheckMemory(self)
-	if not self.db.profile.memorycheck then return end
+	if not self.db.memorycheck then return end
 	UpdateAddOnMemoryUsage()
 	local memory = GetAddOnMemoryUsage(AddOnName)
 	if memory > (self.maxmeme * 1024) then

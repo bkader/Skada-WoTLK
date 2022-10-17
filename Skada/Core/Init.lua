@@ -17,9 +17,9 @@ local pairs, ipairs = pairs, ipairs
 local select, next, max = select, next, math.max
 local band, tonumber, type = bit.band, tonumber, type
 local format, strmatch, gsub = string.format, string.match, string.gsub
-local setmetatable = setmetatable
+local setmetatable, wipe = setmetatable, wipe
 local EmptyFunc = Multibar_EmptyFunc
-local _
+local new, del, _
 
 -- options table
 ns.options = {
@@ -58,6 +58,62 @@ do
 end
 
 -------------------------------------------------------------------------------
+-- creates a table pool
+
+function Private.table_pool()
+	local pool = {tables = {}, new = true, del = true, clear = true}
+	local tables = setmetatable(pool.tables, Private.weaktable)
+
+	-- reuses or creates a table
+	pool.new = function()
+		local t = next(tables)
+		if t then tables[t] = nil end
+		return t or {}
+	end
+
+	-- deletes a table to be reused later
+	pool.del = function(t, deep)
+		if type(t) ~= "table" then return end
+
+		for k, v in pairs(t) do
+			if deep and type(v) == "table" then
+				pool.del(v)
+			end
+			t[k] = nil
+		end
+
+		t[""] = true
+		t[""] = nil
+		setmetatable(t, nil)
+		tables[t] = true
+
+		return nil
+	end
+
+	-- clears/wipes the given table
+	pool.clear = function(t)
+		if type(t) == "table" then
+			for k, v in pairs(t) do
+				t[k] = pool.del(v, true)
+			end
+		end
+		return t
+	end
+
+	return pool
+end
+
+-- create addon's default table pool
+do
+	local _pool = Private.table_pool()
+	new = _pool.new
+	del = _pool.del
+	Private.newTable = _pool.new
+	Private.delTable = _pool.del
+	Private.clearTable = _pool.clear
+end
+
+-------------------------------------------------------------------------------
 -- class, roles ans specs registration
 
 function Private.register_classes()
@@ -84,10 +140,8 @@ function Private.register_classes()
 	classcolors.MONSTER = {r = 0.549, g = 0.388, b = 0.404, colorStr = "ff8c6367"}
 	classcolors.PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"}
 	classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
-	classcolors.ARENA_GOLD = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
-	classcolors.ARENA_GREEN = {r = 0.1, g = 1, b = 0.1, colorStr = "ff19ff19"}
 
-	local P = ns.db.profile
+	local P = ns.db
 
 	-- some useful functions
 	classcolors.unpack = function(class)
@@ -568,58 +622,6 @@ function Private.tCopy(to, from, ...)
 	end
 end
 
--- creates a table pool
-function Private.table_pool()
-	local pool = {tables = {}, new = true, del = true, clear = true}
-	local tables = setmetatable(pool.tables, Private.weaktable)
-
-	-- reuses or creates a table
-	pool.new = function()
-		local t = next(tables)
-		if t then tables[t] = nil end
-		return t or {}
-	end
-
-	-- deletes a table to be reused later
-	pool.del = function(t, deep)
-		if type(t) ~= "table" then return end
-
-		for k, v in pairs(t) do
-			if deep and type(v) == "table" then
-				pool.del(v)
-			end
-			t[k] = nil
-		end
-
-		t[""] = true
-		t[""] = nil
-		setmetatable(t, nil)
-		tables[t] = true
-
-		return nil
-	end
-
-	-- clears/wipes the given table
-	pool.clear = function(t)
-		if type(t) == "table" then
-			for k, v in pairs(t) do
-				t[k] = pool.del(v, true)
-			end
-		end
-		return t
-	end
-
-	return pool
-end
-
--- create addon's default table pool
-do
-	local _pool = Private.table_pool()
-	Private.newTable = _pool.new
-	Private.delTable = _pool.del
-	Private.clearTable = _pool.clear
-end
-
 -- prevents duplicates in a table to format strings
 function Private.prevent_duplicate(value, tbl, key)
 	local num = 0
@@ -727,7 +729,7 @@ do
 		end
 
 		-- install default options
-		local P = ns.db.profile
+		local P = ns.db
 		P.toast = P.toast or ns.defaults.toast
 
 		LibToast:Register(format("%sToastFrame", folder), function(toast, text, title, icon, urgency)
@@ -764,10 +766,10 @@ do
 			type = "group",
 			name = L["Notifications"],
 			get = function(i)
-				return ns.db.profile.toast[i[#i]] or LibToast.config[i[#i]]
+				return ns.db.toast[i[#i]] or LibToast.config[i[#i]]
 			end,
 			set = function(i, val)
-				ns.db.profile.toast[i[#i]] = val
+				ns.db.toast[i[#i]] = val
 				LibToast.config[i[#i]] = val
 			end,
 			order = 990,
@@ -832,7 +834,7 @@ do
 					type = "execute",
 					name = L["Test Notifications"],
 					func = function() Skada:Notify() end,
-					disabled = function() return ns.db.profile.toast.hide_toasts end,
+					disabled = function() return ns.db.toast.hide_toasts end,
 					width = "double",
 					order = 60
 				}
@@ -858,7 +860,7 @@ do
 
 		local values = {al = 0x10, rb = 0x01, rt = 0x02, db = 0x04, dt = 0x08}
 		local disabled = function()
-			return band(ns.db.profile.totalflag, values.al) ~= 0
+			return band(ns.db.totalflag, values.al) ~= 0
 		end
 
 		total_opt = {
@@ -873,14 +875,14 @@ do
 					inline = true,
 					order = 10,
 					get = function(i)
-						return (band(ns.db.profile.totalflag, values[i[#i]]) ~= 0)
+						return (band(ns.db.totalflag, values[i[#i]]) ~= 0)
 					end,
 					set = function(i, val)
 						local v = values[i[#i]]
-						if val and band(ns.db.profile.totalflag, v) == 0 then
-							ns.db.profile.totalflag = ns.db.profile.totalflag + v
-						elseif not val and band(ns.db.profile.totalflag, v) ~= 0 then
-							ns.db.profile.totalflag = ns.db.profile.totalflag - v
+						if val and band(ns.db.totalflag, v) == 0 then
+							ns.db.totalflag = ns.db.totalflag + v
+						elseif not val and band(ns.db.totalflag, v) ~= 0 then
+							ns.db.totalflag = ns.db.totalflag - v
 						end
 					end,
 					args = {
@@ -934,11 +936,11 @@ do
 	end
 
 	function Private.total_noclick(set, mode)
-		return (not ns.db.profile.totalidc and set == "total" and type(mode) == "table" and mode.nototal == true)
+		return (not ns.db.totalidc and set == "total" and type(mode) == "table" and mode.nototal == true)
 	end
 
 	local function total_record(set)
-		local totalflag = Skada.total and set and ns.db.profile.totalflag
+		local totalflag = Skada.total and set and ns.db.totalflag
 
 		-- something missing
 		if not totalflag then
@@ -1282,21 +1284,16 @@ do
 		end
 	end
 
-	do
-		local new = Private.newTable
-		local del = Private.delTable
+	-- adds a pet to the table.
+	function Private.assign_pet(ownerGUID, ownerName, petGUID)
+		pets[petGUID] = pets[petGUID] or new()
+		pets[petGUID].id = ownerGUID
+		pets[petGUID].name = ownerName
+	end
 
-		-- adds a pet to the table.
-		function Private.assign_pet(ownerGUID, ownerName, petGUID)
-			pets[petGUID] = pets[petGUID] or new()
-			pets[petGUID].id = ownerGUID
-			pets[petGUID].name = ownerName
-		end
-
-		-- simply removes the pet from the table.
-		function Private.dismiss_pet(petGUID)
-			pets[petGUID] = del(pets[petGUID])
-		end
+	-- simply removes the pet from the table.
+	function Private.dismiss_pet(petGUID)
+		pets[petGUID] = del(pets[petGUID])
 	end
 end
 
@@ -1388,14 +1385,43 @@ do
 	local enemyPrototype = setmetatable({}, actorPrototype_mt)
 	ns.enemyPrototype = enemyPrototype
 
-	local function bind_set_actors(actors, set)
+	local upgrade_str = "\124cffffbb00%s\124r segment outdated data structure update."
+	local function update_set_actors(set)
+		if not set then return end
+		set.actors = set.actors or {}
+
+		-- players
+		local actors = set.players
+		if actors then
+			local actor = tremove(actors, 1)
+			while actor do
+				set.actors[#set.actors + 1] = actor
+				actor = tremove(actors, 1)
+			end
+			set.players = del(set.players)
+		end
+
+		-- enemies
+		actors = set.enemies
+		if actors then
+			local actor = tremove(actors, 1)
+			while actor do
+				actor.enemy = true
+				set.actors[#set.actors + 1] = actor
+				actor = tremove(actors, 1)
+			end
+			set.enemies = del(set.enemies)
+		end
+	end
+
+	local function bind_set_actors(actors)
 		if not actors then return end
 		for i = 1, #actors do
 			local actor = actors[i]
 			if actor and actor.enemy then
-				enemyPrototype:Bind(actor, set)
+				enemyPrototype:Bind(actor)
 			elseif actor and not actor.enemy then
-				playerPrototype:Bind(actor, set)
+				playerPrototype:Bind(actor)
 			end
 		end
 	end
@@ -1405,14 +1431,18 @@ do
 		if obj and getmetatable(obj) ~= self then
 			setmetatable(obj, self)
 			self.__index = self
-			bind_set_actors(obj.actors, obj)
+			if obj.players or obj.enemies then
+				update_set_actors(obj)
+				ns:Print(format(upgrade_str, obj.name))
+			end
+			bind_set_actors(obj.actors)
 		end
 		self.arena = (ns.forPVP and obj and obj.type == "arena")
 		return obj
 	end
 
 	-- bind an actor table to the prototype
-	function actorPrototype:Bind(obj, set)
+	function actorPrototype:Bind(obj)
 		if obj and getmetatable(obj) ~= self then
 			setmetatable(obj, self)
 			self.__index = self

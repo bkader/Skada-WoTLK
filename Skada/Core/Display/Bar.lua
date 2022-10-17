@@ -28,7 +28,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 	local rolecoords = Skada.rolecoords
 	local speccoords = Skada.speccoords
 	local spellschools = Skada.spellschools
-	local windows = nil
+	local windows = Skada.windows
 
 	local COLOR_WHITE = HIGHLIGHT_FONT_COLOR
 	local FONT_FLAGS = Skada.fontFlags
@@ -301,12 +301,33 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 	end
 
 	do
-		-- these anchors are used to correctly position the windows due
-		-- to the title bar overlapping.
-		local Xanchors = {LT = true, LB = true, LC = true, RT = true, RB = true, RC = true}
-		local Yanchors = {TL = true, TR = true, TC = true, BL = true, BR = true, BC = true}
+		local function stop_move(group, children, deep)
+			local p = group and group.win and group.win.db
+			if not p then return end
 
-		function mod:WindowMoveStop(_, group, x, y)
+			-- the window wasn't sticked to any? remove just incase
+			for i = 1, #windows do
+				local win = windows[i]
+				if win and win.db and win.db.name ~= p.name and win.db.display == "bar" then
+					if win.db.sticked and win.db.sticked[p.name] and not deep then
+						win.db.sticked[p.name] = nil
+						-- remove table if empty
+						if next(win.db.sticked) == nil then
+							win.db.sticked = del(win.db.sticked)
+						end
+						SavePosition(win.bargroup, win.db)
+					end
+
+					-- save other window posotions if sticked to this!
+					if children and children[win.db.name] then
+						SavePosition(win.bargroup, win.db)
+						stop_move(win.bargroup, win.db.sticked, true)
+					end
+				end
+			end
+		end
+
+		function mod:WindowMoveStop(_, group)
 			SavePosition(group, group.win.db) -- save window position
 
 			-- handle sticked windows
@@ -315,68 +336,14 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 
 				-- attempt to stick to the closest frame.
 				local offset = p.background.borderthickness
-				local anchor, name, frame = FlyPaper.StickToClosestFrameInGroup(group, folder, nil, offset, offset)
+				local _, _, frame = FlyPaper.StickToClosestFrameInGroup(group, folder, nil, offset, offset)
 
 				-- found a frame to stick it to?
-				if anchor and frame and frame.win then
-					-- change the window it is sticked to.
-					frame.win.db.sticked = frame.win.db.sticked or new()
-					frame.win.db.sticked[p.name] = true
-
-					-- if the window that we are sticking this one to was
-					-- sticked to it, we make sure to remove it from table.
-					if p.sticked then
-						p.sticked[name] = nil
-					end
-
-					-- bar spacing first
-					p.barspacing = frame.win.db.barspacing
-					group:SetSpacing(p.barspacing)
-
-					-- change the width of the window accordingly
-					if Yanchors[anchor] then
-						-- we change things related to height
-						p.barwidth = frame.win.db.barwidth
-						group:SetLength(p.barwidth)
-					elseif Xanchors[anchor] then
-						-- window height
-						p.background.height = frame.win.db.background.height
-						group:SetHeight(p.background.height)
-
-						-- title bar height
-						p.title.height = frame.win.db.title.height
-						group.button:SetHeight(p.title.height)
-						group:AdjustButtons()
-
-						-- bars height
-						p.barheight = frame.win.db.barheight
-						group:SetBarHeight(p.barheight)
-
-						group:SortBars()
-					end
-
+				if frame then
+					-- nothing to do
 					SavePosition(group, p)
 				else
-					-- the window wasn't sticked to any? remove just incase
-					windows = Skada:GetWindows()
-					for i = 1, #windows do
-						local win = windows[i]
-						if win and win.db and win.db.name ~= p.name and win.db.display == "bar" then
-							if win.db.sticked then
-								if win.db.sticked[p.name] then
-									win.db.sticked[p.name] = nil
-								end
-								-- remove table if empty
-								if next(win.db.sticked) == nil then
-									win.db.sticked = del(win.db.sticked)
-								end
-
-								SavePosition(win.bargroup, win.db)
-							elseif p.sticked and p.sticked[win.db.name] then
-								SavePosition(win.bargroup, win.db)
-							end
-						end
-					end
+					stop_move(group, p.sticked)
 				end
 			end
 
@@ -385,17 +352,24 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 		end
 	end
 
-	function mod:WindowMoveStart(_, group, startX, startY)
-		if FlyPaper and group and group.win and group.win.db and group.win.db.sticky then
-			if group.win.db.hidden then return end
-
-			local offset = group.win.db.background.borderthickness
-			windows = Skada:GetWindows()
+	do
+		local function start_move(group, children, offset)
+			if not children then return end
 			for i = 1, #windows do
 				local win = windows[i]
-				if win and win.db and win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked and group.win.db.sticked[win.db.name] then
+				local p = win and win.db
+				if p and p.display == "bar" and children[win.name] then
 					FlyPaper.Stick(win.bargroup, group, nil, offset, offset)
+					start_move(win.bargroup, p.sticked, p.background.borderthickness)
 				end
+			end
+		end
+
+		function mod:WindowMoveStart(_, group)
+			local p = FlyPaper and group and group.win and group.win.db
+			if p and p.sticky and not p.hidden then
+				local offset = p.background.borderthickness
+				start_move(group, p.sticked, offset)
 			end
 		end
 	end
@@ -424,7 +398,6 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 		-- resize sticked windows as well.
 		if FlyPaper and p.sticky then
 			local offset = p.background.borderthickness
-			windows = Skada:GetWindows()
 			for i = 1, #windows do
 				local win = windows[i]
 				if win and win.db and win.db.display == "bar" and win.bargroup:IsShown() and p.sticked and p.sticked[win.db.name] then
@@ -478,6 +451,67 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 		local bar, isnew = win.bargroup:NewBar(name, label, value, maxvalue, icon, o)
 		bar.win = win
 		return bar, isnew
+	end
+
+	-- ======================================================= --
+
+	do
+		-- these anchors are used to correctly position the windows due
+		-- to the title bar overlapping.
+		local Xanchors = {LT = true, LB = true, LC = true, RT = true, RB = true, RC = true}
+		local Yanchors = {TL = true, TR = true, TC = true, BL = true, BR = true, BC = true}
+
+		function mod:OnAnchorFrame(_, group, frame, anchor, x, y)
+			local p = group and group.win and group.win.db
+			local q = frame and frame.win and frame.win.db
+			if not p or not q then return end
+
+			-- change the window it is sticked to.
+			q.sticked = q.sticked or new()
+			q.sticked[p.name] = true
+
+			-- if the window that we are sticking this one to was
+			-- sticked to it, we make sure to remove it from table.
+			if p.sticked then
+				p.sticked[q.name] = nil
+			end
+
+			-- bar spacing first
+			p.barspacing = q.barspacing
+			group:SetSpacing(p.barspacing)
+
+			-- change the width of the window accordingly
+			if Yanchors[anchor] then
+				-- we change things related to height
+				p.barwidth = q.barwidth
+				group:SetLength(p.barwidth)
+			elseif Xanchors[anchor] then
+				-- window height
+				p.background.height = q.background.height
+				group:SetHeight(p.background.height)
+
+				-- title bar height
+				p.title.height = q.title.height
+				group.button:SetHeight(p.title.height)
+				group:AdjustButtons()
+
+				-- bars height
+				p.barheight = q.barheight
+				group:SetBarHeight(p.barheight)
+
+				group:SortBars()
+			end
+
+			SavePosition(group, p)
+		end
+
+		-- remove all windows that were sticked to this!
+		function mod:OnRemoveFrame(_, group, _, name)
+			local p = group and group.win and group.win.db
+			if p and p.sticked then
+				p.sticked = del(p.sticked)
+			end
+		end
 	end
 
 	-- ======================================================= --
@@ -796,11 +830,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 						bar_seticon(bar, db, data)
 						bar_setcolor(bar, db, data)
 
-						if
-							data.class and
-							Skada.validclass[data.class] and
-							(db.classcolortext or db.classcolorleft or db.classcolorright)
-						then
+						if Skada.validclass[data.class] and (db.classcolortext or db.classcolorleft or db.classcolorright) then
 							local c = classcolors(data.class)
 							if db.classcolortext or db.classcolorleft then
 								bar.label:SetTextColor(c.r, c.g, c.b, c.a or 1)
@@ -1135,7 +1165,6 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 		function mod:WindowResizing(_, group)
 			if FlyPaper and group and not group.isStretching and group.win and group.win.db and group.win.db.sticky then
 				local offset = group.win.db.background.borderthickness
-				windows = Skada:GetWindows()
 				for i = 1, #windows do
 					local win = windows[i]
 					if win and win.db and win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked and group.win.db.sticked[win.db.name] then
@@ -2237,6 +2266,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 
 				local name = check_theme_name(theme.__name)
 				theme.__name = nil
+				G.themes = G.themes or {}
 				G.themes[name] = theme
 				ACR:NotifyChange(folder)
 			end
@@ -2280,7 +2310,6 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 								disabled = function() return (applytheme == nil) end,
 								values = function()
 									wipe(list)
-									windows = Skada:GetWindows()
 									for i = 1, #windows do
 										local win = windows[i]
 										if win and win.db and win.db.display == "bar" then
@@ -2309,7 +2338,6 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 									if applywindow and applytheme then
 										local theme = themes[applytheme] or G.themes and G.themes[applytheme]
 										if theme then
-											windows = Skada:GetWindows()
 											for i = 1, #windows do
 												local win = windows[i]
 												if win and win.db and win.db.name == applywindow then
@@ -2359,7 +2387,6 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 								set = function(_, val) savewindow = val end,
 								values = function()
 									wipe(list)
-									windows = Skada:GetWindows()
 									for i = 1, #windows do
 										local win = windows[i]
 										if win and win.db and win.db.display == "bar" then
@@ -2385,7 +2412,6 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 								order = 30,
 								disabled = function() return (savewindow == nil or savetheme == nil or savetheme:trim() == "") end,
 								func = function()
-									windows = Skada:GetWindows()
 									for i = 1, #windows do
 										local win = windows[i]
 										if win and win.db and win.db.name == savewindow then
@@ -2535,6 +2561,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			rolecoords = rolecoords or Skada.rolecoords
 			speccoords = speccoords or Skada.speccoords
 			spellschools = spellschools or Skada.spellschools
+			windows = windows or Skada.windows
 
 			-- fix old saved themes!
 			if G.themes and #G.themes > 0 then
@@ -2549,6 +2576,11 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 					i = i + 1
 					theme = G.themes[i]
 				end
+			end
+
+			if FlyPaper then
+				FlyPaper.RegisterCallback(self, "OnRemoveFrame")
+				FlyPaper.RegisterCallback(self, "OnAnchorFrame")
 			end
 		end
 	end

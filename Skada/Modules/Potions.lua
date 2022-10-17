@@ -73,7 +73,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 
 			if not potions then
 				return
-			elseif next(potions) ~= nil and class and Skada.validclass[class] then
+			elseif next(potions) ~= nil and Skada.validclass[class] then
 				prepot[#prepot + 1] = format(prepotionStr, classcolors.str(class), actorname, tconcat(potions, " "))
 			end
 			del(potions)
