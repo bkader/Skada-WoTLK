@@ -37,19 +37,19 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 
 	local dmg = {}
 	local function log_damage(set, isdot)
-		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
-		if not player then return end
+		local actor = Skada:GetPlayer(set, dmg.actorid, dmg.actorname, dmg.actorflags)
+		if not actor then return end
 
-		player.damaged = (player.damaged or 0) + dmg.amount
+		actor.damaged = (actor.damaged or 0) + dmg.amount
 		set.damaged = (set.damaged or 0) + dmg.amount
 
 		-- add absorbed damage to total damage
 		local absorbed = dmg.absorbed or 0
 
-		if player.totaldamaged then
-			player.totaldamaged = player.totaldamaged + dmg.amount + absorbed
+		if actor.totaldamaged then
+			actor.totaldamaged = actor.totaldamaged + dmg.amount + absorbed
 		elseif absorbed > 0 then
-			player.totaldamaged = player.damaged + absorbed
+			actor.totaldamaged = actor.damaged + absorbed
 		end
 
 		if set.totaldamaged then
@@ -62,11 +62,11 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		if set == Skada.total and not P.totalidc then return end
 
 		local spellid = isdot and -dmg.spellid or dmg.spellid
-		local spell = player.damagedspells and player.damagedspells[spellid]
+		local spell = actor.damagedspells and actor.damagedspells[spellid]
 		if not spell then
-			player.damagedspells = player.damagedspells or {}
+			actor.damagedspells = actor.damagedspells or {}
 			spell = {id = spellid, school = dmg.school, amount = 0}
-			player.damagedspells[spellid] = spell
+			actor.damagedspells[spellid] = spell
 		elseif not spell.school and dmg.school then
 			spell.school = dmg.school
 		end
@@ -195,9 +195,9 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 
 		if dmg.spellid and not ignoredSpells[dmg.spellid] then
 			dmg.srcName = srcName
-			dmg.playerid = dstGUID
-			dmg.playername = dstName
-			dmg.playerflags = dstFlags
+			dmg.actorid = dstGUID
+			dmg.actorname = dstName
+			dmg.actorflags = dstFlags
 			dmg.misstype = nil
 
 			Skada:DispatchSets(log_damage, eventtype == "SPELL_PERIODIC_DAMAGE")
@@ -240,9 +240,9 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 
 		if dmg.spellid and not ignoredSpells[dmg.spellid] then
 			dmg.srcName = srcName
-			dmg.playerid = dstGUID
-			dmg.playername = dstName
-			dmg.playerflags = dstFlags
+			dmg.actorid = dstGUID
+			dmg.actorname = dstName
+			dmg.actorflags = dstFlags
 
 			dmg.amount = 0
 			dmg.overkill = 0

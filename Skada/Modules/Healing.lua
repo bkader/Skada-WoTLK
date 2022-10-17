@@ -39,10 +39,10 @@ Skada:RegisterModule("Healing", function(L, P)
 	-- list of spells used to queue units.
 	local queued_spells = {[49005] = 61607}
 
-	local function log_spellcast(set, playerid, playername, playerflags, spellid, spellschool)
+	local function log_spellcast(set, actorid, actorname, actorflags, spellid, spellschool)
 		if not set or (set == Skada.total and not P.totalidc) then return end
 
-		local player = Skada:FindPlayer(set, playerid, playername, playerflags)
+		local player = Skada:FindPlayer(set, actorid, actorname, actorflags)
 		if player and player.healspells and player.healspells[spellid] then
 			-- because some HoTs don't have an initial amount
 			-- we start from 1 and not from 0 if casts wasn't
@@ -60,7 +60,7 @@ Skada:RegisterModule("Healing", function(L, P)
 	local function log_heal(set, ishot)
 		if not heal.spellid or not heal.amount then return end
 
-		local player = Skada:GetPlayer(set, heal.playerid, heal.playername, heal.playerflags)
+		local player = Skada:GetPlayer(set, heal.actorid, heal.actorname, heal.actorflags)
 		if not player then return end
 
 		-- get rid of overheal
@@ -150,7 +150,7 @@ Skada:RegisterModule("Healing", function(L, P)
 			srcGUID, srcName, srcFlags = srcQueued.id, srcQueued.name, srcQueued.flag
 		end
 
-		heal.playerid, heal.playername, heal.playerflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+		heal.actorid, heal.actorname, heal.actorflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 		heal.dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
 
 		heal.spellid = (eventtype == "SPELL_PERIODIC_HEAL") and -spellid or spellid

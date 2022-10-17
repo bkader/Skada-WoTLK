@@ -159,10 +159,10 @@ do
 
 		-- 3. retrieve the actor.
 		if is_enemy then -- enemy?
-			return Skada:GetEnemy(set, info.playername, info.playerid, info.playerflags, true)
+			return Skada:GetEnemy(set, info.actorname, info.actorid, info.actorflags, true)
 		end
 
-		return Skada:GetPlayer(set, info.playerid, info.playername, info.playerflags) -- player?
+		return Skada:GetPlayer(set, info.actorid, info.actorname, info.actorflags) -- player?
 	end
 
 	-- handles SPELL_AURA_APPLIED event
@@ -568,9 +568,9 @@ Skada:RegisterModule("Buffs", function(_, P, _, C)
 
 	local function handle_buff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, school, auratype)
 		if spellid and not ignored_buffs[spellid] and (auratype == "BUFF" or special_buffs[spellid]) then
-			aura.playerid = dstGUID
-			aura.playername = dstName
-			aura.playerflags = dstFlags
+			aura.actorid = dstGUID
+			aura.actorname = dstName
+			aura.actorflags = dstFlags
 			aura.dstName = nil
 
 			aura.spellid = spellid
@@ -737,7 +737,7 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 	local function handle_debuff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, school, auratype)
 		if not spellid or ignored_debuffs[spellid] or auratype ~= "DEBUFF" then return end
 
-		aura.playerid, aura.playername, aura.playerflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+		aura.actorid, aura.actorname, aura.actorflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 		aura.dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
 		aura.spellid = -spellid
 		aura.school = school
@@ -895,9 +895,9 @@ Skada:RegisterModule("Enemy Buffs", function(_, P, _, C)
 
 	local function handle_buff(_, event, _, _, _, dstGUID, dstName, dstFlags, spellid, _, school, auratype)
 		if spellid and not ignored_buffs[spellid] and (auratype == "BUFF" or special_buffs[spellid]) then
-			aura.playerid = dstGUID
-			aura.playername = dstName
-			aura.playerflags = dstFlags
+			aura.actorid = dstGUID
+			aura.actorname = dstName
+			aura.actorflags = dstFlags
 			aura.dstName = nil
 
 			aura.spellid = spellid
@@ -977,9 +977,9 @@ Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
 	local function handle_debuff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, school, auratype)
 		if not spellid or ignored_debuffs[spellid] or auratype ~= "DEBUFF" then return end
 
-		aura.playerid = srcGUID
-		aura.playername = srcName
-		aura.playerflags = srcFlags
+		aura.actorid = srcGUID
+		aura.actorname = srcName
+		aura.actorflags = srcFlags
 		aura.dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
 
 		aura.spellid = -spellid

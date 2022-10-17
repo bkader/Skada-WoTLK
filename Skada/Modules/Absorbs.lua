@@ -262,16 +262,16 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 	end
 
-	local function log_spellcast(set, playerid, playername, playerflags, spellid, spellschool)
+	local function log_spellcast(set, actorid, actorname, actorflags, spellid, spellschool)
 		if not set or (set == Skada.total and not P.totalidc) then return end
 
-		local player = Skada:FindPlayer(set, playerid, playername, playerflags)
-		if player and player.absorbspells and player.absorbspells[spellid] then
-			player.absorbspells[spellid].casts = (player.absorbspells[spellid].casts or 1) + 1
+		local actor = Skada:FindPlayer(set, actorid, actorname, actorflags)
+		if actor and actor.absorbspells and actor.absorbspells[spellid] then
+			actor.absorbspells[spellid].casts = (actor.absorbspells[spellid].casts or 1) + 1
 
 			-- fix possible missing spell school.
-			if not player.absorbspells[spellid].school and spellschool then
-				player.absorbspells[spellid].school = spellschool
+			if not actor.absorbspells[spellid].school and spellschool then
+				actor.absorbspells[spellid].school = spellschool
 			end
 		end
 	end
@@ -279,26 +279,26 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	local function log_absorb(set, nocount)
 		if not absorb.spellid or not absorb.amount or absorb.amount == 0 then return end
 
-		local player = Skada:GetPlayer(set, absorb.playerid, absorb.playername)
-		if not player then
+		local actor = Skada:GetPlayer(set, absorb.actorid, absorb.actorname)
+		if not actor then
 			return
-		elseif player.role ~= "DAMAGER" and not passiveSpells[absorb.spellid] and not nocount then
-			Skada:AddActiveTime(set, player, absorb.dstName)
+		elseif actor.role ~= "DAMAGER" and not passiveSpells[absorb.spellid] and not nocount then
+			Skada:AddActiveTime(set, actor, absorb.dstName)
 		end
 
 		-- add absorbs amount
-		player.absorb = (player.absorb or 0) + absorb.amount
+		actor.absorb = (actor.absorb or 0) + absorb.amount
 		set.absorb = (set.absorb or 0) + absorb.amount
 
 		-- saving this to total set may become a memory hog deluxe.
 		if set == Skada.total and not P.totalidc then return end
 
 		-- record the spell
-		local spell = player.absorbspells and player.absorbspells[absorb.spellid]
+		local spell = actor.absorbspells and actor.absorbspells[absorb.spellid]
 		if not spell then
-			player.absorbspells = player.absorbspells or {}
+			actor.absorbspells = actor.absorbspells or {}
 			spell = {school = absorb.school, amount = absorb.amount, count = 1}
-			player.absorbspells[absorb.spellid] = spell
+			actor.absorbspells[absorb.spellid] = spell
 		else
 			if not spell.school and absorb.school then
 				spell.school = absorb.school
@@ -647,9 +647,9 @@ Skada:RegisterModule("Absorbs", function(L, P)
 				-- a previous shield, we attributed dumbly to it.
 				-- the "true" at the end is so we don't update the spell count or active time.
 				if absorbed > 0 and pshield then
-					absorb.playerid = pshield.srcGUID
-					absorb.playername = pshield.srcName
-					absorb.playerflags = pshield.srcFlags
+					absorb.actorid = pshield.srcGUID
+					absorb.actorname = pshield.srcName
+					absorb.actorflags = pshield.srcFlags
 					absorb.dstName = dstName
 
 					absorb.spellid = pshield.spellid
@@ -676,9 +676,9 @@ Skada:RegisterModule("Absorbs", function(L, P)
 				shields[dstName][s.spellid][s.srcName].amount = s.amount - absorbed
 				shields[dstName][s.spellid][s.srcName].full = nil
 
-				absorb.playerid = s.srcGUID
-				absorb.playername = s.srcName
-				absorb.playerflags = s.srcFlags
+				absorb.actorid = s.srcGUID
+				absorb.actorname = s.srcName
+				absorb.actorflags = s.srcFlags
 				absorb.dstName = dstName
 
 				absorb.spellid = s.spellid
@@ -697,9 +697,9 @@ Skada:RegisterModule("Absorbs", function(L, P)
 					shields[dstName][s.spellid][s.srcName] = del(shields[dstName][s.spellid][s.srcName])
 				end
 
-				absorb.playerid = s.srcGUID
-				absorb.playername = s.srcName
-				absorb.playerflags = s.srcFlags
+				absorb.actorid = s.srcGUID
+				absorb.actorname = s.srcName
+				absorb.actorflags = s.srcFlags
 				absorb.dstName = dstName
 
 				absorb.spellid = s.spellid

@@ -216,7 +216,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		local absorbed = dmg.absorbed or 0
 		if (dmg.amount + absorbed) == 0 then return end
 
-		local e = Skada:GetEnemy(set, dmg.enemyname, dmg.enemyid, dmg.enemyflags, true)
+		local e = Skada:GetEnemy(set, dmg.actorname, dmg.actorid, dmg.actorflags, true)
 		if not e then return end
 
 		e.damaged = (e.damaged or 0) + dmg.amount
@@ -282,8 +282,8 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		-- the rest of the code is only for allowed instance diffs.
 		if not allowed_diffs[get_instance_diff()] then return end
 
-		if is_custom_unit(dmg.enemyid, dmg.enemyname, dmg.amount, overkill) then
-			local unit = customUnitsTable[dmg.enemyid]
+		if is_custom_unit(dmg.actorid, dmg.actorname, dmg.amount, overkill) then
+			local unit = customUnitsTable[dmg.actorid]
 			-- started with less than max?
 			if unit.full then
 				local amount = unit.full - unit.curval
@@ -341,7 +341,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		end
 
 		-- custom groups
-		log_custom_group(set, dmg.enemyid, dmg.enemyname, dmg.srcName, spellid, dmg.spellschool, dmg.amount, overkill, absorbed)
+		log_custom_group(set, dmg.actorid, dmg.actorname, dmg.srcName, spellid, dmg.spellschool, dmg.amount, overkill, absorbed)
 	end
 
 	local function spell_damage(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
@@ -355,9 +355,9 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		end
 
 		if dmg.spellid and not ignoredSpells[dmg.spellid] then
-			dmg.enemyid = dstGUID
-			dmg.enemyname = dstName
-			dmg.enemyflags = dstFlags
+			dmg.actorid = dstGUID
+			dmg.actorname = dstName
+			dmg.actorflags = dstFlags
 			dmg.dstGUID = nil
 
 			_, dmg.srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
@@ -378,9 +378,9 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		end
 
 		if misstype == "ABSORB" and spellid and not ignoredSpells[spellid] then
-			dmg.enemyid = dstGUID
-			dmg.enemyname = dstName
-			dmg.enemyflags = dstFlags
+			dmg.actorid = dstGUID
+			dmg.actorname = dstName
+			dmg.actorflags = dstFlags
 			dmg.dstGUID = nil
 
 			dmg.spellid = spellid
@@ -875,7 +875,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		local absorbed = dmg.absorbed or 0
 		if (dmg.amount + absorbed) == 0 then return end
 
-		local e = Skada:GetEnemy(set, dmg.enemyname, dmg.enemyid, dmg.enemyflags, true)
+		local e = Skada:GetEnemy(set, dmg.actorname, dmg.actorid, dmg.actorflags, true)
 		if not e then
 			return
 		elseif (set.type == "arena" or set.type == "pvp") and dmg.amount > 0 then
@@ -958,9 +958,9 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		end
 
 		if dmg.spellid and not ignoredSpells[dmg.spellid] then
-			dmg.enemyid = srcGUID
-			dmg.enemyname = srcName
-			dmg.enemyflags = srcFlags
+			dmg.actorid = srcGUID
+			dmg.actorname = srcName
+			dmg.actorflags = srcFlags
 			dmg.srcName = nil
 
 			dmg.dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
@@ -981,9 +981,9 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		end
 
 		if misstype == "ABSORB" and spellid and not ignoredSpells[spellid] then
-			dmg.enemyid = srcGUID
-			dmg.enemyname = srcName
-			dmg.enemyflags = srcFlags
+			dmg.actorid = srcGUID
+			dmg.actorname = srcName
+			dmg.actorflags = srcFlags
 			dmg.srcName = nil
 
 			dmg.spellid = spellid
@@ -1238,7 +1238,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 
 	function setPrototype:GetEnemyDPS(class)
 		local total = self:GetEnemyDamage(class)
-		if total == 0 then
+		if not total or total == 0 then
 			return 0, total
 		end
 		return total / self:GetTime(), total
@@ -1332,7 +1332,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		if not set or (set == Skada.total and not P.totalidc) then return end
 		if not heal.spellid or not heal.amount or heal.amount == 0 then return end
 
-		local e = Skada:GetEnemy(set, heal.enemyname, heal.enemyid, heal.enemyflags, true)
+		local e = Skada:GetEnemy(set, heal.actorname, heal.actorid, heal.actorflags, true)
 		if not e then
 			return
 		elseif (set.type == "arena" or set.type == "pvp") then
@@ -1361,9 +1361,9 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 	local function spell_heal(_, eventtype, srcGUID, srcName, srcFlags, _, dstName, _, ...)
 		local spellid, _, spellschool, amount, overheal = ...
 		if spellid and not ignoredSpells[spellid] then
-			heal.enemyid = srcGUID
-			heal.enemyname = srcName
-			heal.enemyflags = srcFlags
+			heal.actorid = srcGUID
+			heal.actorname = srcName
+			heal.actorflags = srcFlags
 			heal.dstName = dstName
 
 			heal.spellid = spellid

@@ -3,7 +3,7 @@ local Private = Skada.Private
 Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 	local mod = Skada:NewModule("Sunder Counter")
 	local targetmod = mod:NewModule("Sunder target list")
-	local sourcemod = mod:NewModule("Sunder source list")
+	local sourcemod = targetmod:NewModule("Sunder source list")
 	local get_actor_sunder_sources = nil
 	local get_actor_sunder_targets = nil
 
@@ -31,17 +31,17 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 
 	local data = {}
 	local function log_sunder(set)
-		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
-		if not player then return end
+		local actor = Skada:GetPlayer(set, data.actorid, data.actorname, data.actorflags)
+		if not actor then return end
 
 		set.sunder = (set.sunder or 0) + 1
-		player.sunder = (player.sunder or 0) + 1
+		actor.sunder = (actor.sunder or 0) + 1
 
 		-- saving this to total set may become a memory hog deluxe.
 		if (set == Skada.total and not P.totalidc) or not data.dstName then return end
 
-		player.sundertargets = player.sundertargets or {}
-		player.sundertargets[data.dstName] = (player.sundertargets[data.dstName] or 0) + 1
+		actor.sundertargets = actor.sundertargets or {}
+		actor.sundertargets[data.dstName] = (actor.sundertargets[data.dstName] or 0) + 1
 	end
 
 	local function sunder_dropped(dstGUID)
@@ -74,9 +74,9 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 			active_sunders[dstGUID] = GetTime() + M.sunderdelay
 		end
 
-		data.playerid = last_srcGUID
-		data.playername = last_srcName
-		data.playerflags = last_srcFlags
+		data.actorid = last_srcGUID
+		data.actorname = last_srcName
+		data.actorflags = last_srcFlags
 		data.dstName = dstName
 
 		Skada:DispatchSets(log_sunder)

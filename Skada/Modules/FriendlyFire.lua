@@ -29,25 +29,25 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	local function log_damage(set)
 		if not dmg.spellid or not dmg.amount or dmg.amount == 0 then return end
 
-		local player = Skada:GetPlayer(set, dmg.playerid, dmg.playername, dmg.playerflags)
-		if not player then
+		local actor = Skada:GetPlayer(set, dmg.actorid, dmg.actorname, dmg.actorflags)
+		if not actor then
 			return
 		elseif not passiveSpells[dmg.spellid] then
-			Skada:AddActiveTime(set, player, dmg.dstName)
+			Skada:AddActiveTime(set, actor, dmg.dstName)
 		end
 
-		player.friendfire = (player.friendfire or 0) + dmg.amount
+		actor.friendfire = (actor.friendfire or 0) + dmg.amount
 		set.friendfire = (set.friendfire or 0) + dmg.amount
 
 		-- to save up memory, we only record the rest to the current set.
 		if (set == Skada.total and not P.totalidc) or not dmg.spellid then return end
 
 		-- spell
-		local spell = player.friendfirespells and player.friendfirespells[dmg.spellid]
+		local spell = actor.friendfirespells and actor.friendfirespells[dmg.spellid]
 		if not spell then
-			player.friendfirespells = player.friendfirespells or {}
-			player.friendfirespells[dmg.spellid] = {amount = 0, school = dmg.school}
-			spell = player.friendfirespells[dmg.spellid]
+			actor.friendfirespells = actor.friendfirespells or {}
+			actor.friendfirespells[dmg.spellid] = {amount = 0, school = dmg.school}
+			spell = actor.friendfirespells[dmg.spellid]
 		elseif not spell.school and dmg.school then
 			spell.school = dmg.school
 		end
@@ -73,9 +73,9 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		end
 
 		if dmg.spellid and not ignoredSpells[dmg.spellid] then
-			dmg.playerid = srcGUID
-			dmg.playername = srcName
-			dmg.playerflags = srcFlags
+			dmg.actorid = srcGUID
+			dmg.actorname = srcName
+			dmg.actorflags = srcFlags
 
 			if absorbed and absorbed > 0 then
 				dmg.amount = dmg.amount + absorbed
@@ -99,9 +99,9 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		end
 
 		if misstype == "ABSORB" and dmg.spellid and not ignoredSpells[dmg.spellid] then
-			dmg.playerid = srcGUID
-			dmg.playername = srcName
-			dmg.playerflags = srcFlags
+			dmg.actorid = srcGUID
+			dmg.actorname = srcName
+			dmg.actorflags = srcFlags
 
 			dmg.dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
 			Skada:DispatchSets(log_damage)

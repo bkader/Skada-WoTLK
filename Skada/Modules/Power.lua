@@ -60,7 +60,7 @@ Skada:RegisterModule("Resources", function(L, P)
 	local function log_gain(set)
 		if not (gain and gain.type and gainTable[gain.type]) then return end
 
-		local actor = Skada:GetPlayer(set, gain.playerid, gain.playername, gain.playerflags)
+		local actor = Skada:GetPlayer(set, gain.actorid, gain.actorname, gain.actorflags)
 		if not actor then return end
 
 		actor[gainTable[gain.type]] = (actor[gainTable[gain.type]] or 0) + gain.amount
@@ -75,7 +75,7 @@ Skada:RegisterModule("Resources", function(L, P)
 
 	local function spell_energize(_, _, srcGUID, srcName, srcFlags, _, _, _, spellid, _, _, amount, gain_type)
 		if spellid and not ignoredSpells[spellid] then
-			gain.playerid, gain.playername, gain.playerflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+			gain.actorid, gain.actorname, gain.actorflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 			gain.spellid = spellid
 			gain.amount = amount
 			gain.type = gain_type

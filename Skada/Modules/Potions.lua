@@ -2,8 +2,8 @@ local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Potions", function(L, P, _, C)
 	local mod = Skada:NewModule("Potions")
-	local playermod = mod:NewModule("Potions list")
-	local potionmod = mod:NewModule("Players list")
+	local spellmod = mod:NewModule("Potions list")
+	local playermod = spellmod:NewModule("Players list")
 	local get_actors_by_potion = nil
 
 	-- cache frequently used globals
@@ -29,20 +29,20 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		end
 	end
 
-	local function log_potion(set, playerid, playername, playerflags, spellid)
-		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
-		if not player then return end
+	local function log_potion(set, actorid, actorname, actorflags, spellid)
+		local actor = Skada:GetPlayer(set, actorid, actorname, actorflags)
+		if not actor then return end
 
-		-- record potion usage for player and set
-		player.potion = (player.potion or 0) + 1
+		-- record potion usage for actor and set
+		actor.potion = (actor.potion or 0) + 1
 		set.potion = (set.potion or 0) + 1
 
 		-- saving this to total set may become a memory hog deluxe.
 		if (set == Skada.total and not P.totalidc) or not spellid then return end
 
 		local potionid = potion_ids[spellid]
-		player.potionspells = player.potionspells or {}
-		player.potionspells[potionid] = (player.potionspells[potionid] or 0) + 1
+		actor.potionspells = actor.potionspells or {}
+		actor.potionspells[potionid] = (actor.potionspells[potionid] or 0) + 1
 	end
 
 	local function potion_used(_, _, srcGUID, srcName, srcFlags, _, _, _, spellid)
@@ -55,7 +55,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		local function check_unit_potions(unit, owner, prepot)
 			if owner or UnitIsDeadOrGhost(unit) then return end
 
-			local playerid, playername = UnitGUID(unit), UnitName(unit)
+			local actorid, actorname = UnitGUID(unit), UnitName(unit)
 			local _, class = UnitClass(unit)
 
 			local potions = nil
@@ -66,7 +66,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 				elseif potion_ids[spellid] then
 					potions = potions or new()
 					-- instant recording doesn't work, so we delay it
-					Skada:ScheduleTimer(function() potion_used(nil, nil, playerid, playername, nil, nil, nil, nil, spellid) end, 1)
+					Skada:ScheduleTimer(function() potion_used(nil, nil, actorid, actorname, nil, nil, nil, nil, spellid) end, 1)
 					potions[#potions + 1] = format(potionStr, icon)
 				end
 			end
@@ -74,7 +74,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 			if not potions then
 				return
 			elseif next(potions) ~= nil and class and Skada.validclass[class] then
-				prepot[#prepot + 1] = format(prepotionStr, classcolors.str(class), playername, tconcat(potions, " "))
+				prepot[#prepot + 1] = format(prepotionStr, classcolors.str(class), actorname, tconcat(potions, " "))
 			end
 			del(potions)
 		end
@@ -99,12 +99,12 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		end
 	end
 
-	function potionmod:Enter(win, id, label)
+	function playermod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
 		win.title = label
 	end
 
-	function potionmod:Update(win, set)
+	function playermod:Update(win, set)
 		win.title = win.spellname or L["Unknown"]
 		if win.class then
 			win.title = format("%s (%s)", win.title, L[win.class])
@@ -129,7 +129,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		end
 	end
 
-	function playermod:Enter(win, id, label)
+	function spellmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's used potions"], label)
 	end
@@ -141,7 +141,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		end
 	end
 
-	function playermod:Update(win, set)
+	function spellmod:Update(win, set)
 		win.title = uformat(L["%s's used potions"], win.actorname)
 		if not set or not win.actorname then return end
 
@@ -351,15 +351,15 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 	end
 
 	function mod:OnEnable()
-		potionmod.metadata = {
+		playermod.metadata = {
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"]
 		}
-		playermod.metadata = {click1 = potionmod}
+		spellmod.metadata = {click1 = playermod}
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
-			click1 = playermod,
+			click1 = spellmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = false, sPercent = false},
@@ -369,7 +369,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		mod_cols = self.metadata.columns
 
 		-- no total click.
-		playermod.nototal = true
+		spellmod.nototal = true
 
 		Skada:RegisterForCL(potion_used, {src_is_interesting_nopets = true}, "SPELL_CAST_SUCCESS")
 		Skada.RegisterCallback(self, "Skada_ApplySettings", "ApplySettings")

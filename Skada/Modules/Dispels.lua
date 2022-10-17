@@ -2,9 +2,9 @@ local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Dispels", function(L, P, _, C)
 	local mod = Skada:NewModule("Dispels")
-	local spellmod = mod:NewModule("Dispelled spell list")
+	local extraspellmod = mod:NewModule("Dispelled spell list")
 	local targetmod = mod:NewModule("Dispelled target list")
-	local playermod = mod:NewModule("Dispel spell list")
+	local spellmod = mod:NewModule("Dispel spell list")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local get_actor_dispelled_spells = nil
 	local get_actor_dispelled_targets = nil
@@ -27,21 +27,21 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 
 	local dispel = {}
 	local function log_dispel(set)
-		local player = Skada:GetPlayer(set, dispel.playerid, dispel.playername, dispel.playerflags)
-		if not player then return end
+		local actor = Skada:GetPlayer(set, dispel.actorid, dispel.actorname, dispel.actorflags)
+		if not actor then return end
 
 		-- increment player's and set's dispels count
-		player.dispel = (player.dispel or 0) + 1
+		actor.dispel = (actor.dispel or 0) + 1
 		set.dispel = (set.dispel or 0) + 1
 
 		-- saving this to total set may become a memory hog deluxe.
 		if (set == Skada.total and not P.totalidc) or not dispel.spellid then return end
 
-		local spell = player.dispelspells and player.dispelspells[dispel.spellid]
+		local spell = actor.dispelspells and actor.dispelspells[dispel.spellid]
 		if not spell then
-			player.dispelspells = player.dispelspells or {}
-			player.dispelspells[dispel.spellid] = {count = 1}
-			spell = player.dispelspells[dispel.spellid]
+			actor.dispelspells = actor.dispelspells or {}
+			actor.dispelspells[dispel.spellid] = {count = 1}
+			spell = actor.dispelspells[dispel.spellid]
 		else
 			spell.count = spell.count + 1
 		end
@@ -64,18 +64,18 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 		dispel.extraspellid = dispel.extraspellid or 6603
 
 		if dispel.spellid and not ignoredSpells[dispel.spellid] and not ignoredSpells[dispel.extraspellid] then
-			dispel.playerid, dispel.playername, dispel.playerflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+			dispel.actorid, dispel.actorname, dispel.actorflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 			dispel.dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
 			Skada:DispatchSets(log_dispel)
 		end
 	end
 
-	function spellmod:Enter(win, id, label)
+	function extraspellmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's dispelled spells"], label)
 	end
 
-	function spellmod:Update(win, set)
+	function extraspellmod:Update(win, set)
 		win.title = uformat(L["%s's dispelled spells"], win.actorname)
 
 		local spells, total, actor = get_actor_dispelled_spells(set, win.actorid, win.actorname)
@@ -120,12 +120,12 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 		end
 	end
 
-	function playermod:Enter(win, id, label)
+	function spellmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's dispel spells"], label)
 	end
 
-	function playermod:Update(win, set)
+	function spellmod:Update(win, set)
 		win.title = uformat(L["%s's dispel spells"], win.actorname)
 
 		local actor = set and set:GetPlayer(win.actorid, win.actorname)
@@ -190,8 +190,8 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 			showspots = true,
 			ordersort = true,
 			click1 = targetmod,
-			click2 = spellmod,
-			click3 = playermod,
+			click2 = extraspellmod,
+			click3 = spellmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = false, sPercent = false},
@@ -201,9 +201,9 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 		mod_cols = self.metadata.columns
 
 		-- no total click.
-		spellmod.nototal = true
+		extraspellmod.nototal = true
 		targetmod.nototal = true
-		playermod.nototal = true
+		spellmod.nototal = true
 
 		Skada:RegisterForCL(spell_dispel, {src_is_interesting = true}, "SPELL_DISPEL", "SPELL_STOLEN")
 

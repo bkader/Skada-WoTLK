@@ -2,9 +2,9 @@ local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 	local mod = Skada:NewModule("Interrupts")
-	local spellmod = mod:NewModule("Interrupted spells")
+	local extraspellmod = mod:NewModule("Interrupted spells")
 	local targetmod = mod:NewModule("Interrupted targets")
-	local playermod = mod:NewModule("Interrupt spells")
+	local spellmod = mod:NewModule("Interrupt spells")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local get_actor_interrupted_spells = nil
 	local get_actor_interrupt_targets = nil
@@ -28,21 +28,21 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 
 	local data = {}
 	local function log_interrupt(set)
-		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
-		if not player then return end
+		local actor = Skada:GetPlayer(set, data.actorid, data.actorname, data.actorflags)
+		if not actor then return end
 
 		-- increment player's and set's interrupts count
-		player.interrupt = (player.interrupt or 0) + 1
+		actor.interrupt = (actor.interrupt or 0) + 1
 		set.interrupt = (set.interrupt or 0) + 1
 
 		-- to save up memory, we only record the rest to the current set.
 		if (set == Skada.total and not P.totalidc) or not data.spellid then return end
 
-		local spell = player.interruptspells and player.interruptspells[data.spellid]
+		local spell = actor.interruptspells and actor.interruptspells[data.spellid]
 		if not spell then
-			player.interruptspells = player.interruptspells or {}
-			player.interruptspells[data.spellid] = {count = 1}
-			spell = player.interruptspells[data.spellid]
+			actor.interruptspells = actor.interruptspells or {}
+			actor.interruptspells[data.spellid] = {count = 1}
+			spell = actor.interruptspells[data.spellid]
 		else
 			spell.count = spell.count + 1
 		end
@@ -69,7 +69,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		-- invalid/ignored spell?
 		if ignoredSpells[spellid] or (extraspellid and ignoredSpells[extraspellid]) then return end
 
-		data.playerid, data.playername, data.playerflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+		data.actorid, data.actorname, data.actorflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 		data.dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
 
 		data.spellid = spellid
@@ -86,12 +86,12 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		Skada:SendChat(format(L["%s interrupted!"], spelllink), M.interruptchannel or "SAY", "preset")
 	end
 
-	function spellmod:Enter(win, id, label)
+	function extraspellmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's interrupted spells"], label)
 	end
 
-	function spellmod:Update(win, set)
+	function extraspellmod:Update(win, set)
 		win.title = uformat(L["%s's interrupted spells"], win.actorname)
 		if not set or not win.actorname then return end
 
@@ -138,12 +138,12 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		end
 	end
 
-	function playermod:Enter(win, id, label)
+	function spellmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's interrupt spells"], label)
 	end
 
-	function playermod:Update(win, set)
+	function spellmod:Update(win, set)
 		win.title = uformat(L["%s's interrupt spells"], win.actorname)
 		if not set or not win.actorname then return end
 
@@ -201,9 +201,9 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
-			click1 = spellmod,
+			click1 = extraspellmod,
 			click2 = targetmod,
-			click3 = playermod,
+			click3 = spellmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = true, sPercent = true},
@@ -213,9 +213,9 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		mod_cols = self.metadata.columns
 
 		-- no total click.
-		spellmod.nototal = true
+		extraspellmod.nototal = true
 		targetmod.nototal = true
-		playermod.nototal = true
+		spellmod.nototal = true
 
 		Skada:RegisterForCL(spell_interrupt, {src_is_interesting = true}, "SPELL_INTERRUPT")
 		Skada:AddMode(self)

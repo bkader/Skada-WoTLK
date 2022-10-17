@@ -5,8 +5,8 @@ local folder, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Fails")
-	local playermod = mod:NewModule("Player's failed events")
-	local spellmod = mod:NewModule("Event's failed players")
+	local spellmod = mod:NewModule("Player's failed events")
+	local playermod = spellmod:NewModule("Event's failed players")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local count_fails_by_spell = nil
 
@@ -25,8 +25,8 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 		end
 	end
 
-	local function log_fail(set, playerid, playername, spellid, failname)
-		local actor = Skada:GetPlayer(set, playerid, playername)
+	local function log_fail(set, actorid, actorname, spellid, failname)
+		local actor = Skada:GetPlayer(set, actorid, actorname)
 		if not actor or (actor.role == "TANK" and tank_events[failname]) then return end
 
 		actor.fail = (actor.fail or 0) + 1
@@ -44,20 +44,20 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 		end
 	end
 
-	local function on_fail(failname, playername, failtype, ...)
-		local spellid = failname and playername and LibFail:GetEventSpellId(failname)
-		local playerid = spellid and not ignoredSpells[spellid] and UnitGUID(playername)
-		if not playerid then return end
+	local function on_fail(failname, actorname, failtype, ...)
+		local spellid = failname and actorname and LibFail:GetEventSpellId(failname)
+		local actorid = spellid and not ignoredSpells[spellid] and UnitGUID(actorname)
+		if not actorid then return end
 
-		Skada:DispatchSets(log_fail, playerid, playername, spellid, failname)
+		Skada:DispatchSets(log_fail, actorid, actorname, spellid, failname)
 	end
 
-	function spellmod:Enter(win, id, label)
+	function playermod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
 		win.title = format(L["%s's fails"], label)
 	end
 
-	function spellmod:Update(win, set)
+	function playermod:Update(win, set)
 		win.title = uformat(L["%s's fails"], win.spellname)
 		if not win.spellid then return end
 
@@ -83,12 +83,12 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 		end
 	end
 
-	function playermod:Enter(win, id, label)
+	function spellmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's fails"], label)
 	end
 
-	function playermod:Update(win, set)
+	function spellmod:Update(win, set)
 		win.title = uformat(L["%s's fails"], win.actorname)
 
 		local actor = set and set:GetPlayer(win.actorid, win.actorname)
@@ -148,11 +148,11 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	end
 
 	function mod:OnEnable()
-		playermod.metadata = {click1 = spellmod}
+		spellmod.metadata = {click1 = playermod}
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
-			click1 = playermod,
+			click1 = spellmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = false, sPercent = false},
@@ -162,7 +162,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 		mod_cols = self.metadata.columns
 
 		-- no total click.
-		playermod.nototal = true
+		spellmod.nototal = true
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self)

@@ -2,7 +2,7 @@ local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Resurrects", function(L, P, _, C)
 	local mod = Skada:NewModule("Resurrects")
-	local playermod = mod:NewModule("Resurrect spell list")
+	local spellmod = mod:NewModule("Resurrect spell list")
 	local targetmod = mod:NewModule("Resurrect target list")
 
 	local pairs, format, uformat = pairs, string.format, Private.uformat
@@ -47,21 +47,21 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 
 	local data = {}
 	local function log_resurrect(set)
-		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
-		if not player then return end
+		local actor = Skada:GetPlayer(set, data.actorid, data.actorname, data.actorflags)
+		if not actor then return end
 
-		player.ress = (player.ress or 0) + 1
+		actor.ress = (actor.ress or 0) + 1
 		set.ress = (set.ress or 0) + 1
 
 		-- saving this to total set may become a memory hog deluxe.
 		if (set == Skada.total and not P.totalidc) or not data.spellid then return end
 
 		-- spell
-		local spell = player.resspells and player.resspells[data.spellid]
+		local spell = actor.resspells and actor.resspells[data.spellid]
 		if not spell then
-			player.resspells = player.resspells or {}
-			player.resspells[data.spellid] = {count = 0}
-			spell = player.resspells[data.spellid]
+			actor.resspells = actor.resspells or {}
+			actor.resspells[data.spellid] = {count = 0}
+			spell = actor.resspells[data.spellid]
 		end
 		spell.count = spell.count + 1
 
@@ -75,21 +75,21 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 	local function spell_resurrect(_, event, srcGUID, srcName, srcFlags, _, dstName, _, spellid)
 		if spellid and (event == "SPELL_RESURRECT" or resurrectSpells[spellid]) then
 			data.spellid = spellid
-			data.playerid = srcGUID
-			data.playername = srcName
-			data.playerflags = srcFlags
+			data.actorid = srcGUID
+			data.actorname = srcName
+			data.actorflags = srcFlags
 			data.dstName = (event == "SPELL_RESURRECT") and dstName or srcName
 
 			Skada:DispatchSets(log_resurrect)
 		end
 	end
 
-	function playermod:Enter(win, id, label)
+	function spellmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's resurrect spells"], label)
 	end
 
-	function playermod:Update(win, set)
+	function spellmod:Update(win, set)
 		win.title = uformat(L["%s's resurrect spells"], win.actorname)
 		if not set or not win.actorname then return end
 
@@ -171,7 +171,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 	function mod:OnEnable()
 		self.metadata = {
 			valuesort = true,
-			click1 = playermod,
+			click1 = spellmod,
 			click2 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
@@ -182,7 +182,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 		mod_cols = self.metadata.columns
 
 		-- no total click.
-		playermod.nototal = true
+		spellmod.nototal = true
 		targetmod.nototal = true
 
 		Skada:RegisterForCL(spell_resurrect, {src_is_not_interesting = true, dst_is_interesting_nopets = true}, "SPELL_RESURRECT")

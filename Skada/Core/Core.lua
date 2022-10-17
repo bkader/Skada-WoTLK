@@ -1641,7 +1641,7 @@ function Skada:GetPlayer(set, guid, name, flag)
 
 	set.actors[#set.actors + 1] = player
 
-	-- not all modules provide playerflags
+	-- not all modules provide flags
 	if player.flag == nil and flag then
 		player.flag = flag
 	end
@@ -1791,10 +1791,10 @@ do
 		end
 
 		-- attempts to find the player guid on Russian clients.
-		local function find_name_declension(text, playername)
+		local function find_name_declension(text, actorname)
 			for gender = 2, 3 do
-				for decset = 1, GetNumDeclensionSets(playername, gender) do
-					local ownerName = DeclineName(playername, gender, decset)
+				for decset = 1, GetNumDeclensionSets(actorname, gender) do
+					local ownerName = DeclineName(actorname, gender, decset)
 					if validate_pet_owner(text, ownerName) or find(text, ownerName) then
 						return true
 					end
@@ -1873,27 +1873,27 @@ do
 		action.petname = nil -- clear it
 
 		-- 1: group member / true: player / false: everything else
-		if is_player(action.playerid, action.playername, action.playerflags) ~= false then return end
+		if is_player(action.actorid, action.actorname, action.actorflags) ~= false then return end
 
-		local owner = fix_pets_handler(action.playerid, action.playerflags)
+		local owner = fix_pets_handler(action.actorid, action.actorflags)
 		if owner then
 			if P.mergepets then
-				action.petname = action.playername
-				action.playerid = owner.id
-				action.playername = owner.name
+				action.petname = action.actorname
+				action.actorid = owner.id
+				action.actorname = owner.name
 
-				if action.spellname and action.playername then
+				if action.spellname and action.actorname then
 					action.spellname = format("%s (%s)", action.spellname, action.petname)
 				end
 			else
 				-- just append the creature id to the player
-				action.playerid = format("%s%s", owner.id, GetCreatureId(action.playerid))
-				action.playername = format("%s <%s>", action.playername, owner.name)
+				action.actorid = format("%s%s", owner.id, GetCreatureId(action.actorid))
+				action.actorname = format("%s <%s>", action.actorname, owner.name)
 			end
 		else
 			-- if for any reason we fail to find the pets, we simply
 			-- adds them separately as a single entry.
-			action.playerid = action.playername
+			action.actorid = action.actorname
 		end
 	end
 

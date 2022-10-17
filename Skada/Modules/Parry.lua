@@ -35,26 +35,26 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 
 	local data = {}
 	local function log_parry(set)
-		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
-		if not player then return end
+		local actor = Skada:GetPlayer(set, data.actorid, data.actorname, data.actorflags)
+		if not actor then return end
 
-		player.parry = (player.parry or 0) + 1
+		actor.parry = (actor.parry or 0) + 1
 		set.parry = (set.parry or 0) + 1
 
 		-- saving this to total set may become a memory hog deluxe.
 		if (set == Skada.total and not P.totalidc) or not data.dstName then return end
 
-		player.parrytargets = player.parrytargets or {}
-		player.parrytargets[data.dstName] = (player.parrytargets[data.dstName] or 0) + 1
+		actor.parrytargets = actor.parrytargets or {}
+		actor.parrytargets[data.dstName] = (actor.parrytargets[data.dstName] or 0) + 1
 
 		if M.parryannounce and set ~= Skada.total then
-			Skada:SendChat(format(L["%s parried %s (%s)"], data.dstName, data.playername, player.parrytargets[data.dstName] or 1), M.parrychannel, "preset")
+			Skada:SendChat(format(L["%s parried %s (%s)"], data.dstName, data.actorname, actor.parrytargets[data.dstName] or 1), M.parrychannel, "preset")
 		end
 	end
 
 	local function spell_missed(_, _, srcGUID, srcName, srcFlags, _, dstName, _, swing_miss, _, _, spell_miss)
 		if (swing_miss == "PARRY" or spell_miss == "PARRY") and dstName and parrybosses[dstName] then
-			data.playerid, data.playername, data.playerflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+			data.actorid, data.actorname, data.actorflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 			data.dstName = dstName
 
 			Skada:DispatchSets(log_parry)

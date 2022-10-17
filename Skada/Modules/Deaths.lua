@@ -52,19 +52,19 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local function log_deathlog(set, override)
 		if not set or (set == Skada.total and not P.totalidc) then return end
 
-		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
-		if not player then return end
+		local actor = Skada:GetPlayer(set, data.actorid, data.actorname, data.actorflags)
+		if not actor then return end
 
-		local deathlog = player.deathlog and player.deathlog[1]
+		local deathlog = actor.deathlog and actor.deathlog[1]
 		if not deathlog or (deathlog.timeod and not override) then
-			player.deathlog = player.deathlog or {}
-			tinsert(player.deathlog, 1, {log = new()})
-			deathlog = player.deathlog[1]
+			actor.deathlog = actor.deathlog or {}
+			tinsert(actor.deathlog, 1, {log = new()})
+			deathlog = actor.deathlog[1]
 		end
 
 		-- seet player maxhp if not already set
 		if not deathlog.hpm or deathlog.hpm == 0 then
-			_, _, deathlog.hpm = UnitHealthInfo(player.name, player.id, "group")
+			_, _, deathlog.hpm = UnitHealthInfo(actor.name, actor.id, "group")
 			deathlog.hpm = deathlog.hpm or 0
 		end
 
@@ -74,7 +74,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		log.src = data.srcName
 		log.cri = data.critical
 		log.time = set.last_time or GetTime()
-		_, log.hp = UnitHealthInfo(player.name, player.id, "group")
+		_, log.hp = UnitHealthInfo(actor.name, actor.id, "group")
 
 		if data.amount then
 			deathlog.time = log.time
@@ -139,9 +139,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 		if data.amount then
 			data.srcName = srcName
-			data.playerid = dstGUID
-			data.playername = dstName
-			data.playerflags = dstFlags
+			data.actorid = dstGUID
+			data.actorname = dstName
+			data.actorflags = dstFlags
 
 			data.overheal = nil
 
@@ -162,9 +162,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 		if amount and amount > 0 and misstype and missTypes[misstype] then
 			data.srcName = srcName
-			data.playerid = dstGUID
-			data.playername = dstName
-			data.playerflags = dstFlags
+			data.actorid = dstGUID
+			data.actorname = dstName
+			data.actorflags = dstFlags
 
 			data.amount = nil
 			data.overkill = nil
@@ -220,9 +220,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 			data.srcName = srcName
 
-			data.playerid = dstGUID
-			data.playername = dstName
-			data.playerflags = dstFlags
+			data.actorid = dstGUID
+			data.actorname = dstName
+			data.actorflags = dstFlags
 
 			data.spellid = spellid
 			data.amount = amount
@@ -332,14 +332,14 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 			if event == "SPELL_RESURRECT" then
 				data.srcName = srcName
-				data.playerid = dstGUID
-				data.playername = dstName
-				data.playerflags = dstFlags
+				data.actorid = dstGUID
+				data.actorname = dstName
+				data.actorflags = dstFlags
 			else
 				data.srcName = srcName
-				data.playerid = srcGUID
-				data.playername = srcName
-				data.playerflags = srcFlags
+				data.actorid = srcGUID
+				data.actorname = srcName
+				data.actorflags = srcFlags
 			end
 
 			data.school = nil
@@ -364,9 +364,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		data.remove = removed or nil
 
 		data.srcName = (srcName ~= dstName) and srcName or nil
-		data.playerid = dstGUID
-		data.playername = dstName
-		data.playerflags = dstFlags
+		data.actorid = dstGUID
+		data.actorname = dstName
+		data.actorflags = dstFlags
 
 		data.amount = nil
 		data.overkill = nil
