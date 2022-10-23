@@ -5,13 +5,13 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	local extraspellmod = mod:NewModule("Dispelled spell list")
 	local targetmod = mod:NewModule("Dispelled target list")
 	local spellmod = mod:NewModule("Dispel spell list")
-	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local get_actor_dispelled_spells = nil
 	local get_actor_dispelled_targets = nil
 
 	-- cache frequently used globals
-	local pairs, format, uformat = pairs, string.format, Private.uformat
-	local new, clear = Private.newTable, Private.clearTable
+	local pairs, format = pairs, string.format
+	local uformat, new, clear = Private.uformat, Private.newTable, Private.clearTable
 	local mod_cols = nil
 
 	local function format_valuetext(d, columns, total, metadata, subview)
@@ -60,12 +60,11 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	end
 
 	local function spell_dispel(t)
-		dispel.spellid, dispel.extraspellid = t.spellid, t.extraspellid
-		dispel.extraspellid = dispel.extraspellid or 6603
-
-		if dispel.spellid and not ignoredSpells[dispel.spellid] and not ignoredSpells[dispel.extraspellid] then
+		if t.spellid and not ignored_spells[t.spellid] and not ignored_spells[t.extraspellid] then
 			dispel.actorid, dispel.actorname, dispel.actorflags = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
 			dispel.dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
+			dispel.spellid = t.spellstring
+			dispel.extraspellid = t.extrastring
 			Skada:DispatchSets(log_dispel)
 		end
 	end
@@ -210,8 +209,8 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 		Skada:AddMode(self)
 
 		-- table of ignored spells:
-		if Skada.ignoredSpells and Skada.ignoredSpells.dispels then
-			ignoredSpells = Skada.ignoredSpells.dispels
+		if Skada.ignored_spells and Skada.ignored_spells.dispels then
+			ignored_spells = Skada.ignored_spells.dispels
 		end
 	end
 

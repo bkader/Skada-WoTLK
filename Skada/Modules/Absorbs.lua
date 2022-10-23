@@ -2,10 +2,12 @@ local _, Skada = ...
 local Private = Skada.Private
 
 -- cache frequently used globals
-local pairs, format, uformat = pairs, string.format, Private.uformat
+local pairs, tostring, format, uformat = pairs, tostring, string.format, Private.uformat
 local min, floor = math.min, math.floor
 local new, del = Private.newTable, Private.delTable
 local GetSpellInfo = Private.spell_info or GetSpellInfo
+local tooltip_school = Skada.tooltip_school
+local hits_perc = "%s (\124cffffffff%s\124r)"
 
 -- ============== --
 -- Absorbs module --
@@ -13,16 +15,16 @@ local GetSpellInfo = Private.spell_info or GetSpellInfo
 
 Skada:RegisterModule("Absorbs", function(L, P)
 	local mod = Skada:NewModule("Absorbs")
-	local playermod = mod:NewModule("Absorb spell list")
+	local spellmod = mod:NewModule("Absorb spell list")
 	local targetmod = mod:NewModule("Absorbed target list")
-	local spellmod = targetmod:NewModule("Absorb spell list")
-	local spellschools = Skada.spellschools
-	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local targetspellmod = targetmod:NewModule("Absorb spell list")
+	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local passive_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local GetTime, band, tsort, max = GetTime, bit.band, table.sort, math.max
 	local GetCurrentMapAreaID, UnitBuff, UnitHealthInfo = GetCurrentMapAreaID, UnitBuff, Skada.UnitHealthInfo
 	local IsActiveBattlefieldArena, UnitInBattleground = IsActiveBattlefieldArena, UnitInBattleground
+	tooltip_school = tooltip_school or Skada.tooltip_school
 	local clear = Private.clearTable
 	local mod_cols = nil
 
@@ -31,153 +33,153 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	-- shield ranks. Feel free to provide any helpful data possible to complete it.
 	-- Note: some of the caps are used as backup because their amounts are calculated later.
 	local absorbspells = {
-		[48707] = {dur = 5}, -- Anti-Magic Shell (rank 1)
-		[51052] = {dur = 10}, -- Anti-Magic Zone( (rank 1)
-		[52286] = {dur = 86400, school = 0x01}, -- Will of the Necropolis
-		[49497] = {dur = 86400, school = 0x01}, -- Spell Deflection
-		[62606] = {dur = 10, avg = 1600, cap = 2500}, -- Savage Defense
-		[11426] = {dur = 60}, -- Ice Barrier (rank 1)
-		[13031] = {dur = 60}, -- Ice Barrier (rank 2)
-		[13032] = {dur = 60}, -- Ice Barrier (rank 3)
-		[13033] = {dur = 60}, -- Ice Barrier (rank 4)
-		[27134] = {dur = 60}, -- Ice Barrier (rank 5)
-		[33405] = {dur = 60}, -- Ice Barrier (rank 6)
-		[43038] = {dur = 60}, -- Ice Barrier (rank 7)
-		[43039] = {dur = 60, avg = 6500, cap = 8300}, -- Ice Barrier (rank 8)
-		[6143] = {dur = 30}, -- Frost Ward (rank 1)
-		[8461] = {dur = 30}, -- Frost Ward (rank 2)
-		[8462] = {dur = 30}, -- Frost Ward (rank 3)
-		[10177] = {dur = 30}, -- Frost Ward (rank 4)
-		[28609] = {dur = 30}, -- Frost Ward (rank 5)
-		[32796] = {dur = 30}, -- Frost Ward (rank 6)
-		[43012] = {dur = 30, avg = 5200, cap = 7000}, -- Frost Ward (rank 7)
-		[1463] = {dur = 60}, -- Mana shield (rank 1)
-		[8494] = {dur = 60}, -- Mana shield (rank 2)
-		[8495] = {dur = 60}, -- Mana shield (rank 3)
-		[10191] = {dur = 60}, -- Mana shield (rank 4)
-		[10192] = {dur = 60}, -- Mana shield (rank 5)
-		[10193] = {dur = 60}, -- Mana shield (rank 6)
-		[27131] = {dur = 60}, -- Mana shield (rank 7)
-		[43019] = {dur = 60}, -- Mana shield (rank 8)
-		[43020] = {dur = 60, avg = 4500, cap = 6300}, -- Mana shield (rank 9)
-		[543] = {dur = 30}, -- Fire Ward (rank 1)
-		[8457] = {dur = 30}, -- Fire Ward (rank 2)
-		[8458] = {dur = 30}, -- Fire Ward (rank 3)
-		[10223] = {dur = 30}, -- Fire Ward (rank 4)
-		[10225] = {dur = 30}, -- Fire Ward (rank 5)
-		[27128] = {dur = 30}, -- Fire Ward (rank 6)
-		[43010] = {dur = 30, avg = 5200, cap = 7000}, -- Fire Ward (rank 7)
-		[58597] = {dur = 6, avg = 4400, cap = 6000}, -- Sacred Shield
-		[66233] = {dur = 86400, school = 0x02}, -- Ardent Defender
-		[31230] = {dur = 86400, school = 0x01}, -- Cheat Death
-		[17] = {dur = 30, school = 0x02}, -- Power Word: Shield (rank 1)
-		[592] = {dur = 30, school = 0x02}, -- Power Word: Shield (rank 2)
-		[600] = {dur = 30, school = 0x02}, -- Power Word: Shield (rank 3)
-		[3747] = {dur = 30, school = 0x02}, -- Power Word: Shield (rank 4)
-		[6065] = {dur = 30, school = 0x02}, -- Power Word: Shield (rank 5)
-		[6066] = {dur = 30, school = 0x02}, -- Power Word: Shield (rank 6)
-		[10898] = {dur = 30, avg = 721, cap = 848, school = 0x02}, -- Power Word: Shield (rank 7)
-		[10899] = {dur = 30, avg = 898, cap = 1057, school = 0x02}, -- Power Word: Shield (rank 8)
-		[10900] = {dur = 30, avg = 1543, cap = 1816, school = 0x02}, -- Power Word: Shield (rank 9)
-		[10901] = {dur = 30, avg = 3643, cap = 4288, school = 0x02}, -- Power Word: Shield (rank 10)
-		[25217] = {dur = 30, avg = 5436, cap = 6398, school = 0x02}, -- Power Word: Shield (rank 11)
-		[25218] = {dur = 30, avg = 7175, cap = 8444, school = 0x02}, -- Power Word: Shield (rank 12)
-		[48065] = {dur = 30, avg = 9596, cap = 11293, school = 0x02}, -- Power Word: Shield (rank 13)
-		[48066] = {dur = 30, avg = 10000, cap = 11769, school = 0x02}, -- Power Word: Shield (rank 14)
-		[47509] = {dur = 12}, -- Divine Aegis (rank 1)
-		[47511] = {dur = 12}, -- Divine Aegis (rank 2)
-		[47515] = {dur = 12}, -- Divine Aegis (rank 3)
-		[47753] = {dur = 12, cap = 10000}, -- Divine Aegis (rank 1)
-		[54704] = {dur = 12, cap = 10000}, -- Divine Aegis (rank 1)
-		[47788] = {dur = 10}, -- Guardian Spirit
-		[7812] = {dur = 30, cap = 305}, -- Sacrifice (rank 1)
-		[19438] = {dur = 30, cap = 510}, -- Sacrifice (rank 2)
-		[19440] = {dur = 30, cap = 770}, -- Sacrifice (rank 3)
-		[19441] = {dur = 30, cap = 1095}, -- Sacrifice (rank 4)
-		[19442] = {dur = 30, cap = 1470}, -- Sacrifice (rank 5)
-		[19443] = {dur = 30, cap = 1905}, -- Sacrifice (rank 6)
-		[27273] = {dur = 30, cap = 2855}, -- Sacrifice (rank 7)
-		[47985] = {dur = 30, cap = 6750}, -- Sacrifice (rank 8)
-		[47986] = {dur = 30, cap = 8350}, -- Sacrifice (rank 9)
-		[6229] = {dur = 30, cap = 290}, -- Shadow Ward (rank 1)
-		[11739] = {dur = 30, cap = 470}, -- Shadow Ward (rank 2)
-		[11740] = {dur = 30, avg = 675}, -- Shadow Ward (rank 3)
-		[28610] = {dur = 30, avg = 875}, -- Shadow Ward (rank 4)
-		[47890] = {dur = 30, avg = 2750}, -- Shadow Ward (rank 5)
-		[47891] = {dur = 30, avg = 3300, cap = 8300}, -- Shadow Ward (rank 6)
-		[25228] = {dur = 86400, school = 0x20}, -- Soul Link
-		[29674] = {dur = 86400, cap = 1000}, -- Lesser Ward of Shielding
-		[29719] = {dur = 86400, cap = 4000}, -- Greater Ward of Shielding
-		[29701] = {dur = 86400, cap = 4000}, -- Greater Shielding
-		[28538] = {dur = 120, avg = 3400, cap = 4000}, -- Major Holy Protection Potion
-		[28537] = {dur = 120, avg = 3400, cap = 4000}, -- Major Shadow Protection Potion
-		[28536] = {dur = 120, avg = 3400, cap = 4000}, -- Major Arcane Protection Potion
-		[28513] = {dur = 120, avg = 3400, cap = 4000}, -- Major Nature Protection Potion
-		[28512] = {dur = 120, avg = 3400, cap = 4000}, -- Major Frost Protection Potion
-		[28511] = {dur = 120, avg = 3400, cap = 4000}, -- Major Fire Protection Potion
-		[7233] = {dur = 120, avg = 1300, cap = 1625}, -- Fire Protection Potion
-		[7239] = {dur = 120, avg = 1800, cap = 2250}, -- Frost Protection Potion
-		[7242] = {dur = 120, avg = 1800, cap = 2250}, -- Shadow Protection Potion
-		[7245] = {dur = 120, avg = 1800, cap = 2250}, -- Holy Protection Potion
-		[7254] = {dur = 120, avg = 1800, cap = 2250}, -- Nature Protection Potion
-		[53915] = {dur = 120, avg = 5100, cap = 6000}, -- Mighty Shadow Protection Potion
-		[53914] = {dur = 120, avg = 5100, cap = 6000}, -- Mighty Nature Protection Potion
-		[53913] = {dur = 120, avg = 5100, cap = 6000}, -- Mighty Frost Protection Potion
-		[53911] = {dur = 120, avg = 5100, cap = 6000}, -- Mighty Fire Protection Potion
-		[53910] = {dur = 120, avg = 5100, cap = 6000}, -- Mighty Arcane Protection Potion
-		[17548] = {dur = 120, avg = 2600, cap = 3250}, -- Greater Shadow Protection Potion
-		[17546] = {dur = 120, avg = 2600, cap = 3250}, -- Greater Nature Protection Potion
-		[17545] = {dur = 120, avg = 2600, cap = 3250}, -- Greater Holy Protection Potion
-		[17544] = {dur = 120, avg = 2600, cap = 3250}, -- Greater Frost Protection Potion
-		[17543] = {dur = 120, avg = 2600, cap = 3250}, -- Greater Fire Protection Potion
-		[17549] = {dur = 120, avg = 2600, cap = 3250}, -- Greater Arcane Protection Potion
+		[48707] = {school = 0x20, dur = 5}, -- Anti-Magic Shell (rank 1)
+		[51052] = {school = 0x20, dur = 10}, -- Anti-Magic Zone( (rank 1)
+		[52286] = {school = 0x01, dur = 86400}, -- Will of the Necropolis
+		[49497] = {school = 0x01, dur = 86400}, -- Spell Deflection
+		[62606] = {school = 0x08, dur = 10, avg = 1600, cap = 2500}, -- Savage Defense
+		[11426] = {school = 0x10, dur = 60}, -- Ice Barrier (rank 1)
+		[13031] = {school = 0x10, dur = 60}, -- Ice Barrier (rank 2)
+		[13032] = {school = 0x10, dur = 60}, -- Ice Barrier (rank 3)
+		[13033] = {school = 0x10, dur = 60}, -- Ice Barrier (rank 4)
+		[27134] = {school = 0x10, dur = 60}, -- Ice Barrier (rank 5)
+		[33405] = {school = 0x10, dur = 60}, -- Ice Barrier (rank 6)
+		[43038] = {school = 0x10, dur = 60}, -- Ice Barrier (rank 7)
+		[43039] = {school = 0x10, dur = 60, avg = 6500, cap = 8300}, -- Ice Barrier (rank 8)
+		[6143] = {school = 0x10, dur = 30}, -- Frost Ward (rank 1)
+		[8461] = {school = 0x10, dur = 30}, -- Frost Ward (rank 2)
+		[8462] = {school = 0x10, dur = 30}, -- Frost Ward (rank 3)
+		[10177] = {school = 0x10, dur = 30}, -- Frost Ward (rank 4)
+		[28609] = {school = 0x10, dur = 30}, -- Frost Ward (rank 5)
+		[32796] = {school = 0x10, dur = 30}, -- Frost Ward (rank 6)
+		[43012] = {school = 0x10, dur = 30, avg = 5200, cap = 7000}, -- Frost Ward (rank 7)
+		[1463] = {school = 0x40, dur = 60}, -- Mana shield (rank 1)
+		[8494] = {school = 0x40, dur = 60}, -- Mana shield (rank 2)
+		[8495] = {school = 0x40, dur = 60}, -- Mana shield (rank 3)
+		[10191] = {school = 0x40, dur = 60}, -- Mana shield (rank 4)
+		[10192] = {school = 0x40, dur = 60}, -- Mana shield (rank 5)
+		[10193] = {school = 0x40, dur = 60}, -- Mana shield (rank 6)
+		[27131] = {school = 0x40, dur = 60}, -- Mana shield (rank 7)
+		[43019] = {school = 0x40, dur = 60}, -- Mana shield (rank 8)
+		[43020] = {school = 0x40, dur = 60, avg = 4500, cap = 6300}, -- Mana shield (rank 9)
+		[543] = {school = 0x04, dur = 30}, -- Fire Ward (rank 1)
+		[8457] = {school = 0x04, dur = 30}, -- Fire Ward (rank 2)
+		[8458] = {school = 0x04, dur = 30}, -- Fire Ward (rank 3)
+		[10223] = {school = 0x04, dur = 30}, -- Fire Ward (rank 4)
+		[10225] = {school = 0x04, dur = 30}, -- Fire Ward (rank 5)
+		[27128] = {school = 0x04, dur = 30}, -- Fire Ward (rank 6)
+		[43010] = {school = 0x04, dur = 30, avg = 5200, cap = 7000}, -- Fire Ward (rank 7)
+		[58597] = {school = 0x02, dur = 6, avg = 4400, cap = 6000}, -- Sacred Shield
+		[66233] = {school = 0x02, dur = 86400}, -- Ardent Defender
+		[31230] = {school = 0x01, dur = 86400}, -- Cheat Death
+		[17] = {school = 0x02, dur = 30}, -- Power Word: Shield (rank 1)
+		[592] = {school = 0x02, dur = 30}, -- Power Word: Shield (rank 2)
+		[600] = {school = 0x02, dur = 30}, -- Power Word: Shield (rank 3)
+		[3747] = {school = 0x02, dur = 30}, -- Power Word: Shield (rank 4)
+		[6065] = {school = 0x02, dur = 30}, -- Power Word: Shield (rank 5)
+		[6066] = {school = 0x02, dur = 30}, -- Power Word: Shield (rank 6)
+		[10898] = {school = 0x02, dur = 30, avg = 721, cap = 848}, -- Power Word: Shield (rank 7)
+		[10899] = {school = 0x02, dur = 30, avg = 898, cap = 1057}, -- Power Word: Shield (rank 8)
+		[10900] = {school = 0x02, dur = 30, avg = 1543, cap = 1816}, -- Power Word: Shield (rank 9)
+		[10901] = {school = 0x02, dur = 30, avg = 3643, cap = 4288}, -- Power Word: Shield (rank 10)
+		[25217] = {school = 0x02, dur = 30, avg = 5436, cap = 6398}, -- Power Word: Shield (rank 11)
+		[25218] = {school = 0x02, dur = 30, avg = 7175, cap = 8444}, -- Power Word: Shield (rank 12)
+		[48065] = {school = 0x02, dur = 30, avg = 9596, cap = 11293}, -- Power Word: Shield (rank 13)
+		[48066] = {school = 0x02, dur = 30, avg = 10000, cap = 11769}, -- Power Word: Shield (rank 14)
+		[47509] = {school = 0x01, dur = 12}, -- Divine Aegis (rank 1)
+		[47511] = {school = 0x01, dur = 12}, -- Divine Aegis (rank 2)
+		[47515] = {school = 0x01, dur = 12}, -- Divine Aegis (rank 3)
+		[47753] = {school = 0x01, dur = 12, cap = 10000}, -- Divine Aegis (rank 1)
+		[54704] = {school = 0x01, dur = 12, cap = 10000}, -- Divine Aegis (rank 1)
+		[47788] = {school = 0x02, dur = 10}, -- Guardian Spirit
+		[7812] = {school = 0x20, dur = 30, cap = 305}, -- Sacrifice (rank 1)
+		[19438] = {school = 0x20, dur = 30, cap = 510}, -- Sacrifice (rank 2)
+		[19440] = {school = 0x20, dur = 30, cap = 770}, -- Sacrifice (rank 3)
+		[19441] = {school = 0x20, dur = 30, cap = 1095}, -- Sacrifice (rank 4)
+		[19442] = {school = 0x20, dur = 30, cap = 1470}, -- Sacrifice (rank 5)
+		[19443] = {school = 0x20, dur = 30, cap = 1905}, -- Sacrifice (rank 6)
+		[27273] = {school = 0x20, dur = 30, cap = 2855}, -- Sacrifice (rank 7)
+		[47985] = {school = 0x20, dur = 30, cap = 6750}, -- Sacrifice (rank 8)
+		[47986] = {school = 0x20, dur = 30, cap = 8350}, -- Sacrifice (rank 9)
+		[6229] = {school = 0x20, dur = 30, cap = 290}, -- Shadow Ward (rank 1)
+		[11739] = {school = 0x20, dur = 30, cap = 470}, -- Shadow Ward (rank 2)
+		[11740] = {school = 0x20, dur = 30, avg = 675}, -- Shadow Ward (rank 3)
+		[28610] = {school = 0x20, dur = 30, avg = 875}, -- Shadow Ward (rank 4)
+		[47890] = {school = 0x20, dur = 30, avg = 2750}, -- Shadow Ward (rank 5)
+		[47891] = {school = 0x20, dur = 30, avg = 3300, cap = 8300}, -- Shadow Ward (rank 6)
+		[25228] = {school = 0x20, dur = 86400}, -- Soul Link
+		[29674] = {school = 0x40, dur = 86400, cap = 1000}, -- Lesser Ward of Shielding
+		[29719] = {school = 0x40, dur = 86400, cap = 4000}, -- Greater Ward of Shielding
+		[29701] = {school = 0x40, dur = 86400, cap = 4000}, -- Greater Shielding
+		[28538] = {school = 0x02, dur = 120, avg = 3400, cap = 4000}, -- Major Holy Protection Potion
+		[28537] = {school = 0x20, dur = 120, avg = 3400, cap = 4000}, -- Major Shadow Protection Potion
+		[28536] = {school = 0x04, dur = 120, avg = 3400, cap = 4000}, -- Major Arcane Protection Potion
+		[28513] = {school = 0x08, dur = 120, avg = 3400, cap = 4000}, -- Major Nature Protection Potion
+		[28512] = {school = 0x10, dur = 120, avg = 3400, cap = 4000}, -- Major Frost Protection Potion
+		[28511] = {school = 0x04, dur = 120, avg = 3400, cap = 4000}, -- Major Fire Protection Potion
+		[7233] = {school = 0x04, dur = 120, avg = 1300, cap = 1625}, -- Fire Protection Potion
+		[7239] = {school = 0x10, dur = 120, avg = 1800, cap = 2250}, -- Frost Protection Potion
+		[7242] = {school = 0x20, dur = 120, avg = 1800, cap = 2250}, -- Shadow Protection Potion
+		[7245] = {school = 0x02, dur = 120, avg = 1800, cap = 2250}, -- Holy Protection Potion
+		[7254] = {school = 0x08, dur = 120, avg = 1800, cap = 2250}, -- Nature Protection Potion
+		[53915] = {school = 0x20, dur = 120, avg = 5100, cap = 6000}, -- Mighty Shadow Protection Potion
+		[53914] = {school = 0x08, dur = 120, avg = 5100, cap = 6000}, -- Mighty Nature Protection Potion
+		[53913] = {school = 0x10, dur = 120, avg = 5100, cap = 6000}, -- Mighty Frost Protection Potion
+		[53911] = {school = 0x04, dur = 120, avg = 5100, cap = 6000}, -- Mighty Fire Protection Potion
+		[53910] = {school = 0x04, dur = 120, avg = 5100, cap = 6000}, -- Mighty Arcane Protection Potion
+		[17548] = {school = 0x20, dur = 120, avg = 2600, cap = 3250}, -- Greater Shadow Protection Potion
+		[17546] = {school = 0x08, dur = 120, avg = 2600, cap = 3250}, -- Greater Nature Protection Potion
+		[17545] = {school = 0x02, dur = 120, avg = 2600, cap = 3250}, -- Greater Holy Protection Potion
+		[17544] = {school = 0x10, dur = 120, avg = 2600, cap = 3250}, -- Greater Frost Protection Potion
+		[17543] = {school = 0x04, dur = 120, avg = 2600, cap = 3250}, -- Greater Fire Protection Potion
+		[17549] = {school = 0x04, dur = 120, avg = 2600, cap = 3250}, -- Greater Arcane Protection Potion
 		[28527] = {dur = 15, avg = 1000, cap = 1250}, -- Fel Blossom
-		[29432] = {dur = 3600, avg = 2000, cap = 2500}, -- Frozen Rune
-		[36481] = {dur = 4, cap = 100000}, -- Arcane Barrier (TK Kael'Thas) Shield
-		[17252] = {dur = 1800, cap = 500}, -- Mark of the Dragon Lord (LBRS epic ring)
-		[25750] = {dur = 15, avg = 151, cap = 302}, -- Defiler's Talisman/Talisman of Arathor
-		[25747] = {dur = 15, avg = 344, cap = 378}, -- Defiler's Talisman/Talisman of Arathor
-		[25746] = {dur = 15, avg = 435, cap = 478}, -- Defiler's Talisman/Talisman of Arathor
-		[23991] = {dur = 15, avg = 550, cap = 605}, -- Defiler's Talisman/Talisman of Arathor
-		[30997] = {dur = 300, avg = 1800, cap = 2700}, -- Pendant of Frozen Flame
-		[31002] = {dur = 300, avg = 1800, cap = 2700}, -- Pendant of the Null Rune
-		[30999] = {dur = 300, avg = 1800, cap = 2700}, -- Pendant of Withering
-		[30994] = {dur = 300, avg = 1800, cap = 2700}, -- Pendant of Thawing
-		[31000] = {dur = 300, avg = 1800, cap = 2700}, -- Pendant of Shadow's End
-		[23506] = {dur = 20, avg = 1000, cap = 1250}, -- Arena Grand Master
-		[12561] = {dur = 60, avg = 400, cap = 500}, -- Goblin Construction Helmet
-		[31771] = {dur = 20, cap = 440}, -- Runed Fungalcap
-		[21956] = {dur = 10, cap = 500}, -- Mark of Resolution
-		[29506] = {dur = 20, cap = 900}, -- The Burrower's Shell
-		[4057] = {dur = 60, cap = 500}, -- Flame Deflector
-		[4077] = {dur = 60, cap = 600}, -- Ice Deflector
-		[39228] = {dur = 20, cap = 1150}, -- Argussian Compass (may not be an actual absorb)
-		[27779] = {dur = 30, cap = 350}, -- Divine Protection (Priest dungeon set 1/2)
-		[11657] = {dur = 20, avg = 70, cap = 85}, -- Jang'thraze (Zul Farrak)
-		[10368] = {dur = 15, cap = 200}, -- Uther's Light Effect
-		[37515] = {dur = 15, cap = 200}, -- Blade Turning
-		[42137] = {dur = 86400, cap = 400}, -- Greater Rune of Warding
-		[26467] = {dur = 30, cap = 1000}, -- Scarab Brooch
-		[26470] = {dur = 8, cap = 1000}, -- Persistent Shield
-		[27539] = {dur = 6, avg = 300, cap = 500}, -- Thick Obsidian Breatplate
-		[28810] = {dur = 30, cap = 500}, -- Faith Set Proc Armor of Faith
-		[55019] = {dur = 12, cap = 1100}, -- Sonic Shield
-		[64413] = {dur = 8, cap = 20000}, -- Val'anyr, Hammer of Ancient Kings Protection of Ancient Kings
-		[40322] = {dur = 30, avg = 12000, cap = 12600}, -- Teron's Vengeful Spirit Ghost - Spirit Shield
-		[71586] = {dur = 10, cap = 6400}, -- Hardened Skin (Corroded Skeleton Key)
-		[60218] = {dur = 10, avg = 140, cap = 4000}, -- Essence of Gossamer
-		[57350] = {dur = 6, cap = 1500}, -- Illusionary Barrier (Darkmoon Card: Illusion)
-		[70845] = {dur = 10}, -- Stoicism
-		[65874] = {dur = 15, cap = 175000}, -- Twin Val'kyr's: Shield of Darkness
-		[67257] = {dur = 15, cap = 300000}, -- Twin Val'kyr's: Shield of Darkness
-		[67256] = {dur = 15, cap = 700000}, -- Twin Val'kyr's: Shield of Darkness
-		[67258] = {dur = 15, cap = 1200000}, -- Twin Val'kyr's: Shield of Darkness
-		[65858] = {dur = 15, cap = 175000}, -- Twin Val'kyr's: Shield of Lights
-		[67260] = {dur = 15, cap = 300000}, -- Twin Val'kyr's: Shield of Lights
-		[67259] = {dur = 15, cap = 700000}, -- Twin Val'kyr's: Shield of Lights
-		[67261] = {dur = 15, cap = 1200000}, -- Twin Val'kyr's: Shield of Lights
-		[65686] = {dur = 86400, cap = 1000000}, -- Twin Val'kyr: Light Essence
-		[65684] = {dur = 86400, cap = 1000000} -- Twin Val'kyr: Dark Essence
+		[29432] = {school = 0x04, dur = 3600, avg = 2000, cap = 2500}, -- Frozen Rune (Fire Protection)
+		[36481] = {school = 0x40, dur = 4, cap = 100000}, -- Arcane Barrier (TK Kael'Thas) Shield
+		[17252] = {school = 0x01, dur = 1800, cap = 500}, -- Mark of the Dragon Lord (LBRS epic ring)
+		[25750] = {school = 0x02, dur = 15, avg = 151, cap = 302}, -- Defiler's Talisman/Talisman of Arathor
+		[25747] = {school = 0x02, dur = 15, avg = 344, cap = 378}, -- Defiler's Talisman/Talisman of Arathor
+		[25746] = {school = 0x02, dur = 15, avg = 435, cap = 478}, -- Defiler's Talisman/Talisman of Arathor
+		[23991] = {school = 0x02, dur = 15, avg = 550, cap = 605}, -- Defiler's Talisman/Talisman of Arathor
+		[30997] = {school = 0x04, dur = 300, avg = 1800, cap = 2700}, -- Pendant of Frozen Flame (Fire Absorption)
+		[31002] = {school = 0x40, dur = 300, avg = 1800, cap = 2700}, -- Pendant of the Null Rune (Arcane Absorption)
+		[30999] = {school = 0x08, dur = 300, avg = 1800, cap = 2700}, -- Pendant of Withering (Nature Absorption)
+		[30994] = {school = 0x10, dur = 300, avg = 1800, cap = 2700}, -- Pendant of Thawing (Frost Absorption)
+		[31000] = {school = 0x40, dur = 300, avg = 1800, cap = 2700}, -- Pendant of Shadow's End (Shadow Absorption)
+		[23506] = {school = 0x02, dur = 20, avg = 1000, cap = 1250}, -- Arena Grand Master (Aura of Protection)
+		[12561] = {school = 0x04, dur = 60, avg = 400, cap = 500}, -- Goblin Construction Helmet (Fire Protection)
+		[31771] = {school = 0x02, dur = 20, cap = 440}, -- Runed Fungalcap (Shell of Deterrence)
+		[21956] = {school = 0x02, dur = 10, cap = 500}, -- Mark of Resolution (Physical Protection)
+		[29506] = {school = 0x02, dur = 20, cap = 900}, -- The Burrower's Shell
+		[4057] = {school = 0x04, dur = 60, cap = 500}, -- Flame Deflector (Fire Resistance)
+		[4077] = {school = 0x10, dur = 60, cap = 600}, -- Ice Deflector (Frost Resistance)
+		[39228] = {school = 0x02, dur = 20, cap = 1150}, -- Argussian Compass
+		[27779] = {school = 0x02, dur = 30, cap = 350}, -- Divine Protection (Priest dungeon set 1/2)
+		[11657] = {school = 0x01, dur = 20, avg = 70, cap = 85}, -- Jang'thraze
+		[10368] = {school = 0x02, dur = 15, cap = 200}, -- Uther's Light Effect
+		[37515] = {school = 0x02, dur = 15, cap = 200}, -- Blade Turning
+		[42137] = {school = 0x01, dur = 86400, cap = 400}, -- Greater Rune of Warding
+		[26467] = {school = 0x01, dur = 30, cap = 1000}, -- Scarab Brooch (Persistent Shield)
+		[26470] = {school = 0x08, dur = 8, cap = 1000}, -- Persistent Shield
+		[27539] = {school = 0x01, dur = 6, avg = 300, cap = 500}, -- Thick Obsidian Breatplate (Obsidian Armor)
+		[28810] = {school = 0x02, dur = 30, cap = 500}, -- Faith Set Proc (Armor of Faith)
+		[55019] = {school = 0x01, dur = 12, cap = 1100}, -- Sonic Shield
+		[64413] = {school = 0x08, dur = 8, cap = 20000}, -- Protection of Ancient Kings (Val'anyr, Hammer of Ancient Kings)
+		[40322] = {school = 0x10, dur = 30, avg = 12000, cap = 12600}, -- Teron's Vengeful Spirit Ghost - Spirit Shield
+		[71586] = {school = 0x02, dur = 10, cap = 6400}, -- Hardened Skin (Corroded Skeleton Key)
+		[60218] = {school = 0x02, dur = 10, avg = 140, cap = 4000}, -- Essence of Gossamer
+		[57350] = {school = 0x01, dur = 6, cap = 1500}, -- Illusionary Barrier (Darkmoon Card: Illusion)
+		[70845] = {school = 0x01, dur = 10}, -- Stoicism
+		[65874] = {school = 0x20, dur = 15, cap = 175000}, -- Twin Val'kyr's: Shield of Darkness
+		[67257] = {school = 0x20, dur = 15, cap = 300000}, -- Twin Val'kyr's: Shield of Darkness
+		[67256] = {school = 0x20, dur = 15, cap = 700000}, -- Twin Val'kyr's: Shield of Darkness
+		[67258] = {school = 0x20, dur = 15, cap = 1200000}, -- Twin Val'kyr's: Shield of Darkness
+		[65858] = {school = 0x04, dur = 15, cap = 175000}, -- Twin Val'kyr's: Shield of Lights
+		[67260] = {school = 0x04, dur = 15, cap = 300000}, -- Twin Val'kyr's: Shield of Lights
+		[67259] = {school = 0x04, dur = 15, cap = 700000}, -- Twin Val'kyr's: Shield of Lights
+		[67261] = {school = 0x04, dur = 15, cap = 1200000}, -- Twin Val'kyr's: Shield of Lights
+		[65686] = {school = 0x01, dur = 86400, cap = 1000000}, -- Twin Val'kyr: Light Essence
+		[65684] = {school = 0x01, dur = 86400, cap = 1000000} -- Twin Val'kyr: Dark Essence
 	}
 
 	local priest_divine_aegis = { -- Divine Aegis
@@ -236,7 +238,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	}
 
 	-- spells iof which we don't record casts.
-	local passiveShields = {
+	local passive_shields = {
 		[31230] = true, -- Cheat Death
 		[49497] = true, -- Spell Deflection
 		[52286] = true, -- Will of the Necropolis
@@ -246,8 +248,9 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	local zoneModifier = 1 -- coefficient used to calculate amounts
 	local heals = nil -- holds heal amounts used to "guess" shield amounts
 	local shields = nil -- holds the list of players shields and other stuff
-	local shieldamounts = nil -- holds the amount shields absorbed so far
-	local shieldspopped = nil -- holds the list of shields that popped on a player
+	local shield_amounts = nil -- holds the amount shields absorbed so far
+	local shields_popped = nil -- holds the list of shields that popped on a player
+	local queued_amounts = nil -- amounts that went lost, added to next spell
 	local absorb = {}
 
 	local function format_valuetext(d, columns, total, aps, metadata, subview)
@@ -262,27 +265,22 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 	end
 
-	local function log_spellcast(set, actorid, actorname, actorflags, spellid, spellschool)
+	local function log_spellcast(set, actorid, actorname, actorflags, spellid)
 		if not set or (set == Skada.total and not P.totalidc) then return end
 
 		local actor = Skada:FindPlayer(set, actorid, actorname, actorflags)
 		if actor and actor.absorbspells and actor.absorbspells[spellid] then
 			actor.absorbspells[spellid].casts = (actor.absorbspells[spellid].casts or 1) + 1
-
-			-- fix possible missing spell school.
-			if not actor.absorbspells[spellid].school and spellschool then
-				actor.absorbspells[spellid].school = spellschool
-			end
 		end
 	end
 
 	local function log_absorb(set, nocount)
-		if not absorb.spellid or not absorb.amount or absorb.amount == 0 then return end
+		if not absorb.amount or absorb.amount == 0 then return end
 
 		local actor = Skada:GetPlayer(set, absorb.actorid, absorb.actorname)
 		if not actor then
 			return
-		elseif actor.role ~= "DAMAGER" and not passiveSpells[absorb.spellid] and not nocount then
+		elseif actor.role ~= "DAMAGER" and not passive_spells[absorb.spellid] and not nocount then
 			Skada:AddActiveTime(set, actor, absorb.dstName)
 		end
 
@@ -297,35 +295,49 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		local spell = actor.absorbspells and actor.absorbspells[absorb.spellid]
 		if not spell then
 			actor.absorbspells = actor.absorbspells or {}
-			spell = {school = absorb.school, amount = absorb.amount, count = 1}
-			actor.absorbspells[absorb.spellid] = spell
-		else
-			if not spell.school and absorb.school then
-				spell.school = absorb.school
-			end
-			spell.amount = (spell.amount or 0) + absorb.amount
-			if not nocount then
-				spell.count = (spell.count or 0) + 1
-			end
+			actor.absorbspells[absorb.spellid] = {amount = 0}
+			spell = actor.absorbspells[absorb.spellid]
 		end
+		spell.amount = spell.amount + absorb.amount
 
 		-- start cast counter.
-		if not spell.casts and not passiveShields[absorb.spellid] then
+		if not spell.casts and not passive_shields[absorb.spellid] then
 			spell.casts = 1
 		end
 
-		if not spell.min or absorb.amount < spell.min then
-			spell.min = absorb.amount
-		end
-		if not spell.max or absorb.amount > spell.max then
-			spell.max = absorb.amount
+		if not nocount then
+			spell.count = (spell.count or 0) + 1
+
+			if absorb.critical then
+				spell.c_num = (spell.c_num or 0) + 1
+				spell.c_amt = (spell.c_amt or 0) + absorb.amount
+				if not spell.c_max or absorb.amount > spell.c_max then
+					spell.c_max = absorb.amount
+				end
+				if not spell.c_min or absorb.amount < spell.c_min then
+					spell.c_min = absorb.amount
+				end
+			else
+				spell.n_num = (spell.n_num or 0) + 1
+				spell.n_amt = (spell.n_amt or 0) + absorb.amount
+				if not spell.n_max or absorb.amount > spell.n_max then
+					spell.n_max = absorb.amount
+				end
+				if not spell.n_min or absorb.amount < spell.n_min then
+					spell.n_min = absorb.amount
+				end
+			end
 		end
 
 		-- record the target
-		if absorb.dstName then
+		if not absorb.dstName then return end
+		local target = spell.targets and spell.targets[absorb.dstName]
+		if not target then
 			spell.targets = spell.targets or {}
-			spell.targets[absorb.dstName] = (spell.targets[absorb.dstName] or 0) + absorb.amount
+			spell.targets[absorb.dstName] = 0
+			target = spell.targets[absorb.dstName]
 		end
+		target = target + absorb.amount
 	end
 
 	-- https://github.com/TrinityCore/TrinityCore/blob/5d82995951c2be99b99b7b78fa12505952e86af7/src/server/game/Spells/Auras/SpellAuraEffects.h#L316
@@ -451,7 +463,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	end
 
 	local function handle_shield(t, points)
-		if not t.spellid or not absorbspells[t.spellid] or not t.dstName or ignoredSpells[t.spellid] then return end
+		if not t.spellid or not absorbspells[t.spellid] or not t.dstName or ignored_spells[t.spellid] then return end
 
 		shields = shields or {} -- create table if missing
 
@@ -475,12 +487,9 @@ Skada:RegisterModule("Absorbs", function(L, P)
 			srcGUID, srcName, srcFlags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 		end
 
-		-- fix spellschool (if possible)
-		local spellschool = t.spellschool or absorbspells[t.spellid].school
-
 		-- log spell casts.
-		if not passiveShields[t.spellid] then
-			Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, t.spellid, spellschool)
+		if not passive_shields[t.spellid] and not t.__temp then
+			Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, t.spellstring)
 		end
 
 		-- we calculate how much the shield's maximum absorb amount
@@ -510,25 +519,21 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		elseif t.spellid == 70845 and UnitHealthMax(dstName) then -- Stoicism
 			amount = UnitHealthMax(dstName) * 0.2
 		elseif absorbspells[t.spellid].cap or absorbspells[t.spellid].avg then
-			if shieldamounts and shieldamounts[srcName] and shieldamounts[srcName][t.spellid] then
+			if shield_amounts and shield_amounts[srcName] and shield_amounts[srcName][t.spellid] then
 				local shield = shields[dstName][t.spellid][srcName]
 				if not shield then
 					shield = new()
 					shield.srcGUID = srcGUID
 					shield.srcFlags = srcFlags
-					shield.school = spellschool
+					shield.string = t.spellstring
 					shield.points = points
 					shields[dstName][t.spellid][srcName] = shield
 				end
 
-				shield.amount = shieldamounts[srcName][t.spellid]
+				shield.amount = shield_amounts[srcName][t.spellid]
 				shield.ts = t.timestamp + absorbspells[t.spellid].dur + 0.1
 				shield.full = true
 
-				-- fix things
-				if not shield.school and spellschool then
-					shield.school = spellschool
-				end
 				if not shield.points and points then
 					shield.points = points
 				end
@@ -547,7 +552,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 			shield = new()
 			shield.srcGUID = srcGUID
 			shield.srcFlags = srcFlags
-			shield.school = spellschool
+			shield.string = t.spellstring
 			shield.points = points
 			shields[dstName][t.spellid][srcName] = shield
 		end
@@ -556,18 +561,29 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		shield.ts = t.timestamp + absorbspells[t.spellid].dur + 0.1
 		shield.full = true
 
-		-- fix things
-		if not shield.school and spellschool then
-			shield.school = spellschool
-		end
 		if not shield.points and points then
 			shield.points = points
 		end
+
 		if t.__temp then t = del(t) end
 	end
 
+	-- unfortunate hack so we don't lose any amount!
+	local function queue_amount(dstName, amount)
+		queued_amounts = queued_amounts or new()
+		queued_amounts[dstName] = (queued_amounts[dstName] or 0) + amount
+	end
+
+	local function unqueue_amount(dstName, amount)
+		if queued_amounts and queued_amounts[dstName] then
+			amount = amount + queued_amounts[dstName]
+			queued_amounts[dstName] = nil
+		end
+		return amount
+	end
+
 	local function process_absorb(dstName, t, broke)
-		shieldspopped = clear(shieldspopped) or {}
+		shields_popped = clear(shields_popped) or {}
 
 		for spellid, sources in pairs(shields[dstName]) do
 			for srcName, spell in pairs(sources) do
@@ -596,27 +612,31 @@ Skada:RegisterModule("Absorbs", function(L, P)
 						shield.srcName = srcName
 						shield.srcFlags = spell.srcFlags
 						shield.spellid = spellid
-						shield.school = spell.school
+						shield.string = spell.string
 						shield.points = spell.points
 						shield.ts = spell.ts - absorbspells[spellid].dur
 						shield.amount = spell.amount
 						shield.full = spell.full
-						shieldspopped[#shieldspopped + 1] = shield
+						shields_popped[#shields_popped + 1] = shield
 					end
 				end
 			end
 		end
 
 		-- the player has no shields, so nothing to do.
-		if #shieldspopped == 0 then return end
+		if #shields_popped == 0 then
+			-- queued this lost amount for next spell (sadly!)
+			queue_amount(dstName, t.absorbed)
+			return
+		end
 
 		-- if the player has a single shield and it broke, we update its max absorb
 		local absorbed = t.absorbed
-		if #shieldspopped == 1 and broke and shieldspopped[1].full and absorbspells[shieldspopped[1].spellid].cap then
-			local s = shieldspopped[1]
-			shieldamounts = shieldamounts or {} -- create table if missing
-			shieldamounts[s.srcName] = shieldamounts[s.srcName] or new()
-			local src = shieldamounts[s.srcName]
+		if #shields_popped == 1 and broke and shields_popped[1].full and absorbspells[shields_popped[1].spellid].cap then
+			local s = shields_popped[1]
+			shield_amounts = shield_amounts or {} -- create table if missing
+			shield_amounts[s.srcName] = shield_amounts[s.srcName] or new()
+			local src = shield_amounts[s.srcName]
 			if (not src[s.spellid] or src[s.spellid] < absorbed) and absorbed < (absorbspells[s.spellid].cap * zoneModifier) then
 				src[s.spellid] = absorbed
 			end
@@ -625,10 +645,10 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		-- we loop through available shields and make sure to update
 		-- their maximum absorb values.
 		local total = t.amount + t.absorbed
-		for i = 1, #shieldspopped do
-			local s = shieldspopped[i]
-			if s and s.full and shieldamounts and shieldamounts[s.srcName] and shieldamounts[s.srcName][s.spellid] then
-				s.amount = shieldamounts[s.srcName][s.spellid]
+		for i = 1, #shields_popped do
+			local s = shields_popped[i]
+			if s and s.full and shield_amounts and shield_amounts[s.srcName] and shield_amounts[s.srcName][s.spellid] then
+				s.amount = shield_amounts[s.srcName][s.spellid]
 			elseif s and s.spellid == 52286 and s.points then -- Will of the Necropolis
 				local hppercent = UnitHealthInfo(dstName, t.dstGUID)
 				s.amount = (hppercent and hppercent <= 36) and floor(total * 0.05 * s.points) or 0
@@ -646,10 +666,10 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 
 		-- sort shields
-		tsort(shieldspopped, shields_order_pred)
+		tsort(shields_popped, shields_order_pred)
 
 		local pshield = nil
-		for i = #shieldspopped, 0, -1 do
+		for i = #shields_popped, 0, -1 do
 			-- no shield left to check?
 			if i == 0 then
 				-- if we still have an absorbed amount running and there is
@@ -660,18 +680,17 @@ Skada:RegisterModule("Absorbs", function(L, P)
 					absorb.actorname = pshield.srcName
 					absorb.actorflags = pshield.srcFlags
 					absorb.dstName = dstName
-
-					absorb.spellid = pshield.spellid
-					absorb.school = pshield.school
-					absorb.amount = absorbed
+					absorb.spellid = pshield.string
+					absorb.amount = unqueue_amount(dstName, absorbed)
+					absorb.critical = t.critical
 
 					-- always increment the count of passive shields.
-					Skada:DispatchSets(log_absorb, passiveShields[absorb.spellid] == nil)
+					Skada:DispatchSets(log_absorb, passive_shields[absorb.spellid] == nil)
 				end
 				break
 			end
 
-			local s = shieldspopped[i]
+			local s = shields_popped[i]
 			-- whoops! No shield?
 			if not s then break end
 
@@ -689,10 +708,9 @@ Skada:RegisterModule("Absorbs", function(L, P)
 				absorb.actorname = s.srcName
 				absorb.actorflags = s.srcFlags
 				absorb.dstName = dstName
-
-				absorb.spellid = s.spellid
-				absorb.school = s.school
-				absorb.amount = absorbed
+				absorb.spellid = s.string
+				absorb.amount = unqueue_amount(dstName, absorbed)
+				absorb.critical = t.critical
 
 				Skada:DispatchSets(log_absorb)
 				break
@@ -710,10 +728,9 @@ Skada:RegisterModule("Absorbs", function(L, P)
 				absorb.actorname = s.srcName
 				absorb.actorflags = s.srcFlags
 				absorb.dstName = dstName
-
-				absorb.spellid = s.spellid
-				absorb.school = s.school
-				absorb.amount = s.amount
+				absorb.spellid = s.string
+				absorb.amount = unqueue_amount(dstName, s.amount)
+				absorb.critical = t.critical
 
 				Skada:DispatchSets(log_absorb)
 				absorbed = absorbed - s.amount
@@ -757,63 +774,60 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		tooltip:AddDoubleLine(Skada:FormatNumber(damage) .. "/" .. suffix, Skada:FormatNumber(aps), 1, 1, 1)
 	end
 
-	local function playermod_tooltip(win, id, label, tooltip)
+	local function spellmod_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
 		if not set then return end
 
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		if not actor or enemy then return end -- unavailable for enemies yet
-
-		local spell = actor.absorbspells and actor.absorbspells[id]
+		local actor = set:GetActor(win.actorname, win.actorid)
+		local spell = actor and actor.absorbspells and actor.absorbspells[id]
 		if not spell then return end
 
 		tooltip:AddLine(actor.name .. " - " .. label)
-		if spell.school and spellschools[spell.school] then
-			tooltip:AddLine(spellschools(spell.school))
-		end
+		tooltip_school(tooltip, id)
 
 		if spell.casts and spell.casts > 0 then
 			tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
 		end
 
-		local average = nil
-		if spell.count and spell.count > 0 then
-			tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
-			average = spell.amount / spell.count
-		end
+		if not spell.count or spell.count == 0 then return end
 
-		local separator = nil
+		-- hits and average
+		tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
+		tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
 
-		if spell.min then
+		-- normal hits
+		if spell.n_num then
 			tooltip:AddLine(" ")
-			separator = true
-			tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.min), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Normal Hits"], format(hits_perc, Skada:FormatNumber(spell.n_num), Skada:FormatPercent(spell.n_num, spell.count)))
+			if spell.n_min then
+				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.n_min), 1, 1, 1)
+			end
+			if spell.n_max then
+				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.n_max), 1, 1, 1)
+			end
+			tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.n_amt / spell.n_num), 1, 1, 1)
 		end
 
-		if spell.max then
-			if not separator then
-				tooltip:AddLine(" ")
-				separator = true
+		-- critical hits
+		if spell.c_num then
+			tooltip:AddLine(" ")
+			tooltip:AddDoubleLine(L["Critical Hits"], format(hits_perc, Skada:FormatNumber(spell.c_num), Skada:FormatPercent(spell.c_num, spell.count)))
+			if spell.c_min then
+				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.c_min), 1, 1, 1)
 			end
-			tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.max), 1, 1, 1)
-		end
-
-		if average then
-			if not separator then
-				tooltip:AddLine(" ")
-				separator = true
+			if spell.c_max then
+				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.c_max), 1, 1, 1)
 			end
-
-			tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(average), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.c_amt / spell.c_num), 1, 1, 1)
 		end
 	end
 
-	function spellmod:Enter(win, id, label)
+	function targetspellmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
 		win.title = L["actor absorb spells"](win.actorname or L["Unknown"], label)
 	end
 
-	function spellmod:Update(win, set)
+	function targetspellmod:Update(win, set)
 		win.title = L["actor absorb spells"](win.actorname or L["Unknown"], win.targetname or L["Unknown"])
 		if not set or not win.targetname then return end
 
@@ -843,12 +857,12 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 	end
 
-	function playermod:Enter(win, id, label)
+	function spellmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = L["actor absorb spells"](label)
 	end
 
-	function playermod:Update(win, set)
+	function spellmod:Update(win, set)
 		win.title = L["actor absorb spells"](win.actorname or L["Unknown"])
 		if not set or not win.actorname then return end
 
@@ -977,7 +991,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 				local _, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitBuff(unit, i)
 				if not spellid then
 					break -- nothing found
-				elseif absorbspells[spellid] and unitCaster and not ignoredSpells[spellid] then
+				elseif absorbspells[spellid] and unitCaster and not ignored_spells[spellid] then
 					local t = new()
 					t.timestamp = timestamp + max(0, expires - curtime)
 					t.srcGUID = UnitGUID(unitCaster)
@@ -985,6 +999,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 					t.dstGUID = dstGUID
 					t.dstName = dstName
 					t.spellid = spellid
+					t.spellstring = format("%s.%s", spellid, absorbspells[t.spellid].school)
 					t.__temp = true
 					handle_shield(t)
 				end
@@ -1025,18 +1040,18 @@ Skada:RegisterModule("Absorbs", function(L, P)
 			wipe(absorb)
 			clear(heals)
 			clear(shields)
-			clear(shieldamounts)
-			clear(shieldspopped)
+			clear(shield_amounts)
+			clear(shields_popped)
 		end
 	end
 
 	function mod:OnEnable()
-		playermod.metadata = {tooltip = playermod_tooltip}
-		targetmod.metadata = {showspots = true, click1 = spellmod}
+		spellmod.metadata = {tooltip = spellmod_tooltip}
+		targetmod.metadata = {showspots = true, click1 = targetspellmod}
 		self.metadata = {
 			showspots = true,
 			post_tooltip = absorb_tooltip,
-			click1 = playermod,
+			click1 = spellmod,
 			click2 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
@@ -1047,7 +1062,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		mod_cols = self.metadata.columns
 
 		-- no total click.
-		playermod.nototal = true
+		spellmod.nototal = true
 		targetmod.nototal = true
 
 		local flags_src = {src_is_interesting = true}
@@ -1095,12 +1110,12 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		Skada:AddMode(self, L["Absorbs and Healing"])
 
 		-- table of ignored spells:
-		if Skada.ignoredSpells then
-			if Skada.ignoredSpells.absorbs then
-				ignoredSpells = Skada.ignoredSpells.absorbs
+		if Skada.ignored_spells then
+			if Skada.ignored_spells.absorbs then
+				ignored_spells = Skada.ignored_spells.absorbs
 			end
-			if Skada.ignoredSpells.activeTime then
-				passiveSpells = Skada.ignoredSpells.activeTime
+			if Skada.ignored_spells.activeTime then
+				passive_spells = Skada.ignored_spells.activeTime
 			end
 		end
 	end
@@ -1148,10 +1163,10 @@ end)
 
 Skada:RegisterModule("Absorbs and Healing", function(L, P)
 	local mod = Skada:NewModule("Absorbs and Healing")
-	local playermod = mod:NewModule("Absorbs and healing spells")
+	local spellmod = mod:NewModule("Absorbs and healing spells")
 	local targetmod = mod:NewModule("Absorbed and healed targets")
-	local spellmod = targetmod:NewModule("Absorbs and healing spells")
-	local spellschools = Skada.spellschools
+	local targetspellmod = targetmod:NewModule("Absorbs and healing spells")
+	tooltip_school = tooltip_school or Skada.tooltip_school
 	local mod_cols = nil
 
 	local function format_valuetext(d, columns, total, hps, metadata, subview)
@@ -1186,88 +1201,65 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		tooltip:AddDoubleLine(Skada:FormatNumber(amount) .. "/" .. suffix, Skada:FormatNumber(hps), 1, 1, 1)
 	end
 
-	local function playermod_tooltip(win, id, label, tooltip)
+	local function spellmod_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		if not set or not win.actorname then return end
+		if not set then return end
 
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		if not actor then return end
 
-		local spell = actor.absorbspells and actor.absorbspells[id] -- absorb?
-		spell = spell or actor.healspells and actor.healspells[id] -- heal?
+		local spell = actor.healspells and actor.healspells[id] or actor.absorbspells and actor.absorbspells[id]
 		if not spell then return end
 
 		tooltip:AddLine(actor.name .. " - " .. label)
-		if spell.school and spellschools[spell.school] then
-			tooltip:AddLine(spellschools(spell.school))
-		end
+		tooltip_school(tooltip, id)
 
-		if enemy then
-			tooltip:AddDoubleLine(L["Amount"], spell.amount, 1, 1, 1)
-			return
-		end
-
-		if spell.casts then
+		if spell.casts and spell.casts > 0 then
 			tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
 		end
 
-		local average = nil
-		if spell.count and spell.count > 0 then
-			tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
-			average = spell.amount / spell.count
+		if not spell.count or spell.count == 0 then return end
 
-			if spell.c_num and spell.c_num > 0 then
-				tooltip:AddDoubleLine(L["Critical"], Skada:FormatPercent(spell.c_num, spell.count), 0.67, 1, 0.67)
-			end
-		end
-
+		-- hits and average
+		tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
+		tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
 		if spell.o_amt and spell.o_amt > 0 then
-			tooltip:AddDoubleLine(L["Total Healing"], Skada:FormatNumber(spell.o_amt + spell.amount), 1, 1, 1)
-			tooltip:AddDoubleLine(L["Overheal"], format("%s (%s)", Skada:FormatNumber(spell.o_amt), Skada:FormatPercent(spell.o_amt, spell.o_amt + spell.amount)), 1, 0.67, 0.67)
+			tooltip:AddDoubleLine(L["Overheal"], format(hits_perc, Skada:FormatNumber(spell.o_amt), Skada:FormatPercent(spell.o_amt, spell.amount + spell.o_amt)), 1, 0.67, 0.67)
 		end
 
-		local separator = nil
-
-		if spell.min then
+		-- normal hits
+		if spell.n_num then
 			tooltip:AddLine(" ")
-			separator = true
-
-			local spellmin = spell.min
-			if spell.c_min and spell.c_min < spellmin then
-				spellmin = spell.c_min
+			tooltip:AddDoubleLine(L["Normal Hits"], format(hits_perc, Skada:FormatNumber(spell.n_num), Skada:FormatPercent(spell.n_num, spell.count)))
+			if spell.n_min then
+				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.n_min), 1, 1, 1)
 			end
-			tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
+			if spell.n_max then
+				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.n_max), 1, 1, 1)
+			end
+			tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.n_amt / spell.n_num), 1, 1, 1)
 		end
 
-		if spell.max then
-			if not separator then
-				tooltip:AddLine(" ")
-				separator = true
+		-- critical hits
+		if spell.c_num then
+			tooltip:AddLine(" ")
+			tooltip:AddDoubleLine(L["Critical Hits"], format(hits_perc, Skada:FormatNumber(spell.c_num), Skada:FormatPercent(spell.c_num, spell.count)))
+			if spell.c_min then
+				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.c_min), 1, 1, 1)
 			end
-
-			local spellmax = spell.max
-			if spell.c_max and spell.c_max > spellmax then
-				spellmax = spell.c_max
+			if spell.c_max then
+				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.c_max), 1, 1, 1)
 			end
-			tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
-		end
-
-		if average then
-			if not separator then
-				tooltip:AddLine(" ")
-				separator = true
-			end
-
-			tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(average), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.c_amt / spell.c_num), 1, 1, 1)
 		end
 	end
 
-	function spellmod:Enter(win, id, label)
+	function targetspellmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
 		win.title = L["actor absorb and heal spells"](win.actorname or L["Unknown"], label)
 	end
 
-	function spellmod:Update(win, set)
+	function targetspellmod:Update(win, set)
 		win.title = L["actor absorb and heal spells"](win.actorname or L["Unknown"], win.targetname or L["Unknown"])
 		if not set or not win.targetname then return end
 
@@ -1313,12 +1305,12 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		end
 	end
 
-	function playermod:Enter(win, id, label)
+	function spellmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = L["actor absorb and heal spells"](label)
 	end
 
-	function playermod:Update(win, set)
+	function spellmod:Update(win, set)
 		win.title = L["actor absorb and heal spells"](win.actorname or L["Unknown"])
 		if not win.actorname then return end
 
@@ -1455,11 +1447,11 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 	end
 
 	function mod:OnEnable()
-		playermod.metadata = {tooltip = playermod_tooltip}
-		targetmod.metadata = {showspots = true, click1 = spellmod}
+		spellmod.metadata = {tooltip = spellmod_tooltip}
+		targetmod.metadata = {showspots = true, click1 = targetspellmod}
 		self.metadata = {
 			showspots = true,
-			click1 = playermod,
+			click1 = spellmod,
 			click2 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
@@ -1471,7 +1463,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		mod_cols = self.metadata.columns
 
 		-- no total click.
-		playermod.nototal = true
+		spellmod.nototal = true
 		targetmod.nototal = true
 
 		Skada:AddFeed(L["Healing: Personal HPS"], feed_personal_hps)
@@ -1592,8 +1584,7 @@ end, "Absorbs", "Healing", "Absorbs and Healing")
 
 Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 	local mod = Skada:NewModule("Healing Done By Spell")
-	local spellmod = mod:NewModule("Healing spell sources")
-	local spellschools = Skada.spellschools
+	local sourcemod = mod:NewModule("Healing spell sources")
 	local clear = Private.clearTable
 	local get_absorb_heal_spells = nil
 	local mod_cols = nil
@@ -1610,7 +1601,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 		end
 	end
 
-	local function player_tooltip(win, id, label, tooltip)
+	local function sourcemod_tooltip(win, id, label, tooltip)
 		local set = win.spellname and win:GetSelectedSet()
 		local player = set and set:GetActor(label, id)
 		if not player then return end
@@ -1645,62 +1636,12 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 		end
 	end
 
-	local function spell_tooltip(win, id, label, tooltip)
-		local set = win:GetSelectedSet()
-		local total = set and set:GetAbsorbHeal()
-		if not total or total == 0 then return end
-
-		clear(C)
-		for i = 1, #set.actors do
-			local actor = set.actors[i]
-			if actor and not actor.enemy and (actor.absorbspells or actor.healspells) then
-				local spell = actor.absorbspells and actor.absorbspells[id] or actor.healspells and actor.healspells[id]
-				if spell and spell.amount then
-					local t = C[id]
-					if not t then
-						t = new()
-						t.school = spell.school
-						t.amount = spell.amount
-						t.o_amt = spell.o_amt
-						t.isabsorb = (actor.absorbspells and actor.absorbspells[id])
-						C[id] = t
-					else
-						t.amount = t.amount + spell.amount
-						if spell.o_amt then
-							t.o_amt = (t.o_amt or 0) + spell.o_amt
-						end
-					end
-				end
-			end
-		end
-
-		local spell = C[id]
-		if not spell then return end
-
-		tooltip:AddLine((GetSpellInfo(id)))
-		if spell.school and spellschools[spell.school] then
-			tooltip:AddLine(spellschools(spell.school))
-		end
-
-		if spell.casts and spell.casts > 0 then
-			tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
-		end
-
-		if spell.count and spell.count > 0 then
-			tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
-		end
-		tooltip:AddDoubleLine(spell.isabsorb and L["Absorbs"] or L["Healing"], format("%s (%s)", Skada:FormatNumber(spell.amount), Skada:FormatPercent(spell.amount, total)), 1, 1, 1)
-		if set.overheal and spell.o_amt and spell.o_amt > 0 then
-			tooltip:AddDoubleLine(L["Overheal"], format("%s (%s)", Skada:FormatNumber(spell.o_amt), Skada:FormatPercent(spell.o_amt, set.overheal)), 1, 1, 1)
-		end
-	end
-
-	function spellmod:Enter(win, id, label)
+	function sourcemod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
 		win.title = uformat(L["%s's sources"], label)
 	end
 
-	function spellmod:Update(win, set)
+	function sourcemod:Update(win, set)
 		win.title = uformat(L["%s's sources"], win.spellname)
 		if not (win.spellid and set) then return end
 
@@ -1773,10 +1714,9 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 	end
 
 	function mod:OnEnable()
-		spellmod.metadata = {showspots = true, tooltip = player_tooltip}
+		sourcemod.metadata = {showspots = true, tooltip = sourcemod_tooltip}
 		self.metadata = {
-			click1 = spellmod,
-			post_tooltip = spell_tooltip,
+			click1 = sourcemod,
 			columns = {Healing = true, HPS = false, Percent = true, sHPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_nature_healingwavelesser]]
 		}
@@ -1797,7 +1737,6 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 		if not spell then
 			spell = new()
 			-- common
-			spell.school = info.school
 			spell.amount = info.amount
 
 			-- for heals

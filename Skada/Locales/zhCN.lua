@@ -700,9 +700,7 @@ L["Prints pre-potion after the end of the combat."] = "战斗结束后发布预�
 L["Healthstones"] = "治疗石"
 -- resurrect module lines --
 L["Resurrects"] = "复活"
-L["Resurrect spell list"] = "复活法术列表"
 L["Resurrect target list"] = "复活目标列表"
-L["%s's resurrect spells"] = "%s的复活法术"
 L["%s's resurrect targets"] = "%s的复活目标"
 -- nickname module lines --
 L["Nickname"] = "昵称"

@@ -703,9 +703,7 @@ L["%s parried %s (%s)"] = "%s 패리 %s (%s)"
 L["Healthstones"] = "생명석"
 -- resurrect module lines --
 -- L["Resurrects"] = ""
--- L["Resurrect spell list"] = ""
 -- L["Resurrect target list"] = ""
--- L["%s's resurrect spells"] = ""
 -- L["%s's resurrect targets"] = ""
 -- nickname module lines --
 L["Nickname"] = "별명"

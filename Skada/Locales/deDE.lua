@@ -701,9 +701,7 @@ L["Prints pre-potion after the end of the combat."] = "Druckt Pre-Trank nach dem
 L["Healthstones"] = "Gesundheitsstein"
 -- resurrect module lines --
 L["Resurrects"] = "Resurrects"
-L["Resurrect spell list"] = "Zauberliste wiederbeleben"
 L["Resurrect target list"] = "Zielliste wiederbeleben"
-L["%s's resurrect spells"] = "%s Wiederbelebungszauber"
 L["%s's resurrect targets"] = "%s wiederbelebte Ziele"
 -- nickname module lines --
 L["Nickname"] = "Spitzname"

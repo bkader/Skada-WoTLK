@@ -5,7 +5,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 	local extraspellmod = mod:NewModule("Interrupted spells")
 	local targetmod = mod:NewModule("Interrupted targets")
 	local spellmod = mod:NewModule("Interrupt spells")
-	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local get_actor_interrupted_spells = nil
 	local get_actor_interrupt_targets = nil
 
@@ -65,13 +65,13 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		local spellname = t.spellname or L["Melee"]
 
 		-- invalid/ignored spell?
-		if ignoredSpells[spellid] or (t.extraspellid and ignoredSpells[t.extraspellid]) then return end
+		if ignored_spells[spellid] or (t.extraspellid and ignored_spells[t.extraspellid]) then return end
 
 		data.actorid, data.actorname, data.actorflags = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
 		data.dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
 
-		data.spellid = spellid
-		data.extraspellid = t.extraspellid
+		data.spellid = t.spellstring
+		data.extraspellid = t.extrastring
 
 		Skada:DispatchSets(log_interrupt)
 
@@ -219,8 +219,8 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		Skada:AddMode(self)
 
 		-- table of ignored spells:
-		if Skada.ignoredSpells and Skada.ignoredSpells.interrupts then
-			ignoredSpells = Skada.ignoredSpells.interrupts
+		if Skada.ignored_spells and Skada.ignored_spells.interrupts then
+			ignored_spells = Skada.ignored_spells.interrupts
 		end
 	end
 

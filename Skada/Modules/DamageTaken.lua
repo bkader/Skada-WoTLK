@@ -28,14 +28,14 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 	local sdetailmod = spellmod:NewModule("Damage Breakdown")
 	local sourcemod = mod:NewModule("Damage source list")
 	local tdetailmod = sourcemod:NewModule("Damage spell list")
-	local spellschools = Skada.spellschools
-	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local tooltip_school = Skada.tooltip_school
+	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local missTypes = Skada.missTypes
 	local min, wipe = math.min, wipe
 	local mod_cols = nil
 
 	local dmg = {}
-	local function log_damage(set, isdot)
+	local function log_damage(set)
 		local actor = Skada:GetPlayer(set, dmg.actorid, dmg.actorname, dmg.actorflags)
 		if not actor then return end
 
@@ -60,14 +60,11 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		-- saving this to total set may become a memory hog deluxe.
 		if set == Skada.total and not P.totalidc then return end
 
-		local spellid = isdot and -dmg.spellid or dmg.spellid
-		local spell = actor.damagedspells and actor.damagedspells[spellid]
+		local spell = actor.damagedspells and actor.damagedspells[dmg.spellid]
 		if not spell then
 			actor.damagedspells = actor.damagedspells or {}
-			spell = {id = spellid, school = dmg.school, amount = 0}
-			actor.damagedspells[spellid] = spell
-		elseif not spell.school and dmg.school then
-			spell.school = dmg.school
+			actor.damagedspells[dmg.spellid] = {amount = 0}
+			spell = actor.damagedspells[dmg.spellid]
 		end
 
 		spell.count = (spell.count or 0) + 1
@@ -149,14 +146,12 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 	end
 
 	local function spell_damage(t)
-		if t.srcGUID ~= t.dstGUID and t.spellid and not ignoredSpells[t.spellid] then
+		if t.srcGUID ~= t.dstGUID and t.spellid and not ignored_spells[t.spellid] then
 			dmg.actorid = t.dstGUID
 			dmg.actorname = t.dstName
 			dmg.actorflags = t.dstFlags
 			dmg.srcName = t.srcName
-
-			dmg.spellid = t.spellid
-			dmg.school = t.spellschool
+			dmg.spellid = t.spellstring
 
 			dmg.amount = t.amount
 			dmg.overkill = t.overkill
@@ -168,7 +163,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 			dmg.crushing = t.crushing
 			dmg.misstype = t.misstype
 
-			Skada:DispatchSets(log_damage, t.event == "SPELL_PERIODIC_DAMAGE" or t.event == "SPELL_PERIODIC_MISSED")
+			Skada:DispatchSets(log_damage)
 		end
 	end
 
@@ -199,9 +194,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		if not spell then return end
 
 		tooltip:AddLine(label .. " - " .. actor.name)
-		if spell.school and spellschools[spell.school] then
-			tooltip:AddLine(spellschools(spell.school))
-		end
+		tooltip_school(tooltip, id)
 
 		if spell.n_min then
 			local spellmin = spell.n_min
@@ -233,9 +226,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 			if not spell then return end
 
 			tooltip:AddLine(actor.name .. " - " .. win.spellname)
-			if spell.school and spellschools[spell.school] then
-				tooltip:AddLine(spellschools(spell.school))
-			end
+			tooltip_school(tooltip, win.spellid)
 
 			if label == L["Critical Hits"] and spell.c_amt then
 				if spell.c_min then
@@ -290,7 +281,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
-			local d = win:spell(nr, spellid, spell)
+			local d = win:spell(nr, spellid)
 			d.value = min(total, P.absdamage and spell.total or spell.amount)
 			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
@@ -479,7 +470,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 			if amount then
 				nr = nr + 1
 
-				local d = win:spell(nr, spellid, spell)
+				local d = win:spell(nr, spellid)
 				d.value = amount
 				format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
@@ -579,8 +570,8 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		Skada:AddMode(self, L["Damage Taken"])
 
 		-- table of ignored spells:
-		if Skada.ignoredSpells and Skada.ignoredSpells.damaged then
-			ignoredSpells = Skada.ignoredSpells.damaged
+		if Skada.ignored_spells and Skada.ignored_spells.damaged then
+			ignored_spells = Skada.ignored_spells.damaged
 		end
 	end
 
@@ -863,8 +854,6 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 						local sp = spells[spellid]
 						if not sp then
 							sp = new()
-							sp.id = spell.id
-							sp.school = spell.school
 							sp.amount = amount
 							spells[spellid] = sp
 						else
@@ -881,7 +870,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
-			local d = win:spell(nr, spellid, spell)
+			local d = win:spell(nr, spellid)
 			d.value = spell.amount
 			format_valuetext(d, mod_cols, total, settime and (d.value / settime), win.metadata)
 		end

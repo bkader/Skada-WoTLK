@@ -2,37 +2,13 @@ local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Resurrects", function(L, P, _, C)
 	local mod = Skada:NewModule("Resurrects")
-	local spellmod = mod:NewModule("Resurrect spell list")
 	local targetmod = mod:NewModule("Resurrect target list")
 
 	local pairs, format, uformat = pairs, string.format, Private.uformat
 	local new, clear = Private.newTable, Private.clearTable
 	local get_actor_ress_targets = nil
+	local ress_spells = Skada.ress_spells
 	local mod_cols = nil
-
-	local ress_spells = {
-		-- Rebirth
-		[20484] = 0x08,
-		[20739] = 0x08,
-		[20742] = 0x08,
-		[20747] = 0x08,
-		[20748] = 0x08,
-		[26994] = 0x08,
-		[48477] = 0x08,
-		-- Reincarnation
-		[16184] = 0x08,
-		[16209] = 0x08,
-		[20608] = 0x08,
-		[21169] = 0x08,
-		-- Use Soulstone
-		[3026] = 0x01,
-		[20758] = 0x01,
-		[20759] = 0x01,
-		[20760] = 0x01,
-		[20761] = 0x01,
-		[27240] = 0x01,
-		[47882] = 0x01
-	}
 
 	local function format_valuetext(d, columns, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -54,61 +30,25 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 		set.ress = (set.ress or 0) + 1
 
 		-- saving this to total set may become a memory hog deluxe.
-		if (set == Skada.total and not P.totalidc) or not ress.spellid then return end
-
-		-- spell
-		local spell = actor.resspells and actor.resspells[ress.spellid]
-		if not spell then
-			actor.resspells = actor.resspells or {}
-			actor.resspells[ress.spellid] = {count = 0}
-			spell = actor.resspells[ress.spellid]
-		end
-		spell.count = spell.count + 1
-
-		-- spell targets
-		if ress.dstName then
-			spell.targets = spell.targets or {}
-			spell.targets[ress.dstName] = (spell.targets[ress.dstName] or 0) + 1
+		if (set ~= Skada.total or P.totalidc) and ress.dstName then
+			local target = actor.resstargets and actor.resstargets[ress.dstName]
+			if not target then
+				actor.resstargets = actor.resstargets or {}
+				actor.resstargets[ress.dstName] = 1
+			else
+				target = target + 1
+			end
 		end
 	end
 
 	local function spell_resurrect(t)
 		if t.spellid and (t.event == "SPELL_RESURRECT" or ress_spells[t.spellid]) then
-			ress.spellid = t.spellid
 			ress.actorid = t.srcGUID
 			ress.actorname = t.srcName
 			ress.actorflags = t.srcFlags
 			ress.dstName = (t.event == "SPELL_RESURRECT") and t.dstName or t.srcName
 
 			Skada:DispatchSets(log_resurrect)
-		end
-	end
-
-	function spellmod:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's resurrect spells"], label)
-	end
-
-	function spellmod:Update(win, set)
-		win.title = uformat(L["%s's resurrect spells"], win.actorname)
-		if not set or not win.actorname then return end
-
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		local total = (actor and not enemy) and actor.ress
-
-		if not total or total == 0 or not actor.resspells then
-			return
-		elseif win.metadata then
-			win.metadata.maxvalue = 0
-		end
-
-		local nr = 0
-		for spellid, spell in pairs(actor.resspells) do
-			nr = nr + 1
-
-			local d = win:spell(nr, spellid, nil, ress_spells[spellid])
-			d.value = spell.count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -171,8 +111,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 	function mod:OnEnable()
 		self.metadata = {
 			valuesort = true,
-			click1 = spellmod,
-			click2 = targetmod,
+			click1 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = false, sPercent = false},
@@ -182,7 +121,6 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 		mod_cols = self.metadata.columns
 
 		-- no total click.
-		spellmod.nototal = true
 		targetmod.nototal = true
 
 		Skada:RegisterForCL(spell_resurrect, {src_is_not_interesting = true, dst_is_interesting_nopets = true}, "SPELL_RESURRECT")
@@ -206,24 +144,15 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 	get_actor_ress_targets = function(self, id, name, tbl)
 		local actor = self:GetActor(name, id)
 		local total = actor and actor.ress
-		local spells = total and actor.resspells
-		if not spells then return end
+		local targets = total and actor.restargets
+		if not targets then return end
 
 		tbl = clear(tbl or C)
-		for _, spell in pairs(spells) do
-			if spell.targets then
-				for targetname, count in pairs(spell.targets) do
-					local t = tbl[targetname]
-					if not t then
-						t = new()
-						t.count = count
-						tbl[targetname] = t
-					else
-						t.count = t.count + count
-					end
-					self:_fill_actor_table(t, targetname)
-				end
-			end
+		for targetname, count in pairs(targets) do
+			local t = new()
+			t.count = count
+			self:_fill_actor_table(t, targetname)
+			tbl[targetname] = t
 		end
 		return tbl, total, actor
 	end

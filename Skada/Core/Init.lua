@@ -16,7 +16,7 @@ ns.Private = Private
 local pairs, ipairs = pairs, ipairs
 local select, next, max = select, next, math.max
 local band, tonumber, type = bit.band, tonumber, type
-local format, strmatch, gsub = string.format, string.match, string.gsub
+local strsplit, format, strmatch, gsub = strsplit, string.format, string.match, string.gsub
 local setmetatable, rawset, wipe = setmetatable, rawset, wipe
 local EmptyFunc = Multibar_EmptyFunc
 local new, del, _
@@ -446,6 +446,12 @@ function Private.register_schools()
 			return school.name, school.r, school.g, school.b
 		end
 	})
+
+	ns.tooltip_school = function(tooltip, spellid)
+		local _, school = strsplit(".", spellid, 3)
+		if not school then return end
+		tooltip:AddLine(spellschools(tonumber(school)))
+	end
 end
 
 -------------------------------------------------------------------------------
@@ -1172,6 +1178,16 @@ do
 		if not customSpells[spellid] then
 			return GetSpellLink(spellid)
 		end
+	end
+
+	local strfind = string.find
+	-- used to split spell: [id].[school].[petname]
+	function Private.spell_split(spellid)
+		if type(spellid) == "string" and strfind(spellid, ".") then
+			local id, school, petname = strsplit(".", spellid, 3)
+			return tonumber(id), tonumber(school), petname
+		end
+		return spellid
 	end
 end
 

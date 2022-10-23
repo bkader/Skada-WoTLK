@@ -5,8 +5,8 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	local targetmod = mod:NewModule("Damage target list")
 	local spellmod = mod:NewModule("Damage spell list")
 	local spelltargetmod = spellmod:NewModule("Damage spell targets")
-	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local passive_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local get_actor_friendfire_targets = nil
 
 	local pairs, wipe, format, uformat = pairs, wipe, string.format, Private.uformat
@@ -27,29 +27,27 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 
 	local dmg = {}
 	local function log_damage(set)
-		if not dmg.spellid or not dmg.amount or dmg.amount == 0 then return end
+		if not dmg.amount or dmg.amount == 0 then return end
 
 		local actor = Skada:GetPlayer(set, dmg.actorid, dmg.actorname, dmg.actorflags)
 		if not actor then
 			return
-		elseif not passiveSpells[dmg.spellid] then
+		elseif not passive_spells[dmg.spellid] then
 			Skada:AddActiveTime(set, actor, dmg.dstName)
 		end
 
 		actor.friendfire = (actor.friendfire or 0) + dmg.amount
 		set.friendfire = (set.friendfire or 0) + dmg.amount
 
-		-- to save up memory, we only record the rest to the current set.
-		if (set == Skada.total and not P.totalidc) or not dmg.spellid then return end
+		-- saving this to total set may become a memory hog deluxe.
+		if set == Skada.total and not P.totalidc then return end
 
 		-- spell
 		local spell = actor.friendfirespells and actor.friendfirespells[dmg.spellid]
 		if not spell then
 			actor.friendfirespells = actor.friendfirespells or {}
-			actor.friendfirespells[dmg.spellid] = {amount = 0, school = dmg.school}
+			actor.friendfirespells[dmg.spellid] = {amount = 0}
 			spell = actor.friendfirespells[dmg.spellid]
-		elseif not spell.school and dmg.school then
-			spell.school = dmg.school
 		end
 		spell.amount = spell.amount + dmg.amount
 
@@ -61,13 +59,12 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	end
 
 	local function spell_damage(t)
-		if t.srcGUID ~= t.dstGUID and t.spellid and not ignoredSpells[t.spellid] and (not t.misstype or t.misstype == "ABSORB") then
+		if t.srcGUID ~= t.dstGUID and t.spellid and not ignored_spells[t.spellid] and (not t.misstype or t.misstype == "ABSORB") then
 			dmg.actorid = t.srcGUID
 			dmg.actorname = t.srcName
 			dmg.actorflags = t.srcFlags
 
-			dmg.spellid = t.spellid
-			dmg.school = t.spellschool
+			dmg.spellid = t.spellstring
 			dmg.amount = t.amount
 
 			if t.absorbed and t.absorbed > 0 then
@@ -130,7 +127,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
-			local d = win:spell(nr, spellid, spell)
+			local d = win:spell(nr, spellid, true)
 			d.value = spell.amount
 			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
@@ -251,12 +248,12 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		Skada:AddMode(self, L["Damage Done"])
 
 		-- table of ignored spells:
-		if Skada.ignoredSpells then
-			if Skada.ignoredSpells.friendfire then
-				ignoredSpells = Skada.ignoredSpells.friendfire
+		if Skada.ignored_spells then
+			if Skada.ignored_spells.friendfire then
+				ignored_spells = Skada.ignored_spells.friendfire
 			end
-			if Skada.ignoredSpells.activeTime then
-				passiveSpells = Skada.ignoredSpells.activeTime
+			if Skada.ignored_spells.activeTime then
+				passive_spells = Skada.ignored_spells.activeTime
 			end
 		end
 	end

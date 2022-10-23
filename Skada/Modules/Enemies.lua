@@ -2,8 +2,8 @@ local _, Skada = ...
 local Private = Skada.Private
 
 -- frequently used globals --
-local pairs, type, max, format, uformat = pairs, type, math.max, string.format, Private.uformat
-local wipe, new, clear = wipe, Private.newTable, Private.clearTable
+local pairs, type, format, max = pairs, type, string.format, math.max
+local wipe, uformat, new, clear = wipe, Private.uformat, Private.newTable, Private.clearTable
 local setPrototype, enemyPrototype = Skada.setPrototype, Skada.enemyPrototype
 
 ---------------------------------------------------------------------------
@@ -16,7 +16,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	local spellmod = mod:NewModule("Damage spell list")
 	local spellsourcemod = spellmod:NewModule("Damage spell sources")
 	local usefulmod = mod:NewModule("Useful Damage")
-	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local mod_cols = nil
 
 	local instanceDiff, customGroupsTable, customUnitsTable, customUnitsInfo
@@ -156,7 +156,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		return false
 	end
 
-	local function log_custom_unit(set, name, playername, spellid, spellschool, amount, absorbed)
+	local function log_custom_unit(set, name, playername, spellid, amount, absorbed)
 		local e = Skada:GetEnemy(set, name)
 		if not e then return end
 
@@ -171,7 +171,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		local spell = e.damagedspells and e.damagedspells[spellid]
 		if not spell then
 			e.damagedspells = e.damagedspells or {}
-			e.damagedspells[spellid] = {school = spellschool, amount = amount}
+			e.damagedspells[spellid] = {amount = amount}
 			spell = e.damagedspells[spellid]
 		else
 			spell.amount = spell.amount + amount
@@ -200,17 +200,17 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		end
 	end
 
-	local function log_custom_group(set, id, name, playername, spellid, spellschool, amount, overkill, absorbed)
+	local function log_custom_group(set, id, name, playername, spellid, amount, overkill, absorbed)
 		if not (name and customGroups[name]) then return end -- not a custom group.
 		if customGroups[name] == L["Halion and Inferno"] and get_instance_diff() ~= "25h" then return end -- rs25hm only
 		if customGroupsTable and customGroupsTable[id] then return end -- a custom unit with useful damage.
 
 		amount = (customGroups[name] == L["Princes overkilling"]) and overkill or amount
-		log_custom_unit(set, customGroups[name], playername, spellid, spellschool, amount, absorbed)
+		log_custom_unit(set, customGroups[name], playername, spellid, amount, absorbed)
 	end
 
 	local dmg = {}
-	local function log_damage(set, isdot)
+	local function log_damage(set)
 		if not set or (set == Skada.total and not P.totalidc) then return end
 
 		local absorbed = dmg.absorbed or 0
@@ -235,12 +235,11 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		end
 
 		-- damage spell.
-		local spellid = isdot and -dmg.spellid or dmg.spellid
-		local spell = e.damagedspells and e.damagedspells[spellid]
+		local spell = e.damagedspells and e.damagedspells[dmg.spellid]
 		if not spell then
 			e.damagedspells = e.damagedspells or {}
-			e.damagedspells[spellid] = {school = dmg.spellschool, amount = dmg.amount}
-			spell = e.damagedspells[spellid]
+			e.damagedspells[dmg.spellid] = {amount = dmg.amount}
+			spell = e.damagedspells[dmg.spellid]
 		else
 			spell.amount = spell.amount + dmg.amount
 		end
@@ -293,7 +292,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 					source.useful = (source.useful or 0) + amount
 				end
 				if unit.maxval == unit.full then
-					log_custom_unit(set, unit.name, dmg.srcName, spellid, dmg.spellschool, amount, absorbed)
+					log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, amount, absorbed)
 				end
 				unit.full = nil
 			elseif unit.curval >= unit.maxval then
@@ -301,15 +300,15 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 				unit.curval = unit.curval - amount
 
 				if unit.curval <= unit.maxval then
-					log_custom_unit(set, unit.name, dmg.srcName, spellid, dmg.spellschool, unit.maxval - unit.curval, absorbed)
+					log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, unit.maxval - unit.curval, absorbed)
 					amount = amount - (unit.maxval - unit.curval)
 					if customGroups[unit.oname] and unit.useful then
-						log_custom_group(set, unit.guid, unit.oname, dmg.srcName, spellid, dmg.spellschool, amount, overkill, absorbed)
+						log_custom_group(set, unit.guid, unit.oname, dmg.srcName, dmg.spellid, amount, overkill, absorbed)
 						customGroupsTable = customGroupsTable or {}
 						customGroupsTable[unit.guid] = true
 					end
 					if customGroups[unit.name] then
-						log_custom_group(set, unit.guid, unit.name, dmg.srcName, spellid, dmg.spellschool, unit.maxval - unit.curval, overkill, absorbed)
+						log_custom_group(set, unit.guid, unit.name, dmg.srcName, dmg.spellid, unit.maxval - unit.curval, overkill, absorbed)
 					end
 				end
 				if unit.useful then
@@ -322,43 +321,41 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 				unit.curval = unit.curval - amount
 
 				if customGroups[unit.name] then
-					log_custom_group(set, unit.guid, unit.name, dmg.srcName, spellid, dmg.spellschool, amount, overkill, absorbed)
+					log_custom_group(set, unit.guid, unit.name, dmg.srcName, dmg.spellid, amount, overkill, absorbed)
 				end
 
 				if unit.curval <= unit.minval then
-					log_custom_unit(set, unit.name, dmg.srcName, spellid, dmg.spellschool, amount - (unit.minval - unit.curval), absorbed)
+					log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, amount - (unit.minval - unit.curval), absorbed)
 
 					-- remove it
 					local guid = unit.guid
 					customUnitsTable[guid] = del(customUnitsTable[guid])
 					customUnitsTable[guid] = -1
 				else
-					log_custom_unit(set, unit.name, dmg.srcName, spellid, dmg.spellschool, amount, absorbed)
+					log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, amount, absorbed)
 				end
 			elseif unit.power then
-				log_custom_unit(set, unit.name, dmg.srcName, spellid, dmg.spellschool, dmg.amount - (unit.useful and overkill or 0), absorbed)
+				log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, dmg.amount - (unit.useful and overkill or 0), absorbed)
 			end
 		end
 
 		-- custom groups
-		log_custom_group(set, dmg.actorid, dmg.actorname, dmg.srcName, spellid, dmg.spellschool, dmg.amount, overkill, absorbed)
+		log_custom_group(set, dmg.actorid, dmg.actorname, dmg.srcName, dmg.spellid, dmg.amount, overkill, absorbed)
 	end
 
 	local function spell_damage(t)
-		if t.srcName and t.dstName and t.spellid and not ignoredSpells[t.spellid] and (not t.misstype or t.misstype == "ABSORB") then
+		if t.srcName and t.dstName and t.spellid and not ignored_spells[t.spellid] and (not t.misstype or t.misstype == "ABSORB") then
 			dmg.actorid = t.dstGUID
 			dmg.actorname = t.dstName
 			dmg.actorflags = t.dstFlags
 
-			dmg.spellid = t.spellid
-			dmg.spellschool = t.spellschool
-
+			dmg.spellid = t.spellstring
 			dmg.amount = t.amount
 			dmg.overkill = t.overkill
 			dmg.absorbed = t.absorbed
 
 			_, dmg.srcName = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
-			Skada:DispatchSets(log_damage, t.event == "SPELL_PERIODIC_DAMAGE" or t.event == "SPELL_PERIODIC_MISSED")
+			Skada:DispatchSets(log_damage)
 		end
 	end
 
@@ -494,7 +491,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 			if src then
 				nr = nr + 1
 
-				local d = win:spell(nr, spellid, spell)
+				local d = win:spell(nr, spellid)
 				d.value = P.absdamage and src.total or src.amount
 				format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
@@ -525,7 +522,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
-			local d = win:spell(nr, spellid, spell)
+			local d = win:spell(nr, spellid)
 			d.value = P.absdamage and spell.total or spell.amount
 			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
@@ -663,8 +660,8 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		Skada:AddMode(self, L["Enemies"])
 
 		-- table of ignored spells:
-		if Skada.ignoredSpells and Skada.ignoredSpells.damage then
-			ignoredSpells = Skada.ignoredSpells.damage
+		if Skada.ignored_spells and Skada.ignored_spells.damage then
+			ignored_spells = Skada.ignored_spells.damage
 		end
 	end
 
@@ -809,8 +806,8 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 	local targetspellmod = targetmod:NewModule("Damage spell targets")
 	local spellmod = mod:NewModule("Damage spell list")
 	local spelltargetmod = spellmod:NewModule("Damage spell targets")
-	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local passive_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local mod_cols = nil
 
 	local function format_valuetext(d, columns, total, dps, metadata, subview)
@@ -826,7 +823,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 	end
 
 	local function add_actor_time(set, actor, spellid, target)
-		if not spellid or passiveSpells[spellid] then
+		if not spellid or passive_spells[spellid] then
 			return -- missing spellid or passive spell?
 		elseif not Skada.validclass[actor.class] or actor.role == "HEALER" then
 			return -- missing/invalid actor class or actor is a healer?
@@ -836,7 +833,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 	end
 
 	local dmg = {}
-	local function log_damage(set, isdot)
+	local function log_damage(set)
 		if not set or (set == Skada.total and not P.totalidc) then return end
 
 		local absorbed = dmg.absorbed or 0
@@ -871,12 +868,11 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		end
 
 		-- damage spell.
-		local spellid = isdot and -dmg.spellid or dmg.spellid
-		local spell = e.damagespells and e.damagespells[spellid]
+		local spell = e.damagespells and e.damagespells[dmg.spellid]
 		if not spell then
 			e.damagespells = e.damagespells or {}
-			e.damagespells[spellid] = {school = dmg.spellschool, amount = dmg.amount}
-			spell = e.damagespells[spellid]
+			e.damagespells[dmg.spellid] = {amount = dmg.amount}
+			spell = e.damagespells[dmg.spellid]
 		else
 			spell.amount = spell.amount + dmg.amount
 		end
@@ -915,20 +911,18 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 	end
 
 	local function spell_damage(t)
-		if t.srcName and t.dstName and t.spellid and not ignoredSpells[t.spellid] and (not t.misstype or t.misstype == "ABSORB") then
+		if t.srcName and t.dstName and t.spellid and not ignored_spells[t.spellid] and (not t.misstype or t.misstype == "ABSORB") then
 			dmg.actorid = t.srcGUID
 			dmg.actorname = t.srcName
 			dmg.actorflags = t.srcFlags
 
-			dmg.spellid = t.spellid
-			dmg.spellschool = t.spellschool
-
+			dmg.spellid = t.spellstring
 			dmg.amount = t.amount
 			dmg.overkill = t.overkill
 			dmg.absorbed = t.absorbed
 
 			dmg.dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
-			Skada:DispatchSets(log_damage, t.event == "SPELL_PERIODIC_DAMAGE" and t.event == "SPELL_PERIODIC_MISSED")
+			Skada:DispatchSets(log_damage)
 		end
 	end
 
@@ -957,7 +951,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
-			local d = win:spell(nr, spellid, spell)
+			local d = win:spell(nr, spellid)
 			d.value = spell.amount
 			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
@@ -1056,7 +1050,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
-			local d = win:spell(nr, spellid, spell)
+			local d = win:spell(nr, spellid)
 			d.value = P.absdamage and spell.total or spell.amount
 			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
@@ -1149,12 +1143,12 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		Skada:AddMode(self, L["Enemies"])
 
 		-- table of ignored damage/time spells:
-		if Skada.ignoredSpells then
-			if Skada.ignoredSpells.damaged then
-				ignoredSpells = Skada.ignoredSpells.damaged
+		if Skada.ignored_spells then
+			if Skada.ignored_spells.damaged then
+				ignored_spells = Skada.ignored_spells.damaged
 			end
-			if Skada.ignoredSpells.activeTime then
-				passiveSpells = Skada.ignoredSpells.activeTime
+			if Skada.ignored_spells.activeTime then
+				passive_spells = Skada.ignored_spells.activeTime
 			end
 		end
 	end
@@ -1195,8 +1189,6 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 				local t = tbl[spellid]
 				if not tbl[spellid] then
 					t = new()
-					t = new()
-					t.school = spell.school
 					t.amount = amount
 					tbl[spellid] = t
 				else
@@ -1239,8 +1231,8 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 	local mod = Skada:NewModule("Enemy Healing Done")
 	local targetmod = mod:NewModule("Healed target list")
 	local spellmod = mod:NewModule("Healing spell list")
-	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local passive_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local mod_cols = nil
 
 	local function format_valuetext(d, columns, total, dps, metadata, subview)
@@ -1256,7 +1248,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 	end
 
 	local function add_actor_time(set, actor, spellid, target)
-		if passiveSpells[spellid] then
+		if passive_spells[spellid] then
 			return -- missing spellid or passive spell?
 		elseif not actor.class or not Skada.validclass[actor.class] or actor.role ~= "HEALER" then
 			return -- missing/invalid actor class or actor is not a healer?
@@ -1266,9 +1258,9 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 	end
 
 	local heal = {}
-	local function log_heal(set, ishot)
+	local function log_heal(set)
 		if not set or (set == Skada.total and not P.totalidc) then return end
-		if not heal.spellid or not heal.amount or heal.amount == 0 then return end
+		if not heal.amount or heal.amount == 0 then return end
 
 		local e = Skada:GetEnemy(set, heal.actorname, heal.actorid, heal.actorflags)
 		if not e then
@@ -1280,12 +1272,11 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		set.eheal = (set.eheal or 0) + heal.amount
 		e.heal = (e.heal or 0) + heal.amount
 
-		local spellid = ishot and -heal.spellid or heal.spellid
-		local spell = e.healspells and e.healspells[spellid]
+		local spell = e.healspells and e.healspells[heal.spellid]
 		if not spell then
 			e.healspells = e.healspells or {}
-			e.healspells[spellid] = {school = heal.spellschool, amount = heal.amount}
-			spell = e.healspells[spellid]
+			e.healspells[heal.spellid] = {amount = heal.amount}
+			spell = e.healspells[heal.spellid]
 		else
 			spell.amount = spell.amount + heal.amount
 		end
@@ -1297,17 +1288,16 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 	end
 
 	local function spell_heal(t)
-		if t.spellid and not ignoredSpells[t.spellid] then
+		if t.spellid and not ignored_spells[t.spellid] then
 			heal.actorid = t.srcGUID
 			heal.actorname = t.srcName
 			heal.actorflags = t.srcFlags
 			heal.dstName = t.dstName
 
-			heal.spellid = t.spellid
-			heal.spellschool = t.spellschool
+			heal.spellid = t.spellstring
 			heal.amount = max(0, t.amount - t.overheal)
 
-			Skada:DispatchSets(log_heal, t.event == "SPELL_PERIODIC_HEAL")
+			Skada:DispatchSets(log_heal)
 		end
 	end
 
@@ -1362,7 +1352,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
-			local d = win:spell(nr, spellid, spell, true)
+			local d = win:spell(nr, spellid, true)
 			d.value = spell.amount
 			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
@@ -1437,12 +1427,12 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		Skada:AddMode(self, L["Enemies"])
 
 		-- table of ignored heal/time spells:
-		if Skada.ignoredSpells then
-			if Skada.ignoredSpells.heals then
-				ignoredSpells = Skada.ignoredSpells.heals
+		if Skada.ignored_spells then
+			if Skada.ignored_spells.heals then
+				ignored_spells = Skada.ignored_spells.heals
 			end
-			if Skada.ignoredSpells.activeTime then
-				passiveSpells = Skada.ignoredSpells.activeTime
+			if Skada.ignored_spells.activeTime then
+				passive_spells = Skada.ignored_spells.activeTime
 			end
 		end
 	end

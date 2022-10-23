@@ -703,9 +703,7 @@ L["Prints pre-potion after the end of the combat."] = "После окончан
 L["Healthstones"] = "Камень здоровья"
 -- resurrect module lines --
 L["Resurrects"] = "Воскрешения"
-L["Resurrect spell list"] = "Заклинания воскрешения"
 L["Resurrect target list"] = "Цели воскрешения"
-L["%s's resurrect spells"] = "%s - Заклинания воскрешения"
 L["%s's resurrect targets"] = "%s - Цели воскрешения"
 -- nickname module lines --
 L["Name"] = "Имя"

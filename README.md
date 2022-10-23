@@ -116,7 +116,7 @@ This module was completely rewritter and unlike the default one, it keeps all pl
 
 ### Dispels, Interrupts and Resurrects
 
-These module do what they are named after, and unlike before, they provide more data: spells dispelled/interrupted, spells used to dispel/interrupt, targets dispelled/interrupted, spells user to resurrect, targets resurrected and resurrect spells used on the select player (_too many boring details right?_).
+These module do what they are named after, and unlike before, they provide more data: spells dispelled/interrupted, spells used to dispel/interrupt, targets dispelled/interrupted, spells user to resurrect and targets resurrected.
 
 ### Enemies
 

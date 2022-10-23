@@ -2,7 +2,7 @@ local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Tweaks", function(L, P)
 	local mod = Skada:NewModule("Tweaks", "AceHook-3.0")
-	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local band, format = bit.band, string.format
 	local UnitClass, GetTime = UnitClass, GetTime
@@ -79,7 +79,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 			end
 
 			-- ignore spell?
-			if args.event ~= "SWING_DAMAGE" and args.spellid and ignoredSpells[args.spellid] then
+			if args.event ~= "SWING_DAMAGE" and args.spellid and ignored_spells[args.spellid] then
 				return
 			end
 
@@ -639,8 +639,8 @@ Skada:RegisterModule("Tweaks", function(L, P)
 
 	function mod:OnEnable()
 		-- table of ignored spells (first hit):
-		if Skada.ignoredSpells and Skada.ignoredSpells.firsthit then
-			ignoredSpells = Skada.ignoredSpells.firsthit
+		if Skada.ignored_spells and Skada.ignored_spells.firsthit then
+			ignored_spells = Skada.ignored_spells.firsthit
 		end
 
 		self:ApplySettings()

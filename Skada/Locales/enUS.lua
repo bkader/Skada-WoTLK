@@ -756,9 +756,7 @@ L["Prints pre-potion after the end of the combat."] = true
 L["Healthstones"] = true
 -- resurrect module lines --
 L["Resurrects"] = true
-L["Resurrect spell list"] = true
 L["Resurrect target list"] = true
-L["%s's resurrect spells"] = true
 L["%s's resurrect targets"] = true
 -- nickname module lines --
 L["Nickname"] = true

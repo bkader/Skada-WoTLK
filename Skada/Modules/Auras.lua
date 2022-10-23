@@ -4,14 +4,14 @@ local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 
 -- frequently used global (sort of...)
 local pairs, format, uformat = pairs, string.format, Private.uformat
-local time, min, floor = time, math.min, math.floor
+local time, tonumber, min, floor = time, tonumber, math.min, math.floor
 local _
 
 -- common functions and locals
 local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
 local ignored_buffs = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 local ignored_debuffs = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-local aura, spellschools
+local aura, tooltip_school
 
 ---------------------------------------------------------------------------
 -- Parent Module - Handles common stuff
@@ -34,16 +34,16 @@ do
 		if main_flag == 0 then return end
 
 		aura = {}
-		spellschools = Skada.spellschools
+		tooltip_school = Skada.tooltip_school
 		Skada.RegisterCallback(self, "Skada_SetComplete", "Clean")
 
 		-- what can be cleaned?
 		player_clear = (band(main_flag, player_flag) ~= 0)
 		enemy_clear = (band(main_flag, enemy_flag) ~= 0)
 
-		if Skada.ignoredSpells then
-			ignored_buffs = Skada.ignoredSpells.buffs or ignored_buffs
-			ignored_debuffs = Skada.ignoredSpells.debuffs or ignored_debuffs
+		if Skada.ignored_spells then
+			ignored_buffs = Skada.ignored_spells.buffs or ignored_buffs
+			ignored_debuffs = Skada.ignored_spells.debuffs or ignored_debuffs
 		end
 	end
 
@@ -174,21 +174,16 @@ do
 		local spell = actor.auras and actor.auras[aura.spellid]
 		if not spell then
 			actor.auras = actor.auras or {}
-			actor.auras[aura.spellid] = {school = aura.school, uptime = 0, count = 1, active = 1, start = curtime}
+			actor.auras[aura.spellid] = {uptime = 0, count = 1, active = 1, start = curtime}
 			spell = actor.auras[aura.spellid]
 		else
 			spell.active = (spell.active or 0) + 1
 			spell.count = (spell.count or 0) + 1
 			spell.start = spell.start or curtime
-
-			-- fix missing school
-			if not spell.school and aura.school then
-				spell.school = aura.school
-			end
 		end
 
 		-- only record targets for debuffs
-		if aura.spellid > 0 or not aura.dstName then return end
+		if aura.type == "BUFF" or not aura.dstName then return end
 
 		local target = spell.targets and spell.targets[aura.dstName]
 		if not target then
@@ -252,14 +247,9 @@ do
 		local spell = actor.auras and actor.auras[aura.spellid]
 		if not spell then
 			actor.auras = actor.auras or {}
-			actor.auras[aura.spellid] = {school = aura.school, uptime = 1}
+			actor.auras[aura.spellid] = {uptime = 1}
 		else
 			spell.uptime = (spell.uptime or 0) + 1
-
-			-- fix missing school
-			if not spell.school and aura.school then
-				spell.school = aura.school
-			end
 		end
 	end
 
@@ -269,17 +259,8 @@ do
 			if not spells then return end
 
 			local count, uptime = 0, 0
-			for spellid, spell in pairs(spells) do
-				-- fix old data
-				if spell.type then
-					if spell.type == "DEBUFF" and spellid > 0 then
-						local sid = spellid
-						spellid = -spellid
-						spells[spellid] = spell
-						spells[sid] = nil
-					end
-					spell.type = nil
-				end
+			for id, spell in pairs(spells) do
+				local spellid = tonumber(id)
 				if (auratype == "BUFF" and spellid > 0) or (auratype == "DEBUFF" and spellid < 0) then
 					count = count + 1
 					uptime = uptime + spell.uptime
@@ -344,14 +325,15 @@ do
 		end
 
 		local nr = 0
-		for spellid, spell in pairs(spells) do
+		for id, spell in pairs(spells) do
+			local spellid = tonumber(id)
 			if
 				(auratype == "BUFF" and spellid > 0 and spell.uptime > 0) or
 				(auratype == "DEBUFF" and spellid < 0 and spell.uptime > 0)
 			then
 				nr = nr + 1
 
-				local d = win:spell(nr, spellid, spell, nil, nil, true)
+				local d = win:spell(nr, id, false)
 				d.value = min(maxtime, spell.uptime)
 				format_valuetext(d, cols, spell.count, maxtime, win.metadata, true)
 			end
@@ -363,7 +345,6 @@ do
 		t.count = info.count
 		t.refresh = info.refresh
 		t.uptime = info.uptime
-		t.school = info.school
 		return t
 	end
 
@@ -470,7 +451,7 @@ do
 				local uptime = target and target.uptime
 				if uptime then
 					maxtime = maxtime + uptime
-					tbl[spellid] = new_aura_table(spell.targets[name])
+					tbl[spellid] = new_aura_table(target)
 				end
 			end
 
@@ -493,7 +474,7 @@ do
 			for spellid, spell in pairs(spells) do
 				nr = nr + 1
 
-				local d = win:spell(nr, spellid, spell, nil, nil, true)
+				local d = win:spell(nr, spellid, true)
 				d.value = spell.uptime
 				format_valuetext(d, cols, spell.count, maxtime, win.metadata, true)
 			end
@@ -509,9 +490,7 @@ do
 		if not spell then return end
 
 		tooltip:AddLine(format("%s: %s", actor.name, label))
-		if spell.school and spellschools and spellschools[spell.school] then
-			tooltip:AddLine(spellschools(spell.school))
-		end
+		tooltip_school(tooltip, id)
 
 		if spell.count or spell.refresh then
 			if spell.count then
@@ -541,9 +520,7 @@ do
 		if not target then return end
 
 		tooltip:AddLine(actor.name .. ": " .. win.spellname)
-		if spell.school and spellschools and spellschools[spell.school] then
-			tooltip:AddLine(spellschools(spell.school))
-		end
+		tooltip_school(tooltip, win.spellid)
 
 		if target.count then
 			tooltip:AddDoubleLine(L["Count"], target.count, 1, 1, 1)
@@ -570,8 +547,8 @@ Skada:RegisterModule("Buffs", function(_, P, _, C)
 			aura.actorflags = t.dstFlags
 			aura.dstName = nil
 
-			aura.spellid = t.spellid
-			aura.school = t.spellschool
+			aura.spellid = t.spellstring
+			aura.type = t.auratype
 
 			if t.event == "SPELL_PERIODIC_ENERGIZE" then
 				Skada:DispatchSets(log_specialaura)
@@ -747,8 +724,9 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 
 		aura.actorid, aura.actorname, aura.actorflags = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
 		aura.dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
-		aura.spellid = -t.spellid
-		aura.school = t.spellschool
+
+		aura.spellid = t.spellstring
+		aura.type = t.auratype
 
 		if t.event == "SPELL_AURA_APPLIED" then
 			Skada:DispatchSets(log_auraapplied)
@@ -841,9 +819,7 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 		if not (spell and spell.count) then return end
 
 		tooltip:AddLine(label .. ": " .. win.spellname)
-		if spell.school and spellschools and spellschools[spell.school] then
-			tooltip:AddLine(spellschools(spell.school))
-		end
+		tooltip_school(tooltip, win.spellid)
 
 		tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
 		if spell.refresh then
@@ -908,8 +884,8 @@ Skada:RegisterModule("Enemy Buffs", function(_, P, _, C)
 			aura.actorflags = t.dstFlags
 			aura.dstName = nil
 
-			aura.spellid = t.spellid
-			aura.school = t.spellschool
+			aura.spellid = t.spellstring
+			aura.type = t.auratype
 
 			if t.event == "SPELL_PERIODIC_ENERGIZE" then
 				Skada:DispatchSets(log_specialaura, true)
@@ -990,8 +966,8 @@ Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
 		aura.actorflags = t.srcFlags
 		aura.dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
 
-		aura.spellid = -t.spellid
-		aura.school = t.spellschool
+		aura.spellid = t.spellstring
+		aura.type = t.auratype
 
 		if t.event == "SPELL_AURA_APPLIED" then
 			Skada:DispatchSets(log_auraapplied, true)

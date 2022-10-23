@@ -14,7 +14,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 	local pairs, max = pairs, math.max
 	local format, uformat = string.format, Private.uformat
-	local spellschools = Skada.spellschools
+	local tooltip_school = Skada.tooltip_school
 	local COLOR_GOLD = {r = 1, g = 0.82, b = 0, colorStr = "ffffd100"}
 	local userGUID, otherGUID = Skada.userGUID, nil
 	local userName, otherName = Skada.userName, nil
@@ -68,14 +68,12 @@ Skada:RegisterModule("Comparison", function(L, P)
 		if label == L["Critical Hits"] or label == L["Normal Hits"] or label == L["Glancing"] then
 			local set = win:GetSelectedSet()
 			local actor = set and set:GetActor(win.actorname, win.actorid)
-			local spell = actor.damagespells and actor.damagespells[win.spellname]
+			local spell = actor.damagespells and actor.damagespells[win.spellid]
 
 			if actor.id == otherGUID then
 				if spell then
 					tooltip:AddLine(actor.name .. " - " .. win.spellname)
-					if spell.school and spellschools[spell.school] then
-						tooltip:AddLine(spellschools(spell.school))
-					end
+					tooltip_school(tooltip, win.spellid)
 
 					if label == L["Critical Hits"] and spell.c_amt then
 						if spell.c_min then
@@ -107,13 +105,11 @@ Skada:RegisterModule("Comparison", function(L, P)
 			end
 
 			local ospells = set:GetActorDamageSpells(otherGUID, otherName)
-			local ospell = ospells and ospells[win.spellname]
+			local ospell = ospells and ospells[win.spellid]
 
 			if spell or ospell then
 				tooltip:AddLine(uformat(L["%s vs %s: %s"], actor and actor.name, otherName, win.spellname))
-				if (spell.school and spellschools[spell.school]) or (ospell.school and spellschools[ospell.school]) then
-					tooltip:AddLine(spellschools(spell and spell.school or ospell.school))
-				end
+				tooltip_school(tooltip, win.spellid)
 
 				if label == L["Critical Hits"] and (spell and spell.c_amt or ospell.c_amt) then
 					local num = spell and spell.c_num and (100 * spell.c_num / spell.count)
@@ -206,18 +202,18 @@ Skada:RegisterModule("Comparison", function(L, P)
 	end
 
 	function dspellmod:Enter(win, id, label)
-		win.spellname = label
+		win.spellid, win.spellname = id, label
 		win.title = uformat(L["%s vs %s: %s"], win.actorname, otherName, uformat(L["%s's damage breakdown"], label))
 	end
 
 	function dspellmod:Update(win, set)
 		win.title = uformat(L["%s vs %s: %s"], win.actorname, otherName, uformat(L["%s's damage breakdown"], win.spellname))
-		if not set or not win.spellname then return end
+		if not set or not win.spellid then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)
 		if not actor then return end
 
-		local spell = actor and actor.damagespells and actor.damagespells[win.spellname]
+		local spell = actor and actor.damagespells and actor.damagespells[win.spellid]
 
 		-- same actor?
 		if actor.id == otherGUID then
@@ -259,7 +255,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 		end
 
 		local ospells = set:GetActorDamageSpells(otherGUID, otherName)
-		local ospell = ospells and ospells[win.spellname]
+		local ospell = ospells and ospells[win.spellid]
 
 		if spell or ospell then
 			if win.metadata then
@@ -295,18 +291,18 @@ Skada:RegisterModule("Comparison", function(L, P)
 	end
 
 	function bspellmod:Enter(win, id, label)
-		win.spellname = label
+		win.spellid, win.spellname = id, label
 		win.title = uformat(L["%s vs %s: %s"], win.actorname, otherName, L["actor damage"](label))
 	end
 
 	function bspellmod:Update(win, set)
 		win.title = uformat(L["%s vs %s: %s"], win.actorname, otherName, L["actor damage"](win.spellname or L["Unknown"]))
-		if not set or not win.spellname then return end
+		if not set or not win.spellid then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)
 		if not actor then return end
 
-		local spell = actor and actor.damagespells and actor.damagespells[win.spellname]
+		local spell = actor and actor.damagespells and actor.damagespells[win.spellid]
 
 		if actor.id == otherGUID then
 			win.title = uformat(L["%s's <%s> damage"], actor.name, win.spellname)
@@ -363,7 +359,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 		end
 
 		local ospells = set:GetActorDamageSpells(otherGUID, otherName)
-		local ospell = ospells and ospells[win.spellname]
+		local ospell = ospells and ospells[win.spellid]
 
 		if spell or ospell then
 			local total = spell and spell.amount
@@ -460,13 +456,13 @@ Skada:RegisterModule("Comparison", function(L, P)
 			end
 
 			local nr = 0
-			for spellname, spell in pairs(spells) do
+			for spellid, spell in pairs(spells) do
 				local target = spell.targets and spell.targets[win.targetname]
 				local amount = target and (P.absdamage and target.total or target.amount)
 				if amount then
 					nr = nr + 1
 
-					local d = win:spell(nr, spellname, spell)
+					local d = win:spell(nr, spellid)
 					d.value = amount
 					d.valuetext = Skada:FormatValueCols(mod_cols.Damage and Skada:FormatNumber(d.value))
 
@@ -495,21 +491,21 @@ Skada:RegisterModule("Comparison", function(L, P)
 			end
 
 			local nr = 0
-			for spellname, spell in pairs(spells) do
+			for spellid, spell in pairs(spells) do
 				if spell.targets and spell.targets[win.targetname] then
 					nr = nr + 1
-					local d = win:spell(nr, spellname, spell)
+					local d = win:spell(nr, spellid)
 
 					d.value = spell.targets[win.targetname].amount or 0
 					local oamount = 0
 					if
 						oactor and
 						oactor.damagespells and
-						oactor.damagespells[spellname] and
-						oactor.damagespells[spellname].targets and
-						oactor.damagespells[spellname].targets[win.targetname]
+						oactor.damagespells[spellid] and
+						oactor.damagespells[spellid].targets and
+						oactor.damagespells[spellid].targets[win.targetname]
 					then
-						oamount = oactor.damagespells[spellname].targets[win.targetname].amount or oamount
+						oamount = oactor.damagespells[spellid].targets[win.targetname].amount or oamount
 					end
 
 					if P.absdamage then
@@ -519,12 +515,12 @@ Skada:RegisterModule("Comparison", function(L, P)
 						if
 							oactor and
 							oactor.damagespells and
-							oactor.damagespells[spellname] and
-							oactor.damagespells[spellname].targets and
-							oactor.damagespells[spellname].targets[win.targetname] and
-							oactor.damagespells[spellname].targets[win.targetname].total
+							oactor.damagespells[spellid] and
+							oactor.damagespells[spellid].targets and
+							oactor.damagespells[spellid].targets[win.targetname] and
+							oactor.damagespells[spellid].targets[win.targetname].total
 						then
-							oamount = oactor.damagespells[spellname].targets[win.targetname].total
+							oamount = oactor.damagespells[spellid].targets[win.targetname].total
 						end
 					end
 
@@ -554,13 +550,13 @@ Skada:RegisterModule("Comparison", function(L, P)
 		end
 
 		local nr = 0
-		for spellname, spell in pairs(spells) do
+		for spellid, spell in pairs(spells) do
 			local target = spell.targets and spell.targets[win.targetname]
 			local amount = target and (P.absdamage and target.total or target.amount)
 			if amount then
 				nr = nr + 1
 
-				local d = win:spell(nr, spellname, spell)
+				local d = win:spell(nr, spellid)
 				d.value = amount
 				d.valuetext = format_value_number(0, amount, true)
 
@@ -593,10 +589,10 @@ Skada:RegisterModule("Comparison", function(L, P)
 		if actor.id == otherGUID then
 			win.title = L["actor damage"](actor.name)
 
-			for spellname, spell in pairs(spells) do
+			for spellid, spell in pairs(spells) do
 				nr = nr + 1
 
-				local d = win:spell(nr, spellname, spell)
+				local d = win:spell(nr, spellid)
 				d.value = P.absdamage and spell.total or spell.amount or 0
 				d.valuetext = Skada:FormatValueCols(mod_cols.Damage and Skada:FormatNumber(d.value))
 
@@ -612,13 +608,13 @@ Skada:RegisterModule("Comparison", function(L, P)
 		local ospells = set:GetActorDamageSpells(otherGUID, otherName)
 
 		-- iterate comparison actor's spells.
-		for spellname, spell in pairs(spells) do
+		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
-			local d = win:spell(nr, spellname, spell)
+			local d = win:spell(nr, spellid)
 			d.value = P.absdamage and spell.total or spell.amount
 
-			local ospell = ospells and ospells[spellname]
+			local ospell = ospells and ospells[spellid]
 			local oamount = ospell and (P.absdamage and ospell.total or ospell.amount)
 			d.valuetext = format_value_number(d.value, oamount, true)
 
@@ -629,11 +625,11 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 		-- any other left spells.
 		if not ospells then return end
-		for spellname, spell in pairs(ospells) do
-			if not spells[spellname] then
+		for spellid, spell in pairs(ospells) do
+			if not spells[spellid] then
 				nr = nr + 1
 
-				local d = win:spell(nr, spellname, spell)
+				local d = win:spell(nr, spellid)
 				d.value = P.absdamage and spell.total or spell.amount
 				d.valuetext = format_value_number(0, d.value, true)
 

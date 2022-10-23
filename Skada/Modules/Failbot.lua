@@ -7,10 +7,10 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Fails")
 	local spellmod = mod:NewModule("Player's failed events")
 	local playermod = spellmod:NewModule("Event's failed players")
-	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local count_fails_by_spell = nil
 
-	local pairs, format, UnitGUID = pairs, string.format, UnitGUID
+	local pairs, tostring, format, UnitGUID = pairs, tostring, string.format, UnitGUID
 	local uformat, IsInGroup = Private.uformat, Skada.IsInGroup
 	local tank_events, mod_cols
 
@@ -46,10 +46,10 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 
 	local function on_fail(failname, actorname, failtype, ...)
 		local spellid = failname and actorname and LibFail:GetEventSpellId(failname)
-		local actorid = spellid and not ignoredSpells[spellid] and UnitGUID(actorname)
+		local actorid = spellid and not ignored_spells[spellid] and UnitGUID(actorname)
 		if not actorid then return end
 
-		Skada:DispatchSets(log_fail, actorid, actorname, spellid, failname)
+		Skada:DispatchSets(log_fail, actorid, actorname, tostring(spellid), failname)
 	end
 
 	function playermod:Enter(win, id, label)
@@ -168,8 +168,8 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 		Skada:AddMode(self)
 
 		-- table of ignored spells:
-		if Skada.ignoredSpells and Skada.ignoredSpells.fails then
-			ignoredSpells = Skada.ignoredSpells.fails
+		if Skada.ignored_spells and Skada.ignored_spells.fails then
+			ignored_spells = Skada.ignored_spells.fails
 		end
 	end
 

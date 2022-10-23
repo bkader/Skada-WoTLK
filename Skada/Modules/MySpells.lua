@@ -1,10 +1,13 @@
 local _, Skada = ...
+local Private = Skada.Private
 Skada:RegisterModule("My Spells", function(L, P)
 	local mod = Skada:NewModule("My Spells")
 
 	local pairs, format = pairs, string.format
 	local userGUID, userName = Skada.userGUID, Skada.userName
-	local spellschools = Skada.spellschools
+	local tooltip_school = Skada.tooltip_school
+	local PercentToRGB = Private.PercentToRGB
+	local hits_perc = "%s (\124cffffffff%s\124r)"
 
 	local function format_valuetext(d, metadata)
 		d.valuetext = Skada:FormatNumber(d.value)
@@ -16,56 +19,71 @@ Skada:RegisterModule("My Spells", function(L, P)
 
 	local function spell_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local player = set and set:GetPlayer(userGUID, userName)
-		if not player then return end
+		local actor = set and set:GetPlayer(userGUID, userName)
+		if not actor then return end
 
 		local spell, damage = nil, nil
-		if player.damagespells and player.damagespells[label] then
-			spell, damage = player.damagespells[label], true
-		elseif player.absorbspells and player.absorbspells[id] then
-			spell = player.absorbspells[id]
-		elseif player.healspells and player.healspells[id] then
-			spell = player.healspells[id]
+		if actor.damagespells and actor.damagespells[id] then
+			spell, damage = actor.damagespells[id], true
+		elseif actor.absorbspells and actor.absorbspells[id] then
+			spell = actor.absorbspells[id]
+		elseif actor.healspells and actor.healspells[id] then
+			spell = actor.healspells[id]
 		end
 
 		if not spell then return end
 
-		tooltip:AddLine(player.name .. " - " .. label)
-		if spell.school and spellschools[spell.school] then
-			tooltip:AddLine(spellschools(spell.school))
+		tooltip:AddLine(actor.name .. " - " .. label)
+		tooltip_school(tooltip, id)
+
+		if spell.casts and spell.casts > 0 then
+			tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
 		end
+
+		if not spell.count or spell.count == 0 then return end
 
 		-- count stats
 		tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
-
-		if spell.n_num and spell.n_num > 0 then
-			tooltip:AddDoubleLine(L["Normal Hits"], format("%s (%s)", spell.n_num, Skada:FormatPercent(spell.n_num, spell.count)), 1, 1, 1)
-		end
-
-		if spell.c_num and spell.c_num > 0 then
-			tooltip:AddDoubleLine(L["Critical Hits"], format("%s (%s)", spell.c_num, Skada:FormatPercent(spell.c_num, spell.count)), 1, 1, 1)
-		end
-
-		tooltip:AddLine(" ")
-
-		if spell.n_min or spell.min then
-			local spellmin = spell.n_min or spell.min
-			if spell.c_min and spell.c_min < spellmin then
-				spellmin = spell.c_min
-			end
-			tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
-		end
-
-		if spell.n_max or spell.max then
-			local spellmax = spell.n_max or spell.max
-			if spell.c_max and spell.c_max < spellmax then
-				spellmax = spell.c_max
-			end
-			tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
-		end
-
-		local amount = damage and (P.absdamage and spell.total or spell.amount) or spell.amount
+		local amount = damage and P.absdamage and spell.total or spell.amount
 		tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(amount / spell.count), 1, 1, 1)
+
+		local uptime = actor.auras and actor.auras[id] and actor.auras[id].uptime
+		if uptime and uptime > 0 then
+			uptime = 100 * (uptime / actor:GetTime(set))
+			tooltip:AddDoubleLine(L["Uptime"], Skada:FormatPercent(uptime), 1, 1, 1, PercentToRGB(uptime))
+		end
+
+		-- overheal/overkill
+		if spell.o_amt and spell.o_amt > 0 then
+			local overamount = format(hits_perc, Skada:FormatNumber(spell.o_amt), Skada:FormatPercent(spell.o_amt, spell.amount + spell.o_amt))
+			tooltip:AddDoubleLine(damage and L["Overkill"] or L["Overheal"], overamount, 1, 0.67, 0.67)
+		end
+
+		-- normal hits
+		if spell.n_num then
+			tooltip:AddLine(" ")
+			tooltip:AddDoubleLine(L["Normal Hits"], format(hits_perc, Skada:FormatNumber(spell.n_num), Skada:FormatPercent(spell.n_num, spell.count)))
+			if spell.n_min then
+				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.n_min), 1, 1, 1)
+			end
+			if spell.n_max then
+				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.n_max), 1, 1, 1)
+			end
+			tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.n_amt / spell.n_num), 1, 1, 1)
+		end
+
+		-- critical hits
+		if spell.c_num then
+			tooltip:AddLine(" ")
+			tooltip:AddDoubleLine(L["Critical Hits"], format(hits_perc, Skada:FormatNumber(spell.c_num), Skada:FormatPercent(spell.c_num, spell.count)))
+			if spell.c_min then
+				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.c_min), 1, 1, 1)
+			end
+			if spell.c_max then
+				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.c_max), 1, 1, 1)
+			end
+			tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.c_amt / spell.c_num), 1, 1, 1)
+		end
 	end
 
 	function mod:Update(win, set)
@@ -82,10 +100,10 @@ Skada:RegisterModule("My Spells", function(L, P)
 
 		local spells = player.damagespells -- damage spells
 		if spells then
-			for spellname, spell in pairs(spells) do
+			for spellid, spell in pairs(spells) do
 				nr = nr + 1
 
-				local d = win:spell(nr, spellname, spell)
+				local d = win:spell(nr, spellid)
 				d.value = P.absdamage and spell.total or spell.amount
 				format_valuetext(d, win.metadata)
 			end
@@ -96,7 +114,7 @@ Skada:RegisterModule("My Spells", function(L, P)
 			for spellid, spell in pairs(spells) do
 				nr = nr + 1
 
-				local d = win:spell(nr, spellid, spell)
+				local d = win:spell(nr, spellid, true)
 				d.value = spell.amount
 				format_valuetext(d, win.metadata)
 			end
@@ -107,7 +125,7 @@ Skada:RegisterModule("My Spells", function(L, P)
 			for spellid, spell in pairs(spells) do
 				nr = nr + 1
 
-				local d = win:spell(nr, spellid, spell)
+				local d = win:spell(nr, spellid)
 				d.value = spell.amount
 				format_valuetext(d, win.metadata)
 			end

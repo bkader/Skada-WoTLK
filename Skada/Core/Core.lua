@@ -717,58 +717,34 @@ function Window:nr(i)
 end
 
 -- generates spell's dataset
-function Window:spell(d, spellid, spell, school, isheal, no_suffix)
-	if d and spellid then
-		-- create the dataset?
-		if type(d) == "number" then
-			d = self:nr(d)
-		end
+do
+	local spell_split = Private.spell_split
+	function Window:spell(d, spell, is_hot)
+		if d and spell then
+			-- create the dataset?
+			if type(d) == "number" then
+				d = self:nr(d)
+			end
 
-		if school == true then
-			isheal = true
-			school = nil
-		end
+			d.id = spell -- locked!
 
-		d.id = spellid
-
-		if type(spellid) == "number" or not spell then
+			local spellid, school, petname = spell_split(spell)
 			d.spellid = spellid
-			d.label, _, d.icon = GetSpellInfo(abs(d.spellid))
+			d.label, _, d.icon = GetSpellInfo(abs(spellid))
+			d.spellschool = school
 
-			if (spell and spell.ishot) and not no_suffix then
-				d.label = format("%s%s", d.label, L["HoT"])
-			elseif spellid < 0 and not no_suffix then
-				d.label = format("%s%s", d.label, isheal and L["HoT"] or L["DoT"])
+			-- hots and dots?
+			if spellid < 0 and is_hot ~= false then
+				d.label = format("%s%s", d.label, is_hot and L["HoT"] or L["DoT"])
 			end
-			if spell and spell.school then
-				d.spellschool = spell.school
-			elseif school then
-				d.spellschool = school
+
+			-- petname
+			if petname then
+				d.label = format("%s (%s)", d.label, petname)
 			end
-			return d
 		end
-
-		if type(spell) == "table" then
-			d.spellid = spell.id
-			d.label = spellid
-			_, _, d.icon = GetSpellInfo(abs(d.spellid))
-
-			if spell and (spell.ishot or d.spellid < 0) and not no_suffix then
-				d.label = format("%s%s", d.label, L["HoT"])
-			end
-			if spell and spell.school then
-				d.spellschool = spell.school
-			elseif school then
-				d.spellschool = school
-			end
-			return d
-		end
-
-		-- fallback
-		d.label = spellid
-		d.spellschool = school
+		return d
 	end
-	return d
 end
 
 -- generates actor's dataset
@@ -1565,7 +1541,10 @@ do
 				action.actorid = owner.id
 				action.actorname = owner.name
 
-				if action.spellname and action.actorname then
+				if action.spellid and action.petname then
+					action.spellid = format("%s.%s", action.spellid, action.petname)
+				end
+				if action.spellname and action.petname then
 					action.spellname = format("%s (%s)", action.spellname, action.petname)
 				end
 			else

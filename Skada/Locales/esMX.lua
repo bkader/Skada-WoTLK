@@ -705,9 +705,7 @@ L["Prints pre-potion after the end of the combat."] = "Imprime la lista de jugad
 L["Healthstones"] = "Piedras de salud"
 -- resurrect module lines --
 L["Resurrects"] = "Resurrecciones"
-L["Resurrect spell list"] = "Hechizos de resurrecci\195\179n"
 L["Resurrect target list"] = "Objetivos de resurrecci\195\179n"
-L["%s's resurrect spells"] = "Hechizos de resurrecci\195\179n de %s"
 L["%s's resurrect targets"] = "Objetivos resucitados de %s"
 -- nickname module lines --
 L["Nickname"] = "Apodo"

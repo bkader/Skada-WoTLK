@@ -339,19 +339,19 @@ end
 -- boss and creature functions
 
 do
-	local creatureToFight = Skada.creatureToFight or Skada.dummyTable
-	local creatureToBoss = Skada.creatureToBoss or Skada.dummyTable
+	local creature_to_fight = Skada.creature_to_fight or Skada.dummyTable
+	local creature_to_boss = Skada.creature_to_boss or Skada.dummyTable
 	local GetCreatureId = Skada.GetCreatureId
 
 	-- checks if the provided guid is a boss
 	function Skada:IsBoss(guid, strict)
 		local id = GetCreatureId(guid)
-		if creatureToBoss[id] and creatureToBoss[id] ~= true then
+		if creature_to_boss[id] and creature_to_boss[id] ~= true then
 			if strict then
 				return false
 			end
 			return true, id
-		elseif creatureToBoss[id] or creatureToFight[id] then
+		elseif creature_to_boss[id] or creature_to_fight[id] then
 			return true, id
 		end
 		return false
@@ -360,15 +360,15 @@ do
 	function Skada:IsEncounter(guid, name)
 		local isboss, id = self:IsBoss(guid)
 		if isboss and id then
-			if creatureToBoss[id] and creatureToBoss[id] ~= true then
-				return true, creatureToBoss[id], creatureToFight[id] or name
+			if creature_to_boss[id] and creature_to_boss[id] ~= true then
+				return true, creature_to_boss[id], creature_to_fight[id] or name
 			end
 
-			if creatureToFight[id] then
-				return true, true, creatureToFight[id] or name
+			if creature_to_fight[id] then
+				return true, true, creature_to_fight[id] or name
 			end
 
-			return true, id, creatureToFight[id] or name
+			return true, id, creature_to_fight[id] or name
 		end
 		return false
 	end
@@ -1582,6 +1582,10 @@ do
 			args.spellname = environment_names[envtype]
 			args.spellschool = environment_schools[envtype]
 			args.srcName = L["Environment"]
+		elseif event == "SPELL_PERIODIC_DAMAGE" or event == "SPELL_PERIODIC_MISSED" or args.auratype == "DEBUFF" then
+			args.is_dot = true
+		elseif event == "SPELL_PERIODIC_HEAL" or event == "SPELL_PERIODIC_ENERGIZE" then
+			args.is_hot = true
 		end
 
 		-- check for extra attack
@@ -1599,6 +1603,13 @@ do
 			args.amount = 0
 		elseif args.misstype and not args.amount then
 			args.amount = 0
+		end
+
+		if args.spellid and args.spellschool then
+			args.spellstring = format((args.is_dot or args.is_hot) and "-%s.%s" or "%s.%s", args.spellid, args.spellschool)
+		end
+		if args.extraspellid and args.extraschool then
+			args.extrastring = format("%s.%s", args.extraspellid, args.extraschool)
 		end
 
 		return self:OnCombatEvent(args)

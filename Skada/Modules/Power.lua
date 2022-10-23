@@ -43,7 +43,7 @@ Skada:RegisterModule("Resources", function(L, P)
 		[SPELL_POWER_RUNIC_POWER] = "runicspells"
 	}
 
-	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local function format_valuetext(d, columns, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -74,9 +74,9 @@ Skada:RegisterModule("Resources", function(L, P)
 	end
 
 	local function spell_energize(t)
-		if t.spellid and not ignoredSpells[t.spellid] then
+		if t.spellid and not ignored_spells[t.spellid] then
 			gain.actorid, gain.actorname, gain.actorflags = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
-			gain.spellid = t.spellid
+			gain.spellid = t.spellstring
 			gain.amount = t.amount
 			gain.type = t.powertype
 
@@ -186,7 +186,7 @@ Skada:RegisterModule("Resources", function(L, P)
 		for spellid, amount in pairs(spells) do
 			nr = nr + 1
 
-			local d = win:spell(nr, spellid)
+			local d = win:spell(nr, spellid, true)
 			d.value = amount
 			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
@@ -217,8 +217,8 @@ Skada:RegisterModule("Resources", function(L, P)
 		Skada:AddMode(runicmod, L["Resources"])
 
 		-- table of ignored spells:
-		if Skada.ignoredSpells and Skada.ignoredSpells.power then
-			ignoredSpells = Skada.ignoredSpells.power
+		if Skada.ignored_spells and Skada.ignored_spells.power then
+			ignored_spells = Skada.ignored_spells.power
 		end
 	end
 
