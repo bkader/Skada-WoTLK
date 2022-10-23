@@ -450,73 +450,79 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		return (a.ts > b.ts)
 	end
 
-	local function handle_shield(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, _, points)
-		if not spellid or not absorbspells[spellid] or not dstName or ignoredSpells[spellid] then return end
+	local function handle_shield(t, points)
+		if not t.spellid or not absorbspells[t.spellid] or not t.dstName or ignoredSpells[t.spellid] then return end
 
 		shields = shields or {} -- create table if missing
-		dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
+
+		local dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
+		local srcGUID, srcName, srcFlags = t.srcGUID, t.srcName, t.srcFlags
 
 		-- shield removed?
-		if eventtype == "SPELL_AURA_REMOVED" then
-			if shields[dstName] and shields[dstName][spellid] and shields[dstName][spellid][srcName] then
-				shields[dstName][spellid][srcName].ts = timestamp + 0.1
+		if t.event == "SPELL_AURA_REMOVED" then
+			if shields[dstName] and shields[dstName][t.spellid] and shields[dstName][t.spellid][srcName] then
+				shields[dstName][t.spellid][srcName].ts = t.timestamp + 0.1
 			end
 			return
 		end
 
 		-- shield applied
 		shields[dstName] = shields[dstName] or new()
-		shields[dstName][spellid] = shields[dstName][spellid] or new()
+		shields[dstName][t.spellid] = shields[dstName][t.spellid] or new()
 
 		-- Soul Link
-		if spellid == 25228 then
-			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+		if t.spellid == 25228 then
+			srcGUID, srcName, srcFlags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 		end
 
 		-- fix spellschool (if possible)
-		spellschool = spellschool or absorbspells[spellid].school
+		local spellschool = t.spellschool or absorbspells[t.spellid].school
 
 		-- log spell casts.
-		if not passiveShields[spellid] then
-			Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, spellid, spellschool)
+		if not passiveShields[t.spellid] then
+			Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, t.spellid, spellschool)
 		end
 
 		-- we calculate how much the shield's maximum absorb amount
 		local amount = 0
 
 		-- Stackable Shields
-		if (priest_divine_aegis[spellid] or spellid == 64413) then
-			if shields[dstName][spellid][srcName] and timestamp < shields[dstName][spellid][srcName].ts then
-				amount = shields[dstName][spellid][srcName].amount
+		if (priest_divine_aegis[t.spellid] or t.spellid == 64413) then
+			if shields[dstName][t.spellid][srcName] and t.timestamp < shields[dstName][t.spellid][srcName].ts then
+				amount = shields[dstName][t.spellid][srcName].amount
 			end
 		end
 
-		if priest_divine_aegis[spellid] then -- Divine Aegis
-			if heals and heals[dstName] and heals[dstName][srcName] and heals[dstName][srcName].ts > timestamp - 0.2 then
+		if priest_divine_aegis[t.spellid] then -- Divine Aegis
+			if heals and heals[dstName] and heals[dstName][srcName] and heals[dstName][srcName].ts > t.timestamp - 0.2 then
 				amount = min((UnitLevel(srcName) or 80) * 125, amount + (heals[dstName][srcName].amount * 0.3 * zoneModifier))
+			else
+				amount = absorbspells[t.spellid].cap
 			end
-		elseif spellid == 64413 then -- Protection of Ancient Kings (Vala'nyr)
-			if heals and heals[dstName] and heals[dstName][srcName] and heals[dstName][srcName].ts > timestamp - 0.2 then
+		elseif t.spellid == 64413 then -- Protection of Ancient Kings (Vala'nyr)
+			if heals and heals[dstName] and heals[dstName][srcName] and heals[dstName][srcName].ts > t.timestamp - 0.2 then
 				amount = min(20000, amount + (heals[dstName][srcName].amount * 0.15))
+			else
+				amount = absorbspells[t.spellid].cap
 			end
-		elseif (spellid == 48707 or spellid == 51052) and UnitHealthMax(dstName) then -- Anti-Magic Shell/Zone
+		elseif (t.spellid == 48707 or t.spellid == 51052) and UnitHealthMax(dstName) then -- Anti-Magic Shell/Zone
 			amount = UnitHealthMax(dstName) * 0.5
-		elseif spellid == 70845 and UnitHealthMax(dstName) then -- Stoicism
+		elseif t.spellid == 70845 and UnitHealthMax(dstName) then -- Stoicism
 			amount = UnitHealthMax(dstName) * 0.2
-		elseif absorbspells[spellid].cap or absorbspells[spellid].avg then
-			if shieldamounts and shieldamounts[srcName] and shieldamounts[srcName][spellid] then
-				local shield = shields[dstName][spellid][srcName]
+		elseif absorbspells[t.spellid].cap or absorbspells[t.spellid].avg then
+			if shieldamounts and shieldamounts[srcName] and shieldamounts[srcName][t.spellid] then
+				local shield = shields[dstName][t.spellid][srcName]
 				if not shield then
 					shield = new()
 					shield.srcGUID = srcGUID
 					shield.srcFlags = srcFlags
 					shield.school = spellschool
 					shield.points = points
-					shields[dstName][spellid][srcName] = shield
+					shields[dstName][t.spellid][srcName] = shield
 				end
 
-				shield.amount = shieldamounts[srcName][spellid]
-				shield.ts = timestamp + absorbspells[spellid].dur + 0.1
+				shield.amount = shieldamounts[srcName][t.spellid]
+				shield.ts = t.timestamp + absorbspells[t.spellid].dur + 0.1
 				shield.full = true
 
 				-- fix things
@@ -527,26 +533,27 @@ Skada:RegisterModule("Absorbs", function(L, P)
 					shield.points = points
 				end
 
+				if t.__temp then t = del(t) end
 				return
 			else
-				amount = (absorbspells[spellid].avg or absorbspells[spellid].cap or 1000) * zoneModifier
+				amount = (absorbspells[t.spellid].avg or absorbspells[t.spellid].cap or 1000) * zoneModifier
 			end
 		else
 			amount = 1000 * zoneModifier -- default
 		end
 
-		local shield = shields[dstName][spellid][srcName]
+		local shield = shields[dstName][t.spellid][srcName]
 		if not shield then
 			shield = new()
 			shield.srcGUID = srcGUID
 			shield.srcFlags = srcFlags
 			shield.school = spellschool
 			shield.points = points
-			shields[dstName][spellid][srcName] = shield
+			shields[dstName][t.spellid][srcName] = shield
 		end
 
 		shield.amount = floor(amount)
-		shield.ts = timestamp + absorbspells[spellid].dur + 0.1
+		shield.ts = t.timestamp + absorbspells[t.spellid].dur + 0.1
 		shield.full = true
 
 		-- fix things
@@ -556,32 +563,32 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		if not shield.points and points then
 			shield.points = points
 		end
+		if t.__temp then t = del(t) end
 	end
 
-	local function process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool, damage, broke)
-		shields[dstName] = shields[dstName] or new()
+	local function process_absorb(dstName, t, broke)
 		shieldspopped = clear(shieldspopped) or {}
 
 		for spellid, sources in pairs(shields[dstName]) do
 			for srcName, spell in pairs(sources) do
-				if spell.ts > timestamp then
+				if spell.ts > t.timestamp then
 					-- Light Essence vs Fire Damage
-					if spellid == 65686 and band(spellschool, 0x04) == spellschool then
+					if spellid == 65686 and band(t.spellschool, 0x04) == t.spellschool then
 						return -- don't record
 					-- Dark Essence vs Shadow Damage
-					elseif spellid == 65684 and band(spellschool, 0x20) == spellschool then
+					elseif spellid == 65684 and band(t.spellschool, 0x20) == t.spellschool then
 						return -- don't record
 					-- Frost Ward vs Frost Damage
-					elseif mage_frost_ward[spellid] and band(spellschool, 0x10) ~= spellschool then
+					elseif mage_frost_ward[spellid] and band(t.spellschool, 0x10) ~= t.spellschool then
 						-- nothing
 					-- Fire Ward vs Fire Damage
-					elseif mage_fire_ward[spellid] and band(spellschool, 0x04) ~= spellschool then
+					elseif mage_fire_ward[spellid] and band(t.spellschool, 0x04) ~= t.spellschool then
 						-- nothing
 					-- Shadow Ward vs Shadow Damage
-					elseif warlock_shadow_ward[spellid] and band(spellschool, 0x20) ~= spellschool then
+					elseif warlock_shadow_ward[spellid] and band(t.spellschool, 0x20) ~= t.spellschool then
 						-- nothing
 					-- Anti-Magic, Spell Deflection, Savage Defense
-					elseif (spellid == 48707 or spellid == 49497 or spellid == 62606) and band(spellschool, 0x01) == spellschool then
+					elseif (spellid == 48707 or spellid == 49497 or spellid == 62606) and band(t.spellschool, 0x01) == t.spellschool then
 						-- nothing
 					else
 						local shield = new()
@@ -604,6 +611,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		if #shieldspopped == 0 then return end
 
 		-- if the player has a single shield and it broke, we update its max absorb
+		local absorbed = t.absorbed
 		if #shieldspopped == 1 and broke and shieldspopped[1].full and absorbspells[shieldspopped[1].spellid].cap then
 			local s = shieldspopped[1]
 			shieldamounts = shieldamounts or {} -- create table if missing
@@ -616,23 +624,24 @@ Skada:RegisterModule("Absorbs", function(L, P)
 
 		-- we loop through available shields and make sure to update
 		-- their maximum absorb values.
+		local total = t.amount + t.absorbed
 		for i = 1, #shieldspopped do
 			local s = shieldspopped[i]
 			if s and s.full and shieldamounts and shieldamounts[s.srcName] and shieldamounts[s.srcName][s.spellid] then
 				s.amount = shieldamounts[s.srcName][s.spellid]
 			elseif s and s.spellid == 52286 and s.points then -- Will of the Necropolis
-				local hppercent = UnitHealthInfo(dstName, dstGUID)
-				s.amount = (hppercent and hppercent <= 36) and floor((damage + absorbed) * 0.05 * s.points) or 0
+				local hppercent = UnitHealthInfo(dstName, t.dstGUID)
+				s.amount = (hppercent and hppercent <= 36) and floor(total * 0.05 * s.points) or 0
 			elseif s and s.spellid == 49497 and s.points then -- Spell Deflection
-				s.amount = floor((damage + absorbed) * 0.15 * s.points)
+				s.amount = floor(total * 0.15 * s.points)
 			elseif s and s.spellid == 66233 and s.points then -- Ardent Defender
-				local hppercent = UnitHealthInfo(dstName, dstGUID)
-				s.amount = (hppercent and hppercent <= 36) and floor((damage + absorbed) * 0.0667 * s.points) or 0
+				local hppercent = UnitHealthInfo(dstName, t.dstGUID)
+				s.amount = (hppercent and hppercent <= 36) and floor(total * 0.0667 * s.points) or 0
 			elseif s and s.spellid == 31230 and s.points then -- Cheat Death
-				local _, _, hpmax = UnitHealthInfo(dstName, dstGUID)
+				local _, _, hpmax = UnitHealthInfo(dstName, t.dstGUID)
 				s.amount = floor((hpmax or 0) * 0.1)
 			elseif s and s.spellid == 25228 then -- Soul Link
-				s.amount = floor((absorbed + damage) * 0.2)
+				s.amount = floor(total * 0.2)
 			end
 		end
 
@@ -712,47 +721,22 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 	end
 
-	local function spell_damage(timestamp, eventtype, _, _, _, dstGUID, dstName, dstFlags, ...)
-		if not shields or not dstName then return end
-
-		local spellschool, amount, absorbed
-		if eventtype == "SWING_DAMAGE" then
-			amount, _, _, _, _, absorbed = ...
-		elseif eventtype == "ENVIRONMENTAL_DAMAGE" then
-			_, amount, _, spellschool, _, _, absorbed = ...
-		else
-			_, _, spellschool, amount, _, _, _, _, absorbed = ...
-		end
-
-		dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
-		if absorbed and absorbed > 0 and shields[dstName] then
-			process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool or 0x01, amount, amount > absorbed)
+	local function spell_damage(t)
+		local dstName = t.dstName and Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
+		if shields and dstName and shields[dstName] and t.absorbed and t.absorbed > 0 then
+			process_absorb(dstName, t, t.amount > t.absorbed)
 		end
 	end
 
-	local function spell_missed(timestamp, eventtype, _, _, _, dstGUID, dstName, dstFlags, ...)
+	local function spell_heal(t)
+		local dstName = t.dstName and Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
 		if not shields or not dstName then return end
 
-		local spellschool, misstype, absorbed
-		if eventtype == "SWING_MISSED" then
-			misstype, absorbed = ...
-		else
-			_, _, spellschool, misstype, absorbed = ...
-		end
-
-		dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
-		if misstype == "ABSORB" and absorbed and absorbed > 0 and shields[dstName] then
-			process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool or 0x01, 0, false)
-		end
-	end
-
-	local function spell_heal(timestamp, _, _, srcName, _, _, dstName, _, _, _, _, amount)
-		if not shields or not dstName then return end
 		heals = heals or {} -- create table if missing
 		heals[dstName] = heals[dstName] or new()
-		heals[dstName][srcName] = heals[dstName][srcName] or new()
-		heals[dstName][srcName].ts = timestamp
-		heals[dstName][srcName].amount = amount
+		heals[dstName][t.srcName] = heals[dstName][t.srcName] or new()
+		heals[dstName][t.srcName].ts = t.timestamp
+		heals[dstName][t.srcName].amount = t.amount
 	end
 
 	local function absorb_tooltip(win, id, label, tooltip)
@@ -994,7 +978,15 @@ Skada:RegisterModule("Absorbs", function(L, P)
 				if not spellid then
 					break -- nothing found
 				elseif absorbspells[spellid] and unitCaster and not ignoredSpells[spellid] then
-					handle_shield(timestamp + max(0, expires - curtime), nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
+					local t = new()
+					t.timestamp = timestamp + max(0, expires - curtime)
+					t.srcGUID = UnitGUID(unitCaster)
+					t.srcName = UnitName(unitCaster)
+					t.dstGUID = dstGUID
+					t.dstName = dstName
+					t.spellid = spellid
+					t.__temp = true
+					handle_shield(t)
 				end
 			end
 
@@ -1007,15 +999,23 @@ Skada:RegisterModule("Absorbs", function(L, P)
 			for spellid, _ in pairs(_passive[class]) do
 				local points = LGT:GUIDHasTalent(dstGUID, GetSpellInfo(spellid), LGT:GetActiveTalentGroup(unit))
 				if points then
-					handle_shield(timestamp - 60, nil, dstGUID, dstGUID, nil, dstGUID, dstName, nil, spellid, nil, nil, nil, points)
+					local t = new()
+					t.timestamp = timestamp - 60
+					t.srcGUID = dstGUID
+					t.srcName = dstGUID
+					t.dstGUID = dstGUID
+					t.dstName = dstName
+					t.spellid = spellid
+					t.__temp = true
+					handle_shield(t, points)
 				end
 			end
 		end
 
-		function mod:CombatEnter(_, set, timestamp)
+		function mod:CombatEnter(_, set, args)
 			if set and not set.stopped and not self.checked then
 				self:ZoneModifier()
-				GroupIterator(check_unit_shields, timestamp, set.last_time or GetTime())
+				GroupIterator(check_unit_shields, args.timestamp, set.last_time or GetTime())
 				self.checked = true
 			end
 		end
@@ -1072,22 +1072,21 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		Skada:RegisterForCL(
 			spell_damage,
 			flags_dst,
+			-- damage events
 			"DAMAGE_SHIELD",
+			"DAMAGE_SPLIT",
+			"RANGE_DAMAGE",
+			"SPELL_BUILDING_DAMAGE",
 			"SPELL_DAMAGE",
 			"SPELL_PERIODIC_DAMAGE",
-			"SPELL_BUILDING_DAMAGE",
-			"RANGE_DAMAGE",
 			"SWING_DAMAGE",
-			"ENVIRONMENTAL_DAMAGE"
-		)
-
-		Skada:RegisterForCL(
-			spell_missed,
-			flags_dst,
+			"ENVIRONMENTAL_DAMAGE",
+			-- missed events
+			"DAMAGE_SHIELD_MISSED",
+			"RANGE_MISSED",
+			"SPELL_BUILDING_MISSED",
 			"SPELL_MISSED",
 			"SPELL_PERIODIC_MISSED",
-			"SPELL_BUILDING_MISSED",
-			"RANGE_MISSED",
 			"SWING_MISSED"
 		)
 

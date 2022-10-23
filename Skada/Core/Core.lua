@@ -1253,7 +1253,7 @@ do
 
 	function start_watching()
 		if not is_watching then
-			Skada:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "OnCombatEvent")
+			Skada:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "ParseCombatLog")
 			is_watching = true
 		end
 	end
@@ -3231,12 +3231,6 @@ do
 		end
 	end
 
-	function Skada:OnCombatEvent(_, ...)
-		-- disabled or test mode?
-		if self.disabled or self.testMode then return end
-		return self:CombatLogEvent(...)
-	end
-
 	local function check_pet_flags(petGUID, petFlags, ownerFlags)
 		if band(ownerFlags, BITMASK_GROUP) ~= 0 then
 			return true -- owner is a group member?
@@ -3272,7 +3266,7 @@ do
 	end
 
 	local BITMASK_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100
-	local function check_boss_fight(set, event, srcName, srcFlags, src_is_interesting, dstGUID, dstName, dstFlags, dst_is_interesting)
+	local function check_boss_fight(set, t, src_is_interesting, dst_is_interesting)
 		-- set mobname
 		if not set.mobname then
 			if Skada.insType == "pvp" or Skada.insType == "arena" then
@@ -3283,15 +3277,15 @@ do
 				if set.type == "arena" then
 					Skada:SendMessage("COMBAT_ARENA_START", set, set.mobname)
 				end
-			elseif src_is_interesting and band(dstFlags, BITMASK_FRIENDLY) == 0 then
-				set.mobname = dstName
-				if band(dstFlags, BITMASK_CONTROL_PLAYER) ~= 0 then
+			elseif src_is_interesting and band(t.dstFlags, BITMASK_FRIENDLY) == 0 then
+				set.mobname = t.dstName
+				if band(t.dstFlags, BITMASK_CONTROL_PLAYER) ~= 0 then
 					set.type = "pvp"
 					set.gotboss = false
 				end
-			elseif dst_is_interesting and band(srcFlags, BITMASK_FRIENDLY) == 0 then
-				set.mobname = srcName
-				if band(srcFlags, BITMASK_CONTROL_PLAYER) ~= 0 then
+			elseif dst_is_interesting and band(t.srcFlags, BITMASK_FRIENDLY) == 0 then
+				set.mobname = t.srcName
+				if band(t.srcFlags, BITMASK_CONTROL_PLAYER) ~= 0 then
 					set.type = "pvp"
 					set.gotboss = false
 				end
@@ -3306,30 +3300,30 @@ do
 		-- boss already detected?
 		if set.gotboss then
 			-- default boss defeated event? (no DBM/BigWigs)
-			if not Skada.bossmod and death_events[event] and set.gotboss == GetCreatureId(dstGUID) then
+			if not Skada.bossmod and death_events[t.event] and set.gotboss == GetCreatureId(t.dstGUID) then
 				Skada:ScheduleTimer(Private.boss_defeated, P.updatefrequency or 0.5)
 			end
 			return
 		end
 
 		-- marking set as boss fights relies only on src_is_interesting
-		if not spellcast_events[event] and src_is_interesting and band(dstFlags, BITMASK_FRIENDLY) == 0 then
+		if not spellcast_events[t.event] and src_is_interesting and band(t.dstFlags, BITMASK_FRIENDLY) == 0 then
 			if set.gotboss == nil then
-				if not _targets or not _targets[dstName] then
-					local isboss, bossid, bossname = Skada:IsEncounter(dstGUID, dstName)
+				if not _targets or not _targets[t.dstName] then
+					local isboss, bossid, bossname = Skada:IsEncounter(t.dstGUID, t.dstName)
 					if isboss then -- found?
-						set.mobname = bossname or set.mobname or dstName
+						set.mobname = bossname or set.mobname or t.dstName
 						set.gotboss = bossid or true
 						Skada:SendMessage("COMBAT_ENCOUNTER_START", set)
 						_targets = del(_targets)
 					else
 						_targets = _targets or new()
-						_targets[dstName] = true
+						_targets[t.dstName] = true
 						set.gotboss = false
 					end
 				end
-			elseif _targets and not _targets[dstName] then
-				_targets[dstName] = true
+			elseif _targets and not _targets[t.dstName] then
+				_targets[t.dstName] = true
 				set.gotboss = nil
 			end
 		end
@@ -3355,18 +3349,18 @@ do
 		Skada.current = nil
 	end
 
-	function Skada:CombatLogEvent(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	function Skada:CombatLogEvent(t)
 		-- ignored combat event?
-		if (not eventtype or ignored_events[eventtype]) and not (spellcast_events[eventtype] and self.current) then return end
+		if (not t.event or ignored_events[t.event]) and not (spellcast_events[t.event] and self.current) then return end
 
 		local src_is_interesting = nil
 		local dst_is_interesting = nil
 
-		if not self.current and P.tentativecombatstart and trigger_events[eventtype] and srcName and dstName and srcGUID ~= dstGUID then
-			src_is_interesting = check_flags_interest(srcGUID, srcFlags)
+		if not self.current and P.tentativecombatstart and trigger_events[t.event] and t.srcName and t.dstName and t.srcGUID ~= t.dstGUID then
+			src_is_interesting = check_flags_interest(t.srcGUID, t.srcFlags)
 
-			if eventtype ~= "SPELL_PERIODIC_DAMAGE" then
-				dst_is_interesting = check_flags_interest(dstGUID, dstFlags)
+			if t.event ~= "SPELL_PERIODIC_DAMAGE" then
+				dst_is_interesting = check_flags_interest(t.dstGUID, t.dstFlags)
 			end
 
 			if src_is_interesting or dst_is_interesting then
@@ -3378,13 +3372,13 @@ do
 				tentative_timer = self:ScheduleTimer(tentative_handler, 1)
 				tentative = 0
 
-				check_boss_fight(self.current, eventtype, srcName, srcFlags, src_is_interesting, dstGUID, dstName, dstFlags, dst_is_interesting)
+				check_boss_fight(self.current, t, src_is_interesting, dst_is_interesting)
 			end
 		end
 
 		-- pet summons.
-		if eventtype == "SPELL_SUMMON" and check_pet_flags(dstGUID, dstFlags, srcFlags) then
-			summon_pet(dstGUID, srcGUID, srcName)
+		if t.event == "SPELL_SUMMON" and check_pet_flags(t.dstGUID, t.dstFlags, t.srcFlags) then
+			summon_pet(t.dstGUID, t.srcGUID, t.srcName)
 		end
 
 		-- current segment not created?
@@ -3397,16 +3391,16 @@ do
 				self.current.type = (self.insType == "none" and IsInGroup()) and "group" or self.insType
 			end
 			self.current.started = true
-			self:SendMessage("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+			self:SendMessage("COMBAT_PLAYER_ENTER", self.current, t)
 		end
 
 		-- autostop on wipe enabled?
-		if P.autostop and (eventtype == "UNIT_DIED" or eventtype == "SPELL_RESURRECT") then
-			check_autostop(self.current, eventtype, srcGUID, srcFlags)
+		if P.autostop and (t.event == "UNIT_DIED" or t.event == "SPELL_RESURRECT") then
+			check_autostop(self.current, t.event, t.srcGUID, t.srcFlags)
 		end
 
 		-- stopped or invalid events?
-		if self.current.stopped or not combatlog_events[eventtype] then return end
+		if self.current.stopped or not combatlog_events[t.event] then return end
 
 		self.current.last_action = time()
 		self.current.last_time = GetTime()
@@ -3426,11 +3420,11 @@ do
 			end
 		end
 
-		for func, flags in next, combatlog_events[eventtype] do
+		for func, flags in next, combatlog_events[t.event] do
 			local fail = false
 
 			if flags.src_is_interesting_nopets then
-				local src_is_interesting_nopets = check_flags_interest(srcGUID, srcFlags, true)
+				local src_is_interesting_nopets = check_flags_interest(t.srcGUID, t.srcFlags, true)
 
 				if src_is_interesting_nopets then
 					src_is_interesting = true
@@ -3440,7 +3434,7 @@ do
 			end
 
 			if not fail and flags.dst_is_interesting_nopets then
-				local dst_is_interesting_nopets = check_flags_interest(dstGUID, dstFlags, true)
+				local dst_is_interesting_nopets = check_flags_interest(t.dstGUID, t.dstFlags, true)
 				if dst_is_interesting_nopets then
 					dst_is_interesting = true
 				else
@@ -3450,7 +3444,7 @@ do
 
 			if not fail and flags.src_is_interesting or flags.src_is_not_interesting then
 				if not src_is_interesting then
-					src_is_interesting = check_flags_interest(srcGUID, srcFlags) or Private.get_temp_unit(srcGUID)
+					src_is_interesting = check_flags_interest(t.srcGUID, t.srcFlags) or Private.get_temp_unit(t.srcGUID)
 				end
 
 				if (flags.src_is_interesting and not src_is_interesting) or (flags.src_is_not_interesting and src_is_interesting) then
@@ -3460,7 +3454,7 @@ do
 
 			if not fail and flags.dst_is_interesting or flags.dst_is_not_interesting then
 				if not dst_is_interesting then
-					dst_is_interesting = check_flags_interest(dstGUID, dstFlags)
+					dst_is_interesting = check_flags_interest(t.dstGUID, t.dstFlags)
 				end
 
 				if (flags.dst_is_interesting and not dst_is_interesting) or (flags.dst_is_not_interesting and dst_is_interesting) then
@@ -3471,8 +3465,8 @@ do
 			if not fail then
 				if tentative ~= nil then
 					tentative = tentative + 1
-					self:Debug(format("Tentative: %s (%d)", eventtype, tentative))
-					if tentative == 5 then
+					self:Debug(format("Tentative: %s (%d)", t.event, tentative))
+					if tentative >= 5 then
 						self:CancelTimer(tentative_timer, true)
 						tentative_timer = nil
 						tentative = nil
@@ -3481,10 +3475,10 @@ do
 					end
 				end
 
-				func(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+				func(t)
 			end
 		end
 
-		check_boss_fight(self.current, eventtype, srcName, srcFlags, src_is_interesting, dstGUID, dstName, dstFlags, dst_is_interesting)
+		check_boss_fight(self.current, t, src_is_interesting, dst_is_interesting)
 	end
 end

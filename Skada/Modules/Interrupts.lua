@@ -60,28 +60,26 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		end
 	end
 
-	local function spell_interrupt(_, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, spellname, _, extraspellid, extraspellname, _ = ...
-
-		spellid = spellid or 6603
-		spellname = spellname or L["Melee"]
+	local function spell_interrupt(t)
+		local spellid = t.spellid or 6603
+		local spellname = t.spellname or L["Melee"]
 
 		-- invalid/ignored spell?
-		if ignoredSpells[spellid] or (extraspellid and ignoredSpells[extraspellid]) then return end
+		if ignoredSpells[spellid] or (t.extraspellid and ignoredSpells[t.extraspellid]) then return end
 
-		data.actorid, data.actorname, data.actorflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
-		data.dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
+		data.actorid, data.actorname, data.actorflags = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
+		data.dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
 
 		data.spellid = spellid
-		data.extraspellid = extraspellid
+		data.extraspellid = t.extraspellid
 
 		Skada:DispatchSets(log_interrupt)
 
-		if not M.interruptannounce or srcGUID ~= Skada.userGUID then return end
+		if not M.interruptannounce or t.srcGUID ~= Skada.userGUID then return end
 
-		local spelllink = extraspellname or dstName
+		local spelllink = t.extraspellname or data.dstName
 		if P.reportlinks then
-			spelllink = GetSpellLink(extraspellid or extraspellname) or spelllink
+			spelllink = GetSpellLink(t.extraspellid or t.extraspellname) or spelllink
 		end
 		Skada:SendChat(format(L["%s interrupted!"], spelllink), M.interruptchannel or "SAY", "preset")
 	end

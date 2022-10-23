@@ -73,12 +73,12 @@ Skada:RegisterModule("Resources", function(L, P)
 		actor[spellTable[gain.type]][gain.spellid] = (actor[spellTable[gain.type]][gain.spellid] or 0) + gain.amount
 	end
 
-	local function spell_energize(_, _, srcGUID, srcName, srcFlags, _, _, _, spellid, _, _, amount, gain_type)
-		if spellid and not ignoredSpells[spellid] then
-			gain.actorid, gain.actorname, gain.actorflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
-			gain.spellid = spellid
-			gain.amount = amount
-			gain.type = gain_type
+	local function spell_energize(t)
+		if t.spellid and not ignoredSpells[t.spellid] then
+			gain.actorid, gain.actorname, gain.actorflags = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
+			gain.spellid = t.spellid
+			gain.amount = t.amount
+			gain.type = t.powertype
 
 			Skada:DispatchSets(log_gain)
 		end

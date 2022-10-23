@@ -17,7 +17,7 @@ local pairs, ipairs = pairs, ipairs
 local select, next, max = select, next, math.max
 local band, tonumber, type = bit.band, tonumber, type
 local format, strmatch, gsub = string.format, string.match, string.gsub
-local setmetatable, wipe = setmetatable, wipe
+local setmetatable, rawset, wipe = setmetatable, rawset, wipe
 local EmptyFunc = Multibar_EmptyFunc
 local new, del, _
 
@@ -153,15 +153,15 @@ function Private.register_classes()
 		return color.colorStr
 	end
 	classcolors.format = function(class, text)
-		local colorStr = classcolors(class)
-		return format("\124c%s%s\124r", colorStr, text)
+		local color = classcolors(class)
+		return format("\124c%s%s\124r", color.colorStr, text)
 	end
 
 	-- returns class color or "arg" wrapped in class color
 	local classcolors_mt = {
 		__index = function(t, class)
 			local color = {r = 0.353, g = 0.067, b = 0.027, colorStr = "ff5a1107"} -- unknown
-			t[class] = color
+			rawset(t, class, color)
 			return color
 		end,
 		__call = function(t, class)
@@ -184,7 +184,7 @@ function Private.register_classes()
 	local classcoords_mt = {
 		__index = function(t, class)
 			local coords = {384/512, 448/512, 64/512, 128/512} -- unknown
-			t[class] = coords
+			rawset(t, class, coords)
 			return coords
 		end,
 		__call = coords__call
@@ -213,7 +213,7 @@ function Private.register_classes()
 	local rolecoords_mt = {
 		__index = function(t, role)
 			local coords = {480/512, 512/512, 128/512, 160/512}
-			t[role] = coords
+			rawset(t, role, coords)
 			return coords
 		end,
 		__call = coords__call
@@ -435,8 +435,9 @@ function Private.register_schools()
 			local name, isnone = get_school_name(key)
 			if not isnone then
 				local r, g, b = get_school_color(key)
-				t[key] = {name = name, r = r, g = g, b = b}
-				return t[key]
+				local school = {name = name, r = r, g = g, b = b}
+				rawset(t, key, school)
+				return school
 			end
 			return t[0x00] -- unknown
 		end,

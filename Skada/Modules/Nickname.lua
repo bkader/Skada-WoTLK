@@ -542,15 +542,12 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 			-- ignoring nicknames and it's not me?
 			if P.ignorenicknames and guid ~= Skada.userGUID then
 				nickname = false
-			-- ignoring nicknames and it's not me?
-			elseif P.ignorenicknames and guid ~= Skada.userGUID then
-				nickname = false
-			-- me, but I don't have a nickname?
-			elseif P.ignorenicknames and guid == Skada.userGUID and not G.nickname then
-				nickname = false
+			-- me?
+			elseif guid == Skada.userGUID then
+				nickname = G.nickname or false
 			-- well! we've got one!
 			elseif mod.db and mod.db.cache[guid] then
-				nickname = mod.db and mod.db.cache[guid]
+				nickname = mod.db and mod.db.cache[guid] or false
 			end
 
 			-- cache it and move on!

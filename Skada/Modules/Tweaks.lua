@@ -72,34 +72,34 @@ Skada:RegisterModule("Tweaks", function(L, P)
 			end
 		end
 
-		local function firsthit_check(eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname)
+		local function firsthit_check(args)
 			-- src or dst must be in a group
-			if band(srcFlags, BITMASK_GROUP) == 0 and band(dstFlags, BITMASK_GROUP) == 0 then
+			if band(args.srcFlags, BITMASK_GROUP) == 0 and band(args.dstFlags, BITMASK_GROUP) == 0 then
 				return
 			end
 
 			-- ignore spell?
-			if eventtype ~= "SWING_DAMAGE" and spellid and ignoredSpells[spellid] then
+			if args.event ~= "SWING_DAMAGE" and args.spellid and ignoredSpells[args.spellid] then
 				return
 			end
 
 			local output = nil -- initial output
 
-			if band(dstFlags, BITMASK_GROUP) ~= 0 and Skada:IsBoss(srcGUID) then -- boss started?
-				if is_pet(dstGUID, dstFlags) then
-					output = format(firsthit_fmt[1], srcName, dstName or L["Unknown"])
-				elseif dstName then
-					local _, class = UnitClass(dstName)
+			if band(args.dstFlags, BITMASK_GROUP) ~= 0 and Skada:IsBoss(args.srcGUID) then -- boss started?
+				if is_pet(args.dstGUID, args.dstFlags) then
+					output = format(firsthit_fmt[1], args.srcName, args.dstName or L["Unknown"])
+				elseif args.dstName then
+					local _, class = UnitClass(args.dstName)
 					if class and classcolors[class] then
-						output = format(firsthit_fmt[2], srcName, classcolors.str(class), dstName)
+						output = format(firsthit_fmt[2], args.srcName, classcolors.str(class), args.dstName)
 					else
-						output = format(firsthit_fmt[1], srcName, dstName)
+						output = format(firsthit_fmt[1], args.srcName, args.dstName)
 					end
 				else
-					output = srcName
+					output = args.srcName
 				end
-			elseif band(srcFlags, BITMASK_GROUP) ~= 0 and Skada:IsBoss(dstGUID) then -- a player started?
-				local owner = Skada:GetPetOwner(srcGUID)
+			elseif band(args.srcFlags, BITMASK_GROUP) ~= 0 and Skada:IsBoss(args.dstGUID) then -- a player started?
+				local owner = Skada:GetPetOwner(args.srcGUID)
 				if owner then
 					local _, class = UnitClass(owner.name)
 					if class and classcolors[class] then
@@ -107,30 +107,27 @@ Skada:RegisterModule("Tweaks", function(L, P)
 					else
 						output = format(firsthit_fmt[1], owner.name, L["PET"])
 					end
-				elseif srcName then
-					local _, class = UnitClass(srcName)
+				elseif args.srcName then
+					local _, class = UnitClass(args.srcName)
 					if class and classcolors[class] then
-						output = format(firsthit_fmt[3], classcolors.str(class), srcName)
+						output = format(firsthit_fmt[3], classcolors.str(class), args.srcName)
 					else
-						output = srcName
+						output = args.srcName
 					end
 				end
 			end
 
 			if output then
-				local spell = (eventtype == "SWING_DAMAGE") and GetSpellLink(6603) or GetSpellLink(spellid) or spellname
+				local spell = GetSpellLink(args.spellid) or args.spellname
 				firsthit = firsthit or new()
 				firsthit.hitline, firsthit.targetline = who_pulled(format(L["\124cffffff00First Hit\124r: %s from %s"], spell or "", output))
 				firsthit.checked = true -- once only
 			end
 		end
 
-		function Skada:OnCombatEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
-			-- disabled or test mode?
-			if self.disabled or self.testMode then return end
-
+		function Skada:OnCombatEvent(args)
 			-- The Lich King fight & Fury of Frostmourne
-			if spellid == 72350 or spellname == fofrostmourne then
+			if args.spellid == 72350 or args.spellname == fofrostmourne then
 				if self.current and not self.current.success then
 					self.current.success = true
 					self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
@@ -150,11 +147,11 @@ Skada:RegisterModule("Tweaks", function(L, P)
 			end
 
 			-- first hit
-			if P.firsthit and trigger_events[eventtype] and srcName and dstName and (not firsthit or not firsthit.checked) then
-				firsthit_check(eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname)
+			if P.firsthit and trigger_events[args.event] and args.srcName and args.dstName and (not firsthit or not firsthit.checked) then
+				firsthit_check(args)
 			end
 
-			return self:CombatLogEvent(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname, ...)
+			return self:CombatLogEvent(args)
 		end
 
 		do

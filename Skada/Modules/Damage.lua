@@ -1,8 +1,7 @@
 local _, Skada = ...
 local Private = Skada.Private
 
-local pairs, max = pairs, math.max
-local format, uformat = string.format, Private.uformat
+local pairs, format, uformat = pairs, string.format, Private.uformat
 local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
 
 local function format_valuetext(d, columns, total, dps, metadata, subview)
@@ -29,7 +28,7 @@ Skada:RegisterModule("Damage", function(L, P)
 	local targetmod = mod:NewModule("Damage target list")
 	local tdetailmod = targetmod:NewModule("Damage spell list")
 
-	local UnitGUID, GetTime, wipe = UnitGUID, GetTime, wipe
+	local wipe = wipe
 	local GetSpellInfo = Private.spell_info or GetSpellInfo
 	local PercentToRGB = Private.PercentToRGB
 	local spellschools = Skada.spellschools
@@ -72,7 +71,7 @@ Skada:RegisterModule("Damage", function(L, P)
 
 	local dmg = {}
 	local function log_damage(set, isdot)
-		if not dmg.spellid or not dmg.amount then return end
+		if not dmg.amount then return end
 
 		local actor = Skada:GetPlayer(set, dmg.actorid, dmg.actorname, dmg.actorflags)
 		if not actor then
@@ -221,105 +220,36 @@ Skada:RegisterModule("Damage", function(L, P)
 		end
 	end
 
-	local function spell_cast(_, _, srcGUID, srcName, srcFlags, dstGUID, _, _, spellid, spellname, spellschool)
-		if srcGUID and dstGUID and spellid and spellname and not ignoredSpells[spellid] then
-			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
-			Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, spellname, spellschool)
+	local function spell_cast(t)
+		if t.srcGUID ~= t.dstGUID and t.spellid and t.spellname and not ignoredSpells[t.spellid] then
+			local srcGUID, srcName, srcFlags = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
+			Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, t.spellname, t.spellschool)
 		end
 	end
 
-	local ext_attacks = nil
-	local function spell_damage(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, _, ...)
-		if srcGUID == dstGUID then return end
+	local function spell_damage(t)
+		if t.srcGUID ~= t.dstGUID and t.spellid and t.spellname and not ignoredSpells[t.spellid] then
+			dmg.actorid = t.srcGUID
+			dmg.actorname = t.srcName
+			dmg.actorflags = t.srcFlags
+			dmg.dstName = t.dstName
 
-		-- handle extra attacks
-		if eventtype == "SPELL_EXTRA_ATTACKS" then
-			local spellid, spellname, _, amount = ...
+			dmg.spellid = t.spellid
+			dmg.spellname = t.spellname
+			dmg.school = t.spellschool
 
-			if spellid and spellname and not ignoredSpells[spellid] then
-				ext_attacks = ext_attacks or new()
-				if not ext_attacks[srcName] then
-					ext_attacks[srcName] = new()
-					ext_attacks[srcName].proc = spellname
-					ext_attacks[srcName].count = amount
-					ext_attacks[srcName].time = Skada.current.last_time or GetTime()
-				end
-			end
-
-			return
-		end
-
-		if eventtype == "SWING_DAMAGE" then
-			dmg.spellid, dmg.spellname, dmg.school = 6603, L["Melee"], 0x01
-			dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing = ...
-
-			-- an extra attack?
-			if ext_attacks and ext_attacks[srcName] then
-				local curtime = Skada.current.last_time or GetTime()
-				if not ext_attacks[srcName].spellname then -- queue spell
-					ext_attacks[srcName].spellname = dmg.spellname
-				elseif dmg.spellname == L["Melee"] and ext_attacks[srcName].time < (curtime - 5) then -- expired proc
-					ext_attacks[srcName] = del(ext_attacks[srcName])
-				elseif dmg.spellname == L["Melee"] then -- valid damage contribution
-					dmg.spellname = ext_attacks[srcName].spellname .. " (" .. ext_attacks[srcName].proc .. ")"
-					ext_attacks[srcName].count = max(0, ext_attacks[srcName].count - 1)
-					if ext_attacks[srcName].count == 0 then -- no procs left
-						ext_attacks[srcName] = del(ext_attacks[srcName])
-					end
-				end
-			end
-		else
-			dmg.spellid, dmg.spellname, dmg.school, dmg.amount, dmg.overkill, _, dmg.resisted, dmg.blocked, dmg.absorbed, dmg.critical, dmg.glancing = ...
-		end
-
-		if dmg.spellid and dmg.spellname and not ignoredSpells[dmg.spellid] then
-			dmg.actorid = srcGUID
-			dmg.actorname = srcName
-			dmg.actorflags = srcFlags
-			dmg.dstName = dstName
-			dmg.misstype = nil
+			dmg.amount = t.amount
+			dmg.overkill = t.overkill
+			dmg.resisted = t.resisted
+			dmg.blocked = t.blocked
+			dmg.absorbed = t.absorbed
+			dmg.critical = t.critical
+			dmg.glancing = t.glancing
+			dmg.crushing = t.crushing
+			dmg.misstype = t.misstype
 
 			Skada:FixPets(dmg)
-			Skada:DispatchSets(log_damage, eventtype == "SPELL_PERIODIC_DAMAGE")
-		end
-	end
-
-	local function spell_missed(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, _, ...)
-		if srcGUID == dstGUID then return end
-
-		local amount
-
-		if eventtype == "SWING_MISSED" then
-			dmg.spellid, dmg.spellname, dmg.school = 6603, L["Melee"], 0x01
-			dmg.misstype, amount = ...
-		else
-			dmg.spellid, dmg.spellname, dmg.school, dmg.misstype, amount = ...
-		end
-
-		if dmg.spellid and dmg.spellname and not ignoredSpells[dmg.spellid] then
-			dmg.actorid = srcGUID
-			dmg.actorname = srcName
-			dmg.actorflags = srcFlags
-			dmg.dstName = dstName
-
-			dmg.amount = 0
-			dmg.overkill = 0
-			dmg.resisted = nil
-			dmg.blocked = nil
-			dmg.absorbed = nil
-			dmg.critical = nil
-			dmg.glancing = nil
-
-			if dmg.misstype == "ABSORB" and amount then
-				dmg.absorbed = amount
-			elseif dmg.misstype == "BLOCK" and amount then
-				dmg.blocked = amount
-			elseif dmg.misstype == "RESIST" and amount then
-				dmg.resisted = amount
-			end
-
-			Skada:FixPets(dmg)
-			Skada:DispatchSets(log_damage, eventtype == "SPELL_PERIODIC_MISSED")
+			Skada:DispatchSets(log_damage, t.event == "SPELL_PERIODIC_DAMAGE" or t.event == "SPELL_PERIODIC_MISSED")
 		end
 	end
 
@@ -747,19 +677,15 @@ Skada:RegisterModule("Damage", function(L, P)
 		Skada:RegisterForCL(
 			spell_damage,
 			flags_src_dst,
+			-- damage events
 			"DAMAGE_SHIELD",
 			"DAMAGE_SPLIT",
 			"RANGE_DAMAGE",
 			"SPELL_BUILDING_DAMAGE",
 			"SPELL_DAMAGE",
-			"SPELL_EXTRA_ATTACKS",
 			"SPELL_PERIODIC_DAMAGE",
-			"SWING_DAMAGE"
-		)
-
-		Skada:RegisterForCL(
-			spell_missed,
-			flags_src_dst,
+			"SWING_DAMAGE",
+			-- missed events
 			"DAMAGE_SHIELD_MISSED",
 			"RANGE_MISSED",
 			"SPELL_BUILDING_MISSED",
@@ -793,7 +719,6 @@ Skada:RegisterModule("Damage", function(L, P)
 
 	function mod:CombatLeave()
 		wipe(dmg)
-		clear(ext_attacks)
 	end
 
 	function mod:SetComplete(set)
@@ -1106,6 +1031,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 	local playermod = mod:NewModule("Damage spell list")
 	local targetmod = mod:NewModule("Damage target list")
 	local detailmod = targetmod:NewModule("More Details")
+	local max = math.max
 	local mod_cols = nil
 
 	function playermod:Enter(win, id, label)

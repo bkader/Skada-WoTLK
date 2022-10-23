@@ -60,50 +60,21 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		end
 	end
 
-	local function spell_damage(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		if srcGUID == dstGUID then return end -- ignore damage done to self
+	local function spell_damage(t)
+		if t.srcGUID ~= t.dstGUID and t.spellid and not ignoredSpells[t.spellid] and (not t.misstype or t.misstype == "ABSORB") then
+			dmg.actorid = t.srcGUID
+			dmg.actorname = t.srcName
+			dmg.actorflags = t.srcFlags
 
-		local absorbed
+			dmg.spellid = t.spellid
+			dmg.school = t.spellschool
+			dmg.amount = t.amount
 
-		if eventtype == "SWING_DAMAGE" then
-			dmg.spellid, dmg.school = 6603, 0x01
-			dmg.amount, _, _, _, _, absorbed = ...
-		else
-			dmg.spellid, _, dmg.school, dmg.amount, _, _, _, _, absorbed = ...
-		end
-
-		if dmg.spellid and not ignoredSpells[dmg.spellid] then
-			dmg.actorid = srcGUID
-			dmg.actorname = srcName
-			dmg.actorflags = srcFlags
-
-			if absorbed and absorbed > 0 then
-				dmg.amount = dmg.amount + absorbed
+			if t.absorbed and t.absorbed > 0 then
+				dmg.amount = dmg.amount + t.absorbed
 			end
 
-			dmg.dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
-			Skada:DispatchSets(log_damage)
-		end
-	end
-
-	local function spell_missed(_, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		if srcGUID == dstGUID then return end -- ignore damage done to self
-
-		local misstype
-
-		if eventtype == "SWING_MISSED" then
-			dmg.spellid, dmg.school = 6603, 0x01
-			misstype, dmg.amount = ...
-		else
-			dmg.spellid, _, dmg.school, misstype, dmg.amount = ...
-		end
-
-		if misstype == "ABSORB" and dmg.spellid and not ignoredSpells[dmg.spellid] then
-			dmg.actorid = srcGUID
-			dmg.actorname = srcName
-			dmg.actorflags = srcFlags
-
-			dmg.dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
+			dmg.dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
 			Skada:DispatchSets(log_damage)
 		end
 	end
@@ -259,18 +230,15 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		Skada:RegisterForCL(
 			spell_damage,
 			flags_src_dst,
+			-- damage events
 			"DAMAGE_SHIELD",
 			"DAMAGE_SPLIT",
 			"RANGE_DAMAGE",
 			"SPELL_BUILDING_DAMAGE",
 			"SPELL_DAMAGE",
 			"SPELL_PERIODIC_DAMAGE",
-			"SWING_DAMAGE"
-		)
-
-		Skada:RegisterForCL(
-			spell_missed,
-			flags_src_dst,
+			"SWING_DAMAGE",
+			-- missed events
 			"DAMAGE_SHIELD_MISSED",
 			"RANGE_MISSED",
 			"SPELL_BUILDING_MISSED",

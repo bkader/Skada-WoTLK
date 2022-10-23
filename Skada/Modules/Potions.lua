@@ -45,10 +45,11 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		actor.potionspells[potionid] = (actor.potionspells[potionid] or 0) + 1
 	end
 
-	local function potion_used(_, _, srcGUID, srcName, srcFlags, _, _, _, spellid)
-		if spellid and potion_ids[spellid] then
-			Skada:DispatchSets(log_potion, srcGUID, srcName, srcFlags, spellid)
+	local function potion_used(t)
+		if t.spellid and potion_ids[t.spellid] then
+			Skada:DispatchSets(log_potion, t.srcGUID, t.srcName, t.srcFlags, t.spellid)
 		end
+		if t.__temp then t = del(t) end
 	end
 
 	do
@@ -65,9 +66,15 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 					break -- nothing found
 				elseif potion_ids[spellid] then
 					potions = potions or new()
-					-- instant recording doesn't work, so we delay it
-					Skada:ScheduleTimer(function() potion_used(nil, nil, actorid, actorname, nil, nil, nil, nil, spellid) end, 1)
 					potions[#potions + 1] = format(potionStr, icon)
+
+					-- instant recording doesn't work, so we delay it
+					local t = new()
+					t.srcGUID = actorid
+					t.srcName = actorname
+					t.spellid = spellid
+					t.__temp = true
+					Skada:ScheduleTimer(potion_used, 1, t)
 				end
 			end
 

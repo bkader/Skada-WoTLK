@@ -243,11 +243,11 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 		end
 	end
 
-	local function aura_applied(_, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
-		if CCSpells[spellid] or ExtraCCSpells[spellid] then
-			cc_table.srcGUID, cc_table.srcName, cc_table.srcFlags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
-			cc_table.dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
-			cc_table.spellid = spellid
+	local function aura_applied(t)
+		if t.spellid and CCSpells[t.spellid] or ExtraCCSpells[t.spellid] then
+			cc_table.srcGUID, cc_table.srcName, cc_table.srcFlags = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
+			cc_table.dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
+			cc_table.spellid = t.spellid
 
 			cc_table.dstGUID = nil
 			cc_table.dstFlags = nil
@@ -339,7 +339,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["CC Done"], L[win.class]) or L["CC Done"]
 
-		local total = set:GetTotal(win.class, nil, "ccdone")
+		local total = set and set:GetTotal(win.class, nil, "ccdone")
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -507,14 +507,14 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 		end
 	end
 
-	local function aura_applied(_, _, _, srcName, _, dstGUID, dstName, dstFlags, spellid)
-		if CCSpells[spellid] or ExtraCCSpells[spellid] or RaidCCSpells[spellid] then
-			cc_table.dstGUID = dstGUID
-			cc_table.dstName = dstName
-			cc_table.dstFlags = dstFlags
+	local function aura_applied(t)
+		if t.spellid and CCSpells[t.spellid] or ExtraCCSpells[t.spellid] or RaidCCSpells[t.spellid] then
+			cc_table.dstGUID = t.dstGUID
+			cc_table.dstName = t.dstName
+			cc_table.dstFlags = t.dstFlags
 
-			cc_table.srcName = srcName
-			cc_table.spellid = spellid
+			cc_table.srcName = t.srcName
+			cc_table.spellid = t.spellid
 
 			cc_table.srcGUID = nil
 			cc_table.srcFlags = nil
@@ -606,7 +606,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["CC Taken"], L[win.class]) or L["CC Taken"]
 
-		local total = set:GetTotal(win.class, nil, "cctaken")
+		local total = set and set:GetTotal(win.class, nil, "cctaken")
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -763,22 +763,22 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		end
 	end
 
-	local function aura_broken(_, _, srcGUID, srcName, srcFlags, _, dstName, _, ...)
-		local spellid, spellname, _, extraspellid, extraspellname = ...
-		if not CCSpells[spellid] then return end
+	local function aura_broken(t)
+		if not t.spellid or not CCSpells[t.spellid] then return end
 
+		local srcGUID, srcName, srcFlags = t.srcGUID, t.srcName, t.srcFlags
 		local _srcGUID, _srcName, _srcFlags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 
 		cc_table.srcGUID = _srcGUID
 		cc_table.srcName = _srcName
 		cc_table.srcFlags = _srcFlags
-		cc_table.dstName = dstName
+		cc_table.dstName = t.dstName
 
 		cc_table.dstGUID = nil
 		cc_table.dstFlags = nil
 
-		cc_table.spellid = spellid
-		cc_table.extraspellid = extraspellid
+		cc_table.spellid = t.spellid
+		cc_table.extraspellid = t.extraspellid
 
 		Skada:DispatchSets(log_ccbreak)
 
@@ -802,10 +802,10 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 			end
 
 			-- Go ahead and announce it.
-			if extraspellid or extraspellname then
-				Skada:SendChat(format(L["%s on %s removed by %s's %s"], spellname, dstName, srcName, GetSpellLink(extraspellid or extraspellname)), "RAID", "preset")
+			if t.extraspellid or t.extraspellname then
+				Skada:SendChat(format(L["%s on %s removed by %s's %s"], t.spellname, t.dstName, srcName, GetSpellLink(t.extraspellid or t.extraspellname)), "RAID", "preset")
 			else
-				Skada:SendChat(format(L["%s on %s removed by %s"], spellname, dstName, srcName), "RAID", "preset")
+				Skada:SendChat(format(L["%s on %s removed by %s"], t.spellname, t.dstName, srcName), "RAID", "preset")
 			end
 		end
 	end
@@ -866,7 +866,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["CC Breaks"], L[win.class]) or L["CC Breaks"]
 
-		local total = set:GetTotal(win.class, nil, "ccbreak")
+		local total = set and set:GetTotal(win.class, nil, "ccbreak")
 		if not total or total == 0 then
 			return
 		elseif win.metadata then

@@ -57,67 +57,67 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 		end
 	end
 
-	local function sunder_applied(_, eventtype, _, _, _, dstGUID, dstName, dstFlags, _, spellname)
-		if spellname ~= spell_sunder and spellname ~= spell_devastate then return end
+	local function sunder_applied(t)
+		if t.spellname ~= spell_sunder and t.spellname ~= spell_devastate then return end
 
 		-- sunder removed!
-		if eventtype == "SPELL_AURA_REMOVED" then
-			Skada:ScheduleTimer(sunder_dropped, 0.1, dstGUID)
+		if t.event == "SPELL_AURA_REMOVED" then
+			Skada:ScheduleTimer(sunder_dropped, 0.1, t.dstGUID)
 			return
 		end
 
 		-- sunder refreshed
-		if eventtype == "SPELL_AURA_REFRESH" and active_sunders[dstGUID] and active_sunders[dstGUID] > GetTime() then
-			active_sunders[dstGUID] = GetTime() + M.sunderdelay -- useless refresh
+		if t.event == "SPELL_AURA_REFRESH" and active_sunders[t.dstGUID] and active_sunders[t.dstGUID] > GetTime() then
+			active_sunders[t.dstGUID] = GetTime() + M.sunderdelay -- useless refresh
 			return
 		else
-			active_sunders[dstGUID] = GetTime() + M.sunderdelay
+			active_sunders[t.dstGUID] = GetTime() + M.sunderdelay
 		end
 
 		data.actorid = last_srcGUID
 		data.actorname = last_srcName
 		data.actorflags = last_srcFlags
-		data.dstName = dstName
+		data.dstName = t.dstName
 
 		Skada:DispatchSets(log_sunder)
 
 		-- announce disabled or only for bosses
-		if not M.sunderannounce or (M.sunderbossonly and not Skada:IsBoss(dstGUID, true)) then return end
+		if not M.sunderannounce or (M.sunderbossonly and not Skada:IsBoss(t.dstGUID, true)) then return end
 
-		local t = sunder_targets and sunder_targets[dstGUID]
-		if not t then
-			t = new()
-			t.name = dstName
-			t.count = 1
-			t.time = GetTime()
+		local tar = sunder_targets and sunder_targets[t.dstGUID]
+		if not tar then
+			tar = new()
+			tar.name = t.dstName
+			tar.count = 1
+			tar.time = GetTime()
 			sunder_targets = sunder_targets or {}
-			sunder_targets[dstGUID] = t
-		elseif not t.full then
-			t.count = (t.count or 0) + 1
-			if t.count == 5 then
+			sunder_targets[t.dstGUID] = tar
+		elseif not tar.full then
+			tar.count = (tar.count or 0) + 1
+			if tar.count == 5 then
 				mod:Announce(format(
 					L["%s stacks of %s applied on %s in %s sec!"],
-					t.count,
+					tar.count,
 					sunder_link or spell_sunder,
-					dstName,
-					format("%.1f", GetTime() - t.time)
+					t.dstName,
+					format("%.1f", GetTime() - tar.time)
 				))
-				t.full = true
+				tar.full = true
 			end
 		end
 	end
 
-	local function sunder_cast(_, _, srcGUID, srcName, srcFlags, _, _, _, _, spellname)
-		if spellname == spell_sunder or spellname == spell_devastate then
-			last_srcGUID = srcGUID
-			last_srcName = srcName
-			last_srcFlags = srcFlags
+	local function sunder_cast(t)
+		if t.spellname == spell_sunder or t.spellname == spell_devastate then
+			last_srcGUID = t.srcGUID
+			last_srcName = t.srcName
+			last_srcFlags = t.srcFlags
 		end
 	end
 
-	local function unit_died(_, _, _, _, _, dstGUID)
-		if M.sunderannounce and dstGUID and sunder_targets and sunder_targets[dstGUID] then
-			sunder_targets[dstGUID] = del(sunder_targets[dstGUID])
+	local function unit_died(t)
+		if M.sunderannounce and t.dstGUID and sunder_targets and sunder_targets[t.dstGUID] then
+			sunder_targets[t.dstGUID] = del(sunder_targets[t.dstGUID])
 		end
 	end
 

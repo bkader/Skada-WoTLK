@@ -10,7 +10,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 	local get_actor_ress_targets = nil
 	local mod_cols = nil
 
-	local resurrectSpells = {
+	local ress_spells = {
 		-- Rebirth
 		[20484] = 0x08,
 		[20739] = 0x08,
@@ -45,40 +45,40 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 		end
 	end
 
-	local data = {}
+	local ress = {}
 	local function log_resurrect(set)
-		local actor = Skada:GetPlayer(set, data.actorid, data.actorname, data.actorflags)
+		local actor = Skada:GetPlayer(set, ress.actorid, ress.actorname, ress.actorflags)
 		if not actor then return end
 
 		actor.ress = (actor.ress or 0) + 1
 		set.ress = (set.ress or 0) + 1
 
 		-- saving this to total set may become a memory hog deluxe.
-		if (set == Skada.total and not P.totalidc) or not data.spellid then return end
+		if (set == Skada.total and not P.totalidc) or not ress.spellid then return end
 
 		-- spell
-		local spell = actor.resspells and actor.resspells[data.spellid]
+		local spell = actor.resspells and actor.resspells[ress.spellid]
 		if not spell then
 			actor.resspells = actor.resspells or {}
-			actor.resspells[data.spellid] = {count = 0}
-			spell = actor.resspells[data.spellid]
+			actor.resspells[ress.spellid] = {count = 0}
+			spell = actor.resspells[ress.spellid]
 		end
 		spell.count = spell.count + 1
 
 		-- spell targets
-		if data.dstName then
+		if ress.dstName then
 			spell.targets = spell.targets or {}
-			spell.targets[data.dstName] = (spell.targets[data.dstName] or 0) + 1
+			spell.targets[ress.dstName] = (spell.targets[ress.dstName] or 0) + 1
 		end
 	end
 
-	local function spell_resurrect(_, event, srcGUID, srcName, srcFlags, _, dstName, _, spellid)
-		if spellid and (event == "SPELL_RESURRECT" or resurrectSpells[spellid]) then
-			data.spellid = spellid
-			data.actorid = srcGUID
-			data.actorname = srcName
-			data.actorflags = srcFlags
-			data.dstName = (event == "SPELL_RESURRECT") and dstName or srcName
+	local function spell_resurrect(t)
+		if t.spellid and (t.event == "SPELL_RESURRECT" or ress_spells[t.spellid]) then
+			ress.spellid = t.spellid
+			ress.actorid = t.srcGUID
+			ress.actorname = t.srcName
+			ress.actorflags = t.srcFlags
+			ress.dstName = (t.event == "SPELL_RESURRECT") and t.dstName or t.srcName
 
 			Skada:DispatchSets(log_resurrect)
 		end
@@ -106,7 +106,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 		for spellid, spell in pairs(actor.resspells) do
 			nr = nr + 1
 
-			local d = win:spell(nr, spellid, nil, resurrectSpells[spellid])
+			local d = win:spell(nr, spellid, nil, ress_spells[spellid])
 			d.value = spell.count
 			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end

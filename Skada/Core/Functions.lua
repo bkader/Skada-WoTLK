@@ -160,6 +160,7 @@ do
 	end
 
 	-- loads registered modules
+	local unpack = unpack
 	function Skada:LoadModules(release)
 		-- loadable modules
 		if self.LoadableModules then
@@ -1400,5 +1401,210 @@ do
 			end
 		end
 		return actor
+	end
+end
+
+-------------------------------------------------------------------------------
+-- combat log parser
+
+do
+	local loadstring, rawset = loadstring, rawset
+	local gsub, strsub = string.gsub, string.sub
+	local strlen, strlower = string.len, string.lower
+
+	-- args associated to each event name prefix
+	local PREFIXES = {
+		SWING = "",
+		RANGE = ", spellid, spellname, spellschool",
+		SPELL = ", spellid, spellname, spellschool",
+		SPELL_PERIODIC = ", spellid, spellname, spellschool",
+		SPELL_BUILDING = ", spellid, spellname, spellschool",
+		ENVIRONMENTAL = ", envtype"
+	}
+
+	-- args associated to each event name suffix
+	local SUFFIXES = {
+		DAMAGE = ", amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing",
+		MISSED = ", misstype, amount",
+		HEAL = ", amount, overheal, absorbed, critical",
+		ENERGIZE = ", amount, powertype",
+		DRAIN = ", amount, powertype, extraamount",
+		LEECH = ", amount, powertype, extraamount",
+		INTERRUPT = ", extraspellid, extraspellname, extraschool",
+		DISPEL = ", extraspellid, extraspellname, extraschool, auratype",
+		DISPEL_FAILED = ", extraspellid, extraspellname, extraschool",
+		STOLEN = ", extraspellid, extraspellname, extraschool, auratype",
+		EXTRA_ATTACKS = ", amount",
+		AURA_APPLIED = ", auratype",
+		AURA_REMOVED = ", auratype",
+		AURA_APPLIED_DOSE = ", auratype, amount",
+		AURA_REMOVED_DOSE = ", auratype, amount",
+		AURA_REFRESH = ", auratype",
+		AURA_BROKEN = ", auratype",
+		AURA_BROKEN_SPELL = ", extraspellid, extraspellname, extraschool, auratype",
+		CAST_START = "",
+		CAST_SUCCESS = "",
+		CAST_FAILED = ", failtype",
+		INSTAKILL = "",
+		DURABILITY_DAMAGE = "",
+		DURABILITY_DAMAGE_ALL = "",
+		CREATE = "",
+		SUMMON = "",
+		RESURRECT = ""
+	}
+
+	-- aliases of events that don't follow prefix_suffix
+	local ALIASES = {
+		DAMAGE_SHIELD = "SPELL_DAMAGE",
+		DAMAGE_SPLIT = "SPELL_DAMAGE",
+		DAMAGE_SHIELD_MISSED = "SPELL_MISSED"
+	}
+
+	-- creates dispatchers
+	local code = [[local wipe = wipe; return function(e, %s) wipe(e); e.%s = %s; return e; end]]
+	local Dispatchers = setmetatable({}, {__index = function(self, args)
+		local dispatcher = loadstring(format(code, args, gsub(args, ", ", ", e."), args), args)()
+		rawset(self, args, dispatcher)
+		return dispatcher
+	end})
+
+	local DEFAULTS = "timestamp, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags"
+	local Handlers = setmetatable({}, {__index = function(self, event)
+		local args = DEFAULTS -- default args first
+		event = ALIASES[event] or event
+
+		for prefix, prefix_args in pairs(PREFIXES) do
+			local len = strlen(prefix)
+			if strsub(event, 1, len) == prefix then
+				local suffix_args = SUFFIXES[strsub(event, len + 2)]
+				if suffix_args then
+					args = args .. prefix_args .. suffix_args
+					break
+				end
+			end
+		end
+
+		local handler = Dispatchers[args]
+		rawset(self, event, handler)
+		return handler
+	end})
+
+	-- environment fake spell ids
+	local environment_ids = {
+		falling = 3,
+		drowning = 4,
+		fatigue = 5,
+		fire = 6,
+		lava = 7,
+		slime = 8
+	}
+
+	-- environmental types/names
+	local environment_names = {
+		falling = L["Falling"],
+		drowning = L["Drowning"],
+		fatigue = L["Fatigue"],
+		fire = L["Fire"],
+		lava = L["Lava"],
+		slime = L["Slime"]
+	}
+
+	-- environmental fake spell schools
+	local environment_schools = {
+		falling = 0x01,
+		drowning = 0x01,
+		fatigue = 0x01,
+		fire = 0x04,
+		lava = 0x04,
+		slime = 0x08
+	}
+
+	local ext_attacks = {} -- extra attacks table
+
+	local function create_extra_attack(args)
+		if ext_attacks[args.srcName] then return end
+
+		ext_attacks[args.srcName] = new()
+		ext_attacks[args.srcName].proc_id = args.spellid
+		ext_attacks[args.srcName].proc_name = args.spellname
+		ext_attacks[args.srcName].proc_amount = args.amount
+		ext_attacks[args.srcName].proc_time = GetTime()
+	end
+
+	local function check_extra_attack(args)
+		-- no extra attack was recorded
+		if not ext_attacks[args.srcName] then
+			return
+
+		-- it was missing a spell?
+		elseif not ext_attacks[args.srcName].spellname then
+			ext_attacks[args.srcName].spellname = args.spellname
+
+		-- valid so fat?
+		elseif ext_attacks[args.srcName].spellname and args.spellid == 6603 then
+			-- expired proc?
+			if ext_attacks[args.srcName].proc_time < GetTime() - 5 then
+				ext_attacks[args.srcName] = del(ext_attacks[args.srcName])
+				return
+			end
+
+			args.spellid = ext_attacks[args.srcName].proc_id
+			args.spellname = format("%s (%s)", ext_attacks[args.srcName].spellname, ext_attacks[args.srcName].proc_name)
+
+			ext_attacks[args.srcName].proc_amount = ext_attacks[args.srcName].proc_amount - 1
+			if ext_attacks[args.srcName].proc_amount == 0 then
+				ext_attacks[args.srcName] = del(ext_attacks[args.srcName])
+			end
+		end
+	end
+
+	local ARGS = {} -- reusable args table
+
+	-- combat log handler
+	function Skada:ParseCombatLog(_, timestamp, event, ...)
+		-- disabled or test mode?
+		if self.disabled or self.testMode then return end
+
+		local args = Handlers[event](ARGS, timestamp, event, ...)
+
+		if event == "SPELL_EXTRA_ATTACKS" then
+			create_extra_attack(args)
+			return -- queue for later!
+		end
+
+		if event == "SWING_DAMAGE" or event == "SWING_MISSED" then
+			args.spellid = 6603
+			args.spellname = L["Melee"]
+			args.spellschool = 0x01
+		elseif (event == "ENVIRONMENTAL_DAMAGE" or event == "ENVIRONMENTAL_MISSED") and args.envtype then
+			local envtype = strlower(args.envtype)
+			args.spellid = environment_ids[envtype]
+			args.spellname = environment_names[envtype]
+			args.spellschool = environment_schools[envtype]
+			args.srcName = L["Environment"]
+		end
+
+		-- check for extra attack
+		check_extra_attack(args)
+
+		-- process some miss types!
+		if args.misstype == "ABSORB" and args.amount then
+			args.absorbed = args.amount
+			args.amount = 0
+		elseif args.misstype == "BLOCK" and args.amount then
+			args.blocked = args.amount
+			args.amount = 0
+		elseif args.misstype == "RESIST" and args.amount then
+			args.resisted = args.amount
+			args.amount = 0
+		elseif args.misstype and not args.amount then
+			args.amount = 0
+		end
+
+		return self:OnCombatEvent(args)
+	end
+
+	function Skada:OnCombatEvent(args)
+		return self:CombatLogEvent(args)
 	end
 end

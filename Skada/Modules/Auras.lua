@@ -563,29 +563,27 @@ Skada:RegisterModule("Buffs", function(_, P, _, C)
 	local spelltargetmod = spellmod:NewModule("Players list")
 	local mod_cols = nil
 
-	local UnitName, UnitGUID, UnitBuff = UnitName, UnitGUID, UnitBuff
-	local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
-
-	local function handle_buff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, school, auratype)
-		if spellid and not ignored_buffs[spellid] and (auratype == "BUFF" or special_buffs[spellid]) then
-			aura.actorid = dstGUID
-			aura.actorname = dstName
-			aura.actorflags = dstFlags
+	local function handle_buff(t)
+		if t.spellid and not ignored_buffs[t.spellid] and (t.auratype == "BUFF" or special_buffs[t.spellid]) then
+			aura.actorid = t.dstGUID
+			aura.actorname = t.dstName
+			aura.actorflags = t.dstFlags
 			aura.dstName = nil
 
-			aura.spellid = spellid
-			aura.school = school
+			aura.spellid = t.spellid
+			aura.school = t.spellschool
 
-			if event == "SPELL_PERIODIC_ENERGIZE" then
+			if t.event == "SPELL_PERIODIC_ENERGIZE" then
 				Skada:DispatchSets(log_specialaura)
-			elseif event == "SPELL_AURA_APPLIED" then
+			elseif t.event == "SPELL_AURA_APPLIED" then
 				Skada:DispatchSets(log_auraapplied)
-			elseif event == "SPELL_AURA_REMOVED" then
+			elseif t.event == "SPELL_AURA_REMOVED" then
 				Skada:DispatchSets(log_auraremove)
 			else
 				Skada:DispatchSets(log_aurarefresh)
 			end
 		end
+		if t.__temp then t = del(t) end
 	end
 
 	function spelltargetmod:Enter(win, id, label)
@@ -660,6 +658,9 @@ Skada:RegisterModule("Buffs", function(_, P, _, C)
 	end
 
 	do
+		local UnitName, UnitGUID, UnitBuff = UnitName, UnitGUID, UnitBuff
+		local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
+
 		local function check_unit_buffs(unit, owner)
 			if owner or UnitIsDeadOrGhost(unit) then return end
 			local dstGUID, dstName = UnitGUID(unit), UnitName(unit)
@@ -668,7 +669,14 @@ Skada:RegisterModule("Buffs", function(_, P, _, C)
 				if not spellid then
 					break -- nothing found!
 				elseif unitCaster and rank ~= SPELL_PASSIVE then
-					handle_buff(nil, "SPELL_AURA_APPLIED", nil, nil, nil, dstGUID, dstName, nil, spellid, nil, nil, "BUFF")
+					local t = new()
+					t.event = "SPELL_AURA_APPLIED"
+					t.dstGUID = dstGUID
+					t.dstName = dstName
+					t.spellid = spellid
+					t.auratype = "BUFF"
+					t.__temp = true
+					handle_buff(t)
 				end
 			end
 		end
@@ -734,17 +742,17 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 	local targetspellmod = targetmod:NewModule("Debuff spell list")
 	local mod_cols = nil
 
-	local function handle_debuff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, school, auratype)
-		if not spellid or ignored_debuffs[spellid] or auratype ~= "DEBUFF" then return end
+	local function handle_debuff(t)
+		if t.auratype ~= "DEBUFF" or not t.spellid or ignored_debuffs[t.spellid] then return end
 
-		aura.actorid, aura.actorname, aura.actorflags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
-		aura.dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
-		aura.spellid = -spellid
-		aura.school = school
+		aura.actorid, aura.actorname, aura.actorflags = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
+		aura.dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
+		aura.spellid = -t.spellid
+		aura.school = t.spellschool
 
-		if event == "SPELL_AURA_APPLIED" then
+		if t.event == "SPELL_AURA_APPLIED" then
 			Skada:DispatchSets(log_auraapplied)
-		elseif event == "SPELL_AURA_REMOVED" then
+		elseif t.event == "SPELL_AURA_REMOVED" then
 			Skada:DispatchSets(log_auraremove)
 		else
 			Skada:DispatchSets(log_aurarefresh)
@@ -893,21 +901,21 @@ Skada:RegisterModule("Enemy Buffs", function(_, P, _, C)
 	local spellmod = mod:NewModule("Buff spell list")
 	local mod_cols = nil
 
-	local function handle_buff(_, event, _, _, _, dstGUID, dstName, dstFlags, spellid, _, school, auratype)
-		if spellid and not ignored_buffs[spellid] and (auratype == "BUFF" or special_buffs[spellid]) then
-			aura.actorid = dstGUID
-			aura.actorname = dstName
-			aura.actorflags = dstFlags
+	local function handle_buff(t)
+		if t.spellid and not ignored_buffs[t.spellid] and (t.auratype == "BUFF" or special_buffs[t.spellid]) then
+			aura.actorid = t.dstGUID
+			aura.actorname = t.dstName
+			aura.actorflags = t.dstFlags
 			aura.dstName = nil
 
-			aura.spellid = spellid
-			aura.school = school
+			aura.spellid = t.spellid
+			aura.school = t.spellschool
 
-			if event == "SPELL_PERIODIC_ENERGIZE" then
+			if t.event == "SPELL_PERIODIC_ENERGIZE" then
 				Skada:DispatchSets(log_specialaura, true)
-			elseif event == "SPELL_AURA_APPLIED" then
+			elseif t.event == "SPELL_AURA_APPLIED" then
 				Skada:DispatchSets(log_auraapplied, true)
-			elseif event == "SPELL_AURA_REMOVED" then
+			elseif t.event == "SPELL_AURA_REMOVED" then
 				Skada:DispatchSets(log_auraremove, true)
 			else
 				Skada:DispatchSets(log_aurarefresh, true)
@@ -974,20 +982,20 @@ Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
 	local targetspellmod = targetmod:NewModule("Debuff spell list")
 	local mod_cols = nil
 
-	local function handle_debuff(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, school, auratype)
-		if not spellid or ignored_debuffs[spellid] or auratype ~= "DEBUFF" then return end
+	local function handle_debuff(t)
+		if t.auratype ~= "DEBUFF" or not t.spellid or ignored_debuffs[t.spellid] then return end
 
-		aura.actorid = srcGUID
-		aura.actorname = srcName
-		aura.actorflags = srcFlags
-		aura.dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
+		aura.actorid = t.srcGUID
+		aura.actorname = t.srcName
+		aura.actorflags = t.srcFlags
+		aura.dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
 
-		aura.spellid = -spellid
-		aura.school = school
+		aura.spellid = -t.spellid
+		aura.school = t.spellschool
 
-		if event == "SPELL_AURA_APPLIED" then
+		if t.event == "SPELL_AURA_APPLIED" then
 			Skada:DispatchSets(log_auraapplied, true)
-		elseif event == "SPELL_AURA_REMOVED" then
+		elseif t.event == "SPELL_AURA_REMOVED" then
 			Skada:DispatchSets(log_auraremove, true)
 		else
 			Skada:DispatchSets(log_aurarefresh, true)

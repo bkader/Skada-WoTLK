@@ -124,47 +124,43 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		end
 	end
 
-	local function spell_damage(_, event, _, srcName, _, dstGUID, dstName, dstFlags, ...)
-		if event == "SWING_DAMAGE" then
-			data.spellid, data.school = 6603, 0x01
-			data.amount, data.overkill, _, data.resisted, data.blocked, data.absorbed, data.critical = ...
-			data.amount = 0 - data.amount
-		elseif event == "SPELL_INSTAKILL" then
-			data.spellid, _, data.school = ...
-			data.amount = true
-		else
-			data.spellid, _, data.school, data.amount, data.overkill, _, data.resisted, data.blocked, data.absorbed, data.critical = ...
-			data.amount = 0 - data.amount
-		end
+	local function spell_damage(t)
+		if t.spellid and t.amount then
+			data.srcName = t.srcName
+			data.actorid = t.dstGUID
+			data.actorname = t.dstName
+			data.actorflags = t.dstFlags
 
-		if data.amount then
-			data.srcName = srcName
-			data.actorid = dstGUID
-			data.actorname = dstName
-			data.actorflags = dstFlags
-
+			data.spellid = t.spellid
+			data.school = t.spellschool
+			data.amount = t.amount
+			data.overkill = t.overkill
+			data.resisted = t.resisted
+			data.blocked = t.blocked
+			data.absorbed = t.absorbed
+			data.critical = t.critical
 			data.overheal = nil
+
+			if t.event == "SPELL_INSTAKILL" then
+				data.amount = true
+			else
+				data.amount = 0 - data.amount
+			end
 
 			Skada:DispatchSets(log_deathlog)
 		end
 	end
 
 	local missTypes = {RESIST = true, BLOCK = true, ABSORB = true}
-	local function spell_missed(_, event, _, srcName, _, dstGUID, dstName, dstFlags, ...)
-		local misstype, amount
+	local function spell_missed(t)
+		if t.spellid and t.misstype and missTypes[t.misstype] then
+			data.srcName = t.srcName
+			data.actorid = t.dstGUID
+			data.actorname = t.dstName
+			data.actorflags = t.dstFlags
 
-		if event == "SWING_MISSED" then
-			data.spellid, data.school = 6603, 0x01
-			misstype, amount = ...
-		else
-			data.spellid, _, data.school, misstype, amount = ...
-		end
-
-		if amount and amount > 0 and misstype and missTypes[misstype] then
-			data.srcName = srcName
-			data.actorid = dstGUID
-			data.actorname = dstName
-			data.actorflags = dstFlags
+			data.spellid = t.spellid
+			data.school = t.spellschool
 
 			data.amount = nil
 			data.overkill = nil
@@ -173,59 +169,36 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			data.aura = nil
 			data.remove = nil
 
-			if misstype == "RESIST" then
-				data.resisted = amount
+			if t.misstype == "RESIST" then
+				data.resisted = t.resisted
 				data.blocked = nil
 				data.absorbed = nil
-			elseif misstype == "BLOCK" then
+			elseif t.misstype == "BLOCK" then
 				data.resisted = nil
-				data.blocked = amount
+				data.blocked = t.blocked
 				data.absorbed = nil
-			elseif misstype == "ABSORB" then
+			elseif t.misstype == "ABSORB" then
 				data.resisted = nil
 				data.blocked = nil
-				data.absorbed = amount
+				data.absorbed = t.absorbed
 			end
 
 			Skada:DispatchSets(log_deathlog)
 		end
 	end
 
-	local function environment_damage(_, _, _, _, _, dstGUID, dstName, dstFlags, envtype, amount)
-		local spellid, spellschool = nil, 0x01
-
-		if envtype == "Falling" or envtype == "FALLING" then
-			spellid = 3
-		elseif envtype == "Drowning" or envtype == "DROWNING" then
-			spellid = 4
-		elseif envtype == "Fatigue" or envtype == "FATIGUE" then
-			spellid = 5
-		elseif envtype == "Fire" or envtype == "FIRE" then
-			spellid, spellschool = 6, 0x04
-		elseif envtype == "Lava" or envtype == "LAVA" then
-			spellid, spellschool = 7, 0x04
-		elseif envtype == "Slime" or envtype == "SLIME" then
-			spellid, spellschool = 8, 0x08
-		end
-
-		if spellid then
-			spell_damage(nil, nil, nil, L["Environment"], nil, dstGUID, dstName, dstFlags, spellid, nil, spellschool, amount)
-		end
-	end
-
-	local function spell_heal(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, _, amount, overheal)
-		if spellid and amount and (not M.deathlogthreshold or amount > M.deathlogthreshold) then
-			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
-			dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName, dstFlags)
+	local function spell_heal(t)
+		if t.spellid and t.amount and (not M.deathlogthreshold or t.amount > M.deathlogthreshold) then
+			local _, srcName = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
+			local dstGUID, dstName, dstFlags = Skada:FixMyPets(t.dstGUID, t.dstName, t.dstFlags)
 
 			data.srcName = srcName
-
 			data.actorid = dstGUID
 			data.actorname = dstName
 			data.actorflags = dstFlags
 
-			data.spellid = spellid
-			data.amount = amount
+			data.spellid = t.spellid
+			data.amount = t.amount
 
 			data.school = nil
 			data.overheal = nil
@@ -237,9 +210,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			data.aura = nil
 			data.remove = nil
 
-			if overheal and overheal > 0 then
-				data.amount = max(0, data.amount - overheal)
-				data.overheal = overheal
+			if t.overheal and t.overheal > 0 then
+				data.amount = max(0, data.amount - t.overheal)
+				data.overheal = t.overheal
 			end
 
 			Skada:DispatchSets(log_deathlog)
@@ -290,19 +263,27 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		end
 	end
 
-	local function unit_died(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags)
-		if not UnitIsFeignDeath(dstName) then
-			Skada:DispatchSets(log_death, dstGUID, dstName, dstFlags)
+	local dead = {}
+	local function unit_died(t)
+		if not UnitIsFeignDeath(t.dstName) then
+			dead[t.dstGUID] = true
+			Skada:DispatchSets(log_death, t.dstGUID, t.dstName, t.dstFlags)
+		end
+		if t.__temp then t = del(t) end
+	end
+
+	local function sor_applied(t)
+		if t.spellid == 27827 then -- Spirit of Redemption (Holy Priest)
+			local args = new()
+			args.dstGUID = t.dstGUID
+			args.dstName = t.dstName
+			args.dstFlags = t.dstFlags
+			args.__temp = true
+			Skada:ScheduleTimer(unit_died, 0.01, args)
 		end
 	end
 
-	local function sor_applied(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
-		if spellid == 27827 then -- Spirit of Redemption (Holy Priest)
-			Skada:ScheduleTimer(function() unit_died(nil, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags) end, 0.01)
-		end
-	end
-
-	local resurrectSpells = {
+	local ress_spells = {
 		-- Rebirth
 		[20484] = true,
 		[20739] = true,
@@ -327,7 +308,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	}
 
 	local function spell_resurrect(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
-		if spellid and (event == "SPELL_RESURRECT" or resurrectSpells[spellid]) then
+		if spellid and (event == "SPELL_RESURRECT" or ress_spells[spellid]) then
 			data.spellid = spellid
 
 			if event == "SPELL_RESURRECT" then
@@ -353,6 +334,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			data.aura = nil
 			data.remove = nil
 
+			dead[data.actorid] = nil
 			Skada:DispatchSets(log_deathlog, true)
 		end
 	end
@@ -380,13 +362,13 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	end
 
 	-- local function handle_buff(_, event, _, srcName, _, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
-	-- 	if auratype == "BUFF" and spellid and not ignored_buffs[spellid] then
+	-- 	if auratype == "BUFF" and spellid and not ignored_buffs[spellid] and dstGUID and not dead[dstGUID] then
 	-- 		handle_aura(dstGUID, dstName, dstFlags, srcName, spellid, spellschool, event == "SPELL_AURA_REMOVED")
 	-- 	end
 	-- end
 
 	local function handle_debuff(_, event, _, srcName, _, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
-		if auratype == "DEBUFF" and spellid and not ignored_debuffs[spellid] then
+		if auratype == "DEBUFF" and spellid and not ignored_debuffs[spellid] and dstGUID and not dead[dstGUID] then
 			handle_aura(dstGUID, dstName, dstFlags, srcName, -spellid, spellschool, event == "SPELL_AURA_REMOVED")
 		end
 	end
@@ -485,7 +467,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 					local src = log.src or L["Unknown"]
 
-					if d.spellid and resurrectSpells[d.spellid] then
+					if d.spellid and ress_spells[d.spellid] then
 						d.color = nil
 						d.valuetext = src
 					else
@@ -827,6 +809,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			"SPELL_DAMAGE",
 			"SPELL_PERIODIC_DAMAGE",
 			"SWING_DAMAGE",
+			"ENVIRONMENTAL_DAMAGE",
 			"SPELL_INSTAKILL"
 		)
 
@@ -839,12 +822,6 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			"SPELL_MISSED",
 			"SPELL_PERIODIC_MISSED",
 			"SWING_MISSED"
-		)
-
-		Skada:RegisterForCL(
-			environment_damage,
-			flags_dst_nopets,
-			"ENVIRONMENTAL_DAMAGE"
 		)
 
 		Skada:RegisterForCL(
@@ -908,6 +885,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 	function mod:CombatLeave()
 		wipe(data)
+		wipe(dead)
 	end
 
 	function mod:SetComplete(set)
